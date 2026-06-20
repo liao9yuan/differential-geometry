@@ -15,67 +15,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-/-!
-# The intrinsic `(0, s)` connection-Laplacian Green identity via the Dirichlet current
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file proves the integrated Green identity for the
-rough (connection) Laplacian on `(0, s)`-tensor fields,
-
-```
-tensorL2Inner g 0 (s + 1) (covGrad g 0 s T).toFun (covGrad g 0 s v).toFun
-  = − tensorL2Inner g 0 s (rawTensorConnLapSmooth g 0 s T).toFun v.toFun,
-```
-
-through a single **Dirichlet current** vector field and a single application of
-the divergence theorem on the closed manifold.
-
-This generalizes the rank-`(0, 2)` headline
-`green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed`.  The proof structure is
-identical: the whole Dirichlet-current chain — the current `1`-form, its musical
-sharp, the Bochner divergence identity, and the divergence theorem — is
-**rank-generic**.
-
-## The rank-`0` metric-lowering intertwiner
-
-The single genuinely rank-dependent ingredient is the rank-`0` connection
-intertwiner: at every direction `v` and point `x`, the metric-lowering of the
-genuine `(0, s)`-covariant derivative of a section `S` equals the directional
-covariant derivative of the metric-lowered section,
-
-```
-toModel (loweredCovDerivAt g 0 s S x v)
-  = lowerAllUpperIndices g 0 s x (toModel (∇^{(0,s)}_v S)).
-```
-
-This is the statement that metric-lowering commutes with `∇` (the metric is
-`∇`-parallel).  The committed development proves it at rank `(0, 2)`
-(`loweredCovDerivAt_eq_lower_tensorCovDerivAt`), where the lowered index
-`0 + 2` reduces *definitionally* to `2`.  Every Dirichlet-current lemma below is
-stated for an arbitrary covariant rank `s` together with an *explicit
-intertwiner witness* `hint` at that rank; the rank-`(0, 3)` headline supplies the
-witness by the same definitional-reduction proof (`0 + 3 ≡ 3`).
-
-## Main definitions
-
-* `dirichletFormGen g s T v b` — the `1`-form `X ↦ ⟨∇_X T, v⟩_g` at `b`.
-* `dirichletVFGen g s T v b` — its metric-musical sharp, a tangent vector at `b`.
-* `dirichletVFSectionGen g s T v` — `dirichletVFGen` packaged as a smooth
-  tangent-bundle section.
-
-## Main results
-
-* `loweredCovDerivAt_eq_lower_tensorCovDerivAt_three` — the rank-`(0, 3)`
-  metric-lowering intertwiner.
-* `divergence_dirichletVFGen_eq` — the pointwise Bochner divergence identity at
-  rank `(0, s)` (given the intertwiner witness).
-* `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general` — the headline
-  Green identity at rank `(0, s)` (given the intertwiner witness).
-* `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_three` — the
-  unconditional rank-`(0, 3)` instance (the one consumed by the order-`2` `∇²T`
-  Gårding bound).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -112,10 +51,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The rank-`0` metric-lowering intertwiner at rank `s`: for every smooth
-`(0, s)`-tensor section `S`, point `x` and direction `v`, the model coercion of
-the lowered directional covariant derivative equals the index-lowering of the
-genuine `(0, s)`-covariant derivative. -/
 def LoweringIntertwiner (g : SmoothRiemannianMetric I M) (s : ℕ) : Prop :=
   ∀ (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
     (x : M) (v : TangentSpace I x),
@@ -124,18 +59,10 @@ def LoweringIntertwiner (g : SmoothRiemannianMetric I M) (s : ℕ) : Prop :=
         (TensorRSSpace.toModel
           (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g) S x v))
 
-/-- The rank-`(0, 2)` intertwiner witness (committed). -/
 lemma loweringIntertwiner_two (g : SmoothRiemannianMetric I M) :
     LoweringIntertwiner (I := I) (M := M) g 2 :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S x v
 
-/-- **The rank-`(0, 3)` metric-lowering intertwiner.** Proved by the same
-definitional-reduction argument as the committed `(0, 2)` case: the genuine
-`(0, 3)`-covariant derivative, lowered, equals its evaluation at the unit
-`(0, 0)`-tensor (`0 + 3` reduces to `3`), which by the product rule — the
-covariant derivative of the constant unit `(0, 0)`-section vanishes — is the
-covariant derivative of the lifted `(0, 0 + 3)`-tensor section, i.e.
-`loweredCovDerivAt g 0 3 S x v`. -/
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_three
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun x : M => TensorRSSpace 0 3 I x)⟯)
@@ -195,14 +122,10 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_three
     exact congrArg u (Fin.ext (by simp))
   rw [hsec]
 
-/-- The rank-`(0, 3)` intertwiner witness (unconditional). -/
 lemma loweringIntertwiner_three (g : SmoothRiemannianMetric I M) :
     LoweringIntertwiner (I := I) (M := M) g 3 :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_three (I := I) (M := M) g S x v
 
-/-- The un-lowered first directional covariant derivative `y ↦ ∇_{B y} T y` of a
-smooth `(0, s)`-tensor section `T` along a smooth tangent vector field `B`, as a
-raw `(0, s)`-tensor section. -/
 def covDerivAlongVFrawGen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -219,7 +142,6 @@ def covDerivAlongVFrawGen
       (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-/-- **Smoothness of the un-lowered first directional covariant derivative.** -/
 lemma covDerivAlongVFrawGen_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -247,8 +169,6 @@ lemma covDerivAlongVFrawGen_contMDiff
   rw [← contMDiffOn_univ]
   exact hOn
 
-/-- The un-lowered first directional covariant derivative, bundled as a smooth
-section, at rank `(0, s)`. -/
 def covDerivAlongVFSectionGen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -266,8 +186,6 @@ def covDerivAlongVFSectionGen
       (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-/-- **The lowering of the un-lowered first directional derivative is the lowered
-directional derivative**, at rank `(0, s)`, given the intertwiner witness. -/
 lemma covDerivAlongVFSectionGen_lowered_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -279,9 +197,6 @@ lemma covDerivAlongVFSectionGen_lowered_eq
   rw [hint T y (B y)]
   rfl
 
-/-- The lifted `(0, 0 + s)`-tensor section of the first directional derivative
-coincides, after model coercion, with the lowered directional derivative, at rank
-`(0, s)`, given the intertwiner witness. -/
 lemma toModel_liftedTensorSection_covDerivAlongVFSectionGen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -294,8 +209,6 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSectionGen
   rw [toModel_liftedTensorSection]
   exact covDerivAlongVFSectionGen_lowered_eq (I := I) (M := M) g s hint T B y
 
-/-- **The second directional derivative is the Hessian plus the frame
-correction**, at rank `(0, s)`. -/
 lemma covDerivAlongGen_covDerivAlongVFSectionGen_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -315,7 +228,6 @@ lemma covDerivAlongGen_covDerivAlongVFSectionGen_eq
       tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g) from rfl]
   abel
 
-/-- **The Dirichlet `1`-form** at rank `(0, s)`. -/
 def dirichletFormGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     TangentSpace I b →ₗ[ℝ] ℝ where
@@ -349,13 +261,11 @@ def dirichletFormGen
         (TensorRSSpace.toModel (tensorCovDerivAt (I := I) (M := M) g 0 s T b X))
         (TensorRSSpace.toModel (v.toSection b)) := rfl
 
-/-- **The Dirichlet current vector field, pointwise** at rank `(0, s)`. -/
 def dirichletVFGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     TangentSpace I b :=
   metricSharp (I := I) g b (dirichletFormGen (I := I) (M := M) g s T v b)
 
-/-- **The defining Riesz identity for the Dirichlet current** at rank `(0, s)`. -/
 lemma inner_dirichletVFGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M)
     (X : TangentSpace I b) :
@@ -364,8 +274,6 @@ lemma inner_dirichletVFGen
   rw [dirichletVFGen]
   exact inner_metricSharp (I := I) g b (dirichletFormGen (I := I) (M := M) g s T v b) X
 
-/-- **Chart-local smoothness of the Dirichlet-form chart-basis component** at rank
-`(0, s)`. -/
 private lemma dirichletFormGen_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -417,8 +325,6 @@ private lemma dirichletFormGen_chartBasis_component_contMDiffOn
   intro b _
   rw [dirichletFormGen_apply]
 
-/-- **Smoothness of the Dirichlet current as a tangent-bundle section** at rank
-`(0, s)`. -/
 lemma dirichletVFGen_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -428,8 +334,6 @@ lemma dirichletVFGen_contMDiff
     (fun α j => dirichletFormGen_chartBasis_component_contMDiffOn
       (I := I) (M := M) g s T v α j)
 
-/-- **The Dirichlet current packaged as a smooth tangent-bundle section** at rank
-`(0, s)`. -/
 def dirichletVFSectionGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -442,8 +346,6 @@ def dirichletVFSectionGen
     dirichletVFSectionGen (I := I) (M := M) g s T v b =
       dirichletVFGen (I := I) (M := M) g s T v b := rfl
 
-/-- **Per-direction Bochner expansion of the divergence summand** at rank
-`(0, s)`, given the intertwiner witness. -/
 private lemma divergence_dirichletVFGen_summand_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -561,8 +463,6 @@ private lemma divergence_dirichletVFGen_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
-/-- **Dirichlet integrand = smooth-orthonormal-frame diagonal sum** at rank
-`(0, s)`. -/
 private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 s T v b =
@@ -628,8 +528,6 @@ private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
-/-- **The pointwise Bochner divergence identity** at rank `(0, s)`, given the
-intertwiner witness. -/
 lemma divergence_dirichletVFGen_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -680,8 +578,6 @@ lemma divergence_dirichletVFGen_eq
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
 
-/-- **The headline intrinsic `(0, s)` connection-Laplacian Green identity**, given
-the intertwiner witness. -/
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -762,9 +658,6 @@ theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general
     refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
     simp only [SmoothCcTensor.toFun_apply, rawTensorConnLapSmooth_toSection_apply]
 
-/-- **The rank-`(0, 3)` instance of the connection-Laplacian Green identity**
-(unconditional). This is the special case consumed by the order-`2` `∇²T` Gårding
-bound. -/
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_three
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 3) :
     tensorL2Inner (I := I) (M := M) g 0 (3 + 1)
@@ -775,9 +668,6 @@ theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_three
   tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general
     (I := I) (M := M) g 3 (loweringIntertwiner_three (I := I) (M := M) g) T v
 
-/-- **The rank-`(0, 2)` instance of the connection-Laplacian Green identity**,
-re-derived through the rank-generic Dirichlet-current chain with the committed
-`(0, 2)` intertwiner witness. -/
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_two
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)

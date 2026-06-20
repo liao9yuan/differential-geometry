@@ -4,64 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 
-/-!
-# Chart-coordinate principal part of the tensor `H^1` Dirichlet integrand
-
-For a smooth, compactly-supported `(r, s)`-tensor section `S`, `T` over a closed
-Riemannian manifold `(M, g)` and a chart center `α : M`, the pointwise integrand
-of the `H^1` Dirichlet form
-
-```
-tensorCovDerivPointwiseInner g r s S T = ⟨∇S, ∇T⟩
-```
-
-decomposes, in chart-Euclidean coordinates, into a (component-coupled)
-**principal part** plus a **lower-order remainder**. This file builds the
-principal part.
-
-The covariant-derivative chart-component formula
-(`covDerivComponent_eq_euclidPartial_add_lowerOrder`) expresses the raw
-chart-scalar component of the chart-coordinate covariant derivative as a plain
-chart-Euclidean partial derivative `euclidPartial` plus a zeroth-order
-Christoffel correction `covDerivLowerOrderTerm`. The integrand
-`tensorCovDerivPointwiseInner` is, on the chart base set, the chart-`α`-frame
-trace expression `chartTensorCovDerivPointwiseInner` (`PreHilbert.lean`); each
-chart-frame tensor-metric pairing of two covariant-derivative values expands —
-via the bridge `chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise` and
-the chart-frame basis decomposition `tensorRSModel_eq_sum_basis` — into a finite
-component-coupled sum, with the chart-frame tensor-metric Gram
-`covChartMetricGram` coupling component pairs.
-
-Substituting the component formula and separating the four product groups
-`(∂S · ∂T)`, `(∂S · LO_T)`, `(LO_S · ∂T)`, `(LO_S · LO_T)`, the first group is
-the principal part `covPrincipalIntegrand` and the remaining three are the
-lower-order remainder (built in the companion file).
-
-The principal part is **component-coupled**: the chart-frame tensor metric
-`covChartMetricGram` is not diagonal. The honest headline is the coupled
-identity `tensorCovDerivPointwiseInner_chart_eq`.
-
-## Main definitions
-
-* `covChartMetricGram g r s α P Q` — the chart-frame tensor-metric Gram on
-  component multi-index pairs `P, Q`, a `C^∞` function on the Euclidean chart
-  target.
-* `covPrincipalIntegrand g r s S T α` — the component-coupled principal part of
-  the chart-coordinate Dirichlet integrand: the `euclidPartial · euclidPartial`
-  group, weighted by `covChartMetricGram` and the un-weighted inverse Gram
-  `chartInvGramEuclid`.
-
-## Main results
-
-* `covChartMetricGram_symm` — symmetry of the chart-frame tensor-metric Gram.
-* `covChartMetricGram_contDiffOn` — the chart-frame tensor-metric Gram is `C^∞`
-  on the Euclidean chart target.
-* `tensorCovDerivPointwiseInner_chart_eq` — the headline coupled identity: the
-  chart-coordinate Dirichlet integrand is `covPrincipalIntegrand` plus the
-  lower-order remainder `covLowerOrderIntegrand` (the latter defined in the
-  companion file).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -92,9 +34,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The chart-frame tensor-metric Gram on component multi-index pairs `P, Q`:
-the chart-`α`-frame `(r, s)`-inner product of the chart-frame basis elements
-indexed by `P` and `Q`, viewed as a function on the Euclidean chart target. -/
 noncomputable def covChartMetricGram
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -106,7 +45,6 @@ noncomputable def covChartMetricGram
       (tensorChartBasisElement (E := E) r s P.1 P.2)
       (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-/-- Unfolding lemma for `covChartMetricGram`. -/
 lemma covChartMetricGram_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -118,9 +56,6 @@ lemma covChartMetricGram_def
         (tensorChartBasisElement (E := E) r s P.1 P.2)
         (tensorChartBasisElement (E := E) r s Q.1 Q.2) := rfl
 
-/-- **Symmetry of the chart-frame tensor-metric Gram.** Swapping the two
-component multi-index pairs leaves the chart-frame tensor-metric Gram unchanged
-— a consequence of the symmetry of `chartTensorInnerPointwise_rs_model`. -/
 theorem covChartMetricGram_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -134,8 +69,6 @@ theorem covChartMetricGram_symm
     (tensorChartBasisElement (E := E) r s P.1 P.2)
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
-/-- `(extChartAt I α).symm` maps the chart target into the chart-`α` base set
-(the chart source). -/
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -145,10 +78,6 @@ private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     (extChartAt I α).map_target hy
   rwa [extChartAt_source] at hsrc
 
-/-- **The chart-frame tensor-metric Gram is `C^∞` on the Euclidean chart
-target.** Transport of the chart-base-set smoothness of
-`chartTensorInnerPointwise_rs_model` through `(extChartAt I α).symm` and the
-linear isometry `toEuclidean.symm`. -/
 theorem covChartMetricGram_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -199,9 +128,6 @@ theorem covChartMetricGram_contDiffOn
       exact hy
   exact hcomp_eucl
 
-/-- The chart-frame `(r, s)`-inner product expands as a finite component-coupled
-sum against the chart-frame component projections and the chart-frame
-tensor-metric Gram on the chart-frame basis. -/
 private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (X Y : TensorRSModel r s ℝ E) :
@@ -296,9 +222,6 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
 
-/-- On the chart-`α` base set, the bundle-fibre tensor inner product of the
-`toModel` images of two fibre elements `X`, `Y` equals the chart-`α`-frame
-`(r, s)`-inner product of their `continuousLinearMapAt`-trivialised values. -/
 private lemma tensorInnerPointwise_toModel_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -326,10 +249,6 @@ private lemma tensorInnerPointwise_toModel_eq_chart
   rw [chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s
     (TensorRSSpace.toModel Y)]
 
-/-- The bundle-fibre tensor inner product of the `toModel` images of two fibre
-elements expands as a finite component-coupled sum: the chart-frame
-tensor-metric Gram on the chart-frame basis times the product of the wrapped
-raw-component projections. -/
 lemma tensorInnerPointwise_toModel_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -357,11 +276,6 @@ lemma tensorInnerPointwise_toModel_eq_component_sum
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [wrappedComponentProj_apply, wrappedComponentProj_apply]
 
-/-- The chart-coordinate covariant derivative depends on the directional vector
-field `X` only through its value `X b` at the base point: the intrinsic chart
-piece reads `X b` directly, and each Christoffel slot correction factors
-through `chartLeviCivitaParallelCLM g α b X`, which depends on `X` only via
-`X b`. -/
 private lemma chartTensorRSCovariantDerivative_locality
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -392,12 +306,6 @@ private lemma chartTensorRSCovariantDerivative_locality
     rw [hparallel]
   rw [hinput, houtput]
 
-/-- On the chart-`α` Levi-Civita good set, the abstract directional covariant
-derivative `tensorCovDerivAt` of a smooth compactly-supported tensor section,
-along the chart-coordinate basis direction `chartBasisVecFiber α m b`, equals
-the chart-coordinate covariant derivative
-`chartTensorRSCovariantDerivative r s g α S.toSection (chartBasisVecFiber α m)`
-at `b`. -/
 lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -429,13 +337,6 @@ lemma tensorCovDerivAt_eq_chartTensorRSCovariantDerivative
           (fun y : M => S.toSection y) (chartBasisVecFiber (I := I) α m) b :=
         hloc
 
-/-- **The component-coupled principal part of the chart-coordinate Dirichlet
-integrand.** A double sum over component multi-index pairs `P, Q` of the
-chart-frame tensor-metric Gram `covChartMetricGram` times an inner double sum
-over chart directions `k, l` of the un-weighted inverse Gram `chartInvGramEuclid`
-times the product of the `k`-th chart-Euclidean partial derivative of the raw
-component of `S` at `P` and the `l`-th chart-Euclidean partial derivative of
-the raw component of `T` at `Q`. -/
 noncomputable def covPrincipalIntegrand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M) :
@@ -458,7 +359,6 @@ noncomputable def covPrincipalIntegrand
                     (tensorChartComponentRaw (I := I) (M := M)
                       g r s T α Q.1 Q.2)) y
 
-/-- Unfolding lemma for `covPrincipalIntegrand`. -/
 lemma covPrincipalIntegrand_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -481,10 +381,6 @@ lemma covPrincipalIntegrand_def
                       (tensorChartComponentRaw (I := I) (M := M)
                         g r s T α Q.1 Q.2)) y := rfl
 
-/-- **Symmetry of the principal-part integrand under the `(S, T)` swap.**
-Swapping `S` and `T` swaps the role of the two factors and the two component
-multi-index pairs; the chart-frame tensor-metric Gram is symmetric and the
-inverse Gram is symmetric, so the value is unchanged. -/
 theorem covPrincipalIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -515,17 +411,6 @@ theorem covPrincipalIntegrand_symm
     rw [star_trivial] at hsymm
     exact hsymm
 
-/-- **The chart-coordinate Dirichlet integrand as a component-coupled double
-sum.** For `y` in the Euclidean chart target, set
-`b := (extChartAt I α).symm (toEuclidean.symm y)`. The pointwise integrand
-`tensorCovDerivPointwiseInner g r s S T b` equals the double sum over component
-multi-index pairs `P, Q` of the chart-frame tensor-metric Gram
-`covChartMetricGram` times the inner double sum over chart directions of the
-un-weighted inverse Gram `chartInvGramEuclid` times the product of the
-`(P, k)`-component of the chart-coordinate covariant derivative of `S` and the
-`(Q, l)`-component of the chart-coordinate covariant derivative of `T` — each
-component being `euclidPartial + covDerivLowerOrderTerm` by
-`covDerivComponent_eq_euclidPartial_add_lowerOrder`. -/
 theorem tensorCovDerivPointwiseInner_chart_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

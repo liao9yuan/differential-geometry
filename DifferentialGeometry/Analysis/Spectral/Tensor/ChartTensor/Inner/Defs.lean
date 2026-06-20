@@ -5,39 +5,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Defs
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 
-/-!
-# Chart-frame scalar inner product on mixed `(r, s)`-model tensors
-
-This file defines a chart-frame scalar inner product on `(r, s)`-model tensors
-by composing the chart-frame upper-index lowering map
-`chartLowerAllUpperIndices_model` with the chart-frame `(0, n)`-inner product
-`chartTensorInnerPointwise_0s`. The dependence on the chart base point `b`
-enters only through chart Gram matrix entries (smooth on the chart base set),
-so smoothness in `b` is a direct consequence of the smoothness of the two
-constituents.
-
-## Main definition
-
-* `chartTensorInnerPointwise_rs_model g r s α b T₀ T₁ : ℝ` — the chart-α-frame
-  scalar inner product on mixed `(r, s)`-model tensors `T₀, T₁`.
-
-## Algebraic properties
-
-* `chartTensorInnerPointwise_rs_model_add_left` — additivity in `T₀`.
-* `chartTensorInnerPointwise_rs_model_smul_left` — `ℝ`-linearity in `T₀`.
-* `chartTensorInnerPointwise_rs_model_add_right` — additivity in `T₁` (mirror).
-* `chartTensorInnerPointwise_rs_model_smul_right` — `ℝ`-linearity in `T₁` (mirror).
-* `chartTensorInnerPointwise_rs_model_symm` — symmetry in the two arguments.
-* `chartTensorInnerPointwise_rs_model_nonneg` — non-negativity on the diagonal,
-  on the chart base set.
-
-## Smoothness
-
-* `chartTensorInnerPointwise_rs_model_contMDiffOn` — for fixed `T₀, T₁`, the
-  map `b ↦ chartTensorInnerPointwise_rs_model g r s α b T₀ T₁` is smooth on
-  the chart base set.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -69,7 +36,6 @@ private lemma chartGramMatrix_inv_isHermitian
     (chartGramMatrix g α b)⁻¹.IsHermitian :=
   (chartGramMatrix_isHermitian (I := I) g α b).inv
 
-/-- Symmetry of the chart-frame `(0, n)`-inner product. -/
 private lemma chartTensorInnerPointwise_0s_symm_aux
     (g : SmoothRiemannianMetric I M) (α b : M) (n : ℕ)
     (S T : Tensor0SModel n ℝ E) :
@@ -94,9 +60,6 @@ private lemma chartTensorInnerPointwise_0s_symm_aux
         simpa [star_trivial] using this
       rw [ih, hG]
 
-/-- For `b ∈ baseSet`, the chart-frame `(0, n)`-inner product on the diagonal
-equals a `tensorInnerPointwise_0s` value of a `chartJ`-pulled-back tensor,
-hence is non-negative. -/
 private lemma chartTensorInnerPointwise_0s_nonneg_aux
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (n : ℕ)
@@ -123,13 +86,6 @@ private lemma chartTensorInnerPointwise_0s_nonneg_aux
   rw [← hbridge]
   exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g b n Tback
 
-/-- Chart-α-frame scalar inner product on `(r, s)`-model tensors, defined by
-lowering all `r` upper indices with `chartGramMatrix g α b` (the chart-local
-Gram, smooth on the chart base set) and then taking the `(0, r + s)`-inner
-product `chartTensorInnerPointwise_0s`. The dependence on `b` enters only
-through chart Gram matrix entries (smooth via
-`chartGramMatrix_entry_contMDiffOn`), avoiding chart-basis-fibre
-`b`-dependence. -/
 def chartTensorInnerPointwise_rs_model
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T₀ T₁ : TensorRSModel r s ℝ E) : ℝ :=
@@ -146,7 +102,6 @@ lemma chartTensorInnerPointwise_rs_model_def
         (chartLowerAllUpperIndices_model (I := I) (M := M) r s g α b T₁) :=
   rfl
 
-/-- Additivity of the chart-frame `(r, s)`-inner product in the first argument. -/
 lemma chartTensorInnerPointwise_rs_model_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T₀ T₀' T₁ : TensorRSModel r s ℝ E) :
@@ -160,7 +115,6 @@ lemma chartTensorInnerPointwise_rs_model_add_left
   rw [chartLowerAllUpperIndices_model_add]
   rw [chartTensorInnerPointwise_0s_add_left]
 
-/-- `ℝ`-linearity of the chart-frame `(r, s)`-inner product in the first argument. -/
 lemma chartTensorInnerPointwise_rs_model_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (c : ℝ) (T₀ T₁ : TensorRSModel r s ℝ E) :
@@ -172,7 +126,6 @@ lemma chartTensorInnerPointwise_rs_model_smul_left
   rw [chartLowerAllUpperIndices_model_smul]
   rw [chartTensorInnerPointwise_0s_smul_left]
 
-/-- Symmetry of the chart-frame `(r, s)`-inner product. -/
 lemma chartTensorInnerPointwise_rs_model_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T₀ T₁ : TensorRSModel r s ℝ E) :
@@ -182,7 +135,6 @@ lemma chartTensorInnerPointwise_rs_model_symm
       chartTensorInnerPointwise_rs_model_def]
   exact chartTensorInnerPointwise_0s_symm_aux (I := I) (M := M) g α b (r + s) _ _
 
-/-- Additivity of the chart-frame `(r, s)`-inner product in the second argument. -/
 lemma chartTensorInnerPointwise_rs_model_add_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T₀ T₁ T₁' : TensorRSModel r s ℝ E) :
@@ -196,7 +148,6 @@ lemma chartTensorInnerPointwise_rs_model_add_right
   rw [chartTensorInnerPointwise_rs_model_symm (I := I) (M := M) g r s α b T₁ T₀,
       chartTensorInnerPointwise_rs_model_symm (I := I) (M := M) g r s α b T₁' T₀]
 
-/-- `ℝ`-linearity of the chart-frame `(r, s)`-inner product in the second argument. -/
 lemma chartTensorInnerPointwise_rs_model_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (c : ℝ) (T₀ T₁ : TensorRSModel r s ℝ E) :
@@ -208,8 +159,6 @@ lemma chartTensorInnerPointwise_rs_model_smul_right
   rw [chartTensorInnerPointwise_rs_model_smul_left]
   rw [chartTensorInnerPointwise_rs_model_symm (I := I) (M := M) g r s α b T₁ T₀]
 
-/-- Non-negativity of the chart-frame `(r, s)`-inner product on the diagonal,
-on the chart base set. -/
 lemma chartTensorInnerPointwise_rs_model_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -222,7 +171,6 @@ section Smoothness
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-- The basis-tuple evaluation linear map on `Tensor0SModel n ℝ E`. -/
 private noncomputable def localEvalBasisLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
@@ -297,9 +245,6 @@ private noncomputable def localEvalBasisCLE (n : ℕ) :
     localEvalBasisCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- Smoothness into `Tensor0SModel n ℝ E` from smoothness of every basis-tuple
-evaluation. Local replay of the analogous private bridge in
-`Tensor.Multilinear.MetricLowering`. -/
 private lemma local_contMDiffOn_into_tensor0SModel_of_eval_basis
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -321,9 +266,6 @@ private lemma local_contMDiffOn_into_tensor0SModel_of_eval_basis
   intro b _
   exact ((localEvalBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
 
-/-- Smoothness of every basis-tuple evaluation of `chartSeparableFormAt`. The
-scalar evaluation factors as a finite product of chart Gram matrix entries,
-each smooth on the chart base set. -/
 private lemma chartSeparableFormAt_basis_scalar_contMDiffOn
     (g : SmoothRiemannianMetric I M) {r : ℕ} (α : M)
     (φ_first ψ : Fin r → Fin (Module.finrank ℝ E)) :
@@ -369,10 +311,6 @@ private lemma chartSeparableFormAt_basis_scalar_contMDiffOn
   refine ContMDiffOn.mul ?_ contMDiffOn_const
   exact chartGramMatrix_entry_contMDiffOn (I := I) g α j kk
 
-/-- Smoothness of every basis-tuple evaluation of the chart-frame upper-index
-lowering map, in `b`, on the chart base set. The scalar evaluation factors as
-`T(separableForm) v_last`, where `T` and `v_last` are constants and only the
-inner separable form depends on `b` (via chart Gram matrix entries). -/
 private lemma chartLowerAllUpperIndices_model_basis_eval_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : TensorRSModel r s ℝ E)
@@ -429,10 +367,6 @@ private lemma chartLowerAllUpperIndices_model_basis_eval_contMDiffOn
   intro b _
   exact hcomposed_apply _
 
-/-- Smoothness in the chart base point of the chart-frame `(r, s)`-inner
-product. For fixed `r, s, g, α`, and fixed tensors `T₀, T₁`, the function
-`b ↦ chartTensorInnerPointwise_rs_model g r s α b T₀ T₁` is smooth on the
-chart base set. -/
 theorem chartTensorInnerPointwise_rs_model_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ T₁ : TensorRSModel r s ℝ E) :

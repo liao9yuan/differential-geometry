@@ -1,58 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 
-/-!
-# The metric index-lowering map and the Levi-Civita tensor connections
-
-For a smooth Riemannian manifold `(M, g)` modelled on a real inner-product space
-`E`, the metric induces, on every mixed `(r, s)`-tensor fibre, the index-lowering
-map `lowerAllUpperIndices g r s x` that turns an `(r, s)`-tensor into a covariant
-`(0, r + s)`-tensor by contracting each of the `r` upper slots against `g(x)`.
-
-This file develops foundational structure of that index-lowering map that feeds
-into the statement that the Levi-Civita-induced tensor connections are
-intertwined by index lowering: the metric used to lower indices is itself
-`∇`-parallel (`∇g = 0`), hence `∇` commutes with index lowering.
-
-## The index-lowering map as a fibrewise linear equivalence
-
-A non-degenerate metric lowers indices *reversibly*: `lowerAllUpperIndices g r s x`
-is injective (`lowerAllUpperIndices_injective`), and its source `TensorRSModel r s ℝ E`
-and target `Tensor0SModel (r + s) ℝ E` are finite-dimensional of the *same*
-dimension `(finrank ℝ E) ^ (r + s)`. Hence the lowering map is bijective and, being
-continuous-linear between finite-dimensional spaces, a continuous linear
-equivalence `lowerAllUpperIndicesEquiv g r s x`.
-
-Packaging the lowering map as an equivalence is the natural foundation for the
-parallel-transport statement: the equivalence intertwines
-`tensorRSCovariantDerivative I M r s (LeviCivita g)` with
-`tensor0SCovariantDerivative I M (r + s) (LeviCivita g)`, equivalently the lifted
-section `liftedTensorSection g r s S` has covariant derivative
-`loweredCovDerivAt g r s S` equal to the lowering of the genuine
-`(r, s)`-covariant derivative of `S`.
-
-## The empty contraction at rank `0`
-
-At `r = 0` the index-lowering map contracts *no* upper slots: the separable
-`(0, 0)`-form `separableFormAt g x 0` is the metric-independent unit
-`(0, 0)`-tensor `constOfIsEmpty 1` (`separableFormAt_zero`). Consequently the
-rank-`0` lowering map carries no metric content — it is the canonical
-`(0, 0)`-currying isomorphism `Hom(ℝ, T⁰ₛ) ≅ T⁰ₛ` followed by the slot-relabelling
-`Fin s ≃ Fin (0 + s)`.
-
-## Main results
-
-* `separableFormAt_zero` — the rank-`0` separable form is the unit `(0, 0)`-tensor
-  `constOfIsEmpty 1`, independent of the metric and the base point.
-* `lowerAllUpperIndices_bijective` — the index-lowering map is bijective.
-* `lowerAllUpperIndicesEquiv` — the index-lowering map as a continuous linear
-  equivalence `TensorRSModel r s ℝ E ≃L[ℝ] Tensor0SModel (r + s) ℝ E`.
-* `lowerAllUpperIndicesEquiv_apply`, `lowerAllUpperIndicesEquiv_symm_apply_apply`,
-  `lowerAllUpperIndicesEquiv_apply_symm_apply` — its computation / round-trip
-  lemmas.
-* `lowerAllUpperIndices_eq_zero_iff` — the lowering map detects the zero tensor.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -83,9 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- The rank-`0` separable `(0, 0)`-form is the unit continuous multilinear map
-`constOfIsEmpty 1`: contracting *no* upper slots against the metric leaves the
-metric-independent empty product `1`. -/
+
 lemma separableFormAt_zero
     (g : SmoothRiemannianMetric I M) (x : M) (w : Fin 0 → E) :
     separableFormAt (I := I) (M := M) g x 0 w =
@@ -98,9 +44,7 @@ lemma separableFormAt_zero
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The index-lowering map detects the zero tensor: `lowerAllUpperIndices g r s x T`
-is the zero covariant `(0, r + s)`-tensor if and only if `T` is the zero
-`(r, s)`-tensor. -/
+
 lemma lowerAllUpperIndices_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -113,8 +57,7 @@ lemma lowerAllUpperIndices_eq_zero_iff
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The dimension of the model `(0, n)`-tensor fibre `Tensor0SModel n ℝ E` is
-`(finrank ℝ E) ^ n`. -/
+
 lemma finrank_tensor0SModel_eq (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) = (Module.finrank ℝ E) ^ n := by
   exact finrank_continuousMultilinearMap (𝕜 := ℝ) (F := E) n
@@ -122,8 +65,7 @@ lemma finrank_tensor0SModel_eq (n : ℕ) :
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The model `(r, s)`-tensor fibre and the model covariant `(0, r + s)`-tensor
-fibre have equal `ℝ`-dimension `(finrank ℝ E) ^ (r + s)`. -/
+
 lemma finrank_tensorRSModel_eq_finrank_tensor0SModel (r s : ℕ) :
     Module.finrank ℝ (TensorRSModel r s ℝ E) =
       Module.finrank ℝ (Tensor0SModel (r + s) ℝ E) := by
@@ -132,9 +74,7 @@ lemma finrank_tensorRSModel_eq_finrank_tensor0SModel (r s : ℕ) :
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- **The index-lowering map is bijective.** Injectivity comes from the
-non-degeneracy of the metric (`lowerAllUpperIndices_injective`); surjectivity
-follows because the source and target are finite-dimensional of equal dimension. -/
+
 theorem lowerAllUpperIndices_bijective
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     Function.Bijective (lowerAllUpperIndices (I := I) (M := M) g r s x) := by
@@ -143,11 +83,6 @@ theorem lowerAllUpperIndices_bijective
       (finrank_tensorRSModel_eq_finrank_tensor0SModel (E := E) r s)).mp
     (lowerAllUpperIndices_injective (I := I) (M := M) g r s x)
 
-/-- **The index-lowering map as a continuous linear equivalence.** A non-degenerate
-metric lowers all `r` upper indices of a mixed `(r, s)`-tensor reversibly: the
-lowering map `lowerAllUpperIndices g r s x` is a continuous linear equivalence
-`TensorRSModel r s ℝ E ≃L[ℝ] Tensor0SModel (r + s) ℝ E`. The inverse is the
-all-index *raising* map. -/
 def lowerAllUpperIndicesEquiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     TensorRSModel r s ℝ E ≃L[ℝ] Tensor0SModel (r + s) ℝ E :=
@@ -158,8 +93,7 @@ def lowerAllUpperIndicesEquiv
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The forward direction of `lowerAllUpperIndicesEquiv` is the index-lowering
-map `lowerAllUpperIndices`. -/
+
 @[simp]
 lemma lowerAllUpperIndicesEquiv_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -170,8 +104,7 @@ lemma lowerAllUpperIndicesEquiv_apply
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The index-lowering equivalence as a bundled continuous linear map is the
-underlying index-lowering map. -/
+
 lemma lowerAllUpperIndicesEquiv_coe
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ((lowerAllUpperIndicesEquiv (I := I) (M := M) g r s x :
@@ -183,7 +116,7 @@ lemma lowerAllUpperIndicesEquiv_coe
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- Round-trip: raising back the indices recovers the original `(r, s)`-tensor. -/
+
 @[simp]
 lemma lowerAllUpperIndicesEquiv_symm_apply_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -196,8 +129,7 @@ lemma lowerAllUpperIndicesEquiv_symm_apply_apply
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- Round-trip: lowering the indices of a raised covariant `(0, r + s)`-tensor
-recovers the original tensor. -/
+
 @[simp]
 lemma lowerAllUpperIndicesEquiv_apply_symm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -207,9 +139,6 @@ lemma lowerAllUpperIndicesEquiv_apply_symm_apply
   have h := (lowerAllUpperIndicesEquiv (I := I) (M := M) g r s x).apply_symm_apply U
   rwa [lowerAllUpperIndicesEquiv_apply] at h
 
-/-- The model coercion of the metric-lowered section `liftedTensorSection g r s S`
-at `y` is the index-lowering equivalence `lowerAllUpperIndicesEquiv g r s y`
-applied to the model coercion of `S y`. -/
 lemma toModel_liftedTensorSection_eq_equiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -219,8 +148,6 @@ lemma toModel_liftedTensorSection_eq_equiv
         (TensorRSSpace.toModel (S y)) := by
   rw [toModel_liftedTensorSection, lowerAllUpperIndicesEquiv_apply]
 
-/-- The model coercion of `S y` is recovered from the metric-lowered section by
-the fibrewise inverse of the index-lowering equivalence. -/
 lemma toModel_eq_symm_liftedTensorSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -233,9 +160,7 @@ lemma toModel_eq_symm_liftedTensorSection
 
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] in
-/-- **Smoothness of the constant unit `(0, 0)`-section.** The `(0, 0)`-tensor
-section with constant value `ofModel (constOfIsEmpty 1)` is a smooth section of
-the `(0, 0)`-tensor bundle: its scalar function is the constant `1`. -/
+
 lemma contMDiff_unitZeroSection :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
@@ -249,9 +174,7 @@ lemma contMDiff_unitZeroSection :
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The model coercion of the `(r, s)`-tensor `T` applied to a `(0, r)`-tensor
-`D` is the model `(r, s)`-tensor applied to the model `(0, r)`-tensor: the
-fibrewise model coercions intertwine evaluation. -/
+
 lemma toModel_tensorRS_apply
     (r s : ℕ) (x : M) (T : TensorRSSpace r s I x) (D : Tensor0SSpace r I x) :
     Tensor0SSpace.toModel
@@ -269,10 +192,6 @@ lemma toModel_tensorRS_apply
   rw [hD]
   rfl
 
-/-- Model coercion of a composed mixed tensor: precomposing a `(r + 1, s)`-tensor `A` with a
-fibre map `B : Tensor0SSpace r →L Tensor0SSpace (r + 1)` and reading the model `(r, s)`-tensor
-at a model `(0, r)`-form `D` equals applying `A` (in model form) to the model coercion of
-`B (ofModel D)`. -/
 lemma toModel_tensorRS_comp_apply
     (r s : ℕ) (x : M)
     (A : Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace s I x)
@@ -288,10 +207,6 @@ lemma toModel_tensorRS_comp_apply
   rw [Tensor0SSpace.toModel_ofModel] at h2
   rw [← h2, ContinuousLinearMap.comp_apply, h1]
 
-/-- **Rank-`0` lowering is evaluation at the unit `(0, 0)`-tensor.** At rank
-`r = 0` (here `s = 2`) the metric-lowered `(0, 0 + 2)`-tensor section value
-`liftedTensorSection g 0 2 S y` is exactly `S y` evaluated at the constant unit
-`(0, 0)`-tensor `ofModel (constOfIsEmpty 1)`. -/
 lemma liftedTensorSection_zero_eq_apply_unit
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -318,22 +233,6 @@ lemma liftedTensorSection_zero_eq_apply_unit
   funext j
   exact congrArg u (Fin.ext (by simp))
 
-/-- **The rank-`0` connection-intertwining identity (at `(0, 2)`).** The
-metric-lowered directional covariant derivative of a smooth `(0, 2)`-tensor
-section `S` is the index-lowering of the genuine `(0, 2)`-tensor covariant
-derivative of `S`:
-
-  `toModel (∇_v^lowered S) = lowerAllUpperIndices g 0 2 x (toModel (∇_v^{(0,2)} S))`,
-
-where `∇^lowered = loweredCovDerivAt g 0 2 S` is the covariant derivative of the
-metric-lowered `(0, 0 + 2)`-tensor section, and `∇^{(0,2)}` is the genuine
-Levi-Civita-induced `(0, 2)`-tensor connection `tensorRSCovariantDerivative`.
-
-The proof applies the proved product rule `tensorRSCovariantDerivative_apply`
-with the constant unit `(0, 0)`-section, whose covariant derivative vanishes
-(`tensor0SCovariantDerivative_unitZero_eq_zero`); at rank `0` the lowering map
-is exactly evaluation at that unit (`liftedTensorSection_zero_eq_apply_unit`),
-so no metric-compatibility (`∇g = 0`) input is needed. -/
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -388,27 +287,12 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
     exact liftedTensorSection_zero_eq_apply_unit (I := I) (M := M) g S y
   rw [hsec]
 
-/-! ## The smooth metric-lowering separable `(0, r)`-form section
-
-For `r` smooth vector fields `Y : Fin r → Cₛ^∞⟮I; E, TM⟯`, the metric lowers them to the
-smooth separable covariant `(0, r)`-form section `metricFormFun g r Y` whose model coercion
-at `y` is `separableFormAt g y r (fun i => Y i y) = ∏ i, g.inner y (Y i y) (·)`.  Unlike a
-(false) globally-smooth free-tuple lowering form built from *constant* model slots, here every
-slot `Y i` is a genuinely smooth vector field, so each metric-flat factor `g.inner · (Y i ·)`
-is smooth (`metricFlat_mdiff_total`) and the whole separable form is a smooth bundle section.
--/
-
-/-- The raw separable covariant `(0, r)`-form function built by lowering `r` smooth vector
-fields `Y` with the metric: at `y` it is `ofModel (separableFormAt g y r (Y · y))`, whose
-model coercion is `∏ i, g.inner y (Y i y) (·)`. -/
 noncomputable def metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Π y : M, Tensor0SSpace r I y :=
   fun y => Tensor0SSpace.ofModel
     (separableFormAt (I := I) (M := M) g y r (fun i : Fin r => Y i y))
 
-/-- The model coercion of `metricFormFun g r Y y` is the separable form
-`separableFormAt g y r (fun i => Y i y)`. -/
 @[simp]
 lemma toModel_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -416,17 +300,6 @@ lemma toModel_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
       separableFormAt (I := I) (M := M) g y r (fun i : Fin r => Y i y) := by
   rw [metricFormFun, Tensor0SSpace.toModel_ofModel]
 
-/-! ### Chart-local smoothness of the separable-form section
-
-Smoothness of `metricFormFun` is proved chart-by-chart, mirroring
-`TensorMetricLowering.contMDiff_lifted_section`: on each chart base set the trivialised fibre
-of the section evaluates, on a model-basis tuple `e_ψ`, to a finite product of the smooth
-scalars `g.inner y (Y k y) (symmL e_ψ)`; the basis-tuple evaluation bridge
-`contMDiff_into_tensor0SModel_of_eval_basis_local` lifts this to bundle smoothness on the chart. -/
-
-/-- Evaluation at all model-basis tuples, as a continuous linear equivalence
-`Tensor0SModel n ℝ E ≃L (basis-tuple-indexed scalars)`. The same device as the private
-`TensorMetricLowering.evalAtBasisCLE`, re-derived here to avoid the `private` qualifier. -/
 private noncomputable def evalAtBasisCLE_loc (n : ℕ) :
     Tensor0SModel n ℝ E ≃L[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) := by
@@ -454,7 +327,6 @@ private noncomputable def evalAtBasisCLE_loc (n : ℕ) :
     evalAtBasisCLE_loc (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- Smoothness into `Tensor0SModel n ℝ E` from smoothness of basis-tuple evaluations. -/
 private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_loc
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -476,9 +348,6 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_loc
   intro b _
   exact ((evalAtBasisCLE_loc (E := E) n).symm_apply_apply (Φ b)).symm
 
-/-- **Chart-local smoothness of the separable-form section.** On the chart base set at `α`,
-the section `y ↦ ⟨y, metricFormFun g r Y y⟩` is smooth: its trivialised fibre evaluates at a
-model-basis tuple to a finite product of smooth scalars. -/
 private lemma contMDiffOn_metricFormFun_baseSet
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (α : M) :
@@ -540,9 +409,6 @@ private lemma contMDiffOn_metricFormFun_baseSet
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
   exact hpb.2
 
-/-- **Smoothness of the metric-lowering separable `(0, r)`-form section.** Built from smooth
-vector fields `Y`, the separable form is a smooth section of the `(0, r)`-tensor bundle, in
-total-space form. -/
 lemma contMDiff_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
@@ -554,7 +420,6 @@ lemma contMDiff_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
       (mem_baseSet_trivializationAt _ _ _)))
 
-/-- The bundled smooth metric-lowering separable `(0, r)`-form section. -/
 noncomputable def metricFormSection
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -568,7 +433,6 @@ lemma metricFormSection_apply
     metricFormSection (I := I) (M := M) g r Y y =
       metricFormFun (I := I) (M := M) g r Y y := rfl
 
-/-- The model coercion of the bundled metric-form section is the separable form. -/
 @[simp]
 lemma toModel_metricFormSection
     (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -577,15 +441,12 @@ lemma toModel_metricFormSection
       separableFormAt (I := I) (M := M) g y r (fun i : Fin r => Y i y) := by
   rw [metricFormSection_apply, toModel_metricFormFun]
 
-/-- `metricFormFun` is differentiable (in total-space form) at every point. -/
 lemma metricFormFun_tensorSectionMDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     TensorSectionMDiffAt (I := I) r (metricFormFun (I := I) (M := M) g r Y) x :=
   (contMDiff_metricFormFun (I := I) (M := M) g r Y x).mdifferentiableAt (by simp)
 
-/-- The leading-slot currying of `metricFormFun g (r + 1) Y` is the metric-flat factor
-`g.inner y (Y 0 y) (·)` scaling the rank-`r` metric form built from the tail `Y ∘ succ`. -/
 lemma curriedSection_metricFormFun_succ
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin (r + 1) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) (v : E) :
@@ -608,9 +469,6 @@ lemma curriedSection_metricFormFun_succ
   refine Finset.prod_congr rfl (fun i _ => ?_)
   rw [Fin.cons_succ]
 
-/-- The raw `(0, r + s)`-tensor lift of a raw differentiable `(r, s)`-tensor function `T`:
-`y ↦ ofModel (lowerAllUpperIndices g r s y (toModel (T y)))`.  For a bundled smooth section
-this coincides with `liftedTensorSection`. -/
 noncomputable def rawLiftFun (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π y : M, TensorRSSpace r s I y) : Π y : M, Tensor0SSpace (r + s) I y :=
   fun y => Tensor0SSpace.ofModel
@@ -623,8 +481,6 @@ lemma toModel_rawLiftFun (g : SmoothRiemannianMetric I M) (r s : ℕ)
       lowerAllUpperIndices (I := I) (M := M) g r s y (TensorRSSpace.toModel (T y)) := by
   rw [rawLiftFun, Tensor0SSpace.toModel_ofModel]
 
-/-- Leading-slot decomposition of a separable `(0, r + 1)`-form on a tuple: the first metric
-factor `g.inner x (f 0) (w 0)` times the rank-`r` separable form on the remaining slots. -/
 lemma separableFormAt_succ_cons_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ) (f : Fin (r + 1) → E)
     (w : Fin (r + 1) → E) :
@@ -634,16 +490,6 @@ lemma separableFormAt_succ_cons_apply
           (fun i : Fin r => f i.succ) (fun i : Fin r => w i.succ) := by
   rw [separableFormAt_apply, separableFormAt_apply, Fin.prod_univ_succ]
 
-/-- **The `∇g = 0` Leibniz for the metric-lowering separable form.** The covariant derivative
-of the metric form contributes nothing from the metric (it is `∇`-parallel): differentiating
-`∏ i, g.inner · (Y i ·)` only hits the smooth vector fields `Y i`, giving the sum over `k` of
-the separable forms with the `k`-th slot's field replaced by `(LeviCivita g)_v (Y k)`:
-```
-toModel (∇^{(0,r)}_v (metricFormSection g r Y) x)
-  = ∑ k, separableFormAt g x r (update (Y · x) k ((LeviCivita g)_v (Y k))).
-```
-This mirrors `smoothOrthoFrame_connection_skew`: each per-factor derivative is supplied by
-`LeviCivita_isMetricCompatible`. -/
 lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
     ∀ (r : ℕ) (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
       (x : M) (v : TangentSpace I x),
@@ -672,20 +518,20 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
       refine ContinuousMultilinearMap.ext (fun w => ?_)
       obtain ⟨Yw, hYwx⟩ := ContMDiffSection.exists_eq_at (I := I) (F := E)
         (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) x (w 0)
-      -- Peel the leading slot of ∇^{(0,r+1)}_v (metricFormFun (r+1) Y) read on `cons (w 0) (tail w)`.
+      
       have hpeel := tensor0SCovariantDerivative_succ_consEval_peel (I := I) (M := M) g r
         (W := metricFormFun (I := I) (M := M) g (r + 1) Y)
         (metricFormFun_tensorSectionMDiffAt (I := I) (M := M) g (r + 1) Y x)
         Yw v (Fin.tail w)
       rw [hYwx] at hpeel
-      -- The peeled `(0,r)` section is the scalar `g.inner · (Y 0 ·)(Yw ·)` times the tail form.
+      
       have hcurriedEq : (fun y : M => curriedSection I M
             (metricFormFun (I := I) (M := M) g (r + 1) Y) y (Yw y)) =
           (fun y : M => (fun z : M => g.inner z (Y 0 z) (Yw z)) y •
             metricFormFun (I := I) (M := M) g r (fun i : Fin r => Y i.succ) y) := by
         funext y
         rw [curriedSection_metricFormFun_succ]
-      -- Apply the scalar-times-section Leibniz to the peeled term.
+      
       have hfscal_smooth : ContMDiff I 𝓘(ℝ) ∞
           (fun z : M => g.inner z (Y 0 z) (Yw z)) := by
         have happ : ContMDiff I (I.prod 𝓘(ℝ, ℝ)) ∞
@@ -721,7 +567,7 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
           rfl
         rw [hcong, hLeib, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
           ContinuousLinearMap.smulRight_apply]
-      -- Compute the directional derivative of the scalar by metric compatibility.
+      
       have hYw_mdiff : MDiffAt (T% fun z => Yw z) x :=
         Yw.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
       have hY0_mdiff : MDiffAt (T% fun z => Y 0 z) x :=
@@ -738,7 +584,7 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
           rfl
         rw [hext]
         exact (LeviCivita_isMetricCompatible (I := I) g).apply hY0_mdiff hYw_mdiff v
-      -- Assemble: peel + Leibniz + IH, then match the leading-slot-split RHS sum.
+      
       have hconsw : Fin.cons (w 0) (Fin.tail w) = w := Fin.cons_self_tail w
       rw [show ((tensor0SCovariantDerivative I M (r + 1) (LeviCivita (I := I) g)
             (metricFormFun (I := I) (M := M) g (r + 1) Y) x v)).toModel w =
@@ -746,23 +592,23 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
             (metricFormFun (I := I) (M := M) g (r + 1) Y) x v)).toModel
             (Fin.cons (w 0) (Fin.tail w)) from by rw [hconsw]]
       rw [hpeel, hleibTerm]
-      -- Read the Leibniz sum on `tail w`, expand via IH, substitute the scalar derivative.
+      
       rw [Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_smul,
         ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply,
         ContinuousMultilinearMap.smul_apply, toModel_covDeriv_metricFormSection g r
           (fun i : Fin r => Y i.succ) x v, toModel_metricFormFun, hfscal_deriv, hYwx]
-      -- The peel correction `toModel(metricFormFun (r+1) Y x)(cons (∇Yw) (tail w))`.
+      
       rw [toModel_metricFormFun,
         separableFormAt_succ_cons_apply (I := I) (M := M) g x r (fun i => Y i x)
           (Fin.cons ((LeviCivita (I := I) g).toFun (fun z => Yw z) x v) (Fin.tail w))]
       simp only [Fin.cons_zero, Fin.cons_succ]
-      -- Distribute both multilinear sums over their evaluation tuples.
+      
       rw [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
-      -- RHS: split off the leading (k = 0) slot.
+      
       rw [Fin.sum_univ_succ (fun k : Fin (r + 1) => separableFormAt (I := I) (M := M) g x (r + 1)
         (Function.update (fun i : Fin (r + 1) => Y i x) k
           ((LeviCivita (I := I) g).toFun (fun z => Y k z) x v)) w)]
-      -- The k = 0 summand.
+      
       rw [separableFormAt_succ_cons_apply (I := I) (M := M) g x r
         (Function.update (fun i : Fin (r + 1) => Y i x) 0
           ((LeviCivita (I := I) g).toFun (fun z => Y 0 z) x v)) w]
@@ -774,7 +620,7 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
         funext i
         rw [Function.update_of_ne (Fin.succ_ne_zero i)]
       rw [hupd0_succ]
-      -- Each k = j.succ summand: slot 0 keeps `Y 0 x`; the tail is an `r`-update.
+      
       have hsucc_summand : ∀ j : Fin r,
           separableFormAt (I := I) (M := M) g x (r + 1)
               (Function.update (fun i : Fin (r + 1) => Y i x) j.succ
@@ -802,7 +648,7 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
           · rw [if_neg hij, if_neg (fun h => hij (Fin.succ_injective r h))]
         rw [htail_upd]
       rw [Finset.sum_congr rfl (fun j _ => hsucc_summand j)]
-      -- Both sides are now `A·(∑_j form_j) + B·form` with matching A, B; finish by ring.
+      
       have hfscalx : fscal x = g.inner x (Y 0 x) (w 0) := by
         change g.inner x (Y 0 x) (Yw x) = g.inner x (Y 0 x) (w 0)
         rw [hYwx]
@@ -811,11 +657,6 @@ lemma toModel_covDeriv_metricFormSection (g : SmoothRiemannianMetric I M) :
       simp only [smul_eq_mul, ← Finset.mul_sum]
       ring
 
-/-- The fibre continuous linear equivalence that prepends the metric-flat slot
-`g.inner y (X y) (·)` to a `(0, r)`-tensor, producing a `(0, r + 1)`-tensor.  Built through the
-bundle/model bridge `tensor0SSpace_continuousLinearEquiv` and the leading-slot currying CLE,
-all `smulRight` work staying in the model fibre `Tensor0SModel r ℝ E` so that the source/target
-carry the canonical bundle-fibre instances.  No smoothness is asserted (it is a single fibre). -/
 noncomputable def prependMetricCLM
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -827,8 +668,6 @@ noncomputable def prependMetricCLM
           (g.inner y (X y))).comp
         (tensor0SSpace_continuousLinearEquiv (I := I) r y).toContinuousLinearMap))
 
-/-- Evaluation of the prepend CLM: it puts `g.inner y (X y) (z 0)` in front of the rank-`r`
-form evaluated on the remaining slots. -/
 lemma toModel_prependMetricCLM
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M)
@@ -861,8 +700,6 @@ lemma toModel_prependMetricCLM
     · rw [Fin.cons_succ]
   rw [hzcons, hcurry]
 
-/-- Naturality of the `(0, n)`-tensor covariant derivative under a natural-number
-type re-identification (local copy; the public version lives downstream). -/
 private lemma tensor0SCovDeriv_cast_transport
     {a b : ℕ} (g : SmoothRiemannianMetric I M) (h : a = b)
     (W : Π y : M, Tensor0SSpace b I y) (x : M) (v : TangentSpace I x) :
@@ -872,7 +709,6 @@ private lemma tensor0SCovDeriv_cast_transport
         (tensor0SCovariantDerivative I M b (LeviCivita (I := I) g) W x v) := by
   subst h; rfl
 
-/-- Model coercion of a natural-number type-transport (local copy). -/
 private lemma toModel_cast_transport
     {a b : ℕ} (h : a = b) {x : M} (T : Tensor0SSpace b I x) :
     Tensor0SSpace.toModel (cast (congrArg (fun n => Tensor0SSpace n I x) h.symm) T) =
@@ -882,8 +718,6 @@ private lemma toModel_cast_transport
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-/-- Pointwise differentiability is preserved under a natural-number type-transport of the
-`(0, n)`-tensor section. -/
 private lemma tensorSectionMDiffAt_cast_transport
     {a b : ℕ} (h : a = b) (W : Π y : M, Tensor0SSpace b I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) b W x) :
@@ -891,9 +725,6 @@ private lemma tensorSectionMDiffAt_cast_transport
       (fun y : M => cast (congrArg (fun n => Tensor0SSpace n I y) h.symm) (W y)) x := by
   cases h; exact hW
 
-/-- Pointwise differentiability of the partial evaluation `y ↦ (curriedSection W) y (Y y)` of
-a `(0, s + 1)`-tensor section `W` differentiable at `x` against a smooth vector field `Y`
-(local re-derivation of the private `tensorSectionMDiffAt_curriedSection_apply`). -/
 private lemma tensorSectionMDiffAt_curriedSection_applyVF
     (s : ℕ) (W : Π y : M, Tensor0SSpace (s + 1) I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -914,12 +745,6 @@ private lemma tensorSectionMDiffAt_curriedSection_applyVF
     (b := id) (ϕ := fun y : M => curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
-/-- **Leading-slot rank reduction of the lifted tensor.** Contracting the leading slot of the
-metric-lift of `T : Π y, TensorRSSpace (r + 1) s I y` against a vector field `X` (after the
-`(r + 1) + s = (r + s) + 1` re-identification) reduces, as a `(0, r + s)`-tensor section, to
-the metric-lift of the rank-`r` tensor `y ↦ (T y).comp (prependMetricCLM g r X y)`: the metric
-factor `g.inner · (X ·)` produced on the leading slot is exactly the slot prepended by
-`prependMetricCLM`. -/
 private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π y : M, TensorRSSpace (r + 1) s I y)
@@ -935,8 +760,8 @@ private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
   funext y
   refine Tensor0SSpace.toModel_injective ?_
   refine ContinuousMultilinearMap.ext (fun z => ?_)
-  -- Compute the LHS value at `z` as `TensorRSSpace.toModel (T y)` applied to a `(0, r + 1)`-form
-  -- and an `s`-slot tuple, both read through the `finCongr` reindexing of `Fin.cons (X y) z`.
+  
+  
   have hLHS : Tensor0SSpace.toModel
         (curriedSection I M
           (fun w : M => cast (congrArg (fun n => Tensor0SSpace n I w) h.symm)
@@ -953,8 +778,8 @@ private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     rw [toModel_cast_transport h (rawLiftFun (I := I) (M := M) g (r + 1) s T y)]
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rw [toModel_rawLiftFun, lowerAllUpperIndices_apply]
-  -- Compute the RHS value at `z`, bridging the composed CLM to `TensorRSSpace.toModel (T y)`
-  -- applied to the prepend-image of the rank-`r` separable form via `toModel_tensorRS_apply`.
+  
+  
   have hRHS : Tensor0SSpace.toModel
         (rawLiftFun (I := I) (M := M) g r s
           (fun w : M => (show Tensor0SSpace (r + 1) I w →L[ℝ] Tensor0SSpace s I w from T w).comp
@@ -970,8 +795,8 @@ private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     rw [toModel_tensorRS_comp_apply (I := I) (M := M) r s y (T y)
       (prependMetricCLM (I := I) (M := M) g r X y)
       (separableFormAt (I := I) (M := M) g y r (fun i : Fin r => z (Fin.castAdd s i)))]
-  -- The `finCongr`-reindexed `Fin.cons (X y) z` tuple splits cleanly: the leading `r + 1`
-  -- slots are `Fin.cons (X y) (z ∘ castAdd s)` and the last `s` slots are `z ∘ natAdd r`.
+  
+  
   have hlo : (fun k : Fin (r + 1) =>
         (Fin.cons (X y) z : Fin (r + s + 1) → E) ((finCongr h.symm) (Fin.castAdd s k))) =
       Fin.cons (X y) (fun i : Fin r => z (Fin.castAdd s i)) := by
@@ -993,8 +818,8 @@ private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
         Fin.succ ((Fin.natAdd r j : Fin (r + s))) := Fin.ext (by simp [Fin.succ, Nat.add_right_comm])
     rw [this, Fin.cons_succ]
   rw [hLHS, hRHS, hlo, hhi]
-  -- The two `(0, r + 1)`-forms fed to `TensorRSSpace.toModel (T y)` agree (the metric factor on
-  -- the leading slot is exactly the slot prepended by `prependMetricCLM`).
+  
+  
   have hform : separableFormAt (I := I) (M := M) g y (r + 1)
         (Fin.cons (X y) (fun i : Fin r => z (Fin.castAdd s i))) =
       Tensor0SSpace.toModel
@@ -1008,11 +833,6 @@ private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     simp only [Fin.cons_succ]
   rw [hform]
 
-/-- **The metric-form peel, inductive form (lift-differentiability hypothesis).** Identical to
-`loweredCovDeriv_metricForm_eval` but with the more primitive hypothesis that the metric-lift
-`rawLiftFun g r s T` is everywhere manifold-differentiable (which is what propagates through the
-`r`-fold leading-slot peel: at each step the peeled `(0, r + s)`-section is itself a metric-lift,
-differentiable by `tensorSectionMDiffAt_curriedSection_applyVF`). -/
 private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I M) :
     ∀ (r s : ℕ) (T : Π y : M, TensorRSSpace r s I y)
       (_hLiftDiff : ∀ z : M, TensorSectionMDiffAt (I := I) (r + s)
@@ -1036,7 +856,7 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
   induction r with
   | zero =>
     intro s T _hLiftDiff Y x v m
-    -- Correction term vanishes: ∇^{(0,0)} of the unit metric form is zero.
+    
     have hcorr0 : tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
         (fun y : M => metricFormSection (I := I) (M := M) g 0 Y y) x v = 0 := by
       refine Tensor0SSpace.toModel_injective ?_
@@ -1047,7 +867,7 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
       simp
     rw [hcorr0, map_zero, Tensor0SSpace.toModel_zero, ContinuousMultilinearMap.zero_apply,
       sub_zero]
-    -- The lift at rank 0 is the `0 + s = s` reindexing of `T · (metric form)`.
+    
     have hunit : ∀ y : M, metricFormSection (I := I) (M := M) g 0 Y y =
         Tensor0SSpace.ofModel
           (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)) := by
@@ -1094,32 +914,32 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
     intro s T hLiftDiff Y x v m
     classical
     set h : (r + s) + 1 = (r + 1) + s := (Nat.succ_add r s).symm with hh
-    -- The cast-lift, a `(0, (r + s) + 1)`-tensor section.
+    
     set castLift : Π z : M, Tensor0SSpace ((r + s) + 1) I z :=
       fun z : M => cast (congrArg (fun n => Tensor0SSpace n I z) h.symm)
         (rawLiftFun (I := I) (M := M) g (r + 1) s T z) with hcastLift
-    -- Differentiability of the cast-lift everywhere.
+    
     have hcastLiftDiff : ∀ z : M, TensorSectionMDiffAt (I := I) ((r + s) + 1) castLift z := by
       intro z
       exact tensorSectionMDiffAt_cast_transport h
         (rawLiftFun (I := I) (M := M) g (r + 1) s T) (hLiftDiff z)
-    -- The reduced raw tensor (rank `r`) obtained by prepending the leading metric slot.
+    
     set T' : Π y : M, TensorRSSpace r s I y :=
       fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace s I y from T y).comp
         (prependMetricCLM (I := I) (M := M) g r (Y 0) y) with hT'
-    -- The peeled `(0, r + s)`-section is the metric-lift of `T'`.
+    
     have hpeelEq : (fun y : M => curriedSection I M castLift y (Y 0 y)) =
         rawLiftFun (I := I) (M := M) g r s T' := by
       rw [hcastLift, hT']
       exact curriedSection_castLift_succ_eq_rawLiftFun_comp (I := I) (M := M) g r s T (Y 0)
-    -- Differentiability of the lift of `T'` (from the cast-lift, via currying).
+    
     have hLiftDiff' : ∀ z : M, TensorSectionMDiffAt (I := I) (r + s)
         (rawLiftFun (I := I) (M := M) g r s T') z := by
       intro z
       rw [← hpeelEq]
       exact tensorSectionMDiffAt_curriedSection_applyVF (I := I) (M := M) (r + s)
         castLift (hcastLiftDiff z) (Y 0)
-    -- The append tuple of `Y · x` and `m`, reindexed through `finCongr h`, is the cons tuple.
+    
     have hYcons : (fun k : Fin (r + 1) => Y k x) =
         Fin.cons (Y 0 x) (fun k : Fin r => Y k.succ x) := by
       funext k
@@ -1134,8 +954,8 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
       have hidx : (Fin.cast (Nat.add_right_comm r 1 s)) ((finCongr h) i) = i :=
         Fin.ext (by simp [finCongr])
       rw [hidx]
-    -- Rewrite the left-hand side as the rank-`(r + s) + 1` cast-lift covariant derivative,
-    -- evaluated on the cons tuple.
+    
+    
     have hLHSeq : Tensor0SSpace.toModel
           (tensor0SCovariantDerivative I M ((r + 1) + s) (LeviCivita (I := I) g)
             (rawLiftFun (I := I) (M := M) g (r + 1) s T) x v)
@@ -1155,14 +975,14 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
       rw [ContinuousMultilinearMap.domDomCongr_apply]
       rw [← htuple]
     rw [hLHSeq]
-    -- Peel the leading slot.
+    
     rw [tensor0SCovariantDerivative_succ_consEval_peel (I := I) (M := M) g (r + s)
       (W := castLift) (hcastLiftDiff x) (Y 0) v
       (Fin.append (fun k : Fin r => Y k.succ x) m)]
     rw [hpeelEq]
-    -- Apply the induction hypothesis to the peeled lift of `T'`.
+    
     rw [ih s T' hLiftDiff' (fun k : Fin r => Y k.succ) x v m]
-    -- Identify the first IH term with the goal's first term (the partial evaluations agree).
+    
     have hpartialEq : (fun y : M => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from T' y)
           (metricFormSection (I := I) (M := M) g r (fun k : Fin r => Y k.succ) y)) =
         (fun y : M => (show Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SSpace s I y from T y)
@@ -1181,19 +1001,19 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
           metricFormFun (I := I) (M := M) g (r + 1) Y y from rfl, toModel_metricFormFun,
         separableFormAt_succ_cons_apply]
     rw [hpartialEq]
-    -- The reassembly of the two correction terms into `T x (∇^{(0,r+1)} metricForm)`.
+    
     rw [sub_sub]
     congr 1
-    -- Goal: `T' x (∇^{(0,r)} metricForm_r) (m) + castLift x (cons (∇Y0) (append ...)) (m)
-    --        = T x (∇^{(0,r+1)} metricForm_{r+1}) (m)`.
-    -- Abbreviate the connection differential of the `k`-th vector field along `v` and the
-    -- common `k`-th goal-correction summand.
+    
+    
+    
+    
     set nablaY : Fin (r + 1) → E :=
       fun k => (LeviCivita (I := I) g).toFun (fun y => Y k y) x v with hnablaY
     set RHSk : Fin (r + 1) → ℝ := fun k => TensorRSSpace.toModel (T x)
       (separableFormAt (I := I) (M := M) g x (r + 1)
         (Function.update (fun l : Fin (r + 1) => Y l x) k (nablaY k))) m with hRHSk
-    -- The goal-correction is the full sum of the `RHSk`.
+    
     have hgoalCorr : Tensor0SSpace.toModel
           ((show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace s I x from T x)
             (tensor0SCovariantDerivative I M (r + 1) (LeviCivita (I := I) g)
@@ -1206,7 +1026,7 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
           (metricFormFun (I := I) (M := M) g (r + 1) Y) x v)]
       rw [toModel_covDeriv_metricFormSection g (r + 1) Y x v]
       rw [map_sum, ContinuousMultilinearMap.sum_apply]
-    -- The leading-slot summand `RHSk 0` equals the second peel term.
+    
     have hk0 : Tensor0SSpace.toModel (castLift x)
           (Fin.cons (nablaY 0) (Fin.append (fun k : Fin r => Y k.succ x) m)) = RHSk 0 := by
       rw [hRHSk]
@@ -1245,7 +1065,7 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
           Fin.ext (by simp [Fin.succ, Nat.add_right_comm])
         rw [this, Fin.cons_succ, Fin.append_right]
       rw [hform, htail]
-    -- Each tail summand `RHSk j.succ` equals the corresponding IH-correction summand.
+    
     have hksucc : ∀ j : Fin r, RHSk j.succ = TensorRSSpace.toModel (T x)
           (Tensor0SSpace.toModel
             (prependMetricCLM (I := I) (M := M) g r (Y 0) x
@@ -1268,7 +1088,7 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
       by_cases hij : i = j
       · subst hij; simp
       · rw [if_neg hij, if_neg (fun hcontra => hij (Fin.succ_injective r hcontra))]
-    -- The IH-correction term is the sum of the tail summands `RHSk j.succ`.
+    
     have hIHcorr : Tensor0SSpace.toModel
           ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T' x)
             (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
@@ -1288,24 +1108,9 @@ private lemma loweredCovDeriv_metricForm_eval_aux (g : SmoothRiemannianMetric I 
         (prependMetricCLM (I := I) (M := M) g r (Y 0) x)
         (separableFormAt (I := I) (M := M) g x r
           (Function.update (fun l : Fin r => Y l.succ x) j (nablaY j.succ)))]
-    -- Assemble: IH-correction (tail sum) + second peel term (leading) = full goal-correction sum.
+    
     rw [hgoalCorr, hIHcorr, hk0, add_comm, ← Fin.sum_univ_succ]
 
-/-- **The metric-form peel of the lowered covariant derivative.** For a smooth raw
-`(r, s)`-tensor function `T` (with smooth `(0, r + s)`-lift) and smooth vector fields `Y`,
-the `(0, r + s)`-covariant derivative of the lift, read on the tuple whose first `r` slots are
-`Y · x` and last `s` slots are `m`, decomposes by the `r`-fold leading-slot peel and the
-metric-form `∇g = 0` Leibniz `toModel_covDeriv_metricFormSection`:
-```
-toModel (∇^{(0,r+s)}_v lift)(append (Y·x) m)
-  = toModel (∇^{(0,s)}_v (y ↦ T y (metricFormSection g r Y y)))(m)
-  − toModel (T x (∇^{(0,r)}_v (metricFormSection g r Y)))(m).
-```
-The metric is `∇`-parallel, so the metric form contributes only the correction term, which is
-`T x` applied to `∇^{(0,r)}_v` of the metric form (computed by the `∇g = 0` Leibniz).  The proof
-is the `r`-fold leading-slot peel `loweredCovDeriv_metricForm_eval_aux`: the smoothness
-hypothesis `_hT` supplies the everywhere-differentiability of the metric-lift
-`rawLiftFun g r s T` (`contMDiff_lifted_section`) that the peel induction consumes. -/
 lemma loweredCovDeriv_metricForm_eval (g : SmoothRiemannianMetric I M) :
     ∀ (r s : ℕ) (T : Π y : M, TensorRSSpace r s I y)
       (_hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1331,42 +1136,6 @@ lemma loweredCovDeriv_metricForm_eval (g : SmoothRiemannianMetric I M) :
   intro z
   exact (contMDiff_lifted_section (I := I) (M := M) g r s ⟨T, hT⟩ z).mdifferentiableAt (by simp)
 
-/-- **Leibniz product rule for the metric-lowered section (`∇g`-content), via a smooth
-local lowering form.**  Fix a point `x`, a direction `v` and an evaluation tuple
-`u : Fin (r + s) → E`, with `u_lo = u ∘ Fin.castAdd s` the first `r` slots and
-`u_hi = u ∘ Fin.natAdd r` the last `s` slots.  Let `w` be *any* smooth `(0, r)`-tensor
-section whose value at `x` is the metric-built separable lowering form
-`ofModel (separableFormAt g x r u_lo)` (such a `w` exists — e.g. a bump-extension of the
-fibre value via `ContMDiffSection.exists_eq_at` — and the genuine metric-built lowering form
-is one such local representative).  Then the value of the metric-lowered directional
-covariant derivative `loweredCovDerivAt g r s S x v` read on `u` decomposes by the covariant
-Leibniz product rule applied to the insertion of `w` into the first `r` slots:
-```
-toModel (∇^{(0,r+s)}_v (lift S) x) u
-  = toModel (∇^{(0,s)}_v (y ↦ S y (w y)) x) u_hi
-  − toModel (S x (∇^{(0,r)}_v w x)) u_hi.
-```
-
-This is the genuine `∇g`-content of the parallel-lowering commutation, packaged as a Leibniz
-product rule rather than the (false) "the lowering form is parallel".  The metric
-`∇g`-dependence is carried *inside* the correction term `− S x (∇^{(0,r)}_v w)`, where
-`∇^{(0,r)}_v w` is the (generically nonzero) covariant derivative of the lowering-form
-representative — NOT zero on a curved manifold.  The statement is true and non-vacuous: the
-left-hand side is the fixed value `loweredCovDerivAt g r s S x v`, and the right-hand side is
-the standard covariant-Leibniz expansion of the lift's tuple-evaluation, which is
-independent of the chosen smooth representative `w` (only its value `w x` and the connection
-enter the fixed left-hand side).  In particular `w` is a genuinely *smooth* bundled test
-section (a `Cₛ^∞` section) whose value at `x` is fixed (`hw_at`); the statement never asserts
-that the metric-built lowering form is globally smooth as a free-tuple field (which is false
-on a multi-chart manifold).  It is strictly more primitive than the standard commutation it
-powers (it eliminates the `(r, s)`-connection in favour of the recursive `(0, r)`- and
-`(0, s)`-connections), so it is no packaging of the conclusion.
-
-The proof builds a genuine smooth metric-lowering form section `metricFormSection g r Y` (with
-`Y i x = u_lo i`), evaluates the lowered covariant derivative on the appended tuple by the
-`r`-fold metric-form peel `loweredCovDeriv_metricForm_eval`, and swaps the metric form for the
-arbitrary representative `w` (they agree at `x`) by the vanishing-test-form product rule
-`tensor0SCovariantDerivative_apply_eq_of_vanishing` applied to `w − metricFormSection`. -/
 theorem loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -1386,11 +1155,11 @@ theorem loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection
               (fun y : M => w y) x v))
           (fun j : Fin s => u (Fin.natAdd r j)) := by
   classical
-  -- A smooth vector field `Y i` with value `u (castAdd s i)` at `x`, for each leading slot.
+  
   choose Y hYx using fun i : Fin r =>
     ContMDiffSection.exists_eq_at (I := I) (F := E)
       (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) x (u (Fin.castAdd s i))
-  -- The metric form agrees with the test section `w` at `x`.
+  
   have hWform_x : metricFormSection (I := I) (M := M) g r Y x = w x := by
     refine Tensor0SSpace.toModel_injective ?_
     change Tensor0SSpace.toModel (metricFormSection (I := I) (M := M) g r Y x) =
@@ -1400,28 +1169,28 @@ theorem loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection
     rw [separableFormAt_apply, separableFormAt_apply]
     refine Finset.prod_congr rfl (fun i _ => ?_)
     rw [hYx i]
-  -- `loweredCovDerivAt = ∇^{(0,r+s)}_v` of the raw lift of `S`.
+  
   have hlift : loweredCovDerivAt (I := I) (M := M) g r s S x v =
       tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
         (rawLiftFun (I := I) (M := M) g r s (fun y : M => S y)) x v := by
     rw [loweredCovDerivAt_def]
     congr 1
-  -- `u` is the appended tuple of `Y · x` and `u_hi`.
+  
   have hu_app : u = Fin.append (fun i : Fin r => Y i x) (fun j : Fin s => u (Fin.natAdd r j)) := by
     funext k
     refine Fin.addCases (fun i => ?_) (fun j => ?_) k
     · rw [Fin.append_left]; exact (hYx i).symm
     · rw [Fin.append_right]
-  -- Apply the metric-form peel to the left-hand side only (avoid rewriting `u` in the RHS).
+  
   rw [hlift]
   conv_lhs => rw [hu_app]
   rw [loweredCovDeriv_metricForm_eval (I := I) (M := M) g r s (fun y : M => S y)
       S.contMDiff Y x v (fun j : Fin s => u (Fin.natAdd r j))]
-  -- Swap the metric form for `w`.  By the proved `(r, s)`-tensor product rule
-  -- `tensorRSCovariantDerivative_apply`, each of the two `(∇g)`-bracket expressions equals
-  -- `S x` applied to the corresponding `(0, r)`-form value at `x`; since `Wform x = w x`,
-  -- the two brackets agree.  (This uses `tensorRSCovariantDerivative_apply` only for the
-  -- swap of the right-hand-side shape — never the goal `_rs` itself.)
+  
+  
+  
+  
+  
   have hbracket : ∀ ww : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯,
       Tensor0SSpace.toModel
           (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
@@ -1438,40 +1207,12 @@ theorem loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection
     intro ww
     have hap := tensorRSCovariantDerivative_apply (I := I) M r s (LeviCivita (I := I) g) S ww x v
     rw [← ContinuousMultilinearMap.sub_apply, ← Tensor0SSpace.toModel_sub, ← hap]
-  -- Apply the bracket identity to `metricFormSection Y` (the goal side, defeq to `metricFormFun`)
-  -- and to `w` (the target side); the two brackets agree since `Wform x = w x`.
+  
+  
   conv_rhs => rw [hbracket w]
   conv_lhs => rw [hbracket (metricFormSection (I := I) (M := M) g r Y)]
   rw [hWform_x]
 
-/-- **The parallel-lowering commutation at general rank `(r, s)`.** For a smooth mixed
-`(r, s)`-tensor section `S`, every point `x` and direction `v`, the model coercion of the
-metric-lowered directional covariant derivative `loweredCovDerivAt g r s S x v` (the
-`(0, r + s)`-covariant derivative of the metric-lowered section) equals the index-lowering
-`lowerAllUpperIndices g r s x` of the genuine `(r, s)`-covariant derivative of `S`:
-```
-toModel (∇^lowered_v S) = lowerAllUpperIndices g r s x (toModel (∇^{(r,s)}_v S)).
-```
-Equivalently, the `r`-slot metric index-lowering operator field commutes with `∇`, because
-the metric is `∇`-parallel (`∇g = 0`).
-
-This generalises the unconditional purely-covariant rank-`(0, s)` intertwiner
-`loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen` (there the lowering contracts *no* upper
-slots and reduces to evaluation at the unit `(0, 0)`-tensor) to genuine `r > 0`, where the
-metric is contracted through `r` upper slots.
-
-The proof works pointwise on an evaluation tuple `u`.  A *smooth* `(0, r)`-test section `w`
-with value `ofModel (separableFormAt g x r u_lo)` at `x` is produced by
-`ContMDiffSection.exists_eq_at` — crucially a genuine smooth section, never the (false)
-globally-smooth free-tuple lowering form.  Unfolding the index-lowering
-(`lowerAllUpperIndices_apply`) reads the right-hand side as `∇^{(r,s)}_v S` evaluated at
-`w x`; the proved `(r, s)`-tensor Leibniz product rule `tensorRSCovariantDerivative_apply`
-then rewrites this as `∇^{(0,s)}_v (S · w) − S (∇^{(0,r)}_v w)`.  This matches the
-metric-lift `loweredCovDerivAt` exactly by the Leibniz product rule
-`loweredCovDerivAt_eval_eq_partialEval_sub_lowerFormCorrection` (which carries the
-`∇g`-content *inside* the correction term, rather than the false "the lowering form is
-parallel"); the two `toModel`/subtraction shapes are reconciled by `Tensor0SSpace.toModel_sub`
-and `ContinuousMultilinearMap.sub_apply`. -/
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

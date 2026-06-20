@@ -3,43 +3,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 
-/-!
-# From-`0` uniqueness of the bare manifold flow under the weak `t = 0` datum
-
-This file proves the forward (one-sided, from `t = 0`) uniqueness of the **bare** manifold
-flow for an interior-`C∞` time-dependent vector field `X`, under the *weak* `t = 0` data — the
-continuity datum `hcont0` and the chart-gradient continuity datum `hgrad0`, **without** any
-`C¹`-up-to-`t = 0` joint regularity of the field.
-
-The forward two-sided uniqueness `bare_forward_flow_eqOn_of_jointC1`
-(`ForwardIntegralCurveUniqueness.lean`) requires the autonomised field `(1, X)` on `ℝ × M` to be
-jointly `C¹` *including at `t = 0`* (`AutonomizedFieldJointC1`).  At the `t = 0` corner of the
-forward flow that hypothesis is unavailable: the field is only continuous up to `t = 0`, with the
-chart-gradient continuous up to `t = 0`.  This file supplies the missing corner uniqueness from
-exactly the weak datum that the from-`0` orbit construction
-(`fromZero_manifold_orbit_of_lipschitz`) already consumes.
-
-The route reads both bare-velocity curves into the chart at their common initial point
-`α := γ₁ 0`.  The bare manifold velocity `(1).smulRight (X t (γ t))` pushes to the chart-coordinate
-one-sided derivative with the trivialised chart velocity `fromZeroChartField X α t` (the
-`tangentCoordChange` reading), exactly as in `IsMIntegralCurveOn.hasDerivWithinAt`.  The orbit is
-confined to the validity ball near `t = 0` by the continuity of the curve through `α`; on that ball
-the from-`0` Grönwall Lipschitz-in-initial-point bound `forward_orbit_dist_le`, at the *same*
-initial point, forces the chart distance to vanish, which pulls back to manifold agreement.  The
-chart-field Lipschitz datum is the file's posited
-`fromZeroChartField_uniform_lipschitz_from_zero`; consumers transit its `sorryAx`.  The basepoint
-chart is pinned to `α` throughout, so the chart reads are `T1`-safe.
-
-## Main results
-
-* `fromZero_bare_flow_eqOn_of_weakDatum` — two curves `γ₁ γ₂ : ℝ → M` with `γ₁ 0 = γ₂ 0`, both
-  carrying the bare velocity (`HasMFDerivWithinAt … (Ici 0)` form) on `Ico 0 δ`, agree on
-  `Icc 0 δ'` for some `δ' > 0`.
-* `fromZero_bare_flow_coherent_of_weakDatum` — the flow-coherence corollary: two from-`0` flows
-  `Φ Φ' : ℝ → M → M` through points `x x'` with `Φ 0 x = Φ' 0 x'` and the bare velocity on
-  `Ico 0 δ` coincide (`Φ t x = Φ' t x'`) on `Icc 0 δ'` for some `δ' > 0`.
--/
-
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
@@ -54,11 +17,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless]
   [T2Space M] in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Chart-reading of the bare manifold velocity.**  The forward analogue of
-`IsMIntegralCurveOn.hasDerivWithinAt` for the time-dependent bare velocity: a curve `γ` whose value
-at `t` lies in the chart source and whose bare manifold derivative within `s` is
-`(1).smulRight (X t (γ t))` reads, in the chart at `α`, as a chart-coordinate `HasDerivWithinAt`
-with the change-of-coordinates velocity `tangentCoordChange I (γ t) α (γ t) (X t (γ t))`. -/
+
 private theorem bareVel_to_chartDeriv
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (γ : ℝ → M) (s : Set ℝ) (t : ℝ)
     (hsrc : γ t ∈ (chartAt H α).source)
@@ -78,12 +37,7 @@ private theorem bareVel_to_chartDeriv
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
-/-- **A-priori confinement of a bare-velocity orbit to the basepoint chart and validity ball.**
-A curve `γ` continuous within `Ici 0` at `0` with `γ 0 = α` stays, on a short initial interval
-`Icc 0 δ'`, inside the chart source and with its chart coordinate in the open ball `ball x₀ a`
-around `x₀ = extChartAt I α α`.  Pure continuity through the centre: the open set
-`source ∩ extChartAt ⁻¹' (ball x₀ a)` contains `α` and so its `γ`-preimage is a one-sided
-neighbourhood of `0`. -/
+
 private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : ℝ → M)
     (hγ0 : γ 0 = α)
     (hcw : ContinuousWithinAt γ (Set.Ici (0:ℝ)) 0) :
@@ -111,14 +65,6 @@ private theorem orbit_confine_source_ball (α : M) {a : ℝ} (ha : 0 < a) (γ : 
   have hmem : γ t ∈ U := hW_sub ⟨hε_sub htball, ht.1⟩
   exact ⟨hmem.1, hmem.2⟩
 
-/-- **From-`0` bare-flow uniqueness from an explicit chart-field Lipschitz datum.**  The core
-uniqueness step.  Given, at the basepoint `α`, a chart ball `closedBall x₀ a` on which the
-trivialised chart field `fromZeroChartField X α t` is `K`-Lipschitz for `t ∈ [0, δ₀]`, two curves
-`γ₁ γ₂ : ℝ → M` with `γ₁ 0 = γ₂ 0 = α`, both carrying the bare velocity on `Ico 0 δ`, agree on
-`Icc 0 δ'` for some `δ' > 0`.  The orbits are confined to the validity ball near `t = 0`
-(`orbit_confine_source_ball`), read into the chart with the `fromZeroChartField` velocity
-(`bareVel_to_chartDeriv` plus the `tangentCoordChange` identification), and forced equal by the
-from-`0` Grönwall bound `forward_orbit_dist_le` at the same initial point. -/
 private theorem weak_datum_uniqueness_core
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     {a : ℝ≥0} {δ₀ : ℝ} {K : ℝ≥0} (ha_pos : 0 < (a:ℝ)) (hδ₀_pos : 0 < δ₀)
@@ -217,18 +163,6 @@ private theorem weak_datum_uniqueness_core
   have hpb : (extChartAt I α).symm (f₁ t) = (extChartAt I α).symm (f₂ t) := by rw [hfeq]
   rwa [hf₁, hf₂, (extChartAt I α).left_inv hsrc₁, (extChartAt I α).left_inv hsrc₂] at hpb
 
-/-- **From-`0` bare-flow uniqueness under the weak `t = 0` datum.**
-
-For a field `X` interior-`C∞` on `(0, T) ×ˢ univ` (`hint`), continuous up to `t = 0` (`hcont0`),
-with chart-gradient continuous up to `t = 0` at every base point (`hgrad0`), any two curves
-`γ₁ γ₂ : ℝ → M` with `γ₁ 0 = γ₂ 0`, both carrying the **bare** geometric velocity
-`(1).smulRight (X t (γ t))` (the `HasMFDerivWithinAt … (Ici 0)` form) on `Ico 0 δ`, agree on
-`Icc 0 δ'` for some `δ' > 0`.
-
-This is the weak-datum forward analogue of `bare_forward_flow_eqOn_of_jointC1`: it needs no
-`C¹`-up-to-`t = 0` joint regularity, only the data the from-`0` orbit construction already consumes.
-The chart-field Lipschitz datum is supplied by the posited
-`fromZeroChartField_uniform_lipschitz_from_zero` (transited), specialised at `α := γ₁ 0`. -/
 theorem fromZero_bare_flow_eqOn_of_weakDatum [CompactSpace M]
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -258,13 +192,6 @@ theorem fromZero_bare_flow_eqOn_of_weakDatum [CompactSpace M]
   exact weak_datum_uniqueness_core (I := I) X α ha_pos hδ₀_pos (hdata α).2 γ₁ γ₂ hδ
     rfl hstart.symm hflow₁ hflow₂
 
-/-- **From-`0` flow coherence under the weak `t = 0` datum** (the per-time-slice coherence
-corollary).  Two from-`0` flows `Φ Φ' : ℝ → M → M` through points `x x'` with `Φ 0 x = Φ' 0 x'`,
-both carrying the bare velocity on `Ico 0 δ` (the `HasMFDerivWithinAt … (Ici 0)` form), coincide
-`Φ t x = Φ' t x'` on `Icc 0 δ'` for some `δ' > 0`.  The flow-shaped repackaging of
-`fromZero_bare_flow_eqOn_of_weakDatum` (with `γᵢ = fun u => Φ u x`), the weak-datum analogue of the
-flow-shaped `bare_forward_flow_eqOn_of_jointC1`: it identifies the from-`0` orbit germ with a
-window-flow slice on their overlap. -/
 theorem fromZero_bare_flow_coherent_of_weakDatum [CompactSpace M]
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

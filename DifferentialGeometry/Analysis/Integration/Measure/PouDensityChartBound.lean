@@ -2,30 +2,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
-/-!
-# Uniform bound for the chart-`α` partition-of-unity-weighted chart density
-
-For each base point `α : M` of a smooth Riemannian manifold, the product
-`(chartAtlasPOU I M α) · chartDensity g α` is supported inside the chart
-source `(chartAt H α).source` (via the subordination of the partition of
-unity). Pulled back to the chart target through the inverse chart, the
-product vanishes outside `(extChartAt I α) '' tsupport (chartAtlasPOU I M α)`.
-
-On a closed manifold the latter is compact in the model space `E` and is
-contained in the open chart target, so the continuity of the chart density
-on the chart source together with the continuity of the partition-of-unity
-weight gives a uniform pointwise upper bound for the product over the whole
-chart target.
-
-## Main result
-
-* `exists_pou_chartDensity_bound_on_chartTarget` — for every `α : M` there
-  is a non-negative real `M_α` such that
-  `(chartAtlasPOU I M α) ((extChartAt I α).symm y) *
-        chartDensity g α ((extChartAt I α).symm y) ≤ M_α`
-  for every `y ∈ (extChartAt I α).target`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology
@@ -46,13 +22,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedVariables false in
-/-- **Uniform bound on the chart-`α` partition-of-unity-weighted chart density.**
 
-For every `α : M` on a smooth closed Riemannian manifold, the product
-`(chartAtlasPOU I M α) · chartDensity g α`, viewed through the inverse
-chart over the chart target, is bounded above by a single non-negative
-constant `M_α`. The constant depends only on `g`, the chart `α`, and the
-canonical partition of unity. -/
 theorem exists_pou_chartDensity_bound_on_chartTarget
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :

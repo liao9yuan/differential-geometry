@@ -6,68 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
-/-!
-# Uniform bound on the chart-pushed `L^2` norm of the chart-frame scalar
-component from the H^1 norm of the underlying tensor section
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a smooth
-compactly-supported H^1 tensor section `S : SmoothCcTensorH1 g r s`, a chart
-point `α : M`, and a multi-index pair `(Idx, Jdx)`, the chart-pushed image of
-the chart-frame scalar component
-`tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`, viewed as a
-function on the Euclidean chart target via the canonical chart-push
-construction, has its `L^2(Ω)`-seminorm controlled by a single non-negative
-constant times the H^1 seminorm of `S`, where the constant depends only on
-`(g, r, s, α, β)` and is independent of `S`, `Idx`, and `Jdx`.
-
-This is the `L^2` component of the chart Sobolev norm decomposition
-
-```
-wkpNormChart g 1 2 u = eLpNorm u 2 (volume.restrict Ω)
-                       + Σ_k eLpNorm (chosenWeakPartial' 2 k u Ω) 2 (volume.restrict Ω)
-```
-
-evaluated on the chart-pushed scalar component. The `L^2` piece is the first
-summand and is the deliverable here. The order-one partial sum is delivered
-in companion modules; that work requires bridging the chosen weak partial of
-the chart-pushed scalar component to a chart-pulled-back classical Frechet
-partial, then applying the Layer E decomposition together with the gradient
-norm comparison at index `(r, s + 1)` and the uniform Christoffel sup bound.
-
-## Strategy
-
-The chart-pushed image and the manifold-side scalar component are linked by
-
-```
-eLpNorm (chartPushed (chartAtlasPOU I M) β u) 2 (volume.restrict (chartTargetEuclid β))
-  ≤ ENNReal.ofReal C₁(g, β) * eLpNorm u 2 (riemannianVolumeMeasure g)
-```
-
-(provided as a uniform-in-`u` reverse bridge below). Combined with the
-manifold-side `L^2` uniform-in-`(Idx, Jdx)` bound
-
-```
-eLpNorm (tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx) 2
-    (riemannianVolumeMeasure g)
-  ≤ ENNReal.ofReal C₂(g, r, s, α) *
-      ENNReal.ofReal (tensorL2Norm g r s S.toCcTensor.toFun)
-```
-
-(from `ComponentL2BoundUniform`), and the embedding `‖S.toCcTensor‖ ≤ ‖S‖`
-on smooth sections (from `H1Compl`), the chart-pushed `L^2` seminorm of the
-component scalar is bounded by `ENNReal.ofReal (C₁ * C₂) * ‖S‖₊`, uniformly
-in `(S, Idx, Jdx)`.
-
-## Public theorems
-
-* `eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform`
-  — uniform-in-`u` chart-pushed `L^2` reverse bridge.
-
-* `eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm`
-  — the chart-pushed `L^2` seminorm of the scalar component is bounded by
-  `ENNReal.ofReal C * ‖S‖₊`, with `C` independent of `S`, `Idx`, `Jdx`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -198,38 +136,6 @@ private lemma nnnorm_toCcTensor_le_nnnorm
   rw [coe_nnnorm_eq_ofReal_norm, coe_nnnorm_eq_ofReal_norm]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-- **Headline `L^2`-piece bound (uniform in `S` and in multi-indices, fixed
-charts `α, β`).**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart point
-`α : M` for the chart-frame coordinates of the scalar component, and a chart
-point `β : M` along which the manifold-side scalar field is pushed forward
-to the Euclidean chart target, there is a single non-negative real constant
-`C` (depending only on `(g, r, s, α, β)`) such that for every smooth
-compactly-supported H^1 tensor section `S : SmoothCcTensorH1 g r s` and every
-multi-index pair `(Idx, Jdx)`, the `L^2(volume.restrict (chartTargetEuclid β))`
-seminorm of the chart-pushed image of the manifold-side scalar component
-`tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` is bounded by
-`ENNReal.ofReal C * ‖S‖₊`.
-
-The constant `C` is independent of `S`, `Idx`, and `Jdx`.
-
-The proof chains three existing uniform bounds:
-
-1. **Chart-pushed `L^2` reverse bridge**, uniform-in-`u` form delivered
-   above: `eLpNorm (chartPushed β u) 2 (volume.restrict ChTE_β)
-       ≤ ENNReal.ofReal C₁ * eLpNorm u 2 (riemannianVolumeMeasure g)`
-   for measurable `u : M → ℝ`, with `C₁ ≥ 0` depending only on `(g, β)`.
-
-2. **Manifold `L^2` bound for the scalar component**
-   (`ComponentL2BoundUniform`):
-   `eLpNorm (tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx) 2
-       (riemannianVolumeMeasure g)
-       ≤ ENNReal.ofReal C₂ * ENNReal.ofReal (tensorL2Norm g r s S.toCcTensor.toFun)`
-   with `C₂ ≥ 0` depending only on `(g, r, s, α)`, uniformly in `(S, Idx, Jdx)`.
-
-3. **`L^2 ≤ H^1`** (`H1Compl`): `‖S.toCcTensor‖ ≤ ‖S‖`, equivalently
-   `ENNReal.ofReal (tensorL2Norm g r s S.toCcTensor.toFun) ≤ (‖S‖₊ : ℝ≥0∞)`. -/
 theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -318,9 +224,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     _ ≤ ENNReal.ofReal (C₁ * C₂) * (‖S‖₊ : ℝ≥0∞) :=
         mul_le_mul_of_nonneg_left h_le (by exact zero_le _)
 
-/-- Functional packaging: for fixed `(g, r, s, α, β)`, the chart-pushed
-`L²` seminorm of the scalar component is uniformly controlled across the
-multi-index family by a single constant times the H¹ seminorm of `S`. -/
 theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -338,9 +241,6 @@ theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_foral
   eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm
     (I := I) (M := M) g r s α β
 
-/-- Single-chart specialisation: `α = β`. The chart used for component
-extraction is the same as the chart used to push the manifold-side scalar
-field forward to the Euclidean target. -/
 theorem eLpNorm_chartPushed_tensorChartComponentScalar_le_const_mul_h1Norm_single_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

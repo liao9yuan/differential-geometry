@@ -12,13 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.FlowRealisation.LocalChart
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
-/-!
-# Flat per-slot variational identities for the conjugating flow
-
-Discharges the flat (Lie-type) raw variational identities and the per-slot Christoffel-correction
-equations for the conjugating diffeomorphism flow, which feed the flat-route pullback assembly.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -46,28 +39,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The D.3 flat-jet producer: the producer's flat factor value is the negative
-trivialised-flat derivative.**
-
-The genuine analytic identity behind the flat value-jet equation.  The producer's flat factor
-values `T'`, `P'` (the chart-smoothness data of the concrete flow) carry, on the orbit
-pushforward of `v`, the derivative value `T' (dΦv) + P' v`; the flat variational ODE realisation
-`hodejet` records that this curve's derivative is read by the *trivialised flat derivative*
-`fderiv (fun z => -(chartTrivRepr α X z)) (φ α) (dΦv)` — the chart-`α` conjugated linearisation
-of the generator `-X`.  Combining the two genuine `HasDerivAt`s of the *same* orbit-pushforward
-curve `s ↦ mfderiv (Φ_fam s) x v` (the producer's `RawVariationalIdentityFlat` value `hflat` and
-the trivialised flat ODE value `hodejet`) by derivative uniqueness, and splitting the trivialised
-flat derivative into the raw flat `fderiv` plus the moving-trivialisation `D²φ` correction via the
-committed reconciliation `flatLinearization_eq_rawFderiv_add_movingTriv`, yields
-
-  `T' (dΦv) + P' v = -(fderiv (chartRawRepr α X) (φ α) (dΦv) + movingTrivCorrection α X (dΦv))`.
-
-`hodejet` is the genuine chart-coordinate variational-ODE datum (the trivialised flat
-linearisation of the orbit pushforward), dischargeable from the concrete flow's joint smoothness;
-`hRdiff`/`hCdiff` are the convention-bridge differentiability side conditions.  No
-hypothesis-packaging: `hflat` and `hodejet` are `HasDerivAt`s of the orbit-pushforward curve (the
-producer datum and the chart linearisation), neither of which is the `E`-value equation that is
-the conclusion. -/
 theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)

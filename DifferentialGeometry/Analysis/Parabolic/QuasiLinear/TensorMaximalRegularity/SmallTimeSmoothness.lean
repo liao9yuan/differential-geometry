@@ -1,36 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 
-/-!
-# Small-time order-`(a+2)` smallness of a per-mode Duhamel field
-
-The maximal-regularity Duhamel solution with zero initial datum is, mode by mode,
-the per-mode convolution `perModeConv λᵢ (cᵢ) t` of the forcing coordinate `cᵢ`
-(`maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv`).  At a fixed time `t`, the
-order-`(a+2)` Sobolev norm of the field value is the weighted square sum
-
-  `∑ᵢ (1 + λᵢ)^{a+2} · (perModeConv λᵢ cᵢ t)²`.
-
-This file proves the **classical small-time parabolic smoothing smallness**: if the
-forcing coordinates carry a single across-modes-summable order-`(a+2)` mass majorant
-`B` (`(1 + λᵢ)^{a+2} · (cᵢ s)² ≤ Bᵢ` on `[0,T]`), then the order-`(a+2)` norm of the
-field value is bounded by `√(t · T · ∑ᵢ Bᵢ)`, which tends to `0` as `t → 0⁺`.  Hence
-for every radius `R₀ > 0` there is a short horizon `d₂` on which the order-`(a+2)`
-norm stays below `R₀`.
-
-The single analytic input is the elementary **Cauchy–Schwarz `√t`-smoothing** of the
-per-mode convolution, `(perModeConv λᵢ cᵢ t)² ≤ t · ∫₀ᵗ (cᵢ s)² ds` (the heat kernel
-`e^{−λ(t−s)} ≤ 1` for `λ ≥ 0`, then Cauchy–Schwarz against the constant `1`).  The
-two orders gained by `B` being an *order-`(a+2)`* majorant — i.e. the forcing only
-carries order-`a` mass — is exactly the maximal-regularity two-derivative gain.
-
-## Main result
-
-* `tensorHs_smallTime_norm_le_of_perModeConv` — for a forcing-coordinate family with a
-  summable order-`(a+2)` mass majorant, the order-`(a+2)` Sobolev norm of the per-mode
-  Duhamel field value is `≤ R₀` on a positive small-time horizon `d₂ ≤ T`.  This is the
-  consumer-minimal foundation under the deferred realize-side smallness horizon leaf.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -53,13 +22,6 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-/-- **Cauchy–Schwarz `√t`-smoothing of the per-mode convolution.**  For a decay rate
-`lam ≥ 0`, a continuous forcing coordinate `c`, and `0 ≤ t`,
-
-  `(perModeConv lam c t)² ≤ t · ∫₀ᵗ (c s)² ds`.
-
-The heat kernel `e^{−lam(t−s)} ≤ 1` on `[0,t]` bounds the convolution value by
-`∫₀ᵗ |c|`, and Cauchy–Schwarz against the constant `1` contributes the factor `t`. -/
 private theorem perModeConv_sq_le_time_mul_integral (lam : ℝ) (hlam : 0 ≤ lam)
     {c : ℝ → ℝ} (hc : Continuous c) {t : ℝ} (ht : 0 ≤ t) :
     (perModeConv lam c t) ^ 2 ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 := by
@@ -95,25 +57,6 @@ private theorem perModeConv_sq_le_time_mul_integral (lam : ℝ) (hlam : 0 ≤ la
     _ ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 := by
         exact mul_le_mul_of_nonneg_left hk_sq_int ht
 
-/-- **Small-time order-`(a+2)` Sobolev smallness of a per-mode Duhamel field.**
-
-Let `c : TensorEigenIdx → ℝ → ℝ` be a forcing-coordinate family with each `c i`
-continuous and carrying a single across-modes-summable **order-`(a+2)` mass majorant**
-`B`: `(1 + λᵢ)^{a+2} · (c i s)² ≤ B i` for every `i` and every `s ∈ [0,T]`.
-
-Then for every radius `R₀ > 0` there is a positive small-time horizon `d₂ ≤ T` on
-which every order-`(a+2)` spectral element `W` whose coordinates are the per-mode
-Duhamel convolutions `W.coeff i = perModeConv λᵢ (c i) t` has order-`(a+2)` Sobolev
-norm at most `R₀`.
-
-This is the consumer-minimal foundation under the realize-side smallness horizon: the
-solution-value coordinate is `perModeConv λᵢ (c i) t` (the every-time spectral identity
-`maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv`), the order-`(a+2)` mass majorant is
-the `(j, τ) = (0, a+2)` instance of the all-order time-jet spectral-mass majorant
-supplied with the smooth forcing coordinates, and `W = smoothCcToTensorHs g₀ (a+2) S`
-realizes the pinned smooth representative.  The bound is `‖W‖² ≤ d₂ · T · ∑ᵢ B i`, the
-`√t`-smoothing of the per-mode convolution against the order-`(a+2)` mass: it vanishes
-at `t = 0` (zero initial perturbation) and is short-time small. -/
 theorem tensorHs_smallTime_norm_le_of_perModeConv
     (a : ℝ) {T : ℝ} (hT : 0 < T)
     (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
@@ -129,14 +72,14 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
             perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t) →
           ‖W‖ ≤ R₀ := by
   classical
-  -- Each `B i ≥ 0` (it dominates a nonnegative quantity at `s = 0 ∈ [0,T]`).
+  
   have hB_nonneg : ∀ i, 0 ≤ B i := by
     intro i
     refine le_trans ?_ (hB_le i 0 ⟨le_refl 0, hT.le⟩)
     exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2)) (sq_nonneg _)
   set Mass : ℝ := ∑' i, B i with hMass_def
   have hMass_nonneg : 0 ≤ Mass := tsum_nonneg hB_nonneg
-  -- The horizon: short enough that `d₂ · T · Mass ≤ R₀²`.
+  
   set d₂ : ℝ := min T (R₀ ^ 2 / (T * Mass + 1)) with hd₂_def
   have hden_pos : 0 < T * Mass + 1 := by positivity
   have hd₂_pos : 0 < d₂ := by
@@ -148,7 +91,7 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
   obtain ⟨ht0, htd₂⟩ := ht
   have htT : t ≤ T := le_trans htd₂ hd₂_le
   have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht0, htT⟩
-  -- Per-mode bound: `(1+λᵢ)^{a+2} · (W.coeff i)² ≤ t · T · B i`.
+  
   have hper_mode : ∀ i,
       tensorSobolevWeight (I := I) (M := M) i (a + 2) * (W.coeff i) ^ 2 ≤ t * (T * B i) := by
     intro i
@@ -157,10 +100,10 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
     have hlam_nonneg : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
     have hwt_nonneg : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (a + 2) :=
       tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2)
-    -- Cauchy–Schwarz `√t`-smoothing of the convolution.
+    
     have hCS := perModeConv_sq_le_time_mul_integral
       lam hlam_nonneg (hc_cont i) ht0
-    -- The weighted convolution square is bounded by `t · ∫₀ᵗ (weight · (c i)²)`.
+    
     have hstep1 : tensorSobolevWeight (I := I) (M := M) i (a + 2) *
           (perModeConv lam (c i) t) ^ 2 ≤
         t * (tensorSobolevWeight (I := I) (M := M) i (a + 2) *
@@ -171,7 +114,7 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
             mul_le_mul_of_nonneg_left hCS hwt_nonneg
         _ = t * (tensorSobolevWeight (I := I) (M := M) i (a + 2) *
               ∫ s in (0 : ℝ)..t, (c i s) ^ 2) := by ring
-    -- `weight · ∫₀ᵗ (c i)² = ∫₀ᵗ (weight · (c i)²) ≤ ∫₀ᵗ B i = t · B i`.
+    
     have hweight_int : tensorSobolevWeight (I := I) (M := M) i (a + 2) *
           ∫ s in (0 : ℝ)..t, (c i s) ^ 2 ≤ t * B i := by
       rw [← intervalIntegral.integral_const_mul]
@@ -192,7 +135,7 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
       _ ≤ t * (T * B i) := by
           refine mul_le_mul_of_nonneg_left ?_ ht0
           exact mul_le_mul_of_nonneg_right htT (hB_nonneg i)
-  -- Sum the per-mode bound: `‖W‖² ≤ t · T · Mass`.
+  
   have hW_sum : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a + 2) *
       (W.coeff i) ^ 2) := W.weighted_summable
   have hmaj_sum : Summable (fun i => t * (T * B i)) :=
@@ -206,7 +149,7 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
         ≤ ∑' i, t * (T * B i) := htsum_le
       _ = t * (T * Mass) := by
           rw [tsum_mul_left, tsum_mul_left, hMass_def]
-  -- `t · T · Mass ≤ d₂ · T · Mass ≤ R₀²`.
+  
   have hTMass_nonneg : 0 ≤ T * Mass := mul_nonneg hT.le hMass_nonneg
   have htTMass_le : t * (T * Mass) ≤ d₂ * (T * Mass) :=
     mul_le_mul_of_nonneg_right htd₂ hTMass_nonneg
@@ -220,7 +163,7 @@ theorem tensorHs_smallTime_norm_le_of_perModeConv
       _ = R₀ ^ 2 := by field_simp
   have hnorm_sq_le_R₀ : ‖W‖ ^ 2 ≤ R₀ ^ 2 :=
     le_trans hnorm_sq_le (le_trans htTMass_le hd₂TMass_le)
-  -- Conclude `‖W‖ ≤ R₀`.
+  
   nlinarith [norm_nonneg W, hR₀.le, hnorm_sq_le_R₀]
 
 end QuasiLinear

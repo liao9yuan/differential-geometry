@@ -1,23 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
-/-!
-# Coordinate basis-change for chart-basis components
-
-This file collects coordinate change-of-basis identities for the chart-basis
-component functions `chartCoeff` of a smooth tangent section `X`. These are the
-contravariant counterpart of the basis pullback identities developed in
-`DifferentialGeometry/Analysis/Integration/Measure/Invariance.lean` for the basis vectors
-themselves (`chartBasisVecFiber_pullback`).
-
-## Main result
-
-* `chartCoeff_pullback` — on the overlap of two chart sources, the
-  `α`-chart-basis components of `X` are obtained from the `β`-chart-basis
-  components by left-multiplication by the transition matrix
-  `transitionMatrix α β x`. This is the contravariant counterpart of
-  `chartBasisVecFiber_pullback`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -34,10 +16,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The basis-change identity for `chartCoeff` between two chart bases on the
-overlap of the two chart sources. If the basis vectors transform via
-`v^β_j = ∑ k, T_{kj} v^α_k` with `T = transitionMatrix α β x`, then the
-components transform contravariantly: `c^α_k = ∑ j, T_{kj} c^β_j`. -/
 lemma chartCoeff_pullback
     (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

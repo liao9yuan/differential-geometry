@@ -6,22 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
-/-!
-# Strict per-pair cross-chart `W^{1,p}` bound
-
-For two chart points `γ α : M` on a closed Riemannian manifold and a fixed
-compact set `K_α ⊆ (chartAt H α).source`, the chart-γ pushed cross-pullback
-`chartPushed g γ (chartPullback I α χ)` is bounded in `W^{1,p}(chartTargetEuclid γ)`
-by a constant times `‖χ‖_{W^{1,p}(chartTargetEuclid α)}`, for every smooth
-compactly-supported `χ` whose closed support sits inside the chart-α image of
-`K_α`.
-
-This file packages the `chartTransition_smoothDiffeoBoundedAtOrder` machinery
-together with the smooth chain rule and the Leibniz bound to deliver the
-quantitative cross-chart bound used downstream by the chart-Sobolev smooth
-density program.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -33,8 +17,6 @@ namespace Sobolev
 
 namespace Euclidean
 
-/-- For a continuous function `f` whose closed support lies inside an open set
-`Ω' ⊆ Ω`, the indicator on `Ω` agrees pointwise with the indicator on `Ω'`. -/
 private lemma indicator_eq_indicator_of_tsupport_subset
     {α : Type*} [Zero α]
     {X : Type*} [TopologicalSpace X] {f : X → α}
@@ -51,9 +33,6 @@ private lemma indicator_eq_indicator_of_tsupport_subset
       exact image_eq_zero_of_notMem_tsupport hx_off
     · simp [Set.indicator_of_notMem hxΩ]
 
-/-- For a continuous function `f` whose closed support lies inside an open set
-`Ω' ⊆ Ω`, the `eLpNorm` on `volume.restrict Ω` agrees with the one on
-`volume.restrict Ω'`. -/
 private lemma eLpNorm_restrict_eq_of_tsupport_subset
     {X : Type*} [MeasurableSpace X] [TopologicalSpace X] {μ : Measure X}
     {α : Type*} [NormedAddCommGroup α] {p : ℝ≥0∞}
@@ -65,13 +44,6 @@ private lemma eLpNorm_restrict_eq_of_tsupport_subset
       ← eLpNorm_indicator_eq_eLpNorm_restrict hΩ'_meas]
   rw [indicator_eq_indicator_of_tsupport_subset hΩΩ' hf_supp]
 
-/-- For a smooth compactly supported function `ψ` whose closed support lies
-inside an open set `Ω' ⊆ Ω` (both open), the `wkpNorm 1 p` of `ψ` on `Ω` equals
-the `wkpNorm 1 p` on `Ω'`.
-
-Argument: the chosen weak partial of `ψ` on either set is a.e. equal to the
-classical `fderiv` (since `ψ` is smooth), and this classical `fderiv` vanishes
-outside `tsupport ψ ⊆ Ω' ⊆ Ω`. Hence the integrals over `Ω` and `Ω'` agree. -/
 lemma wkpNorm_eq_of_compactSupport_smooth_subset
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -217,9 +189,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For two chart points `γ α : M` and a fixed compact set `K_α` inside the
-chart-α source, the cross-chart compact `K_M := K_α ∩ tsupport ρ_γ` lies in
-both chart sources and is compact. -/
 private lemma crossChartK_isCompact
     [T2Space M] [SigmaCompactSpace M]
     (γ : M) {K_α : Set M} (hK_compact : IsCompact K_α) :
@@ -247,10 +216,6 @@ private lemma crossChartK_subset_chartγ_source
   intro x hx
   exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M γ hx.2
 
-/-- A strengthened version of `chartTransition_smoothDiffeoBoundedAtOrder`
-which additionally exposes the equation `Φ.toFun = chartTransitionEuclid γ α`
-on the open set `Ω_γα`. This is the variant we use in the strict-strong-support
-bound. -/
 theorem chartTransition_smoothDiffeoBoundedAtOrder_strict
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -755,9 +720,6 @@ theorem chartTransition_smoothDiffeoBoundedAtOrder_strict
       change T_αγ z = chartTransitionEuclid (I := I) (M := M) α γ z
       exact hT_αγ_eq_on_Ωαγ z hz
 
-/-- When `K_α ∩ tsupport ρ_γ = ∅` and `tsupport χ ⊆ chart-α image of K_α`, the
-chart-γ pushed cross-pullback `chartPushed g γ (chartPullback I α χ)` is
-identically zero on `EuclN`. -/
 lemma chartPushed_chartPullback_zero_of_K_M_empty
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (γ α : M) {K_α : Set M}
@@ -827,12 +789,6 @@ lemma chartPushed_chartPullback_zero_of_K_M_empty
       rw [hKM_empty] at hz_in_K_M
       exact Set.notMem_empty z hz_in_K_M
 
-/-- **Headline theorem**. For two chart points `γ α : M` on a closed Riemannian
-manifold and a fixed compact set `K_α ⊆ (chartAt H α).source`, there exists a
-positive constant `K` (depending only on `γ`, `α`, `K_α`, the chart-atlas
-partition of unity, and `p`) such that for every smooth compactly-supported
-`χ : EuclN → ℝ` whose closed support sits inside the chart-α Euclidean image of
-`K_α`, the chart-γ pushed cross-pullback satisfies the `W^{1,p}` bound. -/
 theorem cross_chart_bound_strict_strong
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

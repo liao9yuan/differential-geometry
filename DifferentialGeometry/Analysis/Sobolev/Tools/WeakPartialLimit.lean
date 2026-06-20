@@ -1,19 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-/-!
-# Stability of weak partial derivatives under `L^p` convergence
-
-If a sequence of `L^p` functions has weak partials in `L^p`, and BOTH the
-functions AND their weak partials converge in `L^p` to limits, then the limit's
-weak partial equals the limit of the partials. This file proves the
-single-derivative version, then bootstraps to the iterated `W^{k,p}` predicate.
-
-The proofs use Hölder's inequality with `1/p + 1/q = 1` for the conjugate
-exponent `q := (1 - p⁻¹)⁻¹`, which gives `q = ∞` when `p = 1` and
-`q = p / (p - 1)` otherwise.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -28,9 +15,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The conjugate exponent in `ℝ≥0∞` for the Hölder pair `(p, q)` with
-`p⁻¹ + q⁻¹ = 1`. For `p = 1` this gives `∞`; for `1 < p < ∞` it gives
-`p / (p - 1)`. -/
 private def conj (p : ℝ≥0∞) : ℝ≥0∞ := (1 - p⁻¹)⁻¹
 
 private lemma conj_inv_add_inv_eq_one {p : ℝ≥0∞} (hp : 1 ≤ p) :
@@ -46,16 +30,12 @@ private instance holderConjugate_conj (p : ℝ≥0∞) (hp : 1 ≤ p) :
     simp only [inv_one]
     exact conj_inv_add_inv_eq_one hp
 
-/-- A smooth, compactly supported function on Euclidean space lies in `L^q`
-for every exponent `q : ℝ≥0∞`, after restriction to any subset. -/
 private lemma memLp_of_contDiff_hasCompactSupport
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ)
     (Ω : Set E) (q : ℝ≥0∞) :
     MemLp φ q (volume.restrict Ω) :=
   (hφ.continuous.memLp_of_hasCompactSupport hφ_supp).restrict _
 
-/-- The fiberwise application of `fderiv ℝ φ` to a fixed direction is smooth and
-compactly supported when `φ` is. -/
 private lemma fderiv_apply_memLp
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ)
     (v : E) (Ω : Set E) (q : ℝ≥0∞) :
@@ -67,9 +47,6 @@ private lemma fderiv_apply_memLp
     hφ_supp.fderiv_apply (𝕜 := ℝ) v
   exact (hcont.memLp_of_hasCompactSupport hcpt).restrict _
 
-/-- Hölder's inequality: if `f ∈ L^p` and `g ∈ L^q` with `p⁻¹ + q⁻¹ = 1`, then
-the absolute value of the integral of their product is bounded by the product
-of their `L^p` and `L^q` norms (both treated as `ℝ≥0∞` `eLpNorm`s). -/
 private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     {μ : Measure E} {f g : E → ℝ} {p q : ℝ≥0∞}
     [ENNReal.HolderConjugate p q]
@@ -105,9 +82,6 @@ private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     _ ≤ eLpNorm g q μ * eLpNorm f p μ := h_smul_bound
     _ = eLpNorm f p μ * eLpNorm g q μ := mul_comm _ _
 
-/-- Convergence in `L^p` of a sequence implies that the integral of the product
-with a fixed `L^q` test function tends to zero, where `(p, q)` is a Hölder
-conjugate pair. -/
 private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     {μ : Measure E} {p q : ℝ≥0∞}
     [ENNReal.HolderConjugate p q]
@@ -153,9 +127,6 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     exact squeeze_zero h_ge h_le_real h_rhs_real_tendsto
   exact (tendsto_zero_iff_abs_tendsto_zero _).2 h_abs_tendsto
 
-/-- **Stability of weak partial derivatives under `L^p` convergence**: if each
-`u_n` has weak `i`-partial `g_n`, both in `L^p`, and `u_n → u`, `g_n → g` in
-`L^p` (with `1 ≤ p ≠ ∞`), then `g` is the weak `i`-partial of `u`. -/
 theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (_hp_top : p ≠ ∞)
     {Ω : Set E} (_hΩ_open : IsOpen Ω)
@@ -265,10 +236,6 @@ theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     -∫ x in Ω, g x * φ x
   simpa [dφ] using h_unique
 
-/-- For a sequence converging in `L^p` to `u`, with each `u_n ∈ W^{1,p}(Ω)` and
-each direction's chosen weak partial converging in `L^p` to a candidate
-`g i`, the limit `u` belongs to `W^{1,p}(Ω)` and `chosenWeakPartial' p i u Ω`
-agrees a.e. with `g i`. -/
 private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -315,14 +282,6 @@ private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     (hg_lp i).locallyIntegrable hp_one
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ h_chosen_weak (h_weak_g i) h_chosen_loc hg_loc
 
-/-- For a sequence `u_n` converging in `L^p` to `u`, with each
-`u_n ∈ MemWkp k p (Ω)` and the iterated weak partials converging in `L^p` to
-candidate limits, the limit `u` belongs to `MemWkp k p (Ω)` and its iterated
-weak partials agree a.e. with the candidates.
-
-The candidate `v` is parameterized by all multi-indices, including the empty
-one (`j = 0`), where it must agree with `u` itself. We use the conjunction with
-`u = v 0 (default)` to make the inductive step uniform. -/
 theorem MemWkp_of_iter_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ : IsOpen Ω)

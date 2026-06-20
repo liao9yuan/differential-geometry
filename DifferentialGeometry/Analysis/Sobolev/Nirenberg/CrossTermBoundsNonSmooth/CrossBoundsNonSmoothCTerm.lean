@@ -2,47 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBou
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-/-!
-# Non-smooth analogue of `c_term_bound`
-
-This module establishes a non-smooth analogue of
-`NirenbergCrossBounds.c_term_bound`. The smooth case carries the
-hypothesis `u : E → ℝ` smooth, and the bound features the partial
-derivatives `(fderiv ℝ u y) (EuclideanSpace.single i 1)`. Here we
-replace those with explicit weak partial derivatives `g i : E → ℝ`
-(with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`).
-
-## Strategy
-
-The flow of `c_term_bound` is:
-
-1. Cauchy–Schwarz / Young: `|∫ cu · v_test| ≤ (ε/2) · ‖v_test‖² + (1/(2ε)) · ‖cu‖²_{Ω'}`.
-2. Bound on `‖v_test‖²` via the smooth-only `v_test_sq_int_le`:
-   `‖v_test‖² ≤ 8N² · ∫_{tsupport η}(D_h^k u)² + 2 · ∫ η² · (D_h^k ∂_k u)²`.
-3. Bound on `∫_{tsupport η}(D_h^k u)²` by `∫_{Ω'} ∑_i (∂_i u)²`.
-4. Combine; the absorbing integral becomes
-   `ε · ∫ η² · ∑_i (D_h^k ∂_i u)²`.
-
-Step 1 is general (no smoothness used). Step 2 is the only essential use
-of smoothness — in the non-smooth case, `u` is only `L²` and we cannot
-apply the Leibniz rule to `g := η² · D_h^k u` to relate `∂_k g` to
-`D_h^k(∂_k u)`. We therefore expose the bound
-
-  `∫ (v_test)² ≤ 8N² · ∫_{tsupp η}(D_h^k u)² + 2 · ∫ η² · (D_h^k g_k)²`
-
-as an explicit hypothesis `h_v_test_sq_bound`. Downstream callers that
-have access to mollification + Young's inequality on the weak partial
-supply the bound by approximation. Step 3 is the standard
-Fréchet–Kolmogorov estimate, taken as `h_FK_diffQuot_u_bound` (mirroring
-the role played by the same hypothesis in `cross_1_bound_nonsmooth`).
-
-## Main result
-
-* `c_term_bound_nonsmooth` — the headline bound transcribed for the
-  non-smooth case.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -57,9 +16,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Young's inequality for nonnegative absolute values, written in the
-form used by `c_term_bound`. Re-derivation since the upstream version
-is `private`. -/
 private lemma two_abs_mul_le_eps_sq_add_cterm (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
@@ -80,8 +36,6 @@ private lemma two_abs_mul_le_eps_sq_add_cterm (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
-/-- The Nirenberg test function `v_test = D_{-h}^k(η² · D_h^k u)` is in
-`L²(E)` whenever `u ∈ L²(E)` and `η` is smooth with compact support. -/
 private lemma memLp_two_v_test
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -108,7 +62,6 @@ private lemma memLp_two_v_test
   rw [h_v_eq]
   exact memLp_diffQuot_two k (-h) h_gFun_l2
 
-/-- AE strong measurability of the Nirenberg test function. -/
 private lemma aestronglyMeasurable_v_test
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -129,12 +82,7 @@ private lemma aestronglyMeasurable_v_test
   exact aestronglyMeasurable_diffQuot (d := d) k (-h) h_g_aesm
 
 set_option linter.unusedVariables false in
-/-- **Quantitative non-smooth `c`-term bound.**
 
-The explicit-constant form of `c_term_bound_nonsmooth`: the same
-absorbing inequality with the constant exposed as the closed formula
-`max (4 · ε · N²) (Mc² / (2 · ε))`, where `Mc` is the supremum of
-`|c|` on `closure Ω'`. -/
 theorem c_term_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
@@ -504,36 +452,7 @@ theorem c_term_bound_nonsmooth_quantitative
   linarith
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `c_term_bound`.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the `c`-term
-
-  `∫_Ω c · u · v_test`,
-
-with `v_test` the standard Nirenberg test function
-`D_{-h}^k(η² · D_h^k u)`, satisfies
-
-  `|∫_Ω c · u · v_test| ≤ ε · ∫ η² · ∑_i (D_h^k g_i)² +
-     C · (∫_{Ω'} ∑_i g_i² + ∫_{Ω'} u²)`,
-
-with `C` independent of `h` (for `|h| ≤ 1`).
-
-Two non-smooth-specific hypotheses are exposed and supplied by callers
-through the standard mollification + Young argument:
-
-* `h_v_test_sq_bound` — the analogue of the smooth `v_test_sq_int_le`,
-  stating
-  `∫ (v_test)² ≤ 8N² · ∫_{tsupp η}(D_h^k u)² + 2 · ∫ η² · (D_h^k g_k)²`.
-* `h_FK_diffQuot_u_bound` — the Fréchet–Kolmogorov bound
-  `∫_{tsupp η}(D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`.
-
-Apart from these two non-smooth ingredients, the proof is a mechanical
-transcription of the smooth `c_term_bound`.
-
-This is the existential packaging of `c_term_bound_nonsmooth_quantitative`,
-which exposes `C` as an explicit formula. -/
 theorem c_term_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}

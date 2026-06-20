@@ -1,33 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Inhomogeneous
 
-/-!
-# Parametric linear ODE solution operator
-
-For a continuous family of bounded linear operators `A : F → ℝ → (G →L[ℝ] G)`
-on a Banach space `G`, parametric in `x ∈ F`, this file is the downstream headline of the
-parametric linear ODE solution operator: the variational equation in the parameter, its
-solution `variationalW` packaged as a continuous linear map, and the resulting `C^n` / `C^∞`
-joint regularity of the solution operator `(x, t) ↦ linearODESolution A a b' h₀ Z₀ x t`.
-
-The construction of `linearODESolution` itself, its global existence, joint continuity, and the
-inhomogeneous variant live in the upstream sibling files
-`SolutionOperator`, `GlobalExistence`, `JointContinuity`, and `Inhomogeneous`, all re-exported
-through the import above.
-
-## Main results
-
-* `variationalW` / `variationalW_clm` — the variational solution in the parameter direction and
-  its continuous-linear-map packaging.
-* `linearODESolution_hasFDerivAt_param` — Fréchet differentiability of the solution in the
-  parameter, with derivative `variationalW_clm`.
-* `linearODESolution_contDiffOn` / `linearODESolution_contDiffOn_top` — `C^n` / `C^∞` joint
-  regularity of the parametric solution operator.
-
-All results are formulated on generic Banach spaces `F` and `G`; the parameter
-space `F` carries no completeness assumption.  `[CompleteSpace G]` is required
-for Picard–Lindelöf to apply to the state space.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -43,52 +15,23 @@ section VariationalSolution
 variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/-- **Forcing term** of the variational equation.
-
-`variationalForcing A a b' h₀ Z₀ x v t :=
-  (fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)`.
-
-This is the inhomogeneous term in the variational equation derived by formally
-differentiating `Z'(t) = A(x, t) Z(t)` with respect to the parameter `x` in
-the direction `v`. -/
 noncomputable def variationalForcing
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G)
     (x : F) (v : F) (t : ℝ) : G :=
   (fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)
 
-/-- **Per-parameter, per-direction variational solution** `W(x, t, v)` of the
-parametric linear ODE.
-
-For fixed parameter `x : F` and test direction `v : F`, this is the candidate
-function on `ℝ` satisfying the variational equation
-
-`W'(t) = (fderiv (fun y => A y t) x) v · linearODESolution A a b' h₀ Z₀ x t
-        + A(x, t) · W(t),
-W(h₀) = (fderiv ℝ Z₀ x) v`.
-
-Defined as `inhomogLinearODESolution` applied to coefficient `A`, forcing
-`variationalForcing A a b' h₀ Z₀ x v`, and initial datum `fun y => (fderiv ℝ Z₀ y) v`.
--/
 noncomputable def variationalW
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G)
     (x : F) (v : F) : ℝ → G :=
   inhomogLinearODESolution A (fun y t => variationalForcing A a b' h₀ Z₀ y v t)
     a b' h₀ (fun y => (fderiv ℝ Z₀ y) v) x
 
-/-- **Initial condition** for `variationalW`.  At `t = h₀`, the variational
-solution equals `(fderiv ℝ Z₀ x) v`. -/
 theorem variationalW_init
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) (v : F) :
     variationalW A a b' h₀ Z₀ x v h₀ = (fderiv ℝ Z₀ x) v := by
   unfold variationalW
   exact inhomogLinearODESolution_init _ _ _ _ _ _ _
 
-/-- **Joint continuity of the variational forcing**.
-
-If `A` is jointly continuous and `(x, t) ↦ fderiv (fun y => A y t) x` is jointly
-continuous on `U ×ˢ Ioo a b'`, and `Z₀` is continuous on `U`, then the forcing
-`variationalForcing A a b' h₀ Z₀ · v ·` is jointly continuous on `U ×ˢ Ioo a b'`.
--/
 theorem variationalForcing_continuousOn
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -115,12 +58,6 @@ theorem variationalForcing_continuousOn
     ContinuousOn.clm_apply happ hZ_cont
   convert hgoal using 1
 
-/-- **ODE clause** for `variationalW` under joint continuity hypotheses.
-
-When `A`, `(x, t) ↦ fderiv (fun y => A y t) x` are jointly continuous on
-`U ×ˢ Ioo a b'` and `Z₀` is continuous on `U`, the variational solution at any
-`x ∈ U` and any test direction `v : F` satisfies the variational equation
-pointwise on `Ioo a b'`. -/
 theorem variationalW_hasDerivAt
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -159,13 +96,6 @@ theorem variationalW_hasDerivAt
     rwa [add_comm] at this
   exact hderiv'
 
-/-- **Joint continuity** of `variationalW` in `(x, t)` for a fixed direction `v`.
-
-Under the same regularity hypotheses as `variationalW_hasDerivAt`, the map
-`(x, t) ↦ variationalW A a b' h₀ Z₀ x v t` is jointly continuous on
-`U ×ˢ Ioo a b'`.  Continuity of the initial datum `x ↦ (fderiv ℝ Z₀ x) v` on
-`U` is supplied as a separate hypothesis (it is the natural regularity input
-on `Z₀` for this clause). -/
 theorem variationalW_continuousOn
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -187,11 +117,6 @@ theorem variationalW_continuousOn
   exact inhomogLinearODESolution_continuousOn (Z₀ := fun y => (fderiv ℝ Z₀ y) v)
     hab_lt h₀_mem hU hA_cont hb_cont hZ₀'_cont
 
-/-- **Uniqueness for the inhomogeneous linear ODE on an open interval `Ioo a b`**.
-
-Two solutions of `Z' = A Z + b` sharing the initial value at `h₀ ∈ Ioo a b` agree
-on `Ioo a b`. The proof reduces to the homogeneous-uniqueness statement
-`linearODE_unique_on_Ioo` applied to the difference `Z₁ - Z₂`. -/
 theorem inhomogLinearODE_unique_on_Ioo
     {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
     {A : ℝ → (G →L[ℝ] G)} {b : ℝ → G} {a b' h₀ : ℝ}
@@ -232,7 +157,6 @@ theorem inhomogLinearODE_unique_on_Ioo
   have h' : Z₁ t - Z₂ t = 0 := h
   exact sub_eq_zero.mp h'
 
-/-- **Additivity of `variationalW` in the test direction `v`** at `t ∈ Ioo a b'`. -/
 theorem variationalW_add_in_v
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -355,7 +279,6 @@ theorem variationalW_add_in_v
   have heq := inhomogLinearODE_unique_on_Ioo h₀_mem hAx_cont hZ₁_deriv' hZ₂_deriv' hinit_eq
   exact heq ht
 
-/-- **Homogeneity of `variationalW` in the test direction `v`** at `t ∈ Ioo a b'`. -/
 theorem variationalW_smul_in_v
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -438,8 +361,6 @@ theorem variationalW_smul_in_v
   have heq := inhomogLinearODE_unique_on_Ioo h₀_mem hAx_cont hZ₁_deriv hZ₂_deriv hinit_eq
   exact heq ht
 
-/-- **Linearity in the test direction `v`** of the variational solution, packaged as
-the conjunction of additivity and homogeneity, at any `t ∈ Ioo a b'`. -/
 theorem variationalW_linear_in_v
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -457,14 +378,6 @@ theorem variationalW_linear_in_v
   ⟨fun v₁ v₂ => variationalW_add_in_v hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx v₁ v₂ ht,
    fun c v => variationalW_smul_in_v hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx c v ht⟩
 
-/-- **Apriori bound for `variationalW` on a closed sub-interval, linear in `‖v‖`**.
-
-If `[α, β] ⊂ Ioo a b'` contains both `h₀` and `t`, and `M` bounds `‖A x ·‖`,
-`P` bounds `‖fderiv (A · s) x‖`, `Q` bounds `‖linearODESolution A … x ·‖` on
-`Icc α β`, and `R` bounds `‖fderiv Z₀ x‖` (as an operator norm in `v`),
-then for every `v : F` and every `t ∈ Icc α β`:
-`‖variationalW A a b' h₀ Z₀ x v t‖
-  ≤ gronwallBound R M (P · Q) (β - α) · ‖v‖`. -/
 private theorem variationalW_norm_bound_on_Icc
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -666,13 +579,6 @@ private theorem variationalW_norm_bound_on_Icc
       _ ≤ gronwallBound R M (P * Q) (β - α) * ‖v‖ :=
           mul_le_mul_of_nonneg_right h_step hv_nn
 
-/-- **Packaging `v ↦ variationalW A a b' h₀ Z₀ x v t` as a continuous linear map**
-`F →L[ℝ] G`, for any `t ∈ Ioo a b'`.
-
-The underlying linear map is `v ↦ variationalW A a b' h₀ Z₀ x v t`, whose linearity
-is `variationalW_linear_in_v`.  The operator-norm bound is obtained by applying
-`variationalW_norm_bound_on_Icc` to any closed sub-interval `[α, β] ⊂ Ioo a b'`
-containing both `h₀` and `t`. -/
 noncomputable def variationalW_clm
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
     {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -778,7 +684,6 @@ noncomputable def variationalW_clm
         hMv_bd hPv_bd hQv_bd le_rfl v t h_t_Icc
       simpa using h)
 
-/-- **`variationalW_clm` agrees with `variationalW`** pointwise. -/
 theorem variationalW_clm_apply
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
     {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -793,17 +698,6 @@ theorem variationalW_clm_apply
     variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht v
       = variationalW A a b' h₀ Z₀ x v t := rfl
 
-/-- **Parametric stability for the linear ODE** on a closed sub-interval.
-
-Given `Icc α β ⊂ Ioo a b'` containing `h₀`, two parameters `x₁, x₂ ∈ U`, an
-operator-norm bound `K` for `A x₁` on the interval, and a forcing bound `η`
-for `‖(A x₂ s - A x₁ s) (Z(x₂, s))‖`, the difference between the two
-parametric solutions at any `t ∈ Icc α β` is bounded by
-
-`gronwallBound ‖Z₀(x₁) - Z₀(x₂)‖ K η |t - h₀|`.
-
-This is a public wrapper around the forward / backward Grönwall comparison
-specialised to the (jointly continuous) parametric solution `linearODESolution`. -/
 theorem linearODESolution_dist_le
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -884,13 +778,7 @@ theorem linearODESolution_dist_le
     exact hres
 
 set_option maxHeartbeats 1600000 in
-/-- **Differentiability in the parameter** of the linear ODE solution.
 
-For `A` and `Z₀` of class `C^1` in `x` (with jointly continuous coefficient
-and derivative), the parametric solution `x ↦ linearODESolution A a b' h₀ Z₀
-x t` is Fréchet differentiable at any `x ∈ U` with derivative
-`variationalW_clm … x t : F →L[ℝ] G`, the CLM packaging of the variational
-solution `v ↦ variationalW A a b' h₀ Z₀ x v t`. -/
 theorem linearODESolution_hasFDerivAt_param
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
@@ -1492,10 +1380,6 @@ theorem linearODESolution_hasFDerivAt_param
   change ‖R t‖ ≤ c * ‖h‖
   exact h_final
 
-/-- **Joint continuity of the time-partial derivative** of the parametric
-linear ODE solution. The function `(x, t) ↦ A(x, t) (Z(x, t))`, where
-`Z = linearODESolution A a b' h₀ Z₀`, is jointly continuous on
-`U ×ˢ Ioo a b'`. -/
 private theorem linearODESolution_partial_t_continuousOn
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
     (hab_lt : a < b') (h₀_mem : h₀ ∈ Set.Ioo a b')
@@ -1519,7 +1403,7 @@ private theorem linearODESolution_partial_t_continuousOn
 open Classical in
 set_option linter.style.setOption false in
 set_option maxHeartbeats 800000 in
-/-- Joint continuity of the CLM-valued x-partial in the operator-norm topology. -/
+
 private theorem variationalW_clm_continuousOn
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
@@ -1561,18 +1445,7 @@ private theorem variationalW_clm_continuousOn
   exact variationalW_continuousOn hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont v hZ₀'_cont
 
 set_option maxHeartbeats 1600000 in
-/-- **Total Frechet derivative** of the joint map `(x, t) |-> Z(x, t)`.
 
-At every `(x0, t0) in U xs Ioo a b'`, the map
-`Function.uncurry (linearODESolution A a b' h0 Z0)` has Frechet derivative
-`(variationalW_clm ...).coprod (toSpanSingleton R (A x0 t0 (Z x0 t0)))`,
-i.e. the linear map `(h, s) |-> L_x(h) + s . A(x0, t0)(Z(x0, t0))`.
-
-The proof decomposes the remainder as
-`[Z(x0+h, t0+s) - Z(x0+h, t0) - s . v0] + [Z(x0+h, t0) - Z(x0, t0) - L_x(h)]`
-and bounds each piece as `o(||(h,s)||)` using the mean-value theorem (for the
-time piece) and `linearODESolution_hasFDerivAt_param` (for the parameter piece).
--/
 private theorem linearODESolution_hasFDerivAt_joint
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
@@ -1731,8 +1604,7 @@ private theorem linearODESolution_hasFDerivAt_joint
     _ = c * ‖(h, s)‖ := by ring
 
 set_option maxHeartbeats 800000 in
-/-- **C^1 regularity** of the joint map `(x, t) |-> linearODESolution A a b' h0 Z0 x t`
-on the open set `U xs Ioo a b'`. -/
+
 private theorem linearODESolution_contDiffOn_one
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
@@ -1810,12 +1682,6 @@ private theorem linearODESolution_contDiffOn_one
     exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont
       hA_diff hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).fderiv
 
-/-- **C^n regularity of the augmented coefficient**.
-
-If `A : F → ℝ → (G →L[ℝ] G)` and `b : F → ℝ → G` are both `C^n` jointly on
-`U ×ˢ Ioo a b'`, then the augmented coefficient `inhomogAugmentedCoeff A b`
-is `C^n` jointly.  This extends `inhomogAugmentedCoeff_continuousOn` to
-general regularity order. -/
 private theorem inhomogAugmentedCoeff_contDiffOn
     {n : ℕ∞}
     {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
@@ -1853,18 +1719,6 @@ private theorem inhomogAugmentedCoeff_contDiffOn
       (U ×ˢ Set.Ioo a b') := h_sum.prodMk contDiffOn_const
   exact h_prodL.comp_contDiffOn h_pair
 
-/-- Extract the six hypotheses of `linearODESolution_contDiffOn_one` from
-`ContDiffOn ℝ (↑(n + 1)) (uncurry A)` and `ContDiffOn ℝ (↑(n + 1)) Z₀`,
-plus openness of `U`.
-
-Returns:
-1. `ContinuousOn (uncurry A) (U ×ˢ Ioo a b')`
-2. `ContinuousOn (uncurry (fun x t => fderiv ℝ (fun y => A y t) x)) (U ×ˢ Ioo a b')`
-3. `∀ y ∈ U, ∀ s ∈ Ioo a b', HasFDerivAt (fun z => A z s) (fderiv ℝ (·) y) y`
-4. `ContinuousOn Z₀ U`
-5. `ContinuousOn (fun x => fderiv ℝ Z₀ x) U`
-6. `∀ y ∈ U, HasFDerivAt Z₀ (fderiv ℝ Z₀ y) y`
--/
 private theorem extract_C1_hypotheses
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
     {a b' : ℝ} {n : ℕ}
@@ -1920,10 +1774,6 @@ private theorem extract_C1_hypotheses
     exact ((hZ₀_ge1.differentiableOn (by norm_num : (1 : WithTop ℕ∞) ≠ 0) y hy).differentiableAt
       (hU.mem_nhds hy)).hasFDerivAt
 
-/-- **C^n regularity of the variational forcing**.
-
-If `A` is `C^{n+1}` jointly and `Z` (the linearODESolution) is `C^n` (by IH), then the
-variational forcing `(x,t) ↦ variationalForcing A a b' h₀ Z₀ x v t` is `C^n`. -/
 private theorem variationalForcing_contDiffOn_of_Z_contDiffOn
     {n : ℕ∞}
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} {h₀ : ℝ} {Z₀ : F → G}
@@ -1975,21 +1825,7 @@ private theorem variationalForcing_contDiffOn_of_Z_contDiffOn
 end VariationalSolution
 
 set_option maxHeartbeats 1600000 in
-/-- **C^n regularity of the parametric linear ODE solution operator**.
 
-If `A : F → ℝ → (G →L[ℝ] G)` is `C^n` jointly on `U ×ˢ Ioo a b'` and
-`Z₀ : F → G` is `C^n` on `U`, then the parametric solution
-`(x, t) ↦ linearODESolution A a b' h₀ Z₀ x t` is `C^n` jointly on
-`U ×ˢ Ioo a b'`.
-
-The proof is by induction on `n`:
-- `n = 0`: joint continuity (`linearODESolution_continuousOn`).
-- `n → n + 1`: reduce to `C^n` of the Fréchet derivative via
-  `contDiffOn_succ_iff_fderiv_of_isOpen`.  The derivative is the coprod
-  of `variationalW_clm` (x-partial) and `toSpanSingleton(A(x,t)(Z(x,t)))`
-  (t-partial).  Both components inherit `C^n` from the inductive hypothesis
-  applied to the original system (for the t-partial) and to the augmented
-  variational system (for the x-partial via `contDiffOn_clm_apply`). -/
 theorem linearODESolution_contDiffOn
     {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
@@ -2117,12 +1953,6 @@ section CInfinityRegularity
 variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/-- **C^∞ regularity of the parametric linear ODE solution operator**.
-
-If `A : F → ℝ → (G →L[ℝ] G)` is `C^∞` jointly on `U ×ˢ Ioo a b'` and
-`Z₀ : F → G` is `C^∞` on `U`, then the parametric solution
-`(x, t) ↦ linearODESolution A a b' h₀ Z₀ x t` is `C^∞` jointly on
-`U ×ˢ Ioo a b'`. -/
 theorem linearODESolution_contDiffOn_top
     [FiniteDimensional ℝ F]
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}

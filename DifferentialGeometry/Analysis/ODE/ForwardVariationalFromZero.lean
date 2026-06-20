@@ -4,44 +4,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 import DifferentialGeometry.Analysis.ODE.ChartLocalPicardIntegral
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
 
-/-!
-# Forward (one-sided, from-`0`) Picard and variational ODE layer
-
-This file develops the classical Banach-space content of an ODE flow run *forward from the
-initial time `t = 0`*, for a time-dependent field that is regular only on the half-open
-window `[0, δ)`.  It is the one-sided analogue of the (two-sided, interior) variational
-tower in `Analysis/ODE/Flow/`, and supplies the genuinely missing forward inputs consumed
-by the forward DeTurck flow: the from-`0` Picard solution with its one-sided derivative
-form, the from-`0` linear variational equation, the from-`0` Grönwall bound and continuity,
-and the differentiation-under-the-flow identity at the initial condition.
-
-The development is purely on a Banach space `E`; no manifold or tensor file is imported.
-The manifold flow consumes these results through a single chart, exactly as the interior
-variational tower is consumed.
-
-## Main results
-
-* `forward_picard_solution_from_zero` — Picard existence on `[0, δ]` with the one-sided
-  right derivative `HasDerivWithinAt γ (f t (γ t)) (Ici 0) t` on `[0, δ)`.
-* `forward_field_ftc_from_zero` — its FTC integral form `γ s = γ 0 + ∫₀ˢ f r (γ r)`.
-* `forward_variational_solution_from_zero` — existence on `[0, δ]` of the linear variational
-  solution `J' = (A t) (J t)`, `J 0 = J₀`, with `A` continuous and bounded by `M` and
-  `M · δ < 1`.
-* `forward_variational_gronwall_bound` — the exponential bound `‖J t‖ ≤ ‖J₀‖ · exp (M · δ)`
-  from the *differential* form.
-* `forward_variational_unique` — one-sided uniqueness of the linear variational solution.
-* `forward_orbit_dist_le` — the from-`0` Grönwall Lipschitz-in-initial-point bound on two
-  orbits, and `forward_flow_jointContinuousOn` — joint continuity of the forward flow on
-  `closedBall x₀ r ×ˢ Icc 0 δ`.
-* `forward_orbit_jointContinuousAt_zero` — joint continuity of the orbit at `(x₀, 0)`.
-* `fwdVariationalLinearMapAt` — the from-`0` variational linear map `J₀ ↦ J_{J₀}(t)` bundled
-  as a continuous linear map, with linearity and the operator-norm bound `exp (M · δ)`.
-* `forward_flow_hasFDerivAt_initial` — the differentiation-under-the-flow identity: the
-  partial map `x ↦ Φ x t` is Fréchet differentiable at `x₀` with derivative the forward
-  variational linear map `fwdVariationalLinearMapAt` (the genuine new differentiation step,
-  the from-`0` / right-half analogue of the interior `hasFDerivAt_flow_at_initial_of_isLocalFlow`).
--/
-
 open Set Function Filter Metric Asymptotics Real MeasureTheory
 open scoped Topology NNReal
 
@@ -50,10 +12,7 @@ namespace DifferentialGeometry.Analysis.ODE
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
 omit [CompleteSpace E] in
-/-- The `Icc 0 b` right-derivative at any interior time `τ ∈ [0, b)` restricts to the
-right-derivative with respect to `Ici 0`.  This is the from-`0` companion of the interior
-`hasDerivWithinAt_Ici_of_Icc`: at `τ ∈ [0, b)`, the set `Icc 0 b` is a neighbourhood of `τ`
-within `Ici 0` (intersect with the open `Iio b`), so the within-derivative transfers. -/
+
 lemma hasDerivWithinAt_Ici_zero_of_Icc {y : ℝ → E} {y' : E} {b τ : ℝ}
     (h : HasDerivWithinAt y y' (Icc (0 : ℝ) b) τ) (hτ : τ ∈ Ico (0 : ℝ) b) :
     HasDerivWithinAt y y' (Ici (0 : ℝ)) τ := by
@@ -63,15 +22,6 @@ lemma hasDerivWithinAt_Ici_zero_of_Icc {y : ℝ → E} {y' : E} {b τ : ℝ}
   intro s hs
   exact ⟨hs.2, le_of_lt hs.1⟩
 
-/-- **From-`0` Picard solution.**  For a time-dependent field `f : ℝ → E → E` that is, on
-the closed window `[0, δ]`, Lipschitz-in-space (`K`) on a closed ball, continuous in time,
-and norm-bounded by `L`, with the validity condition `L · δ ≤ a - r`, every initial point
-`x ∈ closedBall x₀ r` admits a solution `γ` on `[0, δ]` with `γ 0 = x` and the *one-sided*
-right derivative `HasDerivWithinAt γ (f t (γ t)) (Ici 0) t` for every `t ∈ [0, δ)`.
-
-Built by Mathlib's `IsPicardLindelof.exists_eq_forall_mem_Icc_hasDerivWithinAt` with
-`tmin = 0`, `tmax = δ`, `t₀ = ⟨0, _⟩`; the resulting `Icc 0 δ` derivative restricts to the
-`Ici 0` form via `hasDerivWithinAt_Ici_zero_of_Icc`. -/
 theorem forward_picard_solution_from_zero
     {f : ℝ → E → E} {x₀ : E} {a r L K : ℝ≥0} {δ : ℝ} (hδ : 0 < δ)
     (hlip : ∀ t ∈ Icc (0 : ℝ) δ, LipschitzOnWith K (f t) (closedBall x₀ a))
@@ -105,10 +55,6 @@ theorem forward_picard_solution_from_zero
     have htIcc : t ∈ Icc (0 : ℝ) δ := ⟨ht.1, le_of_lt ht.2⟩
     exact hasDerivWithinAt_Ici_zero_of_Icc (hγd t htIcc) ht
 
-/-- **FTC integral form of a from-`0` Picard solution.**  If `γ` is continuous on `[0, δ]`,
-solves the one-sided ODE `HasDerivWithinAt γ (f t (γ t)) (Ici 0) t` on `[0, δ)`, and the
-velocity along the orbit is continuous on `[0, δ]`, then `γ s = γ 0 + ∫₀ˢ f r (γ r)` on
-`[0, δ]`.  This is the from-`0` specialization of `ode_field_ftc_integral`. -/
 theorem forward_field_ftc_from_zero
     {γ : ℝ → E} {f : ℝ → E → E} {δ : ℝ}
     (hγcont : ContinuousOn γ (Icc 0 δ))
@@ -117,14 +63,6 @@ theorem forward_field_ftc_from_zero
     ∀ s ∈ Icc (0 : ℝ) δ, γ s = γ 0 + ∫ r in (0 : ℝ)..s, f r (γ r) :=
   ode_field_ftc_integral hγcont hγderiv hfcont
 
-/-- **From-`0` linear variational solution.**  For a continuous, `M`-bounded operator
-coefficient `A : ℝ → (E →L[ℝ] E)` on `[0, δ]` with `M · δ < 1`, every initial value `J₀`
-admits a solution `J` of the linear ODE on `[0, δ]` with `J 0 = J₀` and the one-sided right
-derivative `HasDerivWithinAt J ((A t) (J t)) (Ici 0) t` on `[0, δ)`.
-
-Built like the interior `exists_isVariationalSolutionOn_Icc_of_short`, one-sided from `0`:
-the linear field `v t y = (A t) y` satisfies `IsPicardLindelof` on `closedBall 0 a₀` with
-`a₀ := (‖J₀‖ + 1) / (1 - M·δ)`, for which `M · a₀ · δ ≤ a₀ - ‖J₀‖`. -/
 theorem forward_variational_solution_from_zero
     {A : ℝ → (E →L[ℝ] E)} {M : ℝ} {δ : ℝ} (hδ : 0 < δ) (hM : 0 ≤ M) (hMδ : M * δ < 1)
     (hAcont : ContinuousOn A (Icc (0 : ℝ) δ))
@@ -197,10 +135,7 @@ theorem forward_variational_solution_from_zero
     exact hasDerivWithinAt_Ici_zero_of_Icc (hJd t htIcc) ht
 
 omit [CompleteSpace E] in
-/-- **From-`0` variational Grönwall bound.**  If `J` is a from-`0` solution of the linear
-ODE `J' = (A t) (J t)` on `[0, δ]` with `‖A t‖ ≤ M`, then `‖J t‖ ≤ ‖J₀‖ · exp (M · δ)` on
-`[0, δ]`.  Derived directly from the *differential* form via
-`norm_le_gronwallBound_of_norm_deriv_right_le`, monotonised to the full window. -/
+
 theorem forward_variational_gronwall_bound
     {A : ℝ → (E →L[ℝ] E)} {J : ℝ → E} {M δ : ℝ} (hM : 0 ≤ M)
     (hJcont : ContinuousOn J (Icc (0 : ℝ) δ))
@@ -230,10 +165,7 @@ theorem forward_variational_gronwall_bound
       apply mul_le_mul_of_nonneg_left hexp_mono (norm_nonneg _)
 
 omit [CompleteSpace E] in
-/-- **From-`0` uniqueness of the linear variational solution.**  Two from-`0` solutions of
-the linear ODE with the same initial value agree on `[0, δ]`.  Mathlib's
-`ODE_solution_unique_of_mem_Icc_right` with `a = 0`, `b = δ`, the field being the global
-linear field `v t y = (A t) y` (Lipschitz with constant `‖A t‖ ≤ M` everywhere). -/
+
 theorem forward_variational_unique
     {A : ℝ → (E →L[ℝ] E)} {J₁ J₂ : ℝ → E} {M δ : ℝ} (hM : 0 ≤ M)
     (hAbd : ∀ t ∈ Icc (0 : ℝ) δ, ‖A t‖ ≤ M)
@@ -255,11 +187,7 @@ theorem forward_variational_unique
     hJ₂cont (fun t ht => hJ₂deriv t ht) (fun t _ => mem_univ _) hinit
 
 omit [CompleteSpace E] in
-/-- **From-`0` Grönwall Lipschitz-in-initial-point bound.**  Two orbits `γ₁, γ₂` of the same
-field `f`, both staying in a set `S` on which `f` is `K`-Lipschitz, with the one-sided right
-derivatives from `0`, satisfy `dist (γ₁ t) (γ₂ t) ≤ dist (γ₁ 0) (γ₂ 0) · exp (K · t)` on
-`[0, δ]`.  This is Mathlib's `dist_le_of_trajectories_ODE_of_mem` specialised to the from-`0`
-forward window. -/
+
 theorem forward_orbit_dist_le
     {f : ℝ → E → E} {γ₁ γ₂ : ℝ → E} {S : Set E} {K : ℝ≥0} {δ : ℝ}
     (hlip : ∀ t ∈ Ico (0 : ℝ) δ, LipschitzOnWith K (f t) S)
@@ -277,12 +205,7 @@ theorem forward_orbit_dist_le
   simpa [sub_zero] using h
 
 omit [NormedSpace ℝ E] [CompleteSpace E] in
-/-- **Joint continuity of the forward flow.**  A forward flow `Φ : E → ℝ → E` whose orbits
-are continuous in time (per base point) and which is `K`-Lipschitz in the base point (per
-time) is jointly continuous on `closedBall x₀ r ×ˢ Icc 0 δ`.  The standard
-"Lipschitz-in-one-variable + continuous-in-the-other ⟹ jointly continuous" packaging
-(`continuousOn_prod_of_continuousOn_lipschitzOnWith`); the time-`0` slice is included, so
-this carries the orbit's joint right-continuity up to `0`. -/
+
 theorem forward_flow_jointContinuousOn
     {Φ : E → ℝ → E} {x₀ : E} {r : ℝ} {K : ℝ≥0} {δ : ℝ}
     (hcont_t : ∀ x ∈ closedBall x₀ r, ContinuousOn (fun s : ℝ => Φ x s) (Icc (0 : ℝ) δ))
@@ -292,9 +215,7 @@ theorem forward_flow_jointContinuousOn
     (fun p : E × ℝ => Φ p.1 p.2) K hcont_t hlip_x
 
 omit [NormedSpace ℝ E] [CompleteSpace E] in
-/-- **Joint right-continuity of the orbit at the initial time.**  The slice restriction of
-`forward_flow_jointContinuousOn` to the corner `(x₀, 0)`: under the same hypotheses, the
-map `(x, s) ↦ Φ x s` is continuous within `closedBall x₀ r ×ˢ Icc 0 δ` at `(x₀, 0)`. -/
+
 theorem forward_orbit_jointContinuousAt_zero
     {Φ : E → ℝ → E} {x₀ : E} {r : ℝ} {K : ℝ≥0} {δ : ℝ} (hr : 0 ≤ r) (hδ : 0 ≤ δ)
     (hcont_t : ∀ x ∈ closedBall x₀ r, ContinuousOn (fun s : ℝ => Φ x s) (Icc (0 : ℝ) δ))
@@ -311,15 +232,12 @@ section Operator
 variable {A : ℝ → (E →L[ℝ] E)} {M δ : ℝ}
 
 omit [CompleteSpace E] in
-/-- An `Ici 0` right-derivative at any interior time `τ ∈ [0, δ)` restricts to the `Ici τ`
-right-derivative (since `τ ≥ 0`, so `Ici τ ⊆ Ici 0`). -/
+
 lemma hasDerivWithinAt_Ici_of_Ici_zero {y : ℝ → E} {y' : E} {τ : ℝ}
     (h : HasDerivWithinAt y y' (Ici (0 : ℝ)) τ) (hτ : 0 ≤ τ) :
     HasDerivWithinAt y y' (Ici τ) τ :=
   h.mono (fun _ hs => le_trans hτ hs)
 
-/-- The from-`0` variational solution map: for each initial variation `J₀`, picks (via
-`forward_variational_solution_from_zero`) the from-`0` variational solution on `[0, δ]`. -/
 noncomputable def fwdVariationalSolutionFun
     (hδ : 0 < δ) (hM : 0 ≤ M) (hMδ : M * δ < 1)
     (hAcont : ContinuousOn A (Icc (0 : ℝ) δ))
@@ -327,7 +245,6 @@ noncomputable def fwdVariationalSolutionFun
     E → ℝ → E :=
   fun J₀ => (forward_variational_solution_from_zero hδ hM hMδ hAcont hAbd J₀).choose
 
-/-- Defining property of `fwdVariationalSolutionFun`. -/
 lemma fwdVariationalSolutionFun_spec
     (hδ : 0 < δ) (hM : 0 ≤ M) (hMδ : M * δ < 1)
     (hAcont : ContinuousOn A (Icc (0 : ℝ) δ))
@@ -339,8 +256,6 @@ lemma fwdVariationalSolutionFun_spec
           ((A t) ((fwdVariationalSolutionFun hδ hM hMδ hAcont hAbd J₀) t)) (Ici (0 : ℝ)) t :=
   (forward_variational_solution_from_zero hδ hM hMδ hAcont hAbd J₀).choose_spec
 
-/-- **Linearity of the from-`0` variational solution in the initial variation.**  By one-sided
-uniqueness, the value at each time is linear in `J₀`. -/
 lemma fwdVariationalSolutionFun_linear
     (hδ : 0 < δ) (hM : 0 ≤ M) (hMδ : M * δ < 1)
     (hAcont : ContinuousOn A (Icc (0 : ℝ) δ))
@@ -378,8 +293,6 @@ lemma fwdVariationalSolutionFun_linear
     rw [h12_0, hL_init]
   exact (forward_variational_unique hM hAbd h12_cont h12_d' hL_cont hL_deriv hinit) ht
 
-/-- **Operator-norm bound on the from-`0` variational solution.**  `‖J_{J₀}(t)‖ ≤
-exp (M · δ) · ‖J₀‖`. -/
 lemma fwdVariationalSolutionFun_norm_le
     (hδ : 0 < δ) (hM : 0 ≤ M) (hMδ : M * δ < 1)
     (hAcont : ContinuousOn A (Icc (0 : ℝ) δ))
@@ -395,9 +308,6 @@ lemma fwdVariationalSolutionFun_norm_le
   rw [mul_comm] at hbd
   exact hbd
 
-/-- **The from-`0` variational linear map at time `t`**: the continuous linear map
-`J₀ ↦ J_{J₀}(t)`, where `J_{J₀}` is the from-`0` variational solution with initial variation
-`J₀`.  Bundled from `fwdVariationalSolutionFun` via its linearity and operator-norm bound. -/
 noncomputable def fwdVariationalLinearMapAt
     (hδ : 0 < δ) (hM : 0 ≤ M) (hMδ : M * δ < 1)
     (hAcont : ContinuousOn A (Icc (0 : ℝ) δ))
@@ -435,24 +345,7 @@ open DifferentialGeometry.Analysis.ODE.Flow (gronwallBound_zero_le norm_residual
   exists_uniform_partial_fderiv_of_contDiffOn_univ)
 
 set_option maxHeartbeats 1600000 in
-/-- **Differentiation-under-the-flow at the initial condition (from `0`).**
 
-For a from-`0` forward flow `Φ : E → ℝ → E` of a jointly `C¹` field `f` — that is, `Φ x 0 = x`
-on `closedBall x₀ r`, the orbits solve the one-sided ODE `∂ₛ (Φ x s) = f s (Φ x s)` with the
-right derivative on `[0, δ)`, the orbits are continuous on `[0, δ]`, and `x ↦ Φ x s` is
-uniformly Lipschitz on the ball — the partial map `x ↦ Φ x t` is Fréchet differentiable at the
-centre `x₀` for every `t ∈ [0, δ]`, with derivative the from-`0` variational linear map
-`fwdVariationalLinearMapAt` along the central orbit (`A s = D_x f (s, Φ x₀ s)`, bounded by `M`,
-`M · δ < 1`).
-
-This is the genuine differentiation-under-the-flow step run forward from the initial time: the
-field need only be `C¹`-in-space along the central orbit on `[0, δ]`.  The proof is the from-`0`
-(right-half-only) specialisation of the interior
-`hasFDerivAt_flow_at_initial_of_isLocalFlow`: writing `α_h s := Φ (x₀ + h) s` (the exact orbit)
-and `β_h s := Φ x₀ s + y_h s` (the linear prediction, with `y_h` the from-`0` variational
-solution with initial variation `h`), the mean-value residual estimate
-`norm_residual_le_of_diffOn` controls the defect of `β_h`, and the forward Grönwall
-`dist_le_of_approx_trajectories_ODE_of_mem` (from `0`) bounds `‖α_h t - β_h t‖` by `o(‖h‖)`. -/
 theorem forward_flow_hasFDerivAt_initial
     {f : ℝ → E → E} {Φ : E → ℝ → E} {x₀ : E} {r : ℝ} {M δ : ℝ}
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (univ : Set (ℝ × E)))

@@ -7,37 +7,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Linear
 
-/-!
-# `HasSmoothBoundary` instance for the Euclidean half-space model
-
-This file equips the canonical `n`-dimensional model with corners
-`modelWithCornersEuclideanHalfSpace n : ModelWithCorners ℝ
-  (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n)` with the
-`HasSmoothBoundary` typeclass, for every `n : ℕ` with `[NeZero n]`.
-
-The construction is concrete and entirely linear:
-
-* The boundary normed model is `EuclideanSpace ℝ (Fin (n - 1))`.
-* The boundary topological model is the same `EuclideanSpace ℝ (Fin (n - 1))`,
-  treated via the boundaryless model `modelWithCornersSelf ℝ _`.
-* The inclusion `inclEuclidean` maps a tuple `x : Fin (n - 1) → ℝ` to the
-  tuple `Fin n → ℝ` whose `0`-th coordinate is `0` and whose `i`-th coordinate
-  for `i ≠ 0` is the corresponding entry of `x`.
-* The projection `projEuclidean` maps a tuple `y : Fin n → ℝ` to the tuple
-  `Fin (n - 1) → ℝ` whose `i`-th coordinate is the `(i + 1)`-th coordinate of
-  `y`.
-
-These two maps are continuous-linear; the smoothness conditions of
-`HasSmoothBoundary` follow at `C^∞`. The range identity
-`Set.range (I ∘ inclH) = frontier (Set.range I)` reduces to
-`{y : EuclideanSpace ℝ (Fin n) | y 0 = 0}` on both sides, using
-`range_euclideanHalfSpace` and `frontier_halfSpace`.
-
-The compatibility identity `projE ∘ I ∘ inclH = boundaryI` collapses to the
-identity on `EuclideanSpace ℝ (Fin (n - 1))`, since `boundaryI` is the
-self-model.
--/
-
 noncomputable section
 
 open Set Function Topology
@@ -49,16 +18,12 @@ namespace DivergenceTheorem
 namespace WithBoundary
 namespace EuclideanHalfSpaceInstance
 
-/-- For a positive natural number, `(n - 1) + 1 = n`. -/
 private theorem n_sub_one_add_one (n : ℕ) [NeZero n] : (n - 1) + 1 = n :=
   Nat.sub_one_add_one_eq_of_pos (Nat.pos_of_neZero n)
 
-/-- Given `[NeZero n]`, the index-shift map sending `j : Fin (n - 1)` to
-`Fin n` by adding one (i.e., `j ↦ j.succ` after a length cast). -/
 private def succIndex (n : ℕ) [NeZero n] : Fin (n - 1) → Fin n :=
   fun j => Fin.cast (n_sub_one_add_one n) j.succ
 
-/-- The shifted index is never `0`. -/
 private theorem succIndex_ne_zero (n : ℕ) [NeZero n] (j : Fin (n - 1)) :
     succIndex n j ≠ 0 := by
   intro h
@@ -67,7 +32,6 @@ private theorem succIndex_ne_zero (n : ℕ) [NeZero n] (j : Fin (n - 1)) :
   rw [hsucc, Fin.val_zero] at hval
   exact Nat.succ_ne_zero _ hval
 
-/-- For any nonzero `i : Fin n`, the predecessor lives in `Fin (n - 1)`. -/
 private def predIndex (n : ℕ) [NeZero n] (i : Fin n) (h : i ≠ 0) : Fin (n - 1) :=
   ⟨i.val - 1, by
     have hi : i.val < n := i.isLt
@@ -77,7 +41,6 @@ private def predIndex (n : ℕ) [NeZero n] (i : Fin n) (h : i ≠ 0) : Fin (n - 
       · exact h0
     omega⟩
 
-/-- `succIndex` is a left-inverse of `predIndex` (when applied at a nonzero index). -/
 private theorem succIndex_predIndex (n : ℕ) [NeZero n] (i : Fin n) (h : i ≠ 0) :
     succIndex n (predIndex n i h) = i := by
   have hipos : 0 < i.val := by
@@ -88,46 +51,34 @@ private theorem succIndex_predIndex (n : ℕ) [NeZero n] (i : Fin n) (h : i ≠ 
   change (i.val - 1) + 1 = i.val
   omega
 
-/-- `predIndex` is a left-inverse of `succIndex`. -/
 private theorem predIndex_succIndex (n : ℕ) [NeZero n] (j : Fin (n - 1)) :
     predIndex n (succIndex n j) (succIndex_ne_zero n j) = j := by
   apply Fin.ext
   change (j.val + 1) - 1 = j.val
   omega
 
-/-- Coordinate-level inclusion: insert `0` at index `0`. Sends
-`x : Fin (n - 1) → ℝ` to the function `Fin n → ℝ` defined by
-`f 0 = 0`, `f (succIndex n j) = x j`. -/
 private def consZeroFun (n : ℕ) [NeZero n] (x : Fin (n - 1) → ℝ) : Fin n → ℝ :=
   fun i =>
     if h : i = (0 : Fin n) then 0
     else x (predIndex n i h)
 
-/-- Coordinate-level projection: drop index `0`. Sends `y : Fin n → ℝ`
-to `Fin (n - 1) → ℝ` defined by `f j = y (succIndex n j)`. -/
 private def tailFun (n : ℕ) [NeZero n] (y : Fin n → ℝ) : Fin (n - 1) → ℝ :=
   fun j => y (succIndex n j)
 
-/-- The 0-th coordinate of `consZeroFun n x` is `0`. -/
 private theorem consZeroFun_zero (n : ℕ) [NeZero n] (x : Fin (n - 1) → ℝ) :
     consZeroFun n x 0 = 0 := dif_pos rfl
 
-/-- For any `j : Fin (n - 1)`, `consZeroFun n x (succIndex n j) = x j`. -/
 private theorem consZeroFun_succIndex (n : ℕ) [NeZero n]
     (x : Fin (n - 1) → ℝ) (j : Fin (n - 1)) :
     consZeroFun n x (succIndex n j) = x j := by
   unfold consZeroFun
   rw [dif_neg (succIndex_ne_zero n j), predIndex_succIndex]
 
-/-- The coordinate-level projection is left-inverse to the coordinate-level
-inclusion: `tailFun (consZeroFun x) = x`. -/
 private theorem tailFun_consZeroFun (n : ℕ) [NeZero n] (x : Fin (n - 1) → ℝ) :
     tailFun n (consZeroFun n x) = x := by
   funext j
   exact consZeroFun_succIndex n x j
 
-/-- The coordinate-level inclusion recovers any function whose value at `0`
-is `0` from its tail. -/
 private theorem consZeroFun_tailFun (n : ℕ) [NeZero n] (y : Fin n → ℝ)
     (hy : y 0 = 0) :
     consZeroFun n (tailFun n y) = y := by
@@ -137,8 +88,6 @@ private theorem consZeroFun_tailFun (n : ℕ) [NeZero n] (y : Fin n → ℝ)
   · rw [dif_pos h, h]; exact hy.symm
   · rw [dif_neg h, succIndex_predIndex]
 
-/-- The continuous linear inclusion `(Fin (n - 1) → ℝ) →L[ℝ] (Fin n → ℝ)`
-inserting a `0` at index `0`. -/
 private def consZeroCLM (n : ℕ) [NeZero n] :
     (Fin (n - 1) → ℝ) →L[ℝ] (Fin n → ℝ) :=
   ContinuousLinearMap.pi fun i =>
@@ -147,7 +96,6 @@ private def consZeroCLM (n : ℕ) [NeZero n] :
       ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin (n - 1) => ℝ)
         (predIndex n i h)
 
-/-- `consZeroCLM` agrees with `consZeroFun` as a function. -/
 private theorem consZeroCLM_apply (n : ℕ) [NeZero n] (x : Fin (n - 1) → ℝ) :
     consZeroCLM n x = consZeroFun n x := by
   funext i
@@ -157,14 +105,11 @@ private theorem consZeroCLM_apply (n : ℕ) [NeZero n] (x : Fin (n - 1) → ℝ)
   · rw [dif_pos h, dif_pos h]; rfl
   · rw [dif_neg h, dif_neg h]; rfl
 
-/-- The continuous linear projection `(Fin n → ℝ) →L[ℝ] (Fin (n - 1) → ℝ)`
-dropping index `0`. -/
 private def tailCLM (n : ℕ) [NeZero n] :
     (Fin n → ℝ) →L[ℝ] (Fin (n - 1) → ℝ) :=
   ContinuousLinearMap.pi fun j =>
     ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin n => ℝ) (succIndex n j)
 
-/-- `tailCLM` agrees with `tailFun` as a function. -/
 private theorem tailCLM_apply (n : ℕ) [NeZero n] (y : Fin n → ℝ) :
     tailCLM n y = tailFun n y := by
   funext j
@@ -172,35 +117,26 @@ private theorem tailCLM_apply (n : ℕ) [NeZero n] (y : Fin n → ℝ) :
   rw [ContinuousLinearMap.pi_apply]
   rfl
 
-/-- The continuous linear inclusion of `EuclideanSpace ℝ (Fin (n - 1))` into
-`EuclideanSpace ℝ (Fin n)` inserting a `0` at index `0`. -/
 def inclEuclideanCLM (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin (n - 1)) →L[ℝ] EuclideanSpace ℝ (Fin n) :=
   (EuclideanSpace.equiv (Fin n) ℝ).symm.toContinuousLinearMap.comp
     ((consZeroCLM n).comp
       (EuclideanSpace.equiv (Fin (n - 1)) ℝ).toContinuousLinearMap)
 
-/-- The continuous linear projection of `EuclideanSpace ℝ (Fin n)` onto
-`EuclideanSpace ℝ (Fin (n - 1))` dropping index `0`. -/
 def projEuclideanCLM (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) →L[ℝ] EuclideanSpace ℝ (Fin (n - 1)) :=
   (EuclideanSpace.equiv (Fin (n - 1)) ℝ).symm.toContinuousLinearMap.comp
     ((tailCLM n).comp
       (EuclideanSpace.equiv (Fin n) ℝ).toContinuousLinearMap)
 
-/-- Plain-function form of the inclusion: insert `0` at index `0`. -/
 def inclEuclidean (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin (n - 1)) → EuclideanSpace ℝ (Fin n) :=
   inclEuclideanCLM n
 
-/-- Plain-function form of the projection: drop index `0`. -/
 def projEuclidean (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin (n - 1)) :=
   projEuclideanCLM n
 
-/-- Coordinate-access agreement: `inclEuclideanCLM n x i` (treating both
-sides as functions of `Fin n`) equals `consZeroFun n (ofLp x) i`, where
-`ofLp x : Fin (n - 1) → ℝ` is the underlying tuple of `x`. -/
 private theorem inclEuclideanCLM_apply_coord (n : ℕ) [NeZero n]
     (x : EuclideanSpace ℝ (Fin (n - 1))) (i : Fin n) :
     (inclEuclideanCLM n x) i = consZeroFun n x i := by
@@ -213,7 +149,6 @@ private theorem inclEuclideanCLM_apply_coord (n : ℕ) [NeZero n]
   rw [consZeroCLM_apply]
   rfl
 
-/-- Coordinate-access agreement for the projection. -/
 private theorem projEuclideanCLM_apply_coord (n : ℕ) [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) (j : Fin (n - 1)) :
     (projEuclideanCLM n y) j = tailFun n y j := by
@@ -226,14 +161,12 @@ private theorem projEuclideanCLM_apply_coord (n : ℕ) [NeZero n]
   rw [tailCLM_apply]
   rfl
 
-/-- The 0-th coordinate of `inclEuclidean n x` is `0`. -/
 theorem inclEuclidean_zero_coord (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ (Fin (n - 1))) :
     inclEuclidean n x 0 = 0 := by
   change (inclEuclideanCLM n x) (0 : Fin n) = 0
   rw [inclEuclideanCLM_apply_coord]
   exact consZeroFun_zero n _
 
-/-- The plain-function inverse identity: `projEuclidean (inclEuclidean x) = x`. -/
 theorem projEuclidean_inclEuclidean (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ (Fin (n - 1))) :
     projEuclidean n (inclEuclidean n x) = x := by
   apply (EuclideanSpace.equiv (Fin (n - 1)) ℝ).injective
@@ -244,27 +177,22 @@ theorem projEuclidean_inclEuclidean (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ
   rw [inclEuclideanCLM_apply_coord]
   exact consZeroFun_succIndex n _ _
 
-/-- The inclusion `inclEuclidean` is `C^∞`. -/
 theorem inclEuclidean_contDiff (n : ℕ) [NeZero n] :
     ContDiff ℝ ∞ (inclEuclidean n) :=
   (inclEuclideanCLM n).contDiff
 
-/-- The projection `projEuclidean` is `C^∞`. -/
 theorem projEuclidean_contDiff (n : ℕ) [NeZero n] :
     ContDiff ℝ ∞ (projEuclidean n) :=
   (projEuclideanCLM n).contDiff
 
-/-- The inclusion `inclEuclidean` is continuous. -/
 theorem inclEuclidean_continuous (n : ℕ) [NeZero n] :
     Continuous (inclEuclidean n) :=
   (inclEuclideanCLM n).continuous
 
-/-- The projection `projEuclidean` is continuous. -/
 theorem projEuclidean_continuous (n : ℕ) [NeZero n] :
     Continuous (projEuclidean n) :=
   (projEuclideanCLM n).continuous
 
-/-- The inclusion `inclEuclidean` is injective. -/
 theorem inclEuclidean_injective (n : ℕ) [NeZero n] :
     Function.Injective (inclEuclidean n) := by
   intro x y hxy
@@ -273,7 +201,6 @@ theorem inclEuclidean_injective (n : ℕ) [NeZero n] :
   rw [hxy] at hx
   exact hx.symm.trans hy
 
-/-- The image of `inclEuclidean` is exactly the hyperplane `{y | y 0 = 0}`. -/
 theorem range_inclEuclidean (n : ℕ) [NeZero n] :
     Set.range (inclEuclidean n) =
       {y : EuclideanSpace ℝ (Fin n) | y 0 = 0} := by
@@ -297,7 +224,6 @@ theorem range_inclEuclidean (n : ℕ) [NeZero n] :
       unfold tailFun
       rw [succIndex_predIndex]
 
-/-- The image of `inclEuclidean` is closed in `EuclideanSpace ℝ (Fin n)`. -/
 theorem inclEuclidean_isClosed_range (n : ℕ) [NeZero n] :
     IsClosed (Set.range (inclEuclidean n)) := by
   rw [range_inclEuclidean]
@@ -307,7 +233,6 @@ theorem inclEuclidean_isClosed_range (n : ℕ) [NeZero n] :
   refine IsClosed.preimage ?_ isClosed_singleton
   exact (PiLp.continuous_apply 2 _ 0)
 
-/-- The inclusion `inclEuclidean` is a topological inducing map. -/
 theorem inclEuclidean_isInducing (n : ℕ) [NeZero n] :
     IsInducing (inclEuclidean n) := by
   refine ⟨?_⟩
@@ -319,28 +244,23 @@ theorem inclEuclidean_isInducing (n : ℕ) [NeZero n] :
     ext x
     simp [projEuclidean_inclEuclidean]
 
-/-- The boundary inclusion lifted to `EuclideanHalfSpace n`. -/
 def inclH (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin (n - 1)) → EuclideanHalfSpace n :=
   fun x => ⟨inclEuclidean n x, by
     rw [inclEuclidean_zero_coord]⟩
 
-/-- Subtype-value identity: `(inclH n x).val = inclEuclidean n x`. -/
 theorem inclH_val (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ (Fin (n - 1))) :
     (inclH n x).val = inclEuclidean n x := rfl
 
-/-- `inclH` is continuous. -/
 theorem inclH_continuous (n : ℕ) [NeZero n] : Continuous (inclH n) :=
   Continuous.subtype_mk (inclEuclidean_continuous n) _
 
-/-- `inclH` is injective. -/
 theorem inclH_injective (n : ℕ) [NeZero n] : Function.Injective (inclH n) := by
   intro x y hxy
   have hval : (inclH n x).val = (inclH n y).val := by rw [hxy]
   rw [inclH_val, inclH_val] at hval
   exact inclEuclidean_injective n hval
 
-/-- `inclH` is a topological inducing map. -/
 theorem inclH_isInducing (n : ℕ) [NeZero n] : IsInducing (inclH n) := by
   have h_comp_inducing :
       IsInducing ((Subtype.val : EuclideanHalfSpace n → EuclideanSpace ℝ (Fin n))
@@ -349,8 +269,6 @@ theorem inclH_isInducing (n : ℕ) [NeZero n] : IsInducing (inclH n) := by
     exact inclEuclidean_isInducing n
   exact IsInducing.of_comp (inclH_continuous n) continuous_subtype_val h_comp_inducing
 
-/-- The image of `inclH` after `modelWithCornersEuclideanHalfSpace n` is
-exactly the hyperplane `{y | y 0 = 0}`. -/
 theorem range_modelWithCorners_comp_inclH (n : ℕ) [NeZero n] :
     Set.range (modelWithCornersEuclideanHalfSpace n ∘ inclH n) =
       {y : EuclideanSpace ℝ (Fin n) | y 0 = 0} := by
@@ -369,10 +287,6 @@ theorem range_modelWithCorners_comp_inclH (n : ℕ) [NeZero n] :
     rw [inclH_val]
     exact hx
 
-/-- The frontier of the range of `modelWithCornersEuclideanHalfSpace n` is the
-hyperplane `{y | y 0 = 0}`. This packages
-`frontier_range_modelWithCornersEuclideanHalfSpace` from Mathlib in the
-`y 0 = 0` orientation. -/
 theorem frontier_range_modelWithCornersEuclideanHalfSpace_eq (n : ℕ) [NeZero n] :
     frontier (Set.range (modelWithCornersEuclideanHalfSpace n)) =
       {y : EuclideanSpace ℝ (Fin n) | y 0 = 0} := by
@@ -380,9 +294,6 @@ theorem frontier_range_modelWithCornersEuclideanHalfSpace_eq (n : ℕ) [NeZero n
   ext y
   exact eq_comm
 
-/-- The composite `I ∘ inclH ∘ boundaryI.symm` agrees with `inclEuclidean`.
-Because `boundaryI = modelWithCornersSelf ℝ _` is the identity model, the
-composition collapses to `Subtype.val ∘ inclH n = inclEuclidean n`. -/
 theorem comp_modelWithCornersEuclideanHalfSpace_inclH_self_symm (n : ℕ) [NeZero n] :
     (modelWithCornersEuclideanHalfSpace n :
         EuclideanHalfSpace n → EuclideanSpace ℝ (Fin n))
@@ -392,7 +303,6 @@ theorem comp_modelWithCornersEuclideanHalfSpace_inclH_self_symm (n : ℕ) [NeZer
   funext x
   rfl
 
-/-- The `0`-th coordinate of the standard inward direction is `1`. -/
 private theorem single_zero_one_apply_zero (n : ℕ) [NeZero n] :
     (EuclideanSpace.single (0 : Fin n) (1 : ℝ)) 0 = 1 := by
   rw [show (EuclideanSpace.single (0 : Fin n) (1 : ℝ)) =
@@ -400,7 +310,6 @@ private theorem single_zero_one_apply_zero (n : ℕ) [NeZero n] :
   rw [PiLp.single_apply]
   simp
 
-/-- The standard inward direction is not in the hyperplane `{y | y 0 = 0}`. -/
 private theorem single_zero_one_notMem_hyperplane (n : ℕ) [NeZero n] :
     EuclideanSpace.single (0 : Fin n) (1 : ℝ) ∉
       {y : EuclideanSpace ℝ (Fin n) | y 0 = 0} := by
@@ -410,8 +319,6 @@ private theorem single_zero_one_notMem_hyperplane (n : ℕ) [NeZero n] :
   have : (1 : ℝ) = 0 := this ▸ hmem
   exact one_ne_zero this
 
-/-- The Fréchet derivative of the inclusion `inclEuclidean n` is the constant
-continuous linear map `inclEuclideanCLM n`. -/
 private theorem fderiv_inclEuclidean (n : ℕ) [NeZero n]
     (y : EuclideanSpace ℝ (Fin (n - 1))) :
     fderiv ℝ (inclEuclidean n) y = inclEuclideanCLM n := by
@@ -419,13 +326,9 @@ private theorem fderiv_inclEuclidean (n : ℕ) [NeZero n]
       EuclideanSpace ℝ (Fin n)) y = inclEuclideanCLM n
   exact (inclEuclideanCLM n).fderiv
 
-/-- The range of the continuous-linear inclusion `inclEuclideanCLM` equals the
-range of the underlying function `inclEuclidean`. -/
 private theorem range_inclEuclideanCLM (n : ℕ) [NeZero n] :
     Set.range (inclEuclideanCLM n) = Set.range (inclEuclidean n) := rfl
 
-/-- The standard inward direction `e_0` is transverse to the boundary
-hyperplane: it does not lie in the image of the inclusion's derivative. -/
 private theorem single_zero_one_transverse (n : ℕ) [NeZero n] :
     ∀ y : EuclideanSpace ℝ (Fin (n - 1)),
       EuclideanSpace.single (0 : Fin n) (1 : ℝ) ∉
@@ -439,10 +342,6 @@ private theorem single_zero_one_transverse (n : ℕ) [NeZero n] :
       fderiv_inclEuclidean n y, range_inclEuclideanCLM, range_inclEuclidean]
   exact single_zero_one_notMem_hyperplane n
 
-/-- The hyperplane `{y : EuclideanSpace ℝ (Fin n) | y 0 = 0}` is the kernel of
-the continuous linear functional `EuclideanSpace.proj 0`. As a strict linear
-subspace of a finite-dim normed space, it has zero additive Haar measure (for
-any choice of additive Haar measure on the space). -/
 private theorem hyperplane_basisAddHaar_zero (n : ℕ) [NeZero n] :
     letI : MeasurableSpace (EuclideanSpace ℝ (Fin n)) := borel _
     haveI : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
@@ -478,10 +377,6 @@ private theorem hyperplane_basisAddHaar_zero (n : ℕ) [NeZero n] :
   rw [single_zero_one_apply_zero n] at h_eval
   exact one_ne_zero (h_proj_zero.symm.trans h_eval).symm
 
-/-- The model-level boundary `frontier (Set.range (modelWithCornersEuclideanHalfSpace n))`
-has zero `Module.finBasis`-Haar measure. Combines the explicit identification
-of the frontier as the hyperplane `{y | y 0 = 0}` with the strict-subspace
-null-measure fact. -/
 private theorem frontier_range_modelWithCorners_basisAddHaar_zero
     (n : ℕ) [NeZero n] :
     letI : MeasurableSpace (EuclideanSpace ℝ (Fin n)) := borel _
@@ -494,9 +389,6 @@ private theorem frontier_range_modelWithCorners_basisAddHaar_zero
   rw [frontier_range_modelWithCornersEuclideanHalfSpace_eq]
   exact hyperplane_basisAddHaar_zero n
 
-/-- The Euclidean half-space `EuclideanHalfSpace n` (for any `n` with `[NeZero n]`)
-is a model with smooth boundary, with boundary modelled on the boundaryless
-`EuclideanSpace ℝ (Fin (n - 1))` via the self-model. -/
 instance instHasSmoothBoundary (n : ℕ) [NeZero n] :
     HasSmoothBoundary
       (EuclideanSpace ℝ (Fin n))
@@ -546,35 +438,24 @@ instance instHasSmoothBoundary (n : ℕ) [NeZero n] :
     rw [finrank_euclideanSpace_fin, finrank_euclideanSpace_fin]
     exact Nat.sub_one_add_one_eq_of_pos (Nat.pos_of_neZero n)
 
-/-- Test: the boundary normed model of the half-space instance is the
-`(n - 1)`-dimensional Euclidean space. -/
 example (n : ℕ) [NeZero n] :
     HasSmoothBoundary.boundaryModelE
       (modelWithCornersEuclideanHalfSpace n)
       = EuclideanSpace ℝ (Fin (n - 1)) := rfl
 
-/-- Test: the boundary topological model of the half-space instance is the
-same `(n - 1)`-dimensional Euclidean space. -/
 example (n : ℕ) [NeZero n] :
     HasSmoothBoundary.boundaryModelH
       (modelWithCornersEuclideanHalfSpace n)
       = EuclideanSpace ℝ (Fin (n - 1)) := rfl
 
-/-- Test: the boundary model with corners is the boundaryless self-model. -/
 example (n : ℕ) [NeZero n] :
     HasSmoothBoundary.boundaryModel
       (modelWithCornersEuclideanHalfSpace n)
       = modelWithCornersSelf ℝ (EuclideanSpace ℝ (Fin (n - 1))) := rfl
 
-/-- Test: the projection drops the first coordinate, as a `C^∞` map. -/
 example (n : ℕ) [NeZero n] :
     ContDiff ℝ ∞ (instHasSmoothBoundary n).projE := projEuclidean_contDiff n
 
-/-- The "trivial" base-coordinate identification on the canonical self-charted
-model `EuclideanHalfSpace n`. The inverse trivialisation of the tangent bundle
-at any base point, evaluated at any other point in the chart source, sends
-`inwardCoordE` back to `inwardCoordE` (under the type alias
-`TangentSpace (𝓡∂ n) y = EuclideanSpace ℝ (Fin n)`). -/
 private theorem inwardCoordAt_self_charted_eq
     (n : ℕ) [NeZero n]
     (α y : DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.BoundaryManifold
@@ -650,11 +531,6 @@ private theorem inwardCoordAt_self_charted_eq
   rw [h_fderiv_phi]
   rfl
 
-/-- The orientation property holds for the canonical self-charted
-`EuclideanHalfSpace n`: for any two boundary base points `α₀, α₁` and any
-boundary point `y` in their chart sources, the chart-α₀ and chart-α₁
-inward-direction representatives at `y` agree. Hence `c = 1` realises the
-orientation. -/
 instance instHasOrientableBoundary_self_EuclideanHalfSpace
     (n : ℕ) [NeZero n] :
     DifferentialGeometry.Integral.DivergenceTheorem.WithBoundary.HasOrientableBoundary

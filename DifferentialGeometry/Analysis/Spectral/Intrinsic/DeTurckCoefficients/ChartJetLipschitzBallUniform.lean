@@ -1,37 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRicciRHSRealizeJet
 
-/-!
-# Ball-uniform chart-jet Lipschitz of the realized Ricci–DeTurck right-hand side
-
-The per-pair chart-jet Lipschitz property `HasChartJetLip g₁ g₂ α K F d` binds its
-`bound`/`lip` constants to the *fixed* metric pair `(g₁, g₂)`.  For the smooth-ball Lipschitz
-estimate of the Ricci–DeTurck remainder the metric pair ranges over a whole *set* `𝒢` of metrics
-(the realized fibre-small `R`-ball), and the chart-Nemytskii Lipschitz modulus must be **uniform
-over that set** — the standard Moser ball-uniformity of the chart-Gram / inverse-Gram /
-Christoffel / Ricci / Lie–DeTurck jet towers.
-
-This file defines the **ball-uniform** chart-jet Lipschitz property `HasChartJetLipBall 𝒢 α K F d`
-— a single `bound`/`lip` constant valid for *every* metric (resp. metric pair) drawn from `𝒢` —
-and proves it is closed under the same algebra as the per-pair property:
-
-* `HasChartJetLipBall.of_le`, `.const_smul`, `.add`, `.mul`, `.sum`, `.partialDeriv` — the closure
-  rules, each producing the **same arithmetic expression** in the input ball-uniform constants, so
-  uniformity propagates.
-* `hasChartJetLipBall_const` — a metric-independent base case.
-
-with two genuine **base towers posited** as the irreducible Moser ball-uniformity inputs:
-
-* `hasChartJetLipBall_chartGramOnE` — the chart-Gram entry, ball-uniform.
-* `hasChartJetLipBall_chartInvGramOnE` — the inverse chart-Gram entry, ball-uniform.
-
-On top of these the full Christoffel / Riemann / Ricci / Lie–DeTurck / DeTurck-RHS tower is
-re-derived ball-uniform (`hasChartJetLipBall_chartChristoffel`, …,
-`hasChartJetLipBall_chartDeTurckRicciRHS`), and the **ball-uniform Nemytskii bound**
-`chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE_ballUniform` is assembled — the
-single uniform-over-`R`-ball chart-jet Lipschitz constant of the realized Ricci–DeTurck right-hand
-side that the covariant-`L²` core of the remainder-difference smooth-ball estimate consumes.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -60,34 +28,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **Ball-uniform all-order chart-jet Lipschitz property with derivative loss `d`.**
-
-`HasChartJetLipBall 𝒢 α K F d` records that, over the whole metric set `𝒢`, the metric-evaluated
-scalar field `F g : E → ℝ` is `C^∞` on the chart-target interior, is **uniformly** `Cᴺ`-bounded on
-the compact `K` (a single bound over all of `𝒢`), and that for **any** pair `g₁, g₂ ∈ 𝒢` the
-order-`N` iterated derivative of the difference `F g₁ − F g₂` is controlled by the order-`(N + d)`
-chart-Gram jet-difference seminorm, with a single constant per order `N`, uniform over `𝒢` and `K`.
-
-This is the metric-set ball-uniform analog of `HasChartJetLip`; the constant existentials are hoisted
-**outside** the `∀ g ∈ 𝒢` / `∀ g₁ g₂ ∈ 𝒢` quantifiers. -/
 structure HasChartJetLipBall
     (𝒢 : Set (SmoothRiemannianMetric I M)) (α : M) (K : Set E)
     (F : SmoothRiemannianMetric I M → E → ℝ) (d : ℕ) (N_max : ℕ) : Prop where
-  /-- `F g` is `C^∞` on the chart-target interior, for every metric in `𝒢`. -/
+  
   contDiff : ∀ g ∈ 𝒢, ContDiffOn ℝ ∞ (F g) (interior (extChartAt I α).target)
-  /-- Uniform `Cᴹ` bound on `F g` over `K`, for every metric in `𝒢` and every order `m ≤ N_max`.
-  A single nonnegative constant `B` works for all orders up to `N_max`. -/
+  
   bound : ∃ B : ℝ, 0 ≤ B ∧ ∀ g ∈ 𝒢, ∀ y ∈ K, ∀ m : ℕ, m ≤ N_max →
     ‖iteratedFDerivWithin ℝ m (F g) (interior (extChartAt I α).target) y‖ ≤ B
-  /-- Ball-uniform chart-jet Lipschitz estimate with derivative loss `d`, valid up to order `N_max`. -/
+  
   lip : ∀ N : ℕ, N ≤ N_max → ∃ C : ℝ, 0 < C ∧ ∀ g₁ ∈ 𝒢, ∀ g₂ ∈ 𝒢, ∀ y ∈ K,
     ‖iteratedFDerivWithin ℝ N (fun z => F g₁ z - F g₂ z)
         (interior (extChartAt I α).target) y‖ ≤
       C * chartGramJetDiffSeminormSum (I := I) (M := M) (N + d) g₁ g₂ α
         (interior (extChartAt I α).target) y
 
-/-- The ball-uniform chart-jet Lipschitz property transfers along a pointwise-equal
-reparametrisation `F = F'`. -/
 theorem HasChartJetLipBall.congr
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     {F F' : SmoothRiemannianMetric I M → E → ℝ} {d N_max : ℕ}
@@ -97,7 +52,6 @@ theorem HasChartJetLipBall.congr
   have hrw : F' = F := by funext g; exact (hFF' g).symm
   rw [hrw]; exact hF
 
-/-- The derivative loss may be increased (the seminorm sum is monotone in its order). -/
 theorem HasChartJetLipBall.of_le
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d d' N_max : ℕ} (hd : d ≤ d')
@@ -109,8 +63,6 @@ theorem HasChartJetLipBall.of_le
   refine mul_le_mul_of_nonneg_left ?_ hC_pos.le
   exact chartGramJetDiffSeminormSum_mono (I := I) (M := M) (by omega) g₁ g₂ α _ y
 
-/-- The maximal usable order may be decreased: a single bound/Lipschitz constant valid up to order
-`N_max` is in particular valid up to any smaller order `N_max'`. -/
 theorem HasChartJetLipBall.of_le_Nmax
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d N_max N_max' : ℕ} (hN : N_max' ≤ N_max)
@@ -120,8 +72,6 @@ theorem HasChartJetLipBall.of_le_Nmax
   obtain ⟨B, hB_nn, hB⟩ := hF.bound
   exact ⟨B, hB_nn, fun g hg y hy m hm => hB g hg y hy m (hm.trans hN)⟩
 
-/-- The order-`N` seminorm of the difference `F g₁ − F g₂` is controlled by the order-`(N + d)`
-chart-Gram jet-difference seminorm, with a single ball-uniform constant per order `N`. -/
 theorem HasChartJetLipBall.seminorm_le
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d N_max : ℕ}
@@ -156,7 +106,6 @@ theorem HasChartJetLipBall.seminorm_le
       chartGramJetDiffSeminormSum_mono (I := I) (M := M) (by omega) g₁ g₂ α s y
     exact mul_le_mul_of_nonneg_left hmono (hCl_pos l).le
 
-/-- Constant scalar multiplication preserves the ball-uniform chart-jet Lipschitz property. -/
 theorem HasChartJetLipBall.const_smul
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -204,8 +153,6 @@ theorem HasChartJetLipBall.const_smul
       _ ≤ (|c| * C + 1) * chartGramJetDiffSeminormSum (I := I) (M := M) (N + d) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
-/-- Addition preserves the ball-uniform chart-jet Lipschitz property; the derivative loss is the
-max of the two losses. -/
 theorem HasChartJetLipBall.add
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -255,8 +202,6 @@ theorem HasChartJetLipBall.add
     refine (add_le_add (hCF g₁ hg₁ g₂ hg₂ y hy) (hCG g₁ hg₁ g₂ hg₂ y hy)).trans ?_
     rw [← add_mul]
 
-/-- Multiplication preserves the ball-uniform chart-jet Lipschitz property; the derivative loss is
-the max of the two losses. -/
 theorem HasChartJetLipBall.mul
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -334,9 +279,6 @@ theorem HasChartJetLipBall.mul
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + max dF dG) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
-/-- One partial differentiation raises the derivative loss by exactly one, ball-uniform.  The
-maximal usable order drops by one (`N_max - 1`), since each order-`N` jet of the derivative consumes
-the order-`(N + 1)` jet of the input. -/
 theorem HasChartJetLipBall.partialDeriv
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -385,10 +327,6 @@ theorem HasChartJetLipBall.partialDeriv
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + (d + 1)) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
-/-- **Base case: a metric-independent field has ball-uniform chart-jet Lipschitz with zero loss.**
-If `F g` does not depend on `g` (equals a fixed `C^∞` field `f₀` on the chart-target interior), its
-difference vanishes and its `Cᴺ` bound is the fixed `f₀` bound, so the estimate holds with constant
-`1` and loss `0` uniformly over `𝒢`. -/
 theorem hasChartJetLipBall_const
     (𝒢 : Set (SmoothRiemannianMetric I M)) (α : M) {N_max : ℕ}
     {K : Set E} (hK : IsCompact K)
@@ -414,8 +352,6 @@ theorem hasChartJetLipBall_const
     exact mul_nonneg one_pos.le
       (chartGramJetDiffSeminormSum_nonneg (I := I) (M := M) (N + 0) g₁ g₂ α s y)
 
-/-- A finite sum of ball-uniform chart-jet Lipschitz fields (all of the same derivative loss `d`)
-is ball-uniform chart-jet Lipschitz with loss `d`. -/
 theorem HasChartJetLipBall.sum
     {𝒢 : Set (SmoothRiemannianMetric I M)} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -448,16 +384,6 @@ theorem HasChartJetLipBall.sum
     have := (hhead.add (G := fun g => fun z => ∑ j ∈ u, F j g z) hKsub hIH)
     simpa only [max_self, min_self] using this
 
-/-- **The realized fibre-small covariant-`L²`-`R`-ball of metrics**, anchored at `g₀`.
-
-`realizedFibreSmallBall g₀ R jmax` is the set of smooth metrics obtained as `g₀ + h_sym T` for a
-`g₀`-fibre-small smooth perturbation `T` whose covariant-`L²` jets up to order `jmax` are bounded by
-`R`:
-```
-{ tensorSectionRealizeMetric g₀ T hδ_lt hδ : (∀ j ≤ jmax, ‖∇^j T‖ ≤ R) } .
-```
-This is the metric set over which the chart-jet Lipschitz constants of the Ricci–DeTurck right-hand
-side are uniform (Moser ball-uniformity). -/
 def realizedFibreSmallBall (g₀ : SmoothRiemannianMetric I M) (R : ℝ) (jmax : ℕ) :
     Set (SmoothRiemannianMetric I M) :=
   {g | ∃ (T : SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
@@ -465,8 +391,6 @@ def realizedFibreSmallBall (g₀ : SmoothRiemannianMetric I M) (R : ℝ) (jmax :
       g = tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ ∧
         ∀ j : ℕ, j ≤ jmax → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R}
 
-/-- A realized metric `tensorSectionRealizeMetric g₀ T hδ_lt hδ` with `‖∇^j T‖ ≤ R` for `j ≤ jmax`
-lies in the realized fibre-small `R`-ball. -/
 theorem tensorSectionRealizeMetric_mem_realizedFibreSmallBall
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ}
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -476,23 +400,6 @@ theorem tensorSectionRealizeMetric_mem_realizedFibreSmallBall
       realizedFibreSmallBall (I := I) (M := M) g₀ R jmax :=
   ⟨T, δ, hδ_lt, hδ, rfl, hTball⟩
 
-/-- **(POSITED ball-uniform base tower — the chart-Gram entry.)**
-
-The chart-Gram entry `chartGramOnE g α a b` has ball-uniform chart-jet Lipschitz with zero
-derivative loss over the realized fibre-small `R`-ball: there is a single `Cᴺ`-bound and a single
-order-`N` Lipschitz constant valid for *every* realized metric (pair) in the ball.
-
-This is the **Moser ball-uniformity** of the chart-Gram jets: over the realized `R`-ball the metric
-`g₀ + h_sym T` has chart-Gram iterated derivatives `∂^m chartGramOnE g` uniformly bounded on the
-compact `K` (the covariant-`L²` jet bound `‖∇^j T‖ ≤ R` controls, via the chart-coordinate
-Sobolev embedding, the pointwise `Cᴺ` chart-Gram jets uniformly over the ball), and the chart-Gram
-difference is, summand-wise, bounded by the chart-Gram jet-difference seminorm with constant `1`.
-
-The `contDiff` field is the smoothness of `chartGramOnE` (`chartGramOnE_contDiffOn_int`); the `lip`
-field is the structural `C = 1` domination of the order-`N` jet of the `(a,b)`-difference by the full
-`chartGramJetDiffSeminormSum` (which contains it as one nonnegative summand).  Only the **`bound`
-field** — the genuine analytic Moser/Sobolev one-sided ball-uniform `Cᴺ` bound — remains `sorry`;
-consumers transitively depend on its `sorryAx`. -/
 theorem hasChartJetLipBall_chartGramOnE
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -528,24 +435,6 @@ theorem hasChartJetLipBall_chartGramOnE
       (fun a' _ => Finset.sum_nonneg fun b' _ => Finset.sum_nonneg fun _ _ => norm_nonneg _)
       (Finset.mem_univ a)
 
-/-- **(POSITED ball-uniform base tower — the inverse chart-Gram entry.)**
-
-The inverse chart-Gram entry `chartInvGramOnE g α k l` has ball-uniform chart-jet Lipschitz with zero
-derivative loss over the realized fibre-small `R`-ball.
-
-This is the **Moser ball-uniformity** of the inverse-Gram jets, the deepest analytic input.  Over the
-realized `R`-ball the `δ < 1` fibre-operator bound keeps `det(g₀ + h_sym T)` bounded uniformly away
-from `0`, so the perturbed Gram is uniformly positive-definite, and the inverse-jet formula
-`∂(g^{-1}) = −g^{-1}·∂g·g^{-1}` (Faà-di-Bruno) with the uniformly-bounded chart-Gram jets gives a
-uniform bound `‖∂^m chartInvGramOnE g‖ ≤ Bball(R, δ)` on the compact `K` for every realized metric in
-the ball; the inverse-Gram difference is then controlled by the chart-Gram jet-difference seminorm
-with a single ball-uniform constant per order.
-
-The `contDiff` field is the smoothness of `chartInvGramOnE` (`chartInvGramOnE_contDiffOn_int`).  The
-`bound` field (Moser one-sided ball-uniform `Cᴺ` bound on the inverse-Gram jets) and the `lip` field
-(the inverse-jet difference dominated by the chart-**Gram** jet-difference seminorm via the
-Faà-di-Bruno inverse identity `∂(g⁻¹) = −g⁻¹·∂g·g⁻¹`) remain `sorry` — both are genuine analytic
-Moser/Sobolev prerequisites; consumers transitively depend on their `sorryAx`. -/
 theorem hasChartJetLipBall_chartInvGramOnE
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -559,9 +448,7 @@ theorem hasChartJetLipBall_chartInvGramOnE
   · sorry
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- The `gramBracket` field has ball-uniform chart-jet Lipschitz with derivative loss `1`; one
-order of jet budget is consumed by the partial derivative, so the maximal usable order is
-`jmax - 1`. -/
+
 theorem hasChartJetLipBall_gramBracket
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 1 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -591,8 +478,7 @@ theorem hasChartJetLipBall_gramBracket
   ring
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- The chart Christoffel symbol field has ball-uniform chart-jet Lipschitz with derivative
-loss `1`; the maximal usable order is `jmax - 1`. -/
+
 theorem hasChartJetLipBall_chartChristoffel
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 1 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -619,8 +505,7 @@ theorem hasChartJetLipBall_chartChristoffel
   rw [chartChristoffel_eq_sum_invGramOnE_bracket]
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- The chart DeTurck vector-field component field has ball-uniform chart-jet Lipschitz with
-derivative loss `1` (relative to a fixed background metric `g_bg`). -/
+
 theorem hasChartJetLipBall_chartDeTurckVFComp
     (g₀ g_bg : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 1 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -681,9 +566,7 @@ theorem hasChartJetLipBall_chartDeTurckVFComp
   rw [chartDeTurckVFComp_def]
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- The chart Riemann tensor field has ball-uniform chart-jet Lipschitz with derivative loss `2`;
-the maximal usable order is `jmax - 2` (two orders of jet budget consumed by the second-order
-curvature derivatives). -/
+
 theorem hasChartJetLipBall_chartRiemannTensor
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 2 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -753,8 +636,7 @@ theorem hasChartJetLipBall_chartRiemannTensor
   ring
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- The chart Ricci tensor field has ball-uniform chart-jet Lipschitz with derivative loss `2`;
-the maximal usable order is `jmax - 2`. -/
+
 theorem hasChartJetLipBall_chartRicciTensor
     (g₀ : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 2 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -771,8 +653,7 @@ theorem hasChartJetLipBall_chartRicciTensor
   rw [chartRicciTensor_def]
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- The chart Lie–DeTurck (gauge) summand field has ball-uniform chart-jet Lipschitz with derivative
-loss `2`. -/
+
 theorem hasChartJetLipBall_chartLieDeTurckComp
     (g₀ g_bg : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 2 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -845,10 +726,7 @@ theorem hasChartJetLipBall_chartLieDeTurckComp
   rw [chartLieDeTurckComp_def]
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- **The chart Ricci–DeTurck carrier is ball-uniform chart-jet Lipschitz with derivative loss `2`.**
-Assembled from the ball-uniform Ricci (`hasChartJetLipBall_chartRicciTensor`, loss `2`) and
-Lie–DeTurck (`hasChartJetLipBall_chartLieDeTurckComp`, loss `2`) towers through the ball-uniform
-closure algebra: `chartDeTurckRicciRHS = (-2)·chartRicciTensor + chartLieDeTurckComp`. -/
+
 theorem hasChartJetLipBall_chartDeTurckRicciRHS
     (g₀ g_bg : SmoothRiemannianMetric I M) {R : ℝ} {jmax : ℕ} (hjmax : 2 ≤ jmax) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -868,20 +746,7 @@ theorem hasChartJetLipBall_chartDeTurckRicciRHS
   rw [chartDeTurckRicciRHS_def]
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
-/-- **The ball-uniform chart-jet Nemytskii bound for the realized Ricci–DeTurck carrier difference.**
 
-The ball-uniform hoist of `chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE`: there is
-a single nonnegative constant `C` — **outside** the `∀ T T'` quantifier — such that for **any** two
-`g₀`-fibre-small perturbations `T, T'` whose covariant-`L²` jets up to order `N + 2` lie in the
-radius-`R` ball, every chart Fréchet jet of order `N` of the chart Ricci–DeTurck carrier difference of
-the realized metrics is dominated by the chart Fréchet jets of order `≤ N + 2` of the perturbation
-difference `T − T'`, on the chart-target interior.
-
-Assembled from the ball-uniform `HasChartJetLipBall.seminorm_le` of
-`hasChartJetLipBall_chartDeTurckRicciRHS` (the single chart-jet Lipschitz constant valid for the whole
-realized ball, with `jmax := N + 2`) and the `g₀`-anchored chart-Gram realize-difference jet bound
-`chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE` (a `(T, T')`-uniform structural
-identity-bound).  Consumers transitively depend on the posited ball-uniform base towers' `sorryAx`. -/
 theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) {R : ℝ} (α : M)
     {K : Set E} (hK : IsCompact K)

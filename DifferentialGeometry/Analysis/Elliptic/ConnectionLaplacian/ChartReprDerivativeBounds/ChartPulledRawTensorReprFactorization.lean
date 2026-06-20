@@ -5,61 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
-/-!
-# Linear chart-pulled-representation bound for the raw tensor connection
-Laplacian by orders 0, 1, 2 of the iterated Fréchet derivatives of the
-chart-pulled representation of `T`
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, ranks
-`r, s : ℕ`, and a smooth compactly supported `(r, s)`-tensor section `T`, this
-file ships the unsquared (linear) pointwise bound
-
-```
-‖tensorRSChartE_section_repr r s α
-    (fun y => (rawTensorConnLapSmooth g r s T).toSection y) b‖ ≤
-  K * (∑ j : Fin 3,
-        ‖iteratedFDeriv ℝ j.val
-          ((tensorRSChartE_section_repr r s α (fun y => T.toSection y)) ∘
-            (extChartAt I α).symm) (extChartAt I α b)‖)
-```
-
-valid for every `b` in the intersection of the chart-`α` partition-of-unity
-tsupport and the chart-`α` Levi-Civita good set. The constant `K` depends on
-`g`, the chart at `α`, the chart-atlas locality hypotheses, and the ranks
-`r`, `s`; it is independent of `T` and `b`.
-
-## Strategy
-
-The previously established squared bound
-
-```
-‖rawTensorConnLap g r s (fun y => T.toSection y) b‖^2 ≤
-  K_sq * (V^2 + F^2 + I^2)
-```
-
-where `V, F, I` are the chart-pulled representation norms at orders `0, 1, 2`
-respectively, can be turned into the unsquared
-
-```
-‖rawTensorConnLap g r s (fun y => T.toSection y) b‖ ≤ √K_sq * (V + F + I)
-```
-
-via the bound `V^2 + F^2 + I^2 ≤ (V + F + I)^2` valid for non-negative `V, F,
-I`. The forward fibre-norm bound
-
-```
-‖tensorRSChartE_section_repr r s α (raw T) b‖ ≤ C_fwd * ‖rawTensorConnLap g r s
-  (fun y => T.toSection y) b‖
-```
-
-valid on the partition-of-unity tsupport (a compact subset of the chart-`α`
-source) then yields the desired linear bound on the chart-pulled representation.
-Finally, `V = ‖iteratedFDeriv ℝ 0 ...‖` and `F = ‖iteratedFDeriv ℝ 1 ...‖` via
-`norm_iteratedFDeriv_zero` and `norm_iteratedFDeriv_one`; on the good set
-`(extChartAt I α).symm (extChartAt I α b) = b`, so the order-zero value agrees
-with the chart-pulled representation at `b`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -95,8 +40,6 @@ private lemma sum_sq_le_sq_sum_of_nonneg (V F I2 : ℝ)
     V ^ 2 + F ^ 2 + I2 ^ 2 ≤ (V + F + I2) ^ 2 := by
   nlinarith [mul_nonneg hV hF, mul_nonneg hV hI2, mul_nonneg hF hI2]
 
-/-- The chart-pulled representation `V` at `b ∈` good set equals the order-0
-iterated Fréchet-derivative norm of `T_repr ∘ symm` at `extChartAt I α b`. -/
 private lemma V_eq_iteratedFDeriv_zero_norm
     (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) {b : M}
@@ -118,8 +61,6 @@ private lemma V_eq_iteratedFDeriv_zero_norm
       ((extChartAt I α).symm (extChartAt I α b))‖
   rw [hsymm_eq]
 
-/-- The chart-pulled `fderiv ℝ` norm of `T_repr ∘ symm` at the chart point
-equals the order-1 iterated Fréchet-derivative norm there. -/
 private lemma F_eq_iteratedFDeriv_one_norm
     (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) (b : M) :

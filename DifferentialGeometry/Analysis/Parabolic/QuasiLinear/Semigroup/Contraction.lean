@@ -1,40 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.DuhamelMap
 
-/-!
-# Nonlinear Duhamel map and the contraction estimate
-
-For a real Banach space `X`, a `BoundedC0Semigroup S`, an initial datum
-`u₀ : X`, and a globally Lipschitz lower-order nonlinearity `N : X → X`,
-the **nonlinear Duhamel map** sends a path `u : ℝ → X` to
-
-  `nlDuhamel S u₀ N u t = S t u₀ + ∫₀ᵗ S (t - τ) (N (u τ)) dτ`,
-
-i.e. the linear `duhamel` map fed with the forcing term `F = N ∘ u`.
-
-The central result is the **contraction estimate**: for two paths
-`u, v` whose pointwise distance on `[0, t]` is bounded by `C`, the
-nonlinear Duhamel images satisfy
-
-  `‖nlDuhamel S u₀ N u t - nlDuhamel S u₀ N v t‖ ≤ L * t * C`,
-
-where `L` is the Lipschitz constant of `N`. For small `t` the factor
-`L * t < 1`, which is exactly what turns the nonlinear Duhamel map into a
-contraction and yields a mild solution via the Banach fixed point
-theorem.
-
-## Main definitions
-
-* `nlDuhamel S u₀ N u t` — the nonlinear Duhamel map.
-
-## Main results
-
-* `nlDuhamel_zero` — `nlDuhamel S u₀ N u 0 = u₀`.
-* `nlDuhamel_continuousOn` — `nlDuhamel S u₀ N u` is continuous on
-  `[0, ∞)` for continuous `u` and Lipschitz `N`.
-* `nlDuhamel_dist_le` — the contraction estimate
-  `‖nlDuhamel S u₀ N u t - nlDuhamel S u₀ N v t‖ ≤ L * t * C`.
--/
-
 noncomputable section
 
 open Set Filter Topology MeasureTheory
@@ -48,28 +13,15 @@ namespace QuasiLinear
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
   [CompleteSpace X]
 
-/-- The nonlinear Duhamel map: the linear Duhamel mild solution `duhamel`
-with the forcing term given by the lower-order nonlinearity `N` evaluated
-along the path `u`. Explicitly,
-`nlDuhamel S u₀ N u t = S t u₀ + ∫₀ᵗ S (t - τ) (N (u τ)) dτ`. -/
 noncomputable def nlDuhamel (S : BoundedC0Semigroup X) (u₀ : X)
     (N : X → X) (u : ℝ → X) (t : ℝ) : X :=
   duhamel S u₀ (fun τ => N (u τ)) t
 
-/-- At `t = 0` the nonlinear Duhamel map recovers the initial datum:
-`nlDuhamel S u₀ N u 0 = u₀`. -/
 theorem nlDuhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (N : X → X)
     (u : ℝ → X) : nlDuhamel S u₀ N u 0 = u₀ := by
   unfold nlDuhamel
   exact duhamel_zero S u₀ (fun τ => N (u τ))
 
-/-- The nonlinear Duhamel map `nlDuhamel S u₀ N u` is continuous on
-`[0, ∞)` whenever the path `u` is continuous and the nonlinearity `N` is
-Lipschitz.
-
-A Lipschitz map is continuous, so the forcing term `τ ↦ N (u τ)` is the
-composition of two continuous maps; continuity of the Duhamel map then
-follows from `duhamel_continuousOn`. -/
 theorem nlDuhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {u : ℝ → X}
     (hu : Continuous u) :
@@ -77,14 +29,6 @@ theorem nlDuhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
   unfold nlDuhamel
   exact duhamel_continuousOn S u₀ (hN.continuous.comp hu)
 
-/-- Continuity on `uIcc 0 t` of the map `τ ↦ S (t - τ) (w τ)` for a
-continuous `w`. This is the building block for the interval-integrability
-of the integrands appearing in the contraction estimate.
-
-The map `τ ↦ (max 0 (t - τ), w τ)` is continuous into the domain
-`[0, ∞) × X` of joint continuity of the semigroup action, and on
-`uIcc 0 t` (with `t ≥ 0`) the clipped time `max 0 (t - τ)` equals
-`t - τ`. -/
 private lemma continuousOn_semigroup_apply (S : BoundedC0Semigroup X)
     {w : ℝ → X} (hw : Continuous w) {t : ℝ} (ht : 0 ≤ t) :
     ContinuousOn (fun τ : ℝ => S (t - τ) (w τ)) (Set.uIcc 0 t) := by
@@ -106,29 +50,12 @@ private lemma continuousOn_semigroup_apply (S : BoundedC0Semigroup X)
   change S (t - τ) (w τ) = S (max 0 (t - τ)) (w τ)
   rw [max_eq_right h_nn]
 
-/-- Interval-integrability on `[0, t]` of the map `τ ↦ S (t - τ) (w τ)`
-for a continuous `w` and `t ≥ 0`, obtained from its continuity on
-`uIcc 0 t`. -/
 private lemma intervalIntegrable_semigroup_apply (S : BoundedC0Semigroup X)
     {w : ℝ → X} (hw : Continuous w) {t : ℝ} (ht : 0 ≤ t) :
     IntervalIntegrable (fun τ => S (t - τ) (w τ))
       MeasureTheory.volume 0 t :=
   (continuousOn_semigroup_apply S hw ht).intervalIntegrable
 
-/-- The contraction estimate for the nonlinear Duhamel map.
-
-Let `N` be `L`-Lipschitz and let `u, v` be continuous paths whose
-pointwise distance on `[0, t]` is bounded by `C`. Then the difference of
-the nonlinear Duhamel images at time `t ≥ 0` is bounded by `L * t * C`:
-
-  `‖nlDuhamel S u₀ N u t - nlDuhamel S u₀ N v t‖ ≤ L * t * C`.
-
-The homogeneous terms `S t u₀` cancel; the remaining difference of
-interval integrals is combined into a single integral whose integrand,
-`S (t - τ) (N (u τ) - N (v τ))`, is bounded in norm by
-`‖N (u τ) - N (v τ)‖ ≤ L * ‖u τ - v τ‖ ≤ L * C` using the contraction
-bound of `S` and the Lipschitz bound of `N`. Integrating the constant
-`L * C` over `[0, t]` gives `L * C * t = L * t * C`. -/
 theorem nlDuhamel_dist_le (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {u v : ℝ → X}
     (hu : Continuous u) (hv : Continuous v) {t : ℝ} (ht : 0 ≤ t)

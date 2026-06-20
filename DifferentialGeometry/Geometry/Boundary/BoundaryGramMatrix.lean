@@ -11,46 +11,6 @@ import Mathlib.LinearAlgebra.Matrix.Adjugate
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Data.Matrix.Mul
 
-/-!
-# Boundary chart-Gram-matrix infrastructure
-
-Given a smooth manifold `M` with a smooth boundary stratum
-(`[hI : HasSmoothBoundary E H I]`) and a smooth Riemannian metric `g` on the
-ambient tangent bundle, this file builds the chart-Gram-matrix infrastructure
-for the *induced* Riemannian metric on `BoundaryManifold I M`. The construction
-mirrors `chartGramMatrix` from the ambient (boundaryless) case in
-`Geometry/Metric/ChartGram.lean`, but with the boundary tangent bundle and
-the boundary inner product `inducedMetricInner g` replacing the ambient ones.
-
-## Overview
-
-For a base boundary point `α₀ : BoundaryManifold I M`, we transport a fixed
-algebraic basis of `hI.boundaryE` through the boundary tangent-bundle
-trivialization centred at `α₀` to obtain a chart-local frame on the boundary
-tangent bundle. The Gram matrix of this frame under the induced metric is
-symmetric positive-definite on the chart base set.
-
-## Main definitions
-
-* `boundaryChartBasisVecFiber α₀ i α` — the `i`-th boundary chart-basis vector
-  in `TangentSpace hI.boundaryI α`, obtained by transporting the model basis
-  through the boundary trivialization centred at `α₀`.
-* `boundaryChartBasisVec α₀ i` — the same as a section of the boundary tangent
-  bundle, smooth on the base set of the boundary trivialization at `α₀`.
-* `boundaryGramMatrix g α₀ α` — the Gram matrix at `α` of the boundary
-  chart-basis frame under `(inducedMetric g).inner α`.
-* `boundaryInvGramMatrix g α₀ α` — the matrix inverse of the Gram matrix on
-  the boundary chart base set.
-
-## Main results
-
-* `boundaryGramMatrix_entry_contMDiffOn` — each entry is `C^∞` on the boundary
-  chart base set.
-* `boundaryGramMatrix_posDef` — the Gram matrix is positive-definite there.
-* `boundaryInvGramMatrix_entry_contMDiffOn` — each entry of the matrix inverse
-  is `C^∞` on the boundary chart base set.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -69,18 +29,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The `i`-th pointwise tangent vector of the boundary chart-local frame
-attached to `α₀ : BoundaryManifold I M`. For `α` in the boundary trivialization
-base set, this is the image of the `i`-th model-basis vector of `hI.boundaryE`
-under `(triv at α₀).symm α`; off that set it is a default value. -/
 def boundaryChartBasisVecFiber (α₀ : BoundaryManifold I M)
     (i : Fin (Module.finrank ℝ hI.boundaryE)) (α : BoundaryManifold I M) :
     TangentSpace hI.boundaryI α :=
   (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).symm α
     ((Module.finBasis ℝ hI.boundaryE) i)
 
-/-- The `i`-th pointwise tangent-bundle section of the boundary chart-local
-frame attached to `α₀`. -/
 def boundaryChartBasisVec (α₀ : BoundaryManifold I M)
     (i : Fin (Module.finrank ℝ hI.boundaryE)) :
     BoundaryManifold I M →
@@ -98,9 +52,6 @@ def boundaryChartBasisVec (α₀ : BoundaryManifold I M)
     (boundaryChartBasisVec (M := M) α₀ i α).2 =
       boundaryChartBasisVecFiber (M := M) α₀ i α := rfl
 
-/-- On the base set of the boundary trivialization at `α₀`, applying the
-trivialization to the boundary chart-basis vector recovers the constant
-model-basis vector. -/
 lemma trivializationAt_boundaryChartBasisVec_snd
     (α₀ : BoundaryManifold I M) (i : Fin (Module.finrank ℝ hI.boundaryE))
     {α : BoundaryManifold I M}
@@ -112,8 +63,6 @@ lemma trivializationAt_boundaryChartBasisVec_snd
     ((Module.finBasis ℝ hI.boundaryE) i)
   simpa [boundaryChartBasisVecFiber] using congrArg Prod.snd h
 
-/-- The boundary chart-basis tangent-bundle section is smooth on the base set
-of the trivialization at `α₀`. -/
 lemma boundaryChartBasisVec_contMDiffOn
     (α₀ : BoundaryManifold I M) (i : Fin (Module.finrank ℝ hI.boundaryE)) :
     ContMDiffOn hI.boundaryI (hI.boundaryI.prod 𝓘(ℝ, hI.boundaryE)) ∞
@@ -132,10 +81,6 @@ lemma boundaryChartBasisVec_contMDiffOn
   intro α hα
   exact (trivializationAt_boundaryChartBasisVec_snd (M := M) α₀ i hα)
 
-/-- The boundary chart-basis family at a point `α ∈ triv.baseSet` is a basis of
-`TangentSpace hI.boundaryI α`, obtained by transporting the fixed model-space
-basis through the continuous linear equivalence given by the boundary
-trivialization. -/
 def boundaryChartBasisFamily (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
     (hα : α ∈ (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet) :
     Module.Basis (Fin (Module.finrank ℝ hI.boundaryE)) ℝ (TangentSpace hI.boundaryI α) :=
@@ -154,8 +99,6 @@ lemma boundaryChartBasisFamily_apply
   rw [Module.Basis.map_apply]
   rfl
 
-/-- The boundary chart-basis family is linearly independent at each base-set
-point. -/
 lemma boundaryChartBasisFamily_linearIndependent
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
     (hα : α ∈ (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet) :
@@ -172,8 +115,6 @@ lemma boundaryChartBasisFamily_linearIndependent
   rw [← hcongr]
   exact h
 
-/-- The Gram matrix of the boundary chart-basis frame at `α` under
-`(inducedMetric g).inner α`. -/
 def boundaryGramMatrix (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M) :
     Matrix (Fin (Module.finrank ℝ hI.boundaryE))
@@ -192,7 +133,6 @@ def boundaryGramMatrix (g : SmoothRiemannianMetric I M)
         (boundaryChartBasisVecFiber (M := M) α₀ i α)
         (boundaryChartBasisVecFiber (M := M) α₀ j α) := rfl
 
-/-- The boundary Gram matrix is Hermitian (symmetric for real entries). -/
 lemma boundaryGramMatrix_isHermitian
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M) :
@@ -206,9 +146,6 @@ lemma boundaryGramMatrix_isHermitian
     (boundaryChartBasisVecFiber (M := M) α₀ j α)
     (boundaryChartBasisVecFiber (M := M) α₀ i α)
 
-/-- The quadratic form of the boundary Gram matrix equals the induced inner
-product of the corresponding linear combinations. Tangent-space version of the
-identity used in the standard `Matrix.star_dotProduct_gram_mulVec`. -/
 lemma boundaryGramMatrix_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M)
@@ -266,7 +203,6 @@ lemma boundaryGramMatrix_dotProduct_mulVec
   intro j _
   ring
 
-/-- The boundary Gram matrix is positive-definite on the base set. -/
 lemma boundaryGramMatrix_posDef
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -287,7 +223,6 @@ lemma boundaryGramMatrix_posDef
     exact hc this
   exact inducedMetricInner_pos (M := M) g α w hwnz
 
-/-- The determinant of the boundary Gram matrix is positive on the base set. -/
 lemma boundaryGramMatrix_det_pos
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -295,10 +230,6 @@ lemma boundaryGramMatrix_det_pos
     0 < (boundaryGramMatrix (M := M) g α₀ α).det :=
   (boundaryGramMatrix_posDef (M := M) g α₀ hα).det_pos
 
-/-- Each entry of the boundary Gram matrix is smooth on the boundary
-trivialization base set. Proof: the induced inner product evaluated at two
-smooth boundary sections is smooth, via `ContMDiffOn.clm_bundle_apply₂` applied
-to `inducedMetricInner_contMDiff` and two copies of `boundaryChartBasisVec`. -/
 theorem boundaryGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)
@@ -331,10 +262,6 @@ theorem boundaryGramMatrix_entry_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpα
   exact hpα.2
 
-/-- The determinant of the boundary Gram matrix is smooth on the boundary
-trivialization base set. We expand `Matrix.det` into a finite sum over
-permutations of finite products of entries, then use the smooth-manifold
-finite-sum / finite-product lemmas for scalar-valued functions. -/
 lemma boundaryGramMatrix_det_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) :
@@ -358,17 +285,12 @@ lemma boundaryGramMatrix_det_contMDiffOn
   refine contMDiffOn_finset_prod (fun i _ => ?_)
   exact boundaryGramMatrix_entry_contMDiffOn (M := M) g α₀ (σ i) i
 
-/-- The inverse Gram matrix at `(α₀, α)` for the boundary case. On the boundary
-chart base set this is the matrix inverse of the (positive-definite) boundary
-Gram matrix; off the base set it is a default value. -/
 def boundaryInvGramMatrix (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M) :
     Matrix (Fin (Module.finrank ℝ hI.boundaryE))
       (Fin (Module.finrank ℝ hI.boundaryE)) ℝ :=
   (boundaryGramMatrix (M := M) g α₀ α)⁻¹
 
-/-- On the boundary chart base set, the inverse boundary Gram matrix is a
-left inverse. -/
 lemma boundaryInvGramMatrix_mul_boundaryGramMatrix
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -381,7 +303,6 @@ lemma boundaryInvGramMatrix_mul_boundaryGramMatrix
   unfold boundaryInvGramMatrix
   exact Matrix.nonsing_inv_mul _ hdet_unit
 
-/-- Symmetric form. -/
 lemma boundaryGramMatrix_mul_boundaryInvGramMatrix
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -394,8 +315,6 @@ lemma boundaryGramMatrix_mul_boundaryInvGramMatrix
   unfold boundaryInvGramMatrix
   exact Matrix.mul_nonsing_inv _ hdet_unit
 
-/-- Each adjugate entry of the boundary Gram matrix is smooth on the boundary
-trivialization base set. -/
 lemma boundaryGramMatrix_adjugate_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)
@@ -449,8 +368,6 @@ lemma boundaryGramMatrix_adjugate_entry_contMDiffOn
     rw [heq]
     exact boundaryGramMatrix_entry_contMDiffOn (M := M) g α₀ (σ k) k
 
-/-- Each entry of the inverse boundary Gram matrix is smooth on the boundary
-chart base set. -/
 theorem boundaryInvGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)

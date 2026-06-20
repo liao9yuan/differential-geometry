@@ -3,33 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Geometry.Manifold.BumpFunction
 
-/-!
-# Smooth orthonormal local frame from the chart frame
-
-This file builds a smooth Gram-Schmidt orthonormalisation of the chart-basis
-frame `chartBasisVec g α` from `Geometry/Metric/ChartGram.lean` against the
-Riemannian inner product `g.inner`. The output is a smooth tangent-bundle
-section family `smoothOrthoFrame g α : Fin n → Π b : M, TangentSpace I b`
-whose fibres at `α` are `g`-orthonormal.
-
-## Strategy
-
-The chart-basis vectors `chartBasisVec α i` are `C^∞` only on the
-trivialization base set, which equals the chart source `(chartAt H α).source`.
-A hand-rolled Gram-Schmidt orthonormalisation against the Riemannian inner
-product `g.inner b`, indexed by `Fin (Module.finrank ℝ E)`, produces a fiber
-function `chartFrameNormFiber g α b i ∈ T_b M`. To upgrade to a globally
-smooth tangent section, we multiply by a smooth bump function
-`chartBumpAt α : M → ℝ` whose support is contained in the chart source and
-whose value is `1` on a smaller neighbourhood of `α`. The resulting global
-section `smoothOrthoFrame g α i` is identically zero off the chart source and
-equals the un-bumped Gram-Schmidt frame on the bump-equals-`1` neighbourhood.
-
-The downstream consumer is the heart-of-Bochner trace identity, which feeds
-the orthonormal frame into the conditional `heart_of_bochner_of_inner_form`.
-The re-packaging is exposed at the end of this file.
--/
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter
@@ -49,8 +22,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The normalised Gram-Schmidt vector for the chart frame, in a fixed fiber
-`b`.  Defined by well-founded recursion on `i.val`. -/
 private noncomputable def chartFrameNormFiber
     (g : SmoothRiemannianMetric I M) (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) : TangentSpace I b :=
@@ -66,20 +37,11 @@ private noncomputable def chartFrameNormFiber
 termination_by i.val
 decreasing_by exact j.isLt
 
-/-- The normalised Gram-Schmidt vector for the chart frame as a section in
-`b`: `chartFrameNorm g α i b ∈ T_b M`. -/
 noncomputable def chartFrameNorm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (b : M) : TangentSpace I b :=
   chartFrameNormFiber (I := I) g α b i
 
-/-- The unnormalised Gram-Schmidt vector at index `i`, in a fixed fiber `b`:
-$$
-  \mathrm{raw}_i(b) := v_i(b) - \sum_{j < i}
-      \langle v_i(b), e_j(b)\rangle_g \, e_j(b),
-$$
-where `v_i(b) = chartBasisVecFiber α i b` and
-`e_j(b) = chartFrameNormFiber g α b j`. -/
 private noncomputable def chartFrameRawFiber
     (g : SmoothRiemannianMetric I M) (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) : TangentSpace I b :=
@@ -91,8 +53,6 @@ private noncomputable def chartFrameRawFiber
         chartFrameNormFiber (I := I) g α b
           ⟨j.val, lt_trans j.isLt i.isLt⟩
 
-/-- Recursive expansion of `chartFrameNormFiber`: at index `i`, the normalised
-vector is `(Real.sqrt (g.inner b raw raw))⁻¹ • raw`. -/
 private lemma chartFrameNormFiber_eq
     (g : SmoothRiemannianMetric I M) (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -104,8 +64,6 @@ private lemma chartFrameNormFiber_eq
   unfold chartFrameNormFiber chartFrameRawFiber
   rfl
 
-/-- At the zeroth index, the unnormalised Gram-Schmidt vector reduces to the
-chart-basis vector itself. -/
 private lemma chartFrameRawFiber_at_zero
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     chartFrameRawFiber (I := I) g α b ⟨0, NeZero.pos _⟩ =
@@ -113,8 +71,6 @@ private lemma chartFrameRawFiber_at_zero
   unfold chartFrameRawFiber
   simp
 
-/-- At the zeroth index, the normalised Gram-Schmidt vector is the
-chart-basis vector divided by its `g`-norm. -/
 private lemma chartFrameNormFiber_at_zero
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     chartFrameNormFiber (I := I) g α b ⟨0, NeZero.pos _⟩ =
@@ -125,8 +81,6 @@ private lemma chartFrameNormFiber_at_zero
         chartBasisVecFiber (I := I) α ⟨0, NeZero.pos _⟩ b := by
   rw [chartFrameNormFiber_eq, chartFrameRawFiber_at_zero]
 
-/-- At a base-set point and at the zeroth index, the normalised Gram-Schmidt
-vector is `g`-unit-norm. -/
 private lemma chartFrameNormFiber_at_zero_norm
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -164,22 +118,9 @@ private lemma chartFrameNormFiber_at_zero_norm
   rw [h1, hs_sq]
   exact inv_mul_cancel₀ (ne_of_gt hpos)
 
-/-- A canonical smooth bump function centred at `α`. It is `1` on a
-neighbourhood of `α` and supported in `(chartAt H α).source` (the
-trivialization base set at `α`). The existence is guaranteed by
-`SmoothBumpFunction.instNonempty`. -/
 private noncomputable def chartBumpAt (α : M) : SmoothBumpFunction I α :=
   Classical.arbitrary (SmoothBumpFunction I α)
 
-/-- **Smooth orthonormal frame**. The `i`-th tangent-bundle section of a
-smooth `g`-orthonormal local frame attached to the base point `α`. On the
-neighbourhood of `α` where the chart bump function `chartBumpAt α` equals `1`,
-this section equals the `g`-Gram-Schmidt orthonormalisation of the chart
-basis frame. Off the support of the bump (which is contained in the chart
-source), the section is zero.
-
-The fiber-by-fiber definition uses the chart bump function multiplied by the
-chart-frame normalised Gram-Schmidt step. -/
 noncomputable def smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -187,27 +128,20 @@ noncomputable def smoothOrthoFrame
   fun b => (chartBumpAt (I := I) (M := M) α : M → ℝ) b •
     chartFrameNorm (I := I) g α i b
 
-/-- The open subset of `M` on which `smoothOrthoFrame g α` is guaranteed to
-be a `g`-orthonormal smooth basis: the (open) set where the chart bump
-function equals `1`. -/
 noncomputable def smoothOrthoFrameNbhd (α : M) : Set M :=
   {b : M | (chartBumpAt (I := I) (M := M) α : M → ℝ) b = 1}
 
-/-- The neighbourhood `smoothOrthoFrameNbhd α` is in the filter `𝓝 α`. -/
 lemma smoothOrthoFrameNbhd_mem_nhds (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ∈ 𝓝 α := by
   classical
   exact (chartBumpAt (I := I) (M := M) α).eventuallyEq_one
 
-/-- The centre `α` belongs to `smoothOrthoFrameNbhd α`. -/
 lemma mem_smoothOrthoFrameNbhd_self (α : M) :
     α ∈ smoothOrthoFrameNbhd (I := I) (M := M) α := by
   classical
   change (chartBumpAt (I := I) (M := M) α : M → ℝ) α = 1
   exact (chartBumpAt (I := I) (M := M) α).eq_one
 
-/-- On the neighbourhood `smoothOrthoFrameNbhd α`, the smooth orthonormal
-frame agrees with the un-bumped Gram-Schmidt step. -/
 lemma smoothOrthoFrame_eq_on_nbhd
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {b : M}
@@ -219,8 +153,6 @@ lemma smoothOrthoFrame_eq_on_nbhd
   have hb1 : (chartBumpAt (I := I) (M := M) α : M → ℝ) b = 1 := hb
   rw [hb1, one_smul]
 
-/-- The neighbourhood `smoothOrthoFrameNbhd α` is contained in the chart
-source `(chartAt H α).source` (hence in the trivialization base set at `α`). -/
 lemma smoothOrthoFrameNbhd_subset_chartAt_source (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ⊆ (chartAt H α).source := by
   classical
@@ -231,8 +163,6 @@ lemma smoothOrthoFrameNbhd_subset_chartAt_source (α : M) :
     rw [hb1]; exact one_ne_zero
   exact (chartBumpAt (I := I) (M := M) α).support_subset_source hsupp
 
-/-- The neighbourhood `smoothOrthoFrameNbhd α` is contained in the
-trivialization base set `(trivializationAt E (TangentSpace I) α).baseSet`. -/
 lemma smoothOrthoFrameNbhd_subset_baseSet (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -240,14 +170,6 @@ lemma smoothOrthoFrameNbhd_subset_baseSet (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact smoothOrthoFrameNbhd_subset_chartAt_source (I := I) (M := M) α hb
 
-/-- **Smooth orthonormal frame: orthonormality at `b`** (hypothesis-bearing).
-Given the orthonormality of the un-bumped Gram-Schmidt frame at `b ∈
-smoothOrthoFrameNbhd α`, the smooth orthonormal frame is orthonormal at `b`.
-
-The hypothesis `hOrth` is the orthonormality of `chartFrameNorm g α i b` and
-`chartFrameNorm g α j b` at the point `b`, which is automatic by the
-Gram-Schmidt construction whenever the input chart frame is linearly
-independent at `b` (i.e., `b ∈ baseSet`). -/
 theorem smoothOrthoFrame_orthonormal_of_chartFrameNorm
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ smoothOrthoFrameNbhd (I := I) (M := M) α)
@@ -262,8 +184,6 @@ theorem smoothOrthoFrame_orthonormal_of_chartFrameNorm
       smoothOrthoFrame_eq_on_nbhd (I := I) g α j hb]
   exact hOrth
 
-/-- The base case of the orthonormality of `chartFrameNorm`: at index `0` and
-at any base-set point `b`, the zeroth Gram-Schmidt vector is `g`-unit-norm. -/
 theorem chartFrameNorm_at_zero_norm_one
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -273,8 +193,6 @@ theorem chartFrameNorm_at_zero_norm_one
   unfold chartFrameNorm
   exact chartFrameNormFiber_at_zero_norm (I := I) g α hb
 
-/-- If `chartAt H α₁ = chartAt H α₂`, the `chartBasisVecFiber` values agree
-pointwise. -/
 theorem chartBasisVecFiber_eq_of_chartAt_eq
     {α₁ α₂ : M} (h : chartAt H α₁ = chartAt H α₂)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -291,9 +209,6 @@ theorem chartBasisVecFiber_eq_of_chartAt_eq
     exact h
   rw [h_triv]
 
-/-- Strong induction package: under `chartAt H α₁ = chartAt H α₂`, the raw and
-normalised Gram-Schmidt vectors at any base point `b` and any index `i.val ≤ k`
-agree between `α = α₁` and `α = α₂`. -/
 private theorem chartFrame_eq_of_chartAt_eq_strong
     (g : SmoothRiemannianMetric I M) {α₁ α₂ : M}
     (h : chartAt H α₁ = chartAt H α₂) (b : M) :
@@ -339,8 +254,6 @@ private theorem chartFrame_eq_of_chartAt_eq_strong
       refine ⟨h_raw, ?_⟩
       rw [chartFrameNormFiber_eq, chartFrameNormFiber_eq, h_raw]
 
-/-- If `chartAt H α₁ = chartAt H α₂`, then `chartFrameNorm g α₁ i b =
-chartFrameNorm g α₂ i b`. -/
 theorem chartFrameNorm_eq_of_chartAt_eq
     (g : SmoothRiemannianMetric I M) {α₁ α₂ : M}
     (h : chartAt H α₁ = chartAt H α₂)
@@ -350,8 +263,6 @@ theorem chartFrameNorm_eq_of_chartAt_eq
   unfold chartFrameNorm
   exact (chartFrame_eq_of_chartAt_eq_strong (I := I) g h b i.val i (le_refl _)).2
 
-/-- A bilinear-distribution lemma: the inner product of a vector against a
-finite sum equals the sum of the inner products. -/
 private lemma g_inner_sum_right
     (g : SmoothRiemannianMetric I M) (b : M)
     (v : TangentSpace I b)
@@ -370,7 +281,6 @@ private lemma g_inner_sum_right
       rw [map_smul]; rfl]
     rw [ih]
 
-/-- A bilinear-distribution lemma in the left slot. -/
 private lemma g_inner_sum_left
     (g : SmoothRiemannianMetric I M) (b : M)
     {ι : Type*} (s : Finset ι) (v : ι → TangentSpace I b)
@@ -390,15 +300,7 @@ private lemma g_inner_sum_left
     rw [ih]
 
 set_option maxHeartbeats 4000000 in
-/-- The strong-induction package for the orthonormality of `chartFrameNormFiber`.
-The conclusion bundles three facts at every `i ≤ k`:
 
-1. `chartFrameRawFiber g α b i ≠ 0`;
-2. for all `j < i`, `g.inner b (chartFrameNormFiber g α b j)
-                              (chartFrameNormFiber g α b i) = 0`;
-3. `g.inner b (chartFrameNormFiber g α b i) (chartFrameNormFiber g α b i) = 1`.
-
-We package them together to thread the strong-induction hypothesis cleanly. -/
 private theorem chartFrameNormFiber_orth_strong_aux
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -711,9 +613,6 @@ private theorem chartFrameNormFiber_orth_strong_aux
         rw [h1, hs_sq]
         exact inv_mul_cancel₀ (ne_of_gt hgpos)
 
-/-- **Inductive orthonormality** of `chartFrameNormFiber` on the trivialization
-base set. For `b ∈ baseSet` and indices `i, j`, the inner product
-`g.inner b (e_i b) (e_j b)` equals `1` if `i = j`, and `0` otherwise. -/
 theorem chartFrameNormFiber_orthonormal
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -741,7 +640,6 @@ theorem chartFrameNormFiber_orthonormal
     rw [g.symm]
     exact horth_ji
 
-/-- **Orthonormality** of `chartFrameNorm` on the trivialization base set. -/
 theorem chartFrameNorm_orthonormal
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -753,8 +651,6 @@ theorem chartFrameNorm_orthonormal
   unfold chartFrameNorm
   exact chartFrameNormFiber_orthonormal (I := I) g α hb i j
 
-/-- **Orthonormality of the smooth orthonormal frame** on
-`smoothOrthoFrameNbhd α`. -/
 theorem smoothOrthoFrame_orthonormal
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ smoothOrthoFrameNbhd (I := I) (M := M) α)
@@ -768,20 +664,6 @@ theorem smoothOrthoFrame_orthonormal
   exact smoothOrthoFrame_orthonormal_of_chartFrameNorm (I := I) g α hb i j
     (chartFrameNorm_orthonormal (I := I) g α hb_base i j)
 
-/-- **Heart-of-Bochner inner-product form, instantiated at `smoothOrthoFrame`**.
-This is the conditional inner-product identity at the point `x` against any
-smooth test field, with the orthonormal frame fixed to `smoothOrthoFrame g x`.
-
-The hypothesis `hSmooth` is the smoothness of `smoothOrthoFrame g x` as a
-tangent-bundle section. The hypothesis `hInner` expresses the inner-product
-reduction of the heart-of-Bochner identity, i.e. that the inner product
-against any test vector `w ∈ T_x M` satisfies the Lichnerowicz combination
-$$
-  g_x\bigl((\Delta_\nabla^B \nabla f)(x), w\bigr) =
-    g_x\bigl(\nabla(\Delta_g f)(x), w\bigr) +
-      g_x\bigl(\mathrm{Ric}^\sharp(\nabla f x), w\bigr).
-$$
--/
 theorem heart_of_bochner_smoothOrthoFrame_of_inner_form [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -801,8 +683,6 @@ theorem heart_of_bochner_smoothOrthoFrame_of_inner_form [I.Boundaryless]
   heart_of_bochner_of_inner_form (I := I) g hf
     (smoothOrthoFrame (I := I) g x) hSmooth x hInner
 
-/-- **Orthonormality of the smooth orthonormal frame at the centre `x`.**
-The frame `smoothOrthoFrame g x` is `g_x`-orthonormal. -/
 theorem smoothOrthoFrame_orthonormal_at_center
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -813,8 +693,6 @@ theorem smoothOrthoFrame_orthonormal_at_center
   smoothOrthoFrame_orthonormal (I := I) g x
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x) i j
 
-/-- Smoothness of the inner product of two `C^∞` tangent-bundle sections, on a
-chosen open set `s ⊆ M`. -/
 private lemma g_inner_contMDiffOn_of_sections
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b} {s : Set M}
@@ -839,10 +717,6 @@ private lemma g_inner_contMDiffOn_of_sections
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
-/-- **Step 1 of B2:** the chart-basis section `chartBasisVec g α i` (as a
-section of the tangent bundle, expressed via the `T%` elaborator) is `C^∞` on
-the trivialization base set. Restated form of
-`chartBasisVec_contMDiffOn`. -/
 private lemma chartBasisVec_contMDiffOn_section
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -853,12 +727,7 @@ private lemma chartBasisVec_contMDiffOn_section
   exact h
 
 set_option maxHeartbeats 4000000 in
-/-- **Step 2a of B2 (strong-induction package):** smoothness of
-`chartFrameRawFiber` and `chartFrameNormFiber` on the trivialization base set.
 
-We prove the joint statement by `Nat.strong_induction_on` on the bound `k :
-ℕ`: for every `i : Fin (Module.finrank ℝ E)` with `i.val ≤ k`, both the raw
-and normalised vectors define `C^∞` sections on the base set. -/
 private theorem chartFrameNormFiber_contMDiffOn_strong
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ k : ℕ, ∀ i : Fin (Module.finrank ℝ E), i.val ≤ k →
@@ -1166,8 +1035,6 @@ private theorem chartFrameNormFiber_contMDiffOn_strong
         exact h_smul
       exact ⟨h_raw_section, h_norm_section⟩
 
-/-- **Step 2 of B2:** smoothness of `chartFrameNorm g α i b` on the
-trivialization base set, as a tangent-bundle section in `b`. -/
 lemma chartFrameNorm_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -1177,9 +1044,6 @@ lemma chartFrameNorm_contMDiffOn
   unfold chartFrameNorm
   exact (chartFrameNormFiber_contMDiffOn_strong (I := I) g α i.val i (le_refl _)).2
 
-/-- **Step 3 of B2 — global smoothness of the smooth orthonormal frame.**
-Each component `smoothOrthoFrame g α i` is `C^∞` as a tangent-bundle section
-on `M`. -/
 theorem smoothOrthoFrame_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -1211,14 +1075,6 @@ theorem smoothOrthoFrame_smooth
   rw [h_eq]
   exact h
 
-/-- **Heart-of-Bochner inner-product form on the smooth orthonormal frame, with
-smoothness discharged.** Combines `heart_of_bochner_smoothOrthoFrame_of_inner_form`
-with the smoothness witness `smoothOrthoFrame_smooth`.
-
-The remaining hypothesis `hInner` is the inner-product reduction at `x` against
-any test vector, expressing the heart-of-Bochner identity in inner-product form
-(which is, for an orthonormal frame, equivalent to the textbook
-metric-Hessian-symmetry / curvature-trace combinatorial reduction). -/
 theorem heart_of_bochner_smoothOrthoFrame [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)

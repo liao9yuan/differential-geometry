@@ -9,29 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Basis.Defs
 import Mathlib.LinearAlgebra.Dimension.Free
 
-/-!
-# Smoothness of chart-Jacobian-related CLM-valued functions
-
-For a smooth manifold `M` with model `(I : ModelWithCorners ℝ E H)` and a
-base point `α : M`, the tangent-bundle trivialization at `α` provides
-fiberwise continuous linear maps
-`(triv α).symmL ℝ b : E →L[ℝ] TangentSpace I b` and
-`(triv α).continuousLinearMapAt ℝ b : TangentSpace I b →L[ℝ] E`.
-
-This file establishes smoothness of certain CLM-valued composites,
-expressed in `inTangentCoordinates` form. The factor of
-`(triv b₀).continuousLinearMapAt ℝ b` (resp. `(triv b₀).symmL ℝ b`) that
-`inTangentCoordinates` inserts is identity at `b = b₀` and smooth elsewhere.
-
-The proofs identify the chart-Jacobian inverse with the `mfderivWithin` of the
-inverse extended chart and apply Mathlib's
-`ContMDiffWithinAt.mfderivWithin_const` machinery.
-
-These CLM-valued smoothness results are stepping stones for chart-density and
-measurability arguments downstream; we use them via composition and bundle
-infrastructure rather than directly extracting matrix entries.
--/
-
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap
@@ -45,15 +22,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## Smoothness of the inverse-trivialization CLM, in tangent coordinates -/
-
-/-- Smoothness, near `b₀ ∈ chart α source`, of the CLM-valued composition
-`(triv b₀).continuousLinearMapAt ℝ b ∘L (triv α).symmL ℝ b`, viewed as an
-`E →L[ℝ] E`-valued function of `b`.
-
-This is the form delivered by `ContMDiffWithinAt.mfderivWithin_const` after
-applying it to `f := (extChartAt I α).symm` and unwinding `inTangentCoordinates`
-through the model-space source side. -/
 theorem chartJinv_pre_clm_contMDiffAt
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
@@ -184,11 +152,6 @@ theorem chartJinv_pre_clm_contMDiffAt
   rw [hsrc_id, hmfderiv_eq, htarget_eq, ContinuousLinearMap.comp_id]
   rfl
 
-/-! ## Smoothness of the forward-trivialization CLM, in tangent coordinates -/
-
-/-- Smoothness, near `b₀ ∈ chart α source`, of the CLM-valued composition
-`(triv α).continuousLinearMapAt ℝ b ∘L (triv b₀).symmL ℝ b`, viewed as an
-`E →L[ℝ] E`-valued function of `b`. -/
 theorem chartJ_pre_clm_contMDiffAt
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞

@@ -1,69 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 
-/-!
-# Lipschitz dependence of the DeTurck Lie (gauge) summand on the metric 2-jet
-
-For a fixed chart base point `α`, a fixed background metric `g_bg`, and two smooth
-Riemannian metrics `g₁, g₂`, the chart-frame components of the DeTurck Lie (gauge)
-summand
-```
-(𝓛_{W(g)} g)_{ij}(y) = ∑_k W^k(g)(y) · ∂_k G_{ij}(g)(y)
-                       + ∑_k G_{kj}(g)(y) · ∂_i W^k(g)(y)
-                       + ∑_k G_{ik}(g)(y) · ∂_j W^k(g)(y),
-```
-with the DeTurck vector-field components `W^k(g)(y) = chartDeTurckVFComp g g_bg α k y`
-(carrying `∂g`), satisfy a Lipschitz estimate in the chart `2`-jet of the metric
-difference `g₁ − g₂`:
-```
-|(𝓛_{W(g₁)} g₁)_{ij}(y) − (𝓛_{W(g₂)} g₂)_{ij}(y)| ≤ C · (chart 2-jet seminorm of (g₁−g₂) at y)
-```
-uniformly over a compact subset `K` of the chart-target interior and over the
-"R-ball" of metrics (a uniform entry bound on the inverse-Gram matrices, exactly
-the hypothesis supplied to the inverse-Gram / Christoffel perturbation leaves).
-
-## Strategy
-
-The Lie summand is a finite sum of products in the chart-coordinate building blocks
-
-* `W^k(g) = chartDeTurckVFComp g g_bg α k` (a `1`-jet object: it carries `∂g`),
-* `∂_m W^k(g)` (a `2`-jet object: it carries `∂²g`),
-* `G_{ij}(g) = chartGramOnE g α i j` (a `0`-jet object),
-* `∂_m G_{ij}(g)` (a `1`-jet object).
-
-Each ingredient is `C^∞` on the chart-target interior, hence uniformly bounded on
-a compact subset `K`, and each ingredient's `g₁ − g₂` difference is controlled by
-the relevant jet-difference seminorm:
-
-* `W^k` difference by the `1`-jet seminorm `chartMetricJet1DiffSup`, via the
-  committed Christoffel/inverse-Gram perturbation atoms
-  (`exists_chartChristoffel_lipschitz_on_compact`,
-  `exists_chartInvGramMatrix_lipschitz_on_compact`);
-* `∂_m W^k` difference by the `2`-jet seminorm `chartMetricJet2DiffSup`, via the
-  committed Christoffel-derivative perturbation atom
-  (`exists_chartChristoffelDeriv_lipschitz_on_compact`) plus the inverse-Gram
-  partial-derivative perturbation lemma `partialDeriv_chartInvGramOnE_sub_abs_le`;
-* `G_{ij}` difference by the `0`-jet (`chartGramDiffSup`), and `∂_m G_{ij}`
-  difference by the first-partial aggregate (`chartGramPartialDiffSup`), both
-  dominated by the `2`-jet seminorm.
-
-The difference of each product is majorised by the difference-of-products identity
-`A₁B₁ − A₂B₂ = (A₁ − A₂)B₁ + A₂(B₁ − B₂)`, and every piece reduces to a uniform
-constant times a jet-difference seminorm `≤ chartMetricJet2DiffSup`.
-
-## Main results
-
-* `chartLieDeTurckComp` — the chart-frame `(i, j)` component of the DeTurck Lie
-  (gauge) summand `(𝓛_{W(g)} g)_{ij}`, as a function on the chart target.
-* `exists_chartDeTurckVFComp_lipschitz_on_compact` — the `W^k` Lipschitz bound
-  against the `1`-jet seminorm, uniform over `K`.
-* `exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact` — the `∂_m W^k`
-  Lipschitz bound against the `2`-jet seminorm, uniform over `K`.
-* `exists_chartLieDeTurckComp_lipschitz_on_compact` — the headline Lie-summand
-  bound: `|(𝓛_{W(g₁)} g₁)_{ij}(y) − (𝓛_{W(g₂)} g₂)_{ij}(y)| ≤ C · chartMetricJet2DiffSup g₁ g₂ α y`
-  for all `y ∈ K`, uniform over `K`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -90,8 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-/-- A function that is `C^∞` on the (open) chart-target interior is uniformly
-bounded in absolute value on a compact subset `K`. -/
 private lemma exists_bound_of_contDiffOn_int
     {f : E → ℝ} (α : M)
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -107,8 +42,7 @@ private lemma exists_bound_of_contDiffOn_int
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
 set_option linter.unusedFintypeInType false in
-/-- A finite family of functions, each `C^∞` on the chart-target interior, admits
-a single uniform bound on a compact subset `K`. -/
+
 private lemma exists_uniform_bound_family
     {ι : Type*} [Fintype ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
@@ -125,7 +59,6 @@ private lemma exists_uniform_bound_family
   · intro y hy i
     exact (hC_bd i y hy).trans (Finset.le_sup' C (Finset.mem_univ i))
 
-/-- The chart Christoffel symbol is `C^∞` on the chart-target interior. -/
 private lemma chartChristoffel_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b k : Fin (Module.finrank ℝ E)) :
@@ -133,15 +66,12 @@ private lemma chartChristoffel_contDiffOn_int
       (interior (extChartAt I α).target) :=
   chartChristoffel_contDiffOn_interior (I := I) g α a b k
 
-/-- The chart DeTurck-VF component is `C^∞` on the chart-target interior. -/
 private lemma chartDeTurckVFComp_contDiffOn_int
     (g g_bg : SmoothRiemannianMetric I M) (α : M) (k : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (chartDeTurckVFComp (I := I) g g_bg α k)
       (interior (extChartAt I α).target) :=
   chartDeTurckVFComp_contDiffOn_interior (I := I) g g_bg α k
 
-/-- The first partial of the chart DeTurck-VF component is `C^∞` on the
-chart-target interior. -/
 private lemma partial_chartDeTurckVFComp_contDiffOn_int
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) :
@@ -154,7 +84,6 @@ private lemma partial_chartDeTurckVFComp_contDiffOn_int
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- The chart Christoffel symbol is differentiable at an interior point. -/
 private lemma chartChristoffel_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b k : Fin (Module.finrank ℝ E)) {y : E}
@@ -163,7 +92,6 @@ private lemma chartChristoffel_differentiableAt_int
   ((chartChristoffel_contDiffOn_int (I := I) g α a b k).contDiffAt
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The inverse-Gram entry is differentiable at an interior point. -/
 private lemma chartInvGramOnE_differentiableAt_int'
     (g : SmoothRiemannianMetric I M) (α : M) (a b : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -171,9 +99,6 @@ private lemma chartInvGramOnE_differentiableAt_int'
   (((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset).contDiffAt
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-- **Leibniz expansion of `∂_m W^k`.** On the chart-target interior, the first
-partial of the chart DeTurck-VF component is the product-rule expansion of its
-defining double sum. -/
 theorem partialDeriv_chartDeTurckVFComp_eq
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {y : E}
@@ -239,7 +164,6 @@ theorem partialDeriv_chartDeTurckVFComp_eq
       (chartChristoffel_differentiableAt_int (I := I) g α a b k hy)
       (chartChristoffel_differentiableAt_int (I := I) g_bg α a b k hy)]
 
-/-- Uniform bound on the chart Christoffel symbols over `K`. -/
 private lemma exists_chartChristoffel_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -253,7 +177,6 @@ private lemma exists_chartChristoffel_bound_on_compact
     (fun p => chartChristoffel_contDiffOn_int (I := I) g α p.1.1 p.1.2 p.2) hK hKsub
   exact ⟨C, hC_nn, fun y hy a b k => hC y hy ((a, b), k)⟩
 
-/-- Uniform bound on the chart Christoffel difference `Γ(g) − Γ(g_bg)` over `K`. -/
 private lemma exists_chartChristoffel_diff_bound_on_compact
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -270,7 +193,6 @@ private lemma exists_chartChristoffel_diff_bound_on_compact
       (chartChristoffel_contDiffOn_int (I := I) g_bg α p.1.1 p.1.2 p.2)) hK hKsub
   exact ⟨C, hC_nn, fun y hy a b k => hC y hy ((a, b), k)⟩
 
-/-- Uniform bound on the inverse-Gram entries over `K`. -/
 private lemma exists_invGramOnE_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -283,7 +205,6 @@ private lemma exists_invGramOnE_bound_on_compact
     (fun p => (chartInvGramOnE_contDiffOn (I := I) g α p.1 p.2).mono interior_subset) hK hKsub
   exact ⟨C, hC_nn, fun y hy a b => hC y hy (a, b)⟩
 
-/-- Uniform bound on the first partials of the inverse-Gram entries over `K`. -/
 private lemma exists_partial_invGramOnE_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -308,7 +229,6 @@ private lemma exists_partial_invGramOnE_bound_on_compact
     hsmooth hK hKsub
   exact ⟨C, hC_nn, fun y hy m a b => hC y hy ((m, a), b)⟩
 
-/-- Uniform bound on the first partials of the chart Christoffel symbols over `K`. -/
 private lemma exists_partial_chartChristoffel_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -335,8 +255,6 @@ private lemma exists_partial_chartChristoffel_bound_on_compact
     hsmooth hK hKsub
   exact ⟨C, hC_nn, fun y hy m a b k => hC y hy (((m, a), b), k)⟩
 
-/-- Uniform bound on the chart Christoffel-derivative difference
-`∂_m Γ(g) − ∂_m Γ(g_bg)` over `K`. -/
 private lemma exists_partial_chartChristoffel_diff_bound_on_compact
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -382,7 +300,6 @@ private lemma exists_partial_chartChristoffel_diff_bound_on_compact
     hsmooth hK hKsub
   exact ⟨C, hC_nn, fun y hy m a b k => hC y hy (((m, a), b), k)⟩
 
-/-- Uniform bound on the first partials of the chart Gram entries over `K`. -/
 private lemma exists_partial_gramOnE_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -407,7 +324,6 @@ private lemma exists_partial_gramOnE_bound_on_compact
     hsmooth hK hKsub
   exact ⟨C, hC_nn, fun y hy m a b => hC y hy ((m, a), b)⟩
 
-/-- Uniform bound on the chart Gram entries over `K`. -/
 private lemma exists_gramOnE_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -420,7 +336,6 @@ private lemma exists_gramOnE_bound_on_compact
     (fun p => (chartGramOnE_contDiffOn (I := I) g α p.1 p.2).mono interior_subset) hK hKsub
   exact ⟨C, hC_nn, fun y hy a b => hC y hy (a, b)⟩
 
-/-- Uniform bound on the chart DeTurck-VF components `W^k` over `K`. -/
 private lemma exists_chartDeTurckVFComp_bound_on_compact
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -432,8 +347,6 @@ private lemma exists_chartDeTurckVFComp_bound_on_compact
     (fun k => chartDeTurckVFComp_contDiffOn_int (I := I) g g_bg α k) hK hKsub
   exact ⟨C, hC_nn, fun y hy k => hC y hy k⟩
 
-/-- Uniform bound on the first partials of the chart DeTurck-VF components `∂_m W^k`
-over `K`. -/
 private lemma exists_partial_chartDeTurckVFComp_bound_on_compact
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -446,11 +359,6 @@ private lemma exists_partial_chartDeTurckVFComp_bound_on_compact
     (fun p => partial_chartDeTurckVFComp_contDiffOn_int (I := I) g g_bg α p.1 p.2) hK hKsub
   exact ⟨C, hC_nn, fun y hy m k => hC y hy (m, k)⟩
 
-/-- **Per-point Lipschitz bound for `W^k`.**  With the inverse-Gram `0`-jet
-Lipschitz bound `Cinv · chartGramDiffSup`, the Christoffel difference Lipschitz
-bound `CΓ · jet1`, a uniform Christoffel-difference bound `P` for `g₁`, and a
-uniform inverse-Gram entry bound `M_b` for `g₂`,
-`|W^k(g₁)(y) − W^k(g₂)(y)| ≤ n²·(Cinv·P + M_b·CΓ)·chartMetricJet1DiffSup g₁ g₂ α y`. -/
 theorem chartDeTurckVFComp_sub_abs_le
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     {Cinv CΓ M_b P : ℝ}
@@ -529,8 +437,6 @@ theorem chartDeTurckVFComp_sub_abs_le
         (Module.finrank ℝ E : ℝ) *
           ((Module.finrank ℝ E : ℝ) * ((Cinv * P + M_b * CΓ) * jet1)) by ring]
 
-/-- The manifold image of a compact subset of the chart-target interior is a
-compact subset of the chart source. -/
 private lemma symm_image_compact_subset_source
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -544,19 +450,6 @@ private lemma symm_image_compact_subset_source
     (extChartAt I α).map_target (hKsub_target hzK)
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hsource
 
-/-- **Uniform Lipschitz dependence of the chart DeTurck-VF components `W^k` on the
-chart `1`-jet of the metric difference, over a compact subset of the chart-target
-interior.**
-
-For two smooth Riemannian metrics `g₁, g₂`, a fixed background metric `g_bg`, a
-chart base point `α`, and a compact subset `K` of the interior of the chart-`α`
-target, there is a single constant `C > 0` such that for every `y ∈ K` and every
-index `k`,
-```
-|W^k(g₁)(y) − W^k(g₂)(y)| ≤ C · chartMetricJet1DiffSup g₁ g₂ α y .
-```
-On a fixed compact `R`-ball of metrics the uniform inverse-Gram entry bound `M_b`
-may be taken uniform over the ball, so `C` becomes the desired `C(R)`. -/
 theorem exists_chartDeTurckVFComp_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -597,17 +490,6 @@ theorem exists_chartDeTurckVFComp_lipschitz_on_compact
   refine h_pt.trans ?_
   exact mul_le_mul_of_nonneg_right (by linarith) hjet1_nn
 
-/-- **Per-point Lipschitz bound for `∂_m W^k`.**  On the chart-target interior,
-with the inverse-Gram-partial Lipschitz bound `Cd · jet1`, the inverse-Gram `0`-jet
-Lipschitz bound `Cinv · chartGramDiffSup`, the Christoffel difference Lipschitz
-bound `CΓ · jet1`, the Christoffel-derivative difference Lipschitz bound
-`CdΓ · jet2`, uniform Christoffel-difference bound `P` (for `g₁`), uniform
-inverse-Gram entry bound `M_b` (for `g₂`), uniform inverse-Gram-partial bound `D`
-(for `g₂`), and uniform Christoffel-derivative-difference bound `R` (for `g₁`),
-```
-|∂_m W^k(g₁)(y) − ∂_m W^k(g₂)(y)| ≤
-    n²·(Cd·P + D·CΓ + Cinv·R + M_b·CdΓ)·chartMetricJet2DiffSup g₁ g₂ α y .
-``` -/
 theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target)
@@ -752,19 +634,6 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * C0 * jet2 =
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (C0 * jet2)) by ring]
 
-/-- **Uniform Lipschitz dependence of the chart DeTurck-VF component derivatives
-`∂_m W^k` on the chart `2`-jet of the metric difference, over a compact subset of
-the chart-target interior.**
-
-For two smooth Riemannian metrics `g₁, g₂`, a fixed background metric `g_bg`, a
-chart base point `α`, a direction `m`, and a compact subset `K` of the interior of
-the chart-`α` target, there is a single constant `C > 0` such that for every
-`y ∈ K` and every index `k`,
-```
-|∂_m W^k(g₁)(y) − ∂_m W^k(g₂)(y)| ≤ C · chartMetricJet2DiffSup g₁ g₂ α y .
-```
-On a fixed compact `R`-ball of metrics the uniform bounds become uniform over the
-ball, so `C` becomes the desired `C(R)`. -/
 theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M) (m : Fin (Module.finrank ℝ E))
     {K : Set E} (hK : IsCompact K)
@@ -836,9 +705,6 @@ theorem exists_partialDeriv_chartDeTurckVFComp_lipschitz_on_compact
   rw [← hC0_def]
   linarith
 
-/-- The chart-`α` `(i, j)` component of the DeTurck Lie (gauge) summand
-`(𝓛_{W(g)} g)_{ij}` at the chart point `y ∈ E`, with the DeTurck vector-field
-components `W^k(g) = chartDeTurckVFComp g g_bg α k`. -/
 def chartLieDeTurckComp (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
@@ -865,10 +731,6 @@ def chartLieDeTurckComp (g g_bg : SmoothRiemannianMetric I M) (α : M)
           chartGramOnE (I := I) g α i k y *
             partialDeriv (E := E) j (chartDeTurckVFComp (I := I) g g_bg α k) y) := rfl
 
-/-- A finite-sum difference of products `∑_k A^k₁ B^k₁ − ∑_k A^k₂ B^k₂`, with each
-factor difference bounded by a jet seminorm and each factor uniformly bounded, is
-bounded by `n·(Ca·Mb + Ma·Cb)·jet`.  This is the shared majorisation skeleton for
-all three Lie-summand groups. -/
 private lemma sum_prod_sub_abs_le
     {n : ℕ} (A₁ A₂ B₁ B₂ : Fin n → ℝ) {Ca Cb Ma Mb jet : ℝ}
     (hjet_nn : 0 ≤ jet) (hCa_nn : 0 ≤ Ca) (hMa_nn : 0 ≤ Ma)
@@ -902,10 +764,7 @@ private lemma sum_prod_sub_abs_le
   · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
 
 set_option linter.unusedFintypeInType false in
-/-- A direction-uniform `∂_m W^k` Lipschitz constant: a single `C > 0` such that
-the bound `|∂_m W^k(g₁)(y) − ∂_m W^k(g₂)(y)| ≤ C · jet2` holds for every direction
-`m`, every `y ∈ K`, and every index `k`.  Obtained by taking the maximum over the
-finitely many directions of the per-direction constants. -/
+
 private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -931,27 +790,6 @@ private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir
     refine mul_le_mul_of_nonneg_right (Finset.le_sup' C (Finset.mem_univ m)) ?_
     exact chartMetricJet2DiffSup_nonneg _ _ _ _
 
-/-- **Uniform Lipschitz dependence of the chart-frame DeTurck Lie (gauge) summand
-on the chart `2`-jet of the metric difference, over a compact subset of the
-chart-target interior.**
-
-For two smooth Riemannian metrics `g₁, g₂`, a fixed background metric `g_bg`, a
-chart base point `α`, and a compact subset `K` of the interior of the chart-`α`
-target, there is a single constant `C > 0` such that for every `y ∈ K` and all
-indices `(i, j)`,
-```
-|(𝓛_{W(g₁)} g₁)_{ij}(y) − (𝓛_{W(g₂)} g₂)_{ij}(y)| ≤ C · chartMetricJet2DiffSup g₁ g₂ α y ,
-```
-where `(𝓛_{W(g)} g)_{ij} = chartLieDeTurckComp g g_bg α i j` and the DeTurck vector
-field `W(g) = deTurckVF g g_bg` carries `∂g`, so the Lie derivative carries `∂²g`
-— a genuine `2`-jet dependence.
-
-The DeTurck vector-field components contribute a `1`-jet Lipschitz factor (their
-own difference, via the Christoffel/inverse-Gram perturbation atoms) and a `2`-jet
-Lipschitz factor (their first-partial difference, via the Christoffel-derivative
-perturbation atom); the metric Gram factors contribute a `0`-jet and a `1`-jet
-factor.  On a fixed compact `R`-ball of metrics the uniform bounds become uniform
-over the ball, so `C` becomes the desired `C(R)`. -/
 theorem exists_chartLieDeTurckComp_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

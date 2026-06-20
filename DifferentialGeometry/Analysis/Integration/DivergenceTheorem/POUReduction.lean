@@ -9,24 +9,6 @@ import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 
-/-!
-# Leibniz rule for the chart-Voss-Weyl divergence and partition-of-unity decomposition
-
-For a smooth Riemannian metric `g`, a smooth tangent section `X`, and a smooth scalar
-function `φ : M → ℝ`, the pointwise smul-section `(φ • X) x := φ x • X x` is again a
-smooth tangent section, and the divergence satisfies the Leibniz rule:
-$$\operatorname{div}_g(\varphi \cdot X)(x)
-    = \varphi(x) \cdot \operatorname{div}_g(X)(x) + X(\varphi)(x).$$
-
-Combined with a smooth partition of unity `ρ` subordinate to the chart atlas, this gives the
-decomposition identity
-$$\operatorname{div}_g(X)(x)
-    = \sum'_{\alpha \in M} \operatorname{div}_g(\rho_\alpha \cdot X)(x).$$
-
-The countable sum is locally finite: in a neighborhood of any point only finitely many
-terms are nonzero.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -43,8 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The pointwise scalar multiplication of a smooth tangent section by a smooth scalar
-function, packaged as a smooth tangent section. -/
 def smoothSmul (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -54,8 +34,6 @@ def smoothSmul (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (smoothSmul (I := I) φ hφ X) x = φ x • X x := rfl
 
-/-- On the chart base set at `α`, the chart-basis component of `(φ • X)` equals
-`φ · chartCoeff α X i`. -/
 lemma chartCoeff_smoothSmul (α : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -76,8 +54,6 @@ lemma chartCoeff_smoothSmul (α : M)
   rw [LinearEquiv.map_smul]
   rw [Finsupp.smul_apply, smul_eq_mul]
 
-/-- On the chart target, the chart-pulled-back component of `(φ • X)` equals
-`(scalarOnE α φ y) · chartCoeffOnE α X i y`. -/
 lemma chartCoeffOnE_smoothSmul (α : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -97,8 +73,6 @@ lemma chartCoeffOnE_smoothSmul (α : M)
   unfold chartCoeffOnE scalarOnE
   exact chartCoeff_smoothSmul (I := I) α φ hφ X i hsymm_base
 
-/-- The Leibniz rule for the chart-local Voss–Weyl divergence at the chart at the point
-itself. -/
 private lemma localDivergence_at_self_smoothSmul [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -244,7 +218,6 @@ private lemma localDivergence_at_self_smoothSmul [I.Boundaryless]
         (extChartAt I x x)
     ring
 
-/-- **Leibniz rule for the global divergence.** -/
 theorem divergence_g_smoothSmul [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -256,8 +229,6 @@ theorem divergence_g_smoothSmul [I.Boundaryless] [T2Space M]
   rw [divergence_g_def, divergence_g_def]
   exact localDivergence_at_self_smoothSmul (I := I) g x φ hφ X
 
-/-- The tangent action of `X` on a finite sum of functions equals the finite sum of the
-tangent actions. -/
 theorem tangentSectionAction_finset_sum
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {ι : Type*} (s : Finset ι) (f : ι → M → ℝ) (x : M)
@@ -305,7 +276,6 @@ theorem tangentSectionAction_finset_sum
     rw [ContinuousLinearMap.add_apply]
     rw [ih_eq]
 
-/-- The tangent action of `X` on a constant function vanishes. -/
 @[simp] theorem tangentSectionAction_const
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (c : ℝ) (x : M) :
     tangentSectionAction (I := I) X (fun _ => c) x = 0 := by
@@ -313,14 +283,11 @@ theorem tangentSectionAction_finset_sum
   rw [mfderiv_const]
   rfl
 
-/-- The tangent action of `X` on the zero function vanishes. -/
 @[simp] theorem tangentSectionAction_zero_fun
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     tangentSectionAction (I := I) X (fun _ : M => (0 : ℝ)) x = 0 :=
   tangentSectionAction_const (I := I) X 0 x
 
-/-- A POU sum `∑' α, ρ α y` agrees with a finite Finset sum on a neighborhood of any point,
-where the Finset is `ρ.fintsupport x`. -/
 private lemma pou_tsum_eq_finset_sum_eventually
     (ρ : SmoothPartitionOfUnity M I M univ) (x : M) :
     (fun y : M => ∑' α : M, (ρ α : M → ℝ) y) =ᶠ[𝓝 x]
@@ -335,8 +302,6 @@ private lemma pou_tsum_eq_finset_sum_eventually
     exact hne
   exact hα (hy hα_finsupp)
 
-/-- The tangent action of `X` on the POU completion `∑' α, ρ α y` equals the action on
-the constant function `1` at any point in the partition's set, which is `0`. -/
 theorem tangentSectionAction_pou_tsum_eq_zero
     (ρ : SmoothPartitionOfUnity M I M univ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -363,9 +328,6 @@ theorem tangentSectionAction_pou_tsum_eq_zero
   rw [mfderiv_const]
   rfl
 
-/-- For a smooth POU `ρ` indexed by `M` (e.g. `chartAtlasPOU I M`), the divergence
-`divergence_g g X x` decomposes as the locally-finite tsum
-$\sum'_\alpha \operatorname{div}_g(\rho_\alpha \cdot X)(x)$. -/
 theorem divergence_g_pou_tsum [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -441,7 +403,6 @@ theorem divergence_g_pou_tsum [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   rw [hsum_action]
   ring
 
-/-- Sum rule: `divergence_g g (X + Y) = divergence_g g X + divergence_g g Y`. -/
 theorem divergence_g_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -538,7 +499,6 @@ theorem divergence_g_add [I.Boundaryless] [T2Space M]
   rw [Finset.sum_add_distrib]
   rw [add_div]
 
-/-- The divergence of the zero section vanishes. -/
 @[simp] theorem divergence_g_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     ∀ x : M, divergence_g (I := I) g

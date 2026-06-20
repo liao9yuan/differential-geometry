@@ -12,28 +12,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 import Mathlib.Topology.Compactness.LocallyFinite
 
-/-!
-# Chart-invariance of the metric trace and the partition-of-unity decomposition
-# of the Riemannian volume measure
-
-Building on the definitional layer, this file establishes the chart-independence
-of the metric trace `trace(G⁻¹ · ∂_t G)` of the time-derivative (via the
-transition-matrix conjugation algebra), the abstract parametric set-integral
-`HasDerivAt` packaging, the finite partition-of-unity decomposition of the
-Riemannian volume measure on a compact manifold, and the resulting abstract
-finite-sum form of the volume variation formula.
-
-## Main results
-
-* `traceTimeDerivMetric_eq_trace_chartGramMatrix` : the metric trace evaluated
-  in any chart whose base set contains the point.
-* `riemannianVolumeMeasure_eq_finset_sum` /
-  `integral_riemannianVolumeMeasure_eq_finset_sum` : the finite-sum partition of
-  the Riemannian volume measure and its integral on a compact manifold.
-* `volume_variation_formula` : the assembled finite-sum volume variation
-  `HasDerivAt`, from per-chart parametric derivatives.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Matrix
@@ -53,8 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Bochner integral characterisation of the chart-local measure for a
-measurable, integrable real-valued function. -/
 theorem integral_chartLocalMeasure
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (h : M → ℝ) (hh_meas : Measurable h) :
@@ -123,16 +99,12 @@ theorem integral_chartLocalMeasure
   refine setIntegral_congr_fun htarget_meas (fun y hy => ?_)
   rw [hw_toReal y hy, smul_eq_mul]
 
-/-- On a compact manifold, the set of indices where the chart-atlas POU has
-nonempty support is finite. -/
 lemma chartAtlasPOU_finite_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] :
     {α : M | (Function.support ((chartAtlasPOU I M) α)).Nonempty}.Finite :=
   LocallyFinite.finite_nonempty_of_compact
     (chartAtlasPOU I M).locallyFinite
 
-/-- A designated finite set of POU indices on a compact manifold, covering the
-full nonempty support. -/
 noncomputable def chartAtlasPOU_finset
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] : Finset M :=
   (chartAtlasPOU_finite_support (I := I) (M := M)).toFinset
@@ -145,7 +117,6 @@ lemma chartAtlasPOU_finset_mem
   rw [Set.Finite.mem_toFinset]
   rfl
 
-/-- Outside the finite support Finset, the POU weight is identically zero. -/
 lemma chartAtlasPOU_weight_zero_of_notMem
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M} (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M)) (x : M) :
@@ -157,8 +128,6 @@ lemma chartAtlasPOU_weight_zero_of_notMem
   rw [hα] at hx
   exact (Set.notMem_empty _) hx
 
-/-- For a POU index outside the finite-support set, the weighted chart-local measure
-is the zero measure. -/
 lemma chartAtlasPOU_withDensity_zero_of_notMem
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -202,10 +171,6 @@ theorem hasDerivAt_setIntegral_model
   rw [← hfun, ← hfun']
   exact this.2
 
-/-- Each Gram-matrix entry has a time derivative at every point, equal to its
-classical `deriv`. This is simply a restatement of the
-`MetricFamilyRegularAt.hasDerivAt_chartGramMatrix` field convenient for
-downstream use. -/
 lemma hasDerivAt_chartGramMatrix_entry
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t₀ : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t₀)
@@ -218,9 +183,6 @@ lemma hasDerivAt_chartGramMatrix_entry
 
 section ChartInvarianceOfTraceTimeDeriv
 
-/-- The pointwise time derivative of the Gram matrix under chart change:
-`∂_t G_{x₁}(x) = Jᵀ · ∂_t G_{x₀}(x) · J`, where `J := transitionMatrix x₀ x₁ x`
-is independent of `t` (it depends only on the chart structure). -/
 lemma deriv_chartGramMatrix_pullback
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -283,9 +245,6 @@ lemma deriv_chartGramMatrix_pullback
   refine Finset.sum_congr rfl (fun q _ => ?_)
   ring
 
-/-- The transition matrix is invertible on the chart overlap: composing with the
-reverse transition matrix (from `x₁` to `x₀`) yields the identity. Hence J has
-a two-sided inverse and is a unit in the matrix ring. -/
 lemma transitionMatrix_mul_reverse
     (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -356,8 +315,6 @@ lemma transitionMatrix_mul_reverse
   refine Finset.sum_congr rfl (fun k _ => ?_)
   exact mul_comm _ _
 
-/-- The transition matrix (as an element of the matrix ring) has a two-sided
-inverse, hence is a unit, and in particular has nonzero determinant. -/
 lemma transitionMatrix_isUnit
     (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -372,9 +329,6 @@ lemma transitionMatrix_isUnit
   exact (Matrix.isUnit_iff_isUnit_det _).mpr
     (IsUnit.of_mul_eq_one _ hdet)
 
-/-- Chart-invariance of the metric trace of the time derivative: at a fixed
-spatial point `x` lying in the base sets of two charts `x₀` and `x₁`, the
-trace `trace(G⁻¹ · ∂_t G)` computed in either chart yields the same value. -/
 lemma trace_chartGramMatrix_inv_deriv_chart_independent
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -439,9 +393,6 @@ lemma trace_chartGramMatrix_inv_deriv_chart_independent
 
 end ChartInvarianceOfTraceTimeDeriv
 
-/-- Chart-invariance of `traceTimeDerivMetric`, specialised to evaluation at the
-canonical chart at `x`. For any `α` whose chart base set contains `x`, the trace
-computed in the `α`-chart equals `traceTimeDerivMetric g_fam t x`. -/
 lemma traceTimeDerivMetric_eq_trace_chartGramMatrix
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -458,8 +409,6 @@ lemma traceTimeDerivMetric_eq_trace_chartGramMatrix
   exact trace_chartGramMatrix_inv_deriv_chart_independent
     (I := I) (M := M) hreg x α hxx hxα
 
-/-- On a compact manifold, the canonical Riemannian volume measure equals the
-finite sum of POU-weighted chart-local measures over the finite support set. -/
 theorem riemannianVolumeMeasure_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -561,17 +510,6 @@ theorem integral_riemannianMeasureFamily_eq_finset_sum
   exact integral_riemannianVolumeMeasure_eq_finset_sum (I := I) (M := M)
     (g_fam t) (f t) hf_cont
 
-/-- **Volume variation formula**: the time derivative of the global integral
-of a smooth time-family `f : ℝ → M → ℝ` against the Riemannian volume measure
-on a compact manifold, obtained as the finite-sum assembly of chart-local
-parametric derivatives.
-
-The caller supplies, for each `α` in the finite POU-support Finset, the
-chart-local `HasDerivAt` for the integral against the POU-weighted chart-local
-measure, plus the hypothesis that `f` is continuous in `s` in a neighborhood of
-`t` (so the left-hand-side identifications via
-`integral_riemannianMeasureFamily_eq_finset_sum` go through). The conclusion
-is a `HasDerivAt` for `s ↦ ∫ x, f s x ∂volume_s` at `s = t`. -/
 theorem volume_variation_formula
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)

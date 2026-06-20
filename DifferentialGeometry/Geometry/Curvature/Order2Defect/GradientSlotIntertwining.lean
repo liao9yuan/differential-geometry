@@ -1,41 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 
-/-!
-# The gradient-slot parallel naturality of the covariant-gradient bundle equivalence
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`, the
-section-level covariant gradient `covGrad g 0 s` raises the tensor rank `(0, s) ↦ (0, s + 1)`,
-currying the new tangent-direction slot as the *leftmost* (gradient) covariant slot. Concretely it
-is the fibrewise covariant-gradient bundle equivalence `covGradBundleEquiv 0 s x` applied to the
-directional covariant derivative.
-
-This file records the **single-step gradient-slot parallel naturality** of `covGradBundleEquiv 0 2`:
-the slot-`0` curry of the unit-`(0, 0)`-evaluation of the `(0, 3)`-tensor
-`covGradBundleEquiv 0 2 x (∇^{(0,2)RS}_v σ)` — i.e. the `(0, 3)`-tensor gradient of a smooth
-`(0, 2)`-tensor section `σ`, read along the gradient direction `v` — is the abstract `(0, 2)`-tensor
-covariant derivative of the unit-evaluated section `y ↦ σ y (unit)`:
-```
-tensor0S_curry 2 x ((covGradBundleEquiv 0 2 x (∇^{(0,2)RS}_v σ))(unit)) v
-  = ∇^{(0,2)abs}_v (y ↦ σ y (unit)) (x).
-```
-The unit `(0, 0)`-section is `∇`-parallel, so the product rule against it has no correction term;
-the gradient slot is read off the leftmost slot by the curry, and the bundle equivalence transports
-the directional derivative without curvature. This is the tensor analogue of
-`cotangentCov_metricDuality` on the leftmost (gradient) slot, expressed through the parallel unit
-`(0, 0)`-evaluation.
-
-The naturality is the keystone single covariant-differentiation identity from which the diagonal
-second-order gradient-slot intertwining (and the resulting off-diagonal Riemann curvature reorder of
-the canonical order-`2` Gårding defect `covGradRoughLapCurv g T₀`) is assembled.
-
-## Convention
-
-Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` (frame trace). The covariant gradient `covGrad g 0 s`
-curries the new tangent-direction slot as the leftmost covariant slot. All operators are the
-intrinsic Levi-Civita-induced tensor covariant derivatives.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -71,15 +36,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The slot-`0` curry reads the directional derivative off the gradient slot.** For any
-continuous-linear map `Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 2 I x`, the slot-`0` curry of the
-unit-`(0, 0)`-evaluation of the `(0, 3)`-tensor `covGradBundleEquiv 0 2 x Φ`, taken along `v`, is the
-unit-`(0, 0)`-evaluation of `Φ v`:
-```
-tensor0S_curry 2 x ((covGradBundleEquiv 0 2 x Φ)(unit)) v = (Φ v)(unit).
-```
-The curry reads the tangent direction `v` off the leftmost (gradient) slot, exactly the slot
-`covGradBundleEquiv` places the tangent input on. -/
 theorem tensor0S_curry_covGradBundleEquiv_unit
     (x : M) (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 2 I x)
     (v : TangentSpace I x) :
@@ -113,21 +69,6 @@ theorem tensor0S_curry_covGradBundleEquiv_unit
     funext k; rw [Matrix.vecTail, Function.comp_apply, Fin.cons_succ]
   rw [hzero, htail]
 
-/-- **Gradient-slot parallel naturality (unit-evaluated slot-`0` form).** For a smooth `Cₛ^∞`
-`(0, 2)`-tensor section `σ`, the slot-`0` curry of the unit-`(0, 0)`-evaluation of the `(0, 3)`-tensor
-`covGradBundleEquiv 0 2 x (∇^{(0,2)RS}_·σ(x))` — the `(0, 3)`-tensor gradient of `σ` — read along the
-gradient direction `v`, equals the abstract `(0, 2)`-tensor covariant derivative of the unit-evaluated
-section `y ↦ σ y (unit)`:
-```
-tensor0S_curry 2 x ((covGradBundleEquiv 0 2 x (∇^{(0,2)RS}_·σ(x)))(unit)) v
-  = ∇^{(0,2)abs}_v (y ↦ σ y (unit)) (x).
-```
-The slot-`0` curry reads `v` off the gradient slot (`tensor0S_curry_covGradBundleEquiv_unit`), giving
-the unit-evaluation of `∇^{(0,2)RS}_v σ`, which transports — with no correction term, the unit
-`(0, 0)`-section being `∇`-parallel — to the abstract `(0, 2)` covariant derivative of `y ↦ σ y (unit)`
-(`tensorRSCovariantDerivative_zeroS_unit_eval` at `s = 2`). This is the keystone single-step
-gradient-slot intertwining: the `(0, 3)`-bundle gradient slot is parallel-transported, the abstract
-`(0, 2)` covariant derivative on the unit-evaluated section carries the remaining content. -/
 theorem covGradBundleEquiv_tensorCov_unit_curry_eq_abstractCovDeriv
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)

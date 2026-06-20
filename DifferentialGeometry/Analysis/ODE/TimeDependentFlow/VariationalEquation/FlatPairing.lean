@@ -1,59 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 
-/-!
-# The flat-route Cartan pairing for the moving-pushforward inner product
-
-`variational_flow_feeds_cartan_witness` (`VariationalEquation/VariationalFlow.lean`) consumes the
-**covariant** per-slot identities `RawVariationalIdentity` (each asserting the slot pushforward
-curve has derivative `-∇_{dΦ·} X`) and produces the `-lieDerivMetric` derivative of the
-frozen-metric moving-pushforward inner product
-
-  `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`.
-
-As the orbit-ODE analysis records (`ChartOperator/ManifoldFlowOrbitODE.lean`,
-the residual (★)), the covariant per-slot identity is **not dischargeable** from the flow ODE:
-the genuine derivative of the orbit pushforward curve, read in Mathlib's moving target chart,
-is the **flat / Lie-type** value `T' (dΦv) + P' v` (`RawVariationalIdentityFlat`,
-`CovariantIdentity/FlatIdentity.lean`), which differs from the covariant value by the
-metric Christoffel contraction at the basepoint.  Precisely, with `α := Φ_fam t x` and
-`dΦv := mfderiv (Φ_fam t) x v`, the two per-slot values are related by
-
-  `Vflat = -∇_{dΦv} X + christoffelCorrection g α α (X̃_α α) dΦv`,      (the per-slot residual)
-
-an `E`-equation supplied here as the explicit input `hcorr_v` / `hcorr_w` (it is genuine
-chart-Christoffel geometric data — not the conclusion, and not the false `D²φ = Γ`).
-
-## The honest pairing value
-
-Pairing the two **flat** per-slot derivatives against the *fixed* bilinear form `g.inner α`
-(the genuine derivative of the frozen-metric moving-pushforward inner product, by
-`variational_flow_inner_total_derivative`) and substituting the two per-slot residuals gives
-
-  `d/ds [g_α(dΦ_s v, dΦ_s w)]|_t
-     = -lieDerivMetric g X α dΦv dΦw
-       + ( g_α(Γ(X̃_α, dΦv), dΦw) + g_α(dΦv, Γ(X̃_α, dΦw)) ),`
-
-where the first summand is the Cartan value (`cartan_formula_for_lie_deriv_metric`, via the
-covariant per-slot pairing) and the **bracketed residual** is the metric-transport term
-`X(g)(dΦv, dΦw)` of the metric along the orbit (by chart metric-compatibility,
-`∂_k G_{ij} = ∑_l Γ^l_{ki} G_{lj} + Γ^l_{kj} G_{li}`).
-
-This residual is **not** zero in a general chart; it is exactly the contribution of the
-*moving base point* `Φ_fam s x` inside the genuine pull-back inner product
-`(g_DT s).inner (Φ_fam s x) …`, which the frozen-metric frozen-point pushforward slot does not
-see.  The flat route therefore re-architects the Hamilton–DeTurck cancellation into a genuine
-**three-piece** split (metric-family / base-point-motion / pushforward-kinetic) in which the
-metric-transport residual produced here cancels against the base-point-motion piece, leaving
-`-2 Ric`.  See the file footer for the precise three-piece statement.
-
-No `sorry`, no `axiom`, no `HasLocallyConstantChartAt`-style hypothesis, no
-joint-`C^∞`-on-`ℝ × M` predicate, and no false `D²φ = Γ` identification.  No
-hypothesis-packaging: the inputs are the two flat per-slot `HasDerivAt`s and the two per-slot
-Christoffel-residual `E`-equations; the conclusion is the *scalar* pairing `HasDerivAt`, a
-distinct object.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -75,14 +22,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The covariant per-slot value as an `E`-vector.**
-
-`-(∇^g_{dΦ·} X)`, the negative Levi-Civita covariant derivative of `X` along the slot
-pushforward at the orbit point `α := Φ_fam t x`, packaged at the model-fibre type `E` (via the
-defeq `TangentSpace I α = E`).  This is the value that the *covariant* per-slot identity
-`RawVariationalIdentity` asserts; it is named here as an honest `E`-typed abbreviation so the
-flat-to-covariant residual `E`-equations elaborate without `HAdd` ambiguity across the
-`TangentSpace I α = E` defeq. -/
 def negCovariantSlotValue
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -90,19 +29,6 @@ def negCovariantSlotValue
   -(LeviCivita (I := I) g) (X : ∀ y : M, TangentSpace I y) (Φ_fam t x)
     (mfderiv I I (Φ_fam t : M → M) x v)
 
-/-- **The metric-transport residual at the basepoint.**
-
-For a smooth metric `g`, a smooth vector field `X`, the orbit point `α := Φ_fam t x`, and the
-two frozen pushforwards `dΦv := mfderiv (Φ_fam t) x v`, `dΦw := mfderiv (Φ_fam t) x w`, this is
-the symmetric pairing of the basepoint metric Christoffel correction of `X̃_α(α)` against each
-pushforward slot:
-
-  `g_α( Γ(X̃_α, dΦv), dΦw ) + g_α( dΦv, Γ(X̃_α, dΦw) )`.
-
-By chart metric-compatibility this equals the directional derivative `X(g)(dΦv, dΦw)` of the
-metric `g` along `X` at `α` — the *metric-transport* contribution of the moving base point of
-the pull-back inner product.  It is the genuine residual separating the flat-route pushforward
-slot from `-lieDerivMetric`; it is generically nonzero. -/
 def metricTransportResidual
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -120,32 +46,6 @@ def metricTransportResidual
             (X : ∀ y : M, TangentSpace I y) (Φ_fam t x))
           (mfderiv I I (Φ_fam t : M → M) x w))
 
-/-- **Flat-route Cartan pairing of the moving-pushforward inner product.**
-
-Given the two **flat** per-slot identities (`RawVariationalIdentityFlat` for `v` and `w`, with
-factor-ODE derivative values `T'`, `P'`) and the two per-slot flat-to-covariant residual
-`E`-equations `hcorr_v` / `hcorr_w`
-
-  `T' (dΦv) + P' v = -∇_{dΦv} X + christoffelCorrection g α α (X̃_α α) dΦv`     (and slot `w`),
-
-the frozen-metric moving-pushforward inner-product variation curve
-
-  `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`
-
-has at `t` the derivative
-
-  `-lieDerivMetric g X (Φ_fam t x) dΦv dΦw + metricTransportResidual g X Φ_fam t x v w`.
-
-The flat product rule (`variational_flow_inner_total_derivative`) assembles the two flat slot
-derivatives against the fixed bilinear form `g.inner α`; substituting the per-slot residuals
-and applying `cartan_formula_for_lie_deriv_metric` (through the covariant pairing) yields the
-displayed value.
-
-This is the honest flat-route replacement for `variational_flow_feeds_cartan_witness`: the
-metric content is in the `g.inner` pairing (not per-slot), but the metric-transport residual
-does **not** vanish per the frozen-metric reading; it is exhibited explicitly and cancels only
-against the base-point-motion piece downstream.  No hypothesis-packaging: `hcorr_v`/`hcorr_w`
-are `E`-equations, the conclusion is the scalar pairing `HasDerivAt`. -/
 theorem variational_flow_flat_pairing_hasDerivAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -223,17 +123,6 @@ theorem variational_flow_flat_pairing_hasDerivAt
     ring
   rwa [hval] at h_total
 
-/-- **Flat-route pushforward-slot derivative (within-set form).**
-
-The one-sided `HasDerivWithinAt (Ici 0)` restriction of `variational_flow_flat_pairing_hasDerivAt`:
-with the metric frozen at `g` and the base point frozen at `Φ_fam t x`, the moving-pushforward
-inner-product curve has within-set derivative `-lieDerivMetric g X α dΦv dΦw +
-metricTransportResidual g X Φ_fam t x v w`.
-
-This is the honest flat-route replacement for `deTurck_pushforward_slot_hasDerivWithinAt`: the
-value is **not** `-lieDerivMetric` alone (that would require the non-dischargeable covariant
-per-slot identity); the metric-transport residual is present and cancels only against the
-base-point-motion piece downstream. -/
 theorem variational_flow_flat_pairing_hasDerivWithinAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

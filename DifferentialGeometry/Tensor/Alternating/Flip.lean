@@ -8,24 +8,6 @@ Coauthors: Jack McCarthy
 import DifferentialGeometry.Tensor.Multilinear.Flip
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 
-/-!
-# Flip operations for continuous alternating maps
-
-This file defines "flip" operations that exchange the argument roles in maps whose codomain is
-itself a space of alternating maps.
-
-## Main definitions
-
-* `LinearIsometryEquiv.flipAlternating`: the isometric equivalence
-  `(M' →L[𝕜] M [⋀^ι]→L[𝕜] N) ≃ₗᵢ[𝕜] M [⋀^ι]→L[𝕜] (M' →L[𝕜] N)`.
-* `ContinuousMultilinearMap.flipAlternating`: flips a multilinear map valued in alternating maps
-  into an alternating map valued in multilinear maps, via `(m', m) ↦ f m m'`.
-* `ContinuousAlternatingMap.domDomCongr`: rearranges the domain index type of an alternating map
-  along an equivalence `σ : ι ≃ ι'`, via `domDomCongr σ f v = f (v ∘ σ)`.
-* `ContinuousAlternatingMap.flipAlternating`: flips an alternating map valued in alternating maps,
-  swapping the two argument tuples, via `(m', m) ↦ f m m'`.
--/
-
 open ContinuousAlternatingMap
 
 noncomputable section Flip
@@ -42,11 +24,6 @@ variable
   {ι : Type*} [Fintype ι]
   {ι' : Type*} [Fintype ι']
 
-/-- The linear isometry equivalence between continuous linear maps into alternating maps and
-alternating maps into continuous linear maps:
-`(M' →L[𝕜] M [⋀^ι]→L[𝕜] N) ≃ₗᵢ[𝕜] M [⋀^ι]→L[𝕜] (M' →L[𝕜] N)`.
-The forward direction is `ContinuousLinearMap.flipAlternating`. The norm is preserved via
-`LinearIsometryEquiv.flipMultilinear` applied to the underlying multilinear maps. -/
 def _root_.LinearIsometryEquiv.flipAlternating :
     (M' →L[𝕜] (M [⋀^ι]→L[𝕜] N)) ≃ₗᵢ[𝕜] (M [⋀^ι]→L[𝕜] (M' →L[𝕜] N)) where
   toFun := ContinuousLinearMap.flipAlternating
@@ -76,7 +53,6 @@ def _root_.LinearIsometryEquiv.flipAlternating :
       f.flipAlternating.toContinuousMultilinearMap]
     rfl
 
-
 end ContinuousLinearMap
 
 namespace ContinuousMultilinearMap
@@ -91,10 +67,6 @@ variable
   {ι : Type*} [Fintype ι]
   {ι' : Type*} [Fintype ι']
 
-/-- Flip a continuous multilinear map valued in continuous alternating maps: given
-`f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) (M' [⋀^ι']→L[𝕜] N)`, produce an alternating
-map `M' [⋀^ι']→L[𝕜] (ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) N)` via `(m', m) ↦ f m m'`.
-The norm satisfies `‖flipAlternating f‖ ≤ ‖f‖`. -/
 def flipAlternating (f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) (M' [⋀^ι']→L[𝕜] N)) :
     M' [⋀^ι']→L[𝕜] (ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) N) :=
   AlternatingMap.mkContinuous
@@ -125,8 +97,6 @@ def flipAlternating (f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) (M' [�
         (by positivity)
       _ = (‖f‖ * ∏ i, ‖m i‖) * ∏ i, ‖m' i‖ := by ring)
 
-/-- Evaluation formula for `ContinuousMultilinearMap.flipAlternating`:
-`flipAlternating f m' m = f m m'`. -/
 theorem flipAlternating_apply (f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) (M' [⋀^ι']→L[𝕜] N))
     (m : ι → M) (m' : ι' → M') : flipAlternating f m' m = f m m' :=
   rfl
@@ -146,9 +116,6 @@ variable
   {M' : Type*} [NormedAddCommGroup M'] [NormedSpace 𝕜 M']
   [Fintype ι] [Fintype ι']
 
-/-- Flip a continuous alternating map valued in continuous alternating maps: given
-`f : M [⋀^ι]→L[𝕜] (M' [⋀^ι']→L[𝕜] N)`, produce `M' [⋀^ι']→L[𝕜] M [⋀^ι]→L[𝕜] N`
-via `(m', m) ↦ f m m'`. The norm satisfies `‖flipAlternating f‖ ≤ ‖f‖`. -/
 def flipAlternating (f : M [⋀^ι]→L[𝕜] (M' [⋀^ι']→L[𝕜] N)) :
     M' [⋀^ι']→L[𝕜] M [⋀^ι]→L[𝕜] N :=
   AlternatingMap.mkContinuous
@@ -183,8 +150,6 @@ def flipAlternating (f : M [⋀^ι]→L[𝕜] (M' [⋀^ι']→L[𝕜] N)) :
           (by positivity)
         _ = (‖f‖ * ∏ i, ‖m i‖) * ∏ i, ‖m' i‖ := by ring)
 
-/-- Evaluation formula for `ContinuousAlternatingMap.flipAlternating`:
-`flipAlternating f m' m = f m m'`. -/
 theorem flipAlternating_apply (f : M [⋀^ι]→L[𝕜] (M' [⋀^ι']→L[𝕜] N))
     (m : ι → M) (m' : ι' → M') : flipAlternating f m' m = f m m' :=
   rfl

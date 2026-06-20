@@ -3,44 +3,6 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Connection.Realization.Connection
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
-/-!
-# Generic Hom-bundle covariant derivative on `Hom(U, V)`
-
-Given two smooth vector bundles `U` and `V` over `M` (with model fibers `E_U` and `F`
-respectively) equipped with covariant derivatives `cov_U : CovariantDerivative I E_U U`
-and `cov_V : CovariantDerivative I F V`, this file constructs the induced covariant
-derivative on the Hom-bundle
-`Hom(U, V) = fun x => U x →L[ℝ] V x`.
-
-This is the full generalization of `homBundleCovariantDerivative` (file `HomNabla.lean`)
-to an arbitrary source bundle `U` (in place of the tangent bundle `TM`). The (r,s)-tensor
-covariant derivative on `Hom(T_r M, T_s M)` is obtained as a specialization in
-`TensorRSNabla.lean`.
-
-## Main definition
-
-* `homBundleCovariantDerivativeGen` : the induced `CovariantDerivative` on
-  `fun x => U x →L[ℝ] V x`.
-
-## Strategy
-
-For a Hom-bundle section `τ : Π x : M, U x →L[ℝ] V x`, a vector field `V_field`
-differentiable at `x`, and a `U`-section `Y` differentiable at `x`, the value
-(a vector in the fiber `V x`)
-```
-Ψ(τ, V_field, Y)(x) :=
-  cov_V (fun y => τ y (Y y)) x (V_field x) − τ x (cov_U Y x (V_field x))
-```
-is *tensorial* in BOTH `V_field` (the differentiation direction, of type `TangentSpace I`)
-and `Y` (the `U`-section), at `x`. The `V_field`-tensoriality is automatic from continuous
-linearity of both `cov_V (...) x` and `τ x ∘L cov_U Y x` in the tangent argument. The
-`Y`-tensoriality is the standard product-rule cancellation using `cov_V`'s Leibniz rule
-(with values in the `V` fiber) and `cov_U`'s Leibniz rule (on the `U` source).
-
-By `TensorialAt.mkHom₂`, this gives a continuous bilinear map
-`T_xM →L[ℝ] U x →L[ℝ] V x` representing `(∇^Hom_v τ)(w)`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -75,28 +37,20 @@ variable
   [∀ x, IsTopologicalAddGroup (V x)] [∀ x, ContinuousSMul ℝ (V x)]
   [ContMDiffVectorBundle ∞ F V I]
 
-/-- "τ is differentiable at x" for a Hom-bundle section `τ : Π x, U x →L V x`,
-in total-space form. -/
 private abbrev MDiffAtHom
     (τ : Π x : M, (U x →L[ℝ] V x)) (x : M) : Prop :=
   MDifferentiableAt I (I.prod 𝓘(ℝ, E_U →L[ℝ] F))
     (fun y => TotalSpace.mk' (E_U →L[ℝ] F)
       (E := fun x : M => (U x →L[ℝ] V x)) y (τ y)) x
 
-/-- "Y is differentiable at x" for a section `Y` of the source bundle `U`,
-in total-space form. -/
 private abbrev MDiffAtU (Y : Π x : M, U x) (x : M) : Prop :=
   MDifferentiableAt I (I.prod 𝓘(ℝ, E_U))
     (fun y => TotalSpace.mk' E_U (E := U) y (Y y)) x
 
-/-- "σ is differentiable at x" for a section `σ` of the target bundle `V`,
-in total-space form. -/
 private abbrev MDiffAtV (σ : Π x : M, V x) (x : M) : Prop :=
   MDifferentiableAt I (I.prod 𝓘(ℝ, F))
     (fun y => TotalSpace.mk' F (E := V) y (σ y)) x
 
-/-- Pairing `τ(Y)` is a differentiable section of `V` when `τ` and `Y` are differentiable.
-This is the generic-source analog of `HomConnection.mdiffAt_apply`. -/
 private theorem mdiffAt_apply
     {τ : Π x : M, (U x →L[ℝ] V x)}
     {Y : Π x : M, U x} {x : M}
@@ -104,8 +58,6 @@ private theorem mdiffAt_apply
     MDiffAtV I M F V (fun y => τ y (Y y)) x := by
   exact MDifferentiableAt.clm_bundle_apply (b := id) hτ hY
 
-/-- The raw V-valued operator
-`Ψ(τ, V_field, Y)(x) := cov_V (τ·Y) x (V_field x) − τ x (cov_U Y x (V_field x))`. -/
 private def Psi
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -192,7 +144,6 @@ private theorem Psi_smul_right
   rw [smul_sub]
   abel
 
-/-- Tensoriality in V_field (left argument) at x — for any Y. -/
 private theorem Psi_tensorialAt_left
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -202,7 +153,6 @@ private theorem Psi_tensorialAt_left
   smul := fun _ _ => Psi_smul_left I M E_U U F V cov_U cov_V τ
   add := fun _ _ => Psi_add_left I M E_U U F V cov_U cov_V τ
 
-/-- Tensoriality in Y (right argument) at x — when τ is differentiable at x. -/
 private theorem Psi_tensorialAt_right
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -229,12 +179,6 @@ private theorem vec_section_mdiff
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
   Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
-/-- The generic Hom-bundle covariant derivative pointwise function. For each Hom-bundle section
-`τ : Π x, U x →L[ℝ] V x` and point `x`, returns a CLM
-`T_xM →L[ℝ] (U x →L[ℝ] V x)`.
-
-If `τ` is differentiable at `x`, the value is the bilinear map built via `TensorialAt.mkHom₂`.
-For non-differentiable τ, returns the junk value `0`. -/
 noncomputable def homBundleCovariantDerivativeGenFun
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -251,9 +195,6 @@ noncomputable def homBundleCovariantDerivativeGenFun
       (fun V_field _ => Psi_tensorialAt_right I M E_U U F V cov_U cov_V τ hτ V_field)
   · exact 0
 
-/-- Specification: when `τ`, `V_field`, `Y` are all differentiable at `x`, the generic Hom-bundle
-covariant derivative applied bilinearly to `V_field x` and `Y x` returns
-`Psi cov_U cov_V τ V_field Y x`. -/
 private theorem homBundleCovariantDerivativeGenFun_apply
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -273,7 +214,6 @@ private theorem homBundleCovariantDerivativeGenFun_apply
     (fun Y _ => Psi_tensorialAt_left I M E_U U F V cov_U cov_V τ Y)
     (fun V_field _ => Psi_tensorialAt_right I M E_U U F V cov_U cov_V τ hτ V_field) hV hY
 
-/-- Junk: when τ is not differentiable at x, the generic Hom-bundle covariant derivative is zero. -/
 private theorem homBundleCovariantDerivativeGenFun_of_not_mdiff
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -283,8 +223,6 @@ private theorem homBundleCovariantDerivativeGenFun_of_not_mdiff
   unfold homBundleCovariantDerivativeGenFun
   rw [dif_neg hτ]
 
-/-- The generic Hom-bundle covariant derivative satisfies `IsCovariantDerivativeOn`
-on `Set.univ`. -/
 private theorem homBundleCovariantDerivativeGenFun_isCovOn
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V) :
@@ -359,8 +297,6 @@ private theorem homBundleCovariantDerivativeGenFun_isCovOn
     rw [smul_sub]
     abel
 
-/-- The generic Hom-bundle covariant derivative on `Hom(U, V)`, packaged as a
-`CovariantDerivative`. -/
 noncomputable def homBundleCovariantDerivativeGen
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V) :
@@ -370,11 +306,6 @@ noncomputable def homBundleCovariantDerivativeGen
   isCovariantDerivativeOnUniv :=
     homBundleCovariantDerivativeGenFun_isCovOn I M E_U U F V cov_U cov_V
 
-/-- Public function-level apply: when `τ`, `V_field`, `Y` are all
-manifold-differentiable at `x` (in total-space form), the value of
-`homBundleCovariantDerivativeGen` applied bilinearly to `V_field x` and `Y x`
-equals the product-rule expression
-`cov_V (fun y => τ y (Y y)) x (V_field x) − τ x (cov_U Y x (V_field x))`. -/
 theorem homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -396,9 +327,6 @@ theorem homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
   exact homBundleCovariantDerivativeGenFun_apply I M E_U U F V cov_U cov_V τ
     hτ hV hY
 
-/-- For a smooth Hom-bundle section τ and a smooth `U`-section Y, the V-valued section
-`y ↦ ⟨y, τ y (Y y)⟩` is smooth. This is the generic-source analog of
-`HomConnection.contMDiff_hom_apply_section`. -/
 private theorem contMDiff_hom_apply_section
     (τ : Cₛ^∞⟮I; E_U →L[ℝ] F, (fun x => U x →L[ℝ] V x)⟯)
     (Y : Cₛ^∞⟮I; E_U, U⟯) :
@@ -406,8 +334,6 @@ private theorem contMDiff_hom_apply_section
       (fun y => TotalSpace.mk' F (E := V) y (τ y (Y y))) :=
   ContMDiff.clm_bundle_apply (b := id) τ.contMDiff Y.contMDiff
 
-/-- For smooth `Y ∈ Γ(TM)` and smooth `Z ∈ Γ(U)`, the `U`-valued section
-`x ↦ cov_U Z x (Y x)` is smooth. -/
 private theorem contMDiff_cov_U_apply_section
     (cov_U : CovariantDerivative I E_U U)
     [ContMDiffCovariantDerivative cov_U ∞]
@@ -426,10 +352,6 @@ private theorem contMDiff_cov_U_apply_section
     rwa [← contMDiffOn_univ]
   exact ContMDiff.clm_bundle_apply (b := id) hcov_U_global Y.contMDiff
 
-/-- For smooth τ (Hom(U, V)-section) and smooth Y (TM-section), the `Hom(U, V)`-section
-`x ↦ (homBundleCovariantDerivativeGenFun cov_U cov_V τ x)(Y x)` is smooth.
-
-This is the generic-source analog of `HomConnection.homBundleCov_section_smooth`. -/
 private theorem homBundleCovGen_section_smooth
     (cov_U : CovariantDerivative I E_U U)
     [ContMDiffCovariantDerivative cov_U ∞]
@@ -493,8 +415,6 @@ private theorem homBundleCovGen_section_smooth
   filter_upwards with x
   rw [h_eq]
 
-/-- The generic Hom-bundle covariant derivative on `Hom(U, V)` is `C^∞`, provided both
-`cov_U` and `cov_V` are `C^∞`. -/
 noncomputable instance homBundleCovariantDerivativeGen_contMDiff
     (cov_U : CovariantDerivative I E_U U)
     [ContMDiffCovariantDerivative cov_U ∞]
@@ -521,11 +441,6 @@ noncomputable instance homBundleCovariantDerivativeGen_contMDiff
       exact homBundleCovGen_section_smooth I M E_U U F V cov_U cov_V τ_section Y
   }
 
-/-- Pointwise characterization: when `τ` is a smooth Hom-bundle section and `Y` a smooth
-`U`-section, the generic Hom-bundle covariant derivative applied bilinearly to
-`v ∈ T_xM` and `Y x ∈ U x` has the value
-`cov_V (fun y => τ y (Y y)) x v − τ x (cov_U Y x v)`,
-i.e. the standard product-rule formula `(∇^Hom_v τ)(Y x) = ∇^V_v(τ(Y)) − τ(∇^U_v Y)`. -/
 theorem homBundleCovariantDerivativeGen_apply
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)

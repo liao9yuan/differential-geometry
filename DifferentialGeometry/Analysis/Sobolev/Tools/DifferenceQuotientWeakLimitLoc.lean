@@ -1,32 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
 
-/-!
-# Localized form: from a uniform difference-quotient `L²` bound to a weak
-partial derivative on a precompact open subdomain
-
-This module is a localized counterpart of
-`hasWeakPartialDeriv_of_diffQuot_uniform_bound_univ`. Given:
-
-* an open `Ω ⊆ E`,
-* an open `Ω'' ⊆ E` with compact closure and `closure Ω'' ⊆ Ω`,
-* an `h₀ > 0` with `Metric.cthickening h₀ (closure Ω'') ⊆ Ω`,
-* a function `w : E → ℝ` with `MemLp w 2 (volume.restrict Ω)`,
-* a uniform `L²(Ω'')` bound on the forward difference quotients
-  `D_h^k w` for `0 < |h| ≤ h₀`,
-
-we construct a function `g ∈ L²(Ω'')` realizing the weak `k`-partial
-derivative of `w` on `Ω''`, with the same `L²(Ω'')` bound.
-
-The proof packages the test integral `φ ↦ -∫_Ω w · ∂_k φ` as a linear
-functional on the dense submodule of smooth compactly-supported functions
-on `E` whose topological support lies inside `Ω''`. The room hypothesis
-`Metric.cthickening h₀ (closure Ω'') ⊆ Ω` ensures that the translates of
-these test functions by displacements of length at most `h₀` stay inside
-`Ω`, where `w` is `L²`. Cauchy–Schwarz on the discrete IBP identity then
-bounds the functional by `M · ‖φ‖_{L²(Ω'')}`. Riesz representation on
-`Lp ℝ 2 (volume.restrict Ω'')` yields the sought `g`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -84,9 +57,6 @@ private lemma smoothCSSupportedIn_smul_mem
     rw [hφx]; simp
   exact closure_mono hsubset
 
-/-- The submodule of smooth, compactly supported real functions on
-`E = EuclideanSpace ℝ (Fin d)` whose topological support lies inside the
-open set `Ω''`. -/
 def smoothCSSupportedInSubmodule (Ω'' : Set E) : Submodule ℝ (E → ℝ) where
   carrier := {φ | ContDiff ℝ (⊤ : ℕ∞) φ ∧ HasCompactSupport φ ∧
     tsupport φ ⊆ Ω''}
@@ -101,16 +71,13 @@ omit [NeZero d] in
   Iff.rfl
 
 omit [NeZero d] in
-/-- A smooth, compactly supported real function on Euclidean space has
-finite `L²` norm under the restriction of Lebesgue measure to any set. -/
+
 private lemma memLp_two_restrict_of_smoothCS
     {Ω'' : Set E}
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ) :
     MemLp φ 2 ((volume : Measure E).restrict Ω'') :=
   (hφ.continuous.memLp_of_hasCompactSupport hφ_supp).restrict _
 
-/-- The embedding of the smooth-compactly-supported-in-`Ω''` submodule into
-`Lp ℝ 2 (volume.restrict Ω'')` as a linear map. -/
 def smoothCSSupportedInToLp (Ω'' : Set E) :
     smoothCSSupportedInSubmodule (d := d) Ω'' →ₗ[ℝ]
       Lp ℝ 2 ((volume : Measure E).restrict Ω'') where
@@ -190,8 +157,6 @@ def smoothCSSupportedInToLp (Ω'' : Set E) :
       (memLp_two_restrict_of_smoothCS (d := d)
         (Ω'' := Ω'') φ.2.1 φ.2.2.1).toLp φ.1 := rfl
 
-/-- The image of the smooth-CS-supported-in-`Ω''` submodule has dense range
-in `Lp ℝ 2 (volume.restrict Ω'')`. -/
 lemma denseRange_smoothCSSupportedInToLp
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω'')) :
@@ -466,8 +431,7 @@ lemma denseRange_smoothCSSupportedInToLp
     linarith
 
 omit [NeZero d] in
-/-- For a smooth-CS test function `φ` and `w ∈ L²(Ω, volume)`, the
-integrand `w · ∂_k φ` is integrable on `Ω`. -/
+
 private lemma integrable_w_partial_phi_loc
     {Ω : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -488,8 +452,6 @@ private lemma integrable_w_partial_phi_loc
     (h_partial_cont.memLp_of_hasCompactSupport h_partial_supp).restrict _
   exact MemLp.integrable_mul hw_l2 h_partial_memLp
 
-/-- The pairing `Λ_w(φ) := -∫_Ω w · ∂_k φ` as a linear map from the
-smooth-CS-supported-in-`Ω''` submodule to ℝ. -/
 def smoothTestFunctional_loc
     {Ω Ω'' : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -596,10 +558,7 @@ omit [NeZero d] in
         ∂(volume : Measure E) := rfl
 
 omit [NeZero d] in
-/-- For `φ` smooth and compactly supported with `tsupport ⊆ Ω''`, and
-`|h| ≤ h₀`, the difference quotient `D_h^k φ` vanishes outside the closed
-`h₀`-thickening of `tsupport φ`, which (by the room hypothesis) lies inside
-`Ω`. -/
+
 private lemma diffQuot_eq_zero_of_notMem_cthickening_loc
     {φ : E → ℝ} (_hφ_supp : HasCompactSupport φ)
     (k : Fin d) {h₀ : ℝ} (_hh₀ : 0 ≤ h₀) {h : ℝ} (hh_bd : |h| ≤ h₀) :
@@ -632,10 +591,7 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening_loc
     simp
 
 omit [NeZero d] in
-/-- Convergence of `∫_Ω w · D_{-h_n}^k φ` to `∫_Ω w · ∂_k φ` along a sequence
-`h_n → 0` of nonzero values, for smooth-CS `φ` (with arbitrary support) and
-`w ∈ L²(Ω, volume)`. The proof uses dominated convergence with a Lipschitz
-bound for `D_{-h_n}^k φ`, restricted to a compact thickening of `tsupport φ`. -/
+
 private lemma tendsto_integral_w_diffQuot_phi_loc
     {Ω : Set E} {w : E → ℝ}
     (hw_l2 : MemLp w 2 ((volume : Measure E).restrict Ω))
@@ -786,7 +742,7 @@ private lemma tendsto_integral_w_diffQuot_phi_loc
     h_pointwise_bound h_bound_int h_pointwise_conv
 
 omit [NeZero d] in
-/-- Cauchy–Schwarz: for `f, g ∈ L²(μ)`, `|∫ f · g dμ| ≤ ‖f‖_{L²} · ‖g‖_{L²}`. -/
+
 private lemma abs_integral_mul_le_eLpNorm_two_loc
     {μ : Measure E} {f g : E → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
     ENNReal.ofReal |∫ x, f x * g x ∂μ| ≤ eLpNorm f 2 μ * eLpNorm g 2 μ := by
@@ -839,9 +795,7 @@ private lemma abs_integral_mul_le_norm_lp_mul_norm_lp_loc
   exact h_toReal
 
 omit [NeZero d] in
-/-- The localized smooth-test functional is bounded by `M · ‖φ‖_{L²(Ω'')}`
-whenever the difference quotients of `w` are uniformly `L²(Ω'')`-bounded
-by `M`, and the room hypothesis `cthickening h₀ Ω'' ⊆ Ω` holds. -/
+
 private lemma abs_smoothTestFunctional_loc_le
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1168,10 +1122,6 @@ private lemma abs_smoothTestFunctional_loc_le_lpNorm
   rw [h_norm_eq]
   exact h
 
-/-- The continuous linear extension of `smoothTestFunctional_loc` to all of
-`Lp ℝ 2 (volume.restrict Ω'')`. The hypotheses `hΩ''_open` and
-`hΩ''_compact_closure` are needed for the underlying density of the
-embedding. -/
 def smoothTestFunctional_loc_ext
     {Ω Ω'' : Set E} (_hΩ''_open : IsOpen Ω'')
     (_hΩ''_compact_closure : IsCompact (closure Ω''))
@@ -1182,7 +1132,6 @@ def smoothTestFunctional_loc_ext
   (smoothTestFunctional_loc (d := d) (Ω := Ω) (Ω'' := Ω'') hw_l2 k).extendOfNorm
     (smoothCSSupportedInToLp (d := d) Ω'')
 
-/-- The opNorm of the extension is bounded by `M`. -/
 private lemma opNorm_smoothTestFunctional_loc_ext_le
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1205,7 +1154,6 @@ private lemma opNorm_smoothTestFunctional_loc_ext_le
   exact abs_smoothTestFunctional_loc_le_lpNorm (d := d) hΩ_open hΩ''_open
     hΩ''_compact_closure hh₀ h_room hw_l2 k hM_nn h_bdd φ
 
-/-- The extension agrees with the original functional on the dense subspace. -/
 private lemma smoothTestFunctional_loc_ext_apply
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1231,7 +1179,6 @@ private lemma smoothTestFunctional_loc_ext_apply
   exact abs_smoothTestFunctional_loc_le_lpNorm (d := d) hΩ_open hΩ''_open
     hΩ''_compact_closure hh₀ h_room hw_l2 k hM_nn h_bdd ψ
 
-/-- The Riesz representative of the extended functional. -/
 def smoothTestFunctional_loc_riesz
     {Ω Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))
@@ -1260,8 +1207,7 @@ private lemma norm_smoothTestFunctional_loc_riesz
     (Lp ℝ 2 ((volume : Measure E).restrict Ω''))).symm.norm_map _
 
 omit [NeZero d] in
-/-- The defining property of the Riesz representative: for each
-`f ∈ Lp ℝ 2 (volume.restrict Ω'')`, `Λ_ext(f) = ⟨g_lp, f⟩_{L²}`. -/
+
 private lemma smoothTestFunctional_loc_ext_eq_inner
     {Ω Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω''))
@@ -1276,13 +1222,6 @@ private lemma smoothTestFunctional_loc_ext_eq_inner
   unfold smoothTestFunctional_loc_riesz
   rw [InnerProductSpace.toDual_symm_apply]
 
-/-- **Localized form: from a uniform diffQuot bound to a weak partial derivative.**
-
-If `w : E → ℝ` is in `L²(volume.restrict Ω)`, and the forward difference
-quotients `D_h^k w` are uniformly L²-bounded by `M ≥ 0` on a precompact
-open `Ω'' ⊆ Ω` (with `cthickening h₀ (closure Ω'') ⊆ Ω`, where `h₀ > 0`)
-for all `0 < |h| ≤ h₀`, then `w` admits a weak `k`-partial derivative
-`g ∈ L²(volume.restrict Ω'')` on `Ω''` with `‖g‖_{L²(Ω'')} ≤ M`. -/
 theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')

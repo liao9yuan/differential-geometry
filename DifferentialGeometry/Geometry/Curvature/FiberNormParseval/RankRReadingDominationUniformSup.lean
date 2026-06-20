@@ -4,46 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvatureUnitEvalBridge
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 
-/-!
-# Contravariant-valence-`r` slot-`0` reading domination and uniform curvature sup
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this file lifts to a fixed
-but generic *contravariant* valence `r` two facts that the existing library carries only at
-contravariant rank `0`, both consumed by the order-`0` layer of the frame-free pure-Riemann
-differentiated curvature tower at valence `r` (`RankRPureRCurvatureTower`):
-
-* **The slot-`0` reading domination**
-  `riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs`: the slot-`0` reading
-  `(covGradBundleEquiv r s x).symm T (B i x)` of an `(r, s + 1)`-tensor `T` along a `g_x`-orthonormal
-  frame direction `B i x` — an `(r, s)`-tensor — is fibre-dominated by the full `(r, s + 1)` fibre
-  norm of `T`.  At contravariant rank `0` this is
-  `riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le`
-  (`CovGradBundleEquivFiberNormFrameSum`), which routes through the slot-`0` curry chain
-  (`slot0Curry`, hard-locked to contravariant `0`); the valence-`r` version below is proved instead
-  by the **rank-generic component Parseval** (`riemannianFiberNormSq_eq_tensorInnerPointwise` +
-  `tensorInnerPointwise_eq_sum_componentS_mul`) and the rank-generic slot-`0` evaluation bridge
-  `covGradBundleEquiv_symm_apply_eval`, never touching the contravariant-`0`-only slot-`0` curry.
-
-* **The uniform-over-`M` proportional curvature-operator fibre bound**
-  `exists_uniform_riemannianFiberNormSq_riemannOp_tensorCovRS_proportional`: a single nonnegative
-  constant `C`, independent of the base point, with
-  `rfns(R_x(v, w) T) ≤ C · g(v, v) · g(w, w) · rfns(T)` at every `x` and every `(v, w, T)` at
-  valence `(r, s)`.  At contravariant rank `0` this is
-  `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` (uniformised over the
-  compact `M`); at valence `r` it is built here from the per-point bound
-  `exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs` and the **uniform dual-frame
-  curvature energy** `exists_uniform_riemannOp_tensorCovRS_dualFrameEnergy_const`, whose single
-  dual-frame term is dominated, through the rank-generic slot-wise curvature formula
-  `riemannSec_tensorCov_apply_eval` (covariant `(0, s)` slots and contravariant `(0, r)` slots), by
-  the valence-free Levi-Civita base-curvature bound `exists_uniform_riemannOp_LeviCivita_gNorm_bound`
-  (`Kbase`) — exactly the valence-`r` mirror of the contravariant-`0` dual-frame energy constant
-  `exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const`.
-
-## Convention
-
-All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq` (`rfns`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -72,14 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The valence-`r` slot-`0` reading domination -/
-
-/-- **The slot-`0` reading frame component equals a slot-shifted full-tensor frame component.** For a
-`g_x`-orthonormal frame `e`, the `(K, J)` frame component of the slot-`0` reading
-`(covGradBundleEquiv r s x).symm T (e a)` (an `(r, s)`-tensor) equals the `(K, Fin.cons a J)` frame
-component of the full `(r, s + 1)`-tensor `T`: through the rank-generic evaluation bridge
-`covGradBundleEquiv_symm_apply_eval`, reading `T` at the slot-`0` direction `e a` prepends `a` to the
-covariant multi-index. -/
 private lemma reading_fiberNormSqComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
@@ -102,13 +54,6 @@ private lemma reading_fiberNormSqComponent_eq
   congr 1
   exact (Fin.comp_cons e a J).symm
 
-/-- **The intrinsic `(r, s)` fibre norm is the frame component square sum in any `g_x`-orthonormal
-frame.** For any `g_x`-orthonormal frame `e` (packaged as a `Module.Basis bse`,
-`n = Module.finrank ℝ E`), the intrinsic Riemannian fibre norm squared of an `(r, s)`-tensor `S` is
-the double-multi-index sum of squared frame components.  This is the rank-`(r, s)` lift of
-`rfns_eq_sum_fiberNormSqSummand_of_orthoFrame` (contravariant `0` only), obtained from the bilinear
-fibre-inner frame bridge `tensorInnerPointwise_eq_sum_componentS_mul` (diagonal) through
-`riemannianFiberNormSq_eq_tensorInnerPointwise`. -/
 private lemma rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -123,16 +68,6 @@ private lemma rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
-/-- **The slot-`0` reading of an `(r, s + 1)`-tensor along a `g_x`-orthonormal frame direction is
-fibre-dominated by the whole (valence `r`).** For a `g_x`-orthonormal frame `B` (δ-form Gram, so each
-`B i x` a unit direction), the slot-`0` reading `(covGradBundleEquiv r s x).symm T (B i x)` — an
-`(r, s)`-tensor — has intrinsic fibre norm at most the full `(r, s + 1)` fibre norm of `T`.  This is
-the verbatim contravariant-valence-`r` mirror of the contravariant-`0`
-`riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le`; the proof Parseval-expands both fibre
-norms in the frame `eC i := B i x` (`rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis`), rewrites each
-reading component as the `Fin.cons i`-shifted full-tensor component (`reading_fiberNormSqComponent_eq`),
-and dominates the shifted-index sum by the full multi-index sum (the map `J ↦ Fin.cons i J` is
-injective). -/
 theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
@@ -149,7 +84,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
       g.inner x (eC a) (eC b) = if a = b then (1 : ℝ) else 0 := fun a b => hBorth a b
   haveI : Nonempty (Fin (Module.finrank ℝ E)) :=
     ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
-  -- The orthonormal frame `eC` is linearly independent, hence a `Module.Basis`.
+  
   have he_li : LinearIndependent ℝ eC := by
     rw [linearIndependent_iff']
     intro fs c hsum k hk_mem
@@ -176,7 +111,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
     hbse horthC]
   have hBix : B i x = eC i := rfl
   rw [hBix]
-  -- Termwise: each reading component is the `Fin.cons i`-shifted full-tensor component.
+  
   have hcomp : ∀ K : Fin r → Fin (Module.finrank ℝ E), ∀ J : Fin s → Fin (Module.finrank ℝ E),
       (fiberNormSqComponent (I := I) (M := M) g x r s
           ((covGradBundleEquiv (I := I) (M := M) r s x).symm T (eC i))
@@ -186,7 +121,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
     intro K J
     rw [reading_fiberNormSqComponent_eq (I := I) (M := M) g r s x T eC K J i]
   rw [Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => hcomp K J))]
-  -- The shifted-index sum is dominated by the full multi-index sum (`J ↦ Fin.cons i J` injective).
+  
   refine Finset.sum_le_sum (fun K _ => ?_)
   let consi : (Fin s → Fin (Module.finrank ℝ E)) → (Fin (s + 1) → Fin (Module.finrank ℝ E)) :=
     fun J => Fin.cons i J

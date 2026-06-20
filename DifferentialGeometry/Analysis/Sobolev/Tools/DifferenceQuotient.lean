@@ -1,17 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.Convolution
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 
-/-!
-# Forward difference quotients on Euclidean space
-
-This module develops the forward difference quotient
-
-  `D_h^i v(x) := (v(x + h e_i) - v(x))/h`
-
-in coordinate direction `i ∈ Fin d` on `EuclideanSpace ℝ (Fin d)` and the
-basic estimates needed for first-order Sobolev regularity arguments.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -23,16 +12,11 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The forward difference quotient `D_h^i v(x) := (v(x + h e_i) - v(x))/h`
-in coordinate direction `i`. For `h = 0`, defined to be `0` (a junk default,
-chosen so that the operator is total without affecting the `h ≠ 0` regime). -/
 noncomputable def diffQuot (i : Fin d) (h : ℝ) (v : E → ℝ) : E → ℝ :=
   fun x =>
     if h = 0 then 0 else
       (v (x + h • EuclideanSpace.single i 1) - v x) / h
 
-/-- The translation `τ_{h e_i} v(x) := v(x + h e_i)` in coordinate direction
-`i`. -/
 noncomputable def translate (i : Fin d) (h : ℝ) (v : E → ℝ) : E → ℝ :=
   fun x => v (x + h • EuclideanSpace.single i 1)
 
@@ -93,7 +77,7 @@ omit [NeZero d] in
   simp [translate]
 
 omit [NeZero d] in
-/-- `diffQuot` is additive in the function. -/
+
 @[simp] lemma diffQuot_add (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     diffQuot i h (v + w) = diffQuot i h v + diffQuot i h w := by
   ext x
@@ -103,7 +87,7 @@ omit [NeZero d] in
     ring
 
 omit [NeZero d] in
-/-- `diffQuot` is homogeneous in the function. -/
+
 @[simp] lemma diffQuot_smul (i : Fin d) (h c : ℝ) (v : E → ℝ) :
     diffQuot i h (c • v) = c • diffQuot i h v := by
   ext x
@@ -113,7 +97,7 @@ omit [NeZero d] in
     ring
 
 omit [NeZero d] in
-/-- `diffQuot` is subtractive in the function. -/
+
 @[simp] lemma diffQuot_sub (i : Fin d) (h : ℝ) (v w : E → ℝ) :
     diffQuot i h (v - w) = diffQuot i h v - diffQuot i h w := by
   ext x
@@ -140,7 +124,7 @@ omit [NeZero d] in
     ring
 
 omit [NeZero d] in
-/-- The translation map is measurable when the underlying function is. -/
+
 lemma measurable_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Measurable v) :
     Measurable (translate i h v) := by
@@ -149,8 +133,7 @@ lemma measurable_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
   exact hv.comp hadd
 
 omit [NeZero d] in
-/-- The difference quotient inherits measurability from the underlying
-function. -/
+
 lemma measurable_diffQuot (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Measurable v) :
     Measurable (diffQuot i h v) := by
@@ -169,7 +152,7 @@ lemma measurable_diffQuot (i : Fin d) (h : ℝ) {v : E → ℝ}
     rw [heq]; exact hd
 
 omit [NeZero d] in
-/-- Continuity is preserved under translation. -/
+
 lemma continuous_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Continuous v) : Continuous (translate i h v) := by
   have hadd : Continuous (fun x : E => x + h • EuclideanSpace.single i 1) :=
@@ -177,7 +160,7 @@ lemma continuous_translate (i : Fin d) (h : ℝ) {v : E → ℝ}
   exact hv.comp hadd
 
 omit [NeZero d] in
-/-- The difference quotient of a continuous function is continuous. -/
+
 lemma continuous_diffQuot_of_continuous (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Continuous v) : Continuous (diffQuot i h v) := by
   by_cases hh : h = 0
@@ -195,8 +178,7 @@ lemma continuous_diffQuot_of_continuous (i : Fin d) (h : ℝ) {v : E → ℝ}
     rw [heq]; exact hd
 
 omit [NeZero d] in
-/-- The difference quotient inherits AEStronglyMeasurability when measured
-against the Lebesgue measure (which is translation-invariant). -/
+
 lemma aestronglyMeasurable_diffQuot
     (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : AEStronglyMeasurable v volume) :
@@ -231,9 +213,7 @@ lemma aestronglyMeasurable_diffQuot
     rw [heq]; exact hd
 
 omit [NeZero d] in
-/-- For a `C¹` function `v`, the difference quotient `diffQuot i h v x`
-converges as `h → 0` to the directional derivative
-`(fderiv ℝ v x) (EuclideanSpace.single i 1)`. -/
+
 lemma tendsto_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) (x : E) :
     Tendsto (fun h : ℝ => diffQuot i h v x) (𝓝[≠] 0)
@@ -284,7 +264,7 @@ private lemma measurePreserving_translate (i : Fin d) (h : ℝ) :
   measurePreserving_add_right volume _
 
 omit [NeZero d] in
-/-- L^p-translation invariance: if `v ∈ L^p`, then `translate i h v ∈ L^p`. -/
+
 lemma memLp_translate
     {p : ℝ≥0∞} (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : MemLp v p volume) :
@@ -301,7 +281,7 @@ lemma memLp_translate
   rw [h_eq]; exact hv.eLpNorm_lt_top
 
 omit [NeZero d] in
-/-- `Integrable` is preserved under translation. -/
+
 lemma integrable_translate
     (i : Fin d) (h : ℝ) {v : E → ℝ}
     (hv : Integrable v volume) :
@@ -310,15 +290,14 @@ lemma integrable_translate
   exact hMP.integrable_comp_of_integrable hv
 
 omit [NeZero d] in
-/-- The Hölder triple `(2, 2, 1)` instance — used to make
-`MemLp.integrable_mul` applicable for `f, g ∈ L²`. -/
+
 private lemma holder_two_two : ENNReal.HolderTriple (2 : ℝ≥0∞) 2 1 := by
   constructor
   rw [show (1 : ℝ≥0∞)⁻¹ = 1 from inv_one]
   rw [ENNReal.inv_two_add_inv_two]
 
 omit [NeZero d] in
-/-- For `f, g ∈ L²(volume)`, the product `f · g` is integrable. -/
+
 lemma integrable_mul_of_memLp_two
     {f g : E → ℝ} (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
     Integrable (fun x => f x * g x) volume := by
@@ -328,12 +307,7 @@ lemma integrable_mul_of_memLp_two
   simpa using h
 
 omit [NeZero d] in
-/-- The discrete integration-by-parts identity. For `f, g ∈ L²(ℝ^d)` and `h ≠ 0`:
 
-  `∫ (D_h^i f) · g dx = -∫ f · (D_{-h}^i g) dx`.
-
-This follows from the change of variables `x ↦ x - h • e_i` in the integral
-of `f(x + h e_i) g(x)`. -/
 theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
     (i : Fin d) {h : ℝ} (hh : h ≠ 0) {f g : E → ℝ}
     (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
@@ -434,10 +408,7 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
   rw [div_neg, neg_neg]
 
 omit [NeZero d] in
-/-- FTC representation of the forward difference quotient: for `v ∈ C¹` and
-`h ≠ 0`,
 
-  `(v(x + h e_i) - v(x))/h = ∫₀¹ (∂_i v)(x + s h e_i) ds`. -/
 lemma diffQuot_eq_integral_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (x : E) :
@@ -525,10 +496,7 @@ lemma diffQuot_eq_integral_partialDeriv
   rw [hrewrite_goal]
 
 omit [NeZero d] in
-/-- Squared pointwise bound for the difference quotient via Jensen's inequality
-on the probability measure on `Ioc 0 1`. For `v ∈ C¹` and `h ≠ 0`,
 
-  `(D_h^i v(x))² ≤ ∫₀¹ ((∂_i v)(x + s h e_i))² ds`. -/
 lemma sq_diffQuot_le_integral_sq_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     (x : E) :
@@ -578,8 +546,7 @@ lemma sq_diffQuot_le_integral_sq_partialDeriv
   exact hJensen
 
 omit [NeZero d] in
-/-- Pointwise bound for the difference quotient on a smaller domain `Ω'`
-when `v ∈ C¹` and the displacement is admissible. -/
+
 lemma sq_diffQuot_le_integral_indicator
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     {Ω : Set E} (hΩ : MeasurableSet Ω)
@@ -626,15 +593,7 @@ lemma sq_diffQuot_le_integral_indicator
   exact hbase
 
 omit [NeZero d] in
-/-- The L² lintegral bound for a smooth function on `ℝ^d`, in the global
-form: for `v ∈ C¹(ℝ^d)` and `h ≠ 0`,
 
-  `∫⁻ x : E, ‖D_h^i v(x)‖ₑ² dx ≤ ∫⁻ y : E, ‖(∂_i v)(y)‖ₑ² dy`.
-
-This is the global "Nirenberg-style" L² estimate over all of `ℝ^d`: the
-difference quotient is dominated in L² norm by the partial derivative.
-The proof uses the FTC representation, Jensen's inequality, Fubini, and
-translation invariance of Lebesgue measure. -/
 theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0) :
     ∫⁻ x : E, (‖diffQuot i h v x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure E) ≤
@@ -749,10 +708,7 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     _ = ∫⁻ y : E, H y ∂(volume : Measure E) := h_lintegral_const
 
 omit [NeZero d] in
-/-- `eLpNorm` form of the global L² Nirenberg-style bound: for `v ∈ C¹(ℝ^d)`
-and `h ≠ 0`,
 
-  `‖D_h^i v‖_{L²(ℝ^d)} ≤ ‖∂_i v‖_{L²(ℝ^d)}`. -/
 theorem eLpNorm_diffQuot_le_eLpNorm_partialDeriv
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (i : Fin d) {h : ℝ} (hh : h ≠ 0) :
     eLpNorm (diffQuot i h v) 2 (volume : Measure E) ≤
@@ -794,9 +750,7 @@ theorem eLpNorm_diffQuot_le_eLpNorm_partialDeriv
     (d := d) hv i hh
 
 omit [NeZero d] in
-/-- For `φ ∈ C¹(ℝ^d)` compactly supported, the difference quotients
-`diffQuot i h φ` are uniformly bounded by the Lipschitz constant of `φ`,
-independently of `h`. -/
+
 private lemma diffQuot_bound_of_lipschitz
     {φ : E → ℝ} (hφ_C1 : ContDiff ℝ 1 φ) (hφ_supp : HasCompactSupport φ)
     (i : Fin d) :
@@ -831,21 +785,7 @@ private lemma diffQuot_bound_of_lipschitz
     exact hLip_apply
 
 omit [NeZero d] in
-/-- Identification of the weak partial derivative as the limit of difference
-quotients (whole-space, `Set.univ`).
 
-Suppose `v ∈ L²(ℝ^d)`. Suppose there is a sequence `h_n → 0` with `h_n ≠ 0`
-such that for every smooth compactly supported test function `φ`:
-
-* `∫ (D_{h_n}^i v) φ → ∫ g φ` (the weak limit of the diff quotients tested
-  against `φ`),
-* `∫ v · (D_{-h_n}^i φ) → ∫ v · ∂_i φ` (the dual difference quotient
-  applied to `φ` and integrated against `v` converges to the integral of
-  `v` against the partial derivative of `φ`).
-
-Then `g` is the weak partial derivative of `v` in direction `i` on
-`Set.univ`. The discrete IBP identity (`integral_diffQuot_mul_eq_neg_integral_mul_diffQuot`)
-relates the two sequences and identifies the limit. -/
 theorem hasWeakPartialDeriv_of_diffQuot_tendsto_inner
     (i : Fin d) {v g : E → ℝ}
     (hv_memLp : MemLp v 2 (volume : Measure E))

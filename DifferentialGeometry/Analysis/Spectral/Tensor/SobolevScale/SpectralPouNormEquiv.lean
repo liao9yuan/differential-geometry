@@ -3,44 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2SpectralIterateEquiv
 
-/-!
-# The general-order spectral-scale ↔ `L²`-iterate bridge for smooth tensors
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(0, 2)`-tensor `T`, the canonical spectral embedding of `T` into the intrinsic
-spectral Sobolev scale `tensorHs g 0 2 σ` is the coordinate family
-`i ↦ tensorL2Coeff (toL2 T) i` (the `L²` eigenbasis coordinates of `T`),
-square-summably weighted at every real order `σ`
-(`smoothCcTensor_tensorL2Coeff_weighted_summable`).
-
-This file records the reusable analytic identities relating the **spectral**
-order-`σ` norm of this embedding to the `L²` norms of the rough-connection-Laplacian
-machinery, promoted to first-class library API:
-
-* `ccSpectralEmbed g σ T` — the spectral element with coordinates the `L²`
-  eigenbasis coordinates of `T`.
-* `ccSpectralEmbed_norm_sq_eq_tsum` — its squared spectral norm is the weighted
-  `tsum` `∑ᵢ (1 + λᵢ)^σ · cᵢ(T)²`.
-* `ccSpectralEmbed_norm_mono` — the spectral norm is **monotone in the order** `σ`
-  (the weight `(1 + λᵢ)^σ` is monotone in `σ` since `1 + λᵢ ≥ 1`).
-* `ccSpectralEmbed_even_norm_sq_eq_oneMinusConnLap_l2`
-  (**N1a**) — at an even natural order `2k` the squared spectral norm equals the
-  squared `L²` norm of the `k`-fold one-minus-connection-Laplacian iterate:
-  `‖ccSpectralEmbed g (2k) T‖² = ‖toL2 ((1 - Δ_∇)^k T)‖²_{L²}`.
-* `rawConnLapIter_l2_le_ccSpectralEmbed_even` — the `L²` norm of the `j`-fold
-  **rough** connection-Laplacian iterate `Δ_∇^j T` is bounded by the spectral norm
-  at order `2j`, since `λᵢ^{2j} ≤ (1 + λᵢ)^{2j}`.
-* `tensorPouSobolevHsNorm_le_ccSpectralEmbed` (**N1**, PoU → spectral) — the
-  general-order chart-Sobolev (partition-of-unity) norm `(tensorPouSobolevHsNorm g k T).toReal`
-  is bounded by a constant times the spectral norm at order `2k`, composing the
-  all-orders Gårding estimate with the previous iterate bound and the spectral
-  monotonicity.
-
-These are the chart-locality-free general-order generalisations of the order-`2`
-`Order2SpectralIterateEquiv` results, on the **spectral** rather than the `Δ_∇`-`L²`
-reference scale.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -69,13 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **The canonical spectral embedding of a smooth tensor at order `σ`.**
-
-The smooth compactly-supported `(0, 2)`-tensor `T` is sent to the order-`σ` spectral
-element of `tensorHs g 0 2 σ` whose eigenbasis coordinates are the `L²` coordinates of
-`T` (`tensorL2Coeff (toL2 T)`).  Its weighted summability is the spectral-scale
-summability of a smooth compactly-supported tensor at every real order
-(`smoothCcTensor_tensorL2Coeff_weighted_summable`). -/
 def ccSpectralEmbed (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (T : SmoothCcTensor g 0 2) :
     tensorHs (I := I) (M := M) g 0 2 σ where
@@ -96,8 +51,6 @@ def ccSpectralEmbed (g : SmoothRiemannianMetric I M) (σ : ℝ)
         (SmoothCcTensor.toL2 T) i :=
   rfl
 
-/-- The squared spectral norm of `ccSpectralEmbed g σ T` is the weighted `tsum`
-`∑ᵢ (1 + λᵢ)^σ · cᵢ(T)²`. -/
 theorem ccSpectralEmbed_norm_sq_eq_tsum (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (T : SmoothCcTensor g 0 2) :
     ‖ccSpectralEmbed (I := I) (M := M) g σ T‖ ^ 2 =
@@ -110,9 +63,6 @@ theorem ccSpectralEmbed_norm_sq_eq_tsum (g : SmoothRiemannianMetric I M) (σ : �
     (ccSpectralEmbed (I := I) (M := M) g σ T)]
   exact tsum_congr (fun i => by rw [ccSpectralEmbed_coeff])
 
-/-- **The spectral norm is monotone in the order `σ`.**  Since `1 + λᵢ ≥ 1`, the
-Sobolev weight `(1 + λᵢ)^σ` is monotone increasing in `σ`, so the spectral norm of a
-fixed smooth tensor's embedding grows with the order. -/
 theorem ccSpectralEmbed_norm_mono (g : SmoothRiemannianMetric I M)
     {σ τ : ℝ} (hστ : σ ≤ τ) (T : SmoothCcTensor g 0 2) :
     ‖ccSpectralEmbed (I := I) (M := M) g σ T‖ ≤
@@ -134,16 +84,6 @@ theorem ccSpectralEmbed_norm_mono (g : SmoothRiemannianMetric I M)
     · exact (ccSpectralEmbed (I := I) (M := M) g τ T).weighted_summable
   exact le_of_sq_le_sq hsq hnn_τ
 
-/-- **N1a — the even-order spectral norm is the `L²` norm of the
-one-minus-connection-Laplacian iterate.**
-
-At even natural order `2k`, the squared spectral norm of `ccSpectralEmbed g (2k) T`
-equals the squared `L²` norm of the `k`-fold smooth one-minus-connection-Laplacian
-iterate `(1 - Δ_∇)^k T`.
-
-The proof reformulates the weighted coordinate family `(1 + λᵢ)^{2k} cᵢ(T)²` as the
-unweighted square `cᵢ((1 - Δ_∇)^k T)²` via the iterated per-step eigen-coordinate
-identity `tensorL2Coeff_ofCompact_oneMinusConnLapSmoothIter`, then sums with Parseval. -/
 theorem ccSpectralEmbed_even_norm_sq_eq_oneMinusConnLap_l2
     (g : SmoothRiemannianMetric I M) (k : ℕ) (T : SmoothCcTensor g 0 2) :
     ‖ccSpectralEmbed (I := I) (M := M) g ((2 * k : ℕ) : ℝ) T‖ ^ 2 =
@@ -171,10 +111,6 @@ theorem ccSpectralEmbed_even_norm_sq_eq_oneMinusConnLap_l2
   exact tensorParseval_l2Coeff_ofCompact_sq (I := I) (M := M) h_compact
     (SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g 0 2 k T))
 
-/-- **The per-step eigen-coordinate identity for the rough connection Laplacian.**
-Applying the smooth rough connection Laplacian scales the `i`-th eigenbasis
-coordinate by `-λᵢ`: `cᵢ(Δ_∇ T) = -λᵢ · cᵢ(T)`.  Derived from the one-minus
-identity `cᵢ((1 - Δ_∇) T) = (1 + λᵢ) cᵢ(T)` and `Δ_∇ T = T - (1 - Δ_∇) T`. -/
 theorem tensorL2Coeff_ofCompact_rawTensorConnLapSmooth
     (g : SmoothRiemannianMetric I M)
     (h_compact : IsCompactOperator (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2 (I := I) (M := M) g 0 2))
@@ -196,8 +132,6 @@ theorem tensorL2Coeff_ofCompact_rawTensorConnLapSmooth
     tensorL2Coeff_ofCompact_oneMinusConnLapSmooth (I := I) (M := M) g h_compact T i]
   ring
 
-/-- The iterated rough-Laplacian eigen-coordinate identity:
-`cᵢ(Δ_∇^j T) = (-λᵢ)^j · cᵢ(T)`. -/
 theorem tensorL2Coeff_ofCompact_rawTensorConnLapIter
     (g : SmoothRiemannianMetric I M)
     (h_compact : IsCompactOperator (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorResolventL2 (I := I) (M := M) g 0 2))
@@ -215,10 +149,6 @@ theorem tensorL2Coeff_ofCompact_rawTensorConnLapIter
         ih, pow_succ]
       ring
 
-/-- **The `L²` norm of the `j`-fold rough-Laplacian iterate is bounded by the
-spectral norm at order `2j`.**  Since `λᵢ^{2j} ≤ (1 + λᵢ)^{2j}`, the `Δ_∇`-`L²`
-energy `∑ᵢ λᵢ^{2j} cᵢ²` is dominated coordinatewise by the order-`2j` spectral
-energy `∑ᵢ (1 + λᵢ)^{2j} cᵢ²`. -/
 theorem rawConnLapIter_l2_le_ccSpectralEmbed_even
     (g : SmoothRiemannianMetric I M) (j : ℕ) (T : SmoothCcTensor g 0 2) :
     ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)‖ ≤
@@ -261,20 +191,6 @@ theorem rawConnLapIter_l2_le_ccSpectralEmbed_even
     · exact (ccSpectralEmbed (I := I) (M := M) g ((2 * j : ℕ) : ℝ) T).weighted_summable
   exact le_of_sq_le_sq hsq hnn
 
-/-- **N1 — the general-order PoU → spectral comparison.**
-
-There is a nonnegative constant `C` (uniform in `T`) such that the general-order
-chart-Sobolev (partition-of-unity) norm `(tensorPouSobolevHsNorm g k T).toReal` is
-bounded by `C` times the spectral norm at order `2k`:
-```
-(tensorPouSobolevHsNorm g k T).toReal ≤ C · ‖ccSpectralEmbed g (2k) T‖.
-```
-The proof composes the all-orders intrinsic Gårding estimate
-`exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter g 2 k`
-(PoU ≤ Gårding-`C` · `∑_{j ≤ k} ‖Δ_∇^j T‖_{L²}`) with the per-iterate spectral bound
-`rawConnLapIter_l2_le_ccSpectralEmbed_even` (`‖Δ_∇^j T‖_{L²} ≤ ‖ccSpectralEmbed g (2j) T‖`)
-and the spectral monotonicity `ccSpectralEmbed_norm_mono` (`2j ≤ 2k`), so each of the
-`k + 1` summands is `≤ ‖ccSpectralEmbed g (2k) T‖`, giving the constant `C · (k + 1)`. -/
 theorem tensorPouSobolevHsNorm_le_ccSpectralEmbed (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ T : SmoothCcTensor g 0 2,

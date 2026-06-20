@@ -3,41 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.H2
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 
-/-!
-# Convergence of the smooth-density approximator sequence in `H1Compl g`
-
-For a closed Riemannian manifold `(M, g)`, the smooth approximator sequence
-`smoothApproxSeq g hu_h` for an element `u_h ∈ laplacianDomainPow g 2`
-satisfies `smoothToH1Compl (smoothApproxSeq n) → u_h` in `H1Compl g`.
-
-## Strategy
-
-1. The chart-`W^{2,2}` Cauchy property `smoothApproxSeq_wkpNormChart_diff_le`
-   gives chart-`W^{2,2}` Cauchy. By monotonicity of `wkpNorm` in `k`, the
-   sequence is chart-`W^{1,2}` Cauchy.
-2. The chart-`W^{1,2}` → manifold `L^2` and chart-`W^{1,2}` → manifold
-   gradient-`L^2` bounds (from `Sobolev.Intrinsic.EquivalenceFull`) give a
-   quantitative bound `‖f‖_{SmoothScalar g} ≤ C · wkpNormChart g 1 2 f` for
-   smooth scalars. Hence the smooth approximator sequence is Cauchy in
-   `SmoothScalar g`.
-3. The embedding `smoothToH1Compl` is uniformly continuous; the lifted
-   sequence is Cauchy in `H1Compl g`. By completeness it converges to some
-   `u_*`.
-4. The chart-`W^{1,2}` → manifold `L^2` bound also gives `L^2` convergence of
-   `smoothApproxSeq.toFun n` to the canonical function representative of
-   `u_h`, hence `smoothToLp (smoothApproxSeq n) → H1ComplToLp u_h` in `Lp`.
-5. By the variational identity for smooth lifts and Lp-continuity, for every
-   smooth test `f`, `⟨smoothToH1Compl (smoothApproxSeq n), smoothToH1Compl f⟩
-   → ⟨u_h, smoothToH1Compl f⟩`. The limit therefore agrees with `u_h` on
-   smooth tests; by density of `smoothToH1Compl(SmoothScalar g)` in
-   `H1Compl g`, the limit equals `u_h`.
-
-## Main result
-
-* `smoothApproxSeq_tendsto_h1Compl` — for `u_h ∈ laplacianDomainPow g 2`,
-  `smoothToH1Compl (smoothApproxSeq n) → u_h` in `H1Compl g`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -68,9 +33,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The Euclidean `wkpNorm` is monotone in the order parameter (when we step
-from `k` to `k+1`): the partial sum over indices `j ≤ k` is bounded by the
-sum over `j ≤ k+1`. -/
 private lemma wkpNorm_succ_ge
     (d : ℕ) (k : ℕ) (p : ℝ≥0∞)
     (u : EuclideanSpace ℝ (Fin d) → ℝ)
@@ -87,7 +49,6 @@ private lemma wkpNorm_succ_ge
     omega
   · intro _ _ _; exact zero_le _
 
-/-- The chart-based norm is monotone in the order parameter. -/
 lemma wkpNormChart_le_succ
     (g : SmoothRiemannianMetric I M)
     (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) :
@@ -98,8 +59,6 @@ lemma wkpNormChart_le_succ
   refine ENNReal.tsum_le_tsum (fun α => ?_)
   exact wkpNorm_succ_ge (d := Module.finrank ℝ E) k p _ _
 
-/-- The chart-based norm at order `1` is bounded by the chart-based norm at
-order `2`. -/
 lemma wkpNormChart_one_le_two
     (g : SmoothRiemannianMetric I M)
     (p : ℝ≥0∞) (u : M → ℝ) :
@@ -107,8 +66,6 @@ lemma wkpNormChart_one_le_two
       wkpNormChart (I := I) (M := M) g 2 p u := by
   exact wkpNormChart_le_succ (I := I) (M := M) g 1 p u
 
-/-- For a smooth `f : SmoothScalar g`, the manifold `eLpNorm` of `f.toFun` is
-bounded by a uniform constant times `wkpNormChart g 1 2 f.toFun`. -/
 private lemma eLpNorm_smoothScalar_le_const_mul_wkpNormChart_one
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -125,9 +82,6 @@ private lemma eLpNorm_smoothScalar_le_const_mul_wkpNormChart_one
   intro f
   exact hbound f.smooth.continuous.measurable
 
-/-- For a smooth `f : SmoothScalar g`, the manifold `eLpNorm` of
-`√(g.inner (gradFun f) (gradFun f))` is bounded by a uniform constant
-times `wkpNormChart g 1 2 f.toFun`. -/
 private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -147,7 +101,6 @@ private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
   intro f
   exact hbound f.smooth
 
-/-- The squared L² eLpNorm of a smooth scalar equals `∫ f²`. -/
 private lemma eLpNorm_sq_toReal_eq_integral_sq
     (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
     (eLpNorm f.toFun 2
@@ -163,7 +116,6 @@ private lemma eLpNorm_sq_toReal_eq_integral_sq
   rw [← h_norm]
   exact h
 
-/-- The squared gradient L² eLpNorm equals `∫ g(grad f, grad f)`. -/
 private lemma eLpNorm_gNormGrad_sq_toReal_eq_integral_inner_grad
     (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
     (eLpNorm (fun x : M => Real.sqrt
@@ -241,8 +193,6 @@ private lemma eLpNorm_gNormGrad_sq_toReal_eq_integral_inner_grad
   rw [h_integrand_eq] at h_inner
   exact h_inner.symm
 
-/-- The bound `‖f‖_{SmoothScalar g} ≤ C * (wkpNormChart g 1 2 f.toFun).toReal`
-for smooth `f`. -/
 lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -324,8 +274,6 @@ lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
     _ ≤ C₀ * N + C₁ * N := add_le_add h_L_le_C0N h_Gnorm_le_C1N
     _ = (C₀ + C₁) * N := by ring
 
-/-- For any smooth scalars `v, w : SmoothScalar g`, the chart-W^{1,2} norm of
-their difference is finite. -/
 lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
     (g : SmoothRiemannianMetric I M)
     (v w : SmoothScalar g) :
@@ -345,7 +293,6 @@ lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
       (I := I) (M := M) g hp_one hv_mem hw_mem
   exact (wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) g hp_one h_diff_mem).ne
 
-/-- The smooth approximator sequence is Cauchy in `SmoothScalar g`. -/
 theorem smoothApproxSeq_cauchy_smoothScalar
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -449,7 +396,6 @@ theorem smoothApproxSeq_cauchy_smoothScalar
   have hC_lt_Cp1 : C < Cp1 := by rw [hCp1_def]; linarith
   nlinarith [hε_pos]
 
-/-- The lifted smooth approximator sequence is Cauchy in `H1Compl g`. -/
 theorem smoothToH1Compl_smoothApproxSeq_cauchy
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -472,8 +418,6 @@ private theorem smoothToH1Compl_smoothApproxSeq_has_limit
   cauchySeq_tendsto_of_complete
     (smoothToH1Compl_smoothApproxSeq_cauchy (I := I) (M := M) g hu_h)
 
-/-- The smooth approximator sequence's underlying functions converge to the
-canonical Lp representative of `u_h` in the manifold `L^2` norm. -/
 private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -578,7 +522,7 @@ private theorem eLpNorm_diff_smoothApproxSeq_tendsto_zero
   exact ENNReal.ofReal_le_ofReal h_final_real
 
 set_option maxHeartbeats 1600000 in
-/-- The Lp class of `smoothApproxSeq` converges to `H1ComplToLp u_h` in `Lp`. -/
+
 private theorem smoothToLp_smoothApproxSeq_tendsto
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -654,8 +598,6 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
     exact this
   linarith
 
-/-- For smooth `v, f : SmoothScalar g`, the H¹ inner product satisfies
-`smoothScalarH1Inner v f = ⟨smoothToLp(f.oneSubLapClassical), smoothToLp v⟩_{Lp}`. -/
 lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
     (g : SmoothRiemannianMetric I M) (v f : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) v f =
@@ -664,8 +606,6 @@ lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
   rw [smoothScalarH1Inner_symm]
   exact smoothScalarH1Inner_eq_lpInner_oneSubLap f v
 
-/-- For any `u_h ∈ H1Compl g` and smooth `f : SmoothScalar g`, the inner product
-`⟨u_h, smoothToH1Compl f⟩` equals `⟨smoothToLp(f.oneSubLapClassical), H1ComplToLp u_h⟩_{Lp}`. -/
 lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) (f : SmoothScalar g) :
@@ -687,8 +627,7 @@ lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
   exact real_inner_comm _ _
 
 set_option maxHeartbeats 800000 in
-/-- For a smooth test `f` and the limit `u_*` of the lifted sequence,
-`⟨smoothToH1Compl f, u_*⟩ = ⟨smoothToH1Compl f, u_h⟩`. -/
+
 private lemma inner_smoothToH1Compl_limit_eq_u_h
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -749,8 +688,6 @@ private lemma inner_smoothToH1Compl_limit_eq_u_h
     exact real_inner_comm _ _
   rw [h_LHS_eq, h_RHS_eq]
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the smooth approximator sequence
-converges to `u_h` in `H1Compl g`. -/
 theorem smoothApproxSeq_tendsto_h1Compl
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}

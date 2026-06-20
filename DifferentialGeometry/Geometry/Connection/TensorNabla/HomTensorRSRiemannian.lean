@@ -5,55 +5,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
 
-/-!
-# The `g`-fibre operator-norm Riemannian calculus on the second-order Hom-bundle `Hom(T^{r,a}, T^{r,c})`
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file equips the **second-order Hom-bundle**
-`Hom(TensorRSSpace r a, TensorRSSpace r c) = fun x => HomTensorRSSpace r a c I x`
-(built in `SecondOrderHomBundle.lean` as the `Bundle.ContinuousLinearMap` bundle of the smooth
-`(r, a)`- and `(r, c)`-tensor bundles) with its intrinsic **`g`-fibre operator-norm** calculus,
-making the operator bundle a first-class object of the Riemannian fibre-norm theory.
-
-Each domain / codomain fibre `TensorRSSpace r a I x` / `TensorRSSpace r c I x` carries the `g`-fibre
-inner product installed by `Tensor0SBundle.tensorRS_riemannianBundle`, under which it is a
-finite-dimensional real inner-product space whose squared norm is the intrinsic
-`riemannianFiberNormSq` (the proved bridge `riemannianFiberNormSq_eq_bundle_norm_sq'`).  A fibrewise
-operator `A : TensorRSSpace r a I x →L TensorRSSpace r c I x` then has a well-defined intrinsic
-`g`-fibre operator norm `‖A‖` (measured in those Riemannian fibre norms), and its action obeys the
-sharp fibrewise contraction bound
-```
-rfns(A v) ≤ ‖A‖² · rfns(v)          for every fibre tensor v,
-```
-the intrinsic operator-norm analogue (no Hilbert–Schmidt dimension factor) of the codomain-only
-post-composition bound.  This is the structural fact that makes the rank-`r` curvature operator-field
-bounds clean: the curvature reading operator, being a smooth Hom-bundle section, has a continuous
-`g`-fibre operator norm, and that norm is the proportionality coefficient of the fibre-energy bound.
-
-## Main declarations
-
-* `homTensorRS_riemannianFiberNormSq_clm_apply_le` — the **fibrewise** intrinsic operator bound
-  `rfns(A v) ≤ ‖A‖² · rfns(v)` for any fibrewise operator `A` and the `g`-fibre operator norm `‖A‖`;
-* `continuous_homTensorRS_opNorm` — the single genuinely-irreducible analytic core: for a smooth full
-  Hom-bundle section `Ψ`, the `g`-fibre operator norm `x ↦ ‖Ψ x‖` is continuous (the exact full-Hom
-  analogue of the curvature line's frame-energy continuity
-  `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`), proved by specialising the generic
-  `continuous_homBundle_opNorm_generic` to the tensor bundles via `tensorRS_isContinuousRiemannianBundle`;
-* `exists_uniform_homTensorRS_opNorm_sq` — for a smooth full Hom-bundle section `Ψ`, the squared
-  `g`-fibre operator norm `x ↦ ‖Ψ x‖²` admits a single uniform-over-`M` bound `C`, proved on top of
-  `continuous_homTensorRS_opNorm` by "continuous on compact ⟹ bounded" (the exact full-Hom analogue of
-  the curvature line's uniform constant `exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const`);
-* `exists_continuous_homTensorRS_opNorm_sq` — its continuous-envelope version: a continuous nonnegative
-  `N : M → ℝ` dominating `x ↦ ‖Ψ x‖²`, the constant envelope `fun _ => C` of the uniform bound (the
-  exact full-Hom analogue of `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`);
-* `exists_continuous_riemannianFiberNormSq_homTensorRS_section_clm_le` — **the payoff** (the reason
-  this file exists): for a smooth full Hom-bundle section `Ψ` there is a continuous nonnegative
-  `Cop : M → ℝ` with the per-point fibrewise `g`-contraction bound `rfns(Ψ x v) ≤ Cop x · rfns(v)`,
-  the general envelope behind the rank-`r` curvature operator-field bounds;
-* `exists_uniform_riemannianFiberNormSq_homTensorRS_section_clm_le` — its uniform version on a closed
-  manifold (continuous on compact ⟹ bounded).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -78,24 +29,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-! ## Generic operator-norm continuity for a continuous Hom-bundle section
-
-The intrinsic analytic core, proved for an *arbitrary* pair of continuous Riemannian vector bundles
-`E₁`, `E₂` (model fibres `F₁`, `F₂`).  For a continuous section `Ψ` of the Hom bundle
-`x ↦ E₁ x →L E₂ x`, the fibrewise operator norm `x ↦ ‖Ψ x‖` (measured in the per-fibre inner-product
-norms) is continuous.  The proof reads `Ψ` through the local trivialisations at the base point: the
-conjugated operator `Ψ̃ y = S_c(y) ∘ Ψ y ∘ S_a'(y)` into the *fixed* fibre `E₁ x₀ →L E₂ x₀`
-(`S_c`, `S_a'` the trivialisation transports) is continuous and agrees with `Ψ x₀` at `x₀`, while the
-trivialisation transports distort the norm by a factor arbitrarily close to `1`
-(`eventually_norm_symmL_trivializationAt_self_comp_lt` and its companion), giving the two-sided
-multiplicative pinch `‖Ψ̃ y‖ / r² ≤ ‖Ψ y‖ ≤ r² ‖Ψ̃ y‖` for every `r > 1` near `x₀`; the squeeze as
-`r → 1` is `tendsto_order` applied to `x ↦ ‖Ψ̃ x‖ → ‖Ψ x₀‖`.  This is stated generically so the
-`TensorRSModel`/Hom-fibre normed-instance diamond never enters the concrete application below. -/
-
 section GenericHomOpNorm
 
-/-- For `c < L` there is `r > 1` with `c · r² < L`: a one-sided neighbourhood of `1` witness used to
-close the multiplicative squeeze as `r → 1⁺`. -/
 private lemma exists_one_lt_mul_sq_lt {c L : ℝ} (h : c < L) :
     ∃ r : ℝ, 1 < r ∧ c * r ^ 2 < L := by
   have htend : Tendsto (fun r : ℝ => c * r ^ 2) (𝓝 1) (𝓝 c) := by
@@ -107,10 +42,6 @@ private lemma exists_one_lt_mul_sq_lt {c L : ℝ} (h : c < L) :
   rcases (hev2.and self_mem_nhdsWithin).exists with ⟨r, hr2, hr1⟩
   exact ⟨r, hr1, hr2⟩
 
-/-- **Operator-norm continuity of a continuous Hom-bundle section, generic form.**  For continuous
-Riemannian vector bundles `E₁` (model `F₁`), `E₂` (model `F₂`) over a topological base `B` and a
-continuous section `Ψ : Π x, E₁ x →L E₂ x` of the Hom bundle, the fibrewise operator norm
-`x ↦ ‖Ψ x‖` (in the per-fibre inner-product norms) is continuous. -/
 private lemma continuous_homBundle_opNorm_generic
     {B : Type*} [TopologicalSpace B]
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁]
@@ -252,14 +183,6 @@ private lemma continuous_homBundle_opNorm_generic
 
 end GenericHomOpNorm
 
-/-! ## The fibrewise intrinsic operator-norm contraction bound
-
-For a fibrewise continuous-linear operator `A : TensorRSSpace r a I x →L TensorRSSpace r c I x` whose
-domain / codomain carry the `g`-fibre inner products (`tensorRS_riemannianBundle`), the intrinsic
-squared fibre norm of the image is controlled by the squared `g`-fibre operator norm of `A` with no
-dimension factor.  This is the sharp operator-norm fibre-norm bound, proved through the intrinsic
-fibre-norm / `g`-bundle-norm bridge `riemannianFiberNormSq_eq_bundle_norm_sq'`. -/
-
 section FibrewiseBound
 
 variable (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
@@ -268,19 +191,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The sharp intrinsic operator-norm fibre-norm bound on the second-order Hom-bundle.**  Install
-the domain / codomain `(r, a)` / `(r, c)`-tensor `g`-fibre Riemannian bundle instances, under which
-each fibre is a finite-dimensional inner-product space whose squared norm is `riemannianFiberNormSq`
-(the bridge `riemannianFiberNormSq_eq_bundle_norm_sq'`).  For any fibrewise operator
-`A : TensorRSSpace r a I x →L TensorRSSpace r c I x` the action obeys the squared `g`-fibre
-operator-norm bound
-```
-rfns(A v) ≤ ‖A‖² · rfns(v)
-```
-with **no dimension factor**, where `‖A‖` is the `g`-fibre operator norm of `A` (its operator norm
-measured in the installed Riemannian fibre norms).  The proof reads the bridge `rfns = ‖·‖²` on both
-fibres, under which the claim is the square of the fundamental operator-norm inequality
-`‖A v‖ ≤ ‖A‖ · ‖v‖` (`ContinuousLinearMap.le_opNorm`). -/
+
 lemma homTensorRS_riemannianFiberNormSq_clm_apply_le
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (v : TensorRSSpace r a I x) :
@@ -303,19 +214,6 @@ lemma homTensorRS_riemannianFiberNormSq_clm_apply_le
 
 end FibrewiseBound
 
-/-! ## The continuous `g`-fibre operator norm of a smooth Hom-bundle section
-
-The single genuinely-irreducible analytic content of the payoff: the `g`-fibre operator norm
-`x ↦ ‖Ψ x‖` of a smooth full Hom-bundle section `Ψ` is continuous in the base point.  This is the
-exact full-Hom analogue of the curvature-operator frame-energy continuity
-`exists_continuous_riemannOp_tensorCovS_frameEnergy_bound` (`CurvatureFrameEnergyContinuity`): the
-operator is assembled from the smooth metric `g` and the smooth section `Ψ`, the `g`-fibre inner
-products on the domain / codomain tensor fibres vary continuously with `x`
-(`tensorRSRiemannianInnerCLM_continuous`, packaged as `tensorRS_isContinuousRiemannianBundle`), and
-`Ψ` varies continuously in the model trivialisation (`hΨ`), so the intrinsic `g`-fibre operator norm
-`‖Ψ x‖` is a continuous (never chart-selection-*uniform*) function of `x`.  Proved by specialising the
-generic continuous-Riemannian-bundle result `continuous_homBundle_opNorm_generic` above. -/
-
 section OpNormContinuity
 
 variable (g : SmoothRiemannianMetric I M) (r a c : ℕ)
@@ -324,37 +222,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **`g`-fibre operator-norm continuity of a smooth full Hom-bundle section.**  For a smooth
-full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed Riemannian
-manifold the intrinsic `g`-fibre operator norm `x ↦ ‖Ψ x‖` — the operator norm of `Ψ x` measured in
-the installed `(r, a)` / `(r, c)`-tensor `g`-fibre Riemannian bundle norms — is a *continuous*
-function of the base point:
-```
-Continuous (fun x => ‖Ψ x‖).
-```
 
-This is the single genuinely-irreducible analytic content of the Hom-bundle envelope — the exact
-full-Hom analogue of the curvature line's frame-energy continuity
-`exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`; the uniform bound
-`exists_uniform_homTensorRS_opNorm_sq` is proved on top of it by "continuous on compact ⟹ bounded".
-
-**Proof.**  This is the specialisation of the generic Hom-bundle operator-norm continuity
-`continuous_homBundle_opNorm_generic` (proved above for an arbitrary pair of continuous Riemannian
-vector bundles) to the `(r, a)`- and `(r, c)`-tensor bundles, whose continuous-Riemannian-bundle
-structure is `tensorRS_isContinuousRiemannianBundle`.  The generic proof reads `Ψ` through the local
-trivialisations at the base point: the conjugated operator into the *fixed* fibre `E₁ x₀ →L E₂ x₀` is
-continuous (`continuousAt_hom_bundle` + composition with the fixed trivialisation maps) and agrees
-with `Ψ x₀` at `x₀`, while the trivialisation transports distort the `g`-fibre norm by a factor
-arbitrarily close to `1` (`eventually_norm_symmL_trivializationAt_self_comp_lt` and its companion),
-giving the two-sided multiplicative pinch and the `r → 1` squeeze via `tendsto_order`.  This is the
-chart-locality-free route: the operator norm is the *intrinsic* `g`-fibre operator norm, never the
-chart-trivialisation operator-norm scalar (unbounded on multi-chart manifolds); the trivialisation
-enters only as the continuity tool.
-
-**Non-vacuity.**  This is a genuine continuity statement about the `g`-fibre operator norm of `Ψ`,
-not a degenerate predicate: it constrains `Ψ` through its operator norm and is *false* for a
-discontinuous operator-norm assignment (e.g. an operator-valued field jumping between two distinct
-fibre norms), so it is not satisfiable by an arbitrary section. -/
 theorem continuous_homTensorRS_opNorm
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -378,30 +246,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Uniform `g`-fibre squared operator-norm bound of a smooth full Hom-bundle section.**
-For a smooth full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a
-closed Riemannian manifold there is a *single* nonnegative constant `C`, uniform over `M`, bounding,
-at every base point `x`, the squared `g`-fibre operator norm of `Ψ x` (the operator norm measured in
-the installed `(r, a)` / `(r, c)`-tensor `g`-fibre Riemannian bundle norms):
-```
-‖Ψ x‖² ≤ C.
-```
 
-This is the exact full-Hom analogue of the curvature line's uniform constant
-`exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const`; the continuous version
-`exists_continuous_homTensorRS_opNorm_sq` is proved on top of it by `continuous_const`, exactly as
-`exists_continuous_riemannOp_tensorCovS_frameEnergy_bound` is proved on top of its uniform constant.
-
-**Proof.**  By the posited `g`-fibre operator-norm continuity `continuous_homTensorRS_opNorm` the map
-`x ↦ ‖Ψ x‖` is continuous, hence so is `x ↦ ‖Ψ x‖²` (`Continuous.pow`); on the compact `M` its range
-is compact (`isCompact_range`) and therefore bounded above (`IsCompact.bddAbove`), giving a constant
-`C₀` with `‖Ψ x‖² ≤ C₀` at every `x`.  Take `C := max C₀ 0 ≥ 0`, which also bounds `‖Ψ x‖²`.  This is
-the chart-locality-free route: the operator norm is the *intrinsic* `g`-fibre operator norm, never
-the chart-trivialisation operator-norm scalar (unbounded on multi-chart manifolds).
-
-**Non-vacuity.**  A degenerate `C = 0` is rejected: at any `x` where `Ψ x ≠ 0` there is a fibre
-tensor `v` with `‖Ψ x v‖_g > 0`, forcing `‖Ψ x‖² > 0` and hence `C > 0`; the smallest valid value is
-the genuine uniform squared `g`-fibre operator-norm sup, positive for a nonzero `Ψ`. -/
 theorem exists_uniform_homTensorRS_opNorm_sq
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -427,25 +272,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Continuous `g`-fibre squared operator norm of a smooth full Hom-bundle section.**  For a smooth
-full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed Riemannian
-manifold there is a *continuous* nonnegative function `N : M → ℝ` that dominates, at every base point
-`x`, the squared `g`-fibre operator norm of `Ψ x` (the operator norm measured in the installed
-`(r, a)` / `(r, c)`-tensor `g`-fibre Riemannian bundle norms):
-```
-‖Ψ x‖² ≤ N x.
-```
 
-**Proof.**  By the uniform bound `exists_uniform_homTensorRS_opNorm_sq` there is a single nonnegative
-constant `C` with `‖Ψ x‖² ≤ C` at every `x`; take the constant function `N := fun _ => C`, which is
-continuous (`continuous_const`) and nonnegative, and dominates `‖Ψ x‖²` at every point.  This is the
-exact full-Hom analogue of the proved curvature-operator frame-energy continuity
-`exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`, which is likewise the constant continuous
-envelope of its posited uniform curvature constant.
-
-**Non-vacuity.**  A degenerate `N ≡ 0` is rejected: at any `x` where `Ψ x ≠ 0` there is a fibre
-tensor `v` with `‖Ψ x v‖_g > 0`, forcing `‖Ψ x‖² > 0` and hence `N x > 0`; the smallest valid value
-is the genuine squared `g`-fibre operator norm, positive wherever `Ψ x ≠ 0`. -/
 theorem exists_continuous_homTensorRS_opNorm_sq
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -462,40 +289,13 @@ theorem exists_continuous_homTensorRS_opNorm_sq
 
 end OpNormContinuity
 
-/-! ## The payoff: the continuous per-point `g`-fibre contraction envelope
-
-The reason this file exists.  Assembled from the fibrewise intrinsic operator bound and the
-continuity of the squared `g`-fibre operator norm, the smooth full Hom-bundle section `Ψ` admits a
-continuous nonnegative per-point envelope `Cop` for the fibrewise contraction `rfns(Ψ x v) ≤ Cop x ·
-rfns(v)`.  This is the general envelope of which the rank-`r` curvature operator-field bound
-`exists_continuous_riemannianFiberNormSq_homSection_clm_le` is the curvature instance. -/
-
 section Payoff
 
 variable (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- **The continuous per-point `g`-fibre contraction envelope of a smooth full Hom-bundle section
-(the payoff, the general envelope).**  For a *fixed* smooth full Hom-bundle field
-`Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed Riemannian manifold there is a
-continuous nonnegative `Cop : M → ℝ` with the per-point fibrewise contraction bound
-```
-rfns(Ψ x v) ≤ Cop x · rfns(v)
-```
-at every point `x` and every `(r, a)`-tensor fibre value `v`.
 
-**Proof.**  Take `Cop x := ‖Ψ x‖²_g`, the squared `g`-fibre operator norm of `Ψ x`; it is continuous
-and nonnegative as a continuous dominating envelope `N` by `exists_continuous_homTensorRS_opNorm_sq`.
-The fibrewise bound `rfns(Ψ x v) ≤ ‖Ψ x‖²_g · rfns(v)` is the sharp intrinsic operator-norm fibre-
-norm bound `homTensorRS_riemannianFiberNormSq_clm_apply_le`, and `‖Ψ x‖²_g · rfns(v) ≤ N x · rfns(v)`
-since `rfns(v) ≥ 0`.  This is the exact full-Hom analogue of the proved continuous per-point
-curvature-operator envelope `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`,
-proved generically for an arbitrary smooth Hom-bundle section.
-
-**Non-vacuity.**  A degenerate `Cop ≡ 0` is rejected: the bound at any `v` with `rfns(v) > 0` and
-`Ψ x v ≠ 0` forces `Cop x > 0`; the smallest valid value is the genuine squared `g`-fibre operator
-norm `‖Ψ x‖²_g`, positive wherever `Ψ x ≠ 0`. -/
 theorem exists_continuous_riemannianFiberNormSq_homTensorRS_section_clm_le
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -519,24 +319,7 @@ theorem exists_continuous_riemannianFiberNormSq_homTensorRS_section_clm_le
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-/-- **The uniform `g`-fibre contraction bound of a smooth full Hom-bundle section.**  For a *fixed*
-smooth full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed
-Riemannian manifold there is a single nonnegative constant `C`, uniform over `M`, with the per-point
-fibrewise contraction bound
-```
-rfns(Ψ x v) ≤ C · rfns(v)
-```
-for every point `x` and every `(r, a)`-tensor fibre value `v`.
 
-**Proof.**  By the continuous per-point envelope
-`exists_continuous_riemannianFiberNormSq_homTensorRS_section_clm_le` there is a continuous nonnegative
-`Cop : M → ℝ` with `rfns(Ψ x v) ≤ Cop x · rfns(v)`; on the compact `M` the continuous `Cop` has
-bounded range (`(isCompact_univ).image Cop_cont |>.bddAbove`), so `C := max C₀ 0 ≥ Cop x` uniformly,
-and `Cop x · rfns(v) ≤ C · rfns(v)` by `rfns(v) ≥ 0`.
-
-**Non-vacuity.**  A degenerate `C < 0` is rejected: the conclusion `rfns(Ψ x v) ≤ C · rfns(v)` at any
-`v` with `rfns(v) > 0` and `Ψ x v ≠ 0` forces `C > 0`; the smallest valid `C` is the genuine uniform
-squared `g`-fibre operator-norm sup, positive for a nonzero `Ψ`. -/
 theorem exists_uniform_riemannianFiberNormSq_homTensorRS_section_clm_le
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞

@@ -1,38 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChartBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
-/-!
-# Pointwise gradient bound preserving the partition-of-unity weight squared
-
-The companion bound
-`g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsupport` in
-`GradNormChartBound.lean` controls
-`g.inner b (∇u) (∇u)` on the chart-`α` partition-of-unity `tsupport`, but
-collapses the partition-of-unity factor `ρ_α²` via the inequality `ρ² ≤ 1`
-at the final algebra step. Downstream `L²` atoms involving the
-covariant-derivative trivialization-norm sums and the Christoffel-correction
-trivialization-norm sums need the inequality with the `ρ_α²` factor still
-present on those atoms — keeping the factor lets the atoms be controlled
-under integration against `ρ_α²` test weights without picking up a stray
-unit constant.
-
-The headline below is structurally identical to the existing per-α
-pointwise bound, except that the `ρ_α² ≤ 1` simplification is **not**
-applied to the Tcov / Tchr atoms. The raw-component term still picks up
-the projection-and-Gram constants but is independent of `ρ_α²`.
-
-## Public theorem
-
-* `g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport` — non-negative
-  per-α constants `A, B` with
-  `g.inner b (∇u)(∇u) ≤ A · raw²(b) + B · ρ_α(b)² · (Tcov_sum(b) + Tchr_sum(b))`
-  for every `b` in the chart-`α` partition-of-unity `tsupport`, every smooth
-  compactly-supported tensor section, and every choice of multi-indices.
-
-* `g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1` — the same bound
-  for the H¹ wrapper `SmoothCcTensorH1`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -64,29 +32,12 @@ section PointwiseGradientBoundPouWeighted
 
 variable [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
-/-- Elementary squared-triangle inequality: `(a + b)² ≤ 2 a² + 2 b²` for real
-numbers. -/
 private lemma sq_add_le_two_mul_sq_add_sq_pou (a b : ℝ) :
     (a + b) ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2 := by
   have h : (a + b) ^ 2 + (a - b) ^ 2 = 2 * a ^ 2 + 2 * b ^ 2 := by ring
   have hsq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
   linarith
 
-/-- **Pointwise gradient bound preserving the partition-of-unity weight
-squared.** On the chart-α POU `tsupport`, the metric self-inner-product of
-the gradient of the chart-frame scalar component is bounded above by a
-linear combination of two explicit pieces: a non-negative constant `A`
-times the squared raw chart-frame scalar component, plus a non-negative
-constant `B` times the squared partition-of-unity weight at `b`, times the
-sum of the squared covariant-derivative trivialization-norms and the
-squared Christoffel-correction trivialization-norms over the chart basis.
-
-Compared with
-`g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsupport`,
-the partition-of-unity factor `ρ_α(b)²` is retained on the Tcov / Tchr
-atoms rather than absorbed via the inequality `ρ_α² ≤ 1`. The constants
-`A, B` depend on `g`, `α`, and `(r, s)` but are independent of the smooth
-section, the multi-indices, and the base point `b`. -/
 theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧
@@ -462,10 +413,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
         B * (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) ^ 2 *
             (Tcov_sum + Tchr_sum) := h_RHS_eq
 
-/-- **H¹ variant.** Same as
-`g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport`, formulated for the
-H¹ wrapper `SmoothCcTensorH1`. Specialised by applying the underlying
-`SmoothCcTensor` theorem to `S.toCcTensor`. -/
 theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧

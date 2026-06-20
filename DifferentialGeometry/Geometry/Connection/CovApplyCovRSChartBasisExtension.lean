@@ -1,36 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSSecondCovariantDerivative
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-/-!
-# Global smooth extension of the `(r,s)`-tensor covariant derivative along the chart
-basis on the chart-α good set
-
-For a smooth compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a
-chart-centre `α : M`, and a coordinate index `k : Fin (Module.finrank ℝ E)`, the
-fiber-valued tangent section `chartBasisVecFiber α k : Π x : M, TangentSpace I x` is
-smooth only on the trivialization base set `(triv α).baseSet`; in particular it is
-smooth on `chartLeviCivitaGoodSet α`. The pointwise raw section
-
-  `S_k y := covApply cov_RS (chartBasisVecFiber α k) T₀.toSection y
-          := (cov_RS).toFun T₀.toSection y (chartBasisVecFiber α k y)`
-
-is therefore well-defined on all of `M` but only smooth on
-`chartLeviCivitaGoodSet α`.
-
-This file packages a *globally smooth bundle section* `S_k_ext` of the `(r, s)`-tensor
-bundle that agrees with `S_k` on an open neighbourhood of any given chart-α good-set
-point `b₀`. The construction multiplies the chart-basis tangent section by a
-`SmoothBumpFunction I b₀` whose topological support lies inside
-`chartLeviCivitaGoodSet α`; the bump is identically `1` on a neighbourhood of `b₀`,
-so the covariant-derivative section based on the bumped tangent field coincides with
-the un-bumped one on that neighbourhood.
-
-## Main result
-
-* `covApply_covRS_chartBasis_globalSmoothExtension` — the global smooth extension
-  exists, witnessed together with the open neighbourhood `U ∋ b₀` of agreement.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -58,8 +28,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
-/-- For any chart-α good-set point `b₀`, there exists a smooth bump function based
-at `b₀` whose topological support is contained in `chartLeviCivitaGoodSet α`. -/
 private lemma exists_bump_tsupport_in_goodSet
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ chartLeviCivitaGoodSet (I := I) α) :
     ∃ χ : SmoothBumpFunction I b₀,
@@ -103,10 +71,6 @@ lemma bumpedChartBasis_contMDiff
   exact ContMDiffOn.smul_section_of_tsupport hχ_on_good
     (chartLeviCivitaGoodSet_isOpen (I := I) α) hχ_tsupp hChart_on_good
 
-/-- **The global smooth extension.** For any chart-α good-set point `b₀`, there is a
-globally smooth bundle section `S_k_ext` of the `(r, s)`-tensor bundle that agrees
-on an open neighbourhood `U ∋ b₀` (with `U ⊆ chartLeviCivitaGoodSet α`) with the raw
-section `y ↦ (cov_RS).toFun T₀.toSection y (chartBasisVecFiber α k y)`. -/
 theorem covApply_covRS_chartBasis_globalSmoothExtension
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))

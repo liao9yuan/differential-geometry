@@ -22,29 +22,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
-/-!
-# Smooth Riemannian metric on the (0,s)-tensor bundle
-
-This file assembles the continuity of the pointwise `(0, s)`-tensor inner
-product on smooth sections, delivering the public theorem
-`Tensor0SBundle.continuous_inner_of_smooth_sections`.
-
-The pointwise inner product as a continuous bilinear pairing
-(`innerModelCLM`/`innerBundleCLM`, with symmetry and positive-definiteness), the
-bounded-unit-ball lemma `posDef_bilin_unit_ball_isBounded`, the chart-local
-inner product `chartTensorInnerPointwise_0s` together with its CLM packaging,
-and the bridge identity `tensorInnerPointwise_0s_bridge_identity` are developed
-in the sibling files
-`Tensor0SInnerBundleCLM`, `PosDefBilinBoundedUnitBall`,
-`Tensor0SChartLocalInner`, `Tensor0SChartLocalInnerCLM`, and
-`Tensor0SInnerBridgeIdentity`, all of which are re-exported here.
-
-Using the bridge identity together with the chart-local smoothness/continuity
-of the chart-local inner product on smooth tensor arguments, the inner product
-on smooth `(0, s)`-tensor sections is shown to be continuous on each chart and
-then, by gluing the chart cover, globally continuous.
--/
-
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap Bornology
@@ -71,32 +48,13 @@ open DifferentialGeometry.Integral.Measure (chartGramMatrix
 
 variable {n : ℕ}
 
-/-! ### Continuity of `chartTensorInnerPointwise_0s` with smooth tensor arguments
-
-We extend the smoothness lemma `chartTensorInnerPointwise_0s_contMDiffOn` (for fixed
-tensor args) to the case where the tensor arguments themselves are smooth functions
-of `b` on the chart base set. The proof is by induction on `s`. -/
-
--- File-local instance to ensure typeclass resolution finds NormedSpace on Tensor0SModel.
 private instance tensor0SModelNormedSpace_local {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace s
 
--- File-local instance for NormedAddCommGroup on Tensor0SModel.
 private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
-
-/-! ### Continuity of `chartTensorInnerPointwise_0s` with smooth tensor arguments
-
-We extend the smoothness lemma `chartTensorInnerPointwise_0s_contMDiffOn` (for fixed
-tensor args) to the case where the tensor arguments themselves are smooth functions
-of `b` on the chart base set. The proof is by induction on `s`, using
-`curryLeftAtCLM` (a CLM, avoiding curryEquiv normed-instance issues) to extract the
-arguments at each induction step. -/
-
-/-- The chart-local inner product is continuous in `b` on the chart base set
-when the tensor arguments are continuous functions of `b`. -/
 lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ)
@@ -140,9 +98,7 @@ lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
       refine continuousOn_finset_sum _ (fun j _ => ?_)
       refine ContinuousOn.mul ?_ ?_
       · exact (chartGramMatrix_inv_entry_contMDiffOn (I := I) g α i j).continuousOn
-      · -- Apply ih: need continuity of the curryLeft-applied tensors as functions of b.
-        -- Use the existing `curryLeftAtCLM` (a CLM) for continuity.
-        have hT_curry : ContinuousOn
+      · have hT_curry : ContinuousOn
             (fun b : M => (T b).curryLeft ((chartModelBasis E) i))
             (trivializationAt E (TangentSpace I) α).baseSet := by
           have hheq : (fun b : M => (T b).curryLeft ((chartModelBasis E) i)) =
@@ -162,15 +118,6 @@ lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
           exact (curryLeftAtCLM (E := E) s ((chartModelBasis E) j)).continuous.comp_continuousOn hS
         exact ih _ _ hT_curry hS_curry
 
-/-- The chart-local inner product is smooth in `b` on the chart base set when
-each basis-tuple evaluation of the two tensor arguments is a smooth scalar
-function of `b`. This is the smoothness analog of
-`chartTensorInnerPointwise_0s_continuousOn_smooth_args`. The hypothesis form
-(scalar smoothness of every basis-tuple evaluation) is used directly because
-the diamond between `ContinuousMultilinearMap.instModule` and
-`NormedSpace.toModule` on `Tensor0SModel` makes a direct `ContMDiffOn`
-hypothesis on a `Tensor0SModel`-valued function awkward. The proof is by
-induction on `s`. -/
 lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ)
@@ -200,8 +147,8 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
       rw [heq]
       have hT0 := hT (fun i : Fin 0 => Fin.elim0 i)
       have hS0 := hS (fun i : Fin 0 => Fin.elim0 i)
-      -- The two-tuple shapes `fun i => Fin.elim0 i` and the one used by `hT0`
-      -- agree as functions on `Fin 0`.
+      
+      
       have hempty :
           (fun k : Fin 0 => (chartModelBasis E) ((fun i : Fin 0 => Fin.elim0 i) k))
             = (fun i : Fin 0 => (Fin.elim0 i : E)) := by
@@ -252,15 +199,12 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
       refine contMDiffOn_finset_sum (fun j _ => ?_)
       refine ContMDiffOn.mul ?_ ?_
       · exact chartGramMatrix_inv_entry_contMDiffOn (I := I) g α i j
-      · -- Apply the inductive hypothesis to the curryLeft-applied tensors.
-        -- Each basis evaluation of the curryLeft tensor unfolds to a basis
-        -- evaluation of the original tensor on the extended `Fin.cons`-tuple.
-        refine ih
+      · refine ih
             (fun b : M => (T b).curryLeft ((chartModelBasis E) i))
             (fun b : M => (S b).curryLeft ((chartModelBasis E) j))
             ?_ ?_
         · intro ψ
-          -- The cons-extended index tuple at the basis level.
+          
           set ψ' : Fin (s + 1) → Fin (Module.finrank ℝ E) :=
             Fin.cons (α := fun _ => Fin (Module.finrank ℝ E)) i ψ with hψ'
           have hψ'_zero : ψ' 0 = i := by
@@ -279,10 +223,9 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
             congr 1
             funext k
             refine Fin.cases ?_ ?_ k
-            · -- At k = 0: cons is i; on the LHS, this is i (since Fin.cons at 0)
-              rw [hψ'_zero]
-              -- The LHS at 0 is `Fin.cons ((chartModelBasis E) i) (fun k =>
-              -- (chartModelBasis E) (ψ k)) 0 = (chartModelBasis E) i`.
+            · rw [hψ'_zero]
+              
+              
               simp
             · intro k'
               rw [hψ'_succ k']
@@ -314,15 +257,6 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
           rw [heq']
           exact hS ψ'
 
-/-! ### Public continuity theorem on each chart
-
-Given the bridge identity and the chart-local smoothness, we obtain
-chart-local continuity of the inner product on smooth tensor sections. The
-caller supplies the continuity hypothesis on the chart-trivialised projection. -/
-
-/-- On each chart α, given continuity of the chart-α-trivialised projections of
-the tensor sections, the pointwise inner product is continuous in `b` on the
-chart's base set. -/
 theorem chartLocal_continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T S : ∀ y : M, Tensor0SSpace s I y) (α : M)
@@ -346,8 +280,8 @@ theorem chartLocal_continuous_inner_of_smooth_sections
           (Tensor0SBundle.Tensor0SSpace.toModel
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) (S b)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  -- Apply the bridge identity to convert the LHS to chartTensorInnerPointwise_0s,
-  -- then apply the chart-local smoothness lemma.
+  
+  
   have hbridge : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
       tensorInnerPointwise_0s (I := I) (M := M) s g b
         (Tensor0SBundle.Tensor0SSpace.toModel
@@ -369,12 +303,6 @@ theorem chartLocal_continuous_inner_of_smooth_sections
   exact chartTensorInnerPointwise_0s_continuousOn_smooth_args
     (I := I) (M := M) g α s _ _ hTα hSα
 
-/-- Global continuity of the pointwise inner product on (0,s) tensor sections.
-
-Given the chart-trivialised projection-continuity hypothesis at every point of
-`M` (one chart-α centred at each point), the inner product is globally
-continuous. The hypothesis says: for each `α ∈ M`, the chart-α-trivialised
-projection of each tensor section is continuous on the chart's base set. -/
 theorem _root_.Tensor0SBundle.continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T S : ∀ y : M, Tensor0SSpace s I y)

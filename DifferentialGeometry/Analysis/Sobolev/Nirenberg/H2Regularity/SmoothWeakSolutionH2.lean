@@ -1,26 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBounds
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
 
-/-!
-# Interior `H²` regularity for smooth weak solutions of uniformly elliptic
-divergence-form equations on Euclidean space.
-
-This module provides the absorbed form of the master inequality and the
-existence of weak second partial derivatives in `L²` on compactly contained
-subdomains.
-
-## Main results
-
-* `uniform_nirenberg_estimate` — uniform-in-`h` bound on the integral
-  `∫ η² · ∑_i (D_h^k ∂_i u)²` by `C` times `H¹` data, for the absorbed form
-  of the master inequality.
-* `loc_smooth_solution` — for each pair `(i, k) : Fin d × Fin d`,
-  the function `∂_i u` admits a weak `k`-partial derivative `g` on the
-  open compactly contained subdomain `Ω''`, with the integral of `g²` on
-  `Ω''` bounded in terms of the `H¹` seminorm of `u` plus the `L²` norms
-  of `u` and `f` on a slightly enlarged compact-closure neighborhood.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -36,12 +16,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- **Uniform `L²` Nirenberg estimate** for the absorbed form of the master
-inequality. After moving the `(B.lam / 2) · I` term to the left in
-`nirenberg_master_inequality_after_young`, dividing by `B.lam / 2 > 0`
-yields a uniform-in-`h` bound on the integral `∫ η² · ∑_i (D_h^k ∂_i u)²`
-by a constant times the `H¹` norm of `u` plus the `L²` norm of `f`, all on
-the slightly enlarged set `Ω'`. -/
 theorem uniform_nirenberg_estimate
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -102,8 +76,7 @@ theorem uniform_nirenberg_estimate
   exact h_mul
 
 omit [NeZero d] in
-/-- The classical second partial derivative of a smooth function `u` is
-itself smooth. -/
+
 private lemma contDiff_kdi_partial
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i k : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
@@ -130,8 +103,7 @@ private lemma contDiff_kdi_partial
   exact h_apply_k_smooth.comp h_fderiv_smooth_partial
 
 omit [NeZero d] in
-/-- The smooth weak partial of `∂_i u` (when `u` is smooth) on any open `Ω`
-equals the classical second partial derivative, by `of_contDiff`. -/
+
 private lemma weak_kdi_partial_of_smooth
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -160,8 +132,7 @@ private lemma weak_kdi_partial_of_smooth
     h_partial_C1
 
 omit [NeZero d] in
-/-- A continuous function on a set with compact closure is in `L²`
-on that set restricted. -/
+
 private lemma memLp_two_continuous_compact_closure
     {f : E → ℝ} (hf : Continuous f)
     {Ω : Set E} (hΩ_open : IsOpen Ω) (hΩ_compact : IsCompact (closure Ω)) :
@@ -186,22 +157,6 @@ private lemma memLp_two_continuous_compact_closure
   rw [Real.norm_eq_abs]
   exact h.trans (le_max_left _ _)
 
-/-- **Interior `H²` regularity for smooth weak solutions.**
-
-For each pair `(i, k) : Fin d × Fin d`, the function `∂_i u : E → ℝ` admits
-a weak `k`-partial derivative `g` on the open compactly contained subdomain
-`Ω'' ⊆ Ω`, with `g ∈ L²(Ω'')`. The integral `∫_{Ω''} g²` is bounded by a
-constant times the `H¹` seminorm-squared of `u` plus the `L²`-norm-squared
-of `u` and `f` on a slightly enlarged compact-closure neighborhood `Ω'`
-(also constructed by the proof, using the geometric room `h_room`).
-
-The hypothesis `h_room : Metric.cthickening 2 (closure Ω'') ⊆ Ω` gives the
-geometric room needed to apply the uniform Nirenberg estimate.
-
-The bound is in *integral form* (∫ g²) rather than *norm form* (eLpNorm g):
-the difference-quotient method yields an uniform `L²` bound on
-`D_h^k ∂_i u` via Part A, and Fatou's lemma converts this to a bound on the
-classical limit `g = ∂_k ∂_i u`. -/
 theorem loc_smooth_solution
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {Ω'' : Set E} (hΩ'' : IsOpen Ω'')

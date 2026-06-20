@@ -8,48 +8,6 @@ import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Normed.Operator.Prod
 import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
-/-!
-# Parametrized Borel half-line extension
-
-This is the parameter-uniform generalization of `borel_halfLine_extend`. Given a family
-`g : ℝ → E → F` that is jointly `C^∞` on the closed-half-line slab `Set.Ici 0 ×ˢ K` (with `K`
-compact and `z₀` in its interior), we build a single function `gext : ℝ → E → F` that is jointly
-`C^∞` at every point `(t₀, z₀)` and agrees with `g` for all `t ≥ 0` near `z₀`.
-
-## Construction
-
-Write `cₙ z := iteratedDerivWithin n (g · z) (Set.Ici 0) 0` for the one-sided `t`-jet of `g(·, z)`.
-The first non-trivial fact (`param_jet_contDiffOn`) is that `cₙ` is `C^∞` in the parameter `z`,
-obtained by inducting `ContDiffWithinAt.fderivWithin_apply` over the joint slice
-`(z, t) ↦ iteratedDerivWithin n (g · z) (Set.Ici 0) t`.
-
-We then run the Borel series jointly on `ℝ × E`: the `n`-th term is
-`fₙ(t, z) = ((λₙ)⁻ⁿ · borelBumpMono n (λₙ t)) • (ρ z • cₙ z)`, where `ρ` is a smooth cutoff equal
-to `1` at `z₀` and supported in `interior K` (this is where finite-dimensionality of `E` enters —
-it is needed for a smooth compactly-supported bump), and `λₙ ≥ 1` is a rapidly increasing scale.
-The scale is chosen (`paramScale`) to dominate `4ⁿ · Gₙ · (1 + Aₙ)`, where `Gₙ` bounds the
-bump-monomial derivatives and `Aₙ` bounds all `z`-derivatives of `ρ · cₙ` (finite by compact
-support). The key joint estimate `paramTerm_iteratedFDeriv_bound` then gives
-`‖iteratedFDeriv ℝ k fₙ (t, z)‖ ≤ 2⁻ⁿ` for all `k < n`, uniformly in `(t, z)`, by expanding the
-product via `norm_iteratedFDeriv_smul_le` and pre-composition with the coordinate projections.
-Summability of these bounds feeds `contDiff_tsum`, so the series is globally `C^∞` on `ℝ × E`.
-
-Away from the seam `t = 0` the extension `gext t z := if 0 ≤ t then g t z else ∑' n, fₙ(t, z)` is
-`C^∞` because it locally agrees with either `g` (on the open upper half) or the smooth series (on
-the open lower half).
-
-## The seam
-
-The seam case `t₀ = 0` is the *joint* analogue of `contDiff_if_le_of_jet_match` across the
-hyperplane `{0} × E`: it requires that the globally-smooth series and `g` share their full joint
-Taylor jet at `(0, z₀)`. The series matches `g`'s one-sided `t`-jet `cₙ` for every parameter `z`
-near `z₀` by construction (`paramSeries_slice_iteratedDeriv_zero`, the parametrized analogue of
-`borel_jet_realize`'s jet identity, fibre by fibre), so on the common closed slab `Ici 0 ×ˢ V` both
-`Φ` and `uncurry g` are `C∞` and share their entire one-sided `t`-jet at every seam parameter.
-`Analysis.iteratedFDerivWithin_prod_match` turns that common `t`-jet into the matching joint iterated
-Fréchet derivative, closing the seam coefficient match. The file is `sorry`-free.
--/
-
 noncomputable section
 open Set Filter Topology
 open scoped ContDiff Pointwise
@@ -62,9 +20,6 @@ section Bridge
 variable {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- Joint smoothness of the partial `t`-jet of a jointly-smooth family. If `uncurry g` is `C∞`
-on `Ici 0 ×ˢ U`, then `(z, t) ↦ iteratedDerivWithin n (g · z) (Ici 0) t` is `C∞`
-on `U ×ˢ Ici 0`, for every order `n`. -/
 private theorem param_iteratedDerivWithin_contDiffOn
     (g : ℝ → E → F) (U : Set E)
     (hg : ContDiffOn ℝ ∞ (Function.uncurry g) ((Set.Ici (0:ℝ)) ×ˢ U)) :
@@ -111,7 +66,6 @@ private theorem param_iteratedDerivWithin_contDiffOn
     have hmn : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by simp
     exact ContDiffWithinAt.fderivWithin_apply hf hgsec hksec hUDt hmn hq hst
 
-/-- The `t = 0` slice: `z ↦ iteratedDerivWithin n (g · z) (Ici 0) 0` is `C∞` on `U`. -/
 private theorem param_jet_contDiffOn
     (g : ℝ → E → F) (U : Set E)
     (hg : ContDiffOn ℝ ∞ (Function.uncurry g) ((Set.Ici (0:ℝ)) ×ˢ U)) (n : ℕ) :
@@ -129,8 +83,6 @@ section Engine
 variable {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- A uniform-over-`j ≤ n` global bound on the iterated Fréchet derivatives of a compactly
-supported `C∞` coefficient `a : E → F`. -/
 private theorem param_coeff_deriv_bound (a : E → F) (ha : ContDiff ℝ ∞ a)
     (hsupp : HasCompactSupport a) (n : ℕ) :
     ∃ A : ℝ, 0 ≤ A ∧ ∀ j ≤ n, ∀ z : E, ‖iteratedFDeriv ℝ j a z‖ ≤ A := by
@@ -154,9 +106,6 @@ private theorem param_coeff_deriv_bound (a : E → F) (ha : ContDiff ℝ ∞ a)
 variable (a : ℕ → E → F)
     (ha : ∀ n, ContDiff ℝ ∞ (a n)) (hsupp : ∀ n, HasCompactSupport (a n))
 
-/-- The scale `λₙ ≥ 1` for the `n`-th parametrized term: large enough that the joint
-`k`-th derivative (`k < n`) of the term is `≤ 2⁻ⁿ`. It dominates `4ⁿ · Gₙ · (1 + Aₙ)`, where
-`Gₙ` bounds the bump-monomial derivatives and `Aₙ` bounds the `z`-derivatives of `a n`. -/
 private def paramScale (n : ℕ) : ℝ :=
   max 1 ((4:ℝ) ^ n * Classical.choose (borelBumpMono_deriv_bound n) *
     (1 + Classical.choose (param_coeff_deriv_bound (a n) (ha n) (hsupp n) n)))
@@ -167,9 +116,6 @@ private theorem one_le_paramScale (n : ℕ) : 1 ≤ paramScale a ha hsupp n :=
 private theorem paramScale_pos (n : ℕ) : 0 < paramScale a ha hsupp n :=
   lt_of_lt_of_le one_pos (one_le_paramScale a ha hsupp n)
 
-/-- The `n`-th parametrized Borel term on `ℝ × E`:
-`fₙ(t,z) = ((λₙ)⁻ⁿ · borelBumpMono n (λₙ t)) • a n z`. The `t`-scalar is exactly the fixed-case
-scalar; the constant vector is replaced by the smooth coefficient `a n z`. -/
 private def paramTerm (n : ℕ) (p : ℝ × E) : F :=
   ((paramScale a ha hsupp n)⁻¹ ^ n * borelBumpMono n (paramScale a ha hsupp n * p.1)) • a n p.2
 
@@ -181,8 +127,6 @@ private theorem paramTerm_contDiff (n : ℕ) : ContDiff ℝ ∞ (paramTerm a ha 
   have ha' : ContDiff ℝ ∞ (fun p : ℝ × E => a n p.2) := (ha n).comp contDiff_snd
   exact hb.smul ha'
 
-/-- The `t`-scalar of the `n`-th parametrized term:
-`sₙ(t) = (λₙ)⁻ⁿ · borelBumpMono n (λₙ t)`. -/
 private def paramScalar (n : ℕ) (t : ℝ) : ℝ :=
   (paramScale a ha hsupp n)⁻¹ ^ n * borelBumpMono n (paramScale a ha hsupp n * t)
 
@@ -212,7 +156,6 @@ private theorem paramScalar_hasCompactSupport (n : ℕ) :
       nlinarith
   simp only [paramScalar, borelBumpMono, borelCutoff_eq_zero h2, zero_mul, zero_div, mul_zero]
 
-/-- Pointwise iterated derivative of the `t`-scalar. -/
 private theorem paramScalar_iteratedDeriv (n i : ℕ) (t : ℝ) :
     iteratedDeriv i (paramScalar a ha hsupp n) t =
       (paramScale a ha hsupp n)⁻¹ ^ n * (paramScale a ha hsupp n) ^ i *
@@ -233,8 +176,6 @@ private theorem paramScalar_iteratedDeriv (n i : ℕ) (t : ℝ) :
     exact congrFun h t
   rw [hcomp]; simp only [smul_eq_mul]; ring
 
-/-- For `i < n`, the `i`-th derivative of the `t`-scalar is bounded by `Gₙ / λₙ`, where `Gₙ` is
-the bump-monomial derivative bound. -/
 private theorem paramScalar_iteratedDeriv_bound {n i : ℕ} (hin : i < n) (t : ℝ) :
     ‖iteratedDeriv i (paramScalar a ha hsupp n) t‖ ≤
       Classical.choose (borelBumpMono_deriv_bound n) / paramScale a ha hsupp n := by
@@ -262,7 +203,6 @@ private theorem paramScalar_iteratedDeriv_bound {n i : ℕ} (hin : i < n) (t : �
       ≤ L⁻¹ * G := mul_le_mul hpow hD (norm_nonneg _) (by positivity)
     _ = G / L := by rw [inv_mul_eq_div]
 
-/-- Pre-composing with the first projection does not increase the iterated-derivative norm. -/
 private theorem norm_iteratedFDeriv_comp_fst_le {b : ℝ → F} (hb : ContDiff ℝ ∞ b) (i : ℕ)
     (p : ℝ × E) : ‖iteratedFDeriv ℝ i (fun q : ℝ × E => b q.1) p‖ ≤ ‖iteratedFDeriv ℝ i b p.1‖ := by
   have hcomp : (fun q : ℝ × E => b q.1) = b ∘ (ContinuousLinearMap.fst ℝ ℝ E) := rfl
@@ -281,7 +221,6 @@ private theorem norm_iteratedFDeriv_comp_fst_le {b : ℝ → F} (hb : ContDiff �
         mul_le_mul_of_nonneg_left hprod (norm_nonneg _)
     _ = ‖iteratedFDeriv ℝ i b p.1‖ := mul_one _
 
-/-- Pre-composing with the second projection does not increase the iterated-derivative norm. -/
 private theorem norm_iteratedFDeriv_comp_snd_le {b : E → F} (hb : ContDiff ℝ ∞ b) (j : ℕ)
     (p : ℝ × E) : ‖iteratedFDeriv ℝ j (fun q : ℝ × E => b q.2) p‖ ≤ ‖iteratedFDeriv ℝ j b p.2‖ := by
   have hcomp : (fun q : ℝ × E => b q.2) = b ∘ (ContinuousLinearMap.snd ℝ ℝ E) := rfl
@@ -300,9 +239,6 @@ private theorem norm_iteratedFDeriv_comp_snd_le {b : E → F} (hb : ContDiff ℝ
         mul_le_mul_of_nonneg_left hprod (norm_nonneg _)
     _ = ‖iteratedFDeriv ℝ j b p.2‖ := mul_one _
 
-/-- **The joint Borel decay estimate.** By the scale choice, the joint `k`-th Fréchet derivative
-of the `n`-th parametrized term on `ℝ × E` is bounded by `2⁻ⁿ` whenever `k < n`, uniformly in
-`(t, z)`. -/
 private theorem paramTerm_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (p : ℝ × E) :
     ‖iteratedFDeriv ℝ k (paramTerm a ha hsupp n) p‖ ≤ (2 : ℝ)⁻¹ ^ n := by
   set L : ℝ := paramScale a ha hsupp n with hLdef
@@ -314,7 +250,7 @@ private theorem paramTerm_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (p : �
   obtain ⟨hAnn, hAbound⟩ := hAspec
   have hL0 : 0 < L := paramScale_pos a ha hsupp n
   have hLmax : (4:ℝ) ^ n * G * (1 + A) ≤ L := le_max_right _ _
-  -- paramTerm n = (paramScalar∘fst) • (a∘snd)
+  
   have hterm_eq : paramTerm a ha hsupp n =
       fun q : ℝ × E => (fun r : ℝ × E => paramScalar a ha hsupp n r.1) q •
         (fun r : ℝ × E => a n r.2) q := by
@@ -326,7 +262,7 @@ private theorem paramTerm_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (p : �
     ((paramScalar_contDiff a ha hsupp n).comp contDiff_fst)
     ((ha n).comp contDiff_snd) p (by exact_mod_cast le_top : (k : WithTop ℕ∞) ≤ ∞)
   refine le_trans hsmul ?_
-  -- Bound each summand by C(k,i) * (G/L) * A.
+  
   have hsummand : ∀ i ∈ Finset.range (k + 1),
       (k.choose i : ℝ) * ‖iteratedFDeriv ℝ i (fun r : ℝ × E => paramScalar a ha hsupp n r.1) p‖ *
         ‖iteratedFDeriv ℝ (k - i) (fun r : ℝ × E => a n r.2) p‖
@@ -344,7 +280,7 @@ private theorem paramTerm_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (p : �
       exact hAbound (k - i) (by omega) p.2
     gcongr
   refine le_trans (Finset.sum_le_sum hsummand) ?_
-  -- ∑ C(k,i) * (G/L) * A = 2^k * (G/L) * A
+  
   have hsum_eq : ∑ i ∈ Finset.range (k + 1), (k.choose i : ℝ) * (G / L) * A
       = (2:ℝ) ^ k * (G / L) * A := by
     rw [← Finset.sum_mul, ← Finset.sum_mul]
@@ -352,19 +288,19 @@ private theorem paramTerm_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (p : �
     rw [← Nat.cast_sum, Nat.sum_range_choose]
     push_cast; ring
   rw [hsum_eq]
-  -- Now finish: 2^k * (G/L) * A ≤ 2⁻ⁿ.
+  
   rcases eq_or_lt_of_le hGnn with hG0 | hGpos
   · rw [← hG0]; simp
   · have h1A : (0:ℝ) < 1 + A := by positivity
     have h2n : (0:ℝ) < (2:ℝ) ^ n := by positivity
-    -- Step 1: G / L ≤ 1 / (4^n * (1 + A)).
+    
     have hGL : G / L ≤ 1 / ((4:ℝ) ^ n * (1 + A)) := by
       rw [div_le_div_iff₀ hL0 (by positivity)]
       have hrw : G * ((4:ℝ) ^ n * (1 + A)) = (4:ℝ) ^ n * G * (1 + A) := by ring
       rw [hrw, one_mul]; exact hLmax
     have h2kn : (2:ℝ) ^ k ≤ (2:ℝ) ^ n := pow_le_pow_right₀ (by norm_num) (by omega)
     have h4n : (4:ℝ) ^ n = (2:ℝ) ^ n * (2:ℝ) ^ n := by rw [← mul_pow]; norm_num
-    -- Reduce `2⁻ⁿ` to `1 / 2^n` and clear denominators.
+    
     rw [inv_pow, inv_eq_one_div, le_div_iff₀ h2n]
     have hstep1 : (2:ℝ) ^ k * (G / L) * A * (2:ℝ) ^ n
         ≤ (2:ℝ) ^ n * (1 / ((4:ℝ) ^ n * (1 + A))) * A * (2:ℝ) ^ n := by
@@ -375,8 +311,6 @@ private theorem paramTerm_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (p : �
       rw [h4n]; field_simp
     rw [hsimp, div_le_one h1A]; linarith
 
-/-- For every derivative order `k`, the `k`-th joint Fréchet derivative of the `n`-th term is
-globally bounded (compact support + continuity). -/
 private theorem paramTerm_hasCompactSupport (n : ℕ) :
     HasCompactSupport (paramTerm a ha hsupp n) := by
   apply HasCompactSupport.of_support_subset_isCompact
@@ -403,8 +337,6 @@ private theorem paramTerm_iteratedFDeriv_global_bound (n k : ℕ) :
   obtain ⟨B, hB⟩ := hcs.exists_bound_of_continuous hcont
   exact ⟨B, hB⟩
 
-/-- Summable dominating function for the parametrized Borel series: `2⁻ⁿ` for `k < n`, and a
-global bound otherwise. -/
 private def paramDomBound (k n : ℕ) : ℝ :=
   if k < n then (2 : ℝ)⁻¹ ^ n
   else Classical.choose (paramTerm_iteratedFDeriv_global_bound a ha hsupp n k)
@@ -425,8 +357,6 @@ private theorem paramDomBound_bound (k n : ℕ) (p : ℝ × E) :
   · rw [if_neg hkn]
     exact Classical.choose_spec (paramTerm_iteratedFDeriv_global_bound a ha hsupp n k) p
 
-/-- Near `0`, the `t`-scalar `sₙ` of the `n`-th term equals `tⁿ / n!`, so its `k`-th derivative at
-`0` is `1` if `n = k` and `0` otherwise. -/
 private theorem paramScalar_iteratedDeriv_zero (n k : ℕ) :
     iteratedDeriv k (paramScalar a ha hsupp n) 0 = if n = k then (1 : ℝ) else 0 := by
   have hL0 : 0 < paramScale a ha hsupp n := paramScale_pos a ha hsupp n
@@ -469,7 +399,6 @@ private theorem paramScalar_iteratedDeriv_zero (n k : ℕ) :
   · rw [if_neg (fun h' => h h'.symm), if_neg h]
     simp
 
-/-- The `n`-th term restricted to the fibre over `w` is the scalar `sₙ` times the vector `a n w`. -/
 private theorem paramTerm_slice_eq (n : ℕ) (w : E) :
     (fun t => paramTerm a ha hsupp n (t, w)) = fun t => paramScalar a ha hsupp n t • a n w :=
   rfl
@@ -479,7 +408,6 @@ private theorem paramTerm_slice_contDiff (n : ℕ) (w : E) :
   rw [paramTerm_slice_eq]
   exact (paramScalar_contDiff a ha hsupp n).smul_const (a n w)
 
-/-- The `k`-th derivative at `0` of the `n`-th term over the fibre `w`: `a n w` if `n = k`, else `0`. -/
 private theorem paramTerm_slice_iteratedDeriv_zero (n k : ℕ) (w : E) :
     iteratedDeriv k (fun t => paramTerm a ha hsupp n (t, w)) 0 =
       (if n = k then (1 : ℝ) else 0) • a n w := by
@@ -488,8 +416,6 @@ private theorem paramTerm_slice_iteratedDeriv_zero (n k : ℕ) (w : E) :
       (by exact_mod_cast le_top)),
     paramScalar_iteratedDeriv_zero]
 
-/-- A uniform bound on the fibre-slice term derivatives that dominates the `k`-th derivative of the
-`n`-th fibre-slice term, summably in `n`: `2⁻ⁿ` for `k < n` and a global bound otherwise. -/
 private theorem paramTerm_slice_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (w : E) (t : ℝ) :
     ‖iteratedFDeriv ℝ k (fun s => paramTerm a ha hsupp n (s, w)) t‖ ≤ (2 : ℝ)⁻¹ ^ n := by
   set L : ℝ := paramScale a ha hsupp n with hLdef
@@ -504,7 +430,7 @@ private theorem paramTerm_slice_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (
   rw [norm_iteratedFDeriv_eq_norm_iteratedDeriv, paramTerm_slice_eq,
     iteratedDeriv_smul_const ((paramScalar_contDiff a ha hsupp n).contDiffAt.of_le
       (by exact_mod_cast le_top)), norm_smul]
-  -- The scalar derivative is `≤ G/L`; the constant vector is `≤ A`.
+  
   have hsb : ‖iteratedDeriv k (paramScalar a ha hsupp n) t‖ ≤ G / L := by
     have hb := paramScalar_iteratedDeriv_bound a ha hsupp hkn t
     rwa [← hLdef, ← hGdef] at hb
@@ -514,7 +440,7 @@ private theorem paramTerm_slice_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (
   have hprod : ‖iteratedDeriv k (paramScalar a ha hsupp n) t‖ * ‖a n w‖ ≤ (G / L) * A :=
     mul_le_mul hsb hab (norm_nonneg _) (by positivity)
   refine le_trans hprod ?_
-  -- `(G/L) * A ≤ 2⁻ⁿ` by the scale choice, exactly as in `paramTerm_iteratedFDeriv_bound`.
+  
   rcases eq_or_lt_of_le hGnn with hG0 | hGpos
   · rw [← hG0]; simp
   · have h1A : (0 : ℝ) < 1 + A := by positivity
@@ -534,7 +460,6 @@ private theorem paramTerm_slice_iteratedFDeriv_bound {n k : ℕ} (hkn : k < n) (
     have h1le : (1 : ℝ) ≤ (2 : ℝ) ^ n := one_le_pow₀ (by norm_num)
     nlinarith [mul_nonneg (sub_nonneg.mpr h1le) h1A.le, mul_nonneg hAnn (sub_nonneg.mpr h1le)]
 
-/-- The fibre-slice term has compact support (the scalar `sₙ` does). -/
 private theorem paramTerm_slice_hasCompactSupport (n : ℕ) (w : E) :
     HasCompactSupport (fun t => paramTerm a ha hsupp n (t, w)) := by
   rw [paramTerm_slice_eq]
@@ -550,7 +475,6 @@ private theorem paramTerm_slice_iteratedFDeriv_global_bound (n k : ℕ) (w : E) 
   obtain ⟨B, hB⟩ := hcs.exists_bound_of_continuous hcont
   exact ⟨B, hB⟩
 
-/-- Per-fibre summable dominating function for the fibre-slice Borel series. -/
 private def paramSliceDomBound (w : E) (k n : ℕ) : ℝ :=
   if k < n then (2 : ℝ)⁻¹ ^ n
   else Classical.choose (paramTerm_slice_iteratedFDeriv_global_bound a ha hsupp n k w)
@@ -573,9 +497,6 @@ private theorem paramSliceDomBound_bound (w : E) (k n : ℕ) (t : ℝ) :
   · rw [if_neg hkn]
     exact Classical.choose_spec (paramTerm_slice_iteratedFDeriv_global_bound a ha hsupp n k w) t
 
-/-- The `k`-th `t`-derivative at `0` of the parametrized Borel series over the fibre `w` realizes
-the prescribed coefficient `a k w`. This is the parametrized analogue of `borel_jet_realize`'s jet
-identity, fibre by fibre. -/
 private theorem paramSeries_slice_iteratedDeriv_zero [CompleteSpace F] (k : ℕ) (w : E) :
     iteratedDeriv k (fun t => ∑' n, paramTerm a ha hsupp n (t, w)) 0 = a k w := by
   have hFD : iteratedFDeriv ℝ k (fun t => ∑' n, paramTerm a ha hsupp n (t, w)) 0 =
@@ -599,7 +520,6 @@ private theorem paramSeries_slice_iteratedDeriv_zero [CompleteSpace F] (k : ℕ)
   rw [tsum_congr hterm, tsum_eq_single k (fun n hn => by rw [if_neg hn, zero_smul]),
     if_pos rfl, one_smul]
 
-/-- The parametrized Borel series `(t,z) ↦ ∑' n, fₙ(t,z)` is globally `C∞` on `ℝ × E`. -/
 private theorem paramSeries_contDiff [CompleteSpace F] :
     ContDiff ℝ ∞ (fun p : ℝ × E => ∑' n, paramTerm a ha hsupp n p) :=
   contDiff_tsum (N := (⊤ : ℕ∞)) (v := paramDomBound a ha hsupp)
@@ -614,8 +534,6 @@ section Setup
 variable {E F : Type*}
     [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- Multiplying a function smooth on an open set by a smooth cutoff supported inside that set
-produces a globally smooth function. -/
 private theorem contDiff_cutoff_smul {ρ : E → ℝ} {c : E → F} {U : Set E} (hU : IsOpen U)
     (hρ : ContDiff ℝ ∞ ρ) (htsupp : tsupport ρ ⊆ U) (hc : ContDiffOn ℝ ∞ c U) :
     ContDiff ℝ ∞ (fun z => ρ z • c z) := by
@@ -627,18 +545,13 @@ private theorem contDiff_cutoff_smul {ρ : E → ℝ} {c : E → F} {U : Set E} 
     have h2 : ContDiffWithinAt ℝ ∞ c Set.univ z :=
       (hc.contDiffAt (hU.mem_nhds hzU)).contDiffWithinAt
     exact h1.smul h2
-  · -- z ∉ tsupport ρ: ρ ≡ 0 on the open complement, so the product is ≡ 0 near z.
-    have hopen : (tsupport ρ)ᶜ ∈ 𝓝 z := (isClosed_tsupport ρ).isOpen_compl.mem_nhds hz
+  · have hopen : (tsupport ρ)ᶜ ∈ 𝓝 z := (isClosed_tsupport ρ).isOpen_compl.mem_nhds hz
     have heq : (fun z => ρ z • c z) =ᶠ[𝓝 z] (fun _ => (0:F)) := by
       filter_upwards [hopen] with y hy
       have : ρ y = 0 := image_eq_zero_of_notMem_tsupport hy
       rw [this, zero_smul]
     exact (contDiffAt_const.congr_of_eventuallyEq heq).contDiffWithinAt
 
-/-- Strengthening of `exists_contDiff_tsupport_subset`: a smooth, compactly supported cutoff with
-range in `[0,1]`, support inside the given neighbourhood, and equal to `1` *on a whole
-neighbourhood* of the base point (not merely at it). The last fact is what licenses replacing the
-cutoff coefficient `ρ` by `1` near `z₀`. -/
 private theorem exists_contDiff_tsupport_subset_eventuallyEq_one
     [FiniteDimensional ℝ E] {s : Set E} {x : E} (hs : s ∈ 𝓝 x) :
     ∃ ρ : E → ℝ, tsupport ρ ⊆ s ∧ HasCompactSupport ρ ∧ ContDiff ℝ ∞ ρ ∧
@@ -674,22 +587,7 @@ private theorem exists_contDiff_tsupport_subset_eventuallyEq_one
     simpa only [hρ_def, Function.comp_def, Pi.one_apply] using this
 
 set_option linter.unusedVariables false in
-/-- **Parametrized Borel half-line extension.** Let `g : ℝ → E → F` be jointly `C∞` on
-`Ici 0 ×ˢ K` for a compact `K` with `z₀` in its interior. Then there is a function `gext` and an
-open neighbourhood `V` of `z₀` on which `gext` is jointly `C∞` on the full slab `univ ×ˢ V`
-(*every* time, both sides of the seam), and `gext` agrees with `g` for all `t ≥ 0` and all `z ∈ V`.
 
-This is the `z`-uniform generalization of `borel_halfLine_extend`: the fixed-parameter jet
-coefficients are promoted to smooth functions of the parameter `z`, multiplied by a smooth cutoff
-near `z₀`, and the Borel series is run jointly on `ℝ × E`. The model space `E` is finite-dimensional
-(as in every intended application, where `E` is a chart/tangent model `ℝ^d`); this is required to
-build the smooth cutoff `ρ`. The conclusion is the joint-smoothness-on-a-`z`-neighbourhood form
-needed by the downstream time-extension consumer (not merely `ContDiffAt` on the central fibre).
-
-The compactness hypothesis `hK` is retained because it is the mathematically natural condition for the
-statement (a family smooth on a closed slab over a compact base), even though the present proof draws
-its compact support from the finite-dimensional bump cutoff supported in `interior K` rather than from
-`hK` directly. -/
 theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     (g : ℝ → E → F) (K : Set E) (hK : IsCompact K) (z₀ : E) (hz₀ : z₀ ∈ interior K)
     (hg : ContDiffOn ℝ ∞ (Function.uncurry g) ((Set.Ici (0:ℝ)) ×ˢ K)) :
@@ -697,45 +595,42 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       ContDiffOn ℝ ∞ (Function.uncurry gext) ((Set.univ : Set ℝ) ×ˢ V) ∧
       (∀ t : ℝ, 0 ≤ t → ∀ z ∈ V, gext t z = g t z) := by
   classical
-  -- A smooth cutoff `ρ ≡ 1` on a neighbourhood of `z₀`, supported in the open set `interior K`.
+  
   obtain ⟨ρ, hρ_tsupp, hρ_cs, hρ_smooth, _hρ_range, _hρ_one, hρ_eq1⟩ :=
     exists_contDiff_tsupport_subset_eventuallyEq_one (x := z₀) (isOpen_interior.mem_nhds hz₀)
   set U : Set E := interior K with hU_def
   have hUopen : IsOpen U := isOpen_interior
-  -- The jet coefficients are smooth on `U`.
+  
   have hg' : ContDiffOn ℝ ∞ (Function.uncurry g) ((Set.Ici (0:ℝ)) ×ˢ U) :=
     hg.mono (Set.prod_mono_right interior_subset)
-  -- The parametrized coefficient family `a n z = ρ z • cₙ z`.
+  
   set a : ℕ → E → F :=
     fun n z => ρ z • iteratedDerivWithin n (fun s => g s z) (Set.Ici 0) 0 with ha_def
   have ha : ∀ n, ContDiff ℝ ∞ (a n) := fun n =>
     contDiff_cutoff_smul hUopen hρ_smooth hρ_tsupp (param_jet_contDiffOn g U hg' n)
   have hsupp : ∀ n, HasCompactSupport (a n) := fun n => hρ_cs.smul_right
-  -- The extension.
+  
   set gext : ℝ → E → F :=
     fun t z => if 0 ≤ t then g t z else ∑' n, paramTerm a ha hsupp n (t, z) with hgext_def
-  -- We exhibit a single open neighbourhood `V ∋ z₀` (where `ρ ≡ 1`) on which `uncurry gext` is
-  -- jointly `C∞` on the *full* slab `univ ×ˢ V`. On `univ ×ˢ V`, `uncurry gext` is the piecewise
-  -- glue of the globally-smooth Borel series `Φ` (lower closed side `t ≤ 0`) and `uncurry g` (upper
-  -- closed side `t ≥ 0`), the two agreeing at the seam `{0} × V` because `Φ(0, z) = g(0, z)` there.
-  -- This is the *joint* analogue of `contDiff_if_le_of_jet_match`: we build the joint candidate
-  -- Taylor series piecewise from the two one-sided series and verify
-  -- `HasFTaylorSeriesUpToOn ∞ · · (univ ×ˢ V)`, gluing the seam derivative with
-  -- `HasFDerivWithinAt.union` over `(Iic 0 ×ˢ V) ∪ (Ici 0 ×ˢ V) = univ ×ˢ V`.
-  -- The globally-smooth Borel series `Φ`.
+  
+  
+  
+  
+  
+  
+  
+  
+  
   set Φ : ℝ × E → F := fun p => ∑' n, paramTerm a ha hsupp n p with hΦ_def
   have hΦ : ContDiff ℝ ∞ Φ := paramSeries_contDiff a ha hsupp
-  -- An open neighbourhood `V ∋ z₀`, `V ⊆ U`, on which `ρ ≡ 1`.
+  
   have hVnhds : {z : E | ρ z = 1} ∩ U ∈ nhds z₀ :=
     Filter.inter_mem hρ_eq1 (hUopen.mem_nhds hz₀)
   obtain ⟨V, hVsub, hVopen, hz₀V⟩ := mem_nhds_iff.1 hVnhds
   have hρV : ∀ z ∈ V, ρ z = 1 := fun z hz => (hVsub hz).1
   have hVU : V ⊆ U := fun z hz => (hVsub hz).2
   refine ⟨gext, V, hVopen.mem_nhds hz₀V, ?_, ?_⟩
-  · -- Joint `C∞` of `uncurry gext` on the full slab `univ ×ˢ V`.
-    -- `Φ(0, z) = g 0 z` for `z ∈ V`: only the `n = 0` term of the series survives at `t = 0`,
-    -- and there `ρ z = 1`, `c₀ z = g 0 z`.
-    have hΦ0 : ∀ z ∈ V, Φ (0, z) = g 0 z := by
+  · have hΦ0 : ∀ z ∈ V, Φ (0, z) = g 0 z := by
       intro z hz
       have hbump0 : borelBumpMono 0 0 = 1 := by
         rw [borelBumpMono, borelCutoff_eq_one (by norm_num : (0:ℝ) ^ 2 ≤ 1)]
@@ -758,7 +653,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         if_pos rfl, one_smul, ha_def]
       change ρ z • iteratedDerivWithin 0 (fun s => g s z) (Set.Ici 0) 0 = g 0 z
       rw [hρV z hz, one_smul, iteratedDerivWithin_zero]
-    -- `uncurry gext` equals `Φ` on the closed lower half `Iic 0 ×ˢ V`.
+    
     have hEqLower : Set.EqOn (Function.uncurry gext) Φ (Set.Iic (0:ℝ) ×ˢ V) := by
       rintro ⟨t, z⟩ ⟨ht, hz⟩
       simp only [Set.mem_Iic] at ht
@@ -767,18 +662,18 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         simp only [Function.uncurry, hgext_def, if_pos (le_refl (0:ℝ))]
         exact (hΦ0 z hz).symm
       · simp only [Function.uncurry, hgext_def, if_neg (not_le.mpr ht0), hΦ_def]
-    -- `uncurry gext` equals `uncurry g` on the closed upper half `Ici 0 ×ˢ V`.
+    
     have hEqUpper : Set.EqOn (Function.uncurry gext) (Function.uncurry g)
         (Set.Ici (0:ℝ) ×ˢ V) := by
       rintro ⟨t, z⟩ ⟨ht, _⟩
       simp only [Set.mem_Ici] at ht
       simp only [Function.uncurry, hgext_def, if_pos ht]
-    -- The unique-differentiability of the two closed half-slabs.
+    
     have hUDl : UniqueDiffOn ℝ (Set.Iic (0:ℝ) ×ˢ V) :=
       UniqueDiffOn.prod (uniqueDiffOn_Iic 0) hVopen.uniqueDiffOn
     have hUDr : UniqueDiffOn ℝ (Set.Ici (0:ℝ) ×ˢ V) :=
       UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hVopen.uniqueDiffOn
-    -- The two one-sided Taylor series.
+    
     set pL : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
       ftaylorSeriesWithin ℝ Φ (Set.Iic (0:ℝ) ×ˢ V) with hpL_def
     set pR : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
@@ -789,16 +684,16 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       hΦ.contDiffOn.ftaylorSeriesWithin hUDl
     have hTR : HasFTaylorSeriesUpToOn ∞ (Function.uncurry g) pR (Set.Ici (0:ℝ) ×ˢ V) :=
       hgR.ftaylorSeriesWithin hUDr
-    -- The candidate joint series, assembled piecewise.
+    
     set p : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
       fun q => if q.1 ≤ 0 then pL q else pR q with hp_def
-    -- **THE SEAM COEFFICIENT MATCH**: the two one-sided joint Taylor coefficients agree at every
-    -- seam point `(0, z)`, `z ∈ V`. Since `Φ` is globally smooth, its lower within-jet equals the
-    -- full jet, which equals its *upper* within-jet, so the goal reduces to a common-domain
-    -- (`Ici 0 ×ˢ V`) statement. Both `Φ` and `uncurry g` are `C∞` there and share their entire
-    -- one-sided `t`-jet at every seam parameter `w ∈ V` (the Borel series realizes `cₙ` fibrewise by
-    -- construction, and `ρ ≡ 1` on `V`); `iteratedFDerivWithin_prod_match` turns this common `t`-jet
-    -- into the matching joint iterated Fréchet derivative.
+    
+    
+    
+    
+    
+    
+    
     have htjet : ∀ i : ℕ, Set.EqOn
         (fun w => iteratedDerivWithin i (fun t => Φ (t, w)) (Set.Ici 0) 0)
         (fun w => iteratedDerivWithin i (fun t => Function.uncurry g (t, w)) (Set.Ici 0) 0) V := by
@@ -814,7 +709,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       rw [hLHS]
       simp only [ha_def, hρV w hw, one_smul]
       rfl
-    -- Apply the common-`t`-jet ⟹ matching-joint-jet lemma after collapsing the smooth left jet.
+    
     have hjetF : ∀ (n : ℕ) (z : E), z ∈ V →
         iteratedFDerivWithin ℝ n Φ (Set.Iic (0:ℝ) ×ˢ V) (0, z) =
           iteratedFDerivWithin ℝ n (Function.uncurry g) (Set.Ici (0:ℝ) ×ˢ V) (0, z) := by
@@ -826,16 +721,16 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       rw [iteratedFDerivWithin_eq_iteratedFDeriv hUDl hΦn hmemL,
         ← iteratedFDerivWithin_eq_iteratedFDeriv hUDr hΦn hmemR]
       exact iteratedFDerivWithin_prod_match hVopen hΦ.contDiffOn hgR htjet n hz
-    -- Hence the assembled series is well-defined at the seam: `pL (0,z) = pR (0,z)` on `V`.
+    
     have hpLR : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pR (0, z) n := by
       intro n z hz
       simp only [hpL_def, hpR_def, ftaylorSeriesWithin]
       exact hjetF n z hz
-    -- `p` agrees with `pL` on the lower half (guard true).
+    
     have hEqpL : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pL q m) (Set.Iic (0:ℝ) ×ˢ V) := by
       intro m q hq
       simp only [hp_def, if_pos (Set.mem_Iic.mp hq.1)]
-    -- `p` agrees with `pR` on the upper half (`> 0` directly; at the seam via `hpLR`).
+    
     have hEqpR : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pR q m) (Set.Ici (0:ℝ) ×ˢ V) := by
       intro m q hq
       rcases eq_or_lt_of_le (Set.mem_Ici.mp hq.1) with hq0 | hq0
@@ -845,7 +740,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         simp only [hp_def, if_pos (le_refl (0:ℝ))]
         exact hpLR m z hq.2
       · simp only [hp_def, if_neg (not_le.mpr hq0)]
-    -- The zero-th coefficient yields the value of `uncurry gext`.
+    
     have hzero : ∀ q ∈ Set.univ ×ˢ V, (p q 0).curry0 = Function.uncurry gext q := by
       rintro ⟨t, z⟩ ⟨_, hz⟩
       by_cases ht : t ≤ 0
@@ -858,7 +753,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         have hval : (pR (t, z) 0).curry0 = Function.uncurry g (t, z) := hTR.zero_eq (t, z) hmem
         rw [hp_def]; simp only [if_neg ht]
         rw [hval, hEqUpper hmem]
-    -- The per-point derivative obligation for `p · m`, on `univ ×ˢ V`.
+    
     have hm_lt : ∀ m : ℕ, (m : WithTop ℕ∞) < ∞ := fun m => by
       exact_mod_cast (Nat.cast_lt.mpr m.lt_succ_self).trans_le le_top
     have hderiv : ∀ (m : ℕ), ∀ q ∈ Set.univ ×ˢ V,
@@ -867,8 +762,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       obtain ⟨t, z⟩ := q
       have hz : z ∈ V := hq.2
       rcases lt_trichotomy t 0 with ht | ht | ht
-      · -- Interior of the lower slab: upgrade the `Iic`-derivative to a full one.
-        have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
+      · have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
         have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (t, z) m.succ).curryLeft
             (Set.Iic (0:ℝ) ×ˢ V) (t, z) := hTL.fderivWithin m (hm_lt m) (t, z) hmem
         have hnhds : Set.Iio (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
@@ -883,8 +777,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
           hdL'.congr_of_eventuallyEq hee
         rw [hp_def]; simp only [if_pos (le_of_lt ht)]
         exact hfd.hasFDerivWithinAt
-      · -- The seam `t = 0`: glue the two one-sided derivatives.
-        subst ht
+      · subst ht
         have hmemL : ((0:ℝ), z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.self_mem_Iic, hz⟩
         have hmemR : ((0:ℝ), z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.self_mem_Ici, hz⟩
         have hdL0 : HasFDerivWithinAt (fun y => pL y m) (pL (0, z) m.succ).curryLeft
@@ -904,8 +797,7 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         rw [← Set.union_prod, Set.Iic_union_Ici] at hunion
         rw [hp_def]; simp only [if_pos (le_refl (0:ℝ))]
         exact hunion
-      · -- Interior of the upper slab: upgrade the `Ici`-derivative to a full one.
-        have hmem : (t, z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt ht), hz⟩
+      · have hmem : (t, z) ∈ Set.Ici (0:ℝ) ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt ht), hz⟩
         have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (t, z) m.succ).curryLeft
             (Set.Ici (0:ℝ) ×ˢ V) (t, z) := hTR.fderivWithin m (hm_lt m) (t, z) hmem
         have hnhds : Set.Ioi (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
@@ -920,20 +812,16 @@ theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
           hdR'.congr_of_eventuallyEq hee
         rw [hp_def]; simp only [if_neg (not_le.mpr ht)]
         exact hfd.hasFDerivWithinAt
-    -- Assemble the joint Taylor series on `univ ×ˢ V` (no continuity check needed at order `∞`).
+    
     have hTaylor : HasFTaylorSeriesUpToOn ∞ (Function.uncurry gext) p (Set.univ ×ˢ V) :=
       (hasFTaylorSeriesUpToOn_top_iff' (le_refl _)).mpr ⟨hzero, hderiv⟩
     exact hTaylor.contDiffOn
-  · -- Agreement with `g` for `t ≥ 0`, on all of `V`.
-    intro t ht z _
+  · intro t ht z _
     simp only [hgext_def, if_pos ht]
 
-/-- The linear reflection `(a, b) ↦ (-a, b)` of `ℝ × E`, the derivative of the affine seam-swap
-`(t, z) ↦ (T - t, z)`. -/
 private def reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E) :=
   (ContinuousLinearEquiv.neg ℝ).prodCongr (ContinuousLinearEquiv.refl ℝ E)
 
-/-- The unique-differentiability of a set is preserved by translation. -/
 private theorem uniqueDiffOn_vadd {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
     (a : G) {s : Set G} (hs : UniqueDiffOn ℝ s) : UniqueDiffOn ℝ (a +ᵥ s) := by
   have himg : a +ᵥ s = (fun x => a + x) '' s := by
@@ -945,12 +833,6 @@ private theorem uniqueDiffOn_vadd {G : Type*} [NormedAddCommGroup G] [NormedSpac
     rwa [zero_add] at h
   · exact Function.surjective_id.denseRange
 
-/-- **Reflection transport.** The joint iterated Fréchet derivative of `G` on `s` at the seam image
-`(T - x.1, x.2)` equals that of the reflected `G ∘ (t,z) ↦ (T-t,z)` on the reflected set at `x`,
-post-composed with the (orientation-reversing) linear reflection `reflectFst`. The affine seam-swap
-factors as `(· + (T,0)) ∘ reflectFst`; the translation is absorbed via
-`iteratedFDerivWithin_comp_add_right` and the linear reflection via
-`ContinuousLinearEquiv.iteratedFDerivWithin_comp_right`. -/
 private theorem reflect_iteratedFDerivWithin (T : ℝ) (G : ℝ × E → F) (n : ℕ) (s : Set (ℝ × E))
     (x : ℝ × E) (hs : UniqueDiffOn ℝ s) (hx : (T - x.1, x.2) ∈ s) :
     iteratedFDerivWithin ℝ n (fun p => G (T - p.1, p.2))
@@ -993,9 +875,6 @@ private theorem reflect_iteratedFDerivWithin (T : ℝ) (G : ℝ × E → F) (n :
   congr 1
   rw [iteratedFDerivWithin_comp_add_right, hvadd, hrefl]
 
-/-- The smooth `t`-cutoff: `1` on `(-∞, T/2]`, `0` on `[3T/4, ∞)`. Multiplying a family smooth on
-the compact slab `Icc 0 T ×ˢ V` by this cutoff produces a family smooth on the half-line slab
-`Ici 0 ×ˢ V` that is unchanged near the left seam `t = 0`. -/
 private def intervalCutoff (T : ℝ) (t : ℝ) : ℝ :=
   Real.smoothTransition ((3 * T / 4 - t) / (T / 4))
 
@@ -1023,8 +902,6 @@ private theorem tsupport_intervalCutoff_fst (T : ℝ) (hT : 0 < T) :
     exact hp (intervalCutoff_eq_zero T hT (le_of_lt (lt_of_not_ge h)))
   · exact isClosed_le continuous_fst continuous_const
 
-/-- Multiplying a family `h` smooth on the compact slab `Icc 0 T ×ˢ V` by the smooth `t`-cutoff
-`intervalCutoff T` gives a family smooth on the whole half-line slab `Ici 0 ×ˢ V`. -/
 private theorem contDiffOn_intervalCutoff_smul (T : ℝ) (hT : 0 < T) (h : ℝ × E → F) {V : Set E}
     (hV : IsOpen V) (hh : ContDiffOn ℝ ∞ h (Set.Icc 0 T ×ˢ V)) :
     ContDiffOn ℝ ∞ (fun p : ℝ × E => intervalCutoff T p.1 • h p) (Set.Ici 0 ×ˢ V) := by
@@ -1049,15 +926,6 @@ private theorem contDiffOn_intervalCutoff_smul (T : ℝ) (hT : 0 < T) (h : ℝ �
         zero_smul]
     exact (contDiffAt_const.congr_of_eventuallyEq heq).contDiffWithinAt
 
-/-- **Seam jet match across a compact-interval seam.** A globally-`C∞` family `Φ` and a family `h`
-smooth on the compact slab `Icc 0 T ×ˢ V` that share their entire one-sided `t`-jet at `t = 0` for
-every parameter `w ∈ V` have the same joint iterated Fréchet derivative at every seam point `(0, z)`
-— `Φ`'s computed on the *lower* slab `Iic 0 ×ˢ V`, `h`'s on the compact slab `Icc 0 T ×ˢ V`.
-
-The compact slab is bridged to the half-line slab `Ici 0 ×ˢ V` near the seam (they agree on
-`Iio T`), `Φ`'s lower jet is collapsed to its full jet (`Φ` global), and `h` is replaced by its
-`intervalCutoff` truncation (globally `C∞` on `Ici 0 ×ˢ V`, unchanged near the seam) so that the
-half-line `iteratedFDerivWithin_prod_match` applies. -/
 private theorem prodMatch_intervalCutoff (T : ℝ) (hT : 0 < T) (Φ : ℝ × E → F)
     (hΦ : ContDiff ℝ ∞ Φ) (h : ℝ × E → F) {V : Set E} (hV : IsOpen V)
     (hh : ContDiffOn ℝ ∞ h (Set.Icc 0 T ×ˢ V))
@@ -1112,21 +980,7 @@ private theorem prodMatch_intervalCutoff (T : ℝ) (hT : 0 < T) (Φ : ℝ × E �
   exact iteratedFDerivWithin_prod_match hV hΦ.contDiffOn hĥsmooth htjet n hz
 
 set_option linter.unusedVariables false in
-/-- **Parametrized Borel compact-interval extension.** The two-seam analogue of
-`borel_halfLine_extend_param`. Let `g : ℝ → E → F` be jointly `C∞` on the compact slab
-`Icc 0 T ×ˢ K` for a compact `K` with `z₀` in its interior. Then there is a function `gext` and an
-open neighbourhood `V` of `z₀` on which `gext` is jointly `C∞` on the full slab `univ ×ˢ V` and
-agrees with `g` for all `t ∈ [0, T]` and all `z ∈ V`.
 
-The construction runs the parametrized Borel series twice, once at each endpoint: `Lext` matches
-`g`'s one-sided `t`-jet at `t = 0` and supplies the extension for `t < 0`; `Rext (t, z) := RΦ(T-t,z)`
-is the reflected Borel series matching `g`'s one-sided `t`-jet at `t = T` and supplies the extension
-for `t > T`; on the middle `[0, T]` the extension is `g`. Joint `C∞` on `univ ×ˢ V` is the two-seam
-`HasFTaylorSeriesUpToOn` glue: the assembled candidate Taylor series is the lower series on `t < 0`,
-`g`'s on `0 ≤ t ≤ T`, the reflected series on `t > T`, with the two seam coefficient matches supplied
-by `prodMatch_intervalCutoff` (left seam directly; right seam after the orientation-reversing
-`reflect_iteratedFDerivWithin` transport). As in the half-line case, `E` is finite-dimensional (the
-cutoff `ρ`) and the compactness of `K` provides the interior point. -/
 theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     (g : ℝ → E → F) (T : ℝ) (hT : 0 < T) (K : Set E) (hK : IsCompact K)
     (z₀ : E) (hz₀ : z₀ ∈ interior K)
@@ -1141,7 +995,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
   have hUopen : IsOpen U := isOpen_interior
   have hg' : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ U) :=
     hg.mono (Set.prod_mono_right interior_subset)
-  -- The reflected family `(s, z) ↦ g (T - s) z`, smooth on `Icc 0 T ×ˢ U`.
+  
   set gR : ℝ → E → F := fun s z => g (T - s) z with hgR_def
   have hgR' : ContDiffOn ℝ ∞ (Function.uncurry gR) (Set.Icc (0:ℝ) T ×ˢ U) := by
     have hmap : ContDiffOn ℝ ∞ (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) (Set.Icc (0:ℝ) T ×ˢ U) :=
@@ -1152,14 +1006,14 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       simp only [Set.mem_Icc] at hs
       exact ⟨Set.mem_Icc.mpr ⟨by linarith [hs.1, hs.2], by linarith [hs.1, hs.2]⟩, hz⟩
     exact hg'.comp hmap hmaps
-  -- The two curried cutoff families, smooth on the half-line slab `Ici 0 ×ˢ U`.
+  
   set gLcut : ℝ → E → F := fun s z => intervalCutoff T s • g s z with hgLcut_def
   set gRcut : ℝ → E → F := fun s z => intervalCutoff T s • gR s z with hgRcut_def
   have hgLcut : ContDiffOn ℝ ∞ (Function.uncurry gLcut) (Set.Ici (0:ℝ) ×ˢ U) :=
     contDiffOn_intervalCutoff_smul T hT (Function.uncurry g) hUopen hg'
   have hgRcut : ContDiffOn ℝ ∞ (Function.uncurry gRcut) (Set.Ici (0:ℝ) ×ˢ U) :=
     contDiffOn_intervalCutoff_smul T hT (Function.uncurry gR) hUopen hgR'
-  -- The two parametrized coefficient families.
+  
   set aL : ℕ → E → F :=
     fun n z => ρ z • iteratedDerivWithin n (fun s => gLcut s z) (Set.Ici 0) 0 with haL_def
   set aR : ℕ → E → F :=
@@ -1170,7 +1024,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     contDiff_cutoff_smul hUopen hρ_smooth hρ_tsupp (param_jet_contDiffOn gRcut U hgRcut n)
   have hsuppL : ∀ n, HasCompactSupport (aL n) := fun n => hρ_cs.smul_right
   have hsuppR : ∀ n, HasCompactSupport (aR n) := fun n => hρ_cs.smul_right
-  -- The two Borel series and the reflected right extension.
+  
   set Lext : ℝ × E → F := fun p => ∑' n, paramTerm aL haL hsuppL n p with hLext_def
   set RΦ : ℝ × E → F := fun p => ∑' n, paramTerm aR haR hsuppR n p with hRΦ_def
   set Rext : ℝ → E → F := fun t z => RΦ (T - t, z) with hRext_def
@@ -1180,21 +1034,21 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     have hmap : ContDiff ℝ ∞ (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) :=
       (contDiff_const.sub contDiff_fst).prodMk contDiff_snd
     exact hRΦC.comp hmap
-  -- The extension.
+  
   set gext : ℝ → E → F :=
     fun t z => if t < 0 then Lext (t, z) else if t ≤ T then g t z else Rext t z with hgext_def
-  -- An open neighbourhood `V ∋ z₀`, `V ⊆ U`, on which `ρ ≡ 1`.
+  
   have hVnhds : {z : E | ρ z = 1} ∩ U ∈ nhds z₀ :=
     Filter.inter_mem hρ_eq1 (hUopen.mem_nhds hz₀)
   obtain ⟨V, hVsub, hVopen, hz₀V⟩ := mem_nhds_iff.1 hVnhds
   have hρV : ∀ z ∈ V, ρ z = 1 := fun z hz => (hVsub hz).1
   have hVU : V ⊆ U := fun z hz => (hVsub hz).2
-  -- `g` and the reflected extension are smooth on the relevant slabs over `V`.
+  
   have hgV : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ V) :=
     hg.mono (Set.prod_mono_right (hVU.trans interior_subset))
   have hgRV : ContDiffOn ℝ ∞ (Function.uncurry gR) (Set.Icc (0:ℝ) T ×ˢ V) :=
     hgR'.mono (Set.prod_mono_right hVU)
-  -- The one-sided `t`-jet of the left series at `0` realizes `g`'s one-sided `t`-jet (`ρ ≡ 1`).
+  
   have hjetL : ∀ i : ℕ, ∀ w ∈ V, iteratedDerivWithin i (fun t => Lext (t, w)) (Set.Ici 0) 0
       = iteratedDerivWithin i (fun t => Function.uncurry g (t, w)) (Set.Ici 0) 0 := by
     intro i w hw
@@ -1214,7 +1068,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       rw [intervalCutoff_eq_one T hT (le_of_lt ht), one_smul]; rfl
     · change intervalCutoff T (0:ℝ) • g 0 w = Function.uncurry g (0, w)
       rw [intervalCutoff_eq_one T hT (by positivity), one_smul]; rfl
-  -- The one-sided `t`-jet of the right series at `0` realizes `gR`'s one-sided `t`-jet (`ρ ≡ 1`).
+  
   have hjetR : ∀ i : ℕ, ∀ w ∈ V, iteratedDerivWithin i (fun t => RΦ (t, w)) (Set.Ici 0) 0
       = iteratedDerivWithin i (fun t => Function.uncurry gR (t, w)) (Set.Ici 0) 0 := by
     intro i w hw
@@ -1234,7 +1088,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       rw [intervalCutoff_eq_one T hT (le_of_lt ht), one_smul]; rfl
     · change intervalCutoff T (0:ℝ) • gR 0 w = Function.uncurry gR (0, w)
       rw [intervalCutoff_eq_one T hT (by positivity), one_smul]; rfl
-  -- Value matches at the two seams: only the `n = 0` term survives at the seam, `ρ ≡ 1`, `χ(0) = 1`.
+  
   have hbump0 : borelBumpMono 0 0 = 1 := by
     rw [borelBumpMono, borelCutoff_eq_one (by norm_num : (0:ℝ) ^ 2 ≤ 1)]; norm_num
   have hseamval : ∀ (a : ℕ → E → F) (ha : ∀ n, ContDiff ℝ ∞ (a n))
@@ -1273,14 +1127,13 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     change g (T - 0) z = g T z
     rw [sub_zero]
   refine ⟨gext, V, hVopen.mem_nhds hz₀V, ?_, ?_⟩
-  · -- Joint `C∞` of `uncurry gext` on the full slab `univ ×ˢ V`, via a three-piece, two-seam glue.
-    have hUDl : UniqueDiffOn ℝ (Set.Iic (0:ℝ) ×ˢ V) :=
+  · have hUDl : UniqueDiffOn ℝ (Set.Iic (0:ℝ) ×ˢ V) :=
       UniqueDiffOn.prod (uniqueDiffOn_Iic 0) hVopen.uniqueDiffOn
     have hUDm : UniqueDiffOn ℝ (Set.Icc (0:ℝ) T ×ˢ V) :=
       UniqueDiffOn.prod (uniqueDiffOn_Icc hT) hVopen.uniqueDiffOn
     have hUDr : UniqueDiffOn ℝ (Set.Ici T ×ˢ V) :=
       UniqueDiffOn.prod (uniqueDiffOn_Ici T) hVopen.uniqueDiffOn
-    -- The three one-sided Taylor series.
+    
     set pL : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
       ftaylorSeriesWithin ℝ Lext (Set.Iic (0:ℝ) ×ˢ V) with hpL_def
     set pM : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
@@ -1293,16 +1146,16 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       hgV.ftaylorSeriesWithin hUDm
     have hTR : HasFTaylorSeriesUpToOn ∞ (Function.uncurry Rext) pR (Set.Ici T ×ˢ V) :=
       hRextC.contDiffOn.ftaylorSeriesWithin hUDr
-    -- **LEFT SEAM coefficient match**: `pL (0,z) = pM (0,z)` for `z ∈ V`.
+    
     have hLM : ∀ (n : ℕ) (z : E), z ∈ V → pL (0, z) n = pM (0, z) n := by
       intro n z hz
       simp only [hpL_def, hpM_def, ftaylorSeriesWithin]
       exact prodMatch_intervalCutoff T hT Lext hLextC (Function.uncurry g) hVopen hgV hjetL n hz
-    -- **RIGHT SEAM coefficient match**: `pM (T,z) = pR (T,z)` for `z ∈ V`.
+    
     have hMR : ∀ (n : ℕ) (z : E), z ∈ V → pM (T, z) n = pR (T, z) n := by
       intro n z hz
       simp only [hpM_def, hpR_def, ftaylorSeriesWithin]
-      -- Transport both seam coefficients through the reflection `(t,z) ↦ (T-t,z)`.
+      
       have hpreM : (fun p : ℝ × E => ((T - p.1 : ℝ), p.2)) ⁻¹' (Set.Icc (0:ℝ) T ×ˢ V)
           = Set.Icc (0:ℝ) T ×ˢ V := by
         ext q
@@ -1328,7 +1181,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
       simp only [sub_zero] at hTg hTr
       rw [hpreM] at hTg
       rw [hpreR] at hTr
-      -- `uncurry gR = fun p => uncurry g (T - p.1, p.2)` and `RΦ = fun p => uncurry Rext (T-p.1,p.2)`.
+      
       have hgReq : (fun p : ℝ × E => Function.uncurry g (T - p.1, p.2)) = Function.uncurry gR := by
         funext p; rfl
       have hRΦeq : (fun p : ℝ × E => Function.uncurry Rext (T - p.1, p.2)) = RΦ := by
@@ -1337,11 +1190,11 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         rw [sub_sub_cancel]
       rw [hgReq] at hTg
       rw [hRΦeq] at hTr
-      -- Reflected match via the left-seam bridge applied to `(RΦ, uncurry gR)`.
+      
       have hM : iteratedFDerivWithin ℝ n RΦ (Set.Iic (0:ℝ) ×ˢ V) (0, z)
           = iteratedFDerivWithin ℝ n (Function.uncurry gR) (Set.Icc (0:ℝ) T ×ˢ V) (0, z) :=
         prodMatch_intervalCutoff T hT RΦ hRΦC (Function.uncurry gR) hVopen hgRV hjetR n hz
-      -- Combine: the two reflected coefficients agree, hence (compCLM injective) the seam ones.
+      
       have hcompeq : (iteratedFDerivWithin ℝ n (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ V) (T, z)
             ).compContinuousLinearMap
             (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E)))
@@ -1349,7 +1202,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
             ).compContinuousLinearMap
             (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E))) := by
         rw [← hTg, ← hTr, hM]
-      -- `·.compContinuousLinearMap reflectFst` is injective (it has the inverse `reflectFst.symm`).
+      
       have hroundtrip : ∀ w : (ℝ × E) [×n]→L[ℝ] F,
           (w.compContinuousLinearMap
               (fun _ => ((reflectFst : (ℝ × E) ≃L[ℝ] (ℝ × E)) : (ℝ × E) →L[ℝ] (ℝ × E)))
@@ -1363,10 +1216,10 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         hcompeq
       simp only at hcancel
       rwa [hroundtrip, hroundtrip] at hcancel
-    -- The candidate joint series, assembled piecewise across the two seams.
+    
     set p : ℝ × E → FormalMultilinearSeries ℝ (ℝ × E) F :=
       fun q => if q.1 < 0 then pL q else if q.1 ≤ T then pM q else pR q with hp_def
-    -- `uncurry gext` agrees with the three pieces on their closed slabs.
+    
     have hEqL : Set.EqOn (Function.uncurry gext) Lext (Set.Iic (0:ℝ) ×ˢ V) := by
       rintro ⟨t, z⟩ ⟨ht, hz⟩
       simp only [Set.mem_Iic] at ht
@@ -1389,7 +1242,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         exact (hRextT z hz).symm
       · simp only [Function.uncurry, hgext_def, if_neg (not_lt.mpr (le_of_lt (lt_trans hT htT))),
           if_neg (not_le.mpr htT)]
-    -- `p` agrees with each piece's series on the corresponding closed slab.
+    
     have hEqpL : ∀ m : ℕ, Set.EqOn (fun q => p q m) (fun q => pL q m) (Set.Iic (0:ℝ) ×ˢ V) := by
       intro m q hq
       rcases lt_or_ge q.1 0 with hq0 | hq0
@@ -1412,7 +1265,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         have : q = (T, q.2) := by rw [← hq1]
         rw [this]; exact hMR m q.2 hq.2
       · simp only [hp_def, if_neg (not_lt.mpr (le_of_lt (lt_trans hT hqT))), if_neg (not_le.mpr hqT)]
-    -- The zero-th coefficient yields the value of `uncurry gext`.
+    
     have hzero : ∀ q ∈ Set.univ ×ˢ V, (p q 0).curry0 = Function.uncurry gext q := by
       rintro ⟨t, z⟩ ⟨_, hz⟩
       rcases lt_trichotomy t 0 with ht | ht | ht
@@ -1435,15 +1288,14 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
           rw [hTR.zero_eq (t, z) hmem, hEqR hmem]
     have hm_lt : ∀ m : ℕ, (m : WithTop ℕ∞) < ∞ := fun m => by
       exact_mod_cast (Nat.cast_lt.mpr m.lt_succ_self).trans_le le_top
-    -- The per-order derivative obligation on `univ ×ˢ V`.
+    
     have hderiv : ∀ (m : ℕ), ∀ q ∈ Set.univ ×ˢ V,
         HasFDerivWithinAt (fun y => p y m) (p q m.succ).curryLeft (Set.univ ×ˢ V) q := by
       intro m q hq
       obtain ⟨t, z⟩ := q
       have hz : z ∈ V := hq.2
       rcases lt_trichotomy t 0 with ht | ht | ht
-      · -- t < 0: interior of the lower slab.
-        have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
+      · have hmem : (t, z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.mem_Iic.mpr (le_of_lt ht), hz⟩
         have hdL : HasFDerivWithinAt (fun y => pL y m) (pL (t, z) m.succ).curryLeft
             (Set.Iic (0:ℝ) ×ˢ V) (t, z) := hTL.fderivWithin m (hm_lt m) (t, z) hmem
         have hnhds : Set.Iio (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
@@ -1455,8 +1307,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
             (Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpL m (hsub hy)))
         rw [hp_def]; simp only [if_pos ht]
         exact hfd.hasFDerivWithinAt
-      · -- t = 0: LEFT seam. Work on the nbhd `Iio T ×ˢ V`, glue lower with middle.
-        subst ht
+      · subst ht
         have hu : Set.Iio T ×ˢ V ∈ nhds ((0:ℝ), z) :=
           prod_mem_nhds (Iio_mem_nhds hT) (hVopen.mem_nhds hz)
         have hmemL : ((0:ℝ), z) ∈ Set.Iic (0:ℝ) ×ˢ V := ⟨Set.self_mem_Iic, hz⟩
@@ -1484,10 +1335,8 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
         rw [hLM m.succ z hz] at hres
         rw [hp_def]; simp only [lt_irrefl, if_false, le_of_lt hT, ite_true]
         exact hres
-      · -- t > 0.
-        rcases lt_trichotomy t T with htT | htT | htT
-        · -- 0 < t < T: interior of the middle slab.
-          have hmem : (t, z) ∈ Set.Icc (0:ℝ) T ×ˢ V :=
+      · rcases lt_trichotomy t T with htT | htT | htT
+        · have hmem : (t, z) ∈ Set.Icc (0:ℝ) T ×ˢ V :=
             ⟨Set.mem_Icc.mpr ⟨le_of_lt ht, le_of_lt htT⟩, hz⟩
           have hdM : HasFDerivWithinAt (fun y => pM y m) (pM (t, z) m.succ).curryLeft
               (Set.Icc (0:ℝ) T ×ˢ V) (t, z) := hTM.fderivWithin m (hm_lt m) (t, z) hmem
@@ -1500,8 +1349,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
               (Filter.eventuallyEq_of_mem hnhds (fun y hy => hEqpM m (hsub hy)))
           rw [hp_def]; simp only [if_neg (not_lt.mpr (le_of_lt ht)), if_pos (le_of_lt htT)]
           exact hfd.hasFDerivWithinAt
-        · -- t = T: RIGHT seam. Work on the nbhd `Ioi 0 ×ˢ V`, glue middle with right.
-          subst htT
+        · subst htT
           have hu : Set.Ioi (0:ℝ) ×ˢ V ∈ nhds (t, z) :=
             prod_mem_nhds (Ioi_mem_nhds hT) (hVopen.mem_nhds hz)
           have hmemM : (t, z) ∈ Set.Icc (0:ℝ) t ×ˢ V :=
@@ -1528,8 +1376,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
               ((Set.univ ×ˢ V) ∩ (Set.Ioi (0:ℝ) ×ˢ V)) (t, z) := by rw [hinter]; exact hmono
           have hres := (hasFDerivWithinAt_inter hu).mp hmono'
           simpa only [hp_def, if_neg (not_lt.mpr (le_of_lt hT)), if_pos (le_refl t)] using hres
-        · -- t > T: interior of the upper slab.
-          have hmem : (t, z) ∈ Set.Ici T ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt htT), hz⟩
+        · have hmem : (t, z) ∈ Set.Ici T ×ˢ V := ⟨Set.mem_Ici.mpr (le_of_lt htT), hz⟩
           have hdR : HasFDerivWithinAt (fun y => pR y m) (pR (t, z) m.succ).curryLeft
               (Set.Ici T ×ˢ V) (t, z) := hTR.fderivWithin m (hm_lt m) (t, z) hmem
           have hnhds : Set.Ioi T ×ˢ V ∈ nhds (t, z) :=
@@ -1545,8 +1392,7 @@ theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     have hTaylor : HasFTaylorSeriesUpToOn ∞ (Function.uncurry gext) p (Set.univ ×ˢ V) :=
       (hasFTaylorSeriesUpToOn_top_iff' (le_refl _)).mpr ⟨hzero, hderiv⟩
     exact hTaylor.contDiffOn
-  · -- Agreement with `g` on `[0, T]`, on all of `V`.
-    intro t ht z _
+  · intro t ht z _
     obtain ⟨ht0, htT⟩ := ht
     simp only [hgext_def, if_neg (not_lt.mpr ht0), if_pos htT]
 

@@ -1,28 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkp
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Strict per-pair cross-chart `W^{k,p}` bound — general-`k` version
-
-For two chart points `γ α : M` on a closed Riemannian manifold and a fixed
-compact `K_α ⊆ (chartAt H α).source`, the chart-`γ` pushed cross-pullback
-`chartPushed γ (chartPullback I α v)` is bounded in `W^{k,p}(chartTargetEuclid γ)`
-by a constant times `‖v‖_{W^{k,p}(chartTargetEuclid α)}` for every
-`v ∈ MemWkp k p (chartTargetEuclid α)` whose closed support sits inside the
-chart-`α` image of `K_α`.
-
-This generalises `cross_chart_bound_strict_strong_memWkp` (order 1) to arbitrary
-`k : ℕ`, using:
-
-* the chain rule `MemWkp.comp_smoothDiffeoBoundedAtOrder` and the quantitative
-  chain rule `SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le` (both already general-`k`);
-* the iterated quantitative Leibniz bound `wkpNorm_smul_smooth_bounded_le` for
-  a smooth bounded factor;
-* the general-`k` open-set monotonicity helpers
-  `wkpNorm_eq_of_tsupport_subset_general` and
-  `wkpNorm_le_of_tsupport_subset_mem_small_general`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -46,12 +24,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Headline theorem (`MemWkp k p` inputs, arbitrary `k`).** For two chart
-points `γ α : M` on a closed Riemannian manifold and a fixed compact set
-`K_α ⊆ (chartAt H α).source`, there exists a positive constant `K` such that
-for every `v ∈ MemWkp k p` on the chart-α Euclidean target whose closed support
-sits inside the chart-α Euclidean image of `K_α`, the chart-γ pushed
-cross-pullback satisfies the `W^{k,p}` bound. -/
 theorem cross_chart_bound_strict_strong_memWkp_k
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

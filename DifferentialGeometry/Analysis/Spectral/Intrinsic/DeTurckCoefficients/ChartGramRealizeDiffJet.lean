@@ -1,26 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedInvGramJetLipschitz
 
-/-!
-# Chart-Gram jets of a realized-metric difference are chart jets of the perturbation difference
-
-For two `g_bg`-fibre-small perturbations `T, T'`, the realized metrics
-`g₁ = g_bg + h_sym T`, `g₂ = g_bg + h_sym T'` have, on the chart-`α` target interior, a chart-Gram
-matrix difference equal to the symmetrized raw chart-`α`-frame `(0,2)`-component of `T − T'`
-(`chartGramOnE_realize_sub_eq_symm_rawComponent`).  Because this is an *equality of functions* on the
-open chart-target interior, every iterated Fréchet derivative of the chart-Gram difference equals the
-corresponding derivative of the symmetrized raw component.  Consequently the all-order chart-jet
-seminorm difference `chartGramJetDiffSeminormSum N (realize T) (realize T')` is bounded by the chart
-Fréchet jets of the raw chart components of `T − T'`.
-
-This is the foundational chart-jet bridge that lets the chart-jet Faà-di-Bruno Lipschitz towers
-(`IteratedChartRicciLieJetLipschitz`, `IteratedInvGramJetLipschitz`), which are phrased in terms of
-`chartGramJetDiffSeminormSum`, be driven by the chart Fréchet jets of the perturbation difference.
-
-The result is `δ`-witness independent: a realized metric depends only on `g_bg + h_sym T`, not on the
-fibre-small witness `δ`, so any two fibre-small witnesses produce the same chart-Gram data.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -45,10 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **The chart-Gram entry of a realized metric is `δ`-witness independent.**
-Two fibre-small witnesses `(δ, hδ)`, `(δ', hδ')` for the same perturbation `T` produce realized
-metrics with identical chart-`α` Gram entries (the realized metric depends only on `g_bg + h_sym T`,
-not on the positivity witness). -/
 theorem chartGramOnE_realize_delta_irrel
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -63,13 +39,6 @@ theorem chartGramOnE_realize_delta_irrel
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ_lt hδ,
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ'_lt hδ']
 
-/-- **The chart-Gram entry difference of two realized metrics equals, on the chart-target interior,
-the symmetrized chart-pulled raw component of the perturbation difference.**
-
-On `interior (extChartAt I α).target`, the function
-`chartGramOnE (realize T) α a b − chartGramOnE (realize T') α a b` equals
-`(1/2)·(rawPullR (T − T') α ![] ![a,b] + rawPullR (T − T') α ![] ![b,a])` composed back through
-`toEuclidean`, i.e. its values agree with the symmetrized raw chart-`α` component of `T − T'`. -/
 theorem chartGramOnE_realize_sub_eqOn_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -96,14 +65,12 @@ theorem chartGramOnE_realize_sub_eqOn_symm_rawComponent
     g_bg T T' hδ_lt hδ hδ'_lt hδ' α a b y hp_src
   simpa using hkey
 
-/-- The chart-pulled raw `(0,2)`-component of a tensor as a function on `E` (the chart target):
-`tensorChartComponentRaw g 0 2 S α ![] Jdx ∘ (extChartAt I α).symm`. -/
 def rawCompOnE (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] Jdx ((extChartAt I α).symm y)
 
 open DifferentialGeometry.Analysis.Sobolev.Chart in
-/-- `rawCompOnE` is `C^∞` on the chart-target interior. -/
+
 lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g S α Jdx)
@@ -126,9 +93,6 @@ lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hmem,
     (toEuclidean (E := E)).symm_apply_apply Y]
 
-/-- The `E`-coordinate bare chart-jet content of a `(0,2)`-tensor `S` at chart `α`, point `y`,
-order `N`: the sum over the two covariant index pairs of the order-`≤ N` Fréchet jets (within the
-chart-target interior) of the raw chart components `rawCompOnE`. -/
 def bareChartJetContentOnE (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (N : ℕ) (y : E) : ℝ :=
   ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E),
@@ -141,19 +105,6 @@ lemma bareChartJetContentOnE_nonneg (g : SmoothRiemannianMetric I M) (S : Smooth
     0 ≤ bareChartJetContentOnE (I := I) (M := M) g S α N y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
 
-/-- **The chart-Gram jet-difference seminorm of two realized metrics is bounded by the `E`-coordinate
-bare chart-jet content of the perturbation difference.**
-
-On the chart-target interior, for every order `N`,
-```
-chartGramJetDiffSeminormSum N (realize T) (realize T') α (interior) y
-  ≤ ∑_{a,b} iteratedFDerivSeminorm N (½·(rawCompOnE_{ab} + rawCompOnE_{ba})) (interior) y
-  ≤ (Module.finrank ℝ E) · bareChartJetContentOnE (T − T') N y .
-```
-The first step is the chart-Gram difference EqOn identity
-(`chartGramOnE_realize_sub_eqOn_symm_rawComponent`) lifted to all Fréchet orders
-(`iteratedFDerivWithin_congr`); the second is the triangle inequality on the symmetrized raw
-component. -/
 theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -169,7 +120,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
   classical
   set s : Set E := interior (extChartAt I α).target with hs_def
   have hs_open : IsOpen s := isOpen_interior
-  -- Per index pair `(a,b)`: the chart-Gram jet equals the symmetrized raw-component jet, then bound.
+  
   have hpair : ∀ a b : Fin (Module.finrank ℝ E),
       iteratedFDerivSeminorm N
         (fun z => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)
@@ -182,12 +133,12 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
             ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖)) := by
     intro a b
     refine Finset.sum_le_sum (fun m _ => ?_)
-    -- Transfer the order-`m` jet of the chart-Gram difference to the symmetrized raw component.
+    
     have hEq := chartGramOnE_realize_sub_eqOn_symm_rawComponent (I := I) (M := M)
       g_bg T T' hδ_lt hδ hδ'_lt hδ' α a b
     have hcongr := iteratedFDerivWithin_congr (𝕜 := ℝ) hEq hy m
     rw [hcongr]
-    -- The symmetrized raw is `(1/2)·(rawCompOnE ![a,b] + rawCompOnE ![b,a])` on `s`.
+    
     have hfun_eq : Set.EqOn
         (fun y : E => (1 / 2 : ℝ) *
           (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 (T - T') α ![] ![a, b]
@@ -199,7 +150,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
             rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] y)) s := by
       intro z _; rfl
     rw [iteratedFDerivWithin_congr (𝕜 := ℝ) hfun_eq hy m]
-    -- Pull out the `(1/2)` and split the sum.
+    
     have hcd_ab : ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b]) s :=
       rawCompOnE_contDiffOn (I := I) (M := M) g_bg (T - T') α ![a, b]
     have hcd_ba : ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s :=
@@ -226,17 +177,17 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
       iteratedFDerivWithin_add_apply (hcd_ab.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top))
         (hcd_ba.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top)) hs_open.uniqueDiffOn hy]
     exact norm_add_le _ _
-  -- Assemble: `chartGramJetDiffSeminormSum = ∑_{a,b} iteratedFDerivSeminorm`, bound each pair, sum.
+  
   unfold chartGramJetDiffSeminormSum
   refine (Finset.sum_le_sum (fun a _ => Finset.sum_le_sum (fun b _ => hpair a b))).trans ?_
-  -- Abbreviate the per-`Jdx` jet column.
+  
   set col : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ := fun Jdx =>
     ∑ m ∈ Finset.range (N + 1),
       ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α Jdx) s y‖
     with hcol_def
   have hcol_nn : ∀ Jdx, 0 ≤ col Jdx := fun Jdx =>
     Finset.sum_nonneg fun m _ => norm_nonneg _
-  -- The LHS double sum, in terms of `col`: `∑_{a,b} (1/2)(col ![a,b] + col ![b,a])`.
+  
   have hLHS_eq : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         ∑ m ∈ Finset.range (N + 1),
           ((1 / 2 : ℝ) *
@@ -253,7 +204,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     refine Finset.sum_congr rfl (fun m _ => ?_)
     ring
   rw [hLHS_eq]
-  -- Reindex `(a,b) ↦ ![a,b]` and `(a,b) ↦ ![b,a]` onto all `Jdx : Fin 2 → Fin n`.
+  
   have hsum_pair : ∀ f : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ,
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), f ![a, b]) =
         ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), f Jdx := by
@@ -274,7 +225,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (1 / 2 : ℝ) * (col ![a, b] + col ![b, a])) =
       ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), col Jdx := by
-    -- Split each summand `(1/2)(col_ab + col_ba)` into `(1/2)col_ab + (1/2)col_ba`.
+    
     have hsplit : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           (1 / 2 : ℝ) * (col ![a, b] + col ![b, a])) =
         (∑ a, ∑ b, (1 / 2 : ℝ) * col ![a, b]) +

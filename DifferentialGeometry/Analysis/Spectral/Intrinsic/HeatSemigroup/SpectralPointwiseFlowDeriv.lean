@@ -4,28 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 
-/-! # Pointwise spectral flow-derivative of a realized symmetrized bilinear form
-
-For a smooth representative family `F : ℝ → SmoothCcTensor g 0 2` whose `L²`
-eigen-coordinates on a closed time slab are a `C∞`-in-time family `φ` (with a
-`t`-independent, summable-across-modes all-order time-jet spectral-mass majorant), the
-chart-evaluated symmetrized bilinear form `s ↦ ccTensorBilinSymm g (F s) x v w` is the
-convergent eigen-series `∑' i, φ i s · ψ i` with `ψ i = ccTensorBilinSymm g (eigenSmooth i)
-x v w` a fixed (time-independent) scalar.  The eigen-series differentiates term-by-term
-(Mathlib's `hasDerivAt_tsum`), so the function has, at every interior slab time, the
-`[0, ∞)`-pointwise derivative `∑' i, (deriv (φ i) t) · ψ i`.
-
-This is the pure-spectral soundness bedrock behind the realized Ricci–DeTurck flow
-derivative: the genuine analytic content is the chart-`C⁰` spectral convergence
-`spectralPartialSum_ccTensorBilinSymm_tendsto` (proved in
-`SpectralEigenSeriesJointGram.lean` for the chart-Gram increment, here re-derived in the
-arbitrary-`(x, v, w)` form from the same public chart-frame reconstruction
-`ccTensorBilinSymm_eq_sum_chartBasis` and the POU-weighted chart-component limit
-`spectralChartComponent_tendsto`), and the uniform-in-time summable majorant for the
-time-derivative spectral series (assembled from the supplied time-jet mode-mass and the
-supercritical Weyl tail `tensorEigen_summable_negpow`).  No fibre-bundle topology is used:
-the scalar reconstruction is entirely chart-frame and real-valued. -/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology
@@ -51,12 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **The closed-set / one-sided `tsum` derivative for real series.**  The
-`HasDerivWithinAt` analogue of Mathlib's `hasDerivAt_tsum`: on a convex set with a summable
-uniform bound on the term within-derivatives and termwise within-differentiability, the
-real-valued series `∑' i, f i ·` has within-derivative `∑' i, f' i x` at every point.  The
-`HasFDerivWithinAt` engine is `DifferentialGeometry.Analysis.hasFDerivWithinAt_tsum`;
-`toSpanSingleton` (a continuous linear map) commutes with the `∑'` (`map_tsum`). -/
 theorem hasDerivWithinAt_tsum {α : Type*} {f : α → ℝ → ℝ} {f' : α → ℝ → ℝ}
     {u : α → ℝ} {s : Set ℝ}
     (hf : ∀ (i : α) (z : ℝ), z ∈ s → HasDerivWithinAt (f i) (f' i z) s z)
@@ -77,7 +49,7 @@ theorem hasDerivWithinAt_tsum {α : Type*} {f : α → ℝ → ℝ} {f' : α →
   have hkey := DifferentialGeometry.Analysis.hasFDerivWithinAt_tsum
     hF hFbd hu hs hx₀ hf0 hx
   have hderiv := hkey.hasDerivWithinAt
-  -- `(∑' i, toSpanSingleton ℝ (f' i x)) 1 = ∑' i, f' i x`.
+  
   have hsumF : Summable fun i => ContinuousLinearMap.toSpanSingleton ℝ (f' i x) := by
     refine Summable.of_norm_bounded hu (fun i => ?_)
     rw [ContinuousLinearMap.norm_toSpanSingleton, Real.norm_eq_abs]
@@ -92,12 +64,6 @@ theorem hasDerivWithinAt_tsum {α : Type*} {f : α → ℝ → ℝ} {f' : α →
     simp [ContinuousLinearMap.apply_apply, ContinuousLinearMap.toSpanSingleton_apply]
   rwa [heval] at hderiv
 
-/-- **All-order Sobolev membership of an `L²` tensor with summable weighted coordinate
-squares** (public).  If for every `σ ≥ 0` the weighted eigenbasis-coordinate squares of `u`
-are summable across modes, then `u` lies, via the chart-locality-free realization
-`tensorHsToL2`, in `Hˢ` for every `σ ≥ 0`: the witness `Hˢ`-element is the coordinate
-family of `u` itself, whose `tensorHsToL2` image has the same coordinates as `u` (hence
-equals `u` by eigenbasis-coordinate faithfulness — `HilbertBasis.repr` injectivity). -/
 theorem allHs_of_weighted_summable_pub
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hsum : ∀ σ : ℝ, 0 ≤ σ →
@@ -126,11 +92,6 @@ theorem allHs_of_weighted_summable_pub
   have hrhs : (b.repr u) i = tensorL2Coeff (I := I) (M := M) hc u i := rfl
   rw [hlhs, hrhs, tensorHsToL2_tensorL2Coeff]
 
-/-- **Metric-tag transport of the symmetrized extracted bilinear form.**  The fibre value
-`ccTensorBilinSymm g T x v w` depends only on the underlying smooth section `T.toSection`
-(the metric tag `g` of `SmoothCcTensor g 0 2` is a pure phantom type parameter, used by
-neither `ccTensorMultilinear` nor `ccTensorModel`), so two smooth tensors with equal
-sections — even over different metric tags — extract the same bilinear value. -/
 theorem ccTensorBilinSymm_toSection_congr
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
@@ -146,19 +107,11 @@ theorem ccTensorBilinSymm_toSection_congr
     ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply,
     hmodel v w, hmodel w v]
 
-/-- The fixed (time-independent) per-mode scalar `ψ i = ccTensorBilinSymm g (eigenSmooth i)
-x v w`: the symmetrized extracted bilinear form of the `i`-th smooth eigenbasis tensor,
-evaluated at the base point `x` on the tangent pair `(v, w)`. -/
 def eigenBilinScalar (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) : ℝ :=
   ccTensorBilinSymm (I := I) g (eigenSmooth (I := I) (M := M) g i) x v w
 
-/-- **The norm of a single eigenbasis tensor in the spectral Sobolev scale.**
-`‖smoothCcToTensorHs g σ (eigenSmooth i)‖ = √(tensorSobolevWeight i σ)`: the embedding has
-the same coordinate family as the spectral basis vector `tensorHsBasisVec σ i`
-(Kronecker `δ`, via `tensorL2Coeff_ofCompact_eigenSmooth`), so it shares its norm
-`norm_tensorHsBasisVec`. -/
 theorem norm_smoothCcToTensorHs_eigenSmooth (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     ‖smoothCcToTensorHs (I := I) (M := M) g σ (eigenSmooth (I := I) (M := M) g i)‖ =
@@ -174,10 +127,6 @@ theorem norm_smoothCcToTensorHs_eigenSmooth (g : SmoothRiemannianMetric I M) (σ
       tensorL2Coeff_ofCompact_eigenSmooth (I := I) (M := M) g j i]
   rw [heq, norm_tensorHsBasisVec (I := I) (M := M) i]
 
-/-- **The fixed per-mode scalar is bounded by the spectral-`m` Sobolev weight of the
-eigenmode times the `g`-lengths of the arguments.**  From the lossy `C⁰`-control bridge
-`ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy` applied to the single eigenbasis
-tensor, whose `H^m` norm is `√(tensorSobolevWeight i m)`. -/
 theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ) (hm_even : Even m)
     (h_lossy : 2 * Module.finrank ℝ E + 4 ≤ m)
     (x : M) (v w : TangentSpace I x) :
@@ -197,10 +146,6 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ) (hm_e
     _ = C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by ring
 
-/-- **The `ccTensorBilinSymm` of a finite eigen-combination is the finite coefficient
-sum of the per-mode scalars** (arbitrary `(x, v, w)`).  Re-derivation of the (private)
-sibling `ccTensorBilinSymm_finiteEigenCombo` from the public additivity
-`ccTensorBilinSymm_add` and homogeneity `ccTensorBilinSymm_smul`. -/
 theorem ccTensorBilinSymm_finiteEigenCombo'
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -223,12 +168,7 @@ theorem ccTensorBilinSymm_finiteEigenCombo'
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
-/-- **Pointwise chart-`C⁰` spectral convergence of the symmetrized bilinear form**
-(arbitrary `(x, v, w)`).  Re-derivation of the (private) sibling
-`spectralPartialSum_ccTensorBilinSymm_tendsto` from public chart-frame infrastructure:
-the chart-frame fibre reconstruction `ccTensorBilinSymm_eq_sum_chartBasis` and the
-POU-weighted chart-component limit `spectralChartComponent_tendsto`, divided by the
-positive partition-of-unity weight at a chart where `x` is interior. -/
+
 theorem spectralPartialSum_ccTensorBilinSymm_tendsto'
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
@@ -307,12 +247,6 @@ theorem spectralPartialSum_ccTensorBilinSymm_tendsto'
   refine tendsto_finset_sum _ (fun Q _ => ?_)
   exact (hraw_tendsto Q).mul_const _
 
-/-- **The eigen-series identity for the symmetrized bilinear form** (arbitrary `(x, v, w)`).
-For a smooth representative `Trep` of an `L²` tensor `u` that lies in every `Hˢ`, the
-symmetrized extracted bilinear form is the convergent eigen-series of the per-mode scalars
-weighted by the eigen-coordinates, PROVIDED the eigen-series is summable.  Assembled from
-the finite-combination identity, the chart-`C⁰` convergence, and `HasSum`/limit
-uniqueness. -/
 theorem ccTensorBilinSymm_eigenSeries_eq
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,

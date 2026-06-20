@@ -1,42 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOrderPeeling
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero
 
-/-!
-# The reverse Hebey-Sobolev bridge: order-`2k` chart Hilbert-Schmidt norm
-controlled by intrinsic `L²` norms of the iterated covariant gradients
-
-This file composes the two halves of the reverse Sobolev comparison into the
-single headline bound: the order-`2k` partition-of-unity-weighted chart-Sobolev
-Hilbert-Schmidt norm of a smooth compactly-supported `(r, s)`-tensor `T` is
-controlled by a single constant times the sum, over `j ≤ 2k`, of the intrinsic
-metric `L²` norms of the iterated covariant gradients `∇^j T`:
-
-  `(tensorPouSobolevHsNorm g k T).toReal
-     ≤ C · ∑_{j ∈ range (2k + 1)} tensorL2Norm g r (s + j) (∇^j T).toFun`.
-
-## Composition
-
-* The **order-peeling half**
-  `exists_tensorPouSobolevHsNorm_le_iteratedCovGrad_zero_sum` bounds, in
-  `ℝ≥0∞`, the order-`2k` chart-Sobolev norm of `T` by `ofReal C_B` times the
-  sum over `j ≤ 2k` of the order-`0` chart-Sobolev norms of `∇^j T`.
-
-* The **base half** `tensorPouSobolevHsNorm_zero_le_tensorL2Norm` bounds the
-  order-`0` chart-Sobolev norm of an `(r, s')`-tensor `S` (via its real part) by
-  a constant times the intrinsic `L²` norm `tensorL2Norm g r s' S.toFun`.
-
-Applying the base half at each valence `(r, s + j)` to `S = ∇^j T`, taking a
-finite maximum of the per-`j` base constants over `j ∈ range (2k + 1)`, and
-discharging the `ℝ≥0∞ ↔ ℝ` conversions with `tensorPouSobolevHsNorm_lt_top`
-(every order-`0` norm is finite) and `ENNReal.toReal_le_of_le_ofReal`, yields the
-headline real-valued bound.
-
-## Main result
-
-* `exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum` —
-  the headline reverse Hebey-Sobolev bridge.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology
@@ -56,19 +20,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section ReverseBridge
 
-/-- **The reverse Hebey-Sobolev bridge.** There is a non-negative constant `C`
-(depending only on `(g, r, s, k)`) such that for every smooth
-compactly-supported `(r, s)`-tensor section `T`, the order-`2k` Hilbert-Schmidt
-partition-of-unity-weighted chart-Sobolev norm of `T` is controlled by the sum,
-over `j ≤ 2k`, of the intrinsic metric `L²` norms of the iterated covariant
-gradients `∇^j T`:
-`(tensorPouSobolevHsNorm g k T).toReal ≤
-  C · ∑_{j ∈ range (2k + 1)} tensorL2Norm g r (s + j) (iteratedCovGrad g r s j T).toFun`.
-
-This is the reverse (lower-order recovery) half of the Hebey multi-order Sobolev
-equivalence: the full order-`2k` chart-Sobolev content of `T` is bounded, up to
-uniform Christoffel-controlled constants, by the bare `L²` content of the first
-`2k` iterated covariant gradients. -/
 theorem exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

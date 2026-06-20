@@ -1,13 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 
-/-!
-# Tensor heat semigroup: time-continuity foundation
-
-This file carries the predicate-free measurable / Borel-space foundation
-on `E` and `M` used by the tensor heat-semigroup time-continuity
-development.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

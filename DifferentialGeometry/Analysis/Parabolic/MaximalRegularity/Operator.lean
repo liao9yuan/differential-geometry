@@ -1,56 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
 
-/-!
-# The `L²`-maximal-regularity operator for the inhomogeneous heat equation
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a Sobolev exponent
-`a ≥ 0` and a time horizon `0 < T ≤ 1`, this file constructs the **Duhamel
-solution operator** of the inhomogeneous heat equation
-
-  `∂_t u = Δ_∇ u + f`,  `u(0) = 0`,
-
-with forcing `f ∈ L²([0,T]; Hᵃ)`, and proves the `L²`-maximal-regularity
-estimates: the solution gains *two* Sobolev derivatives over the forcing.
-
-## Mathematical content
-
-After the spatial spectral decomposition the inhomogeneous heat equation
-decouples mode by mode.  On the eigen-coordinate belonging to the connection-
-Laplacian eigenvalue `λᵢ ≥ 0` the Duhamel formula `u(t) = ∫₀ᵗ e^{(t−s)Δ_∇} f(s)
-ds` reduces to the scalar per-mode convolution `φᵢ = perModeConvL2 λᵢ fᵢ`, where
-`fᵢ = timeModeCoeff f i`.  The solution is the time-dependent field with
-`timeModeCoeff u i = φᵢ`.
-
-The **maximal-regularity bounds** (the deliverables), with `C(T) = 1 + T`:
-
-* `u ∈ L²([0,T]; H^{a+2})` with `‖u‖_{L²([0,T];H^{a+2})} ≤ C(T)·‖f‖_{L²([0,T];Hᵃ)}`
-  — the two-derivative gain.  Per mode `(1 + λᵢ)·‖φᵢ‖ ≤ C(T)·‖fᵢ‖`, uniform in
-  `λᵢ ≥ 0`.
-* `∂_t u ∈ L²([0,T]; Hᵃ)` with `‖∂_t u‖_{L²([0,T];Hᵃ)} ≤ 2·‖f‖_{L²([0,T];Hᵃ)}`.
-* `u(0) = 0`.
-
-## Main definitions
-
-* `maximalRegularityDerivField a hT f` — the time derivative `∂_t u`,
-  an element of `L²([0,T]; Hᵃ)`, with `i`-th mode `fᵢ − λᵢ·φᵢ`.
-* `maximalRegularitySolField a hT f` — the solution `u`, viewed as
-  an element of `L²([0,T]; H^{a+2})` (the two-derivative-gain regularity).
-* `maximalRegularityOp a hT hT1 f` — the solution operator, landing in
-  the strong-solution space `H¹([0,T]; Hᵃ)` (initial value `0`, `L²` time
-  derivative `∂_t u`).
-
-## Main results
-
-* `maximalRegularitySolField_timeModeCoeff` — the `i`-th mode of the
-  solution is `perModeConvL2 λᵢ (timeModeCoeff f i)`.
-* `maximalRegularityOp_norm_Ha2_le` — the `H^{a+2}`
-  maximal-regularity bound.
-* `maximalRegularityOp_norm_deriv_le` — the `∂_t` bound.
-* `maximalRegularityOp_trace0` — the initial condition `u(0) = 0`.
-* `maximalRegularityOp_norm_le` — the combined `H¹`-graph-norm bound.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -82,9 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-- The per-mode solution coordinate: `perModeConvL2 λᵢ (timeModeCoeff f i)`,
-the convolution of the `i`-th eigen-coordinate of the forcing against the heat
-kernel of eigenvalue `λᵢ`. -/
 def solModeCoeff (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) : timeL2 ℝ T :=
@@ -92,8 +39,6 @@ def solModeCoeff (hT : 0 ≤ T)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f i)
 
-/-- The per-mode time-derivative coordinate: `perModeConvDerivL2 λᵢ (timeModeCoeff
-f i)`, the right-hand side `fᵢ − λᵢ·φᵢ` of the per-mode scalar ODE. -/
 def derivModeCoeff (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) : timeL2 ℝ T :=
@@ -101,8 +46,6 @@ def derivModeCoeff (hT : 0 ≤ T)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f i)
 
-/-- The auxiliary per-mode bound on the convolution itself:
-`‖perModeConvL2 λᵢ (timeModeCoeff f i)‖ ≤ T · ‖timeModeCoeff f i‖`. -/
 theorem norm_solModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -112,7 +55,6 @@ theorem norm_solModeCoeff_le (hT : 0 ≤ T)
   exact norm_perModeConvL2Fun_le (TensorEigenIdx.lambda (I := I) (M := M) i)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT _
 
-/-- The per-mode maximal-regularity estimate `λᵢ · ‖φᵢ‖ ≤ ‖fᵢ‖`. -/
 theorem lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -126,13 +68,6 @@ theorem lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
     abs_of_nonneg (tensor_lambda_nonneg (I := I) (M := M) i)] at hbase
   exact hbase
 
-/-- **The per-mode two-derivative-gain estimate.**  For `0 ≤ T`,
-
-  `(1 + λᵢ) · ‖φᵢ‖ ≤ (1 + T) · ‖fᵢ‖`,
-
-the per-mode bound underlying the `H^{a+2}` maximal-regularity estimate.  It is
-the sum of the convolution bound `‖φᵢ‖ ≤ T‖fᵢ‖` and the maximal-regularity
-estimate `λᵢ‖φᵢ‖ ≤ ‖fᵢ‖`. -/
 theorem one_add_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -154,15 +89,6 @@ theorem one_add_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
           ‖timeModeCoeff (I := I) (M := M) f i‖ := by gcongr
     _ = (1 + T) * ‖timeModeCoeff (I := I) (M := M) f i‖ := by ring
 
-/-- **The per-mode half-derivative-gain estimate.**  For `0 ≤ T`,
-
-  `√λᵢ · ‖φᵢ‖ ≤ √T · ‖fᵢ‖`.
-
-This is the geometric-mean interpolation `(√λᵢ‖φᵢ‖)² = (λᵢ‖φᵢ‖)·‖φᵢ‖ ≤
-‖fᵢ‖·(T‖fᵢ‖)` between the maximal-regularity estimate `λᵢ‖φᵢ‖ ≤ ‖fᵢ‖`
-(`lambda_mul_norm_solModeCoeff_le`) and the convolution bound `‖φᵢ‖ ≤ T‖fᵢ‖`
-(`norm_solModeCoeff_le`).  Unlike the two-derivative gain it carries the
-parabolic factor `√T`, which `→ 0` as `T → 0`. -/
 theorem sqrt_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -193,15 +119,6 @@ theorem sqrt_lambda_mul_norm_solModeCoeff_le (hT : 0 ≤ T)
       _ = T * ff * ff := by ring
   nlinarith [hsq_le, hlhs_nn, hrhs_nn]
 
-/-- **The per-mode one-derivative-gain estimate with `√T` decay.**  For
-`0 < T ≤ 1`,
-
-  `(1 + λᵢ)^{1/2} · ‖φᵢ‖ ≤ 2·√T · ‖fᵢ‖`.
-
-The per-mode bound underlying the `H^{a+1}` maximal-regularity estimate with
-parabolic decay.  It uses `√(1 + λᵢ) ≤ 1 + √λᵢ`, the convolution bound `‖φᵢ‖ ≤
-T‖fᵢ‖ ≤ √T‖fᵢ‖` (for `T ≤ 1`), and the half-gain estimate `√λᵢ·‖φᵢ‖ ≤
-√T·‖fᵢ‖`. -/
 theorem one_add_lambda_sqrt_mul_norm_solModeCoeff_le (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -242,7 +159,6 @@ theorem one_add_lambda_sqrt_mul_norm_solModeCoeff_le (hT : 0 < T) (hT1 : T ≤ 1
     _ ≤ Real.sqrt T * ff + Real.sqrt T * ff := by gcongr
     _ = 2 * Real.sqrt T * ff := by ring
 
-/-- The per-mode time-derivative estimate `‖fᵢ − λᵢ·φᵢ‖ ≤ 2·‖fᵢ‖`. -/
 theorem norm_derivModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -252,8 +168,6 @@ theorem norm_derivModeCoeff_le (hT : 0 ≤ T)
     (tensor_lambda_nonneg (I := I) (M := M) i) hT
     (timeModeCoeff (I := I) (M := M) f i)
 
-/-- The spectral weight at `σ + 2` factors as the weight at `σ` times
-`(1 + λᵢ)²`. -/
 private theorem tensorSobolevWeight_add_two
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ + 2) =
@@ -264,9 +178,6 @@ private theorem tensorSobolevWeight_add_two
   rw [tensorSobolevWeight, tensorSobolevWeight, Real.rpow_add hbase_pos,
     show ((2 : ℝ)) = ((2 : ℕ) : ℝ) from by norm_num, Real.rpow_natCast]
 
-/-- **The weighted per-mode `H^{a+2}` bound.**  For every eigen-index `i`,
-
-  `(1 + λᵢ)^{a+2} · ‖φᵢ‖² ≤ (1 + T)² · (1 + λᵢ)ᵃ · ‖fᵢ‖²`. -/
 theorem weighted_solModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -303,8 +214,6 @@ theorem weighted_solModeCoeff_le (hT : 0 ≤ T)
     _ = (1 + T) ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
 
-/-- The spectral weight at `σ + 1` factors as the weight at `σ` times
-`(1 + λᵢ)`. -/
 private theorem tensorSobolevWeight_add_one
     (i : TensorEigenIdx (I := I) (M := M) g r s) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (σ + 1) =
@@ -315,15 +224,6 @@ private theorem tensorSobolevWeight_add_one
   rw [tensorSobolevWeight, tensorSobolevWeight, Real.rpow_add hbase_pos,
     Real.rpow_one]
 
-/-- **The weighted per-mode `H^{a+1}` bound with `T`-decay.**  For `0 < T ≤ 1`
-and every eigen-index `i`,
-
-  `(1 + λᵢ)^{a+1} · ‖φᵢ‖² ≤ (2√T)² · (1 + λᵢ)ᵃ · ‖fᵢ‖²`.
-
-The constant `(2√T)² = 4T → 0` as `T → 0`, the source of the small-time
-contraction.  It is the squared one-derivative-gain estimate
-`one_add_lambda_sqrt_mul_norm_solModeCoeff_le`, weighted by `(1 + λᵢ)ᵃ` and using
-that `(1 + λᵢ)^{a+1} = (1 + λᵢ)ᵃ · ((1 + λᵢ)^{1/2})²`. -/
 theorem weighted_solModeCoeff_Ha1_le (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -368,10 +268,6 @@ theorem weighted_solModeCoeff_Ha1_le (hT : 0 < T) (hT1 : T ≤ 1)
     _ = (2 * Real.sqrt T) ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
 
-/-- Chart-locality-free version, parameterized on
-resolvent compactness `h_compact`: the mode family `i ↦ φᵢ` of solution
-coordinates is weighted-summable at the `H^{a+1}` scale (`0 < T ≤ 1`), the
-precondition for synthesising the `H^{a+1}`-valued solution field. -/
 theorem summable_solModeCoeff_Ha1 (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -388,9 +284,6 @@ theorem summable_solModeCoeff_Ha1 (hT : 0 < T) (hT1 : T ≤ 1)
       (sq_nonneg _)
   · exact weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := a) hT hT1 f i
 
-/-- Chart-locality-free version, parameterized on
-resolvent compactness `h_compact`: the mode family `i ↦ φᵢ` of solution
-coordinates is weighted-summable at the `H^{a+2}` scale. -/
 theorem summable_solModeCoeff (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -407,9 +300,6 @@ theorem summable_solModeCoeff (hT : 0 ≤ T)
       (sq_nonneg _)
   · exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
-/-- **The weighted per-mode derivative bound.**  For every eigen-index `i`,
-
-  `(1 + λᵢ)ᵃ · ‖fᵢ − λᵢ·φᵢ‖² ≤ 2² · (1 + λᵢ)ᵃ · ‖fᵢ‖²`. -/
 theorem weighted_derivModeCoeff_le (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -432,9 +322,6 @@ theorem weighted_derivModeCoeff_le (hT : 0 ≤ T)
     _ = 2 ^ 2 * (tensorSobolevWeight (I := I) (M := M) i a *
           ‖timeModeCoeff (I := I) (M := M) f i‖ ^ 2) := by ring
 
-/-- Chart-locality-free version, parameterized on
-resolvent compactness `h_compact`: the mode family `i ↦ fᵢ − λᵢ·φᵢ` of
-time-derivative coordinates is weighted-summable at the `Hᵃ` scale. -/
 theorem summable_derivModeCoeff (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -451,18 +338,12 @@ theorem summable_derivModeCoeff (hT : 0 ≤ T)
       (sq_nonneg _)
   · exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT f i
 
-/-- **The time-derivative field `∂_t u`.**  For a forcing term `f ∈ L²([0,T];
-Hᵃ)`, this is the element of `L²([0,T]; Hᵃ)` whose `i`-th eigen-coordinate is
-`fᵢ − λᵢ·φᵢ`, the per-mode scalar ODE right-hand side. -/
 def maximalRegularityDerivField (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
   timeL2OfModes (I := I) (M := M)
     (fun i => derivModeCoeff (I := I) (M := M) (a := a) hT f i)
 
-/-- Chart-locality-free version,
-parameterized on resolvent compactness `h_compact`: the `i`-th eigen-coordinate
-of the time-derivative field is `fᵢ − λᵢ·φᵢ`. -/
 theorem maximalRegularityDerivField_timeModeCoeff (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -474,20 +355,12 @@ theorem maximalRegularityDerivField_timeModeCoeff (hT : 0 ≤ T)
   timeL2OfModes_timeModeCoeff (I := I) (M := M) _
     (summable_derivModeCoeff (I := I) (M := M) (a := a) hT h_compact f) i
 
-/-- **The solution field `u`, viewed in `L²([0,T]; H^{a+2})`.**  For a forcing
-term `f ∈ L²([0,T]; Hᵃ)`, this is the element of `L²([0,T]; H^{a+2})` whose
-`i`-th eigen-coordinate is `φᵢ = perModeConvL2 λᵢ fᵢ`.  The two-derivative gain
-(`H^{a+2}` from a forcing in `Hᵃ`) is exactly what the maximal-regularity bound
-quantifies. -/
 def maximalRegularitySolField (a : ℝ) {T : ℝ} (hT : 0 ≤ T)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T :=
   timeL2OfModes (I := I) (M := M)
     (fun i => solModeCoeff (I := I) (M := M) (a := a) hT f i)
 
-/-- Chart-locality-free version,
-parameterized on resolvent compactness `h_compact`: the `i`-th eigen-coordinate
-of the solution field is `φᵢ = perModeConvL2 λᵢ (timeModeCoeff f i)`. -/
 theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -499,23 +372,12 @@ theorem maximalRegularitySolField_timeModeCoeff (hT : 0 ≤ T)
   timeL2OfModes_timeModeCoeff (I := I) (M := M) _
     (summable_solModeCoeff (I := I) (M := M) (a := a) hT h_compact f) i
 
-/-- **The solution field `u`, viewed in `L²([0,T]; H^{a+1})`.**  For a forcing
-term `f ∈ L²([0,T]; Hᵃ)` and `0 < T ≤ 1`, the element of `L²([0,T]; H^{a+1})`
-whose `i`-th eigen-coordinate is `φᵢ = perModeConvL2 λᵢ fᵢ` — the same per-mode
-coordinates as `maximalRegularitySolField`, synthesised one Sobolev order lower.
-This is the one-derivative-gain (subcritical) view of the Duhamel solution, the
-order at which the maximal-regularity smoothing carries the decaying constant
-`2√T`. -/
 def maximalRegularitySolFieldHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (_hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T :=
   timeL2OfModes (I := I) (M := M) (σ := a + 1)
     (fun i => solModeCoeff (I := I) (M := M) (a := a) hT.le f i)
 
-/-- Chart-locality-free version,
-parameterized on resolvent compactness `h_compact`: the `i`-th eigen-coordinate
-of the `H^{a+1}`-view solution field is `φᵢ = perModeConvL2 λᵢ
-(timeModeCoeff f i)`. -/
 theorem maximalRegularitySolFieldHa1_timeModeCoeff (hT : 0 < T)
     (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -529,10 +391,6 @@ theorem maximalRegularitySolFieldHa1_timeModeCoeff (hT : 0 < T)
     (summable_solModeCoeff_Ha1 (I := I) (M := M) (a := a) hT hT1
       h_compact f) i
 
-/-- Chart-locality-free version of `maximalRegularitySolFieldHa1_norm_le`
-(the `H^{a+1}` one-derivative-gain bound with `√T`-decay), parameterized on
-resolvent compactness `h_compact`:
-`‖u‖_{L²([0,T];H^{a+1})} ≤ 2√T · ‖f‖_{L²([0,T];Hᵃ)}`. -/
 theorem maximalRegularitySolFieldHa1_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -547,8 +405,6 @@ theorem maximalRegularitySolFieldHa1_norm_le
     (h_compact := h_compact) (a := a) hT hT1 f i]
   exact weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := a) hT hT1 f i
 
-/-- Chart-locality-free version: the `H^{a+1}`-view solution field is additive in
-the forcing term. -/
 theorem maximalRegularitySolFieldHa1_add (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -568,9 +424,6 @@ theorem maximalRegularitySolFieldHa1_add (hT : 0 < T) (hT1 : T ≤ 1)
   rw [solModeCoeff, solModeCoeff, solModeCoeff,
     timeModeCoeff_add (I := I) (M := M), map_add]
 
-/-- Chart-locality-free version: the `H^{a+1}`-view solution field commutes with
-subtraction of forcing terms — the form consumed by the small-time contraction
-estimate. -/
 theorem maximalRegularitySolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -583,11 +436,6 @@ theorem maximalRegularitySolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [sub_add_cancel] at hadd
   rw [hadd, add_sub_cancel_right]
 
-/-- **The `L²`-maximal-regularity operator.**  For a forcing term `f ∈ L²([0,T];
-Hᵃ)`, `maximalRegularityOp a hT hT1 f` is the Duhamel solution of
-`∂_t u = Δ_∇ u + f`, `u(0) = 0`, packaged as an element of the strong-solution
-space `H¹([0,T]; Hᵃ)`: its initial value is `0` and its `L²` time derivative is
-the time-derivative field `∂_t u`. -/
 def maximalRegularityOp (a : ℝ) {T : ℝ} (hT : 0 < T) (_hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeH1 (tensorHs (I := I) (M := M) g r s a) T :=
@@ -610,18 +458,12 @@ def maximalRegularityOp (a : ℝ) {T : ℝ} (hT : 0 < T) (_hT1 : T ≤ 1)
       maximalRegularityDerivField (I := I) (M := M) a hT.le f :=
   rfl
 
-/-- **Initial condition.**  The Duhamel solution vanishes at `t = 0`:
-`u(0) = 0`. -/
 theorem maximalRegularityOp_trace0 (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     TimeSobolev.timeH1.trace0 _ T
         (maximalRegularityOp (I := I) (M := M) a hT hT1 f) = 0 :=
   rfl
 
-/-- Chart-locality-free version of `maximalRegularityOp_norm_Ha2_le`
-(the `H^{a+2}` two-derivative-gain bound), parameterized on resolvent
-compactness `h_compact`:
-`‖u‖_{L²([0,T];H^{a+2})} ≤ (1 + T) · ‖f‖_{L²([0,T];Hᵃ)}`. -/
 theorem maximalRegularityOp_norm_Ha2_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -635,9 +477,6 @@ theorem maximalRegularityOp_norm_Ha2_le
     (h_compact := h_compact) (a := a) hT.le f i]
   exact weighted_solModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
 
-/-- Chart-locality-free version of `maximalRegularityOp_norm_deriv_le`
-(the `∂_t` bound), parameterized on resolvent compactness `h_compact`:
-`‖∂_t u‖_{L²([0,T];Hᵃ)} ≤ 2 · ‖f‖_{L²([0,T];Hᵃ)}`. -/
 theorem maximalRegularityOp_norm_deriv_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -651,9 +490,6 @@ theorem maximalRegularityOp_norm_deriv_le
     (h_compact := h_compact) (a := a) hT.le f i]
   exact weighted_derivModeCoeff_le (I := I) (M := M) (a := a) hT.le f i
 
-/-- Chart-locality-free version of `maximalRegularityOp_norm_le` (the combined
-`H¹`-graph-norm bound), parameterized on resolvent compactness `h_compact`:
-`‖maximalRegularityOp f‖_{H¹([0,T];Hᵃ)} ≤ 2 · ‖f‖_{L²([0,T];Hᵃ)}`. -/
 theorem maximalRegularityOp_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

@@ -1,27 +1,5 @@
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 
-/-!
-# Chart-level metric compatibility identity
-
-This file proves the chart-level metric compatibility identity, derived purely
-algebraically from the explicit definition of the chart Christoffel symbol of
-the second kind:
-$$\Gamma^l{}_{ij}(g, \alpha)(y) = \tfrac12 \sum_m G^{lm}(\alpha, x_y)\,
-  \bigl(\partial_i G_{mj}(\alpha, y) + \partial_j G_{mi}(\alpha, y)
-       - \partial_m G_{ij}(\alpha, y)\bigr),$$
-where `x_y := (extChartAt I α).symm y` and `G^{lm}` is the inverse Gram matrix.
-
-The headline identity states
-$$\partial_k G_{ij}(\alpha, y) = \sum_l \Gamma^l{}_{ki}(\alpha, y)\, G_{lj}(\alpha, y)
-  + \sum_l \Gamma^l{}_{kj}(\alpha, y)\, G_{li}(\alpha, y),$$
-and follows by substituting the explicit formula and collapsing the inner
-contraction `∑_l G^{lm} G_{lj}` to `δ^m_j` via the matrix-inverse pairing.
-
-The hypothesis `y ∈ interior (extChartAt I α).target` ensures the chart map
-inverse `(extChartAt I α).symm` is well-defined at `y` and the inverse Gram
-matrix is the genuine inverse there.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -38,9 +16,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- Symmetry of the chart inverse Gram matrix entries: `G^{ij}(α, y) = G^{ji}(α, y)`,
-derived from the fact that the inverse of a Hermitian (here symmetric) matrix
-is Hermitian. -/
 private lemma chartInvGramOnE_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -58,9 +33,6 @@ private lemma chartInvGramOnE_symm
       (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
   exact hstar.symm
 
-/-- The Gram-inverse pairing identity at a chart-target point: for any
-`y ∈ (extChartAt I α).target` and indices `m, j`,
-`∑_l G^{ml}(α, y) * G_{lj}(α, y) = δ^m_j`. -/
 private lemma sum_chartInvGramOnE_chartGramOnE_left
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -91,8 +63,6 @@ private lemma sum_chartInvGramOnE_chartGramOnE_left
   · rw [if_neg hmj]
     exact Matrix.one_apply_ne hmj
 
-/-- Symmetric form of the Gram-inverse pairing: `∑_l G^{lm}(y) * G_{lj}(y) = δ^m_j`,
-using symmetry of `G^{-1}` in its two indices. -/
 private lemma sum_chartInvGramOnE_chartGramOnE_right
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -112,9 +82,6 @@ private lemma sum_chartInvGramOnE_chartGramOnE_right
         rw [chartInvGramOnE_symm (I := I) g α l m y])]
   exact sum_chartInvGramOnE_chartGramOnE_left (I := I) g α hy m j
 
-/-- Equality of `partialDeriv` on the symmetric pair of Gram entries:
-`∂_k G_{ab} = ∂_k G_{ba}` (since `chartGramOnE g α a b = chartGramOnE g α b a`
-as functions of `y`). -/
 private lemma partialDeriv_chartGramOnE_swap_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (k a b : Fin (Module.finrank ℝ E)) (y : E) :
@@ -124,14 +91,6 @@ private lemma partialDeriv_chartGramOnE_swap_indices
   funext y'
   exact chartGramOnE_symm (I := I) g α a b y'
 
-/-- Two-sum form of the chart metric identity: for
-`y ∈ interior (extChartAt I α).target`,
-$$\partial_k G_{ij}(\alpha, y) =
-  \sum_l \Gamma^l{}_{ki}(\alpha, y)\, G_{lj}(\alpha, y) +
-  \sum_l \Gamma^l{}_{kj}(\alpha, y)\, G_{li}(\alpha, y).$$
-
-This is the metric-compatibility property of the Levi-Civita Christoffel symbol
-of the second kind, derived from the explicit chart formula. -/
 theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -294,13 +253,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
       partialDeriv_chartGramOnE_swap_indices (I := I) g α i k j y]
   ring
 
-/-- **Chart metric compatibility identity** (single-sum form): for
-`y ∈ interior (extChartAt I α).target`,
-$$\partial_k G_{ij}(\alpha, y) = \sum_l \bigl(\Gamma^l{}_{ki}(\alpha, y)\, G_{lj}(\alpha, y)
-  + \Gamma^l{}_{kj}(\alpha, y)\, G_{li}(\alpha, y)\bigr).$$
-
-This is the metric-compatibility property of the Levi-Civita Christoffel symbol
-of the second kind in chart coordinates, in the combined single-sum form. -/
 theorem chartGramOnE_partialDeriv_eq_christoffel_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}

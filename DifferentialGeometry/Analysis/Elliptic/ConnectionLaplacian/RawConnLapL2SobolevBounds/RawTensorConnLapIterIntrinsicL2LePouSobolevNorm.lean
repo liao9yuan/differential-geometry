@@ -1,30 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIntrinsicL2LePouSobolevNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 
-/-!
-# Intrinsic L² bound on the first iterate of the raw tensor connection Laplacian
-by the squared partition-of-unity-weighted chart-Sobolev norm
-
-For a smooth closed Riemannian manifold `(M, g)` and fixed ranks `(r, s)`, this
-file ships the intrinsic L² control of the first iterate
-`rawTensorConnLapIter g r s 1 T`: there exists a single constant
-`C : ℝ≥0∞ \ {⊤}`, uniform in the smooth compactly-supported tensor section `T`,
-such that
-
-```
-∫⁻ b, ENNReal.ofReal
-        (riemannianFiberNormSq g r s b
-          ((rawTensorConnLapIter g r s 1 T).toSection b))
-    ∂(riemannianVolumeMeasure g)
-  ≤ C * (tensorPouSobolevNorm g 1 T) ^ 2.
-```
-
-This is the bundled-iterate counterpart of the headline
-`rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq`. At `k = 1` the
-iterate's underlying section value equals `rawTensorConnLap g r s T` pointwise,
-so the inequality follows by `lintegral_congr` and the base headline.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -53,23 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Intrinsic L² bound on the first iterate of the raw tensor connection
-Laplacian by the squared partition-of-unity-weighted chart-Sobolev norm.**
-
-For a smooth closed Riemannian manifold `(M, g)` and fixed ranks `(r, s)`,
-there exists a finite constant `C : ℝ≥0∞ \ {⊤}` such that for every smooth
-compactly-supported `(r, s)`-tensor section `T`,
-
-```
-∫⁻ b, ENNReal.ofReal
-        (riemannianFiberNormSq g r s b
-          ((rawTensorConnLapIter g r s 1 T).toSection b))
-    ∂(riemannianVolumeMeasure g)
-  ≤ C * (tensorPouSobolevNorm g 1 T) ^ 2.
-```
-
-The constant depends only on `g`, `r`, `s`, and the chart-atlas partition of
-unity; it is uniform in the input section `T`. -/
 theorem rawTensorConnLapIter_intrinsicL2_le_tensorPouSobolevNorm_sq_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

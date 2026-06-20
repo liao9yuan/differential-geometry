@@ -2,49 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.IteratedSobolevEmbedding
 
-/-!
-# A compactly-supported smooth representative of the eigenvector chart component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the eigenvector
-chart component
-`eigenvectorChartComponentFun g r s i α P₀ : EuclN → ℝ` — the chart
-`P₀`-component of a resolvent eigenvector of the connection Laplacian `Δ_∇` —
-has been shown to lie in the iterated Euclidean Sobolev space `MemWkp k 2` on
-the whole chart target, for *every* order `k`
-(`eigenvector_chartComponent_memWkp_arbitrary`). It also vanishes
-almost everywhere off the compact partition-of-unity kernel `chartPouKernel α`.
-
-This module ships a **compactly-supported smooth representative** of the chart
-component:
-
-    `eigenvectorChartComponent_exists_smooth_representative` :
-      there is `u_smooth : EuclN → ℝ`, smooth on the chart target, compactly
-      supported with `tsupport u_smooth ⊆ chartTargetEuclid α`, and almost
-      everywhere equal — for the Lebesgue measure restricted to the chart
-      target — to `eigenvectorChartComponentFun g r s i α P₀`.
-
-## Route
-
-* The iterated-Sobolev embedding `contDiffOn_of_forall_memWkp_two` turns the
-  family `∀ k, MemWkp k 2 …` into a `C^∞` representative `u_smooth₀` on the
-  open chart target, almost everywhere equal to the chart component.
-* A smooth cutoff `η` — equal to `1` on a neighbourhood of the compact kernel
-  `chartPouKernel α` and compactly supported strictly inside the chart target
-  (`exists_smooth_cutoff_with_neighborhood`) — localises `u_smooth₀` to a
-  compactly-supported smooth function `η · u_smooth₀`.
-* The product `η · u_smooth₀` still agrees almost everywhere with the chart
-  component: on the kernel `η = 1`, so the product equals `u_smooth₀`, which is
-  a.e. the chart component; off the kernel the chart component is a.e. zero, and
-  `u_smooth₀` — being a.e. equal to it — is a.e. zero too, hence so is the
-  product.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -78,25 +35,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- **A compactly-supported smooth representative of the eigenvector chart
-component.**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the eigenvector
-chart component `eigenvectorChartComponentFun g r s i α P₀` has a
-representative `u_smooth : EuclN → ℝ` that is `C^∞` on the Euclidean chart
-target, has compact support contained in the chart target, and agrees with the
-chart component almost everywhere for the Lebesgue measure restricted to the
-chart target.
-
-The chart component lies in every iterated Euclidean Sobolev space on the chart
-target (`eigenvector_chartComponent_memWkp_arbitrary`); the
-iterated-Sobolev embedding `contDiffOn_of_forall_memWkp_two` produces a `C^∞`
-representative on the open chart target. The chart component also vanishes
-almost everywhere off the compact partition-of-unity kernel `chartPouKernel α`;
-a smooth cutoff equal to `1` on a neighbourhood of that kernel and compactly
-supported strictly inside the chart target localises the representative to
-compact support without disturbing the almost-everywhere identity. -/
 theorem eigenvectorChartComponent_exists_smooth_representative
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

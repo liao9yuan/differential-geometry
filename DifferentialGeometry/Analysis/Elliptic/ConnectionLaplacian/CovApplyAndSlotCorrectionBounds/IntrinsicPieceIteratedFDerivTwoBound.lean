@@ -1,52 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
 
-/-!
-# Order-2 iterated Fréchet derivative bound for the chart-pulled intrinsic
-piece of the first covariant derivative
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, a smooth
-compactly supported `(r, s)`-tensor section `T`, and a smooth tangent vector
-field `B`, the *intrinsic piece* of the chart-α-pulled first covariant
-derivative is
-
-  `Ψ(y) := fderiv ℝ (tensorRSChartE_section_repr r s α T.toFun ∘ symm) y
-            (trivToE α (symm y) (B (symm y)))`,
-
-an element of the model fibre `TensorRSModel r s ℝ E`, parametrised by
-`y ∈ E` in the chart target. This file ships the uniform bound
-
-  `‖iteratedFDeriv ℝ 2 Ψ (extChartAt I α b)‖
-      ≤ K * (‖iteratedFDeriv ℝ 3 (repr T ∘ symm) (extChartAt I α b)‖
-             + ‖iteratedFDeriv ℝ 2 (repr T ∘ symm) (extChartAt I α b)‖
-             + ‖fderiv ℝ (repr T ∘ symm) (extChartAt I α b)‖)`
-
-valid for all `b` in the intersection of the chart-α partition-of-unity
-tsupport and the chart-α Levi-Civita good set. The constant `K` depends only
-on the metric `g`, the chart at `α`, the ranks `r`, `s`, and `B`; in
-particular `K` is independent of `T` and `b`.
-
-## Strategy
-
-Write `c(y) := fderiv ℝ F y` (where `F := repr T ∘ symm`) and
-`u(y) := trivToE α (symm y) (B (symm y)) = (chartE_section_repr α B ∘ symm) y`.
-Then `Ψ(y) = c(y)(u(y))`. By Mathlib's
-`norm_iteratedFDerivWithin_clm_apply` applied to `c` and `u` on the open
-chart-target image of the chart-α Levi-Civita good set,
-
-  `‖iteratedFDerivWithin 2 (c·u) U y‖
-      ≤ ∑_{k=0,1,2} C(2,k) · ‖iteratedFDerivWithin k c U y‖
-          · ‖iteratedFDerivWithin (2-k) u U y‖`.
-
-Since `U` is open, `iteratedFDerivWithin = iteratedFDeriv` on `U`. We then
-use `norm_iteratedFDeriv_fderiv` to identify
-`‖iteratedFDeriv k c‖ = ‖iteratedFDeriv (k+1) F‖`, yielding bounds in terms
-of orders 1, 2, 3 of `F`. The factors `‖iteratedFDeriv k u‖` for `k = 0, 1, 2`
-are uniformly bounded over the POU tsupport image by continuity of
-`iteratedFDeriv k u` on the open good-set image and compactness of the POU
-tsupport.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -75,9 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- `fderiv ℝ F` is `ContDiffOn ℝ ∞` on the open chart-target image of the
-chart-α Levi-Civita good set, where
-`F = tensorRSChartE_section_repr r s α T.toSection ∘ (extChartAt I α).symm`. -/
 private lemma c_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -97,8 +48,6 @@ private lemma c_contDiffOn_goodSet
   have h_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by rw [ENat.coe_top_add_one]
   exact hF_cd.fderiv_of_isOpen hU_open h_le
 
-/-- Smoothness on the chart-target image of the chart-α Levi-Civita good set of
-the chart-pulled representation `chartE_section_repr α B ∘ symm`. -/
 private lemma u_contDiffOn_goodSet'
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -113,8 +62,6 @@ private lemma u_contDiffOn_goodSet'
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
-/-- Under `[I.Boundaryless]`, the chart-α partition-of-unity tsupport lies in
-the chart-α Levi-Civita good set. -/
 private lemma pouTsupport_subset_goodSet' (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -126,8 +73,6 @@ private lemma pouTsupport_subset_goodSet' (α : M) :
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
-/-- For each `k ∈ {0, 1, 2}`, `iteratedFDeriv ℝ k u` is continuous on the open
-chart-target image of the chart-α Levi-Civita good set. -/
 private lemma iteratedFDeriv_u_continuousOn
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (k : ℕ) :
@@ -168,11 +113,6 @@ private lemma iteratedFDeriv_u_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
-/-- Uniform bound: there is a constant `C ≥ 0` such that for every `b` in the
-chart-α partition-of-unity tsupport,
-`‖iteratedFDeriv ℝ k u (extChartAt I α b)‖ ≤ C` simultaneously for
-`k = 0, 1, 2`, where
-`u := chartE_section_repr α B.toFun ∘ (extChartAt I α).symm`. -/
 private lemma iteratedFDeriv_u_bound_012
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -240,20 +180,6 @@ private lemma iteratedFDeriv_u_bound_012
       _ ≤ max (max C0 C1) C2 := le_max_right _ _
       _ ≤ max (max (max C0 C1) C2) 0 := le_max_left _ _
 
-/-- **Bound on the order-2 iterated Fréchet derivative of the chart-pulled
-intrinsic piece of the first covariant derivative.**
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, and a
-smooth tangent vector field `B`, there is a constant `K ≥ 0` (depending on
-`g`, the chart at `α`, the ranks `r`, `s`, and `B`, but independent of `T`
-and `b`) such that for any smooth compactly supported `(r, s)`-tensor section
-`T` and any `b` in the intersection of the chart-α partition-of-unity
-tsupport and the chart-α Levi-Civita good set, the norm of the order-2
-iterated Fréchet derivative of the intrinsic piece is bounded by
-
-  `K * (‖iteratedFDeriv ℝ 3 (repr T ∘ symm) (extChartAt I α b)‖
-        + ‖iteratedFDeriv ℝ 2 (repr T ∘ symm) (extChartAt I α b)‖
-        + ‖fderiv ℝ (repr T ∘ symm) (extChartAt I α b)‖)`. -/
 theorem intrinsic_piece_iteratedFDeriv_two_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

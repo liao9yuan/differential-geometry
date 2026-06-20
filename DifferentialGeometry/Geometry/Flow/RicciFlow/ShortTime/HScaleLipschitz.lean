@@ -10,12 +10,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-! # `H`-scale Lipschitz bound for the DeTurck nonlinearity
-
-`deturckN_hscale_lipschitz`: the continuous DeTurck nonlinearity `N_cont` is locally
-Lipschitz across Sobolev scales, packaged in the binder shape consumed by the
-short-time-existence Duhamel fixed point. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -44,40 +38,7 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedVariables false in
-/-- **H-scale local Lipschitz estimate for the continuous DeTurck nonlinearity.**
 
-Re-anchored away from the finite-support-gated `deTurckGeometricN` (which is
-globally discontinuous, hence not Lipschitz on any ball: it jumps to `0` at
-infinite-support points arbitrarily close to a realizable center) onto a
-*continuous* realize-based nonlinearity `N_cont`, carried as internal data
-together with an honest construction/agreement hypothesis tying it to the
-**linear** realize (`ccTensorBilinSymm` / `exists_smooth_metric_of_smooth_tensor_small`),
-which works for infinite-support inputs via a smooth representative.
-
-The construction data:
-* `repr u : SmoothCcTensor g_bg 0 2` — a smooth representative of `u`, the
-  realize input (for infinite-support inputs the existence of such a
-  representative is the open Gårding/Weyl input; carried here as an internal,
-  honestly-flagged hypothesis `hrepr_small`, non-leaking — it constrains the
-  internal carrier, never `g₀`/the headline);
-* `Nsec u : SmoothCcTensor g_bg 0 2` — the realize-based geometric remainder
-  section.
-
-The honest construction hypothesis splits into:
-* `hN_coeff` — `N_cont u`'s eigenbasis coordinates ARE the `L²` coordinates of
-  the remainder section `Nsec u` (the *same* packaging as the genuine
-  `deTurckGeometricN_coeff`, but anchored on the continuous realize section
-  `Nsec u` instead of the gated `deTurckRemainderSection u`);
-* `hNsec_realize` — `Nsec u`'s extracted symmetric bilinear form IS the linear
-  realize `ccTensorBilinSymm (repr u)` (a genuine analytic *realize identity*,
-  not the Lipschitz conclusion): this ties `Nsec` to the linear realization
-  program.
-
-Neither hypothesis is the conclusion: they are coefficient/realize identities
-about `N_cont`'s *coordinates* and `Nsec`'s *bilinear extraction*, structurally
-distinct from "`N_cont` is Lipschitz on a ball". The conclusion — local
-Lipschitz-ness of `N_cont` — is then derived (in the fill phase) from the
-continuity of the linear realize `ccTensorBilinSymm` in `H^{a+1}`. -/
 theorem deturckN_hscale_lipschitz
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

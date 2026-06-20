@@ -9,19 +9,6 @@ import Mathlib.Analysis.ODE.Gronwall
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Parallel transport: local existence + uniqueness via Picard–Lindelöf
-
-Given a smooth Riemannian metric `g` on `M` and a smooth curve
-`γ : ℝ → M` whose image stays inside a single chart at `α`, the
-parallel-transport ODE
-`Y'(t) = - Γ_α(u'(t), Y(t))(u(t))`
-is a continuous time-dependent linear ODE on `E`. This file packages
-the chart-local existence + uniqueness obligations on a compact
-sub-interval, used by `ParallelTransport.lean` to glue a global
-solution.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -42,10 +29,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- The chart Christoffel contraction continuous-linear-map
-`t ↦ Γ_α(u'(t), ·)(u(t))` is continuous on a compact sub-interval
-`[a, b]` whenever `u'` and `u` are continuous on `[a, b]` and `u`
-takes values in the chart source. -/
 theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ}
@@ -115,10 +98,6 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
   · exact ((hcoord i).comp_continuousOn hu)
   · exact continuousOn_const
 
-/-- Continuity of
-`t ↦ chartChristoffelContractionRightCLM g α (u'(t)) (u(t))` on the
-compact interval `[a, b]` yields a uniform Lipschitz constant `K` for
-the parallel-transport vector field on `[a, b]`. -/
 theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
@@ -145,11 +124,7 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
   exact htmax_max ht
 
 set_option linter.unusedVariables false in
-/-- Placeholder node carrying the hypotheses (smooth metric, in-chart
-curve, continuity of `uPrime` and the chart curve) needed to assemble
-the Picard–Lindelöf data on a compact sub-interval. Its conclusion is
-`True`; the actual ODE solving is done by `parallel_local_existence_step`
-and `parallel_local_existence_on_Icc`. -/
+
 theorem parallel_picard_lindelof_data
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
@@ -160,11 +135,7 @@ theorem parallel_picard_lindelof_data
 
 set_option linter.style.show false in
 set_option linter.deprecated false in
-/-- Local Picard–Lindelöf step for the
-linear parallel-transport ODE on a sub-interval `[c, d] ⊆ [aa, bb]`
-whose length satisfies `(2K + 2)(d - c) ≤ 1`, with an arbitrary
-initial time `t_in ∈ [c, d]`. Starting from any initial value `w₀`
-at `t_in`, produces a solution on `[c, d]`. -/
+
 private theorem parallel_local_existence_step [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {aa bb : ℝ}
@@ -286,11 +257,7 @@ private theorem parallel_local_existence_step [I.Boundaryless]
 
 set_option linter.style.show false in
 set_option linter.deprecated false in
-/-- On a compact interval
-`[a, b] ∋ t₀`, the linear parallel-transport ODE has a solution
-`Y : ℝ → E` defined on `[a, b]` with `Y(t₀) = v₀`. Constructed by
-subdivision of `[a, b]` into pieces small enough for direct
-Picard–Lindelöf, then patching the local solutions. -/
+
 theorem parallel_local_existence_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
@@ -794,10 +761,6 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
   · show (if t₀ ≤ t₀ then Y_L t₀ else Y_R t₀) = v₀
     rw [if_pos (le_refl _)]; exact hY_L_init
 
-/-- **parallel-local-uniqueness-on-Icc.** On a compact interval
-`[a, b] ∋ t₀`, two solutions of the linear parallel-transport ODE
-sharing an initial value at `t₀` coincide on `[a, b]`. Proved via
-Grönwall against the uniform Lipschitz bound. -/
 theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)

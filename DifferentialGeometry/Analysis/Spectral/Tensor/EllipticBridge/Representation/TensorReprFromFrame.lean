@@ -10,84 +10,6 @@ import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# The canonical Euclidean chart component of an abstract `L²` tensor element
-
-For a closed Riemannian manifold `(M, g)` and fixed ranks `(r, s)`, the metric
-`L²` Hilbert space `TensorL2 r s g` of `(r, s)`-tensor fields is the Hausdorff
-completion of the seminormed space `SmoothCcTensor g r s` of smooth
-compactly-supported tensor sections. A general element of `TensorL2 r s g`
-carries no concrete tensor section: it is a limit of Cauchy sequences and an
-equivalence class for the `L²` seminorm.
-
-The chart-local elliptic-regularity analysis of the connection Laplacian,
-however, operates on concrete chart-coordinate scalar fields. This file builds
-the bridge: for a chart base point `α : M` and a component multi-index
-`P₀ : CompIdx E r s`, it produces the canonical Euclidean chart component of an
-abstract `L²` element `u : TensorL2 r s g` as a genuine `L²` function class on
-the Euclidean chart target.
-
-## The construction
-
-The chart component used here is the **partition-of-unity-weighted**
-chart-frame scalar component, chart-pushed to Euclidean space —
-`tensorChartComponent g r s S α Idx Jdx`. On a smooth compactly-supported
-section `S` this function
-
-* is `ℝ`-linear in `S` (`tensorChartComponent_add`, `tensorChartComponent_smul`);
-* is globally `C^∞` and compactly supported inside the chart target;
-* has `L²` norm (with respect to the Euclidean volume restricted to the chart
-  target) bounded by a fixed constant — depending only on `(g, r, s, α)`,
-  *independent of `S` and of the multi-index* — times the metric `L²` norm
-  `‖S‖` of `S`.
-
-The uniform `L²` bound chains two pre-existing ingredients:
-
-* `tensorChartComponentScalar_eLpNorm_le_uniform` — the manifold-side
-  partition-of-unity-weighted scalar component has `eLpNorm` against the
-  Riemannian volume measure bounded by `C · ‖S‖`;
-* `eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform` — the
-  Euclidean chart-pushforward of a manifold function supported inside a fixed
-  compact set has `eLpNorm` against `volume.restrict (chartTargetEuclid α)`
-  bounded by a fixed constant times the manifold `eLpNorm`.
-
-The compact set fixing the second constant is the chart image of the closed
-support of the canonical partition-of-unity weight at `α`; the chart component
-of *every* section is supported inside it, because the weight cuts off the raw
-component exactly on that compact region.
-
-Packaging the bounded `ℝ`-linear map `S ↦ ⟦tensorChartComponent g r s S α P₀⟧`
-as a `ContinuousLinearMap` and extending it along the dense embedding
-`SmoothCcTensor g r s ↪ TensorL2 r s g` produces the canonical chart component
-of an abstract element.
-
-## Main definitions
-
-* `tensorL2ChartComponent g r s u α P₀` — the canonical Euclidean chart
-  component of an abstract `L²` tensor element `u : TensorL2 r s g`, an element
-  of `Lp ℝ 2 (volume.restrict (chartTargetEuclid α))`.
-
-## Main results
-
-* `tensorL2ChartComponent_smoothToTensorL2_eq` — on a smooth compactly-supported
-  section the canonical chart component recovers the `L²` class of the concrete
-  Euclidean chart component `tensorChartComponent g r s S α P₀`.
-* `tensorL2ChartComponent_zero`, `tensorL2ChartComponent_add`,
-  `tensorL2ChartComponent_smul` — the canonical chart component is a continuous
-  `ℝ`-linear function of the abstract `L²` element.
-
-## A note on the chart component used
-
-The raw (non-partition-of-unity-weighted) chart-frame component reads a section
-over the *whole* chart source. On a non-relatively-compact open chart source the
-chart-frame trivialization distorts the metric fibre norm by an unbounded
-factor, so the raw component's `L²` norm is **not** controlled by `‖S‖`. The
-partition-of-unity weight confines the component to the compact set on which the
-distortion is bounded; this is why the weighted component is the correct object
-carrying a uniform `L²` bound, and hence the one that extends continuously to
-the abstract `L²` completion.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -121,25 +43,15 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The component multi-index type for a chart-frame `(r, s)`-tensor: a pair of
-an `r`-tuple and an `s`-tuple of chart directions. -/
 abbrev TensorCompIdx (r s : ℕ) : Type _ :=
   (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E))
 
-/-- The Euclidean `L²` reference measure of the chart at `α`: the Lebesgue
-volume restricted to the Euclidean chart target. This is a complete, σ-finite
-measure, so `Lp ℝ 2 (chartL2Measure α)` is a real Banach space; it is the
-reference measure carried by every canonical Euclidean chart component. -/
 def chartL2Measure (α : M) : Measure EuclN :=
   (volume : Measure EuclN).restrict (chartTargetEuclid (I := I) (M := M) α)
 
-/-- The closed support of the canonical partition-of-unity weight at `α`. -/
 private def pouTsupportSet (α : M) : Set M :=
   tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
-/-- The chart image of the closed support of the canonical partition-of-unity
-weight at `α`: the compact kernel of the chart in which every chart component is
-supported. -/
 private def pouChartKernel (α : M) : Set E :=
   (extChartAt I α) '' (pouTsupportSet (I := I) (M := M) α)
 
@@ -151,9 +63,6 @@ private lemma pouChartKernel_subset_target (α : M) :
     pouChartKernel (I := I) (M := M) α ⊆ (extChartAt I α).target :=
   chartImage_pouTsupport_subset_target (I := I) (M := M) α
 
-/-- The manifold-side partition-of-unity-weighted chart-frame scalar component
-has topological support inside the closed support of the partition-of-unity
-weight. Multiplying by the weight is `tsupport_smul_subset_left`. -/
 private lemma tensorChartComponentScalar_tsupport_subset_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -176,8 +85,6 @@ private lemma tensorChartComponentScalar_tsupport_subset_pouTsupport
     (f := fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
     (g := tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The manifold-side partition-of-unity-weighted chart-frame scalar component
-has topological support inside the chart source. -/
 private lemma tensorChartComponentScalar_tsupport_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -190,8 +97,6 @@ private lemma tensorChartComponentScalar_tsupport_subset_chart_source
     (I := I) (M := M) g r s S α Idx Jdx).trans
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
 
-/-- The chart image of the topological support of the chart-frame scalar
-component is contained in the canonical compact kernel `pouChartKernel α`. -/
 private lemma tensorChartComponentScalar_chartImage_tsupport_subset_kernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -205,7 +110,6 @@ private lemma tensorChartComponentScalar_chartImage_tsupport_subset_kernel
     (tensorChartComponentScalar_tsupport_subset_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The Euclidean chart component is continuous on the Euclidean model space. -/
 private lemma tensorChartComponent_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -215,7 +119,6 @@ private lemma tensorChartComponent_continuous
   have h := tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx
   exact h.continuous
 
-/-- The Euclidean chart component is Borel measurable. -/
 private lemma tensorChartComponent_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -224,7 +127,6 @@ private lemma tensorChartComponent_measurable
     Measurable (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) :=
   (tensorChartComponent_continuous (I := I) (M := M) g r s S α Idx Jdx).measurable
 
-/-- The manifold-side chart-frame scalar component is continuous on `M`. -/
 private lemma tensorChartComponentScalar_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -235,7 +137,6 @@ private lemma tensorChartComponentScalar_continuous
   (tensorChartComponentScalar_contMDiff
     (I := I) (M := M) g r s S α Idx Jdx).continuous
 
-/-- The manifold-side chart-frame scalar component is Borel measurable. -/
 private lemma tensorChartComponentScalar_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -257,12 +158,6 @@ private lemma tensorChartComponent_eq_chartPushedRaw_scalar
           g r s S α Idx Jdx) := by
   rw [tensorChartComponent_def, tensorChartComponentScalar_def]
 
-/-- **Uniform `L²` bound for the Euclidean chart component.** For each chart
-`α : M` and ranks `(r, s)`, there is a non-negative real constant `C`
-(depending only on `(g, r, s, α)`) such that for every smooth
-compactly-supported `(r, s)`-tensor section `S` and every component
-multi-index `(Idx, Jdx)`, the `L²` norm of the Euclidean chart component is
-bounded by `ENNReal.ofReal C` times `ENNReal.ofReal ‖S‖`. -/
 theorem tensorChartComponent_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -337,8 +232,6 @@ theorem tensorChartComponent_eLpNorm_le_uniform
     rw [h_comp_zero, ENNReal.ofReal_zero, zero_mul]
     rw [show (fun _ : EuclN => (0 : ℝ)) = (0 : EuclN → ℝ) from rfl, eLpNorm_zero]
 
-/-- The Euclidean chart component is in `MemLp 2` of the Euclidean `L²`
-reference measure of the chart. -/
 theorem tensorChartComponent_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -355,8 +248,6 @@ theorem tensorChartComponent_memLp
   · refine lt_of_le_of_lt (h_bound S Idx Jdx) ?_
     exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top ENNReal.ofReal_lt_top
 
-/-- The `L²` class of the Euclidean chart component of a smooth
-compactly-supported tensor section. -/
 private def smoothChartComponentLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -424,8 +315,6 @@ private lemma smoothChartComponentLp_smul
   refine ((smoothChartComponentLp_coeFn (I := I) (M := M)
     g r s S α Idx Jdx).const_smul c).symm.trans h_smul.symm
 
-/-- The `ℝ`-linear map sending a smooth compactly-supported tensor section to
-the `L²` class of its Euclidean chart component at `(α, P₀)`. -/
 private def smoothChartComponentLpLin
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
@@ -443,8 +332,6 @@ private def smoothChartComponentLpLin
     smoothChartComponentLpLin (I := I) (M := M) g r s α P₀ S =
       smoothChartComponentLp (I := I) (M := M) g r s S α P₀.1 P₀.2 := rfl
 
-/-- The operator-norm bound for `smoothChartComponentLpLin`: the `L²` norm of
-the chart component is bounded by the uniform constant times `‖S‖`. -/
 private lemma smoothChartComponentLpLin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
@@ -477,9 +364,6 @@ private lemma smoothChartComponentLpLin_norm_le
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC_nn,
     ENNReal.toReal_ofReal (norm_nonneg _)]
 
-/-- The continuous `ℝ`-linear map from smooth compactly-supported tensor
-sections to the chart-component `L²` space, with operator norm controlled by
-the uniform chart-component `L²` bound. -/
 private def smoothChartComponentLpCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
@@ -495,7 +379,6 @@ private def smoothChartComponentLpCLM
     smoothChartComponentLpCLM (I := I) (M := M) g r s α P₀ S =
       smoothChartComponentLp (I := I) (M := M) g r s S α P₀.1 P₀.2 := rfl
 
-/-- The canonical embedding `SmoothCcTensor g r s →L[ℝ] TensorL2 r s g`. -/
 def smoothToTensorL2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
   UniformSpace.Completion.toComplL
@@ -525,19 +408,6 @@ private lemma isUniformInducing_smoothToTensorL2
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothCcTensor g r s)
 
-/-- **The canonical Euclidean chart component of an abstract `L²` tensor
-element.** For an abstract element `u : TensorL2 r s g` of the metric `L²`
-Hilbert space of `(r, s)`-tensor fields, a chart base point `α : M`, and a
-component multi-index `P₀ : TensorCompIdx r s`, this is the canonical `L²`
-function class on the Euclidean chart target representing the
-`(α, P₀)`-chart-frame scalar component of `u`.
-
-It is defined by continuously extending, along the dense embedding of smooth
-compactly-supported sections into the `L²` Hilbert space, the bounded
-`ℝ`-linear map that sends a smooth section `S` to the `L²` class of its
-partition-of-unity-weighted chart-frame scalar component, chart-pushed to
-Euclidean space. On a smooth section it recovers that concrete chart component
-(`tensorL2ChartComponent_smoothToTensorL2_eq`). -/
 def tensorL2ChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)
@@ -547,8 +417,6 @@ def tensorL2ChartComponent
     (smoothChartComponentLpCLM (I := I) (M := M) g r s α P₀)
     (smoothToTensorL2 (I := I) (M := M) g r s) u
 
-/-- The canonical chart component is a continuous `ℝ`-linear function of the
-abstract `L²` element: it is the application of a `ContinuousLinearMap`. -/
 def tensorL2ChartComponentCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
@@ -564,15 +432,6 @@ def tensorL2ChartComponentCLM
     tensorL2ChartComponentCLM (I := I) (M := M) g r s α P₀ u =
       tensorL2ChartComponent (I := I) (M := M) g r s u α P₀ := rfl
 
-/-- **Compatibility on smooth sections.** For a smooth compactly-supported
-`(r, s)`-tensor section `S`, the canonical chart component of its image
-`(S : TensorL2 r s g)` in the `L²` Hilbert space equals the `L²` class of the
-concrete Euclidean chart component `tensorChartComponent g r s S α P₀`.
-
-This is the bridge identity: it identifies the canonical chart component of an
-abstract `L²` element — on the dense subspace of smooth sections — with the
-explicit chart-coordinate scalar field on which the chart-local elliptic
-analysis operates. -/
 theorem tensorL2ChartComponent_smoothToTensorL2_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -597,9 +456,6 @@ theorem tensorL2ChartComponent_smoothToTensorL2_eq
   rw [h_extend, smoothChartComponentLpCLM_apply]
   rfl
 
-/-- On a smooth compactly-supported tensor section, the canonical chart
-component agrees almost everywhere with the concrete Euclidean chart component
-`tensorChartComponent g r s S α P₀`. -/
 theorem tensorL2ChartComponent_smoothToTensorL2_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -613,8 +469,6 @@ theorem tensorL2ChartComponent_smoothToTensorL2_coeFn
     g r s S α P₀]
   exact MemLp.coeFn_toLp _
 
-/-- The canonical chart component of the zero `L²` element is the zero `L²`
-class. -/
 @[simp] theorem tensorL2ChartComponent_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :
@@ -623,7 +477,6 @@ class. -/
   rw [← tensorL2ChartComponentCLM_apply (I := I) (M := M) g r s α P₀]
   exact map_zero _
 
-/-- The canonical chart component is additive in the abstract `L²` element. -/
 theorem tensorL2ChartComponent_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u v : TensorL2 r s g) (α : M)
@@ -636,8 +489,6 @@ theorem tensorL2ChartComponent_add
     ← tensorL2ChartComponentCLM_apply (I := I) (M := M) g r s α P₀ v]
   exact map_add _ u v
 
-/-- The canonical chart component is `ℝ`-homogeneous in the abstract `L²`
-element. -/
 theorem tensorL2ChartComponent_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (u : TensorL2 r s g) (α : M)
@@ -648,9 +499,6 @@ theorem tensorL2ChartComponent_smul
     ← tensorL2ChartComponentCLM_apply (I := I) (M := M) g r s α P₀ u]
   exact map_smul _ c u
 
-/-- The canonical chart component is a continuous function of the abstract `L²`
-element: it is the application of the continuous linear map
-`tensorL2ChartComponentCLM`. -/
 theorem continuous_tensorL2ChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :

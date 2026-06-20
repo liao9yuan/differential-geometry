@@ -3,51 +3,6 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Curvature.Bochner.WeitzenbockIdentity
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-/-!
-# The connection Laplacian on `(r, s)`-tensor sections
-
-For a smooth Riemannian metric `g` on a manifold `M` without boundary, the
-connection Laplacian on the `(r, s)`-tensor bundle is the metric trace of the
-second covariant derivative,
-$$
-  (\Delta_\nabla T)(x)
-    := \mathrm{tr}_g\bigl(W \mapsto \nabla_W \nabla T\bigr)(x).
-$$
-In a `g_x`-orthonormal frame `B_i` of the tangent space at `x`, the trace
-evaluates to
-$$
-  (\Delta_\nabla T)(x)
-    = \sum_i \bigl(\nabla_{B_i x}\,\nabla_{B_i} T - \nabla_{(\nabla_{B_i} B_i)(x)} T\bigr).
-$$
-
-This file packages the operator on raw `(r, s)`-tensor sections, traced against
-the smooth orthonormal frame at the centre point (`smoothOrthoFrame g x`). The
-frame is `g_x`-orthonormal at `x` and `C^∞` as a tangent-bundle section family
-(see `RicciIdentitySmoothFrame.lean`), which makes the value of the trace at
-`x` the textbook value of the connection Laplacian on tensor sections.
-
-## Main definitions
-
-* `rawTensorConnLap g r s T x` — the pointwise value of the connection
-  Laplacian on a raw `(r, s)`-tensor section `T : Π b, TensorRSSpace r s I b`,
-  computed against the smooth orthonormal frame at `x`.
-
-## Main results
-
-* `rawTensorConnLap_smul` — `ℝ`-linearity on scalars.
-* `rawTensorConnLap_add` — additivity on raw smooth sections.
-* `rawTensorConnLap_zero` — vanishing on the zero section.
-* `rawTensorConnLap_smooth` — for a smooth raw `(r, s)`-tensor section `T`,
-  the raw connection Laplacian is a smooth section.
-
-## Sign convention
-
-The geometer convention is used: `Δ_g = div ∘ grad`, with spectrum in
-`(-∞, 0]` on closed manifolds. The connection Laplacian inherits this sign
-through the trace formula. This is the same sign convention used by the
-scalar / vector / 1-form connection Laplacians in `ConnectionLaplacian.lean`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -72,19 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **Raw connection Laplacian on a `(r, s)`-tensor section.** Given a smooth
-Riemannian metric `g` on `M`, ranks `(r, s)`, and a raw `(r, s)`-tensor section
-`T : Π b, TensorRSSpace r s I b`, the value at `x` is the metric trace of the
-second covariant derivative, computed against the smooth orthonormal frame at
-`x`:
-$$
-  (\Delta_\nabla T)(x)
-    := \sum_i \bigl(\nabla^{(r,s)}_{B_i x}\,\nabla^{(r,s)}_{B_i} T
-      - \nabla^{(r,s)}_{(\nabla_{B_i} B_i)(x)} T\bigr).
-$$
-Here `B_i = smoothOrthoFrame g x i` and `∇^{(r,s)}` abbreviates the
-`(r, s)`-tensor covariant derivative
-`TensorRSNabla.tensorRSCovariantDerivative I M r s (LeviCivita g)`. -/
 def rawTensorConnLap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -103,7 +45,6 @@ def rawTensorConnLap
           (smoothOrthoFrame (I := I) g x i) x
           (smoothOrthoFrame (I := I) g x i x)))
 
-/-- The defining identity for `rawTensorConnLap`. -/
 @[simp] lemma rawTensorConnLap_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -122,8 +63,6 @@ def rawTensorConnLap
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
-/-- **Vanishing on the zero section.** The raw connection Laplacian of the
-identically zero `(r, s)`-tensor section vanishes pointwise. -/
 @[simp] theorem rawTensorConnLap_zero [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     rawTensorConnLap (I := I) g r s
@@ -162,11 +101,6 @@ identically zero `(r, s)`-tensor section vanishes pointwise. -/
   rw [h_first_zero, h_second_zero]
   simp
 
-/-- **Additivity on smooth raw sections.** For raw `(r, s)`-tensor sections
-`T, T'` that are manifold-differentiable to all orders at `x`, the raw
-connection Laplacian is additive at `x`. The exact differentiability needed at
-`x` is `MDifferentiableAt` of `T`, `T'`, `T + T'`, and the corresponding
-single-derivatives along each frame vector. -/
 theorem rawTensorConnLap_add [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T T' : Π b : M, TensorRSSpace r s I b}
@@ -252,9 +186,6 @@ theorem rawTensorConnLap_add [CompleteSpace E]
   simp only [ContinuousLinearMap.add_apply]
   abel
 
-/-- **Scalar homogeneity on smooth raw sections.** For a raw `(r, s)`-tensor
-section `T` and a constant `c : ℝ`, the raw connection Laplacian commutes
-with scaling. -/
 theorem rawTensorConnLap_smul [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b} (c : ℝ)
@@ -316,13 +247,6 @@ theorem rawTensorConnLap_smul [CompleteSpace E]
   rw [h_second_smul, h_smulT]
   simp only [ContinuousLinearMap.smul_apply, smul_sub]
 
-/-- **Locality of the first covariant derivative at a single point.** If a
-raw section `T` vanishes on an open set `U` and `T` is manifold-differentiable
-at the target point `y ∈ U`, then `cov.toFun T y = 0`.
-
-This is a direct application of `IsCovariantDerivativeOn.congr_of_eventuallyEq`
-to the zero section on the open neighbourhood `U`. The differentiability
-witness is required only at `y`, not globally. -/
 private lemma cov_eq_zero_of_eventually_zero_on_open
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
@@ -354,16 +278,6 @@ private lemma cov_eq_zero_of_eventually_zero_on_open
   rw [h_eq]
   exact congrArg (fun φ => φ y) cov.zero
 
-/-- **Vanishing of `rawTensorConnLap` on a section that vanishes on a
-neighbourhood of `x`.** If `T` vanishes on an open neighbourhood of `x` and
-admits `MDifferentiableAt` witnesses at `x` (for `T` itself) and at the
-target point `x` for the first covariant derivative section
-`covApply cov B_i T`, then the raw connection Laplacian of `T` vanishes at
-`x`.
-
-The two `MDifferentiableAt` witnesses are required only at `x`: locality
-inside the open neighbourhood `U` reduces both quantities to the zero
-section's covariant derivative, which vanishes by `cov.zero`. -/
 theorem rawTensorConnLap_eq_zero_of_eventually_zero [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -437,8 +351,6 @@ theorem rawTensorConnLap_eq_zero_of_eventually_zero [CompleteSpace E]
   rw [h_first_zero, h_second_zero]
   simp
 
-/-- **Negation identity for the raw connection Laplacian.** This is the
-`c = -1` specialisation of `rawTensorConnLap_smul`. -/
 theorem rawTensorConnLap_neg [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -460,11 +372,6 @@ theorem rawTensorConnLap_neg [CompleteSpace E]
   simp only [neg_smul, one_smul, neg_smul] at h
   exact h
 
-/-- **Frame-trace presentation of the raw connection Laplacian.** At a fixed
-centre `x`, the raw operator is the finite trace of the second covariant
-derivative against the `g_x`-orthonormal frame `smoothOrthoFrame g x`. This
-restates the definition; it is provided as a named theorem so downstream
-consumers can name the frame explicitly. -/
 theorem rawTensorConnLap_frame_trace
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -487,9 +394,6 @@ section CompactSupport
 
 variable [CompleteSpace E]
 
-/-- **Pointwise smoothness witness of `T` from the bundled section.** A bundled
-`ContMDiffSection` of class `C^∞` gives the manifold-differentiability of the
-total-space form at every point. -/
 private lemma rawTensorConnLap_T_mdiff_at (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
         (fun x : M => TensorRSSpace r s I x)⟯)
@@ -500,10 +404,6 @@ private lemma rawTensorConnLap_T_mdiff_at (r s : ℕ)
   classical
   exact (T.contMDiff x).mdifferentiableAt (by simp)
 
-/-- **Smoothness of `covApply cov B T` at every point** when both `B` and `T`
-are globally `C^∞`. This is the smoothness witness required by
-`rawTensorConnLap_eq_zero_of_eventually_zero` for the first derivative section
-`covApply cov B T`. -/
 private lemma rawTensorConnLap_covApply_mdiff_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -543,13 +443,6 @@ private lemma rawTensorConnLap_covApply_mdiff_at
     h_covApply.contMDiffAt (Filter.univ_mem)
   exact h_at.mdifferentiableAt (by simp)
 
-/-- **Support inclusion (pointwise).** If `T` is a smooth `(r, s)`-tensor
-section and `x ∉ tsupport (b ↦ TensorRSSpace.toModel (T b))`, then
-`rawTensorConnLap g r s T x = 0`.
-
-The proof finds an open neighbourhood `U` of `x` where `T` vanishes (using the
-definition of `tsupport`), then applies `rawTensorConnLap_eq_zero_of_eventually_zero`
-with smoothness witnesses from `T.contMDiff`. -/
 theorem rawTensorConnLap_eq_zero_of_not_mem_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -580,9 +473,6 @@ theorem rawTensorConnLap_eq_zero_of_not_mem_tsupport
       (smoothOrthoFrame (I := I) g x i)
       (smoothOrthoFrame_smooth (I := I) g x i) x
 
-/-- **Support inclusion (functional).** The support of
-`b ↦ TensorRSSpace.toModel (rawTensorConnLap g r s T b)` is contained in
-`tsupport (b ↦ TensorRSSpace.toModel (T b))`. -/
 theorem rawTensorConnLap_support_subset_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -602,9 +492,6 @@ theorem rawTensorConnLap_support_subset_tsupport
     (rawTensorConnLap (I := I) g r s (fun y : M => T y) x) = 0
   rw [h_zero, TensorRSSpace.toModel_zero]
 
-/-- **Compact-support preservation.** If `T` is a smooth `(r, s)`-tensor
-section whose model image has compact support, then so does the model image of
-the raw connection Laplacian of `T`. -/
 theorem rawTensorConnLap_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -626,16 +513,6 @@ open DifferentialGeometry.Integral.L2
 
 variable [CompleteSpace E]
 
-/-- **Bundled connection Laplacian on `SmoothCcTensor`, taking smoothness as an
-explicit hypothesis.** For a smooth, compactly-supported `(r, s)`-tensor
-section `T : SmoothCcTensor g r s`, given a smoothness witness for the
-total-space form of the raw connection Laplacian, the result is packaged as a
-`SmoothCcTensor g r s`.
-
-The smoothness hypothesis is exposed because the proof of smoothness of
-`b ↦ rawTensorConnLap g r s T.toFun b` requires frame-invariance of the
-second-covariant-derivative trace, which is a separate piece of infrastructure
-not yet established in the codebase. -/
 noncomputable def tensorConnLaplacian_of_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (hSmooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -651,8 +528,6 @@ noncomputable def tensorConnLaplacian_of_contMDiff
     rawTensorConnLap_hasCompactSupport (I := I) g r s T.toSection
       T.hasCompactSupport
 
-/-- The underlying function of `tensorConnLaplacian_of_contMDiff` is
-`rawTensorConnLap`. -/
 @[simp] lemma tensorConnLaplacian_of_contMDiff_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (hSmooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -663,9 +538,6 @@ noncomputable def tensorConnLaplacian_of_contMDiff
     (tensorConnLaplacian_of_contMDiff (I := I) g r s T hSmooth).toSection x =
       rawTensorConnLap (I := I) g r s (fun z : M => T.toSection z) x := rfl
 
-/-- **Additivity at the bundled level.** For two `SmoothCcTensor g r s`
-inputs with their smoothness witnesses, the bundled connection Laplacian is
-additive at the underlying-section level. -/
 theorem tensorConnLaplacian_of_contMDiff_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T T' : SmoothCcTensor g r s)
@@ -710,9 +582,6 @@ theorem tensorConnLaplacian_of_contMDiff_add
       (smoothOrthoFrame (I := I) g y i)
       (smoothOrthoFrame_smooth (I := I) g y i) y
 
-/-- **Scalar homogeneity at the bundled level.** For a `SmoothCcTensor g r s`
-input with its smoothness witness, the bundled connection Laplacian commutes
-with scalar multiplication at the underlying-section level. -/
 theorem tensorConnLaplacian_of_contMDiff_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (T : SmoothCcTensor g r s)
@@ -747,7 +616,6 @@ theorem tensorConnLaplacian_of_contMDiff_smul
       (smoothOrthoFrame (I := I) g y i)
       (smoothOrthoFrame_smooth (I := I) g y i) y
 
-/-- The zero section maps to the zero section. -/
 theorem tensorConnLaplacian_of_contMDiff_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hSmooth : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -794,20 +662,6 @@ section FixedFrame
 
 variable [CompleteSpace E]
 
-/-- **Fixed-smooth-frame variant of the raw connection Laplacian on
-`(r, s)`-tensor sections.** For a smooth Riemannian metric `g`, ranks
-`(r, s)`, a fixed frame `B : Fin n → Π b, TangentSpace I b`, a raw
-`(r, s)`-tensor section `T`, and an evaluation point `x`, the value is the
-trace formula
-$$
-  \sum_i \bigl(\nabla^{(r,s)}_{B_i x}\,\nabla^{(r,s)}_{B_i} T -
-    \nabla^{(r,s)}_{(\nabla_{B_i} B_i)(x)} T\bigr).
-$$
-Here `∇^{(r,s)}` abbreviates the bundled tensor covariant derivative and the
-underlying tangent covariant derivative is the Levi-Civita connection of `g`.
-The dependence on `B` is genuine in the absence of an orthonormality
-hypothesis; orthonormality at the centre point `x` is what reduces this to
-the standard connection Laplacian at `x`. -/
 noncomputable def rawTensorConnLap_fixedFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -824,7 +678,6 @@ noncomputable def rawTensorConnLap_fixedFrame
         T x
         ((LeviCivita (I := I) g).toFun (B i) x (B i x)))
 
-/-- The defining identity for `rawTensorConnLap_fixedFrame`. -/
 @[simp] lemma rawTensorConnLap_fixedFrame_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -841,12 +694,6 @@ noncomputable def rawTensorConnLap_fixedFrame
             T x
             ((LeviCivita (I := I) g).toFun (B i) x (B i x))) := rfl
 
-/-- **Identification with the centre-dependent raw operator at orthonormality
-points.** When the fixed frame `B` equals `smoothOrthoFrame g x` (the
-centre-`x`-dependent smooth orthonormal frame), the fixed-frame variant
-agrees with `rawTensorConnLap` at `x`. This is true by definition (both
-expressions are the same finite sum), and is provided as a `rfl` lemma so
-downstream consumers can switch between the two presentations. -/
 lemma rawTensorConnLap_fixedFrame_smoothOrthoFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -854,8 +701,6 @@ lemma rawTensorConnLap_fixedFrame_smoothOrthoFrame
         (smoothOrthoFrame (I := I) g x) T x =
       rawTensorConnLap (I := I) g r s T x := rfl
 
-/-- **The fixed-frame operator's first cov-derivative section
-`b ↦ cov.toFun T b (B_i b)` is smooth** when both `T` and `B_i` are smooth. -/
 private lemma rawTensorConnLap_fixedFrame_covApply_T_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -890,9 +735,6 @@ private lemma rawTensorConnLap_fixedFrame_covApply_T_contMDiff
   intro b
   exact hOn.contMDiffAt (Filter.univ_mem)
 
-/-- **Second cov-derivative summand smoothness.** The function
-`b ↦ cov.toFun (covApply cov (B i) T) b (B i b)`, which is the first summand
-of `rawTensorConnLap_fixedFrame`, is smooth in `b`. -/
 private lemma rawTensorConnLap_fixedFrame_firstSummand_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -941,7 +783,6 @@ private lemma rawTensorConnLap_fixedFrame_firstSummand_contMDiff
     hOn.contMDiffAt (Filter.univ_mem)
   convert hAt
 
-/-- **Smoothness of `b ↦ cov.toFun B_i b (B_i b)`** for a smooth frame field. -/
 private lemma rawTensorConnLap_fixedFrame_covBB_contMDiff
     (g : SmoothRiemannianMetric I M)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -964,9 +805,6 @@ private lemma rawTensorConnLap_fixedFrame_covBB_contMDiff
   intro b
   exact hOn.contMDiffAt (Filter.univ_mem)
 
-/-- **Second summand smoothness.** The function
-`b ↦ cov.toFun T b (cov.toFun B_i b (B_i b))`, which is the second summand
-of `rawTensorConnLap_fixedFrame`, is smooth in `b`. -/
 private lemma rawTensorConnLap_fixedFrame_secondSummand_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -1011,10 +849,6 @@ private lemma rawTensorConnLap_fixedFrame_secondSummand_contMDiff
     hOn.contMDiffAt (Filter.univ_mem)
   convert hAt
 
-/-- **Smoothness of the fixed-frame variant.** For a smooth raw tensor section
-`T` and a fixed smooth tangent frame `B` (each `B i` a smooth global tangent
-section), the fixed-frame operator `rawTensorConnLap_fixedFrame g r s B T` is
-a smooth tensor section. -/
 theorem rawTensorConnLap_fixedFrame_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -1067,9 +901,6 @@ section RawPsiTensorial
 
 variable [CompleteSpace E]
 
-/-- Pointwise smoothness witness for the tensor covariant derivative section
-`b ↦ cov_RS.toFun T b`, treated as a section of the Hom-bundle
-`Hom(TM, TensorRSSpace r s)`, when `T` is globally `C^∞`. -/
 private lemma covRS_T_mdiff_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -1103,8 +934,6 @@ private lemma covRS_T_mdiff_at
       (σ := T) hT_plus.contMDiffOn
   exact ((hcov_sec.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp))
 
-/-- Pointwise smoothness witness for `covApply cov_RS X T` as a tensor section,
-derived from globally smooth `T` and pointwise differentiability of `X` at `y`. -/
 private lemma covApply_covRS_X_T_mdiff_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -1124,17 +953,6 @@ private lemma covApply_covRS_X_T_mdiff_at
   have := MDifferentiableAt.clm_bundle_apply (b := id) hHom hX
   exact this
 
-/-- **Left tensoriality of the raw second cov derivative at `y`.**
-
-For a globally smooth raw tensor section `T` and a globally smooth vector field
-`Y`, the bilinear form
-`Ψ_T(X, Y)(y) := cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`
-is tensorial in the `X`-argument at `y` (i.e., depends only on `X(y)`).
-
-The proof is the standard Leibniz cancellation: applying the Leibniz rule of
-`cov_RS` to the section `f • (covApply cov_RS X T)` and the Leibniz rule of
-`LeviCivita g` to the vector field `f • X`, the `extDerivFun f y`-multiplied
-cross-terms in the two halves coincide and cancel under the subtraction. -/
 private theorem rawTensorConnLap_psi_tensorialAt_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1229,14 +1047,6 @@ private theorem rawTensorConnLap_psi_tensorialAt_left
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-- **Right tensoriality of the raw second cov derivative at `y`.**
-
-For a globally smooth raw tensor section `T` and any vector field `X`, the
-bilinear form
-`Ψ_T(X, Y)(y) := cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`
-is tensorial in the `Y`-argument at `y`. Since `Y` only enters through
-`ContinuousLinearMap` evaluations at `Y y` (no derivative of `Y` is taken),
-this tensoriality is automatic: both halves are `ℝ`-linear in `Y y`. -/
 private theorem rawTensorConnLap_psi_tensorialAt_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1288,15 +1098,6 @@ private theorem rawTensorConnLap_psi_tensorialAt_right
     simp only [ContinuousLinearMap.map_add]
     abel
 
-/-- The raw second covariant derivative `Ψ_T(·, ·)(y)` packaged as a continuous
-bilinear map `T_y M →L[ℝ] T_y M →L[ℝ] TensorRSSpace r s I y`.
-
-The pointwise tensoriality of `Ψ_T` in each of the `(X, Y)`-arguments at `y`
-(see `rawTensorConnLap_psi_tensorialAt_left/right`) allows `Mathlib`'s
-`TensorialAt.mkHom₂` to manufacture the bilinear CLM. The bilinear value at a
-pair of fibre vectors `(u, v) : T_y M × T_y M` is the value of
-`Ψ_T(extend u, extend v)` at `y`, where `extend` is the standard smooth
-extension of a fibre vector to a global section of the tangent bundle. -/
 noncomputable def rawTensorConnLap_psi_bilinAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1324,14 +1125,6 @@ noncomputable def rawTensorConnLap_psi_bilinAt
     (fun X hX =>
       rawTensorConnLap_psi_tensorialAt_right g r s T hT_total y (X := X) hX)
 
-/-- **Apply formula for `rawTensorConnLap_psi_bilinAt`.**
-
-For globally smooth (in particular, `MDifferentiableAt y`) sections `X` and `Y`
-of the tangent bundle, the bundled bilinear map at `y` evaluated on the
-pointwise fibre values `(X y, Y y)` agrees with the raw `Ψ_T(X, Y)(y)`:
-
-`Ψ̂_T(y) (X y) (Y y) =
-   cov_RS (covApply cov_RS X T) y (Y y) - cov_RS T y (cov_TM X y (Y y))`. -/
 theorem rawTensorConnLap_psi_bilinAt_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1358,18 +1151,6 @@ theorem rawTensorConnLap_psi_bilinAt_apply
   unfold rawTensorConnLap_psi_bilinAt
   exact TensorialAt.mkHom₂_apply _ _ hX hY
 
-/-- **Frame invariance of the raw tensor connection Laplacian.**
-
-For any `g_y`-orthonormal basis `B : Fin (Module.finrank ℝ E) → T_y M`,
-the value `rawTensorConnLap g r s T y` equals the orthonormal-frame trace of
-the bundled raw second covariant derivative
-`rawTensorConnLap_psi_bilinAt g r s T hT_total y`:
-$$
-  (\Delta_\nabla T)(y) = \sum_i \hat\Psi_T(y)(B_i,\, B_i).
-$$
-This shows that the centre-dependent choice of `smoothOrthoFrame g y` in the
-definition of `rawTensorConnLap` is irrelevant — any `g_y`-orthonormal basis
-of `T_y M` reproduces the same value. -/
 theorem rawTensorConnLap_eq_frame_trace
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1527,10 +1308,6 @@ section UnconditionalSmoothness
 
 variable [CompleteSpace E]
 
-/-- **Identification of `rawTensorConnLap` with the fixed-frame variant at
-points where the fixed frame is `g`-orthonormal.** For a fixed smooth tangent
-frame `B` such that `B i y` is `g_y`-orthonormal at the evaluation point `y`,
-the raw connection Laplacian agrees with the fixed-frame variant at `y`. -/
 theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1572,12 +1349,6 @@ theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
   rw [Finset.sum_congr rfl (fun i _ => h_summand_eq i)]
   rfl
 
-/-- **The raw tensor connection Laplacian agrees with the fixed-frame variant
-on `smoothOrthoFrameNbhd g x₀`.** For any centre point `x₀`, the smooth
-orthonormal frame field `smoothOrthoFrame g x₀` is `g_y`-orthonormal at every
-`y` in the open neighbourhood `smoothOrthoFrameNbhd g x₀`. Hence the raw
-connection Laplacian coincides with the fixed-frame variant on the
-neighbourhood. -/
 private theorem rawTensorConnLap_eq_fixedFrame_smoothOrthoFrame_on_nbhd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1594,9 +1365,6 @@ private theorem rawTensorConnLap_eq_fixedFrame_smoothOrthoFrame_on_nbhd
     (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) y
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g x₀ hy i j)
 
-/-- **Unconditional smoothness of the raw tensor connection Laplacian.** For a
-smooth raw `(r, s)`-tensor section `T`, the raw connection Laplacian
-`rawTensorConnLap g r s T` is a smooth tensor section. -/
 theorem rawTensorConnLap_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)

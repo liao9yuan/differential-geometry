@@ -5,70 +5,6 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationTh
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.MeasureTheory.Covering.OneDim
 
-/-!
-# The vector-valued time-Sobolev space `H¹([0,T]; X)`
-
-For a real Hilbert space `X` and a time horizon `T : ℝ`, this file builds the
-space `H¹([0,T]; X)` of `X`-valued functions of time with an `L²` time
-derivative.  It is the carrier on which the *strong solutions* of the parabolic
-evolution equation live: a strong solution `u` satisfies
-`u ∈ L²([0,T]; H^{a+2})` together with `∂_t u ∈ L²([0,T]; H^a)`, and the present
-file isolates the purely functional-analytic part of that statement (no
-manifold structure is involved).
-
-## Carrier
-
-Rather than working with distributional derivatives, an element of
-`H¹([0,T]; X)` is represented by the *data of its derivative*:
-
-* an **initial value** `init : X`, and
-* a **derivative** `deriv : L²([0,T]; X)` (`= timeL2 X T`).
-
-The represented function is the indefinite Bochner integral
-
-  `toFun u : ℝ → X`,  `toFun u t = u.init + ∫ s in (0)..t, u.deriv s`.
-
-With this representation the fundamental theorem of calculus, the trace at `0`
-and continuity in time all hold *by construction*; no weak-derivative theory is
-needed.  Concretely the carrier is the `L²`-product Hilbert space
-
-  `timeH1 X T := WithLp 2 (X × timeL2 X T)`,
-
-so the inner product is the **graph inner product**
-
-  `⟪u, w⟫ = ⟪u.init, w.init⟫_X + ⟪u.deriv, w.deriv⟫_{L²}`,
-
-and the squared norm is `‖u‖² = ‖u.init‖² + ‖u.deriv‖²_{L²}`.  All four Hilbert
-instances (`NormedAddCommGroup`, `NormedSpace ℝ`, `InnerProductSpace ℝ`,
-`CompleteSpace`) are inherited from `WithLp 2` of two Hilbert spaces.
-
-## Main definitions
-
-* `timeH1 X T` — the space `H¹([0,T]; X)`, the `L²`-product `X × L²([0,T]; X)`.
-* `timeH1.mk u₀ v` — the element with initial value `u₀` and derivative `v`.
-* `timeH1.init` / `timeH1.deriv` — the two components.
-* `timeH1.trace0` — the value at `0`, as a continuous linear map to `X`.
-* `timeH1.timeDeriv` — the `L²` time derivative, as a continuous linear map to
-  `timeL2 X T`.
-* `timeH1.toFun u` — the represented function `t ↦ u.init + ∫ s in (0)..t, …`.
-* `timeH1.toTimeL2` — the embedding `H¹([0,T]; X) →L[ℝ] L²([0,T]; X)`,
-  `u ↦ toFun u`.
-
-## Main results
-
-* `timeH1.continuousOn_toFun` — `toFun u` is continuous on `[0,T]`.
-* `timeH1.toFun_eq_trace0_add_integral` — the fundamental theorem of calculus
-  `toFun u t = trace0 u + ∫ s in (0)..t, (timeDeriv u) s` for `t ∈ [0,T]`.
-* `timeH1.hasDerivAt_toFun_of_continuousOn` — if the derivative has a
-  continuous representative on `[0,T]`, then `toFun u` is genuinely
-  differentiable on `[0,T]` with the expected derivative.
-* `timeH1.ae_hasDerivWithinAt_toFun` — for almost every `t`, `toFun u` has time
-  derivative `u.deriv t` (vector-valued Lebesgue differentiation theorem).
-* `timeH1.norm_toFun_le` — the 1-D Sobolev embedding bound
-  `‖toFun u t‖ ≤ ‖trace0 u‖ + √T · ‖timeDeriv u‖` for `t ∈ [0,T]`, the
-  `H¹ ↪ C([0,T]; X)` continuity-in-time estimate.
--/
-
 noncomputable section
 
 open Set MeasureTheory Filter intervalIntegral
@@ -85,25 +21,17 @@ open IsUnifLocDoublingMeasure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-- The average of an integrand over a non-degenerate closed interval `[a, b]`
-(with `a ≤ b`) is `(b - a)⁻¹` times the integral over `[a, b]`. -/
 private theorem average_Icc_eq {f : ℝ → E} {a b : ℝ} (hab : a ≤ b) :
     (⨍ t in Icc a b, f t) = (b - a)⁻¹ • ∫ t in Icc a b, f t := by
   rw [setAverage_eq, measureReal_def, Real.volume_Icc,
     ENNReal.toReal_ofReal (by linarith)]
 
-/-- A pointwise identity behind the vector-valued Lebesgue differentiation
-theorem: the slope of an indefinite integral over the interval `[x, y]` (with
-`x ≤ y`) equals the average of the integrand over `[x, y]`. -/
 private theorem slope_integral_eq_average_right {f : ℝ → E}
     (hg : ∀ a b : ℝ, IntervalIntegrable f volume a b) (c x y : ℝ) (hxy : x ≤ y) :
     slope (fun u => ∫ t in c..u, f t) x y = ⨍ t in Icc x y, f t := by
   rw [average_Icc_eq hxy, slope_def_module, integral_interval_sub_left (hg c y) (hg c x),
     integral_of_le hxy, integral_Icc_eq_integral_Ioc]
 
-/-- A pointwise identity behind the vector-valued Lebesgue differentiation
-theorem: the slope of an indefinite integral over the interval `[y, x]` (with
-`y ≤ x`) equals the average of the integrand over `[y, x]`. -/
 private theorem slope_integral_eq_average_left {f : ℝ → E}
     (hg : ∀ a b : ℝ, IntervalIntegrable f volume a b) (c x y : ℝ) (hyx : y ≤ x) :
     slope (fun u => ∫ t in c..u, f t) x y = ⨍ t in Icc y x, f t := by
@@ -111,12 +39,6 @@ private theorem slope_integral_eq_average_left {f : ℝ → E}
     ← integral_of_le hyx, ← integral_interval_sub_left (hg c x) (hg c y),
     ← neg_sub x y, inv_neg, neg_smul, ← smul_neg, neg_sub]
 
-/-- **Vector-valued interval Lebesgue differentiation theorem.**  If
-`f : ℝ → E` is locally integrable for Lebesgue measure, then for almost every
-`x` and every base point `c`, the indefinite integral `x ↦ ∫ t in c..x, f t`
-has derivative `f x` at `x`.  This is the Banach-space generalisation of
-`LocallyIntegrable.ae_hasDerivAt_integral`; the only analytic input is the
-Lebesgue differentiation theorem `VitaliFamily.ae_tendsto_average`. -/
 theorem locallyIntegrable_ae_hasDerivAt_integral
     {f : ℝ → E} (hf : LocallyIntegrable f volume) :
     ∀ᵐ x, ∀ c, HasDerivAt (fun x => ∫ t in c..x, f t) (f x) x := by
@@ -140,15 +62,6 @@ end VectorLebesgueDifferentiation
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ}
 
-/-- **The vector-valued time-Sobolev space** `H¹([0,T]; X)`.
-
-An element is the data of an initial value in `X` together with an `L²` time
-derivative in `L²([0,T]; X)`; it represents the indefinite Bochner integral
-`t ↦ init + ∫ s in (0)..t, deriv s`.  The carrier is the `L²`-product
-`WithLp 2 (X × timeL2 X T)`, so the inner product is the graph inner product
-`⟪u, w⟫ = ⟪u.init, w.init⟫ + ⟪u.deriv, w.deriv⟫` and the squared norm is
-`‖u‖² = ‖u.init‖² + ‖u.deriv‖²`.  All Hilbert-space structure is inherited from
-`WithLp 2` of two real Hilbert spaces. -/
 def timeH1 (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : Type _ :=
   WithLp 2 (X × timeL2 X T)
@@ -167,16 +80,12 @@ instance : InnerProductSpace ℝ (timeH1 X T) :=
 instance : CompleteSpace (timeH1 X T) :=
   inferInstanceAs (CompleteSpace (WithLp 2 (X × timeL2 X T)))
 
-/-- The constructor of `H¹([0,T]; X)`: build the element with initial value `u₀`
-and `L²` time derivative `v`. -/
 def mk (u₀ : X) (v : timeL2 X T) : timeH1 X T :=
   WithLp.toLp 2 (u₀, v)
 
-/-- The initial value (the value at time `0`) of an element of `H¹([0,T]; X)`. -/
 def init (u : timeH1 X T) : X :=
   (WithLp.ofLp u).1
 
-/-- The `L²` time derivative of an element of `H¹([0,T]; X)`. -/
 def deriv (u : timeH1 X T) : timeL2 X T :=
   (WithLp.ofLp u).2
 
@@ -212,36 +121,26 @@ theorem init_zero : (0 : timeH1 X T).init = 0 := rfl
 @[simp]
 theorem deriv_zero : (0 : timeH1 X T).deriv = 0 := rfl
 
-/-- The inner product on `H¹([0,T]; X)` is the **graph inner product**: the sum
-of the `X`-inner product of the initial values and the `L²`-inner product of
-the derivatives. -/
 theorem inner_def (u w : timeH1 X T) :
     (inner ℝ u w : ℝ) = inner ℝ u.init w.init + inner ℝ u.deriv w.deriv :=
   rfl
 
-/-- The squared norm on `H¹([0,T]; X)` is `‖u‖² = ‖u.init‖² + ‖u.deriv‖²`. -/
 theorem norm_sq_eq (u : timeH1 X T) :
     ‖u‖ ^ 2 = ‖u.init‖ ^ 2 + ‖u.deriv‖ ^ 2 :=
   WithLp.prod_norm_sq_eq_of_L2 _
 
-/-- The norm of an element bounds the norm of its initial value. -/
 theorem norm_init_le (u : timeH1 X T) : ‖u.init‖ ≤ ‖u‖ := by
   have h := norm_sq_eq u
   nlinarith [norm_nonneg u.init, norm_nonneg u.deriv, norm_nonneg u, sq_nonneg ‖u.deriv‖]
 
-/-- The norm of an element bounds the `L²` norm of its derivative. -/
 theorem norm_deriv_le (u : timeH1 X T) : ‖u.deriv‖ ≤ ‖u‖ := by
   have h := norm_sq_eq u
   nlinarith [norm_nonneg u.init, norm_nonneg u.deriv, norm_nonneg u, sq_nonneg ‖u.init‖]
 
-/-- The value at time `0` (the trace at the initial time), as a continuous
-linear map `H¹([0,T]; X) →L[ℝ] X`.  By construction it returns `u.init`. -/
 def trace0 (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : timeH1 X T →L[ℝ] X :=
   WithLp.fstL 2 ℝ X (timeL2 X T)
 
-/-- The `L²` time derivative, as a continuous linear map
-`H¹([0,T]; X) →L[ℝ] L²([0,T]; X)`.  By construction it returns `u.deriv`. -/
 def timeDeriv (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : timeH1 X T →L[ℝ] timeL2 X T :=
   WithLp.sndL 2 ℝ X (timeL2 X T)
@@ -258,12 +157,6 @@ theorem trace0_mk (u₀ : X) (v : timeL2 X T) : trace0 X T (mk u₀ v) = u₀ :=
 @[simp]
 theorem timeDeriv_mk (u₀ : X) (v : timeL2 X T) : timeDeriv X T (mk u₀ v) = v := rfl
 
-/-- The function of time represented by an element of `H¹([0,T]; X)`:
-
-  `toFun u t = u.init + ∫ s in (0)..t, u.deriv s`.
-
-For `t ∈ [0,T]` this is the indefinite Bochner integral of the time derivative,
-started at the initial value `u.init`. -/
 def toFun (u : timeH1 X T) : ℝ → X :=
   fun t => u.init + ∫ s in (0 : ℝ)..t, u.deriv s
 
@@ -272,13 +165,10 @@ theorem toFun_apply (u : timeH1 X T) (t : ℝ) :
     u.toFun t = u.init + ∫ s in (0 : ℝ)..t, u.deriv s :=
   rfl
 
-/-- At the initial time the represented function equals the initial value. -/
 @[simp]
 theorem toFun_zero (u : timeH1 X T) : u.toFun 0 = u.init := by
   simp [toFun]
 
-/-- The derivative of an element of `H¹([0,T]; X)`, regarded as a function of
-time, is interval integrable on every interval contained in `[0,T]`. -/
 theorem intervalIntegrable_deriv {a b : ℝ} (u : timeH1 X T)
     (ha : a ∈ Icc (0 : ℝ) T) (hb : b ∈ Icc (0 : ℝ) T) :
     IntervalIntegrable (fun s => u.deriv s) volume a b := by
@@ -287,9 +177,6 @@ theorem intervalIntegrable_deriv {a b : ℝ} (u : timeH1 X T)
   refine MeasureTheory.IntegrableOn.intervalIntegrable ?_
   exact (TimeSobolev.integrableOn u.deriv).mono_set hsub
 
-/-- **The represented function is continuous on `[0,T]`.**  Being an indefinite
-Bochner integral of an integrable function, `toFun u` is (absolutely)
-continuous on the time interval. -/
 theorem continuousOn_toFun (u : timeH1 X T) :
     ContinuousOn u.toFun (Icc (0 : ℝ) T) := by
   rcases le_or_gt 0 T with hT | hT
@@ -304,27 +191,14 @@ theorem continuousOn_toFun (u : timeH1 X T) :
   · rw [Icc_eq_empty (by linarith)]
     exact continuousOn_empty _
 
-/-- The represented function is continuous on `[0,T]` (continuity-within-at
-form at any point of the interval). -/
 theorem continuousWithinAt_toFun (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ContinuousWithinAt u.toFun (Icc (0 : ℝ) T) t :=
   u.continuousOn_toFun t ht
 
-/-- **Fundamental theorem of calculus, integral form.**  For `t ∈ [0,T]`,
-
-  `toFun u t = trace0 u + ∫ s in (0)..t, (timeDeriv u) s`.
-
-This holds by construction of `H¹([0,T]; X)`: an element *is* its initial value
-together with its derivative, and `toFun` is the indefinite integral. -/
 theorem toFun_eq_trace0_add_integral (u : timeH1 X T) (t : ℝ) :
     u.toFun t = trace0 X T u + ∫ s in (0 : ℝ)..t, (timeDeriv X T u) s :=
   rfl
 
-/-- The increment form of the fundamental theorem of calculus: for `t₀, t₁`,
-
-  `toFun u t₁ - toFun u t₀ = ∫ s in t₀..t₁, u.deriv s`,
-
-valid whenever `t₀` and `t₁` lie in `[0,T]`. -/
 theorem toFun_sub_toFun (u : timeH1 X T) {t₀ t₁ : ℝ}
     (ht₀ : t₀ ∈ Icc (0 : ℝ) T) (ht₁ : t₁ ∈ Icc (0 : ℝ) T) :
     u.toFun t₁ - u.toFun t₀ = ∫ s in t₀..t₁, u.deriv s := by
@@ -337,10 +211,6 @@ theorem toFun_sub_toFun (u : timeH1 X T) {t₀ t₁ : ℝ}
   exact intervalIntegral.integral_interval_sub_left
     (u.intervalIntegrable_deriv h0 ht₁) (u.intervalIntegrable_deriv h0 ht₀)
 
-/-- **Differentiability of the represented function under a continuous
-representative.**  If a function `g` continuous on `[0,T]` represents the `L²`
-time derivative of `u`, then for every `t ∈ [0,T]` the represented function
-`toFun u` has derivative `g t` within `[0,T]` at `t`. -/
 theorem hasDerivWithinAt_toFun_of_continuousOn (u : timeH1 X T) {g : ℝ → X}
     (hg : ContinuousOn g (Icc (0 : ℝ) T)) (hrep : u.deriv =ᵐ[timeMeasure T] g)
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
@@ -381,16 +251,6 @@ theorem hasDerivWithinAt_toFun_of_continuousOn (u : timeH1 X T) {g : ℝ → X}
   · rw [Icc_eq_empty (by linarith)] at ht
     exact absurd ht (notMem_empty t)
 
-/-- **Almost-everywhere differentiability of the represented function.**  For
-almost every `t` in `[0,T]` (with respect to the time measure) the represented
-function `toFun u` has derivative `u.deriv t` within `[0,T]` at `t`.  This is
-the vector-valued Lebesgue differentiation theorem: it holds for an arbitrary
-`L²` (hence locally integrable) time derivative, with no continuity assumption.
-
-The almost-everywhere quantifier is taken with respect to `timeMeasure T`
-(Lebesgue measure restricted to `[0,T]`): outside the interval the time
-derivative carries no information, so the statement is necessarily confined to
-the interval. -/
 theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
     ∀ᵐ t ∂(timeMeasure T), HasDerivWithinAt u.toFun (u.deriv t) (Icc (0 : ℝ) T) t := by
   rcases le_or_gt 0 T with hT | hT
@@ -447,12 +307,6 @@ theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
     rw [Filter.eventually_iff, hbot]
     exact Filter.mem_bot
 
-/-- **Pointwise Sobolev embedding bound.**  For `t ∈ [0,T]`,
-
-  `‖toFun u t‖ ≤ ‖trace0 u‖ + √T · ‖timeDeriv u‖`.
-
-This is the one-dimensional Sobolev embedding estimate `H¹ ↪ C([0,T]; X)`: the
-sup-norm-in-time of the represented function is controlled by the `H¹` data. -/
 theorem norm_toFun_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.toFun t‖ ≤ ‖trace0 X T u‖ + Real.sqrt T * ‖timeDeriv X T u‖ := by
   rcases ht with ⟨ht0, htT⟩
@@ -479,8 +333,6 @@ theorem norm_toFun_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     _ ≤ ‖u.init‖ + Real.sqrt T * ‖u.deriv‖ := by gcongr
     _ = ‖trace0 X T u‖ + Real.sqrt T * ‖timeDeriv X T u‖ := rfl
 
-/-- The uniform-in-time Sobolev embedding bound expressed through the `H¹` norm:
-for `t ∈ [0,T]`, `‖toFun u t‖ ≤ (1 + √T) · ‖u‖`. -/
 theorem norm_toFun_le_norm (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.toFun t‖ ≤ (1 + Real.sqrt T) * ‖u‖ := by
   have hbase := u.norm_toFun_le ht
@@ -495,18 +347,9 @@ theorem norm_toFun_le_norm (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 
         exact mul_le_mul_of_nonneg_left hderiv hsqrt
     _ = (1 + Real.sqrt T) * ‖u‖ := by ring
 
-/-- The represented function `toFun u`, regarded as an element of
-`L²([0,T]; X)`.  This is well defined because `toFun u` is continuous on
-`[0,T]`. -/
 def toFunL2 (u : timeH1 X T) : timeL2 X T :=
   TimeSobolev.ofContinuousOn u.continuousOn_toFun
 
-/-- The `L²` norm of the represented function is controlled by the `H¹` norm:
-
-  `‖toFunL2 u‖ ≤ √T · (1 + √T) · ‖u‖`.
-
-This is the `L²`-norm form of the Sobolev embedding bound, obtained by
-integrating the uniform-in-time estimate `norm_toFun_le_norm`. -/
 theorem norm_toFunL2_le (u : timeH1 X T) :
     ‖u.toFunL2‖ ≤ Real.sqrt T * ((1 + Real.sqrt T) * ‖u‖) := by
   rw [toFunL2]
@@ -514,9 +357,6 @@ theorem norm_toFunL2_le (u : timeH1 X T) :
   intro t ht
   exact u.norm_toFun_le_norm ht
 
-/-- Additivity of the represented function on `[0,T]`: for `t ∈ [0,T]`,
-
-  `toFun (u + w) t = toFun u t + toFun w t`. -/
 theorem toFun_add (u w : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     (u + w).toFun t = u.toFun t + w.toFun t := by
   have h0 : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, le_trans ht.1 ht.2⟩
@@ -543,9 +383,6 @@ theorem toFun_add (u w : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
   simp only [toFun_apply, init_add, hsplit]
   abel
 
-/-- Homogeneity of the represented function on `[0,T]`: for `t ∈ [0,T]`,
-
-  `toFun (c • u) t = c • toFun u t`. -/
 theorem toFun_smul (c : ℝ) (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     (c • u).toFun t = c • u.toFun t := by
   have hsmul : ∫ s in (0 : ℝ)..t, ((c • u).deriv) s
@@ -568,9 +405,6 @@ theorem toFun_smul (c : ℝ) (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ
     rw [hcongr, intervalIntegral.integral_smul]
   simp only [toFun_apply, init_smul, hsmul, smul_add]
 
-/-- The underlying (unbundled) linear map `u ↦ toFunL2 u` from `H¹([0,T]; X)`
-into `L²([0,T]; X)`.  Linearity holds because the represented function is
-affine-linear in the `H¹` data on `[0,T]`. -/
 def toTimeL2ₗ (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : timeH1 X T →ₗ[ℝ] timeL2 X T where
   toFun u := u.toFunL2
@@ -599,10 +433,6 @@ def toTimeL2ₗ (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [Co
     filter_upwards [hcu, hu, hsmul, hmem] with t htcu htu htsmul htmem
     rw [htcu, RingHom.id_apply, htsmul, Pi.smul_apply, htu, toFun_smul c u htmem]
 
-/-- **The embedding `H¹([0,T]; X) →L[ℝ] L²([0,T]; X)`**, `u ↦ toFun u`.
-
-It is a bounded linear map: the operator norm is at most `√T · (1 + √T)`, the
-`L²`-integrated form of the Sobolev embedding estimate. -/
 def toTimeL2 (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     (T : ℝ) : timeH1 X T →L[ℝ] timeL2 X T :=
   LinearMap.mkContinuous (toTimeL2ₗ X T) (Real.sqrt T * (1 + Real.sqrt T)) (fun u => by
@@ -612,8 +442,6 @@ def toTimeL2 (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [Compl
 @[simp]
 theorem toTimeL2_apply (u : timeH1 X T) : toTimeL2 X T u = u.toFunL2 := rfl
 
-/-- The operator norm of the embedding into `L²([0,T]; X)` is at most
-`√T · (1 + √T)`. -/
 theorem norm_toTimeL2_le (X : Type*) [NormedAddCommGroup X] [InnerProductSpace ℝ X]
     [CompleteSpace X] (T : ℝ) :
     ‖toTimeL2 X T‖ ≤ Real.sqrt T * (1 + Real.sqrt T) :=

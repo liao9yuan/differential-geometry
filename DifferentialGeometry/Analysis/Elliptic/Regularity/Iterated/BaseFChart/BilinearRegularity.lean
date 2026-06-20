@@ -7,70 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPus
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 
-/-!
-# Polymorphic-in-`m` chart-`W^{m,2}` regularity for the chart-pulled bilinear
-data attached to a `laplacianDomain` element
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, an order
-`m : ℕ`, and an `H1Compl`-element `u_h ∈ laplacianDomain g`, the chart-pulled
-function
-
-```
-(chartBilinearH1ComplData_of_laplacianDomain g α hu_h_lapdom).f_chart
-```
-
-— which equals `chartPushedRawLpFromLp (fHLeibniz g α u_h hu_h_lapdom).coeFn` —
-lies in `MemWkp m 2 chartTargetEuclid α` whenever:
-
-* the canonical chart-pushed function representative of `u_h.coeFn` lies in
-  `MemWkp (m+1) 2 chartTargetEuclid α` (chart-`H^{m+1}` of `u_h`), and
-* the canonical chart-pushed function representative of the `Lp` preimage
-  `(1 - Δ_g) u_h` lies in `MemWkp m 2 chartTargetEuclid α` (chart-`H^m` of
-  `(1-Δ_g) u_h`).
-
-The structural decomposition `base.f_chart =ᵐ fChartPiecePreimage + fChartResidual`
-on `volume.restrict chartTargetEuclid α` reduces the chart-target
-`MemWkp m 2`-discharge of `base.f_chart` to:
-
-* `fChartPiecePreimage = chartPushed POU α (preimage u_h)`, in `MemWkp m 2`
-  by the chart-`H^m` hypothesis on the RHS (Piece 1).
-* `fChartResidual = chartPushedRawLpFromLp` of the residual `Lp` class, in
-  `MemWkp m 2` by the chart-`W^{m,2}`-Cauchy completeness machinery applied
-  to the chart-`W^{m+1,2}`-density approximator of `u_h.coeFn` and the
-  polymorphic `W^{m,2}` bilinear continuity bound for
-  `smoothFChartResidual g α v` in terms of `wkpNormChart g (m+1) 2 v.toFun`.
-
-## Structure
-
-The file delivers two ingredients:
-
-* **Bilinear bound** (polymorphic):
-  `wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM` — for every `m : ℕ`
-  there is a positive constant `C = C(g, α, m)` such that for every smooth
-  scalar `v : SmoothScalar g`,
-  `wkpNorm m 2 (smoothFChartResidual g α v) chartTargetEuclid α
-    ≤ C · wkpNormChart g (m+1) 2 v.toFun`.
-
-* **Hypothesis-bearing entry point**:
-  `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM` —
-  given a smooth approximator sequence with the chart-target `W^{m,2}`-Cauchy
-  + identification properties, the chart-pulled residual lies in `MemWkp m 2`.
-  `base_f_chart_memWkp_m_of_hypotheses` packages the residual + RHS Piece 1
-  to give the headline.
-
-## Main results
-
-* `wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM` — polymorphic
-  bilinear bound.
-* `smoothFChartResidual_memWkp_m` — for every `m : ℕ` and every smooth scalar
-  `v : SmoothScalar g`, `smoothFChartResidual g α v ∈ MemWkp m 2 chartTargetEuclid α`.
-* `memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM` —
-  hypothesis-bearing discharge of `MemWkp m 2 fChartResidual`.
-* `base_f_chart_memWkp_m_of_hypotheses` — headline entry point: from
-  Cauchy + identification + RHS Piece 1, derive
-  `base.f_chart ∈ MemWkp m 2 chartTargetEuclid α`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -109,9 +45,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For smooth `v : SmoothScalar g`, the chart-pushed-raw of `etaTimesV α v.toFun`
-is in `MemWkp (m+1) 2 chartTargetEuclid α` (it is `ContDiff ℝ ∞` with compact
-support inside `chartTargetEuclid α`). -/
 private lemma memWkp_chartPushedRaw_etaTimesV_succ
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -142,8 +75,6 @@ private lemma memWkp_chartPushedRaw_etaTimesV_succ
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) (m + 1)
 
-/-- For smooth `v : SmoothScalar g`, the chart-pushed-raw of `etaTimesV α v.toFun`
-is in `MemWkp m 2 chartTargetEuclid α` at any order `m : ℕ`. -/
 private lemma memWkp_chartPushedRaw_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -174,9 +105,6 @@ private lemma memWkp_chartPushedRaw_etaTimesV
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) m
 
-/-- For smooth `v : SmoothScalar g`, `partialDerivOnEuclid α i (η · v.toFun)`
-is in `MemWkp m 2 chartTargetEuclid α` (via a.e. equality with the chosen
-weak partial of the chart-pushed-raw, which is in `MemWkp m 2`). -/
 private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g)
     (i : Fin (Module.finrank ℝ E)) :
@@ -211,9 +139,6 @@ private lemma memWkp_partialDerivOnEuclid_etaTimesV
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae).mpr h_chosen_mem
 
-/-- The bound on `wkpNorm (m+1) 2 (chartPushedRaw α (η · v.toFun))`: there exists
-`C > 0` such that for every smooth `v`,
-`wkpNorm (m+1) 2 (chartPushedRaw α (η · v.toFun)) ≤ C · wkpNormChart g (m+1) 2 v.toFun`. -/
 private lemma wkpNorm_chartPushedRaw_etaTimesV_le_succ
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -238,9 +163,6 @@ private lemma wkpNorm_chartPushedRaw_etaTimesV_le_succ
   rw [h_funext]
   exact hC_bound h_v_MemWkpChart
 
-/-- The order-`m` analogue of `wkpNorm_chartPushedRaw_etaTimesV_le_succ`: the
-`W^{m,2}` bound for `chartPushedRaw α (η · v.toFun)` is controlled by the
-chart-`W^{m,2}` norm of `v.toFun`. -/
 private lemma wkpNorm_chartPushedRaw_etaTimesV_le_self
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -788,11 +710,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le
             wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
           rw [hCfinal_def]
 
-/-- **Polymorphic `W^{m,2}` bilinear bound**. For a closed Riemannian manifold
-`(M, g)` and a chart-atlas index `α : M`, the smooth chart-pulled Leibniz
-residual `smoothFChartResidual g α v` satisfies a quantitative `W^{m,2}` bound
-on `chartTargetEuclid α` in terms of the chart-based `W^{m+1,2}` norm of
-`v.toFun`. -/
 theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) (m : ℕ) :
@@ -960,9 +877,6 @@ theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_wkpM
         wkpNormChart (I := I) (M := M) g (m + 1) 2 v.toFun := by
             rw [ENNReal.ofReal_add hC_grad_pos.le hC_lap_pos.le]
 
-/-- For every `m : ℕ` and every smooth scalar `v : SmoothScalar g`, the smooth
-chart-pulled Leibniz residual `smoothFChartResidual g α v` lies in
-`MemWkp m 2 chartTargetEuclid α`. -/
 lemma smoothFChartResidual_memWkp_m
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -1068,14 +982,6 @@ lemma smoothFChartResidual_memWkp_m
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     hp_one hΩ_open h_ae.symm).mp hP_sum
 
-/-- **Density-form discharge via the chart-target `W^{m,2}`-Cauchy hypothesis
-and identification of the Cauchy limit.**
-
-Given a smooth approximator sequence `v : ℕ → SmoothScalar g` with the
-chart-target `wkpNorm m 2`-Cauchy property and the ae-identification of the
-`wkpNorm m 2`-limit with `fChartResidual g α u_h` on
-`volume.restrict chartTargetEuclid α`, the chart-pulled residual
-`fChartResidual g α u_h` is in `MemWkp m 2 chartTargetEuclid α`. -/
 theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -1124,25 +1030,6 @@ theorem memWkp_fChartResidual_of_wkpNorm_cauchy_identification_wkpM
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hF_lim_aeEq).mp hF_lim_memWkp
 
-/-- **Hypothesis-bearing chart-target `MemWkp m 2` of `base.f_chart`** (general
-form taking the a.e. decomposition as an external input).
-
-For any `u_h : H1Compl g` and chart base point `α : M`, the chart-pulled function
-`F_base : EuclN → ℝ` lies in `MemWkp m 2 chartTargetEuclid α` provided:
-
-* a smooth approximator sequence `v : ℕ → SmoothScalar g` with the chart-target
-  `wkpNorm m 2`-Cauchy property along `smoothFChartResidual g α (v n)`;
-* the chart-target `wkpNorm m 2`-identification of the Cauchy limit with
-  `fChartResidual g α u_h`;
-* the chart-`H^m` hypothesis on the partition-of-unity-weighted `(1-Δ_g)u_h`
-  representative `f_piece1 : EuclN → ℝ`;
-* an a.e. decomposition `F_base =ᵐ f_piece1 + fChartResidual g α u_h` on
-  `volume.restrict chartTargetEuclid α`.
-
-This is the polymorphic hypothesis-bearing entry point: it isolates the
-chart-target `MemWkp m 2`-recovery from the structural a.e. decomposition,
-which in concrete applications comes from the chart-bilinear data structure
-attached to a `laplacianDomain g` element. -/
 theorem base_f_chart_memWkp_m_of_hypotheses
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (u_h : H1Compl (I := I) (M := M) g)

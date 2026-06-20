@@ -1,59 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LinearizedVectorField
 
-/-!
-# The second-order part of the linearized DeTurck-correction operator
-
-In the chart at a base point `α : M`, the DeTurck-correction term of an evolving
-metric `g` against a fixed background metric `g'` is the metric Lie derivative
-`𝓛_W g` of `g` along the DeTurck vector field `W = W(g, g')`, with chart-coordinate
-components
-$$(\mathcal L_W g)_{ij}
-    = \sum_k W^k\,\partial_k g_{ij}
-        + \sum_k g_{kj}\,\partial_i W^k
-        + \sum_k g_{ik}\,\partial_j W^k.$$
-
-Linearizing `g ↦ 𝓛_{W(g, g')} g` in a metric-perturbation direction `h` and
-collecting the terms that carry **two** chart derivatives of `h` is the first step
-toward the principal symbol of the linearized DeTurck-correction operator.  The
-convective term `∑_k W^k\,\partial_k g_{ij}` and the metric factors `g_{kj}`,
-`g_{ik}` of the two deformation terms each carry **at most one** chart derivative of
-`h`, so the only `∂²h` terms come from the deformation terms `∑_k g_{kj}\,\partial_i
-W^k + ∑_k g_{ik}\,\partial_j W^k` once the linearized vector field `DW^k` is
-inserted: the only summand of `DW^k` carrying a chart derivative of `h` is the
-principal part `chartLinearizedDeTurckVFPrincipal`, and applying the outer chart
-derivative `∂_i` to that principal part produces the `∂²h` content.
-
-Thus the second-order-in-`h` part of `D(\mathcal L_W g)_{ij}[h]` is
-$$\sum_k g_{kj}\,\partial_i \bigl[(DW)^k_{\mathrm{principal}}[h]\bigr]
-    + \sum_k g_{ik}\,\partial_j \bigl[(DW)^k_{\mathrm{principal}}[h]\bigr],$$
-where `(DW)^k_{\mathrm{principal}}[h] = chartLinearizedDeTurckVFPrincipal g g' α h k`.
-
-## Contents
-
-* `chartDeTurckCorrSecondOrderPart` — the second-order-in-`h` part of
-  `D(\mathcal L_W g)_{ij}[h]`, defined as the chart-derivative combination
-  `∑_k g_{kj}\,\partial_i[(DW)^k_{\mathrm{principal}}] + ∑_k g_{ik}\,\partial_j
-  [(DW)^k_{\mathrm{principal}}]` of the metric Gram entries against the principal
-  part of the linearized DeTurck vector field, together with its unfolding lemma
-  `chartDeTurckCorrSecondOrderPart_def`.
-* `partialDeriv_chartLinearizedDeTurckVFPrincipal` — the Leibniz expansion of the
-  outer chart derivative `∂_d[(DW)^k_{\mathrm{principal}}]`, the single technical
-  lemma the principal-symbol / remainder split consumes.  It separates, summand by
-  summand, the `(∂G)·(DΓ_{\mathrm{principal}})` branch (which carries `h`
-  through a single chart derivative) from the `G·∂(DΓ_{\mathrm{principal}})` branch
-  (which carries the second chart derivative of `h`).
-* `chartLinearizedDeTurckVFPrincipal_differentiableAt` — differentiability of the
-  principal part of the linearized DeTurck vector field at chart-interior points,
-  the form the Leibniz expansion consumes.
-* `h`-linearity (`_add`, `_smul`, `_zero`) of `chartDeTurckCorrSecondOrderPart`.
-
-The principal-symbol / remainder split itself — extracting the pure `∂²h`
-expression and the genuinely-first-order remainder from
-`chartDeTurckCorrSecondOrderPart` — is carried out in
-`DeTurckCorrectionPrincipalSymbolRemainder.lean`, which builds on the Leibniz
-expansion recorded here.
--/
-
 noncomputable section
 
 open Set Function
@@ -76,8 +22,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Differentiability
 
-/-- The chart Gram entry `g_{ij}` is differentiable at every point in the interior of
-the chart target. -/
 lemma chartGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -91,8 +35,6 @@ lemma chartGramOnE_differentiableAt_interior
     hcd_int.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-- The chart inverse Gram entry `G^{ab}` is differentiable at every point in the
-interior of the chart target. -/
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -106,9 +48,6 @@ lemma chartInvGramOnE_differentiableAt_interior
     hcd_int.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-- The principal part of the linearized DeTurck vector field is differentiable at
-every point in the interior of the chart target (as a function of the chart-coordinate
-point). -/
 lemma chartLinearizedDeTurckVFPrincipal_differentiableAt
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) {y : E}
@@ -124,8 +63,6 @@ lemma chartLinearizedDeTurckVFPrincipal_differentiableAt
     hcd.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-- The principal linearized Christoffel part is differentiable at every point in the
-interior of the chart target (as a function of the chart-coordinate point). -/
 lemma chartLinearizedChristoffelPrincipal_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (a b k : Fin (Module.finrank ℝ E)) {y : E}
@@ -144,21 +81,6 @@ lemma chartLinearizedChristoffelPrincipal_differentiableAt
 
 end Differentiability
 
-/-- The **second-order-in-`h` part of the linearized DeTurck-correction operator**
-`D(\mathcal L_{W(g, g')} g)_{ij}[h]` in the chart at `α`, in the perturbation
-direction `h`, evaluated at the chart-coordinate point `y ∈ E`:
-$$[D(\mathcal L_W g)]^{(2)}_{ij}[h](y) =
-    \sum_k g_{kj}(y)\,\partial_i\bigl[(DW)^k_{\mathrm{principal}}[h]\bigr](y)
-      + \sum_k g_{ik}(y)\,\partial_j\bigl[(DW)^k_{\mathrm{principal}}[h]\bigr](y),$$
-where `(DW)^k_{\mathrm{principal}}[h] = chartLinearizedDeTurckVFPrincipal g g' α h k`
-is the principal part of the linearized DeTurck vector field, `g_{kj} = chartGramOnE
-g α k j`, and `∂_i F` denotes the Fréchet partial derivative `partialDeriv i F`.
-
-This is the term of the linearized DeTurck-correction operator carrying two chart
-derivatives of `h`: the outer chart derivative `∂_i` falls on the `∂h`-order principal
-part `(DW)^k_{\mathrm{principal}}[h]`.  The convective contribution and the
-inverse-Gram contribution of the linearized vector field are lower order and do not
-appear here. -/
 def chartDeTurckCorrSecondOrderPart (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
@@ -184,13 +106,6 @@ def chartDeTurckCorrSecondOrderPart (g g' : SmoothRiemannianMetric I M) (α : M)
               (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y') y) :=
   rfl
 
-/-- **Leibniz expansion of the outer chart derivative of the principal part of the
-linearized DeTurck vector field.**  Differentiating
-`(DW)^k_{\mathrm{principal}}[h](y') = ∑_{a,b} G^{ab}(y')·(DΓ)^k{}_{ab}[h](y')` in the
-direction `e_d` by the product rule splits each `(a, b)` summand into the
-`(∂_d G^{ab})·(DΓ)^k{}_{ab}[h]` branch and the `G^{ab}·∂_d[(DΓ)^k{}_{ab}[h]]` branch.
-Valid at chart-interior points, where the inverse-Gram entries `G^{ab}` and the
-principal linearized Christoffel parts are differentiable. -/
 lemma partialDeriv_chartLinearizedDeTurckVFPrincipal
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k d : Fin (Module.finrank ℝ E)) {y : E}
@@ -236,9 +151,6 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal
   rw [partialDeriv_mul (chartInvGramOnE (I := I) g α a b) (Γ a b)
         (hG_diff a b) (hΓ_diff a b)]
 
-/-- The second-order part of the linearized DeTurck-correction operator vanishes on
-the zero perturbation: every principal-part outer derivative is the derivative of the
-zero function. -/
 @[simp] theorem chartDeTurckCorrSecondOrderPart_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -271,8 +183,6 @@ zero function. -/
     rw [hpd j k, mul_zero]
   rw [hsum1, hsum2, add_zero]
 
-/-- **Additivity** of the second-order part of the linearized DeTurck-correction
-operator in the perturbation direction. -/
 theorem chartDeTurckCorrSecondOrderPart_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -337,8 +247,6 @@ theorem chartDeTurckCorrSecondOrderPart_add
   rw [hsum1, hsum2]
   ring
 
-/-- **Scalar homogeneity** of the second-order part of the linearized DeTurck-correction
-operator in the perturbation direction. -/
 theorem chartDeTurckCorrSecondOrderPart_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) {y : E}

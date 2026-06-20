@@ -9,26 +9,6 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 
-/-!
-# Chart-pullback naturality of `chartBasisVecFiber` under the universal cover
-
-The chart-local frame vectors `chartBasisVecFiber α' i x'` on the universal
-cover identify, under the projection `proj : UC M → M`, with the chart-local
-frame vectors on the base manifold at the projected points.
-
-Concretely, for `x' ∈ (coverChartAt α').source`,
-```
-chartBasisVecFiber α' i x' = chartBasisVecFiber (proj α') i (proj x')
-```
-viewed through the definitional identification
-`TangentSpace I x' = E = TangentSpace I (proj x')`.
-
-The proof unfolds `chartBasisVecFiber` to the inverse tangent trivialisation
-applied to the fixed model-space basis vector, rewrites both sides through
-`TangentBundle.symmL_trivializationAt_eq_core`, and concludes by
-`uc_tangentBundleCore_coordChange_agree`.
--/
-
 open Set Function Filter
 open scoped Topology ContDiff Manifold
 open DifferentialGeometry.Integral.Measure
@@ -56,29 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M]
 
-/-- **`chartBasisVecFiber` is natural under universal-cover projection.**
-
-For any chart anchor `α' : UC M`, basis index `i`, and cover-point
-`x' ∈ (chartAt H α').source` (equivalently `x' ∈ (coverChartAt α').source`,
-since `chartAt H α' = coverChartAt α'` by the universal-cover charted-space
-instance), the cover-side chart-basis fibre vector at `x'` (defined via the
-inverse tangent trivialisation centred at `α'`) identifies with the
-base-side chart-basis fibre vector at `proj x'` (defined via the inverse
-tangent trivialisation centred at `proj α'`), through the definitional
-identification of the tangent fibres with `E`.
-
-Proof. Both sides unfold to `triv.symmL ℝ x (chartModelBasis E i)`,
-the difference being whether `triv` is `trivializationAt E (TangentSpace I)`
-on `UC M` (with base point `α'`, fibre point `x'`) or on `M` (with base
-point `proj α'`, fibre point `proj x'`). On the chart source, the
-membership hypothesis unfolds, via `coverChartAt_source_eq`, to give in
-particular `proj x' ∈ (chartAt H (proj α')).source`. By
-`TangentBundle.symmL_trivializationAt_eq_core`, each side equals the
-corresponding `tangentBundleCore.coordChange` evaluated at the chart-source
-membership; by `uc_tangentBundleCore_coordChange_agree`, the cover-side
-`coordChange` agrees with the base-side `coordChange` at the projected
-point. The result follows by applying both sides to `chartModelBasis E i`.
--/
 theorem chartBasisVecFiber_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -149,21 +106,6 @@ theorem chartBasisVecFiber_lifted
   have hAt := congrArg (fun L : E →L[ℝ] E => L (chartModelBasis E i)) hSymmL
   exact hAt
 
-/-- **`chartGramMatrix` is natural under universal-cover projection.**
-
-For any chart anchor `α' : UC M`, indices `i j : Fin (finrank ℝ E)`, and a
-cover-point `x' ∈ (chartAt H α').source`, the Gram matrix entry of the
-lifted metric on the universal cover equals the corresponding entry of
-the base-side Gram matrix at the projected points.
-
-Proof. Both sides unfold via `chartGramMatrix_apply` (a `rfl`-style simp
-lemma) to inner products of the chart-basis fibre vectors. The lifted
-metric is defined by `(liftedMetric g).inner x' v w = g.inner (proj x') v w`
-(definitional from the `liftedMetric` `def`), and
-`chartBasisVecFiber_lifted` identifies the cover-side basis fibre vector
-at `x'` with the base-side one at `proj x'` (through the definitional
-identification of the tangent fibre with `E`). Combining these three
-rewrites yields the claim. -/
 theorem chartGramMatrix_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -185,14 +127,6 @@ theorem chartGramMatrix_lifted
       chartBasisVecFiber_lifted (I := I) (M := M) g α' j x' hx']
   rfl
 
-/-- **Chart-basepoint coordinate identity under the universal cover.**
-
-For any cover-point `x' ∈ (chartAt H α').source`, the extended-chart
-coordinate of `x'` in the cover-chart at `α'` agrees with the
-extended-chart coordinate of `proj x'` in the base-chart at `proj α'`.
-Direct consequence of `uc_coverChartAt_extend_conjugacy` applied
-pointwise at `x'`, identifying `extChartAt I α' = (coverChartAt α').extend I`
-and using `localSection α' x' = proj x'`. -/
 lemma extChartAt_proj_eq
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
     (x' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M) :
@@ -207,54 +141,6 @@ lemma extChartAt_proj_eq
   rw [hLS] at this
   exact this
 
-/-- **`chartChristoffel` is natural under universal-cover projection.**
-
-For any chart anchor `α' : UC M`, lower indices `i j` and upper index `k`,
-and a cover-point `x' ∈ (chartAt H α').source`, the chart-coordinate
-Christoffel symbol of the lifted metric on the universal cover at the
-chart-coordinate of `x'` equals the chart-coordinate Christoffel symbol
-of the base metric at the chart-coordinate of `proj x'` in the base chart
-at `proj α'`.
-
-Proof outline:
-
-1. By `extChartAt_proj_eq`, the two chart-coordinate base points agree:
-   `extChartAt I α' x' = extChartAt I (proj α') (proj x')`. Call the common
-   value `y₀`. After this rewrite both sides of the conclusion are evaluated
-   at the same `y₀ : E`.
-
-2. Unfolding `chartChristoffel_def`, the `chartInvGramMatrix` factor on each
-   side becomes `chartInvGramMatrix (lifted/base metric) anchor manifold-point k l`
-   where the manifold point is `(extChartAt I anchor).symm y₀` — which is
-   `x'` on the cover side (by `extChartAt_left_inv` on the `coverChartAt`
-   source) and `proj x'` on the base side (by `extend_left_inv` on the
-   `chartAt H (proj α')` source, with the latter membership extracted from
-   the source-structure description `coverChartAt_source_eq`).
-   By `chartGramMatrix_lifted` the cover-side Gram matrix at `x'` agrees
-   entry-by-entry with the base-side Gram matrix at `proj x'`, so the two
-   matrices are equal (Matrix-extensionality) and hence their inverses
-   are equal (`congrArg`).
-
-3. For the `partialDeriv` factor, the inner factor `chartGramOnE` on each
-   side is a function `E → ℝ`. We show these two functions are eventually
-   equal at `y₀` (`=ᶠ[𝓝 y₀]`) by producing an open neighbourhood of `y₀` on
-   which the pointwise identity holds — concretely, the neighbourhood is
-   carved out by openness of two preimages:
-     (a) `(extChartAt I α').symm ⁻¹' (chartAt H α').source` (open by
-          continuity of the inverse on its source),
-     (b) `(extChartAt I (proj α')).symm ⁻¹' (localSection α').target`
-          (open by continuity of the base-side chart inverse plus openness
-          of the local-section target).
-   On their intersection, the conjugacy identifies the cover-side chart
-   inverse with `(localSection α').symm` composed with the base-side chart
-   inverse, and `proj ((localSection α').symm w) = w` for `w` in the
-   local-section target (via `localSection`-vs-`proj` agreement). The
-   pointwise Gram-matrix identity then follows from `chartGramMatrix_lifted`
-   applied at the appropriate cover-side point.
-   `Filter.EventuallyEq.fderiv_eq` then propagates the equality of
-   functions to equality of their Fréchet derivatives at `y₀`, hence
-   to equality of `partialDeriv` (which is `fderiv` applied to the model
-   basis vector). -/
 theorem chartChristoffel_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -457,24 +343,6 @@ theorem chartChristoffel_lifted
     rw [Filter.EventuallyEq.fderiv_eq (hGramOnE_eventuallyEq i j)]
   rw [hP_ij_lj, hP_ji_li, hP_lij]
 
-/-- **`chartChristoffelContraction` is natural under universal-cover projection.**
-
-For any chart anchor `α' : UC M`, vectors `v w : E`, and a cover-point
-`x' ∈ (chartAt H α').source`, the chart-coordinate Christoffel
-contraction of the lifted metric on the universal cover, evaluated at
-the chart coordinate of `x'`, equals the chart-coordinate Christoffel
-contraction of the base metric, evaluated at the chart coordinate of
-`proj x'` in the base chart at `proj α'`.
-
-Proof. Unfolding both sides via `chartChristoffelContraction_def`, each is
-an inner triple sum
-`∑_k (∑_{i, j} Γ^k_{ij}(·, ·)(y) · v^i · w^j) • e_k`
-with the same outer index set, the same coordinate factors `chartCoord i v`,
-`chartCoord j w`, and the same model basis vectors `chartModelBasis E k`.
-The Christoffel-symbol factor agrees pointwise by `chartChristoffel_lifted`,
-once we rewrite the base-side evaluation point `extChartAt I (proj α') (proj x')`
-back to `extChartAt I α' x'` via `extChartAt_proj_eq`. The conclusion then
-follows by `Finset.sum_congr` applied three times. -/
 theorem chartChristoffelContraction_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -503,21 +371,6 @@ theorem chartChristoffelContraction_lifted
   intro j _
   rw [chartChristoffel_lifted (I := I) (M := M) g α' x' hx' i j k]
 
-/-- **Eventually-equal form of `chartChristoffel_lifted`.**
-
-For any chart anchor `α' : UC M` and any cover-point `x' ∈ (chartAt H α').source`,
-the cover-side chart-Christoffel function `y ↦ Γ^k_{ij}(liftedMetric g, α', y)`
-agrees with the base-side function `y ↦ Γ^k_{ij}(g, proj α', y)` on a
-neighbourhood of `y₀ := extChartAt I α' x'`.
-
-Proof. The neighborhood is
-`(extChartAt I α').target ∩ (extChartAt I α').symm ⁻¹' (chartAt H α').source`.
-On this set, every point `y` corresponds to a manifold point
-`x'_y := (extChartAt I α').symm y` lying in `(chartAt H α').source`, and we
-have `extChartAt I α' x'_y = y`. Applying `chartChristoffel_lifted` at `x'_y`
-gives the cover-side Christoffel at `y` equal to the base-side Christoffel at
-`extChartAt I (proj α') (proj x'_y) = extChartAt I α' x'_y = y`
-(the latter via `extChartAt_proj_eq`). -/
 lemma chartChristoffel_lifted_eventuallyEq
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -568,20 +421,6 @@ lemma chartChristoffel_lifted_eventuallyEq
   rw [hExt_x'_y, hExt_proj_x'_y, hExt_x'_y] at hLifted
   exact hLifted
 
-/-- **`chartRiemannTensor` is natural under universal-cover projection.**
-
-For any chart anchor `α' : UC M`, indices `i j k l`, and cover-point
-`x' ∈ (chartAt H α').source`, the chart-coordinate Riemann curvature
-tensor of the lifted metric at the chart-coordinate of `x'` equals the
-chart-coordinate Riemann curvature tensor of the base metric at the
-chart-coordinate of `proj x'` in the base chart at `proj α'`.
-
-Proof outline. Unfold `chartRiemannTensor_def` on both sides. The formula
-is a sum of two `partialDeriv`-of-`chartChristoffel` terms and a finite
-sum of Christoffel products. The first two factors agree at `y₀` by
-`Filter.EventuallyEq.fderiv_eq` applied to the eventually-equal form of
-`chartChristoffel` (`chartChristoffel_lifted_eventuallyEq`); the product
-terms agree pointwise at `y₀` by `chartChristoffel_lifted`. -/
 theorem chartRiemannTensor_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)
@@ -646,17 +485,6 @@ theorem chartRiemannTensor_lifted
   intro m _
   rw [hChristAt j m l, hChristAt i k m, hChristAt k m l, hChristAt i j m]
 
-/-- **`chartRicciTensor` is natural under universal-cover projection.**
-
-For any chart anchor `α' : UC M`, lower indices `i k`, and cover-point
-`x' ∈ (chartAt H α').source`, the chart-coordinate Ricci tensor of the
-lifted metric at the chart-coordinate of `x'` equals the chart-coordinate
-Ricci tensor of the base metric at the chart-coordinate of `proj x'` in
-the base chart at `proj α'`.
-
-Proof. Unfold `chartRicciTensor_def` on both sides (a finite sum over `j`
-of `chartRiemannTensor` entries) and apply `chartRiemannTensor_lifted`
-term-by-term. -/
 theorem chartRicciTensor_lifted
     (g : SmoothRiemannianMetric I M)
     (α' : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover M)

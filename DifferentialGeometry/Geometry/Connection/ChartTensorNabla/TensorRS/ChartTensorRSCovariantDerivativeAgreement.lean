@@ -3,33 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.ChartTensor0SCovariantDerivativeAgreementSucc
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 
-/-!
-# Agreement of the chart-frame `(r, s)`-tensor covariant derivative with the
-abstract bundled one
-
-Given a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model
-`I`, a chart-centre `α : M`, a smooth `(r, s)`-tensor section `T`, and a
-smooth tangent vector field `X`, this file proves that the chart-frame
-`(r, s)`-tensor covariant derivative at a point `b` of the chart-α
-Levi-Civita good set agrees with the bundled `(r, s)`-tensor covariant
-derivative built from the Levi-Civita connection.
-
-The proof reduces to the agreement of the `(0, r)` and `(0, s)`-tensor
-covariant derivatives (Layer B), the curry-factorisation of the
-`(r, s)`-intrinsic chart Fréchet derivative through the `(0, s)`-tensor
-partial evaluation (D.3.a), and the chart-frame identity for the chart
-parallel extension on `(0, r)`-tensor bundles (D.2). The slot-substitution
-on the input side cancels against the chart-parallel-extension contribution
-of the `(0, r)`-bundle covariant derivative; the slot-substitution on the
-output side is identified slot-by-slot with the `(0, s)`-bundle Christoffel
-correction of the partial evaluation.
-
-## Main results
-
-* `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet` — the headline agreement,
-  for smooth `Cₛ^∞` sections, at a chart-α Levi-Civita good-set point `b`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -56,10 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- Manifold-differentiability of the partial evaluation
-`tensorPartialEval r s T (chartTensor0SParallelExtend r α b α_input)` at the
-basepoint `b`, given pointwise differentiability of `T` and good-set
-membership. -/
 private lemma tensorSectionMDiffAt_tensorPartialEval
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -95,8 +64,6 @@ private lemma tensorSectionMDiffAt_tensorPartialEval
     (v := fun y : M => chartTensor0SParallelExtend (I := I) r α b α_input y)
     hT_at hW_at
 
-/-- On the chart-α trivialisation base set at `b`, the chart-parallel extension
-of `α_input` evaluated at `b` itself equals `α_input`. -/
 private lemma chartTensor0SParallelExtend_at_self
     (r : ℕ) (α : M) {b : M}
     (hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -116,10 +83,6 @@ private lemma chartTensor0SParallelExtend_at_self
       (fun y : M => Tensor0SSpace r I y) α).symmL_continuousLinearMapAt
     (R := ℝ) hb_base_tensor α_input
 
-/-- The `(0, r)`-slot-`k` Christoffel correction of the chart-parallel
-extension of `α_input` at `b`, viewed as an element of `Tensor0SSpace r I b`,
-equals (up to underlying-CMLM evaluation) the value
-`tensorSlotSubstCLM r b (tangentSlotCLM r k Φ) α_input`. -/
 private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
     (r : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -144,9 +107,6 @@ private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
       α_input m]
   rfl
 
-/-- The composition `T b ∘ (chartTensor0SSlotCorrection r g α w X b k)`,
-where `w` is the chart-parallel extension of `α_input`, equals
-`chartTensorRSInputSlotCorrection r s g α T X b k` applied to `α_input`. -/
 private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -164,10 +124,6 @@ private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
   unfold chartTensorRSInputSlotCorrection
   rfl
 
-/-- On the chart-α trivialisation base set, the `(0, s)`-slot-`l` Christoffel
-correction of the partial evaluation, evaluated at a tuple `m`, equals the
-value at `m` of the `(r, s)`-output-slot-`l` correction of `T` at `b` applied
-to `α_input`. -/
 private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -202,18 +158,6 @@ private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlot
     α_input m]
   rfl
 
-/-- The chart-frame `(r, s)`-tensor covariant derivative
-`chartTensorRSCovariantDerivative r s g α T X` agrees, at any point `b` of the
-chart-`α` Levi-Civita good set `chartLeviCivitaGoodSet α`, with the bundled
-`(r, s)`-tensor covariant derivative `tensorRSCovariantDerivative` of the
-Levi-Civita connection `LeviCivita g`.
-
-Here `g` is a smooth Riemannian metric, `α : M` is the chart centre, `T` is a
-smooth `Cₛ^∞` `(r, s)`-tensor section, and `X` is a smooth `Cₛ^∞` tangent
-vector field. The good-set membership `hb : b ∈ chartLeviCivitaGoodSet α` is a
-genuine validity-domain hypothesis: it places `b` in the chart-`α`
-trivialisation base set and the interior of the chart target, where the
-chart-frame construction is defined and differentiable. -/
 theorem chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T :

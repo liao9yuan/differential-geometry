@@ -7,17 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Data.Nat.Choose.Bounds
 
-/-!
-# Higher-order chain rule for `W^{k,p}` under a smooth bounded diffeomorphism
-
-For `u ∈ W^{k,p}(Ω')` with compact support strictly inside `Ω'`, and a
-smooth bounded diffeomorphism `Φ : Ω → Ω'` (in the sense of
-`SmoothDiffeoBounded`), the composition `u ∘ Φ` lies in `W^{k,p}(Ω)`.
-
-The proof proceeds by smooth-density approximation of `u` and Banach
-sequential completeness of `W^{k,p}`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function
@@ -32,9 +21,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- For a smooth function `f`, the absolute value of the iterated classical
-partial derivative along a multi-index `β` of order `j` is bounded above by
-the operator norm of the `j`-th iterated Fréchet derivative. -/
 theorem norm_iterClassicalPartial_le_iteratedFDeriv :
     ∀ (j : ℕ) (β : Fin j → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ x : E,
@@ -62,8 +48,6 @@ theorem norm_iterClassicalPartial_le_iteratedFDeriv :
         norm_iteratedFDeriv_partial_le (d := d) (η := f) hf (β 0) j x
       exact h_ih.trans h_step
 
-/-- The chosen weak partial of a smooth function `ψ ∈ W^{1,p}(Ω)` agrees
-almost everywhere on `Ω` with the classical partial. -/
 private theorem chosenWeakPartial_smooth_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -88,7 +72,6 @@ private theorem chosenWeakPartial_smooth_ae
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_loc h_classical_loc
 
-/-- For smooth, compactly supported `ψ` with `tsupport ψ ⊆ Ω`, `ψ ∈ MemWkp k p Ω`. -/
 private theorem MemWkp_of_smooth_compactSupport_local
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -136,8 +119,6 @@ private theorem MemWkp_of_smooth_compactSupport_local
       have h_ih_classical := ih h_classical_smooth h_classical_cpt h_classical_supp
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
-/-- For smooth, compactly supported `ψ` with `tsupport ψ ⊆ Ω`, the iterated weak
-partial agrees almost everywhere on `Ω` with the iterated classical partial. -/
 private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
@@ -176,9 +157,6 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
-/-- For a smooth + compactly supported function `η` and a fixed natural number
-`k`, the iterated derivatives of `η` up to order `k` are uniformly bounded
-on all of `E`. -/
 lemma exists_iter_deriv_bound_of_smooth_compactSupport
     {η : E → ℝ} (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_cpt : HasCompactSupport η) (k : ℕ) :
@@ -221,9 +199,6 @@ lemma exists_iter_deriv_bound_of_smooth_compactSupport
   · intro i hi y
     exact (hM_spec i hi y).trans (hMη_ge i hi)
 
-/-- For `ψ` smooth + compactly supported with `tsupport ψ ⊆ Ωtarget`, there
-exists a smooth cutoff `η` with `tsupport η ⊆ Ωsource` such that
-`η · (ψ ∘ Φ.toFun)` agrees with `ψ ∘ Φ.toFun` on all of `Ωsource`. -/
 private lemma exists_cutoff_for_comp
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget) (hΩ_open : IsOpen Ωsource)
@@ -265,8 +240,6 @@ private lemma exists_cutoff_for_comp
       image_eq_zero_of_notMem_tsupport h_φx_not_Ktarget
     rw [hψ_zero, mul_zero]
 
-/-- For ψ smooth + compactly supported with `tsupport ψ ⊆ Ωtarget`, the
-composition `ψ ∘ Φ.toFun` lies in `MemWkp k p Ωsource`. -/
 private theorem comp_smooth_compactSupport_memWkp
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget) (hΩ_open : IsOpen Ωsource)
@@ -294,7 +267,6 @@ private theorem comp_smooth_compactSupport_memWkp
     rw [h_eq_on_Ω x hx]
   exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr hg_mem
 
-/-- Pointwise sum form of the iterated chain-rule bound for `ψ ∘ Φ.toFun`. -/
 private lemma norm_iteratedFDeriv_comp_toFun_le_sum
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget)
@@ -319,9 +291,6 @@ private lemma norm_iteratedFDeriv_comp_toFun_le_sum
   rw [h_rearrange] at h
   exact h
 
-/-- Pointwise iterated-derivative bound for the cutoff product
-`η · (ψ ∘ Φ.toFun)`. The bound on the right-hand side is uniform in `j`
-provided `j ≤ k`, since `D ^ (j-i) ≤ D ^ k` and `(j-i)! ≤ k!`. -/
 private lemma norm_iteratedFDeriv_cutoff_comp_le
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget)
@@ -487,8 +456,6 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
     nlinarith
   exact h_mul.trans (h_sum_le.trans (h_factor_choose_le.trans h_align))
 
-/-- Pointwise bound: any vector in `EuclideanSpace ℝ (Fin d)` has
-`|v i| ≤ ‖v‖` (since `‖v‖² = Σ |v i|²`). -/
 private lemma euclidean_coord_le_norm
     (v : EuclideanSpace ℝ (Fin d)) (i : Fin d) :
     |v i| ≤ ‖v‖ := by
@@ -505,8 +472,6 @@ private lemma euclidean_coord_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq hv_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sq
 
-/-- The basis expansion bound: for a continuous multilinear `f` on `EuclideanSpace`,
-`‖f‖ ≤ Σ_β |f (e_β)|`, where `e_β = (single (β 0) 1, ..., single (β (n-1)) 1)`. -/
 private lemma continuousMultilinearMap_norm_le_sum_basis
     {n : ℕ}
     (f : ContinuousMultilinearMap ℝ
@@ -581,8 +546,6 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
   rw [h_factor]
   exact le_of_eq (mul_comm _ _)
 
-/-- Applied to `iteratedFDeriv ℝ n ψ y`: the operator norm is bounded by
-`Σ_β |iteratedFDeriv ℝ n ψ y (e_β)|`. -/
 private lemma norm_iteratedFDeriv_le_sum_basis
     (n : ℕ) {ψ : E → ℝ} (y : E) :
     ‖iteratedFDeriv ℝ n ψ y‖ ≤
@@ -591,10 +554,6 @@ private lemma norm_iteratedFDeriv_le_sum_basis
           (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| :=
   continuousMultilinearMap_norm_le_sum_basis (d := d) (iteratedFDeriv ℝ n ψ y)
 
-/-- Generalised induction step: `iteratedFDeriv ℝ n` of a CLM-valued function
-`g : E → CLM(F, ℝ)`, evaluated at a tuple of basis vectors of `EuclideanSpace`,
-factors through `iteratedFDeriv ℝ n` of the real-valued function
-`y ↦ g(y)(v)`. -/
 private lemma iteratedFDeriv_clm_apply_basis
     {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : E → F →L[ℝ] ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -610,8 +569,6 @@ private lemma iteratedFDeriv_clm_apply_basis
     hg (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤))
   exact h.symm
 
-/-- Core identity: for smooth `f`, the iteratedFDeriv evaluated at standard basis
-vectors equals `iterClassicalPartial` along the reversed index. -/
 private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
     ∀ (n : ℕ) (β : Fin n → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ y : E,
@@ -655,8 +612,6 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
         rw [Fin.rev_zero]
       rw [h_index_eq, h_first_eq]
 
-/-- Combined: for smooth `f`, `‖iteratedFDeriv ℝ n f y‖` is bounded by the
-sum of `|iterClassicalPartial n β f y|` over multi-indices. -/
 private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f) (y : E) :
     ‖iteratedFDeriv ℝ n f y‖ ≤
@@ -702,7 +657,6 @@ private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
   rw [h_equiv] at h1
   exact h1
 
-/-- L^p version of the bound `‖iteratedFDeriv n f y‖ ≤ Σ_β |iterClassicalPartial n β f y|`. -/
 private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
     {f : E → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -810,7 +764,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Pointwise auxiliary used in the `L^p` change-of-variables bound. -/
 private lemma jacobian_lower_pointwise_bound
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω') {q : ℝ}
@@ -824,7 +777,6 @@ private lemma jacobian_lower_pointwise_bound
     ENNReal.ofReal_le_ofReal (Φ.jacobian_lower x hx)
   exact mul_le_mul_of_nonneg_right h_le (zero_le _)
 
-/-- The `lintegral` form of the change-of-variables `L^p` bound. -/
 private lemma lintegral_rpow_enorm_comp_le
     {p : ℝ≥0∞}
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -853,9 +805,6 @@ private lemma lintegral_rpow_enorm_comp_le
   have hchg := Φ.lintegral_image_eq hΩ (fun y => ‖f y‖ₑ ^ q)
   rw [← hchg]
 
-/-- **Quantitative L^p change-of-variables bound**: for `1 ≤ p < ∞`,
-`eLpNorm (f ∘ Φ.toFun) p (vol.restrict Ω) ≤ K_chg · eLpNorm f p (vol.restrict Ω')`,
-where `K_chg = (1 / Φ.jacobian_lower_bound) ^ (1 / p.toReal)`. -/
 theorem eLpNorm_comp_toFun_le_const
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -916,8 +865,6 @@ theorem eLpNorm_comp_toFun_le_const
         (by positivity : (0 : ℝ) < 1 / Φ.jacobian_lower_bound)] at h_pow_le
   exact h_pow_le
 
-/-- For any open `Ω`, two smooth functions agreeing on `Ω` have the same
-iterated classical partials at every point of `Ω`. -/
 private lemma iterClassicalPartial_eqOn_of_eqOn
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {g h : E → ℝ},
@@ -955,9 +902,6 @@ private lemma iterClassicalPartial_eqOn_of_eqOn
       exact ih (fun i : Fin j => β i.succ)
         h_inner_g_smooth h_inner_h_smooth h_partial_eqOn hx
 
-/-- For smooth `ψ` compactly supported with `tsupport ψ ⊆ Ω'`, the iterated
-weak partial of `ψ ∘ Φ` on `Ω` agrees a.e. with the iterated classical
-partial of `ψ ∘ Φ`. -/
 private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -1007,8 +951,6 @@ private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
   intro x hx
   exact h_classical_eqOn hx
 
-/-- Pointwise bound of `‖iterClassicalPartial j β (ψ ∘ Φ) x‖` by an explicit
-constant times `Σ_{i ≤ k} ‖iteratedFDeriv ℝ i ψ (Φ x)‖`, valid for `j ≤ k`. -/
 private lemma norm_iterClassicalPartial_comp_le_uniform
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω')
@@ -1061,7 +1003,6 @@ private lemma norm_iterClassicalPartial_comp_le_uniform
     exact mul_nonneg h_kf_nn (pow_nonneg hD_nonneg k)
   exact mul_le_mul_of_nonneg_left h_inner_sum_le h_outer_nn
 
-/-- `eLpNorm`-bound for the iterated weak partial of the composition. -/
 private lemma eLpNorm_iterWeakPartial_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -1136,8 +1077,6 @@ private lemma eLpNorm_iterWeakPartial_comp_le
   rw [h_pointwise_eq]
   exact eLpNorm_sum_le h_strong_meas hp_one
 
-/-- For smooth `ψ`, the `L^p`-norm over `Ω` of `‖iteratedFDeriv n ψ ∘ Φ‖` is
-bounded by `K_chg` times the `L^p`-norm of `‖iteratedFDeriv n ψ‖` over `Ω'`. -/
 private lemma eLpNorm_iteratedFDeriv_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -1151,8 +1090,6 @@ private lemma eLpNorm_iteratedFDeriv_comp_le
   eLpNorm_comp_toFun_le_const (d := d) hp_one hp_top hΩ Φ
     (fun y => ‖iteratedFDeriv ℝ n ψ y‖)
 
-/-- The "geometric" constant for the chain rule: combines factorials, the
-derivative bound, the Jacobian lower bound, and a count of multi-indices. -/
 noncomputable def wkpComp_const
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω') (k : ℕ) (p : ℝ≥0∞) : ℝ :=
@@ -1217,7 +1154,6 @@ private lemma wkpComp_const_pos
   have h_k1_pos : (0 : ℝ) < ((k + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.zero_lt_succ k
   positivity
 
-/-- **Step S1**: `wkpNorm`-bound for smooth compactly-supported compositions. -/
 theorem wkpNorm_comp_smooth_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω')
@@ -1361,9 +1297,6 @@ theorem wkpNorm_comp_smooth_le
   calc A * W = A * 1 * W := by ring
     _ ≤ A * ((k + 1 : ℕ) : ℝ≥0∞) * W := by gcongr
 
-/-- **Headline**: For a smooth bounded diffeomorphism `Φ : Ω → Ω'`, and a
-function `u ∈ W^{k,p}(Ω')` with compact support `tsupport u ⊆ Ω'`, the
-composition `u ∘ Φ` lies in `W^{k,p}(Ω)`. -/
 theorem MemWkp.comp_smoothDiffeoBounded
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω) (hΩ' : IsOpen Ω')

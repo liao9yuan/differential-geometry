@@ -10,29 +10,6 @@ import DifferentialGeometry.External.DeGiorgi.LpFunctionToolkit
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-/-!
-# Rellich-Kondrachov compact embedding on a closed Riemannian manifold
-
-Infrastructure for the Rellich-Kondrachov compact embedding
-`H^{k+1}(M) ↪ L^p(M, μ_g)` on a closed (compact, boundaryless) smooth
-Riemannian manifold `(M, g)`.
-
-This file develops:
-
-* The key reduction
-  `riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn`: for any
-  measurable `F : M → ℝ≥0∞` supported in the chart-α source, the
-  `μ_g`-integral of `F` equals its `chartLocalMeasure g α`-integral. This
-  follows from the partition-of-unity decomposition of `μ_g` together with
-  the chart-overlap equality of chart-local measures.
-* The pull-back operation `pullbackToM` taking a function on the chart-target
-  Euclidean space to a function on `M`, supported in the chart source.
-* Compatibility of `pullbackToM` with `chartPushed`: if `ρ` is a smooth
-  partition of unity subordinate to the chart family, then
-  `pullbackToM I α (chartPushed ρ α u) = ρ_α · u`.
-* Linearity of `pullbackToM` in its function argument.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -187,8 +164,6 @@ theorem riemannianMeasure_lintegral_eq_chartLocalMeasure_of_supportIn
     exact ((DifferentialGeometry.Integral.Measure.measurable_ofReal_pou_weight
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β)).mul hF
 
-/-- Pull-back of an `EuclideanSpace`-valued function `w` to `M` via the chart at `α`.
-Set to zero outside the chart source. -/
 def pullbackToM
     (I : ModelWithCorners ℝ E H) (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) : M → ℝ := by
@@ -198,7 +173,6 @@ def pullbackToM
       w (toEuclidean (extChartAt I α x))
     else 0
 
-/-- On the chart source, the pull-back of a function `w` evaluates as `w` composed with the chart. -/
 lemma pullbackToM_apply_of_mem (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -207,7 +181,6 @@ lemma pullbackToM_apply_of_mem (α : M)
   classical
   unfold pullbackToM; simp [hx]
 
-/-- Outside the chart source, the pull-back of a function is zero. -/
 lemma pullbackToM_apply_of_notMem (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
@@ -215,7 +188,6 @@ lemma pullbackToM_apply_of_notMem (α : M)
   classical
   unfold pullbackToM; simp [hx]
 
-/-- The pull-back of a function is supported in the chart source. -/
 lemma pullbackToM_support_subset_source (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     Function.support (pullbackToM (M := M) I α w) ⊆ (chartAt H α).source := by
@@ -224,14 +196,12 @@ lemma pullbackToM_support_subset_source (α : M)
   apply hx
   exact pullbackToM_apply_of_notMem (M := M) (I := I) α w h
 
-/-- Outside the chart source, the pull-back is zero. -/
 lemma pullbackToM_zero_of_notMem_source (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
     pullbackToM (M := M) I α w x = 0 :=
   pullbackToM_apply_of_notMem (M := M) (I := I) α w hx
 
-/-- The pull-back is linear in `w`: linearity for addition. -/
 lemma pullbackToM_add (α : M)
     (w₁ w₂ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     pullbackToM (M := M) I α (fun y => w₁ y + w₂ y) =
@@ -244,7 +214,6 @@ lemma pullbackToM_add (α : M)
   · simp [hx]
   · simp [hx]
 
-/-- The pull-back is linear in `w`: linearity for subtraction. -/
 lemma pullbackToM_sub (α : M)
     (w₁ w₂ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     pullbackToM (M := M) I α (fun y => w₁ y - w₂ y) =
@@ -257,8 +226,6 @@ lemma pullbackToM_sub (α : M)
   · simp [hx]
   · simp [hx]
 
-/-- The pull-back of the chart-pushed function for a subordinate POU recovers
-the POU-weighted function. -/
 lemma pullbackToM_chartPushed
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))

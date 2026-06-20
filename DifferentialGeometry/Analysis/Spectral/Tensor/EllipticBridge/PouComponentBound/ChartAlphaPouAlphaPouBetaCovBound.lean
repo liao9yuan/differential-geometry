@@ -1,76 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.ChartAlphaReprL2BoundOnPouTsupport
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 
-/-!
-# Per-pair `(α, β)` chart change-of-variables bound for the partition-of-unity-
-# localised chart-`α` integrand
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional real
-inner-product space `E`, fixed tensor ranks `(r, s)`, two chart base points
-`α, β : M`, and a fixed component multi-index pair `(Idx, Jdx)`, this file
-ships the headline bound
-
-```
-∫⁻ y in chartTargetEuclid α,
-    ENNReal.ofReal
-      (POU(α)((extChartAt α).symm (toEuclidean.symm y)) *
-        (tensorChartComponentPou g r s T β Idx Jdx
-          ((extChartAt α).symm (toEuclidean.symm y))) ^ 2)
-    ∂(volume : Measure EuclN) ≤
-  ENNReal.ofReal K *
-    (wkpNorm 0 2 (tensorChartComp g r s T β Idx Jdx)
-        (chartTargetEuclid β)) ^ 2
-```
-
-with `K ≥ 0` depending on `α, β` but independent of the tensor section `T`.
-
-## Strategy
-
-The integrand carries the partition-of-unity weight `POU(α)` (linear, not
-squared) and the chart-`β` partition-of-unity-weighted raw component
-`tensorChartComponentPou g r s T β Idx Jdx`. The integrand therefore vanishes
-on the chart-`α` Euclidean target unless
-
-* `POU(α)((extChartAt α).symm (toEuclidean.symm y)) > 0`, i.e.
-  `(extChartAt α).symm (toEuclidean.symm y) ∈ tsupport POU(α)`, and
-* `tensorChartComponentPou g r s T β Idx Jdx ((extChartAt α).symm
-  (toEuclidean.symm y)) ≠ 0`, in particular
-  `POU(β)((extChartAt α).symm (toEuclidean.symm y)) > 0`, i.e.
-  `(extChartAt α).symm (toEuclidean.symm y) ∈ tsupport POU(β)`.
-
-Both conditions force the chart-`α` point to lie in the **compact**
-intersection `K := tsupport POU(α) ∩ tsupport POU(β)`, which is contained in
-both chart sources. The strict chart-transition diffeomorphism constructor
-realises the chart transition `chartTransitionEuclid α β` on an open
-neighbourhood `Ω_αβ ⊆ chartTargetEuclid α` of the chart-`α` image of `K` by a
-bounded diffeomorphism `Φ` with `Φ.toFun = chartTransitionEuclid α β` on
-`Ω_αβ`. The integrand vanishes on `chartTargetEuclid α \ Ω_αβ`, so the
-integral reduces to one over `Ω_αβ`.
-
-On `Ω_αβ`, the chart-`β` partition-of-unity-weighted component equals the
-chart-`β` component map applied to the chart transition,
-`tensorChartComponentPou g r s T β Idx Jdx (symm_α y) =
-  tensorChartComp g r s T β Idx Jdx (chartTransitionEuclid α β y)`. Dropping
-the factor `POU(α) ≤ 1` and recognising the L² norm yields
-
-```
-LHS ≤ (eLpNorm (fun y => tensorChartComp g r s T β Idx Jdx (Φ.toFun y)) 2
-        (volume.restrict Ω_αβ)) ^ 2.
-```
-
-The L² change-of-variables bound `Φ.eLpNorm_comp_toFun_le_const` for the per-
-order bounded diffeomorphism converts this to a constant times
-`(eLpNorm (tensorChartComp g r s T β Idx Jdx) 2 (volume.restrict Ω_βα))²`.
-Monotonicity in the measure extends the chart-`β` integration domain from
-`Ω_βα ⊆ chartTargetEuclid β` to all of `chartTargetEuclid β`, and
-`wkpNorm 0 2 _ Ω = eLpNorm _ 2 (volume.restrict Ω)` delivers the headline.
-
-## Main result
-
-* `chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm` — the per-pair `(α, β)`
-  chart change-of-variables bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -105,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 private local instance : MeasurableSpace E := borel E
@@ -113,16 +42,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The intersection of two partition-of-unity tsupports is compact on a
-compact manifold. -/
 private lemma pouInter_isCompact (α β : M) :
     IsCompact
       (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
        tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact.inter_right (isClosed_tsupport _)
 
-/-- The intersection of two partition-of-unity tsupports is contained in the
-chart-`α` source. -/
 private lemma pouInter_subset_chartSourceα (α β : M) :
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
      tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
@@ -130,8 +55,6 @@ private lemma pouInter_subset_chartSourceα (α β : M) :
   intro x hx
   exact (chartAtlasPOU_isSubordinate I M) α hx.1
 
-/-- The intersection of two partition-of-unity tsupports is contained in the
-chart-`β` source. -/
 private lemma pouInter_subset_chartSourceβ (α β : M) :
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
      tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
@@ -139,8 +62,6 @@ private lemma pouInter_subset_chartSourceβ (α β : M) :
   intro x hx
   exact (chartAtlasPOU_isSubordinate I M) β hx.2
 
-/-- The squared `eLpNorm 2` of a real-valued function as an integral of the
-ENNReal-coerced squared norm. -/
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
@@ -158,42 +79,10 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
-/-- For a real number `r`, `(ENNReal.ofReal (r^2)) = (‖r‖ₑ : ℝ≥0∞) ^ 2`. -/
 private lemma ofReal_sq_eq_enorm_sq (r : ℝ) :
     ENNReal.ofReal (r ^ 2) = (‖r‖ₑ : ℝ≥0∞) ^ 2 := by
   rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _), sq_abs]
 
-/-- **Per-pair `(α, β)` chart change-of-variables bound for the
-partition-of-unity-localised chart-`α` integrand.**
-
-For any closed Riemannian manifold `(M, g)`, fixed tensor ranks `(r, s)`, two
-chart base points `α, β : M`, and a fixed component multi-index pair
-`(Idx, Jdx)`, there exists a non-negative real constant `K` (depending on
-`α, β` but independent of the tensor section) such that for every smooth
-compactly-supported `(r, s)`-tensor section `T : SmoothCcTensor g r s`,
-
-```
-∫⁻ y in chartTargetEuclid α,
-    ENNReal.ofReal
-      (POU(α)((extChartAt α).symm (toEuclidean.symm y)) *
-        (tensorChartComponentPou g r s T β Idx Jdx
-          ((extChartAt α).symm (toEuclidean.symm y))) ^ 2)
-    ∂(volume : Measure EuclN) ≤
-  ENNReal.ofReal K *
-    (wkpNorm 0 2 (tensorChartComp g r s T β Idx Jdx)
-        (chartTargetEuclid β)) ^ 2.
-```
-
-The integrand carries the partition-of-unity weight `POU(α)` (linear, not
-squared), so the integrand's support on `chartTargetEuclid α` is the chart-`α`
-image of the (compact!) intersection of the two partition-of-unity tsupports.
-
-Strategy: build the chart-transition bounded diffeomorphism via
-`chartTransition_smoothDiffeoBoundedAtOrder_strict` on the compact set
-`K := tsupport POU(α) ∩ tsupport POU(β)`, drop the factor `POU(α) ≤ 1`,
-identify the chart-`α` integrand with `tensorChartComp β Idx Jdx ∘ Φ.toFun`
-on `Ω_αβ` (the open neighbourhood from the strict constructor), and apply
-the L² change-of-variables bound for the bounded diffeomorphism. -/
 theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

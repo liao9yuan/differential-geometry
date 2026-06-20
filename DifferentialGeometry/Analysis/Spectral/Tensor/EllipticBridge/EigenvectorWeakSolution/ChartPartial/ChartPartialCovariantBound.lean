@@ -5,61 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul
 
-/-!
-# A uniform `L²` bound for the chart covariant-derivative component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and a chart center
-`α : M`, the chart-coordinate covariant-derivative component formula
-(`covDerivComponent_eq_euclidPartial_add_lowerOrder`) has, as its left-hand
-side, the chart-frame scalar component, at a multi-index pair `(Idx, Jdx)`, of
-the chart-coordinate covariant derivative
-`chartTensorRSCovariantDerivative r s g α S.toSection (chartBasisVecFiber α m)`,
-re-trivialised through `continuousLinearMapAt`.
-
-This file ships **one** uniform `L²` estimate: a single non-negative constant
-that bounds, uniformly over every smooth compactly-supported `H¹` tensor
-section `S` and every multi-index pair `(Idx, Jdx)`, the sum over chart
-directions `m` of the `L²` norm — on the Euclidean chart target — of the
-**partition-of-unity-weighted** covariant-derivative component.
-
-The Euclidean chart target `chartTargetEuclid α` is not precompact, and the
-un-weighted chart-frame component does not decay at its boundary; its `L²` norm
-over the full chart target is generally `⊤`. Weighting by the chart-atlas
-partition-of-unity function `ρ_α := chartAtlasPOU I M α` cures this: `ρ_α` is
-compactly supported inside the chart source, so the weighted component is the
-chart push-forward of a compactly-supported manifold-side function and the
-reverse chart-push `L²` bridge applies.
-
-## The proof chain
-
-For `y` in the Euclidean chart target, set
-`b := (extChartAt I α).symm (toEuclidean.symm y)`; then `b` lies in the
-chart-`α` Levi-Civita good set. On the good set the `continuousLinearMapAt`-
-trivialised covariant-derivative value equals the inverse chart-twist of the
-model image of the abstract covariant derivative `tensorCovDerivAt` (via
-`triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel` and
-`tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`); the multi-index
-projection carries a uniform-in-`(Idx, Jdx)` operator-norm bound
-`chartComponentProjectionUniformBound r s`; and the single-direction
-inverse-twist norm is dominated by the square root of the sum over directions.
-
-With `0 ≤ ρ_α ≤ 1` the `ρ_α`-weighted Euclidean component is, on the chart
-target, the chart push-forward of the manifold-side function
-`b ↦ ρ_α(b) · √(∑ᵢ ‖chartRSTwistInv α b r s (toModel (∇S(b)(eᵢ' b)))‖²)`,
-scaled by the projection bound. The reverse chart-push `L²` bridge
-`eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset`
-transports the Euclidean `L²` norm onto the Riemannian-volume `L²` norm of that
-manifold-side function, which the verified unconditional input
-`exists_eLpNorm_chartPou_mul_sqrt_sum_chartRSTwistInv_cov_norm_sq_le_const_mul_h1Norm`
-bounds by a constant times the `H¹` seminorm of `S`. Summing the (finitely
-many, `m`-independent) bounds over the chart directions finishes the estimate.
-
-## Main result
-
-* `exists_const_sum_eLpNorm_pou_covDerivComponent_le_uniform` — the headline
-  uniform `L²` estimate, with an unconditional non-negative constant.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -93,11 +38,8 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Abbreviation for the Euclidean model space of the chart target. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For `y` in the Euclidean chart target, the chart base point lies in the
-chart-`α` Levi-Civita good set. -/
 private lemma chartBasePoint_mem_goodSet
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -110,8 +52,6 @@ private lemma chartBasePoint_mem_goodSet
     extChartAt_source]
   exact hsrc
 
-/-- The base set of the `(r, s)`-tensor trivialisation at `α` equals the
-chart-`α` source. -/
 private lemma tensorRS_baseSet_eq_chart_source (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -126,18 +66,10 @@ private lemma tensorRS_baseSet_eq_chart_source (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
-/-- The tangent-bundle trivialisation base set at `α` equals the chart-`α`
-source. -/
 private lemma tangent_baseSet_eq_chart_source (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
   rfl
 
-/-- **`C^∞` smoothness of the inverse-twisted covariant derivative on the chart
-source.** For a smooth compactly-supported `(r, s)`-tensor section `S` and a
-chart direction `i`, the function
-`b ↦ chartRSTwistInv α b r s (toModel (tensorCovDerivAt g r s S b
-(chartBasisVecFiber α i b)))`, valued in `TensorRSModel r s ℝ E`, is
-`ContMDiffOn ℝ ∞` on the chart-`α` source. -/
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -168,10 +100,6 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn
         (chartBasisVecFiber (I := I) α i b)) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hb_base]
 
-/-- The manifold-side weighted norm-sum function: the chart-atlas
-partition-of-unity weight at `α` times the square root of the sum, over chart
-directions, of the squared inverse-twist norm of the abstract covariant
-derivative of `S`. -/
 private noncomputable def covNormSumFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) : M → ℝ :=
@@ -184,8 +112,6 @@ private noncomputable def covNormSumFun
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
 
-/-- The squared inverse-twist norm sum, as a function of the base point, is
-`ContinuousOn` the chart-`α` source. -/
 private lemma covNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -209,10 +135,6 @@ private lemma covNormSqSum_continuousOn_chart_source
       g r s S α i).continuousOn
   exact (hcov.norm).pow 2
 
-/-- **Global continuity of the manifold-side weighted norm-sum function.** The
-weight `ρ_α` is globally continuous and compactly supported inside the chart
-source; the square-root norm sum is continuous on the chart source. Their
-product is therefore globally continuous. -/
 private lemma covNormSumFun_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -248,16 +170,12 @@ private lemma covNormSumFun_continuous
     hw_contOn.continuousAt ((chartAt H α).open_source.mem_nhds hx_src)
   exact hρ_contAt.smul hw_contAt
 
-/-- The manifold-side weighted norm-sum function is measurable. -/
 private lemma covNormSumFun_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
     Measurable (covNormSumFun (I := I) (M := M) g r s S α) :=
   (covNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
-/-- The topological support of the manifold-side weighted norm-sum function is
-contained in the topological support of the chart-atlas partition-of-unity
-weight at `α`. -/
 private lemma covNormSumFun_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -287,12 +205,6 @@ private lemma covNormSumFun_tsupport_subset
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2))
 
-/-- **The pointwise bound on the chart target.** Set
-`C_proj := chartComponentProjectionUniformBound r s`. For every `y`, the
-absolute value of the `ρ_α`-weighted chart-frame component of the
-chart-coordinate covariant derivative of `S` is bounded by
-`C_proj` times the chart push-forward of the manifold-side weighted norm-sum
-function `covNormSumFun g r s S α`. -/
 private lemma pou_covDerivComponent_le_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -451,10 +363,6 @@ private lemma pou_covDerivComponent_le_chartPushedRaw
       (covNormSumFun (I := I) (M := M) g r s S α) y
     rw [hcov_zero, mul_zero]
 
-/-- The per-direction Euclidean `L²` norm of the `ρ_α`-weighted chart-frame
-covariant-derivative component is bounded by a single non-negative constant —
-independent of `S`, the chart direction `m`, and the multi-index pair — times
-the `H¹` seminorm of `S`. -/
 private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)
@@ -579,22 +487,6 @@ private lemma exists_const_eLpNorm_pou_covDerivComponent_le_uniform
           ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
 
-/-- **A uniform `L²` bound for the chart covariant-derivative component.** For
-a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and a chart center
-`α : M`, there is a non-negative real constant `C` (depending only on
-`(g, r, s, α)`) such that for every smooth compactly-supported `H¹` tensor
-section `S : SmoothCcTensorH1 g r s` and every multi-index pair `(Idx, Jdx)`,
-the sum over chart directions `m` of the `L²(volume.restrict
-(chartTargetEuclid α))` norm of the partition-of-unity-weighted chart-frame
-component, at `(Idx, Jdx)`, of the chart-coordinate covariant derivative
-`chartTensorRSCovariantDerivative r s g α S.toSection (chartBasisVecFiber α m)`
-is bounded by `ENNReal.ofReal C` times the `H¹` seminorm of `S`.
-
-The chart-frame component is the left-hand side of the chart covariant-
-derivative component formula `covDerivComponent_eq_euclidPartial_add_lowerOrder`,
-weighted by the chart-atlas partition-of-unity function `ρ_α := chartAtlasPOU
-I M α` (whose Euclidean push-forward `chartPushedRaw I α ρ_α` is the weight).
-The constant `C` is independent of `S` and of `(Idx, Jdx)`. -/
 theorem exists_const_sum_eLpNorm_pou_covDerivComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)

@@ -6,29 +6,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
-/-!
-# Unconditional uniform op-norm bound for the chart-`(r, s)` fibre inverse map
-
-For a smooth tangent-bundle Riemannian metric `g` and any compact subset
-`K ⊆ (chartAt H α).source`, the family
-`(triv α).symmL ℝ b : TensorRSModel r s ℝ E →L[ℝ] TensorRSSpace r s I b`
-admits a uniform pointwise op-norm bound, without any chart-locality predicate.
-
-The proof combines:
-
-* Mathlib's `eventually_norm_symmL_trivializationAt_lt`, which under
-  `[IsContinuousRiemannianBundle ...]` gives local op-norm boundedness of the
-  inverse trivialisation-centered-at-`y₀` for `b` in a neighbourhood of `y₀`.
-* The `(r, s)`-bundle `IsContinuousRiemannianBundle` instance
-  `tensorRS_isContinuousRiemannianBundle`.
-* The factorisation
-  `(triv α).symmL ℝ b v = (triv y₀).symmL ℝ b ((coordChangeL (triv α) (triv y₀) b) v)`
-  on the intersection of `α` and `y₀` base sets.
-* Continuity of `b ↦ ‖coordChangeL (triv α) (triv y₀) b‖` on the chart
-  intersection (from the smoothness of the coordinate-change CLM).
-* A finite-cover argument over the compact `K`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -222,12 +199,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Unconditional uniform pointwise op-norm bound on the chart-`(r, s)` fibre
-inverse trivialisation over any compact subset of the chart-`α` source. No
-chart-locality predicate is required: the `(r, s)`-tensor bundle is a
-continuous Riemannian bundle (via the `tensorRS_isContinuousRiemannianBundle`
-instance), and Mathlib's `eventually_norm_symmL_trivializationAt_lt` provides
-the necessary local boundedness. -/
+
 theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)

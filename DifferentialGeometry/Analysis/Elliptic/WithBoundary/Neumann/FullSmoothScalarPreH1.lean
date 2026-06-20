@@ -9,46 +9,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Pre-Hilbert structure on full smooth scalar functions
-(with-boundary, half-space model, no support restriction)
-
-For a closed (compact, Hausdorff) smooth Riemannian manifold-with-boundary
-`(M, g)` modelled on the canonical Euclidean half-space
-`EuclideanHalfSpace n`, the space of *all* smooth real-valued functions on
-`M` (with no support restriction) carries a natural pre-Hilbert structure
-whose inner product mirrors the boundaryless case:
-
-  ⟨f, h⟩ := ∫ f · h dμ_g + ∫ g(grad f, grad h) dμ_g
-
-Unlike the interior-supported variant in
-`Analysis/Elliptic/WithBoundary/InteriorSmoothScalarPreH1.lean`, no
-support hypothesis is imposed. The intrinsic gradient `gradFun g f x` is
-not packaged here as a globally smooth tangent-bundle section (this is
-not generally available without an interior-support hypothesis on `f`),
-but the *pointwise* metric pairing
-`x ↦ g.inner x (gradFun g f x) (gradFun g h x)`
-is still globally continuous on `M` for any pair of smooth scalars
-`f, h : M → ℝ`. Continuity is provided chart-by-chart by
-`continuous_g_inner_gradFun_gradFun`, which expands the pairing through
-the chart-local within-formula for the gradient.
-
-On a closed (compact) manifold-with-boundary the Riemannian volume
-measure is finite, so the continuous integrand is integrable, and the
-two integrals defining the H¹ inner product are well-defined real
-numbers.
-
-This file packages a wrapper type `FullSmoothScalar g`, equips it with
-the standard `AddCommGroup` and `Module ℝ` structure, and installs the
-pre-inner-product space structure via `InnerProductSpace.Core`. The
-induced `SeminormedAddCommGroup` and `InnerProductSpace ℝ` instances
-follow from `InnerProductSpace.Core`.
-
-This shared structure underpins the full-scope Neumann variational
-Laplacian on a manifold-with-boundary (the natural variational space
-without trace constraint).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -75,30 +35,20 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
 
-/-- A smooth real-valued function on a half-space-modelled
-manifold-with-boundary `M`, packaged together with the Riemannian-metric
-parameter `g`. No support restriction is imposed.
-
-The metric `g` does not appear in the underlying data fields; its role
-is solely to make `FullSmoothScalar g` a different Lean type for each
-metric, so that downstream files can attach metric-dependent
-inner-product / norm instances cleanly. -/
 structure FullSmoothScalar (g : SmoothRiemannianMetric (I_half n) M) where
-  /-- The underlying function. -/
+  
   toFun : M → ℝ
-  /-- The function is smooth. -/
+  
   smooth : ContMDiff (I_half n) 𝓘(ℝ, ℝ) ∞ toFun
 
 namespace FullSmoothScalar
 
 variable {g : SmoothRiemannianMetric (I_half n) M}
 
-/-- Two `FullSmoothScalar` are equal if their underlying functions are equal. -/
 @[ext] theorem ext {f h : FullSmoothScalar g} (hfh : f.toFun = h.toFun) : f = h := by
   cases f; cases h; congr
 
@@ -159,7 +109,6 @@ instance : SMul ℝ (FullSmoothScalar g) where
 @[simp] lemma toFun_smul_apply (c : ℝ) (f : FullSmoothScalar g) (x : M) :
     (c • f).toFun x = c * f.toFun x := rfl
 
-/-- `FullSmoothScalar.toFun` is injective. -/
 lemma toFun_injective :
     Function.Injective (fun f : FullSmoothScalar g => f.toFun) := by
   intro f h hfh
@@ -203,8 +152,6 @@ instance : AddCommGroup (FullSmoothScalar g) :=
     toFun_nsmul
     toFun_zsmul
 
-/-- The natural additive monoid hom from `FullSmoothScalar g` to its
-underlying function space. -/
 def toFunAddHom : FullSmoothScalar g →+ (M → ℝ) where
   toFun := fun f => f.toFun
   map_zero' := toFun_zero
@@ -217,9 +164,6 @@ end FullSmoothScalar
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The pointwise gradient inner product
-`x ↦ g.inner x (gradFun g f x) (gradFun g h x)`
-is a continuous function on `M`. -/
 lemma FullSmoothScalar.continuous_inner_grad
     {g : SmoothRiemannianMetric (I_half n) M} (f h : FullSmoothScalar g) :
     Continuous (fun x : M =>
@@ -227,14 +171,11 @@ lemma FullSmoothScalar.continuous_inner_grad
         (gradFun (I := I_half n) g h.toFun x)) :=
   continuous_g_inner_gradFun_gradFun (n := n) (M := M) g f.smooth h.smooth
 
-/-- The pointwise product `x ↦ f.toFun x * h.toFun x` is continuous. -/
 lemma FullSmoothScalar.continuous_mul
     {g : SmoothRiemannianMetric (I_half n) M} (f h : FullSmoothScalar g) :
     Continuous (fun x : M => f.toFun x * h.toFun x) :=
   f.smooth.continuous.mul h.smooth.continuous
 
-/-- The product `f · h` is integrable against the Riemannian volume
-measure on a closed manifold-with-boundary. -/
 lemma FullSmoothScalar.integrable_mul
     {g : SmoothRiemannianMetric (I_half n) M} (f h : FullSmoothScalar g) :
     Integrable (fun x : M => f.toFun x * h.toFun x)
@@ -244,7 +185,6 @@ lemma FullSmoothScalar.integrable_mul
   exact (f.continuous_mul h).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The pointwise inner product of gradients is integrable. -/
 lemma FullSmoothScalar.integrable_inner_grad
     {g : SmoothRiemannianMetric (I_half n) M} (f h : FullSmoothScalar g) :
     Integrable (fun x : M =>
@@ -253,8 +193,6 @@ lemma FullSmoothScalar.integrable_inner_grad
       (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
   integrable_g_inner_gradFun_gradFun (n := n) (M := M) g f.smooth h.smooth
 
-/-- The H¹ inner product on full smooth scalars on a closed Riemannian
-manifold-with-boundary. -/
 def fullSmoothScalarH1Inner
     {g : SmoothRiemannianMetric (I_half n) M}
     (f h : FullSmoothScalar g) : ℝ :=
@@ -264,7 +202,6 @@ def fullSmoothScalarH1Inner
         (gradFun (I := I_half n) g h.toFun x)
       ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g))
 
-/-- Unfolding lemma. -/
 lemma fullSmoothScalarH1Inner_def
     {g : SmoothRiemannianMetric (I_half n) M} (f h : FullSmoothScalar g) :
     fullSmoothScalarH1Inner f h =
@@ -274,7 +211,6 @@ lemma fullSmoothScalarH1Inner_def
             (gradFun (I := I_half n) g h.toFun x)
           ∂(riemannianVolumeMeasure (I := I_half n) (M := M) g)) := rfl
 
-/-- The H¹ inner product is symmetric in its two arguments. -/
 lemma fullSmoothScalarH1Inner_symm
     {g : SmoothRiemannianMetric (I_half n) M} (f h : FullSmoothScalar g) :
     fullSmoothScalarH1Inner f h = fullSmoothScalarH1Inner h f := by
@@ -286,7 +222,6 @@ lemma fullSmoothScalarH1Inner_symm
     intro x
     exact g.symm x _ _
 
-/-- The L² self-integral of `f` is non-negative. -/
 lemma FullSmoothScalar.integral_mul_self_nonneg
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     0 ≤ ∫ x, f.toFun x * f.toFun x
@@ -295,8 +230,6 @@ lemma FullSmoothScalar.integral_mul_self_nonneg
   intro x
   exact mul_self_nonneg _
 
-/-- Pointwise non-negativity of the metric inner product on the
-diagonal. -/
 lemma SmoothRiemannianMetric_inner_self_nonneg
     (g : SmoothRiemannianMetric (I_half n) M) (x : M)
     (v : TangentSpace (I_half n) x) :
@@ -305,7 +238,6 @@ lemma SmoothRiemannianMetric_inner_self_nonneg
   · subst hv; simp [map_zero]
   · exact (g.pos x v hv).le
 
-/-- The Riemannian gradient self-integral is non-negative. -/
 lemma FullSmoothScalar.integral_inner_grad_self_nonneg
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     0 ≤ ∫ x, g.inner x (gradFun (I := I_half n) g f.toFun x)
@@ -315,15 +247,12 @@ lemma FullSmoothScalar.integral_inner_grad_self_nonneg
   intro x
   exact SmoothRiemannianMetric_inner_self_nonneg g x _
 
-/-- The H¹ self-pairing is non-negative. -/
 lemma fullSmoothScalarH1Inner_nonneg
     {g : SmoothRiemannianMetric (I_half n) M} (f : FullSmoothScalar g) :
     0 ≤ fullSmoothScalarH1Inner f f := by
   unfold fullSmoothScalarH1Inner
   exact add_nonneg f.integral_mul_self_nonneg f.integral_inner_grad_self_nonneg
 
-/-- Pointwise linearity of `gradFun`: gradient of a sum equals sum of
-gradients. -/
 lemma FullSmoothScalar.gradFun_add_apply
     {g : SmoothRiemannianMetric (I_half n) M}
     (f₁ f₂ : FullSmoothScalar g) (x : M) :
@@ -336,7 +265,6 @@ lemma FullSmoothScalar.gradFun_add_apply
     (f₁.smooth.mdifferentiable (by simp) x)
     (f₂.smooth.mdifferentiable (by simp) x)
 
-/-- L² inner product is additive in the left argument. -/
 lemma fullSmoothScalar_integral_mul_add_left
     {g : SmoothRiemannianMetric (I_half n) M}
     (f₁ f₂ h : FullSmoothScalar g) :
@@ -356,7 +284,6 @@ lemma fullSmoothScalar_integral_mul_add_left
       funext hpt]
   exact integral_add (f₁.integrable_mul h) (f₂.integrable_mul h)
 
-/-- Gradient inner product is additive in the left argument. -/
 lemma fullSmoothScalar_integral_inner_grad_add_left
     {g : SmoothRiemannianMetric (I_half n) M}
     (f₁ f₂ h : FullSmoothScalar g) :
@@ -388,7 +315,6 @@ lemma fullSmoothScalar_integral_inner_grad_add_left
           (gradFun (I := I_half n) g h.toFun x)) from funext hpt]
   exact integral_add (f₁.integrable_inner_grad h) (f₂.integrable_inner_grad h)
 
-/-- Additivity of the H¹ inner product in the left argument. -/
 lemma fullSmoothScalarH1Inner_add_left
     {g : SmoothRiemannianMetric (I_half n) M}
     (f₁ f₂ h : FullSmoothScalar g) :
@@ -399,7 +325,6 @@ lemma fullSmoothScalarH1Inner_add_left
     fullSmoothScalar_integral_inner_grad_add_left]
   ring
 
-/-- Pointwise scalar multiplication of `gradFun`. -/
 lemma FullSmoothScalar.gradFun_smul_apply
     {g : SmoothRiemannianMetric (I_half n) M}
     (c : ℝ) (f : FullSmoothScalar g) (x : M) :
@@ -428,7 +353,6 @@ lemma FullSmoothScalar.gradFun_smul_apply
   change (c • d_f) v = c * d_f v
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-/-- L² inner product is homogeneous in the left argument. -/
 lemma fullSmoothScalar_integral_mul_smul_left
     {g : SmoothRiemannianMetric (I_half n) M}
     (c : ℝ) (f h : FullSmoothScalar g) :
@@ -442,7 +366,6 @@ lemma fullSmoothScalar_integral_mul_smul_left
   rw [hpt]
   rw [integral_const_mul]
 
-/-- Gradient inner product is homogeneous in the left argument. -/
 lemma fullSmoothScalar_integral_inner_grad_smul_left
     {g : SmoothRiemannianMetric (I_half n) M}
     (c : ℝ) (f h : FullSmoothScalar g) :
@@ -462,7 +385,6 @@ lemma fullSmoothScalar_integral_inner_grad_smul_left
     rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [hpt, integral_const_mul]
 
-/-- Homogeneity of the H¹ inner product in the left argument. -/
 lemma fullSmoothScalarH1Inner_smul_left
     {g : SmoothRiemannianMetric (I_half n) M}
     (c : ℝ) (f h : FullSmoothScalar g) :
@@ -473,7 +395,6 @@ lemma fullSmoothScalarH1Inner_smul_left
     fullSmoothScalar_integral_inner_grad_smul_left]
   ring
 
-/-- The pre-inner-product core on full smooth scalars. -/
 noncomputable instance instPreInnerProductSpaceCoreFullSmoothScalar
     {g : SmoothRiemannianMetric (I_half n) M} :
     PreInnerProductSpace.Core ℝ (FullSmoothScalar g) where
@@ -494,13 +415,11 @@ noncomputable instance instPreInnerProductSpaceCoreFullSmoothScalar
       c * fullSmoothScalarH1Inner f h
     exact fullSmoothScalarH1Inner_smul_left c f h
 
-/-- The seminormed structure on `FullSmoothScalar g`. -/
 noncomputable instance instSeminormedAddCommGroupFullSmoothScalar
     {g : SmoothRiemannianMetric (I_half n) M} :
     SeminormedAddCommGroup (FullSmoothScalar g) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
-/-- The inner-product-space structure on `FullSmoothScalar g`. -/
 noncomputable instance instInnerProductSpaceFullSmoothScalar
     {g : SmoothRiemannianMetric (I_half n) M} :
     InnerProductSpace ℝ (FullSmoothScalar g) :=

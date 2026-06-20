@@ -4,25 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 
-/-!
-# Chart-pulled chart-α coordinate matrix: smoothness on the Euclidean chart target
-
-For a smooth Riemannian metric `g` on a closed manifold `M` and a chart center
-`α : M`, the chart-α Gram-Schmidt coefficient matrix entry
-`chartFrameNormGlobalSmoothCoordMatrix g α i k` is smooth on the chart-α
-trivialization base set. Pulling back through the composition
-`(extChartAt I α).symm ∘ (toEuclidean E).symm` yields a smooth scalar function
-on the Euclidean chart target `chartTargetEuclid α`.
-
-In addition, the directional-derivative composition
-`extDerivFun (chartFrameNormGlobalSmoothCoordMatrix g α i k) b
-    (chartBasisVecFiber α l b)`
-is itself smooth when pulled back to the Euclidean chart target.
-
-Both statements are unconditional in the chart atlas: no chart-locality
-predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -50,9 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **First headline.** The pullback of `chartFrameNormGlobalSmoothCoordMatrix g
-α i k` through `(extChartAt I α).symm ∘ (toEuclidean E).symm` is `ContDiffOn ℝ ∞`
-on the Euclidean chart target `chartTargetEuclid α`. -/
 theorem chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -95,9 +73,6 @@ theorem chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     h_coord.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
-/-- The chart-pullback `y ↦ chartFrameNormGlobalSmoothCoordMatrix g α i k
-((extChartAt I α).symm (toEuclidean.symm y))` as a function on
-`EuclideanSpace ℝ (Fin n)`. -/
 private noncomputable def coordMatrixOnEuclid
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -115,7 +90,6 @@ private lemma coordMatrixOnEuclid_def
       chartFrameNormGlobalSmoothCoordMatrix (I := I) g α i k
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
-/-- `coordMatrixOnEuclid g α i k` is `ContDiffOn ℝ ∞` on `chartTargetEuclid α`. -/
 private lemma coordMatrixOnEuclid_contDiffOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -125,9 +99,6 @@ private lemma coordMatrixOnEuclid_contDiffOn
   chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α i k
 
-/-- The exterior derivative of a `ℝ`-valued function applied to a tangent
-vector is the manifold-Fréchet derivative (the `fromTangentSpace` coercion on
-the `ℝ` codomain is the identity). -/
 private lemma extDerivFun_apply_scalar
     (f : M → ℝ) {x : M} (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
@@ -137,9 +108,6 @@ private lemma extDerivFun_apply_scalar
     LinearEquiv.coe_mk]
   rfl
 
-/-- On `chartTargetEuclid α`, the chart-coordinate partial derivative of
-`scalarOnE α f` at `extChartAt I α b` (where `b = chartSymm y`) equals the
-chart-Euclidean partial of the chart-pulled `DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f` at `y`. -/
 private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
@@ -178,10 +146,6 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
-/-- At a Euclidean chart-target point `y` with `b := chartSymm y`, the directional
-derivative of an `MDifferentiableAt`-witnessed scalar `f : M → ℝ` along the chart-α
-coordinate basis vector `chartBasisVecFiber α m b` equals the `m`-th chart-Euclidean
-partial of the chart-pulled `DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f` at `y`. -/
 private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial_of_mdiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
@@ -213,9 +177,6 @@ private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial_of_mdiff
   exact partialDeriv_scalarOnE_eq_euclidPartial_pulled
     (I := I) (M := M) f α m hy
 
-/-- Eventually-equality: on a neighbourhood (within `chartTargetEuclid α`) of any
-`y ∈ chartTargetEuclid α`, the chart-pulled directional derivative equals the
-`l`-th chart-Euclidean partial of the chart-pulled coordinate matrix. -/
 private lemma extDerivFun_pull_eq_euclidPartial_on_target
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -258,8 +219,6 @@ private lemma extDerivFun_pull_eq_euclidPartial_on_target
     (I := I) (M := M)
     (chartFrameNormGlobalSmoothCoordMatrix (I := I) g α i k) α l hy hf_mdiff
 
-/-- Eventually-equality of the chart-pulled coordinate matrix and
-`chartPushedRaw` on the open chart target. -/
 private lemma coordMatrixOnEuclid_eventuallyEq_chartPushedRaw
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -274,8 +233,6 @@ private lemma coordMatrixOnEuclid_eventuallyEq_chartPushedRaw
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (chartFrameNormGlobalSmoothCoordMatrix (I := I) g α i k) hy]
 
-/-- The `l`-th chart-Euclidean partial of `chartPushedRaw` of the coordinate
-matrix is `ContDiffOn ℝ ∞` on `chartTargetEuclid α`. -/
 private lemma euclidPartial_chartPushedRaw_coordMatrix_contDiffOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -321,11 +278,6 @@ private lemma euclidPartial_chartPushedRaw_coordMatrix_contDiffOn
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-- **Second headline.** The pullback of the directional derivative
-`extDerivFun (chartFrameNormGlobalSmoothCoordMatrix g α i k) b
-    (chartBasisVecFiber α l b)`
-through `(extChartAt I α).symm ∘ (toEuclidean E).symm` is `ContDiffOn ℝ ∞` on
-the Euclidean chart target `chartTargetEuclid α`. -/
 theorem chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

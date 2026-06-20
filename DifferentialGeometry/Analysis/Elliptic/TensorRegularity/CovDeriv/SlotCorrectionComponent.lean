@@ -2,65 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Intrinsi
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 
-/-!
-# The Christoffel slot-correction pieces of the chart tensor covariant derivative
-
-For a smooth, compactly-supported `(r, s)`-tensor section `S` over a closed
-Riemannian manifold `(M, g)` and a chart center `α : M`, the chart-coordinate
-covariant derivative `chartTensorRSCovariantDerivative r s g α S.toSection X b`
-decomposes (see `ChartTensorRSCovariantDerivative.lean`) as
-
-```
-tensorRSIntrinsicChartCLM r s α S.toSection b (X b)
-  + ∑ₖ chartTensorRSInputSlotCorrection r s g α S.toSection X b k
-  − ∑ₗ chartTensorRSOutputSlotCorrection r s g α S.toSection X b l
-```
-
-The companion file `CovDerivIntrinsicComponent.lean` handles the intrinsic
-(Fréchet-derivative) piece. This file isolates the **Christoffel slot
-corrections** `chartTensorRSInputSlotCorrection` and
-`chartTensorRSOutputSlotCorrection` and computes their raw chart-scalar
-components.
-
-The slot corrections are **zeroth order in `S`**: no derivative of `S`
-appears, only the tensor value `S.toSection b` itself composed with
-parallel-transport CLMs (`chartLeviCivitaParallelCLM`). The headline results
-of this file express the raw chart-scalar component of each slot correction
-as a finite linear combination
-
-```
-∑ (over component multi-indices) (C^∞ chart coefficient) · (raw chart component of S)
-```
-
-where every coefficient is `C^∞` on the Euclidean chart target
-`chartTargetEuclid α`, and **no derivative is applied to any component of
-`S`**. The `C^∞` coefficients are, up to Kronecker deltas, chart Christoffel
-symbols (`chartChristoffel`); their smoothness is supplied by
-`chartChristoffelEuclid_contDiffOn`.
-
-The whole development uses the same `continuousLinearMapAt`-wrapped
-raw-component projection convention as `CovDerivIntrinsicComponent.lean`, so
-the assembling file can combine both contributions uniformly.
-
-## Main results
-
-* `cmm_eq_sum_chartFrameBasis` — every `(0, r)`-tensor model fibre element is
-  the finite sum of its chart-frame components against the chart-frame basis
-  `chartFrameBasisModel α b`.
-* `cmm_chartFrameTuple_slot_eq` — the multilinear expansion of a `(0, s)`-tensor
-  evaluated on a slot-substituted chart-frame tuple.
-* `chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel` — the chart
-  matrix entry of the chart Levi-Civita parallel CLM, in the chart coordinate
-  basis vector field, is a chart Christoffel symbol.
-* `chartLeviCivitaParallelCLM_coordEntry_contDiffOn` — that matrix entry,
-  pulled back to the Euclidean chart target, is `C^∞`.
-* `chartTensorRSInputSlotCorrection_component_eq`,
-  `chartTensorRSOutputSlotCorrection_component_eq` — the headline: the raw
-  chart-scalar component of each slot correction is a finite linear
-  combination of undifferentiated raw chart components of `S`, with `C^∞`
-  coefficients.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -92,18 +33,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `(Idx)`-th chart-`α`-frame basis element of the `(0, r)`-tensor fibre
-at `b`: the model dual covariant tensor `dualCovariantCMM r Idx`, with each
-multilinear slot precomposed by the chart-Jacobian `chartJ α b`. Viewed at the
-bundle-fibre level `Tensor0SSpace r I b` (definitionally a continuous
-multilinear map). -/
 noncomputable def chartFrameBasisModel (α b : M) (r : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E)) :
     Tensor0SSpace r I b :=
   (dualCovariantCMM (E := E) r Idx).compContinuousLinearMap
     (fun _ : Fin r => chartJ (I := I) (M := M) α b)
 
-/-- Pointwise evaluation of `chartFrameBasisModel`. -/
 lemma chartFrameBasisModel_apply (α b : M) (r : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (v : Fin r → TangentSpace I b) :
@@ -121,9 +56,6 @@ lemma chartFrameBasisModel_apply (α b : M) (r : ℕ)
       dualCovariantCMM_apply]
   exact h
 
-/-- Evaluating `chartFrameBasisModel α b r Idx` on the chart-`α`-frame tuple
-indexed by `Jdx` returns the Kronecker delta — provided `b` lies in the
-tangent trivialisation base set. -/
 lemma chartFrameBasisModel_apply_chartFrameTuple (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (r : ℕ)
     (Idx Jdx : Fin r → Fin (Module.finrank ℝ E)) :
@@ -162,9 +94,6 @@ lemma chartFrameBasisModel_apply_chartFrameTuple (α : M) {b : M}
     rw [Module.Basis.coord_apply, Module.Basis.repr_self, Finsupp.single_apply]
     exact if_neg hk₀.symm
 
-/-- A tangent vector `w` is the finite sum of its chart-`α`-frame coordinates
-against the chart-`α`-frame vectors. Holds on the chart base set, where
-`chartJ α b` and `chartJinv α b` are mutually inverse. -/
 lemma sum_chartFrame_coord_eq (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (w : E) :
     ∑ p : Fin (Module.finrank ℝ E),
@@ -207,11 +136,6 @@ lemma sum_chartFrame_coord_eq (α : M) {b : M}
         rw [hbasis]
     _ = w := chartJinv_chartJ_self (I := I) (M := M) α hb w
 
-/-- **Chart-frame basis expansion of a `(0, r)`-tensor fibre element.**
-On the chart base set, a `(0, r)`-tensor fibre element `f` is the finite sum,
-over all multi-indices `Idx`, of its chart-`α`-frame component
-`f (chart-frame tuple Idx)` against the chart-frame basis element
-`chartFrameBasisModel α b r Idx`. -/
 theorem cmm_eq_sum_chartFrameBasis (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (r : ℕ)
     (f : Tensor0SSpace r I b) :
@@ -276,8 +200,6 @@ theorem cmm_eq_sum_chartFrameBasis (α : M) {b : M}
     smul_eq_mul]
   ring
 
-/-- Native evaluation of the tangent-slot substitution CLM at the bundle-fibre
-level. -/
 lemma tensorSlotSubstCLM_eval (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (τ : Tensor0SSpace n I b) (m : Fin n → TangentSpace I b) :
@@ -285,15 +207,12 @@ lemma tensorSlotSubstCLM_eval (n : ℕ) (b : M)
       τ (fun i : Fin n => Φ i (m i)) :=
   tensorSlotSubstCLM_apply (I := I) n b Φ τ m
 
-/-- The `(p, q)`-entry of a slot CLM `Ψ` in the chart-`α` coordinate frame at
-`b`: `coord_p (chartJ α b (Ψ (chartBasisVecFiber α q b)))`. -/
 noncomputable def chartFrameMatrixEntry (α b : M)
     (Ψ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (p q : Fin (Module.finrank ℝ E)) : ℝ :=
   ((chartModelBasis E).coord p)
     (chartJ (I := I) (M := M) α b (Ψ (chartBasisVecFiber (I := I) α q b)))
 
-/-- Unfolding for `chartFrameMatrixEntry`. -/
 lemma chartFrameMatrixEntry_def (α b : M)
     (Ψ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (p q : Fin (Module.finrank ℝ E)) :
@@ -302,9 +221,6 @@ lemma chartFrameMatrixEntry_def (α b : M)
         (chartJ (I := I) (M := M) α b
           (Ψ (chartBasisVecFiber (I := I) α q b))) := rfl
 
-/-- A slot CLM applied to a chart-`α`-frame vector is the finite sum of its
-chart-frame matrix entries against the chart-`α`-frame vectors. Holds on the
-chart base set. -/
 lemma slotCLM_chartFrameVec_eq (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (Ψ : TangentSpace I b →L[ℝ] TangentSpace I b)
@@ -320,12 +236,6 @@ lemma slotCLM_chartFrameVec_eq (α : M) {b : M}
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [chartFrameMatrixEntry_def]
 
-/-- **Multilinear expansion on a slot-substituted chart-frame tuple.**
-For a `(0, s)`-tensor fibre element `σ`, a family of slot CLMs `Φ`, and a
-multi-index `Jdx`, evaluating `σ` on the tuple
-`fun j => Φ j (chartBasisVecFiber α (Jdx j) b)` expands as a finite sum over
-output multi-indices `Jdx'` of `(∏ⱼ chartFrameMatrixEntry (Φ j) (Jdx' j)
-(Jdx j))` times `σ (chart-frame tuple Jdx')`. Holds on the chart base set. -/
 theorem cmm_chartFrameTuple_slot_eq (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (s : ℕ)
     (σ : Tensor0SSpace s I b)
@@ -371,11 +281,6 @@ theorem cmm_chartFrameTuple_slot_eq (α : M) {b : M}
           σ (fun j : Fin s => chartBasisVecFiber (I := I) α (Jdx' j) b) := hpull
   rw [hpull', smul_eq_mul]
 
-/-- **Raw chart-frame component of a slot-substituted tensor.** On the chart
-base set, the chart-`α`-frame component of `tensorSlotSubstCLM r b Φ τ` at the
-multi-index `Idx` is the finite sum, over multi-indices `Idx'`, of `(∏ᵢ
-chartFrameMatrixEntry (Φ i) (Idx' i) (Idx i))` times the chart-`α`-frame
-component of `τ` at `Idx'`. -/
 theorem tensorSlotSubstCLM_proj_eq (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (r : ℕ)
     (Φ : Fin r → (TangentSpace I b →L[ℝ] TangentSpace I b))
@@ -393,9 +298,6 @@ theorem tensorSlotSubstCLM_proj_eq (α : M) {b : M}
     (fun k : Fin r => chartBasisVecFiber (I := I) α (Idx k) b)]
   exact cmm_chartFrameTuple_slot_eq (I := I) (M := M) α hb r τ Φ Idx
 
-/-- The `p`-th model-basis coordinate of the Christoffel correction term: the
-single-sum-over-`p` collapse of the explicit triple sum
-`christoffelCorrection_apply`. -/
 lemma coord_christoffelCorrection_eq
     (g : SmoothRiemannianMetric I M) (α b : M) (Y : E)
     (v : TangentSpace I b) (p : Fin (Module.finrank ℝ E)) :
@@ -424,9 +326,6 @@ lemma coord_christoffelCorrection_eq
   · intro h
     exact absurd (Finset.mem_univ p) h
 
-/-- The chart-`α`-frame value of the chart Levi-Civita parallel CLM, brought
-back to model coordinates by `chartJ α b`, is the Christoffel-correction term.
-Holds on the chart base set, where `chartJ` undoes `chartJinv`. -/
 lemma chartJ_chartLeviCivitaParallelCLM
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -443,12 +342,6 @@ lemma chartJ_chartLeviCivitaParallelCLM
           (trivToE (I := I) α b (X b)) v)) = _
   exact chartJ_chartJinv (I := I) (M := M) α hb _
 
-/-- **The chart matrix entry of the chart Levi-Civita parallel CLM is a chart
-Christoffel symbol.** For `X` the chart coordinate basis vector field
-`chartBasisVecFiber α m`, the `(p, q)`-entry of `chartLeviCivitaParallelCLM g
-α b X` in the chart-`α` coordinate frame at `b` equals the chart Christoffel
-symbol `Γ^p_{qm}` evaluated at the chart image `extChartAt I α b`. Holds on
-the chart base set. -/
 theorem chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -506,12 +399,6 @@ theorem chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel
   · intro h
     exact absurd (Finset.mem_univ q) h
 
-/-- **The chart matrix entry of the chart Levi-Civita parallel CLM, pulled
-back to the Euclidean chart target, is `C^∞`.** For `X` the chart coordinate
-basis vector field `chartBasisVecFiber α m`, the function on the Euclidean
-chart target sending `y` to the `(p, q)`-entry of `chartLeviCivitaParallelCLM
-g α b X` (with `b` the chart-Euclidean preimage of `y`) is `ContDiffOn ℝ ∞` on
-`chartTargetEuclid α`. -/
 theorem chartLeviCivitaParallelCLM_coordEntry_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -547,8 +434,6 @@ theorem chartLeviCivitaParallelCLM_coordEntry_contDiffOn
     g α hb_base m p q]
   rw [hphi_b, chartChristoffelEuclid_def]
 
-/-- The chart-frame matrix entry of the identity CLM is the Kronecker delta.
-Holds on the chart base set. -/
 lemma chartFrameMatrixEntry_id (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (p q : Fin (Module.finrank ℝ E)) :
@@ -572,11 +457,6 @@ lemma chartFrameMatrixEntry_id (α : M) {b : M}
   rw [htriv, Module.Basis.coord_apply, Module.Basis.repr_self,
     Finsupp.single_apply]
 
-/-- **Closed form of the raw chart-scalar component.** On the chart-`α`
-source, the raw chart-scalar component `tensorChartComponentRaw g r s S α Idx
-Jdx b` equals the underlying tensor value `S.toSection b` applied to the
-chart-`α`-frame basis element `chartFrameBasisModel α b r Idx`, evaluated on
-the chart-`α`-frame tuple indexed by `Jdx`. -/
 theorem tensorChartComponentRaw_eq_chartFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -595,10 +475,6 @@ theorem tensorChartComponentRaw_eq_chartFrame
   rw [tensorChartComponentProjection_apply, chartRSTwistInv_apply]
   rfl
 
-/-- The `(Idx, Idx')`-coefficient of the input-slot Christoffel correction
-along the chart coordinate basis vector field `chartBasisVecFiber α m`, as a
-function on the Euclidean chart target: the product over input slots `i` of
-the chart-frame matrix entries of the slot-`k` substitution CLM. -/
 noncomputable def inputSlotCoeff
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (k : Fin r)
@@ -615,10 +491,6 @@ noncomputable def inputSlotCoeff
           i)
         (Idx i) (Idx' i)
 
-/-- On the Euclidean chart target, the input-slot coefficient factorises as
-the `(Idx k, Idx' k)`-chart matrix entry of the chart Levi-Civita parallel
-CLM times a `y`-independent constant (a product of Kronecker deltas on the
-non-`k` slots). -/
 lemma inputSlotCoeff_eq_entry_mul_const
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (k : Fin r)
@@ -650,9 +522,6 @@ lemma inputSlotCoeff_eq_entry_mul_const
     rw [tangentSlotCLM_other (I := I) r k _ hi_ne,
       chartFrameMatrixEntry_id (I := I) (M := M) α hb_base]
 
-/-- The input-slot coefficient is `C^∞` on the Euclidean chart target: it is a
-constant multiple of the `C^∞` chart matrix entry of the chart Levi-Civita
-parallel CLM. -/
 theorem inputSlotCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (k : Fin r)
@@ -671,8 +540,6 @@ theorem inputSlotCoeff_contDiffOn
   intro y hy
   rw [inputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g r α m k Idx Idx' hy]
 
-/-- The input-slot coefficient is the chart-`α`-frame component of the
-slot-`k` substituted chart-frame basis element. -/
 lemma inputSlotCoeff_eq_chartFrameProj
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (k : Fin r)
@@ -703,16 +570,6 @@ lemma inputSlotCoeff_eq_chartFrameProj
   refine Finset.prod_congr rfl (fun i _ => ?_)
   rw [chartFrameMatrixEntry_def]
 
-/-- **The raw chart-scalar component of the input-slot Christoffel
-correction.** Let `y` lie in the Euclidean chart target `chartTargetEuclid α`,
-and set `b := (extChartAt I α).symm (toEuclidean.symm y)`. The
-`continuousLinearMapAt`-wrapped raw-component projection of the `k`-th
-upper-slot Christoffel correction of `S.toSection`, along the chart
-coordinate basis vector field `chartBasisVecFiber α m`, equals the finite sum
-over input multi-indices `Idx'` of `inputSlotCoeff g r α m k Idx Idx' y`
-times the raw chart component `tensorChartComponentRaw g r s S α Idx' Jdx b`
-of `S`. No derivative of `S` appears: only undifferentiated raw chart
-components, with `C^∞` coefficients (`inputSlotCoeff_contDiffOn`). -/
 theorem chartTensorRSInputSlotCorrection_component_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -782,10 +639,6 @@ theorem chartTensorRSInputSlotCorrection_component_eq
   rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g r s S α
     hb_chart Idx' Jdx, htuple, hSb_def]
 
-/-- The `(Jdx, Jdx')`-coefficient of the output-slot Christoffel correction
-along the chart coordinate basis vector field `chartBasisVecFiber α m`, as a
-function on the Euclidean chart target: the product over output slots `j` of
-the chart-frame matrix entries of the slot-`l` substitution CLM. -/
 noncomputable def outputSlotCoeff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (l : Fin s)
@@ -802,10 +655,6 @@ noncomputable def outputSlotCoeff
           j)
         (Jdx' j) (Jdx j)
 
-/-- On the Euclidean chart target, the output-slot coefficient factorises as
-the `(Jdx' l, Jdx l)`-chart matrix entry of the chart Levi-Civita parallel
-CLM times a `y`-independent constant (a product of Kronecker deltas on the
-non-`l` slots). -/
 lemma outputSlotCoeff_eq_entry_mul_const
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (l : Fin s)
@@ -837,7 +686,6 @@ lemma outputSlotCoeff_eq_entry_mul_const
     rw [tangentSlotCLM_other (I := I) s l _ hj_ne,
       chartFrameMatrixEntry_id (I := I) (M := M) α hb_base]
 
-/-- The output-slot coefficient is `C^∞` on the Euclidean chart target. -/
 theorem outputSlotCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (l : Fin s)
@@ -856,9 +704,6 @@ theorem outputSlotCoeff_contDiffOn
   intro y hy
   rw [outputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g s α m l Jdx Jdx' hy]
 
-/-- The output-slot coefficient is the chart-`α`-frame component, against the
-output multi-index `Jdx'`, of the slot-`l` substituted chart-frame tuple of
-the `(0, s)`-tensor `σ`. -/
 lemma outputSlotCoeff_eq_chartFrameProj
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E)) (l : Fin s)
@@ -878,16 +723,6 @@ lemma outputSlotCoeff_eq_chartFrameProj
   unfold outputSlotCoeff
   rfl
 
-/-- **The raw chart-scalar component of the output-slot Christoffel
-correction.** Let `y` lie in the Euclidean chart target `chartTargetEuclid α`,
-and set `b := (extChartAt I α).symm (toEuclidean.symm y)`. The
-`continuousLinearMapAt`-wrapped raw-component projection of the `l`-th
-lower-slot Christoffel correction of `S.toSection`, along the chart
-coordinate basis vector field `chartBasisVecFiber α m`, equals the finite sum
-over output multi-indices `Jdx'` of `outputSlotCoeff g s α m l Jdx Jdx' y`
-times the raw chart component `tensorChartComponentRaw g r s S α Idx Jdx' b`
-of `S`. No derivative of `S` appears: only undifferentiated raw chart
-components, with `C^∞` coefficients (`outputSlotCoeff_contDiffOn`). -/
 theorem chartTensorRSOutputSlotCorrection_component_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

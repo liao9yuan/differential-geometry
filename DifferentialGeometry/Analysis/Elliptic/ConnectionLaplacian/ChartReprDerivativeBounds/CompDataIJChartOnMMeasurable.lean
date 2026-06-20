@@ -1,40 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 
-/-!
-# Borel measurability on `M` of the chart-`α` pulled-back iterated-Fréchet-derivative
-data of a raw chart-frame tensor scalar component
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`, a chart
-base point `α : M`, a pair of multi-indices `(Idx, Jdx)`, and a derivative order
-`j : ℕ`, the function
-
-```
-F_E : E → ℝ := tensorChartComponentRaw g r s T₀ α Idx Jdx ∘ (extChartAt I α).symm
-```
-
-is `C^∞` on the open Euclidean chart target `(extChartAt I α).target` (see
-`chartPushedRaw_tensorChartComponentRaw_contDiffOn` of
-`Analysis/Elliptic/TensorRegularity/CovDeriv/ChartFormLowerOrder.lean`). On the
-chart target, the `j`-th iterated Fréchet derivative `iteratedFDeriv ℝ j F_E` is
-continuous. Composing with the chart map `extChartAt I α : M → E` and taking
-norms gives a function on `M` whose Borel-measurability is the subject of this
-file. Because the Mathlib partial-equiv `extChartAt I α` has unspecified
-behaviour outside the chart source, we use the Borel-measurable global extension
-`extChartAtExt α : M → E` from
-`Analysis/Sobolev/Chart/ChartTransition/MeasurablePullback.lean`,
-which agrees with `extChartAt I α` on the chart source (where the partition of
-unity weights live in downstream applications).
-
-## Main result
-
-* `compDataIJ_chart_on_M_measurable` — the function
-  `b ↦ ‖iteratedFDeriv ℝ j (tensorChartComponentRaw … ∘ (extChartAt I α).symm)
-        (extChartAtExt α b)‖ ^ 2`
-  is Borel-measurable on `M`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -68,13 +34,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- On the open Euclidean chart target `(extChartAt I α).target`, the `j`-th
-iterated Fréchet derivative of the composite
-`tensorChartComponentRaw g r s T₀ α Idx Jdx ∘ (extChartAt I α).symm` is
-continuous. This follows from the `C^∞`-on-target witness
-`chartPushedRaw_tensorChartComponentRaw_contDiffOn` together with
-`ContDiffOn.continuousOn_iteratedFDerivWithin` and the open-set identification
-`iteratedFDerivWithin = iteratedFDeriv` on open sets. -/
 lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -129,9 +88,6 @@ lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
     (f := (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) ∘
       (extChartAt I α).symm) j hopen hy).symm
 
-/-- The composite `b ↦ iteratedFDeriv ℝ j F_E (extChartAt I α b)` (with
-`F_E := tensorChartComponentRaw g r s T₀ α Idx Jdx ∘ (extChartAt I α).symm`) is
-continuous on the chart source `(chartAt H α).source`. -/
 private lemma comp_extChartAt_continuousOn_chart_source
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -163,9 +119,6 @@ private lemma comp_extChartAt_continuousOn_chart_source
     exact (extChartAt I α).map_source hb'
   exact hcont_target.comp hext_cont hmaps
 
-/-- The composite `b ↦ iteratedFDeriv ℝ j F_E (extChartAtExt α b)` is continuous
-on the chart source. On the chart source, `extChartAtExt α = extChartAt I α`, so
-this reduces to `comp_extChartAt_continuousOn_chart_source`. -/
 private lemma comp_extChartAtExt_continuousOn_chart_source
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -189,28 +142,6 @@ private lemma comp_extChartAtExt_continuousOn_chart_source
     extChartAtExt_apply_of_mem (I := I) (α := α) hb
   rw [h_eq]
 
-/-- **Borel-measurability on `M` of the chart-`α` pulled-back iterated Fréchet
-derivative data.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a smooth
-compactly-supported tensor section `T₀`, a chart base point `α`, multi-indices
-`(Idx, Jdx)`, and an order `j : ℕ`, the function
-
-```
-b ↦ ‖iteratedFDeriv ℝ j (tensorChartComponentRaw … ∘ (extChartAt I α).symm)
-       (extChartAtExt α b)‖ ^ 2
-```
-
-is Borel-measurable on `M`. Here `extChartAtExt α : M → E` is the globally
-Borel-measurable extension of `extChartAt I α`, taking the value `0` outside the
-chart source. On the chart source it agrees pointwise with `extChartAt I α`, so
-this measurability statement covers all downstream uses inside any integrand
-multiplied by a chart-`α`-subordinate weight (in particular the partition of
-unity, whose `tsupport` is contained in the chart source).
-
-The proof identifies the composite with a function continuous on the open chart
-source and constant (zero) outside, then invokes
-`ContinuousOn.measurable_piecewise`. -/
 theorem compDataIJ_chart_on_M_measurable
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

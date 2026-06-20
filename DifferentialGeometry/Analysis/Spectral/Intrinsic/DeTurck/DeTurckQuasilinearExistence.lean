@@ -2,50 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SubcriticalSmallTime
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 
-/-!
-# Quasilinear maximal-regularity existence for the DeTurck–Ricci flow (mixed-view contraction)
-
-The Ricci–DeTurck remainder nonlinearity is genuinely **second order**: the continuous Sobolev
-Nemytskii operator `deTurckSobolevNHa2 g₀ g_bg a : H^{a+2} → H^a` loses two derivatives.  The
-abstract critical-loss engine `quasilinear_strong_existence`
-(`Analysis/Parabolic/QuasiLinear/TensorMaximalRegularity/ForcingFixedPoint.lean`) needs `2K < 1`
-for the **full** Lipschitz constant `K` of `N`, which fails here: `K` does not shrink below the
-lower-order part `‖N'(0)‖ ∼ ‖Rm‖` of the DeTurck linearization.  The subcritical small-time engine
-`quasilinear_strong_existence_smallTime` is hardwired to the `H^{a+1}`-view and cannot see a
-genuine two-derivative nonlinearity.
-
-This file builds the genuine quasilinear engine via a **mixed-view contraction**.  The fixed-point
-map is the composed forcing map
-
-  `Ψ(F) := nemytskii (deTurckSobolevNHa2 g₀ g_bg a) (maxRegDuhamelSolField (a:ℝ) hT hT1 0 F)`
-
-on the forcing space `L²([0,T]; H^a)`.  Its Lipschitz modulus on the `L²(H^a)`-ball of radius `ρ`
-is
-
-  `Λ(ρ, T) = C₁ · ρ · (1 + T)² · 2 + C₂ · 2√T`,
-
-obtained from the **refined mixed forcing estimate** `deTurckSobolevNHa2_mixed_lipschitz` (the one
-honest analytic child): the second-order part of `N` is paired with the two-derivative-gain field
-bound `‖field(F) − field(F')‖_{L²(H^{a+2})} ≤ (1+T)‖F−F'‖` (`maxRegDuhamelSolField_dist_le`) times
-a `ρ`-coefficient, while the lower-order part of `N` is paired with the `√T`-decaying lower-view
-field bound `‖field_{a+1}(F) − field_{a+1}(F')‖_{L²(H^{a+1})} ≤ 2√T‖F−F'‖`
-(`maxRegDuhamelSolFieldHa1_dist_le`), the two views being identified by the structural inclusion
-`timeL2Inclusion (field_{a+2} F) = field_{a+1} F`.  Choosing `ρ` small kills the second-order arm
-and `T` small kills the lower-order arm, so `Λ(ρ,T) < 1`; the stay-in-ball inequality
-`‖Ψ(0)‖ ≤ ρ(1 − Λ)` closes for small `T` because `Ψ(0) = N(0)`-spectral is constant in time, of
-`L²([0,T])` norm `√T·M`.  The Banach fixed point of `Ψ` produces the strong maximal-regularity
-solution `deTurckRicci_quasilinear_maxreg_solution`.
-
-## Main results
-
-* `timeL2_norm_le_of_ae_mixed_bound` — the reusable two-term `L²` Minkowski bound: an a.e.
-  pointwise mixed bound `‖h t‖ ≤ A‖p t‖ + B‖q t‖` integrates to `‖h‖ ≤ A‖p‖ + B‖q‖`.
-* `timeL2Inclusion_maxRegDuhamelSolField` — the structural identification of the two scale views of
-  the Duhamel field: `timeL2Inclusion (field_{a+2} F) = field_{a+1} F`.
-* `deTurckSobolevNHa2_mixed_lipschitz` — POSITED honest leaf: the refined mixed forcing estimate.
-* `deTurckRicci_quasilinear_maxreg_solution` — the strong quasilinear maximal-regularity solution.
--/
-
 noncomputable section
 
 open Bundle MeasureTheory Set Filter
@@ -74,10 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **A two-term `L²` Minkowski bound.**  If a time-`L²` field `h` is a.e. dominated by
-`A·‖p t‖ + B·‖q t‖` for nonnegative constants `A, B` and time-`L²` fields `p, q` (in possibly
-different spatial spaces), then `‖h‖ ≤ A·‖p‖ + B·‖q‖`.  This is the `L²`-triangle inequality
-applied to the scalar majorants `A·‖p·‖`, `B·‖q·‖`. -/
 theorem timeL2_norm_le_of_ae_mixed_bound
     {T : ℝ} {X Y Z : Type*}
     [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
@@ -87,7 +39,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
     (hA : 0 ≤ A) (hB : 0 ≤ B)
     (hbound : ∀ᵐ t ∂(timeMeasure T), ‖h t‖ ≤ A * ‖p t‖ + B * ‖q t‖) :
     ‖h‖ ≤ A * ‖p‖ + B * ‖q‖ := by
-  -- the scalar majorant functions `A • ‖p ·‖` and `B • ‖q ·‖`
+  
   set Pf : ℝ → ℝ := fun t => ‖(p : ℝ → Y) t‖ with hPf
   set Qf : ℝ → ℝ := fun t => ‖(q : ℝ → Z) t‖ with hQf
   have hPm : AEStronglyMeasurable Pf (timeMeasure T) :=
@@ -96,7 +48,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
     (Lp.aestronglyMeasurable q).norm
   have hAPm : AEStronglyMeasurable (A • Pf) (timeMeasure T) := hPm.const_smul A
   have hBQm : AEStronglyMeasurable (B • Qf) (timeMeasure T) := hQm.const_smul B
-  -- bound `eLpNorm h` by the eLpNorm of the (a.e.) majorant `A • Pf + B • Qf`
+  
   have hmono : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
       eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) := by
     refine eLpNorm_mono_ae ?_
@@ -107,7 +59,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
       rw [happ]; exact add_nonneg (mul_nonneg hA (norm_nonneg _)) (mul_nonneg hB (norm_nonneg _))
     rw [Real.norm_eq_abs, abs_of_nonneg hge, happ]
     exact ht
-  -- triangle inequality + scalar pull-out at the `eLpNorm` level
+  
   have htri : eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) ≤
       eLpNorm (A • Pf) 2 (timeMeasure T) + eLpNorm (B • Qf) 2 (timeMeasure T) :=
     eLpNorm_add_le hAPm hBQm (by norm_num)
@@ -117,7 +69,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
   have hscaleQ : eLpNorm (B • Qf) 2 (timeMeasure T) =
       ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
     rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hB]
-  -- assemble the eLpNorm bound, then push to real norms
+  
   have hfinal : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
       ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) +
         ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
@@ -143,14 +95,6 @@ theorem timeL2_norm_le_of_ae_mixed_bound
 
 variable {g₀ g_bg : SmoothRiemannianMetric I M}
 
-/-- **The two scale views of the affine Duhamel solution field coincide under inclusion.**
-
-For a forcing `gforce ∈ L²([0,T]; H^a)`, the order-`(a+2)` Duhamel field `maxRegDuhamelSolField`
-included down to the order-`(a+1)` scale equals the order-`(a+1)`-view Duhamel field
-`maxRegDuhamelSolFieldHa1`.  Both fields are built from the same homogeneous-flow and
-maximal-regularity mode families (the time-mode coordinates `homModeCoeff`, `solModeCoeff` do not
-depend on the spatial scale), and the time-`L²` inclusion preserves every time-mode coordinate
-(`timeModeCoeff_timeL2Inclusion`); the identity then follows from time-mode injectivity. -/
 theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
@@ -161,7 +105,7 @@ theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   refine timeModeCoeff_injective (I := I) (M := M) h_compact (fun i => ?_)
   rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)]
-  -- both sides: `homModeCoeff u₀ i + solModeCoeff gforce i`
+  
   rw [maxRegDuhamelSolField, maxRegDuhamelSolFieldHa1,
     timeModeCoeff_add (I := I) (M := M), timeModeCoeff_add (I := I) (M := M),
     maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T) hT.le u₀ i,
@@ -171,23 +115,15 @@ theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (
     maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
       (h_compact := h_compact) (a := a) hT hT1 gforce i]
 
-/-- **The continuous DeTurck–Ricci Lipschitz constant** `K`, the witness of
-`deTurckSobolevNHa2_lipschitzWith`: `deTurckSobolevNHa2 g₀ g_bg a` is `LipschitzWith K`. -/
 def deTurckLipConst (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) : ℝ≥0 :=
   (deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose
 
-/-- The witnessed Lipschitz bound: `deTurckSobolevNHa2 g₀ g_bg a` is `LipschitzWith`
-`deTurckLipConst …`. -/
 theorem deTurckSobolevNHa2_lipschitzWith_lipConst (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
     LipschitzWith (deTurckLipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even)
       (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a) :=
   (deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose_spec
 
-/-- **The time-`L²` DeTurck–Ricci Nemytskii operator** `L²([0,T]; H^{a+2}) → L²([0,T]; H^a)`,
-`f ↦ deTurckSobolevNHa2 g₀ g_bg a ∘ f`, the pointwise-in-time composition with the genuine
-second-order DeTurck–Ricci nonlinearity.  It is `nemytskii` of the witnessed global Lipschitz bound
-of `deTurckSobolevNHa2`. -/
 def deTurckTimeNemytskii (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} :
     timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T →
@@ -196,34 +132,6 @@ def deTurckTimeNemytskii (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤
     (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super ha_even)
 
-/-- **The pointwise-in-time spectral mixed two-arm bound for the DeTurck–Ricci nonlinearity (the
-genuine missing analytic prerequisite).**
-
-For the spectral nonlinearity `Φ = deTurckSobolevNHa2 g₀ g_bg a : H^{a+2} → H^a` there are
-constants `C₁, C₂` such that for any `time-L²` ball radius `R ≥ 0` and any two `H^{a+2}`-valued
-time-`L²` fields `f, f'` whose `time-L²` norms are `≤ R`, the **pointwise-in-time** mixed bound
-
-  `‖Φ (f t) − Φ (f' t)‖_{H^a} ≤ C₁·R·‖(f − f') t‖_{H^{a+2}}
-                              + C₂·‖(timeL2Inclusion … (f − f')) t‖_{H^{a+1}}`
-
-holds for a.e. `t ∈ [0,T]`.
-
-This packages the spatial half of `deTurckSobolevNHa2_mixed_lipschitz`: the genuine refined Moser /
-Gagliardo–Nirenberg two-arm split of the gauge-cancelled Ricci–DeTurck remainder difference, lifted
-from the covariant-`L²` ball estimate `deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz`
-(on `SmoothCcTensor` data, with the principal-symbol difference coefficient an `O`-of-the-clamp-radius
-metric defect against the second-order `∂²(T − T')` factor, and the lower-order jets paired with the
-`H^{a+1}` difference) through the spectral↔covariant Gårding bridges
-(`exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum`,
-`exists_iteratedCovGrad_sum_le_smoothCcToTensorHs`), the dense Lipschitz extension defining
-`deTurckSobolevNHa2`, and the fixed realizability clamp `recenteredBallRetraction 0 R₀` (which caps
-the effective pointwise `H^{a+2}` radius at the fixed manifold constant `R₀`, so that for fields in
-a `time-L²` ball of radius `R` the per-time principal coefficient is uniformly `O(R)`).  Its
-pointwise-a.e. form is exactly what the `time-L²` Minkowski bound `timeL2_norm_le_of_ae_mixed_bound`
-integrates into the forcing estimate below.
-
-POSITED (recursion frontier — the genuine missing analytic prerequisite; the spectral `H^σ`
-translation tower of the on-disk covariant-`L²` two-arm bound). -/
 theorem deTurckSobolevNHa2_mixed_lipschitz_pointwise (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
     ∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
@@ -238,20 +146,6 @@ theorem deTurckSobolevNHa2_mixed_lipschitz_pointwise (a : ℕ)
                     (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ :=
   sorry
 
-/-- **The refined mixed forcing estimate for the DeTurck–Ricci Nemytskii operator (the one honest
-analytic leaf).**
-
-For the time-`L²` DeTurck–Ricci Nemytskii operator `N = deTurckTimeNemytskii …` there are
-constants `C₁, C₂` such that for any `L²(H^{a+2})`-ball radius `R ≥ 0` and any two `H^{a+2}`-valued
-time-`L²` fields `f, f'` of norm `≤ R`,
-
-  `‖N f − N f'‖_{L²(H^a)} ≤ C₁·R·‖f − f'‖_{L²(H^{a+2})} + C₂·‖timeL2Inclusion (f − f')‖_{L²(H^{a+1})}`,
-
-i.e. the second-order part of the nonlinearity is controlled by the ball radius times the full
-`H^{a+2}`-distance, and the lower-order part by the `H^{a+1}`-distance of the difference alone.
-
-Proved here as the time-`L²` Minkowski integration (`timeL2_norm_le_of_ae_mixed_bound`) of the
-pointwise-in-time mixed two-arm bound `deTurckSobolevNHa2_mixed_lipschitz_pointwise`. -/
 theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
     ∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
@@ -269,7 +163,7 @@ theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
       a ha_super ha_even
   refine ⟨C₁, C₂, ?_⟩
   intro T hT R hR f f' hf hf'
-  -- the Nemytskii operator unfolds to `nemytskii` of the witnessed Lipschitz bound
+  
   set hLip := deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
     a ha_super ha_even with hLip_def
   have hNem_f : deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f =
@@ -277,12 +171,12 @@ theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
   have hNem_f' : deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f' =
       nemytskii (I := I) (M := M) hLip f' := rfl
   rw [hNem_f, hNem_f']
-  -- the Nemytskii difference is a.e. the pointwise difference of `Φ ∘ f` and `Φ ∘ f'`
+  
   have hNf := nemytskii_coeFn (I := I) (M := M) hLip f
   have hNf' := nemytskii_coeFn (I := I) (M := M) hLip f'
   have hsub := Lp.coeFn_sub
     (nemytskii (I := I) (M := M) hLip f) (nemytskii (I := I) (M := M) hLip f')
-  -- a.e. domination of the Nemytskii difference by the mixed pointwise majorant
+  
   have hbound : ∀ᵐ t ∂(timeMeasure T),
       ‖(nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f') t‖ ≤
         (C₁ : ℝ) * R * ‖(f - f') t‖ +
@@ -292,7 +186,7 @@ theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
     filter_upwards [hsub, hNf, hNf', hpt hT R hR f f' hf hf'] with t ht htf htf' htpt
     rw [ht, Pi.sub_apply, htf, htf']
     exact htpt
-  -- integrate the a.e. mixed bound into the time-`L²` Minkowski estimate
+  
   exact timeL2_norm_le_of_ae_mixed_bound (T := T)
     (nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f')
     (f - f')
@@ -300,14 +194,6 @@ theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f'))
     (mul_nonneg C₁.coe_nonneg hR) C₂.coe_nonneg hbound
 
-/-- **The mixed-view forcing fixed-point map of the DeTurck–Ricci quasilinear equation.**
-
-  `Ψ(F) := deTurckTimeNemytskii … (maxRegDuhamelSolField (a:ℝ) hT hT1 0 F)`,
-
-a self-map of the forcing space `L²([0,T]; H^a)`: form the order-`(a+2)` Duhamel solution field of
-the forcing `F` (with zero initial datum), then apply the genuine second-order DeTurck–Ricci
-time-`L²` Nemytskii operator.  A fixed point `F⋆ = Ψ(F⋆)` is a forcing reproducing the nonlinearity
-along its own Duhamel solution; the strong solution is the Duhamel image of `F⋆`. -/
 def deTurckMixedForcingMap (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
     timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
@@ -326,9 +212,6 @@ def deTurckMixedForcingMap (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 �
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F) :=
   rfl
 
-/-- The order-`(a+2)` Duhamel field of `F` (zero initial datum) has `L²(H^{a+2})` norm bounded by
-`(1 + T)·‖F‖`: the homogeneous part vanishes (`u₀ = 0`) and the maximal-regularity field gains two
-derivatives with norm `≤ (1 + T)·‖F‖`. -/
 theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
     ‖maxRegDuhamelSolField (I := I) (M := M) a hT hT1
@@ -349,17 +232,6 @@ theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1
   rw [hhom0, zero_add]
   exact hreg
 
-/-- **The mixed-view Lipschitz estimate for the forcing map on the `L²(H^a)`-ball of radius `ρ`.**
-
-For `‖F‖, ‖F'‖ ≤ ρ` (`ρ ≥ 0`),
-
-  `‖Ψ(F) − Ψ(F')‖ ≤ (C₁·(1 + T)·ρ·(1 + T) + C₂·2√T)·‖F − F'‖`,
-
-with `C₁, C₂` the constants of the refined mixed forcing estimate.  The second-order arm pairs the
-ball bound `‖field(F)‖ ≤ (1+T)ρ` with the two-derivative-gain field distance
-`‖field(F) − field(F')‖_{L²(H^{a+2})} ≤ (1+T)‖F−F'‖`; the lower-order arm pairs `C₂` with the
-`√T`-decaying lower-view field distance `‖field_{a+1}(F) − field_{a+1}(F')‖ ≤ 2√T‖F−F'‖`, the two
-field views identified by `timeL2Inclusion_maxRegDuhamelSolField`. -/
 theorem deTurckMixedForcingMap_dist_le (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -383,7 +255,7 @@ theorem deTurckMixedForcingMap_dist_le (a : ℕ)
     a ha_super ha_even).choose_spec.choose with hC₂
   have hmix := (deTurckSobolevNHa2_mixed_lipschitz (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
     a ha_super ha_even).choose_spec.choose_spec hT
-  -- ball bound on the fields
+  
   set R := (1 + T) * ρ with hR
   have hT_pos : (0 : ℝ) < 1 + T := by linarith
   have hRnn : 0 ≤ R := mul_nonneg (by linarith) hρ
@@ -393,7 +265,7 @@ theorem deTurckMixedForcingMap_dist_le (a : ℕ)
   have hfF'ball : ‖fF'‖ ≤ R := by
     refine le_trans (norm_maxRegDuhamelSolField_zero_le (I := I) (M := M) hT hT1 F') ?_
     rw [hR]; exact mul_le_mul_of_nonneg_left hF' (by linarith)
-  -- field distance bounds
+  
   have hfield_dist : ‖fF - fF'‖ ≤ (1 + T) * ‖F - F'‖ :=
     maxRegDuhamelSolField_dist_le (I := I) (M := M) (h_compact := h_compact) (a := (a : ℝ))
       hT hT1 z F F'
@@ -405,7 +277,7 @@ theorem deTurckMixedForcingMap_dist_le (a : ℕ)
       timeL2Inclusion_maxRegDuhamelSolField (I := I) (M := M) hT hT1 z F']
     exact maxRegDuhamelSolFieldHa1_dist_le (I := I) (M := M) (h_compact := h_compact)
       (a := (a : ℝ)) hT hT1 z F F'
-  -- the mixed estimate on the two fields
+  
   have hmain := hmix R hRnn fF fF' hfFball hfF'ball
   calc ‖deTurckMixedForcingMap (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even hT hT1 F -
           deTurckMixedForcingMap (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even hT hT1 F'‖
@@ -423,7 +295,6 @@ theorem deTurckMixedForcingMap_dist_le (a : ℕ)
     _ = ((C₁ : ℝ) * (1 + T) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
         rw [hR]; ring
 
-/-- The order-`(a+2)` Duhamel field of the **zero** forcing (zero initial datum) is `0`. -/
 theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
     maxRegDuhamelSolField (I := I) (M := M) a hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
@@ -433,8 +304,6 @@ theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : 
   rw [norm_zero, mul_zero] at h
   exact norm_le_zero_iff.mp h
 
-/-- The forcing map sends the zero forcing to the constant-in-time spectral nonlinearity
-`deTurckSobolevNHa2 g₀ g_bg a 0`, with `L²([0,T];H^a)` norm at most `√T·‖N 0‖`. -/
 theorem norm_deTurckMixedForcingMap_zero_le (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
@@ -454,32 +323,6 @@ theorem norm_deTurckMixedForcingMap_zero_le (a : ℕ)
   filter_upwards [hcoe, hzero] with t ht htz
   rw [deTurckTimeNemytskii, ht, htz, Pi.zero_apply]
 
-/-- **The strong quasilinear maximal-regularity solution of the DeTurck–Ricci flow.**
-
-For a closed Riemannian manifold `(M, g₀)`, DeTurck background `g_bg`, and a **supercritical**
-spectral Sobolev exponent `a : ℕ` (`ha_super : 2·finrank E + 10 ≤ a`, the Sobolev algebra
-threshold), there is a positive horizon `T₀` such that for every short interval `(0, T]` with
-`T ≤ T₀ ≤ 1` there is a strong maximal-regularity solution `u ∈ H¹([0,T]; Hᵃ)` together with its
-forcing `gforce ∈ L²([0,T]; Hᵃ)` of the **genuinely second-order** Ricci–DeTurck quasilinear tensor
-heat equation
-
-  `∂_t u = Δ_∇ (field_{a+2} u) + N(field_{a+2} u)`,   `u(0) = 0`,
-  `N = deTurckSobolevNHa2 g₀ g_bg a : H^{a+2} → Hᵃ`,
-
-driven by the continuous, non-gated second-order Ricci–DeTurck nonlinearity.  Concretely:
-
-* `u = maxRegDuhamelMap (a:ℝ) hT hT1 0 gforce` — `u` is the affine Duhamel image of `gforce`;
-* `gforce =ᵐ (fun t => N (field_{a+2} gforce t))` — the forcing reproduces the genuine second-order
-  nonlinearity a.e. along the order-`(a+2)` Duhamel solution field;
-* `trace₀ u = 0` — the initial value is `0`;
-* `∂_t u = Δ_∇ (field_{a+2} gforce) + gforce` — the strong `L²(Hᵃ)` flow identity.
-
-Existence is the Banach fixed point of the **mixed-view forcing contraction**
-`deTurckMixedForcingMap` on the `L²(Hᵃ)`-ball of radius `ρ`, whose Lipschitz modulus
-`Λ(ρ,T) = C₁(1+T)²ρ + C₂·2√T` is `< 1` for small `ρ` (killing the second-order arm, paired with
-the `(1+T)`-field bound) and small `T` (killing the lower-order arm, paired with the `2√T`-decaying
-`H^{a+1}`-field bound); the second-order pairing rests on the one honest analytic leaf
-`deTurckSobolevNHa2_mixed_lipschitz`. -/
 theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
     ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
@@ -499,7 +342,7 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
               gforce := by
   classical
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
-  -- the two refined-estimate constants and the spectral source-mass
+  
   set C₁ := (deTurckSobolevNHa2_mixed_lipschitz (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
     a ha_super ha_even).choose with hC₁def
   set C₂ := (deTurckSobolevNHa2_mixed_lipschitz (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
@@ -507,11 +350,11 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
   set M₀ := ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hM₀def
   have hM₀ : 0 ≤ M₀ := norm_nonneg _
-  -- the forcing-ball radius (kills the second-order arm for `T ≤ 1`)
+  
   set ρ : ℝ := 1 / (16 * ((C₁ : ℝ) + 1)) with hρdef
   have hC₁p : (0 : ℝ) < 16 * ((C₁ : ℝ) + 1) := by positivity
   have hρpos : 0 < ρ := by rw [hρdef]; positivity
-  -- the time horizon (kills the lower-order arm and closes stay-in-ball)
+  
   set T₀ : ℝ := min 1 (min (1 / (64 * ((C₂ : ℝ) + 1) ^ 2)) ((ρ / (2 * (M₀ + 1))) ^ 2)) with hT₀def
   have hT₀pos : 0 < T₀ := by
     refine lt_min one_pos (lt_min ?_ ?_)
@@ -520,18 +363,18 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
       positivity
   refine ⟨T₀, hT₀pos, ?_⟩
   intro T hT hTT₀ hT1
-  -- bounds on `T` from the horizon
+  
   have hT_le1 : T ≤ 1 := hT1
   have hT_lo : T ≤ 1 / (64 * ((C₂ : ℝ) + 1) ^ 2) :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_left _ _))
   have hT_stay : T ≤ (ρ / (2 * (M₀ + 1))) ^ 2 :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_right _ _))
-  -- the contraction modulus
+  
   set Λ : ℝ := (C₁ : ℝ) * (1 + T) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T) with hΛdef
   have hΛnn : 0 ≤ Λ := by
     rw [hΛdef]; have : (0:ℝ) ≤ 1 + T := by linarith
     positivity
-  -- second-order arm `≤ 1/4`
+  
   have h1T : (1 : ℝ) + T ≤ 2 := by linarith
   have harm1 : (C₁ : ℝ) * (1 + T) * ρ * (1 + T) ≤ 1 / 4 := by
     have hle : (C₁ : ℝ) * (1 + T) * ρ * (1 + T) ≤ (C₁ : ℝ) * 2 * ρ * 2 := by
@@ -545,7 +388,7 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
     have hfrac : (C₁ : ℝ) / ((C₁ : ℝ) + 1) ≤ 1 := by
       rw [div_le_one (by positivity)]; linarith [C₁.coe_nonneg]
     nlinarith [hfrac, div_nonneg C₁.coe_nonneg (by positivity : (0:ℝ) ≤ (C₁:ℝ)+1)]
-  -- lower-order arm `≤ 1/4`
+  
   have hsqrtT : Real.sqrt T ≤ 1 / (8 * ((C₂ : ℝ) + 1)) := by
     rw [show (1 : ℝ) / (8 * ((C₂ : ℝ) + 1)) =
         Real.sqrt ((1 / (8 * ((C₂ : ℝ) + 1))) ^ 2) from (Real.sqrt_sq (by positivity)).symm]
@@ -567,14 +410,14 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
           nlinarith [hfrac, div_nonneg hc2 (by positivity : (0:ℝ) ≤ (C₂:ℝ)+1)]
   have hΛ_le : Λ ≤ 1 / 2 := by rw [hΛdef]; linarith
   have hΛ_lt : Λ < 1 := by linarith
-  -- the truncated global contraction `Ψ̃ = Ψ ∘ retract`
+  
   set Ψ := deTurckMixedForcingMap (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even hT hT1
     with hΨdef
   set z₀ : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := 0 with hz₀
   set ρt := recenteredBallRetraction (z₀) ρ with hρtdef
   set Ψ' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
       timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := fun F => Ψ (ρt F) with hΨ'def
-  -- `Ψ` is `Λ`-Lipschitz on the `ρ`-ball
+  
   have hΨ_ball : ∀ (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ‖F‖ ≤ ρ → ‖F'‖ ≤ ρ → ‖Ψ F - Ψ F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F' hF hF'
@@ -582,7 +425,7 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
       a ha_super ha_even hT hT1 hρpos.le F F' hF hF'
     rw [hΛdef]
     exact h
-  -- `ρt` maps everything into the ball and is `1`-Lipschitz
+  
   have hρt_mem : ∀ F, ρt F ∈ Metric.closedBall z₀ ρ := fun F =>
     recenteredBallRetraction_mapsTo (X := _) hρpos.le z₀ (Set.mem_univ F)
   have hρt_norm : ∀ F, ‖ρt F‖ ≤ ρ := by
@@ -591,7 +434,7 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
     rw [Metric.mem_closedBall, hz₀, dist_zero_right] at this
     exact this
   have hρt_lip : LipschitzWith 1 ρt := recenteredBallRetraction_lipschitzWith hρpos.le z₀
-  -- `Ψ'` is globally `Λ`-Lipschitz
+  
   have hΨ'_lip : ∀ (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ‖Ψ' F - Ψ' F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F'
@@ -602,7 +445,7 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
       rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at this
       exact this
     exact mul_le_mul_of_nonneg_left hretr hΛnn
-  -- assemble the contraction
+  
   have hcontr : ContractingWith Λ.toNNReal Ψ' := by
     refine ⟨?_, ?_⟩
     · rw [← NNReal.coe_lt_coe, Real.coe_toNNReal _ hΛnn]
@@ -610,10 +453,10 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
     · refine LipschitzWith.of_dist_le_mul (fun F F' => ?_)
       rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ hΛnn]
       exact hΨ'_lip F F'
-  -- the fixed point
+  
   set Fstar := ContractingWith.fixedPoint Ψ' hcontr with hFstar_def
   have hFstar_fix : Ψ' Fstar = Fstar := ContractingWith.fixedPoint_isFixedPt hcontr
-  -- `Ψ(0)` is `√T·M₀`-small, hence `Ψ'` maps the ball into itself, hence `Fstar ∈ ball`
+  
   have hΨ0 : ‖Ψ z₀‖ ≤ Real.sqrt T * M₀ := by
     rw [hΨdef, hz₀, hM₀def]
     exact norm_deTurckMixedForcingMap_zero_le (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
@@ -631,7 +474,7 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
           have hne : (M₀ + 1) ≠ 0 := by positivity
           field_simp
   have hz₀norm : ‖z₀‖ = 0 := by rw [hz₀, norm_zero]
-  -- `Ψ` maps the `ρ`-ball into itself
+  
   have hΨ_stay : ∀ G, ‖G‖ ≤ ρ → ‖Ψ G‖ ≤ ρ := by
     intro G hG
     have hball := hΨ_ball G z₀ hG (by rw [hz₀norm]; exact hρpos.le)
@@ -645,29 +488,28 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
           calc Λ * ‖G‖ ≤ Λ * ρ := mul_le_mul_of_nonneg_left hG hΛnn
             _ ≤ (1 / 2) * ρ := mul_le_mul_of_nonneg_right hΛ_le hρpos.le
       _ = ρ := by ring
-  -- the fixed point lies in the ball: `Fstar = Ψ' Fstar = Ψ (ρt Fstar)` and `ρt Fstar ∈ ball`
+  
   have hFstar_mem : ‖Fstar‖ ≤ ρ := by
     have heq : Fstar = Ψ (ρt Fstar) := hFstar_fix.symm
     rw [heq]
     exact hΨ_stay (ρt Fstar) (hρt_norm Fstar)
-  -- on the ball the retraction is the identity, so `Fstar` is a genuine fixed point of `Ψ`
+  
   have hρt_Fstar : ρt Fstar = Fstar :=
     recenteredBallRetraction_eq_self_of_mem (by
       rw [Metric.mem_closedBall, hz₀, dist_zero_right]; exact hFstar_mem)
   have hΨFstar : Ψ Fstar = Fstar := by
     have hstep : Ψ' Fstar = Ψ Fstar := by simp only [hΨ'def, hρt_Fstar]
     rw [← hstep]; exact hFstar_fix
-  -- unfold the fixed-point equation to the Nemytskii reproduction identity
+  
   set field := maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar with hfielddef
   have hforce_eq : Fstar = deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super ha_even field := by
     rw [← hΨFstar, hΨdef, deTurckMixedForcingMap_apply]
-  -- the strong solution and its forcing
+  
   refine ⟨maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar, Fstar, rfl, ?_, ?_, ?_⟩
-  · -- forcing reproduces `N` a.e. along the order-`(a+2)` Duhamel field
-    have hcoe := nemytskii_coeFn (I := I) (M := M)
+  · have hcoe := nemytskii_coeFn (I := I) (M := M)
       (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
         a ha_super ha_even) field
     have hforce_ae : ⇑Fstar =ᵐ[timeMeasure T]
@@ -676,11 +518,9 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
     refine hforce_ae.trans ?_
     rw [deTurckTimeNemytskii]
     exact hcoe
-  · -- initial value `0`
-    rw [maxRegDuhamelMap_trace0 (I := I) (M := M) (a := (a : ℝ)) (T := T) hT hT1
+  · rw [maxRegDuhamelMap_trace0 (I := I) (M := M) (a := (a : ℝ)) (T := T) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar, map_zero]
-  · -- the `L²(Hᵃ)` flow identity
-    rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_compact := h_compact)
+  · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_compact := h_compact)
       (a := (a : ℝ)) (T := T) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar]
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

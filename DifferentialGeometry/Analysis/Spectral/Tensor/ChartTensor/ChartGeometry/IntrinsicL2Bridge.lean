@@ -1,35 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 
-/-!
-# Chart-to-intrinsic L² norm comparison for scalar functions
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`
-modelled on a finite-dimensional real inner-product space `E`, a chart point
-`α : M`, and a measurable scalar function `u : M → ℝ`, we provide a uniform
-bound
-
-`eLpNorm (chartPushed (chartAtlasPOU I M) α u) 2 (volume.restrict ChTE_α)
-  ≤ ENNReal.ofReal C · eLpNorm u 2 (riemannianVolumeMeasure g)`
-
-with `C ≥ 0` depending only on `g` and `α` (in particular, independent of `u`).
-
-The proof chains three existing pieces:
-
-1. `chartPushed (chartAtlasPOU) α u` agrees a.e. on
-   `volume.restrict ChTE_α` with the raw chart-push of `ρ_α · u`
-   (`chartPushed_eq_chartPushedRaw_pou_ae`).
-2. The reverse chart-density bridge
-   `eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset`
-   applied with `K := tsupport ρ_α ⊆ (chartAt H α).source`.
-3. The pointwise bound `|ρ_α(x) · u(x)| ≤ |u(x)|` (using
-   `(chartAtlasPOU I M).le_one`), combined with `eLpNorm_mono`, removes the
-   partition-of-unity weight from the right-hand side.
-
-The exponent `p = 2` is used here; the structure of the proof would generalise
-to any `1 ≤ p < ∞` if needed.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -50,8 +21,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Pointwise bound `|ρ_α(x) · u(x)| ≤ |u(x)|` for the canonical partition of
-unity, valid because `0 ≤ ρ_α ≤ 1` everywhere. -/
 private lemma abs_pou_mul_le_abs
     [T2Space M] [SigmaCompactSpace M]
     (α : M) (u : M → ℝ) (x : M) :
@@ -73,12 +42,6 @@ private lemma abs_pou_mul_le_abs
         gcongr
     _ = |u x| := one_mul _
 
-/-- For a measurable scalar function `u : M → ℝ` on a closed Riemannian
-manifold and any chart point `α`, the L² norm of the
-partition-of-unity-weighted chart pushforward of `u` against Lebesgue volume on
-the chart target is controlled by the intrinsic L² norm of `u` against the
-canonical Riemannian volume measure. The constant `C ≥ 0` depends only on `g`
-and `α`. -/
 theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)

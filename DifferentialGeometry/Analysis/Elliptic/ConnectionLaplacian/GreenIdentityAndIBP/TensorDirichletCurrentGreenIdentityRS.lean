@@ -1,65 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapGreenIntertwiner
 
-/-!
-# The general-rank `(r, s)` connection-Laplacian Green identity via the Dirichlet current
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`,
-this file proves the integrated Green identity (the `L²` formal adjoint / Dirichlet-current
-divergence identity) for the rough (connection) Laplacian on **arbitrary** mixed
-`(r, s)`-tensor fields,
-
-```
-tensorL2Inner g r (s + 1) (covGrad g r s T).toFun (covGrad g r s v).toFun
-  = − tensorL2Inner g r s (rawTensorConnLapSmooth g r s T).toFun v.toFun,
-```
-
-i.e. the metric-compatible covariant derivative's `L²` formal adjoint is the covariant
-divergence, integrated over the closed manifold with no boundary term.
-
-The whole Dirichlet-current chain — the current `1`-form `X ↦ ⟨∇_X T, v⟩_g`, its musical
-sharp, the Bochner divergence identity, and the divergence theorem — is **rank-generic**, and
-is here transcribed at general bidegree `(r, s)` from the purely-covariant `(0, s)` development
-in `TensorConnLapGreenDivergenceIdentityAnySection`.  Every analytic and tensorial input it uses
-(`tensorInnerPointwise`, `tensorInnerScalar`, `loweredCovDerivAt`, `liftedTensorSection`,
-`tensorSecondCovDeriv`, `rawTensorConnLap`, `covGrad`, `tensorCovDerivPointwiseInner`, the
-metric-compatibility Leibniz rule, the closed-manifold divergence theorem) is already established
-at general `(r, s)`.
-
-## The general-rank metric-lowering intertwiner (the single rank-`r`-dependent ingredient)
-
-The one genuinely rank-`r`-dependent ingredient is the metric-lowering intertwiner: at every
-direction `v` and point `x`, the metric-lowering of the genuine `(r, s)`-covariant derivative of
-a section `S` equals the directional covariant derivative `loweredCovDerivAt` of the
-metric-lowered section,
-
-```
-toModel (loweredCovDerivAt g r s S x v)
-  = lowerAllUpperIndices g r s x (toModel (∇^{(r,s)}_v S)).
-```
-
-This is the statement that the `r`-slot metric index-lowering commutes with `∇`, which holds
-because the metric is `∇`-parallel (`∇g = 0`).  At purely-covariant rank `(0, s)` the lowering
-map contracts no upper slots — it reduces to evaluation at the unit `(0, 0)`-tensor — so the
-intertwiner is unconditional there (`loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen`).  For
-`r > 0` the lowering genuinely contracts the metric through `r` upper slots, so the
-parallel-lowering commutation `∇ ∘ lower_g = lower_g ∘ ∇` is the irreducible new content; it is
-isolated below as the predicate `LoweringIntertwinerRS` and supplied as a single posited witness
-`loweringIntertwinerRS_holds`.  The Green identity is proved unconditionally on top of that one
-witness.
-
-## Main results
-
-* `LoweringIntertwinerRS g r s` — the general-rank metric-lowering intertwiner predicate.
-* `covDerivAlongVFSectionRS` — the un-lowered first directional covariant derivative
-  `y ↦ ∇_{B y} T y`, bundled as a smooth `(r, s)`-tensor section.
-* `dirichletFormRS`, `dirichletVFRS`, `dirichletVFSectionRS` — the Dirichlet current `1`-form,
-  its metric sharp, and its smooth tangent-bundle section, at general `(r, s)`.
-* `divergence_dirichletVFRS_eq` — the pointwise Bochner divergence identity at `(r, s)` (given
-  the intertwiner witness).
-* `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs` — **the headline
-  general-rank `(r, s)` connection-Laplacian Green identity** (given the intertwiner witness).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -96,13 +36,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The general-rank metric-lowering intertwiner at bidegree `(r, s)`: for every smooth
-`(r, s)`-tensor section `S`, point `x`, and direction `v`, the model coercion of the
-lowered directional covariant derivative `loweredCovDerivAt g r s S x v` equals the
-index-lowering of the genuine `(r, s)`-covariant derivative of `S`.
-
-This is the statement that the metric index-lowering commutes with `∇`, i.e. that the
-index-lowering operator field is `∇`-parallel (because `∇g = 0`). -/
 def LoweringIntertwinerRS (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :=
   ∀ (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
     (x : M) (v : TangentSpace I x),
@@ -111,32 +44,14 @@ def LoweringIntertwinerRS (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :=
         (TensorRSSpace.toModel
           (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) S x v))
 
-/-- **The general-rank metric-lowering intertwiner witness.** The `r`-slot metric
-index-lowering commutes with the Levi-Civita covariant derivative because the metric is
-`∇`-parallel (`∇g = 0`); equivalently, the all-index-lowering operator field
-`lowerAllUpperIndices g r s` is `∇`-parallel, so `∇(lower_g S) = lower_g(∇ S)`.
-
-This is the single irreducible new differential-geometric content of this file — the
-parallel-lowering commutation through `r` upper slots — posited here as a precise child.
-At rank `r = 0` it is the unconditional `loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen`; the
-genuine `r > 0` content is `∇g = 0` propagated through the `r` lowered slots.  Its conclusion
-is the directional commutation identity, structurally distinct from the integrated Green
-identity it powers (no packaging); the body is `sorry` and consumers transitively depend on
-`sorryAx`. -/
 theorem loweringIntertwinerRS_holds (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     LoweringIntertwinerRS (I := I) (M := M) g r s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs (I := I) (M := M) g r s S x v
 
-/-- At purely-covariant rank `(0, s)` the general-rank intertwiner reduces to the in-library
-unconditional intertwiner `loweringIntertwiner_gen` (equivalently `LoweringIntertwiner g s`):
-the two predicates coincide definitionally on `(0, s)`-sections. -/
 theorem loweringIntertwinerRS_zero (g : SmoothRiemannianMetric I M) (s : ℕ) :
     LoweringIntertwinerRS (I := I) (M := M) g 0 s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen (I := I) (M := M) g s S x v
 
-/-- The un-lowered first directional covariant derivative `y ↦ ∇_{B y} T y` of a smooth
-`(r, s)`-tensor section `T` along a smooth tangent vector field `B`, as a raw
-`(r, s)`-tensor section. -/
 def covDerivAlongVFrawRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -153,7 +68,6 @@ def covDerivAlongVFrawRS
       (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-/-- **Smoothness of the un-lowered first directional covariant derivative.** -/
 lemma covDerivAlongVFrawRS_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -181,8 +95,6 @@ lemma covDerivAlongVFrawRS_contMDiff
   rw [← contMDiffOn_univ]
   exact hOn
 
-/-- The un-lowered first directional covariant derivative, bundled as a smooth section, at
-bidegree `(r, s)`. -/
 def covDerivAlongVFSectionRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -200,8 +112,6 @@ def covDerivAlongVFSectionRS
       (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-/-- **The lowering of the un-lowered first directional derivative is the lowered directional
-derivative**, at bidegree `(r, s)`, given the intertwiner witness. -/
 lemma covDerivAlongVFSectionRS_lowered_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -213,9 +123,6 @@ lemma covDerivAlongVFSectionRS_lowered_eq
   rw [hint T y (B y)]
   rfl
 
-/-- The lifted `(0, r + s)`-tensor section of the first directional derivative coincides,
-after model coercion, with the lowered directional derivative, at bidegree `(r, s)`, given
-the intertwiner witness. -/
 lemma toModel_liftedTensorSection_covDerivAlongVFSectionRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -228,8 +135,6 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSectionRS
   rw [toModel_liftedTensorSection]
   exact covDerivAlongVFSectionRS_lowered_eq (I := I) (M := M) g r s hint T B y
 
-/-- **The second directional derivative is the Hessian plus the frame correction**, at
-bidegree `(r, s)`. -/
 lemma covDerivAlongRS_covDerivAlongVFSectionRS_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -249,7 +154,6 @@ lemma covDerivAlongRS_covDerivAlongVFSectionRS_eq
       tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) from rfl]
   abel
 
-/-- **The Dirichlet `1`-form** at bidegree `(r, s)`. -/
 def dirichletFormRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M) :
     TangentSpace I b →ₗ[ℝ] ℝ where
@@ -283,13 +187,11 @@ def dirichletFormRS
         (TensorRSSpace.toModel (tensorCovDerivAt (I := I) (M := M) g r s T b X))
         (TensorRSSpace.toModel (v.toSection b)) := rfl
 
-/-- **The Dirichlet current vector field, pointwise** at bidegree `(r, s)`. -/
 def dirichletVFRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M) :
     TangentSpace I b :=
   metricSharp (I := I) g b (dirichletFormRS (I := I) (M := M) g r s T v b)
 
-/-- **The defining Riesz identity for the Dirichlet current** at bidegree `(r, s)`. -/
 lemma inner_dirichletVFRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M)
     (X : TangentSpace I b) :
@@ -298,8 +200,6 @@ lemma inner_dirichletVFRS
   rw [dirichletVFRS]
   exact inner_metricSharp (I := I) g b (dirichletFormRS (I := I) (M := M) g r s T v b) X
 
-/-- **Chart-local smoothness of the Dirichlet-form chart-basis component** at bidegree
-`(r, s)`. -/
 private lemma dirichletFormRS_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -351,8 +251,6 @@ private lemma dirichletFormRS_chartBasis_component_contMDiffOn
   intro b _
   rw [dirichletFormRS_apply]
 
-/-- **Smoothness of the Dirichlet current as a tangent-bundle section** at bidegree
-`(r, s)`. -/
 lemma dirichletVFRS_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -362,8 +260,6 @@ lemma dirichletVFRS_contMDiff
     (fun α j => dirichletFormRS_chartBasis_component_contMDiffOn
       (I := I) (M := M) g r s T v α j)
 
-/-- **The Dirichlet current packaged as a smooth tangent-bundle section** at bidegree
-`(r, s)`. -/
 def dirichletVFSectionRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -376,8 +272,6 @@ def dirichletVFSectionRS
     dirichletVFSectionRS (I := I) (M := M) g r s T v b =
       dirichletVFRS (I := I) (M := M) g r s T v b := rfl
 
-/-- **Per-direction Bochner expansion of the divergence summand** at bidegree `(r, s)`,
-given the intertwiner witness. -/
 private lemma divergence_dirichletVFRS_summand_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -495,7 +389,6 @@ private lemma divergence_dirichletVFRS_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
-/-- **Dirichlet integrand = smooth-orthonormal-frame diagonal sum** at bidegree `(r, s)`. -/
 private lemma tensorCovDerivPointwiseInnerRS_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v b =
@@ -561,8 +454,6 @@ private lemma tensorCovDerivPointwiseInnerRS_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
-/-- **The pointwise Bochner divergence identity** at bidegree `(r, s)`, given the intertwiner
-witness. -/
 lemma divergence_dirichletVFRS_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -613,8 +504,6 @@ lemma divergence_dirichletVFRS_eq
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
 
-/-- **The headline intrinsic general-rank `(r, s)` connection-Laplacian Green identity**, given
-the intertwiner witness. -/
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs_of_intertwiner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -695,17 +584,6 @@ theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs_of_
     refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
     simp only [SmoothCcTensor.toFun_apply, rawTensorConnLapSmooth_toSection_apply]
 
-/-- **The unconditional general-rank `(r, s)` connection-Laplacian Green identity.** For smooth
-compactly-supported `(r, s)`-tensors `T, v` on a closed manifold,
-
-```
-⟪∇T, ∇v⟫_{L²} = −⟪Δ_∇ T, v⟫_{L²},
-```
-
-i.e. the metric-compatible covariant derivative's `L²` formal adjoint is the covariant
-divergence (the rough connection Laplacian), integrated over the closed manifold with no
-boundary term.  The intertwiner witness `loweringIntertwinerRS_holds` (the `r`-slot
-parallel-lowering commutation `∇ ∘ lower_g = lower_g ∘ ∇`) is supplied automatically. -/
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T v : SmoothCcTensor g r s) :

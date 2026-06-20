@@ -3,34 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySm
 import DifferentialGeometry.Geometry.Connection.ChartBridge.DiffRiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.UniformRiemannOperatorNormBound
 
-/-!
-# Compact-uniform intrinsic `g`-norm bound for the frame-summed differentiated curvature operator
-
-For a closed smooth Riemannian manifold `(M, g)`, the frame-summed acted-slot substitution operator
-of the differentiated base-tangent curvature,
-```
-W_{x, a} := nablaBaseSlotCurvFrameSumCLM g (fun i => B_i) B_a x,
-    B_i := smoothOrthoFrame g x i,    B_a := smoothOrthoFrame g x a,
-```
-is the tangent endomorphism `w ↦ ∑_i (∇_{B_i} R)(B_i, B_a) w`, the first-slot divergence of the
-Riemann curvature read in the `g_x`-orthonormal frame and contracted against the fixed direction
-`B_a`. This is the `(∇R) · S` arm's tangent multiplier in the moving-frame Bochner–Weitzenböck
-first-order curvature bound.
-
-This file records the **compact-uniform intrinsic `g`-operator bound** of `W_{x, a}`: there is a single
-nonnegative constant `Kw`, independent of the base point `x` and the frame index `a`, with
-```
-g.inner x (W_{x, a} u) (W_{x, a} u) ≤ Kw · g.inner x u u    for all u : T_x M.
-```
-It is the differentiated-curvature analogue of the base-curvature bound
-`exists_uniform_riemannOp_LeviCivita_gNorm_bound`, with the orthonormal frame's unit Gram
-simplification `g(B_i, B_i) = g(B_a, B_a) = 1` already folded in. The constant is the compact sup of
-the smooth `∇R` operator field over `M`: `∇R` is a smooth section of a finite-rank tensor bundle on
-the compact manifold, so its `g`-operator size is bounded; patching the pointwise chart-`α`
-differentiated-curvature bound over the finite chart-atlas partition of unity (exactly as the
-base-curvature bound is patched) yields the global constant.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -60,7 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- Non-negativity of `g.inner x v v` for a smooth Riemannian metric. -/
+
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -68,22 +40,6 @@ private lemma metric_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-/-! ### Chart-`α` value expansion of the frame-summed differentiated curvature operator
-
-The frame-summed operator `W_{x, a} u = ∑_i nablaBaseSlotCurv g B_i B_i B_a x u` (with
-`B_j = smoothOrthoFrame g x j`) is value-multilinear in the slot values `B_i x, B_a x, u`
-(`nablaBaseSlotCurv` is a `(1, 3)`-tensor in its first three slots and `ℝ`-linear in the acted
-slot). Expanding each slot value in the chart-`α` frame and using the chart `∇R` coefficient
-expansion `nablaBaseSlotCurv_chartBasisVec_alpha_value` (`DiffRiemannBasisIdentityOffCentre`)
-yields a `chart-coordinate` expansion `W_{x, a} u = ∑_l (...) • e^α_l x` whose coefficient is a
-sum of products of the chart `∇R` coefficient and the chart-frame coordinates of the slot
-vectors, controlled below by the chart-data sup and the chart-Gram bounds, exactly as in the
-base-curvature bound `gNorm_riemannOp_le_chartConstants`. -/
-
-/-- **Full four-slot value-determinacy of `nablaBaseSlotCurv`.** The differentiated base-slot
-curvature depends on its three smooth tangent-field slots only through their point values at `x`:
-`X` and `Y` determinacy is `nablaBaseSlotCurv_eq_of_leftMid`, and `Z`-determinacy is obtained
-from the `Y`-determinacy through the `(Y, Z)`-antisymmetry `nablaCurvSec_swap23`. -/
 private lemma nablaBaseSlotCurv_eq_of_leftMidRight
     (g : SmoothRiemannianMetric I M)
     (X X' Y Y' Z Z' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -106,13 +62,6 @@ private lemma nablaBaseSlotCurv_eq_of_leftMidRight
   congr 1
   exact nablaBaseSlotCurv_eq_of_leftMid (I := I) g X' X' Z Z' Y' x rfl hZZ' u
 
-/-- **Chart-`α` value expansion of the differentiated base-slot curvature.** For
-`x ∈ chartLeviCivitaGoodSet α` and bundled smooth fields `Sp, Sq, Sr` whose values at `x` are the
-chart-`α` frame vectors, the differentiated base-slot curvature on the acted slot vector
-`e^α_s x` expands in the chart-`α` frame with the chart `∇R` coefficient `nablaChartRiemannCoeff`.
-This is the full value form: it depends only on the slot values (`nablaBaseSlotCurv_eq_of_leftMidRight`
-and acted-slot determinacy `nablaCurvSec_eq_of_acted_eq`), so equals the chart-frame expansion
-`nablaCurvSec_chartBasisVec_alpha_frame_expand` on globally-smooth chart-frame extensions. -/
 private lemma nablaBaseSlotCurv_chartBasisVec_alpha_value
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -181,9 +130,6 @@ private lemma nablaBaseSlotCurv_chartBasisVec_alpha_value
   exact nablaCurvSec_chartBasisVec_alpha_frame_expand (I := I) g α p q r s hx
     hXp_sm hXq_sm hXr_sm hXs_sm hU_open hxU hU_good hXp_eqU hXq_eqU hXr_eqU hXs_eqU
 
-/-! ### Value-multilinearity of `nablaBaseSlotCurv` (finite-sum slot expansions) -/
-
-/-- `nablaBaseSlotCurv` vanishes on the zero section in its derivation slot. -/
 private lemma nablaBaseSlotCurv_zero_left
     (g : SmoothRiemannianMetric I M)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -192,13 +138,12 @@ private lemma nablaBaseSlotCurv_zero_left
   rw [add_zero] at h
   exact add_eq_left.mp h.symm
 
-/-- `nablaBaseSlotCurv` vanishes on the zero section in its second antisymmetric slot. -/
 private lemma nablaBaseSlotCurv_zero_Z
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     nablaBaseSlotCurv (I := I) g X Y 0 x u = 0 := by
   classical
-  -- `Z`-additivity via the `(Y, Z)`-antisymmetry and `Y`-additivity (`nablaBaseSlotCurv_add_right`).
+  
   have hext : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b => smoothExtensionTangent (I := I) x u b)) :=
     smoothExtensionTangent_contMDiff (I := I) x u
@@ -208,12 +153,11 @@ private lemma nablaBaseSlotCurv_zero_Z
     rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec]
     exact nablaCurvSec_swap23 (g := g) Y.contMDiff W.contMDiff hext
   rw [hswap 0]
-  -- `nablaBaseSlotCurv g X 0 Y x u = 0` (first antisym slot zero).
+  
   have h := nablaBaseSlotCurv_add_right (I := I) g X 0 0 Y x u
   rw [add_zero] at h
   rw [add_eq_left.mp h.symm, neg_zero]
 
-/-- Finite-sum additivity of `nablaBaseSlotCurv` in its derivation slot. -/
 private lemma nablaBaseSlotCurv_finsetSum_left
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -226,7 +170,6 @@ private lemma nablaBaseSlotCurv_finsetSum_left
   | insert a s ha ih =>
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_left, ih, Finset.sum_insert ha]
 
-/-- Finite-sum additivity of `nablaBaseSlotCurv` in its first antisymmetric slot. -/
 private lemma nablaBaseSlotCurv_finsetSum_right
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -244,8 +187,6 @@ private lemma nablaBaseSlotCurv_finsetSum_right
   | insert a s ha ih =>
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_right, ih, Finset.sum_insert ha]
 
-/-- `ℝ`-homogeneity of `nablaBaseSlotCurv` in its second antisymmetric slot, via the
-`(Y, Z)`-antisymmetry `nablaCurvSec_swap23` and first-antisymmetric-slot homogeneity. -/
 private lemma nablaBaseSlotCurv_smul_Z
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -262,7 +203,6 @@ private lemma nablaBaseSlotCurv_smul_Z
     exact nablaCurvSec_swap23 (g := g) Y.contMDiff W.contMDiff hext
   rw [hswap (c • Z), nablaBaseSlotCurv_smul_right, hswap Z, smul_neg]
 
-/-- Finite-sum additivity of `nablaBaseSlotCurv` in its second antisymmetric slot. -/
 private lemma nablaBaseSlotCurv_finsetSum_Z
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -270,7 +210,7 @@ private lemma nablaBaseSlotCurv_finsetSum_Z
     nablaBaseSlotCurv (I := I) g X Y (∑ i ∈ t, Z i) x u =
       ∑ i ∈ t, nablaBaseSlotCurv (I := I) g X Y (Z i) x u := by
   classical
-  -- via the `(Y, Z)`-antisymmetry and `Y`-finite-sum additivity.
+  
   have hext : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b => smoothExtensionTangent (I := I) x u b)) :=
     smoothExtensionTangent_contMDiff (I := I) x u
@@ -280,7 +220,7 @@ private lemma nablaBaseSlotCurv_finsetSum_Z
     rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec]
     exact nablaCurvSec_swap23 (g := g) Y.contMDiff W.contMDiff hext
   rw [hswap (∑ i ∈ t, Z i)]
-  -- first antisymmetric slot finite-sum additivity.
+  
   have hY : nablaBaseSlotCurv (I := I) g X (∑ i ∈ t, Z i) Y x u =
       ∑ i ∈ t, nablaBaseSlotCurv (I := I) g X (Z i) Y x u := by
     classical
@@ -296,9 +236,6 @@ private lemma nablaBaseSlotCurv_finsetSum_Z
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [← hswap (Z i)]
 
-/-- Finite-sum-of-scaled-vectors additivity of `nablaBaseSlotCurv` in its acted vector slot:
-`(∇R)(X, Y, Z)(∑_i d_i • v_i) = ∑_i d_i • (∇R)(X, Y, Z) v_i`, from the acted-slot additivity and
-homogeneity `nablaBaseSlotCurv_add_acted`, `nablaBaseSlotCurv_smul_acted`. -/
 private lemma nablaBaseSlotCurv_finsetSum_smul_acted
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -316,9 +253,6 @@ private lemma nablaBaseSlotCurv_finsetSum_smul_acted
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_acted,
         nablaBaseSlotCurv_smul_acted, ih, Finset.sum_insert ha]
 
-/-! ### Chart-coordinate expansion of `nablaBaseSlotCurv` on arbitrary slot vectors -/
-
-/-- The smooth chart-frame-extension section whose value at `x` is `e^α_p x`. -/
 private def chartFrameExtSection
     (α : M) (p : Fin (Module.finrank ℝ E)) (x : M) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -332,19 +266,6 @@ private lemma chartFrameExtSection_value
   change smoothExtensionTangent (I := I) x (chartBasisVecFiber (I := I) α p x) x = _
   rw [smoothExtensionTangent_eq]
 
-/-- **Chart-coordinate value expansion of the differentiated base-slot curvature.** For
-`x ∈ chartLeviCivitaGoodSet α` and bundled smooth fields `Sp, Sq, Sr` with acted vector `w`, the
-differentiated base-slot curvature expands in the chart-`α` frame as a multilinear combination of
-the chart-`α` coordinates `a, b, c, e` of the four slot values `Sp x, Sq x, Sr x, w` against the
-chart `∇R` coefficient:
-```
-nablaBaseSlotCurv g Sp Sq Sr x w
-  = ∑_l (∑_{p,q,r,s} a_p b_q c_r e_s · nablaChartRiemannCoeff g α p q r s l (ϕ_α x)) • e^α_l x,
-```
-where `a = repr (Sp x)`, `b = repr (Sq x)`, `c = repr (Sr x)`, `e = repr w` in the chart-`α`
-basis `chartBasisFamily α`. By value-multilinearity (the finite-sum slot lemmas and the acted
-finite-sum lemma) it reduces to the chart-frame value expansion
-`nablaBaseSlotCurv_chartBasisVec_alpha_value` on the frame-extension sections. -/
 private lemma nablaBaseSlotCurv_chartCoord_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -368,7 +289,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
   set ev : Fin n → ℝ := fun s => (chartBasisFamily (I := I) α hxbase).repr w s with hev_def
   set P : Fin n → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     fun p => chartFrameExtSection (I := I) α p x with hP_def
-  -- the chart-coordinate decomposition of each slot value.
+  
   have hSp_decomp : (Sp : Π z : M, TangentSpace I z) x =
       (∑ p : Fin n, a p • P p : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x := by
     rw [ContMDiffSection.finset_sum_apply]
@@ -398,13 +319,13 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     rw [← hrep]
     refine Finset.sum_congr rfl (fun s _ => ?_)
     rw [hev_def, chartBasisFamily_apply]
-  -- Replace the three section slots by the frame-extension sums (value-determinacy), and the
-  -- acted vector by its chart-frame sum.
+  
+  
   rw [nablaBaseSlotCurv_eq_of_leftMidRight (I := I) g Sp (∑ p : Fin n, a p • P p)
       Sq (∑ q : Fin n, b q • P q) Sr (∑ r : Fin n, c r • P r) x hSp_decomp hSq_decomp hSr_decomp w]
   conv_lhs => rw [hw_decomp]
   rw [nablaBaseSlotCurv_finsetSum_smul_acted]
-  -- Per `s`, expand the three section slots into the triple chart-coordinate sum.
+  
   have hper_s : ∀ s : Fin n,
       nablaBaseSlotCurv (I := I) g (∑ p : Fin n, a p • P p) (∑ q : Fin n, b q • P q)
           (∑ r : Fin n, c r • P r) x (chartBasisVecFiber (I := I) α s x) =
@@ -420,10 +341,10 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     rw [nablaBaseSlotCurv_smul_right, nablaBaseSlotCurv_finsetSum_Z, Finset.smul_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl (fun r _ => ?_)
     rw [nablaBaseSlotCurv_smul_Z, smul_smul, smul_smul]
-  -- Assemble: substitute `hper_s`, expand `P p = chartFrameExtSection`, apply the chart-frame value
-  -- expansion, then reorganise the five-fold sum into `∑_l coeff_l • e^α_l`.
+  
+  
   rw [Finset.sum_congr rfl (fun s _ => by rw [hper_s s])]
-  -- expand each `nablaBaseSlotCurv (P p)(P q)(P r) x (e_s)` by the chart-frame value expansion.
+  
   have hPval : ∀ (p q r s : Fin n),
       nablaBaseSlotCurv (I := I) g (P p) (P q) (P r) x (chartBasisVecFiber (I := I) α s x) =
         ∑ l : Fin n,
@@ -433,8 +354,8 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     exact nablaBaseSlotCurv_chartBasisVec_alpha_value (I := I) g α p q r s hx (P p) (P q) (P r)
       (chartFrameExtSection_value (I := I) α p x) (chartFrameExtSection_value (I := I) α q x)
       (chartFrameExtSection_value (I := I) α r x)
-  -- Substitute the chart-frame value expansion `hPval`, flatten all smuls/sums into the canonical
-  -- 5-fold sum over `(s, p, q, r, l)`, then reindex `l` to the front.
+  
+  
   have hLHS : (∑ s : Fin n, ev s •
         ∑ p : Fin n, ∑ q : Fin n, ∑ r : Fin n,
           (a p * b q * c r) •
@@ -457,7 +378,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     congr 2
     ring
   rw [hLHS]
-  -- reindex `∑_s ∑_p ∑_q ∑_r ∑_l = ∑_l ∑_p ∑_q ∑_r ∑_s` (move `l` front, `s` back).
+  
   rw [show (∑ s : Fin n, ∑ p : Fin n, ∑ q : Fin n, ∑ r : Fin n, ∑ l : Fin n,
         (a p * b q * c r * ev s *
           nablaChartRiemannCoeff (I := I) g α p q r s l (extChartAt I α x)) •
@@ -471,7 +392,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
         (a p * b q * c r * ev s *
           nablaChartRiemannCoeff (I := I) g α p q r s l (extChartAt I α x)) •
           chartBasisVecFiber (I := I) α l x with hF_def
-    -- bubble `l` up through `r, q, p, s`.
+    
     have e1 : (∑ s : Fin n, ∑ p : Fin n, ∑ q : Fin n, ∑ r : Fin n, ∑ l : Fin n, F s p q r l) =
         ∑ s : Fin n, ∑ p : Fin n, ∑ q : Fin n, ∑ l : Fin n, ∑ r : Fin n, F s p q r l := by
       refine Finset.sum_congr rfl (fun s _ => ?_)
@@ -498,7 +419,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     refine Finset.sum_congr rfl (fun q _ => ?_)
     rw [Finset.sum_comm]]
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- inner: ∑_p ∑_q ∑_r ∑_s coeff • e_l = (∑_p ∑_q ∑_r ∑_s coeff) • e_l.
+  
   rw [Finset.sum_smul]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [Finset.sum_smul]
@@ -507,10 +428,6 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
   refine Finset.sum_congr rfl (fun r _ => ?_)
   rw [Finset.sum_smul]
 
-/-! ### Uniform bound on the chart-`∇R` coefficient over the partition-of-unity support -/
-
-/-- The chart-`α` `∇R` coefficient as a function on the Euclidean model space, by precomposition
-with `toEuclidean.symm`. -/
 private def nablaChartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s l : Fin (Module.finrank ℝ E)) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
@@ -539,10 +456,6 @@ private lemma nablaChartRiemannEuclid_contDiffOn
         (I := I) (M := M) hy
   exact hcomp
 
-/-- **Uniform bound on the chart-`α` `∇R` coefficient over the chart-`α` partition-of-unity
-tsupport.** The chart `∇R` coefficient `nablaChartRiemannCoeff` is `C^∞` on the chart-target
-interior, hence continuous, hence bounded on the compact chart-`α` image of the
-partition-of-unity tsupport. -/
 private lemma exists_nablaChartRiemannData_uniform_bound_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -595,11 +508,8 @@ private lemma exists_nablaChartRiemannData_uniform_bound_pouTsupport
     _ ≤ C_fn (((p, q), (r, s)), l) := hbd_idx
     _ ≤ C := hidx_le
 
-/-! ### Pointwise chart-`α` `g`-norm bound for the frame-summed differentiated curvature operator -/
-
 set_option linter.unusedSectionVars false in
-/-- The closed support of the chart-atlas partition-of-unity weight at `α` is contained in the
-chart-local good set, on a boundaryless manifold. -/
+
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -613,8 +523,7 @@ private lemma pouTsupport_subset_goodSet (α : M) :
   exact chartAtlasPOU_isSubordinate I M α hb
 
 set_option linter.unusedSectionVars false in
-/-- The intrinsic `g`-norm squared of a tangent vector expressed through its chart-`α` frame
-coordinates and the chart Gram matrix. -/
+
 private lemma gInner_self_eq_chartGram_quadForm
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : TangentSpace I x) :
@@ -649,8 +558,6 @@ private lemma gInner_self_eq_chartGram_quadForm
           (∑ j, c j • chartBasisVecFiber (I := I) α j x) := by rw [← hv]
     _ = _ := hgi
 
-/-- The square of the chart-`α` coordinate sum of a vector is controlled by `cg⁻¹ · g(v, v)`,
-via the chart-Gram forward lower bound: `(∑_p (repr v p)²) ≤ cg⁻¹ · g(v, v)`. -/
 private lemma chartCoord_sq_sum_le
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -669,13 +576,12 @@ private lemma chartCoord_sq_sum_le
   rw [inv_mul_eq_div, le_div_iff₀' hcg]; exact hlow
 
 set_option linter.unusedSectionVars false in
-/-- Factorisation of a four-fold finite sum of a product of single-index factors:
-`∑_p ∑_q ∑_r ∑_s F p · G q · H r · K s = (∑ F)(∑ G)(∑ H)(∑ K)`. -/
+
 private lemma sum4_prod_factor {ι : Type*} [Fintype ι] (F G H K : ι → ℝ) :
     (∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, F p * G q * H r * K s) =
       (∑ p : ι, F p) * (∑ q : ι, G q) * (∑ r : ι, H r) * (∑ s : ι, K s) := by
   classical
-  -- pull `∑_s K s`, then `∑_r H r`, etc., out of the four-fold sum.
+  
   have hs : (∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, F p * G q * H r * K s) =
       ∑ p : ι, ∑ q : ι, ∑ r : ι, (F p * G q * H r) * (∑ s : ι, K s) :=
     Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ =>
@@ -692,10 +598,6 @@ private lemma sum4_prod_factor {ι : Type*} [Fintype ι] (F G H K : ι → ℝ) 
       rw [← Finset.sum_mul, ← Finset.sum_mul, ← Finset.mul_sum])
   rw [hq, ← Finset.sum_mul, ← Finset.sum_mul, ← Finset.sum_mul]
 
-/-- The frame-summed differentiated curvature operator value `W_{x, a} u = ∑_i nablaBaseSlotCurv g
-B_i B_i B_a x u` expanded in the chart-`α` frame: `W_{x, a} u = ∑_l Coeff_l • e^α_l x`, where
-`Coeff_l = ∑_i ∑_{p, q, r, s} (rB_i p)(rB_i q)(rB_a r)(ru s) · nablaChartRiemannCoeff g α p q r s l`,
-with `rv = repr v` in the chart-`α` basis. -/
 private lemma W_chartFrame_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -716,15 +618,13 @@ private lemma W_chartFrame_expand
   classical
   rw [Finset.sum_congr rfl (fun i _ => nablaBaseSlotCurv_chartCoord_expand (I := I) g α hx hxbase
     (B i) (B i) Ba u)]
-  -- swap `∑_i ∑_l = ∑_l ∑_i` and pull the per-`l` coefficient sum out.
+  
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [Finset.sum_smul]
 
 set_option linter.unusedSectionVars false in
-/-- Pure real-arithmetic core of the differentiated `g`-norm bound: given the nonnegativity and
-the four scaling bounds `Sa² ≤ N·G`, `Su² ≤ N·G·U`, `T ≤ N²·G`, the squared coefficient product
-`(CR·Sa·Su·T)²` is `≤ CR²·N⁶·G⁴·U`. -/
+
 private lemma diffCurv_arith_core
     {CR Sa Su T N G U : ℝ}
     (_hCR : 0 ≤ CR) (_hSa : 0 ≤ Sa) (_hSu : 0 ≤ Su) (hT : 0 ≤ T)
@@ -738,13 +638,6 @@ private lemma diffCurv_arith_core
         gcongr
     _ = CR ^ 2 * (N ^ 6 * G ^ 4) * U := by ring
 
-/-- **Pointwise chart-`α` `g`-norm bound for the frame-summed differentiated curvature operator.**
-At a partition-of-unity support point `x` of the chart at `α`, given the uniform chart-`∇R`-data
-bound `CR`, the chart-Gram forward lower bound `cg > 0`, and the chart-Gram upper bound `CG`, all
-specialised at `x`, and `g_x`-orthonormality of the frame `B` and the read direction `Ba`
-(`g(B_i x, B_i x) = 1`, `g(Ba x, Ba x) = 1`), the intrinsic `g`-norm squared of the frame-summed
-differentiated curvature value `W_{x, a} u = ∑_i (∇_{B_i} R)(B_i, B_a) u` is bounded by
-`CG · CR² · n⁷ · cg⁻⁴ · g(u, u)`. -/
 private lemma gNorm_W_le_chartConstants
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -770,15 +663,15 @@ private lemma gNorm_W_le_chartConstants
         (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u) ≤
       CG * CR ^ 2 * (Module.finrank ℝ E : ℝ) ^ 7 * cg⁻¹ ^ 4 * g.inner x u u := by
   classical
-  -- (work directly with `Module.finrank ℝ E`)
-  -- chart coordinates of the slot vectors.
+  
+  
   set bi : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i p => (chartBasisFamily (I := I) α hx_base).repr (B i x) p
     with hbi_def
   set ca : Fin (Module.finrank ℝ E) → ℝ := fun r => (chartBasisFamily (I := I) α hx_base).repr (Ba x) r with hca_def
   set du : Fin (Module.finrank ℝ E) → ℝ := fun s => (chartBasisFamily (I := I) α hx_base).repr u s with hdu_def
   set R : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun p q r s l => nablaChartRiemannCoeff (I := I) g α p q r s l (extChartAt I α x) with hR_def
-  -- the per-`l` coefficient.
+  
   set coeff : Fin (Module.finrank ℝ E) → ℝ := fun l =>
     ∑ i : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
       bi i p * bi i q * ca r * du s * R p q r s l with hcoeff_def
@@ -786,7 +679,7 @@ private lemma gNorm_W_le_chartConstants
       (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u) =
         ∑ l : Fin (Module.finrank ℝ E), coeff l • chartBasisVecFiber (I := I) α l x := by
     rw [W_chartFrame_expand (I := I) g α hx_good hx_base B Ba u]
-  -- The intrinsic norm via the chart Gram form, bounded above by `CG · ∑_l coeff_l²`.
+  
   have hgnorm_le :
       g.inner x (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u)
           (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u) ≤
@@ -804,19 +697,19 @@ private lemma gNorm_W_le_chartConstants
       ring
     rw [heq]
     exact hCGbound coeff
-  -- Per-`l` coefficient bound: |coeff l| ≤ CR · Sa · Su · (∑_i Sbi_i²) where S(v) = ∑|repr v|.
+  
   set Sbi : Fin (Module.finrank ℝ E) → ℝ := fun i => ∑ p : Fin (Module.finrank ℝ E), |bi i p| with hSbi_def
   set Sa : ℝ := ∑ r : Fin (Module.finrank ℝ E), |ca r| with hSa_def
   set Su : ℝ := ∑ s : Fin (Module.finrank ℝ E), |du s| with hSu_def
   have hSbi_nn : ∀ i, 0 ≤ Sbi i := fun i => Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSa_nn : 0 ≤ Sa := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSu_nn : 0 ≤ Su := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-  -- |coeff l| ≤ ∑_i CR · Sbi_i · Sbi_i · Sa · Su.
+  
   have hcoeff_abs : ∀ l, |coeff l| ≤ ∑ i : Fin (Module.finrank ℝ E), CR * (Sbi i * Sbi i * Sa * Su) := by
     intro l
     rw [hcoeff_def]
     refine le_trans (Finset.abs_sum_le_sum_abs _ _) (Finset.sum_le_sum (fun i _ => ?_))
-    -- inner four-fold sum over p, q, r, s.
+    
     have hinner : |∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
           bi i p * bi i q * ca r * du s * R p q r s l| ≤
         ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
@@ -828,12 +721,12 @@ private lemma gNorm_W_le_chartConstants
       rw [abs_mul, abs_mul, abs_mul, abs_mul]
       exact mul_le_mul_of_nonneg_left (hCRbound p q r s l) (by positivity)
     refine le_trans hinner ?_
-    -- factor the four-fold abs sum: = Sbi_i · Sbi_i · Sa · Su · CR.
+    
     have hfac : (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
           |bi i p| * |bi i q| * |ca r| * |du s| * CR) =
         (Sbi i) * (Sbi i) * Sa * Su * CR := by
       rw [hSbi_def, hSa_def, hSu_def]
-      -- pull `CR` out, then factor the four-fold product sum.
+      
       rw [show (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
             |bi i p| * |bi i q| * |ca r| * |du s| * CR) =
           (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
@@ -848,7 +741,7 @@ private lemma gNorm_W_le_chartConstants
       rw [sum4_prod_factor (fun p => |bi i p|) (fun q => |bi i q|) (fun r => |ca r|)
         (fun s => |du s|)]
     rw [hfac]; exact le_of_eq (by ring)
-  -- Collect: |coeff l| ≤ CR · Sa · Su · (∑_i Sbi_i²).
+  
   set T : ℝ := ∑ i : Fin (Module.finrank ℝ E), Sbi i * Sbi i with hT_def
   have hT_nn : 0 ≤ T := Finset.sum_nonneg (fun i _ => mul_nonneg (hSbi_nn i) (hSbi_nn i))
   have hcoeff_abs' : ∀ l, |coeff l| ≤ CR * Sa * Su * T := by
@@ -856,7 +749,7 @@ private lemma gNorm_W_le_chartConstants
     refine le_trans (hcoeff_abs l) ?_
     rw [hT_def, Finset.mul_sum]
     refine le_of_eq (Finset.sum_congr rfl (fun i _ => by ring))
-  -- coeff_l² ≤ CR² · Sa² · Su² · T², then ∑_l ≤ n · (that).
+  
   have hcoeff_sq : ∀ l, coeff l ^ 2 ≤ (CR * Sa * Su * T) ^ 2 := by
     intro l
     calc coeff l ^ 2 = |coeff l| ^ 2 := (sq_abs _).symm
@@ -867,7 +760,7 @@ private lemma gNorm_W_le_chartConstants
           Finset.sum_le_sum (fun l _ => hcoeff_sq l)
       _ = (Module.finrank ℝ E : ℝ) * (CR * Sa * Su * T) ^ 2 := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Chebyshev for each `S(v)² ≤ n · ∑(repr v)²`, then chart-Gram-lower + orthonormality.
+  
   have hCheb : ∀ (v : TangentSpace I x), (∑ p : Fin (Module.finrank ℝ E), |(chartBasisFamily (I := I) α hx_base).repr v p|) ^ 2 ≤
       (Module.finrank ℝ E : ℝ) * ∑ p : Fin (Module.finrank ℝ E), (chartBasisFamily (I := I) α hx_base).repr v p ^ 2 := by
     intro v
@@ -879,7 +772,7 @@ private lemma gNorm_W_le_chartConstants
       Finset.sum_congr rfl (fun p _ => sq_abs _)
     rw [heq] at h
     exact h
-  -- Sa² ≤ n · cg⁻¹, Su² ≤ n · cg⁻¹ · g(u, u), Sbi_i² ≤ n · cg⁻¹.
+  
   have hcg_inv_nn : (0 : ℝ) ≤ cg⁻¹ := le_of_lt (inv_pos.mpr hcg)
   have hn_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
   have hguu_nn : 0 ≤ g.inner x u u := metric_inner_self_nonneg (I := I) g x u
@@ -902,7 +795,7 @@ private lemma gNorm_W_le_chartConstants
       rw [hBon i, mul_one]
     refine le_trans (hCheb (B i x)) ?_
     gcongr
-  -- T = ∑_i Sbi_i² ≤ n² cg⁻¹.
+  
   have hT_le : T ≤ (Module.finrank ℝ E : ℝ) ^ 2 * cg⁻¹ := by
     have hstep : T ≤ ∑ _i : Fin (Module.finrank ℝ E), (Module.finrank ℝ E : ℝ) * cg⁻¹ := by
       rw [hT_def]
@@ -910,7 +803,7 @@ private lemma gNorm_W_le_chartConstants
     refine le_trans hstep ?_
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     rw [show ((Module.finrank ℝ E : ℝ) ^ 2 * cg⁻¹) = (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * cg⁻¹) from by ring]
-  -- (CR Sa Su T)² ≤ CR² n⁶ cg⁻⁴ g(u,u) via the arithmetic core.
+  
   have hSaTU_sq : (CR * Sa * Su * T) ^ 2 ≤
       CR ^ 2 * ((Module.finrank ℝ E : ℝ) ^ 6 * cg⁻¹ ^ 4) * g.inner x u u :=
     diffCurv_arith_core hCR hSa_nn hSu_nn hT_nn hn_nn hcg_inv_nn hguu_nn hSa_sq hSu_sq hT_le
@@ -927,53 +820,6 @@ private lemma gNorm_W_le_chartConstants
           mul_le_mul_of_nonneg_left hcoeffsum_le hCG
     _ = CG * CR ^ 2 * (Module.finrank ℝ E : ℝ) ^ 7 * cg⁻¹ ^ 4 * g.inner x u u := by ring
 
-/-- **Continuous per-point `g`-operator envelope of the frame-summed differentiated curvature
-operator.** For a smooth Riemannian metric `g` on a closed manifold `M`, there is a *continuous*
-nonnegative function `Kw : M → ℝ` such that, at every base point `x` and for every second-slot frame
-index `a` and every tangent vector `u`,
-```
-g.inner x (W_{x, a} u) (W_{x, a} u) ≤ Kw x · g.inner x u u,
-```
-where `W_{x, a} := nablaBaseSlotCurvFrameSumCLM g (fun i => smoothOrthoFrame g x i)
-(smoothOrthoFrame g x a) x` is the frame-summed differentiated base-tangent curvature operator
-`w ↦ ∑_i (∇_{B_i} R)(B_i, B_a) w`, read in the `g_x`-orthonormal frame `B_j := smoothOrthoFrame g x j`.
-
-**Why this is TRUE.** Fix `x`. The endomorphism `W_{x, a}` is a fixed continuous linear map on the
-finite-dimensional fibre `T_x M`, so its `g_x`-operator-norm-squared is a finite nonnegative number;
-choosing `Kw x` to be (an upper bound for, uniformly in `a`) that operator-norm-squared gives the
-displayed proportional bound at `x` for all `(a, u)`. The only content beyond pointwise existence is
-that the envelope can be chosen **continuously** in `x`. The frame-summed value `W_{x, a} u` is the
-intrinsic divergence-of-curvature endomorphism `w ↦ ∑_i (∇_{B_i} R)(B_i, B_a) w` of the once-covariantly
-differentiated Levi-Civita Riemann tensor `∇R`, a smooth `(1, 3)`-tensor field on `M`: in any chart at
-`β` the chart-coordinate components `∂_a R^l{}_{ijk}(g, β)(ϕ_β b) + (Γ · R)`-corrections are `C^∞`
-(polynomial in the chart Christoffel symbols `chartChristoffel`, the chart Riemann data
-`chartRiemannTensor`, and their first partials — all `C^∞` on the chart-target interior by
-`chartChristoffel_contDiffOn_interior` and `chartRiemannTensor_contDiffOn_interior`) and *uniformly
-bounded* on the compact chart-`β` partition-of-unity support. The `g_x`-orthonormal frame
-`B_j = smoothOrthoFrame g x j` is the Gram-Schmidt normalisation of the chart frame (a `C^∞` function of
-the bounded smooth chart Gram data, positive-definite by `chartGramMatrix_posDef`); reading the
-differentiated-curvature value against this frame and controlling the intrinsic fibre norm through the
-forward chart-frame Gram Rayleigh route (`chartGramMatrix` continuous on the chart base set) and its
-reverse companion yields a continuous (indeed locally Lipschitz) envelope `Kw` on the finitely-many
-compact chart supports that cover `M`, patched to a global continuous function by the partition of
-unity. This is the chart-locality-free route (no `HasLocallyConstantChartAt`, no chart-trivialisation
-operator-norm scalar); the only chart objects are the bounded chart Christoffel / Riemann data, their
-first partials, and the positive-definite chart Gram matrix.
-
-**Non-vacuity.** A degenerate witness `Kw ≡ 0` is rejected on any manifold whose curvature has a
-non-vanishing first covariant derivative: at a point `x` where the divergence-of-curvature endomorphism
-`W_{x, a}` is nonzero there is a `u` with `W_{x, a} u ≠ 0`, hence `g.inner x (W_{x, a} u) (W_{x, a} u) >
-0` (positive-definiteness of `g`) while the right-hand side `0 · g.inner x u u = 0`, contradicting the
-bound. So the envelope must carry the genuine differentiated-curvature magnitude — it cannot be the
-trivial zero function.
-
-This is the genuinely-irreducible analytic content (the continuity of the differentiated-curvature
-operator norm / the bridge from uniformly-bounded chart `∇R` data to a continuous intrinsic-fibre-norm
-differentiated-curvature bound), the once-differentiated companion of the base-curvature continuous
-envelope `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`. It is posited here
-as the precise continuous-envelope primitive and discharged separately; the *uniformisation* over the
-compact `M` (the supremum) is proved on top of it in
-`exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound`. -/
 theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     (g : SmoothRiemannianMetric I M) :
     ∃ Kw : M → ℝ, Continuous Kw ∧ (∀ x : M, 0 ≤ Kw x) ∧
@@ -991,8 +837,8 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
                 (smoothOrthoFrame_smooth (I := I) g x a)) x u) ≤
           Kw x * g.inner x u u := by
   classical
-  -- (work directly with `Module.finrank ℝ E`)
-  -- Per-chart uniform constants from the three uniform chart bounds.
+  
+  
   have hCR_ex : ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ b ∈ tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
         ∀ p q r s l : Fin (Module.finrank ℝ E),
@@ -1029,7 +875,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
   refine ⟨fun _ => ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Kα α, continuous_const,
     fun _ => Finset.sum_nonneg (fun α _ => hKα_nonneg α), ?_⟩
   intro x a u
-  -- Rewrite `W` as the explicit frame sum and find a chart `α` whose PoU weight at `x` is nonzero.
+  
   simp only [nablaBaseSlotCurvFrameSumCLM_apply]
   have hsum := DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
     (I := I) (M := M) x
@@ -1049,7 +895,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     pouTsupport_subset_goodSet (I := I) α hx_tsupport
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
-  -- Orthonormality of the smooth orthonormal frame at its centre.
+  
   have hBon : ∀ i : Fin (Module.finrank ℝ E),
       g.inner x ((ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
           (smoothOrthoFrame_smooth (I := I) g x i)) x)
@@ -1067,7 +913,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     have := smoothOrthoFrame_orthonormal_at_center (I := I) g x a a
     rw [if_pos rfl] at this
     simpa using this
-  -- Apply the pointwise chart-`α` bound.
+  
   have hpt := gNorm_W_le_chartConstants (I := I) g α hx_base hx_good
     (CR := CR α) (CG := CG α) (cg := cg α) (hCR0 α) (hCG0 α) (hcg0 α)
     (fun p q r s l => hCRbound α x hx_tsupport p q r s l)
@@ -1099,22 +945,6 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     _ ≤ (∑ β ∈ chartAtlasPOU_finset (I := I) (M := M), Kα β) * g.inner x u u := by
         gcongr
 
-/-- **Compact-uniform intrinsic `g`-norm bound for the frame-summed differentiated curvature
-operator.** For a smooth Riemannian metric `g` on a closed manifold `M`, there is a single
-nonnegative constant `Kw`, independent of the base point `x` and the second-slot frame index `a`, with
-```
-g.inner x (W_{x, a} u) (W_{x, a} u) ≤ Kw · g.inner x u u    for all x, a, u,
-```
-where `W_{x, a} := nablaBaseSlotCurvFrameSumCLM g (fun i => smoothOrthoFrame g x i)
-(smoothOrthoFrame g x a) x` is the frame-summed differentiated base-tangent curvature operator
-`w ↦ ∑_i (∇_{B_i} R)(B_i, B_a) w`. The bound is stated entirely through the intrinsic `g`-fibre norms
-`‖·‖_g² = g.inner x · ·`, with the `g_x`-orthonormal frame's unit Gram normalisation `g(B_i, B_i) =
-g(B_a, B_a) = 1` already absorbed into the constant.
-
-This is the once-differentiated companion of `exists_uniform_riemannOp_LeviCivita_gNorm_bound`. The
-constant is the compact sup of the continuous per-point differentiated-curvature `g`-operator envelope
-`Kw` supplied by `exists_continuous_nablaCurvSec_frameSum_gNorm_envelope`; it is extracted through the
-image-compactness route (a continuous real function on a compact space has bounded range). -/
 theorem exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Kw : ℝ, 0 ≤ Kw ∧

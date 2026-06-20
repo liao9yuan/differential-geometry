@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
 
-/-!
-# The quantitative Sobolev bound for the per-component weak-equation source
-
-The per-component scalar weak equation of the connection Laplacian has an
-explicit, test-function-independent right-hand side `tensorComponentWeakRHS`
-(`WeakSolutionGlobal.lean`). On the Euclidean chart target it is a finite
-combination of four coefficient groups:
-
-* a **source-pairing** group — a smooth chart coefficient times the chart
-  components of the source `F`, zeroth-order in chart derivatives;
-* a **principal-rotation** group — a smooth chart coefficient times a single
-  chart-Euclidean partial of a chart component of the solution `T`;
-* a **lower-order value** group — collecting the undifferentiated
-  Christoffel-correction contributions, a smooth chart coefficient times either
-  a chart-Euclidean partial of a `T`-component or an undifferentiated
-  `T`-component;
-* a **gradient** group `∑_l ∂_l(…)` — the chart-Euclidean divergence of a smooth
-  chart coefficient times the chart components of `T`.
-
-This file bounds the iterated `W^{m,2}` norm of `tensorComponentWeakRHS` over a
-precompact open subdomain `Ω''` of the chart target by the `W^{m,2}` norms of
-the chart components of `F` and the `W^{m+1,2}` norms of the chart components
-of `T`, with a constant that depends only on the geometric data — it is uniform
-in `T`, `F` and `Ω''`. The four coefficient-group bounds are assembled from the
-`Ω`-uniform smooth-multiplier infrastructure of `BootstrapSource.lean`.
-
-## Main result
-
-* `tensorComponentWeakRHS_wkpNorm_le` — for fixed geometric data there is a
-  constant `Kc ≥ 0`, depending only on `g, r, s, α, m, P₀, K`, such that for
-  every pair of chart-supported smooth compactly-supported tensor sections
-  `T F` whose chart components are supported in `K`, and every precompact open
-  `Ω'' ⊆ chartTargetEuclid α`,
-  `wkpNorm m 2 (tensorComponentWeakRHS g r s T F α hK hK_target P₀) Ω'' ≤
-    ENNReal.ofReal Kc ·
-      (∑ Q, wkpNorm m 2 (tensorComponentEuclid g r s F α Q) Ω'' +
-        ∑ P, wkpNorm (m+1) 2 (tensorComponentEuclid g r s T α P) Ω'')`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -80,15 +41,8 @@ section Headline
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
 
-/-- **The `W^{m,2}` bound for the source-pairing group.** There is a constant
-`Kc ≥ 0`, depending only on the geometric data, such that for every
-chart-supported smooth compactly-supported source `F` whose chart components are
-supported in `K`, and every precompact open `Ω'' ⊆ chartTargetEuclid α`, the
-source-pairing group lies in `W^{m,2}(Ω'')` and its `W^{m,2}` norm is bounded by
-`Kc` times the sum of the `W^{m,2}` norms of the chart components of `F`. -/
 private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -175,12 +129,6 @@ private lemma exists_densityMul_sourcePairingCoeff_wkpNorm_le
     hΩ''_open h_ae]
   exact h_sum_le
 
-/-- **The `W^{m,2}` bound for the principal-rotation group.** There is a constant
-`Kc ≥ 0`, depending only on the geometric data, such that for every
-chart-supported smooth compactly-supported solution `T` whose chart components
-are supported in `K`, and every precompact open `Ω'' ⊆ chartTargetEuclid α`, the
-principal-rotation group lies in `W^{m,2}(Ω'')` and its `W^{m,2}` norm is bounded
-by `Kc` times the sum of the `W^{m+1,2}` norms of the chart components of `T`. -/
 private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -286,12 +234,6 @@ private lemma exists_densityMul_covPrincipalRotationCoeff_wkpNorm_le
     hΩ''_open h_ae]
   exact h_sum_le
 
-/-- **The `W^{m,2}` bound for the lower-order value group.** There is a constant
-`Kc ≥ 0`, depending only on the geometric data, such that for every
-chart-supported smooth compactly-supported solution `T` whose chart components
-are supported in `K`, and every precompact open `Ω'' ⊆ chartTargetEuclid α`, the
-lower-order value group lies in `W^{m,2}(Ω'')` and its `W^{m,2}` norm is bounded
-by `Kc` times the sum of the `W^{m+1,2}` norms of the chart components of `T`. -/
 private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -504,8 +446,6 @@ private lemma exists_densityMul_covLowerOrderRotationValueCoeff_wkpNorm_le
   rw [ENNReal.ofReal_add hKcA_nn hKcBC_nn, add_mul]
   exact add_le_add hA_le hBC_le
 
-/-- For a chart direction `l` the chart coefficient family of `weightedGradCoeff
-l`, indexed by tuples `(P, Q, k, p)`. -/
 private noncomputable def weightedGradChartCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P₀ : CompIdx E r s)
     (l : Fin dimE)
@@ -518,7 +458,6 @@ private noncomputable def weightedGradChartCoeff
       a.1.1 a.2.2.2.1 a.1.2 a.2.2.2.2 y *
     covChartMetricGramInv (I := I) (M := M) g r s α y a.2.1 P₀
 
-/-- Each `weightedGradChartCoeff` is `C^∞` on the chart target. -/
 private lemma weightedGradChartCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P₀ : CompIdx E r s)
     (l : Fin dimE)
@@ -534,9 +473,6 @@ private lemma weightedGradChartCoeff_contDiffOn
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M)
       g r s α a.2.1 P₀)
 
-/-- On the chart target `weightedGradCoeff g r s T α P₀ l` equals the finite sum
-over tuples `(P, Q, k, p)` of `weightedGradChartCoeff` against the chart
-components `tensorComponentEuclid g r s T α p`. -/
 private lemma weightedGradCoeff_eq_chartCoeffSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (P₀ : CompIdx E r s)
@@ -573,13 +509,6 @@ private lemma weightedGradCoeff_eq_chartCoeffSum
   unfold weightedGradChartCoeff
   ring
 
-/-- **The `W^{m,2}` bound for the gradient group.** There is a constant
-`Kc ≥ 0`, depending only on the geometric data, such that for every
-chart-supported smooth compactly-supported solution `T` whose chart components
-are supported in `K`, and every precompact open `Ω'' ⊆ chartTargetEuclid α`, the
-gradient group `∑_l ∂_l (weightedGradCoeff l)` lies in `W^{m,2}(Ω'')` and its
-`W^{m,2}` norm is bounded by `Kc` times the sum of the `W^{m+1,2}` norms of the
-chart components of `T`. -/
 private lemma exists_gradientGroup_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -732,27 +661,6 @@ private lemma exists_gradientGroup_wkpNorm_le
     h_partial_le).trans ?_
   rw [ENNReal.ofReal_sum_of_nonneg (fun l _ => hKl_nn l)]
 
-/-- **The quantitative `W^{m,2}` bound for the per-component weak source.** For
-fixed geometric data — a smooth Riemannian metric `g` on a closed manifold, a
-chart center `α`, tensor ranks `(r, s)`, a chart order `m`, a component
-multi-index `P₀`, and a compact `K` inside the chart target — there is a
-constant `Kc ≥ 0`, depending only on that data, such that for **every** pair of
-chart-supported smooth compactly-supported `(r, s)`-tensor sections `T` (the
-solution) and `F` (the source) whose chart components are supported in `K`, and
-**every** precompact open subdomain `Ω'' ⊆ chartTargetEuclid α`, the
-test-function-independent right-hand side `tensorComponentWeakRHS` lies in
-`W^{m,2}(Ω'')` and obeys
-
-```
-wkpNorm m 2 (tensorComponentWeakRHS g r s T F α hK hK_target P₀) Ω'' ≤
-  ENNReal.ofReal Kc ·
-    (∑ Q, wkpNorm m 2 (tensorComponentEuclid g r s F α Q) Ω'' +
-      ∑ P, wkpNorm (m+1) 2 (tensorComponentEuclid g r s T α P) Ω'').
-```
-
-The constant `Kc` is quantified before `T` and `F`: it is uniform in the tensor
-sections and in the subdomain, depending only on the geometric data and the
-compact `K`. -/
 theorem tensorComponentWeakRHS_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)

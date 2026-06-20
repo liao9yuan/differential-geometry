@@ -2,58 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ManifoldH2.NonSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearVariationalIdentity
 
-/-!
-# Manifold-level non-smooth `H²` interior regularity for `laplacianDomain g`
-
-This module records the manifold-level non-smooth `H²` regularity statement for
-elements of the variational Laplacian's domain `laplacianDomain g`, packaged
-in `MemWkpChart g 2 2` form.
-
-The headline `laplacianDomain_memWkpChart_two` says:
-
-> For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and
-> any element `u_h ∈ laplacianDomain g`, the canonical function representative
-> `((H1ComplToLp u_h) : M → ℝ)` (the `Lp.coeFn` of the L² class associated to
-> `u_h`) lies in `MemWkpChart g 2 2`, with a finite chart-based norm.
-
-The proof routes through the existing hypothesis-bearing canonical form
-`memWkpChart_two_of_laplacianDomain_canonical` from `ManifoldH2NonSmooth.lean`.
-The per-chart `ChartH2NonSmoothPOUWitness` evidence is supplied by the
-constructive helper `chartH2NonSmoothPOUWitness_of_laplacianDomain_canonical`,
-which combines:
-
-* `chartBilinearH1ComplData_of_laplacianDomain` from `LaplacianDomainChartData.lean`
-  (the chart-bilinear non-smooth weak-solution data structure carrying the
-  chart-pulled `u`, `f`, the explicit weak first partials, and the variational
-  identity);
-* `chartBilinear_substitution_identity_holds` from
-  `Sobolev/Nirenberg/SubstitutionIdentity/ChartBilinearVariationalIdentity.lean`
-  (the unconditional substitution identity for the chart-bilinear data);
-* `chart_loc_of_uniform_bound` from `Regularity/ChartHk/H2NonSmooth.lean`
-  (the per-chart weak-second-partial output of the localised Nirenberg argument).
-
-## Structural form
-
-The headline is **hypothesis-form**: it consumes a per-chart
-`ChartH2NonSmoothPOUWitness g (lpRep g u_h) α` witness for every chart point
-`α : M`, and produces `MemWkpChart g 2 2 (lpRep g u_h)` plus a finite
-chart-based norm. The per-chart witness is the natural target of the
-chart-level non-smooth `H²` machinery; assembling it unconditionally from
-`u_h ∈ laplacianDomain g` requires the full Friedrichs-commutator
-plus uniform-in-`h` Nirenberg-estimate bootstrap, which is delivered by the
-chart-bilinear unconditional substitution identity together with the localised
-absorbing inequality on the precompact subdomains. The wrapping of these
-pieces into a per-chart `MemWkp 2 2` membership statement is the analytical
-content of the per-chart witness; this module provides the manifold-level
-packaging once those witnesses are in hand.
-
-## Notation
-
-Throughout, `EuclN := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))` is the model
-Euclidean fibre. The chart-pushed function is taken with the canonical atlas
-partition of unity `chartAtlasPOU I M`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -89,27 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Manifold-level non-smooth `H²` regularity for `laplacianDomain g`,
-single-step form.**
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and
-any `u_h ∈ laplacianDomain g`, the canonical function representative
-`((H1ComplToLp u_h) : M → ℝ)` lies in `MemWkpChart g 2 2`, with a finite
-chart-based norm.
-
-The conclusion is in the **canonical** form
-`((H1ComplToLp u_h :
-  Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)`, which is
-the `Lp.coeFn` of the L² class associated to `u_h`. This matches the
-`laplacianDomain.lpRep (I := I) (M := M) g u_h` function representative
-introduced in `ManifoldH2NonSmooth.lean`.
-
-The per-chart `MemWkp 2 2` evidence is supplied by the consumer; the
-unconditional construction of this evidence from `u_h ∈ laplacianDomain g`
-follows from the chart-bilinear non-smooth weak-solution machinery
-(`chartBilinearH1ComplData_of_laplacianDomain` plus
-`chartBilinear_substitution_identity_holds` plus the localised absorbing
-inequality `chart_loc_of_uniform_bound`). -/
 theorem laplacianDomain_memWkpChart_two
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -135,13 +62,6 @@ theorem laplacianDomain_memWkpChart_two
       (laplacianDomain.lpRep (I := I) (M := M) g u_h) α := h_witness
   exact memWkpChart_two_of_laplacianDomain_canonical (I := I) (M := M) g u_h hu_h h_witness'
 
-/-- **Existential form: existence of a function representative with
-`MemWkpChart g 2 2` membership.**
-
-For any `u_h ∈ laplacianDomain g`, there exists a function `u : M → ℝ` whose
-`MemWkpChart g 2 2` membership holds, provided per-chart witnesses are
-supplied. The existential function is the canonical representative
-`((H1ComplToLp u_h) : M → ℝ)`. -/
 theorem exists_laplacianDomain_memWkpChart_two
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -161,9 +81,6 @@ theorem exists_laplacianDomain_memWkpChart_two
   · exact (laplacianDomain_memWkpChart_two (I := I) (M := M) g hu_h h_witness).1
   · exact (laplacianDomain_memWkpChart_two (I := I) (M := M) g hu_h h_witness).2
 
-/-- **Bridge-data form**: the headline takes per-chart `ChartH2NonSmoothBridgeData`
-witnesses (each combining a chart-bilinear data structure with a uniform DQ
-bound and the target `MemWkp 2 2` membership). -/
 theorem laplacianDomain_memWkpChart_two_bridgeData
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -183,7 +100,6 @@ theorem laplacianDomain_memWkpChart_two_bridgeData
     (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) h_bridge
 
-/-- The chart-based `W^{1,2}` membership implied by `MemWkpChart g 2 2`. -/
 theorem laplacianDomain_memWkpChart_one
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

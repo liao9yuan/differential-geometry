@@ -5,56 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Basic
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
-/-!
-# Locality identities and continuity for `chartJ α` and `chartJinv α`
-
-For a smooth manifold `M` modelled on `(E, H)` with model `I`, and base points
-`α, b₀ : M`, this file collects the predicate-free building blocks that identify
-the chart Jacobian `chartJ α b` and its inverse `chartJinv α b` with a continuous
-`coordChangeL` CLM family on a neighbourhood of `b₀` where the chart selection is
-constant (`chartAt H b = chartAt H b₀`), together with a generic operator-norm
-bound on a compact set from continuity.
-
-## Strategy
-
-The chart-Jacobian `chartJ α b = (trivializationAt E (TangentSpace I) α)
-.continuousLinearMapAt ℝ b` and its inverse
-`chartJinv α b = (trivializationAt E (TangentSpace I) α).symmL ℝ b` are not, by
-themselves, continuous in `b` because the chart-selection function jumps
-between chart sources. On a neighbourhood `U_{b₀}` of any base point `b₀` where
-`chartAt H b = chartAt H b₀` (equivalently `achart H b = achart H b₀`), the
-trivialisation at `b₀` satisfies `(triv b₀).symmL b = id` and
-`(triv b₀).clmAt b = id`. Combining this with Mathlib's identity
-`(triv α).coordChangeL ℝ (triv β) b v = (triv β).clmAt b ((triv α).symmL b v)`
-(coming from the bundle's smooth coord-change structure) yields:
-
-* For `chartJ`, taking `α'` = `α`, `β` = `b₀` (and reading off the identity in
-  reverse direction): `(triv b₀).coordChangeL ℝ (triv α) b = (triv α).clmAt b
-  ∘L (triv b₀).symmL b = (triv α).clmAt b = chartJ α b` on the locality nbd.
-
-* For `chartJinv`, taking `α'` = `α`, `β` = `b₀`: `(triv α).coordChangeL ℝ
-  (triv b₀) b = (triv b₀).clmAt b ∘L (triv α).symmL b = (triv α).symmL b
-  = chartJinv α b` on the locality nbd.
-
-The `coordChangeL` CLM family is `ContMDiffOn` — hence continuous — on the
-intersection of base sets, by the `ContMDiffVectorBundle ∞ E (TangentSpace I)`
-Mathlib instance applied via `contMDiffOn_coordChangeL`. This gives continuity of
-`b ↦ chartJ α b` and `b ↦ chartJinv α b` on any such locality neighbourhood, and
-the generic lemma turns continuity on a compact set into a uniform op-norm bound.
-
-## Main results
-
-* `coordChangeL_eq_chartJ_of_locality` / `coordChangeL_eq_chartJinv_of_locality`
-  — identify the `coordChangeL` CLM with `chartJ α b` / `chartJinv α b` on the
-  locality neighbourhood.
-* `chartJ_continuousOn_loc` / `chartJinv_continuousOn_loc` — continuity of
-  `b ↦ chartJ α b` / `b ↦ chartJinv α b` on a locality neighbourhood.
-* `exists_opNorm_bound_on_compact_of_continuousOn` — a uniform op-norm bound on
-  a compact set from continuity there.
-
-These results require no Riemannian-metric structure.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -80,15 +30,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-/-- If `chartAt H b = chartAt H b₀`, the corresponding `achart` values agree
-as subtypes. -/
 private lemma achart_eq_of_chartAt_eq {b b₀ : M}
     (h_chart : chartAt H b = chartAt H b₀) :
     achart H b = achart H b₀ :=
   Subtype.ext h_chart
 
-/-- On the locality neighbourhood of `b₀`, the inverse trivialisation centred
-at `b₀` evaluated at `b` is the identity. -/
 private lemma trivb₀_symmL_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -101,8 +47,6 @@ private lemma trivb₀_symmL_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
-/-- On the locality neighbourhood of `b₀`, the forward trivialisation centred
-at `b₀` evaluated at `b` is the identity. -/
 private lemma trivb₀_clmAt_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -116,8 +60,6 @@ private lemma trivb₀_clmAt_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
-/-- The map `b ↦ (triv b₀).coordChangeL ℝ (triv α) b` is `ContMDiffOn` on
-`(chartAt H b₀).source ∩ (chartAt H α).source`, hence continuous. -/
 private lemma continuousOn_coordChangeL_b₀_α (b₀ α : M) :
     ContinuousOn
       (fun b : M => ((trivializationAt E (TangentSpace I) b₀).coordChangeL ℝ
@@ -142,9 +84,6 @@ private lemma continuousOn_coordChangeL_b₀_α (b₀ α : M) :
   rw [h_base_b₀, h_base_α] at h_smooth
   exact h_smooth.continuousOn
 
-/-- On the locality neighbourhood `U` of `b₀` (inside `(chart α).source`), the
-`coordChangeL` CLM `(triv b₀).coordChangeL ℝ (triv α) b` equals
-`chartJ α b`. -/
 private lemma coordChangeL_eq_chartJ_of_locality
     (α : M) {b b₀ : M}
     (hb_α : b ∈ (chartAt H α).source)
@@ -182,9 +121,6 @@ private lemma coordChangeL_eq_chartJ_of_locality
   rw [h_eq]
   rfl
 
-/-- On the locality neighbourhood `U` of `b₀` (inside `(chart α).source`), the
-`coordChangeL` CLM `(triv α).coordChangeL ℝ (triv b₀) b` equals
-`chartJinv α b`. -/
 private lemma coordChangeL_eq_chartJinv_of_locality
     (α : M) {b b₀ : M}
     (hb_α : b ∈ (chartAt H α).source)

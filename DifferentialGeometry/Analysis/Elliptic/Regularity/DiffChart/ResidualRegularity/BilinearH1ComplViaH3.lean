@@ -2,85 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-/-!
-# Chart-side `W^{1,2}` regularity for the once-differentiated chart-bilinear data
-
-For `u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold `(M, g)`,
-the once-differentiated chart-bilinear data
-`D₁ := diffChartBilinearH1ComplData_of_laplacianDomainPow_two g α l₁ hu_h …`
-packages three chart-side scalar fields:
-
-* `D₁.u_chart_deriv`  — the chart-pushed weak `l₁`-partial of `u_h.coeFn`;
-* `D₁.f_chart_deriv`  — the chosen weak `l₁`-partial of `base.f_chart` (the
-  chart-pull of the right-hand side `fHLeibniz g α u_h`);
-* `D₁.weak_partial_deriv i` — the canonical chosen weak `l₁`-partial of
-  `chartPushed POU α u_h.coeFn` taken first in direction `i`, then in
-  direction `l₁`.
-
-The twice-differentiated chart-bilinear data constructor
-(`diffTwiceChartBilinearH1ComplData_of_laplacianDomainPow_two`) requires each
-of these three fields to be in `MemW1p 2` of the open chart-target image.
-This module discharges those `MemW1p 2` witnesses.
-
-## Strategy
-
-* **`D₁.u_chart_deriv` discharge (unconditional)**: The chart-pushed
-  function `chartPushed POU α u_h.coeFn` lies in `MemWkp 2 2 (chartTargetEuclid
-  α)` unconditionally for `u_h ∈ laplacianDomainPow g 2` (via the two-sided
-  `H²` regularity, `laplacianDomainPow_two_h2_plus_rhs_h2`). The canonical
-  chosen first weak partial `chartPushedChosenFirstPartial u_h l₁`
-  (i.e. `chosenWeakPartial' 2 l₁ (chartPushed POU α u_h.coeFn) chartTarget`)
-  therefore lies in `MemW1p 2 (chartTargetEuclid α)`. The function
-  `D₁.u_chart_deriv` (which is `chartPushedWeakPartialLp.coeFn`) is ae-equal
-  to this chosen first weak partial on every precompact open subdomain of
-  the chart target (by `HasWeakPartialDeriv.ae_eq` applied to the two weak
-  partials of the chart-pushed function). The chart target is open in
-  `EuclideanSpace ℝ (Fin n)`, hence locally compact and second countable,
-  hence σ-compact. By the σ-compact exhaustion, the precompact-open
-  ae-equality lifts to ae-equality on the entire chart target. The
-  conclusion follows by `MemW1p_congr_ae`.
-
-* **`D₁.f_chart_deriv` discharge (hypothesis-bearing)**: From a hypothesis
-  `MemWkp 2 2 base.f_chart (chartTargetEuclid α)` (i.e. chart-`H²` of the
-  chart-pulled right-hand side), `chosenWeakPartial' 2 l₁ base.f_chart
-  chartTarget ∈ MemW1p 2 (chartTargetEuclid α)` follows directly.
-
-* **`D₁.weak_partial_deriv i` discharge (hypothesis-bearing)**: From a
-  hypothesis `MemWkp 3 2 (chartPushed POU α u_h.coeFn) (chartTargetEuclid α)`
-  (i.e. chart-`H³` of the chart-pull of `u_h.coeFn`),
-  `chosenSecondPartialChartPushedU u_h i l₁ ∈ MemW1p 2 (chartTargetEuclid α)`
-  follows: the chart-pushed `Wkp 3 2` element has each first chosen partial in
-  `MemWkp 2 2`, and then each second chosen partial in `MemW1p 2`.
-
-## Main results
-
-* `diffChartBilinearH1Compl_u_chart_deriv_memW1p` — unconditional discharge
-  of the `MemW1p 2 D₁.u_chart_deriv (chartTargetEuclid α)` witness for the
-  once-differentiated data structure built from `u_h ∈ laplacianDomainPow
-  g 2`. Uses
-  `chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget` for
-  the σ-compact-exhaustion ae-equality lift.
-
-* `diffChartBilinearH1Compl_f_chart_deriv_memW1p` — discharge of the
-  `MemW1p 2 D₁.f_chart_deriv (chartTargetEuclid α)` witness, taking
-  `MemWkp 2 2 base.f_chart (chartTargetEuclid α)` as hypothesis.
-
-* `diffChartBilinearH1Compl_weak_partial_deriv_memW1p` — discharge of the
-  `MemW1p 2 (D₁.weak_partial_deriv i) (chartTargetEuclid α)` witness (per
-  `i`), taking `MemWkp 3 2 (chartPushed POU α u_h.coeFn) (chartTargetEuclid α)`
-  as hypothesis.
-
-## Bridge helpers
-
-* `chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_precompact_open` —
-  the chart-pushed weak partial coercion and the canonical chosen first weak
-  partial agree almost everywhere on every precompact open subdomain `Ω'`
-  with closure inside a compact subset of the chart target.
-
-* `chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget` — the
-  σ-compact-exhaustion lift to the entire chart-target image.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -119,8 +40,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The canonical chosen first weak partial of `chartPushed POU α u_h.coeFn`
-in coordinate direction `i` on the chart target. -/
 noncomputable def chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -131,8 +50,6 @@ noncomputable def chartPushedChosenFirstPartial
       ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ))
     (chartTargetEuclid (I := I) (M := M) α)
 
-/-- The canonical chosen first weak partial of the chart-pushed `u_h` lies in
-`MemW1p 2 (chartTargetEuclid α)` for `u_h ∈ laplacianDomainPow g 2`. -/
 theorem chartPushedChosenFirstPartial_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -156,8 +73,6 @@ theorem chartPushedChosenFirstPartial_memW1p_two
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h_step
   exact h_step
 
-/-- A `MemLp 2 (volume.restrict K)` regularity on a compact `K` implies
-`LocallyIntegrable` on the open precompact subdomain `Ω' ⊆ K`. -/
 private lemma locallyIntegrable_of_memLp_two_compact_open_subset
     (K Ω' : Set EuclN) (_hK_compact : IsCompact K) (hΩ'_subset_K : Ω' ⊆ K)
     (hΩ'_meas : MeasurableSet Ω')
@@ -173,14 +88,6 @@ private lemma locallyIntegrable_of_memLp_two_compact_open_subset
     rw [← h_eq]; exact hf_memLp_K.restrict Ω'
   exact hf_memLp_Ω'.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the chart-pushed weak partial coercion
-of `u_h` and the canonical chosen first weak partial of
-`chartPushed POU α u_h.coeFn` agree almost everywhere on every precompact
-open subset of the chart target.
-
-This is the unconditional ae-equality on precompact subdomains: ae-equality
-on the entire chart target follows by combining this with a σ-compact
-exhaustion (supplied as a hypothesis in the headline theorems below). -/
 theorem chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_precompact_open
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -269,8 +176,6 @@ theorem chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_precompact_open
     h_chartPushed_isWeakPartial_Ω' h_chosenFirst_isWeakPartial_Ω'
     h_chartPushed_locInt h_chosenFirst_locInt
 
-/-- The chart target image admits a countable cover by compact subsets, each
-contained in the chart target. -/
 private lemma chartTargetEuclid_sigmaCompact_cover
     (α : M) :
     ∃ K : ℕ → Set EuclN,
@@ -307,10 +212,6 @@ private lemma chartTargetEuclid_sigmaCompact_cover
       obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hz_in
       exact Set.mem_iUnion.mpr ⟨n, z, hn, rfl⟩
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the chart-pushed weak partial coercion
-of `u_h` and the canonical chosen first weak partial of
-`chartPushed POU α u_h.coeFn` agree almost everywhere on the entire
-chart-target image, with respect to plain Lebesgue volume. -/
 theorem chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -363,19 +264,6 @@ theorem chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
   rw [hK_seq_cov] at h_ae_union
   exact h_ae_union
 
-/-- **`MemW1p 2 D₁.u_chart_deriv (chartTargetEuclid α)` discharge,
-unconditional.**
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, direction
-`l₁`, and `u_h ∈ laplacianDomainPow g 2`, the chart-side first weak partial
-`(diffChartBilinearH1ComplData_of_laplacianDomainPow_two g α l₁ hu_h
-  h_base_f_chart_memW1p h_once_identity).u_chart_deriv` lies in `MemW1p 2`
-of the open chart-target image `chartTargetEuclid α`.
-
-The hypotheses `h_base_f_chart_memW1p` and `h_once_identity` are inputs of
-the once-differentiated chart-bilinear data constructor and play no role
-in this discharge — the conclusion depends only on `u_h ∈ laplacianDomainPow
-g 2`. -/
 theorem diffChartBilinearH1Compl_u_chart_deriv_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -446,13 +334,6 @@ theorem diffChartBilinearH1Compl_u_chart_deriv_memW1p
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae.symm).mp
     h_chosenFirst_memW1p
 
-/-- **`MemW1p 2 D₁.f_chart_deriv (chartTargetEuclid α)` discharge from
-chart-`H²` regularity of `base.f_chart`.**
-
-The hypothesis `h_base_f_chart_memWkp22` requires `base.f_chart` to be in
-`MemWkp 2 2` of the chart target. The conclusion `MemW1p 2 D₁.f_chart_deriv
-(chartTargetEuclid α)` then follows from the iterated Sobolev predicate
-projecting onto its first chosen weak partial. -/
 theorem diffChartBilinearH1Compl_f_chart_deriv_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -525,15 +406,6 @@ theorem diffChartBilinearH1Compl_f_chart_deriv_memW1p
     at h_step
   exact h_step
 
-/-- **`MemW1p 2 (D₁.weak_partial_deriv i) (chartTargetEuclid α)` discharge
-from chart-`H³` regularity of the chart-pull of `u_h.coeFn`.**
-
-The hypothesis `h_chartPushed_memWkp32` requires the chart-pulled function
-to be in `MemWkp 3 2` of the chart target — i.e. chart-`H³` regularity of
-`u_h.coeFn`. The conclusion `MemW1p 2 (D₁.weak_partial_deriv i)
-(chartTargetEuclid α)` then follows from two applications of
-`MemWkp.chosenWeakPartial_mem`: chart-`H³` ↦ chart-`H²` (first partial) ↦
-chart-`H¹` (second partial). -/
 theorem diffChartBilinearH1Compl_weak_partial_deriv_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)

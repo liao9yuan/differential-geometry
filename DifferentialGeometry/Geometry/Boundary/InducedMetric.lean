@@ -11,53 +11,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.LocallyConvex.Bounded
 
-/-!
-# Pull-back Riemannian metric on the boundary submanifold
-
-Let `M` be a smooth manifold modelled on `(E, H, I)` whose model with corners
-admits a smooth boundary stratum (`[hI : HasSmoothBoundary E H I]`). Given a
-smooth Riemannian metric `g` on the tangent bundle of `M`, this file constructs
-the *induced* (pull-back) inner product on the tangent bundle of the boundary
-submanifold `BoundaryManifold I M`.
-
-## Main definitions
-
-* `boundaryInclusion` — the inclusion `BoundaryManifold I M → M` (i.e.,
-  `Subtype.val`).
-* `dincl x` — the manifold derivative of the boundary inclusion at `x`,
-  as a continuous linear map `boundaryE →L[ℝ] E`.
-* `inducedMetricInner g x` — the pointwise pull-back of `g.inner x.val`
-  through `dincl x`, as a continuous bilinear form on `boundaryE`.
-
-## Main results
-
-* `boundaryInclusion_contMDiff` — the boundary inclusion is `C^∞`.
-* `dincl_injective` — the inclusion's differential is injective at each
-  boundary point. This follows from the chain rule applied to the local
-  formula `Phi := I ∘ inclH ∘ boundaryI.symm`, whose smooth left-inverse
-  `projE` (via the coordinate-compatibility identity) ensures the Fréchet
-  derivative has a left inverse, hence is injective.
-* `inducedMetricInner_apply` — the explicit formula
-  `inducedMetricInner g x v w = g.inner x.val (dincl x v) (dincl x w)`.
-* `inducedMetricInner_symm`, `inducedMetricInner_pos`,
-  `inducedMetricInner_isVonNBounded` — the structure-field properties of a
-  Riemannian metric on the boundary tangent bundle (modulo the bundle-section
-  smoothness, which is established at the chart-local level).
-
-## Implementation notes
-
-* The chart-local representation of the inclusion in the model spaces is
-  `Phi := I ∘ inclH ∘ boundaryI.symm : boundaryE → E`, smooth by the typeclass
-  field `I_inclH_boundaryI_symm_contDiff`.
-* Positive-definiteness follows from injectivity of `dincl`, which in turn
-  follows from the chain rule applied to the coordinate-compatibility identity
-  `projE ∘ I ∘ inclH = boundaryI`.
-* The von-Neumann bornology bound `isVonNBounded` reduces to metric
-  boundedness in finite dimensions, established via coercivity of the
-  positive-definite continuous bilinear form on a finite-dimensional inner
-  product space.
--/
-
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory Bornology
@@ -73,8 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 
-/-- The inclusion of the boundary submanifold into the ambient manifold,
-realised as `Subtype.val`. -/
 def boundaryInclusion (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] :
     BoundaryManifold I M → M :=
@@ -83,8 +34,6 @@ def boundaryInclusion (I : ModelWithCorners ℝ E H) (M : Type*)
 @[simp] lemma boundaryInclusion_apply (x : BoundaryManifold I M) :
     boundaryInclusion I M x = (x : M) := rfl
 
-/-- The chart-local representation of the boundary inclusion in the model
-spaces: `Phi := I ∘ inclH ∘ boundaryI.symm : boundaryE → E`. -/
 private def Phi (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
     hI.boundaryE → E :=
   (I : H → E) ∘ hI.inclH ∘ hI.boundaryI.symm
@@ -92,15 +41,11 @@ private def Phi (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
 private lemma Phi_eq (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
     Phi I = (I : H → E) ∘ hI.inclH ∘ hI.boundaryI.symm := rfl
 
-/-- The chart-local form of the inclusion is `C^∞`. -/
 private lemma Phi_contDiff (I : ModelWithCorners ℝ E H)
     [hI : HasSmoothBoundary E H I] :
     ContDiff ℝ ∞ (Phi I) :=
   hI.I_inclH_boundaryI_symm_contDiff
 
-/-- Coordinate compatibility in the model spaces: `projE ∘ Phi = id` on
-`boundaryE` (because `boundaryI` is boundaryless and so
-`boundaryI ∘ boundaryI.symm = id`). -/
 private lemma projE_comp_Phi (I : ModelWithCorners ℝ E H)
     [hI : HasSmoothBoundary E H I] :
     hI.projE ∘ Phi I = id := by
@@ -117,14 +62,11 @@ private lemma projE_comp_Phi (I : ModelWithCorners ℝ E H)
   rw [Phi_eq]
   simpa [Function.comp] using h1.trans h2
 
-/-- The smoothness exponent `∞` (i.e., `((⊤ : ℕ∞) : WithTop ℕ∞)`) is not
-equal to `0`. Local copy of `BoundaryManifold.lean`'s helper. -/
 private lemma infty_ne_zero_withTopENat : (∞ : WithTop ℕ∞) ≠ 0 := by
   intro h
   have h' : ((⊤ : ℕ∞) : WithTop ℕ∞) = ((0 : ℕ∞) : WithTop ℕ∞) := h
   exact ENat.top_ne_zero (WithTop.coe_eq_coe.mp h')
 
-/-- Smoothness of the boundary inclusion as a map between smooth manifolds. -/
 theorem boundaryInclusion_contMDiff
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M] :
     ContMDiff hI.boundaryI I ∞ (boundaryInclusion I M) := by
@@ -193,8 +135,6 @@ theorem boundaryInclusion_contMDiff
 
 variable [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
 
-/-- The differential of the boundary inclusion at a boundary point `x`, as a
-continuous linear map `boundaryE →L[ℝ] E`. -/
 noncomputable def dincl (x : BoundaryManifold I M) :
     hI.boundaryE →L[ℝ] E :=
   mfderiv hI.boundaryI I (boundaryInclusion I M) x
@@ -203,16 +143,11 @@ noncomputable def dincl (x : BoundaryManifold I M) :
     (dincl x : hI.boundaryE →L[ℝ] E) =
       mfderiv hI.boundaryI I (boundaryInclusion I M) x := rfl
 
-/-- The boundary inclusion is differentiable at every boundary point. -/
 private lemma boundaryInclusion_mdifferentiableAt (x : BoundaryManifold I M) :
     MDifferentiableAt hI.boundaryI I (boundaryInclusion I M) x :=
   (boundaryInclusion_contMDiff (I := I) (M := M)).mdifferentiableAt
     infty_ne_zero_withTopENat
 
-/-- Computation of the boundary inclusion's manifold derivative in coordinates.
-In the boundary chart at `x` and ambient chart at `x.val`, the chart-local
-representation is `Phi`, so the manifold derivative agrees with the Fréchet
-derivative of `Phi` evaluated at the chart point of `x`. -/
 private lemma dincl_eq_fderiv_Phi (x : BoundaryManifold I M)
     [Nonempty hI.boundaryH] :
     (dincl x : hI.boundaryE →L[ℝ] E) =
@@ -255,8 +190,6 @@ private lemma dincl_eq_fderiv_Phi (x : BoundaryManifold I M)
     rfl
   rw [Filter.EventuallyEq.fderiv_eq h_eq]
 
-/-- The Fréchet derivative of the chart-local form `Phi` is injective at every
-point, by the coordinate-compatibility identity `projE ∘ Phi = id`. -/
 private lemma fderiv_Phi_injective (e : hI.boundaryE) :
     Function.Injective (fderiv ℝ (Phi I) e) := by
   have h_proj_phi : hI.projE ∘ Phi I = id := projE_comp_Phi I
@@ -281,8 +214,6 @@ private lemma fderiv_Phi_injective (e : hI.boundaryE) :
   rw [h_comp_id] at h_apply
   simpa using h_apply
 
-/-- The differential of the boundary inclusion is injective at every boundary
-point. -/
 lemma dincl_injective (x : BoundaryManifold I M) :
     Function.Injective (dincl x) := by
   by_cases hN : Nonempty hI.boundaryH
@@ -294,9 +225,6 @@ lemma dincl_injective (x : BoundaryManifold I M) :
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     exact (IsEmpty.false x).elim
 
-/-- The metric `g.inner y`, for any `y : M`, viewed as a CLM
-`E →L[ℝ] E →L[ℝ] ℝ`. The cast is explicit to avoid triggering instance-resolution
-issues with the (non-reducible) `TangentSpace I y = E` defeq. -/
 private noncomputable def innerOnE
     (g : Measure.SmoothRiemannianMetric I M) (y : M) :
     E →L[ℝ] E →L[ℝ] ℝ := g.inner y
@@ -305,22 +233,17 @@ private noncomputable def innerOnE
     (g : Measure.SmoothRiemannianMetric I M) (y : M) (u v : E) :
     innerOnE g y u v = g.inner y u v := rfl
 
-/-- The pull-back inner product at `x : BoundaryManifold I M`, as a continuous
-bilinear form on the boundary model space `hI.boundaryE`. -/
 noncomputable def inducedMetricInner
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ :=
   (innerOnE g (x : M)).bilinearComp (dincl x) (dincl x)
 
-/-- Explicit formula for the pull-back inner product applied to two tangent
-vectors. -/
 @[simp] lemma inducedMetricInner_apply
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v w : hI.boundaryE) :
     inducedMetricInner g x v w = g.inner (x : M) (dincl x v) (dincl x w) :=
   ContinuousLinearMap.bilinearComp_apply _ _ _ _ _
 
-/-- Symmetry of the pull-back inner product. -/
 lemma inducedMetricInner_symm
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v w : hI.boundaryE) :
@@ -328,7 +251,6 @@ lemma inducedMetricInner_symm
   rw [inducedMetricInner_apply, inducedMetricInner_apply]
   exact g.symm (x : M) (dincl x v) (dincl x w)
 
-/-- Positive-definiteness of the pull-back inner product. -/
 lemma inducedMetricInner_pos
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v : hI.boundaryE) (hv : v ≠ 0) :
@@ -340,9 +262,6 @@ lemma inducedMetricInner_pos
   have h_zero : (dincl x) (0 : hI.boundaryE) = 0 := map_zero _
   exact dincl_injective (I := I) (M := M) x (h0.trans h_zero.symm)
 
-/-- A continuous positive-definite bilinear form on a finite-dimensional real
-normed space is *coercive*: there exists `c > 0` with
-`c · ‖v‖² ≤ B v v` for all `v`. -/
 private lemma exists_coercive_of_posDef
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     (B : V →L[ℝ] V →L[ℝ] ℝ)
@@ -405,8 +324,6 @@ private lemma exists_coercive_of_posDef
     rw [h_simplify] at h_step
     exact h_step
 
-/-- Bornology: the open unit ellipsoid of `inducedMetricInner g x` is von-Neumann
-bounded in `boundaryE`. -/
 lemma inducedMetricInner_isVonNBounded
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     IsVonNBounded ℝ {v : hI.boundaryE | inducedMetricInner g x v v < 1} := by
@@ -427,8 +344,6 @@ lemma inducedMetricInner_isVonNBounded
               Real.sqrt_sq h_norm_nn]
     _ ≤ Real.sqrt (1 / c) := Real.sqrt_le_sqrt h_v_sq_le
 
-/-- The chart-local form of the pull-back inner product, computed via the
-boundary chart at `x₀` and the ambient chart at `x₀.val`. -/
 private noncomputable def inducedMetricInnerLocal
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M) :
     hI.boundaryE → (hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ) :=
@@ -445,17 +360,10 @@ private noncomputable def inducedMetricInnerLocal
   change (innerOnE g _).bilinearComp _ _ v w = _
   exact ContinuousLinearMap.bilinearComp_apply _ _ _ _ _
 
-/-- The Fréchet derivative `e ↦ fderiv ℝ (Phi I) e` is `C^∞` between normed
-spaces, since `Phi I` is `C^∞`. -/
 private lemma fderiv_Phi_contDiff :
     ContDiff ℝ ∞ (fun e : hI.boundaryE => fderiv ℝ (Phi I) e) :=
   (Phi_contDiff I).fderiv_right (m := ∞) le_rfl
 
-/-- **Helper:** smoothness of a bilinear-form pullback at a point, in
-chart-trivialised form. Given:
-  * a smooth ambient bilinear-form section `ψ`,
-  * a smooth-in-coordinates linear bundle morphism `L`,
-the pull-back `bilinearComp(ψ, L, L)` is smooth in chart-trivialised form. -/
 private lemma bilinearComp_smooth_at
     {Eb Hb Bb : Type*} [NormedAddCommGroup Eb] [NormedSpace ℝ Eb]
     [TopologicalSpace Hb] {Ib : ModelWithCorners ℝ Eb Hb}
@@ -495,16 +403,12 @@ private lemma bilinearComp_smooth_at
   intro b
   rfl
 
-/-- Chart-local representation of the smooth section `g.inner` of the
-bilinear-form Hom-bundle over `M`, around `x₀ : M`. -/
 private noncomputable def gInnerCharted
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : M) (b : M) : E →L[ℝ] E →L[ℝ] ℝ :=
   ((trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
       (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x₀)
     ⟨b, g.inner b⟩).2
 
-/-- The chart-local representation `gInnerCharted` of `g.inner` at `x₀ : M` is
-`ContMDiff` at `x₀ ∈ M`. -/
 private lemma gInnerCharted_contMDiffAt
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
@@ -518,8 +422,6 @@ private lemma gInnerCharted_contMDiffAt
   exact ((trivializationAt _ _ x₀).contMDiffAt_section_iff h_x₀).mp
     h_section.contMDiffAt
 
-/-- Smoothness of `b ↦ gInnerCharted (x₀ : M) (b : M)` along the boundary
-inclusion `boundaryInclusion I M`, as a function of the boundary point. -/
 private lemma gInnerCharted_along_inclusion_contMDiffAt
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
@@ -532,10 +434,6 @@ private lemma gInnerCharted_along_inclusion_contMDiffAt
     gInnerCharted_contMDiffAt g (x₀ : M)
   exact h_at.comp x₀ h_inclusion_at
 
-/-- The bundle-trivialised form, applied to vectors `v, w ∈ E`, equals the
-bilinear-form pull-back of `g.inner b` through the inverse trivialisation
-linear maps. We state the pointwise version that avoids putting normed
-structure on `TangentSpace I b`. -/
 private lemma gInnerCharted_eval
     (g : Measure.SmoothRiemannianMetric I M) (x₀ b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) (v w : E) :
@@ -553,9 +451,6 @@ private lemma gInnerCharted_eval
   rw [Bundle.Trivial.linearMapAt_trivialization (𝕜 := ℝ) (B := M) (F := ℝ) b]
   rfl
 
-/-- The bundle-trivialised form of `inducedMetricInner g b`, evaluated at
-`v, w ∈ boundaryE`, expressed via `gInnerCharted` and the chart-conjugated
-boundary inclusion derivative. -/
 private lemma inducedMetricInner_chart_eval
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M)
     (b : BoundaryManifold I M)
@@ -604,10 +499,6 @@ private lemma inducedMetricInner_chart_eval
     simpa using this
   rw [hM_v, hM_w]
 
-/-- The chart-conjugated boundary inclusion derivative
-`b ↦ clmAt_M^x₀.val_b.val ∘ dincl b ∘ symmL_bdy^x₀_b` is `ContMDiffAt` at
-`x₀ : BoundaryManifold I M`. This is the chart-trivialised form of the
-manifold derivative of the boundary inclusion in the basepoint-`x₀` setup. -/
 private lemma dincl_chart_conjugated_contMDiffAt
     (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] E) ∞
@@ -667,7 +558,6 @@ private lemma dincl_chart_conjugated_contMDiffAt
     rfl
   exact h_mfderiv.congr_of_eventuallyEq h_nhds
 
-/-- The bundle section `b ↦ TotalSpace.mk' b (inducedMetricInner g b)` is `C^∞`. -/
 theorem inducedMetricInner_contMDiff
     (g : Measure.SmoothRiemannianMetric I M) :
     ContMDiff hI.boundaryI
@@ -734,8 +624,6 @@ theorem inducedMetricInner_contMDiff
       BoundaryManifold.isEmpty_of_isEmpty_boundaryH (I := I)
     intro x; exact (IsEmpty.false x).elim
 
-/-- The induced Riemannian metric on the boundary of `M`, obtained by pulling
-back `g` through the smooth boundary inclusion. -/
 noncomputable def inducedMetric
     (g : Measure.SmoothRiemannianMetric I M) :
     Measure.SmoothRiemannianMetric hI.boundaryI (BoundaryManifold I M) where

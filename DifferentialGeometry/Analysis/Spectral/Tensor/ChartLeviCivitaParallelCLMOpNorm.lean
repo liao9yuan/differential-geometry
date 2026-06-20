@@ -3,29 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUn
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 
-/-!
-# Uniform operator-norm bound for `chartLeviCivitaParallelCLM` along a general vector field
-
-The headline statement extends the basis-vector bound
-`chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport`
-to a general tangent vector argument: there exists a constant `C ≥ 0` such
-that for every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α` and every vector-field section `X`, the
-operator norm `‖chartLeviCivitaParallelCLM g α b X‖` is bounded by
-`C * ‖X b‖`.
-
-The key observation is that `chartLeviCivitaParallelCLM g α b X` only
-depends on the value `X b` at the point `b`, via the formula
-
-  `chartLeviCivitaParallelCLM g α b X = (trivFromE α b).comp
-      (christoffelCorrection g α b (trivToE α b (X b)))`.
-
-The proof factors through the Christoffel-correction op-norm bound and the
-two trivialization op-norm bounds (`chartJ`, `chartJinv`), all of which are
-uniformly bounded on the partition-of-unity tsupport under a uniform
-compactness hypothesis on the chart sources.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

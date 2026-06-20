@@ -3,82 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# Order-`K` iterated-Sobolev norm bounds for three eigenvector chart limit objects
-
-The chart-Euclidean right-hand side of the connection-Laplacian eigenvector's
-weak-solution assembly is built from `C^∞`-coefficient-weighted lower-order limit
-objects. Three of them are finite sums of `chartPouKernel α`-indicator-cut `C^∞`
-coefficients against the chart-component / chart-partial atoms `componentLpLimit`
-and `partialLpLimit`:
-
-* `covPrincipalRotationCoeffLimit g r s i α P₀` — a four-fold sum
-  over `(P, Q, k, l)` of the kernel-cut `C^∞` factor `principalRotationFactor`
-  against the chart-partial atom `partialLpLimit P k`;
-* `covLowerOrderRotationValueCoeffLimit g r s i α P₀` — a four-fold
-  sum over `(P, Q, k, l)` of the kernel-cut `C^∞` factor `valuePartialFactor`
-  against `partialLpLimit P k`, plus a five-fold sum over
-  `(P, Q, k, l, p)` of the kernel-cut `C^∞` factor `valueComponentFactor` against
-  `componentLpLimit p`;
-* `weightedGradCoeffDivLimit g r s i α P₀ l` — a four-fold sum over
-  `(P, Q, k, p)` of the kernel-cut chart-Euclidean partial of the `C^∞` factor
-  `weightedGradFactor` against `componentLpLimit p`, plus a
-  four-fold sum over `(P, Q, k, p)` of the kernel-cut `weightedGradFactor` against
-  `partialLpLimit p l`.
-
-The order-`0` companions `eLpNorm_covPrincipalRotationCoeffLimit_le`,
-`eLpNorm_covLowerOrderRotationValueCoeffLimit_le` and
-`eLpNorm_weightedGradCoeffDivLimit_le` bound the `eLpNorm` — i.e. the `wkpNorm` at
-Sobolev order `0` — of each limit object, against a chart-pulled weighted measure,
-by a nonnegative constant times a finite sum of the source atoms' `eLpNorm`. This
-file records their order-`K` generalisations: for an arbitrary order `K` there is
-a nonnegative constant `C` with
-
-```
-wkpNorm K 2 (<limit object> …) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C * <AGGREGATE_K>,
-```
-
-where `<AGGREGATE_K>` is the order-`K` analogue of the order-`0` `eLpNorm` atom
-sum: the finite sum of the order-`K` `wkpNorm` of the chart-component /
-chart-partial atoms `componentLpLimit` / `partialLpLimit` on the open Euclidean
-chart target.
-
-## Strategy
-
-Each limit object is a finite (double / quadruple) sum whose summands carry an
-`indicator (chartPouKernel α)` cut of a `C^∞`-on-the-chart-target coefficient,
-times an atom (`componentLpLimit` or `partialLpLimit`). The atoms are `W^{K,2}`
-on the chart target, given the order-`(K + 1)` partition-of-unity regularity
-input `h_pou`: the component atom is `μ` times the canonical eigenvector chart
-component, which is `W^{K,2}` by the Summand-1 route; the partial atom is `μ`
-times the eigenvector weak chart partial, which is `W^{K,2}` because the chart
-component is `W^{K+1,2}` and a weak partial of a `W^{K+1,2}` function is
-`W^{K,2}`. The atoms also vanish almost everywhere off the compact
-partition-of-unity kernel, so the indicator cut is absorbed: the indicator-cut
-summand agrees almost everywhere with the bare `C^∞`-coefficient product, whose
-order-`K` `wkpNorm` is controlled — through a smooth-coefficient cutoff and the
-global-smoothness Leibniz bound `wkpNorm_smul_smooth_bounded_le` — by an explicit
-constant times the order-`K` `wkpNorm` of the atom. The triangle inequality
-`wkpNorm_sum_le` over the nested finite sums assembles the per-summand bounds;
-every summation multiplicity and every per-coefficient constant folds into a
-single nonnegative `C`.
-
-## Main results
-
-* `wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional`
-* `wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional`
-* `wkpNorm_weightedGradCoeffDivLimit_le_unconditional`
-* `wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional`
-* `wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional`
-* `wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional`
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology
@@ -316,11 +240,7 @@ private lemma memWkp_finsetSum
 
 omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] in
-/-- A finite indexed family of `MemWkp K 2` summands, each `wkpNorm`-bounded by
-`ENNReal.ofReal C` times the order-`K` `wkpNorm` of an atom selected by a
-projection `proj`, has its summed `wkpNorm` bounded by `ENNReal.ofReal` of an
-explicit constant times the sum, over the distinct atoms, of the atoms'
-order-`K` `wkpNorm`. -/
+
 private lemma wkpNorm_finsetSum_le_const_mul_atomSum
     {α : M} {K : ℕ} {ι κ : Type*}
     (S : Finset ι) (T : Finset κ) (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ)
@@ -385,15 +305,7 @@ private lemma wkpNorm_finsetSum_le_const_mul_atomSum
               (chartTargetEuclid (I := I) (M := M) α) := by rw [h_cast]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-/-- **A weak chart partial of a `W^{K+1,2}` function is `W^{K,2}`.** For an open
-set `Ω`, a weak `k`-th partial `gpart` of a function `u` that is `W^{K+1,2}` on
-`Ω`, with `gpart` itself `L²` on `Ω`, lies in `W^{K,2}` on `Ω`.
 
-`u ∈ W^{K+1,2}` is in particular `W^{1,2}`, so `chosenWeakPartial' 2 k u Ω` is a
-weak `k`-th partial of `u` and lies in `W^{K,2}` (`MemWkp.chosenWeakPartial_mem`).
-Both `gpart` and `chosenWeakPartial' 2 k u Ω` are weak `k`-th partials of `u` and
-locally integrable, so they agree almost everywhere; `MemWkp` is invariant under
-almost-everywhere equality. -/
 private lemma memWkp_of_weakPartial_of_memWkp_succ
     {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -426,17 +338,7 @@ private lemma memWkp_of_weakPartial_of_memWkp_succ
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-/-- **A weak chart partial inherits the off-kernel vanishing of the
-differentiated function.** For an open set `Ω`, a closed set `Kc`, a weak `k`-th
-partial `gp` of a `W^{1,2}`-on-`Ω` function `u` that vanishes almost everywhere
-off `Kc`, with `gp` itself `L²` on `Ω`, the weak partial `gp` vanishes almost
-everywhere off `Kc`.
 
-The open subset `V := Ω \ Kc` carries `u =ᵐ 0`. The chosen weak `k`-th partial
-of `u` on `V` is therefore almost everywhere zero on `V`
-(`chosenWeakPartial'_ae_zero_of_ae_zero`); it and the restriction of `gp` to `V`
-are both weak `k`-th partials of `u` on `V`, so they agree almost everywhere on
-`V`, whence `gp =ᵐ 0` on `V`. -/
 private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -503,10 +405,7 @@ private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- From a finite (`Fintype`-indexed) family of `wkpNorm` bounds — each summand
-bounded by `ENNReal.ofReal Cⱼ` times the projected atom's `wkpNorm` — extract a
-single nonnegative constant valid uniformly across the family. The uniform
-constant is the sum of all the per-summand constants. -/
+
 private lemma exists_uniform_const_of_finite_wkpNorm_bounds
     {α : M} {K : ℕ} {ι κ : Type*} [Finite ι]
     (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ) (proj : ι → κ)
@@ -540,20 +439,6 @@ section LowerOrderWkpNormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
-/-- **Eigenbasis-uniform smooth-coefficient `wkpNorm` bound.** Given a
-coefficient smooth on the open Euclidean chart target, there is a *single*
-nonnegative constant `C` such that for every factor in `MemWkp K 2` on the chart
-target that vanishes almost everywhere off the compact partition-of-unity
-kernel, the product `coef · factor` lies in `MemWkp K 2` and its order-`K`
-Sobolev norm is bounded by `ENNReal.ofReal C` times the order-`K` norm of the
-factor.
-
-This is `wkpNorm_coef_mul_factor_le` with the factor moved into a `∀ factor`
-quantifier inside the `∃ C`. The hoist is sound because the constant — the
-Leibniz constant of the globally smooth compactly supported cutoff `χ · coef`,
-produced by `wkpNorm_smul_smooth_bounded_le` from a uniform bound on the
-iterated derivatives of `χ · coef` up to order `K` — is determined by `coef`,
-`K` and `α` alone, independently of the factor. -/
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ) {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -680,19 +565,6 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-/-- **Eigenbasis-uniform per-summand explicit-norm `wkpNorm` bound.** Given a
-coefficient smooth on the open Euclidean chart target, there is a *single*
-nonnegative constant `C` such that for every atom `G` in `MemWkp K 2` on the
-chart target that vanishes almost everywhere off the compact partition-of-unity
-kernel, the `chartPouKernel α`-indicator cut of the coefficient times `G` lies
-in `MemWkp K 2` and its order-`K` `wkpNorm` is bounded by `ENNReal.ofReal C`
-times the order-`K` `wkpNorm` of `G`.
-
-This is `wkpNorm_indicatorFactor_mul_atom_le` with the atom moved into a
-`∀ G` quantifier inside the `∃ C`; the constant is the factor-independent one
-delivered by `wkpNorm_coef_mul_factor_le_uniform`. Off the kernel the atom
-ae-vanishes, so the indicator-cut coefficient agrees almost everywhere with the
-uncut `C^∞` coefficient. -/
 private lemma wkpNorm_indicatorFactor_mul_atom_le_uniform
     (α : M) (K : ℕ) {coef : EuclN → ℝ}
     (hcoef : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -741,12 +613,7 @@ private lemma wkpNorm_indicatorFactor_mul_atom_le_uniform
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Eigenbasis-uniform finite-family `wkpNorm` constant collection.** Given a
-finite (`Finite`-indexed) family of `wkpNorm` bounds, additionally indexed by an
-eigenbasis index `δ`, with each summand bounded by `ENNReal.ofReal` of a
-`δ`-independent per-summand constant `Cf j` times the projected atom's
-`wkpNorm`, there is a *single* nonnegative constant `C` — hoisted before the
-`∀ δ` — bounding every summand uniformly. -/
+
 private lemma exists_uniform_const_of_finite_wkpNorm_bounds_uniform
     {α : M} {K : ℕ} {δ ι κ : Type*} [Finite ι]
     (F : δ → ι → EuclN → ℝ) (atom : δ → κ → EuclN → ℝ) (proj : ι → κ)
@@ -774,12 +641,7 @@ private lemma exists_uniform_const_of_finite_wkpNorm_bounds_uniform
     (f := fun j' => Cf j') (fun j' _ => hCf_nn j') (Finset.mem_univ j)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `eigenvectorVec_pou_memWkp`: the partition-of-unity
-Euclidean chart components of the canonical eigenbasis vector
-`tensorResolventEigenbasisVec … i` are `MemWkp N 2` on every chart
-target, given that those of the `L²`-coercion of the resolvent are `MemWkp N 2`.
-The two chart components differ by the nonzero scalar `μ⁻¹`, and `MemWkp` is
-scalar-invariant. -/
+
 private lemma eigenvectorVec_pou_memWkp
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
     (h_pou : ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -844,9 +706,7 @@ private lemma eigenvectorVec_pou_memWkp
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The component atom `componentLpLimit g r s i α P` vanishes almost
-everywhere off the compact partition-of-unity kernel `chartPouKernel α`.
-Chart-locality-free twin of `componentLpLimit_ae_zero_off_chartPouKernel`. -/
+
 private lemma componentLpLimit_ae_zero_off_chartPouKernel
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s) :
@@ -876,10 +736,7 @@ private lemma componentLpLimit_ae_zero_off_chartPouKernel
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The chart-partial atom `partialLpLimit g r s i α P k` vanishes
-almost everywhere off the compact partition-of-unity kernel `chartPouKernel α`,
-given the order-`(K + 1)` partition-of-unity regularity input `h_pou`.
-Chart-locality-free twin of `partialLpLimit_ae_zero_off_chartPouKernel`. -/
+
 private lemma partialLpLimit_ae_zero_off_chartPouKernel
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P : TensorCompIdx (E := E) r s)
@@ -953,14 +810,6 @@ private lemma partialLpLimit_ae_zero_off_chartPouKernel
   filter_upwards [h_ae, h_weak_zero'] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
-/-- **Eigenbasis-uniform order-`K` `wkpNorm` bound for the principal rotation
-coefficient limit (chart-locality-free).** Chart-locality-free twin of
-`wkpNorm_covPrincipalRotationCoeffLimit_le_uniform`: a *single* nonnegative
-constant `C`, independent of the eigenbasis index `i`, serves every `i`
-simultaneously, with every limit object keyed on the canonical eigenbasis vector
-`tensorResolventEigenbasisVec … i` and the order-`(K + 1)`
-partition-of-unity regularity input `h_pou` keyed on
-`eigenvectorResolvent`. -/
 theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1111,9 +960,6 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_uniform_unconditional
   rw [← h_eq, hΩ_def, ← h_atom_eq]
   exact h_bound
 
-/-- **Eigenbasis-uniform order-`K` `wkpNorm` bound for the lower-order rotation
-value coefficient limit (chart-locality-free).** Chart-locality-free twin of
-`wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform`. -/
 theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1454,9 +1300,6 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_uniform_unconditional
                     EuclN → ℝ) y) Ω)) := by
       rw [mul_add]
 
-/-- **Eigenbasis-uniform order-`K` `wkpNorm` bound for the chart-density-weighted
-lower-order gradient divergence coefficient limit (chart-locality-free).**
-Chart-locality-free twin of `wkpNorm_weightedGradCoeffDivLimit_le_uniform`. -/
 theorem wkpNorm_weightedGradCoeffDivLimit_le_uniform_unconditional
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (l : Fin (Module.finrank ℝ E))
@@ -1807,7 +1650,6 @@ section LowerOrderWkpNormBoundsUnconditional
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
-/-- Chart-locality-free twin of `wkpNorm_covPrincipalRotationCoeffLimit_le`. -/
 theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -1928,7 +1770,6 @@ theorem wkpNorm_covPrincipalRotationCoeffLimit_le_unconditional
   rw [← h_eq, hΩ_def, ← h_atom_eq]
   exact h_bound
 
-/-- Chart-locality-free twin of `wkpNorm_covLowerOrderRotationValueCoeffLimit_le`. -/
 theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -2267,7 +2108,6 @@ theorem wkpNorm_covLowerOrderRotationValueCoeffLimit_le_unconditional
                     EuclN → ℝ) y) Ω)) := by
       rw [mul_add]
 
-/-- Chart-locality-free twin of `wkpNorm_weightedGradCoeffDivLimit_le`. -/
 theorem wkpNorm_weightedGradCoeffDivLimit_le_unconditional
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (K : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s)

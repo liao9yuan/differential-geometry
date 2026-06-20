@@ -2,53 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
 
-/-!
-# Chart-parallel extension of a `(0, r)`-tensor
-
-Given a smooth manifold `M` with model fibre `E`, a chart center `α : M`, a
-basepoint `b : M`, and a `(0, r)`-tensor `T₀ ∈ Tensor0SSpace r I b`, this file
-constructs the *chart-α-parallel extension* of `T₀` to a section of the
-`(0, r)`-tensor bundle over `M`. This is the higher-rank analog of
-`chartParallelExtend` (for tangent vectors) from
-`ChartTensor0SCovariantDerivative.lean`.
-
-The construction is straightforward: at every point `b' : M`, the value of the
-parallel extension is obtained by transporting the chart-α-trivialised value of
-`T₀` (computed at the basepoint `b` via `continuousLinearMapAt`) back to the
-fibre `Tensor0SSpace r I b'` through the chart-α trivialisation inverse
-(`symmL`). On the chart-α trivialisation base set this gives a well-defined
-section whose chart-α trivialised representation is locally the constant value
-`continuousLinearMapAt ℝ b T₀ ∈ Tensor0SModel r ℝ E`. Off the base set, the
-construction returns the zero junk value coming from `symmL`.
-
-## Main results
-
-* `chartTensor0SParallelExtend r α b T₀`: the chart-α-parallel extension of
-  the `(0, r)`-tensor `T₀ : Tensor0SSpace r I b` across `M`, as a section
-  `Π b' : M, Tensor0SSpace r I b'`.
-* `chartTensor0SE_section_repr_chartTensor0SParallelExtend`: the chart-α
-  trivialised representation of the parallel extension equals the constant
-  `continuousLinearMapAt ℝ b T₀` on the chart-α trivialisation base set.
-* `chartTensor0SParallelExtend_repr_eventuallyEq_const`: the chart pullback
-  through `(extChartAt I α).symm` is locally constant in a neighbourhood of
-  `extChartAt I α b`.
-* `chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero`: as a consequence,
-  the Fréchet derivative of the chart pullback at `extChartAt I α b` vanishes.
-* `chartTensor0SParallelExtend_mdifferentiableAt`: manifold-differentiability
-  of the parallel extension as a total-space section, at the basepoint `b`.
-
-## Strategy
-
-The constructions and proofs strictly parallel those of
-`ChartLeviCivitaParallelExtend.lean` for the tangent bundle. The only changes
-are: replace `TangentSpace I b` by `Tensor0SSpace r I b`; replace
-`trivializationAt E (TangentSpace I) α` by
-`trivializationAt (Tensor0SModel r ℝ E) (fun y : M => Tensor0SSpace r I y) α`.
-The base sets of these two trivialisations coincide
-(`Bundle.Trivialization.baseSet_continuousMultilinearMap`), so the existing
-good-set membership lemmas can be reused with a minor `change`-rewrite.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -74,8 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-α-parallel extension of a `(0, r)`-tensor `T₀ : Tensor0SSpace r I b`
-across `M`, defined via the chart-α trivialisation. -/
 noncomputable def chartTensor0SParallelExtend
     (r : ℕ) (α b : M) (T₀ : Tensor0SSpace r I b) :
     Π b' : M, Tensor0SSpace r I b' :=
@@ -85,7 +36,6 @@ noncomputable def chartTensor0SParallelExtend
       ((trivializationAt (Tensor0SModel r ℝ E)
           (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt ℝ b T₀)
 
-/-- Pointwise unfolding of `chartTensor0SParallelExtend`. -/
 lemma chartTensor0SParallelExtend_apply
     (r : ℕ) (α b : M) (T₀ : Tensor0SSpace r I b) (b' : M) :
     chartTensor0SParallelExtend (I := I) r α b T₀ b' =
@@ -94,9 +44,6 @@ lemma chartTensor0SParallelExtend_apply
         ((trivializationAt (Tensor0SModel r ℝ E)
             (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt ℝ b T₀) := rfl
 
-/-- **Trivialised representation of the parallel extension.** The chart-α
-trivialised representation of `chartTensor0SParallelExtend r α b T₀` equals the
-constant `continuousLinearMapAt ℝ b T₀` on the chart-α trivialisation base set. -/
 lemma chartTensor0SE_section_repr_chartTensor0SParallelExtend
     (r : ℕ) (α b : M) (T₀ : Tensor0SSpace r I b) {b' : M}
     (hb' : b' ∈ (trivializationAt (Tensor0SModel r ℝ E)
@@ -113,8 +60,6 @@ lemma chartTensor0SE_section_repr_chartTensor0SParallelExtend
       (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb' _
 
-/-- A point in the chart Levi-Civita good set lies in the
-`(0, r)`-bundle trivialisation base set at `α`. -/
 lemma chartLeviCivitaGoodSet_mem_tensor0S_baseSet
     {α x : M} (r : ℕ)
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -124,11 +69,6 @@ lemma chartLeviCivitaGoodSet_mem_tensor0S_baseSet
   change x ∈ (trivializationAt E (TangentSpace I) α).baseSet
   exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
 
-/-- **Local constancy of the chart pullback.** For `b` in the chart Levi-Civita
-good set, the chart-α trivialised representation of
-`chartTensor0SParallelExtend r α b T₀`, pulled back through `(extChartAt I α).symm`,
-is eventually equal to the constant value `continuousLinearMapAt ℝ b T₀` in a
-neighbourhood of `extChartAt I α b`. -/
 lemma chartTensor0SParallelExtend_repr_eventuallyEq_const
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -169,10 +109,6 @@ lemma chartTensor0SParallelExtend_repr_eventuallyEq_const
   exact chartTensor0SE_section_repr_chartTensor0SParallelExtend
     (I := I) r α b T₀ hy_U
 
-/-- **Vanishing Fréchet derivative.** For `b` in the chart Levi-Civita good
-set, the Fréchet derivative at `extChartAt I α b` of
-`tensor0SChartE_section_repr r α (chartTensor0SParallelExtend r α b T₀) ∘ (extChartAt I α).symm`
-is the zero CLM. -/
 lemma chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -186,8 +122,6 @@ lemma chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero
   rw [Filter.EventuallyEq.fderiv_eq hev]
   exact fderiv_const_apply _
 
-/-- **Vanishing Fréchet derivative, applied form.** Applying the zero CLM to
-any vector argument gives zero. -/
 lemma chartTensor0SParallelExtend_repr_pullback_fderiv_apply_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) (w : E) :
@@ -199,13 +133,6 @@ lemma chartTensor0SParallelExtend_repr_pullback_fderiv_apply_eq_zero
         (I := I) r α hb T₀]
   rfl
 
-/-- **Manifold-differentiability of `chartTensor0SParallelExtend r α b T₀`
-as a section** at the basepoint `b`, on the chart Levi-Civita good set.
-
-The proof uses the fact that the chart-α trivialised representation of the
-parallel extension is constantly equal to `continuousLinearMapAt ℝ b T₀` on
-the trivialisation base set, and then applies the section-differentiability
-criterion through the trivialisation. -/
 lemma chartTensor0SParallelExtend_mdifferentiableAt
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :

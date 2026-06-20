@@ -1,54 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Bochner.Polarised
 
-/-!
-# Smooth-case Lp identity from the polarised Bochner-Weitzenböck identity
-
-For a closed Riemannian manifold `(M, g)` and smooth scalars `φ, v ∈ C^∞⟮I, M; ℝ⟯`,
-this module derives the **Lp class identity** from the pointwise polarised
-Bochner-Weitzenböck identity by lifting to `Lp 2 μ_g`.
-
-The pointwise identity (from `BochnerPolarised`) is
-
-```
-Δ_g(g(∇φ, ∇v))(x) =
-    g(∇(Δφ), ∇v)(x) + g(∇φ, ∇(Δv))(x)
-  + 2 · hessPairingChart g φ v x
-  + 2 · ricciTensor g x (∇φ x) (∇v x).
-```
-
-Rearranged into `(1 - Δ_g)`-form:
-
-```
-(1 - Δ_g)(g(∇φ, ∇v))(x) =
-    g(∇φ, ∇v)(x)
-  - g(∇(Δφ), ∇v)(x) - g(∇φ, ∇(Δv))(x)
-  - 2 · hessPairingChart g φ v x
-  - 2 · ricciTensor g x (∇φ x) (∇v x).
-```
-
-The Lp-class identity:
-
-```
-smoothToLp((1-Δ_g)(g(∇φ, ∇v))) =
-    smoothToLp(g(∇φ, ∇v))
-  - smoothToLp(g(∇Δφ, ∇v)) - smoothToLp(g(∇φ, ∇Δv))
-  - 2 • smoothToLp(hessPairingChart g φ v)
-  - 2 • smoothToLp(ricciTensor g · (∇φ) (∇v))
-```
-
-corresponds via the smooth-case identifications to the unconditional candidate
-`gradInnerLaplacianCandidateUnconditional g φ (smoothToH1Compl_mem_laplacianDomainPow_two g v)`,
-giving the `smoothCandidate_identification_target` statement for smooth `v`.
-
-## Main results
-
-* `gradInnerSmoothBundle_oneSubLapClassical_eq_polarised` — for smooth `(φ, v)`,
-  the smooth scalar `(gradInnerSmoothBundle g φ v).oneSubLapClassical` equals the
-  pointwise polarised `(1 - Δ_g)`-form.
-
-* `smoothToLp_oneSubLapClassical_eq_polarised` — at the Lp class level.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -80,19 +31,16 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For smooth `φ, v ∈ C^∞⟮I, M; ℝ⟯`, the sum `φ + v` is smooth. -/
 lemma contMDiff_phi_add_v
     (φ v : C^∞⟮I, M; ℝ⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => (φ : M → ℝ) y + (v : M → ℝ) y) :=
   φ.contMDiff.add v.contMDiff
 
-/-- For smooth `φ, v ∈ C^∞⟮I, M; ℝ⟯`, the difference `φ - v` is smooth. -/
 lemma contMDiff_phi_sub_v
     (φ v : C^∞⟮I, M; ℝ⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun y : M => (φ : M → ℝ) y - (v : M → ℝ) y) :=
   φ.contMDiff.sub v.contMDiff
 
-/-- The smooth scalar `g.inner b (∇φ b) (∇v b)` is `C^∞` on `M`. -/
 lemma contMDiff_g_inner_grad_phi_grad_v
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) :
     ContMDiff I 𝓘(ℝ) ∞ (fun b : M => g.inner b
@@ -104,8 +52,6 @@ lemma contMDiff_g_inner_grad_phi_grad_v
   intro b
   rw [grad_g_apply, grad_g_apply]
 
-/-- Specialisation of `bochner_polarised_pointwise` using smoothness witnesses
-constructed from `φ` and `v`. -/
 theorem bochner_polarised_pointwise_smoothCase
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (x : M) :
     Δ_g (I := I) g (contMDiff_g_inner_grad_phi_grad_v
@@ -125,7 +71,6 @@ theorem bochner_polarised_pointwise_smoothCase
     (contMDiff_phi_sub_v (I := I) (M := M) φ v)
     (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ v) x
 
-/-- `(1 - Δ_g)`-form of the polarised Bochner identity, specialised to smooth `(φ, v)`. -/
 theorem bochner_polarised_pointwise_oneSubLap_smoothCase
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (x : M) :
     g.inner x
@@ -151,8 +96,6 @@ theorem bochner_polarised_pointwise_oneSubLap_smoothCase
     (contMDiff_phi_sub_v (I := I) (M := M) φ v)
     (contMDiff_g_inner_grad_phi_grad_v (I := I) (M := M) g φ v) x
 
-/-- The smooth scalar `gradInnerSmoothBundle g φ v` has the explicit pointwise
-form `b ↦ g.inner b (∇φ b) (∇v b)`. -/
 lemma gradInnerSmoothBundle_toFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (b : M) :
     (gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun b =
@@ -161,8 +104,6 @@ lemma gradInnerSmoothBundle_toFun
         (gradFun (I := I) g v.toFun b) :=
   rfl
 
-/-- The smoothness witness for `gradInnerSmoothBundle g φ v.toFun` agrees with
-the smoothness witness for `b ↦ g.inner b (∇φ b) (∇v.toFun b)` via `Δ_g_congr_funext`. -/
 lemma Δ_g_gradInnerSmoothBundle_eq_contMDiff_g_inner
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (x : M) :
     Δ_g (I := I) g (gradInnerSmoothBundle (I := I) (M := M) g φ v).smooth x =

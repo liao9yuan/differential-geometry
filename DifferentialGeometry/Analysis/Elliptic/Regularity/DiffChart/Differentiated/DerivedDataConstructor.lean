@@ -7,47 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.Residual
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 
-/-!
-# Unconditional derived chart-bilinear data for `u_h ∈ laplacianDomainPow g 2`
-
-For `u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold `(M, g)` and
-a coordinate direction `l`, this module discharges the variational identity
-hypothesis of `derivedChartBilinearH1ComplData` unconditionally and packages
-the result into an axiom-clean `ChartBilinearH1ComplData g α` instance.
-
-The variational identity for the derived chart-bilinear data takes the form
-```
-∫_{chartTarget} ∑_{i,j} weightedInvGramOnEuclid · chosenSecondPartialChartPushedU_{i,l} · ∂_j ψ
-  + ∫_{chartTarget} densityOnEuclid · base.weak_partial l · ψ
-  = ∫_{chartTarget} densityOnEuclid · fChartEff g α l hu_h · ψ.
-```
-
-The discharge proceeds in three stages:
-
-* Stage A — combine the unconditional differentiated variational identity
-  (`differentiated_variational_identity_holds`) with the cross-derivative
-  integration-by-parts identity (`cross_derivative_term_ibp`) to express the
-  left-hand side as a sum of five explicit chart-pulled integrals.
-* Stage B — show that, on the chart-target complement of
-  `chartImagePOUTsupport α`, the chart-pulled base data fields
-  (`u_chart`, `f_chart`, `weak_partial`) and the iterated chosen weak partials
-  used in the variational identity are almost-everywhere zero. The result
-  follows by propagating the pointwise vanishing of `chartPushed POU α u_h.coeFn`
-  outside `chartImagePOUTsupport α` through weak-partial layers via the
-  fundamental lemma of the calculus of variations on an open subset.
-* Stage C — combine Stage A and Stage B with the indicator structure of
-  `fChartEff` to identify the integrated identity in the form required by the
-  derived data's variational identity.
-
-## Main results
-
-* `derived_variational_identity_holds` — the unconditional discharge of the
-  variational identity hypothesis of `derivedChartBilinearH1ComplData`.
-
-* `derivedChartBilinearH1ComplDataUnconditional` — the axiom-clean packaged
-  `ChartBilinearH1ComplData g α` instance.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -177,8 +136,6 @@ private lemma vol_restrict_complement_absCont_chartTarget (α : M) :
     (MeasureTheory.Measure.restrict_mono
       (chartTarget_diff_K_α_subset_target (I := I) (M := M) α) le_rfl)
 
-/-- `D.base.u_chart` agrees ae with `chartPushed POU α u_h.coeFn` on
-`volume.restrict chartTargetEuclid α`. -/
 private lemma base_u_chart_aeEq_chartPushed
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -226,7 +183,6 @@ private lemma base_u_chart_aeEq_chartPushed
     (H1ComplToLp (I := I) (M := M) g u_h)
   exact h_v_abs_w.ae_le h_coeFn
 
-/-- `D.base.u_chart` is ae zero on the chart-target complement of `K_α`. -/
 private lemma base_u_chart_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -250,8 +206,7 @@ private lemma base_u_chart_ae_zero_off_K_α
     hy_diff.1 hy_diff.2
 
 set_option linter.unusedVariables false in
-/-- Auxiliary: a function in `MemLp 2` of `volume.restrict (chartTargetEuclid α)`
-is locally integrable on the open subset `chartTargetEuclid α \ K_α`. -/
+
 private lemma locallyIntegrableOn_of_memLp_two_global
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -294,9 +249,7 @@ private lemma locallyIntegrableOn_of_memLp_two_global
   exact Metric.ball_subset_closedBall
 
 set_option linter.unusedVariables false in
-/-- Auxiliary: a function that is `MemLp 2 (vol.restrict K')` for every
-compact `K' ⊆ chartTargetEuclid α` is locally integrable on
-`chartTargetEuclid α \ K_α`. -/
+
 private lemma locallyIntegrableOn_of_locally_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
     (hf : ∀ K' : Set EuclN, IsCompact K' →
@@ -332,8 +285,7 @@ private lemma locallyIntegrableOn_of_locally_memLp_two
   exact Metric.ball_subset_closedBall
 
 set_option linter.unusedVariables false in
-/-- A continuous-on-`chartTargetEuclid α` real function is in `MemLp ∞` of
-`volume.restrict K` for every compact `K ⊆ chartTargetEuclid α`. -/
+
 private lemma memLp_top_of_continuousOn_on_compact
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
     (hf_contOn : ContinuousOn f (chartTargetEuclid (I := I) (M := M) α))
@@ -368,7 +320,6 @@ private lemma memLp_top_of_continuousOn_on_compact
   apply ENNReal.ofReal_le_ofReal
   exact hy.trans (le_max_left _ _)
 
-/-- `D.base.weak_partial i` is ae zero on the chart-target complement of `K_α`. -/
 lemma base_weak_partial_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -396,8 +347,6 @@ lemma base_weak_partial_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := i) h_isWeak hw_li hf_ae
 
-/-- The first chosen weak partial of `chartPushed POU α u_h.coeFn` is ae zero
-on the chart-target complement of `K_α`. -/
 private lemma chartPushed_first_weak_partial_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -444,8 +393,6 @@ private lemma chartPushed_first_weak_partial_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := i) h_isWeak hw_li h_pushed_zero
 
-/-- `chosenSecondPartialChartPushedU g α u_h i j` is ae zero on the chart-target
-complement of `K_α`. -/
 private lemma chosenSecondPartialChartPushedU_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -491,8 +438,6 @@ private lemma chosenSecondPartialChartPushedU_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li h_g_i_ae_zero
 
-/-- Local-`L²` regularity of `D.base.f_chart` on every compact subset of
-`chartTargetEuclid α`. -/
 private lemma base_f_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -514,13 +459,6 @@ private lemma base_f_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
-/-- `D.base.f_chart` is ae zero on the chart-target complement of `K_α`.
-
-Strategy: apply the base variational identity with a test function ψ supported
-in `chartTargetEuclid α \ K_α`. The LHS vanishes (since `D.u_chart` and
-`D.weak_partial i` are ae zero there), so `∫ c · D.f_chart · ψ = 0` for all
-such ψ. Since `c > 0` on the chart target, this forces `D.f_chart` ae zero on
-the open set via the standard fundamental-lemma argument. -/
 lemma base_f_chart_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -693,7 +631,6 @@ lemma base_f_chart_ae_zero_off_K_α
   filter_upwards [h_target_ae] with y hy hy_U
   exact hy hy_U
 
-/-- `chosenFChartDeriv` is ae zero on the chart-target complement of `K_α`. -/
 private lemma chosenFChartDeriv_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -724,8 +661,6 @@ private lemma chosenFChartDeriv_ae_zero_off_K_α
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := l) h_isWeak hw_li h_base_fc_ae
 
-/-- `fChartEffNumerator g α l hu_h` is ae zero on the chart-target complement
-of `K_α`. -/
 private lemma fChartEffNumerator_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))
@@ -796,9 +731,6 @@ private lemma fChartEffNumerator_ae_zero_off_K_α
     rw [hy_cspu i j]; ring
   rw [hy_fcd, hy_uc, hy_fc, h_sum_wp_zero, h_sum_cspu_zero]; ring
 
-/-- Integration equality: `∫_{chartTarget} fChartEffNumerator · ψ` equals
-`∫_{chartTarget} c · fChartEff · ψ`, via Stage B and the indicator structure of
-`fChartEff`. -/
 private lemma integral_fChartEffNumerator_eq_integral_density_fChartEff
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))
@@ -844,14 +776,6 @@ private lemma integral_fChartEffNumerator_eq_integral_density_fChartEff
       rw [h_pt]
   exact MeasureTheory.integral_congr_ae h_ae_eq
 
-/-- **Unconditional derived chart-bilinear variational identity.**
-
-For `u_h ∈ laplacianDomainPow g 2`, chart base point `α`, coordinate direction
-`l`, and a smooth compactly supported test function `ψ` with
-`tsupport ψ ⊆ chartTargetEuclid α`, the once-differentiated chart-bilinear
-variational identity holds with the chart-pulled effective `L²` source
-`fChartEff g α l hu_h`. This is the residual variational-identity hypothesis
-of `derivedChartBilinearH1ComplData`, discharged unconditionally. -/
 theorem derived_variational_identity_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))
@@ -1192,11 +1116,7 @@ theorem derived_variational_identity_holds
     (I := I) (M := M) g α l hu_h ψ
 
 set_option linter.unusedVariables false in
-/-- **Truly unconditional once-differentiated chart-bilinear data.**
 
-For `u_h ∈ laplacianDomainPow g 2` and a chart point `α : M`, the packaged
-once-differentiated chart-bilinear data instance, with the variational
-identity discharged unconditionally. -/
 noncomputable def derivedChartBilinearH1ComplDataUnconditional
     (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E))
@@ -1208,13 +1128,6 @@ noncomputable def derivedChartBilinearH1ComplDataUnconditional
       derived_variational_identity_holds (I := I) (M := M) g α l hu_h
         hψ hψ_cs hψ_supp)
 
-/-- **Public reformulation: `chosenSecondPartialChartPushedU` vanishes ae on the
-chart-target complement of `chartImagePOUTsupport α`.**
-
-The chosen second mixed weak partial of the canonical chart-pushed
-representative of `u_h ∈ laplacianDomainPow g 2` is ae zero on the open
-subset where the chart-pushed function itself vanishes (everything off the
-POU support). -/
 lemma chosenSecondPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

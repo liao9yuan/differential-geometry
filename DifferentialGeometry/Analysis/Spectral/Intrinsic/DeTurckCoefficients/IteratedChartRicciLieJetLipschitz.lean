@@ -1,39 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartJetLipschitzClosure
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieSummandLipschitz
 
-/-!
-# All-order chart-jet Faà-di-Bruno Lipschitz of the chart Ricci and Lie–DeTurck components
-
-The two genuine deliverables of the chart-jet Faà-di-Bruno tower: the **all-order**
-(general order `N`) Lipschitz dependence of the chart-frame Ricci tensor
-`chartRicciTensor` and of the chart-frame Lie–DeTurck (gauge) summand
-`chartLieDeTurckComp` on the chart-Gram jet of the metric difference, uniform on a compact
-subset of the chart-target interior.
-
-Both components are polynomials in the chart-Gram entries, the inverse chart-Gram, and
-their first/second partial derivatives (the coordinate Christoffel/Ricci/Lie formulas).
-By the closure algebra `HasChartJetLip`, the order-`N` iterated derivative of each
-difference expands by Faà-di-Bruno/Leibniz into a sum of products of `iteratedFDerivWithin l`
-(`l ≤ N + 2`) of the Gram entries (the `+2` is the two derivatives of the curvature
-expression), with constants uniform over a compact `R`-ball of metrics:
-```
-‖iteratedFDerivWithin ℝ N (chartRicciTensor g₁ α i k − chartRicciTensor g₂ α i k) s y‖ ≤
-    C · chartGramJetDiffSeminormSum (N + 2) g₁ g₂ α s y
-```
-and likewise for `chartLieDeTurckComp`.  These are the all-order generalizations of the
-`N = 0` atoms `exists_chartRicciTensor_lipschitz_on_compact` and
-`exists_chartLieDeTurckComp_lipschitz_on_compact`.
-
-## Main results
-
-* `hasChartJetLip_gramBracket`, `hasChartJetLip_chartChristoffel` — derivative loss `1`.
-* `hasChartJetLip_chartDeTurckVFComp` — derivative loss `1`.
-* `hasChartJetLip_chartRicciTensor`, `hasChartJetLip_chartLieDeTurckComp` — loss `2`.
-* `exists_chartRicciTensor_iteratedFDeriv_lipschitz_on_compact`,
-  `exists_chartLieDeTurckComp_iteratedFDeriv_lipschitz_on_compact` — the unpacked
-  all-order chart-jet Faà-di-Bruno Lipschitz estimates.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -59,8 +26,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
-/-- The `gramBracket` field (a combination of three first chart-Gram partials) has
-chart-jet Lipschitz with derivative loss `1`. -/
 theorem hasChartJetLip_gramBracket
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -88,7 +53,6 @@ theorem hasChartJetLip_gramBracket
   simp only [gramBracket]
   ring
 
-/-- The chart Christoffel symbol field has chart-jet Lipschitz with derivative loss `1`. -/
 theorem hasChartJetLip_chartChristoffel
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -113,8 +77,6 @@ theorem hasChartJetLip_chartChristoffel
   funext z
   rw [chartChristoffel_eq_sum_invGramOnE_bracket]
 
-/-- The chart DeTurck vector-field component field has chart-jet Lipschitz with derivative
-loss `1` (relative to a fixed background metric `g_bg`). -/
 theorem hasChartJetLip_chartDeTurckVFComp
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -168,7 +130,6 @@ theorem hasChartJetLip_chartDeTurckVFComp
   funext z
   rw [chartDeTurckVFComp_def]
 
-/-- The chart Riemann tensor field has chart-jet Lipschitz with derivative loss `2`. -/
 theorem hasChartJetLip_chartRiemannTensor
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -225,10 +186,6 @@ theorem hasChartJetLip_chartRiemannTensor
     refine Finset.sum_congr rfl (fun m _ => by ring)]
   ring
 
-/-- **All-order chart-jet Faà-di-Bruno Lipschitz of the chart Ricci tensor.**
-
-The chart Ricci tensor field `chartRicciTensor` has chart-jet Lipschitz with derivative
-loss `2`. -/
 theorem hasChartJetLip_chartRicciTensor
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -243,10 +200,6 @@ theorem hasChartJetLip_chartRicciTensor
   funext z
   rw [chartRicciTensor_def]
 
-/-- **All-order chart-jet Faà-di-Bruno Lipschitz of the chart Lie–DeTurck summand.**
-
-The chart Lie–DeTurck (gauge) summand field `chartLieDeTurckComp` has chart-jet Lipschitz
-with derivative loss `2`. -/
 theorem hasChartJetLip_chartLieDeTurckComp
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -302,17 +255,6 @@ theorem hasChartJetLip_chartLieDeTurckComp
   funext z
   rw [chartLieDeTurckComp_def]
 
-/-- **The unpacked all-order chart-jet Faà-di-Bruno Lipschitz estimate for the chart Ricci
-tensor**, on the chart-target interior `s = interior (extChartAt I α).target`.
-
-For two smooth Riemannian metrics `g₁, g₂`, a chart base point `α`, a compact subset `K`
-of `s`, and any order `N`, there is a single constant `C > 0` such that for every `y ∈ K`
-and all indices `(i, k)`,
-```
-‖iteratedFDerivWithin ℝ N (chartRicciTensor g₁ α i k − chartRicciTensor g₂ α i k) s y‖ ≤
-    C · chartGramJetDiffSeminormSum (N + 2) g₁ g₂ α s y .
-```
-This is the all-order generalization of `exists_chartRicciTensor_lipschitz_on_compact`. -/
 theorem exists_chartRicciTensor_iteratedFDeriv_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -346,17 +288,6 @@ theorem exists_chartRicciTensor_iteratedFDeriv_lipschitz_on_compact
       (chartGramJetDiffSeminormSum_nonneg (I := I) (M := M) (N + 2) g₁ g₂ α _ y)
     exact Finset.le_sup' (fun p => Cik p.1 p.2) (Finset.mem_univ (i, k))
 
-/-- **The unpacked all-order chart-jet Faà-di-Bruno Lipschitz estimate for the chart
-Lie–DeTurck summand**, on the chart-target interior.
-
-For two smooth Riemannian metrics `g₁, g₂`, a fixed background metric `g_bg`, a chart base
-point `α`, a compact subset `K` of the chart-target interior, and any order `N`, there is a
-single constant `C > 0` such that for every `y ∈ K` and all indices `(i, j)`,
-```
-‖iteratedFDerivWithin ℝ N (chartLieDeTurckComp g₁ g_bg α i j −
-    chartLieDeTurckComp g₂ g_bg α i j) s y‖ ≤ C · chartGramJetDiffSeminormSum (N + 2) g₁ g₂ α s y .
-```
-This is the all-order generalization of `exists_chartLieDeTurckComp_lipschitz_on_compact`. -/
 theorem exists_chartLieDeTurckComp_iteratedFDeriv_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

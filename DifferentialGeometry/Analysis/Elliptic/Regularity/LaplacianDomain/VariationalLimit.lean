@@ -16,45 +16,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 
-/-!
-# Variational identity for elements of the variational Laplacian's domain
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and an
-element `u_h : H1Compl g` with `u_h ∈ laplacianDomain g`, this file proves the
-chart-pulled variational identity tying the chart-pushed weak partial of
-`u_h` against test functions to the chart-pulled Leibniz-compensated
-right-hand side `fHLeibniz g α u_h`.
-
-The identity has the standard divergence form:
-
-```
-∫_{chartTarget} ∑_{i,j} √det(g) · g^{ij} · weak_partial_i · ∂_j ψ
-  + ∫_{chartTarget} √det(g) · u_chart · ψ
-  = ∫_{chartTarget} √det(g) · F̃_chart · ψ
-```
-
-where `u_chart = chartPushed (chartAtlasPOU I M) α (H1ComplToLp u_h)` (the
-chart-pushed image of the H¹-completion element's L²-class), the principal
-integrand uses the chart-pulled weak `i`-th partial `weak_partial_i =
-chartPushedWeakPartialLp g α i u_h`, and the right-hand side is the
-chart-pull of the Leibniz-compensated `Lp`-class `fHLeibniz g α u_h hu_h`.
-
-## Strategy
-
-1. **Smooth approximation.** For a sequence `v_n : SmoothScalar g` with
-   `smoothToH1Compl (v_n) → u_h` in `H1Compl g` (produced by
-   `exists_smooth_approx_seq`), the smooth weak-solution theorem
-   `chart_pulled_smooth_weak_solution` applied to the chart-supported smooth
-   function `ρ_α · v_n.toFun` produces the per-`n` chart-bilinear identity.
-2. **Reorganization via Leibniz.** Adding the manifold-side mass term
-   `∫ √det(g)·(ρ_α·v_n)(symm)·ψ` to both sides converts the identity to the
-   target form, with the right-hand side equal to the chart-pull of the
-   smooth `fHLeibniz` representative.
-3. **Limit-passage.** Each integral converges as `n → ∞` using the chart-pulled
-   weighted L² convergence of the chart-pushed function and partial, and the
-   `Lp ℝ 2 μ_g` continuity of `fHLeibniz`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -96,8 +57,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The chart-supported smooth scalar `ρ_α · v`, used to invoke the smooth
-weak-solution identity. -/
 noncomputable def pouScalar
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     SmoothScalar g where
@@ -137,8 +96,6 @@ private lemma pouScalar_tsupport_subset_chartSource
   exact h_tsupp_sub.trans
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α)
 
-/-- On `chartTargetEuclid α`, `chartPullback I α (pouScalar α v).toFun` agrees
-pointwise with `chartPushed (chartAtlasPOU I M) α v.toFun`. -/
 private lemma chartPullback_pouScalar_eq_chartPushed
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -147,17 +104,6 @@ private lemma chartPullback_pouScalar_eq_chartPushed
   rw [chartPullback_apply_of_mem (I := I) α _ hy]
   rfl
 
-/-- Per-`n` smooth chart-bilinear identity: for any smooth test function `ψ`
-with `tsupport ψ ⊆ chartTargetEuclid α`,
-
-```
-∫_{chartTarget} ∑_{i,j} √det(g)·g^{ij} ·∂_i(chartPushed POU α v) ·∂_j ψ
-  = -∫_{chartTarget} √det(g) ·Δ_g(ρ_α·v)(symm) ·ψ.
-```
-
-This is the chart-bilinear identity from the smooth-case theorem applied to
-`f = ρ_α · v.toFun`, restated in terms of `chartPushedPartial` and
-`negDensityLaplacianPullback`. -/
 private theorem smooth_principal_identity
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -380,8 +326,6 @@ private theorem smooth_principal_identity
       exact h_negDens_eq y hy
   rw [← h_LHS_final, h_bilin, h_RHS_final]
 
-/-- For a smooth scalar `v` and a chart point `α`, the chart-pushed function
-agrees on `chartTargetEuclid α` with the chart-pull of `(pouScalar α v).toFun`. -/
 private lemma chartPushed_v_eq_chartPullback_pouScalar_on_chartTarget
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -389,17 +333,12 @@ private lemma chartPushed_v_eq_chartPullback_pouScalar_on_chartTarget
       chartPullback (I := I) α (pouScalar (I := I) (M := M) α v).toFun y :=
   (chartPullback_pouScalar_eq_chartPushed (I := I) (M := M) α v hy).symm
 
-/-- For a smooth scalar `v` and chart point `α`, the smooth function
-`(pouScalar α v).oneSubLapClassical.toFun = ρ_α·v - Δ_g(ρ_α·v)`. -/
 lemma pouScalar_oneSubLapClassical_eq
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =
       (pouScalar (I := I) (M := M) α v).toFun -
         Δ_g (I := I) g (pouScalar (I := I) (M := M) α v).smooth := rfl
 
-/-- Helper: integrability of `density(y) · h(symm y) · ψ(y)` on
-`chartTargetEuclid α` for a continuous function `h : M → ℝ` and a smooth
-test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`. -/
 private lemma integrable_density_pull_mul_test
     {g : SmoothRiemannianMetric I M} (α : M)
     {h : M → ℝ} (hh_cont : Continuous h)
@@ -508,16 +447,6 @@ private lemma integrable_density_pull_mul_test
   · rw [MeasureTheory.integrable_indicator_iff h_chartTarget_meas]
     rfl
 
-/-- For a smooth scalar `v` and a chart point `α`, the per-`n` form of the
-variational identity:
-
-```
-∫ ∑ weightedInvGram·chartPushedPartial v·∂_j ψ + ∫ density·chartPushed POU α v·ψ
-  = ∫ density · ((pouScalar α v).oneSubLapClassical.toFun)(symm) · ψ.
-```
-
-The RHS integrand is the chart-pull of the smooth `(1-Δ_g)(ρ_α · v)` function
-on `M`. -/
 private theorem smooth_full_identity
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -622,10 +551,6 @@ private theorem smooth_full_identity
   rw [h_RHS_split]
   ring
 
-/-- Boundedness of the multiplier `m(y) = invGram_ij(y) · (fderiv ψ y)(e_j)` on
-the chart target. On `tsupport ψ`, the inverse-Gram entry is bounded (smooth on
-chartTarget, restricted to a compact subset of it). Outside `tsupport ψ`, the
-derivative `(fderiv ψ)(e_j)` vanishes, so `m` does too. -/
 private lemma exists_bound_for_invGram_mul_fderiv_psi
     {g : SmoothRiemannianMetric I M} (α : M) (i j : Fin (Module.finrank ℝ E))
     {ψ : EuclN → ℝ} (hψ_cd : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -674,8 +599,6 @@ private lemma exists_bound_for_invGram_mul_fderiv_psi
     rw [h_zero, mul_zero, abs_zero]
     exact le_max_right _ _
 
-/-- Convergence under L² inner product: if `g_n → g_lim` in `Lp ℝ 2 μ` and `m ∈
-Lp ℝ 2 μ`, then `∫ m · g_n dμ → ∫ m · g_lim dμ`. -/
 private lemma tendsto_inner_integral
     {β : Type*} [MeasurableSpace β] {μ : Measure β}
     (m : Lp ℝ 2 μ)
@@ -707,22 +630,6 @@ private lemma tendsto_inner_integral
   exact (continuous_inner.tendsto (m, g_lim)).comp
     (Filter.Tendsto.prodMk_nhds tendsto_const_nhds h_g_tendsto)
 
-/-- **Variational identity for smooth scalars** (public form of
-`smooth_full_identity`).
-
-For a smooth scalar `v : SmoothScalar g`, a chart point `α : M`, and a smooth
-test function `ψ : EuclN → ℝ` with `tsupport ψ ⊆ chartTargetEuclid α`, the
-chart-pulled variational identity holds:
-
-```
-∫_{chartTarget} ∑_{i,j} √det(g) · g^{ij} · ∂_i(chartPushed POU α v) · ∂_j ψ
-  + ∫_{chartTarget} √det(g) · chartPushed POU α v · ψ
-  = ∫_{chartTarget} √det(g) · ((1-Δ_g)(ρ_α · v))(symm) · ψ.
-```
-
-The right-hand side equals `∫_{chartTarget} √det(g) · (fHLeibniz_smoothToH1Compl
-v).coeFn(symm) · ψ` via the Leibniz expansion and the smooth-case identity
-`fHLeibniz_smoothToH1Compl` from `LeibnizCompensatedFh`. -/
 theorem laplacianDomain_variational_identity_smooth_case
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)

@@ -6,41 +6,6 @@ import Mathlib.Analysis.Normed.Group.Uniform
 import Mathlib.Analysis.InnerProductSpace.Completion
 import Mathlib.Analysis.InnerProductSpace.Basic
 
-/-!
-# `L²`-convention chart-based Sobolev space `W^{k,2}_chart(M)` and its
-Hilbert structure on a smooth manifold-with-boundary
-
-This is the with-boundary parallel of
-`Analysis/Sobolev/Chart/AtlasNorm/L2.lean`.
-Given a smooth manifold `M` modelled on the canonical Euclidean
-half-space `EuclideanHalfSpace n` (via
-`modelWithCornersEuclideanHalfSpace n`), we mirror the boundaryless
-chart-based `L²`-Sobolev norm and inner product, replacing the
-underlying boundaryless `L²` quantities by the half-space-friendly
-Dirichlet variants from `WithBoundary/Euclidean/IteratedL2.lean`.
-
-The `L²`-convention chart-based norm is
-
-  `‖u‖_{W^{k,2}_chart(M)}² = ∑_α ‖chartPushed α u‖²_{W^{k,2}_0(chart-target)}`,
-
-i.e., a `tsum` over chart points of squared per-chart Dirichlet
-half-space `L²`-Sobolev norms, and the corresponding `L²`-Sobolev inner
-product is
-
-  `⟨u, v⟩_{W^{k,2}_chart(M)} = ∑_α ⟨chartPushed α u, chartPushed α v⟩_{W^{k,2}_0(chart-target)}`.
-
-The resulting subtype `WkpChartL2 g k` carries:
-* a `SeminormedAddCommGroup` structure;
-* a `Module ℝ` structure;
-* an `InnerProductSpace ℝ` structure.
-
-The standard `SeparationQuotient`-based wrapper `WkpChartL2Quot` then
-carries an honest `NormedAddCommGroup` and `InnerProductSpace ℝ`
-structure.
-
-Completeness is *not* developed here; it is left to a separate module.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -56,8 +21,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-- The squared `L²`-convention chart-based Sobolev norm, as a `tsum`
-over charts of squared per-chart half-space `L²`-Sobolev norms. -/
 def wkpNormChartL2Sq [T2Space M] [SigmaCompactSpace M]
     (_g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
       (modelWithCornersEuclideanHalfSpace n) M)
@@ -71,7 +34,6 @@ def wkpNormChartL2Sq [T2Space M] [SigmaCompactSpace M]
           (modelWithCornersEuclideanHalfSpace n) M) α u)
       (chartTargetEuclid (n := n) (M := M) α)
 
-/-- The `L²`-convention chart-based Sobolev norm. -/
 def wkpNormChartL2 [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
       (modelWithCornersEuclideanHalfSpace n) M)
@@ -100,8 +62,6 @@ theorem wkpNormChartL2Sq_eq_tsum
               (modelWithCornersEuclideanHalfSpace n) M) α u)
           (chartTargetEuclid (n := n) (M := M) α) := rfl
 
-/-- `wkpNormChartL2 g k u = ENNReal.ofReal √((wkpNormChartL2Sq g k u).toReal)`
-when the squared norm is finite. -/
 private theorem wkpNormChartL2_eq_ofReal_sqrt_toReal
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -125,7 +85,6 @@ private theorem wkpNormChartL2_eq_ofReal_sqrt_toReal
       Real.sqrt (wkpNormChartL2Sq (n := n) (M := M) g k u).toReal by
     rw [Real.sqrt_eq_rpow]]
 
-/-- The squared `L²`-Sobolev chart-based norm of the zero function is zero. -/
 theorem wkpNormChartL2Sq_zero_fun
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -148,7 +107,6 @@ theorem wkpNormChartL2Sq_zero_fun
   rw [tsum_congr hpt]
   exact tsum_zero
 
-/-- The `L²`-Sobolev chart-based norm of the zero function is zero. -/
 theorem wkpNormChartL2_zero_fun
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -159,8 +117,6 @@ theorem wkpNormChartL2_zero_fun
   rw [wkpNormChartL2Sq_zero_fun (n := n) (M := M) g]
   exact ENNReal.zero_rpow_of_pos (by norm_num : (0 : ℝ) < 1 / 2)
 
-/-- The squared `L²`-chart norm is finite for any function in
-`MemWkpChart g k 2`, when `M` is compact. -/
 theorem wkpNormChartL2Sq_lt_top_of_memWkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -257,8 +213,6 @@ theorem wkpNormChartL2Sq_lt_top_of_memWkpChart
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_lt_top_of_memWkpHalfSpace
     (d := n) (hu α)
 
-/-- The `L²`-Sobolev chart norm is finite for any function in
-`MemWkpChart g k 2`, when `M` is compact. -/
 theorem wkpNormChartL2_lt_top_of_memWkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -270,7 +224,6 @@ theorem wkpNormChartL2_lt_top_of_memWkpChart
   exact ENNReal.rpow_lt_top_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)
     (wkpNormChartL2Sq_lt_top_of_memWkpChart (n := n) (M := M) g hu).ne
 
-/-- The squared `L²`-chart norm is invariant under `ChartPushedAEEq`. -/
 theorem wkpNormChartL2Sq_congr_chartPushed_ae
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -286,7 +239,6 @@ theorem wkpNormChartL2Sq_congr_chartPushed_ae
     (d := n) (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (huv α)
 
-/-- The `L²`-chart norm is invariant under `ChartPushedAEEq`. -/
 theorem wkpNormChartL2_congr_chartPushed_ae
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -298,7 +250,6 @@ theorem wkpNormChartL2_congr_chartPushed_ae
   unfold wkpNormChartL2
   rw [wkpNormChartL2Sq_congr_chartPushed_ae (n := n) (M := M) g huv]
 
-/-- Scalar-multiplication identity for the squared `L²`-chart norm. -/
 theorem wkpNormChartL2Sq_const_smul
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -316,7 +267,6 @@ theorem wkpNormChartL2Sq_const_smul
     (d := n) (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu α) c
 
-/-- Scalar-multiplication identity for the `L²`-chart norm. -/
 theorem wkpNormChartL2_const_smul
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -334,8 +284,6 @@ theorem wkpNormChartL2_const_smul
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-- Auxiliary: pointwise per-chart triangle for the squared `L²`-norm
-composes to the squared global. -/
 private theorem wkpNormChartL2_add_le_aux
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -718,8 +666,6 @@ private theorem wkpNormChartL2_add_le_aux
   rw [← ENNReal.ofReal_add (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)]
   exact ENNReal.ofReal_le_ofReal h_real_triangle
 
-/-- Triangle inequality for the chart-based `L²`-Sobolev norm
-(compact `M`). -/
 theorem wkpNormChartL2_add_le
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -733,8 +679,6 @@ theorem wkpNormChartL2_add_le
         wkpNormChartL2 (n := n) (M := M) g k v :=
   wkpNormChartL2_add_le_aux (n := n) (M := M) g hu hv
 
-/-- The chart-based `L²`-Sobolev inner product, defined as the `tsum` of
-the per-chart half-space `L²`-Sobolev inner products. -/
 def wkpInnerChartL2
     [T2Space M] [SigmaCompactSpace M]
     (_g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -770,7 +714,6 @@ theorem wkpInnerChartL2_eq_tsum
               (modelWithCornersEuclideanHalfSpace n) M) α v)
           (chartTargetEuclid (n := n) (M := M) α) := rfl
 
-/-- Symmetry of the chart-based `L²`-Sobolev inner product. -/
 theorem wkpInnerChartL2_comm
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -784,8 +727,6 @@ theorem wkpInnerChartL2_comm
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpInnerL2HalfSpace_comm
     (d := n) k _ _ _
 
-/-- The chart-based `L²`-Sobolev inner product is non-negative on the
-diagonal. -/
 theorem wkpInnerChartL2_self_nonneg
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -797,9 +738,6 @@ theorem wkpInnerChartL2_self_nonneg
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpInnerL2HalfSpace_self_nonneg
       (d := n) k _ _
 
-/-- The `L²`-convention chart-based Sobolev space, as a subtype of
-`M → ℝ`, implemented as the underlying subtype of
-`wkpChartSubmodule g k 2`. -/
 def WkpChartL2
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -825,7 +763,6 @@ instance instModuleRealWkpChartL2
   inferInstanceAs (Module ℝ ↥(wkpChartSubmodule (n := n) (M := M) g k 2
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)))
 
-/-- The underlying `M → ℝ` function of an element `u : WkpChartL2 g k`. -/
 def wkpChartL2Fun
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -836,8 +773,6 @@ def wkpChartL2Fun
     (p := fun u => u ∈ wkpChartSubmodule (n := n) (M := M) g k 2
       (by norm_num : (1 : ℝ≥0∞) ≤ 2)) u
 
-/-- The membership property of the underlying function of an element of
-`WkpChartL2`. -/
 lemma wkpChartL2Fun_memWkpChart
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -878,8 +813,6 @@ lemma wkpChartL2Fun_zero
     {k : ℕ} :
     wkpChartL2Fun (0 : WkpChartL2 (n := n) (M := M) g k) = (fun _ => 0) := rfl
 
-/-- `Norm` instance on `WkpChartL2 g k`, using the `L²`-convention chart
-norm. -/
 instance instNormWkpChartL2
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -897,7 +830,6 @@ lemma norm_wkpChartL2_def
     (u : WkpChartL2 (n := n) (M := M) g k) :
     ‖u‖ = (wkpNormChartL2 (n := n) (M := M) g k (wkpChartL2Fun u)).toReal := rfl
 
-/-- The `SeminormedSpace.Core` for `WkpChartL2 g k` (compact `M`). -/
 lemma wkpChartL2_seminormedSpace_core
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -933,7 +865,6 @@ lemma wkpChartL2_seminormedSpace_core
     rw [ENNReal.toReal_add hu_ne hv_ne] at hToReal
     exact hToReal
 
-/-- `SeminormedAddCommGroup` instance on `WkpChartL2 g k` (compact `M`). -/
 instance instSeminormedAddCommGroupWkpChartL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -942,7 +873,6 @@ instance instSeminormedAddCommGroupWkpChartL2
     SeminormedAddCommGroup (WkpChartL2 (n := n) (M := M) g k) :=
   SeminormedAddCommGroup.ofCore (wkpChartL2_seminormedSpace_core (n := n) (M := M) g k)
 
-/-- `NormedSpace ℝ` instance on `WkpChartL2 g k` (compact `M`). -/
 instance instNormedSpaceRealWkpChartL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -957,7 +887,6 @@ instance instNormedSpaceRealWkpChartL2
     rw [wkpNormChartL2_const_smul (n := n) (M := M) g c hu_mem]
     rw [ENNReal.toReal_mul, toReal_enorm]
 
-/-- The `SeparationQuotient` of `WkpChartL2 g k` is a `NormedAddCommGroup`. -/
 def WkpChartL2Quot
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1001,7 +930,6 @@ instance instNormedSpaceRealWkpChartL2Quot
   inferInstanceAs (NormedSpace ℝ
     (SeparationQuotient (WkpChartL2 (n := n) (M := M) g k)))
 
-/-- The `Inner ℝ` instance on `WkpChartL2 g k`. -/
 instance instInnerWkpChartL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1021,8 +949,6 @@ lemma inner_wkpChartL2_def
     @inner ℝ _ _ u v =
       wkpInnerChartL2 (n := n) (M := M) g k (wkpChartL2Fun u) (wkpChartL2Fun v) := rfl
 
-/-- The set of "active" chart points: those for which the partition-of-unity
-weight has nonempty support. This is finite when `M` is compact. -/
 private def activeChartSupp
     [T2Space M] [SigmaCompactSpace M] : Set M :=
   { α : M | (Function.support
@@ -1035,7 +961,6 @@ private theorem activeChartSupp_finite
   ((DifferentialGeometry.Integral.Measure.chartAtlasPOU
     (modelWithCornersEuclideanHalfSpace n) M).locallyFinite).finite_nonempty_of_compact
 
-/-- Outside the active set, the chart-pushed function is identically zero. -/
 private theorem chartPushed_eq_zero_off_activeChartSupp
     [T2Space M] [SigmaCompactSpace M]
     (α : M) (hα : α ∉ activeChartSupp (n := n) (M := M)) (u : M → ℝ) :
@@ -1064,7 +989,6 @@ private theorem chartPushed_eq_zero_off_activeChartSupp
   unfold chartPushed
   rw [hρ_empty]; ring
 
-/-- The chart-based inner product reduces to a finite sum over the active set. -/
 private theorem wkpInnerChartL2_eq_finsum
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1125,8 +1049,6 @@ private theorem wkpInnerChartL2_eq_finsum
     rw [hx]; ring]
   simp
 
-/-- The chart-based norm-squared (real-valued) reduces to a finite sum
-over the active set. -/
 private theorem wkpNormChartL2Sq_toReal_eq_finsum
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1169,7 +1091,6 @@ private theorem wkpNormChartL2Sq_toReal_eq_finsum
   rw [tsum_eq_sum h_zero_outside]
   rw [ENNReal.toReal_sum h_finiteness]
 
-/-- The diagonal inner product reduces to a finite sum over the active set. -/
 private theorem wkpInnerChartL2_self_eq_finsum
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1188,7 +1109,6 @@ private theorem wkpInnerChartL2_self_eq_finsum
           (chartTargetEuclid (n := n) (M := M) α) :=
   wkpInnerChartL2_eq_finsum (n := n) (M := M) g k u u
 
-/-- The norm-inner identity on `WkpChartL2`. -/
 private theorem wkpChartL2_norm_sq_eq_inner
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1224,7 +1144,6 @@ private theorem wkpChartL2_norm_sq_eq_inner
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormL2SqHalfSpace_toReal_eq_wkpInnerL2HalfSpace_self
     (d := n) (hu_mem α)
 
-/-- Inner product is symmetric. -/
 private theorem wkpInnerChartL2_apply_comm
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1235,7 +1154,6 @@ private theorem wkpInnerChartL2_apply_comm
   rw [wkpInnerChartL2_comm (n := n) (M := M) g k (wkpChartL2Fun v) (wkpChartL2Fun u)]
   rfl
 
-/-- Inner product is bilinear in the first slot (additivity). -/
 private theorem wkpInnerChartL2_apply_add_left
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1262,7 +1180,6 @@ private theorem wkpInnerChartL2_apply_add_left
     (d := n) (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     (hu_mem α) (hv_mem α) (hw_mem α)
 
-/-- Inner product is bilinear in the first slot (scalar multiplication). -/
 private theorem wkpInnerChartL2_apply_smul_left
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1285,7 +1202,6 @@ private theorem wkpInnerChartL2_apply_smul_left
     (d := n) (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
     _ (hu_mem α) r
 
-/-- The `InnerProductSpace ℝ` instance on `WkpChartL2 g k` (compact `M`). -/
 instance instInnerProductSpaceRealWkpChartL2
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -1304,8 +1220,6 @@ instance instInnerProductSpaceRealWkpChartL2
     change @inner ℝ _ _ (r • u) v = r * @inner ℝ _ _ u v
     exact wkpInnerChartL2_apply_smul_left (n := n) (M := M) g k u v r
 
-/-- The `InnerProductSpace ℝ` instance on `WkpChartL2Quot g k` (compact `M`),
-inherited via `SeparationQuotient.instInnerProductSpace`. -/
 instance instInnerProductSpaceRealWkpChartL2Quot
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric

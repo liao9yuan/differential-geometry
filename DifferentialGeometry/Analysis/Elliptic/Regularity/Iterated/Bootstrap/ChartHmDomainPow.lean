@@ -5,72 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInter
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChart.PolymorphicRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
 
-/-!
-# Polymorphic-in-`k` chart-`H^{2k}` regularity for `laplacianDomainPow g k`
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`,
-a chart point `α : M`, and an arbitrary order `k : ℕ`, this module exposes
-polymorphic-in-`k` chart-`H^{2k}` regularity headlines for any
-`u_h ∈ laplacianDomainPow g k`.
-
-The module is anchored at the chart-`H⁴` unconditional discharge
-(`chartPushed_memWkp_four_two_of_laplacianDomainPow_two`), which together
-with downward monotonicity of `laplacianDomainPow` yields chart-`H^{2k}`
-regularity for every `k ≤ 2` polymorphically.
-
-## Coupled inductive structure (conceptual outline)
-
-The polymorphic-in-`k` headline at arbitrary `k` is delivered via two
-coupled inductions:
-
-* **Outer induction on `k`**: at each level `k ≥ 1`, the canonical function
-  representative of every `u_h ∈ laplacianDomainPow g k` admits chart-`H^{2k}`
-  regularity. The inductive hypothesis at level `k - 1` provides chart-
-  `H^{2k-2}` of both `u_h` itself (via downward monotonicity) and the
-  `(1 - Δ_g)`-preimage of `u_h` lifted to an element of
-  `laplacianDomainPow g (k-1)`.
-
-* **Inner bootstrap on `m`**: from chart-`H^{2k}` of `u_h.coeFn`, the
-  chart-`H^{2k+2}` regularity is assembled stage by stage via the
-  polymorphic per-step boost `chartPushed_memWkp_m_plus_two_step` from
-  `IteratedChartHmBootstrap`. Each per-stage chart-`H²` of the chosen
-  `m`-mixed partial is discharged by the polymorphic Nirenberg interior
-  pipeline `iteratedDerivedChartBilinear_memWkp_two_two_interior` applied
-  to the canonical iterated chart-bilinear bundle.
-
-## Recursion anchor
-
-The outer recursion is anchored at `k ≤ 2`, for which the chart-`H^{2k}`
-discharge is fully unconditional via the existing infrastructure:
-
-* `k = 0`: trivial `MemLp 2` (via `iteratedH2Regularity_zero`).
-* `k = 1`: chart-`H²` (via `iteratedH2Regularity_one`).
-* `k = 2`: chart-`H⁴` (via
-  `chartPushed_memWkp_four_two_of_laplacianDomainPow_two`).
-
-The polymorphic-in-`k` headline below routes through the `k ≤ 2`
-discharge directly. For `k ≥ 3`, the chart-`H⁴` anchor provides the
-strongest currently-deliverable unconditional chart-Sobolev regularity at
-the chart level; the polymorphic-in-`k` chart-`H^{2k}` headline is the
-natural shape consumed by the downstream heat-semigroup smoothing.
-
-## Main results
-
-* `chartPushed_memWkp_two_k_of_laplacianDomainPow` — chart-`H^{2k}` of the
-  canonical chart-pushed representative for any
-  `u_h ∈ laplacianDomainPow g k` with `k ≤ 2`, unconditional.
-* `memWkpChart_two_k_of_laplacianDomainPow` — manifold-level
-  `MemWkpChart g (2k) 2`.
-* `chartSideH2kBridge_of_laplacianDomainPow` — the per-chart
-  `ChartSideH2kBridge g k` predicate.
-* `laplacianDomainPow_memWkpChart_two_k` — manifold-level
-  `MemWkpChart g (2k) 2` together with finite chart-based norm.
-
-## Sign convention
-
-Geometer Laplacian `Δ_g = div_g ∘ grad_g`. Resolvent `(1 - Δ_g)⁻¹`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -108,8 +42,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Downward monotonicity of `laplacianDomainPow`.** For any `j ≤ k`, the
-iterated Laplacian domain at level `k` is contained in the one at level `j`. -/
 theorem laplacianDomainPow_le_of_le
     (g : SmoothRiemannianMetric I M) {k j : ℕ} (hjk : j ≤ k)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -159,15 +91,6 @@ theorem laplacianDomainPow_le_of_le
           rw [h1, h2]
       exact ih hu_h_jd
 
-/-- **Polymorphic chart-`H^{2k}` of the chart-pushed function for
-`u_h ∈ laplacianDomainPow g k`** (`k ≤ 2`, unconditional).
-
-For any `k ≤ 2` and any `u_h ∈ laplacianDomainPow g k`, the canonical
-chart-pushed POU-cut representative lies in `MemWkp (2k) 2` of the chart
-target.
-
-This is the direct unconditional discharge from the existing infrastructure
-`chartPushed_memWkp_unconditional_of_laplacianDomainPow_le_two`. -/
 theorem chartPushed_memWkp_two_k_of_laplacianDomainPow_le_two
     (g : SmoothRiemannianMetric I M) (α : M) {k : ℕ} (hk : k ≤ 2)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -183,7 +106,6 @@ theorem chartPushed_memWkp_two_k_of_laplacianDomainPow_le_two
   chartPushed_memWkp_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g α hk hu_h
 
-/-- **Polymorphic `ChartSideH2kBridge g k` discharge for `k ≤ 2`.** -/
 theorem chartSideH2kBridge_of_laplacianDomainPow_le_two
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk : k ≤ 2)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -194,7 +116,6 @@ theorem chartSideH2kBridge_of_laplacianDomainPow_le_two
   chartSideH2kBridge_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g hk hu_h
 
-/-- **Polymorphic manifold-level `MemWkpChart g (2k) 2` for `k ≤ 2`.** -/
 theorem memWkpChart_two_k_of_laplacianDomainPow_le_two
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk : k ≤ 2)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -206,16 +127,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_le_two
   memWkpChart_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g hk hu_h
 
-/-- **Polymorphic chart-`H^{2 · min(k, 2)}` of the chart-pushed function for
-`u_h ∈ laplacianDomainPow g k`.**
-
-For any `k : ℕ` and any `u_h ∈ laplacianDomainPow g k`, the canonical
-chart-pushed POU-cut representative lies in `MemWkp (2 · min(k, 2)) 2`
-of the chart target.
-
-For `k ≤ 2`, this coincides with the unconditional chart-`H^{2k}` discharge.
-For `k ≥ 3`, this falls back to chart-`H⁴` via the unconditional `k = 2`
-anchor (combined with the downward monotonicity of `laplacianDomainPow`). -/
 theorem chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -235,8 +146,6 @@ theorem chartPushed_memWkp_two_k_of_laplacianDomainPow_min_two
   exact chartPushed_memWkp_two_k_of_laplacianDomainPow_le_two
     (I := I) (M := M) g α h_min_le_2 hu_h_min
 
-/-- **Polymorphic `ChartSideH2kBridge g (min(k, 2))` discharge** for
-`u_h ∈ laplacianDomainPow g k`. -/
 theorem chartSideH2kBridge_of_laplacianDomainPow_min_two
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -251,8 +160,6 @@ theorem chartSideH2kBridge_of_laplacianDomainPow_min_two
   exact chartSideH2kBridge_of_laplacianDomainPow_le_two
     (I := I) (M := M) g h_min_le_2 hu_h_min
 
-/-- **Polymorphic manifold-level `MemWkpChart g (2 · min(k, 2)) 2`** for
-`u_h ∈ laplacianDomainPow g k`. -/
 theorem memWkpChart_two_k_of_laplacianDomainPow_min_two
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -268,8 +175,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_min_two
   exact memWkpChart_two_k_of_laplacianDomainPow_le_two
     (I := I) (M := M) g h_min_le_2 hu_h_min
 
-/-- **Manifold-level `MemWkpChart g (2 · min(k, 2)) 2` together with finite
-chart-based norm** for `u_h ∈ laplacianDomainPow g k`. -/
 theorem laplacianDomainPow_memWkpChart_two_k
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -289,15 +194,6 @@ theorem laplacianDomainPow_memWkpChart_two_k
   exact DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_lt_top_of_memWkpChart
     (I := I) (M := M) g (k := 2 * min k 2) (p := 2) (by norm_num) h_mem
 
-/-- **Polymorphic chart-`H^{2k}` of the chart-pushed function for arbitrary
-`k`**, with the bridge `ChartSideH2kBridge g k` as the conditional input.
-
-This is the bridge-driven form of the polymorphic statement: given the
-chart-side `H^{2k}` bridge for the canonical function representative, the
-chart-pushed function lies in `MemWkp (2k) 2` of the chart target.
-
-For `k ≤ 2`, the bridge is unconditional and the bridge-driven form
-coincides with the unconditional polymorphic headline. -/
 theorem chartPushed_memWkp_two_k_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -316,8 +212,6 @@ theorem chartPushed_memWkp_two_k_of_laplacianDomainPow
   chartPushed_memWkp_unconditional_of_laplacianDomainPow
     (I := I) (M := M) g α k hu_h h_bridge
 
-/-- **Polymorphic manifold-level `MemWkpChart g (2k) 2`** for arbitrary `k`,
-bridge-driven form. -/
 theorem memWkpChart_two_k_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -333,9 +227,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow
   exact memWkpChart_2k_of_chartSideH2kBridge_polymorphic
     (I := I) (M := M) g k h_bridge
 
-/-- **Polymorphic `ChartSideH2kBridge g k`** for `u_h ∈ laplacianDomainPow g k`
-(bridge-driven form). For `k ≤ 2`, the bridge is unconditional and discharged
-by `chartSideH2kBridge_of_laplacianDomainPow_le_two`. -/
 theorem chartSideH2kBridge_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

@@ -5,60 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
 
-/-!
-# The geometric Ricci–DeTurck nonlinearity on the spectral Sobolev scale
-
-The chart-locality-free maximal-regularity strong-existence engine
-`deTurckRemainder_strong_shortTime_exists`
-(`DeTurck/RemainderShortTimeExistence.lean`) consumes a *locally Lipschitz* first-order
-nonlinearity
-
-  `N : tensorHs g_bg 0 2 (a + 1) → tensorHs g_bg 0 2 a`
-
-(`a : ℝ` a non-negative spectral Sobolev exponent), and produces a strong
-solution of the quasi-linear tensor heat equation
-`∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀`.
-
-This file constructs the *geometric* `N` for the Ricci–DeTurck flow.  The
-top-order part of the Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg g`
-coincides — by the gauge cancellation `deTurckNonlinearitySpectral_principalPart_cancels`
-— with the connection Laplacian `Δ_∇`, so the *remainder*
-
-  `N(u) := deTurckRicciRHS g_bg (g_bg + h(u)) − Δ_∇ h(u)`,
-  `h(u) := realized metric perturbation of u`,
-
-is genuinely first order in `h(u)`.
-
-## The realization, and well-typedness via the spectral summability of smooth data
-
-`tensorHs g_bg 0 2 σ` is a structure carrying an abstract spectral coordinate
-family `coeff : TensorEigenIdx → ℝ` plus a weighted-`ℓ²` summability witness, not
-a pointwise tensor field.  To write `N(u)` we realize the finitely-supported `u`
-as a genuine smooth compactly-supported `(0,2)`-tensor section
-`T_u = tensorHsSmoothRepr u` (the chart-locality-free smooth
-representative on the dense finite-support subspace), assemble the smooth metric
-`g_bg + h_sym(T_u)` on its validity domain via `tensorSectionRealizeMetric`, and
-take the smooth `(0,2)`-tensor section of the geometric remainder
-`deTurckRHSSection g_bg (g_bg + h_sym) − Δ_∇ T_u`.
-
-The geometric remainder section is again a `SmoothCcTensor g_bg 0 2`; by the
-spectral-scale summability of a smooth compactly-supported tensor
-(`smoothCcTensor_tensorL2Coeff_weighted_summable`, valid at *every* real Sobolev
-order) its eigenbasis coordinates are weighted square-summable at order `a`,
-which is exactly the witness needed to package those coordinates as an element of
-`tensorHs g_bg 0 2 a`.  This is the type-level content of the construction.
-
-Off the validity domain — when `u` is not finitely supported, or its
-extracted-and-symmetrized form is not `g_bg`-fibre small (so `g_bg + h_sym` is not
-an honest metric) — the nonlinearity returns the zero element of
-`tensorHs g_bg 0 2 a`.
-
-## Sign convention
-
-Geometer `Δ_∇ = −∇*∇`, spectrum `⊆ (−∞, 0]`; the resolvent is `(1 − Δ_∇)⁻¹`,
-weights `(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -94,10 +40,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The validity-domain predicate for realizing `u : H^{a+1}` as a metric
-perturbation: `u` is finitely supported and its extracted symmetric bilinear
-form is `g_bg`-fibre small with some constant `< 1` (so `g_bg + h_sym` is an
-honest, positive-definite smooth metric). -/
 def realizableAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     (u : tensorHs (I := I) (M := M) g_bg 0 2 σ) : Prop :=
   ∃ (hu_fs : (Function.support u.coeff).Finite) (δ' : ℝ), δ' < 1 ∧
@@ -105,9 +47,7 @@ def realizableAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
       (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ'
 
 open scoped Classical in
-/-- The smooth metric realized from a finitely-supported, fibre-small order-`σ`
-spectral element `u`: the genuine `g_bg + h_sym(u)` on the validity domain
-`realizableAt`, and `g_bg` otherwise. -/
+
 def realizeMetricAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     (u : tensorHs (I := I) (M := M) g_bg 0 2 σ) :
     SmoothRiemannianMetric I M :=
@@ -120,8 +60,7 @@ def realizeMetricAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     g_bg
 
 set_option linter.unusedSectionVars false in
-/-- On the validity domain, the realized metric's inner product is
-`g_bg + tensorHsBilinSymm u`. -/
+
 theorem realizeMetricAt_inner_of_realizable (g_bg : SmoothRiemannianMetric I M)
     {σ : ℝ} (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
     (hu_fs : (Function.support u.coeff).Finite)
@@ -137,7 +76,7 @@ theorem realizeMetricAt_inner_of_realizable (g_bg : SmoothRiemannianMetric I M)
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- Off the validity domain, the realized metric is the background metric. -/
+
 theorem realizeMetricAt_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
     {σ : ℝ} (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
     (hu : ¬ realizableAt (I := I) g_bg u) :
@@ -146,17 +85,7 @@ theorem realizeMetricAt_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
   rw [realizeMetricAt, dif_neg hu]
 
 open scoped Classical in
-/-- The geometric Ricci–DeTurck remainder as a smooth compactly-supported
-`(0,2)`-tensor section, re-tagged by the background metric `g_bg`.
 
-On the validity domain, with smooth representative `T_u` of `u` and realized
-metric `g_u = g_bg + h_sym(u)`, this is
-
-  `deTurckRHSSection g_bg g_u − rawTensorConnLapSmooth g_bg 0 2 T_u`
-
-(the Ricci–DeTurck right-hand side of `g_u`, minus the connection Laplacian of the
-perturbation — the gauge-cancelled first-order remainder).  Off the validity
-domain it is the zero section. -/
 def deTurckRemainderSection (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     (u : tensorHs (I := I) (M := M) g_bg 0 2 σ) :
     SmoothCcTensor g_bg 0 2 :=
@@ -171,25 +100,10 @@ def deTurckRemainderSection (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
   else
     0
 
-/-- The intrinsic resolvent-compactness witness for the rank-`(0,2)` tensor
-resolvent on the closed manifold `(M, g_bg)`. -/
 private def hCompact (g_bg : SmoothRiemannianMetric I M) :
     IsCompactOperator (tensorResolventL2 (I := I) (M := M) g_bg 0 2) :=
   tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2
 
-/-- **The geometric Ricci–DeTurck nonlinearity** as a map of spectral Sobolev
-spaces
-
-  `N : tensorHs g_bg 0 2 ((a : ℝ) + 1) → tensorHs g_bg 0 2 (a : ℝ)`.
-
-On a finitely-supported, fibre-small `u`, `N(u)` is the order-`a` spectral
-element whose eigenbasis coordinates are the `L²` coordinates of the geometric
-remainder section `deTurckRemainderSection g_bg u`
-(`= deTurckRHSSection g_bg (g_bg + h_sym(u)) − Δ_∇ T_u`).  The weighted
-square-summability witness placing these coordinates in `Hᵃ` is supplied by the
-spectral-scale summability of a smooth compactly-supported tensor
-(`smoothCcTensor_tensorL2Coeff_weighted_summable`, valid at every real order).
-Off the validity domain `N(u) = 0`. -/
 def deTurckGeometricN (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1)) :
     tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ) where
@@ -200,8 +114,6 @@ def deTurckGeometricN (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g_bg
       (a : ℝ) (deTurckRemainderSection (I := I) g_bg u) (hCompact (I := I) g_bg)
 
-/-- The eigenbasis coordinate of `deTurckGeometricN g_bg a u` is the `L²`
-coordinate of the geometric remainder section. -/
 @[simp] theorem deTurckGeometricN_coeff (g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -211,7 +123,6 @@ coordinate of the geometric remainder section. -/
         (SmoothCcTensor.toL2 (deTurckRemainderSection (I := I) g_bg u)) i :=
   rfl
 
-/-- Off the validity domain, the geometric nonlinearity vanishes. -/
 theorem deTurckGeometricN_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1))
     (hu : ¬ realizableAt (I := I) g_bg u) :
@@ -227,24 +138,6 @@ theorem deTurckGeometricN_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
     tensorL2Coeff_eq_inner, inner_zero_right]
   rfl
 
-/-! ## Joint `(x, t)`-smoothness of the geometric Ricci–DeTurck right-hand side along the
-realized metric family
-
-The Amann/Picard strong-existence route for the realized nonlinearity needs the geometric
-Ricci–DeTurck right-hand side
-`deTurckRicciRHS g_bg (g₀ + h(F t)) = −2·Ric(g₀ + h(F t)) + 𝓛_{deTurckVF(g₀ + h(F t), g_bg)}(g₀ + h(F t))`
-to depend *jointly* `C^∞` on the base point and the time parameter, for the realized metric
-family `realizedFam g₀ T T' t` (the convex realization path `t ↦ g₀ + h(convexPerturbation T T' t)`).
-
-This is assembled, chart-locality-free, from the joint chart-Gram smoothness tower of the
-realized family (`RicciLinearization.gen_joint_chartDeTurckRicciRHS` over
-`realizedFam_genJointGram_free`): the chart-coordinate inverse Gram (Cramer), Christoffel symbols
-(first chart partials), Riemann/Ricci curvature (`∂Γ + Γ·Γ`), DeTurck vector field and its Lie
-derivative are each finite chart polynomials of the chart-Gram entries, jointly `C^∞` once the
-chart-Gram entries are.  The chart scalar `chartDeTurckRicciRHS` is grounded against the intrinsic
-operator by `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`, and the bundle section is
-read off the multilinear-basis coordinates through the chart-center trivialization. -/
-
 section JointSmoothness
 
 open DifferentialGeometry.Integral.DivergenceTheorem
@@ -255,8 +148,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open TensorMultilinear Tensor0SBundle
 
 set_option linter.unusedSectionVars false in
-/-- The chart-`α`-pushforward frame vector `(triv α).symmL ℝ x (chartModelBasis E i)` equals the
-chart-basis fibre `chartBasisVecFiber α i x` (the `symmL`/`symm` agreement on the trivialization). -/
+
 private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
     (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
@@ -264,14 +156,7 @@ private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
   rw [chartBasisVecFiber, Trivialization.symmL_apply]
 
 set_option linter.unusedSectionVars false in
-/-- **Joint `(x, t)`-smoothness of the chart-coordinate DeTurck–Ricci right-hand side along the
-realized family.**  On the chart-`α` source × the realized small set, the chart scalar
-`(x, t) ↦ chartDeTurckRicciRHS (realizedFam g₀ T T' t) g_bg α i k (ϕ_α x)` is jointly `C^∞`.
 
-The DeTurck-arm mirror of `RicciLinearization.realizedFam_chartRicciTensor_jointContMDiffOn`:
-the chart Euclidean joint smoothness `RicciLinearization.gen_joint_chartDeTurckRicciRHS` (over the
-δ-free joint Gram `realizedFam_genJointGram_free`), threaded through the smooth moving point
-`(x, t) ↦ (t, ϕ_α x)`. -/
 theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -310,21 +195,7 @@ theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedSectionVars false in
-/-- **C1 — joint `(x, t)`-smoothness of the geometric Ricci–DeTurck right-hand side field along
-the realized metric family.**  As a section of the `(0, 2)`-tensor bundle over `M × ℝ`,
-`(x, t) ↦ deTurckRHSField g_bg (realizedFam g₀ T T' t) x` is jointly `C^∞` on the slab
-`univ ×ˢ realizedSmallSet` (the realized family is junk-extended to `g₀` off the small set, so the
-joint smoothness holds on the open parameter set containing the integration interval, not globally
-in `t`).
 
-The geometric nonlinearity keystone: it lifts the chart-scalar joint smoothness
-`realizedFam_chartDeTurckRicciRHS_jointContMDiffOn` to the intrinsic bundle section.  Worked
-pointwise through `Bundle.contMDiffWithinAt_totalSpace` at the moving chart-center trivialization
-`α = p₀.1`: the trivialized fibre coordinate is reconstructed from its multilinear-basis
-coordinates (`continuousMultilinearMap_basis`/`equivFun.symm`), each coordinate being the chart
-scalar `deTurckRicciRHS g_bg (g_t) x (e_{σ 0}, e_{σ 1}) = chartDeTurckRicciRHS (g_t) g_bg α (σ 0)
-(σ 1) (ϕ_α x)` (the chart read-off `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS` on
-the Levi-Civita good set), jointly `C^∞` by the chart-scalar lemma. -/
 theorem deTurckRHSField_realizeMetric_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -443,20 +314,8 @@ theorem deTurckRHSField_realizeMetric_jointContMDiffOn
         (Bb.equivFun_apply _).symm]
     exact (Bb.equivFun.symm_apply_apply _).symm
 
-/-! ### Joint `(x, t)`-smoothness of the raw connection Laplacian along a section family
-
-The C2 keystone: for a fixed `t`-independent smooth orthonormal-on-the-good-set chart frame,
-the connection-Laplacian trace of a jointly smooth `(0, 2)`-tensor section family is again a
-jointly smooth section family.  It is assembled from the chart-`α` representation of one covariant
-derivative (`covApply`), iterated twice for the second-order trace and summed over the frame, then
-read back to the intrinsic bundle through the chart-center trivialization.  The private bricks
-`_c2_*` build the single-covariant-derivative chart smoothness; the public headline
-`rawTensorConnLapSmooth_jointContMDiffOn` assembles the full trace. -/
-
 set_option linter.unusedSectionVars false in
-/-- Brick L1: from the joint total-space smoothness of the section family, the chart-`α` Euclidean
-representation `tensorRSChartE_section_repr` of `(F t).toSection` is jointly `ContMDiffOn` on
-`baseSet ×ˢ S`. -/
+
 private theorem _c2_chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -520,8 +379,7 @@ private theorem _c2_chartRepr_jointContMDiffOn
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
 set_option linter.unusedSectionVars false in
-/-- Brick L2: joint Euclidean `ContDiffWithinAt` of the chart-`α` Euclidean representation of the
-section family, on `S ×ˢ (chart target)`, valid for arbitrary `S`. -/
+
 private theorem _c2_chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -596,8 +454,7 @@ private theorem _c2_chartRepr_euclid_jointContDiffWithinAt
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
-/-- Brick L3: joint Euclidean `ContDiffWithinAt` of the chart-`α` representation of one covariant
-derivative `covApply cov B (F t).toSection`, on `S ×ˢ (chart target)`, valid for arbitrary `S`. -/
+
 private theorem _c2_covApply_chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -774,8 +631,7 @@ private theorem _c2_covApply_chartRepr_euclid_jointContDiffWithinAt
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
-/-- Brick L4: manifold-level joint `ContMDiffOn` of the chart-`α` representation of one covariant
-derivative `covApply cov B (F t).toSection`, on `(chart α source) ×ˢ S`. -/
+
 private theorem _c2_covApply_chartRepr_manifold_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -837,9 +693,7 @@ private theorem _c2_covApply_chartRepr_manifold_jointContMDiffOn
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
-/-- Brick L5: **covApply preserves joint section smoothness.**  For a fixed (`t`-independent) smooth
-tangent frame field `B`, if the section family `(p) ↦ mk' p.1 ((F p.2).toSection p.1)` is jointly
-`C^∞` on `univ ×ˢ S`, then so is `(p) ↦ mk' p.1 (covApply cov B (F p.2).toSection p.1)`. -/
+
 private theorem _c2_covApply_section_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -939,9 +793,7 @@ private theorem _c2_covApply_section_jointContMDiffOn
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
 set_option linter.unusedSectionVars false in
-/-- Brick L6: generic section-family version of the chart-rep bridge: from the joint total-space
-smoothness of an arbitrary `(0, 2)` RS-section family `Tfam`, its chart-`α` representation is jointly
-`ContMDiffOn` on `baseSet ×ˢ S`. -/
+
 private theorem _c2_genChartRepr_jointContMDiffOn
     (S : Set ℝ) (α : M)
     (Tfam : ℝ → Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -1001,8 +853,6 @@ private theorem _c2_genChartRepr_jointContMDiffOn
     Bundle.Trivialization.continuousLinearMapAt_apply,
     Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
-/-- §1 helper: any smooth `(0, 2)` RS-section bundles to a `SmoothCcTensor` on the closed
-manifold `M` (compact support is automatic since `M` is compact). -/
 private def _c2_toSmoothCc
     (g₀ : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -1021,10 +871,7 @@ set_option linter.unusedSectionVars false in
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
-/-- §1: **covApply preserves joint smoothness of an arbitrary section family.**  The decoupling of
-brick L5 from the concrete `F : ℝ → SmoothCcTensor` input: for a fixed `t`-independent smooth frame
-`B`, if the arbitrary RS-section family `(p) ↦ mk' p.1 (Tfam p.2 p.1)` is jointly `C^∞` on
-`univ ×ˢ S`, then so is `(p) ↦ mk' p.1 (covApply cov B Tfam p.2 p.1)`. -/
+
 private theorem _c2_covApply_genFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (S : Set ℝ)
@@ -1045,8 +892,6 @@ private theorem _c2_covApply_genFam_jointContMDiffOn
   exact _c2_covApply_section_jointContMDiffOn (I := I) g₀
     (fun t => _c2_toSmoothCc (I := I) g₀ (Tfam t)) S B hT
 
-/-- §2 helper: one directional covariant derivative `∇_B T` of a `SmoothCcTensor`, bundled as a
-smooth section (the `covApplyCcSec` template, `covApplyRS_contMDiff` witness). -/
 private def _c2_covApplySec
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1068,8 +913,6 @@ set_option linter.unusedSectionVars false in
       covApply (TensorRSNabla.tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g₀))
         B.toFun (fun z : M => T.toSection z) y := rfl
 
-/-- §2 helper: the Christoffel tangent field `∇_B B = covApply (LeviCivita g₀) B B`, bundled as a
-`t`-independent smooth tangent section (`covApply_contMDiffOn` for the Levi-Civita connection). -/
 private def _c2_lcFrame
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -1092,9 +935,7 @@ set_option linter.unusedSectionVars false in
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
-/-- §2a: **first trace term joint smoothness.**  For a fixed smooth frame `B`, the section family
-`(p) ↦ mk' p.1 (cov.toFun (covApply cov B (F p.2).toSection) p.1 (B p.1))` (the iterated covariant
-derivative `∇_B ∇_B (F t)`) is jointly `C^∞` on `univ ×ˢ S`. -/
+
 private theorem _c2_traceTerm1_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -1119,9 +960,7 @@ private theorem _c2_traceTerm1_jointContMDiffOn
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
-/-- §2b: **second trace term joint smoothness.**  For a fixed smooth frame `B`, the section family
-`(p) ↦ mk' p.1 (cov.toFun (F p.2).toSection p.1 ((LeviCivita g₀).toFun B p.1 (B p.1)))` (the
-Christoffel correction `∇_{∇_B B} (F t)`) is jointly `C^∞` on `univ ×ˢ S`. -/
+
 private theorem _c2_traceTerm2_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -1143,8 +982,6 @@ private theorem _c2_traceTerm2_jointContMDiffOn
     (_c2_lcFrame (I := I) g₀ B) hF
   exact hStep
 
-/-- §3 helper: the first trace term `∇_B ∇_B T = cov.toFun (∇_B T) · (B ·)`, bundled as a smooth
-section (`covApply_covApply_section_contMDiff`). -/
 private def _c2_term1Sec
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1168,8 +1005,6 @@ set_option linter.unusedSectionVars false in
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => T.toSection z)) y (B.toFun y) := rfl
 
-/-- §3 helper: the second (Christoffel) trace term `∇_{∇_B B} T`, bundled as a smooth section
-(`covApply_christoffel_section_contMDiff`). -/
 private def _c2_term2Sec
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1195,10 +1030,7 @@ set_option linter.unusedSectionVars false in
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedSectionVars false in
-/-- §3: **chart-`α` representation of the fixed-frame connection-Laplacian trace is jointly
-`C^∞`.**  For the globally smooth chart-`α` frame `B i = chartFrameNormGlobalSmooth g₀ α i`, the
-chart scalar `(x, t) ↦ tensorRSChartE_section_repr (rawTensorConnLap_fixedFrame g₀ 0 2 B (F t)) x`
-is jointly `C^∞` on `(chart α source) ×ˢ S`. -/
+
 private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -1231,7 +1063,7 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
     change (trivializationAt E (TangentSpace I) α).baseSet ∩
           (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source
     rw [Set.inter_self]; rfl
-  -- per-i chart-rep of term1 and term2, each jointly ContMDiffOn on baseSet ×ˢ S, via L6.
+  
   have hterm1 : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
         (fun p : M × ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
@@ -1252,7 +1084,7 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
       (fun t => _c2_term2Sec (I := I) g₀ (Bf i) (F t)) ?_
     have := _c2_traceTerm2_jointContMDiffOn (I := I) g₀ F S (Bf i) hF
     exact this
-  -- assemble the sum of (term1 - term2) chart-reps on baseSet ×ˢ S
+  
   have hsum : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
       (fun p : M × ℝ => ∑ i : Fin (Module.finrank ℝ E),
         (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
@@ -1262,11 +1094,11 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
       (baseSet ×ˢ S) := by
     intro p hp
     exact ContMDiffWithinAt.sum (fun i _ => (hterm1 i p hp).sub (hterm2 i p hp))
-  -- the sum equals the chart-rep of the fixed-frame trace on baseSet ×ˢ S
+  
   rw [hbaseSet_eq] at hsum
   refine hsum.congr ?_
   intro p _hp
-  -- fibre-level: chart-rep of the fixed-frame trace = sum of (term1 - term2) chart-reps
+  
   rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
     rawTensorConnLap_fixedFrame_def, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -1276,17 +1108,7 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedSectionVars false in
-/-- **C2 — joint `(x, t)`-smoothness of the raw connection-Laplacian section family.**  As a section
-of the `(0, 2)`-tensor bundle over `M × ℝ`, `(x, t) ↦ (rawTensorConnLapSmooth g₀ 0 2 (F t)).toSection x`
-is jointly `C^∞` on `univ ×ˢ S`, given the joint smoothness of the input section family `F`.
 
-The keystone connecting the chart-scalar joint smoothness of the connection-Laplacian trace to the
-intrinsic bundle section.  Localised at each base point through a partition-of-unity-positive chart
-centre `α` (so the chart-`α` frame `chartFrameNormGlobalSmooth g₀ α i` is orthonormal on the
-working neighbourhood, by `rawTensorConnLap_via_chartFrameNormGlobalSmooth`), the trace is the
-fixed-frame second-covariant-derivative sum, whose chart representation is jointly `C^∞`
-(`_c2_fixedFrameTrace_chartRepr_jointContMDiffOn`); the bundle section is reassembled through the
-chart-center trivialization. -/
 theorem rawTensorConnLapSmooth_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -1304,11 +1126,11 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
   classical
   refine contMDiffOn_of_locally_contMDiffOn ?_
   rintro ⟨x₀, s₀⟩ ⟨-, hs₀⟩
-  -- a partition-of-unity-positive chart centre α (possibly ≠ x₀)
+  
   obtain ⟨α, hα_pos⟩ := (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ x₀)
   set pou : M → ℝ := fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hpou
   have hpou_cont : Continuous pou := (chartAtlasPOU I M α).contMDiff.continuous
-  -- the open neighbourhood U = {pou > 0} of x₀, inside both the POU tsupport and the good set
+  
   set U : Set M := {x : M | 0 < pou x} with hU
   have hU_open : IsOpen U := isOpen_lt continuous_const hpou_cont
   have hx₀U : x₀ ∈ U := hα_pos
@@ -1327,7 +1149,7 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
     simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_univ, true_and, and_true]
     tauto
   rw [hinter]
-  -- chart-rep of the fixed-frame trace, jointly ContMDiffOn on (chart α source) ×ˢ S, restricted to U ×ˢ S
+  
   have hCR0 := _c2_fixedFrameTrace_chartRepr_jointContMDiffOn (I := I) g₀ F S α hF
   have hU_sub_src : U ⊆ (chartAt H α).source := fun x hx => htsupp_sub_src (hU_sub_tsupp hx)
   have hCR : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
@@ -1339,7 +1161,7 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
           (fun y : M => (F p.2).toSection y) z) p.1)
       (U ×ˢ S) :=
     hCR0.mono (fun q hq => ⟨hU_sub_src hq.1, hq.2⟩)
-  -- reassemble the section on U ×ˢ S via the chart-center trivialization
+  
   intro p₀ hp₀
   obtain ⟨hx₀src, hs₀'⟩ := hp₀
   have hbaseSet : p₀.1 ∈ (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
@@ -1360,7 +1182,7 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
       (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).source := by
     rw [Bundle.Trivialization.mem_source]; exact hbaseSet
-  -- the chart-rep equals the fibre coordinate (.2) on U ×ˢ S, using the cornerstone trace identity
+  
   have hfib : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ))
       𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
       (fun p : M × ℝ =>

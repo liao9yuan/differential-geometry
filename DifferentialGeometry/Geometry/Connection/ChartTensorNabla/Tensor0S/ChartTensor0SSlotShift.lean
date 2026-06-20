@@ -1,44 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 
-/-!
-# Slot-shift identity between the chart `(s + 1)` slot correction and the
-chart `s` slot correction on the partial evaluation
-
-For a smooth Riemannian manifold `(M, g)`, a chart center `α : M`, a base point
-`b : M`, a `(0, s + 1)`-tensor section `T`, a tangent vector field `X`, and a
-tangent vector `v : TangentSpace I b`, the per-slot Christoffel correction
-`chartTensor0SSlotCorrection (s + 1) g α T X b k.succ` evaluated at the tuple
-`Fin.cons (chartParallelExtend α b v b) m` equals the per-slot correction
-`chartTensor0SSlotCorrection s g α (tensor0SPartialEval T (chartParallelExtend α b v)) X b k`
-evaluated at `m`.
-
-In words: shifting the slot index from `k.succ` to `k` while moving the
-position-`0` argument into the tensor by partial evaluation (along the
-chart-parallel extension of `v`) leaves the underlying scalar value unchanged.
-
-The proof is a purely combinatorial reindexing: unfold both sides to their
-underlying multilinear evaluations, use the currying evaluation identity
-`TensorMultilinear.tensor0S_curry_apply_eval` on the right-hand side to pull
-the partial-evaluation argument back into the tensor as a `Fin.cons` prepend,
-then identify the two `Fin.cons` tuples slot-by-slot.
-
-A second version, with literal vector `v` on the left-hand side, follows
-unconditionally as soon as `b` lies in the trivialization base set of the
-chart-`α` tangent-bundle trivialization, since the chart-parallel extension
-collapses back to `v` there.
-
-## Main results
-
-* `chartTensor0SSlotCorrection_succ_eq_partialEval` — the unconditional
-  slot-shift identity, with the `Fin.cons` head equal to the value of the
-  chart-parallel extension at `b`.
-* `chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem` — the
-  conditional version with literal `v` on the left-hand side, under the
-  hypothesis that `b` lies in the chart-`α` tangent-bundle trivialization
-  base set.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -59,21 +21,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The slot-`k` substitution CLM family: returns `Φ` at slot index `k`, and
-the identity at every other slot index. -/
 def localSlotCLM (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin s) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
-/-- Slot value at the substituted index. -/
 @[simp] lemma localSlotCLM_self (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     localSlotCLM (I := I) s k Φ k = Φ := by
   unfold localSlotCLM
   simp
 
-/-- Slot value at a non-substituted index. -/
 lemma localSlotCLM_other (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin s} (h : i ≠ k) :
@@ -81,10 +39,6 @@ lemma localSlotCLM_other (s : ℕ) {b : M}
   unfold localSlotCLM
   simp [h]
 
-/-- The `chartTensor0SSlotCorrection` value in terms of the public
-`localSlotCLM`. By construction, the private `slotCLM` used inside
-`chartTensor0SSlotCorrection`'s definition is the same `if i = k then Φ else id`
-formula as `localSlotCLM`, so the two are definitionally equal. -/
 lemma chartTensor0SSlotCorrection_eq_localSlotCLM_compose (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -97,8 +51,6 @@ lemma chartTensor0SSlotCorrection_eq_localSlotCLM_compose (s : ℕ)
           (chartLeviCivitaParallelCLM (I := I) g α b X)) := by
   rfl
 
-/-- Pointwise application formula for the slot-`k` Christoffel correction
-in terms of `localSlotCLM`. -/
 lemma chartTensor0SSlotCorrection_apply_localSlotCLM (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -116,9 +68,6 @@ lemma chartTensor0SSlotCorrection_apply_localSlotCLM (s : ℕ)
     (I := I) s g α T X b k]
   rfl
 
-/-- Evaluating the partial evaluation `tensor0SPartialEval T Y b` (a
-`Tensor0SSpace s I b`) at a `Fin s`-tuple equals evaluating the original
-`(0, s + 1)`-tensor `T b` at the `Fin.cons (Y b) _` tuple of length `s + 1`. -/
 lemma tensor0SPartialEval_apply_tangent (s : ℕ)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')
     (Y : Π b' : M, TangentSpace I b') (b : M)
@@ -139,8 +88,6 @@ lemma tensor0SPartialEval_apply_tangent (s : ℕ)
   exact TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T b) (v0 := Y b) (vs := vs)
 
-/-- Tuple-equality lemma: the two `Fin (s + 1)`-indexed tuples agree
-pointwise. -/
 private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (w : TangentSpace I b) (m : Fin s → TangentSpace I b) :
@@ -192,18 +139,6 @@ private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
         simp [hjk, hsucc_ne]
     rw [hCLM_eq]
 
-/-- **Slot-shift identity (unconditional).** For a smooth Riemannian metric
-`g`, a chart center `α`, a basepoint `b`, a `(0, s + 1)`-tensor section `T`,
-a tangent vector field `X`, and a tangent vector `v ∈ TangentSpace I b`:
-
-The slot-`k.succ` Christoffel correction of `T` evaluated at the tuple
-`Fin.cons (chartParallelExtend α b v b) m` equals the slot-`k` Christoffel
-correction of the partial evaluation
-`tensor0SPartialEval T (chartParallelExtend α b v)` evaluated at `m`.
-
-This is a purely combinatorial reindexing: the position-`0` argument is moved
-from the evaluation tuple into the tensor itself via partial evaluation, and
-the per-slot Christoffel correction simply re-indexes from `k.succ` to `k`. -/
 theorem chartTensor0SSlotCorrection_succ_eq_partialEval
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')
@@ -234,10 +169,6 @@ theorem chartTensor0SSlotCorrection_succ_eq_partialEval
   congr 1
   exact slot_shift_tuple_eq (I := I) s k Φ w m
 
-/-- **Slot-shift identity (literal `v`, conditional).** Under the
-trivialization-base-set hypothesis
-`b ∈ (trivializationAt E (TangentSpace I) α).baseSet`, the slot-shift identity
-holds with literal vector `v` as the `Fin.cons` head on the left-hand side. -/
 theorem chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')

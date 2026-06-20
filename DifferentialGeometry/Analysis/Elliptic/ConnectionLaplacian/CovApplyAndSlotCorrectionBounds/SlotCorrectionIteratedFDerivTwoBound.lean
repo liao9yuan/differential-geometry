@@ -1,60 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceIteratedFDerivTwoBound
 
-/-!
-# Order-2 iterated Fréchet derivative bound for the chart-pulled input/output
-Christoffel slot corrections
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, ranks
-`r s : ℕ`, a smooth tangent vector field `B`, a slot index `k : Fin r`
-(input) or `l : Fin s` (output), and a smooth compactly supported
-`(r, s)`-tensor section `T`, the chart-`α`-pulled slot correction has the
-form
-
-  `Ψ(y) := (kernel y) (F y)`,
-
-where `F = tensorRSChartE_section_repr r s α T.toSection ∘ (extChartAt I α).symm`
-and `kernel` is the chart-pulled input (resp. output) slot kernel.
-
-This file ships the uniform bound
-
-  `‖iteratedFDeriv ℝ 2 Ψ (extChartAt I α b)‖
-      ≤ K * (‖iteratedFDeriv ℝ 2 F (extChartAt I α b)‖
-             + ‖fderiv ℝ F (extChartAt I α b)‖
-             + ‖F (extChartAt I α b)‖)`
-
-for `b` in the intersection of the chart-`α` partition-of-unity tsupport
-and the chart-`α` Levi-Civita good set. The constant `K` depends on
-`g`, `α`, the locality hypothesis on the chart atlas, the ranks `r`, `s`,
-the slot index, and `B`, but is independent of `T` and `b`.
-
-## Strategy
-
-Mirror the proof of `intrinsic_piece_iteratedFDeriv_two_bound`, but with
-`c(y) := kernel y` and `u(y) := F y`. By
-`norm_iteratedFDerivWithin_clm_apply` on the open chart-target image of the
-chart-`α` Levi-Civita good set,
-
-  `‖iteratedFDerivWithin 2 (c·u) U y‖
-      ≤ ∑_{k=0,1,2} C(2,k) · ‖iteratedFDerivWithin k c U y‖
-          · ‖iteratedFDerivWithin (2-k) u U y‖`.
-
-Since `U` is open, `iteratedFDerivWithin = iteratedFDeriv` on `U`. The
-factors `‖iteratedFDeriv k c‖` for `k = 0, 1, 2` are bounded uniformly on
-the POU tsupport ∩ good set; the order-0 and order-1 bounds come from
-`*_opNorm_uniform_on_pouTsupport` and
-`*_fderiv_opNorm_uniform_on_pouTsupport`. The order-2 bound follows from
-continuity of `iteratedFDeriv 2 (kernel ∘ symm)` on the open good-set
-image and compactness of the POU tsupport.
-
-## Main results
-
-* `inputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport` /
-  `outputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport` —
-  uniform bounds on `‖iteratedFDeriv ℝ 2 (kernel ∘ symm)‖` over the
-  partition-of-unity tsupport intersected with the chart-`α` Levi-Civita
-  good set, the order-2 inputs to the Leibniz estimate. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -83,10 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Pointwise equality between the chart-pulled input-slot correction and the
-chart-kernel applied to `tensorRSChartE_section_repr`, on a neighbourhood of
-`extChartAt I α b`. Repackages
-`input_slot_pulled_eq_kernel_eventually` as an `EventuallyEq`. -/
 private lemma input_slot_pulled_eq_kernel_repr_eventually
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -139,9 +81,6 @@ private lemma input_slot_pulled_eq_kernel_repr_eventually
         (fun y' : M => T.toSection y') ((extChartAt I α).symm y))
   exact h_factor
 
-/-- Pointwise equality between the chart-pulled output-slot correction and
-the chart-kernel applied to `tensorRSChartE_section_repr`, on a
-neighbourhood of `extChartAt I α b`. -/
 private lemma output_slot_pulled_eq_kernel_repr_eventually
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -194,9 +133,6 @@ private lemma output_slot_pulled_eq_kernel_repr_eventually
         (fun y' : M => T.toSection y') ((extChartAt I α).symm y))
   exact h_factor
 
-/-- Continuity on the open chart-target image of the chart-`α` Levi-Civita
-good set of `‖iteratedFDeriv ℝ 2 (kernel ∘ symm)‖`, where `kernel` is the
-input-slot kernel. -/
 private lemma inputSlotChartKernel_iteratedFDeriv_two_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -244,9 +180,6 @@ private lemma inputSlotChartKernel_iteratedFDeriv_two_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
-/-- Continuity on the open chart-target image of the chart-`α` Levi-Civita
-good set of `‖iteratedFDeriv ℝ 2 (kernel ∘ symm)‖`, where `kernel` is the
-output-slot kernel. -/
 private lemma outputSlotChartKernel_iteratedFDeriv_two_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -294,8 +227,6 @@ private lemma outputSlotChartKernel_iteratedFDeriv_two_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
-/-- Under `[I.Boundaryless]`, the chart-α partition-of-unity tsupport lies in
-the chart-α Levi-Civita good set. -/
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -307,8 +238,6 @@ private lemma pouTsupport_subset_goodSet (α : M) :
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
-/-- Uniform bound on `‖iteratedFDeriv ℝ 2 (inputSlotChartKernel ∘ symm)‖`
-over the POU tsupport ∩ good set. -/
 private lemma inputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -350,8 +279,6 @@ private lemma inputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
   have h := hC_mem ⟨b, hb_K, rfl⟩
   exact le_trans h (le_max_left _ _)
 
-/-- Uniform bound on `‖iteratedFDeriv ℝ 2 (outputSlotChartKernel ∘ symm)‖`
-over the POU tsupport ∩ good set. -/
 private lemma outputSlotChartKernel_iteratedFDeriv_two_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :

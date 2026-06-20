@@ -1,84 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHS
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# Explicit-norm `eLpNorm` bound for the differentiated chart-RHS numerator
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the level-`(m+1)`
-differentiated chart-RHS numerator `eigenvectorChartRHSDiffNumerator` is the
-explicit five-layer Leibniz combination `A + B − C + D + E` produced by one more
-integration by parts in the new direction `lₙ := l (Fin.last m)`.
-
-The qualitative companion `eigenvectorChartRHSDiffNumerator_memLp_volume_compact`
-records that the numerator is `MemLp 2` of the plain Lebesgue volume restricted
-to the compact partition-of-unity kernel `chartPouKernel α`, by splitting the
-five layers and proving each `MemLp 2`.
-
-This file records the quantitative twin: there is a nonnegative constant `C`
-with
-
-```
-eLpNorm (eigenvectorChartRHSDiffNumerator … m l fChartEffPrev) 2 μ
-  ≤ ENNReal.ofReal C * <AGGREGATE>,
-```
-
-where `μ = volume.restrict (chartPouKernel α)` and `<AGGREGATE>` is the honest
-finite sum
-
-* `∑ₐ wkpNorm 2 2 (eigenvectorChartIteratedPartial … (m+1) (Fin.cons a (Fin.init
-  l))) (chartTargetEuclid α)` — the iterated weak partials feeding layers `A`,
-  `B`;
-* `wkpNorm 2 2 (eigenvectorChartIteratedPartial … m (Fin.init l))
-  (chartTargetEuclid α)` — the iterated weak partial feeding layer `C`;
-* `wkpNorm 1 2 fChartEffPrev (chartTargetEuclid α)` — controlling layer `E` via
-  the chosen weak partial;
-* `eLpNorm fChartEffPrev 2 μ` — controlling layer `D`.
-
-## Strategy
-
-The numerator is a five-layer `+`/`-` combination of functions `EuclN → ℝ`.
-Iterated Minkowski (`eLpNorm_add_le` / `eLpNorm_sub_le`) bounds its `eLpNorm` by
-the sum of the five layer `eLpNorm`s. Each layer is a finite sum of
-`(smooth coefficient) · atom` summands:
-
-* layers `A`, `B`, `C` have a `C^∞`-on-the-chart-target coefficient
-  (`weightedInvGramDerivOnEuclid`-and-`fderiv` thereof, or `densityDerivOnEuclid`)
-  and an iterated-weak-partial atom — directly the `(m+1)`-fold mixed weak
-  partial, its chosen weak partial, or the `m`-fold mixed weak partial;
-* layers `D`, `E` have the smooth coefficient `densityDerivOnEuclid`,
-  respectively `densityOnEuclid`, and the `fChartEffPrev` atom — directly, or
-  its chosen weak partial.
-
-Per summand the `C^∞`-coefficient bound (the plain-`volume.restrict` analogue of
-`eLpNorm_weighted_contDiffOn_mul_le`, established here by a few-line pointwise
-norm domination on the compact kernel) gives `eLpNorm (coeff · atom) 2 μ ≤
-ENNReal.ofReal Cᵢ * eLpNorm atom 2 μ`. The atom `eLpNorm` is then bounded:
-
-* an iterated weak partial atom by `eLpNorm_le_wkpNorm`, then `wkpNorm 0 2 ≤
-  wkpNorm 2 2`;
-* a chosen weak partial of an iterated partial by `wkpNorm_chosenWeakPartial_le`
-  (which drops one Sobolev order), then `eLpNorm_le_wkpNorm` and the order
-  monotonicity `wkpNorm 1 2 ≤ wkpNorm 2 2`;
-* the `fChartEffPrev` atom by `eLpNorm_le_wkpNorm` of the restricted measure;
-* the chosen weak partial of `fChartEffPrev` by `wkpNorm_chosenWeakPartial_le`
-  then `eLpNorm_le_wkpNorm`.
-
-Every per-summand quantity is dominated by the full aggregate (the norms are
-nonnegative `ℝ≥0∞` quantities), so all per-summand constants and finite-sum
-multiplicities fold into a single nonnegative constant `C`.
-
-## Main result
-
-* `eigenvectorChartRHSDiffNumerator_eLpNorm_le` — the explicit-norm `eLpNorm`
-  bound for the differentiated chart-RHS numerator.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -118,24 +40,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Plain-`volume.restrict` explicit-norm bound for a `C^∞`-coefficient
-product.** Let `c : EuclN → ℝ` be `C^∞` on the open chart target, let
-`K ⊆ chartTargetEuclid α` be compact, and let `w : EuclN → ℝ` be arbitrary. Then
-there is a nonnegative constant `C` — the sup of `‖c‖` over `K` — with
 
-```
-eLpNorm (fun y => c y * w y) 2 (volume.restrict K)
-  ≤ ENNReal.ofReal C * eLpNorm w 2 (volume.restrict K).
-```
-
-The restricted measure `volume.restrict K` is supported in `K`, so the pointwise
-bound `‖c y‖ ≤ C` for `y ∈ K` upgrades — almost everywhere for the restricted
-measure — to `‖c y * w y‖ ≤ ‖C • w y‖`. Monotonicity of `eLpNorm` under that
-norm domination, the homogeneity `eLpNorm (C • w) 2 μ = ‖C‖ₑ * eLpNorm w 2 μ`,
-and the conversion `‖C‖ₑ = ENNReal.ofReal C` for `C ≥ 0` give the estimate.
-
-This is the plain-`volume.restrict` companion of the weighted-measure lemma
-`eLpNorm_weighted_contDiffOn_mul_le`. -/
 private lemma eLpNorm_volume_restrict_contDiffOn_mul_le
     (α : M)
     {c : EuclN → ℝ}
@@ -183,10 +88,7 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- A finite indexed family of `MemLp` summands, each `eLpNorm`-bounded by
-`ENNReal.ofReal Cⱼ` times a fixed aggregate quantity `A`, has its summed
-`eLpNorm` bounded by `ENNReal.ofReal` of an explicit nonnegative constant times
-`A`. -/
+
 private lemma eLpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {μ : Measure EuclN} (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
@@ -232,11 +134,7 @@ private lemma eLpNorm_sum_le_const_mul_aggregate
 section MainBoundUniform
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
-/-- **Uniform-constant plain-`volume.restrict` `C^∞`-coefficient product bound.**
-The constant-uniform form of `eLpNorm_volume_restrict_contDiffOn_mul_le`: the
-constant — the sup of `‖c‖` over the compact `K` — depends only on the
-coefficient `c` and the set `K`, not on the function being multiplied, so a
-single nonnegative `C` serves *every* `w : EuclN → ℝ`. -/
+
 private lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
     (α : M)
     {c : EuclN → ℝ}
@@ -282,12 +180,7 @@ private lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Uniform-constant finite-sum aggregation.** The constant-uniform form of
-`eLpNorm_sum_le_const_mul_aggregate`: a finite indexed family of summands
-`F j n`, each `MemLp` and each — *with an `n`-uniform constant* — having its
-`eLpNorm` bounded by `ENNReal.ofReal Cⱼ` times an aggregate `A n`, has its summed
-`eLpNorm` bounded by `ENNReal.ofReal` of a single nonnegative constant — *the
-same for every `n`* — times `A n`. -/
+
 private lemma eLpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {ν : Type*} {μ : Measure EuclN}
     (F : ι → ν → EuclN → ℝ) (A : ν → ℝ≥0∞)
@@ -338,11 +231,7 @@ end MainBoundUniform
 section SharpAtomBounds
 
 omit [CompleteSpace E] in
-/-- The canonical chosen weak partial `chosenWeakPartial' 2 b w Ω` of an
-arbitrary function is `MemLp 2` of the volume restricted to any measurable
-subset of `Ω`: by case split on `DeGiorgi.MemW1p 2 w Ω`, the chosen weak
-partial is either the genuine `L²` weak partial of a `W^{1,2}` element or
-the zero function. -/
+
 private lemma chosenWp_memLp_volume_restrict
     (b : Fin (Module.finrank ℝ E)) (w : EuclN → ℝ) {Ω K : Set EuclN}
     (hK_meas : MeasurableSet K) (hK_in : K ⊆ Ω) :
@@ -363,10 +252,6 @@ private lemma chosenWp_memLp_volume_restrict
 
 end SharpAtomBounds
 
-/-- The chart-locality-free finite aggregate of source norms controlling the
-differentiated chart-RHS numerator. Chart-locality-free twin of
-`diffNumeratorAggregate`, with the iterated weak partials re-keyed onto
-`eigenvectorChartIteratedPartial`. -/
 def diffNumeratorAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -395,7 +280,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of `eLpNorm_iteratedPartial_succ_le`. -/
 private lemma eLpNorm_iteratedPartial_succ_le
     (a : Fin (Module.finrank ℝ E)) :
     eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -425,7 +309,6 @@ private lemma eLpNorm_iteratedPartial_succ_le
   exact eLpNorm_le_wkpNorm (d := Module.finrank ℝ E) 2 2
     (chartTargetEuclid (I := I) (M := M) α) _
 
-/-- Chart-locality-free twin of `eLpNorm_iteratedPartial_le`. -/
 private lemma eLpNorm_iteratedPartial_le :
     eLpNorm (eigenvectorChartIteratedPartial (I := I) (M := M)
         g r s i α P₀ m (Fin.init l)) 2
@@ -454,8 +337,6 @@ private lemma eLpNorm_iteratedPartial_le :
   exact eLpNorm_le_wkpNorm (d := Module.finrank ℝ E) 2 2
     (chartTargetEuclid (I := I) (M := M) α) _
 
-/-- Chart-locality-free twin of
-`eLpNorm_chosenWeakPartial_iteratedPartial_succ_le`. -/
 private lemma eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
     (a b : Fin (Module.finrank ℝ E)) :
     eLpNorm (chosenWeakPartial' (d := Module.finrank ℝ E) 2 b
@@ -490,8 +371,6 @@ end AtomBoundsUnconditional
 
 section LayerBoundsUnconditional
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -611,8 +490,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le
       exact le_trans (eLpNorm_iteratedPartial_succ_le
         (I := I) (M := M) g r s i α P₀ m l a) (h_atom_le a)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -719,8 +596,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le
       exact le_trans (eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
         (I := I) (M := M) g r s i α P₀ m l a b) (h_atom_le a)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -767,8 +642,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le
   exact le_trans (eLpNorm_iteratedPartial_le
     (I := I) (M := M) g r s i α P₀ m l) h_atom_le
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -807,8 +680,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le
   refine ⟨C₀, hC₀_nn, le_trans hC₀ ?_⟩
   gcongr
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -865,7 +736,7 @@ end LayerBoundsUnconditional
 section MainBoundUnconditional
 
 set_option linter.unusedVariables false in
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiffNumerator_eLpNorm_le`. -/
+
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1094,8 +965,6 @@ end MainBoundUnconditional
 
 section MainBoundUniformUnconditional
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1223,8 +1092,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform
       exact le_trans (eLpNorm_iteratedPartial_succ_le
         (I := I) (M := M) g r s i α P₀ m l a) (h_atom_le i a)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1338,8 +1205,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform
       exact le_trans (eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
         (I := I) (M := M) g r s i α P₀ m l a b) (h_atom_le i a)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1386,8 +1251,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_uniform
   exact le_trans (eLpNorm_iteratedPartial_le
     (I := I) (M := M) g r s i α P₀ m l) (h_atom_le i)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1429,8 +1292,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_uniform
   gcongr
   exact h_atom_le i
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1481,8 +1342,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform
     hΩ_open _ (l (Fin.last m))) (h_atom_le i)
 
 set_option linter.unusedVariables false in
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform`. -/
+
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1721,7 +1581,6 @@ end MainBoundUniformUnconditional
 
 section SharpAtomBoundsUnconditional
 
-/-- Chart-locality-free twin of `iter_memLp_volume_restrict`. -/
 private lemma iter_memLp_volume_restrict
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1741,8 +1600,6 @@ private lemma iter_memLp_volume_restrict
     exact congrArg _ (Set.inter_eq_self_of_subset_left hK_in)
   exact h_eq ▸ h_global.restrict K
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -1878,8 +1735,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
   refine le_trans (hC i) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_assoc C CatomA]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -2006,8 +1861,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
   refine le_trans (hC i) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_assoc C CatomB]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -2071,8 +1924,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
                 g r s) i‖ := by
           rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomC]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -2134,8 +1985,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
                 g r s) i‖ := by
           rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomD]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -2205,7 +2054,6 @@ end SharpAtomBoundsUnconditional
 
 section SharpMainBoundUnconditional
 
-/-- Chart-locality-free twin of `eigen_inv_one_le`. -/
 private lemma eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -2231,7 +2079,6 @@ private lemma eigen_inv_one_le
   have hμ_le_one : i.fst.val ≤ 1 := hμ_unit.2
   exact (one_le_inv₀ hμ_pos).mpr hμ_le_one
 
-/-- Chart-locality-free twin of `pow_eigen_inv_le`. -/
 private lemma pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2240,7 +2087,6 @@ private lemma pow_eigen_inv_le
   exact pow_le_pow_right₀
     (eigen_inv_one_le (I := I) (M := M) g r s i) hke
 
-/-- Chart-locality-free twin of `ofReal_const_pow_eigen_inv_le`. -/
 private lemma ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2251,8 +2097,6 @@ private lemma ofReal_const_pow_eigen_inv_le
   exact mul_le_mul_of_nonneg_left
     (pow_eigen_inv_le (I := I) (M := M) g r s i hke) hC_nn
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_eLpNorm_le_chartcpt`. -/
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

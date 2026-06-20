@@ -5,56 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartDa
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 
-/-!
-# Chart-target `MemW1p 2` discharge for `fChartResidual` from
-`u_h ∈ laplacianDomainPow g 2` and the iterated-closure hypothesis
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and an
-element `u_h ∈ laplacianDomainPow g 2`, the chart-pulled residual
-`fChartResidual g α u_h` is the chart-pulled raw `Lp`-class realisation of
-`fHLeibnizResidualLp g α u_h = -2 g(∇ρα, ∇u_h) - Δρα · u_h`.
-
-By the manifold-side `Lp` identity (rearranged from
-`gradInnerCLM_eq_two_inv_preimageDiff`),
-
-```
-fHLeibnizResidualLp g α u_h
-  = preimage⟨smoothMulH1Compl ρα u_h⟩
-     - smoothMulLp ρα (preimage⟨u_h⟩),
-```
-
-the residual decomposes as a difference of two `Lp` pieces, each in
-`H1ComplToLp '' (laplacianDomain g)` when the relevant iterated-closure
-membership holds. Under the iterated-closure hypothesis
-
-```
-smoothMulH1Compl (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2,
-```
-
-both pieces have manifold-side function representatives in
-`MemWkpChart g 2 2` (the `Lp`-side preimage piece by
-`laplacianDomainPow_two_h2_plus_rhs_h2` applied to
-`smoothMulH1Compl ρα u_h`; the smooth-multiplied preimage piece by
-`MemWkpChart_smooth_mul` applied to the `Lp`-side preimage of `u_h`).
-
-The chart-pulled `MemW1p 2` regularity of each piece is delivered via
-the existing chart-side bridge
-`memW1p_chartPushedRaw_pou_mul_of_memWkpChart`, which converts
-`MemWkpChart g 1 p F` membership into chart-target `MemW1p p` of the
-chart-pulled-raw `ρα · F` on `chartTargetEuclid α`.
-
-This file packages the two-piece discharge into a public theorem
-discharging the `MemW1p 2 fChartResidual chartTargetEuclid α` regularity
-from the iterated-closure hypothesis.
-
-## Main results
-
-* `fChartResidual_memW1p_of_iteratedClosure` — the `MemW1p 2` discharge
-  of `fChartResidual g α u_h` from `u_h ∈ laplacianDomainPow g 2` and the
-  iterated-closure hypothesis
-  `smoothMulH1Compl (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -93,7 +43,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `M → ℝ` function representative of the `(1 - Δ_g)`-preimage of `u_h`. -/
 private noncomputable def preimageFun
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -104,8 +53,6 @@ private noncomputable def preimageFun
           (I := I) (M := M) g 1 hu_h⟩ :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
 
-/-- The `M → ℝ` function representative of the `(1 - Δ_g)`-preimage of
-`smoothMulH1Compl ρα u_h`. -/
 private noncomputable def preimageSmoothMulH1ComplFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -120,12 +67,9 @@ private noncomputable def preimageSmoothMulH1ComplFun
               (I := I) (M := M) g 1 hu_h)⟩ :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) x
 
-/-- The smooth `chartAtlasPOU` weight as `M → ℝ`. -/
 private noncomputable def rhoAlphaFun (α : M) : M → ℝ :=
   fun x => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x
 
-/-- The chart-pulled raw function `chartPushedRaw α (ρα · preimage⟨u_h⟩.coeFn)`
-is in `MemW1p 2 chartTargetEuclid α`. -/
 private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -152,9 +96,6 @@ private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage
       h_preimage_h1 α
   convert h_bridge using 1
 
-/-- Under the iterated-closure hypothesis, the chart-pulled raw function
-`chartPushedRaw α (ρα · preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn)` is in
-`MemW1p 2 chartTargetEuclid α`. -/
 private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -190,16 +131,6 @@ private lemma memW1p_chartPushedRaw_rhoAlpha_mul_preimage_smoothMulH1Compl
       (u := preimageSmoothMulH1ComplFun (I := I) (M := M) g α hu_h) h_smHC_h1 α
   convert h_bridge using 1
 
-/-- The chart-pulled residual `fChartResidual g α u_h` is ae-equal to the
-difference of chart-pulled raw functions corresponding to the two pieces
-of the manifold-side decomposition. Specifically, on the chart-pulled
-weighted measure restricted to `chartTargetEuclid α`,
-
-```
-fChartResidual y =ᵃᵉ chartPushedRaw α (preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn) y
-                  - chartPushedRaw α (ρα · preimage⟨u_h⟩.coeFn) y.
-```
--/
 private lemma fChartResidual_aeEq_chartPushedRaw_diff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -294,31 +225,6 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
   rw [h_lhs, h_pre_smHC, h_smMul_coeFn, h_smMul_aeEq]
   rfl
 
-/-- **Conditional discharge of `MemW1p 2 fChartResidual` from the iterated
-closure**.
-
-For `u_h ∈ laplacianDomainPow g 2` and the iterated-closure hypothesis
-`smoothMulH1Compl (chartAtlasPOU I M α) u_h ∈ laplacianDomainPow g 2`, **given**
-the additional support hypothesis that the function representative of
-`preimage⟨smoothMulH1Compl ρα u_h⟩` is ae-equal to its product with `ρα` on
-`riemannianVolumeMeasure g`, the chart-pulled residual `fChartResidual g α
-u_h` is in `MemW1p 2 chartTargetEuclid α`.
-
-The support hypothesis captures the property that
-`preimage⟨smoothMulH1Compl ρα u_h⟩` is supported (a.e.) in `tsupport(ρα) ⊆
-chart α source`. This property follows from the manifold-side `Lp` identity
-
-```
-preimage⟨smoothMulH1Compl ρα u_h⟩ = smoothMulLp ρα (preimage⟨u_h⟩)
-                                + fHLeibnizGeneralResidualCLM g ρα u_h
-```
-
-(each summand has support in `tsupport(ρα)` at the function level —
-`smoothMulLp ρα` for trivial reasons, `fHLeibnizGeneralResidualCLM` because
-its constituent terms `gradInnerCLM ρα` and `smoothMulLp Δρα` are supported
-in `tsupport(ρα)`). Discharging this support property at the `Lp`-class
-level requires a careful function-representative analysis through the
-density extension of `gradInnerCLM`; we expose it as a clean hypothesis. -/
 theorem fChartResidual_memW1p_of_iteratedClosure
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

@@ -2,83 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothMulH1Compl
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PerChart
 
-/-!
-# Manifold-side Lp decomposition of `fHLeibnizResidualLp`
-
-For a closed Riemannian manifold `(M, g)` and chart point `α`, this module
-exhibits the Lp-class identity expressing the residual
-
-```
-fHLeibnizResidualLp g α u_h = -2 g(∇ρα, ∇u_h) - Δρα · u_h
-```
-
-in terms of `(1-Δ_g)`-preimage data: namely
-
-```
-fHLeibnizResidualLp = preimage⟨smoothMulH1Compl ρα u_h⟩
-                       - smoothMulLp ρα (preimage⟨u_h⟩).
-```
-
-The identity packages the manifold-side Leibniz rule
-`Δ_g(ρα u_h) = ρα Δ_g u_h + 2 g(∇ρα, ∇u_h) + u_h Δ_g ρα` at the `Lp` class
-level, using
-
-* `laplacianDomain_preimage_smoothMulH1Compl` — the preimage identity
-  `preimage⟨smoothMulH1Compl ρα u_h⟩ = fHLeibnizGeneral g ρα u_h hu_dom`.
-
-* `fHLeibnizGeneral` definitional unfolding into
-  `smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h`.
-
-* `fHLeibnizGeneralResidualCLM g (chartAtlasPOU I M α) u_h =
-  fHLeibnizResidualLp g α u_h` (definitionally, since the relevant
-  `smoothLaplacianBundle g (chartAtlasPOU I M α)` equals
-  `laplacianOfChartPOU g α`).
-
-## Main result
-
-* `fHLeibnizResidualLp_eq_preimageDiff` — for `u_h ∈ laplacianDomain g`:
-
-  ```
-  fHLeibnizResidualLp g α u_h
-    = preimage⟨smoothMulH1Compl ρα u_h, smoothMulH1Compl_mem_laplacianDomain⟩
-       - smoothMulLp ρα (preimage⟨u_h, hu_dom⟩).
-  ```
-
-## Connection to `MemW1p 2 fChartResidual chartTarget` discharge
-
-The chart-pulled-raw `fChartResidual` is
-`chartPushedRawLpFromLp(fHLeibnizResidualLp).coeFn`. By the decomposition
-identity above and additivity of `chartPushedRawLpFromLp` at the `coeFn`
-level (in `DiffChartBilinearH1ComplFromDomainPow.lean`),
-
-```
-fChartResidual =ᵃᵉ
-    chartPushedRawLpFromLp(preimage⟨smoothMulH1Compl ρα u_h⟩).coeFn
-       - chartPushedRawLpFromLp(smoothMulLp ρα (preimage⟨u_h⟩)).coeFn.
-```
-
-The second summand has `MemW1p 2 chartTarget` regularity for
-`u_h ∈ laplacianDomainPow g 2` via:
-
-* `laplacianDomainPow_two_h2_plus_rhs_h2.2.1` (the `Lp`-side preimage
-  `preimage⟨u_h⟩.coeFn ∈ MemWkpChart g 2 2`).
-
-* `MemWkpChart_smooth_mul` (smooth-bounded multiplication closure of
-  `MemWkpChart g 2 2`), giving `ρα · preimage⟨u_h⟩.coeFn ∈ MemWkpChart g 2 2`.
-
-* `memW1p_chartPushedRaw_pou_mul_of_memWkpChart` (the existing chart-pulled
-  weighted bridge to `MemW1p 2 chartTarget`).
-
-The first summand `chartPushedRawLpFromLp(preimage⟨smoothMulH1Compl ρα u_h⟩)`
-would require `preimage⟨smoothMulH1Compl ρα u_h⟩.coeFn ∈ MemWkpChart g 1 2`, which
-in turn requires `smoothMulH1Compl ρα u_h ∈ laplacianDomainPow g 2` (iterated
-closure of the Laplacian domain). This iterated closure is not automatic
-from `u_h ∈ laplacianDomainPow g 2` alone: it requires the chart-Sobolev
-third-order control on `u_h` arising from differentiating the Leibniz
-expansion of `(1-Δ_g)(ρα u_h)`. The remaining infrastructure for this
-iterated closure is the subject of follow-up work.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -109,8 +32,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The Leibniz cross-term CLM and the residual Lp-class agree on
-`u_h : H1Compl g`, for `φ := chartAtlasPOU I M α`. -/
 lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -125,18 +46,6 @@ lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
   rw [fHLeibnizGeneralResidualCLM_apply]
   rfl
 
-/-- **The manifold-side Lp decomposition for `fHLeibnizResidualLp`**.
-
-For `u_h ∈ laplacianDomain g`,
-
-```
-preimage⟨smoothMulH1Compl ρα u_h⟩
-  = smoothMulLp ρα (preimage⟨u_h⟩) + fHLeibnizGeneralResidualCLM g ρα u_h.
-```
-
-This is the preimage identity unfolded; it underlies the
-identification of `fHLeibnizResidualLp` with the difference of two
-`(1-Δ_g)`-preimages. -/
 theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -165,13 +74,6 @@ theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
   rw [h_diff_eq] at h_preimage_smoothMulH1Compl
   exact h_preimage_smoothMulH1Compl
 
-/-- **Rearranged form of the decomposition**: for `u_h ∈ laplacianDomain g`,
-
-```
-fHLeibnizGeneralResidualCLM g (chartAtlasPOU I M α) u_h
-  = preimage⟨smoothMulH1Compl ρα u_h⟩ - smoothMulLp ρα (preimage⟨u_h⟩).
-```
--/
 theorem fHLeibnizGeneralResidualCLM_eq_preimageDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

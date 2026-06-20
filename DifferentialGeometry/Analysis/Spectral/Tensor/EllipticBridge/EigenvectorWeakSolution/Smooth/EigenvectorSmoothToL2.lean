@@ -1,58 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponent
 
-/-!
-# The smooth representative *is* the connection-Laplacian resolvent eigenvector
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and an eigenbasis
-index `i`, the smooth representative `eigenvectorSmooth g r s i` is
-a genuine smooth compactly-supported `(r, s)`-tensor section. The chart-component
-analysis has shown that, at every chart centre `β` and component multi-index
-`P₀`, its canonical Euclidean chart component agrees — as an element of the chart
-`L²` space — with the chart component of the abstract connection-Laplacian
-resolvent eigenvector `tensorResolventEigenbasisVec`.
-
-This file is the thin assembly that converts that chart-by-chart agreement into
-the headline identifications, re-keyed onto the intrinsic compact-operator
-eigenbasis at the unconditional compactness witness
-`tensorResolventL2_isCompactOperator`.
-
-## Main results
-
-* `eigenvectorSmooth_toL2` — the image of
-  `eigenvectorSmooth` in the metric `L²` Hilbert space
-  `TensorL2 r s g` equals the eigenvector
-  `tensorResolventEigenbasisVec`. The chart-component separation
-  theorem `tensorL2_eq_of_chartComponent_eq` reduces the equality to the
-  chart-component agreement
-  `eigenvectorSmooth_tensorL2ChartComponent_eq`, which supplies
-  exactly the `∀ β P₀` family of chart-component equalities the separation
-  theorem demands.
-
-* `tensorEigenvector_exists_smooth` — the abstract eigenvector
-  `tensorResolventEigenbasisVec` is the `L²`-coercion of a smooth
-  compactly-supported tensor section. The witness is
-  `eigenvectorSmooth`, whose `SmoothCcTensor` type is exactly the
-  type of smooth compactly-supported `(r, s)`-tensor sections.
-
-* `eigenvectorSmooth_contMDiff` — the underlying section of
-  `eigenvectorSmooth` is `C^∞`. This is the smoothness datum
-  carried by the `SmoothCcTensor` structure, made explicit.
-
-* `eigenvectorSmooth_weak_eigen` — the smooth weak eigen-equation:
-  testing the eigenvector resolvent `eigenvectorResolvent g r s i`
-  against a smooth compactly-supported `H¹` section `S`, its `H¹` pairing with
-  the completion embedding of `S` equals the `L²` pairing of the underlying
-  smooth `L²` section of `S` with the smooth representative
-  `eigenvectorSmooth g r s i`. This is the eigenvector weak
-  equation `eigenWeakEquation`, transported across
-  `eigenvectorSmooth_toL2`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -92,7 +39,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `eigenvectorSmooth_toL2`. -/
+
 theorem eigenvectorSmooth_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -107,7 +54,7 @@ theorem eigenvectorSmooth_toL2
       (I := I) (M := M) g r s i β P₀)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `tensorEigenvector_exists_smooth`. -/
+
 theorem tensorEigenvector_exists_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -118,7 +65,6 @@ theorem tensorEigenvector_exists_smooth
   ⟨eigenvectorSmooth (I := I) (M := M) g r s i,
     eigenvectorSmooth_toL2 (I := I) (M := M) g r s i⟩
 
-/-- Chart-locality-free twin of `eigenvectorSmooth_contMDiff`. -/
 theorem eigenvectorSmooth_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -128,7 +74,6 @@ theorem eigenvectorSmooth_contMDiff
           ((eigenvectorSmooth (I := I) (M := M) g r s i).toSection x)) :=
   (eigenvectorSmooth (I := I) (M := M) g r s i).toSection.contMDiff
 
-/-- Chart-locality-free twin of `eigenvectorSmooth_weak_eigen`. -/
 theorem eigenvectorSmooth_weak_eigen
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

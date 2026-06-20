@@ -1,67 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 
-/-!
-# Symmetry of the chart Ricci tensor for the Levi-Civita connection
-
-For a smooth Riemannian metric `g` on a smooth manifold `M`, the Ricci tensor in
-chart coordinates is the trace `Rc_{ik}(α, y) = ∑_j R^j{}_{ijk}(α, y)` of the
-Riemann curvature tensor. The standard symmetry `Rc_{ik} = Rc_{ki}` is a
-consequence of the Levi-Civita connection's torsion-free and metric-compatible
-properties; at the chart-coordinate level these enter through the symmetry of
-the Christoffel symbols in the lower indices, the matrix-inverse derivative
-identity `∂(G⁻¹) = -G⁻¹·∂G·G⁻¹`, and Schwarz's theorem on the smooth Gram
-matrix.
-
-This file derives `Rc_{ik} = Rc_{ki}` directly from these ingredients, then
-discharges `ricciFun_symm_of_chartRicciTensor_symm` to obtain unconditional
-pointwise symmetry of the Ricci bilinear form `ricciFun`.
-
-## Strategy
-
-Expanding `R^l{}_{ijk}` and contracting `l = j` gives, after distributing the
-summation across the four parts of the chart-Riemann formula:
-$$\operatorname{Rc}_{ik}(α, y) = \sum_j \partial_j \Gamma^j{}_{ik}(α, y)
-  - \sum_j \partial_k \Gamma^j{}_{ij}(α, y)
-  + \sum_{j,m} \Gamma^j{}_{jm}(α, y)\,\Gamma^m{}_{ik}(α, y)
-  - \sum_{j,m} \Gamma^j{}_{km}(α, y)\,\Gamma^m{}_{ij}(α, y).$$
-
-The first and third terms are visibly symmetric in `(i, k)` because
-`Γ^l{}_{ab}` is symmetric in `(a, b)`. The fourth term is symmetric in
-`(i, k)` by relabeling the summation indices and applying lower-index symmetry
-of `Γ`. The only nontrivial step is the second term: we must show
-$$\sum_j \partial_k \Gamma^j{}_{ij}(α, y) = \sum_j \partial_i \Gamma^j{}_{kj}(α, y).$$
-
-Using a sum-derivative interchange, this reduces to
-$$\partial_k\Bigl(\sum_j \Gamma^j{}_{ij}\Bigr)(y) =
-    \partial_i\Bigl(\sum_j \Gamma^j{}_{kj}\Bigr)(y).$$
-
-Substituting the chart-Christoffel formula and simplifying via dummy-index swaps
-gives `∑_j Γ^j{}_{ij}(α, y) = (1/2)∑_{j, l} G^{jl}(α, y) (∂_i G_{lj})(α, y)`.
-Differentiating in `y_k` and using
-* the matrix-inverse derivative identity
-  `∂_k G^{jl} = -∑_{a, b} G^{ja} G^{bl} ∂_k G_{ab}` (provided here as
-  `partialDeriv_chartInvGramOnE_eq` from `HessianTrace.lean`),
-* Schwarz's theorem on the smooth Gram matrix
-  (`partialDeriv_partialDeriv_chartGramOnE_swap` proved here),
-* trace cyclicity for finite matrices (`Matrix.trace_mul_comm` from Mathlib),
-
-leaves a single matrix-trace expression `tr(G⁻¹ · ∂_k G · G⁻¹ · ∂_i G)` which is
-manifestly symmetric in `(i, k)` by trace cyclicity.
-
-## Main results
-
-* `partialDeriv_partialDeriv_chartGramOnE_swap`: Schwarz on `chartGramOnE`.
-* `chartContractedChristoffel_eq_half_invGram_partialDeriv`:
-  `∑_j Γ^j{}_{ij}(α, y) = (1/2) ∑_{j,l} G^{jl}(y) (∂_i G_{lj})(y)`.
-* `partialDeriv_contractedChristoffel_swap`: the central identity
-  `∂_k(∑_j Γ^j{}_{ij})(y) = ∂_i(∑_j Γ^j{}_{kj})(y)`.
-* `chartRicciTensor_symm`: `Rc_{ik}(α, y) = Rc_{ki}(α, y)` on the interior.
-* `chartRicciTensor_symm_of_boundaryless`: the same on the chart source under
-  `[I.Boundaryless]`.
-* `ricciFun_isPointwiseSymm_of_boundaryless`: pointwise symmetry of `ricciFun g` under `[I.Boundaryless]`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -95,7 +34,6 @@ lemma chartInvGramOnE_symm
       (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
   exact hstar.symm
 
-/-- **Schwarz's theorem on `chartGramOnE`.** -/
 lemma partialDeriv_partialDeriv_chartGramOnE_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (l j a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -174,7 +112,6 @@ private lemma sum_invGram_partialDeriv_swap
   exact congrArg (fun f => partialDeriv (E := E) l f y)
     (funext (fun y' => chartGramOnE_symm (I := I) g α j i y'))
 
-/-- **Identity for the contracted Christoffel.** -/
 lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -350,8 +287,6 @@ private lemma chartChristoffel_diag_diffAt_int
     hcd.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-/-- **Index-bijection identity** equivalent to trace cyclicity for our
-specific four-fold sum. -/
 private lemma traceCyclic_invGram_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -568,7 +503,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
           (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y
   ring
 
-/-- **Contracted Christoffel symmetry identity.** -/
 theorem partialDeriv_contractedChristoffel_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -862,7 +796,6 @@ lemma sum_partialDeriv_eq_partialDeriv_sum_christ
   rw [fderiv_fun_sum (fun j _ => hdiff_each j)]
   rw [ContinuousLinearMap.coe_sum', Finset.sum_apply]
 
-/-- **Chart-coordinate Ricci symmetry on the interior.** -/
 theorem chartRicciTensor_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -1091,8 +1024,6 @@ theorem chartRicciTensor_symm
     ring
   rw [hT1, hT2, hT3, hT4]
 
-/-- **Chart-coordinate Ricci symmetry on the chart source under
-`[I.Boundaryless]`.** -/
 theorem chartRicciTensor_symm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -1107,12 +1038,6 @@ theorem chartRicciTensor_symm_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartRicciTensor_symm (I := I) g α i k hx_int
 
-/-- The pointwise Ricci bilinear form `ricciFun g` of a smooth Riemannian metric
-`g` is symmetric on a boundaryless manifold: `ricciFun g x v w = ricciFun g x w v`
-for every `x`, `v`, `w`. The boundaryless hypothesis is used so that every point
-lies in the interior of its chart target, where `chartRicciTensor_symm` applies;
-the chart-level symmetry is then transported through
-`ricciFun_symm_of_chartRicciTensor_symm`. -/
 theorem ricciFun_isPointwiseSymm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) :
     IsPointwiseSymm (ricciFun (I := I) (M := M) g) := by

@@ -4,54 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryRecon
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 
-/-!
-# The first-order Hom-field section identity of the order-`2` commutator defect
-
-For a closed smooth Riemannian manifold `(M, g)` this file upgrades the *fibre-norm bound* of the
-order-`2` rough-Laplacian / covariant-gradient commutator defect
-```
-Curv S := pointwiseTensorCurv g s S = Δ_∇(∇S) − ∇(Δ_∇ S)
-```
-(a `(0, s + 1)`-tensor field, `∇S := covGrad g 0 s S`) to a **fixed smooth Hom-field section
-identity**: there are fixed smooth full Hom-bundle field sections
-`H_R : Hom(T^{(0,s+1)}, T^{(0,s+1)})` and `H_dR : Hom(T^{(0,s)}, T^{(0,s+1)})` such that, for every
-smooth compactly-supported `(0, s)`-tensor `S`,
-```
-Curv S = H_R · ∇S + H_dR · S
-```
-(the action is the full Hom-bundle action `appFullSec`).  This is the **first-order** content: the
-defect carries the `1`-jet `(∇S, S)` only, never `∇²S`.
-
-## The construction
-
-The proof is the section-level upgrade of the proven first-order frame-free *value* identity
-`slot0_read_curv_eq_frameFree` (`PointwiseTensorCurvFirstOrderBound`): the wrapped slot-`0` `X`-read of
-the defect is the frame-free combination
-```
-∑ᵢ (∇R)(Bᵢ, Bᵢ, X) S + 2 ∑ᵢ R(Bᵢ, X)(∇_{Bᵢ} S) − ∑ᵢ ∇_{R(Bᵢ, X) Bᵢ} S
-```
-(`Bᵢ := smoothOrthoFrame g x i`), each term value-local and `ℝ`-linear in the `1`-jet `(∇S, S)`:
-the `∇R`-arm reads `S(x)` (the genuine `(∇R)·S` content, value-local by the Leibniz-contracted
-`nablaTensor0SCurv` divergence-of-curvature collapse, no surviving `∇S`), and the two `R(∇S)`-arms
-read `∇S(x)` (the directional covariant derivative `∇_{Bᵢ}S` is a slot-`0` slice of the gradient
-value `∇S(x)`).
-
-The two value-local `ℝ`-linear fibre functionals — the gradient-reading arm
-`F_R : SmoothCcTensor g 0 (s+1) → SmoothCcTensor g 0 (s+1)` and the section-reading arm
-`F_dR : SmoothCcTensor g 0 s → SmoothCcTensor g 0 (s+1)` — are then each factored as a smooth full
-Hom-bundle field action through the value-local representation theorem
-`exists_value_local_appFullSec` (`FullHomCovariantCalculusRS`), giving the fixed fields `H_R, H_dR`.
-
-The `F_R`-arm is built as a concrete smooth section whose fibre value reads the gradient value's
-slot-`0` slices; `F_dR` is the residual `Curv S − F_R(∇S)`, whose value-locality in `S(x)` is exactly
-the proven `∇R`-arm value-locality.
-
-## Convention
-
-Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` (frame trace).  The covariant gradient `covGrad g 0 s`
-raises the tensor rank from `(0, s)` to `(0, s + 1)`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -79,11 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **Parseval expansion in the moving orthonormal frame `smoothOrthoFrame g x`.** Every tangent
-vector at `x` is its `g_x`-orthonormal expansion against the moving frame `smoothOrthoFrame g x`
-(orthonormal at its centre `x`).  Re-derived here from the public orthonormality
-`smoothOrthoFrame_orthonormal_at_center` so the slot-`0` reconstruction can be read at the canonical
-frame the frame-free value identity uses. -/
 private lemma smoothOrthoFrame_parsevalExpand
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) :
     u = ∑ a : Fin (Module.finrank ℝ E),
@@ -129,10 +76,6 @@ private lemma smoothOrthoFrame_parsevalExpand
   · intro b _ hba; rw [horth a b, if_neg (fun h => hba h.symm), mul_zero]
   · intro h; exact absurd (Finset.mem_univ a) h
 
-/-! ## The directional slot-`0` slice of a `(0, s + 1)`-value -/
-
-/-- **The `(0, t)`-tensor wrapper is additive.** `tensor0SAsRS x (C + D) = tensor0SAsRS x C +
-tensor0SAsRS x D` — the wrapper is `(tensor00Scalar x).smulRight ·`, additive in the value. -/
 private lemma tensor0SAsRS_add_loc {t : ℕ} (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SAsRS (I := I) (M := M) x (C + D) =
       tensor0SAsRS (I := I) (M := M) x C + tensor0SAsRS (I := I) (M := M) x D := by
@@ -149,7 +92,6 @@ private lemma tensor0SAsRS_add_loc {t : ℕ} (x : M) (C D : Tensor0SSpace t I x)
   rw [tensor0SAsRS_apply (I := I) (M := M) x C τ, tensor0SAsRS_apply (I := I) (M := M) x D τ,
     smul_add]
 
-/-- **The `(0, t)`-tensor wrapper commutes with scalar multiplication.** -/
 private lemma tensor0SAsRS_smul_loc {t : ℕ} (x : M) (c : ℝ) (C : Tensor0SSpace t I x) :
     tensor0SAsRS (I := I) (M := M) x (c • C) =
       c • tensor0SAsRS (I := I) (M := M) x C := by
@@ -163,12 +105,6 @@ private lemma tensor0SAsRS_smul_loc {t : ℕ} (x : M) (c : ℝ) (C : Tensor0SSpa
     rw [ContinuousLinearMap.smul_apply]]
   rw [tensor0SAsRS_apply (I := I) (M := M) x C τ, smul_comm]
 
-/-- **The directional slot-`0` slice of a `(0, s + 1)`-tensor value, as a continuous linear map.**
-For a tangent direction `v`, the slice `Wx ↦ tensor0SAsRS x (tensor0S_curry s x (Wx (unit)) v)` reads
-the slot-`0` of the value `Wx`'s unit-evaluation along `v`, re-wrapping the resulting `(0, s)`-model
-tensor as a `(0, s)`-tensor.  It is continuous-linear in `Wx` (composition of the linear unit-eval,
-the curry equivalence at `v`, and the wrapper `tensor0SAsRS`).  When `Wx = (∇S)(x)` the slice is the
-directional covariant derivative `(∇_v S)(x)` (`slot0SliceFib_covGrad_eq`). -/
 noncomputable def slot0SliceFib (x : M) (s : ℕ)
     (v : TangentSpace I x) :
     TensorRSSpace 0 (s + 1) I x →L[ℝ] TensorRSSpace 0 s I x :=
@@ -209,7 +145,7 @@ noncomputable def slot0SliceFib (x : M) (s : ℕ)
         rfl }
 
 set_option linter.unusedSectionVars false in
-/-- The defining formula for `slot0SliceFib`. -/
+
 lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
     slot0SliceFib (I := I) (M := M) x s v Wx =
@@ -224,12 +160,6 @@ lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
   rw [slot0SliceFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-/-- **The directional slot-`0` slice is the `covGradBundleEquiv`-inverse reading.** For any
-`(0, s + 1)`-value `T`, the slice `slot0SliceFib x s v T` equals the gradient-bundle inverse reading
-`(covGradBundleEquiv 0 s x).symm T v`: both reconstruct, model-tuple by model-tuple, the same
-`(0, s + 1)`-evaluation `toModel (T (unit)) (Fin.cons v ·)`.  This identifies the slot-`0` slice with the
-on-disk frozen-frame reading `pureRFrozenDirCLM`, letting that tower's smoothness and frame-independence
-transfer to the gradient arm. -/
 lemma slot0SliceFib_eq_covGradBundleEquiv_symm (x : M) (s : ℕ) (v : TangentSpace I x)
     (T : TensorRSSpace 0 (s + 1) I x) :
     slot0SliceFib (I := I) (M := M) x s v T =
@@ -241,15 +171,15 @@ lemma slot0SliceFib_eq_covGradBundleEquiv_symm (x : M) (s : ℕ) (v : TangentSpa
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun m => ?_)
   rw [slot0SliceFib_apply]
-  -- Read the wrapped slice on the unit, then unfold `tensor0SAsRS` and the curry evaluation.
+  
   rw [tensor0SAsRS_apply (I := I) (M := M) x _ D]
   simp only [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply]
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T)
         (unitZeroSec (I := I) (M := M) x)) (v0 := v) (vs := m)]
-  -- The RHS, also read on the unit through `covGradBundleEquiv_symm_apply_eval`.
+  
   rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 s x T v D m]
-  -- Both now read `toModel (T D) (cons v m)`; the `tensor00Scalar D` factor is the unit scalar.
+  
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T) D =
       tensor00Scalar (I := I) (M := M) x D •
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T)
@@ -258,11 +188,6 @@ lemma slot0SliceFib_eq_covGradBundleEquiv_symm (x : M) (s : ℕ) (v : TangentSpa
     rw [ContinuousLinearMap.map_smul]]
   simp only [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply]
 
-/-- **The directional slot-`0` slice of `∇S` is the directional covariant derivative.** At
-`Wx = (∇S)(x) := (covGrad g 0 s S).toSection x`, the slice along `v` equals the directional covariant
-derivative value `(∇_v S)(x) = (tensorCov g 0 s).toFun (S.toSection) x v`.  By
-`curry_covGrad_unit_eval_genVal` (the slot-`0` curry of the unit-evaluated gradient is the directional
-derivative's unit-evaluation) and `tensor0SAsRS_unit_recover` (the wrapper recovers the tensor). -/
 lemma slot0SliceFib_covGrad_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (x : M) (v : TangentSpace I x) :
     slot0SliceFib (I := I) (M := M) x s v ((covGrad (I := I) (M := M) g 0 s S).toSection x) =
@@ -273,10 +198,7 @@ lemma slot0SliceFib_covGrad_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (S : S
     ((tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x v)
 
 set_option linter.unusedSectionVars false in
-/-- **The slice along a direction is `ℝ`-linear in the direction.** For fixed `Wx`, the map
-`v ↦ slot0SliceFib x s v Wx` is additive and `ℝ`-homogeneous: `slot0SliceFib` reads the slot-`0` curry
-`tensor0S_curry s x (Wx (unit))` at `v`, and `tensor0S_curry s x (Wx (unit))` is itself continuous
-linear in `v`. -/
+
 lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
     slot0SliceFib (I := I) (M := M) x s (v + v') Wx =
@@ -288,7 +210,7 @@ lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
   rw [tensor0SAsRS_add_loc (I := I) (M := M) x]
 
 set_option linter.unusedSectionVars false in
-/-- The slice along a direction is `ℝ`-homogeneous in the direction. -/
+
 lemma slot0SliceFib_dir_smul (x : M) (s : ℕ) (c : ℝ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
     slot0SliceFib (I := I) (M := M) x s (c • v) Wx =
@@ -299,19 +221,6 @@ lemma slot0SliceFib_dir_smul (x : M) (s : ℕ) (c : ℝ) (v : TangentSpace I x)
       (unitZeroSec (I := I) (M := M) x)))]
   rw [tensor0SAsRS_smul_loc (I := I) (M := M) x]
 
-/-! ## The gradient-reading curvature arm operator field -/
-
-/-- **The per-direction gradient-reading curvature arm, as a linear map in the reconstruction
-direction.** For a smooth frame field `B`, point `x`, and `(0, s + 1)`-value `Wx`, the linear map
-sending a reconstruction direction `w` to the frame-summed first-order curvature contraction of the
-slot-`0` slices of `Wx`:
-```
-w ↦ ∑ᵢ [ 2 • R(Bᵢ, w)(slice_{Bᵢ} Wx) − slice_{R(Bᵢ, w) Bᵢ} Wx ],
-```
-with `slice_v Wx := slot0SliceFib x s v Wx`, `R := riemannOp (tensorCov g 0 s) x` the bundled tensor
-curvature operator (linear in its middle slot `w`), and `R(Bᵢ, w)Bᵢ := riemannOp (LeviCivita g) x
-(Bᵢ x) w (Bᵢ x)` the Levi-Civita curvature direction (linear in `w`).  These are the two `R(∇S)`-arms
-of `slot0_read_curv_eq_frameFree` read off the gradient value's slices; both are linear in `w`. -/
 noncomputable def gradArmDirLM
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -339,7 +248,6 @@ noncomputable def gradArmDirLM
       ContinuousLinearMap.smul_apply, slot0SliceFib_dir_smul (I := I) (M := M) x s]
     rw [smul_sub]
 
-/-- The defining formula for `gradArmDirLM`. -/
 @[simp] lemma gradArmDirLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -351,8 +259,6 @@ noncomputable def gradArmDirLM
           slot0SliceFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx) := rfl
 
-/-- **The gradient-reading curvature arm direction map, as a continuous linear map.** The
-continuous-linear closure of `gradArmDirLM` on the finite-dimensional tangent fibre. -/
 noncomputable def gradArmDirCLM
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -375,9 +281,6 @@ noncomputable def gradArmDirCLM
   rw [gradArmDirCLM, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-/-- **The direction map is `ℝ`-linear in the `(0, s + 1)`-value.** `gradArmDirCLM g s B x` is
-additive and `ℝ`-homogeneous in `Wx`: every summand reads `Wx` through the continuous-linear slices
-`slot0SliceFib`. -/
 lemma gradArmDirCLM_value_add
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -411,11 +314,6 @@ lemma gradArmDirCLM_value_smul
       (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x))) c W]
   rw [smul_sub, smul_comm (2 : ℝ) c]
 
-/-- **The gradient-reading curvature arm fibre operator.** The slot-`0` uncurry, through
-`(tensor0S_curry s x).symm`, of the gradient-reading curvature direction map `gradArmDirCLM g s B x`:
-the fixed `(0, s + 1)`-endomorphism whose slot-`0` curry along `w` is the frame-summed first-order
-curvature contraction `∑ᵢ [2 R(Bᵢ, w)(slice_{Bᵢ} Wx) − slice_{R(Bᵢ, w)Bᵢ} Wx]` of the slices of `Wx`.
-It is `ℝ`-linear in `Wx` (`gradArmDirCLM_value_add` / `_smul`). -/
 noncomputable def gradArmFib
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -436,7 +334,7 @@ noncomputable def gradArmFib
         rfl }
 
 set_option linter.unusedSectionVars false in
-/-- The defining formula for `gradArmFib`. -/
+
 lemma gradArmFib_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -451,18 +349,6 @@ lemma gradArmFib_apply
   rw [gradArmFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-/-- **The wrapped slot-`0` slice of the gradient-arm operator at `∇S` is the two `R(∇S)`-arms.** With
-the moving frame `B := smoothOrthoFrame g x`, the wrapped slot-`0` `Bₐ`-read of the gradient-arm
-operator `gradArmFib` applied to the gradient value `(∇S)(x)` equals the two `R(∇S)`-arms of
-`slot0_read_curv_eq_frameFree` (the `2 R(Bᵢ, Bₐ)(∇_{Bᵢ}S)` and `−∇_{R(Bᵢ, Bₐ)Bᵢ}S` terms):
-```
-tensor0SAsRS x (curry ((gradArmFib (∇S)(x))(unit)) (Bₐ x))
-  = 2 ∑ᵢ R(Bᵢ, Bₐ)(∇_{Bᵢ}S)(x) − ∑ᵢ ∇_{R(Bᵢ, Bₐ)Bᵢ}S(x).
-```
-The slot-`0` curry reads the direction map (`tensor0S_curry_covGradBundleEquiv_unit_genVal`,
-`tensor0SAsRS_unit_recover`), and each slice is the directional covariant derivative
-(`slot0SliceFib_covGrad_eq`); the curvature contraction is read back to `riemannSec` form
-(`riemannSec_eq_riemannOp_tensorCov`). -/
 lemma gradArmFib_covGrad_slice_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (a : Fin (Module.finrank ℝ E)) :
@@ -486,18 +372,18 @@ lemma gradArmFib_covGrad_slice_eq
   set B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b :=
     fun i => smoothOrthoFrame (I := I) g x i with hB
   set Wx : TensorRSSpace 0 (s + 1) I x := (covGrad (I := I) (M := M) g 0 s S).toSection x with hWx
-  -- Read the slot-`0` curry through the uncurry equivalence, then unwrap.
+  
   rw [gradArmFib_apply (I := I) (M := M) g s B x Wx]
   rw [tensor0S_curry_covGradBundleEquiv_unit_genVal (I := I) (M := M) s x
     (gradArmDirCLM (I := I) (M := M) g s B x Wx) (B a x)]
   rw [tensor0SAsRS_unit_recover (I := I) (M := M) s x
     (gradArmDirCLM (I := I) (M := M) g s B x Wx (B a x))]
   rw [gradArmDirCLM_apply (I := I) (M := M) g s B x Wx (B a x)]
-  -- Split the frame sum into the two arms.
+  
   rw [Finset.sum_sub_distrib, Finset.smul_sum]
   congr 1
   · refine Finset.sum_congr rfl (fun i _ => ?_)
-    -- Arm `R`: identify `R(Bᵢ, Bₐ)(slice_{Bᵢ} Wx)` with `riemannSec Bᵢ Bₐ (∇_{Bᵢ}S)`.
+    
     rw [hWx, slot0SliceFib_covGrad_eq (I := I) (M := M) g s S x (B i x)]
     rw [riemannSec_eq_riemannOp_tensorCov (I := I) g 0 s
       (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x a)
@@ -505,19 +391,12 @@ lemma gradArmFib_covGrad_slice_eq
         (smoothOrthoFrame_smooth (I := I) g x i))]
     rfl
   · refine Finset.sum_congr rfl (fun i _ => ?_)
-    -- Arm `C5`: the slice along the curvature direction is the directional covariant derivative.
+    
     rw [hWx, slot0SliceFib_covGrad_eq (I := I) (M := M) g s S x
       (riemannOp (LeviCivita (I := I) g) x (B i x) (B a x) (B i x))]
 
-/-! ## Smoothness of the gradient-arm operator field -/
-
 set_option linter.unusedVariables false in
-/-- **Smoothness of the slot-`0` slice section along a smooth direction.** For a smooth `(0, s + 1)`
-section `Y` and a smooth tangent direction field `V`, the section `x ↦ slot0SliceFib x s (V x) (Y x)`
-is `C^∞`.  By the bridge `slot0SliceFib_eq_covGradBundleEquiv_symm` it is the gradient-bundle inverse
-reading `(covGradBundleEquiv 0 s x).symm (Y x) (V x)`, the application of the smooth `Hom`-section
-`x ↦ (covGradBundleEquiv 0 s x).symm (Y x)` (smooth by `covGradBundleEquiv_symm_contMDiff_totalSpace`)
-at the smooth field `V`. -/
+
 lemma slot0SliceFib_section_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {Y : Π b : M, TensorRSSpace 0 (s + 1) I b}
@@ -530,7 +409,7 @@ lemma slot0SliceFib_section_contMDiff
       (fun b : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) b
         (slot0SliceFib (I := I) (M := M) b s (V b) (Y b))) := by
-  -- Rewrite the slice as the `covGradBundleEquiv`-inverse reading.
+  
   have heq : (fun b : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
       (E := fun z : M => TensorRSSpace 0 s I z) b
       (slot0SliceFib (I := I) (M := M) b s (V b) (Y b))) =
@@ -541,7 +420,7 @@ lemma slot0SliceFib_section_contMDiff
     funext b
     rw [slot0SliceFib_eq_covGradBundleEquiv_symm (I := I) (M := M) b s (V b) (Y b)]
   rw [heq]
-  -- The inverse-reading Hom-section is smooth, evaluated at the smooth direction `V`.
+  
   have hHom : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel 0 s ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel 0 s ℝ E)
         (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace 0 s I z) b
@@ -551,15 +430,6 @@ lemma slot0SliceFib_section_contMDiff
     (ϕ := fun b => (covGradBundleEquiv (I := I) (M := M) 0 s b).symm (Y b))
     (v := fun b => V b) hHom hV
 
-/-- **The gradient-arm direction Hom-section is smooth (frozen frame).** For a fixed smooth frame `B`
-and a smooth `(0, s + 1)`-section `Y`, the `Hom(TM, T^{(0,s)})`-section
-`x ↦ gradArmDirCLM g s B x (Y x)` is `C^∞`.  By `contMDiff_clm_section_of_pointwise` it suffices that
-for every smooth tangent field `Z` the section `x ↦ gradArmDirCLM g s B x (Y x) (Z x)` is smooth; that
-value is the frame sum of the two curvature arms, each smooth: the `R`-arm is a `riemannSec`
-contraction of the smooth slice section (`riemannSec_contMDiff`, `slot0SliceFib_section_contMDiff`),
-the `C5`-arm is a slot-`0` slice along the smooth curvature direction `R(Bᵢ, Z)Bᵢ`
-(`slot0SliceFib_section_contMDiff`, the direction smooth by `riemannSec_contMDiff` of the Levi-Civita
-connection). -/
 lemma gradArmDirCLM_homSection_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -578,7 +448,7 @@ lemma gradArmDirCLM_homSection_contMDiff
     (F₂ := TensorRSModel 0 s ℝ E) (V₂ := fun z : M => TensorRSSpace 0 s I z)
     (φ := fun x => gradArmDirCLM (I := I) (M := M) g s B x (Y x))
   intro Z
-  -- The value `gradArmDirCLM ... (Z x)` is the frame sum of the two arms.
+  
   have hval : (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
       (E := fun z : M => TensorRSSpace 0 s I z) x
       (gradArmDirCLM (I := I) (M := M) g s B x (Y x) (Z x))) =
@@ -592,9 +462,9 @@ lemma gradArmDirCLM_homSection_contMDiff
     funext x
     rw [gradArmDirCLM_apply]
   rw [hval]
-  -- Smoothness of the frame sum: each summand smooth.
+  
   refine ContMDiff.sum_section (s := Finset.univ) (fun i _ => ?_)
-  -- `R`-arm summand smoothness.
+  
   have hRarm : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) x
@@ -619,13 +489,13 @@ lemma gradArmDirCLM_homSection_contMDiff
       rw [riemannOp_apply_smooth (cov := tensorCov (I := I) g 0 s) (hB i) Z.contMDiff hslice]
     rw [hpt]
     exact ContMDiff.smul_section (𝕜 := ℝ) (contMDiff_const (c := (2 : ℝ))) hRsec
-  -- `C5`-arm summand smoothness: slice along the smooth Levi-Civita curvature direction.
+  
   have hC5arm : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) x
         (slot0SliceFib (I := I) (M := M) x s
           (riemannOp (LeviCivita (I := I) g) x (B i x) (Z x) (B i x)) (Y x))) := by
-    -- The curvature direction field `x ↦ R(Bᵢ, Z) Bᵢ (x)` is smooth.
+    
     have hdir : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (T% (fun x : M => riemannOp (LeviCivita (I := I) g) x (B i x) (Z x) (B i x))) := by
       have hsec : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -638,11 +508,6 @@ lemma gradArmDirCLM_homSection_contMDiff
     exact slot0SliceFib_section_contMDiff (I := I) (M := M) g s hY hdir
   exact hRarm.sub_section hC5arm
 
-/-- **Smoothness of the gradient-arm section applied to a smooth `(0, s + 1)`-section (frozen
-frame).** For a fixed smooth frame `B` and a smooth `(0, s + 1)`-section `Y`, the section
-`x ↦ gradArmFib g s B x (Y x)` is `C^∞`: it is the `covGradBundleEquiv`-uncurry
-(`covGradBundleEquiv_contMDiff_totalSpace`) of the smooth gradient-arm direction Hom-section
-(`gradArmDirCLM_homSection_contMDiff`). -/
 lemma gradArmFib_frozen_section_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -668,15 +533,6 @@ lemma gradArmFib_frozen_section_contMDiff
   exact (covGradBundleEquiv_contMDiff_totalSpace (I := I) (M := M) 0 s).comp
     (gradArmDirCLM_homSection_contMDiff (I := I) (M := M) g s hB hY)
 
-/-! ## Frame independence of the gradient-arm direction map -/
-
-/-- **The frame sum of the Levi-Civita curvature contracted direction is `−Ric♯`.** For any
-`g_x`-orthonormal frame `e` (indexed by `Fin (finrank E)`), the contracted-curvature direction
-`∑ᵢ R(eᵢ, v) eᵢ` equals the negated raised Ricci endomorphism `−ricEndoRaisedFib g x v`.  Proof by
-`g`-non-degeneracy (`SmoothRiemannianMetric.eq_of_inner_eq`): pairing against `ζ`, the curvature's
-metric skew-adjointness `riemannOp_metric_skew` flips `⟨R(eᵢ, v) eᵢ, ζ⟩` to `−⟨R(eᵢ, v) ζ, eᵢ⟩`, whose
-frame sum is the Ricci trace `Ric(v, ζ) = ⟨ricEndoRaisedFib g x v, ζ⟩`
-(`ricciTensor_eq_orthonormal_trace`, `inner_ricEndoRaisedFib`).  The right-hand side is frame-free. -/
 lemma frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -689,7 +545,7 @@ lemma frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised
   apply SmoothRiemannianMetric.eq_of_inner_eq (I := I) g
   intro ζ
   rw [map_sum, ContinuousLinearMap.sum_apply, map_neg]
-  -- LHS pairing flips by skew-adjointness.
+  
   have hflip : ∀ i : Fin (Module.finrank ℝ E),
       g.inner x (riemannOp (LeviCivita (I := I) g) x (e i) v (e i)) ζ =
         - g.inner x (riemannOp (LeviCivita (I := I) g) x (e i) v ζ) (e i) := by
@@ -701,16 +557,10 @@ lemma frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised
     rw [hsymm] at hskew
     linarith [hskew]
   rw [Finset.sum_congr rfl (fun i _ => hflip i), Finset.sum_neg_distrib]
-  -- RHS pairing is the Ricci trace at the frame `e`.
+  
   rw [ContinuousLinearMap.neg_apply, inner_ricEndoRaisedFib (I := I) (M := M) g x v ζ,
     ricciTensor_eq_orthonormal_trace (I := I) g x v ζ e horth]
 
-/-- **The `R`-arm scalarised diagonal trace, as a continuous bilinear form.** For a fixed
-reconstruction direction `w`, value `Wx`, and model tuple `m`, the map
-`(a, b) ↦ toModel ((R(a, w)(slice_b Wx)) (unit)) m` is a continuous bilinear form on `T_x M`: linear in
-`a` through the curvature operator's first slot, in `b` through the slice's direction-linearity.  It is
-built as a composition of continuous linear maps: the slice direction CLM, the curvature first-slot CLM,
-the unit-evaluation, and the model-tuple evaluation. -/
 private noncomputable def rArmBilin
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (w : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) (m : Fin s → E) :
@@ -721,7 +571,7 @@ private noncomputable def rArmBilin
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
   haveI iT2 : T2Space (TensorRSSpace 0 s I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
-  -- `evalCLM : TensorRSSpace 0 s →L ℝ`, `T ↦ toModel (T (unit)) m`.
+  
   let evalCLM : TensorRSSpace 0 s I x →L[ℝ] ℝ :=
     LinearMap.toContinuousLinearMap
       { toFun := fun T => Tensor0SSpace.toModel
@@ -738,7 +588,7 @@ private noncomputable def rArmBilin
               c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T) from rfl,
             ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
             ContinuousMultilinearMap.smul_apply, RingHom.id_apply] }
-  -- `sliceDirCLM : TangentSpace →L TensorRSSpace 0 s`, `b ↦ slot0SliceFib x s b Wx`.
+  
   let sliceDirCLM : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
     LinearMap.toContinuousLinearMap
       { toFun := fun b => slot0SliceFib (I := I) (M := M) x s b Wx
@@ -771,9 +621,6 @@ private noncomputable def rArmBilin
   simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
     ContinuousLinearMap.comp_apply]
 
-/-- **The unit-tuple read of one gradient-arm summand.** Records the `(0, s)`-model evaluation of the
-`i`-th gradient-arm summand at frame `B`, separating the `R`-arm (the `rArmBilin` diagonal entry) from
-the `C5`-arm slice. -/
 private lemma gradArmDirCLM_summand_toModel
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -809,7 +656,6 @@ private lemma gradArmDirCLM_summand_toModel
   rw [rArmBilin_apply (I := I) (M := M) g s x w Wx m (B i x) (B i x)]
   rfl
 
-/-- **Model-tuple read of a finite sum of `(0, s)`-values at the unit, distributed over the sum.** -/
 private lemma toModel_unit_finsum {ι : Type*} (s : ℕ) (x : M) (fs : Finset ι)
     (T : ι → TensorRSSpace 0 s I x) (m : Fin s → E) :
     Tensor0SSpace.toModel
@@ -840,13 +686,6 @@ private lemma toModel_unit_finsum {ι : Type*} (s : ℕ) (x : M) (fs : Finset ι
           ContinuousLinearMap.add_apply]]
       rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, ih]
 
-/-- **The gradient-arm direction map is frame-independent.** For two `g_x`-orthonormal frames `B`, `C`
-(indexed by `Fin (finrank E)`) and any `(0, s + 1)`-value `Wx`,
-`gradArmDirCLM g s B x Wx = gradArmDirCLM g s C x Wx`.  The `R`-arm `∑ᵢ R(Bᵢ, w)(slice_{Bᵢ} Wx)`, read
-on a model tuple, is the diagonal trace `∑ᵢ rArmBilin(Bᵢ, Bᵢ)` of the bilinear form `rArmBilin`,
-frame-independent by `orthonormal_basis_bilin_trace`; the `C5`-arm direction
-`∑ᵢ R(Bᵢ, w)Bᵢ = −Ric♯(w)` is frame-independent by
-`frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised`. -/
 lemma gradArmDirCLM_frame_independent
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -861,12 +700,12 @@ lemma gradArmDirCLM_frame_independent
   apply ContinuousLinearMap.ext
   intro w
   rw [gradArmDirCLM_apply, gradArmDirCLM_apply]
-  -- Reduce to model-tuple agreement at the unit.
+  
   apply tensorRSSpace_ext (𝕜 := ℝ) 0 s x
   intro D
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun m => ?_)
-  -- Reduce `D` to the unit-scalar multiple on both sides.
+  
   have hredD : ∀ F : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
       Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
@@ -910,22 +749,20 @@ lemma gradArmDirCLM_frame_independent
             (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx) m
   rw [hredD B, hredD C]
   congr 1
-  -- Per-summand: separate `R`-arm (`rArmBilin`) and `C5`-arm (the curvature-direction slice).
+  
   rw [Finset.sum_congr rfl (fun i _ =>
     gradArmDirCLM_summand_toModel (I := I) (M := M) g s x B w Wx m i),
     Finset.sum_congr rfl (fun i _ =>
     gradArmDirCLM_summand_toModel (I := I) (M := M) g s x C w Wx m i)]
   rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib]
   congr 1
-  · -- `R`-arm: the diagonal trace is frame-independent.
-    rw [← Finset.mul_sum, ← Finset.mul_sum]
+  · rw [← Finset.mul_sum, ← Finset.mul_sum]
     congr 1
     rw [orthonormal_basis_bilin_trace (I := I) g x (rArmBilin (I := I) (M := M) g s x w Wx m)
         (fun i => B i x) hBorth,
       orthonormal_basis_bilin_trace (I := I) g x (rArmBilin (I := I) (M := M) g s x w Wx m)
         (fun i => C i x) hCorth]
-  · -- `C5`-arm: the direction sum collapses to `−Ric♯(w)`, frame-free; pull the slice through the sum.
-    have hsliceSum : ∀ F : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
+  · have hsliceSum : ∀ F : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
         (∑ i : Fin (Module.finrank ℝ E),
             Tensor0SSpace.toModel ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
               slot0SliceFib (I := I) (M := M) x s
@@ -937,7 +774,7 @@ lemma gradArmDirCLM_frame_independent
                 riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx)
             (unitZeroSec (I := I) (M := M) x)) m := by
       intro F
-      -- The slice as a linear map in the direction.
+      
       let sliceLM : TangentSpace I x →ₗ[ℝ] TensorRSSpace 0 s I x :=
         { toFun := fun v => slot0SliceFib (I := I) (M := M) x s v Wx
           map_add' := fun v v' => slot0SliceFib_dir_add (I := I) (M := M) x s v v' Wx
@@ -960,14 +797,6 @@ lemma gradArmDirCLM_frame_independent
       frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised (I := I) (M := M) g x
         (fun i => C i x) hCorth w]
 
-/-! ## The moving-frame gradient-arm section -/
-
-/-- **Smoothness of the moving-frame gradient-arm section.** For a smooth `(0, s + 1)`-section `Y`, the
-section `x ↦ gradArmFib g s (smoothOrthoFrame g x) x (Y x)` (read at the moving frame centred at each
-base point) is `C^∞`.  At each `x₀` it agrees, on the orthonormality neighbourhood
-`smoothOrthoFrameNbhd x₀`, with the frozen-frame section `gradArmFib g s (smoothOrthoFrame g x₀) x (Y x)`
-(`gradArmDirCLM_frame_independent`, both frames being `g_y`-orthonormal there), which is smooth
-(`gradArmFib_frozen_section_contMDiff`); `ContMDiffAt.congr_of_eventuallyEq` transfers smoothness. -/
 lemma gradArmFib_moving_section_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {Y : Π b : M, TensorRSSpace 0 (s + 1) I b}
@@ -980,7 +809,7 @@ lemma gradArmFib_moving_section_contMDiff
         (gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (Y x))) := by
   classical
   intro x₀
-  -- Frozen-frame section, smooth at `x₀`.
+  
   have hfrozen : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (s + 1) I z) x
@@ -989,7 +818,7 @@ lemma gradArmFib_moving_section_contMDiff
       (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) hY x₀
   refine hfrozen.congr_of_eventuallyEq ?_
   filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
-  -- On the orthonormality neighbourhood the moving and frozen frames are both `g_y`-orthonormal.
+  
   refine congrArg (TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
     (E := fun z : M => TensorRSSpace 0 (s + 1) I z) y) ?_
   rw [gradArmFib_apply, gradArmFib_apply,
@@ -998,14 +827,6 @@ lemma gradArmFib_moving_section_contMDiff
       (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g y i j)
       (fun i j => smoothOrthoFrame_orthonormal (I := I) g x₀ hy i j) (Y y)]
 
-/-- **The gradient-reading curvature arm as a section operator.** For a smooth compactly-supported
-`(0, s + 1)`-tensor `W`, the moving-frame gradient-arm operator field applied to `W`:
-```
-gradArmSection g s W := x ↦ gradArmFib g s (smoothOrthoFrame g x) x (W.toSection x),
-```
-a smooth compactly-supported `(0, s + 1)`-tensor (smoothness `gradArmFib_moving_section_contMDiff`).
-Its fibre value at `x` is a fixed (`W`-independent) continuous linear map applied to `W.toSection x`,
-so it is value-local and `ℝ`-linear in the gradient value. -/
 noncomputable def gradArmSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 (s + 1)) :
     SmoothCcTensor g 0 (s + 1) where
@@ -1021,28 +842,12 @@ noncomputable def gradArmSection
     (gradArmSection (I := I) (M := M) g s W).toSection x =
       gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (W.toSection x) := rfl
 
-/-! ## The differentiated-curvature arm and the first-order section identity -/
-
-/-- **The differentiated-curvature arm section.** The residual of the defect after removing the
-gradient-reading curvature arm:
-```
-diffArmSection g s S := pointwiseTensorCurv g s S − gradArmSection g s (∇S),
-```
-a smooth compactly-supported `(0, s + 1)`-tensor.  By the frame-free slice identity its wrapped slot-`0`
-`Bₐ`-slice is the differentiated-curvature `(∇R)·S` arm `∑ᵢ (∇R)(Bᵢ, Bᵢ, Bₐ) S`
-(`nablaTensorCurvSec`), value-local and `ℝ`-linear in `S(x)` alone (the proven divergence-of-curvature
-collapse `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval`). -/
 noncomputable def diffArmSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
   pointwiseTensorCurv (I := I) (M := M) g s S -
     gradArmSection (I := I) (M := M) g s (covGrad (I := I) (M := M) g 0 s S)
 
-/-- **The wrapped slot-`0` slice of the differentiated-curvature arm is the `(∇R)·S` arm.** With the
-moving frame `Bₐ := smoothOrthoFrame g x a`, the wrapped slot-`0` `Bₐ`-slice of `diffArmSection g s S`
-equals `∑ᵢ nablaTensorCurvSec g (tensorCov g 0 s) Bᵢ Bᵢ Bₐ S`.  The defect slice
-`slot0_read_curv_eq_frameFree` is `A_a + (2 R(∇S) − C5)`, the gradient-arm slice
-(`gradArmFib_covGrad_slice_eq`) is exactly `2 R(∇S) − C5`, so their difference is the `∇R`-arm `A_a`. -/
 lemma diffArmSection_slice_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (a : Fin (Module.finrank ℝ E)) :
@@ -1057,7 +862,7 @@ lemma diffArmSection_slice_eq
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
           (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x := by
   classical
-  -- The slice is linear over the section subtraction.
+  
   have hsub : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (diffArmSection (I := I) (M := M) g s S).toSection x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
@@ -1068,7 +873,7 @@ lemma diffArmSection_slice_eq
     rw [diffArmSection, SmoothCcTensor.toSection_sub]; rfl
   rw [hsub, ContinuousLinearMap.sub_apply, map_sub, ContinuousLinearMap.sub_apply,
     tensor0SAsRS_sub' (I := I) (M := M) s x]
-  -- The defect slice and the gradient-arm slice.
+  
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (gradArmSection (I := I) (M := M) g s
           (covGrad (I := I) (M := M) g 0 s S)).toSection x) =
@@ -1080,13 +885,6 @@ lemma diffArmSection_slice_eq
   rw [gradArmFib_covGrad_slice_eq (I := I) (M := M) g s S x a]
   abel
 
-/-- **The `(∇R)·S` arm slice, read on a model tuple, depends only on the value `S(x)`.** The wrapped
-slot-`0` `Bₐ`-slice of `diffArmSection g s S`, evaluated at the unit on the trailing tuple `m`, is the
-divergence-of-curvature contraction `−∑ₖ toModel (unitEvalSection S x) (update m k (∑ᵢ ∇R(Bᵢ,Bₐ) ))`,
-which reads `S` only through `unitEvalSection g s S x = (S.toSection x)(unit)`.  The proof passes the
-`nablaTensorCurvSec` frame sum to the abstract `(0, s)`-tensor curvature `nablaTensor0SCurv`
-(`nablaTensorCurvSec_tensorRSCov_unitEval`) and collapses the diagonal frame trace by the contracted
-second Bianchi identity (`frame_sum_nablaTensor0SCurv_diag_baseSlot_eval`). -/
 lemma diffArmSection_slice_toModel_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (a : Fin (Module.finrank ℝ E)) (m : Fin s → TangentSpace I x) :
@@ -1115,8 +913,8 @@ lemma diffArmSection_slice_toModel_value_local
     ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
       (smoothOrthoFrame_smooth (I := I) g x a) with hBa
   set A : Π b : M, Tensor0SSpace s I b := unitEvalSection (I := I) (M := M) g s S with hA
-  -- The `(0, s)`-wrapper slice equals the `∇R`-arm sum (`diffArmSection_slice_eq`); read it at the
-  -- unit on `m` and distribute the frame sum.
+  
+  
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         tensor0SAsRS (I := I) (M := M) x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
@@ -1155,30 +953,24 @@ lemma diffArmSection_slice_toModel_value_local
       (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
         (smoothOrthoFrame_smooth (I := I) g x a)) S.toSection x ▸ rfl
   rw [Finset.sum_congr rfl (fun i _ => hper i)]
-  -- Collapse the diagonal frame sum by the contracted second Bianchi identity.
+  
   rw [frame_sum_nablaTensor0SCurv_diag_baseSlot_eval (I := I) g s Ba A
     (contMDiff_unitEvalSection (I := I) (M := M) g s S) x m]
 
 set_option maxHeartbeats 6400000 in
-/-- **The differentiated-curvature arm is value-local.** If `S₁.toSection x = S₂.toSection x` then
-`(diffArmSection g s S₁).toSection x = (diffArmSection g s S₂).toSection x`: the arm reads `S` only
-through its value `S(x)`.  Two `(0, s + 1)`-tensors are equal iff their slot-`0` slices, read on the
-moving frame, agree on every model tuple (`tensor0S_uncurry_cons_eval_orthonormal`,
-`smoothOrthoFrame_parsevalExpand`); each slice is the divergence-of-curvature contraction of
-`unitEvalSection g s S x = (S.toSection x)(unit)` (`diffArmSection_slice_toModel_value_local`), which is
-equal under `S₁.toSection x = S₂.toSection x`. -/
+
 lemma diffArmSection_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S₁ S₂ : SmoothCcTensor g 0 s) (x : M)
     (hx : S₁.toSection x = S₂.toSection x) :
     (diffArmSection (I := I) (M := M) g s S₁).toSection x =
       (diffArmSection (I := I) (M := M) g s S₂).toSection x := by
   classical
-  -- Reduce to model-tuple agreement at the unit (`tensorRSSpace_ext`, `toModel_injective`).
+  
   apply tensorRSSpace_ext (𝕜 := ℝ) 0 (s + 1) x
   intro D
   apply Tensor0SSpace.toModel_injective
   refine ContinuousMultilinearMap.ext (fun v => ?_)
-  -- Reduce `D` to its unit-scalar multiple.
+  
   have hredD : ∀ T : TensorRSSpace 0 (s + 1) I x,
       Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T) D) v =
@@ -1193,7 +985,7 @@ lemma diffArmSection_value_local
       ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [hredD, hredD]
   congr 1
-  -- Reconstruct each unit-evaluation from its slot-`0` slices at the moving frame.
+  
   obtain ⟨w, m, hcons⟩ : ∃ (w : TangentSpace I x) (m : Fin s → TangentSpace I x),
       v = Fin.cons w m := ⟨v 0, Fin.tail v, (Fin.cons_self_tail v).symm⟩
   subst hcons
@@ -1205,8 +997,8 @@ lemma diffArmSection_value_local
     (fun u => smoothOrthoFrame_parsevalExpand (I := I) (M := M) g x u) w m]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   congr 1
-  -- Each slot-`0` slice, read on `m`, is the same divergence-of-curvature contraction of `S(x)`.
-  -- Bridge the bare `tensor0S_curry` slice to the `tensor0SAsRS`-wrapped form of the slice lemma.
+  
+  
   have hbridge : ∀ S : SmoothCcTensor g 0 s,
       Tensor0SSpace.toModel
           (tensor0S_curry (I := I) (M := M) s x
@@ -1233,10 +1025,6 @@ lemma diffArmSection_value_local
       unitEvalSection (I := I) (M := M) g s S₂ x from by
     rw [unitEvalSection_apply, unitEvalSection_apply, hx]]
 
-/-! ## Value-locality and `ℝ`-linearity of the two arms -/
-
-/-- The gradient-arm section is additive at the fibre value (the fibre operator is continuous-linear,
-and `gradArmFib` is `ℝ`-linear in the value). -/
 lemma gradArmSection_toSection_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W₁ W₂ : SmoothCcTensor g 0 (s + 1)) (x : M) :
     (gradArmSection (I := I) (M := M) g s (W₁ + W₂)).toSection x =
@@ -1247,7 +1035,6 @@ lemma gradArmSection_toSection_add
     rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]]
   rw [map_add]
 
-/-- The gradient-arm section commutes with scalar multiplication at the fibre value. -/
 lemma gradArmSection_toSection_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ) (W : SmoothCcTensor g 0 (s + 1)) (x : M) :
     (gradArmSection (I := I) (M := M) g s (c • W)).toSection x =
@@ -1257,7 +1044,6 @@ lemma gradArmSection_toSection_smul
     rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]]
   rw [map_smul]
 
-/-- The gradient-arm section is value-local. -/
 lemma gradArmSection_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W₁ W₂ : SmoothCcTensor g 0 (s + 1)) (x : M)
     (hx : W₁.toSection x = W₂.toSection x) :
@@ -1265,9 +1051,6 @@ lemma gradArmSection_value_local
       (gradArmSection (I := I) (M := M) g s W₂).toSection x := by
   rw [gradArmSection_toSection, gradArmSection_toSection, hx]
 
-/-- **The gradient-arm section as a fixed smooth Hom-field action.**  By the value-local representation
-theorem `exists_value_local_appFullSec`, there is a smooth full Hom-bundle field `H_R` with
-`gradArmSection g s W = appFullSec H_R W` for every smooth compactly-supported `(0, s + 1)`-tensor `W`. -/
 theorem exists_gradArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ H_R : HomTensorRSField (E := E) (M := M) 0 (s + 1) (s + 1) I,
       ∀ W : SmoothCcTensor g 0 (s + 1),
@@ -1279,8 +1062,6 @@ theorem exists_gradArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : �
     (fun c W x => gradArmSection_toSection_smul (I := I) (M := M) g s c W x)
     (fun W₁ W₂ x hW => gradArmSection_value_local (I := I) (M := M) g s W₁ W₂ x hW)
 
-/-- The order-`2` commutator defect is additive at the section level: `Δ_∇(∇·) − ∇(Δ_∇ ·)` is `ℝ`-linear,
-each constituent (`rawTensorConnLapSmooth`, `covGrad`) preserving `SmoothCcTensor` addition. -/
 lemma pointwiseTensorCurv_toSection_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S₁ S₂ : SmoothCcTensor g 0 s) (x : M) :
     (pointwiseTensorCurv (I := I) (M := M) g s (S₁ + S₂)).toSection x =
@@ -1338,7 +1119,6 @@ lemma pointwiseTensorCurv_toSection_add
     SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
   abel
 
-/-- The order-`2` commutator defect commutes with scalar multiplication at the section level. -/
 lemma pointwiseTensorCurv_toSection_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ) (S : SmoothCcTensor g 0 s) (x : M) :
     (pointwiseTensorCurv (I := I) (M := M) g s (c • S)).toSection x =
@@ -1380,8 +1160,6 @@ lemma pointwiseTensorCurv_toSection_smul
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply, smul_sub]
 
-/-- The differentiated-curvature arm `diffArmSection g s S = Curv S − gradArmSection g s (∇S)` is
-additive at the section level (both `Curv` and `gradArmSection ∘ ∇` are `ℝ`-linear). -/
 lemma diffArmSection_toSection_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S₁ S₂ : SmoothCcTensor g 0 s) (x : M) :
     (diffArmSection (I := I) (M := M) g s (S₁ + S₂)).toSection x =
@@ -1397,7 +1175,6 @@ lemma diffArmSection_toSection_add
       (covGrad (I := I) (M := M) g 0 s S₁) (covGrad (I := I) (M := M) g 0 s S₂) x]
   abel
 
-/-- The differentiated-curvature arm commutes with scalar multiplication at the section level. -/
 lemma diffArmSection_toSection_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ) (S : SmoothCcTensor g 0 s) (x : M) :
     (diffArmSection (I := I) (M := M) g s (c • S)).toSection x =
@@ -1411,10 +1188,6 @@ lemma diffArmSection_toSection_smul
       (covGrad (I := I) (M := M) g 0 s S) x]
   rw [smul_sub]
 
-/-- **The differentiated-curvature arm as a fixed smooth Hom-field action.**  By the value-local
-representation theorem `exists_value_local_appFullSec` (value-locality `diffArmSection_value_local`,
-`ℝ`-linearity `diffArmSection_toSection_add` / `_smul`), there is a smooth full Hom-bundle field `H_dR`
-with `diffArmSection g s S = appFullSec H_dR S` for every smooth compactly-supported `(0, s)`-tensor `S`. -/
 theorem exists_diffArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ H_dR : HomTensorRSField (E := E) (M := M) 0 s (s + 1) I,
       ∀ S : SmoothCcTensor g 0 s,
@@ -1426,23 +1199,6 @@ theorem exists_diffArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : �
     (fun c S x => diffArmSection_toSection_smul (I := I) (M := M) g s c S x)
     (fun S₁ S₂ x hS => diffArmSection_value_local (I := I) (M := M) g s S₁ S₂ x hS)
 
-/-- **The first-order Hom-field section identity of the order-`2` commutator defect.** For a closed
-smooth Riemannian manifold `(M, g)` there are fixed smooth full Hom-bundle field sections
-`H_R : Hom(T^{(0,s+1)}, T^{(0,s+1)})` and `H_dR : Hom(T^{(0,s)}, T^{(0,s+1)})` such that, for every
-smooth compactly-supported `(0, s)`-tensor `S`,
-```
-pointwiseTensorCurv g s S = H_R · ∇S + H_dR · S
-```
-where `Curv S := Δ_∇(∇S) − ∇(Δ_∇ S)`, `∇S := covGrad g 0 s S`, and `·` is the full Hom-bundle action
-`appFullSec`.  This is the **first-order** content of the defect: it carries the `1`-jet `(∇S, S)` only,
-never `∇²S`.
-
-The two fields are the gradient-reading curvature arm `H_R` (the `R(∇S)`-content, the moving-frame
-curvature trace `gradArmSection`, value-local in `∇S(x)`) and the differentiated-curvature arm `H_dR`
-(the `(∇R)·S`-content, `diffArmSection = Curv − gradArmSection(∇S)`, value-local in `S(x)` by the
-proven divergence-of-curvature collapse).  The defining decomposition `Curv S = gradArmSection g s (∇S)
-+ diffArmSection g s S` holds by definition of `diffArmSection`; each arm is then factored as a fixed
-smooth Hom-field action through the value-local representation theorem `exists_value_local_appFullSec`. -/
 theorem exists_pointwiseTensorCurv_firstOrder_homField_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ (H_R : HomTensorRSField (E := E) (M := M) 0 (s + 1) (s + 1) I)
@@ -1455,7 +1211,7 @@ theorem exists_pointwiseTensorCurv_firstOrder_homField_section
   obtain ⟨H_R, hH_R⟩ := exists_gradArmSection_appFullSec (I := I) (M := M) (E := E) g s
   obtain ⟨H_dR, hH_dR⟩ := exists_diffArmSection_appFullSec (I := I) (M := M) (E := E) g s
   refine ⟨H_R, H_dR, fun S => ?_⟩
-  -- `Curv S = gradArmSection (∇S) + diffArmSection S` by definition; substitute the two factorisations.
+  
   have hdecomp : pointwiseTensorCurv (I := I) (M := M) g s S =
       gradArmSection (I := I) (M := M) g s (covGrad (I := I) (M := M) g 0 s S) +
         diffArmSection (I := I) (M := M) g s S := by

@@ -9,27 +9,6 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 
-/-!
-# `L²`-maximal regularity for the connection Laplacian
-
-For a closed Riemannian manifold and `0 < T ≤ 1`, the inhomogeneous tensor heat
-equation `∂_t u = Δ_∇ u + f`, `u(0) = 0`, driven by a forcing
-`f ∈ L²([0,T]; TensorL2 r s g)`, has a strong solution in `H¹([0,T]; TensorL2 r s g)`
-with the De Simon maximal-regularity bound `‖u‖_{H¹} ≤ 2 · ‖f‖_{L²}`. The result is
-packaged as a bounded linear solution operator together with its companion `H²`
-field and the time-pointwise rough Laplacian, recovering the strong form of the
-equation at the `L²([0,T]; L²)` level.
-
-The two-derivative-gain companion field is valued in the **spectral** `H²`
-Sobolev space `tensorHs g r s 2` (the eigenbasis weighted-`ℓ²` completion of the
-connection-Laplacian resolvent), the scale on which the rough Laplacian
-`Δ_∇ : H² →L L²` and the maximal-regularity smoothing act diagonally and
-unconditionally. The whole package is transported from the abstract per-mode
-maximal-regularity operator across the chart-locality-free isometry
-`tensorHsZeroEquivL2 : H⁰ ≃ₗᵢ L²`; no order-`2` Gårding/elliptic-regularity
-comparison is invoked.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open Bundle
@@ -44,12 +23,6 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 open DifferentialGeometry.PDE.RicciFlow.ConnectionLaplacian
 
-/-- **Block-diagonal transport on the time-`H¹` space.**  For real Hilbert
-spaces `X`, `Y`, a time horizon, and bounded linear maps `Li : X →L Y` (acting
-on the initial value) and `Ld : L²([0,T]; X) →L L²([0,T]; Y)` (acting on the
-`L²` time derivative), this is the induced bounded linear map
-`H¹([0,T]; X) →L H¹([0,T]; Y)`, `u ↦ ⟨Li u.init, Ld u.deriv⟩`.  When both
-components are norm-non-increasing, so is the transport (graph-norm). -/
 noncomputable def timeH1blockTransport
     {X Y : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
     [NormedAddCommGroup Y] [InnerProductSpace ℝ Y] [CompleteSpace Y] {Tt : ℝ}
@@ -98,38 +71,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option maxHeartbeats 800000 in
-/-- **`L²`-maximal regularity for the connection Laplacian.**
-On a closed Riemannian manifold, for `0 < T ≤ 1`, the inhomogeneous heat
-equation `∂_t u = Δ_∇ u + f`, `u(0) = 0`, driven by a forcing term
-`f ∈ L²([0,T]; TensorL2 r s g)`, admits a strong solution `u` in the
-time-`H¹` space `H¹([0,T]; TensorL2 r s g)`, with the De Simon
-maximal-regularity bound `‖u‖_{H¹} ≤ 2 · ‖f‖_{L²}`.
 
-The conclusion bundles this as the existence of a bounded linear solution
-operator `SolOp : L²([0,T]; L²) →L H¹([0,T]; L²)` carrying four pieces of
-content:
-
-* **Maximal-regularity bound.**  `‖SolOp‖ ≤ 2`, the absolute constant of
-  the `H¹`-graph-norm estimate.
-* **Initial condition.**  `(SolOp f).init = 0` for every forcing `f`,
-  i.e. the Duhamel solution starts at the origin.
-* **Two-derivative gain (companion `H²` field).**  A bounded linear
-  companion operator
-  `SolField : L²([0,T]; L²) →L L²([0,T]; H²)`,
-  valued in the spectral `H²` Sobolev space `tensorHs g r s 2`,
-  with `‖SolField‖ ≤ 1 + T`, the two-derivative-gain bound.
-* **Inhomogeneous heat equation.**  A bounded linear operator
-  `LapField : L²([0,T]; H²) →L L²([0,T]; L²)`, the time-pointwise
-  extension of the rough Laplacian `Δ_∇ : H² →L L²`, with
-  `(SolOp f).deriv = LapField (SolField f) + f` for every forcing `f` —
-  the strong form of `∂_t u = Δ_∇ u + f` at the `L²([0,T]; L²)` level.
-
-The fourth clause is the non-vacuous content: any candidate solution
-operator must reproduce the forcing through the rough-Laplacian /
-companion-field identity, ruling out the trivial witness `SolOp = 0`
-(for which `(SolOp f).deriv = 0`, forcing `f = 0` for all `f`).
-
-The statement carries no `HasLocallyConstantChartAt` hypothesis. -/
 theorem connection_laplacian_l2_maximal_regularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {T : ℝ}
     (_hT : 0 < T) (_hT1 : T ≤ 1) :

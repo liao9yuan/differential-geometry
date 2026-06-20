@@ -1,26 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 
-/-!
-# The rank-`r` order-`2` rough-Laplacian / covariant-gradient commutator defect
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`, this thin upstream file
-holds the single contravariant-rank-`r` commutator-defect definition
-
-```
-pointwiseTensorCurvRS g r s S := Δ_∇(∇S) − ∇(Δ_∇ S)
-```
-
-a smooth compactly-supported `(r, s + 1)`-tensor field (`∇S = covGrad g r s S`,
-`Δ_∇ = rawTensorConnLapSmooth`). It is the contravariant-rank-`r` lift of `pointwiseTensorCurv`
-(`PointwiseTensorBochner`); at `r = 0` it is definitionally `pointwiseTensorCurv g s`.
-
-The definition lives here, upstream of both its moving-frame field apparatus
-(`MovingFrameGenuineFieldPairingRS`) and its Hom-field curvature jet decomposition
-(`HomFieldCurvatureJetDecomposition`), so the two consume the shared defect without a file-level
-import cycle.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -48,15 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **The rank-`r` order-`2` commutator defect.** The difference of the rough Laplacian of the
-`(r, s + 1)`-tensor gradient field `∇S` and the covariant gradient of the rough Laplacian of `S`, as a
-smooth compactly-supported `(r, s + 1)`-tensor field:
-```
-pointwiseTensorCurvRS g r s S := Δ_∇(∇S) − ∇(Δ_∇ S).
-```
-This is the contravariant-rank-`r` lift of `pointwiseTensorCurv` (`PointwiseTensorBochner`); at `r = 0`
-it is definitionally `pointwiseTensorCurv g s`. Its body matches the inline defect form the rank-`r`
-leaf-`C` consumers (`LocalWeylReproducingKernel`) state. -/
 noncomputable def pointwiseTensorCurvRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     SmoothCcTensor g r (s + 1) :=

@@ -4,39 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciComm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 
-/-!
-# Fixed-family Parseval expansions: rough Laplacian trace and slot-`0` fibre pairing
-
-For a closed smooth Riemannian manifold `(M, g)` and a fixed finite family of smooth global
-tangent vector fields `V a` whose fibre values reproduce every tangent vector through the
-metric (`∑ a, ⟨V a x, u⟩_g • V a x = u`, a *Parseval frame family*,
-`exists_smooth_parseval_frame_family`), this file re-expresses two moving-orthonormal-frame
-traces as sums over the fixed family:
-
-* `rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum` — the rough (connection)
-  Laplacian of a smooth compactly-supported `(0, k)`-tensor is the fixed-family trace of its
-  second covariant derivative,
-  `Δ_∇T (x) = ∑ a, ∇²_{V a, V a} T (x)`.
-  The moving `g_x`-orthonormal frame in the definition of `rawTensorConnLap` is converted to
-  the fixed family through the bundled bilinear second-covariant-derivative read
-  `rawTensorConnLap_psi_bilinAt` (value-tensoriality in both direction slots) and the bilinear
-  trace conversion `parseval_family_sum_bilin_eq`.
-
-* `tensorInnerPointwise_succ_eq_parseval_sum_slot0` — the intrinsic `(0, s+1)`-tensor fibre
-  inner product splits over the fixed family in the leading covariant slot,
-  `⟨A, B⟩_{s+1}(x) = ∑ a, ⟨A(V a x, ·), B(V a x, ·)⟩_s(x)`,
-  the slot-`0` reads being the `tensor0SAsRS`-wrapped bare curries of the unit-section
-  evaluations. This is the fixed-family form of the existential-frame decomposition
-  `tensorInnerPointwise_succ_eq_sum_slot0Curry`: the `g_x`-orthonormal split
-  (`tensorInnerPointwise_eq_sum_componentS_mul`, `fiberNormSqComponent_slot0Curry`) is
-  converted to the family by `parseval_family_sum_bilin_eq` applied to the bilinear map
-  `(u, v) ↦ ⟨A(u, ·), B(v, ·)⟩_s(x)`.
-
-Both identities remove the moving-centre obstruction from integrated Bochner–Weitzenböck
-telescoping: every direction that appears is a fixed smooth global field, on which the
-per-direction covariant integration-by-parts engines apply directly.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -65,18 +32,7 @@ private local instance : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
 private local instance : Module.Finite ℝ E := inferInstance
 
 set_option linter.unusedSectionVars false in
-/-- **Fixed-family Parseval representation of the rough Laplacian.** For a fixed family of
-smooth tangent vector fields `V a` whose fibre values reproduce every tangent vector through
-the metric, the rough (connection) Laplacian of a smooth compactly-supported `(0, k)`-tensor
-is the fixed-family trace of its second covariant derivative:
-$$
-  \Delta_\nabla T (x) = \sum_a \nabla^2_{V_a, V_a} T (x).
-$$
-The moving `g_x`-orthonormal frame trace (`rawTensorConnLap_eq_frame_trace`) is converted to
-the fixed family by the bilinear trace conversion `parseval_family_sum_bilin_eq` applied to
-the bundled bilinear second-covariant-derivative read `rawTensorConnLap_psi_bilinAt`, whose
-values at the fibre vectors of smooth fields are the genuine second covariant derivatives
-(`rawTensorConnLap_psi_bilinAt_apply`). -/
+
 theorem rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum
     (g : SmoothRiemannianMetric I M) {N : ℕ}
     (V : Fin N → Π b : M, TangentSpace I b)
@@ -130,13 +86,13 @@ theorem rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum
         rw [hBval (V a x) (V a x), hψa a]
 
 set_option linter.unusedSectionVars false in
-/-- Two `(0, s)`-tensor fibre elements agreeing on every model tuple are equal. -/
+
 private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
 set_option linter.unusedSectionVars false in
-/-- The `(0, t)`-tensor wrapper `tensor0SAsRS` is additive. -/
+
 private lemma tensor0SAsRS_add (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SAsRS (I := I) (M := M) x (C + D) =
       tensor0SAsRS (I := I) (M := M) x C + tensor0SAsRS (I := I) (M := M) x D := by
@@ -160,7 +116,7 @@ private lemma tensor0SAsRS_add (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
   exact h
 
 set_option linter.unusedSectionVars false in
-/-- The `(0, t)`-tensor wrapper `tensor0SAsRS` is `ℝ`-homogeneous. -/
+
 private lemma tensor0SAsRS_smul (t : ℕ) (x : M) (c : ℝ) (C : Tensor0SSpace t I x) :
     tensor0SAsRS (I := I) (M := M) x (c • C) =
       c • tensor0SAsRS (I := I) (M := M) x C := by
@@ -176,20 +132,7 @@ private lemma tensor0SAsRS_smul (t : ℕ) (x : M) (c : ℝ) (C : Tensor0SSpace t
   exact h
 
 set_option linter.unusedSectionVars false in
-/-- **Slot-`0` fixed-family Parseval expansion of the `(0, s+1)` fibre pairing.** For a fixed
-family of tangent fields whose fibre values at `x` reproduce every tangent vector through the
-metric, the intrinsic `(0, s+1)`-tensor fibre inner product splits over the family in the
-leading covariant slot:
-$$
-  \langle A, B\rangle_{s+1}(x) = \sum_a \langle A(V_a x, \cdot), B(V_a x, \cdot)\rangle_s(x),
-$$
-the slot-`0` reads being the `tensor0SAsRS`-wrapped bare curries of the unit-section
-evaluations. This is the fixed-family companion of the existential-orthonormal-frame
-decomposition `tensorInnerPointwise_succ_eq_sum_slot0Curry`: the orthonormal slot-`0` split
-(`tensorInnerPointwise_eq_sum_componentS_mul` with the leading index split by `Fin.consEquiv`
-and identified per-component by `fiberNormSqComponent_slot0Curry`) is converted to the family
-by `parseval_family_sum_bilin_eq` applied to the slot-`0`-read bilinear map
-`(u, v) ↦ ⟨A(u, ·), B(v, ·)⟩_s(x)`. -/
+
 theorem tensorInnerPointwise_succ_eq_parseval_sum_slot0
     (g : SmoothRiemannianMetric I M) {N : ℕ}
     (V : Fin N → Π b : M, TangentSpace I b)

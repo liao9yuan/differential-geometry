@@ -2,51 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartPulledCovApplyExplicitFormula
 
-/-!
-# Pointwise value bound for the chart-pulled representation of `covApply ∇ B T`
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, ranks
-`r, s : ℕ`, a smooth tangent vector field `B`, and a smooth compactly supported
-`(r, s)`-tensor section `T`, the value of the chart-`α`-trivialised
-representation of `covApply ∇ B T` at a partition-of-unity tsupport point `b`
-inside the chart-`α` Levi-Civita good set is bounded by
-
-```
-K * (‖fderiv ℝ (tensorRSChartE_section_repr r s α T.toSection ∘ symm)
-                (extChartAt I α b)‖
-     + ‖tensorRSChartE_section_repr r s α T.toSection b‖)
-```
-
-for a constant `K ≥ 0` depending only on `g`, `α`, the ranks `r`, `s`, and `B`
-— in particular independent of `T` and `b`.
-
-## Strategy
-
-The chart-pulled explicit formula
-
-```
-tensorRSChartE_section_repr r s α (covApply ∇ B T) b
-    = fderiv ℝ (tensorRSChartE_section_repr r s α T.toSection ∘ symm)
-        (extChartAt I α b) (trivToE α b (B b))
-      + ∑ k, (triv α).cLMA b (chartTensorRSInputSlotCorrection ... k)
-      - ∑ l, (triv α).cLMA b (chartTensorRSOutputSlotCorrection ... l)
-```
-
-valid for `b` in the chart-`α` Levi-Civita good set. Taking norms via the
-triangle inequality reduces the problem to three uniform value bounds:
-
-* the intrinsic piece's CLM-application bound: `‖fderiv F (trivToE α b (B b))‖
-  ≤ ‖fderiv F‖ · ‖trivToE α b (B b)‖`, with `‖trivToE α b (B b)‖` uniformly
-  bounded over the POU tsupport;
-* each input-slot piece's kernel factorisation
-  `(triv α).cLMA b (slot k) = kernel_k(b) (repr T b)`, giving
-  `‖slot k‖ ≤ ‖kernel_k(b)‖ · ‖repr T b‖`, with `‖kernel_k(b)‖` uniformly
-  bounded on `tsupport ∩ goodSet`;
-* the analogous output-slot bound.
-
-Summing and absorbing the constants into a single `K_total` yields the
-headline. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -75,8 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Uniform value bound for `‖trivToE α b (B b)‖` on the chart-`α`
-partition-of-unity tsupport. -/
 private lemma trivToE_B_value_bound_on_pouTsupport
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ C : ℝ, 0 ≤ C ∧

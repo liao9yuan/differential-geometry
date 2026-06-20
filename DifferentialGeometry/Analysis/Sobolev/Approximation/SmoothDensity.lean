@@ -2,49 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
-/-!
-# Per-chart strong-support smooth approximation in `W^{1,p}_chart(M)`
-
-For a closed manifold `M` modelled on a finite-dimensional real inner-product
-space `E`, this file develops the per-chart **strong-support** approximation
-needed to upgrade the Euclidean smooth-density theorem
-`MemWkp.exists_smooth_compactSupport_approx` from a per-chart-target
-approximation (with weak support inside `chartTargetEuclid α`) to a strong
-support approximation supported strictly inside the chart-α image of an open
-neighbourhood of `tsupport ρ_α`.
-
-The strong support property — the approximant `χ_α` has
-`tsupport χ_α ⊆ {y | η_α y = 1}` for a smooth cutoff `η_α` that is `1` on
-the chart-α image of `tsupport ρ_α` — is what is needed to control cross-chart
-contributions in the global smooth-density argument.
-
-## Main definitions and results
-
-* `chartImagePOUTsupport α` : the toEuclidean image
-  `toEuclidean ∘ extChartAt I α '' tsupport ρ_α` of the closed support of
-  the canonical partition of unity weight at `α`.
-* `chartImagePOUTsupport_isCompact` : compactness on a closed `M`.
-* `chartImagePOUTsupport_subset_target` : containment in `chartTargetEuclid α`.
-* `chartPushed_eq_zero_off_chartImagePOUTsupport` : the chart-pushed function
-  vanishes on the chart target outside `chartImagePOUTsupport α`.
-* `exists_chartCutoff` : a smooth cutoff `η_α` that is `1` on a neighbourhood
-  of `chartImagePOUTsupport α`, with `tsupport η_α ⊆ chartTargetEuclid α`.
-* `chartCutoff_smul_chartPushed_eq_chartPushed` : on the chart target, the
-  cutoff product `η_α · chartPushed g α u` equals `chartPushed g α u`
-  pointwise (since `η_α = 1` on the support of `chartPushed g α u`).
-* `chartCutoff_smul_chartPushed_memWkp` : `η · chartPushed g α u` is in the
-  Euclidean `W^{1,p}` of the chart target whenever `‖η‖ ≤ C` and `‖∇η‖ ≤ C`
-  on the chart target.
-* `exists_smooth_strong_support_approx` : for each `α` and each
-  `MemWkpChart` function `u`, there exists a smooth compactly-supported
-  Euclidean approximant `χ_α` whose `tsupport` is contained in the chart
-  target, with quantitative `W^{1,p}` closeness to `chartPushed g α u`.
-
-These are stand-alone helper pieces of the chart-Sobolev smooth-density
-machinery, useful for any per-chart approximation argument that needs the
-strong support property.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -67,18 +24,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The toEuclidean image of `extChartAt I α '' tsupport ρ_α` for the canonical
-chart-atlas partition of unity. Compact on a closed manifold and contained in
-`chartTargetEuclid α`, this is the natural compact "kernel" inside which the
-chart-pushed function `chartPushed g α u` is supported (as a subset of the
-chart target). -/
 def chartImagePOUTsupport
     [T2Space M] [SigmaCompactSpace M] (α : M) : Set EuclN :=
   toEuclidean '' ((extChartAt I α) ''
     (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
-/-- `chartImagePOUTsupport α` is compact on a closed manifold. -/
 lemma chartImagePOUTsupport_isCompact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     IsCompact (chartImagePOUTsupport (I := I) (M := M) α) := by
@@ -98,7 +49,6 @@ lemma chartImagePOUTsupport_isCompact
     hTα_compact.image_of_continuousOn hcont_ext
   exact hImg_ext_compact.image (toEuclidean (E := E)).continuous
 
-/-- `chartImagePOUTsupport α` is contained in `chartTargetEuclid α`. -/
 lemma chartImagePOUTsupport_subset_target
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     chartImagePOUTsupport (I := I) (M := M) α ⊆
@@ -114,8 +64,6 @@ lemma chartImagePOUTsupport_subset_target
     rw [← hxz]; exact (extChartAt I α).map_source hx_ext
   exact ⟨z, hz_target, hzy⟩
 
-/-- The chart-pushed function vanishes pointwise on `chartTargetEuclid α`
-outside `chartImagePOUTsupport α`. -/
 lemma chartPushed_eq_zero_off_chartImagePOUTsupport
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ) {y : EuclN}
@@ -126,14 +74,6 @@ lemma chartPushed_eq_zero_off_chartImagePOUTsupport
   chartPushed_support_subset_compact_in_target (I := I) (M := M) α u y
     hy_target hy_off
 
-/-- For each chart `α` on a closed manifold, there exist a small radius `δ > 0`
-and a smooth cutoff `η_α : EuclN → ℝ` such that:
-
-* `η_α ≡ 1` on the closed `δ`-thickening of `chartImagePOUTsupport α`;
-* `tsupport η_α ⊆ chartTargetEuclid α` (so the cutoff is supported in the
-  chart target);
-* `η_α` has compact support and takes values in `[0, 1]`;
-* `η_α` is `C^∞`. -/
 theorem exists_chartCutoff
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -155,7 +95,7 @@ theorem exists_chartCutoff
     (chartImagePOUTsupport_subset_target (I := I) (M := M) α)
 
 omit [FiniteDimensional ℝ E] in
-/-- A range bound `Set.range η ⊆ [0, 1]` gives `‖η x‖ ≤ 1` everywhere. -/
+
 lemma norm_le_one_of_range_Icc
     {η : EuclN → ℝ}
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1) (x : EuclN) :
@@ -168,9 +108,7 @@ lemma norm_le_one_of_range_Icc
   exact h2
 
 omit [FiniteDimensional ℝ E] in
-/-- A smooth function with compact support has a uniform bound on its gradient
-norm `‖fderiv ℝ η x‖`, derived from continuity of `fderiv` and compactness of
-`tsupport η`. -/
+
 lemma exists_grad_bound_of_compactSupport_smooth
     {η : EuclN → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -210,10 +148,6 @@ lemma exists_grad_bound_of_compactSupport_smooth
     simp only [norm_zero]
     exact le_trans zero_le_one (le_max_right _ _)
 
-/-- If `η_α ≡ 1` on the closed `δ`-thickening of `chartImagePOUTsupport α`,
-and the chart-pushed function `chartPushed g α u` vanishes on the chart target
-outside `chartImagePOUTsupport α`, then `η_α · chartPushed g α u` equals
-`chartPushed g α u` pointwise on the chart target. -/
 lemma chartCutoff_smul_chartPushed_eq_chartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ)
@@ -239,8 +173,6 @@ lemma chartCutoff_smul_chartPushed_eq_chartPushed
         α u hy hyKα
     rw [hf_zero]; ring
 
-/-- The cutoff-product `η · chartPushed g α u` is in `MemWkp 1 p` of the
-chart target, given a uniform bound on `‖η‖` and `‖∇η‖` on the chart target. -/
 lemma chartCutoff_smul_chartPushed_memWkp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -269,19 +201,6 @@ lemma chartCutoff_smul_chartPushed_memWkp
   · rw [norm_iteratedFDeriv_one]
     exact hη_bound_one x hx
 
-/-- For each `α` and each `MemWkpChart g 1 p u` function on a closed manifold,
-the chart-pushed function `chartPushed g α u` admits a smooth Euclidean
-approximant `χ_α` with:
-
-* `tsupport χ_α ⊆ chartTargetEuclid α` (compact support inside the chart
-  target);
-* `χ_α` is `C^∞`;
-* The `W^{1,p}` distance `wkpNorm 1 p (chartPushed g α u - χ_α)` is bounded
-  by `ENNReal.ofReal ε_per`.
-
-This is the per-chart input to the global smooth-density argument: the smooth
-approximant inside the chart target exists with explicit quantitative bound.
--/
 theorem exists_smooth_strong_support_approx
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]

@@ -6,15 +6,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Coordinate frames at a point
-
-This file packages the tangent local frame induced by the chart/trivialization
-at a point.  This is weaker than normal coordinates: it gives a coordinate
-local frame and bracket vanishing, but it does not assert Christoffel symbols
-vanish.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -29,26 +20,19 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The fixed finite index set used by the chart-induced coordinate frame. -/
 abbrev CoordinateIdx (E : Type*) [NormedAddCommGroup E] [NormedSpace Real E]
     [FiniteDimensional Real E] :=
   Fin (Module.finrank Real E)
 
-/-- The tangent-bundle trivialization used for coordinates at `x₀`. -/
 abbrev coordinateTrivializationAt
     (x₀ : M) :
     Trivialization E (π E (TangentSpace I : M -> Type _)) :=
   trivializationAt E (TangentSpace I : M -> Type _) x₀
 
-/-- The chart-induced coordinate tangent frame at `x₀`.
-
-Outside the base set of the tangent-bundle trivialization this has mathlib's
-usual local-frame junk value. -/
 def coordinateFrameAt (x₀ : M) :
     CoordinateIdx E -> (x : M) -> TangentSpace I x :=
   (coordinateTrivializationAt (I := I) x₀).localFrame (Module.finBasis Real E)
 
-/-- The open set on which `coordinateFrameAt x₀` is a local frame. -/
 def coordinateFrameSet (x₀ : M) : Set M :=
   (coordinateTrivializationAt (I := I) x₀).baseSet
 
@@ -66,7 +50,6 @@ theorem coordinateFrameAt_isLocalFrame (x₀ : M) :
   (coordinateTrivializationAt (I := I) x₀).isLocalFrameOn_localFrame_baseSet
     I (∞ : WithTop ℕ∞) (Module.finBasis Real E)
 
-/-- The pointwise basis of `TangentSpace I x` induced by the coordinate frame. -/
 def coordinateFrameAt_basis (x₀ : M) {x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) :
     Module.Basis (CoordinateIdx E) Real (TangentSpace I x) :=
@@ -79,7 +62,6 @@ theorem coordinateFrameAt_basis_apply (x₀ : M) {x : M}
       coordinateFrameAt (I := I) x₀ i x := by
   simp [coordinateFrameAt_basis]
 
-/-- The coordinate-frame basis at the base point. -/
 def coordinateFrameAt_toBasis (x₀ : M) :
     Module.Basis (CoordinateIdx E) Real (TangentSpace I x₀) :=
   coordinateFrameAt_basis (I := I) x₀ (coordinateFrameAt_mem (I := I) x₀)
@@ -90,8 +72,6 @@ theorem coordinateFrameAt_toBasis_apply (x₀ : M) (i : CoordinateIdx E) :
       coordinateFrameAt (I := I) x₀ i x₀ := by
   simp [coordinateFrameAt_toBasis]
 
-/-- On the coordinate chart domain, the coordinate frame is the derivative of
-`(extChartAt I x₀).symm` applied to the fixed model-space basis vector. -/
 theorem coordinateFrameAt_apply_of_mem {x₀ x : M}
     (hx : x ∈ coordinateFrameSet (I := I) x₀) (i : CoordinateIdx E) :
     coordinateFrameAt (I := I) x₀ i x =
@@ -137,11 +117,6 @@ private theorem lieBracketWithin_const_const {s : Set E} {x v w : E} :
     VectorField.lieBracketWithin Real (fun _ : E => v) (fun _ : E => w) s x = 0 := by
   simp [VectorField.lieBracketWithin]
 
-/-- Coordinate-frame bracket vanishing at the base point.
-
-This is the chart-coordinate statement `[∂ᵢ, ∂ⱼ](x₀) = 0`. It is intentionally
-separate from `IsNormalFrameForConnectionAt`: no Christoffel-vanishing claim is
-made here. -/
 theorem coordinateFrameAt_bracket_zero (x₀ : M) (i j : CoordinateIdx E) :
     VectorField.mlieBracket I
       (coordinateFrameAt (I := I) x₀ i)
@@ -165,7 +140,6 @@ theorem coordinateFrameAt_bracket_zero (x₀ : M) (i j : CoordinateIdx E) :
   rw [lieBracketWithin_const_const]
   exact ContinuousLinearMap.map_zero _
 
-/-- A packaged chart-induced coordinate frame at one point. -/
 structure CoordinateFrameAt (x₀ : M) where
   u : Set M
   frame : CoordinateIdx E -> (x : M) -> TangentSpace I x
@@ -175,7 +149,6 @@ structure CoordinateFrameAt (x₀ : M) where
   bracket_zero : ∀ i j : CoordinateIdx E,
     VectorField.mlieBracket I (frame i) (frame j) x₀ = 0
 
-/-- The canonical coordinate-frame package at `x₀`. -/
 def coordinateFramePackageAt (x₀ : M) : CoordinateFrameAt (I := I) x₀ where
   u := coordinateFrameSet (I := I) x₀
   frame := coordinateFrameAt (I := I) x₀
@@ -184,7 +157,6 @@ def coordinateFramePackageAt (x₀ : M) : CoordinateFrameAt (I := I) x₀ where
   mem_base := coordinateFrameAt_mem (I := I) x₀
   bracket_zero := coordinateFrameAt_bracket_zero (I := I) x₀
 
-/-- Covariant tensor components in the coordinate frame at the base point. -/
 def coordComponent0SAt {s : ℕ} {x₀ : M}
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x₀)
     (slots : Fin s -> CoordinateIdx E) : Real :=
@@ -198,7 +170,6 @@ theorem coordComponent0SAt_apply {s : ℕ} {x₀ : M}
       A (fun a => coordinateFrameAt_toBasis (I := I) x₀ (slots a)) :=
   rfl
 
-/-- Mixed tensor components in the coordinate frame at the base point. -/
 def coordComponentRSAt {r s : ℕ} {x₀ : M}
     (T : TensorRSSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s x₀)
     (upper : Fin r -> CoordinateIdx E) (lower : Fin s -> CoordinateIdx E) : Real :=

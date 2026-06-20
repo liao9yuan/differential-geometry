@@ -5,30 +5,6 @@ import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
-/-!
-# Predicate-free building blocks for the chart-`(r, s)` fibre right-inverse op-norm bound
-
-For a chart centre `α : M` and ranks `r s : ℕ`, the chart-`(r, s)` fibre
-right-inverse CLM family
-`tensorRSChartFiberFromModel r s α b : TensorRSModel r s ℝ E →L[ℝ]
-TensorRSSpace r s I b` is compared, on the locality neighbourhood of any base
-point `b₀`, with the `(r, s)`-Hom-bundle coordinate change `coordChangeL α b₀ b`.
-
-This file collects the predicate-free supporting lemmas for that comparison:
-
-* the pullback identity for the norm on `TensorRSSpace r s I b`;
-* the CLM-level locality identity for the `(r, s)`-Hom-bundle's forward
-  trivialisation;
-* the pointwise inequality `‖tensorRSChartFiberFromModel α b D‖ ≤
-  ‖coordChangeL α b₀ b D‖` on the locality neighbourhood;
-* continuity of `b ↦ coordChangeL α b₀ b` on the intersection of chart sources,
-  via the `ContMDiffVectorBundle ∞` instance;
-* a generic op-norm bound on a compact set from operator-norm continuity.
-
-The uniform pointwise op-norm bound itself is assembled, without any
-chart-locality predicate, in `TensorRSChartFiberFromModelOpNormUnconditional`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -52,17 +28,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- The norm on `TensorRSSpace r s I b` is the pullback of the model-fibre
-norm along `tensorRSSpace_continuousLinearEquiv`. -/
 private lemma tensorRSSpace_norm_eq (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
     ‖T‖ = ‖tensorRSSpace_continuousLinearEquiv (𝕜 := ℝ) (M := M) (I := I) r s b T‖ :=
   rfl
 
-/-- CLM-level locality identity for the `(r, s)`-Hom-bundle's forward
-trivialisation: on the locality neighbourhood of `b₀`, the forward
-trivialisation at `b₀` evaluated at `b` agrees with the model-fibre
-identification CLM. -/
 private lemma tensorRS_trivAt_clmAt_eq_CLE_on_locality
     (r s : ℕ) (b₀ : M) {b : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -86,8 +56,6 @@ private lemma tensorRS_trivAt_clmAt_eq_CLE_on_locality
   rw [h_subB]
   rfl
 
-/-- Pointwise inequality between `tensorRSChartFiberFromModel α b D` and
-`coordChangeL α b₀ b D` on the locality neighbourhood of `b₀`. -/
 private lemma chartFiberFromModel_norm_le_coordChangeL_norm_on_locality
     (r s : ℕ) (α : M) {b₀ b : M}
     (hb_α : b ∈ (chartAt H α).source)
@@ -151,8 +119,6 @@ private lemma chartFiberFromModel_norm_le_coordChangeL_norm_on_locality
   rw [h_norm_eq, h_apply, h_appl]
   exact le_refl _
 
-/-- `b ↦ coordChangeL ℝ α b₀ b` for the `(r, s)`-Hom-bundle is continuous on
-the intersection of chart sources. -/
 private lemma continuousOn_RS_coordChangeL_α_b₀ (r s : ℕ) (α b₀ : M) :
     ContinuousOn
       (fun b : M => ((trivializationAt (TensorRSModel r s ℝ E)
@@ -194,7 +160,6 @@ private lemma continuousOn_RS_coordChangeL_α_b₀ (r s : ℕ) (α b₀ : M) :
   rw [h_base_α, h_base_b₀] at h_smooth
   exact h_smooth.continuousOn
 
-/-- Op-norm bound on a compact subset from operator-norm continuity. -/
 private lemma exists_opNorm_bound_on_compact_of_continuousOn
     {r s : ℕ} (f : M → TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)
     {K : Set M} (hK : IsCompact K) (h_cont : ContinuousOn f K) :

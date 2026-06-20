@@ -3,27 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Iter
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartGramRealizeDiffJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
 
-/-!
-# Chart-jet Nemytskii bound on the realized Ricci–DeTurck right-hand-side polynomial
-
-The chart-coordinate Ricci–DeTurck carrier `chartDeTurckRicciRHS g g_bg α i k =
--2·chartRicciTensor g α i k + chartLieDeTurckComp g g_bg α i k` is, by the chart-jet Lipschitz
-closure algebra (`HasChartJetLip`), all-order chart-jet Lipschitz with derivative loss `2`.  Combined
-with the chart-Gram realize-difference jet bound
-(`chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE`), this yields the genuine chart-jet
-**Nemytskii bound** on the realized right-hand side: for two `g_bg`-fibre-small perturbations `T, T'`
-with realized metrics `g₁ = g_bg + h_sym T`, `g₂ = g_bg + h_sym T'`,
-```
-‖∂^N (chartDeTurckRicciRHS g₁ g_bg α i k − chartDeTurckRicciRHS g₂ g_bg α i k)‖
-  ≤ C · bareChartJetContentOnE (T − T') (N + 2)        (on the chart-target interior),
-```
-i.e. every chart Fréchet jet of order `N` of the Ricci–DeTurck carrier difference is dominated by the
-chart Fréchet jets of order `≤ N + 2` of the perturbation difference `T − T'` — the second-order
-quasilinearity of the Ricci–DeTurck operator (`+2`).
-
-This is the `E`-coordinate analytic heart of the chart→intrinsic Faà-di-Bruno RHS-arm domination.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -47,10 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **The chart Ricci–DeTurck carrier is all-order chart-jet Lipschitz with derivative loss `2`.**
-Assembled from the Ricci (`hasChartJetLip_chartRicciTensor`, loss `2`) and Lie–DeTurck
-(`hasChartJetLip_chartLieDeTurckComp`, loss `2`) base cases through the closure algebra:
-`chartDeTurckRicciRHS = (-2)·chartRicciTensor + chartLieDeTurckComp`. -/
 theorem hasChartJetLip_chartDeTurckRicciRHS
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -62,7 +37,7 @@ theorem hasChartJetLip_chartDeTurckRicciRHS
     hKsub (-2 : ℝ)
   have hLie := hasChartJetLip_chartLieDeTurckComp (I := I) (M := M) g₁ g₂ g_bg α hK hKsub i k
   have hAdd := HasChartJetLip.add hKsub hRic hLie
-  -- `max 2 2 = 2`, and the field equals `chartDeTurckRicciRHS` by `chartDeTurckRicciRHS_def`.
+  
   have hmax : max 2 2 = 2 := by norm_num
   rw [hmax] at hAdd
   refine hAdd.congr ?_
@@ -70,10 +45,6 @@ theorem hasChartJetLip_chartDeTurckRicciRHS
   funext z
   rw [chartDeTurckRicciRHS_def]
 
-/-- **The chart-jet Nemytskii bound for the realized Ricci–DeTurck carrier difference.**
-For two `g_bg`-fibre-small perturbations `T, T'`, every chart Fréchet jet of order `N` of the chart
-Ricci–DeTurck carrier difference of the realized metrics is dominated by the chart Fréchet jets of
-order `≤ N + 2` of the perturbation difference `T − T'`, on the chart-target interior. -/
 theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -99,7 +70,7 @@ theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE
   refine ⟨C * ((Module.finrank ℝ E) : ℝ), by positivity, fun y hy => ?_⟩
   have hyint : y ∈ interior (extChartAt I α).target := hKsub hy
   refine (hC y hy).trans ?_
-  -- `chartGramJetDiffSeminormSum (N+2) g₁ g₂ ≤ n · bareChartJetContentOnE (T−T') (N+2)`.
+  
   have hgram := chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE (I := I) (M := M)
     g_bg T T' hδ_lt hδ hδ'_lt hδ' α (N + 2) hyint
   rw [hg₁_def, hg₂_def]

@@ -1,43 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Defs
 
-/-!
-# Closability of the covariant gradient: the faithful `H¹ ↪ L²` embedding
-
-For a closed Riemannian manifold `(M, g)` the canonical continuous linear map
-`TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
-extends the inclusion of smooth compactly-supported tensor sections (carrying
-the `H¹` inner product `⟪T, v⟫_{H¹} = ⟪T, v⟫_{L²} + ⟪∇T, ∇v⟫_{L²}`) into the
-tensor `L²` Hilbert space. So far only its dense range was known.
-
-This file proves the map is **injective** — equivalently, the covariant gradient
-`∇` is a *closable* operator: a sequence of smooth sections that is `H¹`-Cauchy
-and tends to `0` in `L²` already tends to `0` in `H¹`. The closability content
-is the integration-by-parts (Green) identity
-`⟪∇T, ∇v⟫_{L²} = -⟪Δ_∇ T, v⟫_{L²}`, which expresses the `H¹` inner product as
-the `L²` pairing against the symmetric operator `(1 - Δ_∇)`.
-
-## Main results
-
-* `oneMinusConnLapSmooth_toL2_inner_eq_h1_general` — the rank-`(0, s)` Green / `H¹`
-  bridge from a `LoweringIntertwiner g s` witness: for smooth compactly-supported
-  `(0, s)`-tensors `T, v`,
-  `⟪(1 - Δ_∇) T, v⟫_{L²} = ⟪⟦T⟧, ⟦v⟧⟫_{H¹}`.
-* `TensorH1ComplToTensorL2_injective_of_green` — the closability headline at rank
-  `(0, s)`, conditional on the `LoweringIntertwiner g s` witness.
-* `TensorH1ComplToTensorL2_injective_two`, `..._three` — the unconditional
-  injectivity at ranks `(0, 2)` and `(0, 3)`, discharging the witness with
-  `loweringIntertwiner_two` / `loweringIntertwiner_three`.
-* `smoothToTensorH1Compl_eigenvectorSmooth_eq` — the eigenvector identification
-  `⟦eᵢ⟧ = μ⁻¹ • eigenvectorResolvent i` in the `H¹` completion,
-  obtained from the `(0, 2)` injectivity.
-* `tensorL2Coeff_ofCompact_oneMinusConnLapSmooth` — the per-step eigen-coordinate
-  identity `cᵢ((1 - Δ_∇) T) = (1 + λᵢ) · cᵢ(T)`.
-* `smoothCcTensor_tensorL2Coeff_weighted_summable` — the headline: the eigenbasis
-  coordinates of a smooth compactly-supported `(0, 2)`-tensor are weighted
-  square-summable at every real Sobolev order `a`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -74,17 +37,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The rank-`(0, s)` Green / `H¹` bridge.** Given a metric-lowering intertwiner
-witness at rank `s`, for smooth compactly-supported `(0, s)`-tensors `T, v` the
-`L²` pairing of `(1 - Δ_∇) T` with `v` equals the `H¹` pairing of the completion
-embeddings of `T` and `v`:
-`⟪(1 - Δ_∇) T, v⟫_{L²} = ⟪⟦T⟧, ⟦v⟧⟫_{H¹}`.
-
-The proof is integration by parts. The `H¹` pairing decomposes as the `L²`
-pairing plus the Dirichlet (integrated covariant-gradient) pairing; by the
-connection-Laplacian Green identity the Dirichlet pairing equals
-`-⟪Δ_∇ T, v⟫_{L²}`, and `(1 - Δ_∇) T = T - Δ_∇ T` splits the `L²` pairing of
-the left-hand side accordingly. -/
 theorem oneMinusConnLapSmooth_toL2_inner_eq_h1_general
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -168,14 +120,6 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1_general
   rw [h_lhs, h_split, h_l2_Tv, h_dir, h_green]
   ring
 
-/-- **The `H¹`-completion `L²`-adjoint pairing.** For a smooth `(0, s)`-tensor `T`
-and *any* `H¹`-completion element `w`,
-`⟪⟦T⟧, w⟫_{H¹} = ⟪toL2 ((1 - Δ_∇) T), F w⟫_{L²}`,
-where `F = TensorH1ComplToTensorL2 g 0 s`.
-
-Both sides are continuous in `w` and agree on the dense range of
-`smoothToTensorH1Compl`, where the identity is exactly the Green / `H¹` bridge
-combined with `F ⟦v⟧ = v` in `L²`. -/
 theorem inner_smoothToTensorH1Compl_eq_l2_oneMinusConnLap_of_green
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -219,10 +163,6 @@ theorem inner_smoothToTensorH1Compl_eq_l2_oneMinusConnLap_of_green
   have h_AB : A = B := h_dense.equalizer hA_cont hB_cont h_eq_on
   exact congr_fun h_AB w
 
-/-- **Closability of the covariant gradient (general rank `(0, s)`).** Given a
-metric-lowering intertwiner witness at rank `s`, the canonical `H¹ → L²`
-inclusion `TensorH1ComplToTensorL2 g 0 s` is injective: a kernel element pairs to
-`0` against every smooth `H¹` test class, hence vanishes by density. -/
 theorem TensorH1ComplToTensorL2_injective_of_green
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s) :
@@ -259,28 +199,18 @@ theorem TensorH1ComplToTensorL2_injective_of_green
   rw [hA] at this
   exact this
 
-/-- **Closability of the covariant gradient at rank `(0, 2)` (unconditional).**
-The faithful `H¹ ↪ L²` embedding for `(0, 2)`-tensor fields. -/
 theorem TensorH1ComplToTensorL2_injective_two
     (g : SmoothRiemannianMetric I M) :
     Function.Injective (TensorH1ComplToTensorL2 (I := I) (M := M) g 0 2) :=
   TensorH1ComplToTensorL2_injective_of_green (I := I) (M := M) g 2
     (loweringIntertwiner_two (I := I) (M := M) g)
 
-/-- **Closability of the covariant gradient at rank `(0, 3)` (unconditional).**
-The faithful `H¹ ↪ L²` embedding for `(0, 3)`-tensor fields. -/
 theorem TensorH1ComplToTensorL2_injective_three
     (g : SmoothRiemannianMetric I M) :
     Function.Injective (TensorH1ComplToTensorL2 (I := I) (M := M) g 0 3) :=
   TensorH1ComplToTensorL2_injective_of_green (I := I) (M := M) g 3
     (loweringIntertwiner_three (I := I) (M := M) g)
 
-/-- **The smooth eigenvector's `H¹` embedding is the rescaled resolvent
-eigenvector.** For the smooth representative `eᵢ = eigenvectorSmooth i`
-of the resolvent eigenbasis vector at index `i`,
-`⟦eᵢ⟧ = (i.fst.val)⁻¹ • eigenvectorResolvent i`
-in the `H¹` completion. Both sides have the same image
-`tensorResolventEigenbasisVec i` under the injective `H¹ → L²` map. -/
 theorem smoothToTensorH1Compl_eigenvectorSmooth_eq
     (g : SmoothRiemannianMetric I M)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -300,7 +230,6 @@ theorem smoothToTensorH1Compl_eigenvectorSmooth_eq
     map_smul]
   exact eigenvector_eq_resolvent_smul (I := I) (M := M) g 0 2 i
 
-/-- The resolvent eigenvalue `μ = i.fst.val` is positive. -/
 theorem tensorEigenIdx_val_pos
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -312,7 +241,6 @@ theorem tensorEigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
-/-- `1 + λᵢ = (i.fst.val)⁻¹`. -/
 theorem one_add_lambda_eq_inv_val
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -325,10 +253,6 @@ theorem one_add_lambda_eq_inv_val
   field_simp
   ring
 
-/-- **The per-step eigen-coordinate identity.** Applying the smooth
-one-minus-connection-Laplacian scales the `i`-th eigenbasis coordinate by
-`(1 + λᵢ)`:
-`cᵢ((1 - Δ_∇) T) = (1 + λᵢ) · cᵢ(T)`. -/
 theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmooth
     (g : SmoothRiemannianMetric I M)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
@@ -370,7 +294,6 @@ theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmooth
       (T : TensorL2 0 2 g),
     one_add_lambda_eq_inv_val (I := I) (M := M) i]
 
-/-- The iterated per-step identity: `cᵢ((1 - Δ_∇)^k T) = (1 + λᵢ)^k · cᵢ(T)`. -/
 theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmoothIter
     (g : SmoothRiemannianMetric I M)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2))
@@ -392,10 +315,6 @@ theorem tensorL2Coeff_ofCompact_oneMinusConnLapSmoothIter
         ih, pow_succ]
       ring
 
-/-- **Even-order weighted summability.** At an even integer order `2k`, the
-weighted eigenbasis coordinates of a smooth `(0, 2)`-tensor are square-summable,
-since `∑ (1 + λᵢ)^{2k} cᵢ(T)² = ‖toL2 ((1 - Δ_∇)^k T)‖²_{L²}` by the iterated
-per-step identity and Parseval. -/
 theorem smoothCcTensor_tensorL2Coeff_weighted_summable_even
     (g : SmoothRiemannianMetric I M) (k : ℕ) (T : SmoothCcTensor g 0 2)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2)) :
@@ -428,15 +347,6 @@ theorem smoothCcTensor_tensorL2Coeff_weighted_summable_even
   exact tensorL2Coeff_ofCompact_summable_sq' (I := I) (M := M) h_compact
     (SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g 0 2 k T))
 
-/-- **The weighted Sobolev-scale summability headline.** For a closed Riemannian
-manifold `(M, g)` and a smooth compactly-supported `(0, 2)`-tensor field `T`, the
-eigenbasis coordinates of `T` are weighted square-summable at *every* real Sobolev
-order `a`: `∑ᵢ (1 + λᵢ)^a · cᵢ(T)² < ∞`.
-
-This is the spectral-side statement "smooth ⇒ in every `Hˢ`". The proof reduces
-to an even integer order `2k ≥ a` by the monotone domination
-`summable_tensorSobolevWeight_of_even`, where the iterated per-step identity plus
-Parseval gives finiteness. -/
 theorem smoothCcTensor_tensorL2Coeff_weighted_summable
     (g : SmoothRiemannianMetric I M) (a : ℝ) (T : SmoothCcTensor g 0 2)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2)) :

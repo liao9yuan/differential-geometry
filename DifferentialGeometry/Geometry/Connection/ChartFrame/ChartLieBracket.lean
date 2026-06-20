@@ -1,43 +1,6 @@
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 
-/-!
-# Chart-coordinate expression of the manifold-level Lie bracket
-
-Express `VectorField.mlieBracket I X Y x` of two tangent-bundle sections at the
-basepoint of its own chart as a Fréchet-level Lie bracket in chart coordinates.
-
-We work in the *basepoint* form: chart `(φ, U) := extChartAt I x`, trivialization
-`triv := trivializationAt E (TangentSpace I) x`. Mathlib's
-`mlieBracketWithin_apply` formula already expresses `mlieBracket I X Y x` as a
-pullback of the Euclidean `lieBracketWithin` on `range I` through that very
-chart. At the basepoint, two simplifications fire:
-
-* `mfderiv (extChartAt I x) x = id` (by `mfderiv_extChartAt_self`), so the
-  outer `.inverse (·)` collapses to the identity.
-* `mfderivWithin (extChartAt I x).symm (range I) (extChartAt I x x) = id` (by
-  `mfderivWithin_range_extChartAt_symm`), so
-  `(mpullbackWithin 𝓘(ℝ,E) I (extChartAt I x).symm V (range I)) (extChartAt I x x)
-    = V x` (under the canonical defeq `TangentSpace I x = E`).
-
-After these simplifications, the manifold Lie bracket reduces to a pure Fréchet
-`lieBracket` on `E`. We then identify the chart-pulled-back Mathlib vector
-field `mpullbackWithin 𝓘(ℝ,E) I (extChartAt I x).symm V (range I)` with the
-chart-trivialised section representation `chartE_section_repr x V ∘
-(extChartAt I x).symm` near `extChartAt I x x`, which lets us substitute via
-`Filter.EventuallyEq.fderiv_eq`.
-
-The resulting identity, `mlieBracket_eq_chart_fderiv_diff`, gives the
-Lie-bracket-difference of two chart-pulled-back vector fields purely in
-Fréchet `fderiv` form, in the convention that matches Mathlib's
-`VectorField.lieBracket V W x = fderiv W x (V x) - fderiv V x (W x)`.
-
-This is the form consumed by the chart-local Levi-Civita torsion-free
-verification: the symmetric part of `chartChristoffel` cancels in the
-difference `∇_X Y - ∇_Y X`, leaving exactly the Fréchet derivative difference
-of the chart-pulled-back representations of `X` and `Y`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Filter
@@ -51,9 +14,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Pointwise identification: at any point `y ∈ (extChartAt I x).target`, the
-Mathlib chart-pulled-back vector field equals the chart-trivialised
-representation of the section composed with `(extChartAt I x).symm`. -/
 lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
     {x : M} (V : Π y : M, TangentSpace I y) {y : E}
     (hy : y ∈ (extChartAt I x).target) :
@@ -86,10 +46,6 @@ lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
         (𝕜 := ℝ) (I := I) (x₀ := x) (x := φ.symm y) hsymm_chart]
   rfl
 
-/-- Eventual equality on `𝓝 (extChartAt I x x)` (full `E`-neighbourhood) when the
-chart point is in the interior of the chart target: in such an `E`-neighbourhood,
-the Mathlib chart-pulled-back vector field equals the chart-trivialised
-representation composed with the inverse chart. -/
 lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
     {x : M} (V : Π y : M, TangentSpace I y)
     (hxint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E)) :
@@ -104,28 +60,7 @@ lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
 set_option linter.unusedVariables false in
 set_option linter.style.show false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Chart-coordinate Lie bracket at the basepoint.** For a point `x` whose
-chart image lies in the interior of the chart target, with `X, Y` two
-tangent-bundle sections both manifold-differentiable at `x`, the manifold Lie
-bracket `mlieBracket I X Y x` equals the Fréchet Lie-bracket difference of the
-chart-trivialised representations:
-$$
-  \mathrm{mlieBracket}\,I\,X\,Y\,x =
-    \mathrm{fderiv}\,\mathbb{R}\,(Y^E_x \circ \varphi^{-1})\,(\varphi\,x)\,(X\,x)
-    - \mathrm{fderiv}\,\mathbb{R}\,(X^E_x \circ \varphi^{-1})\,(\varphi\,x)\,(Y\,x),
-$$
-where `φ := extChartAt I x` and `X^E_x := chartE_section_repr x X` (similarly
-for `Y`). The convention matches Mathlib's
-`VectorField.lieBracket V W x = fderiv W x (V x) - fderiv V x (W x)`.
 
-The basepoint case (chart at the evaluation point) lets us harness the
-collapse `mfderiv (extChartAt I x) x = id` and the Mathlib
-`mlieBracketWithin_apply` formula directly. The arguments `X x : TangentSpace I x`
-and `Y x : TangentSpace I x` are passed to the Fréchet derivatives via the
-canonical defeq `TangentSpace I x = E`. The MDifferentiableAt hypotheses on
-`X, Y` are kept in the signature for downstream consistency, even though the
-identity holds pointwise via the junk-value propagation in both `mlieBracket`
-and the Mathlib Fréchet `lieBracket`. -/
 theorem mlieBracket_eq_chart_fderiv_diff
     (x : M) (X Y : Π y : M, TangentSpace I y)
     (hxint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
@@ -184,34 +119,7 @@ theorem mlieBracket_eq_chart_fderiv_diff
 set_option linter.unusedVariables false in
 set_option linter.style.show false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Chart-coordinate Lie bracket at an arbitrary chart base point.** For a
-point `x` in the source of `extChartAt I α` and the trivialization base set at
-`α`, with chart image in the interior of the chart target, and `X, Y` two
-tangent-bundle sections both manifold-differentiable at `x`, the manifold Lie
-bracket `mlieBracket I X Y x` is expressed via the chart at `α` (instead of at
-`x`) using the canonical trivialization maps `trivToE α x : T_x M →L E` and
-`trivFromE α x : E →L T_x M` (which collapse to the identity in the
-basepoint-chart special case `α = x`):
-$$
-  \mathrm{mlieBracket}\,I\,X\,Y\,x =
-    \mathrm{trivFromE}\,\alpha\,x\bigl(
-      \mathrm{fderiv}\,\mathbb{R}\,(Y^E_\alpha \circ \varphi_\alpha^{-1})\,(\varphi_\alpha\,x)
-        (\mathrm{trivToE}\,\alpha\,x\,(X\,x))
-      - \mathrm{fderiv}\,\mathbb{R}\,(X^E_\alpha \circ \varphi_\alpha^{-1})
-        (\varphi_\alpha\,x)(\mathrm{trivToE}\,\alpha\,x\,(Y\,x))\bigr),
-$$
-where `φα := extChartAt I α` and `X^E_α := chartE_section_repr α X` (similarly
-for `Y`). The convention matches Mathlib's
-`VectorField.lieBracket V W x = fderiv W x (V x) - fderiv V x (W x)`.
 
-The proof uses `mpullback_mlieBracket` (Mathlib `LieBracket.lean`) applied to
-`f := (extChartAt I α).symm : E → M`, which transports a vector field on `M`
-to a vector field on the model space `E`. The pullback's invariance
-`mpullback f [X,Y] = [pullback X, pullback Y]` lets us evaluate
-`mlieBracket I X Y x` on the manifold side via a Lie bracket of pullbacks on
-the `E` side, which by `mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm`
-unfolds to the chart-α-trivialised representations and their Fréchet
-derivatives. -/
 theorem mlieBracket_eq_chart_fderiv_diff_general
     (α x : M) (X Y : Π y : M, TangentSpace I y)
     (hx_src : x ∈ (extChartAt I α).source)
@@ -389,12 +297,6 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
     trivFromE_trivToE (I := I) α hx_base _
   rw [← hround, hkey]
 
-/-- **Auxiliary: chart-pullback of `b ↦ mfderiv f b (Y b)`.** For a `C^2` scalar function
-`f` on `M` and a tangent vector field `Y` differentiable at `x`, the function `b ↦ mfderiv
-I 𝓘(ℝ) f b (Y b)` agrees, on a neighbourhood of `x` (specifically, on the chart source of
-`extChartAt I x` intersected with the interior of the chart target), with the composition
-`(fun y ↦ fderiv ℝ (f ∘ (extChartAt I x).symm) y (chartE_section_repr x Y ((extChartAt
-I x).symm y))) ∘ extChartAt I x`. -/
 lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
     (x : M) (f : M → ℝ) (Y : Π b : M, TangentSpace I b)
     (hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
@@ -430,10 +332,7 @@ lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Chart form of `mfderiv (b ↦ mfderiv f b (Y b)) x (X x)`.** At an interior chart point,
-the manifold derivative of the function `b ↦ mfderiv f b (Y b)` along `X x` equals the
-Fréchet derivative of the chart-pulled-back form `y ↦ fderiv f̃ y (Y^E_chart y)` at the
-chart point `extChartAt I x x` applied to `X x`. -/
+
 theorem mfderiv_scalar_along_eq_chart_fderiv
     {x : M} {X Y : Π b : M, TangentSpace I b}
     (hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
@@ -496,18 +395,7 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
   rfl
 
 set_option linter.style.show false in
-/-- **Lie bracket as commutator on scalar functions.** Let `X, Y` be two tangent vector
-fields, both `MDifferentiableAt` at `x`, and let `f : M → ℝ` be a function which is
-`ContMDiffAt` of order 2 at `x`. Assume the chart image `extChartAt I x x` lies in the
-interior of the chart target. Then the exterior derivative of `f` along the manifold
-Lie bracket `[X, Y]_x` equals the commutator of the directional derivatives:
-$$
-  (\mathrm{d}f)([X, Y]_x) = X(Y f)(x) - Y(X f)(x).
-$$
-We use `extDerivFun` (the exterior derivative as an `ℝ`-valued cotangent section) on
-both sides to avoid the dependent-tangent-space typing issues of raw `mfderiv I 𝓘(ℝ)`.
 
-This is the Schwarz / `[X, Y] f = X(Y f) - Y(X f)` identity. -/
 theorem extDerivFun_apply_mlieBracket
     {x : M} {X Y : Π b : M, TangentSpace I b}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)

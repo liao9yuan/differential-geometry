@@ -3,50 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Chri
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrection.ChristoffelBound
 
-/-!
-# Pointwise bound on the chart-frame partial-derivative integrand
-
-For a closed Riemannian manifold `(M, g)`, a smooth compactly-supported
-`(r, s)`-tensor section `S`, a chart `α : M`, and a multi-index pair
-`(Idx, Jdx)`, the chart-pulled-back raw scalar component
-
-```
-tensorChartComponentRaw g r s S α Idx Jdx ∘ (extChartAt I α).symm  :  E → ℝ
-```
-
-admits a chain-rule decomposition through the chart-trivialised tensor function
-`tensorTrivProj g r s S α ∘ (extChartAt I α).symm` and the fixed-CLM projection
-`tensorChartComponentProjection r s Idx Jdx`. Combining the chain rule with
-the operator-norm inequality on the projection and a bound on the operator
-norm of the tensor-pull-back derivative gives the pointwise estimate
-
-```
-|∂_w (raw ∘ φ.symm)(φ b)|² ≤ C · ‖fderiv (triv ∘ φ.symm)(φ b)‖_op² · ‖w‖²
-```
-
-The Layer-E decomposition `fderiv_tensorTrivProj_pullback_apply_eq_chart_pushforward_cov`
-further identifies the tensor-pull-back derivative as a sum of three pieces:
-the chart-frame intrinsic covariant-derivative piece plus the input-slot and
-output-slot Christoffel-correction pieces, all post-composed with the
-trivialization CLM. Squaring with `‖u + v‖² ≤ 2 ‖u‖² + 2 ‖v‖²` produces a
-two-term split separating the covariant-derivative contribution from the
-Christoffel-correction contribution; combined with the chain rule through the
-projection, this yields the two-term split of the squared partial of the
-scalar component used downstream.
-
-## Main results
-
-* `fderiv_tensorChartComponentRaw_pullback_norm_sq_le` — operator-norm form.
-* `fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform` —
-  uniform-in-multi-index form via `chartComponentProjectionUniformBound`.
-* `fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split` — two-term
-  split on the tensor-pull-back derivative.
-* `fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split` — the
-  combined two-term split on the squared partial of the scalar component.
-* `exists_const_fderiv_tensorChartComponentRaw_pullback_norm_sq_le` —
-  packaged existential form.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -79,15 +35,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The elementary inequality `(a + b)² ≤ 2 a² + 2 b²` for real numbers. -/
 private lemma sq_add_le_two_mul_sq_add_sq (a b : ℝ) :
     (a + b) ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2 := by
   have h : (a + b) ^ 2 + (a - b) ^ 2 = 2 * a ^ 2 + 2 * b ^ 2 := by ring
   have hsq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
   linarith
 
-/-- For vectors `u v : F` in a real normed space,
-`‖u + v‖² ≤ 2 ‖u‖² + 2 ‖v‖²`. -/
 private lemma norm_add_sq_le_two_mul_sq_add_sq
     {F : Type*} [SeminormedAddCommGroup F] (u v : F) :
     ‖u + v‖ ^ 2 ≤ 2 * ‖u‖ ^ 2 + 2 * ‖v‖ ^ 2 := by
@@ -101,15 +54,6 @@ private lemma norm_add_sq_le_two_mul_sq_add_sq
     linarith [this, h_lhs.symm.le, h_lhs.le, h_rhs.symm.le, h_rhs.le]
   exact hsq.trans (sq_add_le_two_mul_sq_add_sq _ _)
 
-/-- **Operator-norm form of the pointwise partial-derivative bound.** On the
-chart-α Levi-Civita good set, for any direction `w : E`, the squared partial
-of the raw scalar component pull-back in direction `w` is bounded by
-
-```
-‖proj‖² · ‖fderiv (triv ∘ φ.symm)(φ b)‖_op² · ‖w‖²
-```
-
-where `proj := tensorChartComponentProjection r s Idx Jdx`. -/
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -164,7 +108,6 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le
       ‖P‖ ^ 2 * ‖F‖ ^ 2 * ‖w‖ ^ 2 := by ring
   linarith [hsq, hlhs_sq.symm.le, hlhs_sq.le, hrhs_sq.symm.le, hrhs_sq.le]
 
-/-- **Uniform-in-multi-index pointwise partial-derivative bound.** -/
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -206,13 +149,6 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
     exact mul_le_mul_of_nonneg_right h1 hwsq_nn
   linarith
 
-/-- **Two-term Layer-E split (squared norm).** On the chart-α Levi-Civita
-good set, for any tangent vector field `X : Π b', TangentSpace I b'` with
-`X b = trivFromE α b w`, the squared norm of
-`fderiv (triv ∘ φ.symm)(φ b)` applied to `w` is bounded by twice the
-squared norm of `triv.continuousLinearMapAt b` applied to the chart-frame
-covariant-derivative piece, plus twice the squared norm of the Christoffel-
-correction piece. -/
 theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -261,17 +197,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_norm_sq_two_term_split
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b).map_add]
   exact norm_add_sq_le_two_mul_sq_add_sq _ _
 
-/-- **Combined two-term split.** On the chart-α Levi-Civita good set, for any
-tangent vector field `X` with `X b = trivFromE α b w`, the squared partial of
-the raw scalar component pull-back in direction `w` is bounded by
-
-```
-2 ‖proj‖² · ‖triv.continuousLinearMapAt b (cov)‖² +
-  2 ‖proj‖² · ‖triv.continuousLinearMapAt b (christoffel)‖²
-```
-
-This is the form that, combined with Group-A norm comparisons and the uniform
-Christoffel sup bound, yields the downstream pointwise H^1 estimate. -/
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -352,12 +277,6 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
       2 * ‖P‖ ^ 2 * Tcov ^ 2 + 2 * ‖P‖ ^ 2 * Tchr ^ 2 := by ring
   linarith [h_chain, h_rhs_eq.symm.le, h_rhs_eq.le]
 
-/-- **Polished headline.** Existence form of the operator-norm pointwise
-partial-derivative bound. There is a non-negative constant `C`, depending
-only on `(r, s)`, such that on the chart-α Levi-Civita good set, for every
-direction `w : E` and every multi-index pair, the squared partial of the
-raw scalar component pull-back is bounded by
-`C · ‖fderiv (triv ∘ φ.symm)(φ b)‖_op² · ‖w‖²`. -/
 theorem exists_const_fderiv_tensorChartComponentRaw_pullback_norm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

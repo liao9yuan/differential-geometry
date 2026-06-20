@@ -1,23 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 
-/-!
-# Uniform-in-`u` chart-bridge theorems on a fixed compact subset of the chart source
-
-For a smooth Riemannian manifold and a fixed compact set `K ⊆ (chartAt H α).source`
-of `M`, this file provides the chart-bridge inequalities
-
-* `eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset`
-* `eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset`
-
-with a constant that depends only on `α`, `g`, and `K` and is otherwise uniform in
-the function `u : M → ℝ`. The statements only require `tsupport u ⊆ K`. The
-constant is built from sup / inf bounds on the smooth chart density on the compact
-image `(extChartAt I α) '' K` inside the chart target.
-
-These lemmas are the public entry points used downstream when `K` is naturally
-described as a subset of the manifold itself rather than of the model space.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -38,8 +20,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- If `K ⊆ (chartAt H α).source` is compact, then `(extChartAt I α) '' K`
-is compact in `E` and contained in the chart target. -/
 lemma image_extChartAt_compact_subset_target_of_subset
     {K : Set M} {α : M}
     (hK_compact : IsCompact K) (hK_sub : K ⊆ (chartAt H α).source) :
@@ -61,8 +41,6 @@ lemma image_extChartAt_compact_subset_target_of_subset
       exact hK_sub hx
     exact (extChartAt I α).map_source hxsrc
 
-/-- For `tsupport u ⊆ K`, the image `(extChartAt I α) '' (tsupport u)`
-is contained in `(extChartAt I α) '' K`. -/
 lemma image_extChartAt_tsupport_subset_image_K
     {u : M → ℝ} {K : Set M} {α : M}
     (hu_supp : tsupport u ⊆ K) :
@@ -70,9 +48,6 @@ lemma image_extChartAt_tsupport_subset_image_K
   rintro y ⟨x, hx, rfl⟩
   exact ⟨x, hu_supp hx, rfl⟩
 
-/-- Forward bridge inequality at the level of `eLpNorm`s with a uniform
-constant. The constant `C` depends only on `α`, `g`, and a fixed compact
-`K ⊆ (chartAt H α).source` of `M`, and is uniform in `u` with `tsupport u ⊆ K`. -/
 theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -116,9 +91,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of
     rw [hu_zero, eLpNorm_zero]
     exact zero_le _
 
-/-- Reverse bridge inequality at the level of `eLpNorm`s with a uniform
-constant. The constant `C` depends only on `α`, `g`, and a fixed compact
-`K ⊆ (chartAt H α).source` of `M`, and is uniform in `u` with `tsupport u ⊆ K`. -/
 theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)

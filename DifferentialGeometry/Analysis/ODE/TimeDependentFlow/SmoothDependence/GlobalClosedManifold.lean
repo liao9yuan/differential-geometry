@@ -4,38 +4,6 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Topology.Compactness.Compact
 import Mathlib.Data.Finset.Lattice.Fold
 
-/-!
-# Global jointly-smooth flow on a closed manifold
-
-This file upgrades the *local* manifold ODE smooth-dependence theorem
-`local_flow_jointSmooth_and_integralCurve` (one open neighbourhood per point)
-to a single *global* jointly-smooth flow on a closed (compact, boundaryless)
-manifold.  The proof is entirely **intrinsic**: it does not route through the
-chart-coordinate Picard machinery (which would require bridging the intrinsic
-field datum to the moving-chart frame).  Instead it builds the global flow
-directly from the local theorem and glues the local flows by **manifold
-integral-curve uniqueness** in the bare-velocity form.
-
-### Construction
-
-For each `p₀ : M` the local theorem gives an open `U_{p₀} ∋ p₀`, a horizon
-`T_{p₀} > 0` and a local flow `Φ_{p₀}` carrying the bare velocity
-`X t (Φ_{p₀} p t)`.  The `U_{p₀}` cover the compact `M`; a finite subcover and
-`T := minᵢ T_{p_i} > 0` give a uniform horizon.  Choosing a covering index
-`αRep x` for each `x`, the global flow is `Φ x s := Φ_{αRep x} x s`; its value is
-**well-defined** because any two local flows through `x` carry the same bare
-velocity of `X` and agree at `t₀`, hence agree on `Ioo (t₀ ± T)` by
-`bare_integral_flow_eqOn_of_jointC1` (Grönwall uniqueness for the autonomised
-field on `ℝ × M`).  Joint `ContMDiffOn` and the bare velocity are local and are
-read off from the local flow near each point via this agreement.
-
-The bridge `autonomizedFieldJointC1_of_contMDiff` derives the joint-`C¹`
-regularity of the autonomised field `(1, X)` on `ℝ × M` (the input to the
-uniqueness lemma) from the intrinsic smoothness hypothesis `hX`, mirroring
-`concreteIsSmoothFam_embed_liftedSection_contMDiff` with the constant time
-component `1`.
--/
-
 noncomputable section
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff
@@ -51,17 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 open Bundle in
-/--
-**The autonomised field `(1, X)` on `ℝ × M` is `C∞` (hence `C¹`).**
 
-From the intrinsic joint smoothness of `X` (as a tangent-bundle section on `M`,
-jointly in `(t, x)`), the autonomised section
-`p ↦ ⟨p, (1, X p.1 p.2)⟩` of `TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M)` is `C∞`.
-The construction pairs the constant time-section `p ↦ ⟨p.1, 1⟩` (smooth) with the
-spatial section `p ↦ ⟨p.2, X p.1 p.2⟩` (smooth by `hX`), then applies the smooth
-inverse product equivalence `equivTangentBundleProd.symm`.  This mirrors
-`concreteIsSmoothFam_embed_liftedSection_contMDiff` with time component `1`
-instead of `0`. -/
 theorem autonomizedFlowVF_section_contMDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -98,11 +56,7 @@ theorem autonomizedFlowVF_section_contMDiff
   exact hsymm.comp hpair
 
 omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
-/--
-**Bridge: intrinsic smoothness implies `AutonomizedFieldJointC1`.**
 
-The joint-`C¹` predicate consumed by the bare-flow uniqueness lemma follows from
-the `C∞` regularity of the autonomised section, restricted to `C¹`. -/
 theorem autonomizedFieldJointC1_of_contMDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -112,20 +66,6 @@ theorem autonomizedFieldJointC1_of_contMDiff
   have h1le : (1 : WithTop ℕ∞) ≤ ∞ := by exact_mod_cast le_top
   exact ((autonomizedFlowVF_section_contMDiff X hX).of_le h1le).contMDiffAt
 
-/--
-**A jointly-smooth flow on a closed manifold.**
-
-On a closed (compact, boundaryless) manifold `M`, the local manifold ODE
-smooth-dependence theorem upgrades to a single global flow `Φ : M → ℝ → M` on a
-uniform horizon `Ioo (t₀ - T) (t₀ + T)`: `Φ p t₀ = p` for every `p`, the map
-`(t, x) ↦ Φ x t` is jointly `C∞` on `Ioo (t₀ - T) (t₀ + T) ×ˢ univ`, and `Φ`
-carries the bare velocity `X t (Φ p t)`.
-
-The proof is intrinsic.  The local flows from
-`local_flow_jointSmooth_and_integralCurve` are glued by manifold integral-curve
-uniqueness in bare-velocity form (`bare_integral_flow_eqOn_of_jointC1`, whose
-joint-`C¹` input is supplied by `autonomizedFieldJointC1_of_contMDiff`); smoothness
-and the velocity are local, read off each local flow near its base point. -/
 theorem global_flow_jointContMDiffOn_on_closed_manifold
     [CompactSpace M] [CompleteSpace E] [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)

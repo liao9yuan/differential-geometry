@@ -6,42 +6,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
-/-!
-# Chart-trivialised representation of a tangent-bundle section
-
-Bridge between manifold-level differentiation of a tangent-bundle section and
-Fréchet-level differentiation of its chart-trivialised `E`-valued representation.
-
-Given a section `σ : Π x : M, TangentSpace I x` of the tangent bundle and a
-basepoint `α : M` (with associated chart `(extChartAt I α)` and tangent-bundle
-trivialization `triv := trivializationAt E (TangentSpace I) α`), define the
-*chart-trivialised representation* of `σ` at `α` as the `E`-valued map on `M`
-$$
-  \sigma^E_\alpha : M \to E,
-  \quad \sigma^E_\alpha(x) = \mathrm{triv}.\mathrm{continuousLinearMapAt}\,\mathbb{R}\,x\,(\sigma\,x).
-$$
-On the base set this equals the second component of the trivialization applied
-to the total-space point `⟨x, σ x⟩`; off the base set, the Mathlib
-`continuousLinearMapAt` is the zero map and the representation takes the junk
-value `0`.
-
-The file proves three groups of results:
-
-* **(A)** Section MDifferentiability ↔ chart-pulled-back differentiability.
-* **(B)** Manifold derivative of the section identifies, via the canonical defeq
-  `TangentSpace 𝓘(ℝ, E) y = E`, with the Fréchet derivative of the
-  chart-pulled-back representation, evaluated at the trivialization-image of
-  the tangent vector. [Formulation `(B′′)` in the file's design — bypasses the
-  total-space tangent altogether.]
-* **(C)** Smoothness preservation: a `C^k` section gives a `C^k` chart-pulled-
-  back `E → E` map.
-
-Together with the Mathlib trivialization linear-action helpers
-(`continuousLinearMapAt`, `symmL` and their composition identities), this
-provides the foundational toolkit for chart-local covariant-derivative
-constructions on the tangent bundle.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -57,32 +21,20 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The chart-trivialised `E`-valued representation of a tangent-bundle section, taken
-through the canonical trivialization at the base point `α`.
-
-On the base set `(trivializationAt E (TangentSpace I) α).baseSet`, this equals
-the second component of `(trivializationAt E (TangentSpace I) α) ⟨x, σ x⟩`; off
-the base set, `continuousLinearMapAt` is the zero map, so the representation is
-`0`. -/
 def chartE_section_repr (α : M) (σ : Π x : M, TangentSpace I x) (x : M) : E :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x (σ x)
 
-/-- Variant unfolding: the chart-trivialised representation as a function on `M`. -/
 lemma chartE_section_repr_def (α : M) (σ : Π x : M, TangentSpace I x) :
     chartE_section_repr (I := I) α σ =
       fun x : M =>
         (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x (σ x) :=
   rfl
 
-/-- Pointwise evaluation: alias making the definitional equality available. -/
 lemma chartE_section_repr_apply
     (α : M) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α σ x =
       (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x (σ x) := rfl
 
-/-- On the base set of the canonical trivialization at `α`, the chart-trivialised
-representation equals the trivialization-second-component of the section's total-space
-point. -/
 lemma chartE_section_repr_eq_trivialization_snd
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -100,10 +52,7 @@ lemma chartE_section_repr_eq_trivialization_snd
         congrFun (T.coe_continuousLinearEquivAt_eq (R := ℝ) hx) (σ x)]
 
 variable (I) in
-/-- **Section MDifferentiability bridge (within-at form).** A section `σ` of the
-tangent bundle is `MDifferentiableWithinAt I (I.prod 𝓘(ℝ, E))` at a point of the
-base set iff its chart-trivialised representation is
-`MDifferentiableWithinAt I 𝓘(ℝ, E)` there. -/
+
 theorem mdifferentiableWithinAt_section_iff_chartE
     (α : M) (σ : Π x : M, TangentSpace I x) {u : Set M} {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -129,9 +78,7 @@ theorem mdifferentiableWithinAt_section_iff_chartE
     · exact (chartE_section_repr_eq_trivialization_snd (I := I) α σ hx).symm
 
 variable (I) in
-/-- **Section MDifferentiability bridge (at-form).** A section `σ` of the tangent
-bundle is `MDifferentiableAt I (I.prod 𝓘(ℝ, E))` at a point of the base set iff
-its chart-trivialised representation is `MDifferentiableAt I 𝓘(ℝ, E)` there. -/
+
 theorem mdifferentiableAt_section_iff_chartE
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -140,19 +87,12 @@ theorem mdifferentiableAt_section_iff_chartE
   rw [← mdifferentiableWithinAt_univ, ← mdifferentiableWithinAt_univ]
   exact mdifferentiableWithinAt_section_iff_chartE I α σ hx
 
-/-- An `E`-valued function on `M` is `MDifferentiableAt I 𝓘(ℝ, E)` at a point in
-the chart source iff its pull-back through `(extChartAt I α).symm` is
-`MDifferentiableWithinAt 𝓘(ℝ, E) 𝓘(ℝ, E)` over `range I` at the corresponding
-chart point. This is a direct application of `mdifferentiableAt_iff_source_of_mem_source`
-specialised to a vector-space target. -/
 private lemma mdifferentiableAt_iff_pullback_of_mem_source
     (α : M) (f : M → E) {x : M} (hx : x ∈ (chartAt H α).source) :
     MDiffAt f x ↔
       MDiffAt[range I] (f ∘ (extChartAt I α).symm) (extChartAt I α x) :=
   mdifferentiableAt_iff_source_of_mem_source (x := α) (x' := x) hx
 
-/-- For an interior point of the chart target, `MDifferentiableWithinAt 𝓘(ℝ,E) 𝓘(ℝ,E)`
-over `range I` of an `E → E` map collapses to ordinary `DifferentiableAt`. -/
 private lemma mdifferentiableWithinAt_range_iff_differentiableAt_of_interior
     {α : M} {f : E → E} {y : E}
     (hy_int : y ∈ interior ((extChartAt I α).target : Set E)) :
@@ -167,12 +107,7 @@ private lemma mdifferentiableWithinAt_range_iff_differentiableAt_of_interior
   exact ⟨fun h => h.differentiableAt hrange_nhds, fun h => h.differentiableWithinAt⟩
 
 variable (I) in
-/-- **Section ↔ chart-pulled-back differentiability (at-form).** For a point `x`
-in the intersection of the chart source and the trivialization base set, with
-`extChartAt I α x` in the interior of the chart target, the section `σ` is
-`MDifferentiableAt I (I.prod 𝓘(ℝ, E))` at `x` iff the chart-pulled-back
-`E → E` map `chartE_section_repr α σ ∘ (extChartAt I α).symm` is
-`DifferentiableAt ℝ` at `extChartAt I α x`. -/
+
 theorem mdifferentiableAt_section_iff_chartE_fderiv
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx_src : x ∈ (chartAt H α).source)
@@ -189,12 +124,7 @@ theorem mdifferentiableAt_section_iff_chartE_fderiv
   exact mdifferentiableWithinAt_range_iff_differentiableAt_of_interior (α := α) hx_int
 
 variable (I) in
-/-- **Section ContMDiff bridge (within-at form).** A section `σ` of the tangent
-bundle is `ContMDiffWithinAt I (I.prod 𝓘(ℝ, E)) k` at a point `x` of the
-trivialization base set iff its chart-trivialised representation is
-`ContMDiffWithinAt I 𝓘(ℝ, E) k` there. The smoothness order `k : ℕ∞` is
-restricted so that the auto-instance `ContMDiffVectorBundle k` from
-`[ContMDiffVectorBundle ∞]` fires. -/
+
 theorem contMDiffWithinAt_section_iff_chartE
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x) {u : Set M} {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -222,9 +152,7 @@ theorem contMDiffWithinAt_section_iff_chartE
     · exact (chartE_section_repr_eq_trivialization_snd (I := I) α σ hx).symm
 
 variable (I) in
-/-- **Section ContMDiff bridge (at-form).** A section `σ` of the tangent bundle
-is `ContMDiffAt I (I.prod 𝓘(ℝ, E)) k` at a point of the base set iff its
-chart-trivialised representation is `ContMDiffAt I 𝓘(ℝ, E) k` there. -/
+
 theorem contMDiffAt_section_iff_chartE
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -235,16 +163,7 @@ theorem contMDiffAt_section_iff_chartE
   exact contMDiffWithinAt_section_iff_chartE I α σ hx
 
 variable (I) in
-/-- **Manifold derivative of the chart-trivialised representation.** At a point
-`x` in the chart source whose chart image lies in the interior of the chart
-target, the manifold derivative of `σ^E_α : M → E` at `x` applied to a tangent
-vector `v` equals the Fréchet derivative of the chart-pulled-back `E → E` map
-at `extChartAt I α x` applied to the trivialization-image
-`triv.continuousLinearMapAt ℝ x v`.
 
-This is the chart-local form of the section-side of the Levi-Civita identity,
-expressing the directional derivative of `σ^E_α` along `v` purely in terms of
-the Fréchet derivative on `E`. -/
 theorem mfderiv_section_eq_chartE_fderiv
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx_src : x ∈ (chartAt H α).source)
@@ -301,9 +220,7 @@ theorem mfderiv_section_eq_chartE_fderiv
   rfl
 
 variable (I) in
-/-- **ContMDiff section ⟹ ContDiffOn chart pull-back.** A globally `C^k` section
-gives a `C^k` chart-pulled-back `E → E` map on the chart-image of the
-trivialization base set intersected with the chart source. -/
+
 theorem contDiffOn_chartE_pullback_of_contMDiff_section
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x)
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) k (T% σ)) :
@@ -338,17 +255,17 @@ theorem contDiffOn_chartE_pullback_of_contMDiff_section
   exact inter_subset_right
 
 variable (I) in
-/-- The chart-trivialization CLM at `(α, x)`. -/
+
 abbrev trivToE (α x : M) : TangentSpace I x →L[ℝ] E :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x
 
 variable (I) in
-/-- The inverse chart-trivialization CLM at `(α, x)`. -/
+
 abbrev trivFromE (α x : M) : E →L[ℝ] TangentSpace I x :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ x
 
 variable (I) in
-/-- Round-trip identity: `trivFromE ∘ trivToE = id` on the trivialization base set. -/
+
 @[simp] lemma trivFromE_trivToE
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -357,7 +274,7 @@ variable (I) in
   (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt (R := ℝ) hx v
 
 variable (I) in
-/-- Round-trip identity: `trivToE ∘ trivFromE = id` on the trivialization base set. -/
+
 @[simp] lemma trivToE_trivFromE
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -365,12 +282,10 @@ variable (I) in
     trivToE (I := I) α x (trivFromE (I := I) α x w) = w :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL (R := ℝ) hx w
 
-/-- The chart-trivialised representation in terms of `trivToE`. -/
 @[simp] lemma chartE_section_repr_eq_trivToE
     (α : M) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α σ x = trivToE (I := I) α x (σ x) := rfl
 
-/-- Additivity of `chartE_section_repr`: `(σ + τ)^E_α = σ^E_α + τ^E_α` pointwise. -/
 lemma chartE_section_repr_add
     (α : M) (σ τ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α (σ + τ) x =
@@ -379,7 +294,6 @@ lemma chartE_section_repr_add
   unfold chartE_section_repr
   rw [Pi.add_apply, map_add]
 
-/-- Smul-compatibility of `chartE_section_repr`: `(c • σ)^E_α = c • σ^E_α`. -/
 lemma chartE_section_repr_smul
     (α : M) (c : ℝ) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α (c • σ) x = c • chartE_section_repr (I := I) α σ x := by
@@ -387,7 +301,6 @@ lemma chartE_section_repr_smul
   unfold chartE_section_repr
   rw [Pi.smul_apply, map_smul]
 
-/-- Pointwise smul by a scalar function `f : M → ℝ`: `chartE_section_repr` distributes. -/
 lemma chartE_section_repr_smul_function
     (α : M) (f : M → ℝ) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α (fun y => f y • σ y) x =
@@ -396,7 +309,6 @@ lemma chartE_section_repr_smul_function
   unfold chartE_section_repr
   rw [map_smul]
 
-/-- Zero section: `chartE_section_repr α 0 x = 0`. -/
 lemma chartE_section_repr_zero (α : M) (x : M) :
     chartE_section_repr (I := I) α (fun _ => (0 : TangentSpace I _)) x = 0 := by
   classical
@@ -404,12 +316,7 @@ lemma chartE_section_repr_zero (α : M) (x : M) :
   rw [map_zero]
 
 variable (I) in
-/-- **Manifold derivative of a scalar function in chart coordinates.** At a
-point `x` of the chart source whose chart image lies in the interior of the
-chart target, the manifold derivative `mfderiv I 𝓘(ℝ) f x` applied to a tangent
-vector `v` equals the Fréchet derivative of the chart pullback
-`f ∘ (extChartAt I α).symm` at `extChartAt I α x` applied to the
-trivialization-image `trivToE α x v`. -/
+
 theorem mfderiv_scalar_eq_chart_fderiv
     (α : M) (f : M → ℝ) {x : M}
     (hx_src : x ∈ (chartAt H α).source)

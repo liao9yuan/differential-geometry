@@ -1,63 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponentTransport
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.PouCutoffComponentBridge
 
-/-!
-# The chart component of the smooth eigenvector representative
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and an eigenbasis
-index `i`, the smooth representative `eigenvectorSmooth g r s i`
-is the finite partition-of-unity sum, over the chart centres in
-`chartAtlasPOU_finset`, of the per-chart smooth sections
-`eigenvectorSmoothChart g r s i α`.
-
-This file proves the **chart-component equality**: the canonical Euclidean
-chart-`β` `P₀`-component of `eigenvectorSmooth` equals — as an
-element of the chart `L²` space — the canonical chart-`β` `P₀`-component of the
-connection-Laplacian resolvent eigenvector built from the intrinsic
-compact-operator eigenbasis `tensorResolventEigenbasisVec …`.
-
-## The argument
-
-**Left side.** `eigenvectorSmooth` is the finite sum `∑_α eigenvectorSmoothChart
-α`; the canonical chart component is continuous-linear in its abstract `L²`
-argument (it factors through the smooth-section embedding and
-`tensorL2ChartComponentCLM`), so additivity turns its chart-`β` `P₀`-component
-into the finite sum, over `α`, of the chart-`β` `P₀`-components of the
-summands. Each summand component is rewritten, as a function, by the per-chart
-component formula `eigenvectorSmoothChart_tensorL2ChartComponent_coeFn_aeEq`.
-
-**Right side.** The eigenvector's canonical chart-`β` `P₀`-component is
-rewritten by the abstract partition-of-unity transport law
-`tensorL2ChartComponent_ae_eq_pou_transport_sum`: the chart-pushed
-partition-of-unity weight of `β` times a finite double sum, over the transport
-chart centres `γ` and component multi-indices `Q`, of the chart-transition
-transport of the eigenvector's chart-`γ` `Q`-components.
-
-**Matching.** Each per-chart summand of the left side, after pushing the chart
-pushforward through the inner component sum, is reconciled per `(α, Q)` by the
-single transport-term identity `eigenvectorSmoothChart_transport_term_aeEq`
-with the chart-transition transport term of the right side. The index sets
-differ — the left sum ranges over `chartAtlasPOU_finset`, the right over
-`transportChartCenters β` — but the transport chart centres are a subset of the
-partition-of-unity support set, and for a chart centre outside the transport
-set the corresponding transport term vanishes almost everywhere: where the
-chart-`β` cutoff is nonzero the partition-of-unity weight of that centre
-vanishes, hence so does the eigenvector chart component there (the off-support
-vanishing), and elsewhere the transport coefficient itself carries the
-vanishing chart-`β` cutoff factor.
-
-## Main result
-
-* `eigenvectorSmooth_tensorL2ChartComponent_eq` — the chart-`β`
-  `P₀`-component of the smooth representative equals the chart-`β` `P₀`-component
-  of the resolvent eigenvector, as elements of the chart `L²` space.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -98,9 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-/-- If two functions agree almost everywhere with respect to `μ.restrict t` and
-agree everywhere off the measurable set `t`, then they agree almost everywhere
-with respect to `μ` itself. -/
 private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
     {X : Type*} [MeasurableSpace X] {μ : Measure X}
     {f h : X → ℝ} {t : Set X} (ht : MeasurableSet t)
@@ -119,8 +59,6 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact ht.nullMeasurableSet
 
-/-- Every transport chart centre of `β` belongs to the partition-of-unity
-support set. -/
 private lemma transportChartCenters_subset_chartAtlasPOU_finset (β : M) :
     transportChartCenters (I := I) (M := M) β ⊆
       chartAtlasPOU_finset (I := I) (M := M) := by
@@ -129,8 +67,6 @@ private lemma transportChartCenters_subset_chartAtlasPOU_finset (β : M) :
   rw [chartAtlasPOU_finset_mem]
   exact hγ.mono (Set.inter_subset_left)
 
-/-- An `if`-gated finite sum equals the finite sum of the `if`-gated summands:
-both sides are the sum when the condition holds and `0` otherwise. -/
 private lemma ite_finsetSum_eq_finsetSum_ite
     {ι : Type*} (t : Finset ι) (p : Prop) [Decidable p] (f : ι → ℝ) :
     (if p then ∑ a ∈ t, f a else 0) = ∑ a ∈ t, (if p then f a else 0) := by
@@ -138,9 +74,6 @@ private lemma ite_finsetSum_eq_finsetSum_ite
   · simp only [if_pos hp]
   · simp only [if_neg hp, Finset.sum_const_zero]
 
-/-- The chart-pushed partition-of-unity weight of `α`, read at the chart-`α`
-Euclidean image of a chart-`α` source point `z`, recovers the partition-of-unity
-weight `chartAtlasPOU α` at `z`. -/
 private lemma chartPushedPouWeight_toEuclidean_extChartAt
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartPushedPouWeight (I := I) (M := M) α
@@ -153,10 +86,7 @@ private lemma chartPushedPouWeight_toEuclidean_extChartAt
 
 open Classical in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The chart-`β` pushforward of the `if`-gated chart-`α` transformation-law
-component sum, evaluated at a Euclidean point `y`, equals the finite sum, over
-component multi-indices `Q`, of the chart-`β` pushforwards of the single
-`if`-gated transformation-law terms. -/
+
 private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -206,11 +136,7 @@ private lemma chartPushedRaw_ite_transitionSum_eq_finsetSum
     else 0) y
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The canonical chart-`β` `P₀`-component of the per-chart smooth section
-equals, almost everywhere on the chart-`β` `L²` measure, the chart-pushed
-partition-of-unity weight of `β` times the finite sum, over component
-multi-indices `Q`, of the chart-transition transport of the resolvent
-eigenvector's chart-`α` `Q`-components. -/
+
 private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -289,10 +215,7 @@ private lemma eigenvectorSmoothChart_tensorL2ChartComponent_eq_transport_sum
   rw [Finset.mul_sum]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The eigenvector chart-`α` `Q`-component, gated to the zero locus of the
-chart-pushed partition-of-unity weight of `α`, vanishes almost everywhere on the
-chart-`α` `L²` measure: where the weight is nonzero the `if` evaluates to `0`,
-and where it is zero the off-support vanishing kills the component. -/
+
 private lemma eigenvectorChartComponentFun_ite_chartPushedPouWeight_zero_ae_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -312,13 +235,7 @@ private lemma eigenvectorChartComponentFun_ite_chartPushedPouWeight_zero_ae_zero
   · rw [if_neg hw]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- The single transport term of the chart-transition transport applied to the
-eigenvector chart-`α` `Q`-component vanishes almost everywhere on the chart-`β`
-`L²` measure whenever `α` is not a transport chart centre of `β`: off the chart
-overlap the transport coefficient — carrying the chart-`α` cutoff factor —
-vanishes, while on the overlap either the chart-`β` cutoff factor vanishes or the
-chart-`α` partition-of-unity weight is zero, so the off-support vanishing of the
-eigenvector chart component kills the precomposed component. -/
+
 private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -458,10 +375,7 @@ private lemma chartTransitionTransportCLM_eigenvector_ae_zero_of_notMem
   exact ae_eq_of_ae_eq_restrict_of_eqOn_compl hΩ_meas h_on_overlap h_off_overlap
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- For a chart centre `α` outside the transport set of `β`, the finite sum, over
-component multi-indices `Q`, of the chart-transition transport of the eigenvector
-chart-`α` `Q`-components vanishes almost everywhere on the chart-`β` `L²`
-measure. -/
+
 private lemma transportSum_eigenvector_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -497,26 +411,7 @@ private lemma transportSum_eigenvector_ae_zero_of_notMem
   rw [Finset.sum_const_zero]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The chart-component equality of the smooth eigenvector representative.**
 
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart base point `β` and a component multi-index `P₀`, the canonical
-Euclidean chart-`β` `P₀`-component of the smooth representative
-`eigenvectorSmooth g r s i` equals — as an element of the chart
-`L²` space `Lp ℝ 2 (chartL2Measure β)` — the canonical chart-`β` `P₀`-component
-of the connection-Laplacian resolvent eigenvector built from the intrinsic
-compact-operator eigenbasis `tensorResolventEigenbasisVec …`.
-
-The smooth representative is the finite partition-of-unity sum of the per-chart
-smooth sections; the canonical chart component is continuous-linear in the
-abstract `L²` argument, so its chart-`β` `P₀`-component is the finite sum of the
-per-chart components, each reconciled — via the per-chart component formula and
-the single transport-term identity — with a finite sum of chart-transition
-transport terms. The eigenvector's chart-`β` `P₀`-component is governed by the
-abstract partition-of-unity transport law. The two finite double sums match: the
-transport chart centres are a subset of the partition-of-unity support set, and
-for a chart centre outside the transport set the corresponding transport term
-vanishes almost everywhere. -/
 theorem eigenvectorSmooth_tensorL2ChartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -5,57 +5,6 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.Calculus.Deriv.Inverse
 import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 
-/-!
-# Spectral powers of the heat semigroup on `L²` of a closed Riemannian manifold
-
-For a closed Riemannian manifold `(M, g)`, this file extends the spectral
-construction of `heatSemigroup g t` to the family of operators
-
-  `heatPower g k t = (-Δ_g)^k ∘ e^{t Δ_g}` on `Lp ℝ 2 μ_g`,
-
-defined for every `k : ℕ` and `t : ℝ` via the diagonal action
-
-  `heatPower g k t (b i) = λ_i^k · exp(-λ_i · t) • b i`         (for `0 < t`)
-
-on the eigenbasis `b := resolventHilbertEigenbasisSigma g`.
-
-For `k = 0` the operator coincides with `heatSemigroup g t` for every real
-`t`. For `k ≥ 1` and `t ≤ 0` the operator is set to `0` (the spectral series
-fails to converge in `L²` at `t = 0` because the coefficients `λ_i^k` are
-unbounded; the negative-time data is junk by convention, mirroring
-`heatSemigroup`).
-
-## Main definitions
-
-* `heatPower g k t : Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g` — the spectral power.
-
-## Main results
-
-* `heatPower_zero` — `heatPower g 0 t = heatSemigroup g t`.
-* `heatPower_apply_basis_pos` — diagonal action on the eigenbasis.
-* `heatPower_opNorm_le` — the bound `‖heatPower g k t‖ ≤ (k/t)^k · e^{-k}`
-  for `1 ≤ k`, `0 < t`.
-* `heatPower_apply_of_pos` — the spectral series formula on a general `u`.
-* `heatPower_comp_heatSemigroup`, `heatSemigroup_comp_heatPower` — both
-  directions of the composition law `(-Δ_g)^k e^{t Δ_g} ∘ e^{s Δ_g} =
-  (-Δ_g)^k e^{(t+s) Δ_g}` (for `0 < t`, `0 ≤ s`).
-* `hasDerivAt_heatSemigroup` — `(d/dt) e^{t Δ_g} = -heatPower g 1 t` in the
-  operator-norm topology, for `0 < t`.
-* `hasDerivAt_heatPower` — `(d/dt) heatPower g k t = -heatPower g (k+1) t`.
-* `iteratedDeriv_heatSemigroup_eq` — the iterated form
-  `(d/dt)^j e^{t Δ_g} = (-1)^j heatPower g j t`.
-* `contDiffOn_heatSemigroup_Ioi`, `contDiffOn_heatPower_Ioi` — `C^∞`-ness on
-  `(0, ∞)`.
-* `heatPower_isSelfAdjoint` — self-adjointness for `0 < t`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_g = div_g ∘ grad_g`, so the Laplacian
-has spectrum in `(-∞, 0]` and `(-Δ_g)` is non-negative. The formal symbol
-`(-Δ_g)^k e^{t Δ_g}` therefore acts on the basis via multiplication by
-`λ_i^k · exp(-λ_i · t) ≥ 0`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -82,8 +31,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The constant `(k/t)^k · exp(-k)`, the global max of `λ ↦ λ^k e^{-λt}` on
-`[0, ∞)` for `k ≥ 1` and `t > 0`. -/
 private noncomputable def heatPowerCoeffBound (k : ℕ) (t : ℝ) : ℝ :=
   (k / t : ℝ) ^ k * Real.exp (-(k : ℝ))
 
@@ -94,13 +41,6 @@ private lemma heatPowerCoeffBound_nonneg (k : ℕ) {t : ℝ} (ht : 0 < t) :
   · exact pow_nonneg (div_nonneg (Nat.cast_nonneg _) ht.le) k
   · exact (Real.exp_pos _).le
 
-/-- For `λ ≥ 0`, `t > 0` and any `k ≥ 0`, `λ^k · exp(-λt) ≤ (k/t)^k · exp(-k)`.
-For `k = 0` the right-hand side is `1`, and the inequality reduces to
-`exp(-λt) ≤ 1`. For `k ≥ 1`, the function `s ↦ s · e^{-s}` on `[0, ∞)` is
-maximized at `s = 1` with value `e^{-1}`; substituting `s = (t/k) λ` gives
-`(t/k)·λ·exp(-(t/k)·λ) ≤ e^{-1}`, hence
-`λ·exp(-(t/k)·λ) ≤ (k/t)·e^{-1}`, and raising to the `k`-th power yields
-`λ^k · exp(-λt) ≤ (k/t)^k · e^{-k}`. -/
 private lemma lambda_pow_mul_exp_le
     (k : ℕ) {t : ℝ} (ht : 0 < t) {lam : ℝ} (hlam : 0 ≤ lam) :
     lam ^ k * Real.exp (-(lam * t)) ≤ heatPowerCoeffBound k t := by
@@ -163,7 +103,6 @@ private lemma lambda_pow_mul_exp_le
   rw [h_rhs_eq] at h_pow_le
   exact h_pow_le
 
-/-- Squared version of `lambda_pow_mul_exp_le`. -/
 private lemma lambda_pow_mul_exp_sq_le
     (k : ℕ) {t : ℝ} (ht : 0 < t) {lam : ℝ} (hlam : 0 ≤ lam) :
     (lam ^ k * Real.exp (-(lam * t))) ^ 2 ≤ (heatPowerCoeffBound k t) ^ 2 := by
@@ -173,8 +112,6 @@ private lemma lambda_pow_mul_exp_sq_le
     lambda_pow_mul_exp_le k ht hlam
   exact pow_le_pow_left₀ h_lhs_nn h_le 2
 
-/-- For `0 < t` and every `k`, `(λ_i^k · exp(-λ_i t) · ⟪b i, u⟫)²` is
-summable. -/
 private lemma summable_heatPower_coeff_sq
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -210,8 +147,6 @@ private lemma summable_heatPower_coeff_sq
       _ ≤ (heatPowerCoeffBound k t) ^ 2 * (⟪b i, u⟫_ℝ) ^ 2 :=
             mul_le_mul_of_nonneg_right h_coeff_sq_le h_inner_sq_nn
 
-/-- For `0 < t` and every `k`, the heat-power-weighted basis-vector family is
-summable in `L²`. -/
 private lemma summable_heatPowerTerm
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -263,8 +198,6 @@ private lemma summable_heatPowerTerm
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
 
-/-- For `0 < t`, the squared L² norm of the heat-power series is bounded by
-`((k/t)^k · exp(-k))² · ‖u‖²`. -/
 private lemma norm_sq_heatPowerTerm_sum_le
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -348,8 +281,6 @@ private lemma norm_sq_heatPowerTerm_sum_le
   refine le_trans h_dom ?_
   rw [parseval_norm_sq (I := I) (M := M) g u]
 
-/-- For `0 < t`, the L² norm of the heat-power series is bounded by
-`(k/t)^k · exp(-k) · ‖u‖`. -/
 private lemma norm_heatPowerTerm_sum_le
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -368,7 +299,6 @@ private lemma norm_heatPowerTerm_sum_le
   have h_rhs_nn : 0 ≤ heatPowerCoeffBound k t * ‖u‖ := mul_nonneg hC_nn h_u_nn
   exact (abs_le_of_sq_le_sq' h_sq h_rhs_nn).2
 
-/-- The underlying function of `heatPower g k t` for `0 < t`. -/
 private noncomputable def heatPowerFun
     (g : SmoothRiemannianMetric I M) (k : ℕ) (t : ℝ)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -379,7 +309,6 @@ private noncomputable def heatPowerFun
       ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, u⟫_ℝ •
       resolventHilbertEigenbasisSigma (I := I) (M := M) g i
 
-/-- Additivity of `heatPowerFun` in `u` (for `0 < t`). -/
 private lemma heatPowerFun_add
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -417,7 +346,6 @@ private lemma heatPowerFun_add
   rw [Summable.tsum_add (summable_heatPowerTerm (I := I) (M := M) g k ht u)
     (summable_heatPowerTerm (I := I) (M := M) g k ht v)]
 
-/-- Scalar-homogeneity of `heatPowerFun` in `u` (for `0 < t`). -/
 private lemma heatPowerFun_smul
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t) (c : ℝ)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -449,13 +377,6 @@ private lemma heatPowerFun_smul
   rw [h_sum_eq]
   exact (summable_heatPowerTerm (I := I) (M := M) g k ht u).tsum_const_smul c
 
-/-- The spectral power `heatPower g k t = (-Δ_g)^k · e^{t Δ_g}` on
-`Lp ℝ 2 μ_g`.
-
-For `k = 0` and any `t : ℝ`: equals `heatSemigroup g t`.
-For `k ≥ 1` and `t > 0`: the spectral series defines a bounded operator,
-with operator norm bounded by `(k/t)^k · exp(-k)`.
-For `k ≥ 1` and `t ≤ 0`: junk, set to the zero map. -/
 noncomputable def heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) (t : ℝ) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
@@ -472,14 +393,11 @@ noncomputable def heatPower
     exact norm_heatPowerTerm_sum_le (I := I) (M := M) g k ht u
   · exact 0
 
-/-- `heatPower g 0 t = heatSemigroup g t` for every `t : ℝ`. -/
 theorem heatPower_zero (g : SmoothRiemannianMetric I M) (t : ℝ) :
     heatPower (I := I) (M := M) g 0 t = heatSemigroup (I := I) (M := M) g t := by
   unfold heatPower
   rw [dif_pos rfl]
 
-/-- For `k ≥ 1` and `t > 0`, `heatPower g k t u` is the explicit spectral
-series. -/
 theorem heatPower_apply_of_pos_one_le
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk : 1 ≤ k) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -494,7 +412,6 @@ theorem heatPower_apply_of_pos_one_le
   rw [dif_neg hk_ne, dif_pos ht]
   rfl
 
-/-- For `k ≥ 1` and `t ≤ 0`, `heatPower g k t = 0`. -/
 theorem heatPower_eq_zero_of_one_le_of_nonpos
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk : 1 ≤ k) {t : ℝ} (ht : t ≤ 0) :
     heatPower (I := I) (M := M) g k t = 0 := by
@@ -502,8 +419,6 @@ theorem heatPower_eq_zero_of_one_le_of_nonpos
   unfold heatPower
   rw [dif_neg hk_ne, dif_neg (not_lt.mpr ht)]
 
-/-- Unified application formula: for any `k` and `0 < t`, `heatPower g k t u`
-is given by the spectral series with the coefficient `λ_i^k · exp(-λ_i t)`. -/
 theorem heatPower_apply_of_pos
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -520,7 +435,6 @@ theorem heatPower_apply_of_pos
     intro i; rw [pow_zero, one_mul]
   · exact heatPower_apply_of_pos_one_le (I := I) (M := M) g hk_pos ht u
 
-/-- For `k ≥ 1` and `0 < t`, `‖heatPower g k t‖ ≤ (k/t)^k · exp(-k)`. -/
 theorem heatPower_opNorm_le
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk : 1 ≤ k) {t : ℝ} (ht : 0 < t) :
     ‖heatPower (I := I) (M := M) g k t‖ ≤
@@ -531,7 +445,6 @@ theorem heatPower_opNorm_le
   have hC_nn : 0 ≤ heatPowerCoeffBound k t := heatPowerCoeffBound_nonneg k ht
   exact LinearMap.mkContinuous_norm_le _ hC_nn _
 
-/-- For `0 < t`, `heatPower g k t (b i) = λ_i^k · exp(-λ_i t) • b i`. -/
 theorem heatPower_apply_basis_pos
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -575,7 +488,6 @@ theorem heatPower_apply_basis_pos
   rw [h_sum_eq]
   rw [tsum_ite_eq i]
 
-/-- For `0 < t`, `heatPower g k t` is self-adjoint. -/
 theorem heatPower_isSelfAdjoint (g : SmoothRiemannianMetric I M) (k : ℕ)
     {t : ℝ} (ht : 0 < t) :
     IsSelfAdjoint (heatPower (I := I) (M := M) g k t) := by
@@ -677,8 +589,6 @@ theorem heatPower_isSelfAdjoint (g : SmoothRiemannianMetric I M) (k : ℕ)
     exact h_inner_hsum'.tsum_eq.symm
   rw [h_lhs, h_rhs]
 
-/-- Right-composition: `heatPower g k t ∘L heatSemigroup g s =
-heatPower g k (t + s)`, valid for `0 < t` and `0 ≤ s`. -/
 theorem heatPower_comp_heatSemigroup
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     {s : ℝ} (hs : 0 ≤ s) :
@@ -741,8 +651,6 @@ theorem heatPower_comp_heatSemigroup
   rw [h_exp_add]
   ring
 
-/-- Left-composition: `heatSemigroup g s ∘L heatPower g k t =
-heatPower g k (t + s)`, valid for `0 < t` and `0 ≤ s`. -/
 theorem heatSemigroup_comp_heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     {s : ℝ} (hs : 0 ≤ s) :
@@ -812,10 +720,6 @@ theorem heatSemigroup_comp_heatPower
   rw [h_exp_add]
   ring
 
-/-- Uniform spectral Taylor estimate: for `λ ≥ 0`, `0 < t`, `|h| ≤ t/2` and
-`k : ℕ`,
-`|λ^k · (exp(-λ(t+h)) - exp(-λ t)) - λ^k · (-λ h · exp(-λ t))| ≤ K · |h|²`
-where `K = heatPowerCoeffBound (k+2) (t/2)`. -/
 private lemma exp_neg_taylor_bound
     (k : ℕ) {t : ℝ} (ht : 0 < t) {h : ℝ} (hh : |h| ≤ t / 2)
     {lam : ℝ} (hlam : 0 ≤ lam) :
@@ -924,10 +828,6 @@ private lemma exp_neg_taylor_bound
     lambda_pow_mul_exp_le (k + 2) h_t2_pos hlam
   exact mul_le_mul_of_nonneg_right h_final h_h_sq_nn
 
-/-- For `0 < t` and `|h| ≤ t/2`, the operator-norm of the Taylor remainder
-of `s ↦ heatPower g k s` at `t`, applied to a vector `u`, is bounded:
-`‖ heatPower g k (t+h) u - heatPower g k t u + h • heatPower g (k+1) t u ‖
-  ≤ heatPowerCoeffBound (k+2) (t/2) · h² · ‖u‖`. -/
 private lemma norm_heatPower_taylor_remainder
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t)
     {h : ℝ} (hh : |h| ≤ t / 2)
@@ -1085,8 +985,6 @@ private lemma norm_heatPower_taylor_remainder
   rw [← h_rhs_sq] at h_norm_sq_le
   exact (abs_le_of_sq_le_sq' h_norm_sq_le h_rhs_nn).2
 
-/-- For `0 < t`, `s ↦ heatPower g k s` has operator-norm derivative
-`-heatPower g (k+1) t` at `t`. -/
 theorem hasDerivAt_heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => heatPower (I := I) (M := M) g k s)
@@ -1157,8 +1055,6 @@ theorem hasDerivAt_heatPower
     exact h_mul_lt
   linarith [abs_nonneg h, h_step]
 
-/-- Specialization: `s ↦ heatSemigroup g s` has operator-norm derivative
-`-heatPower g 1 t` at `t > 0`. -/
 theorem hasDerivAt_heatSemigroup
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 < t) :
     HasDerivAt (fun s : ℝ => heatSemigroup (I := I) (M := M) g s)
@@ -1170,17 +1066,11 @@ theorem hasDerivAt_heatSemigroup
   rw [h_funext] at h
   exact h
 
-/-- The `j`-th iterated derivative of `s ↦ heatSemigroup g s` at any `t > 0`
-in operator norm is `(-1)^j • heatPower g j t`. We state this directly in
-terms of `heatPower`: at every `t > 0`, the function `s ↦ heatPower g k s`
-is `C^∞`, and its derivative at `t` is `-heatPower g (k+1) t`. From this,
-iterated differentiability of `heatSemigroup` follows by induction. -/
 theorem differentiableAt_heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t) :
     DifferentiableAt ℝ (fun s : ℝ => heatPower (I := I) (M := M) g k s) t :=
   (hasDerivAt_heatPower (I := I) (M := M) g k ht).differentiableAt
 
-/-- `s ↦ heatPower g k s` is differentiable on `(0, ∞)`. -/
 theorem differentiableOn_heatPower_Ioi
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     DifferentiableOn ℝ (fun s : ℝ => heatPower (I := I) (M := M) g k s)
@@ -1188,28 +1078,22 @@ theorem differentiableOn_heatPower_Ioi
   intro t ht
   exact (differentiableAt_heatPower (I := I) (M := M) g k ht).differentiableWithinAt
 
-/-- Continuity of `s ↦ heatPower g k s` at every `t > 0`. -/
 theorem continuousAt_heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t) :
     ContinuousAt (fun s : ℝ => heatPower (I := I) (M := M) g k s) t :=
   (hasDerivAt_heatPower (I := I) (M := M) g k ht).continuousAt
 
-/-- `s ↦ heatPower g k s` is continuous on `(0, ∞)`. -/
 theorem continuousOn_heatPower_Ioi
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ContinuousOn (fun s : ℝ => heatPower (I := I) (M := M) g k s) (Set.Ioi 0) :=
   fun _ ht => (continuousAt_heatPower (I := I) (M := M) g k ht).continuousWithinAt
 
-/-- The derivative of `s ↦ heatPower g k s` on `(0, ∞)` is
-`-heatPower g (k+1) s`. -/
 theorem deriv_heatPower
     (g : SmoothRiemannianMetric I M) (k : ℕ) {t : ℝ} (ht : 0 < t) :
     deriv (fun s : ℝ => heatPower (I := I) (M := M) g k s) t =
       -heatPower (I := I) (M := M) g (k + 1) t :=
   (hasDerivAt_heatPower (I := I) (M := M) g k ht).deriv
 
-/-- The `j`-th iterated derivative on `(0, ∞)` of `s ↦ heatSemigroup g s` at
-`t` is `(-1)^j • heatPower g j t`. -/
 theorem iteratedDerivWithin_heatSemigroup_Ioi
     (g : SmoothRiemannianMetric I M) :
     ∀ j : ℕ, ∀ {t : ℝ}, 0 < t →
@@ -1260,7 +1144,6 @@ theorem iteratedDerivWithin_heatSemigroup_Ioi
     rw [show (-1 : ℝ) ^ j * -1 = -((-1 : ℝ) ^ j) from by ring]
     rw [neg_smul, smul_neg]
 
-/-- `s ↦ heatPower g k s` is `C^∞` on `(0, ∞)`. -/
 theorem contDiffOn_heatPower_Ioi
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ContDiffOn ℝ ∞ (fun s : ℝ => heatPower (I := I) (M := M) g k s)
@@ -1303,7 +1186,6 @@ theorem contDiffOn_heatPower_Ioi
       rw [h_neg]
       exact (ih (k + 1)).const_smul _
 
-/-- `s ↦ heatSemigroup g s` is `C^∞` on `(0, ∞)`. -/
 theorem contDiffOn_heatSemigroup_Ioi
     (g : SmoothRiemannianMetric I M) :
     ContDiffOn ℝ ∞ (fun s : ℝ => heatSemigroup (I := I) (M := M) g s)

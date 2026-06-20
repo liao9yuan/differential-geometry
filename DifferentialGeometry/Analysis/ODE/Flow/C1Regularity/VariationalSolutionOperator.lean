@@ -1,40 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
 
-/-!
-# Fréchet differentiability of the flow in the initial condition
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E`, jointly `C^1` in
-`(t, x)`, and a local Picard–Lindelöf flow `Φ : E × ℝ → E` (packaged by `IsLocalFlow`), this
-file establishes that for each fixed `t` in a small open interval around the initial time,
-the partial map `x ↦ Φ (x, t)` is Fréchet differentiable at the centre point `x₀`, and that
-its derivative equals the solution of the *variational ODE* along the orbit
-`t ↦ Φ (x₀, t)`.
-
-The argument has three ingredients:
-
-* **Uniform-interval variational solution.**  The variational ODE
-  `y' = (D_x f)(t, Φ(x₀, t)) y, y(t₀) = δ` is linear in `y`.  Hence on any closed subinterval
-  `[t₀ - T, t₀ + T]` on which the linearization is bounded by `M` with `M · T < 1`, a
-  solution exists for **every** initial variation `δ ∈ E`.  By Grönwall, this solution
-  satisfies `‖y t‖ ≤ ‖δ‖ · exp (M · T)` uniformly on the interval.  Combined with linearity
-  in `δ` and pointwise uniqueness, the evaluation-at-time-`t` map `δ ↦ y_δ(t)` is a
-  continuous linear map `E →L[ℝ] E`.
-
-* **Grönwall difference estimate.**  Writing
-  `R(h, t) := Φ(x₀ + h, t) - Φ(x₀, t) - y_h(t)`, the difference satisfies a perturbed
-  variational ODE with error `o(‖h‖)`, controlled via
-  `dist_le_of_approx_trajectories_ODE_of_mem`.
-
-* **HasFDerivAt assembly.**  These pieces combine into a Fréchet-derivative statement:
-  for `t` in a small open interval around `t₀`,
-  `HasFDerivAt (fun x => Φ (x, t)) (variationalLinearMapAt … t) x₀`.
-
-The Fréchet differentiability we obtain is local in `t` — restricted to a symmetric open
-interval around `t₀` whose size depends on the operator-norm bound `M` of the linearization
-along the central orbit, on the regularity radius around `(t₀, x₀)`, and on the joint
-modulus of continuity of the linearization.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -75,10 +40,6 @@ section UniformExistence
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
-/-- **Uniform-interval existence** of the variational solution.  Given a continuous
-linearization `t ↦ fderiv ℝ (f t) (α t)` with operator-norm bound `M` on the closed
-interval `Icc (t₀ - T) (t₀ + T)`, provided `M · T < 1`, a variational solution exists on
-`Icc (t₀ - T) (t₀ + T)` for **every** initial variation `δ ∈ E`. -/
 theorem exists_isVariationalSolutionOn_Icc_of_short
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -151,9 +112,6 @@ section GronwallBound
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
-/-- Grönwall bound on the variational solution.  If `y` is a variational solution on
-`Icc (t₀ - T) (t₀ + T)` with `y(t₀) = δ` and the linearization is bounded by `M` on this
-interval, then `‖y t‖ ≤ ‖δ‖ · exp (M · T)` on the whole interval. -/
 theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
     {T M : ℝ} (hT : 0 ≤ T) (hM : 0 ≤ M)
     {δ : E} {y : ℝ → E}
@@ -281,8 +239,6 @@ section LinearMap
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
-/-- **Uniqueness on a closed interval**: any two variational solutions on
-`Icc (t₀ - T) (t₀ + T)` with the same initial value agree on the whole interval. -/
 theorem IsVariationalSolutionOn.unique_Icc
     {T : ℝ} (hT : 0 < T)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -316,9 +272,6 @@ theorem IsVariationalSolutionOn.unique_Icc
   have hzero : y₁ t - y₂ t = 0 := norm_le_zero_iff.mp hbd
   exact sub_eq_zero.mp hzero
 
-/-- The variational solution map: for each `δ ∈ E`, picks (using uniform-interval existence)
-*the* variational solution on `Icc (t₀ - T) (t₀ + T)`.  By uniqueness, this is well-defined
-up to equality on this interval. -/
 def variationalSolutionFun
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -326,7 +279,6 @@ def variationalSolutionFun
     E → ℝ → E :=
   fun δ => (exists_isVariationalSolutionOn_Icc_of_short hT hM hMT hA_cont hA_bd δ).choose
 
-/-- The variational solution function is indeed a solution. -/
 lemma variationalSolutionFun_isSolution
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -336,9 +288,6 @@ lemma variationalSolutionFun_isSolution
       (Icc (t₀ - T) (t₀ + T)) :=
   (exists_isVariationalSolutionOn_Icc_of_short hT hM hMT hA_cont hA_bd δ).choose_spec
 
-/-- **Linearity of the variational solution in `δ` at each time `t`.**  By uniqueness on the
-closed interval, evaluating any variational solution at a fixed time gives a function linear
-in the initial variation `δ`. -/
 lemma variationalSolutionFun_linear
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -363,8 +312,6 @@ lemma variationalSolutionFun_linear
     variationalSolutionFun_isSolution hT hM hMT hA_cont hA_bd (c₁ • δ₁ + c₂ • δ₂)
   exact (IsVariationalSolutionOn.unique_Icc hT hA_cont h₁₂ h₁₂_alt) ht
 
-/-- **Operator bound on the variational solution map.**  At each `t ∈ Icc (t₀-T) (t₀+T)`,
-`‖vSol δ t‖ ≤ exp (M·T) · ‖δ‖`. -/
 lemma variationalSolutionFun_norm_le
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -377,9 +324,6 @@ lemma variationalSolutionFun_norm_le
   rw [mul_comm (‖δ‖) (exp (M * T))] at hbd
   exact hbd
 
-/-- **The variational linear map at time `t`**: the continuous linear map `δ ↦ y_δ(t)` where
-`y_δ` is the variational solution starting at `δ` at time `t₀`.  Bundled from
-`variationalSolutionFun` via its linearity and operator-norm bound. -/
 def variationalLinearMapAt
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -408,7 +352,6 @@ def variationalLinearMapAt
   refine L.mkContinuous (exp (M * T)) (fun δ => ?_)
   exact variationalSolutionFun_norm_le hT hM hMT hA_cont hA_bd δ ht
 
-/-- The variational linear map evaluated at `δ` equals the variational solution at `t`. -/
 @[simp]
 lemma variationalLinearMapAt_apply
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)

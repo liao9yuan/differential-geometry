@@ -3,59 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-/-!
-# Chart-frame covariant derivative on `(r, s)`-tensor bundles
-
-Given a smooth Riemannian manifold `(M, g)` and a chart center `α : M`, this
-file constructs a chart-frame analog of the covariant derivative
-`(∇_X T)(b) ∈ TensorRSSpace r s I b` for an `(r, s)`-tensor section `T` and a
-tangent vector field `X`. The construction parallels
-`chartTensor0SCovariantDerivative` (on the `(0, s)`-tensor bundle) but acts on
-the `(r, s)`-tensor bundle, which by definition at each point is the space of
-continuous linear maps `Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b`.
-
-The chart-frame value is the difference of three pieces:
-
-* The **intrinsic chart Fréchet-derivative piece**, the CLM-valued analog of
-  `tensor0SIntrinsicChartCLM`, built from the Fréchet derivative of the
-  chart-trivialised `TensorRSModel r s ℝ E`-valued representation of the
-  section.
-* A sum of **upper-slot Christoffel corrections**, one for each input slot
-  `k : Fin r`. Each correction substitutes the `k`-th tangent-slot of the
-  input `(0, r)`-tensor via the chart Levi-Civita parallel CLM, then evaluates
-  `T b` at the substituted tensor.
-* A sum of **lower-slot Christoffel corrections**, one for each output slot
-  `l : Fin s`. Each correction post-composes the value `T b α_input ∈
-  Tensor0SSpace s I b` with the slot-`l` chart Levi-Civita parallel CLM
-  substitution.
-
-The slot CLM in both cases is `chartLeviCivitaParallelCLM g α b X` from
-`ChartTensor0SCovariantDerivative.lean`; on the chart Levi-Civita good set it
-agrees with `chartLeviCivita g α (chartParallelExtend α b v) b (X b)` (see
-`ChartLeviCivitaParallelExtend.lean`), so the construction here is the
-natural Layer-C extension of the `(0, s)` chart-frame `∇`.
-
-## Main declarations
-
-* `tensorRSChartE_section_repr r s α T` — the chart-α-trivialised
-  `TensorRSModel r s ℝ E`-valued representation of `T`.
-* `tensorRSChartFiberFromModel r s α b` — fibre inverse of the
-  `(r, s)`-trivialisation as a CLM.
-* `tensorRSIntrinsicChartCLM r s α T b` — the intrinsic chart piece as a CLM
-  `TangentSpace I b →L[ℝ] TensorRSSpace r s I b`.
-* `chartTensorRSInputSlotCorrection r s g α T X b k` — the `k`-th
-  upper-slot Christoffel correction.
-* `chartTensorRSOutputSlotCorrection r s g α T X b l` — the `l`-th
-  lower-slot Christoffel correction.
-* `chartTensorRSCovariantDerivative r s g α T X b` — the chart-frame
-  covariant derivative.
-* `chartTensorRSCovariantDerivative_apply` — the evaluation formula at
-  `(α_input, m)`.
-* `chartTensorRSCovariantDerivative_add`, `_smul` — additivity / scalar
-  homogeneity in `T`, parametrised by Fréchet-differentiability of the
-  chart-pullback.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -81,16 +28,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-α-trivialised `TensorRSModel r s ℝ E`-valued representation of an
-`(r, s)`-tensor section. On the trivialisation base set this is a continuous
-linear isomorphism with the model fibre; off the base set,
-`continuousLinearMapAt` is the zero map. -/
 noncomputable def tensorRSChartE_section_repr (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) (b : M) : TensorRSModel r s ℝ E :=
   (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)
 
-/-- Pointwise unfolding. -/
 @[simp] lemma tensorRSChartE_section_repr_apply (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) (b : M) :
     tensorRSChartE_section_repr (I := I) r s α T b =
@@ -98,7 +40,6 @@ noncomputable def tensorRSChartE_section_repr (r s : ℕ) (α : M)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b) :=
   rfl
 
-/-- Additivity in the section. -/
 lemma tensorRSChartE_section_repr_add (r s : ℕ) (α : M)
     (T₁ T₂ : Π b : M, TensorRSSpace r s I b) :
     tensorRSChartE_section_repr (I := I) r s α (T₁ + T₂) =
@@ -114,7 +55,6 @@ lemma tensorRSChartE_section_repr_add (r s : ℕ) (α : M)
         (T₁ b + T₂ b) = _
   exact map_add _ (T₁ b) (T₂ b)
 
-/-- Scalar-multiplicativity in the section. -/
 lemma tensorRSChartE_section_repr_smul (r s : ℕ) (α : M) (c : ℝ)
     (T : Π b : M, TensorRSSpace r s I b) :
     tensorRSChartE_section_repr (I := I) r s α (c • T) =
@@ -129,15 +69,11 @@ lemma tensorRSChartE_section_repr_smul (r s : ℕ) (α : M) (c : ℝ)
         (c • T b) = _
   exact map_smul _ c (T b)
 
-/-- The fibre right-inverse of the chart-α trivialisation on the
-`(r, s)`-tensor bundle. -/
 noncomputable def tensorRSChartFiberFromModel (r s : ℕ) (α : M) (b : M) :
     TensorRSModel r s ℝ E →L[ℝ] TensorRSSpace r s I b :=
   (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).symmL ℝ b
 
-/-- The intrinsic chart Fréchet derivative CLM for an `(r, s)`-tensor
-section. -/
 noncomputable def tensorRSIntrinsicChartCLM (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) (b : M) :
     TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
@@ -147,7 +83,6 @@ noncomputable def tensorRSIntrinsicChartCLM (r s : ℕ) (α : M)
         (extChartAt I α b)).comp
       (trivToE (I := I) α b))
 
-/-- Pointwise formula for the intrinsic chart CLM. -/
 lemma tensorRSIntrinsicChartCLM_apply (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) (b : M) (v : TangentSpace I b) :
     tensorRSIntrinsicChartCLM (I := I) r s α T b v =
@@ -159,8 +94,6 @@ lemma tensorRSIntrinsicChartCLM_apply (r s : ℕ) (α : M)
   unfold tensorRSIntrinsicChartCLM
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
 
-/-- Additivity in the section, parametrised by Fréchet-differentiability of
-the chart pullback. -/
 lemma tensorRSIntrinsicChartCLM_add_section (r s : ℕ) (α : M)
     (T₁ T₂ : Π b : M, TensorRSSpace r s I b) (b : M)
     (h₁ : DifferentiableAt ℝ
@@ -203,8 +136,6 @@ lemma tensorRSIntrinsicChartCLM_add_section (r s : ℕ) (α : M)
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [ContinuousLinearMap.add_apply, map_add]
 
-/-- Scalar homogeneity in the section, parametrised by
-Fréchet-differentiability of the chart pullback. -/
 lemma tensorRSIntrinsicChartCLM_smul_section (r s : ℕ) (α : M)
     (c : ℝ) (T : Π b : M, TensorRSSpace r s I b) (b : M)
     (hT : DifferentiableAt ℝ
@@ -237,25 +168,17 @@ lemma tensorRSIntrinsicChartCLM_smul_section (r s : ℕ) (α : M)
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [ContinuousLinearMap.smul_apply, map_smul]
 
-/-- Tangent-slot substitution: identity on every coordinate except slot `k`,
-where it places the given CLM `Φ`. Identical to the helper in
-`ChartTensor0SCovariantDerivative.lean`; re-declared here as a non-private
-alias to keep the construction self-contained while letting downstream
-op-norm bounds reason about its structure. -/
 def tangentSlotCLM (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
-/-- The slot-substitution family at the substituted slot `k` is `Φ`. -/
 lemma tangentSlotCLM_self (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     tangentSlotCLM (I := I) n k Φ k = Φ := by
   unfold tangentSlotCLM
   simp
 
-/-- The slot-substitution family at a non-substituted slot `i ≠ k` is the
-identity CLM. -/
 lemma tangentSlotCLM_other (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin n} (h : i ≠ k) :
@@ -263,11 +186,6 @@ lemma tangentSlotCLM_other (n : ℕ) {b : M}
   unfold tangentSlotCLM
   simp [h]
 
-/-- Underlying CMLM substitution CLM viewed at the `E`-tangent-fibre level.
-This is just `compContinuousLinearMapL` on the `E`-valued multilinear maps;
-the wrap into the `Tensor0SSpace` level uses the bundle CLE
-`tensor0SSpace_continuousLinearEquiv` and the definitional identification
-`TangentSpace I b = E`. -/
 noncomputable def tangentCompCLML_E (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     ContinuousMultilinearMap ℝ (fun _ : Fin n => E) ℝ →L[ℝ]
@@ -276,10 +194,6 @@ noncomputable def tangentCompCLML_E (n : ℕ) (b : M)
     (𝕜 := ℝ) (E := fun _ : Fin n => E) (F := ℝ)
     (show Fin n → (E →L[ℝ] E) from Φ)
 
-/-- The tangent-slot substitution CLM acting on `Tensor0SSpace n I b`. On the
-underlying CMLM data this is the standard `compContinuousLinearMapL`
-substitution; we wrap it through the bundle/norm topology bridge so it lives
-at the `Tensor0SSpace` topology level. -/
 noncomputable def tensorSlotSubstCLM (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     Tensor0SSpace n I b →L[ℝ] Tensor0SSpace n I b :=
@@ -291,10 +205,6 @@ noncomputable def tensorSlotSubstCLM (n : ℕ) (b : M)
           : Tensor0SSpace n I b →L[ℝ]
             ContinuousMultilinearMap ℝ (fun _ : Fin n => E) ℝ))
 
-/-- Pointwise evaluation of `tensorSlotSubstCLM` at a `Tensor0SSpace` element,
-followed by a tuple of tangent vectors. The bridge CLEs are the identity on
-the underlying carrier, so the evaluation reduces to the standard
-`compContinuousLinearMap` formula. -/
 lemma tensorSlotSubstCLM_apply (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (τ : Tensor0SSpace n I b) (m : Fin n → TangentSpace I b) :
@@ -308,7 +218,6 @@ lemma tensorSlotSubstCLM_apply (n : ℕ) (b : M)
   unfold tensorSlotSubstCLM tangentCompCLML_E
   rfl
 
-/-- The `k`-th upper-slot (input) Christoffel correction CLM. -/
 noncomputable def chartTensorRSInputSlotCorrection (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -319,8 +228,6 @@ noncomputable def chartTensorRSInputSlotCorrection (r s : ℕ)
       (tangentSlotCLM (I := I) r k
         (chartLeviCivitaParallelCLM (I := I) g α b X)))
 
-/-- Pointwise formula for the input-slot correction on a tuple
-`(α_input, m)`. -/
 lemma chartTensorRSInputSlotCorrection_apply (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -341,7 +248,6 @@ lemma chartTensorRSInputSlotCorrection_apply (r s : ℕ)
   unfold chartTensorRSInputSlotCorrection
   rfl
 
-/-- The input-slot correction is additive in `T`. -/
 lemma chartTensorRSInputSlotCorrection_add (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b' : M, TensorRSSpace r s I b')
@@ -358,7 +264,6 @@ lemma chartTensorRSInputSlotCorrection_add (r s : ℕ)
   rw [hT_add]
   exact ContinuousLinearMap.add_comp _ _ _
 
-/-- The input-slot correction is scalar-homogeneous in `T`. -/
 lemma chartTensorRSInputSlotCorrection_smul (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -373,7 +278,6 @@ lemma chartTensorRSInputSlotCorrection_smul (r s : ℕ)
   rw [hT_smul]
   exact ContinuousLinearMap.smul_comp _ _ _
 
-/-- The `l`-th lower-slot (output) Christoffel correction CLM. -/
 noncomputable def chartTensorRSOutputSlotCorrection (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -384,8 +288,6 @@ noncomputable def chartTensorRSOutputSlotCorrection (r s : ℕ)
         (chartLeviCivitaParallelCLM (I := I) g α b X))).comp
     (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
 
-/-- Pointwise formula for the output-slot correction on a tuple
-`(α_input, m)`. -/
 lemma chartTensorRSOutputSlotCorrection_apply (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -410,7 +312,6 @@ lemma chartTensorRSOutputSlotCorrection_apply (r s : ℕ)
       (chartLeviCivitaParallelCLM (I := I) g α b X))
     ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) α_input) m
 
-/-- The output-slot correction is additive in `T`. -/
 lemma chartTensorRSOutputSlotCorrection_add (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b' : M, TensorRSSpace r s I b')
@@ -427,7 +328,6 @@ lemma chartTensorRSOutputSlotCorrection_add (r s : ℕ)
   rw [hT_add]
   exact ContinuousLinearMap.comp_add _ _ _
 
-/-- The output-slot correction is scalar-homogeneous in `T`. -/
 lemma chartTensorRSOutputSlotCorrection_smul (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -442,17 +342,6 @@ lemma chartTensorRSOutputSlotCorrection_smul (r s : ℕ)
   rw [hT_smul]
   exact ContinuousLinearMap.comp_smul _ _ _
 
-/-- The chart-frame covariant derivative of an `(r, s)`-tensor field along a
-tangent vector field, returning a section of the `(r, s)`-tensor bundle.
-
-By construction this is the difference of three pieces:
-
-* the intrinsic chart Fréchet derivative `tensorRSIntrinsicChartCLM r s α T b
-  (X b)`,
-* the sum over upper slots `k : Fin r` of
-  `chartTensorRSInputSlotCorrection r s g α T X b k`,
-* the sum over lower slots `l : Fin s` of
-  `chartTensorRSOutputSlotCorrection r s g α T X b l`. -/
 noncomputable def chartTensorRSCovariantDerivative (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -463,7 +352,6 @@ noncomputable def chartTensorRSCovariantDerivative (r s : ℕ)
     - (∑ l : Fin s,
         chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l)
 
-/-- Unfolding for the chart-frame covariant derivative. -/
 lemma chartTensorRSCovariantDerivative_def (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -475,11 +363,6 @@ lemma chartTensorRSCovariantDerivative_def (r s : ℕ)
         - (∑ l : Fin s,
             chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) := rfl
 
-/-- Evaluation of the chart-frame covariant derivative at
-`(α_input, m)`. The right-hand side is the difference of three
-contributions: the intrinsic chart piece's scalar value, the sum over input
-slots of the upper-slot correction's scalar value, and the sum over output
-slots of the lower-slot correction's scalar value. -/
 lemma chartTensorRSCovariantDerivative_apply (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -560,7 +443,6 @@ lemma chartTensorRSCovariantDerivative_apply (r s : ℕ)
     rw [ContinuousLinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
   rw [hBeval, hCeval]
 
-/-- **Additivity in `T`.** -/
 lemma chartTensorRSCovariantDerivative_add (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b : M, TensorRSSpace r s I b)
@@ -612,7 +494,6 @@ lemma chartTensorRSCovariantDerivative_add (r s : ℕ)
   rw [hsplit_output]
   abel
 
-/-- **Scalar homogeneity in `T`.** -/
 lemma chartTensorRSCovariantDerivative_smul (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b : M, TensorRSSpace r s I b)

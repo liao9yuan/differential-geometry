@@ -2,28 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOr
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
 
-/-!
-# Compact-uniform chart-jet bounds (interior, not just the partition-of-unity kernel)
-
-The reverse-Christoffel order-peeling
-(`iteratedFDeriv_rawPullR_le_zeroContent_sum`) and the order-`0` reverse fibre
-bound (`exists_zeroContentR_le_fiberNorm_on_pouKernel`) are both stated only on the
-*partition-of-unity kernel* `chartImagePOUTsupport α` / `chartPouKernel α` — a
-proper compact subset of the chart-target image.  That restriction is incidental:
-the only place the kernel enters is as a compact subset of the (open) chart target
-along which the smooth Christoffel coefficients and the chart-trivialisation
-operator norm are uniformly bounded.  Mathlib's `IsCompact.exists_bound_of_continuousOn`
-gives the same uniform bound on *any* compact-in-target set, and the reverse
-op-norm comparison already has an arbitrary-compact-in-source form
-(`chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact`).
-
-This file lifts both bounds to an **arbitrary compact `K ⊆ chartTargetEuclid α`**
-(equivalently `K_M ⊆ (chartAt H α).source` in source coordinates), re-proving them
-from the existing compact-in-source building blocks WITHOUT editing the upstream
-files.  This is exactly the bound the spectral chart-Gram increment series needs
-near the chart-target boundary, where the kernel does not reach.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology Metric Tensor0SBundle
@@ -52,13 +30,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Compact-in-target uniform Christoffel-coefficient jet bound.**  The
-companion of `exists_lowerOrderCoeff_uniform_boundR`, with the kernel
-`chartImagePOUTsupport α` replaced by an arbitrary compact `K ⊆ chartTargetEuclid α`.
-The proof is identical: the lower-order coefficients `covDerivLowerOrderCoeff`
-are `C^∞` on the open chart target, so their iterated Fréchet derivatives are
-uniformly bounded on every compact subset, with a single constant uniform across
-all valences `≤ N`. -/
 lemma exists_lowerOrderCoeff_uniform_bound_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ)
     {K : Set EuclN} (hK : IsCompact K) (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -100,9 +71,6 @@ lemma exists_lowerOrderCoeff_uniform_bound_on_compact
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
-/-- **Compact-in-target valence-range Christoffel bound.**  The companion of
-`exists_christoffel_bound_valence_range`, with `chartImagePOUTsupport α` replaced
-by an arbitrary compact `K ⊆ chartTargetEuclid α`. -/
 lemma exists_christoffel_bound_valence_range_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P N : ℕ)
     {K : Set EuclN} (hK : IsCompact K) (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -138,15 +106,7 @@ lemma exists_christoffel_bound_valence_range_on_compact
       (Finset.le_sup' Γf (Finset.mem_range.mpr (by omega)))
 
 set_option maxHeartbeats 1600000 in
-/-- **Compact-in-target pointwise reverse-peeling.**  The companion of
-`iteratedFDeriv_rawPullR_le_zeroContent_sum`, with the kernel
-`chartImagePOUTsupport α` replaced by an arbitrary compact `K ⊆ chartTargetEuclid α`.
-The inductive argument is identical: the only kernel-specific input is the uniform
-Christoffel-coefficient bound, which is now supplied for `K` by
-`exists_christoffel_bound_valence_range_on_compact`; all other steps
-(`fderiv_rawPullR_single_eq`, `lowerOrderTerm_iteratedFDeriv_norm_leR`,
-`rawPullR_contDiffAt`, `iteratedFDeriv_succ_norm_le_sum_euclidPartial`) need only
-membership in the open chart target, which `hK_sub` provides. -/
+
 lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : ℕ)
@@ -451,13 +411,6 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
         refine le_trans h_final ?_
         apply mul_le_mul_of_nonneg_right (le_max_right _ _) hRHSsum_nn
 
-/-- **Compact-in-source reverse fibre bound for the raw chart component.**  The
-companion of `tensorChartComponentRaw_sq_le_const_mul_tensorInner`, with the
-partition-of-unity support replaced by an arbitrary compact `K_M ⊆ baseSet`.  The
-chart trivialisation has a uniform inverse-operator-norm bound on every compact
-subset of the trivialisation base set
-(`chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact`),
-which combined with the fixed chart-component projections gives the bound. -/
 lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M : IsCompact K_M)
@@ -503,8 +456,8 @@ lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner_on_compact
     have h_rhs : (C_proj * ‖T‖) * (C_proj * ‖T‖) = C_proj ^ 2 * ‖T‖ ^ 2 := by ring
     have h_lhs : ‖P_IJ T‖ * ‖P_IJ T‖ = ‖P_IJ T‖ ^ 2 := by rw [sq]
     linarith [hsq, h_lhs.symm.le, h_rhs.symm.le, h_lhs.le, h_rhs.le]
-  -- The trivialisation-projection squared norm is controlled by the chart inner product,
-  -- which on `baseSet` equals the intrinsic fibre inner product of `S.toFun b`.
+  
+  
   have h_chart_sq_le : ‖T‖ ^ 2 ≤
       K * chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T :=
     h_norm b hb T
@@ -536,12 +489,7 @@ lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner_on_compact
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Compact-in-target order-`0` reverse fibre bound.**  The companion of
-`exists_zeroContentR_le_fiberNorm_on_pouKernel`, with the kernel `chartPouKernel α`
-replaced by an arbitrary compact `K ⊆ chartTargetEuclid α`, equivalently a compact
-`K_M ⊆ (chartAt H α).source` in source coordinates (with `K = toEuclidean '' (extChartAt α '' K_M)`).
-This converts the order-`0` raw content read at the chart-target image of `b ∈ K_M`
-into the intrinsic Riemannian fibre norm `‖S.toSection b‖`. -/
+
 lemma exists_zeroContentR_le_fiberNorm_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M : IsCompact K_M)

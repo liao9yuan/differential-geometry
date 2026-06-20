@@ -12,30 +12,6 @@ import Mathlib.MeasureTheory.Function.ContinuousMapDense
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 
-/-!
-# Compactly-supported smooth scalars and tangent sections
-
-This file packages two `ℝ`-submodules of smooth data on a smooth manifold:
-
-* `compactlySupportedSmoothFunctions I M` — the scalar-valued smooth functions
-  `C^∞⟮I, M; ℝ⟯` whose underlying `M → ℝ` map has compact support;
-* `compactlySupportedSmoothTangentSections I M` — the smooth tangent sections
-  `Cₛ^∞⟮I; E, TangentSpace I⟯` whose underlying map has compact support.
-
-The closure properties under pointwise addition and real scalar multiplication
-follow from the standard `HasCompactSupport` closure lemmas. We further record:
-
-* pointwise multiplication closure for scalars, both symmetric
-  (`_mul_mem`) and one-sided (`_mul_mem_left`, `_mul_mem_right`);
-* closure under the directional derivative
-  `vectorFieldActionSmooth I M X f`, in both variable arguments;
-* closure of the concrete Levi-Civita-style connection
-  `concreteConn I M cov X Y` in the vector-field argument.
-
-All results take hypotheses in the minimal form consistent with the conventions
-of `Integral/Integration/Basic.lean`.
--/
-
 noncomputable section
 
 open Manifold Set Filter Bundle CovariantDerivative
@@ -50,9 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `ℝ`-submodule of smooth scalar functions `C^∞⟮I, M; ℝ⟯` whose underlying
-`M → ℝ` map has compact support. Closed under pointwise addition and scalar
-multiplication by the `HasCompactSupport` closure lemmas. -/
 def compactlySupportedSmoothFunctions
     (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] :
@@ -80,9 +53,6 @@ lemma mem_compactlySupportedSmoothFunctions
     {f : C^∞⟮I, M; ℝ⟯} :
     f ∈ compactlySupportedSmoothFunctions I M ↔ HasCompactSupport (f : M → ℝ) := Iff.rfl
 
-/-- The `ℝ`-submodule of smooth tangent sections whose underlying map to the
-model space has compact support. Closed under pointwise addition and
-scalar multiplication. -/
 def compactlySupportedSmoothTangentSections
     (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] :
@@ -135,8 +105,6 @@ lemma mem_compactlySupportedSmoothTangentSections
     X ∈ compactlySupportedSmoothTangentSections I M ↔
       HasCompactSupport (fun x : M => (X x : E)) := Iff.rfl
 
-/-- Pointwise multiplication preserves compact support on the left: if `f` is
-compactly supported, so is `f * f'` for any smooth `f'`. -/
 theorem compactlySupportedSmoothFunctions_mul_mem_left
     {f : C^∞⟮I, M; ℝ⟯} (hf : f ∈ compactlySupportedSmoothFunctions I M)
     (f' : C^∞⟮I, M; ℝ⟯) :
@@ -148,8 +116,6 @@ theorem compactlySupportedSmoothFunctions_mul_mem_left
   rw [h]
   exact hf.mul_right
 
-/-- Pointwise multiplication preserves compact support on the right: if `f'` is
-compactly supported, so is `f * f'` for any smooth `f`. -/
 theorem compactlySupportedSmoothFunctions_mul_mem_right
     (f : C^∞⟮I, M; ℝ⟯) {f' : C^∞⟮I, M; ℝ⟯}
     (hf' : f' ∈ compactlySupportedSmoothFunctions I M) :
@@ -161,9 +127,6 @@ theorem compactlySupportedSmoothFunctions_mul_mem_right
   rw [h]
   exact hf'.mul_left
 
-/-- Pointwise multiplication is closed within the compactly-supported submodule:
-the product of two compactly-supported smooth scalars is again compactly
-supported. -/
 theorem compactlySupportedSmoothFunctions_mul_mem
     {f f' : C^∞⟮I, M; ℝ⟯}
     (hf : f ∈ compactlySupportedSmoothFunctions I M)
@@ -175,17 +138,12 @@ section DirectionalDerivative
 
 variable [T2Space M] [SigmaCompactSpace M]
 
-/-- Auxiliary: the pointwise value of `vectorFieldAction` at a point `x` where
-the vector field vanishes is zero, since the exterior derivative at `x` is a
-continuous linear map. -/
 private lemma vectorFieldAction_eq_zero_of_vectorField_eq_zero
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : C^∞⟮I, M; ℝ⟯)
     {x : M} (hx : X x = 0) :
     vectorFieldAction I M X f x = 0 := by
   simp [vectorFieldAction, hx]
 
-/-- If the vector field `X` is compactly supported, then the directional
-derivative `X(f)` is compactly supported for every smooth scalar `f`. -/
 theorem compactlySupportedSmoothTangentSections_action_mem
     {X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯}
     (hX : X ∈ compactlySupportedSmoothTangentSections I M)
@@ -205,8 +163,6 @@ theorem compactlySupportedSmoothTangentSections_action_mem
     simpa using hXx
   exact vectorFieldAction_eq_zero_of_vectorField_eq_zero X f this
 
-/-- If the scalar `f` is compactly supported, then the directional derivative
-`X(f)` is compactly supported for every smooth vector field `X`. -/
 theorem compactlySupportedSmoothFunctions_action_of_smooth_section
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f : C^∞⟮I, M; ℝ⟯}
@@ -239,8 +195,6 @@ section CovariantDerivativeClosure
 
 variable [T2Space M] [SigmaCompactSpace M]
 
-/-- If the vector field `X` is compactly supported, then `∇_X Y = concreteConn
-  cov X Y` is a compactly-supported smooth section for every smooth `Y`. -/
 theorem compactlySupportedSmoothTangentSections_conn_mem_of_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -260,11 +214,6 @@ theorem compactlySupportedSmoothTangentSections_conn_mem_of_left
     simp [concreteConn_apply, hXx']
   simpa using this
 
-/-- If the vector field `Y` is compactly supported, then `∇_X Y = concreteConn
-  cov X Y` is a compactly-supported smooth section for every smooth `X`.
-
-The argument uses locality of a covariant derivative: if `Y` vanishes on an open
-neighborhood of `x`, then `cov Y x = cov 0 x = 0`. -/
 theorem compactlySupportedSmoothTangentSections_conn_mem_of_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -326,10 +275,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Integral.Measure
 
-/-- A smooth function with compact support is in `L^p` for every `p` with respect
-to the Riemannian volume measure. Consequence of local finiteness of the
-Riemannian volume measure on compacts together with continuity (smoothness
-implies continuity). -/
 theorem compactlySupportedSmoothFunctions_memLp
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -343,9 +288,6 @@ theorem compactlySupportedSmoothFunctions_memLp
   have hsup : HasCompactSupport ((f : M → ℝ)) := hf
   exact hcont.memLp_of_hasCompactSupport (μ := riemannianVolumeMeasure (I := I) (M := M) g) hsup
 
-/-- Any continuous compactly-supported `φ : M → ℝ` can be uniformly approximated by
-a smooth compactly-supported map whose support is contained in `tsupport φ`. The
-precision of the uniform approximation is controlled by any positive real `δ`. -/
 private lemma exists_contMDiff_uniform_approx_sub_compact_support
     [T2Space M] [SigmaCompactSpace M]
     {φ : M → ℝ} (hφ : Continuous φ) {δ : ℝ} (hδ : 0 < δ) :
@@ -361,12 +303,6 @@ private lemma exists_contMDiff_uniform_approx_sub_compact_support
   have := g_approx x
   simpa [Real.dist_eq] using this
 
-/-- `eLpNorm` of a continuous function bounded by `δ` and supported on a set of
-finite measure `K`, with bound `μ K ^ (1/p) * δ`. This is the key analytic
-building block of the density result: the `L^p` norm of the difference between a
-continuous compactly-supported function and its smooth uniform approximation is
-controlled by the uniform bound times the `(1/p)`-power of the measure of the
-common compact support. -/
 private lemma eLpNorm_le_of_bound_and_support_le_measure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -414,9 +350,6 @@ private lemma eLpNorm_le_of_bound_and_support_le_measure
     _ = ENNReal.ofReal δ * μ K ^ (p.toReal⁻¹) := by rw [hδ_enorm]
     _ = μ K ^ (p.toReal⁻¹) * ENNReal.ofReal δ := by rw [mul_comm]
 
-/-- Approximation of a continuous compactly-supported `φ : M → ℝ` by a smooth
-compactly-supported function in `eLpNorm`. The smooth approximator has its
-support contained in `tsupport φ`, so it is itself compactly supported. -/
 private lemma exists_smoothCompactSupport_eLpNorm_sub_le_of_continuous
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -519,11 +452,6 @@ private lemma exists_smoothCompactSupport_eLpNorm_sub_le_of_continuous
       _ = factor * ENNReal.ofReal δ := by rw [hμK_eq]
       _ ≤ ε := hδ_bound
 
-/-- Density of compactly-supported smooth scalar functions in `L^p`, stated in
-the form: for every `u ∈ Lp ℝ p μ` and every `ε > 0`, there exists `f : C^∞⟮I,
-M; ℝ⟯` with compact support such that the `L^p` distance between `u` and the
-`L^p` class of `f` is less than `ε`. Here `μ` is the Riemannian volume measure
-of the smooth Riemannian metric `g`. -/
 theorem compactlySupportedSmoothFunctions_denseRange_in_Lp
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -606,8 +534,6 @@ theorem compactlySupportedSmoothFunctions_denseRange_in_Lp
     _ ≤ ε / 2 := h_toReal_bound
     _ < ε := by linarith
 
-/-- `Dense`-image formulation of the density result: the range of the canonical
-map `compactlySupportedSmoothFunctions I M → Lp ℝ p μ` has dense image. -/
 theorem compactlySupportedSmoothFunctions_dense_image_in_Lp
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

@@ -2,52 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivChartPushedRawBridge
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 
-/-!
-# Pointwise uniform-in-`T₀` bound on the Riemannian fiber norm-squared of the
-raw tensor connection Laplacian by chart-`α` Sobolev-summand data on `M`.
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-chart base point `α : M`, this file ships a single non-negative constant `C`,
-depending only on `g`, `r`, `s`, `α` (and **independent of the input section
-`T₀`**), such that for every smooth compactly-supported `(r, s)`-tensor
-section `T₀` and every base point `b` lying in the intersection of the
-chart-`α` partition-of-unity tsupport with the chart-`α` Levi-Civita good set,
-the intrinsic Riemannian fiber norm-squared of the raw tensor connection
-Laplacian at `b` is dominated by `C` times the multi-index sum of order-0,
-order-1, and order-2 iterated-Fréchet-derivative squared norms of the chart-α
-pulled composition `tensorChartComponentRaw … ∘ (extChartAt I α).symm`, all
-evaluated at the model-space point `(extChartAt I α) b`.
-
-This headline aggregates two pieces of upstream infrastructure:
-
-* The chart-α Euclidean push-forward bound
-  `rawTensorConnLap_riemannianFiberNormSq_le_chart_α_data_T0_uniform`, whose
-  right-hand side uses `iteratedFDeriv ℝ 2`, `fderiv ℝ`, and a function-value
-  summand of the raw chart push-forward
-  `chartPushedRaw I α (tensorChartComponentRaw …)` evaluated at the Euclidean
-  chart-target point `(toEuclidean (E := E)) ((extChartAt I α) b)`.
-* The chain-rule bridge between the raw chart push-forward and the chart-pulled
-  composition `tensorChartComponentRaw … ∘ (extChartAt I α).symm` at the
-  corresponding model-space point: orders 0, 1, 2 are supplied by
-  `chartPushedRaw_sq_eq_compositionSq`,
-  `fderiv_chartPushedRaw_sq_le_compFderivSq`, and
-  `iteratedFDeriv_two_chartPushedRaw_sq_le_compIterSq` respectively. Each
-  bridge order introduces a chain factor
-  `‖(toEuclidean (E := E)).symm.toContinuousLinearMap‖ ^ (2 j)`, which is a
-  fixed constant absorbed into the final constant `C`.
-
-The shape of the right-hand side is the integrand pattern used by the
-chart-tensor Sobolev norm: a sum over multi-indices `(Idx, Jdx)` and a sum
-over orders `j ∈ {0, 1, 2}` of squared iterated-Fréchet-derivative norms of
-the chart-α pulled composition at the model-space point `(extChartAt I α) b`.
-This pointwise bound is the bridge between the Euclidean-side chart-pushed
-bound and the chart-α-pulled Sobolev-summand pattern used in the downstream
-manifold-level `L²` and Sobolev framework.
-
-The quantifier order is `∃ C, ∀ T₀`: the constant is uniform in `T₀`. No
-chart-locality predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -82,24 +36,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Pointwise uniform-in-`T₀` bound on `riemannianFiberNormSq` of the raw
-tensor connection Laplacian by chart-`α` Sobolev-summand data on `M`.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-chart base point `α : M`, there exists a non-negative constant `C`, depending
-only on `g`, `r`, `s`, `α` and **independent of the section `T₀`**, such that
-for every smooth compactly-supported `(r, s)`-tensor section `T₀` and every
-base point `b` in the intersection of the chart-`α` partition-of-unity tsupport
-with the chart-`α` Levi-Civita good set,
-```
-riemannianFiberNormSq g r s b (rawTensorConnLap g r s T₀.toSection b)
-  ≤ C · ∑_{Idx Jdx} ∑_{j ∈ {0, 1, 2}}
-        ‖iteratedFDeriv ℝ j (tensorChartComponentRaw … ∘ (extChartAt I α).symm)
-            ((extChartAt I α) b)‖^2.
-```
-The bound is unconditional in the chart atlas: no chart-locality predicate is
-required. The quantifier order is `∃ C, ∀ T₀`: the constant is uniform across
-all input sections `T₀`. -/
 theorem rawTensorConnLap_riemannianFiberNormSq_le_chartPouSobolevSummand_T0_uniform
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

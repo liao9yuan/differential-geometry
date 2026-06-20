@@ -2,35 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
 
-/-!
-# The curvature characterisation of the order-`2` commutator defect
-
-This file records the **curvature characterisation** of the rough-Laplacian /
-covariant-gradient commutator defect `Curv = Δ_∇(∇S) − ∇(Δ_∇ S)` appearing in the
-integrated order-`2` Weitzenböck identity `weitzenbock_integrated_covGrad_l2_normSq`.
-
-Fibrewise, `Curv` is a sum of genuine curvature contractions `R_x(B_i, ·)(∇S)` —
-both differentiation directions being honest frame / coordinate vector fields
-(never the gradient slot read pointwise), so the bundled Ricci identity
-`tensorSecondCovDeriv_antisymm_eq_riemannOp` applies directly to the gradient
-field `∇S = covGrad g 0 s S`. The fibre norm of each such contraction is
-controlled by the per-point curvature constant times the fibre norm of `∇S`; over
-a closed manifold this is `‖R‖_∞ · rfns(∇S)`.
-
-## Main results
-
-* `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` — the Ricci identity on the
-  gradient field at arbitrary covariant rank:
-  `∇²_{X, Y}(∇S)(x) − ∇²_{Y, X}(∇S)(x) = R_x(X(x), Y(x))(∇S(x))`.
-* `riemannOp_covGrad_fiberNormSq_le_gen` — the uniform curvature fibre-norm bound
-  on the gradient field at arbitrary covariant rank:
-  `rfns(R_x(v, w)(∇S(x))) ≤ Cx · g(v, v) · g(w, w) · rfns(∇S(x))`.
-
-These are the rank-generic curvature ingredients consumed when bounding the
-commutator cross term `⟨Curv, ∇S⟩_{L²}` by `‖R‖_∞ · (rfns(S) + rfns(∇S))` in the
-integrated route.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -59,16 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- **The Ricci identity on the gradient field** at arbitrary covariant rank. For
-smooth tangent fields `X, Y`, the antisymmetric Hessian of the gradient field
-`∇S = covGrad g 0 s S` equals the bundled Riemann operator on its fibre value:
 
-```
-∇²_{X, Y}(∇S)(x) − ∇²_{Y, X}(∇S)(x) = R_x(X(x), Y(x))(∇S(x)).
-```
-
-This is the rank-`(0, s + 1)` instance of `tensorSecondCovDeriv_antisymm_eq_riemannOp`
-on the gradient section — both commuted directions are genuine vector fields. -/
 theorem secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {X Y : Π b : M, TangentSpace I b} {x : M}
@@ -85,18 +47,7 @@ theorem secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen
     hX hY (covGrad (I := I) (M := M) g 0 s S).toSection.contMDiff
 
 set_option linter.unusedSectionVars false in
-/-- **Uniform curvature fibre-norm bound on the gradient field** at arbitrary
-covariant rank. For any two tangent vectors `v, w` at `x`, the curvature
-contraction of the gradient field `∇S = covGrad g 0 s S` satisfies
 
-```
-rfns(R_x(v, w)(∇S(x))) ≤ Cx · g(v, v) · g(w, w) · rfns(∇S(x)),
-```
-
-with `Cx ≥ 0` the per-point curvature constant, uniform in `(v, w)` and the
-contracted tensor. This is the rank-`(0, s + 1)` curvature fibre bound; together
-with the Ricci identity it controls each curvature summand of the commutator
-defect by `‖R‖_∞ · rfns(∇S)`. -/
 theorem riemannOp_covGrad_fiberNormSq_le_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     ∃ Cx : ℝ, 0 ≤ Cx ∧

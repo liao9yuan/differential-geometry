@@ -1,57 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 
-/-!
-# Off-centre chart-`α` frame expansion of the differentiated base curvature `∇R`
-
-`Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre` establishes the off-centre
-chart-`α` basis identity for the base Riemann operator: at `x ∈ chartLeviCivitaGoodSet α`,
-```
-riemannOp (LeviCivita g) x (e^α_j x) (e^α_k x) (e^α_i x)
-  = ∑ l, R^l{}_{ijk}(g, α)(ϕ_α x) • e^α_l x.
-```
-
-This file pushes that identity **one covariant-derivative order higher**, expanding the
-differentiated base curvature `nablaBaseSlotCurv g X Y Z x u = (∇_X R^{TM})(Y, Z) u`
-(`DifferentiatedRicciEndomorphism`) on chart-`α` frame vectors, for globally-smooth fields
-agreeing with the chart-`α` frame near `x`:
-```
-(∇_{e^α_p} R)(e^α_q, e^α_r)(e^α_s x)
-  = ∑ l, (∂_p R^l{}_{srq}(g, α)(ϕ_α x)
-            + Γ-corrections in chartChristoffel · chartRiemannTensor) • e^α_l x.
-```
-The coefficient is a **fixed polynomial** in the chart Christoffel symbols `chartChristoffel`,
-the chart Riemann coefficients `chartRiemannTensor`, and their first Euclidean partials, all of
-which are `C^∞` on the chart-target interior. The exact coefficient is irrelevant downstream;
-the file records that `(∇_{e^α} R)(e^α, e^α)(e^α)` expands in the chart-`α` frame with a
-coefficient `nablaChartRiemannCoeff` that is `C^∞` on the chart-target interior — hence
-uniformly bounded on the compact partition-of-unity supports — which is what the compact-uniform
-differentiated-curvature `g`-norm bound rests on.
-
-## Strategy
-
-The differentiated curvature unfolds (`nablaCurvSec_def`) into four Leibniz terms:
-`∇_p(R(e_q, e_r) e_s) − R(∇_p e_q, e_r) e_s − R(e_q, ∇_p e_r) e_s − R(e_q, e_r)(∇_p e_s)`.
-
-* The leading term `∇_p(R(e_q, e_r) e_s)` is the covariant derivative of the curvature section
-  `b ↦ R(e_q, e_r) e_s (b)`, which on the good set equals `∑_m R^m{}_{srq}(g, α)(ϕ_α b) • e^α_m b`
-  (`riemannOp_chartBasisVec_alpha_eq` pointwise). Its covariant derivative along `e^α_p` is
-  computed by the Leibniz rule, exactly as in `LeviCivita_chartBasisVec_secondCovDeriv_alpha`:
-  the partial derivative of the chart Riemann coefficient times the frame, plus the coefficient
-  times the chart-Christoffel first covariant derivative of the frame.
-* The three correction curvatures `R(∇_p e_q, e_r) e_s`, etc., substitute the chart-Christoffel
-  first covariant derivative `∇_p e_q = ∑_m Γ^m{}_{pq} e^α_m` and expand each `R(e_m, e_r) e_s`
-  by `riemannOp_chartBasisVec_alpha_eq`.
-
-## Main results
-
-* `nablaCurvSec_chartBasisVec_alpha_frame_expand` — the off-centre chart-`α` frame expansion
-  of the differentiated base curvature on chart-frame triples, with the chart `∇R` coefficient
-  `nablaChartRiemannCoeff`.
-* `nablaChartRiemannCoeff_contDiffOn_interior` — the chart `∇R` coefficient is `C^∞` on the
-  chart-target interior.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -78,21 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **The chart-`α` differentiated-Riemann coefficient.** For chart indices `p` (derivation),
-`q, r` (antisymmetric), `s` (acted), `l` (frame), this is the coefficient of `e^α_l` in the
-chart-`α` frame expansion of `(∇_{e^α_p} R)(e^α_q, e^α_r)(e^α_s)`. It is the fixed polynomial in
-the chart Christoffel symbols, the chart Riemann coefficients, and the first partial derivative
-of the chart Riemann coefficients given by the four-term Leibniz expansion of `nablaCurvSec`:
-```
-nablaChartRiemannCoeff g α p q r s l
-  = ∂_p R^l{}_{sqr}
-    + ∑_m R^m{}_{sqr} Γ^l{}_{pm}
-    − ∑_m Γ^m{}_{pq} R^l{}_{smr}
-    − ∑_m Γ^m{}_{pr} R^l{}_{sqm}
-    − ∑_m Γ^m{}_{ps} R^l{}_{mqr},
-```
-with `R^l{}_{ijk} := chartRiemannTensor g α i j k l` and `Γ^k{}_{ij} := chartChristoffel g α i j k`,
-all evaluated at the Euclidean chart point `y`. -/
 def nablaChartRiemannCoeff (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s l : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y =>
@@ -111,8 +45,7 @@ def nablaChartRiemannCoeff (g : SmoothRiemannianMetric I M) (α : M)
             chartRiemannTensor (I := I) g α m q r l y)
 
 set_option linter.unusedSectionVars false in
-/-- The first model-basis partial derivative of a function `C^∞` on the chart-target interior is
-again `C^∞` there. -/
+
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))
@@ -128,9 +61,7 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   exact hfderiv.clm_apply contDiffOn_const
 
 set_option linter.unusedSectionVars false in
-/-- The chart-`α` Riemann coefficient `chartRiemannTensor g α i j k l` is `C^∞` on the interior
-of the chart target. It is the polynomial `∂Γ − ∂Γ + ΓΓ` in the chart Christoffel symbols, each
-of which is `C^∞` there (`chartChristoffel_contDiffOn_interior`). -/
+
 private lemma chartRiemannTensor_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
@@ -169,11 +100,7 @@ private lemma chartRiemannTensor_contDiffOn_interior
   exact (hdΓ1.sub hdΓ2).add hΓΓ
 
 set_option linter.unusedSectionVars false in
-/-- **The chart-`α` differentiated-Riemann coefficient is `C^∞` on the chart-target interior.**
-It is a polynomial in the chart Christoffel symbols, the chart Riemann coefficients, and the
-first partials of the chart Riemann coefficients, each `C^∞` on the chart-target interior
-(`chartChristoffel_contDiffOn_interior`, `chartRiemannTensor_contDiffOn_interior`,
-`partialDeriv_contDiffOn_interior_of_contDiffOn`). -/
+
 theorem nablaChartRiemannCoeff_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s l : Fin (Module.finrank ℝ E)) :
@@ -228,14 +155,6 @@ theorem nablaChartRiemannCoeff_contDiffOn_interior
   rw [hrw]
   exact ((((hdR.add hsum1).sub hsum2).sub hsum3).sub hsum4)
 
-/-! ### The four Leibniz terms of `nablaCurvSec` on chart-`α` frame vectors -/
-
-/-- **Leading term: covariant derivative of the chart-`α` curvature section.** For globally-smooth
-fields `Xp, Xq, Xr, Xs` agreeing with the chart-`α` frame fields `e^α_p, e^α_q, e^α_r, e^α_s` on
-an open neighbourhood `U ∋ x` inside `chartLeviCivitaGoodSet α`, the covariant derivative of the
-curvature section `b ↦ R(Xq, Xr) Xs (b)` along `Xp` at `x` equals
-`∑_l (∂_p R^l{}_{sqr} + ∑_m R^m{}_{sqr} Γ^l{}_{pm}) • e^α_l x`, by the chart-`α` frame expansion of
-the curvature section (`riemannOp_chartBasisVec_alpha_eq` pointwise) and the Leibniz rule. -/
 private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -265,7 +184,7 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
   set S : Π y : M, TangentSpace I y := fun b => riemannSec cov Xq Xr Xs b with hS_def
   have hS_diff : MDiffAt (T% S) x :=
     (riemannSec_contMDiff (cov := cov) hXq hXr hXs x).mdifferentiableAt (by simp)
-  -- the curvature section equals `∑_m R^m{}_{sqr} • e^α_m` on `U`.
+  
   set Rc : Fin (Module.finrank ℝ E) → M → ℝ :=
     fun m y => chartRiemannTensor (I := I) g α s q r m (extChartAt I α y) with hRc_def
   set term : Fin (Module.finrank ℝ E) → Π y : M, TangentSpace I y :=
@@ -275,7 +194,7 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
     have hy_good : y ∈ chartLeviCivitaGoodSet (I := I) α := hU_good hy
     have hSval : S y = riemannSec cov Xq Xr Xs y := rfl
     rw [hSval]
-    -- read `riemannSec` at `y` as the bundled `riemannOp` on the section values at `y`.
+    
     rw [← riemannOp_apply_smooth (cov := cov) hXq hXr hXs]
     rw [hXq_eq y hy, hXr_eq y hy, hXs_eq y hy]
     rw [riemannOp_chartBasisVec_alpha_eq (I := I) g α s q r hy_good]
@@ -369,7 +288,7 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
     intro m
     rw [LeviCivita_chartBasisVec_alpha_basis_apply (I := I) g α p m hx]
   rw [Finset.sum_congr rfl (fun m _ => by rw [hder m, hRc_x m, hinner m])]
-  -- reorganise `∑_m (∂R • e_m + R • ∑_l Γ • e_l)` into `∑_l coeff_l • e_l`.
+  
   set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
     fun l => chartBasisVecFiber (I := I) α l x with he_def
   set D : Fin (Module.finrank ℝ E) → ℝ :=
@@ -401,11 +320,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_leadingTerm
           refine Finset.sum_congr rfl (fun l _ => ?_)
           rw [← Finset.sum_smul, ← add_smul]
 
-/-- **Bundled-`riemannOp` expansion of a chart-Christoffel-contracted antisymmetric slot.** For
-`x ∈ chartLeviCivitaGoodSet α` and chart indices `m', r, s`, the bundled Riemann operator on the
-frame triple `(e^α_{m'} x, e^α_r x, e^α_s x)` expands as `∑_l R^l{}_{s m' r} • e^α_l x`. This
-restates `riemannOp_chartBasisVec_alpha_eq` (acted index `s`, first/second antisymmetric `m', r`)
-in the bundled-`riemannOp` form. -/
 private lemma riemannOp_chartFrame_triple
     (g : SmoothRiemannianMetric I M) (α : M)
     (m' r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -418,11 +332,6 @@ private lemma riemannOp_chartFrame_triple
           chartBasisVecFiber (I := I) α l x :=
   riemannOp_chartBasisVec_alpha_eq (I := I) g α s m' r hx
 
-/-- **Chart-`α` frame value of a first covariant derivative.** For globally-smooth fields `Xp, Xq`
-agreeing with the chart-`α` frame fields `e^α_p, e^α_q` on an open neighbourhood `U ∋ x` inside
-`chartLeviCivitaGoodSet α`, the first covariant derivative value `(∇_{Xp} Xq)(x)` equals
-`∑_m Γ^m{}_{pq}(ϕ_α x) • e^α_m x`, by germ-locality of `cov.toFun` in `Xq` and value-locality in
-`Xp x`, reduced to `LeviCivita_chartBasisVec_alpha_basis_apply`. -/
 private lemma covApply_chartFrame_value
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q : Fin (Module.finrank ℝ E)) {x : M}
@@ -452,10 +361,6 @@ private lemma covApply_chartFrame_value
   rw [hcov_congr, hXp_eq x hxU]
   rw [LeviCivita_chartBasisVec_alpha_basis_apply (I := I) g α p q hx]
 
-/-- **First correction term: `R(∇_p e_q, e_r) e_s` on chart-`α` frame vectors.** For
-`x ∈ chartLeviCivitaGoodSet α`, the curvature with the chart-Christoffel first covariant
-derivative `∇_{e^α_p} e^α_q = ∑_m Γ^m{}_{pq} e^α_m` inserted into the first antisymmetric slot
-expands as `∑_l (∑_m Γ^m{}_{pq} R^l{}_{smr}) • e^α_l x`. -/
 private lemma nablaCurvSec_chartBasisVec_alpha_corr_firstAntisym
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -480,11 +385,11 @@ private lemma nablaCurvSec_chartBasisVec_alpha_corr_firstAntisym
   classical
   set cov := LeviCivita (I := I) g with hcov_def
   have hcXpXq := covApply_contMDiff (cov := cov) hXp hXq
-  -- read `riemannSec ... x` as bundled `riemannOp` on slot values at `x`.
+  
   rw [← riemannOp_apply_smooth (cov := cov) hcXpXq hXr hXs]
   rw [covApply_chartFrame_value (I := I) g α p q hx hXq hU_open hxU hXp_eq hXq_eq,
     hXr_eq x hxU, hXs_eq x hxU]
-  -- expand the trilinear `riemannOp` over the first-slot frame sum.
+  
   set er : TangentSpace I x := chartBasisVecFiber (I := I) α r x with her_def
   set es : TangentSpace I x := chartBasisVecFiber (I := I) α s x with hes_def
   have hexpand :
@@ -514,9 +419,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_corr_firstAntisym
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [← Finset.sum_smul]
 
-/-- **Second correction term: `R(e_q, ∇_p e_r) e_s` on chart-`α` frame vectors.** The chart
-expansion with `∇_{e^α_p} e^α_r = ∑_m Γ^m{}_{pr} e^α_m` inserted into the second antisymmetric
-slot, giving `∑_l (∑_m Γ^m{}_{pr} R^l{}_{sqm}) • e^α_l x`. -/
 private lemma nablaCurvSec_chartBasisVec_alpha_corr_secondAntisym
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -574,9 +476,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_corr_secondAntisym
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [← Finset.sum_smul]
 
-/-- **Third correction term: `R(e_q, e_r)(∇_p e_s)` on chart-`α` frame vectors.** The chart
-expansion with `∇_{e^α_p} e^α_s = ∑_m Γ^m{}_{ps} e^α_m` inserted into the acted slot, giving
-`∑_l (∑_m Γ^m{}_{ps} R^l{}_{mqr}) • e^α_l x`. -/
 private lemma nablaCurvSec_chartBasisVec_alpha_corr_acted
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -633,21 +532,6 @@ private lemma nablaCurvSec_chartBasisVec_alpha_corr_acted
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [← Finset.sum_smul]
 
-/-- **Off-centre chart-`α` frame expansion of the differentiated base curvature `∇R`.** For
-`x ∈ chartLeviCivitaGoodSet α` and globally-smooth tangent fields `Xp, Xq, Xr, Xs` agreeing with
-the chart-`α` frame fields `e^α_p, e^α_q, e^α_r, e^α_s` on an open neighbourhood `U ∋ x` inside
-the chart-`α` good set, the differentiated base curvature
-`(∇_{Xp} R)(Xq, Xr) Xs (x) = nablaCurvSec (LeviCivita g) Xp Xq Xr Xs x` expands in the chart-`α`
-frame with the chart `∇R` coefficient `nablaChartRiemannCoeff`:
-```
-nablaCurvSec (LeviCivita g) Xp Xq Xr Xs x
-  = ∑ l, nablaChartRiemannCoeff g α p q r s l (ϕ_α x) • e^α_l x.
-```
-This is the off-centre chart-`α` analogue of `riemannOp_chartBasisVec_alpha_eq`, one
-covariant-derivative order higher: it assembles the four Leibniz terms of `nablaCurvSec_def` from
-the leading-term covariant derivative of the curvature section
-(`nablaCurvSec_chartBasisVec_alpha_leadingTerm`) and the three chart-Christoffel-corrected
-curvature terms (`..._corr_firstAntisym`, `..._corr_secondAntisym`, `..._corr_acted`). -/
 theorem nablaCurvSec_chartBasisVec_alpha_frame_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -677,12 +561,11 @@ theorem nablaCurvSec_chartBasisVec_alpha_frame_expand
       hXp hXq hXr hXs hU_open hxU hU_good hXp_eq hXq_eq hXr_eq hXs_eq,
     nablaCurvSec_chartBasisVec_alpha_corr_acted (I := I) g α p q r s hx
       hXp hXq hXr hXs hU_open hxU hU_good hXp_eq hXq_eq hXr_eq hXs_eq]
-  -- collect the four `∑_l (...) • e^α_l` into a single `∑_l coeff_l • e^α_l`.
+  
   rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [← sub_smul, ← sub_smul, ← sub_smul]
   rfl
-
 
 end Connection
 end Integral

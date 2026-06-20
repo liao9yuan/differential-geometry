@@ -7,29 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.External.DeGiorgi.WholeSpaceSobolev
 
-/-!
-# Iterated Sobolev embedding `W^{k,p}_chart(M) ↪ C^0(M)` on closed manifolds
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
-on a finite-dimensional real inner-product space `E` of dimension `n ≥ 1`, and
-for a natural number `k ≥ 1` and a real exponent `p ≥ 1` with `k * p > n`
-(equivalently `k > n / p`), every measurable `u ∈ W^{k,p}_chart(M)` is a.e.-equal
-to a continuous function `ũ : M → ℝ`. There is a finite constant `C` (depending
-on `g`, `k`, `p`, `n`) such that
-
-    `‖ũ‖_{C^0(M)} ≤ C · (wkpNormChart g k p u).toReal`.
-
-## Main results
-
-* `wkpNormChart_succ_le_const_mul_wkpNormChart_at_subcritical_exponent` —
-  Theorem 1: from `W^{k+1, p}_chart` to `W^{k, p_1}_chart` at the sub-critical
-  exponent `p_1 = n p / (n - p)`, with norm bound (for `1 ≤ p < n`).
-* `iterated_sobolev_embedding_chart_C0` — Theorem 2: the headline iterated
-  embedding for `kp > n`.
-* `sobolev_embedding_chart_C0_Hk` — Theorem 3: the
-  Hilbert-Sobolev specialization at `p = 2`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -56,7 +33,6 @@ variable {d : ℕ}
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-/-- The order-`j` `wkpNorm` is at most the order-`k` `wkpNorm` whenever `j ≤ k`. -/
 theorem wkpNorm_mono_order
     {j k : ℕ} (hjk : j ≤ k) {p : ℝ≥0∞} {f : EuN → ℝ} {Ω : Set EuN} :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -71,8 +47,6 @@ theorem wkpNorm_mono_order
   rw [Finset.mem_range]
   omega
 
-/-- If `f ∈ MemW1p p Ω` and `f ∈ MemW1p q Ω`, the chosen weak partials at
-exponents `p` and `q` are a.e. equal. This is uniqueness of weak partials. -/
 theorem chosenWeakPartial'_cross_exponent_ae_eq
     {p q : ℝ≥0∞} (hp : 1 ≤ p) (hq : 1 ≤ q) {Ω : Set EuN}
     (hΩ_open : IsOpen Ω) {f : EuN → ℝ}
@@ -103,8 +77,7 @@ theorem chosenWeakPartial'_cross_exponent_ae_eq
     h_p_loc h_q_loc
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
-/-- The recursive decomposition of `wkpNorm`:
-`wkpNorm (k+1) p u Ω = eLpNorm u p + ∑_i wkpNorm k p (chosenWeakPartial' p i u Ω) Ω`. -/
+
 theorem wkpNorm_succ_eq
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
     wkpNorm (d := d) (k + 1) p u Ω =
@@ -193,8 +166,7 @@ theorem wkpNorm_succ_eq
   rw [hiter_eq]
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
-/-- For each `i`, the sub-sum `wkpNorm k p (chosenWeakPartial' p i u Ω) Ω`
-is bounded by `wkpNorm (k+1) p u Ω`. -/
+
 theorem wkpNorm_chosenWeakPartial_le_wkpNorm_succ
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) (i : Fin d) :
     wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
@@ -212,7 +184,7 @@ theorem wkpNorm_chosenWeakPartial_le_wkpNorm_succ
   exact le_trans h_single (le_add_self)
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean in
-/-- The order-`0` `wkpNorm` is bounded by `wkpNorm k` for any `k`. -/
+
 theorem eLpNorm_le_wkpNorm
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
     eLpNorm u p (volume.restrict Ω) ≤ wkpNorm (d := d) k p u Ω := by
@@ -221,7 +193,6 @@ theorem eLpNorm_le_wkpNorm
 
 end EuclideanIterated
 
-/-- `wkpNormChart g 1 p u ≤ wkpNormChart g k p u` for `1 ≤ k`. -/
 theorem wkpNormChart_one_le_wkpNormChart_succ
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -233,8 +204,6 @@ theorem wkpNormChart_one_le_wkpNormChart_succ
   intro α
   exact EuclideanIterated.wkpNorm_mono_order (d := Module.finrank ℝ E) hk
 
-/-- The chart-Sobolev membership `W^{k,p}_chart` is monotonic in `k` and entails
-membership at order `1`. -/
 theorem MemWkpChart.le_one
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -243,8 +212,6 @@ theorem MemWkpChart.le_one
     MemWkpChart (I := I) (M := M) g 1 p u :=
   MemWkpChart.le_of_le hk h
 
-/-- For `p > n`, the iterated chart-Sobolev embedding follows directly from the
-order-1 manifold Morrey embedding via order monotonicity of `wkpNormChart`. -/
 theorem iterated_sobolev_embedding_chart_C0_supercritical
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -285,7 +252,6 @@ namespace TowerStep
 
 variable {d : ℕ} [NeZero d]
 
-/-- The sub-critical Sobolev exponent `p_1 = d * p / (d - p)` for `1 ≤ p < d`. -/
 def pOne (d : ℕ) (p : ℝ) : ℝ := (d : ℝ) * p / ((d : ℝ) - p)
 
 lemma pOne_pos {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) :
@@ -309,7 +275,6 @@ lemma pOne_ge_one {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) :
     1 ≤ pOne d p :=
   le_trans hp_one (pOne_ge_p hp_one hp_dim)
 
-/-- The base subcritical Sobolev constant: `C_gns d p · d`. -/
 noncomputable def subcriticalConstantBase (d : ℕ) [NeZero d] (p : ℝ) : ℝ :=
   DeGiorgi.C_gns d p * (d : ℝ)
 
@@ -318,8 +283,6 @@ lemma subcriticalConstantBase_nonneg (d : ℕ) [NeZero d] (p : ℝ) :
   unfold subcriticalConstantBase
   exact mul_nonneg (DeGiorgi.C_gns_nonneg d p) (Nat.cast_nonneg _)
 
-/-- The iterated subcritical Sobolev constant. Recursively defined to combine
-the base constant with the dimension. -/
 noncomputable def subcriticalConstant : ∀ (_k : ℕ) (d : ℕ) [NeZero d] (_p : ℝ), ℝ
   | 0,     d, _, p => subcriticalConstantBase d p
   | k + 1, d, _, p => subcriticalConstantBase d p + (d : ℝ) * subcriticalConstant k d p
@@ -345,12 +308,6 @@ local notation "EuN" => EuclideanSpace ℝ (Fin d)
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
   EuclideanSubcritical EuclideanIterated
 
-/-- The headline pure-Euclidean iterated subcritical Sobolev embedding step,
-proved by induction on `k`.
-
-For every `f` with `MemWkp (k+1) p f Ω`, compact support, and `tsupport f ⊆ Ω`:
-* `f ∈ MemWkp k p_1 f Ω`, where `p_1 = d*p/(d-p)`.
-* `wkpNorm k p_1 f Ω ≤ subcriticalConstant k d p · wkpNorm (k+1) p f Ω`. -/
 theorem MemWkp_subcritical_iterated
     (k : ℕ) {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ))
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) :
@@ -601,11 +558,6 @@ theorem MemWkp_subcritical_iterated
               rw [ENNReal.ofReal_mul (Nat.cast_nonneg _)]
               rw [ENNReal.ofReal_natCast]
 
-/-- The headline pure-Euclidean iterated subcritical Sobolev embedding step.
-For every `f` with `MemWkp (k+1) p f Ω`, compact support, and `tsupport f ⊆ Ω`:
-* `f ∈ MemWkp k p_1 f Ω`, where `p_1 = d*p/(d-p)`.
-* There is a constant `C ≥ 0` such that
-  `wkpNorm k p_1 f Ω ≤ C · wkpNorm (k+1) p f Ω`. -/
 theorem MemWkp_succ_subcritical_step
     {k : ℕ} {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ))
     {Ω : Set EuN} (hΩ_open : IsOpen Ω)
@@ -637,8 +589,6 @@ namespace ChartTower
 
 variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- For a compact manifold, the toEuclidean image of `(extChartAt I α) ''
-(tsupport ρ_α)` is compact and contained in `chartTargetEuclid α`. -/
 lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
     [CompactSpace M] (α : M) :
     IsCompact (toEuclidean ''
@@ -671,8 +621,6 @@ lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
   rw [← hxz]
   exact (extChartAt I α).map_source (hTα_ext_src hx_supp)
 
-/-- `chartPushedRaw I α (ρ_α · u)` has tsupport contained in the toEuclidean
-image of `(extChartAt I α) '' tsupport ρ_α`. -/
 lemma tsupport_chartPushedRaw_pou_mul_subset
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -724,7 +672,6 @@ lemma tsupport_chartPushedRaw_pou_mul_subset
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
-/-- The compact support of `chartPushedRaw I α (ρ_α · u)`. -/
 lemma hasCompactSupport_chartPushedRaw_pou_mul
     [CompactSpace M] (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -737,7 +684,6 @@ lemma hasCompactSupport_chartPushedRaw_pou_mul
   exact hK_compact.of_isClosed_subset (isClosed_tsupport _)
     (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u)
 
-/-- `chartPushedRaw I α (ρ_α · u)` has tsupport contained in `chartTargetEuclid α`. -/
 lemma tsupport_chartPushedRaw_pou_mul_subset_target
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -747,8 +693,6 @@ lemma tsupport_chartPushedRaw_pou_mul_subset_target
   (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u).trans
     (toEuclidean_extChartAt_tsupport_pou_compact_subset (I := I) (M := M) α).2
 
-/-- For `u ∈ MemWkpChart g k p`, the chart-pushed-raw of `ρ_α · u` is in
-`MemWkp k p` of `chartTargetEuclid α`. -/
 lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -776,7 +720,6 @@ lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) hp_one hopen h_ae).mp h_chart_pushed
 
-/-- The wkpNorm of the chart-pushed-raw equals that of chart-pushed (a.e. equal). -/
 private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (u : M → ℝ) (α : M) :
@@ -802,15 +745,6 @@ private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
 
 end ChartTower
 
-/-- Theorem A: chart-level sub-critical tower step. Given `u ∈ W^{k+1, p}_chart(M)`
-on a closed Riemannian manifold modelled on a finite-dim inner-product space `E`
-with `finrank ℝ E ≥ 1` and `1 ≤ p < finrank ℝ E`, the function `u` lies in
-`W^{k, p₁}_chart(M)` at the sub-critical exponent `p₁ = n p / (n − p)` (where
-`n = finrank ℝ E`), with norm bound
-
-  `wkpNormChart g k p₁ u ≤ ENNReal.ofReal C * wkpNormChart g (k+1) p u`
-
-for a constant `C ≥ 0` depending only on `k`, `n`, `p` (uniform across charts). -/
 theorem wkpNormChart_succ_subcritical_step
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -966,8 +900,6 @@ theorem wkpNormChart_succ_subcritical_step
 
 namespace IterationCalc
 
-/-- The fundamental identity: if `0 < p < n` and `(k+1)p > n`, then
-`k * (np / (n − p)) > n`. -/
 private lemma kp1_gt_n_of_kp1p_gt_n
     (n : ℝ) (k : ℕ) (p : ℝ) (hp_pos : 0 < p) (hp_dim : p < n)
     (hkp : n < (k + 1 : ℝ) * p) :
@@ -985,8 +917,6 @@ private lemma kp1_gt_n_of_kp1p_gt_n
     ring
   nlinarith [hkp_gt, hn_pos]
 
-/-- Cast version of `kp1_gt_n_of_kp1p_gt_n` for `(d : ℕ)` and ENNReal-friendly
-types. -/
 lemma kp1_real_gt_d_of_kp1p_gt_d
     (d : ℕ) (k : ℕ) (p : ℝ) (hp_pos : 0 < p) (hp_dim : p < (d : ℝ))
     (hkp : (d : ℝ) < (k + 1 : ℝ) * p) :
@@ -1004,8 +934,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 variable [NeZero (Module.finrank ℝ E)]
 
-/-- Auxiliary: the iterated `C^0`-embedding statement, parametrized by `k` and
-`p`. -/
 private def Statement
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (k : ℕ) (p : ℝ) (u : M → ℝ) : Prop :=
@@ -1017,10 +945,6 @@ private def Statement
     (∀ x : M, ‖ũ x‖ ≤ C *
       (wkpNormChart (I := I) (M := M) g k (ENNReal.ofReal p) u).toReal)
 
-/-- Inductive step: assume the statement holds for the order-`k` embedding at
-the sub-critical exponent `p₁ = np / (n − p)` (where `n = finrank ℝ E`). Then it
-holds for the order-`(k+1)` embedding at the original exponent `p`, with
-`(k+1) p > n` and `1 ≤ p < n`. -/
 private theorem succ_subcritical_step
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (k : ℕ) {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (Module.finrank ℝ E : ℝ))
@@ -1098,8 +1022,6 @@ end IteratedC0
 
 namespace RegularExponent
 
-/-- `IsRegular n p k` says that `m · p ≠ n` for every `1 ≤ m ≤ k`, i.e.,
-none of the iteration values `n / m` for `m ∈ {1, …, k}` coincide with `p`. -/
 def IsRegular (n : ℝ) (p : ℝ) (k : ℕ) : Prop :=
   ∀ m : ℕ, 1 ≤ m → m ≤ k → ((m : ℝ) * p ≠ n)
 
@@ -1107,14 +1029,11 @@ lemma IsRegular.zero (n : ℝ) (p : ℝ) : IsRegular n p 0 := by
   intro m hm hm_le
   exact absurd hm_le (by omega)
 
-/-- If `p` is regular at depth `k+1`, it is regular at depth `k`. -/
 lemma IsRegular.le_of_succ {n p : ℝ} {k : ℕ}
     (h : IsRegular n p (k + 1)) : IsRegular n p k := by
   intro m hm hm_le
   exact h m hm (by omega)
 
-/-- If `p` is regular at depth `k`, then `p ≠ n/m` for all `m ∈ [1, k]`,
-equivalently the tower-step exponent `p_1 = n p / (n - p)` is also nice. -/
 lemma IsRegular.p_ne_n_of_one_le {n p : ℝ} {k : ℕ}
     (h : IsRegular n p k) (hk : 1 ≤ k) : p ≠ n := by
   intro hp_eq
@@ -1124,10 +1043,6 @@ lemma IsRegular.p_ne_n_of_one_le {n p : ℝ} {k : ℕ}
   rw [this] at h1
   exact h1 hp_eq
 
-/-- Regularity at depth `k` for `p` implies regularity at depth `k-1` for the
-tower-step exponent `p_1 = n p / (n - p)`, when `1 ≤ p < n`. The intuition:
-if `p_j_(p) = n p / (n - p)` denotes the tower iteration, then
-`p_j(p_1) = p_{j+1}(p)`, so depth `k` regularity for `p` is depth `k-1` for `p_1`. -/
 lemma IsRegular.tower_step
     {n p : ℝ} {k : ℕ}
     (hp_one : 1 ≤ p) (hp_lt : p < n) (h : IsRegular n p (k + 1)) :
@@ -1157,10 +1072,6 @@ end RegularExponent
 
 namespace IteratedC0
 
-/-- Inductive proof of the headline embedding statement. The key technical
-hypothesis is `RegularExponent.IsRegular n p (k+1)` which excludes the
-finitely many "borderline" exponents `n/m` (for `m ∈ {1, …, k+1}`) at which
-the Sobolev iteration would land on the critical value. -/
 private theorem statement_holds_aux :
     ∀ (k : ℕ),
       ∀ {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -1289,17 +1200,6 @@ theorem iterated_sobolev_embedding_chart_C0
     exact hkp
   exact IteratedC0.statement_holds_aux j g hp_one hreg hkp' hu_meas hu
 
-/-- The Hilbert-Sobolev `C^0` embedding on a closed Riemannian manifold:
-when `n < 2k` (with `n = finrank ℝ E`), every measurable function `u` with
-`MemWkpChart g k 2 u` (membership in the order-`k`, exponent-`2` space
-`H^k = W^{k,2}`) admits a continuous representative `ũ`, equal to `u` almost
-everywhere with
-respect to the Riemannian measure of the canonical chart-atlas partition of
-unity, whose sup-norm is bounded by `C · (wkpNormChart g k 2 u).toReal` for some
-constant `0 ≤ C`. This is the `p = 2` specialization of
-`iterated_sobolev_embedding_chart_C0`, obtained by translating `n < 2k` into
-`kp > n` and `(2 : ℝ≥0∞) = ENNReal.ofReal 2`; the regularity hypothesis `hreg`
-records that `2` avoids the borderline exponents `n / m` for `1 ≤ m ≤ k`. -/
 theorem sobolev_embedding_chart_C0_Hk
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -1346,7 +1246,6 @@ theorem sobolev_embedding_chart_C0_Hk
 
 namespace RegularExponent
 
-/-- The finite set of borderline exponents at depth `k` for dimension `n`. -/
 private noncomputable def borderlineSet (n : ℝ) (k : ℕ) : Finset ℝ :=
   (Finset.Icc 1 k).image (fun m : ℕ => n / (m : ℝ))
 
@@ -1373,8 +1272,6 @@ private lemma isRegular_iff_notMem_borderlineSet
       field_simp
       linarith [hmp_eq]
 
-/-- Given any non-empty open interval `(lb, p)` and a finite set `S`,
-there exists `p' ∈ (lb, p) \ S`. -/
 private lemma exists_notMem_finset_in_open_interval
     {lb p : ℝ} (hlb_lt_p : lb < p) (S : Finset ℝ) :
     ∃ p' : ℝ, lb < p' ∧ p' < p ∧ p' ∉ S := by
@@ -1401,10 +1298,6 @@ private lemma exists_notMem_finset_in_open_interval
     have h_le : (M + p) / 2 ≤ M := T.le_max' _ h_in_T
     linarith
 
-/-- Existence of a regular exponent strictly below `p`, when `p > 1`.
-
-Given `p > 1` and `kp > n` with `k ≥ 1`, we find `p' ∈ [1, p)` with
-`kp' > n` and `IsRegular n p' k`. -/
 lemma exists_regular_exponent_below
     (n : ℝ) (k : ℕ) (hk : 1 ≤ k) {p : ℝ} (hp_one : 1 < p)
     (hkp : n < (k : ℝ) * p) :
@@ -1438,15 +1331,11 @@ local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-- `Ω \ K ⊆ Ω \ S` when `S ⊆ K`. -/
 private lemma diff_K_subset_diff_subset
     {S K Ω : Set EuN} (hSK : S ⊆ K) :
     Ω \ K ⊆ Ω \ S := fun _ ⟨hx_Ω, hx_notK⟩ =>
   ⟨hx_Ω, fun h => hx_notK (hSK h)⟩
 
-/-- If `g` ae-vanishes on `Ω \ S` (with respect to `volume.restrict (Ω \ S)`)
-and `S ⊆ K` (with `K` measurable), then `g` is ae-equal to its `K`-indicator
-on `volume.restrict Ω`. -/
 private lemma ae_eq_indicator_of_ae_zero_off_subset
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) {S K : Set EuN} (hSK : S ⊆ K)
     (hK_meas : MeasurableSet K)
@@ -1473,8 +1362,6 @@ private lemma ae_eq_indicator_of_ae_zero_off_subset
     have : g x = 0 := hx hx_diff
     simp [Set.indicator_of_notMem h_in_K, this]
 
-/-- The chosen weak partial of `f` is ae-equal to its `K`-indicator on
-`volume.restrict Ω`, when `tsupport f ⊆ K` (closed `K`). -/
 private lemma chosenWeakPartial'_ae_eq_indicator_of_tsupport_subset
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set EuN} (hΩ_open : IsOpen Ω)
@@ -1494,8 +1381,6 @@ private lemma chosenWeakPartial'_ae_eq_indicator_of_tsupport_subset
   exact ae_eq_indicator_of_ae_zero_off_subset (Ω := Ω) hΩ_open
     (S := tsupport f) (K := K) hf_supp hK_meas h_ae_zero_sdiff
 
-/-- Main lemma: `MemWkp` is preserved when decreasing the exponent, provided
-the function vanishes outside a closed set `K ⊆ Ω` of finite Lebesgue measure. -/
 theorem memWkp_mono_exponent_of_tsupport_subset
     (k : ℕ) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {K : Set EuN} (hK_closed : IsClosed K)
@@ -1605,7 +1490,6 @@ variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-- The carrier compact set in `chartTargetEuclid α`. -/
 private noncomputable def carrierK (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean ''
@@ -1631,8 +1515,6 @@ private lemma carrierK_subset_target [CompactSpace M] (α : M) :
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).2
 
-/-- For a compact manifold, `chartPushedRaw I α (ρ_α · u)` has tsupport
-inside `carrierK α`. -/
 private lemma tsupport_chartPushedRaw_pou_mul_subset_carrier [CompactSpace M]
     (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -1642,8 +1524,6 @@ private lemma tsupport_chartPushedRaw_pou_mul_subset_carrier [CompactSpace M]
   unfold carrierK
   exact ChartTower.tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u
 
-/-- Per-chart lifting: from `MemWkpChart g k p u` to `MemWkp k p'
-(chartPushed ρ α u) (chartTargetEuclid α)` for `1 ≤ p' ≤ p`. -/
 theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1703,8 +1583,6 @@ theorem memWkp_chartPushed_mono_exponent [CompactSpace M]
       (d := Module.finrank ℝ E) hp'_one h_target_open h_ae).mpr
     h_chartRaw_memWkp_p'
 
-/-- Chart-level transfer: `MemWkpChart g k p u → MemWkpChart g k p' u`
-on a compact manifold for `1 ≤ p' ≤ p`. -/
 theorem memWkpChart_mono_exponent [CompactSpace M]
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1717,11 +1595,6 @@ theorem memWkpChart_mono_exponent [CompactSpace M]
 
 end ChartLevelMonoExp
 
-/-- Iterated Sobolev embedding on a closed Riemannian manifold without the
-exponent regularity hypothesis. For `kp > n` (with `k ≥ 1`, `p ≥ 1`) and
-the side condition `2 ≤ Module.finrank ℝ E ∨ 1 < p`, every measurable
-`u ∈ W^{k,p}_chart(M)` is a.e.-equal to a continuous function `ũ : M → ℝ`,
-with `‖ũ‖_∞ ≤ C · (wkpNormChart g k p u).toReal`. -/
 theorem iterated_sobolev_embedding_chart_C0_unconditional
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

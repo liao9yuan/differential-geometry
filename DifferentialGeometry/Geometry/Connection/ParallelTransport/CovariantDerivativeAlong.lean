@@ -5,52 +5,6 @@ import DifferentialGeometry.Geometry.Geodesic.ChartTransition
 
 set_option linter.unusedSectionVars false
 
-/-!
-# The intrinsic covariant derivative along a curve
-
-For a smooth Riemannian metric `g` on a smooth manifold `M`, a curve
-`γ : ℝ → M`, and a section `V` along `γ` (a dependent function
-`V : ∀ t, TangentSpace I (γ t)`), this file defines the **intrinsic**
-covariant derivative `(∇_t V)(t) ∈ T_{γ(t)} M`.
-
-The construction pins the canonical chart at the *foot* `γ t` (the value
-of the curve at the very time at which the derivative is taken). Because
-no chart is chosen by hand — the chart is dictated by the point `γ t` —
-the resulting operator is intrinsic. The output is a bundle vector in
-`T_{γ(t)} M`; the model-space `E`-coordinate representation is only ever
-used *inside* the single fixed foot-chart at `γ t`, which sidesteps the
-basepoint discontinuity of the chart transition Jacobian.
-
-## Construction
-
-Concretely:
-
-1. Represent the section `V` in the chart at `γ t`: for each `s`,
-   `(triv_{γt})·.continuousLinearMapAt ℝ (γ s) (V s) : E` is the
-   chart-`(γ t)`-coordinate of the vector `V s ∈ T_{γ(s)} M`.
-2. Apply the chart-local covariant derivative
-   `chartCovDerivAlong g (γ t) γ` (from `AlongCurve`) to this
-   `E`-valued section, at the time `t`.
-3. Map the resulting model-fibre vector back into `T_{γ(t)} M` by the
-   inverse trivialisation `symmL ℝ (γ t)`.
-
-## Main results
-
-* `covDerivAlong` — the definition.
-* `covDerivAlong_chartCoord` — the chart-`(γ t)`-coordinate of
-  `covDerivAlong g γ V t` is `chartCovDerivAlong g (γ t) γ (chartRep V) t`,
-  i.e. the `symmL`/`continuousLinearMapAt` round-trip is the identity at
-  the foot `γ t` (which lies in its own chart's base set).
-* `covDerivAlong_zero`, `covDerivAlong_add`, `covDerivAlong_smul`,
-  `covDerivAlong_smulFun` — ℝ-linearity in `V` (with the Leibniz rule for
-  the scalar-function multiple), under the natural differentiability
-  hypotheses on the chart-`(γ t)`-coordinate representations.
-* `covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt` — **the
-  keystone velocity equivalence**: for a `C^∞` curve `γ`, the intrinsic
-  covariant derivative of the velocity field `t ↦ dγ_t(1)` vanishes at `t`
-  iff `γ` satisfies the chart-coordinate geodesic equation at `t`.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -71,15 +25,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
 namespace CovariantDerivativeAlong
 
-/-- The chart-`(γ t)`-coordinate representation of a section `V` along
-`γ`, *pinned at the foot `γ t`*: for each `s`, this is the model-fibre
-vector `(triv_{γ t})·.continuousLinearMapAt ℝ (γ s) (V s) : E`, the
-chart-`(γ t)`-coordinate of `V s ∈ T_{γ(s)} M`.
-
-This is a function of the *evaluation time* `t` (which fixes the chart)
-and the *running parameter* `s` (along which one differentiates). At
-`s = t` it returns the chart-`(γ t)`-coordinate of `V t` in its own
-chart, where the trivialisation round-trip is the identity. -/
 def chartRepAt (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) : ℝ → E :=
   fun s => (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ s) (V s)
 
@@ -87,9 +32,6 @@ def chartRepAt (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) : �
     chartRepAt (I := I) γ V t s =
       (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ s) (V s) := rfl
 
-/-- At the foot `γ t`, the chart-`(γ t)`-coordinate of `V t` recovers
-`V t` after the inverse trivialisation: `symmL ℝ (γ t) (chartRepAt γ V t t) = V t`.
-This holds because `γ t` lies in the base set of `trivializationAt E (TangentSpace I) (γ t)`. -/
 lemma symmL_chartRepAt_self (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
         (chartRepAt (I := I) γ V t t) = V t := by
@@ -98,17 +40,6 @@ lemma symmL_chartRepAt_self (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) 
   exact (trivializationAt E (TangentSpace I) (γ t)).symmL_continuousLinearMapAt
     (R := ℝ) hmem (V t)
 
-/-- **Total-space continuity at a point (within a set).** For a curve `γ`
-that is continuous within `s` at `x₀`, and a section `V` along `γ` whose
-pinned chart-`(γ x₀)`-coordinate representation `chartRepAt γ V x₀` is
-differentiable at `x₀`, the bundle-valued map `t ↦ ⟨γ t, V t⟩` is
-`ContinuousWithinAt` into `TangentBundle I M` at `x₀`.
-
-The proof goes through `FiberBundle.continuousWithinAt_totalSpace`: the base
-component is `hγ`; the fibre component coincides, eventually within `s` near
-`x₀` (where `γ t` lies in the base set of the trivialisation at `γ x₀`), with
-`chartRepAt γ V x₀`, which is continuous at `x₀` because it is differentiable
-there. -/
 theorem sectionAlongCurve_continuousWithinAt_totalSpace
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ} {x₀ : ℝ}
     (hx₀ : x₀ ∈ s)
@@ -136,11 +67,6 @@ theorem sectionAlongCurve_continuousWithinAt_totalSpace
     hV.continuousAt.continuousWithinAt
   exact hcont.congr_of_eventuallyEq heq (heq.eq_of_nhdsWithin hx₀)
 
-/-- **Total-space continuity on a set.** For a curve `γ` continuous on `s`
-and a section `V` along `γ` whose pinned chart-`(γ t)`-coordinate
-representations `chartRepAt γ V t` are differentiable at every `t ∈ s`, the
-bundle-valued map `t ↦ ⟨γ t, V t⟩` is `ContinuousOn s` into
-`TangentBundle I M`. This is the pointwise lemma quantified over `s`. -/
 theorem sectionAlongCurve_continuousOn_totalSpace
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
     (hγ : ContinuousOn γ s)
@@ -151,9 +77,6 @@ theorem sectionAlongCurve_continuousOn_totalSpace
   exact sectionAlongCurve_continuousWithinAt_totalSpace (I := I) γ V hx₀
     (hγ x₀ hx₀) (hV x₀ hx₀)
 
-/-- **Total-space continuity on a set, from `C¹` smoothness of the curve.**
-A convenience wrapper for `sectionAlongCurve_continuousOn_totalSpace` that
-extracts the base continuity from `ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s`. -/
 theorem sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
     (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s)
@@ -162,12 +85,6 @@ theorem sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
       (fun t => (TotalSpace.mk' E (γ t) (V t) : TangentBundle I M)) s :=
   sectionAlongCurve_continuousOn_totalSpace (I := I) γ V hγ.continuousOn hV
 
-/-- The intrinsic covariant derivative of a section `V` along `γ` at time
-`t`, valued in `T_{γ(t)} M`. The chart at the foot `γ t` is pinned, `V`
-is represented in that chart by `chartRepAt γ V t`, the chart-local
-covariant derivative `chartCovDerivAlong g (γ t) γ` is applied at the
-time `t`, and the result is mapped back into the fibre by the inverse
-trivialisation `symmL ℝ (γ t)`. -/
 def covDerivAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) : TangentSpace I (γ t) :=
   (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
@@ -179,14 +96,6 @@ def covDerivAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
       (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
         (chartCovDerivAlong (I := I) g (γ t) γ (chartRepAt (I := I) γ V t) t) := rfl
 
-/-- **Chart-`(γ t)`-coordinate of the intrinsic covariant derivative.**
-Applying the forward chart-`(γ t)`-coordinate map (the trivialisation's
-`continuousLinearMapAt` at the foot `γ t`) to `covDerivAlong g γ V t`
-returns exactly the chart-local covariant derivative
-`chartCovDerivAlong g (γ t) γ (chartRepAt γ V t) t`. This is the
-"round-trip is the identity at the foot" identity: `γ t` lies in the base
-set of its own trivialisation, so `continuousLinearMapAt ∘ symmL = id`
-there. -/
 lemma covDerivAlong_chartCoord (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ t)
@@ -198,11 +107,6 @@ lemma covDerivAlong_chartCoord (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   exact (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt_symmL
     (R := ℝ) hmem _
 
-/-- `covDerivAlong` is `0` iff its chart-`(γ t)`-coordinate
-`chartCovDerivAlong g (γ t) γ (chartRepAt γ V t) t` is `0`. Forward
-direction: apply the (injective on the base set) forward chart map; the
-round-trip identity `covDerivAlong_chartCoord` turns `covDerivAlong = 0`
-into `chartCovDerivAlong = 0`. Backward direction: `symmL` of `0` is `0`. -/
 lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ V t = 0 ↔
@@ -215,7 +119,6 @@ lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M
   · intro h
     rw [covDerivAlong_def, h, map_zero]
 
-/-- The zero section has vanishing covariant derivative. -/
 @[simp] lemma covDerivAlong_zero (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ) :
     covDerivAlong (I := I) g γ (fun s => (0 : TangentSpace I (γ s))) t = 0 := by
   have hrep : chartRepAt (I := I) γ (fun s => (0 : TangentSpace I (γ s))) t = fun _ => (0 : E) := by
@@ -227,36 +130,24 @@ lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M
   rw [deriv_const', add_zero]
   exact map_zero _
 
-/-- The chart-`(γ t)`-coordinate representation of a pointwise sum is the
-sum of the representations. -/
 lemma chartRepAt_add (γ : ℝ → M) (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => V s + W s) t =
       fun s => chartRepAt (I := I) γ V t s + chartRepAt (I := I) γ W t s := by
   funext s
   simp [chartRepAt, map_add]
 
-/-- The chart-`(γ t)`-coordinate representation of a real-scalar multiple
-is the scalar multiple of the representation. -/
 lemma chartRepAt_smul (γ : ℝ → M) (c : ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => c • V s) t =
       fun s => c • chartRepAt (I := I) γ V t s := by
   funext s
   simp [chartRepAt, map_smul]
 
-/-- The chart-`(γ t)`-coordinate representation of a scalar-function
-multiple `s ↦ f s • V s` is `s ↦ f s • chartRepAt γ V t s`. -/
 lemma chartRepAt_smulFun (γ : ℝ → M) (f : ℝ → ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => f s • V s) t =
       fun s => f s • chartRepAt (I := I) γ V t s := by
   funext s
   simp [chartRepAt, map_smul]
 
-/-- **Additivity in the section argument.** If the chart-`(γ t)`-coordinate
-representations of `V` and `W` are both differentiable at `t`, then the
-covariant derivative of the pointwise sum is the sum of the covariant
-derivatives. The differentiability hypotheses are the genuine
-"both sections vary differentiably (in chart coordinates)" assumptions
-that make `deriv (X + Y) t = deriv X t + deriv Y t` valid. -/
 theorem covDerivAlong_add (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
@@ -272,10 +163,6 @@ theorem covDerivAlong_add (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_add_right]
   abel
 
-/-- **Real-scalar homogeneity in the section argument.** The covariant
-derivative of `s ↦ c • V s` is `c • covDerivAlong g γ V t`. No
-differentiability hypothesis is needed: `deriv (c • X) t = c • deriv X t`
-holds unconditionally. -/
 theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (c : ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ (fun s => c • V s) t =
@@ -289,13 +176,6 @@ theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_smul_right]
   rw [smul_add]
 
-/-- **Leibniz rule for a scalar-function multiple.** If the chart-`(γ t)`-
-coordinate representation of `V` and the scalar function `f` are both
-differentiable at `t`, then
-`covDerivAlong g γ (f • V) t = f' t • V t + f t • covDerivAlong g γ V t`.
-The first summand uses the *derivative of `f` at `t`* times the value
-`V t` (recovered by the round-trip `symmL`), the second the value `f t`
-times the covariant derivative of `V`. -/
 theorem covDerivAlong_smulFun (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (f : ℝ → ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hf : DifferentiableAt ℝ f t)
@@ -317,9 +197,6 @@ theorem covDerivAlong_smulFun (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [smul_add]
   abel
 
-/-- The open parameter set on which the chart `γ t` "sees" the curve.
-Expressed through `extChartAt I (γ t)` so that the model `I` is part of
-the signature; its source coincides with `(chartAt H (γ t)).source`. -/
 private def chartTime (I : ModelWithCorners ℝ E H) (γ : ℝ → M) (t : ℝ) : Set ℝ :=
   γ ⁻¹' (extChartAt I (γ t)).source
 
@@ -336,9 +213,6 @@ private lemma chartTime_eq_chartSource (γ : ℝ → M) (t : ℝ) :
     chartTime I γ t = γ ⁻¹' (chartAt H (γ t)).source := by
   rw [chartTime, extChartAt_source]
 
-/-- The chart-`(γ t)`-pullback `chartCurve (γ t) γ = extChartAt I (γ t) ∘ γ`
-is `C^n` (`ContDiffOn ℝ n`) on the open set `chartTime γ t`, for any regularity
-order `n` matching that of the curve `γ`. -/
 private lemma contDiffOn_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
     ContDiffOn ℝ n (chartCurve (I := I) (γ t) γ) (chartTime I γ t) := by
@@ -356,19 +230,12 @@ private lemma contDiffOn_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ 
   rw [hfun]
   exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
 
-/-- The chart trajectory is `ContDiffAt ℝ n` at `t`, for any regularity order `n`
-matching that of the curve `γ`. -/
 lemma contDiffAt_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
     ContDiffAt ℝ n (chartCurve (I := I) (γ t) γ) t :=
   (contDiffOn_chartCurve (I := I) hγ t).contDiffAt
     ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
-/-- On `chartTime γ t`, the chart-`(γ t)`-coordinate of the velocity field
-`s ↦ mfderiv γ s 1` coincides with `deriv (chartCurve (γ t) γ)`. This is
-the chain-rule identity `chartCoord_mfderiv_along_curve_eq_fderiv`
-specialised to the chart at `γ t`, together with
-`fderiv (extChartAt I (γ t) ∘ γ) s 1 = deriv (chartCurve (γ t) γ) s`. -/
 private lemma velocity_chartRep_eqOn {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     EqOn (chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t)
       (deriv (chartCurve (I := I) (γ t) γ)) (chartTime I γ t) := by
@@ -381,26 +248,12 @@ private lemma velocity_chartRep_eqOn {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ,
     (γ := γ) hγ (γ t) (t := s) hs']
   rfl
 
-/-- The velocity field's chart-`(γ t)`-coordinate representation agrees
-with `deriv (chartCurve (γ t) γ)` *eventually near `t`* (the open set
-`chartTime γ t` is a neighbourhood of `t`). -/
 private lemma velocity_chartRep_eventuallyEq {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t
       =ᶠ[𝓝 t] deriv (chartCurve (I := I) (γ t) γ) :=
   (velocity_chartRep_eqOn (I := I) hγ t).eventuallyEq_of_mem
     ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
-/-- **Velocity equivalence (keystone).** For a `C^∞` curve `γ : ℝ → M`, the
-intrinsic covariant derivative of the velocity field `s ↦ dγ_s(1)`
-vanishes at `t` iff `γ` satisfies the chart-coordinate geodesic equation
-at `t` (the predicate `HasGeodesicEquationAt`).
-
-The minimal differentiability hypothesis is `ContMDiff 𝓘(ℝ, ℝ) I ∞ γ`
-(space-only `C^∞` smoothness of the one-dimensional curve). This is the
-exact regularity under which the chart-`(γ t)`-coordinate of the velocity
-is the chain-rule `fderiv` (via `chartCoord_mfderiv_along_curve_eq_fderiv`)
-and the chart pullback `chartCurve (γ t) γ` is twice continuously
-differentiable near `t`. -/
 theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) :
@@ -464,24 +317,6 @@ theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     rw [← hv_eq, ← ha_eq]
     exact hid
 
-/-- **`C²`-form velocity equivalence (backward direction).** For a curve `γ`
-that is `ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t` (twice continuously differentiable at `t`
-in the manifold sense), if `γ` satisfies the chart-coordinate geodesic equation
-at `t` (`HasGeodesicEquationAt`), then the intrinsic covariant derivative of the
-velocity field `s ↦ dγ_s(1)` vanishes at `t`.
-
-This is the `C²`-relaxed backward direction of
-`covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt`. The full iff is stated
-under `ContMDiff 𝓘(ℝ, ℝ) I ∞ γ`, but the geodesic-implies-zero direction needs
-only `C²` regularity: the chart trajectory `chartCurve (γ t) γ` is `ContDiffOn 2`
-on an open neighbourhood of `t` (where `γ` is `C²` and lands in the chart source),
-hence its first derivative is `C¹` and the eventual `HasDerivAt` clauses hold; the
-velocity chart-representation equals `deriv (chartCurve (γ t) γ)` near `t` via the
-`MDifferentiableAt`-level chain-rule bridge
-`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`. This is the form
-consumed by second-order variational arguments where the central curve is only
-twice continuously differentiable (e.g. the radial geodesic variation behind
-Gauss's lemma, whose velocity field is `C²` but not known to be `C^∞`). -/
 theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
     (hγ2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t)
@@ -558,12 +393,6 @@ theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
   rw [← hv_eq, ← ha_eq]
   exact hid
 
-/-- The chart-`β`-coordinate representation of a section `V` along `γ`,
-*pinned at the basepoint `β`* (rather than at the moving foot `γ t`): for
-each `s`, the model-fibre vector
-`(triv_β)·.continuousLinearMapAt ℝ (γ s) (V s) : E`, the chart-`β`
-coordinate of `V s ∈ T_{γ(s)} M`. With `β = γ t` it agrees with
-`chartRepAt γ V t`. -/
 def chartRepAtBase (β : M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) : ℝ → E :=
   fun s => (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s) (V s)
 
@@ -572,18 +401,9 @@ def chartRepAtBase (β : M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) 
     chartRepAtBase (I := I) β γ V s =
       (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s) (V s) := rfl
 
-/-- With basepoint `β = γ t`, the pinned-foot chart representation
-`chartRepAt γ V t` and the general `chartRepAtBase (γ t) γ V` coincide. -/
 lemma chartRepAtBase_foot (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAtBase (I := I) (γ t) γ V = chartRepAt (I := I) γ V t := rfl
 
-/-- **Trivialisation composite is the chart-transition Jacobian.** For two
-basepoints `α β : M` and a manifold point `b` in both chart sources, the
-chart-`β` trivialisation coordinate of the inverse chart-`α` trivialisation
-of `v` equals the chart-transition Jacobian `chartTransitionAt α β` at the
-chart-`α` image of `b`, applied to `v`. (Bundle `coordChange` composition
-law combined with the boundaryless identification
-`fderivWithin (range I) = fderiv`.) -/
 private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
@@ -612,22 +432,6 @@ private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
   rw [← hcc]
   exact hcomp
 
-/-- **Chart-foot invariance of the intrinsic covariant derivative.** For a
-`C^∞` curve `γ`, a section `V` along `γ` whose canonical foot-chart
-representation `chartRepAt γ V t` is differentiable at `t`, and *any*
-basepoint `β` whose chart source contains the foot `γ t`, the chart-`β`
-recipe for the covariant derivative — transport `V` into chart-`β`
-coordinates (`chartRepAtBase β γ V`), take the chart-`β` covariant
-derivative `chartCovDerivAlong g β γ (·) t`, push the result back into the
-fibre by the inverse `β`-trivialisation `symmL ℝ (γ t)` — returns exactly
-the canonical intrinsic value `covDerivAlong g γ V t`.
-
-The differentiability hypothesis `hV` is the genuine "the section varies
-differentiably in chart coordinates at `t`" assumption (the same one under
-which `covDerivAlong_add` and friends are stated); it is not a restatement
-of the conclusion. The smoothness `hγ` of the curve supplies the chart
-trajectory's `HasDerivAt` and the eventual two-source membership that make
-the chart-transition chain rule valid near `t`. -/
 theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
@@ -793,20 +597,7 @@ theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
   abel
 
 set_option linter.unusedVariables false in
-/-- **Differentiability of a fixed-basepoint chart representation.** For a `C^∞` curve
-`γ`, a section `V` along `γ` whose canonical *moving*-foot chart representation
-`chartRepAt γ V t` is differentiable at `t`, and *any* basepoint `β` whose chart source
-contains the foot `γ t`, the *fixed*-basepoint chart representation
-`chartRepAtBase β γ V` is differentiable at `t`.
 
-This is the same transition-push computation that underlies
-`covDerivAlong_chart_foot_invariance`: near `t`, the fixed-`β` representation equals the
-chart-transition push `s ↦ chartTransitionAt (γ t) β (uₐ s) (repα s)` of the canonical
-moving-foot representation, which is a composition of the smooth transition Jacobian with
-the differentiable curve and representation, hence differentiable at `t`. The hypothesis
-`hV` is the genuine moving-foot differentiability assumption (the same one under which
-`covDerivAlong_add` and friends are stated); the conclusion is about the genuinely
-*different* fixed-foot function `chartRepAtBase β γ V`. -/
 theorem chartRepAtBase_differentiableAt [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))

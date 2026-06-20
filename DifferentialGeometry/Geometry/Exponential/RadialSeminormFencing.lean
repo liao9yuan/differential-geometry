@@ -16,22 +16,6 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Radial seminorm and FTC fencing for a positive-semidefinite bilinear form
-
-For a symmetric positive-semidefinite continuous bilinear form `B` on a normed
-space `F`, this file develops the seminorm `x ↦ √(B x x)` (Cauchy–Schwarz,
-triangle and reverse-triangle inequalities, global Lipschitz continuity), the
-angular-direction rigidity ODE `angular_hasDerivAt_zero`, and the two
-fundamental-theorem-of-calculus fencing results
-(`image_radialDist_le_intervalIntegral_of_slope_le` and its equality-case
-counterpart `ftc_fencing_equality_case`) that turn a pointwise radial speed
-estimate into an integral length comparison.
-
-These results are the analytic engine consumed by the radial-minimiser package
-in `DifferentialGeometry.Geometry.Exponential.GaussLemma`.
--/
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold
@@ -56,8 +40,6 @@ open MeasureTheory intervalIntegral
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- **Cauchy–Schwarz for a symmetric positive-semidefinite continuous
-bilinear form.** -/
 private lemma psd_cauchy_schwarz (B : F →L[ℝ] F →L[ℝ] ℝ)
     (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) (x y : F) :
     (B x y) ^ 2 ≤ B x x * B y y := by
@@ -89,8 +71,6 @@ private lemma psd_cauchy_schwarz (B : F →L[ℝ] F →L[ℝ] ℝ)
     have := (div_le_iff₀ hpos).mp hb
     linarith [this]
 
-/-- **Triangle inequality for the seminorm `x ↦ √(B x x)`** of a symmetric
-positive-semidefinite continuous bilinear form. -/
 private lemma psd_seminorm_triangle (B : F →L[ℝ] F →L[ℝ] ℝ)
     (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) (x y : F) :
     Real.sqrt (B (x + y) (x + y)) ≤ Real.sqrt (B x x) + Real.sqrt (B y y) := by
@@ -113,7 +93,6 @@ private lemma psd_seminorm_triangle (B : F →L[ℝ] F →L[ℝ] ℝ)
         ≤ Real.sqrt ((Real.sqrt (B x x) + Real.sqrt (B y y)) ^ 2) := Real.sqrt_le_sqrt hle
     _ = Real.sqrt (B x x) + Real.sqrt (B y y) := by rw [Real.sqrt_sq (by positivity)]
 
-/-- **Reverse triangle inequality for the seminorm `x ↦ √(B x x)`.** -/
 private lemma psd_reverse_triangle (B : F →L[ℝ] F →L[ℝ] ℝ)
     (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) (x y : F) :
     |Real.sqrt (B x x) - Real.sqrt (B y y)| ≤ Real.sqrt (B (x - y) (x - y)) := by
@@ -130,8 +109,6 @@ private lemma psd_reverse_triangle (B : F →L[ℝ] F →L[ℝ] ℝ)
   rw [hsymq] at h2
   rw [abs_sub_le_iff]; constructor <;> linarith
 
-/-- **The seminorm `x ↦ √(B x x)` is globally Lipschitz** with constant
-`√‖B‖`, hence continuous and locally Lipschitz on every set. -/
 lemma psd_sqrt_lipschitz (B : F →L[ℝ] F →L[ℝ] ℝ)
     (hsym : ∀ x y, B x y = B y x) (hnn : ∀ x, 0 ≤ B x x) :
     LipschitzWith (Real.toNNReal (Real.sqrt ‖B‖)) (fun x => Real.sqrt (B x x)) := by
@@ -152,15 +129,6 @@ lemma psd_sqrt_lipschitz (B : F →L[ℝ] F →L[ℝ] ℝ)
               rw [Real.sqrt_mul hb0, show ‖x - y‖ * ‖x - y‖ = ‖x - y‖ ^ 2 by ring,
                 Real.sqrt_sq (norm_nonneg _)]
 
-/-- **Angular direction has zero derivative under radiality.** For a curve
-`c : ℝ → F` differentiable at `t` with `ρ s = √(B(cs)(cs))`, if at `t` the
-radial distance is positive (`0 < ρ t`), `ρ` is differentiable with derivative
-`B(ct)(c')/ρ t`, and the velocity `c'` is `B`-radial
-(`c' = (B(ct)(c')/B(ct)(ct)) • c t`), then the angular direction
-`θ s = (ρ s)⁻¹ • c s` has derivative `0` at `t`.  This is the rigidity ODE:
-the angular component of a radial velocity is stationary.  The proof is the
-product rule `θ' = (ρ⁻¹)' • c + ρ⁻¹ • c'`, in which the two scalar coefficients
-of `c t` cancel exactly because `c'` is radial and `ρ t ^ 2 = B(ct)(ct)`. -/
 lemma angular_hasDerivAt_zero (B : F →L[ℝ] F →L[ℝ] ℝ)
     {c : ℝ → F} {c' : F} {ρ : ℝ → ℝ} {t : ℝ}
     (hc : HasDerivAt c c' t) (hρt : 0 < ρ t)
@@ -186,16 +154,6 @@ lemma angular_hasDerivAt_zero (B : F →L[ℝ] F →L[ℝ] ℝ)
     rw [zero_smul]
   rwa [hzero] at hθ'
 
-/-- **Right-difference-quotient fencing theorem.** If `ρ` is continuous on
-`[a, b]` with `ρ a ≤ 0`, and `φ` is integrable on `[a, b]`, continuous from
-the right at every interior point, and dominates the right-side limit inferior
-of the difference quotient of `ρ` there, then `ρ b ≤ ∫ φ`.  This is the
-fundamental-theorem-of-calculus core of the radial length lower bound: it
-turns the pointwise speed estimate into an integral length comparison without
-assuming `ρ` is differentiable everywhere (in particular it tolerates the
-corner of `ρ` at the centre `ψ(γt) = 0`), and it only asks for `φ` to be
-right-continuous in the interior (the velocity speed of a curve `C¹` on a
-closed interval need not be continuous at the endpoints). -/
 lemma image_radialDist_le_intervalIntegral_of_slope_le
     {ρ φ : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     (hρc : ContinuousOn ρ (Set.Icc a b)) (hρa : ρ a ≤ 0)
@@ -228,23 +186,6 @@ lemma image_radialDist_le_intervalIntegral_of_slope_le
   exact image_le_of_liminf_slope_right_le_deriv_boundary hρc hBa hBcont hBderiv hslope
     (Set.right_mem_Icc.2 hab)
 
-/-- **Equality case of the radial fencing (FTC tightness).** If `ρ` is
-continuous on `[a, b]`, has right-derivative `ρ'` at every interior point,
-`ρ'` is interval-integrable and bounded above by an integrable `φ` on the
-interior, and the *boundary value* `ρ b - ρ a` already saturates `∫ φ`
-(the fencing inequality `ρ b - ρ a ≤ ∫ φ` is an equality), then the
-right-derivative agrees with `φ` almost everywhere on `(a, b)`.
-
-This is the equality-case counterpart of
-`image_radialDist_le_intervalIntegral_of_slope_le`: there the slope estimate
-gave a one-sided length lower bound, here the *saturation* of that bound forces
-the pointwise estimate `ρ' ≤ φ` to be an a.e. equality.  The proof is the
-fundamental theorem of calculus (`∫ ρ' = ρ b - ρ a = ∫ φ`) fed into
-`MeasureTheory.integral_eq_iff_of_ae_le`: two integrable functions with `ρ' ≤ φ`
-a.e. and equal integrals coincide a.e.  It is the analytic gateway by which the
-length-equality hypothesis of the radial minimiser becomes the pointwise Gauss
-equality (and hence, via `gauss_radial_lower_bound_eq_iff`, the a.e. radiality
-of the velocity). -/
 private lemma ftc_fencing_equality_case
     {ρ φ ρ' : ℝ → ℝ} {a b : ℝ} (hab : a ≤ b)
     (hρc : ContinuousOn ρ (Set.Icc a b))

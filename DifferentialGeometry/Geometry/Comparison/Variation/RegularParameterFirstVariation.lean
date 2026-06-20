@@ -24,21 +24,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCu
 
 set_option linter.unusedSectionVars false
 
-/-!
-# First variation of arc length at a regular parameter
-
-This file extends the first variation of length to a regular (positive-speed)
-parameter value `s₀`, away from the unit-speed central curve:
-
-* `speed_positivity_near` — a uniform positive lower bound for the speed on a
-  neighbourhood of a regular parameter value;
-* `S2_diff_under_interval_integral_general` — differentiation of
-  `∫₀^L √(speedSq g f s t) dt` under the interval integral at a regular `s₀`;
-* `first_variation_of_arcLength_at_regular_parameter` — the first variation
-  formula at any regular `s₀`, where the slice is neither unit-speed nor a
-  geodesic.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle MeasureTheory intervalIntegral
@@ -61,15 +46,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- **Local positive lower bound for the speed near a regular parameter value.**
-For a smooth two-parameter variation `f` whose slice `t ↦ f s₀ t` is regular
-(positive speed) on the compact interval `[0, L]`, there is an open
-neighbourhood `Ioo (s₀ - δ) (s₀ + δ)` of `s₀` and a uniform positive constant
-`c` with `c ≤ √(speedSq g f s t)` for every `(s, t)` in that neighbourhood times
-`[0, L]`. This is the regularity hypothesis underlying differentiation under the
-arc-length integral away from the central unit-speed curve. The proof takes the
-compact minimum of the (continuous, positive) speed-squared on `{s₀} ×ˢ [0, L]`
-and applies the tube lemma in the open superlevel set. -/
 theorem speed_positivity_near
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f)
@@ -121,18 +97,6 @@ theorem speed_positivity_near
     hUV_in_S (Set.mk_mem_prod hs_in_U ht_in_V)
   exact Real.sqrt_le_sqrt (le_of_lt h_st_in_S)
 
-/-- **Differentiation under the interval integral for the arc-length speed, at a
-general parameter value `s₀`.** For a smooth two-parameter variation `f` whose
-slice `t ↦ f s₀ t` is regular (positive speed) on `[0, L]`, the `s`-derivative
-at `s = s₀` of the slice arc-length integrand `∫₀^L √(speedSq g f s t) dt` equals
-the interval integral of the pointwise `s`-derivative of `√(speedSq)`. By the
-chain rule and `S1_moving_foot_metric_compatibility` reindexed at `s₀` through
-the parameter shift, the pointwise derivative is
-`(∂_s speedSq g f s₀ t) / (2 √(speedSq g f s₀ t))`. The regularity hypothesis at
-`s₀` guarantees positivity of the speed on `[0, L]` and on a neighbourhood of
-`s₀`, supplying the domination / Lipschitz data the Mathlib differentiation
-engine consumes. This is the positivity-based generalisation of
-`S2_diff_under_interval_integral` away from the unit-speed central curve. -/
 private theorem S2_diff_under_interval_integral_general
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -265,17 +229,6 @@ private theorem S2_diff_under_interval_integral_general
       exact (hslice_deriv s₀ t).sqrt (hΦne s₀ h0 t htIcc))
   exact key.2
 
-/-- **First variation of arc length at a regular parameter `s₀`.** For a smooth
-two-parameter variation `f` (hypothesis `hf`) whose slice `t ↦ f s₀ t` has positive
-speed on `[0, L]` (hypothesis `hpos`), the derivative of
-`s' ↦ arcLength g (f s' ·) 0 L` at `s = s₀` is the interval integral of
-`g(∇_s ∂_t f, ∂_t f) / √(speedSq g f s₀ t)` — the transverse covariant derivative
-of the longitudinal velocity paired against the longitudinal velocity, divided by
-the slice speed. Unlike `first_variation_of_arcLength_fixed_endpoints`, this holds at *any* regular
-`s₀`, where the slice is neither unit-speed nor a geodesic. The proof differentiates
-`∫₀^L √(speedSq)` under the integral (`S2_diff_under_interval_integral_general`) and
-identifies the pointwise `s`-derivative of `speedSq` through the parameter-shifted
-metric-compatibility identity. -/
 theorem first_variation_of_arcLength_at_regular_parameter
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L s₀ : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)

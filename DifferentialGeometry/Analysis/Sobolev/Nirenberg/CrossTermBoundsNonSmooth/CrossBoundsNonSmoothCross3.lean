@@ -2,51 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBou
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-/-!
-# Non-smooth analogue of `cross_3_bound`
-
-This module establishes a non-smooth analogue of
-`NirenbergCrossBounds.cross_3_bound`. The smooth case carries the
-hypothesis `u : E → ℝ` smooth, and the bound features the partial
-derivatives `(fderiv ℝ u y) (EuclideanSpace.single i 1)`. Here we
-replace those with explicit weak partial derivatives `g i : E → ℝ`
-(with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`); the third cross
-term then features `(g i)` rather than the smooth-case `∂_i u`.
-
-## Strategy
-
-The pointwise bound `cross_3_pointwise_bound` and the integration step
-both transcribe verbatim with `(fderiv ℝ u y) (single i 1)` replaced by
-`g i y`. The smooth-case bound
-
-  `≤ M N · 𝟙[supp η] · (∂_i u)² + M N · 𝟙[supp η] · (D_h^k u)²`
-
-uses `2 |a| |b| ≤ a² + b²` (Young with no scaling). In the non-smooth
-case the same inequality applies with `(∂_i u) → g i`. The only
-essential use of smoothness in the smooth case is the localised L²
-bound
-
-  `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i (∂_i u)²`
-
-(`integral_diffQuot_sq_on_tsupport_le_gradL2sqOn`). The non-smooth
-analogue —
-
-  `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i (g i)²`
-
-— is the Fréchet–Kolmogorov estimate for functions with weak partial
-derivatives. It is taken here as an explicit hypothesis
-(`h_FK_diffQuot_u_bound`) so that the present file remains a mechanical
-substitution of the smooth case. Downstream callers that have access to
-mollification + Young's inequality on the weak partial supply this bound
-in the natural way.
-
-## Main result
-
-* `cross_3_bound_nonsmooth` — the headline bound transcribed for the
-  non-smooth case.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -62,11 +17,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 set_option linter.unusedVariables false in
-/-- Pointwise bound for one summand of the non-smooth Cross_3 sum.
-Mechanical substitution `(fderiv ℝ u y) (single i 1) → g i y` in
-`cross_3_pointwise_bound`. The bound itself follows from the trivial
-form of Young's inequality `2 |a| |b| ≤ a² + b²` together with the
-mean-value bound on `|D_h^k a^{ij}|`. -/
+
 private theorem cross_3_pointwise_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) (g : Fin d → E → ℝ)
@@ -235,8 +186,6 @@ private theorem cross_3_pointwise_bound_nonsmooth
     have h_t2 : M * N * 0 * (diffQuot k h u x)^2 = 0 := by ring
     linarith
 
-/-- Continuity of `D_h^k a^{ij}`: the difference quotient of a smooth
-function is continuous away from `h = 0`. -/
 private lemma diffQuot_a_continuous
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (i j k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -245,12 +194,6 @@ private lemma diffQuot_a_continuous
         (fun y : E => B.a y i j) x) :=
   continuous_diffQuot_smooth (d := d) (B.contDiff_a i j) k hh
 
-/-- Integrability of the (i, j) summand of the non-smooth Cross_3 sum.
-The integrand factorises as `f₃ · (g i) · D_h^k u`, where
-`f₃ = 2 · D_h^k a · η · ∂_j η` is continuous compactly supported (hence
-bounded), `g i ∈ L²`, and `D_h^k u ∈ L²` (for any fixed `h`). By Hölder
-L² × L² = L¹ for the product `(g i) · D_h^k u`, multiplied by the
-bounded `f₃`. -/
 private lemma integrable_cross_3_summand_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
@@ -312,9 +255,7 @@ private lemma integrable_cross_3_summand_nonsmooth
   exact MemLp.integrable_mul (p := 2) (q := 2) hf₃_gi_l2 h_dq_u_l2
 
 omit [NeZero d] in
-/-- Integrability of `c · 𝟙[supp η] · (g_i)²`. The indicator times the
-square of an L² function (locally on the compact set `tsupport η`) is
-L¹. -/
+
 private lemma integrable_const_indicator_g_sq
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
@@ -378,9 +319,7 @@ private lemma integrable_const_indicator_g_sq
     refine mul_nonneg (abs_nonneg _) h_g_sq_nn
 
 omit [NeZero d] in
-/-- Conversion `∫ c · 𝟙_K · (g i)² = c · ∫_K (g i)²` (analogue of
-`integral_const_indicator_eq` for `(g i)²` in place of
-`(diffQuot k h u)²`). -/
+
 private lemma integral_const_indicator_g_sq_eq
     {g : Fin d → E → ℝ} (η : E → ℝ) (i : Fin d) (c : ℝ) :
     ∫ x, c * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -405,12 +344,7 @@ private lemma integral_const_indicator_g_sq_eq
   rw [MeasureTheory.integral_indicator (isClosed_tsupport η).measurableSet]
 
 set_option linter.unusedVariables false in
-/-- **Quantitative non-smooth Cross_3 bound.**
 
-The explicit-constant form of `cross_3_bound_nonsmooth`: the same
-absorbing inequality with the constant exposed as the closed formula
-`2 · M · N · d²`, where `d = Fintype.card (Fin d)` and `M` is the
-supremum of `|∂_k a^{ij}|` on `closure Ω'`. -/
 theorem cross_3_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
@@ -790,29 +724,7 @@ theorem cross_3_bound_nonsmooth_quantitative
   exact h_total_bound
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `cross_3_bound`.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the third cross
-term
-
-  `S_3 := ∑_{i, j} ∫ 2 · (D_h^k a^{ij}) · η · ∂_j η · g_i · D_h^k u`
-
-is bounded by
-
-  `C · ∫_{Ω'} ∑_i g_i²`,
-
-with `C` independent of `h` (for `|h| ≤ 1`). The Fréchet–Kolmogorov
-bound
-
-  `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`
-
-is taken as an explicit hypothesis `h_FK_diffQuot_u_bound`; downstream
-callers supply it via the standard mollification + Young argument.
-
-This is the existential packaging of `cross_3_bound_nonsmooth_quantitative`,
-which exposes `C` as an explicit formula. -/
 theorem cross_3_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}

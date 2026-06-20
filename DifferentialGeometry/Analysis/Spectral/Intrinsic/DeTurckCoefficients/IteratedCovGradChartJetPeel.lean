@@ -2,32 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOr
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 
-/-!
-# Forward covariant-gradient chart-jet peeling: order-`a` covariant gradient raw
-chart components controlled by the chart Fréchet jets of the bare tensor
-
-The reverse order-peeling file proves the `∂`→`∇` direction: a chart-Euclidean
-Fréchet jet of a component of `∇^p T` is controlled by the order-`0` content of the
-higher covariant iterates `∇^{p+i} T`.  This file proves the **forward** (`∇`→`∂`,
-peeling-down) direction, the genuine covariant Faà-di-Bruno content needed for the
-chart→intrinsic Nemytskii bound on the Ricci–DeTurck right-hand side:
-
-  `‖∂^l (rawPullR (∇^p X)_{Idx,Jdx})‖
-     ≤ C · ∑_{q'} ∑_{m ≤ l + p} ‖∂^m (rawPullR X_{q'})‖`,
-
-i.e. every chart-Euclidean Fréchet jet of a raw component of the order-`p`
-covariant gradient `∇^p X` is, up to a single uniform Christoffel constant on the
-compact partition-of-unity kernel, dominated by the chart-Euclidean Fréchet jets of
-order `≤ l + p` of the raw components of the *bare* tensor `X` (peeling each
-covariant slot to one extra Euclidean partial plus a zeroth-order Christoffel
-correction, via `tensorChartComponentRaw_covGrad`).
-
-This is the pointwise chart-component half of the forward `Cᵐ` order-dropping
-embedding (`SobolevEmbeddingCmOrderDropping`), exposed as a standalone reusable
-per-point chart bound (the embedding file keeps it private and routes only through
-`L²`/`Hˢ` norms).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -58,10 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The order-`p`-covariant-gradient raw chart-jet content of a bare tensor `X` at
-chart `α` and point `y`: the sum over component multi-index pairs `q'` of the chart
-Fréchet jets of order `≤ N` of the raw chart components of `X`.  This is the
-order-`0` (bare-`X`) content that the forward peel produces. -/
 def bareChartJetContent (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) (N : ℕ) (y : EuclN) : ℝ :=
   ∑ q' : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)),
@@ -73,8 +43,6 @@ lemma bareChartJetContent_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     0 ≤ bareChartJetContent (I := I) (M := M) g r s X α N y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
 
-/-- A single raw chart-jet magnitude (order `m ≤ N`, component pair `(Idx, Jdx)`) is
-bounded by the bare chart-jet content of window `N`. -/
 lemma iteratedFDeriv_rawPullR_le_bareChartJetContent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M)
@@ -101,7 +69,6 @@ lemma iteratedFDeriv_rawPullR_le_bareChartJetContent
   refine hbig.trans (le_of_eq ?_)
   rfl
 
-/-- `bareChartJetContent` is monotone in the order window `N`. -/
 lemma bareChartJetContent_mono (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) {N N' : ℕ} (hN : N ≤ N') (y : EuclN) :
     bareChartJetContent (I := I) (M := M) g r s X α N y ≤
@@ -113,11 +80,6 @@ lemma bareChartJetContent_mono (g : SmoothRiemannianMetric I M) (r s : ℕ)
   refine Finset.sum_le_sum (fun q' _ => ?_)
   exact Finset.sum_le_sum_of_subset_of_nonneg hsub (fun m _ _ => norm_nonneg _)
 
-/-- **One Euclidean partial costs one Fréchet order.** For a function `u` that is
-`C^∞` on an open set `O`, the order-`l` Fréchet derivative of `euclidPartial m u`
-has operator norm bounded by the order-`(l + 1)` Fréchet derivative of `u` itself,
-at every point of `O`.  (`euclidPartial m u = (fderiv u ·) (single m 1)`, and applying
-a fixed unit covector to the `(l+1)`-st derivative is `1`-Lipschitz.) -/
 lemma iteratedFDeriv_euclidPartial_norm_le
     {u : EuclN → ℝ} {O : Set EuclN} (hO : IsOpen O) (hu : ContDiffOn ℝ ∞ u O)
     (m : Fin (Module.finrank ℝ E)) (l : ℕ) {y : EuclN} (hy : y ∈ O) :
@@ -150,21 +112,6 @@ lemma iteratedFDeriv_euclidPartial_norm_le
         rw [h_single_norm, one_mul]
     _ = ‖iteratedFDeriv ℝ (l + 1) u y‖ := h_fderiv_iter
 
-/-- **The forward covariant-gradient chart-jet peel.** Fix a smooth compactly-supported
-tensor `X`, a chart `α`, and an order bound `P`.  There is a single non-negative
-constant `C` such that for every covariant order `p` and Fréchet order `l` with
-`l + p ≤ P`, every component multi-index pair `(Idx, Jdx)` of `∇^p X`, and every `y`
-in the compact kernel `chartImagePOUTsupport α`, the order-`l` Fréchet jet of the raw
-chart component of the order-`p` covariant gradient `∇^p X` is dominated by `C` times
-the bare chart-jet content of `X` of window `l + p`:
-```
-‖∂^l (rawPullR (∇^p X)_{Idx,Jdx}) y‖
-  ≤ C · ∑_{q'} ∑_{m ≤ l + p} ‖∂^m (rawPullR X_{q'}) y‖ .
-```
-This is the pointwise covariant Faà-di-Bruno expansion read forward (peeling each
-covariant slot to one extra Euclidean partial plus a zeroth-order Christoffel
-correction), with the single constant `C` collecting the uniform chart-Christoffel
-jets on the compact partition-of-unity kernel. -/
 lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -184,9 +131,9 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     have : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr (NeZero.ne n); exact_mod_cast this
   set Npair : ℝ := (n : ℝ) ^ (r + (s + P)) with hNpair_def
   have hNpair_nn : 0 ≤ Npair := by positivity
-  -- A single uniform constant `C` covering all `p ≤ P` **and all tensors `X`**, defined by the
-  -- (finite) recursion `C₀ = 1`, `C_{p+1} = 1 + Npair · 2^P · Γ · C_p` (the constant depends only on
-  -- the chart-Christoffel bound `Γ`, not on `X`).
+  
+  
+  
   set Cstep : ℝ := 1 + Npair * (2 : ℝ) ^ P * Γ with hCstep_def
   have hCstep_nn : 0 ≤ Cstep := by rw [hCstep_def]; positivity
   set Cp : ℕ → ℝ := fun p => Cstep ^ p with hCp_def
@@ -194,7 +141,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
   refine ⟨(Finset.range (P + 1)).sup' ⟨0, Finset.mem_range.mpr (Nat.succ_pos P)⟩ Cp,
     le_trans (hCp_nn 0) (Finset.le_sup' Cp (Finset.mem_range.mpr (Nat.succ_pos P))), ?_⟩
   intro X
-  -- The per-`p` bound (the genuine forward induction on `p`), for this tensor `X`.
+  
   have hmain : ∀ p l : ℕ, l + p ≤ P →
       ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
@@ -208,7 +155,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     | zero =>
         intro l _hlP Idx Jdx y _hy
         simp only [hCp_def, pow_zero, one_mul]
-        -- `∇^0 X = X` so the LHS jet at `(Idx, Jdx)` is one summand of the bare content.
+        
         have hLHS :
             ‖iteratedFDeriv ℝ l
                 (rawPullR (I := I) (M := M) g r (s + 0)
@@ -225,11 +172,11 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
           chartImagePOUTsupport_subset_target (I := I) (M := M) α hy
         set Z : SmoothCcTensor g r (s + p) :=
           iteratedCovGrad (I := I) g r s p X with hZ_def
-        -- Decompose the target multi-index `Jdx : Fin (s + (p + 1))` into head/tail.
+        
         set m0 : Fin (Module.finrank ℝ E) := Jdx 0 with hm0_def
         set Jtail : Fin (s + p) → Fin (Module.finrank ℝ E) :=
           Matrix.vecTail Jdx with hJtail_def
-        -- `∇^{p+1} X = covGrad (∇^p X) = covGrad Z`; the raw component splits via the chart formula.
+        
         have hsplit : rawPullR (I := I) (M := M) g r (s + (p + 1))
               (iteratedCovGrad (I := I) g r s (p + 1) X) α Idx Jdx =ᶠ[nhds y]
             (fun z => euclidPartial (E := E) m0
@@ -259,7 +206,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
           rw [hcovGrad_eq, hstep]
           ring
         rw [(Filter.EventuallyEq.iteratedFDeriv ℝ hsplit l).self_of_nhds]
-        -- Split the iterated derivative of the sum (both summands `C^∞` at `y`).
+        
         have hA_cdAt : ContDiffAt ℝ ∞
             (fun z => euclidPartial (E := E) m0
               (rawPullR (I := I) (M := M) g r (s + p) Z α Idx Jtail) z) y := by
@@ -295,11 +242,11 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
         have hjle : (l : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
         rw [fun_iteratedFDeriv_add_apply (hA_cdAt.of_le hjle) (hB_cdAt.of_le hjle)]
         refine le_trans (norm_add_le _ _) ?_
-        -- Bounds on the two arms.
+        
         set RHS : ℝ := bareChartJetContent (I := I) (M := M) g r s X α (l + (p + 1)) y
           with hRHS_def
         have hRHS_nn : 0 ≤ RHS := bareChartJetContent_nonneg (I := I) (M := M) g r s X α _ y
-        -- Arm A: euclidPartial bound + IH at order `l + 1`.
+        
         have hA : ‖iteratedFDeriv ℝ l
               (fun z => euclidPartial (E := E) m0
                 (rawPullR (I := I) (M := M) g r (s + p) Z α Idx Jtail) z) y‖ ≤
@@ -318,7 +265,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
             rw [hRHS_def]
             exact bareChartJetContent_mono (I := I) (M := M) g r s X α (by omega) y
           exact mul_le_mul_of_nonneg_left hwin (hCp_nn p)
-        -- Arm B: Christoffel Leibniz + IH applied to each `∇^p X` raw jet.
+        
         have hB : ‖iteratedFDeriv ℝ l
               (fun z => covDerivLowerOrderTerm (I := I) (M := M)
                 g r (s + p) Z α m0 Idx Jtail z) y‖ ≤
@@ -327,7 +274,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
             g r (s + p) Z α m0 Idx Jtail l hy_mem
           refine hleib.trans ?_
           have hp_le_P : p ≤ P := by omega
-          -- Each `(q'', l')` term: coeff bounded by `Γ`, raw `∇^p X`-jet bounded by IH.
+          
           have h_per : ∀ q'' : (Fin r → Fin (Module.finrank ℝ E)) ×
                 (Fin (s + p) → Fin (Module.finrank ℝ E)),
               (∑ l' ∈ Finset.range (l + 1),
@@ -397,7 +344,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
             rw [← Finset.sum_mul, h2]
             refine mul_le_mul_of_nonneg_right ?_ (by positivity)
             exact pow_le_pow_right₀ (by norm_num) (by omega)
-          -- Sum over the component pairs `q''` of `∇^p X`.
+          
           calc (∑ q'' : (Fin r → Fin (Module.finrank ℝ E)) ×
                   (Fin (s + p) → Fin (Module.finrank ℝ E)),
                 ∑ l' ∈ Finset.range (l + 1),
@@ -428,7 +375,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
                       push_cast
                       exact pow_le_pow_right₀ hn1 (by omega)
             _ = (Npair * (2 : ℝ) ^ P * Γ * Cp p) * RHS := by ring
-        -- Combine arms.  `Cp (p + 1) = Cstep · Cp p = (1 + Npair·2^P·Γ)·Cp p`.
+        
         have hCp_succ : Cp (p + 1) = Cp p + Npair * (2 : ℝ) ^ P * Γ * Cp p := by
           simp only [hCp_def]; rw [pow_succ, hCstep_def]; ring
         calc ‖iteratedFDeriv ℝ l
@@ -439,17 +386,13 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
                   g r (s + p) Z α m0 Idx Jtail z) y‖
             ≤ Cp p * RHS + (Npair * (2 : ℝ) ^ P * Γ * Cp p) * RHS := add_le_add hA hB
           _ = Cp (p + 1) * RHS := by rw [hCp_succ]; ring
-  -- Majorise by the chosen constant `max over p ≤ P of Cp p`.
+  
   intro p l hlP Idx Jdx y hy
   refine (hmain p l hlP Idx Jdx y hy).trans ?_
   refine mul_le_mul_of_nonneg_right ?_
     (bareChartJetContent_nonneg (I := I) (M := M) g r s X α _ y)
   exact Finset.le_sup' Cp (Finset.mem_range.mpr (by omega))
 
-/-- **The forward covariant chart-jet peel (per-tensor specialization).**
-The single-tensor specialization of the tensor-uniform
-`iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform` (constant uniform over the
-chart-Christoffel jets on the compact partition-of-unity kernel). -/
 lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) (P : ℕ) :
@@ -467,18 +410,6 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
       (I := I) (M := M) g r s α P
   exact ⟨C, hC_nn, fun p l hlP Idx Jdx y hy => hC X p l hlP Idx Jdx y hy⟩
 
-/-- **The bare chart-jet content of a tensor difference is dominated by the square roots
-of the intrinsic covariant fibre-norm jets, on the partition-of-unity kernel.**
-
-For a smooth compactly-supported tensor `D`, a chart `α` and `y` in the compact kernel
-`chartPouKernel α` (with chart preimage `b`), the order-`≤ N` bare chart-jet content of `D`
-is dominated by a single uniform constant times the sum over `i ≤ N` of the *square roots*
-of the intrinsic Riemannian fibre-norm jets `√(rfns (∇^i D)(b))`.  Each chart Fréchet jet of
-order `m ≤ N` of a raw component of `D` is, by the reverse Christoffel order-peeling
-(`iteratedFDeriv_rawPullR_le_zeroContent_sum`), controlled by the order-`0` content
-`zeroContentR (∇^i D)` of the iterated covariant gradients `i ≤ m`, which is in turn bounded
-by the fibre norm `‖(∇^i D).toSection b‖ = √(rfns (∇^i D)(b))`
-(`exists_zeroContentR_le_fiberNorm_on_pouKernel`). -/
 lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (D : SmoothCcTensor g r s) (α : M) (N : ℕ) :
@@ -491,7 +422,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
               ((iteratedCovGrad (I := I) g r s i D).toSection
                 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) := by
   classical
-  -- Reverse order-peeling constant (covering all Fréchet orders `≤ N`).
+  
   obtain ⟨Cpeel, hCpeel_nn, hCpeel⟩ :=
     iteratedFDeriv_rawPullR_le_zeroContent_sum (I := I) (M := M) g r s α N N (le_refl N)
   set b' : EuclN → M := fun y : EuclN =>
@@ -499,7 +430,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
   set FibAt : EuclN → ℕ → ℝ := fun y i =>
     Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i) (b' y)
       ((iteratedCovGrad (I := I) g r s i D).toSection (b' y))) with hFibAt_def
-  -- Order-`0` reverse fibre bound for each derived rank `s + i`, expressed via `√rfns`.
+  
   have h_fib : ∀ i : ℕ, ∃ Ci : ℝ, 0 ≤ Ci ∧
       ∀ {z : EuclN}, z ∈ chartPouKernel (I := I) (M := M) α →
         zeroContentR (I := I) (M := M) g r (s + i)
@@ -535,9 +466,9 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
   have hFib_nn : ∀ i, 0 ≤ Fib i := fun i => Real.sqrt_nonneg _
   set FibSum : ℝ := ∑ i ∈ Finset.range (N + 1), Fib i with hFibSum_def
   have hFibSum_nn : 0 ≤ FibSum := Finset.sum_nonneg fun i _ => hFib_nn i
-  -- The kernel point lies in `chartImagePOUTsupport α` (definitionally the same set).
+  
   have hyK' : y ∈ chartImagePOUTsupport (I := I) (M := M) α := hyK
-  -- Each order-`i` content is bounded by `Cfibmax · Fib i` (reverse fibre bound).
+  
   have h_zc : ∀ i ∈ Finset.range (N + 1),
       zeroContentR (I := I) (M := M) g r (s + i)
         (iteratedCovGrad (I := I) g r s i D) α y ≤ Cfibmax * Fib i := by
@@ -548,7 +479,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     rw [hFib_def]
     exact mul_le_mul_of_nonneg_right
       (Finset.le_sup' Cfib (Finset.mem_range.mpr hiN)) (Real.sqrt_nonneg _)
-  -- For each component pair `q'`, peel down and fibre-bound.
+  
   have h_each : ∀ q' : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       (∑ m ∈ Finset.range (N + 1),
@@ -575,7 +506,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
       rw [hreindex] at hpeel
       refine hpeel.trans ?_
       refine mul_le_mul_of_nonneg_left ?_ hCpeel_nn
-      -- `∑_{i≤m} zeroContentR(∇^i D) ≤ Cfibmax · FibSum`.
+      
       calc (∑ i ∈ Finset.range (m + 1),
             zeroContentR (I := I) (M := M) g r (s + i)
               (iteratedCovGrad (I := I) g r s i D) α y)
@@ -593,7 +524,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
     push_cast
     ring
-  -- Sum over component pairs.
+  
   calc bareChartJetContent (I := I) (M := M) g r s D α N y
       = ∑ q' : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),

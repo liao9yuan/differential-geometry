@@ -1,83 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentEuclidSkExtExpansion
 
-/-!
-# Global chart-α `(Idx, Jdx)` projection of the bundle second covariant derivative
-`(∇²T₀)(B^α_k, B^α_l)` on the chart-α Levi-Civita good set, with `T₀`-independent
-smooth coefficient functions on `chartTargetEuclid α`.
-
-For a smooth Riemannian manifold `(M, g)` modelled on a real inner-product space
-`E`, a chart-centre `α : M`, chart-coordinate indices `k, l`, and component
-multi-indices `(Idx, Jdx)`, this file ships a single GLOBAL identity:
-
-```
-tensorChartComponentProjection r s Idx Jdx
-  ((triv α).clmAt b ((cov_RS).toFun
-    (covApply cov_RS (chartBasisVecFiber α k) T₀.toSection) b
-    (chartBasisVecFiber α l b))) =
-  ∂_l ∂_k (chartPushedRaw I α (raw T₀^{Idx,Jdx})) (chart-eucl b) +
-  ∑_{I', J', m} GlobalCorr I' J' m (chart-eucl b) *
-    ∂_m (chartPushedRaw I α (raw T₀^{I',J'})) (chart-eucl b) +
-  ∑_{I', J'} GlobalCorr0 I' J' (chart-eucl b) *
-    chartPushedRaw I α (raw T₀^{I',J'}) (chart-eucl b)
-```
-
-valid for every `b ∈ chartLeviCivitaGoodSet α` and every
-`T₀ : SmoothCcTensor g r s`, where `GlobalCorr` and `GlobalCorr0` are
-`T₀`-independent `C^∞` functions on `chartTargetEuclid α`. The b₀-existential
-in the chained B.2.c.iv + B.2.c.v expansion is eliminated by taking
-`b₀ := b` at every `b`: the local neighbourhood `V_b` produced by B.2.c.iii
-always contains the chart-Euclidean image of `b`, so the local identification
-suffices pointwise.
-
-## Mathematical strategy
-
-For each `b ∈ chartLeviCivitaGoodSet α`, set `y := toEuclidean ((extChartAt I α) b)`
-and use B.2.c.iv with `b₀ := b` to obtain a smooth extension `S_k_ext` of the
-chart-basis-applied bundled covariant derivative, with open `U ∋ b ⊆
-chartLeviCivitaGoodSet α`, so that
-
-```
-LHS = covDerivComponentEuclid g r s α S_k_packed l Idx Jdx y.
-```
-
-Applying `covDerivComponentEuclid_eqOn` (B.1) with `S := S_k_packed` rewrites this
-as `∂_l (chartPushedRaw raw S_k_packed^{Idx,Jdx}) y + covDerivLowerOrderTerm
-S_k_packed l Idx Jdx y`. The multi-indexed B.2.c.iii lemma
-`chartPushedRaw_eqOn_covDerivComponentEuclid_uniform` (private to its file but
-reconstructed here via direct chaining of the existing public B.2.c.iii) gives,
-on an open V ⊆ chartTargetEuclid α containing y, that for every multi-index
-pair `p`:
-```
-chartPushedRaw I α (raw S_k_packed^p) y' = covDerivComponentEuclid g r s α T₀ k p.1 p.2 y'
-                                                (y' ∈ V).
-```
-By Fréchet-derivative locality on V, the `∂_l` of the LHS at y equals the `∂_l`
-of `covDerivComponentEuclid g r s α T₀ k Idx Jdx` at y. Substituting the raw
-S_k_packed components in the lower-order term `covDerivLowerOrderTerm S_k_packed l
-Idx Jdx y` via the multi-indexed identification reduces it to a finite sum
-`∑_p covDerivLowerOrderCoeff_l(p)(y) · covDerivComponentEuclid T₀ k p y`.
-
-Applying B.1 again (this time to `T₀` at chart-coord `k`) rewrites each
-`covDerivComponentEuclid T₀ k p y` as `∂_k (chartPushedRaw raw T₀^p) y +
-covDerivLowerOrderTerm T₀ k p y`. The latter expands as `∑_q
-covDerivLowerOrderCoeff_k(p,q)(y) · chartPushedRaw raw T₀^q y` (B.1 unfolding).
-
-Applying `covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder` (the
-chart-coordinate second-derivative formula) to the `∂_l covDerivComponentEuclid
-T₀ k Idx Jdx` term expresses it as `∂_l ∂_k (chartPushedRaw raw T₀^{Idx,Jdx})
-y + ∑_q (secondCovDerivLO_valueCoeff · raw_T₀^q + secondCovDerivLO_gradCoeff ·
-∂_l raw_T₀^q)`.
-
-Collecting all the resulting `∂_m raw_T₀^p` (m ∈ {k, l}) and `raw_T₀^p`
-contributions yields the explicit `T₀`-independent coefficients
-`GlobalCorr` and `GlobalCorr0`.
-
-## Main result
-
-* `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` — the headline.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -108,8 +31,6 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-/-- Coefficient of `∂_m (chartPushedRaw raw T₀^{I',J'})` at chart-Euclidean
-point `y` in the global expansion. -/
 private def GlobalCorr_eu
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -127,8 +48,6 @@ private def GlobalCorr_eu
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α l Idx I' Jdx J' y
      else 0)
 
-/-- Coefficient of `chartPushedRaw raw T₀^{I',J'}` at chart-Euclidean point `y`
-in the global expansion. -/
 private def GlobalCorr0_eu
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -144,7 +63,6 @@ private def GlobalCorr0_eu
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α l Idx p.1 Jdx p.2 y *
         covDerivLowerOrderCoeff (I := I) (M := M) g r s α k p.1 I' p.2 J' y
 
-/-- `GlobalCorr_eu` is `C^∞` on the Euclidean chart target. -/
 private lemma GlobalCorr_eu_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -184,7 +102,6 @@ private lemma GlobalCorr_eu_contDiffOn
       exact contDiffOn_const
   exact h1.add h2
 
-/-- `GlobalCorr0_eu` is `C^∞` on the Euclidean chart target. -/
 private lemma GlobalCorr0_eu_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -515,29 +432,6 @@ private lemma euclidPartial_eqOn_of_eqOn_openG
     Filter.EventuallyEq.fderiv_eq hVeq
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
-/-- **Global chart-α `(Idx, Jdx)` projection of the bundle second covariant
-derivative `(∇²T₀)(B^α_k, B^α_l)` on the chart-α Levi-Civita good set.**
-
-For each chart-coordinate index pair `(k, l)` and each component multi-index
-pair `(Idx, Jdx)`, there exist `T₀`-independent smooth coefficient families
-`GlobalCorr I' J' m` and `GlobalCorr0 I' J'` on `chartTargetEuclid α` such that,
-for every smooth compactly-supported tensor section `T₀` and every chart-α
-Levi-Civita good-set point `b`, the chart-α `(Idx, Jdx)` projection of the
-bundle-level second covariant derivative `(∇²T₀)(B^α_k, B^α_l)` at `b` equals
-the principal mixed second partial `∂_l ∂_k (chartPushedRaw I α (raw
-T₀^{Idx, Jdx}))` of the chart-pushed raw component at the chart-Euclidean image
-of `b`, plus a finite linear combination of `∂_m (chartPushedRaw I α (raw
-T₀^{I', J'}))` and `chartPushedRaw I α (raw T₀^{I', J'})` with the
-`T₀`-independent coefficients `GlobalCorr` and `GlobalCorr0`.
-
-The b₀-existential in the chained B.2.c.iv + B.2.c.v expansion is eliminated by
-applying the local construction at `b₀ := b`: the resulting open neighbourhood
-in the chart-Euclidean target always contains the chart-Euclidean image of `b`,
-so the local identification suffices to derive the pointwise identity at `b`.
-The `GlobalCorr` and `GlobalCorr0` coefficients are explicit finite sums of
-`secondCovDerivLO_*` and `covDerivLowerOrderCoeff` building blocks defined and
-shown to be `C^∞` in `CovDerivComponentSecondFormula.lean` and
-`CovDerivComponentFormula.lean`. -/
 theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

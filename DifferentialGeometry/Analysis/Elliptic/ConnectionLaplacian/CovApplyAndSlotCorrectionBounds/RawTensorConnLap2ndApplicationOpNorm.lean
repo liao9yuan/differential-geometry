@@ -4,23 +4,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartLeviCivitaParallelCLMOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-/-!
-# Pointwise op-norm bound for the second-application term in the
-`(r, s)`-tensor connection-Laplacian frame trace
-
-The frame-trace formula expresses `(Δ_∇ T)(x)` as a sum over `i` of two
-terms: a *first-application* term and a *second-application* term
-`cov_RS T x ((LeviCivita g) B_i x (B_i x))`. This file ships the
-pointwise op-norm bound for the second-application term, in two stages:
-
-* a bound on the inner Γ-correction `(LeviCivita g) X b (X b)` from the
-  chart-α Levi-Civita formula and the uniform op-norm bounds on the
-  trivialisations and the Christoffel correction;
-* a bound on `cov_RS T b v` for any vector `v ∈ T_b M`, obtained from
-  `chartTensorRSCovariantDerivative_opNorm_le_pou_tsupport` after a
-  smooth extension of `v` and the chart-frame agreement
-  `chartTensorRSCovariantDerivative_eq_abstract_on_chartLeviCivitaGoodSet`. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

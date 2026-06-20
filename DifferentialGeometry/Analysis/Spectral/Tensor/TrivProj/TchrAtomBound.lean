@@ -2,38 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.CovNormBound
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 
-/-!
-# Pointwise bound for the Christoffel-correction trivialisation atom
-
-For a closed Riemannian manifold `(M, g)` and a chart base point `α : M`, the
-`Tchr` atom appearing in the per-chart gradient bound is the squared
-Euclidean norm of the `(r, s)`-tensor trivialization's `continuousLinearMapAt`
-action on the sum of input-slot and output-slot Christoffel corrections.
-
-This file ships the pointwise bound:
-
-```
-‖triv.continuousLinearMapAt b
-    (- ∑ i, chartTensorRSInputSlotCorrection r s g α T X b i
-      + ∑ l, chartTensorRSOutputSlotCorrection r s g α T X b l)‖² ≤
-  K * tensorInnerPointwise g r s b (toModel ...) (toModel ...)
-```
-
-valid on the `tsupport` of the chart-`α` partition-of-unity weight.
-
-## Strategy
-
-1. The bridge identity `triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel`
-   rewrites the trivialization action at `b` on a fibre tensor `T_b` as
-   `chartRSTwistInv α b r s (TensorRSSpace.toModel T_b)`, valid on the
-   chart-`α` source. The POU `tsupport` is contained in the chart base set,
-   which coincides with the chart source.
-2. The chart-twist norm bound
-   `chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport`
-   then controls the squared Euclidean norm of the twist-inverted tensor by a
-   constant times the intrinsic pointwise inner product.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -66,9 +34,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The closed support of the chart-`α` partition-of-unity weight is contained
-in the chart source. This is the chart-source form of the base-set inclusion
-`pouTsupport_subset_baseSet`. -/
 private lemma pouTsupport_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -79,15 +44,6 @@ private lemma pouTsupport_subset_chartAt_source (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
 
-/-- **Pointwise Tchr trivialization atom bound.** For a closed Riemannian
-manifold `(M, g)`, a chart base point `α`, and ranks `(r, s)`, there is a
-non-negative constant `K` such that for every `(r, s)`-tensor section `T`,
-every tangent vector field `X`, and every base point `b` in the `tsupport`
-of the chart-atlas partition-of-unity weight at `α`, the squared Euclidean
-norm of the trivialization's `continuousLinearMapAt ℝ b` action on the sum
-of input-slot and output-slot Christoffel corrections is bounded by `K`
-times the intrinsic pointwise inner product of the same sum (lifted to the
-model fibre via `TensorRSSpace.toModel`) against itself. -/
 theorem norm_sq_triv_christoffel_correction_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

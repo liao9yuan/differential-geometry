@@ -1,45 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorChartRHSDiffWkpNormEnergyBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedRegularityHigherQuant
 
-/-!
-# Sharp `eLpNorm` bound for the differentiated chart right-hand side, in
-chart-component data
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P₀`, a level `m`, and a direction multi-index
-`l : Fin m → Fin n`, the level-`m` differentiated chart right-hand side
-`eigenvectorChartRHSDiff g r s i α P₀ m l` has, by the energy-bound
-chain `eigenvectorChartRHSDiff_wkpNorm_le_uniform` at `K = 0` paired with
-`diffRHSAggregate_le_energy_perK`, a sharp `eLpNorm` bound
-
-```
-eLpNorm (eigenvectorChartRHSDiff … m l) 2 (volume.restrict (chartTargetEuclid α))
-  ≤ ENNReal.ofReal (C · μ⁻¹^e) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖
-```
-
-driven by uniform `wkpNorm`-graded chart-component energy hypotheses on each of
-the seven primitive source atoms — the eigenvector chart component itself, and
-the six per-limit resolvent / partial / component / cross-right / cutoff data.
-
-The iterated-weak-partial bound that `diffRHSAggregate_le_energy_perK` requires
-is derived from the chart-component per-K-family hypothesis via the polymorphic
-bridge `eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp`, combined with
-`wkpNorm`-monotonicity in the order: for any direction count `j ≤ m + 1`, the
-`j`-fold mixed weak partial at order `2 + K'` is bounded by the chart component
-at order `(K' + m + 3)` (the maximum order needed in the recursion).
-
-The constant `C` is geometric (it depends on `g r s α P₀ m l` and on
-the constants supplied by the input hypotheses); the exponent `e : ℕ` is
-likewise geometric. The eigenvalue factor `μ⁻¹^e` is the only `i`-dependent
-piece, and the abstract `L²` norm `‖tensorResolventEigenbasisVec …‖` is
-likewise the only abstract right-hand side factor.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -76,7 +37,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `iteratedPartial_wkpNorm_le_of_chart_perK`. -/
 private lemma iteratedPartial_wkpNorm_le_of_chart_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -143,7 +103,7 @@ private lemma iteratedPartial_wkpNorm_le_of_chart_perK
 
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_eLpNorm_le_chartcpt`. -/
+
 theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
@@ -343,7 +303,7 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le_chartcpt
 
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_wkpNormOne_le_chartcpt`. -/
+
 theorem eigenvectorChartRHSDiff_wkpNormOne_le_chartcpt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

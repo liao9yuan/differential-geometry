@@ -1,17 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.Translation
 
-/-!
-# Mollifier construction on Euclidean space
-
-This module provides a fixed mollifier on `EuclideanSpace ℝ (Fin d)` and its
-ε-rescaled version, used downstream in the convolution-smoothing arguments
-underlying compactness in `L^p`.
-
-The construction is based on Mathlib's `ContDiffBump`: a smooth, nonnegative,
-compactly supported bump function with a chosen radius. The `normed` variant
-of a bump integrates to one.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -23,16 +11,12 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The unit `ContDiffBump` centred at the origin with `rIn = 1/2` and
-`rOut = 1`. -/
 def mollifierBump : ContDiffBump (0 : E) where
   rIn := 1 / 2
   rOut := 1
   rIn_pos := by norm_num
   rIn_lt_rOut := by norm_num
 
-/-- The fixed mollifier on `EuclideanSpace ℝ (Fin d)`: smooth, nonnegative,
-supported in the closed unit ball, integrating to 1. -/
 def mollifier : E → ℝ := mollifierBump.normed (volume : Measure E)
 
 theorem mollifier_smooth :
@@ -72,16 +56,12 @@ theorem mollifier_support_subset_closedBall_one :
   rw [mollifier_support_eq]
   exact Metric.ball_subset_closedBall
 
-/-- The ε-scaled `ContDiffBump` centred at the origin with `rIn = ε/2`,
-`rOut = ε`. -/
 def mollifierBumpEps {ε : ℝ} (hε : 0 < ε) : ContDiffBump (0 : E) where
   rIn := ε / 2
   rOut := ε
   rIn_pos := by positivity
   rIn_lt_rOut := by linarith
 
-/-- The ε-scaled mollifier: smooth, nonnegative, supported in the closed
-ε-ball, integrating to 1. -/
 def mollifierEps {ε : ℝ} (hε : 0 < ε) : E → ℝ :=
   (mollifierBumpEps (d := d) hε).normed (volume : Measure E)
 

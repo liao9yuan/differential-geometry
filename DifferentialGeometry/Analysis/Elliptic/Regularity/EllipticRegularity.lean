@@ -2,54 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSo
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-/-!
-# Chart-local elliptic bilinear forms for the variational Laplacian on a
-Riemannian manifold
-
-This module supplies the foundational chart-local divergence-form bilinear
-form needed to apply the Euclidean second-order interior regularity theorem
-`loc_smooth_solution` to chart-pushed scalar functions on a smooth
-manifold equipped with a smooth Riemannian metric.
-
-The construction is the **constant-identity** chart-local form, which
-realises the Euclidean Laplacian as a `SmoothEllipticBilinearForm` on
-`EuclideanSpace ℝ (Fin (Module.finrank ℝ E))`. It is the universal building
-block that does not depend on the manifold's metric structure: every
-manifold-side variational Laplacian, after chart-localisation, reduces to a
-divergence-form Euclidean equation, and the constant-identity form is the
-simplest concrete instance whose coefficient data satisfies the
-`SmoothEllipticBilinearForm` structure.
-
-Concretely we exhibit:
-
-* `chartLocalEuclideanForm Ω` — the `SmoothEllipticBilinearForm` with `a` the
-  identity matrix, `c = 0`, and ellipticity constants `lam = capLam = 1`,
-  defined on any open subset `Ω` of the model Euclidean space.
-
-The principal integrand of `chartLocalEuclideanForm Ω` agrees with
-`∑_i (∂_i u) (∂_i v)`, the standard Euclidean Dirichlet integrand.
-
-## Mathematical context
-
-The variational Laplacian `Δ_g u = div_g(grad_g u)` chart-localises to the
-Euclidean divergence-form operator
-`(1/√det g) · ∂_i(√det g · g^{ij} · ∂_j ũ)`, where `ũ := u ∘ chart^{-1}`.
-The associated bilinear form integrand is `√det g · g^{ij} · ∂_i ũ ∂_j ṽ`.
-On a precompact open subset of the chart range where the Gram matrix is
-uniformly positive definite, this defines a `SmoothEllipticBilinearForm`
-modulo a smooth global extension off the precompact subset.
-
-The full geometric construction (with the matrix-valued coefficient
-`√det g · g^{ij}` smoothly extended off the chart range) requires substantial
-additional infrastructure: a smooth global extension to all of
-`EuclideanSpace ℝ (Fin _)` matching `√det g · g^{ij}` on a precompact open
-subset of the chart range and remaining uniformly elliptic globally. This
-will be developed in subsequent modules. The present module supplies the
-constant-coefficient form, which already establishes the `SmoothEllipticBilinearForm`
-API on the chart side and demonstrates the connection with
-`loc_smooth_solution`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -63,10 +15,6 @@ namespace EllipticRegularity
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-- The constant identity bilinear form on any open set
-`Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))`. This packages the
-Euclidean Laplacian's divergence-form data as a `SmoothEllipticBilinearForm`,
-with matrix coefficient the identity and zeroth-order coefficient zero. -/
 def chartLocalEuclideanForm
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) :
     DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm
@@ -131,8 +79,6 @@ def chartLocalEuclideanForm
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) :
     (chartLocalEuclideanForm (E := E) Ω).capLam = 1 := rfl
 
-/-- The principal integrand of the constant-identity form is the standard
-Euclidean Dirichlet pairing `∑_i (∂_i u) (∂_i v)`. -/
 theorem chartLocalEuclideanForm_principalIntegrand
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -156,8 +102,6 @@ theorem chartLocalEuclideanForm_principalIntegrand
   · intro hk
     exact absurd (Finset.mem_univ i) hk
 
-/-- The principal integrand of the constant-identity form, evaluated at
-`u = v`, equals the squared norm of the gradient vector. -/
 theorem chartLocalEuclideanForm_principalIntegrand_self
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -171,9 +115,6 @@ theorem chartLocalEuclideanForm_principalIntegrand_self
   intro i _
   rw [sq]
 
-/-- The principal integrand of the constant-identity form at `u = v` equals
-the squared norm of `gradientVec`, the Euclidean-vector packaging of the
-gradient. -/
 theorem chartLocalEuclideanForm_principalIntegrand_self_eq_gradient_sq
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -185,8 +126,6 @@ theorem chartLocalEuclideanForm_principalIntegrand_self_eq_gradient_sq
   rw [chartLocalEuclideanForm_principalIntegrand_self]
   rw [DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.gradientVec_norm_sq_eq_sum]
 
-/-- The bilinear form of the constant-identity chart-local form is the
-standard Euclidean Dirichlet bilinear form, integrated over `Ω`. -/
 theorem chartLocalEuclideanForm_bilin
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :

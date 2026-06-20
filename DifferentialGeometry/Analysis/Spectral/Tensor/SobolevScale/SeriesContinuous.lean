@@ -3,32 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.WeylSummabilit
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Synthesis
 import Mathlib.Analysis.Normed.Group.FunctionSeries
 
-/-! # Time-continuity of spectral series in the tensor Sobolev scale
-
-A Weierstrass `M`-test for `tensorHs g 0 2 σ`-valued families that are presented through
-their eigenbasis coordinates.  If a family `W : ℝ → tensorHs g 0 2 σ` has coordinates
-`(W t).coeff i = φ i t` with each `φ i` continuous on a set `s`, and a single uniform-in-`t`
-summable majorant on the **higher**-order weighted coordinate squares
-`tensorSobolevWeight i σ' · (φ i t)² ≤ Cmaj i` with `σ' - σ` above the Weyl summability
-threshold, then `W` is continuous on `s` in the order-`σ` Sobolev norm.
-
-The eigenbasis expansion `W t = ∑ᵢ (φ i t) • bᵢ` (`tensorHs.hasSum_smul_basisVec`) presents
-`W` as a series of continuous functions; the per-mode norm is
-`‖(φ i t) • bᵢ‖ = |φ i t| · √(tensorSobolevWeight i σ)`, whose square at order `σ` is bounded,
-*uniformly in `t`*, by the geometric-mean / arithmetic-mean split
-
-  `tensorSobolevWeight i σ · (φ i t)² = tensorSobolevWeight i (-(σ' - σ)) ·
-      (tensorSobolevWeight i σ' · (φ i t)²)
-    ≤ tensorSobolevWeight i (-(σ' - σ)) · Cmaj i`,
-
-and `‖(φ i t) • bᵢ‖ ≤ ½ (tensorSobolevWeight i (-(σ' - σ)) + Cmaj i)` by `2ab ≤ a² + b²`.
-The right side is summable: the negative-weight tail is `tensorEigen_summable_negpow` (Weyl)
-and `Cmaj` is summable by hypothesis.  Mathlib's `continuousOn_tsum` then delivers the
-continuity of the limit `t ↦ ∑ᵢ (φ i t) • bᵢ = W t`.
-
-This is the analytic engine behind the order-`(a+2)` time-continuity of the realized
-Ricci–DeTurck solution field. -/
-
 namespace DifferentialGeometry
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -54,14 +28,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Weierstrass `M`-test for an eigen-coordinate-presented family in `Hˢ`.**
-
-For a family `W : ℝ → tensorHs g 0 2 σ` whose eigenbasis coordinates are `(W t).coeff i =
-φ i t` on a set `s`, with each coordinate function `φ i` continuous on `s` and a single
-uniform-in-`t` summable majorant on the *higher*-order weighted coordinate squares —
-`tensorSobolevWeight i σ' · (φ i t)² ≤ Cmaj i` for all `i` and `t ∈ s`, with `Summable Cmaj`
-and `σ' - σ` strictly above the Weyl exponent `weylSobolevExp` — the family `W` is continuous
-on `s` in the order-`σ` Sobolev norm. -/
 theorem tensorHs_continuousOn_of_coeff_of_higher_mass
     (g : SmoothRiemannianMetric I M) {σ σ' : ℝ}
     (hσσ' : ((weylSobolevExp (E := E) : ℕ) : ℝ) < σ' - σ)
@@ -74,7 +40,7 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
       tensorSobolevWeight (I := I) (M := M) i σ' * (φ i t) ^ 2 ≤ Cmaj i) :
     ContinuousOn W s := by
   classical
-  -- The summable uniform majorant `U i = ½ (tensorSobolevWeight i (-(σ'-σ)) + Cmaj i)`.
+  
   set negWeight : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
     fun i => tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ)) with hnegWeight
   have hnegWeight_sum : Summable negWeight :=
@@ -83,25 +49,25 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
     fun i => (negWeight i + Cmaj i) / 2 with hU
   have hU_sum : Summable U :=
     ((hnegWeight_sum.add hCmaj).div_const 2)
-  -- The series term `f i t = (φ i t) • basisVec σ i`.
+  
   set f : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → tensorHs (I := I) (M := M) g 0 2 σ :=
     fun i t => φ i t •
       tensorHsBasisVec (I := I) (M := M) (g := g) (r := 0) (s := 2) σ i with hf
-  -- Each term is continuous on `s`: `φ i` continuous, scalar multiplication continuous.
+  
   have hf_cont : ∀ i, ContinuousOn (f i) s := by
     intro i
     exact (hφ_cont i).smul continuousOn_const
-  -- Uniform per-mode norm bound `‖f i t‖ ≤ U i` on `s`.
+  
   have hf_bound : ∀ i, ∀ t ∈ s, ‖f i t‖ ≤ U i := by
     intro i t ht
     have hnorm : ‖f i t‖ =
         |φ i t| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) := by
       rw [hf, norm_smul, Real.norm_eq_abs, norm_tensorHsBasisVec]
-    -- `‖f i t‖² = tensorSobolevWeight i σ · (φ i t)²`.
+    
     have hsq : ‖f i t‖ ^ 2 = tensorSobolevWeight (I := I) (M := M) i σ * (φ i t) ^ 2 := by
       rw [hnorm, mul_pow, sq_abs, sq_sqrt_tensorSobolevWeight]
       ring
-    -- The weight split `(1+λ)^σ = (1+λ)^{-(σ'-σ)} · (1+λ)^{σ'}`.
+    
     have hsplit : tensorSobolevWeight (I := I) (M := M) i σ =
         negWeight i * tensorSobolevWeight (I := I) (M := M) i σ' := by
       have hbase : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
@@ -109,12 +75,12 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
       rw [hnegWeight]
       unfold tensorSobolevWeight
       rw [← Real.rpow_add hbase, show -(σ' - σ) + σ' = σ from by ring]
-    -- `‖f i t‖² = negWeight i · (tensorSobolevWeight i σ' · (φ i t)²) ≤ negWeight i · Cmaj i`.
+    
     have hsq_le : ‖f i t‖ ^ 2 ≤ negWeight i * Cmaj i := by
       rw [hsq, hsplit, mul_assoc]
       exact mul_le_mul_of_nonneg_left (hmass i t ht)
         (by rw [hnegWeight]; exact tensorSobolevWeight_nonneg (I := I) (M := M) i _)
-    -- `‖f i t‖ = √(‖f i t‖²) ≤ √(negWeight i · Cmaj i) ≤ ½ (negWeight i + Cmaj i) = U i`.
+    
     have hnW_nonneg : 0 ≤ negWeight i := by
       rw [hnegWeight]; exact tensorSobolevWeight_nonneg (I := I) (M := M) i _
     have hC_nonneg : 0 ≤ Cmaj i :=
@@ -132,10 +98,10 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
       rw [Real.sq_sqrt hnW_nonneg, Real.sq_sqrt hC_nonneg] at h2
       linarith
     exact hsqrt.trans hgeom
-  -- Mathlib's `M`-test for continuity of a series of functions.
+  
   have hcont_tsum : ContinuousOn (fun t => ∑' i, f i t) s :=
     continuousOn_tsum hf_cont hU_sum (fun i t ht => hf_bound i t ht)
-  -- Identify the series with `W`: `W t = ∑ᵢ (W t).coeff i • bᵢ = ∑ᵢ (φ i t) • bᵢ`.
+  
   refine hcont_tsum.congr ?_
   intro t ht
   have hsum : HasSum

@@ -4,28 +4,6 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 import DifferentialGeometry.Analysis.ODE.IntegralGronwall
 
-/-!
-# Fundamental-theorem-of-calculus integral form of a one-sided ODE solution
-
-For a curve `γ : ℝ → E` that is continuous on `[0, T]` and has the right-derivative
-`v t` at every interior time, the fundamental theorem of calculus gives the integral
-form `γ s = γ 0 + ∫₀ˢ v r dr`.  This is the integral form of the chart-coordinate
-Picard solution of a time-dependent ODE: there the velocity is the field evaluated
-along the orbit, `v r = f r (γ r)`.
-
-Three layers are recorded:
-
-* `ode_right_solution_ftc_integral` — the generic right-derivative FTC integral form
-  for an `E`-valued curve;
-* `ode_field_ftc_integral` — its specialization to a curried time-dependent field
-  `f : ℝ → E → E`, giving `γ s = γ 0 + ∫₀ˢ f r (γ r) dr` (the chart-Picard FTC form);
-* `linear_ode_variational_integral` — the linear (variational) integral equation
-  `J s = J 0 + ∫₀ˢ A r (J r) dr` for an `E`-valued Jacobian curve solving a linear ODE;
-  and `variational_jacobian_gronwall_bound` — the exponential Grönwall bound
-  `‖J s‖ ≤ ‖J 0‖ · exp (CA · s)` derived from that integral equation and a uniform
-  operator bound `‖A r‖ ≤ CA`.
--/
-
 open MeasureTheory Set
 open scoped Topology
 
@@ -33,16 +11,6 @@ namespace DifferentialGeometry.Analysis.ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-- **FTC integral form of a one-sided ODE solution.**  If `γ : ℝ → E` is continuous
-on `[0, T]`, has the right-derivative `v t` (with respect to `Set.Ici 0`) at every
-`t ∈ [0, T)`, and the velocity `v` is continuous on `[0, T]`, then for every
-`s ∈ [0, T]`,
-`γ s = γ 0 + ∫₀ˢ v r dr`.
-
-Proof: the right-derivative-with-respect-to-`Ici 0` data restricts to the
-right-derivative-with-respect-to-`Ioi t` data of Mathlib's FTC-2
-(`intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le`), and `v`'s continuity
-makes it interval-integrable. -/
 theorem ode_right_solution_ftc_integral
     {γ : ℝ → E} {v : ℝ → E} {T : ℝ}
     (hγcont : ContinuousOn γ (Set.Icc 0 T))
@@ -69,15 +37,6 @@ theorem ode_right_solution_ftc_integral
     intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le hs0 hγcont_s hderiv_right hint
   rw [hftc]; abel
 
-/-- **FTC integral form of a chart-coordinate Picard solution.**  Specialization of
-`ode_right_solution_ftc_integral` to a curried time-dependent field `f : ℝ → E → E`:
-if `γ` is continuous on `[0, T]`, solves the right-handed ODE
-`HasDerivWithinAt γ (f t (γ t)) (Ici 0) t` on `[0, T)`, and the velocity along the
-orbit `r ↦ f r (γ r)` is continuous on `[0, T]`, then
-`γ s = γ 0 + ∫₀ˢ f r (γ r) dr` for every `s ∈ [0, T]`.
-
-This is the FTC integral identity consumed near `t = 0` by the forward-flow
-continuity extension, with `f r = chartRawRepr α (X r)` and `γ = extChartAt I α ∘ Φ · x`. -/
 theorem ode_field_ftc_integral
     {γ : ℝ → E} {f : ℝ → E → E} {T : ℝ}
     (hγcont : ContinuousOn γ (Set.Icc 0 T))
@@ -87,15 +46,6 @@ theorem ode_field_ftc_integral
     ∀ s ∈ Set.Icc (0 : ℝ) T, γ s = γ 0 + ∫ r in (0 : ℝ)..s, f r (γ r) :=
   ode_right_solution_ftc_integral hγcont hγderiv hfcont
 
-/-- **Variational (linear-ODE) integral equation.**  For an `E`-valued Jacobian curve
-`J : ℝ → E` continuous on `[0, T]` that solves the linear right-handed ODE
-`HasDerivWithinAt J (A t (J t)) (Ici 0) t` on `[0, T)` with continuous operator
-coefficient `A : ℝ → (E →L[ℝ] E)`, the FTC gives the variational integral equation
-`J s = J 0 + ∫₀ˢ A r (J r) dr` for every `s ∈ [0, T]`.
-
-This is the linearised companion of `ode_field_ftc_integral`: the velocity is the
-linear map `A r` applied to the current Jacobian value `J r`, whose continuity along
-the orbit follows from `ContinuousOn.clm_apply`. -/
 theorem linear_ode_variational_integral
     {J : ℝ → E} {A : ℝ → (E →L[ℝ] E)} {T : ℝ}
     (hJcont : ContinuousOn J (Set.Icc 0 T))
@@ -106,15 +56,7 @@ theorem linear_ode_variational_integral
   ode_right_solution_ftc_integral hJcont hJderiv (hAcont.clm_apply hJcont)
 
 omit [CompleteSpace E] in
-/-- **Grönwall bound for the variational Jacobian.**  If an `E`-valued Jacobian curve
-`J : ℝ → E`, continuous on `[0, T]`, satisfies the linear integral equation
-`J s = J 0 + ∫₀ˢ A r (J r) dr` with a uniform operator bound `‖A r‖ ≤ CA` on `[0, T]`,
-then `‖J s‖ ≤ ‖J 0‖ · exp (CA · s)` for every `s ∈ [0, T]`.
 
-Proof: the norm `f s := ‖J s‖` is continuous, non-negative, and satisfies the scalar
-integral Grönwall hypothesis `f s ≤ ‖J 0‖ + CA · ∫₀ˢ f` (triangle inequality, the
-operator bound `‖A r (J r)‖ ≤ CA · ‖J r‖`, and monotonicity of the integral); the
-conclusion is the project's scalar `gronwall_integral_le`. -/
 theorem variational_jacobian_gronwall_bound
     {J : ℝ → E} {A : ℝ → (E →L[ℝ] E)} {T CA : ℝ} (hT : 0 ≤ T) (hCA : 0 ≤ CA)
     (hJcont : ContinuousOn J (Set.Icc 0 T))

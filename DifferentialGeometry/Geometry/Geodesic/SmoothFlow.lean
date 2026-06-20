@@ -9,78 +9,6 @@ import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Joint `C^1` regularity of the chart-coordinate geodesic flow
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete finite-dimensional inner-product space `E`, the
-chart-coordinate phase-space form of the geodesic equation reads
-$$\dot x = v, \qquad \dot v = -\Gamma_\alpha(v, v)(x),$$
-on `E × E`, where `x ∈ E` is the chart image of the foot point under
-`extChartAt I α` and `v ∈ E` is the velocity in the chart-`α` frame.
-This is autonomous and `C^∞` on `interior (extChartAt I α).target ×ˢ univ`.
-
-By smoothly cutting off the right-hand side outside a small ball centred
-at any base phase-space point `z₀ = (extChartAt I α p, v₀)`, we obtain a
-globally `C^∞` vector field on `E × E` that agrees with the chart-fixed
-geodesic field on a neighbourhood of `z₀`. The Banach-space flow theorem
-then produces a local flow of the cutoff field; the generic joint-`C^1`
-upgrade gives `C^1` smoothness of the flow on an open neighbourhood of
-`(z₀, 0)`.
-
-## Main definitions
-
-* `chartPhaseVF g α : E × E → E × E` — the chart-coordinate phase-space
-  vector field `(x, v) ↦ (v, -Γ_α(v, v)(x))`.
-
-* `chartPhaseVFCutoff g α z₀ b : E × E → E × E` — the globally `C^∞`
-  cutoff version, multiplying `chartPhaseVF g α` pointwise by a
-  `ContDiffBump` centred at `z₀`.
-
-* `chartPhaseVFTime g α z₀ b : ℝ → (E × E) → E × E` — the trivial
-  time-padding, used to feed the generic Banach-space flow theorem.
-
-## Main theorems
-
-* `chartPhaseVF_contDiffOn` — `C^∞` regularity of `chartPhaseVF g α` on
-  `interior (extChartAt I α).target ×ˢ univ`.
-
-* `chartPhaseVFCutoff_contDiff` — global `C^∞` regularity of the cutoff
-  vector field on `E × E`, provided the bump's outer support sits inside
-  the chart-target interior product.
-
-* `chartPhaseVFCutoff_eq_of_mem_closedBall` — the cutoff agrees with the
-  original vector field on the inner closed ball of the bump.
-
-* `exists_chartPhase_isLocalFlow` — existence of a Picard–Lindelöf local
-  flow of the cutoff field around any base point with chart-target
-  interior first coordinate.
-
-* `exists_chartPhase_contDiffOn_isLocalFlow` — the headline: there exist
-  a `ContDiffBump`, a local flow `Φ` of the cutoff field, and strictly
-  smaller open neighbourhoods of `(z₀, 0)` on which `Φ` is jointly
-  `C^1` (via the generic flow theorem of
-  `DifferentialGeometry.Analysis.ODE.FlowC1Continuous`).
-
-## What this file does *not* do
-
-* It does not lift the chart-coordinate flow back to a `TM`-valued
-  geodesic flow. That requires composing with the trivialisation of
-  `T(TM)` at `⟨α, 0⟩` and identifying the result with the existing
-  maximal-geodesic curve from `MaximalInterval.lean`. The identification
-  uses Mathlib-style ODE uniqueness arguments and is left to a follow-up
-  step.
-
-* It does not define the exponential map. With the chart-coordinate flow
-  available, the exponential map can be built as `Φ(z, 1)` after the
-  lift back to `TM`, again as a follow-up step.
-
-The local flow is `C^1`, hence the present file delivers the
-*unconditional `C^1`* regularity of the chart-coordinate geodesic flow.
-`C^k` regularity for `k ≥ 2` would follow from the (conditional) higher
-inductive scaffolding in `Analysis/ODE/FlowCk.lean`; this is deferred.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real Bundle Manifold
@@ -99,7 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-coordinate phase-space geodesic vector field on `E × E`. -/
 def chartPhaseVF (g : SmoothRiemannianMetric I M) (α : M) : E × E → E × E :=
   fun z => (z.2, - chartChristoffelContraction (I := I) g α z.2 z.2 z.1)
 
@@ -115,9 +42,6 @@ def chartPhaseVF (g : SmoothRiemannianMetric I M) (α : M) : E × E → E × E :
 
 variable [I.Boundaryless]
 
-/-- The scalar coefficient
-`(x, v) ↦ ∑_{ij} Γ^k_{ij}(x) · chartCoord i v · chartCoord j v`
-is `C^∞` on `interior (extChartAt I α).target ×ˢ univ`. -/
 lemma chartChristoffelContraction_scalarCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -158,8 +82,6 @@ lemma chartChristoffelContraction_scalarCoeff_contDiffOn
     (hCLM_j.comp hsnd).contDiffOn
   exact (hΓ.mul hci).mul hcj
 
-/-- The chart-coordinate Christoffel contraction `Γ_α(v, v)(x)`, viewed
-as a function on `E × E`, is `C^∞` on `interior (extChartAt I α).target ×ˢ univ`. -/
 lemma chartChristoffelContraction_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞
@@ -176,9 +98,6 @@ lemma chartChristoffelContraction_contDiffOn
     contDiffOn_const
   exact hscalar.smul hconst
 
-/-- **Smoothness of the chart-coordinate phase-space geodesic vector field.**
-The right-hand side of the chart-coordinate geodesic ODE is `C^∞` on
-`interior (extChartAt I α).target ×ˢ univ`. -/
 theorem chartPhaseVF_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (chartPhaseVF (I := I) g α)
@@ -192,8 +111,6 @@ theorem chartPhaseVF_contDiffOn
     chartChristoffelContraction_contDiffOn (I := I) g α
   exact hfst.prodMk hΓ.neg
 
-/-- The cutoff phase-space vector field: `chartPhaseVF g α` multiplied
-pointwise by the smooth bump `b`. -/
 def chartPhaseVFCutoff (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) : E × E → E × E :=
   fun z => b z • chartPhaseVF (I := I) g α z
@@ -204,7 +121,6 @@ def chartPhaseVFCutoff (g : SmoothRiemannianMetric I M) (α : M)
     chartPhaseVFCutoff (I := I) g α z₀ b z =
       b z • chartPhaseVF (I := I) g α z := rfl
 
-/-- On the inner closed ball, the cutoff equals the original vector field. -/
 lemma chartPhaseVFCutoff_eq_of_mem_closedBall
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) {z : E × E}
@@ -213,9 +129,6 @@ lemma chartPhaseVFCutoff_eq_of_mem_closedBall
   have hb1 : b z = 1 := b.one_of_mem_closedBall hz
   simp [chartPhaseVFCutoff_apply, hb1]
 
-/-- **Global smoothness of the cutoff vector field.** If the bump's outer
-closed ball is contained in `interior (extChartAt I α).target ×ˢ univ`,
-the cutoff vector field is `C^∞` on all of `E × E`. -/
 theorem chartPhaseVFCutoff_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -253,7 +166,6 @@ theorem chartPhaseVFCutoff_contDiff
       b.zero_of_le_dist (le_of_lt hw')
     simp [chartPhaseVFCutoff_apply, hb0]
 
-/-- The time-padded cutoff vector field. -/
 def chartPhaseVFTime (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) : ℝ → (E × E) → E × E :=
   fun _ z => chartPhaseVFCutoff (I := I) g α z₀ b z
@@ -271,7 +183,6 @@ lemma uncurry_chartPhaseVFTime_eq
       fun p : ℝ × (E × E) => chartPhaseVFCutoff (I := I) g α z₀ b p.2 := by
   funext p; rfl
 
-/-- The uncurried time-padded cutoff vector field is `C^∞` on `ℝ × (E × E)`. -/
 lemma chartPhaseVFTime_uncurry_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -283,9 +194,6 @@ lemma chartPhaseVFTime_uncurry_contDiff
     chartPhaseVFCutoff_contDiff (I := I) g α z₀ b hb_sub
   exact hVF.comp contDiff_snd
 
-/-- The uncurried time-padded cutoff vector field is `C^1` on
-`Set.univ : Set (ℝ × (E × E))`, the regularity required by the generic
-local-flow theorem. -/
 lemma chartPhaseVFTime_uncurry_contDiffOn_univ_one
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -298,9 +206,6 @@ lemma chartPhaseVFTime_uncurry_contDiffOn_univ_one
     h.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   exact h1.contDiffOn
 
-/-- The uncurried time-padded cutoff vector field is `C^2` on
-`Set.univ : Set (ℝ × (E × E))`, the regularity required by the generic
-local-flow `C^2`-regularity theorem. -/
 lemma chartPhaseVFTime_uncurry_contDiffOn_univ_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -317,10 +222,6 @@ lemma chartPhaseVFTime_uncurry_contDiffOn_univ_two
     h.of_le hle
   exact h2.contDiffOn
 
-/-- The uncurried time-padded cutoff vector field is `C^n` on
-`Set.univ : Set (ℝ × (E × E))` for every finite order `n : ℕ`, the
-regularity required by the unconditional finite-order flow-regularity
-theorem. -/
 lemma chartPhaseVFTime_uncurry_contDiffOn_univ_nat
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) (n : ℕ)
@@ -337,9 +238,6 @@ lemma chartPhaseVFTime_uncurry_contDiffOn_univ_nat
     h.of_le hle
   exact hn.contDiffOn
 
-/-- Given a base phase-space point `(x₀, v₀)` with `x₀ ∈ interior _.target`,
-there exists a `ContDiffBump` at `(x₀, v₀)` whose outer closed ball is
-contained in `interior (extChartAt I α).target ×ˢ univ`. -/
 lemma exists_contDiffBump_subset_chart_interior
     (α : M) {x₀ v₀ : E}
     (hx₀ : x₀ ∈ interior (extChartAt I α).target) :
@@ -358,10 +256,6 @@ lemma exists_contDiffBump_subset_chart_interior
   have hfst_lt : dist p.1 x₀ < ε := lt_of_le_of_lt hfst (by linarith)
   exact hε_sub (Metric.mem_ball.mpr hfst_lt)
 
-/-- **Existence of a local flow of the cutoff field.** For any base
-phase-space point `(x₀, v₀)` with `x₀` in the chart-target interior, there
-exists a `ContDiffBump` cutoff `b` and a Picard–Lindelöf local flow `Φ`
-of the time-padded cutoff vector field around `((x₀, v₀), 0)`. -/
 theorem exists_chartPhase_isLocalFlow
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -391,9 +285,6 @@ theorem exists_chartPhase_isLocalFlow
   rw [heq1, heq2] at hΦ
   exact hΦ
 
-/-- The fderiv of the cutoff vector field is bounded uniformly on `E × E`:
-since the cutoff has compact support, so does its derivative. This is a
-key technical fact for applying the joint-`C^1` upgrade. -/
 lemma exists_bound_fderiv_chartPhaseVFCutoff
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -448,21 +339,6 @@ lemma exists_bound_fderiv_chartPhaseVFCutoff
     rw [norm_zero]
     exact hMglob_nn
 
-/-- **Joint `C^1` regularity of the cutoff-flow.**
-
-For every base phase-space point `(x₀, v₀)` with `x₀ ∈ interior (extChartAt I α).target`,
-there exist a `ContDiffBump` `b`, a phase-space radius `0 < ρ`, a time
-radius `0 < T`, and a map `Φ : (E × E) × ℝ → E × E` such that:
-
-* `Φ` is jointly `C^1` on `ball (x₀, v₀) ρ ×ˢ Ioo (-T) T`;
-* `Φ((x₀, v₀), 0) = (x₀, v₀)`;
-* the underlying flow is a Picard–Lindelöf local flow of the cutoff
-  vector field `chartPhaseVFCutoff g α (x₀, v₀) b`.
-
-On the inner closed ball of `b`, the cutoff agrees with the genuine
-chart-coordinate phase-space geodesic vector field
-`chartPhaseVF g α`, so the flow there solves the chart-coordinate
-geodesic ODE. -/
 theorem exists_chartPhase_contDiffOn_isLocalFlow
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -594,13 +470,6 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow
       exact_mod_cast (le_of_lt hrN)))
   refine ⟨b, (ρ : ℝ), T, Φ, hρ_pos, hT_pos, hb_sub, hCDOn, hinitial⟩
 
-/-- **Combined joint-`C^1` and `IsLocalFlow` packaging.** For every base
-phase-space point `(x₀, v₀)` with `x₀` in the chart-target interior,
-there exist a `ContDiffBump` `b`, Picard–Lindelöf radii `(r, ε)`, a
-joint-`C^1` radius `(ρ, T)`, and a map `Φ : (E × E) × ℝ → E × E` that is
-both an `IsLocalFlow` of the time-padded cutoff field
-`chartPhaseVFTime g α (x₀, v₀) b` (on the larger Picard radius) and
-jointly `C^1` on `ball ((x₀, v₀)) ρ × Ioo (-T) T`. -/
 theorem exists_chartPhase_contDiffOn_isLocalFlow_combined
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -740,20 +609,6 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow_combined
       exact_mod_cast (le_of_lt hrN)))
   exact ⟨b, rN, εN, (ρ : ℝ), T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
 
-/-- **Combined joint-`C^2` and `IsLocalFlow` packaging.** For every base
-phase-space point `(x₀, v₀)` with `x₀` in the chart-target interior,
-there exist a `ContDiffBump` `b`, Picard–Lindelöf radii `(r, ε)`, a
-joint-`C^2` radius `(ρ, T)`, and a map `Φ : (E × E) × ℝ → E × E` that is
-both an `IsLocalFlow` of the time-padded cutoff field
-`chartPhaseVFTime g α (x₀, v₀) b` (on the larger Picard radius) and
-jointly `C^2` on `ball ((x₀, v₀)) ρ × Ioo (-T) T`.
-
-This is the `C^2` strengthening of
-`exists_chartPhase_contDiffOn_isLocalFlow_combined`: the flow regularity
-is upgraded from `ContDiffOn ℝ 1` to `ContDiffOn ℝ 2` by routing through
-the unconditional finite-order flow-existence theorem
-`exists_contDiffOn_flow_C2` (in place of the `C^1`
-`contDiffOn_flow_of_isLocalFlow`). -/
 theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_two
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -827,21 +682,6 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_two
       exact_mod_cast (le_of_lt hrN)))
   exact ⟨b, rN, εN, ρ, T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
 
-/-- **Combined joint-`C^n` and `IsLocalFlow` packaging (every finite
-order `n ≥ 1`).** For every base phase-space point `(x₀, v₀)` with `x₀`
-in the chart-target interior, and every finite order `n ≥ 1`, there exist
-a `ContDiffBump` `b`, Picard–Lindelöf radii `(r, ε)`, a joint-`C^n`
-radius `(ρ, T)`, and a map `Φ : (E × E) × ℝ → E × E` that is both an
-`IsLocalFlow` of the time-padded cutoff field
-`chartPhaseVFTime g α (x₀, v₀) b` (on the larger Picard radius) and
-jointly `C^n` on `ball ((x₀, v₀)) ρ × Ioo (-T) T`.
-
-This is the finite-order strengthening of
-`exists_chartPhase_contDiffOn_isLocalFlow_combined_two`: the flow
-regularity is upgraded from `ContDiffOn ℝ 2` to `ContDiffOn ℝ n` by
-routing through the unconditional finite-order flow-existence theorem
-`exists_contDiffOn_flow_Cnat` (in place of the `C^2`
-`exists_contDiffOn_flow_C2`). -/
 theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_nat
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E} (n : ℕ) (hn : 1 ≤ n)

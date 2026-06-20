@@ -1,44 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
-/-!
-# Slot-`0` Parseval decomposition of the intrinsic `(0, s+1)`-tensor fibre norm
-
-For a smooth Riemannian metric `g`, the intrinsic Riemannian fibre norm squared of a
-`(0, s+1)` covariant tensor `T` at a point `x` decomposes, over the `g`-orthonormal tangent
-frame direction in the first (slot `0`) covariant slot, into the frame-sum of the
-slot-`s` fibre norms of the slot-`0` curries of `T`:
-
-```
-riemannianFiberNormSq g 0 (s+1) x T
-  = ∑ (a : Fin (finrank ℝ E)), riemannianFiberNormSq g 0 s x (slot0Curry g x s e K₀ T a)
-```
-
-where `slot0Curry g x s e K₀ T a` is the `(0, s)`-tensor obtained from `T` by evaluating
-its underlying continuous linear map on the empty covector, currying off the first slot at
-the `a`-th vector `e a` of the same orthonormal frame `e` used internally by
-`riemannianFiberNormSq`, and repackaging the result as a `TensorRSSpace 0 s I x`.
-
-This is Parseval applied along the slot-`0` frame direction: the multi-index `J : Fin (s+1)
-→ Fin n` indexing the dual-tensor-frame components of `T` splits via `Fin.consEquiv` into a
-head index `a : Fin n` (the slot-`0` frame direction) and a tail index `J' : Fin s → Fin n`,
-and the curry identity `tensor0S_curry_apply_eval` identifies the corresponding frame
-components.
-
-## Main definitions
-
-* `slot0Curry` — the slot-`0` curry of a `(0, s+1)`-tensor at a frame vector, as a
-  `(0, s)`-tensor.
-
-## Main results
-
-* `slot0Curry_apply` — the defining evaluation formula for `slot0Curry`.
-* `fiberNormSqComponent_slot0Curry` — the per-component slot-split identity: the
-  slot-`(s+1)` frame component of `T` at `Fin.cons a J'` equals the slot-`s` frame
-  component of `slot0Curry … a` at `J'`.
-* `riemannianFiberNormSq_succ_eq_sum_slot0Curry` — the headline frame-sum decomposition.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false

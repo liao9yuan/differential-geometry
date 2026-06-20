@@ -3,41 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
-/-!
-# Uniform operator-norm bounds on the chart `(r, s)`-tensor twist over a compact base set
-
-For a smooth manifold `M` modelled on `(E, H)` with model `I`, and a fixed base
-point `α : M`, this file proves pointwise operator-norm bounds on the chart
-`(r, s)`-tensor twist `chartRSTwist α b r s` and its inverse
-`chartRSTwistInv α b r s`, viewed as continuous linear maps on
-`TensorRSModel r s ℝ E`, in terms of the operator norms of `chartJ`/`chartJinv`
-at the base point `b`.
-
-## Strategy
-
-The chart `(r, s)`-tensor twist `chartRSTwist α b r s T` is defined as the
-composition `(post-compose with `chartJ α b` on `s` output slots) ∘ T ∘
-(pre-compose with `chartJinv α b` on `r` input slots)`. Mathlib's
-`norm_compContinuousLinearMap_le` gives, for each `α' : Tensor0SModel r ℝ E`:
-
-* `‖α'.compCLM (chartJinv α b)‖ ≤ ‖α'‖ * ‖chartJinv α b‖^r`
-* `‖T (α'.compCLM (chartJinv α b))‖ ≤ ‖T‖ * ‖α'.compCLM (chartJinv α b)‖`
-* `‖(T (α'.compCLM (chartJinv α b))).compCLM (chartJ α b)‖
-    ≤ ‖T (α'.compCLM (chartJinv α b))‖ * ‖chartJ α b‖^s`
-
-Chaining these,
-`‖chartRSTwist α b r s T α'‖ ≤ ‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖ * ‖α'‖`.
-Hence `‖chartRSTwist α b r s T‖ ≤ ‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖`.
-
-## Main results
-
-* `chartRSTwist_opNorm_le` — pointwise op-norm bound on `chartRSTwist α b r s T`
-  in terms of `‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖`.
-* `chartRSTwistInv_opNorm_le` — analogous bound for the inverse twist.
-
-Both bounds are predicate-free and require no Riemannian-metric structure.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -64,9 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M]
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise operator-norm bound on `chartRSTwist α b r s T`, as a continuous
-linear map `Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E`:
-`‖chartRSTwist α b r s T‖ ≤ ‖chartJ α b‖^s * ‖chartJinv α b‖^r * ‖T‖`. -/
+
 lemma chartRSTwist_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     ‖chartRSTwist (I := I) (M := M) α b r s T‖ ≤
@@ -128,8 +91,7 @@ lemma chartRSTwist_opNorm_le
   exact h_combined
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise operator-norm bound on `chartRSTwistInv α b r s T`:
-`‖chartRSTwistInv α b r s T‖ ≤ ‖chartJinv α b‖^s * ‖chartJ α b‖^r * ‖T‖`. -/
+
 lemma chartRSTwistInv_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     ‖chartRSTwistInv (I := I) (M := M) α b r s T‖ ≤

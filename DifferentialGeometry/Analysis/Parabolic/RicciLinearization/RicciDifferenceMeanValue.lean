@@ -7,46 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricA
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
-/-!
-# The mean-value (FTC) core for the Ricci-tensor difference of two realized metrics
-
-For a closed smooth Riemannian manifold `(M, g₀)` and two endpoint perturbation tensor
-sections `T, T' : SmoothCcTensor g₀ 0 2`, both `g₀`-fibre small with constant `< 1`, this
-file builds the **mean-value (fundamental theorem of calculus) reduction** of the Ricci-arm
-difference
-$$\operatorname{Ric}(g_1)_{x}(v, w) - \operatorname{Ric}(g_1')_{x}(v, w)
-    = \int_0^1 \bigl(D\!\operatorname{Ric}\bigr)_{g_s}[T - T']_x(v, w)\, ds,$$
-where `g₁ = realize(g₀, T)`, `g₁' = realize(g₀, T')`, and `g_s = realize(g₀, (1-s)·T' + s·T)`
-is the straight-line metric path joining them through the convex combination of the two
-perturbations.  The integrand is the **linearized Ricci operator** `linearizedRicciAt g_s`
-applied to the perturbation velocity `T - T'`.
-
-This replaces the single-endpoint Palatini telescope (which leaves un-capturable
-two-endpoint cross terms) with the classical mean-value identity: the difference of a
-nonlinear functional at two points is the integral of its derivative along any path joining
-them.
-
-## Contents
-
-* `convexPerturbation g₀ T T' s` — the convex-combination perturbation
-  `(1 - s)·T' + s·T : SmoothCcTensor g₀ 0 2`, with endpoint identities at `s = 0, 1`.
-* `convexPerturbation_gFibreOpBound` — the convex-combination smallness bound: on `[0,1]`
-  the perturbation `convexPerturbation g₀ T T' s` is `g₀`-fibre bounded by the convex
-  combination `(1 - s)·δ' + s·δ < 1`, so the realized metric path is positive-definite.
-* `realizedMetricPath g₀ T T' hδ_lt hδ hδ'_lt hδ' s` — the realized metric path
-  `realize(g₀, convexPerturbation g₀ T T' s)` for `s ∈ [0,1]`, with endpoint identities
-  `path 0 = realize T'`, `path 1 = realize T`.
-* `linearizedRicciAt g₀ T T' x v w s₀` — the linearized Ricci operator at the path metric
-  `g_{s₀}` in the perturbation direction `T - T'`, defined as the `s`-derivative of the
-  Ricci tensor along the (re-anchored) realized path.
-* `hasDerivAt_ricciTensor_realizedMetricPath` (posited child) — the path `s`-derivative of
-  the realized Ricci tensor, identified with `linearizedRicciAt` at each `s₀ ∈ [0,1]`, with
-  interval-integrability of the integrand.  This is the deep mean-value derivative content
-  (the metric-derivative of the curvature functional equals the linearized Ricci operator).
-* `ricciTensor_realized_sub_eq_integral_linearizedRicci` — the FTC headline: the realized
-  Ricci-arm difference equals `∫₀¹ linearizedRicciAt g_s (T - T') ds`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -79,10 +39,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ### Additivity of the symmetric extraction (mirroring `ccTensorBilinSymm_smul`) -/
-
-/-- The underlying multilinear field `ccTensorMultilinear` is additive in the tensor
-section. -/
 theorem ccTensorMultilinear_add (g : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (T + T') x : Tensor0SSpace 2 I x)
@@ -92,7 +48,6 @@ theorem ccTensorMultilinear_add (g : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add]
   rfl
 
-/-- The model value `ccTensorModel` is additive in the tensor section. -/
 theorem ccTensorModel_add (g : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (T + T') x =
@@ -100,7 +55,6 @@ theorem ccTensorModel_add (g : SmoothRiemannianMetric I M)
   unfold ccTensorModel
   rw [ccTensorMultilinear_add, Tensor0SSpace.toModel_add]
 
-/-- The symmetrized extraction is additive in the tensor section. -/
 theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (T + T') x v w =
@@ -109,11 +63,6 @@ theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.add_apply]
   ring
 
-/-! ### The convex-combination perturbation and its smallness bound -/
-
-/-- The **convex-combination perturbation** `(1 - s)·T' + s·T` of two endpoint
-perturbation tensor sections, as a `SmoothCcTensor g₀ 0 2`.  As `s` runs over `[0,1]` this
-traces the straight line in perturbation space from `T'` (at `s = 0`) to `T` (at `s = 1`). -/
 def convexPerturbation (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (s : ℝ) : SmoothCcTensor g₀ 0 2 :=
   (1 - s) • T' + s • T
@@ -128,8 +77,6 @@ def convexPerturbation (g₀ : SmoothRiemannianMetric I M)
     convexPerturbation (I := I) g₀ T T' 1 = T := by
   simp [convexPerturbation]
 
-/-- The fibre form of the convex perturbation is the convex combination of the two endpoint
-fibre forms. -/
 lemma ccTensorBilinSymm_convexPerturbation (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (s : ℝ) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) x v w =
@@ -138,9 +85,6 @@ lemma ccTensorBilinSymm_convexPerturbation (g₀ : SmoothRiemannianMetric I M)
   rw [convexPerturbation, ccTensorBilinSymm_add, ccTensorBilinSymm_smul,
     ccTensorBilinSymm_smul]
 
-/-- **Convex-combination smallness bound.**  If `T` is `g₀`-fibre bounded by `δ` and `T'`
-by `δ'`, then the convex perturbation `(1 - s)·T' + s·T` is `g₀`-fibre bounded by the convex
-combination `(1 - s)·δ' + s·δ` for every `s ∈ [0,1]`. -/
 theorem convexPerturbation_gFibreOpBound (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -172,8 +116,6 @@ theorem convexPerturbation_gFibreOpBound (g₀ : SmoothRiemannianMetric I M)
     _ = ((1 - s) * δ' + s * δ) * Real.sqrt (g₀.inner x v v) *
             Real.sqrt (g₀.inner x w w) := by ring
 
-/-- For `s ∈ [0,1]` the convex smallness constant `(1 - s)·δ' + s·δ` is `< 1` whenever both
-`δ, δ' < 1`. -/
 theorem convex_smallConstant_lt_one {δ δ' : ℝ} (hδ_lt : δ < 1) (hδ'_lt : δ' < 1)
     {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≤ 1) :
     (1 - s) * δ' + s * δ < 1 := by
@@ -181,14 +123,6 @@ theorem convex_smallConstant_lt_one {δ δ' : ℝ} (hδ_lt : δ < 1) (hδ'_lt : 
   nlinarith [mul_nonneg h1ms (le_of_lt (by linarith : (0 : ℝ) < 1 - δ')),
     mul_nonneg hs0 (le_of_lt (by linarith : (0 : ℝ) < 1 - δ))]
 
-/-! ### The realized metric path -/
-
-/-- **The realized metric path** `s ↦ realize(g₀, (1 - s)·T' + s·T)` for `s ∈ [0,1]`.
-The convex-combination smallness bound (`convexPerturbation_gFibreOpBound`,
-`convex_smallConstant_lt_one`) guarantees that the convex perturbation stays `g₀`-fibre
-small with constant `< 1`, so each `realizedMetricPath … s` is a genuine positive-definite
-`SmoothRiemannianMetric I M`.  At `s = 0` it is `realize(g₀, T')` and at `s = 1` it is
-`realize(g₀, T)` (`realizedMetricPath_zero_inner`, `realizedMetricPath_one_inner`). -/
 def realizedMetricPath (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -201,7 +135,6 @@ def realizedMetricPath (g₀ : SmoothRiemannianMetric I M)
     (convex_smallConstant_lt_one hδ_lt hδ'_lt hs0 hs1)
     (convexPerturbation_gFibreOpBound (I := I) g₀ T T' hδ hδ' hs0 hs1)
 
-/-- The realized metric path is fibrewise `g₀ + ` the convex perturbation form. -/
 theorem realizedMetricPath_inner (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -214,11 +147,6 @@ theorem realizedMetricPath_inner (g₀ : SmoothRiemannianMetric I M)
         ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) x v w := by
   rw [realizedMetricPath, tensorSectionRealizeMetric_inner]
 
-/-! ### Endpoint metric equalities -/
-
-/-- **Metric extensionality through the fibre inner product.**  Two smooth Riemannian
-metrics with the same fibrewise inner product are equal (the remaining structure fields are
-propositions, hence proof-irrelevant). -/
 theorem riemannianMetric_eq_of_inner (g g' : SmoothRiemannianMetric I M)
     (h : ∀ (b : M) (v w : TangentSpace I b), g.inner b v w = g'.inner b v w) :
     g = g' := by
@@ -228,19 +156,11 @@ theorem riemannianMetric_eq_of_inner (g g' : SmoothRiemannianMetric I M)
   cases g; cases g'
   congr
 
-/-- The clamped path metric at a parameter `s ∈ [0,1]` (clamped to `max 0 (min s 1)`) is the
-genuine path metric at `s`. -/
 private lemma clamp_eq_of_mem_Icc {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
     max 0 (min s 1) = s := by
   obtain ⟨hs0, hs1⟩ := hs
   rw [min_eq_left hs1, max_eq_right hs0]
 
-/-! ### The linearized Ricci operator along the path and the FTC -/
-
-/-- **The scalar realized Ricci value along the path** as a function of `s ∈ ℝ`, used as the
-`f` of the fundamental theorem of calculus.  For `s` outside `[0,1]` the path metric is not
-defined, so the value is the path metric clamped to the nearest endpoint; on `[0,1]` it is
-the genuine realized Ricci value `Ric(g_s)_x(v, w)`. -/
 def realizedRicciPathValue (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -254,7 +174,6 @@ def realizedRicciPathValue (g₀ : SmoothRiemannianMetric I M)
         have : min s 1 ≤ 1 := min_le_right s 1
         exact max_le (zero_le_one) this)) x v w
 
-/-- The path-value at `s = 1` equals the realized Ricci tensor of `realize(g₀, T)`. -/
 theorem realizedRicciPathValue_one (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -277,7 +196,6 @@ theorem realizedRicciPathValue_one (g₀ : SmoothRiemannianMetric I M)
     rw [this]; ring
   rw [hmetric]
 
-/-- The path-value at `s = 0` equals the realized Ricci tensor of `realize(g₀, T')`. -/
 theorem realizedRicciPathValue_zero (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -300,11 +218,6 @@ theorem realizedRicciPathValue_zero (g₀ : SmoothRiemannianMetric I M)
     rw [this]; ring
   rw [hmetric]
 
-/-- **The linearized Ricci operator at the path metric `g_{s₀}` in direction `T - T'`.**
-By definition it is the `s`-derivative of the realized Ricci value along the path at `s₀`;
-this is the genuine differential `D\!\operatorname{Ric}_{g_{s₀}}[T - T']_x(v, w)` of the
-Ricci tensor functional in the metric-perturbation direction `T - T'`.  It is the integrand
-of the mean-value reduction. -/
 def linearizedRicciAt (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -313,8 +226,6 @@ def linearizedRicciAt (g₀ : SmoothRiemannianMetric I M)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v w : TangentSpace I x) (s₀ : ℝ) : ℝ :=
   deriv (realizedRicciPathValue (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w) s₀
-
-/-! ### abs-value smallness, valid on a neighborhood of `[0,1]` -/
 
 theorem convexPerturbation_gFibreOpBound_abs (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -351,10 +262,6 @@ theorem abs_convex_smallConstant_lt_one {δ δ' : ℝ} (hδ_lt : δ < 1) (hδ'_l
   nlinarith [mul_nonneg (by linarith : (0:ℝ) ≤ 1 - s) (by linarith : (0:ℝ) < 1 - δ').le,
     mul_nonneg h0 (by linarith : (0:ℝ) < 1 - δ).le]
 
-/-! ### The open realized metric family -/
-
-/-- The realized metric of the convex perturbation at any `s` whose abs-convex smallness
-constant is `< 1`. -/
 def realizedMetricPathOpen (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -373,8 +280,6 @@ theorem realizedMetricPathOpen_inner (g₀ : SmoothRiemannianMetric I M)
       g₀.inner x v w +
         ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) x v w := by
   rw [realizedMetricPathOpen, tensorSectionRealizeMetric_inner]
-
-/-! ### Generic joint `(s,y)`-smoothness tower -/
 
 lemma gen_joint_partialDeriv
     (Ψ : ℝ → E → ℝ) (q : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E}
@@ -396,8 +301,6 @@ lemma gen_joint_partialDeriv
 
 variable (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
 
-/-- Hypothesis bundle: joint Gram C∞ at every base point with `s₀ ∈ S`, `y₀` chart-interior;
-plus positive-definiteness of the path Gram over the chart base set for `s₀ ∈ S`. -/
 def GenJointGram (S : Set ℝ) : Prop :=
   (∀ (i j : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E}, s₀ ∈ S →
       y₀ ∈ interior (extChartAt I α).target →
@@ -566,18 +469,6 @@ private lemma gen_joint_ricci {S : Set ℝ} (hG : GenJointGram (I := I) gfam α 
   rw [heq]
   exact ContDiffAt.sum (fun j _ => gen_joint_riemann (I := I) gfam α hG i j k j hs hy)
 
-/-! ### Generic joint smoothness of the DeTurck chart polynomials
-
-The DeTurck (gauge) chart scalars `chartDeTurckVFComp`, `chartLieDeTurckComp` and the combined
-`chartDeTurckRicciRHS` are finite chart polynomials in the inverse Gram, the Christoffel symbols (of
-both the family metric `gfam s` and a fixed background `g_bg`) and their first chart partials.  Each
-is therefore jointly `(s, y)`-`C^∞` over the joint-Gram set, by combining the generic joint bricks
-above with the fixed-background Christoffel smoothness `chartChristoffel_contDiffOn_interior`. -/
-
-/-- The chart DeTurck-vector-field component `W^k(gfam s) = ∑_{a,b} G^{ab}·(Γ^k_{ab}(gfam s) −
-Γ^k_{ab}(g_bg))` is jointly `(s, y)`-`C^∞`.  The fixed-background Christoffel `Γ(g_bg)` is
-`s`-independent (joint smooth via `chartChristoffel_contDiffOn_interior` composed with the `y`
-projection); the family parts come from `gen_joint_invGram` and `gen_joint_christoffel`. -/
 lemma gen_joint_chartDeTurckVFComp {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (g_bg : SmoothRiemannianMetric I M) (k : Fin (Module.finrank ℝ E))
     {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
@@ -606,8 +497,6 @@ lemma gen_joint_chartDeTurckVFComp {S : Set ℝ} (hG : GenJointGram (I := I) gfa
   exact (gen_joint_invGram (I := I) gfam α hG a b hs hy).mul
     ((gen_joint_christoffel (I := I) gfam α hG a b k hs hy).sub (hbg a b))
 
-/-- The chart partial `∂_m W^k(gfam s)` of the DeTurck-vector-field component is jointly
-`(s, y)`-`C^∞`, by `gen_joint_partialDeriv` applied to `gen_joint_chartDeTurckVFComp`. -/
 lemma gen_joint_partial_chartDeTurckVFComp {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (g_bg : SmoothRiemannianMetric I M) (m k : Fin (Module.finrank ℝ E))
     {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
@@ -619,9 +508,6 @@ lemma gen_joint_partial_chartDeTurckVFComp {S : Set ℝ} (hG : GenJointGram (I :
   gen_joint_partialDeriv (fun s y => chartDeTurckVFComp (I := I) (gfam s) g_bg α k y) m
     (gen_joint_chartDeTurckVFComp (I := I) gfam α hG g_bg k hs hy)
 
-/-- The chart DeTurck-Lie summand `(𝓛_{W(gfam s)} gfam s)_{ij}` is jointly `(s, y)`-`C^∞`, by
-expanding `chartLieDeTurckComp` into the three Leibniz groups and combining the joint
-DeTurck-VF component / chart Gram / their partials. -/
 lemma gen_joint_chartLieDeTurckComp {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (g_bg : SmoothRiemannianMetric I M) (i j : Fin (Module.finrank ℝ E))
     {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
@@ -653,9 +539,6 @@ lemma gen_joint_chartLieDeTurckComp {S : Set ℝ} (hG : GenJointGram (I := I) gf
   · exact (hG.1 i k hs hy).mul
       (gen_joint_partial_chartDeTurckVFComp (I := I) gfam α hG g_bg j k hs hy)
 
-/-- The combined chart DeTurck–Ricci right-hand side `−2·Rc(gfam s) + (𝓛_{W} gfam s)` is jointly
-`(s, y)`-`C^∞`, by `chartDeTurckRicciRHS_def` over `gen_joint_ricci` and
-`gen_joint_chartLieDeTurckComp`. -/
 lemma gen_joint_chartDeTurckRicciRHS {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (g_bg : SmoothRiemannianMetric I M) (i k : Fin (Module.finrank ℝ E))
     {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
@@ -670,9 +553,6 @@ lemma gen_joint_chartDeTurckRicciRHS {S : Set ℝ} (hG : GenJointGram (I := I) g
   exact (contDiffAt_const.mul (gen_joint_ricci (I := I) gfam α hG i k hs hy)).add
     (gen_joint_chartLieDeTurckComp (I := I) gfam α hG g_bg i k hs hy)
 
-/-! ### The keystone: GenJointGram for the realized open family -/
-
-/-- The open `s`-set where the abs-convex smallness holds. -/
 def realizedSmallSet {δ δ' : ℝ} : Set ℝ := {s : ℝ | |1 - s| * δ' + |s| * δ < 1}
 
 theorem realizedSmallSet_isOpen {δ δ' : ℝ} :
@@ -684,7 +564,6 @@ theorem Icc_subset_realizedSmallSet {δ δ' : ℝ} (hδ_lt : δ < 1) (hδ'_lt : 
     Set.Icc (0:ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
   fun _ hs => abs_convex_smallConstant_lt_one hδ_lt hδ'_lt hs
 
-/-- The total realized family (junk-extended off the small set by `g₀`). -/
 def realizedFam (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -703,8 +582,6 @@ theorem realizedFam_inner_of_mem (g₀ : SmoothRiemannianMetric I M)
         ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) x v w := by
   rw [realizedFam, dif_pos (Set.mem_setOf.mp hs), realizedMetricPathOpen_inner]
 
-/-- On the small set the realized-family chart Gram is the convex combination of the two
-endpoint realized-metric chart Grams. -/
 theorem realizedFam_chartGramOnE (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -758,15 +635,6 @@ theorem realizedFam_genJointGram (g₀ : SmoothRiemannianMetric I M)
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) α hx
 
-/-! ### A `δ < 1`-free joint chart Gram for the realized family -/
-
-/-- **Spatial smoothness of the symmetric perturbation chart-Gram entry.**  For the smooth
-symmetric bilinear `Hom`-section `ccTensorBilinSymm g₀ T`, the scalar
-`x ↦ ccTensorBilinSymm g₀ T x (e_i x) (e_j x)` (Gram-style entry against the chart-`α` frame) is
-`C^∞` on the chart-`α` trivialization base set.  A direct mirror of
-`chartGramMatrix_entry_contMDiffOn` with the metric Hom-section `g.inner` replaced by the smooth
-perturbation Hom-section (`ccTensorBilinSymm_contMDiff`); it carries NO `δ < 1` smallness
-hypothesis (the bilinear form is smooth regardless of fibre size). -/
 private lemma chartBilinSymmEntry_contMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ) ∞
@@ -791,9 +659,6 @@ private lemma chartBilinSymmEntry_contMDiffOn (g₀ : SmoothRiemannianMetric I M
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
-/-- **Spatial smoothness of the symmetric perturbation chart-Gram entry, pulled back to the chart
-target.**  The chart-`α` pullback of `chartBilinSymmEntry` is `C^∞` on `(extChartAt I α).target`.
-Mirror of `chartGramOnE_contDiffOn`, no `δ < 1`. -/
 private lemma chartBilinSymmOnE_contDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -815,12 +680,6 @@ private lemma chartBilinSymmOnE_contDiffOn (g₀ : SmoothRiemannianMetric I M)
     exact hsource
   exact (hbase.comp hsymm hsubset).contDiffOn
 
-/-- **A `δ < 1`-free joint chart Gram for the realized family.**  The realized family chart-Gram
-joint `(s, y)`-smoothness over `realizedSmallSet`, NOT requiring the individual smallness bounds
-`δ < 1`, `δ' < 1`.  On the small set the chart Gram entry is
-`chartGramOnE g₀ + (1 - s)·B_{T'} + s·B_T`, with `B_T` the (spatially smooth, `s`-independent)
-perturbation chart-Gram entry — an affine-in-`s` combination of spatially smooth fields, hence
-jointly smooth.  The positive-definiteness arm is `chartGramMatrix_det_pos` (also `δ`-free). -/
 theorem realizedFam_genJointGram_free (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -872,13 +731,6 @@ theorem realizedFam_genJointGram_free (g₀ : SmoothRiemannianMetric I M)
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) α hx
 
-/-! ### Generic joint operator-field lift over the product base `M × ℝ` -/
-
-/-- **Source-model-generic pointwise-to-operator smoothness bridge.**  The joint analog of
-`contMDiffAt_clm_of_pointwise` with the *source* model `IX` decoupled from the target operator
-model: per-vector `ContMDiffAt` lifts to operator `ContMDiffAt` over a finite-dimensional source
-fibre, via the basis-evaluation embedding `F₁ →L F₂ ↪ Fin (rank F₁) → F₂` and a continuous-linear
-left inverse. -/
 lemma contMDiffAt_clm_of_pointwise_jointSource
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
@@ -908,15 +760,6 @@ lemma contMDiffAt_clm_of_pointwise_jointSource
   rw [hcompose]
   exact gCLM.contDiff.contMDiff.contMDiffAt.comp _ hEA
 
-/-- **The joint pointwise-to-operator section bridge over the product base `M × ℝ`.**  For an
-`s`-family of fibre operators `φ : ∀ p : M × ℝ, V₁ p.1 →L V₂ p.1`, if for every globally smooth
-`M`-section `Y` of `V₁` the `M × ℝ`-section `(x, s) ↦ φ (x, s) (Y x)` is jointly `(x, s)`-`C^∞`
-over `M × ℝ`, then the operator field `(x, s) ↦ φ (x, s)` is itself jointly `C^∞` as a section of
-the Hom-bundle `Hom(V₁, V₂)`.  This is the product-base (`M × ℝ`) analog of
-`contMDiff_clm_section_of_pointwise`: the hom-bundle smoothness is reduced through
-`contMDiffAt_hom_bundle` to (i) the base projection (`contMDiffAt_fst`) and (ii) the `inCoordinates`
-smoothness, the latter handled by `contMDiffAt_clm_of_pointwise_jointSource` evaluated against a
-local frame of `V₁` near the spatial base point. -/
 theorem contMDiff_clm_section_of_pointwise_jointMR
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {V₁ : M → Type*} [∀ x, AddCommGroup (V₁ x)] [∀ x, Module ℝ (V₁ x)]
@@ -993,11 +836,6 @@ theorem contMDiff_clm_section_of_pointwise_jointMR
   rw [Trivialization.continuousLinearMapAt_apply]
   exact congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₂) hx₂) _
 
-/-- **Within-set source-model-generic pointwise-to-operator smoothness bridge.**  The
-`ContMDiffWithinAt` analog of `contMDiffAt_clm_of_pointwise_jointSource`: per-vector
-`ContMDiffWithinAt` lifts to operator `ContMDiffWithinAt` over a finite-dimensional source
-fibre, via the basis-evaluation embedding `F₁ →L F₂ ↪ Fin (rank F₁) → F₂` and a continuous-linear
-left inverse. -/
 lemma contMDiffWithinAt_clm_of_pointwise_jointSource
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
@@ -1027,16 +865,6 @@ lemma contMDiffWithinAt_clm_of_pointwise_jointSource
   rw [hcompose]
   exact gCLM.contDiff.contMDiff.contMDiffAt.comp_contMDiffWithinAt _ hEA
 
-/-- **The within-slab joint pointwise-to-operator section bridge over the product base `M × ℝ`.**
-The `ContMDiffOn (univ ×ˢ S)` analog of `contMDiff_clm_section_of_pointwise_jointMR`: for an
-`s`-family of fibre operators `φ : ∀ p : M × ℝ, V₁ p.1 →L V₂ p.1`, if for every globally smooth
-`M`-section `Y` of `V₁` the `M × ℝ`-section `(x, s) ↦ φ (x, s) (Y x)` is jointly `(x, s)`-`C^∞`
-on the slab `univ ×ˢ S`, then the operator field `(x, s) ↦ φ (x, s)` is itself jointly `C^∞` on
-`univ ×ˢ S` as a section of the Hom-bundle `Hom(V₁, V₂)`.  This is the key missing slab analog of
-the global bridge: the hom-bundle within-smoothness is reduced through `contMDiffWithinAt_hom_bundle`
-to (i) the base projection and (ii) the `inCoordinates` within-smoothness, the latter handled by
-`contMDiffWithinAt_clm_of_pointwise_jointSource` evaluated against a local frame of `V₁` near the
-spatial base point. -/
 theorem contMDiffOn_clm_section_of_pointwise_jointMR
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {V₁ : M → Type*} [∀ x, AddCommGroup (V₁ x)] [∀ x, Module ℝ (V₁ x)]
@@ -1148,14 +976,6 @@ theorem contMDiffOn_clm_section_of_pointwise_jointMR
     rw [Trivialization.continuousLinearMapAt_apply]
     exact congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₂) hx₂) _
 
-/-! ### Joint `(x, s)`-smoothness of the chart inverse-Gram entry along the realized family -/
-
-/-- **Joint `(x, s)`-smoothness of the chart inverse-Gram entry.**  On the product of the chart-`α`
-source and the realized small set, the intrinsic chart inverse-Gram entry
-`(x, s) ↦ G^{ij}(realizedFam g₀ T T' s)(α, x)` is jointly `C^∞`.  Obtained by composing the joint
-Euclidean inverse-Gram smoothness `gen_joint_invGram` (from the joint-Gram tower
-`realizedFam_genJointGram`) with the smooth moving point `(x, s) ↦ (s, extChartAt I α x)`, then
-reading off `chartInvGramOnE g α i j (extChartAt I α x) = G^{ij}(g)(α, x)` on the source. -/
 theorem realizedFam_chartInvGramMatrix_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1197,11 +1017,6 @@ theorem realizedFam_chartInvGramMatrix_jointContMDiffOn
     rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
-/-- **A `δ < 1`-free joint chart inverse-Gram for the realized family.**  Identical to
-`realizedFam_chartInvGramMatrix_jointContMDiffOn` but threaded through the `δ`-free joint Gram
-`realizedFam_genJointGram_free`, so it carries NO individual smallness hypotheses `δ < 1`,
-`δ' < 1`.  This is the `hinv` input to `metricSharp_jointContMDiffOn` that keeps the keystone
-signature frozen. -/
 theorem realizedFam_chartInvGramMatrix_jointContMDiffOn_free
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1241,13 +1056,8 @@ theorem realizedFam_chartInvGramMatrix_jointContMDiffOn_free
     rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
-/-! ### Joint `(x, s)`-smoothness of the metric sharp along the realized family -/
-
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint chart-basis frame section over `M × ℝ`.**  The chart-`α` frame vector
-`chartBasisVecFiber α i x` is `s`-independent; its `M × ℝ`-section `(x, s) ↦ ⟨x, e_i(x)⟩` is jointly
-`C^∞` on the chart-`α` source × `univ`, by pulling the spatial smoothness `chartBasisVec_contMDiffOn`
-back along the smooth first projection. -/
+
 theorem chartBasisVec_jointContMDiffOn (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
@@ -1260,10 +1070,7 @@ theorem chartBasisVec_jointContMDiffOn (α : M) (i : Fin (Module.finrank ℝ E))
   exact hbase.comp contMDiffOn_fst (fun p hp => hp.1)
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the chart-local sharp coefficient.**  For a metric family `gfam`
-whose chart inverse-Gram is jointly `(x, s)`-`C^∞` on the chart-`α` source × `S`, and a covector
-family `cv` whose chart-frame components `(x, s) ↦ cv s x (e_j(x))` are jointly `C^∞` there, the
-`i`-th sharp coefficient `(x, s) ↦ ∑_j G^{ij}(gfam s)(α, x) · cv_j(s, x)` is jointly `C^∞`. -/
+
 theorem metricSharpChartCoeff_jointContMDiffOn
     (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}
@@ -1289,14 +1096,7 @@ theorem metricSharpChartCoeff_jointContMDiffOn
   exact contMDiffOn_finset_sum (fun j _ => (hinv i j).mul (hcv j))
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the chart-local sharp representative total-space map over `M × ℝ`,
-on the chart-`α` source.**  The chart-local linear-combination representative
-`(x, s) ↦ ⟨x, ∑_i coeff_i(x, s) • e_i(x)⟩` is jointly `C^∞` into the tangent-bundle total space on
-chart-`α` source × `S`.  Worked pointwise through the total-space characterization
-`contMDiffWithinAt_totalSpace`: the projection is `(x, s) ↦ x` (smooth), and the trivialized fibre
-coordinate at the chart-center trivialization is `∑_i coeff_i(x, s) • b_i`, jointly `C^∞` by the joint
-coefficient smoothness `metricSharpChartCoeff_jointContMDiffOn`.  Stated with the trivialization at
-`α` fixed via `contMDiffWithinAt_totalSpace_of_baseSet`. -/
+
 theorem metricSharpChartLocal_jointContMDiffOn
     (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}
@@ -1318,7 +1118,7 @@ theorem metricSharpChartLocal_jointContMDiffOn
       ((chartAt H α).source ×ˢ S) :=
     fun i => metricSharpChartCoeff_jointContMDiffOn (I := I) gfam α cv hinv hcv i
   set e := trivializationAt E (TangentSpace I) α with he
-  -- The trivialized fibre coordinate at the FIXED chart-center trivialization `e`.
+  
   have hcoord_eq : ∀ q ∈ (chartAt H α).source ×ˢ S,
       (e ⟨q.1, metricSharpChartLocal (I := I) (gfam q.2) α (cv q.2) q.1⟩).2 =
         ∑ i, metricSharpChartCoeff (I := I) (gfam q.2) α (cv q.2) i q.1 •
@@ -1336,14 +1136,14 @@ theorem metricSharpChartLocal_jointContMDiffOn
     rw [map_smul, ← hclm]
     congr 1
     rw [trivializationAt_chartBasisVec_snd (I := I) α i hqbase]
-  -- The trivialized coordinate at the FIXED chart-center trivialization `e` is jointly smooth.
+  
   have hcoordSmooth : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
       (fun q : M × ℝ => (e ⟨q.1, metricSharpChartLocal (I := I) (gfam q.2) α (cv q.2) q.1⟩).2)
       ((chartAt H α).source ×ˢ S) := by
     refine ContMDiffOn.congr ?_ hcoord_eq
     refine contMDiffOn_finset_sum (fun i _ => ?_)
     exact (hcoeff i).smul contMDiffOn_const
-  -- Assemble via the arbitrary-trivialization total-space characterization at `e`.
+  
   haveI : MemTrivializationAtlas e := by rw [he]; infer_instance
   rw [Bundle.Trivialization.contMDiffOn_iff (e := e) ?_]
   · exact ⟨contMDiffOn_fst, hcoordSmooth⟩
@@ -1352,14 +1152,7 @@ theorem metricSharpChartLocal_jointContMDiffOn
     exact hqx
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Global joint `(x, s)`-smoothness of the metric sharp over `M × ℝ`, on the small set.**  For a
-metric family `gfam` with jointly-`C^∞` chart inverse-Gram on every chart source × `S`, and a covector
-family `cv` with jointly-`C^∞` chart-frame components, the metric-sharp total-space map
-`(x, s) ↦ ⟨x, metricSharp (gfam s) x (cv s x)⟩` is jointly `C^∞` on `M × ℝ` over the slab
-`univ ×ˢ S`.  The global statement is patched from the chart-local representative
-(`metricSharpChartLocal_jointContMDiffOn`), which agrees with the abstract pointwise sharp on each
-chart source (`metricSharpChartLocal_eq_metricSharp`), localised at each base point through the open
-chart source. -/
+
 theorem metricSharp_jointContMDiffOn
     (gfam : ℝ → SmoothRiemannianMetric I M)
     (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ} (hS : IsOpen S)
@@ -1377,10 +1170,10 @@ theorem metricSharp_jointContMDiffOn
       (Set.univ ×ˢ S) := by
   intro p hp
   obtain ⟨_, hps⟩ := hp
-  -- Localise at the chart of `p.1`.
+  
   have hlocal := metricSharpChartLocal_jointContMDiffOn (I := I) gfam p.1 cv
     (hinv p.1) (hcv p.1)
-  -- On the chart-`p.1` source × S, the chart-local representative equals the abstract sharp.
+  
   have heqOn : ∀ q ∈ (chartAt H p.1).source ×ˢ S,
       TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
           (metricSharpChartLocal (I := I) (gfam q.2) p.1 (cv q.2) q.1) =
@@ -1390,34 +1183,23 @@ theorem metricSharp_jointContMDiffOn
     have hqbase : q.1 ∈ (trivializationAt E (TangentSpace I) p.1).baseSet := by
       rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]; exact hqx
     rw [metricSharpChartLocal_eq_metricSharp (I := I) (gfam q.2) p.1 (cv q.2) hqbase]
-  -- The neighbourhood `(chartAt H p.1).source ×ˢ S` of `p` within `univ ×ˢ S`.
+  
   have hpmem : p ∈ (chartAt H p.1).source ×ˢ S := ⟨mem_chart_source H p.1, hps⟩
   have hnhd : (chartAt H p.1).source ×ˢ S ∈ nhdsWithin p (Set.univ ×ˢ S) := by
     refine mem_nhdsWithin.mpr ⟨(chartAt H p.1).source ×ˢ S,
       (chartAt H p.1).open_source.prod hS, hpmem, fun q hq => hq.1⟩
-  -- The chart-local rep is `ContMDiffWithinAt` at `p` within `univ ×ˢ S` (mono via the nhd).
+  
   have hlocalAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
         (metricSharpChartLocal (I := I) (gfam q.2) p.1 (cv q.2) q.1))
       (Set.univ ×ˢ S) p :=
     (hlocal p hpmem).mono_of_mem_nhdsWithin hnhd
-  -- Congr to the abstract sharp, eventually equal on the nhd.
+  
   refine hlocalAt.congr_of_eventuallyEq ?_ (heqOn p hpmem).symm
   filter_upwards [hnhd] with q hq using (heqOn q hq).symm
 
-/-! ### Joint `(x, s)`-smoothness of the inverse-metric (cometric) sharp along the realized family -/
-
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the inverse-metric (cometric) sharp Hom-section along the
-realized family, on the slab `univ ×ˢ realizedSmallSet`.**  The joint-parameter lift of the
-single-metric `inverseMetricSharpField_contMDiff`: the cometric Hom-section
-`x ↦ inverseMetricSharpFib (realizedFam s) x : Hom(T^*M, TM)` is jointly `C^∞` in `(x, s)` over
-the realized small set.  Via the within-slab CLM-section bridge
-(`contMDiffOn_clm_section_of_pointwise_jointMR`) it reduces, on each globally smooth covector
-field `Y`, to the joint smoothness of `(x, s) ↦ ♯_{g_s} (Y x) = metricSharp (g_s) x
-(cotangentToDual (Y x))`, supplied by the LANDED `metricSharp_jointContMDiffOn` threaded through
-the `δ`-free joint chart inverse-Gram (`realizedFam_chartInvGramMatrix_jointContMDiffOn_free`) and
-the `s`-independent chart-frame components of the smooth covector field `Y`. -/
+
 theorem inverseMetricSharpField_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1434,7 +1216,7 @@ theorem inverseMetricSharpField_realizedFam_jointContMDiffOn [BoundarylessManifo
       (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro Y
-  -- The `s`-independent covector family `cv s b := cotangentToDual (Y b)`.
+  
   set cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ :=
     fun _ b => cotangentToDualLinear (I := I) (x := b) (Y b) with hcvdef
   have hinv : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
@@ -1464,17 +1246,13 @@ theorem inverseMetricSharpField_realizedFam_jointContMDiffOn [BoundarylessManifo
     (gfam := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s) (cv := cv)
     (S := realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hinv hcv
   refine hjoint.congr (fun p hp => ?_)
-  -- the fibre value `inverseMetricSharpFib (g_s) x (Y x) = metricSharp (g_s) x (cotangentToDual (Y x))`
+  
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (inverseMetricSharpFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))
   rw [inverseMetricSharpFib_apply, hcvdef]
 
-/-! ### s-slice smoothness of the chart Ricci along the realized family -/
-
-/-- The s-slice of the joint chart-Ricci smoothness: `s ↦ chartRicciTensor (gfam s) α i k y₀`
-is `ContDiffAt ℝ ∞` at every `s₀ ∈ S` (chart-interior `y₀`). -/
 private lemma gen_s_contDiffAt_ricci (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
@@ -1487,9 +1265,6 @@ private lemma gen_s_contDiffAt_ricci (gfam : ℝ → SmoothRiemannianMetric I M)
   rw [hcomp]
   exact hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)
 
-/-- The `s`-slice of the joint DeTurck–Ricci chart smoothness: at a fixed chart-interior point `y₀`,
-the scalar `s ↦ chartDeTurckRicciRHS (gfam s) g_bg α i k y₀` is `C^∞` in `s`.  The DeTurck analog of
-`gen_s_contDiffAt_ricci`, threaded through `gen_joint_chartDeTurckRicciRHS`. -/
 private lemma gen_s_contDiffAt_deTurckRicciRHS (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S) (g_bg : SmoothRiemannianMetric I M)
     (i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
@@ -1502,8 +1277,6 @@ private lemma gen_s_contDiffAt_deTurckRicciRHS (gfam : ℝ → SmoothRiemannianM
   rw [hcomp]
   exact hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)
 
-/-- For `s` in the small set, the realized family metric equals the genuine realized metric
-path metric (same fibre inner product). -/
 theorem realizedMetricPath_eq_realizedFam (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1517,10 +1290,6 @@ theorem realizedMetricPath_eq_realizedFam (g₀ : SmoothRiemannianMetric I M)
   refine riemannianMetric_eq_of_inner _ _ (fun b u z => ?_)
   rw [realizedMetricPath_inner, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hmem]
 
-/-! ### The realized Ricci value as a chart sum + differentiability -/
-
-/-- The chart-sum form of the realized Ricci path value (valid on the small set, off the
-clamp), as a `C^∞`-in-`s` scalar function. -/
 def realizedRicciChartSum (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1547,15 +1316,6 @@ theorem realizedRicciChartSum_contDiffAt (g₀ : SmoothRiemannianMetric I M)
   refine ContDiffAt.sum (fun i _ => ContDiffAt.sum (fun k _ => ?_))
   exact contDiffAt_const.mul (gen_s_contDiffAt_ricci (I := I) _ x hG i k hs hy)
 
-/-- **The combined DeTurck–Ricci realized chart sum is `C^∞` in `s` on the small set.**
-The DeTurck analog of `realizedRicciChartSum_contDiffAt`: the coordinate sum of the chart
-components of `deTurckRicciRHS g_bg (realizedFam s)` is `C^∞` in `s` at every `s₀` of the
-realized small set, since each chart component equals the chart scalar `chartDeTurckRicciRHS`
-(`chartFComponentOnE_deTurckRicciRHS_eq` at the chart-centre interior point) which is `C^∞` in
-`s` by `gen_s_contDiffAt_deTurckRicciRHS`.  This is the FTC differentiability input for the
-combined Ricci–DeTurck mean-value arm (it matches the body of the downstream
-`realizedDeTurckRicciChartSum`, which must live downstream because it carries the `g_bg`
-background but is otherwise the same coordinate sum). -/
 theorem realizedDeTurckRicciChartSum_contDiffAt (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1591,7 +1351,6 @@ theorem realizedDeTurckRicciChartSum_contDiffAt (g₀ g_bg : SmoothRiemannianMet
   exact contDiffAt_const.mul
     (gen_s_contDiffAt_deTurckRicciRHS (I := I) _ x hG g_bg i k hs hy)
 
-/-- On `Icc 0 1`, the (clamped) realized Ricci path value equals the chart-sum form. -/
 theorem realizedRicciPathValue_eq_chartSum_on_Icc (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1615,15 +1374,12 @@ theorem realizedRicciPathValue_eq_chartSum_on_Icc (g₀ : SmoothRiemannianMetric
     rw [realizedMetricPath_inner, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hmem,
       hclamp]
   rw [hmetric]
-  -- now intrinsic Ricci = chart sum via the bridge
+  
   rw [realizedRicciChartSum]
   exact ricciTensor_eq_chartRicciSwap_of_basis_identity (I := I)
     (realizedFam (I := I) g₀ T T' hδ hδ' s) x
     (chartRiemannBasisIdentity_holds (I := I) _ x) v w
 
-/-! ### Differentiability and integrability, closing the FTC child -/
-
-/-- `realizedRicciPathValue` is differentiable at every `s₀ ∈ Ioo 0 1`. -/
 theorem realizedRicciPathValue_differentiableAt_Ioo (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1643,7 +1399,6 @@ theorem realizedRicciPathValue_differentiableAt_Ioo (g₀ : SmoothRiemannianMetr
   exact ((realizedRicciChartSum_contDiffAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w
     hmem).differentiableAt (by simp)).congr_of_eventuallyEq heq
 
-/-- On `Ioo 0 1`, the linearized Ricci integrand equals the derivative of the chart-sum. -/
 theorem linearizedRicciAt_eq_deriv_chartSum_on_Ioo (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1661,7 +1416,6 @@ theorem linearizedRicciAt_eq_deriv_chartSum_on_Ioo (g₀ : SmoothRiemannianMetri
   rw [linearizedRicciAt]
   exact Filter.EventuallyEq.deriv_eq heq
 
-/-- The derivative of the chart-sum is continuous on the open small set. -/
 theorem deriv_realizedRicciChartSum_continuousOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1677,7 +1431,6 @@ theorem deriv_realizedRicciChartSum_continuousOn (g₀ : SmoothRiemannianMetric 
       hs).contDiffWithinAt
   exact hcd.continuousOn_deriv_of_isOpen realizedSmallSet_isOpen (by exact_mod_cast le_top)
 
-/-- The linearized Ricci integrand is interval-integrable on `[0,1]`. -/
 theorem linearizedRicciAt_intervalIntegrable (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1688,7 +1441,7 @@ theorem linearizedRicciAt_intervalIntegrable (g₀ : SmoothRiemannianMetric I M)
     IntervalIntegrable
       (linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w)
       MeasureTheory.volume 0 1 := by
-  -- the chart-sum derivative is interval-integrable (continuous on Icc 0 1)
+  
   have hcont : ContinuousOn (deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w))
       (Set.Icc (0:ℝ) 1) :=
     (deriv_realizedRicciChartSum_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w).mono
@@ -1697,7 +1450,7 @@ theorem linearizedRicciAt_intervalIntegrable (g₀ : SmoothRiemannianMetric I M)
       (deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w))
       MeasureTheory.volume 0 1 :=
     hcont.intervalIntegrable_of_Icc zero_le_one
-  -- swap to linearizedRicciAt: they agree a.e. on Ι 0 1 = Ioc 0 1 (differ only at {1})
+  
   refine hii.congr_ae ?_
   have hsub : Set.Ioo (0:ℝ) 1 ⊆
       {s | deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w) s =
@@ -1719,7 +1472,6 @@ theorem linearizedRicciAt_intervalIntegrable (g₀ : SmoothRiemannianMetric I M)
   refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
   exact fun hs' => hs (hsub hs')
 
-/-- `realizedRicciPathValue` is continuous on `Icc 0 1`. -/
 theorem realizedRicciPathValue_continuousOn_Icc (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1738,28 +1490,6 @@ theorem realizedRicciPathValue_continuousOn_Icc (g₀ : SmoothRiemannianMetric I
     exact realizedRicciPathValue_eq_chartSum_on_Icc (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
       x v w hs
 
-
-/-- **The path `s`-derivative of the realized Ricci tensor.**
-
-For the realized metric path `g_s = realize(g₀, (1 - s)·T' + s·T)` joining `realize(g₀, T')`
-to `realize(g₀, T)`, the scalar `s ↦ Ric(g_s)_x(v, w)` has, at every interior parameter
-`s₀ ∈ (0,1)`, the derivative `linearizedRicciAt g_s (T - T')_x(v, w)` (the linearized Ricci
-operator at the path metric in the perturbation direction), and the derivative is
-interval-integrable on `[0,1]`.
-
-The interior parameter range `(0,1)` (rather than the closed `[0,1]`) is forced by the
-endpoint clamp in `realizedRicciPathValue`: outside `[0,1]` the value is constant in `s`, so
-the clamped scalar is only one-sided differentiable at the endpoints; the genuine `s`-derivative
-extends continuously to `[0,1]` and the FTC reduction uses the open-interval form
-`integral_eq_sub_of_hasDerivAt_of_le` together with continuity on `[0,1]`
-(`realizedRicciPathValue_continuousOn_Icc`).
-
-This is the **mean-value content**: via the intrinsic↔chart Ricci bridge
-(`ricciTensor_eq_chartRicciSwap_of_basis_identity`) the path Ricci value equals a fixed linear
-combination of chart Ricci tensors of the path metric, and the realized chart Gram is affine
-in `s` × smooth in `y`, so the joint `(s,y)`-smoothness of the whole chart Christoffel→Riemann
-polynomial (`realizedRicciChartSum_contDiffAt`) makes `s ↦ Ric(g_s)_x(v, w)` `C^∞` in `s` on a
-neighbourhood of `[0,1]`, hence differentiable with continuous (integrable) derivative. -/
 theorem hasDerivAt_ricciTensor_realizedMetricPath (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1780,20 +1510,6 @@ theorem hasDerivAt_ricciTensor_realizedMetricPath (g₀ : SmoothRiemannianMetric
       x v w hs₀).hasDerivAt
   · exact linearizedRicciAt_intervalIntegrable (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w
 
-/-- **The mean-value (FTC) reduction of the realized Ricci-arm difference.**
-
-For two endpoint perturbation tensor sections `T, T' : SmoothCcTensor g₀ 0 2`, both
-`g₀`-fibre small with constant `< 1`, the difference of the two realized Ricci tensors
-equals the integral over `[0,1]` of the linearized Ricci operator along the straight-line
-metric path joining `realize(g₀, T')` to `realize(g₀, T)`, applied to the perturbation
-velocity `T - T'`:
-$$\operatorname{Ric}(g_1)_x(v, w) - \operatorname{Ric}(g_1')_x(v, w)
-    = \int_0^1 \bigl(D\!\operatorname{Ric}\bigr)_{g_s}[T - T']_x(v, w)\, ds.$$
-
-This is the mean-value foundation that the Ricci-arm rebuild consumes in place of the
-single-endpoint Palatini telescope: the difference is recovered as the integral of the
-genuine metric-derivative (linearized Ricci) along a path, with no two-endpoint cross
-terms. -/
 theorem ricciTensor_realized_sub_eq_integral_linearizedRicci
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -1817,20 +1533,9 @@ theorem ricciTensor_realized_sub_eq_integral_linearizedRicci
     integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
   rw [hFTC, realizedRicciPathValue_one, realizedRicciPathValue_zero]
 
-/-! ### The joint `(s, x)`-smoothness keystone: the intrinsic fibre coefficient operators
-along the realized path are jointly smooth -/
-
 private local instance instCompleteSpaceE_keystone : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
-/-- **Continuity-in-`s` slice of a joint `(s, x)`-smooth coefficient family.**  Given a family
-`Φ : ℝ → SmoothCcTensor g₀ r s` whose joint `(x, s)`-data is `C^∞` over the product base `M × ℝ`,
-at every fixed base point `x` the model-fibre value `s ↦ (Φ s).toSection x |>.toModel` is
-continuous in `s`.  The joint section restricted to the smooth slice `t ↦ (x, t)` is continuous
-into the total space; the trivialization at the constant base `x` is a homeomorphism on its base
-set (which contains `x`), so the fibre value `t ↦ (Φ t).toSection x` is continuous in the fibre
-topology, and post-composing with the continuous model coercion `TensorRSSpace.toModel`
-(`toModel_continuous`) yields the claim. -/
 theorem jointContMDiff_toModel_continuous_slice
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -1841,7 +1546,7 @@ theorem jointContMDiff_toModel_continuous_slice
     (x : M) :
     ContinuousOn (fun t : ℝ =>
       Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x)) S := by
-  -- Restrict the joint section to the smooth slice `t ↦ (x, t)` (mapping `S` into `univ ×ˢ S`).
+  
   have hmap : ContMDiff 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) ∞ (fun t : ℝ => (x, t)) :=
     (contMDiff_const).prodMk contMDiff_id
   have hmaps : Set.MapsTo (fun t : ℝ => (x, t)) S ((Set.univ : Set M) ×ˢ S) :=
@@ -1850,12 +1555,12 @@ theorem jointContMDiff_toModel_continuous_slice
       (fun t : ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) S :=
     hjoint.comp hmap.contMDiffOn hmaps
-  -- Continuous on `S` into the total space.
+  
   have hcont_total : ContinuousOn (fun t : ℝ =>
       TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) S :=
     hslice.continuousOn
-  -- Extract the fibre value at the constant base `x` via the trivialization homeomorphism.
+  
   set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
     (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x with he
   have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt _ _ x
@@ -1864,7 +1569,7 @@ theorem jointContMDiff_toModel_continuous_slice
         (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x))).2) S :=
     continuous_snd.comp_continuousOn (e.continuousOn_toFun.comp hcont_total
       (fun t _ => e.mem_source.mpr hxbase))
-  -- The fibre coordinate equals the `continuousLinearEquivAt`, whose inverse recovers the fibre.
+  
   have hfibre : ContinuousOn (fun t : ℝ => (Φ t).toSection x) S := by
     have hkey : ∀ t : ℝ, (Φ t).toSection x =
         (e.continuousLinearEquivAt ℝ x hxbase).symm
@@ -1887,14 +1592,7 @@ theorem jointContMDiff_toModel_continuous_slice
   exact Tensor0SBundle.TensorRSSpace.toModel_continuous.comp_continuousOn hfibre
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the interior-product field over the product base, with a joint
-vector slot.**  For a joint-smooth vector field `X` and a joint-smooth `(0, s + 1)`-tensor family
-`α` over `M × ℝ`, the interior product `(p ↦ ⟨p.1, interior_product s p.1 (X p) (α p)⟩)` is jointly
-`C^∞` on the slab `univ ×ˢ S`.  The product-base `ContMDiffOn (univ ×ˢ S)` analog of
-`interiorProductField_contMDiff`, worked pointwise through `Bundle.contMDiffWithinAt_totalSpace`:
-the trivialized fibre coordinate at the chart-center trivialization is `model_interior_bilinear` (a
-constant continuous-bilinear model map) applied to the trivialized joint `X` and the trivialized
-joint `α`. -/
+
 theorem interiorProductField_jointContMDiffOn_vecJoint (s : ℕ) {S : Set ℝ}
     (X : ∀ p : M × ℝ, TangentSpace I p.1)
     (hX : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
@@ -1981,16 +1679,7 @@ theorem interiorProductField_jointContMDiffOn_vecJoint (s : ℕ) {S : Set ℝ}
       rfl
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the cometric raise-slot-0 field over the product base.**  For a
-joint-smooth `(0, s + 2)`-tensor family `Y` over `M × ℝ`, the cometric raise of slot `0` by the
-realized-family cometric `♯_{g_s}`, `(p ↦ ⟨p.1, cometricRaiseSlot0Fib (g_s) s p.1 (Y p)⟩)`, is jointly
-`C^∞` on the slab `univ ×ˢ S`.  The product-base analog of `cometricRaiseSlot0Fib_section_contMDiff`:
-via the within-slab CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` (over the
-covector slot) it reduces, per global covector field `β`, to the joint interior product
-(`interiorProductField_jointContMDiffOn`) of `Y` against the joint smooth raised vector field
-`(p ↦ ♯_{g_s}(β p.1))`, the latter being the Mathlib joint apply `ContMDiffOn.clm_bundle_apply`
-(base `Prod.fst`) of the LANDED joint cometric Hom-section
-`inverseMetricSharpField_realizedFam_jointContMDiffOn` on `β`. -/
+
 theorem cometricRaiseSlot0Fib_realizedFam_jointContMDiffOn [BoundarylessManifold I M] (s : ℕ)
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2014,7 +1703,7 @@ theorem cometricRaiseSlot0Fib_realizedFam_jointContMDiffOn [BoundarylessManifold
       cometricRaiseSlot0Fib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) s p.1 (Y p)))
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro β
-  -- the joint smooth raised vector field `p ↦ ♯_{g_s} (β p.1)`.
+  
   have hsharp := inverseMetricSharpField_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
   have hβjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
@@ -2029,17 +1718,17 @@ theorem cometricRaiseSlot0Fib_realizedFam_jointContMDiffOn [BoundarylessManifold
         (inverseMetricSharpFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (β p.1)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
     ContMDiffOn.clm_bundle_apply (b := Prod.fst) hsharp hβjoint
-  -- the joint interior product of `Y` against the joint smooth vector field `♯β`.
-  -- present the raised vector field as a section indexed by the spatial base via the joint form.
+  
+  
   set sharpβ : ∀ p : M × ℝ, TangentSpace I p.1 :=
     fun p => inverseMetricSharpFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (β p.1)
     with hsharpβdef
-  -- Recast as the joint interior-product field with a constant-in-`s` vector slot via the bridge:
-  -- use the generic joint apply directly through `clm_bundle_apply` of the interior-product operator.
+  
+  
   have hraise := interiorProductField_jointContMDiffOn_vecJoint (I := I) (s := s + 1)
     (S := realizedSmallSet (δ := δ) (δ' := δ')) (X := sharpβ) hsharpβ (α := fun p => Y p) hY
   refine hraise.congr (fun p hp => ?_)
-  -- the fibre value `(cometricRaiseSlot0Fib (g_s) s x (Y p)) (β p.1) = interior_product (s+1) x (♯β) (Y p)`
+  
   change TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)
       (E := fun z : M => Tensor0SBundle.Tensor0SSpace (s + 1) I z) p.1
       (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (s + 1) p.1 (sharpβ p) (Y p)) =
@@ -2053,12 +1742,7 @@ theorem cometricRaiseSlot0Fib_realizedFam_jointContMDiffOn [BoundarylessManifold
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Frame-naturality of the natural trace at a fixed trivialization** (metric-independent).  For a
-trivialization-centre `x₀` and a point `z` in its base set, the trivialized fibre coordinate of the
-natural trace `contract_trace r s z (Tz)` equals `model_contract_trace r s` of the trivialized fibre
-coordinate of `Tz`.  This is the pointwise frame-naturality block extracted from
-`contractTraceField_contMDiff`, valid pointwise without any smoothness, used to identify the joint
-trace fibre coordinate. -/
+
 private theorem contractTraceField_joint_pointwise (r s : ℕ) (x₀ : M) (z : M)
     (Tz : Tensor0SBundle.TensorRSSpace (1 + r) (s + 1) I z)
     (hx : z ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -2182,13 +1866,7 @@ private theorem contractTraceField_joint_pointwise (r s : ℕ) (x₀ : M) (z : M
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the natural-trace field over the product base.**  For a
-joint-smooth `(1 + r, s + 1)`-tensor family `T` over `M × ℝ`, the fibrewise frame-free natural
-trace `(p ↦ ⟨p.1, contract_trace r s p.1 (T p)⟩)` is jointly `C^∞` on the slab `univ ×ˢ S`.  The
-product-base `ContMDiffOn (univ ×ˢ S)` analog of `contractTraceField_contMDiff`, worked pointwise
-through `Bundle.contMDiffWithinAt_totalSpace`: the trivialized fibre coordinate is `model_contract_trace`
-(a constant continuous-linear model map) post-composed with the trivialized joint `T`, through the
-metric-independent frame-naturality of the trace (`model_contract_trace_naturality`). -/
+
 theorem contractTraceField_jointContMDiffOn (r s : ℕ) {S : Set ℝ}
     (T : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace (1 + r) (s + 1) I p.1)
     (hT : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (1 + r) (s + 1) ℝ E)) ∞
@@ -2234,13 +1912,7 @@ theorem contractTraceField_jointContMDiffOn (r s : ℕ) {S : Set ℝ}
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the cometric double-trace fibre operator over the product base.**
-For a joint-smooth `(0, p + 2)`-tensor family `Y` over `M × ℝ`, the realized-family cometric
-double-trace `(q ↦ ⟨q.1, cometricDoubleTraceFib (g_s) p q.1 (Y q)⟩)` is jointly `C^∞` on the slab
-`univ ×ˢ S`.  The product-base analog of `cometricDoubleTraceFib_contMDiff`: per joint `Y`, the
-fibre value is the natural trace (`contractTraceField_jointContMDiffOn`, `r = 0`) of the joint
-cometric raise (`cometricRaiseSlot0Fib_realizedFam_jointContMDiffOn`), evaluated at the unit
-`(0, 0)`-section via the Mathlib joint apply `ContMDiffOn.clm_bundle_apply` (base `Prod.fst`). -/
+
 theorem cometricDoubleTraceFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M] (p : ℕ)
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2255,14 +1927,14 @@ theorem cometricDoubleTraceFib_realizedFam_jointContMDiffOn [BoundarylessManifol
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace p I z) q.1
         (cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' q.2) p q.1 (Y q)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
-  -- the joint cometric raise of `Y` (a `(1, p + 1)`-field).
+  
   have hraise := cometricRaiseSlot0Fib_realizedFam_jointContMDiffOn (I := I) (s := p) g₀ T T' hδ hδ' Y hY
-  -- the joint natural trace of the raise (a `(0, p)`-field), `r = 0`.
+  
   have htrace := contractTraceField_jointContMDiffOn (I := I) 0 p
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
     (fun q : M × ℝ => cometricRaiseSlot0Fib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' q.2) p q.1 (Y q))
     hraise
-  -- evaluate the trace at the unit `(0, 0)`-section, joint-smoothly.
+  
   have hunit : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 0 ℝ E)) ∞
       (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 0 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 0 I z) q.1
@@ -2271,7 +1943,7 @@ theorem cometricDoubleTraceFib_realizedFam_jointContMDiffOn [BoundarylessManifol
     ((Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst)
   have htraceUnit := ContMDiffOn.clm_bundle_apply (b := Prod.fst) htrace hunit
   refine htraceUnit.congr (fun q hq => ?_)
-  -- the matching fibre identity: cometricDoubleTraceFib (g_s) p x (Y q) = trace(raise (Y q))(unit)
+  
   congr 1
   apply Tensor0SBundle.Tensor0SSpace.toModel_injective
   beta_reduce
@@ -2286,12 +1958,7 @@ theorem cometricDoubleTraceFib_realizedFam_jointContMDiffOn [BoundarylessManifol
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Frame-relabel of the slot reindex at a fixed trivialization** (metric-independent).  For a
-trivialization-centre `x₀`, a base-set point `z` and a model `(0, d)`-tensor fibre value `Zz`, the
-trivialized fibre coordinate of the slot-reindexed `ofModel (domDomCongr ρ (toModel Zz))` equals the
-constant model reindex `domDomCongr ρ` applied to the trivialized coordinate of `Zz`.  The pointwise
-relabel identity behind the joint constant-reindex smoothness, mirroring the coordinate identity of
-`hreindex` in `ricciArmPrincipalCoeffFib_contMDiff`. -/
+
 private theorem domDomCongrField_joint_pointwise {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x₀ : M) (z : M)
     (Zz : Tensor0SBundle.Tensor0SSpace d I z)
     (hx : z ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -2305,7 +1972,7 @@ private theorem domDomCongrField_joint_pointwise {d : ℕ} (ρ : Equiv.Perm (Fin
           (fun y : M => Tensor0SBundle.Tensor0SSpace d I y) x₀ ⟨z, Zz⟩).2) := by
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) d
   set L : E →L[ℝ] E := (trivializationAt E (TangentSpace I) x₀).symmL ℝ z with hLdef
-  -- the trivialized coordinate of a `Tensor0SSpace d` element reads its model value on `L`-images.
+  
   have h_cLMAt : ∀ (U : Tensor0SBundle.Tensor0SSpace d I z) (v : Fin d → E),
       (trivializationAt (Tensor0SBundle.Tensor0SModel d ℝ E)
         (fun y : M => Tensor0SBundle.Tensor0SSpace d I y) x₀).continuousLinearMapAt ℝ z U v =
@@ -2332,7 +1999,7 @@ private theorem domDomCongrField_joint_pointwise {d : ℕ} (ρ : Equiv.Perm (Fin
   refine ContinuousMultilinearMap.ext fun v => ?_
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [h_coord, h_coord]
-  -- LHS: `ofModel (domDomCongr ρ (toModel Zz))` applied to `(L ∘ v)`; RHS: `Zz` applied to `(L ∘ v) ∘ ρ`.
+  
   have hof : ∀ (m : Fin d → E),
       (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := z)
         (ContinuousMultilinearMap.domDomCongr ρ (Tensor0SBundle.Tensor0SSpace.toModel Zz))) m =
@@ -2352,13 +2019,7 @@ private theorem domDomCongrField_joint_pointwise {d : ℕ} (ρ : Equiv.Perm (Fin
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of a constant model slot-reindex of a joint `(0, d)`-tensor family
-over the product base.**  For a fixed model slot permutation `ρ` and a joint-smooth `(0, d)`-tensor
-family `Z` over `M × ℝ`, the fibrewise reindexed family `(p ↦ ⟨p.1, ofModel (domDomCongr ρ (toModel
-(Z p)))⟩)` is jointly `C^∞` on the slab `univ ×ˢ S`.  The product-base analog of the constant-reindex
-`hreindex` step inside `ricciArmPrincipalCoeffFib_contMDiff`: the slot reindex is a fixed model
-continuous-linear map (`domDomCongr ρ`), so the trivialized fibre coordinate of the reindexed family
-is that constant map applied to the trivialized coordinate of `Z`. -/
+
 theorem domDomCongrField_jointContMDiffOn {d : ℕ} (ρ : Equiv.Perm (Fin d)) {S : Set ℝ}
     (Z : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hZ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -2402,32 +2063,6 @@ theorem domDomCongrField_jointContMDiffOn {d : ℕ} (ρ : Equiv.Perm (Fin d)) {S
     have hx0 : p₀.1 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by rw [← hx₀]; exact hx
     exact (domDomCongrField_joint_pointwise (I := I) ρ x₀ p₀.1 (Z p₀) hx0).symm
 
-/-! ### Joint `(x, s)`-smoothness of the order-`2` principal coefficient FIBRE operator
-
-The joint-parameter lift of the single-metric base-point smoothness
-`ricciArmPrincipalCoeffFib_contMDiff`: the fibre operator
-`x ↦ ricciArmPrincipalCoeffFib (realizedFam s) x : Hom(Tensor0S 4, Tensor0S 2)` is jointly `C^∞`
-in `(x, s)` over the realized small set.  The operator depends on `g_s` *only* through the smooth
-cometric Hom-section `inverseMetricSharpField g_s` (the model raise `cometricLmodel g_s x`, through
-`cometricDoubleTraceFib` / `combinedTrace42Model`), whose JOINT smoothness over the slab is the
-LANDED `inverseMetricSharpField_realizedFam_jointContMDiffOn` (built from the `δ`-free joint
-chart-inverse-Gram tower `realizedFam_chartInvGramMatrix_jointContMDiffOn_free` →
-`metricSharp_jointContMDiffOn`).
-
-It is the joint analog of the single-metric structural tower
-`inverseMetricSharpField_contMDiff` → `cometricRaiseSlot0Fib_section_contMDiff` →
-`cometricDoubleTraceFib_contMDiff` → `ricciArmPrincipalCoeffFib_contMDiff`, lifted to the product
-base `M × ℝ` over the slab `univ ×ˢ realizedSmallSet` through the within-slab CLM-section bridge
-`contMDiffOn_clm_section_of_pointwise_jointMR` and the Mathlib joint apply `ContMDiffOn.clm_bundle_apply`
-(base map `Prod.fst`).  The metric-dependent input (the joint cometric Hom-section) is supplied; the
-remaining tower is the metric-INDEPENDENT joint structural mirror (interior product / natural trace /
-constant slot reindex / `±1`-section algebra), whose product-base `ContMDiffOn (univ ×ˢ S)` analogs
-are *posited* here as this single joint-fibre keystone.  Non-vacuous: it constrains the section to the
-realized-family principal coefficient, consumed only as the joint smoothness of that exact fibre
-operator. -/
-/-- Pointwise addition of two joint total-space maps over base `M` (source `M × ℝ`) is jointly
-`C^∞` on the slab.  Worked through the within-slab total-space characterization, adding trivialized
-fibre coordinates (a vector-bundle operation). -/
 private theorem jointTotalSpace_add {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -2460,7 +2095,6 @@ private theorem jointTotalSpace_add {d : ℕ} {S : Set ℝ}
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)).symm
 
-/-- Pointwise subtraction of two joint total-space maps over base `M`. -/
 private theorem jointTotalSpace_sub {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -2493,7 +2127,6 @@ private theorem jointTotalSpace_sub {d : ℕ} {S : Set ℝ}
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)).symm
 
-/-- Pointwise constant scaling of a joint total-space map over base `M`. -/
 private theorem jointTotalSpace_smul {d : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -2521,10 +2154,6 @@ private theorem jointTotalSpace_smul {d : ℕ} {S : Set ℝ} (a : ℝ)
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       a (A p₀)).symm
 
-/-- Pointwise addition of two joint `(r, s)`-operator total-space maps over base `M` is jointly
-`C^∞` on the slab.  The `TensorRSModel` analog of `jointTotalSpace_add`, worked through the
-within-slab total-space characterization, adding trivialized fibre coordinates (a vector-bundle
-operation). -/
 private theorem jointTotalSpaceRS_add {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -2579,23 +2208,23 @@ theorem ricciArmPrincipalCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMani
   intro Y
   set κ : Equiv.Perm (Fin 4) := koszulSlotPerm with hκ
   set g_s : ℝ → SmoothRiemannianMetric I M := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s with hg_s
-  -- joint smoothness of the global `(0, 4)`-section `Y` pulled back via `fst`.
+  
   have hYjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) p.1 (Y p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
     Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
-  -- the `κ`-reindexed joint `(0, 4)`-section.
+  
   have hYκ := domDomCongrField_jointContMDiffOn (I := I) κ
     (S := realizedSmallSet (δ := δ) (δ' := δ')) (fun p : M × ℝ => Y p.1) hYjoint
-  -- the joint `{0,1}`-double-trace of `Yκ` (`T₀₃` carrier).
+  
   have hT03 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2) g₀ T T' hδ hδ'
     (fun p : M × ℝ => Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := p.1)
       (ContinuousMultilinearMap.domDomCongr κ (Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)))) hYκ
-  -- the joint `{0,1}`-double-trace of `Y` itself (`CDT` carrier).
+  
   have hCDT := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2) g₀ T T' hδ hδ'
     (fun p : M × ℝ => Y p.1) hYjoint
-  -- the output swap of the first cross trace (`swap T₀₃` carrier).
+  
   have hswap := domDomCongrField_jointContMDiffOn (I := I) (Equiv.swap (0 : Fin 2) 1)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
     (fun p : M × ℝ => (show Tensor0SBundle.Tensor0SSpace 4 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
@@ -2603,11 +2232,11 @@ theorem ricciArmPrincipalCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMani
         (Tensor0SBundle.Tensor0SSpace.ofModel
           (ContinuousMultilinearMap.domDomCongr κ (Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)))))
     hT03
-  -- assemble: `½ ((T₀₃ + swap T₀₃) − CDT)`.
+  
   have hcomb := jointTotalSpace_smul (I := I) (d := 2) (1 / 2 : ℝ) _
     (jointTotalSpace_sub (I := I) (d := 2) _ _ (jointTotalSpace_add (I := I) (d := 2) _ _ hT03 hswap) hCDT)
   refine hcomb.congr (fun p hp => ?_)
-  -- the fibre identity `R₂Fib (g_s) x (Y x) = ½ ((T₀₃ + swap T₀₃) − CDT)`.
+  
   refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) ?_
   apply Tensor0SBundle.Tensor0SSpace.toModel_injective
@@ -2624,33 +2253,6 @@ theorem ricciArmPrincipalCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMani
     ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
   rfl
 
-/-- **Joint `(s, x)`-smoothness of the order-`2` principal coefficient along the realized path.**
-
-For the realized metric family `g_s = realizedFam g₀ T T' s`, the intrinsic order-`2`
-principal coefficient operator field `ricciArmPrincipalCoeff g₀ g_s` (the combined three-trace
-`(4, 2)`-operator field of `g_s`, `RicciDeTurckSectionDifference`) is jointly `C^∞` in the pair
-`(x, s)`, as a section over `M × ℝ` of the `(4, 2)`-tensor bundle, **on the slab
-`univ ×ˢ realizedSmallSet`** — the realized family is junk-extended to `g₀` off the small set, where it
-jumps at the boundary, so the joint smoothness holds only over the open parameter set `realizedSmallSet`
-(which contains the integration interval `[0, 1]`), not globally in `s` (`ContMDiffOn`, not `ContMDiff`).
-
-This is the joint-parameter lift of the single-metric base-point smoothness
-`ricciArmPrincipalCoeffFib_contMDiff`: the operator depends on `g_s` *only* through the smooth
-cometric Hom-section `inverseMetricSharpField g_s` (the model raise `cometricLmodel g_s x`,
-through `cometricDoubleTraceFib`/`combinedTrace42Model`), and the chart inverse-Gram of `g_s` is
-jointly `(s, y)`-`C^∞` by the joint-Gram tower (`realizedFam_genJointGram` / `gen_joint_invGram`,
-which already give the realized-family chart Gram, inverse-Gram and Christoffel jets jointly
-`(s, y)`-`C^∞`).  Through the chart-coordinate form of the metric sharp
-(`metricSharpChartLocal`/`metricSharpChartCoeff`, whose coefficient is `∑_j G^{ij}(g_s) · cv_j`)
-the joint chart-inverse-Gram smoothness lifts the single-metric `contMDiff_clm_section_of_pointwise`
-construction to the product base `M × ℝ` via `Bundle.contMDiffAt_totalSpace` (the
-`cutoffField_contMDiff` product-base section pattern).  This irreducible joint manifold-section
-lift over the product base `M × ℝ` (a complete joint analog of the
-`metricSharp_contMDiff_total` → `inverseMetricSharpField_contMDiff` →
-`ricciArmPrincipalCoeffFib_contMDiff` tower, threaded through the joint-Gram tower) is *posited*
-here as the single joint-fibre-smoothness keystone, to be discharged by recursing into it.  It
-genuinely constrains the section to the realized-family principal coefficient (it is consumed only
-as the joint smoothness of that exact fibre operator), so it is non-vacuous. -/
 theorem ricciArmPrincipalCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2661,21 +2263,13 @@ theorem ricciArmPrincipalCoeff_realizedFam_jointContMDiff [BoundarylessManifold 
         ((ricciArmPrincipalCoeff (I := I) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
-  -- The underlying section value of `ricciArmPrincipalCoeff g₀ g_s` at `x` is definitionally the
-  -- fibre operator `ricciArmPrincipalCoeffFib g_s x` (`ricciArmPrincipalCoeff_toSection`), so the
-  -- joint section read-off is the posited joint-fibre smoothness.
+  
+  
+  
   have hfib := ricciArmPrincipalCoeffFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
   refine hfib.congr (fun p _ => ?_)
   rw [ricciArmPrincipalCoeff_toSection]
 
-/-- **Continuity-in-`s` slice of the order-`2` principal coefficient along the realized path.**
-
-The continuity slice of the joint `(s, x)`-smoothness keystone
-`ricciArmPrincipalCoeff_realizedFam_jointContMDiff`: at every fixed base point `x`, the
-model-fibre value `s ↦ (ricciArmPrincipalCoeff g₀ g_s).toSection x |>.toModel` is continuous in
-`s`.  Obtained by restricting the joint section to the slice `t ↦ (x, t)` (smooth), reading the
-fibre coordinate through the trivialization at the constant base `x`, and post-composing with the
-continuous model coercion `TensorRSSpace.toModel`. -/
 theorem ricciArmPrincipalCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2692,14 +2286,6 @@ theorem ricciArmPrincipalCoeff_realizedFam_toModel_continuous [BoundarylessManif
     (fun t => ricciArmPrincipalCoeff (I := I) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
 
-/-! ### Joint `(x, s)`-smoothness of the raised-Ricci endomorphism along the realized family -/
-
-/-- **Joint `(x, s)`-smoothness of the chart-coordinate Ricci entry along the realized family.**
-On the product of the chart-`α` source and the realized small set, the chart Ricci scalar
-`(x, s) ↦ Rc_{ik}(realizedFam g₀ T T' s)(α, ϕ_α x)` is jointly `C^∞`.  Mirror of
-`realizedFam_chartInvGramMatrix_jointContMDiffOn_free`, substituting the joint Euclidean chart-Ricci
-smoothness `gen_joint_ricci` (from the `δ`-free joint Gram `realizedFam_genJointGram_free`) for the
-inverse-Gram entry, then composing with the smooth moving point `(x, s) ↦ (s, ϕ_α x)`. -/
 theorem realizedFam_chartRicciTensor_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2737,23 +2323,7 @@ theorem realizedFam_chartRicciTensor_jointContMDiffOn
     (fun q _ => rfl) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(Posited sub-child — joint `(x, s)`-smoothness of the chart-frame Ricci component along the
-realized family.)**
 
-For a globally smooth tangent field `Y` and the chart-`α` frame vector `chartBasisVecFiber α j`, the
-scalar `(x, s) ↦ Ric(g_s)(Y x, e_j(x))` is jointly `C^∞` on the chart-`α` source × the realized small
-set.  This is the joint-parameter lift of the single-metric on-source component smoothness
-`ricciTensor_pairing_contMDiff` (specialised to the chart frame): it is the manifold read-off of the
-chart Euclidean joint Ricci smoothness `gen_joint_ricci` (from the joint-Gram tower
-`realizedFam_genJointGram`) threaded — through the off-centre chart-`α` Ricci basis identity
-`ricciTensor_chartBasisVec_alpha_eq` (valid on the full chart source, where
-`chartLeviCivitaGoodSet α = (extChartAt I α).source`) and the chart-frame decomposition of the smooth
-field `Y` with `s`-independent chart-source-smooth coefficients — to the manifold.  It is the joint
-analog of the `s`-independent chart-component input `cotangentSection_chartComponent_contMDiffOn` that
-discharges the `hcv` hypothesis of `metricSharp_jointContMDiffOn`; the only `s`-dependence enters
-through the curvature `2`-jet of `g_s`, supplied jointly by `gen_joint_ricci`.  It genuinely constrains
-the section to the realized-family Ricci component (consumed only as the joint smoothness of that exact
-scalar against a smooth field and the chart frame), so it is non-vacuous. -/
 theorem ricciTensorSection_chartComponent_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2768,7 +2338,7 @@ theorem ricciTensorSection_chartComponent_realizedFam_jointContMDiffOn [Boundary
   classical
   have hbase_eq : (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
     trivializationAt_baseSet_eq_chartAt_source (I := I) α
-  -- The summed (decomposed) form: jointly smooth term by term.
+  
   have hsum : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
       (fun p : M × ℝ => ∑ q : Fin (Module.finrank ℝ E),
         chartCoeff (I := I) α Y q p.1 *
@@ -2791,7 +2361,7 @@ theorem ricciTensorSection_chartComponent_realizedFam_jointContMDiffOn [Boundary
   have hxgood : p.1 ∈ chartLeviCivitaGoodSet (I := I) α := by
     rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α, extChartAt_source (I := I)]
     exact hx
-  -- Decompose `Y p.1` in the chart-`α` frame and use the off-centre Ricci identity.
+  
   set gs := realizedFam (I := I) g₀ T T' hδ hδ' p.2 with hgs
   rw [chartCoeff_recompose (I := I) α Y hxbase]
   rw [map_sum (ricciTensor (I := I) gs p.1), ContinuousLinearMap.sum_apply]
@@ -2801,18 +2371,7 @@ theorem ricciTensorSection_chartComponent_realizedFam_jointContMDiffOn [Boundary
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint `(x, s)`-smoothness of the raised-Ricci endomorphism Hom-section along the realized
-family, on the slab `univ ×ˢ realizedSmallSet`.**  The joint-parameter lift of the single-metric
-`ricEndoRaisedFib_contMDiff`: the raised-Ricci `(1, 1)`-operator field
-`x ↦ ricEndoRaisedFib (realizedFam s) x : Hom(TM, TM)` is jointly `C^∞` in `(x, s)` over the realized
-small set.  Via the within-slab CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` it
-reduces, on each globally smooth tangent field `Y`, to the joint smoothness of
-`(x, s) ↦ ricEndoRaisedFib (g_s) x (Y x) = metricSharp (g_s) x (Ric(g_s)(Y x, ·))`, supplied by the
-LANDED `metricSharp_jointContMDiffOn` threaded through the `δ`-free joint chart inverse-Gram
-(`realizedFam_chartInvGramMatrix_jointContMDiffOn_free`) and the joint chart-frame Ricci components
-`ricciTensorSection_chartComponent_realizedFam_jointContMDiffOn` (the `s`-dependent covector family
-`cv s b := (Ric(g_s) b (Y b)).toLinearMap`).  Mirrors `inverseMetricSharpField_realizedFam_jointContMDiffOn`,
-substituting the joint Ricci component for the `s`-independent cotangent component. -/
+
 theorem ricEndoRaisedFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2829,7 +2388,7 @@ theorem ricEndoRaisedFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
       (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro Y
-  -- The `s`-dependent covector family `cv s b := (Ric(g_s) b (Y b)).toLinearMap`.
+  
   set cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ :=
     fun s b => (ricciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b (Y b)).toLinearMap
     with hcvdef
@@ -2854,23 +2413,16 @@ theorem ricEndoRaisedFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (gfam := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s) (cv := cv)
     (S := realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen hinv hcv
   refine hjoint.congr (fun p hp => ?_)
-  -- the fibre value `ricEndoRaisedFib (g_s) x (Y x) = metricSharp (g_s) x (Ric(g_s)(Y x, ·))`
+  
   change TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (cv p.2 p.1)) =
     TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
       (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))
   rw [ricEndoRaisedFib_apply, hcvdef]
 
-/-! ### Generic joint leading-slot endomorphism insertion over the product base -/
-
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint curry of a joint `(0, d + 1)`-tensor family over the product base.**  For a joint-smooth
-`(0, d + 1)`-tensor family `A` over `M × ℝ`, the curried `Hom(TM, T^{(0, d)})`-section
-`(p ↦ ⟨p.1, tensor0S_curry d p.1 (A p)⟩)` is jointly `C^∞` on the slab `univ ×ˢ S`.  The product-base
-analog of `contMDiffAt_curriedSection_of_contMDiffAt_section`: the curry is the fixed model
-continuous-linear-equiv `continuousMultilinearCurryLeftEquiv`, so the trivialized fibre coordinate of
-the curried family is that constant map applied to the trivialized coordinate of `A`. -/
+
 private theorem curriedField_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace (d + 1) I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)) ∞
@@ -2925,11 +2477,7 @@ private theorem curriedField_jointContMDiffOn {d : ℕ} {S : Set ℝ}
 
 set_option backward.isDefEq.respectTransparency false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Joint uncurry of a joint `Hom(TM, T^{(0, d)})`-family over the product base.**  Inverse of
-`curriedField_jointContMDiffOn`: for a joint-smooth `Hom(TM, T^{(0, d)})`-family `G`, the uncurried
-`(0, d + 1)`-tensor family `(p ↦ ⟨p.1, (tensor0S_curry d p.1).symm (G p)⟩)` is jointly `C^∞` on the
-slab `univ ×ˢ S`.  The product-base analog of `contMDiff_uncurriedSection_of_contMDiff_homSection`,
-threaded through the fixed model uncurry equiv `(continuousMultilinearCurryLeftEquiv).symm`. -/
+
 private theorem uncurriedField_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     (G : ∀ p : M × ℝ, TangentSpace I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace d I p.1)
     (hG : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -2962,7 +2510,7 @@ private theorem uncurriedField_jointContMDiffOn {d : ℕ} {S : Set ℝ}
       ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (d + 1) => E) ℝ
         ).toContinuousLinearEquiv.symm.toContinuousLinearMap).contMDiff
     exact hop.contMDiffAt.comp_contMDiffWithinAt p₀ hG'.2
-  -- pointwise trivialized-coordinate identity for the uncurried section at a base-set point.
+  
   have hpt : ∀ p : M × ℝ,
       p.1 ∈ (trivializationAt (Tensor0SBundle.Tensor0SModel d ℝ E)
           (fun y : M => Tensor0SBundle.Tensor0SSpace d I y) x₀).baseSet →
@@ -3003,14 +2551,7 @@ private theorem uncurriedField_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     exact hpt p₀ hx0
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Joint leading-slot endomorphism insertion applied to a joint `(0, d + 1)`-section.**  For a
-joint-smooth endomorphism Hom-field `Λ` and a joint-smooth `(0, d + 1)`-tensor family `A` over
-`M × ℝ`, the leading-slot insertion `(p ↦ ⟨p.1, slotInsertEndoFib (d + 1) 0 p.1 (Λ p) (A p)⟩)` is
-jointly `C^∞` on the slab `univ ×ˢ S`.  By `slotInsertEndoFib_zero` it equals the joint uncurry
-(`uncurriedField_jointContMDiffOn`) of the composition of the joint curried `(0, d + 1)`-section
-(`curriedField_jointContMDiffOn`) with the joint endomorphism field, the composition assembled per
-smooth tangent test field through the within-slab bridge and the Mathlib joint apply
-`ContMDiffOn.clm_bundle_apply` (twice). -/
+
 theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     (Λ : ∀ p : M × ℝ, TangentSpace I p.1 →L[ℝ] TangentSpace I p.1)
     (hΛ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
@@ -3027,9 +2568,9 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace (d + 1) I z) p.1
         (slotInsertEndoFib (I := I) (M := M) (d + 1) 0 p.1 (Λ p) (A p)))
       ((Set.univ : Set M) ×ˢ S) := by
-  -- the joint curried `Hom(TM, T^{(0, d)})`-section of `A`.
+  
   have hcurry := curriedField_jointContMDiffOn (I := I) (M := M) (d := d) (S := S) A hA
-  -- compose the joint curried section with the joint endomorphism field, per smooth tangent test field.
+  
   have hcomp : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel d ℝ E)
@@ -3042,7 +2583,7 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
       (φ := fun p : M × ℝ => (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) d p.1 (A p)).comp (Λ p))
       (S := S)
     intro Z
-    -- the joint vector field `p ↦ Λ p (Z p.1)`.
+    
     have hZjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
         (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1 (Z p.1))
         ((Set.univ : Set M) ×ˢ S) :=
@@ -3051,11 +2592,11 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1 (Λ p (Z p.1)))
         ((Set.univ : Set M) ×ˢ S) :=
       ContMDiffOn.clm_bundle_apply (b := Prod.fst) hΛ hZjoint
-    -- apply the joint curried section to the joint vector field `Λ Z`.
+    
     have happ := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hcurry hΛZ
     refine happ.congr (fun p _ => ?_)
     rfl
-  -- uncurry the joint Hom-section back to a joint `(0, d + 1)`-section.
+  
   have huncurry := uncurriedField_jointContMDiffOn (I := I) (M := M) (d := d) (S := S)
     (fun p : M × ℝ => (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) d p.1 (A p)).comp (Λ p)) hcomp
   refine huncurry.congr (fun p _ => ?_)
@@ -3063,17 +2604,7 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
   exact slotInsertEndoFib_zero (I := I) (M := M) d p.1 (Λ p) (A p)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Joint trailing-slot (slot `1`) endomorphism insertion applied to a joint `(0, d + 2)`-section.**
-The slot-`1` mirror of `slotInsertEndo0Field_apply_jointContMDiffOn`.  For a joint-smooth endomorphism
-Hom-field `Λ` and a joint-smooth `(0, d + 2)`-tensor family `A` over `M × ℝ`, the trailing-slot
-insertion `(p ↦ ⟨p.1, slotInsertEndoFib (d + 2) 1 p.1 (Λ p) (A p)⟩)` is jointly `C^∞` on the slab
-`univ ×ˢ S`.  By `slotInsertEndoFib_succ` the slot-`1` insertion is the slot extension
-`slotExtendFib (d + 1) (d + 1) x (slotInsertEndoFib (d + 1) 0 x (Λ x))` of the slot-`0` insertion one
-rank below, i.e. the joint uncurry (`uncurriedField_jointContMDiffOn`) of the left-composition of the
-joint curried `(0, d + 1)`-section (`curriedField_jointContMDiffOn`) with the joint inner slot-`0`
-insertion operator, the latter applied per smooth tangent test field through the leading-slot bridge
-`slotInsertEndo0Field_apply_jointContMDiffOn` (at rank `d`) and the within-slab joint apply
-`ContMDiffOn.clm_bundle_apply`. -/
+
 theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     (g : SmoothRiemannianMetric I M)
     (Λ : ∀ p : M × ℝ, TangentSpace I p.1 →L[ℝ] TangentSpace I p.1)
@@ -3091,10 +2622,10 @@ theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace (d + 2) I z) p.1
         (slotInsertEndoFib (I := I) (M := M) (d + 2) 1 p.1 (Λ p) (A p)))
       ((Set.univ : Set M) ×ˢ S) := by
-  -- the joint curried `Hom(TM, T^{(0, d + 1)})`-section of `A`.
+  
   have hcurry := curriedField_jointContMDiffOn (I := I) (M := M) (d := d + 1) (S := S) A hA
-  -- left-compose the joint curried section with the joint inner slot-`0` insertion operator,
-  -- per smooth tangent test field, through the leading-slot bridge at rank `d`.
+  
+  
   have hcomp : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)
@@ -3110,7 +2641,7 @@ theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p)))
       (S := S)
     intro Z
-    -- the joint `(0, d + 1)`-section `p ↦ tensor0S_curry (d + 1) p.1 (A p) (Z p.1)`.
+    
     have hcurryZ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
         (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)) ∞
         (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)
@@ -3122,14 +2653,14 @@ theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
           ((Set.univ : Set M) ×ˢ S) :=
         Z.contMDiff.comp_contMDiffOn contMDiffOn_fst
       exact ContMDiffOn.clm_bundle_apply (b := Prod.fst) hcurry hZjoint
-    -- apply the joint inner slot-`0` insertion operator at rank `d` to that joint section.
+    
     have happ := slotInsertEndo0Field_apply_jointContMDiffOn (I := I) (M := M) (d := d) (S := S)
       (Λ := Λ) hΛ
       (A := fun p : M × ℝ =>
         tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p) (Z p.1)) hcurryZ
     refine happ.congr (fun p _ => ?_)
     rfl
-  -- uncurry the joint Hom-section back to a joint `(0, d + 2)`-section.
+  
   have huncurry := uncurriedField_jointContMDiffOn (I := I) (M := M) (d := d + 1) (S := S)
     (fun p : M × ℝ => (slotInsertEndoFib (I := I) (M := M) (d + 1) 0 p.1 (Λ p)).comp
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p))) hcomp
@@ -3140,17 +2671,7 @@ theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     slotExtendFib_apply (I := I) (M := M) g (d + 1) (d + 1) p.1]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Joint `(x, s)`-smoothness of the leading-slot order-`0` curvature coefficient fibre operator along
-the realized family.**  The fibrewise joint analog of `ricciArmOrder0CurvCoeffFibSlot_contMDiff` at the
-leading slot: the leading-slot insertion `slotInsertEndoFib 2 0 x (ricEndoRaisedFib (g_s) x)` is jointly
-`C^∞` in `(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.  Via the
-within-slab CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` it reduces, on each globally
-smooth `(0, 2)`-tensor field `Y`, to the joint `(0, 2)`-section
-`(x, s) ↦ Y x ∘ (ricEndoRaisedFib (g_s) x, id)` — the leading covariant slot precomposed by the
-joint-smooth raised-Ricci endomorphism `ricEndoRaisedFib_realizedFam_jointContMDiffOn`, threaded
-through the fixed smooth slot-insertion `slotInsertEndoFib`.  This is the leading slot of the two-slot
-Bochner order-`0` coefficient; the trailing slot is the posited
-`ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn`. -/
+
 theorem ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3171,34 +2692,25 @@ theorem ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn [Boundaryle
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro Y
   set g_s : ℝ → SmoothRiemannianMetric I M := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s with hg_s
-  -- the joint-smooth raised-Ricci endomorphism Hom-section.
+  
   have hric := ricEndoRaisedFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
-  -- the joint-smooth `(0, 2)`-section `Y` pulled back via `fst`.
+  
   have hYjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 (Y p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
     Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
-  -- the joint leading-slot insertion of the joint raised-Ricci endomorphism applied to `Y`.
+  
   have happ := slotInsertEndo0Field_apply_jointContMDiffOn (I := I) (M := M) (d := 1)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
     (Λ := fun p : M × ℝ => ricEndoRaisedFib (I := I) (g_s p.2) p.1) hric
     (A := fun p : M × ℝ => Y p.1) hYjoint
   refine happ.congr (fun p _ => ?_)
-  -- the fibre value `slotInsertEndoFib 2 0 x (ricEndo (g_s) x) (Y x) = ricciArmOrder0CurvCoeffFibSlot 0 x (Y x)`
+  
   rw [ricciArmOrder0CurvCoeffFibSlot]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Joint `(x, s)`-smoothness of the trailing-slot order-`0` curvature coefficient fibre operator along
-the realized family.**  The slot-`1` mirror of `ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn`:
-the trailing-slot insertion `slotInsertEndoFib 2 1 x (ricEndoRaisedFib (g_s) x)` is jointly `C^∞` in
-`(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.  Via the within-slab
-CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` it reduces, on each globally smooth
-`(0, 2)`-tensor field `Y`, to the joint `(0, 2)`-section `(x, s) ↦ Y x ∘ (id, ricEndoRaisedFib (g_s) x)`
-— the trailing covariant slot precomposed by the joint-smooth raised-Ricci endomorphism
-`ricEndoRaisedFib_realizedFam_jointContMDiffOn`, threaded through the trailing slot-insertion bridge
-`slotInsertEndo1Field_apply_jointContMDiffOn` (at `d = 0`).  This is the trailing slot of the two-slot
-Bochner order-`0` coefficient. -/
+
 theorem ricciArmOrder0CurvCoeffFibSlot1_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3219,49 +2731,25 @@ theorem ricciArmOrder0CurvCoeffFibSlot1_realizedFam_jointContMDiffOn [Boundaryle
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro Y
   set g_s : ℝ → SmoothRiemannianMetric I M := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s with hg_s
-  -- the joint-smooth raised-Ricci endomorphism Hom-section.
+  
   have hric := ricEndoRaisedFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
-  -- the joint-smooth `(0, 2)`-section `Y` pulled back via `fst`.
+  
   have hYjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 (Y p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
     Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
-  -- the joint trailing-slot insertion of the joint raised-Ricci endomorphism applied to `Y`.
+  
   have happ := slotInsertEndo1Field_apply_jointContMDiffOn (I := I) (M := M) (d := 0) g₀
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
     (Λ := fun p : M × ℝ => ricEndoRaisedFib (I := I) (g_s p.2) p.1) hric
     (A := fun p : M × ℝ => Y p.1) hYjoint
   refine happ.congr (fun p _ => ?_)
-  -- the fibre value `slotInsertEndoFib 2 1 x (ricEndo (g_s) x) (Y x) = ricciArmOrder0CurvCoeffFibSlot 1 x (Y x)`
+  
   rw [ricciArmOrder0CurvCoeffFibSlot]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(Posited deep input — joint `(x, s)`-smoothness of the genuine TWO-SLOT order-`0` curvature
-coefficient fibre operator along the realized family.)**
 
-The fibrewise joint analog of `ricciArmOrder0CurvCoeffFib_contMDiff`: the SUM of the leading-slot and
-trailing-slot insertions of the joint-smooth raised-Ricci endomorphism `ricEndoRaisedFib (g_s) x` is
-jointly `C^∞` in `(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.
-
-The order-`0` of the Weitzenböck fold is the SYMMETRIC two-slot Bochner Ricci action
-`D(Ric♯·, ·) + D(·, Ric♯·)` (`RicciDeTurckSectionDifference.ricciArmOrder0CurvCoeff`), i.e.
-`ricciArmOrder0CurvCoeffFib = slotInsertEndoFib 2 0 (ricEndoRaisedFib g_s) + slotInsertEndoFib 2 1
-(ricEndoRaisedFib g_s)`.  Its joint smoothness is the sum of the leading-slot joint smoothness — the
-PROVED, sorry-free `ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn` (above, via
-`slotInsertEndo0Field_apply_jointContMDiffOn`) — and the trailing-slot (`slot 1`) joint smoothness.  The
-trailing slot needs the slot-`1` analog of `slotInsertEndo0Field_apply_jointContMDiffOn` (a slot-`1`
-joint curry/uncurry insertion bridge — the slot-`1` mirror of `slotInsertEndoFib_zero`'s leading-slot
-uncurry), which is not yet on disk; together with the joint additivity of the two bundle sections into the
-normed `(2, 2)`-operator fibre.
-
-This irreducible joint manifold-section lift over the product base `M × ℝ` — the two-slot analog of the
-`ricEndoRaisedFib_contMDiff` → `slotInsertEndoFib_contMDiff` → `ricciArmOrder0CurvCoeffFib_contMDiff`
-tower, threaded through the joint-Gram/Riemann tower `gen_joint_riemann` for both slots — is *posited*
-here as the single joint-fibre-smoothness keystone, to be discharged by recursing into the slot-`1` joint
-currying tower (a complete mirror of the proved leading-slot tower) plus the bundle-section sum.  It
-genuinely constrains the section to the realized-family two-slot curvature coefficient (consumed only as
-the joint smoothness of that exact fibre operator), so it is non-vacuous. -/
 theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3286,31 +2774,6 @@ theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMan
   refine hadd.congr (fun p _ => ?_)
   rfl
 
-/-- **(Posited deep input — joint `(s, x)`-smoothness of the genuine order-`0` curvature coefficient
-along the realized path.)**
-
-For the realized metric family `g_s = realizedFam g₀ T T' s`, the genuine order-`0` **curvature**
-coefficient operator field `ricciArmOrder0CurvCoeff g₀ g_s` (the leading-slot insertion of the raised
-curvature endomorphism `ricEndoRaisedFib g_s`, `RicciDeTurckSectionDifference`) is jointly `C^∞` in the
-pair `(x, s)`, as a section over `M × ℝ` of the `(2, 2)`-tensor bundle, **on the slab
-`univ ×ˢ realizedSmallSet`** (the realized family is junk-extended to `g₀` off the small set and jumps at
-the boundary, so the joint smoothness is `ContMDiffOn` over `realizedSmallSet ⊇ [0, 1]`, not global).
-
-This is the joint-parameter lift of the single-metric base-point smoothness
-`ricciArmOrder0CurvCoeffFib_contMDiff`: the operator depends on `g_s` *only* through the smooth raised
-curvature (Ricci) endomorphism Hom-section `ricEndoRaisedFib g_s` (in the leading slot, through
-`slotInsertEndoFib`), and the chart Christoffel/Riemann/Ricci jet of `g_s` is jointly `(s, y)`-`C^∞` by
-the joint-Gram tower (`realizedFam_genJointGram` / `gen_joint_riemann`).  Through the chart-coordinate
-form of the Ricci tensor and the metric sharp (`ricciTensor`/`metricSharp`, whose chart coefficients are
-the curvature `2`-jet of `g_s` contracted/raised by `G^{ij}(g_s)`) the joint chart curvature smoothness
-lifts the single-metric `slotInsertEndoFib_contMDiff`/`ricEndoRaisedFib_contMDiff` construction to the
-product base `M × ℝ` via `Bundle.contMDiffAt_totalSpace` (the `cutoffField_contMDiff` product-base
-section pattern).  This irreducible joint manifold-section lift over the product base `M × ℝ` (a complete
-joint analog of the `ricEndoRaisedFib_contMDiff` → `slotInsertEndoFib_contMDiff` →
-`ricciArmOrder0CurvCoeffFib_contMDiff` tower, threaded through the joint-Gram/Riemann tower
-`gen_joint_riemann`) is *posited* here as the single joint-fibre-smoothness keystone, to be discharged
-by recursing into it.  It genuinely constrains the section to the realized-family curvature coefficient
-(it is consumed only as the joint smoothness of that exact fibre operator), so it is non-vacuous. -/
 theorem ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3321,21 +2784,13 @@ theorem ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff [BoundarylessManifold
         ((ricciArmOrder0CurvCoeff (I := I) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
-  -- The underlying section value of `ricciArmOrder0CurvCoeff g₀ g_s` at `x` is definitionally the
-  -- `ofCLM` of the fibre operator `ricciArmOrder0CurvCoeffFib g_s x` (`ricciArmOrder0CurvCoeff_toSection`),
-  -- so the joint section read-off is the joint-fibre smoothness.
+  
+  
+  
   have hfib := ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
   refine hfib.congr (fun p _ => ?_)
   rw [ricciArmOrder0CurvCoeff_toSection]
 
-/-- **Continuity-in-`s` slice of the genuine order-`0` curvature coefficient along the realized path.**
-
-The continuity slice of the joint `(s, x)`-smoothness keystone
-`ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff`: at every fixed base point `x`, the model-fibre
-value `s ↦ (ricciArmOrder0CurvCoeff g₀ g_s).toSection x |>.toModel` is continuous in `s`.  Obtained by
-restricting the joint section to the slice `t ↦ (x, t)` (smooth), reading the fibre coordinate through
-the trivialization at the constant base `x`, and post-composing with the continuous model coercion
-`TensorRSSpace.toModel`. -/
 theorem ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

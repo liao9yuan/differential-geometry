@@ -1,52 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
 import Mathlib.Analysis.ODE.Gronwall
 
-/-!
-# Joint `C^1` smoothness of the variational linear map (building blocks)
-
-The goal: for a time-dependent vector field `f : ℝ → E → E` jointly `C^2` in
-`(t, x)` and a local Picard–Lindelöf flow `Φ`, build a joint-`C^1`
-spatial-piece function `Y : E × ℝ → (E →L[ℝ] E)` satisfying
-`IsVariationalFlowProjection hΦ T_eff ρ_eff Y 1` for some shrunk
-`(T_eff, ρ_eff)`.
-
-The clean construction uses the *augmented flow*: the augmented vector field
-`augVF f` on `E × (E →L[ℝ] E)` is jointly `C^1` whenever `f` is jointly
-`C^2`, so its Picard–Lindelöf flow `aΦ` is jointly `C^1` on a strictly-interior
-open neighbourhood of `((x₀, id), t₀)` by `contDiffOn_flow_of_isLocalFlow`
-applied to `aΦ` itself.  The projection `Y(x, t) := (aΦ ⟨(x, id), t⟩).2`
-inherits joint `C^1`-smoothness via `contDiffOn_fromAugFlow`, and the
-variational identification `Y q = variationalLinearMapAt(...)` holds pointwise.
-
-This file ships **two atomic building-block lemmas** that the orchestrator
-combines downstream to close the projection witness:
-
-## Headlines
-
-* `orbit_eq_of_augFlow_isLocalFlow` — orbit-equality identification.  The first
-  projection of an augmented PL flow agrees with the original PL flow on a
-  neighbourhood of `t₀`, via `ODE_solution_unique_of_eventually`.  This is the
-  bridge that lets us identify `variationalLinearMapAt(α := Φ⟨x, ·⟩, t)` with
-  `variationalLinearMapAt(α := s ↦ (aΦ ⟨(x, id), s⟩).1, t)` once the two
-  orbits agree pointwise.
-
-* `contDiffOn_fromAugFlow_inherits` — the joint smoothness of the projection
-  inherits from the joint smoothness of the augmented flow.  Given `aΦ` is
-  jointly `C^1` on a neighbourhood of `((x₀, id), t₀)`, the function
-  `Y := fromAugFlow aΦ` is jointly `C^1` on the embedded neighbourhood of
-  `(x₀, t₀)`.
-
-The remaining unconditional step — running `contDiffOn_flow_of_isLocalFlow` on
-the augmented system requires a uniform-in-orbit operator-norm bound `M_aug`
-on the augmented linearization — needs either `[FiniteDimensional ℝ E]` (so
-closed balls are compact, giving `M_aug` from joint continuity) or a careful
-Grönwall-based bound using the augmented PL constants.  Both routes are
-independent of this file and shipped downstream.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]`
-is *not* used.  No manifold or tensor file is imported.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -65,17 +19,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
   {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 2400000 in
-/--
-**Orbit-equality lemma.**  If `aΦ` is a local flow of the augmented field
-`augVF f` centred at `((x₀, id), t₀)`, `Φ` is a local flow of `f` centred at
-`(x₀, t₀)`, and `(t₀, x)` lies in the interior of both flows' time domains,
-then the orbit `s ↦ Φ ⟨x, s⟩` agrees with the first projection
-`s ↦ (aΦ ⟨(x, id), s⟩).1` on a neighbourhood of `t₀`.
 
-The proof uses `ODE_solution_unique_of_eventually` applied to the original ODE
-`v t y := f t y`, with the local Lipschitz constant of `uncurry f` at `(t₀, x)`
-supplied by `ContDiffAt.exists_lipschitzOnWith`.
--/
 theorem orbit_eq_of_augFlow_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -216,11 +160,6 @@ section SmoothnessInheritance
 
 variable {f : ℝ → E → E} {x₀ : E} {t₀ : ℝ}
 
-/-- **Smoothness inheritance for the projection.**  If `aΦ` is jointly `C^1` on
-the open neighbourhood `(ball (x₀, id) (ρ_a : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)`,
-and the spatial radius `ρ` and time width `T` satisfy `(ρ : ℝ) ≤ (ρ_a : ℝ)` and
-`T ≤ T_a`, then the projection `fromAugFlow aΦ` is jointly `C^1` on the
-corresponding neighbourhood `ball x₀ (ρ : ℝ) ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
 theorem contDiffOn_fromAugFlow_inherits
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {ρ_a ρ : ℝ≥0} {T_a T : ℝ}
@@ -257,12 +196,6 @@ section OrbitEqualityIcc
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ}
   {Φ : E × ℝ → E}
 
-/-- **Orbit-equality on a closed interval.**  If both orbits land in a closed ball
-`closedBall x₀ r₀` on which `f t` is uniformly `K`-Lipschitz for `t` in the open
-interval `Ioo (t₀ - T) (t₀ + T)`, then `Φ ⟨x, ·⟩` and `(aΦ ⟨(x, id), ·⟩).1` agree on
-the entire closed interval `Icc (t₀ - T) (t₀ + T)`.  The hypotheses package the
-orbit-stays-in-the-ball condition for each side and the uniform Lipschitz property of
-`f` on the slab. -/
 theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {R_aug : ℝ≥0} {tmin_a tmax_a : ℝ}
@@ -363,20 +296,7 @@ section LevelOneSmoothnessClause
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E}
 
 set_option maxHeartbeats 4000000 in
-/-- **Smoothness clause of the level-1 variational-flow projection witness.**
 
-If `f : ℝ → E → E` is jointly `C^2` on `Set.univ` and `E` is a finite-dimensional
-Banach space, then there exist positive `T` and `ρ` together with a function
-`Y : E × ℝ → (E →L[ℝ] E)` that is jointly `C^1` on the open neighbourhood
-`(ball x₀ ρ) ×ˢ Ioo (t₀ - T) (t₀ + T)`.
-
-The function `Y` is `fromAugFlow aΦ` where `aΦ` is the local flow of the augmented
-vector field `augVF f` on `E × (E →L[ℝ] E)` centred at `((x₀, id), t₀)`.
-
-This headline is the **smoothness clause** of the full level-1
-`IsVariationalFlowProjection` witness; the remaining `fderiv_eq` clause is shipped
-separately and requires the orbit-equality identification on a closed time interval
-(see `orbit_eq_Icc_of_augFlow_isLocalFlow`). -/
 theorem exists_contDiffOn_fromAugFlow_one_of_C2
     [FiniteDimensional ℝ E]
     (hf_C2 : ContDiffOn ℝ 2 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -531,9 +451,6 @@ section VariationalLinearMapCongr
 
 variable {f : ℝ → E → E} {t₀ : ℝ}
 
-/-- **Congruence of the variational linear map under orbit equality.**  If
-`α₁ = α₂` on `Icc (t₀ - T) (t₀ + T)`, then `variationalLinearMapAt(α₁, t) = variationalLinearMapAt(α₂, t)`
-as continuous linear maps for every `t ∈ Icc (t₀ - T) (t₀ + T)`. -/
 theorem variationalLinearMapAt_congr_of_eqOn
     {α₁ α₂ : ℝ → E} {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont_1 : ContinuousOn (fun t => fderiv ℝ (f t) (α₁ t)) (Icc (t₀ - T) (t₀ + T)))
@@ -567,12 +484,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
   {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 16000000 in
-/-- **Coproduct identity helper.**  Given a local flow `Φ` of `f`, a local
-flow `aΦ` of the augmented vector field `augVF f` centred at `((x₀, id), t₀)`,
-joint `C^1`-smoothness of `f` on `Set.univ`, and finite-dimensionality of `E`,
-there exist positive `T` and `ρ` such that the coproduct identity
-`fderiv ℝ Φ q = (fromAugFlow aΦ q).coprod (timePieceFn f Φ q)` holds at every
-`q ∈ ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
+
 theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
     [FiniteDimensional ℝ E]
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -992,17 +904,7 @@ section LevelOneFullWitness
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 16000000 in
-/-- **Full level-1 variational-flow projection witness.**
 
-If `f : ℝ → E → E` is jointly `C^2` on `Set.univ`, `E` is a finite-dimensional Banach
-space, `Φ` is a local Picard–Lindelöf flow centered at `(x₀, t₀)` with `t₀` strictly inside
-its time domain, and the flow's spatial radius `r` is positive, then there exist positive
-`T` and `ρ` together with a function `Y : E × ℝ → (E →L[ℝ] E)` that is a level-1
-variational-flow projection of `Φ` on the strictly-interior open neighbourhood
-`(ball x₀ ρ) ×ˢ Ioo (t₀ - T) (t₀ + T)`.
-
-The function `Y` is `fromAugFlow aΦ` where `aΦ` is the local flow of the augmented vector
-field `augVF f` on `E × (E →L[ℝ] E)` centred at `((x₀, id), t₀)`. -/
 theorem exists_isVariationalFlowProjection_one_of_C2
     [FiniteDimensional ℝ E]
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -1342,26 +1244,7 @@ section SuccStepWitness
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 16000000 in
-/-- **Inductive successor step for the variational-flow projection witness.**
 
-If `f : ℝ → E → E` is jointly `C^{n+2}` on `Set.univ`, `Φ` is a local Picard–Lindelöf
-flow of `f` centred at `(x₀, t₀)` with `t₀ ∈ Ioo tmin tmax`, `aΦ` is a local
-Picard–Lindelöf flow of the augmented field `augVF f` centred at `((x₀, id), t₀)`
-with `t₀ ∈ Ioo tmin_a tmax_a`, and a level-`n` variational-flow projection
-witness `Y_ih` for `aΦ` is available, then there exist positive `T` and `ρ` together
-with a function `Y : E × ℝ → (E →L[ℝ] E)` that is a level-`(n+1)` variational-flow
-projection witness for `Φ` on the strictly-interior open neighbourhood
-`ball x₀ ρ × Ioo (t₀ - T) (t₀ + T)`.
-
-The output function `Y` is `fromAugFlow aΦ`.
-
-The inductive hypothesis `hY_ih` packages the level-`n` regularity of the projection of
-`aΦ` itself (one level *down*): `Y_ih` is `ContDiffOn n` on `ball ((x₀, id)) ρ_ih × Ioo`,
-which combined with `aΦ`'s own variational identity bumps `aΦ`'s regularity to
-`ContDiffOn (n+1)` on that neighbourhood; the projection `fromAugFlow aΦ` then inherits
-joint `C^{n+1}` regularity.  This is the natural shape of an inductive step on
-`IsVariationalFlowProjection`: the conclusion is at level `n+1` while the hypothesis
-is at level `n`, so it is *not* hypothesis-packaging. -/
 theorem exists_isVariationalFlowProjection_succ_C_step
     [FiniteDimensional ℝ E]
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -1629,22 +1512,7 @@ section LevelZeroFullWitness
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
 set_option maxHeartbeats 8000000 in
-/-- **Level-0 variational-flow projection witness.**
 
-If `f : ℝ → E → E` is jointly `C^1` on `Set.univ`, `E` is a finite-dimensional
-Banach space, `Φ` is a local Picard–Lindelöf flow centered at `(x₀, t₀)` with
-`t₀` strictly inside its time domain, and the flow's spatial radius `r` is
-positive, then there exist positive `T` and `ρ` together with a function
-`Y : E × ℝ → (E →L[ℝ] E)` that is a level-`0` variational-flow projection of
-`Φ` on the strictly-interior open neighbourhood
-`(ball x₀ ρ) ×ˢ Ioo (t₀ - T) (t₀ + T)`.
-
-The function `Y` is defined directly from `fderiv ℝ Φ` by inverting the
-coproduct decomposition `(E →L[ℝ] E) × (ℝ →L[ℝ] E) ≃L[ℝ] (E × ℝ →L[ℝ] E)`
-and extracting the spatial component.  Joint continuity of `Y` follows from
-joint continuity of `fderiv ℝ Φ` and continuity of the inverse coproduct
-equivalence; the coproduct identity for `fderiv ℝ Φ` is pinned by
-`hasFDerivAt_flow_jointly_at`. -/
 theorem exists_isVariationalFlowProjection_zero_of_C1
     [FiniteDimensional ℝ E]
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -1885,15 +1753,7 @@ end LevelZeroFullWitness
 section ParameterizedCkWitness
 
 set_option maxHeartbeats 800000 in
-/-- **Parameterized variational-flow projection witness.**
 
-If `f : ℝ → E → E` is jointly `C^{k+1}` on `Set.univ`, `E` is a finite-dimensional
-Banach space, `Φ` is a local Picard–Lindelöf flow centered at `(x₀, t₀)` with
-`t₀` strictly inside its time domain, and the flow's spatial radius `r` is
-positive, then there exist positive `T` and `ρ` together with a function
-`Y : E × ℝ → (E →L[ℝ] E)` that is a level-`k` variational-flow projection of
-`Φ` on the strictly-interior open neighbourhood
-`(ball x₀ ρ) ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
 theorem exists_isVariationalFlowProjection_of_C
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
       [CompleteSpace E] [FiniteDimensional ℝ E]

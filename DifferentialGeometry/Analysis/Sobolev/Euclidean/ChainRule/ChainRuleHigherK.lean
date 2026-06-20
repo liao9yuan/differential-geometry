@@ -5,32 +5,6 @@ import DifferentialGeometry.External.DeGiorgi.BallExtension.RoughInput
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.MeasureTheory.Function.Jacobian
 
-/-!
-# Higher-order chain rule infrastructure for `W^{k,p}` under smooth bounded diffeomorphisms
-
-This file packages the classical (Faà di Bruno-style) pointwise bound on the
-iterated `fderiv` of a composition `u ∘ Φ` for a smooth bounded
-diffeomorphism `Φ`, along with related infrastructure used in the
-non-smooth chain rule for `W^{k,p}`.
-
-## Main results
-
-* `SmoothDiffeoBounded.norm_iteratedFDeriv_comp_toFun_le`: the cruder
-  Faà di Bruno-style pointwise bound
-  `‖∂^n (u ∘ Φ)(x)‖ ≤ n! · C · D^n`,
-  where `C` bounds `‖∂^i u(Φ x)‖` for `i ≤ n` and `D = max Φ.deriv_bound 1`.
-
-* `SmoothDiffeoBounded.comp_toFun_contDiff`: smoothness of the
-  composition `u ∘ Φ` is preserved.
-
-The non-smooth version of the chain rule (`MemWkp.comp_smoothDiffeoBounded`
-and `wkpNorm_comp_smoothDiffeoBounded_lt_top`) requires additional
-infrastructure that is currently outside the scope of this file
-(specifically, smooth density in `W^{k,p}` for non-compactly-supported
-functions, or alternatively a Piola-type identity for the chain-rule
-test-function transform).
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -47,8 +21,6 @@ local notation "E" => EuclideanSpace ℝ (Fin d)
 
 namespace SmoothDiffeoBounded
 
-/-- The geometric constant used in the iterated-derivative bound:
-`max Φ.deriv_bound 1`. This is `≥ 1`, so its powers are increasing. -/
 def derivBoundMaxOne {Ω Ω' : Set E} (Φ : SmoothDiffeoBounded d Ω Ω') : ℝ :=
   max Φ.deriv_bound 1
 
@@ -68,14 +40,6 @@ lemma deriv_bound_le_derivBoundMaxOne {Ω Ω' : Set E}
     Φ.deriv_bound ≤ Φ.derivBoundMaxOne :=
   le_max_left _ _
 
-/-- The Faà di Bruno-style cruder bound:
-`‖∂^n (u ∘ Φ.toFun)(x)‖ ≤ n! · C · D^n`
-where `C` bounds `‖∂^i u(Φ x)‖` for all `i ≤ n` and
-`D = max Φ.deriv_bound 1`.
-
-This is a direct corollary of Mathlib's `norm_iteratedFDeriv_comp_le`,
-with the bound on `‖iteratedFDeriv ℝ i Φ.toFun x‖ ≤ D^i` (for `1 ≤ i`)
-following from `Φ.iter_deriv_bounded` together with `D ≥ 1`. -/
 lemma norm_iteratedFDeriv_comp_toFun_le
     {Ω Ω' : Set E} (Φ : SmoothDiffeoBounded d Ω Ω')
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -115,7 +79,6 @@ lemma norm_iteratedFDeriv_comp_toFun_le
     (x := x) hu_smooth_top hΦ_smooth_top hn_le
     (C := C) (D := D) (fun i hi => hC i hi) hΦ_iter
 
-/-- The composition `u ∘ Φ.toFun` is `C^∞` whenever `u` is. -/
 lemma comp_toFun_contDiff
     {Ω Ω' : Set E} (Φ : SmoothDiffeoBounded d Ω Ω')
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :

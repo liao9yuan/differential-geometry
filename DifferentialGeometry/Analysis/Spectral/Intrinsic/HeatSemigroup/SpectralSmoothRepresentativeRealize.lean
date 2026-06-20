@@ -4,47 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenComboGardin
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 
-/-!
-# `C^∞` spectral-partial-sum realization of the smooth-representative gate
-
-This file discharges the smooth-representative gate
-`SpectralSmoothRealizesAsSmooth g 0 2` (defined in `SpectralSmoothing.lean`) at
-rank `(0, 2)` by a **Weyl-free** spectral-partial-sum construction: every `L²`
-tensor `u` that lies (via the chart-locality-free inclusion `tensorHsToL2`) in
-`Hˢ` for *every* exponent `σ ≥ 0` admits a genuine `C^∞` (`SmoothCcTensor`)
-representative whose `L²` class equals `u`.
-
-The representative is the all-order Sobolev limit of the **spectral partial sums**
-`S n = ∑_{i : 1 + λᵢ < n + 1} cᵢ(u) • eᵢ`, finite eigen-combinations
-(`finiteEigenCombo`) of the smooth eigenvector representatives. The partial-sum
-finsets `eigenIdxFinset g n` are the sub-level sets of the eigenvalue map, finite
-by discreteness of the compact-resolvent spectrum
-(`tensorEigenIdx_one_add_lambda_lt_finite`), monotone, and exhausting.
-
-* In `L²` the partial sums converge to `u` (Parseval / orthonormal-basis
-  completeness).
-* In every chart-Sobolev norm `H^{2k}` the partial sums are Cauchy: their
-  differences are again finite eigen-combinations, and the **orthogonal Gårding
-  bound** `eigenSpan_pouHs_le_spectral` controls the `H^{2k}` norm of such a
-  combination by its spectral norm, the tail of the `H^{2k}`-summable weighted
-  series (this uses the all-order membership hypothesis at exponent `2k`).
-
-The `Cᵏ`-Banach completeness keystone
-`smoothCcTensor_limit_of_allOrders_toHs_cauchy` then produces a single smooth
-section `T` that is the `H^{2k}` limit of the partial sums and whose `L²` class is
-the `L²` limit `u`.
-
-## The analytic input
-
-The orthogonal Gårding bound `eigenSpan_pouHs_le_spectral` is the
-`h_elliptic`-discharged form of `eigenSpan_pouHs_le_spectral_of_elliptic`: its
-elliptic hypothesis is discharged by the all-orders intrinsic Gårding constant
-`exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter` (the chart-locality-free
-reverse-Hebey ∘ iterated covariant-gradient elliptic estimate). No Weyl
-eigenvalue-counting / heat-trace input is used; the smooth-representative gate is
-built entirely from interior elliptic regularity and `Cᵏ`-Banach completeness.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology Tensor0SBundle
@@ -80,25 +39,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M)
 
-/-! ### The unconditional orthogonal Gårding bound -/
-
 set_option linter.unusedSectionVars false in
-/-- **The unconditional keystone spectral bound for the finite eigen-combination.**
-For rank `(0, 2)` and every order `k`, there is a constant `C ≥ 0` (depending on
-`k`) such that for every finite set `F` of eigen-indices and every coefficient
-family `c`, the order-`2k` partition-of-unity-weighted chart-Sobolev norm of the
-finite eigen-combination `u = finiteEigenCombo F c` is controlled by its spectral
-norm:
 
-```
-(tensorPouSobolevHsNorm g k u).toReal ≤ (C · (k + 1)) · ‖finiteEigenComboHs F c (2k)‖.
-```
-
-The proof discharges the elliptic hypothesis of
-`eigenSpan_pouHs_le_spectral_of_elliptic` with the all-orders intrinsic Gårding
-constant `exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter` (at rank `s = 2`,
-the reverse-Hebey ∘ covariant-gradient-iterate elliptic estimate), applied to `u`.
-No Weyl counting / heat-trace input enters. -/
 theorem eigenSpan_pouHs_le_spectral (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -116,10 +58,6 @@ theorem eigenSpan_pouHs_le_spectral (k : ℕ) :
   exact eigenSpan_pouHs_le_spectral_of_elliptic (I := I) (M := M) g F c k hC_nn
     (hC (finiteEigenCombo (I := I) (M := M) g F c))
 
-/-! ### A. The spectral packaging realizes the finite combination in `L²` -/
-
-/-- **A.** The chart-locality-free `L²` realization of the spectral packaging
-`finiteEigenComboHs g F c σ` is exactly the `L²` class of `finiteEigenCombo g F c`. -/
 theorem finiteEigenComboHs_tensorHsToL2_eq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -150,16 +88,12 @@ theorem finiteEigenComboHs_tensorHsToL2_eq
       (h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) hσ]
   exact finiteEigenComboHs_coeff_eq (I := I) (M := M) g F c σ i
 
-/-! ### B. The exhausting sequence of spectral sub-level finsets -/
-
-/-- **B.** The `n`-th spectral sub-level finset: all eigen-indices with `1 + λᵢ < n + 1`.
-Finite by discreteness of the compact-resolvent spectrum. -/
 def eigenIdxFinset (n : ℕ) :
     Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :=
   (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g 0 2 ((n : ℝ) + 1)).toFinset
 
 omit [BoundarylessManifold I M] in
-/-- Membership in `eigenIdxFinset g n` is `1 + λᵢ < n + 1`. -/
+
 lemma mem_eigenIdxFinset (n : ℕ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     i ∈ eigenIdxFinset (I := I) (M := M) g n ↔
@@ -169,7 +103,7 @@ lemma mem_eigenIdxFinset (n : ℕ)
   rfl
 
 omit [BoundarylessManifold I M] in
-/-- The spectral sub-level finsets are monotone in `n`. -/
+
 lemma eigenIdxFinset_mono : Monotone (eigenIdxFinset (I := I) (M := M) g) := by
   intro m n hmn i hi
   rw [mem_eigenIdxFinset] at hi ⊢
@@ -179,8 +113,7 @@ lemma eigenIdxFinset_mono : Monotone (eigenIdxFinset (I := I) (M := M) g) := by
   linarith
 
 omit [BoundarylessManifold I M] in
-/-- The spectral sub-level finsets exhaust the index set: every eigen-index lies in
-`eigenIdxFinset g n` for `n` large. -/
+
 lemma exists_mem_eigenIdxFinset
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     ∃ n : ℕ, i ∈ eigenIdxFinset (I := I) (M := M) g n := by
@@ -190,22 +123,17 @@ lemma exists_mem_eigenIdxFinset
   linarith
 
 omit [BoundarylessManifold I M] in
-/-- The partial-sum finsets tend to the whole index type along `atTop`. -/
+
 lemma tendsto_eigenIdxFinset_atTop :
     Tendsto (eigenIdxFinset (I := I) (M := M) g) atTop atTop :=
   tendsto_atTop_finset_of_monotone (eigenIdxFinset_mono (I := I) (M := M) g)
     (exists_mem_eigenIdxFinset (I := I) (M := M) g)
 
-/-! ### C. The spectral partial sums converge to `u` in `L²` -/
-
-/-- The spectral partial sum of `u`: the finite eigen-combination over `eigenIdxFinset g n`
-with the `L²` eigenbasis coordinates of `u` as coefficients. -/
 def spectralPartialSum (u : TensorL2 0 2 g) (n : ℕ) : SmoothCcTensor g 0 2 :=
   finiteEigenCombo (I := I) (M := M) g (eigenIdxFinset (I := I) (M := M) g n)
     (fun i => tensorL2Coeff (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i)
 
-/-- **C.** The `L²` classes of the spectral partial sums of `u` converge to `u`. -/
 theorem spectralPartialSum_toL2_tendsto (u : TensorL2 0 2 g) :
     Tendsto (fun n => (spectralPartialSum (I := I) (M := M) g u n : TensorL2 0 2 g))
       atTop (𝓝 u) := by
@@ -225,10 +153,6 @@ theorem spectralPartialSum_toL2_tendsto (u : TensorL2 0 2 g) :
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) i, ← hb_def]
   rfl
 
-/-! ### D/E. All-order Cauchyness of the chart-Sobolev partial sums -/
-
-/-- The order-`2k` weighted coordinate-square partial sum of `u` over the spectral
-sub-level finset `eigenIdxFinset g n`. -/
 private def weightedPartial (u : TensorL2 0 2 g) (k n : ℕ) : ℝ :=
   ∑ i ∈ eigenIdxFinset (I := I) (M := M) g n,
     (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((2 * k : ℕ) : ℝ) *
@@ -236,7 +160,7 @@ private def weightedPartial (u : TensorL2 0 2 g) (k n : ℕ) : ℝ :=
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i) ^ 2
 
 omit [BoundarylessManifold I M] in
-/-- Each summand of `weightedPartial` is non-negative. -/
+
 private lemma weightedPartial_term_nonneg (u : TensorL2 0 2 g) (k : ℕ)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     0 ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ ((2 * k : ℕ) : ℝ) *
@@ -250,8 +174,7 @@ private lemma weightedPartial_term_nonneg (u : TensorL2 0 2 g) (k : ℕ)
   positivity
 
 open scoped Classical in
-/-- The `toHs (2k)` differences of the spectral partial sums are the `toHs (2k)` images of
-finite eigen-combinations over set differences. -/
+
 private lemma toHs_spectralPartialSum_sub (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
     SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) k
@@ -294,8 +217,7 @@ private lemma toHs_spectralPartialSum_sub (u : TensorL2 0 2 g) (k : ℕ) {m n : 
     rfl
 
 omit [BoundarylessManifold I M] in
-/-- A single weighted coordinate-square partial sum is `≤` the full order-`2k` weighted
-tsum of any `H^{2k}` element with these coordinates. -/
+
 private lemma weightedPartial_le_tsum (u : TensorL2 0 2 g) (k n : ℕ)
     (v : tensorHs (I := I) (M := M) g 0 2 ((2 * k : ℕ) : ℝ))
     (hv : ∀ i, v.coeff i = tensorL2Coeff (I := I) (M := M)
@@ -318,8 +240,7 @@ private lemma weightedPartial_le_tsum (u : TensorL2 0 2 g) (k n : ℕ)
   positivity
 
 omit [BoundarylessManifold I M] in
-/-- The order-`2k` weighted partial sums of an `H^{2k}` element are a Cauchy real sequence
-(monotone and bounded above). -/
+
 private lemma weightedPartial_cauchySeq (u : TensorL2 0 2 g) (k : ℕ)
     (v : tensorHs (I := I) (M := M) g 0 2 ((2 * k : ℕ) : ℝ))
     (hv : ∀ i, v.coeff i = tensorL2Coeff (I := I) (M := M)
@@ -339,9 +260,7 @@ private lemma weightedPartial_cauchySeq (u : TensorL2 0 2 g) (k : ℕ)
   exact (tendsto_atTop_ciSup hmono hbdd).cauchySeq
 
 open scoped Classical in
-/-- The spectral norm squared of the finite eigen-combination over the set difference
-`eigenIdxFinset g m \ eigenIdxFinset g n` (for `n ≤ m`) equals the weighted-partial-sum
-increment `weightedPartial g u k m - weightedPartial g u k n`. -/
+
 private lemma finiteEigenComboHs_sdiff_normSq (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
     ‖finiteEigenComboHs (I := I) (M := M) g
@@ -357,8 +276,7 @@ private lemma finiteEigenComboHs_sdiff_normSq (u : TensorL2 0 2 g) (k : ℕ) {m 
   rw [Finset.sum_sdiff_eq_sub (eigenIdxFinset_mono (I := I) (M := M) g hmn)]
 
 open scoped Classical in
-/-- The chart-Sobolev `H^{2k}` distance between two spectral partial sums (for `n ≤ m`) is
-bounded by `C·(k+1)` times the square root of the weighted-partial-sum increment. -/
+
 private lemma dist_toHs_spectralPartialSum_le (u : TensorL2 0 2 g) (k : ℕ)
     {C : ℝ} (hC :
       ∀ (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -390,8 +308,6 @@ private lemma dist_toHs_spectralPartialSum_le (u : TensorL2 0 2 g) (k : ℕ)
   rw [← finiteEigenComboHs_sdiff_normSq (I := I) (M := M) g u k hmn, hF, hc]
   exact (Real.sqrt_sq (norm_nonneg _)).symm
 
-/-- **D/E.** Under the all-order membership hypothesis on `u`, the chart-Sobolev
-`H^{2k}` images of the spectral partial sums are Cauchy, for every `k`. -/
 theorem spectralPartialSum_toHs_cauchy (u : TensorL2 0 2 g)
     (hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ v : tensorHs (I := I) (M := M) g 0 2 σ,
@@ -458,23 +374,6 @@ theorem spectralPartialSum_toHs_cauchy (u : TensorL2 0 2 g)
                 rw [div_lt_iff₀ hCk_pos]
                 nlinarith [hε, hCk_nn]
 
-/-! ### F. The smooth-representative gate -/
-
-/-- **The smooth-representative gate (proved Weyl-free).**
-
-`SpectralSmoothRealizesAsSmooth g 0 2` holds unconditionally: every `L²` tensor `u`
-lying (via the chart-locality-free inclusion `tensorHsToL2`) in `Hˢ` for *every*
-exponent `σ ≥ 0` admits a genuine `C^∞` representative `T : SmoothCcTensor g 0 2`
-with `↑T = u`.
-
-The representative is the all-order Sobolev limit of the spectral partial sums
-`spectralPartialSum g u n`: they converge to `u` in `L²`
-(`spectralPartialSum_toL2_tendsto`) and are Cauchy in every `H^{2k}`
-(`spectralPartialSum_toHs_cauchy`, the orthogonal Gårding bound applied to the
-all-order membership hypothesis). The `Cᵏ`-Banach completeness keystone
-`smoothCcTensor_limit_of_allOrders_toHs_cauchy` then exhibits the smooth section
-`T` whose `L²` class is the `L²` limit `u`. No Weyl eigenvalue-counting /
-heat-trace input enters. -/
 theorem spectralSmoothRealizesAsSmooth_holds :
     SpectralSmoothRealizesAsSmooth (I := I) (M := M) g 0 2 := by
   classical

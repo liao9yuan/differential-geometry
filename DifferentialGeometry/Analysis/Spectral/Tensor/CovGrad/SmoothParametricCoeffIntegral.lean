@@ -3,69 +3,6 @@ import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-/-!
-# The fibre Bochner path integral of a smooth operator-coefficient family
-
-For a closed smooth Riemannian manifold `(M, g₀)`, this file builds the **general parametric
-Bochner integral tool** behind the Ricci–DeTurck linearization's path-integral coefficient
-construction: it integrates a smooth family `Φ : ℝ → SmoothCcTensor g₀ r s` of operator-coefficient
-fields over `[0, 1]` *pointwise in the fibre*, producing a single smooth coefficient field, and
-records that the integral commutes with the `appCc`/`unitModel` read-off.
-
-Each fibre `TensorRSSpace r s I x = Tensor0SSpace r I x →L Tensor0SSpace s I x` is finite-dimensional,
-so the pointwise interval Bochner integral is well defined.  Working through the model-fibre coordinate
-`TensorRSSpace.toModel` (which identifies the fibre with the fixed Banach space
-`TensorRSModel r s ℝ E`), the integral `∫ t in 0..1, (Φ t).toModel x dt` is the ordinary interval
-Bochner integral in that fixed space; `TensorRSSpace.ofModel` transports it back to the fibre.  Its
-smoothness in the base point follows from the *joint* `(s, x)`-smoothness of the family by
-differentiation under the integral sign; on the closed manifold the resulting section has compact
-support automatically.
-
-## The general tool
-
-* `pathIntegralCoeffField Φ hΦ : SmoothCcTensor g₀ r s` — the pointwise fibre interval Bochner integral
-  of the family, with model-fibre value `(pathIntegralCoeffField Φ hΦ).toSection x |>.toModel =
-  ∫ t in 0..1, (Φ t).toSection x |>.toModel` (`pathIntegralCoeffField_toModel`);
-* `pathIntegralCoeffField_appCc_eq` — the `appCc`/`unitModel` ↔ `intervalIntegral` swap: the operator
-  read-off of the integrated coefficient on a fixed contracted tensor `W` equals the `s`-integral over
-  `[0, 1]` of the per-`s` read-offs,
-  ```
-  unitModel g₀ s' (appCc g₀ r s' (pathIntegralCoeffField Φ hΦ) W) x v
-    = ∫ s in 0..1, unitModel g₀ s' (appCc g₀ r s' (Φ s) W) x v ds.
-  ```
-  The fibrewise composition `A ↦ A.comp (W x)` and unit evaluation (whose model read-off is
-  `toModel_tensorRS_apply`), the model read-off `toModel`, and the evaluation at the tangent tuple `v`
-  are each *fixed* continuous-linear in the integrated coefficient, so the Bochner integral commutes
-  with them in the fixed model fibre (`ContinuousLinearMap.intervalIntegral_apply` /
-  `ContinuousLinearMap.intervalIntegral_comp_comm`).
-
-## The smooth-parametric-integral kernel
-
-The analytic kernel is the *parametric-integral section smoothness*
-`contMDiff_pathIntegralFib_of_jointContMDiff`: the pointwise interval Bochner integral of a jointly
-`(s, x)`-smooth family of `(r, s)`-tensor bundle sections is again a smooth section.  Mathlib packages
-the first-order `HasFDerivAt`/`HasDerivAt`-under-integral lemmas but not the all-orders statement, so
-it is proved here in two layers.
-
-* `contDiffAt_param` is the model-space core: for a finite-dimensional real domain `H` and a fixed
-  normed space `F`, the interval Bochner integral `y ↦ ∫ t in a..b, G (y, t)` of a jointly-`C∞` family
-  `G : H × ℝ → F` on an open `U ×ˢ univ` is `C∞` at each `y₀ ∈ U`.  It is built by induction on the
-  order: the `(k+1)`-th step differentiates under the integral sign
-  (`hasFDerivAt_integral_of_dominated_of_fderiv_le''`) — the derivative of the integral is the integral
-  of the partial fibre-derivative, dominated on a compact tube over `[a, b]` — and re-applies the
-  induction hypothesis at order `k` to that fibre-derivative family (jointly `C∞` by
-  `fderiv_fst_contDiffOn`).
-* `contMDiffAt_manifold_param` lifts the core to a manifold base: a fixed-target family
-  `g : M × ℝ → F` jointly smooth on `V ×ˢ univ` integrates to a base function smooth at each `x₀ ∈ V`,
-  by reducing the base-point smoothness to the source chart (boundaryless, so `range I = univ`).
-
-The kernel then reads the joint section `hjoint` through the fixed bundle trivialisation at `x₀`,
-producing a fixed-target chart-fibre integrand; the trivialisation is a fibrewise continuous linear
-equivalence, so it commutes with the Bochner integral and the path-integral read-off agrees with the
-parametric integral of that integrand near `x₀`.  Its predicate genuinely constrains the constructed
-section to the fibrewise integral (it is consumed only as the smoothness of that exact fibre
-formula). -/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -86,22 +23,12 @@ open DifferentialGeometry.Integral.Connection
 
 universe u
 
-/-! ## The model-space C∞ parametric interval integral
-
-The analytic core of the parametric-integral kernel, stated in a fixed model normed space `F` over a
-finite-dimensional real domain `H`: the interval Bochner integral `y ↦ ∫ t in a..b, G (y, t)` of a
-jointly-`C∞` family `G : H × ℝ → F` is again `C∞`.  This is differentiation under the integral sign
-iterated to all orders — Mathlib packages the first-order `HasFDerivAt`-under-integral lemmas but not
-the all-orders statement, so it is built here by induction on the order: the `k`-th derivative of the
-integral is the integral of the `k`-th fibre-derivative, dominated on a compact tube over `[a, b]`. -/
-
 section ModelKernel
 
 variable {H : Type u} [NormedAddCommGroup H] [NormedSpace ℝ H] [FiniteDimensional ℝ H]
 
 set_option linter.unusedSectionVars false in
-/-- A jointly-continuous map on an open `U ×ˢ univ` is, near any `y₀ ∈ U`, uniformly bounded over
-`t ∈ Ι a b` (a compact tube over the interval). -/
+
 private theorem tube_bound {W : Type*} [NormedAddCommGroup W] (Φ : H × ℝ → W) (U : Set H)
     (hU : IsOpen U) (a b : ℝ) (S : Set ℝ) (hSI : Set.uIcc a b ⊆ S) (y₀ : H) (hy₀ : y₀ ∈ U)
     (hΦ : ContinuousOn Φ (U ×ˢ S)) :
@@ -114,8 +41,7 @@ private theorem tube_bound {W : Type*} [NormedAddCommGroup W] (Φ : H × ℝ →
                   using hC ⟨(y,t), ⟨hyK, uIoc_subset_uIcc ht⟩, rfl⟩⟩
 
 set_option linter.unusedSectionVars false in
-/-- The `t`-slice of a map jointly continuous on an open `U ×ˢ S` is continuous on `S` at each
-`y' ∈ U`. -/
+
 private theorem slice_continuousOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (G : H × ℝ → F) (U : Set H) (hU : IsOpen U) (S : Set ℝ) (hS : IsOpen S)
     (hGc : ContinuousOn G (U ×ˢ S)) (y' : H) (hy' : y' ∈ U) :
@@ -125,8 +51,7 @@ private theorem slice_continuousOn {F : Type u} [NormedAddCommGroup F] [NormedSp
   exact (continuousWithinAt_const.prodMk continuousWithinAt_id)
 
 set_option linter.unusedSectionVars false in
-/-- The partial Fréchet derivative in the base variable of a map jointly `C∞` on an open `U ×ˢ S`
-is again jointly `C∞` on `U ×ˢ S`. -/
+
 private theorem fderiv_fst_contDiffOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (G : H × ℝ → F) (U : Set H) (hU : IsOpen U) (S : Set ℝ) (hS : IsOpen S)
     (hG : ContDiffOn ℝ ∞ G (U ×ˢ S)) :
@@ -140,11 +65,6 @@ private theorem fderiv_fst_contDiffOn {F : Type u} [NormedAddCommGroup F] [Norme
   · fun_prop
   · exact le_refl _
 
-/-- The finite-order induction behind `contDiffAt_param`: the interval Bochner integral of a
-jointly-`C∞` family is `C^n` for every finite `n`.  The inductive step differentiates under the
-integral sign (`hasFDerivAt_integral_of_dominated_of_fderiv_le''`) with the fibre-derivative
-dominated on a compact tube, and re-applies the induction hypothesis at one lower order to the
-fibre-derivative family, which is jointly `C∞` by `fderiv_fst_contDiffOn`. -/
 private theorem contDiffAt_param_aux :
     ∀ (n : ℕ) {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
       (G : H × ℝ → F) (U : Set H) (_hU : IsOpen U) (a b : ℝ) (S : Set ℝ) (_hS : IsOpen S)
@@ -205,10 +125,6 @@ private theorem contDiffAt_param_aux :
           (by fun_prop : ContDiffAt ℝ ∞ (fun z : H => (z, t)) y')
       exact (hslice.differentiableAt (by simp)).hasFDerivAt
 
-/-- **Model-space C∞ parametric interval integral.** For a finite-dimensional real domain `H` and a
-fixed normed space `F`, the interval Bochner integral `y ↦ ∫ t in a..b, G (y, t)` of a family
-`G : H × ℝ → F` that is jointly `C∞` on an open `U ×ˢ S` (with `S` open containing the integration
-interval `uIcc a b`) is `C∞` at each `y₀ ∈ U`. -/
 private theorem contDiffAt_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] (G : H × ℝ → F) (U : Set H) (hU : IsOpen U)
     (a b : ℝ) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc a b ⊆ S) (y₀ : H) (hy₀ : y₀ ∈ U)
@@ -229,11 +145,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- **Local manifold parametric interval integral.** A family `g : M × ℝ → F` into a fixed normed
-space `F` that is jointly smooth on `V ×ˢ S` for an open `V ∋ x₀` and an open `S` containing the
-integration interval `uIcc a b` integrates over `[a, b]` to a function smooth at `x₀`.  Proved by
-reducing the base-point smoothness to the chart coordinate (boundaryless, so `range I = univ`) and
-applying the model-space kernel `contDiffAt_param`. -/
+
 private theorem contMDiffAt_manifold_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] (g : M × ℝ → F) (a b : ℝ) (S : Set ℝ) (hS : IsOpen S)
     (hSI : Set.uIcc a b ⊆ S) (V : Set M) (hV : IsOpen V) (x₀ : M) (hx₀ : x₀ ∈ V)
@@ -269,37 +181,18 @@ private theorem contMDiffAt_manifold_param {F : Type u} [NormedAddCommGroup F] [
   filter_upwards [hU'open.mem_nhds hy₀mem] with y hy
   rfl
 
-/-- **The pointwise fibre interval-integral map of a coefficient family.**
-
-The fibre value at `x` is the interval Bochner integral, computed in the fixed model fibre
-`TensorRSModel r s ℝ E`, of the model-fibre family `t ↦ (Φ t).toSection x |>.toModel`, transported
-back to the fibre by `TensorRSSpace.ofModel`.  This is the underlying map of `pathIntegralCoeffField`;
-its base-point smoothness is supplied by the posited parametric-integral kernel and its compact support
-by the closed manifold. -/
 def pathIntegralFib (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (x : M) : TensorRSSpace r s I x :=
   TensorRSSpace.ofModel (∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)))
 
 set_option linter.unusedSectionVars false in
-/-- The model-fibre value of `pathIntegralFib` is the interval Bochner integral of the model-fibre
-family, by `toModel ∘ ofModel = id`. -/
+
 @[simp] lemma pathIntegralFib_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (x : M) :
     TensorRSSpace.toModel (pathIntegralFib (I := I) (M := M) g₀ r s Φ x) =
       ∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)) := by
   rw [pathIntegralFib, TensorRSSpace.toModel_ofModel]
 
-/-- **The smooth-parametric-integral kernel.** For a family `Φ : ℝ → SmoothCcTensor g₀ r s` whose
-joint `(s, x)`-data `(x, t) ↦ (Φ t).toSection x` is a smooth section of the `(r, s)`-tensor bundle in
-the base point uniformly over the parameter slab `univ ×ˢ S`, with `S` an open set containing the
-integration interval `[0, 1]`, the pointwise interval Bochner integral
-`x ↦ pathIntegralFib g₀ r s Φ x` is again a (globally) smooth section.  The integral only samples the
-family over `[0, 1] ⊆ S`, so the realized family (junk-extended off `S`, jumping at `∂S`) need only be
-jointly smooth on the slab `univ ×ˢ S`.  The proof reads the joint section through the fixed bundle
-trivialisation at `x₀` into the model fibre, where the read-off is a fibrewise continuous linear
-equivalence and so commutes with the Bochner integral; the resulting fixed-target chart-fibre
-integrand is integrated by `contMDiffAt_manifold_param` (the manifold-section parametric integral,
-differentiation under the integral sign iterated to all orders). -/
 theorem contMDiff_pathIntegralFib_of_jointContMDiff
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
@@ -381,12 +274,6 @@ theorem contMDiff_pathIntegralFib_of_jointContMDiff
         (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm_apply_apply _]
   rw [hRHS, ContinuousLinearMap.intervalIntegral_comp_comm K hIIm]
 
-/-- **The fibre Bochner path integral of a smooth operator-coefficient family.**
-
-For a jointly `(s, x)`-smooth family `Φ : ℝ → SmoothCcTensor g₀ r s`, the pointwise interval Bochner
-integral over `[0, 1]`, packaged as a smooth compactly-supported `(r, s)`-tensor.  The model-fibre value
-is `(pathIntegralCoeffField Φ hΦ).toSection x |>.toModel = ∫ t in 0..1, (Φ t).toSection x |>.toModel`
-(`pathIntegralCoeffField_toModel`). -/
 def pathIntegralCoeffField (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -401,7 +288,7 @@ def pathIntegralCoeffField (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The fibre value of `pathIntegralCoeffField` is `pathIntegralFib`. -/
+
 @[simp] lemma pathIntegralCoeffField_toSection (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -413,8 +300,7 @@ set_option linter.unusedSectionVars false in
       pathIntegralFib (I := I) (M := M) g₀ r s Φ x := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The model-fibre value of `pathIntegralCoeffField` is the interval Bochner integral of the
-model-fibre family. -/
+
 @[simp] lemma pathIntegralCoeffField_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
     (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -427,22 +313,6 @@ model-fibre family. -/
       ∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)) := by
   rw [pathIntegralCoeffField_toSection, pathIntegralFib_toModel]
 
-/-- **The `appCc`/`unitModel` ↔ `intervalIntegral` swap for the fibre path integral.**
-
-For a jointly smooth family `Φ : ℝ → SmoothCcTensor g₀ r s'` whose model-fibre family
-`t ↦ (Φ t).toSection x |>.toModel` is continuous at every base point `x`, and a fixed contracted
-`(0, r)`-tensor `W`, the `unitModel` read-off of the integrated coefficient
-`pathIntegralCoeffField Φ` acting on `W` equals the `s`-integral over `[0, 1]` of the per-`s`
-read-offs:
-```
-unitModel g₀ s' (appCc g₀ r s' (pathIntegralCoeffField Φ hΦ) W) x v
-  = ∫ s in 0..1, unitModel g₀ s' (appCc g₀ r s' (Φ s) W) x v ds.
-```
-The fibrewise composition `A ↦ A.comp (W x)` and unit evaluation read off through
-`toModel_tensorRS_apply`, the model read-off `toModel`, and the evaluation at the tangent tuple `v` are
-each fixed continuous-linear in the integrated coefficient, so the Bochner integral commutes with each
-step in the fixed model fibre (`ContinuousLinearMap.intervalIntegral_apply` for the operator
-evaluation, `ContinuousLinearMap.intervalIntegral_comp_comm` for the tuple evaluation). -/
 theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s' : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s') (W : SmoothCcTensor g₀ 0 r)
     (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
@@ -457,33 +327,33 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ∫ t in (0 : ℝ)..1,
         unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v := by
-  -- Abbreviate the fixed contracted-then-unit-evaluated `(0, r)`-tensor `u = (W x) unit`.
+  
   set u : Tensor0SSpace r I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
       (unitTensor (I := I) (M := M) x) with hu
-  -- The model-fibre family `t ↦ (Φ t).toModel x` is interval-integrable (continuous on `[0,1] ⊆ S`).
+  
   have hIIm : IntervalIntegrable (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0 1 :=
     ((hcont x).mono hSI).intervalIntegrable
-  -- Reduce both read-offs to the model-operator action at `u` and evaluation at `v`
-  -- (`unitModel (appCc Ψ W) x v = ((Ψ x).toModel (u.toModel)) v`, via `toModel_tensorRS_apply`).
+  
+  
   have key : ∀ Ψ : SmoothCcTensor g₀ r s',
       unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' Ψ W) x v =
         ((TensorRSSpace.toModel (Ψ.toSection x)) (Tensor0SSpace.toModel u)) v := by
     intro Ψ
     rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
       toModel_tensorRS_apply (I := I) r s' x (Ψ.toSection x) u]
-  -- Rewrite the integrated coefficient's read-off to the model operator at `u`, evaluated at `v`.
+  
   rw [show unitModel (I := I) (M := M) g₀ s'
         (appCc (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ((TensorRSSpace.toModel
             ((pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint).toSection x))
           (Tensor0SSpace.toModel u)) v from key _]
-  -- The integrated coefficient's model fibre is the model interval integral.
+  
   rw [pathIntegralCoeffField_toModel]
-  -- Push the model-operator evaluation at `u.toModel` through the interval integral.
+  
   rw [ContinuousLinearMap.intervalIntegral_apply hIIm (Tensor0SSpace.toModel u)]
-  -- Push the tuple evaluation at `v` (the `Tensor0SModel s'`-CMM application CLM) through the integral.
+  
   have hcontApp : ContinuousOn (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) S :=
     (ContinuousLinearMap.apply ℝ (Tensor0SModel s' ℝ E)
@@ -491,12 +361,12 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
   have hIIapp : IntervalIntegrable (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) volume 0 1 :=
     (hcontApp.mono hSI).intervalIntegrable
-  -- The RHS integrand is the per-`t` model read-off at `v` (via `key`).
+  
   rw [show (fun t : ℝ => unitModel (I := I) (M := M) g₀ s'
           (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v) =
         (fun t : ℝ => ((TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) v) from
     funext (fun t => key (Φ t))]
-  -- Both sides: the CMM evaluation at `v` commutes with the interval integral (apply-CLM commute).
+  
   exact (ContinuousLinearMap.intervalIntegral_comp_comm
       (ContinuousMultilinearMap.apply ℝ (fun _ : Fin s' => E) ℝ v) hIIapp).symm
 

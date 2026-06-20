@@ -2,51 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.MercerProjectorTrace
 
-/-!
-# Weyl summability of negative Sobolev-scale weights
-
-For a closed Riemannian manifold `(M, g)` of dimension `n = finrank E`, the
-connection-Laplacian eigenvalues `λᵢ ≥ 0` attached to the resolvent eigenbasis of
-`(0, 2)`-tensor fields satisfy the classical Weyl summability
-
-  `∑ᵢ (1 + λᵢ)^{-s} < ∞`  for every `s > n / 2`.
-
-This is the eigenvalue-counting / trace-class consequence of Weyl's law
-`N(Λ) := #{i | 1 + λᵢ < Λ} ≲ Λ^{n/2}`, equivalently the polynomial eigenvalue
-growth `1 + λ_k ≳ k^{2/n}` along the non-decreasing enumeration of the spectrum.
-
-## Main result
-
-* `tensorEigen_summable_negpow` — `Summable (fun i => tensorSobolevWeight i (-s))`
-  for `s > n / 2`, i.e. `∑ᵢ (1 + λᵢ)^{-s} < ∞`.
-
-## Structure
-
-The deep classical content — the quantitative Weyl eigenvalue lower bound — is
-isolated in `tensorEigen_one_add_lambda_growth`: an injective rank-enumeration
-`φ : TensorEigenIdx g 0 2 → ℕ` of the (countable, discrete) spectrum together with
-the polynomial growth `C · (φ i + 1)^{2/n} ≤ 1 + λᵢ`. Given that bound, the
-summability follows by comparison with the convergent `p`-series
-`∑ₖ (k + 1)^{-2s/n}` (`2s/n > 1`) along the injection `φ`.
-
-The growth bound `tensorEigen_one_add_lambda_growth` is reduced, via the abstract
-order-theoretic counting-to-growth lemma `exists_growth_of_counting_bound`, to the
-polynomial **counting bound** `tensorEigen_counting_le`:
-
-  `N(Λ) := #{i | 1 + λᵢ < Λ} ≤ K · Λ^{n/2}`.
-
-The counting bound is the genuine Weyl-law node — the eigenvalue-counting estimate
-in its min-max / Sobolev-embedding (Mercer projector-trace) form, proved in
-`eigenProjector_card_le_sobolev` via `Spectral.Mercer.eigenProjector_card_le_mercer`
-(the projector trace integrated against the on-diagonal reproducing kernel, whose
-genuine analytic content — the Bessel reproducing-kernel diagonal estimate — is the
-single deferred node `Spectral.Mercer.eigenProjector_diagonal_le`). Given it, the
-abstract reduction (finite sub-levels `tensorEigenIdx_one_add_lambda_lt_finite` ⟹
-countable index set; lex-ordered rank enumeration `φ i = #{j ≺ i}`;
-`φ i + 1 ≤ N(1 + λᵢ + 1) ≤ K·2^{p}·(1 + λᵢ)^{p}`, `p = weylSobolevExp`) yields the
-growth floor with exponent `1/weylSobolevExp`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -72,7 +27,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The shifted real `p`-series `∑ₖ (k + 1)^{-p}` converges for `1 < p`. -/
 private lemma summable_nat_add_one_rpow_neg (p : ℝ) (hp : 1 < p) :
     Summable (fun k : ℕ => ((k : ℝ) + 1) ^ (-p)) := by
   have hbase : Summable (fun n : ℕ => ((n : ℝ) ^ p)⁻¹) :=
@@ -84,17 +38,6 @@ private lemma summable_nat_add_one_rpow_neg (p : ℝ) (hp : 1 < p) :
   push_cast
   ring_nf
 
-/-- **Abstract polynomial counting ⟹ polynomial growth.** Let `w : ι → ℝ` be a
-weight with `w i ≥ 1`, all sub-levels `{i | w i < Λ}` finite (hence `ι` countable),
-and a polynomial counting bound `#{i | w i < Λ} ≤ K · Λ^p` (`K, p > 0`). Then there
-is an injective rank-enumeration `φ : ι → ℕ` and `C > 0` with
-`C · (φ i + 1)^{1/p} ≤ w i`.
-
-The enumeration is the rank `φ i = #{j | j ≺ i}` in the lexicographic order
-`(w i, enc i)` (where `enc` is a fixed injection `ι ↪ ℕ` from countability); each
-predecessor set is finite (a sub-level of `w`), so `φ` is injective by strict
-monotonicity of `ncard` along strict inclusions, and `φ i + 1 ≤ N(w i + 1) ≤
-K·2^p·(w i)^p` gives the floor on taking `(·)^{1/p}`. -/
 private theorem exists_growth_of_counting_bound
     {ι : Type*} (w : ι → ℝ) (hw1 : ∀ i, 1 ≤ w i)
     (hfin : ∀ Λ : ℝ, {i | w i < Λ}.Finite)
@@ -209,42 +152,15 @@ private theorem exists_growth_of_counting_bound
           mul_le_mul_of_nonneg_left hpow (by positivity)
       _ = w i := hC
 
-/-- The Sobolev order used in the (non-sharp) Mercer eigenvalue-counting bound:
-`weylSobolevExp = 2 · (2 · (n / 2 + 1)) = 4 · (n / 2 + 1)` (with `n = finrank E`
-and `/` Nat division), even and `> n`.  It is the exponent produced by the
-projector-trace route (`Spectral.Mercer.mercerSobolevExp`): the supercritical
-Sobolev `H^{2k₀} ↪ C⁰` embedding (`k₀ = n/2 + 1`) costs `2k₀` orders, doubled by
-the orthogonal Gårding spectral conversion to a spectral exponent `4k₀`, which the
-Bessel reproducing-kernel self-reproduction carries to the on-diagonal counting
-bound. -/
 def weylSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
 
 lemma weylSobolevExp_gt_finrank :
     Module.finrank ℝ E < weylSobolevExp (E := E) := by
   unfold weylSobolevExp; omega
 
-/-- The file-level Weyl exponent agrees with the projector-trace exponent. -/
 lemma weylSobolevExp_eq_mercerSobolevExp :
     weylSobolevExp (E := E) = Spectral.Mercer.mercerSobolevExp (E := E) := rfl
 
-/-- **Mercer on-diagonal eigenvalue-counting bound** for the connection-Laplacian
-spectrum on `(0, 2)`-tensor fields, with the *non-sharp* Sobolev exponent
-`weylSobolevExp = 2·(n/2 + 1) > n`.
-
-This is the genuine Weyl-law content (the spectral counting function), in its
-min-max / reproducing-kernel form. For the finite-dimensional spectral subspace
-`V_Λ = span{eᵢ : 1 + λᵢ < Λ}` of the connection Laplacian, each `H^{2k}`-mass of a
-unit-`L²` eigen-combination is `≤ (1 + Λ)^k`, so the quantitative Sobolev
-embedding `H^{2k} ↪ C⁰` (`tensorHsToC0_opNorm_le`, valid since `2k > n`) gives the
-on-diagonal reproducing-kernel bound `K_Λ(x, x) = ∑_{1+λᵢ<Λ} |eᵢ(x)|²_g ≤
-C²·(1 + Λ)^{2k}` pointwise. The spectral-projector trace identity
-`dim V_Λ = #{i | 1 + λᵢ < Λ} = ∫_M K_Λ(x, x) dvol` then integrates this to
-`#{i | 1 + λᵢ < Λ} ≤ vol(M)·C²·(1 + Λ)^{2k} = K·(1 + Λ)^{weylSobolevExp}`.
-
-The proof is the classical Mercer / projector-trace eigenvalue-counting estimate,
-assembled in `Spectral.Mercer.eigenProjector_card_le_mercer`: the projector trace
-`#S_Λ = ∑_{i∈S_Λ} ‖eᵢ‖²_{L²} = ∫_M (∑_{i∈S_Λ} |eᵢ(x)|²_g) dvol` integrated against
-the on-diagonal reproducing-kernel bound `Spectral.Mercer.eigenProjector_diagonal_le`. -/
 theorem eigenProjector_card_le_sobolev (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 < K ∧ ∀ Λ : ℝ,
       (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
@@ -252,20 +168,6 @@ theorem eigenProjector_card_le_sobolev (g : SmoothRiemannianMetric I M) :
         K * (1 + Λ) ^ ((weylSobolevExp (E := E) : ℕ) : ℝ) :=
   Spectral.Mercer.eigenProjector_card_le_mercer (I := I) (M := M) g
 
-/-- **Weyl eigenvalue-counting bound** for the connection-Laplacian spectrum on
-`(0, 2)`-tensor fields. The number of eigen-indices below a threshold grows at
-most polynomially with the (non-sharp) Weyl exponent
-`weylSobolevExp = 2·(n/2 + 1)`:
-
-  `N(Λ) := #{i | 1 + λᵢ < Λ} ≤ K · Λ^{weylSobolevExp}`  for some `K > 0`.
-
-This is obtained from the Mercer on-diagonal counting bound
-`eigenProjector_card_le_sobolev` (which produces the `(1 + Λ)^{weylSobolevExp}`
-form) by the elementary reduction `(1 + Λ)^p ≤ (2Λ)^p = 2^p·Λ^p` for `Λ > 1`,
-while for `Λ ≤ 1` the index set is empty (`1 + λᵢ ≥ 1 ≥ Λ`) and `Λ^p ≥ 0` since
-`p = weylSobolevExp` is an even natural number. The sharp Weyl exponent `n/2`
-would require the heat-kernel route; the non-sharp `weylSobolevExp` suffices for
-the downstream summability with threshold `s > weylSobolevExp`. -/
 theorem tensorEigen_counting_le (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 < K ∧ ∀ Λ : ℝ,
       (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
@@ -300,24 +202,6 @@ theorem tensorEigen_counting_le (g : SmoothRiemannianMetric I M) :
     have := hpow_nonneg Λ
     positivity
 
-/-- **Weyl polynomial eigenvalue growth** for the connection-Laplacian spectrum on
-`(0, 2)`-tensor fields. The (countable, spectrally-discrete) eigen-index set admits
-an injective rank-enumeration `φ : TensorEigenIdx g 0 2 ↪ ℕ` along which the
-eigenvalues grow at least polynomially:
-
-  `C · (φ i + 1)^{1/weylSobolevExp} ≤ 1 + λᵢ`  for some `C > 0`,
-  with `weylSobolevExp = 2·(n/2 + 1)`,  `n = finrank E`.
-
-This is the quantitative form of Weyl's eigenvalue-counting law
-`N(Λ) ≲ Λ^{weylSobolevExp}` (equivalently `1 + λ_k ≳ k^{1/weylSobolevExp}` along a
-non-decreasing enumeration). Any positive growth exponent `ε > 0` would suffice
-for the consumers below; the non-sharp exponent `1/weylSobolevExp` is recorded
-here (the sharp Weyl exponent `2/n` requires the heat-kernel route).
-
-The proof is the classical eigenvalue-counting estimate: order the spectrum by
-the finite sub-level sets `{i | 1 + λᵢ < Λ}` (`tensorEigenIdx_one_add_lambda_lt_finite`)
-and bound the counting function `N(Λ)` via the min-max / Sobolev-embedding Mercer
-on-diagonal counting estimate `tensorEigen_counting_le`. -/
 theorem tensorEigen_one_add_lambda_growth (g : SmoothRiemannianMetric I M) :
     ∃ (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℕ) (C : ℝ),
       Function.Injective φ ∧ 0 < C ∧
@@ -343,19 +227,6 @@ theorem tensorEigen_one_add_lambda_growth (g : SmoothRiemannianMetric I M) :
   rw [hw_def] at hi
   exact hi
 
-/-- **Weyl summability of negative Sobolev-scale weights.** For
-`s > weylSobolevExp = 2·(n/2 + 1)` (`n = finrank E`), the negative Sobolev weights
-are summable:
-
-  `∑ᵢ (1 + λᵢ)^{-s} = ∑ᵢ tensorSobolevWeight i (-s) < ∞`.
-
-This is the trace-class / eigenvalue-summability consequence of Weyl's law. The
-proof compares `(1 + λᵢ)^{-s}` against the convergent `p`-series
-`∑ₖ (k + 1)^{-s/weylSobolevExp}` (with `s/weylSobolevExp > 1`) along the polynomial
-eigenvalue growth `tensorEigen_one_add_lambda_growth`. The threshold is the
-non-sharp `weylSobolevExp` (the sharp threshold `n/2` requires the heat-kernel
-route); since the downstream consumer uses the summability with an arbitrarily
-large `s`, this non-sharp threshold is harmless. -/
 theorem tensorEigen_summable_negpow (g : SmoothRiemannianMetric I M) (s : ℝ)
     (hs : ((weylSobolevExp (E := E) : ℕ) : ℝ) < s) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>

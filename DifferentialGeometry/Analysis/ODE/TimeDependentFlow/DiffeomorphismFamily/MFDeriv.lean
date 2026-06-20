@@ -2,11 +2,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-! # `mfderiv` packaging of the time-dependent diffeomorphism flow
-
-The pointwise `HasMFDerivAt` of the time-dependent flow `Φ_fam s`, packaged in the
-abstract form expected by the downstream variational-equation machinery. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle
@@ -18,16 +13,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-Packaging of the `HasMFDerivAt`-in-time clause coming out of the global
-flow glue: there exist a positive horizon `T` and a flow family `Φ` such
-that, for every `t < T` and every `x : M`, the time-curve `s ↦ Φ s x` has
-manifold derivative `X t x` at `t`.
-
-The conclusion is stated in the abstract pointwise form expected downstream;
-the concrete packaging into a `HasMFDerivAt`-on-`(t, x)` form is consumed
-by the diffeomorphism-family construction.
--/
 theorem time_dependent_vf_flow_hasMFDerivAt_packaging
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (h : ∃ T : ℝ, 0 < T ∧

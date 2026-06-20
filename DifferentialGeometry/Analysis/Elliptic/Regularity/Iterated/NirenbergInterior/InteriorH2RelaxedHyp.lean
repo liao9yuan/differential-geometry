@@ -5,58 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.Char
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 
-/-!
-# Weakened polymorphic Nirenberg interior `MemWkp 2 2` regularity
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an
-element `u_h : H1Compl g`, a level `m : ℕ`, and an instance
-`D_m : IteratedDiffChartBilinearData g α u_h m`, this module packages the
-polymorphic Nirenberg interior chart-`H²` regularity for the chosen
-`m`-mixed weak partial of the chart-pushed POU-cut representative, **under
-the single regularity hypothesis chart-`H^{m+1}` of the chart-pushed
-parent** — strictly weaker than the chart-`H^{m+1}` and chart-`H^{m+2}`
-twin hypothesis used in the unweakened version.
-
-## Why the weakening works
-
-The unweakened Nirenberg interior `iteratedDerivedChartBilinear_memWkp_two_two_interior`
-consumes the chart-`H^{m+2}` hypothesis in two places:
-
-* The Schwarz reduction
-  `chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae`,
-  which at level `m` swaps the innermost `i` direction with the outer
-  `m`-mixed weak partial. The unweakened proof states this at `MemWkp (m+2) 2`
-  parent, but the **actually used** chart-`H` order in the proof body is
-  only `MemWkp (m+1) 2` — the proof overstates the hypothesis by one order
-  via `MemWkp.le_of_le`.
-
-* The local `MemLp 2` of `chosenWeakPartial' 2 i (chosenMthMixed m dirs)` on
-  every compact subset of the chart target. The natural derivation uses
-  the `chosenMthMixedPartialChartPushedU_memW1p_two` bridge at `m + 1`
-  (giving `MemW1p 2` of the `m`-mixed partial, hence `MemLp 2` of its
-  canonical weak partials), which requires chart-`H^{m+2}` parent. But an
-  alternative route extracts the local `MemLp 2` directly from
-  `chosenMthMixedPartialChartPushedU_memLp_two` at level `m + 1`, which
-  requires only chart-`H^{m+1}` parent (the chosen `(m+1)`-mixed partial
-  is in `MemLp 2` globally on the chart target). Combined with the
-  Schwarz reduction (which identifies the canonical weak partial of the
-  `m`-mixed partial with the `(m+1)`-mixed partial in the augmented
-  direction multi-index), this gives the same `MemLp 2`-on-compacts
-  result with the strictly weaker hypothesis.
-
-## Main results
-
-* `chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae_weak`
-  — the weakened polymorphic Schwarz reduction at order `m`, using only
-  chart-`H^{m+1}` parent (one less than the unweakened version).
-
-* `iteratedChartBilinearH1ComplData_weak` — the weakened chart-bilinear
-  data bundle, taking only chart-`H^{m+1}` parent.
-
-* `iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened` — the
-  headline weakened Nirenberg interior `MemWkp 2 2` regularity.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -99,7 +47,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Helper: `Fin.init` of a `Fin.cons` equals `Fin.cons` of `Fin.init`. -/
 private lemma fin_init_cons_aux {α : Type*} {m : ℕ}
     (x : α) (p : Fin (m + 1) → α) :
     Fin.init (Fin.cons x p : Fin (m + 2) → α) =
@@ -121,46 +68,11 @@ private lemma fin_init_cons_aux {α : Type*} {m : ℕ}
         simp [Fin.init, Fin.cons_succ]
       rw [h1, h2]
 
-/-- Helper: `Fin.cons x p (Fin.last (m + 1)) = p (Fin.last m)`. -/
 private lemma fin_cons_last_succ_aux {α : Type*} {m : ℕ}
     (x : α) (p : Fin (m + 1) → α) :
     (Fin.cons x p : Fin (m + 2) → α) (Fin.last (m + 1)) = p (Fin.last m) := by
   simp
 
-/-- **Weakened polymorphic Schwarz reduction.**
-
-For any `m : ℕ`, multi-index `dirs : Fin m → Fin n`, and direction
-`i : Fin n`, if the chart-pushed POU representative of `u_h.coeFn` lies in
-chart-`H^{m+1}` (one order weaker than the unweakened version), then
-
-```
-chosenMthMixed (m+1) (Fin.cons i dirs) =ae chosenWeakPartial' 2 i (chosenMthMixed m dirs)
-```
-
-on `volume.restrict chartTargetEuclid α`.
-
-The proof is by induction on `m`:
-
-* **Base** `m = 0`: definitional. The base case requires no parent regularity.
-
-* **Inductive step** `m → m + 1`: at level `m + 1`, the LHS is
-
-  ```
-  chosenMthMixed (m+2) (Fin.cons i dirs)
-    = chosenWeakPartial' 2 (dirs(Fin.last m))
-        (chosenMthMixed (m+1) (Fin.cons i (Fin.init dirs))) Ω.
-  ```
-
-  The inductive hypothesis at level `m` (applied to `Fin.init dirs`) gives
-  `chosenMthMixed (m+1) (Fin.cons i (Fin.init dirs)) =ae chosenWeakPartial' 2 i
-  (chosenMthMixed m (Fin.init dirs))` from parent chart-`H^{m+1}` regularity,
-  which by `MemWkp.le_of_le` is available from the input parent chart-`H^{m+2}`
-  regularity at level `m+1`. The order-two Schwarz swap on `chosenMthMixed m
-  (Fin.init dirs)` requires `MemWkp 2 2` of it; via the polymorphic regularity
-  bridge with `k = 2` and direction count `m`, this is provided by parent
-  chart-`H^{m+2}` regularity. The total parent hypothesis at level `m+1` is
-  therefore chart-`H^{m+2}` — which is exactly the weakened claim
-  (chart-`H^{(m+1)+1}` for the level-`(m+1)` result). -/
 theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMixed_ae_weak
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -295,19 +207,6 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 (m + 1) dirs) Ω := h_final
 
-/-- **Local `MemLp 2` of `chosenWeakPartial' 2 i (chosenMthMixed m dirs)`
-under chart-`H^{m+1}` parent.**
-
-From chart-`H^{m+1}` parent regularity alone, the canonical chosen weak
-`i`-partial of `chosenMthMixed m dirs` lies in `MemLp 2` on every compact
-subset of `chartTargetEuclid α`.
-
-The unweakened version `iterated_weak_partial_locally_memLp` uses
-chart-`H^{m+2}` parent to extract `MemW1p 2` of the `m`-mixed partial.
-Here we exploit the weakened Schwarz reduction to identify the canonical
-weak partial with `chosenMthMixed (m+1) (Fin.cons i dirs)` (which is in
-`MemLp 2` globally on the chart target from chart-`H^{m+1}` parent via
-the `k = 0` bridge at order `m+1`). -/
 private lemma iterated_weak_partial_locally_memLp_weak
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -355,15 +254,12 @@ private lemma iterated_weak_partial_locally_memLp_weak
   rw [← h_eq]
   exact h_chosen_memLp_global.restrict K
 
-/-- The chart-side `u_chart` for the weakened iterated data:
-`chosenMthMixedPartialChartPushedU g α u_h m dirs`. -/
 private noncomputable def iterated_u_chart_weak
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
     (dirs : Fin m → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h m dirs
 
-/-- The chart-side `weak_partial i` for the weakened iterated data. -/
 private noncomputable def iterated_weak_partial_weak
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -373,14 +269,6 @@ private noncomputable def iterated_weak_partial_weak
     (iterated_u_chart_weak (I := I) (M := M) g α u_h m dirs)
     (chartTargetEuclid (I := I) (M := M) α)
 
-/-- **The weakened iterated chart-bilinear data bundle.**
-
-Packaged from chart-`H^{m+1}` parent regularity alone. Reuses the public
-helpers `chosenMthMixedPartialChartPushedU_memLp_weighted` (for the
-weighted `MemLp 2` of `u_chart`) and the weakened Schwarz reduction
-(for the variational identity). The local `MemLp 2` of the canonical
-weak partials is delivered by the schwarz-bridged proof
-`iterated_weak_partial_locally_memLp_weak`. -/
 noncomputable def iteratedChartBilinearH1ComplData_weak
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}
@@ -469,17 +357,7 @@ noncomputable def iteratedChartBilinearH1ComplData_weak
     exact h_in
 
 set_option linter.unusedVariables false in
-/-- **Weakened polymorphic Nirenberg interior `MemWkp 2 2`.**
 
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an
-element `u_h : H1Compl g`, a level `m : ℕ`, and an instance
-`D_m : IteratedDiffChartBilinearData g α u_h m`, together with chart-
-`H^{m+1}` regularity of the chart-pushed POU representative of
-`u_h.coeFn` **alone** (strictly weaker than the chart-`H^{m+1}` and
-chart-`H^{m+2}` twin hypothesis of the unweakened version), there exists
-a precompact open `Ω''` in the chart target containing
-`chartImagePOUTsupport α` on which `chosenMthMixed m D_m.directions`
-lies in `MemWkp 2 2`. -/
 theorem iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)

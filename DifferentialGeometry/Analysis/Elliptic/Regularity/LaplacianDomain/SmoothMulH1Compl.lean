@@ -2,45 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothM
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitAnyTest
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# Smooth-multiplication CLM on `H1Compl g`
-
-For a closed Riemannian manifold `(M, g)` and a fixed smooth real-valued
-function `φ : C^∞⟮I, M; ℝ⟯`, the pointwise multiplication `v ↦ φ · v` on
-smooth scalars extends to a continuous linear map
-
-```
-smoothMulH1Compl g φ : H1Compl g →L[ℝ] H1Compl g.
-```
-
-The construction proceeds in three layers, following the same pattern used
-to build `gradInnerCLM` and `smoothToLp`:
-
-1. **Smooth multiplication on `SmoothScalar g`.** The product `φ · v` is
-   smooth, so the assignment `v ↦ φ · v` defines an `ℝ`-linear map on
-   `SmoothScalar g`. The H¹ seminorm bound follows from the gradient
-   Leibniz rule on smooth scalars combined with the supremum bounds
-   `phiSupBound` for `|φ|` and `gradSupBound` for `|∇φ|`.
-
-2. **CLM on `SmoothScalar g`.** The bound assembles into a continuous
-   linear map `smoothScalarMul g φ : SmoothScalar g →L[ℝ] SmoothScalar g`
-   via `LinearMap.mkContinuous`.
-
-3. **Extension to `H1Compl g`.** Compose with the canonical embedding
-   `smoothToH1Compl : SmoothScalar g →L[ℝ] H1Compl g`, then extend the
-   resulting `SmoothScalar g →L[ℝ] H1Compl g` along the dense
-   uniform-inducing embedding `smoothToH1Compl` to obtain the desired
-   `H1Compl g →L[ℝ] H1Compl g`.
-
-The compatibility identity `smoothMulH1Compl_smoothToH1Compl` records that on
-the dense range of smooth lifts, `smoothMulH1Compl g φ (smoothToH1Compl v) =
-smoothToH1Compl (φ · v)`.
-
-The Lp-compatibility identity `H1ComplToLp_smoothMulH1Compl` records that
-`H1ComplToLp ∘ smoothMulH1Compl g φ = smoothMulLp g φ ∘ H1ComplToLp` as
-continuous linear maps `H1Compl g →L[ℝ] Lp ℝ 2 μ_g`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Filter Topology
@@ -69,8 +30,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- Smooth pointwise multiplication of `v : SmoothScalar g` by the bundled
-smooth function `φ : C^∞⟮I, M; ℝ⟯`. -/
 noncomputable def smoothScalarMulFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     SmoothScalar g where
@@ -82,7 +41,6 @@ noncomputable def smoothScalarMulFun
     (smoothScalarMulFun (I := I) (M := M) g φ v).toFun =
       fun x : M => (φ : M → ℝ) x * v.toFun x := rfl
 
-/-- Additivity in `v`. -/
 lemma smoothScalarMulFun_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v w : SmoothScalar g) :
     smoothScalarMulFun (I := I) (M := M) g φ (v + w) =
@@ -98,7 +56,6 @@ lemma smoothScalarMulFun_add
     smoothScalarMulFun_toFun, smoothScalarMulFun_toFun]
   ring
 
-/-- Homogeneity in `v`. -/
 lemma smoothScalarMulFun_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) :
@@ -112,7 +69,6 @@ lemma smoothScalarMulFun_smul
     smoothScalarMulFun_toFun]
   ring
 
-/-- The smooth multiplication packaged as a linear map. -/
 noncomputable def smoothScalarMulLin
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →ₗ[ℝ] SmoothScalar g where
@@ -125,7 +81,6 @@ noncomputable def smoothScalarMulLin
     smoothScalarMulLin (I := I) (M := M) g φ v =
       smoothScalarMulFun (I := I) (M := M) g φ v := rfl
 
-/-- The pointwise gradient of `φ · v` for smooth `φ` and `v ∈ SmoothScalar g`. -/
 lemma gradFun_smoothScalarMulFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -138,7 +93,6 @@ lemma gradFun_smoothScalarMulFun
   exact LaplacianDomainVariationalLimitGeneral.gradFun_smul_smooth_eq_pointwise
     (I := I) (M := M) g φ.contMDiff v.smooth x
 
-/-- Pointwise: `((φ x) · (v x))² ≤ phiSupBound² · v(x)²`. -/
 private lemma sq_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -156,24 +110,16 @@ private lemma sq_phi_mul_v_le
   rw [h_eq]
   exact mul_le_mul_of_nonneg_right h_phi_sq_le h_v_sq_nn
 
-/-- The metric `‖v‖_g` is non-negative. -/
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v :=
   SmoothRiemannianMetric_inner_self_nonneg g x v
 
-/-- The gradient self-inner product is non-negative. -/
 private lemma inner_grad_self_nonneg
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (x : M) :
     0 ≤ g.inner x (gradFun (I := I) g φ x) (gradFun (I := I) g φ x) :=
   metric_inner_self_nonneg (I := I) (M := M) g x _
 
-/-- Pointwise bound on `g(∇(φv), ∇(φv))` using Cauchy-Schwarz and the
-gradient Leibniz rule:
-```
-g(∇(φv), ∇(φv)) ≤ 2·φ²·g(∇v, ∇v) + 2·v²·g(∇φ, ∇φ).
-```
--/
 private lemma inner_grad_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -512,7 +458,6 @@ private lemma integral_inner_grad_phi_mul_v_le
     exact this
   linarith
 
-/-- The constant in the H¹ Lipschitz bound on smooth-multiplication by `φ`. -/
 noncomputable def smoothMulH1ComplConst
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) : ℝ :=
   Real.sqrt (2 * (phiSupBound (I := I) (M := M) g φ ^ 2 +
@@ -534,8 +479,6 @@ lemma smoothMulH1ComplConst_sq
   have h_grad_nn := sq_nonneg (gradSupBound (I := I) (M := M) g φ)
   linarith
 
-/-- The H¹ pre-norm-squared of `smoothScalarMulFun g φ v` is bounded by
-`smoothMulH1ComplConst² · ‖v‖²_{H¹-pre}`. -/
 theorem norm_smoothScalarMulFun_sq_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖smoothScalarMulFun (I := I) (M := M) g φ v‖ ^ 2 ≤
@@ -605,7 +548,6 @@ theorem norm_smoothScalarMulFun_sq_le
   have h_grad_sq_nn := sq_nonneg (gradSupBound (I := I) (M := M) g φ)
   nlinarith [h_l2_le, h_grad_le]
 
-/-- Square-root form of the H¹ norm bound. -/
 theorem norm_smoothScalarMulFun_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ‖smoothScalarMulFun (I := I) (M := M) g φ v‖ ≤
@@ -628,7 +570,6 @@ private lemma norm_smoothScalarMulLin_le
       smoothMulH1ComplConst (I := I) (M := M) g φ * ‖v‖ :=
   norm_smoothScalarMulFun_le (I := I) (M := M) g φ v
 
-/-- The smooth-multiplication CLM on `SmoothScalar g`. -/
 noncomputable def smoothScalarMul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →L[ℝ] SmoothScalar g :=
@@ -641,7 +582,6 @@ noncomputable def smoothScalarMul
     smoothScalarMul (I := I) (M := M) g φ v =
       smoothScalarMulFun (I := I) (M := M) g φ v := rfl
 
-/-- The CLM `SmoothScalar g →L[ℝ] H1Compl g` given by `v ↦ smoothToH1Compl (φ · v)`. -/
 private noncomputable def smoothMulH1ComplOnSmooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     SmoothScalar g →L[ℝ] H1Compl g :=
@@ -654,7 +594,6 @@ private noncomputable def smoothMulH1ComplOnSmooth
       smoothToH1Compl (I := I) (M := M) g
         (smoothScalarMulFun (I := I) (M := M) g φ v) := rfl
 
-/-- The smooth-inclusion `toComplL` has dense range. -/
 private lemma denseRange_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL :
@@ -664,7 +603,6 @@ private lemma denseRange_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- The smooth-inclusion `toComplL` is uniform-inducing. -/
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing
@@ -675,7 +613,6 @@ private lemma isUniformInducing_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothScalar g)
 
-/-- The smooth-multiplication CLM on `H1Compl g`. -/
 noncomputable def smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     H1Compl g →L[ℝ] H1Compl g :=
@@ -683,8 +620,6 @@ noncomputable def smoothMulH1Compl
     (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g)
 
-/-- Compatibility with smooth scalars: on the dense range of `smoothToH1Compl`,
-`smoothMulH1Compl g φ` agrees with `smoothToH1Compl ∘ (φ · ·)`. -/
 @[simp] theorem smoothMulH1Compl_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ
@@ -698,8 +633,6 @@ noncomputable def smoothMulH1Compl
     (denseRange_toComplL_smoothScalar (I := I) (M := M) g)
     (isUniformInducing_toComplL_smoothScalar (I := I) (M := M) g) v
 
-/-- Smooth-case CLM-Lp identity: for smooth `v`, both sides of the desired
-identity equal `smoothToLp g (smoothScalarMulFun g φ v)`. -/
 private lemma H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp_on_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     H1ComplToLp (I := I) (M := M) g
@@ -732,7 +665,6 @@ private lemma H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp_on_smooth
   filter_upwards [h_rhs_aeEq, h_smoothToLp_v_aeEq] with x h_rhs h_v
   rw [h_rhs, h_v]
 
-/-- The Lp-compatibility identity for `smoothMulH1Compl g φ` as a CLM identity. -/
 theorem H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     (H1ComplToLp (I := I) (M := M) g).comp
@@ -759,7 +691,6 @@ theorem H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp
     exact H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp_on_smooth
       (I := I) (M := M) g φ v
 
-/-- Application form of the Lp-compatibility identity. -/
 @[simp] theorem H1ComplToLp_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (u : H1Compl g) :
     H1ComplToLp (I := I) (M := M) g (smoothMulH1Compl (I := I) (M := M) g φ u) =
@@ -769,8 +700,6 @@ theorem H1ComplToLp_smoothMulH1Compl_eq_smoothMulLp_H1ComplToLp
     (I := I) (M := M) g φ
   exact congrArg (fun f => f u) h
 
-/-- The classical Laplace-Beltrami operator applied to a bundled smooth function
-`φ : C^∞⟮I, M; ℝ⟯`, packaged as another bundled smooth function. -/
 noncomputable def smoothLaplacianBundle
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     C^∞⟮I, M; ℝ⟯ :=
@@ -782,9 +711,6 @@ noncomputable def smoothLaplacianBundle
     (smoothLaplacianBundle (I := I) (M := M) g φ : M → ℝ) x =
       Δ_g (I := I) g φ.contMDiff x := rfl
 
-/-- The CLM realisation of the residual Leibniz cross-terms for an arbitrary
-smooth scalar `φ`:
-`-2 g(∇φ, ∇v) - (Δφ) · v`. -/
 noncomputable def fHLeibnizGeneralResidualCLM
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     H1Compl (I := I) (M := M) g →L[ℝ]
@@ -805,7 +731,6 @@ noncomputable def fHLeibnizGeneralResidualCLM
   unfold fHLeibnizGeneralResidualCLM
   rfl
 
-/-- The Leibniz formula for arbitrary smooth `φ`. -/
 noncomputable def fHLeibnizGeneral
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -815,10 +740,6 @@ noncomputable def fHLeibnizGeneral
         laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩) +
     fHLeibnizGeneralResidualCLM (I := I) (M := M) g φ u_h
 
-/-- A key auxiliary continuous bilinear functional:
-`u_h ↦ ⟨smoothMulH1Compl g φ u_h, smoothToH1Compl ṽ⟩_{H¹Compl}`. As a function of
-`u_h`, this is continuous (composition of CLM `smoothMulH1Compl` with the H¹Compl
-inner product). -/
 private noncomputable def smoothMulH1ComplInnerCLM
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g) :
     H1Compl g →L[ℝ] ℝ :=
@@ -835,7 +756,6 @@ private noncomputable def smoothMulH1ComplInnerCLM
   unfold smoothMulH1ComplInnerCLM
   rfl
 
-/-- The H¹Compl-symmetric counterpart: `u_h ↦ ⟨u_h, smoothMulH1Compl g φ (smoothToH1Compl vT)⟩`. -/
 private noncomputable def innerSmoothMulH1ComplCLM
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g) :
     H1Compl g →L[ℝ] ℝ :=
@@ -850,8 +770,6 @@ private noncomputable def innerSmoothMulH1ComplCLM
       ⟪u_h, smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g vT)⟫_ℝ := rfl
 
-/-- For smooth `ũ`, the H¹Compl inner product `⟨smoothMulH1Compl g φ (smoothToH1Compl uT),
-smoothToH1Compl ṽ⟩` equals the H¹-pre inner product `⟨φũ, ṽ⟩_{H¹-pre}`. -/
 private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (uT vT : SmoothScalar g) :
@@ -881,8 +799,6 @@ private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth_eq_integral
   exact smoothScalarH1Inner_eq_integral_oneSubLap_mul
     (smoothScalarMulFun (I := I) (M := M) g φ uT) vT
 
-/-- Pointwise Leibniz: `(smoothScalarMulFun g φ uT).oneSubLapClassical.toFun x =
-φ x · uT.oneSubLapClassical.toFun x - (Δ_g φ) x · uT.toFun x - 2 g(∇φ, ∇uT) x`. -/
 private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g)
     (x : M) :
@@ -919,9 +835,6 @@ private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
       uT.toFun x * Δ_g (I := I) g φ.contMDiff x
   ring
 
-/-- `fHLeibnizGeneral g φ (smoothToH1Compl uT) _` equals the `smoothToLp` lift
-of `(smoothScalarMulFun g φ uT).oneSubLapClassical`, i.e., the smooth Leibniz
-formula for `(1-Δ)(φ·uT)`. -/
 private theorem fHLeibnizGeneral_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g) :
     fHLeibnizGeneral (I := I) (M := M) g φ
@@ -1021,8 +934,6 @@ private theorem fHLeibnizGeneral_smoothToH1Compl
   exact smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
     (I := I) (M := M) g φ uT x
 
-/-- For smooth `uT`, `resolvent(fHLeibnizGeneral g φ (smoothToH1Compl uT) _) =
-smoothToH1Compl (smoothScalarMulFun g φ uT) = smoothMulH1Compl g φ (smoothToH1Compl uT)`. -/
 private theorem smoothMulH1Compl_smoothToH1Compl_eq_resolvent_fHLeibnizGeneral
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ
@@ -1035,8 +946,6 @@ private theorem smoothMulH1Compl_smoothToH1Compl_eq_resolvent_fHLeibnizGeneral
   exact (smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M)
     (smoothScalarMulFun (I := I) (M := M) g φ uT))
 
-/-- L²-self-adjointness of `smoothMulLp g φ`: for real-valued smooth `φ`,
-`⟨smoothMulLp g φ f, h⟩_{L²} = ⟨f, smoothMulLp g φ h⟩_{L²}`. -/
 private lemma smoothMulLp_inner_left_eq_inner_right
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -1063,9 +972,6 @@ private lemma smoothMulLp_inner_left_eq_inner_right
       ((f : M → ℝ) y) from rfl]
   rw [h_l, h_r]; ring
 
-/-- The H¹Compl-continuous "rewritten RHS" functional:
-`u_h ↦ ⟨u_h, smoothMulH1Compl g φ (smoothToH1Compl vT)⟩_{H¹Compl}
-      + ⟨smoothToLp vT, fHLeibnizGeneralResidualCLM g φ u_h⟩_{L²}`. -/
 private noncomputable def rewrittenRHSCLM
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g) :
     H1Compl g →L[ℝ] ℝ :=
@@ -1086,18 +992,6 @@ private noncomputable def rewrittenRHSCLM
   unfold rewrittenRHSCLM
   rfl
 
-/-- Smooth-case identity: For smooth `uT, vT`,
-`⟨smoothMulH1Compl g φ (smoothToH1Compl uT), smoothToH1Compl vT⟩_{H¹Compl}` equals
-`rewrittenRHSCLM g φ vT (smoothToH1Compl uT)`.
-
-Proof strategy: Use the smooth-case resolvent identity
-`smoothMulH1Compl g φ (smoothToH1Compl uT) = resolvent g (fHLeibnizGeneral g φ (smoothToH1Compl uT) _)`,
-combined with `resolvent_inner_eq_lpFunctional`, to rewrite LHS as an L²
-inner product. Then split via L²-bilinearity into the smoothMulLp summand
-(rewritten via self-adjointness, the Lp-compatibility identity, the
-smooth-case resolvent identity, and the variational identity for the
-trivial H¹Compl inner product on smooth elements) and the residual
-summand. -/
 private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (uT vT : SmoothScalar g) :
@@ -1175,9 +1069,6 @@ private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
   rw [h_lpCompat, h_oneSubLap_smooth]
   exact h_var_id
 
-/-- The full inner product identity: for every `u_h ∈ H1Compl g` and every
-smooth `vT ∈ SmoothScalar g`,
-`⟨smoothMulH1Compl g φ u_h, smoothToH1Compl vT⟩_{H¹} = rewrittenRHSCLM g φ vT u_h`. -/
 private theorem smoothMulH1ComplInner_eq_rewrittenRHS
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     (u_h : H1Compl g) :
@@ -1205,8 +1096,6 @@ private theorem smoothMulH1ComplInner_eq_rewrittenRHS
     exact smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
       (I := I) (M := M) g φ uT vT
 
-/-- For `u_h ∈ laplacianDomain g`, the rewritten RHS equals the original RHS
-(the L² inner product against `fHLeibnizGeneral g φ u_h hu_h`). -/
 private lemma rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1251,10 +1140,6 @@ private lemma rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (resolvent_inner_eq_lpFunctional (I := I) (M := M) g _ _).symm]
   rw [h_resolvent_eq]
 
-/-- The full variational identity: for all `u_h ∈ laplacianDomain g` and all
-smooth `vT`,
-`⟨smoothMulH1Compl g φ u_h, smoothToH1Compl vT⟩_{H¹} =
-  ⟨H1ComplToLp(smoothToH1Compl vT), fHLeibnizGeneral g φ u_h hu_h⟩_{L²}`. -/
 private theorem smoothMulH1ComplInner_eq_lpFunctional_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1267,14 +1152,11 @@ private theorem smoothMulH1ComplInner_eq_lpFunctional_smoothToH1Compl
   exact rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (I := I) (M := M) g φ vT hu_h
 
-/-- Continuity of `w ↦ ⟪w, x⟫_ℝ` on `H1Compl g` for fixed `x`. -/
 private lemma continuous_innerSL_right
     (_g : SmoothRiemannianMetric I M) (x : H1Compl _g) :
     Continuous (fun w : H1Compl _g => ⟪w, x⟫_ℝ) := by
   exact ((innerSL ℝ : H1Compl _g →L[ℝ] H1Compl _g →L[ℝ] ℝ).flip x).continuous
 
-/-- **H¹Compl resolvent identity**: For every `u_h ∈ laplacianDomain g`,
-`smoothMulH1Compl g φ u_h = resolvent g (fHLeibnizGeneral g φ u_h hu_h)`. -/
 theorem smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1310,8 +1192,6 @@ theorem smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral
       (I := I) (M := M) g φ vT hu_h]
     rw [resolvent_inner_eq_lpFunctional]
 
-/-- **H¹Compl Laplacian-domain membership**: For every
-`u_h ∈ laplacianDomain g`, `smoothMulH1Compl g φ u_h ∈ laplacianDomain g`. -/
 theorem smoothMulH1Compl_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
@@ -1321,9 +1201,6 @@ theorem smoothMulH1Compl_mem_laplacianDomain
   exact ⟨fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h,
     smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral (I := I) (M := M) g φ hu_h⟩
 
-/-- The preimage formula: for `u_h ∈ laplacianDomain g`, the
-`laplacianDomain.preimage` of `smoothMulH1Compl g φ u_h` equals
-`fHLeibnizGeneral g φ u_h hu_h`. -/
 theorem laplacianDomain_preimage_smoothMulH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :

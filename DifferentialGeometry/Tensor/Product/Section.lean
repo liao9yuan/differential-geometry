@@ -2,28 +2,6 @@
 Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Product.Bundle
-/-!
-# Tensor product of smooth sections
-
-If `g` is a `C^n` section of a vector bundle `E₁` and `h` is a `C^n` section of a vector
-bundle `E₂`, then the pointwise tensor product `fun x => g x ⊗ₜ h x` is a `C^n` section
-of the tensor product bundle `fun x => E₁ x ⊗[𝕜] E₂ x`.
-
-## Main Definitions
-
-* `TensorProduct.mkCLM` : the tensor product map `(v, w) ↦ v ⊗ₜ w` as a continuous
-  bilinear map between finite-dimensional normed spaces.
-
-## Main Results
-
-* `ContMDiffAt.tmul` : the tensor product of two `C^n` functions into model fibers is `C^n`.
-* `ContMDiffSection.tensorProduct` : the tensor product of two `C^n` sections is a `C^n`
-  section of the tensor product bundle.
-
-## Tags
-
-tensor product, smooth section, vector bundle
--/
 
 noncomputable section
 
@@ -33,17 +11,12 @@ open Bundle Set
 
 open scoped Manifold Topology Bundle TensorProduct
 
-/-! ## The tensor product bilinear map as a CLM -/
-
 section TmulCLM
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
 variable (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [FiniteDimensional 𝕜 F₁]
 variable (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
 
-/-- The tensor product map `(v, w) ↦ v ⊗ₜ w` as a continuous bilinear map.
-Well-defined because all linear maps between finite-dimensional normed spaces
-are continuous. -/
 noncomputable def TensorProduct.mkCLM :
     F₁ →L[𝕜] (F₂ →L[𝕜] (F₁ ⊗[𝕜] F₂)) := by
   haveI : FiniteDimensional 𝕜 (F₂ →L[𝕜] (F₁ ⊗[𝕜] F₂)) :=
@@ -60,8 +33,6 @@ theorem TensorProduct.mkCLM_apply (v : F₁) (w : F₂) :
 
 end TmulCLM
 
-/-! ## Smoothness of tensor product of functions into model fibers -/
-
 section TmulSmooth
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -73,9 +44,6 @@ variable {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [Finit
 variable {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
 variable {n : WithTop ℕ∞}
 
-/-- The tensor product of two `C^n` functions into finite-dimensional normed spaces is `C^n`.
-Follows from `TensorProduct.mkCLM` being a CLM (hence `C^∞`) composed with the smooth
-factor functions via `ContMDiffAt.comp` and `ContMDiffAt.clm_apply`. -/
 theorem ContMDiffAt.tmul {f : B → F₁} {g : B → F₂} {x₀ : B}
     (hf : ContMDiffAt IB 𝓘(𝕜, F₁) n f x₀)
     (hg : ContMDiffAt IB 𝓘(𝕜, F₂) n g x₀) :
@@ -90,8 +58,6 @@ theorem ContMDiff.tmul {f : B → F₁} {g : B → F₂}
   fun x₀ => (hf x₀).tmul (hg x₀)
 
 end TmulSmooth
-
-/-! ## Tensor product of smooth sections -/
 
 section SectionProduct
 
@@ -113,12 +79,6 @@ variable [∀ (x : B), ContinuousAdd (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂
 variable (n : WithTop ℕ∞)
 variable [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB]
 
-/-- The tensor product of two `C^n` sections is a `C^n` section of the tensor product bundle.
-
-Smoothness is proved by reducing to local trivializations via `contMDiffAt_section`: the
-trivialized tensor product section decomposes as `triv₁(g) ⊗ₜ triv₂(h)` (by
-`tensorProduct_trivializationAt` and `TensorProduct.map_tmul`), which is smooth by
-`ContMDiffAt.tmul`. -/
 noncomputable def ContMDiffSection.tensorProduct
     (g : ContMDiffSection IB F₁ n E₁)
     (h : ContMDiffSection IB F₂ n E₂) :
@@ -151,17 +111,17 @@ noncomputable def ContMDiffSection.tensorProduct
     rw [contMDiffAt_section x₀]
     set e₁ := trivializationAt F₁ E₁ x₀
     set e₂ := trivializationAt F₂ E₂ x₀
-    -- Extract smoothness of the trivialized factor sections
+    
     have hg₀ := (contMDiffAt_section x₀).mp (g.contMDiff x₀)
     have hh₀ := (contMDiffAt_section x₀).mp (h.contMDiff x₀)
-    -- Show the trivialized tensor section equals (triv₁ g) ⊗ₜ (triv₂ h) near x₀
+    
     refine (hg₀.tmul hh₀).congr_of_eventuallyEq ?_
     have hbase : e₁.baseSet ∩ e₂.baseSet ∈ 𝓝 x₀ :=
       (e₁.open_baseSet.inter e₂.open_baseSet).mem_nhds
         ⟨mem_baseSet_trivializationAt F₁ E₁ x₀, mem_baseSet_trivializationAt F₂ E₂ x₀⟩
     filter_upwards [hbase] with x hx
-    -- Rewrite trivializationAt for the tensor product bundle as the tensor product
-    -- of the factor trivializations, then unfold factor-wise via map_tmul.
+    
+    
     simp only [Bundle.TensorProduct.tensorProduct_trivializationAt]
     change (Pretrivialization.tensorProduct 𝕜 e₁ e₂ ⟨x, g x ⊗ₜ[𝕜] h x⟩).2 =
       (e₁ ⟨x, g x⟩).2 ⊗ₜ[𝕜] (e₂ ⟨x, h x⟩).2

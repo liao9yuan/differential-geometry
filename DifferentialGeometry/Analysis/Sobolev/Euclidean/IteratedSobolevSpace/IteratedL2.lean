@@ -2,29 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.Algebra.Order.Chebyshev
 
-/-!
-# `L²`-convention iterated Euclidean Sobolev norm and inner product
-
-The iterated Sobolev norm `wkpNorm k 2 u Ω` defined in
-`Euclidean/IteratedSobolevSpace/IteratedSobolev.lean` is the *linear* sum
-`∑_{|β| ≤ k} ‖∂^β u‖_{L²(Ω)}`. While this is convenient for general `p`,
-it is not directly compatible with an inner-product structure when
-`p = 2`. The standard `L²`-Sobolev convention uses the Euclidean
-combination
-
-  `‖u‖_{W^{k,2}} = (∑_{|β| ≤ k} ‖∂^β u‖²_{L²(Ω)})^{1/2}`,
-
-i.e. the square root of the sum of squared `L²` norms of all iterated
-weak partials of order at most `k`. This norm derives from the bilinear
-inner product
-
-  `⟨u, v⟩_{W^{k,2}} = ∑_{|β| ≤ k} ∫_Ω (∂^β u)(∂^β v) dx`.
-
-This file introduces these `L²`-convention quantities and establishes
-their basic properties: triangle inequality, scaling, finiteness, and
-norm equivalence with the linear-sum convention.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -39,11 +16,8 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Sigma type indexing all multi-indices of order `j ≤ k` for the iterated
-weak partial derivatives. -/
 abbrev wkpIdx (k d : ℕ) : Type := (j : Fin (k + 1)) × (Fin j.val → Fin d)
 
-/-- The number of multi-indices of order `≤ k` in `d` directions. -/
 def wkpIndexCardL2 (k d : ℕ) : ℕ :=
   ∑ j ∈ Finset.range (k + 1), d ^ j
 
@@ -57,16 +31,11 @@ theorem wkpIndexCardL2_eq_card (k d : ℕ) :
   rw [Finset.sum_image (fun i _ j _ hij => Fin.val_inj.mp hij)]
   simp [Fintype.card_pi, Fintype.card_fin, Fin.sum_univ_eq_sum_range]
 
-/-- The squared `L²`-convention Sobolev norm of order `k`: the sum of
-squared `L²(Ω)` norms of all iterated weak partials of order `≤ k`. -/
 def wkpNormL2Sq (k : ℕ) (u : E → ℝ) (Ω : Set E) : ℝ≥0∞ :=
   ∑ j ∈ Finset.range (k + 1),
     ∑ β : Fin j → Fin d,
       eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) j β u Ω) 2 (volume.restrict Ω) ^ (2 : ℕ)
 
-/-- The `L²`-convention Sobolev norm of order `k`: the square root of
-the sum of squared `L²(Ω)` norms of all iterated weak partials of order
-`≤ k`. -/
 def wkpNormL2 (k : ℕ) (u : E → ℝ) (Ω : Set E) : ℝ≥0∞ :=
   wkpNormL2Sq (d := d) k u Ω ^ ((1 : ℝ) / 2)
 
@@ -83,7 +52,6 @@ theorem wkpNormL2_eq_rpow
     wkpNormL2 (d := d) k u Ω =
       wkpNormL2Sq (d := d) k u Ω ^ ((1 : ℝ) / 2) := rfl
 
-/-- The `L²` Sobolev norm sum reindexed via the Sigma type. -/
 theorem wkpNormL2Sq_eq_sigma_sum
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
     wkpNormL2Sq (d := d) k u Ω =
@@ -98,7 +66,6 @@ theorem wkpNormL2Sq_eq_sigma_sum
   rw [← Finset.univ_sigma_univ (κ := fun (i : Fin (k + 1)) => (Fin i.val → Fin d))]
   rw [Finset.sum_sigma]
 
-/-- Linear-sum norm `wkpNorm k 2` reindexed via the Sigma type. -/
 theorem wkpNorm_two_eq_sigma_sum
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
     wkpNorm (d := d) k 2 u Ω =
@@ -113,7 +80,6 @@ theorem wkpNorm_two_eq_sigma_sum
   rw [← Finset.univ_sigma_univ (κ := fun (i : Fin (k + 1)) => (Fin i.val → Fin d))]
   rw [Finset.sum_sigma]
 
-/-- `wkpNormL2Sq 0 u Ω = (eLpNorm u 2 (volume.restrict Ω))²`. -/
 theorem wkpNormL2Sq_zero
     (u : E → ℝ) (Ω : Set E) :
     wkpNormL2Sq (d := d) 0 u Ω =
@@ -132,8 +98,6 @@ theorem wkpNormL2Sq_zero
               (volume.restrict Ω) ^ (2 : ℕ))]
   simp [iterWeakPartial_zero]
 
-/-- The `L²`-convention Sobolev inner product of order `k`:
-`⟨u, v⟩_{W^{k,2}} = ∑_{|β| ≤ k} ∫_Ω (∂^β u)(∂^β v) dx`. -/
 def wkpInnerL2 (k : ℕ) (u v : E → ℝ) (Ω : Set E) : ℝ :=
   ∑ j ∈ Finset.range (k + 1),
     ∑ β : Fin j → Fin d,
@@ -150,7 +114,6 @@ theorem wkpInnerL2_eq_sum
             iterWeakPartial (d := d) (2 : ℝ≥0∞) j β u Ω x *
               iterWeakPartial (d := d) (2 : ℝ≥0∞) j β v Ω x := rfl
 
-/-- The `L²` Sobolev inner product reindexed via the Sigma type. -/
 theorem wkpInnerL2_eq_sigma_sum
     (k : ℕ) (u v : E → ℝ) (Ω : Set E) :
     wkpInnerL2 (d := d) k u v Ω =
@@ -166,7 +129,6 @@ theorem wkpInnerL2_eq_sigma_sum
   rw [← Finset.univ_sigma_univ (κ := fun (i : Fin (k + 1)) => (Fin i.val → Fin d))]
   rw [Finset.sum_sigma]
 
-/-- `wkpNormL2Sq k 0 Ω = 0`. -/
 theorem wkpNormL2Sq_zero_fun_zero
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω) :
     wkpNormL2Sq (d := d) k (fun _ : E => (0 : ℝ)) Ω = 0 := by
@@ -183,7 +145,6 @@ theorem wkpNormL2Sq_zero_fun_zero
   rw [eLpNorm_congr_ae h_iter_ae]
   simp
 
-/-- `wkpNormL2 k 0 Ω = 0`. -/
 theorem wkpNormL2_zero_fun_zero
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω) :
     wkpNormL2 (d := d) k (fun _ : E => (0 : ℝ)) Ω = 0 := by
@@ -191,7 +152,6 @@ theorem wkpNormL2_zero_fun_zero
   rw [wkpNormL2Sq_zero_fun_zero (d := d) hΩ]
   exact ENNReal.zero_rpow_of_pos (by norm_num : (0 : ℝ) < 1 / 2)
 
-/-- For `u ∈ W^{k,2}(Ω)`, the squared `L²`-Sobolev norm is finite. -/
 theorem wkpNormL2Sq_lt_top_of_memWkp
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) k 2 u Ω) :
@@ -208,7 +168,6 @@ theorem wkpNormL2Sq_lt_top_of_memWkp
   have h_iter := iterWeakPartial_memLp_of_memWkp (d := d) (p := 2) h_uWj β
   exact ENNReal.pow_lt_top h_iter.eLpNorm_lt_top
 
-/-- For `u ∈ W^{k,2}(Ω)`, the `L²`-Sobolev norm is finite. -/
 theorem wkpNormL2_lt_top_of_memWkp
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) k 2 u Ω) :
@@ -217,8 +176,6 @@ theorem wkpNormL2_lt_top_of_memWkp
   exact ENNReal.rpow_lt_top_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)
     (wkpNormL2Sq_lt_top_of_memWkp (d := d) h).ne
 
-/-- `wkpNormL2Sq` is invariant under ae-equality on `volume.restrict Ω`
-for open `Ω`. -/
 theorem wkpNormL2Sq_congr_ae
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v) :
@@ -234,8 +191,6 @@ theorem wkpNormL2Sq_congr_ae
     iterWeakPartial_ae_congr (d := d) (by norm_num) hΩ j β huv
   rw [eLpNorm_congr_ae h_iter_ae]
 
-/-- `wkpNormL2` is invariant under ae-equality on `volume.restrict Ω`
-for open `Ω`. -/
 theorem wkpNormL2_congr_ae
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v) :
@@ -243,7 +198,6 @@ theorem wkpNormL2_congr_ae
   unfold wkpNormL2
   rw [wkpNormL2Sq_congr_ae (d := d) hΩ huv]
 
-/-- Squaring `wkpNormL2` recovers `wkpNormL2Sq`. -/
 theorem wkpNormL2_sq_eq_wkpNormL2Sq
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
     wkpNormL2 (d := d) k u Ω ^ (2 : ℕ) = wkpNormL2Sq (d := d) k u Ω := by
@@ -254,8 +208,6 @@ theorem wkpNormL2_sq_eq_wkpNormL2Sq
   rw [show ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 by norm_num]
   rw [ENNReal.rpow_one]
 
-/-- `wkpNormL2 k u Ω = ENNReal.ofReal √((wkpNormL2Sq k u Ω).toReal)`
-when `wkpNormL2Sq k u Ω` is finite. -/
 private theorem wkpNormL2_eq_ofReal_sqrt_toReal
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (hSq : wkpNormL2Sq (d := d) k u Ω ≠ ∞) :
@@ -274,9 +226,6 @@ private theorem wkpNormL2_eq_ofReal_sqrt_toReal
       Real.sqrt (wkpNormL2Sq (d := d) k u Ω).toReal by
     rw [Real.sqrt_eq_rpow]]
 
-/-- The triangle inequality for `wkpNormL2`. Each summand `(eLpNorm (∂^β (u + v)) 2)²`
-is bounded by `(eLpNorm (∂^β u) 2 + eLpNorm (∂^β v) 2)²` (via the Minkowski inequality on
-`L²(Ω)`); then we apply the Euclidean triangle inequality on the finite-dimensional sum. -/
 theorem wkpNormL2_add_le
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ}
@@ -431,7 +380,6 @@ theorem wkpNormL2_add_le
   apply ENNReal.ofReal_le_ofReal
   exact h_triangle
 
-/-- Scalar multiplication identity for `wkpNormL2Sq`. -/
 theorem wkpNormL2Sq_const_smul
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : MemWkp (d := d) k 2 u Ω) (c : ℝ) :
@@ -457,7 +405,6 @@ theorem wkpNormL2Sq_const_smul
   rw [heq, eLpNorm_const_smul]
   rw [mul_pow]
 
-/-- Scalar multiplication identity for `wkpNormL2`. -/
 theorem wkpNormL2_const_smul
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : MemWkp (d := d) k 2 u Ω) (c : ℝ) :
@@ -472,8 +419,6 @@ theorem wkpNormL2_const_smul
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-- Equivalence inequality 1: `wkpNormL2 ≤ wkpNorm` at `p = 2`.
-This uses that `√(∑ a_i²) ≤ ∑ a_i` for nonneg `a_i`. -/
 theorem wkpNormL2_le_wkpNorm
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (hu : MemWkp (d := d) k 2 u Ω) :
@@ -527,9 +472,6 @@ theorem wkpNormL2_le_wkpNorm
     rw [← hLin_toReal, ENNReal.ofReal_toReal hLin_finite]]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-- Equivalence inequality 2: `wkpNorm ≤ √N · wkpNormL2` at `p = 2`,
-where `N = wkpIndexCardL2 k d` is the number of multi-indices of order `≤ k`.
-This uses Cauchy-Schwarz `(∑ a_i)² ≤ N · ∑ a_i²`. -/
 theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (hu : MemWkp (d := d) k 2 u Ω) :
@@ -590,7 +532,6 @@ theorem wkpNorm_le_sqrt_card_mul_wkpNormL2
   rw [← ENNReal.ofReal_mul (Real.sqrt_nonneg _)]
   exact ENNReal.ofReal_le_ofReal h_real
 
-/-- The `L²`-Sobolev inner product is symmetric. -/
 theorem wkpInnerL2_comm
     (k : ℕ) (u v : E → ℝ) (Ω : Set E) :
     wkpInnerL2 (d := d) k u v Ω = wkpInnerL2 (d := d) k v u Ω := by
@@ -602,12 +543,6 @@ theorem wkpInnerL2_comm
   refine integral_congr_ae ?_
   filter_upwards with x using mul_comm _ _
 
-/-- Pointwise pseudo-additivity: for `u₁, u₂, v ∈ W^{j,2}(Ω)`, the iterated weak
-partial of `u₁ + u₂` is ae-equal to the sum of the iterated weak partials of `u₁`
-and `u₂`, so the inner product is additive on the pointwise pre-Hilbert structure.
-
-We prove additivity in the first slot at order `j ≤ k`, working inside a single
-summand. The full result `wkpInnerL2_add_left` follows by summation. -/
 theorem wkpInnerL2_add_left
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u₁ u₂ v : E → ℝ}
@@ -664,7 +599,6 @@ theorem wkpInnerL2_add_left
     funext x; ring]
   exact integral_add h_int₁ h_int₂
 
-/-- Scalar-multiplication identity for the `L²`-Sobolev inner product (left slot). -/
 theorem wkpInnerL2_smul_left
     {k : ℕ} {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (v : E → ℝ)
@@ -700,7 +634,6 @@ theorem wkpInnerL2_smul_left
     funext x; ring]
   rw [integral_const_mul]
 
-/-- The `L²`-Sobolev inner product is non-negative on the diagonal. -/
 theorem wkpInnerL2_self_nonneg
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
     0 ≤ wkpInnerL2 (d := d) k u u Ω := by
@@ -712,8 +645,6 @@ theorem wkpInnerL2_self_nonneg
   intro β _
   exact integral_nonneg (fun x => mul_self_nonneg _)
 
-/-- For `u ∈ W^{k,2}(Ω)`, the squared `L²`-Sobolev norm (real-valued) equals
-the `L²`-Sobolev inner product `⟨u, u⟩`. -/
 theorem wkpNormL2Sq_toReal_eq_wkpInnerL2_self
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (hu : MemWkp (d := d) k 2 u Ω) :
@@ -770,8 +701,6 @@ theorem wkpNormL2Sq_toReal_eq_wkpInnerL2_self
     have h_iter := iterWeakPartial_memLp_of_memWkp (d := d) (p := (2 : ℝ≥0∞)) h_uWj β
     exact ENNReal.pow_lt_top h_iter.eLpNorm_lt_top
 
-/-- The squared `L²`-Sobolev norm equals the `L²`-Sobolev inner product `⟨u, u⟩`,
-in `ℝ≥0∞` (with both sides finite for `MemWkp k 2 u Ω`). -/
 theorem wkpNormL2_sq_toReal_eq_wkpInnerL2_self
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (hu : MemWkp (d := d) k 2 u Ω) :

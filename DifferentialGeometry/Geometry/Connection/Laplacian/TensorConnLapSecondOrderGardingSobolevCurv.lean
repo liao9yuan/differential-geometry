@@ -1,68 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapSecondOrderGardingL2Bound
 
-/-!
-# The generalized intrinsic order-`2` covariant Gårding `L²` estimate
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product
-space `E`, this file proves the **generalized intrinsic order-`2` covariant Gårding
-inequality** for a smooth compactly-supported `(0, 2)`-tensor field `T`:
-
-```
-‖∇²T‖²_{L²} ≤ C · (‖Δ_∇ T‖²_{L²} + ‖T‖²_{L²}),
-```
-
-where `∇²T = covGrad g 0 3 (covGrad g 0 2 T)` is the iterated covariant gradient
-(a `(0, 4)`-tensor field), `∇T = covGrad g 0 2 T` is the covariant gradient (a
-`(0, 3)`-tensor field), and `Δ_∇ T = rawTensorConnLapSmooth g 0 2 T` is the rough
-(connection) Laplacian.
-
-## Why a generalization is needed
-
-The committed `secondCovGrad_l2NormSq_le_rawConnLap_add_self`
-(`TensorConnLapSecondOrderGardingL2Bound.lean`) assumed the curvature `L²` bound
-`‖Curv‖_{L²} ≤ C₀ · ‖∇T‖_{L²}`. For the *true* third-order curvature defect
-`Tensor3rdCurv`, that hypothesis is **unsatisfiable**: the defect contains the
-second-covariant-derivative bracket terms `∇_{[Bᵢ,W]}(∇_{Bᵢ}T)` and the
-curvature-derivative term `∇_{Bᵢ}(R(Bᵢ,W)T)`, which are genuinely controlled by
-`‖∇²T‖_{L²}` and `‖T‖_{L²}` respectively, not by `‖∇T‖_{L²}` alone. The correct,
-satisfiable curvature `L²` bound is the **full first-order Sobolev bound**
-
-```
-‖Curv‖_{L²} ≤ C₀ · (‖T‖_{L²} + ‖∇T‖_{L²} + ‖∇²T‖_{L²}).
-```
-
-This file states the Gårding assembly with that hypothesis. The new feature in the
-proof is that the `‖∇²T‖_{L²}` summand of the curvature bound produces, after
-Cauchy–Schwarz, a cross term `C₀ · ‖∇²T‖_{L²} · ‖∇T‖_{L²}` on the **same side** as
-the leading `‖∇²T‖²_{L²}`. Young's inequality splits it into `½ ‖∇²T‖²_{L²}` plus a
-multiple of `‖∇T‖²_{L²}`, and the half of `‖∇²T‖²` is **absorbed** into the left-hand
-side, leaving a coefficient `< 1`. The remaining `‖∇T‖²` and `‖T‖ · ‖∇T‖` terms are
-controlled by the order-`1` covariant gradient control `‖∇T‖² ≤ ‖Δ_∇T‖ · ‖T‖` and
-Young's inequality.
-
-## The assembly
-
-The estimate chains:
-
-* the diagonal `(0, 3)` Green identity
-  (`covGrad_two_l2Inner_self_eq_neg_rawConnLap_three_inner`):
-  `‖∇²T‖²_{L²} = − ⟨Δ_∇(∇T), ∇T⟩_{L²}`;
-* the cross-pairing split through the commutator
-  (`rawConnLap_three_l2Inner_covGrad_eq`, supplied by the commitment):
-  `⟨Δ_∇(∇T), ∇T⟩_{L²} = − ‖Δ_∇ T‖²_{L²} + ⟨Curv, ∇T⟩_{L²}`;
-* the curvature `L²` bound `‖Curv‖_{L²} ≤ C₀ · (‖T‖ + ‖∇T‖ + ‖∇²T‖)` (hypothesis);
-* the order-`1` covariant gradient control
-  (`covGrad_l2NormSq_le_rawConnLap_mul_self`): `‖∇T‖² ≤ ‖Δ_∇ T‖ · ‖T‖`;
-* Cauchy–Schwarz on the curvature cross term, Young's inequality, and the
-  `½‖∇²T‖²` absorption.
-
-## Sign / order conventions
-
-Geometer convention `Δ_∇ = -∇*∇` for the rough Laplacian
-`rawTensorConnLapSmooth`. The covariant gradient `covGrad g 0 s` raises the tensor
-rank from `(0, s)` to `(0, s + 1)`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -96,30 +33,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
-/-- **Generalized intrinsic order-`2` covariant Gårding `L²` estimate.** For a smooth
-compactly-supported `(0, 2)`-tensor field `T` on a closed Riemannian manifold,
-given the rough-Laplacian / covariant-gradient commutator
-`Δ_∇(∇T) = ∇(Δ_∇ T) + Curv` (`hcomm`) with an explicit curvature defect field
-`Curv : SmoothCcTensor g 0 3` satisfying the **full first-order Sobolev curvature
-`L²` bound**
 
-```
-‖Curv‖_{L²} ≤ C₀ · (‖T‖_{L²} + ‖∇T‖_{L²} + ‖∇²T‖_{L²})
-```
-
-(`hcurv`), with `C₀ ≥ 0`, there is a nonnegative constant `C` with
-
-```
-‖∇²T‖²_{L²} ≤ C · (‖Δ_∇ T‖²_{L²} + ‖T‖²_{L²}),
-```
-
-where `∇²T = covGrad g 0 3 (covGrad g 0 2 T)`, `∇T = covGrad g 0 2 T`, and
-`Δ_∇ T = rawTensorConnLapSmooth g 0 2 T`. The explicit constant
-`C = 2 + 3 · C₀ + 2 · C₀²` carries the curvature defect and the Young / absorption
-bookkeeping. Unlike the committed `secondCovGrad_l2NormSq_le_rawConnLap_add_self`,
-the curvature hypothesis here is the **satisfiable** one for the true third-order
-defect: it allows the `‖∇²T‖_{L²}` summand, which is absorbed back into the left-hand
-side via Young's inequality. -/
 theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (Curv : SmoothCcTensor g 0 3) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)

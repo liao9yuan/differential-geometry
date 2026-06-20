@@ -1,43 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.SmoothCaseLpClass
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Smooth
 
-/-!
-# Full smooth-case gradient-inner-Laplacian regularity theorem (unconditional on
-the Christoffel discharge + per-chart transferability hypotheses)
-
-For a closed Riemannian manifold `(M, g)`, a smooth scalar
-`φ : C^∞⟮I, M; ℝ⟯`, and a smooth scalar `v : SmoothScalar g`, this module
-combines the smooth-case Lp-class Hessian bridge (delivered conditional on
-`christoffelDischargeSmoothCase` + `perChartAeTransferableSmoothCase` in
-`HessianBridgeSmoothLp`) with the existing smooth-case regularity theorem
-(conditional on the Hessian bridge in `GradInnerLaplacianSmoothFull`)
-to deliver the **full smooth-case regularity theorem** conditional only on
-the two clean hypotheses.
-
-## Hypotheses
-
-The smooth-case regularity theorem is now conditional on two clean
-hypotheses (replacing the broader Hessian-bridge hypothesis):
-
-1. **Christoffel discharge** (`christoffelDischargeSmoothCase g φ v`):
-   the POU-weighted Christoffel diff vanishes pointwise.
-
-2. **Per-chart ae-transferability** (`perChartAeTransferableSmoothCase g φ v`):
-   per-chart LapDom contribution ae-equals POU-weighted Euclidean pairing.
-
-## Main results
-
-* `gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffel_discharge`
-  — the smooth-case regularity theorem in resolvent-of-candidate form,
-  conditional on both hypotheses.
-
-* `smoothCase_full_unconditional_of_christoffel_discharge`
-  — the smooth-case image-membership form, conditional on both.
-
-* `smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge`
-  — the iterated-closure form, conditional on both.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -78,8 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Smooth-case regularity theorem, resolvent-of-candidate form, conditional
-on Christoffel discharge and per-chart transferability.** -/
 theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -96,8 +57,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffe
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-- **Smooth-case conclusion (image-membership form) via the unconditional
-candidate, conditional on Christoffel discharge and per-chart transferability.** -/
 theorem smoothCase_full_unconditional_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -111,8 +70,6 @@ theorem smoothCase_full_unconditional_of_christoffel_discharge
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-- **Smooth-case iterated-closure form via the unconditional candidate,
-conditional on Christoffel discharge and per-chart transferability.** -/
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditional_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -125,9 +82,6 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_unconditiona
     (hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-- **Compact restatement.** The smooth-case variational identity holds
-for the unconditional candidate, conditional on Christoffel discharge and
-per-chart transferability. -/
 theorem smoothCase_variational_identity_unconditional_of_christoffel_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -142,9 +96,6 @@ theorem smoothCase_variational_identity_unconditional_of_christoffel_discharge
   gradInnerCLM_eq_H1ComplToLp_resolvent_unconditional_smooth_of_christoffel_discharge
     (I := I) (M := M) g φ v h_transfer h_discharge
 
-/-- **Smooth-case regularity theorem, resolvent-of-candidate form, conditional
-only on the Christoffel discharge.** Per-chart ae-transferability is discharged
-unconditionally upstream. -/
 theorem gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -159,8 +110,6 @@ theorem gradInnerCLM_eq_H1ComplToLp_resolvent_smoothCase_of_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
-/-- **Smooth-case conclusion (image-membership form), conditional only on
-the Christoffel discharge.** -/
 theorem smoothCase_full_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -172,8 +121,6 @@ theorem smoothCase_full_of_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
-/-- **Smooth-case iterated-closure form, conditional only on the Christoffel
-discharge.** -/
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -184,8 +131,6 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_of_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
-/-- **Headline compact restatement, conditional only on the Christoffel
-discharge.** -/
 theorem smoothCase_variational_identity_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :

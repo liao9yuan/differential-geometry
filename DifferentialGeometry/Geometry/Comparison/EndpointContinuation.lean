@@ -23,19 +23,6 @@ import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Endpoint-continuation data under metric completeness
-
-The genuine asymptotic datum needed to extend a geodesic across a finite right
-endpoint: the `HasEndpointContinuation` predicate, the gluing of a geodesic to a
-fresh continuation past the endpoint, the chart-phase ODE uniqueness used to
-match them, and the producer `hasEndpointContinuation_of_complete` assembling the
-position limit, directional velocity limit, and `C¹` matching from metric
-completeness.
-
-The headline assembly lives in `Comparison.HopfRinow`, which imports this file.
--/
-
 noncomputable section
 
 open Set Function Filter Bundle Manifold
@@ -63,22 +50,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-/-- **Intrinsic extension past a finite endpoint, given the continuation.**
-Let `γ` be a geodesic (intrinsic moving-foot sense) on `Iio T`, and let
-`η` be a fresh local geodesic on `Ioo (-δ) δ` whose left-shift
-`t ↦ η (t - T)` agrees with `γ` approaching `T` from below (the
-`C¹`-matching hypothesis `hmatch`). Then `γ` extends to a geodesic on the
-strictly larger interval `Iio (T + δ)`, agreeing with `γ` below `T`.
-
-This replaces the (false on multi-chart manifolds) fixed-basepoint
-statement `maximalGeodesicInterval g p v = Set.univ`: the extension here
-is genuinely *across charts*, since the continuation geodesic `η` is
-launched from its own chart (typically the limit point `y`), not from the
-original basepoint. The gluing is `Geodesic.isGeodesicOn_glue_at_limit`.
-The continuation `η` is supplied by `exists_isGeodesicOn_Ioo_at` (whose
-launch point/velocity are the metric limit of `γ` at `T` and the limit
-velocity); the matching against that concrete `η` is the genuine
-asymptotic datum, recorded as the explicit hypothesis `hmatch`. -/
 theorem isGeodesicOn_extends_past_finite_endpoint
     (g : SmoothRiemannianMetric I M) {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
     (hγ : IsGeodesicOn (I := I) g γ (Set.Iio T))
@@ -92,14 +63,6 @@ theorem isGeodesicOn_extends_past_finite_endpoint
   intro t ht
   simp only [if_pos ht]
 
-/-- **Endpoint continuation data.** For a geodesic `γ` on `Iio b`, the
-genuine geometric datum needed to extend across the endpoint `b`: a fresh
-local geodesic `η` on some symmetric interval `Ioo (-δ) δ` whose
-left-shift `t ↦ η (t - b)` matches `γ` approaching `b` from below. This is
-the `C¹`-matching produced by the velocity-limit/Cauchy machinery (the
-launch point/velocity of `η` are the metric limit of `γ` at `b` and the
-limit velocity); it is a genuine assertion about `γ`'s asymptotics,
-distinct from the geodesic-extension conclusion. -/
 def HasEndpointContinuation
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (b : ℝ) : Prop :=
   ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧
@@ -107,13 +70,6 @@ def HasEndpointContinuation
     (∀ t ∈ Set.Ioo (-δ) δ, MDifferentiableAt 𝓘(ℝ, ℝ) I η t) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
 
-/-- **Chart-phase ODE uniqueness on `Icc a b`, left-endpoint form.**  Two phase
-curves `c₁, c₂ : ℝ → E × E` that solve the chart-`α` phase geodesic ODE
-`z' = chartPhaseVF g α z` (in one-sided `Iic`-derivative form) on `Ioc a b`,
-are continuous on `Icc a b`, stay inside a compact set `K` contained in the
-chart-target interior product, and agree at the right endpoint `b`, agree on all
-of `Icc a b`.  Direct application of `ODE_solution_unique_of_mem_Icc_left` with
-the uniform Lipschitz constant of `chartPhaseVF g α` on `K`. -/
 theorem chartPhaseVF_orbit_uniqueness_Icc_left
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)} (hK_compact : IsCompact K)
@@ -138,53 +94,7 @@ theorem chartPhaseVF_orbit_uniqueness_Icc_left
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Endpoint-continuation producer under metric completeness.**
-For a moving-foot geodesic `γ` on `Iio b` that is `C¹` with constant
-`g`-speed bounded by `c` (the two minimal separable regularity data a
-unit-speed geodesic supplies — `C¹`-time-smoothness and a uniform
-velocity-enorm bound), metric completeness furnishes endpoint-continuation
-data at `b`.
 
-The genuine ODE-regularity argument has three parts:
-
-* **Full position limit.** The constant-speed length-distance estimate
-  (`gc_length_distance_bound_curve`) makes `γ` uniformly Cauchy in
-  the Riemannian extended distance as `t → b⁻`, so by completeness `γ`
-  converges to a single limit point `y` along the whole filter `𝓝[<] b`
-  (`gc_position_limit`).
-
-* **Directional velocity limit.** Near `b` the geodesic stays inside a
-  single chart at `y`; in that chart the geodesic ODE has continuous,
-  bounded Christoffels on the compact image, so the chart-coordinate
-  solution and its derivative extend continuously to `b`, producing a
-  genuine limit tangent vector `w ∈ T_y M` (of the correct speed, by the
-  speed-preservation lemma `gc_velocity_limit`).
-
-* **`C¹` matching.** A fresh geodesic `η` is launched from `(y, w)` by
-  `exists_isGeodesicOn_Ioo_at`; uniqueness of the chart-`y` geodesic ODE
-  with matching `(position, velocity)` boundary data at `b` gives the
-  asymptotic agreement `γ =ᶠ[𝓝[<] b] (t ↦ η (t - b))`.
-
-The directional velocity-limit step: the chart-coordinate velocity is
-bounded near `b` by the constant-speed Gram estimate
-(`chartVelocity_bound_near_limit`, via the uniform positive-definiteness of the
-chart Gram matrix on a compact neighbourhood of `y`), and a bounded
-chart-acceleration then forces the chart velocity to a genuine limit
-(`chartVelocity_converges_at_finite_endpoint_Ioo`, on the analytic engine
-`velocity_converges_of_bounded_accel_Ioo`), with the chart-fixed second-order
-ODE supplied pointwise by `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity`.
-
-The metric limit produced in the `PseudoEMetricSpace` topology is transported
-into the manifold `ChartedSpace` topology through the topology-compatibility
-bridge `tendsto_nhds_of_tendsto_metric_nhds`, and the continuation geodesic
-`η` is launched from `(y, w)` with its initial chart velocity exposed by
-`exists_isGeodesicOn_Ioo_at_velocity`.
-
-The asymptotic matching `hmatch` is then closed via the chart-`y`-coordinate
-phase curve: `γ` and the shifted continuation `t ↦ η (t - b)` both solve the
-autonomous chart-`y` phase ODE near `b`, share the common boundary datum
-`(φ_y y, w)` at the endpoint, and hence agree by left-endpoint ODE uniqueness
-(`chartPhaseVF_orbit_uniqueness_Icc_left`). -/
 theorem hasEndpointContinuation_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {aL b c : ℝ}

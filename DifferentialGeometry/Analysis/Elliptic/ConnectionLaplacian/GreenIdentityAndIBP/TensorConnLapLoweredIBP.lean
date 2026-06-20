@@ -1,39 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovariantIntegrationByParts
 import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
 
-/-!
-# Directional lowered integration-by-parts for `(r, s)`-tensor fields
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, fixed ranks `(r, s)`, this file packages the
-directional metric-lowered covariant derivative of a smooth compactly-supported
-`(r, s)`-tensor section, contracted against a smooth tangent vector field, as a
-genuine smooth compactly-supported section of the covariant `(0, r + s)`-tensor
-bundle, and derives the directional covariant integration-by-parts identity in
-its self-contained form (no externally supplied integrability hypotheses).
-
-The metric-lowered directional covariant derivative `loweredCovDerivAt g r s S`
-is the covariant derivative of the lifted `(0, r + s)`-tensor section
-`liftedTensorSection g r s S`, induced by the Levi-Civita connection of `g`. For
-a smooth tangent vector field `X`, the section `y ↦ ∇_{X y} S y` (metric-lowered)
-is exactly `covApply (tensor0SCovariantDerivative … (r + s) …) X
-(liftedTensorSection g r s S)`, whose smoothness comes from
-`covApply_contMDiffOn` applied to the smooth lifted section and the smooth vector
-field. Compact support comes from the locality of the covariant derivative: it
-vanishes outside the support of `S`.
-
-## Main results
-
-* `loweredCovDerivAlongVF` — the section `y ↦ loweredCovDerivAt g r s S y (X y)`,
-  bundled as a smooth `(0, r + s)`-tensor section.
-* `loweredCovDerivAlongVF_apply` — its underlying value at `y`.
-* `loweredCovDerivAlongVF_contMDiff` — smoothness in total-space form.
-* `loweredCovDerivAlongVF_hasCompactSupport` — compact support of its model image.
-* `integral_tensorInner_covDeriv_eq_self` — the directional covariant
-  integration-by-parts identity, with the two cross-term integrability
-  hypotheses discharged internally from continuity and compact support.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -66,10 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The metric-lowered directional covariant derivative of a smooth
-`(r, s)`-tensor section `S` along a smooth tangent vector field `X`, as a raw
-`(0, r + s)`-tensor section. At a point `y` its value is
-`loweredCovDerivAt g r s S y (X y)`. -/
 def loweredCovDerivAlongVFraw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -77,8 +40,6 @@ def loweredCovDerivAlongVFraw
     Π y : M, Tensor0SSpace (r + s) I y :=
   fun y => loweredCovDerivAt (I := I) (M := M) g r s S y (X y)
 
-/-- The raw lowered directional derivative section is the covariant derivative of
-the lifted `(0, r + s)`-tensor section along `X`. -/
 lemma loweredCovDerivAlongVFraw_eq_covApply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -90,10 +51,6 @@ lemma loweredCovDerivAlongVFraw_eq_covApply
   funext y
   rfl
 
-/-- **Smoothness of the lowered directional derivative section.** For a smooth
-`(r, s)`-tensor section `S` and a smooth tangent vector field `X`, the section
-`y ↦ loweredCovDerivAt g r s S y (X y)` is a `C^∞` section of the
-`(0, r + s)`-tensor bundle, in total-space form. -/
 lemma loweredCovDerivAlongVFraw_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -125,11 +82,6 @@ lemma loweredCovDerivAlongVFraw_contMDiff
   rw [← contMDiffOn_univ]
   exact hOn
 
-/-- The lowered directional derivative section vanishes outside `tsupport S`.
-
-The lifted section vanishes wherever `S` does, so on a neighbourhood of a point
-outside `tsupport S` it is identically zero; by locality of the covariant
-derivative the lowered directional derivative vanishes there. -/
 lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -190,8 +142,6 @@ lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
   rw [hcov_zero]
   rfl
 
-/-- **Compact support of the lowered directional derivative section.** Its model
-image has compact support contained in `tsupport (toModel ∘ S)`. -/
 lemma loweredCovDerivAlongVFraw_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -208,10 +158,6 @@ lemma loweredCovDerivAlongVFraw_hasCompactSupport
   rw [loweredCovDerivAlongVFraw_eq_zero_off_tsupport (I := I) (M := M) g r s S X hynot,
     Tensor0SSpace.toModel_zero]
 
-/-- **The lowered directional covariant derivative along a vector field, bundled
-as a smooth section.** For a smooth `(r, s)`-tensor section `S` and a smooth
-tangent vector field `X`, the section `y ↦ loweredCovDerivAt g r s S y (X y)` is
-packaged as a `Cₛ^∞` section of the `(0, r + s)`-tensor bundle. -/
 def loweredCovDerivAlongVF
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -228,8 +174,6 @@ def loweredCovDerivAlongVF
     loweredCovDerivAlongVF (I := I) (M := M) g r s S X y =
       loweredCovDerivAt (I := I) (M := M) g r s S y (X y) := rfl
 
-/-- **Smoothness of the inner-product scalar.** For smooth `(r, s)`-tensor
-sections `W`, `S`, the scalar `tensorInnerScalar g r s W S` is `C^∞`. -/
 lemma tensorInnerScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯) :
@@ -238,17 +182,6 @@ lemma tensorInnerScalar_contMDiff
   DifferentialGeometry.Tensor.tensorInnerPointwise_contMDiff_of_mdiff
     (I := I) (M := M) g r s W S
 
-/-- **Directional covariant integration by parts (combined, self-contained).**
-For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, a smooth
-tangent vector field `V`, and smooth `(r, s)`-tensor sections `W`, `S`, the
-integral of the covariant Leibniz expression vanishes:
-
-  `∫_M (⟨∇_V W, S⟩ + ⟨W, ∇_V S⟩ + ⟨W, S⟩ · divᵍ V) dvol_g = 0`,
-
-where `∇_V` is the metric-lowered directional covariant derivative
-`loweredCovDerivAlongVF g r s · V`, and `⟨·, ·⟩` is the covariant `(0, r + s)`
-inner product of the metric-lowered tensors. No integrability or smoothness
-hypothesis is exposed: smoothness of `y ↦ ⟨W y, S y⟩` is discharged internally. -/
 theorem integral_tensorInner_covDeriv_combined_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -270,19 +203,6 @@ theorem integral_tensorInner_covDeriv_combined_eq_zero
     (I := I) (M := M) g r s W S V
     (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W S)
 
-/-- **Directional covariant integration by parts (split form).** For a closed
-smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, a smooth tangent vector
-field `V`, and smooth `(r, s)`-tensor sections `W`, `S` whose two covariant
-cross terms are integrable,
-
-  `∫_M ⟨W, ∇_V S⟩ dvol_g
-     = -∫_M ⟨∇_V W, S⟩ dvol_g - ∫_M ⟨W, S⟩ · divᵍ V dvol_g`,
-
-where `∇_V` is the metric-lowered directional covariant derivative
-`loweredCovDerivAlongVF g r s · V`. The smoothness of the inner-product scalar
-is discharged internally; only the two cross-term integrability witnesses are
-exposed (they are discharged by the caller summing over a frame, where the
-combined boundedness is available). -/
 theorem integral_tensorInner_covDeriv_split_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

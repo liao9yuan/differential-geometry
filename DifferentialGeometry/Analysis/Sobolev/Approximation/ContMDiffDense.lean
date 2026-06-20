@@ -3,39 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkp
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.BanachManifold
 
-/-!
-# Smooth-density theorem for `W^{1,p}_chart(M)` on a closed Riemannian manifold
-
-For a closed Riemannian manifold `M` modelled on a finite-dimensional real
-inner-product space, `1 ≤ p < ∞`, and a function `u ∈ W^{1,p}_chart(M)`, smooth
-functions are dense: for every `ε > 0` there is a `C^∞` `v : M → ℝ` with
-`wkpNormChart g 1 p (u - v) ≤ ENNReal.ofReal ε`.
-
-The construction:
-
-1. Pick a per-chart compact neighbourhood `K_α^M ⊆ chart α source` whose
-   interior contains `tsupport ρ_α`. Build a smooth manifold cutoff `η_M_α`
-   that is `1` on `tsupport ρ_α` and supported in `K_α^M`. Pull this back to
-   the Euclidean chart target as `ηE_α := etaEuclid α η_M_α`. Then `ηE_α`
-   has closed support inside the chart-α image of `K_α^M`.
-2. Per-chart smooth approximant `χ_α : EuclN → ℝ` with strict strong support
-   inside the chart-α image of `K_α^M`, via
-   `exists_strict_strong_support_approx`, satisfying
-   `wkpNorm 1 p (chartPushed g α u - χ_α) ≤ ENNReal.ofReal ε_per`.
-3. The "tightened" chart-pushed `f_α := ηE_α * chartPushed g α u`. Globally on
-   `EuclN`, `f_α` has tsupport inside the chart-α image of `K_α^M`. On the
-   chart target, `f_α` agrees pointwise with `chartPushed g α u`.
-4. The cross-chart constant `K_{γ,α}` from
-   `cross_chart_bound_strict_strong_memWkp`, applied to `f_α - χ_α`.
-5. Manifold approximant `v(x) := Σ_α∈chartAtlasPOU_finset chartPullback I α χ_α (x)`,
-   smooth via `chartPullback_contMDiff` and `contMDiff_finset_sum_chartPullback`.
-6. The pointwise identity `u(x) = Σ_α chartPullback I α (chartPushed g α u)(x)`
-   over the finset, derived from the partition-of-unity identity
-   `Σ_α ρ_α(x) = 1`.
-7. Triangle inequality + cross-chart bound + per-chart bound to get
-   `wkpNormChart g 1 p (u - v) ≤ ε`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -59,7 +26,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [IsManifold I ∞ M] in
-/-- The chart-pullback is additive on the difference of Euclidean functions. -/
+
 lemma chartPullback_sub (α : M)
     (ψ₁ ψ₂ : EuclN → ℝ) :
     chartPullback I α (fun y => ψ₁ y - ψ₂ y) =
@@ -71,9 +38,7 @@ lemma chartPullback_sub (α : M)
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α _ hx]
 
 omit [IsManifold I ∞ M] in
-/-- A finite sum of chart-pullbacks of the same chart `α` is the chart-pullback
-of the finite sum of Euclidean functions. (Not used in the main theorem;
-recorded for completeness.) -/
+
 lemma chartPullback_finset_sum (α : M)
     {ι : Type*} (S : Finset ι) (ψ : ι → EuclN → ℝ) :
     chartPullback I α (fun y => ∑ i ∈ S, ψ i y) =
@@ -94,10 +59,6 @@ lemma chartPullback_finset_sum (α : M)
       funext x
       rw [Finset.sum_insert hiS]
 
-/-- On a compact manifold with the canonical chart-atlas POU, every function
-`u : M → ℝ` decomposes pointwise as a finite sum of chart-pulled-back
-chart-pushed pieces:
-`u(x) = Σ_α∈chartAtlasPOU_finset (chartPullback I α (chartPushed g α u))(x)`. -/
 lemma fun_eq_finset_sum_chartPullback_chartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (u : M → ℝ) :
@@ -152,11 +113,6 @@ lemma fun_eq_finset_sum_chartPullback_chartPushed
       from by rw [Finset.sum_mul]]
   rw [chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x, one_mul]
 
-/-- For each chart `α : M`, choose a fixed compact `K_α ⊆ chart α source` (with
-`tsupport ρ_α ⊆ interior K_α`) and a strict-strong-support smooth approximant
-`χ_α : EuclN → ℝ` whose closed support sits inside the chart-α image of `K_α`,
-with per-chart Euclidean Sobolev distance to `chartPushed g α u` bounded by
-`ENNReal.ofReal ε_per`. -/
 private lemma exists_strict_strong_support_approx_with_compact_neighborhood
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -184,16 +140,6 @@ private lemma exists_strict_strong_support_approx_with_compact_neighborhood
   intro ε_per hε_per
   exact hχ hu ε_per hε_per
 
-/-- `tightenedChartPushed` is `ηE_α * chartPushed g α u`, where `ηE_α` is the
-Euclidean pullback of a manifold cutoff supported inside `K_α` and `≡ 1` on
-`tsupport ρ_α`. By construction:
-
-* `tsupport (tightenedChartPushed) ⊆ chart-α image of K_α^M` (globally on `EuclN`);
-* `tightenedChartPushed = chartPushed g α u` pointwise on `chartTargetEuclid α`
-  (since `ηE_α = 1` on the chart-α image of `tsupport ρ_α`, and `chartPushed g α u`
-  vanishes off this set on the chart target).
-
-This makes `tightenedChartPushed - χ_α` ready as input to the cross-chart bound. -/
 def tightenedChartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (η_M : M → ℝ) (u : M → ℝ) : EuclN → ℝ :=
@@ -202,8 +148,6 @@ def tightenedChartPushed
       chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y
 
-/-- The chart-pullback of `tightenedChartPushed` agrees with the chart-pullback
-of `chartPushed g α u` on `M`. -/
 lemma chartPullback_tightenedChartPushed_eq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {η_M : M → ℝ}
@@ -274,8 +218,6 @@ lemma chartPullback_tightenedChartPushed_eq
   · rw [chartPullback_apply_of_notMem (I := I) (M := M) α _ hxα]
     rw [chartPullback_apply_of_notMem (I := I) (M := M) α _ hxα]
 
-/-- The closed support of `tightenedChartPushed` lies inside the chart-α image
-of `K_α^M`, when the underlying manifold cutoff `η_M` has `tsupport η_M ⊆ K_α`. -/
 lemma tsupport_tightenedChartPushed_subset
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {η_M : M → ℝ}
@@ -310,8 +252,6 @@ lemma tsupport_tightenedChartPushed_subset
     Set.image_mono hη_tsupp_K
   exact h_supp_in_etaEuclid.trans (h_etaEuclid_supp.trans h_image_mono)
 
-/-- `tightenedChartPushed` agrees with `chartPushed g α u` pointwise on the chart
-target `chartTargetEuclid α`, when `η_M ≡ 1` on `tsupport ρ_α`. -/
 lemma tightenedChartPushed_eq_chartPushed_on_target
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {η_M : M → ℝ}
@@ -347,7 +287,6 @@ lemma tightenedChartPushed_eq_chartPushed_on_target
         hη_one_on_tsupport hy_in_image'
     rw [hηE_y]; ring
 
-/-- `tightenedChartPushed` is in `MemWkp 1 p` of the chart target. -/
 private lemma tightenedChartPushed_memWkp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -407,9 +346,6 @@ private lemma tightenedChartPushed_memWkp
   exact chartCutoff_smul_chartPushed_memWkp (I := I) (M := M) g hp_one hu α
     hηE_smooth hC_norm_target hC_grad_target
 
-/-- `wkpNorm 1 p (tightenedChartPushed α η_M u - χ) (chartTargetEuclid α)`
-equals `wkpNorm 1 p (chartPushed g α u - χ) (chartTargetEuclid α)` (modulo a.e.
-equality on the chart target). -/
 private lemma wkpNorm_tightenedChartPushed_sub_eq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -854,10 +790,6 @@ private theorem MemWkp_of_cross_chart_pushforward
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) hp_one (chartTargetEuclid_isOpen (I := I) (M := M) γ) h_ae_eq).mpr hψ_mem_target
 
-/-- **Smooth-density theorem in `W^{1,p}_chart(M)`.** For a closed Riemannian
-manifold `M` modelled on a finite-dimensional real inner-product space, every
-function `u : M → ℝ` in `W^{1,p}_chart(M)` (with `1 ≤ p < ∞`) admits, for any
-`ε > 0`, a smooth `v : M → ℝ` with `wkpNormChart g 1 p (u - v) ≤ ε`. -/
 theorem contMDiff_dense_in_WkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]

@@ -1,60 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 
-/-!
-# Non-smooth weak solutions of uniformly elliptic divergence-form
-equations on Euclidean space.
-
-This module introduces the predicate `IsWeakSolution` for weak solutions
-without imposing smoothness on the unknown `u`, and provides the
-classical second-order operator `SmoothEllipticBilinearForm.classicalApply`
-acting on a smooth function. The main results connect the smooth and
-non-smooth formulations and assemble the duality bookkeeping needed to
-transfer interior regularity from smooth approximating sequences to a
-non-smooth weak solution.
-
-## Main results
-
-* `SmoothEllipticBilinearForm.IsWeakSolution` — the non-smooth weak
-  solution predicate. No smoothness is required on `u`.
-
-* `SmoothEllipticBilinearForm.IsSmoothWeakSolution.toWeakSolution` —
-  every smooth weak solution is a (non-smooth) weak solution.
-
-* `SmoothEllipticBilinearForm.classicalApply` — the classical
-  divergence-form operator
-  `(L v)(x) = -∑_i ∂_i(∑_j a^{ij} ∂_j v) + c · v`, defined on any function
-  `v : E → ℝ`. For smooth `v`, `classicalApply B v` is itself smooth.
-
-* `SmoothEllipticBilinearForm.contDiff_classicalApply` — for smooth `v`,
-  the classical operator action `classicalApply B v` is smooth.
-
-* `SmoothEllipticBilinearForm.isSmoothWeakSolution_classicalApply` — every
-  smooth function `v` is a smooth weak solution of the equation
-  `L v = classicalApply v`. The proof packages the standard integration
-  by parts identity `B(v, ψ) = ∫_Ω L v · ψ` for smooth `v` and smooth
-  compactly supported `ψ`, after re-indexing via the symmetry `a^{ij} =
-  a^{ji}` of the principal coefficient matrix.
-
-* `SmoothEllipticBilinearForm.mollifyEps_isSmoothWeakSolution_classicalApply`
-  — for any locally integrable `u : E → ℝ`, the mollified function
-  `u_ε := mollifyEps hε u` is a smooth weak solution of
-  `L u_ε = classicalApply u_ε`. This is the immediate corollary of the
-  preceding theorem applied to the smooth function `u_ε`.
-
-* `SmoothEllipticBilinearForm.integral_classicalApply_mollifyEps_eq_bilin`
-  — the pairing `∫_Ω classicalApply u_ε · ψ` equals `B.bilin u_ε ψ` for
-  any smooth compactly supported test function `ψ`.
-
-* `SmoothEllipticBilinearForm.integral_classicalApply_mollifyEps_sub_eq_bilin_sub`
-  — the duality difference identity
-  `∫_Ω (classicalApply u_ε - f) · ψ = B.bilin u_ε ψ - B.bilin u ψ` for
-  any non-smooth weak solution `u` of `L u = f`. This identity is the
-  bookkeeping link between the (strong) `L²(Ω')` convergence of
-  `classicalApply u_ε → f` and bilinear-form data convergence
-  `B.bilin u_ε ψ → B.bilin u ψ`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -71,25 +17,17 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- `B.IsWeakSolution u f` says that `u : E → ℝ` is a weak solution of the
-divergence-form equation `L u = f` on `Ω`, in the sense that
-`B(u, ψ) = ∫_Ω f · ψ` for every `ψ ∈ C^∞_c(Ω)`. Unlike
-`IsSmoothWeakSolution`, no smoothness is assumed on `u`. -/
 def IsWeakSolution
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (u f : E → ℝ) : Prop :=
   ∀ ψ : E → ℝ, ContDiff ℝ (⊤ : ℕ∞) ψ → HasCompactSupport ψ → tsupport ψ ⊆ Ω →
     B.bilin u ψ = ∫ x in Ω, f x * ψ x
 
-/-- A smooth weak solution is in particular a (non-smooth) weak solution. -/
 theorem IsSmoothWeakSolution.toWeakSolution
     {Ω : Set E} {B : SmoothEllipticBilinearForm d Ω} {u f : E → ℝ}
     (h : B.IsSmoothWeakSolution u f) : B.IsWeakSolution u f := by
   intro ψ hψ_smooth hψ_supp hψ_tsub
   exact h.2 ψ hψ_smooth hψ_supp hψ_tsub
 
-/-- The classical second-order operator
-`(L v)(x) = -∑_i ∂_i (∑_j a^{ij}(·) ∂_j v(·))(x) + c(x) v(x)`. For a smooth
-`v`, this matches the bilinear-form action via integration by parts. -/
 def classicalApply
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (v : E → ℝ) : E → ℝ :=
   fun x =>
@@ -100,9 +38,6 @@ def classicalApply
         (EuclideanSpace.single i 1) +
       B.c x * v x
 
-/-- For smooth `v`, the classical operator action `classicalApply B v` is
-smooth: it is built from smooth coefficients, smooth derivatives of `v`, and
-smooth multiplications. -/
 theorem contDiff_classicalApply
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) {v : E → ℝ}
     (hv : ContDiff ℝ (⊤ : ℕ∞) v) :
@@ -147,9 +82,6 @@ theorem contDiff_classicalApply
     exact h_outer_partial i
   · exact B.smooth_c.mul hv
 
-/-- For a smooth function `v`, the smooth function `g := ∑_j a^{ij} ∂_j v`
-is integration-by-parts compatible with smooth compactly supported test
-functions: `∫_Ω g · ∂_i ψ = -∫_Ω (∂_i g) · ψ`. -/
 private lemma ibp_smooth_against_test_inner
     {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -163,9 +95,6 @@ private lemma ibp_smooth_against_test_inner
     (i := i) (f := f) hf_C1
   exact h_weak ψ hψ hψ_supp hψ_tsub
 
-/-- Integrability of the principal integrand against a smooth test function:
-for smooth `v` and a smooth compactly supported `ψ` with support in `Ω`, the
-integrand `∑_i ∑_j a^{ij}(·) ∂_i v(·) ∂_j ψ(·)` is integrable on `Ω`. -/
 private lemma integrable_principalIntegrand_smooth_test
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {v ψ : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -196,8 +125,6 @@ private lemma integrable_principalIntegrand_smooth_test
   exact integrable_finset_sum _ (fun i _ => integrable_finset_sum _
     (fun j _ => h_summand_int i j))
 
-/-- Integrability of the zeroth-order integrand `c · v · ψ` against a smooth
-test function. -/
 private lemma integrable_zeroth_smooth_test
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {v ψ : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -209,7 +136,6 @@ private lemma integrable_zeroth_smooth_test
     hψ_supp.mul_left
   exact (h_cont.integrable_of_hasCompactSupport h_supp).restrict
 
-/-- Integrability of each term `a^{ij}(·) (∂_i v)(·) (∂_j ψ)(·)`. -/
 private lemma integrable_principalIntegrand_term_smooth_test
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {v ψ : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -232,8 +158,6 @@ private lemma integrable_principalIntegrand_term_smooth_test
     exact hψ_partial_supp.mul_left
   exact (h_cont.integrable_of_hasCompactSupport h_supp).restrict
 
-/-- Decomposition of `B.bilin v ψ` for smooth `v` and smooth compactly
-supported `ψ`. -/
 private lemma bilin_decomp_smooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {v ψ : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -267,7 +191,6 @@ private lemma bilin_decomp_smooth
         (fderiv ℝ ψ x) (EuclideanSpace.single j 1))
     (fun j _ => h_summand_int i j)]
 
-/-- Smoothness of the inner-sum function `∑_j a^{ij}(·) ∂_j v(·)`. -/
 private lemma contDiff_innerSum
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (i : Fin d) :
@@ -283,7 +206,6 @@ private lemma contDiff_innerSum
       (EuclideanSpace.single j (1 : ℝ))).contDiff
   exact (B.contDiff_a i j).mul (h_apply_smooth.comp h_fderiv_smooth)
 
-/-- IBP on the smooth function `g_i := ∑_j a^{ij} ∂_j v` against `ψ`. -/
 private lemma ibp_innerSum_against_test
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v)
@@ -302,8 +224,6 @@ private lemma ibp_innerSum_against_test
   exact ibp_smooth_against_test_inner (d := d) h_inner_smooth hΩ hψ hψ_supp
     hψ_tsub i
 
-/-- The principal-form contribution to `B.bilin v ψ`, rewritten via reindexing
-and IBP. -/
 private lemma principal_eq_neg_classical
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v)
@@ -364,8 +284,6 @@ private lemma principal_eq_neg_classical
   intro i _
   exact ibp_innerSum_against_test (d := d) hΩ B hv hψ hψ_supp hψ_tsub i
 
-/-- Integrability of the divergence-form integrand `(∂_i (∑_j a^{ij} ∂_j v)) ψ`
-for smooth `v` and smooth compactly supported `ψ`. -/
 private lemma integrable_classicalApply_term_against_psi
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {v ψ : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -404,11 +322,6 @@ private lemma integrable_classicalApply_term_against_psi
     hψ_supp.mul_left
   exact (h_cont.integrable_of_hasCompactSupport h_supp).restrict
 
-/-- For any smooth `v : E → ℝ`, `v` is a smooth weak solution of the equation
-`L v = classicalApply v`. The proof packages two integration-by-parts
-applications: (i) on the principal terms `∫ a^{ij} ∂_i v ∂_j ψ` to bring
-both derivatives onto `v` (via the sum form `∑_j a^{ij} ∂_j v`), and (ii)
-the trivial reorganisation of the zeroth-order term. -/
 theorem isSmoothWeakSolution_classicalApply
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) :
@@ -489,9 +402,6 @@ theorem isSmoothWeakSolution_classicalApply
       (fun i _ => h_class_int i)]
   rw [h_rhs_eq]
 
-/-- For an open set `Ω`, the mollified function `u_ε := mollifyEps hε u` of a
-locally integrable `u : E → ℝ` is smooth on the whole space, and hence is a
-smooth weak solution of `L u_ε = classicalApply u_ε`. -/
 theorem mollifyEps_isSmoothWeakSolution_classicalApply
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu_loc : LocallyIntegrable u (volume : Measure E))
@@ -509,8 +419,6 @@ theorem mollifyEps_isSmoothWeakSolution_classicalApply
       (d := d) hε hu_loc
   exact isSmoothWeakSolution_classicalApply (d := d) hΩ B h_uε_smooth
 
-/-- The pairing of `classicalApply (mollifyEps hε u)` with a smooth
-compactly supported `ψ` equals the bilinear form `B.bilin (mollifyEps hε u) ψ`. -/
 theorem integral_classicalApply_mollifyEps_eq_bilin
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu_loc : LocallyIntegrable u (volume : Measure E))
@@ -526,13 +434,6 @@ theorem integral_classicalApply_mollifyEps_eq_bilin
     mollifyEps_isSmoothWeakSolution_classicalApply (d := d) hΩ B hu_loc hε
   exact (h_smooth_weak.2 ψ hψ hψ_supp hψ_tsub).symm
 
-/-- The duality difference: for `IsWeakSolution u f`, the pairing of
-`classicalApply (mollifyEps hε u) - f` against a smooth compactly supported
-test function `ψ` equals the difference of bilinear-form actions
-`B.bilin (mollifyEps hε u) ψ - B.bilin u ψ`. This is the bookkeeping
-identity that converts the (strong) `L²(Ω')` convergence of
-`classicalApply (mollifyEps hε u) → f` into the bilinear-form data
-convergence. -/
 theorem integral_classicalApply_mollifyEps_sub_eq_bilin_sub
     {Ω : Set E} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}

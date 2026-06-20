@@ -3,73 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Component.PouComponentBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.EigenvectorChartAtomLimits
 
-/-!
-# The `n → ∞` `L²`-limits of the three lower-order coefficient terms
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`,
-and a component multi-index `P₀`, the per-approximant chart bilinear identity of
-the connection Laplacian carries three lower-order coefficient terms on its
-right-hand side, evaluated at the partition-of-unity-weighted smooth approximant
-`Tₙ := pouSmul g r s α (eigenvectorSmoothApprox g r s i n)`:
-
-* the principal rotation coefficient `covPrincipalRotationCoeff g r s Tₙ α P₀`;
-* the lower-order rotation value coefficient
-  `covLowerOrderRotationValueCoeff g r s Tₙ α P₀`;
-* the chart-density-weighted lower-order gradient coefficient
-  `weightedGradCoeff g r s Tₙ α P₀ l`, together with its chart-Euclidean
-  divergence `euclidPartial l (weightedGradCoeff g r s Tₙ α P₀ l)`.
-
-This file produces, for each of these, the `n → ∞` `L²`-limit in
-`Lp ℝ 2 (chartL2Measure α)`.
-
-## The tracing identity
-
-With `wₙ := eigenvectorSmoothApprox g r s i n` and
-`Tₙ := pouSmul g r s α wₙ.toCcTensor`, the raw chart component of `Tₙ` is the
-partition-of-unity-weighted chart component of `wₙ.toCcTensor`
-(`tensorChartComponentRaw_pouSmul_eq_tensorChartComponentPou`), whose Euclidean
-push-forward is the canonical Euclidean chart component
-`tensorChartComponent g r s wₙ.toCcTensor α P`. Consequently each of the three
-coefficients, evaluated at `Tₙ` and restricted to the chart target, is a finite
-`C^∞`-coefficient-weighted sum of the two `T`-dependent atoms
-
-* `tensorChartComponent g r s wₙ.toCcTensor α P` (the bare chart component);
-* `euclidPartial k (tensorChartComponent g r s wₙ.toCcTensor α P)` (its
-  chart-Euclidean partial).
-
-The `L²`-limits of those two atoms are supplied by the companion files:
-`eigenvectorChartComponentL2_tendsto` (chart component) and
-`eigenvectorChartPartialLp_tendsto` (chart partial). Multiplication by a `C^∞`
-coefficient — bounded on the compact partition-of-unity kernel, off which every
-atom vanishes — preserves `L²`-convergence, and a finite sum of `L²`-convergent
-sequences converges.
-
-## Main definitions
-
-* `covPrincipalRotationCoeffLimit g r s i α P₀` — the explicit
-  `L²`-limit function of `covPrincipalRotationCoeff g r s Tₙ α P₀`.
-* `covLowerOrderRotationValueCoeffLimit g r s i α P₀` — the
-  explicit `L²`-limit function of `covLowerOrderRotationValueCoeff g r s Tₙ α P₀`.
-* `weightedGradCoeffLimit g r s i α P₀ l` — the explicit `L²`-limit
-  function of `weightedGradCoeff g r s Tₙ α P₀ l`.
-* `weightedGradCoeffDivLimit g r s i α P₀ l` — the explicit
-  `L²`-limit function of `euclidPartial l (weightedGradCoeff g r s Tₙ α P₀ l)`.
-
-## Main results
-
-* `covPrincipalRotationCoeff_tendsto`,
-  `covLowerOrderRotationValueCoeff_tendsto`,
-  `weightedGradCoeff_tendsto`,
-  `weightedGradCoeffDiv_tendsto` — the four
-  `n → ∞` `L²`-convergence headlines.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -107,7 +40,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of `covPrincipalRotationCoeffLimit`. -/
 noncomputable def covPrincipalRotationCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -122,7 +54,6 @@ noncomputable def covPrincipalRotationCoeffLimit
               (partialLpLimit (I := I) (M := M) g r s i α P k :
                 EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `covPrincipalRotationCoeff_pouSmul_eq_sum`. -/
 private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -153,7 +84,6 @@ private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
   rw [principalRotationFactor]
   ring
 
-/-- Chart-locality-free twin of `covPrincipalRotationCoeff_pouSmul_memLp`. -/
 theorem covPrincipalRotationCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -182,7 +112,6 @@ theorem covPrincipalRotationCoeff_pouSmul_memLp
     covPrincipalRotationCoeff_pouSmul_eq_sum (I := I) (M := M)
       g r s i α P₀ n y))
 
-/-- Chart-locality-free twin of `covPrincipalRotationCoeffLimit_memLp`. -/
 theorem covPrincipalRotationCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -204,9 +133,6 @@ theorem covPrincipalRotationCoeffLimit_memLp
               g r s α P₀ P Q k l)
             (partialLpLimit (I := I) (M := M) g r s i α P k)))))
 
-/-- **The `n → ∞` `L²`-limit of the principal rotation coefficient
-(chart-locality-free).** Chart-locality-free twin of
-`covPrincipalRotationCoeff_tendsto`. -/
 theorem covPrincipalRotationCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -293,7 +219,6 @@ theorem covPrincipalRotationCoeff_tendsto
       g r s i α P₀)
     hFn_eq hFlim_eq
 
-/-- Chart-locality-free twin of `weightedGradCoeffLimit`. -/
 noncomputable def weightedGradCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -309,7 +234,6 @@ noncomputable def weightedGradCoeffLimit
               (componentLpLimit (I := I) (M := M) g r s i α p :
                 EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `weightedGradCoeff_pouSmul_eqOn`. -/
 private lemma weightedGradCoeff_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -344,7 +268,6 @@ private lemma weightedGradCoeff_pouSmul_eqOn
   rw [weightedGradFactor]
   ring
 
-/-- Chart-locality-free twin of `weightedGradCoeff_pouSmul_memLp`. -/
 theorem weightedGradCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -378,7 +301,6 @@ theorem weightedGradCoeff_pouSmul_memLp
     weightedGradCoeff_pouSmul_eqOn (I := I) (M := M)
       g r s i α P₀ l n hy)
 
-/-- Chart-locality-free twin of `weightedGradCoeffLimit_memLp`. -/
 theorem weightedGradCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -401,9 +323,6 @@ theorem weightedGradCoeffLimit_memLp
               g r s α P₀ l P Q k p)
             (componentLpLimit (I := I) (M := M) g r s i α p)))))
 
-/-- **The `n → ∞` `L²`-limit of the chart-density-weighted lower-order gradient
-coefficient (chart-locality-free).** Chart-locality-free twin of
-`weightedGradCoeff_tendsto`. -/
 theorem weightedGradCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -491,7 +410,6 @@ theorem weightedGradCoeff_tendsto
     (weightedGradCoeffLimit_memLp (I := I) (M := M) g r s i α P₀ l)
     hFn_eq hFlim_eq
 
-/-- Chart-locality-free twin of `weightedGradCoeffDivLimit`. -/
 noncomputable def weightedGradCoeffDivLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -518,7 +436,6 @@ noncomputable def weightedGradCoeffDivLimit
                   (partialLpLimit (I := I) (M := M) g r s i α p l :
                     EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `euclidPartial_weightedGradCoeff_pouSmul_memLp`. -/
 theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -589,7 +506,6 @@ theorem euclidPartial_weightedGradCoeff_pouSmul_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
       hy)
 
-/-- Chart-locality-free twin of `weightedGradCoeffDivLimit_memLp`. -/
 theorem weightedGradCoeffDivLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -624,9 +540,6 @@ theorem weightedGradCoeffDivLimit_memLp
                 g r s α P₀ l P Q k p)
               (partialLpLimit (I := I) (M := M) g r s i α p l)))))
 
-/-- **The `n → ∞` `L²`-limit of the chart-Euclidean divergence of the
-chart-density-weighted lower-order gradient coefficient (chart-locality-free).**
-Chart-locality-free twin of `weightedGradCoeffDiv_tendsto`. -/
 theorem weightedGradCoeffDiv_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -774,9 +687,6 @@ theorem weightedGradCoeffDiv_tendsto
       from funext h_termN, h_termLim]
   exact h_add
 
-/-- **The `n → ∞` `L²`-limit of the total chart-Euclidean divergence
-(chart-locality-free).** Chart-locality-free twin of
-`weightedGradCoeffDivSum_tendsto`. -/
 theorem weightedGradCoeffDivSum_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -793,7 +703,6 @@ theorem weightedGradCoeffDivSum_tendsto
     (fun l _ => weightedGradCoeffDiv_tendsto (I := I) (M := M)
       g r s i α P₀ l)
 
-/-- Chart-locality-free twin of `covLowerOrderRotationValueCoeffLimit`. -/
 noncomputable def covLowerOrderRotationValueCoeffLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -818,7 +727,6 @@ noncomputable def covLowerOrderRotationValueCoeffLimit
                     (componentLpLimit (I := I) (M := M)
                       g r s i α p : EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `covLowerOrderRotationValueCoeff_pouSmul_memLp`. -/
 theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -889,7 +797,6 @@ theorem covLowerOrderRotationValueCoeff_pouSmul_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n).toCcTensor
       hy)
 
-/-- Chart-locality-free twin of `covLowerOrderRotationValueCoeffLimit_memLp`. -/
 theorem covLowerOrderRotationValueCoeffLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -926,9 +833,6 @@ theorem covLowerOrderRotationValueCoeffLimit_memLp
                 (componentLpLimit (I := I) (M := M)
                   g r s i α p))))))
 
-/-- **The `n → ∞` `L²`-limit of the lower-order rotation value coefficient
-(chart-locality-free).** Chart-locality-free twin of
-`covLowerOrderRotationValueCoeff_tendsto`. -/
 theorem covLowerOrderRotationValueCoeff_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

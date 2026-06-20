@@ -1,89 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossLimits
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-/-!
-# The cross-right covariant-Leibniz term as an `n → ∞` `L²`-limit, recast at rank `(r, s)`
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
-index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center
-`α : M`, and a fixed smooth compactly-supported `(r, s)`-tensor *test section*
-`S`. Write `ζ_α := chartAtlasPOU I M α` for the chart-atlas partition-of-unity
-weight and `wₙ := eigenvectorSmoothApprox g r s i n` for the
-canonical smooth `H¹`-approximating sequence of the eigenvector resolvent.
-
-The sibling file `EigenvectorChartCrossLimits` analysed the cross-right term
-`tensorCovDerivCrossRight g r s ζ_α wₙ S` only up to the genuine
-`(r, s + 1)`-tensor `L²` pairing
-`⟪covGrad g r s S, prependCovGradSlot g r s ζ_α wₙ⟫`
-(`tensorCovDerivCrossRight_integral_eq_inner`). That `(r, s + 1)` form cannot be
-chart-pulled directly: the abstract chart-pull
-`tensorL2Inner_cutoff_chartKernelSupported_pull` needs the *concrete* section to
-sit inside `tsupport ζ_α`, whereas `covGrad g r s S` is supported throughout the
-chart. This file *recasts* the cross-right integral at rank `(r, s)`.
-
-## The recast
-
-The cross-right term carries the approximant `w` undifferentiated; its explicit
-form `tensorCovDerivCrossRight_def` is an inverse-Gram-weighted double sum of
-`∂ₖζ` against the `(r, s)`-tensor pointwise inner product `⟨w, ∇S⟩`. Pushing the
-inverse-Gram weight and the covector factor `dζ` into the second argument of the
-pointwise inner product, the double sum collapses to a single `(r, s)`-tensor
-pointwise inner product
-
-  `tensorCovDerivCrossRight g r s ζ w S x =
-     tensorInnerPointwise g r s x (w.toFun x) (covDerivAlongGrad g r s S ζ).toFun x`,
-
-where `covDerivAlongGrad g r s S ζ` is the covariant derivative of `S` taken
-along the gradient vector field of the scalar `ζ`. The collapse is the
-metric-sharp identity `gradFun g ζ x = ∑ⱼ (∑ᵢ (G⁻¹)ᵢⱼ ∂ᵢζ) eⱼ`, which feeds the
-inverse-Gram-weighted sum of directional covariant derivatives into a single
-directional covariant derivative along `gradFun g ζ x`.
-
-The covariant derivative along the gradient field is a *concrete*
-`(r, s)`-tensor section supported inside `tsupport ζ` — the gradient field
-vanishes wherever `ζ` is locally constant — so the rank-`(r, s)` chart-pull
-applies.
-
-## The covariant derivative along a vector field
-
-`covDerivAlong g r s S V` — the covariant derivative of a smooth
-compactly-supported `(r, s)`-tensor section `S` along a smooth tangent-vector
-section `V` — is the smooth `(r, s)`-tensor section
-`x ↦ tensorCovDerivAt g r s S x (V x)`. Smoothness is `clm_bundle_apply`: the
-covariant-gradient-bundle section of `S` is a smooth `Hom(TM, T^{(r,s)})`
-section, applied to the smooth vector section `V`. `covDerivAlongGrad g r s S ζ`
-is the special case `V := gradFun g ζ`.
-
-## Main definitions
-
-* `covDerivAlong g r s S V` — the covariant derivative of `S` along the smooth
-  vector field `V`, a smooth compactly-supported `(r, s)`-tensor section.
-* `covDerivAlongGrad g r s S ζ` — the covariant derivative of `S` along the
-  gradient vector field of the smooth scalar `ζ`.
-* `crossRightLimitComponent g r s i α P` — the `n → ∞` limit
-  object of the cutoff chart component of the cross-right approximants: the
-  cutoff chart component of the abstract `L²` limit `TensorH1ComplToTensorL2 g r
-  s (eigenvectorResolvent g r s i)`.
-
-## Main results
-
-* `tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad` — the pointwise recast
-  of the cross-right term as a rank-`(r, s)` tensor pointwise inner product.
-* `tensorCovDerivCrossRight_integral_eq_innerLow` — the per-approximant rewrite
-  of the cross-right integral as the rank-`(r, s)` abstract `L²` pairing
-  `⟪w, covDerivAlongGrad g r s S ζ⟫`.
-* `tensorCovDerivCrossRight_integral_eq_chartPull` — the per-approximant rewrite
-  of the cross-right integral as a single-chart Euclidean integral.
-* `tensorCovDerivCrossRight_integral_tendsto` — the cross-right
-  integral converges, as `n → ∞`, to the rank-`(r, s)` abstract `L²` pairing of
-  the fixed abstract limit.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -124,18 +41,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Scalar form of `extDerivFun`: applied to an `ℝ`-valued function and a
-tangent vector, it is exactly the manifold-Fréchet derivative — the cast
-`NormedSpace.fromTangentSpace` on the `ℝ` value side is the identity. -/
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   rfl
 
-/-- The directional covariant derivative of an `(r, s)`-tensor section along the
-zero direction is the zero `(r, s)`-tensor: it is the bundled covariant
-derivative — a continuous linear map in the direction — applied to `0`. -/
 private lemma tensorCovDerivAt_zero_dir
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
@@ -143,16 +54,6 @@ private lemma tensorCovDerivAt_zero_dir
   rw [tensorCovDerivAt_def]
   exact ContinuousLinearMap.map_zero _
 
-/-- **The metric-sharp basis decomposition of the gradient.** For a smooth
-scalar `ζ` and a point `x`, the gradient vector field `gradFun g ζ x` equals the
-inverse-Gram-weighted combination of the fixed model-fibre basis
-`∑ⱼ (∑ᵢ (G(x)⁻¹)ᵢⱼ · ∂ᵢζ) • eⱼ`, where `∂ᵢζ = extDerivFun ζ x eᵢ`.
-
-The proof checks, by the basis-extensionality of linear functionals and the
-injectivity of the metric flat map, that the metric inner product of the
-right-hand side against each basis vector `eₖ` recovers `∂ₖζ`: the
-inverse-Gram-weighted sum telescopes through the Gram identity
-`G(x)⁻¹ · G(x) = 1`. -/
 private lemma gradFun_eq_gramInv_sum
     (g : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
     gradFun (I := I) g (ζ : M → ℝ) x =
@@ -233,10 +134,6 @@ private lemma gradFun_eq_gramInv_sum
           (gradFun (I := I) g (ζ : M → ℝ) x) ((chartModelBasis E) k) :=
         hgrad_k.symm
 
-/-- The covariant-gradient-bundle section of a smooth compactly-supported
-`(r, s)`-tensor section `S`: the continuous-linear-map–valued function sending a
-base point `x` to the directional covariant derivative
-`v ↦ tensorCovDerivAt g r s S x v`. -/
 private noncomputable def covDerivHomSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -244,21 +141,12 @@ private noncomputable def covDerivHomSection
   fun x => tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
     (fun y : M => S.toSection y) x
 
-/-- The covariant-gradient-bundle section, evaluated bilinearly at a base point
-`x` and a direction `v`, equals the directional covariant derivative
-`tensorCovDerivAt g r s S x v`. -/
 private lemma covDerivHomSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
     covDerivHomSection (I := I) (M := M) g r s S x v =
       tensorCovDerivAt (I := I) (M := M) g r s S x v := rfl
 
-/-- The covariant-gradient-bundle section is a `C^∞` section of the
-covariant-gradient bundle `Hom(TM, T^{(r,s)})`.
-
-This is the `contMDiff` field of the `ContMDiffCovariantDerivative` instance
-carried by the bundled `(r, s)`-tensor covariant derivative, applied to the
-smooth section `S.toSection`. -/
 private lemma covDerivHomSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -281,12 +169,6 @@ private lemma covDerivHomSection_contMDiff
   rw [← contMDiffOn_univ]
   exact hop
 
-/-- The smoothness of the directional-covariant-derivative section
-`x ↦ tensorCovDerivAt g r s S x (V x)`, as a `C^∞` section of the
-`(r, s)`-tensor bundle in total-space form.
-
-It is `ContMDiff.clm_bundle_apply` applied to the smooth covariant-gradient-bundle
-section `covDerivHomSection g r s S` of `S` and the smooth vector section `V`. -/
 private lemma covDerivAlong_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -303,11 +185,6 @@ private lemma covDerivAlong_section_contMDiff
     V.contMDiff
   exact ContMDiff.clm_bundle_apply hϕ hv
 
-/-- The underlying section value of the covariant derivative along `V`, as a
-`C^∞` section of the `(r, s)`-tensor bundle: the function sending a base point
-`x` to the directional covariant derivative `tensorCovDerivAt g r s S x (V x)`.
-Smoothness is `clm_bundle_apply` applied to the smooth covariant-gradient-bundle
-section of `S` and the smooth vector section `V`. -/
 private noncomputable def covDerivAlongSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -335,8 +212,6 @@ private noncomputable def covDerivAlongSection
     Cₛ^∞⟮I; TensorRSModel r s ℝ E,
       (fun x : M => TensorRSSpace r s I x)⟯)
 
-/-- The section value of `covDerivAlongSection g r s S V` at `x` is the
-directional covariant derivative `tensorCovDerivAt g r s S x (V x)`. -/
 private lemma covDerivAlongSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -344,12 +219,6 @@ private lemma covDerivAlongSection_apply
     covDerivAlongSection (I := I) (M := M) g r s S V x =
       tensorCovDerivAt (I := I) (M := M) g r s S x (V x) := rfl
 
-/-- The underlying model-valued map of `covDerivAlongSection g r s S V` vanishes
-at every point outside `tsupport S.toFun`.
-
-The directional covariant derivative `tensorCovDerivAt g r s S x` is the zero
-continuous linear map there (by `tensorCovDerivAt_eq_zero_off_tsupport`); applied
-to `V x` it is the zero `(r, s)`-tensor. -/
 private lemma covDerivAlongSection_toModel_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -361,8 +230,6 @@ private lemma covDerivAlongSection_toModel_eq_zero_off_tsupport
     tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s S hx (V x),
     TensorRSSpace.toModel_zero]
 
-/-- The underlying model-valued map of `covDerivAlongSection g r s S V` has
-compact support: it vanishes outside `tsupport S.toFun`, which is compact. -/
 private lemma covDerivAlongSection_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -378,14 +245,6 @@ private lemma covDerivAlongSection_hasCompactSupport
   exact hx (covDerivAlongSection_toModel_eq_zero_off_tsupport
     (I := I) (M := M) g r s S V hxnot)
 
-/-- **The covariant derivative along a smooth vector field.** The covariant
-derivative of a smooth compactly-supported `(r, s)`-tensor section `S` along a
-smooth tangent-vector section `V`, as a smooth compactly-supported
-`(r, s)`-tensor section.
-
-Pointwise, its underlying section value at a base point `x` is the directional
-covariant derivative `tensorCovDerivAt g r s S x (V x)` of `S` along the tangent
-vector `V x`. -/
 noncomputable def covDerivAlong
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -395,8 +254,6 @@ noncomputable def covDerivAlong
   hasCompactSupport :=
     covDerivAlongSection_hasCompactSupport (I := I) (M := M) g r s S V
 
-/-- The underlying section value of `covDerivAlong g r s S V` at `x` is the
-directional covariant derivative `tensorCovDerivAt g r s S x (V x)`. -/
 lemma covDerivAlong_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -404,9 +261,6 @@ lemma covDerivAlong_toSection_apply
     (covDerivAlong (I := I) (M := M) g r s S V).toSection x =
       tensorCovDerivAt (I := I) (M := M) g r s S x (V x) := rfl
 
-/-- The underlying model-valued map of `covDerivAlong g r s S V` at `x` is the
-model coercion of the directional covariant derivative
-`tensorCovDerivAt g r s S x (V x)`. -/
 lemma covDerivAlong_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -416,9 +270,6 @@ lemma covDerivAlong_toFun_apply
         (tensorCovDerivAt (I := I) (M := M) g r s S x (V x)) := by
   rw [SmoothCcTensor.toFun_apply, covDerivAlong_toSection_apply]
 
-/-- The underlying tensor field of `covDerivAlong g r s S V` has topological
-support inside the closed support of `S`: the directional covariant derivative
-vanishes wherever `S` does. -/
 lemma covDerivAlong_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -434,13 +285,6 @@ lemma covDerivAlong_tsupport_subset
     tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s S hxnot (V x),
     TensorRSSpace.toModel_zero]
 
-/-- **The covariant derivative along the gradient of a scalar.** The covariant
-derivative of a smooth compactly-supported `(r, s)`-tensor section `S` along the
-gradient vector field of the smooth scalar `ζ`, as a smooth compactly-supported
-`(r, s)`-tensor section.
-
-It is `covDerivAlong g r s S` applied to the smooth gradient vector field
-`grad_g g ζ.contMDiff` of `ζ`. -/
 noncomputable def covDerivAlongGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) :
@@ -448,9 +292,6 @@ noncomputable def covDerivAlongGrad
   covDerivAlong (I := I) (M := M) g r s S
     (grad_g (I := I) g ζ.contMDiff)
 
-/-- The underlying section value of `covDerivAlongGrad g r s S ζ` at `x` is the
-directional covariant derivative `tensorCovDerivAt g r s S x (gradFun g ζ x)` of
-`S` along the gradient of `ζ`. -/
 lemma covDerivAlongGrad_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
@@ -459,8 +300,6 @@ lemma covDerivAlongGrad_toSection_apply
         (gradFun (I := I) g (ζ : M → ℝ) x) := by
   rw [covDerivAlongGrad, covDerivAlong_toSection_apply, grad_g_apply]
 
-/-- The underlying tensor field of `covDerivAlongGrad g r s S ζ` at `x` is the
-model coercion of `tensorCovDerivAt g r s S x (gradFun g ζ x)`. -/
 lemma covDerivAlongGrad_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
@@ -470,19 +309,6 @@ lemma covDerivAlongGrad_toFun_apply
           (gradFun (I := I) g (ζ : M → ℝ) x)) := by
   rw [SmoothCcTensor.toFun_apply, covDerivAlongGrad_toSection_apply]
 
-/-- **Support of the covariant derivative along the gradient.** For a smooth
-scalar `ζ` and a smooth compactly-supported `(r, s)`-tensor section `S`, the
-covariant derivative `covDerivAlongGrad g r s S ζ` of `S` along the gradient of
-`ζ` has topological support inside the closed support of `ζ`.
-
-The underlying tensor field is `x ↦ toModel (∇_{gradζ x} S)`; off the closed
-support of `ζ` the gradient field `gradFun g ζ x` vanishes
-(`support_gradFun_subset`), so the directional covariant derivative — being
-linear in the direction — is the zero tensor there.
-
-This is the support hypothesis required by the chart-pull
-`tensorL2Inner_cutoff_chartKernelSupported_pull` (instantiated at `ζ :=
-chartAtlasPOU I M α`). -/
 lemma covDerivAlongGrad_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (ζ : C^∞⟮I, M; ℝ⟯) :
@@ -501,10 +327,6 @@ lemma covDerivAlongGrad_tsupport_subset
     tensorCovDerivAt_zero_dir (I := I) (M := M) g r s S x,
     TensorRSSpace.toModel_zero]
 
-/-- The rank-`(r, s)` pointwise tensor inner product against a fixed first
-argument `A`, packaged as an additive group homomorphism in the second
-argument. Additivity is `tensorInnerPointwise_add_right` and the zero is
-`tensorInnerPointwise_zero_right`. -/
 private noncomputable def tensorInnerPointwiseRightHom
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : TensorRSModel r s ℝ E) :
@@ -513,11 +335,6 @@ private noncomputable def tensorInnerPointwiseRightHom
   map_zero' := tensorInnerPointwise_zero_right (I := I) (M := M) g r s x A
   map_add' := tensorInnerPointwise_add_right (I := I) (M := M) g r s x A
 
-/-- Right-distributivity of the rank-`(r, s)` pointwise tensor inner product
-over a double sum: for a fixed first argument `A` and a doubly-indexed family
-`T`, the pointwise inner product of `A` against the double sum `∑ᵢ ∑ⱼ T i j` is
-the double sum of the pointwise inner products. This is `map_sum` of the
-additive hom `tensorInnerPointwiseRightHom`, applied to the two summations. -/
 private lemma tensorInnerPointwise_sum_sum_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : TensorRSModel r s ℝ E)
@@ -543,11 +360,6 @@ private lemma tensorInnerPointwise_sum_sum_right
   exact map_sum (tensorInnerPointwiseRightHom (I := I) (M := M) g r s x A)
     (fun j => T i j) Finset.univ
 
-/-- The inverse-Gram-weighted combination of the basis-directional covariant
-derivatives of `S` is the directional covariant derivative of `S` along the
-gradient of `ζ`: pushing the model coercion and the directional linearity of
-`tensorCovDerivAt` through, the metric-sharp basis decomposition
-`gradFun_eq_gramInv_sum` collapses the double sum to a single direction. -/
 private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M) :
@@ -625,21 +437,6 @@ private lemma gramInv_sum_covDeriv_eq_covDerivAlongGrad
   rw [hlhs]
   rw [← gradFun_eq_gramInv_sum (I := I) g ζ x]
 
-/-- **The pointwise recast of the cross-right term at rank `(r, s)`.** For a
-closed Riemannian manifold `(M, g)`, a smooth scalar `ζ`, and smooth
-compactly-supported `(r, s)`-tensor sections `w`, `S`, the cross-right term
-`tensorCovDerivCrossRight g r s ζ w S` of the covariant Leibniz rule equals, at
-every point `x`, the rank-`(r, s)` tensor pointwise inner product
-`tensorInnerPointwise g r s x` of the section value `w.toFun x` against the
-underlying tensor field of the covariant derivative `covDerivAlongGrad g r s S ζ`
-of `S` along the gradient of `ζ`.
-
-The cross-right term carries `w` undifferentiated; its explicit
-inverse-Gram-weighted double sum, with the inverse-Gram weight and the
-differentiation factor `∂ᵢζ` pushed into the second argument of the
-`ℝ`-bilinear pointwise inner product `⟨w, ·⟩`, collapses to the single inner
-product against the directional covariant derivative along the metric sharp
-`gradFun g ζ x` of `dζ`. -/
 theorem tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -656,18 +453,6 @@ theorem tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
   rw [tensorInnerPointwise_smul_right]
   ring
 
-/-- **The cross-right integral as a rank-`(r, s)` abstract `L²` pairing.** For a
-smooth scalar `ζ`, a smooth compactly-supported `(r, s)`-tensor section `w`, and
-a fixed smooth compactly-supported `(r, s)`-tensor section `S`, the integral of
-the cross-right term `tensorCovDerivCrossRight g r s ζ w S` against the
-Riemannian volume measure equals the metric `L²` inner product of the
-`L²`-coercion of `w` against the `L²`-coercion of the covariant derivative
-`covDerivAlongGrad g r s S ζ` of `S` along the gradient of `ζ`.
-
-The proof integrates the pointwise recast
-`tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad`, then reads the integral
-of a pointwise tensor inner product of two smooth sections as their `L²` inner
-product. -/
 theorem tensorCovDerivCrossRight_integral_eq_innerLow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) :
@@ -685,19 +470,6 @@ theorem tensorCovDerivCrossRight_integral_eq_innerLow
   exact tensorCovDerivCrossRight_eq_tensorInnerPointwise_grad
     (I := I) (M := M) g r s ζ w S x
 
-/-- **The cross-right integral as a single-chart Euclidean integral.** For a
-chart center `α : M`, a smooth compactly-supported `(r, s)`-tensor section `w`,
-and a fixed smooth compactly-supported `(r, s)`-tensor section `S`, the integral
-of the cross-right term `tensorCovDerivCrossRight g r s (chartAtlasPOU I M α) w S`
-equals the single-chart Euclidean integral coupling the cutoff Euclidean chart
-components `tensorL2ChartComponentCutoff` of `(w : TensorL2 r s g)` to the raw
-Euclidean chart components of the covariant derivative
-`covDerivAlongGrad g r s S (chartAtlasPOU I M α)` along the gradient of the
-chart-atlas partition-of-unity weight.
-
-The covariant derivative along the gradient is supported inside the closed
-support of the partition-of-unity weight (`covDerivAlongGrad_tsupport_subset`),
-so the rank-`(r, s)` chart-pull applies. -/
 theorem tensorCovDerivCrossRight_integral_eq_chartPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (w S : SmoothCcTensor g r s) :
@@ -723,12 +495,6 @@ theorem tensorCovDerivCrossRight_integral_eq_chartPull
     (covDerivAlongGrad_tsupport_subset (I := I) (M := M) g r s S
       (chartAtlasPOU I M α))
 
-/-- **The `n → ∞` abstract `L²` limit of the approximant `L²`-coercion
-(chart-locality-free).** For an eigenbasis index `i`, the `L²`-coercions
-`((eigenvectorSmoothApprox g r s i n).toCcTensor : TensorL2 r s g)`
-converge, as `n → ∞` and in `TensorL2 r s g`, to the `L²`-coercion
-`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent g r s i)` of
-the eigenvector resolvent. -/
 theorem tensorL2_eigenvectorSmoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -747,11 +513,6 @@ theorem tensorL2_eigenvectorSmoothApprox_tendsto
     TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)]
 
-/-- **The `n → ∞` limit object of the cross-right chart component
-(chart-locality-free).** For an eigenbasis index `i`, a chart center `α : M`,
-and a component multi-index `P : CompIdx E r s`, the cutoff Euclidean chart
-component, at `(α, P)`, of the `L²`-coercion `TensorH1ComplToTensorL2 g r s
-(eigenvectorResolvent g r s i)` of the eigenvector resolvent. -/
 def crossRightLimitComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -762,13 +523,6 @@ def crossRightLimitComponent
       (eigenvectorResolvent (I := I) (M := M) g r s i))
     α P
 
-/-- **The `n → ∞` `L²`-convergence of the cross-right chart component
-(chart-locality-free).** For an eigenbasis index `i`, a chart center `α : M`,
-and a component multi-index `P`, the cutoff Euclidean chart components of the
-cross-right approximant `L²`-coercions
-`((eigenvectorSmoothApprox g r s i n).toCcTensor : TensorL2 r s g)`
-converge, as `n → ∞` and in `Lp ℝ 2 (chartL2Measure α)`, to the limit object
-`crossRightLimitComponent g r s i α P`. -/
 theorem crossRightComponent_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -789,16 +543,6 @@ theorem crossRightComponent_tendsto
   simp only [Function.comp_def, tensorL2ChartComponentCutoffCLM_apply] at h_clm
   exact h_clm
 
-/-- **The `n → ∞` limit of the cross-right integral (chart-locality-free).** For
-a chart center `α : M`, an eigenbasis index `i`, and a fixed smooth
-compactly-supported `(r, s)`-tensor test section `S`, the cross-right integrals
-`∫ tensorCovDerivCrossRight g r s (chartAtlasPOU I M α)
-(eigenvectorSmoothApprox g r s i n).toCcTensor S` converge, as
-`n → ∞`, to the metric `L²` inner product of the fixed abstract limit
-`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent g r s i)`
-against the `L²`-coercion of the covariant derivative
-`covDerivAlongGrad g r s S (chartAtlasPOU I M α)` of `S` along the gradient of
-the chart-atlas partition-of-unity weight. -/
 theorem tensorCovDerivCrossRight_integral_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

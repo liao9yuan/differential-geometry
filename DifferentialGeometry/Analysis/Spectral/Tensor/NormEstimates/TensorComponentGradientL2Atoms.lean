@@ -16,28 +16,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 
-/-!
-# Per-`α` gradient `L²` atom bounds and measurability companions
-
-Consolidated `L²` bounds (and the `AEStronglyMeasurable` companion lemmas)
-for the per-`α` partition-of-unity-weighted gradient atom integrands that
-appear in the chart-frame scalar-component gradient `L²` assembly on a
-closed Riemannian manifold `(M, g)`. The atoms covered are:
-
-1. **Chart-source continuity for the covariant-derivative atom** —
-   `aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov`.
-2. **`L²` bound on the covariant-derivative atom sum** —
-   `exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq`.
-3. **`L²` bound on the `raw²`-indicator atom over POU support** —
-   `exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq`.
-4. **Unconditional `L²` bound on the Christoffel slot-correction sum** —
-   `exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`.
-5. **`AEStronglyMeasurable` of the per-`α` `raw²`-indicator atom** —
-   `aestronglyMeasurable_indicator_tsupp_abs_raw`.
-6. **`AEStronglyMeasurable` of the per-direction Christoffel slot-correction
-   atom integrand** — `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -73,8 +51,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The closed support of the chart-atlas partition-of-unity weight at `α`
-is measurable in the Borel σ-algebra on `M`. -/
 private lemma pouTsupport_measurableSet (α : M) :
     MeasurableSet (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
@@ -150,11 +126,6 @@ lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
   have hYb' : Y.toFun b = X b := hYb
   rw [hYb']
 
-/-- On the chart-`α` source, the trivialisation-`α` `continuousLinearMapAt ℝ b`
-applied to the chart-frame covariant derivative
-`chartTensorRSCovariantDerivative r s g α S.toSection (chartBasisVecFiber α k) b`
-equals the trivialisation `.2`-component of the bundled directional covariant
-derivative `tensorCovDerivAt g r s S b (chartBasisVecFiber α k b)`. -/
 private lemma triv_continuousLinearMapAt_chartTensorRSCovariantDerivative_eq_triv_snd
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -192,10 +163,6 @@ private lemma triv_continuousLinearMapAt_chartTensorRSCovariantDerivative_eq_tri
         (chartBasisVecFiber (I := I) α k b)) = _
   exact congrFun hcoe _
 
-/-- On the chart-`α` source, the trivialisation-projected chart-frame
-covariant-derivative atom `b ↦ triv.continuousLinearMapAt b
-  (chartTensorRSCovariantDerivative ... b)` is continuous as a function
-valued in `TensorRSModel r s ℝ E`. -/
 private lemma triv_chartTensorRSCovariantDerivative_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E)) :
@@ -393,18 +360,6 @@ private lemma pou_mul_sqrt_sum_aestronglyMeasurable_restrict_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_measurableSet (I := I) (M := M) α)
 
-/-- **`AEStronglyMeasurable` of the per-`α` chart-frame covariant-derivative
-atom integrand.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`,
-a chart base point `α : M`, and a smooth compactly-supported `H^1` tensor
-section `S : SmoothCcTensorH1 g r s`, the function
-
-```
-b ↦ ρ_α(b) * √(∑ k, ‖triv.continuousLinearMapAt b
-                    (chartTensorRSCovariantDerivative r s g α
-                      S.toSection (chartBasisVecFiber α k) b)‖²)
-```
-
-is `AEStronglyMeasurable` with respect to `riemannianVolumeMeasure g`. -/
 theorem aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :
@@ -496,24 +451,6 @@ private lemma pou_mul_sqrt_sum_triv_chart_cov_eq_pou_mul_sqrt_sum_chartRSTwistIn
     rw [hρ_zero]
     ring
 
-/-- **Per-`α` `L²` bound on the covariant-derivative atom sum.** For a closed
-Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart base point `α : M`,
-there is a non-negative real constant `C` (depending only on `(g, r, s, α)`)
-such that for every smooth compactly-supported `H¹` tensor section
-`S : SmoothCcTensorH1 g r s`,
-
-```
-eLpNorm
-    (fun b ↦ ρ_α(b) *
-      √ (∑ k, ‖triv.continuousLinearMapAt b
-              (chartTensorRSCovariantDerivative r s g α S.toSection
-                (chartBasisVecFiber α k) b)‖²))
-    2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞),
-```
-
-where `ρ_α` is the chart-atlas partition-of-unity weight at `α`. The constant
-`C` is independent of `S`. -/
 theorem exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -599,7 +536,6 @@ private lemma scalarOnE_raw_eq_raw_on_pouTsupport
   exact scalarOnE_extChartAt (I := I) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hb_ext
 
-/-- **Pointwise quadratic upper bound on the chart-pullback raw scalar.** -/
 private lemma scalarOnE_raw_sq_le_const_mul_tensorInner_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -916,8 +852,6 @@ private lemma ofReal_tensorL2Norm_le_norm_ennreal
   rw [coe_nnnorm_eq_ofReal_norm S]
   exact ENNReal.ofReal_le_ofReal h_l2_le_h1
 
-/-- **Per-`α` `L²` bound on the `raw²` chart-component indicator over POU
-support.** -/
 theorem exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -979,8 +913,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The closed support of the chart-atlas partition-of-unity weight at `α`
-is measurable in the Borel σ-algebra on `M`. -/
 private lemma pouTsupport_measurableSet_meas (α : M) :
     MeasurableSet (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
@@ -1083,7 +1015,6 @@ private lemma abs_scalarOnE_raw_aestronglyMeasurable_restrict_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_measurableSet_meas (I := I) (M := M) α)
 
-/-- **`AEStronglyMeasurable` of the per-`α` `raw²`-indicator atom.** -/
 theorem aestronglyMeasurable_indicator_tsupp_abs_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s)
@@ -1271,8 +1202,6 @@ private lemma christoffelAtomIntegrand_aestronglyMeasurable_restrict_pouTsupport
 
 end ChristoffelAtomMeasurability
 
-/-- **`AEStronglyMeasurable` of the per-`α` per-direction Christoffel
-slot-correction atom integrand.** -/
 theorem aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -1323,23 +1252,17 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-compact (closed in a compact ambient space). -/
 private lemma covRiem_pouTsupport_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-contained in the chart-`α` source. -/
 private lemma covRiem_pouTsupport_subset_chartSource (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   chartAtlasPOU_isSubordinate (I := I) (M := M) α
 
-/-- Membership in the chart-`α` source upgrades to membership in the
-chart-`(r, s)` trivialisation base set. -/
 private lemma covRiem_mem_baseSet_of_mem_chartSource
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source) :
     b ∈ (trivializationAt (TensorRSModel r s ℝ E)
@@ -1359,24 +1282,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-`α` Riemannian-fibre-norm covariant-derivative atom `L²` bound
-(HLCC-free).** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a
-chart base point `α`, there is a non-negative real constant `C` (depending only
-on `(g, r, s, α)`) such that for every smooth compactly-supported `H¹` tensor
-section `S : SmoothCcTensorH1 g r s` and all multi-indices `Idx, Jdx`,
 
-```
-eLpNorm
-    (fun b ↦ ρ_α(b) · √(∑ₖ ‖∇^chart_k S(b)‖²_Riem))
-    2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C · (‖S‖₊ : ℝ≥0∞),
-```
-
-where `ρ_α` is the chart-atlas partition-of-unity weight at `α` and the fibre
-norm `‖·‖` on `TensorRSSpace r s I b` is the `g`-induced
-`Bundle.RiemannianBundle` norm (installed via `letI`). The constant `C` is
-independent of `S`, of the multi-indices, and of the base point. No
-chart-locality predicate is required. -/
 theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -1643,9 +1549,6 @@ private lemma chrRiem_basis_vec_norm_le (k : Fin (Module.finrank ℝ E)) :
     ‖(chartModelBasis E) k‖ ≤ chrRiemBasisVecSup (E := E) :=
   Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ _)
 
-/-- Honest model-space norm bound on `christoffelCorrection g α b Y v`,
-controlled by `C · ‖Y‖ · ‖trivToE α b v‖` uniformly on the chart-`α`
-partition-of-unity `tsupport`. No chart-locality predicate is required. -/
 private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1969,12 +1872,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Riemannian-norm uniform op-norm bound for the input-slot Christoffel
-correction (HLCC-free).** On the chart-`α` partition-of-unity `tsupport`, the
-Riemannian fibre norm of the input-slot Christoffel correction along the
-chart-frame basis vector field is bounded by a constant times the Riemannian
-fibre norm of the section value, uniformly in the section, the basis direction
-`k`, the slot `i`, and the base point `b`. -/
+
 theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -2070,9 +1968,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Riemannian-norm uniform op-norm bound for the output-slot Christoffel
-correction (HLCC-free).** Output twin of
-`chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local`. -/
+
 theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -2168,12 +2064,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Unconditional Riemannian-fibre-norm Christoffel slot-correction atom `L²`
-bound.** The per-`α` per-direction
-`L²` norm of the partition-of-unity-weighted square-root of the Euclidean sum of
-squared **Riemannian fibre norms** of the chart-frame input / output slot
-Christoffel corrections is bounded by `ENNReal.ofReal C · ‖S‖₊`, with `C`
-depending only on `(g, r, s, α, j)`. -/
+
 theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E)) :

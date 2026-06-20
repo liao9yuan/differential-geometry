@@ -1,37 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.IteratedRegularityBootstrap
 
-/-!
-# The iterated tensor-component interior elliptic a-priori estimate
-
-The headline of the interior elliptic-regularity bootstrap for tensor weak
-solutions: a quantitative interior a-priori estimate at arbitrary order. For a
-smooth compactly supported `(r, s)`-tensor section `T` satisfying the global
-`H¹` weak equation of the connection Laplacian with smooth source `F`, the
-`W^{2k+2,2}` Sobolev norm of each chart component of `T` is bounded by the
-`W^{2k,2}` norms of the chart components of `F` and the `W^{1,2}` norms of the
-chart components of `T`, with a constant uniform in `T` and `F`.
-
-The per-step regularity boost `tensorComponent_aPriori_succ_sum` raises the
-solution's Sobolev order by one, dropping it onto the source two orders below
-and onto the solution one order below. The headline iterates this: the outer
-induction on `k` applies the per-step boost twice — at orders `2k+1` and `2k+2`
-— absorbing the lower-order solution norm from the inductive hypothesis and the
-source norm from the per-step boost itself, with the source order monotonically
-controlled by the highest order appearing.
-
-## Main results
-
-* `tensorComponent_aPriori_estimate` — for fixed geometric data there is a
-  constant `C ≥ 0`, uniform in the tensor sections, with
-  `wkpNorm (2k+2) 2 (tensorComponentEuclid g r s T α P₀) Ω'' ≤
-    ENNReal.ofReal C ·
-      (∑_Q wkpNorm (2k) 2 (tensorComponentEuclid g r s F α Q) Ω'' +
-        ∑_P wkpNorm 1 2 (tensorComponentEuclid g r s T α P) Ω'')`.
-
-* `tensorComponent_aPriori_estimate_all` — the form packaged over all component
-  multi-indices `P₀`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -72,13 +40,11 @@ section Headline
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
 
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)] in
-/-- The monotone-substitution step: chain a low-order bound and a per-step boost
-into a single bound at the higher order. -/
+
 private lemma chain_step_le
     {S S' BFp BFp' L : ℝ≥0∞} {a c : ℝ} (ha : 0 ≤ a) (hc : 0 ≤ c)
     (hBF_mono : BFp ≤ BFp')
@@ -98,7 +64,6 @@ private lemma chain_step_le
       rw [ENNReal.ofReal_add (by norm_num : (0 : ℝ) ≤ 1) hc, ENNReal.ofReal_one],
     ← ENNReal.ofReal_mul ha]
 
-/-- The source-component sum is monotone in the Sobolev order. -/
 private lemma sum_componentNorm_mono_order
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (F : SmoothCcTensor g r s)
     (α : M) {Ω'' : Set EuclN} {n n' : ℕ} (hn : n ≤ n') :
@@ -109,33 +74,7 @@ private lemma sum_componentNorm_mono_order
   Finset.sum_le_sum (fun _Q _ => wkpNorm_mono_order (d := dimE) hn _ _)
 
 set_option maxHeartbeats 3200000 in
-/-- **Iterated interior elliptic a-priori estimate for a chart component.**
 
-Let `g` be a smooth Riemannian metric on a closed (compact, boundaryless) smooth
-manifold `M`, let `α : M` be a chart center, `(r, s)` tensor ranks, `k` an
-iteration count, `P₀` a component multi-index, `K ⊆ chartTargetEuclid α` a
-compact set, and `Ω''` a precompact open subdomain of the chart target with
-`K ⊆ Ω''`.
-
-There is a constant `C ≥ 0`, depending only on that data — uniform in the tensor
-sections — such that for **every** pair of chart-supported smooth compactly
-supported `(r, s)`-tensor sections `T` (the solution) and `F` (the source) whose
-chart components are supported in `K`, and such that the global `H¹` weak
-equation `∫_M ⟨∇T, ∇v⟩ dμ_g = ⟨F, v⟩_{L²}` of the connection Laplacian holds for
-every smooth compactly-supported test section,
-
-```
-wkpNorm (2k+2) 2 (tensorComponentEuclid g r s T α P₀) Ω'' ≤
-  ENNReal.ofReal C ·
-    (∑_Q wkpNorm (2k) 2 (tensorComponentEuclid g r s F α Q) Ω'' +
-      ∑_P wkpNorm 1 2 (tensorComponentEuclid g r s T α P) Ω'').
-```
-
-The constant `C` is quantified before `T` and `F`: it is uniform in the
-solution and the source. The hypothesis `K ⊆ Ω''` is genuinely used — the
-interior-`H²` engine's data is the global integral, while the right-hand side
-uses `Ω''`-restricted Sobolev norms; they agree because every relevant function
-is supported in `K ⊆ Ω''`. -/
 theorem tensorComponent_aPriori_estimate
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -244,18 +183,6 @@ theorem tensorComponent_aPriori_estimate
       rw [h_lhs, h_rhs] at h_24
       exact h_24
 
-/-- **Iterated interior elliptic a-priori estimate, packaged over all component
-multi-indices.** For fixed geometric data there is a constant `C ≥ 0`, uniform
-in the tensor sections and in the component multi-index, such that for every
-component multi-index `P₀` and every pair of chart-supported smooth compactly
-supported tensor sections `T` (solution) and `F` (source) satisfying the global
-`H¹` weak equation, the order-`(2k+2)` Sobolev norm of the chart component
-`tensorComponentEuclid g r s T α P₀` over the precompact subdomain `Ω''` is
-controlled by the order-`(2k)` source-component norms and the order-`1`
-solution-component norms.
-
-The single constant `C` is obtained as the largest of the per-component-index
-constants supplied by `tensorComponent_aPriori_estimate`. -/
 theorem tensorComponent_aPriori_estimate_all
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set EuclN} (hK : IsCompact K)

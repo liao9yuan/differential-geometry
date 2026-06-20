@@ -2,47 +2,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 
-/-!
-# The rank-generic second-order leading-slot gradient/covariant-derivative commutation
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`,
-this file lifts the first-order leading-slot commutation
-`covGrad_covDeriv_leadingSlot_commutation` (the K-A linchpin) **one covariant-derivative order
-up**: it pins, at the unit evaluation, the difference of the two leading-slot readings of the
-two frame summands `Aᵢ − Dᵢ` of the rank-generic order-`2` rough-Laplacian / covariant-gradient
-commutator defect (`remDiffFib`, `MovingFrameRemainderFrameSumBridge`), where
-
-* `Aᵢ = ∇²_{Bᵢ, Bᵢ}(∇S)` is the (corrected) second covariant derivative of the `(0, s + 1)`-tensor
-  gradient `∇S = covGrad g 0 s S` along the frame pair, and
-* `Dᵢ = covGradBundleEquiv(∇·(∇²_{Bᵢ, Bᵢ} S))` is the covariant gradient of the `(0, s)`-Hessian.
-
-Reading both summands at the unit `(0, 0)`-tensor and currying the slot-`0` direction `w`, the
-foundation's unit-evaluation reductions transport everything into the **abstract `(0, s)`-tensor
-connection** `nab := tensor0SCovariantDerivative I M s (LeviCivita g)` acting on the unit-evaluated
-section `V := unitEvalSection g s S`. There the commutation is a purely abstract third-order Ricci
-identity, whose curvature content is the **abstract differentiated Riemann curvature**
-`nablaTensorCurvSec` (defined here, mirroring the tangent-level `nablaCurvSec` of `SecondBianchi`)
-plus the curvature applied to the once-differentiated arguments, plus an explicit, named
-Christoffel-derivative residual carrying the differentiated single-direction corrections.
-
-## Sign / convention
-
-Geometer convention, matching the foundation: `cov.toFun σ x v ≅ (∇_v σ)(x)`, `R = riemannSec`,
-and `(LeviCivita g).toFun Q x (P x) = (∇_P Q)(x)`. The smooth fields `B, w` are read as genuine
-fields/values per the linchpin's pattern; no `smoothExtensionTangent` enters.
-
-## Main results
-
-* `nablaTensorCurvSec` — the abstract differentiated curvature `(∇_X R)(Y, Z) V` of the abstract
-  `(0, s)`-tensor connection, the Leibniz formula mirroring `nablaCurvSec` one bundle up (the
-  section slot `V` is differentiated by `nab`, the two vector-field slots by the tangent
-  Levi-Civita connection).
-* `covGrad_covDeriv_leadingSlot_secondOrder_commutation` — the second-order leading-slot
-  commutation: the difference of the two curried unit-evaluated frame-summand readings is the
-  `(∇R)`-class `nablaTensorCurvSec(B, w) V`, plus the `R`-on-differentiated class, plus the
-  explicit Christoffel-derivative residual.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -78,21 +37,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The abstract differentiated Riemann curvature of a covariant derivative**, contracted on its
-two vector-field input slots and its section slot, via the standard Leibniz formula
-$$
-  (\nabla_X R)(Y, Z) V := \nabla_X\bigl(R(Y, Z) V\bigr)
-    - R(\nabla_X Y, Z) V - R(Y, \nabla_X Z) V - R(Y, Z)(\nabla_X V),
-$$
-written with the convention `cov.toFun σ x v ≅ (∇_v σ)(x)`. Here `R(Y, Z) V = riemannSec cov Y Z V`
-is the section-level curvature operator of `cov`, the two vector-field directions `∇_X Y, ∇_X Z` are
-the tangent Levi-Civita derivatives `(LeviCivita g).toFun · x (X x)`, and the section direction
-`∇_X V = covApply cov X V` is the `cov`-covariant derivative of the section `V`.
-
-This mirrors `nablaCurvSec` (`SecondBianchi`) one bundle up: there `cov` is the tangent connection
-and the last (section) slot `W` is a tangent field; here `cov` is an arbitrary covariant derivative
-on a bundle `V` and the last slot is a section of that bundle differentiated by `cov` itself. Under
-the tangent identification (`cov = LeviCivita g`, `V` a tangent field) it reduces to `nablaCurvSec`. -/
 def nablaTensorCurvSec
     (g : SmoothRiemannianMetric I M) {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ (𝒱 x)]
@@ -106,19 +50,6 @@ def nablaTensorCurvSec
     - riemannSec cov Y (covApply (LeviCivita (I := I) g) X Z) V x
     - riemannSec cov Y Z (covApply cov X V) x
 
-/-- **The abstract second-order Christoffel-derivative residual.** For an arbitrary covariant
-derivative `cov`, smooth tangent fields `B, w`, and a section `V`, this is the explicit
-curvature-free remainder produced by the second-order leading-slot commutation: the once- and
-twice-differentiated single-direction corrections of the iterated covariant derivative,
-```
-ρ := ∇_{[B,w]}(∇_B V) + ∇_B(∇_{[B,w]} V) − 2 ∇_B(∇_{∇_B w} V) + ∇_{∇_B(∇_B w)} V
-       − ∇_{∇_B B}(∇_w V) + ∇_{∇_{∇_B B} w} V + ∇_w(∇_{∇_B B} V),
-```
-with `[B, w] := mlieBracket I B w` and the tangent Levi-Civita iterated derivatives `∇_B w =
-covApply (LeviCivita g) B w`, `∇_B B = covApply (LeviCivita g) B B`, etc. It is the genuine named
-residual (the "−∇^{abs}_{∇·} V corrections differentiated once") whose frame-summed integral
-treatment is downstream; it carries no Riemann-curvature factor (every summand is a pure iterated
-`covApply` of the tangent Christoffel directions). -/
 def secondOrderChristoffelResidual
     (g : SmoothRiemannianMetric I M) {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ (𝒱 x)]
@@ -138,7 +69,7 @@ def secondOrderChristoffelResidual
     + cov.toFun (covApply cov (covApply (LeviCivita (I := I) g) B B) V) x (w x)
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- Definitional unfolding of `secondOrderChristoffelResidual`. -/
+
 lemma secondOrderChristoffelResidual_def
     (g : SmoothRiemannianMetric I M) {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ (𝒱 x)]
@@ -159,7 +90,7 @@ lemma secondOrderChristoffelResidual_def
         + cov.toFun (covApply cov (covApply (LeviCivita (I := I) g) B B) V) x (w x) := rfl
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- Definitional unfolding of `nablaTensorCurvSec`. -/
+
 lemma nablaTensorCurvSec_def
     (g : SmoothRiemannianMetric I M) {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ (𝒱 x)]
@@ -183,24 +114,7 @@ variable {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ 
   [FiberBundle F 𝒱] [VectorBundle ℝ F 𝒱] [ContMDiffVectorBundle ∞ F 𝒱 I]
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- **The abstract third-order leading-slot commutation (general bundle).** For an arbitrary `C^∞`
-covariant derivative `cov` on a bundle `𝒱`, smooth tangent fields `B, w`, and a smooth section `V`,
-the difference of the two iterated-covariant-derivative readings — the `(B, w)`-Hessian-of-gradient
-form `Aabs` and the `w`-derivative-of-`(B, B)`-Hessian form `Dabs` — is the abstract differentiated
-curvature `(∇_B R)(B, w) V`, plus the curvature applied to the once-differentiated arguments, plus
-the explicit Christoffel-derivative residual:
-```
-Aabs − Dabs = (∇_B R)(B, w) V
-  + ( R(∇_B B, w) V + R(B, ∇_B w) V + 2 R(B, w)(∇_B V) )
-  + ρ.
-```
-Here `Aabs = ∇_B(∇_B(∇_w V)) − 2 ∇_B(∇_{∇_B w} V) + ∇_{∇_B(∇_B w)} V − ∇_{∇_B B}(∇_w V) +
-∇_{∇_{∇_B B} w} V` and `Dabs = ∇_w(∇_B(∇_B V)) − ∇_w(∇_{∇_B B} V)`, the exact abstract forms produced
-by the unit-evaluation reductions of the two frame summands `Aᵢ − Dᵢ`. The proof is the standard
-third-order Ricci computation: a single section-level first-order commutator swap `(SW)`
-(`covApply_outer_swap_eq_riemannSec`) on the inner `∇_B(∇_w V)`, additivity of `cov` over the
-resulting three-term section, one more pointwise first-order swap, the differentiated-curvature
-unfolding `nablaTensorCurvSec_def`, and `abel`. -/
+
 lemma thirdOrder_commutation_abstract
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I F 𝒱)
@@ -224,7 +138,7 @@ lemma thirdOrder_commutation_abstract
             + (2 : ℝ) • riemannSec cov B w (covApply cov B V) x)
         + secondOrderChristoffelResidual (I := I) g cov B w V x := by
   classical
-  -- Smoothness of the once- and twice-differentiated sections needed for the additivity split.
+  
   have hwBV : ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (covApply cov w (covApply cov B V))) :=
     covApply_covApply_contMDiff (cov := cov) hw hB hV
   have hbr : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (VectorField.mlieBracket I B w)) :=
@@ -234,7 +148,7 @@ lemma thirdOrder_commutation_abstract
     covApply_contMDiff (cov := cov) hbr hV
   have hRsec : ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (fun b : M => riemannSec cov B w V b)) :=
     riemannSec_contMDiff (cov := cov) hB hw hV
-  -- The section-level swap `(SW)`: `∇_B(∇_w V) = ∇_w(∇_B V) + ∇_{[B,w]} V + R(B,w)V`.
+  
   have hSW : covApply cov B (covApply cov w V) =
       covApply cov w (covApply cov B V)
         + covApply cov (VectorField.mlieBracket I B w) V
@@ -243,7 +157,7 @@ lemma thirdOrder_commutation_abstract
     have := covApply_outer_swap_eq_riemannSec cov B w V y
     simp only [Pi.add_apply, covApply_apply]
     rw [this]
-  -- Differentiate `(SW)` along `B`, splitting the outer `cov.toFun` over the three-term sum.
+  
   have hsplit : cov.toFun (covApply cov B (covApply cov w V)) x (B x) =
       cov.toFun (covApply cov w (covApply cov B V)) x (B x)
         + cov.toFun (covApply cov (VectorField.mlieBracket I B w) V) x (B x)
@@ -261,9 +175,9 @@ lemma thirdOrder_commutation_abstract
     rw [cov.isCovariantDerivativeOnUniv.add h12 h3,
         cov.isCovariantDerivativeOnUniv.add h1 h2]
     simp only [ContinuousLinearMap.add_apply]
-  -- The first split-term: one more pointwise first-order swap, with `T := ∇_B V`.
+  
   have hswap2 := covApply_outer_swap_eq_riemannSec cov B w (covApply cov B V) x
-  -- The curvature-section leading term, via `nablaTensorCurvSec_def`.
+  
   have hcurv : cov.toFun (fun b : M => riemannSec cov B w V b) x (B x) =
       nablaTensorCurvSec (I := I) g cov B B w V x
         + riemannSec cov (covApply (LeviCivita (I := I) g) B B) w V x
@@ -278,21 +192,6 @@ end AbstractThirdOrder
 
 section Reductions
 
-/-- **The `D`-side reduction: the curried unit-evaluation of the second frame summand is the abstract
-`w`-derivative of the abstract `(0, s)`-Hessian.** For smooth fields `B, w`, the slot-`0` curry at
-`w` of the unit-evaluation of `Dᵢ = covGradBundleEquiv 0 s x (∇·(∇²_{B, B} S)(x))` equals the
-abstract iterated derivative
-```
-curry Dᵢ(unit)(w) = ∇^{abs}_w(∇^{abs}_B(∇^{abs}_B V)) − ∇^{abs}_w(∇^{abs}_{∇_B B} V),
-```
-with `V := unitEvalSection g s S`, `nab := tensor0SCovariantDerivative I M s (LeviCivita g)`.
-
-**Proof.** `tensor0S_curry_covGradBundleEquiv_unit_genVal` reads the slot-`0` curry at the unit as
-`(∇·(∇²_{B, B} S)(x)(w x))(unit)`; the unit-transport `covDeriv_unit_eval_eq_genVal` (the unit
-`(0, 0)`-section is parallel) pushes the outer `∇_w` into the abstract `(0, s)` connection of the
-unit-evaluated Hessian section `y ↦ (∇²_{B, B} S)(y)(unit)`, which is the abstract Hessian
-`∇^{abs}_B(∇^{abs}_B V) − ∇^{abs}_{∇_B B} V` by `tensorSecondCovDeriv_unit_eval_genVal`; additivity of
-`nab` (`cov_toFun_sub`) splits the outer derivative. -/
 lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}
@@ -315,12 +214,12 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
   classical
   set nab := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) with hnab
   set V := unitEvalSection (I := I) (M := M) g s S with hV
-  -- Slot-`0` curry at the unit reads the directional derivative of the Hessian section along `w`.
+  
   rw [tensor0S_curry_covGradBundleEquiv_unit_genVal (I := I) (M := M) s x
     ((tensorCov (I := I) g 0 s).toFun
       (fun y : M => tensorSecondCovDeriv (I := I) g 0 s B B
         (fun z : M => S.toSection z) y) x) (w x)]
-  -- Package the Hessian section as a smooth `(0, s)`-section.
+  
   have hSsec : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
@@ -354,12 +253,12 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
       hHsmooth with hσ
   have hσapp : ∀ y : M, σ y =
       tensorSecondCovDeriv (I := I) g 0 s B B (fun z : M => S.toSection z) y := fun y => rfl
-  -- Rewrite the inner section to `σ`, then transport the outer `∇_w` through the unit.
+  
   rw [show (fun y : M => tensorSecondCovDeriv (I := I) g 0 s B B
         (fun z : M => S.toSection z) y) = (fun y : M => σ y) from
     funext (fun y => (hσapp y).symm)]
   rw [covDeriv_unit_eval_eq_genVal (I := I) (M := M) g s σ x (w x)]
-  -- The unit-evaluated Hessian section is the abstract `(0, s)` Hessian of `V`.
+  
   rw [show (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from σ y)
         (unitZeroSec (I := I) (M := M) y)) =
       (fun y : M => nab.toFun (covApply nab B V) y (B y) - nab.toFun V y
@@ -367,7 +266,7 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
     funext y
     rw [hσapp y]
     exact tensorSecondCovDeriv_unit_eval_genVal (I := I) (M := M) g s S hB y]
-  -- Split the outer `∇_w` over the Hessian's subtraction.
+  
   have hVsm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun z : M => Tensor0SSpace s I z) y (V y)) :=
@@ -384,16 +283,6 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
   rw [cov_toFun_sub nab h1 h2]
   simp only [ContinuousLinearMap.sub_apply]
 
-/-- **The double slot-`0` curry of the abstract `(0, s + 1)` gradient field `U := unitGradFieldGen
-g s S` along a smooth field `w` is the abstract `(0, s)`-Hessian of `V := unitEvalSection g s S`
-along `(B, w)`.** For smooth fields `B, w`, as a section in `y`,
-```
-curry (∇^{(0,s+1)abs}_B U)_y (w y) = ∇^{abs}_B(∇^{abs}_w V)_y − ∇^{abs}_{∇_B w} V_y.
-```
-Each slot-`0` curry of `∇_B U` is read by `abstract_succ_covDeriv_unfold_at_genVal` (with
-differentiation direction `B`); the two pieces use the slot-`0` reading `curry U_· (·) = ∇^{abs}_· V`
-of `U` (`curriedSection_unitGradFieldGen_eq_covApply_abstract`,
-`curriedSection_unitGradFieldGen_apply`). -/
 lemma curry_covApply_unitGradFieldGen_eq_abstractHess
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}
@@ -413,36 +302,21 @@ lemma curry_covApply_unitGradFieldGen_eq_abstractHess
   set nab := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) with hn
   set U := unitGradFieldGen (I := I) (M := M) g s S with hU
   set V := unitEvalSection (I := I) (M := M) g s S with hV
-  -- `curry (∇_B U)_y (w y) = curry (nab1.toFun U y (B y)) (w y)`.
+  
   have hcov : Tensor0SNabla.curriedSection I M (covApply nab1 B U) y (w y) =
       tensor0S_curry (I := I) (M := M) s y (nab1.toFun U y (B y)) (w y) := by
     rw [Tensor0SNabla.curriedSection_apply]; rfl
   rw [hcov]
-  -- Slot-`0` Christoffel exposure of the abstract `(0, s + 1)` derivative along `B`, slot `w`.
+  
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s U (Vfield := B) (Y := w) (x := y)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S y).mdifferentiableAt (by simp))
     ((hB y).mdifferentiableAt (by simp)) ((hw y).mdifferentiableAt (by simp))]
-  -- The two pieces read `curry U · = ∇^{abs}_· V`.
+  
   rw [curriedSection_unitGradFieldGen_eq_covApply_abstract (I := I) (M := M) g s S w]
   rw [curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S y
     ((LeviCivita (I := I) g).toFun w y (B y))]
   rfl
 
-/-- **The `A`-side reduction: the curried unit-evaluation of the first frame summand is the abstract
-`(B, w)`-Hessian-of-gradient form.** For smooth fields `B, w`, the slot-`0` curry at `w` of the
-unit-evaluation of `Aᵢ = ∇²_{B, B}(∇S)` equals the abstract iterated derivative
-```
-curry Aᵢ(unit)(w) = ∇^{abs}_B(∇^{abs}_B(∇^{abs}_w V)) − 2 ∇^{abs}_B(∇^{abs}_{∇_B w} V)
-  + ∇^{abs}_{∇_B(∇_B w)} V − ∇^{abs}_{∇_B B}(∇^{abs}_w V) + ∇^{abs}_{∇_{∇_B B} w} V,
-```
-with `V := unitEvalSection g s S`. The unit-transport `tensorSecondCovDeriv_covGrad_unit_eval_genVal`
-identifies `Aᵢ(unit)` with the abstract `(0, s + 1)` second covariant derivative of `U :=
-unitGradFieldGen g s S` along `B`; currying the slot-`0` direction `w` (linear, `map_sub`) and
-applying the slot-`0` Christoffel exposure `abstract_succ_covDeriv_unfold_at_genVal` to the two
-`(0, s + 1)` directional terms (with the double-curry identity
-`curry_covApply_unitGradFieldGen_eq_abstractHess` for the inner gradient field, and
-`curriedSection_unitGradFieldGen_apply` for the unit-evaluated section) produces the abstract
-third-order form. -/
 lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}
@@ -472,7 +346,7 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
             (unitEvalSection (I := I) (M := M) g s S) x
             ((covApply (LeviCivita (I := I) g) (covApply (LeviCivita (I := I) g) B B) w) x) := by
   classical
-  -- Smoothness of the tangent Christoffel field `∇_B w` and the inner gradient field `∇_B U`.
+  
   have hCwsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply (LeviCivita (I := I) g) B w)) :=
     covApply_contMDiff (cov := LeviCivita (I := I) g) hB hw
   have hUsm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ∞
@@ -497,18 +371,18 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
     (Tensor0SNabla.contMDiff_curriedSection_iff_section (I := I) (M := M)
       (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
         (LeviCivita (I := I) g)) B (unitGradFieldGen (I := I) (M := M) g s S))).mp hBUsm
-  -- STEP 1: `Aᵢ(unit) = nab1.toFun (∇_B U) x (B x) − nab1.toFun U x (∇_B B)`.
+  
   rw [tensorSecondCovDeriv_covGrad_unit_eval_genVal (I := I) (M := M) g s S hB x]
-  -- STEP 2: curry the slot-`0` direction `w` (linear over the subtraction).
+  
   rw [map_sub, ContinuousLinearMap.sub_apply]
-  -- STEP 3a (term `T1`): the leading directional term, via `abstract_succ` (direction `B`, slot `w`).
+  
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
     (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
       (LeviCivita (I := I) g)) B (unitGradFieldGen (I := I) (M := M) g s S))
     (Vfield := B) (Y := w) (x := x)
     ((hcurBU x).mdifferentiableAt (by simp))
     ((hB x).mdifferentiableAt (by simp)) ((hw x).mdifferentiableAt (by simp))]
-  -- STEP 3b (term `T2`): the Christoffel directional term, via `abstract_succ` (direction `∇_B B`).
+  
   rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
         (unitGradFieldGen (I := I) (M := M) g s S) x
         ((LeviCivita (I := I) g).toFun B x (B x)) =
@@ -521,7 +395,7 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((covApply_contMDiff (cov := LeviCivita (I := I) g) hB hB x).mdifferentiableAt (by simp))
     ((hw x).mdifferentiableAt (by simp))]
-  -- STEP 4: read the `U`-curries: the inner double-curry (`Hessian`) and the unit-section curries.
+  
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M
         (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
           (LeviCivita (I := I) g)) B (unitGradFieldGen (I := I) (M := M) g s S)) y (w y)) =
@@ -533,16 +407,16 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
             (unitEvalSection (I := I) (M := M) g s S) y
             ((covApply (LeviCivita (I := I) g) B w) y)) from
     funext (fun y => curry_covApply_unitGradFieldGen_eq_abstractHess (I := I) (M := M) g s S hB hw y)]
-  -- The `T1`-Christoffel `curry (∇_B U)_x (∇_B w)`: same double-curry identity at slot `∇_B w`.
+  
   rw [show ((LeviCivita (I := I) g).toFun w x (B x)) = (covApply (LeviCivita (I := I) g) B w x)
     from rfl]
   rw [curry_covApply_unitGradFieldGen_eq_abstractHess (I := I) (M := M) g s S
     (w := covApply (LeviCivita (I := I) g) B w) hB hCwsm x]
-  -- The `T2` `U`-curries: `curry U_· (·) = ∇^{abs}_· V`.
+  
   rw [curriedSection_unitGradFieldGen_eq_covApply_abstract (I := I) (M := M) g s S w]
   rw [curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S x
     ((LeviCivita (I := I) g).toFun w x ((covApply (LeviCivita (I := I) g) B B) x))]
-  -- STEP 5: split the outer `∇_B` over the inner Hessian section, then `abel`.
+  
   have hVsm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun z : M => Tensor0SSpace s I z) y (unitEvalSection (I := I) (M := M) g s S y)) :=
@@ -602,46 +476,12 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
       (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) h1 h2]
     simp only [ContinuousLinearMap.sub_apply]
   rw [hsplitB]
-  -- Convert the `[Dw]V` term to `covApply`-of-`covApply` form and normalise the scalar `2 •`.
+  
   rw [show ((LeviCivita (I := I) g).toFun w x ((covApply (LeviCivita (I := I) g) B B) x)) =
       (covApply (LeviCivita (I := I) g) (covApply (LeviCivita (I := I) g) B B) w x) from rfl]
   simp only [two_smul]
   abel
 
-/-- **The rank-generic second-order leading-slot covGrad/covDeriv commutation (the K-A `∇²`-version).**
-For a smooth `(0, s)`-tensor `S` and smooth tangent fields `B, w`, the difference of the two
-curried-unit-evaluated readings of the two frame summands `Aᵢ − Dᵢ` of the order-`2` rough-Laplacian /
-covariant-gradient commutator defect — the slot-`0` curry at `w` of `Aᵢ = ∇²_{B, B}(∇S)` and of
-`Dᵢ = covGradBundleEquiv(∇·(∇²_{B, B} S))`, both read at the unit `(0, 0)`-tensor — is, with
-`V := unitEvalSection g s S` and `nab := tensor0SCovariantDerivative I M s (LeviCivita g)`:
-```
-curry Aᵢ(unit)(w) − curry Dᵢ(unit)(w)
-  = (∇_B R)(B, w) V                                              -- the (∇R)-class term
-  + ( R(∇_B B, w) V + R(B, ∇_B w) V + 2 R(B, w)(∇^{abs}_B V) )    -- the R-on-differentiated class
-  + ρ,                                                            -- the Christoffel-derivative residual
-```
-with `R = riemannSec nab` the abstract `(0, s)`-tensor Riemann curvature, `(∇_B R)(B, w) V =
-nablaTensorCurvSec g nab B B w V` the abstract differentiated curvature, and `ρ =
-secondOrderChristoffelResidual g nab B w V` the explicit named residual carrying the once- and
-twice-differentiated single-direction Christoffel corrections (no Riemann-curvature factor).
-
-This is the classical third-order Ricci identity lifted to the covariant-gradient bundle: the
-genuine curvature-derivative `(∇_B R)` and the curvature applied to the differentiated frame
-direction `∇_B B`, the differentiated leading-slot direction `∇_B w`, and the differentiated section
-`∇^{abs}_B V` all appear; the explicit residual `ρ` is the differentiated single-direction
-correction whose frame-summed integral treatment is handled downstream (it is never made to vanish).
-
-**s = 0:** the section slot is a scalar `(0, 0)`-tensor with flat connection, so `R = riemannSec nab`
-vanishes (the scalar connection has no curvature) and `nablaTensorCurvSec` vanishes; the identity
-reduces to the pure scalar third-derivative Christoffel identity `curry Aᵢ(unit)(w) − curry
-Dᵢ(unit)(w) = ρ`, with the `(∇R)`-class and the `R`-on-differentiated class both vanishing, as a
-scalar third-order leading-slot commutation must.
-
-**Proof.** The two leading-slot readings reduce — curvature-free, via the unit-evaluation transports —
-to the abstract iterated `(0, s)`-tensor derivative forms `Aabs`
-(`covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract`) and `Dabs`
-(`covGrad_covDeriv_innerSlot_secondOrder_eq_abstract`); their difference is the abstract third-order
-Ricci identity `thirdOrder_commutation_abstract` applied to `cov := nab` and the smooth section `V`. -/
 theorem covGrad_covDeriv_leadingSlot_secondOrder_commutation
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}

@@ -9,19 +9,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Minimiser implies non-negativity of the index form
-
-The exponential-map construction of a smooth endpoint-fixed variation with a
-prescribed (bundle-smooth) variation field, and the consequence that the index
-form of a length-minimising geodesic is non-negative.
-
-This file sits downstream of both the second-variation machinery
-(`Variation.SecondVariation`) and the joint smoothness of the intrinsic
-exponential map (`Exponential.ExpVariationSmooth`,
-`Exponential.IntrinsicMfderivAtZero`).
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle MeasureTheory intervalIntegral
@@ -45,14 +32,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
-/-- **Second-derivative test (non-negativity form).** If a real function `L`
-has a local minimum at `x₀`, has derivative `0` there (recorded via a first
-`HasDerivAt`), and has a second derivative `c` there (recorded as
-`HasDerivAt (deriv L) c x₀`), then `0 ≤ c`.
-
-If `c < 0` the second-derivative test (maximum version) would make `x₀` a local
-maximum; combined with the local minimum, `L` is eventually constant near `x₀`,
-so its derivative is eventually `0`, forcing `c = 0` — a contradiction. -/
 theorem second_deriv_nonneg_of_isLocalMin {L : ℝ → ℝ} {x₀ c : ℝ}
     (hmin : IsLocalMin L x₀) (hL' : HasDerivAt L 0 x₀)
     (hL'' : HasDerivAt (deriv L) c x₀) : 0 ≤ c := by
@@ -73,23 +52,16 @@ theorem second_deriv_nonneg_of_isLocalMin {L : ℝ → ℝ} {x₀ c : ℝ}
   have : c = 0 := hL''0.unique (hasDerivAt_const x₀ (0 : ℝ))
   exact absurd this (ne_of_lt hc)
 
-/-- A bounded smooth reparametrisation of the line.  For `r > 0`,
-`reparam r s := (2 r / π) · arctan((π / (2 r)) · s)` is `C^∞`, vanishes at `0`,
-has derivative `1` at `0`, and stays strictly inside `(-r, r)`. -/
 def reparam (r : ℝ) (s : ℝ) : ℝ :=
   (2 * r / Real.pi) * Real.arctan ((Real.pi / (2 * r)) * s)
 
-/-- `reparam` is `C^∞`. -/
 theorem contDiff_reparam (r : ℝ) : ContDiff ℝ ∞ (reparam r) := by
   unfold reparam
   exact contDiff_const.mul (Real.contDiff_arctan.comp (contDiff_const.mul contDiff_id))
 
-/-- `reparam r 0 = 0`. -/
 @[simp] theorem reparam_zero (r : ℝ) : reparam r 0 = 0 := by
   simp [reparam, Real.arctan_zero]
 
-/-- For `r > 0`, the values of `reparam r` are strictly bounded by `r` in
-absolute value. -/
 theorem abs_reparam_lt (r : ℝ) (hr : 0 < r) (s : ℝ) : |reparam r s| < r := by
   have hpi : 0 < Real.pi := Real.pi_pos
   have hcoef : (0 : ℝ) < 2 * r / Real.pi := by positivity
@@ -101,7 +73,6 @@ theorem abs_reparam_lt (r : ℝ) (hr : 0 < r) (s : ℝ) : |reparam r s| < r := b
         mul_lt_mul_of_pos_left harctan hcoef
     _ = r := by field_simp
 
-/-- The derivative of `reparam r` at `0` is `1` (for `r > 0`). -/
 theorem hasDerivAt_reparam_zero (r : ℝ) (hr : 0 < r) :
     HasDerivAt (reparam r) 1 0 := by
   have hpi : 0 < Real.pi := Real.pi_pos
@@ -126,10 +97,6 @@ theorem hasDerivAt_reparam_zero (r : ℝ) (hr : 0 < r) :
   rw [hval] at this
   exact this
 
-/-- A `C^∞` cut-off `χ : ℝ → ℝ` with `χ = 1` on `[0, L]`, `χ = 0` outside the open
-interval `(-1, L+1)`, and `0 ≤ χ ≤ 1`.  Used to give the exponential variation a
-field of compact support in the curve parameter, so that the joint smoothness can
-be uniformised over the compact carrier by the tube lemma. -/
 theorem exists_cutoff_one_on_Icc (L : ℝ) :
     ∃ χ : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 (Set.Icc 0 L) ∧
       Set.EqOn χ 0 ((Set.Ioo (-1 : ℝ) (L + 1))ᶜ) ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
@@ -155,12 +122,7 @@ variable [T2Space (TangentBundle I M)] [ConnectedSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Scalar cut-off of a bundle-smooth field of launch directions is bundle-smooth.
-If `t ↦ (γ t, V t)` is a smooth section of `TM` along `γ` and `χ : ℝ → ℝ` is
-smooth, then `t ↦ (γ t, χ t • V t)` is bundle-smooth.  The fibre coordinate of the
-cut-off section, in the trivialisation at `γ t₀`, is `χ t` times the fibre
-coordinate of the original section (fibrewise linearity of the trivialisation),
-hence smooth as a product of smooth scalar functions. -/
+
 theorem contMDiff_smul_bundleField
     {γ : ℝ → M} {V : ℝ → E} {χ : ℝ → ℝ} {n : WithTop ℕ∞}
     (hγ : ContMDiff (𝓘(ℝ, ℝ)) I n γ) (hχ : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n χ)
@@ -191,11 +153,7 @@ theorem contMDiff_smul_bundleField
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic exponential map at `p` is `MDifferentiableAt 𝓘(ℝ, E) I` at the
-zero tangent vector.  It agrees with the chart-fixed `expMap g p` on a
-neighbourhood of `0` (`exists_expMapIntrinsic_eq_expMap_radius`), and the latter
-is `ContMDiffAt 𝓘(ℝ, E) I 1` at `0`
-(`expMap_contMDiffAt_zero`). -/
+
 theorem mdifferentiableAt_expMapIntrinsic_zero
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -238,22 +196,7 @@ theorem mdifferentiableAt_expMapIntrinsic_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Exponential-map construction of a smooth endpoint-fixed variation.**
-Given a smooth curve `γ`, a bundle-smooth field of launch directions
-`t ↦ (γ t, V t)` (a smooth section of `TM` along `γ`) vanishing at the endpoints
-`0` and `L`, there exists a two-parameter variation `f` that is jointly smooth
-(`IsSmoothVariation`), whose central curve is `γ` (`f 0 t = γ t`), whose
-`s`-velocity at `s = 0` realises `V` on `[0, L]`, and which keeps both endpoints
-fixed (`f s 0 = γ 0`, `f s L = γ L`).
 
-The construction is the intrinsic geodesic exponential map of a cut-off of the
-field, `f s t := exp_{γ t}(η s • χ t • V t)`, where `χ` is a compactly supported
-cut-off equal to `1` on `[0, L]` (giving the carrier a compact `t`-range over which
-the per-point joint smoothness of the exponential map can be uniformised by the
-tube lemma) and `η` is a bounded smooth reparametrisation with `η 0 = 0`,
-`η'(0) = 1` (keeping the launch parameter inside the smallness window everywhere).
-The hypotheses `hV0`, `hVL` (`V` vanishing at the endpoints) are what make the
-endpoints fixed. -/
 theorem exists_variation_realising_field_via_exp
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -415,21 +358,7 @@ theorem exists_variation_realising_field_via_exp
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- For a unit-speed geodesic `γ` on `[0, L]` that minimises arc length among `C¹`
-endpoint-fixed competitors, the index form is non-negative on every smooth
-perpendicular endpoint-vanishing variation field `V`: `0 ≤ indexForm g γ 0 L V V`.
 
-The hypotheses are the genuine geometric data of the second-variation argument:
-`hγ` makes `γ` a geodesic on `[0, L]`, `hUnit` makes it unit-speed, `hmin` is the
-length-minimising property (arc length of `γ` is `≤` that of any `C¹` curve with
-the same endpoints), `hVperp` makes `V` perpendicular to `γ'`, and `hV0`, `hVL`
-make `V` vanish at the endpoints. `γ` is assumed smooth (`hγ_smooth` — for a
-minimising geodesic this comes from `isGeodesic_contMDiff`) and `V` a bundle-smooth
-section of `TM` along `γ` (`hVbundle`); these are the regularity data needed to
-build the exponential variation realising `V`. The minimising property makes the
-arc-length functional of that variation have a local minimum at `s = 0`; the first
-variation vanishes (geodesic) and the second-derivative test gives the
-non-negativity of the index form. -/
 theorem indexForm_nonneg_of_minimising_geodesic
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)

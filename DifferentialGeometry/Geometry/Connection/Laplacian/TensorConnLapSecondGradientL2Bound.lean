@@ -3,57 +3,6 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapGradientL
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
-/-!
-# The order-`2` second-covariant-gradient `L²` control from the `(0, 3)` Green identity
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file extracts, from the integrated `(0, 3)`
-connection-Laplacian Green identity
-`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_three`, the second-order
-elliptic-regularity inequality
-
-```
-‖∇²T‖²_{L²} ≤ ‖Δ_∇(∇T)‖_{L²} · ‖∇T‖_{L²}
-```
-
-for every smooth compactly-supported `(0, 2)`-tensor field `T`. Here `∇T` is the
-covariant gradient `covGrad g 0 2 T` (a `(0, 3)`-tensor field) and `∇²T` is the
-iterated covariant gradient `covGrad g 0 3 (covGrad g 0 2 T)` (a `(0, 4)`-tensor
-field), whose diagonal `L²` self-pairing is `‖∇²T‖²_{L²}`. The rough Laplacian
-`Δ_∇(∇T) = rawTensorConnLapSmooth g 0 3 (covGrad g 0 2 T)` acts on the `(0, 3)`
-gradient field.
-
-This is the genuine order-`2` analogue of the committed order-`1` control
-`covGrad_l2NormSq_le_rawConnLap_mul_self` (which bounds `‖∇T‖²` by
-`‖Δ_∇ T‖·‖T‖`): it is the diagonal specialisation of the `(0, 3)` Green
-identity at `S := covGrad g 0 2 T`, combined with the global `L²`
-Cauchy–Schwarz inequality.
-
-## The mechanism
-
-Specialising the rank-`(0, 3)` Green identity at `v := S := covGrad g 0 2 T`
-gives `⟨∇S, ∇S⟩_{L²} = − ⟨Δ_∇ S, S⟩_{L²}`. The left side is the squared `L²`
-norm of the iterated covariant gradient `∇²T` (a non-negative quantity); the
-right side is bounded in absolute value, via the global Cauchy–Schwarz
-inequality `abs_tensorL2Inner_le` together with the square-integrability of
-smooth compactly-supported sections, by `‖Δ_∇ S‖_{L²} · ‖S‖_{L²}`.
-
-## Main results
-
-* `covGrad_two_l2Inner_self_eq_neg_rawConnLap_three_inner` — the diagonal `(0, 3)`
-  Green identity `⟨∇²T, ∇²T⟩_{L²} = − ⟨Δ_∇(∇T), ∇T⟩_{L²}`.
-* `secondCovGrad_l2NormSq_le_rawConnLap_three_mul_covGrad` — the headline
-  second-order control `‖∇²T‖²_{L²} ≤ ‖Δ_∇(∇T)‖_{L²} · ‖∇T‖_{L²}`.
-
-## Sign / order conventions
-
-Geometer convention `Δ_∇ = -∇*∇` for the rough Laplacian
-`rawTensorConnLapSmooth`. The covariant gradient `covGrad g 0 s` raises the
-tensor rank from `(0, s)` to `(0, s + 1)`; iterating it twice from rank `(0, 2)`
-produces the rank-`(0, 4)` object `∇²T` whose diagonal `L²` self-pairing is the
-squared `L²` norm of the iterated second covariant derivative.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -87,16 +36,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
-/-- **Diagonal `(0, 3)` Green identity at the gradient field.** For a smooth
-compactly-supported `(0, 2)`-tensor field `T₀`, writing `S := ∇T₀ =
-covGrad g 0 2 T₀` for its `(0, 3)`-tensor covariant gradient, the diagonal
-`L²` self-pairing of `∇S = ∇²T₀` equals minus the `L²` pairing of the rough
-Laplacian `Δ_∇ S` with `S`:
 
-```
-⟨∇²T₀, ∇²T₀⟩_{L²} = − ⟨Δ_∇(∇T₀), ∇T₀⟩_{L²}.
-```
--/
 lemma covGrad_two_l2Inner_self_eq_neg_rawConnLap_three_inner
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (3 + 1)
@@ -113,19 +53,7 @@ lemma covGrad_two_l2Inner_self_eq_neg_rawConnLap_three_inner
     (covGrad (I := I) (M := M) g 0 2 T₀)
 
 set_option linter.unusedSectionVars false in
-/-- **Second-order covariant-gradient `L²` control.** For a smooth
-compactly-supported `(0, 2)`-tensor field `T₀`, the squared `L²` norm of the
-iterated covariant gradient `∇²T₀ = covGrad g 0 3 (covGrad g 0 2 T₀)` is
-bounded by the product of the `L²` norms of the rough Laplacian `Δ_∇(∇T₀)` and
-of the covariant gradient `∇T₀`:
 
-```
-‖∇²T₀‖²_{L²} ≤ ‖Δ_∇(∇T₀)‖_{L²} · ‖∇T₀‖_{L²}.
-```
-
-This is the order-`2` analogue of the committed order-`1` control
-`covGrad_l2NormSq_le_rawConnLap_mul_self`. The proof is the diagonal `(0, 3)`
-Green identity combined with the global `L²` Cauchy–Schwarz inequality. -/
 theorem secondCovGrad_l2NormSq_le_rawConnLap_three_mul_covGrad
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     tensorL2Norm (I := I) (M := M) g 0 (3 + 1)
@@ -163,18 +91,7 @@ theorem secondCovGrad_l2NormSq_le_rawConnLap_three_mul_covGrad
   exact le_trans hneg_le hcs
 
 set_option linter.unusedSectionVars false in
-/-- **Laplacian-gradient `L²` collapse.** For a smooth compactly-supported
-`(0, 2)`-tensor field `T₀`, the `L²` inner product of the covariant gradient of
-`Δ_∇ T₀` with the covariant gradient of `T₀` equals minus the squared `L²` norm
-of `Δ_∇ T₀`:
 
-```
-⟨∇(Δ_∇ T₀), ∇T₀⟩_{L²} = − ‖Δ_∇ T₀‖²_{L²}.
-```
-
-This is the `(0, 2)` Green identity `green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed`
-applied at the pair `(T₀, Δ_∇ T₀)`, together with the symmetry `tensorL2Inner_symm`
-of the global `L²` pairing. -/
 theorem covGrad_rawConnLap_l2Inner_covGrad_eq_neg_rawConnLap_normSq
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)

@@ -3,70 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# `K`-graded explicit-norm `wkpNorm` bound for the differentiated chart-RHS numerator
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the level-`(m+1)`
-differentiated chart-RHS numerator `eigenvectorChartRHSDiffNumerator` is the
-explicit five-layer Leibniz combination `A + B − C + D + E` produced by one more
-integration by parts in the new direction `lₙ := l (Fin.last m)`.
-
-The order-`0` companion `eigenvectorChartRHSDiffNumerator_eLpNorm_le` records the
-quantitative `eLpNorm`-bound — the `wkpNorm`-bound at Sobolev order `0` — for the
-numerator against `volume.restrict (chartPouKernel α)`. This file records its
-order-`K` generalisation: there is a nonnegative constant `C` with
-
-```
-wkpNorm K 2 (eigenvectorChartRHSDiffNumerator … m l fChartEffPrev)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C * <AGGREGATE_K>,
-```
-
-where `<AGGREGATE_K>` is `diffNumeratorAggregateK`, the order-`K` analogue of the
-order-`0` `diffNumeratorAggregate`: the honest finite sum
-
-* `∑ₐ wkpNorm (2 + K) 2 (eigenvectorChartIteratedPartial … (m+1) (Fin.cons a
-  (Fin.init l))) (chartTargetEuclid α)` — the iterated weak partials feeding
-  layers `A`, `B`;
-* `wkpNorm (2 + K) 2 (eigenvectorChartIteratedPartial … m (Fin.init l))
-  (chartTargetEuclid α)` — the iterated weak partial feeding layer `C`;
-* `wkpNorm (K + 1) 2 fChartEffPrev (chartTargetEuclid α)` — controlling layer
-  `E` via the chosen weak partial;
-* `wkpNorm K 2 fChartEffPrev (chartTargetEuclid α)` — controlling layer `D`.
-
-## Strategy
-
-`eigenvectorChartRHSDiffNumerator` is a five-layer `+`/`-` combination; iterated
-Minkowski for `wkpNorm` bounds its order-`K` norm by the sum of the five layer
-norms. Each layer is a finite sum of `(smooth coefficient) · atom` summands,
-aggregated via `wkpNorm_sum_le`. Per summand the order-`K` smooth-coefficient
-bound `wkpNorm_coef_mul_factor_le` — the quantitative companion of the
-qualitative `memWkp_coef_mul_factor` — gives `wkpNorm K 2 (coef · atom) Ω ≤
-ENNReal.ofReal Cᵢ * wkpNorm K 2 atom Ω`; it cuts the chart-target-smooth
-coefficient off into a globally smooth compactly supported representative,
-uniformly bounds its iterated derivatives up to order `K`, applies the
-global-smoothness Leibniz bound `wkpNorm_smul_smooth_bounded_le`, and transfers
-back through the ae-vanishing of the atom off the kernel. The atom norm is then
-bounded by the aggregate: an iterated weak partial directly (`wkpNorm K 2 ≤
-wkpNorm (2 + K) 2`); a chosen weak partial of one by
-`wkpNorm_chosenWeakPartial_le` (dropping one order, `wkpNorm (K + 1) 2 ≤ wkpNorm
-(2 + K) 2`); `fChartEffPrev` directly; and its chosen weak partial via
-`wkpNorm_chosenWeakPartial_le` (`wkpNorm (K + 1) 2 fChartEffPrev`). All
-per-summand constants and finite-sum multiplicities fold into a single
-nonnegative `C`.
-
-## Main result
-
-* `eigenvectorChartRHSDiffNumerator_wkpNorm_le` — the `K`-graded explicit-norm
-  `wkpNorm` bound for the differentiated chart-RHS numerator.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -340,8 +276,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- The layer-`A` coefficient `∂_b (weightedInvGramDerivOnEuclid g α a b lₙ)` is
-`C^∞` on the open chart target. -/
+
 private lemma layerA_coeff_contDiffOn
     (a b : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -554,7 +489,6 @@ private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
 
 end MainBoundUniform
 
-/-- Chart-locality-free twin of `diffNumeratorAggregateK`. -/
 def diffNumeratorAggregateK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -582,7 +516,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of `wkpNorm_iteratedPartial_succ_le`. -/
 private lemma wkpNorm_iteratedPartial_succ_le
     (a : Fin (Module.finrank ℝ E)) :
     wkpNorm (d := Module.finrank ℝ E) K 2
@@ -595,7 +528,6 @@ private lemma wkpNorm_iteratedPartial_succ_le
           (chartTargetEuclid (I := I) (M := M) α) :=
   wkpNorm_mono_order (d := Module.finrank ℝ E) (by omega) _ _
 
-/-- Chart-locality-free twin of `wkpNorm_iteratedPartial_le`. -/
 private lemma wkpNorm_iteratedPartial_le :
     wkpNorm (d := Module.finrank ℝ E) K 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
@@ -607,8 +539,6 @@ private lemma wkpNorm_iteratedPartial_le :
           (chartTargetEuclid (I := I) (M := M) α) :=
   wkpNorm_mono_order (d := Module.finrank ℝ E) (by omega) _ _
 
-/-- Chart-locality-free twin of
-`wkpNorm_chosenWeakPartial_iteratedPartial_succ_le`. -/
 private lemma wkpNorm_chosenWeakPartial_iteratedPartial_succ_le
     (a b : Fin (Module.finrank ℝ E)) :
     wkpNorm (d := Module.finrank ℝ E) K 2
@@ -636,8 +566,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
   (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter : ∀ a : Fin (Module.finrank ℝ E),
@@ -760,8 +688,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)) y)
     A (fun a => (h_inner a).1) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter : ∀ a : Fin (Module.finrank ℝ E),
@@ -897,8 +823,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le
           (chartTargetEuclid (I := I) (M := M) α) y)
     A (fun a => (h_inner a).1) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
     (fChartEffPrev : EuclN → ℝ)
     (h_iter_m : MemWkp (d := Module.finrank ℝ E) (2 + K) 2
@@ -943,8 +867,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le
   rw [hA_def, diffNumeratorAggregateK]
   exact le_trans le_add_self (le_trans le_self_add le_self_add)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
     {fChartEffPrev : EuclN → ℝ}
     (h_prev : MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -981,8 +903,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le
   rw [hA_def, diffNumeratorAggregateK]
   exact le_add_self
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le
     {fChartEffPrev : EuclN → ℝ}
     (h_prev : MemWkp (d := Module.finrank ℝ E) (K + 1) 2 fChartEffPrev
@@ -1034,7 +954,6 @@ end LayerBoundsUnconditional
 
 section MainBoundUnconditional
 
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiffNumerator_wkpNorm_le`. -/
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1185,8 +1104,6 @@ end MainBoundUnconditional
 
 section MainBoundUniformUnconditional
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1337,8 +1254,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_wkpNorm_le_uniform
       g r s i α P₀ m K l (fChartEffPrev i))
     (fun a i => (h_inner a).1 i) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1505,8 +1420,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_wkpNorm_le_uniform
       g r s i α P₀ m K l (fChartEffPrev i))
     (fun a i => (h_inner a).1 i) (fun a => (h_inner a).2)⟩
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1562,8 +1475,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_trans le_add_self (le_trans le_self_add le_self_add)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1607,8 +1518,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_add_self
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform`. -/
 private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1668,8 +1577,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_wkpNorm_le_uniform
   rw [diffNumeratorAggregateK]
   exact le_trans le_add_self le_self_add
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform`. -/
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

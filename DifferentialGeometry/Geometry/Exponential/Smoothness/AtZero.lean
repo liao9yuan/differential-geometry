@@ -5,43 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowData
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Final unconditional closure of `expMap`'s `C^1` smoothness at zero
-
-This file discharges the last remaining hypothesis of
-`expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData` — the named manifold-side data
-predicate `HasChartFlowGeodesicMatchData g p` — using the unified
-chart-flow packaging `exists_unified_chartFlow_data` and the rescaled
-manifold-lift identification
-`chartFlowOrbitLiftRescaled_proj_at_one`.
-
-## Strategy
-
-`exists_unified_chartFlow_data g p` supplies a chart-flow `Φ` together
-with positive radii `(ρ, T, T_match)` and the full set of properties
-(joint `C^1` regularity, per-`v` initial values, chart-target-interior
-confinement, chart-phase ODE, zero-section orbit constancy, manifold-
-lift integral-curve property). Choosing `t' := T_match / 2` provides a
-positive evaluation time with `0 < t' < T_match ≤ T`. The match
-predicate `ChartFlowGeodesicMatchAt g p Φ t' ρ` is then discharged by
-combining:
-
-* `chartFlowOrbitLiftRescaled_proj_at_one`, which gives
-  `(chartFlowOrbitLiftRescaled Φ p t' v 1).proj = expMap g p (t' • v)`,
-* the unfolding
-  `(chartFlowOrbitLiftRescaled Φ p t' v 1).proj =
-    (extChartAt I p).symm (Φ((x₀, v), t')).1 =
-    chartFlowCandidate Φ p t' v`,
-  which holds whenever `Φ((x₀, v), t' * 1) ∈ (interior target) ×ˢ univ`.
-
-## Main results
-
-* `hasChartFlowGeodesicMatchData_unconditional` — discharges the named
-  predicate unconditionally.
-* `expMap_contMDiffAt_zero` — the fully
-  unconditional headline.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -65,14 +28,6 @@ section UnconditionalDischarge
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Unconditional discharge.** For a smooth Riemannian metric `g` on a
-boundaryless smooth manifold modelled on a complete inner-product space,
-there exists a V.4-compatible chart-flow witnessing
-`HasChartFlowGeodesicMatchData g p`. The witness chart-flow is the one
-supplied by the unified packaging; the evaluation time `t'` is chosen as
-`T_match / 2` so that `0 < t' < T_match ≤ T`; and the match predicate
-is discharged via the rescaled manifold-lift's projection identity at
-`s = 1`. -/
 theorem hasChartFlowGeodesicMatchData_unconditional
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasChartFlowGeodesicMatchData (I := I) g p := by
@@ -153,12 +108,6 @@ section TrulyUnconditional
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the chart-fixed exponential
-map `v ↦ expMap g p v` (read as `E → M` via `TangentSpace I p = E`) is
-`ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector, i.e. `C^1` at `0`. The
-chart-flow / geodesic match data needed by the conditional version is supplied
-internally, so the statement carries no extra hypothesis beyond `g` and `p`. -/
 theorem expMap_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffAt 𝓘(ℝ, E) I 1

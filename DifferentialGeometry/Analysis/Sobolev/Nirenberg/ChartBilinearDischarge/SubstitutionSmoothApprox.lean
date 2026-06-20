@@ -4,40 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 
-/-!
-# Smooth approximating sequence for the Nirenberg test function
-
-Given a chart-bilinear non-smooth data `D : ChartBilinearH1ComplData g α`,
-the symmetric Nirenberg test function
-
-  `v_h := standardNirenbergTest k h η D.u_chart`
-
-is what feeds the H¹_0 variational identity in
-`chart_bilinear_identity_h1_0`. To use the variational identity for `v_h`,
-we need a smooth-CS approximating sequence whose supports lie in `K_0`
-and whose classical partials converge to the weak partials of `v_h`.
-
-This module supplies that approximating sequence in five steps:
-
-1. `exists_chart_target_cutoff` — build a smooth cutoff `χ` that is `1`
-   on `cthickening |h| K_0` and supported in `chartTargetEuclid α`.
-2. `cutoff_uChart_w1p_witness` — package `χ · D.u_chart` together with
-   its weak partials as a `MemW1pWitness 2` over `Set.univ`.
-3. `exists_smooth_uChart_approx` — apply the global smooth-CS
-   approximation result to obtain a sequence `u_n → χ · D.u_chart` in
-   `L²(univ)` with classical partials converging to the explicit weak
-   partial of `χ · D.u_chart`.
-4. `standardNirenbergTest_smooth_seq` — show that the Nirenberg test
-   function applied to a smooth-CS function is itself smooth-CS.
-5. `standardNirenbergTest_seq_tendsto_eLpNorm` — promote the L²
-   convergence of `u_n → χ · D.u_chart` to L² convergence of the
-   Nirenberg test functions on `cthickening |h| K_0`.
-
-The output of step 5 is exactly the data required by
-`chart_bilinear_identity_h1_0` applied to the symmetric Nirenberg test
-function `v_h := standardNirenbergTest k h η D.u_chart`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -72,11 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 set_option linter.unusedVariables false in
-/-- Construct a smooth cutoff `χ : EuclN → ℝ` taking values in `[0, 1]`,
-equal to `1` on the closed thickening `cthickening |h| K_0`, with compact
-support inside the open chart-target `chartTargetEuclid α`. The thickening
-hypothesis ensures `cthickening |h| K_0 ⊆ chartTargetEuclid α`, and a
-positive buffer of width `δ` guarantees room for the cutoff transition. -/
+
 theorem exists_chart_target_cutoff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M}
@@ -114,9 +76,6 @@ theorem exists_chart_target_cutoff
     apply hχ_one
     exact Metric.self_subset_cthickening _ hx
 
-/-- The function `χ · D.u_chart` is `MemLp 2` over the whole space. The
-support `tsupport χ` is compact in the chart target, so plain `L²` of
-`D.u_chart` on `tsupport χ` lifts to a global `L²` bound. -/
 lemma cutoff_uChart_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -182,9 +141,6 @@ lemma cutoff_uChart_memLp_two_univ
   rw [h_indicator_eq] at h_indicator_lp
   exact h_indicator_lp
 
-/-- The function `(∂_i χ) · D.u_chart + χ · D.weak_partial i` is `MemLp 2`
-over the whole space. Same compact-support strategy as
-`cutoff_uChart_memLp_two_univ`. -/
 lemma cutoff_uChart_partial_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -341,15 +297,6 @@ lemma cutoff_uChart_partial_memLp_two_univ
   rw [h_indicator_eq] at h_indicator_lp
   exact h_indicator_lp
 
-/-- The weak partial of `χ · D.u_chart` on `Set.univ` is given by the
-smooth-product rule:
-  `∂_i (χ · D.u_chart) = (∂_i χ) · D.u_chart + χ · D.weak_partial i`.
-
-The proof works on `chartTargetEuclid α` (where `D.weak_partial i` is the
-weak partial of `D.u_chart` per `D.weak_partial_isWeakPartial`), then
-extends to `Set.univ` since the test function `χ · ψ` and the integrand
-`(∂_i χ · u_chart + χ · weak_partial) · ψ` are both supported in
-`tsupport χ ⊆ chartTargetEuclid α`. -/
 lemma cutoff_uChart_hasWeakPartialDeriv_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -703,27 +650,6 @@ lemma cutoff_uChart_hasWeakPartialDeriv_univ
   rw [h_LHS_pt, h_RHS_split]
   linarith [h_ibp_chart]
 
-/-- **Theorem 2: `W^{1,2}` witness for `χ · D.u_chart` over `Set.univ`.**
-
-Given:
-
-* a chart-bilinear non-smooth data set `D : ChartBilinearH1ComplData g α`,
-* a smooth compactly-supported cutoff `χ : EuclN → ℝ` with
-  `tsupport χ ⊆ chartTargetEuclid α`,
-
-the product `χ · D.u_chart` lies in `W^{1,2}(EuclN)` (against the volume
-measure on the whole space), with explicit weak partial derivatives given
-by the smooth-product rule
-
-  `G i x = (∂_i χ) x · D.u_chart x + χ x · D.weak_partial i x`.
-
-Both `χ · D.u_chart` and each `G i` lie in `L²(volume)` (via the compact
-support of `χ` and the local `L²` properties of `D.u_chart` and
-`D.weak_partial i` on compact subsets of the chart target). The `W^{1,2}`
-witness is the explicit gradient `weakGrad x i = G i x` (the `L²`
-gradient field), and `HasWeakGrad weakGrad (χ · D.u_chart) Set.univ`
-follows from `cutoff_uChart_hasWeakPartialDeriv_univ` applied
-component-wise. -/
 theorem cutoff_uChart_w1p_witness
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -749,10 +675,6 @@ theorem cutoff_uChart_w1p_witness
   · exact cutoff_uChart_memLp_two_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_supp_in
 
-/-- Build a `MemW1pWitness (ENNReal.ofReal 2) (χ · D.u_chart) Set.univ` from
-`cutoff_uChart_w1p_witness`. The weak gradient assembles the per-coordinate
-weak partials into a vector field. We use `ENNReal.ofReal 2` to match the
-exponent expected by `DeGiorgi.exists_smooth_compactSupport_W1p_approx_univ`. -/
 private noncomputable def cutoff_uChart_witness
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -808,16 +730,6 @@ private noncomputable def cutoff_uChart_witness
     exact cutoff_uChart_hasWeakPartialDeriv_univ (I := I) (M := M) D
       hχ_smooth hχ_cs hχ_supp_in i
 
-/-- **Theorem 3: Smooth approximating sequence for `χ · D.u_chart`.**
-
-Apply DeGiorgi's `exists_smooth_compactSupport_W1p_approx_univ` (with
-`p = 2`) to the `W^{1,2}` witness for `χ · D.u_chart`. This gives a
-sequence of smooth compactly-supported `u_n : EuclN → ℝ` with
-
-* `u_n → χ · D.u_chart` in `L²(univ)`,
-* for each coordinate `i`, the classical partial `∂_i u_n` converges in
-  `L²(univ)` to the explicit weak partial
-  `(∂_i χ) x · D.u_chart x + χ x · D.weak_partial i x`. -/
 theorem exists_smooth_uChart_approx
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -894,11 +806,6 @@ theorem exists_smooth_uChart_approx
     rw [h_eq_tendsto]
     exact hu_grad_tendsto i
 
-/-- **Theorem 4: Smooth Nirenberg test sequence.**
-
-The symmetric Nirenberg test function `standardNirenbergTest k h η v`
-applied to a smooth compactly-supported `v` is itself smooth and
-compactly-supported. This is a per-element wrapper for sequences. -/
 theorem standardNirenbergTest_smooth_seq
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (k : Fin (Module.finrank ℝ E))
@@ -919,7 +826,6 @@ theorem standardNirenbergTest_smooth_seq
   · exact standardNirenbergTest_hasCompactSupport
       (d := Module.finrank ℝ E) k h hη_supp (u_seq n)
 
-/-- Translation invariance of `eLpNorm` on Euclidean space. -/
 private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : ℝ)
     (F : EuclN → ℝ) :
     eLpNorm (DifferentialGeometry.Analysis.Sobolev.translate
@@ -940,8 +846,6 @@ private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : �
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
-/-- L² Minkowski bound for the forward difference quotient: for `F` AE-strongly-
-measurable, `‖D_h^k F‖_{L²} ≤ (2/|h|) · ‖F‖_{L²}`. -/
 private lemma eLpNorm_diffQuot_le_local
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -1005,10 +909,6 @@ private lemma eLpNorm_diffQuot_le_local
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
-/-- Linearity of the standard Nirenberg test function in its `u`-argument:
-
-  `standardNirenbergTest k h η (u₁ - u₂) =
-    standardNirenbergTest k h η u₁ - standardNirenbergTest k h η u₂`. -/
 private lemma standardNirenbergTest_sub
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (η u₁ u₂ : EuclN → ℝ) :
     (standardNirenbergTest (d := Module.finrank ℝ E) k h η u₁) -
@@ -1034,23 +934,6 @@ private lemma standardNirenbergTest_sub
   rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_sub
     (d := Module.finrank ℝ E) k (-h)]
 
-/-- **Theorem 5: L² convergence of the Nirenberg test function on the
-cthickening.**
-
-If `u_seq n` is a smooth compactly-supported sequence converging to
-`χ · D.u_chart` in `L²(volume)` and the classical partials converge to the
-weak partials of `χ · D.u_chart` (per `cutoff_uChart_w1p_witness`), and if
-`χ = 1` on `cthickening |h| K_0`, then the symmetric Nirenberg test
-function `v_h_n := standardNirenbergTest k h η (u_seq n)` converges to
-`v_h := standardNirenbergTest k h η D.u_chart` in `L²(cthickening |h| K_0)`.
-
-The proof uses the linearity of `standardNirenbergTest` in `u` and the
-`L²` bound `eLpNorm_standardNirenbergTest_le`. The key observation:
-on the support of `standardNirenbergTest k h η D.u_chart` (which is a
-subset of `cthickening |h| K_0`), the cutoff `χ = 1`, so
-`χ · D.u_chart = D.u_chart` at the relevant evaluation points; hence
-`standardNirenbergTest k h η (χ · D.u_chart) = standardNirenbergTest k h η
-D.u_chart` everywhere. -/
 theorem standardNirenbergTest_seq_tendsto_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

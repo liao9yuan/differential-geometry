@@ -6,85 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartReprNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.ChartPulledRawTensorReprFactorization
 
-/-!
-# Pointwise norm bound on the chart-pulled value of the nested chart-frame
-covariant derivative of a smooth compactly supported tensor section
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, ranks
-`r, s : ℕ`, a chart-frame index `i : Fin (Module.finrank ℝ E)`, and a smooth
-compactly supported `(r, s)`-tensor section `T`, the value of the chart-`α`
-trivialised representation of the *nested* chart-frame covariant derivative
-
-  `b ↦ tensorRSChartE_section_repr r s α (covApply ∇ B (covApply ∇ B T)) b`,
-
-where `B := chartFrameNormGlobalSmooth g α i` is the globally smooth
-chart-`α` chart-frame Gram-Schmidt section, is bounded pointwise on the
-intersection of the chart-`α` partition-of-unity tsupport with the chart-`α`
-Levi-Civita good set by the chart-pulled iterated-Fréchet-derivative data of
-`T` up to order `2`.
-
-The pointwise bound, in squared form, reads
-
-```
-‖tensorRSChartE_section_repr r s α
-    (fun y => (covApply ∇ B (covApply ∇ B T)) y) b‖ ^ 2 ≤
-  K *
-    (∑ j : Fin 3,
-      ‖iteratedFDeriv ℝ j.val
-          (tensorRSChartE_section_repr r s α (fun y => T.toSection y) ∘
-            (extChartAt I α).symm)
-          (extChartAt I α b)‖ ^ 2)
-```
-
-with `K ≥ 0` depending only on `g`, the chart
-at `α`, the ranks `r`, `s`, and the chart-frame index `i`. The constant is
-*independent* of `T` and `b`.
-
-This headline is the order-0 (i.e., value, not Fréchet derivative) analogue
-of the chart-pulled-nested-covApply Fréchet-derivative bound that follows
-from iterating the order-1 covApply Fréchet-derivative bound (Sub-E,
-`chart_pulled_covApply_repr_fderiv_bound`). The Fréchet-derivative variant
-also requires an order-2 iterated-Fréchet-derivative bound on the
-chart-pulled `repr (covApply ∇ B T) ∘ symm`, which is not yet developed in
-this codebase; that order-2 bound will be needed downstream and is left as a
-separate obligation.
-
-## Strategy
-
-The chart-pulled explicit formula
-`chart_pulled_covApply_explicit_formula` applied to the smooth section
-`σ := covApply ∇ B T` gives, at every chart-`α` Levi-Civita good-set
-point `b`,
-
-```
-repr (covApply ∇ B σ) (b) =
-  fderiv ℝ (repr σ ∘ symm) (extChartAt I α b) (trivToE α b (B b))
-  + ∑ k : Fin r, triv.cLMA b (inputSlotCorrection r s g α σ B b k)
-  - ∑ l : Fin s, triv.cLMA b (outputSlotCorrection r s g α σ B b l)
-```
-
-We pass to norms via the triangle inequality. The intrinsic Fréchet-derivative
-piece's norm is bounded by
-
-```
-‖fderiv ℝ (repr σ ∘ symm) (extChartAt I α b)‖ · ‖trivToE α b (B b)‖
-```
-
-The first factor is bounded by `chart_pulled_covApply_repr_fderiv_bound`
-(Sub-E) in terms of orders `0, 1, 2` of `repr T ∘ symm`. The second is
-bounded by smoothness of `B`. The slot-correction pieces' norms are bounded
-by op-norm uniform bounds on the slot kernels and norm bounds on
-`repr σ` (the value of `covApply ∇ B T` at `b`), which itself is bounded by
-orders `0, 1` of `repr T ∘ symm` via the chart-pulled explicit formula at `b`
-applied to `T` together with uniform op-norm bounds. Adding the bounds and
-squaring yields the squared headline.
-
-The differentiability witness required by Sub-E (the differentiability of
-`fderiv ℝ (repr T ∘ symm)` at `extChartAt I α b`) is discharged from
-`ContDiffOn ℝ ∞` regularity of `repr T ∘ symm` on the chart-target image of
-the good set, via `ContDiffWithinAt → ContDiffAt → DifferentiableAt`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -115,8 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
-of the chart-pulled representation of a `SmoothCcTensor`. -/
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -205,10 +124,6 @@ private lemma reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- For any chart-`α` Levi-Civita good-set point `b`, the chart-pulled
-representation `repr T ∘ symm` of `T : SmoothCcTensor g r s` is twice
-Fréchet-differentiable at `extChartAt I α b`; in particular, the Fréchet
-derivative `fderiv ℝ (repr T ∘ symm)` is itself differentiable there. -/
 private lemma fderiv_reprT_differentiableAt_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) {b : M}
@@ -246,9 +161,6 @@ private lemma fderiv_reprT_differentiableAt_goodSet
     (hfd_cd.differentiableOn hne) (extChartAt I α b) hx_mem
   exact hwithin.differentiableAt (hU_open.mem_nhds hx_mem)
 
-/-- For a globally smooth tangent vector section `B`, the chart-pulled
-trivialised vector `trivToE α b (B b) = chartE_section_repr α B.toFun b` has
-a uniform norm bound over the chart-`α` partition-of-unity tsupport. -/
 private lemma trivToE_B_norm_bound
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ C : ℝ, 0 ≤ C ∧

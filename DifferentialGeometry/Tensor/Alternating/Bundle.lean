@@ -11,46 +11,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
-/-!
-# The vector bundle of continuous alternating maps
-
-We define the (topological) vector bundle of continuous alternating maps between two vector bundles
-over the same base.
-
-Given bundles `E₁ E₂ : B → Type*`, and normed spaces `F₁` and `F₂`, we define
-`⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯` (notation for `Bundle.continuousAlternatingMap 𝕜 ι F₁ E₁ F₂ E₂ x`) to be
-a type synonym for `fun x ↦ ⋀^ι⟮𝕜; E₁ x; E₂ x⟯`, the sigma-type of continuous alternating maps
-fibrewise from `E₁ x` to `E₂ x`. If the `E₁` and `E₂` are vector bundles with model fibers `F₁` and
-`F₂`, then this will be a vector bundle with model fiber `F₁ [⋀^ι]→L[𝕜] F₂`.
-
-The topology is constructed from the trivializations for `E₁` and `E₂` and the norm-topology on the
-model fiber `F₁ [⋀^ι]→L[𝕜] F₂` using the `vector_prebundle` construction.  This
-is a bit awkward because it introduces a spurious (?) dependence on the normed space structure of
-the model fiber.
-
-Similar constructions should be possible (but are yet to be formalized) for bundles of continuous
-symmetric maps, multilinear maps in general, and so on, where again the topology can be defined
-using a norm on the fiber model if this helps.
-
-## Main Definitions
-
-* `Bundle.continuousAlternatingMap.vectorBundle`: continuous alternating maps between
-  vector bundles form a vector bundle.  (FIXME Notation `⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯`.)
-
-## Implementation notes
-
-The development of the alternating bundle here is unsatisfactory because it is linear rather than
-semilinear, so e.g. the bundle of alternating conjugate-linear maps, needed for Dolbeault
-cohomology, is not constructed.
-
-The wider development of linear-algebraic constructions on vector bundles (the hom-bundle, the
-alternating-maps bundle, the direct-sum bundle, possibly in the future the bundles of multilinear
-and symmetric maps) is also unsatisfactory, in that it proceeds construction by construction rather
-than according to some generalization which works for all of them. But it is not clear what a
-suitable generalization would be which also covers the semilinear case, as well as other important
-cases such as fractional powers of line bundles (needed for the density bundle).
--/
-
 noncomputable section
 
 open Bundle Set ContinuousAlternatingMap
@@ -60,19 +20,13 @@ variable (𝕜 : Type*) [CommSemiring 𝕜] [TopologicalSpace 𝕜] (ι : Type*)
 variable {B : Type*}
 
 set_option linter.unusedVariables false in
-/-- The bundle of continuous `ι`-slot alternating maps between the topological vector bundles `E₁`
-and `E₂`. At each point `x : B`, the fiber is `(E₁ x) [⋀^ι]→L[𝕜] (E₂ x)`.
-We intentionally include `F₁` and `F₂` as (phantom) arguments so that typeclass instances on
-this type can refer to them. The notation `⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯` is introduced below for the
-partial application (without the basepoint `x`). -/
+
 protected def Bundle.continuousAlternatingMap (F₁ : Type*) (E₁ : B → Type*)
     [Π x, AddCommMonoid (E₁ x)] [Π x, Module 𝕜 (E₁ x)] [Π x, TopologicalSpace (E₁ x)]
     (F₂ : Type*) (E₂ : B → Type*) [Π x, AddCommMonoid (E₂ x)] [Π x, Module 𝕜 (E₂ x)]
     [Π x, TopologicalSpace (E₂ x)] (x : B) : Type _ :=
   (E₁ x) [⋀^ι]→L[𝕜] (E₂ x)
--- deriving Inhabited FIXME
 
--- FIXME, notation more consistent with `F₁ [⋀^ι]→L[𝕜] F₂`?
 notation3 "⋀^" ι "⟮" 𝕜 "; " F₁ ", " E₁ "; " F₂ ", " E₂ "⟯" =>
   Bundle.continuousAlternatingMap 𝕜 ι F₁ E₁ F₂ E₂
 
@@ -83,7 +37,7 @@ variable [Π x, TopologicalSpace (E₂ x)]
 variable [Π x, ContinuousAdd (E₂ x)]
 
 instance (x : B) : AddCommMonoid (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) := by
-  -- Unfold the type synonym, then infer the instance from the fiber.
+  
   dsimp [Bundle.continuousAlternatingMap]
   infer_instance
 
@@ -110,11 +64,6 @@ namespace Pretrivialization
 
 variable [e₁.IsLinear 𝕜] [e₁'.IsLinear 𝕜] [e₂.IsLinear 𝕜] [e₂'.IsLinear 𝕜]
 
-/-- Assume `eᵢ` and `eᵢ'` are trivializations of the bundles `Eᵢ` over base `B` with fiber `Fᵢ`
-(`i ∈ {1,2}`), then `continuousAlternatingMapCoordChange σ e₁ e₁' e₂ e₂'` is the coordinate
-change function between the two induced (pre)trivializations
-`Pretrivialization.continuousAlternatingMap σ e₁ e₂` and
-`Pretrivialization.continuousAlternatingMap σ e₁' e₂'` of `Bundle.ContinuousAlternatingMap`. -/
 def continuousAlternatingMapCoordChange
     [e₁.IsLinear 𝕜] [e₁'.IsLinear 𝕜] [e₂.IsLinear 𝕜] [e₂'.IsLinear 𝕜] (b : B) :
     (F₁ [⋀^ι]→L[𝕜] F₂) →L[𝕜] (F₁ [⋀^ι]→L[𝕜] F₂) :=
@@ -124,8 +73,6 @@ def continuousAlternatingMapCoordChange
 variable [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁]
 variable [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
 
-/-- The coordinate change function between two pretrivializations of the alternating-maps bundle
-is continuous on the intersection of their base sets. -/
 theorem continuousOn_continuousAlternatingMapCoordChange
     [VectorBundle 𝕜 F₁ E₁] [VectorBundle 𝕜 F₂ E₂]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
@@ -172,11 +119,6 @@ theorem continuousOn_continuousAlternatingMapCoordChange
     · intro a ha
       exact ⟨ha.1.1, ha.2.1⟩
 
-/-- Given trivializations `e₁`, `e₂` for vector bundles `E₁`, `E₂` over a base `B`,
-`Pretrivialization.continuousAlternatingMap 𝕜 ι e₁ e₂` is the induced pretrivialization for the
-continuous `ι`-slot alternating maps from `E₁` to `E₂`. That is, the map which will later become a
-trivialization, after the bundle of continuous alternating maps is equipped with the right
-topological vector bundle structure. -/
 def continuousAlternatingMap : Pretrivialization (F₁ [⋀^ι]→L[𝕜] F₂)
     (π (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯) where
   toFun p := ⟨p.1, (e₂.continuousLinearMapAt 𝕜 p.1).compContinuousAlternatingMap <|
@@ -211,9 +153,6 @@ def continuousAlternatingMap : Pretrivialization (F₁ [⋀^ι]→L[𝕜] F₂)
   target_eq := rfl
   proj_toFun _ _ := rfl
 
-/-- The pretrivialization `Pretrivialization.continuousAlternatingMap` is fiberwise linear:
-it acts on each fiber by pre- and post-composing with the linear maps given by the trivializations
-`e₁` and `e₂`, which is a linear operation. -/
 instance continuousAlternatingMap.isLinear
     [Π x, ContinuousAdd (E₂ x)] [Π x, ContinuousSMul 𝕜 (E₂ x)] :
     (Pretrivialization.continuousAlternatingMap 𝕜 ι e₁ e₂).IsLinear 𝕜 where
@@ -259,9 +198,7 @@ omit [Fintype ι] in
 variable [Π x, ContinuousAdd (E₂ x)]
 
 omit [Fintype ι] in
-/-- The inverse of the pretrivialization, applied at a point `b` in both base sets.
-This is the user-friendly form of `continuousAlternatingMap_symm_apply`, taking an explicit
-membership proof `hb` rather than working on the total space. -/
+
 theorem continuousAlternatingMap_symm_apply' {b : B} (hb : b ∈ e₁.baseSet ∩ e₂.baseSet)
     (L : (F₁ [⋀^ι]→L[𝕜] F₂)) :
     (continuousAlternatingMap 𝕜 ι e₁ e₂).symm b L =
@@ -271,9 +208,6 @@ theorem continuousAlternatingMap_symm_apply' {b : B} (hb : b ∈ e₁.baseSet �
   · rfl
   exact hb
 
-/-- The coordinate change function agrees with applying the pretrivialization `e₁' e₂'` to the
-image of `b, L` under the inverse pretrivialization `e₁ e₂`. This shows that
-`continuousAlternatingMapCoordChange` encodes the transition between the two local frames. -/
 theorem continuousAlternatingMapCoordChange_apply (b : B)
   (hb : b ∈ (e₁.baseSet ∩ e₂.baseSet) ∩ (e₁'.baseSet ∩ e₂'.baseSet)) (L : F₁ [⋀^ι]→L[𝕜] F₂) :
   continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂' b L =
@@ -300,10 +234,6 @@ variable (F₁ E₁ F₂ E₂)
 variable [Π x : B, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁] [VectorBundle 𝕜 F₁ E₁]
 variable [Π x : B, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
 
-/-- Topology on the continuous `ι`-slot alternating maps between the respective fibers at a point of
-two "normable" vector bundles over the same base. Here "normable" means that the bundles have fibers
-modelled on normed spaces `F₁`, `F₂` respectively. The topology we put on the continuous `ι`-slot
-alternating maps is the topology coming from the norm on alternating maps from `F₁` to `F₂`. -/
 instance (x : B) : TopologicalSpace (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) :=
   TopologicalSpace.induced
     ((Pretrivialization.continuousAlternatingMap 𝕜 ι
@@ -312,10 +242,6 @@ instance (x : B) : TopologicalSpace (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x)
 
 variable [Π x, ContinuousAdd (E₂ x)] [Π x, ContinuousSMul 𝕜 (E₂ x)]
 
-/-- The continuous `ι`-slot alternating maps between two topological vector bundles form a
-`VectorPrebundle` (this is an auxiliary construction for the
-`VectorBundle` instance, in which the pretrivializations are collated but no topology
-on the total space is yet provided). -/
 def _root_.Bundle.continuousAlternatingMap.vectorPrebundle :
     VectorPrebundle 𝕜 (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ where
   pretrivializationAtlas :=
@@ -338,27 +264,20 @@ def _root_.Bundle.continuousAlternatingMap.vectorPrebundle :
       continuousAlternatingMapCoordChange_apply 𝕜 ι e₁ e₁' e₂ e₂'⟩
   totalSpaceMk_isInducing x := ⟨rfl⟩
 
-/-- Topology on the total space of the continuous `ι`-slot alternating maps between two "normable"
-vector bundles over the same base. -/
 instance Bundle.continuousAlternatingMap.topologicalSpace_totalSpace :
     TopologicalSpace (TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯) :=
   (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).totalSpaceTopology
 
-/-- The continuous `ι`-slot alternating maps between two vector bundles form a fiber bundle. -/
 instance _root_.Bundle.continuousAlternatingMap.fiberBundle :
     FiberBundle (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ :=
   (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).toFiberBundle
 
-/-- The continuous `ι`-slot alternating maps between two vector bundles form a vector bundle. -/
 instance _root_.Bundle.continuousAlternatingMap.vectorBundle :
     VectorBundle 𝕜 (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ :=
   (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).toVectorBundle
 
 variable [he₁ : MemTrivializationAtlas e₁] [he₂ : MemTrivializationAtlas e₂] {F₁ E₁ F₂ E₂}
 
-/-- Given trivializations `e₁`, `e₂` in the atlas for vector bundles `E₁`, `E₂` over a base `B`,
-the induced trivialization for the continuous `ι`-slot alternating maps from `E₁` to `E₂`,
-whose base set is `e₁.baseSet ∩ e₂.baseSet`. -/
 def Bundle.Trivialization.continuousAlternatingMap :
     Trivialization (F₁ [⋀^ι]→L[𝕜] F₂) (π (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯) :=
   VectorPrebundle.trivializationOfMemPretrivializationAtlas _ ⟨e₁, e₂, he₁, he₂, rfl⟩
@@ -431,9 +350,7 @@ variable {F₃ F₄ : Type*}
 local notation "AE₁E₂" => Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
 
 omit [∀ (x : B), IsTopologicalAddGroup (E₂ x)] [∀ (x : B), ContinuousSMul 𝕜 (E₂ x)] in
-/-- The coordinate change function for the alternating-maps bundle is smooth (of class `C^∞`) on
-the intersection of the base sets of the two trivializations, whenever the input bundles
-`E₁`, `E₂` are smooth vector bundles. -/
+
 theorem contMDiffOn_continuousAlternatingMapCoordChange
     [ContMDiffVectorBundle ⊤ F₁ E₁ IB] [ContMDiffVectorBundle ⊤ F₂ E₂ IB]
     [MemTrivializationAtlas e₁] [MemTrivializationAtlas e₁']
@@ -467,8 +384,6 @@ theorem contMDiffOn_continuousAlternatingMapCoordChange
 
 variable [ContMDiffVectorBundle ⊤ F₁ E₁ IB] [ContMDiffVectorBundle ⊤ F₂ E₂ IB]
 
-/-- The vector prebundle of continuous alternating maps is smooth: its coordinate change functions
-are `C^∞`. This is the key step before promoting the prebundle to a smooth vector bundle. -/
 instance Bundle.continuousAlternatingMap.vectorPrebundle.isSmooth :
    (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).IsContMDiff IB ⊤ where
   exists_contMDiffCoordChange := by
@@ -479,13 +394,10 @@ instance Bundle.continuousAlternatingMap.vectorPrebundle.isSmooth :
       apply continuousAlternatingMapCoordChange_apply
       exact hb
 
-/-- If `E₁` and `E₂` are smooth vector bundles, then the bundle of continuous `ι`-slot alternating
-maps from `E₁` to `E₂` is also a smooth vector bundle. -/
 instance SmoothVectorBundle.continuousAlternatingMap :
     ContMDiffVectorBundle ⊤ (F₁ [⋀^ι]→L[𝕜] F₂) (Bundle.continuousAlternatingMap 𝕜 ι F₁ E₁ F₂ E₂) IB
   := (Bundle.continuousAlternatingMap.vectorPrebundle 𝕜 ι F₁ E₁ F₂ E₂).contMDiffVectorBundle IB
 
--- Notation for total space of continuous alternating bundle
 notation "𝒜⟮" 𝕜 "," ι ";"  F₁ "," E₁ ";"  F₂ "," E₂ "⟯" =>
   Bundle.TotalSpace (F₁ [⋀^ι]→L[𝕜] F₂) ⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯
 
@@ -502,9 +414,6 @@ variable
 open Bundle Set Function Filter
 open scoped Topology Manifold ContDiff
 
-/-- The total space of the bundle of real-valued alternating `m`-forms on a manifold `M` is a
-charted space. The model space is `ModelProd HM (EM [⋀^Fin m]→L[ℝ] ℝ)`, where `HM` and `EM`
-are the chart model spaces for the base manifold `M`. -/
 instance ChartedSpace.alternatingBundle : ChartedSpace (ModelProd HM (EM [⋀^Fin m]→L[ℝ] ℝ))
     𝒜⟮ℝ,Fin m;EM,TangentSpace IM;ℝ,Bundle.Trivial M ℝ⟯ := inferInstance
 

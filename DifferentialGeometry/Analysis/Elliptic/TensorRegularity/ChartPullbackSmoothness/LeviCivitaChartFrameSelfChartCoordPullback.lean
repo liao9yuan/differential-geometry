@@ -2,25 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
 
-/-!
-# Chart-α `m`-coordinate of `(LC g) B^α_i (B^α_i)`: smoothness on the Euclidean chart target
-
-For a smooth Riemannian metric `g` on a closed manifold `M` and a chart centre
-`α : M`, the chart-α `m`-th coordinate of the Levi-Civita covariant derivative of
-the chart-frame orthonormal section `B^α_i := chartFrameNormGlobalSmooth g α i`
-along itself, evaluated at a base point `b`, is `ContDiffOn ℝ ∞` after pulling
-back through the composition `(extChartAt I α).symm ∘ (toEuclidean E).symm` to
-the Euclidean chart target `chartTargetEuclid α`.
-
-The `m`-th chart-α coordinate of a tangent vector `v ∈ TangentSpace I b` is
-extracted via `chartModelBasisProj m ((trivializationAt _ _ α).clmAt b v)`,
-following the convention used in `ChartFrameNormGlobalSmoothCoordBasisExpansion`
-and `CovApplyFrameToCoordExpansion`.
-
-This statement is unconditional in the chart atlas: no chart-locality
-predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -48,8 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The linear functional `v ↦ ((chartModelBasis E).repr v) m`, packaged as a
-continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def chartModelBasisProj (m : Fin (Module.finrank ℝ E)) :
     E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -66,9 +45,6 @@ private noncomputable def chartModelBasisProj (m : Fin (Module.finrank ℝ E)) :
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-/-- The Levi-Civita Hom-section `x ↦ ⟨x, (LC g) B^α_i x⟩ : TotalSpace (E →L[ℝ] E)
-(Hom(TM, TM))` is `ContMDiff` on `Set.univ`. Direct consequence of
-`LeviCivita_isContMDiff` applied to the smooth section `B^α_i`. -/
 private lemma leviCivita_chartFrame_hom_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -95,9 +71,6 @@ private lemma leviCivita_chartFrame_hom_contMDiff
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun x) hB'
   exact contMDiffOn_univ.mp h_hom_on
 
-/-- The tangent vector field `x ↦ ⟨x, (LC g) B^α_i x (B^α_i x)⟩ : TotalSpace E
-(TangentSpace I)` is `ContMDiff` on `Set.univ`. Combines the smooth Hom-section
-with the smooth chart-frame section via `ContMDiff.clm_bundle_apply`. -/
 private lemma leviCivita_chartFrame_self_section_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -115,10 +88,6 @@ private lemma leviCivita_chartFrame_self_section_contMDiff
   exact h_hom.clm_bundle_apply (v := fun x : M =>
     (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun x) hB
 
-/-- The trivialized form of the Levi-Civita-of-chart-frame-along-itself tangent
-vector field, projected to the chart-α coordinate basis. This is the function
-`b ↦ (triv α).clmAt b ((LC g) B^α_i b (B^α_i b))`; it is `ContMDiffOn` on the
-chart-α trivialization base set. -/
 private lemma leviCivita_chartFrame_self_trivialized_contMDiffOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -193,10 +162,6 @@ private lemma leviCivita_chartFrame_self_trivialized_contMDiffOn
   intro b hb
   exact (h_eq_baseSet hb).symm
 
-/-- The chart-α `m`-th coordinate of `(LC g) B^α_i b (B^α_i b)` as a scalar
-function of `b`, well-defined as `chartModelBasisProj m ∘ (triv α).clmAt b ∘ ·`
-on the trivialization base set. It is `ContMDiffOn` on the chart-α
-trivialization base set. -/
 private lemma leviCivita_chartFrame_self_coordProj_contMDiffOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -216,15 +181,6 @@ private lemma leviCivita_chartFrame_self_coordProj_contMDiffOn
     (chartModelBasisProj (E := E) m).contMDiff
   exact h_proj.contMDiffOn.comp (t := Set.univ) h_triv (Set.subset_preimage_univ)
 
-/-- **Headline.** The chart-α `m`-th coordinate of the Levi-Civita covariant
-derivative of the chart-frame orthonormal section
-`B^α_i := chartFrameNormGlobalSmooth g α i` along itself, evaluated at a base
-point `b := (extChartAt I α).symm (toEuclidean.symm y)` and pulled back through
-the composition `(extChartAt I α).symm ∘ (toEuclidean E).symm` to the Euclidean
-chart target `chartTargetEuclid α`, is `ContDiffOn ℝ ∞`.
-
-The `m`-th chart-α coordinate of a tangent vector `v ∈ TangentSpace I b` is
-extracted via `chartModelBasisProj m ((trivializationAt _ _ α).clmAt b v)`. -/
 theorem leviCivita_chartFrame_self_chartCoord_pullback_contDiffOn_chartTarget
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

@@ -3,41 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiber
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 
-/-!
-# The slot-`0` frame-sum reconstruction of the fibre norm of a covariant-gradient bundle image
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this file records the
-exact slot-`0` Parseval reconstruction of the intrinsic Riemannian fibre norm of the
-`(0, s + 1)`-tensor `covGradBundleEquiv 0 s x Φ` — the slot-`0` uncurry of a
-`Hom(TM, T^{(0, s)})`-valued continuous-linear map `Φ` — as the frame-sum, over a `g_x`-orthonormal
-tangent frame `e`, of the slot-`s` fibre norms of the per-direction values `Φ (e a)`:
-```
-rfns(covGradBundleEquiv 0 s x Φ)(x) = ∑ a, rfns(Φ (e a))(x).
-```
-
-This is the abstract engine — phrased once for an arbitrary direction CLM `Φ`, never for a specific
-curvature trace — behind every per-direction moving-frame fibre order: the leftmost (slot-`0`)
-covariant slot of `covGradBundleEquiv 0 s x Φ`, read at the orthonormal direction `e a` through the
-sorry-free evaluation bridge `covGradBundleEquiv_apply_eval`, is exactly `Φ (e a)`, so the slot-`0`
-Parseval split `riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame` reconstructs the whole fibre
-norm as the frame-sum of the per-direction fibre norms.
-
-## Main results
-
-* `riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq` — each slot-`0` curried slice of
-  `covGradBundleEquiv 0 s x Φ` along a frame direction `e a` has the same intrinsic fibre norm as the
-  per-direction value `Φ (e a)`.
-* `riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame` — the frame-sum reconstruction of the fibre
-  norm of `covGradBundleEquiv 0 s x Φ` in a `g_x`-orthonormal frame.
-* `riemannianFiberNormSq_covGradBundleEquiv_le_card_mul` — the consumer interface: a uniform
-  per-direction fibre bound `(∀ a, rfns(Φ (e a)) ≤ b)` lifts to
-  `rfns(covGradBundleEquiv 0 s x Φ) ≤ finrank · b`.
-
-## Convention
-
-All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq` (`rfns`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -64,18 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **The intrinsic fibre norm is the frame double-sum of `fiberNormSqSummand` in any `g_x`-orthonormal
-frame.** For *any* `g_x`-orthonormal frame `e` (with `n = Module.finrank` directions, in the explicit
-δ-form Gram), the intrinsic Riemannian fibre norm squared of an `(0, s)`-tensor `S` at `x` is the frame
-double-sum of `fiberNormSqSummand`:
-```
-riemannianFiberNormSq g 0 s x S = ∑ K, ∑ J, fiberNormSqSummand g x 0 s S n e K J.
-```
-The internal definition of `riemannianFiberNormSq` uses the `stdOrthonormalBasis` frame; this lemma
-upgrades it to an arbitrary caller-supplied orthonormal frame. The proof reduces the fibre norm to the
-diagonal frame-sum of the lowered tensor (`tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`) in the
-basis `bse` (the linear-independence basis of `e`), identifies each diagonal summand with the squared
-frame component of the unit-section reading, and collapses the empty `K = (0)`-sum. -/
 lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -107,7 +60,7 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
     intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
   have hbse_orth : ∀ i j, g.inner x (bse i) (bse j) = if i = j then (1 : ℝ) else 0 := by
     intro i j; rw [hbse_eq i, hbse_eq j]; exact horth i j
-  -- Reduce each summand to a squared model component and reassemble via the diagonal sum.
+  
   have hstep : riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
       ∑ ψ : Fin s → Fin (Module.finrank ℝ (TangentSpace I x)),
         Tensor0SSpace.toModel
@@ -164,11 +117,11 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
       have : Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k) = k := by ext; simp
       rw [this]
   rw [hstep]
-  -- Collapse the empty `K`-sum and identify each summand with `fiberNormSqSummand`.
+  
   rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
   · refine Finset.sum_congr rfl (fun J _ => ?_)
     rw [fiberNormSqSummand_eq_component_sq]
-    -- The coframe covector along the empty multi-index is the unit `(0,0)`-tensor.
+    
     have hweight : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e ((fun k : Fin 0 => k.elim0) k))) : Tensor0SSpace 0 I x) =
         unitZeroSec (I := I) (M := M) x := by
@@ -199,13 +152,7 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- **The slot-`0` curried slice of a covariant-gradient bundle image is the per-direction value.**
-For a `g_x`-orthonormal frame `e` representing the rank-`s` fibre norm, the slot-`0` curry of
-`covGradBundleEquiv 0 s x Φ` along the frame direction `e a` has the same intrinsic `(0, s)` fibre
-norm as the per-direction value `Φ (e a)`. The slot-`0` curry reads the leftmost covariant slot at
-`e a`; through the sorry-free evaluation bridge `covGradBundleEquiv_apply_eval` this is exactly the
-value of `Φ` at `e a`, so the two `(0, s)`-tensors agree component-by-frame-component
-(`fiberNormSqComponent`), hence have equal fibre norm. -/
+
 lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x)
@@ -224,13 +171,13 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
     riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x s e hreprS _ K₀]
   refine Finset.sum_congr rfl (fun J _ => ?_)
   congr 1
-  -- Compare the two `(0, s)`-tensors component-by-component in the frame `e`.
+  
   unfold fiberNormSqComponent
   set ωK : Tensor0SSpace 0 I x :=
     (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
       (fun k => g.inner x (e (K₀ k))) with hωK
-  -- The slot-`0` curry's CLM value at `ωK` is the `tensor0S_curry` of the bundle image at `ωK`,
-  -- evaluated at `e a` (the scalar weight is `1`).
+  
+  
   have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           slot0Curry (I := I) (M := M) g x s e K₀
             (covGradBundleEquiv (I := I) (M := M) 0 s x Φ) a) ωK =
@@ -249,8 +196,8 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
       simp
     rw [hscalar, one_smul]
   rw [hslot]
-  -- Evaluate both `toModel`s; the bundle image is `covGradBundleEquiv 0 s x Φ`, so the slot-`0`
-  -- reading at `e a` recovers `Φ (e a)` by `covGradBundleEquiv_apply_eval`.
+  
+  
   rw [show (tensor0S_curry (I := I) (M := M) s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           covGradBundleEquiv (I := I) (M := M) 0 s x Φ) ωK) (e a)
@@ -263,22 +210,14 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
       covGradBundleEquiv (I := I) (M := M) 0 s x Φ) ωK) (v0 := e a) (vs := fun k => e (J k))]
-  -- Apply the eval bridge with the `cons` tuple.
+  
   rw [covGradBundleEquiv_apply_eval (I := I) (M := M) 0 s x Φ ωK
     (Fin.cons (e a) (fun k => e (J k)))]
   rw [Fin.cons_zero]
   congr 1
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- **The slot-`0` frame-sum reconstruction of the fibre norm of a covariant-gradient bundle image.**
-For a `g_x`-orthonormal frame `e` (representing both the rank-`s` and the rank-`(s + 1)` fibre norms),
-the intrinsic fibre norm of `covGradBundleEquiv 0 s x Φ` is the frame-sum, over the slot-`0`
-direction, of the per-direction fibre norms `Φ (e a)`:
-```
-rfns(covGradBundleEquiv 0 s x Φ)(x) = ∑ a, rfns(Φ (e a))(x).
-```
-This is the slot-`0` Parseval split `riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame` with each
-slice rewritten by `riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq`. -/
+
 lemma riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x)
@@ -302,16 +241,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
     hreprS a
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- **Per-direction fibre bound interface for a covariant-gradient bundle image.** If every
-per-direction value `Φ v` along a *unit* tangent direction (`g(v, v) = 1`) has fibre norm bounded by
-a single nonnegative `b`, then the fibre norm of `covGradBundleEquiv 0 s x Φ` is bounded by
-`finrank · b`:
-```
-rfns(covGradBundleEquiv 0 s x Φ)(x) ≤ (finrank ℝ E) · b.
-```
-The orthonormal `stdOrthonormalBasis` frame, its δ-form Gram (so each `e a` is a unit direction), and
-the frame-sum reconstruction `riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame` are produced
-internally; the consumer only supplies the uniform per-direction bound `hbound`. -/
+
 lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x) (b : ℝ)
@@ -321,7 +251,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
         (covGradBundleEquiv (I := I) (M := M) 0 s x Φ) ≤
       (Module.finrank ℝ E : ℝ) * b := by
   classical
-  -- Build the `stdOrthonormalBasis` frame and the rank-independent `rfl` representations.
+  
   let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
   have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt x
@@ -357,7 +287,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
     intro S; rfl
   rw [riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame (I := I) (M := M) g s x Φ e K₀
     hreprS hreprSucc]
-  -- Each per-direction value is a unit-direction slice, bounded by `b`.
+  
   have hper : ∀ a : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (Φ (e a)) ≤ b := by
     intro a
@@ -369,12 +299,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
   rw [hn_def, hfr]
 
 omit [CompactSpace M] [I.Boundaryless] in
-/-- **The slot-`0` reading of a `(0, s+1)`-tensor along a frame direction has the same fibre norm as
-its slot-`0` curry.** For a `g_x`-orthonormal frame `e` representing the rank-`s` fibre norm, the
-slot-`0` reading `(covGradBundleEquiv 0 s x).symm T (e a)` — a `(0, s)`-tensor — has the same
-intrinsic fibre norm as the slot-`0` curry `slot0Curry g x s e K₀ T a` (both read the leftmost
-covariant slot at `e a`, agreeing component-by-frame-component through `covGradBundleEquiv_symm_apply_eval`
-resp. the slot-`0` curry eval). -/
+
 lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x)
@@ -397,7 +322,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
   set ωK : Tensor0SSpace 0 I x :=
     (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
       (fun k => g.inner x (e (K₀ k))) with hωK
-  -- The slot-`0` curry's CLM value at `ωK` is the `tensor0S_curry` of `T ωK` at `e a` (scalar `1`).
+  
   have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           slot0Curry (I := I) (M := M) g x s e K₀ T a) ωK =
         tensor0S_curry (I := I) (M := M) s x
@@ -412,7 +337,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
         coframeS_apply (I := I) (M := M) g x 0 e K₀]
       simp
     rw [hscalar, one_smul]
-  -- Rewrite the slot-`0` reading side (LHS) to `toModel (T ωK) (cons (e a) (e ∘ J))`.
+  
   rw [show ((((covGradBundleEquiv (I := I) (M := M) 0 s x).symm T (e a)) ωK)
         (fun k => e (J k)) : ℝ) =
       Tensor0SSpace.toModel
@@ -432,12 +357,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
     (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T) ωK)
     (v0 := e a) (vs := fun k => e (J k))]
 
-/-- **The slot-`0` reading of a `(0, s+1)`-tensor along a centre-frame unit direction is
-fibre-dominated by the whole.** For a `g_x`-orthonormal frame `B` (in δ-form Gram, hence each
-`B i x` a unit direction), the slot-`0` reading `(covGradBundleEquiv 0 s x).symm T (B i x)` is bounded
-by the full `(0, s+1)` fibre norm of `T`. The internal `stdOrthonormalBasis` frame, the rank-`s`/`(s+1)`
-representations, and the slice domination `riemannianFiberNormSq_slot0Curry_le_of_frame` are produced
-internally; the only input is that `B` is a `g_x`-orthonormal frame. -/
 lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x)
@@ -454,7 +373,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le
   have horthC : ∀ a b : Fin (Module.finrank ℝ E),
       g.inner x (eC a) (eC b) = if a = b then (1 : ℝ) else 0 := fun a b => hBorth a b
   set K₀ : Fin 0 → Fin (Module.finrank ℝ E) := fun k => k.elim0 with hK₀
-  -- The `fiberNormSqSummand` representations in the frame `eC`, at ranks `s`, `s + 1`.
+  
   have hreprS : ∀ S : TensorRSSpace 0 s I x,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
         ∑ K : Fin 0 → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
@@ -471,18 +390,6 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le
   exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eC K₀
     hreprS hreprSucc T i
 
-/-- **Bare-curry slot-`0` Parseval decomposition in a caller-supplied `g_x`-orthonormal frame.** For a
-`g_x`-orthonormal frame `B` (in δ-form Gram, with `n = Module.finrank ℝ E` directions), the intrinsic
-`(0, s + 1)` fibre norm of `T` is the frame-sum, over the slot-`0` direction, of the slot-`s` fibre norms
-of the `tensor0SAsRS`-wrapped bare curries of the unit-section `(T) (unitZeroSec x)`:
-```
-rfns(T)(x) = ∑ a, rfns(tensor0SAsRS x (tensor0S_curry s x (T unit) (B a x)))(x).
-```
-This is `riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame` rephrased through the bare-curry bridge
-`slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec`, available for a caller-supplied moving orthonormal frame
-(unlike `riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry`, whose frame is the internal
-`stdOrthonormalBasis`), so a consumer slicing along its own `g_x`-orthonormal frame can run the bare-curry
-decomposition in that frame. -/
 lemma riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x)

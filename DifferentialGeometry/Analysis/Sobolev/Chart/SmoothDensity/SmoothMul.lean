@@ -6,31 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-/-!
-# Chart-based Sobolev space: closure under multiplication by smooth bounded functions
-
-For a smooth function `φ : M → ℝ` on a closed smooth Riemannian manifold and
-any `u : M → ℝ` in the chart-based Sobolev space `MemWkpChart g k p u`, this
-file proves
-
-  `MemWkpChart g k p (fun x => φ x * u x)`.
-
-The proof uses a per-chart factorization on `chartTargetEuclid α`:
-
-  `chartPushed POU α (φ · u)(y) = Λ_α(y) · chartPushed POU α u(y)` (pointwise),
-
-where `Λ_α : EuclN → ℝ` is a globally smooth function with compact support
-extending `φ ∘ (extChartAt I α).symm ∘ (toEuclidean (E:=E)).symm` from a
-sufficiently large compact subset of `chartTargetEuclid α`. The Euclidean
-`MemWkp.smul_smooth_bounded` lemma applied to this factorization closes the
-proof.
-
-The construction of `Λ_α` reuses the existing `smoothChartExt`-style smooth
-extension of `b_α · φ` for an `M`-side cutoff `b_α` equal to `1` on
-`tsupport ρ_α`, identical to the construction used in
-`Manifold/SobolevAlgebra.lean` for the smooth-input first-order case.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -53,9 +28,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For each chart point `α : M` on a closed manifold there exists a smooth
-manifold-side cutoff `b_α : M → ℝ` taking values in `[0,1]`, equal to `1` on
-`tsupport ρ_α`, and with `tsupport b_α ⊆ (chartAt H α).source`. -/
 lemma exists_chart_cutoff_M
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     ∃ b : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ b ∧
@@ -73,9 +45,6 @@ lemma exists_chart_cutoff_M
   refine ⟨η, hη_smooth, hη_range, hη_one_on_tsupp, ?_⟩
   exact hη_tsupport_in_K.trans hK_chart
 
-/-- The smooth global extension of `f : M → ℝ` to `EuclN`, equal to
-`f ((extChartAt I α).symm (toEuclidean.symm y))` on the chart-target image and
-`0` outside. -/
 def smoothExtensionScalar (α : M) (f : M → ℝ) : EuclN → ℝ := by
   classical
   exact fun y =>
@@ -123,9 +92,6 @@ private lemma smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-/-- If `f : M → ℝ` is smooth, the formula
-`y ↦ f ((extChartAt I α).symm (toEuclidean.symm y))` is smooth on
-`chartTargetEuclid α`. -/
 private lemma contDiffOn_smoothExtensionScalar_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContDiffOn ℝ ∞
@@ -166,9 +132,6 @@ private lemma contDiffAt_smoothExtensionScalar_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [smoothExtensionScalar_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
-/-- If `f` has compact support contained in `(chartAt H α).source`, the smooth
-extension `smoothExtensionScalar α f` vanishes outside the toEuclidean image
-of `(extChartAt I α) '' (tsupport f)`. -/
 private lemma smoothExtensionScalar_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt H α).source) {y : EuclN}
@@ -212,8 +175,6 @@ private lemma image_extChartAt_tsupport_subset_chartTargetEuclid_local
   DifferentialGeometry.Analysis.Sobolev.Chart.image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     (I := I) (M := M) (u := f) (α := α) hf_supp
 
-/-- `smoothExtensionScalar α f` is smooth on all of `EuclN` whenever `f` is
-smooth on `M` with compact support contained in `(chartAt H α).source`. -/
 lemma contDiff_smoothExtensionScalar
     [CompactSpace M] [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -241,8 +202,6 @@ lemma contDiff_smoothExtensionScalar
     exact smoothExtensionScalar_eq_zero_off_image_tsupport
       (I := I) (M := M) α (f := f) hf_supp hz
 
-/-- `smoothExtensionScalar α f` has compact support whenever `f` is smooth on
-`M` with `tsupport f ⊆ (chartAt H α).source`. -/
 private lemma hasCompactSupport_smoothExtensionScalar
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -259,8 +218,6 @@ private lemma hasCompactSupport_smoothExtensionScalar
   exact smoothExtensionScalar_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
 
-/-- For a smooth function `ψ : EuclN → ℝ` with compact support, all iterated
-derivatives up to order `k` enjoy uniform bounds. -/
 private lemma iteratedFDeriv_uniformBound_of_compactSupport
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ ∞ ψ) (hψ_compact : HasCompactSupport ψ)
     (k : ℕ) :
@@ -294,8 +251,6 @@ private lemma iteratedFDeriv_uniformBound_of_compactSupport
         refine (hD y).trans ?_
         exact le_trans (le_max_left _ _) (le_max_right _ _)
 
-/-- The iterated derivatives of `smoothExtensionScalar α f` are uniformly
-bounded up to any order `k`. -/
 lemma smoothExtensionScalar_iteratedFDeriv_bound
     [CompactSpace M] [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -309,10 +264,6 @@ lemma smoothExtensionScalar_iteratedFDeriv_bound
     hasCompactSupport_smoothExtensionScalar (I := I) (M := M) α hf_supp
   exact iteratedFDeriv_uniformBound_of_compactSupport hψ_smooth hψ_compact k
 
-/-- For each chart `α` and any choice of cutoff `b_α` with `b_α ≡ 1` on
-`tsupport ρ_α`, the chart-pushed product
-`chartPushed ρ α (φ · u)` equals `smoothExtensionScalar α (b_α · φ) · chartPushed ρ α u`
-pointwise on `chartTargetEuclid α`. -/
 lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b φ u : M → ℝ}
@@ -351,9 +302,6 @@ lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
 
-/-- **Closure of `MemWkpChart` under multiplication by smooth bounded
-functions.** If `u : M → ℝ` is in `MemWkpChart g k p` and `φ : C^∞⟮I, M; ℝ⟯`
-is a smooth global function on `M`, then `φ · u ∈ MemWkpChart g k p`. -/
 theorem MemWkpChart_smooth_mul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]

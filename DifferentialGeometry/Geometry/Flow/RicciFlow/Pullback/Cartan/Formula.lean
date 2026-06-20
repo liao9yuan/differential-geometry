@@ -22,28 +22,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-! ## The Cartan formula for the Lie derivative of a Riemannian metric
-
-The Cartan formula
-$$
-  (\mathcal L_W g)(X, Y) = g(\nabla_X W, Y) + g(X, \nabla_Y W)
-$$
-expresses the Lie derivative of the metric `g` along a vector field `W` as the
-symmetrized covariant derivative of `W`, where `∇` is the Levi-Civita connection of
-`g`. The right-hand side is `2 · (sym ∇W)(X, Y)` — the *Killing operator* of `W`.
-
-The proof unwinds in chart coordinates through:
-
-* the chart-Christoffel expansion of `∇W`
-  (`chart_christoffel_expansion_of_nabla_on_vf`);
-* the chart form of metric compatibility (`metric_compat_coord_identity`);
-* an algebraic recombination (`cartan_formula_chart_algebra`).
-
-The chart-coordinate computations are performed at the basepoint chart at `x`,
-where the canonical trivialization is the identity and the good-set membership
-`x ∈ chartLeviCivitaGoodSet x` is automatic via `self_mem_chartLeviCivitaGoodSet`. -/
-
-/-- **Chart form of metric compatibility.** -/
 theorem metric_compat_coord_identity
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -81,9 +59,6 @@ private lemma cartan_trivFromE_self_apply (x : M) (w : E) :
   have h := trivToE_trivFromE (I := I) x hbase w
   rwa [cartan_trivToE_self_apply (I := I) x (trivFromE (I := I) x x w)] at h
 
-/-- On a neighborhood of `extChartAt I x x`, `chartCoeffOnE x W i` equals the
-composition of the linear coord functional `b.coord i` with the chart pullback of
-`chartE_section_repr x W`. -/
 private lemma chartCoeffOnE_self_eq_basis_comp_pullback_eventuallyEq
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (x : M) (i : Fin (Module.finrank ℝ E)) :
@@ -130,8 +105,6 @@ private lemma differentiableAt_chartE_pullback_self
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   exact differentiableAt_chartE_pullback_of_MDiff (I := I) x hx_good hW_at
 
-/-- **Chart-Christoffel expansion of the covariant derivative of a vector field
-at the basepoint chart.** -/
 theorem chart_christoffel_expansion_of_nabla_on_vf
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -286,7 +259,6 @@ theorem chart_christoffel_expansion_of_nabla_on_vf
     refine Finset.sum_congr rfl (fun i' _ => Finset.sum_congr rfl (fun j' _ => ?_))
     rw [hrepr_chartCoeff j']
 
-/-- **Cartan formula in chart coordinates (at the basepoint).** -/
 theorem cartan_formula_chart_algebra
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -468,18 +440,6 @@ theorem cartan_formula_chart_algebra
   rw [hreshape_H1, hreshape_H2]
   ring
 
-/-- **Cartan formula for the Lie derivative of a Riemannian metric.**
-
-For a smooth Riemannian metric `g` on `M`, a smooth tangent vector field `W`, a
-point `x : M`, and tangent vectors `v, w : T_x M`:
-$$
-  (\mathcal L_W g)(v, w) = g(\nabla_v W, w) + g(v, \nabla_w W),
-$$
-where `∇` is the Levi-Civita connection of `g` and the left-hand side is the
-bundled Lie-derivative tensor `lieDerivMetric g W` evaluated at `(x, v, w)`.
-
-This is the connection form of the Killing operator that drives the DeTurck
-modification of the Ricci flow. -/
 theorem cartan_formula_for_lie_deriv_metric
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

@@ -1,61 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorChartTestDecoupling
 
-/-!
-# The raw chart-component formula for the section-level covariant gradient
-
-For a closed Riemannian manifold `(M, g)` modelled on a real inner-product space
-`E`, ranks `(r, s)`, and a smooth compactly-supported `(r, s)`-tensor section
-`S`, the section-level covariant gradient `covGrad g r s S` is a smooth
-compactly-supported `(r, s + 1)`-tensor section: the extra covariant slot is the
-slot carrying the differentiation direction.
-
-This file proves the **raw chart-component formula** for `covGrad`: the raw
-chart-frame `(r, s + 1)`-component of `covGrad g r s S`, read at the
-chart-source preimage of a Euclidean-chart-target point `y`, equals a
-chart-Euclidean partial derivative of the raw `(r, s)`-component of `S` plus a
-zeroth-order Christoffel correction. Concretely, writing
-`m := Jdx 0` for the leftmost covariant index of the target multi-index `Jdx`
-and `Jdx' := Matrix.vecTail Jdx` for the remaining `Fin s`-tuple,
-
-`tensorChartComponentRaw g r (s + 1) (covGrad g r s S) α Idx Jdx b
-  = euclidPartial m (chartPushedRaw I α (tensorChartComponentRaw g r s S α Idx Jdx')) y
-    + covDerivLowerOrderTerm g r s S α m Idx Jdx' y`,
-
-with `b := (extChartAt I α).symm (toEuclidean.symm y)`.
-
-## Proof route
-
-The underlying section value of `covGrad g r s S` at `b` is, by
-`covGrad_toSection_apply`, the image under the covariant-gradient bundle
-equivalence `covGradBundleEquiv r s b` of the bundled directional covariant
-derivative `Φ := tensorRSCovariantDerivative I M r s (LeviCivita g) S.toSection b`.
-
-Reading the raw chart-frame scalar component at rank `(r, s + 1)`, the
-trivialisation-compatibility identity `covGradBundleEquiv_trivializationAt_eq`
-reduces the chart-`α`-trivialised representation of the covariant-gradient
-bundle equivalence to the constant model equivalence `covGradModelEquiv`, whose
-leftmost-slot evaluation `covGradModelEquiv_apply` reads the direction off the
-slot indexed by `Jdx 0`. The chart component therefore factors as the
-`(r, s)`-component projection, at `(Idx, Matrix.vecTail Jdx)`, of the
-directional covariant derivative `Φ` taken along the `(Jdx 0)`-th chart-frame
-basis vector.
-
-That directional covariant derivative is `tensorCovDerivAt g r s S b
-(chartBasisVecFiber α (Jdx 0) b)`, which on the chart-`α` Levi-Civita good set
-equals the chart-coordinate covariant derivative
-(`tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`). Its raw chart-frame
-component is then the chart-Euclidean partial plus the Christoffel correction by
-the chart-coordinate covariant-derivative component formula
-`covDerivComponent_eq_euclidPartial_add_lowerOrder`.
-
-This is the direct `covGrad`-analogue of `tensorChartComponentRaw_prependCovGradSlot`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -94,11 +38,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The chart-`α`-trivialisation fibre of a covariant-gradient bundle element
-`Φ` (a continuous linear map from a tangent vector to an `(r, s)`-tensor) is the
-continuous linear map post-composing `Φ` (with its tangent input re-trivialised
-through `triv_{TM}.symmL`) with the `(r, s)`-tensor-bundle
-`continuousLinearMapAt`. -/
 private lemma covGradBundle_trivFibre_eq'
     (r s : ℕ) (α : M) (b : M)
     (Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) :
@@ -110,29 +49,6 @@ private lemma covGradBundle_trivFibre_eq'
         (Φ.comp ((trivializationAt E (TangentSpace I) α).symmL ℝ b)) :=
   rfl
 
-/-- **The raw chart-component formula for the section-level covariant
-gradient.** For a smooth compactly-supported `(r, s)`-tensor section `S`, a
-chart center `α`, a component multi-index `Idx : Fin r → Fin n`, a target
-covariant multi-index `Jdx : Fin (s + 1) → Fin n`, and a Euclidean-chart-target
-point `y`, the raw chart-frame scalar component of the section-level covariant
-gradient `covGrad g r s S` at `(Idx, Jdx)`, read at the chart-source preimage
-`b := (extChartAt I α).symm (toEuclidean.symm y)` of `y`, equals the
-`(Jdx 0)`-th chart-Euclidean partial derivative of the Euclidean push-forward of
-the raw `(r, s)`-component of `S` at `(Idx, Matrix.vecTail Jdx)`, plus the
-zeroth-order Christoffel correction term
-`covDerivLowerOrderTerm g r s S α (Jdx 0) Idx (Matrix.vecTail Jdx)`.
-
-The section value of `covGrad g r s S` at `b` is, by `covGrad_toSection_apply`,
-the image under the covariant-gradient bundle equivalence of the bundled
-directional covariant derivative `Φ` of `S`. The trivialisation-compatibility
-identity `covGradBundleEquiv_trivializationAt_eq`, together with the
-leftmost-slot evaluation `covGradModelEquiv_apply`, projects the `(r, s + 1)`-
-component onto the `(r, s)`-component of `Φ` taken along the `(Jdx 0)`-th
-chart-frame basis vector. On the chart-`α` Levi-Civita good set that directional
-covariant derivative agrees with the chart-coordinate covariant derivative
-(`tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`), whose raw chart-frame
-component is `euclidPartial + covDerivLowerOrderTerm`
-(`covDerivComponent_eq_euclidPartial_add_lowerOrder`). -/
 theorem tensorChartComponentRaw_covGrad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

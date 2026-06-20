@@ -6,13 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import Mathlib.LinearAlgebra.Trace
 
-/-!
-# Conjugation of the Ricci tensor via the trace of the Riemann curvature
-
-Takes the trace of the conjugated Riemann curvature to express the Ricci tensor of a pullback
-metric as the pullback of the Ricci tensor.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
@@ -29,8 +22,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 private lemma infty_ne_zero_ricci : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- The pushforward of `Y` at `Φ x` equals `mfderiv Φ x (Y x)`. Mirrors the local lemma in
-`CovDerivPullbackPointwise.lean`. -/
 private lemma pushforward_eval_at_image
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ Y (Φ x) = mfderiv I I (⇑Φ) x (Y x) := by
@@ -43,15 +34,12 @@ private lemma pushforward_eval_at_image
     ((mfderiv I I (⇑Φ) (Φ.symm (Φ x))) (Y (Φ.symm (Φ x))))).trans ?_
   rw [hbase]
 
-/-- Inverse of the previous: pushforward of `Y` at an arbitrary point `b` equals
-`mfderiv Φ (Φ.symm b) (Y (Φ.symm b))` up to a transport. -/
 private lemma pushforward_eval
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (b : M) :
     Diffeomorph.pushforward Φ Y b = mfderiv I I (⇑Φ) (Φ.symm b) (Y (Φ.symm b)) := by
   conv_lhs => rw [show b = Φ (Φ.symm b) from (Φ.apply_symm_apply b).symm]
   exact pushforward_eval_at_image (I := I) Φ Y (Φ.symm b)
 
-/-- `mfderiv Φ.symm (Φ x) ∘ mfderiv Φ x = id` on `T_x M`. -/
 private lemma mfderiv_symm_compose
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (⇑Φ.symm) (Φ x) (mfderiv I I (⇑Φ) x v) = v := by
@@ -65,7 +53,6 @@ private lemma mfderiv_symm_compose
   have := congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I x => f v) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-/-- `mfderiv Φ x ∘ mfderiv Φ.symm (Φ x) = id` on `T_{Φ x} M`. -/
 private lemma mfderiv_compose_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (w : TangentSpace I (Φ x)) :
     mfderiv I I (⇑Φ) x (mfderiv I I (⇑Φ.symm) (Φ x) w) = w := by
@@ -84,8 +71,6 @@ private lemma mfderiv_compose_symm
   have := congrArg (fun f : TangentSpace I (Φ x) →L[ℝ] TangentSpace I (Φ x) => f w) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-/-- For a diffeomorphism `Φ`, the pushforward of a vector field equals the manifold
-pullback of the same vector field by the inverse diffeomorphism, as a function. -/
 private lemma pushforward_eq_mpullback_symm_global
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
     (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
@@ -122,7 +107,6 @@ private lemma pushforward_eq_mpullback_symm_global
   exact eqRec_heq (φ := fun w => TangentSpace I w) (Φ.apply_symm_apply z)
     ((mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)))
 
-/-- Smoothness of pushforward of a smooth tangent vector field. -/
 private lemma pushforward_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) {Y : ∀ x : M, TangentSpace I x}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
@@ -146,8 +130,6 @@ private lemma pushforward_contMDiff
     (f := ⇑Φ.symm) (m := (∞ : WithTop ℕ∞)) (n := (∞ : WithTop ℕ∞))
     hY hΦsymm_smooth hinv (by simp)
 
-/-- The pushforward of `covApply cov_(Φ*g) Y Z` equals `covApply cov_g (Φ_*Y) (Φ_*Z)` at
-every point. -/
 private lemma pushforward_covApply_eq
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     {Y Z : ∀ x : M, TangentSpace I x}
@@ -280,9 +262,6 @@ private lemma riemannOp_pullback_pointwise
       pushforward_eval_at_image (I := I) Φ V x,
       pushforward_eval_at_image (I := I) Φ W x]
 
-/-- The endomorphism `ricciEndo (Φ*g) x v w` on `T_x M` conjugates to
-`ricciEndo g (Φx) (dΦv) (dΦw)` via the manifold derivative of `Φ`. As linear maps:
-`ricciEndo (Φ*g) x v w = (mfderiv Φ.symm (Φx)) ∘ ricciEndo g (Φx) (dΦv) (dΦw) ∘ (mfderiv Φ x)`. -/
 private lemma ricciEndo_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
@@ -301,28 +280,6 @@ private lemma ricciEndo_conjugation
   rw [← riemannOp_pullback_pointwise (I := I) g Φ x v w Z]
   rw [mfderiv_symm_compose (I := I) Φ x]
 
-/-- **Pullback-by-conjugation for the Ricci tensor (pointwise form).**
-For a smooth Riemannian metric `g` on `M` and a diffeomorphism
-`Φ : M ≃ₘ⟮I, I⟯ M`, the Ricci tensor of the pullback metric
-`Diffeomorph.pullbackMetric g Φ` at a point `x` evaluated on
-`(v, w) ∈ T_x M × T_x M` equals the Ricci tensor of `g` at `Φ x`
-evaluated on the pushed-forward vectors `(mfderiv I I Φ x v, mfderiv I I Φ x w)`.
-
-Geometrically, this is the diffeomorphism-naturality of the Ricci tensor:
-`Ric` is the fibrewise trace of the Riemann endomorphism
-`Z ↦ riemannOp (LeviCivita g) x Z v w` (this is `ricciTensor_apply`), and the
-proof shows that endomorphism transforms by conjugation under `Φ`, so its
-trace is unchanged.
-
-The substantive ingredient is the pointwise Riemann-endomorphism
-conjugation identity proved in this file, `ricciEndo_conjugation` (built from
-`riemannOp_pullback_pointwise`):
-  `ricciEndo (Φ*g) x v w
-    = (mfderiv Φ.symm (Φ x)) ∘ ricciEndo g (Φ x) (dΦ_x v) (dΦ_x w) ∘ (mfderiv Φ x)`,
-i.e. the Ricci endomorphism of the pullback metric is the conjugate, by the
-invertible linear map `mfderiv I I Φ x`, of the Ricci endomorphism of `g` at
-`Φ x` with pushed-forward arguments. Taking traces, conjugation-invariance of
-the trace (`LinearMap.trace_conj'`) gives the stated identity. -/
 theorem ricciTensor_pullback_conjugation
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :

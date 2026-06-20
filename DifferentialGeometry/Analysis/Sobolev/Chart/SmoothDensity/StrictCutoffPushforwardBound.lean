@@ -4,28 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 
-/-!
-# Chart-α raw pushforward of the strict-cutoff product
-
-For a closed Riemannian manifold `(M, g)` and a chart-atlas index `α : M`, the
-smooth strict cutoff `chartStrictCutoff α : M → ℝ` (see `Chart/StrictCutoff.lean`)
-has topological support inside `(chartAt H α).source` and equals `1` on the
-topological support of the partition-of-unity weight `ρ_α`.
-
-This file proves: for every `v : M → ℝ` with `MemWkpChart g k p v`, the chart-α
-*raw* pushforward of the product `chartStrictCutoff α · v` is bounded in
-`W^{k,p}` on the chart-α Euclidean target by a constant (depending only on
-`g`, `α`, `k`, `p`) times the chart-based `W^{k,p}` norm of `v`.
-
-The argument uses the partition-of-unity decomposition
-`chartStrictCutoff α · v = Σ_{γ} ρ_γ · chartStrictCutoff α · v` on `M` (only
-finitely many indices `γ` contribute because the partition of unity is locally
-finite and `M` is compact), and applies a per-pair cross-chart bound to each
-summand, using that
-`tsupport ρ_γ ∩ tsupport (chartStrictCutoff α)` is a compact subset of the
-overlap `(chartAt H γ).source ∩ (chartAt H α).source`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -48,7 +26,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Abbreviation for the partition-of-unity weight `ρ_γ : M → ℝ` at index `γ`. -/
 private noncomputable def pou
     [T2Space M] [SigmaCompactSpace M] (γ : M) : M → ℝ :=
   ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M γ
@@ -70,14 +47,11 @@ private lemma pou_hasCompactSupport
     HasCompactSupport (pou (I := I) (M := M) γ) :=
   (isClosed_tsupport _).isCompact
 
-/-- `chartStrictCutoff α` has compact support on a compact manifold. -/
 private lemma hasCompactSupport_chartStrictCutoff
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless] (α : M) :
     HasCompactSupport (chartStrictCutoff (I := I) (M := M) α) :=
   (isClosed_tsupport _).isCompact
 
-/-- The product `pou γ · chartStrictCutoff α · v` vanishes outside
-`tsupport (pou γ) ∩ tsupport (chartStrictCutoff α)`. -/
 private lemma prod_pou_strictCutoff_v_eq_zero_off
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (γ α : M) (v : M → ℝ) {x : M}
@@ -95,8 +69,6 @@ private lemma prod_pou_strictCutoff_v_eq_zero_off
       image_eq_zero_of_notMem_tsupport hx_cut
     rw [h0]; ring
 
-/-- On `M`, the strict cutoff times `v` decomposes as a finite POU-weighted
-sum. -/
 private lemma strictCutoff_mul_v_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (α : M) (v : M → ℝ) (x : M) :
@@ -125,8 +97,6 @@ private lemma strictCutoff_mul_v_eq_finset_sum
             (chartStrictCutoff (I := I) (M := M) α x * v x) := by
       rw [Finset.sum_mul]
 
-/-- The chart-α raw pushforward of `chartStrictCutoff α · v` equals the
-chart-α raw pushforward of the finite POU-weighted sum, pointwise on `EuclN`. -/
 private lemma chartPushedRaw_strictCutoff_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (α : M) (v : M → ℝ) (y : EuclN) :
@@ -160,8 +130,6 @@ private lemma chartPushedRaw_strictCutoff_eq_finset_sum
       exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
     rw [Finset.sum_eq_zero (fun γ _ => h_zero γ)]
 
-/-- If `tsupport (pou γ) ∩ tsupport (chartStrictCutoff α) = ∅`, then the chart-α
-raw pushforward of `pou γ · chartStrictCutoff α · v` is identically zero. -/
 private lemma chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (γ α : M) (v : M → ℝ)
@@ -184,15 +152,6 @@ private lemma chartPushedRaw_pou_strictCutoff_v_zero_of_disjoint
     exact prod_pou_strictCutoff_v_eq_zero_off (I := I) (M := M) γ α v hx_not_in
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
-/-- **Per-pair joint result**: For a pair of chart points `γ, α : M` and a
-function `v` with `MemWkpChart g k p v`, there exists a positive constant
-`C_γα` such that:
-
-(1) the chart-α raw pushforward of `pou γ · chartStrictCutoff α · v` is in
-    `MemWkp k p` on `chartTargetEuclid α`, with compact support inside
-    `chartTargetEuclid α`;
-(2) its `wkpNorm k p` is bounded by `C_γα` times the `wkpNorm k p` of
-    `chartPushed γ v` on `chartTargetEuclid γ`. -/
 private theorem cross_chart_strictCutoff_pushedRaw_joint
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -774,8 +733,6 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     ring
   exact h_K_eq ▸ le_refl _
 
-/-- A finite-`Finset` sum of `MemWkp k p` functions on an open set is also
-`MemWkp k p`. -/
 theorem memWkp_finset_sum
     [NeZero (Module.finrank ℝ E)]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -810,8 +767,6 @@ theorem memWkp_finset_sum
       exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add
         (d := Module.finrank ℝ E) hp_one hΩ hf_δ_mem h_sumT_mem
 
-/-- Triangle inequality for `wkpNorm` over a finite indexed sum on the chart-α
-target. -/
 theorem wkpNorm_finset_sum_le_chartTarget
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -875,12 +830,6 @@ theorem wkpNorm_finset_sum_le_chartTarget
         exact add_le_add le_rfl h_ih
       exact h_triangle.trans h_step
 
-/-- **Headline**: For a closed Riemannian manifold `(M, g)`, a chart-atlas
-index `α : M`, an order `k : ℕ`, and an exponent `1 ≤ p < ∞`, there exists a
-positive constant `C` such that for every `v : M → ℝ` with
-`MemWkpChart g k p v`, the chart-α raw pushforward of
-`chartStrictCutoff α · v` is bounded in `W^{k,p}` on the chart-α Euclidean
-target by `C` times the chart-based `W^{k,p}` norm of `v`. -/
 theorem wkpNorm_chartPushedRaw_strictCutoff_mul_le
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

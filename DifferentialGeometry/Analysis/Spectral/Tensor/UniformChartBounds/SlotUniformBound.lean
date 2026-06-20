@@ -9,24 +9,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Operator.Bilinear
 
-/-!
-# Uniform operator-norm bounds for slot-correction infrastructure
-
-Uniform operator-norm bounds used throughout the chart-spectral machinery on a
-closed Riemannian manifold `(M, g)`:
-
-* **Unconditional chart Levi-Civita parallel CLM op-norm bound** — for a
-  chart base point `α`, the chart Levi-Civita parallel CLM
-  `chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)` has a uniform
-  operator-norm bound on the closed support of the chart-atlas
-  partition-of-unity weight at `α`, where the operator norm is computed with
-  respect to the Riemannian fibre norm on `TangentSpace I b`. No locality
-  hypothesis on the chart selection is required.
-
-Supporting model-side suprema, slot-substitution pointwise bounds, and
-`tangentSlotCLM` factor-product bounds are provided as private helpers.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -71,16 +53,12 @@ private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
 
-/-- The closed support of the canonical POU weight at `α` is contained in the
-chart source at `α` by subordinacy of the chart-atlas partition of unity. -/
 private theorem pouTsupport_subset_chartAt_source_chrCorr (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-/-- The model-space coordinate functional sup. This is a positive constant
-depending only on the dimension and the model space `E`. -/
 private noncomputable def chartModelBasisCoordSup (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -90,7 +68,6 @@ private noncomputable def chartModelBasisCoordSup (E : Type*) [NormedAddCommGrou
       exact ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
 
-/-- The model-space basis vector norm sup. -/
 private noncomputable def chartModelBasisVecSup (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -144,9 +121,6 @@ private lemma norm_basis_le_chartModelBasisVecSup
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-/-- Operator-norm bound on a single summand of the triple sum defining
-`christoffelCorrection`, at a point `b` of the tangent-trivialisation
-neighbourhood, with all geometric / model-side constants exposed. -/
 private lemma christoffelCorrection_summand_opNorm_le
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (Y : E)
     (i j k : Fin (Module.finrank ℝ E))
@@ -277,8 +251,6 @@ private lemma christoffelCorrection_summand_opNorm_le
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The closed support of the canonical POU weight at `α` (a compact subset of
-`(chartAt H α).source` on a closed manifold). -/
 private def pouTsupportSet (α : M) : Set M :=
   tsupport (fun x : M =>
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -291,8 +263,6 @@ private theorem pouTsupportSet_subset_chartAt_source (α : M) :
     pouTsupportSet (I := I) (M := M) α ⊆ (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
-/-- The model-space basis vector norm sup. Local copy used by the chart
-Levi-Civita parallel CLM bound below. -/
 private noncomputable def chartModelBasisVecSup' (E : Type*) [NormedAddCommGroup E]
     [NormedSpace ℝ E] [FiniteDimensional ℝ E]
     [NeZero (Module.finrank ℝ E)] : ℝ :=
@@ -323,10 +293,6 @@ private lemma norm_basis_le_chartModelBasisVecSup'
     (f := fun k => ‖(chartModelBasis E) k‖)
     (Finset.mem_univ _)
 
-/-- The chart Levi-Civita parallel CLM at `b`, applied to the vector field
-`chartBasisVecFiber α j`, decomposes as the composition of `trivFromE α b`
-with the Christoffel correction in the model-side basis vector `chartJ α b
-(chartBasisVecFiber α j b)`. -/
 private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (j : Fin (Module.finrank ℝ E))
@@ -432,19 +398,7 @@ set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Unconditional uniform operator-norm bound for the chart Levi-Civita
-parallel CLM applied to a chart-basis vector field, on
-`tsupport (chartAtlasPOU I M α)`.**
 
-For a closed Riemannian manifold `(M, g)`, there exists a non-negative constant
-`C` such that for every `b` in the closed support of the canonical chart-atlas
-partition-of-unity weight at `α` and every model-basis index `j`,
-
-  `‖chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α j)‖ ≤ C`,
-
-where the operator norm uses the Riemannian fibre norm on `TangentSpace I b`.
-The constant `C` is independent of `b` and `j`. No locality hypothesis on the
-chart selection is required. -/
 theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     letI cg : Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
@@ -506,15 +460,6 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     exact mul_le_mul_of_nonneg_left h_Xb_le hC_B_nn
   exact h_clm_le.trans h_chain
 
-/-- Pointwise upper bound on `tensorSlotSubstCLM` in the model fibre norm.
-The argument proceeds in three steps:
-
-1. By definition, `tensorSlotSubstCLM n b Φ x = CLE.symm (compCLML Φ (CLE x))`.
-2. CLE / CLE.symm preserve norms (Part C.a's `tensor0SSpace_continuousLinearEquiv_norm_apply` /
-   `_symm_norm_apply`), so the LHS norm equals `‖compCLML Φ (CLE x)‖`.
-3. `compCLML Φ` is a CLM with op-norm `≤ ∏ ‖Φ i‖` (Mathlib's
-   `norm_compContinuousLinearMapL_le`), so the standard CLM bound gives
-   `‖compCLML Φ (CLE x)‖ ≤ (∏ ‖Φ i‖) * ‖CLE x‖ = (∏ ‖Φ i‖) * ‖x‖`. -/
 private lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (x : Tensor0SSpace n I b) :
@@ -571,7 +516,6 @@ private lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
 
-/-- Sup-style bound on the slot-CLM factor at slot `k`. -/
 private lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) :
@@ -585,10 +529,6 @@ private lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
       ContinuousLinearMap.norm_id_le
     exact h_id.trans (le_max_right _ _)
 
-/-- Product bound on the `tangentSlotCLM` factor — at slot `k` the norm is
-`‖Φ‖`, at every other slot it is `‖id‖ ≤ 1`. We absorb the `id` factors into
-the constant `1`, yielding `∏ ≤ ‖Φ‖` when `n ≥ 1` and `∏ = 1` when `n = 0`.
-We state the bound `∏ ≤ (max ‖Φ‖ 1) ^ n` which handles all cases. -/
 private lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     (∏ i : Fin n, ‖tangentSlotCLM (I := I) n k Φ i‖) ≤

@@ -11,13 +11,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatToCovariant
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-!
-# Basepoint-motion piece of the pullback-pairing time derivative
-
-Computes the directional metric derivative along the conjugating-flow orbit — the basepoint-motion
-piece of the three-piece chain rule for the pulled-back inner-product pairing.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

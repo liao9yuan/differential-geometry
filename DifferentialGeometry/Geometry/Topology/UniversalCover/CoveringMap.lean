@@ -6,34 +6,6 @@ import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.Connected.LocPathConnected
 import DifferentialGeometry.Geometry.Topology.UniversalCover.Basic
 
-/-!
-# Universal cover of a topological space: covering structure
-
-Building on the slice-topology construction in `UniversalCover.Basic`, we
-prove that, when the base space `X` is connected, locally path-connected,
-and semi-locally simply connected, the projection
-`proj : UniversalCover X → X` is a covering map, and that the universal
-cover is path-connected and simply connected.
-
-Outline (Hatcher, Prop. 1.36, 1.39):
-
-1. Sheet bijection on "good" neighbourhoods (`uc_sheet_bijection_on_good_U`):
-   over a path-connected open `U ⊆ X` in which every loop is
-   null-homotopic in `X`, the basic open `basicOpen p U` projects
-   bijectively onto `U`.
-2. Covering map structure (`UniversalCover.proj_isCoveringMap`): the union of
-   the sheets over each fibre realises evenly-covered neighbourhoods, so
-   `proj` is a covering map.
-3. Path-connectedness (`UniversalCover.pathConnectedSpace`): every
-   point `⟨x, ⟦γ⟧⟩` is connected to the basepoint by the subpath lift
-   `s ↦ ⟨γ s, ⟦γ.subpath 0 s⟧⟩`.
-4. Simple connectedness (`UniversalCover.simplyConnectedSpace`): a loop
-   in the cover projects to a loop in `X`, agrees with the subpath lift of
-   that projection by uniqueness of path lifts (`IsCoveringMap.liftPath`),
-   and is null-homotopic via injectivity of the induced map on homotopy
-   classes (`IsCoveringMap.injective_path_homotopic_map`).
--/
-
 open Set Function Filter
 open scoped Topology ContDiff
 
@@ -49,18 +21,6 @@ variable {X : Type*} [TopologicalSpace X] [Inhabited X]
   [ConnectedSpace X] [LocPathConnectedSpace X]
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace X]
 
-/-- **Sheet bijection on "good" neighbourhoods (Hatcher Prop. 1.39 key step).**
-
-For each `p : UniversalCover X` and each open path-connected neighbourhood
-`U ∋ p.1` over which every loop based at `p.1` is null-homotopic in `X`
-(the semi-local condition supplied pointwise), the projection `proj`
-restricts to a bijection `basicOpen p U hU hp → U`.
-
-* Injectivity: two paths from `p.1` to `y` staying in `U` differ by a loop
-  in `U`, which is null-homotopic, so they give the same class in
-  `Path.Homotopic.Quotient`.
-* Surjectivity: `U` is path-connected, so every `y ∈ U` is reached by some
-  path inside `U`. -/
 theorem uc_sheet_bijection_on_good_U
     (p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
     (U : Set X) (hU : IsOpen U) (hp : p.1 ∈ U)
@@ -136,10 +96,6 @@ theorem uc_sheet_bijection_on_good_U
     refine ⟨hjoined.somePath, ?_, rfl⟩
     exact fun t => hjoined.somePath_mem t
 
-/-- A "good" neighbourhood for the covering structure: a path-connected
-open set containing `x` in which every loop based at `x` is null-homotopic
-in `X`. Existence follows from local path-connectedness combined with the
-semi-locally-simply-connected hypothesis. -/
 private theorem uc_good_nhd_exists (x : X) :
     ∃ (U : Set X), IsOpen U ∧ x ∈ U ∧ IsPathConnected U ∧
       ∀ γ : _root_.Path x x, (∀ t, γ t ∈ U) →
@@ -157,7 +113,6 @@ private theorem uc_good_nhd_exists (x : X) :
   have : γ t ∈ U := by simpa [Path.coe_toContinuousMap] using hγU t
   exact hUsub (ht ▸ this)
 
-/-- **Disjointness of distinct sheets over a "good" `U`.** -/
 private theorem uc_sheet_disjoint
     {U : Set X} (hU : IsOpen U)
     {p₁ p₂ :
@@ -222,7 +177,6 @@ private theorem uc_sheet_disjoint
     _ = c₂.trans (_root_.Path.Homotopic.Quotient.refl xp₁) := by rw [hloop_q]
     _ = c₂ := _root_.Path.Homotopic.Quotient.trans_refl c₂
 
-/-- **Sheets cover the preimage of `U`.** -/
 private theorem uc_sheet_exhaust
     (x : X) {U : Set X} (hU : IsOpen U) (hxU : x ∈ U) (hUpc : IsPathConnected U)
     (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X)
@@ -242,7 +196,6 @@ private theorem uc_sheet_exhaust
       _root_.Path.Homotopic.Quotient.symm (_root_.Path.Homotopic.Quotient.mk ζ) from rfl,
     _root_.Path.Homotopic.Quotient.symm_trans]
 
-/-- **The projection is an open map when restricted to a sheet.** -/
 private theorem uc_sheet_proj_isOpenMap
     {p : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X}
     {U : Set X} (hU : IsOpen U) (hp : p.1 ∈ U)
@@ -274,21 +227,7 @@ private theorem uc_sheet_proj_isOpenMap
   refine ⟨hjoined.somePath, hjoined.somePath_mem, rfl⟩
 
 set_option linter.dupNamespace false in
-/-- **The projection is a covering map.**
 
-The projection `proj : UniversalCover X → X` is a covering map, given that
-`X` is connected, locally path-connected, and semi-locally simply connected
-(the instance hypotheses on `X`).
-
-For each `x : X`, choose a path-connected open neighbourhood `U` of `x`
-(from `LocPathConnectedSpace X`) on which every loop based at `x` is
-null-homotopic in `X` (from `SemilocallySimplyConnectedSpace X`). The
-preimage `proj ⁻¹' U` decomposes as the disjoint union of the sheets
-`basicOpen p U _ _` indexed by `p ∈ proj ⁻¹' {x}`; each sheet maps
-homeomorphically onto `U` by `uc_sheet_bijection_on_good_U`; the fibre
-`proj ⁻¹' {x}` carries the discrete topology. Together these data assemble
-the explicit homeomorphism `proj ⁻¹' U ≃ₜ U × (proj ⁻¹' {x})` witnessing
-that `U` is evenly covered. -/
 theorem UniversalCover.proj_isCoveringMap :
     IsCoveringMap (proj :
       DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X → X) := by
@@ -494,28 +433,17 @@ theorem UniversalCover.proj_isCoveringMap :
   intro q
   rfl
 
-/-- The basepoint of the universal cover: the class of the constant path at
-`default`. -/
 def basePoint :
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X :=
   ⟨(default : X),
     _root_.Path.Homotopic.Quotient.mk (_root_.Path.refl (default : X))⟩
 
-/-- The subpath lift of a path `γ : Path default x` into the universal cover:
-`s ↦ ⟨γ s, ⟦γ.subpath 0 s⟧⟩`, with the source endpoint cast to `default`. -/
 def uc_subpathLift {x : X} (γ : _root_.Path (default : X) x)
     (s : unitInterval) :
     DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X :=
   ⟨γ s,
     (_root_.Path.Homotopic.Quotient.mk (γ.subpath 0 s)).cast γ.source.symm rfl⟩
 
-/-- **The subpath lift of a path is continuous.**
-
-For a path `γ : Path default x` in the base, `uc_subpathLift γ` is a
-continuous map `I → UniversalCover X`. Continuity is verified on the slice
-basis: near `s₀`, the value lies in any basic open containing the value at
-`s₀`, the connecting path being the subpath `γ.subpath s₀ s`, which stays in
-the neighbourhood by the tube lemma. -/
 theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
     Continuous (uc_subpathLift γ) := by
   refine continuous_iff_continuousAt.mpr fun s₀ => ?_
@@ -583,7 +511,6 @@ theorem uc_subpathLift_continuous {x : X} (γ : _root_.Path (default : X) x) :
     rw [hcast, hη₀eq, _root_.Path.Homotopic.Quotient.mk_trans]
     exact _root_.Path.Homotopic.Quotient.trans_assoc _ _ _
 
-/-- The subpath lift of `γ` starts at the basepoint. -/
 theorem uc_subpathLift_zero {x : X} (γ : _root_.Path (default : X) x) :
     uc_subpathLift γ 0 = basePoint := by
   change (⟨γ 0,
@@ -600,7 +527,6 @@ theorem uc_subpathLift_zero {x : X} (γ : _root_.Path (default : X) x) :
     Function.comp_apply, Set.Icc.convexCombo_eq]
   exact γ.source
 
-/-- The subpath lift of `γ` ends at `⟨x, ⟦γ⟧⟩`. -/
 theorem uc_subpathLift_one {x : X} (γ : _root_.Path (default : X) x) :
     uc_subpathLift γ 1 =
       ⟨x, _root_.Path.Homotopic.Quotient.mk γ⟩ := by
@@ -616,14 +542,9 @@ theorem uc_subpathLift_one {x : X} (γ : _root_.Path (default : X) x) :
   rw [Path.cast_coe, Path.subpath, Path.coe_mk_mk, Function.comp_apply,
     Set.Icc.convexCombo_zero_one]
 
-/-- The subpath lift of `γ` projects back to `γ`. -/
 theorem uc_subpathLift_proj {x : X} (γ : _root_.Path (default : X) x)
     (s : unitInterval) : proj (uc_subpathLift γ s) = γ s := rfl
 
-/-- **Every point of the universal cover is joined to the basepoint.**
-
-For `q = ⟨x, ⟦γ⟧⟩`, the subpath lift of `γ` is a continuous path from the
-basepoint `⟨default, ⟦Path.refl default⟧⟩` to `q`. -/
 theorem uc_joined_basePoint
     (q : DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) :
     Joined (basePoint (X := X)) q := by
@@ -636,23 +557,13 @@ theorem uc_joined_basePoint
     target' := uc_subpathLift_one γ }⟩
 
 set_option linter.dupNamespace false in
-/-- **The universal cover is path-connected.**
 
-Each point is joined to the basepoint by the subpath lift of a
-representative path, hence any two points are joined. -/
 instance UniversalCover.pathConnectedSpace :
     PathConnectedSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) where
   nonempty := ⟨basePoint⟩
   joined x y := (uc_joined_basePoint x).symm.trans (uc_joined_basePoint y)
 
-/-- **Loops at the basepoint are null-homotopic.**
-
-A loop `δ` at the basepoint projects to a loop `γ = proj ∘ δ` in `X` based at
-`default`. By uniqueness of path lifts through the covering map `proj`, `δ`
-agrees with the subpath lift of `γ`; comparing endpoints (`δ 1 = δ 0`) forces
-`⟦γ⟧ = ⟦Path.refl default⟧`. Since `proj` induces an injection on homotopy
-classes of loops, `⟦δ⟧ = ⟦Path.refl⟧` as well. -/
 theorem uc_basePoint_loops_nullhomotopic
     (δ : _root_.Path (basePoint (X := X)) basePoint) :
     _root_.Path.Homotopic δ (_root_.Path.refl basePoint) := by
@@ -721,11 +632,7 @@ theorem uc_basePoint_loops_nullhomotopic
   rw [hδmap, hreflmap, hclass]
 
 set_option linter.dupNamespace false in
-/-- **The universal cover is simply connected.**
 
-The cover is path-connected, and every loop is null-homotopic: a loop at any
-point is conjugate (via a path to the basepoint) to a loop at the basepoint,
-which is null-homotopic by `uc_basePoint_loops_nullhomotopic`. -/
 instance UniversalCover.simplyConnectedSpace :
     SimplyConnectedSpace
       (DifferentialGeometry.Geometry.Riemannian.Topology.UniversalCover X) := by

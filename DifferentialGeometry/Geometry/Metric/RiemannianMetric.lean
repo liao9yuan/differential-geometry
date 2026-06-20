@@ -9,19 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 set_option linter.style.longLine false
 
-/-!
-# Riemannian Metric on a Smooth Manifold
-
-We define `RiemannianMetric` on a smooth manifold `M` as a `ContMDiffRiemannianMetric`
-from Mathlib, specialized to the tangent bundle of `M`.
-
-## Main Definitions
-
-* `RiemannianMetric I n M` : a smooth Riemannian metric on `M`, i.e. a smoothly varying
-  family of inner products on the tangent spaces of `M`.
-* `RiemannianMetric.to02Tensor` : convert a Riemannian metric to a smooth (0,2)-tensor field.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -37,8 +24,6 @@ variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (n : WithTop ℕ∞)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
 
-/-- A Riemannian metric on a smooth manifold `M` is a `ContMDiffRiemannianMetric` on the
-tangent bundle, i.e. a smoothly varying family of inner products on the tangent spaces. -/
 abbrev RiemannianMetric := Bundle.ContMDiffRiemannianMetric I n E (TangentSpace I : M → Type _)
 
 private noncomputable def to02Tensor_eCLM :
@@ -51,8 +36,7 @@ private noncomputable def to02Tensor_uCLM :
   (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 2 => E) ℝ).symm.toContinuousLinearMap
 
 set_option maxHeartbeats 800000 in
-/-- In local coordinates at `x₀`, the `(0,2)`-tensor obtained from a Riemannian metric is
-`uCLM` applied to the local coordinates of the curried inner product section. -/
+
 private lemma to02Tensor_trivialization_eq {x₀ x : M}
     (g : RiemannianMetric I n M)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -89,9 +73,6 @@ private lemma to02Tensor_trivialization_eq {x₀ x : M}
   simp [to02Tensor_eCLM, hom_trivializationAt, Trivialization.continuousLinearMap_apply]
   rfl
 
-/-- Convert a Riemannian metric to a smooth (0,2)-tensor field. At each point `x`, the
-inner product `g.inner x : TₓM →L[ℝ] TₓM →L[ℝ] ℝ` is uncurried into a continuous
-bilinear form `TₓM × TₓM → ℝ`, i.e. a (0,2)-tensor. -/
 def RiemannianMetric.to02Tensor {I : ModelWithCorners ℝ E H} {n : WithTop ℕ∞}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]
     (g : RiemannianMetric I n M) :

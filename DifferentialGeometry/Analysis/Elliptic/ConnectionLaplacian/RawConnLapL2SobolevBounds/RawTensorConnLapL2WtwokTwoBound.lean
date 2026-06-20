@@ -9,53 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.TensorChartTransition
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
 
-/-!
-# Order-zero bound: chart-target POU-weighted L² of the chart-pulled
-# tensor representation by the sum of chart-component L² norms
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-chart base point `α : M`, this file ships a uniform bound for the
-chart-α-target partition-of-unity-weighted L² norm-squared of the chart-pulled
-model-fibre representation `tensorRSChartE_section_repr r s α T.toSection ∘
-(extChartAt I α).symm ∘ toEuclidean.symm` of a smooth compactly-supported
-`(r, s)`-tensor section `T`, in terms of the L² (= `wkpNorm 0 2`) norms of the
-chart-frame scalar components `tensorChartComp g r s T α Idx Jdx` over the
-chart-target image `chartTargetEuclid α`.
-
-Concretely:
-
-```
-∫⁻ y in chartTargetEuclid α,
-    ENNReal.ofReal (POU(symm y)² · ‖repr T (symm y)‖²) dvol ≤
-  ENNReal.ofReal K *
-    ∑ Idx, Σ Jdx,
-      (wkpNorm 0 2 (tensorChartComp g r s T α Idx Jdx) (chartTargetEuclid α))²
-```
-
-with `K = (cardinality of (Idx, Jdx)) · basisNormConstant²` depending only on
-`(g, r, s)` and the model space; in particular `K` is independent of `T`.
-
-## Strategy
-
-1. Pointwise on `M`: `‖tensorRSChartE_section_repr r s α T.toSection b‖² ≤
-   K_basis · Σ Idx Σ Jdx |tensorChartComponentRaw α Idx Jdx b|²` via
-   `reprNorm_le_sum_components` squared (Cauchy-Schwarz finite sum).
-
-2. Multiply both sides by `POU(b)²` and rewrite `POU(b)² · |raw α Idx Jdx b|² =
-   |POU(b) · raw α Idx Jdx b|² = |tensorChartComponentPou α Idx Jdx b|²`.
-
-3. Pull through `ENNReal.ofReal` (LHS argument is non-negative) and integrate
-   over `chartTargetEuclid α`.
-
-4. For `y ∈ chartTargetEuclid α`, `tensorChartComp α Idx Jdx y =
-   tensorChartComponentPou α Idx Jdx ((extChartAt I α).symm (toEuclidean.symm y))`.
-
-5. The integral `∫⁻ y in chartTargetEuclid α, ENNReal.ofReal (|tensorChartComp y|²) dvol`
-   equals `(eLpNorm tensorChartComp 2 (volume.restrict (chartTargetEuclid α)))² =
-   (wkpNorm 0 2 tensorChartComp (chartTargetEuclid α))²` via
-   `eLpNorm_eq_lintegral_rpow_enorm_toReal` and `wkpNorm_zero`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -89,15 +42,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Pointwise squared bound: the squared model-fibre norm of the
-chart-α-trivialised representation of `T.toSection` is bounded by a uniform
-constant `K_basis` times the finite double sum of the squares of the raw
-chart-frame scalar components. The constant `K_basis` depends only on the
-ranks `(r, s)` and the model space. -/
 theorem reprNormSq_le_sum_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -195,8 +142,6 @@ theorem reprNormSq_le_sum_components_sq
   rw [h_sumSq_eq] at h_combined
   exact h_combined
 
-/-- For a real-valued function `f` and a measure `μ`, the square of `eLpNorm f 2 μ`
-equals the lintegral of `‖f x‖ₑ ^ 2`. -/
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} {_ : MeasurableSpace α} (f : α → ℝ) (μ : Measure α) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, ‖f x‖ₑ ^ 2 ∂μ := by
@@ -219,17 +164,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
-/-- **Order-0 chart-target POU-weighted L² bound for the chart-pulled tensor
-representation by the sum of chart-component L² norms.** For a smooth closed
-Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a chart base point
-`α : M`, there is a non-negative constant `K` (depending only on `(g, r, s)`
-and the model space; independent of `T`) such that for every smooth
-compactly-supported `(r, s)`-tensor section `T`, the chart-target Lebesgue
-integral of the partition-of-unity-weighted squared model-fibre norm of the
-chart-pulled representation of `T.toSection` is bounded by `K` times the
-finite double sum of the squared `L²`-norms (= `wkpNorm 0 2`) of the
-chart-frame scalar components `tensorChartComp g r s T α Idx Jdx` over the
-chart target. -/
 theorem chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -466,9 +400,6 @@ theorem chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
   refine Finset.sum_le_sum (fun Jdx _ => ?_)
   exact h_per_idx_jdx Idx Jdx
 
-/-- The chart-pushed POU weight: the EuclN-side function
-`y ↦ POU(extChartAt.symm (toEuclidean.symm y))`, extended by `0` off
-`chartTargetEuclid α`. -/
 private noncomputable def chartPouEucl (α : M) : EuclN → ℝ := by
   classical
   exact fun y =>
@@ -491,9 +422,6 @@ private lemma chartPouEucl_apply_of_notMem (α : M) {y : EuclN}
   classical
   unfold chartPouEucl; exact if_neg hy
 
-/-- The chart-pushed POU weight is `ContDiff ℝ ∞` on EuclN. The proof mirrors
-`tensorChartComponent_contMDiff`: inside chartTargetEuclid the formula gives
-smoothness, and outside, the function vanishes on an open neighborhood. -/
 private lemma chartPouEucl_contDiff (α : M) :
     ContDiff ℝ ∞ (chartPouEucl (I := I) (M := M) α) := by
   classical
@@ -587,7 +515,6 @@ private lemma chartPouEucl_contDiff (α : M) :
       refine ⟨w, ⟨(extChartAt I α).symm w, hin_supp, hext_right⟩, hwz⟩
     · exact chartPouEucl_apply_of_notMem (I := I) (M := M) α hz_target
 
-/-- The chart-pushed POU weight has compact support. -/
 private lemma chartPouEucl_hasCompactSupport (α : M) :
     HasCompactSupport (chartPouEucl (I := I) (M := M) α) := by
   classical
@@ -628,7 +555,6 @@ private lemma chartPouEucl_hasCompactSupport (α : M) :
     refine ⟨w, ⟨(extChartAt I α).symm w, hin_supp, hext_right⟩, hwy⟩
   · exact chartPouEucl_apply_of_notMem (I := I) (M := M) α hy_target
 
-/-- The Fréchet derivative of the chart-pushed POU weight is bounded on EuclN. -/
 private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
     ∃ K_pou : ℝ, 0 ≤ K_pou ∧
       ∀ y : EuclN, ‖fderiv ℝ (chartPouEucl (I := I) (M := M) α) y‖ ≤ K_pou := by
@@ -649,7 +575,6 @@ private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
-/-- The chart-pulled raw component is `ContDiffOn ℝ ∞` on the chart target. -/
 private lemma tensorChartComponentRaw_symm_contDiffOn_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -675,7 +600,6 @@ private lemma tensorChartComponentRaw_symm_contDiffOn_target
     hsmooth_on.comp hsymm hmaps
   exact hcomp.contDiffOn
 
-/-- The chart-pulled POU is `ContDiffOn ℝ ∞` on the chart target. -/
 private lemma chartAtlasPOU_symm_contDiffOn_target (α : M) :
     ContDiffOn ℝ ∞
       ((fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∘
@@ -687,7 +611,6 @@ private lemma chartAtlasPOU_symm_contDiffOn_target (α : M) :
   exact DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
     (I := I) α hf_smooth
 
-/-- Differentiability of the chart-pulled POU function at any chart-target point. -/
 private lemma chartAtlasPOU_symm_differentiableAt
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     DifferentiableAt ℝ
@@ -701,7 +624,6 @@ private lemma chartAtlasPOU_symm_differentiableAt
     (hcd _ he).differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
-/-- Differentiability of the chart-pulled raw component at any chart-target point. -/
 private lemma tensorChartComponentRaw_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -720,9 +642,6 @@ private lemma tensorChartComponentRaw_symm_differentiableAt
     (hcd _ he).differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
-/-- For `y ∈ chartTargetEuclid α`, the chart component on EuclN equals the
-chart-pulled POU-weighted raw scalar on M, pulled back via `extChartAt.symm` and
-`toEuclidean.symm`. -/
 private lemma tensorChartComp_eq_pou_mul_raw_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -738,9 +657,6 @@ private lemma tensorChartComp_eq_pou_mul_raw_pulled
   unfold tensorChartComponentPou
   rfl
 
-/-- For `e ∈ (extChartAt I α).target`, the chart component on EuclN evaluated at
-`toEuclidean e` equals the chart-pulled POU-weighted raw scalar evaluated at the
-manifold point. -/
 private lemma tensorChartComp_toEuclidean_eq_pou_mul_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -760,8 +676,6 @@ private lemma tensorChartComp_toEuclidean_eq_pou_mul_raw
   rw [tensorChartComp_eq_pou_mul_raw_pulled
     (I := I) (M := M) g r s T α Idx Jdx hy, h_eq]
 
-/-- For `e ∈ (extChartAt I α).target`, the chart-pulled POU-weighted raw
-component, expressed via the EuclN-side `tensorChartComp` and `toEuclidean`. -/
 private lemma pou_mul_raw_eq_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -777,8 +691,6 @@ private lemma pou_mul_raw_eq_tensorChartComp_toEuclidean
   (tensorChartComp_toEuclidean_eq_pou_mul_raw
     (I := I) (M := M) g r s T α Idx Jdx he).symm
 
-/-- For `e ∈ (extChartAt I α).target`, the chart-pulled POU function equals the
-EuclN-side chartPouEucl at `toEuclidean e`. -/
 private lemma chartPouEucl_toEuclidean_eq_pou_symm
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     chartPouEucl (I := I) (M := M) α ((toEuclidean (E := E)) e) =
@@ -790,8 +702,6 @@ private lemma chartPouEucl_toEuclidean_eq_pou_symm
     (toEuclidean (E := E)).symm_apply_apply e
   rw [chartPouEucl_apply_of_mem (I := I) (M := M) α hy, h_eq]
 
-/-- The pointwise pre-product identity, lifted from the chart-target to a
-function-level eventual equality near a target point. -/
 private lemma pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -811,7 +721,6 @@ private lemma pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
   exact pou_mul_raw_eq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he'
 
-/-- The pointwise pre-product fderiv identity, on the chart target. -/
 private lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -830,8 +739,6 @@ private lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
   (pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he).fderiv_eq
 
-/-- The Fréchet derivative of `tensorChartComp ∘ toEuclidean` on E equals the
-composition of the EuclN-side Fréchet derivative with `toEuclidean`. -/
 private lemma fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -866,7 +773,6 @@ private lemma fderiv_tensorChartComp_toEuclidean
   congr 1
   exact (toEuclidean (E := E)).fderiv
 
-/-- Similarly, the Fréchet derivative of `chartPouEucl ∘ toEuclidean` on E. -/
 private lemma fderiv_chartPouEucl_toEuclidean (α : M) (e : E) :
     fderiv ℝ
         (fun e' : E => chartPouEucl (I := I) (M := M) α
@@ -896,8 +802,6 @@ private lemma fderiv_chartPouEucl_toEuclidean (α : M) (e : E) :
   congr 1
   exact (toEuclidean (E := E)).fderiv
 
-/-- The chart-pulled POU function equals `chartPouEucl ∘ toEuclidean` on the
-chart target. -/
 private lemma pou_symm_eventuallyEq_chartPouEucl_toEuclidean
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     (fun e' : E => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
@@ -909,8 +813,6 @@ private lemma pou_symm_eventuallyEq_chartPouEucl_toEuclidean
   filter_upwards [h_open.mem_nhds he] with e' he'
   exact (chartPouEucl_toEuclidean_eq_pou_symm (I := I) (M := M) α he').symm
 
-/-- The Fréchet derivative of the chart-pulled POU function equals
-`fderiv chartPouEucl (toEuclidean e) ∘ toEuclidean` on the chart target. -/
 private lemma fderiv_pou_symm_eq
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     fderiv ℝ
@@ -923,8 +825,6 @@ private lemma fderiv_pou_symm_eq
     (I := I) (M := M) α he).fderiv_eq]
   exact fderiv_chartPouEucl_toEuclidean (I := I) (M := M) α e
 
-/-- The chart-pulled POU Fréchet derivative is uniformly bounded on
-`(extChartAt I α).target`. -/
 private lemma exists_pou_symm_fderiv_uniform_bound (α : M) :
     ∃ K_pou : ℝ, 0 ≤ K_pou ∧
       ∀ e ∈ (extChartAt I α).target,
@@ -949,11 +849,6 @@ private lemma exists_pou_symm_fderiv_uniform_bound (α : M) :
   refine le_trans hbound ?_
   exact mul_le_mul_of_nonneg_right (hK_bound _) hNtoE_nn
 
-/-- The topological support of `tensorChartComp g r s T α Idx Jdx` is contained in
-`chartTargetEuclid α`. Since `tensorChartComp` equals `0` outside the chart target
-and is identified with the chart-Euclidean push of `tensorChartComponentPou`,
-whose carrier is contained in the compact `toEuclidean`-image of the chart of
-`tsupport (POU * raw)` — itself a subset of `chartTargetEuclid α`. -/
 lemma tensorChartComp_tsupport_subset_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1017,8 +912,6 @@ lemma tensorChartComp_tsupport_subset_chartTargetEuclid
         (I := I) (M := M) α f hy_target
   refine (closure_minimal h_supp_K hK_closed).trans hK_subset_target
 
-/-- The squared `eLpNorm` identity: for a real-valued function `f` and a measure `μ`,
-`(eLpNorm f 2 μ)² = ∫⁻ x, ENNReal.ofReal (f x ^ 2) ∂μ`. -/
 private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
     {α : Type*} {_ : MeasurableSpace α} (f : α → ℝ) (μ : Measure α) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, ENNReal.ofReal ((f x) ^ 2) ∂μ := by
@@ -1029,7 +922,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   rw [show ((f x) ^ 2 : ℝ) = ‖f x‖ ^ 2 from by rw [Real.norm_eq_abs, sq_abs],
     ENNReal.ofReal_pow (norm_nonneg _) 2, ofReal_norm_eq_enorm]
 
-/-- The chart-α-pulled `repr T` is differentiable at any chart-target point. -/
 lemma repr_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1085,8 +977,6 @@ lemma repr_symm_differentiableAt
     (I := I) (M := M) g r s T α Idx Jdx hb_chart
   rwa [he_eq] at hdiff
 
-/-- The chart-pulled `tensorChartComponentRaw α Idx Jdx ∘ symm` is differentiable at
-any chart-target point. (A renaming of an existing helper for ergonomic reuse.) -/
 private lemma raw_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1099,9 +989,6 @@ private lemma raw_symm_differentiableAt
   tensorChartComponentRaw_symm_differentiableAt
     (I := I) (M := M) g r s T α Idx Jdx he
 
-/-- The fderiv of `(POU · raw_IJ) ∘ symm` at a chart-target point factors via
-the EuclN-side `tensorChartComp`: it equals `fderiv tensorChartComp_IJ (toEucl e)
-∘ toEucl`. -/
 private lemma fderiv_pou_raw_symm_eq_chain
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1121,8 +1008,6 @@ private lemma fderiv_pou_raw_symm_eq_chain
     (I := I) (M := M) g r s T α Idx Jdx he]
   exact fderiv_tensorChartComp_toEuclidean (I := I) (M := M) g r s T α Idx Jdx e
 
-/-- The Leibniz expansion of `fderiv (POU · raw_IJ ∘ symm)` at a chart-target
-point. -/
 private lemma fderiv_pou_raw_symm_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1155,9 +1040,6 @@ private lemma fderiv_pou_raw_symm_leibniz
     raw_symm_differentiableAt (I := I) (M := M) g r s T α Idx Jdx he
   exact fderiv_fun_mul hP_diff hR_diff
 
-/-- Pointwise (squared) bound: at any chart-target point, the squared operator
-norm of `fderiv (repr T ∘ symm)` is bounded by `N · Bnorm²` times the finite
-double sum of `‖fderiv (raw_IJ ∘ symm)‖²`. -/
 lemma fderiv_repr_opNormSq_le_sum_fderiv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -1315,22 +1197,6 @@ lemma fderiv_repr_opNormSq_le_sum_fderiv_components_sq
   rw [h_pair_to_nest] at h_combined
   exact h_combined
 
-/-- **Pointwise scaled bound.** On the chart target, the POU²-scaled squared
-chart-pulled-repr Fréchet-derivative norm is bounded by `C1` times the sum of
-squared Fréchet-derivative norms of `tensorChartComp_IJ` at `toEuclidean e`,
-plus `C2` times the sum of squared raw component values at
-`(extChartAt I α).symm e`, with explicit constants:
-
-```
-C1 = 2 * N * Bnorm² * ‖toEuclidean‖²
-C2 = 2 * N * Bnorm² * K_pou²
-```
-
-where `N` is the cardinality of the `(Idx, Jdx)` pair set, `Bnorm` is the
-chart-basis norm constant, and `K_pou` is a uniform upper bound on the
-operator norm of the Fréchet derivative of the chart-pulled
-partition-of-unity. This is the pointwise core of the order-`1` chart-target
-POU-weighted `L²` bound on the chart-pulled repr Fréchet derivative. -/
 lemma pou_sq_fderiv_repr_sq_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (K_pou : ℝ) (hK_pou_nn : 0 ≤ K_pou)
@@ -1595,11 +1461,6 @@ lemma pou_sq_fderiv_repr_sq_pointwise
           ring
   exact le_trans h_scaled h_sum_per
 
-/-- AEMeasurability of `y ↦ ofReal((raw α Idx Jdx (sym y))^2)` on the chart-
-target restriction. The composition `(raw α Idx Jdx) ∘ (extChartAt I α).symm ∘
-toEuclidean.symm` is continuous on `chartTargetEuclid α` (a chain of two
-continuous-on-target maps and one CLE), so by `ContinuousOn.aemeasurable` it is
-AEMeasurable w.r.t. `volume.restrict chartTargetEuclid α`. -/
 private lemma raw_sym_sq_ofReal_aeMeasurable_restrict
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1650,10 +1511,6 @@ private lemma raw_sym_sq_ofReal_aeMeasurable_restrict
     h_raw_sym_ae.pow_const 2
   exact ENNReal.measurable_ofReal.comp_aemeasurable h_sq_ae
 
-/-- AEMeasurability of `y ↦ ofReal(‖fderiv tensorChartComp_IJ y‖^2)`. Since
-`tensorChartComp_IJ` is `ContDiff ℝ ∞`, `fderiv tensorChartComp_IJ` is continuous,
-so the entire integrand is continuous, hence measurable on the whole space (and
-a fortiori AEMeasurable on any restriction). -/
 private lemma fderiv_tensorChartComp_sq_ofReal_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1672,25 +1529,6 @@ private lemma fderiv_tensorChartComp_sq_ofReal_measurable
     exact this.continuous_fderiv (by simp)
   exact h_fderiv_cont.norm.measurable
 
-/-- **Order-1 chart-target POU-weighted L² bound for the Fréchet derivative of
-the chart-pulled tensor representation.** For a smooth closed Riemannian
-manifold `(M, g)`, fixed ranks `(r, s)`, and a chart base point `α : M`, there
-is a non-negative constant `K` (depending only on `(g, r, s, α)` and the model
-space; independent of `T`) such that for every smooth compactly-supported
-`(r, s)`-tensor section `T`, the chart-target Lebesgue integral of the
-partition-of-unity-weighted squared operator norm of the Fréchet derivative
-`fderiv (tensorRSChartE_section_repr r s α T.toSection ∘ (extChartAt I α).symm)`
-is bounded by `K` times the sum of two pieces:
-
-* the sum of the squared `wkpNorm 1 2`-norms of the chart-frame scalar
-  components `tensorChartComp g r s T α Idx Jdx`, and
-* the sum of the squared `L²`-norms (over the chart target) of the chart-pulled
-  raw components `raw_IJ ∘ (extChartAt I α).symm ∘ toEuclidean.symm`.
-
-The first term packages the gradient contribution into Sobolev-style norms via
-the order-`1` chart-target Fréchet-derivative `L²`-bound. The second term, the
-unweighted `L²` of the raw components, is the controlled correction coming
-from the partition-of-unity multiplier. -/
 theorem chartTargetPouWeightedL2NormSq_fderiv_repr_le_sum_chartComp_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -2188,15 +2026,6 @@ theorem chartTargetPouWeightedL2NormSq_fderiv_repr_le_sum_chartComp_data
       _ = ENNReal.ofReal (C1 + C2) * (Xf + Xr) := by
           rw [mul_add]
 
-/-- **Order-2 Leibniz inequality.** For two real-valued functions
-`f, g : E → ℝ` that are `ContDiffAt ℝ 2` at a point `x`, the iterated
-Fréchet derivative satisfies the triangle bound
-`|f x| · ‖∇²g x‖ ≤ ‖∇²(f·g) x‖ + |g x| · ‖∇²f x‖ + 2 · ‖∇f x‖ · ‖∇g x‖`.
-
-The proof works at the `fderiv (fderiv ·)` level, using the order-1
-Leibniz equality (`fderiv_fun_mul`) twice. We unfold both `iteratedFDeriv 2 f`
-and `iteratedFDeriv 2 (fg)` to `fderiv (fderiv ·)` via
-`iteratedFDeriv_two_apply`. -/
 private lemma scalar_iteratedFDeriv_two_mul_norm_le
     (f g : E → ℝ) {x : E}
     (hf : ContDiffAt ℝ 2 f x) (hg : ContDiffAt ℝ 2 g x) :
@@ -2335,10 +2164,6 @@ private lemma scalar_iteratedFDeriv_two_mul_norm_le
     mul_nonneg (norm_nonneg (fderiv ℝ f x)) (norm_nonneg (fderiv ℝ g x)),
     mul_nonneg (norm_nonneg (fderiv ℝ g x)) (norm_nonneg (fderiv ℝ f x))]
 
-/-- **Order-2 squared basis decomposition.** Pointwise (squared) bound: at any
-chart-target point, the squared operator norm of `iteratedFDeriv 2 (repr T ∘
-symm) e` is bounded by `N · Bnorm²` times the finite double sum of
-`‖iteratedFDeriv 2 (raw_IJ ∘ symm) e‖²`. -/
 lemma iteratedFDeriv_two_repr_opNormSq_le_sum_iteratedFDeriv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -2518,12 +2343,6 @@ lemma iteratedFDeriv_two_repr_opNormSq_le_sum_iteratedFDeriv_components_sq
   rw [h_pair_to_nest] at h_combined
   exact h_combined
 
-/-- The chart-pulled POU iterated-Fréchet-derivative (order 2) is uniformly
-bounded on `(extChartAt I α).target` (and globally on `E`, since the
-chart-pushed POU `chartPouEucl` is `ContDiff ℝ ∞` with compact support).
-
-We use the chain-rule decomposition `iteratedFDeriv 2 (chartPouEucl ∘ toEucl)
-e = (composition with toEucl twice)` to transfer the bound from EuclN to E. -/
 private lemma exists_chartPouEucl_iteratedFDeriv_two_uniform_bound (α : M) :
     ∃ K_pou2 : ℝ, 0 ≤ K_pou2 ∧
       ∀ y : EuclN, ‖iteratedFDeriv ℝ 2 (chartPouEucl (I := I) (M := M) α) y‖ ≤ K_pou2 := by
@@ -2547,17 +2366,6 @@ private lemma exists_chartPouEucl_iteratedFDeriv_two_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
-/-- The chart-pulled POU function (composed with `(extChartAt I α).symm`) has a
-uniformly bounded `iteratedFDeriv 2` on `(extChartAt I α).target`.
-
-The proof: the function equals `chartPouEucl ∘ toEucl` on the chart target
-(via `chartPouEucl_toEuclidean_eq_pou_symm`). Since `chartPouEucl` is `ContDiff
-ℝ ∞` and `toEucl` is a continuous linear equivalence (in particular `ContDiff
-ℝ ∞`), the chain rule gives `‖iteratedFDeriv 2 (chartPouEucl ∘ toEucl) e‖ ≤
-‖iteratedFDeriv 2 chartPouEucl (toEucl e)‖ · NtoE²` (since `toEucl` is linear,
-so `iteratedFDeriv toEucl` is `toEucl` itself at order 1 and 0 at higher
-orders). We use `ContinuousLinearMap.iteratedFDeriv_comp_left` (composition
-with a CLM) to derive this bound. -/
 private lemma exists_pou_symm_iteratedFDeriv_two_uniform_bound (α : M) :
     ∃ K_pou2 : ℝ, 0 ≤ K_pou2 ∧
       ∀ e ∈ (extChartAt I α).target,
@@ -2613,12 +2421,6 @@ private lemma exists_pou_symm_iteratedFDeriv_two_uniform_bound (α : M) :
       ≤ K_eucl * NtoE ^ 2 :=
         mul_le_mul_of_nonneg_right hK_eval (sq_nonneg _)
 
-/-- **Order-2 pointwise scaled bound.** On the chart target, the POU²-scaled
-squared chart-pulled-repr iterated-Fréchet-derivative norm (order 2) is bounded
-by `C1` times the sum of squared `iteratedFDeriv 2` norms of `(POU·raw_IJ) ∘
-symm`, plus `C2` times the sum of squared raw component values at
-`(extChartAt I α).symm e`, plus `C3` times the sum of `‖fderiv POU∘symm‖² ·
-‖fderiv raw_IJ∘symm‖²`. -/
 lemma pou_sq_iteratedFDeriv_two_repr_sq_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -3097,31 +2899,6 @@ lemma pou_sq_iteratedFDeriv_two_repr_sq_pointwise
     convert hgoal using 2
   exact h_final
 
-/-- **Order-2 chart-target POU-weighted L² bound for the second iterated
-Fréchet derivative of the chart-pulled tensor representation by chart-component
-data.** For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`,
-and a chart base point `α : M`, there is a non-negative constant `K` (depending
-only on `(g, r, s, α)` and the model space; independent of `T`) such that for
-every smooth compactly-supported `(r, s)`-tensor section `T`, the chart-target
-Lebesgue integral of the partition-of-unity-weighted squared operator norm of
-`iteratedFDeriv ℝ 2 (tensorRSChartE_section_repr r s α T.toSection ∘
-(extChartAt I α).symm)` is bounded by `K` times the sum of three pieces:
-
-* the sum of the chart-target Lebesgue integrals of the squared iterated
-  Fréchet-derivative norms of the POU-weighted chart-frame scalar components
-  (this piece is the principal contribution; it is bounded above by the
-  squared `wkpNorm 2 2` of `tensorChartComp_IJ` modulo a constant factor that
-  is absorbed into `K`),
-* the sum of the squared `L²`-norms over the chart target of the chart-pulled
-  Fréchet derivatives of the raw scalar components (first Leibniz correction),
-* the sum of the squared `L²`-norms over the chart target of the chart-pulled
-  raw scalar components themselves (second Leibniz correction).
-
-The two correction terms are deferred to cross-chart aggregation. The proof
-combines the order-2 squared basis decomposition, the order-2 scalar Leibniz
-inequality, the uniform bound on the chart-pulled POU iteratedFDeriv 2, and
-the `(a+b+c)² ≤ 3(a²+b²+c²)` algebraic inequality, integrated against the
-chart-target restriction measure. -/
 theorem chartTargetPouWeightedL2NormSq_iteratedFDeriv_two_repr_le_sum_chartComp_data
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -3592,14 +3369,11 @@ theorem chartTargetPouWeightedL2NormSq_iteratedFDeriv_two_repr_le_sum_chartComp_
               ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
                   rIntegrand Idx Jdx y ∂(volume : Measure EuclN))) := by rfl
 
-/-- If `chartAt H α = chartAt H β`, the extended charts coincide. -/
 private lemma extChartAt_eq_of_chartAt_eq
     {α β : M} (h_eq : chartAt H α = chartAt H β) :
     extChartAt I α = extChartAt I β := by
   simp only [extChartAt, h_eq]
 
-/-- If `chartAt H α = chartAt H β`, then
-`chartTargetEuclid α = chartTargetEuclid β`. -/
 private lemma chartTargetEuclid_eq_of_chartAt_eq
     {α β : M} (h_eq : chartAt H α = chartAt H β) :
     chartTargetEuclid (I := I) (M := M) α =
@@ -3607,7 +3381,6 @@ private lemma chartTargetEuclid_eq_of_chartAt_eq
   unfold DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
   rw [extChartAt_eq_of_chartAt_eq (I := I) (M := M) h_eq]
 
-/-- For a finite family of non-negative extended reals, `∑ a_i² ≤ (∑ a_i)²`. -/
 private lemma sum_sq_le_sq_sum_finset
     {ι : Type*} (s : Finset ι) (f : ι → ℝ≥0∞) :
     ∑ i ∈ s, (f i) ^ 2 ≤ (∑ i ∈ s, f i) ^ 2 := by
@@ -3627,7 +3400,6 @@ private lemma sum_sq_le_sq_sum_finset
     _ = S * S := by rw [← hS_def]
     _ = S ^ 2 := hS_sq.symm
 
-/-- For a countable family of non-negative extended reals, `∑' a_i² ≤ (∑' a_i)²`. -/
 private lemma tsum_sq_le_sq_tsum_ennreal
     {ι : Type*} (f : ι → ℝ≥0∞) :
     ∑' i, (f i) ^ 2 ≤ (∑' i, f i) ^ 2 := by
@@ -3646,10 +3418,6 @@ private lemma tsum_sq_le_sq_tsum_ennreal
     _ = S * S := by rw [← hS_def]
     _ = S ^ 2 := (sq S).symm
 
-/-- For each `α` in a finset of charts and each component multi-index `(Idx, Jdx)`,
-the square of `wkpNorm 0 2 (tensorChartComp α Idx Jdx)` (on the chart target) is
-bounded by `(wtwokTwoNorm g 1 T)^2`. This is the per-chart contribution to the
-overall `wtwokTwoNorm` square bound. -/
 private lemma wkpNorm_zero_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -3716,9 +3484,6 @@ private lemma wkpNorm_zero_sq_le_wtwokTwoNorm_sq
       wtwokTwoNorm (I := I) (M := M) g 1 T := h01.trans h_α
   exact pow_le_pow_left' h_combined 2
 
-/-- The finset sum `∑_α ∑_IJ (wkpNorm 0 2 of tensorChartComp α IJ)²` over
-`chartAtlasPOU_finset` is bounded by `|finset| · cardIdx · cardJdx ·
-(wtwokTwoNorm g 1 T)²`. -/
 private lemma finset_sum_wkpNorm_zero_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -3786,7 +3551,6 @@ private lemma finset_sum_wkpNorm_zero_sq_le_wtwokTwoNorm_sq
           ((Finset.univ : Finset (Fin s → Fin (Module.finrank ℝ E))).card : ℝ≥0∞) *
             W from by ring]
 
-/-- Same as `wkpNorm_zero_sq_le_wtwokTwoNorm_sq` but for `wkpNorm 1 2`. -/
 private lemma wkpNorm_one_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -3846,7 +3610,6 @@ private lemma wkpNorm_one_sq_le_wtwokTwoNorm_sq
     exact ENNReal.le_tsum α
   exact pow_le_pow_left' (h12.trans h_α) 2
 
-/-- Same as `wkpNorm_zero_sq_le_wtwokTwoNorm_sq` but for `wkpNorm 2 2`. -/
 private lemma wkpNorm_two_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -3900,8 +3663,6 @@ private lemma wkpNorm_two_sq_le_wtwokTwoNorm_sq
     exact ENNReal.le_tsum α
   exact pow_le_pow_left' h_α 2
 
-/-- When `chartAt H α = chartAt H β`, the tangent trivialisations at `α` and `β`
-applied at `b` coincide. -/
 private lemma tangent_continuousLinearMapAt_eq_of_chartAt_eq
     {α β : M} (h_chart : chartAt H α = chartAt H β) (b : M)
     (hb_α : b ∈ (chartAt H α).source) :
@@ -3914,7 +3675,6 @@ private lemma tangent_continuousLinearMapAt_eq_of_chartAt_eq
   congr 1
   exact Subtype.ext h_chart
 
-/-- Cauchy-Schwarz for a finset sum of reals: `(Σ f i)² ≤ #s · Σ (f i)²`. -/
 private lemma finset_sum_sq_le_card_mul_sum_sq
     {ι : Type*} (s : Finset ι) (f : ι → ℝ) :
     (∑ i ∈ s, f i) ^ 2 ≤ (s.card : ℝ) * ∑ i ∈ s, (f i) ^ 2 := by
@@ -3926,11 +3686,6 @@ private lemma finset_sum_sq_le_card_mul_sum_sq
   rw [h_sum_one] at hbase
   exact hbase
 
-/-- **Chart-transition law via POU tsupport.** For any two chart base points
-`α, β : M` whose POU `tsupport`s both contain a point `b`, the raw chart-frame
-scalar component of a smooth compactly-supported tensor section `T` at `α` and
-multi-index `(Idx, Jdx)` equals the finite sum over component multi-indices `Q`
-of `transitionCoeff r s β α ⟨Idx, Jdx⟩ Q b · raw component of T at β, Q b`. -/
 private lemma tensorChartComponentRaw_chartTransition_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α β b : M)
@@ -3958,13 +3713,6 @@ private lemma tensorChartComponentRaw_chartTransition_eq
   exact tensorChartComponentRaw_eq_transitionCoeff_sum
     (E := E) (I := I) (M := M) g r s T β α ⟨Idx, Jdx⟩ ⟨hb_β_src, hb_α_src⟩
 
-/-- **Squared chart-transition bound via POU tsupport.** Under the same POU
-`tsupport` overlap, the squared raw chart-frame scalar component at `α` is
-bounded by `N_idx · K² · Σ_Q (raw β Q b)²`, where `N_idx` is the cardinality
-of the component multi-index type and `K` is any uniform `transitionCoeff`
-bound on the relevant POU-`tsupport` overlap (in particular, the universal
-constant from `transitionCoeff_le_uniform_on_pouTsupport`). The Cauchy-Schwarz
-factor `N_idx` is the squared-finset cost of distributing the sum over `Q`. -/
 private lemma tensorChartComponentRaw_sq_chartTransition_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (K : ℝ)
@@ -4050,10 +3798,6 @@ private lemma tensorChartComponentRaw_sq_chartTransition_bound
                 (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by
             ring
 
-/-- Chain rule transformation: for `y ∈ chartTarget α`, the squared model-space
-iterated Fréchet 2-derivative of the POU-weighted raw chart-frame scalar pulled
-back through the chart symm is bounded by a multiple of the squared Euclidean
-iterated Fréchet 2-derivative of the chart-component function. -/
 private lemma iteratedFDeriv_two_pou_raw_symm_sq_le_iteratedFDeriv_two_chartComp_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -4133,10 +3877,6 @@ private lemma iteratedFDeriv_two_pou_raw_symm_sq_le_iteratedFDeriv_two_chartComp
   refine h_sq_le.trans (le_of_eq ?_)
   ring
 
-/-- For `y ∈ chartTargetEuclid α` and `POU(α at symm y) ≠ 0`, the inverse-chart
-preimage `symm y` lies in `tsupport POU(α) ∩ chartLeviCivitaGoodSet`. Under
-`[I.Boundaryless]`, the good set equals the chart source, and `tsupport POU(α)
-⊆ chart source α` (subordinate), so the intersection equals `tsupport POU(α)`. -/
 private lemma symm_mem_pou_inter_goodSet
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (h_pou_pos :
@@ -4163,8 +3903,6 @@ private lemma symm_mem_pou_inter_goodSet
     rw [h_goodSet_eq]; exact hb_extSrc
   exact ⟨hb_tsupp, hb_good⟩
 
-/-- For `y ∈ chartTargetEuclid α` and `POU(α at symm y) ≠ 0`, `y` lies in the
-`toEuclidean` image of `extChartAt α` image of `tsupport POU(α) ∩ goodSet`. -/
 private lemma mem_pouImage_of_pou_pos
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (h_pou_pos :
@@ -4189,12 +3927,6 @@ private lemma mem_pouImage_of_pou_pos
     exact (extChartAt I α).right_inv hb_target
   · exact (toEuclidean (E := E)).apply_symm_apply y
 
-/-- For each `α` and `IJ`, the integral over `chartTargetEuclid α` of
-`ofReal(‖fderiv (chartComp β IJ) y‖²)` is bounded by `(wkpNorm 2 2 chartComp
-β IJ chartTarget β)²`. Domain enlargement: extend the integral from
-`chartTarget α` to the whole space (since the integrand vanishes outside
-`tsupport (chartComp β IJ) ⊆ chartTarget β`), then apply the Sobolev bridge
-`chartTarget_fderiv_eLpNorm_le_wkpNorm_two`. -/
 private lemma int_fderiv_tensorChartComp_β_sq_le_wkpNorm_two_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α β : M)
@@ -4285,10 +4017,6 @@ private lemma int_fderiv_tensorChartComp_β_sq_le_wkpNorm_two_sq
       h_β_open h_smooth h_cc h_supp_β
   exact pow_le_pow_left' h_bridge 2
 
-/-- The per-α-(Idx, Jdx) `chartTarget α` integral of
-`‖iteratedFDeriv 2 (chartComp β IJ) y‖²` is bounded by
-`(wkpNorm 2 2 chartComp β IJ chartTarget β)²`. The structure mirrors
-`int_fderiv_tensorChartComp_β_sq_le_wkpNorm_two_sq`. -/
 private lemma int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α β : M)
@@ -4380,11 +4108,6 @@ private lemma int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
       h_β_open h_smooth h_cc h_supp_β
   exact pow_le_pow_left' h_bridge 2
 
-/-- The per-(α, IJ) `chartTarget α` integral of the squared norm of the
-iterated 2-derivative of `POU(α) · raw α IJ ∘ symm_α` is bounded by
-`‖toEuclidean‖⁴ · (wkpNorm 2 2 chartComp α IJ chartTarget α)²`. This combines
-the chain rule lemma `iteratedFDeriv_two_pou_raw_symm_sq_le_iteratedFDeriv_two_chartComp_sq`
-with `int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq`. -/
 private lemma int_iteratedFDeriv_two_pou_raw_α_symm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -4452,9 +4175,6 @@ private lemma int_iteratedFDeriv_two_pou_raw_α_symm_sq_le
   exact int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
     (I := I) (M := M) g r s T α α Idx Jdx
 
-/-- The per-α B'.3a bound aggregated: the V-integral
-`∫_α ofReal(POU² · ‖repr‖²)` is bounded by `K_a · cardIdx · cardJdx · W` for an
-explicit `K_a` from `chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq`. -/
 private lemma per_alpha_V_int_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

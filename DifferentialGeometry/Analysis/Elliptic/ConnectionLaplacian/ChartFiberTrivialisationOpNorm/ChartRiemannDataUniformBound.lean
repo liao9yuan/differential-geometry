@@ -2,46 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
-/-!
-# Uniform-over-compact-`M` bound on the chart-`α` Riemann curvature data
-
-For a smooth closed Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, the chart-`α` Riemann tensor coefficients
-`chartRiemannTensor g α i j k l (ϕ_α b)` are the chart-coordinate components of
-the Levi-Civita curvature in the chart at `α`. By the chart Riemann formula
-`R = ∂Γ − ∂Γ + ΓΓ`, they are polynomial in the chart Christoffel symbols
-`chartChristoffel g α · · ·` and their first Euclidean partial derivatives.
-The Christoffel symbols are `C^∞` on the interior of the chart target
-(`chartChristoffel_contDiffOn_interior`), hence so are their partials and the
-Riemann coefficients. A `C^∞` function on the chart-target interior is
-continuous there, hence bounded on the compact chart-`α` image of the
-partition-of-unity tsupport.
-
-This file ships two uniform bounds, both **chart-locality-free** (no
-`HasLocallyConstantChartAt`, no chart-trivialisation operator-norm scalar
-`A(x)`; the only chart objects are the bounded chart Christoffel data):
-
-* `exists_chartRiemannData_uniform_bound_pouTsupport` — a single non-negative
-  constant `C`, depending only on `g`, `α`, such that for every base point `b`
-  in the chart-`α` partition-of-unity tsupport (intersected with the chart-`α`
-  Levi-Civita good set) and all chart indices `i j k l`, the absolute value of
-  the chart-`α` Riemann coefficient at `ϕ_α b` is bounded by `C`.
-
-* `exists_chartRiemannData_uniform_bound_compact` — a single non-negative
-  constant `C_g`, depending only on `g`, that bounds every chart-`α` Riemann
-  coefficient at `ϕ_α b`, uniformly over the finite partition-of-unity index
-  set `chartAtlasPOU_finset` and over all base points `b` in the respective
-  chart-`α` tsupport ∩ good set, for all chart indices.
-
-These are the curvature-DATA uniformity facts on which a fully uniform
-intrinsic-fibre-norm curvature operator bound rests: every chart-coordinate
-component of the Levi-Civita curvature is uniformly bounded on the (compact)
-chart supports that cover `M`.
-
-The quantifier order is `∃ C, ∀ b, ∀ i j k l`: the constant is uniform across
-all base points and all chart indices. No chart-locality predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -68,10 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The chart-`α` Riemann coefficient `R^l{}_{ijk}(g, α)` viewed as a function on
-the standard Euclidean model space, by precomposition with `toEuclidean.symm`.
-This is the Euclidean-side analogue of `chartChristoffelEuclid` for the
-curvature data. -/
 def chartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
@@ -84,8 +40,6 @@ def chartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
     chartRiemannEuclid (I := I) g α i j k l y =
       chartRiemannTensor (I := I) g α i j k l (toEuclidean.symm y) := rfl
 
-/-- The first model-basis partial derivative of a function that is `C^∞` on the
-chart-target interior is again `C^∞` on the chart-target interior. -/
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))
@@ -100,9 +54,6 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   rw [hrw]
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- The chart-`α` Riemann coefficient `chartRiemannTensor g α i j k l` is `C^∞`
-on the interior of the chart target. It is the polynomial `∂Γ − ∂Γ + ΓΓ` in the
-chart Christoffel symbols, each of which is `C^∞` there. -/
 theorem chartRiemannTensor_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
@@ -140,10 +91,6 @@ theorem chartRiemannTensor_contDiffOn_interior
   rw [hrw]
   exact (hdΓ1.sub hdΓ2).add hΓΓ
 
-/-- `chartRiemannEuclid` is `C^∞` on the Euclidean chart target. It is the
-composite of `chartRiemannTensor` (`C^∞` on the `E`-chart-target interior, which
-equals the full `E`-chart-target under `[I.Boundaryless]`) with the smooth
-isometry `toEuclidean.symm`. -/
 theorem chartRiemannEuclid_contDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
@@ -174,27 +121,6 @@ theorem chartRiemannEuclid_contDiffOn [I.Boundaryless]
         (I := I) (M := M) hy
   exact hcomp
 
-/-- **Uniform bound on the chart-`α` Riemann data over the chart-`α`
-partition-of-unity tsupport.**
-
-For a smooth closed Riemannian manifold `(M, g)` and a chart base point `α : M`,
-there is a non-negative constant `C`, depending only on `g` and `α`, such that
-for every base point `b` in the intersection of the chart-`α`
-partition-of-unity tsupport with the chart-`α` Levi-Civita good set, and all
-chart indices `i j k l`,
-```
-|chartRiemannTensor g α i j k l (ϕ_α b)| ≤ C.
-```
-
-The chart-`α` Riemann data is `C^∞` on the chart target (the polynomial
-`∂Γ − ∂Γ + ΓΓ` in the chart Christoffel symbols, all `C^∞`), hence continuous,
-hence bounded on the compact chart-`α` image of the partition-of-unity
-tsupport. The constant is the finite sup of the per-index sup-bounds over the
-(finitely many) chart-index quadruples.
-
-The bound is unconditional in the chart atlas: no chart-locality predicate is
-required, and the right-hand constant involves no chart-trivialisation
-operator-norm scalar — only the bounded chart Christoffel data. -/
 theorem exists_chartRiemannData_uniform_bound_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -250,24 +176,6 @@ theorem exists_chartRiemannData_uniform_bound_pouTsupport
     _ ≤ C_fn ((i, j), (k, l)) := hbd_q
     _ ≤ C := hq_le
 
-/-- **Uniform-over-compact-`M` bound on the chart-`α` Riemann data.**
-
-For a smooth closed Riemannian manifold `(M, g)`, there is a single
-non-negative constant `C_g`, depending only on `g`, such that for every
-partition-of-unity index `α` in the finite cover `chartAtlasPOU_finset`, every
-base point `b` in the intersection of the chart-`α` partition-of-unity tsupport
-with the chart-`α` Levi-Civita good set, and all chart indices `i j k l`,
-```
-|chartRiemannTensor g α i j k l (ϕ_α b)| ≤ C_g.
-```
-
-The constant is the finite maximum of the per-chart constants from
-`exists_chartRiemannData_uniform_bound_pouTsupport`, over the finite
-partition-of-unity index set. Since the chart-`α` tsupports cover `M`
-(`chartAtlasPOU_finset` is a finite cover), this is a genuinely
-uniform-over-`M` bound on every chart-coordinate component of the Levi-Civita
-curvature, with no chart-locality predicate and no chart-trivialisation
-operator-norm scalar. -/
 theorem exists_chartRiemannData_uniform_bound_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :

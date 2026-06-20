@@ -1,62 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 
-/-!
-# The covariant derivative of the Ricci tensor and the contracted second Bianchi identity
-
-For the Levi-Civita covariant derivative `cov := LeviCivita g` on the tangent bundle of a
-smooth closed Riemannian manifold `M`, this file builds the covariant-derivative API for the
-Ricci tensor (`ricciTensor`, `CurvatureOperator/RicciConnection`) and proves the **contracted
-second Bianchi identity** (the divergence of Ricci equals one half the differential of the
-scalar curvature),
-$$
-  \sum_i (\nabla_{B_i} \mathrm{Ric})(B_i, v) = \tfrac12\, \nabla_v \mathrm{scal} .
-$$
-
-## Main definitions
-
-* `nablaRicci g X v w x` — the covariant derivative of the Ricci tensor, contracted on its two
-  input slots, via the standard Leibniz formula
-  $$
-    (\nabla_X \mathrm{Ric})(v, w) := \nabla_X\bigl(\mathrm{Ric}(v, w)\bigr)
-      - \mathrm{Ric}(\nabla_X v, w) - \mathrm{Ric}(v, \nabla_X w),
-  $$
-  written with Mathlib's convention `cov.toFun σ x v ≅ (∇_v σ)(x)`. This mirrors `nablaCurvSec`
-  (`CurvatureOperator/SecondBianchi`) one trace down: the leading scalar derivative is the
-  directional derivative of `b ↦ ricciTensor g b (V b) (W b)`, and the two correction terms
-  subtract the Ricci tensor with `∇_X` inserted into each input slot.
-
-* `scalarCurv g x` — the scalar curvature, the `g`-orthonormal-frame trace of the Ricci tensor
-  `∑_i ricciTensor g x (B_i) (B_i)`, frame-independent by `ricciTensor_eq_orthonormal_trace`
-  applied to the trace of the Ricci endomorphism.
-
-## Main theorems
-
-* `nablaRicci_eq_frame_trace_nablaCurvSec` — **the trace bridge**: the covariant derivative of
-  the Ricci tensor is the `g`-orthonormal-frame trace of the covariant derivative of the
-  Riemann curvature,
-  $$
-    (\nabla_X \mathrm{Ric})(v, w)
-      = \sum_i g_x\bigl((\nabla_X R)(B_i, v) w,\, B_i\bigr),
-  $$
-  the `∇`-level lift of the value-level Ricci-trace collapse
-  `smoothOrthoFrame_riemannOp_trace_eq_ricci`.
-
-* `contracted_second_bianchi` — **the contracted second Bianchi identity**: tracing the cyclic
-  second Bianchi identity twice gives `div Ric = ½ d scal`.
-
-## Proof outline
-
-The trace bridge differentiates the neighbourhood identity
-`∑_i g_b(R(B_i, V) W, B_i) = ricciTensor g b (V b) (W b)` (valid where the smooth orthonormal
-frame `B_i = smoothOrthoFrame g x i` is a `g`-orthonormal basis) along `X`, distributing the
-directional derivative through the finite sum and each metric pairing via metric compatibility
-(`LeviCivita_isMetricCompatible`). The frame-correction terms `g(R(∇_X B_i, V) W, B_i)` pair off
-by the skew-symmetry of the orthonormal frame's covariant derivative
-(`smoothOrthoFrame_cov_skew`) against `g(R(B_i, V) W, ∇_X B_i)`, leaving exactly the trace of
-`nablaCurvSec`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter
@@ -76,24 +20,12 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The covariant derivative of the Ricci tensor**, contracted on its two input slots. For a
-smooth Riemannian metric `g` and tangent vector fields `X, V, W`, this is the standard Leibniz
-formula
-$$
-  (\nabla_X \mathrm{Ric})(v, w) := \nabla_X\bigl(\mathrm{Ric}(v, w)\bigr)
-    - \mathrm{Ric}(\nabla_X v, w) - \mathrm{Ric}(v, \nabla_X w),
-$$
-with `Mathlib`'s convention `cov.toFun σ x v ≅ (∇_v σ)(x)`. The leading term is the directional
-derivative of the smooth scalar `b ↦ ricciTensor g b (V b) (W b)` along `X(x)`; the two
-correction terms subtract the Ricci tensor with the covariant derivative `∇_X` inserted into
-each input slot. This mirrors `nablaCurvSec` one trace down. -/
 def nablaRicci (g : SmoothRiemannianMetric I M)
     (X V W : Π b : M, TangentSpace I b) (x : M) : ℝ :=
   extDerivFun (I := I) (fun b => ricciTensor (I := I) g b (V b) (W b)) x (X x)
     - ricciTensor (I := I) g x ((LeviCivita (I := I) g).toFun V x (X x)) (W x)
     - ricciTensor (I := I) g x (V x) ((LeviCivita (I := I) g).toFun W x (X x))
 
-/-- Definitional unfolding of `nablaRicci`. -/
 lemma nablaRicci_def (g : SmoothRiemannianMetric I M)
     (X V W : Π b : M, TangentSpace I b) (x : M) :
     nablaRicci (I := I) g X V W x =
@@ -111,10 +43,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **Orthonormal-frame vector expansion.** For a `g_x`-orthonormal basis `(B_i)` of `T_x M`,
-every tangent vector `u` expands as `u = ∑_i g_x(u, B_i) • B_i`. This is the direct
-reconstruction from the Parseval identity (`g_inner_eq_orthonormal_parseval_sum`) and the
-non-degeneracy of `g` (`SmoothRiemannianMetric.eq_of_inner_eq`). -/
 theorem orthonormal_frame_vector_expansion
     (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -140,24 +68,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The scalar curvature** of a smooth Riemannian metric `g`, the `g`-orthonormal-frame
-trace of the Ricci tensor at the smooth orthonormal frame `B_i := smoothOrthoFrame g x i`,
-$$
-  \mathrm{scal}(x) := \sum_i \mathrm{Ric}_x(B_i, B_i) .
-$$
-By `ricciTensor_eq_orthonormal_trace` this is the metric trace of the Ricci tensor and hence
-frame-independent (`scalarCurv_eq_orthonormal_trace`). -/
 def scalarCurv (g : SmoothRiemannianMetric I M) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     ricciTensor (I := I) g x (smoothOrthoFrame (I := I) g x i x)
       (smoothOrthoFrame (I := I) g x i x)
 
-/-- **Orthonormal-trace invariance of a symmetric bilinear form.** For two `g_x`-orthonormal
-bases `(B_i)`, `(C_i)` of `T_x M` and a symmetric continuous bilinear form `T`, the orthonormal
-traces agree: `∑_i T(C_i, C_i) = ∑_i T(B_i, B_i)`. The proof expands each `C_i` in the basis
-`(B_k)` (`orthonormal_frame_vector_expansion`), distributes `T` bilinearly, and collapses the
-inner sum `∑_i g_x(B_k, C_i) g_x(C_i, B_l) = g_x(B_k, B_l) = δ_{kl}` by the Parseval identity
-(`g_inner_eq_orthonormal_parseval_sum`). -/
 theorem symm_bilin_orthonormal_trace_invariant
     (g : SmoothRiemannianMetric I M) (x : M)
     (T : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -223,10 +138,6 @@ theorem symm_bilin_orthonormal_trace_invariant
   · intro l _ hlk
     rw [hB k l, if_neg (fun h => hlk h.symm)]; ring
 
-/-- **Frame-independence of the scalar curvature.** For any `g_x`-orthonormal basis `(B_i)` of
-`T_x M`, `scalarCurv g x = ∑_i ricciTensor g x (B_i) (B_i)`. The scalar curvature is the
-metric trace of the symmetric Ricci tensor (`ricciTensor_symm`), so its orthonormal trace is
-basis-independent (`symm_bilin_orthonormal_trace_invariant`). -/
 theorem scalarCurv_eq_orthonormal_trace
     (g : SmoothRiemannianMetric I M) (x : M)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -253,7 +164,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- `MDifferentiableAt` is closed under finite sums of scalar functions. -/
+
 private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M → ℝ) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ) (f i) x) :
     MDifferentiableAt I 𝓘(ℝ) (t.sum f) x := by
@@ -269,8 +180,7 @@ private lemma mdiffAt_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M �
 
 omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
   [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- The exterior derivative distributes over a finite sum of scalar functions, evaluated along a
-tangent direction `v`. (A `extDerivFun` analogue of `mfderiv_add`, by induction on the sum.) -/
+
 private lemma extDerivFun_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι → M → ℝ)
     {x : M} (v : TangentSpace I x)
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ) (f i) x) :
@@ -293,18 +203,6 @@ private lemma extDerivFun_finsetSum_aux {ι : Type*} (t : Finset ι) (f : ι →
         simpa [Pi.add_apply] using hadd
       rw [hstep, ih hft, Finset.sum_insert hit]
 
-/-- **The orthonormal-frame correction terms cancel.** For the smooth `g_x`-orthonormal frame
-`B_i := smoothOrthoFrame g x i` and tangent vector fields `X, V, W`, the frame-variation
-correction produced when commuting `∇_X` past the orthonormal trace vanishes:
-$$
-  \sum_i \Bigl[ g_x\bigl(R(\nabla_X B_i, V) W,\, B_i\bigr)
-    + g_x\bigl(R(B_i, V) W,\, \nabla_X B_i\bigr) \Bigr] = 0 .
-$$
-The proof expands `∇_X B_i = ∑_j a_{ij} B_j` (`orthonormal_frame_vector_expansion`, with
-`a_{ij} := g_x(∇_X B_i, B_j)`), reduces both sums to `∑_{i,j} a_{ij} T_{j i}` and
-`∑_{i,j} a_{ij} T_{i j}` with `T_{ij} := g_x(R(B_i, V) W, B_j)`, then cancels them using the
-skew-symmetry `a_{ij} = -a_{ji}` (`smoothOrthoFrame_cov_skew`) against the relabel-symmetry of
-the index swap. -/
 theorem orthonormal_frame_correction_sum_eq_zero
     (g : SmoothRiemannianMetric I M)
     {X V W : Π b : M, TangentSpace I b} {x : M} :
@@ -391,21 +289,6 @@ theorem orthonormal_frame_correction_sum_eq_zero
   rw [hcancel]
   ring
 
-/-- **The trace bridge.** The covariant derivative of the Ricci tensor is the
-`g`-orthonormal-frame trace of the covariant derivative of the Riemann curvature: for the
-smooth `g_x`-orthonormal frame `B_i := smoothOrthoFrame g x i` and smooth tangent vector fields
-`X, V, W`,
-$$
-  (\nabla_X \mathrm{Ric})(V, W)
-    = \sum_i g_x\bigl((\nabla_X R)(B_i, V) W,\, B_i\bigr) .
-$$
-This is the `∇`-level lift of the value-level Ricci-trace collapse
-`smoothOrthoFrame_riemannOp_trace_eq_ricci`. The leading scalar derivative is computed by
-differentiating the neighbourhood identity `Ric(V, W)(b) = ∑_i g_b(R(B_i, V) W, B_i)` through
-the finite sum and each metric pairing (`LeviCivita_isMetricCompatible`); the input-slot
-corrections of `nablaRicci` are matched by the Ricci-trace collapse applied to `∇_X V` and
-`∇_X W`, and the frame-variation corrections cancel
-(`orthonormal_frame_correction_sum_eq_zero`). -/
 theorem nablaRicci_eq_frame_trace_nablaCurvSec
     (g : SmoothRiemannianMetric I M)
     {X V W : Π b : M, TangentSpace I b} {x : M}
@@ -543,29 +426,15 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The covariant derivative of the scalar curvature**: the directional derivative of the
-scalar-curvature function `scalarCurv g`. Since `scalarCurv g` is a scalar function on `M`, its
-covariant derivative coincides with its exterior derivative
-`∇_X scal := X(scal) = extDerivFun (scalarCurv g) x (X x)`. -/
 def nablaScalar (g : SmoothRiemannianMetric I M)
     (X : Π b : M, TangentSpace I b) (x : M) : ℝ :=
   extDerivFun (I := I) (scalarCurv (I := I) g) x (X x)
 
-/-- Definitional unfolding of `nablaScalar`. -/
 lemma nablaScalar_def (g : SmoothRiemannianMetric I M)
     (X : Π b : M, TangentSpace I b) (x : M) :
     nablaScalar (I := I) g X x =
       extDerivFun (I := I) (scalarCurv (I := I) g) x (X x) := rfl
 
-/-- **The scalar-curvature frame correction vanishes.** For the smooth `g_x`-orthonormal frame
-`B_i := smoothOrthoFrame g x i` and a tangent field `X`,
-$$
-  \sum_i \mathrm{Ric}_x(\nabla_X B_i, B_i) = 0 .
-$$
-The proof expands `∇_X B_i = ∑_j a_{ij} B_j` (`orthonormal_frame_vector_expansion`), reducing
-the sum to `∑_{i,j} a_{ij} \mathrm{Ric}(B_j, B_i)`; this vanishes because `a_{ij}` is
-skew-symmetric (`smoothOrthoFrame_cov_skew`) while `Ric(B_j, B_i)` is symmetric
-(`ricciTensor_symm`). -/
 theorem ricci_orthonormal_frame_correction_eq_zero
     (g : SmoothRiemannianMetric I M)
     {X : Π b : M, TangentSpace I b} {x : M} :
@@ -622,18 +491,6 @@ theorem ricci_orthonormal_frame_correction_eq_zero
     ring
   linarith [hzero]
 
-/-- **The scalar trace bridge.** The covariant derivative of the scalar curvature is the
-orthonormal-frame trace of the covariant derivative of the Ricci tensor: for the smooth
-`g_x`-orthonormal frame `B_i := smoothOrthoFrame g x i` and a smooth tangent field `X`,
-$$
-  \nabla_X \mathrm{scal} = \sum_i (\nabla_X \mathrm{Ric})(B_i, B_i) .
-$$
-This is the `∇`-level lift of the definition `scalarCurv = ∑_i Ric(B_i, B_i)`. The leading
-scalar derivative is computed by differentiating the neighbourhood identity
-`scalarCurv g b = ∑_i Ric_b(B_i, B_i)` (`scalarCurv_eq_orthonormal_trace`,
-`smoothOrthoFrame_orthonormal`) through the finite sum; each per-frame term is the Leibniz
-expansion of `nablaRicci`, and the frame-variation corrections vanish
-(`ricci_orthonormal_frame_correction_eq_zero`). -/
 theorem nablaScalar_eq_frame_trace_nablaRicci
     (g : SmoothRiemannianMetric I M)
     {X : Π b : M, TangentSpace I b} {x : M} :
@@ -707,13 +564,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **Antisymmetry of `∇R` in its two vector-field slots.** For smooth fields `X, Y, Z, W`,
-$$
-  (\nabla_X R)(Y, Z) W = -(\nabla_X R)(Z, Y) W .
-$$
-This is the differentiated form of `riemannSec_swap`; it follows termwise from the
-antisymmetry of `riemannSec` in `(Y, Z)` together with the additivity of `cov.toFun` on the
-curvature section (`cov_toFun_neg`). -/
 theorem nablaCurvSec_swap23
     (g : SmoothRiemannianMetric I M)
     {X Y Z W : Π b : M, TangentSpace I b} {x : M}
@@ -740,15 +590,6 @@ theorem nablaCurvSec_swap23
       riemannSec_swap cov Z Y (covApply cov X W) x]
   abel
 
-/-- **Metric antisymmetry of `∇R` in its last two slots.** For smooth fields `X, Y, Z, W, U`,
-$$
-  g_x\bigl((\nabla_X R)(Y, Z) W,\, U\bigr) + g_x\bigl((\nabla_X R)(Y, Z) U,\, W\bigr) = 0 .
-$$
-This differentiates the pointwise metric antisymmetry `riemannOp_metric_skew` of the Riemann
-operator: differentiating `b ↦ g_b(R(Y,Z)W, U) + g_b(R(Y,Z)U, W) ≡ 0` along `X` via metric
-compatibility, the `∇R` terms remain while all four Riemann-correction pairs
-(`R(∇_X Y, Z)`, `R(Y, ∇_X Z)`, `R(Y, Z)∇_X W`, `R(Y, Z)W` paired with `∇_X U`) cancel by the
-pointwise metric antisymmetry. -/
 theorem nablaCurvSec_metric_skew45
     (g : SmoothRiemannianMetric I M)
     {X Y Z W U : Π b : M, TangentSpace I b} {x : M}
@@ -855,14 +696,6 @@ theorem nablaCurvSec_metric_skew45
       show ((LeviCivita (I := I) g).toFun W x) (X x) = covApply cov X W x from rfl] at hmf0
   linarith [hmf0, p1, p2, p3, p4]
 
-/-- **Pair symmetry of `∇R`.** For smooth fields `X, Y, Z, W, U`,
-$$
-  g_x\bigl((\nabla_X R)(Y, Z) W,\, U\bigr) = g_x\bigl((\nabla_X R)(W, U) Y,\, Z\bigr) .
-$$
-This differentiates the pointwise pair symmetry `riemannOp_inner_pair_symm` of the Riemann
-operator: differentiating `b ↦ g_b(R(Y,Z)W, U) - g_b(R(W,U)Y, Z) ≡ 0` along `X` via metric
-compatibility, the two `∇R` terms remain while the four Riemann-correction terms on each side
-match across by the pointwise pair symmetry. -/
 theorem nablaCurvSec_inner_pair_symm
     (g : SmoothRiemannianMetric I M)
     {X Y Z W U : Π b : M, TangentSpace I b} {x : M}
@@ -998,10 +831,6 @@ theorem nablaCurvSec_inner_pair_symm
   rw [q1, q2, q3, q4, r1, r2, r3, r5] at hmf0
   linarith [hmf0]
 
-/-- **The second Bianchi identity paired against a vector.** For smooth fields `X, Y, Z, W, U`,
-the cyclic sum of `g_x((\nabla_· R)(·, ·) W, U)` over the derivative and the two vector slots
-vanishes. This is `second_bianchi_levi_civita_metric` paired against `U` by additivity of
-`g.inner x`. -/
 theorem nablaCurvSec_bianchi_paired
     (g : SmoothRiemannianMetric I M)
     {X Y Z W U : Π b : M, TangentSpace I b} {x : M}
@@ -1030,20 +859,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The contracted second Bianchi identity (the divergence of Ricci equals one half the
-differential of the scalar curvature).** For a smooth Riemannian metric `g` on a closed
-manifold, the smooth `g_x`-orthonormal frame `B_j := smoothOrthoFrame g x j`, and a smooth
-tangent field `V`,
-$$
-  \sum_j (\nabla_{B_j} \mathrm{Ric})(B_j, V) = \tfrac12\, \nabla_V \mathrm{scal} .
-$$
-
-This is `div Ric = ½ d scal`. The proof rewrites both sides via the trace bridges
-(`nablaRicci_eq_frame_trace_nablaCurvSec`, `nablaScalar_eq_frame_trace_nablaRicci`) into
-double traces of `nablaCurvSec`, then performs the classical double contraction of the second
-Bianchi identity (`nablaCurvSec_bianchi_paired`) using the differentiated-curvature symmetries
-(`nablaCurvSec_swap23`, `nablaCurvSec_metric_skew45`, `nablaCurvSec_inner_pair_symm`) and a
-relabelling of the summation indices. -/
 theorem contracted_second_bianchi
     (g : SmoothRiemannianMetric I M)
     {V : Π b : M, TangentSpace I b} {x : M}

@@ -1,31 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SNabla
 
-/-!
-# Covariant derivative on the (r,s)-tensor bundle
-
-Given a `CovariantDerivative cov` on the tangent bundle `TM` (of class `C^∞`), this file
-constructs the bundled `CovariantDerivative` on the `(r, s)`-tensor bundle
-`fun x => TensorRSSpace r s I x = Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x`.
-
-## Strategy
-
-The (r,s)-tensor bundle is by definition the Hom-bundle from the `(0,r)`-tensor bundle
-to the `(0,s)`-tensor bundle. Using the recursive covariant derivative on the `(0,r)`-
-and `(0,s)`-tensor bundles (from `Tensor0SNabla.lean`), the induced covariant derivative
-on `Hom(T^0_r M, T^0_s M)` is obtained as a direct specialization of the generic
-Hom-bundle covariant derivative `homBundleCovariantDerivativeGen` (from `GenHomNabla.lean`).
-
-## Main declarations
-
-* `tensorRSCovariantDerivative r s cov` : the bundled `CovariantDerivative` on the
-  `(r, s)`-tensor bundle, built from the induced covariant derivatives on `(0,r)`- and
-  `(0,s)`-tensors.
-* `tensorRSCovariantDerivative_contMDiff r s cov` : smoothness instance.
-* `tensorRSCovariantDerivative_apply` : the pointwise product-rule formula
-  `(∇^{(r,s)}_v τ)(w) = (∇^{(0,s)}_v (τ w)) − τ (∇^{(0,r)}_v w)`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -47,9 +22,6 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- The `(r, s)`-tensor bundle covariant derivative obtained by specializing the generic
-Hom-bundle covariant derivative `homBundleCovariantDerivativeGen` to
-`U = Tensor0SSpace r` (source) and `V = Tensor0SSpace s` (target). -/
 noncomputable def tensorRSCovariantDerivative (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞] :
@@ -61,9 +33,6 @@ noncomputable def tensorRSCovariantDerivative (r s : ℕ)
     (Tensor0SNabla.tensor0SCovariantDerivative I M r cov)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
 
-/-- Smoothness of `tensorRSCovariantDerivative`: inherited from the `C^∞` instances of the
-underlying `(0,r)`- and `(0,s)`-tensor covariant derivatives via the generic Hom-bundle
-smoothness instance. -/
 noncomputable instance tensorRSCovariantDerivative_contMDiff (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞] :
@@ -74,18 +43,6 @@ noncomputable instance tensorRSCovariantDerivative_contMDiff (r s : ℕ)
     (Tensor0SNabla.tensor0SCovariantDerivative I M r cov)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
 
-/-- Pointwise characterization of `tensorRSCovariantDerivative`. For a smooth `(r,s)`-tensor
-section `τ` and a smooth `(0,r)`-tensor section `w`, the value of the covariant derivative
-applied bilinearly to a tangent vector `v ∈ T_xM` and `w x ∈ Tensor0SSpace r I x` is
-
-`cov_s (fun y => τ y (w y)) x v − τ x (cov_r w x v)`,
-
-which is the standard product-rule formula
-
-`(∇^(r,s)_v τ)(w x) = ∇^(0,s)_v (τ · w) − τ (∇^(0,r)_v w)`.
-
-Here `cov_r` and `cov_s` abbreviate the induced covariant derivatives on the `(0,r)`- and
-`(0,s)`-tensor bundles respectively. -/
 theorem tensorRSCovariantDerivative_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -106,12 +63,6 @@ theorem tensorRSCovariantDerivative_apply (r s : ℕ)
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov)
     τ w x v
 
-/-- Pointwise apply for `tensorRSCovariantDerivative`: with raw `(r, s)`-tensor
-section `τ` and raw `(0, r)`-tensor section `w`, both manifold-differentiable
-at `x` in total-space form, plus a tangent vector field `V_field`
-manifold-differentiable at `x`, the value of the bundled `(r, s)`-tensor
-covariant derivative applied bilinearly at `x` decomposes as the standard
-product-rule formula. -/
 theorem tensorRSCovariantDerivative_apply_of_mdifferentiableAt (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]

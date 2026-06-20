@@ -1,38 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 
-/-!
-# Pointwise-to-`L²` packaging for tensor fibre-norm bounds (valence-generic)
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this file isolates the
-purely analytic **pointwise-to-`L²` packaging** that turns a *pointwise* intrinsic Riemannian
-fibre-norm bound on a smooth compactly-supported tensor section into the corresponding `L²`
-(semi)norm bound, at arbitrary covariant valence and for an arbitrary finite family of jet terms.
-
-The engine is the fibre-norm bridge `tensorL2Norm_sq_eq_integral_riemannianFiberNormSq`
-(`‖S‖² = ∫ rfns(S)`, identifying the squared metric `L²` norm with the integral of the intrinsic
-Riemannian fibre norm), combined with integral monotonicity, additivity, and the elementary
-arithmetic inequality `∑ⱼ pⱼ² ≤ (∑ⱼ pⱼ)²` for nonnegative `pⱼ`. No curvature content is involved
-here; this is the analytic packaging that the genuine curvature fibre-norm bounds feed.
-
-## Main results
-
-* `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three` — the three-term packaging: from a
-  pointwise bound `rfns(Curv)(x) ≤ C² · (rfns(A) + rfns(B) + rfns(D))(x)` (every `x`, `C ≥ 0`),
-  conclude `‖Curv‖ ≤ C · (‖A‖ + ‖B‖ + ‖D‖)`. The three jet terms `A, B, D` may carry distinct
-  valences.
-
-* `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum` — the finite-sum packaging: from a pointwise
-  bound `rfns(Curv)(x) ≤ C² · (∑_{i < N} rfns(Tᵢ)(x))` (every `x`, `C ≥ 0`), conclude
-  `‖Curv‖ ≤ C · ∑_{i < N} ‖Tᵢ‖`, where `Tᵢ : SmoothCcTensor g 0 (vᵢ)` is a family of jet terms with
-  per-index valences `vᵢ`.
-
-## Sign / convention
-
-All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq`; the metric `L²`
-(semi)norm of a `SmoothCcTensor` is `tensorL2Norm g 0 s S.toFun = ‖S‖`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -65,9 +33,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
-/-- The squared metric `L²` norm of a `SmoothCcTensor` is the integral of its intrinsic fibre
-norm. This is the fibre-norm bridge `tensorL2Norm_sq_eq_integral_riemannianFiberNormSq` read on
-the underlying section of a `SmoothCcTensor` (`S.toFun = fun x => toModel (S.toSection x)`). -/
+
 theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Norm (I := I) (M := M) g 0 s S.toFun ^ 2 =
@@ -79,10 +45,7 @@ theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
   exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g 0 s _
 
 set_option linter.unusedSectionVars false in
-/-- **Integrability of the intrinsic fibre norm.** For a smooth compactly-supported
-`(r, s)`-tensor section `S`, the map `x ↦ riemannianFiberNormSq g r s x (S.toSection x)` is
-Bochner-integrable against the Riemannian volume measure. Transported from `MemL2` of its model
-field through the fibre-norm bridge `riemannianFiberNormSq_eq_tensorInnerPointwise`. -/
+
 theorem integrable_riemannianFiberNormSq_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     MeasureTheory.Integrable
@@ -99,19 +62,7 @@ theorem integrable_riemannianFiberNormSq_toSection
     (S.toSection x)).symm
 
 set_option linter.unusedSectionVars false in
-/-- **Three-term pointwise-to-`L²` packaging.** Let `A : SmoothCcTensor g 0 a`,
-`B : SmoothCcTensor g 0 b`, `D : SmoothCcTensor g 0 d`, `Curv : SmoothCcTensor g 0 c`, and let
-`C ≥ 0`. If, for every `x`, the intrinsic fibre norm of `Curv` at `x` is bounded by `C²` times the
-sum of the intrinsic fibre norms of `A`, `B`, `D`:
-```
-rfns(Curv)(x) ≤ C² · ( rfns(A)(x) + rfns(B)(x) + rfns(D)(x) ),
-```
-then the metric `L²` (semi)norms satisfy
-```
-‖Curv‖ ≤ C · ( ‖A‖ + ‖B‖ + ‖D‖ ).
-```
-This is the analytic packaging that lifts a genuine pointwise curvature fibre-norm bound to the
-`L²` operator bound. -/
+
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three
     (g : SmoothRiemannianMetric I M) {a b c d : ℕ}
     (A : SmoothCcTensor g 0 a) (B : SmoothCcTensor g 0 b) (D : SmoothCcTensor g 0 d)
@@ -218,11 +169,7 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C * (nA + nB + nD))]
 
 set_option linter.unusedSectionVars false in
-/-- **Two-term pointwise-to-`L²` packaging.** Let `A : SmoothCcTensor g 0 a`,
-`B : SmoothCcTensor g 0 b`, `Curv : SmoothCcTensor g 0 c`, and let `C ≥ 0`. If
-`rfns(Curv)(x) ≤ C² · ( rfns(A)(x) + rfns(B)(x) )` for every `x`, then `‖Curv‖ ≤ C · (‖A‖ + ‖B‖)`.
-This is the two-term specialization of `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three`
-(taking the third term to be the zero tensor, whose fibre norm vanishes). -/
+
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
     (g : SmoothRiemannianMetric I M) {a b c : ℕ}
     (A : SmoothCcTensor g 0 a) (B : SmoothCcTensor g 0 b)
@@ -244,19 +191,7 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
     rw [hz, add_zero]; exact hpt x
 
 set_option linter.unusedSectionVars false in
-/-- **Finite-sum pointwise-to-`L²` packaging.** Let `N : ℕ`, let `v : ℕ → ℕ` be a per-index
-valence assignment, let `T : ∀ i, SmoothCcTensor g 0 (v i)` be a finite family of jet terms, let
-`Curv : SmoothCcTensor g 0 c`, and let `C ≥ 0`. If, for every `x`, the intrinsic fibre norm of
-`Curv` at `x` is bounded by `C²` times the sum of the intrinsic fibre norms of the `Tᵢ`,
-```
-rfns(Curv)(x) ≤ C² · ∑_{i < N} rfns(Tᵢ)(x),
-```
-then the metric `L²` (semi)norms satisfy
-```
-‖Curv‖ ≤ C · ∑_{i < N} ‖Tᵢ‖.
-```
-This is the `N`-term analytic packaging that lifts a genuine pointwise curvature-derivative
-fibre-norm bound to the `L²` operator bound used by the all-order commutator-defect recursion. -/
+
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
     (g : SmoothRiemannianMetric I M) {c : ℕ} (N : ℕ) (v : ℕ → ℕ)
     (T : ∀ i, SmoothCcTensor g 0 (v i)) (Curv : SmoothCcTensor g 0 c) (C : ℝ) (hC : 0 ≤ C)
@@ -316,7 +251,7 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
       _ = C ^ 2 * ∑ i ∈ Finset.range N, fi i ^ 2 := by
             congr 1
             exact Finset.sum_congr rfl (fun i _ => (hbridge_i i).symm)
-  -- `∑ fi² ≤ (∑ fi)²` for nonnegative `fi` (square of a sum dominates the sum of squares).
+  
   have hsum_sq_le : ∑ i ∈ Finset.range N, fi i ^ 2 ≤ (∑ i ∈ Finset.range N, fi i) ^ 2 := by
     have hsq_sum : (∑ i ∈ Finset.range N, fi i) ^ 2 =
         ∑ i ∈ Finset.range N, fi i * (∑ j ∈ Finset.range N, fi j) := by

@@ -2,58 +2,6 @@ import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
-/-!
-# The DeTurck vector field as the metric trace of the connection-difference tensor
-
-Given two smooth Riemannian metrics `g` and `g'` on a smooth manifold `M`, the
-connection-difference tensor `connDiff g g'` is a genuine `(1,2)`-tensor field
-(see `ConnectionDifference.lean`).  The **DeTurck vector field** is its metric
-`g`-trace: contracting the upper-`g` inverse metric `g(x)⁻¹ ∈ T_xM ⊗ T_xM` into
-the two lower slots of `connDiff g g' x` produces a tangent vector at every point.
-
-In any chart with coordinate frame `{e_j}` and inverse Gram matrix `G^{jk}` of `g`,
-the DeTurck vector field reads
-$$
-  W(x) = \sum_{j,k} G^{jk}(x)\; A\bigl(e_j(x), e_k(x)\bigr),
-$$
-where `A = connDiff g g' x`.  Since `∑_{j,k} G^{jk} e_j ⊗ e_k` is the intrinsic
-inverse metric `g(x)⁻¹` and `A` is a genuine (chart-free) tensor, the resulting
-vector is independent of the chart.
-
-This file defines `W` purely pointwise: a chart-at-a-fixed-basepoint version
-`deTurckChartLocal`, the canonical chart-at-the-point version `deTurckFun`, and the
-chart-independence theorem `deTurckChartLocal_eq_deTurckFun` linking them.  No
-smoothness statements appear here — that is a separate development.
-
-## Construction
-
-For a fixed basepoint `α : M`, `deTurckChartLocal g g' α x` is the chart-`α`
-coordinate sum displayed above, using the chart-`α` inverse Gram matrix
-`chartInvGramMatrix g α x` and the chart-`α` coordinate frame
-`chartBasisVecFiber α j x`.  The canonical `deTurckFun g g' x` specialises the
-basepoint to `x` itself: `deTurckFun g g' x = deTurckChartLocal g g' x x`.
-
-Chart-independence is proved by expanding the chart-`α` coordinate frame in the
-fixed model basis through the change-of-basis matrix, and using the Gram-matrix
-transformation law `Gα = P · Gx · Pᵀ` together with the algebraic identity
-`Pᵀ · (P · Gx · Pᵀ)⁻¹ · P = Gx⁻¹`.  The outcome is that, for every chart-`α`
-whose base set contains `x`, `deTurckChartLocal g g' α x` equals one and the same
-expression in the model basis — the model-basis metric trace.
-
-## Main definitions
-
-* `deTurckChartLocal g g' α x` — the chart-`α` representative of the DeTurck
-  vector field at `x`.
-* `deTurckFun g g' x` — the canonical, chart-independent DeTurck vector field as a
-  plain function `M → TangentSpace I x`, defined as `deTurckChartLocal g g' x x`.
-
-## Main results
-
-* `deTurckChartLocal_eq_deTurckFun` — chart-independence: at every point of the
-  chart-`α` base set, `deTurckChartLocal g g' α x = deTurckFun g g' x`.
-* `deTurckFun_self` — the DeTurck vector field of a metric with itself vanishes.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -73,17 +21,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- The **DeTurck vector field**, computed in the chart at a fixed basepoint `α`.
-
-At each point `x : M` this is the chart-`α` metric trace of the
-connection-difference tensor `connDiff g g'`:
-$$
-  \sum_{j,k} G^{jk}(x)\; A\bigl(e_j(x), e_k(x)\bigr),
-$$
-where `G^{jk} = chartInvGramMatrix g α x` is the inverse Gram matrix of `g` in
-the chart-`α` coordinate frame `e_j = chartBasisVecFiber α j` and
-`A = connDiff g g' x`.  The chart-independence of this construction is the
-content of `deTurckChartLocal_eq_deTurckFun`. -/
 def deTurckChartLocal (g g' : SmoothRiemannianMetric I M) (α : M) (x : M) :
     TangentSpace I x :=
   ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -92,7 +29,6 @@ def deTurckChartLocal (g g' : SmoothRiemannianMetric I M) (α : M) (x : M) :
         (chartBasisVecFiber (I := I) α j x)
         (chartBasisVecFiber (I := I) α k x)
 
-/-- Unfolding lemma for `deTurckChartLocal`. -/
 lemma deTurckChartLocal_def (g g' : SmoothRiemannianMetric I M) (α : M) (x : M) :
     deTurckChartLocal (I := I) g g' α x =
       ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -101,9 +37,6 @@ lemma deTurckChartLocal_def (g g' : SmoothRiemannianMetric I M) (α : M) (x : M)
             (chartBasisVecFiber (I := I) α j x)
             (chartBasisVecFiber (I := I) α k x) := rfl
 
-/-- Expansion of a continuous bilinear map valued in a topological module over a
-pair of finite sums of scaled vectors:
-`B (∑ p, a_p • u_p) (∑ q, b_q • w_q) = ∑ p, ∑ q, (a_p * b_q) • B (u_p) (w_q)`. -/
 private lemma clm_bilinear_expand_two_sums_vector
     {x : M}
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -125,8 +58,6 @@ private lemma clm_bilinear_expand_two_sums_vector
   intro q _
   rw [map_smul, smul_smul]
 
-/-- Scalar-valued bilinear expansion against two finite sums, specialised to
-`g.inner x`.  Used inside the Gram transformation law. -/
 private lemma clm_bilinear_expand_two_sums_scalar
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (a b : Fin n → ℝ) (u w : Fin n → TangentSpace I x) :
@@ -149,18 +80,12 @@ private lemma clm_bilinear_expand_two_sums_scalar
   rw [map_smul, smul_eq_mul]
   ring
 
-/-- The change-of-basis matrix from the chart-`α` coordinate frame at `x` to the
-fixed model basis: the `(i, k)` entry is the `e_k`-coordinate of
-`chartBasisVecFiber α i x` in the basis `chartModelBasis E`. -/
 private def deTurckCobMatrix (α : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i k =>
     (chartModelBasis E).repr
       ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k
 
-/-- Recovery formula: `chartBasisVecFiber α i x = ∑ k, P_{ik} • (chartModelBasis E k)`,
-where `P = deTurckCobMatrix α x`.  This is `Module.Basis.sum_repr` for the model
-basis. -/
 private lemma chartBasisVecFiber_eq_sum_model (α : M) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x) =
@@ -173,7 +98,6 @@ private lemma chartBasisVecFiber_eq_sum_model (α : M) (x : M)
   exact (((chartModelBasis E).sum_repr
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x))).symm
 
-/-- The change-of-basis matrix is the transpose of `Module.Basis.toMatrix`. -/
 private lemma deTurckCobMatrix_eq_toMatrix_transpose (α : M) (x : M) :
     deTurckCobMatrix (I := I) α x =
       ((chartModelBasis E).toMatrix
@@ -184,7 +108,6 @@ private lemma deTurckCobMatrix_eq_toMatrix_transpose (α : M) (x : M) :
   ext i k
   rw [Matrix.transpose_apply, Module.Basis.toMatrix_apply, Matrix.of_apply]
 
-/-- The change-of-basis matrix is invertible at chart-`α` base-set points. -/
 private lemma deTurckCobMatrix_isUnit (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     IsUnit (deTurckCobMatrix (I := I) α x) := by
@@ -207,8 +130,6 @@ private lemma deTurckCobMatrix_isUnit (α : M) {x : M}
   rw [Matrix.isUnit_iff_isUnit_det] at hbase_unit ⊢
   rwa [Matrix.det_transpose]
 
-/-- The model Gram matrix `chartGramMatrix g x x` is the Gram matrix of `g.inner x`
-in the fixed model basis. -/
 private lemma chartGramMatrix_self_eq_model (g : SmoothRiemannianMetric I M) (x : M)
     (k l : Fin (Module.finrank ℝ E)) :
     chartGramMatrix (I := I) g x x k l =
@@ -217,10 +138,6 @@ private lemma chartGramMatrix_self_eq_model (g : SmoothRiemannianMetric I M) (x 
   rw [chartGramMatrix_apply, chartBasisVecFiber_self (I := I) x k,
     chartBasisVecFiber_self (I := I) x l]
 
-/-- **Gram-matrix transformation law.** The chart-`α` Gram matrix at `x` is the
-conjugate of the model Gram matrix `chartGramMatrix g x x` by the change-of-basis
-matrix `P = deTurckCobMatrix α x`:
-`Gα = P · Gx · Pᵀ`.  This holds for every `x`. -/
 private lemma chartGramMatrix_eq_cob_conj (g : SmoothRiemannianMetric I M)
     (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =
@@ -255,10 +172,6 @@ private lemma chartGramMatrix_eq_cob_conj (g : SmoothRiemannianMetric I M)
   rw [Matrix.transpose_apply, chartGramMatrix_self_eq_model (I := I) g x k l]
   ring
 
-/-- The metric trace of `connDiff g g'` computed in the fixed model basis: the
-sum `∑_{p,q} (Gx⁻¹)_{pq} • connDiff g g' x (e_p) (e_q)`, where `Gx⁻¹` is the
-inverse model Gram matrix and `{e_p}` is the model basis.  This expression
-depends only on `x` — it involves no chart basepoint. -/
 private def deTurckModelTrace (g g' : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x :=
   ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
@@ -267,8 +180,6 @@ private def deTurckModelTrace (g g' : SmoothRiemannianMetric I M) (x : M) :
         ((chartModelBasis E) p : TangentSpace I x)
         ((chartModelBasis E) q : TangentSpace I x)
 
-/-- The conjugation identity `Pᵀ · (P · Gx · Pᵀ)⁻¹ · P = Gx⁻¹` for an invertible
-matrix `P` and an arbitrary matrix `Gx`. -/
 private lemma transpose_mul_conj_inv_mul
     {n : ℕ} (P Gx : Matrix (Fin n) (Fin n) ℝ)
     (hP : IsUnit P) :
@@ -285,13 +196,6 @@ private lemma transpose_mul_conj_inv_mul
   rw [Matrix.mul_nonsing_inv _ hPtdet, Matrix.nonsing_inv_mul _ hPdet,
     Matrix.one_mul, Matrix.mul_one]
 
-/-- For `x` in the chart-`α` base set, the chart-`α` representative of the DeTurck
-vector field equals the model-basis metric trace.
-
-The proof expands each chart-`α` coordinate frame vector in the model basis,
-collects the resulting double sum, and applies the Gram-transformation law
-`Gα = P · Gx · Pᵀ` together with the conjugation identity
-`Pᵀ · (Gα)⁻¹ · P = Gx⁻¹`. -/
 private lemma deTurckChartLocal_eq_modelTrace (g g' : SmoothRiemannianMetric I M)
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -388,35 +292,13 @@ private lemma deTurckChartLocal_eq_modelTrace (g g' : SmoothRiemannianMetric I M
           rw [hconj]
     _ = deTurckModelTrace (I := I) g g' x := rfl
 
-/-- The **DeTurck vector field** of two smooth Riemannian metrics `g` and `g'`, as
-a plain function `M → TangentSpace I x`.
-
-It is the canonical, chart-independent metric `g`-trace of the
-connection-difference tensor `connDiff g g'`, obtained by specialising the chart
-basepoint to the evaluation point itself: `deTurckFun g g' x = deTurckChartLocal
-g g' x x`.  Chart-independence — that this agrees with the chart-`α`
-representative for *any* chart `α` whose base set contains `x` — is
-`deTurckChartLocal_eq_deTurckFun`. -/
 def deTurckFun (g g' : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x :=
   deTurckChartLocal (I := I) g g' x x
 
-/-- Unfolding lemma for `deTurckFun`. -/
 lemma deTurckFun_def (g g' : SmoothRiemannianMetric I M) (x : M) :
     deTurckFun (I := I) g g' x = deTurckChartLocal (I := I) g g' x x := rfl
 
-/-- **Chart-independence of the DeTurck vector field.**
-
-For every chart basepoint `α` and every point `x` in the chart-`α` base set, the
-chart-`α` representative `deTurckChartLocal g g' α x` agrees with the canonical
-DeTurck vector field `deTurckFun g g' x`.
-
-Both sides equal the model-basis metric trace `deTurckModelTrace g g' x`: the
-left side by `deTurckChartLocal_eq_modelTrace` applied to the chart at `α`, and
-the right side by the same lemma applied to the chart at `x` itself (whose base
-set always contains `x`).  This expresses that the metric trace
-`∑_{j,k} G^{jk} e_j ⊗ e_k` contracted into the genuine tensor `connDiff g g'`
-yields a chart-independent tangent vector. -/
 theorem deTurckChartLocal_eq_deTurckFun (g g' : SmoothRiemannianMetric I M)
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -428,9 +310,6 @@ theorem deTurckChartLocal_eq_deTurckFun (g g' : SmoothRiemannianMetric I M)
   rw [deTurckChartLocal_eq_modelTrace (I := I) g g' α hx,
     deTurckChartLocal_eq_modelTrace (I := I) g g' x hbase_x]
 
-/-- Variant of `deTurckChartLocal_eq_deTurckFun` phrased with the chart-source
-membership hypothesis `x ∈ (chartAt H α).source`, which is definitionally the
-trivialization base set. -/
 theorem deTurckChartLocal_eq_deTurckFun_of_mem_source
     (g g' : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -438,9 +317,6 @@ theorem deTurckChartLocal_eq_deTurckFun_of_mem_source
   refine deTurckChartLocal_eq_deTurckFun (I := I) g g' α ?_
   rwa [trivializationAt_baseSet_eq_chartAt_source]
 
-/-- The chart-`α` representative of the DeTurck vector field of a metric with
-itself vanishes identically: every term carries the factor
-`connDiff g g x (·) (·) = 0`. -/
 lemma deTurckChartLocal_self (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     deTurckChartLocal (I := I) g g α x = (0 : TangentSpace I x) := by
   classical
@@ -449,10 +325,6 @@ lemma deTurckChartLocal_self (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
   rw [connDiff_self (I := I) g]
   simp
 
-/-- **The DeTurck vector field of a metric with itself vanishes identically.**
-
-When `g = g'` the connection-difference tensor `connDiff g g` is the zero tensor,
-so its metric trace is the zero vector. -/
 @[simp]
 theorem deTurckFun_self (g : SmoothRiemannianMetric I M) :
     deTurckFun (I := I) g g = fun x => (0 : TangentSpace I x) := by
@@ -460,7 +332,6 @@ theorem deTurckFun_self (g : SmoothRiemannianMetric I M) :
   rw [deTurckFun_def]
   exact deTurckChartLocal_self (I := I) g x x
 
-/-- Pointwise form of `deTurckFun_self`. -/
 theorem deTurckFun_self_apply (g : SmoothRiemannianMetric I M) (x : M) :
     deTurckFun (I := I) g g x = (0 : TangentSpace I x) := by
   rw [deTurckFun_self]

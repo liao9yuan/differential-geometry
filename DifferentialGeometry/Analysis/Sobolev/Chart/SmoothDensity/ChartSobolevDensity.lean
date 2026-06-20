@@ -7,30 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 
-/-!
-# Smooth-density theorem for the chart-Sobolev space `W^{1,p}_chart(M)`
-
-For a closed manifold `M` modelled on a finite-dimensional real inner-product
-space `E`, smooth functions are dense in the chart-Sobolev space
-`W^{1,p}_chart(M)`: for any `u ∈ W^{1,p}_chart(M)` and `ε > 0`, there is a
-smooth function `v : M → ℝ` with `wkpNormChart g 1 p (u - v) ≤ ENNReal.ofReal ε`.
-
-The strategy combines:
-
-1. **Per-chart Euclidean smooth approximation** via the existing density theorem
-   `MemWkp.exists_smooth_compactSupport_approx` applied to each chart-pushed
-   function `chartPushed g α u`.
-2. **Chart-pullback global smoothness** via `chartPullback_contMDiff` to lift
-   each Euclidean-side approximant to a smooth function on `M`.
-3. **Chart-transition quantitative chain rule** via
-   `chartTransition_smoothDiffeoBoundedAtOrder` and the smooth chain rule
-   `SmoothDiffeoBoundedAtOrder.wkpNorm_comp_smooth_le`. A non-smooth
-   quantitative chain rule (helper `wkpNorm_comp_le` proved here) extends this
-   to general `MemWkp` inputs by smooth-density and Banach completeness.
-4. **Partition-of-unity decomposition** of `u - v` chart-by-chart into a finite
-   sum of contributions controlled by the quantitative chain rule.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -46,8 +22,6 @@ variable {d : ℕ}
 
 local notation "EucD" => EuclideanSpace ℝ (Fin d)
 
-/-- Public re-derivation: the chosen weak partial of a smooth function with a
-`MemW1p` hypothesis agrees a.e. with the classical partial. -/
 private theorem chosenWeakPartial_smooth_ae_pub
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set EucD} (hΩ_open : IsOpen Ω)
     {ψ : EucD → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -74,8 +48,6 @@ private theorem chosenWeakPartial_smooth_ae_pub
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_loc h_classical_loc
 
-/-- Public re-derivation: smooth + compactly supported + tsupport ⊆ Ω implies
-`MemWkp k p`. -/
 theorem MemWkp_of_smooth_compactSupport_pub
     {Ω : Set EucD} (hΩ_open : IsOpen Ω)
     {ψ : EucD → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -125,18 +97,6 @@ theorem MemWkp_of_smooth_compactSupport_pub
 
 variable [NeZero d]
 
-/-- **Non-smooth quantitative chain rule** for `SmoothDiffeoBoundedAtOrder`.
-For `u ∈ W^{k,p}(Ω')` with compact support `tsupport u ⊆ Ω'`, where `1 ≤ p < ∞`
-and `k ≤ kmax`:
-
-  `wkpNorm k p (u ∘ Φ.toFun) Ω ≤ ENNReal.ofReal (Φ.wkpComp_const' k p)
-    * wkpNorm k p u Ω'`.
-
-The proof approximates `u` by smooth compactly supported `(ψ_n)`, applies the
-smooth quantitative bound `Φ.wkpNorm_comp_smooth_le` to each `ψ_n`, observes
-that `(ψ_n ∘ Φ)` is `wkpNorm`-Cauchy, takes a limit `vΦ` via Banach
-completeness (`MemWkp.exists_limit_of_wkpNorm_cauchy`), identifies it a.e.
-with `u ∘ Φ`, and uses the triangle inequality + tendsto. -/
 theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
     {kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -640,8 +600,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The chart-pushed image of `chartPullback I α χ` at chart `α`: the same as
-`ρ_α · χ` on `chartTargetEuclid α`. -/
 private lemma chartPushed_chartPullback_self
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (χ : EuclN → ℝ) {y : EuclN}

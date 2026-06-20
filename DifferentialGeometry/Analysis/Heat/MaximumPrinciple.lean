@@ -9,41 +9,6 @@ import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Weak parabolic maximum principle on a closed Riemannian manifold
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and a
-function `u : ℝ → M → ℝ` which is smooth in space at every fixed time, jointly
-continuous in `(t, x)` on `[0, T] × M`, satisfies the heat sub-solution
-inequality `D_t u(t, x) ≤ Δ_g (u t)(x)` for `(t, x) ∈ (0, T) × M`, and the
-initial bound `u(0, x) ≤ 0`, we prove `u(t, x) ≤ 0` on the whole closed
-parabolic cylinder `[0, T] × M`.
-
-The proof is the classical perturbation argument. For `δ > 0` and
-`η ∈ (0, T)`, work with `v_δ := u - δ·(t + 1)` on the compact set
-`[0, T - η] × M`. By compactness `v_δ` attains its max somewhere; if the max
-value were positive, the maximizing point cannot be at `t = 0` (where
-`v_δ ≤ -δ < 0`), and at any interior point `(t₀, x₀)` we would have
-`D_t v_δ(t₀, x₀) ≥ 0` and `Δ_g v_δ(t₀, ·)(x₀) ≤ 0`, contradicting
-`D_t v_δ - Δ_g v_δ ≤ -δ < 0`. Hence `u ≤ δ(t + 1)` on `[0, T - η] × M`.
-Letting `η → 0` (using joint continuity of `u`) and then `δ → 0` gives the
-conclusion on `[0, T] × M`.
-
-The auxiliary fact
-
-  **Δ ≤ 0 at a spatial maximum**: If `f : M → ℝ` is smooth and attains its
-  maximum at `x₀`, then `Δ_g f(x₀) ≤ 0`,
-
-is proved as `laplacian_nonpos_at_max` and is independent of the heat-equation
-argument.
-
-## Main results
-
-* `laplacian_nonpos_at_max` : the spatial-maximum bound `Δ_g f x₀ ≤ 0`.
-* `weak_maximum_principle_of_closed` : the weak parabolic maximum principle on
-  a closed Riemannian manifold.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter SignType
@@ -62,10 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- Pure linear-algebra: spectral entry formula for a Hermitian real matrix.
-For a real Hermitian matrix `A`, the entries decompose as
-`A_{ij} = ∑ k, U_{ik} * λ_k * U_{jk}`, where `U` is the eigenvector unitary
-and `λ` are the eigenvalues. -/
 private lemma isHermitian_real_entry
     {n : Type*} [Fintype n] [DecidableEq n]
     {A : Matrix n n ℝ} (hA : A.IsHermitian) (i j : n) :
@@ -101,9 +62,6 @@ private lemma isHermitian_real_entry
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-/-- For a positive semi-definite real matrix `M` and a real matrix `H` whose
-quadratic form is non-positive on every vector, the contracted sum
-`∑ i j, M i j * H i j` is non-positive. -/
 private lemma sum_posSemidef_mul_neg_semidef_le_zero
     {n : Type*} [Fintype n]
     {M : Matrix n n ℝ} (hM : M.PosSemidef)
@@ -158,8 +116,6 @@ private lemma sum_posSemidef_mul_neg_semidef_le_zero
   rw [h_quad]
   exact mul_nonpos_of_nonneg_of_nonpos (h_lambda_nn k) (hH_neg _)
 
-/-- If `g : ℝ → ℝ` is `C²` at `0` and has a local max at `0`, then the second
-derivative at `0` is non-positive. -/
 private lemma deriv_deriv_nonpos_of_isLocalMax_at_zero
     {g : ℝ → ℝ} (hg_max : IsLocalMax g 0)
     (hg_C2 : ContDiffAt ℝ 2 g 0) :
@@ -226,9 +182,6 @@ private lemma deriv_deriv_nonpos_of_isLocalMax_at_zero
   have ht_lt : g 0 < g t := hMono (left_mem_Icc.mpr (le_of_lt hε_pos)) ht_in_Icc ht_pos
   linarith
 
-/-- The second Fréchet derivative of a `C²` function `ftilde : E → ℝ` at a local
-maximum `y₀` satisfies `(fderiv ℝ (fderiv ℝ ftilde) y₀ v) v ≤ 0` for every
-direction `v : E`. -/
 private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
     {ftilde : E → ℝ} {y₀ : E} (hf_max : IsLocalMax ftilde y₀)
     (hf_C2 : ContDiffAt ℝ 2 ftilde y₀) (v : E) :
@@ -318,9 +271,6 @@ private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
   rw [h_deriv_deriv_g_eq, h_chain.deriv] at h_g_2nd
   exact h_g_2nd
 
-/-- Pointwise expansion: `(fderiv ℝ (fderiv ℝ ftilde) y₀ v) v = ∑_{ij}
-v(i) · v(j) · ∂_i ∂_j ftilde(y₀)`, where `v(i) := (b.repr v) i` are the components
-of `v` in the canonical basis `b := chartModelBasis E`. -/
 private lemma sndFDeriv_apply_self_eq_sum_of_basis
     {ftilde : E → ℝ} {y₀ : E} (hf_diff : DifferentiableAt ℝ (fderiv ℝ ftilde) y₀)
     (v : E) :
@@ -398,9 +348,6 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
   intros j _
   rw [h_outer_inner i j]
 
-/-- For a smooth function `f` on a closed manifold attaining its max at
-`x_max`, the chart-Hessian matrix `H_{ij} = chartHessianTensor g x_max f i j x_max`
-satisfies `∑_{ij} c_i c_j H_{ij} ≤ 0` for every `c : Fin n → ℝ`. -/
 private lemma chartHessianTensor_quad_form_nonpos_at_max
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -503,9 +450,6 @@ private lemma chartHessianTensor_quad_form_nonpos_at_max
   rw [h2]
   exact sndFDeriv_apply_self_nonpos_of_isLocalMax hftilde_max hftilde_C2_at v
 
-/-- **Δ ≤ 0 at a spatial maximum.** Let `(M, g)` be a closed Riemannian
-manifold and `f : M → ℝ` smooth. If `f` attains its maximum at `x_max`, then
-`Δ_g f(x_max) ≤ 0`. -/
 theorem laplacian_nonpos_at_max
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -563,17 +507,6 @@ section MaxPrinciple
 
 variable [I.Boundaryless] [T2Space M] [CompactSpace M]
 
-/-- **Weak parabolic maximum principle on a closed manifold.**
-A heat sub-solution `u : ℝ → M → ℝ` that is `≤ 0` at the initial time `t = 0`
-stays `≤ 0` on the whole closed parabolic cylinder `[0, T] × M`.
-
-The manifold `M` is closed: compact, boundaryless and Hausdorff (from the
-section's `[I.Boundaryless] [T2Space M] [CompactSpace M]`). The function `u` is
-assumed: spatially smooth, `ContMDiff I 𝓘(ℝ, ℝ) ∞ (u t)` for every `t`; jointly
-continuous on `[0, T] × M` (`hu_cont`); time-differentiable per point with
-derivative `Du t x` for `(t, x) ∈ (0, T) × M` (`h_t_diff`); a heat sub-solution,
-`Du t x ≤ Δ_g (u t) x` on `(0, T) × M` (`h_ineq`); and `≤ 0` at `t = 0`
-(`h_init`). The conclusion is `u t x ≤ 0` for every `(t, x) ∈ [0, T] × M`. -/
 theorem weak_maximum_principle_of_closed
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (u : ℝ → M → ℝ)

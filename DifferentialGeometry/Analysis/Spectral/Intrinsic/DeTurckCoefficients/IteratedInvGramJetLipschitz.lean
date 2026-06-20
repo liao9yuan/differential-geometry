@@ -2,36 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Iter
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartRicciStructuralDifference
 
-/-!
-# All-order chart-jet Lipschitz dependence of the inverse chart-Gram matrix
-
-The inverse chart-Gram entry `chartInvGramOnE g α k l` depends on the metric `g` rationally,
-through matrix inversion, and its difference between two metrics is the single-Gram-difference
-perturbation
-`G₁^{kl} − G₂^{kl} = ∑_{p,q} G₁^{kp} · (G₂ − G₁)_{pq} · G₂^{ql}`
-(`invGramOnE_sub_eq`): each summand carries exactly one *undifferentiated* chart-Gram
-difference factor, sandwiched by two uniformly-bounded inverse-Gram factors.
-
-Applying the single-difference Leibniz bound `norm_iteratedFDerivWithin_mul_le_uniformBound`
-to each summand and summing gives the **all-order** (Faà-di-Bruno) chart-jet Lipschitz
-estimate: over a compact subset `K` of the chart-target interior there is a single constant
-`C(N)` with
-```
-‖iteratedFDerivWithin ℝ N (chartInvGramOnE g₁ α k l − chartInvGramOnE g₂ α k l) s y‖ ≤
-    C · ∑_{a,b} iteratedFDerivSeminorm N (chartGramOnE g₁ α a b − chartGramOnE g₂ α a b) s y
-```
-for every `y ∈ K`, where `s = interior (extChartAt I α).target`.  The constant is uniform over
-a fixed compact `R`-ball of metrics, in which the inverse-Gram entries (hence their iterated
-derivatives) are uniformly bounded on `K`.
-
-## Main results
-
-* `chartGramJetDiffSeminormSum` — the order-`N` chart-Gram jet-difference seminorm summed
-  over all index pairs.
-* `exists_chartInvGramOnE_iteratedFDeriv_lipschitz_on_compact` — the all-order chart-jet
-  Lipschitz estimate for the inverse chart-Gram entry.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -55,10 +25,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The order-`N` chart-Gram jet-difference seminorm, summed over all index pairs:
-`∑_{a,b} iteratedFDerivSeminorm N (chartGramOnE g₁ α a b − chartGramOnE g₂ α a b) s y`.
-This is the all-order chart-jet magnitude of `g₁ − g₂` controlling the inverse-Gram,
-Christoffel, Ricci and Lie–DeTurck jet differences. -/
 def chartGramJetDiffSeminormSum (N : ℕ) (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (s : Set E) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -71,7 +37,6 @@ lemma chartGramJetDiffSeminormSum_nonneg (N : ℕ)
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ =>
     iteratedFDerivSeminorm_nonneg _ _ _ _
 
-/-- The chart-Gram jet-difference seminorm sum is monotone in the order `N`. -/
 lemma chartGramJetDiffSeminormSum_mono {N N' : ℕ} (hN : N ≤ N')
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E) :
     chartGramJetDiffSeminormSum (I := I) (M := M) N g₁ g₂ α s y ≤
@@ -81,8 +46,6 @@ lemma chartGramJetDiffSeminormSum_mono {N N' : ℕ} (hN : N ≤ N')
   refine Finset.sum_le_sum fun a _ => Finset.sum_le_sum fun b _ => ?_
   exact iteratedFDerivSeminorm_mono hN _ _ _
 
-/-- Each single index-pair chart-Gram jet-difference seminorm is bounded by the full
-index-summed seminorm. -/
 lemma iteratedFDerivSeminorm_gramDiff_le_sum (N : ℕ)
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -105,7 +68,6 @@ lemma iteratedFDerivSeminorm_gramDiff_le_sum (N : ℕ)
     (fun _ _ => Finset.sum_nonneg fun _ _ => iteratedFDerivSeminorm_nonneg _ _ _ _)
     (Finset.mem_univ a)
 
-/-- The inverse chart-Gram entry is `C^∞` on the chart-target interior. -/
 lemma chartInvGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -113,7 +75,6 @@ lemma chartInvGramOnE_contDiffOn_int
       (interior (extChartAt I α).target) :=
   (chartInvGramOnE_contDiffOn (I := I) g α k l).mono interior_subset
 
-/-- The chart-Gram entry is `C^∞` on the chart-target interior. -/
 lemma chartGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -121,19 +82,6 @@ lemma chartGramOnE_contDiffOn_int
       (interior (extChartAt I α).target) :=
   (chartGramOnE_contDiffOn (I := I) g α a b).mono interior_subset
 
-/-- **All-order chart-jet Lipschitz dependence of the inverse chart-Gram entry.**
-
-For two smooth Riemannian metrics `g₁, g₂`, a chart base point `α`, a compact subset `K`
-of the chart-target interior `s = interior (extChartAt I α).target`, and any order `N`,
-there is a single constant `C > 0` such that for every `y ∈ K` and all index pairs
-`(k, l)`,
-```
-‖iteratedFDerivWithin ℝ N (chartInvGramOnE g₁ α k l − chartInvGramOnE g₂ α k l) s y‖ ≤
-    C · chartGramJetDiffSeminormSum N g₁ g₂ α s y .
-```
-The constant is uniform over a fixed compact `R`-ball of metrics (where the inverse-Gram
-iterated derivatives are uniformly bounded on `K`).  This is the all-order generalization
-of `exists_chartInvGramMatrix_lipschitz_on_compact`. -/
 theorem exists_chartInvGramOnE_iteratedFDeriv_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

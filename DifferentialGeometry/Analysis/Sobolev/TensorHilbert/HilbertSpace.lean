@@ -7,45 +7,6 @@ import Mathlib.Analysis.Normed.Group.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.InnerProductSpace.Completion
 
-/-!
-# Intrinsic Sobolev Hilbert space of `(r, s)`-tensor fields
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional real
-inner-product space `E`, and a non-negative integer regularity order `k`, this
-file constructs the intrinsic `H^k` Sobolev Hilbert space of smooth
-`(r, s)`-tensor fields, obtained as the Hausdorff completion of the
-pre-Hilbert space of smooth compactly-supported sections equipped with an
-inner product whose induced norm is the Hilbert-Schmidt partition-of-unity-
-weighted chart-Sobolev norm `tensorPouSobolevHsNorm g k`.
-
-The construction parallels the standard `TensorL2` / `TensorH1Compl` design:
-a wrapper structure carries `SmoothCcTensor g r s` together with a fresh
-`PreInnerProductSpace.Core` instance, and the Hilbert space itself is the
-uniform-space completion of the wrapped pre-Hilbert space.
-
-The use of the Hilbert-Schmidt aggregation of iterated-Fréchet-derivative
-components in `tensorPouSobolevHsNorm` (rather than the operator-norm
-aggregation in `tensorPouSobolevNorm`) is what allows the norm to be
-induced by an inner product, because the parallelogram law fails for the
-operator norm on multilinear maps of arity `≥ 2` and holds for the
-Hilbert-Schmidt sum-of-squares-over-components expansion.
-
-## Main definitions
-
-* `SmoothCcTensorHs g r s k` — wrapper around `SmoothCcTensor g r s` carrying
-  the `H^k`-style pre-Hilbert structure (norm = `tensorPouSobolevHsNorm g k`).
-* `TensorPouSobolevHilbert g r s k` — the intrinsic `H^k` Hilbert space, the
-  Hausdorff completion of `SmoothCcTensorHs g r s k`.
-* `SmoothCcTensor.toHs` — canonical embedding `SmoothCcTensor g r s →
-  TensorPouSobolevHilbert g r s k`.
-
-## Main results
-
-* `tensorPouSobolevHilbert_norm_eq` — the norm on `TensorPouSobolevHilbert g
-  r s k` agrees with `(tensorPouSobolevHsNorm g k T).toReal` on the dense
-  subspace of smooth compactly-supported sections.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -80,27 +41,18 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Compactly-supported smooth `(r, s)`-tensor section wrapped to carry the
-`H^k` pre-Hilbert structure (with norm `tensorPouSobolevHsNorm g k`).
-
-A separate Lean type from `SmoothCcTensor` (which already carries the `L^2`
-pre-Hilbert structure) and from `SmoothCcTensorH1` (which carries the `H^1`
-pre-Hilbert structure). The regularity order `k` is part of the type so that
-different orders live in different Hilbert spaces. -/
 structure SmoothCcTensorHs (g : SmoothRiemannianMetric I M) (r s k : ℕ) where
-  /-- The underlying smooth, compactly-supported `(r, s)`-tensor section. -/
+  
   toCcTensor : SmoothCcTensor g r s
 
 namespace SmoothCcTensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s k : ℕ}
 
-/-- Two `SmoothCcTensorHs` are equal iff their underlying sections are equal. -/
 @[ext] theorem ext {S T : SmoothCcTensorHs g r s k}
     (h : S.toCcTensor = T.toCcTensor) : S = T := by
   cases S; cases T; congr
 
-/-- `toCcTensor` is injective. -/
 lemma toCcTensor_injective :
     Function.Injective
       (fun S : SmoothCcTensorHs g r s k => S.toCcTensor) := by
@@ -163,8 +115,6 @@ instance : AddCommGroup (SmoothCcTensorHs g r s k) :=
     toCcTensor_nsmul
     toCcTensor_zsmul
 
-/-- Additive monoid hom from `SmoothCcTensorHs g r s k` to the underlying
-compactly-supported smooth section. -/
 def toCcTensorAddHom :
     SmoothCcTensorHs g r s k →+ SmoothCcTensor g r s where
   toFun := fun S => S.toCcTensor
@@ -177,11 +127,7 @@ instance : Module ℝ (SmoothCcTensorHs g r s k) :=
 end SmoothCcTensorHs
 
 set_option linter.unusedSectionVars false in
-/-- The real-valued pointwise integrand of the inner product on
-`SmoothCcTensorHs g r s k`: at point `y` of the chart target it is the
-partition-of-unity weight times the product of the iterated Fréchet
-derivatives of the EuclN-pulled raw chart-frame scalar components of `T` and
-`S`, evaluated on the basis-`basisIdx`-tuple. -/
+
 private noncomputable def hkIntegrand
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -207,8 +153,7 @@ private noncomputable def hkIntegrand
             (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)))
 
 set_option linter.unusedSectionVars false in
-/-- The per-`(α, IJ, j, basisIdx)` integral of `hkIntegrand T S` over the
-chart-target Euclidean set. -/
+
 private noncomputable def hkOneTerm
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -221,10 +166,7 @@ private noncomputable def hkOneTerm
       Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
 
 set_option linter.unusedSectionVars false in
-/-- The inner product on `SmoothCcTensorHs g r s k`: a finite sum over the
-chart-atlas partition-of-unity finite support, the component multi-index
-pair, the iterated-derivative order, and the basis-tuple index, of the
-per-summand integral `hkOneTerm`. -/
+
 private noncomputable def hkInner
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) : ℝ :=
@@ -236,7 +178,7 @@ private noncomputable def hkInner
           hkOneTerm (I := I) (M := M) T S α IJ j basisIdx
 
 set_option linter.unusedSectionVars false in
-/-- Continuity of the inner-product integrand on the open chart target. -/
+
 private lemma hkIntegrand_continuousOn
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -367,8 +309,7 @@ private lemma hkIntegrand_continuousOn
     (h_eval_contOn S.toCcTensor))
 
 set_option linter.unusedSectionVars false in
-/-- The inner-product integrand vanishes on the chart target outside the
-compact set `chartImagePOUTsupport α` (because the POU weight does). -/
+
 private lemma hkIntegrand_zero_off_compact
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -400,9 +341,7 @@ private lemma hkIntegrand_zero_off_compact
   rw [hPOU_y, zero_mul]
 
 set_option linter.unusedSectionVars false in
-/-- The inner-product integrand vanishes when `α` is outside the
-chart-atlas partition-of-unity finite support, because the POU weight is
-identically zero there. -/
+
 private lemma hkIntegrand_zero_of_notMem_finset
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) {α : M}
@@ -418,8 +357,7 @@ private lemma hkIntegrand_zero_of_notMem_finset
   rw [hPOU_zero, zero_mul]
 
 set_option linter.unusedSectionVars false in
-/-- `hkOneTerm` vanishes when `α` is outside the partition-of-unity finite
-support. -/
+
 private lemma hkOneTerm_zero_of_notMem_finset
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) {α : M}
@@ -438,9 +376,7 @@ private lemma hkOneTerm_zero_of_notMem_finset
   simp
 
 set_option linter.unusedSectionVars false in
-/-- Integrability of the inner-product integrand on the chart target: by
-continuity on the open chart target, support inside the compact subset
-`chartImagePOUTsupport α`, and finite Lebesgue measure on this compact set. -/
+
 private lemma hkIntegrand_integrableOn
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -504,7 +440,7 @@ private lemma hkIntegrand_integrableOn
   exact h_int_T
 
 set_option linter.unusedSectionVars false in
-/-- Symmetry of the inner-product integrand: `hkIntegrand T S = hkIntegrand S T`. -/
+
 private lemma hkIntegrand_symm
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -518,8 +454,7 @@ private lemma hkIntegrand_symm
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Additivity of the inner-product integrand in the first argument on
-the chart target. -/
+
 private lemma hkIntegrand_add_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T₁ T₂ S : SmoothCcTensorHs g r s k) (α : M)
@@ -543,8 +478,7 @@ private lemma hkIntegrand_add_left
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Scalar homogeneity of the inner-product integrand in the first argument
-on the chart target. -/
+
 private lemma hkIntegrand_smul_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (c : ℝ) (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -567,7 +501,7 @@ private lemma hkIntegrand_smul_left
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Symmetry of `hkOneTerm`. -/
+
 private lemma hkOneTerm_symm
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -583,7 +517,7 @@ private lemma hkOneTerm_symm
   exact hkIntegrand_symm (I := I) (M := M) T S α IJ j basisIdx y
 
 set_option linter.unusedSectionVars false in
-/-- Additivity of `hkOneTerm` in the first argument. -/
+
 private lemma hkOneTerm_add_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T₁ T₂ S : SmoothCcTensorHs g r s k) (α : M)
@@ -603,7 +537,7 @@ private lemma hkOneTerm_add_left
   exact hkIntegrand_add_left (I := I) (M := M) T₁ T₂ S α IJ j basisIdx hy
 
 set_option linter.unusedSectionVars false in
-/-- Scalar homogeneity of `hkOneTerm` in the first argument. -/
+
 private lemma hkOneTerm_smul_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (c : ℝ) (T S : SmoothCcTensorHs g r s k) (α : M)
@@ -620,8 +554,7 @@ private lemma hkOneTerm_smul_left
   exact hkIntegrand_smul_left (I := I) (M := M) c T S α IJ j basisIdx hy
 
 set_option linter.unusedSectionVars false in
-/-- Non-negativity of the diagonal `hkOneTerm T T` (the integrand reduces
-to `POU · (D^j f)(e_b)²` which is non-negative). -/
+
 private lemma hkOneTerm_self_nonneg
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T : SmoothCcTensorHs g r s k) (α : M)
@@ -661,8 +594,7 @@ private lemma hkOneTerm_self_nonneg
   exact mul_nonneg hPOU_nn hsq_nn
 
 set_option linter.unusedSectionVars false in
-/-- The diagonal `hkOneTerm T T` expressed in ENNReal form, matching the
-inner-most summand of the squared HS-norm. -/
+
 private lemma hkOneTerm_self_eq_lintegral_toReal
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T : SmoothCcTensorHs g r s k) (α : M)
@@ -801,8 +733,7 @@ private lemma hkOneTerm_self_eq_lintegral_toReal
   exact h_int_eq
 
 set_option linter.unusedSectionVars false in
-/-- The diagonal `hkInner T T` equals `(tensorPouSobolevHsNormSq g k
-T.toCcTensor).toReal`. -/
+
 private lemma hkInner_self_eq_normSq_toReal
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T : SmoothCcTensorHs g r s k) :
@@ -944,9 +875,7 @@ private lemma hkInner_self_eq_normSq_toReal
     exact h_each_lt_top α hα IJ hIJ j hj basisIdx hbasisIdx
 
 set_option linter.unusedSectionVars false in
-/-- The pre-inner-product core on `SmoothCcTensorHs g r s k`, with the inner
-product the chart-aggregated bilinear form whose diagonal `⟨T, T⟩` equals
-`((tensorPouSobolevHsNorm g k T).toReal)²`. -/
+
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     PreInnerProductSpace.Core ℝ (SmoothCcTensorHs g r s k) where
@@ -1013,42 +942,25 @@ noncomputable instance instPreInnerProductSpaceCore
     exact hkOneTerm_smul_left (I := I) (M := M) c T S α IJ j basisIdx
 
 set_option linter.unusedSectionVars false in
-/-- The seminormed structure on `SmoothCcTensorHs g r s k` derived from the
-pre-inner-product core. -/
+
 noncomputable instance instSeminormedAddCommGroup
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     SeminormedAddCommGroup (SmoothCcTensorHs g r s k) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
 set_option linter.unusedSectionVars false in
-/-- The inner-product-space structure on `SmoothCcTensorHs g r s k` derived
-from the pre-inner-product core. -/
+
 noncomputable instance instInnerProductSpace
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     InnerProductSpace ℝ (SmoothCcTensorHs g r s k) :=
   InnerProductSpace.ofCore _
 
-/-- The intrinsic `H^k` Hilbert space of mixed `(r, s)`-tensor fields on a
-closed smooth Riemannian manifold `(M, g)`, defined as the Hausdorff
-completion of the pre-Hilbert space `SmoothCcTensorHs g r s k` of smooth
-compactly-supported sections equipped with the inner product whose induced
-norm is the Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm
-`tensorPouSobolevHsNorm g k`.
-
-Mathematically this is the textbook intrinsic `H^k(M; T^{(r,s)} M)` Sobolev
-space. By Mathlib's automatic instances on the completion of a pre-Hilbert
-space, `TensorPouSobolevHilbert g r s k` carries
-`NormedAddCommGroup`, `NormedSpace ℝ`, `InnerProductSpace ℝ`,
-`CompleteSpace`, making it a real Hilbert space. -/
 abbrev TensorPouSobolevHilbert
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) : Type _ :=
   UniformSpace.Completion (SmoothCcTensorHs g r s k)
 
 namespace SmoothCcTensor
 
-/-- The canonical embedding of a smooth compactly-supported `(r, s)`-tensor
-section into the intrinsic `H^k` Hilbert space, going through the
-`SmoothCcTensorHs` wrapper and then the completion. -/
 noncomputable def toHs {g : SmoothRiemannianMetric I M} {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
     TensorPouSobolevHilbert (I := I) (M := M) g r s k :=
@@ -1057,11 +969,7 @@ noncomputable def toHs {g : SmoothRiemannianMetric I M} {r s : ℕ} (k : ℕ)
 end SmoothCcTensor
 
 set_option linter.unusedSectionVars false in
-/-- The Hilbert-space norm on `TensorPouSobolevHilbert g r s k` agrees with
-the Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm on the
-dense subspace of smooth compactly-supported sections: for any
-`T : SmoothCcTensor g r s`,
-`‖T.toHs k‖ = (tensorPouSobolevHsNorm g k T).toReal`. -/
+
 theorem tensorPouSobolevHilbert_norm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :

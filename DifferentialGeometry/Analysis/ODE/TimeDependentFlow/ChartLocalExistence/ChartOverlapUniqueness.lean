@@ -1,11 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 import Mathlib.Analysis.ODE.Gronwall
 
-/-! # Uniqueness of the chart-cover flow on chart overlaps
-
-Grönwall uniqueness for the chart-coordinate flow and its consequence that the
-chart-cover flows agree on the overlaps of their chart neighborhoods. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle
@@ -17,43 +12,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-Chart-α₁-coordinate Grönwall uniqueness primitive for two solutions of the
-chart-α₁-coordinate ODE associated to a time-dependent vector field `X`.
-
-Given a base point `α₁ : M`, a positive horizon `T > 0`, a positive chart-coord
-radius `r > 0`, a Lipschitz constant `K ≥ 0`, and two chart-α₁-coordinate
-curves `u, v : ℝ → E` such that
-
-* `u` and `v` agree at time `0`,
-* `u` and `v` are both continuous on `[0, T]`,
-* both `u` and `v` satisfy the chart-α₁-coordinate ODE
-  `HasDerivWithinAt _ (X t ((chartAt H α₁).symm (I.symm (_ t))) : E) (Set.Ici t) t`
-  on `[0, T)`,
-* both `u t` and `v t` lie in the closed ball of radius `r` around
-  `I ((chartAt H α₁) α₁)` for every `t ∈ [0, T)`,
-* and `(fun y ↦ (X t ((chartAt H α₁).symm (I.symm y)) : E))` is `K`-Lipschitz
-  on the open ball of radius `r' > r` around `I ((chartAt H α₁) α₁)` for every
-  `t ∈ [0, T)`,
-
-then `u` and `v` agree on `[0, T]` as functions `ℝ → E`.
-
-This is a direct application of Mathlib's
-`ODE_solution_unique_of_mem_Icc_right`: the chart-α₁-coordinate vector field
-`f : ℝ → E → E` defined by `f t y := (X t ((chartAt H α₁).symm (I.symm y)) : E)`
-is `K`-Lipschitz on the open ball of radius `r'`, and both `u` and `v` are
-solutions of the right-handed ODE `_'(t) = f t (_(t))` staying inside the
-closed ball of radius `r ⊂ open ball of radius r'` for `t ∈ [0, T)`, with
-equal initial value.
-
-The chart-α₁-coordinate setup is intentional: it avoids the
-chart-AT-y vs chart-α convention mismatch that would otherwise obstruct the
-direct Grönwall application. Downstream, a chart-α₁-coordinate trajectory of
-`hper₁.flow` and a chart-α₁-coordinate trajectory of the chart-α₁ pullback of
-a chart-α₂-coordinate trajectory of `hper₂.flow` (when both stay in the
-chart-α₁ Lipschitz ball) plug into this primitive to give "manifold
-trajectories agree".
--/
 theorem chart_alpha_coord_gronwall_uniqueness
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ : M)
     (T r r' : ℝ) (K : NNReal) (_hT_pos : 0 < T) (hr_lt_r' : r < r')
@@ -108,45 +66,6 @@ theorem chart_alpha_coord_gronwall_uniqueness
     (v := f) (s := s) (K := K)
     hv_lip hu_cont hf_u hus hv_cont hf_v hvs heq0
 
-/--
-Headline chart-overlap Grönwall uniqueness, in chart-α₁-coordinate form.
-
-Given a time-dependent vector field `X` on a closed manifold, two base points
-`α₁, α₂ : M`, per-base-point chart-α-local Picard data `hper₁` for `α₁` and
-`hper₂` for `α₂`, a starting point `x ∈ (hper₁).U ∩ (hper₂).U`, and a chart-α₁
-Lipschitz hypothesis on `X` together with a chart-α₁-coordinate ODE
-representation of the chart-α₂ flow's manifold trajectory, the chart-α₁-coord
-trajectory and the chart-α₁-coordinate representation of the chart-α₂
-trajectory agree on `[0, S]`, hence the two manifold trajectories agree on
-`[0, S]` (modulo the chart-α₁-source membership of the chart-α₂ manifold
-trajectory at every time `s ∈ [0, S]`, which is recorded as an explicit
-analytic compatibility hypothesis).
-
-The hypothesis `hu2_ode` records that the chart-α₁-coordinate image of the
-chart-α₂ manifold trajectory `γ₂(s) := (chartAt H α₂).symm (I.symm
-((hper₂).flow (I ((chartAt H α₂) x)) s))` satisfies the chart-α₁-coordinate
-ODE. This is not hypothesis-packaging: the conclusion of the lemma is that
-the two *manifold trajectories* agree, and `hu2_ode` is a separate analytic
-compatibility statement (the chain rule applied to the chart transition) that
-is proved at the downstream chart-bridge layer.
-
-The hypothesis `hα₂_in_α₁_source` records that the chart-α₂ manifold
-trajectory of `x` lies in the chart-α₁ source for every `s ∈ [0, S]`. This is
-an analytic compatibility statement (continuity of the trajectory + chart
-overlap openness) supplied by the downstream chart-bridge layer.
-
-Mathematical content. The two chart-α₁-coordinate curves
-`u₁(s) := (hper₁).flow (I ((chartAt H α₁) x)) s` and
-`u₂(s) := I ((chartAt H α₁) ((chartAt H α₂).symm (I.symm ((hper₂).flow
-(I ((chartAt H α₂) x)) s))))` agree at `s = 0` (since chart-α₂-symm followed
-by chart-α₁ both lift `x` to a chart-α₁-coord point matching `I ((chartAt H
-α₁) x)` via the chart left-inverses) and both satisfy the chart-α₁-coordinate
-ODE with the same right-hand side. Grönwall
-(`chart_alpha_coord_gronwall_uniqueness`) gives `u₁ = u₂` on `[0, S]`, and
-the chart-α₁ left-inverse property converts this to manifold-trajectory
-equality, using `hα₂_in_α₁_source` for the chart-α₁-left-inverse to apply on
-the chart-α₂ manifold trajectory.
--/
 theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ α₂ : M)
     (hper₁ : ChartLocalPicardData X α₁) (hper₂ : ChartLocalPicardData X α₂)
@@ -264,30 +183,6 @@ theorem chart_cover_flow_unique_on_overlap_chart_alpha_coord
       ∈ (chartAt H α₁).source := hα₂_in_α₁_source s hs
   exact (chartAt H α₁).left_inv hmem
 
-/--
-**Lemma A.** Continuity of the chart-α₂ flow trajectory at `s = 0` plus
-openness of `(chartAt H α₁).source` yields a positive time horizon `S₀ ≤ T₂`
-such that the chart-α₂ manifold trajectory of `x ∈ U₂` stays in
-`(chartAt H α₁).source` on `[0, S₀]`.
-
-Concretely, the chart-α₂-coord flow `(hper₂).flow y₂` (where
-`y₂ := I ((chartAt H α₂) x)`) is continuous on `[0, hper₂.T]` (its derivative
-exists there via `flow_spec.2`); composing with the continuous maps
-`I.symm : E → H` and `(chartAt H α₂).symm : H → M` (the latter continuous on
-the chart-α₂ target, which `I.symm (flow y₂ s)` lies in on an open
-neighborhood of `s = 0`) shows the manifold trajectory
-`γ₂(s) := (chartAt H α₂).symm (I.symm ((hper₂).flow y₂ s))` is continuous at
-`s = 0`. Its value at `s = 0` is `x` (by the chart-α₂ left-inverse identity,
-using `x ∈ (chartAt H α₂).source` which is implied by `x ∈ hper₂.U`).
-Since `x ∈ (chartAt H α₁).source` (open) by `hx₁`, continuity at `s = 0`
-gives a positive `S₀` on which `γ₂(s) ∈ (chartAt H α₁).source` for every
-`s ∈ [0, S₀]`. We additionally take `S₀ ≤ hper₂.T`.
-
-This is not hypothesis-packaging: the hypotheses are purely local
-(continuity + open set + initial-value membership), whereas the conclusion is
-a global membership statement on a closed interval `[0, S₀]` for a freshly
-constructed `S₀`.
--/
 theorem chart_overlap_alpha_in_alpha_source_short_time
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ α₂ : M)
     (hper₂ : ChartLocalPicardData X α₂)
@@ -377,39 +272,6 @@ theorem chart_overlap_alpha_in_alpha_source_short_time
   have : s ∈ γ₂ ⁻¹' (chartAt H α₁).source := hV_subset ⟨hs_in_V, hs_in_Icc⟩
   exact this
 
-/--
-**Lemma B.** Chart-α₁-coord ODE for the chart-α₁-coord representation of the
-chart-α₂ flow trajectory, derived from the chart-α₂ ODE (`flow_spec.2`) and
-the chain rule on the chart-transition map
-`g := I ∘ (chartAt H α₁) ∘ (chartAt H α₂).symm ∘ I.symm`.
-
-The chain rule applied to `g ∘ u₂_y₂` (where `u₂_y₂(s) := (hper₂).flow y₂ s`,
-`y₂ := I ((chartAt H α₂) x)`) gives, at each `t ∈ [0, S)`,
-
-`d/ds [g (u₂_y₂(s))] _{s=t} = Dg(u₂_y₂(t)) · u₂_y₂'(t) = Dg(u₂_y₂(t)) · X t γ₂(t)`
-
-(the second equality from `flow_spec.2`, where `γ₂(t) := (chart₂).symm
-(I.symm (u₂_y₂(t)))` is the chart-α₂ manifold trajectory).
-
-The conclusion of the lemma expects the velocity to be `X t γ₂(t)` (as `E`),
-matching the chart-α₁ ODE form. For these to coincide we need the analytic
-compatibility hypothesis `hcompat`: at each `t ∈ [0, S)`, there exists a
-continuous linear map `L_t : E →L[ℝ] E` such that
-* `g : E → E` has Fréchet derivative `L_t` at `u₂_y₂(t)`, and
-* `L_t` fixes the vector `X t γ₂(t) : E`.
-
-This is a genuine analytic statement about `X`: the chart-transition
-derivative acts as identity on `X` along the chart-α₂ trajectory. For
-chart-invariant vector fields (e.g. `deTurckVF`), this compatibility is a
-consequence of the chart-invariance of `X`; for general `X`, it is the
-fundamental obstruction to chart-cover uniqueness of the chart-coord flows.
-
-The hypothesis is not hypothesis-packaging: it is a *linear-algebra* fact
-(an equality between two elements of `E`) at each `t`, plus a smoothness fact
-(`HasFDerivAt`), whereas the conclusion is an *ODE* statement
-(`HasDerivWithinAt` on `Set.Ici t`) at each `t`. The lemma derives the ODE
-statement from the chain rule.
--/
 theorem chart_overlap_chart_alpha_coord_ode
     (X : ℝ → ∀ x : M, TangentSpace I x) (α₁ α₂ : M)
     (hper₂ : ChartLocalPicardData X α₂)

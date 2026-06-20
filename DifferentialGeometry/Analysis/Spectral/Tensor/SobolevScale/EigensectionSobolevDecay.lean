@@ -2,32 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 
-/-!
-# Uniform-in-index spectral Sobolev decay of the smooth eigensections
-
-For a closed Riemannian manifold `(M, g)`, the smooth representatives
-`eigenvectorSmooth g 0 2 i` of the orthonormal `L²` eigenbasis of the connection
-Laplacian's resolvent have order-`σ` spectral Sobolev norm given *exactly* by the
-eigenvalue power: in the canonical spectral embedding `ccSpectralEmbed`,
-
-`‖ccSpectralEmbed g σ (eigenvectorSmooth g 0 2 i)‖² = (1 + λᵢ)^σ = tensorSobolevWeight i σ`,
-
-because the eigenvectors are `L²`-orthonormal (`tensorL2Coeff_ofCompact_eigenSmooth`,
-the Kronecker delta) and the squared spectral norm is the eigenvalue-weighted sum of
-squared coordinates (`ccSpectralEmbed_norm_sq_eq_tsum`).
-
-Routed through the partition-of-unity Sobolev norm equivalence
-(`tensorPouSobolevHilbert_norm_eq`, `tensorPouSobolevHsNorm_le_ccSpectralEmbed`), this
-yields the *uniform-in-`i`* decay of the order-`2k` partition-of-unity Sobolev norm of the
-smooth eigensection as a fixed power of its eigenvalue:
-
-`∃ C ≥ 0, ∀ i, ‖(eigenvectorSmooth g 0 2 i).toHs (2k)‖ ≤ C · (1 + λᵢ)^(2k)`.
-
-This is the reusable spectral input behind the eigen-series `M`-test majorant for the
-joint chart-Gram smoothness of a realized time-smooth spectral family: it lets a single
-eigenvalue-power factor stand in for every eigensection's chart-jet norm, so the Weyl
-summability `tensorEigen_summable_negpow` controls the across-modes sum. -/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -53,11 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth) in
-/-- **The squared spectral norm of a smooth eigensection is its eigenvalue weight.**
-Since the eigenvectors are `L²`-orthonormal (`tensorL2Coeff_ofCompact_eigenSmooth` gives the
-Kronecker delta for their coordinates), the eigenvalue-weighted sum of squared coordinates
-collapses to the single weight at index `i`:
-`‖ccSpectralEmbed g σ (eᵢ)‖² = ∑ⱼ (1+λⱼ)^σ δᵢⱼ² = (1+λᵢ)^σ = tensorSobolevWeight i σ`. -/
+
 theorem ccSpectralEmbed_eigenvectorSmooth_norm_sq
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -82,16 +52,7 @@ theorem ccSpectralEmbed_eigenvectorSmooth_norm_sq
   rw [tsum_ite_eq i]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth) in
-/-- **Uniform-in-index spectral Sobolev decay of the smooth eigensections.**
-For each natural order `k` there is a single constant `C` such that every smooth eigensection
-`eigenvectorSmooth g 0 2 i` has order-`2k` partition-of-unity Sobolev norm bounded by
-`C · (1 + λᵢ)^(2k)`.
 
-The bridge `tensorPouSobolevHilbert_norm_eq` reads the `.toHs (2k)` norm as the partition-of-unity
-Sobolev norm, `tensorPouSobolevHsNorm_le_ccSpectralEmbed` bounds it by the spectral norm at order
-`2·(2k) = 4k`, and `ccSpectralEmbed_eigenvectorSmooth_norm_sq` evaluates that spectral norm exactly
-as `(1 + λᵢ)^(4k)`, whose square root is `(1 + λᵢ)^(2k)`.  The achievable exponent is `2k` (forced
-by the order-doubling bridge), not `k`. -/
 theorem eigenvectorSmooth_toHs_norm_le_lambda_pow
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

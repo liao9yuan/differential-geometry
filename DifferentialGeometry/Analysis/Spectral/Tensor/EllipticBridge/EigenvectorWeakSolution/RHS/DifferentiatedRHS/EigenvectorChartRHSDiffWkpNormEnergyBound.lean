@@ -1,65 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSWkpNormEnergyBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorChartRHSDiffWkpNorm
 
-/-!
-# An order-`K` uniform energy bound for the differentiated chart right-hand side aggregate
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P₀`, a level `m`, an order `K`, and a
-direction multi-index `l`, the order-`K` aggregate of primitive regularity data
-`diffRHSAggregate g r s h_atlas i α P₀ m K l` controlling the order-`K`
-`wkpNorm` of the level-`m` differentiated chart right-hand side is the
-recursive sum
-
-* at level `0`: the seven-term `rhsZeroAggregate` of source quantities of
-  `eigenvectorChartRHS`;
-* at level `m + 1`: the two-piece `diffRHSHead` of iterated-weak-partial
-  `wkpNorm (2 + K) 2` terms, prepended to the level-`m` aggregate at order
-  `K + 1` along `Fin.init l`.
-
-This file collapses the aggregate, at every level and order, to the abstract
-`L²` norm of the eigenbasis vector `tensorResolventEigenbasisVec h_atlas i`,
-*given* uniform `wkpNorm`-graded chart-component energy hypotheses on the
-primitive regularity data — that is, on each of the seven source atoms of
-`rhsZeroAggregate` and on every iterated weak partial
-`eigenvectorChartIteratedPartial` feeding `diffRHSHead`. The headline is
-
-```
-∃ C ≥ 0, ∀ i,
-  diffRHSAggregate g r s h_atlas i α P₀ m K l
-    ≤ ENNReal.ofReal (C · μ⁻¹) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖.
-```
-
-The constant `C` is geometric — it depends only on `g r s h_atlas α P₀ m K l`
-and on the (geometric) constants supplied by the input hypotheses; in
-particular it is independent of the eigenbasis index `i`. The universal
-quantifier `∀ i` lies *inside* the existential `∃ C`, so a single geometric
-constant controls the aggregate of *every* eigenvector simultaneously; the
-`i`-dependence of the right-hand side is confined to the explicit `μ⁻¹`
-factor.
-
-## Genuine input hypotheses
-
-Bounding the order-`K` `wkpNorm` aggregate of the differentiated chart
-right-hand side by the `L²` energy of the eigenbasis vector is not a free
-consequence of the `L²` eigen-equation: it relies on chart-component
-arbitrary-order Sobolev regularity that the downstream coupled-induction
-argument establishes. The headline therefore takes these regularity facts as
-*genuine* inputs: uniform `wkpNorm`-graded bounds — with constants
-`K`-uniform — on each source atom of `rhsZeroAggregate` and on every
-iterated weak partial.
-
-These are not vacuous defers nor fabricated predicates: they are the same
-chart-component energy bounds that the coupled-induction supplies, phrased as
-the campaign's `_uniform` convention dictates (a single nonnegative geometric
-constant followed by `∀ i …`).
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`.
-The resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -112,7 +53,6 @@ lemma finsetSum_eNNReal_ofReal_mul_le
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `vec_norm_eq_one`. -/
 private lemma vec_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -124,7 +64,6 @@ private lemma vec_norm_eq_one
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
-/-- Chart-locality-free twin of `eigenvalue_pos`. -/
 private lemma eigenvalue_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -139,7 +78,6 @@ private lemma eigenvalue_pos
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
-/-- Chart-locality-free twin of `eigenvalue_le_one`. -/
 private lemma eigenvalue_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -156,7 +94,7 @@ private lemma eigenvalue_le_one
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- Chart-locality-free twin of `rhsZeroAggregate_le_energy_uniform`. -/
+
 private lemma rhsZeroAggregate_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -768,7 +706,6 @@ private lemma rhsZeroAggregate_le_energy_uniform
     (add_le_add ?_ hS2) hS3) hS4) hS5) hS6) hS7
   exact hS1
 
-/-- Chart-locality-free twin of `diffRHSHead_le_energy_uniform`. -/
 private lemma diffRHSHead_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -855,7 +792,7 @@ private lemma diffRHSHead_le_energy_uniform
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- Chart-locality-free twin of `diffRHSAggregate_le_energy_uniform`. -/
+
 theorem diffRHSAggregate_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1066,7 +1003,7 @@ theorem diffRHSAggregate_le_energy_uniform
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- Chart-locality-free twin of `rhsZeroAggregate_le_energy_perK`. -/
+
 lemma rhsZeroAggregate_le_energy_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
@@ -1826,7 +1763,7 @@ lemma rhsZeroAggregate_le_energy_perK
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- Chart-locality-free twin of `diffRHSAggregate_le_energy_perK`. -/
+
 theorem diffRHSAggregate_le_energy_perK
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

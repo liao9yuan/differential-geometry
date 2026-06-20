@@ -12,31 +12,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 import Mathlib.Topology.Compactness.LocallyFinite
 
-/-!
-# First variation of the time-parameterised Riemannian volume measure
-
-Given a smoothly-time-parameterised Riemannian metric family
-`g_fam : ℝ → SmoothRiemannianMetric I M`, this file assembles the first variation
-of volume: the joint and slicewise continuity of the metric trace
-`tr_g(∂_t g)`, the per-chart parametric `HasDerivAt` for the chart-local weighted
-integral, and the clean headline first-variation theorem on a compact manifold.
-
-The definitional layer (measure family, regularity interfaces, chart-density
-families, the metric trace) lives in `FamilyDefs`; the determinant Jacobi
-formula in `JacobiFormula`; and the chart-invariance and partition-of-unity
-decomposition of the volume measure in `FamilyDecomposition`. All three
-are re-exported transitively through this file's import of
-`FamilyDecomposition`.
-
-## Main results
-
-* `traceTimeDerivMetric_continuous` : continuity in `x` of the metric trace.
-* `per_chart_hasDerivAt` : the per-chart parametric `HasDerivAt` for the
-  chart-local POU-weighted integral.
-* `first_variation_of_volume` : the first variation of volume — the derivative of
-  `s ↦ ∫ f s ∂(μ_s)` equals `∫ (∂_t f + ½ · tr_g(∂_t g) · f) ∂(μ_{t₀})`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Matrix
@@ -60,15 +35,6 @@ section CleanVolumeVariation
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 
-/-- Pointwise product-rule `HasDerivAt` for the three-factor integrand at a point
-`x` in a chart base set:
-`s ↦ f s x · ρ x · chartDensity (g_fam s) α x`.
-
-The derivative at `t` expands, via the product rule, into:
-`(deriv (f · x) t · ρ x + f t x · ρ x · (1/2) · traceTimeDerivMetric ...) · density`,
-which factors to
-`(deriv (f · x) t + (1/2) · traceTimeDerivMetric g_fam t x · f t x) · ρ x · density`.
--/
 lemma per_chart_integrand_hasDerivAt
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -147,14 +113,6 @@ lemma per_chart_integrand_hasDerivAt
   rw [← halgebra]
   exact hprod
 
-/-- Sum identity connecting the chart-local weighted integrals (appearing as the
-right-hand sides of the per-chart `HasDerivAt`s in the volume variation formula)
-to a single global integral against the Riemannian volume measure.
-
-Given a continuous integrand `h : M → ℝ`, on a compact manifold,
-`∑ α, ∫ x, h x * ρ_α x ∂(chartLocalMeasure (g_t) α) = ∫ x, h x ∂(riemannianMeasure_t)`.
-This is obtained by rewriting each summand via the `withDensity → smul`
-identity and applying the finite-sum decomposition of the Riemannian measure. -/
 theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
@@ -197,27 +155,6 @@ theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
     funext x; exact hsmul x
   rw [hswap, hintegrand_eq]
 
-/-- Clean version of the volume variation formula, with the derivative
-integrand written explicitly.
-
-The derivative of `t ↦ ∫ f t d(μ_t)` along the time-parameterised Riemannian
-volume measures is the integral of
-`(∂_t f + ½ · tr_g(∂_t g) · f)` against `μ_t` at the base time.
-
-In the present formulation, the per-chart `HasDerivAt` hypothesis is retained:
-deriving it from the joint smoothness of `(t, x) ↦ f t x` alone requires the
-full parametric-integral machinery (uniform bounds over a chart-local
-neighborhood, integrability over chart targets, the three-factor product rule
-for the `f · ρ · density` integrand). The `per_chart_integrand_hasDerivAt`
-lemma above packages the pointwise product-rule step; the remaining step is
-the `hasDerivAt_integral_of_dominated_loc_of_deriv_le` specialization, which
-requires explicit bounds and integrability arguments.
-
-The `hα_deriv_explicit` hypothesis states the per-chart derivative with the
-explicit RHS matching the form produced by `per_chart_integrand_hasDerivAt`
-composed with parametric integration. The `hh_cont` hypothesis ensures the
-RHS integrand is continuous, enabling the finite-sum-to-global-integral
-identity. -/
 theorem volume_variation_formula_clean_of_chart_derivs
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -261,11 +198,6 @@ theorem volume_variation_formula_clean_of_chart_derivs
 
 section TraceTimeDerivMetricContinuous
 
-/-- Joint continuity in `(s, x)` of `trace((G_s α x)⁻¹ · ∂_s G_s α x)` on
-`ℝ ×ˢ base_α`, for any chosen chart `α`. This follows from joint continuity of
-the Gram matrix and its pointwise time-derivatives on `ℝ × base_α`, together with
-continuity of the matrix inverse on the positive-determinant locus and of the
-matrix trace. -/
 lemma continuousOn_traceTimeDerivMetric_on_base
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -423,9 +355,6 @@ lemma continuousOn_traceTimeDerivMetric_on_base
   rw [hfun]
   refine continuousOn_finset_sum _ (fun i _ => h_prod_cont i i)
 
-/-- Continuity in `x` of `traceTimeDerivMetric g_fam t x` on `M`. This is the
-coordinate-invariant scalar, so continuity is established by switching to the
-canonical chart at each point and applying the continuous-on-base-set result. -/
 lemma traceTimeDerivMetric_continuous
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) :
@@ -475,9 +404,6 @@ lemma traceTimeDerivMetric_continuous
   refine ContinuousAt.congr ?_ hev.symm
   exact h_slice.continuousAt (hα_base_open.mem_nhds hx₀_base)
 
-/-- Joint continuity of `(t, x) ↦ traceTimeDerivMetric g_fam t x` on
-`Set.univ ×ˢ base_α`, for any chart `α`. Obtained from the chart-local
-trace formula via `traceTimeDerivMetric_eq_trace_chartGramMatrix`. -/
 lemma continuousOn_traceTimeDerivMetric_of_base
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
@@ -498,8 +424,6 @@ lemma continuousOn_traceTimeDerivMetric_of_base
       (I := I) (M := M) (t := p.1) (hreg.at_any p.1) α hp.2
   exact h_base.congr h_eq
 
-/-- Joint continuity of the chart-local density `(t, x) ↦ chartDensity (g_fam t) α x`
-on `Set.univ ×ˢ base_α`, derived from the regularity interface. -/
 lemma continuousOn_chartDensity_family
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
@@ -537,9 +461,6 @@ lemma continuousOn_chartDensity_family
   refine h_sqrtdet_cont.congr ?_
   intro p _; rfl
 
-/-- Pull-back variant: joint continuity of the chart-α trace form pulled back
-through the chart symm, on an arbitrary set `S ⊆ ℝ × E` mapping into the base
-set. -/
 lemma continuousOn_chartTrace_form_of_base_pullback
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M)
@@ -576,10 +497,7 @@ private lemma chartDensity_nonneg_of_base
   exact Real.sqrt_nonneg _
 
 set_option maxHeartbeats 16000000 in
-/-- Per-chart parametric `HasDerivAt`: the chart-local integral
-`s ↦ ∫ x, f s x ∂(chartLocalMeasure (g_fam s) α).withDensity (ofReal ρ_α)` has a
-derivative at `t` given by the explicit formula
-`∫ x, (∂_t f + ½ tr_g(∂_t g) f) · ρ_α ∂(chartLocalMeasure (g_fam t) α)`. -/
+
 lemma per_chart_hasDerivAt
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {f : ℝ → M → ℝ} {t : ℝ}
@@ -1078,19 +996,6 @@ section CleanTheorem
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 
-/-- **First variation of volume.** At a base time `t₀`, the map
-`s ↦ ∫ x, f s x ∂(riemannianMeasureFamily g_fam s)` has derivative
-`∫ x, (∂_t f + ½ · tr_g(∂_t g) · f) ∂(riemannianMeasureFamily g_fam t₀)`, where
-`∂_t f := deriv (fun s => f s x) t₀` and `tr_g(∂_t g) := traceTimeDerivMetric g_fam t₀ x`
-is the metric trace of the time-derivative of the metric; the conclusion is a
-`HasDerivAt` statement.
-
-Hypotheses: `M` is a compact, σ-compact, Hausdorff manifold; `g_fam` satisfies the
-regularity interface `MetricFamilyRegularAt g_fam t₀` (pointwise-in-time
-differentiability and joint `(t, x)`-continuity of the chart Gram-matrix entries and
-their time-derivatives) and `f` satisfies `FunctionRegularAt f t₀` (pointwise-in-time
-differentiability and joint `(t, x)`-continuity of `f` and its time-derivative). No
-joint smoothness of `(t, x) ↦ g_t(x)` is assumed. -/
 theorem first_variation_of_volume
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M}

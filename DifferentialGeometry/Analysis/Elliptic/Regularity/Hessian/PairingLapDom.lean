@@ -6,47 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
-/-!
-# Chart-local Hessian-Frobenius pairing for `u_h ∈ laplacianDomain g`
-
-For a smooth scalar `φ : C^∞⟮I, M; ℝ⟯` and an element `u_h ∈ laplacianDomain g`
-of the Laplacian domain on a closed Riemannian manifold `(M, g)`, this module
-constructs the chart-local pointwise Hessian-Frobenius pairing on
-`chartTargetEuclid α`:
-
-```
-y ↦ ∑_{i, j, k, l} G^{ik}(y) · G^{jl}(y) · H^φ_{ij}(y) · H^{u_h}_{kl}(y),
-```
-
-where `H^φ_{ij}(y) = chartHessianTensor g α φ i j ((extChartAt I α).symm
-((toEuclidean E).symm y))` is the smooth chart Hessian of `φ` and
-`H^{u_h}_{ij}(y) = laplacianDomainHessianChart g α hu_h i j y` is the
-chart-side weak Hessian of `u_h` (from `HessianLpClass`).
-
-This chart-local function is in `L^2` of the chart-target-restricted volume,
-combining the boundedness of the smooth coefficients (`cutoffInvGram` and an
-analogous cutoff Hessian-φ) with the chart-side Hessian's `L^2` regularity.
-
-## Main definitions
-
-* `chartHessianPhiOnEuclid g α φ i j y` — chart-pullback of `chartHessianTensor
-  g α φ i j` to `EuclideanSpace`.
-* `hessPairingChartLocal g α φ hu_h y` — chart-local Frobenius pairing on `EuclN`.
-
-## Main results
-
-* `chartHessianPhiOnEuclid_continuousOn` — chart-pullback Hessian of `φ` is
-  continuous on `chartTargetEuclid α`.
-* `hessPairingChartLocal_memLp_two` — the chart-local pairing is in `L^2`
-  of the chart-target-restricted volume.
-* `hessPairingChartLocal_memLp_one` — same, in `L^1`.
-
-## Subsequent files
-
-Subsequent files take the chart-local Lp 2 pieces and assemble a global
-`Lp 2 μ_g` class via partition-of-unity weighting.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -81,9 +40,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The chart-pullback Hessian of the smooth scalar `φ` in the chart at `α`:
-the manifold-side smooth Hessian `chartHessianTensor g α φ i j` pulled back to
-`EuclideanSpace` via the inverse chart and `toEuclidean.symm`. -/
 noncomputable def chartHessianPhiOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
@@ -97,7 +53,6 @@ noncomputable def chartHessianPhiOnEuclid
       chartHessianTensor (I := I) g α (φ : M → ℝ) i j
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
-/-- The cutoff-multiplied chart-pullback Hessian: bounded everywhere on `EuclN`. -/
 private noncomputable def cutoffHessianPhi
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
@@ -111,7 +66,6 @@ private lemma cutoffHessianPhi_def
       chartCutoffα (I := I) (M := M) α y *
         chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y := rfl
 
-/-- The chart-local Frobenius pairing function on `EuclideanSpace`. -/
 noncomputable def hessPairingChartLocal
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -440,12 +394,6 @@ private lemma hessPairingChartLocal_ae_eq_cutoff
       rw [hH_zero, mul_zero]
     rw [h_LHS_zero, h_RHS_zero]
 
-/-- Each summand `cutoffInvGram_ik · cutoffInvGram_jl · cutoffHessianPhi_ij · H^{u_h}_{kl}`
-is in `MemLp 2` of `volume.restrict chartTargetEuclid α`.
-
-Proof: The first three factors are bounded continuous functions; the fourth
-is in `Lp 2`. The product of a bounded function with an `Lp 2` function is
-in `Lp 2`. -/
 private lemma cutoffSummand_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -536,8 +484,6 @@ private lemma cutoffSummand_memLp_two
     rw [h_abs_rhs]
     exact h_step3
 
-/-- **The chart-local Hess pairing is in `MemLp 2` of the chart-target-restricted
-volume.** -/
 theorem hessPairingChartLocal_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -570,7 +516,6 @@ theorem hessPairingChartLocal_memLp_two
     exact cutoffSummand_memLp_two (I := I) (M := M) g α φ hu_h i j k l
   exact MemLp.ae_eq h_ae.symm h_cutoff_memLp
 
-/-- The `Lp 2` class of the chart-local Hess pairing on the chart target. -/
 noncomputable def hessPairingChartLocalLp
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -591,10 +536,6 @@ noncomputable def hessPairingChartLocalLp
       hessPairingChartLocal (I := I) (M := M) g α φ hu_h :=
   MemLp.coeFn_toLp _
 
-/-- The "extended chart-local Hess pairing": equals the chart-local Hess
-pairing at `toEuclidean (extChartAt I α x)` whenever `x ∈ (chartAt H α).source`,
-and zero outside. (Picks an arbitrary junk value outside; we'll only use it
-inside `tsupport (POU α) ⊆ chart source`.) -/
 private noncomputable def hessPairingChartLocalMExt
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -610,9 +551,6 @@ lemma hessPairingChartLocalMExt_def
       hessPairingChartLocal (I := I) (M := M) g α φ hu_h
         ((toEuclidean (E := E)) (extChartAt I α x)) := rfl
 
-/-- The chart-local Hess pairing pulled back to `M`, weighted by the POU
-`(chartAtlasPOU I M) α`. Outside `tsupport (POU α)`, the POU value is zero,
-so the product is zero. -/
 noncomputable def hessPairingMChartContribution
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -628,7 +566,6 @@ noncomputable def hessPairingMChartContribution
       (chartAtlasPOU I M α : M → ℝ) x *
         hessPairingChartLocalMExt (I := I) (M := M) g φ α hu_h x := rfl
 
-/-- The chart contribution vanishes outside `tsupport (POU α)`. -/
 lemma hessPairingMChartContribution_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -640,8 +577,6 @@ lemma hessPairingMChartContribution_zero_off_tsupport
     image_eq_zero_of_notMem_tsupport hx
   rw [hρ_zero, zero_mul]
 
-/-- The global Hess pairing function on `M`: sum of chart contributions over
-the finite POU support. -/
 noncomputable def hessPairingMOnLapDom
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -657,8 +592,6 @@ noncomputable def hessPairingMOnLapDom
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         hessPairingMChartContribution (I := I) (M := M) g φ α hu_h x := rfl
 
-/-- Strongly-measurable Lp representative of `hessPairingChartLocal g α φ hu_h`,
-viewed as a function on `EuclN`. -/
 private noncomputable def hessPairingChartLocalRep
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -682,8 +615,6 @@ private lemma hessPairingChartLocalRep_measurable
     Measurable (hessPairingChartLocalRep (I := I) (M := M) g α φ hu_h) :=
   (hessPairingChartLocalRep_stronglyMeasurable (I := I) (M := M) g α φ hu_h).measurable
 
-/-- The Lp representative agrees a.e. with `hessPairingChartLocal` on
-`vol.restrict chartTargetEuclid α`. -/
 private lemma hessPairingChartLocalRep_ae_eq
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -694,7 +625,6 @@ private lemma hessPairingChartLocalRep_ae_eq
       hessPairingChartLocal (I := I) (M := M) g α φ hu_h :=
   hessPairingChartLocalLp_coeFn (I := I) (M := M) g α φ hu_h
 
-/-- The Lp representative has finite `eLpNorm 2` on the chart target. -/
 private lemma hessPairingChartLocalRep_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -704,8 +634,6 @@ private lemma hessPairingChartLocalRep_memLp_two
         (chartTargetEuclid (I := I) (M := M) α)) :=
   Lp.memLp _
 
-/-- The globally measurable manifold-side surrogate: POU(α) weighted pullback
-of the chart-local Lp representative. -/
 private noncomputable def chartContribSurrogate
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -723,17 +651,14 @@ private lemma chartContribSurrogate_def
         DifferentialGeometry.Analysis.Sobolev.Chart.pullbackToManifold (I := I) α
           (hessPairingChartLocalRep (I := I) (M := M) g α φ hu_h) x := rfl
 
-/-- Continuity of the POU. -/
 private lemma chartAtlasPOU_continuous (α : M) :
     Continuous fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
 
-/-- Measurability of the POU. -/
 private lemma chartAtlasPOU_measurable (α : M) :
     Measurable fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU_continuous (I := I) (M := M) α).measurable
 
-/-- Measurability of the surrogate. -/
 private lemma chartContribSurrogate_measurable
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -745,7 +670,6 @@ private lemma chartContribSurrogate_measurable
   · exact DifferentialGeometry.Analysis.Sobolev.Chart.pullbackToManifold_measurable
       (I := I) α (hessPairingChartLocalRep_measurable (I := I) (M := M) g α φ hu_h)
 
-/-- The surrogate is zero outside `(chartAt H α).source`. -/
 private lemma chartContribSurrogate_zero_off_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -758,8 +682,6 @@ private lemma chartContribSurrogate_zero_off_source
     (I := I) α _ hx]
   ring
 
-/-- The `tsupport` of the surrogate is contained in `tsupport (POU α)`,
-hence in the chart α source. -/
 private lemma chartContribSurrogate_tsupport_subset
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -791,9 +713,6 @@ private lemma chartContribSurrogate_tsupport_subset
   exact h_tsupp_in_pou.trans
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
 
-/-- The point-equality formula: on the chart α source, the surrogate equals
-the chart contribution with `hessPairingChartLocal` replaced by its Lp
-representative. -/
 private lemma chartContribSurrogate_eq_on_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -808,8 +727,6 @@ private lemma chartContribSurrogate_eq_on_source
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.pullbackToManifold_apply_of_mem
     (I := I) α _ hx]
 
-/-- On the chart α source, the chart contribution equals
-`POU(α) · hessPairingChartLocal ∘ toE ∘ extChartAt I α`. -/
 theorem hessPairingMChartContribution_eq_on_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -822,7 +739,6 @@ theorem hessPairingMChartContribution_eq_on_source
   unfold hessPairingMChartContribution hessPairingChartLocalMExt
   rfl
 
-/-- The chart contribution vanishes outside `(chartAt H α).source`. -/
 theorem hessPairingMChartContribution_zero_off_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -842,8 +758,6 @@ theorem hessPairingMChartContribution_zero_off_source
   rw [hρ_zero]
   ring
 
-/-- Choose a measurable null superset `N` for the bad set where `h_rep ≠ h_loc`,
-within the chart target. -/
 private lemma hessPairingChartLocalRep_exists_null_superset
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -870,9 +784,6 @@ private lemma hessPairingChartLocalRep_exists_null_superset
     by_contra h_ne
     exact hy_not_bad h_ne
 
-/-- The pullback of a measurable null set in `chartTarget` along the chart map
-has `μ_g`-measure zero. This is the key step that uses the chart-pulled
-measure bridge. -/
 theorem riemannianVolumeMeasure_pullback_null
     (g : SmoothRiemannianMetric I M) (α : M)
     {N : Set EuclN} (hN_meas : MeasurableSet N)
@@ -1041,7 +952,6 @@ theorem riemannianVolumeMeasure_pullback_null
   rw [MeasureTheory.setLIntegral_measure_zero
     (N ∩ chartTargetEuclid (I := I) (M := M) α) _ hN_null, mul_zero]
 
-/-- The surrogate equals the chart contribution a.e. on `μ_g`. -/
 private lemma chartContribSurrogate_ae_eq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1081,8 +991,6 @@ private lemma chartContribSurrogate_ae_eq
     rw [chartContribSurrogate_zero_off_source (I := I) (M := M) g φ α hu_h hx_src,
         hessPairingMChartContribution_zero_off_source (I := I) (M := M) g φ α hu_h hx_src]
 
-/-- The surrogate's `chartPushedRaw` on the chart target is dominated by the
-chart-local Lp representative pointwise in absolute value (POU bounded by 1). -/
 private lemma chartPushedRaw_chartContribSurrogate_le_rep
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1141,7 +1049,6 @@ private lemma chartPushedRaw_chartContribSurrogate_le_rep
       (I := I) (M := M) α _ hy]
     simp
 
-/-- `MemLp 2 μ_g` of the surrogate. -/
 private lemma chartContribSurrogate_memLp_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1187,7 +1094,6 @@ private lemma chartContribSurrogate_memLp_two
     _ < ⊤ :=
         ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_rep_eLp_lt_top
 
-/-- **Per-chart `MemLp 2 μ_g` for the chart contribution.** -/
 theorem hessPairingMChartContribution_memLp_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1200,7 +1106,6 @@ theorem hessPairingMChartContribution_memLp_two
   have h_ae_eq := chartContribSurrogate_ae_eq (I := I) (M := M) g φ α hu_h
   exact MemLp.ae_eq h_ae_eq h_surr_memLp
 
-/-- **Unconditional `MemLp 2 μ_g` for `hessPairingMOnLapDom`.** -/
 theorem hessPairingMOnLapDom_memLp_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1214,7 +1119,6 @@ theorem hessPairingMOnLapDom_memLp_two
   exact hessPairingMChartContribution_memLp_two
     (I := I) (M := M) g φ α hu_h
 
-/-- The `Lp 2 μ_g` class of the global Hess pairing function. -/
 noncomputable def hessPairingLpOnLapDom
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1222,7 +1126,6 @@ noncomputable def hessPairingLpOnLapDom
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (hessPairingMOnLapDom_memLp_two (I := I) (M := M) g φ hu_h).toLp _
 
-/-- Unfolding: the Lp class represents `hessPairingMOnLapDom`. -/
 lemma hessPairingLpOnLapDom_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

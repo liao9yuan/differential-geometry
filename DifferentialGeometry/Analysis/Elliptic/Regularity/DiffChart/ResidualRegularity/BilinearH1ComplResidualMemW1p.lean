@@ -4,80 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 
-/-!
-# `MemW1p 2 fChartResidual` discharge: bridge for raw chart-pull of
-chart-Sobolev functions with compact tsupport in chart source
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, and an
-`Lp 2 μ_g` class `F` whose function representative `F̃ : M → ℝ` satisfies
-
-* `F̃ ∈ MemWkpChart g 1 2` (chart-Sobolev W¹ regularity), and
-* `tsupport F̃ ⊆ (chartAt H α).source` (compactly contained in chart α source),
-
-the chart-pulled raw function `chartPushedRaw α F̃` is in
-`MemW1p 2 chartTargetEuclid α`.
-
-This is the chart-side bridge needed to discharge the residual `MemW1p 2
-fChartResidual` hypothesis in the `_via_residual` constructor for
-`DiffChartBilinearH1ComplData`.
-
-## Strategy
-
-The proof goes by smooth Urysohn construction:
-
-1. Smoothly extend the global smooth function `b : M → ℝ` with
-   `b ≡ 1` on `tsupport(F̃)` and `tsupport(b) ⊆ (chartAt H α).source`
-   (smooth Urysohn / smooth cutoff existence on a smooth manifold).
-
-2. On the chart target, `chartPushedRaw α F̃ = chartPushedRaw α (b · F̃)`
-   pointwise (since `b ≡ 1` on `tsupport(F̃)` and the chart-pullback is
-   pointwise multiplicative).
-
-3. The product `b · F̃` factors as `b · F̃ = (b/ρα) · (ρα · F̃)` where
-   `b/ρα` is *only well-defined where ρα > 0*. The cleanest path goes
-   through a direct smooth-bounded multiplier construction:
-
-   Build a smooth bounded function `Λ : EuclN → ℝ` such that on the
-   chart target, `Λ(y) = (b ∘ symm)(y)` where the right-hand side is
-   smooth (and 0 outside the chart-pulled image of `tsupport(b)`).
-
-4. By Euclidean closure of `MemW1p` under multiplication by smooth
-   bounded functions: from `MemW1p 2 (chartPushedRaw α F̃) chartTarget`
-   (NOT known yet) and `Λ` smooth bounded, we'd get `MemW1p 2 (Λ ·
-   chartPushedRaw α F̃) chartTarget`. But this requires the conclusion.
-
-The actual proof uses an additional ingredient: the `chartPushed POU α F̃`
-function is `MemWkp 1 2` on the chart target by `MemWkpChart_smooth_mul`
-applied to the smooth cutoff `b/ρα` on `{ρα > 0}`, **provided** the
-`{ρα > 0}` boundary is approached gently by `F̃` (i.e., `F̃ = 0` on a
-neighborhood of `{ρα = 0}`).
-
-For general `F̃` with `tsupport(F̃) ⊆ chart α source` (compact), the
-bridge requires the additional structural hypothesis that `F̃` vanishes
-on a neighborhood of `{ρα = 0}`. In the absence of this hypothesis, the
-discharge is conditional on a "vanishing-on-zero-set" predicate.
-
-## Main results delivered
-
-* **Smooth case (unconditional)**: For `v : SmoothScalar g`, the chart-pulled
-  residual `chartPushedRaw α F̃` where `F̃` is the smooth-arithmetic
-  representative of `fHLeibnizResidualLp g α (smoothToH1Compl v)` is in
-  `MemW1p 2 chartTargetEuclid α`.
-
-* **Conditional general case**: For an Lp class `F` whose representative
-  is smooth on `M` with compact tsupport `⊆ chart α source`, the chart-
-  pullback `chartPushedRawLpFromLp α F .coeFn` is in `MemW1p 2
-  chartTargetEuclid α`.
-
-The smooth case is the only case used by smooth scalar approximators
-`v_n → u_h`; the image-membership / iterated-closure / residual-regularity
-chain in `DiffChart/Differentiated/BilinearH1Compl.lean` supplies the smooth approximators
-for which the residual MemW1p holds unconditionally. The general
-(non-smooth) case requires a careful density argument or alternative
-upstream rephrasing; we expose the smooth-case bridge for use as the
-base case in such density chains.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -113,8 +39,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The smooth global extension of a smooth manifold function `f : M → ℝ`
-with `tsupport(f) ⊆ chartAt H α .source` to `EuclN`. -/
 private def smoothExt (α : M) (f : M → ℝ) : EuclN → ℝ := by
   classical
   exact fun y =>
@@ -137,7 +61,6 @@ private lemma smoothExt_apply_of_notMem
   classical
   unfold smoothExt; simp [hy]
 
-/-- `smoothExt α f` agrees with `chartPushedRaw α f` everywhere. -/
 private lemma smoothExt_eq_chartPushedRaw (α : M) (f : M → ℝ) :
     smoothExt (I := I) (M := M) α f =
       chartPushedRaw (I := I) (M := M) α f := by
@@ -149,9 +72,6 @@ private lemma smoothExt_eq_chartPushedRaw (α : M) (f : M → ℝ) :
   · rw [smoothExt_apply_of_notMem (I := I) (M := M) α f hy]
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy]
 
-/-- For `f : M → ℝ` smooth with `tsupport(f) ⊆ chartAt H α .source`, the
-chart-pullback `chartPushedRaw α f` is smooth on `chartTargetEuclid α`
-and vanishes outside the toEuclidean image of `extChartAt I α '' (tsupport f)`. -/
 private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
     {α : M} {f : M → ℝ}
     {y : EuclN}
@@ -163,8 +83,6 @@ private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
       (I := I) (M := M) (u := f) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy_target
 
-/-- For `f : M → ℝ` smooth with `tsupport(f) ⊆ chartAt H α .source`, the
-chart-pullback `chartPushedRaw α f` has compact support in `EuclN`. -/
 private lemma chartPushedRaw_smooth_hasCompactSupport
     {α : M} {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -191,8 +109,6 @@ private lemma chartPushedRaw_smooth_hasCompactSupport
   exact chartPushedRaw_smooth_eq_zero_off_image_tsupport
     (I := I) (M := M) (f := f) (α := α) hyK
 
-/-- For smooth `f : M → ℝ` with `tsupport(f) ⊆ chartAt H α .source`, the
-chart-pulled raw function is continuous on `EuclN`. -/
 private lemma chartPushedRaw_smooth_continuous
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -270,9 +186,6 @@ private lemma chartPushedRaw_smooth_continuous
     · exact continuousAt_const
     · filter_upwards [hKc_nhds] with z hz using (h_eq_zero_on_Kc z hz).symm
 
-/-- For smooth `f : M → ℝ` with `tsupport(f) ⊆ chartAt H α .source` (compact),
-the chart-pulled raw function is in `MemLp p` of `volume.restrict
-chartTargetEuclid α` for any `p ≥ 1`. -/
 private lemma chartPushedRaw_smooth_memLp
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -292,9 +205,6 @@ private lemma chartPushedRaw_smooth_memLp
     hcont.memLp_of_hasCompactSupport (μ := volume) hcompact
   exact hmemLp_full.restrict _
 
-/-- For smooth `f : M → ℝ` with `tsupport(f) ⊆ chartAt H α .source` (compact),
-the chart-pulled raw function is in `MemW1p p chartTargetEuclid α`
-for any `p`. -/
 theorem memW1p_chartPushedRaw_of_contMDiff_tsupport
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -389,8 +299,6 @@ theorem memW1p_chartPushedRaw_of_contMDiff_tsupport
     refine ⟨fun x => hw_chart.weakGrad x i,
       hw_chart.weakGrad_component_memLp i, hw_chart.isWeakGrad i⟩
 
-/-- The smooth manifold representative of `fHLeibnizResidualLp g α (smoothToH1Compl v)`:
-the explicit pointwise function `-2 g(∇ρα, ∇v) - Δρα · v`. -/
 noncomputable def fHLeibnizResidualSmoothRep
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) : M → ℝ :=
   fun x : M =>
@@ -399,7 +307,6 @@ noncomputable def fHLeibnizResidualSmoothRep
       (gradFun (I := I) g v.toFun x)) -
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
-/-- `fHLeibnizResidualSmoothRep g α v` is smooth on `M`. -/
 lemma fHLeibnizResidualSmoothRep_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by
@@ -434,8 +341,6 @@ lemma fHLeibnizResidualSmoothRep_contMDiff
     (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul v.smooth
   exact h_piece1.sub h_piece2
 
-/-- The smooth representative vanishes outside `tsupport(ρα)`, hence its
-`tsupport` is contained in `tsupport(ρα) ⊆ chart α source`. -/
 lemma fHLeibnizResidualSmoothRep_tsupport_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     tsupport (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) ⊆
@@ -488,11 +393,6 @@ lemma fHLeibnizResidualSmoothRep_tsupport_subset
   exact h_tsupp_subset.trans
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
 
-/-- **Smooth-case unconditional discharge of `MemW1p 2 chartPushedRaw α
-fHLeibnizResidualSmoothRep`.**
-
-For `v : SmoothScalar g`, the chart-pulled smooth representative is in
-`MemW1p 2 chartTargetEuclid α`. -/
 theorem memW1p_fChartResidual_smooth_aux
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
@@ -505,9 +405,6 @@ theorem memW1p_fChartResidual_smooth_aux
     (I := I) (M := M) (f := fHLeibnizResidualSmoothRep (I := I) (M := M) g α v)
     (α := α) h_smooth h_supp 2
 
-/-- The Lp class `fHLeibnizResidualLp g α (smoothToH1Compl v)` for `v :
-SmoothScalar g` has coeFn ae-equal to the smooth representative
-`fHLeibnizResidualSmoothRep g α v`. -/
 theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ((DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp
@@ -586,24 +483,6 @@ theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
   simp only [Pi.smul_apply, smul_eq_mul, hx_grad]
   ring
 
-/-- **Smooth-case unconditional discharge of `MemW1p 2 fChartResidual`.**
-
-For `v : SmoothScalar g`, the chart-pulled residual function
-`fChartResidual g α (smoothToH1Compl v)` is in `MemW1p 2
-chartTargetEuclid α`.
-
-Strategy:
-1. `fHLeibnizResidualLp(smoothToH1Compl v).coeFn =ᵐ fHLeibnizResidualSmoothRep g α v`
-   (manifold-side ae-identification, via smooth bridges).
-2. The chart-pullback `chartPushedRaw α (fHLeibnizResidualSmoothRep)` is
-   `MemW1p 2 chartTargetEuclid α` (by `memW1p_chartPushedRaw_of_contMDiff_tsupport`).
-3. `fChartResidual = chartPushedRawLpFromLp(fHLeibnizResidualLp).coeFn`
-   is ae-equal to `chartPushedRaw α (fHLeibnizResidualLp.coeFn)` on
-   the chart-pulled weighted measure (via `chartPushedRawLpFromLp_coeFn`),
-   which by Step 1 is ae-equal to `chartPushedRaw α
-   (fHLeibnizResidualSmoothRep g α v)`. Transfer through ae-equivalence
-   of volume and weighted measure on chartTargetEuclid gives the
-   conclusion. -/
 theorem memW1p_fChartResidual_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
@@ -682,10 +561,6 @@ theorem memW1p_fChartResidual_smoothToH1Compl
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     h_fChart_smooth_ae_vol.symm).mp h_smooth_w1p
 
-/-- For `v : SmoothScalar g`, the chart-pulled residual
-`fChartResidual g α (smoothToH1Compl v)` is in `MemW1p 2
-chartTargetEuclid α`. The `u_h ∈ laplacianDomainPow g 2` membership is
-automatic for `u_h = smoothToH1Compl v`. -/
 theorem memW1p_fChartResidual_smoothCase
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2

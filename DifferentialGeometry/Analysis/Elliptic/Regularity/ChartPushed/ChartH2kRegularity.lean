@@ -7,62 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.Char
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 
-/-!
-# Truly unconditional chart-`H^{2k}` regularity for arbitrary `k`
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and
-any `u_h ∈ laplacianDomainPow g k`, the canonical chart-pushed POU-cut
-representative `chartPushed POU α (H1ComplToLp g u_h).coeFn` lies in
-`MemWkp (2k) 2 (chartTargetEuclid α)` unconditionally, for every `k : ℕ`.
-The manifold-level `MemWkpChart g (2k) 2` and the `ChartSideH2kBridge g k`
-headlines follow.
-
-## Composition strategy
-
-The chart-`H^{2k}` discharge is by outer recursion on `k`. The base cases
-are:
-
-* `k = 0` — chart-`L²` (trivial via `iteratedH2Regularity_zero`).
-* `k = 1` — chart-`H²` (via `iteratedH2Regularity_one`).
-* `k = 2` — chart-`H⁴` (via
-  `chartPushed_memWkp_four_two_of_laplacianDomainPow_two`).
-
-For `k ≥ 2`, the step `k → k + 1` chains two applications of the per-stage
-jump `chartPushed_memWkp_succ_jump`. The first call lifts the chart-`H` order
-from `2k` to `2k + 1`; the second call lifts from `2k + 1` to `2(k + 1)`.
-Each call consumes:
-
-1. `u_h ∈ laplacianDomainPow g 2` (from `u_h ∈ laplacianDomainPow g (k + 1)`
-   via downward monotonicity `laplacianDomainPow_le_of_le`).
-2. chart-`H^{m + 1}` of `u_h.coeFn` (from the outer IH at level `k`, with
-   `m = 2k - 1` for the first call and `m = 2k` for the second call).
-3. chart-`H^m` of the canonical function representative of the `Lp`-side
-   `(1 - Δ_g)`-preimage of `u_h`.
-
-The chart-`H` regularity of the `(1 - Δ_g)`-preimage at order `2k` is
-obtained from the outer IH applied to an `H1Compl` lift of the preimage:
-for `u_h ∈ laplacianDomainPow g (k + 1)` with `k ≥ 1`, there exists
-`v_h ∈ laplacianDomainPow g k` with
-`H1ComplToLp g v_h = laplacianDomain.preimage u_h`. The outer IH then
-delivers `MemWkpChart g (2k) 2` of `v_h.coeFn`, which equals
-`MemWkpChart g (2k) 2` of the preimage's canonical function representative.
-
-## Main results
-
-* `chartPushed_memWkp_two_k_of_laplacianDomainPow` — the per-chart chart-`H^{2k}`
-  regularity of the chart-pushed POU-cut representative on the full chart
-  target, for arbitrary `k : ℕ`.
-* `memWkpChart_two_k_of_laplacianDomainPow_unconditional` — manifold-level
-  `MemWkpChart g (2k) 2` of the canonical function representative, for
-  arbitrary `k : ℕ`.
-* `chartSideH2kBridge_of_laplacianDomainPow_unconditional` — the
-  `ChartSideH2kBridge g k` predicate for the canonical function
-  representative, for arbitrary `k : ℕ`.
-* `laplacianDomainPow_memWkpChart_two_k_unconditional_arbitrary_k` — the
-  combined manifold-level `MemWkpChart g (2k) 2` plus finite chart-based
-  norm, for arbitrary `k : ℕ`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology Function
@@ -97,9 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For `u_h ∈ laplacianDomainPow g (k + 1)` with `k ≥ 1`, there exists a
-witness `v_h ∈ laplacianDomainPow g k` whose `Lp` image equals the
-canonical `(1 - Δ_g)`-preimage of `u_h`. -/
 private theorem laplacianDomainPow_succ_preimage_lift
     (g : SmoothRiemannianMetric I M) {k : ℕ} (hk_pos : 1 ≤ k)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -135,15 +76,6 @@ private theorem laplacianDomainPow_succ_preimage_lift
     rw [← h_apply]
     exact hf.symm
 
-/-- The outer-recursion helper: unconditional manifold-level chart-`H^{2k}`
-of the canonical function representative of any `u_h ∈ laplacianDomainPow g k`,
-for arbitrary `k : ℕ`.
-
-The recursion descends `k` to either a base case (`k ≤ 2`) or the inductive
-step (`k ≥ 3`). The step `k → k + 1` (active for `k ≥ 2`, i.e. `k + 1 ≥ 3`)
-applies `chartPushed_memWkp_succ_jump` twice: once at `m = 2k - 1` to lift
-chart-`H^{2k}` to chart-`H^{2k + 1}`, and once at `m = 2k` to lift
-chart-`H^{2k + 1}` to chart-`H^{2(k + 1)}`. -/
 private theorem chart_H_at_outer_k
     (g : SmoothRiemannianMetric I M) :
     ∀ (k : ℕ) {u_h : H1Compl (I := I) (M := M) g},
@@ -306,13 +238,6 @@ private theorem chart_H_at_outer_k
           rw [← h_arith]
           exact this
 
-/-- **Headline: truly unconditional chart-`H^{2k}` of the chart-pushed
-function, for arbitrary `k`.**
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an order
-`k : ℕ`, and any `u_h ∈ laplacianDomainPow g k`, the canonical chart-pushed
-POU-cut representative `chartPushed POU α (H1ComplToLp g u_h).coeFn` lies in
-`MemWkp (2k) 2 (chartTargetEuclid α)`. -/
 theorem chartPushed_memWkp_two_k_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -327,11 +252,6 @@ theorem chartPushed_memWkp_two_k_of_laplacianDomainPow
         (I := I) (M := M) α) :=
   chart_H_at_outer_k (I := I) (M := M) g k hu_h α
 
-/-- **Headline: truly unconditional manifold-level `MemWkpChart g (2k) 2`,
-for arbitrary `k`.**
-
-For `u_h ∈ laplacianDomainPow g k`, the canonical function representative
-`(H1ComplToLp g u_h).coeFn` lies in `MemWkpChart g (2k) 2`, unconditionally. -/
 theorem memWkpChart_two_k_of_laplacianDomainPow_unconditional
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -342,11 +262,6 @@ theorem memWkpChart_two_k_of_laplacianDomainPow_unconditional
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   chart_H_at_outer_k (I := I) (M := M) g k hu_h
 
-/-- **Headline: truly unconditional `ChartSideH2kBridge g k` for the
-canonical function representative, for arbitrary `k`.**
-
-For `u_h ∈ laplacianDomainPow g k`, the chart-side `H^{2k}` bridge for the
-canonical function representative holds, unconditionally. -/
 theorem chartSideH2kBridge_of_laplacianDomainPow_unconditional
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -358,12 +273,6 @@ theorem chartSideH2kBridge_of_laplacianDomainPow_unconditional
   exact chartPushed_memWkp_two_k_of_laplacianDomainPow
     (I := I) (M := M) g α k hu_h
 
-/-- **Headline: truly unconditional combined `MemWkpChart g (2k) 2` with
-finite chart-based norm, for arbitrary `k`.**
-
-For `u_h ∈ laplacianDomainPow g k`, the canonical function representative
-`(H1ComplToLp g u_h).coeFn` lies in `MemWkpChart g (2k) 2` with a finite
-chart-based norm, unconditionally. -/
 theorem laplacianDomainPow_memWkpChart_two_k_unconditional_arbitrary_k
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

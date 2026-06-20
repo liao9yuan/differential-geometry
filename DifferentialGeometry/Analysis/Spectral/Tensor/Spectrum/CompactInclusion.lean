@@ -3,27 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartCo
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences
 
-/-!
-# Foundations for compactness of the H¹ → L² inclusion for tensor sections
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file
-collects the predicate-free analytic ingredients used to establish that the
-bounded operator
-
-  `TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
-
-is a compact operator:
-
-* the pointwise norm bound `‖TensorH1ComplToTensorL2 v‖_{L²} ≤ ‖v‖_{H¹}`,
-* density of the canonical embedding `smoothToTensorH1Compl`, and
-* the consequent H¹-approximation of any vector by a smooth
-  compactly-supported tensor section.
-
-These ingredients are assembled into the compactness statement in the
-chart-locality-free file
-`DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.CompactInclusionIntrinsic`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -56,8 +35,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
-/-- The pointwise norm bound
-`‖TensorH1ComplToTensorL2 v‖_{L²} ≤ ‖v‖_{H¹}` for `v ∈ TensorH1Compl g r s`. -/
+
 lemma norm_TensorH1ComplToTensorL2_apply_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) :
@@ -86,7 +64,7 @@ lemma norm_TensorH1ComplToTensorL2_apply_le
     exact SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) a
 
 set_option linter.unusedSectionVars false in
-/-- The canonical embedding `smoothToTensorH1Compl` has dense range. -/
+
 lemma denseRange_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange (smoothToTensorH1Compl (I := I) (M := M) g r s) := by
@@ -100,11 +78,7 @@ lemma denseRange_smoothToTensorH1Compl
   exact UniformSpace.Completion.denseRange_coe
 
 set_option linter.unusedSectionVars false in
-/-- For each vector `v ∈ TensorH1Compl g r s` and each `δ > 0`, there
-exists a smooth compactly-supported H¹ tensor section `S` with
-`‖v - smoothToTensorH1Compl g r s S‖ < δ`.
 
-Direct consequence of `denseRange_smoothToTensorH1Compl`. -/
 private lemma exists_smooth_close_to_TensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) {δ : ℝ} (hδ : 0 < δ) :

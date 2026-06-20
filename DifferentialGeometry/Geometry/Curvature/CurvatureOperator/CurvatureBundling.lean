@@ -5,23 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-/-!
-# Bundled trilinear form of the section-level Riemann curvature
-
-The section-level Riemann formula `riemannSec cov X Y Z x` descends, on smooth global sections,
-to a continuous trilinear form on the fibres at `x`. This file packages that observation as
-`riemannOp cov x : T_x M →L[ℝ] T_x M →L[ℝ] V x →L[ℝ] V x`, together with a well-definedness
-lemma, the application formula on smooth sections, and the antisymmetry of the bundled form.
-
-## Main definitions and theorems
-
-* `riemannSec_eq_of_pointwise_eq` — well-definedness of `riemannSec` on smooth global sections
-  modulo pointwise agreement at `x`.
-* `riemannOp` — the bundled trilinear form `T_x M →L[ℝ] T_x M →L[ℝ] V x →L[ℝ] V x`.
-* `riemannOp_apply_smooth` — application formula on smooth sections.
-* `riemannOp_swap` — antisymmetry of the bundled form in the first two arguments.
--/
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter
@@ -46,7 +29,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
   [FiniteDimensional ℝ F]
 
-/-- The smooth tangent extension is a smooth global section of the tangent bundle. -/
 lemma smoothExtensionTangent_contMDiff (x : M) (v : TangentSpace I x) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) := by
   classical
@@ -56,7 +38,6 @@ lemma smoothExtensionTangent_contMDiff (x : M) (v : TangentSpace I x) :
   change ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (fun b => σ b))
   exact σ.contMDiff
 
-/-- The smooth fibre extension is a smooth global section of `V`. -/
 lemma smoothExtensionFiber_contMDiff (x : M) (u : V x) :
     ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (smoothExtensionFiber (I := I) (F := F) (V := V) x u)) := by
   classical
@@ -66,12 +47,10 @@ lemma smoothExtensionFiber_contMDiff (x : M) (u : V x) :
   change ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (fun b => σ b))
   exact σ.contMDiff
 
-/-- The smooth tangent extension is differentiable at every point. -/
 lemma smoothExtensionTangent_mdiff (x : M) (v : TangentSpace I x) :
     MDiff (T% (smoothExtensionTangent (I := I) x v)) :=
   (smoothExtensionTangent_contMDiff (I := I) x v).mdifferentiable (by simp)
 
-/-- The smooth fibre extension is differentiable at every point. -/
 lemma smoothExtensionFiber_mdiff (x : M) (u : V x) :
     MDiff (T% (smoothExtensionFiber (I := I) (F := F) (V := V) x u)) :=
   (smoothExtensionFiber_contMDiff (I := I) (F := F) (V := V) x u).mdifferentiable (by simp)
@@ -95,8 +74,6 @@ lemma covApply_mdifferentiableAt_local
     (hop.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp)
   exact hop_at.clm_bundle_apply (v := X) hX
 
-/-- The X-slot operation `riemannSec cov · Y Z x` is `TensorialAt`, given smooth global
-`Y` and a smooth `Z` of class `C^{∞+1}`. -/
 lemma tensorialAt_X
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -117,8 +94,6 @@ lemma tensorialAt_X
     exact riemannSec_add_left (cov := cov) (X := X) (X' := X') (Y := Y) (Z := Z) (x := x)
       hX hX' hcXZ hcX'Z
 
-/-- The Y-slot operation `riemannSec cov X · Z x` is `TensorialAt`, given smooth global
-`X` and a smooth `Z` of class `C^{∞+1}`. -/
 lemma tensorialAt_Y
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -256,7 +231,6 @@ private lemma extDerivFun_apply_contMDiff
   refine hresult.congr fun b => ?_
   simp [extDerivFun, tangentMap_snd, NormedSpace.fromTangentSpace]
 
-/-- Z-slot additivity for smooth global sections. -/
 private lemma riemannSec_add_third_smooth
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -285,7 +259,6 @@ private lemma riemannSec_add_third_smooth
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZ'_le)
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZsum_le)
 
-/-- Z-slot scalar-multiplication identity for smooth global sections. -/
 private lemma riemannSec_smul_third_smooth
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -502,9 +475,6 @@ lemma riemannSec_eq_of_Z_eq_at
   rw [riemannSec_add_third_smooth (cov := cov) hX hY hZ' hτ_smooth]
   rw [hτ_vanishes, add_zero]
 
-/-- **Well-definedness of `riemannSec` on smooth global sections, modulo pointwise agreement
-at `x`.** Given two triples of smooth global sections `(X, Y, Z)` and `(X', Y', Z')` agreeing
-pointwise at `x`, the values of `riemannSec` at `x` coincide. -/
 theorem riemannSec_eq_of_pointwise_eq
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X X' Y Y' : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -526,9 +496,6 @@ theorem riemannSec_eq_of_pointwise_eq
     riemannSec_eq_of_Z_eq_at (cov := cov) hX' hY' hZ hZ' hZ_eq
   rw [h1, h2, h3]
 
-/-- An evaluation form of `riemannOpFun` on smooth global sections. The proof uses
-`riemannSec_eq_of_pointwise_eq` together with the smoothness of `smoothExtensionTangent`
-and `smoothExtensionFiber`. -/
 theorem riemannOpFun_eq_riemannSec
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -550,8 +517,6 @@ theorem riemannOpFun_eq_riemannSec
   · exact smoothExtensionTangent_eq x (Y x)
   · exact smoothExtensionFiber_eq (V := V) x (Z x)
 
-/-- `riemannOpFun cov x v w u` only depends on the fibre values `(v, w, u)`. The proof uses
-two arbitrary smooth extensions and `riemannSec_eq_of_pointwise_eq`. -/
 theorem riemannOpFun_well_defined
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M} {v w : TangentSpace I x}
@@ -730,7 +695,6 @@ private lemma riemannOpFun_smul_third
       riemannOpFun_well_defined (cov := cov) hX hY hZu hX_eq hY_eq hZu_eq]
   exact riemannSec_smul_third_smooth (cov := cov) hcsmooth hX hY hZu
 
-/-- The Z-slot linear map for fixed `(v, w) ∈ T_x M × T_x M`. -/
 private def riemannOp_Zslot
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v w : TangentSpace I x) : V x →ₗ[ℝ] V x where
@@ -738,7 +702,6 @@ private def riemannOp_Zslot
   map_add' u u' := riemannOpFun_add_third (cov := cov) x v w u u'
   map_smul' c u := riemannOpFun_smul_third (cov := cov) x v w c u
 
-/-- The Z-slot continuous linear map for fixed `(v, w) ∈ T_x M × T_x M`. -/
 private noncomputable def riemannOp_Zslot_clm
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v w : TangentSpace I x) : V x →L[ℝ] V x :=
@@ -746,7 +709,6 @@ private noncomputable def riemannOp_Zslot_clm
   haveI : FiniteDimensional ℝ (V x) := VectorBundle.finiteDimensional ℝ F V x
   LinearMap.toContinuousLinearMap (riemannOp_Zslot (cov := cov) x v w)
 
-/-- The Y-slot linear map for fixed `v ∈ T_x M`, valued in continuous linear maps. -/
 private def riemannOp_Yslot
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v : TangentSpace I x) : TangentSpace I x →ₗ[ℝ] V x →L[ℝ] V x where
@@ -765,7 +727,6 @@ private def riemannOp_Yslot
     change riemannOpFun cov x v (c • w) u = c • riemannOpFun cov x v w u
     exact riemannOpFun_smul_right (cov := cov) x v c w u
 
-/-- The Y-slot continuous linear map for fixed `v ∈ T_x M`. -/
 private noncomputable def riemannOp_Yslot_clm
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v : TangentSpace I x) : TangentSpace I x →L[ℝ] V x →L[ℝ] V x :=
@@ -773,7 +734,6 @@ private noncomputable def riemannOp_Yslot_clm
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   LinearMap.toContinuousLinearMap (riemannOp_Yslot (cov := cov) x v)
 
-/-- The X-slot linear map. -/
 private def riemannOp_Xslot
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) :
@@ -797,9 +757,6 @@ private def riemannOp_Xslot
     change riemannOpFun cov x (c • v) w u = c • riemannOpFun cov x v w u
     exact riemannOpFun_smul_left (cov := cov) x c v w u
 
-/-- **The bundled trilinear continuous linear form `riemannOp`.** At each point `x`, this is
-the continuous trilinear form `T_x M × T_x M × V x → V x` given by the section-level Riemann
-formula evaluated on smooth global extensions of the fibre vectors. -/
 noncomputable def riemannOp
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞] (x : M) :
@@ -808,16 +765,12 @@ noncomputable def riemannOp
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   LinearMap.toContinuousLinearMap (riemannOp_Xslot (cov := cov) x)
 
-/-- The defining identity: `riemannOp cov x (v) (w) (u) = riemannOpFun cov x v w u`. -/
 theorem riemannOp_apply_fun
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v w : TangentSpace I x) (u : V x) :
     riemannOp cov x v w u = riemannOpFun cov x v w u := rfl
 
-/-- **Application formula for `riemannOp` on smooth sections.** For smooth global sections
-`X, Y` of `TM` and `Z` of `V`, we have `riemannOp cov x (X x) (Y x) (Z x) =
-riemannSec cov X Y Z x`. -/
 theorem riemannOp_apply_smooth
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -829,8 +782,6 @@ theorem riemannOp_apply_smooth
   rw [riemannOp_apply_fun]
   exact riemannOpFun_eq_riemannSec (cov := cov) hX hY hZ
 
-/-- **Antisymmetry of `riemannOp` in the first two arguments.** At each point `x`, the bundled
-trilinear form satisfies `R(v, w, u) = -R(w, v, u)`. -/
 lemma riemannOp_swap
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

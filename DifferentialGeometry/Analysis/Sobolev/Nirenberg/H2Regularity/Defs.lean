@@ -2,69 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotient
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 import DifferentialGeometry.External.DeGiorgi.EllipticCoefficients
 
-/-!
-# Foundational machinery for second-order divergence-form operators on
-Euclidean space
-
-This module sets up the data structures, a priori coercivity bounds, and
-auxiliary difference-quotient lemmas for the second-order divergence-form
-operator on Euclidean space. The underlying goal is to support the
-Nirenberg difference-quotient method for interior second-order regularity
-of weak solutions of uniformly elliptic divergence-form equations.
-
-## Setting
-
-Given an open set `Ω : Set (EuclideanSpace ℝ (Fin d))`, smooth coefficient
-functions `a : E → Matrix (Fin d) (Fin d) ℝ` (symmetric and uniformly
-elliptic on `Ω`) and `c : E → ℝ`, the divergence-form operator is
-
-  `L u(x) = -∂_i (a^{ij}(x) ∂_j u(x)) + c(x) u(x)`,
-
-with associated bilinear form
-
-  `B(u, v) := ∫_Ω (∑ i j, a^{ij} (∂_i u) (∂_j v)) + ∫_Ω c · u · v`.
-
-A weak solution of `L u = f` on `Ω` is `u ∈ H¹(Ω)` such that
-`B(u, v) = ⟨f, v⟩_{L²}` for every test function `v ∈ H¹_0(Ω)`.
-
-## Main structures
-
-* `SmoothEllipticBilinearForm d Ω`: smooth uniformly elliptic
-  divergence-form data — matrix coefficient `a` (symmetric, smooth,
-  coercive on `Ω`) and zeroth-order coefficient `c` (smooth).
-* `SmoothEllipticBilinearForm.principalIntegrand`: the integrand
-  `∑ i j, a^{ij} ∂_i u ∂_j v` of the principal part.
-* `SmoothEllipticBilinearForm.bilin`: the associated bilinear form
-  `B(u, v) = ∫_Ω (a^{ij} ∂_i u ∂_j v + c u v)`.
-* `SmoothEllipticBilinearForm.IsSmoothWeakSolution`: smooth `u : E → ℝ`
-  with `B(u, φ) = ∫ f · φ` for all `φ ∈ C^∞_c(Ω)`.
-* `SmoothEllipticBilinearForm.gradientVec`: the gradient packaged as a
-  vector in `EuclideanSpace ℝ (Fin d)`.
-
-## Main results
-
-* `SmoothEllipticBilinearForm.exists_cutoff`: a smooth cutoff
-  `η ∈ C^∞_c(Ω')` equal to `1` on a given compact `K ⊆ Ω'`. Standard
-  Mathlib cutoff re-exposed for use in interior regularity arguments.
-* `SmoothEllipticBilinearForm.bounded_a_on_compact`,
-  `bounded_c_on_compact`, `bounded_fderiv_a_on_compact`: smooth
-  coefficients are uniformly bounded on every compact set, with explicit
-  bounds for the coefficient values and their first derivatives.
-* `diffQuot_bound_of_smooth_compactSupport`: a `C¹` function with compact
-  support has all its difference quotients uniformly bounded by the same
-  Lipschitz constant, independently of the step `h`.
-* `SmoothEllipticBilinearForm.principalIntegrand_self_eq_inner`: the
-  pointwise quadratic form of the principal integrand equals the standard
-  inner-product action `⟪∇u, a · ∇u⟫`.
-* `SmoothEllipticBilinearForm.principalIntegrand_self_ge`: pointwise
-  ellipticity bound: `lam · ‖∇u(x)‖² ≤ ∑ a^{ij} ∂_i u ∂_j u` on `Ω`.
-* `SmoothEllipticBilinearForm.bilin_integrand_self_ge`: the corresponding
-  pointwise bound on the full bilinear-form integrand.
-* `diffQuot_mul`, `diffQuot_coeff_apply`: the discrete product rule for
-  difference quotients used to expand `D_h^k(a · ∂u)` into a principal
-  piece plus a lower-order error.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -77,10 +14,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- A smooth function with compact support has all its difference quotients
-uniformly bounded by a constant independent of `h`. This packages the
-Lipschitz estimate for `C¹` functions with compact support and applies it
-to bound the difference quotient. -/
+
 theorem diffQuot_bound_of_smooth_compactSupport
     {f : E → ℝ} (hf : ContDiff ℝ 1 f) (hf_supp : HasCompactSupport f)
     (i : Fin d) :
@@ -117,19 +51,6 @@ theorem diffQuot_bound_of_smooth_compactSupport
     rw [h_lhs_norm]
     exact hLip_apply
 
-/-- A smooth uniformly elliptic divergence-form structure on an open set
-`Ω : Set E`.
-
-Carries:
-- `a : E → Matrix (Fin d) (Fin d) ℝ` — the principal coefficient matrix,
-  smooth and symmetric;
-- `c : E → ℝ` — the zeroth-order coefficient, smooth;
-- `lam, capLam : ℝ` — lower / upper ellipticity constants (`0 < lam ≤ capLam`).
-
-Coercivity: `lam * ‖ξ‖² ≤ ⟪ξ, a x ξ⟫` for all `x ∈ Ω` and `ξ : E`.
-
-The matrix-vector action uses the standard `EuclideanSpace` action
-`matMulE` from the elliptic-coefficient layer. -/
 structure SmoothEllipticBilinearForm
     (d : ℕ) [NeZero d] (Ω : Set (EuclideanSpace ℝ (Fin d))) where
   a : EuclideanSpace ℝ (Fin d) → Matrix (Fin d) (Fin d) ℝ
@@ -146,37 +67,27 @@ structure SmoothEllipticBilinearForm
 
 namespace SmoothEllipticBilinearForm
 
-/-- Componentwise smoothness of the coefficient matrix. -/
 theorem contDiff_a {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (i j : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun x : E => B.a x i j) :=
   B.smooth_a i j
 
-/-- Continuity of each component of the coefficient matrix. -/
 theorem continuous_a {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (i j : Fin d) :
     Continuous (fun x : E => B.a x i j) :=
   (B.smooth_a i j).continuous
 
-/-- Continuity of the zeroth-order coefficient. -/
 theorem continuous_c {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     Continuous B.c :=
   B.smooth_c.continuous
 
-/-- Lower-ellipticity constant is nonnegative. -/
 theorem lam_nonneg {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     0 ≤ B.lam := B.hlam_pos.le
 
-/-- Upper-ellipticity constant is positive. -/
 theorem capLam_pos {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     0 < B.capLam := lt_of_lt_of_le B.hlam_pos B.hlam_le_capLam
 
-/-- Upper-ellipticity constant is nonnegative. -/
 theorem capLam_nonneg {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     0 ≤ B.capLam := B.capLam_pos.le
 
-/-- A smooth cutoff function: for any compact `K` contained in an open set
-`Ω'`, there is `η ∈ C^∞(E)` with `0 ≤ η ≤ 1`, `η = 1` on `K`, and
-`tsupport η ⊆ Ω'`. Re-derivation of the standard Mathlib cutoff for use
-in this file, public so downstream code can apply it. -/
 theorem exists_cutoff
     {K Ω' : Set E} (hK : IsCompact K) (hΩ' : IsOpen Ω') (hKΩ' : K ⊆ Ω') :
     ∃ η : E → ℝ,
@@ -207,13 +118,6 @@ theorem exists_cutoff
   · rw [tsupport, hη_support]
     exact (Metric.closure_thickening_subset_cthickening δ K).trans hδΩ
 
-/-- A smooth cutoff with a quantitative bound on its derivative.
-
-Strengthening of `exists_cutoff`: in addition to existence of `η ∈ C^∞(E)`
-with `0 ≤ η ≤ 1`, `η = 1` on `K`, and `tsupport η ⊆ Ω'`, we extract a finite
-constant `N ≥ 0` such that `‖fderiv ℝ η x‖ ≤ N` for every `x : E`. The bound
-arises from continuity of the Fréchet derivative on the compact `tsupport η`,
-combined with the fact that `fderiv ℝ η = 0` outside `tsupport η`. -/
 theorem exists_cutoff_with_fderiv_bound
     {K Ω' : Set E} (hK : IsCompact K) (hΩ' : IsOpen Ω') (hKΩ' : K ⊆ Ω') :
     ∃ η : E → ℝ,
@@ -238,7 +142,6 @@ theorem exists_cutoff_with_fderiv_bound
   have h_le : ‖fderiv ℝ η x‖ ≤ N₀ := hN₀ ⟨x, rfl⟩
   exact h_le.trans (le_max_left _ _)
 
-/-- The coefficient matrix is bounded on any compact set. -/
 theorem bounded_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {K : Set E} (hK : IsCompact K) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ i j : Fin d, ∀ x ∈ K, |B.a x i j| ≤ M := by
@@ -263,7 +166,6 @@ theorem bounded_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     exact pairBound_nn ij
   exact (pairBound_le (i, j) x hx).trans hsingle
 
-/-- The zeroth-order coefficient is bounded on any compact set. -/
 theorem bounded_c_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {K : Set E} (hK : IsCompact K) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ x ∈ K, |B.c x| ≤ M := by
@@ -272,8 +174,6 @@ theorem bounded_c_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
   have h := hM (mem_image_of_mem _ hx)
   exact h.trans (le_max_left _ _)
 
-/-- The first partial derivative of each coefficient component is bounded on
-any compact set. -/
 theorem bounded_fderiv_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (k : Fin d) {K : Set E} (hK : IsCompact K) :
     ∃ M : ℝ, 0 ≤ M ∧ ∀ i j : Fin d, ∀ x ∈ K,
@@ -306,10 +206,6 @@ theorem bounded_fderiv_a_on_compact {Ω : Set E} (B : SmoothEllipticBilinearForm
     exact pairBound_nn ij
   exact (pairBound_le (i, j) x hx).trans hsingle
 
-/-- The pointwise integrand of the principal part of the bilinear form:
-`∑ i, ∑ j, a^{ij}(x) (∂_i u)(x) (∂_j v)(x)`.
-
-In coordinates, this is the dot product `⟪∇v(x), a(x) ∇u(x)⟫_ℝ`. -/
 def principalIntegrand {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u v : E → ℝ) (x : E) : ℝ :=
   ∑ i : Fin d, ∑ j : Fin d,
@@ -317,23 +213,15 @@ def principalIntegrand {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
       ((fderiv ℝ u x) (EuclideanSpace.single i 1)) *
       ((fderiv ℝ v x) (EuclideanSpace.single j 1))
 
-/-- The full bilinear form `B(u, v) = ∫_Ω (a^{ij} ∂_i u ∂_j v + c u v)`. -/
 def bilin {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) (u v : E → ℝ) : ℝ :=
   ∫ x in Ω, B.principalIntegrand u v x + B.c x * u x * v x
 
-/-- A smooth function `u` is a smooth weak solution of `L u = f` on `Ω` if
-`B(u, φ) = ∫_Ω f · φ` for every `φ ∈ C^∞_c(Ω)`. The "smooth" qualifier in
-the name refers to `u`, not the equation: `u` is a strong (`C^∞`) solution
-of the equation in the sense that the bilinear identity holds against test
-functions, which by IBP is equivalent to the classical PDE for smooth `u`. -/
 def IsSmoothWeakSolution {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u f : E → ℝ) : Prop :=
   ContDiff ℝ (⊤ : ℕ∞) u ∧
   ∀ φ : E → ℝ, ContDiff ℝ (⊤ : ℕ∞) φ → HasCompactSupport φ → tsupport φ ⊆ Ω →
     B.bilin u φ = ∫ x in Ω, f x * φ x
 
-/-- Symmetry of the principal-integrand pairing: `∑ a^{ij} ∂_i u ∂_j v =
-∑ a^{ij} ∂_i v ∂_j u`, using `a^{ij} = a^{ji}`. -/
 theorem principalIntegrand_symm {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u v : E → ℝ) (x : E) :
     B.principalIntegrand u v x = B.principalIntegrand v u x := by
@@ -347,7 +235,6 @@ theorem principalIntegrand_symm {Ω : Set E} (B : SmoothEllipticBilinearForm d �
   rw [B.symm x j i]
   ring
 
-/-- Continuity of the principal integrand for smooth `u, v`. -/
 theorem continuous_principalIntegrand {Ω : Set E}
     (B : SmoothEllipticBilinearForm d Ω) {u v : E → ℝ}
     (hu : ContDiff ℝ 1 u) (hv : ContDiff ℝ 1 v) :
@@ -362,7 +249,6 @@ theorem continuous_principalIntegrand {Ω : Set E}
   · exact (hu.continuous_fderiv (by simp)).clm_apply continuous_const
   · exact (hv.continuous_fderiv (by simp)).clm_apply continuous_const
 
-/-- Continuity of the bilinear-form integrand for smooth `u, v`. -/
 theorem continuous_bilin_integrand {Ω : Set E}
     (B : SmoothEllipticBilinearForm d Ω) {u v : E → ℝ}
     (hu : ContDiff ℝ 1 u) (hv : ContDiff ℝ 1 v) :
@@ -370,14 +256,10 @@ theorem continuous_bilin_integrand {Ω : Set E}
   (B.continuous_principalIntegrand hu hv).add
     ((B.continuous_c.mul hu.continuous).mul hv.continuous)
 
-/-- The gradient of `u` at `x`, packaged as a Euclidean vector
-`∇u(x) ∈ EuclideanSpace ℝ (Fin d)`. -/
 def gradientVec {Ω : Set E} (_B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) (x : E) : E :=
   WithLp.toLp 2 (fun i : Fin d => (fderiv ℝ u x) (EuclideanSpace.single i 1))
 
-/-- The principal integrand at `x` with `u = v` equals
-`⟪∇u(x), a(x) ∇u(x)⟫_ℝ` (using the standard `EuclideanSpace` inner product). -/
 theorem principalIntegrand_self_eq_inner {Ω : Set E}
     (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ) (x : E) :
     B.principalIntegrand u u x =
@@ -408,8 +290,6 @@ theorem principalIntegrand_self_eq_inner {Ω : Set E}
   intro i _
   rw [B.symm x i j]
 
-/-- The pointwise lower bound for `u = v` from ellipticity: at every `x ∈ Ω`,
-`∑ i j, a^{ij} ∂_i u ∂_j u ≥ lam * ‖∇u(x)‖²`. -/
 theorem principalIntegrand_self_ge {Ω : Set E}
     (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ)
     {x : E} (hx : x ∈ Ω) :
@@ -418,8 +298,6 @@ theorem principalIntegrand_self_ge {Ω : Set E}
   rw [principalIntegrand_self_eq_inner]
   exact B.coercive x hx (B.gradientVec u x)
 
-/-- The Euclidean norm squared of the gradient vector equals
-`∑ i, (∂_i u(x))²`. -/
 theorem gradientVec_norm_sq_eq_sum {Ω : Set E}
     (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ) (x : E) :
     ‖B.gradientVec u x‖ ^ 2 =
@@ -431,9 +309,6 @@ theorem gradientVec_norm_sq_eq_sum {Ω : Set E}
   change ‖(fderiv ℝ u x) (EuclideanSpace.single i 1)‖ ^ 2 = _
   rw [Real.norm_eq_abs, sq_abs]
 
-/-- Integrand-level coercivity bound: at every `x ∈ Ω`, the bilinear-form
-integrand `principal_integrand u u + c · u²` is bounded below by
-`lam · ‖∇u‖² + c · u²`. -/
 theorem bilin_integrand_self_ge {Ω : Set E}
     (B : SmoothEllipticBilinearForm d Ω) (u : E → ℝ)
     {x : E} (hx : x ∈ Ω) :
@@ -445,8 +320,7 @@ theorem bilin_integrand_self_ge {Ω : Set E}
 end SmoothEllipticBilinearForm
 
 omit [NeZero d] in
-/-- The difference quotient of a product splits as
-`D_h^k(f g) = (translate h f) (D_h^k g) + (D_h^k f) g`. -/
+
 theorem diffQuot_mul
     (i : Fin d) (h : ℝ) (f g : E → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot i h (fun x => f x * g x) =
@@ -465,8 +339,7 @@ theorem diffQuot_mul
     ring
 
 omit [NeZero d] in
-/-- Pointwise expansion of the difference quotient of `a · v`:
-`D_h^k(a v) = (translate h a) (D_h^k v) + (D_h^k a) · v`. -/
+
 theorem diffQuot_coeff_apply
     (k : Fin d) (h : ℝ) (a v : E → ℝ) (x : E) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot k h (fun y => a y * v y) x =

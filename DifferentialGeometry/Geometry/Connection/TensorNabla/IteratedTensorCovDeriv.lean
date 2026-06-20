@@ -11,51 +11,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 
-/-!
-# The (0,3)-tensor extension of a covariant derivative and the second covariant derivative
-
-Given a covariant derivative `cov : CovariantDerivative I E (TangentSpace I)` on the tangent
-bundle of a smooth manifold `M`, the file `TensorExtension.lean` defines the induced covariant
-derivative `tensor02Cov cov` on the bundle of (0,2)-tensors.  Its value is a *(0,3)-valued*
-operator section `T_x M →L[ℝ] (T_x M →L[ℝ] T_x M →L[ℝ] ℝ)`.
-
-To iterate it — i.e. to form the **second covariant derivative** `∇²` of a (0,2)-tensor — one
-needs a covariant derivative *on* the (0,3)-tensor bundle to compose with `tensor02Cov`.  This
-file supplies it: `tensor03Cov cov`, the Leibniz extension over the trilinear pairing
-$$
-  (\nabla_X T)(Y, Z, W) := X\bigl(T(Y, Z, W)\bigr)
-    - T(\nabla_X Y, Z, W) - T(Y, \nabla_X Z, W) - T(Y, Z, \nabla_X W).
-$$
-Composing `tensor03Cov cov ∘ tensor02Cov cov` gives `tensor02CovIterate cov`, the iterated
-(second) covariant derivative of a (0,2)-tensor, valued in the (0,4)-tensor bundle.
-
-We also supply the const-`1` fibre isometry bridges identifying the curried-CLM (0,3)- and
-(0,4)-tensor fibres with the model `ContinuousMultilinearMap`-fibres, analogous to
-`bilinFormToModelₗᵢ` (which did (0,2)) in `Geometry/Flow/RicciFlow/DeTurckRHSSection.lean`.
-
-## Main definitions
-
-* `mkHom₃` — generic helper: a scalar operation on three sections that is tensorial in each
-  slot at `x` packages into a continuous trilinear map `V x →L V' x →L V'' x →L A`.
-
-* `tensor03Cov cov` — the induced covariant derivative on the (0,3)-tensor bundle, as a bundled
-  `CovariantDerivative I (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)`.
-
-* `tensor02CovIterate cov` — the iterated (second) covariant derivative on (0,2)-tensor
-  sections, `tensor03Cov cov ∘ tensor02Cov cov`, valued in the (0,4)-tensor bundle.
-
-* `triFormToModelₗᵢ F` / `quadFormToModelₗᵢ F` — the const-`1` fibre isometries identifying a
-  (0,3)- / (0,4)-tensor fibre `F →L … →L ℝ` with the model multilinear fibre
-  `ContinuousMultilinearMap ℝ (fun _ : Fin n => F) ℝ`.
-
-## Main theorems
-
-* `tensor03Cov_pairing` — the defining trilinear-pairing Leibniz identity.
-
-* `triFormToModel_apply`, `quadFormToModel_apply` and their `norm_map` companions — the bridges
-  evaluate on tuples and preserve the operator norm (constant `1`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle
@@ -88,9 +43,6 @@ variable {V₃ : M → Type*} [∀ x, AddCommGroup (V₃ x)] [∀ x, Module ℝ 
   [∀ x, TopologicalSpace (V₃ x)] [TopologicalSpace (TotalSpace F₃ V₃)]
   [FiberBundle F₃ V₃] [VectorBundle ℝ F₃ V₃] [ContMDiffVectorBundle 1 F₃ V₃ I]
 
-/-- The first-slot linear map of a three-section scalar operation `Φ`, tensorial in each slot:
-`v ↦ mkHom₂ (Φ (extend v) · ·)`. Linearity in `v` follows from tensoriality of `Φ` in the first
-slot. -/
 private noncomputable def mkHom₃FirstSlot
     (Φ : (Π x : M, V₁ x) → (Π x : M, V₂ x) → (Π x : M, V₃ x) → ℝ) (x : M)
     (hΦ₁ : ∀ σ₂ σ₃, MDiffAt (T% σ₂) x → MDiffAt (T% σ₃) x →
@@ -163,8 +115,6 @@ private noncomputable def mkHom₃FirstSlot
     rw [hτ_def, (hΦ₁ σ₂ σ₃ hσ₂ hσ₃).smul (f := fun _ => c) (mdifferentiable_const ..)
         (mdifferentiableAt_extend ..)]
 
-/-- **Generic trilinear packaging.** A scalar operation on three sections, tensorial in each
-slot at `x`, packages into a continuous trilinear map. -/
 noncomputable def mkHom₃
     (Φ : (Π x : M, V₁ x) → (Π x : M, V₂ x) → (Π x : M, V₃ x) → ℝ) (x : M)
     (hΦ₁ : ∀ σ₂ σ₃, MDiffAt (T% σ₂) x → MDiffAt (T% σ₃) x →
@@ -182,7 +132,6 @@ noncomputable def mkHom₃
     (VectorBundle.continuousLinearEquivAt ℝ F₁ V₁ x).continuousSMul
   LinearMap.toContinuousLinearMap (mkHom₃FirstSlot Φ x hΦ₁ hΦ₂ hΦ₃)
 
-/-- Evaluation of `mkHom₃` on sections differentiable at `x`. -/
 theorem mkHom₃_apply
     {Φ : (Π x : M, V₁ x) → (Π x : M, V₂ x) → (Π x : M, V₃ x) → ℝ} {x : M}
     (hΦ₁ : ∀ σ₂ σ₃, MDiffAt (T% σ₂) x → MDiffAt (T% σ₃) x →
@@ -210,26 +159,21 @@ theorem mkHom₃_apply
 
 end mkHom₃
 
-/-- Local instance: the (0,3)-tensor bundle is a fibre bundle. -/
 local instance tensor03FiberBundle :
     FiberBundle (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
   inferInstance
 
-/-- Local instance: the (0,3)-tensor bundle is a vector bundle. -/
 local instance tensor03VectorBundle :
     VectorBundle ℝ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
   inferInstance
 
-/-- Local instance: smoothness of the (0,3)-tensor bundle. -/
 local instance tensor03ContMDiffVectorBundle :
     ContMDiffVectorBundle ∞ (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) I :=
   inferInstance
 
-/-- The "(0,3)-tensor-bundle section is differentiable" predicate, in the explicit
-total-space-embedding form. -/
 def MDiffAtTensor03
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (x : M) : Prop :=
@@ -238,7 +182,6 @@ def MDiffAtTensor03
       (E := fun x : M =>
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) b (T b)) x
 
-/-- The auxiliary scalar functional for the (0,3)-tensor connection. -/
 def tensor03Scalar
     (cov : (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -249,7 +192,6 @@ def tensor03Scalar
     - T x (Y x) (cov Z x (X x)) (W x)
     - T x (Y x) (Z x) (cov W x (X x))
 
-/-- Differentiability of `b ↦ T b (Y b)` at `x` as a section of the (0,2)-tensor bundle. -/
 lemma mdifferentiableAt_tensor03_apply_one
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -263,7 +205,6 @@ lemma mdifferentiableAt_tensor03_apply_one
     (b := fun b : M => b)
     (ϕ := fun b => T b) (v := fun b => Y b) hT hY
 
-/-- Differentiability of `b ↦ T b (Y b) (Z b)` at `x` as a section of the cotangent bundle. -/
 lemma mdifferentiableAt_tensor03_apply_two
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -278,7 +219,6 @@ lemma mdifferentiableAt_tensor03_apply_two
     (ϕ := fun b => T b (Y b)) (v := fun b => Z b)
     (mdifferentiableAt_tensor03_apply_one hT hY) hZ
 
-/-- Differentiability of the scalar pairing `b ↦ T b (Y b) (Z b) (W b)` at `x`. -/
 lemma mdifferentiableAt_tensor03_pairing
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y Z W : Π x : M, TangentSpace I x} {x : M}
@@ -298,7 +238,6 @@ lemma mdifferentiableAt_tensor03_pairing
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
-/-- `tensor03Scalar` is tensorial in `X` at `x`. -/
 lemma tensor03Scalar_tensorialAt_X
     (_covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -329,8 +268,6 @@ lemma tensor03Scalar_tensorialAt_X
         ContinuousLinearMap.map_add]
     abel
 
-/-- `tensor03Scalar` is tensorial in `Y` at `x`. The Leibniz cross-term in the `cov Y` slot
-cancels with the `extDerivFun`-Leibniz cross-term. -/
 lemma tensor03Scalar_tensorialAt_Y
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -405,7 +342,6 @@ lemma tensor03Scalar_tensorialAt_Y
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-- `tensor03Scalar` is tensorial in `Z` at `x`. -/
 lemma tensor03Scalar_tensorialAt_Z
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -478,7 +414,6 @@ lemma tensor03Scalar_tensorialAt_Z
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-- `tensor03Scalar` is tensorial in `W` at `x`. -/
 lemma tensor03Scalar_tensorialAt_W
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -551,7 +486,6 @@ lemma tensor03Scalar_tensorialAt_W
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-- The (Y, Z, W)-trilinear value at `x` for a fixed extended X-vector. -/
 private noncomputable def tensor03TrilinAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -568,7 +502,6 @@ private noncomputable def tensor03TrilinAt
       tensor03Scalar_tensorialAt_W cov.isCovariantDerivativeOnUniv hT
         (FiberBundle.extend E v) (mdifferentiableAt_extend ..) Y Z hY hZ)
 
-/-- Apply formula for `tensor03TrilinAt` on extended sections. -/
 private lemma tensor03TrilinAt_apply_extend
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -581,7 +514,6 @@ private lemma tensor03TrilinAt_apply_extend
   unfold tensor03TrilinAt
   exact mkHom₃_apply _ _ _ hY hZ hW
 
-/-- The X-slot linear map: `v ↦ tensor03TrilinAt cov hT v` is linear in `v`. -/
 private noncomputable def tensor03XSlot
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -652,7 +584,6 @@ private noncomputable def tensor03XSlot
     simp only [smul_eq_mul]
     ring
 
-/-- The (0,3)-tensor connection's value at a single point `x : M` on a section `T`. -/
 def tensor03CovAt
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -664,7 +595,6 @@ def tensor03CovAt
   · exact LinearMap.toContinuousLinearMap (tensor03XSlot cov hT)
   · exact 0
 
-/-- When `T` is differentiable at `x`, `tensor03CovAt` evaluates via the X-slot construction. -/
 lemma tensor03CovAt_apply_of_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -675,7 +605,6 @@ lemma tensor03CovAt_apply_of_diff
   rw [dif_pos hT]
   rfl
 
-/-- Evaluation of `tensor03CovAt` on extended sections, via the `tensor03Scalar` formula. -/
 lemma tensor03CovAt_apply_of_diff_extend
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -692,7 +621,6 @@ lemma tensor03CovAt_apply_of_diff_extend
     FiberBundle.extend_apply_self E (X x)
   rw [hext]
 
-/-- When `T` is not differentiable at `x`, the value is zero. -/
 @[simp] lemma tensor03CovAt_of_not_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -702,7 +630,6 @@ lemma tensor03CovAt_apply_of_diff_extend
   unfold tensor03CovAt
   rw [dif_neg hT]
 
-/-- The (0,3)-tensor covariant derivative as an unbundled map of sections. -/
 def tensor03CovFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) →
@@ -718,7 +645,7 @@ def tensor03CovFun
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
-/-- The (0,3)-tensor covariant derivative satisfies `IsCovariantDerivativeOn _ Set.univ`. -/
+
 lemma tensor03CovFun_isCovariantDerivativeOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (V := (fun x : M =>
@@ -875,8 +802,6 @@ lemma tensor03CovFun_isCovariantDerivativeOn
     simp only [smul_eq_mul]
     ring
 
-/-- The **(0,3)-tensor covariant derivative** induced by a tangent-bundle covariant
-derivative. -/
 def tensor03Cov
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     CovariantDerivative I (E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
@@ -889,7 +814,6 @@ lemma tensor03Cov_toFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (tensor03Cov cov).toFun = tensor03CovFun cov := rfl
 
-/-- The defining **trilinear-pairing Leibniz identity** for the (0,3)-tensor connection. -/
 theorem tensor03Cov_pairing
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -912,8 +836,6 @@ theorem tensor03Cov_pairing
   unfold tensor03Scalar
   ring
 
-/-- The iterated (second) covariant derivative `∇²` of a (0,2)-tensor section, as the bundled
-composite `tensor03Cov cov ∘ tensor02Cov cov`. -/
 def tensor02CovIterate
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) →
@@ -929,7 +851,7 @@ def tensor02CovIterate
 
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
-/-- **Additivity** of the (0,3)-tensor covariant derivative on differentiable sections. -/
+
 theorem tensor03Cov_add
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T T' : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -941,7 +863,7 @@ theorem tensor03Cov_add
 
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
-/-- **Scalar homogeneity** of the (0,3)-tensor covariant derivative by a constant. -/
+
 theorem tensor03Cov_smul
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -953,8 +875,7 @@ theorem tensor03Cov_smul
 set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Subtractivity** of the (0,3)-tensor covariant derivative on differentiable sections.
-This is the (0,3) analogue of `metricDiff02Cov_eq_sub`. -/
+
 theorem tensor03Cov_sub
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T T' : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -982,8 +903,6 @@ section NormBridge
 
 variable (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- The (0,2) fibre bridge, reproduced here to keep this file self-contained (identical to
-`bilinFormToModel`). -/
 def biForm₂ToModel :
     (F →L[ℝ] F →L[ℝ] ℝ) ≃ₗ[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ :=
   ((ContinuousLinearEquiv.refl ℝ F).arrowCongr
@@ -1023,14 +942,10 @@ theorem biForm₂ToModel_norm_map (B : F →L[ℝ] F →L[ℝ] ℝ) :
       _ = ‖biForm₂ToModel F B‖ * ‖v‖ * ‖w‖ := by
           rw [Fin.prod_univ_two]; simp [Matrix.cons_val_zero, Matrix.cons_val_one]; ring
 
-/-- The (0,2) bridge as a `LinearIsometryEquiv`. -/
 def biForm₂ToModelₗᵢ :
     (F →L[ℝ] F →L[ℝ] ℝ) ≃ₗᵢ[ℝ] ContinuousMultilinearMap ℝ (fun _ : Fin 2 => F) ℝ :=
   { biForm₂ToModel F with norm_map' := biForm₂ToModel_norm_map F }
 
-/-- The **(0,3) fibre bridge**: identify `F →L F →L F →L ℝ` with the model `(0,3)`-multilinear
-fibre.  Uncurry the first slot (`continuousMultilinearCurryLeftEquiv`), with the inner
-`F →L F →L ℝ` slot mapped through the (0,2) bridge. -/
 def triFormToModel :
     (F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) ≃ₗ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 3 => F) ℝ :=
@@ -1074,15 +989,11 @@ theorem triFormToModel_norm_map (B : F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) :
       LinearIsometry.coe_toContinuousLinearMap, LinearIsometryEquiv.coe_toLinearIsometry]
   rw [hcomp, (biForm₂ToModelₗᵢ F).toLinearIsometry.norm_toContinuousLinearMap_comp]
 
-/-- The (0,3) bridge as a `LinearIsometryEquiv`. -/
 def triFormToModelₗᵢ :
     (F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) ≃ₗᵢ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 3 => F) ℝ :=
   { triFormToModel F with norm_map' := triFormToModel_norm_map F }
 
-/-- The **(0,4) fibre bridge**: identify `F →L F →L F →L F →L ℝ` with the model
-`(0,4)`-multilinear fibre, uncurrying the first slot with the inner three-slot form mapped
-through the (0,3) bridge. -/
 def quadFormToModel :
     (F →L[ℝ] F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) ≃ₗ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 4 => F) ℝ :=
@@ -1126,7 +1037,6 @@ theorem quadFormToModel_norm_map (B : F →L[ℝ] F →L[ℝ] F →L[ℝ] F →L
       LinearIsometry.coe_toContinuousLinearMap, LinearIsometryEquiv.coe_toLinearIsometry]
   rw [hcomp, (triFormToModelₗᵢ F).toLinearIsometry.norm_toContinuousLinearMap_comp]
 
-/-- The (0,4) bridge as a `LinearIsometryEquiv`. -/
 def quadFormToModelₗᵢ :
     (F →L[ℝ] F →L[ℝ] F →L[ℝ] F →L[ℝ] ℝ) ≃ₗᵢ[ℝ]
       ContinuousMultilinearMap ℝ (fun _ : Fin 4 => F) ℝ :=

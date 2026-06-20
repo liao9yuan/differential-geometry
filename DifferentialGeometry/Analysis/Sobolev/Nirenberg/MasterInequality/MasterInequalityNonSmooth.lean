@@ -4,74 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmoothCTerm
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmoothFTerm
 
-/-!
-# Non-smooth analogue of `nirenberg_master_inequality_after_young`
-
-This module establishes the non-smooth analogue of the headline
-absorbing inequality
-`NirenbergCrossBounds.nirenberg_master_inequality_after_young`.
-
-In the smooth case, the headline inequality combines the master
-inequality
-`λ · ∫ η² ‖D_h^k ∇u‖² ≤ |Cross_1| + |Cross_2| + |Cross_3| +
-  |∫_Ω f · v_test| + |∫_Ω c · u · v_test|`
-with the five Young absorbing bounds (`cross_1_bound`, `cross_2_bound`,
-`cross_3_bound`, `c_term_bound`, `f_term_bound`) at parameter
-`ε := λ/8`. This yields the absorbing inequality
-`λ · ∫ η² ‖D_h^k ∇u‖² ≤ (λ/2) · ∫ η² ‖D_h^k ∇u‖² +
-   C · (G + U + F)`,
-where `G = ‖∇u‖²_{L²(Ω')}`, `U = ‖u‖²_{L²(Ω')}`, `F = ‖f‖²_{L²(Ω')}`.
-
-In the non-smooth case the partial derivatives `∂_i u` are replaced by
-explicit weak partials `g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`). The five Young
-bounds carry over verbatim — they are
-`cross_1_bound_nonsmooth`, `cross_2_bound_nonsmooth`,
-`cross_3_bound_nonsmooth`, `c_term_bound_nonsmooth`,
-`f_term_bound_nonsmooth` — once the appropriate Fréchet–Kolmogorov bounds
-on `D_h^k u`, `D_h^k g_j`, and the L² bound on the standard Nirenberg
-test function are supplied.
-
-The master inequality itself is *not* derivable from non-smooth data:
-its proof in `Coercivity.lean` uses pointwise smoothness of `u` to
-expand `D_h^k(a^{ij} ∂_i u)` via the Leibniz rule and to invoke
-`nirenberg_principal_decomposition`. We therefore expose the non-smooth
-master inequality as a hypothesis `h_master_nonsmooth`. Downstream
-callers in possession of mollification + the substitution identity for
-weak solutions supply the bound by approximation.
-
-## Inputs
-
-* `h_master_nonsmooth` — the non-smooth master inequality.
-* `h_FK_diffQuot_u_bound` — `∫_{tsupport η}(D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`.
-* `h_v_test_sq_bound` — the L² bound on the standard Nirenberg test
-  function `D_{-h}^k(η² · D_h^k u)`.
-
-The per-component Fréchet–Kolmogorov bound
-`∫_{tsupport η}(D_h^k g_j)² ≤ ∫_{Ω'} ∑_i g_i²` is **not** needed: the
-non-smooth Cross_2 bound (`cross_2_bound_nonsmooth`) reuses only the
-pointwise / algebraic ingredient of its smooth counterpart, which does
-not consume any FK bound on the partials.
-
-## Main result
-
-* `nirenberg_master_inequality_after_young_nonsmooth` — the headline
-  absorbing inequality transcribed for the non-smooth case.
-
-## Strategy
-
-Mechanical mimic of `nirenberg_master_inequality_after_young`. We choose
-`ε := λ/8` in the four absorbing-term bounds (`cross_1`, `cross_2`,
-`c_term`, `f_term`); `cross_3` does not have an absorbing piece. Sum:
-`λ · I ≤ |C1| + |C2| + |C3| + |R| + |Q|`
-`     ≤ (ε I + C1' G) + (ε I + C2' G) + C3' G +
-        (ε I + Cc' (G + U)) + (ε I + Cf' (G + F))`
-`     = 4ε · I + (C1' + C2' + C3' + Cc' + Cf') · G + Cc' · U + Cf' · F`.
-With `ε = λ/8` we have `4ε = λ/2`, and bounding each remaining constant
-by `C := max(C1' + C2' + C3' + Cc' + Cf', max Cc' Cf')` gives the
-absorbing form.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -87,19 +19,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The explicit constant appearing in the absorbing master inequality
-`nirenberg_master_inequality_after_young_nonsmooth`.
-
-It is `max (C₁ + C₂ + C₃ + Cc + Cf) (max Cc Cf)`, where, with the
-absorbing parameter `ε := λ/8`, `d := Fintype.card (Fin d)` and the
-coefficient suprema `Λ`, `M`, `Mc` of `|a^{ij}|`, `|∂_k a^{ij}|`, `|c|`
-on `closure Ω'`:
-
-* `C₁ = (1 / (ε/d)) · Λ² · N² · d²`,
-* `C₂ = (M² / (4·(ε/d))) · d²`,
-* `C₃ = 2 · M · N · d²`,
-* `Cc = max (4·ε·N²) (Mc²/(2·ε))`,
-* `Cf = max (4·ε·N²) (1/(2·ε))`. -/
 noncomputable def nirenbergMasterYoungConstant
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (N : ℝ) {Ω' : Set E} (hΩ'_compact : IsCompact (closure Ω'))
@@ -131,7 +50,6 @@ noncomputable def nirenbergMasterYoungConstant
               (d := d) B hΩ'_compact))^2 / (2 * (B.lam / 8))))
       (max (4 * (B.lam / 8) * N^2) (1 / (2 * (B.lam / 8)))))
 
-/-- The explicit master constant is non-negative. -/
 theorem nirenbergMasterYoungConstant_nonneg
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {N : ℝ} (hN : 0 ≤ N) {Ω' : Set E}
@@ -165,27 +83,7 @@ theorem nirenbergMasterYoungConstant_nonneg
     exact mul_nonneg (by linarith) hε₀.le
 
 set_option linter.unusedVariables false in
-/-- **Quantitative non-smooth analogue of `nirenberg_master_inequality_after_young`.**
 
-The explicit-constant form of `nirenberg_master_inequality_after_young_nonsmooth`:
-the same absorbing master inequality
-`λ · ∫ η² ∑_i (D_h^k g_i)² ≤ (λ/2) · ∫ η² ∑_i (D_h^k g_i)² +
-   C · (G + U + F)`,
-with `G = ∫_{Ω'} ∑_i g_i²`, `U = ∫_{Ω'} u²`, `F = ∫_{Ω'} f²`, but with
-`C` exposed as the explicit closed formula
-`max (C₁ + C₂ + C₃ + Cc + Cf) (max Cc Cf)`, where, with the absorbing
-parameter `ε := λ/8`, `d := Fintype.card (Fin d)` and the coefficient
-suprema `Λ`, `M`, `Mc` of `|a^{ij}|`, `|∂_k a^{ij}|`, `|c|` on
-`closure Ω'`:
-
-* `C₁ = (1 / (ε/d)) · Λ² · N² · d²`,
-* `C₂ = (M² / (4·(ε/d))) · d²`,
-* `C₃ = 2 · M · N · d²`,
-* `Cc = max (4·ε·N²) (Mc²/(2·ε))`,
-* `Cf = max (4·ε·N²) (1/(2·ε))`.
-
-The proof is a mechanical combination of the quantitative cross-term
-and data-term bounds. -/
 theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -549,14 +447,7 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
   linarith
 
 set_option linter.unusedVariables false in
-/-- **Quantitative absorbed form of `nirenberg_master_inequality_after_young_nonsmooth`.**
 
-The explicit-constant form of `nirenberg_master_inequality_absorbed_nonsmooth`:
-after moving the `(λ/2) · I` term from RHS to LHS in
-`nirenberg_master_inequality_after_young_nonsmooth_quantitative`, we obtain
-  `(λ/2) · ∫ η² ∑_i (D_h^k g_i)² ≤ C · (G + U + F)`,
-with `C = nirenbergMasterYoungConstant B N hΩ'_compact k` the explicit
-master constant. -/
 theorem nirenberg_master_inequality_absorbed_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -645,18 +536,7 @@ theorem nirenberg_master_inequality_absorbed_nonsmooth_quantitative
   linarith [h_main]
 
 set_option linter.unusedVariables false in
-/-- **Quantitative localised non-smooth absorbing inequality.**
 
-The explicit-constant form of `nirenberg_diffQuot_g_localL2_bound`:
-a direct consequence of
-`nirenberg_master_inequality_absorbed_nonsmooth_quantitative`. Since
-`η x = 1` whenever `x ∈ Ω''` (here `Ω''` is any set on which `η ≡ 1`,
-e.g. an inner concentric ball), the weighted integral
-`∫ η² · ∑_i (D_h^k g_i)²` is at least `∫_{Ω''} ∑_i (D_h^k g_i)²`. We
-therefore obtain the uniform-in-`h` bound
-  `(λ/2) · ∫_{Ω''} ∑_i (D_h^k g_i)² ≤ C · (G + U + F)`,
-with `C = nirenbergMasterYoungConstant B N hΩ'_compact k` the explicit
-master constant. -/
 theorem nirenberg_diffQuot_g_localL2_bound_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -823,22 +703,7 @@ theorem nirenberg_diffQuot_g_localL2_bound_quantitative
   exact h_step1.trans h_main
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `nirenberg_master_inequality_after_young`.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), assuming the
-non-smooth master inequality, the Fréchet–Kolmogorov bound on `D_h^k u`,
-and the L² bound on the standard Nirenberg test function, we obtain the
-absorbing master inequality
-`λ · ∫ η² ∑_i (D_h^k g_i)² ≤ (λ/2) · ∫ η² ∑_i (D_h^k g_i)² +
-   C · (G + U + F)`,
-with `G = ∫_{Ω'} ∑_i g_i²`, `U = ∫_{Ω'} u²`, `F = ∫_{Ω'} f²`, and `C`
-independent of `h` (for `|h| ≤ 1`).
-
-This is the existential packaging of
-`nirenberg_master_inequality_after_young_nonsmooth_quantitative`, which
-exposes `C` as the explicit `nirenbergMasterYoungConstant`. -/
 theorem nirenberg_master_inequality_after_young_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -924,17 +789,7 @@ theorem nirenberg_master_inequality_after_young_nonsmooth
     h_FK_diffQuot_u_bound h_v_test_sq_bound h_master_nonsmooth hh hh_le
 
 set_option linter.unusedVariables false in
-/-- **Absorbed form of `nirenberg_master_inequality_after_young_nonsmooth`.**
 
-After moving the `(λ/2) · I` term from RHS to LHS in the headline
-`nirenberg_master_inequality_after_young_nonsmooth`, we obtain
-  `(λ/2) · ∫ η² ∑_i (D_h^k g_i)² ≤ C · (G + U + F)`,
-which is the cleaner uniform-in-`h` L² bound on the difference quotient
-of the weak gradient, weighted by `η²`.
-
-This is the existential packaging of
-`nirenberg_master_inequality_absorbed_nonsmooth_quantitative`, which
-exposes `C` as the explicit `nirenbergMasterYoungConstant`. -/
 theorem nirenberg_master_inequality_absorbed_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}
@@ -1016,20 +871,7 @@ theorem nirenberg_master_inequality_absorbed_nonsmooth
     h_FK_diffQuot_u_bound h_v_test_sq_bound h_master_nonsmooth hh hh_le
 
 set_option linter.unusedVariables false in
-/-- **Localised non-smooth absorbing inequality.**
 
-A direct consequence of `nirenberg_master_inequality_absorbed_nonsmooth`:
-since `η x = 1` whenever `x ∈ Ω''` (here `Ω''` is any set on which
-`η ≡ 1`, e.g. an inner concentric ball), the weighted integral
-`∫ η² · ∑_i (D_h^k g_i)²` is at least `∫_{Ω''} ∑_i (D_h^k g_i)²`. We
-therefore obtain the uniform-in-`h` bound
-  `(λ/2) · ∫_{Ω''} ∑_i (D_h^k g_i)² ≤ C · (G + U + F)`,
-which is the standard local L² estimate on the difference quotient of
-the weak gradient.
-
-This is the existential packaging of
-`nirenberg_diffQuot_g_localL2_bound_quantitative`, which exposes `C` as
-the explicit `nirenbergMasterYoungConstant`. -/
 theorem nirenberg_diffQuot_g_localL2_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}

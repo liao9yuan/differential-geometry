@@ -23,24 +23,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Covariant commutation and curvature on a variation
-
-This file develops the second-order covariant-derivative calculus of a smooth
-two-parameter variation `f : ℝ → ℝ → M`, the infrastructure behind the second
-variation of length:
-
-* the chart-coordinate of the intrinsic covariant derivative read in any foot
-  chart, and the joint `C²`-regularity of the chart-coordinate longitudinal and
-  transverse velocities;
-* differentiability of the chart-coordinate representations of the first- and
-  second-order covariant-derivative fields along the relevant slices;
-* the intrinsic curvature commutation `∇_s ∇_t (∂_t f) − ∇_t ∇_s (∂_t f)
-  = R(V, γ') γ'` (and its transverse-field analogue) on a variation;
-* affine-shift covariance of `covDerivAlong` and the mixed-commutation lifted
-  to an arbitrary transverse parameter.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle MeasureTheory intervalIntegral
@@ -64,17 +46,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Chart-coordinate of the intrinsic covariant derivative, in any foot chart.**
-For a `C^∞` curve `γ`, a section `V` along `γ` whose canonical foot-chart
-representation is differentiable at `t`, and any basepoint `β` with `γ t` in its
-chart source, the chart-`β`-coordinate of the intrinsic covariant derivative
-`covDerivAlong g γ V t` is the chart-`β` covariant derivative of the
-chart-`β`-coordinate representation `chartRepAtBase β γ V`.
 
-This is the forward companion of `covDerivAlong_chart_foot_invariance`: applying
-the forward chart-`β` coordinate map `continuousLinearMapAt β (γ t)` to that
-lemma's identity (and using `continuousLinearMapAt ∘ symmL = id` on the base set)
-produces the chart-`β` covariant derivative directly. -/
 private lemma chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
@@ -91,12 +63,7 @@ private lemma chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase
   exact (trivializationAt E (TangentSpace I) β).continuousLinearMapAt_symmL (R := ℝ) hmem _
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Differentiability of the velocity chart-rep along an arbitrary slice.** For a
-smooth variation `f` and any `u`, the pinned chart-`(f u t₀)`-coordinate
-representation of the longitudinal velocity field `v ↦ ∂_t f|_{(u, v)}` is
-differentiable at `t₀`. This is `velocityField_chartRep_differentiableAt`
-transported to the slice `f u ·` via the reparametrisation `(a, b) ↦ f (u + a) b`,
-whose central slice at `a = 0` is `f u ·`. -/
+
 private lemma slice_velocityField_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (u t₀ : ℝ) :
@@ -115,13 +82,7 @@ private lemma slice_velocityField_chartRep_differentiableAt
   exact h
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Differentiability of the longitudinal-velocity chart-rep along a transverse
-slice.** For a smooth variation `f` and any `v`, the pinned chart-`(f 0 v)`-
-coordinate representation of the longitudinal velocity field `u ↦ ∂_t f|_{(u, v)}`
-(read along the transverse slice `f · v`) is differentiable at `0`. Near `0` it
-agrees with the partial Fréchet derivative `u ↦ fderiv_w (extChartAt (f 0 v)
-(f u w)) v 1` of the jointly-`C^∞` chart-pull `(u, w) ↦ extChartAt (f 0 v) (f u w)`,
-which is `C^∞` in `u`. -/
+
 lemma slice_longitudinalField_transverse_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (v : ℝ) :
@@ -175,12 +136,7 @@ lemma slice_longitudinalField_transverse_chartRep_differentiableAt
   exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Joint `C²`-regularity of the chart-`(f 0 t)`-coordinate longitudinal velocity.**
-The function `(u, v) ↦ φ_{f 0 t}(∂_t f|_{(u, v)})`, i.e. the chart-`(f 0 t)`-
-coordinate of the longitudinal velocity `∂_t f`, is `C²` jointly at `(0, t)`. Near
-`(0, t)` it agrees with the partial Fréchet derivative
-`(u, v) ↦ fderiv_w (extChartAt (f 0 t) (f u w)) v 1` of the jointly-`C^∞`
-chart-pull `(u, v) ↦ extChartAt (f 0 t) (f u v)`, which is `C^∞`. -/
+
 private lemma chartCoord_longitudinalVelocity_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
     ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
@@ -238,17 +194,7 @@ private lemma chartCoord_longitudinalVelocity_contDiffAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Chart-rep differentiability of the second transverse covariant derivative.**
-For a smooth variation `f`, the pinned chart-`(f 0 t)`-coordinate representation of
-the transverse covariant derivative `s ↦ ∇_s ∂_t f|_{(s, t)}` (read along the
-transverse curve `s ↦ f s t`) is differentiable at `s = 0`. Near `0` it agrees with
-the chart-`(f 0 t)` covariant derivative `s ↦ (D/ds)_chart Y(·, t) s` of the
-chart-`(f 0 t)`-coordinate `Y` of the longitudinal velocity `∂_t f`; `Y` is jointly
-`C²` (`chartCoord_longitudinalVelocity_contDiffAt`), so its chart covariant
-derivative — a Leibniz combination of `deriv Y(·, t)` (a `C¹` function, since
-`Y(·, t)` is `C²`) and a Christoffel contraction along the `C^∞` chart curve — is
-differentiable in `s`. This is the `houterL` regularity discharger consumed by the
-second-variation assembly. -/
+
 lemma slice_secondCovDeriv_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -361,14 +307,7 @@ lemma slice_secondCovDeriv_chartRep_differentiableAt
   exact (hbridge.differentiableAt_iff).mpr hccd_diff
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Joint `C²`-regularity of the chart-`(f 0 t)`-coordinate transverse velocity.**
-The function `(u, v) ↦ φ_{f 0 t}(∂_s f|_{(u, v)})`, i.e. the chart-`(f 0 t)`-
-coordinate of the transverse velocity `∂_s f`, is `C²` jointly at `(0, t)`. Near
-`(0, t)` it agrees with the partial Fréchet derivative
-`(u, v) ↦ fderiv_w (extChartAt (f 0 t) (f w v)) u 1` of the jointly-`C^∞`
-chart-pull `(u, v) ↦ extChartAt (f 0 t) (f u v)`, which is `C^∞`. The slot
-direction is `(1, 0)` (the `u`-partial), the transverse-velocity analogue of
-`chartCoord_longitudinalVelocity_contDiffAt`. -/
+
 private lemma chartCoord_transverseVelocity_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
     ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
@@ -425,15 +364,7 @@ private lemma chartCoord_transverseVelocity_contDiffAt
   exact hYmodel.congr_of_eventuallyEq heq
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Differentiability of the transverse-velocity chart-rep along a longitudinal
-slice.** For a smooth variation `f` and any `s`, the pinned chart-`(f s t₀)`-
-coordinate representation of the transverse velocity field `v ↦ ∂_s f|_{(s, v)}`
-(read along the longitudinal slice `f s ·`) is differentiable at `t₀`. Near `t₀`
-it agrees with the partial Fréchet derivative
-`v ↦ fderiv_w (extChartAt (f s t₀) (f w v)) s 1` of the jointly-`C^∞` chart-pull
-`(w, v) ↦ extChartAt (f s t₀) (f w v)`, which is `C^∞` in `v`. This is the
-transverse-velocity analogue (`∂_s f`-field) of
-`slice_velocityField_chartRep_differentiableAt`. -/
+
 private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (s t₀ : ℝ) :
@@ -491,12 +422,7 @@ private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
   exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Differentiability of the transverse-velocity chart-rep along the transverse
-slice.** For a smooth variation `f` and any `v`, the pinned chart-`(f 0 v)`-
-coordinate representation of the transverse velocity field `u ↦ ∂_s f|_{(u, v)}`
-(read along the transverse slice `f · v`) is differentiable at `0`. This is just
-the velocity of the `C^∞` transverse curve `f · v`, so its chart-rep agrees near
-`0` with the velocity of the `C^∞` chart curve `extChartAt (f 0 v) ∘ (f · v)`. -/
+
 private lemma slice_transverseVelocity_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (v : ℝ) :
@@ -546,23 +472,7 @@ private lemma slice_transverseVelocity_chartRep_differentiableAt
   exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Intrinsic curvature commutation on a smooth variation, transverse-velocity
-field.** The `∂_s f`-field analogue of `commute_ds_dt_curvature`: for a smooth
-two-parameter variation `f`, the commutator of the transverse and longitudinal
-covariant derivatives of the *transverse* velocity field `∂_s f`, evaluated at the
-central curve `s = 0`, equals the Riemann curvature operator of the Levi-Civita
-connection applied to the transverse velocity `V := ∂_s f|_{s = 0}`, the
-longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `V`:
-`∇_s ∇_t (∂_s f) − ∇_t ∇_s (∂_s f) = R(V, γ') V`, with all covariant derivatives
-the intrinsic `covDerivAlong` at the common foot `f 0 t`.
 
-The proof is identical in structure to `commute_ds_dt_curvature` with the inner
-field `∂_t f` replaced by `∂_s f`; the chart-coordinate section is the chart-`(f 0
-t)`-coordinate of `∂_s f` (jointly `C²` by `chartCoord_transverseVelocity_contDiffAt`),
-and the inner/outer regularity dischargers are supplied by the transverse-velocity
-slice differentiability lemmas. The `houterL`/`houterR` hypotheses are the genuine
-regularity assumptions that the nested covariant-derivative fields vary
-differentiably in chart coordinates. -/
 theorem commute_ds_dt_curvature_innerS
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ)
@@ -750,12 +660,7 @@ theorem commute_ds_dt_curvature_innerS
   rw [hfoot_symmL]
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Intrinsic curvature commutation on a smooth variation.** For a smooth
-two-parameter variation `f`, the commutator of the transverse and longitudinal
-covariant derivatives of the longitudinal velocity field `∂_t f`, evaluated at the
-central curve `s = 0`, equals the Riemann curvature operator of the Levi-Civita
-connection applied to the transverse velocity `V := ∂_s f|_{s = 0}`, the
-longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `γ'`. -/
+
 private theorem commute_ds_dt_curvature
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ)
@@ -940,14 +845,7 @@ private theorem commute_ds_dt_curvature
   rw [hfoot_symmL]
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Affine-shift covariance of the intrinsic covariant derivative along a
-curve.** Reparametrising the base curve `γ` and the section `V` by the affine
-shift `a ↦ c + a` translates the covariant derivative: evaluating the
-reparametrised covariant derivative at `a = 0` recovers the original covariant
-derivative at the parameter `c`. The chart pinned at the foot `γ c` is the same
-on both sides, and `deriv` is invariant under the domain translation
-(`deriv_comp_const_add`), so the chart-local covariant derivative agrees term by
-term. -/
+
 lemma covDerivAlong_const_add_shift
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ s : ℝ, TangentSpace I (γ s)) (c : ℝ) :
@@ -976,17 +874,7 @@ lemma covDerivAlong_const_add_shift
   rw [hchart]
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Mixed-commutation lifted to the transverse curve.** For a smooth variation
-`f`, at every transverse parameter `s` the transverse covariant derivative of the
-longitudinal velocity `∇_s (∂_t f)|_{(s, t)}` (along the transverse curve `f · t`)
-equals the longitudinal covariant derivative of the transverse velocity
-`∇_t (∂_s f)|_{(s, t)}` (along the longitudinal slice `f s ·`), both intrinsic
-vectors at the common foot `f s t`. This is `commute_ds_dt_intrinsic` applied to
-the `s`-shifted variation `(a, b) ↦ f (s + a) b`, whose central slice at `a = 0`
-is `f s ·`; the affine-shift covariance of `covDerivAlong`
-(`covDerivAlong_const_add_shift`) and the chain rule for the shifted
-`s`-velocity (`mfderiv` of `a ↦ f (s + a) v` at `0` equals the `s`-velocity
-`mfderiv (f · v) s 1`) translate the single-foot commutation to parameter `s`. -/
+
 lemma commute_ds_dt_intrinsic_shifted
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -1055,22 +943,7 @@ lemma commute_ds_dt_intrinsic_shifted
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Chart-rep differentiability of the second transverse covariant derivative
-along the central curve.** For a smooth variation `f`, the pinned chart-`(f 0 t)`-
-coordinate representation of the section
-`v ↦ ∇_s ∂_s f|_{(·, v)}|_{s = 0}` (the second transverse covariant derivative of
-the transverse velocity, read along the central curve `v ↦ f 0 v`) is
-differentiable at `v = t`. Near `t` it agrees with the chart-`(f 0 t)` covariant
-derivative `v ↦ (D/dv)`-free expression: the chart-`(f 0 t)`-coordinate `Z(v)` of
-`∇_s ∂_s f|_{(·, v)}|_0` is `deriv_u Y(·, v)|_0 + Γ(deriv_u uC(·, v)|_0, Y(0, v),
-uC(0, v))`, where `Y(u, v)` is the jointly-`C²` chart-coordinate of `∂_s f`
-(`chartCoord_transverseVelocity_contDiffAt`) and `uC(u, v) = extChartAt (f 0 t)
-(f u v)` is the jointly-`C^∞` chart-pull. Joint `C²` of `Y` makes the inner
-`u`-partial `deriv_u Y(·, v)|_0` differentiable in `v`
-(`Aux2.hasDerivAt_partial_fst`), and the Christoffel contraction is differentiable
-likewise; transporting through the eventual chart-coordinate equality gives the
-chart-rep differentiability. This is the `houterR` discharger for the
-transverse-velocity curvature commutation. -/
+
 lemma slice_secondCovDeriv_central_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -1173,17 +1046,7 @@ lemma slice_secondCovDeriv_central_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
-/-- **Chart-rep differentiability of the longitudinal covariant derivative of the
-variation field along the central curve.** For a smooth variation `f`, the pinned
-chart-`(f 0 t)`-coordinate representation of the section
-`v ↦ ∇_t (∂_s f|_{s = 0})|_{v}` (the longitudinal covariant derivative of the
-variation field `∂_s f|_{s = 0}`, read along the central curve `v ↦ f 0 v`) is
-differentiable at `v = t`. Near `t` it agrees with the chart-`(f 0 t)` covariant
-derivative `v ↦ chartCovDerivAlong g (f 0 t) (f 0 ·) Y0 v` of the chart-coordinate
-`Y0(v) := Y(0, v)` of the variation field, the `u = 0` slice of the jointly-`C²`
-transverse-velocity chart-coordinate `Y` (`chartCoord_transverseVelocity_contDiffAt`).
-Joint `C²` of `Y` makes `Y0` `C²`, so its chart covariant derivative — `deriv Y0 +
-Christoffel` — is differentiable. -/
+
 lemma variationField_covDeriv_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :

@@ -1,20 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentity.SuccessorSource
 
-/-!
-# Polymorphic inductive step of the iterated chart-bilinear identity
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, element
-`u_h : H1Compl g`, and any level-`m` data instance
-`D_m : IteratedDiffChartBilinearData g α u_h m`, this module constructs
-the level-`(m+1)` instance by applying one more directional integration by
-parts and consolidating the resulting contributions using the
-five-layer `fChartEffStepNumerator` packaged in the scaffolding module.
-
-The new direction multi-index is `Fin.snoc D_m.directions l`; the new
-effective `L²` source is
-`fChartEffStep g α u_h m D_m.directions D_m.fChartEff l`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -54,7 +39,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The partial of a smooth function is smooth. -/
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -67,7 +51,6 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
-/-- The partial of a compactly supported smooth function is compactly supported. -/
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -75,14 +58,12 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
-/-- The tsupport of the partial is contained in the tsupport. -/
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-- Schwarz symmetry of mixed partials for a smooth function. -/
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -124,8 +105,6 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-- If `u` is in `MemW1p p Ω` and `u =ᵐ 0` on an open subset `V ⊆ Ω`,
-then `chosenWeakPartial' p i u Ω =ᵐ 0` on `V`. -/
 private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -185,7 +164,6 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
-/-- The base chart-pushed POU representative vanishes a.e. off `chartImagePOUTsupport α`. -/
 private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -206,10 +184,6 @@ private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
-/-- Polymorphic propagation: assuming chart-`H^m` of the parent, the level-`m`
-chosen mixed weak partial vanishes a.e. on `chartTargetEuclid α \
-chartImagePOUTsupport α`. Induction on `m` using
-`chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero`. -/
 private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -271,9 +245,6 @@ private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsuppor
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
-/-- IBP for the previous-level effective source `fChartEff` (in `MemW1p 2`)
-multiplied by the density `c`, against the partial `∂_l ψ` of a smooth
-compactly supported test function. -/
 private theorem ibp_density_fChartEffPrev
     (g : SmoothRiemannianMetric I M) (α : M)
     {fChartEffPrev : EuclN → ℝ}
@@ -416,8 +387,6 @@ private theorem ibp_density_fChartEffPrev
   rw [← hLHS_eq, ← hLeib1_eq, ← hLeib2_eq]
   exact h_ibp_ext
 
-/-- For any element `i`, multi-index `dirs : Fin m → α`, and element `l`, we have
-`Fin.snoc (Fin.cons i dirs) l = Fin.cons i (Fin.snoc dirs l)`. -/
 private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
     (i : β) (dirs : Fin m → β) (l : β) :
     @Fin.snoc m.succ (fun _ => β) (Fin.cons i dirs) l =
@@ -656,13 +625,7 @@ private lemma integrable_triple_helper
   exact full_int.restrict
 
 set_option maxHeartbeats 4000000 in
-/-- **Polymorphic inductive step** of the iterated chart-bilinear variational
-identity: given a level-`m` instance `D_m`, the three regularity inputs
-(chart-`H^{m+1}`, chart-`H^{m+2}`, `MemW1p 2` of `D_m.fChartEff`), and the
-auxiliary "vanishing off `chartImagePOUTsupport α`" hypothesis for
-`D_m.fChartEff`, construct the level-`(m+1)` instance. The new direction
-multi-index is `Fin.snoc D_m.directions l`; the new effective `L²` source is
-`fChartEffStep g α u_h m D_m.directions D_m.fChartEff l`. -/
+
 noncomputable def iteratedDiffChartBilinearData_step
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g} (m : ℕ)

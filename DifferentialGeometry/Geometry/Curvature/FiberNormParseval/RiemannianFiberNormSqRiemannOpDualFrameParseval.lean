@@ -2,73 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
-/-!
-# Tensor-frame Parseval bound for the tensor curvature operator's fibre norm
-
-This file completes the `T`-independent (and hence uniform) absorbing constant for the
-bundled tensor curvature operator `riemannOp (tensorCov g 0 2) x`, building on the
-`(v, w)`-factorisation already established in
-`RiemannianFiberNormSqRiemannOpVWFactorBound.lean`.
-
-Stage 1 (the `(v, w)`-factorisation) gives, for a `g`-orthonormal tangent frame `e` at
-`x`,
-```
-riemannianFiberNormSq g 0 2 x (R_x(v, w) T)
-  ≤ (g.inner x v v) · (g.inner x w w) · ∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T).
-```
-The residual sum `∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T)` is still
-linear-squared in the tensor `T`. This file removes that dependence by a Parseval
-argument in a `g`-orthonormal *tensor* frame.
-
-## The dual tensor frame
-
-For the `g`-orthonormal tangent frame `e` and a pair of indices `(a, b)`, the dual
-tensor frame element `dualTensorFrame g x e a b : TensorRSSpace 0 2 I x` is the
-continuous linear map sending the `(0, 0)`-tensor argument `τ` to `τ(⋆) • (ω^a ⊗ ω^b)`,
-where `ω^c := v ↦ g.inner x (e c) v` is the `g`-orthonormal coframe and `τ(⋆)` is the
-scalar value of the `(0, 0)`-tensor. Its defining property is the Kronecker identity
-```
-fiberNormSqComponent g x 0 2 (dualTensorFrame g x e a b) n e K (![c, d]) = δ_{ac} δ_{bd},
-```
-which holds because the empty-index covector `ω^K` evaluates to `1` and the
-`g`-orthonormality of `e` collapses the coframe pairing to a Kronecker delta.
-
-## Parseval expansion and the `C_x`-form bound
-
-Through `Module.Basis.ext_multilinear` (lifted across the
-`Tensor0SSpace 0 →L Tensor0SSpace 2` coercion) the dual tensor frame spans the fibre:
-```
-T = ∑_{a, b} (fiberNormSqComponent g x 0 2 T n e (![]) (![a, b])) • dualTensorFrame g x e a b.
-```
-Parseval reads
-```
-riemannianFiberNormSq g 0 2 x T = ∑_{a, b} (fiberNormSqComponent g x 0 2 T n e (![]) (![a, b]))².
-```
-A Cauchy–Schwarz over the `(a, b)`-index then yields the `T`-independent per-point bound
-```
-∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T)
-  ≤ C_x · riemannianFiberNormSq g 0 2 x T,
-  C_x = ∑_{i, j, a, b} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) (dualTensorFrame g x e a b)).
-```
-Composed with the Stage 1 factorisation this is the `(v, w, T)`-uniform per-point bound
-```
-riemannianFiberNormSq g 0 2 x (R_x(v, w) T)
-  ≤ C_x · (g.inner x v v) · (g.inner x w w) · riemannianFiberNormSq g 0 2 x T.
-```
-
-## Main results
-
-* `dualTensorFrame` — the `g`-orthonormal dual tensor frame element.
-* `fiberNormSqComponent_dualTensorFrame` — the Kronecker identity for its frame
-  components.
-* `tensor_dualFrame_expansion` — the multilinear expansion of an arbitrary `(0, 2)`-tensor
-  in the dual tensor frame.
-* `riemannianFiberNormSq_eq_sum_component_sq` — Parseval in the dual tensor frame.
-* `sum_riemannianFiberNormSq_riemannOp_le_Cx` — the `T`-independent per-point bound.
-* `riemannianFiberNormSq_riemannOp_tensorCov_vwT_factor_le` — the combined
-  `(v, w, T)`-uniform per-point bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -94,7 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- The scalar-extraction functional on the `(0, 0)`-tensor fibre: `τ ↦ τ(⋆)`. -/
 noncomputable def tensor00Scalar (x : M) :
     Tensor0SSpace 0 I x →L[ℝ] ℝ :=
   (continuousMultilinearCurryFin0 ℝ E ℝ).toContinuousLinearMap.comp
@@ -113,7 +45,6 @@ lemma tensor00Scalar_apply (x : M) (τ : Tensor0SSpace 0 I x)
   congr 1
   exact Subsingleton.elim _ _
 
-/-- The rank-`2` `g`-orthonormal coframe covector `ω^a ⊗ ω^b` as a `(0, 2)`-tensor. -/
 noncomputable def coframe2
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n) :
@@ -133,8 +64,6 @@ lemma coframe2_apply
   rw [Fin.prod_univ_two]
   simp [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-/-- The dual tensor frame element `F_{a, b}`: the continuous linear map sending the
-`(0, 0)`-tensor `τ` to `τ(⋆) • (ω^a ⊗ ω^b)`. -/
 noncomputable def dualTensorFrame
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n) :
@@ -152,10 +81,6 @@ lemma dualTensorFrame_apply
   unfold dualTensorFrame
   rw [ContinuousLinearMap.smulRight_apply]
 
-/-- **Kronecker identity for the dual tensor frame.** For a `g`-orthonormal tangent frame
-`e`, the `(K, J)`-frame component of `dualTensorFrame g x e a b` equals
-`δ_{a, J 0} · δ_{b, J 1}` (independent of `K`, which ranges over the singleton
-`Fin 0 → Fin n`). -/
 lemma fiberNormSqComponent_dualTensorFrame
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -186,9 +111,6 @@ lemma fiberNormSqComponent_dualTensorFrame
   rw [coframe2_apply (I := I) (M := M) g x e a b (fun k : Fin 2 => e (J k))]
   rw [horth a (J 0), horth b (J 1)]
 
-/-- **Coframe expansion of a `(0, 2)` covariant tensor.** For a `g`-orthonormal frame `e`
-arising from a `Module.Basis bse` (`bse i = e i`), every `(0, 2)` covariant tensor `A`
-expands as `A = ∑_{a, b} A(e_a, e_b) • coframe2 g x e a b`. -/
 lemma tensor02_coframe_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -260,11 +182,6 @@ lemma tensor02_coframe_expansion
     rw [if_neg hb, mul_zero, mul_zero]
   · intro h; exact absurd (Finset.mem_univ (v 1)) h
 
-/-- **`g`-orthonormal frame witness with `Module.Basis`.** There is a frame
-`e : Fin n → TangentSpace I x` arising from a `Module.Basis bse` (`bse i = e i`), with
-`n = Module.finrank ℝ (TangentSpace I x)`, that is `g`-orthonormal, satisfies Parseval and
-the frame expansion of tangent vectors, and represents `riemannianFiberNormSq` (at
-`(0, 2)`) as the frame double sum. -/
 lemma tangent_orthonormalBasis_witness
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x)
@@ -326,10 +243,6 @@ lemma tangent_orthonormalBasis_witness
   · intro S
     rfl
 
-/-- **Dual-tensor-frame expansion of a `(0, 2)`-tensor.** For the `g`-orthonormal frame
-`e` (with basis `bse`), every `(0, 2)`-tensor `T` expands as
-`T = ∑_{a, b} (T-component_{a, b}) • dualTensorFrame g x e a b`, where the components are
-the `fiberNormSqComponent`s at the empty covector index. -/
 lemma tensor_dualFrame_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -396,9 +309,6 @@ lemma tensor_dualFrame_expansion
       dualTensorFrame_apply (I := I) (M := M) g x e a b τ, ← hc_def]
   rw [hLHS', hRHS']
 
-/-- **Parseval in the dual tensor frame.** For the `g`-orthonormal frame `e`, the intrinsic
-fibre norm squared is the sum of squared dual-tensor-frame components:
-`riemannianFiberNormSq g 0 2 x T = ∑_{a, b} (fiberNormSqComponent g x 0 2 T n e K₀ ![a, b])²`. -/
 lemma riemannianFiberNormSq_eq_sum_component_sq
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -430,17 +340,6 @@ lemma riemannianFiberNormSq_eq_sum_component_sq
     exact absurd (Subsingleton.elim K K₀) hK
   · intro h; exact absurd (Finset.mem_univ K₀) h
 
-/-- **`T`-independent per-point bound.** For the `g`-orthonormal frame `e` (with basis
-`bse`), the frame-pair residual sum of the curvature acting on `T` is bounded by the
-`T`-independent constant
-`C_x := ∑_{i, j, a, b} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) (dualTensorFrame …))`
-times the intrinsic fibre norm squared of `T`:
-```
-∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T)
-  ≤ (∑_{i, j, a, b} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) (dualTensorFrame g x e a b)))
-    · riemannianFiberNormSq g 0 2 x T.
-```
--/
 lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -605,16 +504,6 @@ lemma sum_riemannianFiberNormSq_riemannOp_le_Cx
           refine Finset.sum_congr rfl (fun i _ => ?_)
           rw [Finset.sum_mul]
 
-/-- **`(v, w, T)`-uniform per-point fibre-norm bound for the tensor curvature operator.**
-For any point `x`, there is a `T`-independent (and `(v, w)`-independent) nonnegative
-constant `C_x` such that for all tangent vectors `v, w` and all `(0, 2)`-tensors `T`,
-```
-riemannianFiberNormSq g 0 2 x (R_x(v, w) T)
-  ≤ C_x · (g.inner x v v) · (g.inner x w w) · riemannianFiberNormSq g 0 2 x T.
-```
-The constant is
-`C_x = ∑_{i, j, a, b} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) (dualTensorFrame g x e a b))`
-for the `g`-orthonormal tangent frame `e` at `x`. -/
 theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCov_le
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ Cx : ℝ, 0 ≤ Cx ∧

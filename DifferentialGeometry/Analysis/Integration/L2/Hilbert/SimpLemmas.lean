@@ -8,25 +8,6 @@ import Mathlib.Topology.Algebra.GroupCompletion
 import Mathlib.Analysis.Normed.Group.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 
-/-!
-# `simp` lemmas bridging `toL2` with the algebraic structure
-
-The canonical embedding
-`SmoothCcTensor.toL2 : SmoothCcTensor g r s →L[ℝ] TensorL2 r s g` is a
-continuous linear map and therefore commutes with the standard
-algebraic operations on both sides: zero, addition, negation,
-subtraction, and real scalar multiplication.
-
-This file collects these basic compatibilities as `@[simp]` lemmas,
-allowing downstream `simp`-based proofs to rewrite expressions
-involving `toL2` directly into the corresponding algebraic
-combinations on the `L²` side, without going through the generic
-`ContinuousLinearMap.map_*` API.
-
-Each lemma is a one-liner deduced from the fact that `toL2` is a
-continuous linear map.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -62,16 +43,13 @@ variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 set_option linter.unusedSectionVars false in
-/-- The embedding `toL2` sends the zero section to the zero element of
-`TensorL2 r s g`. -/
+
 @[simp] theorem toL2_zero :
     (toL2 (g := g) (r := r) (s := s)) 0 = 0 :=
   ContinuousLinearMap.map_zero _
 
 set_option linter.unusedSectionVars false in
-/-- The embedding `toL2` is additive: it sends the sum of two
-compactly-supported smooth sections to the sum of their images in the
-`L²` Hilbert space. -/
+
 @[simp] theorem toL2_add (S T : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (S + T) =
       (toL2 (g := g) (r := r) (s := s)) S +
@@ -79,14 +57,14 @@ compactly-supported smooth sections to the sum of their images in the
   ContinuousLinearMap.map_add _ _ _
 
 set_option linter.unusedSectionVars false in
-/-- The embedding `toL2` commutes with negation. -/
+
 @[simp] theorem toL2_neg (S : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (-S) =
       -((toL2 (g := g) (r := r) (s := s)) S) :=
   ContinuousLinearMap.map_neg _ _
 
 set_option linter.unusedSectionVars false in
-/-- The embedding `toL2` commutes with subtraction. -/
+
 @[simp] theorem toL2_sub (S T : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (S - T) =
       (toL2 (g := g) (r := r) (s := s)) S -
@@ -94,7 +72,7 @@ set_option linter.unusedSectionVars false in
   ContinuousLinearMap.map_sub _ _ _
 
 set_option linter.unusedSectionVars false in
-/-- The embedding `toL2` commutes with real scalar multiplication. -/
+
 @[simp] theorem toL2_smul (c : ℝ) (S : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (c • S) =
       c • ((toL2 (g := g) (r := r) (s := s)) S) :=

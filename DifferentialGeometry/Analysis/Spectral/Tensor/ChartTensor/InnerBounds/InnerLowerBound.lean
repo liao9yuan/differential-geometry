@@ -5,42 +5,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Uniform positive lower bound for the chart-frame `(r, s)`-quadratic form
-
-For a closed Riemannian manifold `(M, g)` and a chart base point `α : M`, the
-chart-frame `(r, s)`-diagonal quadratic form
-`(b, T) ↦ chartTensorInnerPointwise_rs_model g r s α b T T`
-attains a strictly positive minimum on the compact product
-`tsupport (chartAtlasPOU I M α) × unit sphere(TensorRSModel r s ℝ E)`.
-
-This is a uniform-positivity statement: there is a single `ε > 0` such that
-the quadratic form is bounded below by `ε` on the entire compact product.
-
-## Proof strategy
-
-The argument is the standard extreme-value-theorem application on a compact
-domain:
-
-1. The first factor `tsupport (chartAtlasPOU I M α)` is compact in `M`, as a
-   closed subset of the compact ambient manifold.
-2. The second factor `Metric.sphere (0 : TensorRSModel r s ℝ E) 1` is compact
-   in any finite-dimensional normed space (proper space ⇒ closed bounded
-   compact).
-3. The product is compact, the quadratic form is jointly continuous on
-   `baseSet × univ ⊇ tsupport × sphere` (by the joint continuity established
-   earlier), and the form is strictly positive at every `(b, T)` in the
-   compact product (since the chart-`(α, b)`-twist is invertible on `baseSet`
-   and the bundle-fibre `(r, s)`-inner product is positive-definite on
-   non-zero tensors).
-4. The extreme-value theorem produces a minimum, which is strictly positive.
-
-## Main result
-
-* `exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport` —
-  the uniform positive lower bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -69,10 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section TwistInvertible
 
-/-- The inverse chart-`(α, b)`-twist of a mixed model tensor: precompose the
-input on the `r`-block with `chartJ α b`, and postcompose the output on
-the `s`-block with `chartJinv α b`. Composes with `chartRSTwist` to the
-identity on the chart base set. -/
 noncomputable def chartRSTwistInv
     (α : M) (b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     TensorRSModel r s ℝ E :=
@@ -92,8 +52,6 @@ lemma chartRSTwistInv_apply
         (fun _ : Fin s => chartJinv (I := I) (M := M) α b) := by
   rfl
 
-/-- On the chart base set, the inverse twist undoes the forward twist:
-`chartRSTwistInv α b r s (chartRSTwist α b r s T) = T`. -/
 lemma chartRSTwistInv_chartRSTwist
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -124,8 +82,6 @@ lemma chartRSTwistInv_chartRSTwist
   funext k
   exact chartJ_chartJinv (I := I) (M := M) α hb (w k)
 
-/-- On the chart base set, the forward twist undoes the inverse twist:
-`chartRSTwist α b r s (chartRSTwistInv α b r s T) = T`. -/
 lemma chartRSTwist_chartRSTwistInv
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -156,7 +112,6 @@ lemma chartRSTwist_chartRSTwistInv
   funext k
   exact chartJinv_chartJ_self (I := I) (M := M) α hb (w k)
 
-/-- On the chart base set, the forward chart-`(α, b)`-twist is injective. -/
 lemma chartRSTwist_injective
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -168,8 +123,6 @@ lemma chartRSTwist_injective
   have h1 := chartRSTwistInv_chartRSTwist (I := I) (M := M) α hb r s T₁
   rw [← h0, ← h1, h]
 
-/-- On the chart base set, the forward chart-`(α, b)`-twist of a non-zero
-tensor is non-zero. -/
 lemma chartRSTwist_ne_zero
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -207,8 +160,6 @@ section Positivity
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-- Strict positivity of the chart-frame `(r, s)`-diagonal quadratic form
-at a non-zero tensor, on the chart base set. -/
 lemma chartTensorInnerPointwise_rs_model_pos_of_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -238,16 +189,12 @@ section Compactness
 
 variable [CompactSpace M]
 
-/-- The closed support of the chart-atlas partition-of-unity weight at `α`
-is compact in `M`. -/
 lemma pouTsupport_isCompact
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact
 
-/-- The closed support of the chart-atlas partition-of-unity weight at `α`
-is contained in the chart base set. -/
 lemma pouTsupport_subset_baseSet
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     tsupport (fun x : M =>
@@ -264,14 +211,6 @@ section LowerBound
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-/-- **Uniform positive lower bound for the chart-frame `(r, s)`-diagonal
-quadratic form on `K_M × unit sphere`, for an arbitrary compact subset `K_M`
-of the chart base set.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, ranks
-`(r, s)`, and a compact set `K_M` contained in the chart-`α` base set, there is
-`ε > 0` such that `chartTensorInnerPointwise_rs_model g r s α b T T ≥ ε` for
-every `b ∈ K_M` and every unit `(r, s)`-model tensor `T`. -/
 theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -342,18 +281,6 @@ theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
     have hp_mem : (b, T) ∈ K := ⟨hb, hT_mem⟩
     exact absurd ⟨(b, T), hp_mem⟩ hK_ne
 
-/-- **Uniform positive lower bound for the chart-frame `(r, s)`-diagonal
-quadratic form on `tsupport(POU_α) × unit sphere`.**
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α`, and ranks
-`(r, s)`, there is `ε > 0` such that
-`chartTensorInnerPointwise_rs_model g r s α b T T ≥ ε`
-for every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α` and every unit `(r, s)`-model tensor `T`.
-
-This is the specialisation of
-`exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact` to the
-compact closed support of the chart-atlas partition-of-unity weight. -/
 theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ ε : ℝ, 0 < ε ∧

@@ -8,24 +8,6 @@ import Mathlib.MeasureTheory.Function.AEEqOfIntegral
 import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Data.ENNReal.Basic
 
-/-!
-# Chart-invariance of the chart-local Voss–Weyl divergence
-
-For a smooth Riemannian metric `g`, a smooth tangent section `X`, and two
-points `α β : M`, the chart-local Voss–Weyl divergence agrees on the overlap
-of the two chart sources:
-$$\text{localDivergence}_g(\alpha, X)(x) = \text{localDivergence}_g(\beta, X)(x)$$
-for every `x ∈ (chartAt H α).source ∩ (chartAt H β).source`.
-
-The proof goes via integration testing. For any smooth bump function `φ` with
-compact support inside the overlap, the chart-local IBP identity gives
-$\int_M \text{localDivergence}_g(\alpha, X) \phi \, d\mu_\alpha = -\int_M \text{tangentSectionAction}(X, \phi) \, d\mu_\alpha$
-(and likewise at `β`). The right-hand side is intrinsic — it does not depend
-on the chart — and it integrates the same function against two measures that
-agree on the overlap. Hence the two left-hand sides agree, and a
-density argument upgrades this to pointwise equality on the overlap.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -47,10 +29,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For any smooth `φ` with compact tsupport inside the overlap of `α, β`'s
-chart sources, the integrals of `localDivergence g α X · φ` against
-`chartLocalMeasure g α` and of `localDivergence g β X · φ` against
-`chartLocalMeasure g β` are equal. -/
 theorem integral_localDivergence_eq_of_overlap_support [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -102,9 +80,6 @@ theorem integral_localDivergence_eq_of_overlap_support [I.Boundaryless]
       rfl]
   rw [h_meas_eq]
 
-/-- A chart-local measure `chartLocalMeasure g α` is positive on every open
-nonempty subset of the chart source whose closure contains a manifold-interior
-point. Under `[I.Boundaryless]`, every point is a manifold-interior point. -/
 private lemma chartLocalMeasure_open_pos_under_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {V : Set M} (hVopen : IsOpen V) (hVne : V.Nonempty)
@@ -242,10 +217,6 @@ private lemma chartLocalMeasure_open_pos_under_boundaryless [I.Boundaryless]
     exact measure_eq_zero_iff_ae_notMem.mpr hyNotW
   exact (ne_of_gt hW_pos) hW_zero
 
-/-- The continuous-function pointwise positivity, in the form we need for the
-contradiction step: if `f` is continuous on an open `U`, `f x > 0` at some
-`x ∈ U`, then there's an open neighborhood `V` of `x` (with `V ⊆ U`) on which
-`f > f(x)/2`. -/
 private lemma exists_open_nbhd_positive
     {f : M → ℝ} {U : Set M} (hU : IsOpen U) (hfcont : ContinuousOn f U)
     {x : M} (hxU : x ∈ U) (hfx : 0 < f x) :
@@ -264,9 +235,6 @@ private lemma exists_open_nbhd_positive
   intro y hy
   exact hV₀ y (hW_sub hy.1)
 
-/-- Smooth bump function existence, packaged: for any `x ∈ V` (open), there is
-a `φ : M → ℝ`, `C^∞` with compact support, `0 ≤ φ`, `φ(x) > 0`, `tsupport φ ⊆
-V`. We use Mathlib's `SmoothBumpFunction`. -/
 private lemma exists_smooth_bump_in_open [T2Space M]
     {V : Set M} (hVopen : IsOpen V) {x : M} (hxV : x ∈ V) :
     ∃ φ : M → ℝ, ContMDiff I 𝓘(ℝ) ∞ φ ∧ HasCompactSupport φ ∧
@@ -281,7 +249,6 @@ private lemma exists_smooth_bump_in_open [T2Space M]
   · rw [f.eq_one]
     exact one_pos
 
-/-- Helper for the positive case of chart invariance. -/
 private theorem localDivergence_chart_invariance_pos [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -593,9 +560,6 @@ private theorem localDivergence_chart_invariance_pos [I.Boundaryless]
       _ ≤ ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := hLB_total
   linarith
 
-/-- **Chart invariance of `localDivergence`.** Under `[I.Boundaryless]`, for any
-two base points `α β : M` and any `x` in the overlap of their chart sources,
-the chart-local Voss–Weyl divergence at `α` and at `β` agree at `x`. -/
 theorem localDivergence_chart_invariance [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -609,10 +573,6 @@ theorem localDivergence_chart_invariance [I.Boundaryless]
     linarith
   · exact localDivergence_chart_invariance_pos (I := I) g α β X hx_α hx_β hΔpos
 
-/-- **Voss–Weyl divergence formula.** Under `[I.Boundaryless]`, for any base
-point `α : M` and any `x ∈ (chartAt H α).source`, the global divergence
-`divergence_g g X` evaluated at `x` equals the chart-local Voss–Weyl divergence
-`localDivergence g α X x`. -/
 theorem voss_weyl_divergence_formula [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -622,9 +582,6 @@ theorem voss_weyl_divergence_formula [I.Boundaryless]
   unfold divergence_g
   exact localDivergence_chart_invariance (I := I) g x α X (mem_chart_source H x) hx_α
 
-/-- Under `[I.Boundaryless]`, the chart-local Voss–Weyl divergence is `C^∞` on
-the entire chart base set (the smoothness domain reduces to the chart source
-under boundaryless). -/
 theorem localDivergence_contMDiffOn_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -638,8 +595,6 @@ theorem localDivergence_contMDiffOn_baseSet [I.Boundaryless]
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
     exact (extChartAt I α).map_source hx_ext
 
-/-- The global divergence `divergence_g g X` is `C^∞` on `M` under
-`[I.Boundaryless]`. The proof is local-to-global via the Voss–Weyl identity. -/
 theorem divergence_g_contMDiff [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M)

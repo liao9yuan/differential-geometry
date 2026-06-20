@@ -5,62 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
-/-!
-# Frame-component scaffolding for the order-`2` curvature-defect pointwise bound
-
-This file develops scaffolding for the pointwise fibre-norm control of the canonical
-commutator defect `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)`, organised as a **direct
-frame-component expansion**: the explicit `rawTensorConnLap` frame trace
-`∑ᵢ [∇_{Bᵢ}∇_{Bᵢ} − ∇_{∇_{Bᵢ}Bᵢ}]` is manipulated at the level of section values and frame
-components. The covariant directions are always honest smooth tangent fields — the
-`g_x`-orthonormal frame `smoothOrthoFrame g x i` — never an extension `smoothExtensionTangent`
-of a tangent vector off its base point, which has no jet/linearity control and whose
-differentiation produces uncontrolled terms.
-
-## Main results
-
-* `riemannSec_covApply_fiberNormSq_le` — the **genuine-curvature fibre bound**: the intrinsic
-  fibre norm of the Riemann curvature contraction `R(X, Y)(∇_X T₀)` on the once-differentiated
-  tensor is bounded by `Cx · g.inner X X · g.inner Y Y · rfns(∇_X T₀)`, with `Cx ≥ 0` the
-  per-point curvature constant supplied by the imported Parseval fibre lemma. Smoothness of
-  `∇_X T₀` is produced internally, so the lemma is hypothesis-free in the model fibre.
-
-* `riemannSec_orthoFrame_covApply_fiberNormSq_le` — the orthonormal-frame specialisation: with
-  `X = Y = Bᵢ` a `g_x`-orthonormal frame vector (unit `g`-length at the centre `x`), the
-  curvature contraction's fibre norm is bounded by `Cx · rfns(∇_{Bᵢ} T₀)`.
-
-* `orthoFrame_pair_covApply_commutator` — the **per-frame-pair section-level Ricci identity**:
-  the iterated covariant derivative of `T₀` along two frame directions `Bᵢ, Bₐ` commutes up to
-  the frame-bracket section `∇_{[Bᵢ, Bₐ]} T₀` and the genuine Riemann curvature `R(Bᵢ, Bₐ) T₀`.
-  This is the exact section-level commutator (`covApply_covApply_eq_section`) that the
-  frame-component expansion uses to commute inner frame-trace covariant derivatives past the
-  outer covariant direction, with both defect sections made explicit.
-
-## The remaining subgoal (documented, not assumed)
-
-The pointwise bound `hpt` consumed by `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-requires reconciling, at the level of `(0, 3)` section values, the rank-`(0, 3)` rough
-Laplacian of the gradient `Δ_∇(∇T₀) = ∑ᵢ ∇²_{Bᵢ, Bᵢ}(∇T₀)` with the gradient of the rank-`(0, 2)`
-rough Laplacian `∇(Δ_∇ T₀)`. Two genuinely distinct frame corrections separate them, both
-second-covariant-derivative-order in `T₀`:
-
-1. the slot-`0` Christoffel matching identifying the leftmost (gradient) slot of
-   `∇²_{Bᵢ, Bᵢ}(∇T₀)` with `∇²_{Bᵢ, Bᵢ}(∇_{eₐ} T₀)` along a frame outer direction `eₐ`;
-
-2. the **moving-frame correction**: `Δ_∇ T₀` traces against the *moving* `g_z`-orthonormal
-   frame `Cᶻᵢ := smoothOrthoFrame g z i`, so the outer covariant derivative `∇_{eₐ}(Δ_∇ T₀)`
-   differentiates `z ↦ Cᶻᵢ`, whereas the fixed-frame trace `∑ᵢ ∇²_{Bᵢ, Bᵢ}` uses the
-   `g_x`-orthonormal frame `Bᵢ := smoothOrthoFrame g x i`. The two agree at `z = x` but differ
-   in a neighbourhood; their `eₐ`-derivatives differ by an explicit frame-derivative correction
-   that must be bounded by `rfns(∇²T₀)`.
-
-The genuine-curvature terms produced by these reconciliations are controlled by the lemmas of
-this file; the two frame-derivative corrections above are the remaining content and are *not*
-asserted here.
-
-All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -94,16 +38,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Per-point curvature-contraction fibre bound (rank `(0, 2)`).** For smooth tangent
-fields `X, Y` and the once-covariantly-differentiated section `Z := ∇_X T₀` of a smooth
-compactly-supported `(0, 2)`-tensor `T₀`, the intrinsic fibre norm of the genuine Riemann
-curvature contraction `riemannSec (tensorCov g 0 2) X Y Z x` is bounded by
-`Cx · g.inner x (X x) (X x) · g.inner x (Y x) (Y x) · rfns(Z x)` for the per-point curvature
-constant `Cx ≥ 0` supplied by `exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le`.
-
-Smoothness of `Z = ∇_X T₀` is produced internally through `covApplyRS_contMDiff`, so this
-lemma carries no `(0, 2)`-model-fibre smoothness hypothesis. The curvature equality
-`riemannSec_eq_riemannOp_smooth` identifies `riemannSec` with the bundled `riemannOp`. -/
 theorem riemannSec_covApply_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} (x : M)
@@ -125,12 +59,6 @@ theorem riemannSec_covApply_fiberNormSq_le
   rw [riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 2) hX hY hZ]
   exact hbound (X x) (Y x) _
 
-/-- **Curvature-contraction fibre bound along the orthonormal frame.** Specialising
-`riemannSec_covApply_fiberNormSq_le` to the two frame directions `X = Y = smoothOrthoFrame g x i`
-at the centre `x`, where the `g_x`-orthonormal frame has unit `g`-length
-(`smoothOrthoFrame_orthonormal_at_center`), the curvature contraction
-`riemannSec (tensorCov g 0 2) Bᵢ Bᵢ (∇_{Bᵢ} T₀) x` has intrinsic fibre norm bounded by
-`Cx · rfns(∇_{Bᵢ} T₀)(x)` — the frame `g`-length factors collapse to `1`. -/
 theorem riemannSec_orthoFrame_covApply_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -155,17 +83,6 @@ theorem riemannSec_orthoFrame_covApply_fiberNormSq_le
   rw [hortho] at hbound
   simpa using hbound
 
-/-- **Per-frame-pair section commutator.** For the frame directions
-`B := smoothOrthoFrame g x i` and `W := smoothOrthoFrame g x a`, the iterated covariant
-derivative of a smooth compactly-supported `(0, 2)`-tensor `T₀` commutes up to the
-frame-bracket term and the genuine Riemann curvature:
-```
-∇_B (∇_W T₀) = ∇_W (∇_B T₀) + ∇_{[B, W]} T₀ + R(B, W) T₀
-```
-as an equality of `(0, 2)`-tensor sections. This is `covApply_covApply_eq_section` at
-`cov := tensorCov g 0 2`; it is the frame-form Ricci identity that Route `B` uses to commute
-the inner frame-trace covariant derivatives past the outer covariant direction, with the two
-defect sections (frame bracket, Riemann curvature) made explicit. -/
 theorem orthoFrame_pair_covApply_commutator
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (i a : Fin (Module.finrank ℝ E)) :

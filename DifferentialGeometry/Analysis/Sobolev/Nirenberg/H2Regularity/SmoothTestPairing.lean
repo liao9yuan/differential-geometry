@@ -1,31 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Defs
 
-/-!
-# Smooth-test pairing functional for the duality identification of weak
-partial derivatives
-
-This module supplies the auxiliary integrability lemma and the
-linear-in-test-function smooth-test pairing functional
-
-  `smoothTestPairing Ω w k φ := -∫_Ω w · ∂_k φ`,
-
-defined for `w ∈ L²(Ω)` and `φ` smooth compactly supported. This is the
-candidate weak-partial pairing in the Riesz / duality argument: a
-uniform `L²` bound on the difference quotients `D_h^k w` translates to a
-uniform bound on `smoothTestPairing Ω w k φ` in terms of `‖φ‖_{L²}`,
-the Cauchy–Schwarz / discrete-integration-by-parts route to
-identifying a weak partial derivative.
-
-## Main definitions and results
-
-* `smoothTestPairing Ω w k φ`: the smooth-test linear functional
-  `Λ_w(φ) := -∫_Ω w · ∂_k φ`.
-* `integrable_w_partial_phi`: the integrand `w · ∂_k φ` is integrable on
-  `Ω` for `w ∈ L²(Ω)` and `φ` smooth compactly supported.
-* `smoothTestPairing_add`, `smoothTestPairing_smul`: linearity of the
-  smooth-test pairing in the test argument.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -39,8 +13,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- For a smooth compactly supported `φ : E → ℝ` and `w : E → ℝ` in
-`L²(volume.restrict Ω)`, the integrand `w · ∂_k φ` is integrable on `Ω`. -/
+
 theorem integrable_w_partial_phi
     {Ω : Set E} {w : E → ℝ} (hw_l2 : MemLp w 2 (volume.restrict Ω))
     {φ : E → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -61,17 +34,13 @@ theorem integrable_w_partial_phi
   exact MemLp.integrable_mul hw_l2 h_partial_memLp
 
 omit [NeZero d] in
-/-- The smooth-test pairing `Λ_w(φ) := -∫_Ω w · ∂_k φ`, for `w : E → ℝ` and
-`φ` smooth compactly supported. The integrability hypothesis on `w` is not
-imposed at the definition level so that the symbol can be applied to any
-`w` of the appropriate type, with the relevant integrability lemma supplied
-where needed (see `integrable_w_partial_phi`). -/
+
 def smoothTestPairing
     (Ω : Set E) (w : E → ℝ) (k : Fin d) (φ : E → ℝ) : ℝ :=
   -∫ x in Ω, w x * (fderiv ℝ φ x) (EuclideanSpace.single k 1)
 
 omit [NeZero d] in
-/-- The smooth-test pairing is additive in the test function. -/
+
 theorem smoothTestPairing_add
     {Ω : Set E} {w : E → ℝ} (hw_l2 : MemLp w 2 (volume.restrict Ω))
     {k : Fin d} {φ ψ : E → ℝ}
@@ -108,7 +77,7 @@ theorem smoothTestPairing_add
   rw [h_int_eq]; ring
 
 omit [NeZero d] in
-/-- The smooth-test pairing is homogeneous in the test function. -/
+
 theorem smoothTestPairing_smul
     {Ω : Set E} (w : E → ℝ) (k : Fin d) (c : ℝ) {φ : E → ℝ}
     (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :

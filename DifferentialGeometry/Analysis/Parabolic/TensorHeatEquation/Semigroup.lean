@@ -1,49 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 import Mathlib.Analysis.SpecialFunctions.Exp
 
-/-!
-# Tensor heat semigroup: eigen-index and per-eigenvalue heat coefficient
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file
-introduces the sigma-typed basis-index `TensorEigenIdx g r s` for the
-L²-side tensor eigenbasis of the resolvent
-
-  `R := tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`,
-
-and proves the basic non-negativity / unit-interval bound of the per-
-eigenvalue heat coefficient `exp(-λ_i · t)` for `t ≥ 0`, where `λ_i` is
-the connection-Laplacian eigenvalue translated from the corresponding
-nonzero resolvent eigenvalue via `λ = (1 - μ)/μ`.
-
-This is the tensor analogue of the scalar `EigenIdx` / `lambda` /
-`heat_coeff_mem_unit_interval` triple, and serves as the indexing layer
-for the eventual tensor heat semigroup
-`∑' i, exp(-λ_i · t) • ⟪b i, T⟫ • b i`.
-
-## Main definitions
-
-* `TensorEigenIdx g r s` — the sigma-indexed basis-index type for the
-  L² eigenbasis: pairs of a nonzero resolvent eigenvalue and a finite
-  index into its eigenspace orthonormal basis.
-* `TensorEigenIdx.lambda` — the connection-Laplacian eigenvalue
-  attached to a sigma-index, defined as
-  `tensorLaplacianEigenvalueOf μ.val = (1 - μ.val) / μ.val`.
-
-## Main results
-
-* `tensor_lambda_nonneg` — `0 ≤ TensorEigenIdx.lambda i`.
-* `tensor_heat_coeff_mem_unit_interval` — for `t ≥ 0`,
-  `exp(-λ_i · t) ∈ (0, 1]`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`), so
-the translated Laplacian eigenvalue `λ = (1 - μ)/μ` is non-negative for
-`μ ∈ (0, 1]`. The per-eigenvalue heat coefficient is then
-`exp(-λ · t)`, contractive for `t ≥ 0`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -70,22 +27,16 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Sigma-index for the tensor eigenbasis: pairs an eigenvalue `μ`
-(nonzero, nontrivial eigenspace) with a finite-dimensional eigenspace
-index. -/
 abbrev TensorEigenIdx (g : SmoothRiemannianMetric I M) (r s : ℕ) : Type _ :=
   Σ μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g r s,
     Fin (Module.finrank ℝ
       (tensorResolventEigenspace (I := I) (M := M) g r s μ.val))
 
-/-- The connection-Laplacian eigenvalue associated with the resolvent
-eigenvalue at sigma index `i`, defined as `(1 - μ)/μ`. -/
 noncomputable abbrev TensorEigenIdx.lambda
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) : ℝ :=
   tensorLaplacianEigenvalueOf i.fst.val
 
-/-- The per-eigenvalue Laplacian eigenvalue is non-negative. -/
 theorem tensor_lambda_nonneg
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -98,8 +49,6 @@ theorem tensor_lambda_nonneg
       (I := I) (M := M) g r s hu_in hu_ne
   exact tensorLaplacianEigenvalueOf_nonneg_of_resolventEigenvalue h_mem_unit
 
-/-- The per-eigenvalue heat coefficient `exp(-λ_i · t)` is in `(0, 1]`
-for non-negative time. -/
 theorem tensor_heat_coeff_mem_unit_interval
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : 0 ≤ t) :
@@ -111,7 +60,6 @@ theorem tensor_heat_coeff_mem_unit_interval
     tensor_lambda_nonneg (I := I) (M := M) i
   nlinarith
 
-/-- The squared heat coefficient is bounded by `1` for `t ≥ 0`. -/
 lemma tensor_heat_coeff_sq_le_one
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : 0 ≤ t) :
@@ -123,8 +71,6 @@ lemma tensor_heat_coeff_sq_le_one
   nlinarith [sq_nonneg
     (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1)]
 
-/-- Parseval-type square-summability of the tensor basis coefficients for
-the chart-locality-free eigenbasis. -/
 lemma tensorSummable_basis_coeff_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -163,8 +109,6 @@ lemma tensorSummable_basis_coeff_sq
   rw [h_map_eq] at h_iff
   exact h_iff.mp h_summable_smul
 
-/-- Parseval identity for the chart-locality-free tensor eigenbasis: the
-squared L²-norm of `T` equals the sum of the squared basis coefficients. -/
 lemma tensorParseval_norm_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2

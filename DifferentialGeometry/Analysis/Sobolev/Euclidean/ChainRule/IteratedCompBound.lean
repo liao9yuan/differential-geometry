@@ -1,36 +1,6 @@
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Faà di Bruno-style norm envelope for iterated derivatives of a composition
-
-This file packages Mathlib's `norm_iteratedFDeriv_comp_le` into a clean
-polynomial envelope and a uniform-on-compact version, for arbitrary real
-normed spaces. The output is a single-constant majorant of
-`‖iteratedFDeriv ℝ n (f ∘ g) x‖` in terms of plain (un-shaped) bounds on the
-derivatives of `f` and `g`, which is the form needed for cross-chart
-order-`k` Sobolev transfer estimates.
-
-Mathlib's lemma requires the inner derivatives to be bounded in the special
-shape `‖∂^i g‖ ≤ D ^ i`. The lemmas here remove that shaping: from a single
-bound `‖∂^i g‖ ≤ Cg` (for all `1 ≤ i ≤ n`) we obtain `‖∂^i g‖ ≤ (max Cg 1) ^ i`,
-which feeds Mathlib's lemma and yields
-
-`‖∂^n (f ∘ g) x‖ ≤ n! · Cf · (max Cg 1) ^ n  ≤  n! · Cf · (1 + Cg) ^ n`.
-
-## Main results
-
-* `norm_iteratedFDeriv_comp_le_envelope`: pointwise envelope
-  `‖∂^n (f ∘ g) x‖ ≤ n! · Cf · (1 + Cg) ^ n` from natural max-bounds on the
-  derivatives of `f` (on the value `g x`) and `g` (at `x`).
-* `norm_iteratedFDeriv_comp_le_max_pow`: the slightly sharper
-  `‖∂^n (f ∘ g) x‖ ≤ n! · Cf · (max Cg 1) ^ n` variant.
-* `norm_iteratedFDeriv_comp_le_on_compact`: uniform-on-compact version. For a
-  compact set `K`, a single constant majorizes `‖∂^n (f ∘ g) x‖` for every
-  `x ∈ K`, with the constant assembled from the suprema of the derivative
-  norms of `f` over `g '' K` and of `g` over `K`.
--/
-
 noncomputable section
 
 open Set Filter Topology
@@ -47,8 +17,6 @@ variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {F : Type uF} [NormedAddCommGroup F] [NormedSpace ℝ F]
 variable {G : Type uG} [NormedAddCommGroup G] [NormedSpace ℝ G]
 
-/-- If a single number `D ≥ 1` bounds `‖∂^i g x‖`, then it also bounds it in the
-`D ^ i` shape (for `1 ≤ i`), because `D ^ i ≥ D` when `D ≥ 1` and `1 ≤ i`. -/
 private theorem norm_le_pow_of_le_of_one_le
     {a D : ℝ} (hD1 : 1 ≤ D) {i : ℕ} (hi : 1 ≤ i) (ha : a ≤ D) :
     a ≤ D ^ i := by
@@ -56,15 +24,6 @@ private theorem norm_le_pow_of_le_of_one_le
   calc D = D ^ 1 := (pow_one D).symm
     _ ≤ D ^ i := pow_le_pow_right₀ hD1 hi
 
-/-- Faà di Bruno-style envelope, sharp `max`-form.
-
-For `f : F → G` and `g : E → F` both `C^N` with `n ≤ N`, if `Cf` bounds
-`‖∂^i f (g x)‖` for `i ≤ n` and `Cg` bounds `‖∂^i g x‖` for `1 ≤ i ≤ n`, then
-`‖∂^n (f ∘ g) x‖ ≤ n! · Cf · (max Cg 1) ^ n`.
-
-The inner-derivative hypothesis is a *flat* bound `‖∂^i g x‖ ≤ Cg`; the
-`(max Cg 1) ^ n` factor absorbs the `D ^ i` shaping required by
-`norm_iteratedFDeriv_comp_le`. -/
 theorem norm_iteratedFDeriv_comp_le_max_pow
     {g : E → F} {f : F → G} {n : ℕ} {N : WithTop ℕ∞}
     (hf : ContDiff ℝ N f) (hg : ContDiff ℝ N g) (hn : (n : WithTop ℕ∞) ≤ N) (x : E)
@@ -80,13 +39,6 @@ theorem norm_iteratedFDeriv_comp_le_max_pow
       ((hCg i hi1 hin).trans (le_max_left _ _))
   exact norm_iteratedFDeriv_comp_le (𝕜 := ℝ) hf hg hn x hCf hCg'
 
-/-- Faà di Bruno-style envelope, clean `(1 + Cg)`-form.
-
-Same hypotheses as `norm_iteratedFDeriv_comp_le_max_pow`, but the geometric
-factor is the more uniform `(1 + Cg) ^ n`. This holds whenever the inner-bound
-`Cg` is nonnegative, which it automatically is when the hypothesis `hCg` is
-nonvacuous (a norm bounds `Cg`); to keep the statement unconditional we require
-`0 ≤ Cg`. -/
 theorem norm_iteratedFDeriv_comp_le_envelope
     {g : E → F} {f : F → G} {n : ℕ} {N : WithTop ℕ∞}
     (hf : ContDiff ℝ N f) (hg : ContDiff ℝ N g) (hn : (n : WithTop ℕ∞) ≤ N) (x : E)
@@ -106,9 +58,6 @@ theorem norm_iteratedFDeriv_comp_le_envelope
     mul_nonneg (by positivity) hCf0
   exact mul_le_mul_of_nonneg_left hpow hcoef_nonneg
 
-/-- The supremum, over `i ≤ n` and `y ∈ A`, of `‖iteratedFDeriv ℝ i h y‖`,
-realized as an explicit constant. Existence relies on compactness of `A` plus
-continuity of each iterated derivative (finite max over `i`). -/
 private theorem exists_uniform_iteratedFDeriv_bound
     {H : Type*} [NormedAddCommGroup H] [NormedSpace ℝ H]
     {h : E → H} {N : WithTop ℕ∞} (hh : ContDiff ℝ N h)
@@ -141,17 +90,6 @@ private theorem exists_uniform_iteratedFDeriv_bound
   refine Finset.le_sup'_of_le _ hmem ?_
   simp only [hi, dif_pos, le_refl]
 
-/-- **Uniform-on-compact Faà di Bruno envelope.**
-
-For `f : F → G` and `g : E → F` both `C^N` with `n ≤ N`, and a compact
-nonempty `K ⊆ E`, there is a single constant `C` such that
-`‖∂^n (f ∘ g) x‖ ≤ C` for *every* `x ∈ K`.
-
-The constant has the explicit Faà di Bruno shape
-`C = n! · Cf · (1 + Cg) ^ n`, where `Cf` bounds the derivatives of `f` over the
-compact image `g '' K` and `Cg` bounds the derivatives of `g` over `K`. This is
-the form consumed by a cross-chart order-`k` Sobolev transfer estimate, where
-`K` is a coordinate patch and `g` is a chart transition. -/
 theorem norm_iteratedFDeriv_comp_le_on_compact
     {g : E → F} {f : F → G} {n : ℕ} {N : WithTop ℕ∞}
     (hf : ContDiff ℝ N f) (hg : ContDiff ℝ N g) (hn : (n : WithTop ℕ∞) ≤ N)

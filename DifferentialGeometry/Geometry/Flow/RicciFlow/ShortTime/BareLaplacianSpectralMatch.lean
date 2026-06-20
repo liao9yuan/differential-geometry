@@ -11,12 +11,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-! # Spectral action of the bare tensor connection Laplacian
-
-`bare_laplacian_spectral_match`: on each tensor eigenmode, the `L²` coefficient of
-the raw connection Laplacian of a smooth compactly-supported tensor equals
-`-λᵢ` times that mode's coefficient. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

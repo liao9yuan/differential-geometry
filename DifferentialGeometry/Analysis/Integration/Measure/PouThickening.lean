@@ -3,39 +3,6 @@ import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Topology.Compactness.Paracompact
 import Mathlib.Topology.Separation.Regular
 
-/-!
-# Smooth thickening cutoff for the chart-atlas partition of unity
-
-For each base point `α : M` of a smooth manifold modelled on a finite-dimensional
-inner-product space, the canonical partition-of-unity element
-`chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯` has its topological support
-`tsupport (chartAtlasPOU I M α : M → ℝ)` contained in the open chart source
-`(chartAt H α).source`.
-
-This file constructs a slightly larger smooth cutoff: a function
-`χ : C^∞⟮I, M; ℝ⟯` with `0 ≤ χ ≤ 1` that is identically `1` on
-`tsupport (chartAtlasPOU I M α : M → ℝ)` and whose own topological support
-remains inside `(chartAt H α).source`. This is the standard "second-level"
-thickening used downstream when one needs a smooth function that equals `1`
-on the support of a POU element and still vanishes outside the chart.
-
-## Main result
-
-* `chartAtlasPOU_exists_thickening_cutoff` — existence of the smooth cutoff
-  `χ` with the three properties described above.
-
-The construction uses, in order:
-
-* `chartAtlasPOU_isSubordinate`, giving
-  `tsupport (chartAtlasPOU I M α : M → ℝ) ⊆ (chartAt H α).source`;
-* normality of `M` (a sigma-compact Hausdorff locally compact space is
-  paracompact, hence normal by Dieudonné's theorem) plus
-  `normal_exists_closure_subset` to find an open set whose closure still lies
-  in the chart source;
-* `exists_contMDiffMap_one_nhds_of_subset_interior` from Mathlib's manifold
-  partition-of-unity infrastructure to produce the smooth function itself.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology
@@ -50,20 +17,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- **Smooth thickening cutoff for `chartAtlasPOU`.**
-
-Given a smooth manifold `M` modelled on a finite-dimensional inner-product
-space, and a base point `α : M`, there exists a smooth real-valued function
-`χ : C^∞⟮I, M; ℝ⟯` such that
-
-* `0 ≤ χ ≤ 1` everywhere on `M`;
-* `χ ≡ 1` on the topological support `tsupport (chartAtlasPOU I M α : M → ℝ)`;
-* the topological support of `χ` is contained in the open chart source
-  `(chartAt H α).source`.
-
-In particular `{x | 0 < χ x}` is an open neighbourhood of
-`tsupport (chartAtlasPOU I M α : M → ℝ)` that is contained in
-`(chartAt H α).source` — the desired "second-level" thickening. -/
 theorem chartAtlasPOU_exists_thickening_cutoff
     [T2Space M] [SigmaCompactSpace M]
     (α : M) :

@@ -7,47 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.Char
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInterior.MixedPartials
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.DerivedDataConstructor
 
-/-!
-# Single-stage chart-`H^{m+1}` → chart-`H^{m+2}` boost (truly polymorphic)
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, an order
-`m : ℕ`, and an element `u_h ∈ laplacianDomainPow g 2`, this module provides
-the single-stage polymorphic boost: chart-`H^{m+1}` of the chart-pushed POU-cut
-representative of `u_h.coeFn` together with manifold-side chart-`H^m` of the
-canonical representative of the `(1 - Δ_g)`-preimage implies chart-`H^{m+2}`
-of the chart-pushed POU-cut representative.
-
-## Composition outline
-
-For each `m`-direction multi-index `dirs : Fin m → Fin n`, we:
-
-1. Build a level-`m` instance of `IteratedDiffChartBilinearData g α u_h m`
-   whose `directions = dirs`, via `IteratedDiffChartBilinearData.ofBase`
-   followed by `m` applications of `iteratedDiffChartBilinearData_step`.
-   Each step requires `MemW1p 2` of the previous-level effective source on
-   the chart target plus ae-vanishing of it off `chartImagePOUTsupport α`,
-   both threaded inductively through a `MemWkp (m - j) 2` rank invariant
-   (anchored at level `0` by `base_f_chart_memWkp_m`).
-
-2. Apply the weakened polymorphic Nirenberg interior regularity
-   `iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened` to the
-   level-`m` bundle, yielding `MemWkp 2 2` of `chosenMthMixed m dirs` on a
-   precompact open thickening `Ω''` of `chartImagePOUTsupport α`.
-
-3. Extend `MemWkp 2 2` from `Ω''` to the whole `chartTargetEuclid α` via
-   the support-aware cutoff extension `MemWkp_extend_via_cutoff_poly`,
-   using the polymorphic ae-vanishing `chosenMthMixed_ae_zero_off_Kα`.
-
-4. Combine the per-`dirs` `MemWkp 2 2` of `chosenMthMixed m dirs` with the
-   chart-`H^{m+1}` hypothesis and apply
-   `chartPushed_memWkp_m_plus_two_step` to assemble chart-`H^{m+2}` of the
-   chart-pushed parent.
-
-## Main result
-
-* `chartPushed_memWkp_succ_jump` — the headline single-stage boost.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -92,10 +51,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Pad a finite-length multi-index `dirs : Fin n → Fin (finrank ℝ E)` to an
-infinite sequence `ℕ → Fin (finrank ℝ E)` by extending with a default value
-beyond index `n - 1`. The padded sequence will only be queried at indices
-`< n` in our use. -/
 private noncomputable def padDirs {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E)) :
     ℕ → Fin (Module.finrank ℝ E) :=
@@ -108,8 +63,6 @@ private noncomputable def padDirs {n : ℕ}
     padDirs dirs j = dirs ⟨j, hj⟩ := by
   unfold padDirs; rw [dif_pos hj]
 
-/-- The level-`k` direction multi-index reconstructed from the padded
-sequence for `k ≤ n`. -/
 private noncomputable def dirsOf {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E)) (k : ℕ) :
     Fin k → Fin (Module.finrank ℝ E) :=
@@ -133,8 +86,6 @@ private lemma dirsOf_succ {n : ℕ}
     rw [Fin.snoc_last]
     rfl
 
-/-- The level-`n` direction multi-index reconstructed from `padDirs dirs`
-agrees with the original `dirs`. -/
 private lemma dirsOf_self {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E)) :
     dirsOf dirs n = dirs := by
@@ -160,14 +111,6 @@ private structure LevelBundle
         chartImagePOUTsupport (I := I) (M := M) α)]
       (fun _ : EuclN => (0 : ℝ))
 
-/-- The level-`0` `LevelBundle`. The level-`0` data is
-`IteratedDiffChartBilinearData.ofBase`. The rank invariant
-`MemWkp m 2 base.f_chart` is discharged by
-`base_f_chart_memWkp_m` at order `m`, consuming
-manifold-side chart-`H^{m+1}` of `u_h.coeFn` and manifold-side chart-`H^m`
-of the `(1-Δ_g)` preimage. The ae-vanishing is the public
-`base_f_chart_ae_zero_off_K_α` (in
-`DerivedChartBilinearH1ComplDataCanonical`). -/
 private def buildLevelZero
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -217,21 +160,6 @@ private def buildLevelZero
           (I := I) (M := M) g 1 hu_h)
       filter_upwards [h_ae] with y hy using hy }
 
-/-- The inductive step `j → j + 1` of the `LevelBundle` build, given:
-
-* the level-`j` bundle (which carries `MemWkp (m - j) 2` of `D_j.fChartEff`);
-* chart-`H^{j+1}` of the parent (= a restriction of chart-`H^{m+1}` since
-  `j + 1 ≤ m`);
-* chart-`H^{j+2}` of the parent (= a restriction of chart-`H^{m+1}` since
-  `j + 2 ≤ m + 1`);
-* the bound `j + 1 ≤ m` (so the step is meaningful).
-
-The output level-`(j+1)` bundle's `fChartEff` is `fChartEffStep ... j ...`,
-satisfying `MemWkp (m - (j+1)) 2` via `fChartEffStep_memWkp_K_two` at
-`K = m - j - 1`. The chart-`H` requirement of the propagator is
-`chart-H^{j + 2 + (m - j - 1)} = chart-H^{m+1}` ✓.
-
-The ae-vanishing is `fChartEffStep`'s indicator structure (automatic). -/
 private def buildLevelStep
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -340,7 +268,6 @@ private def buildLevelStep
       fChartEff_memWkp := h_D_next_memWkp
       fChartEff_ae_zero_off_K := h_D_next_ae_zero }
 
-/-- Build the level-`j` bundle by induction on `j ≤ m`. -/
 private def buildLevel
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -372,10 +299,6 @@ private def buildLevel
       exact buildLevelStep (I := I) (M := M) g α
         (hu_h := hu_h) (m := m) (j := j) hj_succ_le dirs B_j (h_chart_H_m_plus_1_u α)
 
-/-- For any `m`-direction multi-index `dirs`, the chosen `m`-mixed partial
-of the chart-pushed POU representative lies in `MemWkp 2 2` of the full
-chart target, provided manifold-side chart-`H^{m+1}` of `u_h.coeFn` and
-manifold-side chart-`H^m` of the `(1-Δ_g)`-preimage. -/
 private theorem chosenMthMixed_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -436,13 +359,6 @@ private theorem chosenMthMixed_memWkp_two_two
     hΩ_open hΩ''_open hΩ''_in_Ω hKα_compact hKα_in_Ω''
     h_memWkp_22_Ω'' h_chosen_ae_zero
 
-/-- **Headline single-stage chart-`H^{m+2}` boost.**
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and any
-`u_h ∈ laplacianDomainPow g 2`, manifold-side chart-`H^{m+1}` of the canonical
-representative of `u_h.coeFn` together with manifold-side chart-`H^m` of the
-canonical representative of the `(1-Δ_g)`-preimage gives chart-`H^{m+2}` of
-the chart-pushed POU-cut representative at `α`. -/
 theorem chartPushed_memWkp_succ_jump
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

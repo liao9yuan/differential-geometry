@@ -4,44 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 
-/-!
-# Unconditional discharge of the chart-Christoffel Riemann identity
-
-This file proves, unconditionally, the deep basis-coordinate identification of the
-abstract Riemann operator of the Levi-Civita connection with the chart-Christoffel
-Riemann tensor:
-`chartRiemannBasisIdentity g x` for every smooth Riemannian metric `g` on a closed
-(boundaryless, σ-compact, Hausdorff) manifold and every point `x`.
-
-The abstract Riemann operator `riemannOp (LeviCivita g)` is the curvature
-`∇∇ - ∇∇ - ∇_{[·,·]}` of Mathlib's bundled covariant derivative. The chart Riemann
-tensor `R^l{}_{ijk}` is the classical Christoffel expression
-`∂_j Γ^l{}_{ik} - ∂_k Γ^l{}_{ij} + Γ^l{}_{jm} Γ^m{}_{ik} - Γ^l{}_{km} Γ^m{}_{ij}`.
-
-## Strategy
-
-We mirror the proof of `chartHessianMatrixIdentity_holds` in `ChartBridge.Hessian`,
-one order of differentiation deeper. The genuinely new ingredient is the second
-covariant derivative of a chart-basis section
-`∇_{e_a}(∇_{e_b} e_i)(x)`: the inner derivative is the section
-`b ↦ ∑_m Γ^m{}_{ib}(φ b) • e_m(b)` whose coefficients are now *non-constant* (unlike
-the Hessian case, where the chart-pullback of the constant basis section has vanishing
-`fderiv`). Differentiating that section by the Leibniz rule produces the partial
-derivative `∂_a Γ^l{}_{ib}` together with the quadratic Christoffel term
-`∑_m Γ^l{}_{am} Γ^m{}_{ib}`. Subtracting the two orderings `(a,b) = (j,k)` and
-`(a,b) = (k,j)` and using the symmetry of the Christoffel symbol in the lower indices
-recovers exactly `chartRiemannTensor`.
-
-## Main results
-
-* `LeviCivita_chartBasisVec_secondCovDeriv` — the second covariant derivative of the
-  chart-basis section in coordinates.
-* `chartRiemannBasisIdentity_holds` — the unconditional basis-coordinate identity.
-* `riemannOp_eq_chartRiemannCLM_apply` — the unconditional trilinear bridge:
-  `riemannOp (LeviCivita g) x v w u = chartRiemannCLM g x v w u` for all tangent
-  vectors `v, w, u`, with no hypothesis.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -65,8 +27,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The manifold directional derivative along `e_a` of the chart-pullback `b ↦ gE (φ b)`,
-at the basepoint `x`, equals the Euclidean partial derivative `∂_a gE (φ x)`. -/
 lemma extDerivFun_comp_extChartAt_apply_basis [I.Boundaryless]
     (x : M) {gE : E → ℝ}
     (hgE : ContDiffAt ℝ ∞ gE (extChartAt I x x))
@@ -106,8 +66,6 @@ lemma extDerivFun_comp_extChartAt_apply_basis [I.Boundaryless]
   rw [hcompose_eq.fderiv_eq]
   rw [partialDeriv]
 
-/-- A globally smooth tangent field `Xext = χ • chartBasisVecFiber x j` agreeing with
-`chartBasisVecFiber x j` on an open neighbourhood `U ∋ x` inside `chartLeviCivitaGoodSet x`. -/
 lemma exists_globalSmooth_chartBasisVec_ext
     (x : M) (j : Fin (Module.finrank ℝ E)) :
     ∃ (Xext : Π b : M, TangentSpace I b) (U : Set M),
@@ -138,7 +96,6 @@ lemma exists_globalSmooth_chartBasisVec_ext
   change (χ : M → ℝ) y • chartBasisVecFiber (I := I) x j y = chartBasisVecFiber (I := I) x j y
   rw [hχ_one_y, one_smul]
 
-/-- The chart Christoffel symbol is `C^∞` at the chart basepoint `φ x`. -/
 lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (b i m : Fin (Module.finrank ℝ E)) :
@@ -156,8 +113,6 @@ lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     chartChristoffel_contDiffOn_interior (I := I) g x b i m
   exact hon.contDiffAt (isOpen_interior.mem_nhds hxint)
 
-/-- Finite-sum linearity of the bundled covariant derivative in the section argument:
-`(∇_v (∑_i σ i))(x) = ∑_i (∇_v (σ i))(x)` for sections `σ i` differentiable at `x`. -/
 lemma leviCivita_finset_sum_apply
     {ι : Type*} (g : SmoothRiemannianMetric I M)
     (t : Finset ι) (σ : ι → Π y : M, TangentSpace I y)
@@ -184,11 +139,6 @@ lemma leviCivita_finset_sum_apply
         _ = (insert i t).sum (fun j => (cov.toFun (σ j) x) v) := by
               rw [ih]; simp [Finset.sum_insert, hit]
 
-/-- **Second covariant derivative of a chart-basis section.** Let `Xa, Xb, Xi` be globally
-smooth tangent fields agreeing with the chart-basis fields `e_a, e_b, e_i` on an open
-neighbourhood `U ∋ x` inside `chartLeviCivitaGoodSet x`. Then
-`∇_{e_a}(∇_{e_b} e_i)(x) =
-   ∑_l (∂_a Γ^l{}_{bi}(φ x) + ∑_m Γ^l{}_{am}(φ x) Γ^m{}_{bi}(φ x)) • e_l(x)`. -/
 lemma LeviCivita_chartBasisVec_secondCovDeriv [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (a b i : Fin (Module.finrank ℝ E))
@@ -366,9 +316,6 @@ lemma LeviCivita_chartBasisVec_secondCovDeriv [I.Boundaryless]
           refine Finset.sum_congr rfl (fun m _ => ?_)
           rw [mul_comm]
 
-/-- The chart-trivialised representation of a tangent field that agrees with
-`chartBasisVecFiber x j` on a neighbourhood of `x` has vanishing chart-pullback `fderiv`
-at `φ x`. -/
 lemma fderiv_chartE_section_repr_eq_zero_of_eventuallyEq [I.Boundaryless]
     (x : M) (j : Fin (Module.finrank ℝ E))
     {X : Π b : M, TangentSpace I b} {U : Set M}
@@ -410,8 +357,6 @@ lemma fderiv_chartE_section_repr_eq_zero_of_eventuallyEq [I.Boundaryless]
   rw [hev.fderiv_eq]
   exact fderiv_chartE_chartBasisVec_alpha_eq_zero (I := I) x j hx_good
 
-/-- The Lie bracket of two tangent fields agreeing with the chart-basis fields `e_j, e_k`
-on a neighbourhood of `x` vanishes at `x`. -/
 lemma mlieBracket_chartBasisVec_ext_self_eq_zero [I.Boundaryless]
     (x : M) (j k : Fin (Module.finrank ℝ E))
     {Xj Xk : Π b : M, TangentSpace I b} {U : Set M}
@@ -437,10 +382,6 @@ lemma mlieBracket_chartBasisVec_ext_self_eq_zero [I.Boundaryless]
   rw [ContinuousLinearMap.zero_apply, ContinuousLinearMap.zero_apply]
   exact sub_self 0
 
-/-- **The basis identity on a single basis triple.** For the canonical model-basis triple
-`(e_j, e_k, e_i)`, the abstract Riemann operator of the Levi-Civita connection agrees with
-the chart Riemann CLM:
-`riemannOp (LeviCivita g) x e_j e_k e_i = chartRiemannCLM g x e_j e_k e_i`. -/
 lemma riemannOp_chartBasis_eq_chartRiemannCLM_basis [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -536,10 +477,6 @@ lemma riemannOp_chartBasis_eq_chartRiemannCLM_basis [I.Boundaryless]
   rw [← hcoeff l]
   exact (sub_smul _ _ _).symm
 
-/-- **Unconditional discharge of `chartRiemannBasisIdentity`.** For every smooth Riemannian
-metric `g` on a closed (boundaryless, σ-compact, Hausdorff) manifold and every point `x`,
-the basis-coordinate identification of the abstract Riemann operator of the Levi-Civita
-connection with the chart-Christoffel Riemann tensor holds. -/
 theorem chartRiemannBasisIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) :
     chartRiemannBasisIdentity (I := I) g x := by
@@ -547,10 +484,6 @@ theorem chartRiemannBasisIdentity_holds [I.Boundaryless]
   intro i j k
   exact riemannOp_chartBasis_eq_chartRiemannCLM_basis (I := I) g x i j k
 
-/-- **Unconditional trilinear bridge.** The abstract Riemann operator of the Levi-Civita
-connection agrees with the chart Riemann CLM as trilinear maps, with no hypothesis:
-`riemannOp (LeviCivita g) x v w u = chartRiemannCLM g x v w u` for all tangent vectors
-`v, w, u`. -/
 theorem riemannOp_eq_chartRiemannCLM_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     riemannOp (cov := LeviCivita (I := I) g) x v w u =

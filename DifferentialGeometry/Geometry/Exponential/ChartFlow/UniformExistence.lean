@@ -8,100 +8,6 @@ import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Uniform-in-velocity existence interval for the chart-pushed flow
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the chart-pushed flow at
-the zero-section base point `(extChartAt I p p, 0) ∈ E × E` provides a
-Picard–Lindelöf local flow `Φ : (E × E) × ℝ → E × E`.
-
-Joint continuity of `Φ` at `((x₀, 0), 0)`, combined with the orbit's
-initial condition `Φ ((x₀, v), 0) = (x₀, v)` for `(x₀, v)` near the base,
-yields a *uniform* spatial radius `ρ` and time horizon `T` such that the
-orbit `s ↦ Φ ((x₀, v), s)` stays inside the inner closed ball of the
-bump (where the cutoff agrees with the genuine chart-phase geodesic
-vector field) for every `v` with `‖v‖ < ρ` and every `s ∈ Icc (-T) T`.
-
-Consequently:
-
-* the orbit satisfies the **genuine** chart-phase ODE on `Ioo (-T) T`,
-  uniformly in `v ∈ ball (0 : E) ρ`;
-
-* on the same uniform `Ioo (-T) T`, the orbit's projection
-  `γ_v(s) := (extChartAt I p).symm (Φ ((x₀, v), s)).1` lies in `M`, takes
-  the value `p` at `s = 0`, and admits a chart-`p`-centred tangent-bundle
-  lift produced by `exists_isMIntegralCurveAt_geodesicVectorFieldChart`;
-
-* uniform-in-`v` chart-coordinate ODE uniqueness on `Ioo (-T) T`
-  (`Exponential/UniformUniqueness.lean`) identifies the orbit's
-  projection with `maximalGeodesic g p v` on `Ioo (-T) T`, and yields
-  `Ioo (-T) T ⊆ maximalGeodesicInterval g p v`.
-
-## Main results
-
-* `exists_uniform_orbit_stays_in_inner_ball` — pure chart-coordinate
-  uniform existence: there exists a chart-pushed flow `Φ` and uniform
-  radii `(ρ, T)` such that for every `v ∈ ball (0 : E) ρ` and every
-  `s ∈ Icc (-T) T`, the orbit `Φ ((x₀, v), s)` stays inside the inner
-  closed ball of the bump.
-
-* `exists_uniform_orbit_hasDerivAt_chartPhaseVF` — uniform chart-phase
-  ODE: for the same `(Φ, ρ, T)`, the orbit satisfies the genuine
-  chart-phase ODE on `Ioo (-T) T` uniformly in
-  `v ∈ ball (0 : E) ρ`.
-
-* `exists_uniform_existence_interval` — manifold-level uniform existence
-  interval: `Ioo (-T) T ⊆ maximalGeodesicInterval g p v` and
-  `maximalGeodesic g p v s = (extChartAt I p).symm (Φ ((x₀, v), s)).1`
-  for every `v ∈ ball (0 : E) ρ` and `s ∈ Ioo (-T) T`.
-
-## Strategy
-
-1. Apply `exists_chartPhase_contDiffOn_isLocalFlow_combined` at base
-   `(x₀, 0) := (extChartAt I p p, 0)`. This yields a `ContDiffBump`
-   `b`, Picard–Lindelöf radii `(r, ε)`, joint-`C^1` radii `(ρ_V4, T_V4)`,
-   and a map `Φ : (E × E) × ℝ → E × E` that is jointly `C^1` on
-   `ball (x₀, 0) ρ_V4 ×ˢ Ioo (-T_V4) T_V4` and `IsLocalFlow` of the
-   cutoff field on the larger `closedBall × Icc`.
-
-2. By joint continuity of `Φ` at `((x₀, 0), 0)` and the initial-value
-   identity `Φ ((x₀, 0), 0) = (x₀, 0)`, the orbit's image stays inside
-   the inner closed ball `closedBall (x₀, 0) b.rIn` for `(v, s)` in some
-   small uniform set `ball (0 : E) ρ × Icc (-T) T` with `0 < ρ ≤ min ρ_V4 b.rIn`
-   and `0 < T < T_V4`. We extract these uniform radii by a continuity
-   argument on the compact set `closedBall (0 : E) (ρ_V4/2) × Icc (-T_V4/2) (T_V4/2)`.
-
-3. The cutoff field equals the genuine chart-phase field on
-   `closedBall (x₀, 0) b.rIn`. Hence on the uniform set, the orbit
-   `s ↦ Φ ((x₀, v), s)` satisfies the genuine chart-phase ODE.
-
-4. For each `v ∈ ball (0 : E) ρ`, invoke
-   `exists_isMIntegralCurveAt_geodesicVectorFieldChart g p v` to obtain a
-   manifold tangent-bundle lift `f_v` with `f_v 0 = ⟨p, v⟩`. Its
-   chart-pushed lift `chartPushLift f_v 0` satisfies the chart-phase
-   ODE on a (small, possibly `v`-dependent) neighbourhood of `0`.
-
-5. **R.A uniform uniqueness on `Ioo (-T) T`** identifies the chart-pushed
-   lift with the orbit: both are chart-phase ODE solutions on
-   `Ioo (-T) T` (the lift via R.A's preconnected-propagation step,
-   detailed below), both take value `(x₀, v)` at `0`, and both stay in
-   the same compact set. By
-   `chartPhaseVF_orbit_uniqueness_uniform_Ioo`, they agree on
-   `Ioo (-T) T`.
-
-6. Projecting first components and inverting via `(extChartAt I p).symm`
-   yields `(f_v t).proj = γ_v t` on `Ioo (-T) T`. Packaging the lift's
-   chart-`p` integral-curve property on the uniform interval
-   `Ioo (-T) T` provides the `IsGeodesicOnWithInitial`-witness needed
-   to conclude `Ioo (-T) T ⊆ maximalGeodesicInterval g p v` and the
-   identification with `maximalGeodesic g p v`.
-
-The argument for the lift's chart-phase ODE *on all of `Ioo (-T) T`* is
-the technical core: it routes the lift's local ODE through R.A's uniform
-uniqueness to inherit the orbit's full agreement interval.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -126,14 +32,7 @@ section UniformConfinement
 variable [I.Boundaryless] [CompleteSpace E]
 
 set_option linter.unusedVariables false in
-/-- **Uniform inner-ball confinement.** From joint `C^1`-ness of `Φ` at
-`((x₀, 0), 0)` and the initial condition `Φ ((x₀, 0), 0) = (x₀, 0)`,
-extract uniform radii `0 < ρ` and `0 < T` such that for every
-`v ∈ ball (0 : E) ρ` and every `s ∈ Icc (-T) T`, the orbit
-`Φ ((x₀, v), s)` lies in the open ball `ball ((x₀, 0)) b.rIn`.
 
-The hypothesis `hx₀_def : x₀ = extChartAt I p p` and the metric `g` are
-documentation parameters; the proof uses only continuity of `Φ`. -/
 lemma exists_uniform_orbit_in_inner_ball
     (g : SmoothRiemannianMetric I M) (p : M)
     {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
@@ -239,21 +138,6 @@ section UniformChartCoordExistence
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Headline chart-coordinate uniform existence.** There exist a chart-
-pushed flow `Φ`, a `ContDiffBump` `b` centred at `(x₀, 0)`, and uniform
-radii `(ρ, T)` such that:
-
-* `closedBall (x₀, 0) b.rOut ⊆ interior (extChartAt I p).target ×ˢ univ`;
-* `Φ ((x₀, 0), 0) = (x₀, 0)` (initial condition at the centre);
-* for every `v ∈ ball (0 : E) ρ` and `s ∈ Icc (-T) T`, the orbit
-  `Φ ((x₀, v), s)` lies inside the open ball
-  `ball ((x₀, 0)) b.rIn`;
-* `Φ` is `IsLocalFlow` of the time-padded cutoff field on the larger
-  Picard interval — so `Φ ((x₀, v), 0) = (x₀, v)` for every
-  `v` with `(x₀, v) ∈ closedBall (x₀, 0) (r : ℝ)`, and the orbit's
-  derivative is the cutoff field on `Icc (-ε) ε`.
-
-The base point is `x₀ := extChartAt I p p`. -/
 theorem exists_chartFlow_uniform_orbit
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (b : ContDiffBump (((extChartAt I p p, (0 : E)) : E × E)))
@@ -297,14 +181,7 @@ section UniformChartPhaseODE
 variable [I.Boundaryless] [CompleteSpace E]
 
 set_option linter.unusedVariables false in
-/-- **Uniform orbit ODE on `Ioo (-T) T`.** For each `v ∈ ball (0 : E) ρ`
-and each `s ∈ Ioo (-T) T`, the orbit `s ↦ Φ ((x₀, v), s)` satisfies the
-genuine chart-phase ODE at `s`. This uses the inner-ball confinement and
-the cutoff identity `chartPhaseVFCutoff = chartPhaseVF` on the inner ball.
 
-The hypotheses `hx₀_def`, `hr_pos`, `hε_pos`, `hb_sub`, `hT_pos` are
-documentation parameters; the active hypotheses are `hΦ_ILF`, `hT_lt_ε`,
-`hρ_le_r`, and `h_orbit_in`. -/
 lemma orbit_hasDerivAt_chartPhaseVF_uniform
     (g : SmoothRiemannianMetric I M) (p : M)
     {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
@@ -371,11 +248,6 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
   rw [h_eq] at hd_cutoff
   exact hd_cutoff
 
-/-- **Headline uniform chart-phase ODE.** Combining the two preceding
-results: there exist a chart-pushed flow `Φ` and uniform radii `(ρ, T)`
-such that for every `v ∈ ball (0 : E) ρ`, the orbit's derivative is the
-genuine chart-phase vector field on `Ioo (-T) T`. The orbit's value at
-`s = 0` is `(x₀, v)` (the chart-phase initial datum). -/
 theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (b : ContDiffBump (((extChartAt I p p, (0 : E)) : E × E)))
@@ -470,15 +342,6 @@ section ManifoldIdentification
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Per-`v` orbit-projection identification, local form.** For each
-`v ∈ ball (0 : E) ρ`, the orbit's projection
-`γ_v(s) := (extChartAt I p).symm (Φ ((x₀, v), s)).1` admits a tangent-
-bundle lift `f_v` with `f_v 0 = ⟨p, v⟩` that is a local integral curve
-of `geodesicVectorFieldChart g p` at `0`, and the projection agrees
-with `(f_v ·).proj` on a (`v`-dependent) neighbourhood of `0`.
-
-This is the per-`v` ingredient from which the uniform identification
-on `Ioo (-T) T` is derived in the headline below. -/
 lemma per_v_orbit_proj_eq_lift_proj_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
@@ -590,29 +453,6 @@ section HeadlineUniformExistence
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Headline R.C — uniform existence interval.** For a smooth
-Riemannian metric `g` and a manifold base point `p : M`, there exist a
-chart-pushed flow `Φ : (E × E) × ℝ → E × E` and uniform radii
-`(ρ, T)` such that:
-
-* `Φ` is the chart-pushed flow built from
-  `exists_chartPhase_contDiffOn_isLocalFlow_combined` at the zero-section
-  base `(extChartAt I p p, 0)`;
-* for every `v ∈ ball (0 : E) ρ`:
-  * `Φ ((x₀, v), 0) = (x₀, v)`,
-  * `Φ ((x₀, v), s) ∈ (interior (extChartAt I p).target) ×ˢ univ` for
-    every `s ∈ Icc (-T) T`,
-  * the orbit `s ↦ Φ ((x₀, v), s)` satisfies the genuine chart-phase
-    ODE `chartPhaseVF g p` on `Ioo (-T) T`,
-  * the orbit's projection `γ_v(s) := (extChartAt I p).symm (Φ ((x₀, v), s)).1`
-    coincides, on a `v`-dependent neighbourhood of `0`, with the manifold
-    projection of a tangent-bundle lift `f_v` that is a chart-`p`
-    integral curve of `geodesicVectorFieldChart g p` at `0` with
-    `f_v 0 = ⟨p, v⟩`.
-
-This is the *minimum data* required by R.D for the final assembly,
-where the per-`v` identification with `maximalGeodesic g p v` will be
-chained via R.A's uniform chart-coordinate uniqueness on `Ioo (-T) T`. -/
 theorem exists_uniform_existence_interval
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

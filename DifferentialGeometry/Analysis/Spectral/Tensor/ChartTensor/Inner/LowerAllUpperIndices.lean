@@ -7,50 +7,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Topology.Algebra.Module.LinearMapPiProd
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-/-!
-# Chart-frame analog of the upper-index lowering map
-
-For a smooth manifold `M` modelled on `(E, H)` with model `I`, a smooth Riemannian
-metric `g : SmoothRiemannianMetric I M`, and a chart base point `α : M`, this file
-defines a chart-frame variant of the index-lowering operator on `(r, s)`-model
-tensors. The contraction is performed using the chart-local Gram matrix
-`chartGramMatrix g α b` (whose entries are smooth functions of `b` on the chart
-base set), with vector arguments represented in the fixed model basis
-`chartModelBasis E`.
-
-## Why use the model basis (rather than the chart-basis-fibre)
-
-The chart-basis-fibre form `chartBasisVecFiber α i b : TangentSpace I b = E` has
-`b`-dependence whose continuity as a function `M → E` reduces to bare continuity
-of `(triv α).symmL ℝ b` on the chart base set, which is genuinely discontinuous
-because of the discrete chart-selection in `tangentBundleCore.indexAt`. By
-contrast, the model basis `chartModelBasis E` is constant in `b`, so the only
-`b`-dependence in the construction enters via the chart Gram matrix entries.
-This makes `b`-smoothness of the chart-frame lowered tensor a direct consequence
-of `chartGramMatrix_entry_contMDiffOn`.
-
-## Main definitions
-
-* `chartCoordCLM E i : E →L[ℝ] ℝ` — the `i`-th coordinate functional in the
-  model basis `chartModelBasis E`, packaged as a continuous linear map.
-* `chartGramBilin g α b : E →L[ℝ] E →L[ℝ] ℝ` — the chart-Gram bilinear form on
-  `E × E`, with `b`-dependence concentrated in the chart Gram matrix entries.
-* `chartSeparableFormAt g α b r v : Tensor0SModel r ℝ E` — the chart-frame
-  analog of `separableFormAt`: the separable `(0, r)`-form on `E^r` whose
-  value at `w` is `∏ k, chartGramBilin g α b (v k) (w k)`.
-* `chartLowerAllUpperIndices_model r s g α b T : Tensor0SModel (r + s) ℝ E` —
-  the chart-frame lowering map: for `v : Fin (r + s) → E`, the output value is
-  `T (chartSeparableFormAt g α b r (v ∘ castAdd s)) (v ∘ natAdd r)`.
-
-## Unfolding lemmas
-
-* `chartSeparableFormAt_apply` — evaluation formula on a tuple.
-* `chartLowerAllUpperIndices_model_apply` — evaluation formula on a tuple.
-* `chartLowerAllUpperIndices_model_zero` — formula at `r = 0`.
-* `chartLowerAllUpperIndices_model_succ` — formula at `r + 1` exposing the
-  first-slot separable structure.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -76,8 +32,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `i`-th coordinate of a vector `u : E` in the fixed model basis
-`chartModelBasis E`, packaged as a continuous linear map `E →L[ℝ] ℝ`. -/
 def chartCoordCLM (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] (i : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin (Module.finrank ℝ E) => ℝ) i).comp
@@ -89,8 +43,6 @@ lemma chartCoordCLM_apply (i : Fin (Module.finrank ℝ E)) (u : E) :
   unfold chartCoordCLM
   rfl
 
-/-- The chart-Gram bilinear form on `E × E` at `b`: in the fixed model basis
-`chartModelBasis E`, its matrix entries are `chartGramMatrix g α b j k`. -/
 def chartGramBilin (g : SmoothRiemannianMetric I M) (α b : M) :
     E →L[ℝ] E →L[ℝ] ℝ :=
   ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -108,9 +60,6 @@ lemma chartGramBilin_apply
   simp [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply, smul_eq_mul, mul_assoc]
 
-/-- The chart-frame separable `(0, r)`-form built from `r` vectors
-`v : Fin r → E`. At `w : Fin r → E`, its value is
-`∏ k, chartGramBilin g α b (v k) (w k)`. -/
 def chartSeparableFormAt
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ) (v : Fin r → E) :
     ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ :=
@@ -195,7 +144,6 @@ private lemma chartSeparableFormAt_update_smul
   rw [h_bilin_smul]
   ring
 
-/-- Underlying scalar function of the chart-frame lowering map. -/
 private def chartLowerAllUpperIndices_modelFn
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) : ℝ :=
@@ -254,8 +202,6 @@ private lemma upd_natAdd_last
     intro h
     exact hk (Fin.natAdd_injective s r h.symm).symm
 
-/-- The underlying function of `chartLowerAllUpperIndices_model` as a
-multilinear map in the vector argument. -/
 private noncomputable def chartLowerAllUpperIndices_modelML
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel r s ℝ E) :
@@ -315,9 +261,6 @@ private lemma chartLowerAllUpperIndices_modelML_apply
   unfold chartLowerAllUpperIndices_modelML
   rfl
 
-/-- Norm bound on the underlying multilinear function in terms of `‖T‖` and
-the chart-Gram bilinear-form operator norm. Used to package the multilinear
-map as a continuous multilinear map via `MultilinearMap.mkContinuous`. -/
 private lemma chartLowerAllUpperIndices_modelML_norm_bound
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) :
@@ -387,13 +330,6 @@ private lemma chartLowerAllUpperIndices_modelML_norm_bound
     rw [← hsplit]
   linarith [h_step1, h_step2, h_step3, h_step4, h_step5]
 
-/-- The chart-frame analog of `lowerAllUpperIndices`. For a mixed model tensor
-`T : TensorRSModel r s ℝ E`, the output is the covariant `(0, r + s)`-model
-tensor whose value at `v : Fin (r + s) → E` is
-`T (chartSeparableFormAt g α b r (v ∘ castAdd s)) (v ∘ natAdd r)`.
-
-The `b`-dependence of the construction enters only through the chart Gram
-matrix entries inside `chartSeparableFormAt`. -/
 def chartLowerAllUpperIndices_model
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel r s ℝ E) : Tensor0SModel (r + s) ℝ E :=
@@ -402,10 +338,6 @@ def chartLowerAllUpperIndices_model
     (chartLowerAllUpperIndices_modelML_norm_bound (I := I) (M := M)
       r s g α b T)
 
-/-- Evaluation formula for `chartLowerAllUpperIndices_model`: for `T` and
-`v : Fin (r + s) → E`, the value is `T` applied to the chart-frame separable
-`(0, r)`-form on the first `r` slots of `v`, evaluated on the last `s`
-slots. -/
 @[simp]
 lemma chartLowerAllUpperIndices_model_apply
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
@@ -419,9 +351,6 @@ lemma chartLowerAllUpperIndices_model_apply
       r s g α b T v = _
   rw [chartLowerAllUpperIndices_modelML_apply]
 
-/-- Unfolding lemma at `r = 0`: the lowering reduces to `T` evaluated at the
-unique empty-input continuous multilinear map `constOfIsEmpty 1`, then on
-`v : Fin (0 + s) → E`. -/
 lemma chartLowerAllUpperIndices_model_zero
     (s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel 0 s ℝ E) (v : Fin (0 + s) → E) :
@@ -440,9 +369,6 @@ lemma chartLowerAllUpperIndices_model_zero
     simp
   rw [h_empty]
 
-/-- Unfolding lemma at `r + 1`: the lowering separates the first upper slot.
-The chart-frame separable form is the chart-frame separable form on `r + 1`
-slots. -/
 lemma chartLowerAllUpperIndices_model_succ
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel (r + 1) s ℝ E) (v : Fin ((r + 1) + s) → E) :
@@ -486,7 +412,6 @@ section Smoothness
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 
-/-- Linear "evaluation at all model-basis tuples" map on `Tensor0SModel n ℝ E`. -/
 private noncomputable def chartLowerEvalBasisLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) where
@@ -504,8 +429,6 @@ private noncomputable def chartLowerEvalBasisLinear (n : ℕ) :
     chartLowerEvalBasisLinear (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- The evaluation-at-all-basis-tuples map is injective: two continuous
-multilinear maps agreeing on every tuple of model-basis vectors are equal. -/
 private lemma chartLowerEvalBasisLinear_injective (n : ℕ) :
     Function.Injective (chartLowerEvalBasisLinear (E := E) n) := by
   intro Φ₁ Φ₂ h
@@ -514,7 +437,6 @@ private lemma chartLowerEvalBasisLinear_injective (n : ℕ) :
   intro v
   exact congr_fun h v
 
-/-- Dimension of the model fibre `Tensor0SModel n ℝ E`. -/
 private lemma chartLower_finrank_tensor0SModel (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) =
       (Module.finrank ℝ E) ^ n := by
@@ -537,14 +459,12 @@ private lemma chartLower_finrank_tensor0SModel (n : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
-/-- Dimension of the basis-index Pi-space `(Fin n → Fin (finrank ℝ E)) → ℝ`. -/
 private lemma chartLower_finrank_basis_pi (n : ℕ) :
     Module.finrank ℝ ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) =
       (Module.finrank ℝ E) ^ n := by
   rw [Module.finrank_pi, Fintype.card_pi]
   simp [Fintype.card_fin]
 
-/-- The evaluation-at-all-basis-tuples map is bijective. -/
 private lemma chartLowerEvalBasisLinear_bijective (n : ℕ) :
     Function.Bijective (chartLowerEvalBasisLinear (E := E) n) := by
   have h_inj := chartLowerEvalBasisLinear_injective (E := E) n
@@ -554,7 +474,6 @@ private lemma chartLowerEvalBasisLinear_bijective (n : ℕ) :
     rw [chartLower_finrank_tensor0SModel, chartLower_finrank_basis_pi]
   exact (LinearMap.injective_iff_surjective_of_finrank_eq_finrank h_eq).mp h_inj
 
-/-- Continuous linear equivalence form of the basis-tuple evaluation map. -/
 private noncomputable def chartLowerEvalBasisCLE (n : ℕ) :
     Tensor0SModel n ℝ E ≃L[ℝ]
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) :=
@@ -567,9 +486,6 @@ private noncomputable def chartLowerEvalBasisCLE (n : ℕ) :
     chartLowerEvalBasisCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-/-- Smoothness into `Tensor0SModel n ℝ E` from smoothness of every basis-tuple
-evaluation. Local replay of the analogous private bridge in
-`Tensor.Multilinear.MetricLowering`. -/
 private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -591,8 +507,6 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
   intro b _
   exact ((chartLowerEvalBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
 
-/-- Evaluation of `chartGramBilin g α b` on two model-basis vectors recovers
-the corresponding entry of `chartGramMatrix g α b`. -/
 private lemma chartGramBilin_basis_basis
     (g : SmoothRiemannianMetric I M) (α b : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -667,8 +581,6 @@ private lemma chartGramBilin_basis_basis
       chartGramMatrix (I := I) g α b i j)]
   simp
 
-/-- Evaluation of `chartSeparableFormAt g α b r` on a pair of model-basis
-tuples factors as a finite product of chart Gram matrix entries. -/
 private lemma chartSeparableFormAt_basis_basis
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ)
     (φ_first ψ : Fin r → Fin (Module.finrank ℝ E)) :
@@ -683,9 +595,6 @@ private lemma chartSeparableFormAt_basis_basis
   exact chartGramBilin_basis_basis (I := I) (M := M) g α b
     (φ_first k) (ψ k)
 
-/-- Smoothness of `b ↦ chartSeparableFormAt g α b r v_first` (as a
-`Tensor0SModel r ℝ E`-valued function) on the chart base set, when
-`v_first` is the model-basis tuple selected by `φ_first`. -/
 private lemma chartSeparableFormAt_basis_contMDiffOn
     {r : ℕ} (g : SmoothRiemannianMetric I M) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) :
@@ -709,10 +618,6 @@ private lemma chartSeparableFormAt_basis_contMDiffOn
   refine contMDiffOn_finset_prod (fun k _ => ?_)
   exact chartGramMatrix_entry_contMDiffOn (I := I) g α (φ_first k) (ψ k)
 
-/-- Smoothness in the chart base point of the chart-frame upper-index
-lowering map: for fixed `r`, `s`, `g`, `α`, and `T : TensorRSModel r s ℝ E`,
-the function `b ↦ chartLowerAllUpperIndices_model r s g α b T` is smooth on
-the chart base set at `α`, as a `Tensor0SModel (r + s) ℝ E`-valued map. -/
 theorem chartLowerAllUpperIndices_model_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (T : TensorRSModel r s ℝ E) :

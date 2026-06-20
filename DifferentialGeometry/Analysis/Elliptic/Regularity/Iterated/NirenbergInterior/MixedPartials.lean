@@ -3,86 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplViaH3
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-/-!
-# Iterated mixed weak partials of the canonical chart-pushed representative
-
-For a closed Riemannian manifold `(M, g)` and an element
-`u_h : H1Compl g`, the canonical chart-pushed POU-cut representative
-`chartPushed POU α (H1ComplToLp g u_h).coeFn` is a scalar function on the
-open chart target `chartTargetEuclid α ⊆ EuclideanSpace ℝ (Fin n)`. This
-module packages the polymorphic-in-`m` chosen `m`-fold mixed weak partial of
-that representative, together with the structural regularity bridge
-
-```
-MemWkp (k + m) 2 (chart-pushed parent) Ω
-  ⇒ MemWkp k 2 (m-mixed partial)        Ω
-```
-
-## Indexing convention
-
-The `m` differentiation directions are encoded by a multi-index
-`idx : Fin m → Fin n`. The recursive definition
-
-```
-chosenMthMixedPartialChartPushedU g α u_h (m+1) idx
-  := chosenWeakPartial' 2 (idx (Fin.last m))
-       (chosenMthMixedPartialChartPushedU g α u_h m (Fin.init idx))
-       (chartTargetEuclid α)
-```
-
-treats the **last** entry `idx (Fin.last m)` as the **outermost** (final)
-differentiation direction. Concretely, at `m = 2` with `idx 0 = i`,
-`idx 1 = l`, this collapses to
-
-```
-chosenWeakPartial' 2 l (chosenWeakPartial' 2 i (chart-pushed parent) Ω) Ω
-  = chosenSecondPartialChartPushedU g α u_h i l,
-```
-
-and at `m = 3` with `idx 0 = i, idx 1 = l, idx 2 = j` it collapses to
-
-```
-chosenWeakPartial' 2 j (chosenSecondPartialChartPushedU g α u_h i l) Ω
-  = chosenThirdMixedPartialChartPushedU g α u_h i l j.
-```
-
-## Main definitions
-
-* `chosenMthMixedPartialChartPushedU` — the canonical chosen `m`-fold mixed
-  weak partial of the chart-pushed POU representative of `H1ComplToLp g u_h`
-  in the directions encoded by `idx : Fin m → Fin n`, on the open chart
-  target.
-
-## Main theorems
-
-* `chosenMthMixedPartialChartPushedU_zero` /
-  `chosenMthMixedPartialChartPushedU_succ` — definitional unfolding.
-
-* `chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial` — the
-  `m = 1` instance coincides with `chartPushedChosenFirstPartial`.
-
-* `chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU`
-  — the `m = 2` instance coincides with `chosenSecondPartialChartPushedU`
-  (for matched indices).
-
-* `chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU`
-  — the `m = 3` instance coincides with `chosenThirdMixedPartialChartPushedU`
-  (for matched indices).
-
-* `chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp` — the
-  polymorphic regularity bridge: chart-`H^{k+m}` of the parent ⇒ chart-`H^k`
-  of the `m`-mixed partial.
-
-* `chosenMthMixedPartialChartPushedU_memLp_two` — the `k = 0` corollary:
-  `MemLp 2` on the chart target.
-
-* `chosenMthMixedPartialChartPushedU_memW1p_two` — the `k = 1` corollary:
-  `MemW1p 2` on the chart target.
-
-* `chosenMthMixedPartialChartPushedU_locally_memLp` — the local `L²`
-  corollary on every compact subset of the chart target.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -122,11 +42,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The canonical chosen `m`-fold mixed weak partial of the chart-pushed POU
-representative of `H1ComplToLp g u_h` in the directions encoded by
-`idx : Fin m → Fin n`, on the open chart target. Recursive definition: at
-the inductive step, the **last** entry `idx (Fin.last m)` is the outermost
-(final) differentiation direction. -/
 noncomputable def chosenMthMixedPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -142,7 +57,6 @@ noncomputable def chosenMthMixedPartialChartPushedU
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α)
 
-/-- Definitional unfolding at `m = 0`. -/
 @[simp] theorem chosenMthMixedPartialChartPushedU_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -152,7 +66,6 @@ noncomputable def chosenMthMixedPartialChartPushedU
         (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := rfl
 
-/-- Definitional unfolding at `m + 1`. -/
 theorem chosenMthMixedPartialChartPushedU_succ
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -165,9 +78,6 @@ theorem chosenMthMixedPartialChartPushedU_succ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) := rfl
 
-/-- The `m = 1` instance: for any `idx : Fin 1 → Fin n`, the chosen first
-mixed partial agrees on the nose with `chartPushedChosenFirstPartial g α u_h
-(idx 0)`. -/
 theorem chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -179,9 +89,6 @@ theorem chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial
   unfold chartPushedChosenFirstPartial
   rfl
 
-/-- The `m = 2` instance: for any `idx : Fin 2 → Fin n` with `idx 0 = i` and
-`idx 1 = l`, the chosen second mixed partial agrees on the nose with
-`chosenSecondPartialChartPushedU g α u_h i l`. -/
 theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -203,9 +110,6 @@ theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
   rw [h_last_1, h_inner_last]
   rfl
 
-/-- The `m = 3` instance: for any `idx : Fin 3 → Fin n` with `idx 0 = i`,
-`idx 1 = l`, `idx 2 = j`, the chosen third mixed partial agrees on the nose
-with `chosenThirdMixedPartialChartPushedU g α u_h i l j`. -/
 theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -229,10 +133,6 @@ theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartP
   unfold chosenThirdMixedPartialChartPushedU
   rfl
 
-/-- **Polymorphic regularity bridge.** From chart-`H^{k+m}` of the canonical
-chart-pushed POU representative of `u_h.coeFn` on the chart target, every
-`m`-fold chosen mixed weak partial lies in chart-`H^k` on the chart target,
-for arbitrary `m, k : ℕ` and arbitrary multi-index `idx : Fin m → Fin n`. -/
 theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -281,8 +181,6 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
-/-- **`k = 0` corollary.** From chart-`H^m` of the chart-pushed parent, every
-`m`-fold chosen mixed weak partial is `MemLp 2` on the chart target. -/
 theorem chosenMthMixedPartialChartPushedU_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -315,10 +213,6 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
       (I := I) (M := M) g α u_h m 0 h_parent' idx
   exact h_memWkp_0
 
-/-- **`k = 1` corollary.** From chart-`H^{m+1}` of the chart-pushed parent,
-every `m`-fold chosen mixed weak partial is `MemW1p 2` on the chart target.
-This is the headline `H¹` regularity needed for downstream weak-form
-manipulations. -/
 theorem chosenMthMixedPartialChartPushedU_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -353,9 +247,6 @@ theorem chosenMthMixedPartialChartPushedU_memW1p_two
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h_memWkp_1
   exact h_memWkp_1
 
-/-- **Local `L²` corollary.** From chart-`H^m` of the chart-pushed parent,
-every `m`-fold chosen mixed weak partial is `MemLp 2 (volume.restrict K)`
-for every compact `K ⊆ chartTargetEuclid α`. -/
 theorem chosenMthMixedPartialChartPushedU_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

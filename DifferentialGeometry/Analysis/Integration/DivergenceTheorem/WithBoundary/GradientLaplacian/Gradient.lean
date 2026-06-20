@@ -8,62 +8,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
-/-!
-# Gradient of a smooth function on a Riemannian manifold (with boundary)
-
-This file extends the construction of the metric gradient `gradFun g f` from the
-boundaryless case to manifolds whose local model `I : ModelWithCorners ℝ E H`
-may carry a non-trivial boundary.
-
-The Riesz machinery — the musical flat linear equivalence
-`metricFlatMap g x : TangentSpace I x ≃ₗ[ℝ] (TangentSpace I x →ₗ[ℝ] ℝ)`, the
-sharp `metricSharp g x α := (metricFlatMap g x).symm α`, and the resulting
-pointwise gradient `gradFun g f x := metricSharp g x (mfderiv f x).toLinearMap`
-— is purely fiberwise linear algebra and is reused verbatim from the boundaryless
-file. None of these constructions reference the chart target, so they are
-boundary-agnostic.
-
-The new content of this file is:
-
-* the chart-local representation `gradChartLocalWithin` of the gradient using
-  `partialDerivWithin (extChartAt I α).target` instead of the Fréchet partial
-  derivative `partialDeriv`, which is well posed at every chart-source point
-  (including boundary points of the chart target);
-* the identification `gradChartLocalWithin g α f = gradFun g f` on the chart
-  base set; and
-* the smoothness of `gradFun g f` as a tangent-bundle section on the manifold
-  interior `I.interior M`.
-
-On the manifold interior, `gradFun g f` agrees with the boundaryless gradient
-and inherits all of its properties through the boundary-agnostic intrinsic
-identities.
-
-## Main definitions
-
-* `gradChartLocalWithin g α f x` — the chart-local representation of the
-  gradient at `x`, in the chart at `α`, using `partialDerivWithin` on the chart
-  target.
-* `grad_g_with_boundary g f` — the underlying pointwise gradient function,
-  defined as `gradFun g f`. Smooth as a function on `I.interior M`; junk
-  outside.
-
-## Main results
-
-* `gradChartLocalWithin_eq_gradFun` — the within chart-local formula equals the
-  intrinsic gradient on the chart base set.
-* `gradFun_contMDiffOn_interior` — `C^∞` smoothness of the underlying pointwise
-  gradient as a tangent-bundle section on the manifold interior.
-* `tangentSectionAction_grad_g_with_boundary_eq_inner` — duality with the
-  tangent-section action: the action of any smooth tangent section on a smooth
-  function equals the metric inner product with the gradient.
-* `inner_grad_g_with_boundary_symm` — symmetry of the metric on two gradients.
-* `support_grad_g_with_boundary_subset` — the support of the gradient is
-  contained in the topological support of the underlying scalar function.
-* `hasCompactSupport_grad_g_with_boundary` — compact-support transfer to the
-  gradient when the underlying function has compact support contained in the
-  manifold interior.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -96,13 +40,6 @@ export DifferentialGeometry.Integral.DivergenceTheorem
     chartGramMatrix_mul_chartInvGramMatrix
     chartInvGramMatrix_entry_contMDiffOn)
 
-/-- The `i`-th chart-basis component of the gradient at `x`, in the chart at
-`α`, computed via `partialDerivWithin` on the chart target.
-
-This is the with-boundary analogue of the boundaryless `gradChartCoeff`: the
-formula coincides with `gradChartCoeff` at every interior point of the chart
-target (where `partialDerivWithin` reduces to `partialDeriv`), and is
-well-posed even at boundary points. -/
 def gradChartCoeffWithin (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (x : M) : ℝ :=
   ∑ j : Fin (Module.finrank ℝ E),
@@ -119,16 +56,12 @@ def gradChartCoeffWithin (g : SmoothRiemannianMetric I M) (α : M) (f : M → �
           partialDerivWithin (E := E) (extChartAt I α).target j
             (scalarOnE (I := I) α f) (extChartAt I α x) := rfl
 
-/-- The chart-local representation of the gradient as a linear combination of
-the chart-basis frame at `α`, using `partialDerivWithin` on the chart target. -/
 def gradChartLocalWithin (g : SmoothRiemannianMetric I M)
     (α : M) (f : M → ℝ) (x : M) : TangentSpace I x :=
   ∑ i : Fin (Module.finrank ℝ E),
     gradChartCoeffWithin (I := I) g α f i x •
       chartBasisVecFiber (I := I) α i x
 
-/-- Auxiliary: the chart-pullback `scalarOnE α f` is `MDifferentiableWithinAt`
-on the chart target at any chart-target point, when `f` is smooth on `M`. -/
 private lemma scalarOnE_mdifferentiableWithinAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -142,8 +75,6 @@ private lemma scalarOnE_mdifferentiableWithinAt
     hcont.differentiableWithinAt (by simp)
   exact hdiff.mdifferentiableWithinAt
 
-/-- Auxiliary: the chart map `extChartAt I α : M → E` sends every chart-source
-point into the chart target. -/
 private lemma extChartAt_mapsTo_target_of_chart_source (α : M) :
     Set.MapsTo (extChartAt I α : M → E) (chartAt H α).source
       (extChartAt I α).target := by
@@ -152,10 +83,6 @@ private lemma extChartAt_mapsTo_target_of_chart_source (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hx'
 
-/-- Auxiliary: the chart-basis vector identity. The mfderiv of `extChartAt I α`
-applied to the chart-basis vector returns the constant model-basis vector. This
-is intrinsic — it holds at every chart-source point, no interior precondition.
--/
 private lemma mfderiv_extChartAt_chartBasisVecFiber'
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source)
     (i : Fin (Module.finrank ℝ E)) :
@@ -185,22 +112,17 @@ private lemma mfderiv_extChartAt_chartBasisVecFiber'
   exact Trivialization.continuousLinearMapAt_symmL (R := ℝ) T (b := x) hbase
     ((chartModelBasis E) i)
 
-/-- Auxiliary: equality of `mfderivWithin` on an open set with `mfderiv`. -/
 private lemma mfderivWithin_extChartAt_open (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
     mfderivWithin I 𝓘(ℝ, E) (extChartAt I α : M → E) (chartAt H α).source x =
       mfderiv I 𝓘(ℝ, E) (extChartAt I α : M → E) x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
-/-- Auxiliary: equality of `mfderivWithin` of `f` on an open set with
-`mfderiv`. -/
 private lemma mfderivWithin_chart_source_of_mdiff'
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source) (f : M → ℝ) :
     mfderivWithin I 𝓘(ℝ, ℝ) f (chartAt H α).source x = mfderiv I 𝓘(ℝ, ℝ) f x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
-/-- Within-aware factorisation of `mfderiv` for a smooth `f : M → ℝ` through
-the chart map. -/
 private lemma mfderiv_factor_through_extChartAt'
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -276,10 +198,6 @@ private lemma mfderiv_factor_through_extChartAt'
   rw [hgoal_full, hscalar_mfd_eq_fd]
   rfl
 
-/-- The within chart-basis evaluation lemma: `mfderiv I 𝓘(ℝ) f x` applied to
-`chartBasisVecFiber α i x` equals
-`partialDerivWithin (extChartAt I α).target i (scalarOnE α f) ((extChartAt I α) x)`,
-for any chart-source point `x` and any smooth `f : M → ℝ`. -/
 lemma mfderiv_chartBasisVecFiber_within_of_smooth
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -294,10 +212,6 @@ lemma mfderiv_chartBasisVecFiber_within_of_smooth
   rw [mfderiv_extChartAt_chartBasisVecFiber' (I := I) α hx i]
   rfl
 
-/-- The inner product of `gradChartLocalWithin g α f x` with a chart-basis frame
-vector `e_k` equals the `k`-th within partial derivative of the chart-pullback
-of `f`. Pure linear-algebra step using only the inverse Gram matrix identity
-and the symmetry of `g`. -/
 lemma inner_gradChartLocalWithin_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -407,9 +321,6 @@ lemma inner_gradChartLocalWithin_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-/-- The chart-local representation `gradChartLocalWithin` agrees with the
-intrinsic gradient `gradFun` at every chart-source point, for any smooth
-`f : M → ℝ`. No interior precondition is required. -/
 theorem gradChartLocalWithin_eq_gradFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -463,9 +374,6 @@ theorem gradChartLocalWithin_eq_gradFun
   rw [inner_gradChartLocalWithin_chartBasis (I := I) g α f hbase k,
     hmfderiv_basis k]
 
-/-- The within chart-coefficient `gradChartCoeffWithin g α f i` is `C^∞` on
-the smoothness domain (chart source intersected with the preimage of the
-interior of the chart target). -/
 private lemma gradChartCoeffWithin_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -521,8 +429,6 @@ private lemma gradChartCoeffWithin_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
-/-- The chart-local within-representation `gradChartLocalWithin g α f` is
-smooth as a tangent-bundle section on the smoothness domain. -/
 private lemma gradChartLocalWithin_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -564,15 +470,10 @@ private lemma gradChartLocalWithin_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-/-- The interior of the manifold is open. Direct application of
-`ModelWithCorners.isOpen_interior`. -/
 private lemma isOpen_interior_M' : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-/-- For a manifold-interior point of the chart source, the chart image lies in
-the interior of the chart target. Wrapper of
-`extChartAt_mem_interior_target_of_isInteriorPoint`. -/
 private lemma extChartAt_mem_interior_target_of_interior
     (α : M) {x : M} (hx_src : x ∈ (chartAt H α).source)
     (hx_int : x ∈ I.interior M) :
@@ -580,10 +481,6 @@ private lemma extChartAt_mem_interior_target_of_interior
   extChartAt_mem_interior_target_of_isInteriorPoint
     (I := I) α hx_src hx_int
 
-/-- On the open neighborhood `(chartAt H x₀).source ∩ I.interior M`, the
-intrinsic gradient `gradFun g f` agrees pointwise with the chart-local
-within-formula `gradChartLocalWithin g x₀ f`. This is the local agreement that
-underlies the smoothness on the interior. -/
 private lemma gradFun_eq_gradChartLocalWithin_on_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -593,8 +490,6 @@ private lemma gradFun_eq_gradChartLocalWithin_on_chart_inter_interior
   intro y hy
   exact (gradChartLocalWithin_eq_gradFun (I := I) g x₀ hf hy.1).symm
 
-/-- The chart-local within-representation, viewed as a tangent-bundle section,
-is `C^∞` on `(chartAt H x₀).source ∩ I.interior M`. -/
 private lemma gradChartLocalWithin_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -609,10 +504,6 @@ private lemma gradChartLocalWithin_contMDiffOn_chart_inter_interior
   · rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy.1
   · exact extChartAt_mem_interior_target_of_interior (I := I) x₀ hy.1 hy.2
 
-/-- The intrinsic gradient `gradFun g f` is `C^∞` as a tangent-bundle section
-on the open neighborhood `(chartAt H x₀).source ∩ I.interior M`. Combines the
-local agreement with `gradChartLocalWithin` and the smoothness of the latter.
--/
 private lemma gradFun_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -631,10 +522,6 @@ private lemma gradFun_contMDiffOn_chart_inter_interior
     TotalSpace.mk' E y (gradChartLocalWithin (I := I) g x₀ f y)
   rw [h]
 
-/-- **Smoothness of the gradient on the manifold interior.** The intrinsic
-gradient `gradFun g f`, viewed as a tangent-bundle section, is `C^∞` on
-`I.interior M`. The proof is local-to-global via the chart-local
-within-representation. -/
 theorem gradFun_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -654,10 +541,6 @@ theorem gradFun_contMDiffOn_interior [T2Space M]
     rw [hset_eq]
     exact hsm
 
-/-- The metric gradient of a smooth function as a fiber-valued function on the
-manifold. Smooth on `I.interior M` (see `gradFun_contMDiffOn_interior`). On
-boundary points the value is well-defined intrinsically (from `mfderiv` and the
-fiberwise Riesz isomorphism), but smoothness is not asserted there. -/
 abbrev grad_g_with_boundary
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     ∀ x : M, TangentSpace I x :=
@@ -667,8 +550,6 @@ abbrev grad_g_with_boundary
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     grad_g_with_boundary (I := I) g f x = gradFun (I := I) g f x := rfl
 
-/-- Re-statement of `gradFun_contMDiffOn_interior` for the named alias
-`grad_g_with_boundary`. -/
 theorem grad_g_with_boundary_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -678,15 +559,7 @@ theorem grad_g_with_boundary_contMDiffOn_interior [T2Space M]
   gradFun_contMDiffOn_interior (I := I) g hf
 
 set_option linter.unusedVariables false in
-/-- **Duality of gradient and tangent action (with boundary).** The action of a
-smooth tangent section `X` on a smooth scalar `f` equals the metric inner
-product of `X` with the gradient `gradFun g f`. The identity is intrinsic and
-holds at every point of the manifold (interior or boundary).
 
-The smoothness hypothesis on `f` is recorded for API consistency with the
-downstream integration-by-parts theorems; the identity itself follows from the
-intrinsic Riesz representation `inner_gradFun_right` and does not in fact
-require smoothness. -/
 theorem tangentSectionAction_grad_g_with_boundary_eq_inner
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -698,8 +571,7 @@ theorem tangentSectionAction_grad_g_with_boundary_eq_inner
   rfl
 
 set_option linter.unusedVariables false in
-/-- Symmetric form: the action equals the inner product with the gradient on
-either side. -/
+
 theorem tangentSectionAction_grad_g_with_boundary_eq_inner_left
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -710,9 +582,7 @@ theorem tangentSectionAction_grad_g_with_boundary_eq_inner_left
   exact g.symm x (X x) (grad_g_with_boundary (I := I) g f x)
 
 set_option linter.unusedVariables false in
-/-- The metric inner product on two gradients is symmetric. Direct from the
-symmetry of the metric tensor `g.symm`. The smoothness hypotheses on `f` and
-`h` are recorded for API consistency. -/
+
 theorem inner_grad_g_with_boundary_symm
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -723,26 +593,18 @@ theorem inner_grad_g_with_boundary_symm
         (grad_g_with_boundary (I := I) g f x) :=
   g.symm x _ _
 
-/-- The support of `grad_g_with_boundary g f` is contained in the topological
-support of `f`. Re-stated from the boundary-agnostic
-`support_gradFun_subset`. -/
 lemma support_grad_g_with_boundary_subset
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     Function.support (fun x : M => grad_g_with_boundary (I := I) g f x) ⊆
       tsupport f :=
   support_gradFun_subset (I := I) g f
 
-/-- If `f` is locally zero near `x`, then `grad_g_with_boundary g f` vanishes
-at `x`. Re-stated from `gradFun_eq_zero_of_eventuallyEq_zero`. -/
 lemma grad_g_with_boundary_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : f =ᶠ[𝓝 x] (fun _ : M => (0 : ℝ))) :
     grad_g_with_boundary (I := I) g f x = (0 : TangentSpace I x) :=
   gradFun_eq_zero_of_eventuallyEq_zero (I := I) g hf
 
-/-- If `f` has compact support, then so does `grad_g_with_boundary g f` (as a
-fiber-valued function). The compact-support transfer needs no smoothness
-hypothesis on `f`: the support inclusion alone is enough. -/
 lemma hasCompactSupport_grad_g_with_boundary [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf_cs : HasCompactSupport f) :

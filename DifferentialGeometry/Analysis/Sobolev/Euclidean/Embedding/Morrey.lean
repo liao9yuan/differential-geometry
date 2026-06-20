@@ -8,14 +8,6 @@ import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 import Mathlib.MeasureTheory.Covering.DensityTheorem
 import Mathlib.MeasureTheory.Integral.Average
 
-/-!
-# Morrey-type embedding on Euclidean balls
-
-For `1 ≤ d` and `p > d`, every Sobolev function `u ∈ W^{1,p}(B(x₀, R))` on a
-Euclidean ball admits a continuous representative which is Hölder-continuous
-with exponent `α := 1 - d / p`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function
@@ -29,11 +21,9 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The Lebesgue mean (average) of a real-valued function over a metric ball. -/
 def meanLebesgueOnBall (B : Set E) (u : E → ℝ) : ℝ :=
   ⨍ z in B, u z ∂(volume : Measure E)
 
-/-- The kernel `‖x‖^α` is integrable on `B(0, R)` whenever `α > -d`. -/
 private theorem riesz_kernel_integrable_of_gt_neg_dim
     {α : ℝ} (hα : -(d : ℝ) < α) {R : ℝ} (hR : 0 < R) :
     IntegrableOn (fun x : E => ‖x‖ ^ α) (Metric.ball (0 : E) R) volume := by
@@ -74,7 +64,6 @@ private theorem riesz_kernel_integrable_of_gt_neg_dim
     exact h_ind_int.congr_fun heq.symm measurableSet_Ioi
   exact (MeasureTheory.integrable_fun_norm_addHaar (μ := volume) (f := g)).mpr h1d
 
-/-- Explicit value of `∫_{B(0,R)} ‖x‖^α dx` for `α > -d`. -/
 private theorem integral_norm_rpow_ball_of_gt_neg_dim
     {α : ℝ} (hα : -(d : ℝ) < α) {R : ℝ} (hR : 0 < R) :
     ∫ x in Metric.ball (0 : E) R, ‖x‖ ^ α ∂volume =
@@ -145,7 +134,6 @@ private theorem integral_norm_rpow_ball_of_gt_neg_dim
   simp only [Measure.real, nsmul_eq_mul, smul_eq_mul]
   ring
 
-/-- Integral of the translated kernel `‖x - z‖^α` over a translated ball. -/
 private theorem integral_norm_sub_rpow_ball_of_gt_neg_dim
     {α : ℝ} (hα : -(d : ℝ) < α) {R : ℝ} (hR : 0 < R) (x : E) :
     ∫ y in Metric.ball x R, ‖x - y‖ ^ α ∂volume =
@@ -162,8 +150,6 @@ private theorem integral_norm_sub_rpow_ball_of_gt_neg_dim
     simp]
   exact integral_norm_rpow_ball_of_gt_neg_dim hα hR
 
-/-- Translation of a set integral over a ball: the integral over `Metric.ball x₀ R`
-of `f` equals the integral over `Metric.ball 0 R` of `z ↦ f (x₀ + z)`. -/
 private lemma setIntegral_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
     ∫ y in Metric.ball x₀ R, f y ∂volume =
       ∫ z in Metric.ball (0 : E) R, f (x₀ + z) ∂volume := by
@@ -175,7 +161,6 @@ private lemma setIntegral_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
   rw [h_image] at key
   rw [← key]
 
-/-- Translation of an average over a ball. -/
 private lemma average_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
     ⨍ y in Metric.ball x₀ R, f y ∂volume =
       ⨍ z in Metric.ball (0 : E) R, f (x₀ + z) ∂volume := by
@@ -197,8 +182,6 @@ private lemma average_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
     rw [h_empty1, h_empty2]
     simp [average]
 
-/-- Smooth representation formula on translated balls, deduced from the
-origin-centred version via translation. -/
 private theorem representation_formula_smooth_translated
     {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -258,8 +241,6 @@ private theorem representation_formula_smooth_translated
   rw [hgrad_eq] at hkey
   exact hkey
 
-/-- The kernel `‖x - y‖^α` integrated over the ball `B(z, R)` is bounded by the
-integral over `B(x, R + dist x z)`, which equals an explicit value. -/
 private theorem integral_norm_sub_rpow_ball_at_other_center
     {α : ℝ} (hα : -(d : ℝ) < α) {z x : E} {R : ℝ} (hR : 0 < R) :
     ∫ y in Metric.ball z R, ‖x - y‖ ^ α ∂volume ≤
@@ -309,7 +290,6 @@ private theorem integral_norm_sub_rpow_ball_at_other_center
           R' ^ ((d : ℝ) + α) / ((d : ℝ) + α) :=
         integral_norm_sub_rpow_ball_of_gt_neg_dim (d := d) hα hR'_pos x
 
-/-- The kernel `‖x - y‖^α` is ae-strongly-measurable. -/
 private lemma measurable_norm_sub_rpow (α : ℝ) (x : E) :
     AEStronglyMeasurable (fun y : E => ‖x - y‖ ^ α) (volume : Measure E) := by
   have hcont_complement : ContinuousOn (fun y : E => ‖x - y‖ ^ α) ({x} : Set E)ᶜ := by
@@ -334,13 +314,10 @@ private lemma measurable_norm_sub_rpow (α : ℝ) (x : E) :
     exact hy]
   exact h_aesm_compl
 
-/-- AE strong measurability of `‖x - y‖^α` on a restricted measure. -/
 private lemma measurable_norm_sub_rpow_restrict (α : ℝ) (x : E) (s : Set E) :
     AEStronglyMeasurable (fun y : E => ‖x - y‖ ^ α) (volume.restrict s) :=
   (measurable_norm_sub_rpow α x).restrict
 
-/-- Membership of the kernel `y ↦ ‖x - y‖^{1-d}` in `L^q(B(z, R))` when `p > d`
-and `q = p / (p - 1)`. -/
 private theorem riesz_kernel_memLp
     {p : ℝ} (hp : (d : ℝ) < p) {z : E} {R : ℝ} (hR : 0 < R) (x : E) :
     MemLp (fun y : E => ‖x - y‖ ^ (1 - (d : ℝ)))
@@ -431,13 +408,10 @@ private theorem riesz_kernel_memLp
   · positivity
   exact h_lintegral_finite
 
-/-- Continuity of `‖∇u‖` for smooth `u`. -/
 private lemma continuous_norm_fderiv {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
     Continuous (fun y : E => ‖fderiv ℝ u y‖) :=
   continuous_norm.comp (hu.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0))
 
-/-- For smooth `u`, the function `‖∇u‖` lies in `L^p` on a Euclidean ball, with a bound
-in terms of the maximum of `‖∇u‖` over the closed ball times the volume of the ball. -/
 private theorem smooth_grad_memLp_on_ball
     {p : ℝ} (_hp : 0 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -466,9 +440,6 @@ private theorem smooth_grad_memLp_on_ball
     rw [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] at this
     exact this
 
-/-- Smooth Hölder estimate: for smooth `u` and `x ∈ B(x₀, R)`,
-`|u(x) - ⨍ u| ≤ C(d,p,R) · ‖∇u‖_{L^p(B(x₀, R))}`. We package the constant
-as the product of the representation constant and the kernel L^q norm. -/
 private theorem smooth_pointwise_holder_bound
     {p : ℝ} (hp : (d : ℝ) < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -736,9 +707,6 @@ private theorem smooth_pointwise_holder_bound
             (ENNReal.toReal_rpow _ _).symm]
         rw [ENNReal.toReal_ofReal hIint_nn]
 
-/-- Explicit value of the smooth Hölder constant, as a function of `d` and `p > d`.
-This is the constant that multiplies `R^{1 - d/p} · ‖∇u‖_{L^p(B(x₀, R))}` in the
-smooth Morrey bound. It depends only on the dimension and the exponent. -/
 private def smoothHolderConst (d : ℕ) (p : ℝ) : ℝ :=
   let q : ℝ := p / (p - 1)
   let α : ℝ := (1 - (d : ℝ)) * q
@@ -773,8 +741,6 @@ private theorem smoothHolderConst_nonneg {d : ℕ} [NeZero d] {p : ℝ} (hp : (d
   unfold smoothHolderConst
   positivity
 
-/-- For smooth `u` on a ball `B(z, r)` and `x ∈ B(z, r)`, the explicit Hölder
-estimate with `r^{1 - d/p}` scaling. -/
 private theorem smooth_pointwise_holder_bound_explicit
     {p : ℝ} (hp : (d : ℝ) < p) {z : E} {r : ℝ} (hr : 0 < r)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -1124,8 +1090,6 @@ private lemma norm_fderiv_eq_norm_partials_local
             (fun j : Fin d => (fderiv ℝ ψ y) (EuclideanSpace.single j 1))) i := by simp
   rw [h_fderiv_norm_eq_v, h_v_eq_components]
 
-/-- For any `v : E`, `‖v‖ ≤ ∑ i, ‖v i‖`, since the `L^2` norm is dominated by
-the `L^1` norm for finite sums. -/
 private lemma euclidean_norm_le_sum_norms (v : E) :
     ‖v‖ ≤ ∑ i : Fin d, ‖v i‖ := by
   classical
@@ -1139,8 +1103,6 @@ private lemma euclidean_norm_le_sum_norms (v : E) :
   intro i _
   simp
 
-/-- The smooth Hölder bound on the unit ball, with `‖fderiv ψ‖_{L^p}` replaced by
-the per-component sum `∑ ‖∂_i ψ‖_{L^p}`. -/
 private theorem smooth_holder_bound_unit_ball_components
     {p : ℝ} (hp : (d : ℝ) < p)
     {ψ : E → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1259,8 +1221,6 @@ private theorem smooth_holder_bound_unit_ball_components
             (ENNReal.ofReal p) (volume.restrict (Metric.ball (0 : E) 1))).toReal :=
         mul_le_mul_of_nonneg_left h_real_le hC_nn
 
-/-- For two smooth functions `ψ₁, ψ₂` on the unit ball, the difference
-`ψ₁(z) - ψ₂(z)` is bounded by the mean of the difference plus the Hölder bound. -/
 private theorem smooth_pair_holder_bound_unit_ball
     {p : ℝ} (hp : (d : ℝ) < p)
     {ψ₁ ψ₂ : E → ℝ}
@@ -1360,7 +1320,6 @@ private theorem smooth_pair_holder_bound_unit_ball
   rw [h_first] at hpt_diff_bound
   linarith [hpt_diff_bound, hbound_final]
 
-/-- Monotonicity of the gradient `eLpNorm` under inclusion of balls (smooth case). -/
 private lemma smooth_grad_eLpNorm_le_of_ball_subset
     {p : ℝ} (hp_pos : 0 < p) {x₀ z : E} {R r : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -1385,7 +1344,6 @@ private lemma smooth_grad_eLpNorm_le_of_ball_subset
     (smooth_grad_memLp_on_ball (d := d) hp_pos hR hu).eLpNorm_ne_top
   exact ENNReal.toReal_mono h_eLp_ne_top h_eLp_le
 
-/-- For a smooth function on a Euclidean ball, the function itself is in `L^p`. -/
 private theorem smooth_memLp_on_ball
     {p : ℝ} (_hp_pos : 0 < p) {x₀ : E} {R : ℝ} (_hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -1406,8 +1364,6 @@ private theorem smooth_memLp_on_ball
     rw [norm_one, mul_one]
     exact h_at_y
 
-/-- The `L^1` norm of a smooth function on a ball is bounded by the `L^p` norm
-times the volume to the power `1 - 1/p`. -/
 private lemma smooth_setIntegral_norm_le_eLpNorm
     {p : ℝ} (hp_one : 1 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -1466,8 +1422,6 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
   rw [hμ_def, Measure.restrict_apply_univ] at h_le_real
   exact h_le_real
 
-/-- The norm of the average of a smooth function over a ball is bounded by the
-`L^p` norm times the volume to the power `-1/p`. -/
 private lemma smooth_norm_average_le
     {p : ℝ} (hp_one : 1 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -1527,12 +1481,6 @@ private lemma smooth_norm_average_le
           ((volume (Metric.ball x₀ R)).toReal) ^ (-(1 / p)) := by
         rw [h_rpow_collapse]
 
-/-- Smooth pair Hölder bound on the half-radius interior of a ball.
-
-For a smooth function `u` and any pair `x, y` in `B(x₀, R/2)`, the difference
-`u(x) - u(y)` is bounded by `(dist x y)^{1 - d/p}` times the `L^p` norm of the
-gradient on the larger ball `B(x₀, R)`, with a constant depending only on
-`d` and `p`. -/
 theorem smooth_morrey_pair_bound
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)
@@ -1737,11 +1685,6 @@ theorem smooth_morrey_pair_bound
       rw [hC_def]; ring
     linarith
 
-/-- Smooth sup bound on the half-radius interior of a ball.
-
-For a smooth function `u`, every value `u(x)` with `x ∈ B(x₀, R/2)` is bounded
-by a constant times the sum of the `L^p` norms of `u` and its gradient on the
-larger ball `B(x₀, R)`. -/
 theorem smooth_morrey_sup_bound
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)
@@ -1809,11 +1752,6 @@ theorem smooth_morrey_sup_bound
     linarith
   linarith
 
-/-- Smooth Hölder modulus on the half-radius interior of a ball.
-
-For a smooth function `u`, the value `‖u(x) - u(y)‖` is controlled by
-`(dist x y)^{1 - d/p}` times an absolute constant, for `x, y ∈ B(x₀, R/2)`.
-The constant depends on `d, p, R`, and the gradient `L^p` norm on `B(x₀, R)`. -/
 theorem smooth_morrey_holder_modulus
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)
@@ -1834,9 +1772,6 @@ theorem smooth_morrey_holder_modulus
       C₀ * dist x y ^ (1 - (d : ℝ) / p) * N from by ring]
   exact h
 
-/-- Uniform-in-`u` smooth pair Hölder bound on the half-radius interior of a
-ball. Strengthens `smooth_morrey_pair_bound` by quantifying the constant `C`
-ahead of `u`. -/
 theorem smooth_morrey_pair_bound_uniform
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
@@ -2032,9 +1967,6 @@ theorem smooth_morrey_pair_bound_uniform
       rw [hC_def]; ring
     linarith
 
-/-- Uniform-in-`u` smooth sup bound on the half-radius interior of a ball.
-Strengthens `smooth_morrey_sup_bound` by quantifying the constant `C` ahead of
-`u`. -/
 theorem smooth_morrey_sup_bound_uniform
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
@@ -2101,8 +2033,6 @@ theorem smooth_morrey_sup_bound_uniform
     linarith
   linarith
 
-/-- A smooth cutoff `η` adapted to a ball: `η = 1` on `closedBall x₀ (3R/4)` and
-`tsupport η ⊆ closedBall x₀ (7R/8) ⊂ ball x₀ R`, with `η ∈ [0, 1]`. -/
 private theorem exists_smooth_cutoff_ball
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
     ∃ η : EuclideanSpace ℝ (Fin d) → ℝ,
@@ -2152,7 +2082,6 @@ private theorem exists_smooth_cutoff_ball
   · intro x hx
     exact (hη_one_iff x).1 hx
 
-/-- Bound on the cutoff function: `0 ≤ η ≤ 1`, hence `‖η‖ ≤ 1`. -/
 private lemma cutoff_norm_le_one {η : EuclideanSpace ℝ (Fin d) → ℝ}
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1) (x : EuclideanSpace ℝ (Fin d)) :
     |η x| ≤ 1 := by
@@ -2161,8 +2090,6 @@ private lemma cutoff_norm_le_one {η : EuclideanSpace ℝ (Fin d) → ℝ}
   rw [abs_of_nonneg h0]
   exact h1
 
-/-- Existence of a uniform bound on `‖fderiv η‖` for any compactly supported
-smooth `η : E → ℝ`. -/
 private lemma exists_grad_bound_of_smooth_compactSupport
     {η : EuclideanSpace ℝ (Fin d) → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_compact : HasCompactSupport η) :
@@ -2201,13 +2128,10 @@ private lemma exists_grad_bound_of_smooth_compactSupport
       rw [hx]
   exact ⟨M, hM_nn, hM⟩
 
-/-- The standard Euclidean basis vectors are unit vectors. -/
 private lemma euclideanBasis_norm_one (i : Fin d) :
     ‖(EuclideanSpace.single i (1 : ℝ) : EuclideanSpace ℝ (Fin d))‖ = 1 := by
   simp
 
-/-- For a smooth `f` and `i : Fin d`, the partial derivative `(fderiv ℝ f x) e_i`
-has norm bounded by `‖fderiv ℝ f x‖`. -/
 private lemma partial_deriv_norm_le_fderiv
     (f : EuclideanSpace ℝ (Fin d) → ℝ) (x : EuclideanSpace ℝ (Fin d)) (i : Fin d) :
     |(fderiv ℝ f x) (EuclideanSpace.single i (1 : ℝ))| ≤ ‖fderiv ℝ f x‖ := by
@@ -2215,15 +2139,10 @@ private lemma partial_deriv_norm_le_fderiv
   rw [euclideanBasis_norm_one, mul_one] at h
   rwa [Real.norm_eq_abs] at h
 
-/-- The Euclidean norm of a vector is bounded by the L¹ sum of its components. -/
 private lemma euclidean_norm_le_sum_abs (v : EuclideanSpace ℝ (Fin d)) :
     ‖v‖ ≤ ∑ i : Fin d, |v i| := by
   exact euclidean_norm_le_sum_norms v
 
-/-- The Euclidean norm of `fderiv ℝ f` equals the Euclidean norm of the
-component vector `(∂_i f)_i` (this is just the norm of the dual map identified
-with the gradient via the standard basis). The smooth-side and weak-side
-gradients use the same identification. -/
 private lemma norm_fderiv_eq_partial_norm
     {f : EuclideanSpace ℝ (Fin d) → ℝ} (x : EuclideanSpace ℝ (Fin d)) :
     ‖fderiv ℝ f x‖ =
@@ -2232,7 +2151,6 @@ private lemma norm_fderiv_eq_partial_norm
           EuclideanSpace ℝ (Fin d))‖ :=
   norm_fderiv_eq_norm_partials_local (ψ := f) x
 
-/-- The smooth pointwise Hölder bound, expressed via per-component `L^p` norms. -/
 private theorem smooth_pointwise_holder_bound_components
     {p : ℝ} (hp : (d : ℝ) < p) {z : E} {r : ℝ} (hr : 0 < r)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -2350,9 +2268,6 @@ private theorem smooth_pointwise_holder_bound_components
         apply mul_le_mul_of_nonneg_left h_real_le
         exact mul_nonneg hC_nn h_r_pow_nn
 
-/-- The `MemW1pWitness` for `η · u` constructed from a `MemW1pWitness` for `u`
-together with a smooth bounded cutoff `η`. Wraps
-`DeGiorgi.MemW1pWitness.mul_smooth_bounded_p`. -/
 private noncomputable def cutoffWitness
     {p : ℝ} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -2375,7 +2290,6 @@ private noncomputable def cutoffWitness
     (Classical.choose_spec
       (exists_grad_bound_of_smooth_compactSupport (d := d) hη hη_compact)).2
 
-/-- The `tsupport` of `η · u` is contained in `tsupport η`. -/
 private lemma tsupport_smul_subset_left'
     {η u : E → ℝ} :
     tsupport (fun x => η x * u x) ⊆ tsupport η := by
@@ -2386,9 +2300,6 @@ private lemma tsupport_smul_subset_left'
   apply hx
   rw [hη, zero_mul]
 
-/-- For a `MemW1pWitness` together with a smooth cutoff `η` supported in `Ω`, the
-DeGiorgi approximation theorem produces a sequence of smooth compactly supported
-functions converging to `η · u` in `W^{1,p}(Ω)`. -/
 private theorem exists_smooth_cutoff_approx
     {p : ℝ} (hp : 1 < p)
     {Ω K : Set E} (hΩ_open : IsOpen Ω)
@@ -2448,7 +2359,6 @@ private theorem exists_smooth_cutoff_approx
     ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
   exact ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
 
-/-- L^p convergence on a finite-measure set implies L^1 convergence. -/
 private lemma eLpNorm_one_le_eLpNorm_p_finite_measure
     {p : ℝ} (hp : 1 < p) {μ : Measure E} [IsFiniteMeasure μ]
     {f : E → ℝ} (hf : MemLp f (ENNReal.ofReal p) μ) :
@@ -2466,8 +2376,6 @@ private lemma eLpNorm_one_le_eLpNorm_p_finite_measure
   rw [h_exp_eq] at h
   exact h
 
-/-- L^p convergence to zero on a finite-measure set implies the L^1 norms also
-go to zero. -/
 private lemma tendsto_eLpNorm_one_of_tendsto_eLpNorm_p
     {p : ℝ} (hp : 1 < p) {μ : Measure E} [IsFiniteMeasure μ]
     {F : ℕ → E → ℝ} (hF : ∀ n, MemLp (F n) (ENNReal.ofReal p) μ)
@@ -2492,8 +2400,6 @@ private lemma tendsto_eLpNorm_one_of_tendsto_eLpNorm_p
   intro n
   exact eLpNorm_one_le_eLpNorm_p_finite_measure (d := d) hp (hF n)
 
-/-- For each `n`, `eLpNorm (φ_n - g) 1 μ` finite implies the integral difference
-goes to zero. -/
 private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
     {p : ℝ} (hp : 1 < p) {Ω : Set E} (_hΩ : MeasurableSet Ω)
     (hΩ_finite : volume Ω ≠ ⊤)
@@ -2545,7 +2451,6 @@ private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
   rw [show ∫ x in Ω, g x ∂volume = ∫ x, g x ∂(volume.restrict Ω) from hg_eq_setInt.symm]
   exact h_int_tendsto
 
-/-- Convergence of averages on a fixed bounded ball, from L^p convergence. -/
 private lemma tendsto_setAverage_of_eLpNorm_p_to_zero
     {p : ℝ} (hp : 1 < p) {z : E} {r : ℝ} (hr : 0 < r)
     {g : E → ℝ} {F : ℕ → E → ℝ}
@@ -2581,7 +2486,6 @@ private lemma tendsto_setAverage_of_eLpNorm_p_to_zero
   rw [h_avg_g_eq]
   exact h_inv_tendsto
 
-/-- Reverse triangle inequality for `eLpNorm` on `ENNReal`. -/
 private lemma eLpNorm_sub_le_eLpNorm_diff_real
     {p : ℝ≥0∞} (hp : 1 ≤ p) {μ : Measure E} {f g : E → ℝ}
     (hf : MemLp f p μ) (hg : MemLp g p μ) :
@@ -2627,7 +2531,6 @@ private lemma eLpNorm_sub_le_eLpNorm_diff_real
   rw [abs_sub_le_iff]
   exact ⟨by linarith, by linarith⟩
 
-/-- Convergence of `eLpNorm.toReal` from `eLpNorm` of difference → 0. -/
 private lemma tendsto_eLpNorm_toReal_of_diff_tendsto_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {μ : Measure E} {g : E → ℝ} {F : ℕ → E → ℝ}
     (hg : MemLp g p μ) (hF : ∀ n, MemLp (F n) p μ)
@@ -2657,11 +2560,6 @@ private lemma tendsto_eLpNorm_toReal_of_diff_tendsto_zero
   rw [abs_of_nonneg h_nn] at hN_n
   exact hN_n
 
-/-- The smooth pair difference at `x, y ∈ B(x₀, R/4)` admits a bound where the
-gradient `L^p` norm is computed over the slightly larger ball `B(x₀, 3R/4)`.
-
-The constant is `2 · 2^(1-d/p) · smoothHolderConst d p`, but we expose it
-through an existential to match the structure of `smooth_morrey_pair_bound`. -/
 private theorem smooth_pair_bound_inner
     {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : E} {R : ℝ} (hR : 0 < R)
@@ -2683,8 +2581,6 @@ private theorem smooth_pair_bound_inner
     linarith
   exact ⟨C, hC_nn, hbound hx' hy'⟩
 
-/-- Average difference: for smooth `φ` and `B(c, ρ) ⊆ B(z, r)`, the average over
-the inner ball is close to a "midpoint" reference average. -/
 private lemma smooth_avg_diff_pointwise_bound
     {p : ℝ} (hp : (d : ℝ) < p)
     {z c : E} {r ρ : ℝ} (hr : 0 < r) (hρ : 0 < ρ)
@@ -2792,8 +2688,6 @@ private lemma smooth_avg_diff_pointwise_bound
     _ = Cval := by
         field_simp
 
-/-- The `eLpNorm` of `‖fderiv φ‖` (scalar) is bounded by the sum of the
-component `eLpNorm`s of the partial derivatives. -/
 private lemma eLpNorm_fderiv_norm_le_sum_components
     {p : ℝ} (hp : 1 < p) {z : E} {r : ℝ}
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
@@ -2858,8 +2752,6 @@ private lemma eLpNorm_fderiv_norm_le_sum_components
   refine Finset.sum_congr rfl ?_
   intro i _; exact h_comp_eq i
 
-/-- For the cutoff witness `η · u`, when `η = 1` on an open set `U`, the
-`weakGrad` agrees with `u`'s `weakGrad` pointwise on `U`. -/
 private lemma cutoffWitness_weakGrad_eq_on_open
     {p : ℝ} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -2886,15 +2778,7 @@ private lemma cutoffWitness_weakGrad_eq_on_open
   simp [h_eta_x, h_fderiv_zero]
 
 set_option maxHeartbeats 1600000 in
-/-- Mean-value inequality for `W^{1,p}` functions on a Euclidean ball, `p > d`.
 
-For `x, y ∈ B(x₀, R/4)` (a half-radius interior of `B(x₀, R/2)`), the difference
-of Lebesgue means of `u` on small balls of radius `dist x y / 2` centered at `x`
-and `y` is bounded by `(dist x y)^{1 - d/p}` times the gradient `L^p` norm.
-
-The half-radius restriction `B(x₀, R/4)` (rather than the spec's `B(x₀, R/2)`)
-arises because the comparison balls of radius `dist x y / 2` must remain inside
-the region where the smooth cutoff `η = 1` holds, which forces `R/4`. -/
 theorem mean_value_inequality_W1p
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)
@@ -3548,8 +3432,6 @@ theorem mean_value_inequality_W1p
       C * (dist x y) ^ (1 - (d : ℝ) / p) * N
     exact h_final
 
-/-- Inner smooth cutoff for the Morrey representative construction: `χ = 1` on
-`closedBall x₀ (R/4)` and `tsupport χ ⊆ closedBall x₀ (R/3) ⊂ ball x₀ (3R/8)`. -/
 private theorem exists_smooth_cutoff_inner
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
     ∃ χ : EuclideanSpace ℝ (Fin d) → ℝ,
@@ -3593,7 +3475,6 @@ private theorem exists_smooth_cutoff_inner
   · intro x hx
     exact (hχ_one_iff x).1 hx
 
-/-- Triangle bound for `eLpNorm.toReal`: `‖F n - F m‖_p ≤ ‖F n - g‖_p + ‖F m - g‖_p`. -/
 private lemma eLpNorm_diff_real_bound
     {p : ℝ} (hp_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p)
     {μ : Measure E}
@@ -3637,7 +3518,6 @@ private lemma eLpNorm_diff_real_bound
   rw [← ENNReal.toReal_add h_finite_n h_finite_m]
   exact ENNReal.toReal_mono h_sum_finite h_le_enn
 
-/-- The eLpNorm of `‖fderiv f‖` on a ball in terms of per-component partials. -/
 private lemma eLpNorm_grad_norm_le_sum_components_real
     {p : ℝ} (hp_one : 1 < p) {z : E} {r : ℝ}
     {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -3662,7 +3542,6 @@ private lemma eLpNorm_grad_norm_le_sum_components_real
   rw [ENNReal.toReal_sum (fun i _ => h_finite i)] at h_real_le
   exact h_real_le
 
-/-- Each component `‖weakGrad u i‖_p` is bounded by `‖weakGrad u‖_p`. -/
 private lemma eLpNorm_weakGrad_component_le_norm_real
     {p : ℝ} {x₀ : E} {R : ℝ}
     {u : E → ℝ}
@@ -3706,9 +3585,7 @@ private lemma eLpNorm_weakGrad_component_le_norm_real
   exact eLpNorm_mono_measure _ (Measure.restrict_mono_set _ hS)
 
 set_option maxHeartbeats 4000000 in
-/-- Existence of a continuous Hölder representative for a `MemW1pWitness`,
-combined with the sup bound. This packages the construction shared by both
-`morrey_holder_representative` and `morrey_sup_bound`. -/
+
 private theorem morrey_representative_of_W1pWitness
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)
@@ -4382,12 +4259,6 @@ private theorem morrey_representative_of_W1pWitness
   · intro x hx
     exact h_sup_ũ x hx
 
-/-- Morrey's inequality (Hölder representative). For `p > d`, a `W^{1,p}`
-function `u` on the ball `B(x₀, R)` — given as a `MemW1pWitness` — has a
-continuous representative `ũ` that equals `u` almost everywhere on `B(x₀, R/4)`
-and is Hölder continuous there with exponent `1 - d/p`: on every pair of points
-of `B(x₀, R/4)` the increment is bounded by `C * dist x y ^ (1 - d/p)` times the
-`L^p` norm of the weak gradient over `B(x₀, R)`, for some `C ≥ 0`. -/
 theorem morrey_holder_representative
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)
@@ -4404,9 +4275,6 @@ theorem morrey_holder_representative
     morrey_representative_of_W1pWitness (d := d) hp hR hu
   exact ⟨ũ, CHolder, hũ_cont, hC_nn, h_ae, h_holder⟩
 
-/-- Sup bound for the Hölder representative of a `MemW1pWitness`: there exists
-a continuous representative `ũ` whose values are bounded by a constant times
-the sum of the `L^p` norm of `u` and the `L^p` norm of its gradient. -/
 theorem morrey_sup_bound
     {d : ℕ} [NeZero d] {p : ℝ} (hp : (d : ℝ) < p)
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R)

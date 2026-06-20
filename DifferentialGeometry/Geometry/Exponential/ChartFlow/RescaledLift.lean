@@ -7,49 +7,6 @@ import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Rescaled manifold lift of the chart-pushed flow orbit
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold
-`M` modelled on a complete inner-product space `E`, the rescaled lift
-
-```
-chartFlowOrbitLiftRescaled Φ p t' v s :=
-  (extChartAt I.tangent ⟨p, 0⟩).symm
-    (rescaleChartOrbit t' (Φ ((extChartAt I p p, v), t' * s)))
-```
-
-starts at `⟨p, t' • v⟩`, is an integral curve of
-`geodesicVectorFieldChart g p` on `Ioo (-T/t') (T/t')`, and its
-projection on this interval coincides with `maximalGeodesic g p (t' • v)`.
-Evaluating at `s = 1` (valid when `t' < T`) yields the manifold-side
-identification of the rescaled lift's projection with `expMap g p (t' • v)`.
-
-The construction mirrors `Exponential/InverseManifoldChain.lean` for the
-unrescaled lift: the chart-coordinate rescaled orbit satisfies the
-chart-phase ODE on `Ioo (-T/t') (T/t')` via the chain-rule lemma
-`hasDerivAt_rescaled_orbit` from `Exponential/SmoothnessClose.lean`;
-Picard–Lindelöf at each interior point and chart-coordinate uniqueness
-identify the local lift with the rescaled lift; the projection at `s = 1`
-follows from the preconnected propagation in
-`Exponential/PreconnectedPropagation.lean`.
-
-## Main definitions
-
-* `chartFlowOrbitLiftRescaled` — the manifold-valued rescaled lift.
-
-## Main results
-
-* `chartFlowOrbitLiftRescaled_zero` — `F_v^resc 0 = ⟨p, t' • v⟩`.
-* `chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo` — `F_v^resc` is a
-  local integral curve of `geodesicVectorFieldChart g p` on
-  `Ioo (-T/t') (T/t')`.
-* `chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo` —
-  projection equals `maximalGeodesic g p (t' • v)` on the rescaled interval.
-* `chartFlowOrbitLiftRescaled_proj_at_one` — at `s = 1`, projection equals
-  `expMap g p (t' • v)`.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -71,9 +28,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 section Definition
 
-/-- The **rescaled manifold lift**: invert the chart of `TM` at the zero
-section `⟨p, 0⟩` applied to the chart-coordinate rescaled orbit
-`rescaleChartOrbit t' (Φ((x₀, v), t' * s))`. -/
 def chartFlowOrbitLiftRescaled
     (Φ : (E × E) × ℝ → E × E) (p : M) (t' : ℝ) (v : E) :
     ℝ → TangentBundle I M :=
@@ -92,9 +46,6 @@ section ChartTargetInterior
 
 variable [I.Boundaryless]
 
-/-- **Rescaling preserves the chart-target-interior product.** If
-`z ∈ (interior (extChartAt I p).target) ×ˢ univ`, then so does
-`rescaleChartOrbit t' z`, because the first component is unchanged. -/
 lemma rescaleChartOrbit_mem_chartTargetInterior
     {p : M} (t' : ℝ) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -110,9 +61,6 @@ section InitialValue
 
 variable [I.Boundaryless]
 
-/-- **Initial value of the rescaled lift.** Using the chart-flow's
-initial identity `Φ((x₀, v), 0) = (x₀, v)`, the rescaled lift at `s = 0`
-equals `⟨p, t' • v⟩`. -/
 theorem chartFlowOrbitLiftRescaled_zero
     (p : M) (v : E) (t' : ℝ) {Φ : (E × E) × ℝ → E × E}
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -137,9 +85,6 @@ section ProjectionIdentity
 
 variable [I.Boundaryless]
 
-/-- **Projection identity.** When `Φ((x₀, v), t' * s)` lies in the
-chart-target interior product, the projection of the rescaled lift is
-the inverse extended chart applied to the unrescaled first component. -/
 theorem chartFlowOrbitLiftRescaled_proj
     (p : M) (v : E) (t' : ℝ) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), t' * s) ∈
@@ -156,7 +101,6 @@ theorem chartFlowOrbitLiftRescaled_proj
   rw [h]
   rfl
 
-/-- **Chart-source membership of the projection.** -/
 theorem chartFlowOrbitLiftRescaled_proj_mem_chartAt_source
     (p : M) (v : E) (t' : ℝ) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), t' * s) ∈
@@ -175,8 +119,6 @@ section RescaledChartPhase
 
 variable [I.Boundaryless]
 
-/-- The time-rescaling `s ↦ t' * s` maps `Ioo (-T/t') (T/t')` into
-`Ioo (-T) T` when `t' > 0`. -/
 lemma mul_mem_Ioo_of_pos_of_lt
     {T t' : ℝ} (ht' : 0 < t') {s : ℝ}
     (hs : s ∈ Set.Ioo (-T / t') (T / t')) :
@@ -192,10 +134,6 @@ lemma mul_mem_Ioo_of_pos_of_lt
       field_simp
     linarith
 
-/-- **Chart-phase ODE for the rescaled chart-coordinate orbit.** If the
-chart-coord orbit satisfies the chart-phase ODE at the rescaled time
-`t' * s` for `s ∈ Ioo (-T/t') (T/t')`, then the rescaled orbit
-satisfies it at `s`. -/
 lemma rescaled_orbit_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {p : M} {Φ : (E × E) × ℝ → E × E}
     {T t' : ℝ} (ht'_pos : 0 < t') (v : E)
@@ -228,11 +166,6 @@ section LocalLiftAtsZero
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Identification of a local lift with the rescaled lift near `s₀`.**
-Under the chart-target-interior confinement and chart-phase ODE for the
-rescaled orbit near `s₀`, the local Picard–Lindelöf lift `g_loc` (with
-`g_loc s₀ = chartFlowOrbitLiftRescaled Φ p t' v s₀`) agrees with the
-rescaled lift on a neighbourhood of `s₀`. -/
 private lemma local_lift_eventuallyEq_chartFlowOrbitLiftRescaled
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) (t' : ℝ)
     {Φ : (E × E) × ℝ → E × E} {s₀ : ℝ}
@@ -401,7 +334,6 @@ section IntegralCurveOnIoo
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **`F_v^resc` is a local integral curve at every `s₀ ∈ Ioo (-T/t') (T/t')`.** -/
 theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -469,7 +401,6 @@ theorem chartFlowOrbitLiftRescaled_isMIntegralCurveAt_of_mem_Ioo
   filter_upwards [hs_eq_nhds] with x hx
   exact hx.symm
 
-/-- **Headline: `F_v^resc` is an `IsMIntegralCurveOn` on `Ioo (-T/t') (T/t')`.** -/
 theorem chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -494,15 +425,10 @@ section ProjectionAtOne
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **The rescaled interval is preconnected.** Open ball in ℝ ⟹ convex ⟹
-preconnected. We use the `Ioo` representation directly. -/
 private lemma isPreconnected_Ioo_real (a b : ℝ) :
     IsPreconnected (Set.Ioo a b) :=
   (convex_Ioo a b).isPreconnected
 
-/-- **`F_v^resc 0 = ⟨p, t' • v⟩` packaged together with the
-`IsMIntegralCurveOn` on `Ioo (-T/t') (T/t')`.** This packaging is the
-input consumed by the maximal-geodesic projection identification. -/
 private lemma rescaled_lift_witness_data
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -526,12 +452,6 @@ private lemma rescaled_lift_witness_data
   · exact chartFlowOrbitLiftRescaled_isMIntegralCurveOn_Ioo (I := I) g p v
       ht'_pos hΦ_target_Icc hΦ_phase_Ioo
 
-/-- **Identification of the rescaled lift's projection with
-`maximalGeodesic g p (t' • v)`.** On `Ioo (-T/t') (T/t')`, the projection
-of `F_v^resc` equals `maximalGeodesic g p (t' • v)`. The proof uses the
-preconnected propagation between `F_v^resc` and a Picard–Lindelöf lift at
-`⟨p, t' • v⟩`, together with the chosen-curve construction of
-`maximalGeodesic`. -/
 theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -620,9 +540,6 @@ theorem chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo
   rw [this]
   exact hproj' s
 
-/-- **Headline: projection at `s = 1` equals `expMap g p (t' • v)`.** When
-`t' < T` (so `1 ∈ Ioo (-T/t') (T/t')`), the projection of the rescaled
-lift at `s = 1` equals `expMap g p (t' • v)`. -/
 theorem chartFlowOrbitLiftRescaled_proj_at_one
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t') (ht'_lt : t' < T)

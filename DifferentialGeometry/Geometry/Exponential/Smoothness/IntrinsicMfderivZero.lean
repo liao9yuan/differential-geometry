@@ -1,20 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
-/-!
-# The manifold derivative of the intrinsic exponential map at zero is the identity
-
-The chart-fixed exponential map `expMap g p` has `mfderiv ... 0 = id` by
-`mfderiv_expMap_at_zero`.  The intrinsic exponential map `expMapIntrinsic g hEnorm p`
-agrees with `expMap g p` for every launch vector `v` whose `g`-norm
-`√(g_p(v,v))` is below an explicit positive threshold (the side-condition-free
-agreement `exists_expMapIntrinsic_eq_expMap_radius`).  Since `v ↦ √(g_p(v,v))` is
-continuous and vanishes at `0`, that agreement set is a neighbourhood of the zero
-tangent vector, so the two maps are eventually equal near `0`.  The manifold derivative
-only depends on the germ of the map at the point, hence the two `mfderiv`s coincide and
-`mfderiv (expMapIntrinsic g hEnorm p) 0 = id`.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold Real
@@ -39,20 +25,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **The manifold derivative of the intrinsic exponential map at the zero tangent
-vector is the identity.** For a smooth Riemannian metric `g` on a connected,
-boundaryless, complete Riemannian manifold modelled on a complete inner-product space,
-and any base point `p`,
 
-`mfderiv 𝓘(ℝ, E) I (expMapIntrinsic g hEnorm p) 0 = ContinuousLinearMap.id ℝ E`.
-
-The intrinsic exponential map agrees with the chart-fixed `expMap g p` on a
-neighbourhood of the zero tangent vector (the small-velocity agreement
-`exists_expMapIntrinsic_eq_expMap_radius`, whose threshold is an explicit `g`-norm
-radius and whose agreement region is a `𝓝 0` because `v ↦ √(g_p(v,v))` is continuous
-and vanishes at `0`).  The manifold derivative depends only on the germ, so the two
-derivatives coincide, and the chart-fixed one is the identity by
-`mfderiv_expMap_at_zero`. -/
 theorem mfderiv_expMapIntrinsic_at_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [CompleteSpace E]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

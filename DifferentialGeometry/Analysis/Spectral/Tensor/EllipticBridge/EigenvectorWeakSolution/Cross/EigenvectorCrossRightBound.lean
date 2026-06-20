@@ -3,56 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightLimit
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartComponentWkpNorm
 
-/-!
-# Eigenbasis-uniform per-`K'`-family atom converter for the cross-right
-# limit-component Sobolev bound
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an order ceiling
-`N : ℕ`, an eigenbasis-uniform Sobolev hypothesis `hCN_bd` on the eigenvector
-chart components at order `N` — a single nonnegative constant `CN`, an exponent
-`eN`, with the bound holding β-uniformly over every base point and component
-multi-index — this file ships the per-`K'`-family atom converter for the
-cross-right limit-component atom.
-
-## The atom
-
-`crossRightLimitComponent g r s h_atlas i α P` is, by definition, the cutoff
-Euclidean chart `P`-component, at base point `α`, of the `L²`-coercion
-`TensorH1ComplToTensorL2 g r s (eigenvectorResolvent g r s h_atlas i)` of the
-eigenvector resolvent. By the resolvent ↔ eigenvector rescale
-`resolvent_eq_mul_eigenvector` and `ℝ`-linearity of the cutoff chart-component
-continuous linear map `tensorL2ChartComponentCutoffCLM`, this equals
-`i.fst.val •` the cutoff chart component of the eigenvector vector itself.
-
-## The proof
-
-The input-uniform cutoff ↔ partition-of-unity iterated-Sobolev bound
-`wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform` bounds the cutoff
-chart component's order-`K'` Sobolev norm by a single `(α, P, K')`-dependent
-constant times a finite sum, over transport chart centres `β` and component
-multi-indices `Q`, of order-`K'` Sobolev norms of the partition-of-unity chart
-components of the eigenvector. Each summand is dominated by the chart-component
-converter at `(β, Q)` and order `K' ≤ N` from
-`eigenvector_chartComponent_perK_from_uniform_β`. The resulting output constant
-depends on `K'` (and on `α, P, N`), packaged as a function `CN' : ℕ → ℝ`.
-
-The scaling factor `i.fst.val` from the resolvent ↔ eigenvector rescale is
-absorbed via the inequality `μ · μ⁻¹^eN ≤ μ⁻¹^eN`, valid since the resolvent
-eigenvalue `μ := i.fst.val` lies in the unit interval `(0, 1]`.
-
-## β-uniformity
-
-The output bound is uniform over the eigenbasis index `i` — the cutoff
-multiplier is supplied by an `i`-uniform cutoff bridge, so a single constant per
-`K'` serves every eigenvector. The absorption identity `μ · μ⁻¹^eN ≤ μ⁻¹^eN`
-keeps the exponent stable at `eN`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -91,7 +41,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
-/-- `μ · μ⁻¹^eN ≤ μ⁻¹^eN` whenever `0 < μ ≤ 1`. -/
+
 private lemma mu_mul_inv_pow_le_inv_pow_local
     {μ : ℝ} (hμ_pos : 0 < μ) (hμ_le_one : μ ≤ 1) (eN : ℕ) :
     μ * μ⁻¹ ^ eN ≤ μ⁻¹ ^ eN := by
@@ -105,7 +55,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `vec_norm_eq_one_local`. -/
 private lemma vec_norm_eq_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -117,7 +66,6 @@ private lemma vec_norm_eq_one_local
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
-/-- Chart-locality-free twin of `eigenval_pos_local`. -/
 private lemma eigenval_pos_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -133,7 +81,6 @@ private lemma eigenval_pos_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
-/-- Chart-locality-free twin of `eigenval_le_one_local`. -/
 private lemma eigenval_le_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -149,7 +96,6 @@ private lemma eigenval_le_one_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).2
 
-/-- Chart-locality-free twin of `eigenvectorVec_pou_memWkp_local`. -/
 private lemma eigenvectorVec_pou_memWkp_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -209,7 +155,6 @@ private lemma eigenvectorVec_pou_memWkp_local
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
-/-- Chart-locality-free twin of `resolvent_eq_mul_eigenvector_local`. -/
 private lemma resolvent_eq_mul_eigenvector_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -223,7 +168,6 @@ private lemma resolvent_eq_mul_eigenvector_local
   rw [eigenvector_eq_resolvent_smul (I := I) (M := M) g r s i,
     smul_smul, mul_inv_cancel₀ hμ_ne, one_smul]
 
-/-- Chart-locality-free twin of `resolvent_cutoff_chartComponent_eq_smul`. -/
 private lemma resolvent_cutoff_chartComponent_eq_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -242,7 +186,6 @@ private lemma resolvent_cutoff_chartComponent_eq_smul
     resolvent_eq_mul_eigenvector_local (I := I) (M := M) g r s i,
     map_smul, tensorL2ChartComponentCutoffCLM_apply]
 
-/-- Chart-locality-free twin of `crossRightLimitComponent_coe_ae_eq`. -/
 private lemma crossRightLimitComponent_coe_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -281,8 +224,7 @@ private lemma crossRightLimitComponent_coe_ae_eq
   rw [hy, smul_eq_mul]
 
 set_option maxHeartbeats 3200000 in
-/-- Chart-locality-free twin of
-`eigenvector_crossRightLimit_perK_from_uniform_β`. -/
+
 theorem eigenvector_crossRightLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)

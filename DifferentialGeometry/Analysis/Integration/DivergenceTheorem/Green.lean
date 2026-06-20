@@ -6,24 +6,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Closed
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
-/-!
-# Green's identities on a Riemannian manifold
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` (without boundary),
-the integration-by-parts machinery established in `IntegrationByParts.lean`
-combines with the gradient and Laplacian to yield Green's identities.
-
-## Main results
-
-* `green_first_integral_inner_grad_eq_neg_integral_smul_laplacian` (**Green's first identity**):
-  for smooth `f, h : M → ℝ` with `h` having compact support,
-  $$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g.$$
-
-* `green_second_integral_smul_laplacian_sub_eq_zero` (**Green's second identity**):
-  on a closed manifold, for any smooth `f, h : M → ℝ`,
-  $$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0.$$
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -45,13 +27,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Green's first identity.** For smooth `f, h : M → ℝ` on a σ-compact
-Hausdorff smooth Riemannian manifold `(M, g)` without boundary, with `h`
-compactly supported,
-$$\int_M g(\nabla_g f, \nabla_g h)\,d\mu_g = -\int_M f \cdot \Delta_g h\,d\mu_g,$$
-where the integrals are taken against the Riemannian volume measure `μ_g`.
-Only `h` is required to have compact support; `f` is an arbitrary smooth
-function. -/
 theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -101,8 +76,6 @@ theorem green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- A symmetric variant of Green's first identity, with the compact-support
-hypothesis on `f` instead of `h`. -/
 private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -146,12 +119,6 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian'
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-/-- **Green's second identity.** For smooth `f, h : M → ℝ` on a closed (compact,
-Hausdorff and boundaryless) smooth Riemannian manifold `(M, g)`,
-$$\int_M (f \cdot \Delta_g h - h \cdot \Delta_g f)\,d\mu_g = 0,$$
-where the integral is taken against the Riemannian volume measure `μ_g`. On a
-compact manifold every smooth function is compactly supported, so this follows
-by applying Green's first identity once in each argument. -/
 theorem green_second_integral_smul_laplacian_sub_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

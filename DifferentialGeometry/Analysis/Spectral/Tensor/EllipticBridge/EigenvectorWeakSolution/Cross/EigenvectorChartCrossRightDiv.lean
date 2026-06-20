@@ -2,90 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.EigenvectorChartLowerOrderLimits
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorCutoffChartPartialL2
 
-/-!
-# The cross-right divergence-form `n → ∞` `L²`-limit
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`,
-and a base component multi-index `P₀`, the covariant-Leibniz **cross-right**
-term of the per-approximant chart-bilinear divergence-form identity is evaluated
-at the **raw** smooth approximant `wₙ := (eigenvectorSmoothApprox
-g r s i n).toCcTensor` — the cross-right term `tensorCovDerivCrossRight
-(chartAtlasPOU I M α) wₙ S` carries the approximant `wₙ` undifferentiated.
-
-After the chart-pull `tensorCovDerivCrossRight_integral_eq_chartPull` and the
-test-section decoupling
-`tensorComponentEuclid_covDerivAlongGrad_rotatedTestSection_chartTestPullback_eqOn`,
-the cross-right Dirichlet term has a part carrying `euclidPartial l φ`:
-
-```
-Σ_l ∫ y in chartTargetEuclid α, densityOnEuclid g α y * c[n,l] y * euclidPartial l φ y ∂volume
-```
-
-with
-
-```
-c[n,l] y = ∑_P ∑_Q covChartMetricGram g r s α P Q y
-  * cutoffComponentEuclid g r s wₙ α P.1 P.2 y
-  * crossRightTestGradCoeff g r s α P₀ Q l y.
-```
-
-Here `cutoffComponentEuclid g r s wₙ α P` is the **cutoff** Euclidean chart
-component of the **raw** approximant `wₙ` — exactly the chart-pull weighting of
-`tensorCovDerivCrossRight_integral_eq_chartPull`, whose chart components are the
-cutoff-weighted `tensorL2ChartComponentCutoff`.
-
-This `euclidPartial l φ`-carrying part must be folded into a single `φ`-term by
-integration by parts. The limiting coefficient would involve a non-smooth `Lp`
-chart component of the abstract eigenvector, so integration by parts at the
-limit is impossible. Instead it is performed at level `n`, where the smooth
-approximant makes `c[n,l]` globally `C^∞`, and the `n → ∞` `L²`-limit of the
-resulting chart-Euclidean divergence is taken afterwards.
-
-## The Leibniz split of the divergence
-
-The chart-Euclidean divergence `∑_l euclidPartial l (densityOnEuclid g α ·
-c[n,l])` splits, by the Leibniz rule, into two summand groups:
-
-* **Group 1** — the chart-Euclidean partial does NOT hit the cutoff chart
-  component `cutoffComponentEuclid g r s wₙ α P` (it hits the `C^∞`
-  test-independent factor `crossRightDivFactor`): the cutoff chart component is
-  un-differentiated, with `n → ∞` `L²`-limit the cutoff chart-component limit
-  object `crossRightLimitComponent`;
-* **Group 2** — the chart-Euclidean partial hits the cutoff chart component:
-  involves `euclidPartial l (cutoffComponentEuclid g r s wₙ α P)`, with
-  `n → ∞` `L²`-limit `μ` times the cutoff chart-partial limit object
-  `eigenvectorCutoffChartPartialLp`.
-
-The test-independent `C^∞` factor `crossRightDivFactor` carries the
-chart-Euclidean gradient chart-frame coefficient `gradChartCoeffEuclid` of the
-chart-atlas partition-of-unity weight, which vanishes off the compact
-partition-of-unity kernel `chartPouKernel α`. So `crossRightDivFactor` — and its
-chart-Euclidean partial — vanish off `chartPouKernel α`, which is what makes the
-finite-sum `L²`-limit converge and be supported in that compact kernel.
-
-## Main definitions
-
-* `crossRightTestGradTerm g r s S α P₀ l` — the cross-right gradient-term
-  coefficient `c[S,l]` for a smooth section `S` (built from the cutoff Euclidean
-  chart component `cutoffComponentEuclid g r s S` of the raw section `S`).
-* `crossRightGradCoeffDivLimit g r s i α P₀` — the explicit
-  `n → ∞` `L²`-limit of `∑_l euclidPartial l (densityOnEuclid g α · c[n,l])`.
-
-## Main results
-
-* `crossRightTestGradTerm_byParts` — the per-`n` integration-by-parts rewrite of
-  the `euclidPartial l φ`-carrying part into a single `φ`-term.
-* `crossRightGradCoeffDivSum_tendsto` — the `n → ∞`
-  `L²`-convergence of the chart-Euclidean divergence to
-  `crossRightGradCoeffDivLimit`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -123,8 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The cutoff Euclidean chart component of a smooth section is globally `C^∞` on
-the Euclidean model space. -/
 private lemma cutoffComponentEuclid_contDiff_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -139,8 +53,6 @@ private lemma cutoffComponentEuclid_contDiff_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The cutoff Euclidean chart component of a smooth section has compact
-support. -/
 private lemma cutoffComponentEuclid_hasCompactSupport_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -154,8 +66,6 @@ private lemma cutoffComponentEuclid_hasCompactSupport_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The topological support of the cutoff Euclidean chart component of a smooth
-section is contained in the Euclidean chart target. -/
 private lemma cutoffComponentEuclid_tsupport_subset_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -169,10 +79,6 @@ private lemma cutoffComponentEuclid_tsupport_subset_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The cutoff Euclidean chart component of a smooth section is `MemLp 2` of the
-chart's Euclidean `L²` reference measure: a globally `C^∞` function with compact
-support is `MemLp` of the volume measure, hence of its restriction to the chart
-target. -/
 private lemma cutoffComponentEuclid_memLp_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -191,10 +97,6 @@ private lemma cutoffComponentEuclid_memLp_section
   rw [chartL2Measure]
   exact h_vol.restrict _
 
-/-- For a smooth compactly-supported tensor section `S`, the chosen weak `k`-th
-chart partial of the cutoff Euclidean chart component agrees almost everywhere,
-on the chart `L²` measure, with the classical chart-Euclidean partial
-`euclidPartial k`. -/
 private lemma chosenWeakPartial'_cutoffComponentEuclid_section_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -235,13 +137,6 @@ private lemma chosenWeakPartial'_cutoffComponentEuclid_section_ae_eq
   refine h_ae.trans (Filter.EventuallyEq.of_eq ?_)
   funext y; rw [euclidPartial_def]
 
-/-- **The cross-right gradient-term coefficient `c[S,l]`.** For a chart center
-`α`, ranks `(r, s)`, a smooth compactly-supported section `S`, a base component
-multi-index `P₀`, and a chart direction `l`, the finite sum, over component
-multi-index pairs `(P, Q)`, of the chart-frame tensor-metric Gram
-`covChartMetricGram g r s α P Q`, the cutoff Euclidean chart component
-`cutoffComponentEuclid g r s S α P` of the raw smooth approximant `S`, and the
-cross-right test-decoupling gradient coefficient `crossRightTestGradCoeff`. -/
 noncomputable def crossRightTestGradTerm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -254,9 +149,6 @@ noncomputable def crossRightTestGradTerm
             cutoffComponentEuclid (I := I) (M := M) g r s S α P.1 P.2 y *
           crossRightTestGradCoeff (I := I) (M := M) g r s α P₀ Q l y
 
-/-- The `T`-independent factor of the `(P, Q, l)`-summand of the density-weighted
-cross-right gradient-term coefficient: the chart density, the chart-frame
-tensor-metric Gram, and the cross-right test-decoupling gradient coefficient. -/
 def crossRightDivFactor
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -267,8 +159,6 @@ def crossRightDivFactor
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
       crossRightTestGradCoeff (I := I) (M := M) g r s α P₀ Q l y
 
-/-- The `T`-independent factor of the density-weighted cross-right gradient-term
-coefficient is `C^∞` on the Euclidean chart target. -/
 lemma crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -280,8 +170,6 @@ lemma crossRightDivFactor_contDiffOn
       (covChartMetricGram_contDiffOn (I := I) (M := M) g r s α P Q)).mul
     (crossRightTestGradCoeff_contDiffOn (I := I) (M := M) g r s α P₀ Q l)
 
-/-- The chart-Euclidean partial of the `T`-independent `C^∞` factor
-`crossRightDivFactor` is `C^∞` on the Euclidean chart target. -/
 lemma euclidPartial_crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -294,8 +182,6 @@ lemma euclidPartial_crossRightDivFactor_contDiffOn
   euclidPartial_contDiffOn_target (I := I) (M := M) α l
     (crossRightDivFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q)
 
-/-- The chart push-forward of the chart-atlas partition-of-unity weight vanishes
-outside the compact partition-of-unity kernel `chartPouKernel α`. -/
 lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
@@ -321,9 +207,6 @@ lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     exact hb_supp hc
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ htar]
 
-/-- The chart-Euclidean partial of the chart push-forward of the chart-atlas
-partition-of-unity weight vanishes outside the partition-of-unity kernel
-`chartPouKernel α`. -/
 lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) (j : Fin (Module.finrank ℝ E)) {y : EuclN}
     (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
@@ -356,12 +239,6 @@ lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
-/-- The cross-right test-decoupling gradient coefficient
-`crossRightTestGradCoeff g r s α P₀ Q l` vanishes outside the partition-of-unity
-kernel `chartPouKernel α`: it carries the gradient chart-frame coefficient
-`gradChartCoeffEuclid g α (chartAtlasPOU I M α) l`, an inverse-Gram-weighted
-combination of the chart-Euclidean partials of the push-forward of the
-partition-of-unity weight, each of which vanishes off `chartPouKernel α`. -/
 private lemma crossRightTestGradCoeff_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -374,9 +251,6 @@ private lemma crossRightTestGradCoeff_eq_zero_off_chartPouKernel
   rw [euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (I := I) (M := M) α j hy, mul_zero]
 
-/-- The `T`-independent factor `crossRightDivFactor` vanishes outside the
-partition-of-unity kernel `chartPouKernel α`: it is a product carrying the
-cross-right test-decoupling gradient coefficient `crossRightTestGradCoeff`. -/
 lemma crossRightDivFactor_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -388,10 +262,6 @@ lemma crossRightDivFactor_eq_zero_off_chartPouKernel
     crossRightTestGradCoeff_eq_zero_off_chartPouKernel
       (I := I) (M := M) g r s α P₀ Q l hy, mul_zero]
 
-/-- The chart-Euclidean partial of the `T`-independent factor
-`crossRightDivFactor` vanishes outside the partition-of-unity kernel
-`chartPouKernel α`: the factor vanishes off the compact kernel, hence on an open
-neighbourhood of any point outside it, and so does its Fréchet derivative. -/
 lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -426,10 +296,6 @@ lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
-/-- The chart density times the cross-right gradient-term coefficient `c[S,l]` is
-the double finite sum, over component multi-index pairs `(P, Q)`, of the
-`T`-independent factor `crossRightDivFactor` times the cutoff Euclidean
-chart-component atom `cutoffComponentEuclid g r s S α P`. -/
 private lemma densityOnEuclid_mul_crossRightTestGradTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -451,8 +317,6 @@ private lemma densityOnEuclid_mul_crossRightTestGradTerm_eq
   rw [crossRightDivFactor]
   ring
 
-/-- The chart density times the cross-right gradient-term coefficient `c[S,l]`
-is `C^∞` on the Euclidean chart target. -/
 lemma densityOnEuclid_mul_crossRightTestGradTerm_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -470,9 +334,6 @@ lemma densityOnEuclid_mul_crossRightTestGradTerm_contDiffOn
     ((cutoffComponentEuclid_contDiff_section (I := I) (M := M)
       g r s S α P.1 P.2).contDiffOn)
 
-/-- The product of the chart-Euclidean partial of the density-weighted
-cross-right gradient-term coefficient and a chart-target-supported test function
-is globally `C^∞` with compact support, hence integrable. -/
 private lemma integrable_euclidPartial_crossRightTestGradTerm_mul_test
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -504,20 +365,6 @@ private lemma integrable_euclidPartial_crossRightTestGradTerm_mul_test
     hasCompactSupport_partial_coeff_mul_test (E := E) l hφ_cs
   exact hcontDiff.continuous.integrable_of_hasCompactSupport hsupp
 
-/-- **The per-`n` integration-by-parts rewrite of the cross-right gradient
-term.** For a chart center `α`, ranks `(r, s)`, a smooth compactly-supported
-section `S`, a base component multi-index `P₀`, and a Euclidean test function
-`φ` that is `C^∞` with compact support contained in the Euclidean chart target,
-the `euclidPartial l φ`-carrying part `∑_l ∫ densityOnEuclid g α · c[S,l] ·
-euclidPartial l φ` of the chart-pulled, test-decoupled cross-right term equals
-the negative of the single `φ`-term carrying the chart-Euclidean divergence
-`∑_l euclidPartial l (densityOnEuclid g α · c[S,l])`.
-
-`c[S,l]` is the cross-right gradient-term coefficient `crossRightTestGradTerm`.
-The identity is the chart-Euclidean integration-by-parts `chartTarget_integral_
-byParts` applied per chart direction `l` — `φ` has compact support inside the
-open chart target, so no boundary term appears — followed by pulling the finite
-sum out of the single `φ`-integral. -/
 theorem crossRightTestGradTerm_byParts
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -577,9 +424,6 @@ theorem crossRightTestGradTerm_byParts
     (integrable_euclidPartial_crossRightTestGradTerm_mul_test
       (I := I) (M := M) g r s S α P₀ l hφ hφ_cs hφ_supp).restrict)]
 
-/-- The chart-Euclidean partial of the cutoff Euclidean chart component of a
-smooth section is differentiable at every point of the Euclidean model space:
-the cutoff chart component is globally `C^∞`. -/
 private lemma differentiableAt_cutoffComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -590,9 +434,6 @@ private lemma differentiableAt_cutoffComponentEuclid
   ((cutoffComponentEuclid_contDiff_section (I := I) (M := M)
     g r s S α Idx Jdx).differentiable (by norm_num)).differentiableAt
 
-/-- **Three-fold nested finite-sum `L²`-convergence.** Per-`(a, b, c)`-leaf
-`L²`-convergence assembles into the `L²`-convergence of the three-fold nested
-finite sum. -/
 private lemma tendsto_sum3
     (α : M) {κ₁ κ₂ κ₃ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃]
@@ -633,9 +474,6 @@ private lemma tendsto_sum3
         (hf := fun c n => hf a b c n) (hflim := fun c => hflim a b c)
         (h_tendsto a b)))
 
-/-- **The `L²`-limit of the cutoff chart-partial atom (chart-locality-free).**
-Chart-locality-free twin of `cutoffPartialLpLimit`, keyed on the unconditional
-compactness witness through `eigenvectorCutoffChartPartialLp`. -/
 def cutoffPartialLpLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -646,8 +484,6 @@ def cutoffPartialLpLimit
     eigenvectorCutoffChartPartialLp (I := I) (M := M)
       g r s i α P k
 
-/-- The kernel-indicator-cut of a factor that is `C^∞` on the chart target,
-times the representative of an `Lp` chart-component limit object, is `L²`. -/
 private lemma memLp_indicatorFactor_mul_cutoffLp
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -666,10 +502,6 @@ private lemma memLp_indicatorFactor_mul_cutoffLp
   exact memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd
     (aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc) (Lp.memLp w)
 
-/-- **The explicit `n → ∞` `L²`-limit of the cross-right gradient-term
-divergence (chart-locality-free).** Chart-locality-free twin of
-`crossRightGradCoeffDivLimit`, re-keyed onto the unconditional cross-right
-component and cutoff chart-partial limit objects. -/
 noncomputable def crossRightGradCoeffDivLimit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -693,9 +525,6 @@ noncomputable def crossRightGradCoeffDivLimit
                   g r s i α P l :
                   EuclN → ℝ) y
 
-/-- **`L²`-membership of the explicit cross-right gradient-term divergence limit
-(chart-locality-free).** Chart-locality-free twin of
-`crossRightGradCoeffDivLimit_memLp`. -/
 theorem crossRightGradCoeffDivLimit_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -726,10 +555,6 @@ theorem crossRightGradCoeffDivLimit_memLp
             (cutoffPartialLpLimit (I := I) (M := M)
               g r s i α P l))))
 
-/-- A factor that is `C^∞` on the chart target and vanishes off the
-partition-of-unity kernel, times the cutoff chart component of the `n`-th
-chart-locality-free smooth approximant, is `L²`. Chart-locality-free twin of
-`memLp_factor_mul_cutoffComponentAtom`. -/
 private lemma memLp_factor_mul_cutoffComponentAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -771,9 +596,6 @@ private lemma memLp_factor_mul_cutoffComponentAtom
       (eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor α P.1 P.2)
 
-/-- The chart-Euclidean partial of the cutoff chart component of the `n`-th
-chart-locality-free smooth approximant is `L²`. Chart-locality-free twin of
-`euclidPartial_cutoffComponentEuclid_approx_memLp`. -/
 private lemma euclidPartial_cutoffComponentEuclid_approx_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -793,10 +615,6 @@ private lemma euclidPartial_cutoffComponentEuclid_approx_memLp
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)
       α P.1 P.2 k)
 
-/-- A factor that is `C^∞` on the chart target and vanishes off the
-partition-of-unity kernel, times the chart-Euclidean partial of the cutoff
-chart component of the `n`-th chart-locality-free smooth approximant, is `L²`.
-Chart-locality-free twin of `memLp_factor_mul_cutoffPartialAtom`. -/
 private lemma memLp_factor_mul_cutoffPartialAtom
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -841,10 +659,6 @@ private lemma memLp_factor_mul_cutoffPartialAtom
     (euclidPartial_cutoffComponentEuclid_approx_memLp (I := I) (M := M)
       g r s i α P k n)
 
-/-- On the chart target the chart-Euclidean partial of `densityOnEuclid g α ·
-c[Sₙ,l]` (at the chart-locality-free approximant `Sₙ`) is the summed Leibniz
-contributions. Chart-locality-free twin of
-`euclidPartial_densityOnEuclid_mul_crossRightTestGradTerm_eqOn`. -/
 private lemma euclidPartial_densityOnEuclid_mul_crossRightTestGradTerm_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -913,9 +727,6 @@ private lemma euclidPartial_densityOnEuclid_mul_crossRightTestGradTerm_eqOn
     (differentiableAt_cutoffComponentEuclid (I := I) (M := M) g r s wₙ α
       P.1 P.2 y)
 
-/-- A cutoff chart-component summand `(C^∞ factor) · cutoffComponentEuclid g r s
-Sₙ α P` at the chart-locality-free approximant, `L²`-classed and convergent.
-Chart-locality-free twin of `tendsto_cutoffComponentSummand`. -/
 private lemma tendsto_cutoffComponentSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -994,10 +805,6 @@ private lemma tendsto_cutoffComponentSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
-/-- A cutoff chart-partial summand `(C^∞ factor) · euclidPartial k
-(cutoffComponentEuclid g r s Sₙ α P)` at the chart-locality-free approximant,
-`L²`-classed and convergent. Chart-locality-free twin of
-`tendsto_cutoffPartialSummand`. -/
 private lemma tendsto_cutoffPartialSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1120,10 +927,6 @@ private lemma tendsto_cutoffPartialSummand
       (fun n => (hP_memLp n).toLp _) from funext h_term, h_lim] at h_engine
   exact h_engine
 
-/-- The chart-Euclidean divergence `∑_l euclidPartial l (densityOnEuclid g α ·
-c[Sₙ,l])` of the cross-right gradient-term coefficient at the `n`-th
-chart-locality-free smooth approximant is `L²`. Chart-locality-free twin of
-`crossRightGradCoeffDivSum_memLp`. -/
 theorem crossRightGradCoeffDivSum_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1193,9 +996,6 @@ theorem crossRightGradCoeffDivSum_memLp
       (I := I) (M := M) g r s i α P₀ l n hy),
     Finset.sum_add_distrib]
 
-/-- **The `n → ∞` `L²`-limit of the cross-right gradient-term divergence
-(chart-locality-free).** Chart-locality-free twin of
-`crossRightGradCoeffDivSum_tendsto`. -/
 theorem crossRightGradCoeffDivSum_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

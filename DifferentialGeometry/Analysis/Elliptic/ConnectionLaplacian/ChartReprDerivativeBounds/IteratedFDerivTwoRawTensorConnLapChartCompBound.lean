@@ -3,72 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDeriv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivTensorReprChartCompBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecompReal
 
-/-!
-# Order-2 pointwise bound on chart-component partials of the raw tensor
-connection Laplacian by the order-2 chart-pulled representation of `raw T`
-
-For a smooth Riemannian manifold `(M, g)`, ranks `r, s : ℕ`, a chart centre
-`α : M`, and a smooth compactly-supported `(r, s)`-tensor section
-`T : SmoothCcTensor g r s`, this file ships the squared pointwise bound
-
-```
-‖iteratedFDeriv ℝ 2
-    ((tensorChartComponentRaw α IJ (rawTensorConnLapSmooth g r s T)) ∘
-      (extChartAt I α).symm) (extChartAt I α b)‖ ^ 2 ≤
-  K *
-    ‖iteratedFDeriv ℝ 2
-      ((tensorRSChartE_section_repr r s α
-          (fun y : M => (rawTensorConnLapSmooth g r s T).toSection y)) ∘
-        (extChartAt I α).symm) (extChartAt I α b)‖ ^ 2
-```
-
-valid for every chart-source point `b` and every multi-index pair `(Idx, Jdx)`.
-The constant `K` depends only on `r`, `s`, and `E`; it is independent of `T`,
-`b`, and `(Idx, Jdx)`.
-
-## Strategy
-
-The chart-`α` raw `(Idx, Jdx)`-component of any smooth section `S` is the
-scalar `tensorChartComponentProjection r s Idx Jdx (tensorTrivProj g r s S α x)`
-(by `tensorChartComponentRaw_def`). Using the identification
-`tensorTrivProj g r s S α = tensorRSChartE_section_repr r s α S.toSection`
-(`tensorTrivProj_eq_tensorRSChartE_section_repr`), we obtain on the entire
-manifold
-
-```
-(tensorChartComponentRaw α IJ S) ∘ symm =
-  (tensorChartComponentProjection r s Idx Jdx) ∘
-    ((tensorRSChartE_section_repr r s α S.toSection) ∘ symm).
-```
-
-Applying `ContinuousLinearMap.iteratedFDeriv_comp_left` with the bounded
-linear functional `proj := tensorChartComponentProjection r s Idx Jdx` yields
-
-```
-iteratedFDeriv ℝ 2 (proj ∘ f) y =
-  proj.compContinuousMultilinearMap (iteratedFDeriv ℝ 2 f y),
-```
-
-and `ContinuousLinearMap.norm_compContinuousMultilinearMap_le` then bounds the
-operator norm:
-
-```
-‖iteratedFDeriv ℝ 2 (proj ∘ f) y‖ ≤ ‖proj‖ * ‖iteratedFDeriv ℝ 2 f y‖.
-```
-
-Squaring gives the headline with `K = (max_{IJ} ‖proj_IJ‖) ^ 2`. The
-contDiffAt-2 hypothesis required by `ContinuousLinearMap.iteratedFDeriv_comp_left`
-is supplied by `reprT_contDiffOn_goodSet` (smoothness of the chart-pulled
-representation on the chart-α good-set image) applied to `S = raw T` via the
-bundled smoothness `rawTensorConnLap_contMDiff` packaged into
-`rawTensorConnLapSmooth`.
-
-This file is the bridging step toward the full order-2 bound by orders 0..4 of
-`T`'s chart-pulled representation. The follow-up step expresses
-`‖iteratedFDeriv 2 ((raw T)_repr ∘ symm)‖^2` in terms of `T`'s representation
-via the chart-pulled explicit covApply formula and its higher-order Leibniz
-expansion. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -99,10 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- `tensorChartComponentRaw g r s S α Idx Jdx` equals the composition of the
-fixed bounded linear functional `tensorChartComponentProjection r s Idx Jdx`
-with the chart-α-trivialised representation
-`tensorRSChartE_section_repr r s α S.toSection`. -/
 private lemma chartComponentRaw_eq_proj_comp_repr
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -117,10 +47,6 @@ private lemma chartComponentRaw_eq_proj_comp_repr
   funext x
   rfl
 
-/-- The chart-pulled (composed with `(extChartAt I α).symm`) raw component
-function equals the composition of `tensorChartComponentProjection` with the
-chart-pulled representation. This is the function-level identity on all of `E`
-that we differentiate. -/
 private lemma chartComponentRaw_symm_eq_proj_comp_repr_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -136,9 +62,6 @@ private lemma chartComponentRaw_symm_eq_proj_comp_repr_symm
   simp only [Function.comp_apply]
   rw [chartComponentRaw_eq_proj_comp_repr (I := I) (M := M) g r s S α Idx Jdx]
 
-/-- The chart-pulled chart-α-trivialised representation of any
-`SmoothCcTensor g r s` is `ContDiffAt ℝ ∞` at the chart-coord image of every
-chart-source point. -/
 private lemma tensorRepr_chart_pulled_contDiffAt_inf
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -210,9 +133,6 @@ private lemma tensorRepr_chart_pulled_contDiffAt_inf
     hcomp.contDiffOn
   exact hcontDiffOn.contDiffAt (h_open_target.mem_nhds hb_target)
 
-/-- The chart-pulled chart-α-trivialised representation of any
-`SmoothCcTensor g r s` is `ContDiffAt ℝ 2` at the chart-coord image of every
-chart-source point. -/
 private lemma tensorRepr_chart_pulled_contDiffAt_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -228,9 +148,6 @@ private lemma tensorRepr_chart_pulled_contDiffAt_two
     WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)
   exact h.of_le h2_le
 
-/-- The order-2 iterated Fréchet derivative of the chart-pulled raw chart-α
-component function factors through the chart-α-trivialised representation
-via the fixed bounded linear functional `tensorChartComponentProjection`. -/
 private lemma iteratedFDeriv_two_chartComponentRaw_symm_eq_compCMM
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -257,9 +174,6 @@ private lemma iteratedFDeriv_two_chartComponentRaw_symm_eq_compCMM
   exact (tensorChartComponentProjection (E := E) r s Idx Jdx).iteratedFDeriv_comp_left
     (n := 2) hcd (le_refl _)
 
-/-- Operator-norm bound on the order-2 iterated Fréchet derivative of the
-chart-pulled raw chart-α component function by `‖proj_IJ‖` times the
-order-2 iterated Fréchet derivative of the chart-pulled representation. -/
 private lemma norm_iteratedFDeriv_two_chartComponentRaw_symm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -280,8 +194,6 @@ private lemma norm_iteratedFDeriv_two_chartComponentRaw_symm_le
     (I := I) (M := M) g r s S α Idx Jdx hb_chart]
   exact ContinuousLinearMap.norm_compContinuousMultilinearMap_le _ _
 
-/-- The maximum, over all multi-index pairs `(Idx, Jdx)`, of the operator
-norm of the chart-frame component projection. -/
 private noncomputable def projectionNormMax (r s : ℕ) : ℝ :=
   ∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
@@ -307,18 +219,6 @@ private lemma projection_norm_le_projectionNormMax (r s : ℕ)
     (fun _ _ => norm_nonneg _) (Finset.mem_univ (Idx, Jdx))
   exact h
 
-/-- **Headline (bridging form).** For a smooth Riemannian manifold `(M, g)`,
-ranks `r, s : ℕ`, a chart centre `α : M`, and any smooth compactly-supported
-`(r, s)`-tensor section `T`, the squared operator norm of the order-2
-chart-coordinate iterated Fréchet derivative of the chart-α raw `(Idx, Jdx)`
-component of `rawTensorConnLapSmooth g r s T`, pulled back by
-`(extChartAt I α).symm`, is bounded at every chart-source point by a
-universal constant times the squared operator norm of the order-2
-chart-coordinate iterated Fréchet derivative of the chart-α-trivialised
-representation of `rawTensorConnLapSmooth g r s T`.
-
-The constant depends only on the ranks `r`, `s`, and the model space `E`; in
-particular it is independent of `T`, `α`, `b`, and `(Idx, Jdx)`. -/
 theorem iteratedFDeriv_two_rawTensorConnLap_chartComponentRaw_norm_sq_le_rawRepr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

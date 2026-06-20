@@ -2,48 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSqSummandChartAlphaBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 
-/-!
-# Bounding `riemannianFiberNormSq` by chart-`α`-frame summands on POU tsupport
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and a smooth
-compactly-supported `(r, s)`-tensor section `S : SmoothCcTensor g r s`, this file
-proves a uniform upper bound on the intrinsic Riemannian fiber norm-squared
-`riemannianFiberNormSq g r s b (S.toSection b)` by a constant multiple of the
-double sum of chart-`α`-frame fiber-norm-squared summands
-
-```
-∑_{IJ} fiberNormSqSummand g b r s (S.toSection b) n
-        (fun i => chartBasisVecFiber α i b) Idx Jdx
-```
-
-valid for every `b` in the closed support of the chart-atlas partition-of-unity
-weight at `α`.
-
-The proof has three pieces:
-
-1. *Forward Gram Rayleigh lower bound.* A uniform positive lower bound
-   `c · ∑ ξ_j² ≤ ∑ G_{jk} ξ_j ξ_k` on the closed POU support, derived by the
-   extreme-value theorem on a compact product of POU tsupport and the unit
-   sphere in `Fin n → ℝ`, using positive-definiteness of `chartGramMatrix` on
-   the base set.
-2. *Change-of-basis polynomial expansion.* For `b` in the trivialization base
-   set, the chart-basis family `(v_j)` is a basis of `TangentSpace I b`; the
-   `g`-orthonormal basis chosen inside `riemannianFiberNormSq`'s definition has
-   coordinates `A : Fin n → Fin n → ℝ` in this basis, and the `g`-orthonormality
-   condition `g.inner b (e i) (e i) = 1` reads `∑_{jk} A_{ij} A_{ik} G_{jk} = 1`,
-   which combined with the forward Gram lower bound yields `∑_j A_{ij}² ≤ 1/c`.
-3. *Cauchy–Schwarz on the multilinear expansion.* Each summand at the
-   `g`-orthonormal frame expands by multilinearity in `(K, J)` as a finite sum
-   over chart-`α`-frame summands with coefficients products of `A`-entries;
-   Cauchy–Schwarz then bounds the square of this sum by a uniform constant
-   times the sum of squared chart-`α`-frame summands.
-
-The headline assembles these into a single inequality
-`riemannianFiberNormSq ≤ C · ∑_{IJ} fiberNormSqSummand … (chartBasisVecFiber α · b) …`
-on the POU tsupport, with `C` depending only on `g`, `α`, `r`, `s`, and the
-manifold dimension.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -101,8 +59,6 @@ private lemma sphere_isCompact_forward :
     exact habs
   exact (isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hbdd⟩)
 
-/-- **Uniform Rayleigh-quotient lower bound for the forward chart-frame Gram
-matrix on an arbitrary compact subset `Kα` of the chart base set.** -/
 private lemma exists_chartGramMatrix_quadForm_lower_bound_on_compact
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -278,9 +234,6 @@ private lemma exists_chartGramMatrix_quadForm_lower_bound_on_compact
         exact le_of_eq (hsum_empty _).symm
     · exact absurd ⟨b, hb⟩ hKα_ne
 
-/-- **Uniform Rayleigh-quotient lower bound for the forward chart-frame Gram
-matrix on the closed support of the chart-atlas partition-of-unity weight at
-`α`.** -/
 private lemma exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -298,12 +251,6 @@ private lemma exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
-/-- A strengthened witness for `riemannianFiberNormSq`: there exists a basis
-`e : Fin n → TangentSpace I b` of `TangentSpace I b` such that:
-- `n = Module.finrank ℝ (TangentSpace I b)`;
-- `e` is `g`-orthonormal in the sense `g.inner b (e i) (e j) = if i = j then 1 else 0`;
-- `riemannianFiberNormSq g r s b T = ∑_K ∑_J fiberNormSqSummand g b r s T n e K J`.
--/
 private lemma riemannianFiberNormSq_eq_sum_witness_orthonormal
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
@@ -339,8 +286,6 @@ private lemma riemannianFiberNormSq_eq_sum_witness_orthonormal
     exact hite
   · rfl
 
-/-- If `e i = ∑_j A_ij • chartBasisVecFiber α j b` and `g.inner b (e i) (e i) = 1`,
-then `∑_j A_ij² ≤ 1/c` where `c` is the forward Gram lower bound. -/
 private lemma sum_sq_repr_le_inv_c
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -375,9 +320,6 @@ private lemma sum_sq_repr_le_inv_c
   rw [h_simpl] at h_div
   exact h_div
 
-/-- For `b` in the trivialization base set, the covariant tuple
-`mkPiAlgebra ∘ g.inner ∘ (e ∘ K)` expands as a sum over `Fin r → Fin n` of
-chart-frame inner-product tuples with coefficients `∏_k A_{K_k, I'_k}`. -/
 private lemma mkPiAlgebra_inner_eK_expand_repr
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (_hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -430,10 +372,6 @@ private lemma mkPiAlgebra_inner_eK_expand_repr
     ContinuousMultilinearMap.mkPiAlgebra_apply, smul_eq_mul]
   rw [← Finset.prod_mul_distrib]
 
-/-- Evaluation of a `(0,s)`-tensor `X` on a tuple of the form `e ∘ J`, where
-`e i = ∑_j A i j • v j` with `v = chartBasisVecFiber α · b`, expands as a sum
-over `Fin s → Fin n` of `X` evaluated on chart-frame tuples with coefficients
-`∏ l A_{J_l, J'_l}`. -/
 private lemma tensor0S_apply_eJ_expand_repr
     {b : M}
     (s : ℕ) {n : ℕ}
@@ -710,24 +648,6 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
 private lemma finrank_tangentSpace_eq (b : M) :
     Module.finrank ℝ (TangentSpace I b) = Module.finrank ℝ E := rfl
 
-/-- **`riemannianFiberNormSq` is bounded by chart-`α`-frame summands on POU tsupport.**
-
-For a closed Riemannian manifold `(M, g)`, smooth tensor `S : SmoothCcTensor g r s`,
-and chart base point `α : M`, the intrinsic Riemannian fiber norm-squared of
-`S.toSection b` at any point `b` in the closed support of the chart-atlas
-partition-of-unity weight at `α` is bounded by a uniform constant times the double
-sum of chart-`α`-frame fiber-norm-squared summands of `S.toSection b`:
-
-```
-riemannianFiberNormSq g r s b (S.toSection b)
-  ≤ C * ∑_{IJ} fiberNormSqSummand g b r s (S.toSection b) n
-                (chartBasisVecFiber α · b) Idx Jdx
-```
-
-The constant `C = n^{r+s} * (1/c)^{r+s}` depends on the metric, chart base point,
-and tensor type but not on `S` or `b`. Here `n = Module.finrank ℝ E` and `c > 0`
-is the uniform Rayleigh lower bound for the forward chart-frame Gram matrix on
-the POU tsupport. -/
 theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

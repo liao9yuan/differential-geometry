@@ -4,33 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevPointwise
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-/-!
-# Per-chart sup bound for the inverse-Gram-matrix `L¹` entry sum
-
-For a smooth Riemannian metric `g` on a closed smooth manifold `M` and a chart
-base point `α : M`, the function
-
-```
-b ↦ chartInvGramMatrix_l1Sum g α b
-```
-
-is continuous on `(chartAt H α).source`. The chart-atlas partition of unity
-has `tsupport ρ_α ⊆ (chartAt H α).source`, and on a closed manifold this
-`tsupport` is compact. A continuous function on a compact set attains a
-finite supremum, giving a non-negative pointwise upper bound on the
-`tsupport`.
-
-This bound is the per-chart ingredient used downstream in the chart-bridge
-estimates for the gradient.
-
-## Public theorem
-
-* `exists_chartInvGramMatrix_l1Sum_sup_on_pouTsupport` — non-negative
-  per-chart constant `M_Ginv` such that
-  `chartInvGramMatrix_l1Sum g α b ≤ M_Ginv` for every `b` in the chart-`α`
-  partition-of-unity `tsupport`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -60,13 +33,11 @@ section CompactBound
 
 variable [CompactSpace M]
 
-/-- On a compact manifold, the chart-`α` POU `tsupport` is compact. -/
 private lemma tsupport_chartAtlasPOU_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   isClosed_tsupport _ |>.isCompact
 
-/-- The chart-`α` POU `tsupport` is contained in `(chartAt H α).source`. -/
 private lemma tsupport_chartAtlasPOU_subset_chartSource (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -74,9 +45,6 @@ private lemma tsupport_chartAtlasPOU_subset_chartSource (α : M) :
   intro x hx
   exact (chartAtlasPOU_isSubordinate I M) α hx
 
-/-- **Per-chart sup bound.** There exists a non-negative real constant
-`M_Ginv` such that `chartInvGramMatrix_l1Sum g α b ≤ M_Ginv` for every point
-`b` in the `tsupport` of the chart-`α` partition-of-unity function. -/
 theorem exists_chartInvGramMatrix_l1Sum_sup_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_Ginv : ℝ, 0 ≤ M_Ginv ∧
@@ -112,8 +80,6 @@ section VanishOutsidePou
 
 variable [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
-/-- Off the partition-of-unity `tsupport`, the manifold-side chart-frame
-scalar component vanishes on an open neighbourhood. -/
 private lemma tensorChartComponentScalar_eventuallyEq_zero_of_notMem_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -144,8 +110,6 @@ private lemma tensorChartComponentScalar_eventuallyEq_zero_of_notMem_pouTsupport
   unfold tensorChartComponentScalar tensorChartComponentPou
   rw [h_rho_zero, zero_mul]
 
-/-- Off the partition-of-unity `tsupport`, the gradient of the manifold-side
-chart-frame scalar component vanishes. -/
 private lemma gradFun_tensorChartComponentScalar_eq_zero_of_notMem_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -160,11 +124,6 @@ private lemma gradFun_tensorChartComponentScalar_eq_zero_of_notMem_pouTsupport
     (tensorChartComponentScalar_eventuallyEq_zero_of_notMem_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx hb)
 
-/-- **Vanishing of the inner-product `g`-norm of the chart-component
-gradient outside the POU tsupport.** For any `b` lying outside the
-topological support of the chart-`α` partition-of-unity function, the
-square root of the metric self-inner-product of the gradient of the
-chart-frame scalar component vanishes. -/
 theorem sqrt_g_inner_gradFun_tensorChartComponentScalar_eq_zero_outside_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -200,12 +159,6 @@ variable [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The pointwise product identity for `scalarOnE` of a product: for any two
-manifold-side scalar fields `f, g : M → ℝ`,
-
-  `scalarOnE α (f · g) = (scalarOnE α f) · (scalarOnE α g)`
-
-as functions `E → ℝ`. Follows directly from the definition of `scalarOnE`. -/
 private lemma scalarOnE_mul_pointwise (α : M) (f g : M → ℝ) :
     scalarOnE (I := I) α (fun x : M => f x * g x) =
       (fun y : E => scalarOnE (I := I) α f y * scalarOnE (I := I) α g y) := by
@@ -213,10 +166,6 @@ private lemma scalarOnE_mul_pointwise (α : M) (f g : M → ℝ) :
   unfold scalarOnE
   rfl
 
-/-- The chart-pulled-back raw scalar component `scalarOnE α raw` is
-`ContDiffOn ℝ ∞` on the chart target. Proof: `raw` is smooth on the chart
-source, and `(extChartAt I α).symm` maps the chart target into the chart
-source. -/
 private lemma scalarOnE_tensorChartComponentRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -255,10 +204,6 @@ private lemma scalarOnE_tensorChartComponentRaw_contDiffOn
     hraw_on'.comp hsymm hsymm_maps
   exact hcomp.contDiffOn
 
-/-- Differentiability of `scalarOnE α raw` at any chart-target point. Under
-`[I.Boundaryless]`, the chart target is open and equals its own interior,
-so being on the chart target gives differentiability of every
-`ContDiffOn ℝ ∞` function. -/
 private lemma differentiableAt_scalarOnE_tensorChartComponentRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -286,10 +231,6 @@ private lemma differentiableAt_scalarOnE_tensorChartComponentRaw
     h_within.contDiffAt (h_open.mem_nhds hz)
   exact h_at.differentiableAt (by simp)
 
-/-- Differentiability of `scalarOnE α ρ_α` at any chart-target point. The
-partition-of-unity weight `ρ_α` is globally smooth on `M`, so its pullback
-through the inverse extended chart is `ContDiffOn ℝ ∞` on the chart target,
-hence differentiable at any chart-target point. -/
 private lemma differentiableAt_scalarOnE_chartAtlasPOU
     (α : M) {z : E} (hz : z ∈ (extChartAt I α).target) :
     DifferentiableAt ℝ
@@ -319,13 +260,6 @@ private lemma differentiableAt_scalarOnE_chartAtlasPOU
     h_within.contDiffAt (h_open.mem_nhds hz)
   exact h_at.differentiableAt (by simp)
 
-/-- **Leibniz rule for the chart-direction partial derivative of the
-manifold-side scalar component.** For `b` in the chart-`α` source, the chart
-partial derivative of the chart-pulled-back scalar component decomposes as a
-standard Leibniz sum of two products: the partial of the partition-of-unity
-weight times the raw factor, plus the partition-of-unity weight times the
-partial of the raw factor. All quantities are evaluated at `extChartAt I α b`.
--/
 theorem partialDeriv_scalarOnE_tensorChartComponentScalar_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -404,9 +338,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle
 
-/-- Pointwise bound `|scalarOnE α ρ_α (y)| ≤ 1` for every chart-target point.
-The pullback inherits the pointwise bound `0 ≤ ρ ≤ 1` from the partition-of-
-unity. -/
 private lemma scalarOnE_chartAtlasPOU_abs_le_one (α : M) (y : E) :
     |scalarOnE (I := I) α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y| ≤ 1 := by
@@ -423,10 +354,6 @@ private lemma scalarOnE_chartAtlasPOU_abs_le_one (α : M) (y : E) :
   rw [h_val, abs_of_nonneg h_nn]
   exact h_le
 
-/-- The function `y ↦ ∑_k (∂_k (scalarOnE α ρ_α)) y² ` is continuous on the
-chart target `(extChartAt I α).target`. This follows from the smoothness of
-`scalarOnE α ρ_α` on the chart target, which makes each chart-direction
-partial continuous; squaring and finite-summing preserves continuity. -/
 private lemma sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_continuousOn
     (α : M) :
     ContinuousOn (fun y : E =>
@@ -457,10 +384,6 @@ private lemma sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_continuousOn
     continuous_id.clm_apply continuous_const
   exact (h_eval_cont.comp_continuousOn h_fderiv_cont).pow 2
 
-/-- **Sup of `∑_k (∂_k ρ̃)²` on the POU `tsupport`.** There exists a non-
-negative real constant `M_dρ` such that, for every `b` in the chart-α POU
-`tsupport`, the sum of squared chart-direction partials of `scalarOnE α ρ_α`
-at `extChartAt I α b` is bounded above by `M_dρ`. -/
 theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
     (α : M) :
     ∃ M_dρ : ℝ, 0 ≤ M_dρ ∧
@@ -515,29 +438,17 @@ theorem exists_sum_sq_partialDeriv_scalarOnE_chartAtlasPOU_sup
     have hb_in_K' : extChartAt I α b ∈ K' := ⟨b, hb, rfl⟩
     exact (hK'_ne ⟨_, hb_in_K'⟩).elim
 
-/-- The `k`-th canonical tangent vector field `chartBasisVecFiber α k` agrees
-with `trivFromE α b (chartModelBasis E k)` at every point `b`. This is the
-definition of `chartBasisVecFiber`. -/
 private lemma chartBasisVecFiber_eq_trivFromE_chartModelBasis
     (α : M) (k : Fin (Module.finrank ℝ E)) (b : M) :
     chartBasisVecFiber (I := I) α k b =
       trivFromE (I := I) α b ((chartModelBasis E) k) := rfl
 
-/-- Elementary squared-triangle inequality: `(a + b)² ≤ 2 a² + 2 b²` for real
-numbers. -/
 private lemma sq_add_le_two_mul_sq_add_sq_local (a b : ℝ) :
     (a + b) ^ 2 ≤ 2 * a ^ 2 + 2 * b ^ 2 := by
   have h : (a + b) ^ 2 + (a - b) ^ 2 = 2 * a ^ 2 + 2 * b ^ 2 := by ring
   have hsq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
   linarith
 
-/-- **Pointwise constant bound on the chart-component gradient.** On the
-chart-α POU `tsupport`, the metric self-inner-product of the gradient of the
-chart-frame scalar component is bounded above by a non-negative constant
-(depending on `g`, `α`, and `(r, s)`) times a sum of three explicit
-quantities: a sum over `k` of squared covariant-derivative trivialization-
-norms, a sum over `k` of squared Christoffel-correction trivialization-norms,
-and the squared raw chart-frame scalar component at the chart point. -/
 private theorem g_inner_gradFun_tensorChartComponentScalar_le_const_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

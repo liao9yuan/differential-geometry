@@ -1,28 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-/-!
-# Strict strong-support per-chart approximation and per-pair cross-chart bound
-
-This file completes two pieces of infrastructure for the chart-Sobolev smooth-
-density argument on a closed Riemannian manifold:
-
-1. **Strict strong-support approximation** (`exists_strict_strong_support_approx`):
-   for every chart point `α : M`, there exists a fixed compact neighbourhood
-   `K_α ⊆ (chartAt H α).source` of `tsupport ρ_α` such that for every
-   `MemWkpChart` function `u` and every `ε_per > 0`, the chart-pushed function
-   `chartPushed g α u` admits a smooth Euclidean approximant `χ` whose closed
-   support lies inside the chart-α Euclidean image of `K_α` (a strictly tighter
-   compact set than `chartTargetEuclid α`).
-
-2. **Per-pair cross-chart bound** (`cross_chart_bound_strict_strong`): for any
-   two chart points `γ α : M` and any compact `K_α ⊆ (chartAt H α).source` (in
-   particular the one produced by Item 1), there exists a positive constant
-   `K` such that for every smooth compactly-supported `χ : EuclN → ℝ` whose
-   closed support lies inside the chart-α image of `K_α`, the chart-γ pushed
-   cross-pullback `chartPushed g γ (chartPullback I α χ)` is bounded in
-   `W^{1,p}(chartTargetEuclid γ)` by `K · ‖χ‖_{W^{1,p}(chartTargetEuclid α)}`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -45,9 +22,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For each chart point `α` on a closed manifold there is a compact set
-contained in the chart source whose interior contains `tsupport ρ_α`. We use
-local compactness of `M` and the sandwich `IsCompact.exists_compact_between`. -/
 lemma exists_compact_neighborhood_of_tsupport_pou
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     ∃ K : Set M, IsCompact K ∧ K ⊆ (chartAt H α).source ∧
@@ -67,10 +41,6 @@ lemma exists_compact_neighborhood_of_tsupport_pou
     exists_compact_between h_tsupp_compact (chartAt H α).open_source h_tsupp_chart
   exact ⟨L, hL_compact, hL_sub_chart, h_tsupp_in_int_L⟩
 
-/-- For each chart point `α` on a closed manifold and any compact `K ⊆ chart α
-source` whose interior contains `tsupport ρ_α`, there exists a smooth function
-`η_M : M → ℝ` taking values in `[0, 1]` with `η_M ≡ 1` on `tsupport ρ_α`,
-`support η_M = interior K`, and `tsupport η_M ⊆ K`. -/
 lemma exists_manifold_cutoff_one_on_tsupport_pou
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M)
     {K : Set M} (hK_compact : IsCompact K)
@@ -100,9 +70,6 @@ lemma exists_manifold_cutoff_one_on_tsupport_pou
     rw [hη_support]
     exact (closure_mono interior_subset).trans h_closed_K.closure_subset
 
-/-- The chart-α Euclidean pullback of `η_M : M → ℝ`, defined as
-`η_M ∘ (extChartAt I α).symm ∘ toEuclidean.symm` on `chartTargetEuclid α` and
-`0` outside. -/
 def etaEuclid (α : M) (η_M : M → ℝ) : EuclN → ℝ := by
   classical
   exact fun y =>
@@ -111,8 +78,7 @@ def etaEuclid (α : M) (η_M : M → ℝ) : EuclN → ℝ := by
     else 0
 
 omit [IsManifold I ∞ M] in
-/-- `etaEuclid` evaluated on a point of `chartTargetEuclid α` agrees with the
-explicit pullback formula. -/
+
 lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     etaEuclid (I := I) (M := M) α η_M y =
@@ -122,7 +88,7 @@ lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
   simp [hy]
 
 omit [IsManifold I ∞ M] in
-/-- Outside `chartTargetEuclid α`, `etaEuclid` is zero. -/
+
 lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     etaEuclid (I := I) (M := M) α η_M y = 0 := by
@@ -130,8 +96,6 @@ lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
   unfold etaEuclid
   simp [hy]
 
-/-- The chart-α image of a compact subset of `(chartAt H α).source` is
-compact. -/
 lemma chartImage_isCompact_of_compact_in_source (α : M)
     {S : Set M} (hS_compact : IsCompact S)
     (hS_chart : S ⊆ (chartAt H α).source) :
@@ -158,8 +122,6 @@ lemma chartImage_isCompact_of_compact_in_source (α : M)
       exact ⟨extChartAt I α x, ⟨x, hxS, rfl⟩, hxy⟩
   rw [← hset_eq]; exact h_img
 
-/-- The chart-α image of `tsupport η_M` is contained in `chartTargetEuclid α`,
-provided `tsupport η_M ⊆ (chartAt H α).source`. -/
 lemma chartImage_tsupport_subset_chartTargetEuclid (α : M) (η_M : M → ℝ)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
@@ -174,8 +136,6 @@ lemma chartImage_tsupport_subset_chartTargetEuclid (α : M) (η_M : M → ℝ)
   rw [← hxy]
   exact ⟨extChartAt I α x, h_target, rfl⟩
 
-/-- `etaEuclid α η_M` vanishes on the complement of the chart-α image of
-`tsupport η_M`. -/
 lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     {y : EuclN}
     (hy_off : y ∉ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
@@ -200,9 +160,6 @@ lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     exact ⟨z, hz_tsupp, hy_eq⟩
   · exact etaEuclid_apply_of_notMem (I := I) (M := M) α η_M hy_target
 
-/-- The closed support of `etaEuclid α η_M` is contained in the chart-α image
-of `tsupport η_M`, provided the latter is closed (which holds when `η_M` has
-compact support inside the chart source). -/
 lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
     (h_tsupp_compact : IsCompact (tsupport η_M))
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
@@ -227,13 +184,6 @@ lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
   change closure (Function.support (etaEuclid (I := I) (M := M) α η_M)) ⊆ _
   exact subset_trans (closure_mono h_support_in) h_image_closed.closure_subset
 
-/-- `etaEuclid α η_M` is globally smooth on `EuclN`, provided `η_M` is smooth
-on `M`, has compact closed support, and `tsupport η_M ⊆ (chartAt H α).source`.
-
-The proof is a local argument: every `y ∈ EuclN` is in either the open
-`chartTargetEuclid α` (where the formula is a composition of smooth maps), or
-in the open complement of the chart-α image of `tsupport η_M` (where the
-function is identically zero). -/
 lemma contDiff_etaEuclid [I.Boundaryless] [T2Space M] (α : M) (η_M : M → ℝ)
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
     (hη_cpt : HasCompactSupport η_M)
@@ -338,7 +288,7 @@ lemma contDiff_etaEuclid [I.Boundaryless] [T2Space M] (α : M) (η_M : M → ℝ
       hf_zero_evt
 
 omit [IsManifold I ∞ M] in
-/-- `etaEuclid` takes values in `[0, 1]` whenever `η_M` does. -/
+
 lemma etaEuclid_range_Icc (α : M) (η_M : M → ℝ)
     (hη_range : Set.range η_M ⊆ Set.Icc (0 : ℝ) 1) :
     Set.range (etaEuclid (I := I) (M := M) α η_M) ⊆ Set.Icc (0 : ℝ) 1 := by
@@ -352,8 +302,6 @@ lemma etaEuclid_range_Icc (α : M) (η_M : M → ℝ)
     rw [← hy]
     exact ⟨le_refl _, zero_le_one⟩
 
-/-- `etaEuclid α η_M` agrees with `1` on the chart-α image of any set on which
-`η_M ≡ 1`, intersected with `chartTargetEuclid α`. -/
 lemma etaEuclid_eq_one_of_eta_eq_one
     [T2Space M] [SigmaCompactSpace M] (α : M) (η_M : M → ℝ)
     (hη_one : ∀ x ∈ tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU
@@ -392,8 +340,6 @@ lemma etaEuclid_eq_one_of_eta_eq_one
   rw [hz_eq_x]
   exact hη_one x hx_supp
 
-/-- An `etaEuclid` whose underlying `η_M` has compact support inside the chart
-source has compact support on `EuclN`. -/
 lemma hasCompactSupport_etaEuclid [T2Space M] (α : M) (η_M : M → ℝ)
     (hη_cpt : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
@@ -413,9 +359,6 @@ lemma hasCompactSupport_etaEuclid [T2Space M] (α : M) (η_M : M → ℝ)
     fun h => hy_off (hf_supp_in h)
   exact image_eq_zero_of_notMem_tsupport this
 
-/-- An `etaEuclid` whose underlying `η_M` is smooth, has compact support
-contained in the chart source, has values in `[0, 1]`, admits a uniform
-gradient bound on `chartTargetEuclid α` (in fact on all of `EuclN`). -/
 lemma exists_grad_bound_etaEuclid [I.Boundaryless] [T2Space M]
     (α : M) (η_M : M → ℝ)
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
@@ -429,13 +372,6 @@ lemma exists_grad_bound_etaEuclid [I.Boundaryless] [T2Space M]
     hasCompactSupport_etaEuclid (I := I) (M := M) α η_M hη_cpt h_tsupp_chart
   exact exists_grad_bound_of_compactSupport_smooth hf_smooth hf_cpt
 
-/-- For each chart point `α` on a closed Riemannian manifold and a function
-`u ∈ MemWkpChart g 1 p` with `1 ≤ p < ∞`, the chart-pushed `chartPushed g α u`
-admits a smooth Euclidean approximant whose closed support lies inside the
-chart-α Euclidean image of a fixed compact subset `K_α` of the chart source —
-strictly tighter than `chartTargetEuclid α`. The compact `K_α` is constructed
-once (independently of `u`) by sandwiching `tsupport ρ_α` inside the chart
-source via local compactness. -/
 theorem exists_strict_strong_support_approx
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

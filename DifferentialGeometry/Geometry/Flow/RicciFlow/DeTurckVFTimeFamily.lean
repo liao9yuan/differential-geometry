@@ -4,20 +4,6 @@ import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
-/-!
-# Spatial-smooth / time-continuous regularity of the DeTurck vector field along a metric family
-
-For a background metric `g_bg` and a time-family `g_DT : ℝ → SmoothRiemannianMetric I M`
-whose pointwise pairings (and their chart-coordinate first partials) are time-continuous
-on `[0, T)`, this file records that the DeTurck vector field `deTurckVF (g_DT t) g_bg` is a
-smooth tangent section at each fixed time and continuous in `t` at each fixed point.
-
-## Main results
-
-* `deturck_vf_time_family_smoothness` — the spatial-smoothness / time-continuity statement
-  for the DeTurck vector field of the time-family `g_DT`.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Set
@@ -35,55 +21,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-**Spatial-smooth / time-continuous regularity of the DeTurck vector field
-along a time-family of metrics.**
-
-Given a background metric `g_bg`, a horizon `T : ℝ`, and a time-family of
-metrics `g_DT : ℝ → SmoothRiemannianMetric I M` whose pointwise inner-product
-pairings are time-continuous on `[0, T)` together with continuity-in-`t` of the
-chart-coordinate first partial derivatives of those pairings, the DeTurck vector
-field `deTurckVF (g_DT t) g_bg` is, at each fixed time `t`, a smooth tangent
-section (by construction — this is the meaning of `Cₛ^∞⟮…⟯`), and at each fixed
-point `x : M` the assignment `t ↦ (deTurckVF (g_DT t) g_bg) x` is continuous in
-`t` on `[0, T)`.
-
-The signature records the time-continuity at each spatial point — the spatial
-smoothness is already encoded in the `Cₛ^∞` type of `deTurckVF` and is not
-restated.
-
-## Hypotheses
-
-* `h_metric_cont` records `C^0` time-continuity of the inner-product pairings
-  `(g_DT t).inner x v w`.  This is the conclusion of
-  `maxreg_solution_in_c1_via_sobolev_embedding`
-  (`Geometry/Flow/RicciFlow/DeTurckSolutionC1.lean`) and is produced for free by that
-  lemma when `g_DT` is the maxReg DeTurck-Ricci solution.
-
-* `h_metric_partial_cont` records `C^1` time-continuity of the chart-coordinate
-  representation of the inner-product pairings: each Fréchet partial derivative
-  of the chart-pulled-back Gram entry function is time-continuous.  This is the
-  genuine `C^1`-in-the-metric data that the DeTurck vector field needs in
-  order to express continuity of its chart-coordinate components via the
-  Cramer's-rule chart formula; it cannot be obtained from the bare `C^0`
-  pairing hypothesis alone.  Like `h_metric_cont`, it is produced for free
-  when `g_DT` is the maxReg DeTurck-Ricci solution (where Sobolev embedding
-  gives `C^1` regularity in `(t, x)` for the metric coefficients).
-
-## Proof
-
-The bundled DeTurck vector field admits, in the chart at `α := x`, the
-chart-coordinate expansion `(deTurckVF g g_bg) x = Σ_p chartDeTurckVFComp g g_bg
-x p (extChartAt I x x) · (chartModelBasis E p)` (the bridge
-`deTurckVF_apply_eq_chartDeTurckVFComp_sum_self`, which routes through the
-chart-Christoffel-correction form of `connDiff`).  The chart-coordinate
-component `chartDeTurckVFComp g g_bg x p y` is continuous in `g` in the
-Cramer's-rule sense — `chartDeTurckVFComp_continuous_in_metric_at` — under the
-two chart-coordinate hypotheses, which are exactly what `h_metric_cont` and
-`h_metric_partial_cont` supply (with `α := x`, `y := extChartAt I x x`, and the
-self-chart membership of `x` in its own base set).  The bundled section value
-is therefore a continuous finite linear combination of model-basis vectors
-(constant in `t`), with continuous-in-`t` coefficients. -/
 theorem deturck_vf_time_family_smoothness
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

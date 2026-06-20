@@ -7,41 +7,6 @@ import Mathlib.Topology.Separation.Basic
 import Mathlib.Analysis.Normed.Operator.Bilinear
 import Mathlib.Analysis.InnerProductSpace.Basic
 
-/-!
-# Uniform `BddAbove` for a normalized iSup of a bilinear bundle section
-
-Given a section `Δ : ∀ y : M, T_y M →L[ℝ] T_y M →L[ℝ] ℝ` of the
-`(0, 2)`-tensor (Hom) bundle on a compact manifold `M`, together with a
-**locally uniform pointwise op-norm bound** (i.e. an open cover of `M` and a
-constant for each piece of the cover such that `‖Δ b‖ ≤ C` on each piece),
-the normalized double-iSup
-```
-y ↦ ⨆ a : T_y M, ⨆ b : T_y M, ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1)
-```
-is `BddAbove`.
-
-The strategy is purely elementary:
-
-1. The inner double-iSup is pointwise bounded by the fiber operator norm
-   `‖Δ y‖_op` via `ContinuousLinearMap.le_opNorm₂` plus the normalisation
-   inequality `‖a‖ * ‖b‖ / (‖a‖ * ‖b‖ + 1) ≤ 1`.
-2. The locally uniform op-norm bound gives a finite open cover with per-piece
-   bounds; on a compact space, finite subcover + max gives a global bound.
-
-The two ingredients (`iSup_iSup_normalized_le_opNorm` and the finite-cover
-combinator `bddAbove_iSup_of_locally_bounded_opNorm`) are separated so that
-the caller can substitute its own local-op-norm bound (e.g. via a smooth
-orthonormal frame from a Riemannian metric, or via a continuous Riemannian
-bundle structure, or via direct trivialization continuity in special cases).
-
-## Main results
-
-* `iSup_iSup_normalized_le_opNorm` — for any continuous bilinear map `Δ` on a
-  normed space, the normalized double-iSup is bounded by `‖Δ‖`.
-* `bddAbove_iSup_normalized_of_locally_bounded_opNorm` — assembles the
-  per-point local op-norm bounds into a global `BddAbove` on compact `M`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -62,21 +27,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
 
-/-- Activate the model norm on each tangent space via the defeq
-`TangentSpace I y = E`. -/
 local instance tangentSpaceNormedAddCommGroup (y : M) :
     NormedAddCommGroup (TangentSpace I y) :=
   inferInstanceAs (NormedAddCommGroup E)
 
-/-- Activate the model normed-space structure on each tangent space via the defeq
-`TangentSpace I y = E`. -/
 local instance tangentSpaceNormedSpace (y : M) :
     NormedSpace ℝ (TangentSpace I y) :=
   inferInstanceAs (NormedSpace ℝ E)
 
-/-- Pointwise bound: for any continuous bilinear `Δ : E₀ →L[ℝ] E₀ →L[ℝ] ℝ`,
-the normalized value `‖Δ a b‖ / (‖a‖ * ‖b‖ + 1)` is bounded by the operator
-norm `‖Δ‖`. -/
 lemma normalized_bilinear_le_opNorm
     {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace ℝ E₀]
     (Δ : E₀ →L[ℝ] E₀ →L[ℝ] ℝ) (a b : E₀) :
@@ -91,7 +49,6 @@ lemma normalized_bilinear_le_opNorm
     _ ≤ ‖Δ‖ * (‖a‖ * ‖b‖ + 1) := by
         nlinarith [h_opNorm_nn, norm_nonneg a, norm_nonneg b]
 
-/-- The double iSup of the normalized bilinear value is bounded by `‖Δ‖`. -/
 lemma iSup_iSup_normalized_le_opNorm
     {E₀ : Type*} [NormedAddCommGroup E₀] [NormedSpace ℝ E₀]
     (Δ : E₀ →L[ℝ] E₀ →L[ℝ] ℝ) :
@@ -103,12 +60,7 @@ lemma iSup_iSup_normalized_le_opNorm
   exact normalized_bilinear_le_opNorm Δ a b
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Global `BddAbove` from per-point local op-norm bounds.** If for every
-`y₀ : M` there is an open neighborhood `W` and a constant `C` such that
-`‖Δ b‖ ≤ C` for all `b ∈ W`, then the normalised double-iSup
-`y ↦ ⨆ a, ⨆ b, ‖Δ y a b‖ / (‖a‖ * ‖b‖ + 1)` is `BddAbove` on the compact
-manifold `M`. The bound is obtained by extracting a finite subcover and
-taking the maximum of the per-piece constants. -/
+
 theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_local_bound : ∀ y₀ : M, ∃ W : Set M, IsOpen W ∧ y₀ ∈ W ∧
@@ -161,10 +113,6 @@ theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
     exact Finset.le_sup' Cₐ hy₀
   linarith
 
-/-- **BddAbove from continuous fibre op-norm.** When the function
-`b ↦ ‖Δ b‖` is continuous on the compact manifold `M`, the normalised
-double-iSup is `BddAbove`.  Continuity on compact gives boundedness,
-which supplies the local bound to the main combinator. -/
 theorem bddAbove_iSup_normalized_of_continuous_opNorm
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_cont : Continuous (fun b : M => ‖Δ b‖)) :
@@ -184,9 +132,7 @@ theorem bddAbove_iSup_normalized_of_continuous_opNorm
   exact hW_sub hb
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Global `BddAbove` for the fibre op-norm range from per-point local bounds.**
-Same hypothesis as `bddAbove_iSup_normalized_of_locally_bounded_opNorm`, but
-concludes `BddAbove` on the range of `y ↦ ‖Δ y‖` directly. -/
+
 theorem bddAbove_opNorm_range_of_locally_bounded
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_local_bound : ∀ y₀ : M, ∃ W : Set M, IsOpen W ∧ y₀ ∈ W ∧
@@ -220,7 +166,7 @@ theorem bddAbove_opNorm_range_of_locally_bounded
   exact (hΔ_bound y₀ y hy_W).trans (Finset.le_sup' Cₐ hy₀)
 
 omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
-/-- **BddAbove of the op-norm range from continuous fibre op-norm.** -/
+
 theorem bddAbove_opNorm_range_of_continuous_opNorm
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_cont : Continuous (fun b : M => ‖Δ b‖)) :

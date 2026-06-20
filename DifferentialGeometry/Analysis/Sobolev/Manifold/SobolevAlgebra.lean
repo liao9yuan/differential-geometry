@@ -4,55 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 
-/-!
-# Chart-based Sobolev algebra at first order, super-critical exponent
-
-For a closed Riemannian manifold `(M, g)` of dimension `n ≥ 1` and an exponent
-`p > n`, the chart-based Sobolev space `W^{1,p}_{chart}(M)` admits a
-multiplicative bound for *smooth* inputs. This file delivers this estimate.
-
-The headline theorem `mul_smooth_chart_bound_C1` shows: for every smooth
-`u : M → ℝ`, there is a finite constant `C_u ≥ 0` such that for every smooth
-`v : M → ℝ`,
-
-  `wkpNormChart g 1 p (u · v) ≤ C_u · wkpNormChart g 1 p v`.
-
-The constant depends on `u` (specifically on its `C^1` norm in chart
-coordinates) and on the manifold geometry. Density extension to general
-`MemWkpChart` inputs and the fully bilinear form of the bound are intentionally
-outside the scope of this file.
-
-## Strategy
-
-For each chart `α` in the canonical partition-of-unity finset:
-
-1. Choose a smooth manifold-side cutoff `b_α : M → ℝ` with `b_α ≡ 1` on
-   `tsupport ρ_α` and `tsupport b_α ⊆ (chartAt H α).source`.
-2. Define `mulFactor α u := smoothExtension α (b_α · u)` — smooth and
-   compactly supported on `EuclideanSpace ℝ (Fin n)`, with first-order bounds.
-3. Show `chartPushed ρ α (u · v) = mulFactor α u · chartPushed ρ α v`
-   pointwise on `chartTargetEuclid α`. This uses the identity `b_α · ρ_α = ρ_α`,
-   valid pointwise because `b_α ≡ 1` on `tsupport ρ_α` and `ρ_α = 0` outside.
-4. Apply the existing Euclidean `wkpNorm_smul_smooth_bounded_le_one` to bound
-   `wkpNorm 1 p (mulFactor α u · chartPushed ρ α v)` by a constant times
-   `wkpNorm 1 p (chartPushed ρ α v)`.
-5. Sum the per-chart bounds across the canonical POU finset (a finite set on
-   compact `M`). Outside the finset `ρ_α ≡ 0`, so `chartPushed ρ α (u v)` and
-   `chartPushed ρ α v` both vanish a.e. and contribute nothing.
-
-## Future work
-
-The fully bilinear estimate
-
-  `wkpNormChart g 1 p (u · v) ≤ C · wkpNormChart g 1 p u · wkpNormChart g 1 p v`
-
-requires a manifold-level `C^{0,α}` Hölder Morrey embedding (or equivalent
-`C^1` Sobolev embedding for `p > n`), so that the gradient of `u` in chart
-coordinates can be bounded by `wkpNormChart u`. The current
-`morrey_C0_embedding_of_compact` gives only the `C^0` bound. Extending to the
-bilinear estimate is intentionally outside the scope of this development.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -75,9 +26,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For each chart point `α : M` on a closed manifold there exists a smooth
-manifold-side cutoff `b_α : M → ℝ` taking values in `[0,1]`, equal to `1` on
-`tsupport ρ_α`, and with `tsupport b_α ⊆ (chartAt H α).source`. -/
 private lemma exists_chart_cutoff
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     ∃ b : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ b ∧
@@ -94,9 +42,6 @@ private lemma exists_chart_cutoff
   refine ⟨η, hη_smooth, hη_range, hη_one_on_tsupp, ?_⟩
   exact hη_tsupport_in_K.trans hK_chart
 
-/-- The smooth global extension of `f : M → ℝ` to `EuclN`, equal to
-`f ((extChartAt I α).symm (toEuclidean.symm y))` on the chart-target image and
-`0` outside. -/
 private def smoothExtension (α : M) (f : M → ℝ) : EuclN → ℝ := by
   classical
   exact fun y =>
@@ -144,9 +89,6 @@ private lemma smoothExtension_apply_of_notMem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-/-- If `f : M → ℝ` is smooth, the formula
-`y ↦ f ((extChartAt I α).symm (toEuclidean.symm y))` is smooth on
-`chartTargetEuclid α`. -/
 private lemma contDiffOn_smoothExtension_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContDiffOn ℝ ∞
@@ -187,9 +129,6 @@ private lemma contDiffAt_smoothExtension_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [smoothExtension_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
-/-- If `f` has compact support contained in `(chartAt H α).source`, the smooth
-extension `smoothExtension α f` vanishes outside the toEuclidean image of
-`(extChartAt I α) '' (tsupport f)`. -/
 private lemma smoothExtension_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt H α).source) {y : EuclN}
@@ -232,8 +171,6 @@ private lemma image_extChartAt_tsupport_subset_chartTarget
   image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     (I := I) (M := M) (u := f) (α := α) hf_supp
 
-/-- `smoothExtension α f` is smooth on all of `EuclN` whenever `f` is smooth on
-`M` with compact support contained in `(chartAt H α).source`. -/
 private lemma contDiff_smoothExtension
     [CompactSpace M] [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -261,8 +198,6 @@ private lemma contDiff_smoothExtension
     exact smoothExtension_eq_zero_off_image_tsupport
       (I := I) (M := M) α (f := f) hf_supp hz
 
-/-- `smoothExtension α f` has compact support whenever `f` is smooth on `M` with
-`tsupport f ⊆ (chartAt H α).source`. -/
 private lemma hasCompactSupport_smoothExtension
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -279,8 +214,6 @@ private lemma hasCompactSupport_smoothExtension
   exact smoothExtension_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
 
-/-- For a smooth function `ψ : EuclN → ℝ` with compact support, the iterated
-derivative at any point is bounded by its sup over the support. -/
 private lemma iteratedFDeriv_bound_of_compactSupport
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ ∞ ψ) (hψ_compact : HasCompactSupport ψ)
     (k : ℕ) :
@@ -295,9 +228,6 @@ private lemma iteratedFDeriv_bound_of_compactSupport
   intro y
   exact (hC y).trans (le_max_left _ _)
 
-/-- A uniform bound for `‖iteratedFDeriv ℝ j (smoothExtension α f)‖` for
-`j ∈ {0, 1}`, packaged as a single constant. Applies whenever `f` is smooth on
-`M` with `tsupport f ⊆ (chartAt H α).source`. -/
 private lemma smoothExtension_first_order_bound
     [CompactSpace M] [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -319,10 +249,6 @@ private lemma smoothExtension_first_order_bound
   · exact (hM0 y).trans (le_max_left _ _)
   · exact (hM1 y).trans (le_max_right _ _)
 
-/-- For each chart `α` and any choice of cutoff `b_α` with `b_α ≡ 1` on
-`tsupport ρ_α`, the chart-pushed product
-`chartPushed ρ α (u · v)` equals `smoothExtension α (b_α · u) · chartPushed ρ α v`
-pointwise on `chartTargetEuclid α`. -/
 private lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b u v : M → ℝ}
@@ -361,11 +287,6 @@ private lemma chartPushed_mul_eq_smoothExtension_mul_chartPushed
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
 
-/-- Per-chart sub-multiplicative bound. For each chart `α : M`, smooth
-`u : M → ℝ`, and any `1 ≤ p < ∞`, there is a finite constant `K_α(u) ≥ 0` such
-that for every smooth `v : M → ℝ`,
-
-  `wkpNorm 1 p (chartPushed ρ α (u · v)) Ω_α ≤ K_α(u) · wkpNorm 1 p (chartPushed ρ α v) Ω_α`. -/
 private lemma per_chart_mul_smooth_bound
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -442,16 +363,6 @@ private lemma per_chart_mul_smooth_bound
     (d := Module.finrank ℝ E) hp_one hΩ_open h_factorize]
   exact h_eucl_bound
 
-/-- **Smooth-input chart-Sobolev algebra at first order.** For a closed
-Riemannian manifold of dimension `n ≥ 1` and an exponent `p > n`, the
-chart-based Sobolev norm of a product `u · v` of smooth functions is
-controlled by a smooth-`u`-dependent constant times the chart-based Sobolev
-norm of `v`:
-
-  `wkpNormChart g 1 p (u · v) ≤ C_u · wkpNormChart g 1 p v`,
-
-with `0 ≤ C_u` finite. The constant depends on `u` (its `C^1` profile through
-each chart) and on the manifold geometry, but not on `v`. -/
 theorem mul_smooth_chart_bound_C1
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -559,15 +470,9 @@ theorem mul_smooth_chart_bound_C1
   refine h_step1.trans ?_
   rw [← Finset.mul_sum]
 
-/-- The unweighted chart-Euclidean pull-back of `v : M → ℝ`. On
-`chartTargetEuclid α`, this equals `v ((extChartAt I α).symm (toEuclidean.symm y))`.
-Outside `chartTargetEuclid α`, the value involves the partial inverse and is
-formally well-typed but mathematically irrelevant. -/
 private def chartLifted (α : M) (v : M → ℝ) : EuclN → ℝ :=
   fun y => v ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-/-- Pointwise factorization: `chartPushed ρ α (u · v) y =
-chartPushed ρ α u y · chartLifted α v y` everywhere. -/
 private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (α : M) (u v : M → ℝ) (y : EuclN) :
@@ -577,18 +482,12 @@ private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted
   unfold chartPushed chartLifted
   ring
 
-/-- For any `y : EuclN`, `chartLifted α v y = v(...)` for some manifold point.
-Combined with a manifold sup bound on `v`, this gives a uniform sup bound on
-`chartLifted α v`. -/
 private lemma chartLifted_apply_norm_le
     (α : M) (v : M → ℝ) {Cv : ℝ} (hCv : ∀ x : M, ‖v x‖ ≤ Cv) (y : EuclN) :
     ‖chartLifted (I := I) (M := M) α v y‖ ≤ Cv := by
   unfold chartLifted
   exact hCv _
 
-/-- For each `y : EuclN`, `‖chartPushed (chartAtlasPOU I M) α u y‖ ≤ ‖u‖_∞^M`
-provided `Cu : ℝ` is a uniform sup bound for `u`. The bound exploits
-`|ρ_α| ≤ 1`. -/
 private lemma chartPushed_norm_le_sup
     [T2Space M] [SigmaCompactSpace M]
     (α : M) (u : M → ℝ) {Cu : ℝ} (hCu : ∀ x : M, ‖u x‖ ≤ Cu) (y : EuclN) :
@@ -625,14 +524,9 @@ private lemma chartPushed_norm_le_sup
     _ = ‖u x‖ := one_mul _
     _ ≤ Cu := hCu x
 
-/-- The "left" smooth factor `Eu_α := smoothExtension α (b_α · u)`. Smooth and
-compactly supported on `EuclN`. Agrees with `u_lifted` on `chart_image of
-tsupport ρ_α` (where `b_α = 1`). -/
 private noncomputable def leftSmoothFactor (α : M) (b u : M → ℝ) : EuclN → ℝ :=
   smoothExtension (I := I) (M := M) α (fun x => b x * u x)
 
-/-- Sup bound on the left smooth factor: `‖leftSmoothFactor α b u y‖ ≤
-‖u‖_∞ · ‖b‖_∞`. -/
 private lemma leftSmoothFactor_norm_le
     (α : M) (b u : M → ℝ) {Cu Cb : ℝ}
     (hCu : ∀ x : M, ‖u x‖ ≤ Cu) (hCb : ∀ x : M, ‖b x‖ ≤ Cb) (hCu_nn : 0 ≤ Cu)
@@ -658,8 +552,6 @@ private lemma leftSmoothFactor_norm_le
     rw [norm_zero]
     exact mul_nonneg hCb_nn hCu_nn
 
-/-- For each chart point `α`, there is a smooth manifold cutoff `b_α : M → ℝ`
-in `[0, 1]`, equal to `1` on `tsupport ρ_α`, with `tsupport b_α ⊆ chart_source`. -/
 private lemma exists_chart_cutoff_with_data
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     ∃ b : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ b ∧
@@ -673,8 +565,6 @@ private lemma exists_chart_cutoff_with_data
   intro x
   exact hb_range ⟨x, rfl⟩
 
-/-- Auxiliary form of `wkpNorm_smul_smooth_bounded_le_one` returning a constant
-that splits into an `‖η‖_∞` part and an `‖∇η‖_∞` part. Specialized to `k = 1`. -/
 private lemma wkpNorm_eta_target_le_split
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
@@ -933,9 +823,6 @@ private lemma wkpNorm_eta_target_le_split
   refine add_le_add (le_refl _) ?_
   exact le_self_add
 
-/-- For smooth manifold functions `f, g` with `tsupport f ⊆ (chartAt H α).source`,
-the chart-target product `smoothExtension α f · smoothExtension α g` equals
-`smoothExtension α (f · g)` pointwise on `EuclN`. -/
 private lemma smoothExtension_mul_eq
     (α : M) (f g : M → ℝ) :
     (fun y : EuclN => smoothExtension (I := I) (M := M) α f y *
@@ -952,9 +839,6 @@ private lemma smoothExtension_mul_eq
       smoothExtension_apply_of_notMem_target (I := I) (M := M) α (fun x => f x * g x) hy,
       mul_zero]
 
-/-- The pointwise factorization `smoothExtension α (ρ_α · u · v) =
-smoothExtension α (ρ_α · u) · smoothExtension α (b · v)` (provided `b = 1` on
-`tsupport ρ_α`) — for the bilinear bound. -/
 private lemma smoothExtension_three_factor
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b u v : M → ℝ}
@@ -983,8 +867,6 @@ private lemma smoothExtension_three_factor
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
 
-/-- Symmetric version: `smoothExtension α (ρ_α · u · v) =
-smoothExtension α (b · u) · smoothExtension α (ρ_α · v)`. -/
 private lemma smoothExtension_three_factor_symm
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b u v : M → ℝ}
@@ -1013,8 +895,6 @@ private lemma smoothExtension_three_factor_symm
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
 
-/-- Equality between `smoothExtension α (ρ_α · u · v)` and
-`chartPushed (chartAtlasPOU) α (u · v)` pointwise on `chartTargetEuclid α`. -/
 private lemma smoothExtension_eq_chartPushed_uv
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u v : M → ℝ) {y : EuclN}
@@ -1047,8 +927,6 @@ private lemma chartSmoothExt_pou_mul_eq_chartPushed
       : C^∞⟮I, M; ℝ⟯) x * u x) hy]
   rfl
 
-/-- The classical partial of a smooth+compactly-supported `f` agrees a.e. with
-`chosenWeakPartial' p i f Ω`. -/
 private lemma chosenWeakPartial_eq_classical_ae
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {f : EuclN → ℝ}
@@ -1091,8 +969,6 @@ private lemma chosenWeakPartial_eq_classical_ae
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
-/-- Helper: tsupport of `smoothExtension α f` is in the toEuclidean image of
-`(extChartAt α) '' (tsupport f)`, which is a compact subset of chart-target. -/
 private lemma tsupport_smoothExtension_subset_image
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -1114,8 +990,6 @@ private lemma tsupport_smoothExtension_subset_image
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
-/-- The toEuclidean image of `(extChartAt α) '' (tsupport f)` is contained in
-`chartTargetEuclid α`. -/
 private lemma image_tsupport_subset_chartTarget
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -1124,26 +998,18 @@ private lemma image_tsupport_subset_chartTarget
       chartTargetEuclid (I := I) (M := M) α :=
   image_extChartAt_tsupport_subset_chartTarget (I := I) (M := M) (f := f) (α := α) hf_supp
 
-/-- The lifted POU weight `R_α := smoothExtension α (ρ_α : M → ℝ)`, globally
-smooth and compactly supported on `EuclN`. -/
 private noncomputable def liftedPou
     [T2Space M] [SigmaCompactSpace M] (α : M) : EuclN → ℝ :=
   smoothExtension (I := I) (M := M) α
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) : M → ℝ)
 
-/-- The chart-α smooth-extension of `ρ_α · u`, denoted `Pu_α`. Globally smooth
-and compactly supported. -/
 private noncomputable def smoothPushed
     [T2Space M] [SigmaCompactSpace M] (α : M) (u : M → ℝ) : EuclN → ℝ :=
   smoothExtension (I := I) (M := M) α
     (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) x * u x)
 
-/-- A chart-α geometric compact set that contains the support of `liftedPou α`
-and `smoothPushed α u` for any `u`: the toEuclidean image of the chart-α
-extChartAt image of `tsupport ρ_α`. (Local copy of `chartCarrier` from
-`MorreyManifold.lean`, since that one is private.) -/
 private noncomputable def chartCarrierLocal
     [T2Space M] [SigmaCompactSpace M] (α : M) : Set EuclN :=
   (toEuclidean (E := E)) ''
@@ -1336,7 +1202,6 @@ private lemma smoothPushed_memW1p
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
     (d := Module.finrank ℝ E) hΩ_open hSmooth hCompact h_tsupp hp_one 1).memW1p
 
-/-- `liftedPou α` takes values in `[0, 1]`. -/
 private lemma liftedPou_apply_in_unit_interval
     [T2Space M] [SigmaCompactSpace M] (α : M) (y : EuclN) :
     0 ≤ liftedPou (I := I) (M := M) α y ∧ liftedPou (I := I) (M := M) α y ≤ 1 := by
@@ -1386,7 +1251,6 @@ private lemma exists_liftedPou_grad_bound
   have h := hC 1 (le_refl _) y
   rwa [norm_iteratedFDeriv_one] at h
 
-/-- Sup-bound on `‖smoothPushed α u‖_∞` by `uMax` (uses `|ρ_α| ≤ 1`). -/
 private lemma smoothPushed_norm_le_of_bound
     [T2Space M] [SigmaCompactSpace M] (α : M) {u : M → ℝ} {uMax : ℝ}
     (hu_bound : ∀ x : M, ‖u x‖ ≤ uMax) (huMax_nn : 0 ≤ uMax) (y : EuclN) :
@@ -1427,7 +1291,6 @@ private lemma smoothPushed_norm_le_of_bound
     rw [if_neg hy, norm_zero]
     exact huMax_nn
 
-/-- Sup-bound on `‖leftSmoothFactor α b u‖_∞` by `uMax` (uses `0 ≤ b ≤ 1`). -/
 private lemma leftSmoothFactor_norm_le_of_bound
     (α : M) {b u : M → ℝ}
     (hb_le_one : ∀ x : M, 0 ≤ b x ∧ b x ≤ 1) {uMax : ℝ}
@@ -1457,8 +1320,6 @@ private lemma leftSmoothFactor_norm_le_of_bound
     rw [if_neg hy, norm_zero]
     exact huMax_nn
 
-/-- For any cutoff `b` with `b ≡ 1` on `tsupport ρ_α`,
-`liftedPou α · leftSmoothFactor α b v = smoothPushed α v` pointwise on `EuclN`. -/
 private lemma liftedPou_mul_leftSmoothFactor_eq_smoothPushed
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b v : M → ℝ}
@@ -1484,8 +1345,6 @@ private lemma liftedPou_mul_leftSmoothFactor_eq_smoothPushed
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
 
-/-- `smoothPushed α u · leftSmoothFactor α b v = smoothExtension α (ρ_α · u · v)`
-(for `b ≡ 1` on `tsupport ρ_α`). -/
 private lemma smoothPushed_mul_leftSmoothFactor_eq_smoothExtension_uv
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b u v : M → ℝ}
@@ -1500,9 +1359,6 @@ private lemma smoothPushed_mul_leftSmoothFactor_eq_smoothExtension_uv
   unfold smoothPushed leftSmoothFactor
   exact (smoothExtension_three_factor (I := I) (M := M) α hb_one).symm
 
-/-- If `f : EuclN → ℝ` has support in a measurable set `K` and `‖f‖ ≤ C`
-pointwise, then `eLpNorm f p (volume.restrict Ω) ≤ ENNReal.ofReal C *
-(volume K)^{1/p.toReal}`. -/
 private lemma eLpNorm_restrict_le_ofReal_mul_volume_pow
     {p : ℝ≥0∞} {Ω : Set EuclN}
     {K : Set EuclN} (hK_meas : MeasurableSet K)
@@ -1537,9 +1393,6 @@ private lemma eLpNorm_restrict_le_ofReal_mul_volume_pow
   · rw [Real.enorm_eq_ofReal_abs, abs_of_nonneg hC_nn]
   · exact ENNReal.rpow_le_rpow h_meas_le (by positivity)
 
-/-- The eLpNorm of `Eu · (∂ᵢR) · Ev` on `Ω` is bounded by
-`ENNReal.ofReal (uMax · vMax · C_R) · (volume K_α)^{1/p.toReal}`,
-where `K_α = chartCarrierLocal α`. The function is supported in `K_α`. -/
 private lemma eLpNorm_Eu_dR_Ev_bound
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {b u v : M → ℝ}
@@ -1616,14 +1469,6 @@ private lemma eLpNorm_Eu_dR_Ev_bound
       _ = uMax * vMax * C_R := by ring
   exact eLpNorm_restrict_le_ofReal_mul_volume_pow hK_meas hC_nn h_supp h_bound
 
-/-- Per-chart bilinear bound. For each chart `α : M`, smooth `u, v : M → ℝ`
-with sup-bounds `uMax, vMax`, there is a chart-`α` geometric constant
-`Bα ≥ 0` (independent of `u, v`) such that
-
-  `wkpNorm 1 p (chartPushed ρ α (u · v)) Ω ≤
-       vMax · wkpNorm 1 p (chartPushed ρ α u) Ω
-     + uMax · wkpNorm 1 p (chartPushed ρ α v) Ω
-     + Bα · uMax · vMax`. -/
 private lemma per_chart_bilinear_bound
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -2035,14 +1880,6 @@ private lemma per_chart_bilinear_bound
         gcongr
         exact le_add_self
 
-/-- Explicit bilinear bound (sup-bounds form): for smooth `u, v` with sup-bounds
-`uMax, vMax`,
-
-  `wkpNormChart g 1 p (u · v) ≤ vMax · wkpNormChart g 1 p u +
-                                uMax · wkpNormChart g 1 p v +
-                                B · uMax · vMax`,
-
-where `B ≥ 0` is a manifold-level geometric constant (independent of `u, v`). -/
 private lemma mul_smooth_chart_bound_explicit_form
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -2171,14 +2008,6 @@ private lemma mul_smooth_chart_bound_explicit_form
     ring
   rw [h_factor]
 
-/-- **Bilinear chart-Sobolev algebra estimate at first order, super-critical
-exponent.** For a closed Riemannian manifold of dimension `n ≥ 1` and an
-exponent `p > n`, the chart-based Sobolev norm satisfies
-
-  `wkpNormChart g 1 p (u · v) ≤ C · wkpNormChart g 1 p u · wkpNormChart g 1 p v`
-
-for all smooth `u, v : M → ℝ`. The constant `C ≥ 0` depends on the metric `g`,
-the exponent `p`, and the manifold geometry, but not on `u` or `v`. -/
 theorem mul_smooth_chart_bound
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

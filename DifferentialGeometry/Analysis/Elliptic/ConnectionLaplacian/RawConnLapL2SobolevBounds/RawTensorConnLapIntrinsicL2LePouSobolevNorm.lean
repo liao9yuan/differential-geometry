@@ -5,26 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 
-/-!
-# Intrinsic manifold L² bound on the raw tensor connection Laplacian by the
-squared partition-of-unity-weighted chart-Sobolev norm
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, and a
-smooth compactly-supported `(r, s)`-tensor section `T₀`, this file ships the
-intrinsic L² control of the raw tensor connection Laplacian: there exists a
-single constant `C : ℝ≥0∞ \ {⊤}`, uniform in `T₀`, such that
-
-```
-∫⁻ b, ENNReal.ofReal (riemannianFiberNormSq g r s b (rawTensorConnLap g r s T₀ b))
-    ∂(riemannianVolumeMeasure g)
-  ≤ C * (tensorPouSobolevNorm g 1 T₀) ^ 2.
-```
-
-The constant depends only on `g`, `r`, `s`, and on the chart-atlas partition of
-unity; it is independent of the section `T₀`. There is no chart-locality or
-chart-source-consistency hypothesis at the headline.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -641,24 +621,6 @@ private lemma per_alpha_measurable_lintegral_le
   rw [← Finset.sum_product']
   exact le_refl _
 
-/-- **Intrinsic L² bound for the raw tensor connection Laplacian by the squared
-partition-of-unity-weighted chart-Sobolev norm.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, there
-exists a finite constant `C : ℝ≥0∞ \ {⊤}` such that for every smooth
-compactly-supported `(r, s)`-tensor section `T₀`,
-
-```
-∫⁻ b, ENNReal.ofReal (riemannianFiberNormSq g r s b
-        (rawTensorConnLap g r s T₀ b))
-    ∂(riemannianVolumeMeasure g)
-  ≤ C * (tensorPouSobolevNorm g 1 T₀) ^ 2.
-```
-
-The constant depends only on `g`, `r`, `s`, and the chart-atlas partition of
-unity; it is uniform in the input section `T₀`. The Sobolev order `k = 1`
-corresponds to derivatives up to order `2k = 2`, matching the second
-covariant derivative implicit in the connection Laplacian. -/
 theorem rawTensorConnLap_intrinsicL2_le_tensorPouSobolevNorm_sq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

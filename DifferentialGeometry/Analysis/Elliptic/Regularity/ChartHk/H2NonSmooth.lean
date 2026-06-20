@@ -2,48 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimitLoc
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 
-/-!
-# Per-chart `H²` interior regularity for non-smooth weak solutions
-arising from the chart-bilinear data structure
-
-This module establishes per-chart `H²` regularity for non-smooth weak
-solutions of the variational Laplacian on a closed Riemannian manifold,
-using the localized difference-quotient infrastructure
-(`hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc`) and the non-smooth
-chart-bilinear identity packaged in `ChartBilinearH1ComplData`.
-
-The headline result `chart_loc_of_uniform_bound` produces, for a
-precompact `Ω''` inside the chart target, a weak second `k`-partial
-derivative of the explicit `i`-th weak partial `D.weak_partial i` (lying
-in `L²(Ω'')`), with a quantitative bound in terms of the supplied uniform
-difference-quotient bound on `Ω''`.
-
-## Strategy
-
-The argument is the standard Nirenberg difference-quotient method,
-adapted to the non-smooth setting:
-
-1. From the variational identity packaged in `ChartBilinearH1ComplData`,
-   the caller deduces a uniform-in-`h` `L²(Ω'')` bound on the difference
-   quotient `D_h^k (D.weak_partial i)` (this step requires re-deriving
-   the Nirenberg cross-bounds for weak solutions and is supplied as a
-   hypothesis).
-2. Apply `hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc` to extract
-   a weak `k`-partial derivative `g_{i,k} ∈ L²(Ω'')`.
-
-The localized converter requires `MemLp (D.weak_partial i) 2 (volume.restrict Ω)`
-for some open precompact `Ω` containing `cthickening h₀ (closure Ω'')`. We
-extract this from `D.weak_partial_locally_memLp` applied to the closure of
-`Ω`, which is a compact subset of `chartTargetEuclid α`.
-
-## Main results
-
-* `chart_loc_of_uniform_bound`: for a chart-bilinear data structure
-  `D : ChartBilinearH1ComplData g α` and a uniform-in-`h` bound on the
-  difference quotient of each weak partial of `D.u_chart`, extract weak
-  second partial derivatives in `L²(Ω'')` with quantitative `L²` bound.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -76,21 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Per-chart `H²` regularity from a uniform diffQuot bound.**
-
-Given:
-* a chart-bilinear data structure `D : ChartBilinearH1ComplData g α`,
-  encoding the chart-pulled `u`, `f`, the explicit weak partials of
-  `D.u_chart`, and the variational identity;
-* a precompact open `Ω''` whose closure lies inside `chartTargetEuclid α`;
-* a uniform `L²(Ω'')` bound on `D_h^k (D.weak_partial i)` for `0 < |h| ≤ h₀`,
-* the room hypothesis `cthickening h₀ (closure Ω'') ⊆ chartTargetEuclid α`,
-
-we extract for each pair `(i, k)` a weak `k`-partial derivative `g_{i,k}`
-of `D.weak_partial i` (the `i`-th weak partial of `D.u_chart`) on `Ω''`,
-with `‖g_{i,k}‖_{L²(Ω'')} ≤ M_{i,k}`.
-
-This is the localized Nirenberg conclusion in non-smooth chart form. -/
 theorem chart_loc_of_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

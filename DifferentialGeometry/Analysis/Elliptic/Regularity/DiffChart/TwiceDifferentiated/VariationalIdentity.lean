@@ -8,75 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoef
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-/-!
-# Twice-differentiated variational identity — IBP infrastructure
-
-For `u_h ∈ laplacianDomainPow g 2` and any chart point `α : M`, the formally
-twice-differentiated chart-bilinear variational identity is intended to hold
-for every smooth compactly supported test function `ψ` with `tsupport ψ ⊆
-chartTargetEuclid α`. This module provides the infrastructure for assembling
-that identity.
-
-The schematic form of the headline identity is
-```
-∫ ∑_{i,j} weightedInvGramOnEuclid · chosenThirdMixedPartialChartPushedU(i, l₁, l₂) · ∂_j ψ
-  + ∫ densityOnEuclid · chosenSecondPartialChartPushedU(l₁, l₂) · ψ
-  = ∫ densityOnEuclid · fChartEffTwice · ψ.
-```
-
-This module establishes five per-pair `l₂`-direction IBP identities, against
-each of the weakly-differentiable base scalar fields appearing in the
-once-differentiated chart-bilinear identity:
-
-* `per_pair_ibp_chosenSecond` — the second mixed partial
-  `chosenSecondPartialChartPushedU g α u_h i l₁` ∈ `MemW1p 2` with weak
-  partial `chosenThirdMixedPartialChartPushedU g α u_h i l₁ l₂`.
-* `per_pair_ibp_base_weak_partial` — the base first weak partial
-  `base.weak_partial i` (a `chartPushedWeakPartialLp` coeFn) ∈ `MemW1p 2`
-  (via the chart-target ae-equality bridge to `chartPushedChosenFirstPartial`)
-  with weak partial `chosenSecondPartialChartPushedU g α u_h i l₂`.
-* `per_pair_ibp_base_u_chart` — the base `u_chart` scalar field with
-  weak partials `base.weak_partial l₂`.
-* `per_pair_ibp_base_f_chart` — the base `f_chart` scalar field (∈ `MemW1p 2`
-  unconditionally via `fChartResidual_memW1p_truly_unconditional` and
-  `base_f_chart_memW1p_from_residual_memW1p`) with weak partials
-  `chosenFChartDeriv l₂'`.
-* `per_pair_ibp_chosenFChartDeriv` — the once-differentiated chart-side
-  derivative `chosenFChartDeriv l₁` ∈ `MemW1p 2` (passed as a hypothesis;
-  awaiting unconditional chart-`H³` discharge) with weak partial
-  `fChartDeriv2 l₁ l₂`.
-
-Two further ergonomic bridges are recorded:
-
-* `base_weak_partial_memW1p` — the base first weak partial lies in `MemW1p 2`
-  on the chart target, established via `MemW1p_congr_ae` from the chart-pushed
-  chosen first partial `MemW1p 2` regularity.
-* `chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond` — the canonical
-  chosenWeakPartial' of the base first weak partial in direction `l₂` agrees
-  a.e. on the chart target with the canonical mixed second partial
-  `chosenSecondPartialChartPushedU g α u_h l₁ l₂`.
-* `integral_chosenWeakPartial_base_eq_integral_chosenSecond` — the
-  corresponding integral-level identification of the principal `LHS₂` term.
-
-The headline identity is assembled from these helpers by:
-
-1. Applying the once-differentiated explicit-form identity
-   (`differentiated_variational_identity_holds`) to the test function
-   `∂_{l₂} ψ`.
-2. Performing IBP in direction `l₂` against each of the resulting six
-   terms via the helpers above, plus an additional Schwarz commutation
-   (`fderiv_apply_single_swap`) and a `j`-direction IBP on a residual
-   piece via `cross_derivative_term_ibp_second_order_single`.
-3. Collecting all 13 resulting RHS contributions and identifying them with
-   `fChartEffTwiceNumerator` via the indicator-numerator structure
-   (`density_mul_fChartEffTwice_eq_indicator_numerator`).
-
-The auxiliary ae-equality between `chosenWeakPartial' 2 l₂ (base.wp l₁)`
-and `chosenSecond(l₁, l₂)` (recorded in
-`chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond`) is used to
-identify the principal LHS₂ term in the headline form.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -121,8 +52,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For `ψ : EuclN → ℝ` globally smooth, its `l`-direction partial
-`y ↦ (fderiv ℝ ψ y) (EuclideanSpace.single l 1)` is also globally smooth. -/
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -135,8 +64,6 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
-/-- The `l`-direction partial of a smooth compactly supported `ψ` is also
-compactly supported. -/
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -144,16 +71,12 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
-/-- The tsupport of the `l`-direction partial of a smooth `ψ` is contained in
-`tsupport ψ`. -/
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-- The base first weak partial agrees a.e. with the chart-pushed chosen first
-weak partial on the volume measure restricted to the chart target. -/
 private lemma base_weak_partial_ae_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -169,8 +92,6 @@ private lemma base_weak_partial_ae_eq_chartPushedChosenFirstPartial
   DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplH3.chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget
     (I := I) (M := M) g α hu_h i
 
-/-- The base first weak partial lies in `MemW1p 2 (chartTargetEuclid α)` for
-`u_h ∈ laplacianDomainPow g 2`. -/
 private lemma base_weak_partial_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -221,9 +142,6 @@ private lemma base_weak_partial_memW1p
     (base_weak_partial_ae_eq_chartPushedChosenFirstPartial
       (I := I) (M := M) g α hu_h i)).mpr h_chosen
 
-/-- The chosen weak `l₂`-partial of `base.weak_partial l₁` agrees a.e. with the
-canonical second mixed chosen partial `chosenSecondPartialChartPushedU g α u_h
-l₁ l₂` on the volume measure restricted to the chart target. -/
 private lemma chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -248,9 +166,6 @@ private lemma chosenWeakPartial'_base_weak_partial_ae_eq_chosenSecond
       (p := 2) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_aeEq l₂
   exact h_congr
 
-/-- A smooth coefficient on `chartTargetEuclid α` has a smooth global
-extension that agrees with it on a neighborhood of any prescribed compact
-subset of the chart target. -/
 private lemma exists_smooth_global_extension_chart
     {φ : EuclN → ℝ} {α : M}
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ (chartTargetEuclid (I := I) (M := M) α))
@@ -264,7 +179,6 @@ private lemma exists_smooth_global_extension_chart
   exists_smooth_global_extension (I := I) (M := M) (φ := φ) α
     hφ_chart hK_compact hK_in
 
-/-- Local-`L²` regularity of `base.u_chart`. -/
 private lemma base_u_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -288,7 +202,6 @@ private lemma base_u_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
-/-- Local-`L²` regularity of `base.f_chart`. -/
 private lemma base_f_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -312,7 +225,6 @@ private lemma base_f_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
-/-- Local-`L²` regularity of `base.weak_partial i`. -/
 private lemma base_weak_partial_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -326,7 +238,6 @@ private lemma base_weak_partial_locally_memLp
   (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α hu_h
     ).weak_partial_locally_memLp i K hK_compact hK_in
 
-/-- Local-`L²` regularity of `chosenWeakPartial' 2 l₂ (base.weak_partial l₁)`. -/
 private lemma chosenWeakPartial_base_wp_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -355,7 +266,6 @@ private lemma chosenWeakPartial_base_wp_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-- Schwarz symmetry of mixed partials for a smooth function. -/
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -397,7 +307,6 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-- The Fréchet derivative of `ψ` vanishes pointwise outside `tsupport ψ`. -/
 private lemma fderiv_zero_outside_tsupport
     (ψ : EuclN → ℝ) (x : EuclN) (hx : x ∉ tsupport ψ) :
     fderiv ℝ ψ x = 0 := by
@@ -408,8 +317,6 @@ private lemma fderiv_zero_outside_tsupport
     exact image_eq_zero_of_notMem_tsupport hy
   rw [h_fderiv_eq]; simp
 
-/-- The Fréchet derivative of `fderiv ψ y (single l 1)` vanishes pointwise
-outside `tsupport ψ`, for smooth `ψ`. -/
 private lemma fderiv_partial_zero_outside_tsupport
     {ψ : EuclN → ℝ} (x : EuclN) (hx : x ∉ tsupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -423,8 +330,6 @@ private lemma fderiv_partial_zero_outside_tsupport
     rw [fderiv_zero_outside_tsupport ψ y hy]; simp
   rw [h_fderiv_eq]; simp
 
-/-- Per-pair IBP: smooth coefficient `φ`, weak base `chosenSecond(i, l₁)` ∈ H¹,
-weak `l₂`-partial `chosenThird(i, l₁, l₂)`. Test factor `ψ`. -/
 private lemma per_pair_ibp_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -532,11 +437,6 @@ private lemma per_pair_ibp_chosenSecond
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-- Per-pair IBP: smooth coefficient `φ`, weak base `base.weak_partial i` ∈ H¹
-(via `base_weak_partial_memW1p`), weak `l₂`-partial taken as
-`chosenSecondPartialChartPushedU g α u_h i l₂` (which is a weak partial of
-`base.weak_partial i` by `hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp`).
-Test factor `ψ`. -/
 private lemma per_pair_ibp_base_weak_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -651,8 +551,6 @@ private lemma per_pair_ibp_base_weak_partial
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-- Per-pair IBP: smooth coefficient `φ`, weak base `base.u_chart`, weak partials
-`base.weak_partial l₂'`. Test factor `ψ`. -/
 private lemma per_pair_ibp_base_u_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -766,8 +664,6 @@ private lemma per_pair_ibp_base_u_chart
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-- Per-pair IBP: smooth coefficient `φ`, weak base `base.f_chart` ∈ W^{1,2},
-weak partials `chosenFChartDeriv l₂'`. Test factor `ψ`. -/
 private lemma per_pair_ibp_base_f_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -895,9 +791,6 @@ private lemma per_pair_ibp_base_f_chart
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-- Per-pair IBP: smooth coefficient `φ`, weak base `chosenFChartDeriv l₁` ∈
-W^{1,2} (under the hypothesis), weak partials `fChartDeriv2 l₁ l₂'`. Test
-factor `ψ`. -/
 private lemma per_pair_ibp_chosenFChartDeriv
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1035,9 +928,6 @@ private lemma per_pair_ibp_chosenFChartDeriv
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-/-- The principal `LHS₂` integral admits two equivalent representations:
-the canonical chosenWeakPartial' of `base.wp l₁` and the canonical mixed
-second partial `chosenSecond(l₁, l₂)`. -/
 private lemma integral_chosenWeakPartial_base_eq_integral_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1408,8 +1298,6 @@ private lemma vol_restrict_chart_target_absCont_weighted (α : M)
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-- `D.base.u_chart` agrees ae with `chartPushed POU α u_h.coeFn` on
-`volume.restrict (chartTargetEuclid α)`. -/
 private lemma base_u_chart_ae_eq_chartPushed_on_vol
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1942,10 +1830,7 @@ private lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwic
   exact MeasureTheory.integral_congr_ae h_ae_eq
 
 set_option maxHeartbeats 4000000 in
-/-- **Twice-differentiated chart-bilinear variational identity** for
-`u_h ∈ laplacianDomainPow g 2`, with the chart-`H³`-equivalent hypothesis
-`h_chosenFChartDeriv_memW1p` exposing the once-differentiated chart-side
-derivative `chosenFChartDeriv g α hu_h l₁` as `MemW1p 2` on the chart target. -/
+
 theorem twice_differentiated_variational_identity_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

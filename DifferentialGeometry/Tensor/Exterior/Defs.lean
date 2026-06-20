@@ -11,8 +11,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-! # Differential forms: the `DifferentialForm` structure and its module instances -/
-
 noncomputable section
 
 open Filter ContinuousAlternatingMap Set
@@ -25,15 +23,13 @@ variable {E F F' F'' G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   {n m k : ℕ}
 
-/-- A smooth (C∞) differential n-form on `E` with values in `F`. -/
 structure DifferentialForm (n : ℕ) (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F] where
-  /-- The underlying smooth function -/
+  
   toFun : E → E [⋀^Fin n]→L[ℝ] F
-  /-- The underlying function is smooth -/
+  
   smooth : ContDiff ℝ ⊤ toFun
 
-/-- Notation for smooth differential n-forms from `E` to `F`. -/
 notation "Ω^" n "⟮" E ", " F "⟯" => DifferentialForm n E F
 
 instance : FunLike (DifferentialForm n E F) E (E [⋀^Fin n]→L[ℝ] F) where

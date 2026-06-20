@@ -1,25 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.H1Lp
 
-/-!
-# `H¹` as a submodule of `L²`
-
-This file packages the `MemH1Lp` predicate of `IntrinsicH1Lp.lean` as a
-`Submodule ℝ (Lp ℝ 2 μ_g)`. The carrier consists of those `Lp ℝ 2 μ_g`
-classes that admit a weak Riemannian gradient in the `Lp E 2 μ_g` Banach
-space, an `L²`-controlled metric `g`-norm, and the joint AESM pairing
-clause. Closure under zero, addition, and scalar multiplication is
-delivered by the corresponding theorems on `MemH1Lp`.
-
-## Main definitions
-
-* `H1Submodule g` : the submodule of `Lp ℝ 2 μ_g` consisting of `H¹` classes.
-
-This submodule provides the natural identification of `H¹` with a subset
-of `L²`, viewed as scalar functions. The companion file `H1Intrinsic.lean`
-provides the bundled Hilbert structure whose inner product is the genuine
-`H¹` inner product (rather than the inherited `L²` one).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Function
@@ -42,10 +22,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The submodule `H¹(M, g) ⊆ L²(M, μ_g)` of `L²` classes admitting a weak
-Riemannian gradient witness in `L² (M, E, μ_g)`. The carrier consists of
-those `Lp ℝ 2 μ_g` classes `u` for which the unbundled predicate
-`MemH1Lp g u` holds. -/
 def H1Submodule [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) :
     Submodule ℝ (Lp ℝ 2 (riemannianVolumeMeasure I M g)) where

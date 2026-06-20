@@ -12,24 +12,6 @@ import Mathlib.Topology.Compactness.Compact
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Chain-of-charts continuity of the exponential map
-
-This file collects the six chained-flow continuity steps used to deduce
-`Continuous (expMap g p)` on a geodesically complete Riemannian manifold:
-compactness of the geodesic segment `γ([0, 1])`, a finite chart-cover
-partition via the Lebesgue-number lemma, per-chart joint-`C¹` local flows
-from Picard–Lindelöf, continuity at chart junctions via the local-flow
-group-property gluing, and the final continuity statement obtained by
-specialising the joint flow to `t = 1`.
-
-The detailed Lean types of the intermediate joint-flow predicates are
-deferred to the proof phase; here we expose only the propositional
-shells required to record the chain. The headline statement is
-`expMap_continuous`, whose signature is
-`Continuous (expMap g p)`.
--/
-
 noncomputable section
 
 open Set Filter Topology Metric
@@ -50,11 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
-/-- The maximal geodesic `maximalGeodesic g p v` is continuous at `t = 0`.
-Its value near `0` coincides with the projection of a single
-Picard–Lindelöf integral curve `g_v` (via
-`picardLift_proj_eq_maximalGeodesic_on_ball`), and that projection is
-continuous as a base curve of an integral curve. -/
 theorem maximalGeodesic_continuousAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ContinuousAt (maximalGeodesic (I := I) g p v) 0 := by
@@ -78,8 +55,6 @@ theorem maximalGeodesic_continuousAt_zero
     filter_upwards [h_ball] with t ht using h_eq t ht
   exact hproj_cont.congr h_eventually.symm
 
-/-- The image of `[0, 1]` under `maximalGeodesic g p v₀` is a compact
-subset of `M`. -/
 theorem expMap_geodesicSegment_compactImage
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
     IsCompact (maximalGeodesic (I := I) g p v₀ '' Set.Icc (0 : ℝ) 1) := by
@@ -88,9 +63,6 @@ theorem expMap_geodesicSegment_compactImage
     sorry
   exact isCompact_Icc.image_of_continuousOn h_cont
 
-/-- For every initial velocity `v₀` there exists a radius `ρ > 0` such
-that the chained flow `(v, t) ↦ maximalGeodesic g p v t` is jointly
-continuous on `Metric.ball v₀ ρ × Set.Icc 0 1`. -/
 theorem expMap_chainedFlow_joint_continuity
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -100,17 +72,6 @@ theorem expMap_chainedFlow_joint_continuity
         ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
   sorry
 
-/-- **Joint `C¹` regularity of the chained geodesic flow on a ball.**
-For a *nonzero* initial velocity `v₀`, there is a radius `ρ > 0` such
-that the chained flow `(v, t) ↦ maximalGeodesic g p v t` is jointly
-`ContMDiffOn (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) I 1` on
-`Metric.ball v₀ ρ ×ˢ Set.Icc 0 1`.
-
-This is the `C¹`-in-`(v, t)` strengthening of
-`expMap_chainedFlow_joint_continuity`; restricting it to the
-`t = 1` slice and precomposing with the smooth slice map `w ↦ (w, 1)`
-yields the off-zero exponential-map regularity
-`expMap_contMDiffAt_of_ne_zero`. -/
 theorem expMap_chainedFlow_joint_contMDiff
     (g : SmoothRiemannianMetric I M) (p : M) (v₀ : E)
     (hv₀ : (show TangentSpace I p from v₀) ≠ 0) :
@@ -121,15 +82,6 @@ theorem expMap_chainedFlow_joint_contMDiff
         ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
   sorry
 
-/-- The exponential map `expMap g p : T_p M → M` is continuous.
-
-The proof reduces continuity to `ContinuousAt (expMap g p) v₀` for each `v₀`,
-then restricts the joint continuity of the chained flow
-`expMap_chainedFlow_joint_continuity` to the `t = 1` slice: since
-`expMap g p v = maximalGeodesic g p v 1` by definitional unfolding of
-`expMap`, continuity at `v₀` follows from the joint continuity on the
-neighbourhood `ball v₀ ρ ×ˢ Icc 0 1`, precomposed with the continuous
-slice map `v ↦ (v, 1)`. -/
 theorem expMap_continuous
     (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (expMap (I := I) g p) := by

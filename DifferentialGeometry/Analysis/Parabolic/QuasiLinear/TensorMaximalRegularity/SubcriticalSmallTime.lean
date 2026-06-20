@@ -1,59 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.ForcingFixedPoint
 
-/-!
-# Small-time strong existence for the abstract quasi-linear tensor heat equation
-
-The headline maximal-regularity theorem `quasilinear_strong_existence` requires
-the smallness hypothesis `2·L < 1` on the Lipschitz constant of the
-nonlinearity: it is a **small-data** result.  Its restriction is structural.
-The nonlinearity there is `N : H^{a+2} → Hᵃ`, a *two*-derivative loss, which is
-the **critical** (marginal) parabolic loss.  At the critical loss the
-`L²`-maximal-regularity smoothing `L²([0,T]; Hᵃ) → L²([0,T]; H^{a+2})` has
-operator norm `1 + T`, which does **not** vanish as `T → 0`; the contraction
-constant `L·(1 + T)` cannot be made `< 1` for large `L` by shrinking `T`.
-
-This file removes the smallness restriction for a **subcritical** nonlinearity
-`N : H^{a+1} → Hᵃ` — a *one*-derivative loss.  At a subcritical loss the Duhamel
-smoothing *does* gain a parabolic decay factor: the one-derivative-gain estimate
-
-  `‖u‖_{L²([0,T]; H^{a+1})} ≤ 2√T · ‖f‖_{L²([0,T]; Hᵃ)}`
-
-(`maximalRegularitySolFieldHa1_norm_le`) carries the factor `2√T → 0`.  The
-forcing-space contraction constant is therefore `L·2√T`, which is `< 1` for any
-`L` once `T < 1/(4L²)`.  Choosing `T` small enough gives a strong solution on a
-short interval `(0, T_L]` for **any** Lipschitz constant `L`.
-
-The decay factor is genuine analysis, not an assumption: it is the geometric-mean
-interpolation `(√λᵢ‖φᵢ‖)² = (λᵢ‖φᵢ‖)·‖φᵢ‖ ≤ ‖fᵢ‖·(T‖fᵢ‖)` between the two
-per-mode scalar estimates of `de Simon`-type `L²`-maximal regularity (the
-Schur-test bound `λᵢ‖φᵢ‖ ≤ ‖fᵢ‖` and the convolution bound `‖φᵢ‖ ≤ T‖fᵢ‖`),
-carried out in `MaximalRegularity.Operator`.
-
-## Main definitions
-
-* `nemytskiiHa1 hN` — the Nemytskii operator `L²([0,T]; H^{a+1}) → L²([0,T];
-  Hᵃ)`, `f ↦ N ∘ f`, for a Lipschitz `N : H^{a+1} → Hᵃ`.
-* `quasilinearDuhamelMapHa1 … u₀ hN` — the forcing-space fixed-point map
-  `Φ(g) = N ∘ (maxRegDuhamelSolFieldHa1 … u₀ g)`.
-* `smallTimeHorizon L` — the explicit small time horizon `min 1 (1/(4(L+1)²))`,
-  positive for every `L`, on which the contraction holds.
-
-## Main results
-
-* `nemytskiiHa1_lipschitzWith` — the Nemytskii operator is Lipschitz with the
-  same constant `L`.
-* `maxRegDuhamelSolFieldHa1_dist_le` — the `H^{a+1}`-field contraction estimate
-  `‖field(g) − field(g')‖ ≤ 2√T · ‖g − g'‖`, the source of the `√T`-decay.
-* `quasilinearDuhamelMapHa1_dist_le` — `‖Φ(g) − Φ(g')‖ ≤ L·2√T · ‖g − g'‖`.
-* `smallTime_contraction_const_lt_one` — `L·2√T < 1` on `(0, smallTimeHorizon
-  L]`.
-* `quasilinearDuhamelMapHa1_contracting` — `Φ` is a contraction.
-* `quasilinear_strong_existence_smallTime` — **the headline theorem**: for *any*
-  Lipschitz constant `L` and any subcritical nonlinearity `N : H^{a+1} → Hᵃ`,
-  there is `T_L > 0` and a strong solution of `∂_t u = Δ_∇ u + N(u)`,
-  `u(0) = u₀`, on `(0, T_L]`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -92,9 +38,6 @@ variable {L : ℝ≥0}
   {N : tensorHs (I := I) (M := M) g r s (a + 1) →
     tensorHs (I := I) (M := M) g r s a}
 
-/-- For a Lipschitz `N : H^{a+1} → Hᵃ` and a time-`L²` field `f ∈ L²([0,T];
-H^{a+1})`, the pointwise composition `t ↦ N (f t)` is square-integrable: split
-`N` into the `0`-fixing Lipschitz part and the constant `N 0`. -/
 theorem memLp_comp_nemytskiiHa1 (hN : LipschitzWith L N)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T) :
     MemLp (fun t => N (f t)) 2 (timeMeasure T) := by
@@ -115,21 +58,16 @@ theorem memLp_comp_nemytskiiHa1 (hN : LipschitzWith L N)
   rw [hfun]
   exact hsum
 
-/-- **The subcritical Nemytskii operator** `L²([0,T]; H^{a+1}) → L²([0,T]; Hᵃ)`,
-`f ↦ N ∘ f`, for a Lipschitz nonlinearity `N : H^{a+1} → Hᵃ`. -/
 def nemytskiiHa1 (hN : LipschitzWith L N) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T →
       timeL2 (tensorHs (I := I) (M := M) g r s a) T :=
   fun f => (memLp_comp_nemytskiiHa1 (I := I) (M := M) hN f).toLp (fun t => N (f t))
 
-/-- `nemytskiiHa1 hN f` is represented almost everywhere by `t ↦ N (f t)`. -/
 theorem nemytskiiHa1_coeFn (hN : LipschitzWith L N)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T) :
     nemytskiiHa1 (I := I) (M := M) hN f =ᵐ[timeMeasure T] fun t => N (f t) :=
   (memLp_comp_nemytskiiHa1 (I := I) (M := M) hN f).coeFn_toLp
 
-/-- **The pointwise-in-time squared contraction estimate of the subcritical
-Nemytskii operator.**  `‖N∘f − N∘f'‖² ≤ L²·‖f − f'‖²`. -/
 theorem nemytskiiHa1_dist_sq_le (hN : LipschitzWith L N)
     (f f' : timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T) :
     ‖nemytskiiHa1 (I := I) (M := M) hN f -
@@ -172,7 +110,6 @@ theorem nemytskiiHa1_dist_sq_le (hN : LipschitzWith L N)
         ≤ ((L : ℝ) * ‖f t - f' t‖) ^ 2 := hsq
       _ = (L : ℝ) ^ 2 * ‖(f - f') t‖ ^ 2 := by rw [htf, mul_pow]
 
-/-- **The subcritical Nemytskii operator is Lipschitz with the same constant.** -/
 theorem nemytskiiHa1_lipschitzWith (hN : LipschitzWith L N) :
     LipschitzWith L (nemytskiiHa1 (I := I) (M := M) (T := T) hN) := by
   refine LipschitzWith.of_dist_le_mul (fun f f' => ?_)
@@ -188,7 +125,6 @@ theorem nemytskiiHa1_lipschitzWith (hN : LipschitzWith L N) :
 
 end Nemytskii
 
-/-- Chart-locality-free version of `maxRegDuhamelSolFieldHa1_sub`. -/
 theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -203,7 +139,6 @@ theorem maxRegDuhamelSolFieldHa1_sub (hT : 0 < T) (hT1 : T ≤ 1)
   rw [maxRegDuhamelSolFieldHa1, maxRegDuhamelSolFieldHa1]
   abel
 
-/-- Chart-locality-free version of `maxRegDuhamelSolFieldHa1_dist_le`. -/
 theorem maxRegDuhamelSolFieldHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -219,13 +154,6 @@ theorem maxRegDuhamelSolFieldHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
 
 section FixedPoint
 
-/-- **The subcritical forcing-space fixed-point map.**  For initial datum `u₀ ∈
-H^{a+2}` and Lipschitz `N : H^{a+1} → Hᵃ`,
-
-  `Φ(g) := N ∘ (maxRegDuhamelSolFieldHa1 … u₀ g)`,
-
-a self-map of `L²([0,T]; Hᵃ)`: form the `H^{a+1}`-view Duhamel solution field of
-the forcing `g`, then apply the Nemytskii operator. -/
 def quasilinearDuhamelMapHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     {L : ℝ≥0}
@@ -249,7 +177,6 @@ def quasilinearDuhamelMapHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
         (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) :=
   rfl
 
-/-- Chart-locality-free version of `quasilinearDuhamelMapHa1_dist_le`. -/
 theorem quasilinearDuhamelMapHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -283,25 +210,17 @@ theorem quasilinearDuhamelMapHa1_dist_le (hT : 0 < T) (hT1 : T ≤ 1)
         mul_le_mul_of_nonneg_left hfield L.coe_nonneg
     _ = (L : ℝ) * (2 * Real.sqrt T) * dist gforce gforce' := by ring
 
-/-- **The explicit small time horizon** `T_L = min 1 (1/(4(L+1)²))`.  It is
-positive for every Lipschitz constant `L`, satisfies `T_L ≤ 1`, and is small
-enough that `L·2√T_L < 1` (`smallTime_contraction_const_lt_one`). -/
 def smallTimeHorizon (L : ℝ≥0) : ℝ :=
   min 1 (1 / (4 * ((L : ℝ) + 1) ^ 2))
 
-/-- The small time horizon is positive. -/
 theorem smallTimeHorizon_pos (L : ℝ≥0) : 0 < smallTimeHorizon L := by
   refine lt_min one_pos ?_
   have hpos : (0 : ℝ) < 4 * ((L : ℝ) + 1) ^ 2 := by positivity
   positivity
 
-/-- The small time horizon is at most `1`. -/
 theorem smallTimeHorizon_le_one (L : ℝ≥0) : smallTimeHorizon L ≤ 1 :=
   min_le_left _ _
 
-/-- **The contraction constant `L·2√T` is `< 1` on `(0, T_L]`.**  For `0 < T ≤
-smallTimeHorizon L` one has `T ≤ 1/(4(L+1)²)`, so `2√T ≤ 1/(L+1)` and
-`L·2√T ≤ L/(L+1) < 1`. -/
 theorem smallTime_contraction_const_lt_one {L : ℝ≥0} {T : ℝ}
     (_hT : 0 < T) (hTL : T ≤ smallTimeHorizon L) :
     (L : ℝ) * (2 * Real.sqrt T) < 1 := by
@@ -330,7 +249,6 @@ theorem smallTime_contraction_const_lt_one {L : ℝ≥0} {T : ℝ}
     _ < 1 := by
         rw [div_lt_one hLp1_pos]; linarith
 
-/-- Chart-locality-free version of `quasilinearDuhamelMapHa1_contracting`. -/
 theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
     {L : ℝ≥0} (hTL : T ≤ smallTimeHorizon L)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -355,12 +273,6 @@ theorem quasilinearDuhamelMapHa1_contracting (hT : 0 < T)
 
 end FixedPoint
 
-/-- **Chart-locality-free small-time strong existence**, parameterized on
-resolvent compactness `h_compact`.  Identical to
-`quasilinear_strong_existence_smallTime` but with the compactness hypothesis in
-place of any chart-locality assumption: for any subcritical nonlinearity
-`N : H^{a+1} → Hᵃ` Lipschitz with any constant `L`, there is `T_L > 0` and a
-strong solution of `∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀`, on `(0, T_L]`. -/
 theorem quasilinear_strong_existence_smallTime {L : ℝ≥0}
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}

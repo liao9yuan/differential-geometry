@@ -1,53 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedDatum
 
-/-!
-# The iterated divergence-form step for the eigenvector chart component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the standalone
-iterated divergence-form datum `eigenvectorIteratedTensorChartBilinearData`
-packages the level-`m` differentiated divergence-form variational identity
-satisfied by the eigenvector chart component.
-
-This module ships the **iterated step**: from a level-`m` datum and a new
-direction `l`, the level-`(m + 1)` datum is built by integrating the level-`m`
-variational identity by parts once more in direction `l` and consolidating the
-resulting Leibniz commutator into the standalone-step effective source
-`eigenvectorChartIteratedStep`.
-
-It is the eigenvector/tensor mirror of the scalar campaign's
-`iteratedDiffChartBilinearData_step`. The new direction multi-index is
-`Fin.snoc D_m.directions l`; the new effective `L²` source is
-`eigenvectorChartIteratedStep g r s h_atlas i α P₀ m D_m.directions
-D_m.fChartEff l`, whose weighted-`L²` regularity is the unconditional committed
-fact `eigenvectorChartIteratedStep_memLp_two_weighted`.
-
-## The regularity inputs
-
-The variational identity of the level-`(m + 1)` datum is obtained by performing
-one more directional integration by parts on every term of the level-`m`
-identity. The integrations by parts consume:
-
-* `MemWkp (m + 1) 2` and `MemWkp (m + 2) 2` of the eigenvector chart component
-  on the chart target — needed so the `m`-fold and `(m + 1)`-fold mixed weak
-  partials lie in `W^{1,2}` and the per-pair integration by parts
-  `eigenvector_per_pair_ibp` applies;
-* `MemW1p 2` of the level-`m` effective source `D_m.fChartEff` — needed for the
-  one directional integration by parts of the source term;
-* the a.e.-vanishing of `D_m.fChartEff` off the compact partition-of-unity
-  kernel — needed to identify the consolidated five-layer numerator with the
-  standalone-step numerator.
-
-These are genuine regularity facts about concrete functions, exactly the inputs
-the scalar `iteratedDiffChartBilinearData_step` consumes; they are discharged by
-the arbitrary-order interior-regularity bootstrap.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -82,7 +34,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The partial of a smooth function is smooth. -/
+
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -97,8 +49,7 @@ private lemma contDiff_fderiv_apply_single
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The partial of a compactly supported smooth function is compactly
-supported. -/
+
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -108,7 +59,7 @@ private lemma hasCompactSupport_fderiv_apply_single
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- The tsupport of the partial is contained in the tsupport. -/
+
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
@@ -117,7 +68,7 @@ private lemma tsupport_fderiv_apply_single_subset
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- Schwarz symmetry of mixed partials for a smooth function. -/
+
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -161,8 +112,7 @@ private lemma fderiv_apply_single_swap
 
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
-/-- For any element `i`, multi-index `dirs : Fin m → α`, and element `l`, we have
-`Fin.snoc (Fin.cons i dirs) l = Fin.cons i (Fin.snoc dirs l)`. -/
+
 private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
     (i : β) (dirs : Fin m → β) (l : β) :
     @Fin.snoc m.succ (fun _ => β) (Fin.cons i dirs) l =
@@ -171,9 +121,7 @@ private lemma snoc_cons_eq_cons_snoc {β : Type*} {m : ℕ}
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Unconditional `L²` membership of the canonical chosen weak partial.** For
-*any* function `w` and *any* direction `k`, the canonical chosen weak partial
-`chosenWeakPartial' 2 k w Ω` is `MemLp 2 (volume.restrict Ω)`. -/
+
 private lemma chosenWeakPartial'_memLp_volume_uncond
     {Ω : Set EuclN} (k : Fin (Module.finrank ℝ E)) (w : EuclN → ℝ) :
     MemLp (chosenWeakPartial' (d := Module.finrank ℝ E) 2 k w Ω) 2
@@ -184,12 +132,6 @@ private lemma chosenWeakPartial'_memLp_volume_uncond
   · rw [chosenWeakPartial'_of_not_mem hw k]
     exact MemLp.zero
 
-/-- **Chart-locality-free twin of
-`density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator`.** On the chart
-target, `densityOnEuclid g α · eigenvectorChartIteratedStep` equals
-the indicator of the compact partition-of-unity kernel `chartPouKernel α` of the
-chart-locality-free standalone-step numerator. Re-keyed onto the
-intrinsic-compactness eigenvector; the proof body transfers verbatim. -/
 private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -213,11 +155,6 @@ private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
-/-- Integration by parts for the level-`m` effective source `fChartEffPrev` (in
-`MemW1p 2`) multiplied by the chart density, against the partial `∂_l ψ` of a
-smooth compactly supported test function. A direct application of the generic
-per-pair integration-by-parts primitive `generic_per_pair_ibp` with smooth
-coefficient `densityOnEuclid g α`. -/
 private theorem ibp_density_fChartEffPrev
     (g : SmoothRiemannianMetric I M) (α : M)
     {fChartEffPrev : EuclN → ℝ}
@@ -247,11 +184,6 @@ private theorem ibp_density_fChartEffPrev
     h_fChartEffPrev_memW1p (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
-/-- **Chart-locality-free twin of `ibp_principal_pair`.** Re-keyed onto the
-intrinsic-compactness eigenvector via `eigenvectorChartIteratedPartial`
-and `eigenvector_per_pair_ibp`; the chart-component regularity input
-is the chart-`H^{m+2}` of the chart-locality-free chart component
-`eigenvectorChartComponentFun`. The proof body transfers verbatim. -/
 private theorem ibp_principal_pair_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -342,9 +274,6 @@ private theorem ibp_principal_pair_unconditional
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
-/-- **Chart-locality-free twin of `ibp_mass`.** Re-keyed onto the
-intrinsic-compactness eigenvector via `eigenvectorChartIteratedPartial`
-and `eigenvector_per_pair_ibp`. The proof body transfers verbatim. -/
 private theorem ibp_mass_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -382,9 +311,6 @@ private theorem ibp_mass_unconditional
     h_chart_H_m_plus_1 (densityOnEuclid_contDiffOn (I := I) g α)
     hψ_smooth hψ_cs hψ_supp l
 
-/-- **Chart-locality-free twin of `ibp_inner_j`.** Re-keyed onto the
-intrinsic-compactness eigenvector via `eigenvectorChartIteratedPartial`
-and `eigenvector_per_pair_ibp`. The proof body transfers verbatim. -/
 private theorem ibp_inner_j_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -433,9 +359,7 @@ private theorem ibp_inner_j_unconditional
   exact h_ibp
 
 omit [CompleteSpace E] in
-/-- Triple product `a · u · h` of a chart-target-continuous `a`, a
-`K`-integrable `u`, and a continuous `h` supported in `K` is integrable on the
-plain volume restricted to the chart target. -/
+
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
     (hK_compact : IsCompact K)
@@ -498,27 +422,7 @@ private lemma integrable_triple_helper
   exact full_int.restrict
 
 set_option maxHeartbeats 4000000 in
-/-- **Chart-locality-free iterated step for the standalone iterated divergence-form
-datum.** Chart-locality-free twin of `eigenvectorIteratedTensorChartBilinearData_step`,
-re-keyed onto the intrinsic-compactness eigenvector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator g r s) i`.
 
-Given a level-`m` datum `D_m :
-eigenvectorIteratedTensorChartBilinearData g r s i α P₀ m`, a new
-direction `l`, the chart-component regularity inputs `MemWkp (m + 1) 2` and
-`MemWkp (m + 2) 2` of the chart-locality-free chart component
-`eigenvectorChartComponentFun` on the chart target, the `MemW1p 2`
-regularity of the level-`m` effective source `D_m.fChartEff`, and the
-a.e.-vanishing of `D_m.fChartEff` off the compact partition-of-unity kernel, this
-constructs the level-`(m + 1)` datum.
-
-The new direction multi-index is `Fin.snoc D_m.directions l`; the new effective
-`L²` source is `eigenvectorChartIteratedStep g r s i α P₀ m
-D_m.directions D_m.fChartEff l`, whose weighted-`L²` regularity is the
-unconditional committed fact
-`eigenvectorChartIteratedStep_memLp_two_weighted`.
-
-The proof body transfers verbatim from `eigenvectorIteratedTensorChartBilinearData_step`. -/
 noncomputable def eigenvectorIteratedTensorChartBilinearData_step
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

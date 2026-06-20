@@ -3,50 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# Quantitative iterated-Sobolev norm bounds for the eigenvector partition-of-unity
-chart components
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, this file is the
-*explicit-norm* twin of two qualitative partition-of-unity regularity lemmas for
-the connection-Laplacian eigenvector's chart components.
-
-Where `eigenvectorVec_pou_memWkp` records only that the partition-of-unity
-Euclidean chart component of the eigenvector vector
-`tensorResolventEigenbasisVec h_atlas i` is `W^{N,2}`-regular, and
-`eigenvectorCovGrad_pou_memWkp` records only that the partition-of-unity chart
-component of the section-level covariant gradient
-`tensorCovGradL2Compl g r s (eigenvectorResolvent …)` is `W^{K,2}`-regular, the
-present file produces explicit nonnegative constants and norm inequalities.
-
-## The bounds
-
-* The eigenvector chart component equals `μ⁻¹` times the chart component of the
-  `L²`-coercion of the eigenvector resolvent; the iterated Sobolev norm is
-  scalar-homogeneous, so its order-`N` norm is `‖μ⁻¹‖` times the order-`N` norm
-  of the resolvent-coercion chart component — recorded as a single-constant
-  inequality `eigenvectorVec_pou_wkpNorm_le`.
-
-* The committed identity `eigenvectorCovGrad_pou_chartComponent_ae_eq` decomposes
-  the `μ⁻¹`-rescaled covariant-gradient chart component into a weak chart partial,
-  a partition-of-unity Leibniz cross-term limit, and a Christoffel-correction
-  limit. Each of the three is bounded — through `wkpNorm_chosenWeakPartial_le_wkpNorm_succ`,
-  the quantitative cutoff bridge `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou`,
-  the quantitative Leibniz bound `wkpNorm_smul_smooth_bounded_le`, and a
-  quantitative "smooth coefficient × kernel-vanishing factor" closure — by a
-  constant times the sum, over the chart centre `β` adjoined to the transport
-  chart centres of `β` and over the component multi-indices, of the order-`(K+1)`
-  norms of the resolvent-coercion partition-of-unity components. Collecting the
-  per-term constants and rescaling by `μ` gives the single global constant of
-  `eigenvectorCovGrad_pou_wkpNorm_le`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -257,8 +213,7 @@ private lemma wkpNorm_coef_mul_factor_le
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] in
-/-- The resolvent eigenvalue `i.fst.val` of an eigenbasis index is strictly
-positive. -/
+
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -269,18 +224,6 @@ private lemma eigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
-/-- **The factor-uniform smooth-coefficient `wkpNorm` bound with ae-vanishing.**
-The constant of `wkpNorm_coef_mul_factor_le` — the order-`K` derivative bound of
-the smooth cutoff `χ · coef` of the coefficient — depends only on the coefficient
-and the chart geometry, not on the factor. Hence a single nonnegative constant
-`C` serves *every* factor `factor` that is `W^{K,2}`-regular on the chart target
-and vanishes almost everywhere off the partition-of-unity kernel: the order-`K`
-norm of `coef · factor` is bounded by `C` times the order-`K` norm of `factor`.
-
-This is the factor-uniform companion of `wkpNorm_coef_mul_factor_le`; its
-`Classical.choice` witness comes from `wkpNorm_smul_smooth_bounded_le` applied to
-the factor-independent cutoff `χ · coef`, so the constant is hoisted before the
-`∀ factor`. -/
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (K : ℕ) (α : M) {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef
@@ -398,10 +341,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- The partition-of-unity Euclidean chart component of the chart-locality-free
-eigenvector vector `tensorResolventEigenbasisVec` is `MemWkp N 2` on a chart
-target, and its order-`N` iterated Sobolev norm is `‖μ⁻¹‖` times that of the
-resolvent-coercion chart component of `eigenvectorResolvent`. -/
 private lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -502,12 +441,6 @@ private lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le
   refine le_of_eq ?_
   rw [← ofReal_norm]
 
-/-- **Quantitative iterated Sobolev norm bound for the eigenvector
-partition-of-unity chart component (chart-locality-free).** Given that every
-resolvent-coercion chart component of `eigenvectorResolvent` is `MemWkp N 2`,
-there is a nonnegative constant `C` bounding the order-`N` iterated Sobolev norm
-of the eigenvector chart component by `C` times that of the resolvent-coercion
-chart component. -/
 theorem eigenvectorVec_pou_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -540,11 +473,6 @@ theorem eigenvectorVec_pou_wkpNorm_le
   exact (eigenvectorVec_pou_memWkp_and_wkpNorm_le (I := I) (M := M)
     g r s i N β Q (h_pou β Q)).2
 
-/-- **Constant-uniform iterated Sobolev norm bound for the eigenvector
-partition-of-unity chart component (chart-locality-free).** A single nonnegative
-constant `C`, independent of the eigenbasis index `i`, bounds the order-`N`
-iterated Sobolev norm of the eigenvector chart component by `(i.fst.val)⁻¹ * C`
-times that of the resolvent-coercion chart component of `eigenvectorResolvent`. -/
 theorem eigenvectorVec_pou_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (N : ℕ)
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -583,9 +511,6 @@ theorem eigenvectorVec_pou_wkpNorm_le_uniform
   rw [mul_one]
   rwa [hμ_norm] at h_le
 
-/-- The order-`(K+1)` iterated Sobolev norm of the resolvent-coercion
-partition-of-unity Euclidean chart `Q`-component of `eigenvectorResolvent` at a
-chart centre `β'`. -/
 private def chartCompNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -597,9 +522,6 @@ private def chartCompNorm
         β' Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β')) : EuclN → ℝ) y)
     (chartTargetEuclid (I := I) (M := M) β')
 
-/-- The aggregate of `chartCompNorm`s controlling the covariant gradient: the sum
-over component indices `Q` at the chart centre `β`, plus the double sum over the
-transport chart centres `β'` of `β` and over `Q`. -/
 private def covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ) (β : M) : ℝ≥0∞ :=
@@ -609,8 +531,6 @@ private def covGradAggregate
         ∑ Q : TensorCompIdx (E := E) r s,
           chartCompNorm (I := I) (M := M) g r s i K β' Q
 
-/-- The `chartCompNorm` at the chart centre `β` for a component index `Q` is
-bounded by the aggregate `covGradAggregate` at `β`. -/
 private lemma chartCompNorm_center_le_covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -624,8 +544,6 @@ private lemma chartCompNorm_center_le_covGradAggregate
       chartCompNorm (I := I) (M := M) g r s i K β Q')
     (fun _ _ => zero_le _) (Finset.mem_univ Q)
 
-/-- For a transport chart centre `β'` of `β`, the `chartCompNorm` at `β'` for a
-component index `Q` is bounded by the aggregate `covGradAggregate` at `β`. -/
 private lemma chartCompNorm_transport_le_covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -646,8 +564,6 @@ private lemma chartCompNorm_transport_le_covGradAggregate
       chartCompNorm (I := I) (M := M) g r s i K β' Q')
     (fun _ _ => zero_le _) (Finset.mem_univ Q)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le`. -/
 private lemma eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -781,8 +697,6 @@ private lemma eigenvectorChartWeakPartial_memWkp_and_wkpNorm_le
         (chartCompNorm_center_le_covGradAggregate (I := I) (M := M)
           g r s i K β P) (zero_le _)
 
-/-- Chart-locality-free twin of
-`covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le`. -/
 private lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -1045,8 +959,6 @@ private lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
         ENNReal.ofReal_mul hCcut_nn]
       ring
 
-/-- Chart-locality-free twin of
-`covGradChristoffelLimit_memWkp_and_wkpNorm_le`. -/
 private lemma covGradChristoffelLimit_memWkp_and_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -1225,8 +1137,6 @@ private lemma covGradChristoffelLimit_memWkp_and_wkpNorm_le
     _ = ENNReal.ofReal (∑ p : TensorCompIdx (E := E) r s, Cf p) * Saggr := by
       rw [ENNReal.ofReal_sum_of_nonneg (fun p _ => hCf_nn p)]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartWeakPartial_wkpNorm_le_uniform`. -/
 private lemma eigenvectorChartWeakPartial_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
     (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1350,8 +1260,6 @@ private lemma eigenvectorChartWeakPartial_wkpNorm_le_uniform
           covGradAggregate (I := I) (M := M) g r s i K β := by
       rw [hμ_norm]
 
-/-- Chart-locality-free twin of
-`covGradPouLeibnizCrossLimit_wkpNorm_le_uniform`. -/
 private lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
     (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1624,8 +1532,6 @@ private lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
       congr 2
       rw [hμ_norm]; ring
 
-/-- Chart-locality-free twin of
-`covGradChristoffelLimit_wkpNorm_le_uniform`. -/
 private lemma covGradChristoffelLimit_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
     (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1818,9 +1724,6 @@ private lemma covGradChristoffelLimit_wkpNorm_le_uniform
       rw [← ENNReal.ofReal_sum_of_nonneg
         (fun p _ => mul_nonneg (hCcoef_nn p) (norm_nonneg _)), h_real]
 
-/-- **Quantitative iterated Sobolev norm bound for the covariant-gradient
-partition-of-unity chart component (chart-locality-free).** Chart-locality-free
-twin of `eigenvectorCovGrad_pou_wkpNorm_le`. -/
 theorem eigenvectorCovGrad_pou_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -2055,9 +1958,6 @@ theorem eigenvectorCovGrad_pou_wkpNorm_le
       rw [← mul_assoc, ← ofReal_norm (x := i.fst.val),
         ← ENNReal.ofReal_mul (norm_nonneg _)]
 
-/-- **Constant-uniform iterated Sobolev norm bound for the covariant-gradient
-partition-of-unity chart component (chart-locality-free).** Chart-locality-free
-twin of `eigenvectorCovGrad_pou_wkpNorm_le_uniform`. -/
 theorem eigenvectorCovGrad_pou_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (K : ℕ)
     (h_pou_phi : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)

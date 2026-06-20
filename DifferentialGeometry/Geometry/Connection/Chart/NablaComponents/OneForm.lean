@@ -1,12 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 
-/-!
-# Coordinate one-form covariant derivative components
-
-This file contains the `(0,1)` coordinate-frame component formulas and the
-moving-slot product-rule bridges for `nabla0SFun 1`.
--/
-
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
@@ -29,8 +22,6 @@ variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace Real]
 
-/-- Coordinate-frame component formula for the covariant derivative of a one-form,
-with the derivative term kept in the chart-model form used by `nabla0SFun`. -/
 theorem nabla0S_one_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -71,8 +62,6 @@ theorem nabla0S_one_model_coord
   simp only [modelDeriv0SAt]
   simp_rw [tensor0SModelAt_coordComponent0SAt (I := I)]
 
-/-- Coordinate-frame component formula for one-forms, after supplying the
-derivative-identification bridge. -/
 theorem nabla0S_one_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -92,13 +81,6 @@ theorem nabla0S_one_coord
             coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => k) := by
   rw [nabla0S_one_model_coord (I := I) cov X α x₀ j, hderiv]
 
-/-- Evaluation form of `nabla0S_one_coord` on a coordinate-frame basis vector.
-
-This is the coordinate-frame bridge from the canonical raw derivative
-`nabla0SFun` to the usual one-form Christoffel component formula.  It is not the
-intrinsic moving-vector-field identity
-`(∇_X α)(Z) = X(α Z) - α(∇_X Z)`; that identity additionally needs a product
-rule for differentiating the scalar pairing `p ↦ α p (Z p)`. -/
 theorem nabla0SFun_one_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -118,8 +100,6 @@ theorem nabla0SFun_one_eval_coordFrame
   simpa [coordComponent0SAt, component0S] using
     nabla0S_one_coord (I := I) cov X α x₀ hderiv j
 
-/-- Evaluate a one-form on an arbitrary tangent vector by expanding the vector
-in the coordinate-frame basis at the base point. -/
 theorem tensor0S_one_eval_coordFrame_sum
     {x₀ : M}
     (αx : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x₀)
@@ -180,7 +160,6 @@ theorem tensor0S_one_eval_coordFrame_sum
           (coordinateFrameAt_toBasis (I := I) x₀).coord j Z *
             αx (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j x₀) := by
           simp [b]
-
 
 private theorem tensor0S_one_eval_finset_sum
     {ι : Type*} {x : M}
@@ -275,8 +254,6 @@ private theorem extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
-/-- Finset-sum linearity of `cov`: if each summand is differentiable at `x`, then
-`cov` distributes over the finset sum. -/
 theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
@@ -410,12 +387,6 @@ private theorem oneForm_pair_coordFrame_eventually
             funext q; fin_cases q; simp
           rw [hbase, smul_eq_mul]
 
-/-- Product rule for the scalar pairing `p ↦ α_p (Z_p)` in the coordinate
-frame.  This is the previously external `hpair` input for the moving-slot
-one-form formula.  The remaining hypotheses only say that the coordinate
-coefficient functions and fixed-slot tensor components are differentiable at
-the base point, and identify `dz` with the directional derivatives of the
-coefficients of `Z`. -/
 theorem oneForm_pair_coordFrame_product_rule
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -489,9 +460,6 @@ theorem oneForm_pair_coordFrame_product_rule
   · intro j _
     exact (hdiff_z j).mul (hdiff_α j)
 
-/-- Coordinate expansion of `α(∇_X Z)` in the coordinate frame.  This is the
-connection-side product rule matching `oneForm_pair_coordFrame_product_rule`.
--/
 theorem oneForm_covariantDerivative_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -728,9 +696,6 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
     rw [hsmul2]
     simp [h_eval_cov, smul_eq_mul]]
 
-/-- Coordinate expansion of `nabla0SFun 1` evaluated on an arbitrary tangent
-vector.  This is the fixed-coordinate-slot theorem plus multilinearity in the
-slot being evaluated. -/
 theorem nabla0SFun_one_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -754,15 +719,6 @@ theorem nabla0SFun_one_eval_coordFrame_expanded
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [nabla0SFun_one_eval_coordFrame (I := I) cov X α x₀ hderiv j]
 
-/-- Coordinate product-rule reduction for the intrinsic one-form formula.
-
-The two hypotheses are the genuine moving-slot product-rule inputs:
-* `hpair` differentiates the scalar pairing `p ↦ α_p (Z_p)` in coordinates;
-* `hcovZ` gives the coordinate formula for `α(∇_X Z)`.
-
-Once those are supplied, the canonical derivative `nabla0SFun 1` satisfies the
-textbook evaluation formula
-`(∇_X α)(Z) = X(α Z) - α(∇_X Z)` at the base point. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -802,8 +758,6 @@ theorem nabla0SFun_one_eval_of_coordFrame_product
   simp_rw [Finset.sum_add_distrib]
   ring
 
-/-- Version of `nabla0SFun_one_eval_of_coordFrame_product` with the scalar
-pairing product rule discharged by `oneForm_pair_coordFrame_product_rule`. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -846,10 +800,6 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rule
       (I := I) X Z α x₀ z dz hz hdz hdiff_z hdiff_α)
     hcovZ
 
-/-- Version of `nabla0SFun_one_eval_of_coordFrame_product` with both moving-slot
-product rules discharged in the coordinate frame.  This is the main
-coordinate-frame bridge toward the textbook one-form formula
-`(∇_X α)(Z) = X(α Z) - α(∇_X Z)`. -/
 theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -881,12 +831,6 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (oneForm_covariantDerivative_coordFrame_product_rule
       (I := I) cov X Z α x₀ z dz hz hdz hdiff_z)
 
-/-- Coordinate-frame moving-slot evaluation formula for a one-form.
-
-This discharges the auxiliary coordinate coefficient choices from
-`nabla0SFun_one_eval_of_coordFrame_product_rules`.  The remaining hypotheses
-are exactly the fixed-slot model-derivative bridge and the differentiability of
-the coordinate coefficient functions appearing in the two product rules. -/
 theorem nabla0SFun_one_eval_coordFrame_moving
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

@@ -1,11 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.PointwiseLocal
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-/-! # Chart-local Picard data and uniform existence
-
-The `ChartLocalPicardData` structure packaging per-base-point chart-coordinate
-Picard–Lindelöf flow data, and the uniform-existence consequences it supports. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle
@@ -17,30 +12,17 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-Per-base-point chart-α-coord neighborhood and flow data, as produced by
-`time_dependent_vf_chart_local_picard_with_lipschitz`. Recorded as a single
-structure so that the uniform-existence theorem can take per-α data as a
-function `M → ChartLocalPicardData` and extract a uniform horizon by a
-compactness / finite-subcover argument.
-
-* `T` is the per-α positive time horizon.
-* `r` is the per-α positive chart-coord radius around `I ((chartAt H α) α)`.
-* `flow` is the chart-coord local flow `E → ℝ → E`; only its values for
-  initial points `y` in the closed ball of radius `r` are constrained.
--/
 structure ChartLocalPicardData
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) where
-  /-- Positive time horizon for the chart-α-local flow. -/
+  
   T : ℝ
   T_pos : 0 < T
-  /-- Positive chart-coord radius around `I ((chartAt H α) α)`. -/
+  
   r : ℝ
   r_pos : 0 < r
-  /-- Chart-α-coord flow `E → ℝ → E`. -/
+  
   flow : E → ℝ → E
-  /-- Initial condition and ODE on the closed ball of radius `r` for time
-  `[0, T]`. -/
+  
   flow_spec : ∀ y ∈ Metric.closedBall (I ((chartAt H α) α)) r,
     flow y 0 = y ∧
     ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -48,18 +30,6 @@ structure ChartLocalPicardData
         ((X t ((chartAt H α).symm (I.symm (flow y t)))) : E)
         (Set.Icc (0 : ℝ) T) t
 
-/--
-The chart-α-coord open neighborhood associated to `ChartLocalPicardData` for
-`X` at `α`: the pull-back of the open ball of radius `data.r` around
-`I ((chartAt H α) α)` under the chart map, intersected with the chart
-source. By construction, every point `x` in this set has chart image
-`(chartAt H α) x` whose model embedding `I _` lies in the open `r`-ball,
-hence in the closed `r`-ball used by `flow_spec`.
-
-For convenience this is `open` in `M` (the intersection of an open chart
-source with the pre-image of an open set under a continuous restriction)
-and contains `α`.
--/
 def ChartLocalPicardData.U
     {X : ℝ → ∀ x : M, TangentSpace I x} {α : M}
     (data : ChartLocalPicardData X α) : Set M :=
@@ -84,22 +54,6 @@ lemma ChartLocalPicardData.mem_U_self
   refine ⟨mem_chart_source H α, ?_⟩
   exact Metric.mem_ball_self data.r_pos
 
-/--
-Uniform existence-time on a closed manifold from per-base-point chart-α-local
-Picard data: given chart-α-coord local flows at every base point (with
-per-α positive time horizon `Tα` and chart-coord radius `rα`), compactness
-of `M` lets us extract a finite cover by the chart-α-coord open
-neighborhoods and take the minimum of the horizons. The conclusion is a
-single uniform `T > 0`, a finite set `S ⊆ M` of base points whose
-chart-α-coord open neighborhoods cover `M`, and per-α chart-α-coord local
-flows on `[0, T]` with the right-handed ODE in chart coordinates.
-
-This is the chart-cover form of "uniform existence time": it deliberately
-avoids the manifold-flow form (`HasMFDerivWithinAt` on `M`) to side-step
-chart-at-`y` convention issues; the downstream `Glue` step assembles a
-single global flow from these per-α chart-coord flows via a Grönwall
-uniqueness argument in chart coordinates.
--/
 theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α) :

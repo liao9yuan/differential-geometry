@@ -1,40 +1,16 @@
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.MetricSpace.Lipschitz
 
-/-!
-# Radial retraction onto a closed ball
-
-For a real inner-product space `X` and a radius `R ≥ 0`, the radial retraction
-`ballRetraction R x = (min 1 (R / ‖x‖)) • x` rescales any point outside the closed `R`-ball
-back onto its boundary while fixing every point inside. It is the metric projection onto the
-closed ball, hence nonexpansive. We record three properties:
-
-* `ballRetraction_mem_closedBall` — the image lands in the closed `R`-ball;
-* `ballRetraction_eq_self_of_mem` — the map fixes the closed `R`-ball;
-* `lipschitzWith_ballRetraction` — the map is `1`-Lipschitz.
-
-The `1`-Lipschitz bound is proved directly: there is no ready-made nonexpansiveness lemma for the
-metric projection onto a general convex set in Mathlib (only onto closed subspaces). The proof
-reduces, via the polarisation identity, to the elementary fact that `t ↦ min t R` is `1`-Lipschitz
-on `ℝ`.
--/
-
 open scoped InnerProductSpace
 
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
 
-/-- The radial retraction onto the closed ball of radius `R` centred at the origin:
-points inside the ball are fixed, points outside are rescaled radially onto the boundary.
-At the origin (`‖x‖ = 0`) the scalar `min 1 (R / ‖x‖)` is applied to `0`, giving `0`, so the map
-is total and continuous. -/
 noncomputable def ballRetraction (R : ℝ) (x : X) : X := (min 1 (R / ‖x‖)) • x
 
-/-- The scaling factor lies in `[0, 1]` when `R ≥ 0`. -/
 private theorem ballRetraction_factor_nonneg {R : ℝ} (hR : 0 ≤ R) (x : X) :
     0 ≤ min 1 (R / ‖x‖) :=
   le_min zero_le_one (div_nonneg hR (norm_nonneg x))
 
-/-- The scaling factor times the norm equals `min ‖x‖ R`. -/
 private theorem ballRetraction_factor_mul_norm {R : ℝ} (hR : 0 ≤ R) (x : X) :
     (min 1 (R / ‖x‖)) * ‖x‖ = min ‖x‖ R := by
   rcases eq_or_lt_of_le (norm_nonneg x) with hx | hx
@@ -42,14 +18,12 @@ private theorem ballRetraction_factor_mul_norm {R : ℝ} (hR : 0 ≤ R) (x : X) 
   · rw [min_mul_of_nonneg _ _ (le_of_lt hx), one_mul, div_mul_cancel₀]
     exact ne_of_gt hx
 
-/-- The radial retraction lands in the closed ball of radius `R`. -/
 theorem ballRetraction_mem_closedBall {R : ℝ} (hR : 0 ≤ R) (x : X) :
     ‖ballRetraction R x‖ ≤ R := by
   rw [ballRetraction, norm_smul, Real.norm_eq_abs,
     abs_of_nonneg (ballRetraction_factor_nonneg hR x), ballRetraction_factor_mul_norm hR]
   exact min_le_right _ _
 
-/-- The radial retraction fixes every point of the closed ball of radius `R`. -/
 theorem ballRetraction_eq_self_of_mem {R : ℝ} {x : X} (hx : ‖x‖ ≤ R) :
     ballRetraction R x = x := by
   rw [ballRetraction]
@@ -58,7 +32,6 @@ theorem ballRetraction_eq_self_of_mem {R : ℝ} {x : X} (hx : ‖x‖ ≤ R) :
   · have : (1 : ℝ) ≤ R / ‖x‖ := (one_le_div hx0).2 hx
     rw [min_eq_left this, one_smul]
 
-/-- The radial retraction onto a closed ball is `1`-Lipschitz. -/
 theorem lipschitzWith_ballRetraction {R : ℝ} (hR : 0 ≤ R) :
     LipschitzWith 1 (ballRetraction (X := X) R) := by
   refine LipschitzWith.of_dist_le_mul fun x y => ?_

@@ -10,30 +10,6 @@ import Mathlib.MeasureTheory.Measure.Map
 import Mathlib.MeasureTheory.Integral.Lebesgue.Map
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-/-!
-# Bridge between the Riemannian measure and Euclidean volume on chart targets
-
-For a function `u : M → ℝ` on a smooth Riemannian manifold supported in a single
-chart `α`, this file provides quantitative comparisons between
-
-* the global Riemannian-measure `eLpNorm` of `u` on `M`, and
-* the Euclidean-volume `eLpNorm` of the chart-pushed function on the chart target
-  inside `EuclideanSpace ℝ (Fin (Module.finrank ℝ E))`.
-
-The chart-pushed function comes in two flavours: a *raw* version
-`chartPushedRaw I α u`, which composes `u` with the inverse chart and
-`toEuclidean.symm`, and the partition-of-unity-weighted version `chartPushed`
-already defined in `Sobolev/Chart/Defs.lean`. The raw version is the natural
-target
-for the chart-target Euclidean integral, since it carries no partition-of-unity
-weight.
-
-The constants depend only on the chart `α` and the metric `g` (specifically:
-the Haar / volume scale factor on the model space, and the supremum / infimum
-of the smooth positive density `chartDensity g α` on the compact image of
-`tsupport u`).
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -56,9 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (I)
 
-/-- Raw chart pushforward of `u : M → ℝ` at chart `α`, with the
-partition-of-unity weight removed. Outside the toEuclidean image of the chart
-target the value is `0`. -/
 def chartPushedRaw (α : M) (u : M → ℝ) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ := by
   classical
@@ -69,7 +42,6 @@ def chartPushedRaw (α : M) (u : M → ℝ) :
 
 variable {I}
 
-/-- On the chart target image, the raw chart pushforward is `u ∘ symm`. -/
 lemma chartPushedRaw_apply_of_mem (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -78,7 +50,6 @@ lemma chartPushedRaw_apply_of_mem (α : M) (u : M → ℝ)
   classical
   unfold chartPushedRaw; simp [hy]
 
-/-- Outside the chart target image, the raw chart pushforward is zero. -/
 lemma chartPushedRaw_apply_of_notMem (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -86,29 +57,24 @@ lemma chartPushedRaw_apply_of_notMem (α : M) (u : M → ℝ)
   classical
   unfold chartPushedRaw; simp [hy]
 
-/-- The raw pushforward vanishes outside the chart target image. -/
 lemma chartPushedRaw_eq_zero_off_chartTargetEuclid (α : M) (u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     chartPushedRaw I α u y = 0 :=
   chartPushedRaw_apply_of_notMem α u hy
 
-/-- The extended-chart target is Borel-measurable in `E`. -/
 private lemma extChartAt_target_measurableSet (α : M) :
     MeasurableSet (extChartAt I α).target :=
   DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
     (I := I) (M := M) α
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- `toEuclidean` is a measurable embedding (since it is a homeomorphism). -/
 private lemma toEuclidean_measurableEmbedding :
     MeasurableEmbedding (toEuclidean : E → EuclN E) :=
   (toEuclidean (E := E)).toHomeomorph.toMeasurableEquiv.measurableEmbedding
 
-/-- The chart-target image (under `toEuclidean`) is measurable. -/
 lemma chartTargetEuclid_measurableSet (α : M) :
     MeasurableSet (chartTargetEuclid (I := I) (M := M) α) := by
   unfold chartTargetEuclid
@@ -116,8 +82,6 @@ lemma chartTargetEuclid_measurableSet (α : M) :
     extChartAt_target_measurableSet (I := I) (M := M) α
   exact (toEuclidean_measurableEmbedding (E := E)).measurableSet_image.mpr hT
 
-/-- The chart-target image (under `toEuclidean`) coincides with the preimage of
-the chart target under `toEuclidean.symm`. -/
 lemma chartTargetEuclid_eq_preimage_symm (α : M) :
     chartTargetEuclid (I := I) (M := M) α =
       (toEuclidean (E := E)).symm ⁻¹' (extChartAt I α).target := by
@@ -129,8 +93,6 @@ lemma chartTargetEuclid_eq_preimage_symm (α : M) :
     exact hx
   · exact (toEuclidean (E := E)).apply_symm_apply y
 
-/-- `(extChartAt I α).symm ∘ toEuclidean.symm` sends `chartTargetEuclid α`
-into `(chartAt H α).source`. -/
 lemma symm_toEuclidean_symm_mem_chartAtSource (α : M)
     {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -143,8 +105,6 @@ lemma symm_toEuclidean_symm_mem_chartAtSource (α : M)
   rwa [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
     (I := I) (M := M)] at hsource
 
-/-- `(extChartAt I α).symm ∘ toEuclidean.symm` is continuous on
-`chartTargetEuclid α`. -/
 lemma continuousOn_symm_toEuclideanSymm (α : M) :
     ContinuousOn
       (fun y : EuclN E =>
@@ -158,8 +118,6 @@ lemma continuousOn_symm_toEuclideanSymm (α : M) :
   exact (continuousOn_extChartAt_symm (I := I) α).comp
     (toEuclidean (E := E)).symm.continuous.continuousOn hy_target
 
-/-- The pushforward of `modelHaar` along the continuous linear equivalence
-`toEuclidean : E ≃L[ℝ] EuclN E` is itself an additive Haar measure on `EuclN E`. -/
 private instance modelHaar_map_toEuclidean_isAddHaarMeasure :
     MeasureTheory.Measure.IsAddHaarMeasure
       (Measure.map (toEuclidean : E ≃L[ℝ] EuclN E)
@@ -168,8 +126,6 @@ private instance modelHaar_map_toEuclidean_isAddHaarMeasure :
     (toEuclidean : E ≃L[ℝ] EuclN E)
     (DifferentialGeometry.Integral.Measure.modelHaar (E := E))
 
-/-- The Haar scaling constant: a positive `ℝ≥0` such that
-`Measure.map toEuclidean modelHaar = c • volume` on Euclidean space. -/
 noncomputable def euclideanHaarFactor (E : Type*)
     [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] :
     ℝ≥0 :=
@@ -180,27 +136,21 @@ noncomputable def euclideanHaarFactor (E : Type*)
       (DifferentialGeometry.Integral.Measure.modelHaar (E := E)))
     (volume : Measure (EuclN E))
 
-/-- The Haar scaling constant is positive. -/
 lemma euclideanHaarFactor_pos :
     0 < euclideanHaarFactor E :=
   MeasureTheory.Measure.addHaarScalarFactor_pos_of_isAddHaarMeasure _ _
 
-/-- The Haar scaling constant is nonzero (as `ℝ≥0`). -/
 lemma euclideanHaarFactor_ne_zero :
     euclideanHaarFactor E ≠ 0 :=
   ne_of_gt euclideanHaarFactor_pos
 
-/-- The Haar scaling constant viewed as `ℝ≥0∞` is nonzero. -/
 lemma euclideanHaarFactor_ennreal_ne_zero :
     (euclideanHaarFactor E : ℝ≥0∞) ≠ 0 := by
   exact_mod_cast euclideanHaarFactor_ne_zero
 
-/-- The Haar scaling constant viewed as `ℝ≥0∞` is finite. -/
 lemma euclideanHaarFactor_ennreal_ne_top :
     (euclideanHaarFactor E : ℝ≥0∞) ≠ ⊤ := ENNReal.coe_ne_top
 
-/-- The pushforward equation: `Measure.map toEuclidean modelHaar = c_E • volume`
-on Euclidean space, where `c_E = euclideanHaarFactor E`. -/
 private lemma map_toEuclidean_modelHaar_eq_smul_volume :
     Measure.map (toEuclidean : E → EuclN E)
         (DifferentialGeometry.Integral.Measure.modelHaar (E := E)) =
@@ -208,9 +158,6 @@ private lemma map_toEuclidean_modelHaar_eq_smul_volume :
   classical
   exact MeasureTheory.Measure.isAddLeftInvariant_eq_smul _ _
 
-/-- Auxiliary lintegral identity: pushing a `modelHaar`-integral on `E`
-through `toEuclidean` to a `Measure.map toEuclidean modelHaar`-integral on
-`EuclN E`. -/
 private lemma lintegral_modelHaar_eq_lintegral_map_toEuclidean
     (G : E → ℝ≥0∞) (hG : Measurable G) :
     ∫⁻ x, G x ∂(DifferentialGeometry.Integral.Measure.modelHaar (E := E)) =
@@ -227,8 +174,6 @@ private lemma lintegral_modelHaar_eq_lintegral_map_toEuclidean
   refine MeasureTheory.lintegral_congr (fun x => ?_)
   rw [ContinuousLinearEquiv.symm_apply_apply]
 
-/-- Lintegral identity: pushing the integral on `E` to one on `EuclN E`
-weighted by the Haar scaling constant times `volume`. -/
 private lemma lintegral_modelHaar_eq_const_smul_lintegral_volume
     (G : E → ℝ≥0∞) (hG : Measurable G) :
     ∫⁻ x, G x ∂(DifferentialGeometry.Integral.Measure.modelHaar (E := E)) =
@@ -241,16 +186,12 @@ private lemma lintegral_modelHaar_eq_const_smul_lintegral_volume
   rw [MeasureTheory.lintegral_smul_measure]
   rfl
 
-/-- Globalisation of `(extChartAt I α).symm`, agreeing with it on the chart
-target and equal to a fixed default value off the target. The resulting function
-is Borel measurable on all of `E`. The default value is `α` itself. -/
 private noncomputable def extChartAtSymmGlob (α : M) : E → M := by
   classical
   exact (extChartAt I α).target.piecewise
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-/-- The globalised inverse chart agrees with the inverse chart on the chart target. -/
 private lemma extChartAtSymmGlob_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlob (I := I) α y = (extChartAt I α).symm y := by
@@ -260,7 +201,6 @@ private lemma extChartAtSymmGlob_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-/-- The globalised inverse chart is Borel measurable on all of `E`. -/
 private lemma extChartAtSymmGlob_measurable (α : M) :
     Measurable (extChartAtSymmGlob (I := I) (M := M) α) := by
   classical
@@ -270,9 +210,6 @@ private lemma extChartAtSymmGlob_measurable (α : M) :
     continuousOn_const
     (extChartAt_target_measurableSet (I := I) (M := M) α)
 
-/-- The chart-local lintegral of any measurable `F : M → ℝ≥0∞` equals the
-Euclidean integral over the chart target image weighted by the chart density,
-times the Haar scaling factor. -/
 lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -396,7 +333,6 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
       exact hy
     rw [Set.indicator_of_notMem hy_target, Set.indicator_of_notMem hy]
 
-/-- The chart density is strictly positive at points of the chart target. -/
 lemma chartDensity_pos_on_target
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -410,7 +346,6 @@ lemma chartDensity_pos_on_target
   rwa [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
     (I := I) (M := M)] at hsource
 
-/-- Continuity of the chart density (composed with the chart inverse) on the chart target. -/
 lemma chartDensity_symm_continuousOn_target
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn
@@ -426,8 +361,6 @@ lemma chartDensity_symm_continuousOn_target
   rwa [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
     (I := I) (M := M)] at hsource
 
-/-- Existence of a strict positive sup bound on a nonempty compact subset of the chart
-target. -/
 lemma exists_sup_chartDensity_on_compact_pos
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hKne : K.Nonempty)
@@ -448,8 +381,6 @@ lemma exists_sup_chartDensity_on_compact_pos
     chartDensity_pos_on_target (I := I) (M := M) g α (hK_sub hy₀_mem),
     fun y hy => hy₀_max hy⟩
 
-/-- Existence of a strict positive inf bound on a nonempty compact subset of the chart
-target. -/
 lemma exists_inf_chartDensity_on_compact
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK_compact : IsCompact K) (hKne : K.Nonempty)
@@ -470,8 +401,6 @@ lemma exists_inf_chartDensity_on_compact
     chartDensity_pos_on_target (I := I) (M := M) g α (hK_sub hy₀_mem),
     fun y hy => hy₀_min hy⟩
 
-/-- If `tsupport u ⊆ chartAt α source`, then `(extChartAt I α) '' (tsupport u)`
-is compact in `E` and contained in the chart target. -/
 lemma image_extChartAt_tsupport_compact_subset_target
     [CompactSpace M] {u : M → ℝ} {α : M}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -493,7 +422,6 @@ lemma image_extChartAt_tsupport_compact_subset_target
       exact hu_supp hx
     exact (extChartAt I α).map_source hxsrc
 
-/-- The toEuclidean image of `(extChartAt I α) '' (tsupport u)` is compact in `EuclN E`. -/
 lemma image_toEuclidean_extChartAt_tsupport_compact
     [CompactSpace M] {u : M → ℝ} {α : M}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -502,8 +430,6 @@ lemma image_toEuclidean_extChartAt_tsupport_compact
   ((image_extChartAt_tsupport_compact_subset_target (I := I) (M := M)
     (u := u) (α := α) hu_supp).1).image (toEuclidean (E := E)).continuous
 
-/-- The toEuclidean image of `(extChartAt I α) '' (tsupport u)` is contained in
-`chartTargetEuclid α`. -/
 lemma image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     {u : M → ℝ} {α : M}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -520,8 +446,6 @@ lemma image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     exact hu_supp hx
   exact (extChartAt I α).map_source hxsrc
 
-/-- The raw chart pushforward vanishes (within the chart target) outside
-`toEuclidean '' ((extChartAt I α) '' (tsupport u))`. -/
 lemma chartPushedRaw_eq_zero_off_image_tsupport
     {u : M → ℝ} (α : M)
     {y : EuclN E} (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -543,9 +467,6 @@ lemma chartPushedRaw_eq_zero_off_image_tsupport
   refine ⟨z, ⟨(extChartAt I α).symm z, ?_, hz_eq⟩, hzy⟩
   exact subset_tsupport _ (Function.mem_support.mpr hu_ne)
 
-/-- For `u` supported in `chartAt α source`, the lintegral of `‖u‖ₑ ^ p`
-under `riemannianMeasure g (chartAtlasPOU I M)` agrees with the lintegral
-under `chartLocalMeasure g α`. -/
 lemma lintegral_enorm_pow_riemannianMeasure_eq_chartLocalMeasure_of_supportIn
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -566,10 +487,6 @@ lemma lintegral_enorm_pow_riemannianMeasure_eq_chartLocalMeasure_of_supportIn
     rw [hu_x_zero]
     rw [enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
 
-/-- Combined bridge identity: for `u : M → ℝ` supported in `chartAt α source`
-on a closed manifold, the lintegral of `‖u‖ₑ ^ p` against the Riemannian
-measure equals the Euclidean integral of `density · ‖chartPushedRaw u‖ₑ ^ p`
-over `chartTargetEuclid α`, with the Haar scaling factor. -/
 lemma lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -599,8 +516,6 @@ lemma lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
     ENNReal.ofReal _ * ‖chartPushedRaw I α u y‖ₑ ^ p
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy]
 
-/-- Forward bridge inequality at the level of lintegrals:
-`∫⁻ ‖u‖ₑ^p dμ_g ≤ const · ∫⁻ ‖chartPushedRaw u‖ₑ^p dvolume`. -/
 theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -727,13 +642,6 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
         fun _ => (‖(0 : ℝ)‖ₑ : ℝ≥0∞) ^ p by funext x; rfl, hLHS_zero]
     exact zero_le _
 
-/-- Bridge inequality at the level of `eLpNorm`s, using the raw chart pushforward
-on the Euclidean side. For `1 ≤ p`, `p ≠ ∞`, and a `u : M → ℝ` supported in the
-chart-α source on a closed manifold, we have
-
-`eLpNorm u p μ_g ≤ ENNReal.ofReal C_α^{1/p} · eLpNorm chartPushedRaw u p volume`
-
-where `C_α` depends on the chart and the metric only. -/
 theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -791,8 +699,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
-/-- Reverse bridge inequality at the level of lintegrals:
-`∫⁻ ‖chartPushedRaw u‖ₑ^p dvolume ≤ const · ∫⁻ ‖u‖ₑ^p dμ_g`. -/
 theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -937,7 +843,6 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
     rw [hLHS_zero]
     exact zero_le _
 
-/-- Reverse bridge inequality at the level of `eLpNorm`s. -/
 theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -987,10 +892,6 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
-/-- Forward bridge inequality with a uniform constant. The constant `C_K`
-depends only on a fixed compact set `K ⊆ (extChartAt I α).target`, not on the
-particular function `u`. As long as `(extChartAt I α) '' (tsupport u) ⊆ K`,
-the bound holds with this fixed constant. -/
 theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_uniform
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -1094,7 +995,6 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_unifor
           rw [ENNReal.ofReal_coe_nnreal]
         · exact NNReal.coe_nonneg _
 
-/-- Forward bridge inequality at the level of `eLpNorm`s with a uniform constant. -/
 theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -1173,11 +1073,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Reverse bridge inequality at the level of lintegrals with a uniform
-constant on the Euclidean side.  The constant `C_K` depends only on a fixed
-compact set `K ⊆ (extChartAt I α).target`, not on the particular function `u`.
-As long as `(extChartAt I α) '' (tsupport u) ⊆ K`, the bound holds with this
-fixed constant. -/
 theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure_uniform
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -1302,8 +1197,6 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure_unifor
     gcongr
   rwa [ENNReal.mul_le_iff_le_inv hD_pos hD_ne_top] at h_step
 
-/-- Reverse bridge inequality at the level of `eLpNorm`s with a uniform
-constant on the Euclidean side. -/
 theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -1357,8 +1250,6 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
-/-- Global Borel-measurable extension of `(extChartAt I α).symm` taking the
-fixed default value `α : M` outside the chart target. -/
 private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
   classical
   exact (extChartAt I α).target.piecewise
@@ -1383,7 +1274,6 @@ private lemma extChartAtSymmGlobal_measurable (α : M) :
     continuousOn_const
     (extChartAt_target_measurableSet (I := I) (M := M) α)
 
-/-- Measurability of `chartPushedRaw I α F` for measurable `F`. -/
 lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
     (hF_meas : Measurable F) :
     Measurable (chartPushedRaw I α F) := by
@@ -1420,16 +1310,12 @@ lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
   rw [h_piecewise]
   exact Measurable.piecewise hCT_meas h_comp measurable_const
 
-/-- Helper: `toEuclidean.symm` of a point in `chartTargetEuclid α` lies in the
-chart target. -/
 private lemma toEuclidean_symm_target_of_mem (α : M) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-/-- Pointwise on `chartTargetEuclid α`, the chart-pushed difference equals the
-difference of the chart-pushed components. -/
 private lemma chartPushedRaw_sub_pointwise (α : M) (u v : M → ℝ)
     {y : EuclN E} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPushedRaw I α (fun x => u x - v x) y =
@@ -1439,12 +1325,6 @@ private lemma chartPushedRaw_sub_pointwise (α : M) (u v : M → ℝ)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy]
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α v hy]
 
-/-- Chart-pushed image of an a.e.-zero function (under the global Riemannian
-measure on a closed manifold) is a.e. zero with respect to the Euclidean
-volume measure restricted to the chart-target image.
-
-This is the engine for transferring a.e. equality between `u, v : M → ℝ` to
-a.e. equality of their chart pushforwards on `chartTargetEuclid α`. -/
 private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -1621,9 +1501,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α d hy_in]
   exact hy hy_in
 
-/-- The main null-set transfer: for measurable `u, v : M → ℝ` with
-`u =ᵐ[μ_g] v`, their chart-pushed raw images agree a.e. with respect to the
-Euclidean volume measure restricted to `chartTargetEuclid α`. -/
 theorem chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)
@@ -1656,8 +1533,6 @@ theorem chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
   have hyz := hy hy_in
   linarith [sub_eq_zero.mp hyz]
 
-/-- The POU-weighted version: a.e. equality on `M` lifts to a.e. equality of
-`chartPushed` (with partition-of-unity weight) on the chart target. -/
 theorem chartPushed_aeEq_of_ae_eq_riemannianMeasure
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M) (α : M)

@@ -4,31 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.WeakPartial.Parti
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentL2BoundUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.IntrinsicL2Bridge
 
-/-!
-# Per-section chart-Sobolev bound for tensor scalar components, uniform in
-multi-indices
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart point
-`α : M`, and a smooth compactly-supported H¹ tensor section
-`S : SmoothCcTensorH1 g r s`, this file delivers the per-section chart-Sobolev
-norm bound
-
-  `wkpNormChart g 1 2 (tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx)
-      ≤ ENNReal.ofReal C * (‖S‖₊ + 1)`
-
-with a single non-negative constant `C` (depending on `(g, r, s, α, S)`) that
-is **uniform across the finite multi-index pair `(Idx, Jdx)`**.
-
-The bound is a strengthening of `tensorChartComponent_wkpNormChart_le_per_section`
-in `ComponentSobolevBound.lean`, which produces a constant that may vary with
-`(Idx, Jdx)`. The improvement is obtained by summing the per-multi-index
-constants over the (finite) multi-index Finset.
-
-This is the headline existential `wkpNormChart` bound consumed by the
-downstream spectral pipeline when an `(Idx, Jdx)`-uniform constant is
-required for the per-section assembly.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -60,8 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For a finite indexed family of non-negative reals, the sum dominates each
-individual element. -/
 private lemma le_sum_of_mem_finset_nonneg
     {ι : Type*} [Fintype ι]
     (f : ι → ℝ) (hf_nn : ∀ i, 0 ≤ f i) (i : ι) :
@@ -76,16 +49,6 @@ private lemma le_sum_of_mem_finset_nonneg
     Finset.sum_nonneg (fun j _ => hf_nn j)
   linarith
 
-/-- **Headline per-section bound (uniform in multi-indices).** For each
-chart point `α : M`, ranks `(r, s)`, and smooth compactly-supported H¹ tensor
-section `S : SmoothCcTensorH1 g r s`, there is a single non-negative real
-constant `C` (depending on `(g, r, s, α, S)`) such that for every multi-index
-pair `(Idx, Jdx)`, the chart-Sobolev `W^{1,2}` norm of the chart-frame scalar
-component `tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` is
-bounded by `ENNReal.ofReal C * (‖S‖₊ + 1)`.
-
-The constant `C` is uniform across the (finite) multi-index family
-`(Fin r → Fin d) × (Fin s → Fin d)` with `d = Module.finrank ℝ E`. -/
 theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :
@@ -127,9 +90,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved
     mul_le_mul_of_nonneg_right h_ofReal_le (by exact zero_le _)
   exact (hCIJ_le (Idx, Jdx)).trans h_envelope_le
 
-/-- Functional packaging of the headline bound: for each `(g, r, s, α)` the
-per-section, uniform-in-multi-index bound holds for every
-`S : SmoothCcTensorH1 g r s`. -/
 theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∀ S : SmoothCcTensorH1 g r s,
@@ -143,8 +103,6 @@ theorem tensorChartComponentScalar_wkpNormChart_le_per_section_improved_forall
   tensorChartComponentScalar_wkpNormChart_le_per_section_improved
     (I := I) (M := M) g r s α S
 
-/-- Sum across the (finite) multi-index family of the chart-Sobolev norms,
-bounded by a single non-negative constant times `(‖S‖₊ + 1)`. -/
 theorem sum_tensorChartComponentScalar_wkpNormChart_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :

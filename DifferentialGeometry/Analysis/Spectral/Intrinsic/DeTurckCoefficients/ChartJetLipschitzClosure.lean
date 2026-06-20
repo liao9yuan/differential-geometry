@@ -1,40 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedInvGramJetLipschitz
 
-/-!
-# Closure algebra for the all-order chart-jet Lipschitz property
-
-The chart-coordinate scalar fields entering the Ricci–DeTurck right-hand side
-(`chartGramOnE`, `chartInvGramOnE`, `chartChristoffel`, `chartRicciTensor`,
-`chartLieDeTurckComp`, …) are all built from the chart-Gram entries by finitely many
-additions, multiplications, scalar multiplications and partial differentiations.  Each
-such field `F(g)` obeys an **all-order chart-jet Lipschitz** estimate with a fixed
-*derivative-loss* `d`:
-```
-∀ N, ∃ C > 0, ∀ y ∈ K,
-  ‖iteratedFDerivWithin ℝ N (F g₁ − F g₂) s y‖ ≤ C · chartGramJetDiffSeminormSum (N + d) g₁ g₂ α s y
-```
-together with a uniform `Cᴺ` bound for each metric (`HasChartJetLip`).  The two pieces
-travel together because products need the plain factors uniformly bounded.
-
-This file packages the property `HasChartJetLip F d` and proves it is closed under:
-
-* constant scalar multiplication (loss unchanged),
-* addition (loss = max of the two),
-* multiplication (loss = max of the two),
-* one partial differentiation (loss `d ↦ d + 1`),
-
-with base cases the chart-Gram entry (`HasChartJetLip (chartGramOnE · α a b) 0`) and the
-inverse chart-Gram entry (`HasChartJetLip (chartInvGramOnE · α k l) 0`, from
-`exists_chartInvGramOnE_iteratedFDeriv_lipschitz_on_compact`).  These build the Christoffel,
-Ricci and Lie–DeTurck estimates by structural composition.
-
-## Main results
-
-* `HasChartJetLip` — the all-order chart-jet Lipschitz property with derivative loss `d`.
-* `HasChartJetLip.const_smul`, `.add`, `.mul`, `.partialDeriv`, `.of_le` — the closure rules.
-* `hasChartJetLip_chartGramOnE`, `hasChartJetLip_chartInvGramOnE` — the base cases.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -58,32 +23,23 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- **All-order chart-jet Lipschitz property with derivative loss `d`.**
-
-`HasChartJetLip g₁ g₂ α K F d` records that the two metric-evaluated scalar fields
-`F g₁, F g₂ : E → ℝ` are `C^∞` on the chart-target interior `s`, are uniformly `Cᴺ`-bounded
-on the compact `K` for every order, and that the order-`N` iterated derivative of their
-difference is controlled by the order-`(N + d)` chart-Gram jet-difference seminorm, with a
-single constant per order `N`, uniform over `K`. -/
 structure HasChartJetLip
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (K : Set E)
     (F : SmoothRiemannianMetric I M → E → ℝ) (d : ℕ) : Prop where
-  /-- `F g` is `C^∞` on the chart-target interior, for both metrics. -/
+  
   contDiff : ∀ g : SmoothRiemannianMetric I M,
     ContDiffOn ℝ ∞ (F g) (interior (extChartAt I α).target)
-  /-- Uniform `Cᴺ` bound on `F g` over `K`, for both metrics and every order. -/
+  
   bound : ∀ N : ℕ, ∃ B : ℝ, 0 ≤ B ∧ ∀ y ∈ K, ∀ m : ℕ, m ≤ N →
     ‖iteratedFDerivWithin ℝ m (F g₁) (interior (extChartAt I α).target) y‖ ≤ B ∧
       ‖iteratedFDerivWithin ℝ m (F g₂) (interior (extChartAt I α).target) y‖ ≤ B
-  /-- All-order chart-jet Lipschitz estimate with derivative loss `d`. -/
+  
   lip : ∀ N : ℕ, ∃ C : ℝ, 0 < C ∧ ∀ y ∈ K,
     ‖iteratedFDerivWithin ℝ N (fun z => F g₁ z - F g₂ z)
         (interior (extChartAt I α).target) y‖ ≤
       C * chartGramJetDiffSeminormSum (I := I) (M := M) (N + d) g₁ g₂ α
         (interior (extChartAt I α).target) y
 
-/-- The chart-jet Lipschitz property only depends on the metric-evaluated field, so it
-transfers along a pointwise-equal reparametrisation `F = F'`. -/
 theorem HasChartJetLip.congr
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F F' : SmoothRiemannianMetric I M → E → ℝ} {d : ℕ}
@@ -93,7 +49,6 @@ theorem HasChartJetLip.congr
   have hrw : F' = F := by funext g; exact (hFF' g).symm
   rw [hrw]; exact hF
 
-/-- The derivative loss may be increased (the seminorm sum is monotone in its order). -/
 theorem HasChartJetLip.of_le
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d d' : ℕ} (hd : d ≤ d')
@@ -105,7 +60,6 @@ theorem HasChartJetLip.of_le
   refine mul_le_mul_of_nonneg_left ?_ hC_pos.le
   exact chartGramJetDiffSeminormSum_mono (I := I) (M := M) (by omega) g₁ g₂ α _ y
 
-/-- Constant scalar multiplication preserves the chart-jet Lipschitz property. -/
 theorem HasChartJetLip.const_smul
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -160,8 +114,6 @@ theorem HasChartJetLip.const_smul
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + d) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
-/-- Addition preserves the chart-jet Lipschitz property; the derivative loss is the max
-of the two losses. -/
 theorem HasChartJetLip.add
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -218,10 +170,6 @@ theorem HasChartJetLip.add
     refine (add_le_add (hCF y hy) (hCG y hy)).trans ?_
     rw [← add_mul]
 
-/-- The order-`N` seminorm of the difference `F g₁ − F g₂` is controlled by the
-order-`(N + d)` chart-Gram jet-difference seminorm, with a single constant per order `N`.
-(Each of the `N + 1` orders is bounded by the per-order Lipschitz constant times the
-monotone-bumped seminorm.) -/
 theorem HasChartJetLip.seminorm_le
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d : ℕ}
@@ -252,8 +200,6 @@ theorem HasChartJetLip.seminorm_le
       chartGramJetDiffSeminormSum_mono (I := I) (M := M) (by omega) g₁ g₂ α s y
     exact mul_le_mul_of_nonneg_left hmono (hCl_pos l).le
 
-/-- A `HasChartJetLip` field is uniformly `Cᴺ`-bounded on `K`, packaged as a single
-bound for both metrics (the structure's `bound` field, re-exposed for products). -/
 theorem HasChartJetLip.uniformBound
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d : ℕ}
@@ -267,8 +213,6 @@ theorem HasChartJetLip.uniformBound
   · exact (hB y hy m hm).1
   · exact (hB y hy m hm).2
 
-/-- Multiplication preserves the chart-jet Lipschitz property; the derivative loss is the
-max of the two losses. -/
 theorem HasChartJetLip.mul
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -360,8 +304,6 @@ theorem HasChartJetLip.mul
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + max dF dG) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
-
-/-- One partial differentiation raises the derivative loss by exactly one. -/
 theorem HasChartJetLip.partialDeriv
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -413,9 +355,6 @@ theorem HasChartJetLip.partialDeriv
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + (d + 1)) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
-/-- **Base case: a metric-independent field has chart-jet Lipschitz with zero loss.**  If
-`F g` does not depend on `g` (here: equals a fixed `C^∞` field `f₀` on the chart-target
-interior), its difference vanishes, so the estimate holds with constant `1` and loss `0`. -/
 theorem hasChartJetLip_const
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -441,8 +380,6 @@ theorem hasChartJetLip_const
     exact mul_nonneg one_pos.le
       (chartGramJetDiffSeminormSum_nonneg (I := I) (M := M) (N + 0) g₁ g₂ α s y)
 
-/-- A finite sum of chart-jet Lipschitz fields (all of the same derivative loss `d`) is
-chart-jet Lipschitz with loss `d`. -/
 theorem HasChartJetLip.sum
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -476,9 +413,6 @@ theorem HasChartJetLip.sum
     have := (hhead.add (G := fun g => fun z => ∑ j ∈ u, F j g z) hKsub hIH)
     simpa only [max_self] using this
 
-/-- **Base case: the chart-Gram entry has chart-jet Lipschitz with zero derivative loss.**
-The single-order chart-Gram difference is one summand of the chart-Gram jet-difference
-seminorm sum, so the estimate holds with constant `1` and loss `0`. -/
 theorem hasChartJetLip_chartGramOnE
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -504,10 +438,6 @@ theorem hasChartJetLip_chartGramOnE
       norm_iteratedFDerivWithin_le_seminorm (le_refl N) _ s y
     exact h1.trans (iteratedFDerivSeminorm_gramDiff_le_sum (I := I) (M := M) N g₁ g₂ α s y a b)
 
-/-- **Base case: the inverse chart-Gram entry has chart-jet Lipschitz with zero derivative
-loss.**  The all-order estimate is `exists_chartInvGramOnE_iteratedFDeriv_lipschitz_on_compact`;
-the uniform bound and smoothness come from continuity of the inverse-Gram iterated
-derivatives on the compact `K`. -/
 theorem hasChartJetLip_chartInvGramOnE
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

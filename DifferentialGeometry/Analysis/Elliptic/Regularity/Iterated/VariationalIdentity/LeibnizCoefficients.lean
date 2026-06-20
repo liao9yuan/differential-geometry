@@ -1,66 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiated.BilinearH1Compl
 
-/-!
-# Iterated Frechet derivatives of the smooth chart-target coefficients
-
-The chart-target Leibniz cross-coefficients `weightedInvGramOnEuclid g α i j`
-and `densityOnEuclid g α` are smooth real-valued functions on the open chart
-target `chartTargetEuclid α ⊆ EuclideanSpace ℝ (Fin n)`. Their first
-coordinate Frechet derivatives are packaged as `weightedInvGramDerivOnEuclid`
-and `densityDerivOnEuclid`, and the mixed second-order derivatives as
-`weightedInvGramSecondDerivOnEuclid` and `densitySecondDerivOnEuclid`.
-
-This module generalises both layers to a single polymorphic-in-`m` recursive
-definition that produces the `m`-fold mixed Frechet derivative against an
-arbitrary multi-index `idx : Fin m → Fin n` of coordinate directions, together
-with the corresponding polymorphic smoothness, continuity, and
-boundedness-on-compact-subsets lemmas.
-
-## Indexing convention
-
-The multi-index `idx : Fin m → Fin n` encodes the differentiation directions.
-The recursive step
-
-```
-weightedInvGramMthDerivOnEuclid g α i j (m+1) idx y
-  := fderiv ℝ (weightedInvGramMthDerivOnEuclid g α i j m (Fin.init idx)) y
-        (EuclideanSpace.single (idx (Fin.last m)) 1)
-```
-
-treats the **last** entry `idx (Fin.last m)` as the **outermost** (final)
-differentiation direction. The remaining inner entries `Fin.init idx` are
-fed recursively to produce the inner `m`-fold derivative. This convention is
-chosen to match the layering used by the analogous polymorphic-in-`m`
-multi-mixed-partial machinery for chart-pushed `H¹` representatives.
-
-## Main definitions
-
-* `weightedInvGramMthDerivOnEuclid g α i j m idx` — the `m`-fold mixed Frechet
-  derivative of `weightedInvGramOnEuclid g α i j` in the directions encoded
-  by `idx`.
-* `densityMthDerivOnEuclid g α m idx` — the `m`-fold mixed Frechet
-  derivative of `densityOnEuclid g α` in the directions encoded by `idx`.
-
-## Compatibility theorems
-
-* `*_zero` — at `m = 0`, the polymorphic derivative coincides with the
-  underlying coefficient.
-* `*_one_eq_*DerivOnEuclid` — at `m = 1`, the polymorphic derivative coincides
-  with the hard-coded first-derivative version.
-* `*_two_eq_*SecondDerivOnEuclid` — at `m = 2`, the polymorphic derivative
-  coincides with the hard-coded mixed-second-derivative version.
-
-## Polymorphic regularity
-
-* `*_contDiffOn` — the `m`-fold mixed derivative is `C^∞` on
-  `chartTargetEuclid α` for arbitrary `m` and `idx`. Proof: induction on `m`,
-  using smoothness of the base coefficient at the base case and the
-  smooth-fderiv-of-smooth-function step at the inductive case.
-* `*_continuousOn` — continuity wrapper.
-* `*_bounded_on_compact` — a `C^∞` function is in particular continuous on
-  the open chart target, so attains a uniform bound on every compact subset.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -91,10 +30,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `m`-fold mixed Frechet derivative of `weightedInvGramOnEuclid g α i j`
-in the directions encoded by `idx : Fin m → Fin n`. Recursive definition:
-at the inductive step, the **last** entry `idx (Fin.last m)` is the
-outermost (final) differentiation direction. -/
 noncomputable def weightedInvGramMthDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -105,10 +40,6 @@ noncomputable def weightedInvGramMthDerivOnEuclid
           (weightedInvGramMthDerivOnEuclid g α i j m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1)
 
-/-- The `m`-fold mixed Frechet derivative of `densityOnEuclid g α` in the
-directions encoded by `idx : Fin m → Fin n`. Recursive definition: at the
-inductive step, the **last** entry `idx (Fin.last m)` is the outermost
-(final) differentiation direction. -/
 noncomputable def densityMthDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (m : ℕ), (Fin m → Fin (Module.finrank ℝ E)) → EuclN → ℝ
@@ -118,8 +49,6 @@ noncomputable def densityMthDerivOnEuclid
           (densityMthDerivOnEuclid g α m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1)
 
-/-- Definitional unfolding at `m = 0`: the polymorphic derivative reduces to
-the underlying weighted-inverse-Gram coefficient. -/
 @[simp] theorem weightedInvGramMthDerivOnEuclid_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -127,7 +56,6 @@ the underlying weighted-inverse-Gram coefficient. -/
     weightedInvGramMthDerivOnEuclid (I := I) (M := M) g α i j 0 idx y =
       weightedInvGramOnEuclid (I := I) g α i j y := rfl
 
-/-- Definitional unfolding at `m + 1`. -/
 theorem weightedInvGramMthDerivOnEuclid_succ
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (m : ℕ)
@@ -138,15 +66,12 @@ theorem weightedInvGramMthDerivOnEuclid_succ
             g α i j m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1) := rfl
 
-/-- Definitional unfolding at `m = 0`: the polymorphic density derivative
-reduces to the underlying density coefficient. -/
 @[simp] theorem densityMthDerivOnEuclid_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (idx : Fin 0 → Fin (Module.finrank ℝ E)) (y : EuclN) :
     densityMthDerivOnEuclid (I := I) (M := M) g α 0 idx y =
       densityOnEuclid (I := I) g α y := rfl
 
-/-- Definitional unfolding at `m + 1`. -/
 theorem densityMthDerivOnEuclid_succ
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (idx : Fin (m + 1) → Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -156,9 +81,6 @@ theorem densityMthDerivOnEuclid_succ
             g α m (Fin.init idx)) y)
         (EuclideanSpace.single (idx (Fin.last m)) 1) := rfl
 
-/-- The `m = 1` instance: for any `idx : Fin 1 → Fin n`, the polymorphic
-mixed Frechet derivative agrees on the nose with
-`weightedInvGramDerivOnEuclid g α i j (idx 0)`. -/
 theorem weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -168,8 +90,6 @@ theorem weightedInvGramMthDerivOnEuclid_one_eq_weightedInvGramDerivOnEuclid
   funext y
   rfl
 
-/-- The `m = 1` instance: for any `idx : Fin 1 → Fin n`, the polymorphic
-density derivative agrees on the nose with `densityDerivOnEuclid g α (idx 0)`. -/
 theorem densityMthDerivOnEuclid_one_eq_densityDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (idx : Fin 1 → Fin (Module.finrank ℝ E)) :
@@ -178,9 +98,6 @@ theorem densityMthDerivOnEuclid_one_eq_densityDerivOnEuclid
   funext y
   rfl
 
-/-- The `m = 2` instance: for any `idx : Fin 2 → Fin n`, the polymorphic
-mixed Frechet derivative agrees on the nose with
-`weightedInvGramSecondDerivOnEuclid g α i j (idx 0) (idx 1)`. -/
 theorem weightedInvGramMthDerivOnEuclid_two_eq_weightedInvGramSecondDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -197,9 +114,6 @@ theorem weightedInvGramMthDerivOnEuclid_two_eq_weightedInvGramSecondDerivOnEucli
   rw [h_init_0]
   rfl
 
-/-- The `m = 2` instance: for any `idx : Fin 2 → Fin n`, the polymorphic
-density derivative agrees on the nose with
-`densitySecondDerivOnEuclid g α (idx 0) (idx 1)`. -/
 theorem densityMthDerivOnEuclid_two_eq_densitySecondDerivOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (idx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -215,12 +129,6 @@ theorem densityMthDerivOnEuclid_two_eq_densitySecondDerivOnEuclid
   rw [h_init_0]
   rfl
 
-/-- Polymorphic smoothness of the `m`-fold mixed Frechet derivative of
-`weightedInvGramOnEuclid g α i j` on the open chart target. Proof is by
-induction on `m`: the base case is the smoothness of
-`weightedInvGramOnEuclid`, and the inductive step uses the smooth-fderiv
-characterisation of `C^∞`-on-open and post-composition with the smooth
-linear evaluation map `L ↦ L(v)`. -/
 lemma weightedInvGramMthDerivOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (m : ℕ)
@@ -268,8 +176,6 @@ lemma weightedInvGramMthDerivOnEuclid_contDiffOn
       rw [h_eq]
       exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-- Polymorphic smoothness of the `m`-fold mixed Frechet derivative of
-`densityOnEuclid g α` on the open chart target. -/
 lemma densityMthDerivOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : ℕ) (idx : Fin m → Fin (Module.finrank ℝ E)) :
@@ -315,8 +221,6 @@ lemma densityMthDerivOnEuclid_contDiffOn
       rw [h_eq]
       exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-- Continuity wrapper for `weightedInvGramMthDerivOnEuclid` on the chart
-target. -/
 lemma weightedInvGramMthDerivOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (m : ℕ)
@@ -327,7 +231,6 @@ lemma weightedInvGramMthDerivOnEuclid_continuousOn
   (weightedInvGramMthDerivOnEuclid_contDiffOn
     (I := I) (M := M) g α i j m idx).continuousOn
 
-/-- Continuity wrapper for `densityMthDerivOnEuclid` on the chart target. -/
 lemma densityMthDerivOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : ℕ) (idx : Fin m → Fin (Module.finrank ℝ E)) :
@@ -336,9 +239,6 @@ lemma densityMthDerivOnEuclid_continuousOn
   (densityMthDerivOnEuclid_contDiffOn
     (I := I) (M := M) g α m idx).continuousOn
 
-/-- The polymorphic Leibniz cross-coefficient
-`weightedInvGramMthDerivOnEuclid` is bounded on every compact subset of
-`chartTargetEuclid α`. -/
 lemma weightedInvGramMthDerivOnEuclid_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (m : ℕ)
@@ -370,8 +270,6 @@ lemma weightedInvGramMthDerivOnEuclid_bounded_on_compact
   intro y hy
   exact h_max hy
 
-/-- The polymorphic Leibniz cross-coefficient `densityMthDerivOnEuclid` is
-bounded on every compact subset of `chartTargetEuclid α`. -/
 lemma densityMthDerivOnEuclid_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (m : ℕ) (idx : Fin m → Fin (Module.finrank ℝ E))

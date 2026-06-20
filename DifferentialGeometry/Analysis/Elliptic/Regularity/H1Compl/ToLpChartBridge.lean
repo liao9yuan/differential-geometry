@@ -10,42 +10,6 @@ import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator
 import Mathlib.MeasureTheory.Measure.WithDensity
 
-/-!
-# Bridge: `Lp ℝ 2 μ_g` to chart-pulled weighted `Lp` on `EuclN`
-
-For any measurable scalar `u : M → ℝ` on a closed Riemannian manifold `(M, g)`,
-the chart-pushed function `chartPushed (chartAtlasPOU I M) α u`
-(the partition-of-unity-cut chart push) has `eLpNorm 2` against the chart-pulled
-weighted measure `(chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`
-controlled by a constant times the manifold-side `eLpNorm 2` of `u` against
-the canonical Riemannian volume measure `riemannianVolumeMeasure g`.
-
-The chart-push therefore takes any function in `MemLp 2 μ_g` (whose `Lp ℝ 2 μ_g`
-coercion provides such a representative) into `MemLp 2` of the chart-pulled
-measure.
-
-## Strategy
-
-We use the existing `Sobolev.Manifold.MeasureBridge` infrastructure that bounds
-`eLpNorm (chartPushedRaw I α (ρα·u))` against the manifold `eLpNorm u`
-through `volume.restrict (chartTargetEuclid α)`. To convert from
-`volume.restrict` to `chartPulledWeightedMeasure.restrict` (the latter has the
-chart-density factor), we use boundedness of the chart density on the compact
-set `K_α := toEuclidean '' (extChartAt I α) '' tsupport (ρα)`. Because
-`chartPushedRaw I α (ρα·u)` is supported inside `K_α`, the density bound is
-only needed on this fixed compact set (which depends on the chart `α` and
-the partition of unity, not on `u`).
-
-## Main results
-
-* `eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le`: existence of a
-  constant such that the chart-pulled weighted `eLpNorm` is bounded by the
-  constant times the manifold `eLpNorm`.
-* `chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp`: `MemLp 2`
-  of the chart-pushed function for any measurable function in
-  `MemLp 2 μ_g`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -341,11 +305,6 @@ private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hM_sup_pos]
 
-/-- For any *measurable* `u : M → ℝ`, the `eLpNorm` of `chartPushed POU α u` against
-the chart-pulled weighted measure restricted to the chart target is bounded
-above by a constant times the manifold `eLpNorm` of `u` against the Riemannian
-volume measure. The constant depends on the chart `α`, the metric `g`, and the
-partition of unity, but is uniform in `u`. -/
 theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
@@ -504,8 +463,6 @@ theorem eLpNorm_chartPushed_chartPulledWeightedMeasure_restrict_le
     rw [h_eLpNorm_zero]
     exact zero_le _
 
-/-- A globally Borel-measurable extension of `(extChartAt I α).symm` taking a
-fixed default value (here `α : M`) outside the chart target. -/
 private noncomputable def extChartAtSymmExt (α : M) : E → M := by
   classical
   exact (extChartAt I α).target.piecewise
@@ -533,9 +490,6 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-/-- For a measurable `u : M → ℝ` that is in `MemLp 2 μ_g`, the chart-pushed
-function `chartPushed POU α u` is in `MemLp 2` of the chart-pulled weighted
-measure restricted to the chart target image. -/
 theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu_meas : Measurable u)
@@ -603,9 +557,6 @@ theorem chartPushed_memLp_chartPulledWeightedMeasure_restrict_of_memLp
     apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
     exact hu_memLp.2
 
-/-- For measurable sequences `u_n, u : M → ℝ` with `u_n → u` in `Lp ℝ 2 μ_g`, the
-chart-pushed sequence converges in `eLpNorm 2` against the chart-pulled
-weighted measure restricted to the chart target. -/
 theorem chartPushed_tendsto_chartPulledWeightedMeasure
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : ℕ → M → ℝ} {u_lim : M → ℝ}

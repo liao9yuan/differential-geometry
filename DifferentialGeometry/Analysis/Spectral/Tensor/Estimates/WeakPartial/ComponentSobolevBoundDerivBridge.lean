@@ -7,39 +7,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-/-!
-# Chart-partial bridge for chart-frame scalar components
-
-For a closed Riemannian manifold `(M, g)`, a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensor g r s`, a chart `α : M`, and a
-multi-index pair `(Idx, Jdx)`, the manifold-side scalar field
-`tensorChartComponentScalar g r s S α Idx Jdx` is globally smooth and compactly
-supported on `M`. Its chart-pushed image
-`chartPushed (chartAtlasPOU I M) α (tensorChartComponentScalar g r s S α Idx Jdx)`
-on `chartTargetEuclid α` therefore admits a classical Frechet derivative;
-the chosen weak partial of the chart-pushed image (as used in the iterated
-Sobolev predicate `MemWkp` and norm `wkpNorm`) agrees almost everywhere with
-the classical partial.
-
-The aim of this file is to package, in a form usable downstream by the
-Sobolev / spectral pipeline:
-
-1. The smooth-to-classical bridge for `chosenWeakPartial' 2 k` of the
-   chart-pushed scalar component, expressing it as the classical Frechet
-   directional derivative almost everywhere.
-2. A uniform pointwise sup bound on the directional derivative of the
-   chart-pushed image of `tensorChartComponentScalar g r s S α Idx Jdx`
-   on the chart target. The bound is finite by continuity + compact
-   support of the manifold-side scalar field.
-3. The integrated `L^2` finiteness of the chosen weak partial on the chart
-   target, packaged as a per-section bound matching the style of
-   `ComponentSobolevBound`.
-
-The aux constructions stay in the manifold language whenever possible and
-use only the public smooth bridge `MemWkpChart_of_contMDiff` from the
-`Intrinsic.Equivalence` module.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -74,9 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For smooth `u : M → ℝ`, the chart-pushed image is the multiplication of
-the partition-of-unity weight (chart-pushed) and the function (chart-pushed),
-both as functions of `y : EuclN E`. -/
 private lemma chartPushed_eq_mul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     chartPushed (I := I) (M := M) ρ α u =
@@ -87,10 +51,6 @@ private lemma chartPushed_eq_mul
   funext y
   rfl
 
-/-- The smooth bridge for `chartPushed`: if `u : M → ℝ` is globally smooth on
-a closed Riemannian manifold, then the chart-pushed image
-`chartPushed (chartAtlasPOU I M) α u` is in `DeGiorgi.MemW1p 2` of
-`chartTargetEuclid α`. -/
 theorem chartPushed_memW1p_two_of_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -103,8 +63,6 @@ theorem chartPushed_memW1p_two_of_contMDiff
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h
   exact h
 
-/-- The chosen weak partial of the chart-pushed image of a smooth function is
-in `MemLp 2`. -/
 theorem chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -121,8 +79,6 @@ theorem chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     (d := Module.finrank ℝ E) hW k
 
-/-- The chosen weak partial of the chart-pushed image of a smooth function
-has finite `eLpNorm` in `L^2(chartTargetEuclid α)`. -/
 theorem eLpNorm_chosenWeakPartial'_chartPushed_lt_top_of_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -137,8 +93,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_lt_top_of_contMDiff
   (chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
     (I := I) (M := M) g α hu k).eLpNorm_lt_top
 
-/-- The chart-pushed image of `tensorChartComponentScalar g r s S α Idx Jdx`
-lies in `DeGiorgi.MemW1p 2` of `chartTargetEuclid β` for any chart `β : M`. -/
 theorem chartPushed_tensorChartComponentScalar_memW1p_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -154,9 +108,6 @@ theorem chartPushed_tensorChartComponentScalar_memW1p_two
   exact chartPushed_memW1p_two_of_contMDiff
     (I := I) (M := M) g β hsmooth
 
-/-- For every chart `β : M` and every direction `k`, the chosen weak partial
-of the chart-pushed image of `tensorChartComponentScalar g r s S α Idx Jdx`
-has finite `L^2` norm on the chart target. -/
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -177,9 +128,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
 
-/-- Per-section `L^2` bound for the chosen weak partial of the chart-pushed
-component scalar, with the `(‖S‖₊ + 1)` envelope to absorb the boundary
-case `‖S‖ = 0`. -/
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -240,7 +188,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per
           mul_le_mul_of_nonneg_left h_one_le (by exact zero_le _)
   exact h1.trans h2
 
-/-- Per-section bound for the directional partial (functional packaging). -/
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α β : M)
@@ -261,9 +208,6 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
   eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (I := I) (M := M) g r s S α β Idx Jdx k
 
-/-- Sum over directions of the `eLpNorm` of the chosen weak partial of the
-chart-pushed component scalar, bounded by a per-section constant times
-`(‖S‖₊ + 1)`. -/
 theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -322,10 +266,6 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
     rw [ENNReal.ofReal_sum_of_nonneg (fun k _ => hCk_nn k)]
   exact mul_le_mul_of_nonneg_right hENN (by exact zero_le _)
 
-/-- Decomposition of `wkpNorm 1 2` of a generic Euclidean function as the
-`L^2` of the function plus the sum-over-directions of the `L^2` norms of
-the chosen weak partials. The chart-pushed image of the manifold-side
-component scalar is one instance. -/
 theorem wkpNorm_one_two_decomposition
     (u : EuclN E → ℝ) (Ω : Set (EuclN E)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
@@ -377,8 +317,6 @@ theorem wkpNorm_one_two_decomposition
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_succ]
     simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
 
-/-- Per-section `wkpNorm 1 2` bound on the chart-pushed image of the
-manifold-side component scalar. -/
 theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α β : M)
@@ -443,7 +381,6 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
     rw [ENNReal.ofReal_add (by linarith : (0 : ℝ) ≤ a₀ + 1) hC₁_nn]
   exact mul_le_mul_of_nonneg_right h_ofReal_sum (by exact zero_le _)
 
-/-- Per-section `wkpNorm 1 2` bound (functional packaging). -/
 theorem wkpNorm_chartPushed_tensorChartComponentScalar_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α β : M)

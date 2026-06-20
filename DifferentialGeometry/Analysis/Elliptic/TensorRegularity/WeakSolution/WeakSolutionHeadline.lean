@@ -1,65 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionGlobal
 
-/-!
-# The genuine per-component scalar weak-solution headline
-
-For a smooth Riemannian metric `g` on a closed manifold `(M, g)`, a chart center
-`α : M`, tensor ranks `(r, s)`, and a component multi-index `P₀`, this file
-delivers the unconditional per-component scalar weak-solution headline of the
-connection Laplacian on `(r, s)`-tensor sections, assembled from the genuine
-analytic input: the global `H^1` weak equation
-`∫_M ⟨∇T, ∇v⟩ dμ_g = ⟨F, v⟩_{L²}` of the connection Laplacian.
-
-The companion file `WeakSolution.lean` proves the hypothesis-bearing form
-`tensorComponent_isSmoothWeakSolution_of_chartIdentity`: it *takes* a chart
-bilinear identity for the principal-part form `tensorPrincipalForm` and concludes
-the Euclidean chart component is a smooth weak solution. `WeakSolutionGlobal.lean`
-ships the explicit, test-function-independent right-hand side
-`tensorComponentWeakRHS`. This file supplies the missing chart bilinear identity
-from the global weak equation and ships the headline
-`tensorComponent_isSmoothWeakSolution`.
-
-## The assembly
-
-Given the global weak equation for every smooth compactly-supported test
-section, the chart bilinear identity is obtained by substituting the
-inverse-Gram-rotated test section `rotatedTestSection g r s α P₀ χ` for the test
-section, where `χ := chartTestPullback I α φ` is the manifold-side chart bump
-attached to a Euclidean test function `φ`.
-
-* The left-hand side chart-pulls
-  (`tensorCovDerivPointwiseInner_integral_chart_pull`) to a chart-Euclidean
-  integral of `densityOnEuclid · (covPrincipalIntegrand + covLowerOrderIntegrand)`.
-* The principal part collapses (`covPrincipalIntegrand_rotated_collapse`) to the
-  single-component scalar elliptic principal integrand plus the first-order
-  rotation remainder; the scalar principal integrand, density-weighted, is the
-  `principalIntegrand` of `tensorPrincipalForm` (`weightedInvGram_principalIntegrand_eq`,
-  globalised off the chart-interior compact set `K` by the support hypothesis
-  on the chart component).
-* The component-coupled lower-order remainder collapses
-  (`covLowerOrderIntegrand_rotated_collapse`) to a chart-bump value term plus a
-  chart-bump-gradient term; the gradient term is integrated by parts
-  (`chartTarget_integral_byParts`).
-* The right-hand side chart-pulls (`tensorL2Inner_rotatedTestSection_chart_pull`)
-  to the source contribution.
-
-Collecting the non-principal contributions reproduces the explicit right-hand
-side `tensorComponentWeakRHS`.
-
-## Main results
-
-* `tensorComponent_chartBilinIdentity` — the chart-supported per-component
-  bilinear identity for the principal-part form `tensorPrincipalForm`, valid for
-  every chart-supported Euclidean test function.
-* `tensorComponentWeakRHS_tsupport_subset` — the explicit right-hand side is
-  supported inside the topological support of the Euclidean chart component.
-* `tensorComponent_isSmoothWeakSolution` — the unconditional headline: from the
-  global `H^1` weak equation of the connection Laplacian, the Euclidean chart
-  component `tensorComponentEuclid g r s T α P₀` is a smooth weak solution of the
-  principal-part elliptic bilinear form `tensorPrincipalForm` with right-hand
-  side `tensorComponentWeakRHS`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -102,14 +42,9 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 local notation "chartHaar" =>
   MeasureTheory.Measure.map (toEuclidean : E → EuclN) (modelHaar (E := E))
 
-/-- The chart-source lift of `tsupport φ`: the `(extChartAt I α).symm`-image of
-the `toEuclidean.symm`-image of `tsupport φ`. It is compact and contained in the
-chart-`α` source. -/
 def euclTestLift (α : M) (φ : EuclN → ℝ) : Set M :=
   (extChartAt I α).symm '' ((toEuclidean (E := E)).symm '' tsupport φ)
 
-/-- The chart-source lift `euclTestLift α φ` is compact whenever `φ` is
-compactly supported and `tsupport φ ⊆ chartTargetEuclid α`. -/
 lemma euclTestLift_isCompact (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -130,8 +65,6 @@ lemma euclTestLift_isCompact (α : M)
     (continuousOn_extChartAt_symm (I := I) α).mono hmaps
   exact h1.image_of_continuousOn hcontOn
 
-/-- The chart-source lift `euclTestLift α φ` is contained in the chart-`α`
-source. -/
 lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     euclTestLift (I := I) (M := M) α φ ⊆ (chartAt H α).source := by
@@ -148,8 +81,6 @@ lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     rw [← hz_eq]; exact (extChartAt I α).map_target hz_target
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hx_in_source
 
-/-- The support of `chartTestPullback I α φ` is contained in the chart-source
-lift `euclTestLift α φ`. -/
 lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α φ) ⊆
       euclTestLift (I := I) (M := M) α φ := by
@@ -167,9 +98,6 @@ lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
   · rw [chartTestPullback_apply_of_notMem (I := I) α φ hx_src] at hx
     exact (hx rfl).elim
 
-/-- The topological support of `chartTestPullback I α φ` is contained in the
-chart-`α` source whenever `φ` is compactly supported with
-`tsupport φ ⊆ chartTargetEuclid α`. -/
 lemma chartTestPullback_tsupport_subset_source (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -178,9 +106,6 @@ lemma chartTestPullback_tsupport_subset_source (α : M)
     (euclTestLift_isCompact (I := I) (M := M) α hφ_cs hφ_supp).isClosed).trans
     (euclTestLift_subset_source (I := I) (M := M) α φ hφ_supp)
 
-/-- The manifold-side chart bump `chartTestPullback I α φ` is `C^∞` on the
-chart-`α` source whenever `φ` is `C^∞`: on the chart source it is the
-composition `φ ∘ toEuclidean ∘ extChartAt I α` of smooth maps. -/
 lemma chartTestPullback_contMDiffOn (α : M)
     {φ : EuclN → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
@@ -204,8 +129,6 @@ lemma chartTestPullback_contMDiffOn (α : M)
   refine hcompose.congr (fun x hx => ?_)
   exact chartTestPullback_apply_of_mem (I := I) α φ hx
 
-/-- A function that is `C^∞` on the open Euclidean chart target and vanishes off
-a closed set inside the chart target is globally `C^∞`. -/
 lemma contDiff_of_contDiffOn_chartTarget_zero_off
     (α : M) {P : EuclN → ℝ} {C : Set EuclN}
     (hC : IsClosed C) (hC_target : C ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -224,10 +147,6 @@ lemma contDiff_of_contDiffOn_chartTarget_zero_off
     refine (contDiffAt_const (c := (0 : ℝ))).congr_of_eventuallyEq ?_
     filter_upwards [hC.isOpen_compl.mem_nhds hyC] with z hz using hzero z hz
 
-/-- The product of a function `C^∞` on the chart target and a globally `C^∞`
-function whose topological support is inside the chart target is globally
-`C^∞`. The product vanishes off `tsupport φ`, a closed set inside the open
-chart target. -/
 lemma contDiff_mul_chartTest
     (α : M) {h φ : EuclN → ℝ}
     (hh : ContDiffOn ℝ ∞ h (chartTargetEuclid (I := I) (M := M) α))
@@ -239,16 +158,11 @@ lemma contDiff_mul_chartTest
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
-/-- The product of a function `C^∞` on the chart target and a globally `C^∞`
-function whose topological support is inside the chart target has compact
-support: it vanishes off `tsupport φ`. -/
 lemma hasCompactSupport_mul_chartTest
     {h φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ) :
     HasCompactSupport (fun y => h y * φ y) :=
   hφ_cs.mul_left
 
-/-- The chart-Euclidean partial derivative of a function `C^∞` on the chart
-target is again `C^∞` on the chart target. -/
 lemma euclidPartial_contDiffOn_chartTarget
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
@@ -279,15 +193,11 @@ lemma euclidPartial_contDiffOn_chartTarget
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-- A globally `C^∞` compactly-supported function on the Euclidean model space is
-Bochner-integrable against `volume`. -/
 lemma integrable_of_contDiff_hasCompactSupport
     {P : EuclN → ℝ} (hP : ContDiff ℝ ∞ P) (hP_cs : HasCompactSupport P) :
     Integrable P (volume : Measure EuclN) :=
   hP.continuous.integrable_of_hasCompactSupport hP_cs
 
-/-- On the Euclidean chart target the push-forward `chartPushedRaw I α
-(chartTestPullback I α φ)` of the manifold-side chart bump agrees with `φ`. -/
 lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     Set.EqOn (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -305,9 +215,6 @@ lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     rw [(extChartAt I α).right_inv hy', ContinuousLinearEquiv.apply_symm_apply]
   rw [hb_eq]
 
-/-- On the open Euclidean chart target the chart-Euclidean partial derivative of
-the push-forward `chartPushedRaw I α (chartTestPullback I α φ)` agrees with the
-chart-Euclidean partial derivative of `φ`. -/
 lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
     (α : M) (φ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     Set.EqOn
@@ -324,8 +231,6 @@ lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
       (Filter.eventuallyEq_of_mem (hopen.mem_nhds hy)
         (chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α φ))]
 
-/-- The chart-Euclidean partial derivative of a function vanishes off the
-topological support of that function. -/
 private lemma euclidPartial_eq_zero_of_notMem_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :
@@ -338,16 +243,6 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- **The density-weighted scalar elliptic principal integrand as a
-`principalIntegrand`.** For `y` in the chart target, the density-weighted
-contraction of the chart inverse Gram against the chart-Euclidean partial
-derivatives of a function `u` supported inside `K` and a test function `φ` equals
-the `principalIntegrand` of `tensorPrincipalForm`.
-
-On `K` the density-weighted inverse-Gram pairing is the `principalIntegrand`
-(`weightedInvGram_principalIntegrand_eq`); off the topological support of `u`
-both sides vanish (the chart-Euclidean partial of `u` is zero there); the support
-hypothesis `hu_K` places that support inside `K`. -/
 lemma density_scalarPrincipal_eq_principalIntegrand
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -383,20 +278,6 @@ lemma density_scalarPrincipal_eq_principalIntegrand
     rw [euclidPartial_def] at this
     rw [this]; ring
 
-/-- **The chart-supported per-component bilinear identity.**
-
-For a smooth Riemannian metric `g` on a closed (compact, boundaryless) smooth
-manifold `M`, a chart center `α : M`, smooth compactly-supported `(r, s)`-tensor
-sections `T` (the solution) and `F` (the source), with `T` supported inside the
-chart source, a compact `K ⊆ chartTargetEuclid α`, a component multi-index `P₀`,
-and a smooth compactly-supported Euclidean test function `φ` supported inside the
-chart target, the principal-part elliptic bilinear form `tensorPrincipalForm`
-applied to the Euclidean chart component against `φ` equals the integral of the
-explicit right-hand side `tensorComponentWeakRHS` against `φ`.
-
-The hypothesis `hweak` is the genuine global `H^1` weak equation of the
-connection Laplacian; the support hypotheses `hT_supp`, `hT_K` are the honest
-chart-containment hypotheses. -/
 theorem tensorComponent_chartBilinIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -1022,19 +903,6 @@ theorem tensorComponent_chartBilinIdentity
   rw [hbilin_eq, hWeakRHS_volume]
   linarith [hweak_v]
 
-/-- **Support of the explicit right-hand side.** The explicit right-hand side
-`tensorComponentWeakRHS g r s T F α hK hK_target P₀` is supported inside the
-topological support of the Euclidean chart component
-`tensorComponentEuclid g r s T α P₀`.
-
-For any smooth compactly-supported Euclidean test bump supported in the open set
-`chartTargetEuclid α \ tsupport (tensorComponentEuclid …)`, the chart bilinear
-identity `tensorComponent_chartBilinIdentity` and the vanishing of the
-principal-part bilinear form on that open set give a zero integral of
-`tensorComponentWeakRHS` against the bump; the variational fundamental lemma then
-makes `tensorComponentWeakRHS` vanish almost everywhere on that open set, and
-continuity (`tensorComponentWeakRHS_contDiff`) upgrades this to vanishing on the
-whole open set. -/
 theorem tensorComponentWeakRHS_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -1124,12 +992,6 @@ theorem tensorComponentWeakRHS_tsupport_subset
   · exact hy (tensorComponentWeakRHS_apply_of_notMem (I := I) (M := M)
       g r s T F α hK hK_target P₀ hyT)
 
-/-- **Compact support of the explicit right-hand side.** Under the global `H^1`
-weak equation of the connection Laplacian, the explicit right-hand side
-`tensorComponentWeakRHS g r s T F α hK hK_target P₀` has compact support: its
-topological support is contained in that of the Euclidean chart component
-`tensorComponentEuclid g r s T α P₀`, which has compact support for a
-chart-supported section. -/
 theorem tensorComponentWeakRHS_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -1158,21 +1020,6 @@ theorem tensorComponentWeakRHS_hasCompactSupport
   exact HasCompactSupport.of_support_subset_isCompact hcomp_cs
     (subset_trans (subset_tsupport _) hRHS_supp)
 
-/-- **Per-component scalar weak solution of the connection Laplacian.**
-
-Let `g` be a smooth Riemannian metric on a closed (compact, boundaryless) smooth
-manifold `M`, let `α : M` be a chart center, and let `T` (the solution) and `F`
-(the source) be smooth compactly-supported `(r, s)`-tensor sections supported
-inside the chart source. Let `K ⊆ chartTargetEuclid α` be compact with the
-Euclidean chart component `tensorComponentEuclid g r s T α P₀` supported inside
-`K`, and `P₀ : CompIdx E r s` a component multi-index.
-
-If the global `H^1` weak equation `∫_M ⟨∇T, ∇v⟩ dμ_g = ⟨F, v⟩_{L²}` of the
-connection Laplacian holds for every smooth compactly-supported test section `v`,
-then the Euclidean chart component `tensorComponentEuclid g r s T α P₀` is a
-smooth weak solution of the principal-part elliptic bilinear form
-`tensorPrincipalForm g α hK hK_target` with right-hand side
-`tensorComponentWeakRHS g r s T F α hK hK_target P₀`. -/
 theorem tensorComponent_isSmoothWeakSolution
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

@@ -15,28 +15,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-/-!
-# Chart-side measurable pullback infrastructure for the chart-based Sobolev space
-
-This file provides Borel-measurable pullback constructions on the manifold
-side, used in the assembly of a manifold-side limit from chart-target
-Euclidean Sobolev limits. Specifically:
-
-* `extChartAtExt α : M → E` — the Borel-measurable extension of `extChartAt I α`,
-  taking `0` outside the chart source.
-* `pullbackToManifold α v : M → ℝ` — the pullback of a function
-  `v : EuclideanSpace ℝ (Fin (finrank ℝ E)) → ℝ` to the manifold via
-  `toEuclidean ∘ extChartAt I α`, supported on the chart source.
-* The chart-`α` pullback's compatibility with `chartPushed`: on the chart
-  source, the pullback of `chartPushed α u` recovers `ρ_α · u` pointwise.
-
-These are foundational for the Banach-completeness program of
-`WkpChartQuot g k p hp`. The completeness instance combines this pullback
-infrastructure with the chart-target Euclidean Sobolev convergence (existing)
-and the manifold-side measure bridge `MeasureBridgeUniform`; that final
-assembly is the subject of follow-up work.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -57,8 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Borel-measurable extension of `extChartAt I α` to all of `M`, taking `0`
-outside the chart source. -/
 def extChartAtExt (α : M) : M → E := by
   classical
   exact fun x => if x ∈ (chartAt H α).source then extChartAt I α x else 0
@@ -98,8 +74,6 @@ lemma extChartAtExt_measurable (α : M) :
   exact ContinuousOn.measurable_piecewise h_extChart_continuousOn
     h_const_continuousOn h_src_meas
 
-/-- Pullback of `v : EuclideanSpace ℝ (Fin (finrank ℝ E)) → ℝ` to `M` via the
-chart `α`, extended by `0` outside the chart source. -/
 def pullbackToManifold (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) : M → ℝ := by
   classical
@@ -134,7 +108,6 @@ private lemma pullbackToManifold_eq_indicator (α : M)
   · simp [hx, extChartAtExt_apply_of_mem (I := I) (α := α) hx]
   · simp [hx]
 
-/-- Borel-measurability of the pullback when the input is Borel. -/
 lemma pullbackToManifold_measurable (α : M)
     {v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hv : Measurable v) :
@@ -153,7 +126,6 @@ lemma pullbackToManifold_measurable (α : M)
     hv.comp (h_toEuclidean_meas.comp h_extChart_meas)
   exact h_comp_meas.indicator h_src_meas
 
-/-- The pullback is supported in the chart source. -/
 lemma support_pullbackToManifold_subset (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     Function.support (pullbackToManifold (I := I) α v) ⊆

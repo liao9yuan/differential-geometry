@@ -2,71 +2,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-/-!
-# Trace of the chart Hessian against the inverse Gram matrix equals the Laplacian
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` and a smooth scalar
-function `f : M → ℝ`, the chart Voss–Weyl formula
-$$
-(\Delta_g f)(x) = \frac{1}{\sqrt{\det g_\alpha(x)}}
-  \sum_i \partial_i \Bigl(\sqrt{\det g_\alpha}\,
-    \sum_j g^{ij}_\alpha\, \partial_j \tilde f\Bigr)(\varphi_\alpha(x))
-$$
-expands by Leibniz into three terms:
-$$
-\sum_{ij} g^{ij}\,\partial_i\partial_j \tilde f
-  + \sum_{ij}(\partial_i g^{ij})\,\partial_j \tilde f
-  + \frac{1}{\sqrt{\det g_\alpha}}\sum_{ij}\partial_i(\sqrt{\det g_\alpha})\,g^{ij}\,
-        \partial_j \tilde f.
-$$
-On the other hand the chart-coordinate trace of the Hessian against the inverse
-Gram matrix reads
-$$
-\sum_{ij} g^{ij}\,(\operatorname{Hess} f)_{ij}
-  = \sum_{ij} g^{ij}\,\partial_i\partial_j \tilde f
-    - \sum_{ijk} g^{ij}\,\Gamma^k_{ij}\,\partial_k \tilde f.
-$$
-Equating these two expressions and re-indexing the contraction `k \mapsto j`
-on the trace side reduces to the *contracted Christoffel identity*
-$$
-\sum_{ik} g^{ik}\,\Gamma^j_{ik}
-  = - \frac{1}{\sqrt{\det g_\alpha}}\sum_l
-        \partial_l\bigl(\sqrt{\det g_\alpha}\cdot g^{jl}\bigr).
-$$
-This is the standard identity expressing the divergence of the inverse metric
-"vector field" against the Riemannian volume density. It is purely algebraic in
-the chart coordinates, and follows from the symmetric definition of `Γ` together
-with Jacobi's formula for the derivative of the determinant. We state this
-identity as a hypothesis-bearing scalar predicate `ChartContractedChristoffelOn`
-and use it to derive the trace identity on the chart source.
-
-## Main definitions
-
-* `ChartContractedChristoffelOn g α y j` : the predicate stating the contracted
-  Christoffel identity at the chart-target point `y` and free index `j`.
-
-## Main results
-
-* `chartHessTrace_eq_laplacian` : the chart-coordinate trace identity
-  `∑_{ij} g^{ij}\,(\operatorname{Hess} f)_{ij}(x) = (\Delta_g f)(x)` derived from
-  the contracted Christoffel identity, valid on the chart source under
-  `[I.Boundaryless]`.
-* `traceFun_hessFun_eq_chartHessTrace_of_orthonormal` : the bilinear-form-trace
-  identity `traceFun (\operatorname{hessFun} g f) x = \chartHessTrace g f x`
-  (using the canonical basis) under chart g-orthonormality at `x`.
-* `laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted` : the Bochner /
-  Lichnerowicz dimension-Laplacian inequality, discharging the `htr` hypothesis
-  from the basis-naive Cauchy–Schwarz bound via the trace identity and
-  orthonormality.
-
-The trace identity is presented in two parallel forms: a chart-coordinate form
-`chartHessTrace_eq_laplacian` matching the matrix expression
-`∑_{ij} g^{ij}\,(\operatorname{Hess} f)_{ij}`, and a bilinear-form form
-`traceFun_hessFun_eq_chartHessTrace_of_orthonormal` matching the canonical-basis
-trace of `hessFun`. The latter, combined with the trace identity, discharges the
-`htr` hypothesis of `laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq` directly.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -83,17 +18,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The pulled-back chart density, viewed as a scalar function on the chart
-target `(extChartAt I α).target ⊆ E`. Wrapper around `chartDensityOnE`
-re-exposed for naming consistency with the chart-coordinate identities of this
-file. -/
 abbrev densityOnE (g : SmoothRiemannianMetric I M) (α : M) : E → ℝ :=
   chartDensityOnE (I := I) g α
 
-/-- The *contracted Christoffel identity at `y` with free index `j`*. This is
-the chart-coordinate identity equating the trace of the Christoffel symbol
-contracted with the inverse Gram matrix to (minus) the partial-derivative
-expansion of `D · G^{j ·}`. -/
 def ChartContractedChristoffelOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (y : E) (j : Fin (Module.finrank ℝ E)) : Prop :=
@@ -107,9 +34,6 @@ def ChartContractedChristoffelOn
             chartDensityOnE (I := I) g α y' *
               chartInvGramOnE (I := I) g α j l y') y
 
-/-- Pointwise expansion of `chartHessTrace` in chart coordinates: the trace
-splits into a "Hessian" term `∑_{ij} G^{ij}·\partial_i\partial_j f̃` and a
-"Christoffel correction" term `-∑_{ijk} G^{ij}·Γ^k_{ij}·\partial_k f̃`. -/
 lemma chartHessTrace_expand
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     chartHessTrace (I := I) g f x =
@@ -195,8 +119,6 @@ lemma chartHessTrace_expand
   refine Finset.sum_congr rfl (fun k _ => ?_)
   ring
 
-/-- Pointwise expansion of `chartVossWeylLaplacian` by the Leibniz rule
-applied to the integrand `(\sum_j G^{ij}·\partial_j f̃) · D`. -/
 lemma chartVossWeylLaplacian_expand_hypBearing
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hgrad_diff : ∀ i : Fin (Module.finrank ℝ E),
@@ -258,10 +180,6 @@ lemma chartVossWeylLaplacian_expand_hypBearing
   rw [div_eq_mul_one_div]
   ring
 
-/-- Each partial derivative of `scalarOnE` is `C^∞` on the interior of the
-chart target. (The boundaryless analogue of the with-boundary version in
-`WithBoundary/`. Re-exposed here because the with-boundary analogue is
-internal.) -/
 private lemma partialDeriv_scalarOnE_contDiffOn_interior
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -279,7 +197,6 @@ private lemma partialDeriv_scalarOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- The pulled-back inverse Gram entry is `C^∞` on the chart target. -/
 lemma chartInvGramOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -306,8 +223,6 @@ lemma chartInvGramOnE_contDiffOn
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
-/-- `gradChartCoeffOnE g α f i` is `C^∞` on the interior of the chart
-target. (We use the interior so that `partialDeriv` is well-defined.) -/
 lemma gradChartCoeffOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -321,8 +236,6 @@ lemma gradChartCoeffOnE_contDiffOn_interior
   · exact (chartInvGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
   · exact partialDeriv_scalarOnE_contDiffOn_interior (I := I) α hf j
 
-/-- Leibniz expansion of `∂_i (gradChartCoeffOnE i)`: it splits as
-`∑_j ((∂_i G^{ij})·∂_j f̃ + G^{ij}·∂_i ∂_j f̃)`. -/
 lemma partialDeriv_gradChartCoeffOnE_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -412,17 +325,6 @@ lemma partialDeriv_gradChartCoeffOnE_expand
           ((chartModelBasis E) i))
   ring
 
-/-- **Chart-coordinate trace identity** for the Hessian against the inverse
-Gram matrix. Hypothesis-bearing form: given the contracted Christoffel
-identity at the chart-target image of `x` for every free index `j`, we obtain
-$$
-\sum_{ij} G^{ij}\,(\operatorname{Hess} f)_{ij}(x)
-  = (\Delta_g f)(x).
-$$
-The proof carries out the Leibniz expansion of the chart Voss–Weyl Laplacian,
-the chart-coordinate expansion of the Hessian-against-inverse-Gram trace, and
-the contracted-Christoffel-identity term-rewriting on the contraction
-`-∑_{ijk} G^{ij}\,Γ^k_{ij}\,\partial_k f̃`. -/
 theorem chartHessTrace_eq_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -866,10 +768,6 @@ theorem chartHessTrace_eq_laplacian
   field_simp
   ring
 
-/-- **Trace identity** for the bilinear form `hessFun g f`. Given that the chart
-Gram inverse equals the model identity at `x` (which holds when the chart-basis
-frame is g-orthonormal at `x`), the trace of `hessFun g f` against the canonical
-basis equals the chart-coordinate Hessian trace `chartHessTrace g f x`. -/
 theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
@@ -888,12 +786,6 @@ theorem traceFun_hessFun_eq_chartHessTrace_of_orthonormal
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-/-- **Trace identity (matrix form)**: the chart-coordinate trace of the Hessian
-tensor against the inverse Gram matrix equals the Laplace-Beltrami operator.
-Hypothesis-bearing form: assumes the contracted Christoffel identity at the
-chart-target image of `x`, for every free index `j`. This is an alias for the
-same content as `chartHessTrace_eq_laplacian`, exposing the trace form
-`∑_{ij} G^{ij}\,(\operatorname{Hess} f)_{ij} = \Delta_g f` directly. -/
 theorem trace_hessFun_eq_laplacian
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -908,9 +800,6 @@ theorem trace_hessFun_eq_laplacian
   rw [chartHessTrace_def] at h
   exact h
 
-/-- **Bochner–Lichnerowicz dimension-Laplacian inequality** with the trace
-hypothesis discharged via the contracted Christoffel identity and chart
-g-orthonormality at `x`. -/
 theorem laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -935,8 +824,6 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
   exact laplacian_sq_le_dim_mul_frobenius_sq_of_trace_eq
     (I := I) g hf x htr
 
-/-- Smoothness of the chart Gram matrix entry pulled back to the chart target.
-Analog of `chartInvGramOnE_contDiffOn` but for `chartGramOnE`. -/
 lemma chartGramOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -963,8 +850,6 @@ lemma chartGramOnE_contDiffOn
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
-/-- The chart Gram entry is differentiable at any point in the interior of the
-chart target. -/
 private lemma chartGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -978,8 +863,6 @@ private lemma chartGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-- **Smoothness of `chartChristoffel`.** The chart Christoffel symbol is `C^∞`
-on the interior of the chart target. -/
 theorem chartChristoffel_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -1049,8 +932,6 @@ theorem chartChristoffel_contDiffOn_interior
       exact (hi.add hj).sub hl
   exact (contDiffOn_const (c := (1 / 2 : ℝ))).mul hsum_smooth
 
-/-- The chart inverse Gram entry is differentiable at any point in the interior
-of the chart target. -/
 private lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -1064,8 +945,6 @@ private lemma chartInvGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-- The chart density (pulled back to the chart target) is differentiable at any
-point in the interior of the chart target. -/
 lemma chartDensityOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -1078,12 +957,9 @@ lemma chartDensityOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-- The line through `y₀` in the direction `e_l`. Smooth (in fact affine), with
-derivative `e_l`. -/
 private noncomputable def jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
     ℝ → E := fun s => y₀ + s • (chartModelBasis E) l
 
-/-- The line is differentiable, with derivative `e_l`. -/
 private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
     (s : ℝ) :
     HasDerivAt (jacobiLine (E := E) y₀ l) ((chartModelBasis E) l) s := by
@@ -1112,8 +988,6 @@ private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
   rw [← hfun_eq]
   exact h'
 
-/-- Composing a function `F : E → ℝ` with the Jacobi line: the time derivative
-at `s = 0` equals the partial derivative in direction `l`. -/
 private lemma hasDerivAt_comp_jacobiLine
     {y₀ : E} {l : Fin (Module.finrank ℝ E)} {F : E → ℝ}
     (hF : DifferentiableAt ℝ F y₀) :
@@ -1128,8 +1002,6 @@ private lemma hasDerivAt_comp_jacobiLine
   have := hF''.comp_hasDerivAt 0 hline
   exact this
 
-/-- The chart Gram matrix as a function of `s` along the Jacobi line, formed
-by composing `chartGramOnE` with the line. -/
 private noncomputable def gramJacobiFamily
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
@@ -1146,8 +1018,6 @@ private lemma gramJacobiFamily_zero
   ext i j
   simp [zero_smul, add_zero]
 
-/-- The Gram matrix at `y₀` (viewed as a matrix of `chartGramOnE`-values) equals
-the chart Gram matrix at `(symm y₀)`. -/
 private lemma gramAtY_eq_chartGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) (y₀ : E) :
     (Matrix.of fun i j => chartGramOnE (I := I) g α i j y₀) =
@@ -1155,8 +1025,6 @@ private lemma gramAtY_eq_chartGramMatrix
   ext i j
   rfl
 
-/-- Each entry of the Jacobi family is differentiable at `s = 0` with derivative
-`partialDeriv l (chartGramOnE g α i j) y₀`. -/
 private lemma hasDerivAt_gramJacobiFamily_entry
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -1171,9 +1039,6 @@ private lemma hasDerivAt_gramJacobiFamily_entry
   simp only [Matrix.of_apply]
   exact h
 
-/-- The Gram matrix of `gramJacobiFamily ... 0` is the same as the chart Gram
-matrix at `symm y₀`, in particular has positive determinant for `y₀` in the chart
-target. -/
 private lemma gramJacobiFamily_det_pos
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -1189,9 +1054,6 @@ private lemma gramJacobiFamily_det_pos
     exact hsource
   exact chartGramMatrix_det_pos (I := I) g α hbase
 
-/-- The "spatial" version of `hasDerivAt_det_eq_det_mul_trace_inv_mul`: the
-partial derivative of `det (chartGramMatrix g α (symm ·))` in direction `e_l`
-equals `det · trace(inv · ∂_l G)`. -/
 private lemma partialDeriv_det_chartGramOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -1265,9 +1127,6 @@ private lemma partialDeriv_det_chartGramOnE
   rw [hGf_zero_eq] at heq
   exact heq.symm
 
-/-- The "spatial" version of `hasDerivAt_sqrt_det_eq_half_trace_inv_mul`: the
-partial derivative of `chartDensityOnE` in direction `e_l` equals
-`(1/2) · trace(inv · ∂_l G) · D`. -/
 lemma partialDeriv_chartDensityOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -1319,9 +1178,6 @@ lemma partialDeriv_chartDensityOnE
   rw [hsqrt_eq] at heq
   exact heq.symm
 
-/-- The matrix-inverse derivative identity in entry-wise form: for any
-direction `l` and any matrix index `(j, p)`,
-`∂_l G^{jp}(y₀) = -∑_{a, b} G^{ja}(y₀) · G^{bp}(y₀) · ∂_l G_{ab}(y₀)`. -/
 lemma partialDeriv_chartInvGramOnE_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -1603,8 +1459,6 @@ lemma partialDeriv_chartInvGramOnE_eq
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
-/-- `partialDeriv j (chartGramOnE g α a b)` is `C^∞` on the interior of the
-chart target. -/
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j a b : Fin (Module.finrank ℝ E)) :
@@ -1622,8 +1476,6 @@ private lemma partialDeriv_chartGramOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- `partialDeriv j (chartGramOnE g α a b)` is differentiable at any point
-in the interior of the chart target. -/
 private lemma partialDeriv_chartGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j a b : Fin (Module.finrank ℝ E))
@@ -1638,8 +1490,6 @@ private lemma partialDeriv_chartGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-- `partialDeriv j (chartInvGramOnE g α k l)` is `C^∞` on the interior of the
-chart target. -/
 private lemma partialDeriv_chartInvGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k l : Fin (Module.finrank ℝ E)) :
@@ -1657,8 +1507,6 @@ private lemma partialDeriv_chartInvGramOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- `partialDeriv j (chartInvGramOnE g α k l)` is differentiable at any point
-in the interior of the chart target. -/
 private lemma partialDeriv_chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k l : Fin (Module.finrank ℝ E))
@@ -1673,17 +1521,6 @@ private lemma partialDeriv_chartInvGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
-/-- The second-derivative formula for the inverse Gram matrix entries:
-for any directions `i, j` and any matrix index `(k, l)`,
-`∂_i ∂_j G^{kl}(y₀)` equals
-`∑_{p,q,r,s} G^{kr} G^{ps} G^{ql} (∂_i G_{rs}) (∂_j G_{pq})`
-`+ ∑_{p,q,r,s} G^{kp} G^{qr} G^{ls} (∂_i G_{rs}) (∂_j G_{pq})`
-`- ∑_{p,q} G^{kp} G^{ql} (∂_i ∂_j G_{pq})(y₀)`.
-
-This is obtained by differentiating the first-derivative formula
-`∂_j G^{kl} = -∑_{a,b} G^{ka} G^{bl} ∂_j G_{ab}` in direction `i`, applying
-Leibniz on the resulting product `G^{ka} · G^{bl} · ∂_j G_{ab}`, and substituting
-the first-derivative formula again for `∂_i G^{ka}` and `∂_i G^{bl}`. -/
 lemma partialDeriv2_chartInvGramOnE_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (i j : Fin (Module.finrank ℝ E))
@@ -2095,8 +1932,6 @@ lemma partialDeriv2_chartInvGramOnE_eq
     rw [hsymm l s]]
   ring
 
-/-- Symmetry of the chart Gram matrix entries pulled back to `E`, in the
-function form. -/
 lemma chartGramOnE_symm_fun
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -2104,7 +1939,6 @@ lemma chartGramOnE_symm_fun
   funext y
   exact chartGramOnE_symm (I := I) g α i j y
 
-/-- Symmetry of the chart inverse Gram matrix entries pulled back to `E`. -/
 private lemma chartInvGramOnE_symm_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -2123,16 +1957,6 @@ private lemma chartInvGramOnE_symm_pointwise
       (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
   exact hstar.symm
 
-/-- **Discharge of the contracted Christoffel identity.**
-For any smooth Riemannian metric `g` on `M`, any chart base point `α : M`, any
-chart-target point `y` in the interior of the chart target, and any free index
-`j`, the predicate `ChartContractedChristoffelOn g α y j` holds.
-
-This identity is the chart-coordinate algebraic content of `div(g · G^{j·}) = 0`
-expressing the divergence-free property of the inverse metric "vector field"
-against the Riemannian volume density. The proof combines Jacobi's formula for
-the determinant, the matrix-inverse derivative identity `∂(G⁻¹) = -G⁻¹·∂G·G⁻¹`,
-and the symmetry of the Gram matrix. -/
 theorem chartContractedChristoffel_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     (y : E) (j : Fin (Module.finrank ℝ E))
@@ -2539,10 +2363,6 @@ theorem chartContractedChristoffel_holds
     ring]
   ring
 
-/-- **Discharge of the contracted Christoffel identity (boundaryless variant).**
-Under `[I.Boundaryless]`, the chart target is open in `E`, so any point in the
-chart target is automatically in its interior, and the discharge theorem applies
-to any chart-target point. -/
 theorem chartContractedChristoffel_holds_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ (extChartAt I α).target)
@@ -2552,11 +2372,6 @@ theorem chartContractedChristoffel_holds_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hy
   exact chartContractedChristoffel_holds (I := I) g α y j hy_int
 
-/-- On a closed (boundaryless, compact, T2, σ-compact) manifold, for smooth `f`
-the chart trace `chartHessTrace g f x` of the chart Hessian against the inverse
-Gram matrix equals the Laplace–Beltrami operator `Δ_g f x`. This is the closed
-form of `chartHessTrace_eq_laplacian`: the contracted-Christoffel hypothesis is
-discharged automatically via `chartContractedChristoffel_holds_of_boundaryless`. -/
 theorem chartHessTrace_eq_laplacian_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -2574,13 +2389,6 @@ theorem chartHessTrace_eq_laplacian_of_boundaryless
       (I := I) g x hx_target j
   exact chartHessTrace_eq_laplacian (I := I) g hf x hcc
 
-/-- On a closed (boundaryless, compact, T2, σ-compact) manifold, for smooth `f`
-the explicit chart-coordinate trace
-`∑_{ij} (G⁻¹)_{ij}(x) · (Hess f)_{ij}(x)`, written out in terms of
-`chartInvGramMatrix` and `chartHessianTensor`, equals the Laplace–Beltrami
-operator `Δ_g f x`. This is the closed form of `trace_hessFun_eq_laplacian`:
-the contracted-Christoffel hypothesis is discharged automatically via
-`chartContractedChristoffel_holds_of_boundaryless`. -/
 theorem chartInvGram_trace_hessianTensor_eq_laplacian_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -2601,16 +2409,6 @@ theorem chartInvGram_trace_hessianTensor_eq_laplacian_of_boundaryless
       (I := I) g x hx_target j
   exact trace_hessFun_eq_laplacian (I := I) g hf x hcc
 
-/-- Dimension–Laplacian inequality `(Δ_g f x)² ≤ n · ∑_{ij} (Hess f)_{ij}(x)²`
-for smooth `f` on a closed (boundaryless, compact, T2, σ-compact) manifold,
-*assuming the chart is g-orthonormal at* `x` (the inverse Gram matrix at `x` is
-the identity). This is the pure Frobenius–trace Cauchy–Schwarz bound applied to
-the Hessian; it is not the Bochner formula and carries no Ricci term. The
-orthonormality hypothesis `h_orth` is what makes the naive (non-metric) chart
-Frobenius sum on the right the correct quantity. This is the closed form of
-`laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted`: the
-contracted-Christoffel hypothesis is discharged automatically via
-`chartContractedChristoffel_holds_of_boundaryless`. -/
 theorem laplacian_sq_le_dim_mul_frobenius_sq_of_orthonormal
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -2635,12 +2433,6 @@ theorem laplacian_sq_le_dim_mul_frobenius_sq_of_orthonormal
   exact laplacian_sq_le_dim_mul_frobenius_sq_via_chartContracted
     (I := I) g hf x hcc h_orth
 
-/-- **Compactness-free pointwise variant** of `chartHessTrace_eq_laplacian`.
-The chart-coordinate trace `∑_{ij} G^{ij} (Hess f)_{ij}(x)` equals `Δ_g f x`
-under the contracted Christoffel hypothesis, *without* requiring
-`[CompactSpace M]`. The proof is identical to `chartHessTrace_eq_laplacian`
-except it uses `voss_weyl_laplacian_formula_pointwise` for the Voss-Weyl
-expansion of `Δ_g f x`. -/
 theorem chartHessTrace_eq_laplacian_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -3084,10 +2876,6 @@ theorem chartHessTrace_eq_laplacian_pointwise
   field_simp
   ring
 
-/-- **Closed-form pointwise variant** of `chartHessTrace_eq_laplacian_of_boundaryless`,
-under `[I.Boundaryless]` only (no `[CompactSpace M]`). The contracted Christoffel
-hypothesis is discharged automatically via
-`chartContractedChristoffel_holds_of_boundaryless`. -/
 theorem chartHessTrace_eq_laplacian_pointwise_of_boundaryless
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

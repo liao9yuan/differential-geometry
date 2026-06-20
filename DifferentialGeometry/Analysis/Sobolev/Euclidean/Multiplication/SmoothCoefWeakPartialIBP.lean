@@ -1,22 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Setup
 
-/-!
-# Integration by parts against a smooth coefficient
-
-Let `Ω ⊆ EuclideanSpace ℝ (Fin d)` be open. Suppose `v` is a function on `Ω`
-whose `j`-th weak partial derivative is `w j`, and let `φ` be a smooth scalar
-coefficient. For any smooth compactly supported test function `ψ` with
-`tsupport ψ ⊆ Ω`, the standard product-rule rewriting of the weak-derivative
-identity against the test function `φ · ψ` yields
-
-```
-∫_Ω φ · v · ∂_j ψ = -(∫_Ω (∂_j φ) · v · ψ + ∫_Ω φ · (w j) · ψ).
-```
-
-This is a generic shift-of-derivative tool used wherever a smooth chart-
-dependent coefficient is integrated against a weakly differentiable factor.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -31,10 +14,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Integration by parts identity for a smooth scalar coefficient `φ`
-multiplied by a weakly-differentiable function `v` against the partial of a
-smooth compactly supported test function `ψ`. The Leibniz rule on `φ · ψ`
-combined with the weak-derivative relation for `v` yields the identity. -/
 theorem integral_smul_weak_partial_eq
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {φ : E → ℝ}

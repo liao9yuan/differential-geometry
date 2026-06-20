@@ -4,39 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiate
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-/-!
-# Unconditional differentiated variational identity
-
-For `u_h ∈ laplacianDomainPow g 2` and any chart point `α : M`, the formally
-differentiated chart-bilinear variational identity holds for every smooth
-compactly supported test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`.
-
-The argument applies the base chart-bilinear variational identity to the test
-function `ψ_l := y ↦ (fderiv ℝ ψ y)(EuclideanSpace.single direction 1)`,
-then performs an integration-by-parts shift in the `direction` coordinate on
-each of the three resulting integrals via the generic IBP primitive
-`Sobolev.Euclidean.integral_smul_weak_partial_eq`. The Schwarz symmetry of
-mixed second partials of `ψ` is used on the principal term to convert
-`∂_j ∂_l ψ` into `∂_l ∂_j ψ` so that the IBP-direction `l` matches the
-`fderiv` direction.
-
-The chart-side weak `direction`-partial of `base.f_chart` is supplied by
-`chosenFChartDeriv_isWeakPartial`, which consumes a `MemW1p 2` witness on
-`base.f_chart`. This witness is discharged unconditionally via
-`fChartResidual_memW1p_truly_unconditional` and
-`base_f_chart_memW1p_from_residual_memW1p`.
-
-The smooth chart-target coefficients are extended to globally smooth
-representatives via the cutoff helper `exists_smooth_global_extension`
-re-exported from `DifferentiatedCrossTermIBP`.
-
-## Main result
-
-* `differentiated_variational_identity_holds` — the unconditional discharge of
-  the `h_identity` hypothesis of
-  `diffChartBilinearH1ComplData_of_laplacianDomainPow_two`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -76,8 +43,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For `ψ : EuclN → ℝ` globally smooth, its `l`-direction partial
-`y ↦ (fderiv ℝ ψ y) (EuclideanSpace.single l 1)` is also globally smooth. -/
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -90,8 +55,6 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
-/-- The `l`-direction partial of a smooth compactly supported `ψ` is also
-compactly supported, with tsupport inside `tsupport ψ`. -/
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -99,17 +62,12 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
-/-- The tsupport of the `l`-direction partial of a smooth `ψ` is contained in
-`tsupport ψ`. -/
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
-/-- Mixed partial derivatives commute for smooth functions: the Schwarz
-symmetry of the second derivative, transferred to a fixed pair of basis
-directions. -/
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -151,10 +109,6 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
-/-- The chart-pushed weak partial `(chartPushedWeakPartialLp ...).coeFn` (the
-field `D.base.weak_partial i`) is locally `MemLp 2` on every compact subset of
-`chartTargetEuclid α`. Re-exposed without the `D.base.` projection for direct
-use in `integral_smul_weak_partial_eq`. -/
 private lemma base_weak_partial_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -168,10 +122,6 @@ private lemma base_weak_partial_locally_memLp
   (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
     hu_h).weak_partial_locally_memLp i K hK_compact hK_in
 
-/-- The chart-side scalar field `D.base.u_chart` is locally `MemLp 2` on every
-compact subset of `chartTargetEuclid α`. Derived from the weighted `MemLp 2`
-on the full chart target via the volume / weighted measure equivalence on any
-compact subset. -/
 private lemma base_u_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -197,9 +147,6 @@ private lemma base_u_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
-/-- The chart-side scalar field `D.base.f_chart` is locally `MemLp 2` on every
-compact subset of `chartTargetEuclid α`. Same proof structure as
-`base_u_chart_locally_memLp`. -/
 private lemma base_f_chart_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -900,14 +847,6 @@ private lemma term3_ibp
     rw [← h_eq]
     exact h_global.restrict K'
 
-/-- **Unconditional differentiated chart-bilinear variational identity.**
-
-For `u_h ∈ laplacianDomainPow g 2`, chart base point `α`, coordinate direction
-`direction`, and a smooth compactly supported test function `ψ` with
-`tsupport ψ ⊆ chartTargetEuclid α`, the formally differentiated chart-bilinear
-variational identity holds. This is the residual `h_identity` hypothesis of
-`diffChartBilinearH1ComplData_of_laplacianDomainPow_two`, discharged
-unconditionally. -/
 theorem differentiated_variational_identity_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

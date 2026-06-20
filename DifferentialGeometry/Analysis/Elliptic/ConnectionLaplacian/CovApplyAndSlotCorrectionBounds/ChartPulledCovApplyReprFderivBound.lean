@@ -2,67 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartPulledCovApplyExplicitFormula
 
-/-!
-# Bound on the Fréchet derivative of the chart-pulled representation of
-`covApply ∇ B T`
-
-Combining the intrinsic-piece Fréchet-derivative bound with the input/output
-Christoffel slot-correction Fréchet-derivative bounds, we obtain a uniform
-bound on the operator norm of the Fréchet derivative of the chart-pulled
-representation of `covApply ∇ B T` at chart-coordinate points whose preimage
-lies in the partition-of-unity tsupport intersected with the chart-`α`
-Levi-Civita good set.
-
-Concretely, for a smooth Riemannian manifold `(M, g)`, a chart-centre
-`α : M`, ranks `r, s : ℕ`, a smooth tangent vector field `B`, and a smooth
-compactly supported `(r, s)`-tensor section `T`, there is a constant
-`K ≥ 0` (depending on `g`, the chart at `α`, the locality hypothesis on the
-chart atlas, the ranks `r`, `s`, and `B`, but independent of `T` and `b`)
-such that for any `b ∈ tsupport (POU α) ∩ chartLeviCivitaGoodSet α` and any
-hypothesis `hF2_diff` that the chart-pulled representation `repr T ∘ symm`
-is differentiable in its Fréchet derivative at `extChartAt I α b`, the
-operator norm of the Fréchet derivative of the chart-pulled representation
-of `covApply ∇ B T` at `extChartAt I α b` is bounded by
-
-```
-K * (‖repr T b‖
-     + ‖fderiv ℝ (repr T ∘ symm) (extChartAt I α b)‖
-     + ‖iteratedFDeriv ℝ 2 (repr T ∘ symm) (extChartAt I α b)‖)
-```
-
-## Strategy
-
-1. The chart-pulled formula
-   `chart_pulled_covApply_explicit_formula_target_smoothCc` expresses
-   `repr (covApply ∇ B T) ∘ symm y` as the sum of an intrinsic
-   Fréchet-derivative piece, a finite sum of input-slot Christoffel
-   corrections, minus a finite sum of output-slot Christoffel corrections,
-   at every point `y` of the chart target image of the Levi-Civita good set.
-
-2. This holds on an open neighbourhood of `extChartAt I α b` whenever
-   `b ∈ chartLeviCivitaGoodSet α`. We use `Filter.EventuallyEq.fderiv_eq` to
-   rewrite the LHS's Fréchet derivative as the Fréchet derivative of the
-   three-piece sum.
-
-3. We distribute the Fréchet derivative across `+`, `-`, and finite sums via
-   `fderiv_add`, `fderiv_sub`, `fderiv_fun_sum`. This requires each piece to
-   be differentiable at the chart point.
-
-4. The intrinsic piece's differentiability follows from
-   `DifferentiableAt.clm_apply` applied to `fderiv (repr T ∘ symm)` (whose
-   differentiability is `hF2_diff`) and the chart-pulled `B` representation
-   (smooth on the chart-target image of the good set).
-
-5. Each slot-correction piece's differentiability follows from
-   `Filter.EventuallyEq.differentiableAt_iff` against the kernel-form
-   factorisation, then `DifferentiableAt.clm_apply` for the kernel form.
-
-6. The bounds on each summand come from `intrinsic_piece_fderiv_bound`,
-   `chart_pulled_input_slot_correction_fderiv_bound`,
-   `chart_pulled_output_slot_correction_fderiv_bound`. Summing and absorbing
-   the constants into `K := K_I + ∑ K_in + ∑ K_out` gives the headline.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -91,9 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
-of the chart-pulled tensor representation. Re-derived here to avoid relying on
-a private helper. -/
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -182,8 +118,6 @@ private lemma reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- Smoothness of the chart-pulled `B`-representation on the chart-target
-image of the good set. -/
 private lemma uB_contDiffOn_goodSet
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -198,8 +132,6 @@ private lemma uB_contDiffOn_goodSet
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
-/-- Differentiability of the intrinsic Fréchet-derivative piece at the chart
-point. -/
 private lemma intrinsicPiece_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -239,8 +171,6 @@ private lemma intrinsicPiece_differentiableAt
       (hU_open.mem_nhds hx_mem)
   exact hF2_diff.clm_apply hu_diff
 
-/-- Differentiability of the chart-pulled input-slot Christoffel correction at
-the chart point. -/
 private lemma inputSlotPiece_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -323,8 +253,6 @@ private lemma inputSlotPiece_differentiableAt
     exact h_factor
   exact (h_evt.differentiableAt_iff).mpr h_clm_diff
 
-/-- Differentiability of the chart-pulled output-slot Christoffel correction
-at the chart point. -/
 private lemma outputSlotPiece_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -407,10 +335,6 @@ private lemma outputSlotPiece_differentiableAt
     exact h_factor
   exact (h_evt.differentiableAt_iff).mpr h_clm_diff
 
-/-- The chart-pulled representation of `covApply ∇ B T` is, on an open
-neighbourhood of `extChartAt I α b`, equal to the intrinsic piece plus
-input-slot Christoffel corrections minus output-slot Christoffel
-corrections. -/
 private lemma chart_pulled_covApply_repr_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

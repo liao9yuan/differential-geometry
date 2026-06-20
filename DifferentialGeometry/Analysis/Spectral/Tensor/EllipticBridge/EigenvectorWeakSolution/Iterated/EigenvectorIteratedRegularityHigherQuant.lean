@@ -2,57 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedNirenbergWeakenedQuant
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# Quantitative order-raiser for the eigenvector chart-component iterated regularity
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the eigenvector
-chart component `eigenvectorChartComponentFun` and its recursive `m`-fold mixed
-weak partials `eigenvectorChartIteratedPartial` carry the iterated Sobolev
-structure of the resolvent eigenvector.
-
-The structural module `EigenvectorIteratedRegularityHigher` ships the
-**qualitative** order-assembly headline
-`eigenvectorChartComponent_memWkp_m_plus_two_of_iterated`: from chart-`H²` of
-every `m`-fold mixed weak partial and chart-`H¹` of every `j`-fold mixed weak
-partial for `j ≤ m`, the eigenvector chart component lies in chart-`H^{m+2}`.
-
-This module supplies the **quantitative** counterpart — the
-`wkpNorm`-tracking order-raiser. Every membership conclusion is accompanied by
-an explicit, finite `wkpNorm`-bound whose right-hand side is built from the
-per-tuple `W^{1,2}`- and `W^{2,2}`-norms of the iterated mixed weak partials,
-with an existentially quantified geometric constant.
-
-## Main results
-
-* `eigenvectorChartIteratedPartial_wkpNorm_succ_le` — the
-  order-`(K+2)` decomposition step: the order-`(K+2)` iterated Sobolev norm of
-  the `j`-fold mixed weak partial is bounded by its `W^{1,2}`-norm plus the sum,
-  over the coordinate axes, of the order-`(K+1)` norms of the `(j+1)`-fold mixed
-  weak partials along `Fin.snoc dirs a`. This is the quantitative twin of the
-  per-direction-count engine
-  `eigenvectorIteratedPartial_memWkp_of_chartH_at_all_indices`.
-* `eigenvectorChartIteratedPartial_wkpNorm_one_two_le` — the
-  quantitative `W^{1,2}` bridge: from chart-`H^{m+1}` of the eigenvector chart
-  component, every `m`-fold mixed weak partial lies in `W^{1,2}` of the chart
-  target with its `W^{1,2}`-norm bounded by the chart-`H^{m+1}`-norm of the
-  chart component. This is the quantitative twin of
-  `eigenvectorChartIteratedPartial_memWkp_of_memWkp` at `k = 1`.
-* `eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le` —
-  the quantitative order-raiser: from chart-`H¹` of every `j`-fold mixed weak
-  partial (`j ≤ m`) and chart-`H²` of every `m`-fold mixed weak partial, the
-  eigenvector chart component lies in chart-`H^{m+2}` *and* its chart-`H^{m+2}`-
-  norm is bounded by an explicit geometric constant times the aggregate of the
-  per-tuple `W^{1,2}`- and `W^{2,2}`-norms of the iterated mixed weak partials.
-  This is the quantitative twin of
-  `eigenvectorChartComponent_memWkp_m_plus_two_of_iterated`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -83,7 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Chart-locality-free twin of `eigenvectorChartIteratedPartial_wkpNorm_succ_le`. -/
 theorem eigenvectorChartIteratedPartial_wkpNorm_succ_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -168,8 +116,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_succ_le
   · refine Finset.sum_le_sum (fun a _ => ?_)
     rw [h_succ_eq a]
 
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp`. -/
 theorem eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -239,8 +185,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
         rw [h_eq] at h_inner_norm
         exact h_inner_norm
 
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_wkpNorm_one_two_le`. -/
 theorem eigenvectorChartIteratedPartial_wkpNorm_one_two_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -281,7 +225,6 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_one_two_le
   rw [h_eq] at h_norm
   exact h_norm
 
-/-- Chart-locality-free twin of `eigenvectorIteratedW1Aggregate`. -/
 def eigenvectorIteratedW1Aggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -294,7 +237,6 @@ def eigenvectorIteratedW1Aggregate
           g r s i α P₀ j idx)
         (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `eigenvectorIteratedW2Aggregate`. -/
 def eigenvectorIteratedW2Aggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -306,8 +248,6 @@ def eigenvectorIteratedW2Aggregate
         g r s i α P₀ m idx)
       (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of
-`wkpNorm_one_le_eigenvectorIteratedW1Aggregate`. -/
 private lemma wkpNorm_one_le_eigenvectorIteratedW1Aggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -341,8 +281,6 @@ private lemma wkpNorm_one_le_eigenvectorIteratedW1Aggregate
         (chartTargetEuclid (I := I) (M := M) α))
     (s := Finset.univ) (fun _ _ => zero_le _) (Finset.mem_univ dirs)
 
-/-- Chart-locality-free twin of
-`wkpNorm_two_le_eigenvectorIteratedW2Aggregate`. -/
 private lemma wkpNorm_two_le_eigenvectorIteratedW2Aggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -366,8 +304,6 @@ private lemma wkpNorm_two_le_eigenvectorIteratedW2Aggregate
         (chartTargetEuclid (I := I) (M := M) α))
     (fun _ _ => zero_le _) (Finset.mem_univ dirs)
 
-/-- Chart-locality-free twin of
-`eigenvectorIteratedPartial_wkpNorm_gapInduction`. -/
 private theorem eigenvectorIteratedPartial_wkpNorm_gapInduction
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -520,8 +456,6 @@ private theorem eigenvectorIteratedPartial_wkpNorm_gapInduction
       rw [pow_succ]
       ring
 
-/-- Chart-locality-free twin of
-`eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le`. -/
 theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -581,8 +515,6 @@ theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le
     rw [h_cast]
     exact h_gap_norm
 
-/-- Chart-locality-free twin of
-`eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le_uniform`. -/
 theorem eigenvectorChartComponent_wkpNorm_m_plus_two_of_iterated_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ) :

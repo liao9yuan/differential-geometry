@@ -3,51 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 
-/-!
-# The covariant variational equation of the conjugating flow
-
-For the conjugating diffeomorphism family `Φ_fam` of the Hamilton–DeTurck short-time
-construction, pinned to the genuine flow by the backward bare-orbit ODE
-`∂_s Φ_fam = -deTurckVF (g_DT s) g_bg ∘ Φ_fam` on `Ioo 0 T`, this file proves the
-first-order, curvature-free **covariant variational equation** at an interior time `t`:
-
-`covDerivAlong (g_DT t) (fun s => Φ_fam s x) (fun s => mfderiv (Φ_fam s) x v) t =
-  -(LeviCivita (g_DT t)) (deTurckVF (g_DT t) g_bg) (Φ_fam t x) (mfderiv (Φ_fam t) x v)`.
-
-This is the intrinsic statement that the moving spatial Jacobian `s ↦ mfderiv (Φ_fam s) x v`
-of the conjugating flow is covariantly transported along the orbit `s ↦ Φ_fam s x` by minus
-the Levi-Civita covariant derivative of the (backward) generating field `deTurckVF`.  It is
-the heart of the intrinsic proof of the interior Ricci-flow PDE for the pulled-back metric:
-fed to the metric-compatibility chain rule `metric_compat_hasDerivAt_inner` in both slots
-`v` and `w`, it produces the `∂_s (Φ_fam s)^*(g_DT s)` Lie-derivative term intrinsically.
-
-## Construction
-
-The orbit `s ↦ Φ_fam s x` is the central transverse curve of the two-parameter variation
-`Γ(s, r) = Φ_fam s (c r)`, where `c : ℝ → M` is a smooth curve through `x` with velocity
-`v`.  Mixed second-covariant-derivative commutation on a smooth variation
-(`commute_ds_dt_intrinsic_shifted`) equates the transverse covariant derivative of the
-longitudinal velocity with the longitudinal covariant derivative of the transverse velocity;
-evaluating the resulting equality at the orbit time recovers the variational equation, the
-transverse side collapsing to the Levi-Civita covariant derivative of `deTurckVF` via the
-covariant chain rule (`covDerivAlong_restrict_eq_leviCivita`).
-
-The commutation lemma requires a **globally** smooth variation, while `Φ_fam` is jointly
-smooth only on the interior window `Ioo 0 T` (`conjugating_flow_jointContMDiffOn`) and the
-transverse curve is built from a chart line.  We therefore work with a globalised variation
-`Γ̃(s, r) = Φ_fam (flowTimeRetract t s) (chartLineCurve x v r)`, where:
-
-* `flowTimeRetract t` is a smooth retraction of `ℝ` onto a compact subinterval of `Ioo 0 T`
-  that is the identity on a neighbourhood of `t` (a symmetric `Real.smoothTransition` clamp);
-* `chartLineCurve x v` is a globally smooth chart line through `x` with velocity `v`, kept
-  bounded inside the chart target by the `arctan` reparametrisation `reparam`.
-
-`Γ̃` is globally jointly `C^8` (`IsSmoothVariation`) and agrees with the genuine variation
-`Φ_fam s (chartLineCurve x v r)` on a neighbourhood of `(t, 0)`.  The covariant derivative at
-`(t, 0)` depends only on the germ there, so the locality of `covDerivAlong`
-(`covDerivAlong_locality`) transfers the commuted identity to the genuine orbit data.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -71,15 +26,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ### Locality of the intrinsic covariant derivative in both arguments -/
-
-/-- **Locality of `covDerivAlong` in the curve and the section together.** If two curves
-have the same foot at `t` and the bundle-valued sections-along-the-curve `s ↦ ⟨γᵢ s, Vᵢ s⟩`
-agree on a neighbourhood of `t`, their intrinsic covariant derivatives at `t` coincide.  This
-is the curve-aware companion of `covDerivAlong_congr_of_eventuallyEq`: it allows the *base
-curve* to change, provided the bundle data agrees near `t`.  Phrasing the section hypothesis
-as a `TangentBundle`-valued `EventuallyEq` sidesteps the dependent-type mismatch of the two
-fibrewise sections (and exploits `TangentSpace I y` being defeq `E`). -/
 private lemma covDerivAlong_locality
     (g : SmoothRiemannianMetric I M) (γ₁ γ₂ : ℝ → M)
     (V₁ : ∀ s, TangentSpace I (γ₁ s)) (V₂ : ∀ s, TangentSpace I (γ₂ s)) (t : ℝ)
@@ -95,14 +41,14 @@ private lemma covDerivAlong_locality
     (trivializationAt E (TangentSpace I) α).open_baseSet
   have hpre : γ₁ ⁻¹' (trivializationAt E (TangentSpace I) α).baseSet ∈ 𝓝 t :=
     hγ₁.preimage_mem_nhds (hopen.mem_nhds hbase₀)
-  -- The chart trajectories agree near `t` (the base component of `htot`).
+  
   have hcurve_eq : γ₁ =ᶠ[𝓝 t] γ₂ := by
     filter_upwards [htot] with s hs
     exact congrArg (fun p : TangentBundle I M => p.proj) hs
   have hcurve : chartCurve (I := I) α γ₁ =ᶠ[𝓝 t] chartCurve (I := I) α γ₂ := by
     filter_upwards [hcurve_eq] with s hs
     rw [chartCurve_def, chartCurve_def, hs]
-  -- The chart representations agree near `t`.
+  
   have hrep : chartRepAt (I := I) γ₁ V₁ t =ᶠ[𝓝 t] chartRepAt (I := I) γ₂ V₂ t := by
     have hpre₂ : γ₂ ⁻¹' (trivializationAt E (TangentSpace I) α).baseSet ∈ 𝓝 t := by
       filter_upwards [hpre, hcurve_eq] with s hs hseq
@@ -125,11 +71,6 @@ private lemma covDerivAlong_locality
   congr 1
   rw [hrep.deriv_eq, hrep.eq_of_nhds, hcurve.deriv_eq, hcurve.eq_of_nhds]
 
-/-! ### A smooth retraction of the time line onto the interior window -/
-
-/-- A symmetric smooth clamp of `ℝ` centred at `t`, the identity on `[t - δ, t + δ]` and
-constant `= t` outside `[t - δ - w, t + δ + w]`.  Built from two reflected
-`Real.smoothTransition` factors. -/
 private noncomputable def flowTimeRetract (t δ w : ℝ) (s : ℝ) : ℝ :=
   t + (s - t) * (1 - Real.smoothTransition ((s - t - δ) / w))
     * (1 - Real.smoothTransition ((t - δ - s) / w))
@@ -196,8 +137,6 @@ private lemma flowTimeRetract_abs_le (t δ w : ℝ) (hδ : 0 ≤ δ) (hw : 0 < w
         rw [this]; ring
     rw [hzero, abs_zero]; linarith
 
-/-- For `t ∈ Ioo 0 T` and small `δ, w`, the retraction `flowTimeRetract t δ w` maps `ℝ`
-into the open interior window `Ioo 0 T`. -/
 private lemma flowTimeRetract_mem_Ioo (t T δ w : ℝ) (hδ : 0 ≤ δ) (hw : 0 < w)
     (hlo : 0 < t - (δ + w)) (hhi : t + (δ + w) < T) (s : ℝ) :
     flowTimeRetract t δ w s ∈ Set.Ioo (0 : ℝ) T := by
@@ -205,18 +144,9 @@ private lemma flowTimeRetract_mem_Ioo (t T δ w : ℝ) (hδ : 0 ≤ δ) (hw : 0 
   rw [abs_le] at h
   exact ⟨by linarith [h.1], by linarith [h.2]⟩
 
-/-! ### A globally smooth chart line through `x` with velocity `v` -/
-
-/-- A globally `C^∞` curve through `x` with prescribed initial velocity `v`, built from the
-chart line `r ↦ (extChartAt I x).symm (extChartAt I x x + reparam δ r • v)`.  The `arctan`
-reparametrisation `reparam δ` keeps the chart-coordinate point inside the chart target for
-all `r`, so the pulled-back curve is globally smooth (not merely a germ at `0`). -/
 private noncomputable def chartLineCurve (x : M) (v : TangentSpace I x) (δ : ℝ) : ℝ → M :=
   fun r => (extChartAt I x).symm (extChartAt I x x + (reparam δ r) • (show E from v))
 
-/-- There is `δ > 0` such that the chart line `chartLineCurve x v δ` is globally `C^∞`,
-passes through `x` at `0`, and has velocity `v` there in the form
-`HasMFDerivAt 𝓘(ℝ, ℝ) I (chartLineCurve x v δ) 0 ((1 : ℝ →L[ℝ] ℝ).smulRight v)`. -/
 private lemma exists_chartLineCurve_global
     (x : M) (v : TangentSpace I x) :
     ∃ δ : ℝ, 0 < δ ∧
@@ -238,8 +168,7 @@ private lemma exists_chartLineCurve_global
     exact this htgt
   obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hpre
   refine ⟨ε, hε, ?_, ?_, ?_⟩
-  · -- global smoothness
-    have hreparam : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun r : ℝ => φ + (reparam ε r) • vE) := by
+  · have hreparam : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, E) ∞ (fun r : ℝ => φ + (reparam ε r) • vE) := by
       rw [contMDiff_iff_contDiff]
       have : ContDiff ℝ ∞ (fun r : ℝ => φ + (reparam ε r) • vE) :=
         contDiff_const.add ((contDiff_reparam ε).smul contDiff_const)
@@ -255,10 +184,8 @@ private lemma exists_chartLineCurve_global
       contMDiffOn_extChartAt_symm (n := (∞ : WithTop ℕ∞)) x
     have hcomp := hsymm.comp_contMDiff hreparam hmaps
     simpa [chartLineCurve, Function.comp_def, hφ] using hcomp
-  · -- value at 0
-    simp [chartLineCurve, reparam_zero]
-  · -- velocity at 0
-    have hLine : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun r : ℝ => φ + (reparam ε r) • vE) 0
+  · simp [chartLineCurve, reparam_zero]
+  · have hLine : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun r : ℝ => φ + (reparam ε r) • vE) 0
         ((1 : ℝ →L[ℝ] ℝ).smulRight vE) := by
       rw [hasMFDerivAt_iff_hasFDerivAt]
       have hrd : HasDerivAt (reparam ε) 1 0 := hasDerivAt_reparam_zero ε hε
@@ -294,24 +221,6 @@ private lemma exists_chartLineCurve_global
     rw [ContinuousLinearMap.id_comp] at hcomp'
     simpa [chartLineCurve, hφ] using hcomp'
 
-/-! ### The covariant variational equation (G2) -/
-
-/-- **The covariant variational equation of the conjugating flow (G2).**
-
-For the conjugating diffeomorphism family `Φ_fam` pinned to the genuine flow by the backward
-bare-orbit ODE `hΦode` (`∂_s Φ_fam = -deTurckVF (g_DT s) g_bg ∘ Φ_fam` on `Ioo 0 T`) and
-jointly `C∞` on the interior (`hjoint`, the proven L2 smooth-dependence datum
-`conjugating_flow_jointContMDiffOn`), at an interior time `t ∈ Ioo 0 T`, fixed point `x` and
-tangent vector `v`, the moving spatial Jacobian `s ↦ mfderiv (Φ_fam s) x v` is covariantly
-transported along the orbit `s ↦ Φ_fam s x` by minus the Levi-Civita covariant derivative of
-the generating field `deTurckVF (g_DT t) g_bg`:
-
-`covDerivAlong (g_DT t) (fun s => Φ_fam s x) (fun s => mfderiv (Φ_fam s) x v) t =
-  -(LeviCivita (g_DT t)) (deTurckVF (g_DT t) g_bg) (Φ_fam t x) (mfderiv (Φ_fam t) x v)`.
-
-This is the first-order, curvature-free heart of the intrinsic Hamilton–DeTurck proof of the
-interior Ricci-flow PDE for the pulled-back metric; it is consumed in both inner-product slots
-by the metric-compatibility chain rule `metric_compat_hasDerivAt_inner`. -/
 theorem conjugating_flow_covariant_variational_eq
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -331,7 +240,7 @@ theorem conjugating_flow_covariant_variational_eq
         (mfderiv I I (Φ_fam t : M → M) x v)) := by
   classical
   obtain ⟨ht0, htT⟩ := ht
-  -- The globally smooth chart line through `x` with velocity `v`.
+  
   obtain ⟨δc, hδc, hcc_smooth, hcc0, hcc_vel⟩ := exists_chartLineCurve_global (I := I) x v
   set cc : ℝ → M := chartLineCurve (I := I) x v δc with hcc_def
   have h8le : ((8 : ℕ) : WithTop ℕ∞) ≤ ∞ := by
@@ -343,7 +252,7 @@ theorem conjugating_flow_covariant_variational_eq
     rw [ContinuousLinearMap.one_apply, one_smul]
   have hcc_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I cc 0 :=
     hcc_smooth.contMDiffAt.mdifferentiableAt (by simp)
-  -- The smooth time retraction onto a compact subwindow of `Ioo 0 T`, identity near `t`.
+  
   set η : ℝ := min t (T - t) / 4 with hη_def
   have hη_pos : 0 < η := by
     rw [hη_def]; have : 0 < min t (T - t) := lt_min ht0 (by linarith); positivity
@@ -365,9 +274,9 @@ theorem conjugating_flow_covariant_variational_eq
     filter_upwards [hmem] with s hs using hρ_eq s hs
   have hρ_smooth : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞ ρ := by
     rw [contMDiff_iff_contDiff]; exact flowTimeRetract_contDiff t η η
-  -- The globalised variation `Gg s r = Φ_fam (ρ s) (cc r)`.
+  
   set Gg : ℝ → ℝ → M := fun s r => (Φ_fam (ρ s) : M → M) (cc r) with hGg_def
-  -- `Gg` is a globally smooth variation.
+  
   have hGg_var : IsSmoothVariation (I := I) Gg := by
     have hρ8 : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (8 : ℕ) ρ := hρ_smooth.of_le h8le
     have hcc8 : ContMDiff 𝓘(ℝ, ℝ) I (8 : ℕ) cc := hcc_smooth.of_le h8le
@@ -381,7 +290,7 @@ theorem conjugating_flow_covariant_variational_eq
       hjoint.of_le h8le
     have hcomp := hjoint8.comp_contMDiff hinner hmaps
     exact (hcomp : ContMDiff _ _ _ _)
-  -- Chain rule: the `r`-velocity of `Φ_fam u ∘ cc` at `0` is `mfderiv (Φ_fam u) x v`.
+  
   have hchain : ∀ u : ℝ,
       mfderiv 𝓘(ℝ, ℝ) I (fun w : ℝ => (Φ_fam u : M → M) (cc w)) 0 (1 : ℝ)
         = mfderiv I I (Φ_fam u : M → M) x v := by
@@ -391,14 +300,14 @@ theorem conjugating_flow_covariant_variational_eq
     have hcompeq : (fun w : ℝ => (Φ_fam u : M → M) (cc w)) = (Φ_fam u : M → M) ∘ cc := rfl
     rw [hcompeq, mfderiv_comp 0 hg hcc_mdiff, ContinuousLinearMap.comp_apply, hcc_mderiv]
     rw [hcc0]
-  -- The orbit slice `w ↦ Gg w r` agrees with the genuine orbit near `t` (where `ρ = id`).
+  
   have horbit_nhds : ∀ r : ℝ,
       (fun w : ℝ => Gg w r) =ᶠ[𝓝 t] (fun w : ℝ => (Φ_fam w : M → M) (cc r)) := by
     intro r
     filter_upwards [hρ_nhds] with w hw
     simp only [hGg_def]
     rw [hw]
-  -- The longitudinal velocity of `Gg` at the flow time equals the backward DeTurck field.
+  
   have hsec : ∀ r : ℝ,
       mfderiv 𝓘(ℝ, ℝ) I (fun w : ℝ => Gg w r) t (1 : ℝ)
         = -(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) (cc r))) := by
@@ -411,11 +320,11 @@ theorem conjugating_flow_covariant_variational_eq
     rw [hmf.mfderiv]
     change (1 : ℝ →L[ℝ] ℝ) 1 • (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) (cc r)))) = _
     rw [ContinuousLinearMap.one_apply, one_smul]
-  -- The transverse curve and velocity of `Gg` at the orbit-`0` slice.
+  
   have hGg0 : ∀ s : ℝ, Gg s 0 = (Φ_fam (ρ s) : M → M) x := by
     intro s; simp only [hGg_def]; rw [hcc0]
-  -- The bundle point `⟨g 0, ∂_r g 0⟩` of a transverse slice through `cc` collapses to the
-  -- genuine orbit bundle datum, by the chain rule (a single `congrArg` on the family).
+  
+  
   have hbundle : ∀ u : ℝ,
       (TotalSpace.mk' E ((Φ_fam u : M → M) (cc 0))
           (mfderiv 𝓘(ℝ, ℝ) I (fun w : ℝ => (Φ_fam u : M → M) (cc w)) 0 (1 : ℝ))
@@ -424,20 +333,19 @@ theorem conjugating_flow_covariant_variational_eq
     intro u
     have hbase : (Φ_fam u : M → M) (cc 0) = (Φ_fam u : M → M) x := by rw [hcc0]
     rw [hchain u, hbase]
-  -- Apply the mixed commutation at the `r`-parameter `0` and evaluate at the flow time `t`.
+  
   have hcomm := commute_ds_dt_intrinsic_shifted (I := I) (g_DT t) Gg hGg_var 0
   have hcomm_t := congrFun hcomm t
-  -- The common foot of the longitudinal slice at the flow time.
+  
   have hfoot_t : Gg t 0 = (Φ_fam t : M → M) x := by rw [hGg0 t, hρt]
-  -- LHS transfer: the commuted longitudinal-side derivative equals the genuine orbit one.
+  
   have hL : covDerivAlong (I := I) (g_DT t) (fun s' : ℝ => Gg s' 0)
         (fun s' : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun w : ℝ => Gg s' w) 0 (1 : ℝ)) t
       = covDerivAlong (I := I) (g_DT t) (fun s' : ℝ => (Φ_fam s' : M → M) x)
         (fun s' : ℝ => mfderiv I I (Φ_fam s' : M → M) x v) t := by
     refine covDerivAlong_locality (I := I) (g_DT t) (fun s' : ℝ => Gg s' 0)
       (fun s' : ℝ => (Φ_fam s' : M → M) x) _ _ t hfoot_t ?_ ?_
-    · -- `s' ↦ Gg s' 0` is continuous at `t` (the globally smooth variation restricted).
-      have hslice : ContMDiff 𝓘(ℝ, ℝ) I (8 : ℕ) (fun s' : ℝ => Gg s' 0) :=
+    · have hslice : ContMDiff 𝓘(ℝ, ℝ) I (8 : ℕ) (fun s' : ℝ => Gg s' 0) :=
         (hGg_var : ContMDiff _ _ _ _).comp (contMDiff_id.prodMk contMDiff_const)
       exact hslice.continuous.continuousAt
     · filter_upwards [hρ_nhds] with s' hs'
@@ -452,7 +360,7 @@ theorem conjugating_flow_covariant_variational_eq
               (TotalSpace.mk' E (g 0) (mfderiv 𝓘(ℝ, ℝ) I g 0 (1 : ℝ)) : TangentBundle I M)) hslice
         _ = TotalSpace.mk' E ((Φ_fam s' : M → M) x) (mfderiv I I (Φ_fam s' : M → M) x v) :=
             hbundle s'
-  -- RHS transfer: the commuted transverse-side derivative equals the Levi-Civita value.
+  
   have hR : covDerivAlong (I := I) (g_DT t) (fun r : ℝ => Gg t r)
         (fun r : ℝ => mfderiv 𝓘(ℝ, ℝ) I (fun w : ℝ => Gg w r) t (1 : ℝ)) 0
       = -((LeviCivita (I := I) (g_DT t))
@@ -466,8 +374,7 @@ theorem conjugating_flow_covariant_variational_eq
           (fun r : ℝ => -(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) (cc r)))) 0 := by
       refine covDerivAlong_locality (I := I) (g_DT t) (fun r : ℝ => Gg t r)
         (fun r : ℝ => (Φ_fam t : M → M) (cc r)) _ _ 0 (hRb 0) ?_ ?_
-      · -- `r ↦ Gg t r` is continuous (the globally smooth variation restricted).
-        have hslice : ContMDiff 𝓘(ℝ, ℝ) I (8 : ℕ) (fun r : ℝ => Gg t r) :=
+      · have hslice : ContMDiff 𝓘(ℝ, ℝ) I (8 : ℕ) (fun r : ℝ => Gg t r) :=
           (hGg_var : ContMDiff _ _ _ _).comp (contMDiff_const.prodMk contMDiff_id)
         exact hslice.continuous.continuousAt
       · filter_upwards with r

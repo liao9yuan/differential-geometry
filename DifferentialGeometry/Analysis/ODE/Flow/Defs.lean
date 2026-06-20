@@ -1,42 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Variational
 
-/-!
-# The $C^1$ flow of a Banach-space ODE
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E`, jointly `C^1` in
-`(t, x)`, the initial-value problem
-`α'(t) = f(t, α(t)),  α(t₀) = x₀`
-admits, locally around any reference solution, a `C^1` *flow* `Φ : E × ℝ → E`.  Concretely,
-near `(t₀, x₀)` there is a closed ball `closedBall x₀ r ⊆ E` and a compact time interval
-`Icc tmin tmax ∋ t₀` on which a continuous map `Φ : E × ℝ → E` exists with
-
-* `Φ(x, t₀) = x` for `x ∈ closedBall x₀ r`,
-* `t ↦ Φ(x, t)` solves the ODE for each `x ∈ closedBall x₀ r`,
-* `Φ` is jointly continuous on `closedBall x₀ r ×ˢ Icc tmin tmax`,
-* the partial Fréchet derivative `δ ↦ (D_x Φ(·, t)) (x) δ` exists at every interior point
-  `x ∈ ball x₀ r` and coincides with the solution of the *variational ODE* with initial
-  variation `δ`.
-
-The variational ODE is the linear ODE `y'(t) = (D_x f)(t, Φ(x, t)) y(t),  y(t₀) = δ`, isolated
-and studied in `DifferentialGeometry.Analysis.ODE.Variational`.
-
-## Main definitions
-
-* `Flow.IsLocalFlow f t₀ x₀ r tmin tmax Φ`: a predicate packaging the Picard–Lindelöf flow
-  produced by `IsPicardLindelof.exists_forall_mem_closedBall_eq_hasDerivWithinAt_continuousOn`
-  together with the ODE / initial-value / continuity properties.
-
-## Main results
-
-* `Flow.exists_isLocalFlow_of_contDiffOn_univ`: from joint `C^1` of `f` on `Set.univ`, the
-  existence of a local flow around any base point `(t₀, x₀)`.
-* `Flow.IsLocalFlow.continuousOn_fderiv_along_orbit`: continuity of the linearization along an
-  orbit, used to set up the variational ODE.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]` is *not*
-used.  No manifold or tensor file is imported.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics
@@ -49,13 +12,6 @@ namespace Flow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
-/-- A *local flow* of the time-dependent vector field `f` is a map `Φ : E × ℝ → E` defined on
-`closedBall x₀ r ×ˢ Icc tmin tmax` such that, for every initial point `x ∈ closedBall x₀ r`,
-
-* `Φ ⟨x, t₀⟩ = x`,
-* `Φ ⟨x, ·⟩` is differentiable in `t` with derivative `f t (Φ ⟨x, t⟩)`,
-* `Φ` is continuous on the product domain,
-* there exists a Lipschitz constant for the map `x ↦ Φ ⟨x, t⟩` uniform in `t`. -/
 structure IsLocalFlow (f : ℝ → E → E) (t₀ : ℝ) (x₀ : E) (r : ℝ≥0) (tmin tmax : ℝ)
     (Φ : E × ℝ → E) : Prop where
   htmin_le : tmin ≤ t₀
@@ -74,7 +30,6 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 lemma t₀_mem_Icc (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ) : t₀ ∈ Icc tmin tmax :=
   ⟨h.htmin_le, h.ht₀_le⟩
 
-/-- The orbit starting at `x` is continuous in time. -/
 lemma orbit_continuousOn (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (x : E) (hx : x ∈ closedBall x₀ r) :
     ContinuousOn (fun t : ℝ => Φ ⟨x, t⟩) (Icc tmin tmax) :=
@@ -82,8 +37,6 @@ lemma orbit_continuousOn (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
 
 end IsLocalFlow
 
-/-- Build the Picard–Lindelöf data for the time-dependent vector field `f` near `(t₀, x₀)`
-under the assumption that `f` is jointly `C^1` on `Set.univ`. -/
 lemma exists_isPicardLindelof_of_contDiffOn_univ
     (f : ℝ → E → E) (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (t₀ : ℝ) (x₀ : E) :
@@ -220,11 +173,6 @@ lemma exists_isPicardLindelof_of_contDiffOn_univ
     change Lf * ε ≤ a₀ / 2
     exact hLf_eps
 
-/-- If the time-dependent vector field `f` is jointly `C^1` on all of `ℝ × E`, then around any
-base point `(t₀, x₀)` there exist a radius `r > 0`, a time half-width `ε > 0`, and a map
-`Φ : E × ℝ → E` that is an `IsLocalFlow` of `f` on `closedBall x₀ r ×ˢ Icc (t₀ - ε) (t₀ + ε)`.
-The flow is obtained from the Mathlib Picard–Lindelöf theorem applied to the data built by
-`exists_isPicardLindelof_of_contDiffOn_univ`. -/
 theorem exists_isLocalFlow_of_contDiffOn_univ
     (f : ℝ → E → E) (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (t₀ : ℝ) (x₀ : E) :
@@ -250,7 +198,6 @@ namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The linearization along any orbit is continuous on the time interval. -/
 lemma continuousOn_fderiv_along_orbit
     (hflow : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -268,7 +215,6 @@ lemma continuousOn_fderiv_along_orbit
     fun _ _ => mem_univ _
   exact hpartial.comp horbit hmaps
 
-/-- Norm bound for the linearization along any orbit, on the compact time interval. -/
 lemma exists_norm_fderiv_le_along_orbit
     (hflow : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -280,9 +226,6 @@ lemma exists_norm_fderiv_le_along_orbit
   rcases isCompact_Icc.exists_isMaxOn ⟨t₀, hflow.t₀_mem_Icc⟩ hcontN with ⟨t₁, _, ht₁_max⟩
   exact ⟨‖fderiv ℝ (f t₁) (Φ ⟨x, t₁⟩)‖, norm_nonneg _, fun t ht => ht₁_max ht⟩
 
-/-- Local existence of a variational solution along the orbit `t ↦ Φ ⟨x, t⟩` for `x` in
-`closedBall x₀ r`.  The interval of validity is some open `(t₀ - ε', t₀ + ε')` inside the flow's
-time domain.  Requires the initial time to lie strictly inside `(tmin, tmax)`. -/
 theorem exists_variationalSolutionOn_Ioo_along_orbit
     (hflow : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))

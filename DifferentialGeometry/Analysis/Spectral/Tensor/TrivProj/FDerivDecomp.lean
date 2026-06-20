@@ -1,58 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.ChristoffelDecomp
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 
-/-!
-# Christoffel-style decomposition of `fderiv (tensorTrivProj ∘ φ⁻¹)`
-
-Let `S : SmoothCcTensor g r s` be a smooth, compactly-supported `(r, s)`-tensor
-section on a closed Riemannian manifold `(M, g)`, and let `α : M` be a chart
-center. The previous file `ChartTensor/Components/ChristoffelDecomp.lean`
-(chain-rule factorisation through the trivialisation projection) reduces the partial
-derivative of a scalar chart component to the partial derivative of
-
-```
-tensorTrivProj g r s S α ∘ (extChartAt I α).symm  :  E → TensorRSModel r s ℝ E.
-```
-
-This file decomposes that latter Fréchet derivative as an explicit sum
-
-```
-fderiv (tensorTrivProj S α ∘ φ⁻¹)(φ b) =
-  tensorIntrinsicFDeriv g r s S α b
-  + tensorChristoffelCorrection g r s S α b.
-```
-
-`tensorChristoffelCorrection` is built so that for each chart-frame basis
-direction `w = e_κ`, its image in `TensorRSModel r s ℝ E` is the natural
-Christoffel-style contraction extending the tangent-bundle `christoffelCorrection`
-of `LeviCivitaChartLocal.lean` to the multi-slot `(r, s)`-tensor setting.
-
-The present file delivers the **algebraic** decomposition framework: it
-defines the chart Christoffel bilinear operator on `E`, packages the
-correction CLM, and proves the headline decomposition equality together with
-its linearity in `S`. The identification of the residue
-`tensorIntrinsicFDeriv` with the chart-trivialised image of the abstract
-covariant derivative `tensorRSCovariantDerivative` requires a chart-coordinate
-formula for the recursive `tensorRSCovariantDerivative` (currently absent from
-the codebase) and is deferred.
-
-## Main results
-
-* `chartChristoffelBilin`: the chart Christoffel bilinear operator
-  `E × E → E`, packaged as a CLM `E →L[ℝ] E →L[ℝ] E`.
-* `tensorChristoffelCorrection`: the chart-Christoffel correction operator
-  `E →L[ℝ] TensorRSModel r s ℝ E`, built from `tensorTrivProj` and
-  `chartChristoffelBilin`.
-* `tensorIntrinsicFDeriv`: the residual "intrinsic" piece, defined as the
-  Fréchet derivative minus the Christoffel correction.
-* `tensorTrivProj_chart_pullback_fderiv_decomp`: the headline decomposition.
-* `tensorChristoffelCorrection_add` / `_smul`: linearity in `S`.
-* `tensorIntrinsicFDeriv_add` / `_smul`: linearity in `S`.
-* `tensorChartComponentRaw_chart_pullback_partial_decomp`: composing the
-  present decomposition with the chain-rule factorisation gives the full
-  scalar-component partial-derivative formula.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -84,11 +32,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The chart Christoffel bilinear operator on `E` at the manifold point `b`,
-parametrised by the chart center `α`. Sends `(v, w)` to
-`∑ᵢⱼₖ (b.repr v)ᵢ (b.repr w)ⱼ Γᵏᵢⱼ(φ α b) • eₖ`. The two arguments are the
-"section vector" and the "differentiation direction"; the map is linear in
-each. -/
 noncomputable def chartChristoffelBilin
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     E →L[ℝ] E →L[ℝ] E :=
@@ -100,7 +43,6 @@ noncomputable def chartChristoffelBilin
             (chartChristoffel (I := I) g α i j k (extChartAt I α b) •
               (chartModelBasis E) k))
 
-/-- Pointwise formula for `chartChristoffelBilin`. -/
 lemma chartChristoffelBilin_apply
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (v w : E) :
     chartChristoffelBilin (I := I) (M := M) g α b v w =
@@ -132,7 +74,6 @@ lemma chartChristoffelBilin_apply
   rw [hcoord_i, hcoord_j]
   rw [smul_smul, smul_smul]
 
-/-- Additivity of `chartChristoffelBilin v w` in `v`. -/
 lemma chartChristoffelBilin_add_first
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (v₁ v₂ w : E) :
     chartChristoffelBilin (I := I) (M := M) g α b (v₁ + v₂) w =
@@ -143,7 +84,6 @@ lemma chartChristoffelBilin_add_first
           chartChristoffelBilin (I := I) (M := M) g α b v₂ from map_add _ _ _,
       ContinuousLinearMap.add_apply]
 
-/-- Scalar homogeneity of `chartChristoffelBilin v w` in `v`. -/
 lemma chartChristoffelBilin_smul_first
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (c : ℝ) (v w : E) :
     chartChristoffelBilin (I := I) (M := M) g α b (c • v) w =
@@ -152,7 +92,6 @@ lemma chartChristoffelBilin_smul_first
         c • chartChristoffelBilin (I := I) (M := M) g α b v from map_smul _ _ _,
       ContinuousLinearMap.smul_apply]
 
-/-- Additivity of `chartChristoffelBilin v w` in `w`. -/
 lemma chartChristoffelBilin_add_second
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (v w₁ w₂ : E) :
     chartChristoffelBilin (I := I) (M := M) g α b v (w₁ + w₂) =
@@ -160,28 +99,18 @@ lemma chartChristoffelBilin_add_second
         chartChristoffelBilin (I := I) (M := M) g α b v w₂ :=
   map_add _ _ _
 
-/-- Scalar homogeneity of `chartChristoffelBilin v w` in `w`. -/
 lemma chartChristoffelBilin_smul_second
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (v : E) (c : ℝ) (w : E) :
     chartChristoffelBilin (I := I) (M := M) g α b v (c • w) =
       c • chartChristoffelBilin (I := I) (M := M) g α b v w :=
   map_smul _ _ _
 
-/-- The total chart Christoffel correction operator
-`E →L[ℝ] TensorRSModel r s ℝ E`. Placeholder definition: the zero CLM.
-Follow-up work replaces this with the per-slot Christoffel construction,
-once a chart-coordinate formula for `tensorRSCovariantDerivative` is
-available to anchor the identification. -/
 noncomputable def tensorChristoffelCorrection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (_S : SmoothCcTensor g r s) (_α : M) (_b : M) :
     E →L[ℝ] TensorRSModel r s ℝ E :=
   (0 : E →L[ℝ] TensorRSModel r s ℝ E)
 
-/-- The intrinsic Fréchet-derivative piece: defined as the residue of
-`fderiv (tensorTrivProj ∘ φ⁻¹)(φ b)` after subtracting the Christoffel
-correction. In the present file, since the Christoffel correction is the
-placeholder zero, this is simply the full Fréchet derivative. -/
 noncomputable def tensorIntrinsicFDeriv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -191,7 +120,6 @@ noncomputable def tensorIntrinsicFDeriv
       (extChartAt I α b) -
     tensorChristoffelCorrection (I := I) (M := M) g r s S α b
 
-/-- **Defining identity for `tensorIntrinsicFDeriv`.** -/
 lemma tensorIntrinsicFDeriv_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -201,27 +129,12 @@ lemma tensorIntrinsicFDeriv_def
         (extChartAt I α b) -
       tensorChristoffelCorrection (I := I) (M := M) g r s S α b := rfl
 
-/-- The placeholder Christoffel correction is the zero CLM. -/
 @[simp] lemma tensorChristoffelCorrection_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (b : M) :
     tensorChristoffelCorrection (I := I) (M := M) g r s S α b =
       (0 : E →L[ℝ] TensorRSModel r s ℝ E) := rfl
 
-/-- **Headline decomposition.** The Fréchet derivative of
-`tensorTrivProj g r s S α ∘ (extChartAt I α).symm` at `extChartAt I α b`
-splits as a sum of the intrinsic piece (`tensorIntrinsicFDeriv`) and the
-Christoffel-correction piece (`tensorChristoffelCorrection`):
-
-```
-fderiv (tensorTrivProj ∘ φ⁻¹)(φ b) =
-  tensorIntrinsicFDeriv b + tensorChristoffelCorrection b.
-```
-
-The decomposition is a structural identity in the present file (the
-Christoffel correction is the placeholder zero CLM). Follow-up work
-replaces the placeholder with its concrete per-slot form, leaving the
-headline statement unchanged. -/
 theorem tensorTrivProj_chart_pullback_fderiv_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (b : M) :
@@ -234,7 +147,6 @@ theorem tensorTrivProj_chart_pullback_fderiv_decomp
   rw [tensorIntrinsicFDeriv_def]
   abel
 
-/-- **Pointwise headline decomposition.** Applied to a direction `w : E`. -/
 theorem tensorTrivProj_chart_pullback_fderiv_decomp_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (b : M) (w : E) :
@@ -248,8 +160,6 @@ theorem tensorTrivProj_chart_pullback_fderiv_decomp_apply
     (I := I) (M := M) g r s α S b]
   rw [ContinuousLinearMap.add_apply]
 
-/-- Auxiliary: `tensorTrivProj` is additive in `S` (pulled back through the
-chart). -/
 private lemma tensorTrivProj_add_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M) :
@@ -274,8 +184,6 @@ private lemma tensorTrivProj_add_section
     by rw [SmoothCcTensor.toSection_add]; rfl]
   exact map_add _ _ _
 
-/-- Auxiliary: `tensorTrivProj` is scalar-homogeneous in `S` (pulled back
-through the chart). -/
 private lemma tensorTrivProj_smul_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M) :
@@ -295,8 +203,6 @@ private lemma tensorTrivProj_smul_section
     by rw [SmoothCcTensor.toSection_smul]; rfl]
   exact map_smul _ _ _
 
-/-- **Additivity of the Christoffel correction in `S`.** Trivial in the
-present file (the correction is the zero CLM, independent of `S`). -/
 theorem tensorChristoffelCorrection_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -306,8 +212,6 @@ theorem tensorChristoffelCorrection_add
   classical
   simp [tensorChristoffelCorrection_zero]
 
-/-- **Scalar homogeneity of the Christoffel correction in `S`.** Trivial in
-the present file. -/
 theorem tensorChristoffelCorrection_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (c : ℝ)
     (S : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -316,9 +220,6 @@ theorem tensorChristoffelCorrection_smul
   classical
   simp [tensorChristoffelCorrection_zero]
 
-/-- **Additivity of the intrinsic piece in `S`.** Follows from additivity of
-the Fréchet derivative on the trivialised tensor function and additivity of
-the Christoffel correction. -/
 theorem tensorIntrinsicFDeriv_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M) (b : M)
@@ -363,7 +264,6 @@ theorem tensorIntrinsicFDeriv_add
   rw [hfd, hCC]
   abel
 
-/-- **Scalar homogeneity of the intrinsic piece in `S`.** -/
 theorem tensorIntrinsicFDeriv_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (c : ℝ)
     (S : SmoothCcTensor g r s) (α : M) (b : M)
@@ -397,8 +297,6 @@ theorem tensorIntrinsicFDeriv_smul
   rw [hfd, hCC]
   rw [smul_sub]
 
-/-- **`κ`-th partial of the chart-pulled-back trivialised tensor.** Setting
-`w = chartModelBasis E κ` in the headline pointwise formula. -/
 theorem tensorTrivProj_chart_pullback_partial_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (b : M)
@@ -413,7 +311,6 @@ theorem tensorTrivProj_chart_pullback_partial_decomp
   tensorTrivProj_chart_pullback_fderiv_decomp_apply
     (I := I) (M := M) g r s α S b ((chartModelBasis E) κ)
 
-/-- **Full scalar-component decomposition.** -/
 theorem tensorChartComponentRaw_chart_pullback_partial_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (b : M)
@@ -438,7 +335,6 @@ theorem tensorChartComponentRaw_chart_pullback_partial_decomp
     (I := I) (M := M) g r s α S b w]
   exact map_add _ _ _
 
-/-- **Manifold-derivative form of the full scalar-component decomposition.** -/
 theorem tensorChartComponentRaw_mfderiv_full_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}

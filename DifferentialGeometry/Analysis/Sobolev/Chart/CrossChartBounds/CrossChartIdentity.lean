@@ -1,20 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 
-/-!
-# Pointwise cross-chart identity for non-smooth Euclidean inputs
-
-For two chart points `γ α : M` on a closed Riemannian manifold and a fixed
-compact set `K_α ⊆ (chartAt H α).source`, the chart-γ pushed cross-pullback
-`chartPushed γ (chartPullback I α v)` admits a closed-form pointwise
-expression as a smooth bounded prefactor `ργ_pre` times `v ∘ Φ.toFun` on the
-chart-γ Euclidean target, where `Φ : SmoothDiffeoBoundedAtOrder _ _ _ 1`
-realises the chart transition on the relevant overlap. The identity holds
-for **any** `v : EuclN → ℝ` whose closed support sits inside the chart-α
-Euclidean image of `K_α` — no smoothness of `v` is required. The construction
-reuses the chart-transition diffeomorphism and the cutoff combination produced
-inside the smooth-input cross-chart bound.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -37,23 +22,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Pointwise cross-chart identity for non-smooth inputs.**
-
-For two chart points `γ α : M` on a closed Riemannian manifold and a fixed
-compact set `K_α ⊆ (chartAt H α).source`, there exist:
-
-* an open set `Ω_γα ⊆ EuclN`;
-* a `SmoothDiffeoBoundedAtOrder _ Ω_γα _ 1` instance `Φ` whose forward map
-  agrees with `chartTransitionEuclid γ α` on `Ω_γα`;
-* a globally-smooth bounded prefactor `ργ_pre : EuclN → ℝ` with bounded gradient,
-
-such that for **every** `v : EuclN → ℝ` with closed support inside the chart-α
-Euclidean image of `K_α`, the chart-γ pushed cross-pullback equals
-`ργ_pre y · v (Φ.toFun y)` pointwise on the chart-γ Euclidean target
-`chartTargetEuclid γ`.
-
-No smoothness of `v` is assumed; the proof tracks supports purely
-set-theoretically. -/
 theorem chartPushed_chartPullback_pointwise_identity
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

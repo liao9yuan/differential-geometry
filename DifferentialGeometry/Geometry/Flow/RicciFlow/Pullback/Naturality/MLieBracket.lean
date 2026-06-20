@@ -1,13 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
-/-!
-# Naturality of the Lie bracket under pushforward
-
-Shows that the manifold Lie bracket of vector fields is natural under a diffeomorphism: the
-pushforward of a bracket is the bracket of the pushforwards.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
@@ -22,8 +15,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- Chain-rule consequence for a diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`: the manifold derivatives
-of `Φ` and `Φ.symm` compose to the identity at `(Φ y, y)`. -/
 private lemma mfderiv_symm_comp_self
     (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     (mfderiv I I (⇑Φ.symm) (Φ y)).comp (mfderiv I I (⇑Φ) y)
@@ -37,10 +28,6 @@ private lemma mfderiv_symm_comp_self
   rw [mfderiv_id] at hchain
   exact hchain.symm
 
-/-- The reverse composition: `mfderiv Φ ∘ mfderiv Φ.symm = id` at `(Φ.symm y, y)`.
-The output type `T_y M →L T_{Φ (Φ.symm y)} M` is definitionally equal to `T_y M →L T_y M`
-because `TangentSpace I _ = E` definitionally for every basepoint, so the identity on
-`T_y M` is the correct target. -/
 private lemma mfderiv_self_comp_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     (mfderiv I I (⇑Φ) (Φ.symm y)).comp (mfderiv I I (⇑Φ.symm) y)
@@ -54,8 +41,6 @@ private lemma mfderiv_self_comp_symm
   rw [mfderiv_id] at hchain
   exact hchain.symm
 
-/-- The pushforward of a vector field along a diffeomorphism `Φ` equals the pullback of the
-vector field along `Φ.symm`. -/
 private lemma pushforward_eq_mpullback_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (V : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ V x = VectorField.mpullback I I (⇑Φ.symm) V x := by
@@ -74,12 +59,6 @@ private lemma pushforward_eq_mpullback_symm
   exact eqRec_heq (φ := fun z => TangentSpace I z) (Φ.apply_symm_apply x)
     ((mfderiv I I (⇑Φ) (Φ.symm x)) (V (Φ.symm x)))
 
-/-- The manifold Lie bracket is natural under pushforward by a diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`:
-`mlieBracket I (Φ_* X) (Φ_* Y) x = Φ_* (mlieBracket I X Y) x`, where `Φ_*` is
-`Diffeomorph.pushforward Φ`. The hypotheses `hX`, `hY` are differentiability of the bundled
-sections of `X` and `Y` at the preimage point `Φ.symm x`. The proof rewrites each pushforward as
-the pullback along `Φ.symm` (`pushforward_eq_mpullback_symm`) and then applies Mathlib's
-`VectorField.mpullback_mlieBracket`. -/
 theorem mlie_bracket_pullback_naturality
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (X Y : ∀ x : M, TangentSpace I x)

@@ -13,19 +13,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.See
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.FullIntervalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 
-/-!
-# Forward (one-sided) flow of the DeTurck vector field
-
-Produces the forward integral flow of the time-dependent DeTurck vector field on `[0, T)` from a
-closed-slab joint-`C∞` field hypothesis (`hsmooth0`), together with the time-zero continuity
-extensions used downstream.  The field is smoothly extended across `t = 0` by `seeley_time_extend`
-and the closed-manifold full-interval flow engine is run on the extension, so the from-`0` corner
-machinery is no longer needed: the flow is jointly `C∞` on an *open* slab `Ioo lo hi` containing
-`[0, T]` (`lo < 0 < T < hi`), and every endpoint conjunct — including the up-to-`0` joint orbit and
-joint chart-basis pushforward bundle-section continuities — is read off this open-slab joint
-smoothness or the bundled tangent map of the joint flow.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -55,31 +42,7 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- **Right-continuity at `t = 0` of the bundle-valued moving spatial Jacobian, from joint
-smoothness.**
 
-For a flow `Φ` that is jointly `C∞` on an open product slab `Ioo lo hi ×ˢ univ` containing
-`t = 0` (`lo < 0 < hi`), the tangent-bundle datum `s ↦ ⟨Φ s x, mfderiv I I (Φ s) x v⟩` — the moving
-basepoint together with its spatial Jacobian, tracked coherently inside `TangentBundle I M` — is
-right-continuous at `0`.
-
-This is the unique SOUND time-continuity statement for the moving Jacobian: the *bare*
-`E`-coercion `s ↦ (mfderiv I I (Φ s) x v : E)` of the fibre at the MOVING basepoint `Φ s x` is in
-general discontinuous (the trivialization at `Φ s x` jumps as the basepoint drifts across charts),
-so it is replaced by the trivialization-free bundle reading.
-
-The proof is the bundled tangent map of the joint flow.  Writing `c := extChartAt I y₀` for the
-fixed chart centred at `y₀ := Φ 0 x`, the chart-conjugated spatial derivative
-`P s := inTangentCoordinates I I (fun _ => x) (fun s => Φ s x) (fun s => mfderiv I I (Φ s) x) 0 s v`
-is continuous at `0` by `ContMDiffAt.mfderiv` (degree `0`).  The bundle-valued path
-`s ↦ ⟨c (Φ s x), P s⟩ : TangentBundle 𝓘(ℝ, E) E` is then continuous at `0` (orbit continuity ×
-`P` continuity through the model-space homeomorphism), and the *fixed* chart-inverse map `c.symm`
-has a continuous bundled tangent map on the open `c.target`
-(`ContMDiffOn.continuousOn_tangentMapWithin`); composing the two gives continuity at `0` of
-`s ↦ tangentMapWithin 𝓘(ℝ, E) I c.symm c.target ⟨c (Φ s x), P s⟩`.  That tangent map equals the
-target datum `⟨Φ s x, mfderiv I I (Φ s) x v⟩` on the chart neighbourhood (base by the chart
-round-trip `c.symm (c (Φ s x)) = Φ s x`; fibre by `inTangentCoordinates_eq_mfderiv_comp` cancelling
-the `c`-derivative against the `c.symm`-derivative), so continuity transfers by `congr`. -/
 private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
     (Φ : ℝ → M → M) {lo hi : ℝ} (hlo : lo < 0) (hhi : 0 < hi)
     (hΦsm : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.1 q.2)
@@ -193,19 +156,7 @@ private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
   exact (hRHScont.congr hrecon.symm).continuousWithinAt
 
 set_option linter.unusedSectionVars false in
-/-- **Joint smoothness of the chart-basis pushforward bundle-section of a jointly-`C∞` flow.**
 
-For a bare flow `Φ` that is jointly `C∞` on an open slab `Ioo lo hi ×ˢ univ`, the chart-`x₀`-basis
-pushforward bundle-section `(t, y) ↦ ⟨Φ t y, mfderiv (Φ t) y (chartBasisVecFiber x₀ i y)⟩` is
-jointly `C∞` (degree `m`) at every interior point of `Ioo lo hi ×ˢ (trivAt x₀).baseSet`.
-
-The differential of the (jointly-`C∞`) family `(q, y) ↦ Φ q.1 y` in the `y`-slot is jointly
-`ContMDiffWithinAt` of degree `m` by `ContMDiffWithinAt.mfderivWithin`; pairing it with the smooth
-chart-basis bundle-section `chartBasisVec x₀ i` (`chartBasisVec_contMDiffOn`) through
-`ContMDiffWithinAt.clm_apply_of_inCoordinates` gives the bundle-section smoothness, with the
-`inCoordinates` reading identified with the raw `inTangentCoordinates`/`mfderivWithin` differential
-applied to the seed vector.  (This is the bare-`Φ`, open-slab analogue of the conjugating-flow
-interior pushforward smoothness used downstream.) -/
 private theorem flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth
     (Φ : ℝ → M → M) {lo hi : ℝ}
     (hΦsm : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.1 q.2)
@@ -296,33 +247,6 @@ private theorem flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth
     rw [hrw]
     exact hϕ
 
-/-- A time-dependent field `X_DT` that is jointly `C∞` up to AND across `t = 0` on the
-CLOSED slab `Icc 0 T ×ˢ univ` (`hsmooth0`) admits a single forward flow `Φ : ℝ → M → M`
-with `Φ 0 = id`, per-time diffeomorphisms on `(0,T)`, the bare geometric velocity
-`∂ₛ Φ s x = X_DT t (Φ t x)` on `(0,T)`, `t = 0` right-continuity of the orbit `s ↦ Φ s x`,
-`t = 0` right-continuity of the bundle-valued moving spatial Jacobian
-`s ↦ ⟨Φ s x, mfderiv I I (Φ s) x v⟩`, the joint orbit continuity up to `0` on `Ico 0 T ×ˢ univ`,
-and the joint chart-basis pushforward bundle-section continuity up to `0`.  The single closed-slab
-smoothness `hsmooth0` subsumes the former interior-`C∞` + `C⁰`-to-`0` + `C¹`-chart-gradient-to-`0`
-trio.
-
-The whole theorem is proven sorry-free.  The flow `Φ` (and its reverse `Ψ`) is CONSTRUCTED by
-smoothly extending the field across `t = 0` (`seeley_time_extend`) and running the closed-manifold
-full-interval flow-with-reverse engine (`global_flow_full_interval_with_reverse_on_closed_manifold`),
-which delivers `Φ` jointly `C∞` on an *open* slab `Ioo lo hi ×ˢ univ` with `lo < 0 < T < hi`:
-
-* `Φ 0 = id`, the bare geometric velocity on `(0,T)`, and the orbit right-continuity at `0` are
-  read off from the engine's output;
-* the per-time diffeomorphism witnesses on `(0,T)` are assembled by
-  `time_dependent_vf_diffeomorph_slice_of_smooth_bijective` from the per-slice smoothness of `Φ t`
-  and `Ψ t` together with the two engine mutual-inverse identities;
-* the bundle-valued moving-Jacobian right-continuity is
-  `flow_mfderiv_continuousWithinAt_zero_of_jointSmooth` (the bundled tangent map of the joint flow);
-* the joint orbit continuity up to `0` is the restriction of the engine's open-slab joint smoothness
-  to `Ico 0 T ⊆ Ioo lo hi`;
-* the joint chart-basis pushforward bundle-section continuity is
-  `flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth` (the open-slab joint smoothness of the
-  pushforward of the smooth chart frame), restricted to `Ico 0 T`. -/
 theorem forward_flow_existence_onesided_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -346,12 +270,12 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
   obtain ⟨Xext, hXsm, hXeq⟩ := seeley_time_extend X_DT T hT hsmooth0
   obtain ⟨Φ, Ψ, lo, hi, hlo, hhi, hΦ0, hΦsm, hΦvel, hΨsm, hΨΦ, hΦΨ⟩ :=
     global_flow_full_interval_with_reverse_on_closed_manifold Xext hXsm T hT
-  -- `Ioo 0 T ⊆ Ioo lo hi` and `Ico 0 T ⊆ Ioo lo hi` (from `lo < 0` and `T < hi`).
+  
   have hsub : Set.Ioo (0 : ℝ) T ⊆ Set.Ioo lo hi := fun t ht =>
     ⟨lt_trans hlo ht.1, lt_trans ht.2 hhi⟩
   have hIcoSub : Set.Ico (0 : ℝ) T ⊆ Set.Ioo lo hi := fun t ht =>
     ⟨lt_of_lt_of_le hlo ht.1, lt_trans ht.2 hhi⟩
-  -- The orbit velocity, with `Xext` rewritten to `X_DT` on the closed slab.
+  
   have hvel_eq : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))) := by
@@ -362,7 +286,7 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
     have hrw : Xext t (Φ t x) = X_DT t (Φ t x) := hXeq t htIcc (Φ t x)
     rw [hrw] at hat
     exact hat.hasMFDerivWithinAt
-  -- Each slice `Φ t` (for `t ∈ Ioo lo hi`) is smooth.
+  
   have hΦ_slice : ∀ t ∈ Set.Ioo lo hi, ContMDiff I I ∞ (Φ t) := by
     intro t ht x
     have hmem : ((t, x) : ℝ × M) ∈ Set.Ioo lo hi ×ˢ (Set.univ : Set M) :=
@@ -376,8 +300,7 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
     have hcomp := hxsm.comp x hpair.contMDiffWithinAt hmaps
     simpa using hcomp.contMDiffAt Filter.univ_mem
   refine ⟨Φ, hΦ0, ?_, hvel_eq, ?_, ?_, ?_, ?_⟩
-  · -- C2: per-time diffeomorphisms on `(0,T)`.
-    intro t ht
+  · intro t ht
     have ht0 : 0 < t := ht.1
     have htHi : t < hi := lt_trans ht.2 hhi
     have htIco : t ∈ Set.Ico (0 : ℝ) hi := ⟨ht0.le, htHi⟩
@@ -386,8 +309,7 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
         (hΦ_slice t (hsub ht)) (hΨsm t ht0 htHi)
         (fun x => hΨΦ t htIco x) (fun x => hΦΨ t htIco x)
     exact ⟨d, hd_fwd⟩
-  · -- C4: `t = 0` right-continuity of the orbit.
-    intro x
+  · intro x
     have hmem : ((0 : ℝ), x) ∈ Set.Ioo lo hi ×ˢ (Set.univ : Set M) :=
       ⟨⟨hlo, lt_trans hT hhi⟩, Set.mem_univ _⟩
     have hopen : IsOpen (Set.Ioo lo hi ×ˢ (Set.univ : Set M)) := isOpen_Ioo.prod isOpen_univ
@@ -398,15 +320,12 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
     have horbit : ContMDiffAt 𝓘(ℝ, ℝ) I ∞ (fun s : ℝ => Φ s x) 0 :=
       hjoint.comp 0 hpair
     exact horbit.continuousAt.continuousWithinAt
-  · -- C5: `t = 0` right-continuity of the moving spatial Jacobian (bundle form).
-    intro x v
+  · intro x v
     exact flow_mfderiv_continuousWithinAt_zero_of_jointSmooth Φ hlo (lt_trans hT hhi) hΦsm x v
-  · -- C6: joint orbit continuity up to `0` on `Ico 0 T ×ˢ univ`.
-    have hcontOn : ContinuousOn (fun q : ℝ × M => Φ q.1 q.2)
+  · have hcontOn : ContinuousOn (fun q : ℝ × M => Φ q.1 q.2)
         (Set.Ioo lo hi ×ˢ (Set.univ : Set M)) := hΦsm.continuousOn
     exact hcontOn.mono (Set.prod_mono hIcoSub (subset_refl _))
-  · -- C7: joint chart-basis pushforward bundle-section continuity up to `0`.
-    intro x₀ i
+  · intro x₀ i
     have hsecOn : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) (0 : ℕ)
         (fun p : ℝ × M =>
           (TotalSpace.mk' E (Φ p.1 p.2)

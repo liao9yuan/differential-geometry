@@ -4,33 +4,6 @@ import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.Calculus.ContDiff.FTaylorSeries
 import Mathlib.Analysis.SpecificLimits.Basic
 
-/-!
-# Borel jet-realization on the half-line
-
-Given a function `g : ℝ → F` which is `C^∞` on the closed upper half-line
-`Set.Ici 0`, we construct a globally `C^∞` function `h : ℝ → F` whose full Taylor
-jet at `0` matches the one-sided jet of `g` at `0`:
-`iteratedDeriv n h 0 = iteratedDerivWithin n g (Set.Ici 0) 0` for every `n`.
-
-This is the classical Borel construction (every formal power series is the Taylor
-series of a smooth function), specialised to realize a prescribed one-sided jet.
-The downstream gluing API then stitches `h` on `Set.Iic 0` to `g` on `Set.Ici 0`.
-
-## Construction
-
-Write `c n := iteratedDerivWithin n g (Set.Ici 0) 0` for the prescribed jet
-coefficients. We build `h` as a series `h t = ∑' n, f n t` where each term
-`f n t = c n • (lam n ^ (-n : ℤ) * g₀ n (lam n * t))` for a fixed compactly
-supported smooth bump-monomial `g₀ n s = χ s * s ^ n / n !` (with `χ` equal to
-`1` near `0` and supported in `[-2, 2]`), and a rapidly increasing sequence of
-scales `lam n ≥ 1`. The scales are chosen so large that the `k`-th derivative of
-the `n`-th term is bounded by `2 ^ (-n)` for every `k < n`, which forces the
-series and all its term-by-term derivatives to converge. Near `0` we have
-`χ (lam n * t) = 1`, so `f n` agrees with `c n • ((lam n * t) ^ n / n !) *
-lam n ^ (-n)= c n • (t ^ n / n !)` there, whose `k`-th derivative at `0` is
-`c k` if `n = k` and `0` otherwise.
--/
-
 noncomputable section
 
 open Set Filter Topology
@@ -39,8 +12,6 @@ open scoped ContDiff
 namespace DifferentialGeometry
 namespace Analysis
 
-/-- The smooth cutoff `χ s = Real.smoothTransition (2 - s ^ 2)`: it equals `1`
-for `|s| ≤ 1` and `0` for `|s| ≥ √2`, hence is supported in `[-2, 2]`. -/
 def borelCutoff (s : ℝ) : ℝ := Real.smoothTransition (2 - s ^ 2)
 
 theorem borelCutoff_contDiff {n : ℕ∞} : ContDiff ℝ n borelCutoff := by
@@ -57,14 +28,12 @@ theorem borelCutoff_eq_zero {s : ℝ} (hs : 2 ≤ s ^ 2) : borelCutoff s = 0 := 
   refine Real.smoothTransition.zero_of_nonpos ?_
   linarith
 
-/-- The fixed bump-monomial `g₀ n s = χ s * s ^ n / n !`. -/
 def borelBumpMono (n : ℕ) (s : ℝ) : ℝ := borelCutoff s * s ^ n / (Nat.factorial n : ℝ)
 
 theorem borelBumpMono_contDiff {N : ℕ∞} (n : ℕ) :
     ContDiff ℝ N (borelBumpMono n) :=
   ((borelCutoff_contDiff.mul ((contDiff_id).pow n)).div_const _)
 
-/-- The bump-monomial scaled by a constant `a` is `C^∞`. -/
 theorem borelBumpMono_comp_smul_contDiff {N : ℕ∞} (n : ℕ) (a : ℝ) :
     ContDiff ℝ N (fun s : ℝ => borelBumpMono n (a * s)) :=
   (borelBumpMono_contDiff n).comp (contDiff_const.mul contDiff_id)
@@ -87,8 +56,6 @@ theorem borelBumpMono_hasCompactSupport (n : ℕ) :
   HasCompactSupport.of_support_subset_isCompact isCompact_Icc
     (borelBumpMono_support_subset n)
 
-/-- A global bound on the `k`-th derivative of the bump-monomial `g₀ n`.
-We take the supremum (via compact support) over all `k ≤ n`. -/
 theorem borelBumpMono_deriv_bound (n : ℕ) :
     ∃ G : ℝ, 0 ≤ G ∧ ∀ k ≤ n, ∀ s : ℝ,
       ‖iteratedDeriv k (borelBumpMono n) s‖ ≤ G := by
@@ -116,8 +83,6 @@ theorem borelBumpMono_deriv_bound (n : ℕ) :
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
-/-- The chosen scale for the `n`-th term: large enough to force the low-order
-derivatives of the term to be summably small, and at least `1`. -/
 private def borelScale (c : ℕ → F) (n : ℕ) : ℝ :=
   max 1 (2 ^ n * Classical.choose (borelBumpMono_deriv_bound n) * (1 + ‖c n‖))
 
@@ -129,8 +94,6 @@ omit [NormedSpace ℝ F] in
 private theorem borelScale_pos (c : ℕ → F) (n : ℕ) : 0 < borelScale c n :=
   lt_of_lt_of_le one_pos (one_le_borelScale c n)
 
-/-- The `n`-th term of the Borel series:
-`f n t = c n • ((borelScale c n)⁻¹ ^ n * borelBumpMono n (borelScale c n * t))`. -/
 private def borelTerm (c : ℕ → F) (n : ℕ) (t : ℝ) : F :=
   ((borelScale c n)⁻¹ ^ n * borelBumpMono n (borelScale c n * t)) • c n
 
@@ -163,8 +126,6 @@ private theorem borelTerm_hasCompactSupport (c : ℕ → F) (n : ℕ) :
       nlinarith
   simp only [borelBumpMono, borelCutoff_eq_zero h2, zero_mul, zero_div, mul_zero]
 
-/-- For each derivative order `k`, the `k`-th derivative of the `n`-th term is
-globally bounded (it has compact support and is continuous). -/
 private theorem borelTerm_iteratedDeriv_global_bound (c : ℕ → F) (n k : ℕ) :
     ∃ B : ℝ, ∀ t : ℝ, ‖iteratedDeriv k (borelTerm c n) t‖ ≤ B := by
   have hcs : HasCompactSupport (iteratedFDeriv ℝ k (borelTerm c n)) :=
@@ -177,8 +138,6 @@ private theorem borelTerm_iteratedDeriv_global_bound (c : ℕ → F) (n k : ℕ)
   rw [← norm_iteratedFDeriv_eq_norm_iteratedDeriv]
   exact hB t
 
-/-- Pointwise identity for the iterated derivative of the `n`-th term, reducing
-to the (scaled) iterated derivative of the bump-monomial. -/
 private theorem borelTerm_iteratedDeriv (c : ℕ → F) (n k : ℕ) (t : ℝ) :
     iteratedDeriv k (borelTerm c n) t =
       ((borelScale c n)⁻¹ ^ n *
@@ -211,8 +170,6 @@ private theorem borelTerm_iteratedDeriv (c : ℕ → F) (n k : ℕ) (t : ℝ) :
   simp only [smul_eq_mul]
   ring
 
-/-- The key Borel decay estimate: by the scale choice, the `k`-th derivative of
-the `n`-th term is bounded by `2 ^ (-n)` whenever `k < n`. -/
 private theorem borelTerm_iteratedDeriv_bound (c : ℕ → F) {n k : ℕ} (hkn : k < n) (t : ℝ) :
     ‖iteratedDeriv k (borelTerm c n) t‖ ≤ (2 : ℝ)⁻¹ ^ n := by
   set G : ℝ := Classical.choose (borelBumpMono_deriv_bound n) with hGdef
@@ -261,8 +218,6 @@ private theorem borelTerm_iteratedDeriv_bound (c : ℕ → F) {n k : ℕ} (hkn :
                 mul_le_mul_of_nonneg_right hcnle h2pos.le
             _ = 2 ^ n * (1 + ‖c n‖) := by ring
 
-/-- Summable dominating function for the Borel series and its derivatives:
-`v c k n = 2 ^ (-n)` for `k < n`, and a global derivative bound otherwise. -/
 private def borelDomBound (c : ℕ → F) (k n : ℕ) : ℝ :=
   if k < n then (2 : ℝ)⁻¹ ^ n
   else Classical.choose (borelTerm_iteratedDeriv_global_bound c n k)
@@ -285,8 +240,6 @@ private theorem borelDomBound_bound (c : ℕ → F) (k n : ℕ) (t : ℝ) :
   · rw [if_neg hkn]
     exact Classical.choose_spec (borelTerm_iteratedDeriv_global_bound c n k) t
 
-/-- Near `0`, the `n`-th term equals `(t ^ n / n !) • c n`, so its `k`-th
-derivative at `0` is `c n` if `n = k` and `0` otherwise. -/
 private theorem borelTerm_iteratedDeriv_zero (c : ℕ → F) (n k : ℕ) :
     iteratedDeriv k (borelTerm c n) 0 = (if n = k then (1 : ℝ) else 0) • c n := by
   have hL0 : 0 < borelScale c n := borelScale_pos c n
@@ -333,9 +286,6 @@ private theorem borelTerm_iteratedDeriv_zero (c : ℕ → F) (n k : ℕ) :
       simp
   rw [hpow]
 
-/-- Borel jet-realization for an arbitrary prescribed jet `c : ℕ → F`: there is a
-globally `C^∞` function whose `k`-th derivative at `0` equals `c k`. The series
-defining the function converges in `F`, which requires `F` to be complete. -/
 private theorem borel_jet_realize [CompleteSpace F] (c : ℕ → F) :
     ∃ h : ℝ → F, ContDiff ℝ ∞ h ∧ ∀ k : ℕ, iteratedDeriv k h 0 = c k := by
   refine ⟨fun t => ∑' n, borelTerm c n t, ?_, ?_⟩
@@ -365,13 +315,6 @@ private theorem borel_jet_realize [CompleteSpace F] (c : ℕ → F) :
     rw [tsum_eq_single k (fun n hn => by rw [if_neg hn, zero_smul])]
     rw [if_pos rfl, one_smul]
 
-/-- **Borel jet-realization on the half-line.** Given `g : ℝ → F` that is `C^∞`
-on the closed upper half-line `Set.Ici 0`, there is a globally `C^∞` function
-`h : ℝ → F` whose full jet at `0` equals the one-sided jet of `g` at `0`:
-`iteratedDeriv n h 0 = iteratedDerivWithin n g (Set.Ici 0) 0` for all `n`.
-
-The defining series converges in `F`, so `F` must be complete (true in every
-intended application, where `F` is finite-dimensional). -/
 theorem borel_halfLine_extend {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] (g : ℝ → F) (_hg : ContDiffOn ℝ ∞ g (Set.Ici (0:ℝ))) :
     ∃ h : ℝ → F, ContDiff ℝ ∞ h ∧

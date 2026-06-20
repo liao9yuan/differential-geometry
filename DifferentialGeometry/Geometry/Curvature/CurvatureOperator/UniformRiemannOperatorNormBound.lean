@@ -6,59 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Uniform-over-`M` `g`-norm bound for the base Riemann curvature operator
-
-For a smooth Riemannian metric `g` on a *closed* manifold `M` (modelled on a real
-inner-product space `E`), the base Riemann curvature operator
-`riemannOp (LeviCivita g) x : T_xM →L T_xM →L T_xM →L T_xM` is a continuous trilinear
-map on the tangent space. This file proves the **compact-uniform intrinsic operator
-bound**: there is a single nonnegative constant `Kbase`, independent of the base point,
-with
-
-```
-g.inner x (R_x(v, w) u) (R_x(v, w) u)
-  ≤ Kbase · g.inner x v v · g.inner x w w · g.inner x u u
-```
-
-at every `x : M` and all tangent vectors `v, w, u`, where
-`R = riemannOp (LeviCivita g)`. The bound is stated entirely in the intrinsic `g`-fibre
-norms `‖v‖_g² = g.inner x v v` (and similarly for `w`, `u` and the curvature value); it
-never uses a bundle continuous-linear-map operator norm (unavailable because of the
-`TangentSpace = E` norm diamond) nor the chart-trivialisation operator-norm scalar
-(genuinely unbounded on multi-chart manifolds such as `S²`).
-
-## Proof architecture (chart-locality-free, no posited inputs)
-
-The argument is the **direct chart-`α` partition-of-unity patching**, valid because the
-partition-of-unity support is contained in the chart-local good set on a boundaryless
-manifold (`pouTsupport_subset_goodSet`, from
-`chartLeviCivitaGoodSet_eq_extChartAt_source` together with the subordination of the
-chart-atlas partition of unity). On each compact patch `Kα = tsupport (chartAtlasPOU α)`
-(which is `⊆ chartLeviCivitaGoodSet α ⊆ (trivializationAt ..).baseSet`):
-
-* the off-centre basis identity `riemannOp_chartBasisVec_alpha_eq` expands
-  `R_x(e^α_j, e^α_k) e^α_i = ∑_l R^l{}_{ijk}(g, α)(ϕ_α x) · e^α_l` in the chart-`α`
-  frame, whose coefficients are uniformly bounded by `exists_chartRiemannData_uniform_bound_pouTsupport`;
-* the chart-`α` frame `e^α_· = chartBasisVecFiber α · x` is a basis of `T_xM`, and the
-  coordinates of `v, w, u` in it are controlled below the intrinsic norm by the **forward
-  Gram Rayleigh lower bound** `exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport`
-  (proved here, self-contained, from `chartGramMatrix_posDef` and compactness);
-* the intrinsic norm of the curvature value is controlled above by the **Gram upper
-  bound** `exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport`.
-
-Multiplying the chart-data sup, the squared-coordinate factors, and the Gram bounds
-yields a patch constant `Kα`; the global `Kbase` is the (finite) maximum over the
-finite partition-of-unity index set, which covers `M` because `∑_α chartAtlasPOU α x = 1`.
-
-## Main results
-
-* `exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport` — the forward chart-frame
-  Gram Rayleigh lower bound (bridge from chart coordinates to the intrinsic `g`-norm).
-* `exists_uniform_riemannOp_LeviCivita_gNorm_bound` — the headline compact-uniform
-  intrinsic `g`-norm bound for the base Riemann curvature operator.
--/
-
 noncomputable section
 
 set_option synthInstance.maxHeartbeats 800000
@@ -82,7 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- Non-negativity of `g.inner x v v` for a smooth Riemannian metric. -/
+
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -91,10 +38,7 @@ private lemma metric_inner_self_nonneg
   · exact (g.pos x v hv0).le
 
 set_option linter.unusedSectionVars false in
-/-- The closed support of the chart-atlas partition-of-unity weight at `α` is contained in
-the chart-local good set, on a boundaryless manifold. The good set equals the extended-chart
-source (`chartLeviCivitaGoodSet_eq_extChartAt_source`), which equals the chart source, and the
-chart-atlas partition of unity is subordinate to the chart sources. -/
+
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -107,19 +51,6 @@ private lemma pouTsupport_subset_goodSet (α : M) :
   rw [heq]
   exact chartAtlasPOU_isSubordinate I M α hb
 
-/-- **Forward chart-frame Gram Rayleigh lower bound on the partition-of-unity support.**
-For a smooth Riemannian metric `g` on a closed manifold `M` and a chart base point `α`, the
-forward chart-frame Gram quadratic form has a strictly positive uniform lower bound in
-`ξ`-norm over the compact closed support of the chart-atlas partition-of-unity weight at `α`:
-
-```
-c · (∑ i, ξ i ^ 2) ≤ ∑ i, ∑ j, chartGramMatrix g α b i j · ξ i · ξ j.
-```
-
-The Gram matrix is positive-definite at every point of the trivialisation base set
-(`chartGramMatrix_posDef`); the quadratic form is continuous on `baseSet × (Fin n → ℝ)`,
-strictly positive at every `(b, ξ)` with `ξ ≠ 0`, and the extreme-value theorem on the
-compact product `tsupport(POU_α) × (unit sphere)` produces a strictly positive minimum. -/
 theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ c : ℝ, 0 < c ∧
@@ -298,9 +229,7 @@ theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     exact absurd ⟨(b, ξ₀), hb, hξ₀⟩ hK_ne
 
 set_option linter.unusedSectionVars false in
-/-- The intrinsic `g`-norm squared of a tangent vector `v` expressed through its chart-`α`
-frame coordinates and the chart Gram matrix:
-`g.inner x v v = ∑ i, ∑ j, chartGramMatrix g α x i j · (repr v i) · (repr v j)`. -/
+
 private lemma gInner_self_eq_chartGram_quadForm
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : TangentSpace I x) :
@@ -336,11 +265,7 @@ private lemma gInner_self_eq_chartGram_quadForm
     _ = _ := hgi
 
 set_option linter.unusedSectionVars false in
-/-- **Chart-`α` frame expansion of the base curvature value.** On a good-set point `x`, the
-base Riemann curvature value `R_x(v, w) u` expands in the chart-`α` frame with coefficients
-the contraction of the chart Riemann tensor against the chart-`α` coordinates of `v, w, u`:
-`R_x(v, w) u = ∑_l (∑_i ∑_j ∑_k cᵢ aⱼ bₖ R^l{}_{ijk}(g, α)(ϕ_α x)) • e^α_l`, where
-`a = repr v`, `b = repr w`, `c = repr u`. -/
+
 private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -384,8 +309,8 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     intro i j k
     have hgood : x ∈ chartLeviCivitaGoodSet (I := I) α := hx_good
     exact riemannOp_chartBasisVec_alpha_eq (I := I) g α i j k hgood
-  -- expand the trilinear CLM over the three frame sums into a triple sum of scaled
-  -- basis-triple curvature values
+  
+  
   have htri : riemannOp (cov := LeviCivita (I := I) g) x v w u =
       ∑ i, ∑ k, ∑ j, (c i * (b k * a j)) •
         riemannOp (cov := LeviCivita (I := I) g) x (eα j) (eα k) (eα i) := by
@@ -393,7 +318,7 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum', Finset.sum_apply,
       ContinuousLinearMap.smul_apply, Finset.smul_sum, smul_smul]
   rw [htri]
-  -- substitute the basis identity and reorganise into the `∑_l coeff_l • eα_l` shape
+  
   have hexpand : (∑ i, ∑ k, ∑ j, (c i * (b k * a j)) •
         riemannOp (cov := LeviCivita (I := I) g) x (eα j) (eα k) (eα i)) =
       ∑ i, ∑ k, ∑ j, ∑ l,
@@ -408,7 +333,7 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     congr 1
     ring
   rw [hexpand]
-  -- Reorganise both sides to the common form `∑_i ∑_j ∑_k ∑_l (cᵢ aⱼ bₖ R) • eα_l`.
+  
   set t : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Fin (Module.finrank ℝ E) → TangentSpace I x :=
     fun i j k l => (c i * a j * b k *
@@ -426,29 +351,24 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     refine Finset.sum_congr rfl (fun j _ => ?_)
     rw [Finset.sum_smul]
   rw [hRHS_distr]
-  -- Reorder `∑_i ∑_k ∑_j ∑_l = ∑_l ∑_i ∑_j ∑_k` by adjacent `Finset.sum_comm` swaps.
-  -- Step A: swap (j, l) at depth 2.
+  
+  
   rw [show (∑ i, ∑ k, ∑ j, ∑ l, t i j k l) = ∑ i, ∑ k, ∑ l, ∑ j, t i j k l from by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [Finset.sum_comm]]
-  -- Step B: swap (k, l) at depth 1.
+  
   rw [show (∑ i, ∑ k, ∑ l, ∑ j, t i j k l) = ∑ i, ∑ l, ∑ k, ∑ j, t i j k l from by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Finset.sum_comm]]
-  -- Step C: swap (i, l) at depth 0.
+  
   rw [Finset.sum_comm]
-  -- now `∑_l ∑_i ∑_k ∑_j`; reorder the inner three `i, k, j` to `i, j, k`.
+  
   refine Finset.sum_congr rfl (fun l _ => ?_)
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- swap (k, j) at depth 0 under (l, i).
+  
   rw [Finset.sum_comm]
 
-/-- **Pointwise chart-`α` curvature `g`-norm bound.** At a partition-of-unity support point
-`x` of the chart at `α`, given the uniform chart-Riemann-data bound `CR`, the forward Gram
-Rayleigh lower bound `cg > 0`, and the Gram upper bound `CG` all specialised at `x`, the
-intrinsic `g`-norm squared of the base curvature value is bounded by
-`CG · CR² · n⁴ · cg⁻³` times the intrinsic norm factors `g(v,v) g(w,w) g(u,u)`. -/
 private lemma gNorm_riemannOp_le_chartConstants
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -477,11 +397,11 @@ private lemma gNorm_riemannOp_le_chartConstants
   set R : Fin n → Fin n → Fin n → Fin n → ℝ :=
     fun i j k l => chartRiemannTensor (I := I) g α i j k l (extChartAt I α x) with hR_def
   set coeff : Fin n → ℝ := fun l => ∑ i, ∑ j, ∑ k, c i * a j * b k * R i j k l with hcoeff_def
-  -- Expand `R_x(v,w)u = ∑_l coeff l • eα_l`.
+  
   have hRvwu : riemannOp (cov := LeviCivita (I := I) g) x v w u =
       ∑ l, coeff l • chartBasisVecFiber (I := I) α l x := by
     rw [riemannOp_LeviCivita_chartAlpha_frame_expand (I := I) g α hx_base hx_good v w u]
-  -- The intrinsic norm of the curvature value via the chart Gram form, bounded above.
+  
   have hgnorm_eq : g.inner x (riemannOp (cov := LeviCivita (I := I) g) x v w u)
         (riemannOp (cov := LeviCivita (I := I) g) x v w u) =
       ∑ l, ∑ l', chartGramMatrix (I := I) g α x l l' * coeff l * coeff l' := by
@@ -497,14 +417,14 @@ private lemma gNorm_riemannOp_le_chartConstants
         (riemannOp (cov := LeviCivita (I := I) g) x v w u) ≤
       CG * ∑ l, coeff l ^ 2 := by
     rw [hgnorm_eq]; exact hCGbound coeff
-  -- Per-`l` coefficient bound: |coeff l| ≤ CR · (∑|c|)(∑|a|)(∑|b|).
+  
   set Sa : ℝ := ∑ j, |a j| with hSa_def
   set Sb : ℝ := ∑ k, |b k| with hSb_def
   set Sc : ℝ := ∑ i, |c i| with hSc_def
   have hSa_nonneg : 0 ≤ Sa := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSb_nonneg : 0 ≤ Sb := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSc_nonneg : 0 ≤ Sc := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-  -- Triple-sum product factorisation `∑_i ∑_j ∑_k |c_i||a_j||b_k| = Sc·Sa·Sb`.
+  
   have hk_collapse : ∀ i j : Fin n,
       (∑ k, |c i| * |a j| * |b k|) = |c i| * |a j| * Sb := by
     intro i j
@@ -546,7 +466,7 @@ private lemma gNorm_riemannOp_le_chartConstants
       rw [Finset.sum_mul]
     rw [heq, hprod_factor]
     exact le_of_eq (by ring)
-  -- Square it and sum over `l`: ∑_l coeff l² ≤ n · CR² · (Sc Sa Sb)².
+  
   have hcoeff_sq : ∀ l, coeff l ^ 2 ≤ CR ^ 2 * (Sc * Sa * Sb) ^ 2 := by
     intro l
     have h1 : |coeff l| ≤ CR * (Sc * Sa * Sb) := hcoeff_abs l
@@ -562,7 +482,7 @@ private lemma gNorm_riemannOp_le_chartConstants
           Finset.sum_le_sum (fun l _ => hcoeff_sq l)
       _ = (n : ℝ) * (CR ^ 2 * (Sc * Sa * Sb) ^ 2) := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Chebyshev: Sa² ≤ n · Qa, etc., with Qa = ∑ a², and the lower bound `cg · Qa ≤ g(v,v)`.
+  
   have hSa_sq : Sa ^ 2 ≤ (n : ℝ) * ∑ j, a j ^ 2 := by
     have h := sq_sum_le_card_mul_sum_sq (s := (Finset.univ : Finset (Fin n)))
       (f := fun j => |a j|)
@@ -587,7 +507,7 @@ private lemma gNorm_riemannOp_le_chartConstants
       Finset.sum_congr rfl (fun i _ => sq_abs _)
     rw [heq] at h
     exact h
-  -- The coordinate `ℓ²` sums are controlled by the intrinsic norms via the lower bound.
+  
   have hgvv_eq : g.inner x v v =
       ∑ i, ∑ j, chartGramMatrix (I := I) g α x i j * a i * a j := by
     rw [gInner_self_eq_chartGram_quadForm (I := I) g α hx_base v]
@@ -612,10 +532,10 @@ private lemma gNorm_riemannOp_le_chartConstants
   have hQa_nonneg : 0 ≤ ∑ j, a j ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hQb_nonneg : 0 ≤ ∑ k, b k ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   have hQc_nonneg : 0 ≤ ∑ i, c i ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
-  -- Assemble: square the per-`l` bound, plug in Chebyshev and the lower-bound coordinate
-  -- controls, and collect the constant.
+  
+  
   have hCG_nonneg : 0 ≤ CG := hCG
-  -- (Sc Sa Sb)² = Sc² Sa² Sb² ≤ n³ · Qc Qa Qb
+  
   have hScab_sq : (Sc * Sa * Sb) ^ 2 ≤
       (n : ℝ) ^ 3 * ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)) := by
     have hexp : (Sc * Sa * Sb) ^ 2 = Sc ^ 2 * Sa ^ 2 * Sb ^ 2 := by ring
@@ -634,7 +554,7 @@ private lemma gNorm_riemannOp_le_chartConstants
   have hn_nonneg : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   have hcg_inv_nonneg : (0 : ℝ) ≤ cg⁻¹ := le_of_lt (inv_pos.mpr hcg)
   have hCR2_nonneg : (0 : ℝ) ≤ CR ^ 2 := sq_nonneg _
-  -- ∑coeff² ≤ CR² · n⁴ · (Qc Qa Qb)
+  
   have hsum_coeff_sq' : ∑ l, coeff l ^ 2 ≤
       CR ^ 2 * (n : ℝ) ^ 4 * ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)) := by
     calc ∑ l, coeff l ^ 2 ≤ (n : ℝ) * (CR ^ 2 * (Sc * Sa * Sb) ^ 2) := hsum_coeff_sq
@@ -643,14 +563,14 @@ private lemma gNorm_riemannOp_le_chartConstants
           gcongr
       _ = CR ^ 2 * (n : ℝ) ^ 4 *
             ((∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)) := by ring
-  -- Qc Qa Qb ≤ cg⁻³ · guu gvv gww
+  
   have hQprod_le : (∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2) ≤
       cg⁻¹ ^ 3 * (g.inner x u u * g.inner x v v * g.inner x w w) := by
     calc (∑ i, c i ^ 2) * (∑ j, a j ^ 2) * (∑ k, b k ^ 2)
         ≤ (cg⁻¹ * g.inner x u u) * (cg⁻¹ * g.inner x v v) * (cg⁻¹ * g.inner x w w) := by
           gcongr
       _ = cg⁻¹ ^ 3 * (g.inner x u u * g.inner x v v * g.inner x w w) := by ring
-  -- Final chain.
+  
   calc g.inner x (riemannOp (cov := LeviCivita (I := I) g) x v w u)
         (riemannOp (cov := LeviCivita (I := I) g) x v w u)
       ≤ CG * ∑ l, coeff l ^ 2 := hgnorm_le_CGcoeff
@@ -663,26 +583,6 @@ private lemma gNorm_riemannOp_le_chartConstants
     _ = CG * CR ^ 2 * (n : ℝ) ^ 4 * cg⁻¹ ^ 3 *
           g.inner x v v * g.inner x w w * g.inner x u u := by ring
 
-/-- **Compact-uniform intrinsic `g`-norm bound for the base Riemann curvature operator.**
-For a smooth Riemannian metric `g` on a closed manifold `M`, there is a single nonnegative
-constant `Kbase`, independent of the base point, such that for every `x : M` and all tangent
-vectors `v, w, u`,
-
-```
-g.inner x (R_x(v, w) u) (R_x(v, w) u)
-  ≤ Kbase · g.inner x v v · g.inner x w w · g.inner x u u,
-```
-
-where `R = riemannOp (LeviCivita g)` is the base Riemann curvature operator. The bound is
-stated entirely through the intrinsic `g`-fibre norms `‖·‖_g² = g.inner x · ·`; it uses
-neither a bundle continuous-linear-map operator norm (unavailable because of the
-`TangentSpace = E` norm diamond) nor the chart-trivialisation operator-norm scalar (genuinely
-unbounded on multi-chart manifolds such as `S²`).
-
-The constant is obtained by patching the pointwise chart-`α` bound
-(`gNorm_riemannOp_le_chartConstants`) over the finite chart-atlas partition-of-unity index set
-`chartAtlasPOU_finset`, which covers `M` because the partition weights sum to `1` and each
-support is contained in the chart-local good set (`pouTsupport_subset_goodSet`). -/
 theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Kbase : ℝ, 0 ≤ Kbase ∧
@@ -692,7 +592,7 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
           Kbase * g.inner x v v * g.inner x w w * g.inner x u u := by
   classical
   set n : ℕ := Module.finrank ℝ E with hn_def
-  -- Per-chart uniform constants extracted from the three uniform chart bounds.
+  
   have hCR_ex : ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ b ∈ tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
         ∀ i j k l : Fin n,
@@ -714,7 +614,7 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
     refine le_trans (le_of_eq ?_) h
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
     rw [chartGramMatrix_apply]
-  -- The forward Gram lower bound is over the whole tsupport (its own carrier).
+  
   choose CR hCR0 hCRbound using hCR_ex
   choose CG hCG0 hCGbound using hCG_ex
   choose cg hcg0 hcgbound using fun α =>
@@ -732,7 +632,7 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
   refine ⟨∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Kα α, ?_, ?_⟩
   · exact Finset.sum_nonneg (fun α _ => hKα_nonneg α)
   intro x v w u
-  -- Find a chart `α` whose partition weight is nonzero at `x`.
+  
   have hsum := DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
     (I := I) (M := M) x
   have hex_pos : ∃ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -757,13 +657,13 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
     pouTsupport_subset_goodSet (I := I) α hx_tsupport
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
-  -- Apply the pointwise bound at `x` with the chart-`α` constants.
+  
   have hpt := gNorm_riemannOp_le_chartConstants (I := I) g α hx_base hx_good
     (CR := CR α) (CG := CG α) (cg := cg α) (hCR0 α) (hCG0 α) (hcg0 α)
     (fun i j k l => hCRbound α x hx_tsupport i j k l)
     (fun ξ => hCGbound α x hx_tsupport ξ)
     (fun ξ => hcgbound α x hx_tsupport ξ) v w u
-  -- The pointwise constant equals `Kα α`; bound it by the sum.
+  
   have hKα_le : Kα α ≤ ∑ β ∈ chartAtlasPOU_finset (I := I) (M := M), Kα β :=
     Finset.single_le_sum (fun β _ => hKα_nonneg β) hα_mem
   have hgvv_nonneg : 0 ≤ g.inner x v v := metric_inner_self_nonneg (I := I) g x v

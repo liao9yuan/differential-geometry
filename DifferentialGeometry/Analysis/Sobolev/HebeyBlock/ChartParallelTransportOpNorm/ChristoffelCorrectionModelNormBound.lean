@@ -1,18 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.ChristoffelCorrectionAtomL2Bound
 
-/-!
-# Pointwise Christoffel-correction model-space norm bound
-
-On a closed Riemannian manifold `(M, g)`, the Christoffel correction
-`christoffelCorrection g alpha b Y v` (a vector in the model space `E`)
-is bounded in norm by `C * ||Y|| * ||trivToE alpha b v||` on the POU
-support, where `C` depends only on `(g, alpha)` through the
-unconditional Christoffel-symbol sup `CΓ` and the model-space basis
-geometry (coord-functional norms and basis-vector norms).
-
-No chartJ. No HasLocallyConstantChartAt.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

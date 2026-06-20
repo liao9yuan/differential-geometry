@@ -2,38 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Quantitative local-ball `L²`-Sobolev pointwise embedding for smooth functions
-
-For a smooth function `f` on `EuclideanSpace ℝ (Fin d)` and a ball `B(x₀, R)`,
-when the supercritical threshold `d < 2 K` holds, the value of `f` at any point of
-the smaller ball `B(x₀, R/4)` is controlled by the order-`2K` `L²`-Sobolev norm of
-`f` on `B(x₀, R)`:
-
-    `|f x| ≤ C · ∑_{j ≤ 2K} ‖∂ʲ f‖_{L²(B(x₀, R))}`,
-
-with a constant `C` depending only on `d, K, R` — uniform in `f`.
-
-This is the pure-Euclidean quantitative core consumed by the intrinsic tensor
-Sobolev embedding `H^{2k} ↪ C⁰`.  Unlike the global chart-Sobolev embeddings, the
-bound is *local* (on a single ball) and *quantitative* (a single explicit
-constant times the order-`2K` `L²` norm), which is what the partition-of-unity
-lower-bound localisation needs.
-
-## Strategy
-
-A smooth cutoff `χ` supported in `B(x₀, R)` and equal to `1` on `B(x₀, R/2)`
-turns `f` into a compactly-supported `χ·f` agreeing with `f` (including all
-derivatives) on `B(x₀, R/2)`.  The `L²` subcritical tower
-`MemWkp_subcritical_iterated` is run on `χ·f`, tracking the quantitative
-`wkpNorm` bound at each step, until a supercritical exponent `q > d` of some
-lower order is reached; the order-`0` Morrey bound
-`smooth_morrey_iteratedFDeriv_bound_uniform` then yields the pointwise value at
-`x ∈ B(x₀, R/4)`.  Finally the `wkpNorm` of `χ·f` is bounded by the order-`2K`
-`L²`-derivative norms of `f` via the Leibniz product rule with uniformly bounded
-cutoff derivatives.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function
@@ -52,16 +20,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-/-- **Norm-tracking subcritical tower descent.**
-
-From `MemWkp (m + 1 + s) (ofReal p) f Ω` for a compactly-supported `f` with
-`tsupport f ⊆ Ω`, where `p` is regular at depth `s + 1` and `(s + 1) p > d`,
-produce an exponent `q > d` with `1 ≤ q`, the membership
-`MemWkp (m + 1) (ofReal q) f Ω`, and a finite constant `C ≥ 0` with
-`wkpNorm (m + 1) (ofReal q) f Ω ≤ ofReal C · wkpNorm (m + 1 + s) (ofReal p) f Ω`.
-
-The constant `C` depends only on `d, s, p` (through the recursively defined
-subcritical constants), not on `f`. -/
 private theorem tower_to_supercritical_quant
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) (m : ℕ) :
     ∀ (s : ℕ) {p : ℝ}, 1 ≤ p →
@@ -151,12 +109,6 @@ private theorem tower_to_supercritical_quant
         rw [ENNReal.ofReal_one, one_mul]
         exact wkpNorm_mono_order (d := d) (by omega) f Ω
 
-/-- **Function-uniform norm-tracking subcritical tower descent.**
-
-Identical to `tower_to_supercritical_quant`, but the supercritical exponent `q`
-and the quantitative constant `C` are produced *before* the function `f` is
-introduced — they depend only on `d, s, p`.  This makes the uniformity in `f`
-explicit, as required by a single constant valid for every smooth input. -/
 private theorem tower_to_supercritical_quant_uniform
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) (m : ℕ) :
     ∀ (s : ℕ) {p : ℝ}, 1 ≤ p →
@@ -247,9 +199,6 @@ private theorem tower_to_supercritical_quant_uniform
         rw [ENNReal.ofReal_one, one_mul]
         exact wkpNorm_mono_order (d := d) (by omega) f Ω
 
-/-- Each iterated weak partial of a smooth compactly-supported function has
-`eLpNorm` bounded by the `eLpNorm` of the corresponding-order iterated
-derivative. -/
 private theorem eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     (j : ℕ) (β : Fin j → Fin d) {ψ : EuN → ℝ}
@@ -265,9 +214,6 @@ private theorem eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv
   have h := norm_iterClassicalPartial_le_iteratedFDeriv (d := d) j β hψ_smooth x
   simpa [norm_norm] using h
 
-/-- **Reverse bridge.**  For smooth compactly-supported `ψ` with
-`tsupport ψ ⊆ Ω`, the order-`k` `wkpNorm` is controlled by `(d ^ k)` times the
-sum over `j ≤ k` of `eLpNorm (‖iteratedFDeriv ℝ j ψ‖) p`. -/
 private theorem wkpNorm_le_sum_eLpNorm_iteratedFDeriv
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     (k : ℕ) {ψ : EuN → ℝ}
@@ -294,7 +240,6 @@ private theorem wkpNorm_le_sum_eLpNorm_iteratedFDeriv
   exact eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv (d := d) hΩ_open hp_one
     j β hψ_smooth hψ_cpt hψ_supp
 
-/-- Exponent descent `L^{p'} ≤ L²` on a ball of finite measure. -/
 private theorem eLpNorm_le_eLpNorm_two_mul_rpow_ball
     {p' : ℝ} (hp'_one : 1 ≤ p') (hp'_two : p' ≤ 2)
     {x₀ : EuN} {R : ℝ} {g : EuN → ℝ} (hg : AEStronglyMeasurable g
@@ -314,7 +259,6 @@ private theorem eLpNorm_le_eLpNorm_two_mul_rpow_ball
   have h_toReal_two : ((2 : ℝ≥0∞)).toReal = (2 : ℝ) := by norm_num
   rwa [h_toReal_p', h_toReal_two] at h
 
-/-- `eLpNorm (‖iteratedFDeriv ℝ j u‖) p` over a ball is finite for smooth `u`. -/
 private theorem smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top
     {p : ℝ≥0∞} {x₀ : EuN} {R : ℝ} (j : ℕ)
     {u : EuN → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -341,7 +285,6 @@ private theorem smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top
     rw [norm_one, mul_one]
     exact hM z hz'
 
-/-- Pointwise–to–`eLpNorm` cutoff Leibniz bound at fixed order `j`. -/
 private theorem eLpNorm_iteratedFDeriv_smul_le
     {x₀ : EuN} {R : ℝ}
     {χ f : EuN → ℝ} (hχ : ContDiff ℝ (⊤ : ℕ∞) χ) (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -398,16 +341,6 @@ private theorem eLpNorm_iteratedFDeriv_smul_le
   rw [h_smul, eLpNorm_const_smul,
     Real.enorm_eq_ofReal (mul_nonneg (Nat.cast_nonneg _) hCχ)]
 
-/-- **Quantitative local-ball `L²`-Sobolev pointwise embedding for smooth
-functions.**
-
-For a smooth function `f` on `EuclideanSpace ℝ (Fin d)` and a ball `B(x₀, R)`
-with `R > 0`, in the supercritical regime `d < 2 K`, there is a constant `C ≥ 0`
-depending only on `d, K, R` (uniform in `f`) such that for every
-`x ∈ B(x₀, R/4)` the value `|f x|` is controlled by the order-`2K` `L²`-Sobolev
-norm of `f` on `B(x₀, R)`:
-
-`|f x| ≤ C · ∑_{j ≤ 2K} ‖iteratedFDeriv ℝ j f‖_{L²(B(x₀, R))}`. -/
 theorem smooth_localBall_L2_pointwise_embedding
     {K : ℕ} (hdK : (d : ℝ) < 2 * K)
     {x₀ : EuN} {R : ℝ} (hR : 0 < R) :
@@ -687,27 +620,6 @@ theorem smooth_localBall_L2_pointwise_embedding
               (volume.restrict (Metric.ball x₀ R))).toReal := by
         rw [hT_def, hΩ_def]
 
-/-- **The sharp quantitative local-ball `L²`-Sobolev pointwise embedding for smooth
-functions.**
-
-For a smooth function `f` on `EuclideanSpace ℝ (Fin d)` and a ball `B(x₀, R)` with
-`R > 0`, in the **sharp** supercritical regime `d < 2·(2a)` (the Sobolev embedding
-`H^{2a}(B) ↪ C⁰`, valid as soon as the Sobolev order `2a` exceeds `d/2`), there is a
-constant `C ≥ 0` depending only on `d, a, R` (uniform in `f`) such that for every
-`x ∈ B(x₀, R/4)` the value `|f x|` is controlled by only the order-`≤ 2a`
-`L²`-Sobolev seminorms of `f` on `B(x₀, R)`:
-
-`|f x| ≤ C · ∑_{j ≤ 2a} ‖iteratedFDeriv ℝ j f‖_{L²(B(x₀, R))}`.
-
-This is the **sharp** analogue of `smooth_localBall_L2_pointwise_embedding`, which is
-stated with the **non-sharp** threshold `d < 2K` for an order-`≤ 2K` seminorm bound — to
-bound by only orders `≤ 2a` that lemma would force `K = a`, hence the strictly stronger
-`d < 2a`.  The sharp threshold is reached from the *same* iterated-Morrey tower engine
-`tower_to_supercritical_quant_uniform` by running the descent over `s + 1 = 2a` levels
-with the auxiliary `Lᵖ`-exponent `p'` chosen close to `2` (precisely
-`p' ∈ (max 1 (d/(2a)), 2)`), so that the supercriticality input `d < (2a)·p'` holds; the
-threshold `d < 2·(2a)` makes `d/(2a) < 2`, so this interval is nonempty and such a `p'`
-exists. -/
 theorem smooth_localBall_L2_pointwise_embedding_sharp
     (a : ℕ) (hda : (d : ℝ) < 2 * (2 * a))
     {x₀ : EuN} {R : ℝ} (hR : 0 < R) :

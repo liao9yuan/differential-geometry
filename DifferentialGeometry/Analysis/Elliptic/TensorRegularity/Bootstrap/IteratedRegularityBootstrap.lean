@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSourceHeadline
 
-/-!
-# Quantitative interior elliptic-regularity bootstrap for tensor weak solutions
-
-The interior `H²` regularity engine raises a smooth weak solution of a uniformly
-elliptic divergence-form equation from `H¹` data to `H²` data on a precompact
-subdomain. Iterating it produces, for the chart component of a tensor weak
-solution, a quantitative interior a-priori estimate at arbitrary order: the
-`W^{2k+2,2}` Sobolev norm of each chart component is controlled by the `W^{2k,2}`
-norm of the source's chart components and the `W^{2k+1,2}` norm of the
-solution's chart components, with a constant uniform in the solution and the
-source.
-
-The development has four stages.
-
-* **Assembly.** For a smooth compactly supported `u` and any open `Ω`, the
-  `W^{m+2,2}` norm decomposes — up to a count constant times the `W^{m+1,2}`
-  norm — as the sum, over multi-indices `idx : Fin m → Fin d`, of the `W^{2,2}`
-  norms of the iterated classical partials `∂_{idx} u`
-  (`wkpNorm_assembly_le`).
-
-* **Iterated-source order arithmetic.** The order-`m` iterated perturbed source
-  of `(u, f)` against a `SmoothEllipticBilinearForm B` lies in `L²` with
-  `L²`-norm controlled by the `W^{m,2}` norm of `f` and the `W^{m+1,2}` norm of
-  `u`, with a uniform constant (`wkpNorm_iteratedPerturbedSource_zero_le`).
-
-* **Per-step boost.** For the chart component of a tensor weak solution, the
-  `W^{m+2,2}` norm over a precompact open subdomain is bounded by the `W^{m,2}`
-  norm of the test-function-independent right-hand side and the `W^{m+1,2}` norm
-  of the chart component, with a uniform constant
-  (`tensorComponent_aPriori_succ`).
-
-* **The headline.** Iterating the per-step boost gives, for fixed geometric
-  data, a constant `C ≥ 0` — uniform in the tensor sections — bounding the
-  `W^{2k+2,2}` norm of each chart component by the `W^{2k,2}` norms of the
-  source's chart components and the `W^{2k+1,2}` norms of the solution's chart
-  components (`tensorComponent_aPriori_estimate`,
-  `tensorComponent_aPriori_estimate_all`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -82,11 +43,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
-/-- A smooth compactly supported function lies in `W^{k,2}` of every open set,
-with the classical partial of a smooth `W^{k+1,2}` function controlled, in
-`W^{k,2}` norm, by the parent's `W^{k+1,2}` norm — packaged here as a private
-helper for the assembly induction. The classical partial of a smooth compactly
-supported function is again smooth and compactly supported. -/
 private theorem wkpNorm_assembly_le
     (m : ℕ) {Ω : Set EE} (hΩ : IsOpen Ω) :
     ∃ N : ℝ≥0∞, N ≠ (⊤ : ℝ≥0∞) ∧
@@ -271,8 +227,7 @@ private theorem wkpNorm_assembly_le
       exact h_main
 
 omit [NeZero d] in
-/-- The `tsupport` of a finite sum is contained in any closed set containing the
-`tsupport` of every summand. -/
+
 private theorem tsupport_finsetSum_subset_of_forall
     {ι : Type*} (S : Finset ι) (F : ι → EE → ℝ) {B : Set EE}
     (hB_closed : IsClosed B) (hF : ∀ a ∈ S, tsupport (F a) ⊆ B) :
@@ -286,8 +241,6 @@ private theorem tsupport_finsetSum_subset_of_forall
     have hax : x ∉ tsupport (F a) := fun h => hxB (hF a ha h)
     exact image_eq_zero_of_notMem_tsupport hax))
 
-/-- The single-step perturbed source `perturbedSource B u f l` is supported in
-any closed set containing the supports of `u` and `f`. -/
 private theorem tsupport_perturbedSource_subset
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     {u f : EE → ℝ} {S : Set EE} (hS_closed : IsClosed S)
@@ -351,8 +304,6 @@ private theorem tsupport_perturbedSource_subset
     image_eq_zero_of_notMem_tsupport (fun h => hxS (h_div h))
   rw [hx1, hx2, hx3]; ring
 
-/-- The order-`m` iterated perturbed source `iteratedPerturbedSource B m u f idx`
-is supported in any closed set containing the supports of `u` and `f`. -/
 theorem tsupport_iteratedPerturbedSource_subset
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ) :
     ∀ {u f : EE → ℝ} {S : Set EE}, IsClosed S →
@@ -375,7 +326,6 @@ theorem tsupport_iteratedPerturbedSource_subset
         tsupport_perturbedSource_subset (d := d) B hS_closed hu_S hf_S (idx 0)
       exact ih hS_closed h_du_S h_ps_S (fun i : Fin m => idx i.succ)
 
-/-- The order-`m` iterated perturbed source of smooth `(u, f)` is `C^∞`. -/
 theorem contDiff_iteratedPerturbedSource
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ) :
     ∀ {u f : EE → ℝ}, ContDiff ℝ (⊤ : ℕ∞) u → ContDiff ℝ (⊤ : ℕ∞) f →
@@ -399,16 +349,6 @@ theorem contDiff_iteratedPerturbedSource
       exact ih h_du (contDiff_perturbedSource' (d := d) B hu hf (idx 0))
         (fun i : Fin m => idx i.succ)
 
-/-- **Iterated-source `L²` bound.** For a `SmoothEllipticBilinearForm B` over
-`EuclideanSpace ℝ (Fin d)`, an order `m`, and a precompact open `Ω`, there is a
-constant `C ≥ 0` such that for every smooth compactly supported `u` and `f` with
-`u ∈ W^{m+1,2}(Ω)` and `f ∈ W^{m,2}(Ω)`, the order-`m` iterated perturbed source
-lies in `L²(Ω)` with
-
-`wkpNorm 0 2 (iteratedPerturbedSource B m u f idx) Ω ≤
-  ENNReal.ofReal C · (wkpNorm m 2 f Ω + wkpNorm (m+1) 2 u Ω)`.
-
-The constant `C` is quantified before `u` and `f`, uniform in both. -/
 private theorem wkpNorm_iteratedPerturbedSource_zero_le
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE)) (m : ℕ)
     {Ω : Set EE} (hΩ_open : IsOpen Ω)
@@ -518,8 +458,6 @@ private theorem wkpNorm_iteratedPerturbedSource_zero_le
             rw [ENNReal.ofReal_add hKmax_nn (by norm_num : (0 : ℝ) ≤ 1),
               ENNReal.ofReal_one]
 
-/-- The iterated classical partial of order `m` is supported in any closed set
-containing the parent's support. -/
 theorem tsupport_iterClassicalPartial_subset (m : ℕ) :
     ∀ (idx : Fin m → Fin d) {h : EE → ℝ} {S : Set EE}, IsClosed S →
       tsupport h ⊆ S → tsupport (iterClassicalPartial (d := d) m idx h) ⊆ S := by
@@ -535,10 +473,6 @@ theorem tsupport_iterClassicalPartial_subset (m : ℕ) :
       exact (tsupport_fderiv_apply_subset ℝ
         (EuclideanSpace.single (idx 0) 1)).trans hh_S
 
-/-- For a smooth compactly supported `u` and any open `Ω`, the `W^{k,2}` norm of
-the order-`m` iterated classical partial of `u` is bounded by the `W^{m+k,2}`
-norm of `u`. Each of the `m` differentiation steps drops one Sobolev order, via
-`wkpNorm_classicalPartial_le`. -/
 private theorem wkpNorm_iterClassicalPartial_le
     {Ω : Set EE} (hΩ : IsOpen Ω) (k : ℕ) :
     ∀ (m : ℕ) (idx : Fin m → Fin d) {u : EE → ℝ},
@@ -574,13 +508,13 @@ private theorem wkpNorm_iterClassicalPartial_le
       omega
 
 omit [NeZero d] in
-/-- For nonnegative `a, b : ℝ≥0∞`, `(a + b) ^ (1/2) ≤ a ^ (1/2) + b ^ (1/2)`. -/
+
 private lemma rpow_half_add_le {a b : ℝ≥0∞} :
     (a + b) ^ ((1 : ℝ) / 2) ≤ a ^ ((1 : ℝ) / 2) + b ^ ((1 : ℝ) / 2) :=
   ENNReal.rpow_add_le_add_rpow a b (by norm_num) (by norm_num)
 
 omit [NeZero d] in
-/-- For nonnegative `a, b : ℝ≥0∞`, `(a ^ 2 + b ^ 2) ^ (1/2) ≤ a + b`. -/
+
 private lemma rpow_half_sq_add_sq_le {a b : ℝ≥0∞} :
     (a ^ 2 + b ^ 2) ^ ((1 : ℝ) / 2) ≤ a + b := by
   have h_le : a ^ 2 + b ^ 2 ≤ (a + b) ^ 2 := by
@@ -594,8 +528,7 @@ private lemma rpow_half_sq_add_sq_le {a b : ℝ≥0∞} :
         norm_num
 
 omit [NeZero d] in
-/-- For a smooth compactly supported `h` with support inside `Ω`, the squared
-`L²(Ω)`-seminorm equals `ENNReal.ofReal` of the global integral of the square. -/
+
 private lemma eLpNorm_two_sq_eq_ofReal_integral_sq_univ
     {Ω : Set EE} {h : EE → ℝ}
     (hh_cd : ContDiff ℝ (⊤ : ℕ∞) h) (hh_cpt : HasCompactSupport h)
@@ -640,15 +573,6 @@ private lemma eLpNorm_two_sq_eq_ofReal_integral_sq_univ
   have hx_supp : x ∉ tsupport h := fun h' => hx (hh_S h')
   rw [image_eq_zero_of_notMem_tsupport hx_supp]; ring
 
-/-- **Generic `W^{2,2}` wrapper for the interior-`H²` engine.** Let `B` be a
-`SmoothEllipticBilinearForm` on `Set.univ : Set EE`. There is a constant `C ≥ 0`
-— uniform in the solution data — such that for every smooth compactly supported
-weak solution `(w, s)` of `B` whose support and the support of the source `s`
-lie inside the precompact open subdomain `Ω''`,
-
-`wkpNorm 2 2 w Ω'' ≤ ENNReal.ofReal C · (wkpNorm 1 2 w Ω'' + wkpNorm 0 2 s Ω'')`.
-
-The constant `C` is quantified before the solution data. -/
 private theorem smooth_cc_wkp2_wkpNorm_le
     (B : SmoothEllipticBilinearForm d (Set.univ : Set EE))
     {Ω'' : Set EE} (hΩ'' : IsOpen Ω'')
@@ -817,29 +741,10 @@ section TensorAPriori
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The local dimension of the chart, as a natural number. -/
 local notation "dimE" => Module.finrank ℝ E
 
 set_option maxHeartbeats 1600000 in
-/-- **Per-step interior elliptic regularity boost for a chart component.** For
-fixed geometric data — a smooth Riemannian metric `g` on a closed manifold, a
-chart center `α`, tensor ranks `(r, s)`, an order `m`, a component multi-index
-`P₀`, a compact `K` inside the chart target, and a precompact open subdomain
-`Ω''` with `K ⊆ Ω''` — there is a constant `C ≥ 0`, uniform in the tensor
-sections, such that for every pair of chart-supported smooth compactly supported
-`(r, s)`-tensor sections `T` (solution) and `F` (source) whose chart components
-are supported in `K`, and such that the global `H¹` weak equation of the
-connection Laplacian holds,
 
-`wkpNorm (m+2) 2 (tensorComponentEuclid g r s T α P₀) Ω'' ≤
-  ENNReal.ofReal C ·
-    (wkpNorm m 2 (tensorComponentWeakRHS g r s T F α hK hK_target P₀) Ω'' +
-      wkpNorm (m+1) 2 (tensorComponentEuclid g r s T α P₀) Ω'')`.
-
-The constant `C` is quantified before `T` and `F`. The hypothesis `K ⊆ Ω''` is
-genuinely used: the interior-`H²` engine's data is the global integral, while
-the right-hand side of the estimate uses `Ω''`-restricted Sobolev norms; they
-agree because every relevant function is supported in `K ⊆ Ω''`. -/
 private theorem tensorComponent_aPriori_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -1017,18 +922,7 @@ private theorem tensorComponent_aPriori_succ
           ← ENNReal.ofReal_add (by positivity) hN_toReal_nn]
 
 set_option maxHeartbeats 1600000 in
-/-- **Per-step interior elliptic regularity boost on the full component tuple.**
-For fixed geometric data and a precompact open subdomain `Ω''` with `K ⊆ Ω''`,
-there is a constant `C ≥ 0`, uniform in the tensor sections, such that for every
-chart-supported smooth compactly supported solution `T` and source `F` whose
-chart components are supported in `K`, satisfying the global `H¹` weak equation,
 
-`∑_P wkpNorm (m+2) 2 (tensorComponentEuclid g r s T α P) Ω'' ≤
-  ENNReal.ofReal C ·
-    (∑_Q wkpNorm m 2 (tensorComponentEuclid g r s F α Q) Ω'' +
-      ∑_P wkpNorm (m+1) 2 (tensorComponentEuclid g r s T α P) Ω'')`.
-
-The constant `C` is quantified before `T` and `F`. -/
 theorem tensorComponent_aPriori_succ_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set EuclN} (hK : IsCompact K)

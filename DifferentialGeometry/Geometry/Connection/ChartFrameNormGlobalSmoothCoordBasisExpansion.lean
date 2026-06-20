@@ -1,36 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.ChartFrameNormGlobalSmooth
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-/-!
-# Coordinate-basis expansion of the chart-α globally smooth orthonormal frame
-
-For a closed Riemannian manifold `(M, g)`, a chart centre `α : M`, and an
-index `i : Fin (Module.finrank ℝ E)`, the globally smooth tangent-bundle
-section `chartFrameNormGlobalSmooth g α i : Cₛ^∞⟮I; E, TangentSpace I⟯`
-agrees, on the chart-α partition-of-unity tsupport intersected with the
-chart-α Levi-Civita good set, with the `g`-Gram-Schmidt orthonormalisation
-`chartFrameNorm g α i` of the chart-α coordinate frame
-`chartBasisVecFiber α k`.
-
-This file records:
-
-* the change-of-basis matrix `C(b)^k_i := (chartBasisFamily α hb).repr (B_i b) k`
-  expressing the orthonormal frame `B_i(b) := chartFrameNormGlobalSmooth g α i b`
-  in the chart-α coordinate basis `chartBasisVecFiber α k b`;
-* the coordinate expansion `B_i b = Σ_k C(b)^k_i • chartBasisVecFiber α k b`;
-* the inverse-Gram identity
-  `Σ_i C(b)^k_i · C(b)^l_i = chartInvGramMatrix g α b k l`,
-  which is the algebraic content carrying an orthonormal-frame trace
-  `Σ_i ⟨B_i, ·⟩⟨B_i, ·⟩` to the metric trace
-  `g^{kl}(b) ⟨∂_k, ·⟩⟨∂_l, ·⟩`.
-
-The base point `b` ranges over `chartLeviCivitaGoodSet α` (which in
-particular sits inside the chart-α trivialization base set), on which both
-the chart-α coordinate basis and the chart-α Gram matrix are well-defined
-and the inverse Gram matrix is the genuine matrix inverse of the Gram
-matrix.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -57,12 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Gram-Schmidt coefficient matrix expressing the chart-α orthonormal frame
-`chartFrameNormGlobalSmooth g α i` in the chart-α coordinate basis
-`chartBasisVecFiber α k`. The `(i, k)`-th entry is the `k`-th coordinate of
-`chartFrameNormGlobalSmooth g α i b` against the basis
-`chartBasisFamily α hb`, taken at a base-set point. Off the chart-α base
-set, the matrix is `0` (junk value). -/
 noncomputable def chartFrameNormGlobalSmoothCoordMatrix
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (b : M) : ℝ := by
@@ -73,8 +37,6 @@ noncomputable def chartFrameNormGlobalSmoothCoordMatrix
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b) k
     else 0
 
-/-- On the chart-α base set, the coordinate-basis matrix unfolds as the
-`Basis.repr` of the global frame in the chart-α basis. -/
 private lemma chartFrameNormGlobalSmoothCoordMatrix_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -86,8 +48,6 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_of_mem
   unfold chartFrameNormGlobalSmoothCoordMatrix
   rw [dif_pos hb]
 
-/-- **Expansion of the chart-α orthonormal frame in the chart-α coordinate
-basis** at a chart-α Levi-Civita good-set point. -/
 theorem chartFrameNormGlobalSmooth_eq_coordMatrix_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E))
@@ -117,9 +77,6 @@ section LinearAlgebra
 
 variable (g : SmoothRiemannianMetric I M) (α : M) {b : M}
 
-/-- The change-of-basis matrix at a base-set point, packaged as a `Matrix`.
-The `(i, k)`-th entry is `C(b)^k_i = chartFrameNormGlobalSmoothCoordMatrix
-g α i k b`. -/
 private noncomputable def coordMatrixOf (i k : Fin (Module.finrank ℝ E)) : ℝ :=
   chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k b
 
@@ -131,8 +88,6 @@ private noncomputable def coordMatrix :
     coordMatrix (I := I) (M := M) g α (b := b) i k =
       chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k b := rfl
 
-/-- Expansion identity for one slot of the orthonormal frame as a sum of
-coordinate-basis vectors at a chart-α Levi-Civita good-set point. -/
 private lemma chartFrameNormGlobalSmooth_eq_coord_sum_of_mem
     (i : Fin (Module.finrank ℝ E))
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -151,8 +106,6 @@ private lemma chartFrameNormGlobalSmooth_eq_coord_sum_of_mem
   rw [h]
   rfl
 
-/-- **Bilinear expansion of `g_b(B_i b, B_j b)` via the chart-α coordinate
-basis (Gram form).** -/
 private lemma gram_expand_coordBasis
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -197,9 +150,6 @@ private lemma gram_expand_coordBasis
   rw [chartGramMatrix_apply]
   ring
 
-/-- **Matrix form of orthonormality.** At a chart-α Levi-Civita good-set
-point in the chart-α partition-of-unity tsupport, the change-of-basis matrix
-`C(b)` satisfies `C(b) * G(b) * C(b)ᵀ = I`, where `G(b) = chartGramMatrix g α b`. -/
 private lemma orthonormal_matrix_form_at
     (hb_pou : b ∈ tsupport (fun x : M =>
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
@@ -250,9 +200,6 @@ private lemma orthonormal_matrix_form_at
   intro k₀ _
   ring
 
-/-- **Inverse-matrix consequence of orthonormality.** At a chart-α Levi-Civita
-good-set point in the chart-α partition-of-unity tsupport,
-`Cᵀ * C = G⁻¹`, where `C = coordMatrix` and `G = chartGramMatrix g α b`. -/
 private lemma orthonormal_matrix_inverse_at
     (hb_pou : b ∈ tsupport (fun x : M =>
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
@@ -282,17 +229,6 @@ private lemma orthonormal_matrix_inverse_at
 
 end LinearAlgebra
 
-/-- **Orthonormality identity for the coordinate matrix.**
-At a base point `b` lying in the chart-α partition-of-unity tsupport
-intersected with the chart-α Levi-Civita good set, the chart-α coordinate
-matrix `C(b)` of the chart-α orthonormal frame satisfies
-```
-Σ_i C(b)^k_i · C(b)^l_i = (g^{kl})(b)
-```
-where `g^{kl}(b) = chartInvGramMatrix g α b k l`. This is the inverse-Gram
-identity that carries an orthonormal-frame trace
-`Σ_i ⟨B_i, ·⟩⟨B_i, ·⟩` to the metric trace
-`g^{kl} ⟨∂_k, ·⟩⟨∂_l, ·⟩`. -/
 theorem chartFrameNormGlobalSmoothCoordMatrix_orthonormality
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M}

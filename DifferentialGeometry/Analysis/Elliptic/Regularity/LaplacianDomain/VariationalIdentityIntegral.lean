@@ -5,42 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.ToLpChartBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientH1LipschitzBound
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimit
 
-/-!
-# Substantive form-B general-case variational identity
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and an
-element `u_h : H1Compl g` lying in `laplacianDomain g`, this file proves the
-**substantive** chart-pulled variational identity for `u_h`, matching the
-shape of the smooth-case identity
-`laplacianDomain_variational_identity_smooth_case`:
-
-```
-(∫_{chartTarget α} ∑_{i, j} √det g · g^{ij} · (weak ∂_i u_h)(y) · ∂_j ψ(y) dy) +
-  (∫_{chartTarget α} √det g · (chart-pushed POU·u_h)(y) · ψ(y) dy) =
-  chartPulledIntegralCLM g α (√det g · ψ) (fHLeibniz g α u_h hu_h)
-```
-
-where:
-
-* `(weak ∂_i u_h)(y)` denotes the chart-pushed weak `i`-th partial
-  `(chartPushedWeakPartialLp g α i (canonical) u_h).coeFn(y)`;
-* `(chart-pushed POU·u_h)(y) := chartPushed (chartAtlasPOU I M) α
-  (H1ComplToLp u_h : M → ℝ)(y)`;
-* `fHLeibniz g α u_h hu_h` is the Leibniz-compensated `L²` class.
-
-## Strategy
-
-For each smooth approximating sequence `v_n → u_h` in `H1Compl g`, the
-smooth-case identity gives the explicit integral identity for `v_n`. The
-right-hand side converges to
-`chartPulledIntegralCLM g α (√det g · ψ) (fHLeibniz g α u_h hu_h)` via the
-bilinear bypass machinery in `LaplacianDomainVariationalIdentity`. The
-left-hand side principal and mass terms are realised as L²-inner products
-in the chart-pulled-weighted measure restricted to `chartTargetEuclid α`,
-and converge via the L²-continuity of the chart-pushed-weak-partial map
-`H1ComplPartialCLM` and the chart-pushed-Lp class.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -256,7 +220,6 @@ private lemma principalMultiplier_tsupport_subset
   by_contra hyψ
   exact hy (principalMultiplier_eq_zero_off_tsupport (I := I) (M := M) g α i hyψ)
 
-/-- The principal multiplier as an `Lp 2` class. -/
 private noncomputable def principalMultiplierLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -325,11 +288,6 @@ private lemma densityOnEuclid_lt_top_ae_restrict_chartTarget
       ENNReal.ofReal (densityOnEuclid (I := I) g α y) < ⊤ :=
   Filter.Eventually.of_forall (fun _ => ENNReal.ofReal_lt_top)
 
-/-- Change of measure: the integral against the chart-pulled weighted measure
-restricted to `chartTargetEuclid α` equals `∫_chartTarget density · _ ∂vol`.
-
-(Note: the public name aligns with downstream consumers; it converts a
-single integral, not a setIntegral on a strict subset.) -/
 lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ) :
     ∫ y in chartTargetEuclid (I := I) (M := M) α, f y
@@ -354,9 +312,6 @@ lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
       (ENNReal.ofReal (densityOnEuclid (I := I) g α y)).toReal * f y from rfl]
   rw [this]
 
-/-- The smooth-case LHS principal integrand for a fixed `i`, expressed as the
-integral of `P_i ψ · ∂_i v` against the chart-pulled weighted measure
-restricted to `chartTargetEuclid α`. -/
 private lemma smooth_lhs_principal_per_i_integral_eq_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -409,8 +364,6 @@ private lemma smooth_lhs_principal_per_i_integral_eq_weighted
     (fun y => principalMultiplier (I := I) (M := M) g α i ψ y *
       chartPushedPartial (I := I) (M := M) g α i v y)]
 
-/-- The per-`i` smooth-case integral equals the `Lp 2` inner product
-`⟨principalMultiplierLp, chartPushedPartialLp v⟩`. -/
 private lemma smooth_lhs_principal_per_i_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -459,9 +412,6 @@ private lemma smooth_lhs_principal_per_i_eq_inner
   rw [h_Py, h_Cy]
   ring
 
-/-- For any `u : Lp ℝ 2 μ_g`, the chart-pushed function
-`chartPushed (chartAtlasPOU I M) α u.coeFn` is in `MemLp 2` of the
-chart-pulled weighted measure restricted to `chartTargetEuclid α`. -/
 noncomputable def chartPushedLpFromLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -485,7 +435,6 @@ lemma chartPushedLpFromLp_coeFn
   unfold chartPushedLpFromLp
   exact MemLp.coeFn_toLp _
 
-/-- Lp-convergence of `chartPushedLpFromLp` under Lp-convergence of `u`. -/
 lemma chartPushedLpFromLp_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : ℕ → Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}
@@ -636,8 +585,6 @@ private lemma smooth_lhs_mass_integral_eq_weighted
       DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)
         (chartAtlasPOU I M) α v.toFun y * ψ y)]
 
-/-- For a smooth scalar `v`, the chart-pushed Lp class of `smoothToLp v`
-agrees a.e. with `chartPushed POU α v.toFun`. -/
 private lemma chartPushedLpFromLp_smoothToLp_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
@@ -728,8 +675,6 @@ private lemma chartPushedLpFromLp_smoothToLp_aeEq
         (chartAtlasPOU I M) α v.toFun y = 0 := hy
   linarith
 
-/-- The per-smooth-case LHS-mass integral equals the `Lp 2` inner product
-`⟨massMultiplierLp ψ, chartPushedLpFromLp (smoothToLp v)⟩`. -/
 private lemma smooth_lhs_mass_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -768,9 +713,6 @@ private lemma smooth_lhs_mass_eq_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_ψy, h_Cy]
 
-/-- For a smooth approximating sequence `v_n → u_h` in `H1Compl g`, the
-per-`i` smooth-case LHS principal integrals converge to the corresponding
-form-B inner product with `chartPushedWeakPartialLp u_h`. -/
 private lemma smooth_lhs_principal_per_i_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -844,8 +786,6 @@ private lemma smooth_lhs_principal_per_i_tendsto
     rw [h_per_n n, h_smooth_case_eq n]]
   exact h_inner_tendsto
 
-/-- For a smooth approximating sequence `v_n → u_h` in `H1Compl g`, the
-smooth-case LHS mass integrals converge to the form-B mass inner product. -/
 private lemma smooth_lhs_mass_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -905,9 +845,6 @@ private lemma smooth_lhs_mass_tendsto
     funext h_per_n]
   exact h_inner_tendsto
 
-/-- The general-case LHS principal per-i integral equals the corresponding
-`Lp 2` inner product on the chart-pulled weighted measure restricted to
-`chartTargetEuclid α`. -/
 private lemma general_lhs_principal_per_i_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -997,8 +934,6 @@ private lemma general_lhs_principal_per_i_eq_inner
   rw [h_Py]
   ring
 
-/-- The general-case LHS mass integral equals the corresponding `Lp 2` inner
-product on the chart-pulled weighted measure restricted to `chartTargetEuclid α`. -/
 private lemma general_lhs_mass_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -1064,8 +999,6 @@ private lemma general_lhs_mass_eq_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_ψy, h_Cy]
 
-/-- Helper: the per-`i` integrand in the general-case form-B integral, after
-the change-of-measure pointwise rewriting, is `density · P_i ψ · (weak partial)`. -/
 private lemma general_lhs_principal_full_integrand_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -1112,8 +1045,6 @@ private lemma general_lhs_principal_full_integrand_pointwise
   rw [← Finset.sum_mul, ← Finset.mul_sum]
   ring
 
-/-- The general-case LHS principal full integral equals the sum of
-per-i `Lp 2` inner products. -/
 private lemma general_lhs_principal_eq_sum_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -1380,26 +1311,6 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
   rw [← h_target_eq]
   exact h_sum_lim
 
-/-- **The substantive form-B chart-pulled variational identity.**
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and an
-element `u_h : H1Compl g` lying in `laplacianDomain g`, the chart-pulled
-variational identity matching the smooth-case shape
-`laplacianDomain_variational_identity_smooth_case` holds against any smooth
-test function `ψ : EuclN → ℝ` with `tsupport ψ ⊆ chartTargetEuclid α`:
-
-```
-(∫_{chartTarget α} ∑_{i, j} √det g · g^{ij} · (chart-pushed weak ∂_i u_h)(y) · ∂_j ψ(y) dy) +
-  (∫_{chartTarget α} √det g · (chart-pushed POU · u_h)(y) · ψ(y) dy) =
-  chartPulledIntegralCLM g α (√det g · ψ) (fHLeibniz g α u_h hu_h)
-```
-
-This is the substantive general-case form of the smooth-case identity
-`laplacianDomain_variational_identity_smooth_case`: the LHS contains the
-chart-pushed weak partials of `u_h` (constructed via the H¹-Lipschitz
-extension) and the chart-pushed Lp class of `H1ComplToLp u_h`; the RHS is
-the chart-pulled integral of the Leibniz-compensated `L²` class
-`fHLeibniz g α u_h hu_h`. -/
 theorem laplacianDomain_variational_identity_general
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)

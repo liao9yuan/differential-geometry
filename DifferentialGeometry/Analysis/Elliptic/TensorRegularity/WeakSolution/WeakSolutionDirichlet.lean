@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
 
-/-!
-# The source-free per-component chart bilinear identity
-
-The headline `tensorComponent_chartBilinIdentity` of `WeakSolutionHeadline.lean`
-expresses the principal-part elliptic bilinear form `tensorPrincipalForm`,
-evaluated on the Euclidean chart component of a solution section `T` against a
-chart-supported Euclidean test function `φ`, as an integral of an explicit
-right-hand side `tensorComponentWeakRHS`. That headline carries a global `H^1`
-weak equation `hweak` and a fixed source section `F`: the source term of its
-right-hand side is the bump-independent coefficient `sourcePairingCoeff g r s F
-α P₀`, obtained by chart-pulling the `L²` pairing of `F` against the rotated
-test section.
-
-This file delivers the **source-free** variant: the same chart bilinear
-identity, stated for an *arbitrary* smooth compactly-supported `(r, s)`-tensor
-section `T`, with no global weak equation and no fixed source section. The
-source contribution is kept as the raw Dirichlet pairing of `T` against the
-inverse-Gram-rotated test section, `∫_M ⟨∇T, ∇(rotatedTestSection …)⟩ dμ_g`.
-This is the natural input for downstream regularity arguments that apply the
-chart bilinear identity to smooth approximants of a sequence satisfying no
-global weak equation: there is no source section `F`, so the
-`sourcePairingCoeff`-form is unavailable, while the raw Dirichlet pairing is
-always defined.
-
-The proof is the left-hand-side half of `tensorComponent_chartBilinIdentity`,
-stopped before the global-weak-equation substitution: chart-pull the global
-Dirichlet integral (`tensorCovDerivPointwiseInner_integral_chart_pull`), collapse
-the principal part (`covPrincipalIntegrand_rotated_collapse`) and the
-lower-order part (`covLowerOrderIntegrand_rotated_collapse`), integrate the
-gradient term by parts (`chartTarget_integral_byParts`), and assemble against
-`tensorPrincipalForm.bilin`. No step refers to a source section or to a global
-weak equation.
-
-## Main results
-
-* `tensorComponent_chartBilinIdentity_of_dirichlet` — the source-free chart
-  bilinear identity.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -81,8 +42,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 local notation "chartHaar" =>
   MeasureTheory.Measure.map (toEuclidean : E → EuclN) (modelHaar (E := E))
 
-/-- The chart-Euclidean partial derivative of a function vanishes off the
-topological support of that function. -/
 private lemma euclidPartial_eq_zero_of_notMem_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :
@@ -95,28 +54,6 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- **The source-free per-component chart bilinear identity.**
-
-For a smooth Riemannian metric `g` on a closed (compact, boundaryless) smooth
-manifold `M`, a chart center `α : M`, an *arbitrary* smooth compactly-supported
-`(r, s)`-tensor section `T` supported inside the chart source, a compact
-`K ⊆ chartTargetEuclid α` containing the topological support of the Euclidean
-chart component, a component multi-index `P₀`, and a smooth compactly-supported
-Euclidean test function `φ` supported inside the chart target, the principal-part
-elliptic bilinear form `tensorPrincipalForm` applied to the Euclidean chart
-component `tensorComponentEuclid g r s T α P₀` against `φ` equals
-
-```
-(∫_M ⟨∇T, ∇(rotatedTestSection g r s α P₀ (chartTestPullback I α φ))⟩ dμ_g)
-  − ∫ y, densityOnEuclid g α y · covPrincipalRotationCoeff g r s T α P₀ y · φ y
-  − ∫ y, densityOnEuclid g α y · covLowerOrderRotationValueCoeff g r s T α P₀ y · φ y
-  + ∫ y, (∑ l, euclidPartial l (weightedGradCoeff g r s T α P₀ l) y) · φ y.
-```
-
-This is `tensorComponent_chartBilinIdentity` with the bump-independent source
-coefficient `sourcePairingCoeff g r s F α P₀` replaced by the raw Dirichlet
-pairing of `T` against the rotated test section: no global weak equation, no
-fixed source section. -/
 theorem tensorComponent_chartBilinIdentity_of_dirichlet
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

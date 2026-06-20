@@ -3,44 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 
-/-!
-# Sobolev norm bound for chart-frame components of smooth Cc tensor sections
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensorH1 g r s`, this file shows that each
-chart-frame scalar component (associated with a chart `α : M` and a multi-index
-pair `(I, J)`) lies in the scalar chart-Sobolev class `MemWkpChart g 1 2`, and
-delivers a quantitative finiteness/norm bound for its chart-Sobolev norm.
-
-The "scalar field on `M`" we test for chart-Sobolev membership is the
-globally-smooth, compactly-supported, partition-of-unity-weighted raw scalar
-component built from `tensorChartComponentPou` (see
-`ChartComponents.lean`): on the chart-α source it equals the partition-of-unity
-weight times the trivialization-projection of `S` against the chart-α basis
-element, and it vanishes outside the chart-α source.
-
-## Public theorems
-
-* `tensorChartComponentScalar`: the manifold-side scalar field built from a
-  smooth compactly-supported tensor section, a chart `α`, and a multi-index
-  pair `(I, J)`. Globally smooth on `M`, compactly supported.
-* `tensorChartComponentScalar_contMDiff` and
-  `tensorChartComponentScalar_hasCompactSupport`: smoothness and compact support.
-* `tensorChartComponent_memWkpChart_one_two`: membership in `MemWkpChart g 1 2`.
-* `tensorChartComponentScalar_wkpNormChart_lt_top`: the chart-Sobolev norm is
-  finite.
-* `tensorChartComponent_wkpNormChart_le_per_section_forall`: existential norm
-  bound packaging the chart-Sobolev norm of the scalar component as
-  `ENNReal.ofReal C * (‖S‖₊ + 1)`, with the constant `C` depending on the
-  tensor section `S`. The `+1` offset is essential for the per-section bound
-  to hold in the boundary case `‖S‖ = 0`.
-
-The uniform-in-`S` form of the bound (constant independent of `S`) is the
-natural follow-up. It rests on the explicit Christoffel-symbol algebra
-relating chart-frame partial derivatives of the scalar components to
-covariant derivatives of `S`; that algebra is not constructed here.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -72,16 +34,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The manifold-side scalar field built from a smooth compactly-supported
-tensor section `S`, a chart `α : M`, and a multi-index pair `(Idx, Jdx)`.
-
-It is the partition-of-unity-weighted raw chart-frame scalar component, i.e.
-on the chart-α source it equals the POU weight times the
-trivialization-projected `(Idx, Jdx)`-coordinate of `S` in the chart-α basis,
-and it vanishes outside the chart-α source.
-
-By construction this scalar field is globally smooth on `M`, compactly
-supported, and linear in `S`. -/
 noncomputable def tensorChartComponentScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -98,7 +50,6 @@ noncomputable def tensorChartComponentScalar
     tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx =
       tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx := rfl
 
-/-- The manifold-side scalar field is smooth on `M`. -/
 theorem tensorChartComponentScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -108,7 +59,6 @@ theorem tensorChartComponentScalar_contMDiff
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
   tensorChartComponentPou_contMDiff (I := I) (M := M) g r s S α Idx Jdx
 
-/-- The manifold-side scalar field has compact support. -/
 theorem tensorChartComponentScalar_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -118,8 +68,6 @@ theorem tensorChartComponentScalar_hasCompactSupport
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
   tensorChartComponentPou_hasCompactSupport (I := I) (M := M) g r s S α Idx Jdx
 
-/-- Additivity of the manifold-side scalar field in the underlying tensor
-section. -/
 theorem tensorChartComponentScalar_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -147,8 +95,6 @@ theorem tensorChartComponentScalar_add
     exact map_add _ _ _
   rw [hraw_add]; ring
 
-/-- Homogeneity of the manifold-side scalar field in the underlying tensor
-section. -/
 theorem tensorChartComponentScalar_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
@@ -173,17 +119,6 @@ theorem tensorChartComponentScalar_smul
     rfl
   rw [hraw_smul]; ring
 
-/-- **Layer 1 / headline theorem (membership):** For any smooth
-compactly-supported tensor section `S : SmoothCcTensorH1 g r s`, each
-chart-frame scalar component (in any chart `α`, at any multi-index pair
-`(Idx, Jdx)`) — viewed as the manifold-side scalar field
-`tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx` — lies in the
-scalar chart-Sobolev class `MemWkpChart g 1 2`.
-
-Proof: the scalar field is globally smooth on `M` (by
-`tensorChartComponentScalar_contMDiff`); on a closed Riemannian manifold,
-every smooth function lies in `MemWkpChart g 1 p` for every `1 ≤ p`, by
-`MemWkpChart_of_contMDiff`. -/
 theorem tensorChartComponent_memWkpChart_one_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -199,7 +134,6 @@ theorem tensorChartComponent_memWkpChart_one_two
   exact DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
     (I := I) (M := M) g hp hsmooth
 
-/-- The chart-Sobolev norm of the manifold-side scalar field is finite. -/
 theorem tensorChartComponentScalar_wkpNormChart_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -213,15 +147,6 @@ theorem tensorChartComponentScalar_wkpNormChart_lt_top
     (tensorChartComponent_memWkpChart_one_two
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- **Layer 3 / headline theorem (norm bound).** For each chart `α : M` and
-multi-index pair `(Idx, Jdx)`, every smooth compactly-supported tensor section
-`S : SmoothCcTensorH1 g r s` admits a finite nonnegative constant `C` (which
-may depend on `S`) such that the chart-Sobolev norm of the manifold-side
-scalar chart-frame component is bounded by `ENNReal.ofReal C` times
-`(‖S‖₊ + 1)` (the H¹-tensor norm of `S` plus 1).
-
-The `+ 1` shift packages the boundary case `‖S‖ = 0` together with the
-generic case in a single existential bound. -/
 theorem tensorChartComponent_wkpNormChart_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -260,12 +185,6 @@ theorem tensorChartComponent_wkpNormChart_le_per_section
           mul_le_mul_of_nonneg_left h_one_le (by exact zero_le _)
   exact h1.trans h2
 
-/-- **Layer 3 / headline theorem (norm bound, packaged).** For each chart
-`α : M` and multi-index pair `(Idx, Jdx)`, every smooth compactly-supported
-tensor section `S : SmoothCcTensorH1 g r s` admits a finite nonnegative
-constant `C` (depending on `S`) such that the chart-Sobolev norm of the
-manifold-side scalar chart-frame component is bounded by `ENNReal.ofReal C`
-times `(‖S‖₊ + 1)`. -/
 theorem tensorChartComponent_wkpNormChart_le_per_section_forall
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)

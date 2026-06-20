@@ -4,91 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDivWkpNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHS
 
-/-!
-# The order-`K` `wkpNorm`-graded bound for the eigenvector chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`, and a
-component multi-index `P₀`, the chart-Euclidean right-hand side
-`eigenvectorChartRHS g r s i α P₀` of the eigenvector
-weak-solution assembly is the explicit `densityOnEuclid`-and-`C^∞`-coefficient-
-weighted seven-term bracket combination scaled overall by `μ⁻¹`.
-
-This file records the order-`K` iterated-Sobolev (`wkpNorm`) twin of the
-order-`0` weighted-`eLpNorm` bound `eigenvectorChartRHS_eLpNorm_le`: given the
-order-`(K + 1)` partition-of-unity regularity input `h_pou`, there is a
-nonnegative constant `C` with
-
-```
-wkpNorm K 2 (eigenvectorChartRHS g r s i α P₀) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal (μ⁻¹ * C) * <AGGREGATE>,
-```
-
-where `<AGGREGATE>` is the honest finite sum of the order-`K` `wkpNorm`s of the
-source quantities of the bracket — the order-`K` `wkpNorm`-graded analogue of
-the order-`0` `eLpNorm` aggregate:
-
-* the canonical eigenvector chart component `eigenvectorChartComponentFun`;
-* the cross-left limit object's transport aggregate — the double sum, over the
-  transport chart centres of `α` and of each transport centre, of the
-  order-`(K + 1)` resolvent-inclusion partition-of-unity chart-component norms;
-* the cross-right limit object's transport aggregate — the double sum, over the
-  transport chart centres of `α`, of the order-`K` resolvent-inclusion
-  partition-of-unity chart-component norms;
-* the chart-partial atoms `partialLpLimit` (summed over component multi-index
-  and chart direction);
-* the chart-component atoms `componentLpLimit` (summed over the component
-  multi-indices);
-* the cutoff chart-component limit objects `crossRightLimitComponent` (summed
-  over the component multi-indices);
-* the cutoff chart-partial atoms `cutoffPartialLpLimit` (summed over component
-  multi-index and chart direction).
-
-## Strategy
-
-The bracket is the `μ⁻¹`-scalar multiple of a seven-term `+`/`-` combination of
-functions `EuclN → ℝ`. By the scalar homogeneity `wkpNorm K (c • f) = ‖c‖ₑ ·
-wkpNorm K f` the overall `wkpNorm` is `‖μ⁻¹‖ₑ` times the `wkpNorm` of the
-bracket, and `‖μ⁻¹‖ₑ = ENNReal.ofReal μ⁻¹` since the resolvent eigenvalue lies
-in `(0, 1]`.
-
-Iterated Minkowski (`wkpNorm_add_le` / `wkpNorm_sub_le`) bounds the `wkpNorm` of
-the seven-term bracket by the sum of the `wkpNorm`s of the seven terms — each
-bracket term is `W^{K,2}` by its companion `eigenvectorChartRHS_summand…_memWkp`
-lemma. Each term is then bounded by a constant times a sub-aggregate of the
-source quantities:
-
-* the canonical eigenvector chart-component term is the source quantity itself;
-* the two cross-Leibniz double-sum terms have, per summand, a `C^∞` coefficient
-  product and a `W^{K,2}` cross-limit object that vanishes almost everywhere off
-  the compact cutoff chart kernel; the smooth-coefficient `wkpNorm` bound
-  `wkpNorm_smoothCoef_mul_aeZeroFactor_le` controls the summand and the
-  companion lemmas `wkpNorm_crossLeftLimitComponent_le` /
-  `wkpNorm_crossRightLimitComponent_le` control the cross-limit object;
-* the two lower-order coefficient-limit terms are bounded directly by the
-  companion lemmas `wkpNorm_covPrincipalRotationCoeffLimit_le` and
-  `wkpNorm_covLowerOrderRotationValueCoeffLimit_le`;
-* the two divergence-limit terms are products of the `C^∞` reciprocal chart
-  density `1 / densityOnEuclid g α` with a divergence limit; the
-  smooth-coefficient `wkpNorm` bound and the companion lemmas
-  `wkpNorm_weightedGradCoeffDivLimit_le` and
-  `wkpNorm_crossRightGradCoeffDivLimit_le` control them.
-
-Every sub-aggregate is dominated by the full aggregate (the order-`K` `wkpNorm`s
-are nonnegative `ℝ≥0∞` quantities), so the seven per-term constants and the
-finite-sum multiplicities fold into a single nonnegative constant `C`.
-
-## Main result
-
-* `eigenvectorChartRHS_wkpNorm_le` — the order-`K` `wkpNorm`-graded bound for the
-  eigenvector chart right-hand side.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -132,23 +47,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section SmoothCoefBound
 
 set_option linter.unusedSectionVars false in
-/-- **Quantitative smooth-coefficient `wkpNorm` bound with ae-vanishing factor.**
-For a coefficient `coef : EuclN → ℝ` that is `C^∞` on the open Euclidean chart
-target, a compact kernel `Kkern` inside the chart target, and a factor that is
-`MemWkp K 2` on the chart target and vanishes almost everywhere off `Kkern`, the
-pointwise product `coef · factor` lies in `MemWkp K 2` on the chart target and
-there is a nonnegative constant `C` with
 
-```
-wkpNorm K 2 (fun y => coef y * factor y) (chartTargetEuclid α)
-  ≤ ENNReal.ofReal C * wkpNorm K 2 factor (chartTargetEuclid α).
-```
-
-The coefficient is cut off to a globally `C^∞` compactly-supported
-representative `χ · coef`; a uniform bound on its iterated derivatives up to
-order `K` feeds `MemWkp.smul_smooth_bounded` and the quantitative Leibniz bound
-`wkpNorm_smul_smooth_bounded_le`, and the cut-off product agrees almost
-everywhere with `coef · factor`. -/
 private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -274,8 +173,7 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
   exact hKc_bd hfactor_memWkp
 
 set_option linter.unusedSectionVars false in
-/-- **`MemWkp` is closed under finite `Finset`-indexed sums.** A finite-`Finset`
-sum of `MemWkp k 2` functions on an open set is also `MemWkp k 2`. -/
+
 private lemma memWkpFinsetSum
     {k : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (f : ι → EuclN → ℝ)
@@ -299,10 +197,7 @@ private lemma memWkpFinsetSum
 end SmoothCoefBound
 
 set_option linter.unusedSectionVars false in
-/-- The reciprocal `1 / densityOnEuclid g α` of the chart density is `C^∞` on the
-open Euclidean chart target: the chart density is `C^∞`
-(`densityOnEuclid_contDiffOn`) and strictly positive (`densityOnEuclid_pos`)
-there, so the quotient `1 / densityOnEuclid g α` is `C^∞`. -/
+
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -313,10 +208,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
 section Aggregation
 
 set_option linter.unusedSectionVars false in
-/-- A finite indexed family of `W^{K,2}` summands on an open set, each
-`wkpNorm`-bounded by `ENNReal.ofReal Cⱼ` times a fixed aggregate quantity `A`,
-has its summed `wkpNorm` bounded by `ENNReal.ofReal` of an explicit nonnegative
-constant times `A`. -/
+
 private lemma wkpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → EuclN → ℝ) (A : ℝ≥0∞)
@@ -364,8 +256,6 @@ end Aggregation
 
 section Domination
 
-/-- Each of the seven summands of a seven-fold `ℝ≥0∞` sum is dominated by the
-sum. -/
 private lemma le_sevenSum (a₁ a₂ a₃ a₄ a₅ a₆ a₇ : ℝ≥0∞) :
     a₁ ≤ a₁ + a₂ + a₃ + a₄ + a₅ + a₆ + a₇ ∧
       a₂ ≤ a₁ + a₂ + a₃ + a₄ + a₅ + a₆ + a₇ ∧
@@ -405,7 +295,6 @@ private lemma le_sevenSum (a₁ a₂ a₃ a₄ a₅ a₆ a₇ : ℝ≥0∞) :
 
 end Domination
 
-/-- The conversion `ENNReal.ofReal 2 = (2 : ℝ≥0∞)`. -/
 private lemma ofReal_two : ENNReal.ofReal 2 = (2 : ℝ≥0∞) := by
   rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.ofReal_natCast]
   norm_num
@@ -417,9 +306,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 set_option linter.unusedSectionVars false in
-/-- **The triangle inequality for `wkpNorm` under subtraction.** The order-`K`
-`wkpNorm` is invariant under negation, so `wkpNorm_add_le` for `u + (-v)`
-delivers the subtraction analogue. -/
+
 private lemma wkpNorm_sub_le
     {Ω : Set EuclN} (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
     (hu : MemWkp (d := Module.finrank ℝ E) K 2 u Ω)
@@ -449,9 +336,7 @@ end BracketBound
 section MainBound
 
 set_option linter.unusedSectionVars false in
-/-- The resolvent eigenvalue `μ := i.fst.val` is strictly positive: the
-eigenspace at `μ` is non-trivial, so it contains a non-zero eigenvector, and the
-resolvent eigenvalues lie in the unit interval `(0, 1]`. -/
+
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -467,15 +352,7 @@ end MainBound
 section UniformBounds
 
 set_option linter.unusedSectionVars false in
-/-- **Factor-uniform quantitative smooth-coefficient `wkpNorm` bound with
-ae-vanishing factor.** The `factor`-uniform companion of
-`wkpNorm_smoothCoef_mul_aeZeroFactor_le`: for a coefficient `coef : EuclN → ℝ`
-that is `C^∞` on the open Euclidean chart target and a compact kernel `Kkern`
-inside the chart target, there is a *single* nonnegative constant `C` such that
-for *every* factor that is `MemWkp K 2` on the chart target and vanishes almost
-everywhere off `Kkern`, the pointwise product `coef · factor` lies in
-`MemWkp K 2` and `wkpNorm K 2 (coef · factor) ≤ ENNReal.ofReal C · wkpNorm K 2
-factor`. The `∀ factor` quantifier moves inside the `∃ C`. -/
+
 private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -603,13 +480,7 @@ private lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 set_option linter.unusedSectionVars false in
-/-- **Eigenbasis-uniform finite-sum aggregation.** A finite indexed family `F`
-of `W^{K,2}` summands on an open set, each `wkpNorm`-bounded — uniformly over a
-parameter `δ` — by `ENNReal.ofReal Cⱼ` times a `δ`-indexed aggregate `A d`, has
-its summed `wkpNorm` bounded, uniformly over `δ`, by `ENNReal.ofReal` of an
-explicit nonnegative constant times `A d`. The single constant — the sum of the
-per-summand constants times the index cardinality — is hoisted before the
-`∀ d`. -/
+
 private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {δ : Type*} {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → δ → EuclN → ℝ) (A : δ → ℝ≥0∞)
@@ -663,7 +534,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `PouRegularity`. -/
 private def PouRegularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ) : Prop :=
@@ -681,7 +551,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s)
 
-/-- Chart-locality-free twin of `rhsTerm1`. -/
 private def rhsTerm1 : EuclN → ℝ :=
   fun y =>
     ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -690,7 +559,6 @@ private def rhsTerm1 : EuclN → ℝ :=
             g r s) i) α P₀ :
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `rhsTerm2`. -/
 private def rhsTerm2 : EuclN → ℝ :=
   fun y => ∑ P : TensorCompIdx (E := E) r (s + 1),
     ∑ Q : TensorCompIdx (E := E) r (s + 1),
@@ -699,7 +567,6 @@ private def rhsTerm2 : EuclN → ℝ :=
         ((crossLeftLimitComponent (I := I) (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `rhsTerm3`. -/
 private def rhsTerm3 : EuclN → ℝ :=
   fun y => ∑ P : TensorCompIdx (E := E) r s,
     ∑ Q : TensorCompIdx (E := E) r s,
@@ -708,28 +575,23 @@ private def rhsTerm3 : EuclN → ℝ :=
         ((crossRightLimitComponent (I := I) (M := M) g r s i α P :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y
 
-/-- Chart-locality-free twin of `rhsTerm4`. -/
 private def rhsTerm4 : EuclN → ℝ :=
   covPrincipalRotationCoeffLimit (I := I) (M := M) g r s i α P₀
 
-/-- Chart-locality-free twin of `rhsTerm5`. -/
 private def rhsTerm5 : EuclN → ℝ :=
   covLowerOrderRotationValueCoeffLimit (I := I) (M := M)
     g r s i α P₀
 
-/-- Chart-locality-free twin of `rhsTerm6`. -/
 private def rhsTerm6 : EuclN → ℝ :=
   fun y => (1 / densityOnEuclid (I := I) g α y) *
     (∑ l : Fin (Module.finrank ℝ E),
       weightedGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ l y)
 
-/-- Chart-locality-free twin of `rhsTerm7`. -/
 private def rhsTerm7 : EuclN → ℝ :=
   fun y => (1 / densityOnEuclid (I := I) g α y) *
     crossRightGradCoeffDivLimit (I := I) (M := M) g r s i α P₀ y
 
-/-- Chart-locality-free twin of `rhsBracket`. -/
 private def rhsBracket : EuclN → ℝ :=
   rhsTerm1 (I := I) (M := M) g r s i α P₀ -
       rhsTerm2 (I := I) (M := M) g r s i α P₀ +
@@ -740,7 +602,7 @@ private def rhsBracket : EuclN → ℝ :=
       rhsTerm7 (I := I) (M := M) g r s i α P₀
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `eigenvectorChartRHS_eq_smul_bracket`. -/
+
 private lemma eigenvectorChartRHS_eq_smul_bracket :
     eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
       = fun y => (i.fst.val)⁻¹ *
@@ -759,7 +621,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-/-- Chart-locality-free twin of `rhsTerm1_memWkp`. -/
 private lemma rhsTerm1_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -769,7 +630,6 @@ private lemma rhsTerm1_memWkp
   exact eigenvectorChartRHS_summand1_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
-/-- Chart-locality-free twin of `rhsTerm2_memWkp`. -/
 private lemma rhsTerm2_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -779,7 +639,6 @@ private lemma rhsTerm2_memWkp
   exact eigenvectorChartRHS_summand2_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
-/-- Chart-locality-free twin of `rhsTerm3_memWkp`. -/
 private lemma rhsTerm3_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -789,7 +648,6 @@ private lemma rhsTerm3_memWkp
   exact eigenvectorChartRHS_summand3_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
-/-- Chart-locality-free twin of `rhsTerm4_memWkp`. -/
 private lemma rhsTerm4_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -799,7 +657,6 @@ private lemma rhsTerm4_memWkp
   exact eigenvectorChartRHS_summand4_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
-/-- Chart-locality-free twin of `rhsTerm5_memWkp`. -/
 private lemma rhsTerm5_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -809,7 +666,6 @@ private lemma rhsTerm5_memWkp
   exact eigenvectorChartRHS_summand5_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
-/-- Chart-locality-free twin of `rhsTerm6_memWkp`. -/
 private lemma rhsTerm6_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -819,7 +675,6 @@ private lemma rhsTerm6_memWkp
   exact eigenvectorChartRHS_summand6_memWkp (I := I) (M := M)
     g r s i α P₀ K h_pou
 
-/-- Chart-locality-free twin of `rhsTerm7_memWkp`. -/
 private lemma rhsTerm7_memWkp
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -837,7 +692,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-/-- Chart-locality-free twin of `resInclNorm`. -/
 private def resInclNorm (N : ℕ) (β : M)
     (Q : TensorCompIdx (E := E) r s) : ℝ≥0∞ :=
   wkpNorm (d := Module.finrank ℝ E) N 2
@@ -847,7 +701,6 @@ private def resInclNorm (N : ℕ) (β : M)
         β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
     (chartTargetEuclid (I := I) (M := M) β)
 
-/-- Chart-locality-free twin of `aggrUchart`. -/
 private def aggrUchart : ℝ≥0∞ :=
   wkpNorm (d := Module.finrank ℝ E) K 2
     (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
@@ -857,7 +710,6 @@ private def aggrUchart : ℝ≥0∞ :=
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
     (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `aggrCrossLeft`. -/
 private def aggrCrossLeft : ℝ≥0∞ :=
   ∑ β ∈ transportChartCenters (I := I) (M := M) α,
     ((∑ Q : TensorCompIdx (E := E) r s,
@@ -866,13 +718,11 @@ private def aggrCrossLeft : ℝ≥0∞ :=
           ∑ Q : TensorCompIdx (E := E) r s,
             resInclNorm (I := I) (M := M) g r s i (K + 1) β' Q)
 
-/-- Chart-locality-free twin of `aggrCrossRight`. -/
 private def aggrCrossRight : ℝ≥0∞ :=
   ∑ β ∈ transportChartCenters (I := I) (M := M) α,
     ∑ Q : TensorCompIdx (E := E) r s,
       resInclNorm (I := I) (M := M) g r s i K β Q
 
-/-- Chart-locality-free twin of `aggrPartial`. -/
 private def aggrPartial : ℝ≥0∞ :=
   ∑ P : TensorCompIdx (E := E) r s,
     ∑ k : Fin (Module.finrank ℝ E),
@@ -882,7 +732,6 @@ private def aggrPartial : ℝ≥0∞ :=
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `aggrComponent`. -/
 private def aggrComponent : ℝ≥0∞ :=
   ∑ p : TensorCompIdx (E := E) r s,
     wkpNorm (d := Module.finrank ℝ E) K 2
@@ -891,7 +740,6 @@ private def aggrComponent : ℝ≥0∞ :=
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `aggrCrossRightLimit`. -/
 private def aggrCrossRightLimit : ℝ≥0∞ :=
   ∑ P : TensorCompIdx (E := E) r s,
     wkpNorm (d := Module.finrank ℝ E) K 2
@@ -900,7 +748,6 @@ private def aggrCrossRightLimit : ℝ≥0∞ :=
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `aggrCutoffPartial`. -/
 private def aggrCutoffPartial : ℝ≥0∞ :=
   ∑ P : TensorCompIdx (E := E) r s,
     ∑ l : Fin (Module.finrank ℝ E),
@@ -910,7 +757,6 @@ private def aggrCutoffPartial : ℝ≥0∞ :=
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `wkpRhsAggregate`. -/
 private def wkpRhsAggregate : ℝ≥0∞ :=
   aggrUchart (I := I) (M := M) g r s i α P₀ K +
     aggrCrossLeft (I := I) (M := M) g r s i α K +
@@ -929,35 +775,35 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrUchart_le`. -/
+
 private lemma aggrUchart_le :
     aggrUchart (I := I) (M := M) g r s i α P₀ K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).1
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrCrossLeft_le`. -/
+
 private lemma aggrCrossLeft_le :
     aggrCrossLeft (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.1
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrCrossRight_le`. -/
+
 private lemma aggrCrossRight_le :
     aggrCrossRight (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.2.1
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrPartial_le`. -/
+
 private lemma aggrPartial_le :
     aggrPartial (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.1
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrComponent_le`. -/
+
 private lemma aggrComponent_le :
     aggrComponent (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
@@ -965,7 +811,7 @@ private lemma aggrComponent_le :
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.1
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrCrossRightLimit_le`. -/
+
 private lemma aggrCrossRightLimit_le :
     aggrCrossRightLimit (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
@@ -973,7 +819,7 @@ private lemma aggrCrossRightLimit_le :
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.2.1
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `aggrCutoffPartial_le`. -/
+
 private lemma aggrCutoffPartial_le :
     aggrCutoffPartial (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
@@ -989,7 +835,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm1_wkpNorm_le`. -/
+
 private lemma rhsTerm1_wkpNorm_le :
     ∃ C : ℝ, 0 ≤ C ∧
       wkpNorm (d := Module.finrank ℝ E) K 2
@@ -1002,7 +848,6 @@ private lemma rhsTerm1_wkpNorm_le :
   exact le_trans (le_of_eq rfl)
     (aggrUchart_le (I := I) (M := M) g r s i α P₀ K)
 
-/-- Chart-locality-free twin of `rhsTerm2_wkpNorm_le`. -/
 private lemma rhsTerm2_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1130,7 +975,6 @@ private lemma rhsTerm2_wkpNorm_le
   rw [h_eq, hΩ_def]
   exact hC_bd
 
-/-- Chart-locality-free twin of `rhsTerm3_wkpNorm_le`. -/
 private lemma rhsTerm3_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1246,7 +1090,6 @@ private lemma rhsTerm3_wkpNorm_le
   rw [h_eq, hΩ_def]
   exact hC_bd
 
-/-- Chart-locality-free twin of `rhsTerm4_wkpNorm_le`. -/
 private lemma rhsTerm4_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1264,7 +1107,6 @@ private lemma rhsTerm4_wkpNorm_le
   gcongr
   exact aggrPartial_le (I := I) (M := M) g r s i α P₀ K
 
-/-- Chart-locality-free twin of `rhsTerm5_wkpNorm_le`. -/
 private lemma rhsTerm5_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1301,7 +1143,6 @@ private lemma rhsTerm5_wkpNorm_le
             g r s i α P₀ K := by
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_comm C 2]
 
-/-- Chart-locality-free twin of `weightedGradCoeffDivLimit_sum_wkpNorm_le`. -/
 private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1364,7 +1205,6 @@ private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le
     (wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K)
     (fun l => (h_data l).1) (fun l => (h_data l).2)
 
-/-- Chart-locality-free twin of `rhsTerm6_wkpNorm_le`. -/
 private lemma rhsTerm6_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1432,7 +1272,6 @@ private lemma rhsTerm6_wkpNorm_le
             g r s i α P₀ K := by
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
-/-- Chart-locality-free twin of `crossRightGradCoeffDivLimit_memWkp_local`. -/
 private lemma crossRightGradCoeffDivLimit_memWkp_local
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
@@ -1480,7 +1319,6 @@ private lemma crossRightGradCoeffDivLimit_memWkp_local
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
 
-/-- Chart-locality-free twin of `rhsTerm7_wkpNorm_le`. -/
 private lemma rhsTerm7_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1560,7 +1398,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-/-- Chart-locality-free twin of `rhsBracket_wkpNorm_le`. -/
 private lemma rhsBracket_wkpNorm_le
     (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1722,7 +1559,6 @@ end BracketBoundUnconditional
 
 section MainBoundUnconditional
 
-/-- **Chart-locality-free twin of `eigenvectorChartRHS_wkpNorm_le`.** -/
 theorem eigenvectorChartRHS_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1891,7 +1727,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm1_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm1_wkpNorm_le_uniform :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
@@ -1906,7 +1742,7 @@ private lemma rhsTerm1_wkpNorm_le_uniform :
     (aggrUchart_le (I := I) (M := M) g r s i α P₀ K)
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm2_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm2_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2046,7 +1882,7 @@ private lemma rhsTerm2_wkpNorm_le_uniform
   exact hC_bd i
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm3_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm3_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2183,7 +2019,7 @@ private lemma rhsTerm3_wkpNorm_le_uniform
   exact hC_bd i
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm4_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm4_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2210,7 +2046,7 @@ private lemma rhsTerm4_wkpNorm_le_uniform
   exact aggrPartial_le (I := I) (M := M) g r s i α P₀ K
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm5_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm5_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2256,7 +2092,7 @@ private lemma rhsTerm5_wkpNorm_le_uniform
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_comm C 2]
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform`. -/
+
 private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2334,7 +2170,7 @@ private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform
   exact ⟨C, hC_nn, fun i => hC_bd i⟩
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm6_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm6_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2416,7 +2252,7 @@ private lemma rhsTerm6_wkpNorm_le_uniform
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsTerm7_wkpNorm_le_uniform`. -/
+
 private lemma rhsTerm7_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2507,7 +2343,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 set_option linter.unusedSectionVars false in
-/-- Chart-locality-free twin of `rhsBracket_wkpNorm_le_uniform`. -/
+
 private lemma rhsBracket_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -2683,7 +2519,6 @@ end UniformBracketBoundUnconditional
 
 section UniformMainBoundUnconditional
 
-/-- **Chart-locality-free twin of `eigenvectorChartRHS_wkpNorm_le_uniform`.** -/
 theorem eigenvectorChartRHS_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)

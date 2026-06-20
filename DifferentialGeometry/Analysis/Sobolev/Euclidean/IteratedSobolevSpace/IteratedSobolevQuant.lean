@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevSupportPromotion
 
-/-!
-# Quantitative `wkpNorm`-bound layer for iterated Euclidean Sobolev membership
-
-The iterated-Sobolev `MemWkp` API records *membership* facts only: a function
-has weak partial derivatives up to some order, all in `L^p`. A regularity
-campaign that needs to propagate explicit **norm bounds** — inequalities of the
-form `wkpNorm … ≤ C` — through the same chain of reasoning needs, for each
-`MemWkp` API lemma, an inequality (`wkpNorm`-bound) analogue.
-
-Several of those analogues already exist and are reused here verbatim:
-
-* `wkpNorm_mono_order` — monotonicity in the regularity order `k`;
-* `wkpNorm_mono_set` — monotonicity in the open domain;
-* `wkpNorm_add_le` — the triangle inequality;
-* `wkpNorm_const_smul` — the scalar-multiplication identity;
-* `wkpNorm_congr_ae` — a.e.-congruence;
-* `wkpNorm_succ_eq_eLpNorm_add_sum_partial` — the order-`(k+1)` decomposition;
-* `wkpNorm_chosenWeakPartial_le_wkpNorm_succ` — a chosen weak partial drops one
-  Sobolev order;
-* `wkpNorm_smul_smooth_bounded_le` — the quantitative smooth-coefficient Leibniz
-  bound.
-
-This file supplies the genuinely missing pieces:
-
-* the directed `wkpNorm`-recursion `wkpNorm_succ_le` / `wkpNorm_le_wkpNorm_succ`,
-  expressing `wkpNorm (k+1) 2 u Ω` both as controlled by and as controlling
-  `wkpNorm k 2 u Ω` together with `∑ᵢ wkpNorm k 2 (∂ᵢu) Ω`;
-* the `wkpNorm`-equality under zero-extension `wkpNorm_extend_zero`, for a
-  compactly-supported function whose support sits inside the smaller domain;
-* the quantitative **support-promotion** bound
-  `wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact` — the inequality
-  analogue of `MemWkp_of_memWkp_precompact_of_ae_zero_off_compact`;
-* a finite-sum closure `wkpNorm_sum_le`.
-
-Every headline is an unconditional inequality `wkpNorm … ≤ (explicit
-expression)`, stated so a downstream consumer threading a quantitative bound
-through a regularity campaign can chain them.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -53,11 +14,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- **`wkpNorm`-recursion, forward direction.** The order-`(k+1)` iterated
-Sobolev norm of `u` is bounded by the `L^p`-norm of `u` plus the sum, over the
-coordinate axes, of the order-`k` norms of the chosen weak partials. This is the
-inequality form of the decomposition identity
-`wkpNorm_succ_eq_eLpNorm_add_sum_partial`. -/
 theorem wkpNorm_succ_le
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     wkpNorm (d := d) (k + 1) p u Ω ≤
@@ -66,10 +22,6 @@ theorem wkpNorm_succ_le
         wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω :=
   le_of_eq (wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u)
 
-/-- **`wkpNorm`-recursion, reverse direction.** The `L^p`-norm of `u` together
-with the sum over coordinate axes of the order-`k` norms of the chosen weak
-partials bound the order-`(k+1)` norm of `u`. Again the inequality form of the
-decomposition identity. -/
 theorem wkpNorm_le_wkpNorm_succ_sum
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     eLpNorm u p (volume.restrict Ω) +
@@ -78,10 +30,6 @@ theorem wkpNorm_le_wkpNorm_succ_sum
       wkpNorm (d := d) (k + 1) p u Ω :=
   le_of_eq (wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u).symm
 
-/-- The order-`(k+1)` norm of `u` is bounded by the order-`k` norm of `u` plus
-the sum, over the coordinate axes, of the order-`k` norms of the chosen weak
-partials. This is the campaign-facing recursion: the order-`k` data of `u` and
-of its chosen weak partials bound the order-`(k+1)` data of `u`. -/
 theorem wkpNorm_succ_le_wkpNorm_add_sum_partial
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     wkpNorm (d := d) (k + 1) p u Ω ≤
@@ -95,8 +43,6 @@ theorem wkpNorm_succ_le_wkpNorm_add_sum_partial
     wkpNorm_mono_order (d := d) (Nat.zero_le k) u Ω
   rwa [wkpNorm_zero (d := d) p u Ω] at h0
 
-/-- The `L^p`-norm of `u` is bounded by the order-`(k+1)` iterated Sobolev
-norm. The inequality form of the `j = 0` summand of the norm. -/
 theorem eLpNorm_le_wkpNorm
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     eLpNorm u p (volume.restrict Ω) ≤ wkpNorm (d := d) k p u Ω := by
@@ -104,18 +50,12 @@ theorem eLpNorm_le_wkpNorm
     wkpNorm_mono_order (d := d) (Nat.zero_le k) u Ω
   rwa [wkpNorm_zero (d := d) p u Ω] at h0
 
-/-- A chosen weak partial of `u` has order-`k` iterated Sobolev norm bounded by
-the order-`(k+1)` norm of `u`. This is the quantitative analogue of
-`MemWkp.chosenWeakPartial_mem` — a chosen weak partial drops one Sobolev order.
-It is `wkpNorm_chosenWeakPartial_le_wkpNorm_succ`, re-exported in this file's
-naming for the campaign. -/
 theorem wkpNorm_chosenWeakPartial_le
     (k : ℕ) {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω) (u : E → ℝ) (i : Fin d) :
     wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω ≤
       wkpNorm (d := d) (k + 1) p u Ω :=
   wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := d) k hΩ u i
 
-/-- A finite sum of `W^{k,p}(Ω)` functions lies in `W^{k,p}(Ω)`. -/
 private theorem memWkp_finset_sum
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {ι : Type*} (s : Finset ι) (f : ι → E → ℝ)
@@ -133,9 +73,6 @@ private theorem memWkp_finset_sum
       refine MemWkp.add (d := d) hp hΩ (hf a (Finset.mem_insert_self a t)) ?_
       exact iht (fun i hi => hf i (Finset.mem_insert_of_mem hi))
 
-/-- **Finite-sum closure for `wkpNorm`.** The order-`k` iterated Sobolev norm of
-a finite sum of functions is bounded by the sum of the individual norms,
-provided every summand lies in `W^{k,p}(Ω)`. -/
 theorem wkpNorm_sum_le
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {ι : Type*} (s : Finset ι) (f : ι → E → ℝ)
@@ -164,10 +101,6 @@ theorem wkpNorm_sum_le
         wkpNorm_add_le (d := d) hp hΩ ha_mem h_sum_mem
       exact h_triangle.trans (add_le_add (le_refl _) (ih hs_mem))
 
-/-- For a compactly-supported `W^{1,p}(Ω)` function `u` with `tsupport u ⊆ Ω`,
-the chosen weak partial computed on the larger open set `V ⊇ Ω` is a.e. equal,
-on `volume.restrict V`, to the `Ω`-indicator of the chosen weak partial computed
-on `Ω`. -/
 private theorem chosenWeakPartial'_extend_zero_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤) {Ω V : Set E}
     (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
@@ -231,10 +164,6 @@ private theorem chosenWeakPartial'_extend_zero_ae
   exact (ae_restrict_union_iff Ω (V \ Ω) (fun x => g_V x = Ω.indicator g_Ω x)).mpr
     ⟨h_on_Ω, h_on_diff⟩
 
-/-- The `Ω`-indicator of a chosen weak partial of a compactly-supported
-`W^{1,p}(Ω)` function `u` is itself compactly supported with topological support
-inside `Ω`, and is a.e. equal, on `volume.restrict Ω`, to that chosen weak
-partial. -/
 private theorem chosenWeakPartial'_indicator_aux
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : DeGiorgi.MemW1p (d := d) p u Ω)
@@ -287,8 +216,6 @@ private theorem chosenWeakPartial'_indicator_aux
     exact (ae_restrict_union_iff (tsupport u) (Ω \ tsupport u)
       (fun x => g_mod x = g_Ω x)).mpr ⟨h_ae_tsupp, h_ae_diff⟩
 
-/-- The `Ω`-indicators of two functions that agree a.e. on `volume.restrict Ω`
-agree a.e. on `volume.restrict V` for any open `V ⊇ Ω`. -/
 private theorem indicator_ae_congr_of_ae_restrict
     {Ω V : Set E} (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
     {f g : E → ℝ} (hfg : f =ᵐ[volume.restrict Ω] g) :
@@ -321,11 +248,6 @@ private theorem indicator_ae_congr_of_ae_restrict
   exact (ae_restrict_union_iff Ω (V \ Ω)
     (fun x => Ω.indicator f x = Ω.indicator g x)).mpr ⟨h_on_Ω, h_on_diff⟩
 
-/-- **a.e.-extension identity for iterated weak partials.** For a
-compactly-supported `W^{j,p}(Ω)` function `u` with `tsupport u ⊆ Ω`, every
-iterated weak partial of order `j` computed on the larger open set `V ⊇ Ω`
-agrees almost everywhere, on `volume.restrict V`, with the `Ω`-indicator of the
-iterated weak partial of the same order computed on `Ω`. -/
 private theorem iterWeakPartial_extend_zero_ae
     {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤) {Ω V : Set E}
     (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
@@ -410,11 +332,6 @@ private theorem iterWeakPartial_extend_zero_ae
         indicator_ae_congr_of_ae_restrict hΩ hV hΩV h_iter_wΩ
       exact (h_iter_input.trans h_iter_w).trans h_ind_iter
 
-/-- **`wkpNorm`-equality under zero-extension.** For a compactly-supported
-`W^{k,p}(Ω)` function `u` with `tsupport u ⊆ Ω`, the order-`k` iterated Sobolev
-norm computed on the larger open set `V ⊇ Ω` equals the order-`k` norm computed
-on `Ω`. Extension by zero changes neither membership (`MemWkp.extend_zero`) nor
-norm. -/
 theorem wkpNorm_extend_zero
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤) {Ω V : Set E}
     (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
@@ -440,20 +357,6 @@ theorem wkpNorm_extend_zero
 
 section SupportPromotion
 
-/-- **Quantitative support-aware interior-to-global promotion for `wkpNorm`.**
-
-Suppose `u` is iterated-Sobolev regular (`W^{k,p}`) on a precompact open
-subdomain `Ω'` with `closure Ω' ⊆ Ω`, is globally `L^p` on `Ω`, and vanishes
-almost everywhere off a compact subset `K ⊆ Ω'`. Then there is a constant
-`K_prom > 0` — depending only on `Ω'`, `K`, `k`, `p`, and the dimension — such
-that the global order-`k` iterated Sobolev norm of `u` on `Ω` is bounded:
-`wkpNorm k p u Ω ≤ ENNReal.ofReal K_prom · wkpNorm k p u Ω'`.
-
-The promotion constant is the smooth-cutoff Leibniz constant: multiplying `u` by
-a smooth cutoff that is `1` near `K` and is compactly supported inside `Ω'`
-produces a function a.e. equal to `u`, whose iterated Sobolev norm is unchanged
-by zero-extension and is controlled — through the quantitative Leibniz bound —
-by the interior norm of `u`. -/
 theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     {Ω Ω' K : Set E} {u : E → ℝ}
@@ -516,21 +419,6 @@ theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact
     _ ≤ ENNReal.ofReal K_prom * wkpNorm (d := d) k p u Ω' :=
           hK_prom_bound hu_precompact
 
-/-- **Function-uniform quantitative support-aware interior-to-global promotion
-for `wkpNorm`.**
-
-The promotion constant `K_prom` produced by
-`wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact` is the smooth-cutoff
-Leibniz constant: it depends only on the precompact subdomain `Ω'`, the compact
-kernel `K`, the order `k`, the exponent `p`, and the dimension — never on the
-function `u`. This restatement makes that uniformity explicit by exposing a
-single `K_prom > 0` that bounds the global iterated Sobolev norm of *every*
-function which is `W^{k,p}`-regular on `Ω'` and a.e. zero off `K`.
-
-The proof builds the smooth cutoff and its quantitative Leibniz constant once,
-fixes `K_prom`, and only then introduces the function `u` together with its
-support and regularity hypotheses; the remaining argument is identical to
-`wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact`. -/
 theorem wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact_uniform
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     {Ω Ω' K : Set E}

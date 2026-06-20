@@ -2,31 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapChartCoeffsUniformBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapRiemannianFiberNormSqLeChartData
 
-/-!
-# Uniform-in-`T₀` bound on the squared chart-`α` `(Idx, Jdx)` raw scalar
-component of the raw tensor connection Laplacian.
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a chart
-base point `α : M`, and component multi-indices `(Idx, Jdx)`, this file ships a
-single non-negative constant `K`, depending only on `g`, `r`, `s`, `α`, `Idx`,
-`Jdx` (and **independent of the input section `T₀`**), such that for every
-smooth compactly-supported `(r, s)`-tensor section `T₀` and every base point
-`b` lying in the intersection of the chart-`α` partition-of-unity tsupport
-with the chart-`α` Levi-Civita good set, the squared chart-`α` `(Idx, Jdx)`
-raw scalar component of `rawTensorConnLapSmooth g r s T₀` at `b` is dominated
-by `K` times a multi-index sum of squared iterated-second-Fréchet, squared
-Fréchet, and squared zeroth-order pull-back data on the Euclidean chart target.
-
-The headline is obtained by combining the `T₀`-linear chart-coordinate formula
-`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula` with uniform sup-bounds on
-the `T₀`-independent smooth coefficient families `C_2`, `C_1`, `C_0` over the
-compact chart-`α` image of the partition-of-unity tsupport in
-`chartTargetEuclid α`. The quantifier order is `∃ K, ∀ T₀`: the constant is
-uniform in `T₀`.
-
-No chart-locality predicate is required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -59,10 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- For a scalar function `f` on the Euclidean model space, the squared single
-Euclidean partial `∂_m f y` is bounded by the operator norm squared of
-`fderiv ℝ f y`. (No differentiability hypothesis is needed: when `f` is not
-differentiable at `y`, both sides are zero by Mathlib's `fderiv` convention.) -/
 private lemma euclidPartial_sq_le_fderiv_sq
     {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -86,27 +57,6 @@ private lemma euclidPartial_sq_le_fderiv_sq
   rw [h_sq]
   exact pow_le_pow_left₀ (abs_nonneg _) h_abs 2
 
-/-- **Uniform-in-`T₀` bound on the squared chart-`α` `(Idx, Jdx)` raw scalar
-component of the raw tensor connection Laplacian.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a chart
-base point `α : M`, and component multi-indices `(idx, jdx)`, there exists a
-non-negative constant `K`, depending only on `g`, `r`, `s`, `α`, `idx`, `jdx`
-and **independent of the section `T₀`**, such that for every smooth
-compactly-supported `(r, s)`-tensor section `T₀` and every base point `b` in
-the intersection of the chart-`α` partition-of-unity tsupport with the
-chart-`α` Levi-Civita good set,
-```
-(tensorChartComponentRaw g r s (rawTensorConnLapSmooth g r s T₀) α idx jdx b)^2
-    ≤ K · ∑_{Idx' Jdx'} (‖iteratedFDeriv ℝ 2 (chartPushedRaw ...) y‖^2
-                       + ‖fderiv ℝ (chartPushedRaw ...) y‖^2
-                       + (chartPushedRaw ... y)^2),
-```
-where `y = toEuclidean (extChartAt I α b)`.
-
-The bound is unconditional in the chart atlas: no chart-locality predicate is
-required. The quantifier order is `∃ K, ∀ T₀`: the constant is uniform across
-all input sections `T₀`. -/
 theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport_T0_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (idx : Fin r → Fin (Module.finrank ℝ E))

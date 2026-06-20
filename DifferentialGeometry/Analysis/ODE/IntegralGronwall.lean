@@ -3,34 +3,11 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
-/-!
-# Integral form of Grönwall's inequality
-
-`Mathlib.Analysis.ODE.Gronwall` proves the **differential** Grönwall inequality
-(`le_gronwallBound_of_liminf_deriv_right_le`). Many estimates — notably mild-solution
-bounds for semilinear evolution equations — instead need the **integral** form:
-
-> if `0 ≤ f` is continuous on `[0, T]` and satisfies
-> `f(t) ≤ A + K ∫₀ᵗ f`, then `f(t) ≤ A · exp(K t)` on `[0, T]`,
-
-together with its affine refinement
-
-> if `f(t) ≤ A + B t + K ∫₀ᵗ f`, then `f(t) ≤ (A + B t) · exp(K t)`.
-
-Both follow from the differential form applied to the primitive
-`g(t) := A + K ∫₀ᵗ f`. This file packages the two statements; they could
-reasonably be upstreamed alongside the existing material in
-`Mathlib.Analysis.ODE.Gronwall`.
--/
-
 open MeasureTheory Set Real
 open scoped Topology
 
 namespace DifferentialGeometry.Analysis.ODE
 
-/-- Clamp a function defined on `Icc 0 T` to the whole real line by extending it
-constantly past each endpoint. Equal to the original on `Icc 0 T`, and continuous
-on `ℝ` whenever the original is `ContinuousOn (Icc 0 T)`. -/
 private noncomputable def clamp (T : ℝ) (f : ℝ → ℝ) (t : ℝ) : ℝ :=
   f (max 0 (min T t))
 
@@ -57,12 +34,10 @@ private lemma integral_clamp_eq {T : ℝ} {f : ℝ → ℝ}
   refine intervalIntegral.integral_congr (fun τ hτ => ?_)
   exact clamp_eq_of_mem (h0t hτ)
 
-/-- The primitive `t ↦ ∫₀ᵗ f₀` is continuous when `f₀` is continuous. -/
 private lemma primitive_continuous {f₀ : ℝ → ℝ} (hf₀ : Continuous f₀) :
     Continuous (fun t : ℝ => ∫ τ in (0:ℝ)..t, f₀ τ) :=
   intervalIntegral.continuous_primitive (fun _ _ => hf₀.intervalIntegrable _ _) 0
 
-/-- FTC for the primitive of a continuous function. -/
 private lemma primitive_hasDerivAt {f₀ : ℝ → ℝ} (hf₀ : Continuous f₀) (t : ℝ) :
     HasDerivAt (fun u : ℝ => ∫ τ in (0:ℝ)..u, f₀ τ) (f₀ t) t :=
   intervalIntegral.integral_hasDerivAt_right
@@ -71,9 +46,7 @@ private lemma primitive_hasDerivAt {f₀ : ℝ → ℝ} (hf₀ : Continuous f₀
     hf₀.continuousAt
 
 set_option linter.unusedVariables false in
-/-- **Integral Grönwall inequality.** If `0 ≤ f` is continuous on `[0, T]` and
-satisfies `f(t) ≤ A + K · ∫₀ᵗ f` for every `t ∈ [0, T]`, then
-`f(t) ≤ A · exp(K t)` on `[0, T]`. -/
+
 theorem gronwall_integral_le
     {T A K : ℝ} (hT : 0 ≤ T) (hA : 0 ≤ A) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))
@@ -121,9 +94,7 @@ theorem gronwall_integral_le
   linarith [hgt, hfg_t, hsim.le, hsim.ge]
 
 set_option linter.unusedVariables false in
-/-- **Affine integral Grönwall inequality.** If `0 ≤ f` is continuous on `[0, T]`
-and satisfies `f(t) ≤ A + B · t + K · ∫₀ᵗ f` for every `t ∈ [0, T]`, then
-`f(t) ≤ (A + B · t) · exp(K t)` on `[0, T]`. -/
+
 theorem integral_gronwall_le_affine
     {T A B K : ℝ} (hT : 0 ≤ T) (hA : 0 ≤ A) (hB : 0 ≤ B) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))

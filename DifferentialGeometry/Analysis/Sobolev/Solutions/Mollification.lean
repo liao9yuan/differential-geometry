@@ -3,31 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import Mathlib.Analysis.Calculus.BumpFunction.Convolution
 import Mathlib.Analysis.Calculus.ContDiff.Convolution
 
-/-!
-# Mollification operator on Euclidean space.
-
-This module sets up the mollification operator
-`mollifyEps hε u := mollifierEps hε ⋆ u` on
-`EuclideanSpace ℝ (Fin d)`, used downstream for approximating non-smooth
-`L²` / `H¹` functions by smooth ones.
-
-## Main results
-
-* `mollifyEps_contDiff`: for `0 < ε`, the mollified function is smooth on
-  the whole space when `u : E → ℝ` is locally integrable.
-* `mollifyEps_continuous`: continuity of the mollified function.
-* `mollifyEps_apply`: pointwise integral formula.
-* `mollifyEps_hasCompactSupport`: compact support of the mollified function
-  when `u` has compact support.
-* `mollifyEps_memLp_two_of_hasCompactSupport`: when `u` is in `L²` with
-  compact support, the mollified function is in `L²` (by smoothness +
-  compact support).
-* `tendsto_mollifyEps_of_continuous`: pointwise convergence of the
-  mollified function to a continuous function as `ε → 0⁺`.
-* `ae_tendsto_mollifyEps_of_locallyIntegrable`: a.e. pointwise convergence
-  of the mollified function to a locally integrable function.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -40,15 +15,10 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The ε-mollified version of a function `u : E → ℝ`:
-`mollifyEps hε u := mollifierEps hε ⋆ u`. The convolution uses the standard
-`lsmul ℝ ℝ` bilinear pairing on real-valued functions. -/
 def mollifyEps {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) : E → ℝ :=
   DifferentialGeometry.Analysis.Sobolev.mollifierEps (d := d) hε ⋆[
     ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u
 
-/-- For `0 < ε` and a locally integrable `u : E → ℝ`, the mollified function
-is smooth on the whole space. -/
 theorem mollifyEps_contDiff {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_loc : LocallyIntegrable u (volume : Measure E)) :
     ContDiff ℝ (⊤ : ℕ∞) (mollifyEps (d := d) hε u) := by
@@ -59,13 +29,11 @@ theorem mollifyEps_contDiff {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (DifferentialGeometry.Analysis.Sobolev.mollifierEps_smooth hε)
     hu_loc
 
-/-- Continuity of the mollified function. -/
 theorem mollifyEps_continuous {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_loc : LocallyIntegrable u (volume : Measure E)) :
     Continuous (mollifyEps (d := d) hε u) :=
   (mollifyEps_contDiff (d := d) hε hu_loc).continuous
 
-/-- The mollified value at `x` is the integral of `mollifierEps(t) · u(x - t)`. -/
 lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
       ∫ t,
@@ -74,7 +42,6 @@ lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
   simp [mollifyEps, MeasureTheory.convolution_def,
     ContinuousLinearMap.lsmul_apply, smul_eq_mul]
 
-/-- If `u` has compact support, so does `mollifyEps hε u`. -/
 theorem mollifyEps_hasCompactSupport {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_supp : HasCompactSupport u) :
     HasCompactSupport (mollifyEps (d := d) hε u) :=
@@ -83,9 +50,6 @@ theorem mollifyEps_hasCompactSupport {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (DifferentialGeometry.Analysis.Sobolev.mollifierEps_compactSupport hε)
     hu_supp
 
-/-- For `u ∈ L²` with compact support, the mollified function is in `L²`.
-Combination of smoothness (hence continuity) and compact support of the
-result, both established above. -/
 theorem mollifyEps_memLp_two_of_hasCompactSupport {ε : ℝ} (hε : 0 < ε)
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     (hu_supp : HasCompactSupport u) :
@@ -98,9 +62,6 @@ theorem mollifyEps_memLp_two_of_hasCompactSupport {ε : ℝ} (hε : 0 < ε)
     mollifyEps_hasCompactSupport (d := d) hε hu_supp
   exact h_cont.memLp_of_hasCompactSupport h_supp
 
-/-- Pointwise convergence of the mollified function to a continuous function
-at every point: for `u : E → ℝ` continuous and any `x₀ : E`,
-`mollifyEps εₙ u x₀ → u x₀` along any sequence `εₙ → 0⁺`. -/
 theorem tendsto_mollifyEps_of_continuous {ι : Type*} {l : Filter ι}
     {ε : ι → ℝ} (hε : ∀ i, 0 < ε i) (hε_tendsto : Tendsto ε l (𝓝 0))
     {u : E → ℝ} (hu : Continuous u) (x₀ : E) :
@@ -145,8 +106,6 @@ theorem tendsto_mollifyEps_of_continuous {ι : Type*} {l : Filter ι}
   refine h_conv_tendsto.congr ?_
   intro i; exact h_fn_eq i
 
-/-- Almost-everywhere pointwise convergence of the mollified function to a
-locally integrable function. -/
 theorem ae_tendsto_mollifyEps_of_locallyIntegrable {ι : Type*} {l : Filter ι}
     {ε : ι → ℝ} (hε : ∀ i, 0 < ε i) (hε_tendsto : Tendsto ε l (𝓝 0))
     {u : E → ℝ} (hu_loc : LocallyIntegrable u (volume : Measure E)) :

@@ -6,84 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHS
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorArbitraryKRegularity
 
-/-!
-# The order-`K` `wkpNorm`-graded bound for the differentiated chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`, and a
-component multi-index `P₀`, the level-`m` differentiated chart right-hand side
-`eigenvectorChartRHSDiff g r s i α P₀ m l` of the limiting
-per-component variational identity is the explicit recursion
-
-* level `0` is the seven-term `eigenvectorChartRHS`;
-* level `m + 1` is the indicator, of the compact partition-of-unity kernel, of
-  the chart-density-divided differentiated numerator built from the level-`m`
-  right-hand side.
-
-This module records the **quantitative** (`wkpNorm`-graded) twin of the
-qualitative global iterated-Sobolev regularity headline
-`eigenvectorChartRHSDiff_memWkp`. For each `K : ℕ`, given the order-`(m + 1 + K)`
-partition-of-unity regularity input `h_pou` on every chart center, there is a
-nonnegative constant `C` with
-
-```
-wkpNorm K 2 (eigenvectorChartRHSDiff g r s i α P₀ m l)
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal (μ⁻¹ * C) * <AGGREGATE m K l>,
-```
-
-where `<AGGREGATE m K l>` is the honest finite `ℝ≥0∞`-valued aggregate
-`diffRHSAggregate` of primitive regularity data — a recursive sum that, at level
-`0`, is the order-`K` seven-term aggregate of the chart right-hand side, and at
-level `m + 1`, prepends the order-`(2 + K)` `wkpNorm`s of the iterated weak
-partials feeding the differentiated numerator to the level-`m` aggregate at
-order `K + 1`.
-
-## Strategy
-
-The headline `eigenvectorChartRHSDiff_wkpNorm_le` is proved by induction on `m`,
-with `K` universally quantified so the inductive hypothesis can be invoked at
-`K + 1`:
-
-* level `0`: `eigenvectorChartRHSDiff … 0 l = eigenvectorChartRHS …`, whose
-  order-`K` `wkpNorm` bound is `eigenvectorChartRHS_wkpNorm_le` — its `h_pou`
-  requirement is at order `K + 1 = 0 + 1 + K`, matching this theorem's `h_pou`,
-  and its aggregate is, by definition, `diffRHSAggregate … 0 K l`;
-* level `m + 1`: writing `l = Fin.snoc (Fin.init l) (l (Fin.last m))`, the
-  standalone-step identity `eigenvectorChartIteratedStep_eq_rhsDiff_succ`
-  rewrites `eigenvectorChartRHSDiff … (m+1) l` as the level-`(m+1)` standalone
-  inductive step over the level-`m` right-hand side. The step `wkpNorm` bound
-  `eigenvectorChartIteratedStep_wkpNorm_le` then delivers the order-`K`
-  `wkpNorm`, against the differentiated-numerator aggregate
-  `diffNumeratorAggregateK`. That aggregate has four pieces: the two iterated
-  weak-partial `wkpNorm (2 + K) 2` terms (kept verbatim, forming the level-`(m+1)`
-  head `diffRHSHead`), and the order-`(K + 1)` and order-`K` `wkpNorm`s of the
-  level-`m` right-hand side. The latter two are bounded by the inductive
-  hypothesis at order `K + 1` (the order-`K` term first lifted to order `K + 1`
-  by `wkpNorm_mono_order`). Standard `ℝ≥0∞` algebra folds the step constant, the
-  inductive constant, and the resolvent eigenvalue's reciprocity into a single
-  nonnegative constant.
-
-The three hypotheses of the step `wkpNorm` bound are discharged exactly as in
-the qualitative twin, with one improvement: the iterated-weak-partial regularity
-`h_iter` — `MemWkp (2 + K) 2` of every `eigenvectorChartIteratedPartial … j idx`
-— is supplied **unconditionally** by the arbitrary-order interior regularity
-`eigenvector_chartComponent_memWkp_arbitrary` of the eigenvector chart component,
-followed by the polymorphic bridge `eigenvectorChartIteratedPartial_memWkp_of_memWkp`;
-it needs no partition-of-unity input. The previous-level membership `h_prev` is
-the qualitative headline `eigenvectorChartRHSDiff_memWkp` at the previous level
-and order `K + 1`; the previous-level ae-vanishing `h_prev_zero` is the
-seven-term vanishing at level `0` and the indicator vanishing at positive levels.
-
-The `K = 0` corollary `eigenvectorChartRHSDiff_eLpNorm_le` instantiates the
-headline at `K = 0` and rewrites `wkpNorm 0 2` to `eLpNorm` via `wkpNorm_zero`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -127,9 +49,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section MainBound
 
 set_option linter.unusedSectionVars false in
-/-- The resolvent eigenvalue `μ := i.fst.val` is strictly positive: the
-eigenspace at `μ` is non-trivial, so it contains a non-zero eigenvector, and the
-resolvent eigenvalues lie in the unit interval `(0, 1]`. -/
+
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -141,8 +61,7 @@ private lemma eigenIdx_val_pos
     (I := I) (M := M) g r s hu_in hu_ne).1
 
 set_option linter.unusedSectionVars false in
-/-- The resolvent eigenvalue `μ := i.fst.val` is at most `1`: the resolvent
-eigenvalues lie in the unit interval `(0, 1]`. -/
+
 private lemma eigenIdx_val_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -156,7 +75,7 @@ private lemma eigenIdx_val_le_one
 end MainBound
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `rhsZeroAggregate`. -/
+
 def rhsZeroAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -231,7 +150,6 @@ def rhsZeroAggregate
               EuclN → ℝ) y)
             (chartTargetEuclid (I := I) (M := M) α))
 
-/-- Chart-locality-free twin of `diffRHSHead`. -/
 def diffRHSHead
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -247,7 +165,6 @@ def diffRHSHead
           g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α)
 
-/-- Chart-locality-free twin of `diffRHSAggregate`. -/
 def diffRHSAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -259,7 +176,6 @@ def diffRHSAggregate
       diffRHSHead (I := I) (M := M) g r s i α P₀ m K l +
         diffRHSAggregate g r s i α P₀ m (K + 1) (Fin.init l)
 
-/-- Chart-locality-free twin of `diffRHSAggregate_zero`. -/
 private theorem diffRHSAggregate_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -268,7 +184,6 @@ private theorem diffRHSAggregate_zero
     diffRHSAggregate (I := I) (M := M) g r s i α P₀ 0 K l =
       rhsZeroAggregate (I := I) (M := M) g r s i α P₀ K := rfl
 
-/-- Chart-locality-free twin of `diffRHSAggregate_succ`. -/
 private theorem diffRHSAggregate_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -279,7 +194,6 @@ private theorem diffRHSAggregate_succ
         diffRHSAggregate (I := I) (M := M) g r s i α P₀ m (K + 1)
           (Fin.init l) := rfl
 
-/-- Chart-locality-free twin of `rhsDiff_ae_zero_off_chartPouKernel`. -/
 lemma rhsDiff_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -304,7 +218,6 @@ lemma rhsDiff_ae_zero_off_chartPouKernel
       exact eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel
         (I := I) (M := M) g r s i α P₀ m l hy.2
 
-/-- Chart-locality-free twin of `iteratedPartial_memWkp_two_add`. -/
 private lemma iteratedPartial_memWkp_two_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -323,7 +236,6 @@ private lemma iteratedPartial_memWkp_two_add
   exact eigenvectorChartIteratedPartial_memWkp_of_memWkp (I := I)
     (M := M) g r s i α P₀ j (2 + K) h_comp idx
 
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_wkpNorm_le`. -/
 theorem eigenvectorChartRHSDiff_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -524,7 +436,7 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
       exact add_le_add h_head_le h_tail_le
 
 set_option linter.style.multiGoal false in
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_wkpNorm_le_uniform`. -/
+
 theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -731,7 +643,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
         exact add_le_add h_tail_one h_tail_one
       exact add_le_add h_head_le h_tail_le
 
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_eLpNorm_le`. -/
 theorem eigenvectorChartRHSDiff_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -756,7 +667,6 @@ theorem eigenvectorChartRHSDiff_eLpNorm_le
   refine ⟨C, hC_nn, ?_⟩
   rwa [wkpNorm_zero (d := Module.finrank ℝ E)] at hC_bd
 
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_eLpNorm_le_uniform`. -/
 theorem eigenvectorChartRHSDiff_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)

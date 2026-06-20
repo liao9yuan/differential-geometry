@@ -1,50 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
-/-!
-# Chart-target `W^{2,2}` bilinear bound for the smooth Leibniz residual
-
-For a closed Riemannian manifold `(M, g)` and a chart-atlas index `α : M`, the
-smooth chart-pulled Leibniz residual `smoothFChartResidual g α v` satisfies a
-quantitative `W^{2,2}` bound on `chartTargetEuclid α` in terms of the
-chart-based `W^{3,2}` norm of `v.toFun`. Precisely, there is a positive constant
-`C = C(g, α)` such that for every smooth scalar `v : SmoothScalar g`,
-
-```
-wkpNorm 2 2 (smoothFChartResidual g α v) chartTargetEuclid α
-  ≤ C · wkpNormChart g 3 2 v.toFun.
-```
-
-This is the one-order-higher analogue of `wkpNorm_smoothFChartResidual_le_wkpNormChart`.
-
-## Strategy
-
-The proof mirrors the order-`(1, 2)` argument:
-
-1. `smoothFChartResidual` is a.e. equal to `chartPushedRaw α (smoothRep g α v)`,
-   which decomposes pointwise as
-   `-chartPushedRaw α (gradInnerPiece g α v) - chartPushedRaw α (lapPiece g α v)`.
-2. The triangle inequality on `wkpNorm 2 2` reduces the bound to per-piece
-   estimates.
-3. For the `gradInnerPiece` piece, the chart-formula expansion gives
-   `chartPushedRaw α (gradInnerPiece) = 2 · ∑_i Λgrad_i · ∂_i (η_α · v)`
-   on `chartTargetEuclid α`. The quantitative Euclidean Leibniz bound at order
-   `2` (polymorphic in `k`) controls `wkpNorm 2 2 (Λgrad_i · u)` by
-   `wkpNorm 2 2 u`. Combined with the order-`(2, 3)` chart-direction partial
-   bound and the strict-cutoff `W^{3,2}` bound, this gives
-   `wkpNorm 2 2 chartPushedRaw(gradInnerPiece) ≤ C · wkpNormChart g 3 2 v`.
-4. For the `lapPiece` piece, the factorisation
-   `chartPushedRaw α (lapPiece) = Λ · chartPushedRaw α (η_α · v)`
-   on `chartTargetEuclid α` reduces the bound (via the order-`2` Leibniz bound)
-   to `wkpNorm 2 2 chartPushedRaw(η_α · v) ≤ C · wkpNormChart g 2 2 v`, which is
-   the strict-cutoff `W^{2,2}` bound. By order monotonicity
-   `wkpNormChart g 2 2 v ≤ wkpNormChart g 3 2 v`.
-
-## Main result
-
-* `wkpNorm_smoothFChartResidual_le_wkpNormChart_w22` — the headline
-  `W^{2,2}` bilinear bound.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -81,9 +36,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For smooth `v : SmoothScalar g`, the chart-pushed-raw of `etaTimesV α v.toFun`
-is in `MemWkp 3 2 chartTargetEuclid α` (it is `ContDiff ℝ ∞` with compact
-support inside `chartTargetEuclid α`). -/
 private lemma memWkp_chartPushedRaw_etaTimesV_three
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -114,9 +66,6 @@ private lemma memWkp_chartPushedRaw_etaTimesV_three
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hCP_smooth hCP_cpt hCP_tsupp (by norm_num : (1 : ℝ≥0∞) ≤ 2) 3
 
-/-- For smooth `v : SmoothScalar g`, `partialDerivOnEuclid α i (η · v.toFun)`
-is in `MemWkp 2 2 chartTargetEuclid α` (via a.e. equality with the chosen
-weak partial of the chart-pushed-raw, which is in `MemWkp 2 2`). -/
 private lemma memWkp_partialDerivOnEuclid_etaTimesV_two
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (i : Fin (Module.finrank ℝ E)) :
@@ -151,9 +100,6 @@ private lemma memWkp_partialDerivOnEuclid_etaTimesV_two
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α) h_ae).mpr h_chosen_mem
 
-/-- The bound on `wkpNorm 3 2 (chartPushedRaw α (η · v.toFun))`: there exists
-`C > 0` such that for every smooth `v`,
-`wkpNorm 3 2 (chartPushedRaw α (η · v.toFun)) ≤ C · wkpNormChart g 3 2 v.toFun`. -/
 private lemma wkpNorm_chartPushedRaw_etaTimesV_le_three
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -178,9 +124,6 @@ private lemma wkpNorm_chartPushedRaw_etaTimesV_le_three
   rw [h_funext]
   exact hC_bound h_v_MemWkpChart
 
-/-- The order-`2` analogue of `wkpNorm_chartPushedRaw_etaTimesV_le`: the
-`W^{2,2}` bound for `chartPushedRaw α (η · v.toFun)` is controlled by the
-chart-`W^{2,2}` norm of `v.toFun`. -/
 private lemma wkpNorm_chartPushedRaw_etaTimesV_le_two
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 < C ∧ ∀ v : SmoothScalar g,
@@ -741,11 +684,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_two
             wkpNormChart (I := I) (M := M) g 3 2 v.toFun := by
           rw [hCfinal_def]
 
-/-- **Headline `W^{2,2}` bilinear bound**: For a closed Riemannian manifold
-`(M, g)` and a chart-atlas index `α : M`, the smooth chart-pulled Leibniz
-residual `smoothFChartResidual g α v` satisfies a quantitative `W^{2,2}` bound
-on `chartTargetEuclid α` in terms of the chart-based `W^{3,2}` norm of
-`v.toFun`. -/
 theorem wkpNorm_smoothFChartResidual_le_wkpNormChart_w22
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) :

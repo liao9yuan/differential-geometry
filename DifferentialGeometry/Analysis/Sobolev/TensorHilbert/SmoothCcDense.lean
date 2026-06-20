@@ -1,20 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 
-/-!
-# Density of smooth compactly-supported sections in the intrinsic Sobolev
-Hilbert space
-
-For a closed Riemannian manifold `(M, g)`, the canonical inclusion
-`SmoothCcTensor.toHs` of smooth compactly-supported `(r, s)`-tensor sections
-into the intrinsic `H^k` Hilbert space `TensorPouSobolevHilbert g r s k` has
-dense range. This is immediate from the construction of the Hilbert space as
-the Hausdorff completion of (a wrapper around) `SmoothCcTensor g r s`.
-
-## Main results
-
-* `smoothCcTensor_denseRange_toHs` — `DenseRange (SmoothCcTensor.toHs k)`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -43,11 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- The canonical inclusion `SmoothCcTensor.toHs` of smooth compactly-supported
-`(r, s)`-tensor sections into the intrinsic `H^k` Hilbert space has dense
-range. This is the textbook fact that smooth compactly-supported sections are
-dense in `H^k(M; T^{(r,s)} M)`, here following immediately from the
-construction of `TensorPouSobolevHilbert g r s k` as a Hausdorff completion. -/
+
 theorem smoothCcTensor_denseRange_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     DenseRange

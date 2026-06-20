@@ -1,31 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberOpNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberForwardOpNorm
 
-/-!
-# Reverse uniform bound: fibre norm by the model-side representation norm
-
-For a chart centre `α : M` and ranks `r s : ℕ`, the fibre norm of any
-`T : TensorRSSpace r s I b` is uniformly controlled by the norm of its
-chart-`α` model-side image
-`((triv α).continuousLinearMapAt ℝ b T : TensorRSModel r s ℝ E)` on any compact
-`K ⊆ (chartAt H α).source`. Concretely there exists `C > 0` such that
-`‖T‖ ≤ C * ‖(triv α).continuousLinearMapAt ℝ b T‖` for every `b ∈ K` and every
-`T : TensorRSSpace r s I b`.
-
-This is the reverse-direction counterpart to
-`tensorRSChartFiberToModel_opNorm_isBounded_on_compact` and is an immediate
-consequence of the previously established right-inverse bound
-`tensorRSChartFiberFromModel_opNorm_isBounded_on_compact` together with the
-identity `(triv α).symmL ((triv α).continuousLinearMapAt T) = T` valid on the
-trivialisation base set.
-
-## Main result
-
-* `tensorRSSpace_norm_le_chartRepr_norm_on_compact` — uniform pointwise
-  bound `‖T‖ ≤ C * ‖(triv α).clmAt T‖` over a compact subset of the chart-`α`
-  source.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

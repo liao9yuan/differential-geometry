@@ -6,36 +6,6 @@ import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Multilinear.Basis
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
-/-!
-# Model-fibre dual metric and index lowering
-
-Let `M` be a smooth finite-dimensional manifold modelled on a real normed
-space `E` equipped with a smooth Riemannian metric `g`. The pointwise
-metric-induced inner product on covariant `(0, s)`-tensors is built from
-the Gram matrix of `g(x)` on a fixed model-space basis, and the mixed
-`(r, s)`-tensor inner product is reduced to the covariant case by lowering
-the `r` upper slots through the metric. This file isolates that
-dual-metric / index-lowering layer:
-
-* `modelInnerAt g x` — the pointwise metric `E →L[ℝ] E →L[ℝ] ℝ` on the
-  tangent space, packaged from `Bundle.ContMDiffRiemannianMetric.inner`,
-  together with symmetry, positive-definiteness and zero-iff lemmas.
-* `gramMatrixAt g x` — the Gram matrix of `g(x)` on the fixed model-space
-  basis `chartModelBasis E`, with Hermitian / positive-definite
-  properties of itself and of its inverse.
-* `lowerAllUpperIndices g r s x` — the continuous-linear index-lowering
-  map sending a mixed `(r, s)`-tensor to the covariant `(0, r + s)`-tensor
-  obtained by applying the metric to each of its `r` upper slots, together
-  with an injectivity theorem.
-
-The constructions here are model-fibre only: they take a manifold point
-`x : M` and the corresponding metric value `g.inner x` and produce
-operations on the constant model-space fibers
-`Tensor0SModel · ℝ E` and `TensorRSModel r s ℝ E`. The pointwise inner
-products themselves and their global `L²` counterparts are built in
-companion files using these primitives.
--/
-
 noncomputable section
 
 open Manifold Set Filter Bundle Tensor0SBundle
@@ -52,10 +22,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The pointwise metric `g(x) : E →L[ℝ] E →L[ℝ] ℝ` on the tangent space
-`TangentSpace I x = E`, packaged as a continuous bilinear pairing. This is a
-convenient alias for `g.inner x`; the definitional content is
-`TangentSpace I x = E` as a type synonym. -/
 def modelInnerAt
     (g : SmoothRiemannianMetric I M) (x : M) :
     E →L[ℝ] E →L[ℝ] ℝ :=
@@ -65,23 +31,18 @@ def modelInnerAt
     (g : SmoothRiemannianMetric I M) (x : M) (v w : E) :
     modelInnerAt (I := I) (M := M) g x v w = g.inner x v w := rfl
 
-/-- Symmetry of the pointwise metric on the tangent space. -/
 lemma modelInnerAt_symm
     (g : SmoothRiemannianMetric I M) (x : M) (v w : E) :
     modelInnerAt (I := I) (M := M) g x v w =
       modelInnerAt (I := I) (M := M) g x w v :=
   g.symm x v w
 
-/-- Positive definiteness of the pointwise metric on the tangent space:
-`g(x)(v, v)` is strictly positive for `v ≠ 0`. -/
 lemma modelInnerAt_pos_of_ne_zero
     (g : SmoothRiemannianMetric I M) (x : M)
     {v : E} (hv : v ≠ 0) :
     0 < modelInnerAt (I := I) (M := M) g x v v :=
   g.pos x v hv
 
-/-- Non-negativity of the pointwise metric on the tangent space on the
-diagonal. -/
 lemma modelInnerAt_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : E) :
     0 ≤ modelInnerAt (I := I) (M := M) g x v v := by
@@ -89,7 +50,6 @@ lemma modelInnerAt_nonneg
   · simp [modelInnerAt, map_zero]
   · exact le_of_lt (modelInnerAt_pos_of_ne_zero (I := I) (M := M) g x hv)
 
-/-- Zero–diagonal characterisation of the pointwise metric. -/
 lemma modelInnerAt_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M) (v : E) :
     modelInnerAt (I := I) (M := M) g x v v = 0 ↔ v = 0 := by
@@ -98,8 +58,6 @@ lemma modelInnerAt_eq_zero_iff
   have hpos := modelInnerAt_pos_of_ne_zero (I := I) (M := M) g x hv
   exact absurd h (ne_of_gt hpos)
 
-/-- The Gram matrix of `g(x)` on the fixed model-space basis
-`chartModelBasis E`. Exposed for use in boundedness lemmas. -/
 def gramMatrixAt (g : SmoothRiemannianMetric I M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i j =>
@@ -110,8 +68,6 @@ def gramMatrixAt (g : SmoothRiemannianMetric I M) (x : M) :
     gramMatrixAt (I := I) (M := M) g x i j =
       g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j) := rfl
 
-/-- The Gram matrix of `g(x)` on the fixed model-space basis is Hermitian
-(symmetric, in the real case). -/
 lemma gramMatrixAt_isHermitian
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x).IsHermitian := by
@@ -122,16 +78,11 @@ lemma gramMatrixAt_isHermitian
   rw [gramMatrixAt_apply, gramMatrixAt_apply, star_trivial]
   exact g.symm x _ _
 
-/-- The inverse of the Gram matrix of `g(x)` is Hermitian. -/
 lemma gramMatrixAt_inv_isHermitian
     (g : SmoothRiemannianMetric I M) (x : M) :
     ((gramMatrixAt (I := I) (M := M) g x)⁻¹).IsHermitian :=
   (gramMatrixAt_isHermitian (I := I) (M := M) g x).inv
 
-/-- The Gram matrix of `g(x)` on the fixed model-space basis is positive
-definite: for any `v : Fin n → ℝ` with `v ≠ 0`, the quadratic form
-`vᵀ G(x) v = g(x)(w, w)` is strictly positive, where
-`w = ∑ᵢ vᵢ • eᵢ` and `eᵢ = (chartModelBasis E) i`. -/
 lemma gramMatrixAt_posDef
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x).PosDef := by
@@ -227,15 +178,11 @@ lemma gramMatrixAt_posDef
   rw [hquad]
   exact g.pos x w hw_ne
 
-/-- The inverse of the Gram matrix of `g(x)` is positive semi-definite. -/
 lemma gramMatrixAt_inv_posSemidef
     (g : SmoothRiemannianMetric I M) (x : M) :
     ((gramMatrixAt (I := I) (M := M) g x)⁻¹).PosSemidef :=
   (gramMatrixAt_posDef (I := I) (M := M) g x).inv.posSemidef
 
-/-- The inverse of the Gram matrix of `g(x)` has strictly positive
-eigenvalues, since it is positive definite as the inverse of a positive
-definite matrix. -/
 lemma gramMatrixAt_inv_eigenvalues_pos
     (g : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
     0 < (gramMatrixAt_inv_isHermitian (I := I) (M := M) g x).eigenvalues k := by
@@ -243,14 +190,11 @@ lemma gramMatrixAt_inv_eigenvalues_pos
     (gramMatrixAt_posDef (I := I) (M := M) g x).inv
   exact hpd.eigenvalues_pos k
 
-/-- The Gram matrix `G(x)` is invertible: as a positive-definite matrix it is
-a unit. -/
 lemma gramMatrixAt_isUnit
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsUnit (gramMatrixAt (I := I) (M := M) g x) :=
   (gramMatrixAt_posDef (I := I) (M := M) g x).isUnit
 
-/-- `(G(x))⁻¹ * G(x) = 1`. -/
 lemma gramMatrixAt_inv_mul_self
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x)⁻¹ *
@@ -259,9 +203,6 @@ lemma gramMatrixAt_inv_mul_self
   exact Matrix.isUnit_iff_isUnit_det _ |>.mp
     (gramMatrixAt_isUnit (I := I) (M := M) g x)
 
-/-- Separable covariant `(0, r)`-tensor obtained by applying `g(x)` to each
-of the `r` vectors `v ⟨0⟩, …, v ⟨r-1⟩` on the left slot. For `w : Fin r → E`,
-the value is the product `∏ i, g.inner x (v i) (w i)`. -/
 noncomputable def separableFormAt
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ) (v : Fin r → E) :
     ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ :=
@@ -278,10 +219,6 @@ lemma separableFormAt_apply
     ContinuousMultilinearMap.mkPiAlgebra_apply]
   rfl
 
-/-- Underlying function of the lowering map: for a mixed tensor
-`T : Tensor0SModel r →L[ℝ] Tensor0SModel s`, and a vector
-`v : Fin (r + s) → E`, the lowered value is `T` applied to the separable
-form on the first `r` vectors, evaluated on the last `s` vectors. -/
 private noncomputable def lowerAllUpperIndicesFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) : ℝ :=
@@ -289,7 +226,6 @@ private noncomputable def lowerAllUpperIndicesFn
       (fun i : Fin r => v (Fin.castAdd s i)))
     (fun j : Fin s => v (Fin.natAdd r j))
 
-/-- `castAdd s` and `natAdd r` have disjoint images. -/
 private lemma castAdd_ne_natAdd {r s : ℕ} (i : Fin r) (j : Fin s) :
     Fin.castAdd s i ≠ Fin.natAdd r j := by
   intro h
@@ -300,9 +236,6 @@ private lemma castAdd_ne_natAdd {r s : ℕ} (i : Fin r) (j : Fin s) :
 private lemma natAdd_ne_castAdd {r s : ℕ} (j : Fin s) (i : Fin r) :
     Fin.natAdd r j ≠ Fin.castAdd s i := fun h => castAdd_ne_natAdd i j h.symm
 
-/-- If `i : Fin (r + s)` lies in the first block, updating `v` at `i`
-propagates to updating the `Fin r`-projection at the preimage, and leaves
-the `Fin s`-projection unchanged. -/
 private lemma update_castAdd_first
     {r s : ℕ} (v : Fin (r + s) → E) (i : Fin r) (c : E) :
     (fun k : Fin r => Function.update v (Fin.castAdd s i) c (Fin.castAdd s k)) =
@@ -349,8 +282,6 @@ private lemma update_natAdd_last
     intro h
     exact hk (Fin.natAdd_injective s r h.symm).symm
 
-/-- The separable form behaves linearly in each of the `r` upper-index
-vectors. -/
 private lemma separableFormAt_update_add
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ)
     (v : Fin r → E) (i : Fin r) (a b : E) :
@@ -413,8 +344,6 @@ private lemma separableFormAt_update_smul
   rw [h_inner_smul]
   ring
 
-/-- The underlying function of `lowerAllUpperIndices` as a multilinear map
-in the vector argument. -/
 private noncomputable def lowerAllUpperIndicesML
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -462,8 +391,6 @@ private noncomputable def lowerAllUpperIndicesML
           update_natAdd_last]
       rw [ContinuousMultilinearMap.map_update_smul]
 
-/-- Evaluation of `lowerAllUpperIndicesML` on a tuple is the underlying
-function. -/
 @[simp]
 private lemma lowerAllUpperIndicesML_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -476,8 +403,6 @@ private lemma lowerAllUpperIndicesML_apply
   unfold lowerAllUpperIndicesML
   rfl
 
-/-- Norm bound: `‖lower T v‖ ≤ C · ∏ j, ‖v j‖` where `C = ‖T‖ * ∏ ‖g.inner
-x‖`. -/
 private lemma lowerAllUpperIndicesML_norm_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) :
@@ -532,7 +457,6 @@ private lemma lowerAllUpperIndicesML_norm_bound
     _ = (‖T‖ * ∏ i : Fin r, ‖g.inner x‖) *
           ∏ j : Fin (r + s), ‖v j‖ := by rw [← hsplit]
 
-/-- The continuous-multilinear version of `lowerAllUpperIndicesML`. -/
 private noncomputable def lowerAllUpperIndicesCMLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -553,7 +477,6 @@ private lemma lowerAllUpperIndicesCMLM_apply
   change (lowerAllUpperIndicesML (I := I) (M := M) g r s x T) v = _
   rw [lowerAllUpperIndicesML_apply]
 
-/-- `lowerAllUpperIndicesCMLM` vanishes at `T = 0`. -/
 private lemma lowerAllUpperIndicesCMLM_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     lowerAllUpperIndicesCMLM (I := I) (M := M) g r s x 0 = 0 := by
@@ -562,7 +485,6 @@ private lemma lowerAllUpperIndicesCMLM_zero
   rw [lowerAllUpperIndicesCMLM_apply, ContinuousMultilinearMap.zero_apply]
   rfl
 
-/-- The `T ↦ lowerAllUpperIndicesCMLM` function is linear in `T`. -/
 private lemma lowerAllUpperIndicesCMLM_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -582,7 +504,6 @@ private lemma lowerAllUpperIndicesCMLM_smul
   intro v
   simp [ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
 
-/-- Underlying additive map (in `T`) of `lowerAllUpperIndices`. -/
 private noncomputable def lowerAllUpperIndicesAddHom
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →+
@@ -593,7 +514,6 @@ private noncomputable def lowerAllUpperIndicesAddHom
   map_add' := fun T₁ T₂ =>
     lowerAllUpperIndicesCMLM_add (I := I) (M := M) g r s x T₁ T₂
 
-/-- Norm bound on `lowerAllUpperIndicesCMLM` as a function of `T`. -/
 private lemma lowerAllUpperIndicesCMLM_norm_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -616,11 +536,6 @@ private lemma lowerAllUpperIndicesCMLM_norm_bound
       _ = (∏ _i : Fin r, ‖g.inner x‖) * ‖T‖ *
             ∏ j : Fin (r + s), ‖v j‖ := by ring
 
-/-- The lowering map sending a mixed `(r, s)`-tensor to a covariant
-`(0, r + s)`-tensor by applying the metric to its `r` upper slots, as a
-continuous linear map. For `v : Fin (r + s) → E`, the output is
-`T α_v u_v`, where `α_v` is the separable `(0, r)`-form from the first `r`
-entries of `v` and `u_v` are the last `s` entries of `v`. -/
 noncomputable def lowerAllUpperIndices
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →L[ℝ]
@@ -634,10 +549,6 @@ noncomputable def lowerAllUpperIndices
       (lowerAllUpperIndicesCMLM_norm_bound
         (I := I) (M := M) g r s x T).trans_eq (by ring))
 
-/-- Defining equation for `lowerAllUpperIndices`: for a mixed tensor `T`
-and a vector `v : Fin (r + s) → E`, the lowered value equals `T α_v u_v`,
-where `α_v` is the separable `(0, r)`-form on the first `r` slots of `v`
-and `u_v` is the last `s` slots. -/
 @[simp]
 lemma lowerAllUpperIndices_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -648,8 +559,6 @@ lemma lowerAllUpperIndices_apply
         (fun j : Fin s => v (Fin.natAdd r j)) :=
   lowerAllUpperIndicesCMLM_apply (I := I) (M := M) g r s x T v
 
-/-- Evaluating a separable `(0, r)`-form on a model-basis tuple yields a
-product of Gram-matrix entries. -/
 private lemma separableFormAt_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ)
     (idx jdx : Fin r → Fin (Module.finrank ℝ E)) :
@@ -663,9 +572,6 @@ private lemma separableFormAt_basis_apply
   intro k _
   rw [gramMatrixAt_apply]
 
-/-- The index-lowering map vanishes on a separable form built from a model
-basis precisely when the mixed tensor evaluates to zero on that basis pair.
-This is the fiberwise content of the lower-indices map being zero. -/
 private lemma lower_at_basis_pair_zero_of_lower_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E)
@@ -704,8 +610,6 @@ private lemma lower_at_basis_pair_zero_of_lower_zero
   rw [hcast, hnat] at hzero
   exact hzero
 
-/-- A continuous multilinear map vanishes whenever its values on the standard
-model basis are all zero. -/
 private lemma cmlm_eq_zero_of_basis_zero
     {p : ℕ} (S : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
     (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
@@ -719,9 +623,6 @@ private lemma cmlm_eq_zero_of_basis_zero
     MultilinearMap.zero_apply]
   exact h v
 
-/-- For any pair of continuous multilinear maps on `Fin p` slots of `E`, equality
-follows from agreement on every model-basis tuple. This is
-`Module.Basis.ext_multilinear` specialised to the model basis on each slot. -/
 private lemma tensor0SModel_ext_basis
     {p : ℕ} (S₁ S₂ : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
     (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
@@ -734,12 +635,6 @@ private lemma tensor0SModel_ext_basis
   intro v
   exact h v
 
-/-- **Injectivity of the lower-all-upper-indices map**: if a mixed tensor
-becomes zero after lowering all `r` upper slots through the metric, the
-tensor itself was zero. The argument is that the family of separable
-`(0, r)`-forms over the model basis spans the full covariant `(0, r)`-tensor
-space; the proof uses invertibility of the Gram matrix `G(x)` to invert the
-"separable form ↔ basis-tuple multilinear" transition. -/
 theorem lowerAllUpperIndices_injective
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     Function.Injective

@@ -3,46 +3,6 @@ import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.ODE.Basic
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 
-/-!
-# The variational ODE on a Banach space
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E`, the autonomous ODE
-`α' t = f t (α t)` admits, in addition to its primary unknown `α`, a *variational ODE*
-that governs the derivative of the solution in its initial datum.  Concretely, if `α : ℝ → E`
-solves the ODE and `δ : E` is a "variation of the initial condition", the variational ODE is
-the linear ODE
-
-`y' t = (D_x f) (t, α t) (y t),  y t₀ = δ`,
-
-where `D_x f (t, x)` denotes the Fréchet derivative of `f t` at `x`.  Its solution `y` is the
-*directional derivative* of the solution-map of the original ODE at `α` in the direction `δ`.
-
-This file isolates that linear ODE as a stand-alone Banach-space object — no manifold or
-Riemannian geometry — and establishes the elementary properties: existence (locally in time),
-pointwise uniqueness, linearity in `δ`, and propagation of regularity from the ambient vector
-field `f` to the variational solution `y`.
-
-## Main definitions
-
-* `IsVariationalSolutionOn f α δ t₀ y s`: `y` solves the variational ODE along `α` with initial
-  value `δ` at `t₀` on the set `s ⊆ ℝ`, using `HasDerivWithinAt` on `s`.
-* `IsVariationalSolution f α δ t₀ y`: the global variant using `HasDerivAt` on all of `ℝ`.
-
-## Main results
-
-* `exists_isVariationalSolutionOn_Ioo_local`: local existence on a small open interval
-  `(t₀ - ε, t₀ + ε)`, assuming `f` is `C^1` jointly in `(t, x)` on a neighbourhood of
-  `(t₀, α t₀)` and `α` is continuous on that neighbourhood.
-* `IsVariationalSolutionOn.unique_Ioo`: pointwise uniqueness on an open interval whose closure
-  contains the initial time, assuming continuity of the linearization.
-* `IsVariationalSolutionOn.linear_combination`, `.add`, `.const_smul`, `.zero`: the solution
-  `y` of the variational ODE depends linearly on `δ`.
-
-All results are formulated on a general Banach space `E`.  `[CompleteSpace E]` is added only to
-existence theorems that invoke Picard–Lindelöf.  The file does not import any manifold,
-Riemannian, or tensor file.
--/
-
 noncomputable section
 
 open Set Function Filter Metric
@@ -54,18 +14,11 @@ namespace ODE
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- The variational ODE along `α` (interval form).  Given a time-dependent vector field
-`f : ℝ → E → E`, a reference curve `α : ℝ → E`, an initial variation `δ : E` at time `t₀ : ℝ`,
-and a candidate curve `y : ℝ → E`, the predicate `IsVariationalSolutionOn f α δ t₀ y s` asserts
-that `y t₀ = δ` and that `y` solves the linear ODE
-`y' t = (fderiv ℝ (f t) (α t)) (y t)` within `s` for every `t ∈ s`. -/
 def IsVariationalSolutionOn
     (f : ℝ → E → E) (α : ℝ → E) (δ : E) (t₀ : ℝ) (y : ℝ → E) (s : Set ℝ) : Prop :=
   y t₀ = δ ∧
     ∀ t ∈ s, HasDerivWithinAt y ((fderiv ℝ (f t) (α t)) (y t)) s t
 
-/-- The variational ODE along `α` (global form).  Same data as `IsVariationalSolutionOn`
-but with the linear ODE holding pointwise on all of `ℝ`, via `HasDerivAt`. -/
 def IsVariationalSolution
     (f : ℝ → E → E) (α : ℝ → E) (δ : E) (t₀ : ℝ) (y : ℝ → E) : Prop :=
   y t₀ = δ ∧
@@ -80,16 +33,13 @@ lemma initial (hy : IsVariationalSolutionOn f α δ t₀ y s) : y t₀ = δ := h
 lemma hasDerivWithinAt (hy : IsVariationalSolutionOn f α δ t₀ y s) :
     ∀ t ∈ s, HasDerivWithinAt y ((fderiv ℝ (f t) (α t)) (y t)) s t := hy.2
 
-/-- Restriction to a smaller set. -/
 lemma mono {s' : Set ℝ} (hy : IsVariationalSolutionOn f α δ t₀ y s) (hs : s' ⊆ s) :
     IsVariationalSolutionOn f α δ t₀ y s' :=
   ⟨hy.1, fun t ht => (hy.2 t (hs ht)).mono hs⟩
 
-/-- A variational solution is continuous on its domain. -/
 lemma continuousOn (hy : IsVariationalSolutionOn f α δ t₀ y s) : ContinuousOn y s :=
   fun t ht => (hy.2 t ht).continuousWithinAt
 
-/-- If the solution domain is open and contains a point, the within-derivative is a derivative. -/
 lemma hasDerivAt_of_isOpen (hy : IsVariationalSolutionOn f α δ t₀ y s) (hs : IsOpen s)
     {t : ℝ} (ht : t ∈ s) :
     HasDerivAt y ((fderiv ℝ (f t) (α t)) (y t)) t :=
@@ -106,7 +56,6 @@ lemma initial (hy : IsVariationalSolution f α δ t₀ y) : y t₀ = δ := hy.1
 lemma hasDerivAt (hy : IsVariationalSolution f α δ t₀ y) :
     ∀ t : ℝ, HasDerivAt y ((fderiv ℝ (f t) (α t)) (y t)) t := hy.2
 
-/-- The global form implies the interval form on every subset. -/
 lemma toIsVariationalSolutionOn (hy : IsVariationalSolution f α δ t₀ y) (s : Set ℝ) :
     IsVariationalSolutionOn f α δ t₀ y s :=
   ⟨hy.1, fun t _ => (hy.2 t).hasDerivWithinAt⟩
@@ -120,8 +69,6 @@ section Linearization
 
 variable {f : ℝ → E → E} {α : ℝ → E} {s : Set ℝ} {u : Set E}
 
-/-- Identity: the partial Fréchet derivative `D_x f (t, x)` equals
-`(D f (t, x)).comp inr`. -/
 lemma fderiv_eq_comp_inr {f : ℝ → E → E} {p : ℝ × E}
     (hdiff_joint : DifferentiableAt ℝ (uncurry f) p) :
     fderiv ℝ (f p.1) p.2
@@ -156,8 +103,6 @@ lemma fderiv_eq_comp_inr {f : ℝ → E → E} {p : ℝ × E}
   rw [huncurry_eq] at hcomp_raw
   exact hcomp_raw.fderiv
 
-/-- Joint `C^1` regularity of `f` on the open product `s ×ˢ u` implies continuity of the partial
-Fréchet derivative `D_x f` as a function on `s ×ˢ u`. -/
 lemma continuousOn_partialFDeriv_uncurry
     (hf : ContDiffOn ℝ 1 (uncurry f) (s ×ˢ u)) (hs : IsOpen s) (hu : IsOpen u) :
     ContinuousOn (fun p : ℝ × E => fderiv ℝ (f p.1) p.2) (s ×ˢ u) := by
@@ -184,8 +129,6 @@ lemma continuousOn_partialFDeriv_uncurry
     exact hpostL.comp_continuousOn hf_full
   exact hcomp_cont.congr hpartial_eq
 
-/-- Continuity of the linearization `t ↦ fderiv ℝ (f t) (α t)` along a continuous reference curve
-`α`, on an open set `s`. -/
 lemma continuousOn_fderiv_along_curve
     (hf : ContDiffOn ℝ 1 (uncurry f) (s ×ˢ u)) (hs : IsOpen s) (hu : IsOpen u)
     (hα : ContinuousOn α s) (hmem : ∀ t ∈ s, α t ∈ u) :
@@ -196,7 +139,6 @@ lemma continuousOn_fderiv_along_curve
   have hmaps : MapsTo (fun t : ℝ => (t, α t)) s (s ×ˢ u) := fun t ht => ⟨ht, hmem t ht⟩
   exact hpartial.comp hcont_curve hmaps
 
-/-- A uniform bound on the operator norm of the linearization on a compact subinterval. -/
 lemma exists_bound_fderiv_along_curve_Icc {tmin tmax : ℝ}
     (hf : ContDiffOn ℝ 1 (uncurry f) (s ×ˢ u)) (hs : IsOpen s) (hu : IsOpen u)
     (hα : ContinuousOn α s) (hmem : ∀ t ∈ s, α t ∈ u)
@@ -222,8 +164,6 @@ section Uniqueness
 
 variable {f : ℝ → E → E} {α : ℝ → E} {δ : E} {t₀ : ℝ}
 
-/-- **Uniqueness** of the variational solution on an open interval containing the initial time
-`t₀`, assuming continuity of the linearization. -/
 theorem IsVariationalSolutionOn.unique_Ioo {a b : ℝ} (ht₀ : t₀ ∈ Ioo a b)
     {y₁ y₂ : ℝ → E}
     (h₁ : IsVariationalSolutionOn f α δ t₀ y₁ (Ioo a b))
@@ -290,10 +230,6 @@ section Existence
 
 variable [CompleteSpace E]
 
-/-- **Local existence** of the variational solution.  Given `f : ℝ → E → E` jointly `C^1` on
-an open product `s ×ˢ u`, a continuous reference curve `α : ℝ → E` with `α s ⊆ u`, a time
-`t₀ ∈ s`, and a variation `δ : E`, there exist `ε > 0` and a curve `y : ℝ → E` solving the
-variational ODE on the open interval `(t₀ - ε, t₀ + ε)`. -/
 theorem exists_isVariationalSolutionOn_Ioo_local
     {f : ℝ → E → E} {α : ℝ → E} {s : Set ℝ} {u : Set E}
     (hf : ContDiffOn ℝ 1 (uncurry f) (s ×ˢ u)) (hs : IsOpen s) (hu : IsOpen u)
@@ -418,8 +354,6 @@ section Linearity
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
-/-- The variational ODE is linear in `y`: a real linear combination of variational solutions
-is the variational solution with the corresponding linear-combination initial value. -/
 theorem IsVariationalSolutionOn.linear_combination
     {δ₁ δ₂ : E} {c₁ c₂ : ℝ} {y₁ y₂ : ℝ → E} {s : Set ℝ}
     (h₁ : IsVariationalSolutionOn f α δ₁ t₀ y₁ s)
@@ -442,7 +376,6 @@ theorem IsVariationalSolutionOn.linear_combination
     rw [hlin]
     exact hd_sum
 
-/-- Constant scaling of a variational solution. -/
 theorem IsVariationalSolutionOn.const_smul
     {δ : E} {c : ℝ} {y : ℝ → E} {s : Set ℝ}
     (h : IsVariationalSolutionOn f α δ t₀ y s) :
@@ -456,7 +389,6 @@ theorem IsVariationalSolutionOn.const_smul
   have hcomb := h.linear_combination (c₁ := c) (c₂ := 0) h₂
   simpa using hcomb
 
-/-- Sum of two variational solutions with the same initial time. -/
 theorem IsVariationalSolutionOn.add
     {δ₁ δ₂ : E} {y₁ y₂ : ℝ → E} {s : Set ℝ}
     (h₁ : IsVariationalSolutionOn f α δ₁ t₀ y₁ s)
@@ -465,7 +397,6 @@ theorem IsVariationalSolutionOn.add
   have hcomb := h₁.linear_combination (c₁ := 1) (c₂ := 1) h₂
   simpa using hcomb
 
-/-- The zero curve solves the variational ODE with initial value `0`. -/
 theorem IsVariationalSolutionOn.zero
     {s : Set ℝ} :
     IsVariationalSolutionOn f α (0 : E) t₀ (fun _ => (0 : E)) s := by

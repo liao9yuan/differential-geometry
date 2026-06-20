@@ -1,20 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
-/-!
-# Quantitative `W^{k,p}` bound for multiplication by a smooth bounded function
-  — iterated version at arbitrary order `k`
-
-For a smooth (`C^∞`) function `η : E → ℝ` whose iterated derivatives up to
-order `k` are uniformly bounded by `C` on the open set `Ω`, the operation
-`u ↦ η · u` admits a uniform bound on the `W^{k,p}` norm at any `k ∈ ℕ`.
-
-This generalises the `k ≤ 1` bound `wkpNorm_smul_smooth_bounded_le_one`. The
-proof proceeds by induction on `k` using the unfolding identity
-`wkpNorm (k+1) p u Ω = eLpNorm u + ∑_i wkpNorm k p (∂_i u) Ω`, the chosen
-weak-partial Leibniz identity `∂_i(η · u) =ᵃᵉ η · ∂_i u + (∂_i η) · u`, and
-the comparison `wkpNorm k p (∂_i u) ≤ wkpNorm (k+1) p u`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -29,9 +14,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Reindex the inner sum at level `j+1` over multi-indices `Fin (j+1) → Fin d`
-into a double sum: outer over the first axis `i : Fin d`, inner over the
-tail `Fin j → Fin d`. -/
 private lemma sum_fin_succ_to_iterWeakPartial_succ
     (j : ℕ) (q : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
     ∑ α : Fin (j + 1) → Fin d,
@@ -59,9 +41,6 @@ private lemma sum_fin_succ_to_iterWeakPartial_succ
     exact Fin.cons_succ _ _ _
   rw [h_first, h_tail]
 
-/-- For `u : E → ℝ`, the `wkpNorm` at order `k+1` decomposes as the
-`L^p`-norm plus the sum, over coordinate axes `i`, of the `wkpNorm` at order
-`k` of the chosen weak partial `∂ᵢu`. -/
 theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     wkpNorm (d := d) (k + 1) p u Ω =
@@ -140,8 +119,6 @@ theorem wkpNorm_succ_eq_eLpNorm_add_sum_partial
     rw [Finset.sum_comm]
   rw [h_inner_swap]
 
-/-- The `wkpNorm` at order `k` of a chosen weak partial is bounded by the
-`wkpNorm` at order `k+1` of the original function. -/
 lemma wkpNorm_chosenWeakPartial_le_wkpNorm_succ
     (k : ℕ) {p : ℝ≥0∞} {Ω : Set E} (_hΩ : IsOpen Ω) (u : E → ℝ) (i : Fin d) :
     wkpNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω ≤
@@ -167,12 +144,6 @@ section LeibnizQuant
 
 variable [NeZero d]
 
-/-- **Quantitative Leibniz at order `k`** (arbitrary `k`). For a smooth
-function `η : E → ℝ` whose iterated derivatives up to order `k` are uniformly
-bounded by `C` on the open set `Ω`, there exists a constant `K > 0`
-(depending only on `η`, `k`, and `d`) such that for every `u ∈ W^{k,p}(Ω)`,
-the product `η · u` lies in `W^{k,p}(Ω)` and
-`wkpNorm k p (η · u) Ω ≤ K · wkpNorm k p u Ω`. -/
 theorem wkpNorm_smul_smooth_bounded_le
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -415,8 +386,6 @@ theorem wkpNorm_smul_smooth_bounded_le
 
 end LeibnizQuant
 
-/-- Public version: iterated derivatives of a smooth function with compact
-support are uniformly bounded up to any finite order. -/
 theorem exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_compact : HasCompactSupport η)
     (m : ℕ) :

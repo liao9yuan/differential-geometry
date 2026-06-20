@@ -3,51 +3,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Add
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 
-/-!
-# Smoothness of the chart-local Levi-Civita covariant derivative
-
-The chart-local Levi-Civita covariant derivative `chartLeviCivita g α`, defined
-chart-by-chart in `LeviCivitaChartLocal.lean`, is a smooth covariant derivative
-on its open *good set* `chartLeviCivitaGoodSet α` in the sense of Mathlib's
-`ContMDiffCovariantDerivativeOn`: for any smooth section `σ` of the tangent
-bundle, the section `(fun x => chartLeviCivita g α σ x)` of `Hom(TM, TM)` is
-smooth on the good set.
-
-## Construction
-
-The proof unfolds in chart coordinates. Recall
-
-  `chartLeviCivita g α σ x =`
-    `trivFromE α x ∘L (fderiv (σ̃ ∘ φ.symm)(φ x) ∘L trivToE α x +`
-                       `christoffelCorrection g α x (σ̃ x))`,
-
-with `σ̃ := chartE_section_repr α σ` and `φ := extChartAt I α`. The hom-bundle
-trivialization at `α` reads off the section's pointwise CLM in chart coordinates
-as a CLM `E →L[ℝ] E` via Mathlib's `inCoordinates`. Substituting the
-chart-coordinate formula and using the round-trip identities
-`trivToE α x ∘L trivFromE α x = id_E`, this chart-coordinate CLM equals the
-sum of:
-
-* the chart-level Fréchet derivative `fderiv ℝ (σ̃ ∘ φ.symm) (φ x)`, and
-* a finite sum `∑ᵢⱼₖ ((b.repr σ̃(x))ⱼ Γᵏᵢⱼ(φ x)) • Cᵢⱼₖ` of scalar-times-
-  constant-CLM terms, each smooth in `x` on the good set.
-
-Both summands are `C^∞` in `x` on the good set, and the chart-side sum
-identifies (via `inCoordinates`) with the trivialization second component of the
-section `(fun x => chartLeviCivita g α σ x)` of the hom-bundle. A
-`congr_of_eventuallyEq` rewrite through `Bundle.contMDiffWithinAt_section`
-yields the desired chart-local smoothness statement.
-
-## Main result
-
-* `chartLeviCivita_contMDiffCovariantDerivativeOn` —
-  `ContMDiffCovariantDerivativeOn (V := TangentSpace I) E ∞
-    (chartLeviCivita g α) (chartLeviCivitaGoodSet α)`. Together with the
-  `IsCovariantDerivativeOn` axioms verified in `LeviCivitaChartLocal.lean`,
-  this completes the smoothness profile of the chart-local Levi-Civita
-  derivative on its good set.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -66,7 +21,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-target image of the good set is open in `E`. -/
 lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
@@ -99,22 +53,10 @@ lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
     exact htgt_cont.mono interior_subset
   exact hsymm_cont.isOpen_inter_preimage hint_open hS_open
 
-/-- Constant building-block CLM `E →L[ℝ] E` indexed by basis triples
-`(i, j, k)`: `Cᵢⱼₖ : w ↦ (b.repr w)ᵢ • bⱼ`, used for the Christoffel-
-correction expansion. The `j`-index of the basis vector encodes the
-section-component subscript; the contraction is built outside via the scalar
-factor `(b.repr σ̃(x))ⱼ * Γᵏᵢⱼ(φ x)`.
-
-Note: the basis vector chosen here is `(chartModelBasis E) k`, the `k`-th
-target-basis element corresponding to the upper Christoffel index. -/
 def christoffelBlockCLM (i k : Fin (Module.finrank ℝ E)) : E →L[ℝ] E :=
   (((chartModelBasis E).coord i).toContinuousLinearMap).smulRight
     ((chartModelBasis E) k)
 
-/-- The chart-side Christoffel correction CLM as a function of `x : M`,
-expressed as a CLM `E →L[ℝ] E`. The map sends `w ↦ ∑ᵢⱼₖ (b.repr w)ᵢ
-(b.repr (σ̃ x))ⱼ Γᵏᵢⱼ(φ x) eₖ` and equals `∑ᵢⱼₖ (scalar(x)) • Cᵢₖ`,
-factored to expose smoothness. -/
 def christoffelCorrectionCLM (g : SmoothRiemannianMetric I M)
     (α : M) (σ : Π x : M, TangentSpace I x) (x : M) : E →L[ℝ] E :=
   ∑ i : Fin (Module.finrank ℝ E),
@@ -125,7 +67,6 @@ def christoffelCorrectionCLM (g : SmoothRiemannianMetric I M)
             chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
           christoffelBlockCLM (E := E) i k)
 
-/-- Pointwise formula for `christoffelCorrectionCLM`. -/
 lemma christoffelCorrectionCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) (x : M) (w : E) :
@@ -160,10 +101,6 @@ lemma christoffelCorrectionCLM_apply
   congr 1
   ring
 
-/-- Identification: applying `christoffelCorrection g α x Y` precomposed with
-`trivFromE α x` to `w : E` (on the baseset, so `trivToE α x (trivFromE α x w) =
-w`) yields the same as `christoffelCorrectionCLM g α σ x w` with
-`Y := chartE_section_repr α σ x`. -/
 lemma christoffelCorrection_eq_christoffelCorrectionCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) {x : M}
@@ -183,9 +120,6 @@ lemma christoffelCorrection_eq_christoffelCorrectionCLM
     trivToE_trivFromE (I := I) α hx w
   rw [hround]
 
-/-- Chart-side smoothness of `chartE_section_repr α σ ∘ (extChartAt I α).symm`
-on the chart-target image of the good set. Built from a local
-`ContMDiffOn`-of-section hypothesis. -/
 lemma chartE_pullback_contDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -230,7 +164,6 @@ lemma chartE_pullback_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- Smoothness of `chartE_section_repr α σ` on the good set. -/
 lemma chartE_section_repr_contMDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -250,8 +183,6 @@ lemma chartE_section_repr_contMDiffOn_goodSet
   have h := (contMDiffAt_section_iff_chartE I α σ (k := (⊤ : ℕ∞)) hx_base).mp hσ_at
   exact h.contMDiffWithinAt
 
-/-- Smoothness of the basis component `(b.repr σ̃)_j` as a scalar function of
-`x : M` on the good set. -/
 lemma chartE_section_repr_basis_component_contMDiffOn
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -273,8 +204,6 @@ lemma chartE_section_repr_basis_component_contMDiffOn
   intro x hx
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt x (hbase x hx)
 
-/-- `chartChristoffel`, viewed as a function on `M` (precomposed with
-`extChartAt I α`), is `ContMDiffOn` on the good set. -/
 lemma chartChristoffel_contMDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -298,8 +227,6 @@ lemma chartChristoffel_contMDiffOn_goodSet
     exact hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxint)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
-/-- Smoothness of the Christoffel-correction CLM as a CLM-valued function of
-`x : M` on the good set. -/
 lemma christoffelCorrectionCLM_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {σ : Π x : M, TangentSpace I x}
@@ -329,8 +256,6 @@ lemma christoffelCorrectionCLM_contMDiffOn
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
-/-- The Fréchet derivative of the chart-pulled-back section is `C^∞` on the
-chart-target image of the good set, viewed as a CLM-valued function. -/
 lemma fderiv_chartE_pullback_contDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -348,8 +273,6 @@ lemma fderiv_chartE_pullback_contDiffOn_goodSet
     rw [ENat.coe_top_add_one]
   exact hpull.fderiv_of_isOpen himg_open h_le
 
-/-- The Fréchet derivative piece, pulled back through `extChartAt I α`,
-viewed as a CLM-valued function on `M`, is `ContMDiffOn` on the good set. -/
 lemma fderiv_chartE_pullback_contMDiffOn
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -373,9 +296,6 @@ lemma fderiv_chartE_pullback_contMDiffOn
     h_fd_on.contDiffAt (himg_open.mem_nhds (Set.mem_image_of_mem _ hx))
   exact (hfd_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
-/-- On the good set, the `inCoordinates` form of `chartLeviCivita g α σ x`
-equals the sum of the chart-pulled-back Fréchet derivative and the
-Christoffel-correction CLM. -/
 lemma inCoordinates_chartLeviCivita_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) {x : M}
@@ -403,11 +323,6 @@ lemma inCoordinates_chartLeviCivita_eq
     christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α σ hx_base w]
   rw [ContinuousLinearMap.add_apply]
 
-/-- **Smoothness of the chart-local Levi-Civita as a covariant derivative.**
-For any smooth section `σ` of the tangent bundle (as `ContMDiff` of `T% σ`),
-the section `(fun x => chartLeviCivita g α σ x)` of the hom-bundle
-`Hom(TM, TM)` is `ContMDiffOn` on the open good set at `α`, packaged in
-Mathlib's `ContMDiffCovariantDerivativeOn` form. -/
 theorem chartLeviCivita_contMDiffCovariantDerivativeOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffCovariantDerivativeOn (V := (TangentSpace I : M → Type _))

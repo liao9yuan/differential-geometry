@@ -1,94 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.SmoothViaDensity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.DensityExtension
 
-/-!
-# Integral-form variational identity for `gradInnerCLM g φ u_h`
-
-For a closed Riemannian manifold `(M, g)`, a smooth scalar
-`φ : C^∞⟮I, M; ℝ⟯`, and an element `u_h ∈ laplacianDomainPow g 2`, this module
-states and proves the **integral-form variational identity**
-
-```
-∫ g(∇φ, ∇u_h)(x) · ((1 - Δ_g) w)(x) dμ_g(x) = ∫ F(x) · w(x) dμ_g(x)
-```
-
-valid for every smooth test scalar `w : SmoothScalar g`. Here:
-
-* `g(∇φ, ∇u_h)` is the `Lp 2 μ_g` class `gradInnerCLM g φ u_h`.
-* `w` is the underlying smooth function and `Δ_g w` is its classical Laplacian.
-* `F : Lp ℝ 2 μ_g` is an explicit Lp 2 class playing the role of the
-  resolvent-side Bochner cross-term, namely
-  `laplacianDomain.preimage ⟨w_lift, hw_lift⟩`, where
-  `w_lift ∈ laplacianDomain g` is the H¹Compl-lift of `gradInnerCLM g φ u_h`.
-
-## Mathematical content
-
-The identity is the **weak-Laplacian formulation** of `(1 - Δ_g) A = F`, where
-`A := gradInnerCLM g φ u_h`. Equivalently, `A` is the `H1ComplToLp` image of
-`resolvent g F` (i.e., the variational identity at the H¹Compl level).
-
-The integral form follows from the abstract Lax–Milgram variational identity
-`resolvent_inner_eq_lpFunctional` combined with the smooth bridge
-`smoothToH1Compl u = resolvent g (smoothToLp u.oneSubLapClassical)`.
-
-## Strategy
-
-For `u_h ∈ H1Compl g`, assume there exists `w_lift ∈ laplacianDomain g` with
-`H1ComplToLp w_lift = gradInnerCLM g φ u_h` (this is the regularity theorem's
-image-membership form, conditional in general on the Bochner discharge
-hypotheses, but unconditional in the smooth case).
-
-The integral identity follows from two evaluations of the abstract
-inner-product identity:
-
-1. `⟨w_lift, smoothToH1Compl w⟩_{H1Compl}` evaluated as
-   `⟨gradInnerCLM g φ u_h, smoothToLp w.oneSubLapClassical⟩_{Lp}`
-   (via the smooth bridge for `smoothToH1Compl`).
-
-2. `⟨w_lift, smoothToH1Compl w⟩_{H1Compl}` evaluated as
-   `⟨smoothToLp w, F⟩_{Lp}`
-   (via `resolvent_inner_eq_lpFunctional` applied with `f := F`).
-
-Equating the two and unfolding `L2.inner_def` gives the integral-form
-identity. For ℝ-valued Lp the inner product is `⟪a, b⟫_ℝ = b * a` pointwise,
-producing the asserted integral.
-
-## Main results
-
-* `lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage` — the
-  Lp-class formulation:
-  `⟨gradInnerCLM g φ u_h, smoothToLp w.oneSubLapClassical⟩_{Lp} =
-   ⟨smoothToLp w, F⟩_{Lp}`
-  for any `u_h ∈ H1Compl g` with an H1Compl-lift in `laplacianDomain g`.
-
-* `integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth` — the
-  integral form, manifold-side:
-  `∫ A · (1 - Δ_g) w dμ_g = ∫ F · w dμ_g`.
-
-* `integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth_smoothCase`
-  — the integral identity for smooth `v : SmoothScalar g` with
-  `u_h := smoothToH1Compl v`, conditional on the Christoffel discharge
-  hypothesis from `HessianChartAlphaChristoffelDischarge`.
-
-* `integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth_density` —
-  the integral identity for `u_h ∈ laplacianDomainPow g 2` under the density
-  hypotheses from `GradInnerLaplacianDensityExtension`.
-
-## Connection to the Bochner cross-term identity
-
-The integral-form identity is the **weak content** of the polarised
-Bochner–Weitzenböck identity at the `Lp` level. The smooth-case form makes
-this manifest: `F = (1 - Δ_g)(g(∇φ, ∇v))` (as a smooth scalar, in classical
-form), and the identity asserts the weak-Laplacian transfer:
-
-```
-∫ g(∇φ, ∇v) · (1 - Δ_g) w = ∫ (1 - Δ_g)(g(∇φ, ∇v)) · w
-```
-
-which, after manipulation, is the standard integration-by-parts identity
-(`Δ_g` is symmetric under the L² inner product).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -127,15 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Abstract variational identity in Lp inner-product form.** For
-`w_lift ∈ laplacianDomain g` and smooth `w : SmoothScalar g`,
-
-```
-⟨H1ComplToLp w_lift, smoothToLp w.oneSubLapClassical⟩_{Lp} =
-  ⟨smoothToLp w, laplacianDomain.preimage ⟨w_lift, hw_lift⟩⟩_{Lp}.
-```
-
-This is the integral-pairing form of the resolvent variational identity. -/
 theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M)
     {w_lift : H1Compl (I := I) (M := M) g}
@@ -173,15 +76,6 @@ theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     exact resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g ⟨w_lift, hw_lift⟩
   rw [h_LHS, h_RHS]
 
-/-- **Variational identity for `gradInnerCLM g φ u_h` in Lp inner-product form,
-hypothesis-bearing**. Given `w_lift ∈ laplacianDomain g` with
-`H1ComplToLp w_lift = gradInnerCLM g φ u_h`, for every smooth `w : SmoothScalar g`,
-
-```
-⟨gradInnerCLM g φ u_h, smoothToLp w.oneSubLapClassical⟩_{Lp} =
-  ⟨smoothToLp w, laplacianDomain.preimage ⟨w_lift, hw_lift⟩⟩_{Lp}.
-```
--/
 theorem lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -198,17 +92,6 @@ theorem lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage
   exact lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     (I := I) (M := M) g hw_lift w
 
-/-- **Integral-form variational identity for `H1ComplToLp w_lift`**. For
-`w_lift ∈ laplacianDomain g` and any smooth `w : SmoothScalar g`,
-
-```
-∫ (H1ComplToLp w_lift)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · (laplacianDomain.preimage ⟨w_lift, hw_lift⟩)(x) dμ_g(x).
-```
-
-The left-hand side is the action of `H1ComplToLp w_lift` against `(1-Δ_g) w`
-in the L² pairing; the right-hand side is the action of the preimage against
-`w`. -/
 theorem integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
     (g : SmoothRiemannianMetric I M)
     {w_lift : H1Compl (I := I) (M := M) g}
@@ -312,19 +195,6 @@ theorem integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
   rw [← h_LHS_integral, ← h_RHS_integral]
   exact h_abs
 
-/-- **Integral-form variational identity for `gradInnerCLM g φ u_h`,
-hypothesis-bearing**. Given `w_lift ∈ laplacianDomain g` with
-`H1ComplToLp w_lift = gradInnerCLM g φ u_h`, for every smooth
-`w : SmoothScalar g`,
-
-```
-∫ g(∇φ, ∇u_h)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · (laplacianDomain.preimage ⟨w_lift, hw_lift⟩)(x) dμ_g(x).
-```
-
-The left-hand integrand `g(∇φ, ∇u_h)(x)` is interpreted via the coeFn of
-`gradInnerCLM g φ u_h`; on the smooth subspace `u_h := smoothToH1Compl v`
-it agrees with the pointwise smooth function `b ↦ g.inner b (∇φ b) (∇v b)`. -/
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -346,17 +216,6 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
   exact integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
     (I := I) (M := M) g hw_lift w
 
-/-- **Integral form, smooth case via the `smoothGradInnerWitness`**. For smooth
-`v : SmoothScalar g` and smooth `w : SmoothScalar g`,
-
-```
-∫ g(∇φ, ∇v)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · (1 - Δ_g)(g(∇φ, ∇v))(x) dμ_g(x).
-```
-
-The right-hand side is the integral against the smooth Lp class of
-`(gradInnerSmoothBundle g φ v).oneSubLapClassical`, i.e. the classical
-`(1 - Δ_g)(g(∇φ, ∇v))`. -/
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (w : SmoothScalar g) :
@@ -400,21 +259,6 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_smoothCase
   rw [h_preimage_eq] at h_main
   exact h_main
 
-/-- **Integral form for arbitrary `u_h ∈ laplacianDomainPow g 2`, variational-identity-bearing**.
-Given the variational identity for the unconditional Bochner candidate:
-
-```
-gradInnerCLM g φ u_h = H1ComplToLp(resolvent g (Bochner candidate)),
-```
-
-for every smooth `w : SmoothScalar g`,
-
-```
-∫ g(∇φ, ∇u_h)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · F(x) dμ_g(x),
-```
-
-where `F := gradInnerLaplacianCandidateUnconditional g φ hu_h`. -/
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -457,18 +301,6 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
   rw [h_preimage_eq] at h_main
   exact h_main
 
-/-- **Integral form, smooth case via the unconditional candidate, conditional
-on Christoffel discharge**. For smooth `v : SmoothScalar g`, smooth
-`w : SmoothScalar g`, given the Christoffel discharge:
-
-```
-∫ g(∇φ, ∇v)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · F(x) dμ_g(x),
-```
-
-where `F := gradInnerLaplacianCandidateUnconditional g φ
-(smoothToH1Compl_mem_laplacianDomainPow_two g v)` is the unconditional
-Bochner candidate. -/
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_smoothCase_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v)
@@ -493,18 +325,6 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_smoothCase_of_
     (smoothToH1Compl_mem_laplacianDomainPow_two (I := I) (M := M) g v)
     hvar_id w
 
-/-- **Integral form for `u_h ∈ laplacianDomainPow g 2`, density-extension form**.
-Given an approximating sequence of smooth scalars `v_n` with H¹Compl
-convergence to `u_h` and Lp convergence of the candidates plus the smooth
-identification target for each `v_n`,
-
-```
-∫ g(∇φ, ∇u_h)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · F(x) dμ_g(x),
-```
-
-for every smooth `w : SmoothScalar g`, where `F` is the unconditional Bochner
-candidate. -/
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_density
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -540,17 +360,6 @@ theorem integral_gradInner_oneSubLap_smooth_eq_integral_candidate_density
   exact integral_gradInner_oneSubLap_smooth_eq_integral_candidate_of_variational
     (I := I) (M := M) g φ hu_h hvar_id w
 
-/-- **Integral-form variational identity, smooth-function form**. Given a
-smooth `w : M → ℝ` with witness `hw : ContMDiff I 𝓘(ℝ, ℝ) ∞ w`, the
-hypothesis-bearing form reads:
-
-```
-∫ A(x) · (w(x) - Δ_g w(x)) dμ_g(x) = ∫ w(x) · F(x) dμ_g(x)
-```
-
-where `A := gradInnerCLM g φ u_h` and `F := laplacianDomain.preimage
-⟨w_lift, hw_lift⟩` for any `w_lift ∈ laplacianDomain g` with
-`H1ComplToLp w_lift = A`. -/
 theorem integral_gradInner_oneSubLap_contMDiff_eq_integral_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -571,16 +380,6 @@ theorem integral_gradInner_oneSubLap_contMDiff_eq_integral_preimage
   exact integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (I := I) (M := M) g φ hw_lift h_witness ⟨w, hw⟩
 
-/-- **Fully pointwise smooth-case integral form**. For smooth `φ`, smooth
-`v : SmoothScalar g`, and smooth `w : SmoothScalar g`,
-
-```
-∫ g.inner x (∇φ x) (∇v x) · (w x - Δ_g w x) dμ_g =
-  ∫ w x · ((g(∇φ, ∇v))(x) - Δ_g (g(∇φ, ∇v))(x)) dμ_g.
-```
-
-Both integrands are pointwise smooth functions; no Lp coercions appear in
-the statement. -/
 theorem integral_grad_inner_oneSubLap_smooth_pointwise
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (w : SmoothScalar g) :
@@ -654,15 +453,6 @@ theorem integral_grad_inner_oneSubLap_smooth_pointwise
   rw [← h_LHS_eq, ← h_RHS_eq]
   exact h_main
 
-/-- **Integral-form variational identity, `C^∞⟮I, M; ℝ⟯` form**. Given
-`w_lift ∈ laplacianDomain g` with `H1ComplToLp w_lift = gradInnerCLM g φ u_h`,
-for every smooth test map `w : C^∞⟮I, M; ℝ⟯`,
-
-```
-∫ g(∇φ, ∇u_h)(x) · (w(x) - Δ_g w(x)) dμ_g(x) =
-  ∫ w(x) · (laplacianDomain.preimage ⟨w_lift, hw_lift⟩)(x) dμ_g(x).
-```
--/
 theorem integral_gradInner_oneSubLap_contMDiffMap_eq_integral_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -683,9 +473,6 @@ theorem integral_gradInner_oneSubLap_contMDiffMap_eq_integral_preimage
   exact integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (I := I) (M := M) g φ hw_lift h_witness ⟨(w : M → ℝ), w.contMDiff⟩
 
-/-- **Weak `(1 - Δ_g) A = F` characterization (forward direction)**. If
-`A ∈ Lp 2 μ_g` is the `H1ComplToLp` image of `w_lift ∈ laplacianDomain g`,
-then the weak-Laplacian transfer holds with `F := preimage⟨w_lift⟩`. -/
 theorem weak_oneSubLap_holds_of_image_in_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {A : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}

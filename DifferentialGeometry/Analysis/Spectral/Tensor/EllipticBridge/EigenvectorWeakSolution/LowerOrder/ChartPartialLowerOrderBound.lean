@@ -2,39 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrection.ChristoffelBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 
-/-!
-# A uniform `L²` bound for the partition-of-unity-weighted lower-order term
-
-The lower-order term `covDerivLowerOrderTerm` of the chart-coordinate
-covariant-derivative component formula is, by
-`covDerivComponent_lowerOrder_eq_linearCombination`, a finite linear combination
-of *undifferentiated* raw chart components of a section `S`, with `C^∞`
-Christoffel coefficients `covDerivLowerOrderCoeff`. Built from the raw,
-un-weighted chart component `tensorChartComponentRaw`, this term does not decay
-at the (non-precompact) chart-target boundary, so its `L²` norm there is `⊤`.
-
-Weighting by the pushed partition-of-unity weight `ρ_α` cures this: on the
-chart target the weighted term equals a finite linear combination of the
-*weighted* Euclidean chart components `tensorChartComponent`, each of which is
-compactly supported inside the canonical compact partition-of-unity kernel and
-carries an unconditional uniform-in-`S` order-0 `L²` bound
-(`tensorChartComponent_eLpNorm_le_uniform`). The Christoffel coefficients are
-uniformly bounded on that same compact kernel
-(`chartChristoffel_bdd_on_pou_tsupport`); since each weighted chart component
-vanishes off the kernel, the product of coefficient and component has its `L²`
-norm controlled by the coefficient sup times the component `L²` norm. The
-result is a single non-negative constant — depending only on `(g, r, s, α)`,
-independent of `S` and of the component multi-indices — bounding the `L²` norm
-of the partition-of-unity-weighted lower-order term summed over all
-chart-coordinate directions.
-
-## Main results
-
-* `exists_const_sum_eLpNorm_pou_covDerivLowerOrderTerm_le_uniform` — the
-  headline unconditional uniform `L²` bound for the partition-of-unity-weighted
-  lower-order term.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -70,11 +37,9 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The closed support of the canonical partition-of-unity weight at `α`. -/
 private def pouTsupport (α : M) : Set M :=
   tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
-/-- A product of Kronecker deltas has absolute value at most `1`. -/
 private lemma abs_prod_kronecker_le_one
     {ι : Type*} (t : Finset ι) (f : ι → Prop) [DecidablePred f] :
     |∏ i ∈ t, (if f i then (1 : ℝ) else 0)| ≤ 1 := by
@@ -87,16 +52,12 @@ private lemma abs_prod_kronecker_le_one
       · rw [if_pos hf, abs_one, one_mul]; exact ih
       · rw [if_neg hf, abs_zero, zero_mul]; exact zero_le_one
 
-/-- A Kronecker delta has absolute value at most `1`. -/
 private lemma abs_kronecker_le_one {P : Prop} [Decidable P] :
     |if P then (1 : ℝ) else 0| ≤ 1 := by
   by_cases h : P
   · rw [if_pos h, abs_one]
   · rw [if_neg h, abs_zero]; exact zero_le_one
 
-/-- The absolute value of a finite sum of `coefficient · Kronecker-delta`
-products, with each coefficient bounded by `Cχ` in absolute value, is at most
-`card · Cχ`. -/
 private lemma abs_sum_coeff_kronecker_le
     {ι : Type*} (t : Finset ι) (f : ι → ℝ) (P : ι → Prop) [DecidablePred P]
     {Cχ : ℝ} (hCχ_nn : 0 ≤ Cχ) (hf : ∀ i ∈ t, |f i| ≤ Cχ) :
@@ -116,13 +77,6 @@ private lemma abs_sum_coeff_kronecker_le
     _ ≤ ∑ _i ∈ t, Cχ := Finset.sum_le_sum hbound
     _ = t.card * Cχ := by rw [Finset.sum_const, nsmul_eq_mul]
 
-/-- **Uniform sup bound for `covDerivLowerOrderCoeff` on the partition-of-unity
-kernel.** There is a single non-negative constant `C` such that for every
-chart-coordinate direction `m`, every component multi-index pair, and every
-Euclidean chart-target point `y` whose chart-Euclidean preimage lies in the
-closed support of the canonical partition-of-unity weight at `α`, the
-lower-order Christoffel coefficient `covDerivLowerOrderCoeff` is bounded in
-absolute value by `C`. -/
 private theorem exists_const_covDerivLowerOrderCoeff_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -209,9 +163,6 @@ private theorem exists_const_covDerivLowerOrderCoeff_bdd
   rw [add_mul]
   linarith
 
-/-- On the chart target, the pushed partition-of-unity weight times the raw
-chart component (read at the chart-Euclidean preimage) equals the weighted
-Euclidean chart component `tensorChartComponent`. -/
 private lemma chartPushedRaw_pou_mul_raw_eq_component
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -232,10 +183,6 @@ private lemma chartPushedRaw_pou_mul_raw_eq_component
       (tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx) hy]
   rfl
 
-/-- On the chart target, the pushed partition-of-unity weight times the
-lower-order term `covDerivLowerOrderTerm` equals the finite linear combination,
-over component multi-index pairs, of `covDerivLowerOrderCoeff` times the
-weighted Euclidean chart component `tensorChartComponent`. -/
 private lemma chartPushedRaw_pou_mul_lowerOrderTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -262,8 +209,6 @@ private lemma chartPushedRaw_pou_mul_lowerOrderTerm_eq
     chartPushedRaw_pou_mul_raw_eq_component (I := I) (M := M) g r s S α
       p.1 p.2 hy]
 
-/-- The weighted Euclidean chart component is continuous on the Euclidean model
-space. -/
 private lemma tensorChartComponent_continuous'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -272,9 +217,6 @@ private lemma tensorChartComponent_continuous'
     Continuous (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) :=
   (tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
 
-/-- If the weighted Euclidean chart component is nonzero at `y`, then `y` lies
-in the chart target and its chart-Euclidean preimage lies in the closed support
-of the canonical partition-of-unity weight at `α`. -/
 private lemma mem_pouTsupport_of_tensorChartComponent_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -307,11 +249,6 @@ private lemma mem_pouTsupport_of_tensorChartComponent_ne_zero
   exact subset_tsupport
     (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) hρ_ne
 
-/-- **The `L²` bound for a single coefficient-component product.** For a fixed
-component multi-index pair `p` and chart-coordinate direction `m`, the `L²`
-norm of `covDerivLowerOrderCoeff · tensorChartComponent` against the Euclidean
-volume restricted to the chart target is bounded by the Christoffel-coefficient
-sup `Ccoeff` times the order-0 component `L²` norm. -/
 private lemma eLpNorm_coeff_mul_component_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -364,22 +301,6 @@ private lemma eLpNorm_coeff_mul_component_le
     _ = ENNReal.ofReal Ccoeff * eLpNorm comp 2 μ := by
         rw [Real.enorm_eq_ofReal hCcoeff_nn]
 
-/-- **A uniform `L²` bound for the partition-of-unity-weighted lower-order
-term.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart
-center `α : M`, there is a single non-negative real constant `C` — depending
-only on `(g, r, s, α)`, **independent of the section `S` and of the component
-multi-indices `(Idx, Jdx)`** — such that for every smooth compactly-supported
-`H¹` tensor section `S`, the `L²` norm (against the Euclidean volume restricted
-to the chart target) of the pushed-partition-of-unity-weighted lower-order
-correction term `covDerivLowerOrderTerm`, summed over all chart-coordinate
-directions, is bounded by `ENNReal.ofReal C` times the `H¹` norm of `S`.
-
-The pushed partition-of-unity weight `chartPushedRaw I α (⇑(chartAtlasPOU I M
-α))` is essential: the raw (un-weighted) lower-order term does not decay at the
-non-precompact chart-target boundary, so its un-weighted `L²` norm there is
-infinite. The weight confines the term to the compact partition-of-unity
-kernel, on which the Christoffel coefficients are uniformly bounded and the
-weighted chart components carry an unconditional order-0 `L²` bound. -/
 theorem exists_const_sum_eLpNorm_pou_covDerivLowerOrderTerm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)

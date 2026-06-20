@@ -12,8 +12,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-/-! # Exterior derivative of rough (not-necessarily-smooth) alternating-form-valued maps -/
-
 noncomputable section
 
 open Filter ContinuousAlternatingMap Set
@@ -26,12 +24,11 @@ variable {E F F' F'' G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup G] [NormedSpace ℝ G]
   {n m k : ℕ}
 
-
 section RoughDifferentialForm
 
 variable {n m k : ℕ}
 variable {v : E}
-/- Generic (possibly non-smooth) differential n-form. -/
+
 variable (ω τ : E → E [⋀^Fin n]→L[ℝ] F)
 variable (f : E → F)
 
@@ -55,8 +52,6 @@ theorem smul_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) (c : ℝ) : (c • ω) 
 theorem zero_apply : (0 : E → E [⋀^Fin n]→L[ℝ] F) v = 0 :=
   rfl
 
-/- The natural equivalence between differential forms from `E` to `F`
-and maps from `E` to continuous 1-multilinear alternating maps from `E` to `F`. -/
 def ofSubsingleton :
     (E → E →L[ℝ] F) ≃ (E → E [⋀^Fin 1]→L[ℝ] F) where
   toFun f := fun e ↦ ContinuousAlternatingMap.ofSubsingleton ℝ E F 0 (f e)
@@ -64,15 +59,12 @@ def ofSubsingleton :
   left_inv _ := rfl
   right_inv _ := by simp
 
-/- The constant map is a differential form when `Fin n` is empty -/
 def constOfIsEmpty (x : F) : E → E [⋀^Fin 0]→L[ℝ] F :=
   fun _ ↦ ContinuousAlternatingMap.constOfIsEmpty ℝ E (Fin 0) x
 
-/-- Exterior derivative of a differential form. -/
 def ederiv (ω : E → E [⋀^Fin n]→L[ℝ] F) : E → E [⋀^Fin (n + 1)]→L[ℝ] F :=
   fun x ↦ .uncurryFin (fderiv ℝ ω x)
 
-/- Exterior derivative of a differential form within a set -/
 def ederivWithin (ω : E → E [⋀^Fin n]→L[ℝ] F) (s : Set E) : E → E [⋀^Fin (n + 1)]→L[ℝ] F :=
   fun (x : E) ↦ .uncurryFin (fderivWithin ℝ ω s x)
 
@@ -152,7 +144,7 @@ theorem ederivWithin_ederivWithin_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {s
     have : DifferentiableWithinAt ℝ (fderivWithin ℝ ω s) s x := (h.fderivWithin_right
       (hs) (by ring_nf; exact le_of_eq rfl) (hx)).differentiableWithinAt
       (by simp only [ne_eq, one_ne_zero, not_false_eq_true])
-    let ⟨ω'', h⟩ := this -- ω' has deriv ω''
+    let ⟨ω'', h⟩ := this 
     have uncurryDeriv := @ContinuousLinearMap.hasFDerivWithinAt ℝ _ _ _ _ _ _ _ _ _
       (@uncurryFinCLM ℝ E F _ _ _ _ _ n) (fderivWithin ℝ ω s x) t
     have chain : HasFDerivWithinAt (uncurryFinCLM ∘ (fderivWithin ℝ ω s)) (uncurryFinCLM ∘L ω'') s x
@@ -204,7 +196,7 @@ theorem ederiv_ederiv_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {x : E} (h : C
     have : DifferentiableAt ℝ (fderiv ℝ ω) x := (h.fderiv_right
       (by ring_nf; exact le_of_eq rfl)).differentiableAt
       (by simp only [ne_eq, one_ne_zero, not_false_eq_true])
-    let ⟨ω'', h⟩ := this -- ω' has deriv ω''
+    let ⟨ω'', h⟩ := this 
     have uncurryDeriv := @ContinuousLinearMap.hasFDerivAt ℝ _ _ _ _ _ _ _ _ _
       (@uncurryFinCLM ℝ E F _ _ _ _ _ n) (fderiv ℝ ω x)
     have chain : HasFDerivAt (uncurryFinCLM ∘ (fderiv ℝ ω)) (uncurryFinCLM ∘L ω'') x
@@ -219,11 +211,8 @@ theorem ederiv_ederiv_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {x : E} (h : C
 theorem ederiv_ederiv (ω : E → E [⋀^Fin n]→L[ℝ] F) (h : ContDiff ℝ 2 ω) : ederiv (ederiv ω) = 0 :=
   funext fun _ ↦ ederiv_ederiv_apply ω h.contDiffAt
 
-
-
 end RoughDifferentialForm
 
-/- Pullback of a form under a function -/
 namespace RoughDifferentialForm
 
 def domDomCongr (σ : Fin n ≃ Fin m) (ω : E → E [⋀^Fin n]→L[ℝ] F) : E → E [⋀^Fin m]→L[ℝ] F :=
@@ -233,7 +222,6 @@ theorem domDomCongr_apply (σ : Fin n ≃ Fin m) (ω : E → E [⋀^Fin n]→L[�
     (domDomCongr σ ω) e v = (ω e) (v ∘ σ)  :=
   rfl
 
-/- Pullback of a differential form -/
 def pullback (f : E → F) (ω : F → F [⋀^Fin k]→L[ℝ] G) : E → E [⋀^Fin k]→L[ℝ] G :=
     fun x ↦ (ω (f x)).compContinuousLinearMap (fderiv ℝ f x)
 
@@ -265,7 +253,6 @@ theorem pullback_constOfIsEmpty (f : E → F) (g : G) :
     pullback f (constOfIsEmpty g) = fun _ ↦ (ContinuousAlternatingMap.constOfIsEmpty ℝ E (Fin 0) g)
   := rfl
 
-/- Interior product of differential forms -/
 def iprod (ω : E → E [⋀^Fin (m + 1)]→L[ℝ] F) (v : E → E) : E → E [⋀^Fin m]→L[ℝ] F :=
     fun e => ContinuousAlternatingMap.curryFin (ω e) (v e)
 
@@ -273,7 +260,6 @@ theorem iprod_apply (ω : E → E [⋀^Fin (m + 1)]→L[ℝ] F) (v : E → E) (e
     iprod ω v e = ContinuousAlternatingMap.curryFin (ω e) (v e) :=
   rfl
 
-/- Interior product is antisymmetric -/
 theorem iprod_antisymm (ω : E → E [⋀^Fin (m + 2)]→L[ℝ] ℝ) (v w : E → E) (e : E) (m' : Fin m → E) :
     iprod (iprod ω v) w e m' = - iprod (iprod ω w) v e m' := by
   repeat
@@ -293,7 +279,6 @@ theorem iprod_antisymm (ω : E → E [⋀^Fin (m + 2)]→L[ℝ] ℝ) (v w : E �
     simp only [Fin.cons_succ, ← Fin.succ_zero_eq_one, ne_eq, Fin.succ_inj,
       Fin.succ_ne_zero, not_false_eq_true]
 
-/- Interior product with twice the same vector field is zero -/
 theorem iprod_iprod (ω : E → E [⋀^Fin (m + 2)]→L[ℝ] ℝ) (v : E → E) :
     iprod (iprod ω v) v = 0 := by
   ext e m'
@@ -301,11 +286,9 @@ theorem iprod_iprod (ω : E → E [⋀^Fin (m + 2)]→L[ℝ] ℝ) (v : E → E) 
   rw [eq_neg_iff_add_eq_zero, add_self_eq_zero] at h
   exact h
 
-/- Wedge product of differential forms -/
 def wedge_product (ω₁ : E → E [⋀^Fin m]→L[ℝ] F) (ω₂ : E → E [⋀^Fin n]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'') :
     E → E [⋀^Fin (m + n)]→L[ℝ] F'' := fun e => ContinuousAlternatingMap.wedge_product (ω₁ e) (ω₂ e) f
 
--- TODO: change notation
 notation ω₁ "∧r["f"]" ω₂ => wedge_product ω₁ ω₂ f
 notation ω₁ "∧r" ω₂ => wedge_product ω₁ ω₂ (ContinuousLinearMap.mul ℝ ℝ)
 
@@ -313,19 +296,16 @@ theorem wedge_product_def {ω₁ : E → E [⋀^Fin m]→L[ℝ] F} {ω₂ : E �
     {x : E} : (ω₁ ∧r[f] ω₂) x = ContinuousAlternatingMap.wedge_product (ω₁ x) (ω₂ x) f :=
   rfl
 
-/- The wedge product wrt multiplication -/
 theorem wedge_product_mul {ω₁ : E → E [⋀^Fin m]→L[ℝ] ℝ} {ω₂ : E → E [⋀^Fin n]→L[ℝ] ℝ} {x : E} :
     (ω₁ ∧r ω₂) x =
     ContinuousAlternatingMap.wedge_product (ω₁ x) (ω₂ x) (ContinuousLinearMap.mul ℝ ℝ) :=
   rfl
 
-/- The wedge product wrt scalar multiplication -/
 theorem wedge_product_lsmul {ω₁ : E → E [⋀^Fin m]→L[ℝ] ℝ} {ω₂ : E → E [⋀^Fin n]→L[ℝ] F} {x : E} :
     (ω₁ ∧r[ContinuousLinearMap.lsmul ℝ ℝ] ω₂) x =
     ContinuousAlternatingMap.wedge_product (ω₁ x) (ω₂ x) (ContinuousLinearMap.lsmul ℝ ℝ) :=
   rfl
 
-/- Associativity of wedge product -/
 theorem wedge_assoc [FiniteDimensional ℝ E]
     (ω₁ : E → E [⋀^Fin m]→L[ℝ] ℝ) (ω₂ : E → E [⋀^Fin n]→L[ℝ] ℝ) (ω₃ : E → E [⋀^Fin k]→L[ℝ] ℝ) :
     domDomCongr Fin.finAssoc.symm (ω₁ ∧r ω₂ ∧r ω₃) = (ω₁ ∧r ω₂) ∧r ω₃ := by
@@ -334,14 +314,12 @@ theorem wedge_assoc [FiniteDimensional ℝ E]
     ← ContinuousAlternatingMap.domDomCongr_apply]
   exact ContinuousAlternatingMap.wedge_mul_assoc (ω₁ x) (ω₂ x) (ω₃ x) y
 
-/- Left distributivity of wedge product -/
 theorem add_wedge (ω₁ ω₂ : E → E [⋀^Fin m]→L[ℝ] F) (τ : E → E [⋀^Fin n]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'') :
     ((ω₁ + ω₂) ∧r[f] τ) = (ω₁ ∧r[f] τ) + (ω₂ ∧r[f] τ) := by
   ext1 x
   rw[wedge_product_def, _root_.add_apply, _root_.add_apply, wedge_product_def, wedge_product_def]
   exact ContinuousAlternatingMap.add_wedge (ω₁ x) (ω₂ x) (τ x) f
 
-/- Right distributivity of wedge product -/
 theorem wedge_add (ω : E → E [⋀^Fin m]→L[ℝ] F) (τ₁ τ₂ : E → E [⋀^Fin n]→L[ℝ] F') (f : F →L[ℝ] F' →L[ℝ] F'') :
     (ω ∧r[f] (τ₁ + τ₂)) = (ω ∧r[f] τ₁) + (ω ∧r[f] τ₂) := by
   ext1 x
@@ -362,7 +340,6 @@ theorem wedge_smul (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fi
   exact (ContinuousAlternatingMap.wedge_smul c (ω x) (τ x)
     (ContinuousLinearMap.mul ℝ ℝ)).symm
 
-/- Antisymmetry of multiplication wedge product -/
 theorem wedge_antisymm [FiniteDimensional ℝ E]
     (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (τ : E → E [⋀^Fin n]→L[ℝ] ℝ) :
     (ω ∧r τ) = RoughDifferentialForm.domDomCongr Fin.finAddCongr ((-1 : ℝ)^(m*n) • (τ ∧r ω)) := by
@@ -374,8 +351,6 @@ theorem wedge_antisymm [FiniteDimensional ℝ E]
 
 variable {M : Type*} [NormedAddCommGroup M] [NormedSpace ℝ M]
 
-/- Corollary of `wedge_antisymm` saying that a wedge of a m-form with itself is
-zero if m is odd. -/
 theorem wedge_self_odd_zero [FiniteDimensional ℝ E]
     (ω : E → E [⋀^Fin m]→L[ℝ] ℝ) (m_odd : Odd m) :
     (ω ∧r ω) = 0 := by
@@ -383,7 +358,6 @@ theorem wedge_self_odd_zero [FiniteDimensional ℝ E]
   rw[wedge_product_mul]
   exact ContinuousAlternatingMap.wedge_self_odd_zero (ω x) m_odd
 
-/- Pullback commutes with taking the wedge product -/
 theorem pullback_wedge (f : G → E) (ω₁ : E → E [⋀^Fin m]→L[ℝ] F) (ω₂ : E → E [⋀^Fin n]→L[ℝ] F')
     (f' : F →L[ℝ] F' →L[ℝ] F'') : pullback f (ω₁ ∧r[f'] ω₂) = pullback f ω₁ ∧r[f'] pullback f ω₂ := by
   ext x y

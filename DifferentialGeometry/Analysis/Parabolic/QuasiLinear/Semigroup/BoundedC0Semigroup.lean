@@ -1,36 +1,5 @@
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 
-/-!
-# Abstract bounded `C₀`-semigroup on a Banach space
-
-For a real normed space `X` this file packages the data of a strongly
-continuous one-parameter contraction semigroup `S(t) : X →L[ℝ] X`
-(`t ≥ 0`) as a structure `BoundedC0Semigroup X`:
-
-* `S(0) = id`,
-* `S(t + s) = S(t) ∘ S(s)` for `t, s ≥ 0`,
-* `‖S(t)‖ ≤ 1` for `t ≥ 0`,
-* `t ↦ S(t) v` is continuous on `[0, ∞)` for every `v`.
-
-This is the abstract interface underlying the Duhamel mild-solution map
-for the linear evolution equation `u' = A u + F(t)`: the semigroup is the
-solution operator of the homogeneous equation `u' = A u`, and only its
-structural and continuity properties — not the generator `A` — enter the
-construction of the mild solution.
-
-## Main definitions
-
-* `BoundedC0Semigroup X` — the structure carrying the semigroup family
-  together with its semigroup law, contractivity, and strong continuity.
-
-## Main results
-
-* `BoundedC0Semigroup.norm_apply_le` — the pointwise contraction estimate
-  `‖S t v‖ ≤ ‖v‖` for `t ≥ 0`.
-* `BoundedC0Semigroup.continuousOn_uncurry` — joint continuity of
-  `(t, v) ↦ S t v` on `[0, ∞) × X`.
--/
-
 noncomputable section
 
 open Set Filter Topology
@@ -40,26 +9,18 @@ namespace Analysis
 namespace Parabolic
 namespace QuasiLinear
 
-/-- A bounded strongly continuous one-parameter contraction semigroup on a
-real normed space `X`.
-
-The field `toFun` carries the family `S(t) : X →L[ℝ] X` for `t : ℝ`; the
-remaining fields record, for non-negative time, the identity at `t = 0`,
-the semigroup law, the contraction bound `‖S(t)‖ ≤ 1`, and the strong
-continuity `t ↦ S(t) v`. No constraint is placed on `toFun` for negative
-`t`. -/
 structure BoundedC0Semigroup (X : Type*) [NormedAddCommGroup X]
     [NormedSpace ℝ X] where
-  /-- The underlying one-parameter family of bounded operators. -/
+  
   toFun : ℝ → (X →L[ℝ] X)
-  /-- The semigroup is the identity at time `0`. -/
+  
   apply_zero : toFun 0 = ContinuousLinearMap.id ℝ X
-  /-- The semigroup law `S(t + s) = S(t) ∘ S(s)` for non-negative times. -/
+  
   apply_add : ∀ t s : ℝ, 0 ≤ t → 0 ≤ s →
     toFun (t + s) = (toFun t).comp (toFun s)
-  /-- Each operator is a contraction: `‖S(t)‖ ≤ 1` for `t ≥ 0`. -/
+  
   opNorm_le_one : ∀ t : ℝ, 0 ≤ t → ‖toFun t‖ ≤ 1
-  /-- Strong continuity: `t ↦ S(t) v` is continuous on `[0, ∞)`. -/
+  
   continuousOn_apply : ∀ v : X,
     ContinuousOn (fun t : ℝ => toFun t v) (Set.Ici 0)
 
@@ -67,9 +28,6 @@ namespace BoundedC0Semigroup
 
 variable {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X]
 
-/-- Coercion of a `BoundedC0Semigroup` to its underlying one-parameter
-family, so that `S t` denotes `S.toFun t`. The application `S t v` then
-makes sense via the continuous-linear-map coercion on `X →L[ℝ] X`. -/
 instance : CoeFun (BoundedC0Semigroup X) (fun _ => ℝ → (X →L[ℝ] X)) :=
   ⟨BoundedC0Semigroup.toFun⟩
 
@@ -78,8 +36,6 @@ theorem coe_mk (toFun : ℝ → (X →L[ℝ] X)) (h₀ h₁ h₂ h₃) :
     ⇑(BoundedC0Semigroup.mk toFun h₀ h₁ h₂ h₃) = toFun :=
   rfl
 
-/-- Pointwise contraction estimate: for `t ≥ 0` the operator `S t` does
-not increase the norm, `‖S t v‖ ≤ ‖v‖`. -/
 theorem norm_apply_le (S : BoundedC0Semigroup X) {t : ℝ} (ht : 0 ≤ t)
     (v : X) : ‖S t v‖ ≤ ‖v‖ := by
   have h_op : ‖S t‖ ≤ 1 := S.opNorm_le_one t ht
@@ -89,15 +45,6 @@ theorem norm_apply_le (S : BoundedC0Semigroup X) {t : ℝ} (ht : 0 ≤ t)
     _ ≤ 1 * ‖v‖ := mul_le_mul_of_nonneg_right h_op h_nn
     _ = ‖v‖ := one_mul _
 
-/-- Joint continuity of the semigroup action `(t, v) ↦ S t v` on the
-domain `[0, ∞) × X`.
-
-The estimate
-`‖S σ v - S σ₀ v₀‖ ≤ ‖v - v₀‖ + ‖S σ v₀ - S σ₀ v₀‖`
-splits the increment into a part controlled by the contraction bound
-(`‖S σ (v - v₀)‖ ≤ ‖v - v₀‖`, valid since `σ ≥ 0` inside the domain) and
-a part controlled by strong continuity of `t ↦ S t v₀`. Both pieces tend
-to `0`, and a squeeze argument finishes the proof. -/
 theorem continuousOn_uncurry (S : BoundedC0Semigroup X) :
     ContinuousOn (fun p : ℝ × X => S p.1 p.2)
       (Set.Ici 0 ×ˢ Set.univ) := by

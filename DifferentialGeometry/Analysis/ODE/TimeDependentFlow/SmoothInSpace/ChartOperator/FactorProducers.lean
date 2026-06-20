@@ -4,50 +4,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 
-/-!
-# Producers for the two linearized-flow factor derivatives `hT` and `hP`
-
-The orbit-ODE assembly `chartCloseDop_hasDerivAt_clm_comp`
-(`ChartOperator/ManifoldFlowOrbitODE.lean`) and the flat per-slot identity
-`rawVariationalIdentityFlat_of_orbitODE_factors`
-(`CovariantIdentity/FlatIdentity.lean`) both consume, for a diffeomorphism family
-`Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)`, the two factor `HasDerivAt` data
-
-* `hP : HasDerivAt (chartCloseFderiv Φ_fam α x) P' t` — the orbit-derivative of the
-  chart-coordinate spatial Fréchet derivative of the chart-`α`-conjugated flow; and
-* `hT : HasDerivAt (chartCloseTriv Φ_fam α x) T' t` — the orbit-derivative of the moving
-  inverse target trivialisation.
-
-This file builds `hP` from the genuine Euclidean linearized-flow ODE, taking as inputs exactly
-the chart-conjugation data that a concrete chart-local flow makes available.
-
-## `hP` from the Euclidean variational ODE
-
-`chartCloseFderiv Φ_fam α x s = mfderiv I 𝓘(ℝ, E) (extChartAt I α ∘ Φ_fam s) x`.  For a
-chart-`α`-conjugated flow — i.e. when, near `x`, `extChartAt I α ∘ Φ_fam s` agrees with the
-Euclidean flow `Φ_eucl(·, s)` post-composed with the *fixed* source chart `extChartAt I α`,
-`extChartAt I α (Φ_fam s y) = Φ_eucl (extChartAt I α y) s` — the chain rule
-(`mfderiv_comp`, `mfderiv_eq_fderiv` on the model side) factors the manifold pushforward as
-
-  `chartCloseFderiv Φ_fam α x s
-     = (fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)).comp (trivToE α x)`,
-
-a *fixed* continuous-linear post-composition `· ∘L trivToE α x` of the Euclidean
-chart-flow spatial Fréchet derivative `s ↦ fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)`.
-The Euclidean operator-valued variational ODE `IsLocalFlow.hasDerivAt_partial_spatial_fderiv`
-(`VariationalODE/EuclideanVariationalODE.lean`) supplies the `HasDerivAt` of that Euclidean factor; the
-fixed post-composition then transfers it (`HasFDerivAt.comp_hasDerivAt` with the fixed CLM
-`compL · |>.flip (trivToE α x)`) to `chartCloseFderiv`.
-
-This is the genuine producer for `hP`: no metric `g`, no `HasLocallyConstantChartAt`, no
-joint-`C^∞`-on-`ℝ × M` predicate.  The only smoothness input is the Euclidean operator-valued
-ODE on the model space `E`; the chart-conjugation agreement is a per-flow chart fact (an
-eventual equality of `E`-valued maps), and the source-chart differential is the fixed
-trivialisation `trivToE α x`.  No hypothesis-packaging: the inputs are the Euclidean
-`HasDerivAt`, a chart-agreement eventual equality, and a manifold-differentiability datum,
-none of which is — or trivially destructures to — the operator-valued `HasDerivAt` conclusion.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
@@ -67,15 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- **Operator-valued `HasDerivAt` through a fixed continuous-linear post-composition on the
-right.**
 
-If `s ↦ A s : E →L[ℝ] E` has `HasDerivAt` at `t` with derivative `A'`, then for any fixed
-`R : E →L[ℝ] E`, the path `s ↦ (A s).comp R` has `HasDerivAt` at `t` with derivative
-`A'.comp R`.
-
-This is the mechanical transport used to push the Euclidean operator-valued variational ODE
-through the (time-independent) source-chart differential `R := trivToE α x`. -/
 theorem hasDerivAt_clm_comp_right
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (R : E →L[ℝ] E) :
@@ -88,27 +36,7 @@ theorem hasDerivAt_clm_comp_right
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- **Chart-conjugation decomposition of the chart-coordinate spatial Fréchet derivative.**
 
-Let `Φ_eucl : E → ℝ → E` be the Euclidean chart-coordinate flow, and suppose that, near `x`,
-the chart-`α`-conjugated manifold flow agrees with `Φ_eucl` post-composed with the *fixed*
-source chart `extChartAt I α`:
-
-  `extChartAt I α (Φ_fam s y) = Φ_eucl (extChartAt I α y) s`   for `y` near `x`.
-
-Then the chart-coordinate spatial Fréchet derivative factor `chartCloseFderiv Φ_fam α x s`
-(the second factor of `chartCloseDop`) decomposes, by the manifold chain rule
-(`mfderiv_comp`, `mfderiv_eq_fderiv` on the model-space factor,
-`continuousLinearMapAt_trivializationAt` for the source-chart differential), as the Euclidean
-chart-flow spatial Fréchet derivative post-composed on the right with the *fixed* source-chart
-trivialisation `trivToE α x`:
-
-  `chartCloseFderiv Φ_fam α x s
-     = (fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)).comp (trivToE α x)`.
-
-Genuine content: the manifold chain rule applied to `(fun z => Φ_eucl z s) ∘ extChartAt I α`,
-read through the eventual chart-conjugation agreement.  No metric, no hypothesis-packaging:
-the conclusion is an `E →L E`-equation, not the variational `HasDerivAt` target. -/
 theorem chartCloseFderiv_eq_eucl_comp_trivToE
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ)
     (Φ_eucl : E → ℝ → E)
@@ -144,33 +72,7 @@ theorem chartCloseFderiv_eq_eucl_comp_trivToE
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- **Producer for the chart spatial-variational factor `hP`.**
 
-For a diffeomorphism family `Φ_fam` whose chart-`α`-conjugated flow agrees, near `x` and for
-`s` near `t`, with a Euclidean chart-coordinate flow `Φ_eucl` post-composed with the *fixed*
-source chart `extChartAt I α`, the chart-coordinate spatial Fréchet derivative factor
-`chartCloseFderiv Φ_fam α x` satisfies the orbit-derivative ODE
-
-  `HasDerivAt (chartCloseFderiv Φ_fam α x) (D'_eucl.comp (trivToE α x)) t`,
-
-where `D'_eucl` is the derivative value of the *Euclidean* operator-valued variational ODE
-`s ↦ fderiv ℝ (fun z => Φ_eucl z s) (extChartAt I α x)` at `t` (supplied by
-`IsLocalFlow.hasDerivAt_partial_spatial_fderiv`).
-
-The inputs are exactly the chart-coordinate flow data:
-
-* `heucl` — the Euclidean operator-valued variational `HasDerivAt` on the model space `E`;
-* `hx_src` — `x` lies in the chart source of `α` (where the conjugation is valid);
-* `heucl_diff` — differentiability of the Euclidean spatial slice near `t` (so the chart
-  decomposition `chartCloseFderiv_eq_eucl_comp_trivToE` applies eventually);
-* `hagree` — the eventual (`=ᶠ[𝓝 t]` of `=ᶠ[𝓝 x]`) chart-conjugation agreement.
-
-This is precisely the `hP : HasDerivAt (chartCloseFderiv Φ_fam α x) P' t` consumed by
-`chartCloseDop_hasDerivAt_clm_comp` and `rawVariationalIdentityFlat_of_orbitODE_factors`, with
-`P' := D'_eucl.comp (trivToE α x)`.  No metric `g`, no `HasLocallyConstantChartAt`, no
-joint-`C^∞`-on-`ℝ × M`.  No hypothesis-packaging: the inputs are a Euclidean `HasDerivAt`, a
-chart-membership datum, a per-time differentiability datum, and a chart-agreement eventual
-equality, none of which is the operator-valued `HasDerivAt` conclusion. -/
 theorem chartCloseFderiv_hasDerivAt_of_eucl
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ)
     (Φ_eucl : E → ℝ → E) {D'_eucl : E →L[ℝ] E}
@@ -201,8 +103,7 @@ section MovingTrivInverse
 variable [CompleteSpace E]
 
 omit [CompleteSpace E] in
-/-- At the basepoint image `φ α`, the forward moving trivialisation is the identity
-(`chartMovingTriv_basepoint`), hence a unit of the endomorphism ring `E →L[ℝ] E`. -/
+
 theorem chartMovingTriv_basepoint_isUnit (α : M) :
     IsUnit (chartMovingTriv (I := I) α (extChartAt I α α)) := by
   have h1 : chartMovingTriv (I := I) α (extChartAt I α α) = (1 : E →L[ℝ] E) := by
@@ -213,18 +114,7 @@ theorem chartMovingTriv_basepoint_isUnit (α : M) :
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- **The chart-close inverse trivialisation IS the ring inverse of the moving trivialisation.**
 
-For an orbit point `b := Φ_fam s x` in the chart source of `α`, the canonical chart-close
-inverse trivialisation factor `chartCloseTriv Φ_fam α x s = trivFromE α b` (an honest `E →L[ℝ] E`
-by the `chartCloseTriv` definition) is the *ring inverse* of the forward moving trivialisation
-`chartMovingTriv α (extChartAt I α b)`:
-
-  `chartCloseTriv Φ_fam α x s = Ring.inverse (chartMovingTriv α (extChartAt I α (Φ_fam s x)))`.
-
-Both sides are genuine `E →L[ℝ] E`; the moving trivialisation, with the `chartCloseTriv` value as
-its two-sided (vector-level) inverse, is a unit, and the ring inverse is read off by
-`Ring.inverse_mul_cancel`.  No metric, no hypothesis-packaging: an `E →L E`-equation. -/
 theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ)
     (hsrc : (Φ_fam s : M → M) x ∈ (chartAt H α).source) :
@@ -265,37 +155,6 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     _ = chartCloseTriv (I := I) Φ_fam α x s := by
           rw [Ring.inverse_mul_cancel _ hunit, one_mul]
 
-/-- **Producer for the moving inverse-trivialisation factor `hT`.**
-
-For a diffeomorphism family `Φ_fam` with `α := Φ_fam t x` the time-`t` orbit point, the moving
-inverse target trivialisation factor `chartCloseTriv Φ_fam α x` (the first factor of
-`chartCloseDop`) satisfies the orbit-derivative ODE
-
-  `HasDerivAt (chartCloseTriv Φ_fam α x)
-      ((-ContinuousLinearMap.mulLeftRight ℝ (E →L[ℝ] E) 1 1) g') t`,
-
-where `g'` is the derivative value of the *forward* moving trivialisation along the orbit
-`s ↦ chartMovingTriv α (extChartAt I α (Φ_fam s x))` at `t` (a pure smooth-structure jet).
-
-The inputs are exactly the chart-coordinate flow data:
-
-* `hg` — the `HasDerivAt` of the forward moving trivialisation along the orbit (the genuine
-  smooth-structure chart-transition jet; metric-free, the orbit-derivative of the moving
-  trivialisation, decomposed by the convention bridge `chartTrivRepr_fderiv_eq` into the `D²φ`
-  content the project documents);
-* `hcontAt` — continuity of the orbit `s ↦ Φ_fam s x` at `t` (so the orbit stays in the chart
-  source of `α` near `t`, where the ring-inverse identification holds).
-
-The derivative value uses the operator-inverse Fréchet derivative `hasFDerivAt_ringInverse` at
-the basepoint unit `chartMovingTriv α (φ α) = 1` (`chartMovingTriv_basepoint_isUnit`), so
-`(g t)⁻¹ = 1` and the value reduces to `-mulLeftRight ℝ (E →L E) 1 1` applied to `g'`.
-
-This is precisely the `hT : HasDerivAt (chartCloseTriv Φ_fam α x) T' t` consumed by
-`chartCloseDop_hasDerivAt_clm_comp` and `rawVariationalIdentityFlat_of_orbitODE_factors`, with
-`T' := (-mulLeftRight ℝ (E →L E) 1 1) g'`.  No metric `g`, no `HasLocallyConstantChartAt`, no
-joint-`C^∞`-on-`ℝ × M`.  No hypothesis-packaging: the inputs are the moving-trivialisation
-`HasDerivAt` and an orbit-continuity datum, neither of which is the operator-valued `HasDerivAt`
-conclusion. -/
 theorem chartCloseTriv_hasDerivAt_of_movingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) {g' : E →L[ℝ] E}
     (hg : HasDerivAt

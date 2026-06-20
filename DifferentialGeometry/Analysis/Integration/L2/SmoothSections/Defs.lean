@@ -4,33 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Topology.Algebra.Support
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 
-/-!
-# Compactly-supported smooth `(r, s)`-tensor sections
-
-Let `M` be a smooth finite-dimensional manifold modelled on a real normed
-space `E` equipped with a smooth Riemannian metric `g`.  The mixed
-`(r, s)`-tensor bundle of `M` has fixed model fiber
-`TensorRSModel r s ℝ E`, and we consider here its smooth sections whose
-underlying map `M → TensorRSModel r s ℝ E` has compact support.
-
-This file packages two views of these sections:
-
-* `compactlySupportedSmoothTensorSections I M r s` — the `ℝ`-submodule of
-  `Cₛ^∞⟮I; TensorRSModel r s ℝ E, fun x : M => TensorRSSpace r s I x⟯`
-  cut out by the compact-support condition; closure under pointwise
-  addition and real scalar multiplication follows from the standard
-  `HasCompactSupport` closure lemmas.
-* `SmoothCcTensor g r s` — a structure wrapper carrying the same data as
-  the submodule alongside an explicit Riemannian-metric parameter `g`.
-  The parameter `g` does not appear in the carrier, but having it as a
-  type-level parameter allows downstream files to attach
-  metric-dependent inner-product / norm instances cleanly without diamond
-  risk.
-
-The wrapper carries the standard `AddCommGroup` and `Module ℝ` structure
-inherited from the underlying section type via `Function.Injective`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -52,11 +25,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The `ℝ`-submodule of smooth `(r, s)`-tensor sections whose underlying
-map to the model fiber `TensorRSModel r s ℝ E` (via
-`TensorRSSpace.toModel`) has compact support.  Closure under pointwise
-addition and real scalar multiplication follows from the standard
-`HasCompactSupport` closure lemmas. -/
 def compactlySupportedSmoothTensorSections
     (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -123,26 +91,18 @@ lemma mem_compactlySupportedSmoothTensorSections {r s : ℕ}
       HasCompactSupport
         (fun x : M => TensorRSSpace.toModel (S x)) := Iff.rfl
 
-/-- A smooth, compactly-supported `(r, s)`-tensor section, packaged
-together with an explicit Riemannian-metric parameter `g`.
-
-The metric `g` does not appear in the underlying data fields; its role is
-solely to make `SmoothCcTensor g r s` a different Lean type for each
-metric, so that downstream files can attach metric-dependent
-inner-product / norm instances cleanly. -/
 structure SmoothCcTensor (g : SmoothRiemannianMetric I M) (r s : ℕ) where
-  /-- The underlying smooth section. -/
+  
   toSection : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
     (fun x : M => TensorRSSpace r s I x)⟯
-  /-- The underlying map to the model fiber has compact support. -/
+  
   hasCompactSupport :
     HasCompactSupport (fun x : M => TensorRSSpace.toModel (toSection x))
 
 namespace SmoothCcTensor
 
 set_option linter.unusedSectionVars false in
-/-- Function-coercion of a `SmoothCcTensor` to its underlying map
-`M → TensorRSModel r s ℝ E`. -/
+
 def toFun {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) : M → TensorRSModel r s ℝ E :=
   fun x => TensorRSSpace.toModel (S.toSection x)
@@ -248,7 +208,7 @@ instance : SMul ℝ (SmoothCcTensor g r s) where
         exact S.hasCompactSupport.smul_left }
 
 set_option linter.unusedSectionVars false in
-/-- The natural projection `SmoothCcTensor g r s → Cₛ^∞⟮…⟯` is injective. -/
+
 lemma SmoothCcTensor.toSection_injective :
     Function.Injective (fun S : SmoothCcTensor g r s => S.toSection) := by
   intro S T h
@@ -319,8 +279,7 @@ instance : AddCommGroup (SmoothCcTensor g r s) :=
     SmoothCcTensor.toSection_zsmul
 
 set_option linter.unusedSectionVars false in
-/-- The additive monoid homomorphism from `SmoothCcTensor g r s` to the
-underlying smooth section type. -/
+
 def SmoothCcTensor.toSectionAddHom :
     SmoothCcTensor g r s →+ Cₛ^∞⟮I; TensorRSModel r s ℝ E,
       (fun x : M => TensorRSSpace r s I x)⟯ where

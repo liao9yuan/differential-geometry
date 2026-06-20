@@ -1,27 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.JointContinuity
 
-/-!
-# The inhomogeneous parametric linear ODE
-
-The solution operator for `Z'(t) = A(x, t) Z(t) + b(x, t)`, built from the homogeneous
-operator via the augmented-coefficient device on `G × ℝ`.
-
-## Main definitions
-
-* `inhomogAugmentedCoeff A b` — augmented coefficient on `G × ℝ` encoding the inhomogeneity.
-* `HasInhomogLinearODESolution` — per-parameter existence predicate for the inhomogeneous ODE.
-* `inhomogLinearODESolution A b a b' h₀ Z₀` — the inhomogeneous parametric solution, the first
-  component of the augmented-system solution.
-
-## Main results
-
-* `inhomogLinearODESolution_init` — initial condition.
-* `inhomogLinearODESolution_hasDerivAt` — ODE clause under joint continuity of `A` and `b`.
-* `inhomogLinearODESolution_continuousOn` — joint continuity of the inhomogeneous solution.
-
-`[CompleteSpace G]` is required throughout.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -37,14 +15,6 @@ section Inhomogeneous
 variable {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
-/-- **Augmented coefficient** of an inhomogeneous linear ODE.
-
-For `A : F → ℝ → (G →L[ℝ] G)` and `b : F → ℝ → G`, this is the continuous
-linear map `AHat(x, t) : (G × ℝ) →L[ℝ] (G × ℝ)` sending `(g, c)` to
-`(A(x, t) g + c • b(x, t), 0)`.  Its first component combines the linear part
-on `G` with the inhomogeneity scaled by the auxiliary scalar component; its
-second component is identically zero, so the auxiliary scalar component of any
-solution of the associated homogeneous system has zero derivative. -/
 noncomputable def inhomogAugmentedCoeff
     (A : F → ℝ → (G →L[ℝ] G)) (b : F → ℝ → G) (x : F) (t : ℝ) :
     (G × ℝ) →L[ℝ] (G × ℝ) :=
@@ -102,25 +72,12 @@ private lemma inhomogAugmentedCoeff_continuousOn
     h_prodL_cont.comp_continuousOn h_pair
   exact hcomp
 
-/-- **Per-parameter existence predicate** for the inhomogeneous linear ODE.
-`HasInhomogLinearODESolution A b a b' h₀ Z₀ x` asserts that for the fixed
-parameter `x : F`, there exists a curve `Z : ℝ → G` with `Z h₀ = Z₀ x` and
-`HasDerivAt Z (A x t (Z t) + b x t) t` for every `t ∈ Ioo a b'`. -/
 def HasInhomogLinearODESolution
     (A : F → ℝ → (G →L[ℝ] G)) (b : F → ℝ → G)
     (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) : Prop :=
   ∃ Z : ℝ → G, Z h₀ = Z₀ x ∧
     ∀ t ∈ Set.Ioo a b', HasDerivAt Z (A x t (Z t) + b x t) t
 
-/-- **Parametric solution of the inhomogeneous linear ODE**
-`Z'(t) = A(x, t) Z(t) + b(x, t)` with initial condition `Z(x, h₀) = Z₀ x` on
-the open interval `Ioo a b'`.
-
-Defined as the first component of the augmented-system solution
-`linearODESolution (inhomogAugmentedCoeff A b) a b' h₀ (fun x => (Z₀ x, 1)) x t`.
-This is total: when joint continuity of `A` and `b` holds, it satisfies both
-the initial-condition and ODE clauses; otherwise it falls back via the
-underlying `linearODESolution` fallback. -/
 noncomputable def inhomogLinearODESolution
     (A : F → ℝ → (G →L[ℝ] G)) (b : F → ℝ → G)
     (a b' h₀ : ℝ) (Z₀ : F → G) : F → ℝ → G :=
@@ -128,8 +85,6 @@ noncomputable def inhomogLinearODESolution
     (linearODESolution (inhomogAugmentedCoeff A b) a b' h₀
       (fun y => (Z₀ y, (1 : ℝ))) x t).1
 
-/-- **Initial condition** for `inhomogLinearODESolution`.  At `t = h₀`, the
-parametric solution equals the initial datum `Z₀ x`. -/
 theorem inhomogLinearODESolution_init
     (A : F → ℝ → (G →L[ℝ] G)) (b : F → ℝ → G)
     (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) :
@@ -137,11 +92,6 @@ theorem inhomogLinearODESolution_init
   unfold inhomogLinearODESolution
   rw [linearODESolution_init]
 
-/-- **Auxiliary scalar component stays at one**.
-
-If the augmented coefficient is continuous on `U ×ˢ Ioo a b'`, then the second
-component of the augmented solution is identically `1` on `Ioo a b'`.  Its
-derivative is `0` (second component of `AHat`) and its value at `h₀` is `1`. -/
 private theorem inhomogLinearODESolution_second_eq_one
     {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
     {a b' h₀ : ℝ} {Z₀ : F → G}
@@ -192,11 +142,6 @@ private theorem inhomogLinearODESolution_second_eq_one
   change w t = 1
   rw [h_const, hw_init]
 
-/-- **ODE clause** for `inhomogLinearODESolution` under joint continuity.
-
-When `A` and `b` are jointly continuous on `U ×ˢ Ioo a b'`, the parametric
-solution at any `x ∈ U` satisfies the inhomogeneous linear ODE pointwise on
-`Ioo a b'`. -/
 theorem inhomogLinearODESolution_hasDerivAt
     {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
     {a b' h₀ : ℝ} {Z₀ : F → G}
@@ -234,12 +179,6 @@ theorem inhomogLinearODESolution_hasDerivAt
   rw [h_ZHat_fst] at h_comp
   exact h_comp
 
-/-- **Joint continuity of `inhomogLinearODESolution` in `(x, t)`**.
-
-If `A` and `b` are jointly continuous on `U × Ioo a b'` and `Z₀` is continuous
-on `U`, then the parametric solution
-`(x, t) ↦ inhomogLinearODESolution A b a b' h₀ Z₀ x t` is jointly continuous on
-`U × Ioo a b'`. -/
 theorem inhomogLinearODESolution_continuousOn
     {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
     {a b' h₀ : ℝ} {Z₀ : F → G}

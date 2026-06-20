@@ -10,45 +10,6 @@ import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-/-!
-# Uniform upper bound on the chart-Gram quadratic form over a compact base set
-
-For a smooth manifold `M` modelled on `(E, H)` carrying a smooth Riemannian
-metric `g : SmoothRiemannianMetric I M`, this file proves a uniform
-pointwise upper bound on the chart-Gram quadratic form
-`chartGramBilin g α b v v` for `b` ranging over a compact subset of one chart
-source and `v` ranging over the model fibre `E`. Through the always-true bridge
-identity `chartGramBilin_eq_innerJinv`, this equivalently bounds the
-`chartJinv α b`-pullback `g.inner b (chartJinv α b v) (chartJinv α b v)` of the
-bundle metric.
-
-## Strategy
-
-The bundle metric `g.inner b v v` (for `v : E ≡ TangentSpace I b`) is, by
-itself, not jointly continuous in `(b, v)` because the chart trivialisation
-of the tangent bundle jumps between chart sources. We therefore work with the
-chart-Gram form centred at a single chart base point `α`. The function
-`b ↦ chartGramBilin g α b` is continuous on the chart source `(chartAt H α).source`
-(a finite sum of `(b ↦ chartGramMatrix g α b j k)` times constant CLMs, each
-entry being smooth on the chart base set by `chartGramMatrix_entry_contMDiffOn`).
-Consequently `b ↦ ‖chartGramBilin g α b‖` is continuous on the chart source
-and, on any compact subset of it, bounded above by the extreme-value theorem.
-
-On a compact `K_base ⊆ (chartAt H α).source` the operator-norm bound gives
-`chartGramBilin g α b v v ≤ C · ‖v‖²`, and taking `K := √C + 1` (strictly
-positive) yields the bound `√(chartGramBilin g α b v v) ≤ K · ‖v‖`.
-
-## Main results
-
-* `g_inner_sqrt_uniform_upper_bound_on_compact` — for any chart
-  base point `α` and any compact `K_base ⊆ (chartAt H α).source`, there is
-  `K > 0` with `√(chartGramBilin g α b v v) ≤ K · ‖v‖` for all `b ∈ K_base`
-  and all `v : E`.
-* `g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional` — the
-  same bound transported through `chartGramBilin_eq_innerJinv` onto the
-  `chartJinv α b`-pullback of the bundle metric.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -81,9 +42,6 @@ private lemma achart_eq_of_chartAt_eq {b b₀ : M}
   apply Subtype.ext
   exact h_chart
 
-/-- When the chart at `b` agrees with the chart at `b₀`, the inverse
-chart-Jacobian `chartJinv b₀ b : E →L[ℝ] E` is the identity (the core
-coordinate change with equal endpoints is the identity). -/
 private lemma chartJinv_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -97,8 +55,6 @@ private lemma chartJinv_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
-/-- On the locality neighbourhood, the bundle metric quadratic form coincides
-with the chart-Gram bilinear quadratic form centred at `b₀`. -/
 private lemma g_inner_eq_chartGramBilin_of_chartAt_eq
     (g : SmoothRiemannianMetric I M) {b b₀ : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -183,9 +139,6 @@ private lemma exists_norm_bound_on_compact_subset_of_chartSource
     hC ⟨b, hb, rfl⟩
   exact h1.trans (le_max_left _ _)
 
-/-- The chart-Gram quadratic form is non-negative: it is the
-`chartJinv α b`-pullback of the bundle metric, which is non-negative by
-positive semi-definiteness of the Riemannian metric. -/
 private lemma chartGramBilin_self_nonneg
     (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
     0 ≤ chartGramBilin (I := I) (M := M) g α b v v := by
@@ -193,9 +146,6 @@ private lemma chartGramBilin_self_nonneg
   exact metric_inner_self_nonneg (I := I) (M := M) g b
     (chartJinv (I := I) (M := M) α b v)
 
-/-- Pointwise upper bound on the chart-Gram quadratic form by the operator
-norm of the chart-Gram bilinear form. Holds unconditionally for every `b`
-and every `v : E`. -/
 private lemma chartGramBilin_self_le_norm_sq
     (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
     chartGramBilin (I := I) (M := M) g α b v v ≤
@@ -210,17 +160,6 @@ private lemma chartGramBilin_self_le_norm_sq
     _ ≤ ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ * ‖v‖ := h_abs_le
     _ = ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ ^ 2 := by ring
 
-/-- **Locality-free uniform upper bound on the chart-Gram quadratic form over a
-compact base set.**
-
-For any chart base point `α` and any compact `K_base ⊆ (chartAt H α).source`,
-there is `K > 0` with
-`√(chartGramBilin g α b v v) ≤ K · ‖v‖` for all `b ∈ K_base` and all `v : E`.
-
-Where `chartJinv α b = id`, the chart-Gram quadratic form coincides with
-`g.inner b v v`, so this recovers a bound `√(g.inner b v v) ≤ K · ‖v‖` there.
-The chart-Gram form is, by `chartGramBilin_eq_innerJinv`, the
-`chartJinv α b`-pullback of the bundle metric `g.inner b`. -/
 theorem g_inner_sqrt_uniform_upper_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K_base : Set M} (hK_base : IsCompact K_base)
@@ -255,16 +194,6 @@ theorem g_inner_sqrt_uniform_upper_bound_on_compact
     nlinarith [h_norm_nn]
   linarith
 
-/-- **Locality-free uniform upper bound on the bundle metric quadratic form
-over a compact base set, in the chart frame.**
-
-Reformulation of `g_inner_sqrt_uniform_upper_bound_on_compact`
-through the always-true bridge identity `chartGramBilin_eq_innerJinv`:
-for any chart base point `α` and any compact `K_base ⊆ (chartAt H α).source`,
-there is `K > 0` with
-`√(g.inner b (chartJinv α b v) (chartJinv α b v)) ≤ K · ‖v‖`
-for all `b ∈ K_base` and all `v : E`. Where `chartJinv α b = id` this is
-exactly the bound `√(g.inner b v v) ≤ K · ‖v‖`. -/
 theorem g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
     (g : SmoothRiemannianMetric I M) (α : M)
     {K_base : Set M} (hK_base : IsCompact K_base)

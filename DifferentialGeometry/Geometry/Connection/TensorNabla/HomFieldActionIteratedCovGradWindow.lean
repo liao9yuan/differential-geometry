@@ -1,51 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 
-/-!
-# Iterated covariant gradients of a fixed full-Hom-field action: derived-field expansion and
-windowed fibre bound
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file proves the **iterated-gradient calculus of a single fixed
-full-Hom-field action** `appFullSec Q W` (`FullHomCovariantCalculusRS`) at a generic contravariant
-valence `r` and *arbitrary* source/target covariant ranks `m`, `c` (in particular rank-*reducing*
-fields `c < m`, e.g. metric traces, which the base-raising tower normal form `NormalFormFull`
-cannot host):
-
-* `homFieldAction_iteratedCovGrad_expansion` — the **derived-field expansion**: for every gradient
-  order `k` there is a family of fixed smooth full-Hom fields
-  `D i : Hom(T^{(r, m + i)}, T^{(r, c + k)})` (built from `Q` by iterated section covariant
-  gradients `homTensorRSCovGradSec` and slot extensions `slotExtendFullSec`) with
-  ```
-  ∇^k (Q · W) = ∑_{i < k + 1} (D i) · (∇^i W)
-  ```
-  for every smooth compactly-supported `(r, m)`-tensor `W` — proved by induction on `k` through the
-  section-level full-Hom covariant product rule `covGrad_appFullSec_eq`, the new top jet carried by
-  the slot extension and the differentiated coefficient staying on the old jets;
-
-* `exists_appFullSec_iteratedCovGrad_window_bound` — the **windowed fibre bound**: a per-order
-  nonnegative constant family `cc : ℕ → ℝ`, depending only on the fixed field `Q` (never on `W`),
-  with
-  ```
-  rfns(∇^k (Q · W))(x) ≤ cc k · ∑_{i < k + 1} rfns(∇^i W)(x),
-  ```
-  each derived-field summand bounded by the uniform `g`-fibre-operator contraction envelope
-  `exists_uniform_riemannianFiberNormSq_appFullRS_le` of its fixed field;
-
-* `exists_appFullSec_on_jet_iteratedCovGrad_window_bound` — the **order-shifted window** for an
-  action on the `j`-th covariant jet: for a fixed field `Q : Hom(T^{(r, s + j)}, T^{(r, c)})`,
-  ```
-  rfns(∇^k (Q · ∇^j S))(x) ≤ cc k · ∑_{i < 1 + k} rfns(∇^{i + j} S)(x),
-  ```
-  the window of `S` entering at contracted order `j` with width `1` — exactly the
-  `(p, w) = (j, 1)` graded-curvature-jet window shape consumed by the order-resolved
-  curvature-jet splits (`IsGradedCurvJetRS`, `OrderSeparatedCurvatureJetRS`).
-
-The constants are uniform over the closed manifold and over the contracted section; all genuinely
-analytic content is inherited from the full-Hom calculus (`FullHomCovariantCalculusRS`), whose
-smoothness children consumers transitively depend on.  Geometer convention; all fibre norms are the
-intrinsic `riemannianFiberNormSq`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -74,19 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- **The derived-field expansion of the iterated covariant gradients of a fixed full-Hom-field
-action.** For a fixed smooth full-Hom field section `Q : Hom(T^{(r,m)}, T^{(r,c)})` and every
-gradient order `k`, there is a family of fixed smooth full-Hom field sections
-`D i : Hom(T^{(r, m + i)}, T^{(r, c + k)})` with
-```
-∇^k (appFullSec Q W) = ∑_{i < k + 1} appFullSec (D i) (∇^i W)
-```
-for *every* smooth compactly-supported `(r, m)`-tensor `W`.  The family is built from `Q` by
-iterated Hom-section covariant gradients (`homTensorRSCovGradSec`, the differentiated-coefficient
-contribution, staying on the jet `∇^i W`) and slot extensions (`slotExtendFullSec`, the spectator
-contribution, moving up to the next jet `∇^{i+1} W`), via the section-level full-Hom covariant
-product rule `covGrad_appFullSec_eq`; the source/target ranks are fully generic (in particular the
-field may be rank-reducing, `c < m`, as for a metric trace).  Proved by induction on `k`. -/
+
 theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) (k : ℕ) :
     ∃ D : (i : ℕ) → HomTensorRSField (E := E) (M := M) r (m + i) (c + k) I,
@@ -110,13 +52,13 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
                 homTensorRSCovGradSec (I := I) (M := M) g r (m + (i + 1)) (c + k) (D (i + 1))
               else 0) +
               slotExtendFullSec (I := I) (M := M) g r (m + i) (c + k) (D i), fun W => ?_⟩
-      -- `∇^{k+1}(Q·W) = ∇(∇^k(Q·W))`, expanded by the order-`k` derived-field expansion.
+      
       rw [show iteratedCovGrad g r c (k + 1) (appFullSec (I := I) (M := M) g r m c Q W) =
           covGrad (I := I) (M := M) g r (c + k)
             (iteratedCovGrad g r c k (appFullSec (I := I) (M := M) g r m c Q W)) from rfl,
         hD W, covGrad_finset_sum]
-      -- Termwise full-Hom covariant product rule: each summand contributes the
-      -- differentiated-coefficient action on `∇^i W` plus the slot-extended action on `∇^{i+1} W`.
+      
+      
       rw [show (∑ i ∈ Finset.range (k + 1), covGrad (I := I) (M := M) g r (c + k)
             (appFullSec (I := I) (M := M) g r (m + i) (c + k) (D i)
               (iteratedCovGrad g r m i W))) =
@@ -132,7 +74,7 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
             (iteratedCovGrad g r m i W)]
           rfl)]
       rw [Finset.sum_add_distrib]
-      -- Split the target sum off its bottom index `i = 0`.
+      
       rw [Finset.sum_range_succ' (fun j =>
         appFullSec (I := I) (M := M) g r (m + j) (c + (k + 1))
           ((match j with
@@ -143,7 +85,7 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
                   else 0) +
                   slotExtendFullSec (I := I) (M := M) g r (m + i) (c + k) (D i)))
           (iteratedCovGrad g r m j W)) (k + 1)]
-      -- Each target `j = i + 1` term splits into the guarded gradient term and the slot term.
+      
       rw [show (∑ i ∈ Finset.range (k + 1),
             appFullSec (I := I) (M := M) g r (m + (i + 1)) (c + (k + 1))
               ((if i + 1 < k + 1 then
@@ -164,7 +106,7 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [appFullSec_add_left]]
-      -- The guarded gradient sum drops its vanishing top term `i = k`.
+      
       rw [show (∑ i ∈ Finset.range (k + 1),
             appFullSec (I := I) (M := M) g r (m + (i + 1)) (c + (k + 1))
               (if i + 1 < k + 1 then
@@ -179,28 +121,16 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
         rw [if_neg (by omega : ¬ (k + 1 < k + 1)), appFullSec_zero_left, add_zero]
         refine Finset.sum_congr rfl (fun i hi => ?_)
         rw [if_pos (by simp only [Finset.mem_range] at hi; omega : i + 1 < k + 1)]]
-      -- Split the differentiated-coefficient sum off its bottom index as well.
+      
       rw [Finset.sum_range_succ' (fun i =>
         appFullSec (I := I) (M := M) g r (m + i) (c + (k + 1))
           (homTensorRSCovGradSec (I := I) (M := M) g r (m + i) (c + k) (D i))
           (iteratedCovGrad g r m i W)) k]
-      -- Both sides are now an arrangement of the same three blocks.
+      
       abel
 
 set_option linter.unusedSectionVars false in
-/-- **The windowed fibre bound for the iterated covariant gradients of a fixed full-Hom-field
-action.** For a fixed smooth full-Hom field section `Q : Hom(T^{(r,m)}, T^{(r,c)})` on a closed
-Riemannian manifold there is a nonnegative per-gradient-order constant family `cc : ℕ → ℝ` —
-depending only on `Q`, never on the contracted section — such that for every smooth
-compactly-supported `(r, m)`-tensor `W`, every gradient order `k`, and every point `x`,
-```
-rfns(∇^k (appFullSec Q W))(x) ≤ cc k · ∑_{i < k + 1} rfns(∇^i W)(x).
-```
-By the derived-field expansion `homFieldAction_iteratedCovGrad_expansion`, `∇^k (Q · W)` is a
-finite sum of fixed-field actions on the jets `∇^i W`; each summand is bounded by the uniform
-`g`-fibre-operator contraction envelope of its fixed derived field
-(`exists_uniform_riemannianFiberNormSq_appFullRS_le`), and the finite sum is accumulated by
-`riemannianFiberNormSq_sum_le_card_mul`. -/
+
 theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetric I M)
     (r m c : ℕ) (Q : HomTensorRSField (E := E) (M := M) r m c I) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
@@ -212,10 +142,10 @@ theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetr
             riemannianFiberNormSq (I := I) (M := M) g r (m + i) x
               ((iteratedCovGrad g r m i W).toSection x) := by
   classical
-  -- One derived-field family per gradient order.
+  
   choose D hD using fun k =>
     homFieldAction_iteratedCovGrad_expansion (I := I) (M := M) g r m c Q k
-  -- The uniform per-summand contraction constant of each fixed derived field.
+  
   set C : ℕ → ℕ → ℝ := fun k i =>
     (exists_uniform_riemannianFiberNormSq_appFullRS_le (I := I) (M := M) g r (m + i) (c + k)
       (fun x : M => D k i x) (D k i).contMDiff).choose with hC_def
@@ -233,26 +163,26 @@ theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetr
   refine ⟨fun k => ((k + 1 : ℕ) : ℝ) * ∑ i ∈ Finset.range (k + 1), C k i,
     fun k => mul_nonneg (Nat.cast_nonneg _) (Finset.sum_nonneg fun i _ => hC_nn k i),
     fun W k x => ?_⟩
-  -- Abbreviate the jet terms.
+  
   set a : ℕ → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g r (m + i) x
     ((iteratedCovGrad g r m i W).toSection x) with ha_def
   have ha_nn : ∀ i, 0 ≤ a i := fun i =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + i) x _
-  -- Step 1: expand by the derived-field family and pass `rfns` through the finite sum.
+  
   rw [hD k W, SmoothCcTensor.toSection_sum_apply]
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r (c + k) x
     (Finset.range (k + 1))
     (fun i => (appFullSec (I := I) (M := M) g r (m + i) (c + k) (D k i)
       (iteratedCovGrad g r m i W)).toSection x)) ?_
   rw [Finset.card_range]
-  -- Step 2: bound each summand by its uniform fixed-field contraction envelope.
+  
   have hsummand : ∀ i ∈ Finset.range (k + 1),
       riemannianFiberNormSq (I := I) (M := M) g r (c + k) x
           ((appFullSec (I := I) (M := M) g r (m + i) (c + k) (D k i)
             (iteratedCovGrad g r m i W)).toSection x) ≤ C k i * a i :=
     fun i _ => hC_bound k i (iteratedCovGrad g r m i W) x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
-  -- Step 3: `∑_i C·a ≤ (∑_i C) · (∑_i a)`, all terms nonnegative.
+  
   have hCa_le : (∑ i ∈ Finset.range (k + 1), C k i * a i) ≤
       (∑ i ∈ Finset.range (k + 1), C k i) * ∑ i ∈ Finset.range (k + 1), a i := by
     rw [Finset.sum_mul]
@@ -266,19 +196,12 @@ theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetr
     _ = ((k + 1 : ℕ) : ℝ) * (∑ i ∈ Finset.range (k + 1), C k i) *
           ∑ i ∈ Finset.range (k + 1), a i := by ring
 
-/-- **Heterogeneous rank-congruence for `covGrad` (file-local).** If two covariant ranks agree
-(`h : a = b`) and the smooth compactly-supported `(r, ·)`-tensors are heterogeneously equal, then
-so are their covariant gradients. -/
 private theorem covGrad_heq_congr_hw (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad (I := I) (M := M) g r a Y) (covGrad (I := I) (M := M) g r b Z) := by
   subst h
   rw [eq_of_heq hYZ]
 
-/-- **Heterogeneous composition of iterated covariant gradients (file-local).** Applying `i`
-covariant gradients to the `j`-th covariant jet `∇^j S` is heterogeneously equal to the
-`(j + i)`-fold iterated gradient of `S` (the two living in the ranks `(s + j) + i` and
-`s + (j + i)`, which agree as naturals).  Proved by induction on the outer order `i`. -/
 private theorem iteratedCovGrad_comp_heq_hw (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (S : SmoothCcTensor g r s) (i : ℕ) :
     HEq (iteratedCovGrad g r (s + j) i (iteratedCovGrad g r s j S))
@@ -293,8 +216,6 @@ private theorem iteratedCovGrad_comp_heq_hw (g : SmoothRiemannianMetric I M) (r 
       exact covGrad_heq_congr_hw (I := I) (M := M) g r
         (by omega : (s + j) + i = s + (j + i)) ihi
 
-/-- **The intrinsic fibre norm is invariant under a rank-cast of heterogeneously equal sections
-(file-local).** -/
 private theorem rfns_toSection_heq_congr_hw (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r a x (Y.toSection x) =
@@ -303,9 +224,7 @@ private theorem rfns_toSection_heq_congr_hw (g : SmoothRiemannianMetric I M) (r 
   rw [eq_of_heq hYZ]
 
 set_option linter.unusedSectionVars false in
-/-- **Composing iterated covariant gradients, in fibre-norm form.** The intrinsic squared fibre
-norm of `∇^i (∇^j S)` at `x` equals that of `∇^{j + i} S` (the ranks `(s + j) + i` and
-`s + (j + i)` agree as naturals; `rfns` is invariant under that rank-cast). -/
+
 theorem rfns_iteratedCovGrad_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r ((s + j) + i) x
@@ -316,8 +235,6 @@ theorem rfns_iteratedCovGrad_comp (g : SmoothRiemannianMetric I M) (r s j i : �
     (by omega : (s + j) + i = s + (j + i))
     (iteratedCovGrad_comp_heq_hw (I := I) (M := M) g r s j S i) x
 
-/-- **Gradient-order congruence of the iterated-gradient fibre norm (file-local).** Equal gradient
-orders give equal fibre norms (the rank indices recast along the order equality). -/
 private theorem rfns_iteratedCovGrad_order_congr_hw (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -328,18 +245,7 @@ private theorem rfns_iteratedCovGrad_order_congr_hw (g : SmoothRiemannianMetric 
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The order-shifted windowed fibre bound: a fixed full-Hom-field action on the `j`-th covariant
-jet is `(j, 1)`-window controlled.** For a fixed smooth full-Hom field section
-`Q : Hom(T^{(r, s + j)}, T^{(r, c)})` on a closed Riemannian manifold there is a nonnegative
-per-gradient-order constant family `cc : ℕ → ℝ` — depending only on `Q` — such that for every
-smooth compactly-supported `(r, s)`-tensor `S`, every gradient order `k`, and every point `x`,
-```
-rfns(∇^k (appFullSec Q (∇^j S)))(x) ≤ cc k · ∑_{i < 1 + k} rfns(∇^{i + j} S)(x).
-```
-This is the windowed bound `exists_appFullSec_iteratedCovGrad_window_bound` at `W := ∇^j S`, the
-inner window re-indexed onto the jets of `S` by `rfns_iteratedCovGrad_comp` — the window of `S`
-entering at contracted order `j` with width `1`, exactly the `(p, w) = (j, 1)`
-graded-curvature-jet window shape. -/
+
 theorem exists_appFullSec_on_jet_iteratedCovGrad_window_bound (g : SmoothRiemannianMetric I M)
     (r s j c : ℕ) (Q : HomTensorRSField (E := E) (M := M) r (s + j) c I) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
@@ -357,7 +263,7 @@ theorem exists_appFullSec_on_jet_iteratedCovGrad_window_bound (g : SmoothRiemann
   refine ⟨cc, hcc_nn, fun S k x => ?_⟩
   refine (hcc (iteratedCovGrad g r s j S) k x).trans (le_of_eq ?_)
   refine congrArg (fun t => cc k * t) ?_
-  -- Re-index the inner `∇^j S`-jet window `i < k + 1` onto the `S`-jet window `i < 1 + k`.
+  
   rw [Nat.add_comm 1 k]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [rfns_iteratedCovGrad_comp (I := I) (M := M) g r s j i S x]

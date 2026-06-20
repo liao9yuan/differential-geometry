@@ -3,50 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmoothCross2
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-/-!
-# Non-smooth analogue of `f_term_bound`
-
-This module establishes a non-smooth analogue of
-`NirenbergCrossBounds.f_term_bound`. The smooth case carries the
-hypothesis `u : E → ℝ` smooth, and the bound features the partial
-derivatives `(fderiv ℝ u y) (EuclideanSpace.single i 1)`. Here we
-replace those with explicit weak partial derivatives `g i : E → ℝ`
-(with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`).
-
-## Strategy
-
-The smooth `f_term_bound` proceeds in three steps:
-
-1. The test function `v_test := D_{-h}^k(η² · D_h^k u)` (the
-   `NirenbergTestFunction.nirenbergTestFunction`) is supported in the
-   closed `|h|`-thickening of `tsupport η`, so the integral over `Ω`
-   reduces to an integral over `Ω'`.
-2. Pointwise Young: `|f · v_test| ≤ (ε/2) v_test² + (1/(2ε)) f²`.
-3. The L² bound on `v_test`:
-
-     `‖v_test‖²_{L²(E)} ≤ 8 N² · ∫_{tsupport η} (D_h^k u)² +
-        2 · ∫ η² · (D_h^k(∂_k u))²`
-
-   (the smooth case `v_test_sq_int_le`), combined with the localised
-   bound `∫_{tsupport η} (D_h^k u)² ≤ ∫_{Ω'} ∑_i (∂_i u)²`.
-
-The pointwise Young step and the support-reduction step transcribe
-verbatim with `(fderiv ℝ u y) (single i 1)` replaced by `g i y`, since
-they make no use of smoothness. The L² bound on `v_test` and the
-localised bound on `∫_{tsupport η} (D_h^k u)²` use smoothness in the
-smooth case; in the non-smooth case both bounds are taken as explicit
-hypotheses (`h_v_test_l2_bound` and `h_FK_diffQuot_u_bound`) so that the
-present file remains a mechanical substitution of the smooth case.
-Downstream callers that have access to mollification + Young's
-inequality on the weak partial supply both bounds in the natural way.
-
-## Main result
-
-* `f_term_bound_nonsmooth` — the headline bound transcribed for the
-  non-smooth case.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -62,8 +18,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Young's inequality for nonnegative absolute values. Re-derivation
-since the upstream version is `private`. -/
 private lemma two_abs_mul_le_eps_sq_add_fterm (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
@@ -85,10 +39,7 @@ private lemma two_abs_mul_le_eps_sq_add_fterm (a b ε : ℝ) (hε : 0 < ε) :
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
 omit [NeZero d] in
-/-- Support reduction: the smooth-case `nirenbergTestFunction` (defined
-as `D_{-h}^k(η² · D_h^k u)`) has support contained in the closed
-`|h|`-thickening of `tsupport η`, regardless of smoothness of `u`. For
-`|h| ≤ 1`, this thickening is contained in `Ω'`. -/
+
 private lemma v_test_supported_in_Ω'_nonsmooth_fterm
     {u : E → ℝ}
     {η : E → ℝ}
@@ -104,8 +55,7 @@ private lemma v_test_supported_in_Ω'_nonsmooth_fterm
     (d := d) η u k h).trans (hh_supp_in_Ω' hh_le)
 
 omit [NeZero d] in
-/-- The smooth-case `nirenbergTestFunction` inherits compact support
-from `η`, regardless of smoothness of `u`. -/
+
 private lemma hasCompactSupport_v_test_nonsmooth_fterm
     {η : E → ℝ} (hη_supp : HasCompactSupport η)
     {u : E → ℝ} (k : Fin d) (h : ℝ) :
@@ -116,8 +66,7 @@ private lemma hasCompactSupport_v_test_nonsmooth_fterm
     hη_supp k h
 
 omit [NeZero d] in
-/-- The product `η² · D_h^k u` is in `L²(E)` whenever `η` is smooth
-compactly supported and `u ∈ L²`. -/
+
 private lemma memLp_eta_sq_diffQuot_u_fterm
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -137,8 +86,7 @@ private lemma memLp_eta_sq_diffQuot_u_fterm
   exact memLp_bounded_mul hη_sq_cont.aestronglyMeasurable hM_nn hM h_dq_l2
 
 omit [NeZero d] in
-/-- The smooth-case `nirenbergTestFunction` is in `L²(E)` whenever
-`u ∈ L²` and `η` is smooth compactly supported. -/
+
 private lemma memLp_v_test_nonsmooth_fterm
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -158,7 +106,7 @@ private lemma memLp_v_test_nonsmooth_fterm
   exact memLp_diffQuot_two k (-h) h_inner
 
 omit [NeZero d] in
-/-- Pointwise Young inequality `|f · v_test| ≤ (ε/2) v_test² + (1/(2ε)) f²`. -/
+
 private lemma pointwise_young_f_v_test
     (f : E → ℝ) (v_test : E → ℝ) {ε : ℝ} (hε : 0 < ε) (x : E) :
     |f x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (f x)^2 := by
@@ -173,7 +121,7 @@ private lemma pointwise_young_f_v_test
   linarith [h_y, h_div_eq, h_ε_eq]
 
 omit [NeZero d] in
-/-- Pointwise Young inequality `|f · v_test| ≤ (1/2) (f² + v_test²)`. -/
+
 private lemma pointwise_half_sum_f_v_test
     (f v_test : E → ℝ) (x : E) :
     |f x * v_test x| ≤ (1/2) * ((f x)^2 + (v_test x)^2) := by
@@ -183,11 +131,7 @@ private lemma pointwise_half_sum_f_v_test
   linarith
 
 set_option linter.unusedVariables false in
-/-- **Quantitative non-smooth `f`-term bound.**
 
-The explicit-constant form of `f_term_bound_nonsmooth`: the same
-absorbing inequality with the constant exposed as the closed formula
-`max (4 · ε · N²) (1 / (2 · ε))`. -/
 theorem f_term_bound_nonsmooth_quantitative
     {Ω : Set E}
     {f : E → ℝ} (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
@@ -421,40 +365,7 @@ theorem f_term_bound_nonsmooth_quantitative
   linarith
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `f_term_bound`.**
 
-For a non-smooth `u : E → ℝ` with `u ∈ L²` and explicit weak partials
-`g i : E → ℝ` (with `g i ∈ L²` and
-`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`), the right-hand-side
-data term
-
-  `R := ∫_Ω f · v_test`
-
-(where `v_test := nirenbergTestFunction k h η u =
-D_{-h}^k(η² · D_h^k u)` is the standard Nirenberg test function) is
-bounded by
-
-  `ε · ∫ η² ∑_i (diffQuot k h g_i)² +
-    C · (∫_{Ω'} ∑_i g_i² + ∫_{Ω'} f²)`,
-
-with `C` independent of `h` (for `|h| ≤ 1`).
-
-Two non-smooth-specific hypotheses are exposed and supplied by callers
-through the standard mollification + Young argument:
-
-* `h_v_test_l2_bound` — the analogue of the smooth `v_test_sq_int_le`,
-  stating `∫ (v_test)² ≤ 8 N² · ∫_{tsupport η}(D_h^k u)² +
-    2 · ∫ η² · ∑_i (D_h^k g_i)²`. (This is the cleaner sum-form; the
-  smooth case bounds the single `(D_h^k(∂_k u))²` term and then
-  immediately upgrades to the sum.)
-* `h_FK_diffQuot_u_bound` — the Fréchet–Kolmogorov bound
-  `∫_{tsupport η}(D_h^k u)² ≤ ∫_{Ω'} ∑_i g_i²`.
-
-Apart from these two non-smooth ingredients, the proof is a mechanical
-transcription of the smooth `f_term_bound`.
-
-This is the existential packaging of `f_term_bound_nonsmooth_quantitative`,
-which exposes `C` as an explicit formula. -/
 theorem f_term_bound_nonsmooth
     {Ω : Set E}
     {f : E → ℝ} (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →

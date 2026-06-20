@@ -12,27 +12,6 @@ import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 
-/-!
-# Sub-critical Sobolev embedding `W^{1,p}_chart(M) ↪ L^{p*}(M, μ_g)`
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled
-on a finite-dimensional real inner-product space `E` of dimension `n ≥ 1`, and
-for `1 ≤ p < n`, this file provides the sub-critical Sobolev embedding from the
-chart-based Sobolev space `W^{1,p}_chart(M)` (defined in `Chart/Defs.lean`) into
-`L^{p*}(M, μ_g)`, where `p* = n*p/(n-p)` is the Sobolev conjugate exponent.
-
-## Main results
-
-* `sobolev_embedding_subcritical_of_closed` — the headline statement: there is a
-  finite constant `C ≥ 0` such that for every `u ∈ W^{1,p}_chart(M)`,
-  `eLpNorm u (ENNReal.ofReal p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`.
-
-The proof proceeds chart-by-chart using the canonical chart-atlas partition of
-unity, the per-chart Euclidean Sobolev embedding (built from a smooth-compact
-support approximation argument and the vendored whole-space Sobolev inequality),
-and the existing chart-to-Riemannian-measure bridge.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -57,18 +36,14 @@ namespace EuclideanSubcritical
 
 variable {d : ℕ} [NeZero d]
 
-/-- Helper notation for the Euclidean ambient. -/
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
-/-- A function with `tsupport ⊆ Ω` and `Ω` open vanishes off `Ω`. -/
 private lemma eq_zero_off_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN} (hf_supp : tsupport f ⊆ Ω)
     {x : EuN} (hx : x ∉ Ω) : f x = 0 := by
   have hx_notsupp : x ∉ tsupport f := fun h => hx (hf_supp h)
   exact image_eq_zero_of_notMem_tsupport hx_notsupp
 
-/-- For a function with `tsupport ⊆ Ω` and `Ω` open, the function vanishes
-in a neighborhood of every point off `Ω`, hence its `fderiv` vanishes off `Ω`. -/
 private lemma fderiv_eq_zero_off_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN}
     (hf_supp : tsupport f ⊆ Ω)
@@ -83,8 +58,6 @@ private lemma fderiv_eq_zero_off_of_tsupport_subset
   rw [Filter.EventuallyEq.fderiv_eq hf_zero]
   simp
 
-/-- For a function with `tsupport ⊆ Ω` (with `Ω` measurable), the `eLpNorm` over
-the whole `volume` agrees with the `eLpNorm` over `volume.restrict Ω`. -/
 private lemma eLpNorm_eq_eLpNorm_restrict_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN} (hΩ_meas : MeasurableSet Ω)
     (hf_supp : tsupport f ⊆ Ω) (p : ℝ≥0∞) :
@@ -100,8 +73,6 @@ private lemma eLpNorm_eq_eLpNorm_restrict_of_tsupport_subset
     _ = eLpNorm f p (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
-/-- Same for `fderiv ℝ f`: the `eLpNorm` over `volume` agrees with
-`eLpNorm` over `volume.restrict Ω` when `tsupport f ⊆ Ω`. -/
 private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN}
     (hΩ_meas : MeasurableSet Ω) (hf_supp : tsupport f ⊆ Ω) (p : ℝ≥0∞) :
@@ -117,8 +88,6 @@ private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
     _ = eLpNorm (fderiv ℝ f) p (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
-/-- The directional partial of a smooth `f`, restricted to `volume.restrict Ω`,
-is a.e.-equal to the chosen weak partial of `f`. -/
 private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -155,8 +124,6 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
-/-- The pointwise norm of the gradient is bounded by the sum of the norms of the
-directional partial derivatives along the standard basis directions. -/
 private lemma norm_fderiv_le_sum_norm_partials
     (f : EuN → ℝ) (x : EuN) :
     ‖fderiv ℝ f x‖ ≤ ∑ i : Fin d, ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖ := by
@@ -187,8 +154,6 @@ private lemma norm_fderiv_le_sum_norm_partials
   intro i _
   simp
 
-/-- For smooth `f`, the `eLpNorm` of `fderiv ℝ f` is bounded by the sum over `i`
-of the `eLpNorm` of the partial in direction `e_i`. -/
 private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {μ : Measure EuN}
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f) :
@@ -235,8 +200,6 @@ private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
-/-- The directional partial of a smooth `f` has the same `eLpNorm` as the chosen
-weak partial. -/
 private lemma eLpNorm_classical_partial_eq_chosen
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -249,8 +212,6 @@ private lemma eLpNorm_classical_partial_eq_chosen
     (classical_partial_ae_eq_chosenWeakPartial_of_smooth
       (d := d) hp_one hΩ_open hf_smooth hf_compact hf_supp i)
 
-/-- For a smooth `f` with compact support and `tsupport f ⊆ Ω`, the gradient
-`L^p` norm is bounded by `d * wkpNorm 1 p f Ω`. -/
 private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -347,7 +308,6 @@ private lemma eLpNorm_fderiv_smooth_le_d_mul_wkpNorm
     (one_mul _).symm]
   gcongr
 
-/-- Per-chart Euclidean Sobolev embedding (smooth case). -/
 private lemma sobolev_smooth_compactSupport_in_Ω
     {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {φ : EuN → ℝ} (hφ_smooth : ContDiff ℝ (⊤ : ℕ∞) φ)
@@ -373,8 +333,6 @@ private lemma sobolev_smooth_compactSupport_in_Ω
   rw [← h_lhs_eq, ← h_rhs_eq]
   exact h_smooth_sob
 
-/-- The per-chart Euclidean Sobolev embedding for `MemWkp 1 p` functions
-with compact support and `tsupport ⊆ Ω`. -/
 theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
     {p : ℝ} (hp_one : 1 ≤ p) (hp_dim : p < (d : ℝ)) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ}
@@ -609,7 +567,6 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
 
 end EuclideanSubcritical
 
-/-- The (closed) support of `ρ_α · u` is contained in the (closed) support of `ρ_α`. -/
 private lemma tsupport_pou_mul_subset_tsupport_pou_subcrit
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
@@ -621,7 +578,6 @@ private lemma tsupport_pou_mul_subset_tsupport_pou_subcrit
   exact tsupport_smul_subset_left
     (f := fun x : M => ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) (g := u)
 
-/-- Measurability of `(ρ α) · u`. -/
 private lemma measurable_pou_mul_subcrit
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     {u : M → ℝ} (hu : Measurable u) :
@@ -630,8 +586,6 @@ private lemma measurable_pou_mul_subcrit
     (ρ α).contMDiff.continuous
   exact hcont.measurable.mul hu
 
-/-- The toEuclidean image of `(extChartAt I α) '' (tsupport ρ_α)` is compact and
-contained in `chartTargetEuclid α`. -/
 private lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] (α : M) :
     IsCompact (toEuclidean ''
@@ -664,8 +618,6 @@ private lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
   rw [← hxz]
   exact (extChartAt I α).map_source (hTα_ext_src hx_supp)
 
-/-- `chartPushedRaw I α (ρ_α · u)` has tsupport contained in the toEuclidean
-image of `(extChartAt I α) '' tsupport ρ_α`. -/
 private lemma tsupport_chartPushedRaw_pou_mul_subset
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ) :
@@ -715,7 +667,6 @@ private lemma tsupport_chartPushedRaw_pou_mul_subset
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
-/-- The compact support of `chartPushedRaw I α (ρ_α u)`. -/
 private lemma hasCompactSupport_chartPushedRaw_pou_mul
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -728,7 +679,6 @@ private lemma hasCompactSupport_chartPushedRaw_pou_mul
   exact hK_compact.of_isClosed_subset (isClosed_tsupport _)
     (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u)
 
-/-- `chartPushedRaw I α (ρ_α · u)` has tsupport contained in `chartTargetEuclid α`. -/
 private lemma tsupport_chartPushedRaw_pou_mul_subset_target
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -738,8 +688,6 @@ private lemma tsupport_chartPushedRaw_pou_mul_subset_target
   (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u).trans
     (toEuclidean_extChartAt_tsupport_pou_compact_subset (I := I) (M := M) α).2
 
-/-- For `u ∈ MemWkpChart g 1 p`, the chart-pushed-raw of `ρ_α · u` is in
-`MemWkp 1 p` of `chartTargetEuclid α`. -/
 private lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -766,7 +714,6 @@ private lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := Module.finrank ℝ E) hp_one hopen h_ae).mp h_chart_pushed
 
-/-- The wkpNorm of the chart-pushed-raw equals that of chart-pushed (a.e. equal). -/
 private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -789,8 +736,6 @@ private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
   exact (chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u).symm
 
-/-- Per-chart sub-critical Sobolev bound. The manifold L^{p*} norm of `ρ_α · u`
-is bounded by a constant times the chart Sobolev norm. -/
 private theorem perChart_eLpNorm_pStar_le
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -919,7 +864,6 @@ private theorem perChart_eLpNorm_pStar_le
           (C_d * wkpNormChart (I := I) (M := M) g 1 p_enn u) := by gcongr
     _ = K_α * wkpNormChart (I := I) (M := M) g 1 p_enn u := by rw [hK_α_def]; ring
 
-/-- Pointwise decomposition `u(x) = ∑_{α ∈ chartAtlasPOU_finset} ρ_α(x) · u(x)`. -/
 private theorem chartAtlasPOU_pou_decomp_subcritical
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (u : M → ℝ) (x : M) :
@@ -934,7 +878,6 @@ private theorem chartAtlasPOU_pou_decomp_subcritical
       (I := I) (M := M) x
   rw [← Finset.sum_mul, hsum, one_mul]
 
-/-- The per-chart constant for the sub-critical embedding. -/
 private noncomputable def perChartConst_pStar
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -970,11 +913,6 @@ private lemma perChartConst_pStar_bound
   (Classical.choose_spec (perChart_eLpNorm_pStar_le
     (I := I) (M := M) g hp_one hp_dim α)).2 hu_meas hu
 
-/-- Sub-critical Sobolev embedding for measurable functions. The hypotheses match
-the headline theorem, with the additional measurability assumption needed for
-the proof. We discharge measurability automatically in the headline theorem
-using a.e. modification (since the chart-Sobolev space respects a.e. equality
-on each chart, but globally we still need a measurable representative). -/
 private theorem sobolev_embedding_chart_subcritical_measurable
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -1097,15 +1035,6 @@ private theorem sobolev_embedding_chart_subcritical_measurable
   rw [hD_eq] at h_max_le
   exact h_max_le
 
-/-- Sub-critical Sobolev embedding `W^{1,p}_chart(M) ↪ L^{p*}(M, μ_g)` on a closed
-(compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a
-finite-dimensional real inner-product space `E` of dimension `n ≥ 1`. For a
-sub-critical exponent `1 ≤ p < n` and a measurable `u ∈ W^{1,p}_chart(M)`, there
-exists a finite constant `C ≥ 0` (depending on the metric, the canonical
-chart-atlas partition of unity, and `p`) with
-`eLpNorm u (ENNReal.ofReal p*) μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`,
-where `p* = n*p/(n-p)` is the Sobolev conjugate exponent and `μ_g` is the
-Riemannian measure built from the chart-atlas partition of unity. -/
 theorem sobolev_embedding_subcritical_of_closed
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

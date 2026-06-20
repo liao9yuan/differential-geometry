@@ -15,83 +15,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Rot
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 
-/-!
-# Joint chart-Gram smoothness from a *time-smooth* spectral eigen-coordinate family
-
-This file records the corrected spectral-regularity bedrock behind the joint
-chart-Gram smoothness conjunct of the realized DeTurck–Ricci family.  It replaces
-the false-as-stated `jointChartGramSmooth_of_spectralSmooth_timeContinuous`
-(`SpectralPartialSumJointGram.lean`), whose hypothesis was only `L²`-time
-*continuity* of the family — which does **not** give joint `C^∞` (counterexample
-`T_rep t = |t| · S₀`: the realized chart-Gram entries are then merely `C⁰`, not
-`C^∞`, in `t`).
-
-The corrected statement takes a genuinely **time-smooth** eigen-coordinate family
-`φ : TensorEigenIdx g 0 2 → ℝ → ℝ` together with a single, `t`-independent,
-summable-across-modes majorant on every time-jet of the weighted coordinate
-squares — exactly the consumer-facing conclusion shape produced by
-`perModeConv_allOrder_timeDeriv_spectralMass_le`
-(`MaxRegInteriorTimeSmoothing.lean`).  Under these hypotheses the chart-Gram
-matrix entries of the realized metric family
-`g_DT t = tensorSectionRealizeMetric g (T_rep t) hδ_lt (hδ t)` are jointly `C^∞`
-up to `t = 0` (`JointChartGramSmooth`).
-
-## The reasoning route
-
-The realized chart-Gram entry is *affine* in the tensor `T_rep t`:
-`chartGramMatrix (realize g (T_rep t)) α x i j
-  = chartGramMatrix g α x i j + ccTensorBilinSymm g (T_rep t) x (vᵢ) (vⱼ)`
-(`tensorSectionRealizeMetric_inner`, `chartGramMatrix_apply`), where
-`vₖ = chartBasisVecFiber α k x`.  The first (background) term is time-independent
-and smooth in `x` (`chartGramMatrix_entry_contMDiffOn`); the time-dependence enters
-only through the increment, and through `T_rep t`'s eigen-series
-`T_rep t = ∑ᵢ φᵢ(t) · bᵢ`.
-
-This file proves the manifold-level joint smoothness *in full* — the affine
-decomposition, the background smoothness, the manifold↔Euclidean chart pull/push,
-and the composition with the smooth moving chart point — and reduces the genuine
-analytic content to a **single** Euclidean prerequisite: that the realized
-chart-Gram increment, pulled through the inverse chart to a scalar function on
-`ℝ × E`, is jointly `C^∞` on the closed-time slab over the chart target.
-
-That Euclidean increment is the series
-`(t, y) ↦ ∑' i, φᵢ(t) · ccTensorBilinSymm g (bᵢ) ((extChartAt α).symm y) (vᵢ) (vⱼ)`
-of jointly-`C^∞` per-mode terms (time-`C^∞` `φᵢ` by `hφ_smooth`; space-`C^∞`
-eigensection chart-component by `eigenvectorSmooth_contMDiff`), and joint `C^∞`
-is the closed-set `M`-test series lemma `contDiffOn_tsum` applied per convex
-chart-ball: the spatial chart `Sobolev ↪ Cᵏ` embedding of the eigensections
-contributes a `tensorSobolevWeight`-power factor per spatial order, which the
-supplied time-jet mode-mass hypothesis `hmodemass` absorbs into a
-summable-across-modes majorant.
-
-## The chart-`C⁰` spectral convergence (proved in full)
-
-The Euclidean increment smoothness `realizedChartGramIncrement_euclidean_contDiffOn`
-is the eigen-series assembly: `contDiffOn_tsum` applied per convex chart-ball over the
-open-ball cover of the chart-target interior (`contDiffOn_of_locally_contDiffOn`), with the
-per-mode joint smoothness `eigenChartIncrementMode_contDiffOn` and the per-mode mixed-jet
-chart `M`-test majorant `eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant`
-(the latter via the compact-uniform reverse-Christoffel order-peeling and `C^m` Sobolev
-embedding).  The pointwise eigen-series identity
-`realizedChartGramIncrement_eigenSeries_eq` is assembled from public spectral API (all-order
-`Hˢ` membership, the finite spectral partial-sum bilinear identity, the eigenIdxFinset
-exhaustion, and `HasSum`).
-
-Its genuine analytic core is the *chart-`C⁰` (pointwise)* convergence
-`spectralPartialSum_ccTensorBilinSymm_tendsto` of the symmetrized extracted bilinear form of
-the spectral partial sums to that of the smooth `L²` representative.  This is proved here in
-full by a **scalar** argument that bypasses the disabled fibre-bundle topology: the chart-frame
-fibre reconstruction `toSection_eq_sum_chartBasisFiberSection` expands the symmetrized form
-(through the additive, homogeneous fibre functional `ccBilinSymmFibre`) into a finite sum of
-real raw chart-frame components, and each raw component converges by dividing the POU-weighted
-chart-component limit (`spectralChartComponent_tendsto` — the all-order uniform-Cauchy limit
-of `SmoothTensorAllOrderCompleteness`, identified with the smooth representative via
-`continuous_tensorL2ChartComponent` + an a.e. subsequence + `Measure.eqOn_of_ae_eq`) by the
-positive partition-of-unity weight.
-
-The apex `jointChartGramSmooth_of_spectralSmooth_timeSmooth` is sorry-free: `#print axioms`
-is `[propext, Classical.choice, Quot.sound]`. -/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology
@@ -122,10 +45,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Additivity of the symmetrized extracted bilinear form in the tensor argument.**
-The companion to `ccTensorBilinSymm_smul`: `ccTensorBilinSymm` is additive in the
-`(0,2)`-tensor section.  Both `ccTensorBilin` and the symmetrization are linear in the
-section, which is additive (`SmoothCcTensor.toSection_add`). -/
 theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (S + T) x v w =
@@ -152,10 +71,6 @@ theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
     rw [hmodel, ContinuousMultilinearMap.add_apply]
   rw [hbilin v w, hbilin w v]; ring
 
-/-- The Euclidean *per-mode* increment scalar: for an eigen-index `i`, the chart-pulled
-chart-Gram increment of the smooth eigensection `eigenvectorSmooth g 0 2 i`, weighted by the
-smooth time coordinate `φ i`.  This is the summand of the eigen-series whose joint `C^∞`
-smoothness (across the closed-time slab) assembles into the increment smoothness. -/
 private def eigenChartIncrementMode
     (g : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -170,22 +85,6 @@ private def eigenChartIncrementMode
         (chartBasisVecFiber (I := I) α i' ((extChartAt I α).symm q.2))
         (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm q.2))
 
-/-- **Per-mode joint smoothness (analytic prerequisite P0).**  Each eigen-series summand
-`eigenChartIncrementMode` is jointly `C^∞` on the closed-time slab over the chart-target
-interior.  In `t` it is the smooth coordinate `φ i` (`hφ_smooth`); in `y` it is the
-chart-pulled chart-Gram increment of the *smooth* eigensection
-`eigenvectorSmooth g 0 2 i` (a `C^∞` tensor section, whose chart component is `C^∞` in the
-chart coordinate).  The product is jointly smooth.
-
-The chart-pulled increment of a fixed smooth eigensection is `C^∞` in `y` through the same
-manifold↔Euclidean chart transfer used by the sibling
-`realizedChartGramIncrement_alongChart_contMDiffOn`, specialised to the time-constant
-eigensection: the manifold scalar `x ↦ ccTensorBilinSymm g bᵢ x (vᵢ' x)(vⱼ' x)` is smooth on
-the trivialization base set (the smooth Hom-section `ccTensorBilinSymm_contMDiff` evaluated on
-the two smooth chart-basis sections, exactly as `chartGramMatrix_entry_contMDiffOn`), composed
-with the smooth inverse chart `contMDiffOn_extChartAt_symm` and read as a Euclidean
-`ContDiffOn` (`ContMDiffOn.contDiffOn`).  The product with the time-smooth coordinate is jointly
-smooth. -/
 private theorem eigenChartIncrementMode_contDiffOn
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -196,9 +95,9 @@ private theorem eigenChartIncrementMode_contDiffOn
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   set S := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eigenvectorSmooth
     (I := I) (M := M) g 0 2 i with hS_def
-  -- Step 1: the manifold scalar `x ↦ ccTensorBilinSymm g S x (vᵢ' x)(vⱼ' x)` is smooth on
-  -- the trivialization base set, by the same `clm_bundle_apply₂` pattern as
-  -- `chartGramMatrix_entry_contMDiffOn`.
+  
+  
+  
   have hB : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -225,8 +124,8 @@ private theorem eigenChartIncrementMode_contDiffOn
     have hpx := happ x hx
     rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
     exact hpx.2
-  -- Step 2: rewrite the base set to the chart source, compose with the smooth inverse chart,
-  -- and read off the Euclidean `ContDiffOn` in the chart coordinate `y`.
+  
+  
   rw [Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I)] at hScal
   have hsource_eq : (chartAt H α).source = (extChartAt I α).source := by
     rw [extChartAt_source (I := I)]
@@ -251,7 +150,7 @@ private theorem eigenChartIncrementMode_contDiffOn
         (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y)))
       (interior (extChartAt I α).target) :=
     hcomp.contDiffOn
-  -- Step 3: the per-mode increment is `(φ i ∘ fst) · (space scalar ∘ snd)`, jointly smooth.
+  
   have htime : ContDiffOn ℝ ∞ (fun q : ℝ × E => φ i q.1)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
@@ -263,11 +162,6 @@ private theorem eigenChartIncrementMode_contDiffOn
     hSpace.comp contDiffOn_snd (Set.mapsTo_snd_prod)
   exact htime.mul hspaceComp
 
-/-- **Eigenbasis-coordinate faithfulness of the `L²` spectral coordinates.**  Two
-`L²` tensors with the same eigenbasis-coordinate family `tensorL2Coeff` are equal.
-This is `HilbertBasis.repr`-injectivity applied to the chart-locality-free eigenbasis
-`tensorResolventHilbertEigenbasisSigma`, of which `tensorL2Coeff` is the coordinate
-readout (`tensorL2Coeff i = (b.repr ·) i` by definition). -/
 private theorem tensorL2_ext_of_tensorL2Coeff'
     (g : SmoothRiemannianMetric I M)
     {S T : TensorL2 0 2 g}
@@ -286,12 +180,6 @@ private theorem tensorL2_ext_of_tensorL2Coeff'
   have hT : (b.repr T) i = tensorL2Coeff (I := I) (M := M) hc T i := rfl
   rw [hS, hT, h i]
 
-/-- **All-order Sobolev membership of an `L²` tensor with summable weighted coordinate
-squares.**  If for every `σ ≥ 0` the weighted eigenbasis-coordinate squares of `u` are
-summable across modes, then `u` lies (via the chart-locality-free realization
-`tensorHsToL2`) in `Hˢ` for every `σ ≥ 0`: the witness `v : Hˢ` is the coordinate family
-of `u` itself, whose `tensorHsToL2` image has the same coordinates as `u` and hence equals
-`u` by eigenbasis-coordinate faithfulness. -/
 private theorem allHs_of_weighted_summable
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hsum : ∀ σ : ℝ, 0 ≤ σ →
@@ -313,11 +201,6 @@ private theorem allHs_of_weighted_summable
   refine tensorL2_ext_of_tensorL2Coeff' (I := I) (M := M) g (fun i => ?_)
   rw [tensorHsToL2_tensorL2Coeff]
 
-/-- **The `ccTensorBilinSymm` of a finite eigen-combination is the finite coefficient
-sum of the per-mode `ccTensorBilinSymm`.**  Bilinear-form extraction is additive
-(`ccTensorBilinSymm_add`) and `ℝ`-homogeneous (`ccTensorBilinSymm_smul`) in the tensor
-argument, and `finiteEigenCombo F c = ∑_{i ∈ F} c i • eᵢ`, so the symmetrized extracted
-form distributes over the finite sum. -/
 private theorem ccTensorBilinSymm_finiteEigenCombo
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -338,15 +221,6 @@ private theorem ccTensorBilinSymm_finiteEigenCombo
       rw [Finset.sum_insert ha, Finset.sum_insert ha, ccTensorBilinSymm_add,
         ccTensorBilinSymm_smul, ih]
 
-/-- **Fibre-level symmetrized bilinear extraction.**  A real-valued functional of the raw
-`(0,2)`-tensor fibre element `T` at `x`, additive and `ℝ`-homogeneous in `T`, recovering
-`ccTensorBilinSymm` on the section value.  It evaluates `T` on the canonical empty-product
-`(0,0)`-tensor, pushes the resulting `(0,2)` model value through `Tensor0SSpace.toModel`, and
-symmetrizes its bilinear evaluation on `(v, w)`.  Working at the fibre level (rather than on
-`SmoothCcTensor`) is what lets the chart-frame fibre reconstruction
-`toSection_eq_sum_chartBasisFiberSection` distribute over the symmetrized form, reducing the
-scalar spectral convergence to a finite sum of real chart-component limits — no fibre-bundle
-topology required. -/
 def ccBilinSymmFibre (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) : ℝ :=
   (1 / 2 : ℝ) * (
@@ -357,8 +231,6 @@ def ccBilinSymmFibre (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
       (T (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![w, v])
 
-/-- `ccTensorBilinSymm g S x v w` is the fibre functional `ccBilinSymmFibre` applied to the
-section value `S.toSection x`. -/
 theorem ccTensorBilinSymm_eq_ccBilinSymmFibre (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g S x v w =
@@ -366,7 +238,6 @@ theorem ccTensorBilinSymm_eq_ccBilinSymmFibre (g : SmoothRiemannianMetric I M)
   rw [ccTensorBilinSymm_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   rfl
 
-/-- `ccBilinSymmFibre` is additive in the fibre argument. -/
 theorem ccBilinSymmFibre_add (x : M) (T₁ T₂ : Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
     ccBilinSymmFibre (I := I) x (T₁ + T₂) v w =
@@ -382,7 +253,6 @@ theorem ccBilinSymmFibre_add (x : M) (T₁ T₂ : Tensor0SBundle.TensorRSSpace 0
     ContinuousMultilinearMap.add_apply]
   ring
 
-/-- `ccBilinSymmFibre` is `ℝ`-homogeneous in the fibre argument. -/
 theorem ccBilinSymmFibre_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
     ccBilinSymmFibre (I := I) x (a • T) v w = a * ccBilinSymmFibre (I := I) x T v w := by
@@ -395,7 +265,6 @@ theorem ccBilinSymmFibre_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSpac
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
-/-- `ccBilinSymmFibre` distributes over a finite scalar-weighted sum of fibre elements. -/
 theorem ccBilinSymmFibre_sum {ι : Type*} (s : Finset ι) (x : M)
     (c : ι → ℝ) (T : ι → Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
@@ -413,13 +282,7 @@ theorem ccBilinSymmFibre_sum {ι : Type*} (s : Finset ι) (x : M)
         ccBilinSymmFibre_smul, ih]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (tensorChartComponentRaw) in
-/-- **The symmetrized extracted bilinear form as a finite chart-frame component sum.**
-On the chart-`β` source, `ccTensorBilinSymm g S b v w` is the finite sum over component
-multi-indices `Q` of the raw chart-`β`-frame component
-`tensorChartComponentRaw g 0 2 S β Q.1 Q.2 b` weighted by a fixed (`S`-independent) real
-scalar `ccBilinSymmFibre b (chartBasisFiberSection 0 2 β Q b) v w`.  This is the chart-frame
-fibre reconstruction `toSection_eq_sum_chartBasisFiberSection` carried through the additive,
-homogeneous fibre functional `ccBilinSymmFibre`. -/
+
 theorem ccTensorBilinSymm_eq_sum_chartBasis (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (β : M) {b : M} (hb : b ∈ (chartAt H β).source)
     (v w : TangentSpace I b) :
@@ -434,24 +297,7 @@ theorem ccTensorBilinSymm_eq_sum_chartBasis (g : SmoothRiemannianMetric I M)
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
-/-- **Pointwise convergence of the POU-weighted chart-frame component of the spectral
-partial sums to that of any smooth `L²` representative.**
 
-If the spectral partial sums `F n = spectralPartialSum g u n` are Cauchy in every chart
-`H^{2k}` (`hcauchy`) and converge to `u` in `L²` (`hF_L2`), and `Trep` is any smooth
-representative of `u` (`hTrep`), then at every chart-target point `y` the canonical
-POU-weighted Euclidean chart component `tensorChartComponent g 0 2 (F n) β P.1 P.2 y`
-converges to `tensorChartComponent g 0 2 Trep β P.1 P.2 y`.
-
-The Euclidean uniform-limit-of-derivatives machinery
-(`exists_chartComponent_limit_smooth_compactSupport`) supplies a *pointwise everywhere*
-continuous limit `uP`; the canonical chart component is continuous-linear in the `L²`
-argument (`continuous_tensorL2ChartComponent`) and identifies, as an `Lp` class, with the
-smooth chart component (`tensorL2ChartComponent_smoothToTensorL2_eq`), so the chart
-components converge to `tensorChartComponent Trep` in `Lp(chartL2Measure)`; an a.e.-convergent
-subsequence (`TendstoInMeasure.exists_seq_tendsto_ae`) then forces `uP = tensorChartComponent
-Trep` a.e., hence everywhere on the open chart target (both continuous,
-`Measure.eqOn_of_ae_eq` against the open-positive Lebesgue measure). -/
 theorem spectralChartComponent_tendsto
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hcauchy : ∀ k : ℕ, CauchySeq (fun n =>
@@ -534,27 +380,7 @@ theorem spectralChartComponent_tendsto
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
-/-- **Pointwise chart-`C⁰` spectral convergence of the symmetrized bilinear form
-(analytic prerequisite P1₀).**  For an `L²` tensor `u` lying in `Hˢ` for every `σ ≥ 0`
-(`hu`) and a smooth representative `Trep` of `u` (`hTrep : (Trep : TensorL2) = u`), the
-symmetrized extracted bilinear form of the spectral partial sums converges, at every
-point `x` and pair of tangent vectors `(v, w)`, to that of `Trep`:
-`ccTensorBilinSymm g (spectralPartialSum g u n) x v w → ccTensorBilinSymm g Trep x v w`.
 
-The argument is purely scalar (`ℝ`-valued), bypassing the disabled fibre-bundle topology.
-Choose any chart `β` whose partition-of-unity weight is positive at `x` (such a `β` exists
-since `chartAtlasPOU` sums to `1`); then `x` lies in the chart-`β` source.  The chart-frame
-fibre reconstruction `ccTensorBilinSymm_eq_sum_chartBasis` writes
-`ccTensorBilinSymm g S x v w` as the finite sum over component multi-indices `Q` of the raw
-chart-`β`-frame component `tensorChartComponentRaw g 0 2 S β Q.1 Q.2 x` weighted by a fixed
-real scalar.  Each raw component of the spectral partial sums converges to that of `Trep`:
-the POU-weighted chart component converges (`spectralChartComponent_tendsto`, the genuine
-analytic content), and dividing by the positive POU weight `ρ` recovers the raw component
-(`tensorChartComponent = ρ · raw` at the chart point).  `tendsto_finset_sum` over the finite
-`CompIdx` then gives the result.
-
-The hypotheses `hu`/`hTrep` constrain it to the genuine spectral expansion of `u`'s smooth
-representative; it is not a free posit. -/
 private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
@@ -577,7 +403,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     fun k => spectralPartialSum_toHs_cauchy (I := I) (M := M) g u hu (2 * k)
   have hF_L2 : Tendsto (fun n => (F n : TensorL2 0 2 g)) atTop (𝓝 u) :=
     spectralPartialSum_toL2_tendsto (I := I) (M := M) g u
-  -- Pick a chart `β` whose partition-of-unity weight is positive at `x`.
+  
   have hsum := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
   have hexists : ∃ β ∈ chartAtlasPOU_finset (I := I) (M := M),
       0 < ((chartAtlasPOU I M) β : C^∞⟮I, M; ℝ⟯) x := by
@@ -604,7 +430,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
   have hround : (extChartAt I β).symm (toEuclidean.symm yx) = x := by
     rw [hyx_def, ContinuousLinearEquiv.symm_apply_apply]
     exact (extChartAt I β).left_inv (by rw [extChartAt_source (I := I)]; exact hx_src)
-  -- `tensorChartComponent` at the chart image of `x` is `ρ · raw`.
+  
   have hcomp_eq : ∀ (Z : SmoothCcTensor g 0 2) (Q : CompIdx E 0 2),
       tensorChartComponent (I := I) (M := M) g 0 2 Z β Q.1 Q.2 yx =
         ρ * tensorChartComponentRaw (I := I) (M := M) g 0 2 Z β Q.1 Q.2 x := by
@@ -612,7 +438,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     rw [tensorChartComponent_def,
       chartPushedRaw_apply_of_mem (I := I) (M := M) β _ hyx_mem, hround]
     rfl
-  -- Raw chart-`β`-component convergence, by dividing the POU-weighted limit by `ρ > 0`.
+  
   have hraw_tendsto : ∀ Q : CompIdx E 0 2,
       Tendsto (fun n => tensorChartComponentRaw (I := I) (M := M) g 0 2 (F n) β Q.1 Q.2 x)
         atTop (𝓝 (tensorChartComponentRaw (I := I) (M := M) g 0 2 Trep β Q.1 Q.2 x)) := by
@@ -624,7 +450,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     have hscaled := hct.const_mul ρ⁻¹
     simp only [← mul_assoc, inv_mul_cancel₀ hρne, one_mul] at hscaled
     exact hscaled
-  -- Assemble via the chart-frame fibre reconstruction and a finite sum.
+  
   rw [ccTensorBilinSymm_eq_sum_chartBasis (I := I) (M := M) g Trep β hx_src v w]
   have hrw : (fun n => ccTensorBilinSymm (I := I) g (F n) x v w) =
       fun n => ∑ Q : CompIdx E 0 2,
@@ -637,39 +463,6 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
   refine tendsto_finset_sum _ (fun Q _ => ?_)
   exact (hraw_tendsto Q).mul_const _
 
-/-- **Per-order summable mixed-jet majorant (analytic prerequisite P2).**  On a convex
-subset `Icc 0 T ×ˢ B` of the slab over a **compact** chart-ball `B ⊆ interior target`, each
-order-`k` within-iterated Fréchet derivative of the per-mode increment admits a single
-summable-across-modes uniform majorant.  By the Leibniz product rule the mixed `(t, y)`-jet
-is bounded by `∑_{a+b=k} |∂ₜ^a φ_i| · ‖∇^b(chart increment of eigensection)‖`; the spatial
-factor is controlled, uniformly over the **compact** `B`, by the eigensection's chart
-`H^{2k} ↪ C^b` Sobolev embedding — now reduced (away from the partition-of-unity kernel, near
-the chart-target boundary) to the compact-uniform reverse-Christoffel order-peeling
-`iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact` and order-`0` fibre bound
-`exists_zeroContentR_le_fiberNorm_on_compact` (`CompactChartJetBound.lean`, both PROVEN),
-composed with the global pointwise `C^m` embedding
-`iteratedCovGrad_toSobolev_embedding_Cm_unconditional` — contributing a
-`tensorSobolevWeight`-power factor, which the supplied summable time-jet mode-mass
-(`hmodemass`) absorbs into a summable-across-modes bound.
-
-**Domain correctness (the routing fix).**  The earlier free `{B} (hB : B ⊆ interior target)`
-quantification was FALSE-as-posited: the chart-trivialisation operator norm blows up at the
-chart-target boundary, so no `tensorSobolevWeight`-power majorant exists for an arbitrary
-boundary-touching `B`.  Requiring `B` compact (e.g. a closed ball strictly inside the
-interior) is exactly the domain on which the compact-uniform bounds hold; the consumer
-`realizedChartGramIncrement_euclidean_contDiffOn` only ever needs a compact-in-interior ball
-(it works locally per ball via `contDiffOn_of_locally_contDiffOn`), so the restriction does
-not weaken the apex.
-
-This is now proved in full.  The spatial factor of each per-mode increment is bounded,
-uniformly over the compact `B`, by the **uniform-in-`i` eigensection chart `H^{2k} ↪ C^b`
-Sobolev decay** (`eigenvectorSmooth_toHs_norm_le_lambda_pow`, the spectral norm of the
-smooth eigensection equals its eigenvalue weight) composed with the compact-uniform
-reverse-Christoffel order-peeling and `C^m` Sobolev embedding; the time factor of each
-Leibniz summand is controlled, uniformly over `Icc 0 T`, by the supplied summable time-jet
-mode-mass `hmodemass` (without which no uniform majorant exists).  The two factors are
-combined across modes by the arithmetic–geometric-mean inequality against the Weyl
-summability `tensorEigen_summable_negpow`. -/
 private lemma norm_iteratedFDeriv_clm_le
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
@@ -965,9 +758,7 @@ private lemma exists_rawCompOnE_jet_le_toHs_on_compact
     _ = Cnorm * (Cpeel * (Czmax * Cemb)) * N := by ring
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
-/-- The spatial factor of the per-mode increment, as a function on `E` (the chart target):
-`y ↦ ccTensorBilinSymm g (eᵢ) ((extChartAt α).symm y) (vᵢ')(vⱼ')`, equal on the chart-target
-interior to `(1/2)(rawCompOnE ![i',j'] + rawCompOnE ![j',i'])`. -/
+
 private def eigenSpatialFactor
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) : E → ℝ :=
@@ -1025,9 +816,9 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
   classical
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hUDO : UniqueDiffOn ℝ O := isOpen_interior.uniqueDiffOn
-  -- Embedding order covering all spatial orders up to m.
+  
   set kE : ℕ := Module.finrank ℝ E + 2 * m + 1 with hkE_def
-  -- Per-order spatial bound (single embedding order kE works for every m' ≤ m).
+  
   have hper : ∀ m' : ℕ, m' ≤ m → ∃ Cm' : ℝ, 0 ≤ Cm' ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ y ∈ B,
         ‖iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y‖ ≤
@@ -1042,7 +833,7 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
      eigenvectorSmooth_toHs_norm_le_lambda_pow (I := I) (M := M) g kE
    refine ⟨(1 / 2 : ℝ) * (Cab + Cba) * Cdec, by positivity, fun i y hy => ?_⟩
    set S := eigenvectorSmooth (I := I) (M := M) g 0 2 i with hS_def
-   -- Jet of eigenSpatialFactor = jet of (1/2 • (rawCompOnE_ab + rawCompOnE_ba)).
+   
    have hcongr : iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y =
        iteratedFDerivWithin ℝ m'
          ((1 / 2 : ℝ) • (rawCompOnE (I := I) (M := M) g S α ![i', j'] +
@@ -1127,27 +918,27 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
   set O : Set E := interior (extChartAt I α).target with hO_def
   set s : Set (ℝ × E) := Set.Icc (0 : ℝ) T ×ˢ B with hs_def
   have hUD : UniqueDiffOn ℝ s := (uniqueDiffOn_Icc hT).prod hB_uniq
-  -- Spatial decay exponent: a single `pSp` covering all spatial orders `b ≤ k`.
+  
   obtain ⟨Csp, pSp, hCsp_nn, hCsp⟩ :=
     exists_eigenSpatialFactor_jet_le_lambda_pow (I := I) (M := M) g α i' j' k hB_compact hB
-  -- The time mode-mass at order `σ := 2 * pSp + 2 * (weylSobolevExp + 1)`, per time-jet order `a ≤ k`.
+  
   set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
   set σ0 : ℝ := 2 * (pSp : ℝ) + 2 * (sW : ℝ) with hσ0_def
   have hσ0_nn : (0 : ℝ) ≤ σ0 := by rw [hσ0_def]; positivity
-  -- For each time order `a`, the summable mode-mass `Cmaj a`.
+  
   have htime : ∀ a : ℕ, ∃ Cm : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cm ∧
       ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
         tensorSobolevWeight (I := I) (M := M) i σ0 * (iteratedDeriv a (φ i) t) ^ 2 ≤ Cm i :=
     fun a => hmodemass a σ0 hσ0_nn
   choose Cmf hCmf_summable hCmf using htime
-  -- Weyl summability of `(1 + λ)^(-2 sW)`.
+  
   have hweyl : Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (-(2 * (sW : ℝ)))) := by
     refine tensorEigen_summable_negpow (I := I) (M := M) g (2 * (sW : ℝ)) ?_
     rw [hsW_def]; push_cast; have := weylSobolevExp_gt_finrank (E := E); push_cast at this ⊢
     have h0 : (0:ℝ) ≤ (weylSobolevExp (E := E) : ℝ) := by positivity
     nlinarith [h0]
-  -- Time-factor pointwise bound: `|∂ʲφi t| ≤ sqrt(Cmf j i) * (1+λ)^{-σ0/2}` for `t ∈ Icc`.
+  
   have hbase_pos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
       (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := fun i => by
     have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
@@ -1157,7 +948,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
         Real.sqrt (Cmf j i) * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) := by
     intro j i t ht
     have hmm := hCmf j i t ht
-    -- (1+λ)^σ0 * (∂ʲφ)² ≤ Cmf j i, σ0 = 2pSp + 2sW.
+    
     have hw : tensorSobolevWeight (I := I) (M := M) i σ0 =
         ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ))) ^ 2 := by
       unfold tensorSobolevWeight
@@ -1166,7 +957,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     rw [hw] at hmm
     set W : ℝ := (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ)) with hW_def
     have hW_pos : 0 < W := Real.rpow_pos_of_pos (hbase_pos i) _
-    -- W² (∂ʲφ)² ≤ Cmf, so |∂ʲφ| ≤ sqrt(Cmf)/W = sqrt(Cmf)·W⁻¹.
+    
     have hCm_nn : 0 ≤ Cmf j i := le_trans (by positivity) hmm
     have habs : |iteratedDeriv j (φ i) t| ≤ Real.sqrt (Cmf j i) / W := by
       rw [le_div_iff₀ hW_pos]
@@ -1178,7 +969,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     rw [Real.rpow_neg (hbase_pos i).le]
     rw [div_eq_mul_inv] at habs
     rwa [← hW_def]
-  -- The per-mode majorant.
+  
   set Kconst : ℝ := (2 : ℝ) ^ k * (k.factorial : ℝ) * (k.factorial : ℝ) *
     (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k *
     Csp with hKconst_def
@@ -1241,7 +1032,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     change _ ≤ ∑ a ∈ Finset.range (k + 1), termf a i
     refine Finset.sum_le_sum (fun a ha => ?_)
     have hak : a ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp ha)
-    -- Time factor `Cφa`.
+    
     set Cφa : ℝ := (∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i)) *
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) with hCφa_def
     have hCφa_nn : 0 ≤ Cφa := by
@@ -1261,14 +1052,14 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
       (eigenSpatialFactor_contDiffOn (I := I) (M := M) g α i' j' i) hB hUD (k - a) q hq
       (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)
       (fun jj hjj => hCsp jj (by omega) i q.2 hqB)
-    -- Now combine: term ≤ C(k,a) * (a! Cφa (‖fst‖+1)ᵃ) * ((k-a)! Csp(1+λ)^pSp (‖snd‖+1)^{k-a}).
+    
     have hfn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ := norm_nonneg _
     have hgn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ (k - a)
         (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖ := norm_nonneg _
     have hchoose_nn : (0:ℝ) ≤ (k.choose a : ℝ) := by positivity
     have hF1 := hfst_bnd
     have hG1 := hsnd_bnd
-    -- Bound the product of the two factors, then multiply by the choose coefficient.
+    
     have hsp_nn : 0 ≤ Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp :=
       mul_nonneg hCsp_nn (pow_nonneg hbase_nn _)
     have hprod : ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
@@ -1291,7 +1082,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
           mul_le_mul_of_nonneg_left hprod hchoose_nn
       _ ≤ termf a i := by
           simp only [htermf_def, hCφa_def, hKconst_def, hwfun_def]
-          -- Regroup: the (1+λ)^{-(pSp+sW)} · (1+λ)^pSp = (1+λ)^{-sW}.
+          
           have hcollapse : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) *
               (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp =
               tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) := by
@@ -1314,7 +1105,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
           have hsnd_pow : (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a) ≤
               (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k :=
             pow_le_pow_right₀ (by linarith [norm_nonneg (ContinuousLinearMap.snd ℝ ℝ E)]) (by omega)
-          -- Assemble all bounds via nlinarith-style monotone multiplication.
+          
           have hlhs_eq : (k.choose a : ℝ) * (((a.factorial : ℝ) *
                 (Ssqrt * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ)))) *
                 (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
@@ -1348,28 +1139,6 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
             exact hstep
           · exact mul_nonneg hSs_nn (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
 
-/-- **Pointwise eigen-series identity (analytic prerequisite P1).**  On the closed-time
-slab over the chart-target interior, the Euclidean chart-Gram increment of `T_rep q.1`
-equals the eigen-series of its per-mode increments.  This is the chart-level (pointwise)
-convergence `T_rep t = ∑' i, φ i t • eigenvectorSmooth g 0 2 i` of the spectral partial
-sums, paired with the additivity of `ccTensorBilinSymm` in its tensor argument.
-
-This is now proved in full, assembled from public spectral API plus the single isolated
-chart-`C⁰` convergence posit `spectralPartialSum_ccTensorBilinSymm_tendsto`:
-
-* the `hmodemass` hypothesis (at time-jet order `0`) supplies, for each `σ ≥ 0`, the
-  summable weighted coordinate squares of `(T_rep t).toL2`, hence the all-order `Hˢ`
-  membership `hu` (`allHs_of_weighted_summable`), so the partial sums are all-order Cauchy;
-* the spectral partial sum `spectralPartialSum g ((T_rep t).toL2) n = finiteEigenCombo` has
-  symmetrized bilinear form equal to `∑_{i ∈ eigenIdxFinset n} φᵢ(t)·(per-mode increment)`
-  (`ccTensorBilinSymm_finiteEigenCombo`, `hcoeff` identifying the coordinates as `φᵢ(t)`),
-  i.e. the eigenIdxFinset partial sum of the eigen-series summands;
-* the chart-`C⁰` convergence (`spectralPartialSum_ccTensorBilinSymm_tendsto`) gives the
-  limit of these partial sums is the chart-Gram increment of `T_rep t`, while the per-mode
-  summability (from the P2 compact-uniform majorant on a closed ball about `q.2`) gives
-  `HasSum` of the eigen-series; composing the eigenIdxFinset exhaustion
-  (`tendsto_eigenIdxFinset_atTop`) with `HasSum` and uniqueness of limits identifies the
-  limit with the `∑'`. -/
 private theorem realizedChartGramIncrement_eigenSeries_eq
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -1398,11 +1167,11 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
   set vv : TangentSpace I x := chartBasisVecFiber (I := I) α i' x with hvv
   set ww : TangentSpace I x := chartBasisVecFiber (I := I) α j' x with hww
   set u : TensorL2 0 2 g := SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t) with hu_def
-  -- The eigenbasis coordinates of `u` are `φ · t` on the slab.
+  
   have hcoeff_t : ∀ i, tensorL2Coeff (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i = φ i t :=
     fun i => hcoeff t hqt i
-  -- All-order `Hˢ` membership of `u` from the order-`0` time-jet mode-mass.
+  
   have hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ vH : tensorHs (I := I) (M := M) g 0 2 σ,
         tensorHsToL2 (I := I) (M := M) (g := g) (r := 0) (s := 2)
@@ -1415,8 +1184,8 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
       rw [iteratedDeriv_zero] at h
       rw [hcoeff_t i]
       exact h
-  -- The finite spectral partial sums of `u` agree, fibrewise, with the eigenIdxFinset
-  -- partial sums of the eigen-series summands.
+  
+  
   have hpartial : ∀ n,
       ccTensorBilinSymm (I := I) g (spectralPartialSum (I := I) (M := M) g u n) x vv ww =
         ∑ i ∈ eigenIdxFinset (I := I) (M := M) g n,
@@ -1425,7 +1194,7 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
     rw [spectralPartialSum, ccTensorBilinSymm_finiteEigenCombo]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [hcoeff_t i, eigenChartIncrementMode]
-  -- The chart-`C⁰` posit: the partial sums converge to the increment of `T_rep t`.
+  
   have hTrep_u : (T_rep t : TensorL2 0 2 g) = u := by rw [hu_def, SmoothCcTensor.toL2_apply]
   have htend_lhs : Filter.Tendsto
       (fun n => ∑ i ∈ eigenIdxFinset (I := I) (M := M) g n,
@@ -1435,8 +1204,8 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
     have h := spectralPartialSum_ccTensorBilinSymm_tendsto
       (I := I) (M := M) g u hu (T_rep t) hTrep_u x vv ww
     refine h.congr (fun n => (hpartial n))
-  -- Summability of the eigen-series summands at `q`, from the P2 compact-uniform majorant
-  -- on a closed ball inside the interior containing `q.2`.
+  
+  
   set Ω : Set E := interior (extChartAt I α).target with hΩ_def
   have hΩ_open : IsOpen Ω := isOpen_interior
   obtain ⟨r, hr_pos, hball_sub⟩ := Metric.isOpen_iff.mp hΩ_open q.2 hqy
@@ -1463,8 +1232,8 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
     have hb := hv0_bd i q hqmemBc
     rwa [iteratedFDerivWithin_zero_eq_comp, Function.comp_apply,
       (LinearIsometryEquiv.norm_map _ _)] at hb
-  -- `HasSum` of the eigen-series; its Finset-`Tendsto` composed with eigenIdxFinset
-  -- exhaustion is the same partial-sum sequence.
+  
+  
   have hhasSum : HasSum
       (fun i => eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q)
       (∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q) :=
@@ -1475,35 +1244,9 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
       Filter.atTop
       (𝓝 (∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q)) :=
     hhasSum.comp (tendsto_eigenIdxFinset_atTop (I := I) (M := M) g)
-  -- Uniqueness of limits.
+  
   exact tendsto_nhds_unique htend_lhs htend_tsum
 
-/-- **The realized chart-Gram increment is jointly `C^∞` in chart coordinates.**
-
-For a smooth representative family `T_rep` whose `L²` eigen-coordinates at time `t`
-are `φ i t` (`hcoeff`), with `φ` time-smooth (`hφ_smooth`) and equipped with summable
-time-jet mode-mass (`hmodemass`), the chart-Gram *increment*
-`ccTensorBilinSymm g (T_rep t) ((extChartAt α).symm y) (vᵢ') (vⱼ')`, pulled to a scalar
-function of `(t, y) : ℝ × E`, is jointly `C^∞` on the closed-time slab
-`Icc 0 T ×ˢ interior (extChartAt α).target`.
-
-The increment is the eigen-series
-`∑' i, φᵢ(t) · ccTensorBilinSymm g (bᵢ) ((extChartAt α).symm y) (vᵢ') (vⱼ')` of
-jointly-`C^∞` per-mode terms (`eigenChartIncrementMode_contDiffOn`, equal to the increment
-by `realizedChartGramIncrement_eigenSeries_eq`); joint `C^∞` is the closed-set `M`-test
-series lemma `contDiffOn_tsum` applied per convex chart-ball
-(`Icc 0 T ×ˢ B`, convex as a product), the `M`-test majorant supplied by
-`eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant`, and glued over the open
-ball cover of `interior (extChartAt α).target` by `contDiffOn_of_locally_contDiffOn`.
-
-This assembles the spectral series joint smoothness; the genuine analytic content is the
-chart-`C⁰` convergence `spectralPartialSum_ccTensorBilinSymm_tendsto` (proved in full via the
-chart-frame fibre reconstruction and the POU-weighted chart-component limit identification);
-the per-mode smoothness `eigenChartIncrementMode_contDiffOn`, the eigen-series identity
-`realizedChartGramIncrement_eigenSeries_eq`, and the `M`-test majorant
-`eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant` are all proved here in full.
-The hypotheses `hφ_smooth`/`hcoeff`/`hmodemass` constrain it: a non-time-smooth `φ`, or one
-without summable time-jet mode-mass, does not yield the joint `C^∞` increment. -/
 theorem realizedChartGramIncrement_euclidean_contDiffOn
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -1532,9 +1275,9 @@ theorem realizedChartGramIncrement_euclidean_contDiffOn
   rintro ⟨t₀, y₀⟩ hmem
   obtain ⟨_ht₀, hy₀⟩ := hmem
   obtain ⟨r, hr_pos, hball_sub⟩ := Metric.isOpen_iff.mp hΩ_open y₀ hy₀
-  -- Local set: the OPEN ball of radius `r/2`.  We prove `ContDiffOn` on the *compact* closed
-  -- ball `closedBall y₀ (r/2)` — where the compact-uniform spatial majorant (P2) holds — and
-  -- restrict (`mono`) to the requested open ball.
+  
+  
+  
   refine ⟨Set.univ ×ˢ Metric.ball y₀ (r / 2), isOpen_univ.prod Metric.isOpen_ball,
     ⟨Set.mem_univ t₀, Metric.mem_ball_self (by positivity)⟩, ?_⟩
   set B : Set E := Metric.ball y₀ (r / 2) with hB_def
@@ -1591,11 +1334,6 @@ theorem realizedChartGramIncrement_euclidean_contDiffOn
   exact realizedChartGramIncrement_eigenSeries_eq (I := I) (M := M) (T := T)
     g hT T_rep φ hφ_smooth hcoeff hmodemass α i' j' q hq'
 
-/-- The realized chart-Gram increment, along the moving chart point, is jointly `C^∞` on
-the closed-time slab over the trivialization base set: the Euclidean increment scalar (a
-function on `ℝ × E`, supplied by `realizedChartGramIncrement_euclidean_contDiffOn`) is
-composed with the smooth moving `(t, x) ↦ (t, extChartAt α x)`, carried pointwise through
-the single normed-space model to avoid the product-model defeq blow-up. -/
 private theorem realizedChartGramIncrement_alongChart_contMDiffOn
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (T_rep : ℝ → SmoothCcTensor g 0 2)
@@ -1664,33 +1402,6 @@ private theorem realizedChartGramIncrement_alongChart_contMDiffOn
     hGEuclid.contDiffWithinAt (hmaps hq)
   exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
 
-/-- **Joint chart-Gram smoothness of a realized time-smooth spectral family
-(the corrected interior-smoothing regularity bedrock).**
-
-Let `g` be a closed Riemannian metric, `T_rep : ℝ → SmoothCcTensor g 0 2` a family of
-`C^∞` representatives, uniformly `g`-fibre small with a single constant `δ < 1`
-(`hδ_lt`, `hδ`), and suppose
-
-* `φ` is a genuinely **time-smooth** eigen-coordinate family (`hφ_smooth`) realizing the
-  `L²` eigen-coordinates of `T_rep` (`hcoeff`); and
-* `hmodemass`: every time-jet of the weighted coordinate squares admits a single,
-  `t`-independent, summable-across-modes majorant on `[0,T]` — the consumer-facing
-  conclusion shape produced by `perModeConv_allOrder_timeDeriv_spectralMass_le`.
-
-Then the chart-Gram matrix entries of the realized metric family
-`g_DT t = tensorSectionRealizeMetric g (T_rep t) hδ_lt (hδ t)` are jointly `C^∞` up to
-`t = 0`: `JointChartGramSmooth T g_DT`.
-
-This is the corrected form of `jointChartGramSmooth_of_spectralSmooth_timeContinuous`
-(whose `L²`-time-*continuity* hypothesis is too weak — `T_rep t = |t| · S₀`
-counterexample): time *smoothness* of the eigen-coordinates with summable time-jet
-mode-mass is what makes the chart-Gram limit jointly `C^∞`.
-
-The chart-Gram entry of the realized metric is affine in `T_rep t`; the time-constant
-background part is smooth (`chartGramMatrix_entry_contMDiffOn`), and the increment is
-jointly `C^∞` in chart coordinates (`realizedChartGramIncrement_euclidean_contDiffOn`,
-the spectral series joint smoothness), pushed back through the smooth moving chart point.
-This is proved in full: `#print axioms` is `[propext, Classical.choice, Quot.sound]`. -/
 theorem jointChartGramSmooth_of_spectralSmooth_timeSmooth
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (T_rep : ℝ → SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)

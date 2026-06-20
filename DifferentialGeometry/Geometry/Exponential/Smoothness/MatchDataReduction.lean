@@ -9,69 +9,6 @@ import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Headline: unconditional `ContMDiffAt 1` smoothness of `expMap` at zero
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the exponential map
-`expMap g p : T_p M → M` is `ContMDiffAt 𝓘(ℝ, E) I 1` at the zero
-vector, given a single named manifold-side identification predicate.
-
-This file closes the headline modulo that predicate by packaging all the
-other ingredients of the bridge: the V.4 chart-pushed flow with joint
-`C^1` regularity, the `IsLocalFlow` packaging of that same flow,
-zero-section orbit constancy, and the chart-target-interior + inverse-
-chart-image conditions for the chart-flow's value at a positive time.
-
-## Substantive analytic content
-
-The V.4 chart-pushed flow `Φ : (E × E) × ℝ → E × E` (combined form,
-`exists_chartPhase_contDiffOn_isLocalFlow_combined`) provides:
-
-* jointly `C^1` regularity on `ball ((x₀, 0)) ρ × Ioo (-T) T`;
-* the initial-value identity `Φ((x₀, 0), 0) = (x₀, 0)`;
-* an `IsLocalFlow` predicate on the Picard radius `(r, ε)` that the
-  zero-section orbit constancy of `SmoothnessUnconditional.lean` is
-  formulated against.
-
-From zero-section orbit constancy, for every sufficiently small positive
-`t'`, the chart-flow's value at `((x₀, 0), t')` equals `(x₀, 0)`, so its
-first coordinate is `x₀`, which lies in the chart-target (since
-`x₀ = extChartAt I p p` lies in the chart-target interior for any
-boundaryless model), and `(extChartAt I p).symm x₀ = p`.
-
-The remaining ingredient is the **manifold-side identification**
-`ChartFlowGeodesicMatchAt g p Φ t' ρ'` (defined in
-`SmoothnessUnconditional.lean`): for every `v` in a small ball,
-`expMap g p (t' • v) = chartFlowCandidate Φ p t' v`. This identification
-is the manifold-side step where chart-coord ODE uniqueness against the
-maximal-geodesic lift is combined with chart-coord geodesic rescaling.
-
-## Headline predicate
-
-`HasChartFlowGeodesicMatchData g p` packages the full existential needed
-by `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch`. We expose it
-cleanly as the **single remaining named hypothesis** for the headline.
-
-The current file discharges everything *except* `HasChartFlowGeodesicMatchData`
-unconditionally from existing infrastructure. The named predicate is the
-manifold-side inverse-chart lift together with chart-coord geodesic
-rescaling — a downstream step that lifts a chart-coord chart-phase ODE
-solution back to a `TangentBundle I M`-valued integral curve of
-`geodesicVectorFieldChart g p`, applies the per-`v` unconditional
-identification against `maximalGeodesicChosenCurve`, and applies the
-rescaling identity at the manifold level. The current file packages the
-identification cleanly so that the manifold lift can be filled in.
-
-## Main results
-
-* `HasChartFlowGeodesicMatchData` — the named single-predicate input.
-
-* `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData` — the headline. The
-  exponential map is `ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector,
-  given `HasChartFlowGeodesicMatchData g p`.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -95,8 +32,6 @@ section ChartTargetInterior
 
 variable [I.Boundaryless]
 
-/-- The chart-image of the base point lies in the chart-target interior
-under `[I.Boundaryless]`. -/
 private lemma extChartAt_self_mem_interior_target (p : M) :
     extChartAt I p p ∈ interior (extChartAt I p).target := by
   have hsrc : p ∈ (extChartAt I p).source :=
@@ -111,13 +46,6 @@ section ZeroSectionWitness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Existence packaging: V.4 chart-flow with `t'`-evaluation
-witnesses.** For any base point `p : M`, the V.4 combined-form chart-flow
-delivers: a chart-flow `Φ` (joint `C^1` on the ball-times-`Ioo` and
-`IsLocalFlow` on a larger Picard radius), positive radii `ρ, T`, and —
-modulo any choice of positive `t' ∈ Ioo (-T_match, T_match)` for a
-suitable smaller `T_match` — the chart-target containment and inverse-
-chart image conditions for the chart-flow's value at `((x₀, 0), t')`. -/
 theorem exists_chartFlow_combined_witness
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -169,15 +97,6 @@ section HasMatchData
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **The named manifold-side data predicate.** For a smooth Riemannian
-metric `g` on a boundaryless smooth manifold modelled on a complete
-inner-product space, there exists a V.4-compatible chart-flow `Φ`, a
-positive evaluation time `t'` in its time interval, and a positive ball
-radius `ρ'` such that `ChartFlowGeodesicMatchAt g p Φ t' ρ'` holds — i.e.,
-for every `v` in the ball, `expMap g p (t' • v) = chartFlowCandidate Φ p t' v`
-— together with the chart-side ingredients
-(`ContDiffOn 1`, chart-target containment, inverse-chart-image is `p`)
-needed by the conditional headline. -/
 def HasChartFlowGeodesicMatchData (g : SmoothRiemannianMetric I M) (p : M) : Prop :=
   ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' ρ' : ℝ),
     0 < ρ ∧ 0 < T ∧ 0 < t' ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < ρ' ∧
@@ -197,11 +116,6 @@ section ReductionToMatch
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Reduction.** If there exists a V.4-compatible chart-flow `Φ` and
-a positive time `t'` together with a positive ball radius `ρ'` such that
-`ChartFlowGeodesicMatchAt g p Φ t' ρ'` holds and `t'` lies in the
-zero-section-constancy interval and in the joint-`C^1` time interval,
-then `HasChartFlowGeodesicMatchData g p` holds. -/
 theorem hasChartFlowGeodesicMatchData_of_match
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match t' ρ' : ℝ),
@@ -253,16 +167,6 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- Given a witness of `HasChartFlowGeodesicMatchData g p`, the exponential
-map `fun v => expMap g p v` is `ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector,
-for a smooth Riemannian metric `g` on a boundaryless smooth manifold modelled
-on a complete inner-product space and any base point `p : M`.
-
-The named predicate `HasChartFlowGeodesicMatchData g p` is the single
-hypothesis: it packages the chart-flow data and the manifold-side
-chart-flow/geodesic identification. The proof unfolds the predicate to the
-existential it abbreviates and forwards it to
-`expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch`. -/
 theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : HasChartFlowGeodesicMatchData (I := I) g p) :

@@ -4,25 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Operator.ContinuousLinearMap
 
-/-!
-# Continuous inclusion `H^{k+1} → H^k` of intrinsic Sobolev Hilbert spaces
-
-For a closed Riemannian manifold `(M, g)`, the intrinsic `H^{k+1}` Sobolev
-Hilbert space of `(r, s)`-tensor fields embeds continuously into `H^k` with
-operator norm at most `1`. The inclusion is induced by the fact that the
-Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm is monotone
-in the regularity order (`tensorPouSobolevHsNorm_le_succ`).
-
-## Main definitions
-
-* `inclusionHk_succ g r s k` — the continuous linear inclusion
-  `TensorPouSobolevHilbert g r s (k+1) →L[ℝ] TensorPouSobolevHilbert g r s k`.
-
-## Main results
-
-* `inclusionHk_succ_opNorm_le_one` — its operator norm is bounded by `1`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -53,9 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- The identity map `SmoothCcTensorHs g r s (k+1) →ₗ[ℝ] SmoothCcTensorHs g
-r s k` viewed as a linear map between the two pre-Hilbert spaces (on the
-same underlying additive group, but with different norms). -/
+
 noncomputable def smoothInclusionHsSuccLin
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     SmoothCcTensorHs g r s (k + 1) →ₗ[ℝ] SmoothCcTensorHs g r s k where
@@ -72,13 +51,6 @@ noncomputable def smoothInclusionHsSuccLin
     rw [SmoothCcTensorHs.toCcTensor_smul]
     rfl
 
-/-- Bound for the per-`(α, IJ, j)` Lebesgue integral inside
-`tensorPouSobolevNorm`. The integrand is pointwise zero off the compact set
-`chartImagePOUTsupport α` (because the partition-of-unity weight pulled back
-to the chart target vanishes there), and is bounded by the continuous function
-`y ↦ ‖iteratedFDeriv ℝ j (raw ∘ extChartAt.symm) (toEuclidean.symm y)‖²` on the
-compact set. The set has finite Lebesgue measure, and the integrand is bounded
-on it, hence the integral is finite. -/
 private lemma tensorPouSobolevNorm_inner_integral_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -372,8 +344,6 @@ theorem tensorPouSobolevNorm_ne_top
   exact tensorPouSobolevNorm_inner_integral_lt_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j
 
-/-- The function `(raw ∘ extChart.symm ∘ toEuclidean.symm) : EuclN → ℝ` is
-`ContDiffOn` of any order on `chartTargetEuclid α`. -/
 private lemma tensorChartComponentRaw_euclidPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -421,11 +391,6 @@ private lemma tensorChartComponentRaw_euclidPull_contDiffOn
   exact h_raw_pull_contDiffOn.comp
     h_toEucl_symm_smooth.contDiffOn h_maps
 
-/-- Bound for the per-`(α, IJ, j, basisIdx)` Lebesgue integral inside
-`tensorPouSobolevHsNorm`. The integrand vanishes off the compact set
-`chartImagePOUTsupport α` (POU pulled back to the chart target is zero
-there), and on the compact set the integrand is bounded by a continuous
-function. -/
 private lemma tensorPouSobolevHsNorm_inner_integral_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -731,9 +696,7 @@ private lemma tensorPouSobolevHsNorm_ne_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j basisIdx
 
 set_option linter.unusedSectionVars false in
-/-- The norm bound `‖smoothInclusionHsSuccLin g r s k S‖ ≤ 1 * ‖S‖`,
-expressing that the `H^k` norm is dominated by the `H^{k+1}` norm on the
-smooth dense subspace. -/
+
 lemma smoothInclusionHsSuccLin_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (S : SmoothCcTensorHs g r s (k + 1)) :
@@ -780,9 +743,7 @@ lemma smoothInclusionHsSuccLin_norm_le
     (tensorPouSobolevHsNorm_le_succ (I := I) (M := M) g k T)
 
 set_option linter.unusedSectionVars false in
-/-- The continuous linear inclusion `SmoothCcTensorHs g r s (k+1) →L[ℝ]
-SmoothCcTensorHs g r s k` on the smooth dense subspace, with operator norm
-at most `1`. -/
+
 noncomputable def smoothInclusionHsSucc
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     SmoothCcTensorHs g r s (k + 1) →L[ℝ] SmoothCcTensorHs g r s k :=
@@ -790,10 +751,7 @@ noncomputable def smoothInclusionHsSucc
     (fun S => smoothInclusionHsSuccLin_norm_le (I := I) (M := M) g r s k S)
 
 set_option linter.unusedSectionVars false in
-/-- The smooth-level inclusion composed with the completion embedding on the
-codomain side: a continuous linear map `SmoothCcTensorHs g r s (k+1) →L[ℝ]
-TensorPouSobolevHilbert g r s k`, sending each smooth section into the
-intrinsic `H^k` Hilbert space. -/
+
 noncomputable def smoothInclusionHsSuccToHkCompl
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     SmoothCcTensorHs g r s (k + 1) →L[ℝ]
@@ -803,13 +761,7 @@ noncomputable def smoothInclusionHsSuccToHkCompl
     (smoothInclusionHsSucc (I := I) (M := M) g r s k)
 
 set_option linter.unusedSectionVars false in
-/-- The continuous linear inclusion
-`TensorPouSobolevHilbert g r s (k+1) →L[ℝ] TensorPouSobolevHilbert g r s k`,
-expressing the standard `H^{k+1} ↪ H^k` embedding at intrinsic Sobolev
-regularity, with operator norm bounded by `1`.
 
-Defined as the continuous linear extension of the smooth-level inclusion
-along the dense uniform embedding `UniformSpace.Completion.toComplL`. -/
 noncomputable def inclusionHk_succ
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     TensorPouSobolevHilbert g r s (k + 1) →L[ℝ]
@@ -821,8 +773,7 @@ noncomputable def inclusionHk_succ
         TensorPouSobolevHilbert g r s (k + 1))
 
 set_option linter.unusedSectionVars false in
-/-- The operator norm of the intrinsic `H^{k+1} ↪ H^k` inclusion is at
-most `1`. -/
+
 theorem inclusionHk_succ_opNorm_le_one
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ‖inclusionHk_succ (I := I) (M := M) g r s k‖ ≤ 1 := by

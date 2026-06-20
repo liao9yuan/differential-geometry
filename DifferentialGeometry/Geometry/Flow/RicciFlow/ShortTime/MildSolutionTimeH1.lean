@@ -11,12 +11,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-/-! # Time-`H¹` regularity of the DeTurck mild solution
-
-`deturck_mildsolution_timeh1`: the maximal-regularity Duhamel mild solution of the
-DeTurck-Ricci linearized flow lies in the time-`H¹` space, from the matching
-coordinate/realize identities of its construction data. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -44,21 +38,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Spectral strong (`timeH1`) DeTurck-remainder solution (parent re-anchor).**
-
-Re-anchored onto the *same* continuous realize-based nonlinearity `N_cont` as
-`deturckN_hscale_lipschitz` (A5) and `forcing_continuous_interior` (A4), for
-coherence: the spectral engine `deTurckRemainder_strong_shortTime_exists` takes a
-**generic** first-order nonlinearity `{N : H^{a+1} → Hᵃ}` (verified: it is a bound
-implicit fed straight to
-`quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact`),
-so swapping `deTurckGeometricN → N_cont` in the forcing fixed-point conjunct does
-not break it.
-
-The construction data `N_cont`, `repr`, `Nsec` and the construction/realize
-hypotheses `hN_coeff`, `hNsec_realize`, `hrepr_small` are IDENTICAL in shape to
-A4/A5 (coordinate/realize identities, NOT the existence conclusion). The
-`gforce =ᵐ (fun t => N_cont (…))` conjunct now references the same `N_cont`. -/
 theorem deturck_mildsolution_timeh1
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E < 2 * (a - 2))

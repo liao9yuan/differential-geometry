@@ -3,38 +3,6 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Manifold derivative of `expMap g p` at the zero vector
-
-The exponential map `expMap g p : TangentSpace I p → M` is `C^1` at the
-origin (`expMap_contMDiffAt_zero`). This file
-computes its manifold derivative at zero and shows it is the identity:
-
-`mfderiv 𝓘(ℝ, E) I (expMap g p) 0 = ContinuousLinearMap.id ℝ (TangentSpace I p)`.
-
-## Strategy
-
-The chart-pushed flow `Φ : (E × E) × ℝ → E × E` of the cutoff phase-space
-geodesic vector field satisfies, for `v` in a small ball around `0 : E`
-and a small positive time `t'`,
-
-  `expMap g p (t' • v) = (extChartAt I p).symm (Φ((x₀, v), t')).1`,
-
-with `x₀ := extChartAt I p p`. The variational ODE (Fréchet derivative
-of the Picard–Lindelöf flow with respect to initial conditions, supplied
-by `Analysis/ODE/FlowC1Frechet.lean`) applied to the central constant
-orbit `Φ((x₀, 0), ·) ≡ (x₀, 0)` produces a linear map whose first
-component, evaluated on the right inclusion `δw ↦ (0, δw)`, equals
-`δw ↦ t' • δw`. The manifold chart-inverse derivative is the identity at
-the base chart point, so the manifold chain rule gives the derivative of
-`v ↦ expMap g p (t' • v)` at `0` as `t' • id`. Cancelling the scaling
-`v ↦ t' • v` extracts `mfderiv (expMap g p) 0 = id`.
-
-## Main result
-
-* `mfderiv_expMap_at_zero` — `mfderiv 𝓘(ℝ, E) I (expMap g p) 0 = id`.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold Real
@@ -60,10 +28,6 @@ section ChartPhaseVFLinearization
 
 variable [I.Boundaryless]
 
-/-- A single scalar summand
-`(z : E × E) ↦ Γ(z.1) i j k · chartCoord i z.2 · chartCoord j z.2`
-has Fréchet derivative `0` at `(x, 0)` for `x` in the chart-target
-interior. -/
 private lemma chartChristoffel_scalarSummand_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {x : E}
@@ -131,8 +95,6 @@ private lemma chartChristoffel_scalarSummand_hasFDerivAt_zero
   rw [hAB0, hC0, zero_smul, zero_smul, zero_add] at this
   exact this
 
-/-- The chart-Christoffel contraction `(x, w) ↦ Γ(w, w)(x)` has Fréchet
-derivative `0` at `(x, 0)` for `x` in the chart-target interior. -/
 private lemma chartChristoffelContraction_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (α : M) {x : E}
     (hx : x ∈ interior (extChartAt I α).target) :
@@ -213,9 +175,6 @@ private lemma chartChristoffelContraction_hasFDerivAt_zero
   rw [hfn_eq]
   exact hsum
 
-/-- The chart-phase vector field `chartPhaseVF g α (x, w) = (w, -Γ(w,w)(x))`
-has Fréchet derivative `(δx, δw) ↦ (δw, 0)` at `(x, 0)` for `x` in the
-chart-target interior. -/
 lemma chartPhaseVF_hasFDerivAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M) {x : E}
     (hx : x ∈ interior (extChartAt I α).target) :
@@ -235,8 +194,6 @@ lemma chartPhaseVF_hasFDerivAt_zero_section
   have hcombined := hfst.prodMk hsnd
   exact hcombined
 
-/-- On a neighborhood of `(x, 0)` lying in the inner ball of the cutoff
-bump, the cutoff vector field equals the un-cutoff vector field. -/
 private lemma chartPhaseVFCutoff_eventuallyEq_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (α : M)
     {z₀ : E × E} (b : ContDiffBump z₀)
@@ -254,9 +211,6 @@ private lemma chartPhaseVFCutoff_eventuallyEq_chartPhaseVF
   exact chartPhaseVFCutoff_eq_of_mem_closedBall (I := I) g α z₀ b
     (Metric.mem_closedBall.mpr hw_z₀)
 
-/-- The cutoff chart-phase vector field has Fréchet derivative
-`(δx, δw) ↦ (δw, 0)` at `(x, 0)` whenever `(x, 0)` lies in the open inner
-ball of the bump and `x` is in the chart-target interior. -/
 lemma chartPhaseVFCutoff_hasFDerivAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M) {x : E}
     (hx : x ∈ interior (extChartAt I α).target)
@@ -276,11 +230,6 @@ section CombinedData
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Combined chart-flow data.** For a smooth Riemannian metric `g` and
-a base point `p : M`, there exists a chart-flow `Φ`, a cutoff bump `b`,
-Picard radii `(r, ε)`, joint-`C^1` radii `(ρ, T)`, a "constancy" time
-`T_match ≤ T`, a positive evaluation time `t' < T_match`, an `M ≥ 0` with
-`M * t' < 1`, and all the structural properties recorded below. -/
 private theorem exists_combined_chartFlow_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E)
@@ -467,12 +416,6 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **The manifold derivative of `expMap g p` at the zero tangent vector is
-the identity.** For a smooth Riemannian metric `g` on a boundaryless
-smooth manifold modelled on a complete inner-product space, and any base
-point `p : M`,
-
-`mfderiv 𝓘(ℝ, E) I (expMap g p) (0 : TangentSpace I p) = ContinuousLinearMap.id ℝ _`. -/
 theorem mfderiv_expMap_at_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     mfderiv 𝓘(ℝ, E) I

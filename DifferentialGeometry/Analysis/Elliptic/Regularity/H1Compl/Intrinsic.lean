@@ -3,55 +3,6 @@ import Mathlib.Analysis.InnerProductSpace.ProdL2
 import Mathlib.Analysis.Normed.Lp.WithLp
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-/-!
-# Intrinsic `H¹` Hilbert space on a closed Riemannian manifold
-
-This file defines the intrinsic Sobolev space `H¹(M, g)` as a Hilbert space.
-
-The construction uses the *bundled* approach: an element of `H¹(M, g)` is a
-pair `(u, G) ∈ L²(M, ℝ) × L²(M, E)` satisfying
-
-* the integration-by-parts identity that `G` is a weak Riemannian gradient
-  of `u`;
-* an `L²`-controlled metric `g`-norm bound on `G`;
-* the joint AESM pairing clause for `G`.
-
-The ambient Hilbert space is `WithLp 2 (Lp ℝ 2 μ_g × Lp E 2 μ_g)`, on which
-the L²-product inner product matches the intrinsic H¹ inner product
-$$\langle (u,G),\, (v,G')\rangle_{H^1}
-   = \int_M u\, v\, d\mu_g + \int_M g(G, G')\, d\mu_g.$$
-
-The bundled approach avoids the use of `Classical.choice` for selecting a
-gradient witness, and gives an unambiguous inner product. The price is that
-a single underlying `u : L²` may correspond to multiple `H¹` elements
-differing in the gradient witness — under uniqueness of weak gradients
-these are all equal, but the uniqueness lemma is not used here.
-
-## Main definitions
-
-* `H1Bundle g` : the type alias for the ambient Hilbert space
-  `WithLp 2 ((Lp ℝ 2 μ_g) × (Lp E 2 μ_g))`.
-* `H1IntrinsicSubmodule g` : the closed submodule of pairs `(u, G)`
-  satisfying the three conditions above.
-* `H1Intrinsic g` : the type alias for the carrier of
-  `H1IntrinsicSubmodule g`. Inherits `InnerProductSpace ℝ` and
-  `CompleteSpace`.
-
-## Closure under L²-limits
-
-The submodule `H1IntrinsicSubmodule g` is closed under L²-limits:
-
-* IBP identity: passes to the L² limit via Cauchy–Schwarz with smooth
-  bounded test fields.
-* Metric `g`-norm `L²` control: a finite-dimensional model fiber means
-  the metric `g`-norm of `G` is comparable to the Euclidean norm of `G`,
-  so `L²(M, E)`-membership of `G` already gives finiteness; the explicit
-  hypothesis is included for stability under the IBP identity.
-* Joint AESM pairing clause: passes to the L² limit via subsequence
-  extraction (a.e.-convergent subsequence) and pointwise a.e. AESM
-  closure.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Function
@@ -107,7 +58,6 @@ private lemma g_inner_smul_right
     g.inner x v (c • y) = c * g.inner x v y := by
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
-/-- Bilinear expansion: `g.inner x (v + w) (v + w) = g(v,v) + 2 g(v,w) + g(w,w)`. -/
 private lemma g_inner_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     g.inner x (v + w) (v + w) =
@@ -117,7 +67,6 @@ private lemma g_inner_add_diag
   have hsymm : g.inner x w v = g.inner x v w := g.symm x w v
   rw [hsymm]; ring
 
-/-- Triangle inequality for the metric `g`-norm. -/
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -195,7 +144,6 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
-/-- Scalar homogeneity for the metric `g`-norm. -/
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =
@@ -204,18 +152,11 @@ private lemma g_norm_const_smul
   rw [show c * (c * g.inner x v v) = c ^ 2 * g.inner x v v from by ring]
   rw [Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq_eq_abs]
 
-/-- Notation for the ambient Hilbert space on which the H¹ inner product is
-realized as the L²-product inner product. -/
 abbrev H1Bundle [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) : Type _ :=
   WithLp 2 ((Lp ℝ 2 (riemannianVolumeMeasure I M g)) ×
     (Lp E 2 (riemannianVolumeMeasure I M g)))
 
-/-- A pair `(u, G) ∈ Lp ℝ 2 μ_g × Lp E 2 μ_g` is an `H¹`-pair when:
-
-* `G` is a weak Riemannian gradient of `u` (the IBP identity);
-* the metric `g`-norm of `G` is in `L²`;
-* `G` satisfies the joint AESM pairing clause. -/
 def IsH1Pair [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure I M g))
@@ -230,7 +171,6 @@ namespace IsH1Pair
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- The zero pair is in `IsH1Pair`. -/
 theorem zero (g : SmoothRiemannianMetric I M) :
     IsH1Pair (I := I) (M := M) g
       (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g))
@@ -276,8 +216,6 @@ theorem zero (g : SmoothRiemannianMetric I M) :
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h0G.symm
       (PairAEMeasurable.zero (I := I) (M := M) g)
 
-/-- The H¹ pair predicate is closed under addition (of both function and
-gradient witness). -/
 theorem add (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     {G G' : Lp E 2 (riemannianVolumeMeasure I M g)}
@@ -403,7 +341,6 @@ theorem add (g : SmoothRiemannianMetric I M)
       PairAEMeasurable.add (I := I) (M := M) (g := g) hG_pair hG'_pair
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_sum_G.symm hsum_pair
 
-/-- Scalar multiplication of an `H¹` pair. -/
 theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     {G : Lp E 2 (riemannianVolumeMeasure I M g)}
@@ -454,8 +391,6 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
 
 end IsH1Pair
 
-/-- The intrinsic `H¹` submodule of `WithLp 2 (Lp ℝ 2 × Lp E 2)`. Its
-elements are pairs `(u, G)` satisfying the `IsH1Pair` predicate. -/
 def H1IntrinsicSubmodule
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) :
@@ -491,10 +426,6 @@ def H1IntrinsicSubmodule
     rw [h1, h2]
     exact IsH1Pair.const_smul (I := I) (M := M) g c hp
 
-/-- The intrinsic `H¹` Hilbert space. The carrier is the `H1IntrinsicSubmodule`
-of the L²-product Hilbert space, inheriting the L²-product inner product
-which coincides with the H¹ inner product
-$$\langle (u,G), (v,G')\rangle_{H^1} = \langle u, v\rangle_{L^2} + \langle G, G'\rangle_{L^2}.$$ -/
 abbrev H1Intrinsic [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) : Type _ :=
   H1IntrinsicSubmodule (I := I) (M := M) g
@@ -503,7 +434,6 @@ namespace H1Intrinsic
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- Project an `H¹` element to its underlying `L² ℝ`-class. -/
 def toLp (g : SmoothRiemannianMetric I M) :
     H1Intrinsic (I := I) (M := M) g →ₗ[ℝ] Lp ℝ 2 (riemannianVolumeMeasure I M g) where
   toFun u := (WithLp.ofLp (u : H1Bundle (I := I) (M := M) g)).1
@@ -525,7 +455,6 @@ def toLp (g : SmoothRiemannianMetric I M) :
       simp
     rw [h]; rfl
 
-/-- Project an `H¹` element to its `L² E`-gradient witness. -/
 def gradL2 (g : SmoothRiemannianMetric I M) :
     H1Intrinsic (I := I) (M := M) g →ₗ[ℝ] Lp E 2 (riemannianVolumeMeasure I M g) where
   toFun u := (WithLp.ofLp (u : H1Bundle (I := I) (M := M) g)).2
@@ -547,13 +476,11 @@ def gradL2 (g : SmoothRiemannianMetric I M) :
       simp
     rw [h]; rfl
 
-/-- Defining identity for `toLp` on `H¹`. -/
 @[simp] lemma toLp_apply (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     toLp (I := I) (M := M) g u =
       (WithLp.ofLp (u : H1Bundle (I := I) (M := M) g)).1 := rfl
 
-/-- Defining identity for `gradL2` on `H¹`. -/
 @[simp] lemma gradL2_apply (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     gradL2 (I := I) (M := M) g u =

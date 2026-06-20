@@ -2,27 +2,6 @@
 Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Multilinear.Fiber
-/-!
-# Fiber-level results for the mixed multilinear bundle
-
-This file establishes normed instances, a continuous linear equivalence to the model fiber,
-and coercion functions for the mixed multilinear fiber
-`Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] Bundle.continuousMultilinearMap 𝕜 s F E x`.
-
-The normed structure is transported via the topology equality `topology_eq`, and the CLE
-is constructed via `arrowCongr` of the `continuousLinearEquivAt` CLEs from
-`Multilinear/Fiber.lean`.
-
-## Main Definitions
-
-* `Bundle.continuousMultilinearMap.mixedContinuousLinearEquivAt`: CLE from the mixed fiber
-  at `x` to the model fiber.
-* `Bundle.continuousMultilinearMap.mixedToModel` / `mixedOfModel`: coercions to/from model.
-
-## Tags
-
-multilinear map, mixed tensor, vector bundle, fiber topology
--/
 
 noncomputable section
 
@@ -42,18 +21,6 @@ variable [TopologicalSpace (TotalSpace F E)]
 variable [FiberBundle F E] [VectorBundle 𝕜 F E]
 variable {r s : ℕ}
 
-/-!
-## Fiber normed instances
-
-The fiber type
-`Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜] Bundle.continuousMultilinearMap 𝕜 s F E x`
-inherits normed structure via the topology equality `topology_eq`, which shows that the
-bundle and norm topologies on each multilinear fiber agree.
--/
-
-/-- The CLM between multilinear bundle fibers (with bundle topology) is the same type as
-the CLM between `ContinuousMultilinearMap` spaces (with norm topology), since the
-topologies agree by `topology_eq`. -/
 private theorem mixed_type_eq (r s : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
      Bundle.continuousMultilinearMap 𝕜 s F E x) =
@@ -62,7 +29,6 @@ private theorem mixed_type_eq (r s : ℕ) (x : B) :
   unfold Bundle.continuousMultilinearMap
   congr 1 <;> exact topology_eq (𝕜 := 𝕜) (F := F) (E := E) _ x
 
-/-- Transport `NormedAddCommGroup` and `NormedSpace` from the norm-topology type. -/
 private def mixed_normedInstances (r s : ℕ) (x : B) :
     Σ' (ng : NormedAddCommGroup
           (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
@@ -73,21 +39,18 @@ private def mixed_normedInstances (r s : ℕ) (x : B) :
         _ ng.toSeminormedAddCommGroup :=
   (mixed_type_eq (𝕜 := 𝕜) (F := F) (E := E) r s x) ▸ ⟨inferInstance, inferInstance⟩
 
-/-- The mixed multilinear fiber is a normed additive commutative group. -/
 instance mixed_instNormedAddCommGroup (r s : ℕ) (x : B) :
     NormedAddCommGroup
       (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
        Bundle.continuousMultilinearMap 𝕜 s F E x) :=
   (mixed_normedInstances (𝕜 := 𝕜) (F := F) (E := E) r s x).1
 
-/-- The mixed multilinear fiber is a normed `𝕜`-module. -/
 instance mixed_instNormedSpace (r s : ℕ) (x : B) :
     NormedSpace 𝕜
       (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
        Bundle.continuousMultilinearMap 𝕜 s F E x) :=
   (mixed_normedInstances (𝕜 := 𝕜) (F := F) (E := E) r s x).2
 
-/-- Scalar multiplication on the mixed multilinear fiber is continuous. -/
 instance mixed_instContinuousSMul (r s : ℕ) (x : B) :
     ContinuousSMul 𝕜
       (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
@@ -96,15 +59,6 @@ instance mixed_instContinuousSMul (r s : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
      Bundle.continuousMultilinearMap 𝕜 s F E x))
 
-/-!
-## Continuous linear equivalence to model fiber
-
-The CLE is constructed via `ContinuousLinearEquiv.arrowCongr` applied to the
-`continuousLinearEquivAt` CLEs from `Fiber.lean`.
--/
-
-/-- The continuous linear equivalence from the mixed multilinear fiber at `x` to the
-model fiber, constructed via `arrowCongr` of the multilinear CLEs. -/
 def mixedContinuousLinearEquivAt (r s : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
      Bundle.continuousMultilinearMap 𝕜 s F E x) ≃L[𝕜]
@@ -113,12 +67,6 @@ def mixedContinuousLinearEquivAt (r s : ℕ) (x : B) :
   (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r x).arrowCongr
     (continuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) s x)
 
-/-!
-## Coercion to model fiber
--/
-
-/-- Coerce a mixed multilinear fiber element to the model fiber.
-This is the forward direction of `mixedContinuousLinearEquivAt`. -/
 def mixedToModel {r s : ℕ} {x : B}
     (T : Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
          Bundle.continuousMultilinearMap 𝕜 s F E x) :
@@ -126,7 +74,6 @@ def mixedToModel {r s : ℕ} {x : B}
     ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
   (mixedContinuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r s x).toContinuousLinearMap T
 
-/-- `mixedToModel` as a bundled `ContinuousLinearMap`. -/
 def mixedToModelL (r s : ℕ) (x : B) :
     (Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
      Bundle.continuousMultilinearMap 𝕜 s F E x) →L[𝕜]
@@ -134,8 +81,6 @@ def mixedToModelL (r s : ℕ) (x : B) :
      ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :=
   (mixedContinuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r s x).toContinuousLinearMap
 
-/-- Construct a mixed multilinear fiber element from a model fiber element.
-This is the inverse of `mixedToModel`. -/
 def mixedOfModel {r s : ℕ} {x : B}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜]
          ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜) :

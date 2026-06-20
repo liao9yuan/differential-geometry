@@ -4,61 +4,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Topology.Order.Compact
 
-/-!
-# Lipschitz dependence of the inverse chart-Gram matrix on the metric 0-jet
-
-For a fixed chart base point `α` on a smooth manifold `M` and two smooth
-Riemannian metrics `g₁, g₂`, the inverse chart-Gram matrices
-`chartInvGramMatrix g₁ α x` and `chartInvGramMatrix g₂ α x` (the matrices
-`g^{kl}` of the inverse fibre Gram form in the chart-`α` frame) satisfy an
-entrywise Lipschitz estimate in the chart 0-jet of `g₁ − g₂`:
-
-```
-|g₁^{kl}(x) − g₂^{kl}(x)| ≤ C · (entry-sup of (Gram g₁ − Gram g₂) at x)
-```
-
-where `C` depends only on a uniform entrywise bound on the two inverse-Gram
-matrices.  This is the elementary first analytic input for the quasilinear
-DeTurck coefficient apparatus: the principal coefficients of the
-Ricci–DeTurck operator are polynomial functions of the inverse-metric
-entries `g^{kl}`, and their Lipschitz dependence on the metric reduces, at the
-0-jet level, to this matrix-inversion perturbation bound.
-
-## Strategy
-
-The algebraic engine is the matrix identity
-`A⁻¹ − B⁻¹ = A⁻¹ (B − A) B⁻¹` (`Matrix.inv_sub_inv`), valid whenever `A` and
-`B` are both invertible.  Expanding the `(i, j)` entry of the right-hand side
-as a double sum `∑_{p, q} A⁻¹_{ip} (B − A)_{pq} B⁻¹_{qj}` and bounding each
-factor by the relevant entry-sups gives the entrywise estimate with constant
-`n² · M²`, where `M` is a uniform bound on the inverse-Gram entries and `n` is
-the fibre dimension.
-
-On a closed Riemannian manifold the inverse-Gram entries admit a uniform
-bound `M` over any compact subset of the chart base set (continuity of the
-inverse-Gram entries on the chart source, by
-`chartInvGramMatrix_entry_contMDiffOn`, plus the extreme-value theorem).  This
-turns the per-point bound into one with a single constant `C` uniform over the
-chart kernel — the role of the `C(R)` constant on a fixed compact ball of
-metrics: any metric `g` with `‖g − g₀‖ ≤ R` has its inverse-Gram entries
-controlled by such a uniform `M`, and the perturbation bound then follows.
-
-## Main results
-
-* `Matrix.inv_entry_sub_abs_le_of_entry_bound` — the pure-matrix entrywise
-  perturbation engine.
-* `chartInvGramMatrix_entry_sub_abs_le` — the geometric per-point bound:
-  `|g₁^{kl}(x) − g₂^{kl}(x)| ≤ n² · M² · D`, where `D` bounds the chart-Gram
-  difference entrywise and `M` bounds the two inverse-Gram matrices entrywise.
-* `chartInvGramMatrix_entry_sub_abs_le_gramDiffSup` — the same bound stated
-  with the explicit chart-Gram-difference entry-sup `chartGramDiffSup` as the
-  perturbation magnitude.
-* `exists_chartInvGramMatrix_lipschitz_on_compact` — the uniform-over-compact
-  headline: a single constant `C > 0` with
-  `|g₁^{kl}(x) − g₂^{kl}(x)| ≤ C · chartGramDiffSup g₁ g₂ α x` for every `x` in
-  a compact subset of the chart base set, uniform over the chart kernel.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -82,11 +27,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- **Entrywise perturbation bound for matrix inversion.**
-
-Let `A B : Matrix (Fin n) (Fin n) ℝ` be invertible, with all entries of their
-inverses bounded by `M` and all entries of `B − A` bounded by `D`. Then every
-entry of `A⁻¹ − B⁻¹` is bounded by `n² · M² · D`. -/
 theorem _root_.Matrix.inv_entry_sub_abs_le_of_entry_bound
     {n : ℕ} {A B : Matrix (Fin n) (Fin n) ℝ}
     (hA : IsUnit A) (hB : IsUnit B) {M D : ℝ}
@@ -135,17 +75,13 @@ theorem _root_.Matrix.inv_entry_sub_abs_le_of_entry_bound
           nsmul_eq_mul]
         ring
 
-/-- The entry `L¹` norm of a square matrix: the sum of absolute values of all
-entries. -/
 def matrixEntryL1 {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) : ℝ :=
   ∑ pq : (Fin n) × (Fin n), |A pq.1 pq.2|
 
-/-- `matrixEntryL1` is non-negative. -/
 lemma matrixEntryL1_nonneg {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ) :
     0 ≤ matrixEntryL1 A :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-/-- Each entry of a matrix is bounded in absolute value by its entry `L¹` norm. -/
 lemma abs_entry_le_matrixEntryL1 {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ)
     (p q : Fin n) : |A p q| ≤ matrixEntryL1 A := by
   classical
@@ -153,18 +89,13 @@ lemma abs_entry_le_matrixEntryL1 {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ)
     (f := fun pq : (Fin n) × (Fin n) => |A pq.1 pq.2|)
     (fun pq _ => abs_nonneg _) (Finset.mem_univ (p, q))
 
-/-- The chart-Gram difference magnitude at `x`: the entry `L¹` norm of
-`chartGramMatrix g₁ α x − chartGramMatrix g₂ α x`.  This is the chart 0-jet
-magnitude of `g₁ − g₂` at `x` in the chart-`α` frame. -/
 def chartGramDiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M) : ℝ :=
   matrixEntryL1 (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x)
 
-/-- `chartGramDiffSup` is non-negative. -/
 lemma chartGramDiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M) :
     0 ≤ chartGramDiffSup (I := I) (M := M) g₁ g₂ α x :=
   matrixEntryL1_nonneg _
 
-/-- Each chart-Gram-difference entry is bounded by `chartGramDiffSup`. -/
 lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M)
     (p q : Fin (Module.finrank ℝ E)) :
@@ -174,16 +105,6 @@ lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x) p q
   rwa [Matrix.sub_apply] at h
 
-/-- **Per-point entrywise perturbation bound for the inverse chart-Gram
-matrix.**
-
-Let `g₁, g₂` be smooth Riemannian metrics, `α` a chart base point, and `x` a
-point of the chart-`α` base set.  If all entries of the two inverse chart-Gram
-matrices at `x` are bounded by `M`, and all entries of the chart-Gram
-difference are bounded by `D`, then every entry of the inverse-Gram difference
-satisfies
-`|g₁^{kl}(x) − g₂^{kl}(x)| ≤ n² · M² · D`,
-with `n = finrank ℝ E` the fibre dimension. -/
 theorem chartInvGramMatrix_entry_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -224,9 +145,6 @@ theorem chartInvGramMatrix_entry_sub_abs_le
   unfold chartInvGramMatrix
   exact h
 
-/-- The per-point bound expressed with the explicit chart-Gram-difference
-entry-sup `chartGramDiffSup` as the perturbation magnitude:
-`|g₁^{kl}(x) − g₂^{kl}(x)| ≤ n² · M² · chartGramDiffSup g₁ g₂ α x`. -/
 theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -242,9 +160,6 @@ theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (fun p q => chartGramMatrix_sub_entry_abs_le_gramDiffSup (I := I) (M := M)
       g₁ g₂ α x p q) k l
 
-/-- For a fixed metric `g` and chart base point `α`, the inverse chart-Gram
-entries are uniformly bounded (in absolute value) on any compact subset of the
-chart source. -/
 lemma exists_chartInvGramMatrix_entry_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
@@ -273,21 +188,6 @@ lemma exists_chartInvGramMatrix_entry_bound_on_compact
     exact abs_entry_le_matrixEntryL1 (chartInvGramMatrix (I := I) g α x) p q
   exact h_entry_le.trans (h_l1_le.trans (le_max_left _ _))
 
-/-- **Uniform Lipschitz dependence of the inverse chart-Gram matrix on the
-chart 0-jet of the metric difference, over a compact subset of the chart
-source.**
-
-For two smooth Riemannian metrics `g₁, g₂`, a chart base point `α`, and a
-compact subset `K` of the chart-`α` source, there is a single constant `C > 0`
-such that for every `x ∈ K` and every pair of indices `(k, l)`,
-```
-|g₁^{kl}(x) − g₂^{kl}(x)| ≤ C · chartGramDiffSup g₁ g₂ α x .
-```
-The constant `C = n² · M²` is built from the fibre dimension `n` and a uniform
-entry bound `M` on the two inverse chart-Gram matrices over `K`; it is uniform
-over the chart kernel `x ∈ K`.  On a fixed compact ball of metrics
-`{g : ‖g − g₀‖ ≤ R}` the entry bound `M` may be taken uniform over the ball, so
-`C` becomes the desired `C(R)`. -/
 theorem exists_chartInvGramMatrix_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set M} (hK : IsCompact K)

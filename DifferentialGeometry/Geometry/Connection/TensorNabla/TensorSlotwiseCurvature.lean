@@ -2,42 +2,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetric
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleCurvatureLeibniz
 
-/-!
-# Slot-wise curvature formula for the covariant `(0, t)`-tensor connection
-
-For the Levi-Civita connection `LeviCivita g` of a smooth Riemannian metric `g`, the induced
-covariant derivative `tensor0SCovariantDerivative t` on the `(0, t)`-tensor bundle has a Riemann
-curvature operator whose action on a covariant tensor is the **slot-wise** (derivation across the
-tensor slots) contraction with the base-tangent curvature `riemannSec (LeviCivita g)`. Concretely,
-for smooth tangent fields `X, W`, a smooth `(0, t)`-tensor section `A`, a point `x`, and a tangent
-tuple `u : Fin t → T_x M`,
-
-```
-(R^{(t)}(X, W) A x)(u₁, …, u_t)
-  = − ∑ₖ (A x)(u₁, …, R^{TM}(X, W) u_k, …, u_t),
-```
-
-where `R^{(t)} = riemannSec (tensor0SCovariantDerivative t (LeviCivita g))` is the curvature of the
-tensor connection and `R^{TM}(X, W) u_k` is the base-bundle Riemann curvature acting on the `k`-th
-argument slot.
-
-## Strategy
-
-The proof is an induction on `t`. The single inductive ingredient is the leading-slot peel of the
-tensor curvature `riemannSec_tensor0SCov_succ_consEval` (the second-order curried product rule),
-which expands the leading argument of the second covariant derivative; the curvature of the residual
-`(0, t)`-section is supplied by the induction hypothesis. The base case `t = 0` is the flatness of
-the scalar connection (mixed second covariant derivatives commute by the Schwarz identity
-`extDerivFun_apply_mlieBracket`, i.e. the symmetric scalar Hessian).
-
-## Main results
-
-* `riemannSec_tensor0SCov_zero_eq_zero` — the scalar (rank-`0`) curvature vanishes.
-* `riemannSec_tensor0SCov_succ_consEval` — the inductive leading-slot peel of the tensor curvature.
-* `riemannSec_tensor0SCov_apply_eval` — the slot-wise curvature formula on a tangent tuple, for the
-  covariant `(0, t)`-tensor connection (smooth-field form).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -63,14 +27,11 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
-/-- Smoothness predicate for a raw `(0, t)`-tensor section: the total-space map is `C^∞`. -/
 private abbrev TensorSmooth (t : ℕ) (A : Π b : M, Tensor0SSpace t I b) : Prop :=
   ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel t ℝ E)) ∞
     (fun b => TotalSpace.mk' (Tensor0SModel t ℝ E)
       (E := fun z : M => Tensor0SSpace t I z) b (A b))
 
-/-- The scalar function of `covApply (∇⁰) W A` is the directional exterior derivative of the
-scalar of `A` along `W`: `scalarFn (∇⁰_W A) b = extDerivFun (scalarFn A) b (W b)`. -/
 private lemma scalarFn_covApply_tensor0SCov_zero
     (g : SmoothRiemannianMetric I M) (A : Π b : M, Tensor0SSpace 0 I b)
     (W : Π b : M, TangentSpace I b) (b : M) :
@@ -79,10 +40,6 @@ private lemma scalarFn_covApply_tensor0SCov_zero
   rw [scalarFn_apply, covApply_apply, tensor0SCovariantDerivative_apply_zero]
   exact (tensor0Iso I M b).apply_symm_apply _
 
-/-- **The scalar (rank-`0`) curvature vanishes.** For smooth tangent fields `X, W` and a smooth
-`(0, 0)`-tensor (scalar) section `A`, the Riemann curvature of the scalar connection is zero at
-every point. This is the Schwarz identity `[X, W] f = X(W f) − W(X f)` for the scalar
-`f = scalarFn A`, packaged through the scalar-connection apply formula. -/
 theorem riemannSec_tensor0SCov_zero_eq_zero
     (g : SmoothRiemannianMetric I M)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -159,8 +116,6 @@ theorem riemannSec_tensor0SCov_zero_eq_zero
   rw [hW_eq, hX_eq, hschwarz]
   ring
 
-/-- The base-tangent Riemann curvature acting on a fixed slot vector `u`, packaged as the
-section-level `riemannSec` of the Levi-Civita connection along a smooth extension of `u`. -/
 def baseSlotCurv
     (g : SmoothRiemannianMetric I M)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -168,10 +123,6 @@ def baseSlotCurv
   riemannSec (LeviCivita (I := I) g) (fun b => X b) (fun b => W b)
     (fun b => smoothExtensionTangent (I := I) x u b) x
 
-/-- The generic Hom-bundle covariant derivative on `Hom(TM, (0, s)-tensors)`, instantiated
-with source bundle the tangent bundle and target the `(0, s)`-tensor bundle, both connected by
-the Levi-Civita connection and its induced `(0, s)`-tensor connection. This is the connection
-whose curvature–Leibniz rule `riemannSec_homBundleGen_apply_eq` supplies the leading-slot peel. -/
 noncomputable def homGenS (g : SmoothRiemannianMetric I M) (s : ℕ) :
     CovariantDerivative I (E →L[ℝ] Tensor0SModel s ℝ E)
       (fun x : M => TangentSpace I x →L[ℝ] Tensor0SSpace s I x) :=
@@ -181,17 +132,6 @@ noncomputable def homGenS (g : SmoothRiemannianMetric I M) (s : ℕ) :
     (LeviCivita (I := I) g)
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
 
-/-- **Section conjugation of the `(0, s + 1)`-tensor covariant derivative through `tensor0S_curry`.**
-For a `(0, s + 1)`-tensor section `S` differentiable at `x` and any direction `v`, the curry of the
-`(0, s + 1)` covariant derivative coincides with the generic Hom-bundle covariant derivative
-`homGenS` of the curried section:
-```
-tensor0S_curry s x (∇^{(0,s+1)}_v S x) = homGenS g s (curriedSection S) x v.
-```
-Both sides are CLMs `T_x M →L[ℝ] Tensor0SSpace s I x`; testing on the value `Y x` of any smooth
-vector field `Y`, the left side expands by `tensor0SCovariantDerivative_curriedSection_hom_leibniz`
-and the right by `homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt` into the **same**
-product-rule difference `∇^{(0,s)}_v (curry S · Y) x − curry S x (∇^{TM}_v Y)`. -/
 lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -203,7 +143,7 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   have hC := mdifferentiableAt_curriedSection_of_section (I := I) (M := M) s S hS
   apply ContinuousLinearMap.ext
   intro w
-  -- `Vext` extends the derivative direction `v`; `Y` extends the slot input `w`.
+  
   set Vext : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
       (smoothExtensionTangent_contMDiff (I := I) x v) with hVext_def
@@ -218,7 +158,7 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   have hYat : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  -- Right side at direction `v = Vext x`, slot `w = Y x`: the generic Hom product-rule difference.
+  
   have hgen := HomConnectionGen.homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
     I M E (TangentSpace I : M → Type _) (Tensor0SModel s ℝ E)
     (fun x : M => Tensor0SSpace s I x)
@@ -227,11 +167,11 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
     (curriedSection I M S) (x := x) hC
     (V_field := (Vext : Π b : M, TangentSpace I b)) (Y := (Y : Π b : M, TangentSpace I b))
     hVat hYat
-  -- Left side: the same product-rule difference, via the section Leibniz at direction `v`.
+  
   have hleib := tensor0SCovariantDerivative_curriedSection_hom_leibniz
     (I := I) (M := M) g s S hS Y v
-  -- Reduce the slot input `w` and the derivative direction `v` to the extensions' values, then
-  -- match the generic-Hom apply formula and the section Leibniz directly (both as `Vext x`/`Y x`).
+  
+  
   have hgoal : tensor0S_curry (I := I) (M := M) s x
         (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g) S x
           ((Vext : Π b : M, TangentSpace I b) x))
@@ -248,15 +188,6 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   rw [hVx, hYx] at hgoal
   exact hgoal
 
-/-- **Curvature conjugation through `tensor0S_curry`.** For smooth fields `X, W`, a smooth
-`(0, s + 1)`-tensor section `A`, and a point `x`, the curry of the `(0, s + 1)`-tensor curvature
-coincides with the generic Hom-bundle curvature `homGenS` of the curried section:
-```
-tensor0S_curry s x (R^{(s+1)}(X, W) A x) = R^{homGenS}(X, W) (curriedSection A) x.
-```
-This conjugates the curvature operator term-by-term through `riemannSec_def`, each term reduced by
-the section conjugation `tensor0S_curry_tensor0SCov_succ_eq_homGenS` (the inner covariant-derivative
-sections `∇_W A`, `∇_X A`, `A` are all differentiable at `x`). -/
 lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -267,15 +198,15 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
       riemannSec (homGenS (I := I) (M := M) g s) (fun b => X b) (fun b => W b)
         (curriedSection I M A) x := by
   classical
-  -- Global smoothness of `A` (`+1` degree, for `covApply` smoothness) and pointwise
-  -- differentiability of `A` at every base point.
+  
+  
   have hA1 : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ((∞ : WithTop ℕ∞) + 1)
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b (A b)) := by
     rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from by simp]; exact hA
   have hAatAll : ∀ b : M, TensorSectionMDiffAt (I := I) (s + 1) A b := fun b =>
     (hA b).mdifferentiableAt (by simp)
-  -- `TensorSectionMDiffAt (s+1)` of an inner covariant-derivative section `covApply ∇ Z A` at `x`.
+  
   have hcovApply_at : ∀ (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       TensorSectionMDiffAt (I := I) (s + 1)
         (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -284,8 +215,8 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
     have hsm := covApply_contMDiffOn (cov := tensor0SCovariantDerivative I M (s + 1)
       (LeviCivita (I := I) g)) Z.contMDiff hA1
     exact (hsm.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp)
-  -- The curried inner sections agree: `curriedSection (covApply ∇ Z A) =
-  -- covApply (homGenS) Z (curriedSection A)` (the section conjugation at every base point).
+  
+  
   have hcurry_covApply : ∀ (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       curriedSection I M
           (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -306,32 +237,6 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
       (VectorField.mlieBracket I (fun b => X b) (fun b => W b) x)]
   rw [hcurry_covApply W, hcurry_covApply X]
 
-/-- **Inductive leading-slot peel of the tensor curvature (posited curry-plumbing identity).**
-For smooth fields `X, W`, a smooth `(0, s + 1)`-tensor section `A`, a leading slot vector
-`u₀ : T_x M` and a residual tuple `u' : Fin s → T_x M`, the `(0, s + 1)` curvature evaluated on the
-cons-tuple peels its leading argument: it equals the `(0, s)` curvature of the leading-slot paired
-section (the contraction of `A` against a smooth extension of `u₀` in the leading argument), read on
-`u'`, minus the value of `A` with the base-tangent curvature `R^{TM}(X, W) u₀` inserted into the
-leading slot:
-
-```
-toModel (R^{(s+1)}(X, W) A x) (Fin.cons u₀ u')
-  = toModel (R^{(s)}(X, W) (b ↦ A b ⌟ ext u₀ b) x) u'
-    − toModel (A x) (Fin.cons (R^{TM}(X, W) u₀) u').
-```
-
-**Why this is TRUE.** This is the second-covariant-derivative expansion of the leading-slot peel
-`tensor0SCovariantDerivative_succ_consEval_peel` (the curried first-order product rule) applied to
-each of the three terms of `riemannSec`. Differentiating the product rule a second time produces, in
-addition to the rank-`s` curvature of the paired section and the leading-slot base curvature, four
-mixed `(∇A)(∇ext)` cross terms which cancel between the two derivative orderings `∇_X ∇_W` and
-`∇_W ∇_X` together with the bracket term — exactly the cancellation already carried out for the
-generic Hom-bundle in `riemannSec_homBundleGen_apply_eq`, here transported through the fibrewise
-currying `tensor0S_curry`. The leading-slot residue assembles to
-`riemannSec (LeviCivita g) X W (ext u₀) x = baseSlotCurv g X W x u₀` because the symmetric
-(torsion-free) part of the connection on the extension field cancels, leaving precisely the
-base-bundle Riemann curvature acting on the leading argument. This identity is the single inductive
-ingredient of the slot-wise curvature formula. -/
 theorem riemannSec_tensor0SCov_succ_consEval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -348,8 +253,8 @@ theorem riemannSec_tensor0SCov_succ_consEval
         Tensor0SSpace.toModel (A x)
           (Fin.cons (baseSlotCurv (I := I) g X W x u₀) u') := by
   classical
-  -- Package the leading-slot extension `ext u₀` and the curried section `curry A` as smooth
-  -- sections, as required by the generic Hom-bundle curvature–Leibniz rule.
+  
+  
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (smoothExtensionTangent (I := I) x u₀)
       (smoothExtensionTangent_contMDiff (I := I) x u₀) with hY_def
@@ -358,13 +263,13 @@ theorem riemannSec_tensor0SCov_succ_consEval
       (fun x : M => TangentSpace I x →L[ℝ] Tensor0SSpace s I x)⟯ :=
     ContMDiffSection.mk (curriedSection I M A)
       ((contMDiff_curriedSection_iff_section I M A).mp hA) with hAcurry_def
-  -- Step 1: peel the leading argument of the LHS via the curry-evaluation identity.
+  
   rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
       (fun b => X b) (fun b => W b) A x) (v0 := u₀) (vs := u')]
-  -- Step 2: conjugate the tensor curvature into the generic Hom-bundle curvature.
+  
   rw [tensor0S_curry_riemannSec_tensor0SCov_succ_eq (I := I) (M := M) g s X W A hA x]
-  -- Step 3: the generic Hom curvature–Leibniz rule (read at `u₀ = Y x`).
+  
   rw [show (u₀ : TangentSpace I x) = (Y : Π b : M, TangentSpace I b) x from hYx.symm]
   rw [show riemannSec (homGenS (I := I) (M := M) g s) (fun b => X b) (fun b => W b)
         (curriedSection I M A) x =
@@ -380,30 +285,14 @@ theorem riemannSec_tensor0SCov_succ_consEval
     (LeviCivita (I := I) g)
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) X W
     Acurry Y x]
-  -- Step 4: distribute `toModel(·)(u')` over the subtraction, identify the two residues.
+  
   rw [Tensor0SBundle.Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   rw [hYx]
-  -- Both residues now match the target: the first (paired-section curvature) and the second
-  -- (`Acurry x v` read on `u'` equals `A x (cons v u')` by the curry-evaluation identity) reduce
-  -- definitionally to the target's two slot-wise residues.
+  
+  
+  
   congr 1
 
-/-- **Slot-wise curvature formula for the covariant `(0, t)`-tensor connection (tuple form).**
-For smooth tangent fields `X, W`, a smooth `(0, t)`-tensor section `A`, a point `x`, and a tangent
-tuple `u : Fin t → T_x M`, the Riemann curvature of the tensor connection acts as the negated sum
-of the base-tangent curvature inserted into each argument slot:
-
-```
-toModel (R^{(t)}(X, W) A x) u
-  = − ∑ₖ toModel (A x) (Function.update u k (R^{TM}(X, W) (u k))),
-```
-
-where `R^{(t)} = riemannSec (tensor0SCovariantDerivative t (LeviCivita g))` and
-`R^{TM}(X, W) (u k) = baseSlotCurv g X W x (u k)` is the base-tangent Riemann curvature acting on the
-`k`-th slot. This is the standard formula expressing that the curvature of the induced connection on
-covariant tensors is the derivation extending the base-bundle curvature across the tensor slots. It
-is proved by induction on `t` using the leading-slot peel `riemannSec_tensor0SCov_succ_consEval`
-(inductive step) over the scalar flatness `riemannSec_tensor0SCov_zero_eq_zero` (base case). -/
 theorem riemannSec_tensor0SCov_apply_eval
     (g : SmoothRiemannianMetric I M) (t : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -423,19 +312,19 @@ theorem riemannSec_tensor0SCov_apply_eval
   | succ s ih =>
       intro A hA x u
       classical
-      -- The smooth paired section `b ↦ A b ⌟ (ext (u 0)) b`.
+      
       have hpaired_smooth : TensorSmooth (I := I) s
           (fun b => curriedSection I M A b (smoothExtensionTangent (I := I) x (u 0) b)) :=
         ContMDiff.clm_bundle_apply (b := id)
           ((contMDiff_curriedSection_iff_section I M A).mp hA)
           (smoothExtensionTangent_contMDiff (I := I) x (u 0))
-      -- Peel the leading slot.
+      
       rw [show u = Fin.cons (u 0) (Fin.tail u) from (Fin.cons_self_tail u).symm,
         riemannSec_tensor0SCov_succ_consEval (I := I) g s X W A hA x (u 0) (Fin.tail u)]
       have hih := ih (fun b => curriedSection I M A b (smoothExtensionTangent (I := I) x (u 0) b))
         hpaired_smooth x (Fin.tail u)
       rw [hih]
-      -- `paired x` evaluated on a tuple is `A x` on the cons with leading entry `u 0`.
+      
       have hpx : ∀ v : Fin s → TangentSpace I x,
           Tensor0SSpace.toModel
               (curriedSection I M A x (smoothExtensionTangent (I := I) x (u 0) x)) v =
@@ -446,7 +335,7 @@ theorem riemannSec_tensor0SCov_apply_eval
             (T := A x) (v0 := u 0) (vs := v)]
       rw [Finset.sum_congr rfl (fun k _ => by
         rw [hpx (Function.update (Fin.tail u) k (baseSlotCurv (I := I) g X W x (Fin.tail u k)))])]
-      -- Cons-update identities to assemble the `Fin (s + 1)` sum.
+      
       have hcons_lead :
           Fin.cons (baseSlotCurv (I := I) g X W x (u 0)) (Fin.tail u) =
             Function.update u 0 (baseSlotCurv (I := I) g X W x (u 0)) := by

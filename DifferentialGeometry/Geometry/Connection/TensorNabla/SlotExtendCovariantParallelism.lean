@@ -1,28 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculus
 
-/-! # Covariant parallelism of the leading-passenger-slot extension of an operator field
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g₀)` modelled on a real
-inner-product space `E`, the leading-passenger-slot extension `slotExtend g₀ r s Φ` of a smooth
-`(r, s)`-operator field inserts an extra covariant passenger slot at the front, read identically on
-source and target and parallel-transported trivially.  This file records the two generic
-`∇₀`-compatibility facts of `slotExtend`, building blocks of any passenger-slot parallel recursion
-(e.g. the cometric `g₀⁻¹` double-trace parallelism propagated through its gradient-shift recursion):
-
-* `tensorCovDerivAt_slotExtend_eq` — the atomic **directional** commutation: the directional covariant
-  derivative of `slotExtend g₀ r s Φ` is the `slotExtendFib` of the directional covariant derivative of
-  `Φ` (the connection differentiates only the contraction coefficient, which `slotExtend` relabels
-  without touching the passenger slot);
-* `covGrad_slotExtend_eq_zero_of_covGrad_eq_zero` — the section-level consequence: the covariant
-  gradient annihilates the slot-extension of a `∇₀`-parallel field (`covGrad Φ = 0 ⟹ covGrad (slotExtend
-  Φ) = 0`).
-
-These are generic operator-field covariant-calculus facts — no metric-trace, no cometric, no DeTurck
-content — and are the slot-recursion engine on which a parallel passenger-passing contraction's
-parallelism propagates (`Analysis/Spectral/Tensor/CovGrad/CometricDoubleTraceParallelContraction.lean`,
-`Analysis/Spectral/Intrinsic/DeTurck/SegmentMetricCurvatureDifferenceCovJet.lean`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -52,23 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **Leading-passenger-slot reading of the directional covariant derivative of a slot-extension.**
-Reading the leading covariant passenger slot (via `tensor0S_curry`) of the directional covariant
-derivative of the slot-extended operator field `slotExtend g₀ r s Φ`, in direction `v0`, recovers the
-directional covariant derivative `tensorCovDerivAt g₀ r s Φ x v` acting on the curried passenger
-reading of the input:
-```
-tensor0S_curry s x ((∇_v (slotExtend Φ)) D) v0 = (∇_v Φ) (tensor0S_curry r x D v0).
-```
-Tested on a local smooth `(0, r + 1)`-section `w` (`w x = D`) and a local smooth vector field `Y`
-(`Y x = v0`): the Hom-connection product rule `tensorRSCovariantDerivative_apply` expands both
-`∇_v (slotExtend Φ)` (on `w`) and `∇_v Φ` (on the curried passenger section
-`y ↦ tensor0S_curry r y (w y) (Y y)`); the curry-Leibniz
-`tensor0SCovariantDerivative_curriedSection_hom_leibniz` (applied to the uncurried slot-extension
-section `y ↦ (slotExtend Φ)(y)(w y)` and, separately, to `w`) passes the connection through the
-leading-slot curry, and `slotExtendFib_apply` reads the slot-extended fibre operator as left-composition
-by `Φ`; the shared `∇^{(0,s)}`-of-composition term cancels and the moving-passenger corrections match,
-leaving the claimed identity. -/
 private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s) (x : M) (v : E)
     (D : Tensor0SBundle.Tensor0SSpace (r + 1) I x) (v0 : E) :
@@ -159,26 +119,7 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
   abel
 
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the directional covariant-derivative commutation with the leading-passenger-slot
-extension.)**  The atomic commutation fact beneath the slot-extension parallelism step: the directional
-covariant derivative of the passenger-slot-extended operator field `slotExtend g r s Φ` is the
-slot-extension of the directional covariant derivative of `Φ`:
-```
-tensorCovDerivAt g (r + 1) (s + 1) (slotExtend g r s Φ) x v = slotExtendFib g r s x (tensorCovDerivAt g r s Φ x v).
-```
-The leading passenger covariant slot is read identically on source and target (`slotExtendFib_apply_eval`)
-and is parallel-transported trivially, so differentiating the slot-extended operator commutes with the
-slot insertion: the connection differentiates only the *contraction coefficient*, which `slotExtend`
-relabels without touching the passenger slot.  This is the genuine deep covariant-derivative ×
-slot-insertion commutation (the directional, hence permute-free, form on which the section-level
-parallelism step is built).  It is **non-vacuous**: it is a genuine commutation, false for a connection
-that does not parallel-transport the passenger slot.
 
-**Proof.**  Both sides are `(r + 1, s + 1)`-tensors; test on a `(0, r + 1)`-tensor `D` and a tuple
-`Fin.cons (m 0) (vecTail m)`.  The right side reads off the new passenger slot first
-(`slotExtendFib_apply_eval`); reading the left side's leading slot through `tensor0S_curry`
-(`tensor0S_curry_apply_eval`), the equality reduces to the leading-passenger-slot reading
-`core_curry_reading` of the directional covariant derivative of the slot extension. -/
 theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s) (x : M) (v : E) :
     Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ (r + 1) (s + 1)
@@ -204,30 +145,15 @@ theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s 
   exact core_curry_reading (I := I) (M := M) g₀ r s Φ x v D (m 0)
 
 set_option linter.unusedSectionVars false in
-/-- **The covariant gradient annihilates a leading-passenger-slot extension of a parallel field.**  The
-covariant gradient commutes with the leading-passenger-slot extension `slotExtend`: if a smooth
-`(r, s)`-operator field `Φ` is `∇₀`-parallel (`covGrad g r s Φ = 0`), then its leading-passenger-slot
-extension `slotExtend g r s Φ` is also `∇₀`-parallel:
-```
-covGrad g r s Φ = 0  ⟹  covGrad g (r + 1) (s + 1) (slotExtend g r s Φ) = 0.
-```
 
-**Decomposition.**  `covGrad Φ = 0` forces the directional covariant derivative `tensorCovDerivAt g r s Φ
-x v` to vanish at every base point and direction (`covGrad_toSection_apply_eval` reads the gradient slot
-as the directional derivative).  By the directional commutation `tensorCovDerivAt_slotExtend_eq` the
-directional derivative of `slotExtend Φ` is `slotExtendFib` of that vanishing directional derivative, and
-`slotExtendFib` is `ℝ`-linear (it sends the zero fibre operator to the zero fibre operator,
-`map_zero`), so the directional derivative of `slotExtend Φ` vanishes — hence so does its covariant
-gradient.  It is **non-vacuous**: the structural step propagating the cometric parallelism through the
-passenger-slot recursion (a nonzero `covGrad Φ` would have a nonzero extension). -/
 theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s)
     (hΦ : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ r s Φ = 0) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (r + 1) (s + 1)
         (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) = 0 := by
   classical
-  -- The slot-extended fibre operator sends the zero fibre operator to zero (`slotExtendFib` is the
-  -- conjugation of left-composition by the operator, and `(0).comp _ = 0`).
+  
+  
   have hslotZero : ∀ (y : M),
       Integral.Connection.slotExtendFib (I := I) (M := M) g₀ r s y
           (0 : Tensor0SBundle.Tensor0SSpace r I y →L[ℝ] Tensor0SBundle.Tensor0SSpace s I y) =
@@ -237,7 +163,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     intro D
     rw [Integral.Connection.slotExtendFib_apply, ContinuousLinearMap.zero_comp, map_zero,
       ContinuousLinearMap.zero_apply]
-  -- `covGrad Φ = 0` forces the directional covariant derivative of `Φ` to vanish everywhere.
+  
   have hdir : ∀ (x : M) (v : E),
       Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v = 0 := by
     intro x v
@@ -245,7 +171,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     intro D
     apply Tensor0SBundle.Tensor0SSpace.toModel_injective
     refine ContinuousMultilinearMap.ext (fun m => ?_)
-    -- Read the gradient slot of `covGrad Φ = 0` in direction `v` on `D` and the tuple `m`.
+    
     have heval := Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval
       (I := I) (M := M) g₀ r s Φ x D (Fin.cons v m)
     rw [hΦ, Integral.L2.SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply,
@@ -257,8 +183,8 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     rw [ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
       ContinuousMultilinearMap.zero_apply]
     exact heval.symm
-  -- The directional derivative of `slotExtend Φ` is `slotExtendFib` of the (vanishing) directional
-  -- derivative of `Φ`, hence vanishes; the section-level covariant gradient therefore vanishes.
+  
+  
   apply Integral.L2.SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x

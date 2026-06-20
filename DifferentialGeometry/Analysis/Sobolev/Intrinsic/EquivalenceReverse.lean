@@ -1,46 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 
-/-!
-# Reverse bridge: intrinsic-`L^p` Sobolev components to chart-based norm
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`
-modelled on a finite-dimensional real inner-product space `E`, and an exponent
-`1 ≤ p < ∞`, this file provides the reverse direction of the chart-based to
-intrinsic-`L^p` Sobolev norm comparison: a uniform-in-`u` bound
-
-  `wkpNormChart g 1 p u ≤ ENNReal.ofReal C *
-      (eLpNorm u p μ_g + eLpNorm √g(∇u, ∇u) p μ_g)`
-
-for every smooth `u : M → ℝ`. The constant `C ≥ 0` depends only on `g`, `p`,
-and the canonical chart-atlas partition of unity, and is otherwise uniform in
-`u`.
-
-The forward direction (uniform-in-`u`) is delivered in
-`Intrinsic/EquivalenceForward.lean` via
-`w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform_full`.
-
-## Mathematical strategy
-
-For each chart `α` in the canonical finite POU finset, we bound the per-α
-component of `wkpNormChart` by the manifold L^p norms on the chart-α support.
-
-The L^p part `eLpNorm (chartPushed ρ α u) p (volume.restrict ChTE)` is bounded
-via the existing reverse chart-density bridge
-`eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform_of_subset`.
-
-The gradient part requires a direct estimate: for `y` in the chart target,
-the partial derivative `(∂_i chartSmoothExt α (ρ_α u))(y)` is, by the chain rule,
-a manifold derivative `mfderiv (ρ_α u) x w_i(x)` where `w_i(x)` is the
-pushforward of the standard Euclidean basis vector `e_i` through the chart
-inverse to a tangent vector at `x`. By Cauchy-Schwarz on the metric:
-`|mfderiv (ρ_α u) x w_i(x)| = |g.inner x (gradFun (ρ_α u) x) w_i(x)|
-  ≤ √g(grad, grad)(x) · √g(w_i(x), w_i(x))`. The factor `√g(w_i(x), w_i(x))`
-is a continuous function of `x`, bounded above on the compact support of
-`ρ_α`. The Leibniz rule on `ρ_α u` then bounds `√g(grad(ρ_α u), grad(ρ_α u))`
-by a constant times `√g(grad u, grad u) + |u|`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -68,9 +28,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 local notation "EuclN_E" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Cauchy-Schwarz inequality for the metric inner product `g.inner x` at a
-fixed point `x`. The proof uses the standard polynomial argument applied to
-`t ↦ g.inner x (v + t • w) (v + t • w) ≥ 0`. -/
 private lemma g_inner_cauchy_schwarz_sq
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
@@ -157,7 +114,6 @@ private lemma g_inner_cauchy_schwarz_sq
     rw [div_le_iff₀ h_w_pos] at h_step
     linarith
 
-/-- Square-root form of the metric Cauchy-Schwarz inequality. -/
 private lemma abs_g_inner_le_sqrt_mul_sqrt
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
@@ -184,10 +140,6 @@ private lemma abs_g_inner_le_sqrt_mul_sqrt
   rw [Real.sqrt_mul h_v_nn] at h_sqrt_le
   exact h_sqrt_le
 
-/-- The "chart-target unit" tangent vector at `x` corresponding to the
-standard Euclidean basis vector `e_i` (transported back through `toEuclidean`
-and through the chart trivialization). This is the chart pushforward of
-`(toEuclidean.symm) e_i ∈ E` to a tangent vector at `x`. -/
 private noncomputable def chartTargetUnitFiber (α : M)
     (i : Fin (Module.finrank ℝ E)) (x : M) : TangentSpace I x :=
   (trivializationAt E (TangentSpace I) α).symm x
@@ -213,8 +165,6 @@ private lemma chartTargetUnit_smoothOn (α : M)
   exact congrArg Prod.snd
     ((trivializationAt E (TangentSpace I) α).apply_mk_symm hx v_E)
 
-/-- The function `x ↦ g.inner x (w_i(x)) (w_i(x))` is continuous on the chart
-base set. -/
 private lemma g_inner_chartTargetUnit_continuousOn
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) (i : Fin (Module.finrank ℝ E)) :
@@ -245,8 +195,6 @@ private lemma g_inner_chartTargetUnit_continuousOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact (hpx.2.continuousWithinAt)
 
-/-- Bound on `g.inner x (w_i(x)) (w_i(x))` over the compact `tsupport(ρ_α)`,
-summed over `i`. -/
 private noncomputable def chartTargetUnitSqSumSupOnPouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -332,8 +280,6 @@ private lemma chartTargetUnitSqSumSupOnPouTsupport_nonneg
     exact le_trans h_val_nn h_le
   · rw [dif_neg hKα_ne]
 
-/-- For `x ∈ tsupport ρ_α`, the sum `∑ᵢ g.inner x (w_i(x)) (w_i(x))` is bounded by
-the chosen sup. -/
 private lemma chartTargetUnitSqSum_le_sup
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -372,8 +318,6 @@ private lemma chartTargetUnitSqSum_le_sup
     (hKα_compact.image_of_continuousOn h_cont).bddAbove
   exact hImg.choose_spec ⟨x, hx, rfl⟩
 
-/-- `mfderiv (extChartAt α) x` applied to `(triv.symm x v_E)` returns `v_E`,
-for `x` in the trivialization base set and `v_E ∈ E`. -/
 private lemma mfderiv_extChartAt_apply_triv_symm
     (α : M) {x : M} (hxchart : x ∈ (chartAt H α).source) (v_E : E) :
     mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
@@ -390,11 +334,6 @@ private lemma mfderiv_extChartAt_apply_triv_symm
   exact Trivialization.continuousLinearMapAt_symmL
     (R := ℝ) (trivializationAt E (TangentSpace I) α) hbase v_E
 
-/-- General chain-rule identity (mirrors
-`mfderiv_chartBasisVecFiber_of_mdifferentiableAt` with a constant vector
-parameter): for `f` mdifferentiable at `x`, `x` in the chart source,
-`extChartAt α x` in the interior of the chart target, and any `v_E ∈ E`,
-`mfderiv f x ((triv.symm x) v_E) = fderiv (scalarOnE α f) (φ x) v_E`. -/
 private lemma mfderiv_triv_symm_const_eq_fderiv_scalarOnE
     (α : M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -481,9 +420,6 @@ private lemma mfderiv_triv_symm_const_eq_fderiv_scalarOnE
             (I := I) α f) (φ x)) v_E
   rw [mfderiv_extChartAt_apply_triv_symm (I := I) α hxchart v_E]
 
-/-- Chain rule: `fderiv (chartSmoothExt α f) y (e_i)` equals
-`fderiv (scalarOnE α f) (toEuclidean.symm y) (toEuclidean.symm e_i)`
-for `y ∈ chartTargetEuclid α`, where `e_i = EuclideanSpace.single i 1`. -/
 private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
     [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -566,9 +502,6 @@ private lemma fderiv_chartSmoothExt_apply_eq_fderiv_scalarOnE
   rw [h_fderiv_eq]
   rfl
 
-/-- For smooth `f` with `tsupport f ⊆ tsupport(ρ_α)`, and `y ∈ chartTargetEuclid α`
-with `x = (extChartAt α)^{-1}(toEuclidean.symm y)`:
-`(fderiv (chartSmoothExt α f) y (e_i))² ≤ g(grad,grad)(x) · g(w_i,w_i)(x)`. -/
 private lemma sq_fderiv_chartSmoothExt_apply_le_g_inner_mul
     [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -645,7 +578,6 @@ private lemma sq_fderiv_chartSmoothExt_apply_le_g_inner_mul
       (I := I) g f x)
     (chartTargetUnitFiber (I := I) α i x)
 
-/-- Leibniz: `gradFun g (ρ · u) x = ρ(x) · gradFun g u x + u(x) · gradFun g ρ x`. -/
 private lemma gradFun_mul_pointwise
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {ρ u : M → ℝ} {x : M}
@@ -722,8 +654,6 @@ private lemma gradFun_mul_pointwise
     rw [hd_ρ_def]
     exact DifferentialGeometry.Integral.DivergenceTheorem.inner_gradFun (I := I) g ρ x v]
 
-/-- For closed Riemannian manifolds and smooth `f`, the function
-`x ↦ √g(grad f, grad f)(x)` is continuous. -/
 private lemma continuous_sqrt_g_inner_gradFun_self
     [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -749,7 +679,6 @@ private lemma continuous_sqrt_g_inner_gradFun_self
   rw [hcoe] at hcont
   exact Real.continuous_sqrt.comp hcont
 
-/-- A continuous function on a closed (compact) manifold has a finite sup. -/
 private lemma exists_continuous_sup_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {f : M → ℝ} (hf : Continuous f) (hf_nn : ∀ x, 0 ≤ f x) :
@@ -762,8 +691,6 @@ private lemma exists_continuous_sup_of_compactSpace
     exact le_trans (hf_nn x₀) (hC_le ⟨x₀, rfl⟩)
   · refine ⟨0, le_refl _, fun x => (hM ⟨x⟩).elim⟩
 
-/-- Continuous sup bound on `|ρ_α(x)|` over compact M. Since `0 ≤ ρ_α ≤ 1`, the
-bound is `1`. -/
 private lemma chartAtlasPOU_le_one
     [T2Space M] [SigmaCompactSpace M] (α : M) (x : M) :
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -783,7 +710,6 @@ private lemma abs_chartAtlasPOU_le_one
   abs_le.mpr ⟨by linarith [chartAtlasPOU_nonneg (I := I) (M := M) α x],
     chartAtlasPOU_le_one (I := I) (M := M) α x⟩
 
-/-- The Leibniz pointwise bound on the metric norm of `grad(ρ_α u)`. -/
 private lemma sqrt_g_inner_gradFun_pou_mul_le
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -937,8 +863,6 @@ private lemma sqrt_g_inner_gradFun_pou_mul_le
         add_le_add h_step1 h_step2
     _ = K * (|u x| + Real.sqrt (g.inner x gu gu)) := by ring
 
-/-- `chartSmoothExt α (ρ_α u) y` agrees with `chartPushed (chartAtlasPOU) α u y` on
-the chart target. -/
 lemma chartSmoothExt_eq_chartPushed_pou_on_target
     [T2Space M] [SigmaCompactSpace M] (α : M) (u : M → ℝ)
     {y : EuclN_E}
@@ -986,8 +910,6 @@ lemma chartSmoothExt_eq_chartPushed_pou_ae
       (I := I) (M := M) α)] with y hy
   exact chartSmoothExt_eq_chartPushed_pou_on_target (I := I) (M := M) α u hy
 
-/-- For closed manifolds and smooth `u`, the function
-`chartSmoothExt α (ρ_α u)` is C^∞ on EuclN. -/
 lemma contDiff_chartSmoothExt_pou_mul_local_reverse
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -1168,9 +1090,6 @@ private lemma eLpNorm_chartPushed_le_const_mul_eLpNorm_u
       ≤ 1 * |u x| := by gcongr
     _ = |u x| := one_mul _
 
-/-- Pointwise bound for `|fderiv chartSmoothExt α (ρ_α u) y e_i|`:
-`≤ K · (chartPushedRaw α (|u| + √g(grad u, grad u))) y`,
-with `K` uniform in `u`. -/
 private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1554,9 +1473,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le
             (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z)
             (DifferentialGeometry.Integral.DivergenceTheorem.gradFun (I := I) g u z))) hy_in]
 
-/-- Refinement of `abs_fderiv_chartSmoothExt_apply_pou_mul_le` using the indicator of
-`tsupport ρ_α`. Since the LHS vanishes off the chart pushforward of `tsupport ρ_α`,
-the bound holds with the indicator-truncated `v`. -/
 private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1662,10 +1578,6 @@ private lemma abs_fderiv_chartSmoothExt_apply_pou_mul_le_indicator
       (I := I) α _ hy_in]
     exact h_full
 
-/-- Per-α gradient L^p bound: for each α and smooth `u`, the L^p norm on the
-chart target of the partial `e_i` of the chart-pushed function is bounded by a
-constant times the manifold L^p norm of `|u| + √g(grad u, grad u)`,
-with constant uniform in `u`. -/
 theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1847,8 +1759,6 @@ theorem eLpNorm_fderiv_chartSmoothExt_apply_le_const_mul
               (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)) := by
         rw [← mul_assoc, ← ENNReal.ofReal_mul hK_nn]
 
-/-- The classical partial of `chartSmoothExt α (ρ_α u)` agrees a.e. on
-`volume.restrict ChTE` with `chosenWeakPartial' p i (chartPushed ρ α u) ChTE`. -/
 lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -2125,7 +2035,6 @@ lemma chosenWeakPartial_chartPushed_ae_eq_fderiv
     h_chosen_chartPushed_isWeak_psi h_classical_isWeak
     h_chosen_chartPushed_loc h_classical_loc
 
-/-- Sum over `Fin 1 → Fin d` indexed via the natural equivalence. -/
 private lemma sum_Fin1_eq_sum_Fin (d : ℕ)
     (f : Fin (d) → ℝ≥0∞) :
     ∑ β : Fin 1 → Fin d, f (β 0) = ∑ i : Fin d, f i := by
@@ -2137,8 +2046,6 @@ private lemma sum_Fin1_eq_sum_Fin (d : ℕ)
       right_inv := fun _ => rfl }
   exact Fintype.sum_equiv e _ _ (fun _ => rfl)
 
-/-- For each α and smooth `u`, the per-α `wkpNorm` term is bounded by
-`C_α · (eLpNorm u + eLpNorm √g(grad u, grad u))`, with `C_α` uniform in `u`. -/
 private lemma wkpNorm_chartPushed_le_const_mul_per_α
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -2355,13 +2262,6 @@ private lemma chartPushed_eq_zero_of_pou_zero
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 from by rw [h_pou_zero]]
   simp
 
-/-- Reverse direction (uniform-in-`u`). For a closed Riemannian manifold
-modelled on a finite-dim real inner-product space and an exponent
-`1 ≤ p < ∞`, there is a finite constant `C ≥ 0` (depending only on `g`, `p`,
-and the canonical chart-atlas partition of unity) such that for every smooth
-`u : M → ℝ`, the chart-based Sobolev norm is bounded by `ENNReal.ofReal C`
-times the sum of the manifold L^p norm of `u` and the manifold L^p norm of
-the metric norm of the Riemannian gradient of `u`. -/
 theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

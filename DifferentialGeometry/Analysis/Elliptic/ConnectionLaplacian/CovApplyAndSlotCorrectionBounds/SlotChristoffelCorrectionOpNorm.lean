@@ -2,50 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
-/-!
-# Pointwise operator-norm bound for the chart-frame slot Christoffel corrections
-
-For a smooth Riemannian manifold `(M, g)` with chart base point `α : M`, an
-`(r, s)`-tensor section `T`, a tangent vector field `X`, a base point `b : M`,
-and a slot index `k : Fin r` (input) or `l : Fin s` (output), this file
-bounds the operator norm of the slot Christoffel corrections appearing in
-`chartTensorRSCovariantDerivative` by a single Christoffel-derived factor
-times the fibre norm `‖T b‖`.
-
-The slot correction at `b` factorises through the chart Levi-Civita parallel
-CLM `Φ := chartLeviCivitaParallelCLM g α b X` (which only depends on `X`
-through the value `X b`). Define
-
-  `c_Φ b X := max ‖Φ‖ 1 = max ‖chartLeviCivitaParallelCLM g α b X‖ 1`.
-
-For each input slot `k : Fin r`:
-
-  `‖chartTensorRSInputSlotCorrection r s g α T X b k‖ ≤ (c_Φ b X) ^ r · ‖T b‖`.
-
-For each output slot `l : Fin s`:
-
-  `‖chartTensorRSOutputSlotCorrection r s g α T X b l‖ ≤ (c_Φ b X) ^ s · ‖T b‖`.
-
-The bound is **pointwise** in `b` and `X`; no compactness or partition-of-unity
-hypothesis is needed. Composed with any uniform bound `‖Φ‖ ≤ C(b) · ‖X b‖` on
-a compact set (e.g.
-`chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport` in the
-spectral layer) this immediately yields a uniform op-norm bound for the slot
-corrections of the form `(Christoffel constant) · ‖T b‖`.
-
-## Main declarations
-
-* `slotChristoffelCLMFactor` — abbreviation
-  `(max ‖chartLeviCivitaParallelCLM g α b X‖ 1) ^ n` for the slot-product
-  factor of arity `n`, capturing the slot-CLM contribution.
-* `tensorSlotSubstCLM_apply_norm_le` — pointwise factor bound
-  `‖tensorSlotSubstCLM n b Φ x‖ ≤ (∏ ‖Φ i‖) · ‖x‖`.
-* `tangentSlotCLM_prod_norm_le` — slot-substitution product bound
-  `(∏ ‖tangentSlotCLM n k Φ i‖) ≤ (max ‖Φ‖ 1) ^ n`.
-* `chartTensorRSInputSlotCorrection_opNorm_le` — the headline input-slot bound.
-* `chartTensorRSOutputSlotCorrection_opNorm_le` — the headline output-slot bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -70,15 +26,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- Pointwise upper bound on `tensorSlotSubstCLM` in the model fibre norm.
-The argument proceeds in three steps:
-
-1. By definition, `tensorSlotSubstCLM n b Φ x = CLE.symm (compCLML Φ (CLE x))`.
-2. The CLE / CLE.symm preserves norms (`tensor0SSpace_continuousLinearEquiv`
-   is a norm-preserving identification of the bundle fibre with the model
-   fibre), so the LHS norm equals `‖compCLML Φ (CLE x)‖`.
-3. `compCLML Φ` is a CLM with op-norm `≤ ∏ ‖Φ i‖` by Mathlib's
-   `ContinuousMultilinearMap.norm_compContinuousLinearMapL_le`. -/
 lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (x : Tensor0SSpace n I b) :
@@ -135,8 +82,6 @@ lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
 
-/-- Per-slot bound on `tangentSlotCLM`'s factors: identity at non-substituted
-slots (`≤ 1`), the substituted CLM at the substituted slot (`= ‖Φ‖`). -/
 lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) :
@@ -150,10 +95,6 @@ lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
       ContinuousLinearMap.norm_id_le
     exact h_id.trans (le_max_right _ _)
 
-/-- The product of the per-slot factor norms is dominated by `(max ‖Φ‖ 1) ^ n`.
-At the substituted slot the factor norm is `‖Φ‖`, at every other slot it is
-`‖id‖ ≤ 1`; we absorb both into the `max`-with-`1` so the bound covers all
-cases uniformly. -/
 lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     (∏ i : Fin n, ‖tangentSlotCLM (I := I) n k Φ i‖) ≤
@@ -166,11 +107,6 @@ lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
   · intro i _; exact norm_nonneg _
   · intro i _; exact tangentSlotCLM_factor_norm_le (I := I) n b k Φ i
 
-/-- `tensorSlotSubstCLM n b Φ` viewed as an element of `TensorRSSpace n n I b`.
-
-The two types are definitionally equal (`TensorRSSpace n n I b` unfolds to
-`Tensor0SSpace n I b →L[ℝ] Tensor0SSpace n I b`); this packaging is purely
-for `Norm`-instance access. -/
 def tensorSlotSubstCLMRS (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     TensorRSSpace n n I b :=
@@ -183,17 +119,11 @@ def tensorSlotSubstCLMRS (n : ℕ) (b : M)
       tensorSlotSubstCLMRS (I := I) n b Φ) x =
       tensorSlotSubstCLM (I := I) n b Φ x := rfl
 
-/-- The product of the slot-CLM factor norms is non-negative. -/
 private lemma slotSubstCLM_factor_prod_nonneg (n : ℕ) {b : M}
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     0 ≤ ∏ i : Fin n, ‖Φ i‖ :=
   Finset.prod_nonneg (fun _ _ => norm_nonneg _)
 
-/-- **Operator-norm bound for `tensorSlotSubstCLM`.**
-
-`tensorSlotSubstCLM n b Φ`, packaged as a `TensorRSSpace n n I b` element,
-has norm bounded by `∏ ‖Φ i‖`. The bound is the `TensorRSSpace`-level lift
-of `tensorSlotSubstCLM_apply_norm_le`. -/
 theorem tensorSlotSubstCLM_opNorm_le (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     ‖tensorSlotSubstCLMRS (I := I) n b Φ‖ ≤ ∏ i : Fin n, ‖Φ i‖ := by
@@ -203,14 +133,6 @@ theorem tensorSlotSubstCLM_opNorm_le (n : ℕ) (b : M)
   intro x
   exact tensorSlotSubstCLM_apply_norm_le (I := I) n b Φ x
 
-/-- **Composite op-norm bound for the slot CLM used in the slot Christoffel
-corrections.**
-
-`tensorSlotSubstCLM n b (tangentSlotCLM n k Φ)` is the single-slot
-substitution CLM appearing inside both `chartTensorRSInputSlotCorrection`
-(with `n = r`) and `chartTensorRSOutputSlotCorrection` (with `n = s`). Its
-`TensorRSSpace`-norm is bounded by `(max ‖Φ‖ 1) ^ n`, combining the
-substitution-CLM op-norm bound with the slot-factor product bound. -/
 theorem tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     ‖tensorSlotSubstCLMRS (I := I) n b
@@ -219,14 +141,6 @@ theorem tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (n : ℕ) (b : M)
       (tangentSlotCLM (I := I) n k Φ)).trans
     (tangentSlotCLM_prod_norm_le (I := I) n b k Φ)
 
-/-- **Uniform op-norm bound for the input-slot substitution CLM in terms of
-the chart Levi-Civita parallel CLM.**
-
-Specialising `Φ` to `chartLeviCivitaParallelCLM g α b X`, the input-slot
-substitution CLM has `TensorRSSpace`-norm bounded by
-`(max ‖chartLeviCivitaParallelCLM g α b X‖ 1) ^ r`. Combined with a uniform
-bound on `‖chartLeviCivitaParallelCLM g α b X‖` over a compact set this
-yields a uniform op-norm bound for the slot CLM on that compact set. -/
 theorem tensorSlotSubstCLM_inputSlotChartCLM_opNorm_le (r : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') (b : M) (k : Fin r) :
@@ -236,12 +150,6 @@ theorem tensorSlotSubstCLM_inputSlotChartCLM_opNorm_le (r : ℕ)
       (max ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ 1) ^ r :=
   tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (I := I) r b k _
 
-/-- **Uniform op-norm bound for the output-slot substitution CLM in terms
-of the chart Levi-Civita parallel CLM.**
-
-The dual statement of `tensorSlotSubstCLM_inputSlotChartCLM_opNorm_le`, on
-the output-side `(0, s)`-tensor space, used inside
-`chartTensorRSOutputSlotCorrection`. -/
 theorem tensorSlotSubstCLM_outputSlotChartCLM_opNorm_le (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') (b : M) (l : Fin s) :
@@ -251,9 +159,6 @@ theorem tensorSlotSubstCLM_outputSlotChartCLM_opNorm_le (s : ℕ)
       (max ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ 1) ^ s :=
   tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (I := I) s b l _
 
-/-- **Headline.** Op-norm bound for the `k`-th input-slot Christoffel
-correction, by a Christoffel factor `(max ‖chartLeviCivitaParallelCLM g α b X‖ 1) ^ r`
-times the fibre norm `‖T b‖`. -/
 theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -322,9 +227,6 @@ theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
   rw [h_rearrange] at hChain2
   exact hChain2
 
-/-- **Headline.** Op-norm bound for the `l`-th output-slot Christoffel
-correction, by a Christoffel factor `(max ‖chartLeviCivitaParallelCLM g α b X‖ 1) ^ s`
-times the fibre norm `‖T b‖`. -/
 theorem chartTensorRSOutputSlotCorrection_opNorm_le (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')

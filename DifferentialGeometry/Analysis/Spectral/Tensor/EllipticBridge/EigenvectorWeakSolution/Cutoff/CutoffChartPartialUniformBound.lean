@@ -5,40 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrec
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
-/-!
-# A uniform `L²` bound for the chosen weak chart-partials of the cutoff chart component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and a chart center
-`α : M`, the cutoff-weighted Euclidean chart component
-`cutoffComponentEuclid g r s S α Idx Jdx` is the chart push-forward of the
-manifold scalar field `chartKernelCutoff α · tensorChartComponentRaw …`. The
-cutoff `chartKernelCutoff α` is a fixed smooth `[0, 1]`-valued bump compactly
-supported inside the chart-`α` source. The cutoff chart component is therefore
-globally `C^∞` on the Euclidean model space with compact support inside the
-Euclidean chart target, so each of its chosen weak chart-partials is
-`L²`-finite.
-
-This file assembles the headline uniform-in-`S` `L²` bound on those chosen weak
-chart-partials, summed over the chart-coordinate directions. It is the
-cutoff-weight analogue of
-`exists_const_sum_eLpNorm_chosenWeakPartial'_tensorChartComponent_le_uniform`
-(the partition-of-unity-weighted version of `ChartPartialUniformBound.lean`),
-obtained by the same Leibniz factorisation: the classical `k`-th partial of the
-cutoff component splits, on the chart target, into the cutoff-weighted
-covariant component, the cutoff-weighted lower-order term, and the Leibniz
-cross-term carrying the derivative of the pushed cutoff. The three contributions
-are bounded by, respectively, the generic chart-supported-weight covariant
-`L²` bound `exists_eLpNorm_chartWeight_mul_sqrt_sum_…`, the Christoffel-uniform
-lower-order argument over the (compact) cutoff support, and the reverse
-chart-push `L²` bridge applied to the cutoff scalar component.
-
-## Main result
-
-* `exists_const_sum_eLpNorm_chosenWeakPartial'_cutoffComponentEuclid_le_uniform`
-  — the headline unconditional uniform `L²` bound for the cutoff chart
-  component.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -75,8 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For three almost-everywhere strongly measurable functions, the `L²`
-seminorm of `a + b − c` is bounded by the sum of the three `L²` seminorms. -/
 private lemma eLpNorm_add_add_sub_le
     {β : Type*} [MeasurableSpace β] {ν : Measure β} {a b c : β → ℝ}
     (ha : AEStronglyMeasurable a ν) (hb : AEStronglyMeasurable b ν)
@@ -91,7 +55,6 @@ private lemma eLpNorm_add_add_sub_le
     eLpNorm_sub_le (ha.add hb) hc (by norm_num)
   exact h_full.trans (by gcongr)
 
-/-- A product of Kronecker deltas has absolute value at most `1`. -/
 private lemma abs_prod_kronecker_le_one'
     {ι : Type*} (t : Finset ι) (f : ι → Prop) [DecidablePred f] :
     |∏ i ∈ t, (if f i then (1 : ℝ) else 0)| ≤ 1 := by
@@ -104,16 +67,12 @@ private lemma abs_prod_kronecker_le_one'
       · rw [if_pos hf, abs_one, one_mul]; exact ih
       · rw [if_neg hf, abs_zero, zero_mul]; exact zero_le_one
 
-/-- A Kronecker delta has absolute value at most `1`. -/
 private lemma abs_kronecker_le_one' {P : Prop} [Decidable P] :
     |if P then (1 : ℝ) else 0| ≤ 1 := by
   by_cases h : P
   · rw [if_pos h, abs_one]
   · rw [if_neg h, abs_zero]; exact zero_le_one
 
-/-- The absolute value of a finite sum of `coefficient · Kronecker-delta`
-products, with each coefficient bounded by `Cχ` in absolute value, is at most
-`card · Cχ`. -/
 private lemma abs_sum_coeff_kronecker_le'
     {ι : Type*} (t : Finset ι) (f : ι → ℝ) (P : ι → Prop) [DecidablePred P]
     {Cχ : ℝ} (hCχ_nn : 0 ≤ Cχ) (hf : ∀ i ∈ t, |f i| ≤ Cχ) :
@@ -133,7 +92,6 @@ private lemma abs_sum_coeff_kronecker_le'
     _ ≤ ∑ _i ∈ t, Cχ := Finset.sum_le_sum hbound
     _ = t.card * Cχ := by rw [Finset.sum_const, nsmul_eq_mul]
 
-/-- The closed support of the chart-kernel cutoff at `α`. -/
 private def cutoffKernelM (α : M) : Set M :=
   tsupport (fun x : M => ((chartKernelCutoff (I := I) (M := M) α
     : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -152,8 +110,6 @@ private lemma cutoffKernelM_subset_chart_source (α : M) :
     (I := I) (M := M) α)
   exact subset_rfl
 
-/-- The cutoff kernel is contained in the tangent-bundle trivialisation base
-set at `α`. -/
 private lemma cutoffKernelM_subset_baseSet (α : M) :
     cutoffKernelM (I := I) (M := M) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -161,15 +117,12 @@ private lemma cutoffKernelM_subset_baseSet (α : M) :
   rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
   exact cutoffKernelM_subset_chart_source (I := I) (M := M) α hx
 
-/-- The chart-kernel cutoff at `α` is `C^∞` as a function on `M`. -/
 private lemma chartKernelCutoff_contMDiff (α : M) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => ((chartKernelCutoff (I := I) (M := M) α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) :=
   (chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯).contMDiff
 
-/-- The pushed chart-kernel cutoff `chartPushedRaw I α (⇑(chartKernelCutoff I M
-α))` is `C^∞` on all of the Euclidean model space. -/
 private lemma chartPushedRaw_cutoff_contDiff (α : M) :
     ContDiff ℝ ∞
       (chartPushedRaw (I := I) (M := M) α
@@ -179,8 +132,6 @@ private lemma chartPushedRaw_cutoff_contDiff (α : M) :
     (chartKernelCutoff_contMDiff (I := I) (M := M) α)
     (cutoffKernelM_subset_chart_source (I := I) (M := M) α)
 
-/-- The `k`-th Euclidean partial derivative of a globally `C^∞` function is
-again `C^∞`. -/
 private lemma euclidPartial_contDiff_of_contDiff'
     {u : EuclN → ℝ} (hu : ContDiff ℝ ∞ u) (k : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (euclidPartial (E := E) k u) := by
@@ -195,8 +146,6 @@ private lemma euclidPartial_contDiff_of_contDiff'
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single k 1)).contDiff.comp hfd
 
-/-- The cutoff Euclidean chart component is globally `C^∞` on the Euclidean
-model space. -/
 private lemma cutoffComponentEuclid_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -211,7 +160,6 @@ private lemma cutoffComponentEuclid_contDiff
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The cutoff Euclidean chart component has compact support. -/
 private lemma cutoffComponentEuclid_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -225,8 +173,6 @@ private lemma cutoffComponentEuclid_hasCompactSupport
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The topological support of the cutoff Euclidean chart component is contained
-in the Euclidean chart target. -/
 private lemma cutoffComponentEuclid_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -240,10 +186,6 @@ private lemma cutoffComponentEuclid_tsupport_subset
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- **Step 1.** For a smooth compactly-supported tensor section `S`, the chosen
-weak `k`-th partial of the cutoff Euclidean chart component agrees almost
-everywhere, on the Euclidean volume restricted to the chart target, with the
-classical Euclidean partial derivative `euclidPartial k`. -/
 private lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -284,8 +226,6 @@ private lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
   funext y
   rw [euclidPartial_def]
 
-/-- On the chart target the cutoff chart component is the pushed chart-kernel
-cutoff times the pushed raw chart component. -/
 private lemma cutoffComponentEuclid_eq_cutoff_mul_rawPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -306,11 +246,6 @@ private lemma cutoffComponentEuclid_eq_cutoff_mul_rawPushed
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hy]
   rfl
 
-/-- **Leibniz factorisation of the cutoff-component partial.** For a chart-target
-point `y`, the classical `k`-th Euclidean partial of the cutoff chart component
-is the pushed chart-kernel cutoff times the `k`-th partial of the pushed raw
-component, plus the `k`-th partial of the pushed cutoff times the pushed raw
-component. -/
 private lemma euclidPartial_cutoffComponentEuclid_eq_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -369,9 +304,6 @@ private lemma euclidPartial_cutoffComponentEuclid_eq_leibniz
     euclidPartial_def, euclidPartial_def]
   ring
 
-/-- **The covariant-component substitution.** For a chart-target point `y`, the
-`k`-th Euclidean partial of the pushed raw chart component equals the chart
-covariant-derivative component minus the lower-order correction term. -/
 private lemma euclidPartial_rawPushed_eq_covDerivComponent_sub'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -395,8 +327,6 @@ private lemma euclidPartial_rawPushed_eq_covDerivComponent_sub'
     (I := I) (M := M) g r s S α k Idx Jdx hy
   linarith [h]
 
-/-- The Leibniz cross-term: the `k`-th partial of the pushed chart-kernel cutoff
-times the pushed raw chart component. -/
 private def cutoffLeibnizCrossTerm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -410,7 +340,6 @@ private def cutoffLeibnizCrossTerm
       chartPushedRaw (I := I) (M := M) α
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) y
 
-/-- The cutoff-weighted chart covariant-derivative component. -/
 private def cutoffCovDerivComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -428,7 +357,6 @@ private def cutoffCovDerivComponent
             (chartBasisVecFiber (I := I) α k)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))
 
-/-- The cutoff-weighted lower-order correction term. -/
 private def cutoffLowerOrderTerm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -440,10 +368,6 @@ private def cutoffLowerOrderTerm
         (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y *
       covDerivLowerOrderTerm (I := I) (M := M) g r s S α k Idx Jdx y
 
-/-- **The three-term identity.** For a chart-target point `y`, the classical
-`k`-th Euclidean partial of the cutoff chart component is the cutoff-weighted
-covariant component, plus the Leibniz cross-term, minus the cutoff-weighted
-lower-order term. -/
 private lemma euclidPartial_cutoffComponentEuclid_eq_three_terms
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -581,8 +505,6 @@ private lemma cutoffLeibnizCrossTerm_continuousOn
     (chartPushedRaw_rawComponent_continuousOn' (I := I) (M := M)
       g r s S α Idx Jdx)
 
-/-- The `k`-th partial of the pushed chart-kernel cutoff has topological support
-inside the chart image of the closed support of the chart-kernel cutoff. -/
 private lemma euclidPartial_chartPushedRaw_cutoff_tsupport_subset
     (α : M) (k : Fin (Module.finrank ℝ E)) :
     tsupport
@@ -654,8 +576,6 @@ private lemma euclidPartial_chartPushedRaw_cutoff_tsupport_subset
     exact (toEuclidean (E := E)).apply_symm_apply y
   exact h1.trans h2
 
-/-- The Leibniz cross-term vanishes off the chart image of the closed support of
-the chart-kernel cutoff. -/
 private lemma cutoffLeibnizCrossTerm_eq_zero_off_cutoff_kernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -676,8 +596,6 @@ private lemma cutoffLeibnizCrossTerm_eq_zero_off_cutoff_kernel
       (I := I) (M := M) α k (subset_tsupport _ (Function.mem_support.mpr hne)))
   rw [hχ_zero, zero_mul]
 
-/-- The manifold-side raw-component cutoff: the raw chart component on the
-closed support of the chart-kernel cutoff at `α`, zero elsewhere. -/
 private def rawComponentCutoffM
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -686,8 +604,6 @@ private def rawComponentCutoffM
   (cutoffKernelM (I := I) (M := M) α).indicator
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The raw-component cutoff has topological support inside the closed support
-of the chart-kernel cutoff at `α`. -/
 private lemma rawComponentCutoffM_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -702,7 +618,6 @@ private lemma rawComponentCutoffM_tsupport_subset
   by_contra hx_off
   exact hx (by rw [rawComponentCutoffM, Set.indicator_of_notMem hx_off])
 
-/-- The raw-component cutoff is Borel measurable. -/
 private lemma rawComponentCutoffM_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -729,10 +644,6 @@ private lemma rawComponentCutoffM_measurable
   exact ContinuousOn.measurable_piecewise hraw_cont
     (continuousOn_const) (cutoffKernelM_isClosed (I := I) (M := M) α).measurableSet
 
-/-- **Uniform pointwise quadratic bound for the raw-component cutoff.** There is
-a single non-negative constant `C` such that for every section, every component
-multi-index pair, and every base point, the square of the raw-component cutoff
-is bounded by `C` times the pointwise tensor inner product. -/
 private lemma exists_const_rawComponentCutoffM_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -843,11 +754,6 @@ private lemma sqrt_ofReal_eq_ofReal_sqrt' {a : ℝ} (ha : 0 ≤ a) :
     ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
-/-- **Uniform `L²` bound for the raw-component cutoff.** There is a single
-non-negative constant `C` such that for every smooth compactly-supported tensor
-section and every component multi-index pair, the `L²` norm of the
-raw-component cutoff against the Riemannian volume measure is bounded by `C`
-times the `L²` norm of the section. -/
 private lemma exists_const_eLpNorm_rawComponentCutoffM_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -943,9 +849,6 @@ private lemma exists_const_eLpNorm_rawComponentCutoffM_le
   rw [h_sqrt_factor, ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLp_le
   exact h_eLp_le
 
-/-- A uniform supremum bound for the `k`-th partial of the pushed chart-kernel
-cutoff: a single non-negative constant bounding the absolute value
-everywhere. -/
 private lemma exists_const_euclidPartial_chartPushedRaw_cutoff_le
     (α : M) (k : Fin (Module.finrank ℝ E)) :
     ∃ Cχ : ℝ, 0 ≤ Cχ ∧
@@ -989,9 +892,6 @@ private lemma exists_const_euclidPartial_chartPushedRaw_cutoff_le
     have hy : y ∉ tsupport χ := fun hy => hK_ne ⟨y, hy⟩
     rw [image_eq_zero_of_notMem_tsupport hy, norm_zero]
 
-/-- **The pointwise cross-term bound.** For every `y`, the absolute value of the
-Leibniz cross-term is bounded by `Cχ` times the chart push-forward of the
-raw-component cutoff. -/
 private lemma cutoffLeibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1060,13 +960,6 @@ private lemma cutoffLeibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
         (rawComponentCutoffM (I := I) (M := M) g r s S α Idx Jdx) hy
     rw [h_cross_zero, norm_zero, h_cut_zero, norm_zero, mul_zero]
 
-/-- **A uniform `L²` bound for the Leibniz cross-term.** For a closed Riemannian
-manifold `(M, g)`, ranks `(r, s)`, a chart center `α : M`, and a chart-
-coordinate direction `k`, there is a single non-negative real constant `C` —
-depending only on `(g, r, s, α, k)` — such that for every smooth
-compactly-supported `H¹` tensor section `S`, the `L²` norm of the Leibniz
-cross-term against the Euclidean volume restricted to the chart target is
-bounded by `ENNReal.ofReal C` times the `H¹` norm of `S`. -/
 private theorem exists_const_eLpNorm_cutoffLeibnizCrossTerm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -1172,10 +1065,6 @@ private theorem exists_const_eLpNorm_cutoffLeibnizCrossTerm_le_uniform
         rw [ENNReal.ofReal_mul hCχ_nn, ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
 
-/-- The manifold-side weighted norm-sum function for the cutoff weight: the
-chart-kernel cutoff at `α` times the square root of the sum, over chart
-directions, of the squared inverse-twist norm of the abstract covariant
-derivative of `S`. -/
 private noncomputable def cutoffCovNormSumFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) : M → ℝ :=
@@ -1188,8 +1077,6 @@ private noncomputable def cutoffCovNormSumFun
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
 
-/-- The base set of the `(r, s)`-tensor trivialisation at `α` equals the
-chart-`α` source. -/
 private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -1204,8 +1091,6 @@ private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
-/-- `C^∞` smoothness of the inverse-twisted covariant derivative on the chart
-source. -/
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1237,8 +1122,6 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
         (chartBasisVecFiber (I := I) α i b)) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hb_base]
 
-/-- The squared inverse-twist norm sum is `ContinuousOn` the chart-`α`
-source. -/
 private lemma cutoffCovNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -1262,8 +1145,6 @@ private lemma cutoffCovNormSqSum_continuousOn_chart_source
       g r s S α i).continuousOn
   exact (hcov.norm).pow 2
 
-/-- **Global continuity of the manifold-side cutoff weighted norm-sum
-function.** -/
 private lemma cutoffCovNormSumFun_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -1299,15 +1180,12 @@ private lemma cutoffCovNormSumFun_continuous
     hw_contOn.continuousAt ((chartAt H α).open_source.mem_nhds hx_src)
   exact hχ_contAt.smul hw_contAt
 
-/-- The manifold-side cutoff weighted norm-sum function is measurable. -/
 private lemma cutoffCovNormSumFun_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
     Measurable (cutoffCovNormSumFun (I := I) (M := M) g r s S α) :=
   (cutoffCovNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
-/-- The topological support of the cutoff weighted norm-sum function is
-contained in the topological support of the chart-kernel cutoff at `α`. -/
 private lemma cutoffCovNormSumFun_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -1338,8 +1216,6 @@ private lemma cutoffCovNormSumFun_tsupport_subset
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2))
 
-/-- For `y` in the Euclidean chart target, the chart base point lies in the
-chart-`α` Levi-Civita good set. -/
 private lemma chartBasePoint_mem_goodSet'
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -1352,10 +1228,6 @@ private lemma chartBasePoint_mem_goodSet'
     extChartAt_source]
   exact hsrc
 
-/-- **The pointwise bound on the chart target.** For every `y`, the absolute
-value of the cutoff-weighted chart-frame component of the chart-coordinate
-covariant derivative of `S` is bounded by `C_proj` times the chart push-forward
-of the manifold-side cutoff weighted norm-sum function. -/
 private lemma cutoffCovDerivComponent_le_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1511,9 +1383,6 @@ private lemma cutoffCovDerivComponent_le_chartPushedRaw
       (cutoffCovNormSumFun (I := I) (M := M) g r s S α) y
     rw [hcov_zero, mul_zero]
 
-/-- The per-direction Euclidean `L²` norm of the cutoff-weighted chart-frame
-covariant-derivative component is bounded by a single non-negative constant
-times the `H¹` seminorm of `S`. -/
 private lemma exists_const_eLpNorm_cutoffCovDerivComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)
@@ -1629,9 +1498,6 @@ private lemma exists_const_eLpNorm_cutoffCovDerivComponent_le_uniform
           ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
 
-/-- On the chart target, the pushed chart-kernel cutoff times the raw chart
-component (read at the chart-Euclidean preimage) equals the cutoff Euclidean
-chart component `cutoffComponentEuclid`. -/
 private lemma chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1650,9 +1516,6 @@ private lemma chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent
     cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
   rfl
 
-/-- On the chart target, the cutoff-weighted lower-order term equals the finite
-linear combination, over component multi-index pairs, of `covDerivLowerOrderCoeff`
-times the cutoff Euclidean chart component `cutoffComponentEuclid`. -/
 private lemma cutoffLowerOrderTerm_eq_linearCombination
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1678,8 +1541,6 @@ private lemma cutoffLowerOrderTerm_eq_linearCombination
     chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent (I := I) (M := M)
       g r s S α p.1 p.2 hy]
 
-/-- The cutoff Euclidean chart component is continuous on the Euclidean model
-space. -/
 private lemma cutoffComponentEuclid_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1688,9 +1549,6 @@ private lemma cutoffComponentEuclid_continuous
     Continuous (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) :=
   (cutoffComponentEuclid_contDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
 
-/-- If the cutoff Euclidean chart component is nonzero at `y`, then `y` lies in
-the chart target and its chart-Euclidean preimage lies in the closed support of
-the chart-kernel cutoff at `α`. -/
 private lemma mem_cutoffKernelM_image_of_cutoffComponentEuclid_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1734,10 +1592,6 @@ private lemma mem_cutoffKernelM_image_of_cutoffComponentEuclid_ne_zero
   rw [h_extChartAt_b]
   exact (toEuclidean (E := E)).apply_symm_apply y
 
-/-- **Uniform sup bound for `covDerivLowerOrderCoeff` on the cutoff kernel.**
-There is a single non-negative constant `C` bounding the lower-order Christoffel
-coefficient in absolute value at every chart-Euclidean point whose preimage lies
-in the closed support of the chart-kernel cutoff at `α`. -/
 private theorem exists_const_covDerivLowerOrderCoeff_bdd_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1856,11 +1710,6 @@ private theorem exists_const_covDerivLowerOrderCoeff_bdd_cutoff
   rw [add_mul]
   linarith
 
-/-- **The `L²` bound for a single coefficient-cutoff-component product.** For a
-fixed component multi-index pair `p` and chart-coordinate direction `m`, the
-`L²` norm of `covDerivLowerOrderCoeff · cutoffComponentEuclid` against the
-Euclidean volume restricted to the chart target is bounded by the
-Christoffel-coefficient sup `Ccoeff` times the cutoff component `L²` norm. -/
 private lemma eLpNorm_coeff_mul_cutoffComponent_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -1913,14 +1762,6 @@ private lemma eLpNorm_coeff_mul_cutoffComponent_le
     _ = ENNReal.ofReal Ccoeff * eLpNorm comp 2 μ := by
         rw [Real.enorm_eq_ofReal hCcoeff_nn]
 
-/-- **A uniform `L²` bound for the cutoff-weighted lower-order term.** For a
-closed Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart center
-`α : M`, there is a single non-negative real constant `C` — depending only on
-`(g, r, s, α)` — such that for every smooth compactly-supported `H¹` tensor
-section `S`, the `L²` norm (against the Euclidean volume restricted to the
-chart target) of the cutoff-weighted lower-order term, summed over all
-chart-coordinate directions, is bounded by `ENNReal.ofReal C` times the `H¹`
-norm of `S`. -/
 private theorem exists_const_sum_eLpNorm_cutoffLowerOrderTerm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)
@@ -2045,22 +1886,6 @@ private theorem exists_const_sum_eLpNorm_cutoffLowerOrderTerm_le_uniform
     rw [ENNReal.ofReal_natCast]]
   rw [← mul_assoc, ← ENNReal.ofReal_mul (by positivity)]
 
-/-- **A uniform `L²` bound for the chosen weak chart-partials of the cutoff
-chart component.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)` and
-a chart center `α : M`, there is a single non-negative real constant `C` —
-depending only on `(g, r, s, α)`, **independent of the section `S` and of the
-component multi-indices `(Idx, Jdx)`** — such that for every smooth
-compactly-supported `H¹` tensor section `S`, the `L²` norm (against the
-Euclidean volume restricted to the chart target) of the chosen weak `k`-th
-chart-partial of the cutoff Euclidean chart component
-`cutoffComponentEuclid g r s S.toCcTensor α Idx Jdx`, summed over all
-chart-coordinate directions `k`, is bounded by `ENNReal.ofReal C` times the
-`H¹` norm of `S`.
-
-The constant `C` is unconditional and uniform in `S`, `Idx`, `Jdx`. The cutoff
-chart component is, by construction, the chart push-forward of a globally smooth
-compactly-supported manifold scalar field confined to the Euclidean chart
-target, so each of its chosen weak chart-partials is `L²`-finite. -/
 theorem exists_const_sum_eLpNorm_chosenWeakPartial'_cutoffComponentEuclid_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (S : SmoothCcTensorH1 g r s)

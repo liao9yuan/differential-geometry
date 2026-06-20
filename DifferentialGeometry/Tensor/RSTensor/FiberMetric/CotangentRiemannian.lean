@@ -5,13 +5,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Cotangent Fibers
-
-The Riemannian metric on `T_x M` induces the dual metric on `T_x^* M` by
-raising covectors with the tangent sharp map.
--/
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -23,13 +16,11 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Interpret a realized cotangent vector as a continuous linear functional. -/
 def cotangentToCLM {x : M} (α : Tensor0SSpace 1 I x) :
     TangentSpace I x →L[Real] Real :=
   continuousMultilinearCurryFin1 Real (TangentSpace I x) Real
     (Tensor0SSpace.toModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) α)
 
-/-- Interpret a realized cotangent vector as an algebraic dual vector. -/
 def cotangentToDual {x : M} (α : Tensor0SSpace 1 I x) :
     Module.Dual Real (TangentSpace I x) :=
   (cotangentToCLM (I := I) α).toLinearMap
@@ -42,8 +33,6 @@ def cotangentToDual {x : M} (α : Tensor0SSpace 1 I x) :
     congrArg (fun v : Fin 1 -> TangentSpace I x => α v)
     (funext fun i => by fin_cases i; rfl)
 
-/-- The linear identification from realized one-covariant tensors to the
-algebraic dual of the tangent space. -/
 def cotangentToDualLinear {x : M} :
     Tensor0SSpace 1 I x →ₗ[Real] Module.Dual Real (TangentSpace I x) where
   toFun := cotangentToDual (I := I)
@@ -71,10 +60,6 @@ theorem cotangentToDualLinear_injective {x : M} :
   have h0 := congrArg (fun L : Module.Dual Real (TangentSpace I x) => L (v 0)) h
   simpa [cotangentToDualLinear, cotangentToDual_apply, hv] using h0
 
-/-- Realize an algebraic cotangent vector as a `(0,1)` tensor.
-
-In finite dimension the algebraic linear functional is automatically continuous,
-so it can be uncurried into the one-slot continuous multilinear tensor model. -/
 def dualToCotangent {x : M} (α : Module.Dual Real (TangentSpace I x)) :
     Tensor0SSpace 1 I x :=
   Tensor0SSpace.ofModel (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -95,13 +80,11 @@ def dualToCotangent {x : M} (α : Module.Dual Real (TangentSpace I x)) :
   ext X
   simp
 
-/-- The linear sharp map `T_x^*M -> T_xM` induced by `g`. -/
 def cotangentSharpLinear (g : SmoothMetric I M) (x : M) :
     Tensor0SSpace 1 I x →ₗ[Real] TangentSpace I x :=
   ((tangentMetricData (I := I) g x).metric.sharp).toLinearMap.comp
     (cotangentToDualLinear (I := I) (x := x))
 
-/-- Raise a realized cotangent vector using the Riemannian metric. -/
 def cotangentSharp (g : SmoothMetric I M) (x : M)
     (α : Tensor0SSpace 1 I x) : TangentSpace I x :=
   cotangentSharpLinear (I := I) g x α
@@ -118,8 +101,6 @@ theorem cotangentSharpLinear_injective
   apply cotangentToDualLinear_injective (I := I) (x := x)
   exact ((tangentMetricData (I := I) g x).metric.sharp.injective h)
 
-/-- The dual metric on cotangent vectors:
-`<α, β> = g(α#, β#)`. -/
 def cotangentInner (g : SmoothMetric I M) (x : M)
     (α β : Tensor0SSpace 1 I x) : Real :=
   g.inner x
@@ -134,8 +115,6 @@ def cotangentInner (g : SmoothMetric I M) (x : M)
         (cotangentSharp (I := I) g x β) := by
   rfl
 
-/-- The flat map on `T_x^*M`, obtained by pulling the tangent metric back along
-the sharp map. -/
 def cotangentFlatLinear (g : SmoothMetric I M) (x : M) :
     Tensor0SSpace 1 I x →ₗ[Real] Module.Dual Real (Tensor0SSpace 1 I x) where
   toFun α :=
@@ -224,10 +203,6 @@ theorem cotangentFlatLinear_injective
     rwa [hmap] at hsub
   exact sub_eq_zero.mp hdiff
 
-/-- Metric data on `T_x^*M` induced by the tangent Riemannian metric.
-
-This is the pullback of the tangent metric along the sharp map
-`T_x^*M -> T_xM`. -/
 def cotangentMetricData (g : SmoothMetric I M) (x : M) :
     MetricFiberData (Tensor0SSpace 1 I x) :=
   MetricFiberData.ofFlat
@@ -253,7 +228,6 @@ def cotangentMetricData (g : SmoothMetric I M) (x : M) :
         simp
       · exact le_of_lt (g.pos x (cotangentSharpLinear (I := I) g x α) hα))
 
-/-- The packaged cotangent metric computes the sharp-definition inner product. -/
 theorem cotangentMetricData_inner
     (g : SmoothMetric I M) (x : M)
     (α β : Tensor0SSpace 1 I x) :
@@ -261,13 +235,6 @@ theorem cotangentMetricData_inner
       cotangentInner (I := I) g x α β := by
   rfl
 
-/-- The inverse Gram-matrix predicate for an indexed finite family of
-tangent vectors.
-
-This is intentionally not used as a hypothesis for tensor coordinate
-formulas: an arbitrary finite family with an inverse Gram matrix on its span
-does not by itself give a basis of the tangent fiber. Use
-`MetricInverseInBasis` for coordinate identities. -/
 def MetricInverseOnFiniteFrameGram {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
     (frame : Idx -> TangentSpace I x)
@@ -278,9 +245,6 @@ def MetricInverseOnFiniteFrameGram {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       (∑ k : Idx, g.inner x (frame i) (frame k) * gInv k j) =
         (if i = j then 1 else 0)
 
-/-- A basis inverse-metric predicate at one point. This is the correct
-hypothesis for coordinate formulas: the indexed vectors must span the tangent
-fiber, not just have an invertible Gram matrix on their own span. -/
 def MetricInverseInBasis {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -291,7 +255,6 @@ def MetricInverseInBasis {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       (∑ k : Idx, g.inner x (basis i) (basis k) * gInv k j) =
         (if i = j then 1 else 0)
 
-/-- Raising a covector is inverse to lowering by the metric. -/
 theorem cotangentSharp_inner
     (g : SmoothMetric I M) (x : M)
     (α : Tensor0SSpace 1 I x) (X : TangentSpace I x) :
@@ -309,8 +272,6 @@ theorem cotangentSharp_inner
       cotangentToDual (I := I) α X
   exact h
 
-/-- Two tangent vectors are equal if they have the same metric pairing with a
-basis. -/
 theorem eq_of_inner_basis_eq
     {Idx : Type*} [Finite Idx]
     (g : SmoothMetric I M) (x : M)
@@ -339,7 +300,6 @@ theorem eq_of_inner_basis_eq
     _ = tangentFlatLinear (I := I) g x Y Z := by
           exact (hcoord (tangentFlatLinear (I := I) g x Y)).symm
 
-/-- Coordinate reconstruction of the raised covector. -/
 theorem cotangentSharp_eq_sum_inv
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -400,7 +360,6 @@ theorem cotangentSharp_eq_sum_inv
           (basis l) := by
           simp [map_sum]
 
-/-- Coordinate formula for the cotangent metric in a basis. -/
 theorem cotangentInner_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -444,7 +403,6 @@ theorem cotangentInner_eq_coord
               cotangentToDual (I := I) β (basis j)
           ring
 
-/-- Coordinate formula for the packaged cotangent metric. -/
 theorem cotangentMetricData_inner_eq_coord
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)

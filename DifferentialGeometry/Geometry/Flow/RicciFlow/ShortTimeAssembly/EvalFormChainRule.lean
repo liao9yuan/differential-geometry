@@ -12,14 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 
-/-!
-# Three-piece chain rule for the pullback-pairing evaluation form
-
-Builds the geometry-slot and Fréchet data for the pulled-back inner-product pairing and assembles
-the additive three-piece time chain rule (metric-family, basepoint-motion, pushforward-kinetic)
-for the evaluation form.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

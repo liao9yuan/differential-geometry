@@ -1,72 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnK
 
-/-!
-# Parametric `C^k` smoothness of the variational linear map
-
-The previous file `ContDiffOnK.lean` reduced the `C^k` flow problem to the joint `C^j`
-smoothness of the *spatial piece* `Lsp(x, t) ∈ E →L[ℝ] E` of the joint Fréchet derivative
-`D Φ`.  Pointwise, `Lsp(x, t) δ = y_δ(x, t)` where `y_δ` is the variational solution
-along the orbit `Φ ⟨x, ·⟩` with initial variation `δ`.
-
-The key mathematical observation is that the variational ODE itself defines a flow.
-For each base point `x`, the variational ODE in `δ` is the linear ODE
-`y'(t) = A_x(t) y(t)` where `A_x(t) := fderiv ℝ (f t) (Φ ⟨x, t⟩)`.  Equivalently,
-viewing `Y(x, t) ∈ E →L[ℝ] E` (with `Y(x, t) δ := y_δ(x, t)`) as a CLM-valued curve,
-`Y` solves the linear ODE on `E →L[ℝ] E` :
-`Y'(t) = A_x(t) ∘ Y(t)`, `Y(t₀) = id`.
-
-Crucially, this linear ODE on `E →L[ℝ] E` can be *packaged together with the original
-ODE* into a single ODE on the augmented Banach space `E × (E →L[ℝ] E)`.  Define
-`augF : ℝ → (E × (E →L[ℝ] E)) → (E × (E →L[ℝ] E))` by
-```
-augF t (x, Z) := (f t x, (fderiv ℝ (f t) x).comp Z)
-```
-The augmented vector field `augF` is jointly `C^k` whenever `f` is jointly `C^{k+1}`,
-because the spatial Fréchet derivative `(t, x) ↦ fderiv ℝ (f t) x` is `C^k` (it is the
-post-composition of `fderiv ℝ (uncurry f)` — itself `C^k` from `f` being `C^{k+1}` — with
-the inclusion `inr`).  Composition `(A, Z) ↦ A.comp Z` is bounded bilinear in
-`A : E →L[ℝ] E` and `Z : E →L[ℝ] E`, hence jointly smooth.
-
-The augmented flow `aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)` satisfies, for any
-initial point `(x₀, Z₀)`,
-```
-aΦ ⟨(x, Z), t⟩ = (Φ(x, t), variationalLinearMapAt(x, t) ∘ Z)
-```
-when the original local flow `Φ` exists.  In particular, taking `Z = id` recovers
-`variationalLinearMapAt(x, t)` as the second component of `aΦ ⟨(x, id), t⟩`.
-
-This recursive observation gives the abstract induction:
-* **Base** `k = 1` : V.2.c.2 applied to the original ODE gives `Φ ∈ C^1`.
-* **Step** : if the augmented system has a flow that is jointly `C^k`, the projection
-  `(x, t) ↦ Y(x, t) ∘ id = variationalLinearMapAt(x, t)` is jointly `C^k`, which
-  discharges the spatial-piece hypothesis of `contDiffOn_flow_succ_of_spatial_smooth`
-  (the inductive step from `ContDiffOnK.lean`) and upgrades `Φ` from `C^k` to `C^{k+1}`.
-
-This file provides the *structural* pieces of this argument:
-
-* `augVF` — the augmented vector field on `E × (E →L[ℝ] E)`.
-* `augVF_uncurry_contDiff` — `uncurry augVF` is `C^k` whenever `uncurry f` is `C^{k+1}`.
-* `contDiffOn_partial_fderiv_of_succ` — the partial-Fréchet-derivative regularity
-  `(t, x) ↦ fderiv ℝ (f t) x` is `C^k` from `uncurry f` `C^{k+1}`.
-* `contDiffOn_variational_linear_of_aug_flow` — the projection lemma: if a function
-  `Y : E × ℝ → E →L[ℝ] E` is the second component of a `C^k` candidate `aΦ` for the
-  augmented flow with initial spatial-component `id`, then `Y` is jointly `C^k`.
-* `contDiffOn_flow_of_isLocalFlow_of_contDiff_via_aug` — the cleanest packaging of the
-  unconditional `C^k` flow theorem, parametrised by a *single* `C^k` candidate for the
-  augmented flow.  This factors out the entire `Lsp_seq` sequence from `ContDiffOnK.lean` into
-  a single, mathematically-transparent hypothesis.
-
-The connecting hypothesis between "the augmented system has a `C^k` joint flow" and
-"the variational linear map is jointly `C^k`" is captured by a `Prop` predicate
-`IsVariationalFlowProjection` that bundles the variational identity for the spatial
-component of the augmented flow.  When discharged at level `k` (by the augmented flow
-theorem or by a direct uniqueness argument), this predicate gives an unconditional
-`C^k` flow theorem in one line.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]` is
-*not* used.  No manifold or tensor file is imported.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -81,10 +14,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
 
 section AugVFDefinition
 
-/-- The **augmented vector field** for the linear-ODE coupling.  This is the
-time-dependent vector field on `E × (E →L[ℝ] E)` whose first component is the original
-ODE `x'(t) = f t (x(t))` and whose second component is the variational ODE for the
-CLM-valued curve `Z(t) = Y(x(t)) ∘ Z₀`. -/
 def augVF (f : ℝ → E → E) : ℝ → (E × (E →L[ℝ] E)) → (E × (E →L[ℝ] E)) :=
   fun t p => (f t p.1, ((fderiv ℝ (f t) p.1).comp p.2))
 
@@ -98,10 +27,6 @@ section PartialFDerivSmoothness
 
 variable {f : ℝ → E → E}
 
-/-- The partial-Fréchet-derivative map `(t, x) ↦ fderiv ℝ (f t) x` equals the
-post-composition of `fderiv ℝ (uncurry f)` with the inclusion `inr : E →L[ℝ] ℝ × E`,
-on the open set where `uncurry f` is differentiable.  We package this on `Set.univ`,
-since the project-wide hypothesis is `ContDiffOn ℝ _ (uncurry f) Set.univ`. -/
 lemma partial_fderiv_eq_comp_inr_on_univ
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E))) :
     ∀ p : ℝ × E, fderiv ℝ (f p.1) p.2
@@ -112,9 +37,6 @@ lemma partial_fderiv_eq_comp_inr_on_univ
     exact (hf.contDiffAt hp_open).differentiableAt one_ne_zero
   exact fderiv_eq_comp_inr hdiff_joint
 
-/-- **Spatial-Fréchet-derivative smoothness.**  If `uncurry f` is `C^{k+1}` on
-`Set.univ`, then the partial Fréchet derivative `(t, x) ↦ fderiv ℝ (f t) x` is `C^k`
-on `Set.univ`. -/
 theorem contDiffOn_partial_fderiv_of_succ
     {k : ℕ∞} (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContDiffOn ℝ k (fun p : ℝ × E => fderiv ℝ (f p.1) p.2) (Set.univ : Set (ℝ × E)) := by
@@ -153,8 +75,6 @@ section AugVFSmoothness
 
 variable {f : ℝ → E → E}
 
-/-- **Smoothness of the augmented vector field.**  If `uncurry f` is `C^{k+1}` on
-`Set.univ : Set (ℝ × E)`, then `uncurry (augVF f)` is `C^k` on `Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))`. -/
 theorem augVF_uncurry_contDiff
     {k : ℕ∞} (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContDiffOn ℝ k (uncurry (augVF f))
@@ -227,8 +147,6 @@ theorem augVF_uncurry_contDiff
   rw [heq_final] at hpair_final
   exact hpair_final
 
-/-- The augmented vector field is `C^0` (continuous) when `uncurry f` is `C^1`.  This is
-the base-level smoothness used for Picard–Lindelöf on the augmented system. -/
 theorem augVF_uncurry_continuousOn_of_C1
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContinuousOn (uncurry (augVF f))
@@ -244,9 +162,6 @@ section NestingData
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Joint continuity of the linearization along the flow.**  For a local flow `Φ` of a
-jointly `C^1` field `f`, the map `(x, τ) ↦ fderiv ℝ (f τ) (Φ ⟨x, τ⟩)` is continuous on the
-product `closedBall x₀ ρ ×ˢ Icc tmin tmax`, for any radius `ρ ≤ r`. -/
 theorem continuousOn_fderiv_along_flow_joint
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -270,9 +185,6 @@ theorem continuousOn_fderiv_along_flow_joint
 
 variable [FiniteDimensional ℝ E]
 
-/-- **Joint bound on the linearization along the flow.**  In finite dimensions, the
-continuous linearization map is bounded on the compact product `closedBall x₀ ρ ×ˢ Icc tmin
-tmax`.  This produces the uniform constant `M` required by the variational-flow step. -/
 theorem exists_norm_fderiv_le_along_flow_joint
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -292,10 +204,6 @@ theorem exists_norm_fderiv_le_along_flow_joint
   have hmem : ((x, τ) : E × ℝ) ∈ (closedBall x₀ ρ) ×ˢ (Icc tmin tmax) := ⟨hx, hτ⟩
   exact hp_max hmem
 
-/-- **Uniform Lipschitz bound for `f t` on a closed ball.**  In finite dimensions, joint
-`C^1` regularity of `f` gives a single constant `K` with `f t` `K`-Lipschitz on `closedBall
-x₀ ρ` for every `t` in a compact interval.  The constant is the maximum spatial-derivative
-norm over the compact product `Icc × closedBall`. -/
 theorem exists_lipschitzOnWith_closedBall_of_C1
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (x₀ : E) (ρ : ℝ) (a b : ℝ) (hab : a ≤ b) :
@@ -339,15 +247,6 @@ theorem exists_lipschitzOnWith_closedBall_of_C1
     rw [hball]
     exact lipschitzOnWith_empty 0 (f t)
 
-/-- **Nesting and bound data for the flow recursion.**
-
-From a local flow `Φ` of a jointly `C^1` field `f` in finite dimensions, with the initial
-time `t₀` strictly interior in `Icc tmin tmax` and a non-degenerate flow ball (`0 < r`),
-all the geometric bookkeeping consumed by the variational-flow inductive step is produced:
-nested radii `0 < ρ < ρ_mid < ρ_out ≤ r` with `ρ_mid + r' ≤ r`, nested times
-`0 < T < T_mid < T_out` with `M · T_mid < 1`, a closed time interval inside the flow's time
-domain, and a uniform bound `M` on the linearization over the closed ball of initial
-conditions and the closed time interval. -/
 theorem exists_flow_nesting_data
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -417,17 +316,6 @@ section ProjectionPredicate
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **The augmented-flow projection predicate.**
-
-Given the parameters of `contDiffOn_flow_succ_of_spatial_smooth`, a function
-`Y : E × ℝ → (E →L[ℝ] E)` is a *variational-flow projection at level `k`* if
-
-* `Y` is jointly `C^k` on the open neighbourhood
-  `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`;
-* `Y(x, t)` agrees with the variational linear map at `(x, t)` for the local flow `Φ`.
-
-The second clause is captured via the coproduct identity for `fderiv ℝ Φ`, matching
-the hypothesis of `contDiffOn_flow_succ_of_spatial_smooth`. -/
 structure IsVariationalFlowProjection
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ) (T : ℝ) (ρ : ℝ≥0)
     (Y : E × ℝ → (E →L[ℝ] E)) (k : ℕ∞) : Prop where
@@ -435,7 +323,6 @@ structure IsVariationalFlowProjection
   fderiv_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
     fderiv ℝ Φ q = (Y q).coprod (timePieceFn f Φ q)
 
-/-- Mono: a level-`k` variational-flow projection is also a level-`j` one for `j ≤ k`. -/
 lemma IsVariationalFlowProjection.of_le {hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ}
     {T : ℝ} {ρ : ℝ≥0} {Y : E × ℝ → (E →L[ℝ] E)} {k j : ℕ∞}
     (hY : IsVariationalFlowProjection hΦ T ρ Y k) (hjk : j ≤ k) :
@@ -452,10 +339,6 @@ section RecursiveFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Recursive `C^k` flow theorem (single-projection form).**
-
-If a function `Y : E × ℝ → (E →L[ℝ] E)` is a variational-flow projection at level `k`,
-then the flow `Φ` is jointly `C^{k+1}` on the strictly-interior open neighbourhood. -/
 theorem contDiffOn_flow_succ_of_isVariationalFlowProjection
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -477,12 +360,6 @@ theorem contDiffOn_flow_succ_of_isVariationalFlowProjection
     hsub hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd hf_succ hΦ_Ck
     hY.contDiffOn hY.fderiv_eq
 
-/-- **Recursive `C^k` flow theorem (sequence form).**
-
-A sequence of variational-flow projections, one at each level `j < k`, gives the flow
-joint `C^k` regularity on the strictly-interior open neighbourhood, for any `k : ℕ`.
-This is a direct consequence of `contDiffOn_flow_of_spatial_smooth_seq` once the
-sequence-of-`Y_seq` formulation is unpacked. -/
 theorem contDiffOn_flow_of_isVariationalFlowProjection_seq
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -507,14 +384,6 @@ theorem contDiffOn_flow_of_isVariationalFlowProjection_seq
   · intro j hj
     exact (hY_seq j hj).fderiv_eq
 
-/-- **Recursive `C^k` flow theorem (single-projection top-level form).**
-
-Given a *single* variational-flow projection at level `k - 1`, the flow is jointly
-`C^k` on the strictly-interior open neighbourhood, for any `k : ℕ` with `1 ≤ k`.
-
-The single hypothesis at the highest level `k - 1` is upgraded via `IsVariationalFlowProjection.of_le`
-to a sequence at every intermediate level `j < k`.  In particular, the user only ever
-needs to supply *one* projection — at level `k - 1`. -/
 theorem contDiffOn_flow_of_isVariationalFlowProjection_top
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -546,10 +415,6 @@ section FderivCoprodIdentity
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The **spatial piece** of the joint Fréchet derivative of the flow: the spatial
-restriction `(fderiv ℝ Φ q).comp (inl ℝ E ℝ)` of the joint derivative, viewed as a total
-`CLM`-valued function of `q = (x, t)`.  By `hasFDerivAt_flow_jointly_at`, at every interior
-point this equals the variational linear map along the orbit through `x`. -/
 def spatialPieceFn (Φ : E × ℝ → E) : E × ℝ → (E →L[ℝ] E) :=
   fun q => (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ)
 
@@ -557,14 +422,6 @@ def spatialPieceFn (Φ : E × ℝ → E) : E × ℝ → (E →L[ℝ] E) :=
 lemma spatialPieceFn_apply (Φ : E × ℝ → E) (q : E × ℝ) :
     spatialPieceFn Φ q = (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ) := rfl
 
-/-- **Regularity-independent coproduct identity.**  Under the standard `C^1` flow
-hypotheses (three-layer nested setup of `contDiffOn_flow_of_isLocalFlow`), at every point
-`q = (x, t)` of the strictly-interior open neighbourhood the joint Fréchet derivative of
-the flow splits as the coproduct of its spatial piece and the time piece:
-`fderiv ℝ Φ q = (spatialPieceFn Φ q).coprod (timePieceFn f Φ q)`.
-
-This is exactly the `fderiv_eq` clause of `IsVariationalFlowProjection`, realised for the
-canonical spatial piece `spatialPieceFn Φ`.  Only `C^1` of `f` is required. -/
 theorem fderiv_flow_eq_coprod_spatialPiece
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -619,12 +476,6 @@ section LevelTwo
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Existence of a local flow for the augmented system.**
-
-When `uncurry f` is jointly `C^2` on `Set.univ`, the augmented vector field `augVF f`
-is jointly `C^1` on `Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))`.  V.2.b.1's
-`exists_isLocalFlow_of_contDiffOn_univ` (`Flow/Defs.lean`) then produces a local flow of
-the augmented system around any base point. -/
 theorem exists_isLocalFlow_augVF_of_C2
     (hf_C2 : ContDiffOn ℝ 2 (uncurry f) (Set.univ : Set (ℝ × E)))
     (t₀ : ℝ) (p₀ : E × (E →L[ℝ] E)) :
@@ -638,12 +489,6 @@ theorem exists_isLocalFlow_augVF_of_C2
     augVF_uncurry_contDiff (k := (1 : ℕ∞)) hf_succ
   exact exists_isLocalFlow_of_contDiffOn_univ (augVF f) h_augVF_C1 t₀ p₀
 
-/-- **The `C^2` flow theorem, conditional on a `C^1` variational-flow projection.**
-
-If `uncurry f` is jointly `C^2`, the local flow `Φ` is jointly `C^1` on the
-strictly-interior open neighbourhood (by V.2.c.2), and a `C^1` variational-flow
-projection `Y` at level `1` exists, then `Φ` is jointly `C^2` on the same
-neighbourhood. -/
 theorem contDiffOn_flow_of_isLocalFlow_C2_of_isVariationalFlowProjection
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C2 : ContDiffOn ℝ 2 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -679,10 +524,6 @@ section AugFlowProjection
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The **operator-valued curve from a candidate augmented flow**: given a candidate
-`aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)`, the projection
-`Y(x, t) := aΦ ⟨(x, id), t⟩.2 : E →L[ℝ] E` is the natural candidate for the spatial
-piece of `fderiv ℝ Φ`. -/
 def fromAugFlow (aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)) :
     E × ℝ → (E →L[ℝ] E) :=
   fun q => (aΦ ⟨(q.1, ContinuousLinearMap.id ℝ E), q.2⟩).2
@@ -692,10 +533,6 @@ lemma fromAugFlow_apply (aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[�
     (x : E) (t : ℝ) :
     fromAugFlow aΦ (x, t) = (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩).2 := rfl
 
-/-- **Joint smoothness of the projection.**  If the candidate `aΦ` is jointly `C^k` in
-its arguments on an open set `Ω ⊆ (E × (E →L[ℝ] E)) × ℝ`, and the embedding
-`(x, t) ↦ ((x, id), t)` maps `U ⊆ E × ℝ` into `Ω`, then the projection `fromAugFlow aΦ`
-is jointly `C^k` on `U`. -/
 theorem contDiffOn_fromAugFlow
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {k : ℕ∞} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)} {U : Set (E × ℝ)}
@@ -740,19 +577,6 @@ section UnconditionalAbstract
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Unconditional `C^{k+1}` flow theorem via an augmented-flow candidate.**
-
-If we have a candidate `aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)` that is jointly
-`C^k` on an open neighbourhood `Ω` of `((x₀, id), t₀)`, and whose second-component
-projection `fromAugFlow aΦ` is a level-`k` variational-flow projection of `Φ`, then
-`Φ` is jointly `C^{k+1}` on the strictly-interior open neighbourhood.
-
-The hypothesis is exactly what an inductive argument on the augmented-flow theorem
-delivers; the conclusion plugs back into the same induction at the next level.  In
-particular, for `k = 1`, the augmented flow's `C^1` regularity is supplied by V.2.c.2
-applied to the augmented vector field `augVF f` (provided `uncurry f` is `C^2`), and
-the level-`1` variational identification is the pointwise variational ODE
-identification described above. -/
 theorem contDiffOn_flow_succ_of_augFlow_candidate
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -788,13 +612,6 @@ section AggregatedPublic
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Public headline `C^k` flow theorem (general `k : ℕ`).**
-
-This theorem packages the inductive structural argument cleanly: given a sequence of
-augmented-flow candidates `aΦ_seq j`, each jointly `C^j` on its respective open
-neighbourhood `Ω j`, whose second-component projections `fromAugFlow (aΦ_seq j)` satisfy
-the variational identification with `fderiv ℝ Φ` at every level, the flow `Φ` is
-jointly `C^k` on the strictly-interior open neighbourhood. -/
 theorem contDiffOn_flow_of_augFlow_seq
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -833,9 +650,6 @@ section OperatorVariational
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
-/-- The application `Z(·) δ` of a CLM-curve `Z : ℝ → E →L[ℝ] E` to a fixed vector
-`δ ∈ E` has, at every point where `Z` has the operator-valued derivative `Z'(t)`,
-ordinary derivative `Z'(t) δ : E`. -/
 lemma hasDerivWithinAt_apply {Z Z' : ℝ → (E →L[ℝ] E)} {s : Set ℝ} {t : ℝ} {δ : E}
     (hZ : HasDerivWithinAt Z (Z' t) s t) :
     HasDerivWithinAt (fun τ => Z τ δ) ((Z' t) δ) s t := by
@@ -854,15 +668,6 @@ lemma hasDerivWithinAt_apply {Z Z' : ℝ → (E →L[ℝ] E)} {s : Set ℝ} {t :
   rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
   exact happ_fd
 
-/-- **Operator-valued variational ODE → pointwise variational solutions.**
-
-Suppose `Z : ℝ → E →L[ℝ] E` satisfies, on `Icc (t₀ - T) (t₀ + T)`:
-* `Z(t₀) = id`,
-* for every `t` in the interval, `Z` has the operator-valued derivative
-  `(fderiv ℝ (f t) (α t)).comp (Z t)`.
-
-Then for every `δ ∈ E`, the curve `t ↦ Z(t) δ` is a variational solution along the
-central curve `α` with initial variation `δ` on the same interval. -/
 theorem isVariationalSolutionOn_apply
     {T : ℝ}
     {Z : ℝ → E →L[ℝ] E}
@@ -884,17 +689,6 @@ theorem isVariationalSolutionOn_apply
     rw [hsimp] at happ
     exact happ
 
-/-- **Identification of `Z` with the variational linear map.**
-
-Under the hypotheses of `isVariationalSolutionOn_apply` (operator-valued variational
-ODE with `Z(t₀) = id`), at every `t ∈ Icc (t₀ - T) (t₀ + T)`, the CLM `Z t` agrees
-with the variational linear map `variationalLinearMapAt(...)`.
-
-The proof: by `isVariationalSolutionOn_apply`, `t ↦ Z t δ` is a variational solution
-on the closed interval; by `variationalSolutionFun_isSolution`,
-`t ↦ variationalSolutionFun(...) δ t` is also one; by `unique_Icc`, they agree at every
-`t`; hence `Z t δ = variationalLinearMapAt(...) δ` for every `δ`; CLM extensionality
-finishes. -/
 theorem Z_eq_variationalLinearMapAt
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))
@@ -923,15 +717,6 @@ section AugFlowVariationalIdentification
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- Given a local flow `aΦ` of the augmented vector field `augVF f`, started at
-`(x, id)`, the second component is, at every time `t` in the operating interval,
-equal to the variational linear map along the central orbit `t ↦ (aΦ ⟨(x, id), t⟩).1`.
-
-The hypothesis structure mirrors `IsLocalFlow`: the augmented flow has, for every
-`p ∈ closedBall p₀ R`, the derivative property
-`(aΦ ⟨p, ·⟩)'(t) = augVF f t (aΦ ⟨p, t⟩)`.  Specialising to `p = (x, id)`, the second
-component evolves by the operator-valued variational ODE, so
-`Z_eq_variationalLinearMapAt` applies. -/
 theorem augFlow_snd_eq_variationalLinearMapAt
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ}
@@ -996,13 +781,6 @@ section UniformContainment
 variable [FiniteDimensional ℝ E]
 variable {x₀ : E} {t₀ tmin tmax : ℝ}
 
-/-- **Uniform time-shrink containment for a continuous orbit map.**
-
-Let `Ψ : E × ℝ → E` be continuous on the compact product `closedBall x₀ ρ₀ ×ˢ Icc tmin tmax`,
-with `Ψ(x, t₀) = x` for `x ∈ closedBall x₀ ρ₀` and `t₀` strictly interior.  For any target
-radius `ρ_b > 0` there are a (smaller) initial radius `ρ_c > 0` and a time radius `T_c > 0`,
-with `Icc (t₀ - T_c) (t₀ + T_c) ⊆ Icc tmin tmax`, such that `Ψ(x, t) ∈ closedBall x₀ ρ_b` for
-every `x ∈ closedBall x₀ ρ_c` and every `t ∈ Ioo (t₀ - T_c) (t₀ + T_c)`. -/
 theorem exists_uniform_time_containment
     {ρ₀ : ℝ} (Ψ : E × ℝ → E)
     (hΨ_cont : ContinuousOn Ψ (closedBall x₀ ρ₀ ×ˢ Icc tmin tmax))
@@ -1063,17 +841,6 @@ section OrbitUniqueness
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Orbit uniqueness for the original ODE (set-localized form).**
-
-Two curves `y₁ y₂ : ℝ → E` that both solve the ODE `y'(t) = f t (y(t))` on an open interval
-`Ioo a b ∋ t₀`, agree at `t₀`, stay inside a closed ball `closedBall c ρ` along which
-`f t` is uniformly `K`-Lipschitz, coincide on `Ioo a b`.  This is
-`ODE_solution_unique_of_mem_Ioo` specialised to the autonomous-in-form vector field
-`v t y := f t y` and the *constant-in-time* set family `s t := closedBall c ρ`.
-
-Unlike a global-Lipschitz hypothesis (which a generic `C¹` field — e.g. `x ↦ x²` — does
-not satisfy), the Lipschitz bound here is only required on the closed ball where the two
-orbits live, matching `exists_lipschitzOnWith_closedBall_of_C1`. -/
 theorem orbit_unique_Ioo
     {a b : ℝ} {y₁ y₂ : ℝ → E} {K : ℝ≥0} {c : E} {ρ : ℝ}
     (ht₀ : t₀ ∈ Ioo a b)
@@ -1091,24 +858,6 @@ theorem orbit_unique_Ioo
     (fun t ht => ⟨hy₂ t ht, hy₂_mem t ht⟩)
     hinit
 
-/-- **The augmented flow's first component is the original flow's orbit.**
-
-Let `Φ` be a local flow of `f`, and `aΦ` a local flow of the augmented vector field
-`augVF f` started at `(x, id)`.  Suppose:
-* both flows are operative on a common open time interval `Ioo a b ∋ t₀`, contained in
-  the respective closed time domains;
-* `f t` is uniformly `K`-Lipschitz on a closed ball `closedBall c ρ_b` (the ball where the
-  two orbits live) for `t ∈ Ioo a b`;
-* both orbits stay inside `closedBall c ρ_b` on `Ioo a b`;
-* the initial spatial values agree: the augmented orbit starts at `(x, id)` and `x` is in
-  the original flow's closed ball, and `(x, id)` is in the augmented flow's closed ball.
-
-Then for every `t ∈ Ioo a b`, the first component of the augmented orbit equals the
-original orbit: `(aΦ ⟨(x, id), t⟩).1 = Φ ⟨x, t⟩`.
-
-The Lipschitz hypothesis is *local* (on a closed ball, not on `univ`), so this applies to a
-generic `C¹` field; the orbit-containment hypotheses are discharged at the headline by a
-uniform time-shrink (`exists_orbit_containment`). -/
 theorem augFlow_fst_eq_flow
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ} {p₀ : E × (E →L[ℝ] E)}
@@ -1166,8 +915,6 @@ section VariationalLinearMapCongr
 
 variable {f : ℝ → E → E} {α₁ α₂ : ℝ → E} {t₀ : ℝ}
 
-/-- If two central orbits agree on `Icc (t₀ - T) (t₀ + T)`, an `IsVariationalSolutionOn`
-along the first is an `IsVariationalSolutionOn` along the second. -/
 theorem IsVariationalSolutionOn.congr_central
     {T : ℝ} {δ : E} {y : ℝ → E}
     (hαeq : EqOn α₁ α₂ (Icc (t₀ - T) (t₀ + T)))
@@ -1178,11 +925,6 @@ theorem IsVariationalSolutionOn.congr_central
   have hd := hy.2 t ht
   rwa [hαeq ht] at hd
 
-/-- **Congruence of the variational linear map under agreement of the central orbit.**
-
-If `α₁ = α₂` on `Icc (t₀ - T) (t₀ + T)`, then the variational linear maps along the two
-orbits agree at every `t` in the interval (with the bound/continuity data transported
-across the agreement). -/
 theorem variationalLinearMapAt_congr_central
     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M) (hMT : M * T < 1)
     (hαeq : EqOn α₁ α₂ (Icc (t₀ - T) (t₀ + T)))
@@ -1210,9 +952,6 @@ section SpatialPieceVariational
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **The spatial piece is the variational linear map.**  Under the standard `C^1` flow
-hypotheses, at every interior point `(x, t)`, `spatialPieceFn Φ (x, t)` equals the
-variational linear map along the orbit `Φ ⟨x, ·⟩` evaluated at `t`. -/
 theorem spatialPieceFn_eq_variationalLinearMapAt
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -1241,19 +980,6 @@ section SpatialPieceAugFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Pointwise identification of the spatial piece with the augmented-flow projection.**
-
-Let `Φ` be a local flow of `f` and `aΦ` a local flow of `augVF f` centred at `(x₀, id)`.
-On a strictly-interior open time interval `Ioo (t₀ - T) (t₀ + T)` and spatial ball
-`closedBall x₀ ρ`, where:
-* `f` is `C^1`, `f t` is uniformly `K`-Lipschitz on a slightly larger open time interval;
-* the closed time interval is covered by both flow domains and the original `Icc tmin tmax`;
-* the spatial ball is inside both the flow's `closedBall x₀ r` (with the recentring slack
-  `r'`) and the augmented flow's `closedBall (x₀, id) R`;
-* a uniform linearization bound `M` holds along the orbits,
-
-then at every `(x, t)` with `x ∈ closedBall x₀ ρ` and `t ∈ Ioo (t₀ - T) (t₀ + T)`,
-`spatialPieceFn Φ (x, t) = fromAugFlow aΦ (x, t)`. -/
 theorem spatialPieceFn_eq_fromAugFlow
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ}
@@ -1326,13 +1052,6 @@ section VariationalLinearMapSmooth
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Joint `C^k` smoothness of the variational linear map (augmented-flow form).**
-
-Let `Φ` be a local flow of `f`, and `aΦ` a *jointly `C^k`* local flow of the augmented
-vector field `augVF f` centred at `(x₀, id)`, on an open neighbourhood `Ω` covering the
-embedded orbit data.  Then `spatialPieceFn Φ` — the spatial piece of `fderiv ℝ Φ`, i.e. the
-variational linear map — is jointly `C^k` on the strictly-interior open neighbourhood
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)`. -/
 theorem contDiffOn_variationalLinearMap
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)}
@@ -1371,17 +1090,6 @@ theorem contDiffOn_variationalLinearMap
       hLip hr' hρρ' hρR hA_bd hx_cb (hcontain₁ x hx_cb) (hcontain₂ x hx_cb) hq_t
   exact h_fromAug_Ck.congr h_eq
 
-/-- **The inductive step, driven by a `C^k` augmented flow.**
-
-If `Φ` is the local flow of a `C^{k+1}` field `f`, is already jointly `C^k` on the
-strictly-interior neighbourhood, and a *jointly `C^k`* augmented flow `aΦ` of `augVF f`
-covering the orbit data is available, then `Φ` is jointly `C^{k+1}`.
-
-This is the `n → n + 1` step of the strong induction: it converts the inductive hypothesis
-applied to `augVF f` (giving the `C^k` augmented flow `aΦ`) into the next regularity level
-for `Φ`.  The variational-flow projection is built from `spatialPieceFn Φ`, whose
-smoothness is `contDiffOn_variationalLinearMap` and whose coproduct identity is
-`fderiv_flow_eq_coprod_spatialPiece`. -/
 theorem contDiffOn_flow_succ_via_augFlow
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)}
@@ -1451,13 +1159,6 @@ section UnconditionalC1
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Unconditional `C^1` flow regularity (existence form).**
-
-In finite dimensions, a local flow `Φ` of a jointly `C^1` field `f` is jointly `C^1` on an
-open neighbourhood of `(x₀, t₀)`, with all bound/nesting data derived internally.  The two
-genuine non-degeneracy requirements are that `t₀` lie strictly interior in `Icc tmin tmax`
-(a two-sided time neighbourhood is impossible at a boundary time) and that the flow ball be
-non-degenerate (`0 < r`). -/
 theorem exists_contDiffOn_flow_C1 [FiniteDimensional ℝ E]
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -1475,8 +1176,6 @@ section NeighbourhoodReconciliation
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- From an open set `U ∋ (x₀, t₀)`, extract a basic product neighbourhood
-`ball x₀ ρ₁ ×ˢ Ioo (t₀ - T₁) (t₀ + T₁) ⊆ U`. -/
 theorem exists_basic_nhds_subset_aux {U : Set (E × ℝ)}
     (hU_open : IsOpen U) (hU_mem : (x₀, t₀) ∈ U) :
     ∃ ρ₁ > 0, ∃ T₁ > 0, ball x₀ ρ₁ ×ˢ Ioo (t₀ - T₁) (t₀ + T₁) ⊆ U := by
@@ -1491,9 +1190,6 @@ theorem exists_basic_nhds_subset_aux {U : Set (E × ℝ)}
   rw [Metric.mem_ball, Real.dist_eq, abs_lt]
   exact ⟨by linarith [hp2.1], by linarith [hp2.2]⟩
 
-/-- From an open set `Ω ∋ ((x₀, id), t₀)` in `(E × (E →L[ℝ] E)) × ℝ`, extract radius / time
-caps `ρ_a, T_a` so that the embedding `(x, t) ↦ ((x, id), t)` maps every box
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` with `ρ ≤ ρ_a`, `T ≤ T_a` into `Ω`. -/
 theorem exists_embed_caps_aux
     {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)} (hΩ_open : IsOpen Ω)
     (hΩ_mem : ((x₀, ContinuousLinearMap.id ℝ E), t₀) ∈ Ω) :
@@ -1518,9 +1214,6 @@ theorem exists_embed_caps_aux
 
 variable [FiniteDimensional ℝ E]
 
-/-- **Capped nesting and bound data.**  Like `exists_flow_nesting_data`, but additionally
-guarantees `ρ_out ≤ ρcap` and `T_out ≤ Tcap` for user-supplied positive caps.  This lets the
-`C^k` driver shrink the flow box to fit inside every other relevant neighbourhood. -/
 theorem exists_flow_nesting_data_capped
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -1592,8 +1285,6 @@ theorem exists_flow_nesting_data_capped
     hM_nonneg, hMT_mid, hr'_pos, hρ_pos, hρ_lt_mid, hρ_mid_lt_out, hρρ', hρ_out_le_r,
     hρ_out_le_cap, hT_out_le_cap, hsub, hA_bd⟩
 
-/-- Continuity of the augmented orbit's first component `(x, t) ↦ (aΦ ⟨(x, id), t⟩).1` on the
-product `closedBall x₀ ρ₀ ×ˢ Icc tmin' tmax'`, for `ρ₀ ≤ R`. -/
 theorem continuousOn_augFlow_fst
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ}
@@ -1622,16 +1313,6 @@ section CkDriver
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 variable [FiniteDimensional ℝ E]
 
-/-- **The `C^k → C^{k+1}` flow-regularity driver.**
-
-From a local flow `Φ` of a jointly `C^{k+1}` field `f`, a jointly `C^k` augmented flow `aΦ`
-of `augVF f` centred at `(x₀, id)` on an open neighbourhood `Ω` of `((x₀, id), t₀)`, and the
-prior-level regularity (`Φ` is `C^k` on some open neighbourhood of `(x₀, t₀)`), the flow `Φ`
-is `C^{k+1}` on an open neighbourhood of `(x₀, t₀)`.
-
-The augmented flow `aΦ` is a genuine constructed datum (Picard–Lindelöf for the `C^k` field
-`augVF f`), and the prior regularity is the inductive hypothesis; neither is a packaging of
-the conclusion. -/
 theorem exists_contDiffOn_flow_succ_driver
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)}
@@ -1751,12 +1432,6 @@ section CkInduction
 
 universe u
 
-/-- **The universe-polymorphic `C^n` flow-existence predicate.**
-
-`FlowCkPred n` is the statement "for every finite-dimensional complete normed space `E'` (in
-a fixed universe), a local flow of a jointly `C^n` field on `E'` is jointly `C^n` on an open
-neighbourhood of its base point, given `t₀` strictly interior and a non-degenerate flow ball".
-Quantifying over `E'` lets the inductive step apply the hypothesis to the augmented space. -/
 def FlowCkPred (n : ℕ) : Prop :=
   ∀ {E' : Type u} [NormedAddCommGroup E'] [NormedSpace ℝ E'] [CompleteSpace E']
     [FiniteDimensional ℝ E'] {g : ℝ → E' → E'} {t₀ : ℝ} {x₀ : E'} {r : ℝ≥0}
@@ -1766,14 +1441,11 @@ def FlowCkPred (n : ℕ) : Prop :=
     t₀ ∈ Ioo tmin tmax → 0 < (r : ℝ) →
     ∃ U : Set (E' × ℝ), IsOpen U ∧ (x₀, t₀) ∈ U ∧ ContDiffOn ℝ (n : ℕ∞) Ψ U
 
-/-- Base case of the strong induction: `FlowCkPred 1` is `exists_contDiffOn_flow_C1`. -/
 theorem flowCkPred_base : FlowCkPred.{u} 1 := by
   intro E' _ _ _ _ g t₀ x₀ r tmin tmax Ψ hΨ hg ht₀ hr
   have hg1 : ContDiffOn ℝ 1 (uncurry g) (Set.univ : Set (ℝ × E')) := by simpa using hg
   exact exists_contDiffOn_flow_C1 hΨ hg1 ht₀ hr
 
-/-- Inductive step: `FlowCkPred n → FlowCkPred (n + 1)` for `n ≥ 1`, via the augmented flow
-and the `C^k → C^{k+1}` driver. -/
 theorem flowCkPred_step {n : ℕ} (hn : 1 ≤ n) (IH : FlowCkPred.{u} n) :
     FlowCkPred.{u} (n + 1) := by
   intro E' _ _ _ _ g t₀ x₀ r tmin tmax Ψ hΨ hg ht₀ hr
@@ -1806,7 +1478,6 @@ theorem flowCkPred_step {n : ℕ} (hn : 1 ≤ n) (IH : FlowCkPred.{u} n) :
   rw [ContDiffOn] at hU_C ⊢
   convert hU_C using 2
 
-/-- The strong induction: `FlowCkPred n` holds for every `n ≥ 1`. -/
 theorem flowCkPred_all (n : ℕ) (hn : 1 ≤ n) : FlowCkPred.{u} n := by
   induction n, hn using Nat.le_induction with
   | base => exact flowCkPred_base
@@ -1818,16 +1489,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [FiniteDimensional ℝ E]
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Unconditional `C^n` flow regularity (existence form, every finite order `n ≥ 1`).**
-
-In finite dimensions, a local flow `Φ` of a jointly `C^n` field `f` is jointly `C^n` on an
-open neighbourhood of `(x₀, t₀)`, with all bound / nesting / Lipschitz / orbit-containment
-data derived internally.  The two genuine non-degeneracy requirements are that `t₀` lie
-strictly interior in `Icc tmin tmax` and that the flow ball be non-degenerate (`0 < r`).
-
-This is the headline unconditional finite-order flow-regularity theorem: for `n = 1` it is
-`exists_contDiffOn_flow_C1`, and for every higher finite order it is established by the strong
-induction `flowCkPred_all` through the augmented-flow recursion. -/
 theorem exists_contDiffOn_flow_Cnat
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {n : ℕ} (hn : 1 ≤ n) (hf : ContDiffOn ℝ (n : ℕ∞) (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -1835,11 +1496,6 @@ theorem exists_contDiffOn_flow_Cnat
     ∃ U : Set (E × ℝ), IsOpen U ∧ (x₀, t₀) ∈ U ∧ ContDiffOn ℝ (n : ℕ∞) Φ U :=
   flowCkPred_all n hn hΦ hf ht₀ hr
 
-/-- **Unconditional `C^2` flow regularity (existence form).**
-
-The `C^2` specialisation of `exists_contDiffOn_flow_Cnat`, in the form consumed downstream
-(e.g. for the Gauss lemma): a local flow of a jointly `C^2` field is jointly `C^2` on an open
-neighbourhood of `(x₀, t₀)`. -/
 theorem exists_contDiffOn_flow_C2
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 2 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -1850,18 +1506,7 @@ theorem exists_contDiffOn_flow_C2
   exact ⟨U, hU1, hU2, by exact_mod_cast hU3⟩
 
 omit [FiniteDimensional ℝ E] in
-/-- **Uniform-radius all-orders (`C^∞`) flow regularity on a fixed box.**
 
-Given the standard three-layer nesting / bound data for a local flow `Φ` of a jointly
-`C^∞` field `f`, together with the joint `C^j` smoothness of the spatial piece
-`spatialPieceFn Φ` on the **fixed** box `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` at *every*
-finite order `j`, the flow `Φ` is jointly `C^∞` on that same fixed box.
-
-The radius `(ρ, T)` is fixed once: every finite-order instance of
-`contDiffOn_flow_of_spatial_smooth_seq` is invoked with the *same* box, and the result is
-assembled via `contDiffOn_infty`.  The spatial-piece smoothness hypothesis
-`hLsp_smooth` is the smooth-parameter-dependence content of the variational linear ODE and
-is the sole remaining mathematical input. -/
 theorem contDiffOn_flow_infty_of_spatial_smooth_all
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -1894,19 +1539,6 @@ theorem contDiffOn_flow_infty_of_spatial_smooth_all
     hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd k hf_Ck (fun _ => spatialPieceFn Φ)
     (fun j _ => hLsp_smooth j) (fun _ _ => hLsp_eq)
 
-/-- **Uniform-radius all-orders (`C^∞`) flow regularity (existence form).**
-
-In finite dimensions, a local flow `Φ` of a jointly `C^∞` field `f` is jointly `C^∞` on a
-**single fixed** open neighbourhood of `(x₀, t₀)` — `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` —
-**provided** the spatial piece `spatialPieceFn Φ` is jointly `C^j` on that fixed box at every
-finite order `j` (the smooth-parameter-dependence content of the variational linear ODE).
-All bound / nesting data is derived internally via `exists_flow_nesting_data`.
-
-This is the all-orders, fixed-domain strengthening of `exists_contDiffOn_flow_Cnat`: the
-per-order theorem's neighbourhood shrinks with the order, whereas here a *single* domain
-carries `ContDiffOn ℝ ∞`.  The hypothesis `hLsp_smooth` is stated against the nesting box
-produced by `exists_flow_nesting_data`, exposed through the existential so the caller can
-discharge it on the concrete box. -/
 theorem exists_contDiffOn_flow_Cinfty
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ ∞ (uncurry f) (Set.univ : Set (ℝ × E)))

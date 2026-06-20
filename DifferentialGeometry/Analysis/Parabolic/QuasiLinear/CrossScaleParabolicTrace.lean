@@ -1,70 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 
-/-!
-# The cross-scale parabolic trace embedding `L²(H^{a+2}) ∩ H¹(Hᵃ) ↪ C(H^{a+1})`
-
-For the spectral tensor Sobolev scale `tensorHs g r s σ` of a closed Riemannian
-manifold `(M, g)`, this file builds the **Lions–Magenes parabolic trace
-embedding** one Sobolev order below the top regularity:
-
-> If a time-dependent tensor field has its values in `H^{a+2}` (`L²`-in-time)
-> and its time derivative in `Hᵃ` (`L²`-in-time), then it has a representative
-> continuous in time into the intermediate scale `H^{a+1}`, with the
-> sup-in-time energy estimate
->
->   `sup_t ‖u(t)‖²_{H^{a+1}} ≤ ‖u(0)‖²_{H^{a+1}} +
->      2 ∫₀ᵀ ‖u(s)‖_{H^{a+2}} · ‖∂_t u(s)‖_{Hᵃ} ds`.
-
-## The summation-free route
-
-The proof is *not* a Weierstrass `M`-test on the eigenmode series — an
-`L²`-in-time bound cannot dominate a sup-in-time series and there is no
-`(1 + λ)`-smoothing gain per mode.  Instead it follows the classical
-Lions–Magenes argument, which is *summation-free*:
-
-1. **Cross-scale duality pairing** (`crossPairing`): the `H^{a+1}` inner
-   product, read as a pairing of an `H^{a+2}` vector against an `Hᵃ` vector.
-   The weight splits as
-   `(1 + λᵢ)^{a+1} = √(1+λᵢ)^{a+2} · √(1+λᵢ)^a`, so a single global
-   Cauchy–Schwarz over the modes gives
-   `|⟨v, w⟩| ≤ ‖v‖_{H^{a+2}} · ‖w‖_{Hᵃ}` (`abs_crossPairing_le`); no
-   unsummable series appears.
-
-2. **Absolute continuity of the squared norm**: `t ↦ ‖u(t)‖²_{H^{a+1}}` is
-   the bilinear cross-pairing of the (continuous) `H^{a+2}` representative
-   against the indefinite `Hᵃ`-integral of the derivative; it is therefore
-   absolutely continuous, with a.e. derivative
-   `2 ⟨v(t), ∂_t u(t)⟩` (`crossPairingNormSq_hasDerivAt`).
-
-3. **Fundamental theorem of calculus** turns the a.e. derivative into the exact
-   identity `‖u(t)‖² = ‖u(0)‖² + ∫₀ᵗ 2⟨v, ∂_t u⟩`, and the cross-scale
-   Cauchy–Schwarz of step 1 bounds the integrand, giving the sup estimate.
-   Continuity of `t ↦ ‖u(t)‖²` plus the (already-available) `H^{a+1}` weak
-   continuity of the representative gives the strong-continuous representative.
-
-## Data
-
-The energy-space element is packaged as a `CrossScaleField`: a continuous
-`H^{a+2}` representative `hi : ℝ → H^{a+2}` of the values, the `Hᵃ`-valued
-time-Sobolev element `lo : timeH1 Hᵃ T` recording the initial value and the
-`L²` derivative, and the structural link that the `H^{a+1}` view of `hi` is the
-`H^{a+1}` view of the indefinite integral `lo.toFun`.  This matches exactly the
-companion-field shape of the maximal-regularity Duhamel solution
-(`maxRegDuhamelSolField` lives in `L²(H^{a+2})`, its carrier in `H¹(Hᵃ)`), so the
-headline can be applied to discharge the sup-in-time `hstay` residual.
-
-## Main results
-
-* `abs_crossPairing_le` — the cross-scale Cauchy–Schwarz pairing bound.
-* `crossPairing_self_eq_normSq` — the diagonal recovers `‖·‖²_{H^{a+1}}`.
-* `CrossScaleField.continuousOn_repr` — the `H^{a+1}` representative is
-  continuous on `[0,T]`.
-* `CrossScaleField.normSq_eq_init_add_integral` — the FTC for the squared
-  `H^{a+1}` norm.
-* `CrossScaleField.iSup_normSq_le` — the sup-in-time energy estimate.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter intervalIntegral
@@ -96,8 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {a : ℝ} {T : ℝ}
 
-/-- The middle Sobolev weight is the geometric mean of the upper and lower
-weights: `(1 + λᵢ)^{a+1} = √((1+λᵢ)^{a+2}) · √((1+λᵢ)^a)`. -/
 lemma tensorSobolevWeight_mid_eq_sqrt_mul_sqrt
     (i : TensorEigenIdx (I := I) (M := M) g r s) (a : ℝ) :
     tensorSobolevWeight (I := I) (M := M) i (a + 1) =
@@ -117,10 +51,6 @@ lemma tensorSobolevWeight_mid_eq_sqrt_mul_sqrt
   rw [hsqrt_u, hsqrt_l, ← Real.rpow_add hbase]
   congr 1; ring
 
-/-- The mode-wise product family `i ↦ (1+λᵢ)^{a+1} · vᵢ · wᵢ` of an upper-scale
-vector `v ∈ H^{a+2}` and a lower-scale vector `w ∈ Hᵃ` is summable.  The bound
-splits the weight `(1+λᵢ)^{a+1} = √wᵢ⁺·√wᵢ⁻` and applies AM–GM to dominate the
-term by the two (summable) weighted-square families. -/
 lemma crossPairing_summable
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -150,18 +80,11 @@ lemma crossPairing_summable
     Real.sqrt_nonneg wu, Real.sqrt_nonneg wl, abs_nonneg (v.coeff i),
     abs_nonneg (w.coeff i), sq_abs (v.coeff i), sq_abs (w.coeff i), hsqu, hsql]
 
-/-- The **cross-scale duality pairing** of an upper-scale vector `v ∈ H^{a+2}`
-against a lower-scale vector `w ∈ Hᵃ`:
-
-  `crossPairing v w = ∑ᵢ (1 + λᵢ)^{a+1} · vᵢ · wᵢ`,
-
-the `H^{a+1}` inner product read through the shared eigenmode coordinates. -/
 def crossPairing
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) : ℝ :=
   ∑' i, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (v.coeff i * w.coeff i)
 
-/-- The cross-scale pairing is additive in its upper-scale argument. -/
 lemma crossPairing_add_left
     (v v' : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -173,7 +96,6 @@ lemma crossPairing_add_left
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.add_coeff]; ring
 
-/-- The cross-scale pairing is additive in its lower-scale argument. -/
 lemma crossPairing_add_right
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w w' : tensorHs (I := I) (M := M) g r s a) :
@@ -185,7 +107,6 @@ lemma crossPairing_add_right
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.add_coeff]; ring
 
-/-- The cross-scale pairing is homogeneous in its upper-scale argument. -/
 lemma crossPairing_smul_left (c : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -196,7 +117,6 @@ lemma crossPairing_smul_left (c : ℝ)
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.smul_coeff]; ring
 
-/-- The cross-scale pairing is homogeneous in its lower-scale argument. -/
 lemma crossPairing_smul_right (c : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -207,8 +127,6 @@ lemma crossPairing_smul_right (c : ℝ)
   refine tsum_congr (fun i => ?_)
   simp only [tensorHs.smul_coeff]; ring
 
-/-- The cross-scale pairing is the `ℓ²` inner product of the two diagonally
-rescaled coordinate families. -/
 lemma crossPairing_eq_inner_rescale
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -227,11 +145,6 @@ lemma crossPairing_eq_inner_rescale
     tensorSobolevWeight_mid_eq_sqrt_mul_sqrt (I := I) (M := M) i a]
   ring
 
-/-- **The cross-scale Cauchy–Schwarz pairing bound.**  The `H^{a+1}` pairing of an
-`H^{a+2}` vector against an `Hᵃ` vector is controlled by the product of their
-norms at the respective scales:
-
-  `|crossPairing v w| ≤ ‖v‖_{H^{a+2}} · ‖w‖_{Hᵃ}`. -/
 theorem abs_crossPairing_le
     (v : tensorHs (I := I) (M := M) g r s (a + 2))
     (w : tensorHs (I := I) (M := M) g r s a) :
@@ -244,8 +157,6 @@ theorem abs_crossPairing_le
     (tensorHs.rescaleEquivL2 (I := I) (M := M)).norm_map w
   rw [hv, hw]
 
-/-- The cross-scale pairing of `v ∈ H^{a+2}` against its own `Hᵃ` view is the
-squared `H^{a+1}` norm of the `H^{a+1}` view of `v`. -/
 theorem crossPairing_self_eq_normSq
     (v : tensorHs (I := I) (M := M) g r s (a + 2)) :
     crossPairing (I := I) (M := M) v
@@ -258,7 +169,6 @@ theorem crossPairing_self_eq_normSq
   refine tsum_congr (fun i => ?_)
   rw [tensorHsInclusion_coeff_apply, tensorHsInclusion_coeff_apply, sq]
 
-/-- The eigenmode-coordinate `|T.coeff i|` is bounded by `√((1+λᵢ)^σ)⁻¹ · ‖T‖`. -/
 lemma abs_coeff_le_norm {σ : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s)
     (T : tensorHs (I := I) (M := M) g r s σ) :
     |T.coeff i| ≤ (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ))⁻¹ * ‖T‖ := by
@@ -281,8 +191,6 @@ lemma abs_coeff_le_norm {σ : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s)
   rw [inv_mul_eq_div, le_div_iff₀ hsqrt_pos, mul_comm]
   exact hle
 
-/-- The eigenmode-coordinate `T ↦ T.coeff i` as a continuous linear functional
-on `Hˢ`, with operator-norm bound `√((1+λᵢ)^σ)⁻¹`. -/
 def coeffCLM {σ : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorHs (I := I) (M := M) g r s σ →L[ℝ] ℝ :=
   LinearMap.mkContinuous
@@ -299,12 +207,6 @@ def coeffCLM {σ : ℝ} (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (T : tensorHs (I := I) (M := M) g r s σ) :
     coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := σ) i T = T.coeff i := rfl
 
-/-- **Scalar absolutely-continuous FTC-2 for the square, between two base
-points.**  Let `c, d : ℝ → ℝ` with `d` interval integrable on `t₀..t`, and
-suppose `c` is an indefinite integral of `d` near `t₀..t`, i.e. for every `x` in
-the (unordered) interval `c x - c t₀ = ∫ r in t₀..x, d r`.  Then
-
-  `c t ^ 2 = c t₀ ^ 2 + ∫ s in t₀..t, 2 * c s * d s`. -/
 theorem sq_eq_base_add_integral_of_indefinite
     {c d : ℝ → ℝ} {t₀ t : ℝ}
     (hd : IntervalIntegrable d volume t₀ t)
@@ -353,14 +255,11 @@ theorem sq_eq_base_add_integral_of_indefinite
 
 structure CrossScaleField (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (a : ℝ) (T : ℝ) where
-  /-- The upper-scale (`H^{a+2}`) `L²`-in-time datum, an a.e.-class. -/
+  
   hiL2 : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T
-  /-- The lower-scale (`Hᵃ`) time-Sobolev datum: initial value and `L²`
-  derivative. -/
+  
   lo : timeH1 (tensorHs (I := I) (M := M) g r s a) T
-  /-- For almost every `t`, the `Hᵃ` view of the pointwise value `hiL2 t` is the
-  indefinite `Hᵃ`-integral `lo.toFun t` of the derivative.  This is the a.e.
-  compatibility of the two scales; no continuity is assumed. -/
+  
   link : ∀ᵐ t ∂(timeMeasure T),
     tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         (show a ≤ a + 2 by linarith) (hiL2 t) = lo.toFun t
@@ -369,15 +268,9 @@ namespace CrossScaleField
 
 variable (u : CrossScaleField (I := I) (M := M) g r s a T)
 
-/-- The per-mode coordinate `cᵢ(t) = (lo.toFun t).coeff i`, a scalar function of
-time defined for every `t`. -/
 def coeffFun (i : TensorEigenIdx (I := I) (M := M) g r s) (t : ℝ) : ℝ :=
   (u.lo.toFun t).coeff i
 
-/-- The per-mode coordinate is the scalar indefinite integral of the derivative
-coordinate:
-
-  `cᵢ(t) = lo.init.coeff i + ∫₀ᵗ (lo.deriv s).coeff i ds`. -/
 lemma coeffFun_eq_integral (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     u.coeffFun i t =
@@ -395,9 +288,6 @@ lemma coeffFun_eq_integral (i : TensorEigenIdx (I := I) (M := M) g r s)
   rw [hval, timeH1.toFun_apply, map_add, hcomm]
   rfl
 
-/-- Each per-mode coordinate `cᵢ` is continuous on `[0,T]`: the bounded
-coordinate functional `coeffCLM i` composed with the continuous represented
-function `lo.toFun`. -/
 lemma continuousOn_coeffFun (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ContinuousOn (u.coeffFun i) (Icc (0 : ℝ) T) := by
   have hcomp : ContinuousOn
@@ -407,8 +297,6 @@ lemma continuousOn_coeffFun (i : TensorEigenIdx (I := I) (M := M) g r s) :
       i).continuous.comp_continuousOn u.lo.continuousOn_toFun
   simpa only [coeffCLM_apply] using hcomp
 
-/-- For almost every `t`, every per-mode coordinate of the lower-scale function
-equals the corresponding coordinate of the top-scale value `hiL2 t`. -/
 lemma ae_coeffFun_eq_hiL2 :
     ∀ᵐ t ∂(timeMeasure T), ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       u.coeffFun i t = (u.hiL2 t).coeff i := by
@@ -416,9 +304,6 @@ lemma ae_coeffFun_eq_hiL2 :
   have := congrArg (fun T => tensorHs.coeff T i) ht
   simpa only [coeffFun, tensorHsInclusion_coeff_apply] using this.symm
 
-/-- For almost every `t`, the finite-set weighted partial sum of the squared
-continuous coordinates at the *top* exponent `a+2` is bounded by the squared
-`H^{a+2}` norm of `hiL2 t`. -/
 lemma ae_finset_top_sq_le (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) :
     ∀ᵐ t ∂(timeMeasure T),
       ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (a + 2) * (u.coeffFun i t) ^ 2 ≤
@@ -431,9 +316,6 @@ lemma ae_finset_top_sq_le (S : Finset (TensorEigenIdx (I := I) (M := M) g r s)) 
   refine Summable.sum_le_tsum S (fun i _ => ?_) (u.hiL2 t).weighted_summable
   exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a + 2)) (sq_nonneg _)
 
-/-- The derivative coordinate `s ↦ (lo.deriv s).coeff i` is interval integrable
-on every `t₀..t` with endpoints in `[0,T]`: the bounded functional `coeffCLM i`
-applied to the interval-integrable `L²` derivative. -/
 lemma intervalIntegrable_deriv_coeffFun
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t₀ t : ℝ} (ht₀ : t₀ ∈ Icc (0 : ℝ) T) (ht : t ∈ Icc (0 : ℝ) T) :
@@ -448,10 +330,6 @@ lemma intervalIntegrable_deriv_coeffFun
         (intervalIntegrable_iff.mp hbase))
   simpa only [coeffCLM_apply] using hcomp
 
-/-- **Per-mode squared fundamental theorem of calculus, between two times.**
-For `t₀, t ∈ [0,T]`,
-
-  `cᵢ(t)² = cᵢ(t₀)² + ∫_{t₀}^t 2·cᵢ(s)·(lo.deriv s).coeff i ds`. -/
 lemma coeffFun_sq_eq (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t₀ t : ℝ} (ht₀ : t₀ ∈ Icc (0 : ℝ) T) (ht : t ∈ Icc (0 : ℝ) T) :
     (u.coeffFun i t) ^ 2 = (u.coeffFun i t₀) ^ 2 +
@@ -466,12 +344,6 @@ lemma coeffFun_sq_eq (i : TensorEigenIdx (I := I) (M := M) g r s)
     (u.intervalIntegrable_deriv_coeffFun i h0 hxmem)
     (u.intervalIntegrable_deriv_coeffFun i h0 ht₀)
 
-/-- **Finite-set cross-scale Cauchy–Schwarz, almost everywhere.**  For a.e. `s`
-and every finite set of modes `S`, the partial cross-scale pairing of the
-continuous coordinates against the derivative coordinates is bounded by the
-product of the `H^{a+2}` norm of `hiL2 s` and the `Hᵃ` norm of `lo.deriv s`:
-
-  `|∑_{i∈S} (1+λᵢ)^{a+1} cᵢ(s) dᵢ(s)| ≤ ‖hiL2 s‖_{H^{a+2}} · ‖lo.deriv s‖_{Hᵃ}`. -/
 lemma ae_abs_finset_crossPairing_le :
     ∀ᵐ τ ∂(timeMeasure T),
       ∀ S : Finset (TensorEigenIdx (I := I) (M := M) g r s),
@@ -517,8 +389,6 @@ lemma ae_abs_finset_crossPairing_le :
     mul_nonneg (norm_nonneg _) (norm_nonneg _)
   exact abs_le_of_sq_le_sq hsq_le hprodnn
 
-/-- The dominating product `s ↦ ‖hiL2 s‖ · ‖lo.deriv s‖` is integrable on
-`[0,T]`: the product of the two square-integrable norm factors. -/
 lemma integrableOn_normMul :
     IntegrableOn (fun s => ‖u.hiL2 s‖ * ‖u.lo.deriv s‖) (Set.Icc (0 : ℝ) T) volume := by
   have hhi : IntegrableOn (fun s => ‖u.hiL2 s‖ ^ 2) (Set.Icc (0 : ℝ) T) volume := by
@@ -552,14 +422,6 @@ lemma integrableOn_normMul :
   nlinarith [sq_nonneg (‖u.hiL2 s‖ - ‖u.lo.deriv s‖), norm_nonneg (u.hiL2 s),
     norm_nonneg (u.lo.deriv s)]
 
-/-- **`H^{a+1}` summability of the representative coordinates, uniformly in
-time.**  For `0 < T` there is a single bound `B` such that, for every `t` and
-every finite set of modes `S`,
-
-  `∑_{i∈S} (1+λᵢ)^{a+1} cᵢ(t)² ≤ B`.
-
-In particular the family `i ↦ (1+λᵢ)^{a+1} cᵢ(t)²` is summable for every `t`,
-i.e. the per-mode coordinates of `lo.toFun t` define an element of `H^{a+1}`. -/
 lemma exists_uniform_bound (hT : 0 < T) :
     ∃ B : ℝ, ∀ t ∈ Icc (0 : ℝ) T, ∀ S : Finset (TensorEigenIdx (I := I) (M := M) g r s),
       ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t) ^ 2 ≤ B := by
@@ -661,11 +523,6 @@ lemma exists_uniform_bound (hT : 0 < T) :
       _ = C := by rw [hC_def, hdom_def, ← MeasureTheory.integral_const_mul]
   linarith [hterm0, hterm1]
 
-/-- **`H^{a+1}` summability of the representative coordinates.**  For `0 < T` and
-every `t ∈ [0,T]`, the family `i ↦ (1+λᵢ)^{a+1} cᵢ(t)²` is summable: the
-continuous per-mode coordinates of `lo.toFun t` define an element of `H^{a+1}`.
-This is the conclusion of the Lions–Magenes energy comparison, i.e.
-`exists_uniform_bound`. -/
 lemma summable_coeffFun_sq (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t) ^ 2) := by
@@ -675,18 +532,13 @@ lemma summable_coeffFun_sq (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     (fun S => hB t ht S)
 
 open Classical in
-/-- The intermediate-scale (`H^{a+1}`) representative of the field, **produced**
-from the continuous per-mode coordinates `cᵢ(t) = (lo.toFun t).coeff i`.  Where
-the coordinates are `H^{a+1}`-summable it is the corresponding `H^{a+1}` element;
-otherwise it is `0` (a case that does not arise on `[0,T]` for `0 < T`). -/
+
 def repr (t : ℝ) : tensorHs (I := I) (M := M) g r s (a + 1) :=
   if h : Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t) ^ 2) then
     { coeff := fun i => u.coeffFun i t, weighted_summable := h }
   else 0
 
-/-- On the summable regime, the representative's coordinates are exactly the
-continuous per-mode coordinates `cᵢ(t)`. -/
 lemma repr_coeff_of_summable {t : ℝ}
     (h : Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
       tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t) ^ 2))
@@ -694,15 +546,11 @@ lemma repr_coeff_of_summable {t : ℝ}
     (u.repr t).coeff i = u.coeffFun i t := by
   rw [repr, dif_pos h]
 
-/-- For `0 < T` and `t ∈ [0,T]`, the representative's coordinates are the
-continuous per-mode coordinates `cᵢ(t)`. -/
 @[simp] lemma repr_coeff (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (u.repr t).coeff i = u.coeffFun i t :=
   u.repr_coeff_of_summable (u.summable_coeffFun_sq hT ht) i
 
-/-- The squared `H^{a+1}` norm of the representative is the weighted tsum of the
-squared continuous coordinates. -/
 lemma normSq_repr (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.repr t‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i (a + 1) * (u.coeffFun i t) ^ 2 := by

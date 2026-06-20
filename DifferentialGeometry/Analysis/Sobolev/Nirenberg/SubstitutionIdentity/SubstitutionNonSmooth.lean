@@ -2,62 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.MasterIn
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
 
-/-!
-# Non-smooth substitution identity, principal-term lower bound, and
-master inequality discharge
-
-This module produces the non-smooth analogues of three building blocks
-used in the smooth derivation of the Nirenberg interior `H²` estimate.
-For a non-smooth weak solution `u ∈ L²` of a uniformly elliptic
-divergence-form equation `B(u, ·) = ⟨f, ·⟩` with weak partials
-`g i ∈ L²` (`DeGiorgi.HasWeakPartialDeriv i (g i) u Set.univ`) and
-`f ∈ L²`, we establish:
-
-* `nirenberg_substitution_identity_nonsmooth` — the algebraic identity
-  resulting from substituting the symmetric Nirenberg test function
-  `v_h := D_{-h}^k(η² · D_h^k u)` into the variational identity and
-  expanding via the discrete product rule. The expanded form uses the
-  weak partials `g i` in place of the classical partials `(fderiv u) e_i`.
-
-* `principal_term_ge_lambda_norm_sq_nonsmooth` — the pointwise
-  ellipticity bound applied to the difference-quotient gradient
-  `D_h^k g_i`, integrated against `η²`. This is purely pointwise and
-  independent of the weak structure of `u`.
-
-* `nirenberg_master_inequality_nonsmooth` — the headline absorbing
-  inequality
-  `λ · ∫ η² ∑ (D_h^k g_i)² ≤ (λ/2) · ∫ η² ∑ (D_h^k g_i)² +
-     C · (∫ ∑ g_i² + ∫ u² + ∫ f²)`,
-  obtained by combining the substitution identity with the principal
-  bound and the five Young absorbing bounds.
-
-## Strategy
-
-The substitution identity is established by approximating `u` with the
-mollification `u_ε` (smooth on the whole space and a smooth weak
-solution of `L u_ε = classicalApply u_ε`), applying the smooth
-substitution identity, and passing to the L² limit. The L² convergence
-inputs:
-
-* `mollifyEps hε u → u` in L² uniformly on compact subsets;
-* the classical partial of `mollifyEps hε u` equals
-  `mollifyEps hε (g i)` and converges to `g i` in L²;
-* the difference quotient `D_h^k (mollifyEps hε u)` converges to
-  `D_h^k u` in L² (linearity + L² convergence of mollification);
-* analogously for `D_h^k (g i)`.
-
-The identification of the right-hand side `f`-data uses the duality
-identity `integral_classicalApply_mollifyEps_sub_eq_bilin_sub`.
-
-The principal-term bound is a direct consequence of the pointwise
-ellipticity coercivity at the shifted point `x + h e_k`.
-
-The master inequality discharge applies the existing combinator
-`nirenberg_master_inequality_after_young_nonsmooth`, supplying
-`h_master_nonsmooth` from the substitution identity and the principal
-bound via the triangle inequality.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -76,9 +20,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-- Pointwise ellipticity at the shifted point: for any vector
-`V : Fin d → ℝ`, when `x + h e_k ∈ Ω`,
-`∑_{i j} a^{ij}(x + h e_k) · V i · V j ≥ λ · ∑_i (V i)²`. -/
 private lemma shiftedEllipticity_pointwise
     {Ω : Set EuclN} (B : SmoothEllipticBilinearForm d Ω)
     (V : Fin d → ℝ) (k : Fin d) (h : ℝ) {x : EuclN}
@@ -122,12 +63,6 @@ private lemma shiftedEllipticity_pointwise
   rw [← hξ_norm_sq]
   exact hcoer
 
-/-- The integral lower bound on the principal term, expressed in terms
-of explicit weak partials `g i`. The bound is purely pointwise + a
-nonneg weight (`η²`) and integration. No smoothness on `u` or `g i` is
-needed; the only requirement is that the difference quotients of `g i`
-make sense pointwise and integrate to a finite value (provided by
-`MemLp` and the cutoff `η`). -/
 theorem principal_term_ge_lambda_norm_sq_nonsmooth
     {Ω : Set EuclN} (B : SmoothEllipticBilinearForm d Ω)
     {u : EuclN → ℝ}
@@ -420,25 +355,7 @@ theorem principal_term_ge_lambda_norm_sq_nonsmooth
   exact integral_mono h_lhs_int h_rhs_int h_pointwise
 
 set_option linter.unusedVariables false in
-/-- **Non-smooth analogue of `nirenberg_substitution_identity` (expanded
-form).**
 
-The expanded form of the substitution identity, after substituting
-`v_h := D_{-h}^k(η² · D_h^k u)` into the variational identity and
-expanding via the discrete product rule and per-pair IBP. The five
-terms are:
-
-* `principal_term` — the leading principal-coefficient piece;
-* `cross_1` — the boundary correction from `∂_j(η² · D_h^k u)`;
-* `cross_2` — the difference-quotient of the coefficient piece;
-* `cross_3` — the cross of `cross_1` and `cross_2`;
-* `c_term` — the lower-order zeroth-order piece.
-
-The right-hand side `f_term` is the duality pairing with the data `f`.
-
-The proof strategy (mollification + L² limit passage from the smooth
-substitution identity) is encapsulated in the hypothesis
-`h_substitution_identity_holds`. -/
 theorem nirenberg_substitution_identity_nonsmooth
     {Ω : Set EuclN} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : EuclN → ℝ}
@@ -527,29 +444,7 @@ theorem nirenberg_substitution_identity_nonsmooth
   h_substitution_identity_holds
 
 set_option linter.unusedVariables false in
-/-- **Master inequality discharge for non-smooth weak solutions.**
 
-Given a non-smooth weak solution `u ∈ L²` with explicit weak partials
-`g i ∈ L²` (and `f ∈ L²`), supplied with:
-
-* the substitution identity (in algebraic form, Theorem 1's hypothesis);
-* the Fréchet–Kolmogorov bounds on `D_h^k u` and `D_h^k g_j`;
-* the L² bound on the symmetric Nirenberg test function,
-
-the absorbing inequality
-
-  `λ · ∫ η² ∑_i (D_h^k g_i)² ≤ (λ/2) · ∫ η² ∑_i (D_h^k g_i)² +
-       C · (∫_{Ω'} ∑_i g_i² + ∫_{Ω'} u² + ∫_{Ω'} f²)`
-
-holds, with `C` independent of `h` (for `|h| ≤ 1`).
-
-The proof reduces to the existing combinator
-`nirenberg_master_inequality_after_young_nonsmooth` once the master
-inequality
-`λ · ∫ η² ∑_i (D_h^k g_i)² ≤ |C1| + |C2| + |C3| + |R| + |Q|`
-is supplied; the latter follows from the substitution identity
-(rearranged) and the principal-term lower bound, by the triangle
-inequality. -/
 theorem nirenberg_master_inequality_nonsmooth
     {Ω : Set EuclN} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
     {u f : EuclN → ℝ}

@@ -1,12 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 
-/-!
-# Coordinate two-tensor covariant derivative components
-
-This file contains the `(0,2)` coordinate-frame component formulas and the
-arbitrary-slot expansion for `nabla0SFun 2`.
--/
-
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
@@ -29,8 +22,6 @@ variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace Real]
 
-/-- Evaluate a `(0,2)` tensor on arbitrary tangent vectors by expanding both
-vectors in the coordinate-frame basis at the base point. -/
 theorem tensor0S_two_eval_coordFrame_sum
     {x₀ : M}
     (Ax : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x₀)
@@ -162,10 +153,6 @@ theorem tensor0S_two_eval_coordFrame_sum
               else coordinateFrameAt (I := I) x₀ j x₀) := by
           simp [b, pair]
 
-
-/-- Coordinate-frame component formula for the covariant derivative of a `(0,2)`
-tensor, with the derivative term kept in the chart-model form used by
-`nabla0SFun`. -/
 theorem nabla0S_two_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -313,8 +300,6 @@ theorem nabla0S_two_model_coord
         exact hright_model k]
   rw [← hslots]
 
-/-- Coordinate-frame component formula for `(0,2)` tensors, after supplying
-the derivative-identification bridge. -/
 theorem nabla0S_two_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -342,10 +327,6 @@ theorem nabla0S_two_coord
               (fun q : Fin 2 => if q = 0 then j else k) := by
   rw [nabla0S_two_model_coord (I := I) cov X A x₀ j l, hderiv]
 
-/-- Evaluation form of `nabla0S_two_coord` on coordinate-frame basis vectors.
-
-This is the coordinate-frame bridge from the canonical raw derivative
-`nabla0SFun` to the usual `(0,2)` Christoffel component formula. -/
 theorem nabla0SFun_two_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -382,8 +363,6 @@ theorem nabla0SFun_two_eval_coordFrame
   simpa [coordComponent0SAt, component0S, hslots] using
     nabla0S_two_coord (I := I) cov X A x₀ hderiv j l
 
-/-- Coordinate expansion of `nabla0SFun 2` evaluated on arbitrary tangent
-vectors, obtained from the coordinate-basis formula by multilinearity. -/
 theorem nabla0SFun_two_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

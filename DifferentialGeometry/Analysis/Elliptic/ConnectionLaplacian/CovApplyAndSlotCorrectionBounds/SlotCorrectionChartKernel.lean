@@ -5,61 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotUnif
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.SlotChartSourceContMDiff
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-/-!
-# Kernel factorisation, chart-pulled smoothness, and uniform bounds for the
-chart-`α`-trivialised input / output Christoffel slot corrections
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, ranks
-`r s : ℕ`, a smooth tangent vector field `B`, and a slot index
-`k : Fin r` (input) or `l : Fin s` (output), the chart-`α`-trivialised
-input / output slot corrections of an `(r, s)`-tensor section `T` factor on
-the chart source as
-
-  `(triv α).cLMA b (chartTensorRSInputSlotCorrection r s g α T B b k)
-      = (inputSlotChartKernel g r s α B k b) ((triv α).cLMA b (T b))`
-
-(and the analogous identity for the output slot), where the kernel CLM
-`inputSlotChartKernel g r s α B k b : TensorRSModel r s ℝ E →L[ℝ]
-TensorRSModel r s ℝ E` (and its output sibling) depends only on `g`, `α`,
-`B`, the slot index, and the base point `b` — not on `T`. The kernel is
-chart-pulled `C^∞` on the chart-`α` Levi-Civita good set and admits uniform
-operator-norm and Fréchet-derivative bounds on the intersection of the POU
-tsupport with the good set.
-
-## Strategy
-
-The kernel is realised as composition with a model-side slot-conjugated CLM
-family `slotInputConjCLM` (resp. `slotOutputConjCLM`) of type
-`Fin r → (E →L[ℝ] E)`. The conjugation is by `chartJ α b ∘ · ∘ chartJinv α b`
-of the Levi-Civita parallel CLM at slot `k` (resp. `l`) and identity at
-every other slot. The composite `chartJ α b ∘ chartLeviCivitaParallelCLM g α b B
-∘ chartJinv α b` is exactly the hom-bundle trivialisation image of
-`chartLeviCivitaParallelCLM` at `b`, which agrees with
-`christoffelCorrectionCLM g α B b` on the chart source — and the latter is
-chart-source `C^∞` by `christoffelCorrectionCLM_contMDiffOn_chartSource`.
-
-The uniform op-norm bound on the conjugation reduces to the existing
-chart-`α`-trivialisation and Levi-Civita parallel CLM op-norm bounds on the
-POU tsupport. The uniform Fréchet-derivative bound is obtained from the
-chart-source smoothness via continuity of `fderiv` on the chart-target image
-of the (open) chart-`α` Levi-Civita good set.
-
-## Main declarations
-
-* `slotInputConjCLM` / `slotOutputConjCLM` — the per-slot conjugation CLM
-  families on `E →L[ℝ] E`.
-* `inputSlotChartKernel` / `outputSlotChartKernel` — the bundled kernel CLMs.
-* `chartTensorRSInputSlotCorrection_chart_kernel_factorization` /
-  `chartTensorRSOutputSlotCorrection_chart_kernel_factorization` — the
-  kernel factorisation identities.
-* `inputSlotChartKernel_contDiffAt_chart_pulled` /
-  `outputSlotChartKernel_contDiffAt_chart_pulled` — chart-pulled `C^∞`
-  smoothness on the chart-`α` Levi-Civita good set.
-* `inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport` /
-  `outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport` — uniform
-  Fréchet-derivative op-norm bounds on the same set.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -89,8 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The per-input-slot conjugation CLM: the chart-`α`-conjugate of the
-Levi-Civita parallel CLM at slot `k`, the identity at every other slot. -/
 def slotInputConjCLM (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M)
     (i : Fin r) : E →L[ℝ] E :=
@@ -101,8 +44,6 @@ def slotInputConjCLM (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
   else
     ContinuousLinearMap.id ℝ E
 
-/-- The per-output-slot conjugation CLM: the chart-`α`-conjugate of the
-Levi-Civita parallel CLM at slot `l`, the identity at every other slot. -/
 def slotOutputConjCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M)
     (j : Fin s) : E →L[ℝ] E :=
@@ -145,8 +86,6 @@ def slotOutputConjCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
   unfold slotOutputConjCLM
   simp [h]
 
-/-- The model-side precomposition CLM induced by the input-slot
-conjugation family. -/
 def inputSlotPrecompCLM (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M) :
     Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel r ℝ E :=
@@ -154,8 +93,6 @@ def inputSlotPrecompCLM (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (𝕜 := ℝ) (E := fun _ : Fin r => E) (F := ℝ)
     (slotInputConjCLM (I := I) g r α B k b)
 
-/-- The model-side postcomposition CLM induced by the output-slot
-conjugation family. -/
 def outputSlotPostcompCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M) :
     Tensor0SModel s ℝ E →L[ℝ] Tensor0SModel s ℝ E :=
@@ -163,8 +100,6 @@ def outputSlotPostcompCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (𝕜 := ℝ) (E := fun _ : Fin s => E) (F := ℝ)
     (slotOutputConjCLM (I := I) g s α B l b)
 
-/-- **The input-slot kernel CLM.** Acts on a chart-α-trivialised `(r, s)`-
-tensor model element by right-composing with `inputSlotPrecompCLM`. -/
 def inputSlotChartKernel (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M) :
     (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →L[ℝ]
@@ -173,8 +108,6 @@ def inputSlotChartKernel (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
       (Tensor0SModel r ℝ E) (Tensor0SModel s ℝ E)).flip
     (inputSlotPrecompCLM (I := I) g r α B k b)
 
-/-- **The output-slot kernel CLM.** Acts on a chart-α-trivialised `(r, s)`-
-tensor model element by left-composing with `outputSlotPostcompCLM`. -/
 def outputSlotChartKernel (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M) :
     (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E) →L[ℝ]
@@ -195,15 +128,6 @@ def outputSlotChartKernel (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     outputSlotChartKernel (I := I) g r s α B l b S =
       (outputSlotPostcompCLM (I := I) g s α B l b).comp S := rfl
 
-/-- Identity relating the slot-conjugated precomposition on the model side
-to the bundle-side slot-substitution after composing with `chartJ` on input.
-
-For `b` in the chart-`α` source and `α' : Tensor0SModel r ℝ E`, the
-`(α'.compCLM slotInputConjCLM)`-composition with `chartJ` on the input side
-equals `tensorSlotSubstCLM r b (tangentSlotCLM r k chartLeviCivitaParallelCLM)`
-applied to `α'.compCLM chartJ`. The key step is the identity
-`(chartJ ∘ Ψ_k ∘ chartJinv) ∘ chartJ = chartJ ∘ Ψ_k` on the chart base set,
-which uses `chartJinv ∘ chartJ = id`. -/
 private lemma slotInputConjCLM_compCLM_compCLM_chartJ
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') {b : M}
@@ -267,11 +191,6 @@ private lemma slotInputConjCLM_compCLM_compCLM_chartJ
   rw [hfam_at_v]
   exact (ContinuousMultilinearMap.compContinuousLinearMap_apply _ _ _).symm
 
-/-- Identity relating the slot-conjugated postcomposition on the model side
-to the bundle-side slot-substitution after composing with `chartJinv` on
-output. For `b` in the chart source and the output kernel,
-`chartJinv ∘ (chartJ ∘ Ψ_l ∘ chartJinv) = Ψ_l ∘ chartJinv` on the base set,
-which is the per-slot ingredient for the postcomposition identity. -/
 private lemma slotOutputConjCLM_compose_chartJinv
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Π b' : M, TangentSpace I b') {b : M}
@@ -296,12 +215,6 @@ private lemma slotOutputConjCLM_compose_chartJinv
       tangentSlotCLM_other (I := I) s l _ hjl]
     rw [ContinuousLinearMap.id_apply, ContinuousLinearMap.id_apply]
 
-/-- **Kernel factorisation of the chart-`α`-trivialised input-slot
-Christoffel correction.**
-
-For `b` in the chart-`α` source, the chart-`α`-trivialised input-slot
-Christoffel correction at `b` equals the input-slot kernel applied to the
-chart-`α`-trivialisation of `T b`. -/
 theorem chartTensorRSInputSlotCorrection_chart_kernel_factorization
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -399,12 +312,6 @@ theorem chartTensorRSInputSlotCorrection_chart_kernel_factorization
     rfl
   exact hLHS_eval.trans hRHS_eval.symm
 
-/-- **Kernel factorisation of the chart-`α`-trivialised output-slot
-Christoffel correction.**
-
-For `b` in the chart-`α` source, the chart-`α`-trivialised output-slot
-Christoffel correction at `b` equals the output-slot kernel applied to the
-chart-`α`-trivialisation of `T b`. -/
 theorem chartTensorRSOutputSlotCorrection_chart_kernel_factorization
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -475,9 +382,6 @@ theorem chartTensorRSOutputSlotCorrection_chart_kernel_factorization
     exact slotOutputConjCLM_compose_chartJinv (I := I) (M := M) g s α B hb l m j
   exact hLHS_eval.trans hRHS_eval.symm
 
-/-- On the chart-`α` source, the chart-`α`-conjugation
-`chartJ α b ∘L chartLeviCivitaParallelCLM g α b X ∘L chartJinv α b` agrees
-with `christoffelCorrectionCLM g α X b`. -/
 private lemma chartLCConj_eq_christoffelCorrectionCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -504,9 +408,6 @@ private lemma chartLCConj_eq_christoffelCorrectionCLM
   rw [trivToE_trivFromE (I := I) α hb_base]
   exact christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α X hb_base w
 
-/-- Chart-pulled smoothness of the chart-`α`-conjugation
-`chartJ α (symm y) ∘L chartLeviCivitaParallelCLM g α (symm y) B ∘L chartJinv α (symm y)`
-on the chart-target image of the chart-`α` Levi-Civita good set. -/
 private lemma chartLCConj_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -539,12 +440,10 @@ private lemma chartLCConj_contMDiffOn_chartSource
   intro b hb
   exact chartLCConj_eq_christoffelCorrectionCLM (I := I) (M := M) g α B.toFun hb
 
-/-- The chart-target image of the chart-`α` Levi-Civita good set is open. -/
 private lemma goodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
   chartLeviCivitaGoodSet_image_isOpen (I := I) α
 
-/-- The chart-`α` Levi-Civita good set is contained in the chart source. -/
 private lemma goodSet_subset_chartSource (α : M) :
     chartLeviCivitaGoodSet (I := I) α ⊆ (chartAt H α).source := by
   intro b hb
@@ -553,16 +452,11 @@ private lemma goodSet_subset_chartSource (α : M) :
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)] at hb
   exact hb
 
-/-- For `b` in the chart-`α` Levi-Civita good set, `extChartAt I α b` lies in
-the chart-target image of the good set. -/
 private lemma extChartAt_mem_goodSet_image (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
     extChartAt I α b ∈ (extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α :=
   ⟨b, hb, rfl⟩
 
-/-- Chart-pulled smoothness (in the `y : E` chart variable) of the chart-`α`
-conjugation `chartJ ∘ parallel ∘ chartJinv` evaluated at `(symm y)`, on the
-chart-target image of the chart-`α` Levi-Civita good set. -/
 private lemma chartLCConj_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -609,8 +503,6 @@ private lemma chartLCConj_chart_pulled_contDiffOn
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- Wrapper. Chart-pulled smoothness (as a `ContDiffAt`) of the chart-`α`
-conjugation, at a point in the chart-`α` Levi-Civita good set. -/
 private lemma chartLCConj_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -630,8 +522,6 @@ private lemma chartLCConj_chart_pulled_contDiffAt
   exact (chartLCConj_chart_pulled_contDiffOn (I := I) (M := M) g α B).contDiffAt
     (hOpen.mem_nhds hmem)
 
-/-- Chart-pulled `ContDiffAt` smoothness of each slot of the input slot
-conjugation family at a chart-good-set point. -/
 private lemma slotInputConjCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r)
@@ -663,8 +553,6 @@ private lemma slotInputConjCLM_chart_pulled_contDiffAt
     rw [heq]
     exact contDiffAt_const
 
-/-- Chart-pulled `ContDiffAt` smoothness of each slot of the output slot
-conjugation family at a chart-good-set point. -/
 private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s)
@@ -696,7 +584,6 @@ private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     rw [heq]
     exact contDiffAt_const
 
-/-- Smoothness of the chart-pulled `inputSlotPrecompCLM` at a good-set point. -/
 private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r)
@@ -741,7 +628,6 @@ private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
   intro y
   exact h_eval y
 
-/-- Smoothness of the chart-pulled `outputSlotPostcompCLM` at a good-set point. -/
 private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s)
@@ -786,11 +672,6 @@ private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
   intro y
   exact h_eval y
 
-/-- **Chart-pulled smoothness of the input-slot kernel.**
-
-The chart-pulled input-slot kernel `y ↦ inputSlotChartKernel g r s α B k
-((extChartAt I α).symm y)` is `ContDiffAt ℝ ∞` at `extChartAt I α b` for any
-`b` in the chart-`α` Levi-Civita good set. -/
 theorem inputSlotChartKernel_contDiffAt_chart_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -814,11 +695,6 @@ theorem inputSlotChartKernel_contDiffAt_chart_pulled
   intro y
   rfl
 
-/-- **Chart-pulled smoothness of the output-slot kernel.**
-
-The chart-pulled output-slot kernel `y ↦ outputSlotChartKernel g r s α B l
-((extChartAt I α).symm y)` is `ContDiffAt ℝ ∞` at `extChartAt I α b` for any
-`b` in the chart-`α` Levi-Civita good set. -/
 theorem outputSlotChartKernel_contDiffAt_chart_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -842,8 +718,6 @@ theorem outputSlotChartKernel_contDiffAt_chart_pulled
   intro y
   rfl
 
-/-- Op-norm bound on the chart-`α`-conjugation
-`chartJ α b ∘L chartLeviCivitaParallelCLM g α b X ∘L chartJinv α b`. -/
 private lemma chartLCConj_opNorm_le (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b') :
     ‖(chartJ (I := I) (M := M) α b).comp
@@ -856,7 +730,6 @@ private lemma chartLCConj_opNorm_le (g : SmoothRiemannianMetric I M) (α b : M)
   refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
   exact ContinuousLinearMap.opNorm_comp_le _ _
 
-/-- Pointwise per-slot op-norm bound on `slotInputConjCLM`. -/
 private lemma slotInputConjCLM_opNorm_le (g : SmoothRiemannianMetric I M)
     (r : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M)
     (i : Fin r) :
@@ -875,7 +748,6 @@ private lemma slotInputConjCLM_opNorm_le (g : SmoothRiemannianMetric I M)
     refine ContinuousLinearMap.norm_id_le.trans ?_
     exact le_max_left _ _
 
-/-- Pointwise per-slot op-norm bound on `slotOutputConjCLM`. -/
 private lemma slotOutputConjCLM_opNorm_le (g : SmoothRiemannianMetric I M)
     (s : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M)
     (j : Fin s) :
@@ -894,7 +766,6 @@ private lemma slotOutputConjCLM_opNorm_le (g : SmoothRiemannianMetric I M)
     refine ContinuousLinearMap.norm_id_le.trans ?_
     exact le_max_left _ _
 
-/-- Op-norm bound on the product of per-slot input conjugation factors. -/
 private lemma slotInputConjCLM_prod_opNorm_le (g : SmoothRiemannianMetric I M)
     (r : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M) :
     (∏ i : Fin r, ‖slotInputConjCLM (I := I) g r α B k b i‖) ≤
@@ -914,7 +785,6 @@ private lemma slotInputConjCLM_prod_opNorm_le (g : SmoothRiemannianMetric I M)
   · intro i _; exact norm_nonneg _
   · intro i _; exact slotInputConjCLM_opNorm_le (I := I) (M := M) g r α B k b i
 
-/-- Op-norm bound on the product of per-slot output conjugation factors. -/
 private lemma slotOutputConjCLM_prod_opNorm_le (g : SmoothRiemannianMetric I M)
     (s : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M) :
     (∏ j : Fin s, ‖slotOutputConjCLM (I := I) g s α B l b j‖) ≤
@@ -934,7 +804,6 @@ private lemma slotOutputConjCLM_prod_opNorm_le (g : SmoothRiemannianMetric I M)
   · intro j _; exact norm_nonneg _
   · intro j _; exact slotOutputConjCLM_opNorm_le (I := I) (M := M) g s α B l b j
 
-/-- Op-norm bound on the `inputSlotPrecompCLM`. -/
 private lemma inputSlotPrecompCLM_opNorm_le (g : SmoothRiemannianMetric I M)
     (r : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M) :
     ‖inputSlotPrecompCLM (I := I) g r α B k b‖ ≤
@@ -949,7 +818,6 @@ private lemma inputSlotPrecompCLM_opNorm_le (g : SmoothRiemannianMetric I M)
       (𝕜 := ℝ) (E := fun _ : Fin r => E) ℝ _) ?_
   exact slotInputConjCLM_prod_opNorm_le (I := I) (M := M) g r α B k b
 
-/-- Op-norm bound on the `outputSlotPostcompCLM`. -/
 private lemma outputSlotPostcompCLM_opNorm_le (g : SmoothRiemannianMetric I M)
     (s : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M) :
     ‖outputSlotPostcompCLM (I := I) g s α B l b‖ ≤
@@ -964,7 +832,6 @@ private lemma outputSlotPostcompCLM_opNorm_le (g : SmoothRiemannianMetric I M)
       (𝕜 := ℝ) (E := fun _ : Fin s => E) ℝ _) ?_
   exact slotOutputConjCLM_prod_opNorm_le (I := I) (M := M) g s α B l b
 
-/-- Op-norm bound on `inputSlotChartKernel`. -/
 private lemma inputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (k : Fin r) (b : M) :
     ‖inputSlotChartKernel (I := I) g r s α B k b‖ ≤
@@ -981,7 +848,6 @@ private lemma inputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
   refine le_trans (mul_le_mul_of_nonneg_right h_le h_nn) ?_
   rw [one_mul]
 
-/-- Op-norm bound on `outputSlotChartKernel`. -/
 private lemma outputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (B : Π b' : M, TangentSpace I b') (l : Fin s) (b : M) :
     ‖outputSlotChartKernel (I := I) g r s α B l b‖ ≤
@@ -997,8 +863,6 @@ private lemma outputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
   refine le_trans (mul_le_mul_of_nonneg_right h_le h_nn) ?_
   rw [one_mul]
 
-/-- **Chart-pulled `ContDiffOn` smoothness of `inputSlotChartKernel`** on the
-chart-target image of the chart-`α` Levi-Civita good set. -/
 theorem inputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -1029,8 +893,6 @@ theorem inputSlotChartKernel_chart_pulled_contDiffOn
     rfl
   exact h_at.contDiffWithinAt
 
-/-- **Chart-pulled `ContDiffOn` smoothness of `outputSlotChartKernel`** on the
-chart-target image of the chart-`α` Levi-Civita good set. -/
 theorem outputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -1101,8 +963,6 @@ private lemma outputSlotChartKernel_fderiv_continuousOn
     exact hcd.fderiv_of_isOpen hOpen h_le
   exact continuous_norm.comp_continuousOn hfd_cd.continuousOn
 
-/-- **Uniform Fréchet-derivative op-norm bound for the chart-pulled
-input-slot kernel.** -/
 theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -1148,8 +1008,6 @@ theorem inputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
   have h := hC_mem ⟨b, hb_K, rfl⟩
   exact le_trans h (le_max_left _ _)
 
-/-- **Uniform Fréchet-derivative op-norm bound for the chart-pulled
-output-slot kernel.** -/
 theorem outputSlotChartKernel_fderiv_opNorm_uniform_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :

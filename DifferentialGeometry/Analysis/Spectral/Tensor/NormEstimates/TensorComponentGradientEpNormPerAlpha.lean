@@ -5,67 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorCh
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.GradNormChartBound
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
-/-!
-# Per-`α` `eLpNorm` bound on the metric self-inner-product square-root of the
-gradient of the chart-frame scalar component
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and
-ranks `(r, s)`, this file collects the file-local elementary inequalities used
-to assemble the per-`α` `L²` bound
-
-```
-eLpNorm (b ↦ √ g.inner b (∇ u_α b) (∇ u_α b)) 2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊
-```
-
-where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`, the
-metric `g.inner` is the Riemannian fibre inner product on the tangent bundle,
-and the constant `C` depends only on `(g, r, s, α)`.
-
-## Strategy
-
-The complete proof combines:
-
-* the pointwise `ρ_α²`-weighted gradient bound
-  (`g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1`) and the
-  vanishing of the gradient off `tsupport ρ_α`
-  (`sqrt_g_inner_gradFun_tensorChartComponentScalar_eq_zero_outside_pouTsupport`),
-  giving, after taking square roots,
-  `√ g.inner b (∇u) (∇u) ≤ √A · |raw|_indicator
-                          + √B · ρ · √Tcov_sum + √B · ρ · √Tchr_sum`
-  globally on `M`;
-* the per-`α` `L²`-bound on the raw indicator
-  (`exists_integral_indicator_tsupp_raw_sq_le_const_mul_h1NormSq`, G4);
-* the per-`α` `L²`-bound on the chart-covariant-derivative atom sum
-  (`exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq`, G2);
-* the per-`α` per-direction `L²`-bound on the chart-Christoffel-correction
-  atom (`exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq`,
-  G3), bridged to the `G1` per-direction trivialised Christoffel correction
-  via the chart-twist inverse uniform operator-norm bound
-  (`chartRSTwistInv_pointwise_opNorm_isBounded_on_compact`) combined with a
-  square-of-sum bound;
-* `AEStronglyMeasurable` of each summand from the atom measurability
-  headlines (`aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov`,
-  `aestronglyMeasurable_pou_mul_sqrt_sum_christoffel_correction`,
-  `aestronglyMeasurable_indicator_tsupp_abs_raw`).
-
-Three Minkowski applications (`eLpNorm_add_le`) glue the three `eLpNorm`
-bounds into the headline.
-
-This module currently ships the elementary algebraic ingredients used in the
-final assembly. The remaining structural bridge between the trivialised
-Christoffel correction sum `Tchr_k = ‖triv(−Σ inputs + Σ outputs)‖²` and the
-non-trivialised slot-correction Euclidean square `(Σ ‖input‖² + Σ ‖output‖²)`,
-followed by the three-way Minkowski assembly, will land in a follow-up step
-in the same module.
-
-## File-local helper lemmas
-
-* `sqrt_add_le_sqrt_add_sqrt` — `√(a + b) ≤ √a + √b` for non-negative reals.
-* `sqrt_add3_le_sum` — `√(a + b + c) ≤ √a + √b + √c` for non-negative reals.
-* `coe_nnnorm_eq_ofReal_norm` — `(‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -98,7 +37,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For non-negative reals `a`, `b`, `√(a + b) ≤ √a + √b`. -/
 lemma sqrt_add_le_sqrt_add_sqrt {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     Real.sqrt (a + b) ≤ Real.sqrt a + Real.sqrt b := by
   have h_sum_nn : 0 ≤ a + b := add_nonneg ha hb
@@ -114,7 +52,6 @@ lemma sqrt_add_le_sqrt_add_sqrt {a b : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) :
     rw [h_lhs_sq, h_rhs_sq]; linarith
   exact (abs_le_of_sq_le_sq' h_sq_le h_sum_sq_nn).2
 
-/-- For non-negative reals `a`, `b`, `c`, `√(a + b + c) ≤ √a + √b + √c`. -/
 lemma sqrt_add3_le_sum {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) :
     Real.sqrt (a + b + c) ≤ Real.sqrt a + Real.sqrt b + Real.sqrt c := by
   have h_ab_nn : 0 ≤ a + b := add_nonneg ha hb
@@ -124,18 +61,12 @@ lemma sqrt_add3_le_sum {a b c : ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c
     sqrt_add_le_sqrt_add_sqrt ha hb
   linarith
 
-/-- For any element of a `SeminormedAddCommGroup`,
-`(‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖`. -/
 lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
     (x : X) :
     (‖x‖₊ : ℝ≥0∞) = ENNReal.ofReal ‖x‖ := by
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
-/-- For a finite indexing set `s : Finset ι` and a `NormedAddCommGroup`-valued
-family `x : ι → X`, the square of the norm of the sum is bounded by `|s|`
-times the sum of squared norms:
-`‖∑ i ∈ s, x i‖² ≤ |s| · ∑ i ∈ s, ‖x i‖²`. -/
 lemma sum_norm_sq_le_card_mul_sum_norm_sq
     {ι : Type*} {X : Type*} [SeminormedAddCommGroup X]
     (s : Finset ι) (x : ι → X) :
@@ -153,10 +84,6 @@ lemma sum_norm_sq_le_card_mul_sum_norm_sq
     sq_sum_le_card_mul_sum_sq
   exact h_sq_tri.trans h_pmi
 
-/-- For a `NormedAddCommGroup`-valued family `x : Fin r → X` and `y : Fin s → X`,
-the squared norm of `(−∑ x_i + ∑ y_l)` is bounded by twice the sum of squared
-sub-block norms:
-`‖−∑ i, x i + ∑ l, y l‖² ≤ 2·(‖∑ x_i‖² + ‖∑ y_l‖²)`. -/
 lemma norm_sq_neg_sum_add_sum_le_two_mul
     {r' s' : ℕ} {X : Type*} [SeminormedAddCommGroup X]
     (x : Fin r' → X) (y : Fin s' → X) :
@@ -181,9 +108,6 @@ lemma norm_sq_neg_sum_add_sum_le_two_mul
     linarith
   exact h_sq.trans h_abc
 
-/-- For a non-negative real-valued family `a : Fin n → ℝ`, the square root of
-the finite sum is bounded by the sum of square roots:
-`√(∑ k, a k) ≤ ∑ k, √(a k)`. -/
 lemma sqrt_sum_le_sum_sqrt_fin {n : ℕ} (a : Fin n → ℝ)
     (ha : ∀ k, 0 ≤ a k) :
     Real.sqrt (∑ k : Fin n, a k) ≤ ∑ k : Fin n, Real.sqrt (a k) := by
@@ -390,21 +314,7 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace
   Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace in
-/-- **Unconditional Riemannian-norm twin of the G5 headline.** For a closed
-Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart base point `α : M`,
-there is a non-negative constant `C` (depending only on `(g, r, s, α)`) such
-that for every smooth compactly-supported `H¹` tensor section
-`S : SmoothCcTensorH1 g r s` and every chart-frame multi-index choice
-`(Idx, Jdx)`,
-```
-eLpNorm
-    (fun b => √ g.inner b (∇u_α b) (∇u_α b)) 2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C * ‖S‖₊,
-```
-where `u_α := tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`. The
-Christoffel slot-correction atom is routed through its intrinsic
-Riemannian-fibre-norm operator bounds, so no chart-locality predicate is
-required. -/
+
 theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

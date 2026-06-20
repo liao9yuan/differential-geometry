@@ -5,44 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
-/-!
-# Chart formula for `gradInnerCLM` (smooth case)
-
-For a closed Riemannian manifold `(M, g)` and a chart point `α : M`, the
-pointwise metric inner product of the gradients of two smooth functions `ρα`
-and `v` expands in chart coordinates as
-
-```
-g(grad ρα, grad v)(x) =
-  ∑ i, j, g⁻¹^{ij}(x) · ∂_i (ρα ∘ symm)(φ x) · ∂_j (v ∘ symm)(φ x),
-```
-
-where `φ = extChartAt I α`, `symm = (extChartAt I α).symm` and `g⁻¹^{ij}(x)`
-is the `(i, j)`-entry of the chart-local inverse Gram matrix at `x`. After
-pulling back via `(extChartAt I α).symm ∘ toEuclidean.symm` to a point `y` in
-`chartTargetEuclid α`, the formula reads
-
-```
-chartPushedRaw I α (gradInnerSmooth g ρα v) y =
-  ∑ i, j, invGramOnEuclid g α i j y
-    · partialDerivOnEuclid α i ρα y · partialDerivOnEuclid α j v.toFun y,
-```
-
-where `partialDerivOnEuclid α i u y := partialDeriv i (scalarOnE α u) (symm_E y)`
-denotes the `i`-th chart-coordinate partial of the chart-pulled scalar
-`u ∘ (extChartAt I α).symm` evaluated at `(toEuclidean (E := E)).symm y`.
-
-This file packages the smooth-case chart formula in two equivalent forms:
-
-* a pointwise identity on `chartTargetEuclid α`,
-* an `ae`-identity between two `Lp ℝ 2` classes on the chart-pulled weighted
-  measure restricted to `chartTargetEuclid α`, lifting the pointwise identity
-  through the `chartPushedRawLpFromLp` construction.
-
-Both formulations use the smooth-case identification `gradInnerCLM g ρα
-(smoothToH1Compl v) = gradInnerSmooth g ρα v` from `GradInnerCLM.lean`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology Function
@@ -77,9 +39,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The `i`-th chart-pulled partial derivative of a function `u : M → ℝ` at a
-point `y ∈ EuclN`, defined as
-`partialDeriv i (u ∘ (extChartAt I α).symm) ((toEuclidean (E := E)).symm y)`. -/
 def partialDerivOnEuclid (α : M) (i : Fin (Module.finrank ℝ E)) (u : M → ℝ) :
     EuclN → ℝ := fun y =>
   partialDeriv (E := E) i (scalarOnE (I := I) α u) ((toEuclidean (E := E)).symm y)
@@ -90,12 +49,6 @@ def partialDerivOnEuclid (α : M) (i : Fin (Module.finrank ℝ E)) (u : M → �
       partialDeriv (E := E) i (scalarOnE (I := I) α u)
         ((toEuclidean (E := E)).symm y) := rfl
 
-/-- **Pointwise chart formula** for the smooth pointwise gradient inner
-product. For smooth `ρα, u : M → ℝ` and `y ∈ chartTargetEuclid α`, denoting
-`x = (extChartAt I α).symm ((toEuclidean (E := E)).symm y)`, the metric inner
-product `g(grad ρα x, grad u x)` equals the chart-coordinate sum
-`∑ i, j, invGramOnEuclid g α i j y · partialDerivOnEuclid α i ρα y ·
-partialDerivOnEuclid α j u y`. -/
 theorem gradInner_eq_chart_formula
     (g : SmoothRiemannianMetric I M) (α : M)
     {ρα u : M → ℝ}
@@ -148,9 +101,6 @@ theorem gradInner_eq_chart_formula
   intro j _
   rw [h_partial i ρα, h_partial j u, h_invGram i j]
 
-/-- Pointwise chart formula at a point `y ∈ chartTargetEuclid α` for the
-pulled-back gradient inner product `gradInnerSmooth g ρα v` evaluated at
-`x_y = (extChartAt I α).symm ((toEuclidean (E := E)).symm y)`. -/
 theorem chartPushedRaw_gradInnerSmooth_pointwise
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) {y : EuclN}
@@ -166,8 +116,6 @@ theorem chartPushedRaw_gradInnerSmooth_pointwise
           partialDerivOnEuclid (I := I) (M := M) α j v.toFun y :=
   gradInner_eq_chart_formula (I := I) (M := M) g α ρα.contMDiff v.smooth hy
 
-/-- Smoothness of `partialDerivOnEuclid α i u` on `chartTargetEuclid α` for
-smooth `u`. -/
 lemma partialDerivOnEuclid_contDiffOn (α : M) (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ContDiffOn ℝ ∞ (partialDerivOnEuclid (I := I) (M := M) α i u)
@@ -202,14 +150,12 @@ lemma partialDerivOnEuclid_contDiffOn (α : M) (i : Fin (Module.finrank ℝ E))
     h_pd.comp h_symm_smooth.contDiffOn h_maps
   exact h_comp
 
-/-- Continuity of `partialDerivOnEuclid α i u` on `chartTargetEuclid α`. -/
 lemma partialDerivOnEuclid_continuousOn (α : M) (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ContinuousOn (partialDerivOnEuclid (I := I) (M := M) α i u)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (partialDerivOnEuclid_contDiffOn (I := I) (M := M) α i hu).continuousOn
 
-/-- The chart formula RHS for the smooth gradient inner product. -/
 def chartFormulaRhsSmooth (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (u : M → ℝ) : EuclN → ℝ := fun y =>
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -225,8 +171,6 @@ def chartFormulaRhsSmooth (g : SmoothRiemannianMetric I M) (α : M)
           partialDerivOnEuclid (I := I) (M := M) α i ρα y *
           partialDerivOnEuclid (I := I) (M := M) α j u y := rfl
 
-/-- Smoothness of `chartFormulaRhsSmooth g α ρα u` on `chartTargetEuclid α`
-for smooth `u`. -/
 lemma chartFormulaRhsSmooth_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -242,7 +186,6 @@ lemma chartFormulaRhsSmooth_contDiffOn
     · exact partialDerivOnEuclid_contDiffOn (I := I) (M := M) α i ρα.contMDiff
   · exact partialDerivOnEuclid_contDiffOn (I := I) (M := M) α j hu
 
-/-- Continuity of `chartFormulaRhsSmooth g α ρα u` on `chartTargetEuclid α`. -/
 lemma chartFormulaRhsSmooth_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -250,8 +193,6 @@ lemma chartFormulaRhsSmooth_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (chartFormulaRhsSmooth_contDiffOn (I := I) (M := M) g α ρα hu).continuousOn
 
-/-- **Pointwise identity** on `chartTargetEuclid α`: for smooth `v`, the
-chart-pushed-raw gradient inner product agrees with the chart-formula RHS. -/
 theorem chartPushedRaw_gradInner_eq_rhs_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) {y : EuclN}
@@ -265,8 +206,6 @@ theorem chartPushedRaw_gradInner_eq_rhs_pointwise
   unfold chartFormulaRhsSmooth
   exact chartPushedRaw_gradInnerSmooth_pointwise (I := I) (M := M) g α ρα v hy
 
-/-- The chart formula RHS, extended by `0` outside `chartTargetEuclid α`.
-The natural conventional extension. -/
 noncomputable def chartFormulaRhsSmoothExt (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (u : M → ℝ) : EuclN → ℝ := by
   classical
@@ -296,9 +235,6 @@ lemma chartFormulaRhsSmoothExt_apply_of_notMem (g : SmoothRiemannianMetric I M) 
       else 0) = 0
   rw [if_neg hy]
 
-/-- The extended chart formula RHS is continuous on the open chart target
-(by smoothness on it) and vanishes outside, hence it is measurable on
-`EuclN`. -/
 lemma chartFormulaRhsSmoothExt_measurable
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -339,10 +275,6 @@ lemma chartFormulaRhsSmoothExt_measurable
   refine ContinuousOn.measurable_piecewise h_cont_on ?_ h_meas_target
   exact continuousOn_const
 
-/-- **Smooth-case Lp class identity** for the chart formula. The
-chart-pushed-raw Lp class of `gradInnerSmooth g ρα v` is ae-equal to the
-extended chart-formula RHS, where ae is taken against the chart-pulled
-weighted measure restricted to `chartTargetEuclid α`. -/
 theorem chartPushedRawLpFromLp_gradInnerSmooth_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -384,9 +316,6 @@ theorem chartPushedRawLpFromLp_gradInnerSmooth_aeEq
   unfold chartFormulaRhsSmooth
   exact chartPushedRaw_gradInnerSmooth_pointwise (I := I) (M := M) g α ρα v hy_target
 
-/-- **Smooth-case chart formula** for `gradInnerCLM`. For smooth `v` and
-`u_h = smoothToH1Compl v`, the chart-pushed-raw Lp class of
-`gradInnerCLM g ρα u_h` is ae-equal to the extended chart-formula RHS. -/
 theorem chartPushedRawLpFromLp_gradInnerCLM_smoothToH1Compl_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :

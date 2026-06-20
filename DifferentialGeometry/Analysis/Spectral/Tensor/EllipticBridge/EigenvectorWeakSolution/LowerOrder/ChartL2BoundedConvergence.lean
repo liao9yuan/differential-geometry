@@ -1,27 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.ChartPouKernel
 
-/-!
-# Bounded-factor and finite-sum `L²`-convergence engine for chart components
-
-This file collects the measure-theoretic `L²` machinery used to take `n → ∞`
-limits of the lower-order chart-coefficient terms, all formulated over the chart
-`L²` measure `chartL2Measure α`:
-
-* multiplication of an `L²` function by a globally bounded `AEStronglyMeasurable`
-  factor stays `L²` (`memLp_bdd_mul`) with a controlled `L²` norm
-  (`eLpNorm_bdd_mul_le`) and preserves `L²`-convergence (`tendsto_bdd_mul`);
-* the bare Euclidean chart component is globally `C^∞`
-  (`tensorChartComponent_contDiff'`), its topological support sits inside the
-  partition-of-unity kernel, and its chosen weak partial agrees a.e. with the
-  classical chart-Euclidean partial
-  (`chosenWeakPartial'_tensorChartComponent_ae_eq`);
-* a finite sum of `L²`-convergent sequences converges
-  (`tendsto_toLp_finsetSum`, `tendsto_sumToLp`, `tendsto_sum4`, `tendsto_sum5`),
-  the chart-Euclidean partial distributes across a finite sum
-  (`euclidPartial_finsetSum`), and `C^∞`-on-the-chart-target factors are
-  differentiable there.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -59,8 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The product of a bounded `AEStronglyMeasurable` function with an `L²`
-function is `L²`, with the `L²` norm of the product controlled by the bound. -/
 lemma memLp_bdd_mul
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (hc_meas : AEStronglyMeasurable c (chartL2Measure (I := I) (M := M) α))
@@ -84,8 +60,6 @@ lemma memLp_bdd_mul
         eLpNorm_const_smul (C : ℝ) f 2 _
     _ < ⊤ := ENNReal.mul_lt_top (by simp) hf.2
 
-/-- The `L²` norm of the product of a bounded `AEStronglyMeasurable` function
-`c` with an `L²` function is bounded by the sup bound times the `L²` norm. -/
 lemma eLpNorm_bdd_mul_le
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (f : EuclN → ℝ) :
@@ -109,10 +83,6 @@ lemma eLpNorm_bdd_mul_le
           eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) := by
         rw [Real.enorm_eq_ofReal hC]
 
-/-- **Multiplication by a bounded measurable factor preserves `L²`-convergence.**
-If a sequence `Fₙ` of `Lp` classes converges to `F` in `Lp ℝ 2 (chartL2Measure α)`,
-and `c` is a globally bounded `AEStronglyMeasurable` function, then the sequence
-of `L²` classes of `c · Fₙ` converges to the `L²` class of `c · F`. -/
 lemma tendsto_bdd_mul
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (hc_meas : AEStronglyMeasurable c (chartL2Measure (I := I) (M := M) α))
@@ -192,9 +162,6 @@ lemma tendsto_bdd_mul
         mul_lt_mul_of_pos_left hd hCpos
     _ = ε := by field_simp
 
-/-- The Euclidean chart component is globally `C^∞`: a restatement of
-`tensorChartComponent_contMDiff` via the model-space `ContMDiff ↔ ContDiff`
-correspondence. -/
 lemma tensorChartComponent_contDiff'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -205,8 +172,6 @@ lemma tensorChartComponent_contDiff'
   (contMDiff_iff_contDiff (n := (⊤ : ℕ∞))).mp
     (tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx)
 
-/-- The topological support of the Euclidean chart component is contained in the
-partition-of-unity kernel, hence in the chart target. -/
 lemma tensorChartComponent_tsupport_subset_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -225,9 +190,6 @@ lemma tensorChartComponent_tsupport_subset_chartPouKernel
   exact closure_minimal hsupp
     (chartPouKernel_isCompact (I := I) (M := M) α).isClosed
 
-/-- The chosen weak `k`-th chart partial of the Euclidean chart component agrees,
-almost everywhere on the chart `L²` measure, with the classical chart-Euclidean
-partial. -/
 lemma chosenWeakPartial'_tensorChartComponent_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -268,8 +230,6 @@ lemma chosenWeakPartial'_tensorChartComponent_ae_eq
   refine h_ae.trans (Filter.EventuallyEq.of_eq ?_)
   funext y; rw [euclidPartial_def]
 
-/-- The function underlying a finite sum of `L²` classes agrees almost
-everywhere with the finite sum of the underlying functions. -/
 lemma coeFn_finsetSum_lp
     (α : M) {ι : Type*} (s : Finset ι)
     (G : ι → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -288,8 +248,6 @@ lemma coeFn_finsetSum_lp
       filter_upwards [ih] with y hy
       rw [Pi.add_apply, hy, Finset.sum_insert ha]
 
-/-- The function underlying a finite sum of `L²` classes of `MemLp` functions
-agrees almost everywhere with the finite sum of those functions. -/
 lemma coeFn_finsetSum_toLp
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -307,8 +265,6 @@ lemma coeFn_finsetSum_toLp
       filter_upwards [ih, MemLp.coeFn_toLp (hf a)] with y hy hya
       rw [Finset.sum_insert ha, Finset.sum_insert ha, hya, hy]
 
-/-- The `L²` class of a function equal almost everywhere to a finite sum of `L²`
-functions is the finite sum of the `L²` classes of the summands. -/
 lemma toLp_finsetSum_congr
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -323,11 +279,6 @@ lemma toLp_finsetSum_congr
   exact (MemLp.coeFn_toLp hF).trans
     (hFeq.trans (coeFn_finsetSum_toLp (I := I) (M := M) α s hf).symm)
 
-/-- **Finite-sum `L²`-convergence assembly.** If, for each index `a` in a finite
-set, the `L²` classes `(hf a n).toLp (f a n)` converge to `(hflim a).toLp
-(flim a)`, and `Fₙ` agrees almost everywhere with `∑ a, f a n` while `Flim`
-agrees almost everywhere with `∑ a, flim a`, then the `L²` class of `Fₙ`
-converges to the `L²` class of `Flim`. -/
 lemma tendsto_toLp_finsetSum
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → ℕ → EuclN → ℝ} {flim : ι → EuclN → ℝ}
@@ -359,8 +310,6 @@ lemma tendsto_toLp_finsetSum
       (fun n => ∑ a ∈ s, (hf a n).toLp (f a n)) from funext h_n, h_lim]
   exact tendsto_finset_sum s (fun a _ => h_tendsto a)
 
-/-- A `C^∞`-on-the-chart-target factor, indicator-cut to the partition-of-unity
-kernel, times an arbitrary `L²` limit class, is `L²`. -/
 lemma memLp_indicatorFactor_mul_lp
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -379,13 +328,6 @@ lemma memLp_indicatorFactor_mul_lp
   exact memLp_bdd_mul (I := I) (M := M) α hC_nn hci_bd
     (aestronglyMeasurable_indicator_mul (I := I) (M := M) α hc) (Lp.memLp G)
 
-
-/-- **One nesting level of finite-sum `L²`-convergence.** If, for every index `a`
-in a finite type, the `L²` classes `(hf a n).toLp (f a n)` converge to
-`(hflim a).toLp (flim a)`, then the `L²` class of the finite sum `∑ a, f a n`
-converges to the `L²` class of `∑ a, flim a`. The summed `L²` classes are built
-from `memLp_finset_sum`, so the conclusion composes with itself across nesting
-levels. -/
 lemma tendsto_sumToLp
     (α : M) {ι : Type*} [Fintype ι]
     {f : ι → ℕ → EuclN → ℝ} {flim : ι → EuclN → ℝ}
@@ -408,9 +350,6 @@ lemma tendsto_sumToLp
       Finset.univ (fun a _ => hflim a))
     (fun _ => Filter.EventuallyEq.rfl) Filter.EventuallyEq.rfl
 
-/-- **The chart-Euclidean partial distributes across a finite sum.** For a
-finite family of functions all differentiable at `y`, the `l`-th chart-Euclidean
-partial of the sum is the sum of the chart-Euclidean partials. -/
 lemma euclidPartial_finsetSum
     (l : Fin (Module.finrank ℝ E)) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ} {y : EuclN}
@@ -421,9 +360,6 @@ lemma euclidPartial_finsetSum
   rw [euclidPartial_def, fderiv_fun_sum hf, ContinuousLinearMap.sum_apply]
   exact Finset.sum_congr rfl (fun a _ => by rw [euclidPartial_def])
 
-/-- **Four-fold nested finite-sum `L²`-convergence.** Per-`(a, b, c, d)`-leaf
-`L²`-convergence assembles into the `L²`-convergence of the four-fold nested
-finite sum. -/
 lemma tendsto_sum4
     (α : M) {κ₁ κ₂ κ₃ κ₄ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃] [Fintype κ₄]
@@ -475,9 +411,6 @@ lemma tendsto_sum4
           (hf := fun d n => hf a b c d n) (hflim := fun d => hflim a b c d)
           (h_tendsto a b c))))
 
-/-- **Five-fold nested finite-sum `L²`-convergence.** Per-`(a, b, c, d, e)`-leaf
-`L²`-convergence assembles into the `L²`-convergence of the five-fold nested
-finite sum. -/
 lemma tendsto_sum5
     (α : M) {κ₁ κ₂ κ₃ κ₄ κ₅ : Type*}
     [Fintype κ₁] [Fintype κ₂] [Fintype κ₃] [Fintype κ₄] [Fintype κ₅]
@@ -526,8 +459,6 @@ lemma tendsto_sum5
       (fun b c d e => hflim a b c d e)
       (fun b c d e => h_tendsto a b c d e))
 
-/-- A function `C^∞` on the open Euclidean chart target is differentiable at
-every point of the chart target. -/
 lemma differentiableAt_of_contDiffOn_chartTarget
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -538,8 +469,6 @@ lemma differentiableAt_of_contDiffOn_chartTarget
       (I := I) (M := M) α
   exact (hc.contDiffAt (hopen.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The bare Euclidean chart component of a smooth section is differentiable at
-every point. -/
 lemma differentiableAt_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -550,8 +479,6 @@ lemma differentiableAt_tensorChartComponent
   ((tensorChartComponent_contDiff' (I := I) (M := M) g r s S α Idx Jdx).differentiable
     (by simp)).differentiableAt
 
-/-- The `L²` class of a function equal almost everywhere to a sum of two `L²`
-functions is the sum of the `L²` classes of the summands. -/
 lemma toLp_add_eq
     (α : M) {f₁ f₂ F : EuclN → ℝ}
     (hf₁ : MemLp f₁ 2 (chartL2Measure (I := I) (M := M) α))

@@ -3,21 +3,6 @@ import DifferentialGeometry.External.DeGiorgi.SobolevSpace
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.Indicator
 
-/-!
-# Iterated Euclidean Sobolev space `W^{k,p}` on open subsets of `EuclideanSpace ℝ (Fin d)`
-
-We extend the vendored `W^{1,p}` API (from the DeGiorgi library) to general
-order `k : ℕ`. The construction is recursive:
-
-* `MemWkp 0 p u Ω` ↔ `u ∈ L^p(Ω)`;
-* `MemWkp (k+1) p u Ω` ↔ `u ∈ W^{1,p}(Ω)` and every weak first-partial of `u`,
-  chosen via `MemW1p.someWitness`, lies in `W^{k,p}(Ω)`.
-
-The accompanying norm `wkpNorm k p u Ω` collects, for every `j ≤ k` and every
-multi-index `α : Fin j → Fin d`, the `L^p`-norm of the iterated weak partial
-defined by repeated application of `chosenWeakPartial'`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -32,9 +17,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- A canonical representative of an `i`-th weak partial derivative of `u` on
-`Ω`, chosen via `MemW1p.someWitness` from any `MemW1p` witness. If `u` is not
-in `W^{1,p}(Ω)`, returns the zero function. -/
 def chosenWeakPartial' (p : ℝ≥0∞) (i : Fin d) (u : E → ℝ) (Ω : Set E) : E → ℝ := by
   classical
   exact
@@ -42,7 +24,6 @@ def chosenWeakPartial' (p : ℝ≥0∞) (i : Fin d) (u : E → ℝ) (Ω : Set E)
       fun x => (DeGiorgi.MemW1p.someWitness h).weakGrad x i
     else 0
 
-/-- If `u ∈ W^{1,p}(Ω)`, then `chosenWeakPartial' p i u Ω` is in `L^p(Ω)`. -/
 theorem chosenWeakPartial'_memLp_of_mem
     {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
     (h : DeGiorgi.MemW1p p u Ω) (i : Fin d) :
@@ -52,8 +33,6 @@ theorem chosenWeakPartial'_memLp_of_mem
   simp only [dif_pos h]
   exact (DeGiorgi.MemW1p.someWitness h).weakGrad_component_memLp i
 
-/-- If `u ∈ W^{1,p}(Ω)`, then `chosenWeakPartial' p i u Ω` is a weak `i`-th
-partial derivative of `u`. -/
 theorem chosenWeakPartial'_isWeakPartial_of_mem
     {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
     (h : DeGiorgi.MemW1p p u Ω) (i : Fin d) :
@@ -63,7 +42,6 @@ theorem chosenWeakPartial'_isWeakPartial_of_mem
   simp only [dif_pos h]
   exact (DeGiorgi.MemW1p.someWitness h).isWeakGrad i
 
-/-- If `u` is not in `W^{1,p}(Ω)`, the chosen weak partial is the zero function. -/
 theorem chosenWeakPartial'_of_not_mem
     {p : ℝ≥0∞} {Ω : Set E} {u : E → ℝ}
     (h : ¬ DeGiorgi.MemW1p p u Ω) (i : Fin d) :
@@ -72,7 +50,6 @@ theorem chosenWeakPartial'_of_not_mem
   unfold chosenWeakPartial'
   simp only [dif_neg h]
 
-/-- `MemWkp k p u Ω`: iterated `W^{k,p}` membership. -/
 def MemWkp : ℕ → ℝ≥0∞ → (E → ℝ) → Set E → Prop
   | 0,     p, u, Ω => MemLp u p (volume.restrict Ω)
   | k + 1, p, u, Ω =>
@@ -86,13 +63,10 @@ def MemWkp : ℕ → ℝ≥0∞ → (E → ℝ) → Set E → Prop
       DeGiorgi.MemW1p p u Ω ∧
         ∀ i : Fin d, MemWkp (d := d) k p (chosenWeakPartial' p i u Ω) Ω := Iff.rfl
 
-/-- `W^{0,p}(Ω) = L^p(Ω)`. -/
 theorem MemWkp.zero_iff_memLp
     {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E} :
     MemWkp (d := d) 0 p u Ω ↔ MemLp u p (volume.restrict Ω) := Iff.rfl
 
-/-- For `k = 1`: this iterated definition coincides with the vendored
-`MemW1p`. -/
 theorem MemWkp.one_iff_memW1p
     {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E} :
     MemWkp (d := d) 1 p u Ω ↔ DeGiorgi.MemW1p p u Ω := by
@@ -100,7 +74,6 @@ theorem MemWkp.one_iff_memW1p
   refine ⟨fun h => h.1, fun h => ⟨h, fun i => ?_⟩⟩
   exact chosenWeakPartial'_memLp_of_mem h i
 
-/-- Membership in `W^{k,p}(Ω)` implies membership in `L^p(Ω)`. -/
 theorem MemWkp.memLp
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) k p u Ω) :
@@ -111,7 +84,6 @@ theorem MemWkp.memLp
       rw [MemWkp_succ] at h
       exact h.1.1
 
-/-- Membership in `W^{k+1,p}(Ω)` implies membership in `W^{1,p}(Ω)`. -/
 theorem MemWkp.memW1p
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) (k + 1) p u Ω) :
@@ -119,8 +91,6 @@ theorem MemWkp.memW1p
   rw [MemWkp_succ] at h
   exact h.1
 
-/-- Each chosen weak partial of an element of `W^{k+1,p}(Ω)` lies in
-`W^{k,p}(Ω)`. -/
 theorem MemWkp.chosenWeakPartial_mem
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) (k + 1) p u Ω) (i : Fin d) :
@@ -128,7 +98,6 @@ theorem MemWkp.chosenWeakPartial_mem
   rw [MemWkp_succ] at h
   exact h.2 i
 
-/-- `W^{k+1,p}(Ω) ⊆ W^{k,p}(Ω)`. -/
 theorem MemWkp.le_succ
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) (k + 1) p u Ω) :
@@ -142,7 +111,6 @@ theorem MemWkp.le_succ
       refine ⟨h.1, fun i => ?_⟩
       exact ih (h.2 i)
 
-/-- `W^{k',p}(Ω) ⊆ W^{k,p}(Ω)` whenever `k ≤ k'`. -/
 theorem MemWkp.le_of_le
     {k k' : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (hk : k ≤ k') (h : MemWkp (d := d) k' p u Ω) :
@@ -151,8 +119,6 @@ theorem MemWkp.le_of_le
   | base => exact h
   | succ k' _hk ih => exact ih h.le_succ
 
-/-- The iterated weak partial of order `j` along the multi-index
-`α : Fin j → Fin d`. -/
 def iterWeakPartial (p : ℝ≥0∞) :
     ∀ (j : ℕ), (Fin j → Fin d) → (E → ℝ) → Set E → (E → ℝ)
   | 0,     _, u, _ => u
@@ -171,8 +137,6 @@ lemma iterWeakPartial_succ
       iterWeakPartial p j (fun i : Fin j => α i.succ)
         (chosenWeakPartial' p (α 0) u Ω) Ω := rfl
 
-/-- For `u ∈ W^{j,p}(Ω)`, every iterated weak partial of order `j` lies in
-`L^p(Ω)`. -/
 theorem iterWeakPartial_memLp_of_memWkp
     {j : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) j p u Ω) (α : Fin j → Fin d) :
@@ -184,7 +148,6 @@ theorem iterWeakPartial_memLp_of_memWkp
       rw [iterWeakPartial_succ]
       exact ih (h.chosenWeakPartial_mem (α 0)) (fun i : Fin j => α i.succ)
 
-/-- A weak partial of `u` is a weak partial of any `v` ae-equal to `u`. -/
 theorem hasWeakPartialDeriv_congr_ae
     {Ω : Set E} (hΩ : IsOpen Ω)
     (i : Fin d) {g u v : E → ℝ}
@@ -202,7 +165,6 @@ theorem hasWeakPartialDeriv_congr_ae
   rw [integral_congr_ae h_ae]
   exact h φ hφ_smooth hφ_supp hφ_sub
 
-/-- `MemW1p` is invariant under ae-equality on `volume.restrict Ω` for open `Ω`. -/
 theorem MemW1p_congr_ae
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v) :
@@ -219,7 +181,6 @@ theorem MemW1p_congr_ae
       obtain ⟨g, hg_memLp, hg_weak⟩ := h.2 i
       exact ⟨g, hg_memLp, hasWeakPartialDeriv_congr_ae hΩ i huv.symm hg_weak⟩
 
-/-- The chosen weak partials of two ae-equal functions are ae-equal. -/
 theorem chosenWeakPartial'_ae_congr
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v)
@@ -240,8 +201,6 @@ theorem chosenWeakPartial'_ae_congr
   · have hv : ¬ DeGiorgi.MemW1p p v Ω := fun hv => hu ((MemW1p_congr_ae hΩ huv).mpr hv)
     rw [chosenWeakPartial'_of_not_mem hu, chosenWeakPartial'_of_not_mem hv]
 
-/-- `MemWkp k p` is invariant under ae-equality on `volume.restrict Ω` for open `Ω`,
-provided `1 ≤ p`. -/
 theorem MemWkp_congr_ae
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v) :
@@ -262,7 +221,6 @@ theorem MemWkp_congr_ae
         have hae := chosenWeakPartial'_ae_congr (d := d) hp hΩ huv.symm i
         exact (ih hae).mp (h.2 i)
 
-/-- For `u ∈ W^{1,p}(Ω)` with `u =ᵐ 0`, the chosen weak partial is ae zero. -/
 theorem chosenWeakPartial'_ae_zero_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu_ae : u =ᵐ[volume.restrict Ω] (fun _ => 0))
@@ -296,8 +254,6 @@ theorem chosenWeakPartial'_ae_zero_of_ae_zero
   · rw [chosenWeakPartial'_of_not_mem hW]
     exact Filter.Eventually.of_forall (fun _ => rfl)
 
-/-- If the input `u` is ae zero on `volume.restrict Ω`, then the iterate is
-ae zero. -/
 theorem iterWeakPartial_ae_zero_of_input_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     (j : ℕ) (α : Fin j → Fin d) {u : E → ℝ}
@@ -314,7 +270,6 @@ theorem iterWeakPartial_ae_zero_of_input_ae_zero
         chosenWeakPartial'_ae_zero_of_ae_zero (d := d) hp hΩ hu (α 0)
       exact ih (fun i : Fin j => α i.succ) h_chosen_ae
 
-/-- The constant zero function is in `MemWkp k p` of any open set, for `1 ≤ p`. -/
 theorem MemWkp_zero_fun
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω) :
     MemWkp (d := d) k p (fun _ : E => (0 : ℝ)) Ω := by
@@ -338,7 +293,6 @@ theorem MemWkp_zero_fun
             (Filter.Eventually.of_forall (fun _ => rfl)) i
         exact (MemWkp_congr_ae (d := d) hp hΩ hae).mpr ih
 
-/-- `MemW1p` is closed under addition. -/
 theorem MemW1p.add
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     {u v : E → ℝ}
@@ -408,8 +362,6 @@ theorem MemW1p.add
       _ = - ∫ x in Ω, (gu x + gv x) * φ x := by
             congr 1; congr 1; funext x; ring
 
-/-- The chosen weak partial of `u + v` is ae equal to
-`(chosen weak partial of u) + (chosen weak partial of v)`. -/
 theorem chosenWeakPartial'_add_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (hu : DeGiorgi.MemW1p p u Ω) (hv : DeGiorgi.MemW1p p v Ω)
@@ -501,7 +453,6 @@ theorem chosenWeakPartial'_add_ae
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ hPartial_left hPartial_right
     hLp_left hLp_right
 
-/-- `MemWkp` is closed under addition. -/
 theorem MemWkp.add
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ}
@@ -521,7 +472,6 @@ theorem MemWkp.add
         ih (hu.2 i) (hv.2 i)
       exact (MemWkp_congr_ae (d := d) hp hΩ hae).mpr hSum
 
-/-- `MemW1p` is closed under scalar multiplication. -/
 theorem MemW1p.const_smul
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     {u : E → ℝ} (hu : DeGiorgi.MemW1p p u Ω) (c : ℝ) :
@@ -564,7 +514,6 @@ theorem MemW1p.const_smul
       _ = - ∫ x in Ω, c * g x * φ x := by
             congr 1; congr 1; funext x; ring
 
-/-- The chosen weak partial of `c * u` is ae equal to `c * (chosen weak partial of u)`. -/
 theorem chosenWeakPartial'_const_smul_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : DeGiorgi.MemW1p p u Ω) (c : ℝ) (i : Fin d) :
@@ -621,7 +570,6 @@ theorem chosenWeakPartial'_const_smul_ae
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ hPartial_left hPartial_right
     hLp_left hLp_right
 
-/-- `MemWkp` is closed under scalar multiplication. -/
 theorem MemWkp.const_smul
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) (c : ℝ) :
@@ -640,7 +588,6 @@ theorem MemWkp.const_smul
         ih (hu.2 i)
       exact (MemWkp_congr_ae (d := d) hp hΩ hae).mpr hScaled
 
-/-- `MemWkp` is closed under negation. -/
 theorem MemWkp.neg
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
@@ -651,7 +598,6 @@ theorem MemWkp.neg
   rw [hEq] at h
   exact h
 
-/-- `MemWkp` is closed under subtraction. -/
 theorem MemWkp.sub
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ}
@@ -664,14 +610,11 @@ theorem MemWkp.sub
   rw [hEq] at h
   exact h
 
-/-- The iterated `W^{k,p}` norm: sum of `L^p`-norms of all iterated weak
-partials of order ≤ `k`. -/
 def wkpNorm (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) : ℝ≥0∞ :=
   ∑ j ∈ Finset.range (k + 1),
     ∑ α : Fin j → Fin d,
       eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω)
 
-/-- The norm decomposes as a sum over `j ≤ k` and over multi-indices. -/
 theorem wkpNorm_eq_sum
     (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
     wkpNorm (d := d) k p u Ω =
@@ -679,7 +622,6 @@ theorem wkpNorm_eq_sum
         ∑ α : Fin j → Fin d,
           eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω) := rfl
 
-/-- Order-zero norm equals `eLpNorm`. -/
 theorem wkpNorm_zero
     (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
     wkpNorm (d := d) 0 p u Ω = eLpNorm u p (volume.restrict Ω) := by
@@ -696,7 +638,6 @@ theorem wkpNorm_zero
           eLpNorm (iterWeakPartial (d := d) p 0 α u Ω) p (volume.restrict Ω))]
   simp [iterWeakPartial_zero]
 
-/-- The `wkpNorm` of the zero function is zero. -/
 theorem wkpNorm_zero_fun_zero
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω) :
     wkpNorm (d := d) k p (fun _ : E => (0 : ℝ)) Ω = 0 := by
@@ -713,7 +654,6 @@ theorem wkpNorm_zero_fun_zero
   rw [eLpNorm_congr_ae h_iter_ae]
   simp
 
-/-- The `wkpNorm` is finite for any function in `W^{k,p}(Ω)`. -/
 theorem wkpNorm_lt_top_of_memWkp
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) k p u Ω) :
@@ -731,15 +671,12 @@ theorem wkpNorm_lt_top_of_memWkp
   have h_iter := iterWeakPartial_memLp_of_memWkp (d := d) (p := p) h_uWj α
   exact h_iter.eLpNorm_lt_top
 
-/-- A function in `W^{k,p}(Ω)` has finite `eLpNorm`. -/
 theorem MemWkp.eLpNorm_lt_top
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) k p u Ω) :
     eLpNorm u p (volume.restrict Ω) < (⊤ : ℝ≥0∞) :=
   h.memLp.eLpNorm_lt_top
 
-/-- If `u =ᵐ v` on `volume.restrict Ω`, then iterated weak partials of order `j`
-agree a.e. -/
 theorem iterWeakPartial_ae_congr
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     (j : ℕ) (α : Fin j → Fin d) {u v : E → ℝ}
@@ -756,8 +693,6 @@ theorem iterWeakPartial_ae_congr
         chosenWeakPartial'_ae_congr (d := d) hp hΩ huv (α 0)
       exact ih (fun i : Fin j => α i.succ) h_chosen_ae
 
-/-- The `wkpNorm` is invariant under a.e. equality on `volume.restrict Ω` for
-open `Ω`, provided `1 ≤ p`. -/
 theorem wkpNorm_congr_ae
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v) :
@@ -773,8 +708,6 @@ theorem wkpNorm_congr_ae
     iterWeakPartial_ae_congr (d := d) hp hΩ j α huv
   exact eLpNorm_congr_ae h_iter_ae
 
-/-- For `u, v ∈ W^{j,p}(Ω)`, the iterated weak partial of `u + v` of order `j`
-agrees a.e. with the sum of the iterated weak partials of `u` and `v`. -/
 theorem iterWeakPartial_add_ae
     {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     (α : Fin j → Fin d) {u v : E → ℝ}
@@ -809,8 +742,6 @@ theorem iterWeakPartial_add_ae
       have h_iter_sum := ih (α := fun i : Fin j => α i.succ) h_uW h_vW
       exact h_iter_congr.trans h_iter_sum
 
-/-- For `u ∈ W^{j,p}(Ω)` and `c : ℝ`, the iterated weak partial of `c * u` of
-order `j` agrees a.e. with `c` times the iterated weak partial of `u`. -/
 theorem iterWeakPartial_const_smul_ae
     {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     (α : Fin j → Fin d) {u : E → ℝ}
@@ -841,7 +772,6 @@ theorem iterWeakPartial_const_smul_ae
       have h_iter_smul := ih (α := fun i : Fin j => α i.succ) h_uW
       exact h_iter_congr.trans h_iter_smul
 
-/-- The triangle inequality: `wkpNorm k p (u + v) Ω ≤ wkpNorm k p u Ω + wkpNorm k p v Ω`. -/
 theorem wkpNorm_add_le
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ}
@@ -883,7 +813,6 @@ theorem wkpNorm_add_le
     exact h
   exact htriangle
 
-/-- The scalar-multiplication identity: `wkpNorm k p (c * u) Ω = ‖c‖ₑ * wkpNorm k p u Ω`. -/
 theorem wkpNorm_const_smul
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ}
@@ -911,8 +840,6 @@ theorem wkpNorm_const_smul
   rw [heq]
   rw [eLpNorm_const_smul]
 
-/-- `MemW1p` restricts to open subsets: if `u ∈ W^{1,p}(Ω)` and `Ω' ⊆ Ω` is
-open, then `u ∈ W^{1,p}(Ω')`. -/
 theorem MemW1p.mono_set
     {p : ℝ≥0∞} {Ω Ω' : Set E}
     (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
@@ -926,8 +853,6 @@ theorem MemW1p.mono_set
     · exact hg_memLp.mono_measure (Measure.restrict_mono_set volume hΩΩ')
     · exact DeGiorgi.HasWeakPartialDeriv.restrict hΩ' hΩΩ' hg_weak
 
-/-- The chosen weak partial on a larger open set, viewed on the smaller open
-subset, is a.e. equal to the chosen weak partial on the smaller open set. -/
 theorem chosenWeakPartial'_mono_set_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
     (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
@@ -956,8 +881,6 @@ theorem chosenWeakPartial'_mono_set_ae
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
     hP_Ω_loc hP_Ω'_loc
 
-/-- `MemWkp` restricts to open subsets: if `u ∈ W^{k,p}(Ω)` and `Ω' ⊆ Ω` is
-open, then `u ∈ W^{k,p}(Ω')`. -/
 theorem MemWkp.mono_set
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
     (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
@@ -976,8 +899,6 @@ theorem MemWkp.mono_set
       have hae := chosenWeakPartial'_mono_set_ae (d := d) hp hΩ' hΩΩ' hu.1 i
       exact (MemWkp_congr_ae (d := d) hp hΩ' hae).mp h_partial_Ω'
 
-/-- The iterated weak partial on `Ω`, viewed on `Ω' ⊆ Ω`, agrees a.e. on `Ω'`
-with the iterated weak partial on `Ω'`. -/
 theorem iterWeakPartial_mono_set_ae
     {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
     (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω) (α : Fin j → Fin d)
@@ -1012,8 +933,6 @@ theorem iterWeakPartial_mono_set_ae
           h_chosen_ae
       exact h_iter_mono_Ω'.trans h_iter_congr
 
-/-- The iterated `W^{k,p}` norm is monotone in the open set: if `Ω' ⊆ Ω` and
-`u ∈ W^{k,p}(Ω)`, then `wkpNorm k p u Ω' ≤ wkpNorm k p u Ω`. -/
 theorem wkpNorm_mono_set
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
     (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
@@ -1033,10 +952,6 @@ theorem wkpNorm_mono_set
   rw [← eLpNorm_congr_ae h_iter_ae]
   exact eLpNorm_mono_measure _ (Measure.restrict_mono_set volume hΩΩ')
 
-/-- The iterated `W^{k,p}` norm is monotone in the regularity order: if
-`k ≤ k'`, then `wkpNorm k p u Ω ≤ wkpNorm k' p u Ω`. The lower-order norm sums
-over a sub-range of orders `j`, and every summand is a non-negative element of
-`ℝ≥0∞`. -/
 theorem wkpNorm_mono_order
     {k k' : ℕ} (hk : k ≤ k') {p : ℝ≥0∞} (u : E → ℝ) (Ω : Set E) :
     wkpNorm (d := d) k p u Ω ≤ wkpNorm (d := d) k' p u Ω := by

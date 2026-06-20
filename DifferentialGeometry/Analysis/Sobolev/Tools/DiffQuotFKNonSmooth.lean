@@ -1,39 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.H1WeakSolutionApprox
 
-/-!
-# Fréchet–Kolmogorov L² bound for the difference quotient of a non-smooth H¹ function
-
-This module establishes the key non-smooth Fréchet–Kolmogorov estimate: for a
-function `u : E → ℝ` with `u, g_k ∈ L²(E)` (where `E := EuclideanSpace ℝ (Fin d)`)
-and `g_k` the weak `k`-th partial derivative of `u` on `Set.univ`, the forward
-difference quotient is uniformly L²-bounded on a precompact subdomain `Ω''` by
-the L² norm of `g_k` on a slightly larger subdomain `Ω'`, provided
-`cthickening h₀ closure(Ω'') ⊆ Ω'` for the displacement bound `h₀ > 0`.
-
-The proof proceeds by mollification. We approximate `u` by the smooth functions
-`u_ε := mollifyEps ε u`. Three ingredients combine:
-
-* The smooth-case localized FK bound (proved here): for `v ∈ C¹` and an
-  admissible localization, the lintegral of the squared difference quotient on
-  `Ω''` is dominated by the lintegral of the squared partial derivative on `Ω'`,
-  uniformly for `0 < |h| ≤ h₀`. This is the integrated form of the pointwise
-  Jensen bound from `sq_diffQuot_le_integral_indicator`.
-
-* The identification `(∂_k u_ε)(x) = (mollifyEps ε g_k)(x)`, available from
-  `mollifyEps_partial_eq_mollifyEps_weakPartial`.
-
-* L²-loc convergence `mollifyEps ε g_k → g_k` on a compact set, combined with
-  Fatou's lemma to pass to the limit. The compact set used is the cthickening
-  of `closure Ω''` by `h₀`, which lies inside `Ω'`.
-
-## Main theorems
-
-* `eLpNorm_diffQuot_le_eLpNorm_weakPartial` — the headline FK bound stated as
-  an inequality of `eLpNorm`s.
-* `integral_sq_diffQuot_le_integral_sq_weakPartial` — the same bound expressed
-  with explicit Bochner integrals of squares.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -49,11 +15,7 @@ variable {d : ℕ} [NeZero d]
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- For a `C¹` function `v` and an admissible displacement, the lintegral of
-the squared difference quotient on `Ω''` is bounded by the lintegral of the
-squared partial derivative on `Ω'`. Set-theoretic hypothesis:
-for every `x ∈ Ω''` and every `s ∈ (0, 1]`, the displaced point
-`x + s·h·e_k` lies in `Ω'`. -/
+
 private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_local
     {v : EuclN → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {Ω' Ω'' : Set EuclN}
@@ -234,8 +196,7 @@ private lemma lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv_loc
     _ = ∫⁻ y in Ω', FF y ∂(volume : Measure EuclN) := h_indicator_to_restrict
 
 omit [NeZero d] in
-/-- Direct sup-norm bound on the L² norm restricted to a finite-volume
-measurable set. -/
+
 private lemma eLpNorm_two_restrict_le_of_sup_bound
     {K : Set EuclN} (hK_meas : MeasurableSet K)
     {f : EuclN → ℝ} {C : ℝ} (hf : ∀ x ∈ K, ‖f x‖ ≤ C) :
@@ -262,8 +223,7 @@ private lemma eLpNorm_two_restrict_le_of_sup_bound
   exact h_bound
 
 omit [NeZero d] in
-/-- Sup-norm convergence on a measurable finite-volume set implies L²
-convergence on that set. -/
+
 private lemma tendsto_eLpNorm_restrict_of_tendstoUniformlyOn
     {ι : Type*} {l : Filter ι}
     {K : Set EuclN} (hK_meas : MeasurableSet K)
@@ -326,9 +286,6 @@ private lemma tendsto_eLpNorm_restrict_of_tendstoUniformlyOn
   filter_upwards [h_eventual_bound ε₀ hε₀_pos] with i hi
   exact hi.trans hε₀_le
 
-/-- Uniform convergence of the mollifier on a set, for a uniformly continuous
-function. The uniform continuity of `φ` ensures a uniform modulus of
-continuity that controls the convergence radius. -/
 private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -369,10 +326,6 @@ private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
   rw [dist_comm]
   exact lt_of_le_of_lt h_bound h_half_lt
 
-/-- For a continuous compactly supported function `φ`, the mollified function
-converges to `φ` in `L²(K)` for any compact set `K`. Proof: continuous functions
-with compact support are uniformly continuous, so we apply the previous two
-lemmas. -/
 private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSupport
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -403,9 +356,6 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSuppo
       hφ_cont hφ_uc
   exact tendsto_eLpNorm_restrict_of_tendstoUniformlyOn hK_meas hK_volume_finite h_unif
 
-/-- Mollification commutes with subtraction (a special case of linearity).
-For `f, g ∈ L²(EuclN)` and `0 < ε`,
-`mollifyEps ε f - mollifyEps ε g = mollifyEps ε (f - g)` pointwise. -/
 private lemma mollifyEps_sub_eq_mollifyEps_sub
     {ε : ℝ} (hε : 0 < ε) {f g : EuclN → ℝ}
     (hf_loc : LocallyIntegrable f (volume : Measure EuclN))
@@ -443,9 +393,6 @@ private lemma mollifyEps_sub_eq_mollifyEps_sub
   simp [Pi.sub_apply]
   ring
 
-/-- L² convergence of the mollifier on a compact set, for `g ∈ L²(EuclN)`.
-Density argument: approximate `g` by continuous compactly supported `φ`,
-then use uniform convergence + Young's inequality. -/
 private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -570,8 +517,7 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
   rw [h_sum]
 
 omit [NeZero d] in
-/-- For `f, g ∈ L²(EuclN)` with finite `eLpNorm` and `eLpNorm (f - g) ≤ δ`,
-we have `eLpNorm f ≤ eLpNorm g + δ`. -/
+
 private lemma eLpNorm_le_of_eLpNorm_sub_le
     {μ : Measure EuclN} {f g : EuclN → ℝ}
     (hf_aestron : AEStronglyMeasurable f μ)
@@ -587,9 +533,7 @@ private lemma eLpNorm_le_of_eLpNorm_sub_le
   exact add_le_add le_rfl h_le
 
 omit [NeZero d] in
-/-- Continuity of squaring `(eLpNorm)²` under L² convergence — easier ENNReal version.
-For `f, g ∈ L²` with `eLpNorm` finite and `eLpNorm (f - g) ≤ δ`, we have
-`(eLpNorm f)² ≤ (eLpNorm g + δ)² = (eLpNorm g)² + 2 δ * eLpNorm g + δ²`. -/
+
 private lemma eLpNorm_sq_le_of_eLpNorm_sub_le
     {μ : Measure EuclN} {f g : EuclN → ℝ}
     (hf_aestron : AEStronglyMeasurable f μ)
@@ -600,7 +544,7 @@ private lemma eLpNorm_sq_le_of_eLpNorm_sub_le
   pow_le_pow_left' (eLpNorm_le_of_eLpNorm_sub_le hf_aestron hg_aestron h_le) 2
 
 omit [NeZero d] in
-/-- The lintegral of `‖f‖²_e` equals `(eLpNorm f 2 μ)²`. -/
+
 private lemma lintegral_enorm_sq_eq_eLpNorm_sq
     {μ : Measure EuclN} (f : EuclN → ℝ) :
     ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ = (eLpNorm f 2 μ) ^ 2 := by
@@ -619,11 +563,6 @@ private lemma lintegral_enorm_sq_eq_eLpNorm_sq
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-- The headline non-smooth Fréchet–Kolmogorov bound, lintegral form.
-For `u, g_k ∈ L²(EuclN)` with `g_k` the weak `k`-th partial of `u` on
-`Set.univ`, and an admissible localization with `cthickening h₀ closure(Ω'') ⊆ Ω'`
-and `0 < |h| ≤ h₀`:
-`∫⁻_{Ω''} ‖D_h^k u‖²_e ≤ ∫⁻_{Ω'} ‖g_k‖²_e`. -/
 private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
@@ -904,14 +843,6 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
             h_lint_eq_eLpNorm_sq_g.symm
     _ ≤ ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) := h_K_to_Ω'
 
-/-- **Fréchet–Kolmogorov L² bound for the difference quotient of a non-smooth H¹ function.**
-
-For `u : EuclN → ℝ` with weak partial derivative `g_k : EuclN → ℝ` (i.e., `g_k ∈ L²(univ)`
-is the weak `k`-partial of `u` on `Set.univ`), and for any open precompact `Ω'' ⊆ EuclN`
-and any `h₀ > 0` with `cthickening h₀ closure(Ω'') ⊆ Ω'`, the difference quotient
-satisfies the uniform L² bound
-
-  `‖diffQuot k h u‖_{L²(Ω'')} ≤ ‖g_k‖_{L²(Ω')}` for `0 < |h| ≤ h₀`. -/
 theorem eLpNorm_diffQuot_le_eLpNorm_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
@@ -948,11 +879,6 @@ theorem eLpNorm_diffQuot_le_eLpNorm_weakPartial
     rw [h_LHS_sq, h_RHS_sq]; exact h_lint
   exact (ENNReal.pow_le_pow_left_iff (by norm_num : 2 ≠ 0)).mp h_sq_le
 
-/-- L² version with explicit ∫ form, requiring only measurability of `Ω''`
-(and `Ω'`). This lets the bound be applied with closed sets such as
-`tsupport η` as the inner localization, which is essential when one cannot
-afford to enlarge `Ω''` to an open superset without breaking the `cthickening
-h₀ (closure Ω'') ⊆ Ω'` room condition. -/
 theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
@@ -1018,10 +944,6 @@ theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
   rw [h_LHS_eq, h_RHS_eq]
   exact ENNReal.toReal_mono h_RHS_lint_lt_top.ne h_lint
 
-/-- L² version with explicit ∫ form (for use in cross-bound theorems).
-
-For `u : EuclN → ℝ` with weak partial derivative `g_k : EuclN → ℝ`, `u, g_k ∈ L²`,
-the squared Bochner integral version of the FK bound on the difference quotient. -/
 theorem integral_sq_diffQuot_le_integral_sq_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))

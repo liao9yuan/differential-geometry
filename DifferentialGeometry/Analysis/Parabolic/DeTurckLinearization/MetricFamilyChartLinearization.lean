@@ -4,36 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrd
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-/-!
-# The chart `s`-linearization of the DeTurck–Ricci right-hand side along a metric family
-
-For a realising metric family `gfam` of the perturbation line `s ↦ g₀ ⊕ s·h`
-(`IsMetricPerturbationFamily g₀ α h gfam`), this file computes the `s`-derivative at
-`s = 0` of the chart-frame scalar DeTurck–Ricci right-hand side
-`chartDeTurckRicciRHS (gfam s) g_bg α i k y` at chart-interior points, and identifies it
-with the on-disk chart second-order part `deTurckRicciRHSChartSecondOrderPart g₀ g_bg`
-plus a genuinely-first-order remainder.
-
-## Method
-
-The master structural-difference identity `chartDeTurckRicciRHS_sub_eq` exhibits
-`chartDeTurckRicciRHS g₁ g_bg α i k y − chartDeTurckRicciRHS g₂ g_bg α i k y` as a finite
-sum of products, in each of which **exactly one** factor is a `g₁ − g₂`-difference (a
-Christoffel, Christoffel-derivative, Gram, Gram-first-partial, or DeTurck
-vector-field-component(-partial) difference, each ultimately a single `chartGramOnE` jet
-of chart order `≤ 2`).  Setting `g₁ = gfam s`, `g₂ = g₀` and differentiating in `s` at
-`0`, every product `(diff)·(plain)` has `diff|_{s = 0} = 0`, so its `s`-derivative is
-`(d/ds diff)|_0 · (plain|_0)`, and the `s`-derivative of the single difference factor is
-read off the chart-Gram jet pins of `IsMetricPerturbationFamily` through the
-structural-difference identities `invGramOnE_sub_eq`, `gramBracket_sub_eq`,
-`gramBracketDeriv_sub_eq`, `chartChristoffel_sub_eq`, `partialDeriv_chartChristoffel_sub_eq`,
-`chartDeTurckVFComp_sub_eq`, `partialDeriv_chartDeTurckVFComp_sub_eq`.
-
-No matrix-inverse `s`-differentiation is needed: the inverse-Gram difference is the
-algebraic perturbation `invGramOnE_sub_eq`, whose only `s`-dependent factor is a plain
-`chartGramOnE` difference.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -60,17 +30,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
-/-! ### A general commutation of the `s`-derivative with a chart partial derivative
-
-For a function `Φ : ℝ × E → ℝ` jointly `C^∞` at `(0, y₀)`, the chart partial derivative
-`∂_p` (a directional `fderiv` in the `y`-slot) commutes with the `s`-derivative:
-`(d/ds) [∂_p Φ(s, ·)](y₀)|_{s = 0} = ∂_p [(d/ds) Φ(·, y)|_{s = 0}](y₀)`.  This is
-Clairaut's symmetry of the mixed second derivative, supplied by `IsSymmSndFDerivAt`. -/
-
-/-- **Mixed `(s, y)`-second-partial commutation.**  For `Φ : ℝ × E → ℝ` jointly `C^∞` at
-`(0, y₀)`, the `s`-derivative of the directional `y`-derivative `fderiv ℝ (Φ(s, ·)) y₀ v`
-equals the directional `y`-derivative of the `s`-derivative
-`fderiv ℝ (fun y => deriv (Φ(·, y)) 0) y₀ v`. -/
 private lemma hasDerivAt_fderiv_comm
     (Φ : ℝ × E → ℝ) (y₀ : E) (v : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (0, y₀)) :
@@ -133,9 +92,6 @@ private lemma hasDerivAt_fderiv_comm
   rw [rhs_eq]
   exact h_sv'.congr_of_eventuallyEq lhs_eq
 
-/-- **Commutation of the `s`-derivative with a chart partial derivative.**  Specialising
-`hasDerivAt_fderiv_comm` to `v = chartModelBasis E p` (so the directional derivative is the
-chart partial `partialDeriv p`). -/
 private lemma hasDerivAt_partialDeriv_comm
     (Φ : ℝ × E → ℝ) (p : Fin (Module.finrank ℝ E)) (y₀ : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (0, y₀)) :
@@ -145,17 +101,6 @@ private lemma hasDerivAt_partialDeriv_comm
   unfold partialDeriv
   exact hasDerivAt_fderiv_comm Φ y₀ (chartModelBasis E p) hΦ
 
-/-! ### Joint `(s, y)`-smoothness of the chart objects along the family
-
-The commutation lemma `hasDerivAt_partialDeriv_comm` consumes joint `C^∞` of the chart
-objects in `(s, y)`.  The chart-Gram entry is jointly smooth by the predicate clause; the
-inverse-Gram entry is jointly smooth by the det/adjugate composition; a chart partial
-preserves joint smoothness (the partial-`y`-`fderiv` of a jointly-smooth function is jointly
-smooth, `ContDiffAt.fderiv`). -/
-
-/-- **Joint `(s, y)`-smoothness of a chart partial along the family.**  If the
-`(s, y)`-uncurried map `(p) ↦ Φ (gfam p.1) p.2` is jointly `C^∞` at every `(s, y)` near
-`(0, y₀)`, then so is `(p) ↦ partialDeriv q (fun y => Φ (gfam p.1) y) p.2`. -/
 private lemma joint_contDiffAt_partialDeriv
     (Ψ : ℝ → E → ℝ) (q : Fin (Module.finrank ℝ E)) {y₀ : E}
     (hΨ : ContDiffAt ℝ ∞ (fun r : ℝ × E => Ψ r.1 r.2) (0, y₀)) :
@@ -174,8 +119,6 @@ private lemma joint_contDiffAt_partialDeriv
   have hfd := ContDiffAt.fderiv hf hg (le_refl _)
   exact (ContinuousLinearMap.apply ℝ ℝ (chartModelBasis E q)).contDiff.contDiffAt.comp (0, y₀) hfd
 
-/-- **Joint `(s, y)`-smoothness of the chart Gram entry along the family** (the predicate
-clause, restated as a `ContDiffAt` at every nearby point via the open-set form). -/
 private lemma joint_contDiffAt_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -186,10 +129,6 @@ private lemma joint_contDiffAt_chartGramOnE
       (fun r : ℝ × E => chartGramOnE (I := I) (gfam r.1) α i j r.2) (0, y₀) :=
   hfam.2.2.1 i j hy
 
-/-! ### `s`-smoothness of the chart Gram and inverse Gram along the family -/
-
-/-- The chart point `x = (extChartAt I α).symm y` of a chart-interior point `y` lies in the
-trivialization base set, so the Gram matrix there is positive definite. -/
 private lemma symm_mem_baseSet_of_interior {α : M} {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     (extChartAt I α).symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -199,9 +138,6 @@ private lemma symm_mem_baseSet_of_interior {α : M} {y : E}
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   exact hsource
 
-/-- **Restriction of the joint smoothness clause to the `s`-slice.**  Given the
-joint-`C^∞` clause of `IsMetricPerturbationFamily` for the chart Gram entry, the
-single-variable map `s ↦ chartGramOnE (gfam s) α i j y` is `ContDiffAt ℝ ∞` at `0`. -/
 private lemma s_contDiffAt_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -218,8 +154,6 @@ private lemma s_contDiffAt_chartGramOnE
   refine hjoint.comp 0 ?_
   exact (contDiffAt_id).prodMk contDiffAt_const
 
-/-- The chart Gram matrix determinant along the family is `C^∞` in `s` near `0` and
-nonzero at `0`. -/
 private lemma s_contDiffAt_det_and_ne
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -252,8 +186,6 @@ private lemma s_contDiffAt_det_and_ne
     exact s_contDiffAt_chartGramOnE (I := I) hfam (σ k) k hy
   · exact ne_of_gt (chartGramMatrix_det_pos (I := I) (gfam 0) α hx_base)
 
-/-- An adjugate entry of the chart Gram matrix along the family is `C^∞` in `s` near
-`0`. -/
 private lemma s_contDiffAt_adjugate
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -291,10 +223,6 @@ private lemma s_contDiffAt_adjugate
     rw [heq]
     exact s_contDiffAt_chartGramOnE (I := I) hfam (σ k) k hy
 
-/-- **`s`-smoothness of the chart inverse-Gram entry along the family.**  At a
-chart-interior point, `s ↦ chartInvGramOnE (gfam s) α k l y` is `ContDiffAt ℝ ∞` at `0`.
-This is the only place the matrix-inverse smoothness enters; its explicit `s`-derivative
-is never needed (it drops out in products against a vanishing difference factor). -/
 private lemma s_contDiffAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -319,7 +247,6 @@ private lemma s_contDiffAt_chartInvGramOnE
   refine ContDiffAt.mul ?_ (s_contDiffAt_adjugate (I := I) hfam k l hy)
   exact (contDiffAt_inv _ hdet_ne).comp 0 hdet_smooth
 
-/-- The chart inverse-Gram entry along the family is `DifferentiableAt ℝ · 0`. -/
 private lemma s_differentiableAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -329,10 +256,6 @@ private lemma s_differentiableAt_chartInvGramOnE
     DifferentiableAt ℝ (fun s : ℝ => chartInvGramOnE (I := I) (gfam s) α k l y) 0 :=
   (s_contDiffAt_chartInvGramOnE (I := I) hfam k l hy).differentiableAt (by simp)
 
-/-- **Joint `(s, y)`-smoothness of the chart inverse-Gram entry along the family** at
-`(0, y₀)` for `y₀` chart-interior.  Mirrors the `s`-only version with the det/adjugate
-composition in the joint variable, the chart-Gram entries being jointly smooth by the
-predicate clause. -/
 private lemma joint_contDiffAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -342,7 +265,7 @@ private lemma joint_contDiffAt_chartInvGramOnE
     ContDiffAt ℝ ∞
       (fun p : ℝ × E => chartInvGramOnE (I := I) (gfam p.1) α k l p.2) (0, y₀) := by
   classical
-  -- joint smoothness of a single Gram matrix entry
+  
   have hGentry : ∀ a b : Fin (Module.finrank ℝ E),
       ContDiffAt ℝ ∞
         (fun p : ℝ × E => chartGramMatrix (I := I) (gfam p.1) α
@@ -350,7 +273,7 @@ private lemma joint_contDiffAt_chartInvGramOnE
     intro a b
     have := joint_contDiffAt_chartGramOnE (I := I) hfam a b hy
     simpa only [chartGramOnE_def] using this
-  -- joint smoothness + nonvanishing of the determinant
+  
   have hdet : ContDiffAt ℝ ∞
       (fun p : ℝ × E => (chartGramMatrix (I := I) (gfam p.1) α
         ((extChartAt I α).symm p.2)).det) (0, y₀) := by
@@ -414,8 +337,6 @@ private lemma joint_contDiffAt_chartInvGramOnE
   rw [hcongr]
   exact ((contDiffAt_inv _ hdet_ne).comp (0, y₀) hdet).mul (hadj k l)
 
-/-- Joint `(s, y)`-smoothness of the first chart partial of the Gram entry along the
-family. -/
 private lemma joint_contDiffAt_partial_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -429,7 +350,6 @@ private lemma joint_contDiffAt_partial_chartGramOnE
     (fun s y => chartGramOnE (I := I) (gfam s) α i j y) p
     (joint_contDiffAt_chartGramOnE (I := I) hfam i j hy)
 
-/-- Joint `(s, y)`-smoothness of the `gramBracket` along the family. -/
 private lemma joint_contDiffAt_gramBracket
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -449,7 +369,6 @@ private lemma joint_contDiffAt_gramBracket
     (joint_contDiffAt_partial_chartGramOnE (I := I) hfam l i j hy)).sub
     (joint_contDiffAt_partial_chartGramOnE (I := I) hfam i j l hy)
 
-/-- Joint `(s, y)`-smoothness of the chart Christoffel symbol along the family. -/
 private lemma joint_contDiffAt_chartChristoffel
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -468,21 +387,10 @@ private lemma joint_contDiffAt_chartChristoffel
   exact (joint_contDiffAt_chartInvGramOnE (I := I) hfam k l hy).mul
     (joint_contDiffAt_gramBracket (I := I) hfam i j l hy)
 
-/-! ### `s`-derivatives of the atomic chart objects along the family
-
-Each atom `Φ(gfam s)` has a `HasDerivAt` at `s = 0` matching the on-disk frozen-`g₀`
-linearization, computed from the chart-Gram jet pins of `IsMetricPerturbationFamily`
-through the structural-difference identities, with no matrix-inverse `s`-differentiation:
-the inverse-Gram difference (`invGramOnE_sub_eq`) has its only `s`-dependent factor a plain
-`chartGramOnE` difference. -/
-
-/-- Abbreviation for the chart value at the base point `gfam 0 = g₀`. -/
 private lemma gfam_zero {g₀ : SmoothRiemannianMetric I M} {α : M}
     {h : ChartMetricPerturbation E} {gfam : ℝ → SmoothRiemannianMetric I M}
     (hfam : IsMetricPerturbationFamily (I := I) g₀ α h gfam) : gfam 0 = g₀ := hfam.1
 
-/-- **`s`-derivative of the chart Gram entry along the family** (the value pin, stated as a
-`HasDerivAt` of the function rather than of a difference). -/
 private lemma hasDerivAt_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -492,7 +400,6 @@ private lemma hasDerivAt_chartGramOnE
     HasDerivAt (fun s : ℝ => chartGramOnE (I := I) (gfam s) α i j y) (h i j y) 0 :=
   hfam.2.1 i j hy
 
-/-- The chart Gram entry along the family is differentiable in `s` at `0`. -/
 private lemma s_differentiableAt_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -502,7 +409,6 @@ private lemma s_differentiableAt_chartGramOnE
     DifferentiableAt ℝ (fun s : ℝ => chartGramOnE (I := I) (gfam s) α i j y) 0 :=
   (hasDerivAt_chartGramOnE (I := I) hfam i j hy).differentiableAt
 
-/-- **`s`-derivative of the first chart partial of the Gram entry** (the `1`-jet pin). -/
 private lemma hasDerivAt_partial_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -514,8 +420,6 @@ private lemma hasDerivAt_partial_chartGramOnE
       (partialDeriv (E := E) p (h i j) y) 0 :=
   hfam.2.2.2.1 i j p hy
 
-/-- **`s`-derivative of the second iterated chart partial of the Gram entry** (the `2`-jet
-pin). -/
 private lemma hasDerivAt_partial2_chartGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -529,13 +433,6 @@ private lemma hasDerivAt_partial2_chartGramOnE
       (partialDeriv (E := E) p (partialDeriv (E := E) q (h i j)) y) 0 :=
   hfam.2.2.2.2 i j p q hy
 
-/-- **`s`-derivative of the chart inverse-Gram entry along the family.**  At a chart
-interior point, `s ↦ chartInvGramOnE (gfam s) α k l y` has derivative at `0`
-`−∑_{q,p} G₀^{kp}·h_{pq}·G₀^{ql}` (the matrix-inversion perturbation
-`−G₀⁻¹·h·G₀⁻¹`), obtained from `invGramOnE_sub_eq` by the product rule: the only
-`s`-dependent factor needing its derivative is the plain chart-Gram difference (pinned by
-`hasDerivAt_chartGramOnE`); the inverse-Gram factor `G_{gfam s}^{kp}` is only required to
-be differentiable, its derivative dropping out against the vanishing difference. -/
 private lemma hasDerivAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -581,7 +478,7 @@ private lemma hasDerivAt_chartInvGramOnE
       ring]
     refine HasDerivAt.fun_sum (fun q _ => ?_)
     refine HasDerivAt.fun_sum (fun p _ => ?_)
-    -- the summand: G_{gfam s}^{kp} · (G_{g₀,pq} − G_{gfam s,pq}) · G_{g₀}^{ql}
+    
     set A : ℝ → ℝ := fun s => chartInvGramOnE (I := I) (gfam s) α k p y with hA
     set B : ℝ → ℝ := fun s =>
       chartGramOnE (I := I) g₀ α p q y - chartGramOnE (I := I) (gfam s) α p q y with hB
@@ -595,7 +492,7 @@ private lemma hasDerivAt_chartInvGramOnE
       have := hconstB.sub hg
       simpa [hB] using this
     have hB0 : B 0 = 0 := by simp [hB, hg0]
-    -- product (A · B) · C with C constant
+    
     have hAB : HasDerivAt (fun s => A s * B s)
         (chartInvGramOnE (I := I) g₀ α k p y * (-(h p q y))) 0 := by
       have := hA_diff.hasDerivAt.mul hB_deriv
@@ -615,8 +512,6 @@ private lemma hasDerivAt_chartInvGramOnE
   rw [zero_add] at hfinal
   exact hfinal
 
-/-- The `s`-derivative of the `gramBracket` along the family: the bracket of the chart
-partials of `h`. -/
 private lemma hasDerivAt_gramBracket
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -638,7 +533,6 @@ private lemma hasDerivAt_gramBracket
     funext s; rw [gramBracket]
   rw [heq]; exact hsum
 
-/-- The chart Gram value at the base point. -/
 private lemma chartGramOnE_gfam_zero
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -647,11 +541,6 @@ private lemma chartGramOnE_gfam_zero
     chartGramOnE (I := I) (gfam 0) α i j y = chartGramOnE (I := I) g₀ α i j y := by
   rw [hfam.1]
 
-/-- The **first-order Christoffel correction**: the `(∂G⁻¹)·S` branch of the `s`-derivative
-of the chart Christoffel symbol along the family, where the `s`-derivative lands on the
-inverse-Gram factor.  It carries **no** chart derivative of `h` beyond the bracket
-`gramBracket g₀`, so it is genuinely first order in `h` (it vanishes when the value of `h`
-vanishes). -/
 private def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
@@ -660,11 +549,6 @@ private def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : 
           chartInvGramOnE (I := I) g₀ α q l y)) *
       gramBracket (I := I) g₀ α i j l y
 
-/-- **`s`-derivative of the chart Christoffel symbol along the family.**  At a chart
-interior point, `s ↦ chartChristoffel (gfam s) α i j k y` has derivative at `0`
-`chartLinearizedChristoffelPrincipal g₀ α h i j k y + christoffelFirstOrderCorr g₀ α h i j k y`:
-the principal `G₀⁻¹·∂h` branch (the on-disk frozen-`g₀` linearization) plus the
-first-order `(∂G₀⁻¹)·S` correction. -/
 private lemma hasDerivAt_chartChristoffel
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -681,7 +565,7 @@ private lemma hasDerivAt_chartChristoffel
         chartInvGramOnE (I := I) (gfam s) α k l y * gramBracket (I := I) (gfam s) α i j l y) := by
     funext s; rw [chartChristoffel_eq_sum_invGramOnE_bracket]
   rw [heq]
-  -- derivative value of the sum
+  
   set D : ℝ := ∑ l : Fin (Module.finrank ℝ E),
     ((-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g₀ α k p y * h p q y *
@@ -699,7 +583,7 @@ private lemma hasDerivAt_chartChristoffel
     have hG := hasDerivAt_chartInvGramOnE (I := I) hfam k l hy
     have hbr := hasDerivAt_gramBracket (I := I) hfam i j l hy
     have hprod := hG.mul hbr
-    -- evaluate the value factors at s = 0
+    
     have hGval : chartInvGramOnE (I := I) (gfam 0) α k l y =
         chartInvGramOnE (I := I) g₀ α k l y := by rw [hg0]
     have hbrval : gramBracket (I := I) (gfam 0) α i j l y =
@@ -735,8 +619,6 @@ private lemma hasDerivAt_chartChristoffel
     refine Finset.sum_congr rfl (fun l _ => ?_)
     ring]
 
-/-- The `s`-derivative of the `gramBracketDeriv` along the family: the bracket of the
-iterated chart partials of `h`.  Direct from the chart-Gram `2`-jet pin. -/
 private lemma hasDerivAt_gramBracketDeriv
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -761,11 +643,6 @@ private lemma hasDerivAt_gramBracketDeriv
     funext s; rw [gramBracketDeriv]
   rw [heq]; exact hsum
 
-/-- **`s`-derivative of the first chart partial of the inverse-Gram entry along the
-family.**  At a chart-interior point, `s ↦ partialDeriv m (chartInvGramOnE (gfam s) α j p) y`
-has derivative at `0`, computed from the on-disk matrix-inverse-derivative identity
-`partialDeriv_chartInvGramOnE_eq` (`∂_m G⁻¹ = −∑ G^{ja}G^{bp}∂_m G_{ab}`) by the product
-rule, with the chart-Gram value and `1`-jet pins. -/
 private lemma hasDerivAt_partial_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -801,12 +678,12 @@ private lemma hasDerivAt_partial_chartInvGramOnE
   refine HasDerivAt.neg ?_
   refine HasDerivAt.fun_sum (fun a _ => ?_)
   refine HasDerivAt.fun_sum (fun b _ => ?_)
-  -- summand: G^{ja}(gfam s) · G^{bp}(gfam s) · ∂_m G_{ab}(gfam s)
+  
   have hG1 := hasDerivAt_chartInvGramOnE (I := I) hfam j a hy
   have hG2 := hasDerivAt_chartInvGramOnE (I := I) hfam b p hy
   have hGd := hasDerivAt_partial_chartGramOnE (I := I) hfam a b m hy
   have hprod := (hG1.mul hG2).mul hGd
-  -- evaluate the value factors at s = 0
+  
   have hG1v : chartInvGramOnE (I := I) (gfam 0) α j a y = chartInvGramOnE (I := I) g₀ α j a y := by
     rw [hg0]
   have hG2v : chartInvGramOnE (I := I) (gfam 0) α b p y = chartInvGramOnE (I := I) g₀ α b p y := by
@@ -818,8 +695,6 @@ private lemma hasDerivAt_partial_chartInvGramOnE
   simp only [Pi.mul_apply, hg0]
   ring
 
-/-- The first chart partial of the chart Gram entry is differentiable at chart-interior
-points. -/
 private lemma partial_chartGramOnE_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (p l b : Fin (Module.finrank ℝ E)) {y₀ : E}
@@ -838,9 +713,6 @@ private lemma partial_chartGramOnE_differentiableAt
     exact hfderiv.clm_apply contDiffOn_const
   exact (hpd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The first-order Christoffel correction is differentiable in `y` at chart-interior
-points (each factor — the `−G₀⁻¹·h·G₀⁻¹` coefficient and the `gramBracket g₀` — is
-differentiable there). -/
 private lemma christoffelFirstOrderCorr_differentiableAt
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {i j k : Fin (Module.finrank ℝ E)} {y₀ : E}
@@ -865,14 +737,6 @@ private lemma christoffelFirstOrderCorr_differentiableAt
     · exact partial_chartGramOnE_differentiableAt (I := I) g₀ α j l i hy
     · exact partial_chartGramOnE_differentiableAt (I := I) g₀ α l i j hy
 
-/-- **`s`-derivative of the chart partial of the Christoffel symbol along the family.**
-At a chart interior point, `s ↦ partialDeriv m (chartChristoffel (gfam s) α i j k) y₀` has
-derivative at `0` the chart partial of the Christoffel `s`-derivative
-`partialDeriv m (chartLinearizedChristoffelPrincipal g₀ h i j k) y₀ +
- partialDeriv m (christoffelFirstOrderCorr g₀ h i j k) y₀`, by the mixed-partial
-commutation `hasDerivAt_partialDeriv_comm` (joint smoothness via
-`joint_contDiffAt_chartChristoffel`) and the Christoffel `s`-derivative
-`hasDerivAt_chartChristoffel`. -/
 private lemma hasDerivAt_partial_chartChristoffel
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -887,18 +751,18 @@ private lemma hasDerivAt_partial_chartChristoffel
         partialDeriv (E := E) m
           (fun y => christoffelFirstOrderCorr (I := I) g₀ α h i j k y) y₀) 0 := by
   classical
-  -- the derivative of the family deriv-in-s, as a function of y, near y₀
+  
   have hderiv_eq : (fun y => deriv (fun s : ℝ =>
         chartChristoffel (I := I) (gfam s) α i j k y) 0) =ᶠ[nhds y₀]
       (fun y => chartLinearizedChristoffelPrincipal (I := I) g₀ α h i j k y +
         christoffelFirstOrderCorr (I := I) g₀ α h i j k y) := by
     filter_upwards [isOpen_interior.mem_nhds hy] with y hy'
     exact (hasDerivAt_chartChristoffel (I := I) hfam i j k hy').deriv
-  -- the commutation
+  
   have hcomm := hasDerivAt_partialDeriv_comm
     (fun p : ℝ × E => chartChristoffel (I := I) (gfam p.1) α i j k p.2) m y₀
     (joint_contDiffAt_chartChristoffel (I := I) hfam i j k hy)
-  -- rewrite the RHS via hderiv_eq (a partialDeriv = fderiv applied is congruent on a nbhd)
+  
   have hrhs : partialDeriv (E := E) m
         (fun y => deriv (fun s : ℝ => chartChristoffel (I := I) (gfam s) α i j k y) 0) y₀ =
       partialDeriv (E := E) m
@@ -918,13 +782,6 @@ private lemma hasDerivAt_partial_chartChristoffel
   rw [hrhs] at hcomm
   exact hcomm
 
-/-! ### `s`-derivative of the chart Ricci tensor along the family -/
-
-/-- The **Ricci first-order remainder** of the chart Ricci-tensor `s`-derivative: the part
-not captured by the on-disk `chartRicciSecondOrderPart g₀ h`.  It is the chart partial of
-the Christoffel first-order corrections (the `∂(G⁻¹)`-branch of the Christoffel
-linearization) plus the `s`-derivative of the `Γ·Γ` term — both genuinely first order in
-`h`. -/
 def ricciDerivFirstOrderRemainder (g₀ : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ j : Fin (Module.finrank ℝ E),
@@ -946,7 +803,6 @@ def ricciDerivFirstOrderRemainder (g₀ : SmoothRiemannianMetric I M) (α : M)
           (chartLinearizedChristoffelPrincipal (I := I) g₀ α h i j m y +
             christoffelFirstOrderCorr (I := I) g₀ α h i j m y))))
 
-/-- The chart Christoffel symbol is differentiable in `y` at chart-interior points. -/
 private lemma chartChristoffel_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y₀ : E}
@@ -966,10 +822,6 @@ private lemma chartChristoffel_differentiableAt
     (partial_chartGramOnE_differentiableAt (I := I) g α j l i hy)).sub
     (partial_chartGramOnE_differentiableAt (I := I) g α l i j hy)
 
-/-- **`s`-derivative of the chart Ricci tensor along the family.**  At a chart interior
-point, `s ↦ chartRicciTensor (gfam s) α i k y` has derivative at `0` the on-disk
-second-order part `chartRicciSecondOrderPart g₀ h i k y` plus the
-`ricciDerivFirstOrderRemainder`. -/
 lemma hasDerivAt_chartRicciTensor
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -981,7 +833,7 @@ lemma hasDerivAt_chartRicciTensor
         ricciDerivFirstOrderRemainder (I := I) g₀ α h i k y) 0 := by
   classical
   have hg0 : gfam 0 = g₀ := hfam.1
-  -- second-order term s-derivative
+  
   have hSO : HasDerivAt
       (fun s : ℝ => chartRicciSecondOrderTerm (I := I) (gfam s) α i k y)
       (chartRicciSecondOrderPart (I := I) g₀ α h i k y +
@@ -1020,7 +872,7 @@ lemma hasDerivAt_chartRicciTensor
     rw [chartRicciSecondOrderPart_def, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     ring
-  -- first-order term s-derivative
+  
   have hFO : HasDerivAt
       (fun s : ℝ => chartRicciFirstOrderTerm (I := I) (gfam s) α i k y)
       (∑ j : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
@@ -1053,7 +905,7 @@ lemma hasDerivAt_chartRicciTensor
     have hp1 := (hΓ1.mul hΓ2)
     have hp2 := (hΓ3.mul hΓ4)
     have hsub := hp1.sub hp2
-    -- evaluate value factors at s = 0
+    
     rw [show chartChristoffel (I := I) (gfam 0) α j m j y =
           chartChristoffel (I := I) g₀ α j m j y from by rw [hg0],
       show chartChristoffel (I := I) (gfam 0) α i k m y =
@@ -1064,7 +916,7 @@ lemma hasDerivAt_chartRicciTensor
           chartChristoffel (I := I) g₀ α i j m y from by rw [hg0]] at hsub
     refine hsub.congr_deriv ?_
     ring
-  -- assemble: chartRicciTensor = secondOrderTerm + firstOrderTerm
+  
   have htotal := hSO.add hFO
   have heq : (fun s : ℝ => chartRicciTensor (I := I) (gfam s) α i k y) =
       (fun s : ℝ => chartRicciSecondOrderTerm (I := I) (gfam s) α i k y +
@@ -1075,8 +927,6 @@ lemma hasDerivAt_chartRicciTensor
   rw [ricciDerivFirstOrderRemainder]
   ring
 
-/-- A function constant in `s` and `C^∞` in `y` (here the background-metric chart
-Christoffel) is jointly `C^∞` at `(0, y₀)`. -/
 private lemma joint_contDiffAt_const_s_chartChristoffel
     (g_bg : SmoothRiemannianMetric I M) (α : M)
     (a b k : Fin (Module.finrank ℝ E)) {y₀ : E}
@@ -1114,8 +964,6 @@ private lemma joint_contDiffAt_const_s_chartChristoffel
   rw [hcomp]
   exact hcdat.comp (0, y₀) contDiffAt_snd
 
-/-- Joint `(s, y)`-smoothness of the chart DeTurck vector-field component along the
-family. -/
 private lemma joint_contDiffAt_chartDeTurckVFComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1137,13 +985,6 @@ private lemma joint_contDiffAt_chartDeTurckVFComp
   exact (joint_contDiffAt_chartChristoffel (I := I) hfam a b k hy).sub
     (joint_contDiffAt_const_s_chartChristoffel (I := I) g_bg α a b k hy)
 
-/-! ### `s`-derivative of the chart DeTurck Lie summand along the family -/
-
-/-- The **DeTurck vector-field first-order correction**: the `s`-derivative of the DeTurck
-vector-field component along the family, minus the principal
-`chartLinearizedDeTurckVFPrincipal g₀ g_bg h k` part.  It collects the
-`(∂G⁻¹)·(Γ-Γ_bg)` branch and the Christoffel first-order corrections — both first order in
-`h`. -/
 private def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -1155,10 +996,6 @@ private def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α
       chartInvGramOnE (I := I) g₀ α a b y *
         christoffelFirstOrderCorr (I := I) g₀ α h a b k y)
 
-/-- **`s`-derivative of the chart DeTurck vector-field component along the family.**  At a
-chart interior point, `s ↦ chartDeTurckVFComp (gfam s) g_bg α k y` has derivative at `0`
-the on-disk principal part `chartLinearizedDeTurckVFPrincipal g₀ g_bg h k y` plus the
-first-order correction `deTurckVFFirstOrderCorr g₀ g_bg h k y`. -/
 private lemma hasDerivAt_chartDeTurckVFComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1209,8 +1046,6 @@ private lemma hasDerivAt_chartDeTurckVFComp
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
-/-- The DeTurck vector-field first-order correction is differentiable in `y` at
-chart-interior points. -/
 private lemma deTurckVFFirstOrderCorr_differentiableAt
     {g₀ g_bg : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {k : Fin (Module.finrank ℝ E)} {y₀ : E}
@@ -1233,8 +1068,6 @@ private lemma deTurckVFFirstOrderCorr_differentiableAt
   · exact (chartInvGramOnE_differentiableAt_interior (I := I) g₀ α a b hy).mul
       (christoffelFirstOrderCorr_differentiableAt (I := I) (g₀ := g₀) hy)
 
-/-- **`s`-derivative of the chart partial of the DeTurck vector-field component along the
-family.**  By the mixed-partial commutation and `hasDerivAt_chartDeTurckVFComp`. -/
 private lemma hasDerivAt_partial_chartDeTurckVFComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1277,10 +1110,6 @@ private lemma hasDerivAt_partial_chartDeTurckVFComp
   rw [hrhs] at hcomm
   exact hcomm
 
-/-- The **Lie first-order remainder** of the chart DeTurck Lie-summand `s`-derivative: the
-part not captured by the on-disk `chartDeTurckCorrSecondOrderPart g₀ g_bg h`.  It collects
-the convective `W·∂G` deformation, the metric-factor deformations, and the DeTurck-VF
-first-order corrections — all first order in `h`. -/
 private def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
@@ -1301,10 +1130,6 @@ private def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
           partialDeriv (E := E) j
             (fun y' => deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y') y))
 
-/-- **`s`-derivative of the chart DeTurck Lie summand along the family.**  At a chart
-interior point, `s ↦ chartLieDeTurckComp (gfam s) g_bg α i j y` has derivative at `0` the
-on-disk DeTurck-correction second-order part `chartDeTurckCorrSecondOrderPart g₀ g_bg h i j y`
-plus the `lieDerivFirstOrderRemainder`. -/
 private lemma hasDerivAt_chartLieDeTurckComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1331,7 +1156,7 @@ private lemma hasDerivAt_chartLieDeTurckComp
                 (fun y' => chartDeTurckVFComp (I := I) (gfam s) g_bg α k y') y)) := by
     funext s; rw [chartLieDeTurckComp_def]
   rw [heq]
-  -- term 1: convective W·∂G
+  
   have hT1 : HasDerivAt
       (fun s : ℝ => ∑ k : Fin (Module.finrank ℝ E),
         chartDeTurckVFComp (I := I) (gfam s) g_bg α k y *
@@ -1347,7 +1172,7 @@ private lemma hasDerivAt_chartLieDeTurckComp
     have hprod := hW.mul hG
     simp only [hg0] at hprod
     exact hprod
-  -- term 2: G_{kj}·∂_i W
+  
   have hT2 : HasDerivAt
       (fun s : ℝ => ∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) (gfam s) α k j y *
@@ -1370,7 +1195,7 @@ private lemma hasDerivAt_chartLieDeTurckComp
     simp only [hg0] at hprod
     refine hprod.congr_deriv ?_
     ring
-  -- term 3: G_{ik}·∂_j W
+  
   have hT3 : HasDerivAt
       (fun s : ℝ => ∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) (gfam s) α i k y *
@@ -1398,19 +1223,11 @@ private lemma hasDerivAt_chartLieDeTurckComp
   rw [chartDeTurckCorrSecondOrderPart_def, lieDerivFirstOrderRemainder]
   ring
 
-/-! ### Assembly: the chart linearization of the DeTurck–Ricci right-hand side -/
-
-/-- The chart-`α`-pushforward frame vector equals the chart basis fibre vector: both are
-the chart-`α` trivialisation inverse applied to the model-basis vector. -/
 private lemma chartPushforwardFrameVec_eq_chartBasisVecFiber
     (α : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     DifferentialGeometry.PDE.RicciFlow.chartPushforwardFrameVec (I := I) α i x =
       chartBasisVecFiber (I := I) α i x := rfl
 
-/-- **The chart `(i, j)`-component of `deTurckRicciRHS g_bg` equals the chart scalar
-`chartDeTurckRicciRHS`** at chart-interior points.  Combines the on-disk good-set
-identity `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS` with the
-frame-vector bridge and the `extChartAt` right-inverse. -/
 lemma chartFComponentOnE_deTurckRicciRHS_eq
     (g_bg g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -1432,27 +1249,12 @@ lemma chartFComponentOnE_deTurckRicciRHS_eq
   rw [deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS (I := I) g g_bg α i j hz_good,
     hyz]
 
-/-- **The first-order remainder of the chart DeTurck–Ricci `s`-linearization**:
-`-2·ricciDerivFirstOrderRemainder + lieDerivFirstOrderRemainder`.  Each summand carries at
-most one chart derivative of a component field of `h` (it is built from the Christoffel /
-DeTurck-vector-field first-order corrections and the `∂h`/`h`-value pins), so it is a
-genuine first-order remainder — it vanishes when the value and first chart partials of `h`
-vanish at the point (`metricFamilyDeTurckRicciFirstOrderRemainder_isFirstOrder`). -/
 def metricFamilyDeTurckRicciFirstOrderRemainder
     (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (-2 : ℝ) * ricciDerivFirstOrderRemainder (I := I) g₀ α h i j y +
     lieDerivFirstOrderRemainder (I := I) g₀ g_bg α h i j y
 
-/-- **The chart `s`-linearization of `deTurckRicciRHS g_bg`.**  At chart-interior points,
-the `s`-derivative at `0` of the chart `(i, j)`-component of `deTurckRicciRHS g_bg (gfam s)`
-equals `-2·chartRicciSecondOrderPart g₀ h i j y + chartDeTurckCorrSecondOrderPart g₀ g_bg h i j y`
-(the on-disk chart second-order part `deTurckRicciRHSChartSecondOrderPart`, unfolded) plus
-the genuinely-first-order remainder `metricFamilyDeTurckRicciFirstOrderRemainder`.
-
-This is the analytic heart of the DeTurck-linearization clause of
-`deTurckRicciRHS_chartSecondOrderPart_spec`: it identifies the `s`-derivative of the chart
-DeTurck–Ricci tower with the frozen-`g₀` on-disk second-order parts. -/
 theorem hasDerivAt_chartFComponentOnE_deTurckRicciRHS
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
@@ -1483,8 +1285,6 @@ theorem hasDerivAt_chartFComponentOnE_deTurckRicciRHS
   rw [metricFamilyDeTurckRicciFirstOrderRemainder]
   ring
 
-/-! ### The first-order remainder vanishes to first order in the perturbation -/
-
 section FirstOrderVanish
 
 variable {g₀ g_bg : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E} {y : E}
@@ -1493,8 +1293,6 @@ variable {g₀ g_bg : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPertu
 
 include hval hjet
 
-/-- `chartLinearizedChristoffelPrincipal g₀ h` vanishes at a point where `h`'s first chart
-partials vanish. -/
 private lemma chartLinearizedChristoffelPrincipal_vanish
     (a b k : Fin (Module.finrank ℝ E)) :
     chartLinearizedChristoffelPrincipal (I := I) g₀ α h a b k y = 0 := by
@@ -1503,7 +1301,6 @@ private lemma chartLinearizedChristoffelPrincipal_vanish
   refine mul_eq_zero_of_right _ (Finset.sum_eq_zero (fun l _ => ?_))
   rw [hjet a l b, hjet b l a, hjet l a b]; ring
 
-/-- `christoffelFirstOrderCorr g₀ h` vanishes at a point where `h`'s value vanishes. -/
 private lemma christoffelFirstOrderCorr_vanish
     (a b k : Fin (Module.finrank ℝ E)) :
     christoffelFirstOrderCorr (I := I) g₀ α h a b k y = 0 := by
@@ -1515,8 +1312,6 @@ private lemma christoffelFirstOrderCorr_vanish
   refine Finset.sum_eq_zero (fun q _ => Finset.sum_eq_zero (fun p _ => ?_))
   rw [hval p q]; ring
 
-/-- `chartLinearizedDeTurckVFPrincipal g₀ g_bg h` vanishes at a point where `h`'s first
-chart partials vanish. -/
 private lemma chartLinearizedDeTurckVFPrincipal_vanish
     (k : Fin (Module.finrank ℝ E)) :
     chartLinearizedDeTurckVFPrincipal (I := I) g₀ g_bg α h k y = 0 := by
@@ -1525,7 +1320,6 @@ private lemma chartLinearizedDeTurckVFPrincipal_vanish
   refine Finset.sum_eq_zero (fun a _ => Finset.sum_eq_zero (fun b _ => ?_))
   rw [chartLinearizedChristoffelPrincipal_vanish hval hjet a b k]; ring
 
-/-- `deTurckVFFirstOrderCorr g₀ g_bg h` vanishes at a point where `h`'s value vanishes. -/
 private lemma deTurckVFFirstOrderCorr_vanish
     (k : Fin (Module.finrank ℝ E)) :
     deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y = 0 := by
@@ -1541,9 +1335,6 @@ private lemma deTurckVFFirstOrderCorr_vanish
     rw [hval p q]; ring
   rw [hc]; ring
 
-/-- The first chart partial of a product `G₀^{ab}·h_{bc}·G₀^{cd}` vanishes at a point where
-`h`'s value and first chart partials vanish: by the product rule, each of the three terms
-carries either an `h`-value or a `∂h`-factor at that point. -/
 private lemma partialDeriv_invGram_h_invGram_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p a b c d : Fin (Module.finrank ℝ E)) :
@@ -1560,9 +1351,6 @@ private lemma partialDeriv_invGram_h_invGram_vanish
   rw [hval b c, hjet p b c]
   ring
 
-/-- The coefficient `C_{abl} = −∑_q∑_r G₀^{ar}·h_{rq}·G₀^{ql}` of the Christoffel
-first-order correction, and its first chart partial, both vanish at a point where `h`'s
-value and first chart partials vanish. -/
 private lemma christoffelCorrCoeff_partial_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p a l : Fin (Module.finrank ℝ E)) :
@@ -1593,9 +1381,6 @@ private lemma christoffelCorrCoeff_partial_vanish
   refine Finset.sum_eq_zero (fun r _ => ?_)
   exact partialDeriv_invGram_h_invGram_vanish hval hjet hy p a r q l
 
-/-- The first chart partial of the Christoffel first-order correction vanishes at a point
-where `h`'s value and first chart partials vanish: the correction is `(1/2)∑_l (coeff_l)·
-(gramBracket g₀)`, and both the coefficient and its partial vanish there. -/
 private lemma partialDeriv_christoffelFirstOrderCorr_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p a b k : Fin (Module.finrank ℝ E)) :
@@ -1645,8 +1430,6 @@ private lemma partialDeriv_christoffelFirstOrderCorr_vanish
     rw [hC]; exact christoffelCorrCoeff_partial_vanish hval hjet hy p k l
   rw [hCval, hCpartial]; ring
 
-/-- The first chart partial of the DeTurck vector-field first-order correction vanishes at
-a point where `h`'s value and first chart partials vanish. -/
 private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (p k : Fin (Module.finrank ℝ E)) :
@@ -1664,7 +1447,7 @@ private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
             christoffelFirstOrderCorr (I := I) g₀ α h a b k y')) := by
     funext y'; rw [deTurckVFFirstOrderCorr]
   rw [hcorr_eq]
-  -- coefficient and its diff data
+  
   set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ := fun a b y' =>
     -(∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E),
       chartInvGramOnE (I := I) g₀ α a r y' * h r q y' *
@@ -1710,7 +1493,7 @@ private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
   rw [partialDeriv_mul (E := E) (chartInvGramOnE (I := I) g₀ α a b)
     (fun y' => christoffelFirstOrderCorr (I := I) g₀ α h a b k y')
     (chartInvGramOnE_differentiableAt_interior (I := I) g₀ α a b hy) (hcorr_diff a b)]
-  -- vanishing of values and partials
+  
   have hCval : C a b y = 0 := by
     rw [hC, neg_eq_zero]
     refine Finset.sum_eq_zero (fun q _ => Finset.sum_eq_zero (fun r _ => ?_))
@@ -1724,8 +1507,6 @@ private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
     partialDeriv_christoffelFirstOrderCorr_vanish hval hjet hy p a b k
   rw [hCval, hCpartial, hcorrval, hcorrpartial]; ring
 
-/-- The Ricci first-order remainder vanishes at a point where `h`'s value and first chart
-partials vanish. -/
 private lemma ricciDerivFirstOrderRemainder_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -1766,8 +1547,6 @@ private lemma ricciDerivFirstOrderRemainder_vanish
     ring
   rw [h1, h2]; ring
 
-/-- The Lie first-order remainder vanishes at a point where `h`'s value and first chart
-partials vanish. -/
 private lemma lieDerivFirstOrderRemainder_vanish
     (hy : y ∈ interior (extChartAt I α).target)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -1805,10 +1584,6 @@ private lemma lieDerivFirstOrderRemainder_vanish
 
 end FirstOrderVanish
 
-/-- **The chart DeTurck–Ricci `s`-linearization remainder is genuinely first order in the
-perturbation.**  At chart-interior points, `metricFamilyDeTurckRicciFirstOrderRemainder`
-vanishes whenever the value and first chart partials of `h` vanish at the point — so it is
-invisible to the second-order principal symbol. -/
 theorem metricFamilyDeTurckRicciFirstOrderRemainder_vanish
     {g₀ g_bg : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E} {y : E}
     (hy : y ∈ interior (extChartAt I α).target)

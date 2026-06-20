@@ -2,36 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartParallelExtend
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SIntrinsicChartCurryFactor
 
-/-!
-# Curry factorisation of the intrinsic chart Fréchet derivative on `(r, s)`-tensors
-
-Given a smooth Riemannian manifold `(M, g)` modelled on `(E, H)` with model
-`I`, a chart-centre `α : M`, a base point `b : M` on the chart-Levi-Civita
-good set, a tangent vector field `X`, an `(r, s)`-tensor section `T`, and an
-input `(0, r)`-tensor `α_input : Tensor0SSpace r I b`, the chart intrinsic
-Fréchet derivative CLM
-`tensorRSIntrinsicChartCLM r s α T b : TangentSpace I b →L[ℝ] TensorRSSpace r s I b`
-applied to a vector `X b` and then evaluated at `α_input` admits a clean
-factorisation through the `(0, s)`-tensor partial evaluation.
-
-Mechanism: the chart-α-trivialised representation of `T` at `b'`, applied to
-the constant model-fibre value
-`D_α := e_r.continuousLinearMapAt b α_input`, equals the chart-α-trivialised
-representation at `b'` of the partially-evaluated `(0, s)`-tensor section
-`b' ↦ T b' (chartTensor0SParallelExtend r α b α_input b')`. The
-chart-parallel extension is locally constant after the trivialisation, so the
-Fréchet derivative of the partial-eval representation factors through the
-"evaluate at `D_α`" CLM applied to the Fréchet derivative of the
-`(r, s)`-representation.
-
-## Main results
-
-* `tensorPartialEval r s T w` — the partial evaluation of a `(r, s)`-tensor
-  section at a `(0, r)`-tensor section, viewed at the bundle level.
-* `tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval` — the headline
-  factorisation theorem.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -55,25 +25,18 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- The pointwise partial evaluation of an `(r, s)`-tensor section `T` at a
-`(0, r)`-tensor section `w`. At a point `b ∈ M`, this is the value of `T b`
-(viewed as a CLM `Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b`) applied to
-`w b ∈ Tensor0SSpace r I b`. -/
 noncomputable def tensorPartialEval (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (w : Π b : M, Tensor0SSpace r I b) :
     Π b : M, Tensor0SSpace s I b :=
   fun b => (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) (w b)
 
-/-- Pointwise unfolding of `tensorPartialEval`. -/
 @[simp] lemma tensorPartialEval_apply (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (w : Π b : M, Tensor0SSpace r I b) (b : M) :
     tensorPartialEval (I := I) (M := M) r s T w b =
       (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) (w b) := rfl
 
-/-- The "evaluate at a fixed `(0, r)`-tensor model input" CLM: sends a model
-fibre `D : TensorRSModel r s ℝ E` to `D D_α ∈ Tensor0SModel s ℝ E`. -/
 noncomputable def tensorRSEvalAtCLM (r s : ℕ) (D_α : Tensor0SModel r ℝ E) :
     TensorRSModel r s ℝ E →L[ℝ] Tensor0SModel s ℝ E :=
   ContinuousLinearMap.apply ℝ (Tensor0SModel s ℝ E) D_α
@@ -85,10 +48,6 @@ noncomputable def tensorRSEvalAtCLM (r s : ℕ) (D_α : Tensor0SModel r ℝ E) :
   unfold tensorRSEvalAtCLM
   rfl
 
-/-- On the chart-α trivialisation base set, the chart-α-trivialised
-`(r, s)`-tensor representation of a fibre `T_b`, applied to a model fibre input
-`D : Tensor0SModel r ℝ E`, equals
-`e_s.continuousLinearMapAt b (T_b (e_r.symmL b D))`. -/
 theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -133,10 +92,6 @@ theorem tensorRSChartE_section_repr_apply_model (r s : ℕ) (α : M)
           : Tensor0SModel r ℝ E →L[ℝ] Tensor0SSpace r I b))) D = _
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
 
-/-- On the chart-α trivialisation base set, the chart-α `(r, s)`-tensor fibre
-right-inverse `symmL`, applied to a model fibre value `D : TensorRSModel r s ℝ E`
-and then to a `(0, r)`-tensor input `α_input : Tensor0SSpace r I b`, equals
-`e_s.symmL b (D (e_r.continuousLinearMapAt b α_input))`. -/
 theorem tensorRSChartFiberFromModel_apply_at (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (D : TensorRSModel r s ℝ E) (α_input : Tensor0SSpace r I b) :
@@ -215,11 +170,6 @@ theorem tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
   rw [hPE_at_b']
   rw [tensorRSChartE_section_repr_apply_model (I := I) r s α T (b := b') hb' D_α]
 
-/-- The chart pullback of the chart-α-trivialised `(0, s)`-tensor representation
-of `tensorPartialEval r s T (chartTensor0SParallelExtend r α b α_input)` agrees,
-in a neighbourhood of `extChartAt I α b`, with the chart pullback of the
-chart-α-trivialised `(r, s)`-tensor representation of `T` post-composed with
-the evaluation-at-`D_α` CLM. -/
 theorem tensorPartialEval_chartPullback_eventually_eq_evalAt_chartPullback
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (α_input : Tensor0SSpace r I b)
@@ -255,11 +205,6 @@ theorem tensorPartialEval_chartPullback_eventually_eq_evalAt_chartPullback
   exact tensor0SChartE_section_repr_tensorPartialEval_eq_tensorRS_repr_apply
     (I := I) r s α T (b := b) hb_base α_input (b' := φ.symm y) hyBase
 
-/-- The Fréchet derivative of the chart pullback of the
-chart-α-trivialised `(0, s)`-tensor representation of the partial evaluation
-at `φ b` factors through the evaluate-at-`D_α` CLM applied to the Fréchet
-derivative of the chart pullback of the `(r, s)`-trivialised representation
-of `T`. -/
 theorem fderiv_tensorPartialEval_chartPullback_eq_comp_evalAt
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (α_input : Tensor0SSpace r I b)
@@ -293,13 +238,6 @@ theorem fderiv_tensorPartialEval_chartPullback_eq_comp_evalAt
         (extChartAt I α).symm) (extChartAt I α b))).comp
     (extChartAt I α b) hT.hasFDerivAt).fderiv
 
-/-- **Curry factorisation of the `(r, s)`-intrinsic chart Fréchet derivative.**
-On the chart Levi-Civita good set, applying the intrinsic chart Fréchet
-derivative CLM of an `(r, s)`-tensor `T` to a vector `X b` and then evaluating
-the resulting `(r, s)`-tensor at an input `α_input` agrees with the
-intrinsic chart Fréchet derivative CLM of the partial evaluation
-`tensorPartialEval r s T (chartTensor0SParallelExtend r α b α_input)` (a
-`(0, s)`-tensor section) applied to `X b`. -/
 theorem tensorRSIntrinsicChartCLM_factor_via_tensorPartialEval
     (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)

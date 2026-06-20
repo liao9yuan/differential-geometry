@@ -2,50 +2,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovaria
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 
-/-! # The intrinsic partial-contraction Cauchy–Schwarz and the uniform operator-field action envelope
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file proves the **intrinsic partial-contraction Cauchy–Schwarz** for the
-operator-field action and the **uniform section-proportional fibre envelope** it yields for `appCc`.
-
-## The intrinsic partial-contraction Cauchy–Schwarz
-
-The fibre value of the operator-field action `appCc Φ W` is the fibrewise composition
-`(Φ x).comp (W x) : Tensor0SSpace 0 I x →L Tensor0SSpace s I x` (`appCc_toSection`), a `(0, s)`-tensor.
-`riemannianFiberNormSq_comp_le_mul` is the fibre Cauchy–Schwarz for this composition, *intrinsic in the
-Riemannian fibre norms* (no chart trivialisation, no model-fibre operator norm):
-```
-rfns_{(0,s)}((Φ x).comp (W x)) ≤ rfns_{(r,s)}(Φ x) · rfns_{(0,r)}(W x).
-```
-The proof Parseval-expands all three fibre norms in a single `g_x`-orthonormal tensor frame
-(`tangent_orthonormalBasisRS_witness`): the composition's frame components are the matrix–vector product
-`∑_P (W x)_{∅,P} · (Φ x)_{P,J}` of the contracted tensor's components against the operator field's
-components (`fiberNormSqComponent_appCc_comp_eq`, through the coframe expansion
-`tensorS_coframe_expansion`), and a per-row discrete Cauchy–Schwarz (`Finset.sum_mul_sq_le_sq_mul_sq`)
-over the contracted multi-index, summed over the output index, gives the Hilbert–Schmidt bound (the
-product of the two squared frame norms). It is the Hilbert–Schmidt-norm submultiplicativity of tensor
-contraction, phrased intrinsically.
-
-## The uniform operator-field action envelope
-
-`exists_uniform_riemannianFiberNormSq_appCc_le` is the section-proportional fibre envelope the
-recursively-differentiated curvature towers need: for a *fixed* smooth `(r, s)`-operator field `Φ`, the
-operator-field action `appCc Φ W` is bounded, uniformly over the compact `M`, proportionally to the
-contracted section `W`:
-```
-rfns(appCc Φ W)(x) ≤ C · rfns(W)(x),    C := sup_x rfns(Φ x).
-```
-The uniform constant is the global fibre-norm bound for the *fixed* smooth section `Φ`
-(`exists_bound_riemannianFiberNormSq_smoothCcTensor`, the chart-locality-free forward-Gram route on the
-compact partition-of-unity supports) — it depends only on `Φ`, never on `W`. This is the bridge by which
-the iterated covariant gradient `∇^p Φ₀` of a curvature coefficient operator field — itself a *fixed*
-smooth `(r, r + p)`-tensor, hence with a uniform fibre-norm bound — yields the section-proportional
-high-order envelope of the differentiated curvature tower, with NO chart-selection-unbounded data.
-
-## Convention
-
-Geometer convention; all fibre norms are the intrinsic `riemannianFiberNormSq`. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -74,11 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 set_option linter.unusedSectionVars false in
-/-- **The intrinsic fibre-norm representation of a `(0, t)`-tensor in a `g_x`-orthonormal frame.** For a
-`g_x`-orthonormal frame `e` (with `n = Module.finrank`) arising as a `Module.Basis`, the intrinsic squared
-Riemannian fibre norm of a `(0, t)`-tensor `S` is the frame double sum of `fiberNormSqSummand`. The single
-non-trivial multi-index is the empty `K`; the rank-`t` index `J` ranges over the dual tensor frame. Ported
-from the diagonal-sum reconstruction `tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`. -/
+
 lemma rfns_repr_of_orthoFrame_cb
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (S : TensorRSSpace 0 t I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -199,13 +151,7 @@ lemma rfns_repr_of_orthoFrame_cb
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
 set_option linter.unusedSectionVars false in
-/-- **The operator-field action's frame components are the matrix–vector product.** For a `g_x`-orthonormal
-tensor frame `e` (built from a `Module.Basis`), the `(0, s)`-component of the fibrewise composition
-`(Φ x).comp (W x)` along the empty `K₀` and the output index `J` is the contraction sum, over the rank-`r`
-multi-index `P`, of the `(0, r)`-component of `W x` along `(K₀, P)` against the `(r, s)`-component of `Φ x`
-along `(P, J)`. The proof expands `W x` applied to the empty coframe covector through the coframe basis
-(`tensorS_coframe_expansion`), distributes the operator field linearly, and reads each summand off as the
-product of the two component scalars. -/
+
 private lemma fiberNormSqComponent_comp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φx : TensorRSSpace r s I x) (Wx : TensorRSSpace 0 r I x)
@@ -261,22 +207,7 @@ private lemma fiberNormSqComponent_comp_eq
   rw [hwcomp, smul_eq_mul]
 
 set_option linter.unusedSectionVars false in
-/-- **The intrinsic partial-contraction Cauchy–Schwarz for the operator-field action.** The intrinsic
-squared Riemannian fibre norm of the fibrewise composition `(Φ x).comp (W x)` of an `(r, s)`-tensor `Φ x`
-with a `(0, r)`-tensor `W x` (a `(0, s)`-tensor) is bounded by the product of the `(r, s)` fibre norm of
-`Φ x` and the `(0, r)` fibre norm of `W x`:
-```
-rfns_{(0,s)}((Φ x).comp (W x)) ≤ rfns_{(r,s)}(Φ x) · rfns_{(0,r)}(W x).
-```
-This is the Hilbert–Schmidt-norm submultiplicativity of tensor contraction, intrinsic in the Riemannian
-fibre norms (no chart trivialisation, no model-fibre operator norm). Proved by Parseval-expanding all three
-fibre norms in a single `g_x`-orthonormal tensor frame, identifying the composition's frame components with
-the matrix–vector product of the two factors' components (`fiberNormSqComponent_comp_eq`), and a per-output
-discrete Cauchy–Schwarz (`Finset.sum_mul_sq_le_sq_mul_sq`) over the contracted multi-index.
 
-**Non-vacuity.** The bound genuinely uses both `Φ x` and `W x`; it is the fibre Cauchy–Schwarz, so it is
-sharp up to the operator/Hilbert–Schmidt norm gap and forces nonzero RHS whenever the contraction is
-nonzero. -/
 theorem riemannianFiberNormSq_comp_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φx : TensorRSSpace r s I x) (Wx : TensorRSSpace 0 r I x) :
@@ -331,26 +262,7 @@ theorem riemannianFiberNormSq_comp_le_mul
     hΦrepr]
 
 set_option linter.unusedSectionVars false in
-/-- **The uniform section-proportional fibre envelope for the operator-field action.** For a *fixed* smooth
-compactly-supported `(r, s)`-operator field `Φ` on a closed Riemannian manifold, there is a single
-nonnegative constant `C`, uniform over `M`, with
-```
-rfns(appCc Φ W)(x) ≤ C · rfns(W)(x)
-```
-for every smooth compactly-supported `(0, r)`-tensor `W` and every point `x`. The constant `C` is the global
-fibre-norm bound for the *fixed* smooth section `Φ` (`exists_bound_riemannianFiberNormSq_smoothCcTensor`,
-the chart-locality-free forward-Gram route); it depends only on `Φ`, never on `W`. The pointwise step is the
-intrinsic partial-contraction Cauchy–Schwarz `riemannianFiberNormSq_comp_le_mul`
-(`rfns((Φ x).comp (W x)) ≤ rfns(Φ x) · rfns(W x)`) followed by the uniform bound on `rfns(Φ x)`.
 
-This is the bridge by which the iterated covariant gradient `∇^p Φ₀` of a curvature-coefficient operator
-field — itself a fixed smooth `(r, r + p)`-tensor with a uniform fibre-norm bound — yields the
-section-proportional high-order envelope of the differentiated curvature tower with no
-chart-selection-unbounded data.
-
-**Non-vacuity.** A degenerate `C = 0` is rejected whenever `Φ` has a nonzero contraction on some `W` at
-some `x`: then `rfns(appCc Φ W)(x) > 0 = 0 · rfns(W)(x)`; the envelope genuinely uses `Φ` (its fibre norm)
-and `W` (the operator is applied to `W`). -/
 theorem exists_uniform_riemannianFiberNormSq_appCc_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (W : SmoothCcTensor g 0 r) (x : M),

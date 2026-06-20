@@ -2,39 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberOpNorm
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUniformBoundLocallyConstant
 
-/-!
-# Uniform op-norm bound on the intrinsic chart Fréchet-derivative CLM
-
-For ranks `r s : ℕ` and a chart centre `α : M`, the intrinsic chart
-Fréchet-derivative piece
-`tensorRSIntrinsicChartCLM r s α T b : TangentSpace I b →L[ℝ] TensorRSSpace r s I b`
-admits a pointwise operator-norm bound at any point `b`, parametrised by
-op-norm bounds `C_fib`, `C_J` on the two trivialisation families. Concretely,
-for every tangent vector `X : TangentSpace I b`,
-
-  `‖tensorRSIntrinsicChartCLM r s α T b X‖ ≤
-      C_fib * C_J * ‖fderiv ℝ (chart-pulled repr of T) (extChartAt I α b)‖ * ‖X‖`.
-
-The factor `C_fib * C_J` absorbs the op-norm bounds on the chart-`(r, s)`
-fibre right-inverse `tensorRSChartFiberFromModel α b` and on the
-chart-Jacobian `chartJ α b` (equivalently the tangent-bundle forward
-trivialisation `trivToE α b`).
-
-## Strategy
-
-By `tensorRSIntrinsicChartCLM_apply`,
-`tensorRSIntrinsicChartCLM r s α T b X
-  = tensorRSChartFiberFromModel r s α b (fderiv ℝ F (extChartAt I α b) (trivToE α b X))`
-where `F = tensorRSChartE_section_repr r s α T ∘ (extChartAt I α).symm` is the
-chart-pulled representation of `T`. The composition's norm is bounded by
-
-  `‖tensorRSChartFiberFromModel α b‖ · ‖fderiv ℝ F (extChartAt I α b)‖
-    · ‖trivToE α b‖ · ‖X‖`,
-
-and the first and third factors admit uniform bounds on `K` from the
-fibre-right-inverse op-norm bound and the chart-Jacobian op-norm bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -60,10 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
-/-- Pointwise op-norm bound for `tensorRSIntrinsicChartCLM r s α T b` at a
-single point `b`, parametrised by op-norm bounds on the two trivialisation
-families. The Fréchet-derivative norm is read off the chart-pulled
-representation of `T`. -/
 private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b') (b : M)
     {C_fib C_J : ℝ}

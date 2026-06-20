@@ -9,24 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedRegularityHigherQuant
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorPartialCompCutoffBounds
 
-/-!
-# Quantitative arbitrary-order chart-component Sobolev bound (chart-base uniform)
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_atlas`, an order `k : ℕ`, a chart center `α : M`, and a component
-multi-index `P₀`, there is a chart-geometric constant `C ≥ 0` — uniform over
-*every* eigenbasis index `i` — such that, with resolvent eigenvalue
-`μ := i.fst.val ∈ (0, 1]`, the order-`k` Euclidean Sobolev norm of the
-eigenvector chart component on the chart target is bounded by
-`ENNReal.ofReal (C · μ⁻¹^(k+1))` times the abstract `L²` norm of the
-eigenbasis vector.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -110,8 +92,7 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel_lo
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
 omit [CompleteSpace E] in
-/-- Eigenbasis-uniform weighted-versus-volume `eLpNorm` comparison on the
-kernel: an inlined non-`private` restatement of the comparison lemma. -/
+
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform_local
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M)
     {f : ι → EuclN → ℝ}
@@ -187,8 +168,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of
-`wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem`. -/
 private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -240,8 +219,6 @@ private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_chart_open
 
-/-- Chart-locality-free twin of
-`resolventChartComponent_memWkp_arbitrary_local`. -/
 private lemma resolventChartComponent_memWkp_arbitrary_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K' : ℕ)
@@ -297,7 +274,6 @@ private lemma resolventChartComponent_memWkp_arbitrary_local
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_eigen i.fst.val)
 
-/-- Chart-locality-free twin of `sharpDiff_eigen_inv_nonneg`. -/
 private lemma sharpDiff_eigen_inv_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -305,8 +281,6 @@ private lemma sharpDiff_eigen_inv_nonneg
   le_trans zero_le_one (sharpDiff_eigen_inv_one_le
     (I := I) (M := M) g r s i)
 
-/-- Chart-locality-free twin of
-`sharpDiff_eigen_inv_pow_le_inv_pow_succ`. -/
 private lemma sharpDiff_eigen_inv_pow_le_inv_pow_succ
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (e : ℕ) :
@@ -315,8 +289,6 @@ private lemma sharpDiff_eigen_inv_pow_le_inv_pow_succ
     sharpDiff_eigen_inv_one_le (I := I) (M := M) g r s i
   exact pow_le_pow_right₀ h1 (by omega)
 
-/-- Chart-locality-free twin of
-`eigenvector_chartComponent_wkpNorm_step_perPair`. -/
 private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (m : ℕ) (C_IH : ℝ) (hC_IH_nn : 0 ≤ C_IH)
@@ -999,8 +971,6 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       ((DirCard : ℝ) * C_IH + C_cmp * Sum_p5)) * (i.fst.val)⁻¹ ^ (m + 2)) =
       C * (i.fst.val)⁻¹ ^ (m + 2) by rw [hC_def]; ring]
 
-/-- Chart-locality-free twin of
-`eigenvector_chartComponent_wkpNorm_pm_uniform_β`. -/
 private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (m : ℕ) :
@@ -1089,9 +1059,6 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
           (I := I) (M := M) g r s i hα P₀ ((m + 1) + 2)]
         exact zero_le _
 
-/-- **Arbitrary-order chart-base-uniform Sobolev bound for the eigenvector
-chart component (chart-locality-free).** Chart-locality-free twin of
-`eigenvector_chartComponent_wkpNorm_arbitrary`. -/
 theorem eigenvector_chartComponent_wkpNorm_arbitrary
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (k : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s) :

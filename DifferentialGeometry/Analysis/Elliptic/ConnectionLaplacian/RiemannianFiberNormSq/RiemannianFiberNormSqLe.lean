@@ -3,24 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 import DifferentialGeometry.Tensor.RSTensor.FiberMetric.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
-/-!
-# Auxiliary scalars for bounding `riemannianFiberNormSq`
-
-For a smooth Riemannian metric `g` on a smooth manifold `M`, this file declares the
-basis-and-metric-dependent scalar `pointwiseBoundScalar g b`, built from
-`metricInnerOpNorm g b` (the bilinear operator norm of `g.inner b`) and the
-`E`-norms-squared of the `g`-orthonormal basis vectors used inside
-`riemannianFiberNormSq`. This is the pointwise ingredient that downstream uniform
-bounds package via a finite chart cover.
-
-## Main declarations
-
-* `orthoBasisSumNormSq g b` — the sum of `‖e i‖²` for `e` the `stdOrthonormalBasis`
-  of `(TangentSpace I b, g.inner b)`.
-* `pointwiseBoundScalar g b` — `1 + metricInnerOpNorm g b + orthoBasisSumNormSq g b`.
-* Basic non-negativity / one-bound lemmas for both.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -44,14 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- The sum of `E`-norms-squared of the `g`-orthonormal basis vectors used inside
-`riemannianFiberNormSq` at the base point `b`. Concretely, it is
-`∑ i, ‖e i‖²` for `e` the `stdOrthonormalBasis` of `(TangentSpace I b, g.inner b)`,
-with the norm taken in the locally-installed `g`-induced norm (so each
-`‖e i‖ = 1` in that local norm). The constructor for the local `InnerProductSpace`
-is taken from `RiemannianMetric.toCore` and
-`InnerProductSpace.ofCoreOfTopology`; we then build the sum
-`∑ i, ‖e i‖²`. -/
 noncomputable def orthoBasisSumNormSq
     (g : SmoothRiemannianMetric I M) (b : M) : ℝ := by
   classical
@@ -75,8 +49,6 @@ lemma orthoBasisSumNormSq_nonneg
   unfold orthoBasisSumNormSq
   exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
 
-/-- The pointwise bounding scalar at `b`:
-`1 + metricInnerOpNorm g b + orthoBasisSumNormSq g b`, guaranteed to be `≥ 1`. -/
 noncomputable def pointwiseBoundScalar
     (g : SmoothRiemannianMetric I M) (b : M) : ℝ :=
   1 + metricInnerOpNorm (I := I) (M := M) g b +
@@ -114,15 +86,12 @@ lemma orthoBasisSumNormSq_le_pointwiseBoundScalar
   have h2 : 0 ≤ metricInnerOpNorm (I := I) (M := M) g b := norm_nonneg _
   linarith
 
-/-- Bound on the operator norm of a single-factor metric covector `g.inner b v`. -/
 private lemma metric_inner_apply_opNorm_le
     (g : SmoothRiemannianMetric I M) (b : M) (v : TangentSpace I b) :
     ‖g.inner b v‖ ≤ metricInnerOpNorm (I := I) (M := M) g b * ‖v‖ := by
   unfold metricInnerOpNorm
   exact (g.inner b).le_opNorm v
 
-/-- The covariant test tensor `ω^K = ∏_k g.inner b (e (K k))` has operator norm
-bounded by `‖g.inner b‖^r · ∏_k ‖e (K k)‖`. -/
 private lemma omegaK_opNorm_le
     (g : SmoothRiemannianMetric I M) (b : M) (r : ℕ) (n : ℕ)
     (e : Fin n → TangentSpace I b) (K : Fin r → Fin n) :
@@ -154,7 +123,6 @@ private lemma omegaK_opNorm_le
     rw [Finset.prod_mul_distrib]; simp [Finset.prod_const, Finset.card_univ]
   exact hprod_le.trans (le_of_eq hprod_eq)
 
-/-- Pointwise bound for `fiberNormSqSummand`. -/
 lemma fiberNormSqSummand_le_pointwise_bound
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (T : TensorRSSpace r s I b)
@@ -247,8 +215,6 @@ lemma fiberNormSqSummand_le_pointwise_bound
   rw [h_target_eq]
   exact h_sq.trans (le_of_eq hRHS_alg)
 
-/-- The "ambient" sum of squared `E`-norms of a tangent-vector family on a finite index
-set. Each vector `e i` is taken with its canonical `E`-norm via `TangentSpace I b = E`. -/
 noncomputable def ambientFrameNormSq
     (b : M) (n : ℕ) (e : Fin n → TangentSpace I b) : ℝ :=
   ∑ i : Fin n, ‖e i‖ ^ 2
@@ -258,7 +224,6 @@ lemma ambientFrameNormSq_nonneg
     0 ≤ ambientFrameNormSq (I := I) (M := M) b n e :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-/-- The sum `∑_{K : Fin r → Fin n} ∏_k ‖e (K k)‖²` equals `(∑_i ‖e i‖²)^r`. -/
 private lemma sum_prod_norm_sq_eq_pow
     {b : M} (n : ℕ) (e : Fin n → TangentSpace I b) (r : ℕ) :
     (∑ K : Fin r → Fin n, ∏ k : Fin r, ‖e (K k)‖ ^ 2) =
@@ -266,16 +231,6 @@ private lemma sum_prod_norm_sq_eq_pow
   classical
   rw [Fintype.sum_pow (f := fun (i : Fin n) => ‖e i‖ ^ 2) r]
 
-/-- **Summed pointwise bound for `riemannianFiberNormSq` (basis-free statement).**
-
-For any g-orthonormal-style basis `e : Fin n → TangentSpace I b` (note: this lemma
-does NOT require `e` to be g-orthonormal — the bound is purely a consequence of the
-operator-norm structure), we have
-
-  `∑_K ∑_J fiberNormSqSummand g b r s T n e K J ≤ ‖T‖² · ‖g.inner b‖^(2r) · (∑_i ‖e i‖²)^(r+s)`.
-
-This is the key pointwise inequality that the headline `_le_canonical_normSq_on_compact`
-then bounds uniformly via compact-cover arguments. -/
 lemma riemannianFiberNormSq_sum_le_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b)
@@ -352,13 +307,6 @@ lemma riemannianFiberNormSq_sum_le_pointwise
   unfold ambientFrameNormSq
   rw [pow_add]
 
-/-- Witness: there exists a `Fin n → TangentSpace I b` family `e` (with
-`n = Module.finrank ℝ (TangentSpace I b)`) such that
-`riemannianFiberNormSq g r s b T = ∑_K ∑_J fiberNormSqSummand g b r s T n e K J`.
-
-This is just an unfolding of the definition: `e` is the g-orthonormal basis chosen
-by `stdOrthonormalBasis`. The witness is used to pass the pointwise summand bound
-through the definition. -/
 lemma riemannianFiberNormSq_eq_sum_witness
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
@@ -383,8 +331,6 @@ lemma riemannianFiberNormSq_eq_sum_witness
   refine ⟨n, fun i => e i, rfl, ?_⟩
   rfl
 
-/-- The pointwise bound for `riemannianFiberNormSq`. The `A(b)` is the sum of squared
-`E`-norms of the (g-orthonormal) basis used inside `riemannianFiberNormSq`. -/
 lemma riemannianFiberNormSq_le_pointwise_witness
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :

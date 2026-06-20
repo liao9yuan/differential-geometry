@@ -2,55 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.Normed.Group.Tannery
 
-/-!
-# The heat semigroup on `L²` of a closed Riemannian manifold
-
-For a closed Riemannian manifold `(M, g)`, this file defines the heat semigroup
-`e^{t Δ_g}` (with the geometer Laplacian convention `Δ_g = div_g ∘ grad_g`,
-so that `Δ_g` is non-positive on a closed manifold) acting on `Lp ℝ 2 μ_g`,
-via spectral calculus on the eigenbasis assembled in
-`Analysis/Spectral/Scalar/EigenBasis.lean`.
-
-Concretely, with the L² eigenbasis `b := resolventHilbertEigenbasisSigma g`
-and Laplacian eigenvalues `λ_i := laplacianEigenvalueOf i.1.val ≥ 0`, the
-heat semigroup is defined for `t ≥ 0` by
-
-  `heatSemigroup g t u = ∑' i, exp(-λ_i · t) • ⟪b i, u⟫_ℝ • b i`,
-
-and for `t < 0` we set `heatSemigroup g t = 0` (the negative-time data is
-purposely junk: the heat operator is not bounded backwards).
-
-## Main definitions
-
-* `heatSemigroup g t : Lp ℝ 2 μ_g →L[ℝ] Lp ℝ 2 μ_g` — the heat semigroup at
-  time `t`. Operator-norm `≤ 1` for `t ≥ 0`; the zero map for `t < 0`.
-
-## Main results
-
-* `heatSemigroup_apply_basis`: `heatSemigroup g t (b i) = exp(-λ_i t) • b i`
-  (for `t ≥ 0`).
-* `heatSemigroup_isSelfAdjoint`: each `heatSemigroup g t` is self-adjoint
-  (for `t ≥ 0`).
-* `heatSemigroup_zero`: `heatSemigroup g 0 = id`.
-* `heatSemigroup_add`: the semigroup law
-  `heatSemigroup g (s + t) = (heatSemigroup g s).comp (heatSemigroup g t)`
-  for `s, t ≥ 0`.
-* `heatSemigroup_continuous_at_zero`: strong continuity at `t = 0+`,
-  `heatSemigroup g t u → u` as `t → 0+`.
-
-## Sign / time convention
-
-Following the project's geometer convention, `Δ_g` has spectrum in `(-∞, 0]`
-on a closed manifold, so `e^{t Δ_g}` is `∑ exp(-λ_i t) P_i` with `λ_i ≥ 0`
-and `P_i` the spectral projection onto the `λ_i`-eigenspace. The heat
-semigroup is well-defined and contractive for `t ≥ 0`.
-
-We expose a single `heatSemigroup g : ℝ → ⋯` (i.e., the time argument is
-real, not nonneg). For `t < 0` the operator is set to `0`; downstream
-consumers of the semigroup law should always supply `0 ≤ t` (and `0 ≤ s`)
-hypotheses.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -77,13 +28,11 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The (sigma) basis-index type for the L² eigenbasis associated with `g`. -/
 abbrev EigenIdx (g : SmoothRiemannianMetric I M) :=
   Σ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
     Fin (Module.finrank ℝ
       (resolventEigenspace (I := I) (M := M) g μ.val))
 
-/-- The per-eigenvalue Laplacian eigenvalue (nonneg). -/
 abbrev EigenIdx.lambda {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) : ℝ :=
   laplacianEigenvalueOf i.1.val
@@ -93,8 +42,6 @@ lemma lambda_nonneg {g : SmoothRiemannianMetric I M}
     0 ≤ EigenIdx.lambda (I := I) (M := M) i :=
   laplacianEigenvalueOf_nonneg (I := I) (M := M) i.1
 
-/-- The per-eigenvalue heat coefficient `exp(-λ_i · t)` is in `(0, 1]` for
-nonneg time. -/
 theorem heat_coeff_mem_unit_interval {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) {t : ℝ} (ht : 0 ≤ t) :
     0 < Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) ∧
@@ -105,7 +52,6 @@ theorem heat_coeff_mem_unit_interval {g : SmoothRiemannianMetric I M}
     lambda_nonneg (I := I) (M := M) i
   nlinarith
 
-/-- The squared heat coefficient is bounded by `1` for `t ≥ 0`. -/
 private lemma heat_coeff_sq_le_one {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) {t : ℝ} (ht : 0 ≤ t) :
     (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) ^ 2 ≤ 1 := by
@@ -113,7 +59,6 @@ private lemma heat_coeff_sq_le_one {g : SmoothRiemannianMetric I M}
   have h_nn : 0 ≤ Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) := h_pos.le
   nlinarith [sq_nonneg (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) - 1)]
 
-/-- Parseval-type square-summability of the basis coefficients of a vector. -/
 lemma summable_basis_coeff_sq
     (g : SmoothRiemannianMetric I M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -155,8 +100,6 @@ lemma summable_basis_coeff_sq
   rw [h_sq_eq] at h_iff
   exact h_iff.mp h_summable_smul
 
-/-- Parseval identity: the squared norm of `u` equals the sum of squared
-basis coefficients. -/
 lemma parseval_norm_sq
     (g : SmoothRiemannianMetric I M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -173,8 +116,6 @@ lemma parseval_norm_sq
   rw [h_eq] at h_par
   rw [h_par, h_sq]
 
-/-- For `t ≥ 0`, the family of heat-coefficient–weighted basis terms is
-summable in `Lp ℝ 2 μ_g`. -/
 lemma summable_heatTerm
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -241,8 +182,6 @@ lemma summable_heatTerm
   rw [h_map_eq] at h_summable_V
   exact h_summable_V
 
-/-- For `f : ι → ℝ` square-summable and orthonormal `b`, the sum
-`∑' i, f i • b i` has L²-norm equal to the lp-norm of `f`. -/
 lemma orthonormal_norm_sq_eq_tsum_sq
     (g : SmoothRiemannianMetric I M)
     (f : EigenIdx (I := I) (M := M) g → ℝ)
@@ -302,8 +241,6 @@ lemma orthonormal_norm_sq_eq_tsum_sq
       h_orthFam.linearIsometry f_lp := h_iso_apply.symm
   rw [h_eq1, h_iso_norm, h_lp_norm_sq]
 
-/-- For `t ≥ 0`, the squared L² norm of the heat-eigenbasis series is bounded
-by `‖u‖²`. -/
 private lemma norm_sq_heatTerm_sum_le
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -356,7 +293,6 @@ private lemma norm_sq_heatTerm_sum_le
   refine le_trans h_dom ?_
   rw [parseval_norm_sq (I := I) (M := M) g u]
 
-/-- For `t ≥ 0`, the operator-norm bound `‖heatSemigroup_fun u‖ ≤ ‖u‖`. -/
 private lemma norm_heatTerm_sum_le
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -372,7 +308,6 @@ private lemma norm_heatTerm_sum_le
   have h_rhs_nn : 0 ≤ ‖u‖ := norm_nonneg _
   exact (abs_le_of_sq_le_sq' h_sq h_rhs_nn).2
 
-/-- The underlying function of the heat semigroup at time `t`. -/
 private noncomputable def heatSemigroupFun
     (g : SmoothRiemannianMetric I M) (t : ℝ)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -382,7 +317,6 @@ private noncomputable def heatSemigroupFun
       ⟪resolventHilbertEigenbasisSigma (I := I) (M := M) g i, u⟫_ℝ •
       resolventHilbertEigenbasisSigma (I := I) (M := M) g i
 
-/-- Additivity in `u` (for `t ≥ 0`). -/
 private lemma heatSemigroupFun_add
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t)
     (u v : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -414,7 +348,6 @@ private lemma heatSemigroupFun_add
   rw [Summable.tsum_add (summable_heatTerm (I := I) (M := M) g ht u)
     (summable_heatTerm (I := I) (M := M) g ht v)]
 
-/-- Scalar-homogeneity in `u` (for `t ≥ 0`). -/
 private lemma heatSemigroupFun_smul
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t) (c : ℝ)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -442,13 +375,6 @@ private lemma heatSemigroupFun_smul
   rw [h_sum_eq]
   exact (summable_heatTerm (I := I) (M := M) g ht u).tsum_const_smul c
 
-/-- The heat semigroup `e^{t Δ_g}` on `Lp ℝ 2 μ_g`.
-
-For `t ≥ 0`: the spectral series `u ↦ ∑' i, exp(-λ_i t) • ⟪b i, u⟫ • b i`
-defines a contraction on `L²` (operator norm `≤ 1`).
-
-For `t < 0`: the operator is set to `0` (junk; consumers should always
-supply `0 ≤ t`). -/
 noncomputable def heatSemigroup
     (g : SmoothRiemannianMetric I M) (t : ℝ) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
@@ -464,8 +390,6 @@ noncomputable def heatSemigroup
     exact norm_heatTerm_sum_le (I := I) (M := M) g ht u
   · exact 0
 
-/-- Application formula for `heatSemigroup g t u` when `t ≥ 0`: it equals
-the explicit eigenbasis sum. -/
 theorem heatSemigroup_apply_of_nonneg
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -478,13 +402,11 @@ theorem heatSemigroup_apply_of_nonneg
   rw [dif_pos ht]
   rfl
 
-/-- For `t < 0`, the heat semigroup is the zero map. -/
 theorem heatSemigroup_of_neg (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : t < 0) :
     heatSemigroup (I := I) (M := M) g t = 0 := by
   unfold heatSemigroup
   rw [dif_neg (not_le.mpr ht)]
 
-/-- For `t ≥ 0`, the operator norm of `heatSemigroup g t` is at most `1`. -/
 theorem heatSemigroup_opNorm_le_one (g : SmoothRiemannianMetric I M)
     {t : ℝ} (ht : 0 ≤ t) :
     ‖heatSemigroup (I := I) (M := M) g t‖ ≤ 1 := by
@@ -492,8 +414,6 @@ theorem heatSemigroup_opNorm_le_one (g : SmoothRiemannianMetric I M)
   rw [dif_pos ht]
   exact LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-- The heat semigroup acts diagonally on basis vectors:
-`e^{t Δ_g} (b i) = exp(-λ_i t) • b i`. -/
 theorem heatSemigroup_apply_basis
     (g : SmoothRiemannianMetric I M) {t : ℝ} (ht : 0 ≤ t)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -536,7 +456,6 @@ theorem heatSemigroup_apply_basis
   rw [h_sum_eq]
   rw [tsum_ite_eq i]
 
-/-- For `t ≥ 0`, the heat semigroup is self-adjoint. -/
 theorem heatSemigroup_isSelfAdjoint (g : SmoothRiemannianMetric I M)
     {t : ℝ} (ht : 0 ≤ t) :
     IsSelfAdjoint (heatSemigroup (I := I) (M := M) g t) := by
@@ -620,7 +539,6 @@ theorem heatSemigroup_isSelfAdjoint (g : SmoothRiemannianMetric I M)
     exact h_inner_hsum'.tsum_eq.symm
   rw [h_lhs, h_rhs]
 
-/-- At `t = 0`, the heat semigroup is the identity. -/
 theorem heatSemigroup_zero (g : SmoothRiemannianMetric I M) :
     heatSemigroup (I := I) (M := M) g 0 = ContinuousLinearMap.id ℝ _ := by
   apply ContinuousLinearMap.ext
@@ -645,7 +563,6 @@ theorem heatSemigroup_zero (g : SmoothRiemannianMetric I M) :
   rw [h_eq] at h_hsum
   exact h_hsum.tsum_eq
 
-/-- Semigroup law: `e^{(s+t) Δ_g} = e^{s Δ_g} ∘ e^{t Δ_g}` for `s, t ≥ 0`. -/
 theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
     {s t : ℝ} (hs : 0 ≤ s) (ht : 0 ≤ t) :
     heatSemigroup (I := I) (M := M) g (s + t) =
@@ -706,7 +623,6 @@ theorem heatSemigroup_add (g : SmoothRiemannianMetric I M)
   rw [h_exp_add]
   ring
 
-/-- Strong continuity at `t = 0+`: as `t → 0+`, `heatSemigroup g t u → u`. -/
 theorem heatSemigroup_continuous_at_zero
     (g : SmoothRiemannianMetric I M)
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

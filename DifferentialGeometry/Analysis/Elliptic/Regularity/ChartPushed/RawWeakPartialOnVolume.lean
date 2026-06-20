@@ -4,62 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartDa
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-/-!
-# Chart-pushed raw weak partial: `Lp` class on the chart target
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and a
-coordinate direction `j : Fin (Module.finrank ℝ E)`, this file packages the
-chart-pushed *raw* weak partial of an element `u_h : H1Compl g`. The
-construction parallels `chartPushedWeakPartialLp` (POU-weighted version) but
-uses `chartPushedRaw α u_h.coeFn` (without the partition-of-unity multiplier)
-as the function being differentiated.
-
-## Construction overview
-
-For a smooth scalar `v : SmoothScalar g`, the chart-pushed raw partial at a
-point `y ∈ chartTargetEuclid α` is
-
-```
-chartPushedRawPartial g α j v y
-  := fderiv ℝ (chartPushedRaw α v.toFun) y (EuclideanSpace.single j 1)
-```
-
-where `chartPushedRaw α v.toFun = v.toFun ∘ symm ∘ toE.symm` on the chart
-target and `0` off it. On the chart target this equals the j-th chart-α
-basis-direction directional derivative of `v.toFun` at the corresponding
-manifold point.
-
-To define the chart-pushed raw weak partial as a continuous linear map
-`H1Compl g →L[ℝ] Lp ℝ 2 (chart-pulled-weighted-restrict chartTarget)`, the
-construction needs a Lipschitz bound on the linear map on smooth scalars in
-the H¹ pre-norm. We package this bound as a `ChartPushedRawPartialLipschitz`
-structure, parallel to `ChartPushedPartialLipschitz`. Concrete instances of
-the structure can be supplied by downstream files that have additional
-structural control on the chart-α basis g-norm (e.g., a uniform bound on the
-support of relevant functions).
-
-## Main results
-
-* `chartPushedRawPartial`: the pointwise chart-pushed raw partial of a smooth
-  scalar, as a function `EuclN → ℝ`.
-
-* `ChartPushedRawPartialLipschitz`: the Lipschitz-witness structure encoding
-  the H¹-pre-norm continuity of the chart-pushed raw partial linear map.
-
-* `chartPushedRawPartialLpLin_of_lipschitz`: given the Lipschitz witness, the
-  chart-pushed raw partial map as a linear map `SmoothScalar g →ₗ[ℝ] Lp ℝ 2 (...)`.
-
-* `chartPushedRawPartialCLM`: given the Lipschitz witness, the chart-pushed
-  raw partial as a continuous linear map `SmoothScalar g →L[ℝ] Lp ℝ 2 (...)`.
-
-* `chartPushedRawWeakPartialLp`: the chart-pushed raw weak partial extended
-  to `H1Compl g`, given a Lipschitz witness.
-
-* `chartPushedRawWeakPartialLp_smoothToH1Compl`: the smooth-case identity.
-
-* `chartPushedRawWeakPartialLp_continuous`: continuity of the resulting map.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -94,10 +38,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The chart-pushed raw partial of a smooth scalar `v` at a point `y : EuclN`
-in the `j`-th coordinate direction. Defined as the fderiv of the raw
-chart-pull `chartPushedRaw α v.toFun` at `y`, evaluated on
-`EuclideanSpace.single j 1`. -/
 noncomputable def chartPushedRawPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) (v : SmoothScalar g) : EuclN → ℝ :=
@@ -115,38 +55,35 @@ noncomputable def chartPushedRawPartial
 structure ChartPushedRawPartialLipschitz
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) where
-  /-- The Lipschitz constant. -/
+  
   C : ℝ
-  /-- Non-negativity of the constant. -/
+  
   C_nonneg : 0 ≤ C
-  /-- The chart-pushed raw partial is in `MemLp 2` for every smooth scalar. -/
+  
   memLp : ∀ v : SmoothScalar g,
     MemLp (chartPushedRawPartial (I := I) (M := M) g α j v) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
-  /-- The H¹-Lipschitz bound. -/
+  
   bound : ∀ v : SmoothScalar g,
     eLpNorm (chartPushedRawPartial (I := I) (M := M) g α j v) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) ≤
       ENNReal.ofReal C * (‖v‖₊ : ℝ≥0∞)
-  /-- The chart-pushed raw partial is additive in `v`. -/
+  
   add : ∀ v w : SmoothScalar g,
     chartPushedRawPartial (I := I) (M := M) g α j (v + w) =ᵐ[
         (chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
       fun y => chartPushedRawPartial (I := I) (M := M) g α j v y +
         chartPushedRawPartial (I := I) (M := M) g α j w y
-  /-- The chart-pushed raw partial is `ℝ`-linear in `v`. -/
+  
   smul : ∀ (c : ℝ) (v : SmoothScalar g),
     chartPushedRawPartial (I := I) (M := M) g α j (c • v) =ᵐ[
         (chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
       fun y => c * chartPushedRawPartial (I := I) (M := M) g α j v y
 
-/-- The chart-pushed raw partial of a smooth scalar `v`, as an `Lp ℝ 2`
-element on the chart-pulled weighted measure restricted to the chart target,
-given a Lipschitz witness. -/
 noncomputable def chartPushedRawPartialLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -182,7 +119,6 @@ lemma norm_chartPushedRawPartialLp
   unfold chartPushedRawPartialLp
   exact MeasureTheory.Lp.norm_toLp _ _
 
-/-- The chart-pushed raw partial as a linear map on smooth scalars. -/
 noncomputable def chartPushedRawPartialLpLin
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j) :
@@ -228,8 +164,6 @@ lemma chartPushedRawPartialLpLin_apply
     chartPushedRawPartialLpLin (I := I) (M := M) g α j hLip v =
       chartPushedRawPartialLp (I := I) (M := M) g α j hLip v := rfl
 
-/-- The norm of `chartPushedRawPartialLpLin v` equals (the toReal of) the
-chart-pulled-weighted eLpNorm of `chartPushedRawPartial g α j v`. -/
 lemma norm_chartPushedRawPartialLpLin
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -241,8 +175,6 @@ lemma norm_chartPushedRawPartialLpLin
   rw [chartPushedRawPartialLpLin_apply]
   exact norm_chartPushedRawPartialLp (I := I) (M := M) g α j hLip v
 
-/-- The chart-pushed raw partial promoted to a continuous linear map via the
-Lipschitz hypothesis. -/
 noncomputable def chartPushedRawPartialCLM
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j) :
@@ -277,7 +209,6 @@ noncomputable def chartPushedRawPartialCLM
     chartPushedRawPartialCLM (I := I) (M := M) g α j hLip v =
       chartPushedRawPartialLp (I := I) (M := M) g α j hLip v := rfl
 
-/-- `smoothToH1Compl` has dense range. -/
 private lemma denseRange_smoothToH1Compl_local
     (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
@@ -287,7 +218,6 @@ private lemma denseRange_smoothToH1Compl_local
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- `smoothToH1Compl` is uniform-inducing. -/
 private lemma isUniformInducing_smoothToH1Compl_local
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing (smoothToH1Compl (I := I) (M := M) g) := by
@@ -297,8 +227,6 @@ private lemma isUniformInducing_smoothToH1Compl_local
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.isUniformInducing_coe (SmoothScalar g)
 
-/-- The chart-pushed raw partial CLM, extended along the dense
-uniform-inducing embedding `smoothToH1Compl`. -/
 noncomputable def H1ComplRawPartialCLM
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j) :
@@ -323,10 +251,6 @@ noncomputable def H1ComplRawPartialCLM
     (denseRange_smoothToH1Compl_local (I := I) (M := M) g)
     (isUniformInducing_smoothToH1Compl_local (I := I) (M := M) g) v
 
-/-- For `u_h : H1Compl g` and chart point `α`, the chart-pushed raw weak
-partial is the L²-limit of the chart-pushed raw classical partials of any
-smooth approximating sequence. The construction requires a Lipschitz witness
-`hLip : ChartPushedRawPartialLipschitz g α j`. -/
 noncomputable def chartPushedRawWeakPartialLp
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -335,8 +259,6 @@ noncomputable def chartPushedRawWeakPartialLp
       (chartTargetEuclid (I := I) (M := M) α)) :=
   H1ComplRawPartialCLM (I := I) (M := M) g α j hLip u_h
 
-/-- The chart-pushed raw weak partial agrees with the chart-pushed raw
-classical partial on smooth scalars. -/
 @[simp] theorem chartPushedRawWeakPartialLp_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -348,7 +270,6 @@ classical partial on smooth scalars. -/
   rw [H1ComplRawPartialCLM_smoothToH1Compl]
   rfl
 
-/-- The chart-pushed raw weak partial is a continuous function of `u_h`. -/
 theorem chartPushedRawWeakPartialLp_continuous
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j) :
@@ -356,9 +277,6 @@ theorem chartPushedRawWeakPartialLp_continuous
   unfold chartPushedRawWeakPartialLp
   exact (H1ComplRawPartialCLM (I := I) (M := M) g α j hLip).continuous
 
-/-- The chart-pushed raw weak partial coincides (a.e. on the chart-pulled
-weighted measure restricted to the chart target) with the pointwise
-chart-pushed raw partial for smooth scalars. -/
 theorem chartPushedRawWeakPartialLp_smoothToH1Compl_coeFn
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)

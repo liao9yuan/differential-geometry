@@ -1,32 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.MildSolutionExistence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.ScalarHeat.HeatSemigroupInstance
 
-/-!
-# Quasi-linear scalar heat equation on the spectral Sobolev scale
-
-For a closed Riemannian manifold `(M, g)` and a spectral Sobolev exponent
-`σ`, the extended scalar heat semigroup `e^{t Δ_g}` on `scalarHs g σ` is
-a bounded strongly continuous one-parameter contraction semigroup
-(packaged as `scalarHsBoundedC0Semigroup g σ`). Feeding this into the
-abstract semilinear existence/uniqueness machinery yields a short-time
-mild solution of the **quasi-linear** scalar heat equation
-
-  `∂_t u = Δ_g u + N(u)`,  `u(0) = u_0`,
-
-for a globally Lipschitz lower-order nonlinearity
-`N : scalarHs g σ → scalarHs g σ`.
-
-## Main results
-
-* `scalar_quasilinear_local_existence` — short-time existence of a
-  continuous mild solution of the quasi-linear scalar heat equation on
-  the spectral `Hˢ`-scale.
-* `scalar_quasilinear_local_unique` — uniqueness of the mild solution
-  on a short time interval.
-* `scalar_quasilinear_local_existence_Hk` — integer-exponent
-  specialisation on `HkScalar g k = scalarHs g (k : ℝ)`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -53,18 +27,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Short-time existence of a mild solution of the quasi-linear scalar
-heat equation on the spectral `Hˢ`-scale.**
-
-For a closed Riemannian manifold `(M, g)`, a spectral Sobolev exponent
-`σ`, an initial datum `u₀ : scalarHs g σ`, and a globally Lipschitz
-lower-order nonlinearity `N`, there is a positive existence time `T`
-and a continuous path `u : [0, T] → scalarHs g σ` solving the Duhamel
-integral equation
-
-  `u(t) = e^{t Δ_g} u₀ + ∫₀ᵗ e^{(t-τ) Δ_g} (N (u τ)) dτ`
-
-with `u(0) = u₀`. -/
 theorem scalar_quasilinear_local_existence
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (u₀ : scalarHs (I := I) (M := M) g σ)
@@ -85,12 +47,6 @@ theorem scalar_quasilinear_local_existence
   have h := hu_eq t ht
   simpa only [scalarHsBoundedC0Semigroup_apply] using h
 
-/-- **Uniqueness of the mild solution of the quasi-linear scalar heat
-equation on the spectral `Hˢ`-scale.**
-
-Any two continuous paths `u, v : [0, T] → scalarHs g σ` solving the
-quasi-linear scalar heat Duhamel integral equation with the same
-initial datum `u₀` coincide on `[0, T]`, provided `(L : ℝ) * T < 1`. -/
 theorem scalar_quasilinear_local_unique
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (u₀ : scalarHs (I := I) (M := M) g σ)
@@ -116,10 +72,6 @@ theorem scalar_quasilinear_local_unique
   · intro t ht
     simpa only [scalarHsBoundedC0Semigroup_apply] using hv_eq t ht
 
-/-- **Short-time existence of a mild solution of the quasi-linear scalar
-heat equation on the integer Sobolev scale `Hᵏ`.**
-
-The integer-exponent specialisation of `scalar_quasilinear_local_existence`. -/
 theorem scalar_quasilinear_local_existence_Hk
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (u₀ : HkScalar (I := I) (M := M) g k)

@@ -3,46 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# A quantitative iterated-Sobolev norm bound for the cutoff tensor `L²` chart
-component
-
-For a closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)` and a chart base
-point `α`, this file is the *explicit-norm* twin of the qualitative
-partition-of-unity → cutoff membership bridge. Where
-`tensorL2ChartComponentCutoff_memWkp_of_pou` records only that the
-cutoff-weighted Euclidean chart `P₀`-component is `W^{k,2}`-regular, the present
-file produces a constant `C` and an explicit inequality bounding the order-`k`
-iterated Euclidean Sobolev norm of that component by `C` times the sum — over
-the transport chart centres `β` and the component multi-indices `Q` — of the
-order-`k` norms of the partition-of-unity `Q`-components of the underlying `L²`
-tensor element.
-
-## The bound
-
-The cutoff-weighted chart `P₀`-component of `u` equals, almost everywhere on the
-Euclidean chart target, the finite double sum of the chart-transition transports
-of the partition-of-unity `Q`-components of `u`. The iterated Sobolev norm is
-invariant under almost-everywhere equality, subadditive over finite sums, and —
-through a quantitative chart-transition chain rule — bounded on each transported
-summand by a constant times the norm of the corresponding partition-of-unity
-component. Collecting the per-summand constants and the multiplicity of the
-double sum yields the single global constant `C`.
-
-The quantitative chart-transition chain rule for a not-necessarily-smooth input
-is supplied by the private helper `wkpNorm_comp_smoothDiffeoBoundedAtOrder_le`,
-which propagates the explicit composition bound
-`SmoothDiffeoBoundedAtOrder.wkpNorm_comp_smooth_le` from a smooth approximating
-sequence to its `W^{k,2}` limit.
-
-## Main result
-
-* `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou` — an explicit order-`k`
-  iterated Sobolev norm bound for the cutoff-weighted chart component, given
-  iterated Sobolev regularity of all partition-of-unity chart components at
-  every chart centre.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -77,9 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The topological support of the chart-`α` pushforward of a function `u` whose
-topological support is a compact subset of the chart-`α` source is contained in
-the chart-`α` Euclidean image of `tsupport u`. -/
 private lemma tsupport_chartPushedRaw_subset_chartImage
     (α : M) {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -105,10 +62,6 @@ private lemma tsupport_chartPushedRaw_subset_chartImage
       (I := I) (M := M) (u := u) α hy_target hy_off')
   · exact hy (chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy_target)
 
-/-- The chart-transition chain-rule constant `wkpComp_const'` is positive: it is
-a product of a positive count of multi-indices, a positive factorial, a positive
-derivative power, a positive rpow of the inverse Jacobian lower bound and the
-positive factor `k + 1`. -/
 private lemma wkpComp_const'_pos
     {d : ℕ} {kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax) (k : ℕ) (p : ℝ≥0∞) :
@@ -140,24 +93,12 @@ private lemma wkpComp_const'_pos
     exact_mod_cast Nat.zero_lt_succ k
   positivity
 
-/-- The chart-transition chain-rule constant `wkpComp_const'` is non-negative. -/
 private lemma wkpComp_const'_nonneg
     {d : ℕ} {kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax) (k : ℕ) (p : ℝ≥0∞) :
     0 ≤ Φ.wkpComp_const' k p :=
   (wkpComp_const'_pos Φ k p).le
 
-/-- **Quantitative chart-transition chain rule.** For a bounded chart-transition
-diffeomorphism `Φ : Ω → Ω'` whose derivatives are controlled up to order `kmax`,
-and a function `u ∈ W^{k,p}(Ω')` (`k ≤ kmax`) with compact support inside `Ω'`,
-the composition `u ∘ Φ` satisfies the explicit iterated Sobolev norm bound
-`wkpNorm k p (u ∘ Φ) Ω ≤ ENNReal.ofReal (Φ.wkpComp_const' k p) · wkpNorm k p u Ω'`.
-
-The proof mirrors `MemWkp.comp_smoothDiffeoBoundedAtOrder`: approximate `u` by
-smooth compactly-supported functions `ψ_n → u` in `W^{k,p}`, bound each smooth
-composition `ψ_n ∘ Φ` by the smooth chain rule, and pass to the `W^{k,p}` limit
-`v =ᵐ u ∘ Φ`. Subadditivity of `wkpNorm`, the reverse triangle inequality and
-`ge_of_tendsto` transfer the smooth bound to the limit. -/
 private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     {d : ℕ} [NeZero d] {kmax : ℕ} (k : ℕ) (hk : k ≤ kmax)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -595,17 +536,6 @@ private lemma wkpNorm_comp_smoothDiffeoBoundedAtOrder_le
     simpa using h_sum
   exact ge_of_tendsto h_rhs_tendsto (Filter.Eventually.of_forall h_v_bound)
 
-/-- **Quantitative iterated Sobolev bound for a transported chart component.**
-For chart base points `β`, `α`, component multi-indices `(P₀, Q)`, an order
-`k`, and an `L²` class `f` on the chart-`β` Euclidean target, there is a
-constant `C ≥ 0` such that the chart-transition transport
-`chartTransitionTransportCLM g r s β α P₀ Q f` is iterated Sobolev regular on
-the chart-`α` target and satisfies
-`wkpNorm k 2 (transport) (chartTargetEuclid α) ≤ ENNReal.ofReal C ·
-wkpNorm k 2 f (chartTargetEuclid β)`, whenever `f` is iterated Sobolev regular
-on the chart-`β` target. The membership conclusion is recorded alongside the
-norm bound so that the double-sum subadditivity step can be applied without
-re-deriving it. -/
 private lemma wkpNorm_chartTransitionTransportCLM_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (k : ℕ) :
@@ -827,9 +757,6 @@ private lemma wkpNorm_chartTransitionTransportCLM_le
           ENNReal.ofReal_mul hKcomp_nn]
         ring
 
-/-- **`MemWkp` is closed under finite sums.** If every member of a family of
-functions indexed by a finite set is `W^{k,p}`-regular on an open set, then the
-pointwise finite sum is `W^{k,p}`-regular. -/
 private lemma memWkp_finsetSum
     {d : ℕ} [NeZero d] {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ : IsOpen Ω)
@@ -857,9 +784,6 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
-/-- **A double-sum `wkpNorm` bound.** If every member of a doubly-indexed family
-of functions is `W^{k,p}`-regular, the order-`k` iterated Sobolev norm of the
-double sum is bounded by the double sum of the individual norms. -/
 private lemma wkpNorm_double_sum_le
     {d : ℕ} [NeZero d] {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ : IsOpen Ω)
@@ -883,26 +807,6 @@ private lemma wkpNorm_double_sum_le
   exact wkpNorm_sum_le (d := d) hp hΩ (Finset.univ : Finset κ)
     (fun j => F i j) (fun j _ => hF i hi j)
 
-/-- **The quantitative cutoff ↔ partition-of-unity iterated-Sobolev bound.** For
-a closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, an abstract `L²`
-tensor element `u : TensorL2 r s g`, a chart base point `α` and a component
-multi-index `P₀`, if every partition-of-unity Euclidean chart component of `u` —
-taken at every chart centre `β` and for every component multi-index `Q` — is
-iterated Sobolev regular (`W^{k,2}`) on its chart target, then there is a
-constant `C ≥ 0` such that the order-`k` iterated Euclidean Sobolev norm of the
-cutoff-weighted Euclidean chart `P₀`-component of `u` centred at `α` is bounded
-by `C` times the sum — over the transport chart centres `β` and the component
-multi-indices `Q` — of the order-`k` norms of the partition-of-unity
-`Q`-components of `u`.
-
-This is the explicit-norm twin of `tensorL2ChartComponentCutoff_memWkp_of_pou`:
-the cutoff component is, almost everywhere, a finite double sum of
-chart-transition transports of the partition-of-unity components; the iterated
-Sobolev norm is invariant under almost-everywhere equality, subadditive over
-finite sums, and — by the quantitative bounded chart-transition chain rule —
-bounded on each transport by a constant times the norm of the partition-of-unity
-component. Collecting the per-summand constants and the multiplicity of the
-double sum yields the single global constant `C`. -/
 theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M)
@@ -1039,20 +943,6 @@ theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou
     rw [Finset.mul_sum]
   rw [Finset.sum_congr rfl h_inner_factor, ← Finset.mul_sum]
 
-/-- **Input-uniform explicit norm bound for the cutoff tensor `L²` chart
-component.** A single nonnegative constant `C` — chart-transition geometric data,
-independent of the `L²` tensor element — works for *every* `u : TensorL2 r s g`:
-whenever all partition-of-unity Euclidean chart components of `u` are iterated
-Sobolev regular of order `k`, the order-`k` iterated Euclidean Sobolev norm of the
-cutoff-weighted chart `P₀`-component of `u` is bounded by `C` times the sum, over
-the transport chart centres `β` of `α` and the component multi-indices `Q`, of the
-order-`k` norms of the partition-of-unity `Q`-components of `u`.
-
-This is the input-uniform companion of `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou`:
-the per-transport constants of that bound stem from
-`wkpNorm_chartTransitionTransportCLM_le`, whose explicit constant is already
-quantified uniformly over the transported function; collecting them — flooring at
-`1` — yields the single `u`-independent constant. -/
 theorem wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (k : ℕ) :

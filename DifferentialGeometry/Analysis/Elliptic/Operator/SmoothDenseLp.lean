@@ -3,35 +3,6 @@ import Mathlib.MeasureTheory.Function.ContinuousMapDense
 import Mathlib.Topology.ContinuousMap.StoneWeierstrass
 import Mathlib.Geometry.Manifold.BumpFunction
 
-/-!
-# Density of smooth scalar functions in `Lp` on a closed Riemannian manifold
-
-For a closed (compact, Hausdorff) smooth Riemannian manifold `(M, g)` modelled on
-a finite-dimensional real inner-product space, the continuous linear map
-`smoothToLp g : SmoothScalar g →L[ℝ] Lp ℝ 2 μ_g` has dense range.
-
-The proof uses the Stone–Weierstrass theorem: the smooth real-valued functions
-on `M` form a unital `ℝ`-subalgebra of `C(M, ℝ)` that separates points (using
-`SmoothBumpFunction` to construct distinguishing functions). Hence smooth
-functions are sup-norm dense in `C(M, ℝ)`. Combined with
-`BoundedContinuousFunction.toLp_denseRange` (continuous functions are
-`Lp`-dense on a finite weakly regular measure), this yields that smooth
-functions are `Lp`-dense.
-
-The density of `smoothToLp` lifts to density of the H¹ extension
-`H1ComplToLp g : H1Compl g →L[ℝ] Lp ℝ 2 μ_g`, which is the form used by the
-variational Laplacian construction (see `VariationalLaplacian.lean`).
-
-## Main results
-
-* `smoothScalarSubalgebra g`: the unital ℝ-subalgebra of `C(M, ℝ)` consisting
-  of (continuous representatives of) smooth real-valued functions on `M`.
-* `smoothScalarSubalgebra_separatesPoints`: the smooth subalgebra separates
-  points.
-* `denseRange_smoothToLp`: `smoothToLp g` has dense range in `Lp ℝ 2 μ_g`.
-* `denseRange_H1ComplToLp`: `H1ComplToLp g` has dense range in `Lp ℝ 2 μ_g`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter BoundedContinuousFunction
@@ -56,8 +27,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- Convert a smooth real-valued function on `M` (packaged as a `SmoothScalar g`)
-into a continuous map `C(M, ℝ)`. -/
 def SmoothScalar.toContinuousMap {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) : C(M, ℝ) :=
   ⟨f.toFun, f.smooth.continuous⟩
@@ -83,7 +52,6 @@ def SmoothScalar.toContinuousMap {g : SmoothRiemannianMetric I M}
   ext x
   rfl
 
-/-- The constant-1 smooth scalar. -/
 def SmoothScalar.one (g : SmoothRiemannianMetric I M) : SmoothScalar g where
   toFun := fun _ => (1 : ℝ)
   smooth := contMDiff_const
@@ -91,7 +59,6 @@ def SmoothScalar.one (g : SmoothRiemannianMetric I M) : SmoothScalar g where
 @[simp] lemma SmoothScalar.one_toFun (g : SmoothRiemannianMetric I M) :
     (SmoothScalar.one g).toFun = fun _ : M => (1 : ℝ) := rfl
 
-/-- Pointwise product of two smooth scalars. -/
 def SmoothScalar.mul {g : SmoothRiemannianMetric I M} (f h : SmoothScalar g) :
     SmoothScalar g where
   toFun := fun x => f.toFun x * h.toFun x
@@ -101,14 +68,10 @@ def SmoothScalar.mul {g : SmoothRiemannianMetric I M} (f h : SmoothScalar g) :
     (f h : SmoothScalar g) :
     (SmoothScalar.mul f h).toFun = fun x => f.toFun x * h.toFun x := rfl
 
-/-- The set of smooth real-valued functions on `M`, viewed as a subset of
-`C(M, ℝ)` via the canonical "continuous representative" map. -/
 def SmoothScalar.imageInContinuousMap (g : SmoothRiemannianMetric I M) :
     Set C(M, ℝ) :=
   { φ : C(M, ℝ) | ∃ f : SmoothScalar g, f.toContinuousMap = φ }
 
-/-- The unital ℝ-subalgebra of `C(M, ℝ)` consisting of smooth real-valued
-functions on `M`. -/
 def smoothScalarSubalgebra (g : SmoothRiemannianMetric I M) :
     Subalgebra ℝ C(M, ℝ) where
   carrier := SmoothScalar.imageInContinuousMap g
@@ -144,13 +107,6 @@ def smoothScalarSubalgebra (g : SmoothRiemannianMetric I M) :
     φ ∈ smoothScalarSubalgebra (I := I) (M := M) g ↔
       ∃ f : SmoothScalar g, f.toContinuousMap = φ := Iff.rfl
 
-/-- Auxiliary: for any two distinct points `x, y` in a smooth manifold modelled
-on a finite-dimensional inner-product space (with `[T2Space]`), there exists a
-smooth real-valued function `f : M → ℝ` with `f x = 1` and `f y = 0`.
-
-We construct a `SmoothBumpFunction` centred at `x`. It always satisfies
-`f x = 1`. We then choose its outer radius small enough that its support
-avoids `y`, so that `f y = 0`. -/
 private lemma exists_smooth_separating
     (x y : M) (hxy : x ≠ y) :
     ∃ f : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ f ∧ f x = 1 ∧ f y = 0 := by
@@ -171,7 +127,6 @@ private lemma exists_smooth_separating
     have hy_in_compl : y ∈ ({y}ᶜ : Set M) := hφ_tsupp hy_supp
     exact hy_in_compl rfl
 
-/-- The smooth subalgebra of `C(M, ℝ)` separates points. -/
 theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) :
     (smoothScalarSubalgebra (I := I) (M := M) g).SeparatesPoints := by
   intro x y hxy
@@ -182,8 +137,6 @@ theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) 
   · rw [hfx, hfy]
     exact one_ne_zero
 
-/-- For any continuous `φ : C(M, ℝ)` and `ε > 0`, there exists a smooth scalar
-function `f : SmoothScalar g` with `‖f.toContinuousMap - φ‖ < ε` (sup norm). -/
 theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
     (φ : C(M, ℝ)) {ε : ℝ} (hε : 0 < ε) :
     ∃ f : SmoothScalar g, ‖f.toContinuousMap - φ‖ < ε := by
@@ -196,9 +149,6 @@ theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
   rw [hf]
   exact hg'_lt
 
-/-- A continuous function with `‖φ‖_∞ ≤ K` on a compact `M` has `Lp` norm at
-most `μ(univ)^(1/p) · K`. We work with `p = 2`. The Mathlib lemma puts the
-measure factor on the left. -/
 private lemma eLpNorm_two_le_of_norm_le
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (_hφ : Continuous φ) (K : ℝ)
     (hK : ∀ x, ‖φ x‖ ≤ K) :
@@ -211,11 +161,6 @@ private lemma eLpNorm_two_le_of_norm_le
   exact MeasureTheory.eLpNorm_le_of_ae_bound (μ := riemannianVolumeMeasure (I := I) (M := M) g)
     (f := φ) (C := K) (Filter.Eventually.of_forall hK)
 
-/-- The pointwise L² eLpNorm of the difference between a smooth function and a
-bounded continuous function is bounded by the sup-norm of the pointwise
-difference times the measure factor. This is a pure-`eLpNorm` statement,
-avoiding `BoundedContinuousFunction.toLp` in the type signature so that no
-`[IsFiniteMeasure]` instance is needed at signature elaboration time. -/
 private lemma eLpNorm_smooth_sub_bc_le
     (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) (ψ : M →ᵇ ℝ) (δ : ℝ)
@@ -231,18 +176,12 @@ private lemma eLpNorm_smooth_sub_bc_le
     f.smooth.continuous.sub ψ.continuous
   exact eLpNorm_two_le_of_norm_le (I := I) (M := M) g _ h_diff_cont δ h_pt
 
-/-- Auxiliary: equality between the `Lp`-edist of `MemLp.toLp` of two functions
-and the `eLpNorm` of their pointwise difference. Just `Lp.edist_toLp_toLp`
-specialised to our setting. -/
 private lemma edist_toLp_eq_eLpNorm
     {μ : Measure M} (a b : M → ℝ) (ha : MemLp a 2 μ) (hb : MemLp b 2 μ) :
     edist (ha.toLp a) (hb.toLp b) = eLpNorm (fun x : M => a x - b x) 2 μ := by
   rw [Lp.edist_toLp_toLp]
   rfl
 
-/-- Auxiliary: smooth scalars approximate any `MemLp 2 μ_g` function via a
-sup-norm-then-eLpNorm decomposition. Returns a smooth function whose
-`MemLp.toLp` is `edist`-close in `Lp ℝ 2 μ`. -/
 private lemma exists_smoothToLp_close_to_memLp
     (g : SmoothRiemannianMetric I M)
     [hμ_fin : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g)]
@@ -324,10 +263,6 @@ private lemma exists_smoothToLp_close_to_memLp
     _ ≤ ε / 2 + ε / 2 := add_le_add h1 h2_bound
     _ = ε := ENNReal.add_halves _
 
-/-- Smooth scalars on a closed Riemannian manifold are dense in `Lp ℝ 2 μ_g`.
-
-Proof: Stone–Weierstrass gives smooth-dense-in-continuous in sup norm, and
-continuous-dense-in-`Lp` from `MemLp.exists_boundedContinuous_eLpNorm_sub_le`. -/
 theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToLp (I := I) (M := M) g) := by
   classical
@@ -348,9 +283,6 @@ theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
   conv_lhs => rw [show v = (Lp.memLp v).toLp (v : M → ℝ) from h_v_eq]
   exact hf
 
-/-- The continuous linear map `H1ComplToLp g : H1Compl g →L[ℝ] Lp ℝ 2 μ_g`
-has dense range. This follows from `denseRange_smoothToLp` together with the
-identity `H1ComplToLp ∘ smoothToH1Compl = smoothToLp`. -/
 theorem denseRange_H1ComplToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (H1ComplToLp (I := I) (M := M) g) := by
   refine Dense.mono ?_ (denseRange_smoothToLp (I := I) (M := M) g)

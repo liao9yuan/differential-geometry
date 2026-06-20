@@ -1,37 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedFDerivProductDifferenceBound
 
-/-!
-# Seminorm calculus for the all-order chart-jet estimate
-
-The order-`N` iterated-derivative seminorm `iteratedFDerivSeminorm N f s y` of a scalar
-field obeys the expected sub-additivity and product rules, which the all-order
-(Faà-di-Bruno) chart-jet estimate assembles term by term.  Two structural facts are
-isolated here:
-
-* **Sub-additivity through a finite sum** — the seminorm of a finite sum of `ContDiffOn`
-  fields is bounded by the sum of seminorms (`iteratedFDerivWithin_sum_apply` + the
-  triangle inequality, order by order).
-
-* **Binary product-difference bound** — the order-`N` derivative of a difference of two
-  binary products `f₁·f₂ − g₁·g₂`, with all four factors `ContDiffOn` and uniformly
-  `Cᴺ`-bounded by `B` on a compact `K`, is controlled by the seminorms of the two factor
-  differences:
-  ```
-  ‖iteratedFDerivWithin ℝ N (f₁·f₂ − g₁·g₂) s y‖ ≤
-      2ᴺ·B·(iteratedFDerivSeminorm N (f₁−g₁) s y + iteratedFDerivSeminorm N (f₂−g₂) s y) .
-  ```
-  This is the algebraic telescoping `f₁f₂ − g₁g₂ = (f₁−g₁)f₂ + g₁(f₂−g₂)` followed by the
-  single-difference Leibniz bound `norm_iteratedFDerivWithin_mul_le_uniformBound`.
-
-These two facts, together with the partial-derivative order bridge, reduce every
-chart-coordinate Ricci/Lie–DeTurck difference to the chart-Gram jet difference.
-
-## Main results
-
-* `norm_iteratedFDerivWithin_sum_le` — sub-additivity through a finite sum.
-* `norm_iteratedFDerivWithin_two_prod_sub_le` — the binary product-difference bound.
--/
-
 noncomputable section
 
 open Set
@@ -45,9 +13,6 @@ namespace DeTurckCoefficients
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-/-- **Sub-additivity of the order-`N` derivative through a finite sum.**  For a finite
-family of `ContDiffOn ℝ ∞` fields on an open set `s`, the order-`N` iterated derivative
-of the sum is bounded, pointwise, by the sum of the order-`N` iterated derivatives. -/
 theorem norm_iteratedFDerivWithin_sum_le
     {ι : Type*} {F : ι → E → ℝ} {s : Set E} (hs : IsOpen s)
     (u : Finset ι) (hF : ∀ j ∈ u, ContDiffOn ℝ ∞ (F j) s)
@@ -67,17 +32,6 @@ theorem norm_iteratedFDerivWithin_sum_le
   rw [hsum]
   exact norm_sum_le _ _
 
-/-- **Binary product-difference bound.**  Let `s` be open and `f₁ f₂ g₁ g₂ : E → ℝ` all
-`ContDiffOn ℝ ∞` on `s`.  Suppose the three plain factors `f₂`, `g₁` (and indeed any
-factor needed) are uniformly `Cᴺ`-bounded by `B` on a compact `K ⊆ s`.  Then the
-order-`N` derivative of the product difference `f₁·f₂ − g₁·g₂` is controlled by the
-seminorms of the two factor differences `f₁ − g₁` and `f₂ − g₂`:
-```
-‖iteratedFDerivWithin ℝ N (fun y => f₁ y * f₂ y - g₁ y * g₂ y) s y‖ ≤
-    2ᴺ·B·(iteratedFDerivSeminorm N (f₁ − g₁) s y + iteratedFDerivSeminorm N (f₂ − g₂) s y) .
-```
-The proof telescopes `f₁f₂ − g₁g₂ = (f₁−g₁)·f₂ + g₁·(f₂−g₂)` and applies the
-single-difference Leibniz bound to each of the two single-difference products. -/
 theorem norm_iteratedFDerivWithin_two_prod_sub_le
     {f₁ f₂ g₁ g₂ : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hf₁ : ContDiffOn ℝ ∞ f₁ s) (hf₂ : ContDiffOn ℝ ∞ f₂ s)

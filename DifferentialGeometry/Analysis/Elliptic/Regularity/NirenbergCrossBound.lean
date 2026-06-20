@@ -3,28 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.StandardNire
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotient
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 
-/-!
-# Auxiliary `L²` bounds for difference quotients on a compact set
-
-This module collects auxiliary `L²` bounds for the forward difference quotient
-`D_h^k w` on a precompact open `Ω''` of Euclidean space, when `w ∈ L²(K)` for
-a compact set `K` containing `cthickening |h| (closure Ω'')`.
-
-The bounds are intended as building blocks for the difference-quotient
-approach to interior `H²` regularity: see
-`Sobolev/Nirenberg/MasterInequality/CrossBounds.lean` for the
-smooth-case algebra and `Regularity/ChartHk/H2NonSmooth.lean` for the consumer
-(`chart_loc_of_uniform_bound`) that turns a uniform-in-`h` bound into a
-weak second partial derivative.
-
-## Main results
-
-* `eLpNorm_diffQuot_restrict_le_of_cthickening`: for `w ∈ L²(K)` and `0 < |h|`
-  with `cthickening |h| (closure Ω'') ⊆ K`, the difference quotient `D_h^k w`
-  is `L²` on `Ω''` with norm bounded by `(2/|h|) · ‖w‖_{L²(K)}` (a Minkowski
-  estimate).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -58,13 +36,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For `w ∈ L²(volume.restrict K)` with `cthickening |h| (closure Ω'') ⊆ K`,
-the difference quotient `D_h^k w` satisfies the `L²(Ω'')` bound
-
-`‖D_h^k w‖_{L²(Ω'')} ≤ (2/|h|) · ‖w‖_{L²(K)}`.
-
-This bound is **not** uniform in `h`; for the uniform-in-`h` Nirenberg bound,
-see the headline theorem framework in `Nirenberg/CrossBounds.lean`. -/
 theorem eLpNorm_diffQuot_restrict_le_of_cthickening
     {Ω'' K : Set EuclN} (hΩ''_open : IsOpen Ω'')
     (_hΩ''_compact_closure : IsCompact (closure Ω''))

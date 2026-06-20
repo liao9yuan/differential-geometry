@@ -5,20 +5,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Riemannian Metrics on Mixed Tensor Fibers
-
-`TensorRSSpace r s I x` is modeled as
-`Tensor0SSpace r I x ->L Tensor0SSpace s I x`.  Once the metric-induced inner
-products on the covariant tensor fibers are supplied, a mixed tensor gets its
-inner product by the Hilbert-Schmidt formula
-
-`<A, B> = tr(A^† B)`.
-
-The construction below is fiberwise and metric-bound.  It uses the covariant
-tensor metrics constructed recursively from the Riemannian metric.
--/
-
 namespace Tensor0SBundle
 
 noncomputable section
@@ -31,9 +17,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {Time : Type*}
 
-/-- Adjoint of an `(r,s)` tensor in the Hom model
-`Tensor0SSpace r ->L Tensor0SSpace s`, using the supplied metric data on the
-source and target covariant tensor fibers. -/
 def adjointRS
     {g : SmoothMetric I M} {x : M}
     (r s : Nat) (A : TensorRSSpace r s I x) :
@@ -43,8 +26,6 @@ def adjointRS
     (tensor0SMetricData (I := I) g x s)
     A.toLinearMap
 
-/-- The Hom-model adjoint is adjoint with respect to the metric-induced
-inner products on the covariant source and target fibers. -/
 theorem adjointRS_inner
     {g : SmoothMetric I M} {x : M}
     (r s : Nat) (A : TensorRSSpace r s I x)
@@ -57,8 +38,6 @@ theorem adjointRS_inner
       (tensor0SMetricData (I := I) g x s)
       A.toLinearMap Y X
 
-/-- Metric-induced inner product on all `(r,s)` tensors in the realized
-`TensorRSSpace` Hom model. -/
 def innerRS
     {g : SmoothMetric I M} {x : M}
     (r s : Nat) (A B : TensorRSSpace r s I x) : Real :=
@@ -73,7 +52,6 @@ def innerRS
         ((adjointRS (I := I) (g := g) (x := x) r s A).comp B.toLinearMap) := by
   rfl
 
-/-- Squared norm of a realized `(r,s)` tensor. -/
 def normSqRS
     {g : SmoothMetric I M} {x : M}
     (r s : Nat) (A : TensorRSSpace r s I x) : Real :=
@@ -86,13 +64,11 @@ def normSqRS
       innerRS (I := I) (g := g) (x := x) r s A A := by
   rfl
 
-/-- A time-dependent pointwise realized `(r,s)` tensor field. -/
 abbrev TensorRSTimeField
     (I : ModelWithCorners Real E H) (M : Type*) [TopologicalSpace M]
     [ChartedSpace H M] [IsManifold I ∞ M] (Time : Type*) (r s : Nat) :=
   Time -> (x : M) -> TensorRSSpace r s I x
 
-/-- Pointwise squared norm of a time-dependent realized `(r,s)` tensor field. -/
 def tensorNormSqRS
     (g : Time -> SmoothMetric I M)
     {r s : Nat}

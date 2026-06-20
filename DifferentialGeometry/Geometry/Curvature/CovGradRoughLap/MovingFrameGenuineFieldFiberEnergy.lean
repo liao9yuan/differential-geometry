@@ -4,51 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
 
-/-!
-# Frame-summed fibre-norm energy of the genuine moving-frame curvature fibre fields
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this file isolates the
-genuinely-irreducible *per-fibre-field* energy primitives underneath the order-separated fibre
-bounds and the moving-frame divergence datum of the rank-generic order-`2` rough-Laplacian /
-covariant-gradient commutator defect `Curv S := Δ_∇(∇S) − ∇(Δ_∇ S)` (`pointwiseTensorCurv g s S`).
-
-The pure-Riemann order bound on the concrete genuine curvature section `GcurvSection g s S`
-(`MovingFrameGenuineSectionOrderDivergence`) reduces, through the slot-`0` fibre-match
-`GcurvSection_toSection_eq_genuineThirdCurvFieldFibPureR` together with the frame-invariant fibre-norm
-reconstruction `riemannianFiberNormSq_eq_tensorInnerPointwise` /
-`tensorInnerPointwise_0s_eq_diag_sum_orthoFrame` (valid in *any* `g_x`-orthonormal frame), to a single
-shared statement: the frame-summed squared energy of the pure-Riemann *fibre field*
-`genuineThirdCurvFieldFibPureR` (the inner-product-weighted frame reconstruction of the pure-Riemann
-curvature contraction `R(∇S)`) is bounded by a single valence-dependent proportional constant times
-`rfns(∇S)`. This pure-Riemann energy bound is the sound, tensorial genuine content; this file states
-it as the precise primitive the order-divergence producer consumes for its `GcurvSection` bound.
-
-The differentiated-curvature `(∇R) S` field and the moving-frame bracket remainder are **not** treated
-here as concrete extension-curried sections: the differentiated-curvature trace
-`∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` and the bracket discrepancy are *non-tensorial* in the direction (their Leibniz
-expansions see the first jet of the direction's smooth extension `smoothExtensionTangent`, an
-uncontrolled `Classical.choose`), so a per-direction fibre bound on them is *false term-by-term* — only
-the intrinsic sum is order-controlled. Those two fields are therefore carried *existentially* (never
-extension-curried) in the intrinsic spine of the order-divergence producer
-`exists_GcurvSection_orderSeparatedBounds_movingFrameDivergence`
-(`MovingFrameGenuineSectionOrderDivergence`).
-
-## The pure-Riemann energy primitive
-
-For a `g_x`-orthonormal frame `e` with `n = Module.finrank ℝ (TangentSpace I x)`:
-
-* `genuineThirdCurvFieldFibPureR_fiberNormEnergy_le` — the pure-Riemann fibre field
-  `genuineThirdCurvFieldFibPureR g s S x e` carries `∑ₐ ⟨e a, ·⟩_g • R(B_i, W a)(∇_{B_i} S)`; its
-  frame-summed squared energy is bounded `rfns(∇S)`-order. **Why TRUE.** Orthonormality collapses the
-  inner weight `⟨e a, e (φ 0)⟩_g = δ_{a, φ 0}`, leaving the `(0, s)` fibre norm of the pure-Riemann
-  curvature trace `∑_i R(B_i, e (φ 0))(∇_{B_i} S)` reassembled over the orthonormal frame
-  (`frame_field_energy_eq_sum_trace_fiberNormSq`); each curvature contraction is fibre-bounded by the
-  uniform pure-Riemann genuine-trace sup `exists_uniform_genuineCurvTracePureR_fiberNormSq_bound`
-  (sorry-free, uniformised over the compact `M`), with the orthonormal Gram scalars `g(e a, e a) = 1`,
-  reduced to `rfns(∇S)`. The pure-Riemann trace is *tensorial* in the direction (no extension jet), so
-  this bound is genuinely true and proved here in full. The proportional constant is independent of `x`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -77,7 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- Non-negativity of the metric self-inner product `g(x; v, v)`. -/
+
 private lemma g_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -85,17 +40,6 @@ private lemma g_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-/-- **Frame-summed squared model components of a `(0, s)`-tensor reassemble its fibre norm.** For a
-`(0, s)`-tensor value `Tr` at `x` and a `g_x`-orthonormal frame `e` (`n = Module.finrank`), the sum
-over multi-indices `ψ : Fin s → Fin n` of the squared model components reassembles the intrinsic
-fibre norm:
-```
-rfns(Tr) = ∑_{ψ} (toModel Tr (e ∘ ψ))².
-```
-The proof passes through the fibre-norm / inner-product bridge `riemannianFiberNormSq_eq_tensorInnerPointwise`
-and the arbitrary-`g_x`-orthonormal-frame diagonal sum `tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`
-(applied to the `Module.Basis` built from `e`). It is the rank-`s` value analogue of the section
-reconstruction `riemannianFiberNormSq_succ_section_eq_sum_toModel_unit_sq`. -/
 private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (Tr : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -181,9 +125,7 @@ private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     rw [this]
 
 set_option linter.unusedSectionVars false in
-/-- **Orthonormal collapse of an inner-product-weighted frame field.** For a `g_x`-orthonormal frame
-`e` and a trace family `Tr : Fin n → TensorRSSpace 0 s`, the inner-product-weighted frame sum
-`∑ₐ ⟨e a, e a₀⟩_g • toModel (Tr a (unit)) m` collapses to the single `a₀` term. -/
+
 private lemma orthoWeighted_frame_sum_collapse
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -203,18 +145,6 @@ private lemma orthoWeighted_frame_sum_collapse
     rw [horth b a₀, if_neg hb, zero_smul]
   · intro h; exact absurd (Finset.mem_univ a₀) h
 
-/-- **Reduction of the frame-summed squared field energy to the frame sum of trace fibre norms.**
-For a `g_x`-orthonormal frame `e` (`n = Module.finrank`) and a trace family `Tr : Fin n → TensorRSSpace 0 s`,
-if the field is the inner-product-weighted frame reconstruction
-`field w m = ∑ₐ ⟨e a, w⟩_g • toModel (Tr a (unit)) m`, then the frame-summed squared energy of the
-field at `(e (φ 0), e ∘ Fin.tail φ)` reassembles into the frame sum of the intrinsic fibre norms of
-the traces:
-```
-∑_{φ} (field (e (φ 0)) (e ∘ Fin.tail φ))² = ∑_{a} rfns(Tr a).
-```
-The proof orthonormally collapses each field component (`orthoWeighted_frame_sum_collapse`), re-indexes
-`φ ↔ (φ 0, Fin.tail φ)`, and reassembles the inner `ψ`-sum into the fibre norm
-(`riemannianFiberNormSq_eq_sum_toModel_sq`). -/
 private lemma frame_field_energy_eq_sum_trace_fiberNormSq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -240,7 +170,7 @@ private lemma frame_field_energy_eq_sum_trace_fiberNormSq
     rw [orthoWeighted_frame_sum_collapse (I := I) (M := M) g s x e horth Tr (φ 0)
       (fun k => e (Fin.tail φ k))]
   rw [Finset.sum_congr rfl (fun φ (_ : φ ∈ Finset.univ) => hcollapse φ)]
-  -- Re-index `φ ↔ (φ 0, Fin.tail φ)` via the `Fin.cons`/`Fin.tail` equivalence.
+  
   rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (s + 1) => Fin n))
         (fun (pr : Fin n × (Fin s → Fin n)) =>
           Tensor0SSpace.toModel
@@ -259,30 +189,6 @@ private lemma frame_field_energy_eq_sum_trace_fiberNormSq
   refine Finset.sum_congr rfl (fun a₀ _ => ?_)
   rw [riemannianFiberNormSq_eq_sum_toModel_sq (I := I) (M := M) g s x (Tr a₀) e hn horth]
 
-/-- **Uniform pure-Riemann genuine-trace fibre bound (`‖R‖_∞ · rfns(∇S)`).** For a closed smooth
-Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant `Kpure : ℕ → ℝ` such
-that, at every covariant rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`, and
-*unit* tangent vector `v` at `x` (`g(v, v) = 1`), the pure-Riemann genuine curvature trace at the
-smooth extension of `v`, against the moving orthonormal frame `smoothOrthoFrame g x`,
-```
-genuineCurvTraceFixedFramePureR g s (smoothExtensionTangent x v) (smoothOrthoFrame g x) (S.toSection) x
-  = ∑ᵢ R(Bᵢ, v)(∇_{Bᵢ} S)(x),
-```
-has fibre norm bounded `rfns(∇S)`-order, with constant `Kpure s` independent of `x` and `v`.
-
-**Why this is TRUE.** Each summand `R(Bᵢ, v)(∇_{Bᵢ} S)` is the bundled rank-`s` curvature operator
-`riemannOp (tensorCov g 0 s) x (Bᵢ x) v (∇_{Bᵢ} S(x))` (`tensor3rdCurv_pure_R_eq_riemannOp`),
-fibre-bounded by the uniform rank-`s` curvature sup (the sup over the compact `M` of the continuous
-per-point proportional envelope `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`)
-times the orthonormal Gram scalars `g(Bᵢ x, Bᵢ x) = 1` (`smoothOrthoFrame_orthonormal_at_center`),
-`g(v, v) = 1`, and the directional-derivative slice fibre norm `rfns(∇_{Bᵢ} S)`, in turn controlled by
-the full gradient fibre norm `rfns(∇S)` (`riemannianFiberNormSq_covApply_le_covGrad`, the slot-`0`
-Parseval domination of a unit-direction gradient slice). Summing the `n`-fold frame sum by
-`riemannianFiberNormSq_sum_le_card_mul` gives a single `x`-uniform constant.
-
-**Non-vacuity.** A zero envelope `Kpure s = 0` forces `∑ᵢ R(Bᵢ, v)(∇_{Bᵢ} S) = 0` for all unit `v`,
-but the pure-Riemann contraction is genuinely nonzero when `R ≠ 0` and `∇S ≠ 0` on a non-flat manifold;
-so the bound genuinely envelopes the per-point curvature operator norm. -/
 theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Kpure : ℕ → ℝ, (∀ s, 0 ≤ Kpure s) ∧
@@ -296,7 +202,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
   classical
-  -- Uniformise the rank-`s` continuous proportional curvature envelope over the compact `M`.
+  
   have huniform : ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
       ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x),
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
@@ -330,7 +236,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
   refine ⟨fun s => (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * C s), fun s => ?_, ?_⟩
   · exact mul_nonneg (Nat.cast_nonneg _) (mul_nonneg (Nat.cast_nonneg _) (hC_nonneg s))
   intro s S x v hv
-  -- Expand the trace as a frame sum of `riemannOp` summands.
+  
   set n : ℕ := Module.finrank ℝ E with hn_def
   set F : Fin n → TensorRSSpace 0 s I x := fun i =>
     riemannSec (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -342,14 +248,14 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
       (fun y : M => S.toSection y) x = ∑ i : Fin n, F i := by
     rw [genuineCurvTraceFixedFramePureR]
   rw [htrace]
-  -- Smoothness inputs for the bundled-operator rewrite of each summand.
+  
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) :=
     smoothExtensionTangent_contMDiff (I := I) x v
   have hS_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
     S.toSection.contMDiff
-  -- Each summand is the bundled curvature operator on the directional slice.
+  
   have hFop : ∀ i : Fin n, F i =
       riemannOp (tensorCov (I := I) g 0 s) x
         (smoothOrthoFrame (I := I) g x i x) (smoothExtensionTangent (I := I) x v x)
@@ -357,10 +263,10 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           (fun y : M => S.toSection y) x) := by
     intro i; rw [hF_def]
     exact tensor3rdCurv_pure_R_eq_riemannOp (I := I) g 0 s i hW hS_total
-  -- Directional-slice fibre domination: each `∇_{B_i} S(x)` is bounded by the full gradient.
-  -- The slot-`0` slice of `(covGrad g 0 s S).toSection x` along `B_i x`, in the moving frame
-  -- `e a := B_a x`, has the same unit-section value `(∇_{B_i} S(x))(unit)` as the directional
-  -- covariant derivative, so equal fibre norm; the slot-`0` Parseval domination bounds it by `∇S`.
+  
+  
+  
+  
   have hcovApply_le : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -373,7 +279,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     have horthF : ∀ a b : Fin n, g.inner x (eF a) (eF b) = if a = b then (1 : ℝ) else 0 := by
       intro a b; rw [heF_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
     set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
-    -- `fiberNormSqSummand`-form representations of the fibre norm at ranks `s` and `s + 1` in `eF`.
+    
     have hweight : ∀ (m : ℕ),
         ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
           (fun k => g.inner x (eF (K₀ k))) : Tensor0SSpace 0 I x) =
@@ -418,7 +324,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
         rw [fiberNormSqSummand, hweight (s + 1)]; rfl
       · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
       · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
-    -- The slot-`0` slice in direction `eF i` equals the directional covariant derivative `∇_{B_i} S`.
+    
     have hslice_eq :
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
             (slot0Curry (I := I) (M := M) g x s eF K₀
@@ -457,7 +363,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     rw [← hslice_eq]
     exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eF K₀
       hreprS hreprSucc ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
-  -- Per-summand fibre bound: uniform curvature sup × unit Gram scalars × directional slice.
+  
   have hgv : g.inner x (smoothExtensionTangent (I := I) x v x) (smoothExtensionTangent (I := I) x v x)
       = 1 := by rw [smoothExtensionTangent_eq x v]; exact hv
   have hper : ∀ i : Fin n,
@@ -476,7 +382,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     refine le_trans hbound ?_
     refine mul_le_mul_of_nonneg_left ?_ (hC_nonneg s)
     exact hcovApply_le i
-  -- Sum the per-summand bounds with `n`-subadditivity of the fibre norm.
+  
   calc riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i)
       ≤ (n : ℝ) * ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by
         have := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 s x
@@ -492,30 +398,6 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hn_def]
         ring
 
-/-- **Frame-summed squared energy of the pure-Riemann genuine curvature fibre field
-(`rfns(∇S)`-order).** For a closed smooth Riemannian manifold `(M, g)` there is a valence-dependent
-nonnegative constant `C₁ : ℕ → ℝ` such that, at every covariant rank `s`, smooth compactly-supported
-`(0, s)`-tensor `S`, point `x`, and `g_x`-orthonormal frame `e` (with
-`n = Module.finrank ℝ (TangentSpace I x)`), the frame-summed squared energy of the pure-Riemann fibre
-field is bounded `rfns(∇S)`-order:
-```
-∑_{φ : Fin (s+1) → Fin n} (genuineThirdCurvFieldFibPureR g s S x e (e (φ 0)) (e ∘ Fin.tail φ))²
-  ≤ (C₁ s)² · rfns(∇S)(x),    ∇S := covGrad g 0 s S.
-```
-
-**Why this is TRUE.** `genuineThirdCurvFieldFibPureR g s S x e w m
-  = ∑ₐ ⟨e a, w⟩_g • toModel (∑ᵢ R(Bᵢ, W a)(∇_{Bᵢ} S)(x)) m`, `W a := smoothExtensionTangent x (e a)`.
-With `w = e (φ 0)` the orthonormal Gram `⟨e a, e (φ 0)⟩_g = δ_{a, φ 0}` collapses the `a`-sum to the
-single index `a = φ 0`, leaving the model value of the pure-Riemann curvature trace, whose frame-summed
-squared model components reassemble its intrinsic `(0, s)` fibre norm
-(`frame_field_energy_eq_sum_trace_fiberNormSq`). Each trace is fibre-bounded `rfns(∇S)`-order by the
-uniform pure-Riemann genuine-trace bound `exists_uniform_genuineCurvTracePureR_fiberNormSq_bound` (with
-`g(e a, e a) = 1`), and the `n`-fold frame sum gives `C₁ s := √(n · Kpure s)`, independent of `x`.
-
-**Non-vacuity.** A zero envelope `C₁ s = 0` would force the pure-Riemann energy to vanish for all
-`S, x, e`, but it carries the curvature trace `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ} S)`, genuinely non-zero when
-`R ≠ 0` and `∇S ≠ 0` on a non-flat manifold; so the bound genuinely envelopes the per-point curvature
-operator norm. -/
 theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     (g : SmoothRiemannianMetric I M) :
     ∃ C₁ : ℕ → ℝ, (∀ s, 0 ≤ C₁ s) ∧
@@ -534,7 +416,7 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     exists_uniform_genuineCurvTracePureR_fiberNormSq_bound (I := I) (M := M) g
   refine ⟨fun s => Real.sqrt ((Module.finrank ℝ E : ℝ) * Kpure s), fun s => Real.sqrt_nonneg _,
     fun s S x n e hn horth => ?_⟩
-  -- Abbreviate the pure-R trace family and identify the field as its inner-product-weighted sum.
+  
   set Tr : Fin n → TensorRSSpace 0 s I x := fun a =>
     genuineCurvTraceFixedFramePureR (I := I) g s
       (smoothExtensionTangent (I := I) x (e a)) (smoothOrthoFrame (I := I) g x)
@@ -548,12 +430,12 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     intro w m; rw [genuineThirdCurvFieldFibPureR]
   rw [frame_field_energy_eq_sum_trace_fiberNormSq (I := I) (M := M) g s x e hn horth Tr
     (genuineThirdCurvFieldFibPureR (I := I) (M := M) g s S x e) hfield]
-  -- Square-root constant: `C₁ s ^ 2 = n · Kpure s` (nonnegative product).
+  
   have hCsq : (Real.sqrt ((Module.finrank ℝ E : ℝ) * Kpure s)) ^ 2 =
       (Module.finrank ℝ E : ℝ) * Kpure s :=
     Real.sq_sqrt (mul_nonneg (Nat.cast_nonneg _) (hKpure_nn s))
   rw [hCsq]
-  -- Per-`a` bound (each frame vector is a unit vector), summed.
+  
   have hper : ∀ a : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (Tr a) ≤
         Kpure s * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
@@ -572,7 +454,6 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
         rw [show (n : ℝ) = (Module.finrank ℝ E : ℝ) from by
           rw [hn]; rfl]
         ring
-
 
 end Connection
 end Integral

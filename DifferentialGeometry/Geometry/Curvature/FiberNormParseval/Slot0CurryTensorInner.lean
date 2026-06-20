@@ -1,34 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
-/-!
-# Slot-`0` decomposition of the intrinsic `(0, s+1)`-tensor fibre inner product
-
-The bilinear companion of `riemannianFiberNormSq_succ_eq_sum_slot0Curry`. For a smooth
-Riemannian metric `g`, the model Gram-matrix-based pointwise inner product
-`tensorInnerPointwise g 0 (s+1)` of two `(0, s+1)` covariant tensors `A`, `B` at a point `x`
-decomposes, over the `g`-orthonormal tangent frame direction in the first (slot `0`) covariant
-slot, into the frame-sum of the slot-`s` fibre inner products of the slot-`0` curries:
-
-```
-tensorInnerPointwise g 0 (s+1) x (toModel A) (toModel B)
-  = ∑ (a : Fin (finrank ℝ E)),
-      tensorInnerPointwise g 0 s x (toModel (slot0Curry g x s e K₀ A a))
-                                   (toModel (slot0Curry g x s e K₀ B a))
-```
-
-This is the polarization of `riemannianFiberNormSq_succ_eq_sum_slot0Curry` (whose diagonal
-`A = B` case is the squared-norm statement): the bilinear frame Parseval splits the slot-`0`
-frame direction, with the same per-component slot-split identity `fiberNormSqComponent_slot0Curry`
-identifying the head-indexed components. The frame is exposed existentially, matching the norm
-version, so consumers receive the same `g`-orthonormal frame `e` used internally by
-`tensorInnerPointwise`.
-
-## Main results
-
-* `tensorInnerPointwise_succ_eq_sum_slot0Curry` — the headline bilinear frame-sum decomposition.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -52,13 +24,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **Slot-`0` Parseval decomposition of the `(0, s+1)`-tensor fibre inner product.** For a
-`g`-orthonormal tangent frame `e` (with `n = Module.finrank ℝ (TangentSpace I x)`), the model
-pointwise inner product of `A`, `B` at `x` is the frame-sum, over the slot-`0` direction, of
-the slot-`s` inner products of the slot-`0` curries `slot0Curry g x s e K₀ · a`. This is the
-bilinear companion of `riemannianFiberNormSq_succ_eq_sum_slot0Curry`; the proof splits the
-leading frame index via `Fin.consEquiv` and applies `fiberNormSqComponent_slot0Curry` to each
-argument, through the bilinear fibre-inner bridge `tensorInnerPointwise_eq_sum_componentS_mul`. -/
 theorem tensorInnerPointwise_succ_eq_sum_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A B : TensorRSSpace 0 (s + 1) I x) :

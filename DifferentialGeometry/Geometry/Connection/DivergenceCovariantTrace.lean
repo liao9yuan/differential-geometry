@@ -2,47 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordB
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
 
-/-!
-# The Voss–Weyl divergence equals the Levi-Civita covariant frame-trace
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, a chart base point `α : M`, and a smooth tangent
-vector field `Z`, this file proves that the global (Voss–Weyl coordinate)
-divergence `divergence_g g Z` coincides with the Levi-Civita **covariant
-frame-trace**
-
-```
-divergence_g g Z b = ∑ i, g.inner b
-    ((LeviCivita g).toFun Z.toFun b ((chartFrameNormGlobalSmooth g α i).toFun b))
-    ((chartFrameNormGlobalSmooth g α i).toFun b)
-```
-
-at every base point `b` in the intersection of the chart-α partition-of-unity
-tsupport with the chart-α Levi-Civita good set. On that intersection the
-globally smooth chart-α frame `chartFrameNormGlobalSmooth g α i` is
-`g(b)`-orthonormal, so its trace really is a metric trace.
-
-## Strategy
-
-The proof reduces both sides to chart-α coordinate expressions and matches them.
-
-* **Frame side.** Expand each frame vector `Fᵢ(b) = ∑ₖ Cᵏᵢ(b) • ∂ₖ` in the
-  chart-α coordinate basis `∂ₖ := chartBasisVecFiber α k`. Linearity of the
-  Levi-Civita connection in its vector argument and bilinearity of `g.inner`
-  give
-  `∑ᵢ g(∇_{Fᵢ}Z, Fᵢ) = ∑ₘ ∑ₙ (∑ᵢ Cᵐᵢ Cⁿᵢ) g(∇_{∂ₘ}Z, ∂ₙ)`,
-  and the inverse-Gram identity `∑ᵢ Cᵐᵢ Cⁿᵢ = G^{mn}` collapses this to the
-  metric trace `∑ₘ ∑ₙ G^{mn} g(∇_{∂ₘ}Z, ∂ₙ)`. The chart-coordinate covariant
-  derivative formula then turns this into `∑ₘ (∂ₘ Zᵐ + ∑ⱼ Γᵐₘⱼ Zʲ)`.
-
-* **Divergence side.** `divergence_g g Z b = localDivergence g α Z b`
-  (Voss–Weyl chart invariance), and the Leibniz expansion of the Voss–Weyl
-  numerator gives `∑ᵢ ∂ᵢ Zⁱ + ∑ᵢ Zⁱ (∂ᵢ D / D)`. The density log-derivative
-  identity `∂ᵢ D / D = ∑ₖ Γᵏᵢₖ` (a consequence of Jacobi's formula
-  `∂ᵢ √det G = ½ tr(G⁻¹ ∂ᵢ G) √det G`, on disk) finishes the match, after one
-  use of the lower-index symmetry of the Christoffel symbol.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -69,8 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Symmetry of the chart inverse Gram matrix entries pulled back to `E`
-(the inverse of a symmetric matrix is symmetric). -/
 lemma chartInvGramOnE_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -87,9 +44,6 @@ lemma chartInvGramOnE_symm
   rw [star_trivial] at h_apply
   exact h_apply.symm
 
-/-- The contracted Christoffel symbol `∑ₖ Γᵏᵢₖ(y)` equals
-`½ ∑ₖ ∑ₗ G^{kl}(y) ∂ᵢ G_{lk}(y) = ½ tr(G⁻¹ ∂ᵢ G)(y)`, on the interior of the
-chart target. -/
 lemma sum_chartChristoffel_diag_eq_half_trace
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -171,12 +125,6 @@ lemma sum_chartChristoffel_diag_eq_half_trace
     exact chartGramOnE_symm (I := I) g α k i z
   rw [hGUsym, hdGsym]
 
-/-- **Density log-derivative equals the contracted Christoffel symbol.** On the
-interior of the chart target, the directional `∂ᵢ` derivative of the chart
-density `D = chartDensityOnE g α` equals the contracted Christoffel symbol
-`∑ₖ Γᵏᵢₖ` times `D`:
-
-  `∂ᵢ D(y) = (∑ₖ Γᵏᵢₖ(y)) · D(y)`. -/
 lemma partialDeriv_chartDensityOnE_eq_sum_chartChristoffel_diag
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E))
@@ -202,8 +150,6 @@ lemma partialDeriv_chartDensityOnE_eq_sum_chartChristoffel_diag
   rw [sum_chartChristoffel_diag_eq_half_trace (I := I) g α i y]
   rw [htrace]
 
-/-- The linear functional `v ↦ ((chartModelBasis E).repr v) k`, packaged as a
-continuous linear map `E →L[ℝ] ℝ`. -/
 private noncomputable def coordProjE (k : Fin (Module.finrank ℝ E)) :
     E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -218,8 +164,6 @@ private noncomputable def coordProjE (k : Fin (Module.finrank ℝ E)) :
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-/-- The `m`-th chart-coordinate direction `∂ₘ := chartBasisVecFiber α m b`,
-trivialised, is the `m`-th model-basis vector. -/
 private lemma trivToE_chartBasisVecFiber
     (α : M) (m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -230,13 +174,6 @@ private lemma trivToE_chartBasisVecFiber
     rfl
   rw [hcoe, trivToE_trivFromE (I := I) α hb]
 
-/-- **Chart-coordinate formula for the directional Levi-Civita derivative.**
-For a smooth tangent section `Z`, a chart-α good-set point `b`, and a coordinate
-direction `m`, the `k`-th chart-α coordinate of `∇_{∂ₘ}Z` at `b` is
-
-  `∂ₘ Zᵏ + ∑ⱼ Γᵏₘⱼ Zʲ`,
-
-where `Zⁱ = chartCoeffOnE α Z i` are the chart-α coordinate components. -/
 lemma chartCoord_leviCivita_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -359,9 +296,6 @@ lemma chartCoord_leviCivita_chartBasis
     · intro hm
       exact absurd (Finset.mem_univ m) hm
 
-/-- A tangent vector `w` at a base-set point `b` is reconstructed from its
-chart-α coordinates `(b.repr (trivToE α b w))` against the chart-α coordinate
-frame `∂ₖ := chartBasisVecFiber α k`. -/
 private lemma tangent_eq_coordSum
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -388,10 +322,6 @@ private lemma tangent_eq_coordSum
           rw [map_smul]
           rfl
 
-/-- The metric inner product of the directional Levi-Civita derivative
-`∇_{∂ₘ}Z` against the coordinate frame vector `∂ₙ`, in chart coordinates:
-
-  `g(∇_{∂ₘ}Z, ∂ₙ) = ∑ₖ (∂ₘ Zᵏ + ∑ⱼ Γᵏₘⱼ Zʲ) Gₖₙ`. -/
 lemma inner_leviCivita_chartBasis_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -417,12 +347,6 @@ lemma inner_leviCivita_chartBasis_eq
   rw [chartCoord_leviCivita_chartBasis (I := I) g α Z m k hb]
   rw [chartGramMatrix_apply]
 
-/-- **Frame-trace reduces to the metric trace.** On the intersection of the
-chart-α partition-of-unity tsupport with the chart-α Levi-Civita good set, the
-orthonormal-frame trace of the Levi-Civita derivative equals the metric trace
-in the chart-α coordinate frame:
-
-  `∑ᵢ g(∇_{Fᵢ}Z, Fᵢ) = ∑ₘ ∑ₙ G^{mn} g(∇_{∂ₘ}Z, ∂ₙ)`. -/
 lemma frameTrace_eq_metricTrace
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}
@@ -491,11 +415,6 @@ lemma frameTrace_eq_metricTrace
       exact chartFrameNormGlobalSmoothCoordMatrix_orthonormality
         (I := I) (M := M) g α hb_pou hb m n]
 
-/-- **Metric trace collapses to the coordinate covariant divergence.** At a
-chart-α good-set point, the metric trace of the Levi-Civita derivative in the
-chart-α coordinate frame equals the chart-α coordinate covariant divergence:
-
-  `∑ₘ ∑ₙ G^{mn} g(∇_{∂ₘ}Z, ∂ₙ) = ∑ₘ (∂ₘ Zᵐ + ∑ⱼ Γᵐₘⱼ Zʲ)`. -/
 lemma metricTrace_eq_coord_covariant_divergence
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}
@@ -592,15 +511,6 @@ lemma metricTrace_eq_coord_covariant_divergence
   · intro hm
     exact absurd (Finset.mem_univ m) hm
 
-/-- **Coordinate expansion of the chart-α Voss–Weyl divergence.** For a smooth
-tangent section `Z` and a point `b` in the chart-α Levi-Civita good set, the
-chart-α Voss–Weyl divergence `localDivergence g α Z b` equals the chart-α
-coordinate covariant divergence
-
-  `∑ᵢ ∂ᵢ Zⁱ + ∑ᵢ Zⁱ (∑ₖ Γᵏᵢₖ)`,
-
-where `Zⁱ = chartCoeffOnE α Z i` are the chart-α coordinate components and
-`∂ᵢ`, `Γᵏᵢₖ` are evaluated at the chart image `φ b`. -/
 lemma localDivergence_eq_coord_covariant_divergence
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}
@@ -675,18 +585,6 @@ lemma localDivergence_eq_coord_covariant_divergence
     rw [partialDeriv_chartDensityOnE_eq_sum_chartChristoffel_diag (I := I) g α i hy₀_int]
     ring
 
-/-- **The Voss–Weyl divergence equals the Levi-Civita covariant frame-trace.**
-For a smooth Riemannian metric `g`, a chart base point `α : M`, a smooth tangent
-vector field `Z`, and a base point `b` lying in the tsupport of the chart-α
-partition-of-unity bump and in the chart-α Levi-Civita good set, the Voss–Weyl
-divergence `divergence_g g Z b` equals the covariant frame-trace
-
-  `∑ i, g(∇_{Fᵢ}Z, Fᵢ)`,
-
-where `Fᵢ := chartFrameNormGlobalSmooth g α i` is the globally smooth chart-α
-frame and `∇` is the Levi-Civita connection. Near the partition-of-unity tsupport
-the frame agrees with the Gram-Schmidt chart frame, so it is `g(b)`-orthonormal
-there. -/
 theorem voss_weyl_divergence_eq_leviCivita_frameTrace
     (g : SmoothRiemannianMetric I M) (α : M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {b : M}

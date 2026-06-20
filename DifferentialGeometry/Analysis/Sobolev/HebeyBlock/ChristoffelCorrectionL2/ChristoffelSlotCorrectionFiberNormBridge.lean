@@ -4,52 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Algebra.Order.Chebyshev
 
-/-!
-# Intrinsic bridge between the chart-Christoffel slot-correction sum and the
-sum of squared individual slot-correction fiber norms
-
-For the chart-Christoffel slot-correction sum at a chart direction `k`, the
-**G1 pointwise gradient bound** presents — after lifting to the model fiber —
-a squared norm of a signed input/output slot sum (apparent in the consumer
-file `TensorComponentGradientEpNormPerAlpha`). The G3 `L²`-atom bound, on the
-other hand, presents the Euclidean sum of squared individual slot-correction
-fiber norms.
-
-The two are connected by an op-norm bridge that, in its chart-trivialisation
-form, requires a uniform op-norm bound on the chart trivialisation inverse over
-the compact partition-of-unity support. That uniform bound is unavailable on a
-generic smooth atlas (no local chart-constancy is asserted on a normal manifold
-such as `S²`), so any approach that routes through a chart-trivialisation
-op-norm is mathematically not derivable.
-
-This file ships the **intrinsic version** of the same bridge inequality:
-working directly with the fiber norm on `TensorRSSpace r s I b`, we bound the
-squared fiber norm of the signed input/output slot sum by a constant multiple
-of the Euclidean sum of squared individual slot-correction fiber norms — with
-the constant `2 · (r + s)` (purely combinatorial; the constant has no chart-
-trivialisation factor).
-
-## Strategy
-
-The bridge is a direct consequence of two elementary norm inequalities in any
-seminormed additive commutative group:
-
-1. **Triangle + binary `(a + b)² ≤ 2 (a² + b²)`:**
-   `‖− Σᵢ aᵢ + Σₗ cₗ‖² ≤ 2 · (‖Σᵢ aᵢ‖² + ‖Σₗ cₗ‖²)`.
-2. **Power-mean / Cauchy–Schwarz with the constant-`1` family:**
-   `‖Σ_{i ∈ s} x i‖² ≤ |s| · Σ_{i ∈ s} ‖x i‖²`. (Mathlib's
-   `Finset.sq_sum_le_card_mul_sum_sq` applied to the family `i ↦ ‖x i‖`.)
-3. **Domination** `2 r · A + 2 s · B ≤ 2 (r + s) · (A + B)` for non-negative
-   `A`, `B`.
-
-Combined, these give `‖− Σ aᵢ + Σ cₗ‖² ≤ 2 (r + s) · (Σ ‖aᵢ‖² + Σ ‖cₗ‖²)`.
-
-The constant `C_bridge := 2 · (r + s)` is non-negative and independent of the
-section `S`, of the chart base point `α`, of the point `b ∈ tsupport ρ_α`,
-and of the direction `k`. No chart-trivialisation, chart-pushforward, or
-chart-constancy is invoked at any point in the proof.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -71,13 +25,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For a finite indexing set `s : Finset ι` and a `SeminormedAddCommGroup`-valued
-family `x : ι → X`, the square of the norm of the sum is bounded by `|s|`
-times the sum of squared norms:
-`‖∑ i ∈ s, x i‖² ≤ |s| · ∑ i ∈ s, ‖x i‖²`.
-
-This is the standard power-mean / Cauchy–Schwarz inequality applied to the
-real-valued family `i ↦ ‖x i‖`, prefixed by the triangle inequality. -/
 private lemma intrinsic_sum_norm_sq_le_card_mul_sum_norm_sq
     {ι : Type*} {X : Type*} [SeminormedAddCommGroup X]
     (s : Finset ι) (x : ι → X) :
@@ -93,12 +40,6 @@ private lemma intrinsic_sum_norm_sq_le_card_mul_sum_norm_sq
     sq_sum_le_card_mul_sum_sq
   exact h_sq_tri.trans h_pmi
 
-/-- For a `SeminormedAddCommGroup`-valued family `x : Fin r → X` and `y : Fin s → X`,
-the squared norm of `(− ∑ i, x i + ∑ l, y l)` is bounded by twice the sum of
-squared sub-block norms:
-`‖− ∑ i, x i + ∑ l, y l‖² ≤ 2 · (‖∑ x i‖² + ‖∑ y l‖²)`.
-
-This is the triangle inequality followed by the elementary `(a + b)² ≤ 2 (a² + b²)`. -/
 private lemma intrinsic_norm_sq_neg_sum_add_sum_le_two_mul
     {r' s' : ℕ} {X : Type*} [SeminormedAddCommGroup X]
     (x : Fin r' → X) (y : Fin s' → X) :
@@ -123,22 +64,7 @@ private lemma intrinsic_norm_sq_neg_sum_add_sum_le_two_mul
   exact h_sq.trans h_abc
 
 variable (I M) in
-/-- **Intrinsic bridge inequality.** For each chart base point `α : M`, each
-chart-basis direction `k : Fin (Module.finrank ℝ E)`, every point
-`b ∈ tsupport ρ_α`, and every smooth compactly-supported `(r, s)`-tensor
-section `S`:
-```
-‖− Σᵢ chartTensorRSInputSlotCorrection … b i
-   + Σₗ chartTensorRSOutputSlotCorrection … b l‖² ≤
-  C_bridge · ( (Σᵢ ‖chartTensorRSInputSlotCorrection … b i‖²)
-             + (Σₗ ‖chartTensorRSOutputSlotCorrection … b l‖²) )
-```
-where `‖·‖` is the intrinsic fiber norm on `TensorRSSpace r s I b`.
 
-The non-negative bridge constant `C_bridge := 2 · (r + s)` is purely
-combinatorial; it depends only on the ranks `(r, s)` and is independent of
-the section `S`, the chart base point `α`, the point `b`, and the
-direction `k`. -/
 theorem intrinsicG1G3BridgePouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C_bridge : ℝ, 0 ≤ C_bridge ∧
@@ -250,8 +176,7 @@ theorem intrinsicG1G3BridgePouTsupport
   exact h_X_sq_bound.trans h_dominate
 
 variable (I M) in
-/-- **`H¹` variant of the intrinsic bridge inequality.** Same shape as
-`intrinsicG1G3BridgePouTsupport`, formulated for `SmoothCcTensorH1`. -/
+
 theorem norm_sq_triv_neg_sum_add_sum_le_const_mul_sum_norm_sq_on_pouTsupport_intrinsic_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C_bridge : ℝ, 0 ≤ C_bridge ∧

@@ -9,20 +9,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 import Mathlib.Analysis.Normed.Operator.Mul
 
-/-!
-# Flip operations for continuous multilinear maps
-
-This file defines "flip" operations that exchange the argument roles in maps whose codomain is
-itself a space of continuous multilinear maps.
-
-## Main definitions
-
-* `LinearIsometryEquiv.flipMultilinear`: the isometric equivalence
-  `(G →L[𝕜] ContinuousMultilinearMap 𝕜 E G') ≃ₗᵢ[𝕜] ContinuousMultilinearMap 𝕜 E (G →L[𝕜] G')`.
-* `ContinuousMultilinearMap.flipMultilinear`: flips a multilinear-valued multilinear map,
-  swapping the two argument tuples, via `(m', m) ↦ f m m'`.
--/
-
 noncomputable section Flip
 
 variable
@@ -32,11 +18,6 @@ variable
   {G : Type*} [SeminormedAddCommGroup G] [NormedSpace 𝕜 G]
   {G' : Type*} [SeminormedAddCommGroup G'] [NormedSpace 𝕜 G']
 
-/-- The linear isometry equivalence between continuous linear maps into multilinear maps and
-multilinear maps into continuous linear maps:
-`(G →L[𝕜] ContinuousMultilinearMap 𝕜 E G') ≃ₗᵢ[𝕜] ContinuousMultilinearMap 𝕜 E (G →L[𝕜] G')`.
-The underlying map is `ContinuousLinearMap.flipMultilinear`. Norms are equal, proved by
-showing the two op-norm bounds hold in each direction. -/
 def LinearIsometryEquiv.flipMultilinear :
     (G →L[𝕜] ContinuousMultilinearMap 𝕜 E G') ≃ₗᵢ[𝕜]
       (ContinuousMultilinearMap 𝕜 E (G →L[𝕜] G')) where
@@ -71,10 +52,6 @@ variable
   {ι : Type*} [Fintype ι]
   {ι' : Type*} [Fintype ι']
 
-/-- Flip a continuous multilinear map valued in continuous multilinear maps: given
-`f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) (ContinuousMultilinearMap 𝕜 (fun _ : ι' ↦ M') N)`,
-produce `ContinuousMultilinearMap 𝕜 (fun _ : ι' ↦ M') (ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) N)`
-via `(m', m) ↦ f m m'`. The norm satisfies `‖flipMultilinear f‖ ≤ ‖f‖`. -/
 def flipMultilinear (f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M)
     (ContinuousMultilinearMap 𝕜 (fun _ : ι' ↦ M') N)) :
     ContinuousMultilinearMap 𝕜 (fun _ : ι' ↦ M') (ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M) N) :=
@@ -105,8 +82,6 @@ def flipMultilinear (f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M)
           (f.le_opNorm m') (by positivity)
         _ = (‖f‖ * ∏ i, ‖m i‖) * ∏ i, ‖m' i‖ := by ring)
 
-/-- Evaluation formula for `ContinuousMultilinearMap.flipMultilinear`:
-`f.flipMultilinear m' m = f m m'`. -/
 theorem flipMultilinear_apply (f : ContinuousMultilinearMap 𝕜 (fun _ : ι ↦ M)
     (ContinuousMultilinearMap 𝕜 (fun _ : ι' ↦ M') N)) (m : ι → M) (m' : ι' → M') :
     f.flipMultilinear m' m = f m m' :=

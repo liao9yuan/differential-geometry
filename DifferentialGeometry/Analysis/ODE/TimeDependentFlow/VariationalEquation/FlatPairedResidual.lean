@@ -2,73 +2,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.F
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatToCovariant
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.Transport
 
-/-!
-# The PAIRED-residual route for the moving-pushforward inner product
-
-`variational_flow_flat_pairing_hasDerivAt` (`VariationalEquation/FlatPairing.lean`) produces the
-flat-route derivative of the frozen-metric moving-pushforward inner product
-
-  `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`
-
-namely `-lieDerivMetric g X α dΦv dΦw + metricTransportResidual g X Φ_fam t x v w`, **out of two
-per-slot inputs** `hcorr_v` / `hcorr_w`:
-
-  `T'v (dΦv) + P'v v = -∇_{dΦv} X + christoffelCorrection g α α (X̃_α α) dΦv`     (and slot `w`).
-
-Each per-slot input mixes the **metric** Christoffel correction `christoffelCorrection g α α …`
-into a per-slot `E`-equation.  But `∇g = 0` is a *paired*, not a per-slot, identity: the metric
-content of the moving-pushforward variation is the symmetric pairing of the two pushforward
-slots against the metric-transport term, and only there does metric-compatibility close it.
-Asking for the metric Christoffel correction *per slot* is, after the bridge substitution
-`∇_w X = F(w) + Γ(w)` (with `F` the metric-free trivialised flat / Lie-type derivative), the
-identity `T'v (dΦv) + P'v v = -F(dΦv)` **fused with** the metric `Γ(dΦv)` on the right-hand
-side — i.e. it forces the metric Christoffel to be reconstructed from the metric-free factor
-jets per slot, which is the false `D²φ = Γ` per-slot reading.
-
-## The paired re-architecture
-
-This file replaces the two metric-carrying per-slot inputs by the two **metric-free** flat-value
-identities (the genuine Lie-type variational fact, never the false `D²φ = Γ`)
-
-  `T'v (dΦv) + P'v v = -(fderiv (chartRawRepr α X) (φ α) dΦv + movingTrivCorrection α X dΦv)`
-
-(and slot `w`), which assert only that the orbit-pushforward flat derivative equals the negative
-**trivialised flat derivative** of `X` (= `-F(dΦv)`); this carries no metric and no `Γ`/`D²φ`
-identification.  The metric `Γ` then enters **only paired**, inside the proof, via the basepoint
-bridge `leviCivita_basepoint_eq_rawFderiv_add_corrections` — itself derived from
-`trivFromE_innerCLM_eq_leviCivita_at_orbit` (`∇g = 0` read through metric-compatible chart
-Levi-Civita) and the honest chart decomposition
-`chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections`.  The bridge states
-
-  `(LeviCivita g) X α w = fderiv (chartRawRepr α X) (φ α) w + movingTrivCorrection α X w
-                            + christoffelCorrection g α α (X̃_α α) w`,
-
-i.e. `F(w) = ∇_w X - Γ(w)`.  Substituting `F(dΦv) = ∇_{dΦv} X - Γ(dΦv)` into the symmetric
-pairing
-
-  `g_α(Vflat, dΦw) + g_α(dΦv, Wflat) = -g_α(F(dΦv), dΦw) - g_α(dΦv, F(dΦw))`,
-
-the **covariant** pieces `g_α(∇_{dΦv} X, dΦw) + g_α(dΦv, ∇_{dΦw} X)` assemble to `lieDerivMetric`
-(`neg_lieDerivMetric_eq_neg_killing_sum`) while the **metric** Christoffel pieces survive
-*paired* as `g_α(Γ(dΦv), dΦw) + g_α(dΦv, Γ(dΦw)) = metricTransportResidual`.  The metric-free
-factor jets `fderiv (chartRawRepr) + D²φ` (= `F`) cancel across the two slots against `∇ - Γ`;
-the metric appears solely through the paired bridge substitution, exactly as `∇g = 0` dictates.
-
-This is the honest paired replacement for `variational_flow_flat_pairing_hasDerivAt`: same
-conclusion (`-lieDerivMetric + metricTransportResidual`), with the two per-slot metric-carrying
-`hcorr_v`/`hcorr_w` replaced by two metric-free flat-value identities plus the two basepoint-bridge
-`E`-equations (`∇_u X = F(u) + Γ(u)`).  The bridge equations are *not* assumed: the
-combined-instance lemma `leviCivita_basepoint_eq_rawFderiv_add_corrections` (section A) discharges
-each from the genuinely-paired bridge data (a goodset-membership and section-differentiability
-datum at the basepoint, plus the convention-bridge side conditions), and they cross into the
-inner-product-only pairing assembly (section B) as plain `E`-equations.  No `sorry`, no `axiom`,
-no `HasLocallyConstantChartAt`-style
-hypothesis, no joint-`C^∞`-on-`ℝ × M` predicate, and **no** false `D²φ = Γ` identification — the
-metric Christoffel is never assumed equal to a smooth-structure jet per slot; it enters only
-paired, derived from `∇g = 0`.  No hypothesis-packaging: the flat-value inputs are `E`-equations,
-the conclusion is the scalar pairing `HasDerivAt`, a distinct object.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -92,13 +25,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The inverse target trivialisation is the identity at its own basepoint.**
-
-The chart-`α` inverse trivialisation CLM at `(α, α)` is the identity on the fibre
-`TangentSpace I α = E`: `trivFromE α α v = v`.  This is the inverse companion of
-`trivToE_basepoint`: `trivFromE α α` is the self-`coordChange` of the tangent-bundle core read
-at `α`, which is the identity on the base set (which contains `α`).  Routed through
-`TangentBundle.symmL_trivializationAt_eq_core` and `coordChange_self`. -/
 theorem trivFromE_basepoint (α : M) (v : TangentSpace I α) :
     trivFromE (I := I) α α v = v := by
   classical
@@ -110,30 +36,6 @@ theorem trivFromE_basepoint (α : M) (v : TangentSpace I α) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
 
-/-- **The basepoint bridge: the bundled Levi-Civita value as raw flat `fderiv` + `D²φ` + metric
-Christoffel.**
-
-At the orbit basepoint `α` (in its own good set, with `X` manifold-differentiable there, and the
-convention-bridge differentiability side conditions), the bundled covariant derivative of `X`
-along `w` decomposes as
-
-  `(LeviCivita g) X α w
-     = fderiv (chartRawRepr α X) (φ α) w + movingTrivCorrection α X w
-       + christoffelCorrection g α α (X̃_α α) w`,
-
-i.e. `∇_w X = F(w) + Γ(w)` with `F(w) := fderiv (chartRawRepr α X) (φ α) w +
-movingTrivCorrection α X w` the *metric-free* trivialised flat (Lie-type) derivative and `Γ(w)`
-the metric Christoffel correction.
-
-This is **`∇g = 0` read on the chart**: `trivFromE_innerCLM_eq_leviCivita_at_orbit` (the
-metric-compatible chart Levi-Civita value, equal to the bundled covariant derivative at the
-basepoint) composed with the honest chart decomposition
-`chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections`, with the basepoint inverse
-trivialisation discharged to the identity (`trivFromE_basepoint`).  The conclusion is an
-`E`-equation exposing precisely how the metric `Γ` sits *between* the bundled covariant value and
-the metric-free factor jets; it is the genuinely-paired channel by which the metric enters the
-pushforward variation.  No hypothesis-packaging: the conclusion is an `E`-equation derived from
-two cited identities, never an asserted target. -/
 theorem leviCivita_basepoint_eq_rawFderiv_add_corrections
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π y : M, TangentSpace I y) (w : TangentSpace I α)
@@ -167,40 +69,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **PAIRED flat-route Cartan pairing of the moving-pushforward inner product.**
-
-The honest **paired-residual** replacement for `variational_flow_flat_pairing_hasDerivAt`.  Given
-the two flat per-slot identities (`RawVariationalIdentityFlat` for `v` and `w`, the producers'
-output), the two **metric-free** flat-value identities
-
-  `T'v (dΦv) + P'v v = -(fderiv (chartRawRepr α X) (φ α) dΦv + movingTrivCorrection α X dΦv)`
-  `T'w (dΦw) + P'w w = -(fderiv (chartRawRepr α X) (φ α) dΦw + movingTrivCorrection α X dΦw)`
-
-— each asserting only that the orbit-pushforward flat derivative is the negative trivialised flat
-(Lie-type) derivative `-F(·)`, carrying **no** metric and **no** `Γ`/`D²φ` identification — and
-the two basepoint-bridge `E`-equations (`∇g = 0`)
-
-  `(LeviCivita g) X α dΦv = (fderiv (chartRawRepr α X) (φ α) dΦv + movingTrivCorrection α X dΦv)
-                              + christoffelCorrection g α α (X̃_α α) dΦv`     (and slot `w`),
-
-discharged by `leviCivita_basepoint_eq_rawFderiv_add_corrections`, the frozen-metric
-moving-pushforward inner-product variation curve
-
-  `s ↦ g.inner (Φ_fam t x) (mfderiv (Φ_fam s) x v) (mfderiv (Φ_fam s) x w)`
-
-has at `t` the derivative
-
-  `-lieDerivMetric g X (Φ_fam t x) dΦv dΦw + metricTransportResidual g X Φ_fam t x v w`.
-
-The metric `Γ` enters **only paired**: combining the metric-free flat-value identity
-`Vflat = -F(dΦv)` with the bridge `∇_{dΦv} X = F(dΦv) + Γ(dΦv)` gives `Vflat = -∇_{dΦv} X + Γ(dΦv)`
-(and slot `w`); the metric-free factor jets `F` cancel against `∇ - Γ` slot by slot, the covariant
-pieces assemble to `-lieDerivMetric` (`neg_lieDerivMetric_eq_neg_killing_sum`), and the metric
-Christoffel pieces survive *paired* as `metricTransportResidual`.  The false per-slot `D²φ = Γ`
-is never used: each bridge `E`-equation is the *true* chart formula `∂X = ∇X - ΓX`, not an
-identification of a smooth-structure jet with the metric symbol.  No hypothesis-packaging: the
-flat-value and bridge inputs are `E`-equations, the conclusion is the scalar pairing
-`HasDerivAt`, a distinct object. -/
 theorem variational_flow_flat_paired_residual_hasDerivAt
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

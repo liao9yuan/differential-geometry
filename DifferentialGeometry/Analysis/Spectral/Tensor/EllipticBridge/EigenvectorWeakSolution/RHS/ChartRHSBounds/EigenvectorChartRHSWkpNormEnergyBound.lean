@@ -1,58 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSEnergyBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSWkpNorm
 
-/-!
-# An order-`K` uniform energy bound for the eigenvector chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, a component multi-index `P₀`, and an iteration order `K`, the
-chart-Euclidean right-hand side `eigenvectorChartRHS g r s h_atlas i α P₀` of the
-connection-Laplacian eigenvector weak-solution assembly has, by
-`eigenvectorChartRHS_wkpNorm_le_uniform`, an order-`K` iterated Sobolev
-(`wkpNorm`) bound whose right-hand side is `ENNReal.ofReal (μ⁻¹ · C)` times a
-seven-summand aggregate, where `μ := i.fst.val ∈ (0, 1]` is the resolvent
-eigenvalue attached to the eigenbasis index `i`.
-
-This file collapses the seven-summand aggregate to the abstract `L²` norm of the
-eigenbasis vector `tensorResolventEigenbasisVec h_atlas i`, *given* uniform
-order-`K` (and order-`(K + 1)`) `wkpNorm`-graded chart-component energy
-hypotheses that the campaign's downstream coupled-induction supplies. The
-headline is
-
-```
-∃ C ≥ 0, ∀ i,
-  wkpNorm K 2 (eigenvectorChartRHS g r s h_atlas i α P₀) (chartTargetEuclid α)
-    ≤ ENNReal.ofReal (C · μ⁻¹) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖.
-```
-
-The constant `C` is geometric — it depends only on `g r s h_atlas α P₀ K` and on
-the (geometric) constants supplied by the input hypotheses; in particular it is
-independent of the eigenbasis index `i`. The universal quantifier `∀ i` lies
-*inside* the existential `∃ C`, so a single geometric constant controls the
-chart right-hand side of *every* eigenvector simultaneously; the `i`-dependence
-of the right-hand side is confined to the explicit `μ⁻¹` factor.
-
-## Genuine input hypotheses
-
-Bounding higher-order Sobolev norms of the eigenvector chart right-hand side by
-its `L²` energy is not a free consequence of the `L²` eigen-equation — it relies
-on a chart-component arbitrary-order Sobolev regularity statement that is
-established by the downstream coupled-induction argument. The headline therefore
-takes that regularity as a *genuine* input: uniform `wkpNorm`-graded bounds
-covering every `wkpNorm` term that appears in the aggregate of
-`eigenvectorChartRHS_wkpNorm_le_uniform`.
-
-These are not vacuous defers nor fabricated predicates: they are the same
-chart-component energy bounds that the coupled-induction supplies, phrased as
-the campaign's `_uniform` convention dictates (a single nonnegative geometric
-constant followed by `∀ i …`).
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -107,7 +55,6 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-- Chart-locality-free twin of `vec_norm_eq_one`. -/
 private lemma vec_norm_eq_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -119,7 +66,6 @@ private lemma vec_norm_eq_one
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
-/-- Chart-locality-free twin of `eigenvalue_pos`. -/
 private lemma eigenvalue_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -135,7 +81,7 @@ private lemma eigenvalue_pos
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
-/-- Chart-locality-free twin of `eigenvectorChartRHS_wkpNorm_le_energy_uniform`. -/
+
 theorem eigenvectorChartRHS_wkpNorm_le_energy_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)

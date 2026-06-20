@@ -4,90 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# A uniform order-2 Sobolev energy bound for the eigenvector chart component
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, and a component multi-index `P₀`, the chart `P₀`-component
-`(eigenvectorTensorChartBilinearData g r s i α P₀).u_chart` of the
-abstract connection-Laplacian eigenvector
-`tensorResolventEigenbasisVec … i` is in `MemWkp 2 2` of the Euclidean
-chart target. This file supplies the **quantitative** twin: a chart-geometric
-constant — uniform over the eigenbasis — bounds the order-2 Euclidean Sobolev
-norm of the chart component by an eigenvalue-weighted multiple of the abstract
-`L²` norm of the eigenbasis vector. The headline is
-
-```
-∃ C ≥ 0, ∀ i,
-  wkpNorm 2 2 (eigenvectorTensorChartBilinearData g r s i α P₀).u_chart
-      (chartTargetEuclid α)
-    ≤ ENNReal.ofReal (C · μ⁻¹) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖,
-```
-
-with `μ := i.fst.val ∈ (0, 1]` the resolvent eigenvalue attached to the
-eigenbasis index `i`, and `C` a chart-geometric constant — depending only on
-`g r s α P₀`, never on the eigenbasis index `i`.
-
-## Why an energy bound is genuine
-
-A higher-order norm of a function cannot be bounded by a lower-order norm of the
-same function in general. The bound below is genuine precisely because the
-function is an *eigenvector*: it routes through the quantitative interior
-order-2 elliptic engine and the eigen-equation energy estimates, never a per-`i`
-ratio. The universal quantifier `∀ i` lies *inside* the existential `∃ C`, so a
-single geometric constant `C` controls the chart component of *every*
-eigenvector simultaneously; the `i`-dependence of the right-hand side is
-confined to the explicit `μ⁻¹` factor.
-
-## Strategy
-
-The chart component is packaged by `EigenvectorVariationalIdentity` into the
-chart-bilinear divergence-form data
-`eigenvectorTensorChartBilinearData g r s i α P₀`, whose `u_chart`
-is the chart component, whose `f_chart` is the chart right-hand side
-`eigenvectorChartRHS`, and whose `weak_partial` are the weak chart partials
-`eigenvectorChartWeakPartial`.
-
-1. The region setup of `eigenvector_chartComponent_memWkp_global` — the compact
-   partition-of-unity kernel `K`, the precompact interior subdomain
-   `Ω'' := thickening (R_α/2) K`, the difference-quotient room radius
-   `R₀ := R_α/4`, the precompact target `Ω'` and smooth Nirenberg cutoff `η` —
-   is built once; it depends only on the chart geometry, never on `i`.
-
-2. The quantitative interior order-2 engine
-   `tensor_h2_chart_loc_of_data_quantitative` produces a chart-geometric
-   constant `C_geom`, uniform over **every** chart-bilinear data, and for every
-   pair `(i, k)` a weak `k`-partial of `D.weak_partial i` in `L²(Ω'')` bounded
-   by `C_geom i k · √DATA`, where `DATA` aggregates the squared `L²(closure Ω')`
-   norms of the weak partials, of `u_chart`, and of `f_chart`.
-
-3. The interior `W^{2,2}`-norm on `Ω''` is assembled from the order-`(k+1)`
-   `wkpNorm` decomposition: the order-`0` term `eLpNorm u_chart` and the
-   order-`1` terms `eLpNorm (weak partials)` are dominated by the corresponding
-   chart-target `eLpNorm`s, the order-`2` terms by the quantitative engine.
-
-4. Each `DATA` atom is bounded by `μ`-power · `‖vec‖`: the committed
-   `eigenvectorChartWeakPartial_eLpNorm_le` gives the weak partials a `√(μ⁻¹)`
-   power, the chart-component continuous-linear-map operator norm gives
-   `u_chart` order `0`, and `eigenvectorChartRHS_eLpNorm_le_energy` gives
-   `f_chart` a `μ⁻¹` power. Since `μ ∈ (0, 1]`, `μ⁻² ≥ μ⁻¹ ≥ 1`, so
-   `√DATA ≤ C · μ⁻¹ · ‖vec‖`.
-
-5. A uniform-constant support-aware promotion raises the interior `W^{2,2}`-norm
-   on `Ω''` to a global `W^{2,2}`-norm bound on the chart target — the chart
-   component vanishes almost everywhere off the compact kernel.
-
-## Main result
-
-* `eigenvector_chartComponent_wkpNorm_two_energy_le` — the uniform
-  order-2 Sobolev energy bound for the eigenvector chart component.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -119,18 +35,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Uniform-constant support-aware interior-to-global promotion for `wkpNorm`.**
-
-For a precompact open subdomain `Ω'` with `closure Ω' ⊆ Ω`, an open `Ω`, and a
-compact `K ⊆ Ω'`, there is a constant `K_prom > 0` — depending only on `Ω'`,
-`K`, `k`, `p`, and the dimension — such that *every* function `u` that is
-iterated-Sobolev regular (`W^{k,p}`) on `Ω'` and vanishes almost everywhere off
-`K` has global order-`k` iterated Sobolev norm on `Ω` bounded by
-`ENNReal.ofReal K_prom · wkpNorm k p u Ω'`.
-
-The proof mirrors `wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact` but
-fixes the smooth cutoff `χ` (equal to `1` near `K`, compactly supported inside
-`Ω'`) and its quantitative Leibniz constant before quantifying over `u`. -/
 private theorem wkpNorm_le_of_memWkp_precompact_uniform
     {d : ℕ} [NeZero d] {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     {Ω Ω' K : Set (EuclideanSpace ℝ (Fin d))}
@@ -200,10 +104,6 @@ private theorem wkpNorm_le_of_memWkp_precompact_uniform
     _ ≤ ENNReal.ofReal K_prom * wkpNorm (d := d) k p u Ω' :=
           hK_prom_bound hu_precompact
 
-/-- **Geometric energy `√`-to-linear conversion.** For a finite family
-`a : Fin n → ℝ` together with `a_u, a_f : ℝ`, all bounded in absolute value by a
-common nonnegative real `T`, the square root of the energy expression
-`∑ l, (a l)² + a_u² + a_f²` is bounded by `√(n + 2) · T`. -/
 private lemma sqrt_energy_le_of_atoms_le
     {n : ℕ} {T : ℝ} (hT : 0 ≤ T) {a : Fin n → ℝ} {a_u a_f : ℝ}
     (ha : ∀ l, |a l| ≤ T) (ha_u : |a_u| ≤ T) (ha_f : |a_f| ≤ T) :
@@ -235,32 +135,7 @@ private lemma sqrt_energy_le_of_atoms_le
 
 set_option maxHeartbeats 3200000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **A uniform order-2 Sobolev energy bound for the eigenvector chart component
-(chart-locality-free).**
 
-The chart-locality-free headline.
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, a chart center
-`α : M`, and a component multi-index `P₀`, there is a chart-geometric constant
-`C ≥ 0` — uniform over the eigenbasis index `i` — such that for *every* eigenbasis
-index `i`, with resolvent eigenvalue `μ := i.fst.val ∈ (0, 1]`, the order-2
-Euclidean Sobolev norm of the chart component
-`(eigenvectorTensorChartBilinearData g r s i α P₀).u_chart` on the
-chart target is bounded by `ENNReal.ofReal (C · μ⁻¹)` times the abstract `L²`
-norm of the chart-locality-free eigenbasis vector
-`tensorResolventEigenbasisVec (tensorResolventL2_isCompactOperator
-g r s) i`:
-
-```
-wkpNorm 2 2 (eigenvectorTensorChartBilinearData g r s i α P₀).u_chart
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal (C · μ⁻¹) · ENNReal.ofReal ‖tensorResolventEigenbasisVec …‖.
-```
-
-The explicit eigenvalue factor `μ⁻¹` stays *inside* the `∀ i` — it is a genuine
-per-`i` quantity — while only the chart-geometric constant `C` is hoisted before
-the `∀ i`. The bound is genuine and not a vacuous per-`i` ratio: a single `C`
-controls the order-2 Sobolev norm of *every* eigenvector simultaneously. No
-chart-selection hypothesis appears. -/
 theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

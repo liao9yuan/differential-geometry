@@ -1,34 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradMetricBridge
 
-/-!
-# The covariant-gradient `L²` inner product as the integrated Dirichlet pairing
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, fixed ranks `(r, s)`, and two smooth
-compactly-supported `(r, s)`-tensor sections `T`, `v`, this file ships the
-*off-diagonal* metric-isometry identity, in integrated form:
-
-```
-tensorL2Inner g r (s + 1) (covGrad g r s T).toFun (covGrad g r s v).toFun
-  = ∫ x, tensorCovDerivPointwiseInner g r s T v x ∂(riemannianVolumeMeasure g).
-```
-
-The `(r, s + 1)`-tensor `L²` inner product of the two section-level covariant
-gradients equals the integral of the pointwise inverse-Gram-weighted
-covariant-gradient (Dirichlet) pairing. It is the polarised form of the
-diagonal Dirichlet identity, obtained by integrating the pointwise
-metric-isometry bridge
-`tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad` against the
-Riemannian volume measure. No hypothesis on `T`, `v`, or the metric beyond the
-standing closed-manifold typeclasses is required.
-
-This is the gradient-side (`LHS`) bridge of the integrated Green identity for
-the connection Laplacian: it converts the headline left-hand side, written with
-the one-rank-higher `L²` inner product of covariant gradients, into the
-integrated Dirichlet pairing that the directional integration-by-parts
-machinery consumes.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -59,24 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The off-diagonal covariant-gradient `L²` inner product is the integrated
-Dirichlet pairing.**
-
-For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, and two smooth
-compactly-supported `(r, s)`-tensor sections `T`, `v`, the one-rank-higher
-`(r, s + 1)`-tensor `L²` inner product of the section-level covariant gradients
-`covGrad g r s T` and `covGrad g r s v` equals the integral of the pointwise
-covariant-gradient inner product `tensorCovDerivPointwiseInner g r s T v`:
-
-```
-tensorL2Inner g r (s + 1) (covGrad g r s T).toFun (covGrad g r s v).toFun
-  = ∫ x, tensorCovDerivPointwiseInner g r s T v x ∂(riemannianVolumeMeasure g).
-```
-
-The identity is the integral of the pointwise metric-isometry bridge
-`tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad`, applied with the
-two distinct sections `T`, `v`. It is the polarised generalisation of the
-diagonal Dirichlet identity. -/
 theorem tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T v : SmoothCcTensor g r s) :

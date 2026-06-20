@@ -20,62 +20,6 @@ import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 
-/-!
-# Intrinsic Sobolev space `W^{1,p}_{int,Lp}(M)` on manifolds with boundary
-
-For a closed (compact) smooth Riemannian manifold `(M, g)` whose model `I` may
-carry a smooth boundary, and an exponent `1 ≤ p ≤ ∞` (with `p ≠ ∞`), this file
-extends the boundaryless intrinsic Sobolev space
-`Analysis/Sobolev/Intrinsic/Lp.lean` to the with-boundary setting.
-
-Compared with the boundaryless case, the integration-by-parts identity carries
-a boundary correction term in general:
-`∫_M g.inner G X = -∫_M u · div_g^∂ X + ∫_∂M u · g.inner X ν dS`.
-
-The cleanest way to define the Sobolev space without referring to a boundary
-trace is to test only against tangent fields **supported in the manifold
-interior** `I.interior M`. The boundary correction term then vanishes
-identically (because both `X` and `div_g^∂ X` vanish on the boundary), so the
-IBP identity reduces to the boundaryless form
-`∫_M g.inner G X = -∫_M u · div_g^∂ X` against interior-supported test fields.
-This corresponds to the **Dirichlet-style** weak gradient.
-
-A function `G : M → E` (interpreted as a tangent section via the canonical
-definitional equality `TangentSpace I x = E`) is a **weak Riemannian gradient
-with boundary** of `u : M → ℝ` when:
-
-1. The pairing `x ↦ g.inner x (G x) (Y x)` is `AEStronglyMeasurable` for every
-   smooth tangent test field `Y`.
-2. For every smooth tangent test field `X` with **compact support contained
-   in the manifold interior** `I.interior M`, the IBP identity
-   `∫_M g.inner G X dμ_g = -∫_M u · div_g^∂ X dμ_g` holds.
-
-The Sobolev space `MemW1pIntrinsicLp_withBoundary g p u` then asks for
-`u ∈ L^p` plus the existence of such a `G` whose pointwise `g`-norm
-`x ↦ √(g.inner x (G x) (G x))` is in `L^p`.
-
-## Main definitions
-
-* `HasWeakRiemannianGradLp_withBoundary g u G` — `G : M → E` is a weak
-  Riemannian gradient of `u` (against interior-supported test fields).
-* `MemW1pIntrinsicLp_withBoundary g p u` — `u ∈ L^p` and admits an `L^p` weak
-  Riemannian gradient with boundary.
-* `w1pNormIntrinsicLp_withBoundary g p u` — the intrinsic Sobolev norm.
-
-## Main results
-
-* `MemW1pIntrinsicLp_withBoundary.zero` and
-  `MemW1pIntrinsicLp_withBoundary.const_smul` — algebraic closure under zero
-  and scalar multiplication.
-* `HasWeakRiemannianGradLp_withBoundary.add` — additivity at the IBP-identity
-  level.
-* `MemW1pIntrinsicLp_withBoundary_const` — every constant function on a
-  closed Riemannian manifold with smooth boundary lies in
-  `MemW1pIntrinsicLp_withBoundary` for every exponent `p`.
-* `w1pNormIntrinsicLp_withBoundary_zero` — the norm of the zero function is
-  zero.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Function
@@ -320,21 +264,6 @@ private lemma continuous_integrable_of_compactSpace
     continuous_memLp_of_compactSpace g 1 hf
   exact memLp_one_iff_integrable.mp h_one
 
-/-- A function `G : M → E` (interpreted as a tangent section via the canonical
-`TangentSpace I x = E` definitional equality) is a **weak Riemannian
-gradient with boundary** of `u : M → ℝ` if:
-
-* the pairing `x ↦ g.inner x (G x) (Y x)` is `AEStronglyMeasurable` for every
-  smooth tangent test field `Y`; and
-* for every smooth tangent test field `X` with compact support contained in
-  the manifold interior `I.interior M`, the integration-by-parts identity
-  $$\int_M g.inner x (G x) (X x)\,d\mu_g
-    = -\int_M u(x) \cdot \operatorname{div}_g^{(\partial)}(X)(x)\,d\mu_g$$
-  holds.
-
-The interior-supported test-field requirement makes the boundary correction
-term in the with-boundary divergence theorem vanish identically, so the
-identity above takes the same shape as in the boundaryless case. -/
 def HasWeakRiemannianGradLp_withBoundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) (G : M → E) : Prop :=
@@ -352,7 +281,6 @@ namespace HasWeakRiemannianGradLp_withBoundary
 
 variable {g : SmoothRiemannianMetric I M} {u : M → ℝ} {G : M → E}
 
-/-- The integration-by-parts identity. -/
 lemma pairing_eq
     [T2Space M] [SigmaCompactSpace M]
     (h : HasWeakRiemannianGradLp_withBoundary (I := I) (M := M) g u G)
@@ -363,7 +291,6 @@ lemma pairing_eq
       -∫ x, u x * divergence_g_with_boundary (I := I) g X x
         ∂(riemannianVolumeMeasure I M g) := h.2 X hX hX_int
 
-/-- The pairing is `AEStronglyMeasurable` against every smooth test section. -/
 lemma pairing_aestronglyMeasurable
     [T2Space M] [SigmaCompactSpace M]
     (h : HasWeakRiemannianGradLp_withBoundary (I := I) (M := M) g u G)
@@ -373,12 +300,6 @@ lemma pairing_aestronglyMeasurable
 
 end HasWeakRiemannianGradLp_withBoundary
 
-/-- `MemW1pIntrinsicLp_withBoundary g p u` means:
-
-* `u : M → ℝ` is in `L^p` against the Riemannian volume measure;
-* there exists a function `G : M → E` which is a weak Riemannian gradient
-  of `u` with boundary (in the `HasWeakRiemannianGradLp_withBoundary` sense),
-  and whose pointwise `g`-norm `x ↦ √(g.inner x (G x) (G x))` is in `L^p`. -/
 def MemW1pIntrinsicLp_withBoundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) : Prop :=
@@ -388,15 +309,12 @@ def MemW1pIntrinsicLp_withBoundary
       MemLp (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-/-- The `L^p` membership component. -/
 lemma MemW1pIntrinsicLp_withBoundary.memLp_self
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsicLp_withBoundary (I := I) (M := M) g p u) :
     MemLp u p (riemannianVolumeMeasure I M g) := h.1
 
-/-- The zero `M → E` map is a weak `L^p` Riemannian gradient with boundary
-of the zero function. -/
 theorem HasWeakRiemannianGradLp_withBoundary.zero
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -424,8 +342,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.zero
         (fun _ : M => (0 : ℝ)) from by funext x; simp]
     simp [integral_zero]
 
-/-- The zero scalar function is in `MemW1pIntrinsicLp_withBoundary` for every
-exponent. -/
 theorem MemW1pIntrinsicLp_withBoundary.zero
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -446,10 +362,6 @@ theorem MemW1pIntrinsicLp_withBoundary.zero
   rw [hcongr]
   exact MemLp.zero
 
-/-- The zero `M → E` map is a weak `L^p` Riemannian gradient with boundary
-for any constant function. The IBP identity reduces to `0 = -c · ∫ div`,
-which holds because the integral of the with-boundary divergence of an
-interior-supported, compactly-supported smooth tangent section is zero. -/
 theorem HasWeakRiemannianGradLp_withBoundary.const
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (c : ℝ) :
@@ -488,9 +400,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.const
     rw [hdiv_zero]
     ring
 
-/-- Every constant function on a closed Riemannian manifold with smooth
-boundary lies in `MemW1pIntrinsicLp_withBoundary` for every exponent `p`.
-The witness is the zero gradient. -/
 theorem MemW1pIntrinsicLp_withBoundary_const
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (c : ℝ) :
@@ -512,7 +421,6 @@ theorem MemW1pIntrinsicLp_withBoundary_const
     rw [hcongr]
     exact MemLp.zero
 
-/-- Sum of two `L^p` weak Riemannian gradients with boundary. -/
 theorem HasWeakRiemannianGradLp_withBoundary.add
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -665,7 +573,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.add
     intro x
     ring
 
-/-- A constant scalar multiple of a weak Riemannian gradient with boundary. -/
 theorem HasWeakRiemannianGradLp_withBoundary.const_smul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -740,7 +647,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.const_smul
     rw [hcong, integral_const_mul]
     ring
 
-/-- Closure of `MemW1pIntrinsicLp_withBoundary` under scalar multiplication. -/
 theorem MemW1pIntrinsicLp_withBoundary.const_smul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -761,8 +667,6 @@ theorem MemW1pIntrinsicLp_withBoundary.const_smul
     rw [hcongr]
     exact hG_p.const_mul (|c|)
 
-/-- The negation of a weak Riemannian gradient with boundary is a weak
-gradient of the negated function. -/
 theorem HasWeakRiemannianGradLp_withBoundary.neg
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -782,7 +686,6 @@ theorem HasWeakRiemannianGradLp_withBoundary.neg
   rw [h_G] at h1
   exact h1
 
-/-- Closure of `MemW1pIntrinsicLp_withBoundary` under negation. -/
 theorem MemW1pIntrinsicLp_withBoundary.neg
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -796,7 +699,6 @@ theorem MemW1pIntrinsicLp_withBoundary.neg
   rw [h_eq] at h
   exact h
 
-/-- The `W^{1,p}_{int,Lp}` norm of `u` on a manifold with boundary. -/
 def w1pNormIntrinsicLp_withBoundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) : ℝ≥0∞ :=
@@ -821,7 +723,6 @@ private lemma w1pNormIntrinsicLp_withBoundary_def
       eLpNorm u p (riemannianVolumeMeasure I M g) +
         gradInfimumLp_withBoundary (I := I) (M := M) g p u := rfl
 
-/-- The norm of the zero function is zero. -/
 theorem w1pNormIntrinsicLp_withBoundary_zero
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :

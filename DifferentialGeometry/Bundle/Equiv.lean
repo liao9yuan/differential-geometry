@@ -9,37 +9,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
 set_option autoImplicit false
 
-/-!
-# Vector Bundle Homomorphisms and Equivalences
-
-A vector bundle homomorphism between vector bundles `E₁` over `B₁` and `E₂` over `B₂` is a
-continuous map between total spaces that sends fibers linearly into fibers, covering
-some base map `baseMap : B₁ → B₂`.
-
-A vector bundle equivalence strengthens this to a homeomorphism with fiberwise linear
-equivalences. The `C^n` variants require smoothness.
-
-The base map is stored as a field rather than a parameter, since it is determined by
-the total space map. The lemma `baseMap_eq` recovers it as
-`fun x => (toFun ⟨x, 0⟩).proj`.
-
-## Main Definitions
-
-* `VectorBundleHom` : a continuous, fiberwise-linear homomorphism between vector bundles.
-* `VectorBundleEquiv` : a vector bundle isomorphism.
-* `ContMDiffVectorBundleHom` : a `C^n` vector bundle homomorphism.
-* `ContMDiffVectorBundleEquiv` : a `C^n` vector bundle equivalence.
-
-## Tags
-
-vector bundle, homomorphism, equivalence, isomorphism, diffeomorphism
--/
-
 open Bundle
 
-/-! ## Vector bundle homomorphisms -/
-
-/-- A vector bundle homomorphism from `E₁` over `B₁` to `E₂` over `B₂`. -/
 structure VectorBundleHom
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {B₁ : Type*} [TopologicalSpace B₁] {B₂ : Type*} [TopologicalSpace B₂]
@@ -49,15 +20,15 @@ structure VectorBundleHom
     (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
     (E₂ : B₂ → Type*) [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
     [TopologicalSpace (TotalSpace F₂ E₂)] where
-  /-- The base map covered by this bundle homomorphism. -/
+  
   baseMap : B₁ → B₂
-  /-- The underlying continuous map between total spaces. -/
+  
   toFun : TotalSpace F₁ E₁ → TotalSpace F₂ E₂
-  /-- The total space map is continuous. -/
+  
   continuous_toFun : Continuous toFun
-  /-- A family of linear maps between the fibers. -/
+  
   fiberLinearMap : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ (baseMap x)
-  /-- The map acts fiberwise via `fiberLinearMap`. -/
+  
   fiber_compat : ∀ (x : B₁) (v : E₁ x),
     toFun ⟨x, v⟩ = ⟨baseMap x, fiberLinearMap x v⟩
 
@@ -77,8 +48,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E₃ : B₃ → Type*} [∀ x, AddCommGroup (E₃ x)] [∀ x, Module 𝕜 (E₃ x)]
   [TopologicalSpace (TotalSpace F₃ E₃)]
 
-/-- Construct a `VectorBundleHom` without specifying the base map, deriving it as
-`fun x => (Φ ⟨x, 0⟩).proj`. -/
 def mk'
     (Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂) (hΦ : Continuous Φ)
     (φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ ((Φ ⟨x, 0⟩).proj))
@@ -110,13 +79,10 @@ theorem ext (A B : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
   have h1 := hA x v; rw [hB] at h1
   exact TotalSpace.mk_inj.mp h1.symm
 
-/-- The base map equals the projection of the total space map on the zero section. -/
 theorem baseMap_eq (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂) (x : B₁) :
     f.baseMap x = (f.toFun ⟨x, 0⟩).proj := by
   simp [f.fiber_compat, map_zero]
 
-/-- The base map of a vector bundle homomorphism is continuous, since it factors as
-`π₂ ∘ Φ ∘ zeroSection` and the zero section is continuous. -/
 theorem baseMapContinuous
     [∀ x, TopologicalSpace (E₁ x)] [FiberBundle F₁ E₁] [VectorBundle 𝕜 F₁ E₁]
     [∀ x, TopologicalSpace (E₂ x)] [FiberBundle F₂ E₂]
@@ -156,9 +122,6 @@ def comp (g : VectorBundleHom 𝕜 F₂ E₂ F₃ E₃) (f : VectorBundleHom �
 
 end VectorBundleHom
 
-/-! ## Vector bundle equivalences -/
-
-/-- A vector bundle equivalence between bundles `E₁` over `B₁` and `E₂` over `B₂`. -/
 structure VectorBundleEquiv
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {B₁ : Type*} [TopologicalSpace B₁] {B₂ : Type*} [TopologicalSpace B₂]
@@ -168,13 +131,13 @@ structure VectorBundleEquiv
     (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
     (E₂ : B₂ → Type*) [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
     [TopologicalSpace (TotalSpace F₂ E₂)] where
-  /-- The base map covered by this bundle equivalence. -/
+  
   baseMap : B₁ → B₂
-  /-- The underlying homeomorphism between total spaces. -/
+  
   toHomeomorph : TotalSpace F₁ E₁ ≃ₜ TotalSpace F₂ E₂
-  /-- A family of linear equivalences between the fibers. -/
+  
   fiberLinearEquiv : ∀ x : B₁, E₁ x ≃ₗ[𝕜] E₂ (baseMap x)
-  /-- The homeomorphism acts fiberwise via `fiberLinearEquiv`. -/
+  
   fiber_compat : ∀ (x : B₁) (v : E₁ x),
     toHomeomorph ⟨x, v⟩ = ⟨baseMap x, fiberLinearEquiv x v⟩
 
@@ -194,8 +157,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E₃ : B₃ → Type*} [∀ x, AddCommGroup (E₃ x)] [∀ x, Module 𝕜 (E₃ x)]
   [TopologicalSpace (TotalSpace F₃ E₃)]
 
-/-- Construct a `VectorBundleEquiv` without specifying the base map, deriving it as
-`fun x => (Φ ⟨x, 0⟩).proj`. -/
 def mk'
     (Φ : TotalSpace F₁ E₁ ≃ₜ TotalSpace F₂ E₂)
     (φ : ∀ x : B₁, E₁ x ≃ₗ[𝕜] E₂ ((Φ ⟨x, 0⟩).proj))
@@ -227,7 +188,6 @@ theorem baseMap_eq (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) (x : B₁) :
     e.baseMap x = (e.toHomeomorph ⟨x, 0⟩).proj := by
   simp [e.fiber_compat, map_zero]
 
-/-- The base map of a vector bundle equivalence is bijective. -/
 theorem baseMapBijective (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
     Function.Bijective e.baseMap := by
   constructor
@@ -253,7 +213,6 @@ theorem toHomeomorph_apply (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) (x :
     e.toHomeomorph ⟨x, v⟩ = ⟨e.baseMap x, e.fiberLinearEquiv x v⟩ :=
   e.fiber_compat x v
 
-/-- A `VectorBundleEquiv` gives a `VectorBundleHom` in the forward direction. -/
 def toVectorBundleHom (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
     VectorBundleHom 𝕜 F₁ E₁ F₂ E₂ where
   baseMap := e.baseMap
@@ -273,7 +232,7 @@ def symm (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
   baseMap y := (e.toHomeomorph.symm ⟨y, 0⟩).proj
   toHomeomorph := e.toHomeomorph.symm
   fiberLinearEquiv y :=
-    -- x := (Φ⁻¹ ⟨y, 0⟩).proj, and e.baseMap x = y
+    
     let x := (e.toHomeomorph.symm ⟨y, 0⟩).proj
     have hx : e.baseMap x = y := by
       have := e.proj_eq (e.toHomeomorph.symm ⟨y, 0⟩)
@@ -299,8 +258,6 @@ def trans (e₁₂ : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) (e₂₃ : Vect
 
 end VectorBundleEquiv
 
-/-! ## Trivialization Coordinates -/
-
 section TrivializationCoord
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -315,11 +272,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
 
-/-- Given a family of fiberwise linear maps `φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ (baseMap x)`
-covering a base map `baseMap : B₁ → B₂`, and a base point `x : B₁`, the local
-representative through the trivializations at `x` in `E₁` and at `baseMap x` in `E₂`: a
-continuous linear map `F₁ →L[𝕜] F₂` defined on the overlap of base sets (and `0`
-otherwise). -/
 noncomputable def trivializationCoord (baseMap : B₁ → B₂)
     (φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ (baseMap x)) (x : B₁) : B₁ → (F₁ →L[𝕜] F₂) := by
   classical
@@ -333,8 +285,6 @@ noncomputable def trivializationCoord (baseMap : B₁ → B₂)
             ((trivializationAt F₁ E₁ x).continuousLinearEquivAt 𝕜 q hq.1).symm.toLinearMap))
     else 0
 
-/-- Closed-form formula: the trivialization coordinate at `q` applied to `v` equals the
-fiber coordinate of `Φ` on `e₁⁻¹ (q, v)` read through `e₂`. -/
 lemma trivializationCoord_apply
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
     {baseMap : B₁ → B₂}
@@ -358,8 +308,6 @@ lemma trivializationCoord_apply
             𝕜 (baseMap q) hq₂ _)]
   rfl
 
-/-- `trivializationCoord baseMap φ x q` is invertible on the overlap of the base sets
-whenever each fiber map `φ q` is bijective. -/
 lemma trivializationCoord_isInvertible
     {baseMap : B₁ → B₂}
     {φ : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ (baseMap x)}
@@ -382,10 +330,6 @@ lemma trivializationCoord_isInvertible
         𝕜 (baseMap q) hq₂).toLinearEquiv).bijective
   exact ⟨(LinearEquiv.ofBijective _ hbij_lm).toContinuousLinearEquiv, by ext; rfl⟩
 
-/-- On a neighborhood of `e₂ ⟨baseMap x, w⟩`, inverting `trivializationCoord baseMap φ x`
-pointwise computes the second coordinate of `e₁ ∘ Φ⁻¹ ∘ e₂⁻¹`. The base map is required to
-be a homeomorphism so that points near `baseMap x` in `B₂` correspond, via the inverse, to
-points near `x` in `B₁`. -/
 lemma trivializationCoord_inverse_eventuallyEq
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
     (baseMap : B₁ ≃ₜ B₂)
@@ -447,10 +391,6 @@ lemma trivializationCoord_inverse_eventuallyEq
 
 end TrivializationCoord
 
-/-! ## Bijective bundle homomorphisms are equivalences -/
-
-/-! ### Generalization to non-identity base map -/
-
 section ToVectorBundleEquivGeneral
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -473,9 +413,7 @@ omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 
   [TopologicalSpace B₁] [TopologicalSpace B₂]
   [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁]
   [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] in
-/-- If a fiberwise-linear bijection of total spaces covers a base map and acts as
-`⟨x, v⟩ ↦ ⟨baseMap x, φ x v⟩`, then each fiber map `φ x` is bijective. The base map
-itself need not be assumed bijective — it follows from `Φ` being bijective. -/
+
 private lemma fiberBijective_of_bijective'
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
     {baseMap : B₁ → B₂}
@@ -493,9 +431,6 @@ private lemma fiberBijective_of_bijective'
   subst hy
   exact ⟨v, TotalSpace.mk_inj.mp hv⟩
 
-/-- Pointwise continuity of a continuous-linear-map-valued map lifts to continuity when
-the source is finite-dimensional, by embedding `F₁ →L[𝕜] F₂` into `Fin (rank F₁) → F₂`
-via evaluation on a basis (a closed embedding in the finite-dimensional setting). -/
 private lemma continuousAt_clm_of_pointwise
     {X : Type*} [TopologicalSpace X]
     {A : X → (F₁ →L[𝕜] F₂)} {x : X}
@@ -512,12 +447,6 @@ private lemma continuousAt_clm_of_pointwise
     (LinearMap.ker_eq_bot.mpr evalBasis_inj)).isEmbedding.continuousAt_iff]
   exact continuousAt_pi.mpr fun i => h (bF₁ i)
 
-/-- The inverse of a fiberwise-linear, fiberwise-bijective continuous bijection between
-vector bundles over different bases is continuous, provided the base map is a
-homeomorphism. The proof is local: through trivializations at a point, the transition map
-is a family of continuous linear isomorphisms `A : B₁ → (F₁ →L[𝕜] F₂)`, continuous in the
-parameter, so its pointwise inverse is also continuous by
-`ContinuousLinearMap.inverse`. -/
 private lemma continuous_symm_of_fiberBijective'
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂} (hΦ_cont : Continuous Φ)
     (baseMap : B₁ ≃ₜ B₂)
@@ -588,7 +517,7 @@ private lemma continuous_symm_of_fiberBijective'
       trivializationCoord_isInvertible (baseMap := baseMap) hφ_bij x x ⟨hx₁, hx₂⟩
     have hA_inv_cont : ContinuousAt (ContinuousLinearMap.inverse ∘ A) x :=
       (hA_inv_at_x.contDiffAt_map_inverse (n := 0)).continuousAt.comp hA_cont
-    -- The "Nice" function: read inverse of A through baseMap.symm
+    
     have hNice_cont : ContinuousAt
         (fun p : B₂ × F₂ =>
           ContinuousLinearMap.inverse (A (baseMap.symm p.1)) p.2) (e₂ ⟨baseMap x, w⟩) := by
@@ -612,9 +541,6 @@ private lemma continuous_symm_of_fiberBijective'
           exact congrArg (fun q => (e₁ (Φ_equiv.symm q)).2)
             (e₂.toOpenPartialHomeomorph.left_inv hp))
 
-/-- A bijective vector bundle homomorphism whose base map is a homeomorphism is a vector
-bundle equivalence. The base map being a homeomorphism cannot be derived from bijectivity of
-the total-space map alone. See `toVectorBundleEquivId` for the identity-base special case. -/
 noncomputable def VectorBundleHom.toVectorBundleEquiv
     (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
     (baseMap : B₁ ≃ₜ B₂)
@@ -638,8 +564,6 @@ noncomputable def VectorBundleHom.toVectorBundleEquiv
 
 end ToVectorBundleEquivGeneral
 
-/-! ### Identity base map specialization -/
-
 section ToVectorBundleEquiv
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -653,9 +577,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
 
-/-- The inverse of a fiberwise-linear, fiberwise-bijective continuous bijection between
-vector bundles over the same base (with identity base map) is continuous. This is the
-special case of `continuous_symm_of_fiberBijective'` with `Homeomorph.refl B`. -/
 private lemma continuous_symm_of_fiberBijective
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂} (hΦ_cont : Continuous Φ)
     {φ : ∀ x, E₁ x →ₗ[𝕜] E₂ x}
@@ -664,7 +585,6 @@ private lemma continuous_symm_of_fiberBijective
     Continuous (Equiv.ofBijective Φ hbij).symm :=
   continuous_symm_of_fiberBijective' hΦ_cont (Homeomorph.refl B) hcompat hbij hφ_bij
 
-/-- Special case of `VectorBundleHom.toVectorBundleEquiv` for the identity base map. -/
 noncomputable def VectorBundleHom.toVectorBundleEquivId
     (f : VectorBundleHom 𝕜 F₁ E₁ F₂ E₂)
     (hid : f.baseMap = _root_.id)
@@ -674,11 +594,8 @@ noncomputable def VectorBundleHom.toVectorBundleEquivId
 
 end ToVectorBundleEquiv
 
-/-! ## `C^n` vector bundle equivalences -/
-
 open scoped Manifold
 
-/-- A `C^n` vector bundle equivalence between bundles `E₁` over `B₁` and `E₂` over `B₂`. -/
 structure ContMDiffVectorBundleEquiv
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
@@ -725,8 +642,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   [TopologicalSpace (TotalSpace F₃ E₃)] [∀ x, TopologicalSpace (E₃ x)]
   [FiberBundle F₃ E₃] [VectorBundle 𝕜 F₃ E₃]
 
-/-- Construct a `ContMDiffVectorBundleEquiv` without specifying the base map, deriving it as
-`fun x => (Φ ⟨x, 0⟩).proj`. -/
 def mk'
     (Φ : Diffeomorph (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂))
       (TotalSpace F₁ E₁) (TotalSpace F₂ E₂) n)
@@ -759,7 +674,6 @@ theorem baseMap_eq (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂
     e.baseMap x = (e.toDiffeomorph ⟨x, 0⟩).proj := by
   simp [e.fiber_compat, map_zero]
 
-/-- The base map of a `C^n` vector bundle equivalence is bijective. -/
 theorem baseMapBijective (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂) :
     Function.Bijective e.baseMap := by
   constructor
@@ -825,9 +739,6 @@ def trans (e₁₂ : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂)
 
 end ContMDiffVectorBundleEquiv
 
-/-! ## `C^n` vector bundle homomorphisms -/
-
-/-- A `C^n` vector bundle homomorphism from `E₁` over `B₁` to `E₂` over `B₂`. -/
 structure ContMDiffVectorBundleHom
     (𝕜 : Type*) [NontriviallyNormedField 𝕜]
     {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
@@ -874,8 +785,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   [TopologicalSpace (TotalSpace F₃ E₃)] [∀ x, TopologicalSpace (E₃ x)]
   [FiberBundle F₃ E₃] [VectorBundle 𝕜 F₃ E₃]
 
-/-- Construct a `ContMDiffVectorBundleHom` without specifying the base map, deriving it as
-`fun x => (Φ ⟨x, 0⟩).proj`. -/
 def mk'
     (Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂)
     (hΦ : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n Φ)
@@ -909,8 +818,6 @@ theorem baseMap_eq (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) 
     f.baseMap x = (f.toFun ⟨x, 0⟩).proj := by
   simp [f.fiber_compat, map_zero]
 
-/-- The base map of a `C^n` vector bundle homomorphism is `C^n`, since it factors as
-`π₂ ∘ Φ ∘ zeroSection`. -/
 theorem baseMapContMDiff [ContMDiffVectorBundle n F₁ E₁ IB]
     (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂) :
     ContMDiff IB IB n f.baseMap := by
@@ -971,10 +878,6 @@ def ofEquiv (e : ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂) :
 
 end ContMDiffVectorBundleHom
 
-/-! ## Bijective `C^n` bundle homomorphisms are equivalences -/
-
-/-! ### Generalization to non-identity base map (smooth case) -/
-
 section ToContMDiffVectorBundleEquivGeneral
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -995,10 +898,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
   [ContMDiffVectorBundle n F₂ E₂ IB]
 
-/-- `ContMDiffAt` analog of `continuousAt_clm_of_pointwise`: pointwise smoothness of a
-continuous-linear-map-valued map lifts to operator-valued smoothness when the source
-is finite-dimensional, by embedding `F₁ →L[𝕜] F₂` into `Fin (rank F₁) → F₂` via evaluation
-on a basis and using a continuous linear left inverse. -/
 lemma contMDiffAt_clm_of_pointwise
     {X : Type*} [TopologicalSpace X] [ChartedSpace HB X]
     {A : X → (F₁ →L[𝕜] F₂)} {x : X}
@@ -1023,9 +922,6 @@ lemma contMDiffAt_clm_of_pointwise
   rw [this]
   exact g.contDiff.contMDiff.contMDiffAt.comp _ hEA
 
-/-- `ContMDiff` analog of `continuous_symm_of_fiberBijective'`: the inverse of a
-fiberwise-linear, fiberwise-bijective `C^n` bijection between `C^n` vector bundles is `C^n`
-when the base map is a `Diffeomorph`. -/
 private lemma contMDiff_symm_of_fiberBijective'
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
     (hΦ_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n Φ)
@@ -1138,10 +1034,6 @@ private lemma contMDiff_symm_of_fiberBijective'
           exact congrArg (fun q => (e₁ (Φ_equiv.symm q)).2)
             (e₂.toOpenPartialHomeomorph.left_inv hp).symm)
 
-/-- A bijective `C^n` vector bundle homomorphism whose base map is a `Diffeomorph` is a `C^n`
-vector bundle equivalence. The base map being a diffeomorphism cannot be derived from
-bijectivity of the total-space map alone. See `toContMDiffVectorBundleEquivId` for the
-special case where the base map is the identity. -/
 noncomputable def ContMDiffVectorBundleHom.toContMDiffVectorBundleEquiv
     (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (baseMap : Diffeomorph IB IB B₁ B₂ n)
@@ -1168,8 +1060,6 @@ noncomputable def ContMDiffVectorBundleHom.toContMDiffVectorBundleEquiv
 
 end ToContMDiffVectorBundleEquivGeneral
 
-/-! ### Identity base map specialization (smooth case) -/
-
 section ToContMDiffVectorBundleEquiv
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
@@ -1189,10 +1079,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
   [ContMDiffVectorBundle n F₂ E₂ IB]
 
-/-- `ContMDiff` analog of `continuous_symm_of_fiberBijective`: the inverse of a
-fiberwise-linear, fiberwise-bijective `C^n` bijection between `C^n` vector bundles over the
-same base (with identity base map) is itself `C^n`. This is the special case of
-`contMDiff_symm_of_fiberBijective'` with `Diffeomorph.refl`. -/
 private lemma contMDiff_symm_of_fiberBijective
     {Φ : TotalSpace F₁ E₁ → TotalSpace F₂ E₂}
     (hΦ_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n Φ)
@@ -1203,17 +1089,12 @@ private lemma contMDiff_symm_of_fiberBijective
       (Equiv.ofBijective Φ hbij).symm :=
   contMDiff_symm_of_fiberBijective' hΦ_smooth (Diffeomorph.refl IB B n) hcompat hbij hφ_bij
 
-/-- Special case of `ContMDiffVectorBundleHom.toContMDiffVectorBundleEquiv` for the identity
-base map. -/
 noncomputable def ContMDiffVectorBundleHom.toContMDiffVectorBundleEquivId
     (f : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (hid : f.baseMap = _root_.id)
     (hbij : Function.Bijective f.toFun) :
     ContMDiffVectorBundleEquiv 𝕜 IB n F₁ E₁ F₂ E₂ :=
   f.toContMDiffVectorBundleEquiv (Diffeomorph.refl IB B n) hid hbij
-
-
-/-! ## Building `ContMDiffVectorBundleEquiv` from fiberwise data -/
 
 section FiberwiseEquiv
 
@@ -1232,11 +1113,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
 
-/-- Package a fiberwise linear map family into a `ContMDiffVectorBundleHom` covering an
-arbitrary base map `f : B → B₂`, given a smoothness proof for the induced total-space map.
-Intended entry point for callers who can discharge smoothness directly via operations on
-structured bundles (e.g. `Bundle.continuousMultilinearMap`), bypassing the
-section-characterization lemma. -/
 def ContMDiffVectorBundleHom.ofFiberwiseLinearMap
     {B₂ : Type*} [TopologicalSpace B₂] [ChartedSpace HB B₂]
     {E₂ : B₂ → Type*} [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
@@ -1253,11 +1129,6 @@ def ContMDiffVectorBundleHom.ofFiberwiseLinearMap
   fiberLinearMap := φ
   fiber_compat _ _ := rfl
 
-/-- Assemble a `ContMDiffVectorBundleEquiv` covering the identity from two mutually-inverse
-`ContMDiffVectorBundleHom`s. Unlike `ContMDiffVectorBundleHom.toContMDiffVectorBundleEquivId`,
-both directions of smoothness are supplied as input, so no finite-dimensional or
-complete-space assumptions are needed on the fibers or base field. The base map of `Ψ` is
-forced to be the identity by the mutual-inverse hypotheses, so it need not be supplied. -/
 noncomputable def ContMDiffVectorBundleEquiv.ofMutualInverseHoms
     (Φ : ContMDiffVectorBundleHom 𝕜 IB n F₁ E₁ F₂ E₂)
     (Ψ : ContMDiffVectorBundleHom 𝕜 IB n F₂ E₂ F₁ E₁)
@@ -1289,10 +1160,6 @@ noncomputable def ContMDiffVectorBundleEquiv.ofMutualInverseHoms
             exact eq_of_heq (TotalSpace.mk.inj h).2)
       fiber_compat := compatΦ }
 
-/-- Construct a `ContMDiffVectorBundleEquiv` covering the identity from a fiberwise linear
-equivalence `φ : ∀ x, E₁ x ≃ₗ[𝕜] E₂ x`, together with smoothness proofs for the total-space
-maps induced by `φ` and `φ.symm`. This is the main user-facing constructor for equivalences
-built from pointwise linear-algebraic data. -/
 noncomputable def ContMDiffVectorBundleEquiv.ofFiberwiseLinearEquiv
     (φ : ∀ x : B, E₁ x ≃ₗ[𝕜] E₂ x)
     (h_smooth : ContMDiff (IB.prod 𝓘(𝕜, F₁)) (IB.prod 𝓘(𝕜, F₂)) n

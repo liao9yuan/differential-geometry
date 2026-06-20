@@ -5,59 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.MasterIn
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Tools.DiffQuotFKNonSmooth
 
-/-!
-# Uniform-in-`h` `L²` bound on the difference quotient of the chart-pulled
-weak partial derivatives, packaged for `chart_loc_of_uniform_bound`
-
-For a non-smooth chart-bilinear data structure `D` and a precompact
-`Ω''` whose `h₀`-thickening lies inside the chart-target image, this
-module produces the uniform-in-`h` `L²(Ω'')` bound
-
-  `‖D_h^k (g_g i)‖_{L²(Ω'')} ≤ M_bound i k`
-
-for `0 < |h| ≤ 1`, where `g_g i` is a globally `L²` representative of
-`D.weak_partial i` (agreeing on a neighbourhood of `closure Ω''`).
-This bound is exactly the input shape consumed by
-`chart_loc_of_uniform_bound` to extract weak second partial
-derivatives.
-
-## Strategy
-
-The wrapper packages the localised non-smooth absorbing inequality
-`nirenberg_diffQuot_g_localL2_bound`. The key conversion is from the
-sum-form bound
-
-  `(λ/2) · ∫_{Ω''} ∑_i (D_h^k g_i)² ≤ C · (G + U + F)`
-
-to per-`(i, k)` `eLpNorm` bounds. Since each summand
-`(D_h^k g_i)² ≥ 0`, the sum dominates each term. Using the equivalence
-`(eLpNorm w 2 μ)² = ∫⁻ ‖w‖² ∂μ` and the relation
-`(ENNReal.ofReal S)^(1/2) = ENNReal.ofReal (Real.sqrt S)` for
-`S ≥ 0`, the per-`(i, k)` `eLpNorm` bound follows.
-
-## Inputs
-
-The headline accepts the master inequality, the per-component
-Fréchet–Kolmogorov bound on the difference quotient of the explicit
-weak partials, the FK bound on `u`, and the L² bound on the standard
-Nirenberg test function as additional hypotheses, alongside the chart-
-bilinear data structure `D` and a smooth elliptic bilinear form `B`.
-These hypotheses bundle the non-smooth analogues of the absorbing-
-master ingredients required by `nirenberg_diffQuot_g_localL2_bound`.
-Downstream callers in possession of the substitution identity for
-non-smooth weak solutions discharge these hypotheses by mollification.
-
-## Main results
-
-* `chartBilinearH1Compl_uniform_diffQuot_bound`: the uniform-in-`h`
-  per-`(i, k)` `eLpNorm` bound on `D_h^k (g_g i)` over `Ω''`, with an
-  existential bound `M_bound i k`.
-* `chartBilinearH1Compl_uniform_diffQuot_bound_quantitative`: the
-  explicit-constant sibling, whose bound is the literal closed-form
-  `√((2 / λ) · C · G_total)` with `C` the explicit master constant
-  `nirenbergMasterYoungConstant B N hΩ'_compact k`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -91,15 +38,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Pointwise: `f i x ^ 2 ≤ ∑_l f l x ^ 2`. -/
 private lemma sq_le_finset_sum_sq
     {n : ℕ} {α : Type*} (f : Fin n → α → ℝ) (i : Fin n) (x : α) :
     (f i x)^2 ≤ ∑ l : Fin n, (f l x)^2 :=
   Finset.single_le_sum (f := fun l => (f l x)^2)
     (fun _ _ => sq_nonneg _) (Finset.mem_univ i)
 
-/-- The square of `eLpNorm f 2 μ` equals `∫⁻ ‖f x‖² ∂μ`. Mirrors a
-private helper of the same name in `DiffQuotFKNonSmooth`. -/
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
     {α : Type*} [MeasurableSpace α] (μ : Measure α) (f : α → ℝ) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
@@ -119,16 +63,12 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-- For a nonnegative integrable real-valued function `g`, the lintegral
-of `ENNReal.ofReal g` equals `ENNReal.ofReal (∫ g)`. -/
 private lemma lintegral_ofReal_eq_ofReal_integral
     {α : Type*} [MeasurableSpace α] {μ : Measure α}
     {g : α → ℝ} (hg_int : Integrable g μ) (hg_nn : 0 ≤ᵐ[μ] g) :
     ∫⁻ x, ENNReal.ofReal (g x) ∂μ = ENNReal.ofReal (∫ x, g x ∂μ) := by
   rw [MeasureTheory.ofReal_integral_eq_lintegral_ofReal hg_int hg_nn]
 
-/-- Conversion: if `∫ ∑_l (f l x)² ∂μ ≤ S` (with the sum integrable),
-then for each fixed `i`, `(eLpNorm (f i) 2 μ)² ≤ ENNReal.ofReal S`. -/
 private lemma sq_eLpNorm_two_le_of_integral_sum_sq_le
     {n : ℕ} {α : Type*} [MeasurableSpace α] {μ : Measure α}
     (f : Fin n → α → ℝ)
@@ -165,7 +105,6 @@ private lemma sq_eLpNorm_two_le_of_integral_sum_sq_le
   rw [h_sum_int_eq]
   exact ENNReal.ofReal_le_ofReal h_sum_le
 
-/-- If `x^2 ≤ y` in `ℝ≥0∞`, then `x ≤ y^(1/2)`. -/
 private lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x^ 2 ≤ y) :
     x ≤ y ^ ((1 : ℝ) / 2) := by
   have h_xpow : x = (x^ 2) ^ ((1 : ℝ) / 2) := by
@@ -175,7 +114,6 @@ private lemma le_sqrt_of_sq_le {x y : ℝ≥0∞} (h : x^ 2 ≤ y) :
   conv_lhs => rw [h_xpow]
   exact ENNReal.rpow_le_rpow h (by norm_num)
 
-/-- For `S ≥ 0`, `(ENNReal.ofReal S)^(1/2) = ENNReal.ofReal (Real.sqrt S)`. -/
 private lemma sqrt_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
     (ENNReal.ofReal S) ^ ((1 : ℝ) / 2) = ENNReal.ofReal (Real.sqrt S) := by
   rw [show S = Real.sqrt S * Real.sqrt S from (Real.mul_self_sqrt hS).symm]
@@ -186,8 +124,6 @@ private lemma sqrt_ofReal_eq_ofReal_sqrt {S : ℝ} (hS : 0 ≤ S) :
   rw [← ENNReal.rpow_mul]
   norm_num
 
-/-- From `(eLpNorm f 2 μ)^2 ≤ ENNReal.ofReal S` (with `S ≥ 0`), deduce
-`eLpNorm f 2 μ ≤ ENNReal.ofReal (Real.sqrt S)`. -/
 private lemma eLpNorm_two_le_ofReal_sqrt
     {α : Type*} [MeasurableSpace α] {μ : Measure α} {f : α → ℝ}
     {S : ℝ} (hS : 0 ≤ S)
@@ -197,40 +133,6 @@ private lemma eLpNorm_two_le_ofReal_sqrt
   rw [sqrt_ofReal_eq_ofReal_sqrt hS] at h_pow
   exact h_pow
 
-/-- **Uniform-in-`h` per-`(i, k)` `L²(Ω'')` bound on the difference
-quotient of the chart-pulled weak partial derivatives.**
-
-The headline integrates the localised non-smooth absorbing inequality
-`nirenberg_diffQuot_g_localL2_bound` with a sum-to-component shape
-conversion. The output is exactly the uniform-in-`h` bound consumed
-by `chart_loc_of_uniform_bound` to extract weak second partial
-derivatives.
-
-### Inputs
-
-* `D` — the chart-bilinear data structure.
-* `Ω'', η, Ω', N, B, u_g, f_g, g_g` — the standard non-smooth
-  Nirenberg setup: the precompact target, the smooth bump (≡ 1 on
-  `Ω''`), the slightly larger precompact `Ω'` containing
-  `tsupport η`, the bump-derivative bound `N`, the smooth elliptic
-  bilinear form `B` (whose principal coefficient agrees with the
-  chart-pulled `weightedInvGramOnEuclid g α` on a neighbourhood of
-  `closure Ω''`, taken on the global Euclidean space via the
-  metric-extension construction), and the global `L²` extensions
-  `u_g, f_g, g_g i` of `D.u_chart, D.f_chart, D.weak_partial i`.
-* `h_FK_diffQuot_u_bound, h_v_test_sq_bound, h_master_nonsmooth` — the
-  three non-smooth analogues of the smooth ingredients of the master
-  inequality. These are discharged downstream by mollification + the
-  substitution identity for weak solutions.
-
-### Output
-
-A constant `M_bound i k ≥ 0` such that, for every `0 < |h| ≤ 1` and
-every `(i, k)`:
-
-  `‖D_h^k (g_g i)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound i k)`.
-
-The bound is uniform in `h`. -/
 theorem chartBilinearH1Compl_uniform_diffQuot_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -460,30 +362,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound
     rw [hM_eq]
     exact h_concl
 
-/-- **Quantitative uniform-in-`h` per-`(i, k)` `L²(Ω'')` bound on the
-difference quotient of the chart-pulled weak partial derivatives.**
-
-The explicit-constant form of `chartBilinearH1Compl_uniform_diffQuot_bound`.
-It integrates the *quantitative* localised non-smooth absorbing inequality
-`nirenberg_diffQuot_g_localL2_bound_quantitative` with the same
-sum-to-component shape conversion. In contrast with the existential
-sibling, the bound is exposed as the literal closed-form expression
-
-  `‖D_h^k (g_g i)‖_{L²(Ω'')} ≤
-    ENNReal.ofReal (√((2 / B.lam) · C · G_total))`,
-
-with `C = nirenbergMasterYoungConstant B N hΩ'_compact k` the explicit
-master constant and `G_total = ∫_{Ω'} ∑_l g_l² + ∫_{Ω'} u² + ∫_{Ω'} f²`
-the energy quantity. The bound is uniform in `h` (for `0 < |h| ≤ R₀`).
-
-### Inputs
-
-Byte-identical to `chartBilinearH1Compl_uniform_diffQuot_bound`.
-
-### Output
-
-For every `0 < |h| ≤ R₀` and every `(i, k)`, the per-component `eLpNorm`
-bound on `D_h^k (g_g i)` over `Ω''` with the explicit constant in place. -/
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_quantitative
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

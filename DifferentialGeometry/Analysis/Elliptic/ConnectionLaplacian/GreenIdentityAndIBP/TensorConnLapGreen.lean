@@ -6,51 +6,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetr
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
 
-/-!
-# Partition-of-unity assembly of the `(0, 2)` connection-Laplacian Green identity
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file develops the partition-of-unity assembly
-infrastructure that combines the per-direction second-order integration-by-parts
-identity with the chart-frame trace identity to produce the integrated Green
-identity for the rough (connection) Laplacian on `(0, 2)`-tensor fields.
-
-The headline target is
-
-```
-tensorL2Inner g 0 3 (covGrad g 0 2 T).toFun (covGrad g 0 2 v).toFun
-  = − tensorL2Inner g 0 2 (rawTensorConnLapSmooth g 0 2 T).toFun v.toFun.
-```
-
-The assembly proceeds by inserting `1 = ∑_α ρ_α` (the chart-atlas partition of
-unity) into the integrated Dirichlet pairing, reducing the integrand on each
-chart-`α` partition-of-unity tsupport to a diagonal frame sum over the globally
-smooth orthonormal chart-`α` frame `chartFrameNormGlobalSmooth g α i`, applying
-the per-direction second-order integration-by-parts identity, summing over the
-frame index `i` to collapse the second covariant derivative to the rough
-Laplacian, and finally summing over `α`.
-
-The genuinely new ingredient supplied here is the **partition-of-unity gradient
-cancellation** `chartAtlasPOU_tangentSectionAction_finset_sum_eq_zero`: the sum
-over the chart-atlas partition-of-unity Finset of the directional derivatives
-`X(ρ_α)` of the partition weights vanishes pointwise, because the partition
-weights sum to the constant `1`. This is the algebraic identity through which the
-per-chart Leibniz weight terms `B(ρ_α) · ⟨∇_B T, v⟩`, produced by the
-partition-of-unity-weighted integration by parts, cancel after summation over
-`α`.
-
-## Main results
-
-* `chartAtlasPOU_tangentSectionAction_finset_sum_eq_zero` — the partition-of-unity
-  gradient cancellation: `∑_α X(ρ_α) x = 0`.
-
-* `integral_weighted_secondOrder_combined_eq_neg_weightDeriv` — the
-  partition-of-unity-weighted second-order combined integration-by-parts
-  identity for a fixed smooth tangent vector field `B` and a smooth scalar weight
-  `ρ`: the integral of `ρ · (⟨∇_B(∇_B T), v⟩ + ⟨∇_B T, ∇_B v⟩ + ⟨∇_B T, v⟩·divᵍ B)`
-  equals minus the integral of the Leibniz weight term `⟨∇_B T, v⟩ · B(ρ)`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -80,19 +35,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Generic partition-of-unity gradient cancellation.** For a smooth tangent
-vector field `X`, a smooth partition of unity `ρ` on `M` indexed by `M`, and a
-Finset `S` over which the partition weights sum to the constant `1` at every
-point, the sum over `S` of the directional derivatives `X(ρ_α)` vanishes at every
-point.
-
-Stated over a *variable* partition `ρ` and a *variable* Finset `S` so that no
-opaque `def` (such as `chartAtlasPOU` / `chartAtlasPOU_finset`, built from choice
-terms) is unfolded during elaboration. The proof commutes the directional
-derivative through the finite sum (`tangentSectionAction_finset_sum`), identifies
-the summed weights with the constant `1` on a neighbourhood (here, everywhere),
-and uses that the directional derivative of a locally-constant function vanishes
-(`EventuallyEq.mfderiv_eq` + `mfderiv_const`). -/
 theorem pou_tangentSectionAction_finset_sum_eq_zero
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (S : Finset M)
@@ -114,22 +56,6 @@ theorem pou_tangentSectionAction_finset_sum_eq_zero
   rw [h_fun_eq, Filter.EventuallyEq.mfderiv_eq h_eq_one, mfderiv_const]
   rfl
 
-/-- **Partition-of-unity gradient cancellation.** For a smooth tangent vector
-field `X` on a closed manifold, the sum over the chart-atlas partition-of-unity
-Finset of the directional derivatives `X(ρ_α)` of the partition weights vanishes
-at every point:
-
-```
-∑_{α ∈ chartAtlasPOU_finset} tangentSectionAction X (ρ_α) x = 0.
-```
-
-The proof instantiates the generic `pou_tangentSectionAction_finset_sum_eq_zero`
-with the chart-atlas partition of unity and the constant-`1` property
-`chartAtlasPOU_finset_sum_eq_one`.
-
-This is the algebraic device through which the per-chart Leibniz weight terms
-`B(ρ_α) · ⟨∇_B T, v⟩`, produced by the partition-of-unity-weighted integration by
-parts, cancel after summation over `α`. -/
 theorem chartAtlasPOU_tangentSectionAction_finset_sum_eq_zero
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -158,10 +84,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The directional derivative of a scalar `f` along the smooth weighted vector
-field `ρ · B` equals `ρ` times the directional derivative along `B`. This is the
-scalar-linearity of `mfderiv` in the direction (the derivative is a continuous
-linear map, hence commutes with the scalar `ρ x` applied to the direction). -/
 lemma tangentSectionAction_smoothSmul
     (ρ : M → ℝ) (hρ : ContMDiff I 𝓘(ℝ) ∞ ρ)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) (x : M) :
@@ -172,23 +94,6 @@ lemma tangentSectionAction_smoothSmul
   rw [(mfderiv I 𝓘(ℝ) f x).map_smul (ρ x) (B x)]
   rw [smul_eq_mul]
 
-/-- **Partition-of-unity-weighted second-order combined integration by parts.**
-For smooth `(0, 2)`-tensor sections `T`, `v`, a smooth tangent vector field `B`,
-and a smooth scalar weight `ρ` on a closed Riemannian manifold,
-
-```
-∫_M ρ · (⟨(∇_B (∇_B T))ᵇ, vᵇ⟩ + ⟨(∇_B T)ᵇ, (∇_B v)ᵇ⟩ + ⟨∇_B T, v⟩ · divᵍ B) dvol_g
-  = − ∫_M ⟨∇_B T, v⟩ · B(ρ) dvol_g,
-```
-
-where `(·)ᵇ` denotes metric index-lowering and `B(ρ)` is the directional derivative
-of the weight `ρ` along `B`. The left-hand integrand is the `ρ`-weighted form of the
-unweighted second-order Leibniz expression of
-`integral_secondOrder_combined_eq_zero`; the right-hand side is the Leibniz weight
-correction term.
-
-No integrability hypothesis is exposed: it is discharged internally by the scalar
-integration-by-parts identity and the smoothness of the inner-product scalar. -/
 theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     (g : SmoothRiemannianMetric I M)
     (T v : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)

@@ -1,60 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedStepRegularity
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSMemWkp
 
-/-!
-# Global `W^{k,2}` regularity of the differentiated chart right-hand side
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the level-`m`
-chart-locality-free differentiated chart right-hand side
-`eigenvectorChartRHSDiff g r s i α P₀ m l` of the limiting
-per-component variational identity is the explicit recursion
-
-* level `0` is the seven-term `eigenvectorChartRHS`;
-* level `m + 1` is the indicator, of the compact partition-of-unity kernel, of
-  the chart-density-divided differentiated numerator built from the level-`m`
-  right-hand side.
-
-This module discharges its **global iterated Euclidean Sobolev regularity**: for
-each `K : ℕ`, given the order-`(m + 1 + K)` partition-of-unity regularity input
-`h_pou` on every chart center, the level-`m` differentiated right-hand side lies
-in `MemWkp K 2` on the open chart target. The `K = 1` corollary restates this as
-the vendored `DeGiorgi.MemW1p 2` membership.
-
-## Strategy
-
-The polymorphic-in-`K` headline `eigenvectorChartRHSDiff_memWkp` is
-proved by induction on `m`, with `K` universally quantified so the inductive
-hypothesis can be invoked at `K + 1`:
-
-* level `0`: `eigenvectorChartRHSDiff … 0 l =
-  eigenvectorChartRHS …`, whose `MemWkp K 2` regularity is
-  `eigenvectorChartRHS_memWkp` — its `h_pou` requirement is at
-  order `K + 1 = 0 + 1 + K`, matching this theorem's `h_pou`;
-* level `m + 1`: writing `l = Fin.snoc (Fin.init l) (l (Fin.last m))`, the
-  standalone-step identity `eigenvectorChartIteratedStep_eq_rhsDiff_succ`
-  rewrites `eigenvectorChartRHSDiff … (m+1) l` as the level-`(m+1)`
-  standalone inductive step over the level-`m` right-hand side. The per-step
-  regularity propagator `eigenvectorChartIteratedStep_memWkp_K_two`
-  then delivers `MemWkp K 2`, discharging its three hypotheses: the eigenvector
-  chart component is `MemWkp (m + 2 + K) 2` (supplied by `h_pou`); the level-`m`
-  right-hand side is `MemWkp (K + 1) 2` (the inductive hypothesis at order `K +
-  1`); the level-`m` right-hand side is ae-zero off the partition-of-unity kernel
-  (the seven-term vanishing `eigenvectorChartRHS_ae_zero_off_chartPouKernel`
-  at level `0`, the indicator-vanishing
-  `eigenvectorChartRHSDiff_succ_eq_zero_off_chartPouKernel` at
-  positive levels).
-
-The `K = 1` corollary `eigenvectorChartRHSDiff_memW1p` instantiates
-the headline at `K = 1` and rewrites `MemWkp 1 2` to `DeGiorgi.MemW1p 2` via
-`MemWkp.one_iff_memW1p`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -86,14 +32,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `eigenvectorChartComponentFun_memWkp_of_pou`.
 
-The canonical eigenvector chart component `eigenvectorChartComponentFun
-g r s i α P₀` is `MemWkp N 2` on the chart-`α` target, given that the chart
-components of the `L²`-coercion of the chart-locality-free eigenvector resolvent
-are `MemWkp N 2` on every chart target. The two chart components differ by the
-nonzero scalar `μ⁻¹` (`eigenvector_chartComponent_eq`), and `MemWkp`
-is scalar-invariant. -/
 private lemma eigenvectorChartComponentFun_memWkp_of_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -145,13 +84,6 @@ private lemma eigenvectorChartComponentFun_memWkp_of_pou
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel`.
-
-The level-`m` chart-locality-free differentiated chart right-hand side
-`eigenvectorChartRHSDiff g r s i α P₀ m l` is almost everywhere zero
-on the open complement of the compact partition-of-unity kernel `chartPouKernel α`
-inside the chart target. -/
 private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -177,28 +109,7 @@ private lemma eigenvectorChartRHSDiff_ae_zero_off_chartPouKernel
         (I := I) (M := M) g r s i α P₀ m l hy.2
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_memWkp`.
 
-**Global `W^{k,2}` regularity of the chart-locality-free differentiated chart
-right-hand side.** For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an
-eigenbasis index `i`, a chart center `α : M`, a component multi-index `P₀`, a
-level `m`, and a direction multi-index `l : Fin m → Fin n`, the level-`m`
-chart-locality-free differentiated chart right-hand side
-`eigenvectorChartRHSDiff g r s i α P₀ m l` is `MemWkp K 2` on the
-chart-`α` target, given the order-`(m + 1 + K)` partition-of-unity regularity input
-`h_pou` (keyed on `eigenvectorResolvent`) on every chart center.
-
-The proof is induction on `m`, with `K` universally quantified:
-
-* level `0` is the seven-term `eigenvectorChartRHS`, whose `MemWkp K
-  2` regularity is `eigenvectorChartRHS_memWkp` at order `K + 1 = 0 +
-  1 + K`;
-* level `m + 1` rewrites the right-hand side as the standalone inductive step
-  (`eigenvectorChartIteratedStep_eq_rhsDiff_succ`) and applies the
-  per-step regularity propagator `eigenvectorChartIteratedStep_memWkp_K_two`,
-  fed: the `MemWkp (m + 2 + K) 2` regularity of the eigenvector chart component
-  (from `h_pou`); the inductive hypothesis at order `K + 1`; the ae-vanishing of the
-  level-`m` right-hand side off the partition-of-unity kernel. -/
 theorem eigenvectorChartRHSDiff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -293,18 +204,6 @@ theorem eigenvectorChartRHSDiff_memWkp
           g r s i α P₀ m (Fin.init l))
         (l (Fin.last m)) h_comp h_prev_memWkp_succ h_prev_ae_zero
 
-/-- Chart-locality-free twin of `eigenvectorChartRHSDiff_memW1p`.
-
-**Global `W^{1,2}` regularity of the chart-locality-free differentiated chart
-right-hand side.** The level-`m` chart-locality-free differentiated chart
-right-hand side `eigenvectorChartRHSDiff g r s i α P₀ m l` lies in the
-vendored `DeGiorgi.MemW1p 2` on the chart-`α` target, given the order-`(m + 2)`
-partition-of-unity regularity input `h_pou` (keyed on
-`eigenvectorResolvent`) on every chart center.
-
-This is the `K = 1` instance of `eigenvectorChartRHSDiff_memWkp` — at
-`K = 1` the `h_pou` requirement is at order `m + 1 + 1 = m + 2`, and
-`MemWkp.one_iff_memW1p` restates `MemWkp 1 2` as `DeGiorgi.MemW1p 2`. -/
 theorem eigenvectorChartRHSDiff_memW1p
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

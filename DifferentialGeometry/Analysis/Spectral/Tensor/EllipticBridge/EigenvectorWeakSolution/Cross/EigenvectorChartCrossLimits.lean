@@ -3,91 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
-/-!
-# The covariant-Leibniz cross terms of an eigenvector approximant as `n → ∞`
-# `L²`-limits
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, fix an eigenbasis
-index `i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center
-`α : M`, and a fixed smooth compactly-supported `(r, s)`-tensor *test section*
-`S`. Write `ζ_α := chartAtlasPOU I M α` for the chart-atlas partition-of-unity
-weight and `wₙ := eigenvectorSmoothApprox g r s i n` for the
-canonical smooth `H¹`-approximating sequence of the eigenvector resolvent.
-
-The variational-identity assembly that promotes the abstract eigenvector to a
-chart-local weak elliptic solution applies a per-approximant chart identity to
-`Tₙ := scalarSmul ζ_α wₙ`. Its Dirichlet term `∫⟨∇Tₙ, ∇S⟩` splits, via the
-covariant Leibniz rule `tensorCovDerivPointwiseInner_scalarSmul_left`, into the
-genuine-gradient term `∫⟨∇wₙ, ∇(scalarSmul ζ_α S)⟩` corrected by the two cross
-terms `∫ tensorCovDerivCrossLeft g r s ζ_α wₙ S` and
-`∫ tensorCovDerivCrossRight g r s ζ_α wₙ S`. This file analyses the `n → ∞`
-behaviour of those two cross integrals.
-
-## The cross-left term
-
-`tensorCovDerivCrossLeft g r s ζ_α wₙ S` rewrites — via the cross-left
-metric-isometry bridge `tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad`
-pointwise plus the smooth-case pairing formula `tensorCovGradL2_inner_smooth` —
-as the abstract `L²` pairing
-`⟪tensorCovGradL2 g r s wₙ, prependCovGradSlot g r s ζ_α S⟫`, where the
-covector-prepend section `prependCovGradSlot g r s ζ_α S` is a fixed concrete
-chart-supported `(r, s + 1)`-tensor section. The chart-pull
-`tensorL2Inner_cutoff_chartKernelSupported_pull` at rank `(r, s + 1)` then
-expresses the pairing as a single-chart Euclidean integral against the cutoff
-chart component `tensorL2ChartComponentCutoff` of the abstract `L²` element
-`tensorCovGradL2 g r s wₙ`.
-
-As `n → ∞`, `tensorCovGradL2 g r s wₙ =
-tensorCovGradL2Compl g r s (smoothToTensorH1Compl g r s wₙ)` converges, by
-`eigenvectorSmoothApprox_tendsto` and continuity of
-`tensorCovGradL2Compl`, to
-`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s i)`. Since
-`tensorL2ChartComponentCutoff` is the coercion of a continuous linear map, the
-chart integrand converges in `Lp ℝ 2 (chartL2Measure α)`, and the cross-left
-integral converges to the chart-Euclidean integral built from that abstract
-limit.
-
-## The cross-right term
-
-`tensorCovDerivCrossRight g r s ζ_α wₙ S` carries `wₙ` *undifferentiated*. The
-pointwise symmetry `tensorCovDerivCrossRight g r s ζ w S =
-tensorCovDerivCrossLeft g r s ζ S w` (`tensorCovDerivCrossRight_eq_crossLeft`)
-re-expresses it through the cross-left term with the two tensor sections
-swapped. Composing with the cross-left metric-isometry bridge and the
-smooth-case pairing formula yields the per-approximant rewrite of the
-cross-right integral as the genuine `(r, s + 1)`-tensor `L²` pairing
-`⟪covGrad g r s S, prependCovGradSlot g r s ζ_α wₙ⟫`.
-
-## Main definitions
-
-* `crossLeftLimitComponent g r s i α P` — the `n → ∞` limit of the
-  cutoff chart component of `tensorCovGradL2 g r s wₙ`: the cutoff chart
-  component of the abstract `L²` limit `tensorCovGradL2Compl g r s
-  (eigenvectorResolvent g r s i)`.
-
-## Main results
-
-* `tensorCovDerivCrossLeft_integral_eq_inner` — the per-approximant rewrite of
-  the cross-left integral as the abstract `L²` pairing.
-* `tensorCovDerivCrossLeft_integral_eq_chartPull` — the per-approximant rewrite
-  of the cross-left integral as the single-chart Euclidean integral.
-* `crossLeftComponent_tendsto` — the cutoff chart components of the
-  cross-left approximants converge, in `Lp ℝ 2 (chartL2Measure α)`, to
-  `crossLeftLimitComponent`.
-* `tensorCovDerivCrossLeft_integral_tendsto` — the cross-left
-  integral converges, as `n → ∞`, to the abstract `L²` pairing of the fixed
-  limit.
-* `tensorCovDerivCrossRight_eq_crossLeft` — the pointwise cross-right/cross-left
-  symmetry.
-* `tensorCovDerivCrossRight_integral_eq_inner` — the per-approximant rewrite of
-  the cross-right integral as the genuine `(r, s + 1)`-tensor `L²` pairing.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -126,11 +41,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The covariant gradient `covGrad g r s w` vanishes — as an `(r, s + 1)`-tensor
-field — at every point outside `tsupport w.toFun`. The directional covariant
-derivative `tensorCovDerivAt g r s w x` is the zero continuous linear map there
-(`tensorCovDerivAt_eq_zero_off_tsupport`), and the covariant-gradient bundle
-equivalence sends the zero fibre to the zero `(r, s + 1)`-tensor. -/
 private lemma covGrad_toFun_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport w.toFun) :
@@ -145,9 +55,6 @@ private lemma covGrad_toFun_eq_zero_off_tsupport
   rw [SmoothCcTensor.toFun_apply, covGrad_toSection_apply, hcov_zero, map_zero,
     TensorRSSpace.toModel_zero]
 
-/-- The smooth-scalar-weighted section `scalarSmul g r s ζ w` has topological
-support inside the closed support of the scalar `ζ`: the underlying tensor field
-`ζ x • w.toFun x` vanishes wherever `ζ` vanishes. -/
 private lemma scalarSmul_toFun_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) {x : M}
@@ -169,16 +76,6 @@ private lemma scalarSmul_tsupport_subset
   exact hx (scalarSmul_toFun_eq_zero_off_tsupport (I := I) (M := M) g r s ζ w
     hx_notin)
 
-/-- **Support of the covector-prepend section.** For a smooth scalar `ζ` and a
-smooth compactly-supported `(r, s)`-tensor section `S`, the covector-prepend
-section `prependCovGradSlot g r s ζ S` has topological support inside the closed
-support of `ζ`.
-
-The covector-prepend section is the difference `covGrad g r s (scalarSmul ζ S) -
-scalarSmul ζ (covGrad g r s S)`; both summands vanish off the closed support of
-`ζ`, the first because `scalarSmul ζ S` does (`scalarSmul_tsupport_subset`,
-`covGrad_toFun_eq_zero_off_tsupport`), the second because the smooth-scalar
-weight `ζ` does. -/
 private lemma prependCovGradSlot_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) :
@@ -209,13 +106,6 @@ private lemma prependCovGradSlot_tsupport_subset
       (covGrad (I := I) (M := M) g r s S) hx_notin
   rw [hfst, hsnd, sub_zero]
 
-/-- **The cross-left integral as an abstract `L²` pairing.** For a smooth scalar
-`ζ`, a smooth compactly-supported `H¹` tensor section `w`, and a fixed smooth
-compactly-supported `(r, s)`-tensor section `S`, the integral of the cross-left
-term `tensorCovDerivCrossLeft g r s ζ w.toCcTensor S` against the Riemannian
-volume measure equals the metric `L²` inner product of the covariant-gradient
-operator value `tensorCovGradL2 g r s w` against the `L²`-coercion of the
-covector-prepend section `prependCovGradSlot g r s ζ S`. -/
 theorem tensorCovDerivCrossLeft_integral_eq_inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensorH1 g r s)
@@ -233,14 +123,6 @@ theorem tensorCovDerivCrossLeft_integral_eq_inner
     (I := I) (M := M) g r s ζ w.toCcTensor S x]
   rfl
 
-/-- **The cross-left integral as a single-chart Euclidean integral.** For a chart
-center `α : M`, a smooth compactly-supported `H¹` tensor section `w`, and a fixed
-smooth compactly-supported `(r, s)`-tensor section `S`, the integral of the
-cross-left term `tensorCovDerivCrossLeft g r s (chartAtlasPOU I M α) w.toCcTensor
-S` equals the single-chart Euclidean integral coupling the cutoff Euclidean chart
-components `tensorL2ChartComponentCutoff` of `tensorCovGradL2 g r s w` to the raw
-Euclidean chart components of the covector-prepend section
-`prependCovGradSlot g r s (chartAtlasPOU I M α) S`. -/
 theorem tensorCovDerivCrossLeft_integral_eq_chartPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (w : SmoothCcTensorH1 g r s) (S : SmoothCcTensor g r s) :
@@ -266,9 +148,6 @@ theorem tensorCovDerivCrossLeft_integral_eq_chartPull
     (prependCovGradSlot_tsupport_subset (I := I) (M := M) g r s
       (chartAtlasPOU I M α) S)
 
-/-- The inverse Gram matrix of `g(x)` on the fixed model-space basis is symmetric:
-swapping its two component indices leaves it unchanged. This is the real-case
-specialisation of `gramMatrixAt_inv_isHermitian`. -/
 private lemma gramMatrixAt_inv_symm
     (g : SmoothRiemannianMetric I M) (x : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -278,16 +157,6 @@ private lemma gramMatrixAt_inv_symm
   have h := hHerm.apply l k
   rwa [star_trivial] at h
 
-/-- **The cross-right / cross-left symmetry.** For a smooth scalar `ζ` and smooth
-compactly-supported `(r, s)`-tensor sections `w` and `S`, the cross-right term
-`tensorCovDerivCrossRight g r s ζ w S` coincides, at every point, with the
-cross-left term `tensorCovDerivCrossLeft g r s ζ S w` — the same cross term with
-the two tensor sections swapped.
-
-Unfolding both sides to the explicit inverse-Gram-weighted double sums, the
-identity is the symmetry of the pointwise tensor inner product
-`tensorInnerPointwise_symm` together with the symmetry of the inverse Gram matrix
-`gramMatrixAt_inv_symm`, after exchanging the two summation indices. -/
 theorem tensorCovDerivCrossRight_eq_crossLeft
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -304,20 +173,6 @@ theorem tensorCovDerivCrossRight_eq_crossLeft
       (TensorRSSpace.toModel
         (tensorCovDerivAt (I := I) (M := M) g r s S x ((chartModelBasis E) j)))]
 
-/-- **The cross-right integral as a genuine `(r, s + 1)`-tensor `L²` pairing.**
-For a smooth scalar `ζ`, a smooth compactly-supported `H¹` tensor section `w`,
-and a fixed smooth compactly-supported `(r, s)`-tensor section `S`, the integral
-of the cross-right term `tensorCovDerivCrossRight g r s ζ w.toCcTensor S` against
-the Riemannian volume measure equals the metric `L²` inner product of the
-`L²`-coercion of the covariant gradient `covGrad g r s S` of the fixed test
-section against the `L²`-coercion of the covector-prepend section
-`prependCovGradSlot g r s ζ w.toCcTensor` carrying the approximant in its
-undifferentiated covariant block.
-
-The proof feeds the cross-right / cross-left symmetry into the cross-left
-metric-isometry bridge with `S` and `w.toCcTensor` swapped, then reads the
-integral of a pointwise tensor inner product of two smooth sections as their
-`L²` inner product. -/
 theorem tensorCovDerivCrossRight_integral_eq_inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensorH1 g r s)
@@ -341,12 +196,6 @@ theorem tensorCovDerivCrossRight_integral_eq_inner
       g r s ζ S w.toCcTensor x]
   rfl
 
-/-- **The `n → ∞` abstract `L²` limit of the cross-left operator value.** For an
-eigenbasis index `i`, the covariant-gradient operator values
-`tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s i n)`
-converge, as `n → ∞` and in `TensorL2 r (s + 1) g`, to the completion-extended
-covariant gradient `tensorCovGradL2Compl g r s` applied to the eigenvector
-resolvent `eigenvectorResolvent g r s i`. -/
 theorem tensorCovGradL2_eigenvectorSmoothApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -365,12 +214,6 @@ theorem tensorCovGradL2_eigenvectorSmoothApprox_tendsto
     tensorCovGradL2Compl_smoothToTensorH1Compl (I := I) (M := M) g r s
       (eigenvectorSmoothApprox (I := I) (M := M) g r s i n)]
 
-/-- **The `n → ∞` limit object of the cross-left chart component.** For an
-eigenbasis index `i`, a chart center `α : M`, and a component multi-index
-`P : CompIdx E r (s + 1)`, this is the cutoff Euclidean chart component, at
-`(α, P)`, of the completion-extended covariant gradient
-`tensorCovGradL2Compl g r s` applied to the eigenvector resolvent
-`eigenvectorResolvent g r s i`. -/
 def crossLeftLimitComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -381,12 +224,6 @@ def crossLeftLimitComponent
       (eigenvectorResolvent (I := I) (M := M) g r s i))
     α P
 
-/-- **The `n → ∞` `L²`-convergence of the cross-left chart component.** For an
-eigenbasis index `i`, a chart center `α : M`, and a component multi-index `P`,
-the cutoff Euclidean chart components of the cross-left operator values
-`tensorCovGradL2 g r s (eigenvectorSmoothApprox g r s i n)`
-converge, as `n → ∞` and in `Lp ℝ 2 (chartL2Measure α)`, to the limit object
-`crossLeftLimitComponent g r s i α P`. -/
 theorem crossLeftComponent_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -406,15 +243,6 @@ theorem crossLeftComponent_tendsto
   simp only [Function.comp_def, tensorL2ChartComponentCutoffCLM_apply] at h_clm
   exact h_clm
 
-/-- **The `n → ∞` limit of the cross-left integral.** For a chart center
-`α : M`, an eigenbasis index `i`, and a fixed smooth compactly-supported
-`(r, s)`-tensor test section `S`, the cross-left integrals
-`∫ tensorCovDerivCrossLeft g r s (chartAtlasPOU I M α)
-(eigenvectorSmoothApprox g r s i n).toCcTensor S` converge, as
-`n → ∞`, to the metric `L²` inner product of the fixed abstract limit
-`tensorCovGradL2Compl g r s (eigenvectorResolvent g r s i)`
-against the `L²`-coercion of the covector-prepend section
-`prependCovGradSlot g r s (chartAtlasPOU I M α) S`. -/
 theorem tensorCovDerivCrossLeft_integral_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

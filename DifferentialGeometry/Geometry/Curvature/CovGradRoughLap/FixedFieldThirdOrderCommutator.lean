@@ -2,38 +2,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Slot0CurryCovariantL
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 
-/-!
-# The per-fixed-field third-order commutator of the covariant gradient
-
-For a smooth compactly-supported `(0, s)`-tensor `S` and fixed smooth tangent fields
-`V, X` on a closed manifold, this file computes the slot-`0` `X`-read of the
-third-order defect
-```
-∇²_{V,V}(∇S) − ∇(∇²_{V,V}S)
-```
-as an explicit seven-term curvature carrier combination: two genuinely differentiated
-curvature terms `R(V,X)(∇_V S)` and `∇_V(R(V,X)S)`, three curvature-operator terms
-`R(∇_V X, V)S`, `R(X, ∇_V V)S` and `−∇_{R(V,X)V}S`, and the symmetric second-order
-pair `−∇²_{∇_X V, V}S − ∇²_{V, ∇_X V}S`.
-
-* `secondCovDerivCc` — the packaged diagonal second covariant derivative
-  `∇²_{V,V} T` as a smooth compactly-supported tensor.
-* `secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq` — the seven-term
-  identity, the pointwise telescoping core of the rank-`0` integrated
-  Bochner–Weitzenböck assembly.
-
-The proof peels both third-order blocks into slot-`0` reads through the directional
-slot-`0` curry covariant Leibniz rule
-(`tensor0S_curry_covApply_slot0_leibniz_fib`, applied three times — along `V`,
-along `∇_V V`, and with read field `∇_V X`), substitutes the outer second-order
-block commutator `secondCovDeriv_swap_outer`, replaces every Lie bracket through
-torsion-freeness of the Levi-Civita connection (`covApply_sub_eq_mlieBracket`),
-folds the antisymmetric second-covariant-derivative pairs into curvature operators
-(`tensorSecondCovDeriv_antisymm_eq_riemannOp`), and collects the surviving
-single-derivative directions into `−∇_{R(V,X)V}S` via the section-level tangent
-curvature (`riemannSec_eq_riemannOp_smooth`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -65,10 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- **Total-space smoothness of the diagonal second covariant derivative section.** For a
-smooth tangent field `B` and a smooth `(0, k)`-tensor section `T`, the per-direction section
-`y ↦ ∇²_{B,B} T (y)` is smooth: it is the difference of the iterated covariant section
-`∇_B(∇_B T)` and the Christoffel-correction section `∇_{∇_B B} T`. -/
+
 private lemma secondCovDeriv_section_contMDiff' (g : SmoothRiemannianMetric I M) (k : ℕ)
     {T : Π b : M, TensorRSSpace 0 k I b}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 k ℝ E)) ∞
@@ -88,12 +53,6 @@ private lemma secondCovDeriv_section_contMDiff' (g : SmoothRiemannianMetric I M)
   refine (h1.sub_section h2).congr fun y => ?_
   rfl
 
-/-- **The packaged diagonal second covariant derivative.** For a smooth tangent field `V`
-and a smooth compactly-supported `(0, k)`-tensor `T`, the section
-`x ↦ ∇²_{V,V} T (x) = tensorSecondCovDeriv g 0 k V V T x` packaged as a smooth
-compactly-supported tensor. Smoothness is the difference structure of the second
-covariant derivative (`secondCovDeriv_section_contMDiff'`); compact support holds since
-`M` is compact. -/
 def secondCovDerivCc (g : SmoothRiemannianMetric I M) (k : ℕ)
     {V : Π b : M, TangentSpace I b}
     (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -107,8 +66,7 @@ def secondCovDerivCc (g : SmoothRiemannianMetric I M) (k : ℕ)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section of `secondCovDerivCc` is the raw diagonal second covariant
-derivative. -/
+
 @[simp] lemma secondCovDerivCc_toSection_apply (g : SmoothRiemannianMetric I M) (k : ℕ)
     {V : Π b : M, TangentSpace I b}
     (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -118,7 +76,7 @@ derivative. -/
       tensorSecondCovDeriv (I := I) g 0 k V V (fun y : M => T.toSection y) x := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The scalar-extraction functional evaluates to `1` on the unit `(0, 0)`-tensor. -/
+
 private lemma tensor00Scalar_unitZeroSec (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
   rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
@@ -128,13 +86,13 @@ private lemma tensor00Scalar_unitZeroSec (x : M) :
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
 set_option linter.unusedSectionVars false in
-/-- Two `(0, t)`-tensor fibre elements agreeing on every model tuple are equal. -/
+
 private lemma tensor0S_eq_of_toModel_eq {t : ℕ} {x : M} {T T' : Tensor0SSpace t I x}
     (h : ∀ v : Fin t → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
 set_option linter.unusedSectionVars false in
-/-- Every `(0, 0)`-tensor is its unit-scalar multiple of the unit `(0, 0)`-tensor. -/
+
 private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
     τ = tensor00Scalar (I := I) (M := M) x τ • unitZeroSec (I := I) (M := M) x := by
   apply tensor0S_eq_of_toModel_eq (I := I) (M := M)
@@ -151,7 +109,7 @@ private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
   rw [smul_eq_mul, mul_one]
 
 set_option linter.unusedSectionVars false in
-/-- Wrapping the unit evaluation of a `(0, t)`-Hom-tensor reconstructs the tensor. -/
+
 private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
     tensor0SAsRS (I := I) (M := M) x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
@@ -170,7 +128,7 @@ private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x)
   rw [ContinuousLinearMap.map_smul]
 
 set_option linter.unusedSectionVars false in
-/-- The `(0, t)`-tensor wrapper distributes over subtraction. -/
+
 private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SAsRS (I := I) (M := M) x (C - D) =
       tensor0SAsRS (I := I) (M := M) x C - tensor0SAsRS (I := I) (M := M) x D := by
@@ -194,8 +152,7 @@ private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
   exact h
 
 set_option linter.unusedSectionVars false in
-/-- A `(0, t)`-Hom-tensor subtraction, read as a continuous linear map, distributes over
-the argument. -/
+
 private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A - B) τ =
@@ -203,8 +160,7 @@ private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from B) τ := rfl
 
 set_option linter.unusedSectionVars false in
-/-- A `(0, t)`-Hom-tensor addition, read as a continuous linear map, distributes over
-the argument. -/
+
 private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A + B) τ =
@@ -212,8 +168,7 @@ private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from B) τ := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The tensor covariant derivative distributes over a pointwise difference of smooth
-sections, as continuous linear maps at a point. -/
+
 private lemma tensorCov_toFun_sub (g : SmoothRiemannianMetric I M) (k : ℕ)
     {P Q : Π y : M, TensorRSSpace 0 k I y} {x : M}
     (hP : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 k ℝ E)) ∞
@@ -239,9 +194,7 @@ private lemma tensorCov_toFun_sub (g : SmoothRiemannianMetric I M) (k : ℕ)
   exact eq_sub_of_add_eq hadd.symm
 
 set_option linter.unusedSectionVars false in
-/-- **Slot-`0` read of the covariant gradient at an arbitrary direction.** Reading slot `0`
-of the unit-evaluated covariant gradient `(∇P)(y)(unit)` along a tangent vector `w`
-recovers the unit-evaluated directional covariant derivative of `P` along `w`. -/
+
 private lemma curry_covGrad_unit_read (g : SmoothRiemannianMetric I M) (k : ℕ)
     (P : SmoothCcTensor g 0 k) (y : M) (w : TangentSpace I y) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) k y
@@ -254,9 +207,7 @@ private lemma curry_covGrad_unit_read (g : SmoothRiemannianMetric I M) (k : ℕ)
   curry_unitGradFieldGen_eq (I := I) (M := M) g k P y w
 
 set_option linter.unusedSectionVars false in
-/-- **Wrapped slot-`0` read of the covariant gradient at an arbitrary direction.** The
-`tensor0SAsRS`-wrapped slot-`0` `w`-read of the unit-evaluated covariant gradient is the
-directional covariant derivative of `P` along `w`, as a `(0, k)`-Hom-tensor fibre value. -/
+
 private lemma slotRead_covGrad_dir (g : SmoothRiemannianMetric I M) (k : ℕ)
     (P : SmoothCcTensor g 0 k) (y : M) (w : TangentSpace I y) :
     tensor0SAsRS (I := I) (M := M) y
@@ -269,9 +220,7 @@ private lemma slotRead_covGrad_dir (g : SmoothRiemannianMetric I M) (k : ℕ)
   exact tensor0SAsRS_rs_unit (I := I) (M := M) k y _
 
 set_option linter.unusedSectionVars false in
-/-- **Section-level collapse of the wrapped slot-`0` read of the covariant gradient.** As
-raw sections, the `tensor0SAsRS`-wrapped slot-`0` `B`-read of the unit-evaluated covariant
-gradient of `P` is the directional covariant derivative `∇_B P`. -/
+
 private lemma slotRead_covGrad_section (g : SmoothRiemannianMetric I M) (k : ℕ)
     (P : SmoothCcTensor g 0 k) (B : Π b : M, TangentSpace I b) :
     (fun y : M => tensor0SAsRS (I := I) (M := M) y
@@ -283,9 +232,6 @@ private lemma slotRead_covGrad_section (g : SmoothRiemannianMetric I M) (k : ℕ
   funext y
   exact slotRead_covGrad_dir (I := I) (M := M) g k P y (B y)
 
-/-- The directionally-derived gradient field `∇_V(∇S)` packaged as a smooth
-compactly-supported `(0, s + 1)`-tensor, the input to the slot-`0` curry covariant
-Leibniz rule at third order. -/
 private def covApplyCovGradCc (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) {V : Π b : M, TangentSpace I b}
     (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -298,15 +244,6 @@ private def covApplyCovGradCc (g : SmoothRiemannianMetric I M) (s : ℕ)
         (covGrad (I := I) (M := M) g 0 s S).toSection.contMDiff hV }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- **The per-fixed-field third-order carrier identity.** For fixed smooth fields `V, X`,
-the slot-`0` `X`-read of the per-`V` third-order defect `∇²_{V,V}(∇S) − ∇(∇²_{V,V}S)` is
-the seven-term curvature carrier combination
-```
-R(V,X)(∇_V S) + ∇_V(R(V,X)S) + R(∇_V X, V)S + R(X, ∇_V V)S
-  − ∇_{R(V,X)V}S − ∇²_{∇_X V, V}S − ∇²_{V, ∇_X V}S.
-```
-This is the pointwise telescoping core of the rank-`0` integrated Bochner–Weitzenböck
-assembly. -/
 theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {V X : Π b : M, TangentSpace I b}
@@ -367,7 +304,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
   have hW := covApply_contMDiff (cov := LeviCivita (I := I) g) hVs hVs
   have hXV := covApply_contMDiff (cov := LeviCivita (I := I) g) hVs hXs
   have hVX := covApply_contMDiff (cov := LeviCivita (I := I) g) hXs hVs
-  -- Bracket substitutions from torsion-freeness.
+  
   have hbrx : VectorField.mlieBracket I V X x =
       covApply (LeviCivita (I := I) g) V X x - covApply (LeviCivita (I := I) g) X V x :=
     (covApply_sub_eq_mlieBracket (LeviCivita (I := I) g)
@@ -388,18 +325,18 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         ((hVs y).mdifferentiableAt (by simp)) ((hXs y).mdifferentiableAt (by simp))).symm
     rw [covApply_apply, hbry, map_sub]
     rfl
-  -- The slot-0 X-read collapses of the wrapped covariant-gradient sections.
+  
   have hρ0 := slotRead_covGrad_section (I := I) (M := M) g s S X
   have hρ0' := slotRead_covGrad_section (I := I) (M := M) g s S
     (covApply (LeviCivita (I := I) g) V X)
-  -- The three slot-0 curry Leibniz applications.
+  
   have hM3a := tensor0S_curry_covApply_slot0_leibniz_fib (I := I) (M := M) g s
     (covApplyCovGradCc (I := I) (M := M) g s S hVs) hVs hXs x
   have hM3b := tensor0S_curry_covApply_slot0_leibniz_fib (I := I) (M := M) g s
     (covGrad (I := I) (M := M) g 0 s S) hW hXs x
   have hM3c := tensor0S_curry_covApply_slot0_leibniz_fib (I := I) (M := M) g s
     (covGrad (I := I) (M := M) g 0 s S) hVs hXV x
-  -- Collapse of the slot-0 X-read of ∇_V(∇S): a difference of covApply sections.
+  
   have hρ1 : (fun y : M => tensor0SAsRS (I := I) (M := M) y
       ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
@@ -432,7 +369,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         ((LeviCivita (I := I) g).toFun X y (V y))]
     rw [hρ0]
     rfl
-  -- The value-level identity in the (0, s)-tensor fibre.
+  
   have hVAL : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         tensorSecondCovDeriv (I := I) g 0 (s + 1) V V
@@ -474,7 +411,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
             (fun y : M => (LeviCivita (I := I) g).toFun V y (X y))
             (fun y : M => S.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
-    -- LEFT SIDE. Split the diagonal second derivative of ∇S.
+    
     have hD2split : tensorSecondCovDeriv (I := I) g 0 (s + 1) V V
         (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x =
         covApply (tensorCov (I := I) g 0 (s + 1)) V
@@ -483,7 +420,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x := by
       rw [tensorSecondCovDeriv_def]
       rfl
-    -- Split the gradient of the packaged diagonal second derivative.
+    
     have hL2a : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (covGrad (I := I) (M := M) g 0 s
@@ -521,7 +458,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         (covApplyRS_contMDiff (I := I) g 0 s
           (covApplyRS_contMDiff (I := I) g 0 s hSAt hVs) hVs)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hW)
-    -- The first Leibniz peel: read of ∇_V(∇_V ∇S).
+    
     have hT1 : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         covApply (tensorCov (I := I) g 0 s) V
           (fun y : M => tensor0SAsRS (I := I) (M := M) y
@@ -563,7 +500,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (covApplyRS_contMDiff (I := I) g 0 s hSAt hXs) hVs)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hXV)]
       rfl
-    -- The read of ∇_{∇_V V}(∇S): collapse of the M3b first term.
+    
     have hT3 : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         covApply (tensorCov (I := I) g 0 s) (covApply (LeviCivita (I := I) g) V V)
           (fun y : M => tensor0SAsRS (I := I) (M := M) y
@@ -591,7 +528,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
                   (unitZeroSec (I := I) (M := M) y))) (X y))) x
             (covApply (LeviCivita (I := I) g) V V x) from rfl]
       rw [hρ0]
-    -- The reads of the correction terms through the covariant gradient.
+    
     have hq2 : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (covApplyCovGradCc (I := I) (M := M) g s S hVs).toSection x)
@@ -656,7 +593,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (unitZeroSec (I := I) (M := M) x) :=
       curry_covGrad_unit_read (I := I) (M := M) g s S x
         ((LeviCivita (I := I) g).toFun X x (covApply (LeviCivita (I := I) g) V V x))
-    -- The outer swap of the third-order block.
+    
     have hswap := secondCovDeriv_swap_outer (cov := tensorCov (I := I) g 0 s)
       (B := V) (W := X) (T := fun z : M => S.toSection z) (x := x) hVs hXs hSAt
     have hsw2 : (tensorCov (I := I) g 0 s).toFun
@@ -687,7 +624,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hXV)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hVX)]
       rfl
-    -- RIGHT SIDE. Antisymmetric pairs as curvature operators.
+    
     have hanti1 : tensorSecondCovDeriv (I := I) g 0 s
         (covApply (LeviCivita (I := I) g) V X) V (fun z : M => S.toSection z) x -
         tensorSecondCovDeriv (I := I) g 0 s V
@@ -702,7 +639,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         riemannOp (tensorCov (I := I) g 0 s) x (X x)
           (covApply (LeviCivita (I := I) g) V V x) (S.toSection x) :=
       tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 s hXs hW hSAt
-    -- The tangent curvature direction.
+    
     have ht5dir : riemannOp (LeviCivita (I := I) g) x (V x) (X x) (V x) =
         (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g) X V) x (V x) -
         (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g) V V) x (X x) -
@@ -710,7 +647,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (LeviCivita (I := I) g).toFun V x (covApply (LeviCivita (I := I) g) X V x)) := by
       rw [← riemannSec_eq_riemannOp_smooth (cov := LeviCivita (I := I) g) hVs hXs hVs]
       rw [riemannSec_def, hbrx, map_sub]
-    -- D²-definitional expansions.
+    
     have hd31 : tensorSecondCovDeriv (I := I) g 0 s
         (covApply (LeviCivita (I := I) g) V X) V (fun z : M => S.toSection z) x =
         (tensorCov (I := I) g 0 s).toFun
@@ -769,17 +706,17 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
             (V x)) := by
       rw [tensorSecondCovDeriv_def]
       rfl
-    -- Assemble: expand the left side into unit-evaluated atoms.
+    
     rw [hD2split, rs_sub_apply', map_sub, ContinuousLinearMap.sub_apply]
     rw [hM3a, hM3b]
     rw [hT1, hT3, hq2, hq4]
     rw [hL2a, hL2b, ContinuousLinearMap.sub_apply, rs_sub_apply']
-    -- Swap the third-order block and distribute.
+    
     rw [hswap]
     simp only [rs_add_apply']
     rw [hsw2, hsw4]
     simp only [rs_sub_apply']
-    -- Expand the right side.
+    
     rw [show riemannOp (tensorCov (I := I) g 0 s) x
         ((LeviCivita (I := I) g).toFun X x (V x)) (V x) (S.toSection x) =
         riemannOp (tensorCov (I := I) g 0 s) x
@@ -799,7 +736,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
     simp only [map_sub]
     simp only [rs_sub_apply']
     abel
-  -- Read the value identity on the model tuple.
+  
   have h := congrArg (fun t : Tensor0SSpace s I x => Tensor0SSpace.toModel t m) hVAL
   simp only [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply] at h
   exact h

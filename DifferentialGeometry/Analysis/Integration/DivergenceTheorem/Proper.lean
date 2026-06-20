@@ -14,49 +14,6 @@ import Mathlib.Topology.Algebra.Support
 import Mathlib.Topology.Compactness.LocallyFinite
 import Mathlib.Topology.Compactness.LocallyCompact
 
-/-!
-# Divergence theorem for compactly-supported sections on a boundaryless Riemannian manifold
-
-For a smooth Riemannian metric `g` on a σ-compact Hausdorff smooth manifold `M`
-without boundary, and a smooth tangent section `X` with compact support, the
-integral of the global divergence `divergence_g g X` against the canonical
-Riemannian volume measure vanishes:
-$$\int_M \operatorname{div}_g(X)\,d\mu_g = 0.$$
-
-This generalises `integral_divergence_eq_zero_of_compact` from a closed manifold
-to a manifold of any (possibly non-compact) σ-compact topology, replacing the
-hypothesis `[CompactSpace M]` with the explicit hypothesis `HasCompactSupport X`.
-
-## Strategy
-
-Since `tsupport X` is compact, the family of POU indices `α : M` for which
-`tsupport (chartAtlasPOU α) ∩ tsupport X` is non-empty is finite (by
-`LocallyFinite.finite_nonempty_inter_compact` applied to the closure of the
-locally-finite cover by POU supports). Outside this finite set the chart-local
-integrand vanishes, allowing the global integral to be expressed as a finite
-sum of POU-weighted chart-local integrals.
-
-The chart-local integration-by-parts step requires the test function to have
-compact support globally (not just `tsupport ⊆ chart α source`). On a
-non-compact `M` the POU pieces `chartAtlasPOU α` are not, in general, of
-compact support. We instead choose a smooth cutoff `χ : M → ℝ` with compact
-support that is identically `1` on a neighborhood of `tsupport X`, and apply
-chart-local IBP to the products `χ · (chartAtlasPOU α)` (which inherit compact
-support from `χ`). Since `divergence_g g X` is itself supported on `tsupport
-X`, multiplying its weighted form by `χ` does not change the integral.
-
-## Main results
-
-* `pouFinset_for_compactSet`: for compact `K ⊆ M`, the set of POU indices `α`
-  with `tsupport (chartAtlasPOU α) ∩ K ≠ ∅` is finite.
-* `tsupport_divergence_g_subset`: `tsupport (divergence_g g X) ⊆ tsupport X`.
-* `tsupport_tangentSectionAction_subset`:
-  `tsupport (tangentSectionAction X f) ⊆ tsupport X`.
-* `integral_divergence_eq_zero_of_hasCompactSupport`: the divergence theorem on
-  a σ-compact boundaryless Riemannian manifold for compactly-supported smooth
-  tangent sections.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -78,11 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For compact `K ⊆ M`, the set of POU indices `α : M` for which
-`tsupport (chartAtlasPOU α) ∩ K ≠ ∅` is finite. The proof applies
-`LocallyFinite.finite_nonempty_inter_compact` to the locally-finite family
-`fun α : M => tsupport (chartAtlasPOU α)` (locally finite by closure of the
-locally-finite family of supports). -/
 lemma pouFinset_for_compactSet
     [T2Space M] [SigmaCompactSpace M]
     {K : Set M} (hK : IsCompact K) :
@@ -157,7 +109,6 @@ private lemma localDivergence_zero_of_eventuallyEq_zero [I.Boundaryless]
     exact hsum_zero i]
   rw [zero_div]
 
-/-- If `X` vanishes on a neighborhood of `x`, then `divergence_g g X x = 0`. -/
 lemma divergence_g_zero_of_eventuallyEq_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -166,8 +117,6 @@ lemma divergence_g_zero_of_eventuallyEq_zero [I.Boundaryless] [T2Space M]
   rw [divergence_g_def]
   exact localDivergence_zero_of_eventuallyEq_zero (I := I) g x X (mem_chart_source H x) hev
 
-/-- The support of `divergence_g g X` is contained in the topological support
-of `X`. -/
 lemma support_divergence_g_subset [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -183,23 +132,18 @@ lemma support_divergence_g_subset [I.Boundaryless] [T2Space M]
     exact hy (subset_tsupport _ hyS)
   exact hx (divergence_g_zero_of_eventuallyEq_zero (I := I) g X hev)
 
-/-- The topological support of `divergence_g g X` is contained in the
-topological support of `X`. -/
 lemma tsupport_divergence_g_subset [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     tsupport (divergence_g (I := I) g X) ⊆ tsupport X :=
   closure_minimal (support_divergence_g_subset (I := I) g X) (isClosed_tsupport _)
 
-/-- If `X` has compact support, so does `divergence_g g X`. -/
 lemma hasCompactSupport_divergence_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯} (hX : HasCompactSupport X) :
     HasCompactSupport (divergence_g (I := I) g X) :=
   hX.mono' (support_divergence_g_subset (I := I) g X)
 
-/-- The directional derivative `tangentSectionAction X f` vanishes wherever `X`
-vanishes (because `mfderiv f x` applied to the zero vector is zero). -/
 lemma tangentSectionAction_zero_of_X_zero
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (f : M → ℝ) {x : M} (hx : X x = (0 : TangentSpace I x)) :
@@ -207,8 +151,6 @@ lemma tangentSectionAction_zero_of_X_zero
   change (mfderiv I 𝓘(ℝ, ℝ) f x) (X x) = 0
   rw [hx, ContinuousLinearMap.map_zero]
 
-/-- The support of `tangentSectionAction X f` is contained in the support of
-`X` (as functions on `M`). -/
 lemma support_tangentSectionAction_subset
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) :
     Function.support (tangentSectionAction (I := I) X f) ⊆
@@ -218,8 +160,6 @@ lemma support_tangentSectionAction_subset
   rw [Function.notMem_support] at hne
   exact hx (tangentSectionAction_zero_of_X_zero (I := I) X f hne)
 
-/-- The topological support of `tangentSectionAction X f` is contained in the
-topological support of `X`. -/
 lemma tsupport_tangentSectionAction_subset
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (f : M → ℝ) :
     tsupport (tangentSectionAction (I := I) X f) ⊆ tsupport X :=
@@ -227,8 +167,6 @@ lemma tsupport_tangentSectionAction_subset
     ((support_tangentSectionAction_subset (I := I) X f).trans
       (subset_tsupport (X : ∀ x, TangentSpace I x))) (isClosed_tsupport _)
 
-/-- If `X` has compact support, so does the directional derivative
-`tangentSectionAction X f`. -/
 lemma hasCompactSupport_tangentSectionAction
     {X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯} (hX : HasCompactSupport X)
     (f : M → ℝ) :
@@ -307,10 +245,6 @@ private lemma withDensity_pou_restrict_eq_zero_of_disjoint
   rw [hρα_zero]
   simp
 
-/-- Restriction equality: on a compact set `K`, the global Riemannian volume
-measure equals the finite-Finset sum of POU-weighted chart-local measures, the
-sum running over the (finite) set of POU indices whose topological support
-intersects `K`. -/
 private lemma riemannianVolumeMeasure_restrict_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -366,9 +300,6 @@ private lemma riemannianVolumeMeasure_restrict_eq_finset_sum
         (fun x : M => ENNReal.ofReal (ρ α x))).restrict K from rfl]
     rw [ih, ← Measure.restrict_add]
 
-/-- For continuous compactly-supported `h : M → ℝ`, the integral against the
-canonical Riemannian volume measure decomposes as a finite sum over the relevant
-POU Finset of POU-weighted chart-local integrals. -/
 private lemma integral_riemannianVolumeMeasure_of_compactSupport_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -534,15 +465,6 @@ private lemma exists_smooth_cutoff_compactSupport_one_nhds
   by_contra hyL
   exact hy (hf_zero y hyL)
 
-/-- **Divergence theorem on a σ-compact boundaryless Riemannian manifold for
-compactly-supported sections.** For any smooth tangent section `X` with compact
-support on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)` without
-boundary, the integral of the divergence `divergence_g g X` against the
-canonical Riemannian volume measure vanishes.
-
-Compared to `integral_divergence_eq_zero_of_compact`, which requires the manifold
-to be compact, this version replaces `[CompactSpace M]` with the explicit
-hypothesis `HasCompactSupport X`. -/
 theorem integral_divergence_eq_zero_of_hasCompactSupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

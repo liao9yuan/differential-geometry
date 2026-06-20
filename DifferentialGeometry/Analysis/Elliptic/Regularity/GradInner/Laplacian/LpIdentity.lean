@@ -2,69 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothM
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
 
-/-!
-# Manifold-side `Lp`-class identity for `gradInnerCLM g φ u_h`
-
-For a closed Riemannian manifold `(M, g)` and an arbitrary smooth scalar
-`φ : C^∞⟮I, M; ℝ⟯`, this module derives an explicit `Lp`-class identity for
-twice the gradient inner product `2 · gradInnerCLM g φ u_h` valid for every
-`u_h ∈ laplacianDomain g`.
-
-The identity follows from the `(1-Δ)`-preimage formula
-`laplacianDomain.preimage⟨smoothMulH1Compl g φ u_h⟩ = fHLeibnizGeneral g φ u_h hu_h`
-combined with the definitional unfolding of `fHLeibnizGeneral` and
-`fHLeibnizGeneralResidualCLM`.
-
-## Main results
-
-* `gradInnerCLM_eq_two_inv_preimageDiff` — for `u_h ∈ laplacianDomain g`:
-
-  ```
-  2 • gradInnerCLM g φ u_h
-    = smoothMulLp g φ (preimage⟨u_h⟩)
-      − preimage⟨smoothMulH1Compl g φ u_h⟩
-      − smoothMulLp g (Δφ) (H1ComplToLp u_h).
-  ```
-
-  This rearranges the existing preimage decomposition; for
-  `φ := chartAtlasPOU I M α` it specialises to (and is mathematically
-  equivalent to) `ResidualLpDecomposition.fHLeibnizGeneralResidualCLM_eq_preimageDiff`.
-
-* `gradInnerCLM_mem_H1ComplToLp_laplacianDomain_iff` — the equivalence
-
-  ```
-  gradInnerCLM g φ u_h ∈ H1ComplToLp '' (laplacianDomain g)
-    ↔ smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2,
-  ```
-
-  proved for `u_h ∈ laplacianDomainPow g 2`. The forward direction is the
-  iterated regularity closure for `smoothMulH1Compl`; the reverse is the
-  rearrangement of the Lp identity above using that the other two summands
-  always lie in the image of the resolvent.
-
-* `gradInnerCLM_mem_image_implies_smoothMulH1Compl_mem_pow_two` — direct
-  implication form of the equivalence, packaged for downstream use.
-
-## Connection to the iterated regularity bottleneck
-
-For `u_h ∈ laplacianDomainPow g 2`, the membership
-`smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2` is the iterated closure of
-the Laplacian domain under smooth multiplication. By the equivalence above,
-this is precisely the question whether `gradInnerCLM g φ u_h` lifts to an
-H¹Compl element in `laplacianDomain g`.
-
-Equivalently: whether `g(∇φ, ∇u_h)` is H¹ chart-wise, which is true
-mathematically (each chart-side ∂_j of `u_h` is H¹ for `u_h ∈ laplacianDomain g`,
-and smooth-bounded `g_inv^{ij} · ∂_i φ ∘ symm` times H¹ is H¹). The chart-side
-non-smooth formalisation requires a "raw" chart-pushed weak-partial Lp class
-without partition-of-unity weight, which is a separate substantial
-infrastructure item.
-
-This file does NOT attempt that chart-side construction. It exposes the
-equivalence cleanly so that the bottleneck localizes to a single, sharp
-mathematical statement.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -93,38 +30,18 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Algebraic rearrangement in an additive commutative group:
-`a = b - c - d ↔ c = b - a - d`. -/
 private lemma sub_rearrange_three {α : Type*} [AddCommGroup α] {a b c d : α}
     (h : a = b - c - d) : c = b - a - d := by
   have hcomp : c = b - (b - c - d) - d := by abel
   rw [← h] at hcomp
   exact hcomp
 
-/-- Algebraic rearrangement in an additive commutative group:
-`a + b = c - d ↔ a = c - b - d`. (We don't actually need this; see
-`sub_rearrange_three` instead.) -/
 private lemma add_sub_rearrange {α : Type*} [AddCommGroup α] {a b c d : α}
     (h : a + b = c - d) : a = c - b - d := by
   have : a = c - d - b := by
     rw [← h]; abel
   rw [this]; abel
 
-/-- **The general manifold-side `Lp`-class identity for `2 • gradInnerCLM g φ u_h`.**
-
-For an arbitrary smooth scalar `φ : C^∞⟮I, M; ℝ⟯` and `u_h ∈ laplacianDomain g`,
-twice the gradient inner product splits as the difference of two
-`(1-Δ_g)`-preimages plus the smooth-multiplication of `u_h` by `Δφ`:
-
-```
-2 • gradInnerCLM g φ u_h
-  = smoothMulLp g φ (preimage⟨u_h⟩)
-    − preimage⟨smoothMulH1Compl g φ u_h⟩
-    − smoothMulLp g (Δφ) (H1ComplToLp u_h).
-```
-
-This generalises `ResidualLpDecomposition.fHLeibnizGeneralResidualCLM_eq_preimageDiff`
-from `φ := chartAtlasPOU I M α` to arbitrary smooth `φ`. -/
 theorem gradInnerCLM_eq_two_inv_preimageDiff
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -166,8 +83,6 @@ theorem gradInnerCLM_eq_two_inv_preimageDiff
   rw [← h_rearrange]
   abel
 
-/-- The auxiliary lift of `preimage⟨u_h⟩ ∈ Lp` to an `H1Compl` element in
-`laplacianDomain g`, available for `u_h ∈ laplacianDomainPow g 2`. -/
 noncomputable def preimageLift
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -196,9 +111,6 @@ lemma H1ComplToLp_preimageLift
   (Classical.choose_spec (laplacianDomainPow_two_preimage_eq
     (I := I) (M := M) g hu_h)).2
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the `Lp`-class
-`smoothMulLp g φ (preimage⟨u_h⟩)` lifts to `H1Compl`: it is the L²-image
-of `smoothMulH1Compl g φ (preimageLift g hu_h) ∈ laplacianDomain g`. -/
 theorem smoothMulLp_preimage_in_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -219,10 +131,6 @@ theorem smoothMulLp_preimage_in_image_laplacianDomain
   · rw [H1ComplToLp_smoothMulH1Compl]
     rw [H1ComplToLp_preimageLift]
 
-/-- For any `u_h ∈ H1Compl g`, the `Lp`-class
-`smoothMulLp g (Δφ) (H1ComplToLp u_h)` lifts to `H1Compl` when
-`u_h ∈ laplacianDomain g`: it equals `H1ComplToLp(smoothMulH1Compl g (Δφ) u_h)`
-with `smoothMulH1Compl g (Δφ) u_h ∈ laplacianDomain g`. -/
 theorem smoothMulLp_DeltaPhi_in_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -240,13 +148,6 @@ theorem smoothMulLp_DeltaPhi_in_image_laplacianDomain
   · exact h_sM_mem
   · rw [H1ComplToLp_smoothMulH1Compl]
 
-/-- **Reverse implication (gradInnerCLM image ⊆ iterated closure)**.
-
-For `u_h ∈ laplacianDomainPow g 2`, if `gradInnerCLM g φ u_h` lifts to an
-`H1Compl` element in `laplacianDomain g`, then so does
-`preimage⟨smoothMulH1Compl g φ u_h⟩` (the `Lp` class `(1-Δ_g)(φ · u_h)`).
-This is precisely the iterated closure
-`smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2`. -/
 theorem smoothMulH1Compl_mem_pow_two_of_gradInnerCLM_mem_image
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -309,11 +210,6 @@ theorem smoothMulH1Compl_mem_pow_two_of_gradInnerCLM_mem_image
   rw [hf]
   rfl
 
-/-- **Forward implication (iterated closure → gradInnerCLM image)**.
-
-For `u_h ∈ laplacianDomainPow g 2`, if `smoothMulH1Compl g φ u_h ∈
-laplacianDomainPow g 2`, then `gradInnerCLM g φ u_h` lifts to an
-`H1Compl` element in `laplacianDomain g`. -/
 theorem gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -355,20 +251,6 @@ theorem gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two
     rw [smul_smul]
     norm_num
 
-/-- **Equivalence theorem**: for `u_h ∈ laplacianDomainPow g 2`,
-
-```
-smoothMulH1Compl g φ u_h ∈ laplacianDomainPow g 2
-  ↔ gradInnerCLM g φ u_h ∈ H1ComplToLp '' laplacianDomain g.
-```
-
-This localizes the iterated-closure question to a single sharp statement:
-whether the gradient-inner-product Lp class is in the image of
-`H1ComplToLp` restricted to `laplacianDomain g`. Equivalently, whether
-`g(∇φ, ∇u_h)` is H¹ chart-wise (the "H²-of-product" question for `φ · u_h`).
-
-The forward direction is `gradInnerCLM_mem_image_of_smoothMulH1Compl_mem_pow_two`;
-the reverse is `smoothMulH1Compl_mem_pow_two_of_gradInnerCLM_mem_image`. -/
 theorem smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -383,8 +265,6 @@ theorem smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image
   exact smoothMulH1Compl_mem_pow_two_of_gradInnerCLM_mem_image
     (I := I) (M := M) g φ hu_h
 
-/-- The smooth scalar representing the pointwise gradient inner product
-`x ↦ g.inner x (∇φ x) (∇v x)` for smooth `φ, v`. -/
 noncomputable def gradInnerSmoothBundle
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     SmoothScalar g where
@@ -408,8 +288,6 @@ noncomputable def gradInnerSmoothBundle
     (gradInnerSmoothBundle (I := I) (M := M) g φ v).toFun x =
       g.inner x (gradFun (I := I) g φ x) (gradFun (I := I) g v.toFun x) := rfl
 
-/-- For smooth `v`, `gradInnerSmooth g φ v` (the Lp class) equals
-`smoothToLp g (gradInnerSmoothBundle g φ v)`. -/
 theorem gradInnerSmooth_eq_smoothToLp_bundle
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerSmooth (I := I) (M := M) g φ v =
@@ -421,13 +299,6 @@ theorem gradInnerSmooth_eq_smoothToLp_bundle
   refine Filter.Eventually.of_forall ?_
   intro x; rfl
 
-/-- **Smooth-case discharge**: for smooth `v`, the gradient inner product
-`gradInnerCLM g φ (smoothToH1Compl v)` lies in `H1ComplToLp '' laplacianDomain g`.
-
-The discharge is direct: the smooth scalar
-`gradInnerSmoothBundle g φ v` has its `smoothToH1Compl` lift in
-`laplacianDomain g`, and the `H1ComplToLp` of that lift equals
-`gradInnerCLM g φ (smoothToH1Compl v) = gradInnerSmooth g φ v`. -/
 theorem gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     gradInnerCLM (I := I) (M := M) g φ
@@ -443,13 +314,6 @@ theorem gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     rw [gradInnerCLM_smoothToH1Compl]
     rw [gradInnerSmooth_eq_smoothToLp_bundle]
 
-/-- Specialised form: for smooth `v`, the bottleneck statement (`gradInnerCLM
-g φ u_h ∈ H1ComplToLp '' laplacianDomain g`) holds. Hence by the equivalence
-`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`, the iterated closure
-`smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2` follows once
-`smoothToH1Compl v ∈ laplacianDomainPow g 2`. The latter is automatic since
-the variational Laplacian on smooth scalars agrees with the classical
-Laplacian, which iterates within smooth scalars. -/
 theorem smoothToH1Compl_mem_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :
     smoothToH1Compl (I := I) (M := M) g v ∈
@@ -471,13 +335,6 @@ theorem smoothToH1Compl_mem_laplacianDomainPow_two
     v.oneSubLapClassical]
   rw [H1ComplToLp_smoothToH1Compl]
 
-/-- **Smooth-case full discharge**: for smooth `v`,
-`smoothMulH1Compl g φ (smoothToH1Compl v) ∈ laplacianDomainPow g 2`.
-
-This is the smooth case of the iterated closure bottleneck. It follows from
-`gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain` (the smooth-case
-discharge of `gradInnerCLM`) combined with the equivalence theorem
-`smoothMulH1Compl_mem_pow_two_iff_gradInnerCLM_mem_image`. -/
 theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulH1Compl (I := I) (M := M) g φ

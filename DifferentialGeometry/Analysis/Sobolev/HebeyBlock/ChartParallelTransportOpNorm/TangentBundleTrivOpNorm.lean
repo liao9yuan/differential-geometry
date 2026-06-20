@@ -3,23 +3,6 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentContinuousRiemann
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 
-/-!
-# Unconditional operator-norm bound for the tangent trivialisation on compact sets
-
-Given a smooth Riemannian metric `g` on a compact boundaryless manifold `M`,
-the operator norm
-`‖(trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b‖`
-(measured with the Riemannian norm on the tangent fibre) is uniformly bounded
-for `b` in any compact `K ⊆ (trivializationAt E (TangentSpace I) α).baseSet`.
-
-The bound uses the Riemannian norm on `TangentSpace I b` derived from `g`.
-With this norm, Mathlib's `eventually_norm_trivializationAt_lt` applies
-directly: for each point `y₀`, the trivialisation centred at `y₀` has
-locally bounded operator norm. A `coordChangeL` factorisation reduces
-`(triv α).clmAt b` to `coordChangeL(y₀→α) ∘ (triv y₀).clmAt b`, and a
-finite cover of the compact set `K` gives the global bound.
--/
-
 noncomputable section
 
 open Bundle ContinuousLinearMap

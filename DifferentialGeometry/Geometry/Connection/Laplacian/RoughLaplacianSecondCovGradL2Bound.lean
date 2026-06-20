@@ -3,52 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Pack
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
-/-!
-# The rough-Laplacian-to-second-covariant-gradient `L²` trace bound (uniform in valence)
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`,
-this file proves the elementary metric-trace half of the closed-manifold Bochner package: the
-metric `L²` norm of the rough (connection) Laplacian `Δ_∇ S := rawTensorConnLapSmooth g 0 s S`
-of a smooth compactly-supported `(0, s)`-tensor field `S` is controlled, with a single
-valence-uniform multiplier `K = dim`, by the metric `L²` norm of the second iterated covariant
-gradient `∇²S = covGrad g 0 (s+1) (covGrad g 0 s S)`:
-
-```
-‖Δ_∇ S‖_{L²} ≤ dim · ‖∇²S‖_{L²}.
-```
-
-This is the companion of the on-disk integration-by-parts half
-`covGrad_l2NormSq_le_rawConnLap_mul_self_gen` (`IntegratedOrder2Garding.lean`).
-
-## The mechanism
-
-The rough Laplacian is the metric trace of the Hessian
-(`rawTensorConnLap_eq_metricTraceHessian`): with `B_i := smoothOrthoFrame g x i` the smooth
-`g_x`-orthonormal frame,
-```
-Δ_∇ S (x) = ∑_i ∇²_{B_i, B_i} S (x)        (`metricTraceHessian`).
-```
-Each diagonal summand `∇²_{B_i, B_i} S (x)` is the `(B_i(x), B_i(x))`-evaluation of the second
-covariant gradient `∇²S` in its leftmost two slots; since `B_i(x)` is `g_x`-unit, its intrinsic
-fibre norm is dominated by the full fibre norm of `∇²S(x)` (the orthonormal-frame component
-bound — the genuine general-valence currying, isolated as `secondCovDeriv_unit_frame_fiberNormSq_le`).
-The diagonal trace is a sum of `dim` such summands, so by the `n`-sub-additivity of the squared
-fibre norm (`riemannianFiberNormSq_sum_le_card_mul`),
-```
-rfns(Δ_∇ S)(x) ≤ dim · ∑_i rfns(∇²_{B_i, B_i} S)(x) ≤ dim · dim · rfns(∇²S)(x),
-```
-and integrating this pointwise bound over the compact manifold via the finite-sum
-pointwise-to-`L²` packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum` gives the
-displayed `L²` inequality with `K := dim`.
-
-## Sign / convention
-
-Geometer convention `Δ_∇ = ∑_i ∇²_{B_i, B_i}` for the rough Laplacian (the frame trace
-`rawTensorConnLapSmooth`). The covariant gradient `covGrad g 0 s` raises the tensor rank from
-`(0, s)` to `(0, s + 1)`. All fibre norms are the intrinsic Riemannian fibre norm
-`riemannianFiberNormSq`; the metric `L²` norm of a `SmoothCcTensor` is `tensorL2Norm g 0 s S.toFun`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -81,9 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The empty-index `g`-orthonormal coframe covector `coframeS g x 0 e K₀` (the constant-`1`
-`(0, 0)`-tensor) coincides with the unit `(0, 0)`-tensor `unitZeroSec x`. Both are the
-`Fin 0`-multilinear map with scalar value `1`, so they agree as elements of `Tensor0SSpace 0`. -/
 private lemma coframeS_zero_eq_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) :
@@ -108,28 +59,6 @@ private lemma coframeS_zero_eq_unitZeroSec
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
   rw [hL, hR]
 
-/-- **The two-leftmost-slot unit-vector fibre-norm slice bound (general valence).**
-
-For a `(0, s + 1 + 1)`-tensor `T` at `x`, a tangent vector `w` of `g_x`-length `≤ 1`, and any
-`(0, s)`-tensor `U` whose components are the two-leftmost-slot evaluation of `T` (read at the
-unit `(0, 0)`-tensor) at `(w, w)` — i.e.
-`U.toModel m = (T(unit)).toModel (w ::ᵥ w ::ᵥ m)` for every `Fin s`-tuple `m` — the squared
-intrinsic fibre norm of `U` is dominated by that of `T`:
-```
-rfns(U)(x) ≤ rfns(T)(x).
-```
-
-The proof expands the `g_x`-unit vector `w` in the intrinsic orthonormal tangent frame `e` (the
-same frame the fibre norm is built on) as `w = ∑_a c_a e_a` with `∑_a c_a² = g_x(w,w) ≤ 1`.
-Reading each Parseval component of `U` off the unit-evaluation on the frame tuple `e_J`
-(`fiberNormSqComponent`), the two-slot evaluation `T(unit).toModel(w ::ᵥ w ::ᵥ e_J)` distributes
-— via the **clean continuous-linear-map linearity** of the slot-`0` curry `tensor0S_curry`
-(applied in each of the two leftmost slots, with `tensor0S_curry_apply_eval`) — into
-`∑_{a,b} c_a c_b · T(unit).toModel(e_a ::ᵥ e_b ::ᵥ e_J)`. The Cauchy–Schwarz inequality over the
-frame-pair index (`Finset.sum_mul_sq_le_sq_mul_sq`) together with `∑_{a,b}(c_a c_b)² = g_x(w,w)²
-≤ 1` gives `U.toModel(e_J)² ≤ ∑_{a,b} T(unit).toModel(e_a ::ᵥ e_b ::ᵥ e_J)²`; summing over `J`
-and re-indexing the triple sum `(a, b, J) ↦ a ::ᵥ b ::ᵥ J` (two `Fin.consEquiv`s) recovers the
-full rank-`(s + 1 + 1)` Parseval frame expansion of `rfns(T)`. -/
 private theorem riemannianFiberNormSq_twoSlotUnitEval_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : Tensor0SBundle.TensorRSSpace 0 (s + 1 + 1) I x)
@@ -147,8 +76,8 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
     riemannianFiberNormSq (I := I) (M := M) g 0 s x U ≤
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x T := by
   classical
-  -- Build the internal `g`-orthonormal frame `e` (the one `riemannianFiberNormSq` uses), so the
-  -- Parseval representations at ranks `s` and `s + 1 + 1` both hold by `rfl`.
+  
+  
   let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
   have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt x
@@ -165,7 +94,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
   set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
   have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
     fun u v => rfl
-  -- Parseval sum-of-squares and the tangent-vector frame expansion.
+  
   have hpars : ∀ v : TangentSpace I x, ∑ i : Fin n, g.inner x (e i) v ^ 2 = g.inner x v v := by
     intro v
     have h := OrthonormalBasis.sum_sq_inner_right eob v
@@ -191,25 +120,25 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x S =
         ∑ K : Fin 0 → Fin n, ∑ J : Fin (s + 1 + 1) → Fin n,
           fiberNormSqSummand (I := I) (M := M) g x 0 (s + 1 + 1) S n e K J := fun S => rfl
-  -- Abbreviations: the unit-evaluations of `U` and `T` as `(0, s)` / `(0, s+1+1)`-tensors.
+  
   set Uu : Tensor0SSpace s I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from U)
       (unitZeroSec (I := I) (M := M) x) with hUu_def
   set Tu : Tensor0SSpace (s + 1 + 1) I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x from T)
       (unitZeroSec (I := I) (M := M) x) with hTu_def
-  -- The frame-component value of `T` at the multi-index `a ::ᵥ b ::ᵥ J`.
+  
   set D : Fin n → Fin n → (Fin s → Fin n) → ℝ :=
     fun a b J => Tensor0SSpace.toModel Tu
       (Fin.cons (e a) (Fin.cons (e b) (fun k : Fin s => e (J k)))) with hD_def
-  -- STEP 1: each rank-`s` component of `U` is the `(c_a · c_b)`-weighted frame sum of `D a b J`,
-  -- where `c_a = g.inner x (e a) w`. This is the double slot-`0` uncurry (`tensor0S` linearity).
+  
+  
   have hcomp : ∀ J : Fin s → Fin n,
       fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J =
         ∑ a : Fin n, ∑ b : Fin n,
           (g.inner x (e a) w * g.inner x (e b) w) • D a b J := by
     intro J
-    -- The component is `Uu.toModel (e_J)`.
+    
     have hUcomp : fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J =
         Tensor0SSpace.toModel Uu (fun k : Fin s => e (J k)) := by
       have hco : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
@@ -223,12 +152,12 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
       rw [hco, hUu_def]
       rfl
     rw [hUcomp]
-    -- Replace `Uu.toModel(e_J)` by `Tu.toModel(w :: w :: e_J)` via `hU`.
+    
     have hUT : Tensor0SSpace.toModel Uu (fun k : Fin s => e (J k)) =
         Tensor0SSpace.toModel Tu
           (Fin.cons w (Fin.cons w (fun k : Fin s => e (J k)))) := hU _
     rw [hUT]
-    -- First slot-`0` uncurry: expand the outer `w`.
+    
     have hstep1 : Tensor0SSpace.toModel Tu
           (Fin.cons w (Fin.cons w (fun k : Fin s => e (J k)))) =
         ∑ a : Fin n, g.inner x (e a) w • Tensor0SSpace.toModel
@@ -239,7 +168,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         (Fin.cons w (fun k : Fin s => e (J k)))
     rw [hstep1]
     refine Finset.sum_congr rfl (fun a _ => ?_)
-    -- Second slot-`0` uncurry: expand the inner `w` inside each `tensor0S_curry … (e a)` slice.
+    
     have hstep2 : Tensor0SSpace.toModel
           (tensor0S_curry (I := I) (M := M) (s + 1) x Tu (e a))
           (Fin.cons w (fun k : Fin s => e (J k))) =
@@ -252,7 +181,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         (fun b => g.inner x (e b) w) e w (hexp w) (fun k : Fin s => e (J k))
     rw [hstep2, Finset.smul_sum]
     refine Finset.sum_congr rfl (fun b _ => ?_)
-    -- Identify the doubly-curried slice value with `D a b J`.
+    
     have hcurry2 : Tensor0SSpace.toModel
         (tensor0S_curry (I := I) (M := M) s x
           (tensor0S_curry (I := I) (M := M) (s + 1) x Tu (e a)) (e b))
@@ -265,7 +194,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         Tu (e a) (Fin.cons (e b) (fun k : Fin s => e (J k)))]
     rw [hcurry2]
     exact (mul_smul (g.inner x (e a) w) (g.inner x (e b) w) (D a b J)).symm
-  -- The rank-`(s+1+1)` frame component of `T` at `a ::ᵥ b ::ᵥ J` equals `D a b J`.
+  
   have hDcomp : ∀ (a b : Fin n) (J : Fin s → Fin n),
       fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1 + 1) T n e K₀
           (Fin.cons a (Fin.cons b J)) = D a b J := by
@@ -291,15 +220,15 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
     unfold fiberNormSqComponent
     rw [hco, htuple]
     rfl
-  -- STEP 2: Cauchy–Schwarz per `J`: the squared `U`-component is dominated by the
-  -- frame-pair sum of squared `T`-components, using `∑ₐ cₐ² = g_x(w,w) ≤ 1`.
+  
+  
   have hCS : ∀ J : Fin s → Fin n,
       (fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J) ^ 2 ≤
         ∑ a : Fin n, ∑ b : Fin n,
           (fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1 + 1) T n e K₀
             (Fin.cons a (Fin.cons b J))) ^ 2 := by
     intro J
-    -- Flatten the double sum over `Fin n × Fin n`.
+    
     have hflat : fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J =
         ∑ p : Fin n × Fin n,
           (g.inner x (e p.1) w * g.inner x (e p.2) w) * D p.1 p.2 J := by
@@ -308,7 +237,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
       refine Finset.sum_congr rfl (fun b _ => ?_)
       rw [smul_eq_mul]
     rw [hflat]
-    -- Cauchy–Schwarz over the product index.
+    
     have hcs := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset (Fin n × Fin n))
       (fun p => g.inner x (e p.1) w * g.inner x (e p.2) w) (fun p => D p.1 p.2 J)
     have hcoeff : ∑ p : Fin n × Fin n,
@@ -344,10 +273,10 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
           refine Finset.sum_congr rfl (fun a _ => ?_)
           refine Finset.sum_congr rfl (fun b _ => ?_)
           rw [hDcomp a b J]
-  -- STEP 3 + 4: sum the per-`J` bound and re-index `(a, b, J) ↦ a ::ᵥ b ::ᵥ J`.
+  
   rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x s e hreprS U K₀]
   rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x (s + 1 + 1) e hreprT T K₀]
-  -- Expand the rank-`(s+1+1)` Parseval sum as a triple sum via two `Fin.consEquiv`s.
+  
   have hexpandT : ∑ J'' : Fin (s + 1 + 1) → Fin n,
         (fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1 + 1) T n e K₀ J'') ^ 2 =
       ∑ a : Fin n, ∑ b : Fin n, ∑ J : Fin s → Fin n,
@@ -372,7 +301,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
           (fun pr => by simp [Fin.consEquiv])]
     rw [Fintype.sum_prod_type]
   rw [hexpandT]
-  -- `rfns(U) = ∑_J (compU J)² ≤ ∑_J ∑_a ∑_b (compT (a::b::J))² = (reindexed) rfns(T)`.
+  
   calc ∑ J : Fin s → Fin n,
           (fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J) ^ 2
       ≤ ∑ J : Fin s → Fin n, ∑ a : Fin n, ∑ b : Fin n,
@@ -386,24 +315,6 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         refine Finset.sum_congr rfl (fun a _ => ?_)
         rw [Finset.sum_comm]
 
-/-- **The orthonormal-frame Hessian-component fibre-norm bound (the general-valence currying).**
-
-For a smooth compactly-supported `(0, s)`-tensor field `S`, a point `x`, and the smooth
-`g_x`-orthonormal frame `B_i := smoothOrthoFrame g x i`, the intrinsic fibre norm of the diagonal
-second covariant derivative `∇²_{B_i, B_i} S (x)` is dominated by the fibre norm of the full
-second iterated covariant gradient `∇²S = covGrad g 0 (s+1) (covGrad g 0 s S)` at `x`:
-```
-rfns(∇²_{B_i, B_i} S)(x) ≤ rfns(∇²S)(x).
-```
-
-This is the general-valence two-step covariant-gradient currying together with the
-orthonormal-frame component comparison. By the proven two-slot evaluation bridge
-`tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal`, the second covariant derivative
-`tensorSecondCovDeriv` along `(B_i, B_i)`, evaluated at the unit, is exactly the
-`(B_i(x), B_i(x))`-evaluation of the two leftmost slots of `∇²S(x)(unit)`; since `B_i(x)` is
-`g_x`-unit (`smoothOrthoFrame_orthonormal_at_center`), the slice fibre-norm bound
-`riemannianFiberNormSq_twoSlotUnitEval_le` dominates the fibre norm of that evaluation by the
-full fibre norm of `∇²S(x)`. -/
 private theorem secondCovDeriv_unit_frame_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : Integral.L2.SmoothCcTensor g 0 s) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -430,17 +341,6 @@ private theorem secondCovDeriv_unit_frame_fiberNormSq_le
     (Y := smoothOrthoFrame (I := I) g x i)
     (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i) x m).symm
 
-
-/-- **Pointwise rough-Laplacian-to-second-covariant-gradient fibre-norm bound.** For a smooth
-compactly-supported `(0, s)`-tensor field `S` and a point `x`,
-```
-rfns(Δ_∇ S)(x) ≤ dim² · rfns(∇²S)(x),
-```
-where `dim = finrank ℝ E`. The rough Laplacian is the metric trace `∑_i ∇²_{B_i, B_i} S (x)`
-(`rawTensorConnLap_eq_metricTraceHessian`), a sum of `dim` diagonal Hessian summands; the
-`n`-sub-additivity of the squared fibre norm contributes one factor of `dim` and the
-orthonormal-frame component bound `secondCovDeriv_unit_frame_fiberNormSq_le` bounds each summand
-by `rfns(∇²S)(x)`, contributing the second. -/
 theorem rawConnLap_fiberNormSq_le_secondCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : Integral.L2.SmoothCcTensor g 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x
@@ -454,7 +354,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
   set rhs : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
       ((covGrad (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hrhs_def
-  -- The rough Laplacian as the diagonal metric-trace sum of second covariant derivatives.
+  
   have hsum :
       (rawTensorConnLapSmooth (I := I) g 0 s S).toSection x =
         ∑ i : Fin n,
@@ -466,7 +366,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
       (fun y : M => S.toSection y) x]
     rw [metricTraceHessian_def (I := I) g 0 s (fun y : M => S.toSection y) x]
   rw [hsum]
-  -- `n`-sub-additivity of the squared fibre norm on the diagonal trace sum.
+  
   have hsub :
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (∑ i : Fin n,
@@ -483,7 +383,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
   have hcard : ((Finset.univ : Finset (Fin n)).card : ℝ) = (n : ℝ) := by
     rw [Finset.card_univ, Fintype.card_fin]
   rw [hcard] at hsub
-  -- Each summand is bounded by `rhs` (the orthonormal-frame component bound).
+  
   have hterm : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (tensorSecondCovDeriv (I := I) g 0 s
@@ -520,23 +420,6 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
     _ ≤ (n : ℝ) * ((n : ℝ) * rhs) := mul_le_mul_of_nonneg_left hsum_le hn_nn
     _ = (n : ℝ) ^ 2 * rhs := by ring
 
-/-- **The rough-Laplacian-to-second-covariant-gradient `L²` trace bound (uniform in valence).**
-
-There is a single multiplier `K ≥ 1` (depending only on `g` and the manifold, valence-uniform —
-in fact `K = dim`) such that for every valence `s` and every smooth compactly-supported
-`(0, s)`-tensor `S`, the metric `L²` norm of the rough (connection) Laplacian
-`Δ_∇ S := rawTensorConnLapSmooth g 0 s S` is controlled by the metric `L²` norm of the second
-iterated covariant gradient `∇²S = covGrad g 0 (s+1) (covGrad g 0 s S)`:
-```
-‖Δ_∇ S‖_{L²} ≤ K · ‖∇²S‖_{L²}.
-```
-
-This is the elementary metric-trace half of the closed-manifold Bochner package, the companion of
-the on-disk integration-by-parts half `covGrad_l2NormSq_le_rawConnLap_mul_self_gen`. The proof
-integrates the pointwise fibre-norm trace bound `rawConnLap_fiberNormSq_le_secondCovGrad`
-(`rfns(Δ_∇ S)(x) ≤ dim² · rfns(∇²S)(x)`) over the compact manifold via the finite-sum
-pointwise-to-`L²` packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum`. Both sides are
-intrinsic metric `L²` norms. -/
 theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -553,10 +436,10 @@ theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
   have hK1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn_pos
   refine ⟨(n : ℝ), hK1, ?_⟩
   intro s S
-  -- The single-term jet family for the packaging lemma: `∇²S` at valence `s + 1 + 1`.
+  
   set HH : Integral.L2.SmoothCcTensor g 0 (s + 1 + 1) :=
     covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) with hHH_def
-  -- Pointwise fibre-norm bound, packaged as a one-term sum with multiplier `n`.
+  
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           ((rawTensorConnLapSmooth (I := I) g 0 s S).toSection x) ≤
@@ -566,7 +449,7 @@ theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
     rw [Finset.sum_const, Finset.card_range, one_nsmul]
     rw [hHH_def]
     exact rawConnLap_fiberNormSq_le_secondCovGrad (I := I) (M := M) g s S x
-  -- Lift the pointwise bound to the metric `L²` norm.
+  
   have hpack :
       ‖rawTensorConnLapSmooth (I := I) g 0 s S‖ ≤
         (n : ℝ) * ∑ _i ∈ Finset.range 1, ‖HH‖ :=

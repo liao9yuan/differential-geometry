@@ -10,29 +10,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 
-/-!
-# Per-pair cross-chart support helpers and existence form
-
-For a closed Riemannian manifold `M` modelled on a finite-dimensional real
-inner-product space `E` and two distinguished points `γ α : M`, this file
-delivers structural helpers used by the chart-density program's per-pair
-cross-chart `W^{1,p}` bound:
-
-* `crossChartCompact γ α := tsupport ρ_γ ∩ tsupport ρ_α` for the canonical
-  chart-atlas partition of unity `ρ`. Compact and contained in both chart
-  sources, by partition-of-unity subordination.
-* `cross_chart_diffeo_exists`: extracts the chart-transition
-  `SmoothDiffeoBoundedAtOrder ... 1` realising `T_γα` on a neighbourhood of
-  the chart-γ Euclidean image of `crossChartCompact γ α`. Packages the
-  per-order chain-rule infrastructure for downstream use.
-* `cross_chart_bound`: the headline existential constant statement. The
-  constant is delivered as `K := 1`, with the bound holding in the
-  partition-of-unity-empty regime via direct support analysis combined with
-  the canonical hypothesis on `χ`. The intermediate regime closure is
-  deferred to follow-up infrastructure (the quantitative Leibniz rule for
-  multiplication by the partition-of-unity weight `ρ_γ`).
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -55,10 +32,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The compact "joint chart support" set
-`K_γα := tsupport ρ_γ ∩ tsupport ρ_α` for the canonical chart-atlas partition
-of unity. It is contained in both chart sources, by partition-of-unity
-subordination. -/
 def crossChartCompact
     [T2Space M] [SigmaCompactSpace M] (γ α : M) : Set M :=
   tsupport
@@ -68,39 +41,28 @@ def crossChartCompact
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) :
       M → ℝ)
 
-/-- `crossChartCompact` is closed. -/
 lemma crossChartCompact_isClosed
     [T2Space M] [SigmaCompactSpace M] (γ α : M) :
     IsClosed (crossChartCompact (I := I) (M := M) γ α) :=
   IsClosed.inter (isClosed_tsupport _) (isClosed_tsupport _)
 
-/-- `crossChartCompact` is contained in chart-γ source, by partition-of-unity
-subordination. -/
 lemma crossChartCompact_subset_chartAt_source_γ
     [T2Space M] [SigmaCompactSpace M] (γ α : M) :
     crossChartCompact (I := I) (M := M) γ α ⊆ (chartAt H γ).source := by
   intro x hx
   exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M γ hx.1
 
-/-- `crossChartCompact` is contained in chart-α source. -/
 lemma crossChartCompact_subset_chartAt_source_α
     [T2Space M] [SigmaCompactSpace M] (γ α : M) :
     crossChartCompact (I := I) (M := M) γ α ⊆ (chartAt H α).source := by
   intro x hx
   exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α hx.2
 
-/-- On a compact manifold, `crossChartCompact` is compact (closed subset of a
-compact space). -/
 lemma crossChartCompact_isCompact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (γ α : M) :
     IsCompact (crossChartCompact (I := I) (M := M) γ α) :=
   (crossChartCompact_isClosed (I := I) (M := M) γ α).isCompact
 
-/-- **Helper**: For two charts `γ α` on a closed manifold, extract a per-order
-chart-transition diffeomorphism realising the chart transition `T_γα` on a
-neighbourhood of the chart-γ Euclidean image of `K_γα`, with derivative bounds
-up to order `1`. This packages `chartTransition_smoothDiffeoBoundedAtOrder`
-for the canonical compact set `crossChartCompact γ α`. -/
 theorem cross_chart_diffeo_exists
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -123,19 +85,6 @@ theorem cross_chart_diffeo_exists
   exact chartTransition_smoothDiffeoBoundedAtOrder (I := I) (M := M)
     γ α hK_compact hK_γ hK_α 1
 
-/-- **Headline (existence form, empty case)**: for two charts `γ α` on a
-closed Riemannian manifold `M` with `crossChartCompact γ α = ∅` and
-`1 ≤ p < ∞`, there exists a positive constant `K` such that for every smooth
-compactly-supported `χ : EuclN → ℝ` whose closed support sits inside the
-chart-α Euclidean image of `tsupport ρ_α` (the canonical chart-density-program
-strengthening of the support hypothesis), the chart-pushed cross-pullback
-satisfies `LHS ≤ ENNReal.ofReal K * RHS`.
-
-The constant is `K := 1`. The bound holds because the chart-pushed function
-vanishes pointwise on `EuclN` under the strengthened support hypothesis: for
-every `y ∈ chartTargetEuclid γ`, the manifold preimage `z` cannot lie in both
-`tsupport ρ_γ` (required for `ρ_γ z ≠ 0`) and `tsupport ρ_α` (forced by the
-strengthened support hypothesis on `χ`), since their intersection is empty. -/
 theorem cross_chart_bound_empty
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

@@ -2,71 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Cha
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.SourcePairing
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartIntegrationByParts
 
-/-!
-# The per-component scalar weak-solution headline from the global weak equation
-
-For a smooth Riemannian metric `g` on a closed manifold `(M, g)`, a chart center
-`α : M`, tensor ranks `(r, s)`, and a component multi-index `P₀`, this file
-derives the genuine, unconditional per-component scalar weak-solution headline of
-the connection Laplacian on `(r, s)`-tensor sections.
-
-The companion file `WeakSolution.lean` proves the hypothesis-bearing form
-`tensorComponent_isSmoothWeakSolution_of_chartIdentity`: it *takes* a chart
-bilinear identity for the principal-part form `tensorPrincipalForm` and concludes
-the Euclidean chart component is a smooth weak solution. This file supplies that
-chart bilinear identity from the genuine analytic input — the global `H^1` weak
-equation of the connection Laplacian — and ships the unconditional headline
-`tensorComponent_isSmoothWeakSolution`.
-
-## The derivation
-
-Given the global weak equation `∫_M ⟨∇T, ∇v⟩ dμ_g = ⟨F, v⟩_{L²}` for every smooth
-compactly-supported test section `v`, the chart bilinear identity is obtained by
-substituting the inverse-Gram-rotated test section `rotatedTestSection g r s α P₀
-χ` for `v`, where `χ := chartTestPullback I α φ` is the manifold-side chart bump
-attached to a Euclidean test function `φ`.
-
-* The left-hand side chart-pulls (`tensorCovDerivPointwiseInner_integral_chart_pull`)
-  to a chart-Euclidean integral of `densityOnEuclid · (covPrincipalIntegrand +
-  covLowerOrderIntegrand)`.
-* The principal part collapses (`covPrincipalIntegrand_rotated_collapse`) to the
-  single-component scalar elliptic principal integrand plus the first-order
-  rotation remainder `covPrincipalRotationRemainder`.
-* The scalar elliptic principal integrand, density-weighted, is the
-  `principalIntegrand` of `tensorPrincipalForm` (`weightedInvGram_principalIntegrand_eq`,
-  valid on the compact chart-interior set `K`), hence its chart-target integral
-  is `tensorPrincipalForm.bilin`.
-* The component-coupled lower-order remainder collapses to a test-bump value term
-  plus a test-bump-gradient term; the gradient term is integrated by parts
-  (`chartTarget_integral_byParts`), moving the derivative onto the smooth
-  coefficient.
-* The right-hand side chart-pulls (`tensorL2Inner_rotatedTestSection_chart_pull`)
-  to a chart-Euclidean integral of `densityOnEuclid · χ̃ · sourcePairingCoeff`.
-
-Collecting the non-principal contributions produces the explicit
-test-function-independent right-hand side `tensorComponentWeakRHS`.
-
-## Main definitions
-
-* `tensorComponentWeakRHS g r s T F α hK hK_target P₀` — the explicit,
-  test-function-independent Euclidean right-hand side of the per-component scalar
-  weak equation: `densityOnEuclid · sourcePairingCoeff` (the source contribution)
-  minus the density-weighted rotation-remainder coefficient minus the
-  density-weighted lower-order value coefficient plus the integration-by-parts
-  divergence of the density-weighted lower-order gradient coefficient, extended by
-  `0` off the Euclidean chart target.
-
-## Main results
-
-* `tensorComponentWeakRHS_contDiff` — the explicit right-hand side is globally
-  `C^∞`.
-* `tensorComponent_isSmoothWeakSolution` — the unconditional headline: from the
-  global `H^1` weak equation of the connection Laplacian, the Euclidean chart
-  component `tensorComponentEuclid g r s T α P₀` is a smooth weak solution of the
-  principal-part elliptic bilinear form `tensorPrincipalForm` with right-hand
-  side `tensorComponentWeakRHS`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -108,12 +43,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The collapsed Christoffel-correction coefficient: the value, on the chart
-target, of `covDerivLowerOrderTerm g r s (rotatedTestSection …) α l Q.1 Q.2`
-divided by the chart-pushed bump. By `covDerivLowerOrderTerm_def` and the rotated
-test section's raw-component identity it is the finite sum over component
-multi-index pairs `p` of `covDerivLowerOrderCoeff` against the inverse-Gram entry
-`covChartMetricGramInv g r s α · p P₀`. -/
 noncomputable def lowerOrderRotationLOCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -124,13 +53,6 @@ noncomputable def lowerOrderRotationLOCoeff
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α l Q.1 p.1 Q.2 p.2 y *
         covChartMetricGramInv (I := I) (M := M) g r s α y p P₀
 
-/-- **The lower-order gradient coefficient of the rotated lower-order
-remainder.** The coefficient multiplying the chart-Euclidean partial `∂_l χ̃` of
-the chart-pushed bump. It collects, from the `LO_T · ∂_l(raw v_Q)` cross group,
-exactly the Leibniz contribution where `∂_l` falls on the chart-pushed bump.
-
-It is a plain function `EuclideanSpace ℝ (Fin n) → ℝ` — first-order in `T`, with
-`C^∞` coefficients. -/
 noncomputable def covLowerOrderRotationGradCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -145,7 +67,6 @@ noncomputable def covLowerOrderRotationGradCoeff
               covDerivLowerOrderTerm (I := I) (M := M) g r s T α k P.1 P.2 y *
               covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀
 
-/-- Unfolding lemma for `covLowerOrderRotationGradCoeff`. -/
 lemma covLowerOrderRotationGradCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -160,14 +81,6 @@ lemma covLowerOrderRotationGradCoeff_def
                 covDerivLowerOrderTerm (I := I) (M := M) g r s T α k P.1 P.2 y *
                 covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀ := rfl
 
-/-- **The lower-order value coefficient of the rotated lower-order remainder.**
-The coefficient multiplying the chart-pushed bump `χ̃` itself. It collects the
-three groups in which no chart-Euclidean derivative falls on the chart-pushed
-bump: the `∂_k(raw T_P) · LO_v` group, the Leibniz contribution of the
-`LO_T · ∂_l(raw v_Q)` group where `∂_l` falls on the inverse-Gram coefficient,
-and the pure `LO_T · LO_v` group.
-
-It is a plain function `EuclideanSpace ℝ (Fin n) → ℝ` with `C^∞` coefficients. -/
 noncomputable def covLowerOrderRotationValueCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -193,7 +106,6 @@ noncomputable def covLowerOrderRotationValueCoeff
                       lowerOrderRotationLOCoeff (I := I) (M := M)
                         g r s α P₀ l Q y)
 
-/-- Unfolding lemma for `covLowerOrderRotationValueCoeff`. -/
 lemma covLowerOrderRotationValueCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -220,9 +132,6 @@ lemma covLowerOrderRotationValueCoeff_def
                         lowerOrderRotationLOCoeff (I := I) (M := M)
                           g r s α P₀ l Q y) := rfl
 
-/-- On the Euclidean chart target the Christoffel correction
-`covDerivLowerOrderTerm g r s (rotatedTestSection …) α l Q.1 Q.2` equals the
-collapsed coefficient `lowerOrderRotationLOCoeff` times the chart-pushed bump. -/
 private lemma covDerivLowerOrderTerm_rotatedTestSection_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -241,14 +150,6 @@ private lemma covDerivLowerOrderTerm_rotatedTestSection_eq
   rw [rotatedTestSection_chartComp (I := I) (M := M) g r s α P₀ hχs hχt p hy]
   ring
 
-/-- **The rotated lower-order collapse.** On the Euclidean chart target the
-component-coupled lower-order remainder `covLowerOrderIntegrand g r s T
-(rotatedTestSection g r s α P₀ χ) α` collapses to
-`covLowerOrderRotationValueCoeff · χ̃ + ∑_l covLowerOrderRotationGradCoeff l · ∂_l χ̃`.
-
-The chart-Euclidean partial `∂_l χ̃` arises solely from the Leibniz contribution
-of the `LO_T · ∂_l(raw v_Q)` cross group in which `∂_l` falls on the chart-pushed
-bump; every other group contributes the chart-pushed bump undifferentiated. -/
 theorem covLowerOrderIntegrand_rotated_collapse
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -454,8 +355,6 @@ theorem covLowerOrderIntegrand_rotated_collapse
       rw [Finset.mul_sum, Finset.sum_mul]
     rw [hLHS, hRHS]
 
-/-- The `l`-th chart-Euclidean partial derivative of a function `C^∞` on the
-Euclidean chart target is again `C^∞` on the chart target. -/
 lemma euclidPartial_contDiffOn_target
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
@@ -486,8 +385,6 @@ lemma euclidPartial_contDiffOn_target
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-- The collapsed Christoffel coefficient `lowerOrderRotationLOCoeff` is `C^∞`
-on the Euclidean chart target. -/
 lemma lowerOrderRotationLOCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s)
@@ -500,9 +397,6 @@ lemma lowerOrderRotationLOCoeff_contDiffOn
       g r s α l Q.1 p.1 Q.2 p.2).mul
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α p P₀)
 
-/-- The Christoffel correction `covDerivLowerOrderTerm g r s T α k Idx Jdx` is
-`C^∞` on the Euclidean chart target — the raw-component-push-forward smoothness
-hypothesis is discharged from `chartPushedRaw_tensorChartComponentRaw_contDiffOn`. -/
 private lemma covDerivLowerOrderTerm_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -516,8 +410,6 @@ private lemma covDerivLowerOrderTerm_contDiffOn
     (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
       (I := I) (M := M) g r s T α Idx' Jdx')
 
-/-- The lower-order gradient coefficient `covLowerOrderRotationGradCoeff` is
-`C^∞` on the Euclidean chart target. -/
 theorem covLowerOrderRotationGradCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -535,8 +427,6 @@ theorem covLowerOrderRotationGradCoeff_contDiffOn
       (covDerivLowerOrderTerm_contDiffOn (I := I) (M := M) g r s T α k P.1 P.2)).mul
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
 
-/-- The lower-order value coefficient `covLowerOrderRotationValueCoeff` is `C^∞`
-on the Euclidean chart target. -/
 theorem covLowerOrderRotationValueCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -572,13 +462,6 @@ theorem covLowerOrderRotationValueCoeff_contDiffOn
       (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
   exact ((hdkT.mul hloVc).add (hloT.mul hdlGinv)).add (hloT.mul hloVc)
 
-/-- **The test-bump-free coefficient of the principal rotation remainder.** The
-first-order rotation remainder `covPrincipalRotationRemainder` divided by the
-chart-pushed bump: the contributions in which the chart-Euclidean partial `∂_l`
-falls on the inverse-Gram coefficient, with the chart-pushed bump factored out.
-
-It is a plain function `EuclideanSpace ℝ (Fin n) → ℝ`, first-order in `T`, with
-`C^∞` coefficients. -/
 noncomputable def covPrincipalRotationCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -597,7 +480,6 @@ noncomputable def covPrincipalRotationCoeff
                 euclidPartial (E := E) l
                   (gramInvEntry (I := I) (M := M) g r s α Q P₀) y
 
-/-- Unfolding lemma for `covPrincipalRotationCoeff`. -/
 lemma covPrincipalRotationCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -616,9 +498,6 @@ lemma covPrincipalRotationCoeff_def
                   euclidPartial (E := E) l
                     (gramInvEntry (I := I) (M := M) g r s α Q P₀) y := rfl
 
-/-- The first-order rotation remainder `covPrincipalRotationRemainder` factors as
-the principal rotation coefficient `covPrincipalRotationCoeff` times the
-chart-pushed bump: the bump is a literal factor of every summand. -/
 lemma covPrincipalRotationRemainder_eq_coeff_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -661,8 +540,6 @@ lemma covPrincipalRotationRemainder_eq_coeff_mul
     ring
   rw [hinner, ← mul_assoc]
 
-/-- The principal rotation coefficient `covPrincipalRotationCoeff` is `C^∞` on
-the Euclidean chart target. -/
 theorem covPrincipalRotationCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -680,9 +557,6 @@ theorem covPrincipalRotationCoeff_contDiffOn
   · exact euclidPartial_contDiffOn_target (I := I) (M := M) α l
       (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M) g r s α Q P₀)
 
-/-- The chart-density-weighted lower-order gradient coefficient in chart direction
-`l`: the coefficient whose chart-Euclidean divergence is the integration-by-parts
-contribution of the lower-order gradient term. -/
 noncomputable def weightedGradCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -691,8 +565,6 @@ noncomputable def weightedGradCoeff
   fun y => densityOnEuclid (I := I) g α y *
     covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y
 
-/-- Unfolding lemma for `weightedGradCoeff`: it is the chart density times the
-lower-order rotation gradient coefficient. -/
 lemma weightedGradCoeff_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -703,10 +575,6 @@ lemma weightedGradCoeff_eq
         covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y) :=
   rfl
 
-/-- The chart-density-weighted lower-order gradient coefficient `weightedGradCoeff`
-is `C^∞` on the Euclidean chart target: it is the product of the `C^∞` chart
-density `densityOnEuclid` and the `C^∞` lower-order rotation gradient
-coefficient `covLowerOrderRotationGradCoeff`. -/
 theorem weightedGradCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -718,27 +586,6 @@ theorem weightedGradCoeff_contDiffOn
   exact (densityOnEuclid_contDiffOn (I := I) g α).mul
     (covLowerOrderRotationGradCoeff_contDiffOn (I := I) (M := M) g r s T α P₀ l)
 
-/-- **The explicit test-function-independent right-hand side of the per-component
-scalar weak equation.**
-
-For smooth compactly-supported `(r, s)`-tensor sections `T` (the solution) and
-`F` (the source), a chart center `α`, a compact `K ⊆ chartTargetEuclid α`, and a
-component multi-index `P₀`, this is the Euclidean function
-
-```
-densityOnEuclid · sourcePairingCoeff
-  − densityOnEuclid · covPrincipalRotationCoeff
-  − densityOnEuclid · covLowerOrderRotationValueCoeff
-  + ∑_l euclidPartial l (densityOnEuclid · covLowerOrderRotationGradCoeff l)
-```
-
-on the Euclidean chart target `chartTargetEuclid α`, and `0` off it. The first
-term is the source contribution; the second is the principal rotation remainder;
-the third and fourth collect the lower-order remainder, with the fourth being the
-integration-by-parts divergence of the lower-order gradient coefficient.
-
-It is a plain function `EuclideanSpace ℝ (Fin n) → ℝ`, independent of any test
-function. -/
 noncomputable def tensorComponentWeakRHS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -759,9 +606,6 @@ noncomputable def tensorComponentWeakRHS
             (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y
     else 0
 
-/-- On the Euclidean chart target `tensorComponentWeakRHS` is the explicit
-density-weighted combination of the source, principal-rotation and lower-order
-coefficients. -/
 lemma tensorComponentWeakRHS_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -782,7 +626,6 @@ lemma tensorComponentWeakRHS_apply_of_mem
   unfold tensorComponentWeakRHS
   rw [if_pos hy]
 
-/-- Off the Euclidean chart target `tensorComponentWeakRHS` vanishes. -/
 lemma tensorComponentWeakRHS_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -794,8 +637,6 @@ lemma tensorComponentWeakRHS_apply_of_notMem
   unfold tensorComponentWeakRHS
   rw [if_neg hy]
 
-/-- A function that is `C^∞` on an open set `U` and vanishes off a closed set
-`C ⊆ U` is globally `C^∞`. -/
 private lemma contDiff_of_contDiffOn_zero_off_closed_local
     {P : EuclN → ℝ} {U C : Set EuclN}
     (hU : IsOpen U) (hC : IsClosed C) (hCU : C ⊆ U)
@@ -811,8 +652,6 @@ private lemma contDiff_of_contDiffOn_zero_off_closed_local
     refine (contDiffAt_const (c := (0 : ℝ))).congr_of_eventuallyEq ?_
     filter_upwards [hy_nhds] with z hz using hzero z hz
 
-/-- The chart-Euclidean partial derivative of a function vanishing off a closed
-set vanishes off that set: on the open complement the function is locally `0`. -/
 private lemma euclidPartial_eq_zero_off_closed
     {u : EuclN → ℝ} {C : Set EuclN} (hC : IsClosed C)
     (hu : ∀ z, z ∉ C → u z = 0)
@@ -825,8 +664,6 @@ private lemma euclidPartial_eq_zero_off_closed
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- The chart-Euclidean partial derivative of a function vanishing on an open
-neighbourhood of `y` vanishes at `y`. -/
 private lemma euclidPartial_eq_zero_of_open_zero
     {u : EuclN → ℝ} {U : Set EuclN} (hU : IsOpen U) {y : EuclN} (hy : y ∈ U)
     (hu : ∀ z ∈ U, u z = 0) (l : Fin (Module.finrank ℝ E)) :
@@ -837,8 +674,6 @@ private lemma euclidPartial_eq_zero_of_open_zero
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- The Euclidean chart component `tensorComponentEuclid g r s S α P` vanishes off
-the compact Euclidean image of the topological support of `S`. -/
 private lemma tensorComponentEuclid_eq_zero_off_image
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -857,8 +692,6 @@ private lemma tensorComponentEuclid_eq_zero_off_image
     exact (Set.image_mono (Set.image_mono hsub)) hmem
   · exact tensorComponentEuclid_apply_of_notMem (I := I) (M := M) g r s S α P hyT
 
-/-- The Euclidean image of the topological support of a smooth compactly-supported
-section, under the chart, is compact (`S` supported inside the chart source). -/
 private lemma image_tsupport_isCompact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -874,8 +707,6 @@ private lemma image_tsupport_isCompact
     hTcompact.image_of_continuousOn hcontOn
   exact himg1.image (toEuclidean (E := E)).continuous
 
-/-- The Euclidean image of the topological support of a chart-supported smooth
-section lies inside the Euclidean chart target. -/
 private lemma image_tsupport_subset_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -889,12 +720,6 @@ private lemma image_tsupport_subset_target
     exact hS_supp hx
   exact (extChartAt I α).map_source hx_src
 
-/-- **The explicit right-hand side `tensorComponentWeakRHS` is globally `C^∞`.**
-On the open Euclidean chart target every constituent is `C^∞`; off the compact
-union of the Euclidean images of the topological supports of `T` and `F` the
-right-hand side vanishes (each constituent carries a chart-component factor of
-`T` or `F`). Extension by zero across the closed-off complement is therefore
-globally `C^∞`. -/
 theorem tensorComponentWeakRHS_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)

@@ -1,52 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 
-/-!
-# Global smooth Parseval frame fields
-
-For a closed (compact, boundaryless is not needed here — compactness suffices) smooth Riemannian
-manifold `(M, g)` modelled on a real inner-product space `E`, this file constructs a **global smooth
-Parseval frame family**: finitely many smooth global tangent vector fields `W a : Π b, T_b M`
-(`a : Fin N`) whose fibre values reproduce every tangent vector through the metric,
-
-```
-∀ x u,  ∑ a, ⟨W a x, u⟩_g • W a x = u.
-```
-
-No global orthonormal frame exists on a general closed manifold (hairy ball), but a Parseval frame
-family always does: glue the local Gram–Schmidt orthonormal frames `smoothOrthoFrame g α`
-(`RicciIdentitySmoothFrame`) over a finite subcover of their orthonormality neighbourhoods with a
-smooth partition of unity `(f k)`, weight by `f k / √(∑ⱼ (f j)²)`, and renormalise — the square
-weights then sum to `1` pointwise, so the local Parseval identities glue exactly.
-
-The point of the family is that **every `g`-trace over a pointwise orthonormal frame is computed by
-the fixed global family**: for a bilinear form `B` on the tangent fibre,
-
-```
-∑ a, B (W a x) (W a x) = ∑ i, B (e i) (e i)        (any `g_x`-orthonormal basis `e`),
-```
-
-(`parseval_family_sum_bilin_eq`). Consequently moving-frame trace expressions — the rough Laplacian
-frame trace, curvature traces, Ricci contractions — can be rewritten as finite sums of expressions
-in the *fixed smooth global fields* `W a`, on which the per-direction covariant
-integration-by-parts engines (`integral_tensorInner_covDeriv_combined_eq_zero`,
-`integral_frameSummed_covDeriv_combined_eq_zero`) apply directly. This removes the
-moving-centre obstruction (the frame `smoothOrthoFrame g x` read at its own centre `x` is not a
-fixed field, so it cannot be integrated by parts) from the integrated Bochner–Weitzenböck
-telescoping.
-
-## Main results
-
-* `orthonormal_tangent_expansion` — the pointwise `g_x`-orthonormal expansion
-  `∑ i, ⟨e i, u⟩_g • e i = u` for a `g_x`-orthonormal family of `finrank` tangent vectors.
-* `exists_smooth_parseval_frame_family` — the headline existence of the global smooth Parseval
-  frame family on a compact manifold.
-* `parseval_family_inner_mul_sum` — the scalar dual-Parseval identity
-  `∑ a, ⟨W a, u⟩_g ⟨W a, v⟩_g = ⟨u, v⟩_g`.
-* `parseval_family_sum_bilin_eq` — the bilinear trace conversion: the Parseval family computes the
-  same diagonal sum as every `g_x`-orthonormal basis, for every `ℝ`-bilinear map into a module.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -67,12 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
-/-- **The pointwise `g_x`-orthonormal expansion.** A `g_x`-orthonormal family
-`e : Fin (finrank ℝ E) → T_x M` of full cardinality is a basis, and every tangent vector expands as
-`u = ∑ i, ⟨e i, u⟩_g • e i`. The inner-product-space structure induced by `g_x` on the tangent fibre
-is installed locally (as in `tangent_orthonormalBasisS_witness`), the family upgrades to an
-orthonormal basis (`basisOfOrthonormalOfCardEqFinrank`, `Module.Basis.toOrthonormalBasis`), and the
-expansion is `OrthonormalBasis.sum_repr'`. -/
+
 theorem orthonormal_tangent_expansion
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -124,10 +73,7 @@ theorem orthonormal_tangent_expansion
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M]
   [BoundarylessManifold I M] in
-/-- **The scalar dual-Parseval identity.** A family reproducing every tangent vector through the
-metric also reproduces the metric itself:
-`∑ a, ⟨W a, u⟩_g · ⟨W a, v⟩_g = ⟨u, v⟩_g`. Apply the continuous-linear `g`-pairing against `v` to
-the reproducing identity at `u`. -/
+
 theorem parseval_family_inner_mul_sum
     (g : SmoothRiemannianMetric I M) (x : M)
     {N : ℕ} (W : Fin N → TangentSpace I x)
@@ -147,12 +93,7 @@ theorem parseval_family_inner_mul_sum
       smul_eq_mul]
 
 omit [FiniteDimensional ℝ E] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
-/-- **The bilinear trace conversion.** A `g_x`-Parseval family computes the same diagonal sum as
-every `g_x`-orthonormal basis: for every `ℝ`-bilinear map `B` into an `ℝ`-module,
-`∑ a, B (W a) (W a) = ∑ i, B (e i) (e i)`. Expanding each `W a` over the orthonormal basis and
-using the dual-Parseval identity `∑ a, ⟨e i, W a⟩_g ⟨e j, W a⟩_g = δᵢⱼ` collapses the double frame
-sum to the diagonal. This is the conversion through which fixed-family expressions compute
-pointwise metric traces (the rough-Laplacian frame trace, curvature traces, Ricci contractions). -/
+
 theorem parseval_family_sum_bilin_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     {N : ℕ} (W : Fin N → TangentSpace I x)
@@ -214,20 +155,6 @@ theorem parseval_family_sum_bilin_eq
 
 variable [CompactSpace M]
 
-/-- **Existence of a global smooth Parseval frame family on a compact manifold.** There are
-finitely many smooth global tangent vector fields `W a` whose fibre values reproduce every tangent
-vector through the metric: `∀ x u, ∑ a, ⟨W a x, u⟩_g • W a x = u`.
-
-**Construction.** Each centre `α` carries the smooth Gram–Schmidt frame `smoothOrthoFrame g α`,
-`g_b`-orthonormal for every `b` in the neighbourhood `smoothOrthoFrameNbhd α`
-(`smoothOrthoFrame_orthonormal`). The interiors of these neighbourhoods cover the compact manifold;
-take a finite subcover with centres `k ∈ t` and a smooth partition of unity `(f k)` subordinate to
-it (`SmoothPartitionOfUnity.exists_isSubordinate`). With `ρ := ∑ₖ (f k)²` (smooth and everywhere
-positive since some `f k x > 0`), the weighted fields `W (k,i) := ((√ρ)⁻¹ f k) • smoothOrthoFrame g
-k i` are smooth global tangent fields. At a point `x`, the `k`-summands with `f k x = 0` vanish;
-for the others `x` lies in the orthonormality neighbourhood of `k`, so the inner `i`-sum reproduces
-`u` by the orthonormal expansion (`orthonormal_tangent_expansion`), leaving
-`∑ₖ (f k x)²/ρ x • u = u`. -/
 theorem exists_smooth_parseval_frame_family (g : SmoothRiemannianMetric I M) :
     ∃ (N : ℕ) (W : Fin N → Π b : M, TangentSpace I b),
       (∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (W a))) ∧

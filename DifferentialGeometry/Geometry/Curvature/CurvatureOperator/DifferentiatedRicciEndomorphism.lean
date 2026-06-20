@@ -6,32 +6,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 
-/-! # Differentiated-Ricci endomorphism and the slot-substitution metric-trace calculus
-
-This file collects the *first-class curvature-operator calculus* needed to open the metric trace of
-the differentiated Riemann curvature onto the differentiated-Ricci content.  Four ingredients:
-
-* **Acted-vector linearity of `nablaBaseSlotCurv`.** The differentiated base-tangent curvature
-  `nablaBaseSlotCurv g X Y Z x u = (∇_X R^{TM})(Y, Z) u` is `ℝ`-linear in the acted slot vector `u`
-  (`nablaBaseSlotCurv_add_acted`, `nablaBaseSlotCurv_smul_acted`).  Unlike the (already available)
-  derivation-slot and first-antisymmetric-slot linearity, the acted slot is read through the leading
-  section-derivative term and so is established by a value-determinacy / local-frame argument
-  (mirroring the first-antisymmetric-slot route).  The frame-summed substitution operator
-  `w ↦ ∑_i nablaBaseSlotCurv g (B_i) (B_i) Vb x w` is packaged as a continuous linear endomorphism
-  `nablaBaseSlotCurvFrameSumCLM`.
-
-* **The differentiated-Ricci endomorphism `nablaRicciEndo`.** The `(1, 1)`-raise of `nablaRicci`
-  via the metric sharp, with defining inner law `g.inner x (nablaRicciEndo g X V x w) v = nablaRicci g X V w x`.
-
-* **`nablaRicci` slot symmetry** (`nablaRicci_symm`): inherited from `ricciTensor_symm` differentiated.
-
-* **The summed slot-derivation fold** (`tensorInnerPointwise_slotSubst_sum`): the metric pairing of a
-  `(0, s)`-tensor after per-slot substitution by a fixed endomorphism, folded into the sum over slots
-  through `tensorSlotSubstCLM` / `tangentSlotCLM` and the model bilinearity `tensorInnerPointwise_sum_left`.
-
-These are GENERAL statements; the Parseval Bochner-fold nullity kernel specialises them.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -62,15 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
 
-/-! ### Acted-vector (`W`-slot) linearity of the differentiated tangent curvature `nablaCurvSec`
-
-The acted slot `W` of `nablaCurvSec (LeviCivita g) X Y Z W x` enters the leading
-section-derivative term `∇_X(R(Y, Z) W)`, hence the *germ* of `W`; only after the Leibniz correction
-`R(Y, Z)(∇_X W)` does the dependence collapse to the value `W x`.  We establish additivity,
-homogeneity and value-determinacy in the acted slot by mirroring the first-antisymmetric-slot route. -/
-
-/-- Smoothness of `b ↦ extDerivFun f b (X b)` for a smooth function `f` and smooth tangent section
-`X`, as the second component of the composed tangent map `b ↦ Tf(b, X b)`. -/
 lemma extDerivFunApply_contMDiff
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {X : Π b : M, TangentSpace I b} (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
@@ -92,10 +57,6 @@ lemma extDerivFunApply_contMDiff
   refine hresult.congr fun b => ?_
   simp [extDerivFun, tangentMap_snd, NormedSpace.fromTangentSpace]
 
-/-- **Globalization of a scalar function smooth on a neighbourhood.** A function `f : M → ℝ` that is
-`C^∞` on an open neighbourhood `U` of `x` admits a global `C^∞` function `F` agreeing with `f` near
-`x`: cut off `f` by a smooth bump `χ` (`= 1` near `x`, `tsupport χ ⊆ U`) and glue the product `χ · f`
-(smooth on `U`) with `0` (smooth off `tsupport χ`) across the open cover. -/
 private lemma exists_globalSmoothScalar_eqOn_nhd
     {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U) (hxU : x ∈ U)
     (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U) :
@@ -122,8 +83,6 @@ private lemma exists_globalSmoothScalar_eqOn_nhd
   · filter_upwards [χ.eventuallyEq_one] with b hb
     rw [hb, Pi.one_apply, one_mul]
 
-/-- Acted-slot (`Z`) additivity of `riemannSec` for smooth global sections, the public-dependency
-re-derivation of the bundled smoothness wrapper through `riemannSec_add_third`. -/
 private lemma riemannSec_add_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -153,8 +112,6 @@ private lemma riemannSec_add_acted_smooth
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZ'_le)
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZsum_le)
 
-/-- Acted-slot (`Z`) scalar-homogeneity of `riemannSec` for smooth global sections, the
-public-dependency re-derivation through `riemannSec_smul_third`. -/
 private lemma riemannSec_smul_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -230,12 +187,6 @@ private lemma riemannSec_smul_acted_smooth
     hZ_at hcXZ_at hcYZ_at hcXfZ_at hcYfZ_at hYf_at hXf_at
     hf_smul_cYZ_at hf_smul_cXZ_at hYf_smul_Z_at hXf_smul_Z_at hx_int
 
-/-- **Additivity of `nablaCurvSec` in its acted slot.** For the Levi-Civita connection of `g` and
-smooth fields `X, Y, Z, W, W'`, `(∇_X R)(Y, Z)(W + W') = (∇_X R)(Y, Z) W + (∇_X R)(Y, Z) W'`.  Each of
-the four Leibniz terms splits in the acted slot: the leading connection-derivative term through the
-section-additivity of the curvature section `R(Y, Z)(W + W')` (`riemannSec_add_third_smooth` at every
-nearby point), and the three correction curvatures through `riemannSec_add_third_smooth` directly
-(after the section-additivity of `covApply X (W + W')` for the last term). -/
 private lemma nablaCurvSec_add_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -250,7 +201,7 @@ private lemma nablaCurvSec_add_acted
   have hX := X.contMDiff; have hY := Y.contMDiff; have hZ := Z.contMDiff
   have hW := W.contMDiff; have hW' := W'.contMDiff
   rw [nablaCurvSec_def, nablaCurvSec_def, nablaCurvSec_def]
-  -- T1: the curvature section `R(Y, Z)(W + W')` splits in its acted slot (section equality), then `cov.toFun`.
+  
   have hsecWW' : (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => (W + W') b) b) =
       (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => W b) b)
         + (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => W' b) b) := by
@@ -274,7 +225,7 @@ private lemma nablaCurvSec_add_acted
     rw [hsecWW', cov.isCovariantDerivativeOnUniv.add (hRWsm.mdifferentiableAt (by simp))
       (hRW'sm.mdifferentiableAt (by simp))]
     rfl
-  -- T2: the acted slot of the first correction-curvature `R(∇_X Y, Z)(W + W')`.
+  
   have hcXY := covApply_contMDiff (cov := cov) hX hY
   have h2 : riemannSec cov (covApply cov (fun b => X b) (fun b => Y b)) (fun b => Z b)
         (fun b => (W + W') b) x =
@@ -285,7 +236,7 @@ private lemma nablaCurvSec_add_acted
       funext b; simp only [ContMDiffSection.coe_add, Pi.add_apply]
     rw [heq]
     exact riemannSec_add_acted_smooth (cov := cov) hcXY hZ hW hW'
-  -- T3: the acted slot of the second correction-curvature `R(Y, ∇_X Z)(W + W')`.
+  
   have hcXZ := covApply_contMDiff (cov := cov) hX hZ
   have h3 : riemannSec cov (fun b => Y b) (covApply cov (fun b => X b) (fun b => Z b))
         (fun b => (W + W') b) x =
@@ -296,8 +247,8 @@ private lemma nablaCurvSec_add_acted
       funext b; simp only [ContMDiffSection.coe_add, Pi.add_apply]
     rw [heq]
     exact riemannSec_add_acted_smooth (cov := cov) hY hcXZ hW hW'
-  -- T4: the acted slot of the third correction-curvature `R(Y, Z)(∇_X(W + W'))`; the inner
-  -- `∇_X(W + W')` splits in its section slot, then `riemannSec_add_third_smooth`.
+  
+  
   have hcovT4 : covApply cov (fun b => X b) (fun b => (W + W') b) =
       covApply cov (fun b => X b) (fun b => W b) + covApply cov (fun b => X b) (fun b => W' b) := by
     funext b
@@ -320,13 +271,6 @@ private lemma nablaCurvSec_add_acted
   rw [h1, h2, h3, h4]
   abel
 
-/-- **`C^∞(M)`-homogeneity of `nablaCurvSec` in its acted slot.** For the Levi-Civita connection of
-`g`, a smooth function `f`, and smooth fields `X, Y, Z, W`, `(∇_X R)(Y, Z)(f · W) = f · (∇_X R)(Y, Z) W`.
-The acted slot *is* differentiated by the leading term, so a single `df`-correction arises from
-`∇_X(f · R(Y, Z) W)` and another from `R(Y, Z)(∇_X(f · W))` (whose inner `∇_X(f·W) = f·∇_X W +
-(df·X)·W` Leibniz produces `(df·X)·R(Y, Z) W`); they appear with opposite signs in the four-term
-Leibniz formula and cancel exactly, the remaining terms scaling by `f x` through
-`riemannSec_smul_acted_smooth`. -/
 private lemma nablaCurvSec_smul_acted
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (X Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -341,8 +285,8 @@ private lemma nablaCurvSec_smul_acted
   set Xf : M → ℝ := fun b => extDerivFun (I := I) f b (X b) with hXf_def
   have hXf : ContMDiff I 𝓘(ℝ, ℝ) ∞ Xf := extDerivFunApply_contMDiff hf hX
   have hfW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (f • fun b => W b)) := hf.smul_section hW
-  -- T1: leading term. The curvature section `R(Y, Z)(f • W)` equals `f • R(Y, Z) W` (globally), so
-  -- `∇_X(R(Y,Z)(f•W)) = f·∇_X(R(Y,Z)W) + (X f)·R(Y,Z)W` by the connection Leibniz rule.
+  
+  
   have hsec1 :
       (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (f • fun b => W b) b) =
         f • (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => W b) b) := by
@@ -361,7 +305,7 @@ private lemma nablaCurvSec_smul_acted
       (hf.mdifferentiableAt (by simp))]
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       ContinuousLinearMap.smulRight_apply, hXf_def]
-  -- T2, T3: correction curvatures with unchanged antisymmetric slots, acted slot `f • W`.
+  
   have hcXY := covApply_contMDiff (cov := cov) hX hY
   have hcXZ := covApply_contMDiff (cov := cov) hX hZ
   have h2 : riemannSec cov (covApply cov (fun b => X b) (fun b => Y b)) (fun b => Z b)
@@ -374,9 +318,9 @@ private lemma nablaCurvSec_smul_acted
       f x • riemannSec cov (fun b => Y b) (covApply cov (fun b => X b) (fun b => Z b))
         (fun b => W b) x :=
     riemannSec_smul_acted_smooth (cov := cov) hf hY hcXZ hW
-  -- T4: third correction `R(Y, Z)(∇_X(f • W))`. The inner `∇_X(f•W) = f•∇_X W + (X f)•W` holds
-  -- *globally* (the connection Leibniz rule at every point), so we rewrite the acted section by a
-  -- `funext`-proved equality of sections and split via acted-slot additivity + homogeneity.
+  
+  
+  
   have hcXW := covApply_contMDiff (cov := cov) hX hW
   have hsec4 : covApply cov (fun b => X b) (f • fun b => W b) =
       f • covApply cov (fun b => X b) (fun b => W b) + Xf • (fun b => W b) := by
@@ -400,10 +344,6 @@ private lemma nablaCurvSec_smul_acted
   simp only [smul_sub]
   abel
 
-/-- Finite additivity of `nablaCurvSec` in its acted slot:
-`(∇_X R)(Y, Z)(∑ᵢ Wᵢ) = ∑ᵢ (∇_X R)(Y, Z) Wᵢ`, by induction over the index finset using
-`nablaCurvSec_add_acted` and (for the empty/zero base) `nablaCurvSec`'s acted additivity at the zero
-section. -/
 private lemma nablaCurvSec_finsetSum_acted
     (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -416,7 +356,7 @@ private lemma nablaCurvSec_finsetSum_acted
   induction s using Finset.induction_on with
   | empty =>
       simp only [Finset.sum_empty]
-      -- `(∇_X R)(Y, Z) 0 = 0`: additivity at `0 + 0 = 0`.
+      
       have h := nablaCurvSec_add_acted (g := g) X Y Z
         (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
         (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x
@@ -435,13 +375,6 @@ private lemma nablaCurvSec_finsetSum_acted
       rw [hfun, nablaCurvSec_add_acted (g := g) X Y Z (W a) (∑ i ∈ t, W i) x, ih,
         Finset.sum_insert ha]
 
-/-- **Germ-locality of the differentiated tangent curvature `nablaCurvSec` in its acted slot.** For
-smooth fields with `W =ᶠ W'` near `x`, `(∇_X R)(Y, Z) W x = (∇_X R)(Y, Z) W' x`.  Each of the four
-Leibniz terms is germ-local in `W`: the leading connection-derivative term, because the curvature
-section `b ↦ R(Y, Z) W b` is eventually equal to `b ↦ R(Y, Z) W' b` near `x` (`riemannSec_eq_of_Z_eq_at`
-at every nearby base point), so the covariant derivatives agree (`congr_of_eventuallyEq`); the three
-correction curvatures by `riemannSec_eq_of_Z_eventuallyEq` (the last through `covApply X W =ᶠ
-covApply X W'`, the covariant derivative reading `W` pointwise). -/
 private lemma nablaCurvSec_acted_eventuallyEq
     (g : SmoothRiemannianMetric I M)
     {X Y Z W W' : Π b : M, TangentSpace I b} {x : M}
@@ -458,7 +391,7 @@ private lemma nablaCurvSec_acted_eventuallyEq
   have hW_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% W) := by simpa using hW
   have hW'_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% W') := by simpa using hW'
   rw [nablaCurvSec_def, nablaCurvSec_def]
-  -- Term 1: the curvature section is eventually equal near `x`, so `cov.toFun` agrees.
+  
   have hsec_ev : ∀ᶠ b in 𝓝 x,
       riemannSec cov Y Z W b = riemannSec cov Y Z W' b := by
     rw [Filter.eventually_iff_exists_mem] at hWW' ⊢
@@ -478,7 +411,7 @@ private lemma nablaCurvSec_acted_eventuallyEq
       (hRYZW_sm.mdifferentiableAt (by simp)) (hRYZW'_sm.mdifferentiableAt (by simp))
       Filter.univ_mem hsec_ev
   rw [hT1]
-  -- Term 2, 3: acted slot `W`, germ-local via `riemannSec_eq_of_Z_eventuallyEq`.
+  
   have hcXY := covApply_contMDiff (cov := cov) hX hY
   have hcXZ := covApply_contMDiff (cov := cov) hX hZ
   have hcXY_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (covApply cov X Y)) := by
@@ -493,8 +426,8 @@ private lemma nablaCurvSec_acted_eventuallyEq
       riemannSec cov Y (covApply cov X Z) W' x :=
     riemannSec_eq_of_Z_eventuallyEq (cov := cov) hY hcXZ hW_le hW'_le hWW'
   rw [hT3]
-  -- Term 4: acted slot is `covApply X W`, eventually equal to `covApply X W'` (covApply reads `W`
-  -- pointwise), germ-local via `riemannSec_eq_of_Z_eventuallyEq`.
+  
+  
   have hcXW := covApply_contMDiff (cov := cov) hX hW
   have hcXW' := covApply_contMDiff (cov := cov) hX hW'
   have hcXW_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (covApply cov X W)) := by
@@ -518,15 +451,6 @@ private lemma nablaCurvSec_acted_eventuallyEq
     riemannSec_eq_of_Z_eventuallyEq (cov := cov) hY hZ hcXW_le hcXW'_le hev_cXW
   rw [hT4]
 
-/-- **Vanishing of the differentiated tangent curvature on an acted section vanishing at the
-basepoint.** For smooth fields with `Δ x = 0`, the differentiated tangent curvature `(∇_X R)(Y, Z) Δ x
-= 0`.  This is the value-locality of `∇R` in its acted slot phrased as a vanishing.  In a chart
-trivialization `e` at `x` with model basis `bE`, the section `Δ` expands near `x` as `Δ = ∑ᵢ cᵢ • sᵢ`
-over the local frame `sᵢ = e.localFrame bE i` with coefficients `cᵢ = e.localFrame_coeff bE i · Δ`
-vanishing at `x`.  Globalizing the frame (`exists_contMDiffSection_eqOn_nhd`) and the coefficients
-(`exists_global_smooth_eqOn_nhd_scalar`), `Δ = ∑ᵢ fᵢ • Sᵢ` near `x`, so by the acted germ-locality of
-`nablaCurvSec`, finite additivity, and the proven `ℝ`-homogeneity, `(∇_X R)(Y, Z) Δ x = ∑ᵢ fᵢ x •
-(∇_X R)(Y, Z) Sᵢ x = ∑ᵢ 0 • … = 0`. -/
 private lemma nablaCurvSec_vanish_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -587,10 +511,6 @@ private lemma nablaCurvSec_vanish_acted
     simp only [hΔx, map_zero]
   rw [hfix, zero_smul]
 
-/-- **Value-determinacy of the differentiated tangent curvature in its acted slot.** For smooth fields
-with `W x = W' x`, `(∇_X R)(Y, Z) W x = (∇_X R)(Y, Z) W' x`.  Write `W = W' + (W - W')`; the additivity
-`nablaCurvSec_add_acted` splits the value into `(∇_X R)(Y, Z) W' x + (∇_X R)(Y, Z)(W - W') x`, and the
-second summand vanishes by `nablaCurvSec_vanish_acted` since `(W - W') x = 0`. -/
 lemma nablaCurvSec_eq_of_acted_eq
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -613,14 +533,6 @@ lemma nablaCurvSec_eq_of_acted_eq
     simp only [ContMDiffSection.coe_sub, Pi.sub_apply, hWW', sub_self]
   rw [hsplit, hvanish, add_zero]
 
-/-! ### Acted-vector linearity of the differentiated base-tangent curvature `nablaBaseSlotCurv` -/
-
-/-- **Additivity of the differentiated base-tangent curvature `nablaBaseSlotCurv` in its acted slot
-vector.** For smooth tangent fields `X, Y, Z` and fibre vectors `u, v : T_x M`,
-`(∇_X R)(Y, Z)(u + v) = (∇_X R)(Y, Z) u + (∇_X R)(Y, Z) v`.  Through the definitional identification
-`nablaBaseSlotCurv g X Y Z x u = nablaCurvSec (LeviCivita g) X Y Z (ext u) x`, the smooth extensions
-satisfy `ext(u + v) x = u + v = (ext u + ext v) x`, so the value-determinacy `nablaCurvSec_eq_of_acted_eq`
-followed by the proven acted-additivity `nablaCurvSec_add_acted` gives the result. -/
 theorem nablaBaseSlotCurv_add_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u v : TangentSpace I x) :
@@ -643,18 +555,13 @@ theorem nablaBaseSlotCurv_add_acted
       nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b) (fun b => Z b)
         (fun b => ev b) x := nablaBaseSlotCurv_eq_nablaCurvSec (I := I) g X Y Z x v
   rw [hbase, hbu, hbv]
-  -- Value-determinacy: `euv x = (eu + ev) x`, then acted additivity.
+  
   have hval : (euv : Π b : M, TangentSpace I b) x = (eu + ev) x := by
     simp only [heuv_def, heu_def, hev_def, ContMDiffSection.coeFn_mk, ContMDiffSection.coe_add,
       Pi.add_apply, smoothExtensionTangent_eq]
   rw [nablaCurvSec_eq_of_acted_eq (g := g) X Y Z euv (eu + ev) x hval]
   exact nablaCurvSec_add_acted (g := g) X Y Z eu ev x
 
-/-- **`ℝ`-homogeneity of `nablaBaseSlotCurv` in its acted slot vector.** For smooth tangent fields
-`X, Y, Z`, a scalar `c`, and a fibre vector `u : T_x M`, `(∇_X R)(Y, Z)(c • u) = c • (∇_X R)(Y, Z) u`.
-The smooth extensions satisfy `ext(c • u) x = c • u = (c • ext u) x`, so the value-determinacy
-`nablaCurvSec_eq_of_acted_eq` followed by the proven acted-homogeneity `nablaCurvSec_smul_acted`
-(with the constant function `c`) gives the result. -/
 theorem nablaBaseSlotCurv_smul_acted
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -673,7 +580,7 @@ theorem nablaBaseSlotCurv_smul_acted
         (fun b => eu b) x := nablaBaseSlotCurv_eq_nablaCurvSec (I := I) g X Y Z x u
   rw [hbase, hbu]
   have hcsmooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c) := contMDiff_const
-  -- The section whose field is `c • ext u`.
+  
   set ecu' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk ((fun _ : M => c) • (fun b => smoothExtensionTangent (I := I) x u b))
       (hcsmooth.smul_section eu.contMDiff) with hecu'_def
@@ -689,7 +596,7 @@ theorem nablaBaseSlotCurv_smul_acted
     rw [hecuval, hecu'val]
   rw [nablaCurvSec_eq_of_acted_eq (g := g) X Y Z ecu ecu' x hval]
   have h := nablaCurvSec_smul_acted (g := g) hcsmooth X Y Z eu x
-  -- `(fun b => ecu' b) = (fun _ => c) • (fun b => eu b)`, matching `nablaCurvSec_smul_acted`'s LHS.
+  
   have hfield : (fun b => (ecu' : Π b : M, TangentSpace I b) b) =
       ((fun _ : M => c) • fun b => (eu : Π b : M, TangentSpace I b) b) := by
     funext b
@@ -697,12 +604,6 @@ theorem nablaBaseSlotCurv_smul_acted
   rw [hfield]
   exact h
 
-/-- **The frame-summed acted-slot substitution operator of the differentiated base-tangent curvature,
-as a linear endomorphism.** For smooth tangent fields `Y, Z` (and derivation `X`), the map
-`w ↦ ∑_i nablaBaseSlotCurv g (B_i) (B_i) Vb x w` over an indexed family of smooth fields `B`
-(the per-slot inserted vector of the Parseval Bochner-fold nullity kernel, with `B_i` the frame and
-`Vb` the read direction) is `ℝ`-linear in `w`, packaged as a `LinearMap`.  Linearity is the frame sum
-of the acted-slot additivity/homogeneity `nablaBaseSlotCurv_add_acted`, `nablaBaseSlotCurv_smul_acted`. -/
 def nablaBaseSlotCurvFrameSumLinear
     (g : SmoothRiemannianMetric I M) {ι : Type*} [Fintype ι]
     (B : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -722,9 +623,6 @@ def nablaBaseSlotCurvFrameSumLinear
     nablaBaseSlotCurvFrameSumLinear (I := I) g B Vb x w =
       ∑ i : ι, nablaBaseSlotCurv (I := I) g (B i) (B i) Vb x w := rfl
 
-/-- **The frame-summed acted-slot substitution operator as a continuous linear endomorphism of the
-tangent fibre.** The finite-dimensionality of `T_x M` upgrades `nablaBaseSlotCurvFrameSumLinear` to a
-`T_x M →L[ℝ] T_x M` (`LinearMap.toContinuousLinearMap`). -/
 noncomputable def nablaBaseSlotCurvFrameSumCLM
     (g : SmoothRiemannianMetric I M) {ι : Type*} [Fintype ι]
     (B : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -740,14 +638,6 @@ noncomputable def nablaBaseSlotCurvFrameSumCLM
     nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x w =
       ∑ i : ι, nablaBaseSlotCurv (I := I) g (B i) (B i) Vb x w := rfl
 
-/-! ### Slot symmetry of the differentiated Ricci tensor -/
-
-/-- **The differentiated Ricci tensor is symmetric in its two lower (Ricci) slots.** For smooth tangent
-fields `X, V, W`, `(∇_X Ric)(V, W) = (∇_X Ric)(W, V)`.  This is inherited from the symmetry of the
-Ricci tensor `ricciTensor_symm` differentiated: the leading directional derivative is the same after the
-pointwise swap `Ric(V·, W·) = Ric(W·, V·)` (`funext` over `ricciTensor_symm`), and the two Leibniz
-correction terms swap into one another (each `Ric(∇_X V, W) = Ric(W, ∇_X V)`, `Ric(V, ∇_X W) =
-Ric(∇_X W, V)`). -/
 theorem nablaRicci_symm
     (g : SmoothRiemannianMetric I M)
     (X V W : Π b : M, TangentSpace I b) (x : M) :
@@ -762,16 +652,6 @@ theorem nablaRicci_symm
     ricciTensor_symm (I := I) g x (V x) ((LeviCivita (I := I) g).toFun W x (X x))]
   ring
 
-/-! ### Value-bilinearity and value-determinacy of `nablaRicci` in its two lower slots
-
-The differentiated Ricci tensor `nablaRicci g X V W x` is additive, `ℝ`-homogeneous and value-local in
-each of its two lower slots `V, W`.  We obtain the `W`-slot facts from the frame trace
-`nablaRicci g X V W x = ∑_i g_x((∇_X R)(B_i, V) W, B_i)` together with the acted-slot
-additivity/homogeneity/value-determinacy of `nablaCurvSec` (proved above), and the `V`-slot facts from
-these through the slot symmetry `nablaRicci_symm`. -/
-
-/-- `W`-slot additivity of `nablaRicci`: `(∇_X Ric)(V, W + W') = (∇_X Ric)(V, W) + (∇_X Ric)(V, W')`,
-via the frame trace and the acted-slot additivity `nablaCurvSec_add_acted`. -/
 private lemma nablaRicci_add_right_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -797,8 +677,6 @@ private lemma nablaRicci_add_right_raw
         (smoothOrthoFrame_smooth (I := I) g x i)) V W W' x
   rw [hadd, (g.inner x).map_add, ContinuousLinearMap.add_apply]
 
-/-- `W`-slot homogeneity of `nablaRicci`: `(∇_X Ric)(V, c • W) = c • (∇_X Ric)(V, W)`, via the frame
-trace and the acted-slot homogeneity `nablaCurvSec_smul_acted` (with the constant function `c`). -/
 private lemma nablaRicci_smul_right_raw
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -829,8 +707,6 @@ private lemma nablaRicci_smul_right_raw
     simpa only [ContMDiffSection.coeFn_mk] using h
   rw [hsmul, (g.inner x).map_smul, ContinuousLinearMap.smul_apply]
 
-/-- `W`-slot value-determinacy of `nablaRicci`: if `W x = W' x` then `(∇_X Ric)(V, W) = (∇_X Ric)(V, W')`,
-via the frame trace and the acted-slot value-determinacy `nablaCurvSec_eq_of_acted_eq`. -/
 lemma nablaRicci_eq_of_W_eq_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -850,8 +726,6 @@ lemma nablaRicci_eq_of_W_eq_raw
         (smoothOrthoFrame_smooth (I := I) g x i)) V W W' x hWW'
   exact congrArg (fun t => g.inner x t (smoothOrthoFrame (I := I) g x i x)) hcc
 
-/-- `V`-slot value-determinacy of `nablaRicci`, obtained from the `W`-slot determinacy through the slot
-symmetry `nablaRicci_symm`. -/
 lemma nablaRicci_eq_of_V_eq_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -863,8 +737,6 @@ lemma nablaRicci_eq_of_V_eq_raw
     nablaRicci_symm (I := I) g (fun b => X b) (fun b => V' b) (fun b => W b) x]
   exact nablaRicci_eq_of_W_eq_raw (g := g) X W V V' x hVV'
 
-/-- Two-slot value-determinacy of `nablaRicci`: if `V x = V₀ x` and `W x = W₀ x` (all smooth sections),
-then the differentiated Ricci tensors agree (chain the `V`- and `W`-slot determinacies). -/
 lemma nablaRicci_eq_of_VW_eq
     (g : SmoothRiemannianMetric I M)
     (X V V₀ W W₀ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -876,7 +748,6 @@ lemma nablaRicci_eq_of_VW_eq
   rw [nablaRicci_eq_of_V_eq_raw (g := g) X V V₀ W x hVV₀,
     nablaRicci_eq_of_W_eq_raw (g := g) X V₀ W W₀ x hWW₀]
 
-/-- `V`-slot additivity of `nablaRicci`, obtained from `W`-slot additivity via `nablaRicci_symm`. -/
 private lemma nablaRicci_add_left_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -889,7 +760,6 @@ private lemma nablaRicci_add_left_raw
     nablaRicci_symm (I := I) g (fun b => X b) (fun b => V' b) (fun b => W b) x]
   exact nablaRicci_add_right_raw (g := g) X W V V' x
 
-/-- `V`-slot homogeneity of `nablaRicci`, obtained from `W`-slot homogeneity via `nablaRicci_symm`. -/
 private lemma nablaRicci_smul_left_raw
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -900,14 +770,11 @@ private lemma nablaRicci_smul_left_raw
     nablaRicci_symm (I := I) g (fun b => X b) (fun b => V b) (fun b => W b) x]
   exact nablaRicci_smul_right_raw (g := g) c X W V x
 
-/-- The smooth-extension section of a fibre vector (a `Cₛ^∞` wrapper of `smoothExtensionTangent x v`),
-named for the differentiated-Ricci bilinear form's coherence proofs. -/
 private noncomputable abbrev extSec (x : M) (v : TangentSpace I x) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
     (smoothExtensionTangent_contMDiff (I := I) x v)
 
-/-- Additivity of `(v, w) ↦ nablaRicci g X (ext v) (ext w) x` in the first slot `v`. -/
 private lemma nablaRicciBilinAux_add_left
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v v' w : TangentSpace I x) :
@@ -926,7 +793,6 @@ private lemma nablaRicciBilinAux_add_left
     (extSec (I := I) x w) x
   exact hdet.trans hadd
 
-/-- Homogeneity of `(v, w) ↦ nablaRicci g X (ext v) (ext w) x` in the first slot `v`. -/
 private lemma nablaRicciBilinAux_smul_left
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (v w : TangentSpace I x) :
@@ -942,7 +808,6 @@ private lemma nablaRicciBilinAux_smul_left
   exact hdet.trans (nablaRicci_smul_left_raw (g := g) c X (extSec (I := I) x v)
     (extSec (I := I) x w) x)
 
-/-- Additivity of `(v, w) ↦ nablaRicci g X (ext v) (ext w) x` in the second slot `w`. -/
 private lemma nablaRicciBilinAux_add_right
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v w w' : TangentSpace I x) :
@@ -961,7 +826,6 @@ private lemma nablaRicciBilinAux_add_right
     (extSec (I := I) x w') x
   exact hdet.trans hadd
 
-/-- Homogeneity of `(v, w) ↦ nablaRicci g X (ext v) (ext w) x` in the second slot `w`. -/
 private lemma nablaRicciBilinAux_smul_right
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (v w : TangentSpace I x) :
@@ -977,10 +841,6 @@ private lemma nablaRicciBilinAux_smul_right
   exact hdet.trans (nablaRicci_smul_right_raw (g := g) c X (extSec (I := I) x v)
     (extSec (I := I) x w) x)
 
-/-- **The differentiated-Ricci bilinear form on fibre vectors.** For a smooth derivation field `X`, the
-bilinear form `(v, w) ↦ (∇_X Ric)(ext v, ext w) x` on `T_x M`, packaged via the value-bilinearity of
-`nablaRicci` in its two lower slots (read off the frame trace of the acted- and first-antisymmetric
-slot linear `nablaCurvSec`).  It is the differentiated analogue of `ricciTensorBilin`. -/
 noncomputable def nablaRicciBilin
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -994,12 +854,6 @@ noncomputable def nablaRicciBilin
     (fun v w w' => nablaRicciBilinAux_add_right (I := I) g X x v w w')
     (fun c v w => nablaRicciBilinAux_smul_right (I := I) g X x c v w)
 
-/-- **The differentiated-Ricci endomorphism `nablaRicciEndo`: the `(1,1)`-raise of `nablaRicci`.** For a
-smooth derivation field `X`, the fibre endomorphism `T_x M →L[ℝ] T_x M` raising the second lower slot of
-`(∇_X Ric)`, defined as the metric sharp of the differentiated-Ricci bilinear form's first-slot
-contraction.  Its defining inner law is `g.inner x (nablaRicciEndo g X x v) w = (∇_X Ric)(ext v, ext w) x`
-(`inner_nablaRicciEndo`); equivalently, on smooth fields, `g.inner x (nablaRicciEndo g X x (V x)) (W x) =
-nablaRicci g X V W x`. -/
 noncomputable def nablaRicciEndo
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -1008,8 +862,6 @@ noncomputable def nablaRicciEndo
   LinearMap.toContinuousLinearMap
     (((metricFlatMap (I := I) g x).symm.toLinearMap).comp (nablaRicciBilin (I := I) g X x))
 
-/-- **Defining inner law of `nablaRicciEndo`.** `g.inner x (nablaRicciEndo g X x v) w =
-(∇_X Ric)(ext v, ext w) x = nablaRicciBilin g X x v w`. -/
 lemma inner_nablaRicciEndo
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v w : TangentSpace I x) :
@@ -1018,9 +870,6 @@ lemma inner_nablaRicciEndo
   change g.inner x (metricSharp (I := I) g x (nablaRicciBilin (I := I) g X x v)) w = _
   exact inner_metricSharp (I := I) g x (nablaRicciBilin (I := I) g X x v) w
 
-/-- **`nablaRicciEndo` on smooth-field values reproduces `nablaRicci`.** For smooth fields `X, V, W`,
-`g.inner x (nablaRicciEndo g X x (V x)) (W x) = nablaRicci g X V W x` (the smooth extensions agree with
-`V, W` at `x`, so the value-bilinear form `nablaRicciBilin` returns `nablaRicci g X V W x`). -/
 lemma inner_nablaRicciEndo_smooth
     (g : SmoothRiemannianMetric I M)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -1036,21 +885,6 @@ lemma inner_nablaRicciEndo_smooth
       (smoothExtensionTangent_contMDiff (I := I) x (W x))) W x
     (smoothExtensionTangent_eq (I := I) x (V x)) (smoothExtensionTangent_eq (I := I) x (W x))
 
-/-! ### The summed slot-derivation fold of the metric pairing -/
-
-/-- **The summed slot-substitution metric pairing fold.** For a fixed continuous endomorphism `T` of
-`T_x M`, the `(0, s)` metric pairing of the slot-summed substitution `∑_k (A with slot k substituted by
-T)` of a `(0, s)`-tensor `A`, against a `(0, s)`-tensor `D`, equals the sum over slots `k` of the
-per-slot substituted pairings `⟨tensorSlotSubstCLM (tangentSlotCLM k T) A, D⟩`:
-```
-⟨∑_k toModel (tensorSlotSubstCLM (tangentSlotCLM k T) A), toModel D⟩
-  = ∑_k ⟨toModel (tensorSlotSubstCLM (tangentSlotCLM k T) A), toModel D⟩.
-```
-This is the left-additivity of `tensorInnerPointwise` over the finite slot sum
-(`tensorInnerPointwise_sum_left`), with the `tensorSlotSubstCLM`/`tangentSlotCLM` substitution machinery
-naming the per-slot inserted endomorphism.  The kernel worker specialises `T` to the frame-summed
-`nablaBaseSlotCurvFrameSumCLM` substitution and reads each per-slot pairing through the model component
-sum `tensorInnerPointwise_eq_sum_componentS_mul`. -/
 theorem tensorInnerPointwise_slotSubst_sum
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -1067,7 +901,7 @@ theorem tensorInnerPointwise_slotSubst_sum
               (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)))
           (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) := by
   classical
-  -- `toModel (∑_k Aₖ) = ∑_k toModel Aₖ`.
+  
   have hsum : TensorRSSpace.toModel (∑ k : Fin s,
         tensor0SAsRS (I := I) (M := M) x
           (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) =
@@ -1084,8 +918,8 @@ theorem tensorInnerPointwise_slotSubst_sum
     rw [hL, map_sum]
     exact Finset.sum_congr rfl (fun k _ => TensorRSSpace.toModelL_apply _)
   rw [hsum]
-  -- Finite left-additivity of the pointwise inner product over the slot sum (`map_sum` of the
-  -- left-linear functional `m ↦ ⟨m, D⟩`, built from the CompactSpace-free `add_left`/`zero_left`).
+  
+  
   let φ : TensorRSModel 0 s ℝ E →+ ℝ :=
     { toFun := fun m => tensorInnerPointwise (I := I) (M := M) g 0 s x m
         (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D))

@@ -1,65 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 
-/-!
-# Differentiated chart-bilinear identity
-
-This module packages the **differentiated** chart-bilinear variational identity
-on `chartTargetEuclid α` obtained by formally differentiating the variational
-identity of a `ChartBilinearH1ComplData g α` along a coordinate direction
-`l : Fin n`.
-
-Mathematically, if the base data records the identity
-```
-∫ ∑_{i,j} (√det g · g^{ij}) · (weak_partial i) · ∂_j ψ
-  + ∫ √det g · u_chart · ψ
-  = ∫ √det g · f_chart · ψ
-```
-for every smooth test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`,
-then applying `∂_l` (Leibniz) leaves us with the *differentiated* identity for
-the weak `l`-partial derivatives of `u_chart` and `f_chart`:
-```
-∫ ∑_{i,j} (√det g · g^{ij}) · ∂_l(weak_partial i) · ∂_j ψ
-  + ∫ √det g · ∂_l(u_chart) · ψ
-  = ∫ √det g · ∂_l(f_chart) · ψ
-    - ∫ ∑_{i,j} ∂_l(√det g · g^{ij}) · (weak_partial i) · ∂_j ψ
-    - ∫ ∂_l(√det g) · u_chart · ψ
-    + ∫ ∂_l(√det g) · f_chart · ψ.
-```
-
-The chart-side coefficients `√det g · g^{ij}` (`weightedInvGramOnEuclid`) and
-`√det g` (`densityOnEuclid`) are smooth on `chartTargetEuclid α`, so their
-`l`-partial derivatives are smooth functions on the same open set.
-
-This identity is the input to a per-chart elliptic regularity step at one
-order higher than the base step: applying the Nirenberg difference-quotient
-machinery to the weak `l`-partial derivatives of `u_chart` produces second
-weak partials, and iterating in `l` over all coordinate directions yields the
-full second-order regularity bootstrap.
-
-## Main definitions
-
-* `DiffChartBilinearH1ComplData`: packaged data for the differentiated
-  chart-bilinear identity, recording the base data, the direction `l`, the
-  weak `l`-partials of `u_chart`, `f_chart`, each `weak_partial i`, the
-  smooth Leibniz cross-coefficients, and the differentiated variational
-  identity.
-* `weightedInvGramDerivOnEuclid`: the `l`-partial Frechet derivative of
-  `weightedInvGramOnEuclid g α i j` evaluated against the `l`-th unit
-  vector. Smooth on `chartTargetEuclid α`.
-* `densityDerivOnEuclid`: the `l`-partial Frechet derivative of
-  `densityOnEuclid g α`. Smooth on `chartTargetEuclid α`.
-
-## Main results
-
-* `differentiated_chart_bilinear_identity`: hypothesis-bearing form of the
-  differentiated chart-bilinear identity, expressed via the data structure.
-* `weightedInvGramDerivOnEuclid_contDiffOn`,
-  `densityDerivOnEuclid_contDiffOn`: smoothness of the cross-coefficient
-  fields on `chartTargetEuclid α`.
-* `weightedInvGramDerivOnEuclid_continuousOn`,
-  `densityDerivOnEuclid_continuousOn`: continuity wrappers.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -89,23 +29,15 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The `l`-partial Frechet derivative of `weightedInvGramOnEuclid g α i j`,
-evaluated against the `l`-th Euclidean unit vector. Smooth on
-`chartTargetEuclid α`; junk values elsewhere. -/
 def weightedInvGramDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   (fderiv ℝ (weightedInvGramOnEuclid (I := I) g α i j) y)
     (EuclideanSpace.single l 1)
 
-/-- The `l`-partial Frechet derivative of `densityOnEuclid g α`, evaluated
-against the `l`-th Euclidean unit vector. Smooth on `chartTargetEuclid α`;
-junk values elsewhere. -/
 def densityDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l 1)
 
-/-- The `l`-partial Frechet derivative of `weightedInvGramOnEuclid g α i j` is
-smooth on `chartTargetEuclid α`. -/
 lemma weightedInvGramDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -128,8 +60,6 @@ lemma weightedInvGramDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-- The `l`-partial Frechet derivative of `densityOnEuclid g α` is smooth on
-`chartTargetEuclid α`. -/
 lemma densityDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -151,7 +81,6 @@ lemma densityDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-- Continuity wrapper for `weightedInvGramDerivOnEuclid`. -/
 lemma weightedInvGramDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -160,7 +89,6 @@ lemma weightedInvGramDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α i j l).continuousOn
 
-/-- Continuity wrapper for `densityDerivOnEuclid`. -/
 lemma densityDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -169,8 +97,6 @@ lemma densityDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityDerivOnEuclid_contDiffOn (I := I) g α l).continuousOn
 
-/-- The Leibniz cross-coefficient `weightedInvGramDerivOnEuclid` is bounded on
-every compact subset of `chartTargetEuclid α`. -/
 lemma weightedInvGramDerivOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -198,8 +124,6 @@ lemma weightedInvGramDerivOnEuclid_bounded_on_compact
   intro y hy
   exact h_max hy
 
-/-- The Leibniz cross-coefficient `densityDerivOnEuclid` is bounded on every
-compact subset of `chartTargetEuclid α`. -/
 lemma densityDerivOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -225,102 +149,51 @@ lemma densityDerivOnEuclid_bounded_on_compact
   intro y hy
   exact h_max hy
 
-/-- Packaged data describing the *differentiated* chart-bilinear identity on
-`chartTargetEuclid α` obtained by formally differentiating a base
-`ChartBilinearH1ComplData` in direction `direction : Fin n`.
-
-The structure records:
-
-(1) the base data `base : ChartBilinearH1ComplData g α`;
-(2) the differentiation direction `direction : Fin (Module.finrank ℝ E)`;
-(3) the weak `direction`-partials `u_chart_deriv`, `f_chart_deriv`,
-    `weak_partial_deriv i` of the base scalar fields and weak partials;
-(4) DeGiorgi-style witnesses that each `_deriv` field is indeed a weak
-    `direction`-partial of the corresponding base field, and local-`L²`
-    regularity on every compact subset of `chartTargetEuclid α`;
-(5) the differentiated variational identity, expressing the integrated
-    Leibniz expansion as a balance of principal `L²` terms (involving
-    `weak_partial_deriv` and `u_chart_deriv`) and lower-order Leibniz
-    cross-terms (involving `weightedInvGramDerivOnEuclid`,
-    `densityDerivOnEuclid`, and the base `weak_partial`, `u_chart`,
-    `f_chart`).
-
-The principal integrand uses the EXPLICIT weak partial
-`weak_partial_deriv i`, not the classical Fréchet derivative
-`fderiv ℝ (base.weak_partial i)` (which would vanish a.e. in non-smooth
-contexts). The Leibniz cross-terms `weightedInvGramDerivOnEuclid` and
-`densityDerivOnEuclid` are *smooth* on `chartTargetEuclid α`, so they
-contribute lower-order (zero-th and first-order) corrections to the
-variational identity.
-
-The differentiated identity has the form
-```
-∫ ∑_{i,j} weightedInvGramOnEuclid · weak_partial_deriv i · ∂_j ψ
-  + ∫ densityOnEuclid · u_chart_deriv · ψ
-  = ∫ densityOnEuclid · f_chart_deriv · ψ
-    - ∫ ∑_{i,j} weightedInvGramDerivOnEuclid · base.weak_partial i · ∂_j ψ
-    - ∫ densityDerivOnEuclid · base.u_chart · ψ
-    + ∫ densityDerivOnEuclid · base.f_chart · ψ
-```
-for every smooth test ψ with `tsupport ψ ⊆ chartTargetEuclid α`.
--/
 structure DiffChartBilinearH1ComplData
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) where
-  /-- The base chart-bilinear data structure we differentiate. -/
+  
   base : ChartBilinearH1ComplData (I := I) (M := M) g α
-  /-- The coordinate direction in which we differentiate. -/
+  
   direction : Fin (Module.finrank ℝ E)
-  /-- The weak `direction`-partial of `base.u_chart`. -/
+  
   u_chart_deriv : EuclN → ℝ
-  /-- The weak `direction`-partial of `base.f_chart`. -/
+  
   f_chart_deriv : EuclN → ℝ
-  /-- The weak `direction`-partial of `base.weak_partial i`. -/
+  
   weak_partial_deriv : Fin (Module.finrank ℝ E) → EuclN → ℝ
-  /-- `u_chart_deriv` is the weak `direction`-partial of `base.u_chart` on
-  `chartTargetEuclid α`. -/
+  
   u_chart_deriv_isWeakPartial :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
       u_chart_deriv base.u_chart
       (chartTargetEuclid (I := I) (M := M) α)
-  /-- `f_chart_deriv` is the weak `direction`-partial of `base.f_chart` on
-  `chartTargetEuclid α`. -/
+  
   f_chart_deriv_isWeakPartial :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
       f_chart_deriv base.f_chart
       (chartTargetEuclid (I := I) (M := M) α)
-  /-- `weak_partial_deriv i` is the weak `direction`-partial of
-  `base.weak_partial i` on `chartTargetEuclid α`. -/
+  
   weak_partial_deriv_isWeakPartial :
     ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction
       (weak_partial_deriv i) (base.weak_partial i)
       (chartTargetEuclid (I := I) (M := M) α)
-  /-- Local `L²` regularity of `u_chart_deriv` on each compact subset of
-  `chartTargetEuclid α` (with respect to plain Lebesgue volume). -/
+  
   u_chart_deriv_locally_memLp :
     ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp u_chart_deriv 2 ((volume : Measure EuclN).restrict K)
-  /-- Local `L²` regularity of `f_chart_deriv` on each compact subset of
-  `chartTargetEuclid α`. -/
+  
   f_chart_deriv_locally_memLp :
     ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp f_chart_deriv 2 ((volume : Measure EuclN).restrict K)
-  /-- Local `L²` regularity of each `weak_partial_deriv i` on each compact
-  subset of `chartTargetEuclid α`. -/
+  
   weak_partial_deriv_locally_memLp :
     ∀ i, ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp (weak_partial_deriv i) 2
         ((volume : Measure EuclN).restrict K)
-  /-- The differentiated variational identity.
-
-  The principal LHS integrand uses `weak_partial_deriv` and `u_chart_deriv`
-  (the weak first partials of the base fields). The Leibniz cross-terms on
-  the RHS involve the smooth coefficient derivatives
-  `weightedInvGramDerivOnEuclid` and `densityDerivOnEuclid` paired with the
-  base fields `weak_partial`, `u_chart`, `f_chart`. -/
+  
   differentiated_variational_identity :
     ∀ ψ : EuclN → ℝ, ContDiff ℝ (⊤ : ℕ∞) ψ → HasCompactSupport ψ →
       tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α →
@@ -353,11 +226,6 @@ structure DiffChartBilinearH1ComplData
           base.f_chart y * ψ y
         ∂(volume : Measure EuclN))
 
-/-- Headline form of the differentiated chart-bilinear identity for a
-differentiated `H1Compl` element: given the data `D`, the differentiated
-variational identity holds for every smooth test function `ψ` with
-`tsupport ψ ⊆ chartTargetEuclid α`. This is a re-export of
-`D.differentiated_variational_identity` for ergonomics. -/
 theorem differentiated_chart_bilinear_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -395,23 +263,18 @@ theorem differentiated_chart_bilinear_identity
       ∂(volume : Measure EuclN)) :=
   D.differentiated_variational_identity ψ hψ hψ_cs hψ_supp
 
-/-- The base data of a `DiffChartBilinearH1ComplData`. -/
 abbrev base
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α) :
     ChartBilinearH1ComplData (I := I) (M := M) g α := D.base
 
-/-- The differentiation direction of a `DiffChartBilinearH1ComplData`. -/
 abbrev direction
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.direction
 
-/-- A `DiffChartBilinearH1ComplData` carries the *base* variational identity
-intact via its `.base` field. This is a convenience re-export for callers that
-need both identities side by side. -/
 theorem base_chart_bilinear_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

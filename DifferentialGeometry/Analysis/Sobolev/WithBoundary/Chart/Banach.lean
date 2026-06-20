@@ -3,24 +3,6 @@ import Mathlib.Analysis.Normed.Module.Basic
 import Mathlib.Analysis.Normed.Group.NullSubmodule
 import Mathlib.Analysis.Normed.Group.Uniform
 
-/-!
-# Seminormed and normed structures on the chart-based Sobolev space `W^{k,p}_chart(M)` with boundary
-
-Building on `WithBoundary/Chart/Defs.lean`, we equip the subtype
-`WkpChart g k p hp := ↥(wkpChartSubmodule g k p hp)` with a seminormed real
-vector-space structure, using the chart-based half-space-Sobolev norm
-`wkpNormChart g k p u` (taken in real form via `ENNReal.toReal`).
-
-For compact `M` the norm is finite for any element of `WkpChart`, and the
-three core seminorm axioms (nonnegativity, homogeneity, triangle) are direct
-consequences of the `wkpNormChart` triangle and scalar-multiplication
-identities established in `WithBoundary/Chart/Defs.lean`.
-
-The standard quotient `SeparationQuotient (WkpChart …)` then carries a
-`NormedAddCommGroup` structure (Mathlib's `SeparationQuotient` machinery),
-with the canonical projection providing a continuous linear surjection.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -36,8 +18,6 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
-/-- Real-valued (`ℝ≥0∞.toReal`) version of the chart-based half-space-Sobolev
-norm. -/
 def wkpNormChartReal
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -54,7 +34,6 @@ lemma wkpNormChartReal_def
     wkpNormChartReal (n := n) (M := M) g k p u =
       (wkpNormChart (n := n) (M := M) g k p u).toReal := rfl
 
-/-- The real-valued chart-based norm is non-negative. -/
 lemma wkpNormChartReal_nonneg
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -63,7 +42,6 @@ lemma wkpNormChartReal_nonneg
     0 ≤ wkpNormChartReal (n := n) (M := M) g k p u :=
   ENNReal.toReal_nonneg
 
-/-- The real-valued chart-based norm of the zero function is zero. -/
 lemma wkpNormChartReal_zero
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -74,8 +52,6 @@ lemma wkpNormChartReal_zero
   rw [wkpNormChart_zero_fun (n := n) (M := M) g hp]
   simp
 
-/-- The triangle inequality for the real-valued chart-based norm, when both
-inputs are in `MemWkpChart` and the manifold is compact. -/
 lemma wkpNormChartReal_add_le
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -102,8 +78,6 @@ lemma wkpNormChartReal_add_le
   rw [ENNReal.toReal_add hu_ne hv_ne] at hToReal
   exact hToReal
 
-/-- The real-valued chart-based norm satisfies homogeneity:
-`‖c • u‖ = ‖c‖ * ‖u‖`. -/
 lemma wkpNormChartReal_const_smul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -116,9 +90,6 @@ lemma wkpNormChartReal_const_smul
   rw [wkpNormChart_const_smul (n := n) (M := M) g hp c hu]
   rw [ENNReal.toReal_mul, toReal_enorm]
 
-/-- The underlying `M → ℝ` function of an element `u : WkpChart g k p hp`.
-Implementation: `WkpChart` is by definition the submodule subtype, so we
-extract `.val` directly. -/
 def wkpChartFun
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -128,8 +99,6 @@ def wkpChartFun
   Subtype.val (α := (M → ℝ))
     (p := fun u => u ∈ wkpChartSubmodule (n := n) (M := M) g k p hp) u
 
-/-- The membership property of the underlying function of an element of
-`WkpChart`. -/
 lemma wkpChartFun_memWkpChart
     [T2Space M] [SigmaCompactSpace M]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -163,8 +132,6 @@ lemma wkpChartFun_smul
   ext x
   rfl
 
-/-- `Norm` instance on `WkpChart g k p hp`, with norm
-`(wkpNormChart g k p u).toReal`. -/
 instance instNormWkpChart
     [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -173,8 +140,6 @@ instance instNormWkpChart
     Norm (WkpChart (n := n) (M := M) g k p hp) where
   norm u := (wkpNormChart (n := n) (M := M) g k p (wkpChartFun u)).toReal
 
-/-- The norm of `u : WkpChart g k p hp` equals
-`(wkpNormChart g k p (wkpChartFun u)).toReal`. -/
 @[simp]
 lemma norm_wkpChart_def
     [T2Space M] [SigmaCompactSpace M]
@@ -184,7 +149,6 @@ lemma norm_wkpChart_def
     (u : WkpChart (n := n) (M := M) g k p hp) :
     ‖u‖ = (wkpNormChart (n := n) (M := M) g k p (wkpChartFun u)).toReal := rfl
 
-/-- The `SeminormedSpace.Core` for `WkpChart g k p hp` (compact `M`). -/
 lemma wkpChart_seminormedSpace_core
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -220,8 +184,6 @@ lemma wkpChart_seminormedSpace_core
     rw [ENNReal.toReal_add hu_ne hv_ne] at hToReal
     exact hToReal
 
-/-- The `SeminormedAddCommGroup` instance on `WkpChart g k p hp` for compact
-`M`. -/
 instance instSeminormedAddCommGroupWkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -230,7 +192,6 @@ instance instSeminormedAddCommGroupWkpChart
     SeminormedAddCommGroup (WkpChart (n := n) (M := M) g k p hp) :=
   SeminormedAddCommGroup.ofCore (wkpChart_seminormedSpace_core (n := n) (M := M) g k p hp)
 
-/-- `WkpChart g k p hp` is a normed real vector space (well, seminormed). -/
 instance instNormedSpaceRealWkpChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric
@@ -245,8 +206,6 @@ instance instNormedSpaceRealWkpChart
     rw [wkpNormChart_const_smul (n := n) (M := M) g hp c hu_mem]
     rw [ENNReal.toReal_mul, toReal_enorm]
 
-/-- The `SeparationQuotient` of `WkpChart g k p hp` is a `NormedAddCommGroup`
-(automatically inherited from the seminormed structure). -/
 def WkpChartQuot
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric

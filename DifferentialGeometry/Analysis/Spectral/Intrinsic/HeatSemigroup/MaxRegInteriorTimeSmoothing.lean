@@ -1,61 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralMassUniformSup
 
-/-!
-# All-order interior-time smoothing of the per-mode Duhamel coordinates
-
-For a closed Riemannian manifold `(M, g₀)` and ranks `(0, 2)`, the inhomogeneous
-heat equation `∂_t u = Δ_∇ u + f`, `u(0) = 0`, has the `L²`-maximal-regularity
-solution whose `i`-th eigen-coordinate is the per-mode Duhamel convolution
-`φᵢ(t) = perModeConv λᵢ (f i) t = ∫₀ᵗ e^{−λᵢ(t−s)} (f i)(s) ds`.
-
-The companion file `SpectralMassUniformSup.lean` controls the order-`0` time
-value of the spectral mass uniformly on `[0,T]`.  This file strengthens the
-control to **all time-derivatives**: for every time-derivative order `k` and
-every spatial Sobolev order `σ ≥ 0`, the weighted square of the `k`-th
-time-derivative `∂ₜᵏφᵢ` has a single, `t`-independent, summable-across-modes
-majorant on `[0,T]`.
-
-## The reasoning route (the parabolic time-bootstrap)
-
-The eigen-coordinate solves the scalar ODE `φᵢ' = (f i) − λᵢ·φᵢ`, `φᵢ(0) = 0`
-(`perModeConv_hasDerivAt`).  Differentiating `k` times gives the **one-step time
-recursion**
-
-  `∂ₜᵏ⁺¹φᵢ = ∂ₜᵏ(f i) − λᵢ·∂ₜᵏφᵢ`
-
-(`perModeConv_iteratedDeriv_succ`, the iterated form of the ODE, valid for a
-`C∞` forcing coordinate).  Each time-derivative therefore costs **one extra
-power of `λᵢ`** — equivalently *two* extra spatial Sobolev orders after squaring.
-The weighted square then bootstraps:
-
-  `(1 + λᵢ)^σ (∂ₜᵏ⁺¹φᵢ)² ≤ 2·(1 + λᵢ)^σ (∂ₜᵏ(f i))² + 2·(1 + λᵢ)^{σ+2}(∂ₜᵏφᵢ)²`,
-
-the first term controlled by the *forcing* mass at order `(k, σ)` and the second
-by the order-`(k, σ+2)` instance of the very same statement — an induction on `k`
-that raises the spatial order by `2` per step.  The base case `k = 0` is the
-endpoint Cauchy–Schwarz bound `perModeConv_endpoint_sq_le` against the forcing's
-own order-`σ` mass.
-
-Because each step is dominated by a `t`-independent, summable majorant supplied
-by the forcing hypothesis `hforcing_mass`, the conclusion is a single
-summable-across-modes constant `Cmaj`, uniform over `t ∈ [0,T]`.
-
-## Chart-independence
-
-The forcing enters this file *only* through a genuine `C∞`-in-time
-coordinate family `f : TensorEigenIdx … → ℝ → ℝ` (a smooth representative of the
-per-mode forcing coordinate) together with its own all-order spectral-mass
-control `hforcing_mass`.  The file is therefore independent of the chart-jet
-coefficient tower: the smoothness and summability of that representative are
-*hypotheses*, to be discharged by the parabolic interior smoothing of the
-genuine engine forcing where this lemma is consumed.
-
-## Sign convention
-
-Geometer convention `Δ_∇ = −∇*∇`, eigenvalues `λᵢ ≥ 0`, weights
-`(1 + λᵢ)^σ ≥ 1` for `σ ≥ 0`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -88,17 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {T : ℝ}
 
-/-- **The one-step time recursion for the per-mode Duhamel convolution.**  For a
-`C∞` forcing term `f`, the `(k+1)`-th time-derivative of the per-mode
-convolution `perModeConv lam f` is, as a function,
-
-  `∂ₜᵏ⁺¹(perModeConv lam f) = ∂ₜᵏf − lam·∂ₜᵏ(perModeConv lam f)`.
-
-This is the iterated form of the defining ODE `φ' = f − lam·φ`
-(`perModeConv_hasDerivAt`): one differentiates the ODE `k` times, using that the
-time derivative of `perModeConv lam f` is `f − lam·perModeConv lam f`, and that
-both `f` and `perModeConv lam f` are `C∞` (`perModeConv_contDiff_of_contDiff`), so
-the `iteratedDeriv` of the difference splits termwise. -/
 private theorem perModeConv_iteratedDeriv_succ (lam : ℝ) (f : ℝ → ℝ)
     (hf : ContDiff ℝ ∞ f) (k : ℕ) :
     iteratedDeriv (k + 1) (perModeConv lam f)
@@ -137,15 +70,6 @@ private theorem perModeConv_iteratedDeriv_succ (lam : ℝ) (f : ℝ → ℝ)
     exact hsmul
   rw [hconst]
 
-/-- The pointwise endpoint bound on the per-mode convolution against the
-forcing's pointwise square, uniform on `[0,T]`: for a continuous `f`, `0 ≤ lam`,
-`0 ≤ T` and `t ∈ [0,T]`,
-
-  `(perModeConv lam f t)² ≤ T · ∫₀ᵀ f(s)² ds`.
-
-The endpoint Cauchy–Schwarz bound `perModeConv_endpoint_sq_le` dominates the
-square by the kernel mass times `∫₀ᵗ f²`; the kernel mass is `≤ t ≤ T` and the
-forcing square integral over `[0,t]` is `≤` the one over `[0,T]`. -/
 private theorem perModeConv_sq_le_T_mul_integral (lam : ℝ) (hlam : 0 ≤ lam)
     (f : ℝ → ℝ) (hf : Continuous f) (hT : 0 ≤ T) {t : ℝ}
     (ht : t ∈ Set.Icc (0 : ℝ) T) :
@@ -173,26 +97,6 @@ private theorem perModeConv_sq_le_T_mul_integral (lam : ℝ) (hlam : 0 ≤ lam)
     _ ≤ T * ∫ s in (0 : ℝ)..T, f s ^ 2 := by
         apply mul_le_mul hmass_le hintegral_le hintegral_t_nn hT
 
-/-- **The all-order pointwise spectral-mass control of the per-mode Duhamel
-coordinates.**  Let `f i : ℝ → ℝ` be a `C∞`-in-time forcing-coordinate family
-(`hf_smooth`) whose own all-order weighted pointwise spectral masses are
-summable across the spectrum, uniformly on `[0,T]` (`hforcing_mass`: for every
-time-order `j` and spatial order `τ ≥ 0`, the family
-`i ↦ (1 + λᵢ)^τ (∂ₜʲ(f i) t)²` has a `t`-independent summable majorant on
-`[0,T]`).
-
-Then for every time-derivative order `k` and spatial Sobolev order `σ ≥ 0`, the
-per-mode Duhamel coordinates `φᵢ = perModeConv λᵢ (f i)` satisfy the analogous
-control: there is a single summable-across-modes majorant `Cmaj`, independent of
-`t`, with
-
-  `(1 + λᵢ)^σ · (∂ₜᵏφᵢ t)² ≤ Cmaj i`   for all `i` and all `t ∈ [0,T]`.
-
-This is the parabolic interior-time smoothing of the maximal-regularity
-solution at the level of its eigen-coordinates: every time-derivative is
-spatially controlled, summably across modes, uniformly up to `t = 0` on `[0,T]`.
-The proof is the induction on `k` described in the module header, raising the
-spatial order by `2` per time-derivative. -/
 theorem perModeConv_allOrder_timeDeriv_spectralMass_le (hT : 0 ≤ T)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
     (hf_smooth : ∀ i, ContDiff ℝ ∞ (f i))

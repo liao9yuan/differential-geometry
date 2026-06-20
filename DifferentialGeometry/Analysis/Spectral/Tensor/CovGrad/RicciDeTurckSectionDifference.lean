@@ -8,51 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 
-/-!
-# The connection-difference vector as the inverse-Gram raise of the metric-difference covariant gradient
-
-For a closed smooth Riemannian manifold `(M, g₀)` modelled on a real inner-product space `E`, a second
-metric `g₁`, and a smooth `(0, 2)`-tensor section `S` whose extracted bilinear form is the metric
-difference `g₁ − g₀`, this file expresses the **connection-difference tensor** `A = connDiff g₁ g₀`
-(the intrinsic Christoffel variation `δΓ = ∇₁ − ∇₀`, the bedrock of the `(A)` Lichnerowicz `_core` for
-the Ricci–DeTurck linearization) through the **bundled covariant gradient of the metric-difference
-section**.
-
-The classical Koszul / Christoffel-difference identity gives `A` only in its `g₁`-LOWERED form
-(`connDiff_koszul_metricDiff`):
-$$
-  2\,g_1\bigl(A(Y, X), Z\bigr)
-    = (\nabla^0_X h)(Y, Z) + (\nabla^0_Y h)(X, Z) - (\nabla^0_Z h)(X, Y),
-    \qquad h = g_1 - g_0,\ \nabla^0 = \mathrm{LeviCivita}\,g_0,
-$$
-where `connDiff g₁ g₀ x (Y x) (X x) = ∇¹_X Y − ∇⁰_X Y` (Mathlib convention) and each `∇⁰ h` is the
-Leibniz-defect `metricDiffCovDeriv`.  The metric-difference covariant-gradient bridge
-(`covGrad02_unitModel_eval_eq_metricDiffCovDeriv'`) reads each `∇⁰ h` term as the unit-evaluated bundled
-covariant gradient `covGrad g₀ 0 2 S` (since `metricDiffCovDeriv g₀ g₀ = 0`).  Composing the two yields
-the LOWERED bridge `connDiff_inner_eq_half_covGradKoszul`.
-
-The genuinely new step is the **inverse-Gram raise**: the lowered identity holds for every test vector
-`Z`, and the right-hand side is tensorial in `Z`, so non-degeneracy of `g₁`
-(`SmoothRiemannianMetric.eq_of_inner_eq`) un-pairs it.  The raised vector is the inverse-metric sharp
-`♯_{g₁}` (`inverseMetricSharpFib`, the index-raising operator of the cometric `g₁⁻¹`) applied to the
-half-symmetrised Koszul covector, which is exactly the `(0, 2)`-covariant gradient `covGrad g₀ 0 2 S`
-contracted to a covector in its trailing slot.  This is the `δΓ = ½ g₁⁻¹ (∇₀ h + ∇₀ h − ∇₀ h)`
-formula of the Ricci–DeTurck development in raised form, the substitution the Lichnerowicz `_core`
-consumes for the bare connection-difference value `A(V, W)`.
-
-## Main results
-
-* `connDiff_inner_eq_half_covGradKoszul` — the LOWERED bridge: twice the `g₁`-pairing of the
-  connection-difference value `A(Y, X)` against `Z` equals the symmetric Koszul combination of the
-  unit-evaluated covariant gradient `covGrad g₀ 0 2 S`.
-
-* `connDiff_eq_appCc_invGram_covGrad` — **the inverse-Gram raise (headline)**: the connection-difference
-  value `connDiff g₁ g₀ x (Y x) (X x)` equals the inverse-metric sharp `♯_{g₁}` of the half-symmetrised
-  Koszul covector `koszulCovGradCovec g₀ g₁ S X Y x`, whose `g₁`-flat (`cotangentToDual`) evaluation on
-  any vector is the half Koszul combination of `covGrad g₀ 0 2 S`.  This is the genuine raise of the
-  lowered Koszul identity by the cometric operator field.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -85,11 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## Abbreviation for the unit-evaluated covariant-gradient Koszul sum -/
-
-/-- The unit-evaluated bundled covariant gradient `covGrad g₀ 0 2 S` read on the cons-tuple
-`(X x, Y x, Z x)`: the `(0, 2)` Leibniz-defect covariant derivative `(∇₀_X (g₁ − g₀))(Y, Z)` when the
-bilinear form of `S` is the metric difference (`covGrad02_unitModel_eval_eq_metricDiffCovDeriv'`). -/
 private def covGradEval (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   Tensor0SSpace.toModel
@@ -98,24 +48,8 @@ private def covGradEval (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor 
       (unitZeroSec (I := I) (M := M) x))
     (Fin.cons (X x) (Fin.cons (Y x) ![Z x]))
 
-/-! ## The lowered Koszul bridge through the covariant gradient -/
-
 set_option linter.unusedSectionVars false in
-/-- **The metric-difference Koszul covariant-gradient bridge (lowered form).**
 
-Suppose the extracted bilinear form of the smooth `(0, 2)`-tensor section `S` is, at every base point
-and on every pair of tangent vectors, the metric difference `g₁ − g₀` (a genuine hypothesis on `S`,
-NOT the conclusion — the realize-tie content for `h = g₁ − g₀`).  Then twice the `g₁`-pairing of the
-connection-difference value `connDiff g₁ g₀ x (Y x) (X x)` against `Z x` is the symmetric Koszul
-combination of the unit-evaluated bundled covariant gradient `covGrad g₀ 0 2 S`:
-```
-2 g₁(connDiff g₁ g₀ (Y, X), Z)
-  = covGrad(S)(X, Y, Z) + covGrad(S)(Y, X, Z) − covGrad(S)(Z, X, Y).
-```
-This composes the `g₁`-lowered Christoffel-difference Koszul identity `connDiff_koszul_metricDiff`
-(through `metricDiffCovDeriv g₁ g₀`) with the covariant-gradient bridge
-`covGrad02_unitModel_eval_eq_metricDiffCovDeriv'` (which reads each `metricDiffCovDeriv g₁ g₀` term as
-the unit-evaluated `covGrad`, since `metricDiffCovDeriv g₀ g₀ = 0`). -/
 theorem connDiff_inner_eq_half_covGradKoszul
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -127,14 +61,14 @@ theorem connDiff_inner_eq_half_covGradKoszul
       covGradEval (I := I) (M := M) g₀ S X Y Z x
         + covGradEval (I := I) (M := M) g₀ S Y X Z x
         - covGradEval (I := I) (M := M) g₀ S Z X Y x := by
-  -- Each `covGradEval` term is `metricDiffCovDeriv g₁ g₀ − metricDiffCovDeriv g₀ g₀`, and
-  -- `metricDiffCovDeriv g₀ g₀ = 0` since `∇₀` is metric-compatible with `g₀`.
+  
+  
   have hzero : ∀ (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       metricDiffCovDeriv (I := I) g₀ g₀ (fun b => P b) (fun b => Q b) (fun b => R b) x = 0 := by
     intro P Q R
     unfold metricDiffCovDeriv
     rw [sub_self]
-  -- Rewrite each `covGradEval` via bridge #3 (`g₁' := g₀`), then drop the vanishing `g₀ g₀` term.
+  
   have hXYZ : covGradEval (I := I) (M := M) g₀ S X Y Z x =
       metricDiffCovDeriv (I := I) g₁ g₀ (fun b => X b) (fun b => Y b) (fun b => Z b) x := by
     rw [covGradEval, covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
@@ -148,27 +82,11 @@ theorem connDiff_inner_eq_half_covGradKoszul
     rw [covGradEval, covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
       (I := I) (M := M) g₀ g₁ g₀ S hbil Z X Y x, hzero Z X Y, sub_zero]
   rw [hXYZ, hYXZ, hZXY]
-  -- The remaining identity is the lowered Christoffel-difference Koszul identity in `metricDiffCovDeriv`
-  -- form, with the three smooth fields supplied differentiably.
+  
+  
   exact connDiff_koszul_metricDiff (I := I) g₁ g₀
     X.mdifferentiableAt Y.mdifferentiableAt Z.mdifferentiableAt
 
-/-! ## The half-symmetrised Koszul covector and the inverse-Gram raise -/
-
-/-- **The half-symmetrised Koszul covector of the metric-difference covariant gradient.**
-
-The `(0, 1)`-covector at `x` whose `g₁`-flat (`cotangentToDual`) evaluation on a tangent vector `ζ` is
-the half symmetric Koszul combination of the unit-evaluated bundled covariant gradient
-`covGrad g₀ 0 2 S` (the content of `koszulCovGradCovec_dual_apply_covGrad`):
-```
-cotangentToDual (koszulCovGradCovec g₀ g₁ X Y x) ζ
-  = ½ (covGrad(S)(X, Y, ζ) + covGrad(S)(Y, X, ζ) − covGrad(S)(ζ, X, Y)).
-```
-Concretely it is the `dualToCotangent` packaging of the `g₁`-flat of the connection-difference value
-`connDiff g₁ g₀ x (Y x) (X x)`.  Packaging through the `g₁`-flat makes the covector manifestly a
-continuous linear functional (and extension-independent); the covariant-gradient evaluation is then
-supplied by the lowered bridge `connDiff_inner_eq_half_covGradKoszul` (it does not depend on the
-section `S` until that bridge is invoked, so `S` is not part of the covector datum). -/
 def koszulCovGradCovec (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     Tensor0SSpace 1 I x :=
@@ -176,9 +94,7 @@ def koszulCovGradCovec (g₀ g₁ : SmoothRiemannianMetric I M)
     ((g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (X x))).toLinearMap)
 
 set_option linter.unusedSectionVars false in
-/-- The `g₁`-flat (`cotangentToDual`) of the half-symmetrised Koszul covector reproduces the metric
-pairing of the connection-difference value: `cotangentToDual (koszulCovGradCovec …) ζ
-= g₁(connDiff g₁ g₀ (Y, X), ζ)`. -/
+
 @[simp] theorem koszulCovGradCovec_dual_apply
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
@@ -188,17 +104,7 @@ pairing of the connection-difference value: `cotangentToDual (koszulCovGradCovec
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The covariant-gradient evaluation of the half-symmetrised Koszul covector.**
 
-Under the metric-difference hypothesis `hbil` on `S`, the `g₁`-flat of the Koszul covector evaluated on
-the value `Z x` of a smooth field `Z` is the half symmetric Koszul combination of the unit-evaluated
-covariant gradient `covGrad g₀ 0 2 S`:
-```
-cotangentToDual (koszulCovGradCovec g₀ g₁ X Y x) (Z x)
-  = ½ (covGrad(S)(X, Y, Z) + covGrad(S)(Y, X, Z) − covGrad(S)(Z, X, Y)).
-```
-This identifies the Koszul covector with the trailing-slot contraction of `covGrad g₀ 0 2 S`; it is the
-lowered bridge `connDiff_inner_eq_half_covGradKoszul` read through the covector packaging. -/
 theorem koszulCovGradCovec_dual_apply_covGrad
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -215,57 +121,24 @@ theorem koszulCovGradCovec_dual_apply_covGrad
   linarith [h]
 
 set_option linter.unusedSectionVars false in
-/-- **The inverse-Gram raise of the metric-difference covariant gradient (headline).**
 
-The connection-difference value `connDiff g₁ g₀ x (Y x) (X x)` (the intrinsic Christoffel variation
-`δΓ = ∇₁ − ∇₀` evaluated at `Y` in direction `X`) is the inverse-metric sharp `♯_{g₁}`
-(`inverseMetricSharpFib`, the index-raising operator of the cometric `g₁⁻¹`) of the half-symmetrised
-Koszul covector `koszulCovGradCovec g₀ g₁ X Y x`, whose `g₁`-flat evaluation is, on any smooth section
-`S` realising the metric difference `g₁ − g₀`, the half symmetric Koszul combination of the bundled
-covariant gradient `covGrad g₀ 0 2 S` (`koszulCovGradCovec_dual_apply_covGrad`):
-```
-connDiff g₁ g₀ x (Y x) (X x)
-  = ♯_{g₁} (½ (covGrad(S)(X, Y, ·) + covGrad(S)(Y, X, ·) − covGrad(S)(·, X, Y))).
-```
-This is the `δΓ = ½ g₁⁻¹ (∇₀ h + ∇₀ h − ∇₀ h)` formula of the Ricci–DeTurck development in raised
-form: the lowered Koszul identity `connDiff_inner_eq_half_covGradKoszul` holds for every test vector and
-its right-hand side is tensorial, so non-degeneracy of `g₁` (`SmoothRiemannianMetric.eq_of_inner_eq`)
-un-pairs it.  It is the substitution the `(A)` Lichnerowicz `_core` consumes for the bare
-connection-difference value. -/
 theorem connDiff_eq_appCc_invGram_covGrad
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (X x) =
       inverseMetricSharpFib (I := I) g₁ x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) := by
-  -- Non-degeneracy of `g₁`: it suffices to match the `g₁`-pairing against every test vector `ζ`.
+  
   refine (SmoothRiemannianMetric.eq_of_inner_eq g₁ (fun ζ => ?_)).symm
-  -- The sharp un-pairs against the `g₁`-flat of the Koszul covector (`inverseMetricSharpFib_inner`),
-  -- which is precisely `g₁(connDiff (Y, X), ζ)` (`koszulCovGradCovec_dual_apply`).
+  
+  
   rw [inverseMetricSharpFib_inner (I := I) g₁ x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) ζ,
       cotangentToDualLinear_apply,
       koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ X Y x ζ]
 
-/-! ## The cotangent connection-difference bridge (the dual of `connDiff`) -/
-
 set_option linter.unusedSectionVars false in
-/-- **The cotangent connection-difference bridge (value level).**
 
-The induced cotangent covariant derivatives of the two `g₁`/`g₀`-Levi-Civita connections differ on a
-smooth covector field `θ` exactly by the dual action of the (tangent) connection-difference tensor
-`A = connDiff g₁ g₀`.  Writing `∇^{g}_K θ := cotangentCov (LeviCivita g) θ` for the cotangent covariant
-derivative, evaluated at `x` in direction `v` on a test vector `w`,
-```
-(∇^{g₁}_K θ)(v)(w) − (∇^{g₀}_K θ)(v)(w) = −θ x (connDiff g₁ g₀ x w v).
-```
-This is the dual of the difference-tensor convention `connDiff g₁ g₀ x (σ x) v = ∇¹_v σ − ∇⁰_v σ`
-(`connDiff_apply`): the cotangent connection is defined by the dual-pairing Leibniz rule
-`cotangentScalar (cov) θ x X Y = X(θ(Y)) − θ(∇_X Y)` (`cotangentScalar_def`), whose first
-(exterior-derivative) term is connection-independent and cancels in the difference, leaving the
-covariant-derivative term `−θ(∇¹_X Y − ∇⁰_X Y) = −θ(connDiff g₁ g₀ (Y, X))`.  It is the genuine
-order-dropping dual connection-difference, the last connection-conversion bridge the SP2-endpoint
-principal alignment consumes (`cotangentCov(LeviCivita g₁) → cotangentCov(LeviCivita g₀)`). -/
 theorem cotangentCov_leviCivita_diff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
@@ -275,14 +148,14 @@ theorem cotangentCov_leviCivita_diff
         ((cotangentCov (LeviCivita (I := I) g₀)).toFun θ x v) w =
       -θ x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v) := by
   classical
-  -- Extend `v`, `w` to smooth tangent fields so the defining `Φ`-formula applies for both connections.
+  
   set X : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x v with hXdef
   set Y : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x w with hYdef
   have hX := smoothExtensionTangent_mdiff (I := I) x v x
   have hY := smoothExtensionTangent_mdiff (I := I) x w x
   have hXx : X x = v := smoothExtensionTangent_eq (I := I) x v
   have hYx : Y x = w := smoothExtensionTangent_eq (I := I) x w
-  -- Both cotangent covariant derivatives evaluate to the `cotangentScalar` Leibniz formula.
+  
   have h₁ : ((cotangentCov (LeviCivita (I := I) g₁)).toFun θ x v) w =
       cotangentScalar ((LeviCivita (I := I) g₁).toFun) θ x X Y := by
     rw [cotangentCov_toFun, cotangentCovFun_apply,
@@ -294,7 +167,7 @@ theorem cotangentCov_leviCivita_diff
         show v = X x from hXx.symm, show w = Y x from hYx.symm,
         cotangentCovAt_apply_of_diff (LeviCivita (I := I) g₀) hθ hX hY]
   rw [h₁, h₀, cotangentScalar_def, cotangentScalar_def]
-  -- The connection-independent exterior-derivative terms cancel; the difference is the dual `connDiff`.
+  
   have hconn : PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v =
       (LeviCivita (I := I) g₁).toFun Y x v - (LeviCivita (I := I) g₀).toFun Y x v := by
     have := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := Y) hY v
@@ -305,14 +178,7 @@ theorem cotangentCov_leviCivita_diff
   ring
 
 set_option linter.unusedSectionVars false in
-/-- **The continuous-linear realization of the half-symmetrised Koszul covector.**
 
-The `cotangentToCLM` realization of the Koszul covector `koszulCovGradCovec g₀ g₁ Z Y b` is the
-metric flat of the connection-difference value: `cotangentToCLM (K b) = g₁(connDiff g₁ g₀ (Y, Z), ·)`.
-This is the `dualToCotangent`/`cotangentToCLM` round-trip `cotangentToDual_dualToCotangent` read
-through the definition `koszulCovGradCovec = dualToCotangent (g₁(connDiff g₁ g₀ (Y, Z), ·).toLinearMap)`;
-it identifies the cotangent field the SP2-endpoint principal differentiates with the smooth metric flat
-`metricFlat g₁` of the smooth connection-difference vector field. -/
 theorem cotangentToCLM_koszulCovGradCovec
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -328,15 +194,7 @@ theorem cotangentToCLM_koszulCovGradCovec
         cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b) w)
 
 set_option linter.unusedSectionVars false in
-/-- **Smoothness of the Koszul cotangent realization (cotangent-differentiability).**
 
-The covector field `b ↦ cotangentToCLM (koszulCovGradCovec g₀ g₁ Z Y b)` the SP2-endpoint principal
-differentiates is cotangent-differentiable (`MDiffAtCotangent`) at every point.  By
-`cotangentToCLM_koszulCovGradCovec` it equals the metric flat `metricFlat g₁ (connDiff g₁ g₀ (Y, Z))`
-of the smooth connection-difference vector field (`connDiff_contMDiff`, smooth in the first slot `Y`,
-direction `Z`); `metricFlat` of a differentiable vector field is cotangent-differentiable
-(`metricFlat_mdiff`).  This discharges the `hθ` hypothesis of `cotangentCov_leviCivita_diff` for the
-SP2-endpoint principal. -/
 theorem koszulCovGradCovecCLM_mdiffAtCotangent
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -351,33 +209,14 @@ theorem koszulCovGradCovecCLM_mdiffAtCotangent
     rw [cotangentToCLM_koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b]
     rfl
   rw [hflat]
-  -- The connection-difference vector field is smooth (first slot `Y`, direction `Z`), so its
-  -- metric flat is cotangent-differentiable.
+  
+  
   have hconn_sm := PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
   have hconn_at := (hconn_sm x).mdifferentiableAt (by simp)
   exact metricFlat_mdiff (I := I) g₁ hconn_at
 
-/-! ## The SP2-endpoint principal alignment (`cotangentCov(LeviCivita g₁) → cotangentCov(LeviCivita g₀)`) -/
-
 set_option linter.unusedSectionVars false in
-/-- **The SP2-endpoint principal alignment to the `g₀`-cotangent covariant derivative.**
 
-The SP2-endpoint order-2 principal differentiates the Koszul covector with the *`g₁`*-cotangent
-covariant derivative `cotangentCov (LeviCivita g₁)`.  Applying the cotangent connection-difference
-bridge `cotangentCov_leviCivita_diff` (the dual of `connDiff g₁ g₀`) converts it to the
-*`g₀`*-cotangent covariant derivative plus an order-`1` `connDiff` correction: evaluating both sides on
-a test vector `w`,
-```
-(∇^{g₁}_K (cotangentToCLM K_S))(X x)(w)
-  = (∇^{g₀}_K (cotangentToCLM K_S))(X x)(w)
-    − cotangentToCLM (K_S x) (connDiff g₁ g₀ x w (X x)).
-```
-The principal `∇^{g₀}_K (cotangentToCLM K_S)` is the genuine `g₀`-covariant derivative of the Koszul
-covector — the order-2 PRINCIPAL the Ricci–DeTurck `C₂` linearization expands as the iterated
-covariant gradient `∇₀²` of the metric-difference section — while the `connDiff` term is the order-`1`
-endpoint correction.  This is the last connection-conversion step: with it the SP2-endpoint principal
-is expressed against the *background* connection `∇₀`, where the iterated-covariant-gradient calculus
-(`covGrad`/`iteratedCovGrad`) applies. -/
 theorem covDerivConnDiff_principal_align
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (w : TangentSpace I x) :
@@ -392,40 +231,12 @@ theorem covDerivConnDiff_principal_align
             (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w (X x)) := by
   have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ g₁ Z Y x
   have hbridge := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁ hθ (X x) w
-  -- `hbridge : (∇^{g₁}_K θ)(X x)(w) − (∇^{g₀}_K θ)(X x)(w) = −θ x (connDiff g₁ g₀ x w (X x))`,
-  -- where `θ x = cotangentToCLM (K x)` definitionally.
+  
+  
   linarith [hbridge]
 
-/-! ## The differentiated connection difference (the value-level order-graded product rule) -/
-
 set_option linter.unusedSectionVars false in
-/-- **The differentiated connection difference, order-graded (value level).**
 
-The directional covariant derivative `covDerivConnDiff g₀ g₁ X Z Y x` of the connection-difference
-tensor `A = connDiff g₁ g₀` under the `g₀`-Levi-Civita connection (`= (∇₀_X A)(Z, Y)` in the
-consumer's `X Z Y` slot order) is the order-graded covariant product rule of the inverse-Gram raise
-`connDiff_eq_appCc_invGram_covGrad`.  Writing `K = koszulCovGradCovec g₀ g₁ Z Y` for the `g₁`-flat
-Koszul covector of the metric-difference covariant gradient, `A(Z, Y) = ♯_{g₁}(K)` (leaf (1)), so
-differentiating covariantly in `X` along `∇₀` and using the difference one-form `connDiff` to swap
-`∇₀ ↔ ∇₁` together with the `∇₁`-parallelism of `♯_{g₁}`
-(`inverseMetricSharpField_covGrad_eq_zero`) gives
-```
-(∇₀_X A)(Z, Y)
-  = ♯_{g₁}(∇₁_X K)                                   -- the order-2 PRINCIPAL: the further covariant
-                                                       --   gradient of K (carrying ∇₀²(metric diff)),
-                                                       --   raised by the cometric ♯_{g₁};
-    − A(♯_{g₁}(K), X)                                -- the order-1 CROSS term ∇₀(g₁⁻¹) (the genuine
-                                                       --   endpoint coefficient: the Christoffel
-                                                       --   difference applied to the raised K);
-    − A(Y, ∇₀_X Z) − A(∇₀_X Y, Z),                   -- the two order-1 SLOT corrections of the
-                                                       --   (1, 2)-tensor covariant derivative,
-```
-where `∇₁_X K := dualToCotangent ((cotangentCov (LeviCivita g₁)) (b ↦ cotangentToCLM (K b)) x (X x))`
-is the `g₁`-cotangent covariant derivative of the Koszul covector, `A(·, ·) = connDiff g₁ g₀ x · ·`,
-and `∇₀_X Z = (LeviCivita g₀) Z x (X x)`.  The principal `♯_{g₁}(∇₁_X K)` is the order-2 term the
-Ricci–DeTurck `C₂` linearization expands; the three `connDiff` terms are the order-1 cross
-coefficients (`A = δΓ`, the intrinsic Christoffel variation).  This is the value-level identity the
-Ricci/Lie arms consume (the `appCc` packaging happens later, at the `(0, 2)` output level). -/
 theorem covDerivConnDiff_eq_invGramSharp_graded
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -443,24 +254,24 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
         - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
             ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) := by
   classical
-  -- The `g₁`-flat Koszul covector field and the raised connection-difference field.
+  
   set K : Π b : M, Tensor0SSpace 1 I b :=
     fun b => koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b with hKdef
-  -- Leaf (1), pointwise: `A(Z, Y) = ♯_{g₁}(K)` as a field equality.
+  
   have hWeq : (fun b : M => inverseMetricSharpFib (I := I) g₁ b (K b)) =
       (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b)) := by
     funext b
     exact (connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ Z Y b).symm
   set W : Π b : M, TangentSpace I b :=
     fun b => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b) with hWdef
-  -- Smoothness of the raised field `W` (`connDiff` of two smooth fields, first slot `Y`).
+  
   have hW_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) :=
     PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
   have hW_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) x :=
     (hW_sm x).mdifferentiableAt (by simp)
-  -- Same differentiability transported across `hWeq` to the `♯_{g₁}(K)` form (for the parallelism).
+  
   have hWsharp_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
         (inverseMetricSharpFib (I := I) g₁ b (K b))) x := by
@@ -469,15 +280,15 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
         (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) := by
       funext b; rw [congrFun hWeq b]
     rw [hfun]; exact hW_at
-  -- The `∇₀ ↔ ∇₁` swap on the raised field via the difference one-form `connDiff g₁ g₀`.
+  
   have hswap : (LeviCivita (I := I) g₀).toFun (fun b => W b) x (X x) =
       (LeviCivita (I := I) g₁).toFun (fun b => W b) x (X x) -
         PDE.DeTurck.connDiff (I := I) g₁ g₀ x (W x) (X x) := by
     have h := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := fun b => W b) (x := x) hW_at (X x)
     rw [h]; abel
-  -- The `∇₁`-parallelism of the cometric raise applied to the Koszul covector field `K`.
+  
   have hpar := inverseMetricSharpField_covGrad_eq_zero (I := I) g₁ K hWsharp_at (X x)
-  -- Rewrite `(LeviCivita g₁) W` through `hWeq` into the `♯_{g₁}(K)` form, then apply `hpar`.
+  
   have hW1 : (LeviCivita (I := I) g₁).toFun (fun b => W b) x (X x) =
       inverseMetricSharpFib (I := I) g₁ x
         (dualToCotangent (I := I)
@@ -486,11 +297,11 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
     rw [show (fun b => W b) =
         (fun b : M => inverseMetricSharpFib (I := I) g₁ b (K b)) from hWeq.symm]
     exact hpar
-  -- `W x = ♯_{g₁}(K x)` for the cross term.
+  
   have hWx : W x = inverseMetricSharpFib (I := I) g₁ x (K x) := by
     have := congrFun hWeq x
     rw [hWdef]; exact this.symm
-  -- The definitional unfolding of `covDerivConnDiff` (the bridge's `hexpand`, value level).
+  
   have hexpand : covDerivConnDiff (I := I) g₀ g₁
         (fun b => X b) (fun b => Z b) (fun b => Y b) x =
       (LeviCivita (I := I) g₀).toFun (fun b => W b) x (X x)
@@ -500,49 +311,8 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
             ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) := rfl
   rw [hexpand, hswap, hW1, hWx]
 
-/-! ## The two-endpoint mean-value telescope of the differentiated connection difference -/
-
 set_option linter.unusedSectionVars false in
-/-- **The two-endpoint differentiated connection difference, order-graded (value level).**
 
-For a common base metric `g₀` and two endpoint metrics `g₁, g₁'` (in the consumer the realized
-metrics `realize(g₀ + T)`, `realize(g₀ + T')` with section difference `S = T − T'`), the difference of
-the differentiated connection-differences `covDerivConnDiff g₀ g₁ X Z Y x − covDerivConnDiff g₀ g₁' X Z
-Y x` is the order-graded mean-value Leibniz telescope of the single-endpoint inverse-Gram raise
-`covDerivConnDiff_eq_invGramSharp_graded` (leaf SP1'), assembled by applying SP1' at each endpoint and
-subtracting term by term, with the principal term further telescoped by the add-subtract-middle-term
-rule into a *same-operator-on-covector-difference* arm plus an *operator-difference-on-endpoint* arm.
-
-Writing `K_g := koszulCovGradCovec g₀ g Z Y` for the `g`-flat Koszul covector of the metric-difference
-covariant gradient (`covGrad g₀ 0 2` of the section realising `g − g₀`), `A_g := connDiff g g₀` for the
-intrinsic Christoffel variation `δΓ`, `∇^g` the `g`-Levi-Civita connection, `∇^g_K` its induced
-cotangent covariant derivative, and `♯_g := inverseMetricSharpFib g` the cometric raise, the identity is
-```
-covDerivConnDiff g₀ g₁ X Z Y x − covDerivConnDiff g₀ g₁' X Z Y x
-  = ( ♯_{g₁}(∇^{g₁}_X K_{g₁}) − ♯_{g₁}(∇^{g₁}_X K_{g₁'}) )      -- (P) PRINCIPAL, order-2 in S:
-                                                                 --   the SAME operators ♯_{g₁}∇^{g₁}
-                                                                 --   on the covector difference K_S;
-    + ( ♯_{g₁}(∇^{g₁}_X K_{g₁'}) − ♯_{g₁'}(∇^{g₁'}_X K_{g₁'}) ) -- (O) OPERATOR-DIFFERENCE, order-0:
-                                                                 --   ♯_{g₁}∇^{g₁} − ♯_{g₁'}∇^{g₁'} on the
-                                                                 --   ENDPOINT covector K_{g₁'};
-    − ( A_{g₁}(♯_{g₁}(K_{g₁}), X) − A_{g₁'}(♯_{g₁'}(K_{g₁'}), X) ) -- (C) order-1 cross difference (δΓ);
-    − ( A_{g₁}(Y, ∇^{g₀}_X Z) − A_{g₁'}(Y, ∇^{g₀}_X Z) )          -- (S₁) order-1 slot difference;
-    − ( A_{g₁}(∇^{g₀}_X Y, Z) − A_{g₁'}(∇^{g₀}_X Y, Z) ).         -- (S₂) order-1 slot difference.
-```
-
-The principal arm (P) carries the second covariant gradient `∇₀² S` of the metric-difference section
-(the covector difference `K_{g₁} − K_{g₁'}` is, under the realize-tie, the Koszul covector of the
-section difference `S = T − T'`, by `covGrad_sub`), raised by the single cometric `♯_{g₁}`; it is the
-order-2 PRINCIPAL the Ricci–DeTurck `C₂` linearization expands.  The operator-difference arm (O) is
-order-`0` in `S` as a value: it splits, via the inverse-metric-difference multiplier
-`gInvDiffRaisedEndo_eq_metricSharp_flatDiff` (for `♯_{g₁} − ♯_{g₁'}`, linear in `S(x)` as a value) and
-the connection-difference cocycle `connDiff_cocycle` (for `∇^{g₁} − ∇^{g₁'} = connDiff g₁ g₁'`,
-order-`≤ 1`), into the genuine endpoint coefficients acting on the endpoint development `∇^{g₁'} K_{g₁'}`
-— the order-`0`/cross arm the Ricci/Lie arms package into `Rₘ`/`Lₘ`.  The cross and slot arms
-(C, S₁, S₂) are the order-`1` `connDiff` couplings.  The operator coefficients (`♯_{g₁}`, `∇^{g₁}`, the
-endpoint development of `K_{g₁'}`) are kept symbolic — they are the endpoint-dependent coefficients the
-arms package afterward.  This is the value-level two-endpoint identity both the Ricci-arm telescope
-(`ricciTensor_sub_eq_palatini_telescope`) and the Lie arm consume. -/
 theorem covDerivConnDiff_diff_endpoint_graded
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -586,56 +356,16 @@ theorem covDerivConnDiff_diff_endpoint_graded
       covDerivConnDiff_eq_invGramSharp_graded (I := I) (M := M) g₀ g₁' X Y Z x]
   abel
 
-/-! ## The corrected order-2 combined three-trace coefficient field `R₂`
-
-The numerically-verified order-2 PRINCIPAL of the Ricci–DeTurck connection-difference is NOT the bare
-cometric double trace of the two leading covariant slots `{0, 1}`.  Writing
-`D = iteratedCovGrad g₀ 0 2 2 S` for the second covariant gradient of the metric-difference section `S`
-— a `(0, 4)`-tensor with slots `(deriv2, deriv1, S1, S2)` — and `g₁^{·}` for the cometric raise
-`cometricLmodel g₁`, the traced principal is
-```
-P(Z, Y)
-  = ½ ∑ₖ ( D(♯b^k, Z, Y, b_k) + D(♯b^k, Y, Z, b_k) − D(♯b^k, b_k, Z, Y) ),
-```
-a COMBINED three-trace: the bare double trace `cometricDoubleTrace` captures ONLY the third Koszul term
-`−D(♯b^k, b_k, Z, Y)` (the `{0, 1}`-slot trace), while the first two Koszul terms
-`D(♯b^k, Z, Y, b_k) + D(♯b^k, Y, Z, b_k)` are `{0, 3}`-cross traces (`T₀₃`).  This section builds the
-combined operator `R₂` realising `P` as the `appCc`/`unitModel` read-off of `D`, the order-2 building
-block the Ricci-arm eval-matching (`deTurckRicciArm_appCc_graded`) consumes.
-
-The `{0, 3}`-cross trace is the `{0, 1}`-cometric double trace of the slot-reindexed tensor: the
-permutation `koszulSlotPerm` of `Fin 4` (fixing slot `0`, cycling `1 → 2 → 3 → 1`) carries the trace pair
-`{0, 3}` onto the leading pair `{0, 1}` while leaving the output indices `(Z, Y)` in the trailing slots,
-so `T₀₃(D)(Z, Y) = modelDoubleTrace 2 ♯ (domDomCongr koszulSlotPerm D) (Z, Y)`. -/
-
-/-- The slot permutation of `Fin 4` that carries the `{0, 3}`-trace pair onto the leading `{0, 1}` pair:
-it fixes slot `0` (the cometric-raised slot) and cycles `1 → 2 → 3 → 1` so that, after the reindexing
-`domDomCongr koszulSlotPerm`, the original `{0, 3}` slots become the leading `{0, 1}` trace pair and the
-original `{1, 2}` slots (carrying the output indices `Z, Y`) become the trailing `{2, 3}` output slots. -/
 def koszulSlotPerm : Equiv.Perm (Fin 4) :=
   Equiv.Perm.decomposeFin.symm (0, finRotate 3)
 
 set_option linter.unusedSectionVars false in
-/-- The model-fibre value of `koszulSlotPerm` on the four slots: it fixes `0` and cycles
-`1 ↦ 2 ↦ 3 ↦ 1`. -/
+
 private theorem koszulSlotPerm_apply :
     koszulSlotPerm 0 = 0 ∧ koszulSlotPerm 1 = 2 ∧ koszulSlotPerm 2 = 3 ∧ koszulSlotPerm 3 = 1 := by
   unfold koszulSlotPerm
   refine ⟨?_, ?_, ?_, ?_⟩ <;> decide
 
-/-- **The combined model three-trace operator of the corrected order-2 principal.**
-
-For a model cometric raise `L : Tensor0SModel 1 → E` (`L = cometricLmodel g₁ x`), the combined
-three-trace `(0, 4) → (0, 2)` model operator
-```
-combinedTrace42Model L D (Z, Y)
-  = ½ ( modelDoubleTrace 2 L (domDomCongr koszulSlotPerm D) (Z, Y)        -- T₀₃^{Z,Y}
-      + modelDoubleTrace 2 L (domDomCongr koszulSlotPerm D) (Y, Z)        -- T₀₃^{Y,Z}
-      − modelDoubleTrace 2 L D (Z, Y) ),                                  -- {0,1}-double trace
-```
-assembled from the `{0, 1}`-cometric double trace `modelDoubleTrace` (the third Koszul term) and its
-slot-reindexed forms (the two `{0, 3}`-cross Koszul terms).  This is the model reading of the order-2
-coefficient `R₂`. -/
 noncomputable def combinedTrace42Model
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) :
     Tensor0SBundle.Tensor0SModel 4 ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel 2 ℝ E :=
@@ -651,14 +381,7 @@ noncomputable def combinedTrace42Model
       - modelDoubleTrace (E := E) 2 L)
 
 set_option linter.unusedSectionVars false in
-/-- **Defining evaluation of the combined model three-trace.**  On a `Fin 2`-tuple `m = (Z, Y)`,
-the combined three-trace reads off the sum of the two `{0, 3}`-cross Koszul traces minus the
-`{0, 1}`-double trace, halved:
-```
-combinedTrace42Model L D m
-  = ½ ∑ₖ ( D(L b^k, m 0, m 1, b_k) + D(L b^k, m 1, m 0, b_k) − D(L b^k, b_k, m 0, m 1) ).
-```
-Definitional through `modelDoubleTrace_apply` and the slot-reindexing `domDomCongr koszulSlotPerm`. -/
+
 theorem combinedTrace42Model_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -676,7 +399,7 @@ theorem combinedTrace42Model_apply
                 (Fin.cons ((Module.finBasis ℝ E) k) m))) := by
   classical
   obtain ⟨hp0, hp1, hp2, hp3⟩ := koszulSlotPerm_apply
-  -- The `domDomCongrₗᵢ` continuous-linear-equiv reading reduces to the bare `domDomCongr` reindex.
+  
   have hcongr_eq : ∀ (D' : Tensor0SBundle.Tensor0SModel 4 ℝ E),
       (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
           koszulSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap D' =
@@ -691,7 +414,7 @@ theorem combinedTrace42Model_apply
     intro T
     rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-  -- Tuple reading of the `{0, 3}`-cross trace `T₀₃` on a `Fin 2`-tuple `mm`.
+  
   have hT03 : ∀ (mm : Fin 2 → E),
       modelDoubleTrace (E := E) 2 L
           (ContinuousMultilinearMap.domDomCongr koszulSlotPerm D) mm =
@@ -718,31 +441,22 @@ theorem combinedTrace42Model_apply
   congr 1
   rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.sub_apply,
     ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply]
-  -- The third (un-permuted) term: the bare `{0, 1}`-double trace.
+  
   rw [modelDoubleTrace_apply (E := E) 2 L D m]
-  -- The first {0,3}-cross term, through `domDomCongr koszulSlotPerm`.
+  
   rw [ContinuousLinearMap.comp_apply, hcongr_eq, hT03 m]
-  -- The second {0,3}-cross term: output swap then `T₀₃` at the swapped tuple `(m 1, m 0)`.
+  
   rw [ContinuousLinearMap.comp_apply, hswap_eq, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousLinearMap.comp_apply, hcongr_eq, hT03 (fun i => m (Equiv.swap (0 : Fin 2) 1 i))]
-  -- Combine the three sums termwise.
+  
   rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun k _ => ?_
-  -- Only the second `{0, 3}`-cross term differs: its tuple `(m (swap 0), m (swap 1)) = (m 1, m 0)`.
+  
   have htuple : (![m (Equiv.swap (0 : Fin 2) 1 0), m (Equiv.swap (0 : Fin 2) 1 1),
         (Module.finBasis ℝ E) k] : Fin 3 → E) = ![m 1, m 0, (Module.finBasis ℝ E) k] := by
     rw [Equiv.swap_apply_left, Equiv.swap_apply_right]
   rw [htuple]
 
-/-! ## The corrected order-2 coefficient field `R₂` as a smooth `(4, 2)`-operator field -/
-
-/-- **The fibrewise corrected order-2 combined three-trace operator.**  At a base point `x`, the
-combined three-trace `combinedTrace42Model (cometricLmodel g₁ x)` of the two leading-plus-trailing
-covariant slots, transported through the fibre/model continuous-linear equivalences to a fibre operator
-`Tensor0SSpace 4 I x →L Tensor0SSpace 2 I x`.  This is the order-2 PRINCIPAL coefficient: it contracts a
-`(0, 4)`-tensor `D = ∇₀² S` (slots `(deriv2, deriv1, S1, S2)`) by the COMBINED cometric `g₁⁻¹` trace
-`½(T₀₃^{Z,Y} + T₀₃^{Y,Z} − cometricDoubleTrace)` of the corrected Koszul principal.  It depends on `g₁`
-only through the SMOOTH cometric Hom-section `inverseMetricSharpField`; NO chart-selected ambient frame. -/
 noncomputable def ricciArmPrincipalCoeffFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 2 x).symm.toContinuousLinearMap.comp
@@ -750,9 +464,7 @@ noncomputable def ricciArmPrincipalCoeffFib (g₁ : SmoothRiemannianMetric I M) 
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
 set_option linter.unusedSectionVars false in
-/-- The model image of `ricciArmPrincipalCoeffFib` is the combined three-trace `combinedTrace42Model`
-against the cometric reading of `g₁`.  Definitional, since `Tensor0SSpace.toModel` is the identity
-equivalence. -/
+
 @[simp] theorem ricciArmPrincipalCoeffFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciArmPrincipalCoeffFib (I := I) g₁ x D) =
@@ -761,15 +473,7 @@ equivalence. -/
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **Base-point smoothness of the corrected order-2 coefficient field.**  The fibre field
-`x ↦ ricciArmPrincipalCoeffFib g₁ x` is a smooth section of the `(4, 2)`-tensor bundle.  Its smoothness
-routes through the globally-smooth cometric Hom-section `inverseMetricSharpField`: by
-`contMDiff_clm_section_of_pointwise` it reduces, on a smooth `(0, 4)`-field `Y`, to the model
-combination `½(T₀₃ + (output swap) T₀₃ − {0,1}-trace)`, each summand a `±1`/output-reindexed value of
-the SMOOTH rank-generic cometric double-trace field `cometricDoubleTraceFib g₁ 2`
-(`cometricDoubleTraceFib_contMDiff`) applied to a constant-reindexed smooth `(0, 4)`-field.  NO
-chart-selected, non-`∇₀`-parallel ambient frame enters.  Non-vacuous (the genuine combined cometric
-trace field, smooth, not the zero field). -/
+
 theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -781,12 +485,12 @@ theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) 
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x => ricciArmPrincipalCoeffFib (I := I) g₁ x)
   intro Y
-  -- The constant model slot-reindex carrying `{0, 3}` onto the leading `{0, 1}` trace pair.
+  
   let κ : Equiv.Perm (Fin 4) := koszulSlotPerm
-  -- A constant model slot-reindex of a smooth `(0, d)`-tensor field is smooth: its trivialised
-  -- basis coordinate at `τ` is the `(τ ∘ ρ)`-coordinate of the original (a relabeling), through
-  -- `contMDiff_multilinearSection_iff_coord` (the proof of `domDomCongrField_contMDiff`, inline on a
-  -- bare `Tensor0SSpace` section to avoid the `SmoothCcTensor 0 d` vs `Tensor0SModel d` packaging).
+  
+  
+  
+  
   have hreindex : ∀ {d : ℕ} (ρ : Equiv.Perm (Fin d))
       (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
       (_hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -818,26 +522,26 @@ theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) 
           ((Module.finBasis ℝ E) (τ j))) = _
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rfl
-  -- The smooth `(0, 4)`-section reindexed by `κ`.
+  
   have hYκ := hreindex κ (fun x => Y x) Y.contMDiff
-  -- The smooth `{0,1}`-double-trace of `Yκ`: the smooth field `cometricDoubleTraceFib g₁ 2` applied.
+  
   have hT03field := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) hYκ
-  -- The smooth `{0,1}`-double-trace of `Y` itself.
+  
   have hCDTfield := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) Y.contMDiff
-  -- The output swap of the first cross trace.
+  
   have hswapfield := hreindex (Equiv.swap (0 : Fin 2) 1)
     (fun x => (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         cometricDoubleTraceFib (I := I) g₁ 2 x)
         (Tensor0SBundle.Tensor0SSpace.ofModel
           (ContinuousMultilinearMap.domDomCongr κ (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))))
     hT03field
-  -- Assemble: `R₂Fib (Y x) = ½ • (T₀₃ + swap T₀₃ − CDT)` at the fibre level.
+  
   have hcomb := ((hT03field.add_section hswapfield).sub_section hCDTfield).const_smul_section
     (a := (1 / 2 : ℝ))
   refine hcomb.congr (fun x => ?_)
-  -- The fibre identity: `R₂Fib (Y x) = ½ • ((T₀₃ x + swap T₀₃ x) − CDT x)`.
+  
   have hfib : ricciArmPrincipalCoeffFib (I := I) g₁ x (Y x) =
       (1 / 2 : ℝ) •
         ((((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
@@ -869,18 +573,11 @@ theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) 
       ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv,
       ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-  -- Lift the fibre identity to the total-space equality.
+  
   simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply]
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) hfib.symm
 
-/-- **The corrected order-2 coefficient field `R₂` as a smooth compactly-supported `(4, 2)`-tensor.**
-The fibre value at `x` is `ricciArmPrincipalCoeffFib g₁ x` (smooth by
-`ricciArmPrincipalCoeffFib_contMDiff`); on the closed manifold it has compact support.  This is the
-order-2 PRINCIPAL coefficient operator field of the Ricci–DeTurck connection-difference: the COMBINED
-three-trace `½(T₀₃^{Z,Y} + T₀₃^{Y,Z} − cometricDoubleTrace)` of the corrected Koszul principal (NOT the
-bare `{0, 1}`-cometric double trace), whose `appCc`-action on `D = ∇₀² S` reproduces the traced principal
-`P` (`ricciArmPrincipalCoeff_appCc_eq_combinedTrace`). -/
 noncomputable def ricciArmPrincipalCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 where
   toSection :=
@@ -890,33 +587,13 @@ noncomputable def ricciArmPrincipalCoeff (g₀ g₁ : SmoothRiemannianMetric I M
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `ricciArmPrincipalCoeff g₀ g₁` at `x` is the fibre operator
-`ricciArmPrincipalCoeffFib g₁ x`.  Definitional. -/
+
 @[simp] theorem ricciArmPrincipalCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffFib (I := I) g₁ x) := rfl
 
-/-! ## The corrected order-2 connector: the `appCc`-action of `R₂` is the combined three-trace `P` -/
-
 set_option linter.unusedSectionVars false in
-/-- **The `appCc`/`unitModel` read-off of the corrected order-2 coefficient `R₂` is the combined
-three-trace principal `P`.**
 
-For any smooth `(0, 4)`-tensor field `W` (in the consumer `W = iteratedCovGrad g₀ 0 2 2 (T − T')` the
-second covariant gradient of the metric-difference section), the `unitModel` read-off of the operator-field
-action `appCc g₀ 4 2 R₂ W` at `x` on a tangent pair `v` is the combined three-trace `P` of the unit-form
-`D = unitModel g₀ 4 W x` of `W` against the cometric `g₁⁻¹`:
-```
-unitModel g₀ 2 (appCc g₀ 4 2 R₂ W) x v
-  = ½ ∑ₖ ( D(♯b^k, v 0, v 1, b_k) + D(♯b^k, v 1, v 0, b_k) − D(♯b^k, b_k, v 0, v 1) ),
-  ♯ = cometricLmodel g₁ x,  D = unitModel g₀ 4 W x.
-```
-This is the corrected order-2 PRINCIPAL building block: the combined three-trace `R₂` realises the traced
-Palatini principal `P = ∑ᵢ repr(♯_{g₁}(∇^{g₁}_{eᵢ} K))i` (the first two `{0, 3}`-cross Koszul terms plus
-the `{0, 1}`-double-trace term), NOT the bare cometric double trace.  It composes `appCc_toSection`
-(`(R₂ x).comp (W x)`), the definitional identity `R₂ x = ricciArmPrincipalCoeffFib g₁ x` with model image
-`combinedTrace42Model (cometricLmodel g₁ x)` (`ricciArmPrincipalCoeffFib_toModel`), and the read-off
-`combinedTrace42Model_apply`. -/
 theorem ricciArmPrincipalCoeff_appCc_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -939,7 +616,7 @@ theorem ricciArmPrincipalCoeff_appCc_eq_combinedTrace
                     (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                       ((Module.finBasis ℝ E).cDualBasis k)))
                   (Fin.cons ((Module.finBasis ℝ E) k) v))) := by
-  -- `unitModel (appCc R₂ W) x v = toModel ((R₂ x).comp (W x) (unit)) v`.
+  
   rw [unitModel, appCc_toSection]
   rw [show ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
@@ -953,33 +630,8 @@ theorem ricciArmPrincipalCoeff_appCc_eq_combinedTrace
     combinedTrace42Model_apply (E := E) (cometricLmodel (I := I) g₁ x)]
   rfl
 
-/-! ## The PURE rough-Laplacian order-2 coefficient field `R₂_pure`
-
-The DeTurck gauge cancellation makes the COMBINED principal symbol of the Ricci–DeTurck right-hand side
-the *pure* rough Laplacian `A_{ik} = ∑_{j,l} g₁^{jl} ∂_j ∂_l h_{ik}` on a symmetric perturbation: the two
-`{0, 3}`-cross Koszul terms of the bare Ricci symbol are exactly killed by the DeTurck-correction symbol,
-leaving only the `{0, 1}`-cometric double trace of the two leading covariant slots of `∇₀² S`.  Numerically
-(dim-`4` random SPD), `A = +1 · modelDoubleTrace 2 (cometricLmodel g₁ x)`, with NO `½` scaling and NO sign
-flip — the single third Koszul summand of `combinedTrace42Model` taken with coefficient `+1`.
-
-So the corrected order-2 PRINCIPAL coefficient of the *combined* operator is the SINGLE cometric
-double-trace field `cometricDoubleTraceFib g₁ 2` (the `(4, 2)`-operator field whose `appCc` read-off is the
-`{0, 1}`-cometric double trace `∑ₖ D(♯b^k, b_k, Z, Y)`), NOT the gauge-carrying combined three-trace
-`ricciArmPrincipalCoeff`.  This section mints it as a `g₀`-tagged smooth `(4, 2)`-tensor (the cometric raise
-is `g₁`'s, the `SmoothCcTensor` metric tag is the phantom `g₀`, exactly mirroring `ricciArmPrincipalCoeff`).
--/
-
 set_option linter.unusedSectionVars false in
-/-- **The PURE rough-Laplacian order-2 coefficient field `R₂_pure` as a smooth compactly-supported
-`(4, 2)`-tensor.**  The fibre value at `x` is the single cometric double-trace operator
-`cometricDoubleTraceFib g₁ 2 x` (smooth by `cometricDoubleTraceFib_contMDiff`); on the closed manifold it
-has compact support.  This is the corrected order-2 PRINCIPAL coefficient of the *combined* Ricci–DeTurck
-operator (after the DeTurck gauge cancellation): the genuine pure rough Laplacian
-`A_{ik} = ∑_{j,l} g₁^{jl} ∂_j ∂_l h_{ik}`, whose `appCc`-action on `D = ∇₀² S` reproduces the gauge-cancelled
-principal `∑ₖ D(♯b^k, b_k, v 0, v 1)` (`ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian`), NOT the
-gauge-carrying combined three-trace `ricciArmPrincipalCoeff`.  Mirrors `ricciArmPrincipalCoeff g₀ g₁` (the
-`g₀` slot is a phantom tag), but reads the SINGLE `{0, 1}`-double trace, so it is non-vacuous (the genuine
-cometric double-trace field, smooth, not the zero field). -/
+
 noncomputable def ricciArmPrincipalCoeffPure (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 where
   toSection :=
@@ -989,30 +641,13 @@ noncomputable def ricciArmPrincipalCoeffPure (g₀ g₁ : SmoothRiemannianMetric
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `ricciArmPrincipalCoeffPure g₀ g₁` at `x` is the cometric double-trace
-fibre operator `cometricDoubleTraceFib g₁ 2 x`.  Definitional. -/
+
 @[simp] theorem ricciArmPrincipalCoeffPure_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 4 2 I x from cometricDoubleTraceFib (I := I) g₁ 2 x) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The `appCc`/`unitModel` read-off of the PURE order-2 coefficient `R₂_pure` is the pure rough
-Laplacian (the single `{0, 1}`-cometric double trace).**
 
-For any smooth `(0, 4)`-tensor field `W` (in the consumer `W = iteratedCovGrad g₀ 0 2 2 (T − T')` the second
-covariant gradient of the metric-difference section), the `unitModel` read-off of the operator-field action
-`appCc g₀ 4 2 R₂_pure W` at `x` on a tangent pair `v` is the pure `g₁⁻¹`-double trace of the unit-form
-`D = unitModel g₀ 4 W x`:
-```
-unitModel g₀ 2 (appCc g₀ 4 2 R₂_pure W) x v
-  = ∑ₖ D(♯b^k, b_k, v 0, v 1),   ♯ = cometricLmodel g₁ x,  D = unitModel g₀ 4 W x.
-```
-This is the gauge-cancelled order-2 PRINCIPAL building block `A = appCc R₂_pure (∇₀² S)`: the rough
-Laplacian `A_{ik} = ∑_{j,l} g₁^{jl} ∂_j ∂_l h_{ik}` realised as the single `{0, 1}`-cometric double trace of
-`∇₀² S` (slots `(deriv2, deriv1, S1, S2)`), with NO `½` and NO sign flip.  It composes `appCc_toSection`
-(`(R₂_pure x).comp (W x)`), the definitional identity `R₂_pure x = cometricDoubleTraceFib g₁ 2 x` with model
-image `modelDoubleTrace 2 (cometricLmodel g₁ x)` (`cometricDoubleTraceFib_toModel`), and the read-off
-`modelDoubleTrace_apply`. -/
 theorem ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -1037,44 +672,8 @@ theorem ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
     modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g₁ x)]
   rfl
 
-/-! ## The corrected order-2 match (the building block the Ricci arm consumes)
-
-The corrected order-2 PRINCIPAL building block: the traced principal `P` (the `{0, 3}`-cross plus the
-`{0, 1}`-double-trace combined three-trace) is the `appCc`/`unitModel` read-off of the combined coefficient
-`R₂ = ricciArmPrincipalCoeff g₀ g₁` on the second covariant gradient `W₂ = iteratedCovGrad g₀ 0 2 2 (T − T')`
-of the metric-difference section.  Stated as the corrected order-2 building block the Ricci arm's
-eval-matching `deTurckRicciArm_appCc_graded` (free `R₂` existential) instantiates: for the perturbation
-difference `S = T − T'`, the order-2 PRINCIPAL coefficient `R₂` realises the corrected principal trace, with
-the order-`0`/`1` lower-order remainder carried by the sibling coefficients `R₀, R₁` (not discharged here —
-the order-2 PRINCIPAL is the deliverable of this node). -/
-
 set_option linter.unusedSectionVars false in
-/-- **The corrected order-2 match (the order-2 PRINCIPAL building block).**
 
-For the perturbation difference `S` (in the consumer `S = T − T'`), the `appCc`/`unitModel` read-off of the
-combined coefficient `R₂ = ricciArmPrincipalCoeff g₀ g₁` on the second covariant gradient
-`W₂ = iteratedCovGrad g₀ 0 2 2 S` is the corrected order-2 PRINCIPAL combined three-trace `P` of the unit
-form `D = unitModel g₀ 4 W₂ x` against the cometric `g₁⁻¹`:
-```
-unitModel g₀ 2 (appCc g₀ 4 2 R₂ (iteratedCovGrad g₀ 0 2 2 S)) x v
-  = ½ ∑ₖ ( D(♯b^k, v 0, v 1, b_k) + D(♯b^k, v 1, v 0, b_k) − D(♯b^k, b_k, v 0, v 1) ),
-  ♯ = cometricLmodel g₁ x,  D = unitModel g₀ 4 (iteratedCovGrad g₀ 0 2 2 S) x.
-```
-This is exactly the corrected order-2 coefficient the Ricci-arm grading `deTurckRicciArm_appCc_graded`
-(free `R₂` existential) provides; the order-`0`/`1` lower-order corrections are the sibling coefficients
-`R₀, R₁` carried alongside.  It is the specialization of `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` to
-the order-2 iterated covariant gradient `W₂`.
-
-**What is proven here:** the `appCc`/`unitModel` read-off of the genuinely-built combined-three-trace
-coefficient `R₂` is the EXPLICIT corrected-principal trace formula `P` (the `{0, 3}`-cross plus the
-`{0, 1}`-double trace, the structure the dim-`4` random-SPD numeric check confirms is the order-2 trace —
-NOT the bare cometric double trace, which captures only the third Koszul term).  The remaining identification
-of this explicit `P` with the SP2-endpoint Palatini traced principal `∑ᵢ repr(♯_{g₁}(∇^{g₁}_{eᵢ} K))i`
-(through the cotangent-cov ↔ tensor-cov-deriv connector `cotangentCov_eq_tensorCovDerivAt_ccTensor01`, the
-metric-compat parallelism `inverseMetricSharpField_covGrad_eq_zero`, the covGrad bridge
-`connDiffSection_covGrad_eq_covDerivConnDiff`, and the Palatini frame-trace) is the CARRIED connector
-residual the Ricci-arm eval-matching assembles; it is not discharged in this node, whose deliverable is the
-corrected order-2 coefficient `R₂` and its `appCc`-read-off. -/
 theorem covDerivConnDiff_tracedPrincipal_eq_appCc
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -1101,18 +700,12 @@ theorem covDerivConnDiff_tracedPrincipal_eq_appCc
   ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁
     (iteratedCovGrad (I := I) g₀ 0 2 2 S) x v
 
-/-! ## The second-order Koszul covariant-gradient bridge (the SP2-endpoint deep prerequisite) -/
-
-/-- The scalar `(0, 3)` evaluation field of an abstract `(0, 3)`-tensor section `V` on three smooth
-vector fields `A, B, C`: `b ↦ V(b)(A b, B b, C b)`. -/
 private def triEvalFn (V : Π b : M, Tensor0SSpace 3 I b)
     (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
   fun b => Tensor0SSpace.toModel (V b) (Fin.cons (A b) (Fin.cons (B b) ![C b]))
 
 set_option linter.unusedSectionVars false in
-/-- The partial evaluation `y ↦ curriedSection W y (Y y)` of a `(0, s + 1)`-tensor section `W`
-differentiable at `x` against a smooth vector field `Y` is a `(0, s)`-tensor section differentiable
-at `x`. -/
+
 private lemma triMDiffAt_curried
     (s : ℕ) (W : Π x : M, Tensor0SSpace (s + 1) I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -1133,19 +726,8 @@ private lemma triMDiffAt_curried
     (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
--- The abstract (0,3) Leibniz-defect: 3-slot peel.
-
 set_option linter.unusedSectionVars false in
-/-- **The abstract `(0, 3)`-tensor covariant-derivative Leibniz-defect (tuple form).** For an abstract
-`(0, 3)`-tensor section `V` differentiable at `x`, a direction `v`, and three smooth vector fields
-`A, B, C`, the model value of `∇³_v V` read on the cons-tuple `(A x, B x, C x)` decomposes by the
-covariant Leibniz product rule applied to the three slots, with `∇₀ = LeviCivita g₀`:
-```
-toModel(∇³_v V x)(A x, B x, C x)
-  = ∂_v (b ↦ V(b)(A b, B b, C b))
-    − V(x)(∇₀_v A, B x, C x) − V(x)(A x, ∇₀_v B, C x) − V(x)(A x, B x, ∇₀_v C).
-```
-The three-fold leading-slot peel `tensor0SCovariantDerivative_succ_consEval_peel`. -/
+
 private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 3 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 3 V x)
@@ -1169,16 +751,16 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     fun b => Tensor0SNabla.curriedSection I M W₂ b (B b) with hW₁
   have hW₁_mdiff : TensorSectionMDiffAt (I := I) 1 W₁ x :=
     triMDiffAt_curried (I := I) (M := M) 1 W₂ hW₂_mdiff B
-  -- Peel slot A off the rank-3 derivative.
+  
   have hpeel1 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 2 V hV A v (Fin.cons (B x) ![C x])
-  -- Peel slot B off the rank-2 derivative of W₂.
+  
   have hpeel2 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 1 W₂ hW₂_mdiff B v ![C x]
-  -- Peel slot C off the rank-1 derivative of W₁.
+  
   have hpeel3 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 0 W₁ hW₁_mdiff C v (fun i => Fin.elim0 i)
-  -- The rank-0 base reads as the directional derivative of the scalar tri-evaluation.
+  
   have hbase : Tensor0SSpace.toModel
       ((Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)).toFun
         (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (C b)) x v)
@@ -1213,7 +795,7 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
       funext k
       fin_cases k <;> rfl
     rw [hscalar]
-  -- Correction slot C: reads W₁ x on cons-tuple, uncurries through W₂ x then V x.
+  
   have hcorrC : Tensor0SSpace.toModel (W₁ x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v) (fun i => Fin.elim0 i)) =
       Tensor0SSpace.toModel (V x)
@@ -1237,7 +819,7 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     apply congrArg
     funext k
     fin_cases k <;> rfl
-  -- Correction slot B: reads W₂ x on cons-tuple, uncurries through V x.
+  
   have hcorrB : Tensor0SSpace.toModel (W₂ x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v)
           (Fin.cons (C x) (fun i => Fin.elim0 i))) =
@@ -1255,7 +837,7 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     apply congrArg
     funext k
     fin_cases k <;> rfl
-  -- Assemble.
+  
   rw [hpeel1]
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M V y (A y)) = W₂ from rfl]
   rw [hpeel2]
@@ -1271,30 +853,27 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
   ring
 
 set_option linter.unusedSectionVars false in
-/-- The unit-evaluated `(0, 3)`-field of the FIRST covariant gradient `covGrad g₀ 0 2 S`, as an abstract
-`(0, 3)`-tensor section (`unitEvalSection` of `covGrad g₀ 0 2 S`). -/
+
 private def covGrad2UnitV (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
     Π b : M, Tensor0SSpace 3 I b :=
   unitEvalSection (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S)
 
 set_option linter.unusedSectionVars false in
-/-- `covGradEval g₀ S A B C` is the `triEvalFn` of the unit-evaluated first covariant gradient. -/
+
 private lemma covGradEval_eq_triEvalFn (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     (fun b : M => covGradEval (I := I) (M := M) g₀ S A B C b) =
       triEvalFn (I := I) (M := M) (covGrad2UnitV (I := I) (M := M) g₀ S) A B C := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The unit-evaluated first covariant gradient is differentiable at every point. -/
+
 private lemma covGrad2UnitV_mdiff (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M) :
     TensorSectionMDiffAt (I := I) 3 (covGrad2UnitV (I := I) (M := M) g₀ S) x := by
   have h := contMDiff_unitEvalSection (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S)
   exact (h x).mdifferentiableAt (by simp)
 
 set_option linter.unusedSectionVars false in
-/-- The abstract `(0, 3)` covariant derivative of the unit-evaluated first covariant gradient `V` is the
-unit-evaluation of the SECOND covariant gradient `iteratedCovGrad g₀ 0 2 2 S`, read on the cons-tuple
-`(v, m)`: `toModel(∇³_v V x)(m) = unitModel g₀ 4 (∇₀²S) x (v, m)`. -/
+
 private lemma covGrad2UnitV_nabla3_eq_iteratedCovGrad
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (v : TangentSpace I x) (m : Fin 3 → TangentSpace I x) :
@@ -1320,20 +899,7 @@ private lemma covGrad2UnitV_nabla3_eq_iteratedCovGrad
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The directional-derivative Leibniz defect of the first covariant-gradient evaluation.** The
-directional derivative of `b ↦ covGradEval g₀ S A B C b` along `v` is the unit-evaluation of the SECOND
-covariant gradient `iteratedCovGrad g₀ 0 2 2 S` on `(v, A x, B x, C x)`, plus the three order-1 frame
-corrections (the first covariant gradient applied to the frame derivatives `∇₀_v A`, `∇₀_v B`, `∇₀_v C`):
-```
-∂_v (covGradEval g₀ S A B C)
-  = unitModel g₀ 4 (∇₀²S) x (v, A x, B x, C x)
-    + (covGrad g₀ 0 2 S)(x)(unit)(∇₀_v A, B x, C x)
-    + (covGrad g₀ 0 2 S)(x)(unit)(A x, ∇₀_v B, C x)
-    + (covGrad g₀ 0 2 S)(x)(unit)(A x, B x, ∇₀_v C).
-```
-This is `tensor0SCovariantDerivative03_consEval_leibnizDefect` for the unit-evaluated first covariant
-gradient `V`, with the principal `∇³_v V` read off as the second covariant gradient
-(`covGrad2UnitV_nabla3_eq_iteratedCovGrad`). -/
+
 private lemma covGradEval_directionalDeriv
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
@@ -1369,9 +935,7 @@ private lemma covGradEval_directionalDeriv
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- The first covariant-gradient evaluation `b ↦ covGradEval g₀ S A B C b` is differentiable at `x`:
-the unit-evaluated first covariant gradient is a smooth `(0, 3)`-section, curried against the three
-smooth fields `A, B, C`, whose scalar evaluation is `covGradEval`. -/
+
 private lemma covGradEval_mdifferentiableAt
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -1428,35 +992,7 @@ private lemma covGradEval_mdifferentiableAt
   exact hscalar
 
 set_option linter.unusedSectionVars false in
-/-- **The second-order Koszul covariant-gradient bridge (the SP2-endpoint deep prerequisite).**
 
-The `g₀`-cotangent covariant derivative of the half-Koszul covector field
-`b ↦ cotangentToCLM (koszulCovGradCovec g₀ g₁ Z Y b)`, taken in direction `X` and read (via the
-`g₁`-flat round trip `cotangentToDual ∘ dualToCotangent`) on a test vector `ζ`, is the half-Koszul
-combination of the SECOND covariant gradient `iteratedCovGrad g₀ 0 2 2 S` (the order-2 PRINCIPAL the
-Ricci–DeTurck `C₂` linearization expands) PLUS the order-1 FRAME remainder built from the FIRST
-covariant gradient `covGrad g₀ 0 2 S` applied to the `∇₀`-frame derivatives `∇₀_X Z`, `∇₀_X Y`:
-```
-cotangentToDual (∇^{g₀}_K (cotangentToCLM K_S))(X)(ζ)
-  = ½ ( D(X, Z, Y, ζ) + D(X, Y, Z, ζ) − D(X, ζ, Z, Y) )                 -- order-2 PRINCIPAL, D = ∇₀²S
-    + ½ ( C(∇₀_X Z, Y, ζ) + C(Z, ∇₀_X Y, ζ)
-        + C(∇₀_X Y, Z, ζ) + C(Y, ∇₀_X Z, ζ)
-        − C(ζ, ∇₀_X Z, Y) − C(ζ, Z, ∇₀_X Y) ),                          -- order-1 FRAME remainder, C = ∇₀S
-```
-where `D = unitModel g₀ 4 (∇₀²S)`, `C = unitModel g₀ 3 (∇₀S)`, and `∇₀_X Z = (LeviCivita g₀) Z x (X x)`.
-
-The frame remainder does NOT vanish (a `dim`-`3`/`4` random numeric check confirms the six terms do not
-cancel, since the first covariant gradient is not symmetric in its three slots); it is the order-1
-lower-order correction the connector absorbs.  The `ζ`-slot frame corrections of the three Koszul terms
-cancel exactly against the `−θ(∇₀_X ζ)` term of the cotangent Leibniz rule (the cotangent covariant
-derivative freezes the test vector), leaving only the `Z`/`Y`-slot frame corrections above.
-
-The route is the second covariant Leibniz peel: `cotangentCov (LeviCivita g₀)` reduces, via
-`cotangentCovAt_apply_of_diff`, to the Leibniz defect `cotangentScalar` (`∂_X(θ(ζ)) − θ(∇₀_X ζ)`);
-under the metric-difference hypothesis `hbil` each `θ(ζ)` pairing is the half-Koszul combination of the
-first covariant-gradient evaluation `covGradEval` (`koszulCovGradCovec_dual_apply_covGrad`), whose
-directional derivative is the second covariant gradient plus its three frame corrections
-(`covGradEval_directionalDeriv`). -/
 theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -1489,9 +1025,9 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
                 ![ζ, Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)]) := by
   classical
   rw [cotangentToDual_apply, dualToCotangent_apply]
-  -- The covector field is cotangent-differentiable at `x`.
+  
   have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ g₁ Z Y x
-  -- Smooth extensions of `X x` and `ζ`.
+  
   let ζf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩
   let Xf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -1500,7 +1036,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
   have hXfx : Xf x = X x := smoothExtensionTangent_eq (I := I) x (X x)
   have hXfmd := smoothExtensionTangent_mdiff (I := I) x (X x) x
   have hζfmd := smoothExtensionTangent_mdiff (I := I) x ζ x
-  -- Reduce the cotangent covariant derivative to the Leibniz defect `cotangentScalar`.
+  
   have hcov : ((cotangentCov (LeviCivita (I := I) g₀)).toFun
         (fun b => cotangentToCLM (I := I)
           (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ =
@@ -1510,7 +1046,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     rw [cotangentCov_toFun, cotangentCovFun_apply, ← hXfx, ← hζfx]
     exact cotangentCovAt_apply_of_diff (LeviCivita (I := I) g₀) hθ hXfmd hζfmd
   rw [ContinuousLinearMap.coe_coe, hcov, cotangentScalar_def]
-  -- The pairing `b ↦ θ_b(ζf_b)` is the half-Koszul combination of the first covariant gradient.
+  
   have hpairfun : (fun b : M => (cotangentToCLM (I := I)
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) =
       (fun b : M => (1 / 2 : ℝ) *
@@ -1522,7 +1058,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     rw [show (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b) =
         cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b) (ζf b) from rfl]
     rw [h]
-  -- Differentiate the half-Koszul pairing: linearity + the three `covGradEval` directional derivatives.
+  
   have hext : extDerivFun (I := I)
         (fun b : M => (cotangentToCLM (I := I)
           (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) x (Xf x) =
@@ -1533,7 +1069,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     have hf := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S Z Y ζf x
     have hg := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S Y Z ζf x
     have hh := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S ζf Z Y x
-    -- The pairing function has the half-Koszul `HasMFDerivAt` derivative at `x`.
+    
     have hmf0 := (((hf.hasMFDerivAt.add hg.hasMFDerivAt).sub hh.hasMFDerivAt).const_smul
       (1 / 2 : ℝ))
     have heq : (fun b : M => (cotangentToCLM (I := I)
@@ -1552,7 +1088,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     rw [hmf.mfderiv]
     rfl
   rw [hext, hXfx]
-  -- The `θ(∇₀_X ζf)` term: the half-Koszul evaluation on the frame derivative `∇₀_X ζf`.
+  
   have hθext : (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x))
         ((LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x)) =
       (1 / 2 : ℝ) *
@@ -1563,7 +1099,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
           - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
               ![(LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x), Z x, Y x]) := by
     set w : TangentSpace I x := (LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x) with hw
-    -- Extend `w` to a smooth field; the Koszul covector evaluation on `w` reads via `_dual_apply_covGrad`.
+    
     let wf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
       ⟨smoothExtensionTangent (I := I) x w, smoothExtensionTangent_contMDiff (I := I) x w⟩
     have hwfx : wf x = w := smoothExtensionTangent_eq (I := I) x w
@@ -1572,7 +1108,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
         cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x) (wf x) from by
       rw [hwfx]; rfl]
     rw [h]
-    -- Each `covGradEval … wf … x` reads as `unitModel g₀ 3 (covGrad g₀ 0 2 S) x` on the vector `w`.
+    
     have hcg : ∀ (A B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
         covGradEval (I := I) (M := M) g₀ S A B wf x =
           unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x ![A x, B x, w] := by
@@ -1583,12 +1119,12 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
       rw [covGradEval, unitModel, hwfx]; rfl
     rw [hcg Z Y, hcg Y Z, hcg2]
   rw [hθext]
-  -- Expand the three covGradEval directional derivatives (principal + frame).
+  
   rw [covGradEval_directionalDeriv (I := I) (M := M) g₀ S Z Y ζf x (X x),
       covGradEval_directionalDeriv (I := I) (M := M) g₀ S Y Z ζf x (X x),
       covGradEval_directionalDeriv (I := I) (M := M) g₀ S ζf Z Y x (X x)]
   rw [hζfx]
-  -- Normalize the principal cons-tuples to matrix notation, then the ζ-slot frame corrections cancel.
+  
   have ht1 : (Fin.cons (X x) (Fin.cons (Z x) (Fin.cons (Y x) ![ζ])) : Fin 4 → TangentSpace I x) =
       ![X x, Z x, Y x, ζ] := by funext k; fin_cases k <;> rfl
   have ht2 : (Fin.cons (X x) (Fin.cons (Y x) (Fin.cons (Z x) ![ζ])) : Fin 4 → TangentSpace I x) =
@@ -1597,9 +1133,6 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
       ![X x, ζ, Z x, Y x] := by funext k; fin_cases k <;> rfl
   rw [ht1, ht2, ht3]
   ring
-
-
-/-! ## The Palatini SP2-endpoint traced-principal connector to the combined three-trace `P` -/
 
 set_option linter.unusedSectionVars false in
 private theorem traceViaBasis_c (G : E →ₗ[ℝ] E) :
@@ -1698,7 +1231,6 @@ private theorem traceViaCometric_c (g₁ : SmoothRiemannianMetric I M) (x : M) (
   rw [hrepr, hε]
   rfl
 
-
 set_option linter.unusedSectionVars false in
 private lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α + β)
@@ -1725,7 +1257,6 @@ private lemma dualToCotangent_subC {x : M} (α β : Module.Dual ℝ (TangentSpac
     cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
-/-- The `g₀`-aligned SP2-endpoint principal endomorphism `v ↦ ♯_{g₁}(∇₀_v K_{Z,Y})` as a linear map. -/
 private def alignedPrincipalEndoC (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : E →ₗ[ℝ] E where
   toFun := fun v => inverseMetricSharpFib (I := I) g₁ x
@@ -1763,7 +1294,6 @@ private def alignedPrincipalEndoC (g₀ g₁ : SmoothRiemannianMetric I M)
     rw [dualToCotangent_smulC]
     rw [map_smul]; rfl
 
-/-- The SP2-endpoint `g₁`-principal vector `♯_{g₁}(∇^{g₁}_v K_{Z,Y})` (direction `v`). -/
 private def g1PrincipalVecC (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     TangentSpace I x :=
@@ -1774,8 +1304,6 @@ private def g1PrincipalVecC (g₀ g₁ : SmoothRiemannianMetric I M)
           (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
         TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
 
-/-- The order-1 alignment correction vector `♯_{g₁}(−K_{Z,Y}(connDiff g₁ g₀ · v))` (direction `v`),
-the `∇^{g₁} → ∇₀` SP2-endpoint conversion residual. -/
 private def alignCorrVecC (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     TangentSpace I x :=
@@ -1852,7 +1380,6 @@ private lemma g1Principal_splitC
         (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v)) from rfl]
   ring
 
-
 private lemma alignedPrincipalEndoC_inner_secondKoszul
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -1891,9 +1418,6 @@ private lemma alignedPrincipalEndoC_inner_secondKoszul
   rw [hXfx] at hbridge
   rw [hbridge]
 
-
-/-- The order-1 second-Koszul frame remainder `R_trace`: the `½`-scaled cometric-frame sum of the six
-order-1 frame-derivative terms of the second covariant gradient bridge. -/
 def secondKoszulFrameRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   (1 / 2 : ℝ) *
@@ -2005,59 +1529,17 @@ private lemma alignedPrincipalEndoC_trace_eq
   rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
   congr 1
 
-
-/-- The order-1 `∇^{g₁} → ∇₀` alignment-trace remainder: the `chartModelBasis`-frame trace of the
-order-1 alignment correction vector `alignCorrVecC` (the SP2-endpoint `g₁`-to-`g₀` connection-conversion
-residual `−K_{Z,Y}(connDiff g₁ g₀ · ·)` raised by `♯_{g₁}`). -/
 def alignmentTraceRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
       (alignCorrVecC (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)) i
 
-/-- **The named order-1 remainder of the Palatini SP2-endpoint traced-principal connector.**
-
-The sum of the second-Koszul order-1 frame remainder `secondKoszulFrameRemainder` (the `∇₀`-frame
-derivative terms of the second covariant-gradient bridge) and the `∇^{g₁} → ∇₀` alignment-trace remainder
-`alignmentTraceRemainder` (the `g₁`-to-`g₀` SP2-endpoint connection-conversion residual).  Both arms carry
-at most ONE covariant derivative of the metric-difference section `S` (through `covGrad g₀ 0 2 S`), so the
-remainder is genuinely order `≤ 1`; the Ricci-arm order-`0`/`1` sibling coefficients `R₀, R₁` absorb it.
-
-**Why not an `appCc R₁ (∇₀ S) ![Z x, Y x]` packaging.**  Both `secondKoszulFrameRemainder` and (the X-slot
-analogue of) the Z-slot frame remainder depend on the COVARIANT DERIVATIVES `∇₀ Z`, `∇₀ Y` of the test
-fields (through `(LeviCivita g₀).toFun (fun b => Z b) x …`), not merely on the values `Z x`, `Y x`.  An
-`appCc R₁ (∇₀ S) ![Z x, Y x]` form is by construction a function of `(∇₀ S)(x)`, `Z x`, `Y x` ONLY and
-therefore CANNOT represent the `∇₀ Z`, `∇₀ Y` dependence: two smooth fields with the same value at `x`
-but different covariant derivative give the same `appCc` value but different remainders.  So the remainder
-is kept in this explicit, frame-derivative-honest order-`≤ 1` form; the cancellation of these
-arbitrary-extension `∇₀ Z`, `∇₀ Y` artifacts happens only in the FULL Palatini telescope (`X`-slot minus
-`Z`-slot), where the Ricci tensor is extension-independent — which is the order-`0`/`1` eval-matching
-assembly carried by the Ricci-arm node, not a per-slot currying. -/
 def palatiniTracedPrincipalRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   secondKoszulFrameRemainder (I := I) (M := M) g₀ g₁ S Z Y x
     + alignmentTraceRemainder (I := I) (M := M) g₀ g₁ Z Y x
 
-/-- **The Palatini SP2-endpoint traced-principal connector.**
-
-The `chartModelBasis`-frame trace of the SP2-endpoint order-2 PRINCIPAL `♯_{g₁}(∇^{g₁}_{eᵢ} K_{Z,Y})` of
-the differentiated connection difference (the divergence-type principal arm of
-`covDerivConnDiff_eq_invGramSharp_graded`, the Ricci-arm Palatini-telescope's leading term) equals the
-EXPLICIT combined-three-trace `P = unitModel g₀ 2 (appCc g₀ 4 2 R₂ (∇₀² S)) ![Z x, Y x]` of the second
-covariant gradient (the `appCc`/`unitModel` read-off of the corrected order-2 coefficient
-`R₂ = ricciArmPrincipalCoeff g₀ g₁` proved in `covDerivConnDiff_tracedPrincipal_eq_appCc`), PLUS the
-named order-`≤ 1` remainder `palatiniTracedPrincipalRemainder` (the second-Koszul `∇₀`-frame derivative
-remainder plus the `∇^{g₁} → ∇₀` alignment-trace residual).
-
-Route: the frame-trace is the basis-independent `LinearMap.trace` of the principal direction-endomorphism
-(`traceViaBasis_c`); the `∇^{g₁}`-principal splits, via `covDerivConnDiff_principal_align`, into the
-`g₀`-aligned principal `alignedPrincipalEndoC` plus the order-1 alignment correction `alignCorrVecC`
-(`g1Principal_splitC`); the `g₀`-aligned principal's trace is computed in the cometric biorthogonal frame
-(`traceViaCometric_c`), where each summand is the second covariant-gradient half-Koszul of
-`koszulCovGradCovec_covDeriv_eq_secondCovGrad` (`alignedPrincipalEndoC_inner_secondKoszul`); the half-Koszul
-combined three-trace is exactly `P` (`covDerivConnDiff_tracedPrincipal_eq_appCc`), the second-Koszul
-frame terms forming `secondKoszulFrameRemainder` (`alignedPrincipalEndoC_trace_eq`).  The two order-1
-remainders are carried as the named `palatiniTracedPrincipalRemainder`. -/
 theorem palatini_tracedPrincipal_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -2077,7 +1559,7 @@ theorem palatini_tracedPrincipal_eq_combinedTrace
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![Z x, Y x]
         + palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x := by
   classical
-  -- Each summand is `repr (g1PrincipalVecC ... (chartModelBasis E i)) i`.
+  
   have hsumeq : (∑ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
         (inverseMetricSharpFib (I := I) g₁ x
@@ -2104,43 +1586,17 @@ theorem palatini_tracedPrincipal_eq_combinedTrace
   rw [palatiniTracedPrincipalRemainder, alignmentTraceRemainder]
   ring
 
-/-! ## The Z-slot combined three-trace coefficient `R₂ᶻ`
-
-The Palatini telescope traces the differentiated connection difference in TWO slots.  The X-slot
-(`palatini_tracedPrincipal_eq_combinedTrace`) traces `∑ᵢ ♯_{g₁}(∇^{g₁}_{eᵢ} K_{Z,Y})` (the trace runs
-over the DIFFERENTIATION direction).  The Z-slot traces the SECOND telescope term
-`∑ᵢ ♯_{g₁}(∇^{g₁}_V K_{eᵢ,W})` — the differentiation direction `V` is FIXED and the trace runs over the
-FIRST Koszul covector slot `Z = eᵢ`.  The second-Koszul bridge
-`koszulCovGradCovec_covDeriv_eq_secondCovGrad` (with `X = V`, `Z = eᵢ`, `Y = W`) gives the principal
-`½(D[V, eᵢ, W, ζ] + D[V, W, eᵢ, ζ] − D[V, ζ, eᵢ, W])` (`D = ∇₀² S`); tracing `eᵢ` against `ζ` through the
-cometric biorthogonal frame produces the COMBINED Z-slot three-trace
-```
-½ ∑ₖ ( D(V, ♯b^k, W, b_k) + D(V, W, ♯b^k, b_k) − D(V, b_k, ♯b^k, W) ),
-```
-whose raised slot moves between slots `1` and `2` while the output `(V, W)` sits in the remaining two
-slots — a contraction pattern genuinely different from the X-slot (where slot `0` is always raised).
-This section builds the realising operator `R₂ᶻ = ricciArmPrincipalCoeffZ g₀ g₁` exactly as
-`ricciArmPrincipalCoeff` builds the X-slot `R₂`. -/
-
-/-- The `Fin 4` slot reindex carrying the Z-slot's first cross-trace tuple `D(V, ♯b^k, W, b_k)` onto the
-leading `{0, 1}` cometric trace pair of `modelDoubleTrace` (which raises slot `0`, contracts the new
-leading slot `1`, and reads the output pair into slots `2, 3`).  Concretely `0 ↦ 2, 1 ↦ 0, 2 ↦ 3,
-3 ↦ 1`, so `modelDoubleTrace 2 L (domDomCongr zSlotPerm1 D) (V, W) = ∑ₖ D(V, ♯b^k, W, b_k)`. -/
 def zSlotPerm1 : Equiv.Perm (Fin 4) :=
   (Equiv.swap (0 : Fin 4) 2).trans ((Equiv.swap (0 : Fin 4) 3).trans (Equiv.swap (0 : Fin 4) 1))
 
-/-- The `Fin 4` slot reindex carrying the Z-slot's second cross-trace tuple `D(V, W, ♯b^k, b_k)` onto the
-leading `{0, 1}` trace pair: `0 ↦ 2, 1 ↦ 3, 2 ↦ 0, 3 ↦ 1`. -/
 def zSlotPerm2 : Equiv.Perm (Fin 4) :=
   (Equiv.swap (0 : Fin 4) 2).trans (Equiv.swap (1 : Fin 4) 3)
 
-/-- The `Fin 4` slot reindex carrying the Z-slot's double-trace tuple `D(V, b_k, ♯b^k, W)` onto the
-leading `{0, 1}` trace pair: `0 ↦ 2, 1 ↦ 1, 2 ↦ 0, 3 ↦ 3`, i.e. the transposition `(0 2)`. -/
 def zSlotPerm3 : Equiv.Perm (Fin 4) :=
   Equiv.swap (0 : Fin 4) 2
 
 set_option linter.unusedSectionVars false in
-/-- The model-fibre values of the three Z-slot reindexes. -/
+
 private theorem zSlotPerm_apply :
     (zSlotPerm1 0 = 2 ∧ zSlotPerm1 1 = 0 ∧ zSlotPerm1 2 = 3 ∧ zSlotPerm1 3 = 1) ∧
     (zSlotPerm2 0 = 2 ∧ zSlotPerm2 1 = 3 ∧ zSlotPerm2 2 = 0 ∧ zSlotPerm2 3 = 1) ∧
@@ -2148,19 +1604,6 @@ private theorem zSlotPerm_apply :
   unfold zSlotPerm1 zSlotPerm2 zSlotPerm3
   refine ⟨⟨?_, ?_, ?_, ?_⟩, ⟨?_, ?_, ?_, ?_⟩, ?_, ?_, ?_, ?_⟩ <;> decide
 
-/-- **The Z-slot combined model three-trace operator.**
-
-For a model cometric raise `L : Tensor0SModel 1 → E` (`L = cometricLmodel g₁ x`), the Z-slot combined
-three-trace `(0, 4) → (0, 2)` model operator
-```
-combinedTrace42ModelZ L D (V, W)
-  = ½ ( modelDoubleTrace 2 L (domDomCongr zSlotPerm1 D) (V, W)     -- ∑ₖ D(V, ♯b^k, W, b_k)
-      + modelDoubleTrace 2 L (domDomCongr zSlotPerm2 D) (V, W)     -- ∑ₖ D(V, W, ♯b^k, b_k)
-      − modelDoubleTrace 2 L (domDomCongr zSlotPerm3 D) (V, W) ),  -- ∑ₖ D(V, b_k, ♯b^k, W)
-```
-assembled from the `{0, 1}`-cometric double trace `modelDoubleTrace` (which raises slot `0` and contracts
-the new leading slot) on the three Z-slot reindexes.  This is the model reading of the order-2 Z-slot
-coefficient `R₂ᶻ`. -/
 noncomputable def combinedTrace42ModelZ
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) :
     Tensor0SBundle.Tensor0SModel 4 ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel 2 ℝ E :=
@@ -2176,12 +1619,7 @@ noncomputable def combinedTrace42ModelZ
             zSlotPerm3).toContinuousLinearEquiv.toContinuousLinearMap))
 
 set_option linter.unusedSectionVars false in
-/-- **Defining evaluation of the Z-slot combined model three-trace.**  On a `Fin 2`-tuple `m = (V, W)`,
-```
-combinedTrace42ModelZ L D m
-  = ½ ∑ₖ ( D(m 0, L b^k, m 1, b_k) + D(m 0, m 1, L b^k, b_k) − D(m 0, b_k, L b^k, m 1) ).
-```
-Definitional through `modelDoubleTrace_apply` and the three Z-slot reindexings. -/
+
 theorem combinedTrace42ModelZ_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -2202,7 +1640,7 @@ theorem combinedTrace42ModelZ_apply
     intro σ D'
     rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-  -- Tuple reading of each Z-slot reindexed double trace on `m`.
+  
   have htrace : ∀ (σ : Equiv.Perm (Fin 4)) (tup : Fin (Module.finrank ℝ E) → Fin 4 → E)
       (_htup : ∀ k, (fun j =>
         (![L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
@@ -2250,12 +1688,6 @@ theorem combinedTrace42ModelZ_apply
           simp only [zSlotPerm3, Fin.isValue, Equiv.swap_apply_def] <;> rfl)]
   rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
 
-/-- **The fibrewise Z-slot combined three-trace operator.**  At a base point `x`, the Z-slot combined
-three-trace `combinedTrace42ModelZ (cometricLmodel g₁ x)`, transported through the fibre/model
-continuous-linear equivalences to a fibre operator `Tensor0SSpace 4 I x →L Tensor0SSpace 2 I x`.  This is
-the order-2 Z-slot coefficient: it contracts a `(0, 4)`-tensor `D = ∇₀² S` by the COMBINED cometric `g₁⁻¹`
-Z-slot three-trace `½(D(V, ♯, W, ·) + D(V, W, ♯, ·) − D(V, ·, ♯, W))`.  It depends on `g₁` only through the
-SMOOTH cometric Hom-section `inverseMetricSharpField`; NO chart-selected ambient frame. -/
 noncomputable def ricciArmPrincipalCoeffZFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 2 x).symm.toContinuousLinearMap.comp
@@ -2263,8 +1695,7 @@ noncomputable def ricciArmPrincipalCoeffZFib (g₁ : SmoothRiemannianMetric I M)
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
 set_option linter.unusedSectionVars false in
-/-- The model image of `ricciArmPrincipalCoeffZFib` is the Z-slot combined three-trace
-`combinedTrace42ModelZ` against the cometric reading of `g₁`.  Definitional. -/
+
 @[simp] theorem ricciArmPrincipalCoeffZFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciArmPrincipalCoeffZFib (I := I) g₁ x D) =
@@ -2273,15 +1704,7 @@ set_option linter.unusedSectionVars false in
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **Base-point smoothness of the Z-slot order-2 coefficient field.**  The fibre field
-`x ↦ ricciArmPrincipalCoeffZFib g₁ x` is a smooth section of the `(4, 2)`-tensor bundle.  Its smoothness
-routes through the globally-smooth cometric Hom-section `inverseMetricSharpField`: by
-`contMDiff_clm_section_of_pointwise` it reduces, on a smooth `(0, 4)`-field `Y`, to the model combination
-`½(CDT(reindex zSlotPerm1 Y) + CDT(reindex zSlotPerm2 Y) − CDT(reindex zSlotPerm3 Y))`, each summand a
-value of the SMOOTH rank-generic cometric double-trace field `cometricDoubleTraceFib g₁ 2`
-(`cometricDoubleTraceFib_contMDiff`) applied to a constant-reindexed smooth `(0, 4)`-field.  NO
-chart-selected, non-`∇₀`-parallel ambient frame enters.  Non-vacuous (the genuine Z-slot combined cometric
-trace field, smooth, not the zero field). -/
+
 theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -2293,7 +1716,7 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x => ricciArmPrincipalCoeffZFib (I := I) g₁ x)
   intro Y
-  -- A constant model slot-reindex of a smooth `(0, 4)`-tensor field is smooth (a basis relabeling).
+  
   have hreindex : ∀ (ρ : Equiv.Perm (Fin 4))
       (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 4 I x)
       (_hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
@@ -2325,7 +1748,7 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
           ((Module.finBasis ℝ E) (τ j))) = _
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rfl
-  -- The smooth `{0,1}`-double-trace `cometricDoubleTraceFib g₁ 2` of each Z-slot reindex of `Y`.
+  
   have hcdt : ∀ (ρ : Equiv.Perm (Fin 4)),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
@@ -2338,7 +1761,7 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
     intro ρ
     exact ContMDiff.clm_bundle_apply (b := id)
       (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) (hreindex ρ (fun x => Y x) Y.contMDiff)
-  -- Assemble: `R₂ᶻFib (Y x) = ½ • ((CDT₁ + CDT₂) − CDT₃)` at the fibre level.
+  
   have hcomb := (((hcdt zSlotPerm1).add_section (hcdt zSlotPerm2)).sub_section
     (hcdt zSlotPerm3)).const_smul_section (a := (1 / 2 : ℝ))
   refine hcomb.congr (fun x => ?_)
@@ -2377,12 +1800,6 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) hfib.symm
 
-/-- **The Z-slot order-2 coefficient field `R₂ᶻ` as a smooth compactly-supported `(4, 2)`-tensor.**
-The fibre value at `x` is `ricciArmPrincipalCoeffZFib g₁ x` (smooth by
-`ricciArmPrincipalCoeffZFib_contMDiff`); on the closed manifold it has compact support.  This is the
-order-2 PRINCIPAL coefficient operator field of the Z-slot Palatini trace: the COMBINED Z-slot three-trace
-`½(D(V, ♯, W, ·) + D(V, W, ♯, ·) − D(V, ·, ♯, W))` of the corrected Koszul principal, whose `appCc`-action
-on `D = ∇₀² S` reproduces the Z-slot traced principal. -/
 noncomputable def ricciArmPrincipalCoeffZ (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 where
   toSection :=
@@ -2392,21 +1809,13 @@ noncomputable def ricciArmPrincipalCoeffZ (g₀ g₁ : SmoothRiemannianMetric I 
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `ricciArmPrincipalCoeffZ g₀ g₁` at `x` is the fibre operator
-`ricciArmPrincipalCoeffZFib g₁ x`.  Definitional. -/
+
 @[simp] theorem ricciArmPrincipalCoeffZ_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZFib (I := I) g₁ x) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The `appCc`/`unitModel` read-off of the Z-slot order-2 coefficient `R₂ᶻ` is the Z-slot combined
-three-trace.**  For any smooth `(0, 4)`-tensor field `W`, the `unitModel` read-off of the operator-field
-action `appCc g₀ 4 2 R₂ᶻ W` at `x` on a tangent pair `v` is the Z-slot combined three-trace of the
-unit-form `D = unitModel g₀ 4 W x` against the cometric `g₁⁻¹`:
-```
-unitModel g₀ 2 (appCc g₀ 4 2 R₂ᶻ W) x v
-  = ½ ∑ₖ ( D(v 0, ♯b^k, v 1, b_k) + D(v 0, v 1, ♯b^k, b_k) − D(v 0, b_k, ♯b^k, v 1) ).
-``` -/
+
 theorem ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -2439,12 +1848,6 @@ theorem ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace
     combinedTrace42ModelZ_apply (E := E) (cometricLmodel (I := I) g₁ x)]
   rfl
 
-/-! ## The Z-slot value-linear principal endomorphism and its trace -/
-
-/-- The Z-slot principal covector `ζ ↦ ½(D(V, e, W, ζ) + D(V, W, e, ζ) − D(V, ζ, e, W))` of the second
-covariant gradient `D = unitModel g₀ 4 (∇₀² S) x`, value-linear in the Koszul-slot direction `e`.  It is
-the value-level principal that the second-Koszul bridge produces from `∇^{g₀}_V K_{e, W}` (without the
-order-1 frame corrections in `∇₀ e`, `∇₀ W`). -/
 private def zPrincipalCovec (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e : TangentSpace I x) :
     TangentSpace I x →L[ℝ] ℝ :=
@@ -2520,7 +1923,7 @@ private def zPrincipalCovec (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTen
         ring }
 
 set_option linter.unusedSectionVars false in
-/-- The defining evaluation of the Z-slot principal covector. -/
+
 private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
     zPrincipalCovec (I := I) (M := M) g₀ S V W x e ζ =
@@ -2530,8 +1933,7 @@ private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : Smo
           - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- Additivity of `zPrincipalCovec` in the Koszul-slot direction `e` (slot-`1` and slot-`2`
-multilinearity of `D = ∇₀² S`). -/
+
 private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e e' : TangentSpace I x) :
     zPrincipalCovec (I := I) (M := M) g₀ S V W x (e + e') =
@@ -2576,7 +1978,7 @@ private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : Smoot
   rw [h1, h2, h3]; ring
 
 set_option linter.unusedSectionVars false in
-/-- Homogeneity of `zPrincipalCovec` in the Koszul-slot direction `e`. -/
+
 private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (e : TangentSpace I x) :
     zPrincipalCovec (I := I) (M := M) g₀ S V W x (c • e) =
@@ -2610,9 +2012,6 @@ private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : Smoo
   rw [h1, h2, h3]
   simp only [smul_eq_mul]; ring
 
-/-- The Z-slot value-linear principal endomorphism `e ↦ ♯_{g₁}(zPrincipalCovec e)`: the value-linear
-part of the differentiated Koszul principal `♯_{g₁}(∇^{g₁}_V K_{e, W})` (without the order-1 frame
-corrections).  Genuinely linear in the Koszul-slot direction `e`. -/
 private def alignedPrincipalEndoCZ (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : E →ₗ[ℝ] E where
   toFun := fun e => inverseMetricSharpFib (I := I) g₁ x
@@ -2646,8 +2045,7 @@ private def alignedPrincipalEndoCZ (g₀ g₁ : SmoothRiemannianMetric I M) (S :
     rw [dualToCotangent_smulC, map_smul]; rfl
 
 set_option linter.unusedSectionVars false in
-/-- The `g₁`-inner product of the Z-slot value-linear principal endomorphism reproduces the value-level
-Z-slot principal of the second covariant gradient. -/
+
 private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
@@ -2665,10 +2063,7 @@ private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I
   exact zPrincipalCovec_apply (I := I) (M := M) g₀ S V W x e ζ
 
 set_option linter.unusedSectionVars false in
-/-- **The trace of the Z-slot value-linear principal endomorphism is the `appCc` Z-slot combined
-three-trace.**  The basis-independent `LinearMap.trace` of `alignedPrincipalEndoCZ` equals the
-`appCc`/`unitModel` read-off of the Z-slot order-2 coefficient `R₂ᶻ = ricciArmPrincipalCoeffZ g₀ g₁` on
-the second covariant gradient `∇₀² S` at the output pair `(V, W)`. -/
+
 private lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -2688,18 +2083,8 @@ private lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetri
         ((Module.finBasis ℝ E).cDualBasis k))) ((Module.finBasis ℝ E) k)]
   norm_num [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-/-! ## The Z-slot Palatini traced-principal connector -/
-
 set_option linter.unusedSectionVars false in
-/-- **The order-`1` character of the Z-slot frame-difference vector.**  Under the metric-difference
-hypothesis `hbil`, the `g₁`-pairing of the difference between the FULL `g₀`-aligned principal
-`alignedPrincipalEndoC eᵢ W x V` (which carries the second covariant gradient `∇₀² S` PLUS the order-1
-frame corrections, by the second-Koszul bridge `alignedPrincipalEndoC_inner_secondKoszul`) and its
-value-linear part `alignedPrincipalEndoCZ eᵢ` (carrying ONLY `∇₀² S`) is exactly the order-`1`
-frame-derivative remainder built from the FIRST covariant gradient `C = ∇₀ S` applied to the `∇₀`-frame
-derivatives `∇₀_V eᵢ`, `∇₀_V W` — carrying at most ONE covariant derivative of `S`.  This certifies that
-the connector remainder `palatiniTracedPrincipalZRemainder` is genuinely order `≤ 1` (the value-linear
-order-2 principal `∇₀² S` cancels).  Here `eᵢ := smoothExtensionTangent x e` for a fibre vector `e`. -/
+
 theorem alignedPrincipalEndoC_sub_endoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -2741,15 +2126,6 @@ theorem alignedPrincipalEndoC_sub_endoCZ_inner (g₀ g₁ : SmoothRiemannianMetr
   rw [heix]
   ring
 
-/-- **The named order-`≤ 1` remainder of the Z-slot Palatini traced-principal connector.**
-
-The sum of two explicit order-1 `chartModelBasis`-frame traces: the Z-slot frame remainder
-`∑ᵢ repr(♯_{g₁}(∇₀_V K_{eᵢ,W}) − R₂ᶻ-principal(eᵢ))ᵢ` (the order-1 `∇₀_V eᵢ`/`∇₀_V W` frame-derivative
-corrections of the second covariant-gradient bridge, the difference between the FULL `g₀`-aligned
-principal and its value-linear part) plus the `∇^{g₁} → ∇₀` alignment-trace remainder
-`∑ᵢ repr(alignCorrVecC eᵢ W x V)ᵢ`.  Both arms carry at most ONE covariant derivative of the
-metric-difference section `S` (through `covGrad g₀ 0 2 S`), so the remainder is genuinely order `≤ 1`.
-`eᵢ = smoothExtensionTangent x (chartModelBasis E i)`. -/
 def palatiniTracedPrincipalZRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   (∑ i : Fin (Module.finrank ℝ E),
@@ -2767,35 +2143,7 @@ def palatiniTracedPrincipalZRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
           W x (V x)) i)
 
 set_option linter.unusedSectionVars false in
-/-- **The Z-slot Palatini SP2-endpoint traced-principal connector.**
 
-The `chartModelBasis`-frame trace of the SP2-endpoint order-2 PRINCIPAL `♯_{g₁}(∇^{g₁}_V K_{eᵢ,W})` of the
-differentiated connection difference, traced over the FIRST Koszul covector slot `eᵢ` (the Z-slot of the
-Ricci-arm Palatini telescope `ricciTensor_sub_eq_palatini_telescope`, the second telescope term
-`covDerivConnDiff g₀ g₁ V eᵢ W`, with the differentiation direction `V` FIXED), equals the EXPLICIT Z-slot
-combined three-trace `Pᶻ = unitModel g₀ 2 (appCc g₀ 4 2 R₂ᶻ (∇₀² S)) ![V x, W x]` of the second covariant
-gradient (the `appCc`/`unitModel` read-off of the Z-slot order-2 coefficient
-`R₂ᶻ = ricciArmPrincipalCoeffZ g₀ g₁`, the slot-permuted combined three-trace
-`½(D(V, ♯, W, ·) + D(V, W, ♯, ·) − D(V, ·, ♯, W))`), PLUS the named order-`≤ 1` remainder
-`palatiniTracedPrincipalZRemainder`.
-
-Route: the `g₁`-principal splits, via `g1Principal_splitC`, into the `g₀`-aligned principal
-`alignedPrincipalEndoC eᵢ W x V` plus the order-1 alignment correction `alignCorrVecC`; the `g₀`-aligned
-principal splits further (by `g₁`-non-degeneracy and the second-Koszul bridge
-`alignedPrincipalEndoC_inner_secondKoszul`/`alignedPrincipalEndoCZ_inner`) into the value-linear Z-slot
-principal `alignedPrincipalEndoCZ` (a genuine `LinearMap` in `eᵢ`, whose `chartModelBasis` trace is
-`LinearMap.trace`, computed in the cometric biorthogonal frame to be `Pᶻ` by
-`alignedPrincipalEndoCZ_trace_eq`) plus the order-1 `∇₀_V eᵢ`/`∇₀_V W` frame-derivative remainder.  The
-two order-1 frame/alignment remainders are carried as `palatiniTracedPrincipalZRemainder` (certified
-genuinely order `≤ 1` by `palatiniTracedPrincipalZRemainder_eq_frameForm`, where the metric-difference
-hypothesis `hbil` enters and the order-2 principal `∇₀² S` cancels).
-
-The decomposition itself is an algebraic split (the principal `alignedPrincipalEndoCZ` is read off the
-second covariant gradient `∇₀² S` directly, and the remainder collects the rest), so it holds for any
-section `S`; the metric-difference tie `hbil` is the hypothesis under which `∇₀² S` is the genuine
-order-2 jet of the metric difference and the remainder is certified order `≤ 1`
-(`alignedPrincipalEndoC_sub_endoCZ_inner`).  It is stated `hbil`-free for the consumer that supplies the
-tie separately, matching the sibling order-1 certificate. -/
 theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -2817,7 +2165,7 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
   rw [← alignedPrincipalEndoCZ_trace_eq (I := I) (M := M) g₀ g₁ S V W x]
   rw [← traceViaBasis_c (alignedPrincipalEndoCZ (I := I) (M := M) g₀ g₁ S V W x)]
   rw [palatiniTracedPrincipalZRemainder]
-  -- Each LHS summand is `repr (g1PrincipalVecC eᵢ W x (V x)) i`; split via `g1Principal_splitC`.
+  
   have hsumeq : ∀ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
         (inverseMetricSharpFib (I := I) g₁ x
@@ -2859,32 +2207,12 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
   rw [Finset.sum_congr rfl fun i _ => hsumeq i]
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
 
-/-! ## The realize-tie symmetrization section `symmS` (PIECE 1)
-
-The single-endpoint Palatini connectors `palatini_tracedPrincipal_eq_combinedTrace` and
-`palatini_tracedPrincipal_Zslot_eq_combinedTrace` require the *unsymmetric* tie
-`hbil : ∀ b u w, ccTensorBilin g₀ S b u w = g₁.inner b u w − g₀.inner b u w`, whereas the realized
-metric supplies only the *symmetric* tie `g₁.inner − g₀.inner = ccTensorBilinSymm g₀ T`
-(`tensorSectionRealizeMetric_inner`).  The bridge is the slot-symmetrization section
-`symmS g₀ T := ½ (T + domDomCongrSection (Equiv.swap 0 1) T)` whose extracted (non-symmetrized) bilinear
-form is the symmetrized form of `T`: `ccTensorBilin g₀ (symmS g₀ T) = ccTensorBilinSymm g₀ T`.  A
-realize-tied `T` therefore yields `hbil (symmS g₀ T)`.
-
-The symmetrization is genuinely needed at order `2`: a `dim`-`3`/`4` random numeric check shows the
-combined three-trace coefficient `R₂ = ricciArmPrincipalCoeff` is NOT invariant under symmetrizing the
-two trailing (`S1`, `S2`) slots of `D = ∇₀² S`, so `appCc R₂ (∇₀² (symmS T)) ≠ appCc R₂ (∇₀² T)`; the
-section-difference connector below is therefore stated on `symmS (T − T')`, not on `T − T'`. -/
-
-/-- **The realize-tie slot symmetrization of a `(0, 2)`-tensor section.**  `symmS g₀ T` is the half-sum
-of `T` and its slot-`{0, 1}`-swapped section `domDomCongrSection (Equiv.swap 0 1) T`; its extracted
-bilinear form is the fibrewise symmetrization `ccTensorBilinSymm g₀ T = ½(T(u, w) + T(w, u))`
-(`ccTensorBilin_symmS`). -/
 noncomputable def symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 2 :=
   (1 / 2 : ℝ) • (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)
 
 set_option linter.unusedSectionVars false in
-/-- `unitModel` is additive in the `(0, 2)`-section (local copy of the cross-file private lemma). -/
+
 private lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x =
@@ -2894,8 +2222,7 @@ private lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
 set_option linter.unusedSectionVars false in
-/-- The unit-evaluated `(0, 2)` model fibre of `S` on `(u, w)` is the extracted bilinear form
-`ccTensorBilin g₀ S b u w`. -/
+
 private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
@@ -2909,8 +2236,7 @@ private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
   fin_cases k <;> rfl
 
 set_option linter.unusedSectionVars false in
-/-- The slot-`{0, 1}` swap on the section transposes the extracted bilinear form:
-`ccTensorBilin g₀ (domDomCongrSection (swap 0 1) T) b u w = ccTensorBilin g₀ T b w u`. -/
+
 private lemma ccTensorBilin_domDomCongrSection_swap (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     ccTensorBilin (I := I) g₀
@@ -2925,7 +2251,7 @@ private lemma ccTensorBilin_domDomCongrSection_swap (g₀ : SmoothRiemannianMetr
   fin_cases k <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
 
 set_option linter.unusedSectionVars false in
-/-- The extracted bilinear form is additive in the section. -/
+
 private lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     ccTensorBilin (I := I) g₀ (S + T) b u w =
@@ -2936,7 +2262,7 @@ private lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel_add2 (I := I) (M := M) g₀ S T b, ContinuousMultilinearMap.add_apply]
 
 set_option linter.unusedSectionVars false in
-/-- The extracted bilinear form is `ℝ`-homogeneous in the section. -/
+
 private lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     ccTensorBilin (I := I) g₀ (c • S) b u w =
@@ -2945,9 +2271,7 @@ private lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
 set_option linter.unusedSectionVars false in
-/-- **The extracted bilinear form of `symmS g₀ T` is the symmetrized form `ccTensorBilinSymm g₀ T`.**
-This is the bridge that converts the symmetric realize-tie `g₁.inner − g₀.inner = ccTensorBilinSymm g₀ T`
-into the unsymmetric tie `hbil` the single-endpoint connectors require. -/
+
 theorem ccTensorBilin_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (b : M) (u w : TangentSpace I b) :
     ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T) b u w =
@@ -2957,14 +2281,7 @@ theorem ccTensorBilin_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTen
     ccTensorBilinSymm_apply]
 
 set_option linter.unusedSectionVars false in
-/-- **The realize-tie `hbil` for the symmetrization `symmS g₀ T`.**  If the endpoint metric `g₁` is the
-realized perturbation `g₁.inner = g₀.inner + ccTensorBilinSymm g₀ T` (`tensorSectionRealizeMetric_inner`),
-then `symmS g₀ T` satisfies the unsymmetric metric-difference tie the single-endpoint Palatini connectors
-require:
-```
-ccTensorBilin g₀ (symmS g₀ T) b u w = g₁.inner b u w − g₀.inner b u w.
-```
--/
+
 theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
       g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
@@ -2975,8 +2292,7 @@ theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : Smoo
   ring
 
 set_option linter.unusedSectionVars false in
-/-- `unitModel` of the slot-`{0, 1}`-swapped section is additive in the section (the slot reindexing
-`domDomCongr (swap 0 1)` is `ℝ`-linear). -/
+
 private lemma unitModel_domDomCongrSection_swap_add (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2
@@ -2994,7 +2310,7 @@ private lemma unitModel_domDomCongrSection_swap_add (g₀ : SmoothRiemannianMetr
     ContinuousMultilinearMap.domDomCongr_apply]
 
 set_option linter.unusedSectionVars false in
-/-- `unitModel` of the slot-`{0, 1}`-swapped section is `ℝ`-homogeneous in the section. -/
+
 private lemma unitModel_domDomCongrSection_swap_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2
@@ -3014,7 +2330,7 @@ private lemma unitModel_domDomCongrSection_swap_smul (g₀ : SmoothRiemannianMet
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
 set_option linter.unusedSectionVars false in
-/-- `unitModel` is `ℝ`-homogeneous in the section. -/
+
 private lemma unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (c • T) x =
@@ -3023,7 +2339,6 @@ private lemma unitModel_smul (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
-/-- **`symmS` is additive in the section: `symmS g₀ (T + T') = symmS g₀ T + symmS g₀ T'`.** -/
 theorem symmS_add (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
     symmS (I := I) (M := M) g₀ (T + T') =
       symmS (I := I) (M := M) g₀ T + symmS (I := I) (M := M) g₀ T' := by
@@ -3032,7 +2347,6 @@ theorem symmS_add (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g�
   simp only [symmS, unitModel_smul, unitModel_add2, unitModel_domDomCongrSection_swap_add]
   module
 
-/-- **`symmS` is `ℝ`-homogeneous in the section: `symmS g₀ (c • T) = c • symmS g₀ T`.** -/
 theorem symmS_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ) (T : SmoothCcTensor g₀ 0 2) :
     symmS (I := I) (M := M) g₀ (c • T) = c • symmS (I := I) (M := M) g₀ T := by
   apply smoothCcTensor_ext_of_unitModel
@@ -3040,38 +2354,17 @@ theorem symmS_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ) (T : SmoothCcTe
   simp only [symmS, unitModel_smul, unitModel_add2, unitModel_domDomCongrSection_swap_smul]
   module
 
-/-- **`symmS` negates with the section: `symmS g₀ (-T) = -symmS g₀ T`.** -/
 theorem symmS_neg (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     symmS (I := I) (M := M) g₀ (-T) = -symmS (I := I) (M := M) g₀ T := by
   have h := symmS_smul (I := I) (M := M) g₀ (-1 : ℝ) T
   rw [neg_one_smul, neg_one_smul] at h
   exact h
 
-/-- **`symmS` distributes over subtraction: `symmS g₀ (T - T') = symmS g₀ T - symmS g₀ T'`.** -/
 theorem symmS_sub (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
     symmS (I := I) (M := M) g₀ (T - T') =
       symmS (I := I) (M := M) g₀ T - symmS (I := I) (M := M) g₀ T' := by
   rw [sub_eq_add_neg, symmS_add, symmS_neg, sub_eq_add_neg]
 
-/-! ## The cross-pairing Palatini traced-principal connector (PIECE 2 — X-slot)
-
-The two-endpoint principal arm of `covDerivConnDiff_diff_endpoint_graded` applies the SAME operator
-`♯_{g₁}∇^{g₁}` to the TWO different Koszul covectors `K_{g₁,Z,Y}` and `K_{g₁',Z,Y}`.  The standard
-single-endpoint connector `palatini_tracedPrincipal_eq_combinedTrace` closes the term whose covector
-matches the operator metric (`K_{g₁}`).  The cross term `♯_{g₁}(∇^{g₁}_{eᵢ} K_{g₁'})` — operator `g₁`,
-covector `g₁'` — is closed by the cross-pairing variant below.
-
-The cross variant reuses the metric-independent infrastructure: the second-Koszul covariant-gradient
-bridge `koszulCovGradCovec_covDeriv_eq_secondCovGrad` (instantiated at the covector metric `gcov` and a
-section `S'` tied to `gcov`), the cotangent connection-difference bridge `cotangentCov_leviCivita_diff`
-(operator pair `(gop, g₀)`), the un-pairing `inverseMetricSharpFib_inner` and the biorthogonal-frame
-trace `traceViaCometric_c` (both reading the OPERATOR metric `gop`).  The resulting combined three-trace
-coefficient is `R₂(gop) = ricciArmPrincipalCoeff g₀ gop` — the operator's metric — applied to the
-covector-section's `∇₀² S'`. -/
-
-/-- The `gop`-aligned cross-pairing SP2-endpoint principal endomorphism `v ↦ ♯_{gop}(∇₀_v K_{gcov,Z,Y})`:
-the `g₀`-cotangent covariant derivative of the `gcov`-Koszul covector, raised by the OPERATOR cometric
-`♯_{gop}`.  (The covector metric `gcov` may differ from the operator metric `gop`.) -/
 private def alignedPrincipalEndoCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : E →ₗ[ℝ] E where
   toFun := fun v => inverseMetricSharpFib (I := I) gop x
@@ -3119,8 +2412,6 @@ private def alignedPrincipalEndoCcross (g₀ gop gcov : SmoothRiemannianMetric I
               (koszulCovGradCovec (I := I) (M := M) g₀ gcov Z Y b)) x v :
             TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x))) := rfl
 
-/-- The cross-pairing SP2-endpoint principal vector `♯_{gop}(∇^{gop}_v K_{gcov,Z,Y})` (operator `gop`,
-covector `gcov`). -/
 private def g1PrincipalVecCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     TangentSpace I x :=
@@ -3131,7 +2422,6 @@ private def g1PrincipalVecCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
           (koszulCovGradCovec (I := I) (M := M) g₀ gcov Z Y b)) x v :
         TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
 
-/-- The order-1 cross-pairing alignment correction vector `♯_{gop}(−K_{gcov,Z,Y}(connDiff gop g₀ · v))`. -/
 private def alignCorrVecCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     TangentSpace I x :=
@@ -3172,8 +2462,8 @@ private lemma g1Principal_splitCcross
   congr 1
   ext w
   rw [LinearMap.add_apply]
-  -- The cross alignment: operator `gop`, covector field `K_{gcov}`, via the decoupled cotangent
-  -- connection-difference bridge `cotangentCov_leviCivita_diff` (works for any cotangent-diff `θ`).
+  
+  
   have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ gcov Z Y x
   have halign := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ gop hθ v w
   rw [ContinuousLinearMap.coe_coe, ContinuousLinearMap.coe_coe]
@@ -3320,29 +2610,19 @@ private lemma alignedPrincipalEndoCcross_trace_eq
   rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
   congr 1
 
-/-- The order-1 cross-pairing alignment-trace remainder. -/
 def alignmentTraceRemainderCross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
       (alignCorrVecCcross (I := I) (M := M) g₀ gop gcov Z Y x ((chartModelBasis E) i)) i
 
-/-- The named order-`≤ 1` remainder of the cross-pairing Palatini traced-principal connector. -/
 def palatiniTracedPrincipalRemainderCross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (S' : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   secondKoszulFrameRemainder (I := I) (M := M) g₀ gop S' Z Y x
     + alignmentTraceRemainderCross (I := I) (M := M) g₀ gop gcov Z Y x
 
 set_option linter.unusedSectionVars false in
-/-- **The cross-pairing Palatini SP2-endpoint traced-principal connector.**
 
-The `chartModelBasis`-frame trace of the order-2 PRINCIPAL `♯_{gop}(∇^{gop}_{eᵢ} K_{gcov,Z,Y})` —
-operator metric `gop`, covector metric `gcov` (which may differ) — equals the EXPLICIT combined
-three-trace `unitModel g₀ 2 (appCc (ricciArmPrincipalCoeff g₀ gop) (∇₀² S')) ![Z x, Y x]` (the operator's
-order-2 coefficient `ricciArmPrincipalCoeff g₀ gop` applied to the covector-section's `∇₀² S'`, where
-`S'` is tied to the covector metric `gcov` by `hbil`), PLUS the named order-`≤ 1` remainder
-`palatiniTracedPrincipalRemainderCross`.  The standard single-endpoint connector
-`palatini_tracedPrincipal_eq_combinedTrace` is the diagonal special case `gop = gcov`. -/
 theorem palatini_tracedPrincipal_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -3390,46 +2670,13 @@ theorem palatini_tracedPrincipal_cross_eq_combinedTrace
   rw [palatiniTracedPrincipalRemainderCross, alignmentTraceRemainderCross]
   ring
 
-/-! ## The section-difference covector-difference principal connector (PIECE 2 — X-slot + Z-slot)
-
-The principal arm (P) of the two-endpoint graded decomposition `covDerivConnDiff_diff_endpoint_graded`
-is the SAME operator `♯_{g₁}∇^{g₁}` on the covector DIFFERENCE `K_{g₁,Z,Y} − K_{g₁',Z,Y}`.  Its
-`chartModelBasis`-frame trace (X-slot) is the difference of two traces: the standard one
-(`palatini_tracedPrincipal_eq_combinedTrace` at `S = symmS g₀ T`) and the cross one
-(`palatini_tracedPrincipal_cross_eq_combinedTrace` at operator `g₁`, covector `g₁'`, section
-`S' = symmS g₀ T'`).  Differencing, the two `appCc (ricciArmPrincipalCoeff g₀ g₁)` principals share the
-SAME operator coefficient `R₂(g₁)`, so by `appCc`-linearity and `iteratedCovGrad_sub` they collapse to
-`appCc R₂(g₁) (∇₀² (symmS g₀ T − symmS g₀ T')) = appCc R₂(g₁) (∇₀² (symmS g₀ (T − T')))`
-(`symmS_sub`).  The two single-endpoint order-`≤ 1` remainders difference into the named order-`≤ 1`
-remainder `palatiniTracedPrincipalDiffRemainder`.
-
-The symmetrization `symmS` is genuinely present (it is the section that satisfies the unsymmetric tie
-`hbil` of the per-endpoint connectors), and `R₂` does NOT see through it at order `2` (`symmS` is NOT
-transparent — see the `symmS` section), so the conclusion is on `symmS g₀ (T − T')`. -/
-
-/-- The named order-`≤ 1` remainder of the X-slot section-difference principal connector: the difference
-of the standard and cross single-endpoint order-`≤ 1` remainders. -/
 def palatiniTracedPrincipalDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x
     - palatiniTracedPrincipalRemainderCross (I := I) (M := M) g₀ g₁ g₁' S' Z Y x
 
 set_option linter.unusedSectionVars false in
-/-- **The X-slot section-difference covector-difference principal connector.**
 
-For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')` (supplied as
-`hg₁ : g₁.inner = g₀.inner + ccTensorBilinSymm g₀ T` and `hg₁'` analogously), the X-slot
-`chartModelBasis`-frame trace of the principal arm (P) — the SAME operators `♯_{g₁}∇^{g₁}` on the two
-covectors `K_{g₁,Z,Y}` and `K_{g₁',Z,Y}` — is the `appCc`/`unitModel` read-off of the operator's combined
-three-trace coefficient `R₂ = ricciArmPrincipalCoeff g₀ g₁` on the second covariant gradient of the
-SYMMETRIZED section difference `symmS g₀ (T − T')`, PLUS the named order-`≤ 1` remainder
-`palatiniTracedPrincipalDiffRemainder`:
-```
-∑ᵢ repr(♯_{g₁}(∇^{g₁}_{eᵢ} K_{g₁,Z,Y}))ᵢ − ∑ᵢ repr(♯_{g₁}(∇^{g₁}_{eᵢ} K_{g₁',Z,Y}))ᵢ
-  = unitModel g₀ 2 (appCc R₂ (∇₀² (symmS g₀ (T − T')))) ![Z x, Y x]
-    + palatiniTracedPrincipalDiffRemainder g₀ g₁ g₁' (symmS g₀ T) (symmS g₀ T') Z Y x.
-```
--/
 theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -3477,7 +2724,7 @@ theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
   rw [symmS_sub (I := I) (M := M) g₀ T T']
   rw [iteratedCovGrad_sub (I := I) g₀ 0 2 2
         (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')]
-  -- The principal `appCc R₂(g₁)` is right-linear; difference the section argument.
+  
   have happCc_sub : appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
         (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
           - iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) =
@@ -3506,20 +2753,6 @@ theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
   rw [hsub]
   ring
 
-/-! ## The Z-slot section-difference covector-difference principal connector (PIECE 2 — Z-slot)
-
-The Z-slot of the Palatini telescope traces the second telescope term `♯_{g₁}(∇^{g₁}_V K_{eᵢ,W})` over
-the FIRST Koszul covector slot `eᵢ` (differentiation direction `V` fixed).  The two-endpoint principal
-arm differences the SAME operator `♯_{g₁}∇^{g₁}` on the two covectors `K_{g₁,eᵢ,W}` and `K_{g₁',eᵢ,W}`.
-As in the X-slot case the single-endpoint Z-slot connector `palatini_tracedPrincipal_Zslot_eq_combinedTrace`
-closes the diagonal term (covector `g₁`); the cross Z-slot connector below closes the cross term
-(operator `g₁`, covector `g₁'`).  The Z-slot principal `alignedPrincipalEndoCZ g₀ g₁ S'` reads `∇₀² S'`
-directly through the OPERATOR cometric `♯_{g₁}` (it does NOT reference a covector metric — the covector
-metric enters only the order-`≤ 1` frame remainder through `alignedPrincipalEndoCcross`), so its trace is
-`appCc (ricciArmPrincipalCoeffZ g₀ g₁) (∇₀² S')` (`alignedPrincipalEndoCZ_trace_eq`, hbil-free). -/
-
-/-- The cross Z-slot named order-`≤ 1` remainder: the cross-pairing frame remainder (using the cross
-covector `g₁'`) plus the cross alignment-trace remainder. -/
 def palatiniTracedPrincipalZRemainderCross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (S' : SmoothCcTensor g₀ 0 2) (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   (∑ i : Fin (Module.finrank ℝ E),
@@ -3537,13 +2770,7 @@ def palatiniTracedPrincipalZRemainderCross (g₀ gop gcov : SmoothRiemannianMetr
           W x (V x)) i)
 
 set_option linter.unusedSectionVars false in
-/-- **The cross-pairing Z-slot Palatini SP2-endpoint traced-principal connector.**  The `chartModelBasis`
-trace (over the FIRST Koszul slot `eᵢ`) of the order-2 PRINCIPAL `♯_{gop}(∇^{gop}_V K_{gcov,eᵢ,W})` —
-operator `gop`, covector `gcov` — equals the Z-slot combined three-trace
-`unitModel g₀ 2 (appCc (ricciArmPrincipalCoeffZ g₀ gop) (∇₀² S')) ![V x, W x]` (the operator's Z-slot
-coefficient applied to the covector-section's `∇₀² S'`) PLUS the named order-`≤ 1` remainder
-`palatiniTracedPrincipalZRemainderCross`.  The diagonal `gop = gcov` case is
-`palatini_tracedPrincipal_Zslot_eq_combinedTrace`. -/
+
 theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -3606,29 +2833,13 @@ theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
   rw [Finset.sum_congr rfl fun i _ => hsumeq i]
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
 
-/-- The named order-`≤ 1` remainder of the Z-slot section-difference principal connector: the difference
-of the standard and cross single-endpoint Z-slot order-`≤ 1` remainders. -/
 def palatiniTracedPrincipalZDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   palatiniTracedPrincipalZRemainder (I := I) (M := M) g₀ g₁ S V W x
     - palatiniTracedPrincipalZRemainderCross (I := I) (M := M) g₀ g₁ g₁' S' V W x
 
 set_option linter.unusedSectionVars false in
-/-- **The Z-slot section-difference covector-difference principal connector.**
 
-For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the Z-slot
-`chartModelBasis`-trace (over the FIRST Koszul slot `eᵢ`, differentiation direction `V` fixed) of the
-principal arm — the SAME operators `♯_{g₁}∇^{g₁}` on the two covectors `K_{g₁,eᵢ,W}` and `K_{g₁',eᵢ,W}` —
-is the `appCc`/`unitModel` read-off of the operator's Z-slot combined three-trace coefficient
-`R₂ᶻ = ricciArmPrincipalCoeffZ g₀ g₁` on the second covariant gradient of the symmetrized section
-difference `symmS g₀ (T − T')`, PLUS the named order-`≤ 1` remainder
-`palatiniTracedPrincipalZDiffRemainder`.
-```
-∑ᵢ repr(♯_{g₁}(∇^{g₁}_V K_{g₁,eᵢ,W}))ᵢ − ∑ᵢ repr(♯_{g₁}(∇^{g₁}_V K_{g₁',eᵢ,W}))ᵢ
-  = unitModel g₀ 2 (appCc R₂ᶻ (∇₀² (symmS g₀ (T − T')))) ![V x, W x]
-    + palatiniTracedPrincipalZDiffRemainder g₀ g₁ g₁' (symmS g₀ T) (symmS g₀ T') V W x.
-```
--/
 theorem palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -3694,37 +2905,6 @@ theorem palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
   rw [hsub]
   ring
 
-/-! ## The source-slot reindex of a `(4, 2)`-operator coefficient (the symmetrizer absorption — PIECE 3)
-
-The X-slot and Z-slot section-difference principal connectors
-(`palatini_tracedPrincipalDiff_covector_eq_combinedTrace`,
-`palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace`) read the principal arm on the SYMMETRIZED
-section difference `symmS g₀ (T − T')`, whereas the Ricci-arm eval-matching target
-`deTurckRicciArm_appCc_eval` reads on the BARE difference `T − T'`.  The symmetrization is the half-sum
-`symmS g₀ S = ½(S + domDomCongrSection (swap 0 1) S)` (`symmS`), so by `appCc`-linearity and
-`iteratedCovGrad_sub`/`iteratedCovGrad`-additivity the principal on `∇₀² (symmS S)` is the half-sum of
-the principal on `∇₀² S` and on `∇₀² (domDomCongrSection (swap 0 1) S)`.  The slot-permutation
-naturality of the iterated covariant gradient `exists_iteratedCovGrad_unitModel_domDomCongrSection`
-identifies the unit fibre of `∇₀² (domDomCongrSection σ S)` with a CONSTANT model reindexing
-`domDomCongr σ' (unit fibre of ∇₀² S)` at a fixed permutation `σ'` of `Fin (2 + 2) = Fin 4` (for the
-slot-`{0, 1}` swap at order `2`, `σ'` is the trailing-pair swap `swap 2 3`, the dispatch's "slot
-symmetrizer on the LAST TWO S-slot indices of `∇₀²`").
-
-`reindexCoeff R σ'` is the source-slot reindex of the `(4, 2)`-coefficient `R` that ABSORBS this
-constant model reindexing: it precomposes `R` (fibrewise) with the model reindex `domDomCongr σ'`, so
-that `appCc (reindexCoeff R σ') W = appCc R W'` whenever `unit(W') = domDomCongr σ' (unit W)`
-(`reindexCoeff_appCc_eq`).  Composing with the half-sum gives `symmAbsorbedPrincipalCoeff R σ'`, the
-coefficient whose `appCc`-action on `∇₀² (T − T')` reproduces the principal on `∇₀² (symmS (T − T'))`
-(`symmAbsorbedPrincipalCoeff_appCc_eq`).  This is the order-2 PRINCIPAL coefficient `R₂` of the Ricci-arm
-eval-matching, read on the bare iterated gradient of the section difference, exactly as the dispatch
-posits.  The construction mirrors `combinedTrace42Model`'s model precomposition with `domDomCongrₗᵢ`, and
-its smoothness routes through the same constant-reindex-of-a-smooth-field criterion as
-`ricciArmPrincipalCoeffFib_contMDiff`. -/
-
-/-- **The fibrewise source-slot reindex of a `(4, 2)`-operator.**  Precomposes the fibre operator `A`
-with the constant model slot reindexing `domDomCongr σ'` of its `(0, 4)`-source, transported through the
-fibre/model continuous-linear equivalences.  This absorbs a `domDomCongr σ'` reindex of the contracted
-section into the coefficient (`reindexCoeffFib_apply`). -/
 noncomputable def reindexCoeffFib (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x) :
     Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
@@ -3735,8 +2915,7 @@ noncomputable def reindexCoeffFib (σ' : Equiv.Perm (Fin 4)) (x : M)
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap))
 
 set_option linter.unusedSectionVars false in
-/-- The defining application of `reindexCoeffFib`: `A` applied to the `ofModel` of the
-`domDomCongr σ'`-reindexed model fibre. -/
+
 theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -3749,8 +2928,7 @@ theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
   congr 1
 
 set_option linter.unusedSectionVars false in
-/-- The source-slot reindex `reindexCoeffFib σ' x` is `ℝ`-linear in the operator `A` (the half-sum of
-the symmetrizer threads through it). -/
+
 private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A B : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -3761,13 +2939,7 @@ private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **Base-point smoothness of the source-slot-reindexed `(4, 2)`-coefficient field.**  For a smooth
-`(4, 2)`-coefficient field `R` and a fixed permutation `σ'`, `x ↦ reindexCoeffFib σ' x (R x)` is a
-smooth section of the `(4, 2)`-tensor bundle.  As in `ricciArmPrincipalCoeffFib_contMDiff`, on a smooth
-`(0, 4)`-field `Y` the value `R x (ofModel (domDomCongr σ' (toModel (Y x))))` is the action of the
-smooth operator field `R` on the constant-reindexed smooth field `ofModel (domDomCongr σ' (toModel Y))`,
-smooth by the constant-reindex-of-a-smooth-field criterion (`contMDiff_multilinearSection_iff_coord`)
-and `ContMDiff.clm_bundle_apply`. -/
+
 theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
@@ -3784,8 +2956,8 @@ theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
       (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         R.toSection x))
   intro Y
-  -- The constant model slot-reindex of the smooth `(0, 4)`-field `Y` is smooth (same coordinate
-  -- relabeling argument as `domDomCongrField_contMDiff` / `ricciArmPrincipalCoeffFib_contMDiff`).
+  
+  
   have hYσ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x
@@ -3819,10 +2991,6 @@ theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
       (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         R.toSection x) (Y x)).symm
 
-/-- **The source-slot reindex of a `(4, 2)`-coefficient field as a smooth compactly-supported tensor.**
-The fibre value at `x` is `reindexCoeffFib σ' x (R x)` (smooth by `reindexCoeffFib_contMDiff`); on the
-closed manifold it has compact support.  Absorbs a constant `domDomCongr σ'` reindex of the contracted
-`(0, 4)`-section into the coefficient. -/
 noncomputable def reindexCoeff (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) :
     SmoothCcTensor g₀ 4 2 where
@@ -3836,8 +3004,7 @@ noncomputable def reindexCoeff (g₀ : SmoothRiemannianMetric I M)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `reindexCoeff R σ'` at `x` is `reindexCoeffFib σ' x (R x)`.
-Definitional. -/
+
 @[simp] theorem reindexCoeff_toSection (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) (x : M) :
     (reindexCoeff (I := I) (M := M) g₀ R σ').toSection x =
@@ -3848,15 +3015,7 @@ Definitional. -/
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **The source-slot reindex absorbs a constant `domDomCongr σ'` reindex of the contracted section.**
-If two smooth `(0, 4)`-fields `W, W'` have unit fibres related by the constant model reindexing
-`unit(W' x) = domDomCongr σ' (unit(W x))` at every base point, then the `unitModel` read-off of
-`appCc (reindexCoeff R σ') W` equals that of `appCc R W'`:
-```
-unitModel g₀ 2 (appCc g₀ 4 2 (reindexCoeff R σ') W) x = unitModel g₀ 2 (appCc g₀ 4 2 R W') x.
-```
-This is the absorption of the slot-permutation naturality `exists_iteratedCovGrad_unitModel_domDomCongrSection`
-into the coefficient. -/
+
 theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4))
     (W W' : SmoothCcTensor g₀ 0 4)
@@ -3869,13 +3028,13 @@ theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel, unitModel, appCc_toSection, appCc_toSection,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [reindexCoeff_toSection]
-  -- The reindex-coefficient applied to `W`'s unit fibre, reduced through `reindexCoeffFib_apply`.
+  
   rw [reindexCoeffFib_apply (I := I) σ' x
     (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
       R.toSection x)
     ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
       W.toSection x) (unitTensor (I := I) (M := M) x))]
-  -- `toModel (W.toSection x unit) = unitModel W x`; rewrite by the σ'-relation, then `ofModel_toModel`.
+  
   have hWu : Tensor0SBundle.Tensor0SSpace.toModel
       ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
         W.toSection x) (unitTensor (I := I) (M := M) x)) =
@@ -3891,8 +3050,7 @@ theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
   rw [hWu, ← hWW' x, hW'u]
 
 set_option linter.unusedSectionVars false in
-/-- The iterated covariant gradient is `ℝ`-homogeneous in the section: `∇^j (c • w) = c • ∇^j w`.
-Induction on `j` from `iteratedCovGrad_zero`/`iteratedCovGrad_succ` and the single-step `covGrad_smul`. -/
+
 private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -3903,8 +3061,7 @@ private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : �
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The operator-field action is `ℝ`-homogeneous in the operator-field factor:
-`appCc (c • Φ) W = c • appCc Φ W`.  Mirrors `appCc_add_left`. -/
+
 private theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     appCc (I := I) (M := M) g r s (c • Φ) W =
@@ -3920,28 +3077,7 @@ private theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.smul_comp]
 
 set_option linter.unusedSectionVars false in
-/-- **The symmetrizer-absorbed order-2 principal coefficient (connector 1 — the X/Z PRINCIPAL `R₂`).**
 
-The X-slot and Z-slot section-difference principal connectors read the principal arm on the SYMMETRIZED
-section difference `symmS g₀ (T − T')` (the unsymmetric realize-tie `hbil` forces the symmetrization),
-whereas the Ricci-arm eval-matching target `deTurckRicciArm_appCc_eval` reads on the BARE difference
-`T − T'`.  This connector absorbs the slot-symmetrizer into the coefficient: there is a single built
-`(4, 2)`-coefficient field `R₂' = ½ R₂ + ½ reindexCoeff R₂ σ'` (`σ'` the order-`2` slot permutation of the
-iterated-gradient naturality `exists_iteratedCovGrad_unitModel_domDomCongrSection (swap 0 1) S 2`, the
-trailing-pair swap of `∇₀²`) whose `appCc`/`unitModel` read-off on the bare `∇₀² (T − T')` reproduces the
-principal-arm read-off on `∇₀² (symmS (T − T'))`:
-```
-unitModel g₀ 2 (appCc g₀ 4 2 R₂' (∇₀² (T − T'))) x v
-  = unitModel g₀ 2 (appCc g₀ 4 2 R₂ (∇₀² (symmS g₀ (T − T')))) x v.
-```
-Route: `symmS S = ½(S + domDomCongrSection (swap 0 1) S)` (`symmS`); `iteratedCovGrad` is additive
-(`iteratedCovGrad_add`) and `ℝ`-homogeneous (`iteratedCovGrad_smul`); `appCc` is right-additive and
-right-homogeneous (`appCc_add_right`, `appCc_smul_right`); the swapped-section term is absorbed via the
-source-slot reindex `reindexCoeff` (`reindexCoeff_appCc_eq`) at the order-`2` permutation `σ'`; the
-half-sum of coefficients is collected through `appCc_add_left` and the `unitModel`-level scalar
-distribution (`unitModel_add2`, `unitModel_smul`).  This is the order-2 PRINCIPAL coefficient `R₂` of the
-Ricci-arm eval-matching, read on the bare iterated gradient of the section difference, exactly as the
-dispatch posits. -/
 theorem symmAbsorbedPrincipalCoeff_appCc_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (R₂ : SmoothCcTensor g₀ 4 2) :
@@ -3953,23 +3089,23 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
           (appCc (I := I) (M := M) g₀ 4 2 R₂
             (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v := by
   classical
-  -- The order-`2` slot permutation `σ'` relating `∇₀² (domDomCongrSection (swap) S)` to `∇₀² S`.
+  
   obtain ⟨σ', hσ'⟩ := exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
     (Equiv.swap (0 : Fin 2) 1) S 2
   refine ⟨(1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ', fun x v => ?_⟩
-  -- Expand `∇₀² (symmS S)` through the half-sum of `S` and its slot-swapped section.
+  
   have hsymm : iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 S +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S) := by
     rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
-  -- Abbreviations for the three `unitModel`-read-off scalars.
+  
   set uR : ℝ := unitModel (I := I) (M := M) g₀ 2
     (appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huR
   set uRein : ℝ := unitModel (I := I) (M := M) g₀ 2
     (appCc (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R₂ σ')
       (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huRein
-  -- LHS = `½ uR + ½ uRein` through `appCc`-left-linearity (`R₂' = ½ R₂ + ½ reindexCoeff R₂ σ'`).
+  
   have hLHS : unitModel (I := I) (M := M) g₀ 2
       (appCc (I := I) (M := M) g₀ 4 2
         ((1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ')
@@ -3980,7 +3116,7 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
       ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
     rw [huR, huRein]
     simp only [smul_eq_mul]
-  -- RHS = `½ uR + ½ uSwap`, and `uSwap = uRein` by the source-slot reindex absorption.
+  
   have hSwap : unitModel (I := I) (M := M) g₀ 2
       (appCc (I := I) (M := M) g₀ 4 2 R₂
         (iteratedCovGrad (I := I) g₀ 0 2 2
@@ -4003,24 +3139,6 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
     simp only [smul_eq_mul]
   rw [hLHS, hRHS]
 
-/-! ## The generic source-slot reindex and symmetrizer-absorbed coefficient at every gradient order
-
-The sibling `symmAbsorbedPrincipalCoeff_appCc_eq` resolves the bare-vs-`symmS` read-off mismatch at the
-order-`2` PRINCIPAL `(4, 2)`-coefficient (gradient order `i = 2`, source rank `4`).  The Ricci-arm bridges
-ALSO read the order-`0` `(2, 2)` curvature coefficient on `iteratedCovGrad g₀ 0 2 0 (T − T')` (gradient
-order `i = 0`, source rank `2`), and the chart velocity that the realize-tie
-`chartGramOnE_realize_sub_eqOn_symm_rawComponent` pins is the SYMMETRIZED `symmS g₀ (T − T')` (the
-realize map symmetrizes via `ccTensorBilinSymm`).  This block lifts the sibling's symmetrizer-absorption
-to EVERY gradient order: a generic source-slot reindex of an `(r, s)`-coefficient and the half-sum
-symmetrizer-absorbed `(2 + i, 2)`-coefficient `symmAbsorbedCoeff i R` whose bare-section read-off
-reproduces the original coefficient's `symmS`-section read-off.  Specialised to `i = 2` (the pure
-rough-Laplacian principal) and `i = 0` (the two-slot curvature) it gives the symmetrizer-absorbed
-coefficients the bridges consume, with the consumer's bare `(T − T')` shape preserved. -/
-
-/-- **The fibrewise source-slot reindex of an `(r, s)`-operator (generic rank).**  The rank-generic
-mirror of `reindexCoeffFib`: precomposes the fibre operator `A` with the constant model slot reindexing
-`domDomCongr σ'` of its `(0, r)`-source, transported through the fibre/model continuous-linear
-equivalences. -/
 noncomputable def reindexCoeffFibGen (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x) :
     Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x :=
@@ -4031,8 +3149,7 @@ noncomputable def reindexCoeffFibGen (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x :
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) r x).toContinuousLinearMap))
 
 set_option linter.unusedSectionVars false in
-/-- The defining application of `reindexCoeffFibGen`: `A` applied to the `ofModel` of the
-`domDomCongr σ'`-reindexed model fibre. -/
+
 theorem reindexCoeffFibGen_apply (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x)
     (D : Tensor0SBundle.Tensor0SSpace r I x) :
@@ -4046,10 +3163,7 @@ theorem reindexCoeffFibGen_apply (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **Base-point smoothness of the source-slot-reindexed `(r, s)`-coefficient field (generic rank).**
-The rank-generic mirror of `reindexCoeffFib_contMDiff`: for a smooth `(r, s)`-coefficient field `R` and a
-fixed permutation `σ'`, `x ↦ reindexCoeffFibGen r s σ' x (R x)` is a smooth section of the `(r, s)`-tensor
-bundle. -/
+
 theorem reindexCoeffFibGen_contMDiff (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -4099,8 +3213,6 @@ theorem reindexCoeffFibGen_contMDiff (g₀ : SmoothRiemannianMetric I M) (r s : 
       (show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
         R.toSection x) (Y x)).symm
 
-/-- **The source-slot reindex of an `(r, s)`-coefficient field as a smooth compactly-supported tensor
-(generic rank).**  Rank-generic mirror of `reindexCoeff`. -/
 noncomputable def reindexCoeffGen (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
     SmoothCcTensor g₀ r s where
@@ -4114,8 +3226,7 @@ noncomputable def reindexCoeffGen (g₀ : SmoothRiemannianMetric I M) (r s : ℕ
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `reindexCoeffGen R σ'` at `x` is `reindexCoeffFibGen r s σ' x (R x)`.
-Definitional. -/
+
 @[simp] theorem reindexCoeffGen_toSection (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) (x : M) :
     (reindexCoeffGen (I := I) (M := M) g₀ r s R σ').toSection x =
@@ -4126,11 +3237,7 @@ Definitional. -/
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **The generic source-slot reindex absorbs a constant `domDomCongr σ'` reindex of the contracted
-section.**  Rank-generic mirror of `reindexCoeff_appCc_eq` with target rank fixed to `2` (the only target
-the bridges read).  If two smooth `(0, r)`-fields `W, W'` have unit fibres related by the constant model
-reindexing `unit(W' x) = domDomCongr σ' (unit(W x))` at every base point, then the `unitModel` read-off of
-`appCc (reindexCoeffGen R σ') W` equals that of `appCc R W'`. -/
+
 theorem reindexCoeffGen_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (R : SmoothCcTensor g₀ r 2) (σ' : Equiv.Perm (Fin r))
     (W W' : SmoothCcTensor g₀ 0 r)
@@ -4162,30 +3269,13 @@ theorem reindexCoeffGen_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
       Tensor0SBundle.Tensor0SSpace.ofModel_toModel]
   rw [hWu, ← hWW' x, hW'u]
 
-/-- **The symmetrizer-absorbed `(2 + i, 2)`-coefficient at gradient order `i` (the half-sum).**  The
-single built coefficient `R' = ½ R + ½ reindexCoeffGen R σ'` (`σ'` the order-`i` slot permutation of the
-iterated-gradient naturality `exists_iteratedCovGrad_unitModel_domDomCongrSection (swap 0 1) S i`, the
-trailing-pair swap on the `(0, 2 + i)`-source of `∇₀^i`) whose `appCc`/`unitModel` read-off on the bare
-`∇₀^i S` reproduces the original coefficient's read-off on `∇₀^i (symmS S)`
-(`symmAbsorbedCoeff_appCc_eq`).  Generic over the gradient order `i`; the sibling
-`symmAbsorbedPrincipalCoeff_appCc_eq` is the `i = 2` existence version. -/
 noncomputable def symmAbsorbedCoeff (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     (R : SmoothCcTensor g₀ (2 + i) 2)
     (σ' : Equiv.Perm (Fin (2 + i))) : SmoothCcTensor g₀ (2 + i) 2 :=
   (1 / 2 : ℝ) • R + (1 / 2 : ℝ) • reindexCoeffGen (I := I) (M := M) g₀ (2 + i) 2 R σ'
 
 set_option linter.unusedSectionVars false in
-/-- **The symmetrizer-absorbed coefficient's `appCc` read-off on the bare section equals the original
-coefficient's read-off on the `symmS`-symmetrised section.**  Generic over the gradient order `i`:
-```
-unitModel g₀ 2 (appCc g₀ (2+i) 2 (symmAbsorbedCoeff i R σ') (∇₀^i S)) x v
-  = unitModel g₀ 2 (appCc g₀ (2+i) 2 R (∇₀^i (symmS g₀ S))) x v,
-```
-where `σ'` is the slot permutation `exists_iteratedCovGrad_unitModel_domDomCongrSection (swap 0 1) S i`
-provides.  Mirrors the sibling `symmAbsorbedPrincipalCoeff_appCc_eq` (the `i = 2` case) verbatim, threading
-`symmS S = ½(S + domDomCongrSection (swap 0 1) S)`, `iteratedCovGrad` additivity/homogeneity, `appCc`
-right-additivity/homogeneity, the generic source-slot reindex absorption `reindexCoeffGen_appCc_eq`, and
-the `appCc`-left half-sum collection. -/
+
 theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     (S : SmoothCcTensor g₀ 0 2) (R : SmoothCcTensor g₀ (2 + i) 2)
     (σ' : Equiv.Perm (Fin (2 + i)))
@@ -4246,22 +3336,8 @@ theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     simp only [smul_eq_mul]
   rw [symmAbsorbedCoeff, hLHS, hRHS]
 
-/-! ## The operator-difference (O)-arm sharp-difference resolvent (order-`0`, extension-free) -/
-
 set_option linter.unusedSectionVars false in
-/-- **The sharp-difference resolvent paired with `g₁` (order-`0`, value-only).**
 
-For a single cotangent value `α : Tensor0SSpace 1 I x`, the difference of the two inverse-metric sharps
-`♯_{g₁} α − ♯_{g₁'} α`, paired with the OPERATOR metric `g₁` against any test vector `w`, reads off the
-metric-VALUE difference `α(w) − g₁(♯_{g₁'} α, w)`:
-```
-g₁(♯_{g₁} α − ♯_{g₁'} α, w) = cotangentToDualLinear α w − g₁(♯_{g₁'} α, w).
-```
-The `g₁`-sharp inverts the `g₁`-flat (`inverseMetricSharpFib_inner`): `g₁(♯_{g₁} α, w)
-= cotangentToDualLinear α w`, so the `g₁`-pairing of the sharp difference equals
-`α(w) − g₁(♯_{g₁'} α, w)`.  Since `g₁'(♯_{g₁'} α, w) = cotangentToDualLinear α w` too, this is the
-resolvent kernel of the order-`0` (O)-arm: the metric VALUE difference `g₁ − g₁'` survives at
-`∇₀(T − T')(x) = 0`. -/
 theorem inverseMetricSharpFib_sub_inner_g1
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (α : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
@@ -4274,18 +3350,7 @@ theorem inverseMetricSharpFib_sub_inner_g1
       inverseMetricSharpFib_inner (I := I) g₁ x α w]
 
 set_option linter.unusedSectionVars false in
-/-- **The sharp-difference resolved through the metric-VALUE difference under the realize-tie.**
 
-Under the two realize-ties `g₁.inner = g₀.inner + ccTensorBilinSymm g₀ T`,
-`g₁'.inner = g₀.inner + ccTensorBilinSymm g₀ T'`, the operator `g₁`-pairing of the sharp difference is
-the (negated) symmetrized bilinear form of `T − T'`:
-```
-g₁(♯_{g₁} α − ♯_{g₁'} α, w) = − ccTensorBilinSymm g₀ (T − T') x (♯_{g₁'} α) w.
-```
-This collapses the resolvent `inverseMetricSharpFib_sub_inner_g1` through the realize-ties:
-`g₁'(u, w) − g₁(u, w) = ccTensorBilinSymm g₀ T' x u w − ccTensorBilinSymm g₀ T x u w
-= − ccTensorBilinSymm g₀ (T − T') x u w` (linearity of `ccTensorBilinSymm` in the section).  It is the
-genuine order-`0` value coefficient of the (O)-arm: a fibrewise-linear function of `(T − T')(x)`. -/
 theorem inverseMetricSharpFib_sub_inner_g1_realize
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -4318,17 +3383,7 @@ theorem inverseMetricSharpFib_sub_inner_g1_realize
   rw [hsub]; ring
 
 set_option linter.unusedSectionVars false in
-/-- **The two-endpoint cotangent connection-difference bridge (value level).**
 
-Chaining the single-endpoint cotangent connection-difference bridge `cotangentCov_leviCivita_diff` at the
-two endpoints `(g₁, g₀)` and `(g₁', g₀)` (the connection-independent exterior-derivative term cancels at
-each, and the `∇₀` reference term cancels between them):
-```
-(∇^{g₁}_K θ)(v)(w) − (∇^{g₁'}_K θ)(v)(w) = −θ x (connDiff g₁ g₁' x w v).
-```
-This is the value-level cotangent connection difference between the TWO endpoint connections directly
-(the cotangent dual of `connDiff g₁ g₁'`, the intrinsic Christoffel variation between the endpoints),
-the bridge the (O)-arm connection leg consumes. -/
 theorem cotangentCov_leviCivita_diff_endpoint
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
@@ -4339,7 +3394,7 @@ theorem cotangentCov_leviCivita_diff_endpoint
       -θ x (PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v) := by
   have h1 := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁ hθ v w
   have h1' := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁' hθ v w
-  -- `connDiff g₁ g₁' = connDiff g₁ g₀ − connDiff g₁' g₀` (the difference-one-form cocycle, value level).
+  
   have hcocycle : PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v =
       PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v
         - PDE.DeTurck.connDiff (I := I) g₁' g₀ x w v := by
@@ -4356,21 +3411,7 @@ theorem cotangentCov_leviCivita_diff_endpoint
   linarith [h1, h1']
 
 set_option linter.unusedSectionVars false in
-/-- **The (O)-arm pointwise split: sharp-difference resolvent plus connection-difference leg.**
 
-The per-`i` (O)-arm atom differentiates a SINGLE endpoint covector `K_{g₁'}` (operator and connection
-both vary across the two terms).  Add-subtract the middle term `♯_{g₁'}(dual(∇^{g₁}_dir K))` to split it:
-```
-♯_{g₁}(dual(∇^{g₁}_dir K)) − ♯_{g₁'}(dual(∇^{g₁'}_dir K))
-  = (♯_{g₁} − ♯_{g₁'})(dual(∇^{g₁}_dir K))                       -- (O.a) the sharp-difference resolvent
-                                                                  --   (order-`0` cometric VALUE difference)
-    + ♯_{g₁'}(dual(∇^{g₁}_dir K) − dual(∇^{g₁'}_dir K)),         -- (O.b) the connection-difference leg
-```
-where `K = koszulCovGradCovec g₀ g₁' Z Y`.  This is the pure algebraic add-subtract-middle of the
-operator-difference arm: it isolates the sharp-difference resolvent `(O.a)` (whose `g₁`-pairing is the
-order-`0` cometric value difference, `inverseMetricSharpFib_sub_inner_g1`) from the cotangent
-connection-difference leg `(O.b)` (the cotangent dual of `connDiff g₁ g₁'`,
-`cotangentCov_leviCivita_diff_endpoint`). -/
 theorem oArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g₁ x
@@ -4406,19 +3447,7 @@ theorem oArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   abel
 
 set_option linter.unusedSectionVars false in
-/-- **The (O.b) connection-difference leg as the cotangent dual of `connDiff g₁ g₁'`.**
 
-The cotangent covariant-derivative difference `dual(∇^{g₁}_dir K) − dual(∇^{g₁'}_dir K)` of the SINGLE
-covector `K = koszulCovGradCovec g₀ g₁' Z Y` is the `dualToCotangent` of the functional
-`w ↦ −cotangentToCLM(K x)(connDiff g₁ g₁' x w dir)`:
-```
-dual(∇^{g₁}_dir K) − dual(∇^{g₁'}_dir K)
-  = dualToCotangent (−(K_x ∘ (connDiff g₁ g₁' x).flip dir)).
-```
-This converts the operator-difference leg into the order-`1` connection difference `connDiff g₁ g₁'`
-(the intrinsic Christoffel variation between the endpoints), via the two-endpoint cotangent bridge
-`cotangentCov_leviCivita_diff_endpoint`.  The functional is genuinely linear (a CLM composition), so it
-packages as a single `Module.Dual`. -/
 theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
     dualToCotangent (I := I)
@@ -4443,16 +3472,7 @@ theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   exact hbridge
 
 set_option linter.unusedSectionVars false in
-/-- **The endpoint connection-difference cocycle (value level).**
 
-The two background-referenced connection differences telescope to the inter-endpoint connection difference:
-```
-connDiff g₁ g₀ x w v − connDiff g₁' g₀ x w v = connDiff g₁ g₁' x w v.
-```
-This is the difference-one-form cocycle `connDiff g₁ g₁' = connDiff g₁ g₀ − connDiff g₁' g₀` read at the
-value level (the reference connection `∇₀` cancels), the algebraic identity every cross/slot `(C)/(S₁)/(S₂)`
-leg consumes to telescope an endpoint-pair difference of `connDiff ·  g₀` into the single order-`≤ 1`
-inter-endpoint variation `connDiff g₁ g₁'`. -/
 theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (w v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v
@@ -4469,19 +3489,7 @@ theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   rw [e1, e2, e3]; abel
 
 set_option linter.unusedSectionVars false in
-/-- **The (C)-arm pointwise split: first-slot value difference plus inter-endpoint cocycle leg.**
 
-The (C)-arm cross atom differences the connection-difference `connDiff · g₀` over BOTH the metric and its
-first (raised-covector) vector argument: at the two endpoints the first argument is `a := ♯_{g₁}K_{g₁}` and
-`a' := ♯_{g₁'}K_{g₁'}`.  Add-subtract the middle term `connDiff g₁ g₀ x a' dir` to split it:
-```
-connDiff g₁ g₀ x a dir − connDiff g₁' g₀ x a' dir
-  = connDiff g₁ g₀ x (a − a') dir            -- (C.a) first-slot VALUE difference (linearity of connDiff)
-    + connDiff g₁ g₁' x a' dir,              -- (C.b) the inter-endpoint cocycle leg (order-`≤ 1`)
-```
-the first leg the pure first-slot value difference `a − a'` of the raised connection difference (order-`0`
-through `gInvDiffRaisedEndo_eq_metricSharp_flatDiff` plus an order-`≤ 1` covector-difference piece), the
-second the inter-endpoint variation `connDiff g₁ g₁'` (`connDiff_endpoint_cocycle`). -/
 theorem csArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (a a' dir : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x a dir
@@ -4493,22 +3501,7 @@ theorem csArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
   abel
 
 set_option linter.unusedSectionVars false in
-/-- **The quadratic-arm pointwise split: first-slot difference-section difference plus cocycle leg.**
 
-The quadratic `connDiff ∧ diffSec` atom contracts the connection difference `connDiff · g₀` against the
-endpoint's OWN difference-section value (`q := diffSec_{g₁}`, `q' := diffSec_{g₁'}`).  Add-subtract the
-middle term `connDiff g₁ g₀ x q' dir` to split it:
-```
-connDiff g₁ g₀ x q dir − connDiff g₁' g₀ x q' dir
-  = connDiff g₁ g₀ x (q − q') dir            -- (Q.a) the `A_{g₁} ∘ (dA)` difference-section difference
-    + connDiff g₁ g₁' x q' dir,              -- (Q.b) the `(dA) ∘ A_endpoint` inter-endpoint cocycle leg,
-```
-matching the `dA ∘ A_endpoint + A_endpoint ∘ dA` quadratic structure: the first leg the endpoint connection
-applied to the difference-section difference `q − q' = dA` (order-`≤ 1`, since `diffSec g₁ − diffSec g₁'`
-carries one covariant derivative of the inter-endpoint metric difference), the second the inter-endpoint
-variation `connDiff g₁ g₁'` (`connDiff_endpoint_cocycle`) applied to a single difference-section.  Identical
-algebra to `csArm_split` (a left-slot value difference plus a metric-pair cocycle), specialised to the
-difference-section arguments. -/
 theorem quadArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (q q' dir : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x q dir
@@ -4519,76 +3512,8 @@ theorem quadArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
   rw [map_sub, ContinuousLinearMap.sub_apply]
   abel
 
-/-! ## The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge)
-
-The Ricci-arm eval-matching `deTurckRicciArm_appCc_eval` assembles the `(−2)`-scaled Ricci-tensor
-difference from the Palatini telescope `ricciTensor_sub_eq_palatini_telescope`, whose `chartModelBasis`
-trace of the two-endpoint differentiated connection difference is order-graded by
-`covDerivConnDiff_diff_endpoint_graded` into the order-`2` PRINCIPAL arm `(P)` (closed by the
-X-slot/Z-slot principal connectors `palatini_tracedPrincipalDiff_covector_eq_combinedTrace`,
-`palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace` and the symmetrizer absorption
-`symmAbsorbedPrincipalCoeff_appCc_eq`), the order-`0` operator-difference arm `(O)`, the order-`1`
-cross/slot `connDiff` couplings `(C)/(S₁)/(S₂)`, and the order-`1` quadratic `connDiff ∧ diffSec`
-telescope.
-
-The principal arm `(P)` is `appCc R₂ (∇₀² S)` PLUS a carried order-`≤ 1` remainder
-`palatiniTracedPrincipalDiffRemainder − palatiniTracedPrincipalZDiffRemainder` (the `∇₀_V eᵢ`/`∇₀_V W`
-frame-derivative corrections of the second-Koszul bridge, certified order `≤ 1` by
-`alignedPrincipalEndoC_sub_endoCZ_inner`).  Crucially, **no proper sub-arm of the lower part is
-tensorial on its own**: each of `(O)`, `(C)/(S₁)/(S₂)`, the quadratic, and even the carried principal
-remainder individually carries the test-field-extension gradients `∇₀ Z`, `∇₀ Y` (the
-`smoothExtensionTangent` Leibniz artifacts of `covDerivConnDiff` against an arbitrary smooth extension
-of the output values), which a value-only `appCc Rₘ ![Z x, Y x]` read-off cannot represent.  These
-extension artifacts cancel ONLY across the FULL lower combination: the total Ricci-tensor difference is
-manifestly tensorial (a difference of two genuine Ricci `(0, 2)`-tensors), and the order-`2` piece
-`appCc R₂ (∇₀² S)` is the extension-free combined three-trace of `∇₀² S` against the cometric `g₁⁻¹`, so
-their difference — the COMBINED lower arm here — is again tensorial (a value-only `(T − T')` order-`0`
-plus a first-jet `∇₀(T − T')` order-`1` read-off, with no order-`2` and no extension dependence).  This
-is the numerically-verified artifact-cancellation: the combined non-principal telescope is invariant
-under the extension gradients `∇₀ Z`, `∇₀ Y` at fixed values `Z x`, `Y x`, while every proper sub-arm
-is not.
-
-The connector is consumer-minimal: its left-hand side is EXACTLY the sum of the order-graded lower arms
-produced by `covDerivConnDiff_diff_endpoint_graded` (the operator-difference arm `(O)`, the cross/slot
-`connDiff` couplings, and the quadratic `connDiff ∧ diffSec` telescope, read at the X-slot config
-`(X = eᵢ, Z = v, Y = w)` minus the Z-slot config `(X = v, Z = eᵢ, Y = w)` of the Palatini telescope)
-plus the carried order-`≤ 1` principal-remainder difference, and its right-hand side is the
-`unitModel`/`appCc` read-off of a PAIR of endpoint-dependent operator coefficient fields `R₀` (order `0`)
-and `R₁` (order `1`) on the iterated covariant gradients `W₀ = (T − T')` and `W₁ = ∇₀(T − T')` of the
-perturbation difference.  Its existential predicate genuinely constrains `(R₀, R₁)` to reproduce the
-actual combined-lower value, so it is non-vacuous: the zero pair does not satisfy it where the combined
-lower arm is nonzero.  Posited here as the genuine missing covariant-bridge prerequisite, to be
-discharged by recursing into the inverse-metric-difference multiplier
-`gInvDiffRaisedEndo_eq_metricSharp_flatDiff`, the `δΓ` slot couplings, the quadratic telescope, and the
-frame-derivative remainder bridges. -/
 set_option linter.unusedSectionVars false in
-/-- **STEP 1 — the extension-artifact cancellation: the combined lower arm is extension-free.**
 
-For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the sum of the
-order-`0` operator-difference arm `(O)`, the order-`1` cross/slot `connDiff` couplings `(C)/(S₁)/(S₂)`,
-the order-`1` quadratic `connDiff ∧ diffSec` telescope, and the carried order-`≤ 1` principal-remainder
-difference `palatiniTracedPrincipalDiffRemainder − palatiniTracedPrincipalZDiffRemainder` equals the
-manifestly EXTENSION-FREE combination
-```
-Ric(g₁)(v 0, v 1) − Ric(g₁')(v 0, v 1) − unitModel g₀ 2 (appCc R₂' (∇₀² (T − T'))) x v,
-```
-where `R₂'` is the symmetrizer-absorbed order-`2` principal coefficient on the BARE section difference
-(from `symmAbsorbedPrincipalCoeff_appCc_eq`).  This is the joint artifact cancellation: each proper
-sub-arm carries the test-field-extension gradients `∇₀ Z`, `∇₀ Y`, but the full combination is a
-difference of two genuine Ricci `(0, 2)`-tensors minus the extension-free order-`2` principal read-off,
-so it is extension-INDEPENDENT.
-
-**Mechanism (no term-by-term grind).** The two-endpoint Palatini telescope
-`Ric(g₁) − Ric(g₁') = [Ric(g₁) − Ric(g₀)] − [Ric(g₁') − Ric(g₀)]`, each via
-`ricciTensor_sub_eq_connDiff_palatini`, regroups (`covDerivConnDiff_diff_endpoint_graded`) the
-differentiated connection difference at the X-slot config minus the Z-slot config into the four blocks
-`(O) + (C/S₁/S₂) + quadratic + (raw principal X/Z-slot trace)`.  The raw principal block is peeled by the
-X-slot/Z-slot principal connectors `palatini_tracedPrincipalDiff_covector_eq_combinedTrace`,
-`palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace` and the symmetrizer absorption
-`symmAbsorbedPrincipalCoeff_appCc_eq` into `unitModel (appCc R₂' (∇₀² (T − T')))` plus the carried
-principal-remainder difference.  Subtracting the raw principal block from the Ricci telescope and adding
-back the carried remainder is exactly the combined-lower left-hand side, so it equals the extension-free
-right-hand side. -/
 theorem combinedLowerArm_extension_free
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -4773,7 +3698,7 @@ theorem combinedLowerArm_extension_free
   have hYwx : Yw x = v 1 := smoothExtensionTangent_eq (I := I) x (v 1)
   have hcons : (![v 0, v 1] : Fin 2 → TangentSpace I x) = v := by
     funext k; fin_cases k <;> rfl
-  -- The two-endpoint Palatini telescope built from the single-metric Palatini identity.
+  
   have htel : ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
       (∑ i : Fin (Module.finrank ℝ E),
         (chartModelBasis E).repr
@@ -4822,7 +3747,7 @@ theorem combinedLowerArm_extension_free
           - (ricciTensor (I := I) g₁' x (v 0) (v 1) - ricciTensor (I := I) g₀ x (v 0) (v 1)) from by
       ring]
     rw [h₁, h₁']
-  -- The per-`i` order grading at the X-slot config `(eᵢ, v0, v1)` and the Z-slot config `(v0, eᵢ, v1)`.
+  
   have hgradX : ∀ i : Fin (Module.finrank ℝ E),
       covDerivConnDiff (I := I) g₀ g₁ (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x (v 0)) (smoothExtensionTangent (I := I) x (v 1)) x =
@@ -4844,7 +3769,7 @@ theorem combinedLowerArm_extension_free
       (covDerivConnDiff_diff_endpoint_graded (I := I) (M := M) g₀ g₁ g₁' Zv Yw
         ⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
           smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩ x)
-  -- Regroup the telescope into blocks 1, 2, 3 (= combined-lower legs) plus block 4 (raw principal trace).
+  
   have hregroup :
       ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
       (
@@ -5042,8 +3967,8 @@ theorem combinedLowerArm_extension_free
     rw [hgradX i, hgradZ i]
     simp only [hZv, hYw, ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
     abel
-  -- Peel block 4 (the raw principal X/Z-slot trace) into `unitModel (appCc R₂' W₂)` plus the carried
-  -- principal-remainder difference.
+  
+  
   have hPX := palatini_tracedPrincipalDiff_covector_eq_combinedTrace
     (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁' Zv Yw x
   have hPZ := palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
@@ -5070,8 +3995,8 @@ theorem combinedLowerArm_extension_free
       ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply]
     simp only [smul_eq_mul]
     ring
-  -- Peel block 4 (the raw principal X/Z-slot trace, in `Zv`/`Yw` form) into `unitModel (appCc R₂' W₂)`
-  -- plus the carried principal-remainder difference.
+  
+  
   have hP :
       ((∑ i : Fin (Module.finrank ℝ E),
           (chartModelBasis E).repr
@@ -5126,20 +4051,8 @@ theorem combinedLowerArm_extension_free
   simp only [← hZv, ← hYw]
   linarith [hP]
 
-/-! ## The order-`0` inverse-metric-difference multiplier coefficient field (rebuilt in-file)
-
-The downstream `gInvDiffSlotCoeff`/`gInvDiffSlotEndo`/`gInvDiffRaisedEndo` of
-`RicciDeTurckMetricArmCoeffField`/`CometricInverseDifferenceMultiplier` are import-cyclic relative to this
-file, so the order-`0` two-endpoint inverse-metric-difference multiplier is rebuilt here from the
-in-closure primitives `inverseMetricSharpFib`, `metricSharp`, and the slot-insertion calculus.  The
-coefficient is the leading-slot insertion of the `g₁'`-lowered cometric difference
-`(g₁⁻¹ − g₁'⁻¹)`-representative, the `(2, 2)`-operator field whose `appCc`/`unitModel` read-off is the
-order-`0` value coefficient on `W₀ = (T − T')`. -/
-
 set_option linter.unusedSectionVars false in
-/-- **The `g₁'`-flat covector field** `v ↦ g₁'(v, ·)`, read into the cotangent fibre via
-`dualToCotangent`.  A continuous-linear map `TₓM →L Tensor0SSpace 1 I x`; the in-file rebuild of the
-`g0FlatCLM` flat operator. -/
+
 def lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] Tensor0SSpace 1 I x :=
   LinearMap.toContinuousLinearMap
@@ -5161,14 +4074,14 @@ def lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M) :
   rw [lowerFlatCLM, LinearMap.coe_toContinuousLinearMap']; rfl
 
 set_option linter.unusedSectionVars false in
-/-- The pairing of the `g₁'`-flat against any vector recovers the metric value. -/
+
 @[simp] lemma cotangentToDual_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) (lowerFlatCLM (I := I) g₁' x v) w = g₁'.inner x v w := by
   rw [lowerFlatCLM_apply, cotangentToDual_dualToCotangent]; rfl
 
 set_option linter.unusedSectionVars false in
-/-- The `g₁'`-sharp inverts the `g₁'`-flat: `g₁'^♯(g₁'^♭ v) = v`. -/
+
 lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g₁' x (lowerFlatCLM (I := I) g₁' x v) = v := by
@@ -5176,7 +4089,7 @@ lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x
         TangentSpace I x →L[ℝ] ℝ) = g₁'.inner x v := by
     ext w
     rw [inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_lowerFlatCLM]
-  -- injectivity of the metric flat (positive-definiteness)
+  
   have hinj : Function.Injective
       (fun u : TangentSpace I x => (g₁'.inner x u : TangentSpace I x →L[ℝ] ℝ)) := by
     intro a b hab
@@ -5196,8 +4109,7 @@ lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x
   exact hinj hkey
 
 set_option linter.unusedSectionVars false in
-/-- The `g₁`-sharp of a `g₁'`-flat covector collapses to a metric sharp:
-`g₁^♯(g₁'^♭ v) = metricSharp g₁ x (g₁'.inner x v)`. -/
+
 lemma inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g₁ x (lowerFlatCLM (I := I) g₁' x v) =
@@ -5209,10 +4121,6 @@ lemma inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp
         = (g₁'.inner x v).toLinearMap from by
     rw [cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]]
 
-/-- **The `g₁'`-lowered representative of the two-endpoint cometric difference `g₁⁻¹ − g₁'⁻¹`.**
-The fibre endomorphism `v ↦ g₁^♯(g₁'^♭ v) − v`.  Since `g₁'^♯ g₁'^♭ = id`, this is
-`(g₁^♯ − g₁'^♯) ∘ g₁'^♭`, the `g₁'`-lowered two-endpoint cometric difference; the in-file rebuild of
-`gInvDiffRaisedEndo g₁' g₁`. -/
 def combinedLowerRaisedEndo0 (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
   (inverseMetricSharpFib (I := I) g₁ x).comp (lowerFlatCLM (I := I) g₁' x)
@@ -5226,17 +4134,14 @@ def combinedLowerRaisedEndo0 (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
     ContinuousLinearMap.id_apply]
 
 set_option linter.unusedSectionVars false in
-/-- **Self-vanishing at `g₁ = g₁'`** (non-vacuity litmus).  When the two endpoints coincide the
-representative is the zero endomorphism (`g₁'^♯ g₁'^♭ v = v`), so the multiplier genuinely measures
-`g₁⁻¹ − g₁'⁻¹` and is not a degenerate stand-in. -/
+
 @[simp] lemma combinedLowerRaisedEndo0_self (g₁' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     combinedLowerRaisedEndo0 (I := I) g₁' g₁' x v = 0 := by
   rw [combinedLowerRaisedEndo0_apply, inverseMetricSharpFib_lowerFlatCLM, sub_self]
 
 set_option linter.unusedSectionVars false in
-/-- **The raised representative as a single metric sharp of the metric-difference flat.**
-`combinedLowerRaisedEndo0 g₁ g₁' x v = metricSharp g₁ x ((g₁'.inner x v) − (g₁.inner x v))`. -/
+
 lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     combinedLowerRaisedEndo0 (I := I) g₁ g₁' x v =
@@ -5259,9 +4164,7 @@ lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
   rw [hsharp_sub, hv]
 
 set_option linter.unusedSectionVars false in
-/-- **On-chart-source smoothness of the metric-flat covector field's chart components** (in-file rebuild
-of `metricFlat_chartComponent_contMDiffOn`).  For a smooth tangent field `Y`, the scalar
-`b ↦ g(Y b, chartBasisVecFiber γ j b)` is `C^∞` on the chart-`γ` source. -/
+
 theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -5287,8 +4190,7 @@ theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric 
   exact hpb.2
 
 set_option linter.unusedSectionVars false in
-/-- **On-chart-source smoothness of the two-endpoint metric-difference flat covector field's chart
-components** (in-file rebuild of `metricFlatDiff_chartComponent_contMDiffOn`). -/
+
 theorem metricFlatDiff_chartComponent_contMDiffOn_local (g₁ g₁' : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -5303,11 +4205,7 @@ theorem metricFlatDiff_chartComponent_contMDiffOn_local (g₁ g₁' : SmoothRiem
   rw [LinearMap.sub_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Base-point smoothness of the order-`0` raised representative field.**  The `(1, 1)`-operator field
-`x ↦ combinedLowerRaisedEndo0 g₁ g₁' x` is a smooth section of the endomorphism bundle.  By
-`contMDiff_clm_section_of_pointwise` it reduces, per smooth tangent field `Y`, to the smoothness of
-`x ↦ combinedLowerRaisedEndo0 g₁ g₁' x (Y x)`, which by `combinedLowerRaisedEndo0_eq_metricSharp_flatDiff`
-is the `g₁`-metric sharp of the smooth covector field `x ↦ g₁'(Y x, ·) − g₁(Y x, ·)`. -/
+
 theorem combinedLowerRaisedEndo0_contMDiff (g₁ g₁' : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -5330,9 +4228,7 @@ theorem combinedLowerRaisedEndo0_contMDiff (g₁ g₁' : SmoothRiemannianMetric 
   rw [combinedLowerRaisedEndo0_eq_metricSharp_flatDiff (I := I) g₁ g₁' x (Y x)]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The leading-slot insertion of a tangent endomorphism into a `(0, 2)`-tensor fibre** (in-file
-rebuild of `slotInsertEndoFib 2 0`).  The continuous-linear endomorphism of the `(0, 2)`-tensor fibre
-that precomposes the leading covariant slot with `Λ` and leaves the trailing slot untouched. -/
+
 def lowerSlotInsert0Fib (x : M) (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
@@ -5354,8 +4250,7 @@ def lowerSlotInsert0Fib (x : M) (Λ : TangentSpace I x →L[ℝ] TangentSpace I 
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-`0` insertion reads its leading slot through `Λ`: on a tuple `m`, the inserted tensor is the
-original on the tuple with the `0`-th entry replaced by `Λ (m 0)`. -/
+
 lemma lowerSlotInsert0Fib_apply_eval (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (lowerSlotInsert0Fib (I := I) (M := M) x Λ A) m =
@@ -5377,8 +4272,7 @@ lemma lowerSlotInsert0Fib_apply_eval (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Slot-`0` insertion is the curry conjugation of right-composition** (the rank-`2` slot-`0`
-specialisation of `slotInsertEndoFib_zero`). -/
+
 lemma lowerSlotInsert0Fib_curry (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace 2 I x) :
     lowerSlotInsert0Fib (I := I) (M := M) x Λ A =
@@ -5399,17 +4293,13 @@ lemma lowerSlotInsert0Fib_curry (x : M)
   rw [← hcurry, ContinuousLinearEquiv.symm_apply_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The order-`0` inverse-metric-difference multiplier fibre operator.**  At `x`, the leading-slot
-insertion of the `g₁'`-lowered cometric-difference representative `combinedLowerRaisedEndo0 g₁ g₁' x`
-into a `(0, 2)`-tensor.  This is the genuine `(g₁⁻¹ − g₁'⁻¹)·h` order-`0` action; the in-file rebuild
-of `gInvDiffSlotEndo`. -/
+
 def combinedLowerCoeff0Fib (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   lowerSlotInsert0Fib (I := I) (M := M) x (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x)
 
 set_option linter.unusedSectionVars false in
-/-- The defining eval of `combinedLowerCoeff0Fib`: the original `(0, 2)`-tensor with the leading slot
-read through the raised representative. -/
+
 lemma combinedLowerCoeff0Fib_apply_eval (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (combinedLowerCoeff0Fib (I := I) g₁ g₁' x A) m =
@@ -5418,9 +4308,7 @@ lemma combinedLowerCoeff0Fib_apply_eval (g₁ g₁' : SmoothRiemannianMetric I M
   rw [combinedLowerCoeff0Fib, lowerSlotInsert0Fib_apply_eval]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Base-point smoothness of the order-`0` multiplier field** (as a `(2, 2)`-tensor section): the
-slot-`0` insertion (curry conjugation of right-composition, `lowerSlotInsert0Fib_curry`) of the smooth
-raised-representative field `combinedLowerRaisedEndo0_contMDiff`. -/
+
 theorem combinedLowerCoeff0Fib_contMDiff (g₁ g₁' : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
@@ -5475,11 +4363,6 @@ theorem combinedLowerCoeff0Fib_contMDiff (g₁ g₁' : SmoothRiemannianMetric I 
   exact contMDiff_uncurriedSection_of_contMDiff_homSection (I := I) (M := M)
     (fun x : M => ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x)).comp (φ x)) hG
 
-/-- **The order-`0` inverse-metric-difference multiplier coefficient field as a smooth
-compactly-supported `(2, 2)`-tensor.**  The fibre value at `x` is `combinedLowerCoeff0Fib g₁ g₁' x`
-(smooth by `combinedLowerCoeff0Fib_contMDiff`); on the closed manifold it has compact support.  It is the
-order-`0` value coefficient of the combined-lower arm, the slot-`0` insertion of the two-endpoint
-inverse-metric difference. -/
 noncomputable def combinedLowerCoeff0 (g₀ g₁ g₁' : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -5489,25 +4372,13 @@ noncomputable def combinedLowerCoeff0 (g₀ g₁ g₁' : SmoothRiemannianMetric 
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `combinedLowerCoeff0` at `x` is the fibre operator
-`combinedLowerCoeff0Fib g₁ g₁' x`.  Definitional. -/
+
 @[simp] theorem combinedLowerCoeff0_toSection (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
     (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁').toSection x =
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from combinedLowerCoeff0Fib (I := I) g₁ g₁' x) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The `appCc`/`unitModel` read-off of the order-`0` coefficient `combinedLowerCoeff0`.**
 
-For any smooth `(0, 2)`-tensor field `W` (in the consumer `W = T − T'`), the `unitModel` read-off of the
-operator-field action `appCc g₀ 2 2 (combinedLowerCoeff0 g₀ g₁ g₁') W` at `x` on a tangent pair `v` reads
-the leading slot of the unit-form `D = unitModel g₀ 2 W x` through the raised representative
-`combinedLowerRaisedEndo0 g₁ g₁'`:
-```
-unitModel g₀ 2 (appCc g₀ 2 2 (combinedLowerCoeff0 g₀ g₁ g₁') W) x v
-  = D (Function.update v 0 (combinedLowerRaisedEndo0 g₁ g₁' x (v 0))).
-```
-This is the order-`0` value building block: the inverse-metric-difference multiplier collapses the
-`(O)`-arm's `g₁`-pairing to a fibrewise-linear coefficient acting on `W₀ = (T − T')`. -/
 theorem combinedLowerCoeff0_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -5529,26 +4400,7 @@ theorem combinedLowerCoeff0_appCc_eq
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- **STAGE 1 — the `connDiff g₁ g₁'` order-split (value level).**
 
-The inter-endpoint connection difference `connDiff g₁ g₁'`, evaluated at the value `Y x` of a smooth
-field `Y` in the direction `X x`, splits as an ORDER-`0` endomorphism applied to the FIXED endpoint-`g₁`
-Koszul covector plus an ORDER-`1` `g₁'`-raise of the inter-endpoint Koszul-covector difference:
-```
-connDiff g₁ g₁' x (Y x) (X x)
-  = (♯_{g₁} − ♯_{g₁'}) (koszulCovGradCovec g₀ g₁ X Y x)                        -- order `0`
-    + ♯_{g₁'} (koszulCovGradCovec g₀ g₁ X Y x − koszulCovGradCovec g₀ g₁' X Y x).  -- order `1`
-```
-The mechanism is the endpoint cocycle `connDiff_endpoint_cocycle`
-(`connDiff g₁ g₁' = connDiff g₁ g₀ − connDiff g₁' g₀`), the raised-Koszul formula
-`connDiff_eq_appCc_invGram_covGrad` at each endpoint
-(`connDiff g_e g₀ x (Y x) (X x) = ♯_{g_e}(koszulCovGradCovec g₀ g_e X Y x)`), and the pure algebraic
-add-subtract-middle of `♯_{g₁'}(koszulCovGradCovec g₀ g₁ X Y x)`.  The first leg is the order-`0`
-inverse-metric VALUE difference `g₁⁻¹ − g₁'⁻¹` applied to the fixed endpoint-`g₁` Koszul covector (it
-survives at `∇₀(T − T')(x) = 0`); the second leg is the order-`1` `g₁'`-raise of the Koszul-covector
-difference, whose `g₁'`-flat is the half-Koszul of the bare metric-difference `∇₀(T − T')`
-(`koszulCovGradCovec_dual_apply_covGrad`).  This is the foundational telescoping the (O.b)/(C.b)/(S₁)/(S₂)
-/(Q.b) order-`1` legs each consume. -/
 theorem connDiff_g1g1'_order_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     PDE.DeTurck.connDiff (I := I) g₁ g₁' x (Y x) (X x) =
@@ -5565,39 +4417,8 @@ theorem connDiff_g1g1'_order_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M
   rw [map_sub (inverseMetricSharpFib (I := I) g₁' x)]
   abel
 
-/-! ## The value-local order-`1` cocycle leg (the explicit `E` form)
-
-The order-`1` cocycle legs `(O.b)/(C.b)/(S₁)/(S₂)/(Q.b)` of the combined lower arm all reduce, through
-`connDiff_g1g1'_order_split`, to the single order-`1` building block
-`♯_{g₁'}(koszulCovGradCovec g₀ g₁ X Y x − koszulCovGradCovec g₀ g₁' X Y x)` — the `g₁'`-raise of the
-inter-endpoint Koszul-covector difference.  This block is genuinely VALUE-LOCAL: its `g₁'`-flat is the
-half symmetric Koszul combination of the BARE metric-difference covariant gradient
-`covGrad g₀ 0 2 (S − S')` (the order-`1` jet of `g₁ − g₁'`), a function of `(S − S')`'s first covariant
-gradient and the output values `X x`, `Y x` only — no `∇₀ Z`/`∇₀ Y` test-field artifacts.  This is the
-explicit `E` form the order-`1` R₁ representation consumes. -/
-
 set_option linter.unusedSectionVars false in
-/-- **The value-local explicit `E` covector of the order-`1` cocycle leg.**
 
-The `g₁'`-flat (`cotangentToDual`) of the order-`1` cocycle building block
-`♯_{g₁'}(koszulCovGradCovec g₀ g₁ X Y x − koszulCovGradCovec g₀ g₁' X Y x)`, evaluated on a vector `ζ`,
-is the half symmetric Koszul combination of the covariant gradient `covGrad g₀ 0 2 (S − S')` of the BARE
-metric-difference section `S − S'` (where `S` realises `g₁ − g₀` and `S'` realises `g₁' − g₀`, so `S − S'`
-realises `g₁ − g₁'`):
-```
-g₁'(♯_{g₁'}(K_{g₁,X,Y} − K_{g₁',X,Y}), ζ)
-  = ½ (covGrad(S−S')(X, Y, ζ) + covGrad(S−S')(Y, X, ζ) − covGrad(S−S')(ζ, X, Y)).
-```
-The right-hand side is manifestly VALUE-LOCAL: each `covGradEval` term reads the unit-evaluated covariant
-gradient `covGrad g₀ 0 2 (S − S')` on the values `X x`, `Y x`, `ζ` only.  This is the explicit `E` form
-(its `g₁'`-flat) the order-`1` cocycle legs `(O.b)/(C.b)/(S₁)/(S₂)/(Q.b)` each consume after the
-`connDiff_g1g1'_order_split` telescoping; it decouples the order-`1` R₁ representation from the order-`0`
-inverse-metric-difference residue.
-
-Route: the sharp un-pairs against the `g₁'`-flat (`inverseMetricSharpFib_inner`); the Koszul-covector
-difference's flat is the difference of the two endpoint half-Koszul evaluations
-(`koszulCovGradCovec_dual_apply_covGrad` at `S` and at `S'`); and `covGrad_sub` collapses
-`covGrad(S) − covGrad(S')` to `covGrad(S − S')`. -/
 theorem order1CocycleLeg_flat_eq_explicit
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
@@ -5633,7 +4454,7 @@ theorem order1CocycleLeg_flat_eq_explicit
   have hXex : Xe x = X x := smoothExtensionTangent_eq (I := I) x (X x)
   have hYex : Ye x = Y x := smoothExtensionTangent_eq (I := I) x (Y x)
   have hZex : Ze x = ζ := smoothExtensionTangent_eq (I := I) x ζ
-  -- The sharp un-pairs through `g₁'`; the Koszul-covector difference's flat is the difference of flats.
+  
   rw [inverseMetricSharpFib_inner (I := I) g₁' x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
           - koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ,
@@ -5645,11 +4466,11 @@ theorem order1CocycleLeg_flat_eq_explicit
             - cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ from by
         rw [← cotangentToDualLinear_apply, ← cotangentToDualLinear_apply,
             ← cotangentToDualLinear_apply, map_sub, LinearMap.sub_apply]]
-  -- The covariant-gradient evaluation of each endpoint Koszul covector against `ζ = Ze x`.
+  
   rw [show ζ = Ze x from hZex.symm]
   rw [koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁ S hbil X Y Ze x,
       koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁' S' hbil' X Y Ze x]
-  -- Realign the section-difference covariant gradient: `covGrad(S) − covGrad(S') = covGrad(S − S')`.
+  
   have hcg : ∀ (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       covGradEval (I := I) (M := M) g₀ S P Q R x
           - covGradEval (I := I) (M := M) g₀ S' P Q R x =
@@ -5659,7 +4480,7 @@ theorem order1CocycleLeg_flat_eq_explicit
     rw [covGrad_sub (I := I) (M := M) g₀ 0 2 S S', SmoothCcTensor.toSection_sub]
     rw [ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply,
         Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  -- `covGradEval` reads only the VALUES of its three field arguments (manifestly value-local).
+  
   have hval : ∀ (W : SmoothCcTensor g₀ 0 2)
       (P₁ P₂ Q₁ Q₂ R₁ R₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       P₁ x = P₂ x → Q₁ x = Q₂ x → R₁ x = R₂ x →
@@ -5667,37 +4488,13 @@ theorem order1CocycleLeg_flat_eq_explicit
           covGradEval (I := I) (M := M) g₀ W P₂ Q₂ R₂ x := by
     intro W P₁ P₂ Q₁ Q₂ R₁ R₂ hP hQ hR
     simp only [covGradEval, hP, hQ, hR]
-  -- Switch the section-difference evaluations to the extension forms (`hval`), then combine paired
-  -- endpoint terms into section-difference ones (`hcg`) by linear arithmetic.
+  
+  
   have eXY := (hcg X Y Ze).trans (hval (S - S') X Xe Y Ye Ze Ze hXex.symm hYex.symm rfl)
   have eYX := (hcg Y X Ze).trans (hval (S - S') Y Ye X Xe Ze Ze hYex.symm hXex.symm rfl)
   have eZXY := (hcg Ze X Y).trans (hval (S - S') Ze Ze X Xe Y Ye rfl hXex.symm hYex.symm)
   linarith [eXY, eYX, eZXY]
 
-/-! ## The subleading order-2 coefficient `R₂lower` — the two-endpoint full-Ricci principal difference
-
-The combined-lower arm-sum equals (by `combinedLowerArm_extension_free`)
-`Ric(g₁) − Ric(g₁') − unitModel(appCc R₂' (∇₀²(T − T')))`, where `R₂'` subtracts the order-2 PRINCIPAL of
-the Ricci difference read at the SINGLE operator cometric `g₁⁻¹`.  The order-2 part of THIS leftover is the
-classical Lichnerowicz principal symbol applied at the cometric DIFFERENCE `g₁⁻¹ − g₁'⁻¹`: in a `g₀`-normal
-frame the linearised Ricci principal symbol of `Ric(g_e) − Ric(g₀)` is the full combined three-trace
-`combinedTrace42Model(g_e⁻¹) − combinedTrace42ModelZ(g_e⁻¹)` of `∇₀²(T_e)`, so
-
-```
-[Ric(g₁) − Ric(g₀)]₂ − [Ric(g₁') − Ric(g₀)]₂ − [R₂'(g₁⁻¹) read-off on ∇₀²(T − T')]
-  = (full-trace(g₁⁻¹) − full-trace(g₁⁻¹))(∇₀²T) − full-trace(g₁'⁻¹)(∇₀²T')
-  = (full-trace(g₁⁻¹) − full-trace(g₁'⁻¹))(∇₀²T').
-```
-
-Hence the subleading order-2 coefficient is the two-endpoint DIFFERENCE of the full-Ricci principal
-coefficients `(R₂ − R₂ᶻ)(g₁) − (R₂ − R₂ᶻ)(g₁')`, a metric-only `(4, 2)`-operator field whose `appCc`
-read-off is the cometric-DIFFERENCE full combined three-trace.  It is even-rank (4, 2), index-consistent,
-and built decl-for-decl from the PROVEN principal coefficients `ricciArmPrincipalCoeff` /
-`ricciArmPrincipalCoeffZ` and the `SmoothCcTensor` subtraction.  Its consumer source is `∇₀²T'` (the second
-covariant gradient of the SINGLE endpoint `T'`), NOT `∇₀²(T − T')`: the leftover order-2 is the bilinear
-product of the order-1 cometric difference `g₁⁻¹ − g₁'⁻¹` and the order-2 jet `∇₀²T'`, which is not a
-function of `∇₀²(T − T')` alone (a `g₀`-normal-frame 3-jet computation confirms varying `∇₀²T` at fixed
-`∇₀²(T − T')` changes the leftover). -/
 noncomputable def ricciArmSubleadingCoeff (g₀ g₁ g₁' : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 :=
   (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
@@ -5706,24 +4503,7 @@ noncomputable def ricciArmSubleadingCoeff (g₀ g₁ g₁' : SmoothRiemannianMet
         - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁')
 
 set_option linter.unusedSectionVars false in
-/-- **The `appCc`/`unitModel` read-off of the subleading order-2 coefficient `R₂lower` is the
-cometric-DIFFERENCE full combined three-trace.**
 
-For any smooth `(0, 4)`-tensor field `W` (in the consumer `W = ∇₀²T'`, the second covariant gradient of the
-SINGLE endpoint `T'`), the `unitModel` read-off of `appCc g₀ 4 2 (ricciArmSubleadingCoeff g₀ g₁ g₁') W` at
-`x` on a tangent pair `v` is the difference of the two endpoint full-Ricci combined three-traces of the
-unit form `D = unitModel g₀ 4 W x`, against the cometrics `g₁⁻¹` and `g₁'⁻¹`:
-```
-unitModel g₀ 2 (appCc R₂lower W) x v
-  = [combinedTrace(g₁⁻¹) − combinedTraceZ(g₁⁻¹)] D v
-    − [combinedTrace(g₁'⁻¹) − combinedTraceZ(g₁'⁻¹)] D v,
-```
-where each `combinedTrace − combinedTraceZ` is the full linearised-Ricci principal symbol `½ ∑ₖ (X-slot
-cross + Z-slot cross − double trace)`.  Routes through `appCc_sub_left`/`appCc_add_left`/`appCc_smul_left`
-and the `unitModel`-level additivity (`unitModel_add2`/`unitModel_smul`) onto the four PROVEN single-endpoint
-connectors `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (X-slot) and
-`ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace` (Z-slot).  Non-vacuous: the read-off is the genuine
-cometric-difference Lichnerowicz trace, which is the zero field only when `g₁⁻¹ = g₁'⁻¹` (i.e. `T = T'`). -/
 theorem ricciArmSubleadingCoeff_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -5808,76 +4588,18 @@ theorem ricciArmSubleadingCoeff_appCc_eq
     ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁' W x v,
     ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁' W x v]
 
-/-! ## The genuine order-`0` (curvature) coefficient field `R₀` as a smooth `(2, 2)`-operator field
-
-The order-`0` (value-level) arm of the linearized DeTurck–Ricci operator `D[−2 Ric(g_s) + 𝓛_{W} g_s][h]`
-is the classical **Lichnerowicz–DeTurck curvature action** on the symmetric `(0, 2)`-tensor `h`, NOT the
-inverse-Gram-difference multiplier `(g_s⁻¹ − g₀⁻¹)·h` (which vanishes identically at `g_s = g₀`).
-
-**The GROUND-TRUTH order-`0` form (exact, dims 3/4/5, no Riemann-free shortcut).**  Linearizing the
-sealed intrinsic right-hand side `chartDeTurckRicciRHS g g_bg = −2·Rc(g) + 𝓛_{W(g)} g`
-(`ChartDeTurckRemainderPolynomial.chartDeTurckRicciRHS_def`, `W(g) = deTurckVF g g_bg`) along
-`g_s = g_bg + s·h` and reading off the value-level (no-`∂h`) part gives, in exact normal-coordinate jet
-arithmetic in dimensions `3, 4, 5`:
-```
-order-0[h]_{ik} = 2·R_{ipkq} h^{pq}  +  (𝓛_{δW} g_bg)_{ik},   δW = D(deTurckVF)[h].
-```
-* The `−2 Ric` arm contributes **purely the Riemann action `2·R_{ipkq} h^{pq}`** with coefficient
-  `c_Rm = +2` and `c_Ric = 0` — there is **NO standalone two-slot Ricci term**.  (The exact fit
-  `D(−2 Ric)[h]_{value} = c_Ric·(Ric♯h + hRic♯) + c_Rm·R(·)h` returns `c_Ric = 0`, `c_Rm = +2` to
-  machine zero across dims 3/4/5; the residual of any pure two-slot Ricci ansatz is `O(1)`.)
-* The DeTurck Lie arm `𝓛_W g` contributes the **value-level part of the symmetrized covariant gradient
-  of the linearized DeTurck vector field** `(𝓛_{δW} g_bg)_{ik} = ∇_i δW_k + ∇_k δW_i`, with `δW` the
-  first-order linearization of `W = g^{jk}(Γ(g) − Γ̄(g_bg))`.  This is a genuinely separate symmetric
-  curvature-times-`h` structure: it is **not** in the span of `{Ric♯h + hRic♯, R_{ipkq}h^{pq}}` (the
-  fit residual is `O(1)`), it is its own carrier, and it depends on **both** `g_s` and `g_bg`.
-
-The earlier mint as the pure two-slot raised-Ricci action `h(Ric♯·, ·) + h(·, Ric♯·)` is therefore
-**false as the order-`0`**: the chart-coordinate-Laplacian-vs-covariant-Laplacian commutator does carry
-the independent Riemann action, and the DeTurck Lie linearization carries its own gauge-symmetric piece.
-The order-`0` is re-minted below as the GT Lichnerowicz–DeTurck combination `2·(Riemann action) +
-(Lie(W) order-0)`, with the Riemann-action coefficient built here and the Lie(W) order-0 carried by the
-posited DeTurck-VF-linearization coefficient.
-
-The Riemann-action coefficient is minted as a smooth `g_s`-built `(2, 2)`-operator field — mirroring the
-order-`2` principal coefficient `ricciArmPrincipalCoeff g₀ g₁` (the `SmoothCcTensor` metric is a phantom
-`g₀`-tag), but with the `g_s`-Riemann curvature operator `riemannOp (LeviCivita g_s)` contracted across
-both covariant slots, so it carries genuine `s`-dependence and is nonzero at `g_s = g₀` on a curved
-background. -/
-
-/-- **The fibrewise genuine order-`0` curvature operator, slot `k`.**  At a base point `x`, the slot-`k`
-insertion `slotInsertEndoFib 2 k x (ricEndoRaisedFib g₁ x)` of the raised curvature (Ricci)
-endomorphism of `g₁` — the `(0, 2)`-tensor fibre operator that precomposes the `k`-th covariant slot
-with the raised endomorphism `ricEndoRaisedFib g₁ x : T_x M →L T_x M`.  This is the per-slot building
-block of the order-`0` curvature coefficient: it contracts the `(0, 2)`-tensor `D = T − T'` by the
-curvature `2`-jet of `g₁` on slot `k` (`Rm(g₁)·` reading), so it is NONZERO at `g₁ = g₀` on a curved
-background.  It depends on `g₁` only through the SMOOTH raised-Ricci endomorphism Hom-section
-`ricEndoRaisedFib`; NO chart-selected ambient frame. -/
 noncomputable def ricciArmOrder0CurvCoeffFibSlot (g₁ : SmoothRiemannianMetric I M)
     (k : Fin 2) (x : M) :
     Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   slotInsertEndoFib (I := I) (M := M) 2 k x (ricEndoRaisedFib (I := I) g₁ x)
 
-/-- **The fibrewise genuine order-`0` curvature operator.**  At a base point `x`, the SUM of the
-leading-slot and trailing-slot insertions of the raised curvature (Ricci) endomorphism of `g₁`:
-```
-ricciArmOrder0CurvCoeffFib g₁ x
-  = slotInsertEndoFib 2 0 x (ricEndoRaisedFib g₁ x) + slotInsertEndoFib 2 1 x (ricEndoRaisedFib g₁ x).
-```
-This is the genuine, SYMMETRIC order-`0` curvature coefficient: it contracts the `(0, 2)`-tensor
-`D = T − T'` by the raised-Ricci endomorphism on BOTH covariant slots (the two-slot Bochner curvature
-action `D(Ric♯·, ·) + D(·, Ric♯·)`), so it is NONZERO at `g₁ = g₀` on a curved background AND symmetric
-on a symmetric `D`.  It depends on `g₁` only through the SMOOTH raised-Ricci endomorphism Hom-section
-`ricEndoRaisedFib`; NO chart-selected ambient frame. -/
 noncomputable def ricciArmOrder0CurvCoeffFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   ricciArmOrder0CurvCoeffFibSlot (I := I) (M := M) g₁ 0 x +
     ricciArmOrder0CurvCoeffFibSlot (I := I) (M := M) g₁ 1 x
 
 set_option linter.unusedSectionVars false in
-/-- The fibre value of the per-slot operator `ricciArmOrder0CurvCoeffFibSlot k`, read on a tuple `v`, is
-the unit-form `D` evaluated on the tuple with its `k`-th entry replaced by `ricEndoRaisedFib g₁ x (v k)`.
-This is the slot read-off `slotInsertEndoFib_apply_eval`. -/
+
 @[simp] theorem ricciArmOrder0CurvCoeffFibSlot_toModel (g₁ : SmoothRiemannianMetric I M)
     (k : Fin 2) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -5890,10 +4612,7 @@ This is the slot read-off `slotInsertEndoFib_apply_eval`. -/
     (ricEndoRaisedFib (I := I) g₁ x) D v
 
 set_option linter.unusedSectionVars false in
-/-- The fibre value of `ricciArmOrder0CurvCoeffFib`, read on a tuple `v`, is the sum of the two slot
-read-offs: the unit-form `D` evaluated with its leading entry, resp. trailing entry, replaced by the
-raised-Ricci direction.  Combines `ricciArmOrder0CurvCoeffFibSlot_toModel` at slots `0` and `1` through
-the additivity of the fibre operator and of `Tensor0SSpace.toModel`. -/
+
 @[simp] theorem ricciArmOrder0CurvCoeffFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciArmOrder0CurvCoeffFib (I := I) g₁ x D) v =
@@ -5907,11 +4626,7 @@ the additivity of the fibre operator and of `Tensor0SSpace.toModel`. -/
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **Base-point smoothness of the per-slot order-`0` curvature coefficient field.**  The fibre field
-`x ↦ ricciArmOrder0CurvCoeffFibSlot g₁ k x` is a smooth section of the `(2, 2)`-tensor (operator)
-bundle.  Its smoothness routes through the globally-smooth raised-Ricci Hom-section `ricEndoRaisedFib g₁`
-(`ricEndoRaisedFib_contMDiff`) and the slot-insertion smoothness `slotInsertEndoFib_contMDiff` (the
-exact tower of `ricBackgroundSlotCoeff`).  NO chart-selected, non-`∇₀`-parallel ambient frame enters. -/
+
 theorem ricciArmOrder0CurvCoeffFibSlot_contMDiff (g₁ : SmoothRiemannianMetric I M) (k : Fin 2) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
@@ -5921,10 +4636,6 @@ theorem ricciArmOrder0CurvCoeffFibSlot_contMDiff (g₁ : SmoothRiemannianMetric 
     (fun x : M => ricEndoRaisedFib (I := I) g₁ x)
     (ricEndoRaisedFib_contMDiff (I := I) g₁)
 
-/-- **The per-slot order-`0` curvature coefficient field as a smooth compactly-supported `(2, 2)`-tensor.**
-The fibre value at `x` is `ricciArmOrder0CurvCoeffFibSlot g₁ k x` (smooth by
-`ricciArmOrder0CurvCoeffFibSlot_contMDiff`); on the closed manifold it has compact support.  The two
-slots are summed to form the full order-`0` coefficient `ricciArmOrder0CurvCoeff`. -/
 noncomputable def ricciArmOrder0CurvCoeffSlot (g₀ g₁ : SmoothRiemannianMetric I M) (k : Fin 2) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -5935,34 +4646,20 @@ noncomputable def ricciArmOrder0CurvCoeffSlot (g₀ g₁ : SmoothRiemannianMetri
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `ricciArmOrder0CurvCoeffSlot g₀ g₁ k` at `x` is the fibre operator
-`ricciArmOrder0CurvCoeffFibSlot g₁ k x`.  Definitional. -/
+
 @[simp] theorem ricciArmOrder0CurvCoeffSlot_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (k : Fin 2) (x : M) :
     (ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ k).toSection x =
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFibSlot (I := I) g₁ k x)) := rfl
 
-/-- **The genuine order-`0` curvature coefficient field `R₀` as a smooth compactly-supported
-`(2, 2)`-tensor.**  The SUM of the leading-slot and trailing-slot per-slot coefficients
-`ricciArmOrder0CurvCoeffSlot g₀ g₁ 0 + ricciArmOrder0CurvCoeffSlot g₀ g₁ 1`; its fibre value at `x` is
-`ricciArmOrder0CurvCoeffFib g₁ x` (the two slot operators summed, `ricciArmOrder0CurvCoeff_toSection`).
-This is the genuine, SYMMETRIC order-`0` (value-level) curvature coefficient operator field of the
-Ricci–DeTurck linearization: the two-slot insertion of the raised curvature endomorphism
-`ricEndoRaisedFib g₁` (the classical Bochner two-slot curvature action `D(Ric♯·, ·) + D(·, Ric♯·)`),
-whose `appCc`-action on `D = T − T'` reproduces the symmetric curvature contraction
-(`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`).  Exactly mirrors `ricciArmPrincipalCoeff g₀ g₁`
-(the `g₀` slot is a phantom tag), but is `g₁`-curvature-built — so it is NONZERO at `g₁ = g₀` on a curved
-background, unlike the inverse-Gram-difference multiplier. -/
 noncomputable def ricciArmOrder0CurvCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 0 +
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 1
 
 set_option linter.unusedSectionVars false in
-/-- The underlying section value of `ricciArmOrder0CurvCoeff g₀ g₁` at `x` is the summed fibre operator
-`ricciArmOrder0CurvCoeffFib g₁ x`.  Composes the additive `SmoothCcTensor.toSection_add` with the two
-per-slot definitional read-offs `ricciArmOrder0CurvCoeffSlot_toSection`. -/
+
 @[simp] theorem ricciArmOrder0CurvCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from
@@ -5971,30 +4668,8 @@ per-slot definitional read-offs `ricciArmOrder0CurvCoeffSlot_toSection`. -/
     Pi.add_apply, ricciArmOrder0CurvCoeffSlot_toSection, ricciArmOrder0CurvCoeffSlot_toSection]
   rfl
 
-/-! ## The order-`0` connector: the `appCc`-action of `R₀` is the curvature action `Rm(g₁)·h` -/
-
 set_option linter.unusedSectionVars false in
-/-- **The `appCc`/`unitModel` read-off of the genuine order-`0` curvature coefficient `R₀` is the
-two-slot Bochner curvature action `Rm(g₁)·h`.**
 
-For any smooth `(0, 2)`-tensor field `W` (in the consumer `W = iteratedCovGrad g₀ 0 2 0 (T − T') = T − T'`
-the order-`0` metric-difference section), the `unitModel` read-off of the operator-field action
-`appCc g₀ 2 2 R₀ W` at `x` on a tangent pair `v` is the SUM of the two slot curvature contractions of the
-unit-form `D = unitModel g₀ 2 W x` against the raised curvature endomorphism `ricEndoRaisedFib g₁ x` of
-`g₁` — the raised-Ricci direction inserted into the leading slot, plus into the trailing slot:
-```
-unitModel g₀ 2 (appCc g₀ 2 2 R₀ W) x v
-  = D(ricEndoRaisedFib g₁ x (v 0), v 1) + D(v 0, ricEndoRaisedFib g₁ x (v 1)),   D = unitModel g₀ 2 W x.
-```
-This is the genuine, SYMMETRIC order-`0` (value-level) curvature building block: the curvature
-coefficient `R₀` realises the classical Bochner two-slot curvature `Rm(g₁)·h` order-`0` action (the
-raised-Ricci endomorphism in BOTH covariant slots — the curvature commutator `Δ_chart h − Δ_∇ h` of the
-chart coordinate Laplacian and the covariant rough Laplacian on the symmetric `(0, 2)`-tensor `h`), NOT
-the inverse-Gram-difference multiplier (which vanishes at `g₁ = g₀`), and NOT a single-slot insertion
-(which is asymmetric and incomplete).  It composes `appCc_toSection` (`(R₀ x).comp (W x)`), the
-definitional identity `R₀ x = TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib g₁ x)`, and the two-slot
-read-off `ricciArmOrder0CurvCoeffFib_toModel` (the sum of the two `slotInsertEndoFib_apply_eval`).
-Mirrors `ricciArmPrincipalCoeff_appCc_eq_combinedTrace`. -/
 theorem ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -6025,26 +4700,6 @@ theorem ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction
   rw [ricciArmOrder0CurvCoeffFib_toModel]
   rfl
 
-/-! ## The GT-validated order-`0` Riemann-action coefficient `2·R_{ipkq}h^{pq}` (STEP 1)
-
-The exact ground-truth order-`0` of the `−2 Ric` arm is the Riemann action `2·R_{ipkq}h^{pq}` (coefficient
-`c_Rm = +2`, NO standalone Ricci term).  The Riemann action `R(·)h` on a `(0, 2)`-tensor `h` is the
-two-slot curvature contraction `(R(·)h)_{ik} = ∑_{p,q} R_{ipkq} h^{pq}`, which in a `g₁`-orthonormal
-frame `{eₐ}` reads `(R(·)h)(v₀, v₁) = ∑_{a,b} ⟨R(v₀, eₐ) e_b, v₁⟩_{g₁} · h(eₐ, e_b)` with
-`R = riemannOp (LeviCivita g₁)` and `⟨·,·⟩_{g₁}` the metric inner product (the lowered Riemann
-`riemann4`, `riemannOp_inner_pair_symm`).  Unlike the per-slot raised-Ricci insertion it is a genuine
-**double** contraction (the two free indices `(i, k)` are the curvature's outer slots, `(p, q)` are
-contracted against `h`), so it is not a `slotInsertEndoFib`; it is the two-slot symmetric Riemann action.
-
-The smooth `(2, 2)`-operator-field carrier of this action — `R(·)`-acting `(0, 2) → (0, 2)`, depending on
-`g₁` only through the smooth Levi-Civita curvature operator `riemannOp (LeviCivita g₁)` (smooth by
-`riemannOp_section_contMDiff`) and the smooth `g₁`-orthonormal frame, frame-free at the field level — is
-the precise sub-child posited here.  It is non-vacuous: on a curved (non-flat) background the Riemann
-action of a nonzero `h` is nonzero, so the zero coefficient fails the read-off.  It is the genuine
-`g₁`-curvature carrier, nonzero at `g₁ = g₀` on a curved background. -/
-
-/-- The Riemann kernel bilinear form `(v0,v1) ↦ g₁.inner x (R x v0 p q) v1`, continuous bilinear,
-for fixed frame vectors `p q : T_x M`. -/
 def riemannKernelBilin (g₁ : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -6064,9 +4719,6 @@ def riemannKernelBilin (g₁ : SmoothRiemannianMetric I M) (x : M) (p q : Tangen
       g₁.inner x (riemannOp (LeviCivita (I := I) g₁) x v0 p q) v1 := by
   rw [riemannKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
-/-- The per-`(a,b)` Riemann summand operator, for fixed frame vectors `p q : T_x M`:
-`D ↦ (toModel D ![p, q]) • ofModel(bilinFormToModel (riemannKernelBilin g₁ x p q))`.
-A rank-one-in-`D` continuous linear endomorphism of the `(0,2)`-tensor fibre. -/
 def riemannSummandFib (g₁ : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
@@ -6091,15 +4743,12 @@ def riemannSummandFib (g₁ : SmoothRiemannianMetric I M) (x : M) (p q : Tangent
     bilinFormToModel_apply, smul_eq_mul]
   rfl
 
-/-- The frozen-frame two-slot Riemann-action fibre operator: `2 ·` the double sum over the frame
-`B` of the per-`(a,b)` summands evaluated at the frame vectors `B a x, B b x`. -/
 def riemannBiContrFibFixedFrame (g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   (2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     riemannSummandFib (I := I) g₁ x (B a x) (B b x)
 
-/-- Read-off of the frozen-frame fibre operator on a tuple `v`. -/
 theorem riemannBiContrFibFixedFrame_toModel (g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -6120,7 +4769,6 @@ theorem riemannBiContrFibFixedFrame_toModel (g₁ : SmoothRiemannianMetric I M)
   rw [Tensor0SSpace.toModelL_apply, riemannSummandFib_toModel]
   ring
 
-/-- Inner bilinear form for a fixed `X`: `(Y, Y') ↦ K X Y * Dd X Y'`. -/
 def innerPairBilin (x : M) (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X : TangentSpace I x) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -6135,7 +4783,6 @@ theorem innerPairBilin_apply (x : M) (K Dd : TangentSpace I x →L[ℝ] TangentS
   rw [innerPairBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
     ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-/-- Outer bilinear form: `(X, X') ↦ ∑_{k,l} G^{kl} · K X c_k * Dd X' c_l`. -/
 def outerPairBilin (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -6178,9 +4825,6 @@ theorem outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-/-- The double diagonal sum `∑_{a,b} K(B_a,B_b)·Dd(B_a,B_b)` over a `g`-orthonormal frame `B`
-equals the fixed-model-basis expansion `∑_{m,n,k,l} G^{mn} G^{kl} K(c_m,c_k) Dd(c_n,c_l)`, hence is
-frame-independent. Two nested applications of `orthonormal_basis_bilin_trace`. -/
 theorem double_frame_bilin_trace_eq_fixed
     (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -6192,7 +4836,7 @@ theorem double_frame_bilin_trace_eq_fixed
           (K (chartModelBasis E m) (chartModelBasis E k) *
             Dd (chartModelBasis E n) (chartModelBasis E l))) := by
   classical
-  -- inner sum over b: trace of innerPairBilin (B a) via orthonormal_basis_bilin_trace
+  
   have hinner : ∀ a, ∑ b, K (B a) (B b) * Dd (B a) (B b) =
       outerPairBilin (I := I) g x K Dd (B a) (B a) := by
     intro a
@@ -6202,7 +4846,7 @@ theorem double_frame_bilin_trace_eq_fixed
     simp only [innerPairBilin_apply] at h
     rw [h]
   rw [Finset.sum_congr rfl (fun a _ => hinner a)]
-  -- outer sum over a: trace of outerPairBilin via orthonormal_basis_bilin_trace
+  
   have hout := orthonormal_basis_bilin_trace (I := I) (M := M) g (x := x)
     (outerPairBilin (I := I) g x K Dd) B hB
   rw [hout]
@@ -6210,7 +4854,6 @@ theorem double_frame_bilin_trace_eq_fixed
   refine Finset.sum_congr rfl (fun n _ => ?_)
   rw [outerPairBilin_apply]
 
-/-- Frame-independence of the double diagonal sum among two `g`-orthonormal frames. -/
 theorem double_frame_bilin_trace_indep
     (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -6222,12 +4865,6 @@ theorem double_frame_bilin_trace_indep
   rw [double_frame_bilin_trace_eq_fixed (I := I) g x K Dd B hB,
     double_frame_bilin_trace_eq_fixed (I := I) g x K Dd C hC]
 
-/-! ### Smoothness of a `(0,2)`-section built from a smooth bilinear-form field -/
-
-/-- General bridge: a `(0,2)`-tensor section `x ↦ ofModel(bilinFormToModel (Hb x))` built from a
-field of continuous bilinear forms `Hb` is smooth, provided that for every base point `x₀` and every
-pair of basis indices `σ`, the scalar `x ↦ Hb x (chartFrameVec x₀ (σ 0) x) (chartFrameVec x₀ (σ 1) x)`
-is `C^∞` on the chart source.  Mirrors `deTurckRHSField`'s coordinate proof. -/
 theorem contMDiff_bilinSection_of_chartScalar
     (Hb : (x : M) → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hscalar : ∀ (x₀ : M) (σ : Fin 2 → Fin (Module.finrank ℝ E)),
@@ -6265,10 +4902,6 @@ theorem contMDiff_bilinSection_of_chartScalar
   exact bilinFormToModel_apply (TangentSpace I x) (Hb x)
     (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j)))
 
-/-! ### Smoothness of the frozen-frame Riemann operator -/
-
-/-- Global kernel-scalar smoothness `x ↦ g₁.inner x (R(Y x)(p x)(q x)) (W x)` for global smooth
-fields, via `riemannOp_apply_smooth` + `riemannSec_contMDiff` (no manual `clm_bundle_apply` chain). -/
 theorem kernelScalar_global (g₁ : SmoothRiemannianMetric I M)
     {Y W p q : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
@@ -6291,8 +4924,6 @@ theorem kernelScalar_global (g₁ : SmoothRiemannianMetric I M)
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₁
     ⟨fun b => riemannSec (LeviCivita (I := I) g₁) Y p q b, hRsec⟩ ⟨fun b => W b, hW⟩
 
-/-- Kernel Hom²-section smoothness `x ↦ ⟨x, riemannKernelBilin g₁ x (p x)(q x)⟩`, via
-`cotangentCov_clmSection_smooth_aux` twice over `kernelScalar_global`. -/
 theorem riemannKernelBilin_homSection_contMDiff (g₁ : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -6320,10 +4951,6 @@ theorem riemannKernelBilin_homSection_contMDiff (g₁ : SmoothRiemannianMetric I
   rw [riemannKernelBilin_apply]
   rfl
 
-/-- Bridge: a smooth Hom²-section `Hb` yields a smooth `(0,2)`-bilinForm-section
-`x ↦ ofModel(bilinFormToModel (Hb x))`.  The chart-scalar required by
-`contMDiff_bilinSection_of_chartScalar` is the light 2-fold `clm_bundle_apply₂` of the Hom²-section
-on the two chart frame vectors. -/
 theorem contMDiff_bilinSection_of_homSection
     (Hb : (x : M) → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hHb : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -6355,9 +4982,6 @@ theorem contMDiff_bilinSection_of_homSection
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
-/-- The `(0,2)`-section value `x ↦ riemannBiContrFibFixedFrame g₁ B x (Y x)` of the frozen-frame
-operator on a smooth `(0,2)`-section `Y`, made explicit as a `2 •` double sum of
-scalar-times-bilinForm-sections. -/
 theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
@@ -6367,7 +4991,7 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
         (E := fun z : M => Tensor0SSpace 2 I z) x
         (riemannBiContrFibFixedFrame (I := I) g₁ B x (Y x))) := by
   classical
-  -- per-(a,b) section: x ↦ ⟨x, riemannSummandFib g₁ x (B a x)(B b x) (Y x)⟩ = (scalar) • (bilinForm-sec)
+  
   have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -6400,7 +5024,7 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
     refine hsmul.congr ?_
     intro x
     rfl
-  -- bundle each summand into a section and take the double-sum section
+  
   set S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
     fun a b =>
@@ -6445,8 +5069,6 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
   rw [ContinuousLinearMap.sum_apply]
   rfl
 
-/-- `(2,2)`-operator-field smoothness of the frozen-frame Riemann operator, via
-`contMDiff_clm_section_of_pointwise` over `riemannBiContrFibFixedFrame_apply_section_contMDiff`. -/
 theorem riemannBiContrFibFixedFrame_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
@@ -6462,8 +5084,6 @@ theorem riemannBiContrFibFixedFrame_contMDiff (g₁ : SmoothRiemannianMetric I M
   intro Y
   exact riemannBiContrFibFixedFrame_apply_section_contMDiff (I := I) g₁ B hB Y
 
-/-- The frame-kernel bilinear form `(p,q) ↦ g₁.inner x (R(v0)(p)(q)) v1`, bilinear in the two
-curvature frame slots `(p,q)` (with `v0, v1` frozen). -/
 def frameRiemannKernel (g₁ : SmoothRiemannianMetric I M) (x : M) (v0 v1 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -6486,15 +5106,10 @@ theorem frameRiemannKernel_apply (g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [frameRiemannKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.flip_apply]
 
-/-- The moving-frame two-slot Riemann-action fibre operator at `x`: the frozen operator with the
-frame `B = smoothOrthoFrame g₁ x` (orthonormal at its centre `x`). -/
 def riemannBiContrFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   riemannBiContrFibFixedFrame (I := I) g₁ (smoothOrthoFrame (I := I) g₁ x) x
 
-/-- On `smoothOrthoFrameNbhd x₀`, the moving fibre operator equals the frozen-frame operator against
-`smoothOrthoFrame g₁ x₀`.  Frame-independence of the `g₁`-metric double trace
-(`double_frame_bilin_trace_indep`) applied to the kernel and the unit-form. -/
 theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I M) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
     riemannBiContrFib (I := I) g₁ y =
@@ -6507,7 +5122,7 @@ theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I
   intro v
   rw [riemannBiContrFib, riemannBiContrFibFixedFrame_toModel,
     riemannBiContrFibFixedFrame_toModel]
-  -- both are 2 * ∑∑ K(Ba,Bb)·Dd(Ba,Bb), frame-independent
+  
   congr 1
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -6532,8 +5147,6 @@ theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
 
-/-- `(2,2)`-operator-field smoothness of the moving-frame Riemann operator `riemannBiContrFib`, by
-the moving→frozen freeze (`riemannBiContrFib_eq_fixedFrame_on_nbhd`) + `congr_of_eventuallyEq`. -/
 theorem riemannBiContrFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
@@ -6555,8 +5168,6 @@ theorem riemannBiContrFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     (congrArg TensorRSSpace.ofCLM
       (riemannBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₁ x₀ hy))
 
-/-- The genuine order-`0` Riemann-action coefficient field `R_Rm = 2·R(·)` as a smooth, compactly
-supported `(2,2)`-tensor.  Its fibre value at `x` is `riemannBiContrFib g₁ x`. -/
 def ricciArmOrder0RiemannCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -6571,21 +5182,6 @@ def ricciArmOrder0RiemannCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
       (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)) :=
   rfl
 
-
-/-- **(Posited STEP-1 sub-child — the smooth two-slot Riemann-action `(2, 2)`-coefficient.)**  There is a
-smooth compactly-supported `(2, 2)`-tensor field `R_Rm` whose `appCc`/`unitModel` read-off on any
-`(0, 2)`-tensor field `W` is the two-slot Riemann action `2·R_{ipkq}(g₁) D^{pq}` of `g₁` on the unit-form
-`D = unitModel g₀ 2 W x`, written frame-free through the Levi-Civita curvature operator
-`riemannOp (LeviCivita g₁)` and a `g₁`-orthonormal frame `e` at `x`:
-```
-unitModel g₀ 2 (appCc g₀ 2 2 R_Rm W) x v
-  = 2 · ∑_{a,b} ⟨riemannOp (LeviCivita g₁) x (v 0) (e a) (e b), v 1⟩_{g₁} · D(e a, e b),
-                                                 D = unitModel g₀ 2 W x, e a `g₁`-orthonormal.
-```
-This is the GT Riemann-action order-`0` building block (`c_Rm = +2`).  The carrier is built from
-`riemannOp (LeviCivita g₁)` (smooth, frame-free) contracted across both covariant slots; its base-point
-smoothness routes through `riemannOp_section_contMDiff` exactly as `ricEndoRaisedFib`/`slotInsertEndoFib`
-route their endomorphism fields. -/
 theorem exists_ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ∃ R_Rm : SmoothCcTensor g₀ 2 2,
       ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
@@ -6629,29 +5225,17 @@ theorem exists_ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I 
   funext j
   fin_cases j <;> simp
 
-/-- **The GT-validated order-`0` Riemann-action coefficient `R_Rm = 2·R(·)`**, the concrete
-`riemannBiContrFib`-built field `ricciArmOrder0RiemannCoeffField` (the same carrier produced by
-`exists_ricciArmOrder0RiemannCoeff`).  Its fibre value at `x` is `riemannBiContrFib g₁ x`
-(`ricciArmOrder0RiemannCoeff_toSection`), so the joint `(s, x)`-smoothness keystone can extract a
-joint-smooth carrier — unlike an opaque `Classical.choose`.  Its `appCc` read-off is the two-slot Riemann
-action `2·R_{ipkq}h^{pq}` of `g₁` (`ricciArmOrder0RiemannCoeff_appCc_eq`).  This is the `c_Rm = +2`
-Riemann arm of the GT Lichnerowicz–DeTurck order-`0`. -/
 noncomputable def ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   ricciArmOrder0RiemannCoeffField (I := I) (M := M) g₀ g₁
 
-/-- The underlying section value of `ricciArmOrder0RiemannCoeff g₀ g₁` at `x` is the concrete fibre
-operator `riemannBiContrFib g₁ x`.  Definitional (the coefficient IS its concrete field). -/
 @[simp] theorem ricciArmOrder0RiemannCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁).toSection x =
       (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)) :=
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- The `appCc`/`unitModel` read-off of the order-`0` Riemann-action coefficient is the two-slot Riemann
-action `2·R_{ipkq}h^{pq}` of `g₁`.  Reproved directly on the concrete `riemannBiContrFib`-built field
-(no `Classical.choose_spec`): it is the `W x v`-instance of `exists_ricciArmOrder0RiemannCoeff`'s
-read-off, whose witness is exactly `ricciArmOrder0RiemannCoeffField`. -/
+
 theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -6691,25 +5275,6 @@ theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric 
   funext j
   fin_cases j <;> simp
 
-/-! ## The symmetrizer-absorbed Ricci-arm coefficients (order-`2` pure rough Laplacian, order-`0`
-two-slot curvature)
-
-The Ricci-arm chart-symbol bridges read the coefficients on the BARE section difference
-`iteratedCovGrad g₀ 0 2 i (T − T')`, but the realize-tie
-`chartGramOnE_realize_sub_eqOn_symm_rawComponent` pins the chart velocity `h` to the SYMMETRIZED section
-`symmS g₀ (T − T')` (the realize map symmetrizes via `ccTensorBilinSymm`).  These two named coefficients
-absorb the slot symmetrizer into the order-`2` pure rough-Laplacian coefficient `ricciArmPrincipalCoeffPure`
-and the order-`0` two-slot curvature coefficient `ricciArmOrder0CurvCoeff`, so that the bridges' bare
-read-off matches the symmetrized velocity while the eval consumer keeps its bare `(T − T')` shape (the
-symm-absorption lives entirely in the coefficient).  Each is `symmAbsorbedCoeff` at the relevant gradient
-order with the trailing-pair slot permutation `Classical.choose`n from the iterated-gradient naturality. -/
-
-/-- **The symmetrizer-absorbed order-`2` PURE rough-Laplacian coefficient.**  For a `(0, 2)`-section `S`
-and the metrics `(g₀, g₁)`, the half-sum symmetrizer-absorbed `(4, 2)`-coefficient of the pure
-rough-Laplacian coefficient `ricciArmPrincipalCoeffPure g₀ g₁` at gradient order `2`, with the
-trailing-pair slot permutation supplied by `exists_iteratedCovGrad_unitModel_domDomCongrSection`.  Its
-`appCc` read-off on the bare `∇₀² S` reproduces `ricciArmPrincipalCoeffPure`'s read-off on
-`∇₀² (symmS g₀ S)` (`symmAbsorbedPrincipalCoeffPure_appCc_eq`). -/
 noncomputable def symmAbsorbedPrincipalCoeffPure (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 4 2 :=
   symmAbsorbedCoeff (I := I) (M := M) g₀ 2
@@ -6718,13 +5283,7 @@ noncomputable def symmAbsorbedPrincipalCoeffPure (g₀ g₁ : SmoothRiemannianMe
       (Equiv.swap (0 : Fin 2) 1) S 2))
 
 set_option linter.unusedSectionVars false in
-/-- **The symmetrizer-absorbed order-`2` coefficient's `appCc` read-off on the bare section equals the
-pure rough Laplacian on the `symmS`-symmetrised section.**
-```
-unitModel g₀ 2 (appCc g₀ 4 2 (symmAbsorbedPrincipalCoeffPure g₀ g₁ S) (∇₀² S)) x v
-  = unitModel g₀ 2 (appCc g₀ 4 2 (ricciArmPrincipalCoeffPure g₀ g₁) (∇₀² (symmS g₀ S))) x v.
-```
-The order-`2` instance of `symmAbsorbedCoeff_appCc_eq`, with `hσ'` discharged by `Classical.choose_spec`. -/
+
 theorem symmAbsorbedPrincipalCoeffPure_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -6740,12 +5299,6 @@ theorem symmAbsorbedPrincipalCoeffPure_appCc_eq (g₀ g₁ : SmoothRiemannianMet
     (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
       (Equiv.swap (0 : Fin 2) 1) S 2)) x v
 
-/-- **The symmetrizer-absorbed order-`0` two-slot curvature coefficient.**  For a `(0, 2)`-section `S`
-and the metrics `(g₀, g₁)`, the half-sum symmetrizer-absorbed `(2, 2)`-coefficient of the two-slot
-curvature coefficient `ricciArmOrder0CurvCoeff g₀ g₁` at gradient order `0`, with the trailing-pair slot
-permutation supplied by `exists_iteratedCovGrad_unitModel_domDomCongrSection`.  Its `appCc` read-off on the
-bare `∇₀⁰ S = S` reproduces `ricciArmOrder0CurvCoeff`'s read-off on `∇₀⁰ (symmS g₀ S) = symmS g₀ S`
-(`symmAbsorbedOrder0CurvCoeff_appCc_eq`). -/
 noncomputable def symmAbsorbedOrder0CurvCoeff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 :=
   symmAbsorbedCoeff (I := I) (M := M) g₀ 0
@@ -6754,13 +5307,7 @@ noncomputable def symmAbsorbedOrder0CurvCoeff (g₀ g₁ : SmoothRiemannianMetri
       (Equiv.swap (0 : Fin 2) 1) S 0))
 
 set_option linter.unusedSectionVars false in
-/-- **The symmetrizer-absorbed order-`0` coefficient's `appCc` read-off on the bare section equals the
-two-slot curvature action on the `symmS`-symmetrised section.**
-```
-unitModel g₀ 2 (appCc g₀ 2 2 (symmAbsorbedOrder0CurvCoeff g₀ g₁ S) (∇₀⁰ S)) x v
-  = unitModel g₀ 2 (appCc g₀ 2 2 (ricciArmOrder0CurvCoeff g₀ g₁) (∇₀⁰ (symmS g₀ S))) x v.
-```
-The order-`0` instance of `symmAbsorbedCoeff_appCc_eq`, with `hσ'` discharged by `Classical.choose_spec`. -/
+
 theorem symmAbsorbedOrder0CurvCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -6776,13 +5323,6 @@ theorem symmAbsorbedOrder0CurvCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric
     (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
       (Equiv.swap (0 : Fin 2) 1) S 0)) x v
 
-/-- **The symmetrizer-absorbed order-`0` Riemann-action coefficient (STEP 1).**  For a `(0, 2)`-section
-`S` and the metrics `(g₀, g₁)`, the half-sum symmetrizer-absorbed `(2, 2)`-coefficient of the GT
-Riemann-action coefficient `ricciArmOrder0RiemannCoeff g₀ g₁` (the `c_Rm = +2` arm) at gradient order `0`,
-with the trailing-pair slot permutation supplied by `exists_iteratedCovGrad_unitModel_domDomCongrSection`.
-Its `appCc` read-off on the bare `∇₀⁰ S = S` reproduces `ricciArmOrder0RiemannCoeff`'s read-off on
-`∇₀⁰ (symmS g₀ S) = symmS g₀ S` (`symmAbsorbedOrder0RiemannCoeff_appCc_eq`).  Mirrors
-`symmAbsorbedOrder0CurvCoeff`. -/
 noncomputable def symmAbsorbedOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 :=
   symmAbsorbedCoeff (I := I) (M := M) g₀ 0
@@ -6791,13 +5331,7 @@ noncomputable def symmAbsorbedOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMe
       (Equiv.swap (0 : Fin 2) 1) S 0))
 
 set_option linter.unusedSectionVars false in
-/-- **The symmetrizer-absorbed order-`0` Riemann coefficient's `appCc` read-off on the bare section equals
-the Riemann action on the `symmS`-symmetrised section.**
-```
-unitModel g₀ 2 (appCc g₀ 2 2 (symmAbsorbedOrder0RiemannCoeff g₀ g₁ S) (∇₀⁰ S)) x v
-  = unitModel g₀ 2 (appCc g₀ 2 2 (ricciArmOrder0RiemannCoeff g₀ g₁) (∇₀⁰ (symmS g₀ S))) x v.
-```
-The order-`0` instance of `symmAbsorbedCoeff_appCc_eq`, with `hσ'` discharged by `Classical.choose_spec`. -/
+
 theorem symmAbsorbedOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -6813,33 +5347,6 @@ theorem symmAbsorbedOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMet
     (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
       (Equiv.swap (0 : Fin 2) 1) S 0)) x v
 
-/-! ## The GT-validated order-`0` DeTurck-Lie coefficient `Δ_Lie` (STEP 1)
-
-The DeTurck Lie arm of the GT order-`0` is the value-level (no-`∂h`) part of the linearized DeTurck
-gauge term `δ(𝓛_{W(g, g_bg)} g)[h]`, with `W = deTurckVF g g_bg` the metric `g`-trace of the
-connection-difference `A = connDiff g g_bg`.  Linearizing the sealed intrinsic right-hand side and
-reading off the value-level (no-`∂h`) terms gives, in exact normal-coordinate jet arithmetic
-(numeric rel-resid `1e-15`, dims 3/4/5, gauge-invariant), the closed form (all `∇`/raise/lower
-w.r.t. `g = g_s`):
-```
-Δ_Lie(h)_{ij}
-  = − h^{pq} (∇_i A_{jpq} + ∇_j A_{ipq})        -- DLa, coeff +1
-    + h_{pj} ∇_i W^p + h_{ip} ∇_j W^p,           -- DLb, coeff +1
-  A^k{}_{pq} = Γ(g)^k_{pq} − Γ(g_bg)^k_{pq},  A_{jpq} = g_{jk}A^k{}_{pq},  W^p = g^{ab}A^p{}_{ab}.
-```
-It is `g_bg`-genuine: at `g_bg = g` both `A = connDiff g g = 0` and `W = deTurckVF g g = 0`, so
-`Δ_Lie = 0`; for `g_bg ≠ g` on a curved background it is nonzero (the boxed form is symmetric in
-`(i, j)`, so it lives in the symmetric `(0, 2)` output space).  Mirrors `ricciArmOrder0RiemannCoeff`:
-the read-off is posited as a precise existence sub-child, written frame-free through the genuine
-connection-difference `connDiff g₁ g_bg`, the DeTurck vector field `deTurckVF g₁ g_bg`, their
-`∇^{g₁}`-covariant derivatives, and a `g₁`-orthonormal frame `smoothOrthoFrame g₁ x` (to raise the
-`h^{pq}` contraction). -/
-
-/-- **The `∇^{g₁}`-covariant derivative of the connection-difference `(1, 2)`-tensor `A = connDiff g₁ g_bg`.**
-The genuine directional covariant derivative `(∇^{g₁}_X A)(Y, Z) (x)` along the `g₁`-Levi-Civita
-connection, on the smooth connection-difference field `b ↦ connDiff g₁ g_bg b (Y b) (Z b)`, with the two
-slot corrections subtracted (the standard coordinate-free covariant derivative of a `(1, 2)`-tensor):
-`(LeviCivita g₁)(A(Y, Z)) − A(∇^{g₁}_X Y, Z) − A(Y, ∇^{g₁}_X Z)`. -/
 noncomputable def deTurckLieCovDerivA (g₁ g_bg : SmoothRiemannianMetric I M)
     (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   (LeviCivita (I := I) g₁).toFun
@@ -6849,19 +5356,11 @@ noncomputable def deTurckLieCovDerivA (g₁ g_bg : SmoothRiemannianMetric I M)
     - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x)
         ((LeviCivita (I := I) g₁).toFun (fun b => Z b) x (X x))
 
-/-- **The `∇^{g₁}`-covariant derivative of the DeTurck vector field `W = deTurckVF g₁ g_bg`.**
-The directional covariant derivative `(∇^{g₁}_X W) (x)` along the `g₁`-Levi-Civita connection on the
-smooth DeTurck VF section. -/
 noncomputable def deTurckLieCovDerivW (g₁ g_bg : SmoothRiemannianMetric I M)
     (X : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   (LeviCivita (I := I) g₁).toFun
     (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b) x (X x)
 
-
-/-! ### The raw connection-difference operator-field smoothness -/
-
-/-- The raw connection-difference `(1, 2)`-operator field `b ↦ connDiff g₁ g_bg b` is a smooth
-Hom²-section, via `cotangentCov_clmSection_smooth_aux` twice over `connDiff_contMDiff`. -/
 theorem connDiffOp_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
@@ -6878,7 +5377,6 @@ theorem connDiffOp_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
   intro Z
   exact PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg Y.contMDiff Z.contMDiff
 
-/-- Pointwise differentiability of the raw connDiff operator field, total-space form. -/
 theorem connDiffOp_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
@@ -6886,9 +5384,6 @@ theorem connDiffOp_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
         (PDE.DeTurck.connDiff (I := I) g₁ g_bg b)) x :=
   (connDiffOp_homSection_contMDiff (I := I) g₁ g_bg).contMDiffAt.mdifferentiableAt (by simp)
 
-/-- The modified vector section `b ↦ connDiff g₁ g_bg b (Y b) (Z b)` is differentiable at `x` from
-the pointwise differentiability of `Y`, `Z` and the smooth connDiff operator field (two
-`clm_bundle_apply`s). Explicit total-space form (mirrors `HomConnection.mdiffAt_apply`). -/
 theorem connDiff_pairing_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b} {x : M}
     (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -6915,11 +5410,6 @@ theorem connDiff_pairing_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M)
     (b := fun b : M => b)
     (ϕ := fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b)) (v := fun b => Z b) h1 hZ
 
-/-! ### Tensoriality of `deTurckLieCovDerivA g₁ g_bg X · · x` in the two covariant slots -/
-
-/-- `deTurckLieCovDerivA g₁ g_bg X · Z x` is tensorial in the `Y`-slot at `x`. The Leibniz
-cross-term of `∇^{g₁}_X (A(Y, Z))` cancels against the cross-term of `A(∇^{g₁}_X Y, Z)` (both equal to
-`(extDerivFun f x)(X x) • A_x(Y x, Z x)`). Vector-valued analogue of `tensor02Scalar_tensorialAt_Y`. -/
 theorem deTurckLieCovDerivA_tensorialAt_Y (g₁ g_bg : SmoothRiemannianMetric I M)
     (X Z : Π b : M, TangentSpace I b) (x : M)
     (hZ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -6992,7 +5482,6 @@ theorem deTurckLieCovDerivA_tensorialAt_Y (g₁ g_bg : SmoothRiemannianMetric I 
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-- `deTurckLieCovDerivA g₁ g_bg X Y · x` is tensorial in the `Z`-slot at `x`. Symmetric to `Y`. -/
 theorem deTurckLieCovDerivA_tensorialAt_Z (g₁ g_bg : SmoothRiemannianMetric I M)
     (X Y : Π b : M, TangentSpace I b) (x : M)
     (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -7065,11 +5554,6 @@ theorem deTurckLieCovDerivA_tensorialAt_Z (g₁ g_bg : SmoothRiemannianMetric I 
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
-/-! ### The pointwise DLa covariant-derivative kernel -/
-
-/-- The pointwise DLa covariant-derivative kernel CLM₂ in the two curvature slots `(p, q)`, for a
-frozen direction `v0` (extended to `ext v0`): built via `TensorialAt.mkHom₂` from the `Y`/`Z`
-tensoriality of `deTurckLieCovDerivA`. -/
 noncomputable def dLaCovKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
@@ -7083,7 +5567,6 @@ noncomputable def dLaCovKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (fun Y hY => deTurckLieCovDerivA_tensorialAt_Z (I := I) g₁ g_bg
       (smoothExtensionTangent (I := I) x v0) Y x hY)
 
-/-- The DLa covariant-derivative kernel applied to extensions of `p, q` reproduces the raw value. -/
 theorem dLaCovKernel_apply_extend (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 p q : TangentSpace I x) :
     dLaCovKernel (I := I) g₁ g_bg x v0 p q =
@@ -7106,8 +5589,6 @@ theorem dLaCovKernel_apply_extend (g₁ g_bg : SmoothRiemannianMetric I M) (x : 
   rw [smoothExtensionTangent_eq, smoothExtensionTangent_eq] at h
   exact h
 
-/-- The DLa covariant-derivative kernel applied to GLOBAL smooth fields `V_field, W_field` (not
-their point-extensions) reproduces the raw value `deTurckLieCovDerivA (ext v0) V_field W_field x`. -/
 theorem dLaCovKernel_apply_field (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 : TangentSpace I x) (V_field W_field : Π b : M, TangentSpace I b)
     (hV : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -7127,17 +5608,12 @@ theorem dLaCovKernel_apply_field (g₁ g_bg : SmoothRiemannianMetric I M) (x : M
       (smoothExtensionTangent (I := I) x v0) Y x hY)
     (σ := V_field) (τ := W_field) hV hW
 
-/-! ### `X`-value linearity of `deTurckLieCovDerivA` and `dLaCovKernel` -/
-
-/-- `deTurckLieCovDerivA X Y Z x` depends on `X` only through its value `X x`. -/
 theorem deTurckLieCovDerivA_X_congr (g₁ g_bg : SmoothRiemannianMetric I M)
     (X X' Y Z : Π b : M, TangentSpace I b) (x : M) (hXX : X x = X' x) :
     deTurckLieCovDerivA (I := I) g₁ g_bg X Y Z x =
       deTurckLieCovDerivA (I := I) g₁ g_bg X' Y Z x := by
   rw [deTurckLieCovDerivA, deTurckLieCovDerivA, hXX]
 
-/-- `deTurckLieCovDerivA · Y Z x` is additive in the `X x` value (the three covariant terms are each a
-CLM applied to `X x`). -/
 theorem deTurckLieCovDerivA_X_add (g₁ g_bg : SmoothRiemannianMetric I M)
     (X X' Y Z : Π b : M, TangentSpace I b) (x : M) :
     deTurckLieCovDerivA (I := I) g₁ g_bg (X + X') Y Z x =
@@ -7149,7 +5625,6 @@ theorem deTurckLieCovDerivA_X_add (g₁ g_bg : SmoothRiemannianMetric I M)
   simp only [map_add, ContinuousLinearMap.add_apply]
   abel
 
-/-- `deTurckLieCovDerivA · Y Z x` is homogeneous in the `X x` value. -/
 theorem deTurckLieCovDerivA_X_smul (g₁ g_bg : SmoothRiemannianMetric I M)
     (X Y Z cX : Π b : M, TangentSpace I b) (c : ℝ) (x : M) (hcX : cX x = c • X x) :
     deTurckLieCovDerivA (I := I) g₁ g_bg cX Y Z x =
@@ -7159,8 +5634,6 @@ theorem deTurckLieCovDerivA_X_smul (g₁ g_bg : SmoothRiemannianMetric I M)
   simp only [map_smul, ContinuousLinearMap.smul_apply]
   rw [smul_sub, smul_sub]
 
-/-- `dLaCovKernel x · p q` is additive in `v0`: the kernel depends on `v0` only through the value
-`(ext v0) x = v0`, which is additive. -/
 theorem dLaCovKernel_add_left (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 v0' p q : TangentSpace I x) :
     dLaCovKernel (I := I) g₁ g_bg x (v0 + v0') p q =
@@ -7175,7 +5648,6 @@ theorem dLaCovKernel_add_left (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
         rw [smoothExtensionTangent_eq, smoothExtensionTangent_eq, smoothExtensionTangent_eq])]
   rw [deTurckLieCovDerivA_X_add]
 
-/-- `dLaCovKernel x · p q` is homogeneous in `v0`. -/
 theorem dLaCovKernel_smul_left (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (c : ℝ) (v0 p q : TangentSpace I x) :
     dLaCovKernel (I := I) g₁ g_bg x (c • v0) p q = c • dLaCovKernel (I := I) g₁ g_bg x v0 p q := by
@@ -7185,11 +5657,6 @@ theorem dLaCovKernel_smul_left (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
       (smoothExtensionTangent (I := I) x (c • v0)) c x (by
         rw [smoothExtensionTangent_eq, smoothExtensionTangent_eq])]
 
-/-! ### The symmetrized DLa inner-product kernel bilinear form (in `v0, v1`) -/
-
-/-- The DLa kernel bilinear form `(v0, v1) ↦ ⟨A_lie(v0, p, q), v1⟩`, continuous bilinear in `(v0, v1)`,
-for fixed frame vectors `p q : T_x` (the `v0`-linearity routes through `dLaCovKernel_add_left/smul_left`).
-The symmetrization in `v0 ↔ v1` is added later at the read-off. -/
 def dLaKernelBilin (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -7206,8 +5673,6 @@ def dLaKernelBilin (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : Tange
       g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v0 p q) v1 := by
   rw [dLaKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
-/-- The symmetrized DLa kernel bilinear form `(v0, v1) ↦ ⟨A_lie(v0, p, q), v1⟩ + ⟨A_lie(v1, p, q),
-v0⟩`, for fixed frame vectors `p q`. -/
 def dLaKernelBilinSym (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   dLaKernelBilin (I := I) g₁ g_bg x p q +
@@ -7221,12 +5686,6 @@ def dLaKernelBilinSym (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : Ta
   rw [dLaKernelBilinSym, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.flip_apply, dLaKernelBilin_apply, dLaKernelBilin_apply]
 
-/-! ### The per-`(a,b)` DLa summand and the frozen-frame DLa operator -/
-
-/-- The per-`(a, b)` DLa summand operator, for fixed frame vectors `p q : T_x`:
-`D ↦ (toModel D ![p, q]) • ofModel(bilinFormToModel (dLaKernelBilinSym g₁ g_bg x p q))`.
-A rank-one-in-`D` continuous linear endomorphism of the `(0, 2)`-tensor fibre (mirrors
-`riemannSummandFib`). -/
 def dLaSummandFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
@@ -7253,15 +5712,12 @@ def dLaSummandFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : Tangen
   rw [dLaKernelBilinSym]
   rfl
 
-/-- The frozen-frame DLa fibre operator: `(-1) ·` the double sum over the frame `B` of the per-`(a, b)`
-DLa summands evaluated at the frame vectors `B a x, B b x`. -/
 def dLaBiContrFibFixedFrame (g₁ g_bg : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   (-1 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     dLaSummandFib (I := I) g₁ g_bg x (B a x) (B b x)
 
-/-- Read-off of the frozen-frame DLa fibre operator on a tuple `v`. -/
 theorem dLaBiContrFibFixedFrame_toModel (g₁ g_bg : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -7283,11 +5739,6 @@ theorem dLaBiContrFibFixedFrame_toModel (g₁ g_bg : SmoothRiemannianMetric I M)
   rw [Tensor0SSpace.toModelL_apply, dLaSummandFib_toModel]
   ring
 
-/-! ### Smoothness of the DLa covariant-derivative vector field and kernel -/
-
-/-- The DLa covariant-derivative vector field `b ↦ deTurckLieCovDerivA g₁ g_bg V0 p q b` is a smooth
-global section, expanded as `covApply (LeviCivita g₁) V0 (A(p, q)) − A(∇V0 p, q) − A(p, ∇V0 q)` and
-assembled from `covApply_contMDiff` and `connDiff_contMDiff`. -/
 theorem deTurckLieCovDerivA_section_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
     (V0 p q : Π b : M, TangentSpace I b)
     (hV0 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V0))
@@ -7319,8 +5770,6 @@ theorem deTurckLieCovDerivA_section_contMDiff (g₁ g_bg : SmoothRiemannianMetri
   refine ((hterm1.sub_section hterm2).sub_section hterm3).congr (fun b => ?_)
   rfl
 
-/-- The DLa covariant-derivative kernel applied to GLOBAL smooth fields in all three slots reproduces
-the raw value `deTurckLieCovDerivA V0 p q x` (the first slot via `apply_field` then `X`-congr). -/
 theorem dLaCovKernel_apply_field3 (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (V0 V_field W_field : Π b : M, TangentSpace I b)
     (_hV0 : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
@@ -7336,8 +5785,6 @@ theorem dLaCovKernel_apply_field3 (g₁ g_bg : SmoothRiemannianMetric I M) (x : 
     (smoothExtensionTangent (I := I) x (V0 x)) V0 V_field W_field x
     (smoothExtensionTangent_eq (I := I) x (V0 x))
 
-/-- Global scalar smoothness of the DLa kernel `x ↦ ⟨A_lie(V0(x), p(x), q(x)), W(x)⟩_{g₁}` for smooth
-global fields `V0, p, q, W`, via `apply_field3` then `contMDiff_g_inner_of_smooth_sections`. -/
 theorem dLaKernelScalar_global (g₁ g_bg : SmoothRiemannianMetric I M)
     {V0 W p q : Π b : M, TangentSpace I b}
     (hV0 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V0))
@@ -7361,9 +5808,6 @@ theorem dLaKernelScalar_global (g₁ g_bg : SmoothRiemannianMetric I M)
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₁
     ⟨fun b => deTurckLieCovDerivA (I := I) g₁ g_bg V0 p q b, hAsec⟩ ⟨fun b => W b, hW⟩
 
-/-- The DLa kernel Hom²-section smoothness `x ↦ ⟨x, dLaKernelBilinSym g₁ g_bg x (p x)(q x)⟩` for
-smooth global fields `p, q`, via `cotangentCov_clmSection_smooth_aux` twice over
-`dLaKernelScalar_global` (in both `v0` and `v1`). -/
 theorem dLaKernelBilinSym_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -7393,11 +5837,6 @@ theorem dLaKernelBilinSym_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetr
   rw [dLaKernelBilinSym_apply]
   rfl
 
-/-! ### Smoothness of the frozen-frame DLa operator -/
-
-/-- The `(0, 2)`-section value `x ↦ dLaBiContrFibFixedFrame g₁ g_bg B x (Y x)` of the frozen-frame DLa
-operator on a smooth `(0, 2)`-section `Y`, as a `(-1) •` double sum of scalar-times-bilinForm-sections
-(mirrors `riemannBiContrFibFixedFrame_apply_section_contMDiff`). -/
 theorem dLaBiContrFibFixedFrame_apply_section_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
@@ -7483,8 +5922,6 @@ theorem dLaBiContrFibFixedFrame_apply_section_contMDiff (g₁ g_bg : SmoothRiema
   rw [ContinuousLinearMap.sum_apply]
   rfl
 
-/-- `(2, 2)`-operator-field smoothness of the frozen-frame DLa operator, via
-`contMDiff_clm_section_of_pointwise` over `dLaBiContrFibFixedFrame_apply_section_contMDiff`. -/
 theorem dLaBiContrFibFixedFrame_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
@@ -7500,11 +5937,6 @@ theorem dLaBiContrFibFixedFrame_contMDiff (g₁ g_bg : SmoothRiemannianMetric I 
   intro Y
   exact dLaBiContrFibFixedFrame_apply_section_contMDiff (I := I) g₁ g_bg B hB Y
 
-/-! ### The moving-frame DLa operator and its frame-independence freeze -/
-
-/-- The symmetrized frame-kernel bilinear form `(p, q) ↦ ⟨A_lie(v0, p, q), v1⟩ + ⟨A_lie(v1, p, q),
-v0⟩`, bilinear in the two curvature frame slots `(p, q)` (with `v0, v1` frozen), via the `(p, q)`-CLM₂
-`dLaCovKernel`. -/
 def frameDLaKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (v0 v1 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -7536,15 +5968,10 @@ theorem frameDLaKernel_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
 
-/-- The moving-frame DLa operator at `x`: the frozen operator with the frame `B = smoothOrthoFrame g₁ x`
-(orthonormal at its centre `x`). -/
 def dLaBiContrFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   dLaBiContrFibFixedFrame (I := I) g₁ g_bg (smoothOrthoFrame (I := I) g₁ x) x
 
-/-- On `smoothOrthoFrameNbhd x₀`, the moving DLa operator equals the frozen-frame operator against
-`smoothOrthoFrame g₁ x₀`. Frame-independence of the `g₁`-metric double trace
-(`double_frame_bilin_trace_indep`) applied to the symmetrized frame-kernel and the unit-form. -/
 theorem dLaBiContrFib_eq_fixedFrame_on_nbhd (g₁ g_bg : SmoothRiemannianMetric I M) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
     dLaBiContrFib (I := I) g₁ g_bg y =
@@ -7581,8 +6008,6 @@ theorem dLaBiContrFib_eq_fixedFrame_on_nbhd (g₁ g_bg : SmoothRiemannianMetric 
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
     (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
 
-/-- `(2, 2)`-operator-field smoothness of the moving-frame DLa operator `dLaBiContrFib`, by the
-moving→frozen freeze (`dLaBiContrFib_eq_fixedFrame_on_nbhd`) + `congr_of_eventuallyEq`. -/
 theorem dLaBiContrFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
@@ -7604,10 +6029,6 @@ theorem dLaBiContrFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     (congrArg TensorRSSpace.ofCLM
       (dLaBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₁ g_bg x₀ hy))
 
-/-! ### The DLb slot-insertion endomorphism (transplanted) -/
-
-/-- The DLb endomorphism `Wd_endo g₁ g_bg x : T_x → T_x`, `v ↦ (LeviCivita g₁).toFun (deTurckVF
-g₁ g_bg) x v` (so `deTurckLieCovDerivW g₁ g_bg (ext v) x = Wd_endo g₁ g_bg x v`). -/
 def deTurckLieWEndo (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
   (LeviCivita (I := I) g₁).toFun
@@ -7619,8 +6040,6 @@ theorem deTurckLieWEndo_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
       deTurckLieCovDerivW (I := I) g₁ g_bg (smoothExtensionTangent (I := I) x v) x := by
   rw [deTurckLieWEndo, deTurckLieCovDerivW, smoothExtensionTangent_eq]
 
-/-- The DLb endomorphism Hom-section is smooth, via `cotangentCov_clmSection_smooth_aux` over
-`covApply_contMDiff` of the smooth `deTurckVF` section. -/
 theorem deTurckLieWEndo_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -7642,7 +6061,6 @@ theorem deTurckLieWEndo_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric
     Y.contMDiff hdvf
   exact hcov
 
-/-- The DLb fibre operator: slot-0 plus slot-1 insertion of the DLb endomorphism. -/
 def deTurckLieDLbFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   slotInsertEndoFib (I := I) (M := M) 2 0 x (deTurckLieWEndo (I := I) g₁ g_bg x) +
@@ -7686,10 +6104,6 @@ theorem deTurckLieDLbFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [deTurckLieDLbFib]
   rfl
 
-/-! ### The combined DLa + DLb order-`0` DeTurck-Lie operator field and its existence read-off -/
-
-/-- The combined DLa + DLb fibre operator at `x`: the symmetrized covariant-gradient Lie kernel
-double-contraction plus the slot-insertion endomorphism. -/
 def deTurckLieFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   dLaBiContrFib (I := I) g₁ g_bg x + deTurckLieDLbFib (I := I) g₁ g_bg x
@@ -7714,8 +6128,6 @@ theorem deTurckLieFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [deTurckLieFib]
   rfl
 
-/-- The genuine combined order-`0` DeTurck-Lie coefficient field as a smooth, compactly supported
-`(2, 2)`-tensor. Its fibre value at `x` is `deTurckLieFib g₁ g_bg x`. -/
 def deTurckLieCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -7729,9 +6141,6 @@ def deTurckLieCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x)) :=
   rfl
 
-/-- **The smooth DLa + DLb order-`0` DeTurck-Lie `(2, 2)`-coefficient `Δ_Lie`** existence + read-off:
-its `appCc`/`unitModel` read-off on any `(0, 2)`-field `W` is the boxed GT DeTurck-Lie order-`0`
-action of `(g₁, g_bg)` on the unit-form `D = unitModel g₀ 2 W x`. -/
 theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ∃ R_Lie : SmoothCcTensor g₀ 2 2,
       ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
@@ -7779,15 +6188,14 @@ theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianM
       deTurckLieFib (I := I) g₁ g_bg x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
           (unitTensor (I := I) (M := M) x)) from rfl]
-  -- Split into DLa + DLb
+  
   set D : Tensor0SSpace 2 I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
       (unitTensor (I := I) (M := M) x) with hD_def
   rw [deTurckLieFib, ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
   congr 1
-  · -- DLa half
-    change Tensor0SSpace.toModel (dLaBiContrFib (I := I) g₁ g_bg x D) v = _
+  · change Tensor0SSpace.toModel (dLaBiContrFib (I := I) g₁ g_bg x D) v = _
     rw [dLaBiContrFib, dLaBiContrFibFixedFrame_toModel, neg_one_mul]
     rw [show (- ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           unitModel (I := I) (M := M) g₀ 2 W x
@@ -7826,8 +6234,7 @@ theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianM
     congr 1
     funext j
     fin_cases j <;> simp
-  · -- DLb half
-    change Tensor0SSpace.toModel (deTurckLieDLbFib (I := I) g₁ g_bg x D) v = _
+  · change Tensor0SSpace.toModel (deTurckLieDLbFib (I := I) g₁ g_bg x D) v = _
     rw [deTurckLieDLbFib_toModel]
     rw [deTurckLieWEndo_apply, deTurckLieWEndo_apply]
     congr 1
@@ -7840,20 +6247,10 @@ theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianM
       funext j
       fin_cases j <;> simp
 
-
-/-- **The GT-validated order-`0` DeTurck-Lie coefficient `R_Lie = Δ_Lie`**, the concrete
-`deTurckLieFib`-built field `deTurckLieCoeffField` (the same carrier produced by
-`exists_ricciArmOrder0DeTurckLieCoeff`).  Its fibre value at `x` is `deTurckLieFib g₁ g_bg x`
-(`ricciArmOrder0DeTurckLieCoeff_toSection`), so the joint `(s, x)`-smoothness keystone can extract a
-joint-smooth carrier — unlike an opaque `Classical.choose`.  Its `appCc` read-off is the boxed GT
-DeTurck-Lie order-`0` action of `(g₁, g_bg)` (`ricciArmOrder0DeTurckLieCoeff_appCc_eq`).  This is the
-`DLa + DLb` arm of the GT Lichnerowicz–DeTurck order-`0`, `g_bg`-genuine (vanishing at `g_bg = g₁`). -/
 noncomputable def ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg
 
-/-- The underlying section value of `ricciArmOrder0DeTurckLieCoeff g₀ g₁ g_bg` at `x` is the concrete
-fibre operator `deTurckLieFib g₁ g_bg x`.  Definitional (the coefficient IS its concrete field). -/
 @[simp] theorem ricciArmOrder0DeTurckLieCoeff_toSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) :
     (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg).toSection x =
@@ -7861,10 +6258,7 @@ fibre operator `deTurckLieFib g₁ g_bg x`.  Definitional (the coefficient IS it
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- The `appCc`/`unitModel` read-off of the order-`0` DeTurck-Lie coefficient is the boxed GT DeTurck-Lie
-order-`0` action `Δ_Lie` of `(g₁, g_bg)`.  Reproved directly on the concrete `deTurckLieFib`-built field
-(no `Classical.choose_spec`): it is the `W x v`-instance of `exists_ricciArmOrder0DeTurckLieCoeff`'s
-read-off, whose witness is exactly `deTurckLieCoeffField`. -/
+
 theorem ricciArmOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -7968,13 +6362,6 @@ theorem ricciArmOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannia
       funext j
       fin_cases j <;> simp
 
-/-- **The symmetrizer-absorbed order-`0` DeTurck-Lie coefficient (STEP 1).**  For a `(0, 2)`-section `S`
-and the metrics `(g₀, g₁, g_bg)`, the half-sum symmetrizer-absorbed `(2, 2)`-coefficient of the GT
-DeTurck-Lie order-`0` coefficient `ricciArmOrder0DeTurckLieCoeff g₀ g₁ g_bg` (the `DLa + DLb` arm) at
-gradient order `0`, with the trailing-pair slot permutation supplied by
-`exists_iteratedCovGrad_unitModel_domDomCongrSection`.  Its `appCc` read-off on the bare `∇₀⁰ S = S`
-reproduces `ricciArmOrder0DeTurckLieCoeff`'s read-off on `∇₀⁰ (symmS g₀ S) = symmS g₀ S`
-(`symmAbsorbedOrder0DeTurckLieCoeff_appCc_eq`).  Mirrors `symmAbsorbedOrder0RiemannCoeff`. -/
 noncomputable def symmAbsorbedOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 :=
   symmAbsorbedCoeff (I := I) (M := M) g₀ 0
@@ -7983,13 +6370,7 @@ noncomputable def symmAbsorbedOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiem
       (Equiv.swap (0 : Fin 2) 1) S 0))
 
 set_option linter.unusedSectionVars false in
-/-- **The symmetrizer-absorbed order-`0` DeTurck-Lie coefficient's `appCc` read-off on the bare section
-equals the DeTurck-Lie action on the `symmS`-symmetrised section.**
-```
-unitModel g₀ 2 (appCc g₀ 2 2 (symmAbsorbedOrder0DeTurckLieCoeff g₀ g₁ g_bg S) (∇₀⁰ S)) x v
-  = unitModel g₀ 2 (appCc g₀ 2 2 (ricciArmOrder0DeTurckLieCoeff g₀ g₁ g_bg) (∇₀⁰ (symmS g₀ S))) x v.
-```
-The order-`0` instance of `symmAbsorbedCoeff_appCc_eq`, with `hσ'` discharged by `Classical.choose_spec`. -/
+
 theorem symmAbsorbedOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2

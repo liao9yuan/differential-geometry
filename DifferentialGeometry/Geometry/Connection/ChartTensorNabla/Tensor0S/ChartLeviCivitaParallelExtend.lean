@@ -1,38 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
 
-/-!
-# Chart Levi-Civita applied to a chart-parallel-extended vector
-
-Given a smooth Riemannian metric `g`, a chart center `α : M`, a basepoint `b : M`
-in the chart Levi-Civita good set, a tangent vector `v ∈ TangentSpace I b` and a
-tangent vector field `X`, this file establishes that
-
-  `chartLeviCivita g α (chartParallelExtend α b v) b (X b)
-    = trivFromE α b (christoffelCorrection g α b (trivToE α b v) (X b))`.
-
-In other words, when the section input to `chartLeviCivita` is the chart-α-parallel
-extension of a single tangent vector `v`, the Fréchet-derivative term in the
-chart Levi-Civita formula vanishes (because the chart-trivialised representation
-of `chartParallelExtend α b v` is locally constant on the trivialisation base
-set), and only the Christoffel-correction term survives.
-
-## Main results
-
-* `chartParallelExtend_repr_eventuallyEq_const`: the chart-trivialised
-  representation of `chartParallelExtend α b v`, pulled back through
-  `(extChartAt I α).symm`, is eventually equal to the constant
-  `trivToE α b v ∈ E` in a neighbourhood of `extChartAt I α b`.
-* `chartParallelExtend_repr_pullback_fderiv_eq_zero`: as a consequence, the
-  Fréchet derivative of `chartE_section_repr α (chartParallelExtend α b v) ∘
-  (extChartAt I α).symm` at `extChartAt I α b` is zero.
-* `chartLeviCivita_chartParallelExtend`: the headline identity, reducing
-  `chartLeviCivita g α (chartParallelExtend α b v) b (X b)` to the pure
-  Christoffel correction.
-* `chartLeviCivita_chartParallelExtend_symm`: the same identity expressed in
-  the swapped form (using torsion-free symmetry of the Christoffel correction).
--/
-
 noncomputable section
 
 set_option linter.unusedSectionVars false
@@ -54,10 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- **Local constancy of the chart pullback.** For `b` in the chart Levi-Civita
-good set, the chart-trivialised representation of `chartParallelExtend α b v`,
-pulled back through `(extChartAt I α).symm`, is eventually equal to the
-constant `trivToE α b v` in a neighbourhood of `extChartAt I α b`. -/
 lemma chartParallelExtend_repr_eventuallyEq_const
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :
@@ -93,10 +57,6 @@ lemma chartParallelExtend_repr_eventuallyEq_const
       ((extChartAt I α).symm y) = trivToE (I := I) α b v
   exact chartE_section_repr_chartParallelExtend (I := I) α b v hy_U
 
-/-- **Vanishing Fréchet derivative.** For `b` in the chart Levi-Civita good
-set, the Fréchet derivative at `extChartAt I α b` of
-`chartE_section_repr α (chartParallelExtend α b v) ∘ (extChartAt I α).symm`
-is the zero CLM. -/
 lemma chartParallelExtend_repr_pullback_fderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :
@@ -109,8 +69,6 @@ lemma chartParallelExtend_repr_pullback_fderiv_eq_zero
   rw [Filter.EventuallyEq.fderiv_eq hev]
   exact fderiv_const_apply _
 
-/-- **Vanishing Fréchet derivative, applied form.** Applying the zero CLM to
-any tangent vector argument gives zero. -/
 lemma chartParallelExtend_repr_pullback_fderiv_apply_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) (w : E) :
@@ -120,11 +78,6 @@ lemma chartParallelExtend_repr_pullback_fderiv_apply_eq_zero
   rw [chartParallelExtend_repr_pullback_fderiv_eq_zero (I := I) α hb v]
   rfl
 
-/-- **Chart Levi-Civita on a chart-parallel-extended vector reduces to the
-Christoffel correction.** For `b` in the chart Levi-Civita good set, the chart
-Levi-Civita derivative of `chartParallelExtend α b v` at `b` along `X b`
-equals the chart-α Christoffel correction transported back to the tangent
-space. -/
 theorem chartLeviCivita_chartParallelExtend
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -152,9 +105,6 @@ theorem chartLeviCivita_chartParallelExtend
   rw [hfderiv, hrepr]
   rw [zero_add]
 
-/-- **Symmetric form of the headline identity.** Using torsion-free Christoffel
-symmetry, the same identity can be expressed with the input vector `v` in the
-CLM-argument position. -/
 theorem chartLeviCivita_chartParallelExtend_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -169,11 +119,6 @@ theorem chartLeviCivita_chartParallelExtend_symm
   congr 1
   exact (christoffelCorrection_symm_cancel (I := I) g α b v (X b)).symm
 
-/-- **Manifold-differentiability of `chartParallelExtend α b v` as a section** at
-the basepoint `b`, on the chart Levi-Civita good set. The proof uses the fact
-that the chart-trivialised representation of the parallel extension is
-constantly equal to `trivToE α b v` on the trivialisation base set, and then
-applies the section-differentiability criterion through the trivialisation. -/
 lemma chartParallelExtend_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :

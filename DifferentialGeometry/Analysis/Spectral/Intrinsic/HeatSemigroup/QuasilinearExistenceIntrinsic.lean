@@ -1,29 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.BoundedC0Intrinsic
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.MildSolutionExistence
 
-/-!
-# Quasi-linear tensor heat equation on `L²` (chart-selection-free)
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, the
-**intrinsic** tensor heat semigroup `e^{t Δ_∇}` on `TensorL2 r s g` is a
-bounded strongly continuous one-parameter contraction semigroup, packaged
-as `tensorBoundedC0Semigroup g r s`. Feeding it into the
-abstract semilinear existence/uniqueness machinery yields a short-time
-mild solution of the **quasi-linear** tensor heat equation
-
-  `∂_t T = Δ_∇ T + N(T)`,  `T(0) = T_0`,
-
-for a globally Lipschitz lower-order nonlinearity `N : TensorL2 → TensorL2`,
-**without any chart-selection hypothesis**.
-
-## Main results
-
-* `tensor_quasilinear_heat_mild_solution_existence_intrinsic` — short-time
-  existence of a continuous mild solution.
-* `tensor_quasilinear_parabolic_unique` — uniqueness of the
-  mild solution on a short time interval.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -45,17 +22,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
-/-- **Short-time existence of a mild solution of the quasi-linear tensor
-heat equation (chart-selection-free).**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an initial
-datum `T_0 : TensorL2 r s g`, and a globally Lipschitz lower-order
-nonlinearity `N`, there is a positive existence time `T` and a continuous
-path `u : [0, T] → TensorL2 r s g` solving the Duhamel integral equation
-
-  `u(t) = e^{t Δ_∇} T_0 + ∫₀ᵗ e^{(t-τ) Δ_∇} (N (u τ)) dτ`
-
-with `u(0) = T_0`. -/
 theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T_0 : TensorL2 r s g)
@@ -75,12 +41,6 @@ theorem tensor_quasilinear_heat_mild_solution_existence_intrinsic
   have h := hu_eq t ht
   simpa only [tensorBoundedC0Semigroup_intrinsic_apply] using h
 
-/-- **Uniqueness of the mild solution of the quasi-linear tensor heat
-equation (chart-selection-free).**
-
-Any two continuous paths `u, v : [0, T] → TensorL2 r s g` solving the
-quasi-linear tensor heat Duhamel integral equation with the same initial
-datum `T_0` coincide on `[0, T]`, provided `(L : ℝ) * T < 1`. -/
 theorem tensor_quasilinear_parabolic_unique
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T_0 : TensorL2 r s g)

@@ -31,39 +31,6 @@ open DifferentialGeometry.PDE.RicciFlow.ODE
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.Integral.Connection
 
-/-! ## Short-time existence for the Ricci flow
-
-Classical construction (Hamilton–DeTurck): given an initial smooth Riemannian
-metric `g₀` on a closed manifold `M`, the Ricci flow `∂_t g = -2 Ric(g)` admits
-a positive-time smooth solution with `g(0) = g₀`. The proof passes through:
-
-1. Solve the (strictly parabolic) DeTurck–Ricci flow
-   `∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (where `X_DT = deTurckVF g_DT g_bg`)
-   for time `[0, T_DT)`, via `deturck_ricci_flow_parabolic_short_time_existence` (here we take
-   `g_bg := g₀` as the background metric).
-2. Integrate the time-dependent vector field `-X_DT(t)` to obtain a smooth family
-   of diffeomorphisms `Φ_t : M ≃ₘ M` with `Φ_0 = id` and `∂_t Φ_t = -X_DT ∘ Φ_t`.
-3. Set `g_fam(t) := (Φ_t)^* (g_DT(t))`. Then `g_fam(0) = g₀` from
-   `pullbackMetric_refl`, and by the chain rule + Ricci/Lie naturality
-   the Lie-derivative term cancels, leaving `∂_t g_fam = -2 Ric(g_fam)`.
-
-The conclusion is the genuine smooth Ricci flow on `[0, T)`: the family `g_fam`
-is jointly `C∞` in `(t, x)` on the open interval `(0, T)` (at the level of the
-chart-local Gram matrices, `Integral.Measure.chartGramMatrix`), jointly continuous
-up to `t = 0`, satisfies `g_fam 0 = g₀`, and solves `∂_t g_fam = -2 Ric(g_fam)`
-on `[0, T)`.
-
-The DeTurck step is supplied by `deturck_ricci_flow_parabolic_short_time_existence` (the clean spectral
-DeTurck–Ricci parabolic engine, which also exposes the DeTurck-field regularity and
-the joint chart-Gram smoothness/continuity of `g_DT`); the conjugating
-diffeomorphism family `Φ_fam` is built by `conjugating_diffeo_family` (integrating
-the negated DeTurck field); the interior `∂_t g_fam = -2 Ric` identity is the flat
-Hamilton–DeTurck assembly `flat_assembly_interior` and the `t = 0` endpoint the
-continuity extension `ricci_flow_pde_at_zero`; the joint smoothness/continuity of
-`g_fam = (Φ_fam)^* g_DT` follows from the conjugating-flow smooth-dependence data
-(`conjugating_flow_*`, pinned to the genuine flow by its orbit ODE). The
-construction step is assembled in `h_construct` below; it transits only those
-faithful labeled inputs. -/
 theorem ricci_flow_short_time_existence
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]

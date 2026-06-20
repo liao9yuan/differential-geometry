@@ -4,8 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
-/-! # Chart-coordinate decomposition `∇T = ∂T + Γ * T` of the covariant derivative on `(r, s)`-tensor sections -/
-
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
 open Bundle DifferentialGeometry
@@ -25,13 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- Chart-coordinate decomposition of the covariant derivative on `(r, s)`-tensor
-sections: `∇T = ∂T + Γ * T`. Concretely, for any chart center `α : M`, any
-underlying tensor field `T : Π b, TensorRSSpace r s I b`, and any vector field
-`X : Π b, TangentSpace I b`, the chart-frame covariant derivative is the
-intrinsic chart-frame Fréchet-derivative piece (the `∂T` term) plus a sum of
-upper-slot Christoffel corrections, minus a sum of lower-slot Christoffel
-corrections (the `Γ * T` terms). -/
 theorem nabla_equals_partial_plus_christoffel_on_tensors
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (T : Π b : M, TensorRSSpace r s I b)
@@ -44,8 +35,6 @@ theorem nabla_equals_partial_plus_christoffel_on_tensors
             chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) :=
   chartTensorRSCovariantDerivative_def (I := I) r s g α T X b
 
-/-- The preimage of `extChartAt.target` under `toEuclidean.symm` equals
-`chartTargetEuclid α`. -/
 private lemma nabla_tensor_toEucl_symm_preimage_target (α : M) :
     ((toEuclidean (E := E)).symm) ⁻¹' (extChartAt I α).target =
       chartTargetEuclid (I := I) (M := M) α := by
@@ -58,8 +47,6 @@ private lemma nabla_tensor_toEucl_symm_preimage_target (α : M) :
       rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply z
     rw [Set.mem_preimage, h_eq]; exact hz_tgt
 
-/-- Smoothness on `chartTargetEuclid α` of the EuclN-pulled raw chart component:
-`raw α IJ ∘ extChartAt.symm ∘ toEuclidean.symm`. -/
 private lemma nabla_tensor_raw_pull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -108,7 +95,6 @@ private lemma nabla_tensor_raw_pull_contDiffOn
   exact h_raw_pull_contDiffOn.comp
     h_toEucl_symm_smooth.contDiffOn h_maps
 
-/-- Chain-rule identity for the iterated derivative on `EuclN` versus on `E`. -/
 private lemma nabla_tensor_iteratedFDeriv_chain_rule
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -163,10 +149,6 @@ private lemma nabla_tensor_iteratedFDeriv_chain_rule
   rw [h_swap_left, h_swap_right] at h_chain
   exact h_chain
 
-/-- Pointwise basis-sum bound: the sum over basis-index tuples of the squared
-absolute value of the EuclN iterated derivative evaluated on basis vectors is
-bounded by `(finrank ℝ E)^j · ‖toEuclidean.symm‖^(2j)` times the squared
-operator norm of the E iterated derivative. -/
 private lemma basis_sum_sq_le_opNorm_sq_E
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -294,7 +276,6 @@ private lemma basis_sum_sq_le_opNorm_sq_E
     _ = ((Module.finrank ℝ E : ℝ) ^ j) *
           (‖Lsymm‖ ^ (2 * j)) * ‖A‖ ^ 2 := by ring
 
-/-- ContinuousOn of the pulled partition-of-unity weight on `chartTargetEuclid α`. -/
 private lemma nabla_tensor_pouPull_contOn (α : M) :
     ContinuousOn
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -323,10 +304,6 @@ private lemma nabla_tensor_pouPull_contOn (α : M) :
     exact hz_tgt
   exact hPOU_cont.comp_continuousOn' h_inner
 
-/-- Per-(α, IJ, j) integral bound, in `ENNReal`:
-the sum over basis-index tuples of the integral of the partition-of-unity
-weighted squared HS-evaluation is bounded by `CE` times the integral of the
-partition-of-unity weighted squared operator norm. -/
 private lemma per_alpha_j_basis_integral_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -662,13 +639,6 @@ private lemma per_alpha_j_basis_integral_bound
     _ ≤ _ := h_pt_le
     _ = _ := h_pull_const
 
-/-- Substantive existence theorem: the Hilbert-Schmidt partition-of-unity
-chart-Sobolev seminorm is uniformly dominated by the operator-norm
-partition-of-unity chart-Sobolev seminorm, with a non-negative constant
-depending only on `(r, s, k, E)`.
-
-The bound is `‖T‖_Hs ≤ √D · ‖T‖_pou`, where
-`D := (n^(2k) + 1) · (1 + ‖toEuclidean.symm‖^(4k))` and `n = finrank ℝ E`. -/
 private theorem hs_le_pou_uniform
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -823,11 +793,6 @@ private theorem hs_le_pou_uniform
     _ = Real.sqrt D * (tsumPou ^ (1 / 2 : ℝ)).toReal := by
         rw [ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
 
-/-- Single-step chart Sobolev seminorm bound: at order `k`, the Hilbert-Schmidt
-partition-of-unity Sobolev seminorm of a smooth compactly-supported `(r, s)`-tensor
-section is controlled by a constant multiple of its operator-norm partition-of-
-unity Sobolev seminorm. This is the single-step form of the
-`∇T = ∂T + Γ * T` chart formula, in seminorm bound shape. -/
 theorem nabla_tensor_single_step_formula
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -836,11 +801,6 @@ theorem nabla_tensor_single_step_formula
           C * (tensorPouSobolevNorm (I := I) (M := M) g k T).toReal :=
   hs_le_pou_uniform (I := I) (M := M) g r s k
 
-/-- Iterated `H^k` chart Sobolev seminorm bound: the Hilbert-Schmidt
-partition-of-unity Sobolev seminorm of order `k` on `(r, s)`-tensor sections is
-controlled by a constant multiple of the operator-norm partition-of-unity
-Sobolev seminorm of the same order. This is the iterated form of the
-`∇^k T = ∂^k T + (Γ-correction terms)` chart formula. -/
 theorem nabla_tensor_iterated_Hk_formula
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

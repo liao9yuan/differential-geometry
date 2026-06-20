@@ -6,29 +6,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
-/-!
-# Unconditional uniform op-norm bound for the chart-`(r, s)` fibre forward map
-
-For a smooth tangent-bundle Riemannian metric `g` and any compact subset
-`K ⊆ (chartAt H α).source`, the family
-`(triv α).continuousLinearMapAt ℝ b : TensorRSSpace r s I b →L[ℝ] TensorRSModel r s ℝ E`
-admits a uniform pointwise op-norm bound, without any chart-locality predicate.
-
-The proof combines:
-
-* Mathlib's `eventually_norm_trivializationAt_lt`, which under
-  `[IsContinuousRiemannianBundle ...]` gives local op-norm boundedness of the
-  trivialisation-centered-at-`y₀` for `b` in a neighbourhood of `y₀`.
-* The `(r, s)`-bundle `IsContinuousRiemannianBundle` instance
-  `tensorRS_isContinuousRiemannianBundle`.
-* The factorisation
-  `(triv α).clmAt ℝ b T = (coordChangeL y₀ α b) ((triv y₀).clmAt ℝ b T)`
-  on the intersection of `α` and `y₀` base sets.
-* Continuity of `b ↦ ‖coordChangeL y₀ α b‖` on the chart intersection (from
-  the smoothness of the coordinate-change CLM).
-* A finite-cover argument over the compact `K`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -221,12 +198,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Unconditional uniform pointwise op-norm bound on the chart-`(r, s)` fibre
-forward trivialisation over any compact subset of the chart-`α` source. No
-chart-locality predicate is required: the `(r, s)`-tensor bundle is a
-continuous Riemannian bundle (via the `tensorRS_isContinuousRiemannianBundle`
-instance), and Mathlib's `eventually_norm_trivializationAt_lt` provides the
-necessary local boundedness. -/
+
 theorem tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)

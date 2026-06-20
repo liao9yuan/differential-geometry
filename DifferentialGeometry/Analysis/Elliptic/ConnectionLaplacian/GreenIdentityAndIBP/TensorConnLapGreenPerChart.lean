@@ -3,62 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-/-!
-# Per-chart weighted Dirichlet–second-order identity for the `(0, 2)` connection Laplacian
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file assembles, on a single chart base point
-`α : M`, the partition-of-unity-weighted form of the integrated Green identity
-for the rough (connection) Laplacian acting on `(0, 2)`-tensor fields.
-
-The headline per-chart identity expresses the `ρ_α`-weighted integral of the
-inverse-Gram-weighted covariant-gradient (Dirichlet) pairing
-`tensorCovDerivPointwiseInner g 0 2 T v` as minus the `ρ_α`-weighted integral of
-the full second-order frame sum (the second covariant derivative
-`∇_{Bᵢ}(∇_{Bᵢ}T)` of `T` paired against `v`), minus the frame
-divergence-correction sum, minus the partition-of-unity Leibniz weight terms,
-where `Bᵢ = chartFrameNormGlobalSmooth g α i` is the globally smooth chart-`α`
-orthonormal frame:
-
-```
-∫ ρ_α · tensorCovDerivPointwiseInner g 0 2 T v
-  = − ∑ᵢ ∫ ρ_α · ⟨∇_{Bᵢ}(∇_{Bᵢ}T), v⟩
-    − ∑ᵢ ∫ ρ_α · ⟨∇_{Bᵢ}T, v⟩ · divᵍ Bᵢ
-    − ∑ᵢ ∫ ⟨∇_{Bᵢ}T, v⟩ · Bᵢ(ρ_α).
-```
-
-All inner products are the mixed `(0, 2)`-tensor pointwise inner product
-`tensorInnerScalar g 0 2`, written through the smooth directional covariant
-derivative sections `covDerivAlongVFSection g · Bᵢ` of `TensorConnLapSecondOrderIBP`.
-This form keeps every integrand a *mixed* tensor inner-product scalar, whose
-smoothness (hence integrability on a closed manifold) is the committed
-`tensorInnerScalar_contMDiff`.
-
-It is obtained by combining three committed ingredients:
-
-* the **diagonal-frame reduction** of the Dirichlet integrand
-  `tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two`, valid at a
-  base point where the chart-`α` frame is `g`-orthonormal — which holds on the
-  intersection of the chart-`α` partition-of-unity tsupport with the chart-`α`
-  Levi-Civita good set
-  (`chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet`), and is killed
-  off-support by `ρ_α = 0` through the support case-split;
-
-* the **partition-of-unity-weighted second-order integration by parts**
-  `integral_weighted_secondOrder_combined_eq_neg_weightDeriv`, applied per frame
-  direction `Bᵢ`;
-
-* finite-sum / integrability bookkeeping over the frame index `i`.
-
-The diagonal-frame middle term `tensorInnerPointwise_0s (0 + 2) g b (∇_{Bᵢ}T)ᵇ (∇_{Bᵢ}v)ᵇ`
-and the weighted-IBP lowered cross term are both identified with the mixed
-inner product `tensorInnerScalar g 0 2 (∇_{Bᵢ}T) (∇_{Bᵢ}v)` through the
-metric-lowering / lifting-section identities
-`tensorInnerPointwise_eq_liftedTensorSection_inner`,
-`toModel_liftedTensorSection_covDerivAlongVFSection`, and the definitional
-unfolding of `loweredCovDerivAlongVF`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -94,15 +38,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The chart-`α` frame direction `i` as a smooth tangent vector field. -/
 def frameVF
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   chartFrameNormGlobalSmooth (I := I) (M := M) g α i
 
-/-- The per-direction *cross (Dirichlet)* integrand `⟨∇_{Bᵢ}T, ∇_{Bᵢ}v⟩`, as a
-mixed `(0, 2)`-tensor inner-product scalar. -/
 def perDirCross
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -111,8 +52,6 @@ def perDirCross
     (covDerivAlongVFSection (I := I) (M := M) g T.toSection (frameVF (I := I) (M := M) g α i))
     (covDerivAlongVFSection (I := I) (M := M) g v.toSection (frameVF (I := I) (M := M) g α i))
 
-/-- The per-direction *second-order* integrand `⟨∇_{Bᵢ}(∇_{Bᵢ}T), v⟩`, as a
-mixed `(0, 2)`-tensor inner-product scalar. -/
 def perDirSecond
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -123,7 +62,6 @@ def perDirSecond
       (frameVF (I := I) (M := M) g α i))
     v.toSection
 
-/-- The per-direction *divergence-correction* integrand `⟨∇_{Bᵢ}T, v⟩ · divᵍ Bᵢ`. -/
 def perDirDiv
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -134,7 +72,6 @@ def perDirDiv
         v.toSection b
       * divergence_g (I := I) g (frameVF (I := I) (M := M) g α i) b
 
-/-- The per-direction *weight (Leibniz)* integrand `⟨∇_{Bᵢ}T, v⟩ · Bᵢ(ρ_α)`. -/
 def perDirWeight
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -192,18 +129,6 @@ private lemma perDir_integrable_of_continuous
   Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     (I := I) g hf (HasCompactSupport.of_compactSpace _)
 
-/-- **Diagonal-frame reduction at orthonormality points.** On the intersection
-of the chart-`α` partition-of-unity tsupport with the chart-`α` Levi-Civita good
-set, the inverse-Gram-weighted Dirichlet integrand
-`tensorCovDerivPointwiseInner g 0 2 T v b` equals the plain frame sum of the
-per-direction mixed cross integrands `perDirCross g T v α i b`.
-
-The proof instantiates `tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two`
-with the frame `Bᵢ = chartFrameNormGlobalSmooth g α i`, whose orthonormality at
-`b` on this intersection is supplied by
-`chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet`, then identifies
-each lowered diagonal summand with the mixed inner product `perDirCross` via the
-lifting-section / lowering identities. -/
 private theorem tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M) {b : M}
@@ -241,22 +166,6 @@ private theorem tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i) b]
   rfl
 
-/-- **Per-direction weighted Dirichlet integration-by-parts rearrangement.**
-For each chart-`α` frame direction `i`,
-
-```
-∫ ρ_α · perDirCross g T v α i
-  = − ∫ ρ_α · perDirSecond g T v α i
-    − ∫ ρ_α · perDirDiv g T v α i
-    − ∫ perDirWeight g T v α i.
-```
-
-This is the committed weighted second-order combined integration by parts
-`integral_weighted_secondOrder_combined_eq_neg_weightDeriv` (with `B = Bᵢ`,
-`ρ = ρ_α`), after recasting the lowered `tensorInnerPointwise_0s` summands as the
-mixed inner-product scalars `perDirSecond`, `perDirCross`, then rearranging using
-additivity of the integral and integrability of the three smooth,
-compactly-supported summands. -/
 private theorem integral_pou_perDirCross_eq
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
@@ -397,17 +306,6 @@ private theorem integral_pou_perDirCross_eq
   rw [h3] at hIBP
   linarith [hIBP]
 
-/-- **`ρ_α`-weighted Dirichlet integrand equals the `ρ_α`-weighted frame
-cross-sum pointwise.** For every base point `b`,
-
-```
-ρ_α b · tensorCovDerivPointwiseInner g 0 2 T v b
-  = ρ_α b · ∑ᵢ perDirCross g T v α i b.
-```
-
-On the chart-`α` partition-of-unity tsupport the chart-source / good-set
-identification supplies the orthonormality needed by the diagonal-frame
-reduction; off the tsupport `ρ_α b = 0` kills both sides. -/
 private theorem pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M) (b : M) :
@@ -433,9 +331,6 @@ private theorem pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum
       image_eq_zero_of_notMem_tsupport hb_supp
     rw [hp0, zero_mul, zero_mul]
 
-/-- **Integrated `ρ_α`-weighted Dirichlet reduction.** Integrating the
-`ρ_α`-weighted Dirichlet integrand equals the frame sum of the integrated
-`ρ_α`-weighted per-direction cross integrands. -/
 private theorem integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M) :
@@ -462,33 +357,6 @@ private theorem integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum
   exact perDir_integrable_of_continuous (I := I) g
     (hρ_cont.mul (perDirCross_continuous (I := I) (M := M) g T v α i))
 
-/-- **Per-chart weighted Green identity for the `(0, 2)` connection Laplacian.**
-For a single chart base point `α`, the `ρ_α`-weighted integral of the Dirichlet
-pairing equals minus the frame sums of the integrated `ρ_α`-weighted
-second-order pairings, divergence-correction terms, and partition-of-unity
-Leibniz weight terms:
-
-```
-∫ ρ_α · tensorCovDerivPointwiseInner g 0 2 T v
-  = − ∑ᵢ ∫ ρ_α · perDirSecond g T v α i
-    − ∑ᵢ ∫ ρ_α · perDirDiv g T v α i
-    − ∑ᵢ ∫ perDirWeight g T v α i,
-```
-
-where, with `Bᵢ = chartFrameNormGlobalSmooth g α i`,
-
-* `perDirSecond g T v α i = ⟨∇_{Bᵢ}(∇_{Bᵢ}T), v⟩` is the full second-order
-  covariant-derivative pairing;
-* `perDirDiv g T v α i = ⟨∇_{Bᵢ}T, v⟩ · divᵍ Bᵢ` is the frame divergence
-  correction;
-* `perDirWeight g T v α i = ⟨∇_{Bᵢ}T, v⟩ · Bᵢ(ρ_α)` is the partition-of-unity
-  Leibniz weight term.
-
-It combines the integrated weighted Dirichlet reduction
-`integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum` (diagonal-frame
-reduction with the support case-split) with the per-direction weighted
-integration by parts `integral_pou_perDirCross_eq`, summed over the chart-`α`
-frame index. -/
 theorem integral_pou_tensorCovDerivPointwiseInner_eq_neg_second_div_weight
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M) :

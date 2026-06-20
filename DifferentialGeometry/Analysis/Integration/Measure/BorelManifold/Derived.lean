@@ -10,37 +10,6 @@ import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable
 
-/-!
-# Borel-measurability of smooth bundle sections
-
-For a `ChartedSpace H M` carrying the `IsBorelChartedSpace` typeclass, this file
-proves that the underlying map of a smooth bundle section, viewed through the
-canonical fibre-to-model identification, is Borel-measurable as a function
-`M → ModelFiber`.
-
-The argument:
-
-1. The typeclass `IsBorelChartedSpace H M` gives a countable enumeration of the
-   range of `chartAt H` together with Borel-measurability of each level set.
-2. For each chart-index `n`, choose a representative `x_n` belonging to the
-   level set `s n = {x | chartAt H x = c n}`.  The trivialization-projected
-   map `g_n : M → ModelFiber`, defined by
-   `g_n x = (trivializationAt _ _ x_n ⟨x, S.toSection x⟩).2`, is smooth on
-   `(chartAt H x_n).source` (Mathlib's
-   `Trivialization.contMDiffOn_section_baseSet_iff`), hence continuous there.
-3. On the level set `s n` (where `chartAt H x = chartAt H x_n`, equivalently
-   `achart H x = achart H x_n`), the trivialization-projection coincides with
-   the intrinsic fibre-to-model coercion `TensorRSSpace.toModel` because the
-   relevant tangent-bundle change-of-coordinates is the identity by
-   `VectorBundleCore.coordChange_self`.
-4. Combining (1)–(3) with the standard "Borel union of open / closed
-   restrictions is Borel" lemma yields global Borel-measurability of
-   `S.toFun`.
-
-The headline export is `SmoothCcTensor.measurable_toFun`, with
-`AEStronglyMeasurable` and `StronglyMeasurable` variants.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -63,13 +32,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Generic gluing principle.  If a function `f : M → F` to a Borel-measurable
-codomain is continuous on every chart source of `M`, and `M` is a Borel-charted
-space, then `f` is Borel-measurable.
-
-The proof partitions `M` into countably many Borel pieces along the level sets
-of `chartAt H`, uses chart-local continuity to express the preimage of any open
-set as a relatively-open subset of a chart source, and assembles the pieces. -/
 theorem measurable_of_continuousOn_chart_source
     [IsBorelChartedSpace H M] [Nonempty M]
     {F : Type*} [TopologicalSpace F]
@@ -193,8 +155,6 @@ private lemma continuousOn_trivProj
       ((chartAt H α).source) :=
   (contMDiffOn_trivProj (I := I) (M := M) S α).continuousOn
 
-/-- The tangent-bundle trivialization at `α`, restricted to the level set
-`{x | chartAt H x = chartAt H α}`, has identity `continuousLinearMapAt` map. -/
 private lemma tangent_continuousLinearMapAt_levelSet (α x : M)
     (hx : chartAt H x = chartAt H α) :
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x =
@@ -214,8 +174,6 @@ private lemma tangent_continuousLinearMapAt_levelSet (α x : M)
   exact (tangentBundleCore I M).coordChange_self (achart H α) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact hx_src) v
 
-/-- The tangent-bundle trivialization at `α`, restricted to the level set
-`{x | chartAt H x = chartAt H α}`, has identity `symmL` map. -/
 private lemma tangent_symmL_levelSet (α x : M)
     (hx : chartAt H x = chartAt H α) :
     (trivializationAt E (TangentSpace I) α).symmL ℝ x = (1 : E →L[ℝ] E) := by
@@ -234,8 +192,6 @@ private lemma tangent_symmL_levelSet (α x : M)
   exact (tangentBundleCore I M).coordChange_self (achart H α) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact hx_src) v
 
-/-- The (0, s)-tensor trivialization at `α` evaluates to the identity on
-fibre elements at any point of the level set. -/
 private lemma tensor0S_continuousLinearMapAt_levelSet_apply
     (s : ℕ) (α x : M) (hx : chartAt H x = chartAt H α)
     (p : Tensor0SSpace s I x) :
@@ -268,8 +224,6 @@ private lemma tensor0S_continuousLinearMapAt_levelSet_apply
   change p (fun i => (1 : E →L[ℝ] E) (v i)) = p v
   congr
 
-/-- The (0, s)-tensor trivialization at `α` has identity `symmL` on fibre
-elements at any point of the level set. -/
 private lemma tensor0S_symmL_levelSet_apply
     (s : ℕ) (α x : M) (hx : chartAt H x = chartAt H α)
     (p : Tensor0SModel s ℝ E) :
@@ -296,13 +250,6 @@ private lemma tensor0S_symmL_levelSet_apply
         (fun y : M => Tensor0SSpace s I y) α).symmL ℝ x p)
   exact hid.symm.trans hinv
 
-/-- Level-set identity for the `(r, s)`-tensor bundle: on the level set
-`{x | chartAt H x = chartAt H α}`, the trivialization at `α` evaluated at
-`⟨x, S.toSection x⟩` agrees with `S.toFun x`.
-
-The proof unfolds the `(r, s)`-tensor trivialization to its
-`ContinuousLinearMap.inCoordinates` formula, then collapses the two
-`(0, ·)`-tensor coordinate maps to identities via the level-set lemmas above. -/
 private lemma tensorRS_levelSet_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α x : M)
@@ -324,8 +271,6 @@ private lemma tensorRS_levelSet_identity
     ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
-/-- The underlying map `S.toFun : M → TensorRSModel r s ℝ E` of a smooth
-compactly-supported `(r, s)`-tensor section is Borel-measurable. -/
 theorem SmoothCcTensor.measurable_toFun
     [IsBorelChartedSpace H M] [Nonempty M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -427,10 +372,6 @@ theorem SmoothCcTensor.measurable_toFun
     (hg_n_cont n).isOpen_inter_preimage (chartAt H (xn n)).open_source hU
   exact MeasurableSet.inter hopen.measurableSet (hs'meas n)
 
-/-- The underlying map `S.toFun : M → TensorRSModel r s ℝ E` is strongly
-measurable.  The codomain is finite-dimensional (since `E` is), hence has
-`SecondCountableTopology`, so Borel-measurability and strong measurability
-coincide. -/
 theorem SmoothCcTensor.stronglyMeasurable_toFun
     [IsBorelChartedSpace H M] [Nonempty M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -443,12 +384,6 @@ theorem SmoothCcTensor.stronglyMeasurable_toFun
   have hmeas := SmoothCcTensor.measurable_toFun (I := I) (M := M) S
   exact hmeas.stronglyMeasurable
 
-/-- Almost-everywhere strong measurability of `S.toFun` against any measure.
-This is the typical entry point for use within `Lp` / `Memℒp` arguments.
-
-The Borel σ-algebra on `M` is installed inside the body, so the measure
-parameter `μ` is supplied via a `letI`-bound `MeasurableSpace` instance to keep
-the public signature free of measurable-space typeclass parameters. -/
 theorem SmoothCcTensor.aestronglyMeasurable_toFun
     [IsBorelChartedSpace H M] [Nonempty M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

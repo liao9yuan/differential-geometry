@@ -9,66 +9,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
-/-!
-# Intrinsic g-metric `L²` bound on the chart Christoffel-correction atom
-
-For a closed (compact, boundaryless) Riemannian manifold `(M, g)` modelled on
-a finite-dimensional real inner-product space `E`, a chart base point
-`α : M`, and a chart-frame direction `k : Fin (Module.finrank ℝ E)`, the
-chart-Levi-Civita parallel-transport CLM
-`chartLeviCivitaParallelCLM g α b X : TangentSpace I b →L[ℝ] TangentSpace I b`
-applied to the chart-basis vector field `X = chartBasisVecFiber (I := I) α k`
-and evaluated at the chart-basis vector `chartBasisVecFiber α k b ∈
-TangentSpace I b` produces the Christoffel-correction tangent vector
-
-```
-Φ_b := chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α k)
-         (chartBasisVecFiber α k b).
-```
-
-Its squared `g`-norm `g.inner b Φ_b Φ_b` is, on the chart `α` base set, a
-finite bilinear sum over the chart Christoffel symbol entries weighted by
-the chart Gram matrix entries; off the chart `α` base set
-`chartLeviCivitaParallelCLM` evaluates to `0` (since the trivialisation
-`symm` evaluates to `0` off its base set), making the integrand globally
-non-negative and bounded under the partition-of-unity weight at `α`.
-
-## Strategy (Option α — intrinsic g-norm path)
-
-The unconditional sup bound on the chart Christoffel symbols
-(`chartChristoffel_bdd_on_pou_tsupport`) combined with the unconditional
-sup bound on each chart Gram matrix entry on the compact partition-of-unity
-support (`chartGramMatrix_entry_isBounded_on_compact` applied to
-`pouTsupport_isCompact`) gives a single non-negative pointwise constant
-`K(g, α, k)` controlling `g.inner b Φ_b Φ_b` on the chart `α`
-partition-of-unity support. Off the support the partition-of-unity weight
-vanishes; off the chart base set the integrand itself vanishes.
-
-The resulting pointwise bound on `chartAtlasPOU I M α · √(g.inner b Φ_b Φ_b)`
-is globally `≤ √K(g, α, k)`. The Riemannian volume measure
-`riemannianVolumeMeasure g` is a finite measure on a compact manifold
-(`riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace`), so
-`MeasureTheory.eLpNorm_le_of_ae_bound` converts the pointwise bound to the
-headline `L²` bound.
-
-This path uses **only intrinsic ingredients** — Christoffel sup on POU
-support, chart Gram entries on POU support, the `g`-inner-product expansion
-in the chart-frame, and the finiteness of the Riemannian volume on a
-compact manifold. No trivialisation operator-norm, no chart-`J` / chart-
-`J⁻¹`, no `HasLocallyConstantChartAt`-style locality hypothesis ever appears.
-
-## Public theorem
-
-* `g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou` — the headline
-  uniform `L²` bound on the partition-of-unity weighted square-root of
-  `g.inner b Φ_b Φ_b`, with the constant depending only on
-  `(g, α, k, atlas)` (in particular, uniform in `(r, s, S)` since the
-  integrand is S-independent).
-
-Downstream consumers package this as the G3 atom in the intrinsic
-gradient-norm decomposition without needing any chart-`J`-routed sup bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -248,8 +188,6 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_apply_chartBasisVec_eq_su
   intro p _
   rfl
 
-/-- Bilinear expansion: `g.inner b (∑_p a p • e_p) (∑_q a q • e_q) =
-∑_p ∑_q (a p · a q) · chartGramMatrix g α b p q`. -/
 private lemma g_inner_sum_smul_chartBasisVec_self_eq_double_sum
     (g : SmoothRiemannianMetric I M) (α : M) (b : M)
     (a : Fin (Module.finrank ℝ E) → ℝ) :
@@ -302,14 +240,6 @@ private lemma g_inner_Phi_eq_double_sum
   exact g_inner_sum_smul_chartBasisVec_self_eq_double_sum (I := I) (M := M) g α b
     (fun p => chartChristoffel (I := I) g α k k p (extChartAt I α b))
 
-/-- Uniform sup bound on `g.inner b Φ_b k Φ_b k` over `tsupport(POU_α)`,
-the chart-`α` partition-of-unity support, where
-`Φ_b k := chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α k)
-  (chartBasisVecFiber α k b)`.
-
-The constant `K` depends only on `(g, α, k)`; it is the product of the
-finite-dimensional double sum
-`Σ_{p,q} (chartChristoffel-sup) · (chartChristoffel-sup) · (chartGram-sup)`. -/
 private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -485,16 +415,6 @@ private theorem g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_o
         (Module.finrank ℝ E : ℝ) ^ 2 * CΓ ^ 2 * C_G := by ring
   linarith
 
-/-- Pointwise bound: `chartAtlasPOU I M α b · √(g.inner b Φ_b Φ_b) ≤ √K`
-globally on `M`, where
-`Φ_b := chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α k)
-  (chartBasisVecFiber α k b)` and `K` is the uniform constant from
-`g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_le_const_on_pouTsupport`.
-
-Off the partition-of-unity support, either the chart-`α` POU weight
-vanishes or the chart-`α` parallel-CLM evaluates to `0` (because the
-chart-`α` trivialisation `symm` evaluates to `0` off its base set, and the
-POU is subordinate to the chart base set). -/
 private theorem chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -554,10 +474,6 @@ private theorem chartAtlasPOU_mul_sqrt_g_inner_Phi_le_sqrt_const_globally
     rw [this]
     exact Real.sqrt_nonneg _
 
-/-- **Intrinsic `L²` bound on the partition-of-unity-weighted square-root
-of the `g`-norm-squared of the Christoffel-correction tangent vector
-`Φ_b k`.** The bound is S-independent (the integrand does not depend on
-any tensor section). -/
 theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_self_eLpNorm_le_uniform_intrinsic
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -638,13 +554,6 @@ theorem chartAtlasPOU_mul_sqrt_g_inner_chartLeviCivitaParallelCLM_chartBasisVec_
   rw [hC_def]
   rw [ENNReal.ofReal_mul (Real.rpow_nonneg hμM_real_nn _)]
 
-/-- **G3 intrinsic L² bound (parametric form).** For ranks `(r, s)`, the
-`L²` norm of the partition-of-unity-weighted square-root of `g.inner b Φ_b Φ_b`
-(`Φ_b := chartLeviCivitaParallelCLM g α b (chartBasisVecFiber α k)
-  (chartBasisVecFiber α k b)`) is bounded uniformly by `ENNReal.ofReal C`
-for every smooth compactly supported `(r, s)`-tensor section `S` (the
-integrand is S-independent). The constant `C` depends only on
-`(g, α, k, atlas)`. -/
 theorem g3_christoffel_atom_eLpNorm_le_uniform_intrinsic_pou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -5,37 +5,6 @@ import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Local diffeomorphism of `expMap g p` at the zero vector
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, and any base point
-`p : M`, the exponential map `expMap g p : T_p M → M` is a `C^1` local
-diffeomorphism at the zero vector.
-
-## Strategy
-
-The exponential map at `p` is `C^1` at `0` and its manifold derivative
-at `0` is the identity. Composing with the local chart `extChartAt I p`
-produces a self-map `f : E → E` (the chart-pushed exponential) that is
-`C^1` at `0` with Fréchet derivative the identity. The Banach inverse
-function theorem yields an open partial homeomorphism `Φ : E → E`
-realising `f` on an open neighborhood of `0`, with a `C^1` inverse
-defined on a neighborhood of `f 0 = (extChartAt I p) p`. We transport
-this data through `extChartAt I p` to produce a
-`PartialDiffeomorph 𝓘(ℝ, E) I E M 1` realising `expMap g p` on an open
-neighborhood of `0`.
-
-## Main results
-
-* `expMap_isLocalDiffeomorphAt_zero` — `expMap g p` is a `C^1` local
-  diffeomorphism at the zero tangent vector.
-
-* `exists_open_nhds_expMap_diffeoOn` — there exists an open neighborhood
-  of `0` in `T_p M` on which `expMap g p` is realised by an explicit
-  partial diffeomorphism.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -57,11 +26,9 @@ section LocalDiffeomorph
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- The chart-pushed exponential map at `p`. -/
 private def chartedExpAt (g : SmoothRiemannianMetric I M) (p : M) : E → E :=
   fun v => (extChartAt I p) (expMap (I := I) g p (show TangentSpace I p from v))
 
-/-- `chartedExpAt g p` is `ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) 1` at `0`. -/
 private lemma chartedExpAt_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) 1 (chartedExpAt (I := I) g p) (0 : E) := by
@@ -78,13 +45,11 @@ private lemma chartedExpAt_contMDiffAt_zero
     exact contMDiffAt_extChartAt (I := I) (x := p) (n := 1)
   exact hext.comp (0 : E) hexp
 
-/-- `chartedExpAt g p` is `ContDiffAt ℝ 1` at `0`. -/
 private lemma chartedExpAt_contDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContDiffAt ℝ 1 (chartedExpAt (I := I) g p) (0 : E) :=
   (chartedExpAt_contMDiffAt_zero (I := I) g p).contDiffAt
 
-/-- The Fréchet derivative of `chartedExpAt g p` at `0` is the identity. -/
 private lemma chartedExpAt_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasFDerivAt (chartedExpAt (I := I) g p) (ContinuousLinearMap.id ℝ E) (0 : E) := by
@@ -117,7 +82,6 @@ private lemma chartedExpAt_hasFDerivAt_zero
   rw [ContinuousLinearMap.id_comp] at hcomp_mfd
   exact hasMFDerivAt_iff_hasFDerivAt.mp hcomp_mfd
 
-/-- A convenient `HasFDerivAt` statement using the refl equiv. -/
 private lemma chartedExpAt_hasFDerivAt_refl
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasFDerivAt (chartedExpAt (I := I) g p)
@@ -128,8 +92,6 @@ private lemma chartedExpAt_hasFDerivAt_refl
     ext v; simp
   rw [hcoe]; exact h
 
-/-- The Banach inverse function theorem applied to `chartedExpAt g p` at
-`0`, with derivative the identity continuous linear equiv. -/
 private def chartedExpAtIFTHomeomorph
     (g : SmoothRiemannianMetric I M) (p : M) : OpenPartialHomeomorph E E :=
   ContDiffAt.toOpenPartialHomeomorph (𝕂 := ℝ)
@@ -152,15 +114,12 @@ private lemma chartedExpAt_zero_mem_IFT_target
   ContDiffAt.image_mem_toOpenPartialHomeomorph_target
     (chartedExpAt_contDiffAt_zero (I := I) g p) _ one_ne_zero
 
-/-- The IFT-produced inverse equals the `.symm` of the open partial
-homeomorph. -/
 private lemma chartedExpAtIFTHomeomorph_symm_eq_localInverse
     (g : SmoothRiemannianMetric I M) (p : M) :
     (chartedExpAtIFTHomeomorph (I := I) g p).symm =
       (chartedExpAt_contDiffAt_zero (I := I) g p).localInverse
         (chartedExpAt_hasFDerivAt_refl (I := I) g p) one_ne_zero := rfl
 
-/-- The IFT-produced inverse is `ContDiffAt 1` at `chartedExpAt g p 0`. -/
 private lemma chartedExpAtIFTHomeomorph_symm_contDiffAt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContDiffAt ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm
@@ -279,11 +238,9 @@ private theorem exists_nice_open_nhds
   exact ⟨U, W, hU_isOpen, h0U, hU_sub_IFT, hU_smooth, hU_extSrc, hW_open, hW_sub_target,
     hW_smooth, hU_chartedExp_W⟩
 
-/-- A choice of open neighborhood `U` of `0 : E`. -/
 private def niceSource (g : SmoothRiemannianMetric I M) (p : M) : Set E :=
   (Classical.choose (exists_nice_open_nhds (I := I) g p))
 
-/-- A choice of open neighborhood `W` of `chartedExpAt g p 0` in `E`. -/
 private def niceSymmDomain (g : SmoothRiemannianMetric I M) (p : M) : Set E :=
   Classical.choose
     (Classical.choose_spec (exists_nice_open_nhds (I := I) g p))
@@ -342,12 +299,10 @@ private lemma chartedExp_niceSource_sub_niceSymmDomain
       niceSymmDomain (I := I) g p :=
   (niceSource_spec (I := I) g p).2.2.2.2.2.2.2.2
 
-/-- The target in `M`: image of `niceSource g p` under `expMap g p`. -/
 private def niceTarget (g : SmoothRiemannianMetric I M) (p : M) : Set M :=
   (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
     '' (niceSource (I := I) g p)
 
-/-- The image `chartedExpAt g p '' niceSource g p` is open in `E`. -/
 private lemma chartedExp_image_niceSource_isOpen
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (chartedExpAt (I := I) g p '' (niceSource (I := I) g p)) := by
@@ -361,7 +316,6 @@ private lemma chartedExp_image_niceSource_isOpen
   rw [heq]
   exact (chartedExpAtIFTHomeomorph (I := I) g p).isOpen_image_of_subset_source hopen hsub
 
-/-- The target characterisation. -/
 private lemma niceTarget_eq_source_inter_preimage
     (g : SmoothRiemannianMetric I M) (p : M) :
     niceTarget (I := I) g p =
@@ -408,7 +362,6 @@ private lemma niceTarget_sub_chartSource
   have := niceTarget_sub_extChartSource (I := I) g p hq
   rwa [extChartAt_source I] at this
 
-/-- For `q ∈ niceTarget g p`, `(extChartAt I p) q ∈ niceSymmDomain g p`. -/
 private lemma extChartAt_niceTarget_sub_niceSymmDomain
     (g : SmoothRiemannianMetric I M) (p : M) :
     (extChartAt I p) '' (niceTarget (I := I) g p) ⊆ niceSymmDomain (I := I) g p := by
@@ -419,7 +372,6 @@ private lemma extChartAt_niceTarget_sub_niceSymmDomain
     exact chartedExp_niceSource_sub_niceSymmDomain (I := I) g p ⟨v, hv, rfl⟩
   exact hin
 
-/-- The candidate local inverse: chart, then IFT inverse. -/
 private def niceInvFun (g : SmoothRiemannianMetric I M) (p : M) : M → E :=
   fun q => (chartedExpAtIFTHomeomorph (I := I) g p).symm ((extChartAt I p) q)
 
@@ -465,7 +417,6 @@ private lemma niceInvFun_right_inv
     expMap (I := I) g p (show TangentSpace I p from v)
   rw [niceInvFun_left_inv (I := I) g p hv]
 
-/-- The inverse `niceInvFun g p` is `ContMDiffOn I 𝓘(ℝ, E) 1` on `niceTarget`. -/
 private lemma niceInvFun_contMDiffOn
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn I 𝓘(ℝ, E) 1 (niceInvFun (I := I) g p) (niceTarget (I := I) g p) := by
@@ -488,8 +439,6 @@ private lemma niceInvFun_contMDiffOn
   have := hsymm_contMDiff.comp hext_on hmaps
   exact this
 
-/-- The exponential map at `p`, packaged as a partial diffeomorphism
-realising it on `niceSource g p`. -/
 private def expMapPartialDiffeomorph
     (g : SmoothRiemannianMetric I M) (p : M) :
     PartialDiffeomorph 𝓘(ℝ, E) I E M 1 where
@@ -519,8 +468,6 @@ private lemma zero_mem_expMapPartialDiffeomorph_source
     (0 : E) ∈ (expMapPartialDiffeomorph (I := I) g p).source :=
   zero_mem_niceSource (I := I) g p
 
-/-- **The exponential map at `p` is a `C^1` local diffeomorphism at the
-zero tangent vector.** -/
 theorem expMap_isLocalDiffeomorphAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsLocalDiffeomorphAt 𝓘(ℝ, E) I 1
@@ -532,8 +479,6 @@ theorem expMap_isLocalDiffeomorphAt_zero
   intro v _hv
   rfl
 
-/-- There exists an open neighborhood of `0 ∈ T_p M` on which `expMap g p`
-is realised by a partial diffeomorphism. -/
 theorem exists_open_nhds_expMap_diffeoOn
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1,

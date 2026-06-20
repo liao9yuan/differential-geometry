@@ -6,49 +6,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.Instances.Real
 import Mathlib.Topology.ContinuousOn
 
-/-!
-# Continuity of the metric pairing of two gradients on a manifold-with-boundary
-
-For a smooth Riemannian metric `g` on a smooth manifold `M` whose local model
-`I : ModelWithCorners ℝ E H` may carry a non-trivial boundary, the pointwise
-metric pairing
-`x ↦ g.inner x (gradFun g f x) (gradFun g h x)`
-is continuous on the entire manifold `M`, including boundary points, whenever
-`f, h : M → ℝ` are smooth.
-
-The argument is purely chart-local. At any `x : M`, the chart at `x` provides
-an open neighbourhood `(chartAt H x).source` on which both gradients can be
-written as
-`gradFun g f y = ∑ i, (gradChartCoeffWithin g x f i y) • (chartBasisVecFiber x i y)`,
-with each chart-coefficient continuous on the chart source (the inverse Gram
-matrix is smooth there, and the within-partial of the chart pullback is
-continuous on the entire chart target by the
-`partialDerivWithin_contDiffOn_top_of_uniqueDiffOn` smoothness on a set with
-unique-diff-within). Bilinear expansion of `g.inner` against the chart-basis
-frame turns the pairing into a polynomial in continuous functions, with
-chart-Gram-matrix-entry coefficients (also smooth on the chart source).
-
-This drops the `tsupport h ⊆ I.interior M` (or symmetric) hypothesis required
-by the existing helpers in the surrounding files, which packaged the gradient
-as a globally smooth tangent section. Continuity alone suffices for L^p / H^1
-constructions on a closed manifold.
-
-## Public theorems (specialised to the half-space model)
-
-* `continuous_g_inner_gradFun_gradFun` — the pointwise pairing
-  `x ↦ g.inner x (gradFun g f x) (gradFun g h x)` is continuous on all of `M`.
-* `bddAbove_g_inner_gradFun_gradFun_of_compactSpace` — boundedness of the
-  range on a compact manifold-with-boundary.
-* `integrable_g_inner_gradFun_gradFun` — integrability against the canonical
-  Riemannian volume measure on a compact manifold-with-boundary.
-
-The chart-local helper lemmas (`g_inner_gradFun_gradFun_continuousOn_*`,
-`gradChartCoeffWithin_continuousOn_source`, …) are stated for an arbitrary
-`I : ModelWithCorners ℝ E H` since the proof technique does not depend on
-the specific half-space structure; the public theorems are then specialised to
-`modelWithCornersEuclideanHalfSpace n` per the headline API.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter
@@ -67,8 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 
 set_option linter.unusedSectionVars false in
-/-- The within-partial of the chart pullback is continuous on the full chart
-target. -/
+
 private lemma partialDerivWithin_scalarOnE_continuousOn_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -89,8 +45,7 @@ private lemma partialDerivWithin_scalarOnE_continuousOn_target
   exact hpartial_target.continuousOn
 
 set_option linter.unusedSectionVars false in
-/-- The within-partial of the chart pullback, pulled back through the chart
-to `M`, is continuous on the chart source. -/
+
 private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -119,11 +74,7 @@ private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
   exact hpartial.comp hchart hmaps
 
 set_option linter.unusedSectionVars false in
-/-- Each chart-coefficient `gradChartCoeffWithin g α f i` is continuous on the
-chart source `(chartAt H α).source`, including boundary points. The expression
-expands to a finite sum of products of the inverse Gram matrix entries (smooth
-on the chart base set, hence continuous on the chart source) and chart-pulled-
-back within-partials (continuous on the chart source by the previous lemma). -/
+
 private lemma gradChartCoeffWithin_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -155,7 +106,7 @@ private lemma gradChartCoeffWithin_continuousOn_source
       (I := I) α hf j
 
 set_option linter.unusedSectionVars false in
-/-- Each chart-Gram-matrix entry is continuous on the chart source. -/
+
 private lemma chartGramMatrix_entry_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -170,10 +121,7 @@ private lemma chartGramMatrix_entry_continuousOn_source
   exact hy
 
 set_option linter.unusedSectionVars false in
-/-- Bilinear expansion of the metric pairing on two chart-local representations
-of gradients. The computation is a direct application of the metric's
-bilinearity (left-linear by construction, right-linear because each fibre
-inner product is a continuous linear map). -/
+
 private lemma g_inner_gradChartLocalWithin_expand
     (g : SmoothRiemannianMetric I M) (α : M) (f h : M → ℝ) (y : M) :
     g.inner y (gradChartLocalWithin (I := I) g α f y)
@@ -235,10 +183,7 @@ private lemma g_inner_gradChartLocalWithin_expand
     rfl
 
 set_option linter.unusedSectionVars false in
-/-- The metric pairing `g.inner x (gradFun g f x) (gradFun g h x)` is
-continuous on the chart source `(chartAt H α).source`. The proof rewrites
-both gradients via the chart-local within-formula
-`gradChartLocalWithin_eq_gradFun`, then applies the bilinear expansion. -/
+
 private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {f h : M → ℝ}
@@ -266,10 +211,7 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
 
 set_option linter.unusedSectionVars false in
-/-- For any smooth scalars `f, h : M → ℝ` on a smooth manifold `(M, g)` whose
-local model `I` may carry a non-trivial boundary, the pointwise metric pairing
-`x ↦ g.inner x (gradFun g f x) (gradFun g h x)` is continuous on all of `M`,
-including boundary points. -/
+
 private lemma g_inner_gradFun_gradFun_continuous_general
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}
@@ -303,19 +245,6 @@ variable {M : Type*} [TopologicalSpace M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- **Continuity of the gradient inner product (closed half-space model).**
-
-For a smooth Riemannian metric `g` on a smooth manifold-with-boundary `M`
-modelled on the canonical Euclidean half-space `EuclideanHalfSpace n`, and
-two smooth scalars `f, h : M → ℝ`, the pointwise metric pairing
-`x ↦ g.inner x (gradFun g f x) (gradFun g h x)` is continuous on the entire
-manifold `M`, including boundary points.
-
-No interior-support hypothesis is required: the chart-local within-formula
-for the gradient is well-posed at boundary points (because
-`partialDerivWithin (extChartAt I α).target` agrees with the standard partial
-derivative on a half-space target with unique-diff-within), and the metric
-inner product is continuous in the base point. -/
 theorem continuous_g_inner_gradFun_gradFun
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
@@ -328,11 +257,6 @@ theorem continuous_g_inner_gradFun_gradFun
   g_inner_gradFun_gradFun_continuous_general
     (I := modelWithCornersEuclideanHalfSpace n) (M := M) g hf hh
 
-/-- **Boundedness of the gradient inner product on a compact manifold.**
-
-On a closed (compact) manifold-with-boundary modelled on
-`EuclideanHalfSpace n`, the range of the gradient inner product is bounded
-above (a continuous real-valued function on a compact space is bounded). -/
 theorem bddAbove_g_inner_gradFun_gradFun_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
@@ -352,12 +276,6 @@ private local instance instMeasurableSpaceM_gradContinuity :
     MeasurableSpace M := borel M
 private local instance instBorelSpaceM_gradContinuity : BorelSpace M := ⟨rfl⟩
 
-/-- **Integrability of the gradient inner product on a compact manifold.**
-
-On a closed (compact) manifold-with-boundary modelled on
-`EuclideanHalfSpace n`, the gradient inner product is integrable against the
-canonical Riemannian volume measure. This follows from continuity (hence
-boundedness) and finiteness of the volume measure. -/
 theorem integrable_g_inner_gradFun_gradFun
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)

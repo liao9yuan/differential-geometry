@@ -4,20 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero
 import Mathlib.Analysis.Normed.Operator.Extend
 
-/-!
-# Banach equivalence: intrinsic `H^0` ≃L `TensorL2`
-
-The intrinsic partition-of-unity-weighted Sobolev Hilbert space at regularity
-order `k = 0` and the metric `L²` Hilbert space of mixed `(r, s)`-tensor
-fields are canonically isomorphic as topological vector spaces over `ℝ`.
-
-This file declares the continuous linear equivalence
-`TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g`, constructed from a
-two-sided uniform equivalence between the pre-Hilbert seminorms on
-`SmoothCcTensor g r s` (the metric `L²` seminorm and the Hilbert-Schmidt
-partition-of-unity-weighted chart-Sobolev seminorm at order `0`).
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -45,11 +31,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The canonical `ℝ`-linear equivalence between the wrapper carrying the
-intrinsic `H^0` pre-Hilbert structure and the underlying smooth
-compactly-supported tensor section type with its `L²` pre-Hilbert
-structure. Both types are `ℝ`-modules built from the same underlying data,
-linked by the wrapper field `toCcTensor`. -/
 noncomputable def smoothCcTensorHsLinearEquiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensorHs g r s 0 ≃ₗ[ℝ] SmoothCcTensor g r s where
@@ -84,17 +65,6 @@ private lemma smoothCcTensorHs_norm_eq
   rw [h_eq] at h1
   linarith
 
-/-- The canonical continuous linear equivalence between the intrinsic
-partition-of-unity-weighted Sobolev Hilbert space at regularity order `0`
-and the metric `L²` Hilbert space of mixed `(r, s)`-tensor fields.
-
-Constructed from a two-sided norm equivalence on the common dense subspace
-`SmoothCcTensor g r s`, via the extension lemma
-`LinearEquiv.extend` applied to the wrapper bijection and the canonical
-embeddings `toComplL` into each completion. The constants `C₁`, `C₂` are
-positive reals indexing the equivalence; they are absorbed as data into
-the equivalence (the underlying `ℝ`-linear map is independent of them, but
-the bound proofs in `LinearEquiv.extend` use them). -/
 noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C₁ C₂ : ℝ)
@@ -179,10 +149,6 @@ noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv
       rw [hT_norm]
       exact h_norm_ge T⟩
 
-/-- The reverse seminorm comparison hypothesis
-`h_norm_ge` of `TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv`,
-proved unconditionally as the order-`0` base case of the reverse Sobolev
-comparison. -/
 theorem exists_tensorPouSobolevHsNorm_zero_le_const_mul_norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C₂ : ℝ, 0 ≤ C₂ ∧
@@ -191,10 +157,6 @@ theorem exists_tensorPouSobolevHsNorm_zero_le_const_mul_norm
   DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm_zero_toReal_le_norm
     (I := I) (M := M) g r s
 
-/-- The continuous linear equivalence
-`TensorPouSobolevHilbert g r s 0 ≃L[ℝ] TensorL2 r s g`, with the reverse
-seminorm comparison `h_norm_ge` discharged unconditionally; only the forward
-comparison `h_norm_le` remains as an input. -/
 noncomputable def TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv_of_forward
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C₁ : ℝ)

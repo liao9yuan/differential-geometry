@@ -1,29 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-/-!
-# Per-chart Hölder bound for the chart-pushed Sobolev norm
-
-For a single chart `α` on a closed manifold `M` modelled on a finite-dimensional
-real inner-product space `E`, the chart-pushed function `chartPushed POU α u`
-has compact support in `chartTargetEuclid α` (the image of `tsupport POU_α`
-under the chart-α-map). On this compact carrier of finite volume the Hölder
-inequality bounds the iterated Sobolev norm at the smaller exponent `p'` by a
-constant multiple of the same norm at the larger exponent `p`.
-
-The main theorem here is `wkpNorm_chartPushed_mono_exponent_holder`: there is a
-finite non-negative constant `C` (depending on `g`, `α`, `k`, `p`, `p'`) such
-that for every `u : M → ℝ` lying in `MemWkpChart g k p`,
-
-  `wkpNorm k p' (chartPushed POU α u) (chartTargetEuclid α)
-    ≤ ENNReal.ofReal C *
-        wkpNorm k p (chartPushed POU α u) (chartTargetEuclid α)`.
-
-This single-chart inequality is the building block for any aggregate
-`wkpNormChart`-level Hölder bound; the per-chart constant depends on the
-volume of the compact carrier of the chart's partition-of-unity weight.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -48,8 +25,6 @@ variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
-/-- The compact carrier inside the chart target image (under `toEuclidean`):
-the image of `tsupport (POU_α)` under the chart-α-map. -/
 private noncomputable def K (α : M) :
     Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
   toEuclidean ''
@@ -79,7 +54,6 @@ private lemma K_subset_target [CompactSpace M] (α : M) :
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).2
 
-/-- The raw chart pushforward of `(POU_α · u)`. -/
 private noncomputable def fRaw (α : M) (u : M → ℝ) :
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   chartPushedRaw (I := I) (M := M) α
@@ -101,9 +75,6 @@ private lemma chartPushed_ae_eq_fRaw [CompactSpace M] (α : M) (u : M → ℝ) :
   chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u
 
-/-- For `f` with `MemWkp j p f Ω` and `MemWkp j p' f Ω`, every iterated weak
-partial of order `j` at exponent `p` is ae-equal to the one at exponent
-`p'` on `volume.restrict Ω`. -/
 private lemma iterWeakPartial_cross_exponent_ae_eq
     {d : ℕ} [NeZero d]
     {p p' : ℝ≥0∞} (hp_one : 1 ≤ p) (hp'_one : 1 ≤ p')
@@ -152,8 +123,6 @@ private lemma iterWeakPartial_cross_exponent_ae_eq
         hg_memWkp_p_of_p' hg_memWkp_p' (fun i : Fin j => β i.succ)
       exact h_bridge1.trans h_bridge2
 
-/-- For `f` in `MemWkp j p Ω` with `tsupport f ⊆ K` (closed K), the iterated
-weak partial of order `j` ae-vanishes on `Ω \ K`. -/
 private lemma iterWeakPartial_ae_zero_on_sdiff_K
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -299,11 +268,6 @@ private lemma iterWeakPartial_ae_eq_indicator
     have hfx : iterWeakPartial (d := d) p j β f Ω x = 0 := hx hx_diff
     simp [Set.indicator_of_notMem h_in_K, hfx]
 
-/-- For `f ∈ MemWkp k p Ω ∩ MemWkp k p' Ω` with `tsupport f ⊆ K` (closed K of
-finite volume, K ⊆ Ω, Ω open), and for `1 ≤ p' ≤ p`, the `L^{p'}`-norm of
-each iterated weak partial of order `j ≤ k` (computed at exponent `p'`) is
-bounded by the `L^p`-norm of the same iterated weak partial (at exponent
-`p`) times `(volume K)^(1/p'.toReal - 1/p.toReal)`. -/
 private lemma eLpNorm_iterWeakPartial_mono_exponent
     {d : ℕ} [NeZero d]
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ_open : IsOpen Ω)
@@ -445,12 +409,6 @@ private lemma exponent_nonneg
     one_div_le_one_div_of_le hp'_pos hp'_le_real
   linarith
 
-/-- For a single chart `α` on a closed manifold, the chart-pushed function
-`chartPushed POU α u` of a function `u` in `MemWkpChart g k p u` has its
-iterated Sobolev norm at the smaller exponent `p' ≤ p` bounded by a constant
-multiple of the same norm at `p`. The constant depends only on the volume of
-the compact carrier of POU_α (image under the chart) and the exponents — it
-is independent of `u`. -/
 theorem wkpNorm_chartPushed_mono_exponent_holder
     [CompactSpace M] [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)

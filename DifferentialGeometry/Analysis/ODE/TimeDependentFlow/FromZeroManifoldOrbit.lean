@@ -3,32 +3,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 
-/-!
-# From-`0` manifold orbit of an interior-`C∞` time-dependent field
-
-This file pushes the Banach **from-`0` Picard layer**
-(`forward_picard_solution_from_zero`) through the basepoint chart, producing the manifold
-flow germ at `t = 0` for a time-dependent vector field `X` on a closed manifold `M` that is
-interior-`C∞` on `(0, T) ×ˢ univ` and continuous up to `t = 0` on `Icc 0 T ×ˢ univ`.
-
-For each base point `x : M` we choose the chart `α := x` *pinned to the initial point* and run
-the from-`0` Picard solution of the **trivialised** chart field
-`F s c = tangentCoordChange I (φ.symm c) α (φ.symm c) (X s (φ.symm c))`
-(the genuine chart velocity, `field_form_identity_trivreading_eq_chartvelocity`).  The chart
-solution pulls back to the manifold orbit `Φ s = (extChartAt I α).symm (γ_E s)`, on which the
-chart-coordinate one-sided derivative is the `tangentCoordChange` form and — after the
-pushforward cancellation `pushforward_velocity_cancellation` — the manifold velocity is the
-**bare** geometric velocity `(1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))`.  Because the chart is
-pinned to the initial point (never read off a moving orbit point), the chart reads here are
-`T1`-safe.
-
-## Main results
-
-* `fromZero_manifold_orbit_of_lipschitz` — per base point, the from-`0` orbit with
-  `Φ 0 = x`, the `tangentCoordChange` chart-coordinate one-sided derivative on `Ico 0 δ`,
-  and the bare manifold velocity on `Ico 0 δ`, from an explicit chart-field Lipschitz datum.
--/
-
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 
@@ -40,10 +14,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
 
-/-- The **trivialised chart field** of a time-dependent vector field `X`, read in the chart
-at `α`: `F s c = tangentCoordChange I (φ.symm c) α (φ.symm c) (X s (φ.symm c))`, equal to the
-`.2`-component of the chart trivialization applied to the bundle value at `φ.symm c`
-(`field_form_identity_trivreading_eq_chartvelocity`). -/
 noncomputable def fromZeroChartField (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) :
     ℝ → E → E :=
   fun s c =>
@@ -56,12 +26,6 @@ lemma fromZeroChartField_eq_tangentCoordChange
       = tangentCoordChange I ((extChartAt I α).symm c) α ((extChartAt I α).symm c)
           (X s ((extChartAt I α).symm c)) := rfl
 
-/-- **Interior joint-`C∞` of the trivialised chart field on a time-window.**
-
-The from-`0` companion of `chart_pushforward_field_jointContDiff`, restricted to the open time
-interval `(0, T)` where the interior datum `hint` lives.  On `(0, T) ×ˢ Metric.ball x₀ ρ` (with
-the ball inside the chart target), the trivialised chart field `fromZeroChartField X α` is jointly
-`C∞`.  The proof transcribes the global version with `univ` replaced by `Ioo 0 T`. -/
 theorem fromZeroChartField_jointContDiffOn_Ioo
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -119,13 +83,6 @@ theorem fromZeroChartField_jointContDiffOn_Ioo
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp
 
-/-- **Time-continuity of the trivialised chart field up to `t = 0`.**
-
-For a fixed chart coordinate `c`, the trivialised chart field `s ↦ fromZeroChartField X α s c`
-is the fixed continuous linear map `tangentCoordChange I (φ.symm c) α (φ.symm c)` applied to the
-section value `s ↦ X s (φ.symm c)`, which is continuous up to `t = 0` by the `t = 0`-continuity
-datum `hcont0`.  No moving-base smoothness is required (the chart base is the fixed point
-`φ.symm c`). -/
 theorem fromZeroChartField_continuousOn_time_from_zero
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T δ : ℝ} (hδT : δ ≤ T)
     (hcont0 : ContinuousOn
@@ -152,19 +109,6 @@ theorem fromZeroChartField_continuousOn_time_from_zero
     exact hcomp.mono (Set.Icc_subset_Icc_right hδT)
   exact T₀.continuous.comp_continuousOn hXy
 
-/-- **A-priori confinement of a from-`0` ODE solution to the validity ball.**
-
-Banach-space helper.  If `γ : ℝ → E` is continuous on `[0, δ]`, starts at the center `x₀`, has
-the one-sided right derivative `f t (γ t)` on `[0, δ)`, the field is norm-bounded by `L` on the
-closed ball `closedBall x₀ a` (for times in `[0, δ]`), and the **strict** validity `L · δ < a`
-holds, then `γ s ∈ closedBall x₀ a` for every `s ∈ [0, δ]`.
-
-The proof is the standard a-priori continuation estimate: the set
-`{t | dist (γ t) x₀ ≤ L · t}` meets `[0, δ]` on a closed subset and contains `0`; at any
-confined interior point `x` the strict margin `L · x ≤ L · δ < a` puts `γ x` in the *open* ball,
-so the velocity bound `‖f u (γ u)‖ ≤ L` holds on a whole neighborhood, and the mean-value
-segment bound `‖γ z − γ x‖ ≤ L · (z − x)` propagates the estimate to a point beyond `x`
-(`IsClosed.Icc_subset_of_forall_exists_gt`). -/
 private theorem fromZero_orbit_confined
     {f : ℝ → E → E} {x₀ : E} {a L : ℝ} {δ : ℝ} (hL : 0 ≤ L)
     (γ : ℝ → E) (hγ_init : γ 0 = x₀)
@@ -272,21 +216,6 @@ private theorem fromZero_orbit_confined
     rw [hsδ]; exact hLδ
   · exact le_of_lt (hbound_to_openball s ⟨hs.1, hsδ⟩ (hmain hs))
 
-/-- **From-`0` manifold orbit from an explicit chart-field Lipschitz/norm datum.**
-
-Fix the basepoint chart `α` and a closed coordinate ball `closedBall x₀ a ⊆ (extChartAt I α).target`
-around `x₀ = extChartAt I α α`.  Given that the trivialised chart field `fromZeroChartField X α`
-is, on `Icc 0 δ`, Lipschitz-in-space (`K`) on that ball, continuous-in-time on the ball, and
-norm-bounded by `L`, with the **strict** validity condition `L · δ < a - r` and `0 < r`, the
-from-`0` Banach Picard solution pulls back through the chart to a manifold orbit `Φ : ℝ → M`
-with `Φ 0 = α`, staying inside the chart source on `Ico 0 δ`, with the `tangentCoordChange`
-chart-coordinate one-sided derivative and the **bare** manifold velocity on `Ico 0 δ`.
-
-The chart `α` is pinned to the initial point throughout (the orbit value is never read off a
-moving point as a basepoint), so the chart reads are `T1`-safe.  The orbit is confined to the
-validity ball by `fromZero_orbit_confined`; the bare velocity is produced from the
-chart-coordinate derivative by `chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt`
-followed by `pushforward_velocity_cancellation`. -/
 theorem fromZero_manifold_orbit_of_lipschitz
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     {a r : ℝ≥0} {K L : ℝ≥0} {δ : ℝ} (hδ : 0 < δ)
@@ -330,8 +259,7 @@ theorem fromZero_manifold_orbit_of_lipschitz
     have : (extChartAt I α).symm (γE s) ∈ (extChartAt I α).source :=
       (extChartAt I α).map_target htgt
     rwa [extChartAt_source] at this
-  · -- chart-coordinate one-sided derivative
-    intro t ht
+  · intro t ht
     have hticc : t ∈ Set.Icc (0 : ℝ) δ := ⟨ht.1, le_of_lt ht.2⟩
     have hIco_mem : Set.Ico (0 : ℝ) δ ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
       have hIco_eq : Set.Ico (0 : ℝ) δ = Set.Ici (0 : ℝ) ∩ Set.Iio δ := by
@@ -353,8 +281,7 @@ theorem fromZero_manifold_orbit_of_lipschitz
         ((extChartAt I α).right_inv (hball (hconf t hticc)))
     rw [hvel_eq] at hd'
     exact hd'
-  · -- bare manifold velocity
-    intro t ht
+  · intro t ht
     have hticc : t ∈ Set.Icc (0 : ℝ) δ := ⟨ht.1, le_of_lt ht.2⟩
     have htgt_t : γE t ∈ (extChartAt I α).target := hball (hconf t hticc)
     have hIco_mem : Set.Ico (0 : ℝ) δ ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
@@ -389,27 +316,6 @@ theorem fromZero_manifold_orbit_of_lipschitz
     rw [← hvelCLM]
     exact hbridge
 
-/-- **Uniform-in-time (up to `t = 0`) and uniform-in-base Lipschitz datum for the trivialised
-chart field, on the compact manifold.**
-
-ISOLATED DEFERRED INPUT (the single posited fact of this file).  For a field `X` interior-`C∞`
-on `(0, T) ×ˢ univ` (`hint`), continuous up to `t = 0` (`hcont0`), with chart-gradient continuous
-up to `t = 0` at every base point (`hgrad0`), there are *uniform* constants `a, δ₀ > 0` (with
-`δ₀ ≤ T`) and a uniform Lipschitz constant `K` such that, for **every** base point `α : M`, the
-ball `closedBall (extChartAt I α α) a` lies in the chart target and the trivialised chart field
-`fromZeroChartField X α t` is `K`-Lipschitz on it, uniformly for `t ∈ [0, δ₀]`.
-
-This is TRUE: per base point, writing `F t = chartTrivRepr α (X t) = chartMovingTriv α · ∘ chartRawRepr α (X t)`
-on the ball, the spatial Fréchet derivative decomposes (product rule) as
-`chartMovingTriv α c · (fderiv (chartRawRepr α (X t)) c) + (fderiv (chartMovingTriv α) c) · (X t (φ.symm c))`;
-the moving-trivialization and its derivative are `C∞`-in-`c` (smooth-structure, bounded on the
-compact ball), `fderiv (chartRawRepr α (X t)) c` is bounded up to `t = 0` by `hgrad0`, and
-`X t (φ.symm c)` is bounded up to `t = 0` by `hcont0`; the resulting derivative bound yields a
-Lipschitz constant by the mean-value inequality on the convex ball, made uniform in the base point
-by compactness of `M` (a finite subcover of charts).  The derivation requires the general-point
-trivialised-gradient product rule and the moving-trivialization smoothness (the `ConventionBridge`
-chart-calculus layer, whose current `chartTrivRepr_fderiv_eq` is stated only at the basepoint), so it
-is isolated here as the single deferred input; consumers transit `sorryAx`. -/
 theorem fromZeroChartField_uniform_lipschitz_from_zero [CompactSpace M]
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -431,14 +337,6 @@ theorem fromZeroChartField_uniform_lipschitz_from_zero [CompactSpace M]
             (Metric.closedBall (extChartAt I α α) a) := by
   sorry
 
-/-- **Orbit assembly on a time window from a ball Lipschitz datum and a center-norm bound.**
-
-Given, at base point `α`, a chart ball `closedBall x₀ a ⊆ (extChartAt I α).target`, a `K`-Lipschitz
-datum for `fromZeroChartField X α t` on the ball for `t ∈ [0, δ_w]`, an explicit center-norm bound
-`Mbd`, the time-continuity datum (`hcont0`, with `δ_w ≤ T`), and the strict validity
-`(Real.toNNReal Mbd + K · a) · δ_w < a/2`, the core orbit construction produces the manifold orbit
-on `Ico 0 δ_w`.  The Picard norm bound is `Real.toNNReal Mbd + K · a`, obtained from the Lipschitz
-datum and the center bound. -/
 private theorem fromZero_orbit_of_window
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T : ℝ}
     {a : ℝ≥0} {δ_w : ℝ} {K : ℝ≥0} {Mbd : ℝ}
@@ -489,8 +387,6 @@ private theorem fromZero_orbit_of_window
     (fun c _ => fromZeroChartField_continuousOn_time_from_zero (I := I) X α hδw_le hcont0 c)
     hnorm hstrict' hr_pos
 
-/-- The center value `fromZeroChartField X α t (extChartAt I α α) = X t α`: the self
-`tangentCoordChange` is the identity. -/
 private lemma fromZeroChartField_center_eq
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ) :
     fromZeroChartField (I := I) X α t (extChartAt I α α) = (X t α : TangentSpace I α) := by
@@ -499,18 +395,6 @@ private lemma fromZeroChartField_center_eq
   rw [fromZeroChartField_eq_tangentCoordChange, hsymm]
   exact tangentCoordChange_self (I := I) (mem_extChartAt_source α)
 
-/-- **Uniform from-`0` manifold orbit germ over the compact manifold.**
-
-Combines the (single posited) uniform Lipschitz datum, the time-continuity datum, and the orbit
-construction.  For `X` interior-`C∞` on `(0, T) ×ˢ univ` and continuous (with chart-gradient at
-every base point) up to `t = 0`, there is a **single** positive `δ` (with `δ ≤ T`) such that every
-base point `α` admits an orbit `Φ : ℝ → M` with `Φ 0 = α`, staying in the chart source on
-`Ico 0 δ`, with the `tangentCoordChange` chart-coordinate one-sided derivative and the **bare**
-manifold velocity on `Ico 0 δ`.
-
-The uniform `δ` is built from the uniform ball radius and Lipschitz constant of the posited datum
-together with the uniform center bound `‖X t α‖ ≤ Mbd` over the compact `Icc 0 T ×ˢ univ`
-(`hcont0`, `univ = M` compact). -/
 theorem fromZero_manifold_orbit_uniform_delta [CompactSpace M]
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -577,18 +461,6 @@ theorem fromZero_manifold_orbit_uniform_delta [CompactSpace M]
   · show ((Real.toNNReal Mbd + K * a : ℝ≥0) : ℝ) * δ < (a : ℝ) / 2
     rw [← hL]; exact hstrict
 
-/-- **From-`0` forward orbit germ flow: a single `Φ : ℝ → M → M` on the seed window.**
-
-Assembles the per-base from-`0` orbits of `fromZero_manifold_orbit_uniform_delta` (one orbit
-`Φ_α : ℝ → M` per base point `α`, all on a common uniform window `Ico 0 δ`) into a *single*
-two-argument flow `Φ : ℝ → M → M` by choosing, for each base point `x`, the orbit through `x`
-and setting `Φ s x = Φ_x s`.  The resulting germ flow has `Φ 0 = id`, stays in the chart source
-on `Ico 0 δ`, and carries both the `tangentCoordChange` chart-coordinate one-sided derivative and
-the **bare** geometric velocity `(1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))` on `Ico 0 δ`.
-
-This is the `[0, δ)` seed of the forward flow: the chart pinned to each initial point is never
-read off a moving orbit point, so all chart reads are `T1`-safe.  It is the single-`Φ` packaging
-of the uniform-delta orbit family, the starting datum from which the interior flow is extended. -/
 theorem fromZero_forward_orbit_germ_flow [CompactSpace M]
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

@@ -3,82 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CurvatureDefect
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFiberNormBound
 
-/-!
-# The pointwise-to-`L²` reduction for the curvature defect bound `hcurv`
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space
-`E`, the generalized order-`2` covariant Gårding estimate
-`secondCovGrad_l2NormSq_le_rawConnLap_gen` (`TensorConnLapSecondOrderGardingSobolevCurv.lean`)
-consumes a **curvature defect `L²` bound** `hcurv` of the shape
-```
-‖Curv‖_{L²} ≤ C₀ · (‖T₀‖_{L²} + ‖∇T₀‖_{L²} + ‖∇²T₀‖_{L²}),
-```
-where `Curv : SmoothCcTensor g 0 3` is the canonical commutator defect
-`covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)`, `∇T₀ = covGrad g 0 2 T₀` and
-`∇²T₀ = covGrad g 0 3 (covGrad g 0 2 T₀)`.
-
-This file supplies the **analytic packaging** that turns a *pointwise* fibre-norm bound on
-the defect — the form in which the genuine third-order Weitzenböck curvature reconciliation
-(`Tensor3rdCurv` + the moving-frame residual, `CurvatureDefect.lean`)
-delivers its control — into the `L²` inequality of the exact shape consumed by
-`secondCovGrad_l2NormSq_le_rawConnLap_gen`. The bridge corollary
-`tensorL2Norm_sq_eq_integral_riemannianFiberNormSq`
-(`RiemannianFiberNormSqTensorInnerBridge.lean`) converts the squared metric `L²` norm of a
-tensor section field into the integral of its intrinsic Riemannian fibre norm; the packaging
-then chains: `integral` monotonicity (`MeasureTheory.integral_mono_of_nonneg`), the bridge
-corollary on each of the four squared norms, and `Real.sqrt` monotonicity with the elementary
-`p² + q² + r² ≤ (p + q + r)²` (`p, q, r ≥ 0`).
-
-## Main results
-
-* `integrable_riemannianFiberNormSq_toSection` — square-integrability of the intrinsic fibre
-  norm of a compactly-supported smooth tensor section, transported from `MemL2` of its model
-  field through the fibre-norm bridge equality.
-
-* `tensorL2Norm_le_of_pointwise_fiberNormSq_bound` — the headline packaging: from a pointwise
-  fibre-norm bound
-  `riemannianFiberNormSq g 0 3 x (Curv.toSection x) ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x)`
-  (for every `x`, with `C₀ ≥ 0`), conclude the curvature defect `L²` bound `hcurv`
-  `‖Curv‖_{L²} ≤ C₀ · (‖T₀‖_{L²} + ‖∇T₀‖_{L²} + ‖∇²T₀‖_{L²})` of the exact shape consumed by
-  `secondCovGrad_l2NormSq_le_rawConnLap_gen`.
-
-* `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` — the Gårding assembly with
-  the curvature `L²` bound replaced by its sufficient *pointwise* fibre-norm form: the
-  commutator equation `hcomm` is discharged automatically through the canonical defect
-  `covGradRoughLapCurv` (`covGradRoughLap_commutator_eq`), and the `L²` bound `hcurv` is
-  supplied by `tensorL2Norm_le_of_pointwise_fiberNormSq_bound` from the pointwise hypothesis.
-
-## The remaining gap (documented, not assumed)
-
-The single remaining ingredient for the unconditional `hcurv` — and hence for the
-unconditional `secondCovGrad_l2NormSq_le_rawConnLap` (no `hcomm`/`hcurv` hypotheses) — is the
-**pointwise** fibre-norm bound
-```
-riemannianFiberNormSq g 0 3 x (covGradRoughLapCurv g T₀).toSection x
-  ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x),
-```
-the hypothesis of `tensorL2Norm_le_of_pointwise_fiberNormSq_bound` /
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`. That bound is **not** packaged
-here: it is the genuine third-order tensor Weitzenböck content. Its closure requires the
-slot-`0` Christoffel matching (obstruction 1 of `FreeDirectionReduction.lean`) — the
-torsion-free identification of `Δ_∇(∇T₀)(x)(unit)` (curried) with the fixed-frame trace
-`∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)` — followed by the two genuinely-distinct fibre-norm bounds:
-the `Tensor3rdCurv` curvature-contraction bound (controlled fibrewise by `rfns(T₀)`,
-`rfns(∇T₀)`, `rfns(∇²T₀)` via `Tensor3rdCurvFiberNormBound.lean` and the Parseval curvature
-lemmas) and the moving-frame residual bound (`covGradRoughLapMovingFrameResidual`, controlled
-by `rfns(∇²T₀)`). Both obstructions are documented as open in
-`FreeDirectionReduction.lean` / `CurvatureDefect.lean`; this file isolates the analytic packaging so that
-closing them immediately yields the unconditional estimate.
-
-## Sign / convention
-
-Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` for the rough Laplacian
-`rawTensorConnLapSmooth`. The covariant gradient `covGrad g 0 s` raises the tensor rank from
-`(0, s)` to `(0, s + 1)`. All fibre norms are the intrinsic Riemannian fibre norm
-`riemannianFiberNormSq` — never a model-space norm or chart operator norm, which are
-genuinely unbounded on multi-chart manifolds.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -112,9 +36,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
-/-- **Integrability of the intrinsic fibre norm.** For a smooth compactly-supported
-`(r, s)`-tensor section `S`, the map `x ↦ riemannianFiberNormSq g r s x (S.toSection x)` is
-Bochner-integrable against the Riemannian volume measure. -/
+
 theorem integrable_riemannianFiberNormSq_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     MeasureTheory.Integrable
@@ -131,21 +53,7 @@ theorem integrable_riemannianFiberNormSq_toSection
     (S.toSection x)).symm
 
 set_option linter.unusedSectionVars false in
-/-- **Pointwise-to-`L²` packaging for `hcurv`.** Let `T₀ : SmoothCcTensor g 0 2` and
-`Curv : SmoothCcTensor g 0 3`, and let `C₀ ≥ 0`. If, for every `x`, the intrinsic fibre norm
-of `Curv` at `x` is bounded by `C₀²` times the sum of the intrinsic fibre norms of `T₀`,
-`∇T₀ = covGrad g 0 2 T₀` and `∇²T₀ = covGrad g 0 3 (covGrad g 0 2 T₀)`:
-```
-riemannianFiberNormSq g 0 3 x (Curv.toSection x)
-  ≤ C₀² · ( riemannianFiberNormSq g 0 2 x (T₀.toSection x)
-          + riemannianFiberNormSq g 0 3 x ((∇T₀).toSection x)
-          + riemannianFiberNormSq g 0 (3 + 1) x ((∇²T₀).toSection x) ),
-```
-then the curvature defect `L²` bound `hcurv` holds:
-```
-‖Curv‖_{L²} ≤ C₀ · (‖T₀‖_{L²} + ‖∇T₀‖_{L²} + ‖∇²T₀‖_{L²}).
-```
-This is the exact `hcurv` hypothesis of `secondCovGrad_l2NormSq_le_rawConnLap_gen`. -/
+
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (Curv : SmoothCcTensor g 0 3) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)
@@ -279,22 +187,7 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C₀ * (nT + nGrad + nHess))]
 
 set_option linter.unusedSectionVars false in
-/-- **Order-`2` covariant Gårding estimate from a pointwise curvature defect bound.** Let `g`
-be a smooth Riemannian metric on a closed manifold `M` and `T₀ : SmoothCcTensor g 0 2`. If the
-canonical commutator defect `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)` satisfies the
-pointwise fibre-norm bound
-```
-riemannianFiberNormSq g 0 3 x (covGradRoughLapCurv g T₀).toSection x
-  ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x)
-```
-for every `x`, with `C₀ ≥ 0`, then
-```
-‖∇²T₀‖²_{L²} ≤ (2 + 3 C₀ + 2 C₀²) · (‖Δ_∇ T₀‖²_{L²} + ‖T₀‖²_{L²}),
-```
-where `∇²T₀ = covGrad g 0 3 (covGrad g 0 2 T₀)`, `∇T₀ = covGrad g 0 2 T₀`, and
-`Δ_∇ T₀ = rawTensorConnLapSmooth g 0 2 T₀`. The commutator equation `hcomm` is discharged
-through `covGradRoughLap_commutator_eq`; the curvature `L²` bound `hcurv` is discharged from
-the pointwise hypothesis through `tensorL2Norm_le_of_pointwise_fiberNormSq_bound`. -/
+
 theorem secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)
     (hpt : ∀ x : M,

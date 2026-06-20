@@ -1,63 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovGradL2InnerDirichletBridge
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 
-/-!
-# Lowered directional reductions for the connection-Laplacian Green identity
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file develops the *lowered directional* reductions
-of the pointwise Dirichlet integrand `tensorCovDerivPointwiseInner g 0 s T v`
-that feed the integrated Green identity for the rough (connection) Laplacian.
-
-The target Green identity, for two smooth compactly-supported `(0, s)`-tensor
-sections `T`, `v`, is
-
-```
-tensorL2Inner g 0 (s + 1) (covGrad g 0 s T).toFun (covGrad g 0 s v).toFun
-  = − tensorL2Inner g 0 s (rawTensorConnLapSmooth g 0 s T).toFun v.toFun,
-```
-
-obtained by combining the gradient-side bridge
-`tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner` with the
-diagonal-frame reduction and the directional integration-by-parts machinery.
-
-The integration-by-parts machinery is stated entirely in *lowered* directional
-form, through `loweredCovDerivAlongVF` and the covariant `(0, r + s)` inner
-product `tensorInnerPointwise_0s`, whereas the Dirichlet integrand
-`tensorCovDerivPointwiseInner` and the rough Laplacian `rawTensorConnLap` are
-phrased through the *un-lowered* `(r, s)`-tensor covariant derivative. The
-reductions in this file are the bridge between the two presentations at rank
-`r = 0`.
-
-## Main results
-
-* `toModel_liftedTensorSection_zero_eq_apply_unit_reindex` — the general `(0, s)`
-  reindexed unit-evaluation of the lifted section (the genuine `(0, s)` analogue
-  of the committed `(0, 2)` lemma `liftedTensorSection_zero_eq_apply_unit`,
-  recorded through the `Fin.natAdd 0` index reindexing the lowering map inserts).
-
-* `tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two` — at
-  `(0, 2)`, the mixed pointwise inner product of two un-lowered directional
-  covariant derivatives equals the covariant `(0, 0 + 2)` inner product of the
-  corresponding lowered directional derivatives `loweredCovDerivAt`.
-
-* `tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two` — at `(0, 2)`,
-  the full diagonal-frame reduction: for a smooth tangent frame field `B` that is
-  `g_b`-orthonormal at the evaluation point `b`, the inverse-Gram-weighted
-  Dirichlet integrand equals the plain diagonal sum over `B` of the covariant
-  `(0, 0 + 2)` inner products of the lowered directional derivatives. This is the
-  precise per-point integrand consumed by the directional integration-by-parts
-  machinery once a fixed smooth orthonormal frame field is supplied (chart by
-  chart through the partition of unity, with `B = chartFrameNormGlobalSmooth`).
-
-At rank `r = 0` the metric index-lowering is metric-free (it contracts no upper
-slots), so the lowering intertwiner needs no metric-compatibility input. Rank
-`(0, 2)` is the rank that the downstream Ricci–DeTurck application requires (the
-metric perturbation is a `(0, 2)`-tensor); there the lowered index `0 + 2`
-reduces definitionally to `2`, so the committed `(0, 2)` intertwiner applies
-directly.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -92,16 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Rank-`0` lowering is evaluation at the unit `(0, 0)`-tensor (general `(0, s)`),
-in reindexed-evaluation form.** At rank `r = 0` the model coercion of the
-metric-lowered `(0, 0 + s)`-tensor section value `liftedTensorSection g 0 s S y`,
-evaluated on a tuple `u : Fin (0 + s) → E`, equals the model coercion of `S y`
-evaluated at the constant unit `(0, 0)`-tensor `ofModel (constOfIsEmpty 1)` and
-the reindexed tuple `fun j : Fin s => u (Fin.natAdd 0 j)`. This is the genuine
-`(0, s)` analogue of the committed `(0, 2)` lemma
-`liftedTensorSection_zero_eq_apply_unit`: at general `s`, the source index `s`
-and the lowered index `0 + s` differ as Lean types, so the relation is recorded
-through the `Fin.natAdd 0` reindexing inserted by the lowering map. -/
 lemma toModel_liftedTensorSection_zero_eq_apply_unit_reindex
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -120,18 +53,6 @@ lemma toModel_liftedTensorSection_zero_eq_apply_unit_reindex
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))]
   rw [Tensor0SSpace.toModel_ofModel]
 
-/-- **Mixed inner product of two un-lowered directional derivatives equals the
-covariant `(0, 0 + 2)` inner product of the lowered derivatives (at `(0, 2)`).**
-For smooth `(0, 2)`-tensor sections `W`, `S`, a point `x`, and tangent vectors
-`a`, `b`,
-
-  `tensorInnerPointwise g 0 2 x (∇_a W) (∇_b S)
-     = tensorInnerPointwise_0s (0 + 2) g x (∇_a^lowered W) (∇_b^lowered S)`,
-
-where `∇_·` is the un-lowered `(0, 2)`-tensor covariant derivative and `∇_·^lowered`
-the lowered directional derivative `loweredCovDerivAt`. Both sides are the same
-metric contraction; the identity is the index-lowering intertwiner applied to
-each argument together with the definition of `tensorInnerPointwise`. -/
 theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
     (g : SmoothRiemannianMetric I M)
     (W S : SmoothCcTensor g 0 2) (x : M) (a b : TangentSpace I x) :
@@ -159,20 +80,6 @@ theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
         (loweredCovDerivAt (I := I) (M := M) g 0 2 S.toSection x b) from
     (loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S.toSection x b).symm]
 
-/-- **Diagonal-frame reduction of the Dirichlet integrand into the lowered
-directional form (at `(0, 2)`).** For smooth `(0, 2)`-tensor sections `T`, `v`,
-a point `b`, and a smooth tangent frame field `B` whose values `B i b` are
-`g_b`-orthonormal at `b`, the inverse-Gram-weighted Dirichlet integrand equals
-the plain diagonal sum over the frame of the covariant `(0, 0 + 2)` inner
-products of the lowered directional covariant derivatives:
-
-```
-tensorCovDerivPointwiseInner g 0 2 T v b
-  = ∑ i, tensorInnerPointwise_0s (0 + 2) g b
-          (loweredCovDerivAt g 0 2 T.toSection b (B i b))
-          (loweredCovDerivAt g 0 2 v.toSection b (B i b)).
-```
--/
 theorem tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (b : M)

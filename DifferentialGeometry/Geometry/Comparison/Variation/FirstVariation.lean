@@ -22,23 +22,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 
 set_option linter.unusedSectionVars false
 
-/-!
-# First variation of arc length
-
-This file proves the first variation of length of a smooth two-parameter
-variation `f : ℝ → ℝ → M`, together with the covariant-derivative calculus it
-rests on:
-
-* metric compatibility (the Leibniz rule) for the `g`-inner product of two
-  sections along a curve, at the `C²` and the smooth-curve levels;
-* the intrinsic mixed-covariant commutation `∇_s ∂_t f = ∇_t ∂_s f` at the
-  central curve, both as a smooth and as a `C²` statement;
-* differentiability of the canonical chart-coordinate representations of the
-  variation and velocity fields along the central curve;
-* the first variation formulas with fixed and with free endpoints, and the
-  vanishing of the first variation along a unit-speed geodesic.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle MeasureTheory intervalIntegral
@@ -63,23 +46,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Metric compatibility (Leibniz rule) for the `g`-inner product of two
-sections along a curve, `C²`-level hypotheses.** For a curve `γ` continuous at
-`t₀` whose pinned chart-`(γ t₀)`-coordinate trajectory `chartCurve (γ t₀) γ` is
-differentiable at `t₀`, and two sections `V, W : ∀ t, TangentSpace I (γ t)`
-whose pinned chart-`(γ t₀)`-coordinate representations are differentiable at
-`t₀`, the `t`-derivative of `t ↦ g.inner (γ t) (V t) (W t)` at `t₀` equals
-`⟨∇_t V, W⟩_g + ⟨V, ∇_t W⟩_g`, where `∇_t` is the intrinsic covariant
-derivative `covDerivAlong g γ · t₀`. This is the genuine metric-compatibility
-identity (`∇g = 0`), proved by pinning the chart at the foot `γ t₀`,
-identifying the inner product with the chart-Gram bilinear form, and applying
-the covariant product rule `chartGramAlongCurve_hasDerivAt_covariant`.
 
-The hypotheses are the minimal regularity the proof consumes: continuity of `γ`
-at `t₀` (for the chart-source neighbourhood) and differentiability of the
-chart trajectory and the two chart-reps at `t₀`. The smooth-curve form
-`metric_compat_hasDerivAt_inner` is a wrapper supplying these from
-`ContMDiff … ∞ γ`. -/
 lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
@@ -224,11 +191,7 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
   simp only [← hDVchart, ← hDWchart]
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Metric compatibility (Leibniz rule) for the `g`-inner product of two
-sections along a smooth curve.** Smooth-curve wrapper of
-`metric_compat_hasDerivAt_inner_of_chartCurveDeriv`: from `ContMDiff … ∞ γ` it
-supplies continuity of `γ` at `t₀` and differentiability of the chart trajectory
-`chartCurve (γ t₀) γ` at `t₀`. -/
+
 lemma metric_compat_hasDerivAt_inner
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -251,15 +214,7 @@ lemma metric_compat_hasDerivAt_inner
     hγ.continuous.continuousAt hchartDeriv hVdiff hWdiff
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Intrinsic mixed-covariant commutation at the central curve.** For a smooth
-two-parameter variation `f`, the transverse covariant derivative of the
-longitudinal velocity at `s = 0` equals the longitudinal covariant derivative of
-the transverse (variation-field) velocity, both viewed as intrinsic
-`covDerivAlong` vectors at the common foot `f 0 t`:
-`∇_s ∂_t f|_{s = 0} = ∇_t ∂_s f|_{s = 0}`. This is the intrinsic lift of
-`commute_ds_dt_fixed_chart`: both sides have foot `f 0 t`, and their chart-`(f 0 t)`
-coordinate representations are exactly the two sections of the fixed-chart
-commutation lemma. -/
+
 lemma commute_ds_dt_intrinsic
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -345,24 +300,7 @@ lemma commute_ds_dt_intrinsic
 
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Intrinsic mixed-covariant commutation at the central curve (`C²`
-hypotheses).** For a two-parameter map `f : ℝ → ℝ → M`, the transverse covariant
-derivative of the longitudinal velocity at `s = 0` equals the longitudinal
-covariant derivative of the transverse (variation-field) velocity, both as intrinsic
-`covDerivAlong` vectors at the common foot `f 0 t`:
-`∇_s ∂_t f|_{s = 0} = ∇_t ∂_s f|_{s = 0}`. The regularity is assumed only at the
-`C²`-level: the chart-`(f 0 t)`-pullback of `f` is `ContDiffAt ℝ 2` at `(0, t)`
-(`hF2`), the longitudinal and transverse slices are eventually
-`ContMDiffAt 𝓘(ℝ, ℝ) I 2` near the relevant points (`hslice_u`, `hslice_v`), and
-the slice basepoints are continuous (`htransverse_cont`, `hcentral_cont`).
 
-This is the `C²`-relaxed sibling of `commute_ds_dt_intrinsic`: the chain-rule bridge
-specialises to the `MDifferentiableAt`-level
-`chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`, and the fixed-chart
-commutation is supplied directly by `commute_ds_dt_fixed_chart_C2` rather than
-through the `IsSmoothVariation` wrapper. It is the form consumed by the radial
-geodesic variation behind Gauss's lemma, whose variation is jointly `C²` but not
-known to be jointly `C^∞`. -/
 theorem covDerivAlong_commute_transverse_longitudinal_of_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f 0 t) (f p.1 p.2)) (0, t))
@@ -442,10 +380,6 @@ theorem covDerivAlong_commute_transverse_longitudinal_of_variation
   rw [hchartL, hchartR]
   rw [hcommute']
 
-/-- The chart-pulled variation `(u, v) ↦ extChartAt I α (f u v)` is jointly `C^8`
-(the fixed finite order of `IsSmoothVariation`) at any `(s₀, t₀)` whose foot
-`f s₀ t₀` lies in the chart source at `α`. Downstream consumers extract the order
-they need (`C¹`, `C²`, or a small constant) via `.of_le` from `8`. -/
 lemma chartPulled_contDiffAt_infty
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (α : M) (s₀ t₀ : ℝ)
     (hsrc : f s₀ t₀ ∈ (chartAt H α).source) :
@@ -459,11 +393,7 @@ lemma chartPulled_contDiffAt_infty
   exact hcomp
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Differentiability of the variation-field chart-rep along the central
-curve.** For a smooth variation `f`, the pinned chart-`(f 0 t₀)`-coordinate
-representation of the variation field `v ↦ ∂_s f|_{s = 0}(v)` is differentiable
-at `t₀`. The chart-rep agrees, near `t₀`, with the smooth partial Fréchet
-derivative `v ↦ fderiv (fun u => extChartAt I (f 0 t₀) (f u v)) 0 1`. -/
+
 lemma variationField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -525,9 +455,7 @@ lemma variationField_chartRep_differentiableAt
   exact (heq.differentiableAt_iff).mpr (hsec_cdiff.differentiableAt (by simp))
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
-/-- **Differentiability of the velocity chart-rep along the central curve.** For
-a smooth variation `f`, the pinned chart-`(f 0 t₀)`-coordinate representation of
-the velocity field `v ↦ ∂_t f|_{s = 0}(v)` is differentiable at `t₀`. -/
+
 lemma velocityField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -578,10 +506,7 @@ lemma velocityField_chartRep_differentiableAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Smoothness of the scalar `t ↦ g.inner (γ t) (v t) (w t)` for a base curve
-`γ` and two sections `v, w` along `γ`, presented through their total-space
-smoothness. The `ContMDiff` analogue of `continuousOn_g_inner_along_curve`; the
-tangent-space norm-instance diamond is resolved by the disabled instances. -/
+
 private lemma g_inner_along_curve_contMDiff
     {n : WithTop ℕ∞} [ENat.LEInfty n] (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)}
@@ -598,15 +523,6 @@ private lemma g_inner_along_curve_contMDiff
     refine hinner.congr (fun t => ?_); rfl
   rw [← contMDiff_iff_contDiff]; exact hcm
 
-/-- **First variation of arc length (fixed endpoints).** For a smooth
-endpoint-fixed variation `f` of a unit-speed curve `γ := f 0` on `[0, L]`, the
-derivative of `s ↦ arcLength g (f s ·) 0 L` at `s = 0` equals minus the integral
-of `⟨V, ∇_t γ'⟩_g`, where `V t := ∂_s f|_{s = 0}` is the variation field and
-`γ' t := ∂_t (f 0)` the central velocity. The hypotheses are that `f` is a smooth
-variation (`hf`), the endpoints `f s 0` and `f s L` are independent of `s`
-(`hfix0`, `hfixL`), and the central slice is unit-speed on `[0, L]` (`hUnit`). The
-boundary contribution `⟨V, γ'⟩|_0^L` vanishes because `V 0 = V L = 0` for
-endpoint-fixed variations, so it is absent from the conclusion. -/
 theorem first_variation_of_arcLength_fixed_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -803,15 +719,6 @@ theorem first_variation_of_arcLength_fixed_endpoints
   rw [hAB] at hS2A
   exact hS2A
 
-/-- **First variation of arc length (free endpoints).** Same setup as
-`first_variation_of_arcLength_fixed_endpoints` but without the endpoint-fixed hypotheses: for a smooth
-variation `f` of a unit-speed curve `γ := f 0` on `[0, L]` (hypotheses `hf` and the
-unit-speed condition `hUnit`), the derivative of `s ↦ arcLength g (f s ·) 0 L` at
-`s = 0` equals the boundary term `⟨V L, γ' L⟩ - ⟨V 0, γ' 0⟩` minus the integral of
-`⟨V, ∇_t γ'⟩_g`, where `V t := ∂_s f|_{s = 0}` is the variation field and
-`γ' t := ∂_t (f 0)` the central velocity. When the endpoints are fixed,
-`V 0 = V L = 0` and the boundary term vanishes, recovering
-`first_variation_of_arcLength_fixed_endpoints`. -/
 theorem first_variation_of_arcLength_free_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -999,9 +906,6 @@ theorem first_variation_of_arcLength_free_endpoints
   rw [hAB] at hS2A
   exact hS2A
 
-/-- For a unit-speed geodesic `γ` and any endpoint-fixed smooth
-variation `f` whose central curve is `γ`, the first variation of
-arc length at `s = 0` vanishes. -/
 theorem first_variation_vanishes_for_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)

@@ -1,41 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.ChartLocalPicardRegular
 
-/-!
-## From spatial `C¹`-regularity to the Picard–Lindelöf regularity predicate
-
-The chart-cover assembly that builds the time-indexed diffeomorphism family
-(`manifoldFlowFamily_exists` / its regularity-driven wrapper
-`manifoldFlowFamily_of_regular`) consumes the clean predicate
-`ChartCoordPicardRegular X` — continuity of the uncurried field `(t, x) ↦ X t x`
-on `ℝ × M` together with a *per-chart, uniform-in-time* spatial Lipschitz bound
-for the chart pushforward `y ↦ X t ((chartAt H α).symm (I.symm y))`.
-
-This file closes the remaining gap: it produces `ChartCoordPicardRegular X` from
-the genuine regularity that a parabolic-PDE-driven vector field actually has —
-namely
-
-* **continuity in time–space**: `(t, x) ↦ X t x` is continuous on `ℝ × M`; and
-* **spatial `C¹` with a jointly-continuous spatial derivative**: for each base
-  chart `α`, the chart pushforward `f^α t y := (X t ((chartAt H α).symm (I.symm
-  y)) : E)` is Fréchet-differentiable in the space variable `y` on a ball around
-  the chart centre, with the *spatial* derivative `Df^α t y : E →L[ℝ] E`
-  *jointly continuous* in `(t, y)` on a compact time–space box.
-
-The uniform-in-time Lipschitz constant is extracted by the extreme value theorem:
-the jointly-continuous operator-norm `(t, y) ↦ ‖Df^α t y‖` attains a finite
-maximum `K` on the compact box `[0, L] × closedBall(centre, r)`, and the
-mean-value inequality on the convex ball
-(`lipschitzOnWith_of_nnnorm_hasFDerivWithin_le`) then makes `f^α t` uniformly
-`K`-Lipschitz on the open ball for *every* `t ∈ [0, L]`.
-
-`chartCoordPicardRegular_of_spatialC1` is the producer. Composed with the
-already-proved `chartLocalPicardData_of_regular`
-(`Regularity/ChartLocalPicardRegular.lean`), it yields the per-base-point
-`ChartLocalPicardData X α` — and likewise for `-X`, whose chart pushforward has
-spatial derivative `-Df^α` with the same joint continuity — directly from the
-spatial-`C¹` regularity of `X`, with no bundled ODE-solution data anywhere.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle Set
@@ -47,30 +11,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/--
-The genuine spatial-`C¹` regularity of a time-dependent vector field, stated
-chart-by-chart in model-space coordinates, that suffices to manufacture the
-Picard–Lindelöf regularity predicate `ChartCoordPicardRegular X`.
-
-`ChartCoordSpatialC1 X` packages, for each base chart `α : M`:
-
-* a positive time horizon `L` and a positive chart radius `r`;
-* the **spatial Fréchet derivative** `Df : ℝ → E → (E →L[ℝ] E)` of the chart
-  pushforward `f t y := X t ((chartAt H α).symm (I.symm y))` (a member of `E`
-  via the canonical type-synonym defeq `TangentSpace I p = E`);
-* `hHasDeriv`: for each time `t ∈ [0, L]` and each point `y` in the closed
-  `r`-ball around the chart centre `I ((chartAt H α) α)`, the chart pushforward
-  `f t` has `Df t y` as its derivative-within the closed ball at `y`; and
-* `hDerCont`: the uncurried spatial derivative `(t, y) ↦ Df t y` is continuous
-  on the compact box `[0, L] × closedBall(centre, r)`.
-
-This is purely the regularity of `X`: it never references a flow or an
-ODE-solution. For a metric-trace vector field `X t = deTurckVF (g t) g₀` whose
-metric family `g` is `C¹` in `(t, x)`, the chart pushforward is `C¹` in `y` (the
-DeTurck components are smooth functions of the metric jet, which is `C¹` in `x`),
-and the spatial derivative is jointly continuous in `(t, y)` (the metric jet is
-continuous in `t`); so this predicate is the natural separable interface a
-parabolic Ricci-DeTurck solution supplies. -/
 def ChartCoordSpatialC1 (X : ℝ → ∀ x : M, TangentSpace I x) : Prop :=
   ∀ α : M, ∃ (L r : ℝ) (Df : ℝ → E → (E →L[ℝ] E)),
     0 < L ∧ 0 < r ∧
@@ -80,21 +20,6 @@ def ChartCoordSpatialC1 (X : ℝ → ∀ x : M, TangentSpace I x) : Prop :=
     ContinuousOn (Function.uncurry Df)
       (Set.Icc (0 : ℝ) L ×ˢ Metric.closedBall (I ((chartAt H α) α)) r)
 
-/--
-**Per-chart uniform-in-time Lipschitz bound from spatial `C¹`.**
-
-Given the spatial-`C¹` data at a single base chart `α` — a positive horizon `L`,
-a positive radius `r`, a spatial derivative `Df` of the chart pushforward on the
-closed `r`-ball, and joint continuity of `Df` on the compact box `[0, L] ×
-closedBall(centre, r)` — there exist a positive horizon, a positive radius, and a
-non-negative constant `K` (the maximum of the operator norm of `Df` over the
-compact box) such that, for every `t ∈ [0, L]`, the chart pushforward
-`y ↦ X t ((chartAt H α).symm (I.symm y))` is `K`-Lipschitz on the open `r`-ball.
-
-The proof extracts `K = max_{[0,L]×closedBall} ‖Df‖` by the extreme value
-theorem (the box is compact and `(t, y) ↦ ‖Df t y‖` is continuous), then applies
-the mean-value Lipschitz estimate `lipschitzOnWith_of_nnnorm_hasFDerivWithin_le`
-on the convex open `r`-ball with the uniform bound `‖Df t y‖ ≤ K`. -/
 theorem exists_uniform_chart_lipschitz_of_spatialC1
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (L r : ℝ) (Df : ℝ → E → (E →L[ℝ] E))
@@ -154,18 +79,6 @@ theorem exists_uniform_chart_lipschitz_of_spatialC1
     exact hnorm
   exact hconv.lipschitzOnWith_of_nnnorm_hasFDerivWithin_le hder_open hbound_open
 
-/--
-**Producer: spatial-`C¹` regularity ⇒ Picard–Lindelöf regularity predicate.**
-
-From continuity of the uncurried field `(t, x) ↦ X t x` on `ℝ × M` and the
-spatial-`C¹` data `ChartCoordSpatialC1 X` (per-chart spatial Fréchet derivative
-with a jointly-continuous spatial derivative), produce the clean Picard–Lindelöf
-regularity predicate `ChartCoordPicardRegular X` consumed by the chart-cover
-assembly.
-
-The continuity conjunct of `ChartCoordPicardRegular` is exactly `hCont`; the
-per-chart spatial-Lipschitz conjunct is supplied, uniformly in time, by
-`exists_uniform_chart_lipschitz_of_spatialC1`. -/
 theorem chartCoordPicardRegular_of_spatialC1
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hCont : ContinuousOn (Function.uncurry (fun t x => X t x))
@@ -178,13 +91,6 @@ theorem chartCoordPicardRegular_of_spatialC1
   exact exists_uniform_chart_lipschitz_of_spatialC1 X α L r Df hL hr hHasDeriv
     hDerCont
 
-/--
-**The negated field inherits the spatial-`C¹` regularity.**
-
-If `X` is spatial-`C¹` with spatial derivative `Df`, then `-X` is spatial-`C¹`
-with spatial derivative `-Df`: the chart pushforward of `-X` is the negation of
-the chart pushforward of `X`, whose derivative is `-(Df t y)`, and the uncurried
-`(t, y) ↦ -Df t y` is continuous wherever `(t, y) ↦ Df t y` is. -/
 theorem chartCoordSpatialC1_neg
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hC1 : ChartCoordSpatialC1 (I := I) X) :
@@ -207,27 +113,6 @@ theorem chartCoordSpatialC1_neg
     rw [hfun]
     exact hDerCont.neg
 
-/--
-**End-to-end producer: spatial-`C¹` regularity ⇒ per-base-point chart-local
-Picard data, for `X` and for `-X`.**
-
-From continuity of `(t, x) ↦ X t x` on `ℝ × M` and the spatial-`C¹` data
-`ChartCoordSpatialC1 X`, produce both families of per-base-point chart-local
-Picard data,
-
-* `∀ α, ChartLocalPicardData X α`, and
-* `∀ α, ChartLocalPicardData (fun t x => -(X t x)) α`,
-
-which are exactly the two hypotheses `hper` / `hper_neg` consumed by the global
-flow / diffeomorphism-family endpoint on a closed manifold.
-
-The construction routes the spatial-`C¹` regularity through
-`chartCoordPicardRegular_of_spatialC1` to obtain `ChartCoordPicardRegular X`
-(and, via `chartCoordSpatialC1_neg`, `ChartCoordPicardRegular (-X)` — the
-negated field is continuous because negation is continuous), then feeds each
-into the previously-proved Picard-data producer `chartLocalPicardData_of_regular`.
-The sole ODE-existence input is therefore the genuine spatial-`C¹` regularity of
-`X`; no bundled ODE-solution data appears. -/
 noncomputable def chartLocalPicardData_of_spatialC1
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hCont : ContinuousOn (Function.uncurry (fun t x => X t x))

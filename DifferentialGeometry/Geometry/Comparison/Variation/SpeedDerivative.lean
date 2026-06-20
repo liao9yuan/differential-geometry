@@ -21,23 +21,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 
 set_option linter.unusedSectionVars false
 
-/-!
-# The `s`-derivative of the arc-length speed
-
-This file develops the variation of the speed-squared of a smooth two-parameter
-variation `f : ℝ → ℝ → M` and the differentiation of the arc-length integrand
-under the interval integral, the analytic engine of the first variation of
-length:
-
-* `S1_moving_foot_metric_compatibility` — the metric-compatibility (Leibniz)
-  identity giving the `s`-derivative at `s = 0` of the slice speed-squared as
-  `2 ⟨∇_s ∂_t f, ∂_t f⟩_g`;
-* the joint `C^∞`-smoothness of the speed-squared in the parameter `(s, t)`;
-* `S2_diff_under_interval_integral` — differentiation of
-  `∫₀^L √(speedSq g f s t) dt` under the interval integral at `s = 0` along a
-  unit-speed central curve.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle MeasureTheory intervalIntegral
@@ -60,14 +43,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- **Metric compatibility for the moving-foot speed-squared.** For a smooth
-two-parameter variation `f`, the `s`-derivative at `s = 0` of the slice
-speed-squared `speedSq g f s t` is `2 ⟨∇_s ∂_t f, ∂_t f⟩_g`, where the
-transverse covariant derivative `∇_s ∂_t f` is `covDerivAlong` of the
-longitudinal-velocity section `s ↦ ∂_t f(s, t)` along the transverse curve
-`s ↦ f s t`, evaluated at `s = 0`, and `∂_t f|_{s = 0}` is the longitudinal
-velocity of the central curve. This is the Leibniz / metric-compatibility step
-underlying the first variation of arc length. -/
 theorem S1_moving_foot_metric_compatibility
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hf : IsSmoothVariation (I := I) f) :
@@ -309,11 +284,7 @@ theorem S1_moving_foot_metric_compatibility
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The speed-squared `speedSq g f s t` is jointly `C^∞` in the parameter
-`(s, t)`. The total-space partial-`t` velocity is smooth in `(s, t)`
-(`velocity_totalSpace_contMDiff`), and the Riemannian inner product of two
-smooth bundle sections is a smooth scalar function (`ContMDiff.inner_bundle`);
-the model spaces `ℝ × ℝ` and `ℝ` are trivial, so `ContMDiff` is `ContDiff`. -/
+
 lemma speedSq_contDiff
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) :
@@ -333,17 +304,6 @@ lemma speedSq_contDiff
   rw [← contMDiff_iff_contDiff, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcm
 
-/-- **Differentiation under the interval integral for the arc-length speed.**
-For a smooth two-parameter variation `f` whose central curve is unit-speed on
-`[0, L]`, the `s`-derivative at `s = 0` of the slice arc-length integrand
-`∫₀^L √(speedSq g f s t) dt` equals the interval integral of the pointwise
-`s`-derivative of `√(speedSq)`. By the chain rule and
-`S1_moving_foot_metric_compatibility`, the pointwise derivative is
-`(2 ⟨∇_s ∂_t f, ∂_t f⟩_g) / (2 √(speedSq g f 0 t))`. The unit-speed hypothesis
-at `s = 0` guarantees positivity of the speed on `[0, L]`, so the square-root is
-differentiable there; the full domination / measurability hypotheses are
-supplied to the Mathlib differentiation-under-the-integral engine inside the
-proof. -/
 theorem S2_diff_under_interval_integral
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (_hf : IsSmoothVariation (I := I) f) (_hL : 0 < L)

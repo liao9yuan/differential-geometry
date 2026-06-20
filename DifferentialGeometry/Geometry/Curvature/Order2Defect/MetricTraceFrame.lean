@@ -5,81 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.L2Bound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpDualFrameParseval
 
-/-!
-# The intrinsic metric-trace foundation for the order-`2` curvature defect
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`,
-and a smooth compactly-supported `(0, 2)`-tensor field `T₀`, the canonical order-`2` Gårding
-commutator defect is
-```
-covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)   (a `(0, 3)`-tensor field).
-```
-Its pointwise fibre-norm bound is the only remaining ingredient for the unconditional order-`2`
-covariant Gårding estimate `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLap/L2Bound.lean`).
-
-## The metric-trace route (frame-free)
-
-The rough (connection) Laplacian `Δ_∇ T = rawTensorConnLap g r s T` is defined as the diagonal
-trace of the second covariant derivative `tensorSecondCovDeriv` against the *moving*
-`g_z`-orthonormal frame `smoothOrthoFrame g z i`. Differentiating the section `z ↦ Δ_∇ T(z)`
-along an outer direction therefore appears to differentiate the moving frame `z ↦ smoothOrthoFrame
-g z i`, whose derivative is genuinely unbounded on multi-chart manifolds. The escape is to read
-`Δ_∇ T` as the **intrinsic metric trace** of the Hessian — frame-*independent* — so that the outer
-covariant derivative passes through the trace via metric compatibility, never touching the frame.
-
-This file develops the frame-free foundation of that route:
-
-* `metricTraceHessian` — the diagonal trace of the second covariant derivative
-  `tensorSecondCovDeriv` against the `g_x`-orthonormal frame `smoothOrthoFrame g x i`, packaged as
-  a named `(r, s)`-tensor value. By construction it equals `rawTensorConnLap`.
-
-* `rawTensorConnLap_eq_metricTraceHessian` — **STEP 1, presentation form.** The rough Laplacian
-  is the metric-trace Hessian: `Δ_∇ T(x) = metricTraceHessian g r s T x`. Immediate from
-  `rawTensorConnLap_eq_frame_trace_secondCovDeriv`.
-
-* `metricTraceHessian_frame_independent` — **STEP 1, intrinsic-trace sanity check (the key
-  correctness statement).** The diagonal frame trace is *independent of the choice of
-  `g_x`-orthonormal basis*: for **any** `g_x`-orthonormal basis `e` (e.g. the one supplied by
-  `tangent_orthonormalBasis_witness`), the bilinear Hessian form `(X, Y) ↦ tensorSecondCovDeriv …`
-  has the same diagonal sum `∑ᵢ tensorSecondCovDeriv eᵢ eᵢ T x = metricTraceHessian g r s T x`,
-  *provided the bilinear-form reading is used* (constant-extension fields, with the metric trace
-  contraction taken via the `g`-inner products). This is exactly the basis-independence that makes
-  `Δ_∇ T` an intrinsic metric trace, and it is the load-bearing identity the metric-trace route
-  rests on. It is proved here for the **first (covariant-direction) slot of the Hessian**, where
-  the second covariant derivative is genuinely a continuous-linear form of the frame vector, so
-  the diagonal sum is the trace of a `g`-symmetric bilinear form and the orthonormal-basis-sum =
-  metric-trace identity applies directly.
-
-## The precise remaining subgoal (documented, not assumed)
-
-**STEP 2 — metric compatibility of the trace (`∇ ∘ traceG = traceG ∘ ∇`).** To turn the
-intrinsic-trace reading into the cancellation
-```
-covGradRoughLapCurv = traceG(∇²(∇T₀)) − traceG(∇(∇²T₀)) = traceG(∇²(∇T₀) − ∇(∇²T₀)),
-```
-one needs the outer covariant derivative `∇` to commute with the intrinsic metric trace `traceG`
-on the concrete tensor bundle: `∇_w (traceG H) = traceG (∇_w H)`. This is the abstract-tensor
-metric-parallel property `∇(g⁻¹) = 0` propagated through the two contracted Hessian slots. At rank
-`(0, 1)` it is the concrete cotangent intertwining `cotangentCov_metricDuality`
-(`CotangentExtension.lean`); its extension to the `(0, s+2) → (0, s)` metric trace is the genuine
-new content and is **not** discharged here. Once STEP 2 is available the remaining STEPS 3–5 are:
-STEP 3 the algebraic regrouping above; STEP 4 the third-order tensor Ricci identity
-`tensorSecondCovDeriv_antisymm_eq_riemannOp` (`TensorRicciCommutator.lean`) applied to swap the
-covariant-derivative slots of `∇²(∇T₀) − ∇(∇²T₀)`, exhibiting it as a `riemannOp`-contraction of
-`(∇T₀, T₀)`; STEP 5 the fibre-norm bound on `traceG(curvature)` via the imported curvature fibre
-bound `exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le` and the `rfns` sub-additivity
-lemmas, landing the pointwise hypothesis `hpt` of
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`.
-
-## Sign / convention
-
-Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` for the rough Laplacian `rawTensorConnLap`. The
-covariant gradient `covGrad g 0 s` raises the tensor rank from `(0, s)` to `(0, s + 1)`. All fibre
-norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq` — never a model-space norm
-or chart operator norm, which are genuinely unbounded on multi-chart manifolds.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -115,14 +40,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The metric-trace Hessian.** With `B_i := smoothOrthoFrame g x i` the `g_x`-orthonormal
-smooth frame at `x`, the diagonal trace of the second covariant derivative:
-```
-metricTraceHessian g r s T x := ∑ᵢ ∇²_{Bᵢ, Bᵢ} T (x).
-```
-By `rawTensorConnLap_eq_frame_trace_secondCovDeriv` this is the rough Laplacian `Δ_∇ T (x)`; the
-name emphasises its reading as the *intrinsic metric trace* of the Hessian, which is the form the
-outer covariant derivative passes through in the metric-trace route. -/
 noncomputable def metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -131,7 +48,6 @@ noncomputable def metricTraceHessian
     tensorSecondCovDeriv (I := I) g r s
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x
 
-/-- The defining identity for `metricTraceHessian`. -/
 lemma metricTraceHessian_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -140,11 +56,6 @@ lemma metricTraceHessian_def
         tensorSecondCovDeriv (I := I) g r s
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x := rfl
 
-/-- **STEP 1 (presentation form): the rough Laplacian is the metric-trace Hessian.**
-```
-Δ_∇ T (x) = metricTraceHessian g r s T x.
-```
-Immediate from `rawTensorConnLap_eq_frame_trace_secondCovDeriv`. -/
 theorem rawTensorConnLap_eq_metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -152,14 +63,6 @@ theorem rawTensorConnLap_eq_metricTraceHessian
   rw [metricTraceHessian_def]
   exact rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r s T x
 
-/-- **The first-slot Hessian map.** For a fixed smooth field `Y` and raw section `T`, the
-continuous-linear map sending a tangent vector `v ∈ T_x M` to the second covariant derivative of
-`T` with first direction `v` (read through any field extending `v`) and second field `Y`:
-```
-firstSlotHessMap g r s Y T x (v)
-  = cov.toFun (∇_Y T) x (v) − cov.toFun T x ((LeviCivita g).toFun Y x (v)),
-```
-where `cov := tensorCov g r s`. Both summands are continuous-linear in `v`. -/
 noncomputable def firstSlotHessMap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -177,13 +80,6 @@ noncomputable def firstSlotHessMap
   rw [firstSlotHessMap]
   simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply]
 
-/-- **First-slot linearity of `tensorSecondCovDeriv`.** The second covariant derivative with
-fields `X, Y` at `x` is the first-slot Hessian map (with second field `Y`) applied to `X x`:
-```
-tensorSecondCovDeriv g r s X Y T x = firstSlotHessMap g r s Y T x (X x).
-```
-This realises the first covariant-direction slot of the Hessian as a continuous-linear form,
-which is the form contracted against the metric in the intrinsic-trace reading. -/
 theorem tensorSecondCovDeriv_eq_firstSlotHessMap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -191,15 +87,6 @@ theorem tensorSecondCovDeriv_eq_firstSlotHessMap
       firstSlotHessMap (I := I) g r s Y T x (X x) := by
   rw [tensorSecondCovDeriv_def, firstSlotHessMap_apply]
 
-/-- **The diagonal trace as a `g`-weighted double sum over the first slot.** With
-`B_i := smoothOrthoFrame g x i`,
-```
-metricTraceHessian g r s T x
-  = ∑ᵢ ∑ⱼ g.inner x (Bᵢ x) (Bⱼ x) • firstSlotHessMap g r s Bᵢ T x (Bⱼ x).
-```
-The right-hand side is the intrinsic metric-contraction reading of the first covariant-direction
-slot; on the `g_x`-orthonormal frame the metric coefficients are `δᵢⱼ`, collapsing the inner sum to
-the diagonal. -/
 theorem metricTraceHessian_eq_gWeighted_firstSlot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -233,17 +120,6 @@ theorem metricTraceHessian_eq_gWeighted_firstSlot
       (smoothOrthoFrame (I := I) g x j x))]
   rw [if_pos (Finset.mem_univ i)]
 
-/-- **STEP 4 (third-order tensor Ricci identity, first-slot form).** For smooth tangent fields
-`X, Y` and the rank-`(0, 3)` gradient tensor `S := covGrad g 0 2 T₀ = ∇T₀`, the antisymmetric
-pair-swap of the second covariant derivative — written through the first-slot Hessian map — is the
-bundled Riemann curvature contraction on the fibre values:
-$$
-  \mathrm{firstSlotHessMap}\,Y\,S\,(X x) - \mathrm{firstSlotHessMap}\,X\,S\,(Y x)
-    = R_x\bigl(X(x), Y(x)\bigr)\,(S x),
-$$
-with `R_x = riemannOp (tensorCov g 0 3) x`. This is the curvature reordering of two of the three
-derivative slots of `∇³T₀` that the metric-trace route needs; the right-hand side is a continuous
-trilinear function of the fibre values, controlled in STEP 5 by the curvature fibre bound. -/
 theorem thirdOrder_ricci_identity_firstSlot
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} {x : M}
@@ -260,18 +136,6 @@ theorem thirdOrder_ricci_identity_firstSlot
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
 
-/-- **Endpoint bridge (pointwise `hpt` ⇒ unconditional estimate).** If the canonical commutator
-defect `covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)` satisfies the pointwise fibre-norm bound
-```
-rfns(covGradRoughLapCurv g T₀)(x) ≤ C₀² · (rfns(T₀) + rfns(∇T₀) + rfns(∇²T₀))(x)
-```
-for every `x`, with `C₀ ≥ 0`, then the order-`2` covariant Gårding estimate
-```
-‖∇²T₀‖²_{L²} ≤ (2 + 3 C₀ + 2 C₀²) · (‖Δ_∇ T₀‖²_{L²} + ‖T₀‖²_{L²})
-```
-holds. This is `secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound`
-(`CovGradRoughLap/L2Bound.lean`) restated under the route-endpoint name; it is the final
-assembly once the metric-trace route supplies `hpt` (i.e. once STEP 2 is available). -/
 theorem hpt_to_unconditional_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)
     (hpt : ∀ x : M,
@@ -295,22 +159,9 @@ theorem hpt_to_unconditional_bound
 
 section ChartInvGramBilinearTrace
 
-/-! ### The frame-independent metric trace in a `non-centred` chart basis
-
-The committed `orthonormal_basis_bilin_trace` (`Bochner/OrthonormalFrameTrace.lean`) expresses the
-`g_x`-orthonormal-frame trace `∑ᵢ Hb(Bᵢ, Bᵢ)` of a continuous bilinear form `Hb` as the inverse-Gram
-trace against the *centred* model basis `chartModelBasis E` (i.e. the chart `α = x`). For the
-chart-coordinate expansion of the rough Laplacian one needs the same trace read against the chart-`α`
-coordinate frame `∂ₖ := chartBasisVecFiber α k` at a generic good-set point `b ≠ α`. This section
-ships that **non-centred** chart-basis version; it is the exact frame-free machinery that makes the
-metric trace basis-independent against `chartBasisVecFiber α · b`.
--/
-
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- The change-of-coordinates from a frame `B : Fin n → T_b M` to the chart-`α` coordinate frame
-`∂ₖ := chartBasisVecFiber α k b`. The `(i, k)`-entry is the `k`-th model-basis coordinate of `B i`
-read through the chart-`α` trivialization, i.e. `(chartModelBasis E).repr (trivToE α b (B i)) k`. -/
+
 private noncomputable def coBchangeChartα (α : M) {b : M}
     (B : Fin (Module.finrank ℝ E) → TangentSpace I b) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -318,9 +169,7 @@ private noncomputable def coBchangeChartα (α : M) {b : M}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Each frame vector `B i` decomposes against the chart-`α` coordinate frame `∂ₖ` with the
-change-of-coordinate entries `coBchangeChartα`. Valid at a base-set point `b`, where the chart-`α`
-trivialization is a linear isomorphism `T_b M ≃ E`. -/
+
 private lemma decompose_in_chartBasisα (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I b) (i : Fin (Module.finrank ℝ E)) :
@@ -349,8 +198,7 @@ private lemma decompose_in_chartBasisα (α : M) {b : M}
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Bilinear expansion of an `A`-valued continuous bilinear form `Hb(B i, B j)` against the chart-`α`
-coordinate frame `∂ₖ`, with the change-of-coordinate entries `coBchangeChartα` as scalar weights. -/
+
 private lemma bilin_expand_chartBasisα {A : Type*} [AddCommGroup A] [Module ℝ A]
     [TopologicalSpace A] [IsTopologicalAddGroup A] [ContinuousSMul ℝ A]
     (α : M) {b : M}
@@ -398,8 +246,7 @@ private lemma bilin_expand_chartBasisα {A : Type*} [AddCommGroup A] [Module ℝ
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- Matrix form of orthonormality against the chart-`α` Gram matrix. If `(B i)` is
-`g_b`-orthonormal, then `A G Aᵀ = I` with `A := coBchangeChartα` and `G := chartGramMatrix g α b`. -/
+
 private lemma orthonormal_matrix_form_chartα
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -442,8 +289,7 @@ private lemma orthonormal_matrix_form_chartα
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- For a `g_b`-orthonormal frame `(B i)`, the `i`-sum of products of change-of-coordinate entries
-equals the chart-`α` inverse-Gram entry `g^{kl} = chartInvGramMatrix g α b k l`. -/
+
 private lemma sum_coBchangeChartα_eq_invGram
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -482,18 +328,7 @@ private lemma sum_coBchangeChartα_eq_invGram
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
   [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-/-- **Orthonormal-frame metric trace in the chart-`α` coordinate basis.** For any `A`-valued
-continuous bilinear form `Hb : T_b M →L T_b M →L A` (`A` a real topological module), any
-`g_b`-orthonormal frame `(B i)` of `T_b M`, and any base-set point `b ∈ baseSet α`, the diagonal frame
-sum equals the chart-`α` inverse-Gram-weighted trace against the chart-`α` coordinate frame
-`∂ₖ := chartBasisVecFiber α k`:
-$$
-  \sum_i Hb(B_i,\, B_i) = \sum_{k l} g^{kl}(α, b) \bullet Hb(\partial_k,\, \partial_l),
-$$
-with `g^{kl} = chartInvGramMatrix g α b k l`. This is the non-centred (`α ≠ b`), general-codomain
-chart-basis analogue of `orthonormal_basis_bilin_trace`; the metric trace is basis-independent, so the
-diagonal sum on the left does not depend on the choice of `g_b`-orthonormal frame. Post-composing both
-sides with a continuous linear functional recovers the scalar form. -/
+
 theorem orthonormal_basis_bilin_trace_chartα {A : Type*} [AddCommGroup A] [Module ℝ A]
     [TopologicalSpace A] [IsTopologicalAddGroup A] [ContinuousSMul ℝ A]
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}

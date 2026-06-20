@@ -25,7 +25,6 @@ lemma sign_addAssocPerm (σ₁ : Equiv.Perm ((Fin m ⊕ Fin n) ⊕ Fin p)) :
     Equiv.Perm.sign (addAssocPerm σ₁) = Equiv.Perm.sign σ₁ := by
   simp only [addAssocPerm, Equiv.Perm.sign_permCongr]
 
-
 def addCongrPerm : Equiv.Perm (Fin (m + n)) ≃ Equiv.Perm (Fin (n + m)) :=
   Equiv.permCongr finAddCongr
 
@@ -82,19 +81,16 @@ def finAddCongr_equiv : ModSumCongr (Fin m) (Fin n) ≃ ModSumCongr (Fin n) (Fin
     rcases x with ⟨σ₁⟩
     simp only [Function.comp_apply, Perm.sumCongrPerm_sumCongrPerm]
 
--- UNUSED functionality
 @[simps!]
 def sumCommPerm : Equiv.Perm (Fin m ⊕ Fin n) ≃ Equiv.Perm (Fin n ⊕ Fin m) :=
   Equiv.permCongr (Equiv.sumComm (Fin m) (Fin n))
 
--- UNUSED functionality
 @[simp]
 lemma sumCommPerm_sumCommPerm (σ₁ : Equiv.Perm (Fin m ⊕ Fin n)) :
     sumCommPerm (sumCommPerm σ₁) = σ₁ := by
   ext i
   simp
 
--- UNUSED functionality
 open Equiv.Perm in
 lemma sumCommPerm_spec (a b : Equiv.Perm (Fin m ⊕ Fin n))
     (h : (QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin m) (Fin n)).range) a b) :
@@ -122,13 +118,11 @@ lemma sumCommPerm_spec (a b : Equiv.Perm (Fin m ⊕ Fin n))
     rw[← h]
     rfl
 
--- UNUSED functionality
 @[simp]
 lemma sign_sumCommPerm (σ₁ : Equiv.Perm (Fin m ⊕ Fin n)) :
     Equiv.Perm.sign (sumCommPerm σ₁) = Equiv.Perm.sign σ₁ := by
   simp only [sumCommPerm, Equiv.Perm.sign_permCongr]
 
--- UNUSED functionality
 @[simps!]
 def finAddFlip_equiv : ModSumCongr (Fin m) (Fin n) ≃ ModSumCongr (Fin n) (Fin m) where
   toFun := Quot.lift (Quot.mk _ ∘ sumCommPerm) sumCommPerm_spec
@@ -142,25 +136,21 @@ def finAddFlip_equiv : ModSumCongr (Fin m) (Fin n) ≃ ModSumCongr (Fin n) (Fin 
     rcases x with ⟨σ₁⟩
     simp only [Function.comp_apply, sumCommPerm_sumCommPerm]
 
--- UNUSED functionality
 @[simps!]
 def sumCommPerm_eqFin : Equiv.Perm (Fin m ⊕ Fin m) ≃ Equiv.Perm (Fin m ⊕ Fin m) :=
   MulAut.conj (Equiv.sumComm (Fin m) (Fin m))
 
--- UNUSED functionality
 @[simp]
 lemma sumComm_inv : (Equiv.sumComm (Fin m) (Fin m))⁻¹ = (Equiv.sumComm (Fin m) (Fin m)) := by
   ext i
   simp [Equiv.Perm.inv_def]
 
--- UNUSED functionality
 @[simp]
 lemma sumCommPerm_eqFin_sumCommPerm_eqFin (σ₁ : Equiv.Perm (Fin m ⊕ Fin m)) :
     sumCommPerm_eqFin (sumCommPerm_eqFin σ₁) = σ₁ := by
   ext i
   simp
 
--- UNUSED functionality
 lemma sumCommPerm_eqFin_spec (a b : Equiv.Perm (Fin m ⊕ Fin m))
     (h : (QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin m) (Fin m)).range) a b) :
       (Quot.mk (QuotientGroup.leftRel (sumCongrHom (Fin m) (Fin m)).range) ∘ sumCommPerm_eqFin) a =
@@ -181,7 +171,6 @@ lemma sumCommPerm_eqFin_spec (a b : Equiv.Perm (Fin m ⊕ Fin m))
   use τ, σ
   ext (x|y) <;> simp
 
--- UNUSED functionality
 @[simp]
 lemma sign_sumCommPerm_eqFin (σ₁ : Equiv.Perm (Fin m ⊕ Fin m)) :
     Equiv.Perm.sign (sumCommPerm_eqFin σ₁) = Equiv.Perm.sign σ₁ := by
@@ -204,27 +193,17 @@ def finAddFlip_equiv_eqFin : ModSumCongr (Fin m) (Fin m) ≃ ModSumCongr (Fin m)
     rcases x with ⟨σ₁⟩
     simp only [Function.comp_apply, sumCommPerm_eqFin_sumCommPerm_eqFin]
 
-/-!
-## Order embedding lemmas
--/
-
-/-- `Fin k ↪o Fin n` is a finite type, via the equivalence with
-`Set.powersetCard (Fin n) k`. -/
 noncomputable instance : Fintype (Fin k ↪o Fin n) :=
   Fintype.ofEquiv _
     (Set.powersetCard.ofFinEmbEquiv
       (I := Fin n) (n := k)).symm
 
-/-- Two order embeddings `Fin k ↪o Fin n` with the same range
-are equal. -/
 theorem orderEmb_eq_of_range_eq
     {I J : Fin k ↪o Fin n}
     (h : Set.range (⇑I) = Set.range (⇑J)) : I = J :=
   DFunLike.ext'
     ((I.strictMono.range_inj J.strictMono).mp h)
 
-/-- For order embeddings `I ≠ J`, no permutation `σ` satisfies
-`↑I = ↑J ∘ σ`. -/
 theorem orderEmb_ne_comp_perm
     {I J : Fin k ↪o Fin n} (hIJ : I ≠ J)
     (σ : Equiv.Perm (Fin k)) :
@@ -233,9 +212,6 @@ theorem orderEmb_ne_comp_perm
   rw [heq, Set.range_comp,
     Equiv.range_eq_univ, Set.image_univ]
 
-/-- The row-swap permutation: sends `i < n` to `m + i` and `i ≥ n` to
-`i - n`. This is the permutation that relates `addCases J I` (reindexed
-via `finAddCongr`) to `addCases I J`. -/
 def addCasesSwapPerm (m n : ℕ) : Equiv.Perm (Fin (m + n)) where
   toFun i := if h : i.val < n then ⟨m + i.val, by omega⟩
     else ⟨i.val - n, by omega⟩
@@ -364,8 +340,6 @@ theorem addCasesSwapPerm_sign (m n : ℕ) :
       rw [Nat.add_mod, show 2 * ((2 * c + n) * c + c) % 2 = 0 by simp]
       simp [Nat.add_mod]
 
-/-- The block permutation on `Fin (m + p)` induced by permutations on
-`Fin m` and `Fin p`. Acts as `α` on the first `m` indices and `β` on the last `p`. -/
 noncomputable def blockPerm
     {m p : ℕ} (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p)) :
     Equiv.Perm (Fin (m + p)) :=
@@ -388,9 +362,6 @@ theorem sign_blockPerm
 
 variable {𝕜 : Type*} [Field 𝕜]
 
-/-- For any matrix `M` and permutation `γ`, the column-Leibniz sum
-`∑ σ, sign(σ) * ∏ k, M(γ k, σ k)` equals `sign(γ) * det M`.
-This follows from `det(Mᵀ) = det M` and `det(M.submatrix γ id) = sign(γ) * det M`. -/
 theorem sum_sign_prod_eq
     {n : ℕ} (M : Matrix (Fin n) (Fin n) 𝕜) (γ : Equiv.Perm (Fin n)) :
     ∑ σ : Equiv.Perm (Fin n),
@@ -408,9 +379,6 @@ theorem sum_sign_prod_eq
     ← Matrix.det_apply, Matrix.det_transpose, Matrix.det_permute]
   simp [Units.smul_def, zsmul_eq_mul]
 
-/-- For fixed `(α, β)`, the inner sum over `σ` of `sign(σ) * ∏_castAdd * ∏_natAdd`
-equals `sign(α) * sign(β) * det M`. The proof combines the two partial products into
-a single product over `Fin (m + p)` via `blockPerm`, then applies `sum_sign_prod_eq`. -/
 theorem inner_sum_eq_det
     {m p : ℕ} (M : Matrix (Fin (m + p)) (Fin (m + p)) 𝕜)
     (α : Equiv.Perm (Fin m)) (β : Equiv.Perm (Fin p)) :

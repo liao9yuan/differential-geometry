@@ -1,64 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
 
-/-!
-# Auxiliary infrastructure for cross-term bounds in the master inequality
-
-This module assembles the pointwise estimates and integrability lemmas
-needed to bound the cross-term and data-term integrals appearing in
-`NirenbergCoercivity.nirenberg_master_inequality`.
-
-## Strategy
-
-Each of the cross terms `Cross_1`, `Cross_2`, `Cross_3` and each of the
-data terms `c · u · v_test`, `f · v_test` is bounded by combining
-
-1. a pointwise Young inequality
-   `2 |a| |b| ≤ ε a² + (1/ε) b²`,
-2. uniform pointwise bounds on the smooth coefficients `a^{ij}`, `c`, on
-   `∇η`, `η`, on the translated/difference-quotient versions of `a^{ij}`,
-3. a localised L² bound that controls the integral of `(D_h^k v)²` over a
-   measurable set `K` by the integral of `(∂_k v)²` over the closed
-   `|h|`-thickening of `K`.
-
-This file establishes (1)–(3) in a uniform, `h`-independent way, and proves
-the pointwise bound for one summand of `Cross_1` as a worked example. The
-remaining integrated cross-term bounds and the headline absorbing inequality
-are direct combinations of these pieces.
-
-## Main components
-
-### Localised L² bound
-
-* `lintegral_sq_diffQuot_le_local` — `lintegral` form of the localised L²
-  bound: `∫⁻ x in K, ‖D_h^k v(x)‖ₑ² ≤ ∫⁻ y in cthickening |h| K, ‖∂_k v(y)‖ₑ²`.
-* `integral_sq_diffQuot_le_local` — real-valued version of the localised
-  L² bound, requiring integrability of `(∂_k v)²` on the thickening.
-* `integral_diffQuot_sq_on_tsupport_le` — specialisation: bounds
-  `∫_{tsupport η} (D_h^k u)²` by `∫_{Ω'} (∂_k u)²` when
-  `cthickening |h| (tsupport η) ⊆ Ω'`.
-
-### Pointwise FTC and translation bounds
-
-* `abs_diffQuot_le_of_bound`, `abs_diffQuot_a_le_of_bound_on_set` —
-  pointwise FTC bounds for the difference quotient.
-* `abs_translate_le_of_bound_on_set` — pointwise translation bound.
-
-### Set-theoretic helpers
-
-* `shift_in_omega'`, `singleton_cthick_subset` — relate the
-  `|h|`-thickening of `tsupport η` to the localising set `Ω'`.
-
-### Pointwise inequalities
-
-* `two_abs_mul_le_eps_sq_add` — Young's inequality for absolute values.
-* `cross_1_pointwise_bound` — worked example: pointwise bound for one
-  summand of the `Cross_1` cross-term, split into ε-Young absorbing
-  (`η² · (D_h^k ∂_i u)²`) plus a `tsupport η`-localised data piece
-  (`(D_h^k u)²` weighted by an indicator).
-* `cross_1_summand_continuous`, `cross_1_summand_compactSupport` —
-  regularity of the `Cross_1` summand needed for integrability.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -76,7 +17,7 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
-/-- Localized L² lintegral bound for the difference quotient. -/
+
 private theorem lintegral_sq_diffQuot_le_local
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {K : Set E} (_hK : MeasurableSet K) :
@@ -211,10 +152,7 @@ private theorem lintegral_sq_diffQuot_le_local
         simp [Real.volume_Ioc]
 
 omit [NeZero d] in
-/-- Real-valued localized L² bound for the difference quotient: for smooth
-`v` whose squared partial derivative is integrable on the closed
-`|h|`-thickening of `K`, the integral of `(D_h^k v)²` over `K` is bounded
-by the integral of `(∂_k v)²` over the thickening. -/
+
 private theorem integral_sq_diffQuot_le_local
     {v : E → ℝ} (hv : ContDiff ℝ 1 v) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {K : Set E} (hK : MeasurableSet K)
@@ -307,10 +245,7 @@ private theorem integral_sq_diffQuot_le_local
   exact ENNReal.toReal_mono hRHS_fin h_lintegral_real
 
 omit [NeZero d] in
-/-- Pointwise FTC bound: for smooth `g`, the difference quotient
-`D_h^k g(x)` is bounded in absolute value by the supremum of `|∂_k g|` on
-the closed `|h|`-thickening of `{x}`. In our application, we take `K` to
-be a compact set and combine with a uniform sup bound on `cthickening |h| K`. -/
+
 private theorem abs_diffQuot_le_of_bound
     {g : E → ℝ} (hg : ContDiff ℝ 1 g) (k : Fin d) (h : ℝ)
     {x : E} {M : ℝ}
@@ -399,9 +334,7 @@ private theorem abs_diffQuot_le_of_bound
   exact le_trans h_tri h_mono
 
 omit [NeZero d] in
-/-- For smooth coefficient `a` and `x` in a compact set whose
-`|h|`-thickening lies in `K`, the absolute value of `D_h^k a(x)` is bounded
-by the supremum of `|∂_k a|` on `K`. -/
+
 theorem abs_diffQuot_a_le_of_bound_on_set
     {a : E → ℝ} (ha : ContDiff ℝ 1 a) (k : Fin d) (h : ℝ)
     {K : Set E} {M : ℝ}
@@ -413,8 +346,7 @@ theorem abs_diffQuot_a_le_of_bound_on_set
   exact hM y (hx hy)
 
 omit [NeZero d] in
-/-- The translation `(τ_h a)(x) = a(x + h e_k)`: if `x + h e_k ∈ K`, then
-`|τ_h a(x)| ≤ sup_{y ∈ K} |a(y)|`. -/
+
 private theorem abs_translate_le_of_bound_on_set
     {a : E → ℝ} (k : Fin d) (h : ℝ)
     {K : Set E} {M : ℝ}
@@ -425,9 +357,7 @@ private theorem abs_translate_le_of_bound_on_set
   exact hM _ hx
 
 omit [NeZero d] in
-/-- For `x ∈ tsupport η` and `|h| ≤ h₀` with
-`Metric.cthickening h₀ (tsupport η) ⊆ Ω'`, the shifted point
-`x + h e_k ∈ Ω'`. -/
+
 private theorem shift_in_omega'
     (η : E → ℝ) (k : Fin d) {h h₀ : ℝ}
     {Ω' : Set E}
@@ -446,8 +376,7 @@ private theorem shift_in_omega'
   exact h_abs
 
 omit [NeZero d] in
-/-- The cthickening of a singleton `{x}` is contained in any `K ⊇ Ω'`
-provided `x ∈ tsupport η` and `Metric.cthickening h₀ (tsupport η) ⊆ Ω'`. -/
+
 theorem singleton_cthick_subset
     (η : E → ℝ) {h h₀ : ℝ}
     {Ω' : Set E}
@@ -469,7 +398,6 @@ theorem singleton_cthick_subset
   refine le_trans hy ?_
   exact_mod_cast ENNReal.ofReal_le_ofReal h_abs
 
-/-- Young's inequality for nonnegative absolute values. -/
 private lemma two_abs_mul_le_eps_sq_add (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
@@ -490,7 +418,6 @@ private lemma two_abs_mul_le_eps_sq_add (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
-/-- Pointwise bound for one summand of `Cross_1`. -/
 private theorem cross_1_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -676,19 +603,16 @@ private theorem cross_1_pointwise_bound
       rw [h_indicator]; ring
     linarith
 
-/-- Continuity of `D_h^k u` for smooth `u` (h ≠ 0). -/
 lemma continuous_diffQuot_smooth
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     Continuous (diffQuot k h v) :=
   (contDiff_diffQuot_of_contDiff (d := d) hv k hh).continuous
 
-/-- Auxiliary continuity: `(D_h^k v)²` is continuous for smooth `v`. -/
 private lemma continuous_diffQuot_sq_smooth
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     Continuous (fun x : E => (diffQuot k h v x)^2) :=
   (continuous_diffQuot_smooth (d := d) hv k hh).pow 2
 
-/-- The integrand of Cross_1 (one (i, j) summand) is continuous. -/
 private lemma cross_1_summand_continuous
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -725,7 +649,6 @@ private lemma cross_1_summand_continuous
   refine (((((continuous_const.mul h_translate_a).mul hη.continuous).mul
     h_partial_η).mul h_diffQuot_partial_u).mul h_diffQuot_u)
 
-/-- The integrand of Cross_1 has compact support (inherits from `η`). -/
 private lemma cross_1_summand_compactSupport
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ)
@@ -749,8 +672,6 @@ private lemma cross_1_summand_compactSupport
     h_step2.mul_right
   exact h_step3.mul_right
 
-/-- A bound for `∫_{tsupport η} (D_h^k u)²` in terms of `∫_{Ω'} (∂_k u)²`,
-when `cthickening |h| (tsupport η) ⊆ Ω'`. -/
 private theorem integral_diffQuot_sq_on_tsupport_le
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     (η : E → ℝ)
@@ -805,9 +726,6 @@ private theorem integral_diffQuot_sq_on_tsupport_le
     · exact (Filter.Eventually.of_forall hh_supp_in_Ω').mono (fun _ h => h)
   exact h_local.trans h_setIntegral_mono
 
-/-- The "η²-weighted absorbing integral" appearing in every cross-term
-bound: `∫ η² · ∑_i (D_h^k ∂_i u)²`. This is the term we absorb on the LHS
-in the master inequality after applying Young to all cross terms. -/
 private noncomputable def absorbingIntegral
     (k : Fin d) (h : ℝ) (η u : E → ℝ) : ℝ :=
   ∫ x, (η x)^2 *
@@ -815,14 +733,13 @@ private noncomputable def absorbingIntegral
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x ^ 2
     ∂(volume : Measure E)
 
-/-- The "Ω'-localized gradient L² norm squared": `∫_{Ω'} ∑_i (∂_i u)²`. -/
 private noncomputable def gradL2sqOn (Ω' : Set E) (u : E → ℝ) : ℝ :=
   ∫ x in Ω',
       ∑ i : Fin d, ((fderiv ℝ u x) (EuclideanSpace.single i 1)) ^ 2
     ∂(volume : Measure E)
 
 omit [NeZero d] in
-/-- The absorbing integral is nonnegative. -/
+
 private lemma absorbingIntegral_nonneg
     (k : Fin d) (h : ℝ) (η u : E → ℝ) :
     0 ≤ absorbingIntegral (d := d) k h η u := by
@@ -833,7 +750,7 @@ private lemma absorbingIntegral_nonneg
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
 omit [NeZero d] in
-/-- `gradL2sqOn` is nonnegative. -/
+
 private lemma gradL2sqOn_nonneg (Ω' : Set E) (u : E → ℝ) :
     0 ≤ gradL2sqOn (d := d) Ω' u := by
   unfold gradL2sqOn
@@ -841,7 +758,6 @@ private lemma gradL2sqOn_nonneg (Ω' : Set E) (u : E → ℝ) :
   intro x
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-/-- For smooth `u` and `h ≠ 0`, `D_h^k(∂_i u)` is continuous. -/
 private lemma continuous_diffQuot_partial_u
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (i k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -859,14 +775,13 @@ private lemma continuous_diffQuot_partial_u
   exact continuous_diffQuot_smooth (d := d) h_smooth k hh
 
 omit [NeZero d] in
-/-- Continuity of `(fderiv ℝ u) (EuclideanSpace.single i 1)` for smooth `u`. -/
+
 private lemma continuous_partial_u
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i : Fin d) :
     Continuous (fun x : E => (fderiv ℝ u x) (EuclideanSpace.single i 1)) := by
   have hu_C1 : ContDiff ℝ 1 u := hu.of_le (by norm_cast)
   exact (hu_C1.continuous_fderiv (by norm_num)).clm_apply continuous_const
 
-/-- Compact-support version of integrability of `(η x)² · ∑_i (D_h^k(∂_i u) x)²`. -/
 private lemma integrable_eta_sq_diffQuot_sum
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -898,7 +813,6 @@ private lemma integrable_eta_sq_diffQuot_sum
     h_eta_sq_supp.mul_right
   exact h_prod_cont.integrable_of_hasCompactSupport h_prod_supp
 
-/-- Integrability of the per-(i, j) integrand of Cross_1. -/
 private lemma integrable_cross_1_summand
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -913,8 +827,6 @@ private lemma integrable_cross_1_summand
   have h_supp := cross_1_summand_compactSupport (d := d) B u hη_supp i j k h
   exact h_cont.integrable_of_hasCompactSupport h_supp
 
-/-- A bound for `∫_{tsupport η} (D_h^k u)²` in terms of
-`gradL2sqOn Ω' u`. -/
 private theorem integral_diffQuot_sq_on_tsupport_le_gradL2sqOn
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     (η : E → ℝ)
@@ -954,7 +866,6 @@ private theorem integral_diffQuot_sq_on_tsupport_le_gradL2sqOn
   intro i _
   exact sq_nonneg _
 
-/-- Integrability of `(η x)² · (D_h^k(∂_i u) x)²`. -/
 private lemma integrable_eta_sq_diffQuot_partial_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -980,7 +891,6 @@ private lemma integrable_eta_sq_diffQuot_partial_sq
     h_eta_sq_supp.mul_right
   exact h_cont.integrable_of_hasCompactSupport h_supp
 
-/-- Integrability of `(c : ℝ) · η² · (D_h^k(∂_i u))²` (constant multiplier). -/
 private lemma integrable_const_eta_sq_diffQuot_partial_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -998,7 +908,6 @@ private lemma integrable_const_eta_sq_diffQuot_partial_sq
   rw [h_eq]
   exact h_base.const_mul c
 
-/-- Integrability of `c · 𝟙_{tsupport η} · (D_h^k u)²`. -/
 private lemma integrable_const_indicator_diffQuot_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη_supp : HasCompactSupport η)
@@ -1028,7 +937,6 @@ private lemma integrable_const_indicator_diffQuot_sq
   exact (ContinuousOn.integrableOn_compact h_tsupp_compact h_inner_cont.continuousOn).integrable_indicator
     h_tsupp_meas
 
-/-- Conversion of `∫ c · 𝟙_K · f` to `c · ∫_K f`. -/
 private lemma integral_const_indicator_eq
     {u : E → ℝ} (k : Fin d) (h : ℝ) (η : E → ℝ) (c : ℝ) :
     ∫ x, c * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -1053,8 +961,7 @@ private lemma integral_const_indicator_eq
   rw [MeasureTheory.integral_indicator (isClosed_tsupport η).measurableSet]
 
 set_option linter.unusedVariables false in
-/-- The first cross term is bounded by an absorbing piece plus a
-gradient piece localised on `Ω'`. -/
+
 theorem cross_1_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -1333,7 +1240,7 @@ theorem cross_1_bound
   linarith
 
 set_option linter.unusedVariables false in
-/-- Pointwise bound for one summand of `Cross_2`. -/
+
 private theorem cross_2_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -1470,7 +1377,6 @@ private theorem cross_2_pointwise_bound
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 = 0 := by ring
     linarith
 
-/-- Continuity of the (i, j) summand of Cross_2. -/
 private lemma cross_2_summand_continuous
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -1494,7 +1400,6 @@ private lemma cross_2_summand_continuous
     continuous_diffQuot_partial_u (d := d) hu j k hh
   exact (((h_dq_a.mul h_eta_sq_cont).mul h_partial_u).mul h_dq_partial_u)
 
-/-- The (i, j) summand of Cross_2 has compact support. -/
 private lemma cross_2_summand_compactSupport
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) {η : E → ℝ} (hη_supp : HasCompactSupport η)
@@ -1517,7 +1422,6 @@ private lemma cross_2_summand_compactSupport
     h1.mul_right
   exact h2.mul_right
 
-/-- Integrability of the (i, j) summand of Cross_2. -/
 private lemma integrable_cross_2_summand
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -1532,7 +1436,6 @@ private lemma integrable_cross_2_summand
   (cross_2_summand_continuous (d := d) B hu hη i j k hh).integrable_of_hasCompactSupport
     (cross_2_summand_compactSupport (d := d) B u hη_supp i j k h)
 
-/-- Integrability of `c · η² · 𝟙_{tsupport η} · (∂_i u)²`. -/
 private lemma integrable_const_eta_sq_indicator_partial_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -1572,8 +1475,7 @@ private lemma integrable_const_eta_sq_indicator_partial_sq
   exact h_cont.integrable_of_hasCompactSupport h_step2
 
 set_option linter.unusedVariables false in
-/-- The second cross term is bounded by an absorbing piece plus a
-gradient piece localised on `Ω'`. -/
+
 theorem cross_2_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -2085,9 +1987,6 @@ theorem cross_2_bound
     rw [← h_C_eq]
   linarith
 
-/-- Pointwise bound for one summand of `Cross_3`. Uses `2 ab ≤ a² + b²`
-applied to `|∂_i u|` and `|D_h^k u|`, after extracting bounds on
-`|D_h^k a^{ij}|`, `η`, `|∂_j η|`. -/
 private theorem cross_3_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
@@ -2257,7 +2156,6 @@ private theorem cross_3_pointwise_bound
     have h_t2 : M * N * 0 * (diffQuot k h u x)^2 = 0 := by ring
     linarith
 
-/-- Continuity of the (i, j) summand of Cross_3. -/
 private lemma cross_3_summand_continuous
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -2283,7 +2181,6 @@ private lemma cross_3_summand_continuous
   exact (((((continuous_const.mul h_dq_a).mul hη.continuous).mul h_partial_η).mul
     h_partial_u).mul h_dq_u)
 
-/-- The (i, j) summand of Cross_3 has compact support. -/
 private lemma cross_3_summand_compactSupport
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) {η : E → ℝ} (hη_supp : HasCompactSupport η)
@@ -2307,7 +2204,6 @@ private lemma cross_3_summand_compactSupport
     h2.mul_right
   exact h3.mul_right
 
-/-- Integrability of the (i, j) summand of Cross_3. -/
 private lemma integrable_cross_3_summand
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -2322,7 +2218,7 @@ private lemma integrable_cross_3_summand
     (cross_3_summand_compactSupport (d := d) B u hη_supp i j k h)
 
 set_option linter.unusedVariables false in
-/-- The third cross term is bounded by `C · ‖∇u‖²_{L²(Ω')}`. -/
+
 theorem cross_3_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -2707,8 +2603,6 @@ theorem cross_3_bound
     rw [← h_C_eq]
   exact h_total_bound
 
-/-- The pointwise FDeriv expansion of `η² · D_h^k u`:
-`∂_k(η² · D_h^k u)(x) = 2 η(x) · ∂_k η(x) · D_h^k u(x) + η(x)² · D_h^k(∂_k u)(x)`. -/
 private lemma fderiv_eta_sq_diffQuot_apply
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -2724,8 +2618,6 @@ private lemma fderiv_eta_sq_diffQuot_apply
       (d := d) hη hu k k hh x
   exact h_apply
 
-/-- Pointwise bound for `(∂_k(η² · D_h^k u))² ≤ 8 N² · 𝟙_{tsupport η} · (D_h^k u)² +
-2 η² · (D_h^k(∂_k u))²`. -/
 private lemma fderiv_eta_sq_diffQuot_sq_bound
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -2843,7 +2735,7 @@ private lemma fderiv_eta_sq_diffQuot_sq_bound
       sq_nonneg (diffQuot k h u x)]
 
 set_option maxHeartbeats 800000 in
-/-- Bound: `‖v_test‖²_{L²} ≤ 8 N² · ∫_{tsupport η} (D_h^k u)² + 2 · ∫ η² · (D_h^k(∂_k u))²`. -/
+
 private theorem v_test_sq_int_le
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -2994,8 +2886,6 @@ private theorem v_test_sq_int_le
     rw [integral_const_mul]
   rw [h_t2_eq]
 
-/-- The test function has compact support contained in the |h|-thickening of `tsupport η`,
-hence in `Ω'` for `|h| ≤ 1`. -/
 private lemma v_test_supported_in_Ω'
     {u : E → ℝ}
     {η : E → ℝ}
@@ -3009,7 +2899,6 @@ private lemma v_test_supported_in_Ω'
   (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
     (d := d) η u k h).trans (hh_supp_in_Ω' hh_le)
 
-/-- Continuity of `v_test` for smooth `u`, `η` and `h ≠ 0`. -/
 private lemma continuous_v_test
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -3019,7 +2908,6 @@ private lemma continuous_v_test
   (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.contDiff_nirenbergTestFunction
     hη hu k hh).continuous
 
-/-- Compact support of `v_test`. -/
 private lemma hasCompactSupport_v_test
     {u : E → ℝ} {η : E → ℝ} (hη_supp : HasCompactSupport η)
     (k : Fin d) (h : ℝ) :
@@ -3029,8 +2917,7 @@ private lemma hasCompactSupport_v_test
     hη_supp k h
 
 set_option linter.unusedVariables false in
-/-- The c-term `∫_Ω c · u · v_test` is bounded by an absorbing piece plus
-`C · (‖∇u‖²_{L²(Ω')} + ‖u‖²_{L²(Ω')})`. -/
+
 theorem c_term_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -3322,8 +3209,7 @@ theorem c_term_bound
   linarith
 
 set_option linter.unusedVariables false in
-/-- The f-term `∫_Ω f · v_test` is bounded by an absorbing piece plus
-`C · (‖∇u‖²_{L²(Ω')} + ‖f‖²_{L²(Ω')})`. -/
+
 theorem f_term_bound
     {Ω : Set E}
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -3580,12 +3466,6 @@ theorem f_term_bound
     linarith
   linarith
 
-/-- The headline absorbing inequality: combining the master inequality
-(`nirenberg_master_inequality`) with the five cross-term bounds and
-choosing `ε := λ/8` so that the four absorbing pieces sum to at most
-`λ/2`, we obtain
-  `λ · ∫ η² ‖D_h^k ∇u‖² ≤ (λ/2) · ∫ η² ‖D_h^k ∇u‖² +
-    C · (‖∇u‖²_{L²(Ω')} + ‖u‖²_{L²(Ω')} + ‖f‖²_{L²(Ω')}).` -/
 theorem nirenberg_master_inequality_after_young
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)

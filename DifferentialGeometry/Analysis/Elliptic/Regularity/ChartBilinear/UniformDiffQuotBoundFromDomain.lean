@@ -3,87 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDi
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.ChartBilinearVariationalIdentity
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 
-/-!
-# Unconditional uniform-in-`h` `L²` bound on the difference quotient of the
-chart-pulled weak partial derivatives — setup
-
-This module is the entry point for the unconditional version of
-`chartBilinearH1Compl_uniform_diffQuot_bound`. The original wrapper takes
-three analytical hypotheses (`h_FK_diffQuot_u_bound`, `h_v_test_sq_bound`,
-`h_master_nonsmooth`) and produces a uniform-in-`h` per-`(i, k)`
-`L²(Ω'')` bound on `D_h^k (g_g i)` for a globally-`L²` extension
-`g_g i` of `D.weak_partial i`. The unconditional version aims to
-discharge those three hypotheses internally from the chart-bilinear
-data structure `D` and the substitution identity supplied by
-`chartBilinear_substitution_identity_holds`, and to relate the output
-bound on `g_g i` back to `D.weak_partial i` on `Ω''`.
-
-This module provides the import-level setup and the local cutoff
-construction used to glue `D`'s chart-pulled data into globally-`L²`
-extensions. Subsequent modules (named `…_of_data`-suffixed) thread
-the three discharges through the existing substitution-identity
-machinery and the principal-term ellipticity bound.
-
-## Discharge plan
-
-The discharge constructs, internally:
-
-* a smooth cutoff `χ` equal to `1` on a `1`-thickening of `tsupport η`
-  and compactly supported strictly inside the chart target;
-* a smooth elliptic bilinear form `B` whose principal coefficient
-  agrees with `weightedInvGramOnEuclid g α` on the thickened compact
-  set, via `exists_smooth_metric_extension`;
-* the globally-`L²` extensions
-  - `u_g := χ · D.u_chart`,
-  - `f_g := χ · D.f_chart`,
-  - `g_g i := (∂_i χ) · D.u_chart + χ · D.weak_partial i`.
-
-The three discharges:
-
-1. **`h_FK_diffQuot_u_bound`** — apply
-   `integral_sq_diffQuot_le_integral_sq_weakPartial` to `u_g` with
-   weak `k`-partial `g_g k`. Bound the RHS `∫_{Ω'} (g_g k)²` by
-   `∫_{Ω'} ∑_l (g_g l)²` since all summands are non-negative.
-
-2. **`h_v_test_sq_bound`** — apply
-   `hasWeakPartialDeriv_eta_sq_diffQuot` (chain rule for
-   `D_h^k (η² · D_h^k u_g)`) to obtain the explicit weak
-   `k`-partial of `η² · D_h^k u_g`. Apply
-   `eLpNorm_diffQuot_le_eLpNorm_weakPartial` to `D_{-h}^k(·)` (FK
-   for the outer difference quotient). The result is the explicit
-   sum-form bound; pointwise `(a + b)² ≤ 2 a² + 2 b²` combined with
-   `η² ≤ 1` (from `η ∈ [0, 1]`) and `‖∂_k η‖ ≤ N` yields the
-   factor `8 N²` on the first term and `2` on the second.
-
-3. **`h_master_nonsmooth`** — the chart-bilinear substitution
-   identity `chartBilinear_substitution_identity_holds` gives
-   `principal + cross_1 + cross_2 + cross_3 + f_term = c_term`,
-   hence `principal = c_term − cross_1 − cross_2 − cross_3 − f_term`.
-   The ellipticity bound `B.lam · ∫ η² ∑(D_h^k g_g_l)² ≤ principal`
-   (from `principal_term_ge_lambda_norm_sq_nonsmooth`) and the
-   triangle inequality on the resulting expression for `principal`
-   produce the master inequality. The bridge from the chart-bilinear
-   coefficients (`weightedInvGramOnEuclid`) to the
-   `SmoothEllipticBilinearForm` coefficients (`B.a`) uses the
-   agreement `B.a = weightedInvGramOnEuclid` on the thickened cutoff
-   support and the support of `η` restricting integration to that
-   region.
-
-The output bound, in terms of `g_g i`, is converted to a bound on
-`D.weak_partial i` via the agreement `g_g i = D.weak_partial i` on
-`cthickening 1 (tsupport η) ⊇ cthickening 1 Ω''`. For `x ∈ Ω''` and
-`|h| ≤ 1`, both `x` and `x + h e_k` lie in this region, so
-`diffQuot k h (g_g i) x = diffQuot k h (D.weak_partial i) x`, and
-the L² norm equality follows.
-
-## Closure hypothesis
-
-The chart-containment constraint `closure Ω' ⊆ chartTargetEuclid α`
-(replacing the trivially-true `closure Ω' ⊆ Set.univ` of the
-hypothesis-bearing version) is mathematically essential: `D`'s
-data are only locally `L²` on compact subsets of the chart target.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -125,9 +44,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Existence of a smooth cutoff `χ` equal to `1` on
-`cthickening 1 (tsupport η)` and compactly supported strictly inside
-`chartTargetEuclid α`. -/
 theorem exists_cutoff_around_tsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M} {η : EuclN → ℝ} (hη_supp : HasCompactSupport η)
@@ -170,7 +86,6 @@ theorem exists_cutoff_around_tsupport
     exact ⟨hx_mem.1, hx_mem.2⟩
   exact ⟨χ, hχ_smooth, hχ_cs, hχ_nn, hχ_one, hχ_tsupp_in_chart⟩
 
-/-- The global `L²` extension `f_g := χ · D.f_chart`. -/
 theorem cutoff_fChart_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -237,18 +152,7 @@ theorem cutoff_fChart_memLp_two_univ
   exact h_indicator_lp
 
 set_option linter.unusedVariables false in
-/-- Discharge of `h_FK_diffQuot_u_bound` from the chart-bilinear data `D`,
-with `u_g := D.u_chart` and `g_g l := D.weak_partial l`. The proof internally
-constructs a smooth cutoff `χ` equal to `1` on a closed thickening of
-`tsupport η` strictly larger than `cthickening R₀ (tsupport η)` (possible by
-the chart-containment slack `closure Ω' ⊆ chartTargetEuclid α`) and applies
-the non-smooth Fréchet–Kolmogorov bound to the cutoff extensions
-`χ · D.u_chart` and `(∂_l χ) · D.u_chart + χ · D.weak_partial l`. The
-inequality survives the conversion back to `D.u_chart` and `D.weak_partial l`
-because, on the relevant integration regions, the cutoff agrees with the
-identity (where `χ = 1`) and the derivative term `(∂_l χ) · D.u_chart`
-vanishes (where `∂_l χ = 0`). The bound `R₀ > 0` is the diff-quotient
-radius parameter; the proof works uniformly in `R₀`. -/
+
 theorem chartBilinearFK_diffQuot_u_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -513,16 +417,7 @@ theorem chartBilinearFK_diffQuot_u_discharge
 
 set_option maxHeartbeats 1200000 in
 set_option linter.unusedVariables false in
-/-- Discharge of `h_v_test_sq_bound` from the chart-bilinear data `D`, with
-`u_g := D.u_chart` and `g_g k := D.weak_partial k`. The proof builds a smooth
-cutoff `χ` equal to `1` on a closed thickening of `tsupport η` strictly larger
-than `cthickening R₀ (tsupport η)` (possible by the chart-containment slack
-`closure Ω' ⊆ chartTargetEuclid α`), applies the `Set.univ`-weak-partial
-chain rule for `η² · D_h^k (χ · D.u_chart)` and the Fréchet–Kolmogorov
-bound for the outer difference quotient `D_{-h}^k`, then converts the
-bound back to `D.u_chart` and `D.weak_partial k` using the cutoff
-agreements on the relevant integration regions. The radius `R₀ > 0` is
-the diff-quotient bound; the proof works uniformly in `R₀`. -/
+
 theorem chartBilinear_v_test_sq_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -1566,14 +1461,7 @@ theorem chartBilinear_v_test_sq_discharge
 
 set_option maxHeartbeats 4000000 in
 set_option linter.unusedVariables false in
-/-- Discharge of `h_master_nonsmooth` from the chart-bilinear data `D` with an
-externally supplied elliptic bilinear form `B`. The hypotheses
-`h_B_a_match` and `h_B_c_match` connect `B` to the chart data on
-`cthickening R₀ (tsupport η)`. The output instantiates the conditional
-wrapper's `h_master_nonsmooth` shape with `u_g := D.u_chart`,
-`f_g := densityOnEuclid g α · D.f_chart`, and `g_g i := D.weak_partial i`.
-The radius `R₀ > 0` is the diff-quotient bound; the proof works uniformly
-in `R₀`. -/
+
 theorem chartBilinear_master_nonsmooth_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -2442,11 +2330,6 @@ theorem chartBilinear_master_nonsmooth_discharge
           rw [abs_neg, abs_neg, abs_neg, abs_neg]
   exact h_LHS_le_principal_A.trans h_triangle
 
-/-- The smooth extension of `densityOnEuclid` paired with the unit constant.
-
-On `tsupport χ`, this is `χ · densityOnEuclid g α`. Off `tsupport χ` it is
-the constant `1`. Smooth globally, positive, and equal to `densityOnEuclid`
-exactly where `χ y = 1`. -/
 private def extendedDensity
     (g : SmoothRiemannianMetric I M) (α : M) (χ : EuclN → ℝ) (y : EuclN) : ℝ :=
   χ y * densityOnEuclid (I := I) g α y + (1 - χ y) * 1
@@ -2490,10 +2373,6 @@ private lemma extendedDensity_eq_density_of_chi_one
   unfold extendedDensity
   rw [hχ_one]; ring
 
-/-- Internal helper: build a `SmoothEllipticBilinearForm` whose principal
-coefficient agrees with `weightedInvGramOnEuclid` on a chosen compact
-`K ⊆ chartTargetEuclid α` AND whose zeroth-order coefficient agrees with
-`densityOnEuclid` on `K`. -/
 private theorem exists_smooth_metric_extension_with_density
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -2596,31 +2475,7 @@ private theorem exists_smooth_metric_extension_with_density
 
 set_option maxHeartbeats 8000000 in
 set_option linter.unusedVariables false in
-/-- **Quantitative final assembly**: the unconditional uniform-in-`h`
-per-`(i, k)` `L²(Ω'')` bound on the difference quotient of the
-chart-bilinear data's weak partial derivatives, with an *explicit
-chart-geometric constant* `C_geom` that is **uniform over the bilinear
-data `D`**.
 
-Given a standard Nirenberg cutoff `η` on the Euclidean chart space with a
-precompact target `Ω'` inside the chart target and `Ω'' ⊆ Ω'` on which
-`η ≡ 1`, there is a constant `C_geom i k ≥ 0` — built purely from the
-chart geometry (a smooth elliptic extension `B` of the metric and a
-master cutoff `χ`, neither depending on `D`) — such that **for every**
-`ChartBilinearH1ComplData D` and every `0 < |h| ≤ R₀`:
-
-  `‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤`
-  `  ENNReal.ofReal (C_geom i k · √(∑_l ‖D.weak_partial l‖²_{L²(closure Ω')}`
-  `    + ‖D.u_chart‖²_{L²(closure Ω')} + ‖D.f_chart‖²_{L²(closure Ω')}))`.
-
-Because `C_geom` is quantified **before** `D`, the statement asserts the
-constant is uniform over all bilinear data — which is the whole point: the
-chart-localising cutoff `χ` and the smooth elliptic extension `B` depend
-only on `g`, `α`, `Ω'`, `η`, never on `D`.
-
-The radius `R₀ > 0` is the diff-quotient bound; the proof works uniformly
-in `R₀`. The existential headline `chartBilinearH1Compl_uniform_diffQuot_bound_of_data`
-is a thin wrapper around this theorem. -/
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -3804,26 +3659,7 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
-/-- **Final assembly**: the unconditional uniform-in-`h` per-`(i, k)`
-`L²(Ω'')` bound on the difference quotient of the chart-bilinear data's
-weak partial derivatives.
 
-Given a chart-bilinear data structure `D`, a standard Nirenberg cutoff `η`
-on the Euclidean chart space with a precompact target Ω' inside the chart
-target and Ω'' ⊆ Ω' on which `η ≡ 1`, the wrapper produces a constant
-`M_bound i k ≥ 0` such that for every `0 < |h| ≤ R₀`:
-
-  `‖D_h^k (D.weak_partial i)‖_{L²(Ω'')} ≤ ENNReal.ofReal (M_bound i k)`.
-
-The conclusion is the uniform-in-`h` bound consumed by
-`chart_loc_of_uniform_bound` to extract `H²` regularity. The radius
-`R₀ > 0` is the diff-quotient bound; the proof works uniformly in `R₀`.
-
-This is a thin wrapper around the quantitative theorem
-`chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative`: the
-existential witness `M_bound i k` is the quantitative theorem's explicit
-chart-geometric constant `C_geom i k` multiplied by the (data-dependent)
-square root of the `L²` energy of `D`. -/
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

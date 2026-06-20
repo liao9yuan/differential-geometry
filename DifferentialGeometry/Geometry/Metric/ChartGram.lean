@@ -21,37 +21,6 @@ import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
-/-!
-# Chart-local volume density from a Riemannian metric
-
-Given a smooth `ContMDiffRiemannianMetric` `g` on the tangent bundle of a manifold `M`
-and a base point `x₀ : M`, we construct a chart-local positive smooth density on the
-domain of the base chart at `x₀`, and the associated chart-local Borel measure on `M`.
-
-## Overview
-
-Inside the open set `triv.baseSet = (chartAt H x₀).source`, we build a pointwise basis of
-the tangent bundle by transporting a fixed algebraic basis of the model space `E` through
-the tangent-bundle trivialization centred at `x₀`. The Gram matrix of this basis under
-`g` is symmetric positive-definite, so its determinant is strictly positive and its
-square root gives a positive smooth density on the chart domain.
-
-The chart-local measure is obtained by weighting a chosen reference measure on the model
-space `E` by the pullback of this density through the extended chart, and then pushing
-forward to `M`.
-
-## Main definitions
-
-* `chartBasisVec g x₀ i` : the tangent-bundle section over `triv.baseSet` whose value
-  at `x` is the image of the `i`-th model-space basis vector under the inverse of the
-  tangent trivialization centred at `x₀`.
-* `chartGramMatrix g x₀ x` : the Gram matrix at `x` of the family `chartBasisVec g x₀ •`
-  under the inner product `g.inner x`.
-* `chartDensity g x₀ x` : the positive density `√(det (chartGramMatrix g x₀ x))`.
-* `chartLocalMeasure g x₀` : the chart-local measure on `M` obtained by pushing
-  forward the weighted canonical additive Haar measure on the model space `E`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -73,14 +42,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 export DifferentialGeometry (SmoothRiemannianMetric)
 
-/-- The fixed model-space basis used throughout the chart-local construction. It is the
-image of the standard `EuclideanSpace.basisFun` under the inverse of the canonical
-continuous-linear equivalence `toEuclidean : E ≃L[ℝ] EuclideanSpace ℝ (Fin n)`.
-
-Marked `irreducible` to avoid expensive `whnf` chains that reduce
-`(EuclideanSpace.basisFun ...).toBasis.map toEuclidean.symm.toLinearEquiv` —
-downstream proofs should rely on the simp lemma `chartModelBasis_apply` (and
-`Module.Basis.repr`-style API) rather than on definitional unfolding. -/
 @[irreducible] def chartModelBasis (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] :
     Module.Basis (Fin (Module.finrank ℝ E)) ℝ E :=
@@ -98,16 +59,10 @@ downstream proofs should rely on the simp lemma `chartModelBasis_apply` (and
   simp [OrthonormalBasis.coe_toBasis,
     EuclideanSpace.basisFun_apply (𝕜 := ℝ) (ι := Fin (Module.finrank ℝ E))]
 
-/-- The `i`-th pointwise tangent vector of the chart-local frame attached to `x₀`. For `x`
-in the trivialization base set this is the image of the `i`-th model-space basis vector
-under `(trivializationAt E (TangentSpace I) x₀).symm x`; off that set it is a default
-(junk) value in the fiber, still well-defined. -/
 def chartBasisVecFiber (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     TangentSpace I x :=
   (trivializationAt E (TangentSpace I) x₀).symm x ((chartModelBasis E) i)
 
-/-- The `i`-th pointwise tangent-bundle section of the chart-local frame attached to `x₀`.
-Smooth on `triv.baseSet`. -/
 def chartBasisVec (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
     M → TotalSpace E (TangentSpace I : M → Type _) :=
   fun x => TotalSpace.mk' E x (chartBasisVecFiber (I := I) x₀ i x)
@@ -118,8 +73,6 @@ def chartBasisVec (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
 @[simp] lemma chartBasisVec_snd (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     (chartBasisVec (I := I) x₀ i x).2 = chartBasisVecFiber (I := I) x₀ i x := rfl
 
-/-- On the base set of the trivialization at `x₀`, applying the trivialization to the
-chart-basis vector recovers the constant model-basis vector. -/
 lemma trivializationAt_chartBasisVec_snd
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -130,8 +83,6 @@ lemma trivializationAt_chartBasisVec_snd
     ((chartModelBasis E) i)
   simpa [chartBasisVecFiber] using congrArg Prod.snd h
 
-/-- The chart-basis tangent-bundle section is smooth on the base set of the
-trivialization at `x₀`. -/
 lemma chartBasisVec_contMDiffOn
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (chartBasisVec (I := I) x₀ i)
@@ -148,16 +99,6 @@ lemma chartBasisVec_contMDiffOn
   intro x hx
   exact (trivializationAt_chartBasisVec_snd (I := I) x₀ i hx)
 
-/-- Smoothness of the chart-`α`-pushforward frame vector
-`(triv α).symmL ℝ b (chartModelBasis E i)` as a smooth bundle section, on the
-chart-`α` source.  The fibre `(triv α).symmL ℝ b v` is, by `Trivialization.coe_symmₗ`,
-equal to `(triv α).symm b v` as a function of `v` (`symmL` is built from `symmₗ`
-with its function field given explicitly as `e.symm b`), so the section coincides
-pointwise with `chartBasisVec α i`; the smoothness then follows from
-`chartBasisVec_contMDiffOn` together with the identification
-`(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source` for the
-tangent bundle (`TangentBundle.trivializationAt_baseSet`).  Stated with model
-space `I.tangent`, which unfolds (it is an `abbrev`) to `I.prod 𝓘(ℝ, E)`. -/
 lemma chartAlphaFrame_section_contMDiffOn
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I I.tangent ∞
@@ -180,9 +121,6 @@ lemma chartAlphaFrame_section_contMDiffOn
   rw [h_baseSet] at h_base
   exact h_base
 
-/-- The chart-basis family at a point `x ∈ triv.baseSet` is a basis of `TangentSpace I x`,
-obtained by transporting the fixed model-space basis through the continuous linear
-equivalence given by the trivialization. -/
 def chartBasisFamily (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
@@ -199,7 +137,6 @@ lemma chartBasisFamily_apply (x₀ : M) {x : M}
   rw [Module.Basis.map_apply]
   rfl
 
-/-- The chart-basis family is linearly independent at each base-set point. -/
 lemma chartBasisFamily_linearIndependent (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     LinearIndependent ℝ
@@ -213,7 +150,6 @@ lemma chartBasisFamily_linearIndependent (x₀ : M) {x : M}
   rw [← hcongr]
   exact h
 
-/-- The Gram matrix of the chart-basis family at `x` under `g.inner x`. -/
 def chartGramMatrix (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i j =>
@@ -229,7 +165,6 @@ def chartGramMatrix (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
         (chartBasisVecFiber (I := I) x₀ i x)
         (chartBasisVecFiber (I := I) x₀ j x) := rfl
 
-/-- The Gram matrix is Hermitian (symmetric for real entries). -/
 lemma chartGramMatrix_isHermitian
     (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
     (chartGramMatrix g x₀ x).IsHermitian := by
@@ -241,9 +176,6 @@ lemma chartGramMatrix_isHermitian
     (chartBasisVecFiber (I := I) x₀ j x)
     (chartBasisVecFiber (I := I) x₀ i x)
 
-/-- Helper: the quadratic form of the Gram matrix equals the inner product of the linear
-combinations. This is the tangent-space version of the standard identity used in
-`Matrix.star_dotProduct_gram_mulVec`. -/
 lemma chartGramMatrix_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M)
     (c : Fin (Module.finrank ℝ E) → ℝ) :
@@ -295,7 +227,6 @@ lemma chartGramMatrix_dotProduct_mulVec
   intro j _
   ring
 
-/-- The Gram matrix of the chart-basis family is positive-definite on the base set. -/
 lemma chartGramMatrix_posDef
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -315,16 +246,12 @@ lemma chartGramMatrix_posDef
     exact hc this
   exact g.pos x w hwnz
 
-/-- The determinant of the Gram matrix is positive on the base set. -/
 lemma chartGramMatrix_det_pos
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     0 < (chartGramMatrix g x₀ x).det :=
   (chartGramMatrix_posDef (I := I) g x₀ hx).det_pos
 
-/-- Each Gram-matrix entry is smooth on the trivialization base set. Proof: the inner
-product evaluated at two smooth sections is smooth, via `ContMDiffOn.clm_bundle_apply₂`
-applied to `g.contMDiff` and two copies of `chartBasisVec`. -/
 lemma chartGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -354,8 +281,6 @@ lemma chartGramMatrix_entry_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
-/-- Each entry of the Gram matrix viewed as a function of `x`, but indexed by a pair
-`(i, j)`, is smooth on the base set. -/
 private lemma chartGramMatrix_pair_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :
@@ -364,9 +289,6 @@ private lemma chartGramMatrix_pair_entry_contMDiffOn
       (trivializationAt E (TangentSpace I) x₀).baseSet :=
   chartGramMatrix_entry_contMDiffOn (I := I) g x₀ ij.1 ij.2
 
-/-- The determinant of the Gram matrix is smooth on the trivialization base set. We expand
-`Matrix.det` into a finite sum over permutations of finite products of entries, then use
-the smooth-manifold finite-sum / finite-product lemmas for scalar-valued functions. -/
 lemma chartGramMatrix_det_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffOn I 𝓘(ℝ) ∞
@@ -388,7 +310,6 @@ lemma chartGramMatrix_det_contMDiffOn
     (contMDiffOn_const (c := ((Equiv.Perm.sign σ : ℤ) : ℝ))) ?_
   refine contMDiffOn_finset_prod (fun i _ => ?_)
   exact chartGramMatrix_entry_contMDiffOn (I := I) g x₀ (σ i) i
-
 
 end Measure
 end Integral

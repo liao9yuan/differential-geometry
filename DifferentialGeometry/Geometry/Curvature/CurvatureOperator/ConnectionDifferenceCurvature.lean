@@ -1,53 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 
-/-!
-# The curvature-difference identity of two covariant derivatives
-
-Given two covariant derivatives `∇₀, ∇₁` on a vector bundle `V` over a smooth manifold `M`,
-their Riemann curvature operators differ by terms built entirely from the *difference tensor*
-`D := ∇₁ - ∇₀` (Mathlib's `CovariantDerivative.difference`, a one-form valued in the
-endomorphisms of `V`).  Writing the section-level curvature as
-`R^∇(X, Y) Z = ∇_X(∇_Y Z) - ∇_Y(∇_X Z) - ∇_{[X, Y]} Z` (`riemannSec`), substituting
-`∇₁ = ∇₀ + D`, and collecting yields the classical formula
-$$
-  R^{∇₁}(X, Y) Z = R^{∇₀}(X, Y) Z
-    + (∇₀_X D)(Y, Z) - (∇₀_Y D)(X, Z)
-    + D(X, D(Y, Z)) - D(Y, D(X, Z)).
-$$
-
-This file proves the identity at the generality the on-disk curvature machinery supports
-(arbitrary covariant derivatives on a general vector bundle), then specialises the Ricci
-contraction to the Levi-Civita pair `∇₀ = LeviCivita g₀`, `∇₁ = LeviCivita g₁`, where the
-difference tensor is `connDiff g₁ g₀ = CovariantDerivative.difference (LeviCivita g₁)
-(LeviCivita g₀)`.
-
-## Conventions
-
-We follow Mathlib's argument convention `cov.toFun σ x v ≅ (∇_v σ)(x)`, so
-`covApply cov X Z = ∇_X Z`.  The difference one-form satisfies
-`CovariantDerivative.difference cov₁ cov₀ x (σ x) v = (∇₁_v σ - ∇₀_v σ)(x)` on sections `σ`
-differentiable at `x` (`diff_eval`); thus `D = ∇₁ - ∇₀`.  The "bilinear difference section"
-`diffSec cov₀ cov₁ X Z` is the section `b ↦ D b (Z b) (X b)`, i.e. `D(X, Z)` on paper.
-
-## Main definitions
-
-* `diffSec cov₀ cov₁ X Z` — the section `D(X, Z) : b ↦ D b (Z b) (X b)`.
-* `covDerivDiff cov₀ cov₁ X Y Z x` — the directional covariant derivative `(∇₀_X D)(Y, Z) (x)`
-  of the difference (1,2)-tensor under `∇₀`, on the tangent bundle.
-
-## Main theorems
-
-* `riemannSec_difference_raw` — the raw (torsion-free-hypothesis-free) curvature-difference
-  expansion, valid for arbitrary covariant derivatives on any vector bundle.
-* `riemannSec_difference` — the grouped classical identity for torsion-free `∇₀` on the
-  tangent bundle, with the first-order terms packaged as `covDerivDiff`.
-* `ricciTensor_sub_eq_basisSum` — the Ricci-trace corollary: the difference of the two Ricci
-  tensors at a point is the model-basis trace of the per-slot section-level curvature
-  difference, the form consumed by the metric-difference (DeTurck) telescoping.
-* `ricciTensor_sub_eq_basisSum_difference` — the same, with the per-slot curvature difference
-  expanded into the grouped `covDerivDiff`-plus-quadratic `D`-terms via `riemannSec_difference`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set
@@ -75,9 +27,7 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [ContMDiffVectorBundle 1 F V I]
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
-/-- Evaluation of the difference one-form on a section value, expanded into the two covariant
-derivatives.  On a section `σ` differentiable at `x`,
-`CovariantDerivative.difference cov₁ cov₀ x (σ x) v = (∇₁_v σ - ∇₀_v σ)(x)`. -/
+
 theorem diff_eval (cov₀ cov₁ : CovariantDerivative I F V)
     {σ : Π x, V x} {x : M} (hσ : MDiffAt (T% σ) x) (v : TangentSpace I x) :
     CovariantDerivative.difference cov₁ cov₀ x (σ x) v
@@ -90,15 +40,12 @@ theorem diff_eval (cov₀ cov₁ : CovariantDerivative I F V)
       cov₁.isCovariantDerivativeOnUniv.difference cov₀.isCovariantDerivativeOnUniv from rfl]
   exact this
 
-/-- The **bilinear difference section** `D(X, Z) := b ↦ D b (Z b) (X b)`, where
-`D = CovariantDerivative.difference cov₁ cov₀` is the difference one-form.  This is the
-covariant-derivative correction `∇₁_X Z - ∇₀_X Z` on differentiable `Z` (`covApply_cov1_eq`). -/
 def diffSec (cov₀ cov₁ : CovariantDerivative I F V)
     (X : Π b : M, TangentSpace I b) (Z : Π b : M, V b) : Π b : M, V b :=
   fun b => CovariantDerivative.difference cov₁ cov₀ b (Z b) (X b)
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
-/-- On a section `Z` differentiable at `b`, `∇₁_X Z = ∇₀_X Z + D(X, Z)` pointwise. -/
+
 theorem covApply_cov1_eq (cov₀ cov₁ : CovariantDerivative I F V)
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {b : M} (hZ : MDiffAt (T% Z) b) :
     covApply cov₁ X Z b = covApply cov₀ X Z b + diffSec cov₀ cov₁ X Z b := by
@@ -107,7 +54,7 @@ theorem covApply_cov1_eq (cov₀ cov₁ : CovariantDerivative I F V)
   abel
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
-/-- On a section `Z` differentiable at `b`, `D(X, Z) = ∇₁_X Z - ∇₀_X Z` pointwise. -/
+
 theorem diffSec_eq_sub (cov₀ cov₁ : CovariantDerivative I F V)
     {X : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {b : M} (hZ : MDiffAt (T% Z) b) :
     diffSec cov₀ cov₁ X Z b = covApply cov₁ X Z b - covApply cov₀ X Z b := by
@@ -115,8 +62,7 @@ theorem diffSec_eq_sub (cov₀ cov₁ : CovariantDerivative I F V)
   rw [diff_eval cov₀ cov₁ hZ]
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
-/-- **Smoothness of the bilinear difference section.**  For smooth covariant derivatives and
-smooth tangent field `X` and section `Z`, the difference section `D(X, Z)` is smooth. -/
+
 theorem diffSec_contMDiff (cov₀ cov₁ : CovariantDerivative I F V)
     [CovariantDerivative.ContMDiffCovariantDerivative cov₀ ∞]
     [CovariantDerivative.ContMDiffCovariantDerivative cov₁ ∞]
@@ -149,11 +95,7 @@ variable (cov₀ cov₁ : CovariantDerivative I F V)
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
 include hY hZ in
-/-- Expansion of the outer `∇₁` term `∇₁_X(∇₁_Y Z) (x)` into its `∇₀`-curvature contributions
-plus the difference-one-form correction.  This is the technical heart of the curvature
-expansion: the inner section `∇₁_Y Z` is rewritten as `∇₀_Y Z + D(Y, Z)`, the outer `∇₁` is
-expanded via `diff_eval`, and the `∇₀`-derivative is split by additivity.  The differentiated
-slot `X` enters only as a direction value, so only the smoothness of `Y, Z` is required. -/
+
 theorem covApply_cov1_outer_expand (x : M) :
     cov₁.toFun (covApply cov₁ Y Z) x (X x) =
       cov₀.toFun (covApply cov₀ Y Z) x (X x)
@@ -204,7 +146,7 @@ theorem covApply_cov1_outer_expand (x : M) :
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M]
   [CovariantDerivative.ContMDiffCovariantDerivative cov₀ ∞]
   [CovariantDerivative.ContMDiffCovariantDerivative cov₁ ∞] hX hY hZ in
-/-- Expansion of the bracket term `∇₁_W Z (x)` into `∇₀_W Z (x) + D(W, Z)(x)`. -/
+
 theorem covApply_cov1_bracket_expand {x : M} (hZx : MDiffAt (T% Z) x) (w : TangentSpace I x) :
     cov₁.toFun Z x w = cov₀.toFun Z x w
       + CovariantDerivative.difference cov₁ cov₀ x (Z x) w := by
@@ -213,11 +155,7 @@ theorem covApply_cov1_bracket_expand {x : M} (hZx : MDiffAt (T% Z) x) (w : Tange
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [BoundarylessManifold I M] in
 include hX hY hZ in
-/-- **Raw curvature-difference expansion** of two covariant derivatives on a general vector
-bundle, requiring no torsion hypothesis.  The first-order block is written un-grouped as the
-covariant `∇₀`-derivatives of the difference section, plus the bracket-direction
-difference-one-form term; the second-order block is the quadratic `D`-pairing.  See
-`riemannSec_difference` for the grouped classical form on the tangent bundle. -/
+
 theorem riemannSec_difference_raw (x : M) :
     riemannSec cov₁ X Y Z x =
       riemannSec cov₀ X Y Z x
@@ -265,12 +203,6 @@ variable (cov₀ cov₁ : CovariantDerivative I E (TangentSpace I : M → Type _
   [CovariantDerivative.ContMDiffCovariantDerivative cov₀ ∞]
   [CovariantDerivative.ContMDiffCovariantDerivative cov₁ ∞]
 
-/-- The directional **covariant derivative of the difference (1,2)-tensor** `D = ∇₁ - ∇₀`
-under `∇₀`, on the tangent bundle:
-`(∇₀_X D)(Y, Z) (x) = ∇₀_X(D(Y, Z)) (x) - D(∇₀_X Y, Z)(x) - D(Y, ∇₀_X Z)(x)`.
-With Mathlib's argument convention this expands to
-`cov₀.toFun (D(Y, Z)) x (X x) - D x (Z x) (∇₀_X Y (x)) - D x (∇₀_X Z (x)) (Y x)`, the standard
-coordinate-free covariant derivative of a `(1,2)`-tensor along `X`. -/
 def covDerivDiff (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   cov₀.toFun (diffSec cov₀ cov₁ Y Z) x (X x)
     - CovariantDerivative.difference cov₁ cov₀ x (Z x) (covApply cov₀ X Y x)
@@ -283,16 +215,7 @@ variable {X Y Z : Π b : M, TangentSpace I b}
 
 omit [BoundarylessManifold I M] in
 include hX hY hZ in
-/-- **Grouped (classical) curvature-difference identity** for a torsion-free `∇₀` on the
-tangent bundle:
-$$
-  R^{∇₁}(X, Y) Z = R^{∇₀}(X, Y) Z
-    + (∇₀_X D)(Y, Z) - (∇₀_Y D)(X, Z)
-    + D(X, D(Y, Z)) - D(Y, D(X, Z)),
-$$
-where `D = CovariantDerivative.difference cov₁ cov₀`.  The grouping of the first-order terms
-into `covDerivDiff` uses the torsion-free identity `∇₀_X Y - ∇₀_Y X = [X, Y]` to absorb the
-bracket-direction term. -/
+
 theorem riemannSec_difference (htor : cov₀.torsion = 0) (x : M) :
     riemannSec cov₁ X Y Z x =
       riemannSec cov₀ X Y Z x
@@ -327,19 +250,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
-/-- **Ricci-trace corollary (per-slot section form).**  For two smooth Riemannian metrics
-`g₀, g₁` and fibre vectors `v, w ∈ T_x M`, the difference of their Ricci tensors at `x` is the
-model-basis trace of the per-slot section-level curvature difference of the two Levi-Civita
-covariant derivatives, evaluated on the smooth extensions of the model-basis frame and of
-`v, w`:
-$$
-  \mathrm{Ric}^{g₁}(v, w) - \mathrm{Ric}^{g₀}(v, w)
-    = \sum_i \bigl[\,b\bigr]_i\Bigl(R^{∇₁}(B_i, V) W - R^{∇₀}(B_i, V) W\Bigr)(x),
-$$
-where `b = chartModelBasis E`, `B_i = smoothExtensionTangent x (b i)`,
-`V = smoothExtensionTangent x v`, `W = smoothExtensionTangent x w`.  This is the form the
-DeTurck metric-difference telescoping consumes: each summand is a section-level curvature
-difference, expandable into the difference-tensor terms via `riemannSec_difference`. -/
 theorem ricciTensor_sub_eq_basisSum (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciTensor (I := I) g₁ x v w - ricciTensor (I := I) g₀ x v w =
@@ -382,20 +292,6 @@ theorem ricciTensor_sub_eq_basisSum (g₀ g₁ : SmoothRiemannianMetric I M) (x 
         riemannOp_apply_smooth (cov := LeviCivita (I := I) g₀) hB_sm hV_sm hW_sm]
   rw [h1, h0]
 
-/-- **Ricci-trace corollary (expanded difference-tensor form).**  Combining
-`ricciTensor_sub_eq_basisSum` with the grouped curvature-difference identity
-`riemannSec_difference` (applied to `∇₀ = LeviCivita g₀`, `∇₁ = LeviCivita g₁`, which is
-torsion-free), the Ricci difference at `x` is the model-basis trace of the grouped
-difference-tensor terms:
-$$
-  \mathrm{Ric}^{g₁}(v, w) - \mathrm{Ric}^{g₀}(v, w)
-    = \sum_i \bigl[\,b\bigr]_i\Bigl(
-        (∇₀_{B_i} D)(V, W) - (∇₀_V D)(B_i, W)
-        + D(B_i, D(V, W)) - D(V, D(B_i, W))
-      \Bigr)(x),
-$$
-where `D = CovariantDerivative.difference (LeviCivita g₁) (LeviCivita g₀)` (definitionally
-`connDiff g₁ g₀`).  This is the fully expanded telescoping kernel. -/
 theorem ricciTensor_sub_eq_basisSum_difference (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ricciTensor (I := I) g₁ x v w - ricciTensor (I := I) g₀ x v w =

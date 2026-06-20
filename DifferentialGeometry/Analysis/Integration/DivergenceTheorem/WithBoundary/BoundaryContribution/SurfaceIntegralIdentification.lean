@@ -4,61 +4,6 @@ import DifferentialGeometry.Geometry.Boundary.SurfaceMeasure
 import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-/-!
-# Identification of the chart-by-chart boundary face sum with the intrinsic
-surface integral
-
-For a smooth Riemannian metric `g` on a compact smooth manifold-with-boundary
-`M` modelled on `EuclideanHalfSpace n` (with `[NeZero n]`), this file
-establishes the identification
-
-  `boundaryFaceSum g X = ∫_{∂M} g.inner x.val (outwardNormal g x) (X x.val) dS`,
-
-linking the chart-by-chart presentation of the with-boundary divergence theorem
-boundary contribution (`boundaryFaceSum`, defined via the chart-atlas partition
-of unity in `GreenWithBoundary.lean`) with the intrinsic surface integral
-against the smooth outward unit normal (`outwardNormal`, from
-`Geometry/Boundary/OutwardNormal.lean`) and the surface measure (`surfaceMeasure`, from
-`Geometry/Boundary/SurfaceMeasure.lean`).
-
-## Strategy
-
-The identification proceeds in two layers:
-
-* **Per-chart identification (hypothesis).** For each base point
-  `α ∈ chartAtlasPOU_finset`, the chart-α boundary face integral
-  `chartBoundaryFaceIntegral g α X (ρ α)` equals an integral over
-  `BoundaryManifold I M` of the chart-α-POU-weighted intrinsic surface
-  integrand. This is the deep step: it amounts to the chart-local Voss–Weyl
-  formula applied at the boundary face, plus the matching of chart-target
-  Lebesgue measure on the boundary face with the induced metric volume on the
-  boundary submanifold.
-
-* **Global assembly.** Granted the per-chart identification, summing over `α`
-  in the chart-atlas POU support set and exchanging the finite sum with the
-  Bochner integral yields the global statement, after using the partition of
-  unity sum-to-one identity to collapse the POU sum to `1`.
-
-This file delivers the global assembly as a single named theorem
-`boundaryFaceSum_eq_surface_integral_of_chartIdentification`, taking the
-per-chart identifications as a hypothesis. The chart-level identification
-itself is the subject of subsequent work and is not established here; the
-hypothesis form makes the structural reduction explicit and permits downstream
-clients to consume the identification once the per-chart step is proved.
-
-## Main definitions and results
-
-* `chartFaceIntegralEqualsSurfaceIntegralOnChart` — the per-chart
-  identification predicate: for a base point `α`, the chart-α boundary face
-  integral against a smooth weight `f` equals the surface integral of
-  `f(x.val) · g.inner x.val (outwardNormal g x) (X x.val)` over the boundary
-  submanifold.
-
-* `boundaryFaceSum_eq_surface_integral_of_chartIdentification` — the global
-  identification, taking the per-chart hypothesis specialised to the chart-α
-  POU weight `ρ α` for each `α` in the chart-atlas POU support.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Function
@@ -78,24 +23,6 @@ private local instance instBorelSpaceM
     {M : Type*} [TopologicalSpace M] :
     @BorelSpace M _ (borel M) := letI : MeasurableSpace M := borel M; ⟨rfl⟩
 
-/-- The per-chart identification predicate: the chart-α boundary face integral
-of `X` against a smooth weight `f : M → ℝ` equals the surface integral of
-`f` (precomposed with the boundary inclusion) times the intrinsic surface
-integrand `g.inner x.val (outwardNormal g x) (X x.val)`.
-
-Concretely:
-$$\chartBoundaryFaceIntegral g \alpha X f
-   = \int_{\partial M} f(x.\mathrm{val}) \cdot
-       g.\mathrm{inner}\, x.\mathrm{val}\, (\nu\, x)\, (X\, x.\mathrm{val})\,
-       dS,$$
-where `\nu := outwardNormal g` and `dS := surfaceMeasure g`.
-
-This predicate is the chart-by-chart content of the matching: when satisfied
-for every `α ∈ chartAtlasPOU_finset` (with `f := chartAtlasPOU I M α`), the
-global identification of `boundaryFaceSum g X` with the intrinsic surface
-integral follows by linearity and the partition-of-unity sum-to-one identity,
-as established in
-`boundaryFaceSum_eq_surface_integral_of_chartIdentification`. -/
 def chartFaceIntegralEqualsSurfaceIntegralOnChart
     {n : ℕ} [NeZero n] {M : Type*} [TopologicalSpace M]
     [ChartedSpace (EuclideanHalfSpace n) M]
@@ -128,7 +55,7 @@ variable {M : Type*} [TopologicalSpace M]
   [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 omit [T2Space M] [SigmaCompactSpace M] in
-/-- The boundary submanifold of a compact ambient manifold is compact. -/
+
 private lemma compactSpace_boundaryManifold :
     CompactSpace
       (BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) := by
@@ -150,7 +77,6 @@ private lemma compactSpace_boundaryManifold :
     isCompact_iff_compactSpace.mp h_compact
   exact h_compact_subtype
 
-/-- The surface measure on a compact boundary submanifold is finite. -/
 private lemma surfaceMeasure_isFiniteMeasure
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M) :
     IsFiniteMeasure
@@ -317,32 +243,6 @@ private lemma sum_integral_eq_integral_sum_pou
   refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
   simp only [Finset.sum_mul]
 
-/-- **Global identification of the boundary face sum with the intrinsic
-surface integral**, assuming the per-chart matching for the chart-atlas POU.
-
-Given the per-chart identification
-`chartBoundaryFaceIntegral g α X (ρ α) = ∫_{∂M} (ρ α)(x.val) · g.inner ⋯ dS`
-for every `α ∈ chartAtlasPOU_finset`, this theorem assembles the global
-identification:
-
-$$\mathrm{boundaryFaceSum}\, g\, X
-   = \int_{\partial M} g.\mathrm{inner}\, x.\mathrm{val}\, (\nu\, x)\,
-     (X\, x.\mathrm{val})\, dS,$$
-
-where `\nu := outwardNormal g` and `dS := surfaceMeasure g`.
-
-The proof has three structural steps. (i) Sum the per-chart identifications
-over the chart-atlas POU support set (a Finset). (ii) Exchange the finite
-sum with the Bochner integral via `integral_finset_sum`, with per-summand
-integrability obtained from `Integrable.bdd_mul` (the POU weights are
-bounded by `1`). (iii) Use the partition-of-unity sum-to-one identity
-(specialised to the support Finset via `finsum_eq_sum_of_support_subset`) to
-collapse the integrand to the unweighted form.
-
-The integrability hypothesis `h_int` on the unweighted integrand is supplied
-by the caller; it is automatically satisfied whenever the integrand is
-continuous on the compact boundary submanifold (a standard application of
-`Continuous.integrable_of_hasCompactSupport`). -/
 theorem boundaryFaceSum_eq_surface_integral_of_chartIdentification
     (g : SmoothRiemannianMetric (modelWithCornersEuclideanHalfSpace n) M)
     (X : Cₛ^∞⟮(modelWithCornersEuclideanHalfSpace n);

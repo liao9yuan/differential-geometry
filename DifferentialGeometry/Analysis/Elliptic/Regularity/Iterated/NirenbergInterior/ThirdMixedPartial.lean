@@ -5,54 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoef
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-/-!
-# Third-mixed-partial infrastructure of the canonical chart-pushed representative
-
-For `u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold `(M, g)`,
-the canonical chart-pushed POU representative lies in `MemWkp 3 2` on the
-chart target (chart-`H³` regularity). Consequently:
-
-* every chosen second mixed partial
-  `chosenSecondPartialChartPushedU g α u_h i l` lies in `MemW1p 2` on the
-  chart target (equivalently `MemWkp 1 2`);
-* the canonical chosen weak `j`-partial of that second mixed partial — denoted
-  `chosenThirdMixedPartialChartPushedU g α u_h i l j` — lies in
-  `MemLp 2 (volume.restrict chartTarget)` (in particular: `MemLp 2` on every
-  compact subset of the chart target).
-
-This module packages these regularity results, together with a per-pair
-integration-by-parts identity for the cross-derivative term obtained by
-pairing the second mixed partial against the `j`-direction derivative of a
-smooth compactly supported test function, and the corresponding doubly-summed
-aggregate identity.
-
-## Main definitions
-
-* `chosenThirdMixedPartialChartPushedU` — the canonical chosen weak
-  `j`-partial of `chosenSecondPartialChartPushedU g α u_h i l` on the chart
-  target.
-
-## Main theorems
-
-* `chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two` —
-  every chosen second mixed partial of the canonical chart-pushed
-  representative lies in `MemW1p 2` on the chart target, unconditionally for
-  `u_h ∈ laplacianDomainPow g 2`.
-* `chosenThirdMixedPartialChartPushedU_isWeakPartial` — the third mixed
-  partial is a weak `j`-partial of the second mixed partial on the chart
-  target.
-* `chosenThirdMixedPartialChartPushedU_memLp_two` — global `L²` regularity of
-  the third mixed partial on the chart target.
-* `chosenThirdMixedPartialChartPushedU_locally_memLp` — local `L²`
-  regularity on every compact subset of the chart target.
-* `cross_derivative_term_ibp_second_order_single` — per-pair integration by
-  parts identity for the second-order cross-derivative term.
-* `cross_derivative_term_ibp_second_order` — doubly-summed (over indices `(i, j)`)
-  aggregate of the per-pair identity, with a polymorphic smooth
-  `(i, j)`-indexed coefficient on the chart target.
-
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -93,11 +45,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The canonical chosen weak `j`-partial of the second mixed partial
-`chosenSecondPartialChartPushedU g α u_h i l` on the chart target. By
-construction this is the iterated `chosenWeakPartial'` applied three times,
-in directions `i`, `l`, `j`, to the chart-pushed representative of
-`H1ComplToLp g u_h`. -/
 noncomputable def chosenThirdMixedPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -108,9 +55,6 @@ noncomputable def chosenThirdMixedPartialChartPushedU
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
 
-/-- The chosen second mixed partial `chosenSecondPartialChartPushedU g α u_h i l`
-lies in `MemW1p 2 (chartTargetEuclid α)` unconditionally for
-`u_h ∈ laplacianDomainPow g 2`. -/
 theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -175,9 +119,6 @@ theorem chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
       h_outer_memWkp_1
   exact h_step
 
-/-- The chosen third mixed partial `chosenThirdMixedPartialChartPushedU g α u_h i l j`
-is a weak `j`-partial of `chosenSecondPartialChartPushedU g α u_h i l` on
-`chartTargetEuclid α`, for `u_h ∈ laplacianDomainPow g 2`. -/
 theorem chosenThirdMixedPartialChartPushedU_isWeakPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -192,8 +133,6 @@ theorem chosenThirdMixedPartialChartPushedU_isWeakPartial
     (chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h i l) j
 
-/-- The chosen third mixed partial lies in `MemLp 2 (volume.restrict
-chartTargetEuclid α)` unconditionally for `u_h ∈ laplacianDomainPow g 2`. -/
 theorem chosenThirdMixedPartialChartPushedU_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -207,9 +146,6 @@ theorem chosenThirdMixedPartialChartPushedU_memLp_two
     (chosenSecondPartialChartPushedU_memW1p_two_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h i l) j
 
-/-- The chosen third mixed partial lies in `MemLp 2 (volume.restrict K)` for
-every compact `K ⊆ chartTargetEuclid α`, unconditionally for
-`u_h ∈ laplacianDomainPow g 2`. -/
 theorem chosenThirdMixedPartialChartPushedU_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -238,17 +174,6 @@ theorem chosenThirdMixedPartialChartPushedU_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-- Per-pair integration-by-parts identity for the second-order cross-derivative
-term. For fixed indices `i, l, j`, smooth coefficient `φ : EuclN → ℝ`
-(smooth on `chartTargetEuclid α`, arbitrary off the chart target), and smooth
-compactly supported test function `ψ` with `tsupport ψ ⊆ chartTargetEuclid α`:
-
-```
-∫_chartTarget φ y · chosenSecondPartialChartPushedU g α u_h i l y ·
-                    (fderiv ψ y)(eⱼ) ∂vol
-  = -(∫_chartTarget (fderiv φ y)(eⱼ) · chosenSecondPartialChartPushedU g α u_h i l y · ψ y ∂vol
-    + ∫_chartTarget φ y · chosenThirdMixedPartialChartPushedU g α u_h i l j y · ψ y ∂vol).
-``` -/
 theorem cross_derivative_term_ibp_second_order_single
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -385,25 +310,6 @@ theorem cross_derivative_term_ibp_second_order_single
   rw [← hLHS_eq, ← hLeibniz1_eq, ← hLeibniz2_eq]
   exact h_ibp_ext
 
-/-- **Doubly-summed second-order IBP identity for the cross-derivative term.**
-
-For `u_h ∈ laplacianDomainPow g 2`, fixed direction `l` (encoded in the
-smooth coefficient `A`), and a smooth compactly supported test function `ψ`
-with `tsupport ψ ⊆ chartTargetEuclid α`, the cross-derivative term obtained
-by pairing the chosen second mixed partial `chosenSecondPartialChartPushedU`
-against the `j`-direction derivative of `ψ` admits the integration-by-parts
-identity
-
-```
-∫ ∑_{i,j} A i j y · chosenSecondPartialChartPushedU g α u_h i l y *
-                    (fderiv ψ y)(eⱼ) ∂vol
-  = -[ ∫ ∑_{i,j} (fderiv (A i j) y)(eⱼ) ·
-                chosenSecondPartialChartPushedU g α u_h i l y · ψ y ∂vol
-     + ∫ ∑_{i,j} A i j y · chosenThirdMixedPartialChartPushedU g α u_h i l j y · ψ y ∂vol ].
-```
-
-The smooth coefficient `A : Fin n → Fin n → EuclN → ℝ` is polymorphic — only
-its `ContDiffOn ℝ ∞ Ω` hypothesis is used. -/
 theorem cross_derivative_term_ibp_second_order
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

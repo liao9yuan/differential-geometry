@@ -6,60 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Witnesses
 
-/-!
-# Even reflection of scalar functions across the boundary hyperplane `{y₀ = 0}`
-
-This file develops the **even reflection** operator on scalar functions on
-`EuclideanSpace ℝ (Fin n)` (`n ≥ 1`) across the boundary hyperplane
-`{y₀ = 0}`, together with its weak gradient and the resulting `W^{1,p}`
-extension witnesses. It is the Euclidean half-space extension theory that
-underlies the with-boundary manifold Morrey embedding in
-`Embedding/MorreyManifold.lean`; the development is purely Euclidean and
-independent of the chart / partition-of-unity manifold machinery.
-
-## Main constructions
-
-### Point maps
-* `evenReflectFun` — the reflection `y ↦ (|y₀|, y₁, …, y_{n-1})` into the
-  closed half-space, with idempotency, continuity, measurability, and the
-  image-of-half-space identity.
-* `signFlipFun` / `signFlipLinear` / `signFlipLIE` — the linear isometry that
-  negates the `0`-th coordinate; volume-preserving, swapping the open upper and
-  lower half-spaces.
-
-### The even reflection and its gradient
-* `evenReflect n f y := f (evenReflectFun n y)` — even reflection of a scalar
-  function, with the closed-half-space agreement, continuity, measurability,
-  sup-norm and support bounds.
-* `evenReflectGrad` — the even-reflection gradient field (classical gradient on
-  the upper half, sign-flipped reflected gradient on the lower half), with
-  componentwise formulas, continuity / measurability of components, and the
-  pointwise norm bounds.
-
-### `L^p` and weak-gradient results
-* `memLp_evenReflect_of_contDiff_hasCompactSupport`,
-  `memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport`,
-  `memLp_evenReflectGrad_of_contDiff_hasCompactSupport` — `L^p` membership of
-  the reflection and of its gradient components / field.
-* `contDiff_evenReflect_of_tsupport_in_openHalfSpace`,
-  `hasCompactSupport_evenReflect_of_tsupport_in_openHalfSpace`,
-  `fderiv_evenReflect_apply_single_eq_evenReflectGrad`,
-  `hasWeakGrad_evenReflectGrad_evenReflect` — for `tsupport` strictly inside the
-  open half-space, the reflection is smooth and `evenReflectGrad` is its weak
-  gradient.
-* The inward-shift family `shiftDownFun` / `shiftDownE0` and the convergence
-  lemmas (`tendsto_evenReflect_shiftDownFun`,
-  `tendsto_evenReflectGrad_shiftDownFun_ae`, …) reduce the closed-half-space
-  case to the strict-interior case, yielding
-  `hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace`.
-
-### `W^{1,p}` extension witnesses
-* `evenReflect_memW1pWitness_of_smooth_strictInterior` and
-  `evenReflect_memW1pWitness_of_smooth_closedHalfSpace` — `MemW1pWitness` for
-  the even reflection on a ball, for smooth compactly-supported `f` with
-  `tsupport` in the open (resp. closed) half-ball.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -75,16 +21,12 @@ variable {n : ℕ} [NeZero n]
 local notation "EuN" => EuclideanSpace ℝ (Fin n)
 local notation "I_hs" => modelWithCornersEuclideanHalfSpace n
 
-/-- **The even-reflection point map.** For `y ∈ EuclideanSpace ℝ (Fin n)`,
-return the point in the closed half-space whose `0`-th coordinate is `|y 0|`
-and whose other coordinates match `y`. -/
 def evenReflectFun (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n) :=
   fun y =>
     (WithLp.toLp 2 (fun j : Fin n => if j = 0 then |y 0| else y j) :
       EuclideanSpace ℝ (Fin n))
 
-/-- The reflection map sets the `0`-th coordinate to `|y 0|`. -/
 lemma evenReflectFun_apply_zero {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) :
     evenReflectFun n y 0 = |y 0| := by
@@ -94,7 +36,6 @@ lemma evenReflectFun_apply_zero {n : ℕ} [NeZero n]
   rw [PiLp.toLp_apply]
   simp
 
-/-- The reflection map preserves coordinates other than `0`. -/
 lemma evenReflectFun_apply_ne {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) (j : Fin n) (hj : j ≠ 0) :
     evenReflectFun n y j = y j := by
@@ -104,7 +45,6 @@ lemma evenReflectFun_apply_ne {n : ℕ} [NeZero n]
   rw [PiLp.toLp_apply]
   simp [if_neg hj]
 
-/-- The reflection of any point lies in the closed half-space. -/
 lemma evenReflectFun_mem_closedHalfSpace {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) :
     evenReflectFun n y ∈
@@ -113,8 +53,6 @@ lemma evenReflectFun_mem_closedHalfSpace {n : ℕ} [NeZero n]
   rw [evenReflectFun_apply_zero]
   exact abs_nonneg _
 
-/-- For points already in the closed half-space, the reflection map is the
-identity. -/
 lemma evenReflectFun_eq_self_of_mem_closedHalfSpace {n : ℕ} [NeZero n]
     {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace) :
@@ -129,22 +67,18 @@ lemma evenReflectFun_eq_self_of_mem_closedHalfSpace {n : ℕ} [NeZero n]
     exact abs_of_nonneg this
   · exact evenReflectFun_apply_ne y j hj
 
-/-- The reflection map is idempotent: applying it twice has no effect. -/
 lemma evenReflectFun_idempotent {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) :
     evenReflectFun n (evenReflectFun n y) = evenReflectFun n y := by
   exact evenReflectFun_eq_self_of_mem_closedHalfSpace
     (evenReflectFun_mem_closedHalfSpace y)
 
-/-- The reflection map sends all of `EuN` into the closed half-space. -/
 lemma evenReflectFun_image_univ_subset_closedHalfSpace {n : ℕ} [NeZero n] :
     Set.range (evenReflectFun n) ⊆
       DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace := by
   rintro y ⟨z, rfl⟩
   exact evenReflectFun_mem_closedHalfSpace z
 
-/-- The image of the closed half-space under the reflection map equals the
-closed half-space. -/
 lemma evenReflectFun_image_closedHalfSpace_eq {n : ℕ} [NeZero n] :
     evenReflectFun n ''
         DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace =
@@ -157,7 +91,6 @@ lemma evenReflectFun_image_closedHalfSpace_eq {n : ℕ} [NeZero n] :
     refine ⟨y, hy, ?_⟩
     exact evenReflectFun_eq_self_of_mem_closedHalfSpace hy
 
-/-- The reflection map is continuous. -/
 lemma continuous_evenReflectFun {n : ℕ} [NeZero n] :
     Continuous (evenReflectFun n) := by
   classical
@@ -190,18 +123,14 @@ lemma continuous_evenReflectFun {n : ℕ} [NeZero n] :
     exact LinearMap.continuous_of_finiteDimensional _
   exact hWithLp.comp h_pi_cont
 
-/-- The reflection map is measurable. -/
 lemma measurable_evenReflectFun {n : ℕ} [NeZero n] :
     Measurable (evenReflectFun n) :=
   (continuous_evenReflectFun (n := n)).measurable
 
-/-- **The even reflection of a scalar function** `f : EuN → ℝ`. Defined by
-`evenReflect n f y := f (evenReflectFun n y)`. -/
 def evenReflect (n : ℕ) [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     EuclideanSpace ℝ (Fin n) → ℝ :=
   fun y => f (evenReflectFun n y)
 
-/-- On the closed half-space, the even reflection equals the original function. -/
 lemma evenReflect_eq_of_mem_closedHalfSpace {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {y : EuclideanSpace ℝ (Fin n)}
@@ -210,14 +139,12 @@ lemma evenReflect_eq_of_mem_closedHalfSpace {n : ℕ} [NeZero n]
   unfold evenReflect
   rw [evenReflectFun_eq_self_of_mem_closedHalfSpace hy]
 
-/-- The even reflection is continuous when the original function is continuous. -/
 lemma continuous_evenReflect {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : Continuous f) :
     Continuous (evenReflect n f) := by
   unfold evenReflect
   exact hf.comp (continuous_evenReflectFun (n := n))
 
-/-- The even reflection is measurable when the original is measurable. -/
 lemma measurable_evenReflect {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : Measurable f) :
     Measurable (evenReflect n f) := by
@@ -231,12 +158,10 @@ lemma evenReflect_eq_on_inter_closedHalfSpace {n : ℕ} [NeZero n]
   intro y hy
   exact evenReflect_eq_of_mem_closedHalfSpace f hy.2
 
-/-- Norm identity for the reflection. -/
 lemma norm_evenReflect_eq {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ) (y : EuclideanSpace ℝ (Fin n)) :
     ‖evenReflect n f y‖ = ‖f (evenReflectFun n y)‖ := rfl
 
-/-- On the closed half-space, `‖evenReflect n f y‖ = ‖f y‖`. -/
 lemma norm_evenReflect_eq_norm_self_of_mem_closedHalfSpace {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {y : EuclideanSpace ℝ (Fin n)}
@@ -244,9 +169,6 @@ lemma norm_evenReflect_eq_norm_self_of_mem_closedHalfSpace {n : ℕ} [NeZero n]
     ‖evenReflect n f y‖ = ‖f y‖ := by
   rw [evenReflect_eq_of_mem_closedHalfSpace f hy]
 
-/-- The reflection of a function with bounded sup is bounded by the same sup
-(on the closed half-space side; off it the values are images of half-space
-points so still bounded). -/
 lemma norm_evenReflect_le_sup_norm_on_closedHalfSpace {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ) {C : ℝ}
     (hfC : ∀ z ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace,
@@ -256,8 +178,6 @@ lemma norm_evenReflect_le_sup_norm_on_closedHalfSpace {n : ℕ} [NeZero n]
   rw [norm_evenReflect_eq]
   exact hfC _ (evenReflectFun_mem_closedHalfSpace y)
 
-/-- The support of the even reflection is contained in the preimage under
-`evenReflectFun n` of the support of the original function. -/
 lemma support_evenReflect_subset {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     Function.support (evenReflect n f) ⊆
@@ -265,9 +185,6 @@ lemma support_evenReflect_subset {n : ℕ} [NeZero n]
   intro y hy
   exact hy
 
-/-- If `f` has compact support, then `evenReflect n f`'s support is contained
-in the preimage of `support f` under the continuous reflection map. The
-preimage is closed in `EuN`. -/
 lemma tsupport_evenReflect_subset {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     tsupport (evenReflect n f) ⊆
@@ -281,17 +198,11 @@ lemma tsupport_evenReflect_subset {n : ℕ} [NeZero n]
   refine Set.Subset.trans (closure_mono (h_supp.trans h_supp_le_tsupp)) ?_
   exact (isClosed_tsupport _).preimage continuous_evenReflectFun |>.closure_subset
 
-/-- Composing `evenReflectFun n` after `evenReflectFun n` agrees with
-`evenReflectFun n` itself (the reflection is idempotent), so in particular
-the reflection equals its own composition with itself. -/
 lemma evenReflectFun_comp_self {n : ℕ} [NeZero n] :
     evenReflectFun n ∘ evenReflectFun n = evenReflectFun n := by
   funext y
   exact evenReflectFun_idempotent y
 
-/-- **The sign-flip on the `0`-th coordinate.** Negates `y 0`, leaves all other
-coordinates unchanged. This is a linear isometry self-equivalence of
-`EuclideanSpace ℝ (Fin n)`. -/
 def signFlipFun (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n) :=
   fun y =>
@@ -316,7 +227,6 @@ def signFlipFun (n : ℕ) [NeZero n] :
   rw [PiLp.toLp_apply]
   simp [if_neg hj]
 
-/-- The sign-flip is its own inverse. -/
 @[simp] lemma signFlipFun_signFlipFun {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) :
     signFlipFun n (signFlipFun n y) = y := by
@@ -327,7 +237,6 @@ def signFlipFun (n : ℕ) [NeZero n] :
   · subst hj; simp
   · simp [signFlipFun_apply_ne _ _ hj]
 
-/-- The sign-flip as a linear endomorphism of `EuclideanSpace ℝ (Fin n)`. -/
 def signFlipLinear (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) →ₗ[ℝ] EuclideanSpace ℝ (Fin n) where
   toFun := signFlipFun n
@@ -353,7 +262,6 @@ def signFlipLinear (n : ℕ) [NeZero n] :
     (y : EuclideanSpace ℝ (Fin n)) :
     signFlipLinear n y = signFlipFun n y := rfl
 
-/-- The sign-flip preserves the Euclidean norm. -/
 lemma norm_signFlipFun {n : ℕ} [NeZero n]
     (y : EuclideanSpace ℝ (Fin n)) :
     ‖signFlipFun n y‖ = ‖y‖ := by
@@ -371,7 +279,6 @@ lemma norm_signFlipFun {n : ℕ} [NeZero n]
   · change ‖signFlipFun n y j‖ ^ 2 = ‖y j‖ ^ 2
     rw [signFlipFun_apply_ne _ _ hj]
 
-/-- The sign-flip is a linear isometry equivalence. -/
 def signFlipLIE (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) ≃ₗᵢ[ℝ] EuclideanSpace ℝ (Fin n) where
   toLinearEquiv :=
@@ -391,17 +298,14 @@ def signFlipLIE (n : ℕ) [NeZero n] :
     (y : EuclideanSpace ℝ (Fin n)) :
     (signFlipLIE n).symm y = signFlipFun n y := rfl
 
-/-- The sign-flip is continuous. -/
 lemma continuous_signFlipFun {n : ℕ} [NeZero n] :
     Continuous (signFlipFun n) :=
   (signFlipLIE n).toContinuousLinearEquiv.continuous
 
-/-- The sign-flip is measurable. -/
 lemma measurable_signFlipFun {n : ℕ} [NeZero n] :
     Measurable (signFlipFun n) :=
   (continuous_signFlipFun (n := n)).measurable
 
-/-- The sign-flip preserves the Lebesgue volume. -/
 lemma measurePreserving_signFlipFun {n : ℕ} [NeZero n] :
     MeasurePreserving (signFlipFun n)
       (volume : Measure (EuclideanSpace ℝ (Fin n)))
@@ -409,7 +313,6 @@ lemma measurePreserving_signFlipFun {n : ℕ} [NeZero n] :
   have h := (signFlipLIE n).measurePreserving
   exact h
 
-/-- The sign-flip swaps the open upper and open lower half-spaces. -/
 lemma signFlipFun_image_openHalfSpace_eq {n : ℕ} [NeZero n] :
     signFlipFun n ''
         DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace =
@@ -428,8 +331,6 @@ lemma signFlipFun_image_openHalfSpace_eq {n : ℕ} [NeZero n] :
     have : y 0 < 0 := hy
     linarith
 
-/-- For `y` in the open lower half-space, the even reflection equals `f` of the
-sign-flip of `y`. -/
 lemma evenReflect_eq_comp_signFlip_of_lower {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {y : EuclideanSpace ℝ (Fin n)} (hy : y 0 < 0) :
@@ -445,26 +346,17 @@ lemma evenReflect_eq_comp_signFlip_of_lower {n : ℕ} [NeZero n]
     exact abs_of_neg hy
   · rw [evenReflectFun_apply_ne _ _ hj, signFlipFun_apply_ne _ _ hj]
 
-/-- For `y` in the closed upper half-space, the even reflection equals `f`. -/
 lemma evenReflect_eq_self_of_upper {n : ℕ} [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {y : EuclideanSpace ℝ (Fin n)} (hy : 0 ≤ y 0) :
     evenReflect n f y = f y :=
   evenReflect_eq_of_mem_closedHalfSpace f hy
 
-/-- **Auxiliary smoothness via composition.** When `f` is smooth on `E` and `y`
-is in the open lower half-space, the even reflection equals `f ∘ signFlipFun n`
-near `y`, and is smooth there. Stated as a local Continuity result for use in
-the global continuity & L^p arguments. -/
 lemma continuous_evenReflect_of_continuous {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : Continuous f) :
     Continuous (evenReflect n f) :=
   continuous_evenReflect (n := n) hf
 
-/-- **L^p membership of the even reflection.** When `f` is smooth and has
-compact support, the even reflection is also continuous with compact support
-contained in the preimage of the support under the reflection map. Hence it
-is in `L^p` for any `p`. -/
 theorem memLp_evenReflect_of_contDiff_hasCompactSupport
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -507,7 +399,6 @@ theorem memLp_evenReflect_of_contDiff_hasCompactSupport
       exact signFlipFun_signFlipFun y
   exact h_cont.memLp_of_hasCompactSupport h_supp_compact
 
-/-- The componentwise gradient of `f` at `y`, returning a Euclidean vector. -/
 private noncomputable def fderivVec
     {n : ℕ} [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ)
     (y : EuclideanSpace ℝ (Fin n)) : EuclideanSpace ℝ (Fin n) :=
@@ -520,10 +411,6 @@ private noncomputable def fderivVec
   unfold fderivVec
   rw [PiLp.toLp_apply]
 
-/-- **The even-reflection gradient field.** On the upper half: classical
-gradient of `f`. On the lower half: classical gradient of `f` at the reflected
-point, with the `0`-th component negated. Defined to agree with the upper-half
-formula on the boundary `{y_0 = 0}`. -/
 noncomputable def evenReflectGrad (n : ℕ) [NeZero n]
     (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n) :=
@@ -563,17 +450,12 @@ lemma evenReflectGrad_apply_lower_component_ne
   rw [PiLp.toLp_apply]
   simp [if_neg hi]
 
-/-- For `y` in the upper half (i.e. `0 ≤ y 0`), each component of
-`evenReflectGrad` is the corresponding partial derivative of `f`. -/
 lemma evenReflectGrad_apply_component_upper
     {n : ℕ} [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {y : EuclideanSpace ℝ (Fin n)} (hy : 0 ≤ y 0) (i : Fin n) :
     evenReflectGrad n f y i = (fderiv ℝ f y) (EuclideanSpace.single i 1) := by
   rw [evenReflectGrad_apply_upper f hy, fderivVec_apply]
 
-/-- For `i ≠ 0`, the `i`-th component of `evenReflectGrad n f` equals
-`(fderiv ℝ f) (evenReflectFun n y)` applied to `EuclideanSpace.single i 1` —
-because the formulas on the upper and lower halves agree there. -/
 lemma evenReflectGrad_apply_component_eq_compReflect_of_ne_zero
     {n : ℕ} [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {i : Fin n} (hi : i ≠ 0) (y : EuclideanSpace ℝ (Fin n)) :
@@ -595,8 +477,6 @@ lemma evenReflectGrad_apply_component_eq_compReflect_of_ne_zero
   · rw [evenReflectGrad_apply_component_upper f hge i]
     rw [evenReflectFun_eq_self_of_mem_closedHalfSpace hge]
 
-/-- For `i ≠ 0`, the `i`-th component of `evenReflectGrad n f` is continuous
-when `f` is smooth. -/
 theorem continuous_evenReflectGrad_component_of_contDiff_ne_zero
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -616,13 +496,6 @@ theorem continuous_evenReflectGrad_component_of_contDiff_ne_zero
   rw [h_eq]
   exact hderiv_cont.comp continuous_evenReflectFun
 
-/-- The `0`-th component of `evenReflectGrad n f` equals
-`(Real.sign (y 0)) * (fderiv ℝ f (evenReflectFun n y)) (EuclideanSpace.single 0 1)`
-**off the boundary hyperplane** `{y : y 0 = 0}`. On the boundary itself the
-formula gives the upper-half value `(fderiv ℝ f y) (EuclideanSpace.single 0 1)`,
-which need not be zero — so the component is not continuous in general at
-`y_0 = 0`. However, the boundary hyperplane has Lebesgue measure zero, so the
-component agrees a.e. with a continuous function. -/
 lemma evenReflectGrad_apply_zero_off_boundary
     {n : ℕ} [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ)
     {y : EuclideanSpace ℝ (Fin n)} (hy : y 0 ≠ 0) :
@@ -651,8 +524,6 @@ lemma evenReflectGrad_apply_zero_off_boundary
     rw [Real.sign_of_pos hgt]
     ring
 
-/-- The `0`-th component of `evenReflectGrad n f` is bounded pointwise by
-`‖fderiv ℝ f (evenReflectFun n y)‖`. -/
 lemma norm_evenReflectGrad_apply_zero_le
     {n : ℕ} [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ)
     (y : EuclideanSpace ℝ (Fin n)) :
@@ -688,8 +559,6 @@ lemma norm_evenReflectGrad_apply_zero_le
     rw [h_unit, mul_one] at h_op
     exact h_op
 
-/-- For any `i`, the `i`-th component of `evenReflectGrad n f` is bounded
-pointwise by `‖fderiv ℝ f (evenReflectFun n y)‖`. -/
 lemma norm_evenReflectGrad_apply_le
     {n : ℕ} [NeZero n] (f : EuclideanSpace ℝ (Fin n) → ℝ)
     (y : EuclideanSpace ℝ (Fin n)) (i : Fin n) :
@@ -706,7 +575,6 @@ lemma norm_evenReflectGrad_apply_le
     rw [h_unit, mul_one] at h_op
     exact h_op
 
-/-- The closed half-space `{y : E | 0 ≤ y 0}` is closed, hence measurable. -/
 lemma measurableSet_closedHalfSpace_aux {n : ℕ} [NeZero n] :
     MeasurableSet
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.closedHalfSpace
@@ -719,9 +587,6 @@ lemma measurableSet_closedHalfSpace_aux {n : ℕ} [NeZero n] :
   rw [heq]
   exact hcont.measurable measurableSet_Ici
 
-/-- The `i`-th component of `evenReflectGrad n f` is `AEStronglyMeasurable`
-when `f` is smooth, on Lebesgue volume. The `i = 0` case uses the fact that
-the discontinuity at `y 0 = 0` lives on a Lebesgue-null hyperplane. -/
 theorem aestronglyMeasurable_evenReflectGrad_component_of_contDiff
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f) (i : Fin n) :
@@ -762,8 +627,6 @@ theorem aestronglyMeasurable_evenReflectGrad_component_of_contDiff
     · exact h_lowercont.aestronglyMeasurable.restrict
   · exact (continuous_evenReflectGrad_component_of_contDiff_ne_zero hf hi).aestronglyMeasurable
 
-/-- The map `y ↦ ‖fderiv ℝ f (evenReflectFun n y)‖` is continuous when `f` is
-smooth. -/
 lemma continuous_norm_fderiv_compReflect
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f) :
@@ -773,9 +636,6 @@ lemma continuous_norm_fderiv_compReflect
     hf.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
   exact (h_cont_fderiv.comp continuous_evenReflectFun).norm
 
-/-- The map `y ↦ ‖fderiv ℝ f (evenReflectFun n y)‖` has compact support when
-`f` has compact support. The support is contained in
-`evenReflectFun n ⁻¹' tsupport f`. -/
 lemma hasCompactSupport_norm_fderiv_compReflect
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (_hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -835,8 +695,6 @@ lemma hasCompactSupport_norm_fderiv_compReflect
     refine ⟨signFlipFun n y, h_y_in, ?_⟩
     exact signFlipFun_signFlipFun y
 
-/-- For each `i : Fin n`, the `i`-th component of `evenReflectGrad n f` is in
-`L^p(volume)` when `f` is smooth with compact support. -/
 theorem memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -867,8 +725,6 @@ theorem memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport
     exact Real.le_norm_self _
   exact h1.trans h2
 
-/-- The gradient field `evenReflectGrad n f` is in `MemLp p volume` when `f`
-is smooth with compact support. -/
 theorem memLp_evenReflectGrad_of_contDiff_hasCompactSupport
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -880,20 +736,15 @@ theorem memLp_evenReflectGrad_of_contDiff_hasCompactSupport
   intro i
   exact memLp_evenReflectGrad_component_of_contDiff_hasCompactSupport hf hf_supp p i
 
-/-- **Smoothness of `signFlipFun n`.** The sign-flip is a continuous linear
-self-equivalence of `EuclideanSpace ℝ (Fin n)`, hence smooth. -/
 lemma contDiff_signFlipFun {n : ℕ} [NeZero n] {k : WithTop ℕ∞} :
     ContDiff ℝ k (signFlipFun n) :=
   (signFlipLIE n).toContinuousLinearEquiv.contDiff
 
-/-- **Smoothness of `f ∘ signFlipFun n`** when `f` is smooth. -/
 lemma contDiff_comp_signFlipFun {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} {k : WithTop ℕ∞} (hf : ContDiff ℝ k f) :
     ContDiff ℝ k (fun y : EuclideanSpace ℝ (Fin n) => f (signFlipFun n y)) :=
   hf.comp contDiff_signFlipFun
 
-/-- For `f` smooth with `tsupport f ⊆ openHalfSpace`, the even reflection
-agrees pointwise with `f + f ∘ signFlipFun n`. -/
 lemma evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -946,8 +797,6 @@ lemma evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace
       image_eq_zero_of_notMem_tsupport h_sfy_not_supp
     rw [h_sfy_zero, add_zero]
 
-/-- For `f` smooth with `tsupport f ⊆ openHalfSpace`, the even reflection is
-`C^∞` on all of `E`. -/
 theorem contDiff_evenReflect_of_tsupport_in_openHalfSpace
     {n : ℕ} [NeZero n] {k : WithTop ℕ∞}
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -958,8 +807,6 @@ theorem contDiff_evenReflect_of_tsupport_in_openHalfSpace
   rw [evenReflect_eq_add_comp_signFlip_of_tsupport_in_openHalfSpace hf_supp]
   exact hf.add (contDiff_comp_signFlipFun hf)
 
-/-- For `f` smooth with `tsupport f ⊆ openHalfSpace`, the even reflection has
-compact support contained in `tsupport f ∪ signFlipFun n '' tsupport f`. -/
 theorem hasCompactSupport_evenReflect_of_tsupport_in_openHalfSpace
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -997,9 +844,6 @@ theorem hasCompactSupport_evenReflect_of_tsupport_in_openHalfSpace
     refine ⟨signFlipFun n y, h1, ?_⟩
     exact signFlipFun_signFlipFun y
 
-/-- For `f` smooth with `tsupport f ⊆ openHalfSpace`, the partial derivative
-in coordinate `i` of `evenReflect n f` matches the `i`-th component of
-`evenReflectGrad n f`. -/
 theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -1117,9 +961,6 @@ theorem fderiv_evenReflect_apply_single_eq_evenReflectGrad
         · rw [signFlipFun_apply_ne _ _ hj]
       rw [h_sf_eval]
 
-/-- **HasWeakGrad for the even reflection.** When `f` is smooth with
-`tsupport f ⊆ openHalfSpace ∩ Ω` (`Ω` open), the even reflection has
-`evenReflectGrad n f` as its weak gradient on `Ω`. -/
 theorem hasWeakGrad_evenReflectGrad_evenReflect
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -1144,16 +985,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect
   rw [← h_eq]
   exact h_classical
 
-/-- **Even-reflection W^{1,p}-witness construction (strict-interior case).**
-For a smooth function `f` on `E := EuclideanSpace ℝ (Fin n)` (n ≥ 1) supported
-in the open half-ball `openHalfSpace ∩ Metric.ball x₀ R` (where `x₀` is any
-point in `closedHalfSpace`), the even reflection `evenReflect f` admits a
-`MemW1pWitness` on `Metric.ball x₀ R`.
-
-This is the strict version where `f` vanishes in a neighborhood of the
-boundary hyperplane `{y_0 = 0}`, which makes the reflection itself globally
-smooth. The general version (with `closedHalfSpace` instead of `openHalfSpace`)
-is the natural extension via density and IBP across the boundary. -/
 noncomputable def evenReflect_memW1pWitness_of_smooth_strictInterior
     {n : ℕ} [NeZero n]
     {x₀ : EuclideanSpace ℝ (Fin n)}
@@ -1195,7 +1026,6 @@ noncomputable def evenReflect_memW1pWitness_of_smooth_strictInterior
     exact h_full.restrict (Metric.ball x₀ R)
   · exact hasWeakGrad_evenReflectGrad_evenReflect hf_smooth hf_supp_open Metric.isOpen_ball
 
-/-- **The basis vector `e_0`** in `EuclideanSpace ℝ (Fin n)`. -/
 private noncomputable def basisE0 (n : ℕ) [NeZero n] :
     EuclideanSpace ℝ (Fin n) :=
   EuclideanSpace.single (0 : Fin n) (1 : ℝ)
@@ -1216,7 +1046,6 @@ lemma norm_basisE0 {n : ℕ} [NeZero n] : ‖basisE0 n‖ = 1 := by
   unfold basisE0
   simp
 
-/-- **The smooth inward shift** `y ↦ y - δ · e_0`. -/
 private noncomputable def shiftDownE0 {n : ℕ} [NeZero n] (δ : ℝ) :
     EuclideanSpace ℝ (Fin n) → EuclideanSpace ℝ (Fin n) :=
   fun y => y - δ • basisE0 n
@@ -1246,7 +1075,6 @@ lemma fderiv_shiftDownE0 {n : ℕ} [NeZero n] (δ : ℝ)
   unfold shiftDownE0
   rw [fderiv_sub_const, fderiv_id']
 
-/-- The shifted function `f_δ(y) := f(y - δ · e_0)`. -/
 private noncomputable def shiftDownFun {n : ℕ} [NeZero n] (δ : ℝ)
     (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     EuclideanSpace ℝ (Fin n) → ℝ :=
@@ -1257,8 +1085,6 @@ lemma contDiff_shiftDownFun {n : ℕ} [NeZero n] (δ : ℝ) {k : WithTop ℕ∞}
     ContDiff ℝ k (shiftDownFun (n := n) δ f) :=
   hf.comp (contDiff_shiftDownE0 (n := n) δ)
 
-/-- The chain rule for the shifted function: `∂_i (shiftDownFun δ f) y =
-∂_i f (y - δ · e_0)`. -/
 lemma fderiv_shiftDownFun_apply
     {n : ℕ} [NeZero n] (δ : ℝ)
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -1276,7 +1102,6 @@ lemma fderiv_shiftDownFun_apply
   rw [fderiv_shiftDownE0]
   simp
 
-/-- The shift `shiftDownE0 δ` packaged as a homeomorphism. -/
 private noncomputable def shiftDownE0Homeo {n : ℕ} [NeZero n] (δ : ℝ) :
     EuclideanSpace ℝ (Fin n) ≃ₜ EuclideanSpace ℝ (Fin n) where
   toFun := shiftDownE0 (n := n) δ
@@ -1287,14 +1112,11 @@ private noncomputable def shiftDownE0Homeo {n : ℕ} [NeZero n] (δ : ℝ) :
     (contDiff_shiftDownE0 (n := n) (k := (0 : WithTop ℕ∞)) δ).continuous
   continuous_invFun := continuous_id.add continuous_const
 
-/-- The function `shiftDownFun δ f` factors through `shiftDownE0Homeo`. -/
 private lemma shiftDownFun_eq_comp {n : ℕ} [NeZero n] (δ : ℝ)
     (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     shiftDownFun (n := n) δ f = f ∘ (shiftDownE0Homeo (n := n) δ) :=
   rfl
 
-/-- The tsupport of `shiftDownFun δ f` is the preimage of `tsupport f` under
-the shift. -/
 private lemma tsupport_shiftDownFun_eq_preimage {n : ℕ} [NeZero n] (δ : ℝ)
     (f : EuclideanSpace ℝ (Fin n) → ℝ) :
     tsupport (shiftDownFun (n := n) δ f) =
@@ -1309,8 +1131,6 @@ private lemma tsupport_shiftDownFun_eq_preimage {n : ℕ} [NeZero n] (δ : ℝ)
   have h_eq := (shiftDownE0Homeo (n := n) δ).preimage_closure (Function.support f)
   exact h_eq.symm
 
-/-- For `δ > 0` and `f` with `tsupport f ⊆ closedHalfSpace`, the shifted
-function `f_δ(y) := f(y - δ · e_0)` has `tsupport ⊆ openHalfSpace`. -/
 lemma tsupport_shiftDownFun_subset_openHalfSpace
     {n : ℕ} [NeZero n] {δ : ℝ} (hδ : 0 < δ)
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -1330,7 +1150,6 @@ lemma tsupport_shiftDownFun_subset_openHalfSpace
   change (0 : ℝ) < y 0
   linarith
 
-/-- The shifted function has compact support when `f` does. -/
 lemma hasCompactSupport_shiftDownFun
     {n : ℕ} [NeZero n] (δ : ℝ)
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -1360,8 +1179,6 @@ lemma hasCompactSupport_shiftDownFun
   rw [h_preimage_eq]
   exact hf_compact.image h_inv_cont
 
-/-- For `δ > 0` and `f` smooth with `tsupport f ⊆ closedHalfSpace ∩ B(x₀, R)`,
-the shifted function has `tsupport ⊆ openHalfSpace ∩ B(x₀, R + δ)`. -/
 lemma tsupport_shiftDownFun_subset_ball
     {n : ℕ} [NeZero n] {δ : ℝ} (hδ : 0 < δ)
     {x₀ : EuclideanSpace ℝ (Fin n)} {R : ℝ}
@@ -1395,7 +1212,6 @@ lemma tsupport_shiftDownFun_subset_ball
       _ = dist (shiftDownE0 δ y) x₀ + δ := by rw [hdist_eq', h_norm_e0]
       _ < R + δ := by linarith
 
-/-- Helper: As `δ → 0`, `shiftDownE0 δ z → z` for any fixed `z`. -/
 private lemma tendsto_shiftDownE0 {n : ℕ} [NeZero n]
     (z : EuclideanSpace ℝ (Fin n)) :
     Filter.Tendsto (fun δ : ℝ => shiftDownE0 δ z) (nhds 0) (nhds z) := by
@@ -1411,8 +1227,6 @@ private lemma tendsto_shiftDownE0 {n : ℕ} [NeZero n]
   have := h_const_tendsto.sub h_smul_tendsto
   simpa using this
 
-/-- **Pointwise convergence of `evenReflect f_δ` to `evenReflect f`** as `δ →
-0⁺`. -/
 lemma tendsto_evenReflect_shiftDownFun
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : Continuous f)
@@ -1434,8 +1248,6 @@ lemma tendsto_evenReflect_shiftDownFun
   rw [h_eq_lim]
   exact (hf.tendsto _).comp (tendsto_shiftDownE0 (evenReflectFun n y))
 
-/-- Helper: As `δ → 0`, `(fderiv f (shiftDownE0 δ z)) (single i 1) →
-(fderiv f z) (single i 1)`. -/
 private lemma tendsto_fderiv_apply_shiftDownE0
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -1456,8 +1268,6 @@ private lemma tendsto_fderiv_apply_shiftDownE0
     (h_fderiv_cont.tendsto _).comp (tendsto_shiftDownE0 z)
   exact (h_eval_cont.tendsto _).comp h_fderiv_tendsto
 
-/-- **Pointwise convergence of `evenReflectGrad (shiftDownFun δ f) y i` to
-`evenReflectGrad f y i`** as `δ → 0⁺`, for `y` off the boundary hyperplane. -/
 lemma tendsto_evenReflectGrad_shiftDownFun_off_boundary
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -1515,7 +1325,6 @@ lemma tendsto_evenReflectGrad_shiftDownFun_off_boundary
     simp_rw [h_eq_δ]
     exact tendsto_fderiv_apply_shiftDownE0 hf y i
 
-/-- The boundary hyperplane `{y_0 = 0}` is Lebesgue-null. -/
 lemma volume_boundaryHyperplane_eq_zero {n : ℕ} [NeZero n] :
     volume
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.boundaryHyperplane
@@ -1545,8 +1354,6 @@ lemma volume_boundaryHyperplane_eq_zero {n : ℕ} [NeZero n] :
   rw [basisE0_apply_zero] at h_basisE0_zero
   exact one_ne_zero h_basisE0_zero
 
-/-- **Pointwise convergence of `evenReflectGrad (shiftDownFun δ f) y i` to
-`evenReflectGrad f y i`** as `δ → 0⁺` is valid almost everywhere on `volume`. -/
 lemma tendsto_evenReflectGrad_shiftDownFun_ae
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -1577,7 +1384,6 @@ lemma tendsto_evenReflectGrad_shiftDownFun_ae
   by_contra hy_outside
   exact hy (h_outside y hy_outside)
 
-/-- **Uniform bound** on `‖evenReflect (shiftDownFun δ f) y‖`. -/
 lemma norm_evenReflect_shiftDownFun_le_sup
     {n : ℕ} [NeZero n] (δ : ℝ)
     {f : EuclideanSpace ℝ (Fin n) → ℝ} {C : ℝ}
@@ -1587,8 +1393,6 @@ lemma norm_evenReflect_shiftDownFun_le_sup
   unfold evenReflect shiftDownFun
   exact hfC _
 
-/-- **Uniform bound** on `‖evenReflectGrad (shiftDownFun δ f) y i‖` by `‖fderiv f‖`
-at the appropriate (shifted) point. -/
 lemma norm_evenReflectGrad_shiftDownFun_apply_le_sup
     {n : ℕ} [NeZero n] (δ : ℝ)
     {f : EuclideanSpace ℝ (Fin n) → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f) {C : ℝ}
@@ -1613,10 +1417,6 @@ lemma norm_evenReflectGrad_shiftDownFun_apply_le_sup
   rw [h_fderiv_eq] at h_bound
   exact h_bound.trans (hfC _)
 
-/-- **HasWeakGrad for the even reflection (closed-half-space case).**
-When `f` is smooth with compact support and `tsupport f ⊆ closedHalfSpace`,
-the even reflection has `evenReflectGrad n f` as its weak gradient on every
-open `Ω`. -/
 theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
     {n : ℕ} [NeZero n]
     {f : EuclideanSpace ℝ (Fin n) → ℝ}
@@ -1826,15 +1626,6 @@ theorem hasWeakGrad_evenReflectGrad_evenReflect_closedHalfSpace
     exact h_RHS_tendsto
   exact tendsto_nhds_unique h_LHS_tendsto h_LHS_eq_lim
 
-/-- **Even-reflection W^{1,p}-witness construction (closed-half-space case).**
-For a smooth function `f` on `E := EuclideanSpace ℝ (Fin n)` (n ≥ 1) supported
-in the closed half-ball `closedHalfSpace ∩ Metric.ball x₀ R`, the even
-reflection `evenReflect f` admits a `MemW1pWitness` on `Metric.ball x₀ R`.
-
-Compared to the strict-interior version, this allows `f` to be nonzero at the
-boundary hyperplane `{y_0 = 0}`. The proof reduces to the strict-interior case
-via an inward shift `f_δ(y) := f(y - δ · e_0)` and bounded convergence on the
-integration-by-parts identity. -/
 noncomputable def evenReflect_memW1pWitness_of_smooth_closedHalfSpace
     {n : ℕ} [NeZero n]
     {x₀ : EuclideanSpace ℝ (Fin n)}

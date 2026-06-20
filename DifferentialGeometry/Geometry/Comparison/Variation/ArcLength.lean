@@ -20,23 +20,6 @@ import Mathlib.Topology.Compactness.Compact
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Arc length and the regularity of speed
-
-This file packages the arc-length functional and the analytic regularity of
-the speed of a smooth two-parameter variation `f : ℝ → ℝ → M`, the foundation
-on which the first and second variation of length are built:
-
-* `arcLength g η a b` — the real-valued arc length of a curve `η` on `[a, b]`;
-* the speed-squared `speedSq g f s t` of the slice `t ↦ f s t` and its
-  identification with the chart-coordinate Gram quadratic form;
-* smoothness and continuity of the total-space partial-`t` velocity and of the
-  metric inner product of parameter-dependent tangent vectors;
-* continuity of the speed-squared in the parameter `(s, t)`;
-* a uniform positive lower bound for the speed on a neighbourhood of `s = 0`
-  along a regular variation whose central curve is unit-speed.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle MeasureTheory intervalIntegral
@@ -59,11 +42,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- Real-valued arc length of a curve `η : ℝ → M` on `[a, b]` against
-the smooth Riemannian metric `g`. The integrand is the speed
-`‖η'(t)‖_g = √ g.inner (η t) (η'(t)) (η'(t))`, computed via the
-manifold derivative `mfderiv (𝓘(ℝ, ℝ)) I η t (1 : ℝ)`. The integral is
-the interval integral on `[a, b]`. -/
 def arcLength (g : SmoothRiemannianMetric I M) (η : ℝ → M) (a b : ℝ) : ℝ :=
   ∫ t in a..b,
     Real.sqrt
@@ -71,43 +49,18 @@ def arcLength (g : SmoothRiemannianMetric I M) (η : ℝ → M) (a b : ℝ) : �
         (mfderiv (𝓘(ℝ, ℝ)) I η t (1 : ℝ))
         (mfderiv (𝓘(ℝ, ℝ)) I η t (1 : ℝ)))
 
-/-- Pointwise speed-squared along a smooth two-parameter variation
-`f : ℝ → ℝ → M`, viewed as a function of `(s, t) ∈ ℝ × ℝ`. Auxiliary
-definition used to state the unit-speed-at-`s = 0` hypothesis of
-`speed_positivity_on_regular_variation`. -/
 def speedSq
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (s t : ℝ) : ℝ :=
   g.inner (f s t)
     (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
     (mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f s u) t (1 : ℝ))
 
-/-- The arc length of the slice `t ↦ f s t` on `[0, L]` is the interval
-integral of the square root of the speed-squared `speedSq g f s t`. This is
-definitional: the `arcLength` integrand is `√(g.inner (f s t) (∂_t f) (∂_t f))`,
-and `speedSq g f s t` is exactly that inner product. -/
 lemma arcLength_slice_eq_integral_sqrt_speedSq
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (s L : ℝ) :
     arcLength (I := I) g (fun t : ℝ => f s t) 0 L
       = ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t) := by
   rfl
 
-/-- **Moving-foot speed-as-chartGram bridge.** The speed-squared
-`speedSq g f s t` of the slice `t ↦ f s t`, defined through the manifold
-velocity `mfderiv (fun u ↦ f s u) t 1`, equals the chart-coordinate Gram
-quadratic form `chartGramAlongCurve g (f s t) (fun v ↦ f s v) D D t`, where
-`D v := fderiv ℝ (extChartAt I (f s t) ∘ (fun w ↦ f s w)) v 1` is the
-chart-coordinate velocity section in the chart *pinned at the foot* `f s t`.
-
-The foot of the chart coincides with the basepoint `f s t`, so at the diagonal
-the moving-foot manifold velocity equals, after applying the inverse
-trivialisation, the chart-coordinate velocity; there is no transition-Jacobian
-obstruction. The proof first rewrites the raw `mfderiv`-velocity as
-`triv.symmL (f s t) (D t)` (the chart-coordinate bridge
-`raw_mfderiv_eq_symmL_apply_fderiv`), then identifies the `g`-inner product with
-the Gram bilinear form (`inner_eq_chartGramOnE_bilinear_on_baseSet`), and finally
-reconciles `chartGramMatrix g (f s t) (f s t)` with
-`chartGramOnE g (f s t) · · (extChartAt I (f s t) (f s t))` via the chart
-round-trip `(extChartAt I α).symm (extChartAt I α α) = α`. -/
 private lemma speedSq_eq_chartGramAlongCurve
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
@@ -163,9 +116,6 @@ private lemma speedSq_eq_chartGramAlongCurve
     rw [extChartAt_to_inv]
   rw [hroundtrip]
 
-/-- The partial-`t` derivative of a smooth two-parameter variation, evaluated
-at `(s, t)` with the unit input vector `1 : ℝ`, coincides with the directional
-derivative of the uncurried map at `(s, t)` along `(0, 1) : ℝ × ℝ`. -/
 private lemma mfderiv_partial_t_eq
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
     (mfderiv (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (fun p : ℝ × ℝ => f p.1 p.2) (s, t))
@@ -188,13 +138,6 @@ private lemma mfderiv_partial_t_eq
     ContinuousLinearMap.map_zero _
   rw [hzero, zero_add]
 
-/-- The total-space `TM`-valued partial-`t` velocity of a smooth two-parameter
-variation is continuous in the parameter `(s, t)`. Smoothness into the total
-space `TM` decomposes via `Bundle.contMDiffAt_totalSpace` into smoothness of
-the projection `(s, t) ↦ f s t` (immediate from joint smoothness) and
-smoothness of the chart-trivialisation-projected fiber value, which is a
-mfderiv-applied-to-a-smooth-vector formula handled by
-`ContMDiffAt.mfderiv_apply`. -/
 lemma velocity_totalSpace_contMDiff
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
     ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) (7 : ℕ)
@@ -277,9 +220,6 @@ lemma velocity_totalSpace_contMDiff
         ⟨f p.1 p.2, mfderiv (𝓘(ℝ, ℝ)) I (fun u : ℝ => f p.1 u) p.2 (1 : ℝ)⟩).2) p₀
   exact h_smooth_mfd.congr_of_eventuallyEq h_eq
 
-/-- The total-space `TM`-valued partial-`t` velocity of a smooth two-parameter
-variation is continuous in the parameter `(s, t)`. Immediate corollary of the
-smoothness of this total-space velocity (`velocity_totalSpace_contMDiff`). -/
 private lemma velocity_totalSpace_continuous
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) :
     Continuous (fun p : ℝ × ℝ =>
@@ -290,11 +230,7 @@ private lemma velocity_totalSpace_continuous
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Continuity of the metric inner product of two parameter-dependent tangent
-vectors at a moving base point. The base map `b : ℝ × ℝ → M` and the
-parameter-indexed sections `v, w : ∀ p, TangentSpace I (b p)` are presented
-through their total-space continuity, mirroring the boundaryless tangent-bundle
-diamond-handling pattern from `TangentRiemannian.lean`. -/
+
 private lemma continuous_g_inner_along_param
     (g : SmoothRiemannianMetric I M)
     {b : ℝ × ℝ → M} {v w : ∀ p : ℝ × ℝ, TangentSpace I (b p)}
@@ -313,8 +249,6 @@ private lemma continuous_g_inner_along_param
   intro p
   rfl
 
-/-- Continuity in `(s, t)` of the speed-squared of a smooth two-parameter
-variation. -/
 lemma speedSq_continuous
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) :
@@ -322,25 +256,6 @@ lemma speedSq_continuous
   have hvel := velocity_totalSpace_continuous (I := I) (M := M) f hf
   exact continuous_g_inner_along_param (I := I) (M := M) g hvel hvel
 
-/-- On a small neighbourhood of `s = 0`, the speed `‖∂_t f(s, t)‖_g`
-of a regular smooth variation `f` whose central curve is unit-speed
-on `[0, L]` admits a uniform positive lower bound on `[0, L]`.
-
-**Hypotheses**.
-
-* `hf` — joint smoothness of the variation `f : ℝ × ℝ → M`. Without
-  this, the speed function `(s, t) ↦ √g(∂_t f, ∂_t f)` need not be
-  continuous and the conclusion fails (counter-example: piecewise
-  variations with abrupt direction reversals at non-zero `s`).
-* `hf0` — the central curve `t ↦ f 0 t` is unit-speed on the compact
-  parameter interval `[0, L]`. Without unit-speed at `t = 0`, the
-  speed at `(0, t)` could vanish on a subset of `[0, L]`, falsifying
-  the conclusion (counter-example: a variation reparameterising the
-  central curve to vanishing speed).
-
-Both hypotheses are genuine geometric / analytic preconditions that a
-working mathematician would expect on any second-variation-of-arc-length
-statement involving a regular variation. -/
 theorem speed_positivity_on_regular_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f)

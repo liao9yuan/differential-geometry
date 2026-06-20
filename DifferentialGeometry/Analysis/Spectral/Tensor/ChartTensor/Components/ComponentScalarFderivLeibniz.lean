@@ -1,39 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.POUFDerivBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevBound
 
-/-!
-# Leibniz decomposition for `fderiv (chartPushed ρ_α (tensorChartComponentScalar S))`
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensor g r s`, the manifold-side scalar
-field
-
-  `u_α^{IJ} := tensorChartComponentScalar g r s S α Idx Jdx
-             = (chartAtlasPOU I M α) · tensorChartComponentRaw S α Idx Jdx`,
-
-viewed via the chart-pushed scalar `chartPushed ρ_α α u_α^{IJ}` on the
-Euclidean chart target, has a pointwise Leibniz expression for its Fréchet
-derivative obtained by specialising
-`fderiv_chartPushed_pou_eq_leibniz_on_target` to this particular scalar
-field. The latter is smooth on `M`
-(`tensorChartComponentScalar_contMDiff`), so the smoothness premise of the
-generic Leibniz formula is automatic.
-
-## Main result
-
-* `fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target` —
-  on the open chart target, the Fréchet derivative of
-  `chartPushed ρ_α α (tensorChartComponentScalar g r s S α Idx Jdx)` decomposes
-  as the standard Leibniz sum of two smooth-extension factors.
-
-The result is stated pointwise on the open chart target and exposes only
-the universally-quantified Leibniz form. Specialisations identifying the
-"raw" factor with `tensorChartComponentProjection ∘ tensorTrivProj` are
-left to downstream consumers that need the Christoffel decomposition.
-
-All hypotheses are closed-manifold standard. No new axioms are introduced.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -67,9 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Leibniz decomposition** for the Fréchet derivative of
-`chartPushed ρ_α α (tensorChartComponentScalar g r s S α Idx Jdx)` on the
-open chart target. -/
 theorem fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -102,9 +66,6 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (u := tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx)
     hu_smooth hy
 
-/-- Filter-eventual form of the Leibniz decomposition: on the neighbourhood
-filter of any chart-target point, the Fréchet derivative of the chart-pushed
-scalar component equals the Leibniz sum. -/
 theorem fderiv_chartPushed_tensorChartComponentScalar_eventuallyEq_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -137,9 +98,6 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eventuallyEq_leibniz
   exact fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (I := I) (M := M) g r s α S Idx Jdx hz
 
-/-- Leibniz decomposition specialised to the `tensorChartComponentPou` alias.
-This is `tensorChartComponentScalar = tensorChartComponentPou` and is purely
-a renaming convenience. -/
 theorem fderiv_chartPushed_tensorChartComponentPou_eq_leibniz_on_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

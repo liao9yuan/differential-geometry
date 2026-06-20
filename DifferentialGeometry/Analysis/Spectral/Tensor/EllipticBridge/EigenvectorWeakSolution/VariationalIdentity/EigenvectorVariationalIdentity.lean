@@ -15,47 +15,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstr
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.RotatedTestSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 
-/-!
-# The eigenvector chart variational identity and the chart-bilinear data
-# assembly
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`,
-and a component multi-index `P₀`, this module assembles the per-component
-chart-local weak-elliptic identity for the `P₀`-chart-component of the abstract
-connection-Laplacian eigenvector, and packages it into the chart-bilinear
-divergence-form data structure `TensorChartBilinearH1ComplData`.
-
-The variational-identity assembly applies the source-free per-approximant chart
-bilinear identity `tensorComponent_chartBilinIdentity_of_dirichlet` to the
-partition-of-unity-weighted canonical smooth approximants
-`Tₙ := eigenvectorPouApprox g r s h_atlas i α n = pouSmul g r s α
-(eigenvectorSmoothApprox g r s h_atlas i n).toCcTensor`. The per-approximant
-identity holds for every `n`; the `n → ∞` limit of both sides — assembled from
-the lower-order source limits proven below, the main-Dirichlet limit
-`mainDir_tendsto`, and the cross-Leibniz limits of the sibling files — turns it
-into a chart variational identity for the eigenvector chart component.
-
-## Main results
-
-* `covPrincipalRotationCoeff_source_tendsto`,
-  `covLowerOrderRotationValueCoeff_source_tendsto`,
-  `weightedGradCoeffDivSum_source_tendsto` — the `n → ∞` limits of the three
-  explicit lower-order source terms of the per-approximant chart bilinear
-  identity.
-* `eigenvectorChartVariationalIdentity` — the per-component chart variational
-  identity, in the exact density-weighted shape of the
-  `variational_identity` field of `ChartBilinearH1ComplData`.
-* `eigenvectorTensorChartBilinearData` — the chart-bilinear divergence-form
-  data `TensorChartBilinearH1ComplData g r s α P₀` of the eigenvector
-  `P₀`-chart-component.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -97,9 +56,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Convergence of an `L²` integral against a fixed test element.** For a
-sequence `g : ℕ → Lp ℝ 2 μ` converging to `g_lim` and a fixed `m : Lp ℝ 2 μ`,
-the real integrals `∫ m · g n dμ` converge to `∫ m · g_lim dμ`. -/
 private lemma tendsto_lp_inner_integral
     {β : Type*} [MeasurableSpace β] {μ : Measure β}
     (m : Lp ℝ 2 μ) {g : ℕ → Lp ℝ 2 μ} {g_lim : Lp ℝ 2 μ}
@@ -123,9 +79,6 @@ private lemma tendsto_lp_inner_integral
   exact (continuous_inner.tendsto (m, g_lim)).comp
     (Filter.Tendsto.prodMk_nhds tendsto_const_nhds h_tendsto)
 
-/-- **The partition-of-unity-weighted `n`-th canonical smooth approximant
-(chart-locality-free).** Chart-locality-free twin of `eigenvectorPouApprox`,
-built from `eigenvectorSmoothApprox`. -/
 def eigenvectorPouApprox
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -134,9 +87,6 @@ def eigenvectorPouApprox
     (eigenvectorSmoothApprox (I := I) (M := M)
       g r s i n).toCcTensor
 
-/-- The chart-Euclidean partial derivative of a function vanishes off the
-topological support of that function: on the open complement of the support the
-function is locally zero, so its Fréchet derivative there is the zero map. -/
 private lemma euclidPartial_zero_off_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :
@@ -149,9 +99,6 @@ private lemma euclidPartial_zero_off_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- The chart-pulled weighted-`MemLp` test element `densityOnEuclid g α · ψ` of
-the chart target, used to pair the lower-order `L²`-limits against the chart
-density and the test function. -/
 private lemma densityOnEuclid_mul_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -167,17 +114,12 @@ private lemma densityOnEuclid_mul_test_memLp
   rw [chartL2Measure]
   exact (h_cd.continuous.memLp_of_hasCompactSupport h_cs).restrict _
 
-/-- The test function `ψ` is `MemLp 2` of the chart-`L²` measure when it is `C^∞`
-and compactly supported. -/
 private lemma test_memLp
     (α : M) {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ) :
     MemLp ψ 2 (chartL2Measure (I := I) (M := M) α) := by
   rw [chartL2Measure]
   exact (hψ.continuous.memLp_of_hasCompactSupport hψ_cs).restrict _
 
-/-- **The `n → ∞` limit of the principal-rotation source term
-(chart-locality-free).** Chart-locality-free twin of
-`covPrincipalRotationCoeff_source_tendsto`. -/
 theorem covPrincipalRotationCoeff_source_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -262,9 +204,6 @@ theorem covPrincipalRotationCoeff_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
-/-- **The `n → ∞` limit of the lower-order rotation value source term
-(chart-locality-free).** Chart-locality-free twin of
-`covLowerOrderRotationValueCoeff_source_tendsto`. -/
 theorem covLowerOrderRotationValueCoeff_source_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -349,9 +288,6 @@ theorem covLowerOrderRotationValueCoeff_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
-/-- **The `n → ∞` limit of the lower-order gradient divergence source term
-(chart-locality-free).** Chart-locality-free twin of
-`weightedGradCoeffDivSum_source_tendsto`. -/
 theorem weightedGradCoeffDivSum_source_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -451,8 +387,6 @@ theorem weightedGradCoeffDivSum_source_tendsto
   rw [h_int_lim] at h_main
   exact h_main.congr (fun n => h_int_n n)
 
-/-- The `i`-th principal-symbol test element `∑ⱼ weightedInvGramOnEuclid g α i j ·
-∂ⱼψ`, a function `EuclN → ℝ`. -/
 private def principalSymbolTest
     (g : SmoothRiemannianMetric I M) (α : M)
     (ψ : EuclN → ℝ) (i' : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
@@ -460,11 +394,6 @@ private def principalSymbolTest
     weightedInvGramOnEuclid (I := I) g α i' j y *
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
 
-/-- The `i`-th principal-symbol test element is `MemLp 2` with respect to the
-chart-`L²` measure: a finite sum of products of the `C^∞` weighted inverse-Gram
-entry `weightedInvGramOnEuclid g α i j` (`= weightedInvGramEuclid g α i j`, `C^∞`
-on the chart target) with the chart-Euclidean partial `∂ⱼψ` of the
-chart-supported smooth test function. -/
 private lemma principalSymbolTest_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -528,9 +457,7 @@ private lemma principalSymbolTest_memLp
 set_option linter.style.show false in
 
 set_option linter.style.show false in
-/-- The inverse-Gram-rotated chart test section
-`rotatedTestSection g r s α P₀ (chartTestPullback I α ψ)` attached to a
-chart-supported smooth Euclidean test function `ψ`. -/
+
 private def eigenvectorRotatedTestSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -542,9 +469,6 @@ private def eigenvectorRotatedTestSection
     (chartTestPullback_contMDiffOn (I := I) (M := M) α hψ)
     (chartTestPullback_tsupport_subset_source (I := I) (M := M) α hψ_cs hψ_supp)
 
-/-- On the Euclidean chart target the chart `P`-component of the inverse-Gram-rotated
-test section attached to `ψ` equals the inverse-Gram entry
-`covChartMetricGramInv g r s α y P P₀` times `ψ`. -/
 private lemma tensorComponentEuclid_eigenvectorRotatedTestSection_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -566,10 +490,6 @@ private lemma tensorComponentEuclid_eigenvectorRotatedTestSection_eqOn
       P hy,
     chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α ψ hy]
 
-/-- The inverse-Gram-rotated chart test section attached to `ψ` has its underlying
-tensor field supported inside the chart-`α` source: each summand of its
-finite-sum definition is a chart-basis tensor section cut off by a bump
-supported in the chart source. -/
 private lemma eigenvectorRotatedTestSection_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
@@ -617,9 +537,6 @@ private lemma eigenvectorRotatedTestSection_tsupport_subset
     image_eq_zero_of_notMem_tsupport hb_notin, mul_zero, zero_smul,
     Tensor0SBundle.TensorRSSpace.toModel_zero]
 
-/-- The product `densityOnEuclid g α · c · ψ` of the chart density, a coefficient
-`c` that is `C^∞` on the open chart target, and a chart-supported smooth test
-function `ψ` is `MemLp 2` with respect to the chart-`L²` measure. -/
 private lemma density_coeff_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -643,18 +560,12 @@ private lemma density_coeff_test_memLp
   rw [chartL2Measure]
   exact (hcd.continuous.memLp_of_hasCompactSupport hcs).restrict _
 
-/-- The chart-atlas-partition-of-unity scalar product `pouSmul g r s α S` is the
-smooth-scalar product `scalarSmul g r s (chartAtlasPOU I M α) S`: both are the
-pointwise scalar product of the chart-atlas partition-of-unity weight and `S`. -/
 private lemma pouSmul_eq_scalarSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
     pouSmul (I := I) (M := M) g r s α S =
       scalarSmul (I := I) (M := M) g r s (chartAtlasPOU I M α) S := rfl
 
-/-- The chart density times a chart-`L²` limit object times a chart-supported
-smooth test function is integrable with respect to the chart-pulled volume
-restricted to the chart target. -/
 private lemma density_memLp2_test_integrable
     (g : SmoothRiemannianMetric I M) (α : M) {w : EuclN → ℝ}
     (hw : MemLp w 2
@@ -682,9 +593,6 @@ private lemma density_memLp2_test_integrable
   simp only []
   ring
 
-/-- The chart density times a chart-`C^∞`-coefficient times a chart-`L²` limit
-object times a chart-supported smooth test function is integrable with respect
-to the chart-pulled volume restricted to the chart target. -/
 private lemma density_coeff_memLp2_test_integrable
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -715,8 +623,6 @@ private lemma density_coeff_memLp2_test_integrable
   simp only []
   ring
 
-/-- Chart-locality-free twin of
-`eigenvectorPouApprox_component_tsupport_subset`. -/
 private lemma eigenvectorPouApprox_component_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -729,7 +635,6 @@ private lemma eigenvectorPouApprox_component_tsupport_subset
   exact tensorChartComponent_tsupport_subset_chartPouKernel (I := I) (M := M)
     g r s _ α P₀.1 P₀.2
 
-/-- Chart-locality-free twin of `eigenvectorPouApprox_tsupport_subset_source`. -/
 private lemma eigenvectorPouApprox_tsupport_subset_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -738,7 +643,6 @@ private lemma eigenvectorPouApprox_tsupport_subset_source
         g r s i α n).toFun ⊆ (chartAt H α).source :=
   pouSmul_tsupport_subset_chartSource (I := I) (M := M) g r s α _
 
-/-- Chart-locality-free twin of `eigenvectorPouApprox_component_contDiff`. -/
 private lemma eigenvectorPouApprox_component_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -750,8 +654,6 @@ private lemma eigenvectorPouApprox_component_contDiff
     (eigenvectorPouApprox_tsupport_subset_source (I := I) (M := M)
       g r s i α n)
 
-/-- Chart-locality-free twin of
-`euclidPartial_eigenvectorPouApprox_component_contDiff`. -/
 private lemma euclidPartial_eigenvectorPouApprox_component_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -764,8 +666,6 @@ private lemma euclidPartial_eigenvectorPouApprox_component_contDiff
     (eigenvectorPouApprox_component_contDiff (I := I) (M := M)
       g r s i α P₀ n) k
 
-/-- Chart-locality-free twin of
-`euclidPartial_eigenvectorPouApprox_component_hasCompactSupport`. -/
 private lemma euclidPartial_eigenvectorPouApprox_component_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -795,8 +695,6 @@ private lemma euclidPartial_eigenvectorPouApprox_component_hasCompactSupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-/-- Chart-locality-free twin of
-`euclidPartial_eigenvectorPouApprox_component_memLp`. -/
 private lemma euclidPartial_eigenvectorPouApprox_component_memLp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -814,8 +712,7 @@ private lemma euclidPartial_eigenvectorPouApprox_component_memLp
       (I := I) (M := M) g r s i α P₀ k n)).restrict _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of
-`eigenvectorChartPartialCLM_smoothApprox_coeFn_eq`. -/
+
 private lemma eigenvectorChartPartialCLM_smoothApprox_coeFn_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -883,8 +780,6 @@ private lemma eigenvectorChartPartialCLM_smoothApprox_coeFn_eq
   refine (h4.trans h2).trans ?_
   rw [h3]
 
-/-- Chart-locality-free twin of
-`euclidPartial_eigenvectorPouApprox_toLp_eq_clm`. -/
 private lemma euclidPartial_eigenvectorPouApprox_toLp_eq_clm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -901,8 +796,6 @@ private lemma euclidPartial_eigenvectorPouApprox_toLp_eq_clm
   exact (eigenvectorChartPartialCLM_smoothApprox_coeFn_eq (I := I) (M := M)
     g r s i α P₀ k n).symm
 
-/-- Chart-locality-free twin of
-`euclidPartial_eigenvectorPouApprox_toLp_tendsto`. -/
 private lemma euclidPartial_eigenvectorPouApprox_toLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -933,8 +826,6 @@ private lemma euclidPartial_eigenvectorPouApprox_toLp_tendsto
         g r s i α P₀ k n]
   exact h_scaled.congr h_eq
 
-/-- Chart-locality-free twin of
-`principalIntegrand_eigenvectorPouApprox_eqOn`. -/
 private lemma principalIntegrand_eigenvectorPouApprox_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1023,7 +914,7 @@ private lemma principalIntegrand_eigenvectorPouApprox_eqOn
     rw [hLHS_zero, hRHS_zero]
 
 set_option linter.style.show false in
-/-- Chart-locality-free twin of `bilin_eigenvectorPouApprox_eq_sum`. -/
+
 private lemma bilin_eigenvectorPouApprox_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1300,7 +1191,7 @@ private lemma bilin_eigenvectorPouApprox_eq_sum
   rw [hbilin_eq, hPI_volume_to_target, hPI_target_eq, hreorg]
 
 set_option linter.style.show false in
-/-- Chart-locality-free twin of `bilin_eigenvectorPouApprox_tendsto`. -/
+
 private lemma bilin_eigenvectorPouApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1535,12 +1426,7 @@ private lemma bilin_eigenvectorPouApprox_tendsto
   exact h_sum_tendsto
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `eigenvectorMainDir_tendsto`. The
-`mainDir_tendsto` step is inlined here using the chart-locality-free Dirichlet
-convergence `smoothApprox_dirichlet_tendsto`, the chart-locality-free
-eigenvector weak equation `eigenWeakEquation` and the resolvent
-rescaling `eigenvector_eq_resolvent_smul`, so that no
-`mainDir_tendsto_unconditional` companion lemma is needed. -/
+
 private lemma eigenvectorMainDir_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1712,7 +1598,6 @@ private lemma eigenvectorMainDir_tendsto
   rw [← h_eq]
   exact h_dir
 
-/-- Chart-locality-free twin of `crossLeftPairing_integrable`. -/
 private lemma crossLeftPairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1780,7 +1665,6 @@ private lemma crossLeftPairing_integrable
     (I := I) (M := M) g r s α P₀ hψ hψ_cs hψ_supp Q hy]
   ring
 
-/-- Chart-locality-free twin of `crossLeftLimitPairing_integrable`. -/
 private lemma crossLeftLimitPairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -1825,7 +1709,6 @@ private lemma crossLeftLimitPairing_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   ring
 
-/-- Chart-locality-free twin of `eigenvectorCrossLeft_tendsto`. -/
 private lemma eigenvectorCrossLeft_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2103,7 +1986,6 @@ private lemma eigenvectorCrossLeft_tendsto
   rw [← h_limit_eq]
   exact h_sum_tendsto
 
-/-- Chart-locality-free twin of `crossRightValuePairing_integrable`. -/
 private lemma crossRightValuePairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2156,7 +2038,6 @@ private lemma crossRightValuePairing_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   ring
 
-/-- Chart-locality-free twin of `crossRightValueLimitPairing_integrable`. -/
 private lemma crossRightValueLimitPairing_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2201,7 +2082,6 @@ private lemma crossRightValueLimitPairing_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   ring
 
-/-- Chart-locality-free twin of `eigenvectorCrossRight_tendsto`. -/
 private lemma eigenvectorCrossRight_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2448,7 +2328,6 @@ private lemma eigenvectorCrossRight_tendsto
   rw [← h_limit_eq]
   exact h_sum_tendsto
 
-/-- Chart-locality-free twin of `eigenvectorCrossRightGrad_tendsto`. -/
 private lemma eigenvectorCrossRightGrad_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2547,7 +2426,6 @@ private lemma eigenvectorCrossRightGrad_tendsto
   intro n
   exact (h_int_n n).symm
 
-/-- Chart-locality-free twin of `eigenvectorSource_integral_split`. -/
 private lemma eigenvectorSource_integral_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2652,8 +2530,6 @@ private lemma eigenvectorSource_integral_split
         ∫ x, Cright x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
         rw [MeasureTheory.integral_sub hAmain_int hBleft_int]
 
-/-- Chart-locality-free twin of
-`density_crossRightTestGradTerm_partialTest_integrable`. -/
 private lemma density_crossRightTestGradTerm_partialTest_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2703,8 +2579,6 @@ private lemma density_crossRightTestGradTerm_partialTest_integrable
     hasCompactSupport_mul_chartTest (E := E) hdψ_cs
   exact (hcd.continuous.integrable_of_hasCompactSupport hcs).restrict
 
-/-- Chart-locality-free twin of
-`density_crossRightValueSum_test_integrable`. -/
 private lemma density_crossRightValueSum_test_integrable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2746,8 +2620,6 @@ private lemma density_crossRightValueSum_test_integrable
   refine Filter.Eventually.of_forall (fun y => ?_)
   simp only [Finset.mul_sum, Finset.sum_mul]
 
-/-- Chart-locality-free twin of
-`tensorL2ChartComponentCutoff_smoothApprox_ae_all`. -/
 private lemma tensorL2ChartComponentCutoff_smoothApprox_ae_all
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -2767,8 +2639,6 @@ private lemma tensorL2ChartComponentCutoff_smoothApprox_ae_all
       g r s (eigenvectorSmoothApprox (I := I) (M := M)
         g r s i n).toCcTensor α P)
 
-/-- Chart-locality-free twin of
-`eigenvectorCrossRight_integral_eq_value_plus_grad`. -/
 private lemma eigenvectorCrossRight_integral_eq_value_plus_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -3013,12 +2883,7 @@ private lemma eigenvectorCrossRight_integral_eq_value_plus_grad
       (I := I) (M := M) g r s i α P₀ l hψ hψ_cs hψ_supp n)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The eigenvector chart variational identity (chart-locality-free).**
-Chart-locality-free twin of `eigenvectorChartVariationalIdentity`, re-keyed onto
-the chart-locality-free eigenvector chart component
-`tensorL2ChartComponent g r s (tensorResolventEigenbasisVec …) α P₀`,
-the chart-locality-free candidate weak chart partial / right-hand side, and the
-chart-locality-free limit objects. -/
+
 theorem eigenvectorChartVariationalIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -3608,28 +3473,7 @@ theorem eigenvectorChartVariationalIdentity
       one_mul]]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- **The chart-bilinear divergence-form data of the eigenvector chart
-component (chart-locality-free).** Chart-locality-free twin of
-`eigenvectorTensorChartBilinearData`, re-keyed onto the chart-locality-free
-eigenbasis vector `tensorResolventEigenbasisVec
-(tensorResolventL2_isCompactOperator g r s) i`. For a closed
-Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index `i` with
-nonzero resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`, and a
-component multi-index `P₀`, this is the chart-bilinear divergence-form data
-`TensorChartBilinearH1ComplData g r s α P₀` of the chart `P₀`-component of the
-abstract connection-Laplacian eigenvector:
 
-* the chart component `u_chart` is `tensorL2ChartComponent g r s
-  (tensorResolventEigenbasisVec …) α P₀`;
-* the weak partials are the chart-locality-free candidate weak chart partials
-  `eigenvectorChartWeakPartial g r s i α P₀`;
-* the right-hand side `f_chart` is the chart-locality-free chart-Euclidean
-  right-hand side `eigenvectorChartRHS g r s i α P₀`;
-* the variational identity is `eigenvectorChartVariationalIdentity`.
-
-This packages the per-component chart-local weak-elliptic identity for the
-`P₀`-chart-component of the abstract connection-Laplacian eigenvector, without
-any chart-locality hypothesis on the atlas. -/
 def eigenvectorTensorChartBilinearData
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

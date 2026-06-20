@@ -2,31 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 import DifferentialGeometry.Geometry.Operator.Hessian
 
-/-!
-# The chart-Gram difference of two realized metrics as a symmetric raw tensor component
-
-For two fibre-small smooth perturbations `T, T'`, the realized metrics
-`g₁ = g_bg + h_sym T = tensorSectionRealizeMetric g_bg T` and `g₂ = g_bg + h_sym T'` differ, in the
-chart-`α` Gram matrix, by the chart-`α` Gram entries of the *symmetrized* perturbation difference
-`h_sym(T − T')`.  Since the background `g_bg` cancels and `h_sym` is the symmetrization of the raw
-extracted bilinear form `ccTensorBilin`, the pointwise chart-Gram difference is the symmetric raw
-chart-`α`-frame `(0,2)`-component of the difference tensor `T − T'`:
-```
-chartGramOnE g₁ α a b y − chartGramOnE g₂ α a b y
-  = ½ · (rawComp_{a,b}(T − T')(p) + rawComp_{b,a}(T − T')(p)),
-```
-where `p = (extChartAt I α).symm y` and `rawComp` is `tensorChartComponentRaw`.
-
-This is the foundational identity that lets the chart-jet Faà-di-Bruno Lipschitz tower (which is
-stated in terms of `chartGramJetDiffSeminormSum`, i.e. the chart-jet magnitude of the Gram
-difference) be controlled by the covariant fibre-norm jets of the perturbation difference `T − T'`.
-
-## Main result
-
-* `chartGramOnE_realize_sub_eq_symm_rawComponent` — the pointwise chart-Gram difference of the two
-  realized metrics equals the symmetrized raw chart-`α`-frame `(0,2)`-component of `T − T'`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -58,12 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- **The chart-`α` Gram entry of a realized metric equals the background Gram entry plus the
-symmetrized extracted bilinear form of the perturbation.**
 
-For a fibre-small perturbation `T` and a base point `x`, the chart-`α` Gram matrix entry of the
-realized metric `tensorSectionRealizeMetric g_bg T` is `chartGramMatrix g_bg α x a b` plus the
-symmetrized extracted bilinear form `ccTensorBilinSymm g_bg T x (e^α_a x) (e^α_b x)`. -/
 theorem chartGramMatrix_realize_apply
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -77,13 +47,6 @@ theorem chartGramMatrix_realize_apply
   rw [chartGramMatrix_apply, chartGramMatrix_apply,
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ_lt hδ x]
 
-/-- **The chart-Gram difference of two realized metrics is the symmetrized raw `(0,2)`-component of
-the perturbation difference.**
-
-For two fibre-small perturbations `T, T'`, the pointwise chart-`α` Gram-entry difference of the two
-realized metrics at a chart-target point `y` (read at the chart preimage `p = (extChartAt I α).symm
-y` when `p ∈ (chartAt H α).source`) equals the symmetrized raw chart-`α`-frame `(0,2)`-component of
-the difference tensor `T − T'`. -/
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -103,7 +66,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
   rw [chartGramOnE_def, chartGramOnE_def]
   rw [chartGramMatrix_realize_apply (I := I) g_bg T hδ_lt hδ α p a b,
     chartGramMatrix_realize_apply (I := I) g_bg T' hδ_lt hδ' α p a b]
-  -- The background Gram entries cancel.
+  
   rw [show (chartGramMatrix (I := I) g_bg α p a b +
         ccTensorBilinSymm (I := I) g_bg T p
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p)) -
@@ -114,16 +77,16 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p) -
         ccTensorBilinSymm (I := I) g_bg T' p
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p) by ring]
-  -- Each symmetrized bilinear value expands by `ccTensorBilinSymm_apply`.
+  
   rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
-  -- The raw `(0,2)` component of `T - T'` is the bilinear value of its difference section.
+  
   have hrawAB := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (T - T') α hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
     (![a, b] : Fin 2 → Fin (Module.finrank ℝ E))
   have hrawBA := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (T - T') α hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
     (![b, a] : Fin 2 → Fin (Module.finrank ℝ E))
-  -- For `r = 0` the chart-frame basis element is the canonical unit `constOfIsEmpty 1`.
+  
   have hframe : chartFrameBasisModel (I := I) (M := M) α p 0
       (![] : Fin 0 → Fin (Module.finrank ℝ E)) =
       (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -136,8 +99,8 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     exact h
   rw [hframe] at hrawAB hrawBA
-  -- The bilinear value of `(T - T')` recovers `ccTensorBilin (T - T')`, which is the difference
-  -- `ccTensorBilin T - ccTensorBilin T'` of the per-tensor extracted forms.
+  
+  
   have hbilin : ∀ (i j : Fin (Module.finrank ℝ E)),
       ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -155,7 +118,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
         ![chartBasisVecFiber (I := I) α i p, chartBasisVecFiber (I := I) α j p] := by
       funext k; fin_cases k <;> rfl
     rw [hvecAB, ccTensorBilin_apply, ccTensorBilin_apply]
-    -- `ccTensorModel g S p ![v,w] = toModel (S.toSection p (const 1)) ![v,w]` for any `S`.
+    
     show Tensor0SSpace.toModel
         ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -165,16 +128,10 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
     rfl
   rw [hrawAB, hrawBA, hbilin a b, hbilin b a]
-  -- Both `ccTensorBilinSymm` are the half-sum; assemble.
+  
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   ring
 
-/-- **The chart-Gram difference of two realized metrics, with separate fibre-small witnesses.**
-
-The same symmetrized-raw-component identity as `chartGramOnE_realize_sub_eq_symm_rawComponent`, but
-allowing the two perturbations `T, T'` to carry *separate* fibre-small witnesses `(δ, hδ)`,
-`(δ', hδ')`.  The realized chart-Gram entries depend only on `g_bg + h_sym`, not on the positivity
-witness, so the identity is witness independent. -/
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

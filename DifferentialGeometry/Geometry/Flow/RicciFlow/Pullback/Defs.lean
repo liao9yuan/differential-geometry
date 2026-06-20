@@ -6,20 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.InnerProductSpace.Basic
 
-/-!
-# Pullback of a Riemannian metric along a diffeomorphism
-
-This is the low-rank anchor of the `Pullback` concept: it defines the fiberwise pullback of the
-inner product along a diffeomorphism `Φ` and assembles it into a pulled-back Riemannian metric,
-together with the immediately-needed smoothness/bilinearity API.
-
-## Main definitions
-
-* `Diffeomorph.pullbackInner` — the fiberwise pullback `Φ^* g` of an inner product along `Φ`,
-  as a continuous bilinear form on each tangent space.
-* `Diffeomorph.pullbackMetric` — the resulting pulled-back smooth Riemannian metric.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle
@@ -34,15 +20,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- Fiberwise pullback of the inner product along a diffeomorphism `Φ`. As a
-continuous bilinear form on `T_x M`, this is the composition of the inner
-product `g.inner (Φ x)` at the image with the manifold derivative
-`mfderiv I I Φ x` in both slots.
-
-The construction uses `ContinuousLinearMap.comp` and
-`ContinuousLinearMap.precomp` to avoid the `SeminormedAddCommGroup`
-hypotheses that `ContinuousLinearMap.bilinearComp` would require — those
-instances are not synthesised on `TangentSpace I _` without manual aid. -/
 noncomputable def Diffeomorph.pullbackInner
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -80,9 +57,6 @@ theorem Diffeomorph.pullbackInner_pos
     rw [← h2]; exact fun h => h1 (by simpa [hcoe] using h)
   exact g.pos (Φ x) _ hvImg
 
-/-- The fiberwise inner product `g.inner` of the original metric, pulled back along the
-diffeomorphism `Φ` (i.e. evaluated at `Φ x`), is a smooth section of the bundle of
-continuous bilinear forms on `E`. -/
 theorem inner_comp_smooth_along_diffeo
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -104,8 +78,6 @@ private theorem mfderiv_eq_mfderivCLE_apply
   have h := Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Φ) (x := x) infty_ne_zero
   exact congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I (Φ x) => f v) h
 
-/-- For each base point `x`, the set `{v ∈ T_x M | pullbackInner g Φ x v v < 1}`
-is von-Neumann-bounded. -/
 theorem Diffeomorph.pullbackInner_isVonNBounded
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ∀ x : M, Bornology.IsVonNBounded ℝ
@@ -141,9 +113,6 @@ theorem Diffeomorph.pullbackInner_isVonNBounded
   rw [hseteq]
   exact himg
 
-/-- For a smooth diffeomorphism `Φ` and a smooth tangent section `Y`, the section
-`x ↦ ⟨Φ x, mfderiv I I Φ x (Y x)⟩` of the tangent bundle (with base map `Φ`) is smooth.
-Obtained from `tangentMap I I Φ` smoothness composed with the smooth tangent section `Y`. -/
 private theorem mfderiv_apply_section_smooth_along_diffeo
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (Y : ∀ x : M, TangentSpace I x)
@@ -157,7 +126,6 @@ private theorem mfderiv_apply_section_smooth_along_diffeo
   have h := h_tangentMap.comp hY
   exact h
 
-/-- The pullback of a smooth Riemannian metric along a diffeomorphism. -/
 noncomputable def Diffeomorph.pullbackMetric
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
@@ -223,14 +191,12 @@ noncomputable def Diffeomorph.pullbackMetric
         ⟨y, Diffeomorph.pullbackInner g Φ y (Y y) (W y)⟩).2
     rfl
 
-/-- The pullback metric exists: it is `Diffeomorph.pullbackMetric g Φ`. -/
 theorem diffeomorph_pullback_metric_exists
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ∃ g' : SmoothRiemannianMetric I M, g' = Diffeomorph.pullbackMetric g Φ :=
   ⟨Diffeomorph.pullbackMetric g Φ, rfl⟩
 
-/-- Pullback by the identity diffeomorphism is the identity operation. -/
 theorem Diffeomorph.pullbackMetric_refl
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) :
@@ -260,8 +226,6 @@ theorem Diffeomorph.pullbackMetric_refl
   unfold Diffeomorph.pullbackMetric
   congr 1
 
-/-- Smoothness of the pullback inner-product section.
-This is exactly the `contMDiff` field of `Diffeomorph.pullbackMetric g Φ`. -/
 theorem Diffeomorph.pullbackInner_contMDiff
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
@@ -270,17 +234,11 @@ theorem Diffeomorph.pullbackInner_contMDiff
         ((Diffeomorph.pullbackInner g Φ x : E →L[ℝ] E →L[ℝ] ℝ))) :=
   (Diffeomorph.pullbackMetric g Φ).contMDiff
 
-/-- A diffeomorphism is smooth as a map `M → M`. This is the smoothness witness
-carried by the `Diffeomorph` structure. -/
 theorem Diffeomorph.mfderiv_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff I I ∞ (Φ : M → M) :=
   Φ.contMDiff
 
-/-- The bilinear pullback `(B, L) ↦ B.bilinearComp L L` is smooth in `(B, L)` on the
-model normed space. The operation is a polynomial composition of (i) precomposition
-`(B, L) ↦ B.comp L`, (ii) `ContinuousLinearMap.flip` (a linear isometry equivalence,
-hence smooth), and these are iterated twice, so the composite is `C^∞`. -/
 theorem bilinear_pullback_bundle_smooth
     (_Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff

@@ -2,55 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedd
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.TensorAllOrdersRegularity
 
-/-!
-# Finite eigen-combinations as smooth weak solutions and their spectral identities
-
-For a closed Riemannian manifold `(M, g)` and rank `(0, 2)`, this file builds the
-*finite eigen-combination*
-`finiteEigenCombo F c := ∑_{i ∈ F} c i • eᵢ`,
-where `eᵢ = eigenvectorSmooth g 0 2 i` is the chart-locality-free
-smooth representative of the connection-Laplacian resolvent eigenbasis vector at
-index `i`, `F` a finite set of eigen-indices and `c` a real coefficient family.
-This is a genuine smooth compactly-supported `(0, 2)`-tensor section.
-
-It is the grounded analytic base of the spectral smooth-representative gate: a
-finite combination of eigenvectors is honestly a smooth weak solution of the
-connection Laplacian, and its eigenbasis coordinates are *exactly* the indicator
-of `F` weighted by `c` (the diagonal nature of the eigenbasis). From those two
-facts the spectral norms of the combination — at every `Hˢ` scale and after every
-iterate of the connection Laplacian — collapse to *finite* weighted sums over `F`,
-with no cross-terms, which is the orthogonality that avoids a `|F|`-blowup.
-
-## Main definitions
-
-* `finiteEigenCombo F c` — the finite eigen-combination as `SmoothCcTensor g 0 2`.
-
-## Main results
-
-* `finiteEigenCombo_contMDiff` — the underlying section is `C^∞`.
-* `finiteEigenCombo_toL2` — its `L²` image is `∑_{i ∈ F} c i • bᵢ`, `bᵢ` the
-  resolvent eigenbasis vector.
-* `finiteEigenCombo_tensorL2Coeff` — its `i`-th eigenbasis coordinate is
-  `if i ∈ F then c i else 0` (diagonality / orthonormality of the eigenbasis).
-* `finiteEigenCombo_weakSolution` — the `(T, F)`-weak-solution identity of the
-  connection Laplacian in the exact shape consumed by
-  `tensorComponent_memWkp_allOrders_interior`, with source
-  `F = -Δ_∇ (finiteEigenCombo F c)`.
-* `finiteEigenCombo_rawConnLap_tensorL2Coeff` — the `L²`-coordinate eigen-equation
-  `cᵢ(Δ_∇ u) = -λᵢ · cᵢ(u)` for `u = finiteEigenCombo F c` (the honest spectral
-  content; the strong pointwise eigen-equation is not used / not on disk).
-* `finiteEigenCombo_spectral_normSq` — the `Hˢ`-norm identity
-  `‖finiteEigenCombo F c‖²_{Hˢ} = ∑_{i ∈ F} (1 + λᵢ)^σ · (c i)²`.
-* `finiteEigenCombo_l2NormSq` — `‖finiteEigenCombo F c‖²_{L²} = ∑_{i ∈ F} (c i)²`.
-* `finiteEigenCombo_iterRawConnLap_l2NormSq` — the iterated-Laplacian identity
-  `‖Δ_∇^j (finiteEigenCombo F c)‖²_{L²} = ∑_{i ∈ F} λᵢ^{2j} · (c i)²`.
-
-## Sign convention
-
-Geometer Laplacian `Δ_∇ = -∇*∇`, spectrum `⊆ (-∞, 0]`; the resolvent is
-`(1 - Δ_∇)⁻¹` (spectrum `⊆ [1, ∞)`), and `1 + λᵢ = (i.fst.val)⁻¹`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -90,30 +41,21 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M)
 
-/-- The chart-locality-free smooth representative of the resolvent eigenbasis
-vector at eigen-index `i`, as a smooth compactly-supported `(0, 2)`-tensor. -/
 abbrev eigenSmooth
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) : SmoothCcTensor g 0 2 :=
   eigenvectorSmooth (I := I) (M := M) g 0 2 i
 
-/-- **The finite eigen-combination.** For a finite set `F` of eigen-indices and a
-real coefficient family `c`, the finite sum `∑_{i ∈ F} c i • eᵢ` of the smooth
-eigenvector representatives, a smooth compactly-supported `(0, 2)`-tensor. -/
 def finiteEigenCombo
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) : SmoothCcTensor g 0 2 :=
   ∑ i ∈ F, c i • eigenSmooth (I := I) (M := M) g i
 
-/-- The finite eigen-combination unfolds to the finite sum of scaled smooth
-eigenvectors. -/
 lemma finiteEigenCombo_eq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
     finiteEigenCombo (I := I) (M := M) g F c =
       ∑ i ∈ F, c i • eigenSmooth (I := I) (M := M) g i := rfl
 
-/-- **The finite eigen-combination is `C^∞`.** The underlying tensor section of
-`finiteEigenCombo F c` is a `C^∞` section of the `(0, 2)`-tensor bundle. -/
 theorem finiteEigenCombo_contMDiff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
@@ -123,14 +65,9 @@ theorem finiteEigenCombo_contMDiff
           ((finiteEigenCombo (I := I) (M := M) g F c).toSection x)) :=
   (finiteEigenCombo (I := I) (M := M) g F c).toSection.contMDiff
 
-/-- The compactness witness used throughout: the chart-locality-free compactness
-of the L²-side tensor resolvent at rank `(0, 2)`. -/
 abbrev hCompact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2) :=
   tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2
 
-/-- **The `L²` image of the finite eigen-combination.** It is the finite
-combination `∑_{i ∈ F} c i • bᵢ` of the chart-locality-free resolvent eigenbasis
-vectors `bᵢ = tensorResolventEigenbasisVec i`. -/
 theorem finiteEigenCombo_toL2
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
@@ -144,12 +81,7 @@ theorem finiteEigenCombo_toL2
     eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i]
 
 open scoped Classical in
-/-- The `i`-th eigenbasis coordinate of the smooth eigenvector representative `eⱼ`
-is the orthonormality indicator: `cᵢ(eⱼ) = if i = j then 1 else 0`.
 
-The eigenbasis-coordinate functional is `⟪bᵢ, ·⟫` against the chart-locality-free
-Hilbert eigenbasis `b`; since `(eⱼ : L²) = b j` and `b` is orthonormal, this is the
-Kronecker delta. -/
 theorem tensorL2Coeff_ofCompact_eigenSmooth
     (i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
@@ -168,9 +100,7 @@ theorem tensorL2Coeff_ofCompact_eigenSmooth
   exact horth i j
 
 open scoped Classical in
-/-- **The eigenbasis coordinate of the finite eigen-combination.** The `i`-th
-eigenbasis coordinate of `finiteEigenCombo F c` is `c i` when `i ∈ F` and `0`
-otherwise. -/
+
 theorem finiteEigenCombo_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -212,15 +142,6 @@ theorem finiteEigenCombo_tensorL2Coeff
     intro j hj
     rw [if_neg (fun h => hiF (by rw [h]; exact hj))]
 
-/-- **The smooth weak-solution identity.** For the finite eigen-combination
-`u = finiteEigenCombo F c` and any smooth compactly-supported test tensor `v`, the
-integrated covariant-gradient pairing of `u` against `v` equals the `L²` pairing of
-the source `-Δ_∇ u` against `v`:
-`∫_M ⟨∇u, ∇v⟩ dμ_g = ⟨-Δ_∇ u, v⟩_{L²}`.
-
-This is precisely the `hweak` hypothesis of
-`tensorComponent_memWkp_allOrders_interior` with solution `T = u` and source
-`F = -Δ_∇ u = -rawTensorConnLapSmooth g 0 2 u`. -/
 theorem finiteEigenCombo_weakSolution
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -245,14 +166,6 @@ theorem finiteEigenCombo_weakSolution
   rw [tensorL2Inner_smul_left]
   ring
 
-/-- **The `L²`-coordinate eigen-equation for `Δ_∇`.** For any smooth
-compactly-supported `(0, 2)`-tensor `T`, applying the rough connection Laplacian
-scales the `i`-th eigenbasis coordinate by `-λᵢ`:
-`cᵢ(Δ_∇ T) = -λᵢ · cᵢ(T)`.
-
-Since `Δ_∇ T = T - (1 - Δ_∇) T` and the per-step identity gives
-`cᵢ((1 - Δ_∇) T) = (1 + λᵢ) · cᵢ(T)`, additivity of the coordinate functional
-yields `cᵢ(Δ_∇ T) = cᵢ(T) - (1 + λᵢ) cᵢ(T) = -λᵢ · cᵢ(T)`. -/
 theorem rawConnLapSmooth_tensorL2Coeff
     (T : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
@@ -273,8 +186,6 @@ theorem rawConnLapSmooth_tensorL2Coeff
       (I := I) (M := M) g (hCompact (I := I) (M := M) g) T i]
   ring
 
-/-- **The iterated `L²`-coordinate eigen-equation.** The `i`-th eigenbasis
-coordinate of `Δ_∇^j T` is `(-λᵢ)^j · cᵢ(T)`. -/
 theorem rawConnLapIter_tensorL2Coeff
     (T : SmoothCcTensor g 0 2)
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) (j : ℕ) :
@@ -292,8 +203,7 @@ theorem rawConnLapIter_tensorL2Coeff
       ring
 
 open scoped Classical in
-/-- The eigenbasis coordinate of `Δ_∇^j (finiteEigenCombo F c)` is supported on
-`F`: at index `i ∈ F` it is `(-λᵢ)^j · c i`, and `0` off `F`. -/
+
 private lemma finiteEigenCombo_iterRawConnLap_tensorL2Coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (j : ℕ)
@@ -312,13 +222,6 @@ private lemma finiteEigenCombo_iterRawConnLap_tensorL2Coeff
     finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g F c i]
   by_cases h : i ∈ F <;> simp [h]
 
-/-- **The iterated-Laplacian `L²`-norm identity.** The squared `L²` norm of
-`Δ_∇^j (finiteEigenCombo F c)` is the finite weighted sum
-`∑_{i ∈ F} λᵢ^{2j} · (c i)²`.
-
-This is the orthogonality that avoids the `|F|`-blowup: Parseval turns the squared
-`L²` norm into the sum of squared eigenbasis coordinates, which — being supported
-on `F` and free of cross-terms by orthonormality — is exactly the finite sum. -/
 theorem finiteEigenCombo_iterRawConnLap_l2NormSq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (j : ℕ) :
@@ -345,8 +248,6 @@ theorem finiteEigenCombo_iterRawConnLap_l2NormSq
     rw [if_neg hb]
     ring
 
-/-- **The `L²`-norm identity.** The squared `L²` norm of `finiteEigenCombo F c` is
-the finite sum `∑_{i ∈ F} (c i)²` (the `j = 0` case of the iterated identity). -/
 theorem finiteEigenCombo_l2NormSq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
@@ -359,8 +260,7 @@ theorem finiteEigenCombo_l2NormSq
   simp
 
 open scoped Classical in
-/-- The `Hˢ`-spectral element whose eigenbasis coordinates are the indicator
-`(if i ∈ F then c i else 0)` — the coordinates of `finiteEigenCombo F c`. -/
+
 def finiteEigenComboHs
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) :
@@ -374,8 +274,7 @@ def finiteEigenComboHs
     ring
 
 open scoped Classical in
-/-- The `coeff` of `finiteEigenComboHs F c σ` is the indicator
-`if i ∈ F then c i else 0`. -/
+
 @[simp] lemma finiteEigenComboHs_coeff
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ)
@@ -383,8 +282,6 @@ open scoped Classical in
     (finiteEigenComboHs (I := I) (M := M) g F c σ).coeff i =
       (if i ∈ F then c i else 0) := rfl
 
-/-- The `coeff` of `finiteEigenComboHs F c σ` matches the `L²` eigenbasis
-coordinate of `finiteEigenCombo F c`. -/
 lemma finiteEigenComboHs_coeff_eq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ)
@@ -395,14 +292,6 @@ lemma finiteEigenComboHs_coeff_eq
   rw [finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g F c i]
   rfl
 
-/-- **The `Hˢ`-norm identity (spectral orthogonality).** The squared `Hˢ` norm of
-the spectral packaging of `finiteEigenCombo F c` is the weighted finite sum
-`∑_{i ∈ F} (1 + λᵢ)^σ · (c i)²`.
-
-The `Hˢ` inner product is diagonal in the eigenbasis coordinates, so the squared
-norm is the weighted tsum of squared coordinates (`norm_sq_eq_tsum`); since the
-coordinates are supported on `F`, the tsum collapses to a finite sum with no
-cross-terms — the orthogonality input that avoids any `|F|`-blowup. -/
 theorem finiteEigenCombo_spectral_normSq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) :

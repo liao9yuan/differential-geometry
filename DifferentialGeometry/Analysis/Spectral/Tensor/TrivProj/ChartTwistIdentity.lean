@@ -7,43 +7,6 @@ import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Basic
 
-/-!
-# Bridge identity between `tensorTrivProj` and the chart-`(α, b)`-twist
-
-For a smooth compactly-supported `(r, s)`-tensor section `S : SmoothCcTensor g r s`
-over a closed smooth manifold `M`, two algebraic gadgets describe the same
-underlying data in slightly different ways:
-
-* `tensorTrivProj g r s S α b : TensorRSModel r s ℝ E` — the value of the
-  Hom-bundle trivialization at chart center `α`, applied at base point `b`,
-  to the smooth bundle section `S.toSection b`. Concretely, this is the
-  composition
-  `(triv_0Ss α).continuousLinearMapAt ℝ b ∘L (S.toSection b) ∘L
-   (triv_0Sr α).symmL ℝ b`, where `triv_0Sk α` is the trivialization at `α`
-  of the `(0, k)`-tensor bundle (itself derived from the tangent
-  trivialization at `α`).
-
-* `S.toFun b : TensorRSModel r s ℝ E` — the value of the canonical bundle-
-  to-model identification `TensorRSSpace.toModel`, applied to `S.toSection b`.
-  This is `arrowCongr` of the `(0, k)`-fibre `≃L[ℝ]`-equivs, which are
-  identity at the function level.
-
-The trivialization-projected value differs from `S.toFun b` by a
-`chartJ`/`chartJinv`-twist on the `r`-block input and `s`-block output:
-the inverse twist `chartRSTwistInv α b r s` precomposes the input with
-`chartJ α b` and postcomposes the output with `chartJinv α b`, which is
-exactly the composition pattern produced by the Hom-bundle pretrivialization
-formula.
-
-This file ships the identity
-
-```
-tensorTrivProj g r s S α b = chartRSTwistInv α b r s (S.toFun b)
-```
-
-valid for `b` in the chart-`α` base set.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -71,9 +34,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `continuousLinearMapAt ℝ b` of the `(0, r)`-tensor trivialization at
-`α`, applied to a fibre element `T : Tensor0SSpace r I b`, precomposes the
-multilinear slots with `chartJinv α b`. Holds on the chart-`α` base set. -/
 private lemma tensor0S_trivialization_continuousLinearMapAt_apply
     (α : M) {b : M} (r : ℕ)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -97,9 +57,6 @@ private lemma tensor0S_trivialization_continuousLinearMapAt_apply
       congrFun hcoe T]
   rfl
 
-/-- The `symmL ℝ b` of the `(0, r)`-tensor trivialization at `α`, applied
-to a model fibre element `V : Tensor0SModel r ℝ E`, precomposes the
-multilinear slots with `chartJ α b`. Holds on the chart-`α` base set. -/
 private lemma tensor0S_trivialization_symmL_apply
     (α : M) {b : M} (r : ℕ)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -125,20 +82,6 @@ private lemma tensor0S_trivialization_symmL_apply
   rw [h]
   rfl
 
-/-- **Bridge identity**: on the chart-`α` base set, the trivialization-`α`
-projection of a smooth `(r, s)`-tensor section at `b` equals the inverse
-chart-`(α, b)`-twist of the canonical model-fibre value `S.toFun b`.
-
-Explicitly:
-```
-tensorTrivProj g r s S α b
-  = chartRSTwistInv α b r s (S.toFun b)
-```
-
-The inverse twist precomposes the input on the `r`-block with `chartJ α b`
-and postcomposes the output on the `s`-block with `chartJinv α b`, which is
-exactly the composition pattern produced by the Hom-bundle pretrivialization
-formula. -/
 theorem tensorTrivProj_eq_chartRSTwistInv_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -198,8 +141,6 @@ theorem tensorTrivProj_eq_chartRSTwistInv_toFun
   rw [chartRSTwistInv_apply]
   rfl
 
-/-- **Reverse orientation** of `tensorTrivProj_eq_chartRSTwistInv_toFun`: the
-forward twist of `tensorTrivProj` recovers `S.toFun`. -/
 theorem chartRSTwist_tensorTrivProj_eq_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -232,19 +173,6 @@ theorem chartRSTwist_tensorTrivProj_eq_toFun
   funext k
   exact chartJinv_chartJ_self (I := I) (M := M) α hb (w k)
 
-/-- **Generalized bridge identity (pointwise, in the fibre)**: on the
-chart-`α` source, the trivialization's `continuousLinearMapAt ℝ b` action on
-an arbitrary fibre element `T : TensorRSSpace r s I b` equals the inverse
-chart-`(α, b)`-twist of the model-fibre value `TensorRSSpace.toModel T`.
-
-Explicitly:
-```
-(triv_RS α).continuousLinearMapAt ℝ b T
-  = chartRSTwistInv α b r s (TensorRSSpace.toModel T)
-```
-
-This is the section-independent kernel of
-`tensorTrivProj_eq_chartRSTwistInv_toFun`. -/
 theorem triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (T : TensorRSSpace r s I b) :

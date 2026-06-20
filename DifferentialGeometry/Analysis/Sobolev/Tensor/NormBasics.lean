@@ -1,42 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 
-/-!
-# Finiteness and the real-valued normed structure on the tensor `W^{2k, 2}` space
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional real
-inner product space `E` and fixed ranks `(r, s)`, the companion file
-`Analysis/Sobolev/Tensor/Defs.lean` introduces the tensor Sobolev space
-`W^{2k, 2}` as a `Submodule ℝ (SmoothCcTensor g r s)`, together with the
-`ℝ≥0∞`-valued chart-aggregated norm `wtwokTwoNorm g k T` and its basic
-algebraic inequalities.
-
-This file completes the analytic side:
-
-* **Finiteness.** For a smooth compactly-supported `(r, s)`-tensor section in
-  `W^{2k, 2}`, the chart-aggregated norm `wtwokTwoNorm g k T` is finite. The
-  argument mirrors the scalar precedent `wkpNormChart_lt_top_of_memWkpChart`:
-  the canonical chart-atlas partition of unity has locally finite supports, so
-  on a compact manifold only finitely many chart base points contribute, and
-  each per-chart contribution is a finite sum of finite Euclidean Sobolev norms.
-
-* **The real-valued norm.** `wtwokTwoNormReal g k T := (wtwokTwoNorm g k T).toReal`,
-  with the non-negativity, vanishing-on-zero, triangle and homogeneity
-  inequalities transported from the `ℝ≥0∞` versions using finiteness.
-
-* **Separation and the normed structure.** A smooth compactly-supported tensor
-  section all of whose chart components have vanishing scalar `W^{2k, 2}` norm
-  is the zero section: the order-zero summand of the scalar `W^{2k, 2}` norm
-  controls the `L²` norm of the (continuous) chart component on the open chart
-  target, hence the chart component vanishes there; reassembling against the
-  chart frame and using that the partition of unity sums to one recovers the
-  section pointwise. Consequently `WtwokTwo g r s k` carries a genuine
-  `NormedAddCommGroup` and `NormedSpace ℝ` structure (not merely a seminormed
-  one).
-
-Banach completeness of `WtwokTwo g r s k` is **not** developed here; it is
-deferred to a later file.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -64,18 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The tensor Sobolev norm is finite for any `W^{2k, 2}`-tensor section on a
-closed manifold.
-
-This mirrors the scalar chart-Sobolev precedent
-`wkpNormChart_lt_top_of_memWkpChart`. The canonical chart-atlas partition of
-unity has locally finite supports, so on a compact manifold only finitely many
-chart base points `α` have a nonempty partition-of-unity support. For every
-other `α` the chart component of any section is the zero function (the
-partition-of-unity weight vanishes identically), hence its scalar Sobolev norm
-is `0`. The chart-aggregating `tsum` therefore has finitely many nonzero terms,
-each of which is a finite sum, over the `n ^ (r + s)` component multi-indices,
-of finite Euclidean iterated Sobolev norms `wkpNorm (2 * k) 2`. -/
 theorem wtwokTwoNorm_lt_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -140,7 +91,6 @@ theorem wtwokTwoNorm_lt_top
   intro Jdx _
   exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E) (hT α Idx Jdx)
 
-/-- The tensor Sobolev norm of a `W^{2k, 2}`-tensor section is not `⊤`. -/
 theorem wtwokTwoNorm_ne_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -148,16 +98,6 @@ theorem wtwokTwoNorm_ne_top
     wtwokTwoNorm (I := I) (M := M) g k T ≠ ⊤ :=
   (wtwokTwoNorm_lt_top (I := I) (M := M) g hT).ne
 
-/-- If the tensor Sobolev norm of a section vanishes, then every scalar chart
-component vanishes identically on its chart target.
-
-The chart-aggregating `tsum` is a sum of non-negative `ℝ≥0∞` terms, so a zero
-total forces every per-chart double sum — and hence every individual scalar
-Euclidean Sobolev norm `wkpNorm (2 * k) 2 (tensorChartComp …)` — to vanish. The
-order-zero summand of `wkpNorm` is the `L²` norm (`eLpNorm`) of the chart
-component itself; its vanishing makes the component a.e.-zero on the open chart
-target, and a continuous a.e.-zero function on an open set (for the
-open-positive Lebesgue measure) vanishes identically there. -/
 theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -243,10 +183,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
   exact MeasureTheory.Measure.eqOn_open_of_ae_eq hu_ae hΩ_open
     hu_cont.continuousOn continuousOn_const
 
-/-- The base set of the `TensorRSModel`-trivialization at `α` is the chart
-source at `α`. (The product trivialization of a `(0, r)`- and a
-`(0, s)`-tensor bundle, each in turn a tensor power of the tangent bundle,
-shares the tangent-bundle base set, namely the chart source.) -/
 private lemma tensorRS_baseSet_eq_chart_source
     (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -262,13 +198,6 @@ private lemma tensorRS_baseSet_eq_chart_source
   rw [Set.inter_self]
   rfl
 
-/-- If the trivialization-projected fibre value of a tensor section vanishes at
-a point of the chart source, then the section itself vanishes there.
-
-The trivialization of the `(r, s)`-tensor bundle is fibrewise a linear equiv on
-the base set, so its fibrewise component `continuousLinearMapAt` is injective
-there; applying the fibrewise inverse `symmL` (a continuous linear map, hence
-zero-preserving) recovers the section value. -/
 private lemma toSection_eq_zero_of_tensorTrivProj_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {x : M}
@@ -288,18 +217,6 @@ private lemma toSection_eq_zero_of_tensorTrivProj_eq_zero
   rw [hproj, map_zero] at hrecover
   exact hrecover.symm
 
-/-- **Separation.** A smooth compactly-supported `(r, s)`-tensor section whose
-tensor Sobolev norm vanishes is the zero section.
-
-By `tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero`, every scalar chart
-component vanishes on its chart target. Reassembling the chart components
-against the chart frame (`tensorChartPushed_eq_sum_tensorChartComp`) shows the
-partition-of-unity-weighted chart-pushed tensor vanishes on each chart target;
-on the chart source this reads `ρ_α(x) • tensorTrivProj S α x = 0`. Since the
-partition of unity sums to one, for every point `x` some chart base point `α`
-has `ρ_α(x) > 0`, forcing `tensorTrivProj S α x = 0` and hence — by
-`toSection_eq_zero_of_tensorTrivProj_eq_zero` — `S.toSection x = 0`. As `x` was
-arbitrary, the section is zero. -/
 theorem eq_zero_of_wtwokTwoNorm_zero
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -363,7 +280,6 @@ theorem eq_zero_of_wtwokTwoNorm_zero
   rw [ContMDiffSection.coe_zero]
   rfl
 
-/-- The real-valued (`ℝ≥0∞.toReal`) tensor Sobolev norm. -/
 def wtwokTwoNormReal
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) : ℝ :=
@@ -375,14 +291,12 @@ def wtwokTwoNormReal
     wtwokTwoNormReal (I := I) (M := M) g k T =
       (wtwokTwoNorm (I := I) (M := M) g k T).toReal := rfl
 
-/-- The real-valued tensor Sobolev norm is non-negative. -/
 theorem wtwokTwoNormReal_nonneg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
     0 ≤ wtwokTwoNormReal (I := I) (M := M) g k T :=
   ENNReal.toReal_nonneg
 
-/-- The real-valued tensor Sobolev norm of the zero section is zero. -/
 theorem wtwokTwoNormReal_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     wtwokTwoNormReal (I := I) (M := M) g k (0 : SmoothCcTensor g r s) = 0 := by
@@ -390,7 +304,6 @@ theorem wtwokTwoNormReal_zero_section
   rw [wtwokTwoNorm_zero_section (I := I) (M := M) g k]
   simp
 
-/-- The triangle inequality for the real-valued tensor Sobolev norm. -/
 theorem wtwokTwoNormReal_add_le
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T₁ T₂ : SmoothCcTensor g r s}
@@ -411,7 +324,6 @@ theorem wtwokTwoNormReal_add_le
   have hToReal := ENNReal.toReal_mono hRHS_ne hsum_le
   rwa [ENNReal.toReal_add h₁_ne h₂_ne] at hToReal
 
-/-- The scalar-homogeneity identity for the real-valued tensor Sobolev norm. -/
 theorem wtwokTwoNormReal_smul
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     (c : ℝ) {T : SmoothCcTensor g r s}
@@ -422,9 +334,6 @@ theorem wtwokTwoNormReal_smul
   rw [wtwokTwoNorm_smul (I := I) (M := M) g c h]
   rw [ENNReal.toReal_mul, toReal_enorm]
 
-/-- Each per-chart term of the tensor Sobolev norm is monotone in the regularity
-order `k`: the Euclidean iterated Sobolev norm `wkpNorm` is monotone in its
-order, applied componentwise. -/
 private lemma wtwokTwoNorm_le_succ_aux
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -442,8 +351,6 @@ private lemma wtwokTwoNorm_le_succ_aux
     (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
     (chartTargetEuclid (I := I) (M := M) α)
 
-/-- The tensor Sobolev norm is monotone in the regularity order `k`: a
-lower-order norm is bounded by a higher-order one. -/
 theorem wtwokTwoNorm_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -451,8 +358,6 @@ theorem wtwokTwoNorm_le_succ
       wtwokTwoNorm (I := I) (M := M) g (k + 1) T :=
   wtwokTwoNorm_le_succ_aux (I := I) (M := M) g k T
 
-/-- The real-valued tensor Sobolev norm is monotone in the regularity order
-`k`, for any `W^{2(k+1), 2}`-tensor section. -/
 theorem wtwokTwoNormReal_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -464,16 +369,12 @@ theorem wtwokTwoNormReal_le_succ
     wtwokTwoNorm_ne_top (I := I) (M := M) g hT
   exact ENNReal.toReal_mono hk_ne (wtwokTwoNorm_le_succ (I := I) (M := M) g k T)
 
-/-- The underlying smooth compactly-supported tensor section of an element of
-`WtwokTwo g r s k`. -/
 def wtwokTwoFun
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ}
     (T : WtwokTwo (I := I) (M := M) g r s k) : SmoothCcTensor g r s :=
   Subtype.val (α := SmoothCcTensor g r s)
     (p := fun T => T ∈ wtwokTwoSubmodule (I := I) (M := M) g r s k) T
 
-/-- The membership property of the underlying section of an element of
-`WtwokTwo g r s k`. -/
 lemma wtwokTwoFun_memWtwokTwo
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ}
     (T : WtwokTwo (I := I) (M := M) g r s k) :
@@ -497,8 +398,6 @@ lemma wtwokTwoFun_memWtwokTwo
     (c : ℝ) (T : WtwokTwo (I := I) (M := M) g r s k) :
     wtwokTwoFun (c • T) = c • wtwokTwoFun T := rfl
 
-/-- `wtwokTwoFun` is injective: an element of `WtwokTwo g r s k` is determined
-by its underlying section. -/
 lemma wtwokTwoFun_injective
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ} :
     Function.Injective
@@ -506,8 +405,6 @@ lemma wtwokTwoFun_injective
   intro T₁ T₂ h
   exact Subtype.ext h
 
-/-- `Norm` instance on `WtwokTwo g r s k`, with norm
-`(wtwokTwoNorm g k T).toReal`. -/
 instance instNormWtwokTwo
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     Norm (WtwokTwo (I := I) (M := M) g r s k) where
@@ -518,12 +415,6 @@ instance instNormWtwokTwo
     (T : WtwokTwo (I := I) (M := M) g r s k) :
     ‖T‖ = wtwokTwoNormReal (I := I) (M := M) g k (wtwokTwoFun T) := rfl
 
-/-- The `NormedSpace.Core` for `WtwokTwo g r s k`: non-negativity, scalar
-homogeneity, the triangle inequality, and — crucially — the genuine separation
-axiom `‖T‖ = 0 ↔ T = 0`. The forward separation direction is the analytic
-content: finiteness of the norm turns the vanishing real-valued norm into a
-vanishing `ℝ≥0∞`-valued norm, and `eq_zero_of_wtwokTwoNorm_zero` then forces the
-zero section. -/
 lemma wtwokTwo_normedSpace_core
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     NormedSpace.Core ℝ (WtwokTwo (I := I) (M := M) g r s k) where
@@ -563,22 +454,16 @@ lemma wtwokTwo_normedSpace_core
       rw [hT, norm_wtwokTwo_def, wtwokTwoFun_zero]
       exact wtwokTwoNormReal_zero_section (I := I) (M := M) g k
 
-/-- `WtwokTwo g r s k` carries a genuine `NormedAddCommGroup` structure: the
-real-valued tensor Sobolev norm separates points (a vanishing norm forces the
-zero section). -/
 instance instNormedAddCommGroupWtwokTwo
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     NormedAddCommGroup (WtwokTwo (I := I) (M := M) g r s k) :=
   NormedAddCommGroup.ofCore (wtwokTwo_normedSpace_core (I := I) (M := M) g r s k)
 
-/-- `WtwokTwo g r s k` is a normed real vector space. -/
 instance instNormedSpaceRealWtwokTwo
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     NormedSpace ℝ (WtwokTwo (I := I) (M := M) g r s k) :=
   NormedSpace.ofCore (wtwokTwo_normedSpace_core (I := I) (M := M) g r s k)
 
-/-- The norm of an element of `WtwokTwo g r s k` equals the real-valued tensor
-Sobolev norm of the underlying section. -/
 theorem norm_wtwokTwo_eq
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ}
     (T : WtwokTwo (I := I) (M := M) g r s k) :

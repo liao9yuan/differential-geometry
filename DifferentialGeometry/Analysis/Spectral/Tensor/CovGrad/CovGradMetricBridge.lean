@@ -4,57 +4,6 @@ import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
 
-/-!
-# The metric-isometry bridge for the section-level covariant gradient
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, the `H^1` pre-Hilbert structure on smooth
-compactly-supported `(r, s)`-tensor sections pairs the covariant derivatives
-of two sections through the inverse-Gram-weighted double sum
-`tensorCovDerivPointwiseInner`. This file proves that this inverse-Gram-weighted
-pairing coincides, pointwise, with the genuine one-rank-higher tensor
-pointwise inner product `tensorInnerPointwise g r (s + 1)` of the section-level
-covariant gradients `covGrad g r s S` and `covGrad g r s T`.
-
-## Main result
-
-* `tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad` — for all smooth
-  compactly-supported `(r, s)`-tensor sections `S`, `T` and every point `x`,
-
-  `tensorCovDerivPointwiseInner g r s S T x
-    = tensorInnerPointwise g r (s + 1) x
-        (TensorRSSpace.toModel ((covGrad g r s S).toSection x))
-        (TensorRSSpace.toModel ((covGrad g r s T).toSection x))`.
-
-## Strategy
-
-Both sides are the same metric contraction of the same data, written with the
-`r + s + 1` covariant slots in a different order.
-
-The covariant gradient `covGrad g r s S` is the `(r, s + 1)`-tensor whose extra
-covariant slot — placed as the *leftmost* of the `s + 1` covariant slots, by the
-gradient-bundle convention `covGradBundleEquiv_apply_eval` — carries the
-differentiation direction. The mixed pointwise inner product
-`tensorInnerPointwise g r (s + 1)` first lowers the `r` upper slots through the
-metric (`lowerAllUpperIndices`, placing the `r` lowered slots *before* the
-`s + 1` covariant slots), then contracts all `r + (s + 1)` covariant slots via
-the inverse Gram matrix of `g`.
-
-Consequently, in the lowered covariant `(0, r + (s + 1))`-tensor the
-differentiation slot sits at index `r`: after the `r` lowered upper slots and
-before the `s` genuine covariant slots. Splitting the index `r` slot out of the
-`(0, r + (s + 1))` contraction — via the explicit closed form
-`tensorInnerPointwise_0s_eq_sum` and the tuple-splitting equivalence
-`Fin.insertNthEquiv` at position `r` — produces exactly the inverse-Gram weight
-`(G⁻¹)ᵢⱼ` of the differentiation direction together with the inverse-Gram-weighted
-`(0, r + s)` contraction of the directional covariant derivatives, i.e. the
-summand of `tensorCovDerivPointwiseInner`.
-
-The proof therefore expands both sides to explicit inverse-Gram-weighted sums
-and reconciles them by the bijective slot reindexing `Fin.insertNthEquiv`; no
-new predicate hypothesis is introduced and the identity holds unconditionally.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -89,10 +38,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Evaluation of the model coercion of an `(r, s)`-tensor. For a tensor
-`T : TensorRSSpace r s I x` and a model `(0, r)`-tensor `Dm`, the
-`(0, s)`-model tensor `(TensorRSSpace.toModel T) Dm` is the model coercion of
-`T` applied to the fibre `(0, r)`-tensor `Tensor0SSpace.ofModel Dm`. -/
 private lemma tensorRSSpace_toModel_apply
     (r s : ℕ) (x : M) (T : TensorRSSpace r s I x)
     (Dm : Tensor0SModel r ℝ E) :
@@ -103,12 +48,6 @@ private lemma tensorRSSpace_toModel_apply
           (Tensor0SSpace.ofModel Dm)) :=
   rfl
 
-/-- **Model-fibre evaluation of the covariant gradient.** For a smooth
-compactly-supported `(r, s)`-tensor section `S`, the model coercion of the
-section value `(covGrad g r s S).toSection x` — an `(r, s + 1)`-model tensor —
-evaluated on a model `(0, r)`-tensor `Dm` and a `Fin (s + 1)`-tuple `v`, equals
-the model coercion of the directional covariant derivative
-`tensorCovDerivAt g r s S x (v 0)` evaluated on `Dm` and the tail of `v`. -/
 private lemma covGrad_toModel_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -128,25 +67,14 @@ private lemma covGrad_toModel_apply
   rw [tensorRSSpace_toModel_apply (I := I) r s x
         (tensorCovDerivAt (I := I) (M := M) g r s S x (v 0)) Dm]
 
-/-- The index of the differentiation slot inside the lowered covariant
-`(0, r + (s + 1))`-tensor: it sits at position `r`, after the `r` lowered upper
-slots and before the `s` genuine covariant slots. -/
 private def diffSlot (r s : ℕ) : Fin (r + (s + 1)) :=
   ⟨r, by omega⟩
 
-/-- The differentiation slot is the `natAdd`-image of the leftmost covariant
-slot: `lowerAllUpperIndices` maps the covariant block to the `natAdd r`
-positions, and `covGrad` places the differentiation direction at the leftmost
-of the `s + 1` covariant slots. -/
 private lemma natAdd_zero_eq_diffSlot (r s : ℕ) :
     (Fin.natAdd r (0 : Fin (s + 1)) : Fin (r + (s + 1))) = diffSlot r s := by
   apply Fin.ext
   simp [diffSlot, Fin.natAdd]
 
-/-- The omit-index-`r` embedding sends the `r` upper-slot positions
-(`castAdd s` into `Fin (r + s)`) to the `r` upper-slot positions
-(`castAdd (s + 1)` into `Fin (r + (s + 1))`): both blocks occupy positions
-`0, …, r - 1`, which lie below the differentiation slot. -/
 private lemma diffSlot_succAbove_castAdd (r s : ℕ) (a : Fin r) :
     (diffSlot r s).succAbove (Fin.castAdd s a) = Fin.castAdd (s + 1) a := by
   apply Fin.ext
@@ -158,11 +86,6 @@ private lemma diffSlot_succAbove_castAdd (r s : ℕ) (a : Fin r) :
   rw [Fin.succAbove, if_pos hcond]
   simp only [Fin.val_castSucc, Fin.val_castAdd]
 
-/-- The omit-index-`r` embedding sends the `s` covariant-slot positions
-(`natAdd r` into `Fin (r + s)`) to the `s` genuine covariant-slot positions
-(`natAdd r ∘ Fin.succ` into `Fin (r + (s + 1))`): the `Fin (r + s)` covariant
-block occupies positions `r, …, r + s - 1`, which lie at or above the
-differentiation slot, so each is shifted up by one. -/
 private lemma diffSlot_succAbove_natAdd (r s : ℕ) (a : Fin s) :
     (diffSlot r s).succAbove (Fin.natAdd r a) =
       Fin.natAdd r (Fin.succ a) := by
@@ -176,14 +99,6 @@ private lemma diffSlot_succAbove_natAdd (r s : ℕ) (a : Fin s) :
   simp only [Fin.val_succ, Fin.val_natAdd]
   omega
 
-/-- **The lowered covariant gradient on an `insertNth` basis tuple.** For a
-smooth compactly-supported `(r, s)`-tensor section `S`, an index `k : Fin n`
-and a slot-index tuple `i : Fin (r + s) → Fin n`, the lowered covariant gradient
-`lowerAllUpperIndices g r (s + 1) x (TensorRSSpace.toModel (covGrad g r s S))`,
-evaluated on the basis tuple indexed by `Fin.insertNth (diffSlot r s) k i`,
-equals the lowered directional covariant derivative
-`lowerAllUpperIndices g r s x (TensorRSSpace.toModel (∇_{eₖ} S))` evaluated on
-the basis tuple indexed by `i`. -/
 private lemma lower_covGrad_insertNth_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -227,12 +142,6 @@ private lemma lower_covGrad_insertNth_basis
         (fun j : Fin (s + 1) => (chartModelBasis E) (I' (Fin.natAdd r j)))]
   rw [hdir, hupper, hcov]
 
-/-- Splitting the inverse-Gram product at the differentiation slot. For
-slot-index tuples `i j : Fin (r + s) → Fin n` and differentiation indices
-`k l : Fin n`, the product of inverse-Gram entries over all `r + (s + 1)`
-covariant slots of the `insertNth`-assembled tuples equals the inverse-Gram
-weight `(G⁻¹)ₖₗ` of the differentiation direction times the product over the
-remaining `r + s` slots. -/
 private lemma gramInv_prod_insertNth_split
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     (k l : Fin (Module.finrank ℝ E))
@@ -269,11 +178,6 @@ private lemma gramInv_prod_insertNth_split
   refine Finset.prod_congr rfl (fun a _ => ?_)
   rw [Fin.insertNth_apply_succAbove, Fin.insertNth_apply_succAbove]
 
-/-- Reindexing a sum over `Fin (r + (s + 1))`-indexed slot tuples through the
-tuple-splitting equivalence `Fin.insertNthEquiv` at the differentiation slot:
-the sum equals the iterated sum over a differentiation index `k : Fin n` and a
-`Fin (r + s)`-indexed slot tuple `i`, of the summand at the assembled tuple
-`Fin.insertNth (diffSlot r s) k i`. -/
 private lemma sum_reindex_diffSlot (r s : ℕ)
     (F : (Fin (r + (s + 1)) → Fin (Module.finrank ℝ E)) → ℝ) :
     ∑ I' : Fin (r + (s + 1)) → Fin (Module.finrank ℝ E), F I' =
@@ -289,23 +193,6 @@ private lemma sum_reindex_diffSlot (r s : ℕ)
         (diffSlot r s)) F).symm
   rw [h1, Fintype.sum_prod_type]
 
-/-- **The metric-isometry bridge for the section-level covariant gradient.**
-
-For a closed smooth Riemannian manifold `(M, g)` and smooth compactly-supported
-`(r, s)`-tensor sections `S`, `T`, the inverse-Gram-weighted pairing of the
-covariant derivatives of `S` and `T` — the gradient term
-`tensorCovDerivPointwiseInner` of the `H^1` inner product — equals, at every
-point `x`, the genuine one-rank-higher tensor pointwise inner product
-`tensorInnerPointwise g r (s + 1)` of the section-level covariant gradients
-`covGrad g r s S` and `covGrad g r s T`.
-
-Both sides are the same metric contraction of the covariant derivatives,
-written with the `r + (s + 1)` covariant slots in a different order: the mixed
-inner product `tensorInnerPointwise g r (s + 1)` places the differentiation
-slot at index `r`, after the `r` lowered upper slots; the gradient term
-`tensorCovDerivPointwiseInner` separates the differentiation contraction as an
-outer inverse-Gram-weighted double sum. The identity holds unconditionally — no
-extra hypothesis on `S`, `T`, or `x`. -/
 theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) :

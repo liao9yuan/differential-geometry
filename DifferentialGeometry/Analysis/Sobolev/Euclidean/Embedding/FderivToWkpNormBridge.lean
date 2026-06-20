@@ -2,22 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 
-/-!
-# `eLpNorm`-of-Fréchet-derivative bound by `wkpNorm 2 2`
-
-For a smooth function `u : EuclideanSpace ℝ (Fin d) → ℝ` with compact support
-strictly inside an open set `Ω`, the `L²` norm of the Fréchet-derivative norm
-`‖fderiv ℝ u y‖` (restricted to `Ω`) is bounded by the iterated Sobolev norm
-`wkpNorm 2 2 u Ω`.
-
-The proof reduces the Fréchet-derivative norm to a coordinate-direction sum
-via the canonical orthonormal basis of `EuclideanSpace`, identifies the
-classical partial derivatives with the chosen weak partials a.e., and observes
-that the sum of `L²`-norms of those weak partials is exactly the order-one
-contribution to `wkpNorm 2 2 u Ω`, which is bounded above by the full
-`wkpNorm 2 2`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -32,8 +16,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-- For `w : EuclideanSpace ℝ (Fin d)`, the norm is bounded by the sum of the
-absolute values of the components. -/
 private lemma euclN_norm_le_sum_components_norms (w : EuclN) :
     ‖w‖ ≤ ∑ i : Fin d, ‖w i‖ := by
   classical
@@ -47,9 +29,6 @@ private lemma euclN_norm_le_sum_components_norms (w : EuclN) :
   intro i _
   simp
 
-/-- For `ψ : EuclN → ℝ`, the norm of `fderiv ℝ ψ y` (as an element of the dual
-of the Euclidean space) equals the norm of the Riesz representative, which has
-components `(fderiv ℝ ψ y) (EuclideanSpace.single i 1)`. -/
 private lemma norm_fderiv_eq_norm_partials
     {ψ : EuclN → ℝ} (y : EuclN) :
     ‖fderiv ℝ ψ y‖ =
@@ -78,8 +57,6 @@ private lemma norm_fderiv_eq_norm_partials
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))) i := by simp
   rw [h_fderiv_norm_eq_v, h_v_eq_components]
 
-/-- Pointwise: `‖fderiv ℝ ψ y‖` is bounded by the sum of the absolute values of
-its components along the canonical basis. -/
 private lemma norm_fderiv_le_sum_partials
     (ψ : EuclN → ℝ) (y : EuclN) :
     ‖fderiv ℝ ψ y‖ ≤
@@ -91,9 +68,6 @@ private lemma norm_fderiv_le_sum_partials
   intro i _
   simp
 
-/-- For smooth `ψ : EuclN → ℝ` and any measure `μ`, the `L^q` norm of
-`‖fderiv ℝ ψ‖` is bounded by the sum over coordinate directions of the
-`L^q` norms of the directional partials. -/
 private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {μ : Measure EuclN}
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -144,9 +118,6 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
-/-- For a smooth function `ψ` with compact support strictly inside an open set
-`Ω`, the `i`-th classical partial derivative agrees a.e. (under
-`volume.restrict Ω`) with `chosenWeakPartial' q i ψ Ω`. -/
 private lemma classical_partial_ae_eq_chosenWeakPartial
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -184,9 +155,6 @@ private lemma classical_partial_ae_eq_chosenWeakPartial
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
-/-- The order-one contribution to `wkpNorm` decomposed as a sum over
-`β : Fin 1 → Fin d` equals the sum over `i : Fin d` of the `L^q` norms of the
-chosen weak partials. -/
 private lemma wkpNorm_order_one_block_eq_sum_partials
     {q : ℝ≥0∞} (ψ : EuclN → ℝ) (Ω : Set EuclN) :
     (∑ β : Fin 1 → Fin d,
@@ -223,8 +191,6 @@ private lemma wkpNorm_order_one_block_eq_sum_partials
       eLpNorm (chosenWeakPartial' (d := d) q i ψ Ω) q (volume.restrict Ω))
     (fun _ => rfl)
 
-/-- The sum over coordinate directions of the `L²` norms of the chosen weak
-partials of `ψ` on an open set `Ω` is bounded by `wkpNorm 2 2 ψ Ω`. -/
 private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
     (Ω : Set EuclN) (ψ : EuclN → ℝ) :
     (∑ i : Fin d,
@@ -289,13 +255,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
                   (volume.restrict Ω)) :=
           le_add_of_nonneg_right hJ2_nonneg
 
-/-- **Fréchet-derivative `L²` bound by `wkpNorm 2 2`.** For a smooth function
-`u : EuclideanSpace ℝ (Fin d) → ℝ` with compact support strictly inside an
-open set `Ω`, the `L²` norm of `y ↦ ‖fderiv ℝ u y‖` (restricted to `Ω`) is
-bounded by the iterated Sobolev norm `wkpNorm 2 2 u Ω`.
-
-This is the chart-target Sobolev-equivalence inequality at the level of
-Fréchet-derivative norms. -/
 theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -328,8 +287,6 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
     sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two (d := d) Ω u
   exact h_grad_le.trans (le_of_eq h_step |>.trans h_le_wkp)
 
-/-- The sum over coordinate directions of the `L²` norms of the chosen weak
-partials of `ψ` on an open set `Ω` is bounded by `wkpNorm 1 2 ψ Ω`. -/
 private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
     (Ω : Set EuclN) (ψ : EuclN → ℝ) :
     (∑ i : Fin d,
@@ -367,13 +324,6 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
             (volume.restrict Ω)) := zero_le _
   exact le_add_of_nonneg_left hJ0_nonneg
 
-/-- **Fréchet-derivative `L²` bound by `wkpNorm 1 2`.** For a smooth function
-`u : EuclideanSpace ℝ (Fin d) → ℝ` with compact support strictly inside an
-open set `Ω`, the `L²` norm of `y ↦ ‖fderiv ℝ u y‖` (restricted to `Ω`) is
-bounded by the order-`1` iterated Sobolev norm `wkpNorm 1 2 u Ω`.
-
-This is the chart-target Sobolev-equivalence inequality at the level of
-Fréchet-derivative norms, in the minimal Sobolev order (`k = 1`). -/
 theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)

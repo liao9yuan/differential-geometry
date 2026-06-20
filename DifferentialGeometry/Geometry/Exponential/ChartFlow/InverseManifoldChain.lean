@@ -3,85 +3,6 @@ import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Manifold integral-curve property of `chartFlowOrbitLift` on the full uniform interval
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, the manifold lift
-`F_v := chartFlowOrbitLift Φ p v` of the chart-pushed flow orbit
-(constructed in `Exponential/ChartFlowToTangentLift.lean`) is — under
-the chart-target-interior confinement and chart-phase ODE hypotheses
-supplied by the uniform existence interval — a local integral curve of
-the chart-fixed geodesic vector field `geodesicVectorFieldChart g p` at
-**every** point of the open interval `Ioo (-T) T`.
-
-This upgrades the "integral curve at `0`" property from
-`Exponential/ChartFlowToTangentLift.lean` to "integral curve on the
-full uniform interval", which is the manifold-side ingredient required
-by the downstream uniform-uniqueness step.
-
-## Strategy
-
-The argument is local at every interior point `s₀ ∈ Ioo (-T) T`.
-
-1. **Chart-of-`TM` chain at a fixed base point `⟨p, 0⟩`.** We prove that,
-   for any local integral curve `f` of `geodesicVectorFieldChart g p` at
-   `s₀` with `(f s₀).proj ∈ (chartAt H p).source`, the chart-pushed
-   curve at the *fixed* zero-section base point `⟨p, 0⟩`,
-   ```
-   c_p(s) := extChartAt I.tangent ⟨p, 0⟩ (f s),
-   ```
-   satisfies the chart-phase ODE
-   `HasDerivAt c_p (chartPhaseVF g p (c_p s)) s` on a neighbourhood of
-   `s₀`. The proof mirrors the Mathlib lemma
-   `IsMIntegralCurveAt.eventually_hasDerivAt`, but with the chart at the
-   running base point `f s₀` replaced by the chart at the *fixed* point
-   `⟨p, 0⟩`. The replacement is valid because the chart-of-`TM` only
-   depends on the projection and the projection of `f s` remains in the
-   chart-`p` source on a neighbourhood of `s₀`.
-
-2. **Picard–Lindelöf local lift at `s₀`.** At each `s₀ ∈ Ioo (-T) T`,
-   Mathlib's Picard–Lindelöf theorem produces a curve
-   `g_loc : ℝ → TangentBundle I M` with `g_loc s₀ = F_v s₀` and
-   `IsMIntegralCurveAt g_loc (gvf...) s₀`. The smoothness hypothesis
-   needed is `(F_v s₀).proj ∈ (chartAt H p).source`, which holds from
-   `chartAt_source_of_extChartAt_tangent_zero_symm` applied to the
-   orbit's chart-target-interior confinement.
-
-3. **Chart-coordinate ODE uniqueness against the orbit.** Both the
-   curve `c_p ∘ g_loc` (from step 1) and the orbit
-   `c(s) := Φ((x₀, v), s)` solve the chart-phase ODE on a neighbourhood
-   of `s₀`. They take the same value at `s = s₀`: at the curve side,
-   `c_p (g_loc s₀) = c_p (F_v s₀) = c s₀` (by construction of `F_v`).
-   By `chartPhaseVF_orbit_uniqueness`, they agree on a neighbourhood of
-   `s₀`. Inverting the chart-of-`TM` at `⟨p, 0⟩` yields
-   `g_loc =ᶠ[𝓝 s₀] F_v`.
-
-4. **Transfer of the integral-curve property.** From `g_loc =ᶠ[𝓝 s₀] F_v`
-   and `IsMIntegralCurveAt g_loc (gvf...) s₀`, transfer the property to
-   `F_v` via `HasMFDerivAt.congr_of_eventuallyEq`.
-
-## Main results
-
-* `eventually_hasDerivAt_chartPhaseVF_at_zero_section` — the chart-of-
-  `TM`-at-`⟨p, 0⟩` form of the chart-phase ODE for any local integral
-  curve of `geodesicVectorFieldChart g p` whose projection at the base
-  time lies in the chart-`p` source.
-
-* `chartFlowOrbitLift_isMIntegralCurveAt_of_mem_Ioo` — for each
-  `s₀ ∈ Ioo (-T) T` and `v ∈ ball (0 : E) ρ`, the lift `F_v` is a local
-  integral curve of `geodesicVectorFieldChart g p` at `s₀`.
-
-* `chartFlowOrbitLift_isMIntegralCurveOn_Ioo` — the headline:
-  `F_v` is `IsMIntegralCurveOn (geodesicVectorFieldChart g p) (Ioo (-T) T)`.
-
-* `exists_chartFlowOrbitLift_isMIntegralCurveOn_Ioo_data` — packaged
-  existence form: there exist a chart-pushed flow `Φ` and uniform
-  radii `(ρ, T) > 0` such that for every `v ∈ ball (0 : E) ρ`, all
-  R.D.1 data plus the `IsMIntegralCurveOn` of `F_v` on `Ioo (-T) T`
-  hold.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -106,13 +27,7 @@ section ChartPhaseAtZeroSection
 variable [I.Boundaryless]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Chart-`⟨α, 0⟩`-pushed derivative of a local integral curve.** For
-a curve `f : ℝ → TangentBundle I M` that is a local integral curve of
-`geodesicVectorFieldChart g α` at `s₀`, and whose projection at `s₀`
-lies in the chart-`α` source, the chart-pushed curve at the fixed
-zero-section base `⟨α, 0⟩`,
-`s ↦ extChartAt I.tangent ⟨α, 0⟩ (f s)`, satisfies the genuine
-chart-phase ODE on a neighbourhood of `s₀`. -/
+
 theorem eventually_hasDerivAt_chartPhaseVF_at_zero_section
     {g : SmoothRiemannianMetric I M} {α : M} {s₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -165,11 +80,6 @@ section LocalLiftAtsZero
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Local existence of a tangent-bundle integral curve at a given
-phase-space point.** For any `q : TangentBundle I M` whose projection
-lies in `(chartAt H α).source`, and any base time `s₀ : ℝ`, there exists
-a curve `g_loc : ℝ → TangentBundle I M` with `g_loc s₀ = q` and
-`IsMIntegralCurveAt g_loc (gvf...) s₀`. -/
 private lemma exists_local_lift_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {q : TangentBundle I M}
@@ -194,16 +104,6 @@ private lemma exists_local_lift_at
       (v := geodesicVectorFieldChart (I := I) g α)
       (t₀ := s₀) (x₀ := q) hsmooth1
 
-/-- **Identification of the local lift with `F_v` near `s₀`.** Under the
-chart-target-interior confinement of the orbit and the chart-phase ODE
-on the orbit at `s₀`, the local lift `g_loc` agrees with the manifold
-lift `F_v` on a neighbourhood of `s₀`.
-
-The agreement is proved by applying `chartPhaseVF_orbit_uniqueness` to
-the chart-coordinate curve `c_p ∘ g_loc` (from
-`eventually_hasDerivAt_chartPhaseVF_at_zero_section`) and the orbit
-`c(s) := Φ((x₀, v), s)`, both of which solve the chart-phase ODE near
-`s₀` with matching values at `s₀`. -/
 private lemma local_lift_eventuallyEq_chartFlowOrbitLift
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E} {s₀ : ℝ}
@@ -376,11 +276,6 @@ section IntegralCurveOnIoo
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **`F_v` is a local integral curve at every `s₀ ∈ Ioo (-T) T`.** Under
-the chart-target-interior confinement of the orbit on `Icc (-T) T` and
-the chart-phase ODE on `Ioo (-T) T`, the manifold lift
-`F_v := chartFlowOrbitLift Φ p v` is `IsMIntegralCurveAt
-(geodesicVectorFieldChart g p) s₀` at every interior point `s₀`. -/
 theorem chartFlowOrbitLift_isMIntegralCurveAt_of_mem_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) {T : ℝ}
     {Φ : (E × E) × ℝ → E × E}
@@ -424,7 +319,6 @@ theorem chartFlowOrbitLift_isMIntegralCurveAt_of_mem_Ioo
   filter_upwards [hs_eq_nhds] with x hx
   exact hx.symm
 
-/-- **Headline: `F_v` is an `IsMIntegralCurveOn` on `Ioo (-T) T`.** -/
 theorem chartFlowOrbitLift_isMIntegralCurveOn_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) {T : ℝ}
     {Φ : (E × E) × ℝ → E × E}
@@ -448,19 +342,6 @@ section HeadlineRD3a
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Headline R.D.3.a — `F_v` is an integral curve on the full uniform
-interval, uniformly in `v`.** There exist a chart-pushed flow
-`Φ : (E × E) × ℝ → E × E` and uniform radii `(ρ, T) > 0` such that, for
-every `v ∈ Metric.ball (0 : E) ρ`:
-
-* all R.D.1 manifold-lift data is available on `Ioo (-T) T`;
-* the chart-coordinate orbit satisfies the genuine chart-phase ODE on
-  `Ioo (-T) T`;
-* the manifold lift `F_v := chartFlowOrbitLift Φ p v` starts at
-  `⟨p, v⟩` at `s = 0`;
-* **`F_v` is an `IsMIntegralCurveOn` of `geodesicVectorFieldChart g p`
-  on the entire `Ioo (-T) T`** (the upgrade from R.D.1's
-  `IsMIntegralCurveAt … 0`). -/
 theorem exists_chartFlowOrbitLift_isMIntegralCurveOn_Ioo_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

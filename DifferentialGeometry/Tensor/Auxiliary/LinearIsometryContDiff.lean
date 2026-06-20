@@ -7,8 +7,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Analysis.Normed.Module.Alternating.Basic
 import Mathlib.RingTheory.Finiteness.Defs
 
-/-! # A linear isometry into a finite-dimensional space is a `C^n` embedding -/
-
 section LinearIsometry
 
 variable {𝕜 E F G : Type*} [NontriviallyNormedField 𝕜]
@@ -17,8 +15,6 @@ variable {𝕜 E F G : Type*} [NontriviallyNormedField 𝕜]
     [NormedSpace 𝕜 E] [NormedSpace 𝕜 F] [NormedSpace 𝕜 G]
     [Module.Finite 𝕜 F]
 
-/-- A linear isometry `L : E →ₗᵢ[𝕜] F` (into a finite-dimensional space) is a smooth embedding:
-`f : G → E` is `C^n` iff `L ∘ f` is `C^n`. -/
 theorem LinearIsometry.comp_contDiff_iff {L : E →ₗᵢ[𝕜] F} {f : G → E} {n : WithTop ℕ∞} :
     ContDiff 𝕜 n (L ∘ f) ↔ ContDiff 𝕜 n f := by
   have hL : LinearMap.ker L.toLinearMap = ⊥ := LinearMap.ker_eq_bot_of_injective L.injective

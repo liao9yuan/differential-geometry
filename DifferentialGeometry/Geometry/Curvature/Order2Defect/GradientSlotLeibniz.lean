@@ -2,75 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameCurvatureCore
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrozenFrameTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
 
-/-!
-# The gradient-slot Leibniz intertwining: the outer covariant gradient through the frozen frame
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real inner-product space `E`, and
-a smooth compactly-supported `(0, 2)`-tensor field `T₀`, the canonical order-`2` covariant Gårding
-commutator defect is the `(0, 3)`-tensor field
-```
-covGradRoughLapCurv g T₀ = Δ_∇(∇T₀) − ∇(Δ_∇ T₀)
-```
-(`CovGradRoughLap/CurvatureDefect.lean`); its pointwise intrinsic fibre-norm bound is the sole
-remaining ingredient for the unconditional order-`2` covariant Gårding estimate, assembled by the
-endpoint bridge `hpt_to_unconditional_bound` (`MetricTraceFrame.lean`).
-
-The rough Laplacian `Δ_∇ T = rawTensorConnLap g r s T` traces the second covariant derivative
-against the *moving* `g_y`-orthonormal frame `Cʸᵢ := smoothOrthoFrame g y i`. Differentiating the
-section `y ↦ Δ_∇ T(y)` along an outer direction therefore *appears* to differentiate the moving
-frame, whose derivative is genuinely unbounded on multi-chart manifolds. The escape — the
-gradient-slot Leibniz intertwining of this file — is to read `Δ_∇ T` near `x` as the *fixed-frame*
-diagonal trace `frozenFrameTrace g r s T x ·` against the `x`-centred frame `Bᵢ := smoothOrthoFrame
-g x i`, which is `g_y`-orthonormal at *every* `y` in the orthonormality neighbourhood
-(`smoothOrthoFrame_orthonormal`). The two sections agree near `x` (`FrameCurvatureCore.lean`),
-so the outer covariant gradient of `Δ_∇ T` equals the outer covariant gradient of the
-fixed-frame trace; and the fixed-frame trace is a *finite sum* of smooth sections over a *fixed*
-frame, so the gradient passes through the sum with no moving-frame derivative.
-
-## What this file establishes
-
-* `tensorSecondCovDeriv_section_contMDiff` — total-space smoothness of the per-summand section
-  `y ↦ ∇²_{Bᵢ, Bᵢ} T (y) = tensorSecondCovDeriv g r s Bᵢ Bᵢ T y` for a smooth frame field `Bᵢ` and
-  a smooth `(r, s)`-tensor section `T`. The section is the difference of the iterated covariant term
-  `covApply cov Bᵢ (covApply cov Bᵢ T)` and the Christoffel-correction term
-  `covApply cov (∇_{Bᵢ} Bᵢ) T`, both smooth by `covApplyRS_contMDiff`.
-
-* `frozenFrameTrace_section_contMDiff` — total-space smoothness of the frame-frozen diagonal trace
-  `y ↦ frozenFrameTrace g r s T x y` (a finite sum of the per-summand sections).
-
-* `covDeriv_frozenFrameTrace_eq_sum` — **the gradient-slot Leibniz intertwining (covariant-additivity
-  form).** The directional `(r, s)`-tensor covariant derivative of the frame-frozen diagonal trace
-  passes through the *fixed* frame sum:
-  ```
-  ∇_v (frozenFrameTrace g r s T x ·) (x) = ∑ᵢ ∇_v (y ↦ ∇²_{Bᵢ, Bᵢ} T y) (x).
-  ```
-  This is the genuine moving-frame discharge: the frame `Bᵢ` is fixed, so the covariant derivative
-  is additive over the finite frame sum (`IsCovariantDerivativeOn.add`, iterated by `Finset`
-  induction).
-
-* `covDeriv_rawConnLap_eq_frozenFrameTrace_sum` — **the headline gradient-slot Leibniz commutation.**
-  Combining the frame-independence bridge `rawTensorConnLap_eventuallyEq_frozenFrameTrace` (the two
-  sections agree near `x`) with the covariant-additivity form, the directional covariant derivative
-  of the rough Laplacian `Δ_∇ T` equals the fixed-frame sum of the covariant derivatives of the
-  per-summand second covariant derivatives:
-  ```
-  ∇_v (Δ_∇ T) (x) = ∑ᵢ ∇_v (y ↦ ∇²_{Bᵢ, Bᵢ} T y) (x).
-  ```
-  This is the tensor analogue of `cotangentCov_metricDuality` on the gradient slot: the outer
-  covariant derivative passes through the (frame-frozen) intrinsic metric trace, leaving the
-  curvature reordering of the three covariant slots as the sole remaining content — controlled by
-  the off-diagonal Ricci identity `secondCovDeriv_gradTensor_antisymm_eq_riemannOp` and the
-  frame-summed curvature fibre bound `frame_offDiag_curvature_sum_fiberNormSq_le`.
-
-## Sign / convention
-
-Geometer convention `Δ_∇ = ∑ᵢ ∇²_{Bᵢ, Bᵢ}` for the rough Laplacian. The covariant gradient
-`covGrad g 0 s` raises the tensor rank from `(0, s)` to `(0, s + 1)`, currying the new
-tangent-direction slot as the leftmost (gradient) covariant slot. All fibre norms are the intrinsic
-Riemannian fibre norm `riemannianFiberNormSq` — never a model-space norm or chart operator norm,
-which are genuinely unbounded on multi-chart manifolds.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -106,9 +37,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Smoothness of the iterated directional covariant derivative `∇_{Bᵢ} ∇_{Bᵢ} T`.** For a smooth
-tangent field `B` and smooth `(r, s)`-tensor section `T`, the twice-directionally-derived section
-`y ↦ cov.toFun (covApply cov B T) y (B y)` (`= covApply cov B (covApply cov B T)`) is smooth. -/
 theorem covApply_covApply_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -126,10 +54,6 @@ theorem covApply_covApply_section_contMDiff
   have hOuter := covApplyRS_contMDiff (I := I) g r s hInner hB
   exact hOuter
 
-/-- **Smoothness of the Christoffel-correction section `∇_{(∇_{Bᵢ} Bᵢ)} T`.** For a smooth tangent
-field `B` and smooth `(r, s)`-tensor section `T`, the correction section
-`y ↦ cov.toFun T y ((LeviCivita g).toFun B y (B y))` (`= covApply cov (∇_B B) T`, with
-`∇_B B := covApply (LeviCivita g) B B` a smooth tangent field) is smooth. -/
 theorem covApply_christoffel_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -153,11 +77,6 @@ theorem covApply_christoffel_section_contMDiff
     exact hOn.contMDiffAt (Filter.univ_mem)
   exact covApplyRS_contMDiff (I := I) g r s hT hChristoffel
 
-/-- **Total-space smoothness of the per-summand second covariant derivative section.** For a smooth
-tangent field `B` and a smooth `(r, s)`-tensor section `T`, the per-summand section
-`y ↦ ∇²_{B, B} T (y) = tensorSecondCovDeriv g r s B B T y` is smooth. It is the difference of the
-iterated covariant section `covApply cov B (covApply cov B T)` and the Christoffel-correction
-section `covApply cov (∇_B B) T`. -/
 theorem tensorSecondCovDeriv_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -186,11 +105,6 @@ theorem tensorSecondCovDeriv_section_contMDiff
   rw [hpt]
   exact hSub
 
-/-- **Total-space smoothness of the frame-frozen diagonal trace.** For a smooth `(r, s)`-tensor
-section `T`, the frame-frozen diagonal trace `y ↦ frozenFrameTrace g r s T x y =
-∑ᵢ ∇²_{Bᵢ, Bᵢ} T (y)` over the fixed `x`-centred smooth orthonormal frame `Bᵢ := smoothOrthoFrame
-g x i` is smooth. It is a finite sum of the per-summand sections, each smooth by
-`tensorSecondCovDeriv_section_contMDiff`. -/
 theorem frozenFrameTrace_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -228,14 +142,6 @@ theorem frozenFrameTrace_section_contMDiff
   rw [hpt]
   exact hsum
 
-/-- **The covariant derivative distributes over a finite sum of differentiable sections.** For the
-bundled `(r, s)`-tensor covariant derivative `cov := tensorCov g r s` and a family `σ i` of sections,
-each differentiable at `x` in the total-space sense,
-```
-cov.toFun (∑ᵢ∈t, σ i) x = ∑ᵢ∈t, cov.toFun (σ i) x.
-```
-This is `IsCovariantDerivativeOn.add` iterated by `Finset` induction; `MDifferentiableAt.sum_section`
-supplies differentiability of the running partial sums. -/
 theorem tensorCov_toFun_finset_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {ι : Type*} (t : Finset ι) (σ : ι → Π b : M, TensorRSSpace r s I b) {x : M}
@@ -270,16 +176,6 @@ theorem tensorCov_toFun_finset_sum
     rw [hsection, hadd, Finset.sum_insert ha]
     rw [ih]
 
-/-- **The gradient-slot Leibniz intertwining (covariant-additivity form).** The directional
-`(r, s)`-tensor covariant derivative of the frame-frozen diagonal trace passes through the *fixed*
-`x`-centred frame sum: with `Bᵢ := smoothOrthoFrame g x i`,
-```
-∇_v (frozenFrameTrace g r s T x ·) (x) = ∑ᵢ ∇_v (y ↦ ∇²_{Bᵢ, Bᵢ} T y) (x).
-```
-The proof distributes `cov.toFun` over the finite frame sum via `tensorCov_toFun_finset_sum`, using
-the per-summand smoothness `tensorSecondCovDeriv_section_contMDiff`. Because the frame is fixed, *no*
-moving-frame derivative appears — this is the discharge of the moving-frame obstruction in the
-metric-trace route. -/
 theorem covDeriv_frozenFrameTrace_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -313,20 +209,6 @@ theorem covDeriv_frozenFrameTrace_eq_sum
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y) hσ]
   rw [ContinuousLinearMap.sum_apply]
 
-/-- **The gradient-slot Leibniz commutation.** The directional `(r, s)`-tensor covariant derivative
-of the rough Laplacian `Δ_∇ T` at `x` equals the fixed-frame sum of the covariant derivatives of the
-per-summand second covariant derivatives: with `Bᵢ := smoothOrthoFrame g x i`,
-```
-∇_v (Δ_∇ T) (x) = ∑ᵢ ∇_v (y ↦ ∇²_{Bᵢ, Bᵢ} T y) (x).
-```
-The proof transports the outer covariant derivative from the rough Laplacian section onto the
-frame-frozen trace by `tensorRSCovariantDerivative_congr_of_eventuallyEq` (the two sections are
-`EventuallyEq` at `x`, `rawTensorConnLap_eventuallyEq_frozenFrameTrace`), then distributes through
-the fixed frame sum by `covDeriv_frozenFrameTrace_eq_sum`. This is the tensor analogue of
-`cotangentCov_metricDuality` on the covariant-gradient slot: the outer covariant derivative passes
-through the (frame-frozen) intrinsic metric trace, with *no* moving-frame derivative. The remaining
-content — the difference between `∑ᵢ ∇_v ∇²_{Bᵢ, Bᵢ} T` and `∑ᵢ ∇²_{Bᵢ, Bᵢ} ∇_v T` — is the
-curvature reordering of the three covariant slots, governed by the off-diagonal Ricci identity. -/
 theorem covDeriv_rawConnLap_eq_frozenFrameTrace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -363,12 +245,6 @@ theorem covDeriv_rawConnLap_eq_frozenFrameTrace_sum
   rw [hcongr]
   exact covDeriv_frozenFrameTrace_eq_sum (I := I) g r s hT x v
 
-/-- **The directional covariant derivative of `Δ_∇ T` as a sum of continuous-linear maps.** The
-continuous-linear map `v ↦ ∇_v (Δ_∇ T) (x)` (the directional covariant derivative of the rough
-Laplacian, read as a map of the direction) equals the fixed-frame sum of the per-summand directional
-maps `v ↦ ∇_v (∇²_{Bᵢ, Bᵢ} T) (x)`. This is the continuous-linear-map upgrade of
-`covDeriv_rawConnLap_eq_frozenFrameTrace_sum` (which gives the equality of values for each `v`),
-obtained by `ContinuousLinearMap.ext`. -/
 theorem covDerivMap_rawConnLap_eq_frozenFrameTrace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -386,21 +262,6 @@ theorem covDerivMap_rawConnLap_eq_frozenFrameTrace_sum
   rw [ContinuousLinearMap.sum_apply]
   exact covDeriv_rawConnLap_eq_frozenFrameTrace_sum (I := I) g r s hT x v
 
-/-- **The covariant gradient of the rough Laplacian as a frame sum of per-summand gradients.** The
-covariant gradient `∇(Δ_∇ T)` of the rough Laplacian, at `x`, equals the fixed-frame sum of the
-covariant gradients of the per-summand second covariant derivatives. Each is the fibrewise
-covariant-gradient bundle equivalence `covGradBundleEquiv r s x` applied to the corresponding
-directional-covariant-derivative continuous-linear map:
-```
-covGradBundleEquiv r s x (∇·(Δ_∇ T)(x))
-  = ∑ᵢ covGradBundleEquiv r s x (∇·(∇²_{Bᵢ, Bᵢ} T)(x)).
-```
-The right-hand side is, fibrewise, exactly `∇(∇²_{Bᵢ, Bᵢ} T)(x)` (the `(0, s + 1)`-tensor covariant
-gradient of the per-summand section). The proof rewrites the directional map as the frame sum
-(`covDerivMap_rawConnLap_eq_frozenFrameTrace_sum`) and pushes the *linear* equivalence
-`covGradBundleEquiv` through the finite sum (`map_sum`). This exhibits the covariant gradient of the
-rough Laplacian as a fixed-frame sum, with no moving-frame derivative — the gradient-slot Leibniz
-intertwining in `(0, s + 1)`-tensor form. -/
 theorem covGradBundleEquiv_covDeriv_rawConnLap_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -419,18 +280,6 @@ theorem covGradBundleEquiv_covDeriv_rawConnLap_eq_sum
   rw [covDerivMap_rawConnLap_eq_frozenFrameTrace_sum (I := I) g r s hT x]
   exact map_sum (covGradBundleEquiv (I := I) (M := M) r s x) _ _
 
-/-- **The gradient piece of the defect as a fixed-frame sum of per-summand covariant gradients.** The
-covariant gradient `∇(Δ_∇ T₀)` of the rough Laplacian (the section of `covGrad g 0 2 (Δ_∇ T₀)`)
-equals, at `x`, the fixed-frame sum of the covariant gradients of the per-summand second covariant
-derivatives:
-```
-(covGrad g 0 2 (Δ_∇ T₀)).toSection x
-  = ∑ᵢ covGradBundleEquiv 0 2 x (∇·(∇²_{Bᵢ, Bᵢ} T₀)(x)),
-```
-where each summand is the `(0, 3)`-tensor covariant gradient of the per-summand section
-`y ↦ ∇²_{Bᵢ, Bᵢ} T₀ (y)` (the fibrewise `covGradBundleEquiv` applied to its directional covariant
-derivative). This is `covGradBundleEquiv_covDeriv_rawConnLap_eq_sum` at `r = 0`, `s = 2`, `T = T₀`,
-read through `covGrad_toSection_apply` and `rawTensorConnLapSmooth_toSection_apply`. -/
 theorem covGrad_rawConnLap_toSection_eq_frame_sum
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     (covGrad (I := I) (M := M) g 0 2
@@ -452,22 +301,6 @@ theorem covGrad_rawConnLap_toSection_eq_frame_sum
     funext y; rw [rawTensorConnLapSmooth_toSection_apply]]
   exact covGradBundleEquiv_covDeriv_rawConnLap_eq_sum (I := I) g 0 2 hT x
 
-/-- **The canonical defect as a fixed-frame sum of per-summand third-order differences.** The
-underlying section value of the canonical order-`2` commutator defect at `x` is the fixed-frame sum
-```
-(covGradRoughLapCurv g T₀).toSection x
-  = ∑ᵢ [ ∇²_{Bᵢ, Bᵢ}(∇T₀)(x) − covGradBundleEquiv 0 2 x (∇·(∇²_{Bᵢ, Bᵢ} T₀)(x)) ],
-```
-with `Bᵢ := smoothOrthoFrame g x i`. The first per-summand term is the rank-`(0, 3)` second covariant
-derivative of the gradient tensor `∇T₀` (whose leftmost/gradient slot is differentiated by the
-`(0, 3)`-bundle connection); the second is the `(0, 3)`-tensor covariant gradient of the per-summand
-`(0, 2)` second covariant derivative `∇²_{Bᵢ, Bᵢ} T₀`. Their difference is the *gradient-slot*
-reordering of the three covariant derivative slots — the genuine off-diagonal Riemann curvature. The
-proof splits the defect by `covGradRoughLapCurv_toSection_eq_sub`, reads the rough-Laplacian piece by
-`rawTensorConnLap_gradTensor_toSection_eq_frame_trace`, and the gradient piece by
-`covGrad_rawConnLap_toSection_eq_frame_sum`, then combines the two frame sums via
-`Finset.sum_sub_distrib`. No moving-frame derivative survives: this is the gradient-slot Leibniz
-intertwining in defect form, the curvature-free reduction the metric-trace route delivers. -/
 theorem covGradRoughLapCurv_toSection_eq_frame_sum
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     (covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x =

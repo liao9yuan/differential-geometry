@@ -3,58 +3,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovaria
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 
-/-!
-# The two-free-slot curvature operator Hom-field
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this file constructs the
-**two-free-slot curvature operator Hom-field** `Θ s : Hom(T^{(0,s)}, T^{(0,s+2)})`: the fixed smooth
-second-order Hom-bundle field whose full Hom-bundle action `appFullSec (Θ s) S` on a smooth
-compactly-supported `(0, s)`-tensor `S` evaluates, in the two leading free slots `(u, w)`, to *minus*
-the slot-wise curvature sum
-
-```
-(Θ s · S)(x)(u, w, m₁, …, m_s) = − ∑ₖ S(x)(m₁, …, R_x(u, w) m_k, …, m_s),
-```
-
-the derivation action of the tangent-bundle Riemann curvature `R = riemannOp (LeviCivita g)` across
-the `s` covariant slots of `S`, with the two curvature directions `(u, w)` re-exposed as the two new
-leading covariant slots.  This is exactly the value of the curvature operator of the induced
-`(0, s)`-tensor connection, packaged frame-free as a *fixed* smooth Hom-bundle field, so that the
-operator-field covariant calculus (`covGrad_appFullSec_eq`) and the uniform fibre contraction
-envelope (`exists_uniform_riemannianFiberNormSq_appFullRS_le`) apply to it `S`- and `x`-uniformly.
-
-## Construction
-
-Everything is assembled from two elementary fibre operators and their base-point smoothness:
-
-* `slotInsertEndoFib s k x Λ` — the **slot-`k` insertion endomorphism** of the `(0, s)`-tensor
-  fibre: precompose the `k`-th covariant slot with a fixed tangent endomorphism `Λ`,
-  `A ↦ A(…, Λ(·_k), …)`, realised through `ContinuousMultilinearMap.compContinuousLinearMap` with
-  the identity in every other slot.  Its smoothness in the base point (for a smooth endomorphism
-  field `Λ = φ x`) is proved by induction on `s` through the two leading-slot conjugation
-  identities: at slot `0` it is the curry conjugation of right-composition by `φ x`
-  (`tensor0S_curry`), and at slot `k + 1` it is the slot extension (`slotExtendFib`) of the slot-`k`
-  insertion one rank below.
-* `slotCurvSumFib g s x u w` — minus the sum over `k` of the slot-`k` insertions of the curvature
-  endomorphism `R_x(u, w)`; bilinear in `(u, w)` because `riemannOp` is.
-* `slotFreeCurvOpFib g s x` — the fibre operator `T^{(0,s)}_x →L T^{(0,s+2)}_x`: the double
-  leading-slot uncurry (`tensor0S_curry.symm`, twice) of `(u, w) ↦ slotCurvSumFib g s x u w A`.
-* `slotFreeCurvHomField g s` — the Hom-bundle field `Θ s`, post-composition by
-  `slotFreeCurvOpFib g s x` on the `(0, s)`-tensor fibre, packaged as a smooth section of the
-  second-order Hom-bundle `Hom(T^{(0,s)}, T^{(0,s+2)})`.
-
-## Main result
-
-* `exists_slotFreeCurvOpField_baseSlot_eval` — the existence form consumed by the bracket-channel
-  fibre-order line: a Hom-field family `Θ` such that for every rank `s`, tensor `S`, point `x` and
-  tangent data `(u, w, m)`,
-  `(appFullSec (Θ s) S)(x)(unit)(u, w, m) = − ∑ₖ S(x)(unit)(m with slot k hit by R_x(u, w))`.
-
-The construction is frame-free: only the smooth metric `g` and the bundled Levi-Civita curvature
-operator `riemannOp (LeviCivita g)` (smooth by `riemannOp_section_contMDiff`) enter; no orthonormal
-frame, chart selection, or per-direction extension jet appears in the field.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -82,9 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- Two `(0, s)`-tensor fibre elements agreeing on every model tuple under
-`Tensor0SSpace.toModel` are equal: the model identification is a continuous linear equivalence,
-hence injective, and continuous multilinear maps are determined by their values. -/
+
 private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' := by
   have hM : Tensor0SSpace.toModel T = Tensor0SSpace.toModel T' :=
@@ -92,7 +38,7 @@ private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace 
   exact Tensor0SSpace.toModel_injective hM
 
 set_option linter.unusedSectionVars false in
-/-- `Tensor0SSpace.toModel` commutes with finite sums. -/
+
 private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace s I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) = ∑ i ∈ t, Tensor0SSpace.toModel (f i) := by
@@ -102,14 +48,8 @@ private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι
   | insert a t ha ih =>
       rw [Finset.sum_insert ha, Finset.sum_insert ha, Tensor0SSpace.toModel_add, ih]
 
-/-! ## The slot-`k` insertion endomorphism of the `(0, s)`-tensor fibre -/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- **The slot-`k` insertion endomorphism.** For a fixed tangent endomorphism
-`Λ : T_x M →L T_x M`, the continuous linear endomorphism of the `(0, s)`-tensor fibre that
-precomposes the `k`-th covariant slot with `Λ` and leaves every other slot untouched:
-`A ↦ A(m₁, …, Λ m_k, …, m_s)`.  Realised through the model identification and
-`ContinuousMultilinearMap.compContinuousLinearMap` with the slot family `(id, …, Λ, …, id)`. -/
+
 def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace s I x :=
@@ -129,7 +69,7 @@ def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The defining formula for `slotInsertEndoFib`. -/
+
 @[simp] lemma slotInsertEndoFib_apply (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace s I x) :
     slotInsertEndoFib (I := I) (M := M) s k x Λ A =
@@ -141,8 +81,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **The slot-`k` insertion reads its slot through `Λ`:** on a tuple `m` the inserted tensor is
-the original tensor on the tuple with the `k`-th entry replaced by `Λ (m k)`. -/
+
 lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace s I x)
     (m : Fin s → E) :
@@ -162,7 +101,7 @@ lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-`k` insertion is additive in the inserted endomorphism. -/
+
 lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
     (Λ₁ Λ₂ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) s k x (Λ₁ + Λ₂) =
@@ -180,7 +119,7 @@ lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-`k` insertion is `ℝ`-homogeneous in the inserted endomorphism. -/
+
 lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) s k x (c • Λ) =
@@ -194,15 +133,9 @@ lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
     ContinuousMultilinearMap.smul_apply, slotInsertEndoFib_apply_eval,
     ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.map_update_smul]
 
-/-! ## The two leading-slot conjugation identities
-
-The slot-`0` insertion is the curry conjugation of right-composition by `Λ`; the slot-`(k + 1)`
-insertion is the slot extension (`slotExtendFib`) of the slot-`k` insertion one rank below.  These
-two identities drive the base-point smoothness induction. -/
-
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Slot-`0` insertion is the curry conjugation of right-composition.** -/
+
 lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace (s + 1) I x) :
     slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x Λ A =
@@ -223,7 +156,7 @@ lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Slot-`(k + 1)` insertion is the slot extension of the slot-`k` insertion.** -/
+
 lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) (s + 1) j.succ x Λ =
@@ -247,17 +180,9 @@ lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin
   rw [slotExtendFib_apply (I := I) (M := M) g s s x, ← hcurry,
     ContinuousLinearEquiv.symm_apply_apply]
 
-/-! ## Base-point smoothness of the slot-insertion operator field -/
-
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Base-point smoothness of the slot-insertion operator field.** For a smooth tangent
-endomorphism field `φ`, the fibre field `x ↦ slotInsertEndoFib s k x (φ x)` is a smooth section of
-the `(s, s)`-tensor (operator) bundle.  Induction on `s`: at slot `0` the insertion is the curry
-conjugation of right-composition by `φ x` (`slotInsertEndoFib_zero`), smooth by the curried-section
-transfer and `ContMDiff.clm_bundle_apply`; at slot `k + 1` it is the slot extension of the slot-`k`
-insertion one rank below (`slotInsertEndoFib_succ`), smooth by `slotExtendFib_contMDiff` over the
-inductive hypothesis. -/
+
 theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
     ∀ (s : ℕ) (k : Fin s) (φ : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x),
       ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
@@ -337,13 +262,8 @@ theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
             slotInsertEndoFib_succ (I := I) (M := M) g s j x (φ x)]
           rfl
 
-/-! ## The bracket slot-sum fibre operator and its bilinearity -/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- **The two-direction curvature slot-sum fibre operator.** For tangent vectors `u, w` at `x`,
-minus the sum over the `s` covariant slots of the slot-`k` insertion of the curvature endomorphism
-`R_x(u, w) = riemannOp (LeviCivita g) x u w`:
-`A ↦ − ∑ₖ A(…, R_x(u, w)(·_k), …)`. -/
+
 def slotCurvSumFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w : TangentSpace I x) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace s I x :=
@@ -352,7 +272,7 @@ def slotCurvSumFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **The slot-sum operator evaluates to minus the slot-wise curvature sum.** -/
+
 lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w : TangentSpace I x) (A : Tensor0SSpace s I x) (m : Fin s → E) :
     Tensor0SSpace.toModel (slotCurvSumFib (I := I) (M := M) g s x u w A) m =
@@ -368,7 +288,7 @@ lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-sum operator is additive in the first curvature direction. -/
+
 lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u u' w : TangentSpace I x) :
     slotCurvSumFib (I := I) (M := M) g s x (u + u') w =
@@ -387,7 +307,7 @@ lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-sum operator is `ℝ`-homogeneous in the first curvature direction. -/
+
 lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
     (u w : TangentSpace I x) :
     slotCurvSumFib (I := I) (M := M) g s x (c • u) w =
@@ -403,7 +323,7 @@ lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-sum operator is additive in the second curvature direction. -/
+
 lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w w' : TangentSpace I x) :
     slotCurvSumFib (I := I) (M := M) g s x u (w + w') =
@@ -422,7 +342,7 @@ lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The slot-sum operator is `ℝ`-homogeneous in the second curvature direction. -/
+
 lemma slotCurvSumFib_smul_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
     (u w : TangentSpace I x) :
     slotCurvSumFib (I := I) (M := M) g s x u (c • w) =
@@ -436,11 +356,8 @@ lemma slotCurvSumFib_smul_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
       (riemannOp (LeviCivita (I := I) g) x u w)]
   rw [← Finset.smul_sum, ← smul_neg]
 
-/-! ## The two-free-slot curvature operator fibre CLM -/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- The inner (second-direction) continuous linear layer: for fixed `A` and `u`, the map
-`w ↦ slotCurvSumFib g s x u w A`. -/
+
 def slotFreeCurvWCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u : TangentSpace I x) :
     TangentSpace I x →L[ℝ] Tensor0SSpace s I x :=
@@ -458,7 +375,7 @@ def slotFreeCurvWCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The defining formula for `slotFreeCurvWCLM`. -/
+
 @[simp] lemma slotFreeCurvWCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u w : TangentSpace I x) :
     slotFreeCurvWCLM (I := I) (M := M) g s x A u w =
@@ -467,8 +384,7 @@ set_option backward.isDefEq.respectTransparency false in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The middle (first-direction) continuous linear layer: for fixed `A`, the map
-`u ↦ (tensor0S_curry s x).symm (slotFreeCurvWCLM g s x A u)`, valued in `(0, s + 1)`-tensors. -/
+
 def slotFreeCurvUCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) :
     TangentSpace I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
@@ -500,7 +416,7 @@ def slotFreeCurvUCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The defining formula for `slotFreeCurvUCLM`. -/
+
 @[simp] lemma slotFreeCurvUCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u : TangentSpace I x) :
     slotFreeCurvUCLM (I := I) (M := M) g s x A u =
@@ -510,10 +426,7 @@ set_option backward.isDefEq.respectTransparency false in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **The two-free-slot curvature operator fibre CLM.** The continuous linear map
-`T^{(0,s)}_x →L T^{(0,s+2)}_x` sending `A` to the double leading-slot uncurry of the bilinear
-slot-sum `(u, w) ↦ slotCurvSumFib g s x u w A`: the `(0, s + 2)`-tensor reading
-`(u, w, m) ↦ − ∑ₖ A(m with slot k hit by R_x(u, w))`. -/
+
 def slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
@@ -556,7 +469,7 @@ def slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The defining formula for `slotFreeCurvOpFib`. -/
+
 @[simp] lemma slotFreeCurvOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) :
     slotFreeCurvOpFib (I := I) (M := M) g s x A =
@@ -567,9 +480,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **The two-free-slot curvature operator reads its two leading slots as the curvature
-directions:** on a tuple `Fin.cons u (Fin.cons w m)`, the value is minus the sum over the `s`
-trailing slots of `A` evaluated with slot `k` hit by `R_x(u, w)`. -/
+
 lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u w : TangentSpace I x) (m : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel (slotFreeCurvOpFib (I := I) (M := M) g s x A)
@@ -589,18 +500,9 @@ lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x
   rw [ContinuousLinearEquiv.apply_symm_apply, slotFreeCurvWCLM_apply]
   exact slotCurvSumFib_apply_eval (I := I) (M := M) g s x u w A m
 
-/-! ## Base-point smoothness of the two-free-slot curvature operator field -/
-
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Base-point smoothness of the two-free-slot curvature operator field.** The fibre field
-`x ↦ slotFreeCurvOpFib g s x` is a smooth section of the `(s, s + 2)`-tensor (operator) bundle.
-By `contMDiff_clm_section_of_pointwise` it suffices that for every smooth `(0, s)`-tensor `Y` the
-value section `x ↦ slotFreeCurvOpFib g s x (Y x)` is smooth; that value is the double uncurry
-(`contMDiff_uncurriedSection_of_contMDiff_homSection`, twice) of the per-direction slot-sum
-`x ↦ slotCurvSumFib g s x (U x) (W x) (Y x)`, which is the negated finite sum of the slot-insertion
-fields (`slotInsertEndoFib_contMDiff`) applied to `Y` along the smooth curvature endomorphism field
-`x ↦ R_x(U x, W x)` (`riemannOp_section_contMDiff`, two `ContMDiff.clm_bundle_apply`). -/
+
 theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel s (s + 2) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel s (s + 2) ℝ E)
@@ -694,12 +596,8 @@ theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
   exact contMDiff_uncurriedSection_of_contMDiff_homSection (I := I) (M := M)
     (fun x : M => slotFreeCurvUCLM (I := I) (M := M) g s x (Y x)) hU
 
-/-! ## The two-free-slot curvature operator Hom-field -/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- **The two-free-slot curvature operator Hom-fibre.** The fibre value of the Hom-field `Θ s` at
-`x`: post-composition of an `(0, s)`-tensor (read as the map `T^{(0,0)} →L T^{(0,s)}`) by the
-two-free-slot curvature operator fibre CLM `slotFreeCurvOpFib g s x`. -/
+
 def slotFreeCurvHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x :=
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 s I x) :=
@@ -722,7 +620,7 @@ def slotFreeCurvHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The defining formula for `slotFreeCurvHomFib`. -/
+
 @[simp] lemma slotFreeCurvHomFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 s I x) :
     slotFreeCurvHomFib (I := I) (M := M) g s x T =
@@ -737,10 +635,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Base-point smoothness of the two-free-slot curvature operator Hom-fibre field.** Reduced by
-the pointwise criterion (twice) to the evaluation
-`x ↦ slotFreeCurvOpFib g s x ((Z x) (ζ x))`, two `ContMDiff.clm_bundle_apply` over the smooth
-operator field `slotFreeCurvOpFib_contMDiff`. -/
+
 theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E →L[ℝ] TensorRSModel 0 (s + 2) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E →L[ℝ] TensorRSModel 0 (s + 2) ℝ E)
@@ -779,9 +674,7 @@ theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) 
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **The two-free-slot curvature operator Hom-field `Θ s`**, as a smooth section of the
-second-order Hom-bundle `Hom(T^{(0,s)}, T^{(0,s+2)})`.  Its fibre value at `x` is post-composition
-by the two-free-slot curvature operator fibre CLM `slotFreeCurvOpFib g s x`. -/
+
 def slotFreeCurvHomField (g : SmoothRiemannianMetric I M) (s : ℕ) :
     HomTensorRSField (E := E) (M := M) 0 s (s + 2) I where
   toFun := fun x : M => slotFreeCurvHomFib (I := I) (M := M) g s x
@@ -789,30 +682,15 @@ def slotFreeCurvHomField (g : SmoothRiemannianMetric I M) (s : ℕ) :
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The fibre value of `slotFreeCurvHomField g s` at `x` is `slotFreeCurvHomFib g s x`.
-Definitional. -/
+
 @[simp] lemma slotFreeCurvHomField_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (show TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x from
         slotFreeCurvHomField (I := I) (M := M) g s x) =
       slotFreeCurvHomFib (I := I) (M := M) g s x := rfl
 
-/-! ## The existence form consumed by the bracket-channel fibre-order line -/
-
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **The two-free-slot curvature operator Hom-field and its base-slot evaluation.** There is a
-family of fixed smooth Hom-bundle fields `Θ s : Hom(T^{(0,s)}, T^{(0,s+2)})` whose full Hom-bundle
-action on a smooth compactly-supported `(0, s)`-tensor `S` evaluates, in the two leading free slots
-`(u, w)`, to *minus* the slot-wise curvature sum:
 
-```
-(appFullSec (Θ s) S)(x)(unit)(u, w, m) = − ∑ₖ S(x)(unit)(m with slot k hit by R_x(u, w)),
-```
-
-with `R = riemannOp (LeviCivita g)` the bundled Levi-Civita curvature operator.  The witness is
-`slotFreeCurvHomField`: frame-free (built from the smooth curvature operator field alone) and
-smooth, so the operator-field covariant calculus and the uniform fibre contraction envelope apply
-to it `S`- and `x`-uniformly. -/
 theorem exists_slotFreeCurvOpField_baseSlot_eval (g : SmoothRiemannianMetric I M) :
     ∃ Θ : ∀ s : ℕ, HomTensorRSField (E := E) (M := M) 0 s (s + 2) I,
       ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) (u w : TangentSpace I x)

@@ -1,49 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionSmoothApprox
 
-/-!
-# Gradient L² convergence of the smooth approximating Nirenberg sequence
-
-Building on the L² convergence in `SubstitutionDischargeSmoothApprox`, this
-module establishes the corresponding **gradient** L² convergence:
-
-For a smooth approximating sequence `u_seq n → χ · D.u_chart` in `L²` whose
-classical partials `∂_i u_seq n` converge in `L²` to the explicit weak
-partial `(∂_i χ) · D.u_chart + χ · D.weak_partial i`, the classical partial
-`∂_j v_h_n` of the Nirenberg test function `v_h_n := standardNirenbergTest k
-h η (u_seq n)` converges in `L²(cthickening |h| K_0)` to the explicit weak
-partial of the limit `v_h := standardNirenbergTest k h η D.u_chart`,
-namely
-
-  `∂_j v_h := D_{-h}^k(η² · D_h^k(D.weak_partial j) +
-              2η · ∂_j η · D_h^k(D.u_chart))`.
-
-The proof has four conceptual stages.
-
-* **Stage A.** For each smooth `u_seq n`, the classical pointwise expansion
-  `fderiv_nirenbergTestFunction_apply` rewrites
-  `∂_j v_h_n` as `D_{-h}^k(2η · ∂_j η · D_h^k u_seq n + η² · D_h^k ∂_j u_seq n)`.
-* **Stage B.** Subtracting the explicit limit and substituting
-  `D.u_chart ↦ χ · D.u_chart` (with the same trick as the unrestricted
-  convergence: `χ ≡ 1` at every evaluation point hit by `η`), the tail
-  decomposes into two `L²`-vanishing pieces driven by
-  `hu_seq_l2` and `hu_seq_grad_l2`, plus a vanishing residual involving
-  `(∂_j χ) · D.u_chart`.
-* **Stage C.** The `L²` Minkowski bound for `D_h^k` (in tandem with the
-  uniform bound on `η` and `∂_j η`) reduces the two principal pieces to
-  `‖u_seq n − χ · D.u_chart‖_{L²}` and
-  `‖∂_j u_seq n − ((∂_j χ) D.u_chart + χ D.weak_partial j)‖_{L²}`, which
-  vanish by hypothesis.
-* **Stage D.** The residual involving `(∂_j χ) · D.u_chart` vanishes once we
-  use that `∂_j χ = 0` on the support of `η` and on the unit shifts of `K_0`.
-  This is supplied by the additional hypothesis `hχ_dx_zero`.
-
-The hypothesis `hχ_dx_zero` (vanishing of `(fderiv χ)(e_i)` on
-`Metric.cthickening |h| K_0`) is naturally satisfied by the cutoff
-constructed via `exists_chart_target_cutoff`: the construction guarantees
-`χ ≡ 1` on a *neighborhood* of `cthickening |h| K_0`, which forces all
-derivatives of `χ` to vanish on the closed set itself.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -77,10 +33,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For smooth `u`, `(fderiv (standardNirenbergTest k h η u) y)(e_j)` agrees
-with the explicit `D_{-h}^k`-expression. This is just
-`fderiv_nirenbergTestFunction_apply` packaged with the definitional unfolding
-`standardNirenbergTest = nirenbergTestFunction`. -/
 private lemma fderiv_standardNirenbergTest_apply
     {η u : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -110,9 +62,6 @@ private lemma fderiv_standardNirenbergTest_apply
   exact NirenbergTestFunction.fderiv_nirenbergTestFunction_apply
     (d := Module.finrank ℝ E) hη hu k j hh x
 
-/-- The pointwise residue term (χ - 1) · D.u_chart vanishes when multiplied
-by `2η · ∂_j η` after applying `diffQuot k h`, because at every point
-where the η-factor is nonzero we are inside `K_0`, where `χ ≡ 1`. -/
 private lemma diffQuot_chi_sub_one_uChart_vanishes
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -165,10 +114,6 @@ private lemma diffQuot_chi_sub_one_uChart_vanishes
           (χ z - 1) * D.u_chart z) / h) = 0
     rw [h1, h2, sub_zero, zero_div, mul_zero]
 
-/-- The pointwise residue term `(∂_j χ) · D.u_chart + (χ - 1) · D.weak_partial j`
-vanishes when multiplied by `η²` after applying `diffQuot k h`, because at
-every point where the `η²`-factor is nonzero we are inside `K_0`, where
-`χ ≡ 1` and (by the strengthened hypothesis) `∂_j χ ≡ 0`. -/
 private lemma diffQuot_dx_chi_uChart_vanishes
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -242,7 +187,6 @@ private lemma diffQuot_dx_chi_uChart_vanishes
             (χ z - 1) * D.weak_partial j z)) / h) = 0
     rw [h1, h2, sub_zero, zero_div, mul_zero]
 
-/-- Translation invariance of `eLpNorm` on Euclidean space. -/
 private lemma eLpNorm_translate_eq_local
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (F : EuclN → ℝ) :
     eLpNorm (DifferentialGeometry.Analysis.Sobolev.translate
@@ -263,8 +207,6 @@ private lemma eLpNorm_translate_eq_local
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
-/-- L² Minkowski bound for the forward difference quotient on whole space:
-`‖D_h^k F‖_{L²} ≤ (2/|h|) · ‖F‖_{L²}`. -/
 private lemma eLpNorm_diffQuot_le_local
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -328,8 +270,6 @@ private lemma eLpNorm_diffQuot_le_local
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
-/-- L² bound for a uniformly-bounded multiplier times an arbitrary function:
-`‖f · g‖_{L²} ≤ ofReal M · ‖g‖_{L²}` when `|f x| ≤ M` for all x. -/
 private lemma eLpNorm_mul_bounded
     (M : ℝ) (hM_nn : 0 ≤ M) {f g : EuclN → ℝ}
     (hf_bound : ∀ x, |f x| ≤ M) :
@@ -423,24 +363,6 @@ private lemma eLpNorm_mul_bounded
     rw [h_calc, ENNReal.rpow_one]
   rw [h_sqrt_M2]
 
-/-- **Headline gradient L² convergence.** Given a smooth approximating
-sequence `u_seq n → χ · D.u_chart` in `L²` whose classical partials
-`∂_i u_seq n` converge to the explicit weak partial of `χ · D.u_chart`
-namely `(∂_i χ) · D.u_chart + χ · D.weak_partial i`, the classical
-partial of the Nirenberg test function
-
-  `v_h_n := standardNirenbergTest k h η (u_seq n)`
-
-converges in `L²(cthickening |h| K_0)` to the explicit weak partial of the
-limit `v_h := standardNirenbergTest k h η D.u_chart`, namely
-
-  `∂_j v_h := D_{-h}^k(η² · D_h^k(D.weak_partial j)
-                       + 2η · ∂_j η · D_h^k(D.u_chart))`.
-
-The hypothesis `hχ_dx_zero` (vanishing of `(fderiv χ)(e_i)` on
-`Metric.cthickening |h| K_0`) is naturally satisfied by the cutoff
-constructed in `exists_chart_target_cutoff`, where `χ ≡ 1` on a
-*neighborhood* of `cthickening |h| K_0`. -/
 theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

@@ -6,44 +6,6 @@ import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
 import Mathlib.Analysis.Normed.Group.FunctionSeries
 import Mathlib.Analysis.SpecificLimits.Normed
 
-/-!
-# Smoothness of series on a closed set
-
-We prove the within-set (relative to a set `s`) analogues of the whole-space smooth-series
-lemmas `hasFDerivAt_tsum` / `contDiff_tsum` from `Mathlib/Analysis/Calculus/SmoothSeries.lean`.
-Whereas the Mathlib versions conclude `HasFDerivAt` / `ContDiff` (the two-sided, full-derivative
-notions), the versions here conclude `HasFDerivWithinAt` / `ContDiffOn`, so they apply on closed
-sets such as a closed interval `Set.Icc a b`, where the differentiability at the endpoints is the
-*one-sided* (within) one.
-
-The Mathlib uniform-limit-of-derivatives machinery
-(`hasFDerivAt_of_tendstoUniformlyOn`) only covers open sets and only the full Fréchet derivative.
-The within-derivative on a closed set requires a `HasFDerivWithinAt` version, which does not exist
-in Mathlib, so we build it here directly via:
-* the mean value inequality on a convex set
-  (`Convex.norm_image_sub_le_of_norm_hasFDerivWithin_le`),
-* the M-test tail estimate `tendsto_tsum_compl_atTop_zero`, and
-* the difference-quotient characterisation `hasFDerivWithinAt_iff_tendsto`.
-
-The hypotheses are genuinely constraining: the conclusion fails without a summable majorant on the
-*derivative* series. For instance the partial sums of a non-summable derivative series need not
-converge to a differentiable limit at all, so `contDiffOn_tsum` would have no content; the
-summability hypothesis on `u` is what makes the within-derivative the termwise sum.
-
-## Main statements
-
-* `DifferentialGeometry.Analysis.hasFDerivWithinAt_tsum`: on a convex set, a series of functions
-  with a summable bound on the within-derivatives is differentiable within the set, with
-  within-derivative the sum of the within-derivatives.
-* `DifferentialGeometry.Analysis.contDiffOn_tsum`: on a convex set with unique derivatives,
-  a series of `C^N`-on-`s` functions with per-order summable sup bounds on `s` is `C^N`-on-`s`.
-* `DifferentialGeometry.Analysis.contDiffOn_tsum_Icc`: the `Set.Icc a b` convenience specialization.
-
-As a sanity check, the geometric-type series `t ↦ ∑' n, t ^ n / n !` is `C^∞` on `Set.Icc (0 : ℝ) 1`
-(`DifferentialGeometry.Analysis.contDiffOn_Icc_tsum_pow_div_factorial`), exhibiting the one-sided
-derivatives at the endpoints `0` and `1`.
--/
-
 open Set Filter Topology
 
 namespace DifferentialGeometry
@@ -55,11 +17,6 @@ section FDeriv
 variable {α E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
-/-- On a convex set, the difference of a tail of the series between two points is controlled by the
-tail of the majorant times the distance of the points. This is the non-circular core estimate: the
-bound on the tail of `∑ f i` is obtained from the mean value inequality applied to the *finite*
-sub-partial-sums (whose within-derivatives are genuine finite sums of `f' i`), then passing to the
-limit, so no derivative of the infinite tail is needed. -/
 private theorem tsum_compl_diff_le {f : α → E → F} {f' : α → E → E →L[ℝ] F} {u : α → ℝ}
     {s : Set E} (hf : ∀ (i : α) (z : E), z ∈ s → HasFDerivWithinAt (f i) (f' i z) s z)
     (hf' : ∀ (i : α) (z : E), z ∈ s → ‖f' i z‖ ≤ u i) (hu : Summable u) (hs : Convex ℝ s)
@@ -96,7 +53,6 @@ private theorem tsum_compl_diff_le {f : α → E → F} {f' : α → E → E →
     exact (h1.sub h2).norm
   exact le_of_tendsto hlim (Eventually.of_forall hbound_r)
 
-/-- The norm of the tail of the within-derivative series is bounded by the tail of the majorant. -/
 private theorem norm_tsum_compl_fderiv_le {f' : α → E → E →L[ℝ] F} {u : α → ℝ} {s : Set E}
     {x : E} (hx : x ∈ s) (hf' : ∀ (i : α) (z : E), z ∈ s → ‖f' i z‖ ≤ u i) (hu : Summable u)
     (t : Finset α) :
@@ -113,11 +69,6 @@ private theorem norm_tsum_compl_fderiv_le {f' : α → E → E →L[ℝ] F} {u :
     _ ≤ ∑' i : {i // i ∉ t}, u (i : α) :=
         hsumm.tsum_le_tsum (fun i => hf' (i : α) x hx) (hu.subtype _)
 
-/-- Consider a series of functions `∑' i, f i x` on a convex set. If all functions are
-differentiable within the set with a summable bound on the within-derivatives, and the series
-converges at one point of the set, then it converges at every point of the set. This is the
-within-set analogue of `summable_of_summable_hasFDerivAt_of_isPreconnected`; convexity replaces
-preconnected-open-ness. -/
 theorem summable_of_summable_hasFDerivWithinAt {f : α → E → F} {f' : α → E → E →L[ℝ] F}
     {u : α → ℝ} {s : Set E} (hf : ∀ (i : α) (z : E), z ∈ s → HasFDerivWithinAt (f i) (f' i z) s z)
     (hf' : ∀ (i : α) (z : E), z ∈ s → ‖f' i z‖ ≤ u i) (hu : Summable u) (hs : Convex ℝ s)
@@ -134,12 +85,6 @@ theorem summable_of_summable_hasFDerivWithinAt {f : α → E → F} {f' : α →
   have heq : (fun i => f i y) = fun i => (f i y - f i x₀) + f i x₀ := by ext i; abel
   rw [heq]; exact key.add hf0
 
-/-- Consider a series of functions `∑' i, f i x` on a convex set. If the series converges at one
-point, all functions are differentiable within the set, and there is a summable bound on the
-within-derivatives, then the series has a within-derivative equal to the termwise sum of the
-within-derivatives, at every point of the set.
-
-This is the closed-set / one-sided analogue of `hasFDerivAt_tsum_of_isPreconnected`. -/
 theorem hasFDerivWithinAt_tsum {f : α → E → F} {f' : α → E → E →L[ℝ] F} {u : α → ℝ} {s : Set E}
     (hf : ∀ (i : α) (z : E), z ∈ s → HasFDerivWithinAt (f i) (f' i z) s z)
     (hf' : ∀ (i : α) (z : E), z ∈ s → ‖f' i z‖ ≤ u i) (hu : Summable u) (hs : Convex ℝ s)
@@ -216,7 +161,6 @@ theorem hasFDerivWithinAt_tsum {f : α → E → F} {f' : α → E → E →L[�
           gcongr
       _ = ε := by ring
 
-/-- The within-derivative of the sum is the sum of the within-derivatives, as a function. -/
 theorem fderivWithin_tsum {f : α → E → F} {u : α → ℝ} {s : Set E} (hs : UniqueDiffOn ℝ s)
     (hconv : Convex ℝ s) (hf : ∀ i, DifferentiableOn ℝ (f i) s)
     (hf' : ∀ (i : α) (x : E), x ∈ s → ‖fderivWithin ℝ (f i) s x‖ ≤ u i) (hu : Summable u)
@@ -232,10 +176,6 @@ section ContDiffOn
 variable {α E F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
-/-- Consider a series of `C^N`-on-`s` functions on a convex set with unique derivatives, with
-summable uniform bounds on the successive within-derivatives. Then the iterated within-derivative
-of the sum is the sum of the iterated within-derivatives. This is the closed-set analogue of
-`iteratedFDeriv_tsum`. -/
 theorem iteratedFDerivWithin_tsum {f : α → E → F} {v : ℕ → α → ℝ} {s : Set E} {N : ℕ∞}
     (hs : UniqueDiffOn ℝ s) (hconv : Convex ℝ s) (hf : ∀ i, ContDiffOn ℝ N (f i) s)
     (hv : ∀ k : ℕ, (k : ℕ∞) ≤ N → Summable (v k))
@@ -275,7 +215,6 @@ theorem iteratedFDerivWithin_tsum {f : α → E → F} {v : ℕ → α → ℝ} 
     exact (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (k + 1) => E)
       F).symm.toContinuousLinearEquiv.map_tsum
 
-/-- Pointwise form of `iteratedFDerivWithin_tsum`. -/
 theorem iteratedFDerivWithin_tsum_apply {f : α → E → F} {v : ℕ → α → ℝ} {s : Set E} {N : ℕ∞}
     (hs : UniqueDiffOn ℝ s) (hconv : Convex ℝ s) (hf : ∀ i, ContDiffOn ℝ N (f i) s)
     (hv : ∀ k : ℕ, (k : ℕ∞) ≤ N → Summable (v k))
@@ -286,10 +225,6 @@ theorem iteratedFDerivWithin_tsum_apply {f : α → E → F} {v : ℕ → α →
       = ∑' n, iteratedFDerivWithin ℝ k (f n) s x :=
   iteratedFDerivWithin_tsum hs hconv hf hv h'f hx₀ hk hx
 
-/-- Consider a series of functions `∑' i, f i x` on a convex set with unique derivatives. Assume
-each `f i` is `C^N` on the set, and there is a per-order summable uniform bound on the `k`-th
-within-derivative for each `k ≤ N`. Then the series is `C^N` on the set. This is the closed-set /
-one-sided analogue of `contDiff_tsum`. -/
 theorem contDiffOn_tsum {f : α → E → F} {v : ℕ → α → ℝ} {s : Set E} {N : ℕ∞}
     (hs : UniqueDiffOn ℝ s) (hconv : Convex ℝ s) (hf : ∀ i, ContDiffOn ℝ N (f i) s)
     (hv : ∀ k : ℕ, (k : ℕ∞) ≤ N → Summable (v k))
@@ -322,9 +257,6 @@ end ContDiffOn
 
 section Icc
 
-/-- The closed-interval specialization of `contDiffOn_tsum`: a series of functions that are `C^N`
-on `Set.Icc a b` (with `a < b`), with per-order summable uniform sup bounds on `Icc a b`, is `C^N`
-on `Icc a b`. The within-derivatives at the endpoints `a` and `b` are the one-sided derivatives. -/
 theorem contDiffOn_tsum_Icc {α F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] {f : α → ℝ → F} {v : ℕ → α → ℝ} {a b : ℝ} {N : ℕ∞} (hab : a < b)
     (hf : ∀ i, ContDiffOn ℝ N (f i) (Set.Icc a b))
@@ -336,15 +268,7 @@ theorem contDiffOn_tsum_Icc {α F : Type*} [NormedAddCommGroup F] [NormedSpace �
     (left_mem_Icc.mpr hab.le)
 
 open Nat in
-/-- Sanity check / litmus instantiation of `contDiffOn_tsum_Icc`: the exponential-type power series
-`t ↦ ∑' n, t ^ n / n !` is `C^∞` on the closed interval `Set.Icc 0 1`. The series is differentiated
-to all orders within the interval, exhibiting the one-sided derivatives at the endpoints `0` and `1`.
 
-The per-order majorant `v k n = n.descFactorial k / n !` is summable for every order `k` (it equals
-`1 / (n - k)!`, a shift of `∑ 1 / n !`), and the `k`-th derivative of `t ^ n / n !` on `[0, 1]` is
-bounded by it. This is precisely the data the M-test hypothesis of `contDiffOn_tsum` demands, so the
-hypothesis is genuinely constraining: were the derivative majorants not summable the conclusion would
-fail. -/
 theorem contDiffOn_Icc_tsum_pow_div_factorial :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun t : ℝ => ∑' n : ℕ, t ^ n / n !) (Set.Icc (0 : ℝ) 1) := by
   set v : ℕ → ℕ → ℝ := fun k n => (n.descFactorial k : ℝ) / n ! with hv_def

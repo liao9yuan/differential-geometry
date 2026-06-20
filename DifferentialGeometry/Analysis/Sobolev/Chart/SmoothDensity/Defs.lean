@@ -7,25 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.Completene
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-/-!
-# Chart pullback and per-chart structure for the smooth-density program
-
-For a smooth manifold `M` modelled on an inner-product space `E`, this file
-develops infrastructure used in the smooth-density program for the chart-based
-Sobolev space `W^{k,p}_chart(M)`:
-
-* `chartPullback I α ψ` lifts a function `ψ : EuclN → ℝ` (where `EuclN` is the
-  standard Euclidean space of dimension `finrank ℝ E`) to a function on `M`
-  via the inverse chart, extended by zero outside the chart source. The
-  pullback is linear in `ψ`.
-* `chartPushed_chartPullback_apply_of_mem` establishes the pointwise identity
-  `chartPushed ρ α (chartPullback I α ψ) y = ρ_α(z) · ψ(y)` for every
-  `y ∈ chartTargetEuclid α`, where `z = (extChartAt I α).symm (toEuclidean.symm y)`.
-* Support / compactness lemmas for the partition-of-unity-weighted product
-  `ρ_α · u`, used for the Euclidean approximation hypothesis "the chart-pushed
-  function has compact support strictly inside `chartTargetEuclid α`".
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -47,8 +28,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (I) in
-/-- The chart-α pullback of `ψ : EuclN → ℝ`: it is `ψ ∘ toEuclidean ∘ extChartAt I α`
-on `chart α source`, and `0` elsewhere. -/
+
 def chartPullback (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) : M → ℝ := by
   classical
@@ -58,7 +38,7 @@ def chartPullback (α : M)
     else 0
 
 omit [IsManifold I ∞ M] in
-/-- On `chart α source`, the pullback equals the composition. -/
+
 lemma chartPullback_apply_of_mem (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -68,7 +48,7 @@ lemma chartPullback_apply_of_mem (α : M)
   simp [hx]
 
 omit [IsManifold I ∞ M] in
-/-- Off `chart α source`, the pullback is zero. -/
+
 lemma chartPullback_apply_of_notMem (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
@@ -78,7 +58,7 @@ lemma chartPullback_apply_of_notMem (α : M)
   simp [hx]
 
 omit [IsManifold I ∞ M] in
-/-- The chart pullback is additive. -/
+
 lemma chartPullback_add (α : M)
     (ψ₁ ψ₂ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     chartPullback I α (fun y => ψ₁ y + ψ₂ y) =
@@ -90,7 +70,7 @@ lemma chartPullback_add (α : M)
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α _ hx]
 
 omit [IsManifold I ∞ M] in
-/-- The chart pullback is homogeneous. -/
+
 lemma chartPullback_const_smul (α : M) (c : ℝ)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     chartPullback I α (fun y => c * ψ y) =
@@ -102,7 +82,7 @@ lemma chartPullback_const_smul (α : M) (c : ℝ)
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α _ hx]
 
 omit [IsManifold I ∞ M] in
-/-- The chart pullback of the zero function is zero. -/
+
 lemma chartPullback_zero_fun (α : M) :
     chartPullback I α (fun _ => (0 : ℝ)) = (fun _ : M => (0 : ℝ)) := by
   classical
@@ -112,8 +92,7 @@ lemma chartPullback_zero_fun (α : M) :
   · simp [chartPullback_apply_of_notMem (I := I) (M := M) α (fun _ => (0 : ℝ)) hx]
 
 omit [IsManifold I ∞ M] in
-/-- Off the chart-source, the pullback is identically zero, so its support
-sits inside the chart source. -/
+
 lemma support_chartPullback_subset_chartAt_source (α : M)
     (ψ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     Function.support (chartPullback I α ψ) ⊆ (chartAt H α).source := by
@@ -124,8 +103,7 @@ lemma support_chartPullback_subset_chartAt_source (α : M)
   exact chartPullback_apply_of_notMem (I := I) (M := M) α ψ hx_off
 
 omit [IsManifold I ∞ M] in
-/-- For any `u : M → ℝ`, the (closed) support of `(ρ_α · u : M → ℝ)` is
-contained in the (closed) support of `ρ_α`. -/
+
 lemma tsupport_pou_mul_subset_tsupport_pou
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M =>
@@ -139,8 +117,6 @@ lemma tsupport_pou_mul_subset_tsupport_pou
   apply hx
   rw [h_pou_zero, zero_mul]
 
-/-- For the canonical chart-atlas POU, the (closed) support of `ρ_α · u` is
-contained in `chart α source`. -/
 lemma tsupport_chartAtlasPOU_mul_subset_chartAt_source
     [T2Space M] [SigmaCompactSpace M]
     (α : M) (u : M → ℝ) :
@@ -153,8 +129,6 @@ lemma tsupport_chartAtlasPOU_mul_subset_chartAt_source
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
 
-/-- For the canonical chart-atlas POU on a compact manifold, the closed
-support of `ρ_α · u` is compact. -/
 lemma hasCompactSupport_chartAtlasPOU_mul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (α : M) (u : M → ℝ) :
@@ -168,12 +142,6 @@ lemma hasCompactSupport_chartAtlasPOU_mul
     (isClosed_tsupport _).isCompact
   exact h_compact.of_isClosed_subset (isClosed_tsupport _) h_subset
 
-/-- For `y` in `chartTargetEuclid α`, the chart-pushed value of the chart-α
-pullback of `ψ` is `ρ_α(z) · ψ(y)`, where `z = symm_α(toEuclidean.symm y)`.
-
-This algebraic identity, combined with the Euclidean smooth-density theorem
-`MemWkp.exists_smooth_compactSupport_approx`, drives the per-chart smooth
-approximation step in the chart-Sobolev density program. -/
 lemma chartPushed_chartPullback_apply_of_mem
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)

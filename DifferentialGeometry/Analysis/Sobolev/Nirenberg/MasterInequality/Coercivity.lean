@@ -1,46 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.Substitution
 
-/-!
-# Coercivity expansion of the substitution identity
-
-Starting from the substitution identity
-
-  `-∑ i j ∫ D_h^k (a^{ij} ∂_i u) · ∂_j (η² · D_h^k u) + ∫_Ω c · u · v_test
-    = ∫_Ω f · v_test`
-
-(produced in `NirenbergSubstitution.nirenberg_substitution_identity`), we
-expand the principal term using the discrete product rule for difference
-quotients
-
-  `D_h^k (a^{ij} ∂_i u)(x) =
-    (τ_h a^{ij})(x) · D_h^k(∂_i u)(x) + (D_h^k a^{ij})(x) · ∂_i u(x)`
-
-and the partial-derivative formula for `η² · D_h^k u`
-
-  `∂_j (η² · D_h^k u)(x) =
-    2 η(x) · ∂_j η(x) · D_h^k u(x) + η(x)² · D_h^k(∂_j u)(x)`.
-
-Multiplying these two expansions yields four explicit terms per `(i, j)`
-pair. The principal term, with coefficient `(τ_h a^{ij})(x) · η²(x)`, is
-controlled below by ellipticity at the shifted point. The remaining three
-"cross" terms are bounded by absolute values, ready for downstream
-estimation.
-
-## Main outputs
-
-* `principalIntegrand_at_translate_self_ge`: pointwise ellipticity at the
-  shifted point `x + h e_k`, applied to the difference-quotient gradient
-  `D_h^k ∇u(x)`.
-* `nirenberg_principal_decomposition`: identity expressing the principal
-  LHS of the substitution identity as `PRINCIPAL_term - CROSS_1 - CROSS_2 -
-  CROSS_3`.
-* `principal_term_ge_lambda_norm_sq`: integral lower bound
-  `λ ∫ η² ‖D_h^k ∇u‖² ≤ PRINCIPAL_term`.
-* `nirenberg_master_inequality`: the headline bound
-  `λ ∫ η² ‖D_h^k ∇u‖² ≤ |Cross_1| + |Cross_2| + |Cross_3| +
-    |∫ f · v_test| + |∫ c u · v_test|`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -56,10 +15,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- The "shifted-coefficient principal integrand" at `x`: the quadratic form
-`∑ i j a^{ij}(x + h e_k) · ξ_i · ξ_j`, evaluated with
-`ξ_i := D_h^k(∂_i u)(x)`. This is the integrand of `PRINCIPAL_term` modulo
-the factor `η(x)²`. -/
 private def shiftedPrincipal
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) (k : Fin d) (h : ℝ) (x : E) : ℝ :=
@@ -71,8 +26,6 @@ private def shiftedPrincipal
       DifferentialGeometry.Analysis.Sobolev.diffQuot k h
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single j 1)) x
 
-/-- The Euclidean vector `D_h^k ∇u(x) ∈ E`: the difference quotient applied
-componentwise to the gradient of `u`. -/
 private def diffQuotGradient
     (u : E → ℝ) (k : Fin d) (h : ℝ) (x : E) : E :=
   WithLp.toLp 2 (fun i : Fin d =>
@@ -80,8 +33,7 @@ private def diffQuotGradient
       (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x)
 
 omit [NeZero d] in
-/-- The Euclidean norm squared of the difference-quotient gradient equals
-the sum of squares of its components. -/
+
 private lemma diffQuotGradient_norm_sq
     (u : E → ℝ) (k : Fin d) (h : ℝ) (x : E) :
     ‖diffQuotGradient u k h x‖ ^ 2 =
@@ -96,12 +48,6 @@ private lemma diffQuotGradient_norm_sq
       (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) x‖ ^ 2 = _
   rw [Real.norm_eq_abs, sq_abs]
 
-/-- Pointwise ellipticity at the shifted point: when the shifted point
-`x + h e_k` lies in `Ω`, the quadratic form
-
-  `∑ i j a^{ij}(x + h e_k) · D_h^k(∂_i u)(x) · D_h^k(∂_j u)(x)`
-
-is bounded below by `λ · ‖D_h^k ∇u(x)‖²`. -/
 private theorem shiftedPrincipal_ge
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) (k : Fin d) (h : ℝ) {x : E}
@@ -156,8 +102,6 @@ private theorem shiftedPrincipal_ge
   rw [h_inner] at hcoer
   exact hcoer
 
-/-- Pointwise expansion of `D_h^k(a^{ij} ∂_i u) · ∂_j(η² · D_h^k u)` as a
-sum of four explicit terms. -/
 private theorem principal_integrand_pointwise_decomposition
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -220,8 +164,7 @@ private theorem principal_integrand_pointwise_decomposition
   ring
 
 omit [NeZero d] in
-/-- `D_h^k v` of a smooth `v` is itself continuous (a special case of
-`contDiff_diffQuot_of_contDiff` and `ContDiff.continuous`). -/
+
 private lemma continuous_diffQuot_of_contDiff
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) (h : ℝ) :
     Continuous (DifferentialGeometry.Analysis.Sobolev.diffQuot k h v) := by
@@ -232,7 +175,7 @@ private lemma continuous_diffQuot_of_contDiff
   · exact (contDiff_diffQuot_of_contDiff (d := d) hv k hh).continuous
 
 omit [NeZero d] in
-/-- The translation `τ_h v` is continuous when `v` is. -/
+
 private lemma continuous_translate_of_continuous
     {v : E → ℝ} (hv : Continuous v) (k : Fin d) (h : ℝ) :
     Continuous (DifferentialGeometry.Analysis.Sobolev.translate k h v) := by
@@ -242,13 +185,6 @@ private lemma continuous_translate_of_continuous
     continuous_id.add continuous_const
   exact hv.comp h_translate_map
 
-/-- The principal LHS of the substitution identity decomposes into a sum of
-four explicit integrals. Specifically:
-
-`-∑ i j ∫ D_h^k(a^{ij} ∂_i u) · ∂_j(η² D_h^k u)
-  = -PRINCIPAL_term - CROSS_1 - CROSS_2 - CROSS_3`,
-
-where each piece is an explicit double sum of integrals. -/
 theorem nirenberg_principal_decomposition
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -626,14 +562,6 @@ theorem nirenberg_principal_decomposition
     intro j _
     exact h_pair_int i j
 
-/-- Pointwise lower bound on the integrand of the principal term: at every
-`x ∈ tsupport η` and every `h` with `Metric.cthickening |h| (tsupport η) ⊆
-Ω`,
-
-  `λ · η²(x) · ‖D_h^k ∇u(x)‖² ≤ η²(x) · ∑ i j (τ_h a^{ij})(x) ·
-                                       D_h^k(∂_i u)(x) · D_h^k(∂_j u)(x)`.
-
-Outside `tsupport η`, both sides are zero. -/
 private theorem principal_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ)
@@ -683,13 +611,7 @@ private theorem principal_pointwise_bound
     simp
 
 set_option linter.unusedVariables false in
-/-- The integral lower bound: for every `h ≠ 0` with `cthickening |h|
-(tsupport η) ⊆ Ω`,
 
-  `λ · ∫ η² · ‖D_h^k ∇u‖² ≤ PRINCIPAL_term`,
-
-where `PRINCIPAL_term` is the `(τ_h a) · η² · D_h^k(∂u) · D_h^k(∂u)` term
-of the four-term decomposition. -/
 theorem principal_term_ge_lambda_norm_sq
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -924,27 +846,6 @@ theorem principal_term_ge_lambda_norm_sq
       from rfl]
   rw [integral_finset_sum _ (fun j _ => hT1_int i j)]
 
-/-- The master inequality: the sum of three "cross" terms plus the data
-terms `f · v_test` and `c · u · v_test` dominates `λ ∫ η² ‖D_h^k ∇u‖²`.
-
-This is the rearranged form of the substitution identity, after expanding
-the principal LHS via the discrete product rule and using ellipticity at
-the shifted point. It is the immediate input to the difference-quotient
-estimate that controls all `D_h^k ∂_i u` simultaneously by the data and
-lower-order pieces.
-
-The "cross" terms are:
-
-* `Cross_1` = `∑ i j ∫ 2 (τ_h a^{ij}) η · ∂_j η · D_h^k(∂_i u) · D_h^k u`,
-* `Cross_2` = `∑ i j ∫ (D_h^k a^{ij}) η² · ∂_i u · D_h^k(∂_j u)`,
-* `Cross_3` = `∑ i j ∫ 2 (D_h^k a^{ij}) η · ∂_j η · ∂_i u · D_h^k u`.
-
-The inequality reads:
-
-  `λ · ∫ η² · ‖D_h^k ∇u‖² ≤
-    |Cross_1| + |Cross_2| + |Cross_3| + |∫ f · v_test| + |∫ c u · v_test|`.
-
-It is stated below using `‖D_h^k ∇u‖² = ∑ i, (D_h^k ∂_i u)²`. -/
 theorem nirenberg_master_inequality
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u f : E → ℝ}

@@ -1,51 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartKernel
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 
-/-!
-# Bound on the Fréchet derivative of the chart-pulled input/output Christoffel
-slot corrections
-
-For a smooth Riemannian manifold `(M, g)`, a chart-centre `α : M`, ranks
-`r s : ℕ`, a smooth tangent vector field `B`, an input slot `k : Fin r`
-(resp. output slot `l : Fin s`), and a smooth compactly supported
-`(r, s)`-tensor section `T`, the chart-`α`-trivialised input-slot
-Christoffel correction factors through a `T`-linear chart kernel:
-
-```
-(triv α).cLMA b (chartTensorRSInputSlotCorrection r s g α T B b k)
-    = inputSlotChartKernel g r s α B k b
-        (tensorRSChartE_section_repr r s α T b)
-```
-
-(and the analogous identity for the output slot). Differentiating in the
-chart variable `y` and applying `fderiv_clm_apply` to the kernel-CLM action
-gives
-
-```
-fderiv (y ↦ (kernel y) (R y)) x
-    = (kernel x).comp (fderiv R x) + (fderiv kernel x).flip (R x)
-```
-
-whose operator norm is bounded by
-
-```
-‖kernel x‖ · ‖fderiv R x‖ + ‖fderiv kernel x‖ · ‖R x‖
-```
-
-Both `‖kernel x‖` and `‖fderiv kernel x‖` admit uniform bounds on the
-intersection of the partition-of-unity tsupport with the chart-`α`
-Levi-Civita good set, supplied by the kernel infrastructure.
-
-## Main results
-
-* `R_contDiffOn_goodSet` — smoothness on the chart-target image of the
-  chart-`α` Levi-Civita good set of the chart-pulled tensor representation.
-* `input_slot_pulled_eq_kernel_eventually` /
-  `output_slot_pulled_eq_kernel_eventually` — pointwise equality between the
-  chart-pulled slot correction and the chart-kernel applied to
-  `tensorRSChartE_section_repr`, on a neighbourhood of the chart-target image
-  of a point of the chart-`α` Levi-Civita good set. -/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -74,9 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- Smoothness on the chart-target image of the chart-`α` Levi-Civita good set
-of the chart-pulled tensor representation
-`tensorRSChartE_section_repr r s α T ∘ (extChartAt I α).symm`. -/
 lemma R_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -165,9 +117,6 @@ lemma R_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-/-- Pointwise equality between the chart-pulled input-slot correction and the
-chart-kernel applied to `tensorRSChartE_section_repr`, on a neighbourhood of
-the chart target image of a point `b ∈ chartLeviCivitaGoodSet α`. -/
 private lemma input_slot_pulled_eq_kernel_eventually
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -220,9 +169,6 @@ private lemma input_slot_pulled_eq_kernel_eventually
         (fun y' : M => T.toSection y') ((extChartAt I α).symm y))
   exact h_factor
 
-/-- Pointwise equality between the chart-pulled output-slot correction and the
-chart-kernel applied to `tensorRSChartE_section_repr`, on a neighbourhood of
-the chart target image of a point `b ∈ chartLeviCivitaGoodSet α`. -/
 private lemma output_slot_pulled_eq_kernel_eventually
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

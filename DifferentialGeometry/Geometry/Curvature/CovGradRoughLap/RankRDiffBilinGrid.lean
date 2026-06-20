@@ -1,50 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 
-/-! # The general-valence `rfns` covariant-Leibniz grid for a differentiated bilinear contraction
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, the analysis file `MetricContractionLeibnizGrid` builds, for a generic
-*fibrewise-linear, non-parallel, recursively-differentiated* bilinear contraction operator at
-**contravariant rank `0`** (the structure `DiffBilinOp`), the intrinsic `riemannianFiberNormSq`
-(`rfns`) binomial covariant-Leibniz grid
-
-```
-rfns(∇^j(op 0 r W))(x) ≤ 4^j · ∑_{p ≤ j} kappa p r · ∑_{q ≤ j} rfns(∇^q W)(x),
-```
-
-through the recursive Leibniz-remainder operators and their per-order, per-rank section-proportional
-fibre envelope `kappa`.
-
-The `DiffBilinOp` engine is **hard-locked to contravariant rank `0`**: its operator family carries a
-literal contravariant `0` (`op : ∀ p r, SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)`).  This
-file **liberates that engine to a fixed but generic contravariant valence `c`** (R7 — extend, do not
-duplicate): the structure `DiffBilinOpRS g c` is the verbatim lift of `DiffBilinOp` with `0` replaced
-by `c` everywhere, and its `rfns` binomial grid, single-sum collapse, and at-centre variants are
-**proved outright** by the same binomial covariant-Leibniz induction the rank-`0` engine uses, with
-**no posit of its own** (the order × rank window bookkeeping `gridWindowSum` and the rank-cast
-`castRankCc_db` are rank-generic and reused verbatim from `MetricContractionLeibnizGrid`).
-
-This is the engine the contravariant-rank-`r` curvature-jet tower of the order-`2` rough-Laplacian /
-covariant-gradient commutator defect needs for its frame-free pure-Riemann differentiated operator,
-exactly as the rank-`0` curvature-jet tower (`FrozenFramePureRCurvatureTower`) consumes the rank-`0`
-`DiffBilinOp` engine.
-
-## Main definitions
-
-* `DiffBilinOpRS g c` — a differentiated fibrewise-linear bilinear contraction operator family at
-  contravariant valence `c`: a section-level operator `op p` at every differentiation order `p` and
-  base covariant width, satisfying the exact recursive covariant Leibniz (`covGrad_op`) and a
-  per-order, per-rank base-point-uniform proportional fibre envelope (`kappa`, `rfns_op_le`).
-
-## Main results
-
-* `DiffBilinOpRS.rfns_iteratedCovGrad_grid` — the binomial covariant-Leibniz `rfns` double grid.
-* `DiffBilinOpRS.exists_rfns_iteratedCovGrad_singleSum_le` — its single-sum collapse, the shape the
-  contravariant-rank-`r` curvature-jet tower consumes.
-* `DiffBilinOpRS.rfns_iteratedCovGrad_grid_at`, `DiffBilinOpRS.exists_rfns_iteratedCovGrad_singleSum_le_at`
-  — the at-a-single-centre variants (the envelope supplied only at one point), the shape the
-  moving-centre curvature jet needs at the frame's own centre. -/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -74,15 +29,12 @@ variable [CompleteSpace E]
 section RankCastRS
 
 set_option linter.unusedSectionVars false in
-/-- **Heterogeneous rank-congruence for `covGrad` at valence `c`.** If `h : a = b`, then
-`covGrad g c a Y` and `covGrad g c b Z` are heterogeneously equal whenever `Y, Z` are. -/
+
 private theorem covGrad_heq_congr_dbRS (g : SmoothRiemannianMetric I M) (c : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b} (hYZ : HEq Y Z) :
     HEq (covGrad g c a Y) (covGrad g c b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
-/-- **Heterogeneous commuting of one covariant gradient through the iterated gradient at valence
-`c`.** -/
 private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetric I M) (c s m : ℕ)
     (X : SmoothCcTensor g c s) :
     HEq (iteratedCovGrad g c (s + 1) m (covGrad g c s X))
@@ -95,7 +47,7 @@ private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetri
       exact covGrad_heq_congr_dbRS g c (by omega : (s + 1) + k = s + (k + 1)) ih
 
 set_option linter.unusedSectionVars false in
-/-- **`rfns` is invariant under a `SmoothCcTensor` rank-cast at valence `c`.** -/
+
 private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
     (c : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b}
     (hYZ : HEq Y Z) (x : M) :
@@ -103,8 +55,6 @@ private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
       riemannianFiberNormSq (I := I) (M := M) g c b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
-/-- **Front-commuting one covariant gradient through the iterated gradient (rfns form) at valence
-`c`.** The intrinsic squared fibre norm of `∇^m(∇W)` at `x` equals that of `∇^{m+1}W`. -/
 private theorem rfns_iteratedCovGrad_covGrad_comm_dbRS (g : SmoothRiemannianMetric I M)
     (c s m : ℕ) (W : SmoothCcTensor g c s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g c ((s + 1) + m) x
@@ -114,8 +64,6 @@ private theorem rfns_iteratedCovGrad_covGrad_comm_dbRS (g : SmoothRiemannianMetr
   rfns_toSection_heq_congr_dbRS g c (by omega : (s + 1) + m = s + (m + 1))
     (iteratedCovGrad_covGrad_comm_heq_dbRS g c s m W) x
 
-/-- **A `range`-sum shift bookkeeping helper at valence `c`** (a copy of the rank-`0` `sum_range_shift_le_db`,
-which is `private` to `MetricContractionLeibnizGrid`). -/
 private lemma sum_range_shift_le_dbRS (n : ℕ) (f : ℕ → ℝ) (hf : ∀ i, 0 ≤ f i) :
     ∑ i ∈ Finset.range n, f (i + 1) ≤ ∑ i ∈ Finset.range (n + 1), f i := by
   rw [Finset.sum_range_succ' f n]
@@ -123,28 +71,19 @@ private lemma sum_range_shift_le_dbRS (n : ℕ) (f : ℕ → ℝ) (hf : ∀ i, 0
 
 end RankCastRS
 
-/-- **A differentiated fibrewise-linear bilinear contraction operator family at contravariant valence
-`c`.**  The verbatim contravariant-valence-`c` lift of `DiffBilinOp` (`MetricContractionLeibnizGrid`),
-with the literal contravariant rank `0` replaced by the generic `c`.  The family `op p` is the
-`p`-times covariantly differentiated operator (a smooth compactly-supported `(c, r + p)`-tensor at each
-covariant width `r`, fibrewise-`ℝ`-linear in the contracted section), with two genuine
-`∇`-compatibility / boundedness fields: the exact recursive single-step covariant Leibniz `covGrad_op`
-and the per-order, per-rank base-point-uniform proportional fibre envelope in **jet** form
-`rfns_op_le`. -/
 structure DiffBilinOpRS (g : SmoothRiemannianMetric I M) (c : ℕ) where
-  /-- The `p`-times differentiated operator at base covariant width `r`, fibrewise-linear in the
-  section. -/
+  
   op : ∀ (p r : ℕ), SmoothCcTensor g c r → SmoothCcTensor g c (r + p)
-  /-- The exact recursive single-step covariant Leibniz of the family (non-parallel). -/
+  
   covGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g c r),
     covGrad g c (r + p) (op p r W) =
       op (p + 1) r W +
         castRankCc_db g c (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g c r W))
-  /-- The per-order **and per-rank** proportional fibre-envelope constant. -/
+  
   kappa : ℕ → ℕ → ℝ
-  /-- The envelope constant is nonnegative. -/
+  
   kappa_nonneg : ∀ p r, 0 ≤ kappa p r
-  /-- The per-order, per-rank, base-point-uniform proportional fibre bound in **jet form**. -/
+  
   rfns_op_le : ∀ (p r : ℕ) (W : SmoothCcTensor g c r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g c (r + p) x ((op p r W).toSection x) ≤
       kappa p r * ∑ q ∈ Finset.range (p + 1),
@@ -155,13 +94,6 @@ namespace DiffBilinOpRS
 
 variable {g : SmoothRiemannianMetric I M} {c : ℕ}
 
-/-- **The binomial covariant-Leibniz `rfns` double grid for a differentiated bilinear contraction at
-valence `c`.**  The verbatim valence-`c` lift of `DiffBilinOp.rfns_iteratedCovGrad_grid`.  For every
-gradient order `j`, differentiation order `p`, base width `r`, section `W`, and point `x`,
-```
-rfns(∇^j(op p r W))(x) ≤ 4^j · gridWindowSum kappa p r j · ∑_{q < p + j + 1} rfns(∇^q W)(x).
-```
-Proved by induction on `j` by the same binomial covariant-Leibniz argument. -/
 theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOpRS g c) (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g c r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g c ((r + p) + j) x
@@ -289,13 +221,6 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOpRS g c) (j : ℕ) :
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))
         (mul_le_mul_of_nonneg_left hB (by norm_num))
 
-/-- **The single-sum collapse of the differentiated-operator `rfns` grid at valence `c`.**  The
-valence-`c` lift of `DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le`: there is a single
-nonnegative per-rank, per-order constant `C r j := 4^j · gridWindowSum kappa 0 r j` such that
-```
-rfns(∇^j(op 0 r W))(x) ≤ C r j · ∑_{q ≤ j} rfns(∇^q W)(x).
-```
-Proved from the grid by `mul_assoc`. -/
 theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : DiffBilinOpRS g c) :
     ∃ C : ℕ → ℕ → ℝ, (∀ r j, 0 ≤ C r j) ∧
       ∀ (r : ℕ) (W : SmoothCcTensor g c r) (j : ℕ) (x : M),

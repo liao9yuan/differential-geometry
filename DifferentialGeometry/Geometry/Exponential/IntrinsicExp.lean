@@ -6,43 +6,6 @@ import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 
 set_option linter.unusedSectionVars false
 
-/-!
-# The intrinsic exponential map of a complete Riemannian manifold
-
-The chart-fixed exponential map `expMap g p v = maximalGeodesic g p v 1`
-(`Exponential/Defs.lean`) follows the geodesic spray written in the single
-chart at `p`.  That object is junk once the geodesic leaves `(chartAt H p).source`,
-so on a multi-chart manifold `expMap g p v` reverts to `p` for large `v`.
-
-For the metric-geometry program (e.g. the compactness/diameter theorems) one needs
-the *intrinsic* exponential map: the value at `t = 1` of the **complete** geodesic
-through `p` with initial velocity `v`, where "complete" means defined on all of `ℝ`
-via the moving-foot geodesic predicate `IsGeodesic` (chart-independent).
-
-## Main objects
-
-* `exists_complete_geodesic_at_velocity` — existence of a two-sided complete
-  geodesic `Γ : ℝ → M` with `Γ 0 = p` and launch velocity `v`.  Built from the
-  local seed `exists_isGeodesicOn_Ioo_at_velocity` and the metric-completeness
-  forward/backward extension `isGeodesicOn_Ici_of_complete`.
-* `intrinsicGeodesic g p v : ℝ → M` — the chosen complete geodesic.
-* `expMapIntrinsic g p v : M := intrinsicGeodesic g p v 1` — the intrinsic
-  exponential map.
-
-## Status of this file
-
-The forward/backward completeness extension engine
-`HopfRinow.isGeodesicOn_Ici_of_complete` is seeded by a geodesic on a
-*left-unbounded* interval `Iio b₀`.  The local seed
-`exists_isGeodesicOn_Ioo_at_velocity` only produces a geodesic on a *bounded*
-interval `Ioo (-δ) δ`.  Bridging the two — an `Ioo`-seeded completeness engine,
-or equivalently a two-sided complete-extension producer — is the single missing
-analytic input recorded as the residual of
-`exists_complete_geodesic_at_velocity` below.  The downstream definitions and
-their specification lemmas are stated against that existential so that, once it
-is discharged, the intrinsic exponential map is available with no further work.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Filter Function
@@ -68,12 +31,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Velocity enorm bound from a squared-speed bound (the norm-diamond bridge).**
-Given the ambient fibre-norm — square-root inner-product compatibility
-`hEnorm : ‖·‖ₑ = ENNReal.ofReal (√(g.inner …))` (the same structural fact threaded
-throughout the Hopf-Rinow / Bonnet-Myers pipeline as an explicit hypothesis), a
-squared `g`-speed bound `g.inner x w w ≤ c²` (with `c ≥ 0`) yields the fibre
-enorm bound `‖w‖ₑ ≤ ENNReal.ofReal c`. -/
+
 private lemma velocity_enorm_le_of_speedSq_le
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -88,14 +46,7 @@ private lemma velocity_enorm_le_of_speedSq_le
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`hreg` data for a constant-speed geodesic extending a seed.**  Given a
-local seed `η` (a geodesic on `Ioo a₀ δ`, continuous there) whose squared speed
-at the launch time `0` is `g.inner (η 0) (η'(0)) (η'(0)) ≤ c²` (with `c ≥ 0`),
-and the ambient fibre-norm — square-root inner-product compatibility `hEnorm`,
-every geodesic `γ` on `Ioo a₀ b` that is continuous there and agrees with `η` on
-the agreement window has constant `g`-speed `≤ c²`, is `C¹`, and has its velocity
-enorm bounded by `c`.  This is exactly the per-extension analytic record
-`isGeodesicOn_Ici_of_complete_Ioo` consumes. -/
+
 private lemma isGeodesicOn_hreg_record
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -150,34 +101,7 @@ private lemma isGeodesicOn_hreg_record
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Two-sided geodesic completeness.**  On a complete Riemannian manifold,
-for every base point `p` and tangent vector `v : T_p M` there is a geodesic
-`Γ : ℝ → M` defined on all of `ℝ` with `Γ 0 = p` and launch velocity `v`
-(`mfderiv Γ 0 1 = v`).
 
-This is the chart-independent, genuinely complete object that the chart-fixed
-`expMap` fails to provide: it follows the moving-foot geodesic equation at every
-real time, so it remains valid after the geodesic leaves the home chart at `p`.
-
-The fibre-norm — square-root inner-product compatibility `hEnorm` ties the
-ambient bundle norm `‖·‖ₑ` to the metric `g` (the same structural hypothesis
-threaded throughout the Hopf-Rinow / Bonnet-Myers pipeline); without it the
-ambient norm is unrelated to `g`, so it is a genuine mathematical input rather
-than a packaging of the conclusion.
-
-CONSTRUCTION:
-
-* SEED: `HopfRinow.exists_isGeodesicOn_Ioo_at_velocity g p v` gives a local
-  geodesic `η` on `Ioo (-δ) δ` with `η 0 = p` and `mfderiv η 0 1 = v`.
-* FORWARD: `HopfRinow.isGeodesicOn_Ici_of_complete_Ioo` (the `Ioo`-seeded
-  forward-completeness engine) extends `η` to a geodesic on `Ioi (-δ/2)`,
-  agreeing with `η` below `δ`.  Its per-extension regularity record is the
-  constant-speed `hreg` data supplied by `isGeodesicOn_hreg_record`.
-* BACKWARD: the same engine applied to the time-reversal `t ↦ η (-t)` extends
-  left; reflecting gives a geodesic on `Iio (δ/2)`.
-* GLUE at `0`: both halves agree with `η` on `Ioo (-δ/2) (δ/2)`, so the
-  `if t < 0` assembly is a geodesic on all of `ℝ` (checked pointwise by
-  locality), preserving the value `p` and velocity `v` at `0`. -/
 theorem exists_complete_geodesic_at_velocity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -361,11 +285,7 @@ theorem exists_complete_geodesic_at_velocity
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic complete geodesic through `p` with launch velocity `v`,
-chosen by `exists_complete_geodesic_at_velocity`.  The hypothesis `hEnorm` is the
-ambient fibre-norm — square-root inner-product compatibility tying the ambient
-bundle norm to `g` (the same structural fact used across the Hopf-Rinow /
-Bonnet-Myers pipeline). -/
+
 def intrinsicGeodesic
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -377,7 +297,7 @@ def intrinsicGeodesic
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic geodesic is a geodesic on all of `ℝ`. -/
+
 theorem intrinsicGeodesic_isGeodesic
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -390,7 +310,7 @@ theorem intrinsicGeodesic_isGeodesic
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic geodesic starts at `p` (value at `t = 0`). -/
+
 @[simp] theorem intrinsicGeodesic_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -403,7 +323,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The launch velocity of the intrinsic geodesic at `t = 0` is `v`. -/
+
 theorem intrinsicGeodesic_mfderiv_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -417,10 +337,7 @@ theorem intrinsicGeodesic_mfderiv_zero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic exponential map at `p`: the value at `t = 1` of the complete
-geodesic through `p` with launch velocity `v`.  Unlike the chart-fixed `expMap`,
-this follows the geodesic across charts and is the object used by the
-metric-geometry (compactness / diameter) theorems. -/
+
 def expMapIntrinsic
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -443,12 +360,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- Continuity of the intrinsic geodesic.  The complete geodesic
-`exists_complete_geodesic_at_velocity` produces is the half-line glue of the
-forward / backward cross-chart extensions, each continuous on its open half-line
-(the per-extension continuity tracked by `isGeodesicOn_Ioi_of_endpointContinuation`);
-the two halves agree at the splice point, so the glue is continuous.  This is the
-regularity datum feeding the `C¹`-in-time lemma below. -/
+
 theorem intrinsicGeodesic_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -461,9 +373,7 @@ theorem intrinsicGeodesic_continuous
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic geodesic is `C¹` in time on all of `ℝ`.  A geodesic, continuous
-on the open set `Set.univ`, is `ContMDiffOn 𝓘(ℝ,ℝ) I 1` there by
-`HopfRinow.isGeodesicOn_contMDiffOn_one`. -/
+
 theorem intrinsicGeodesic_contMDiffOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -482,13 +392,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Chart-`q`-phase ODE for a moving-foot geodesic.**  Fix a chart basepoint
-`q : M`.  If `γ` satisfies the moving-foot geodesic equation at every time in an
-open neighbourhood `O` of `t`, is continuous there, and keeps its foot in the
-chart source `(chartAt H q).source` throughout `O`, then the chart-`q`-phase
-curve `c(s) = (chartCurve q γ s, deriv (chartCurve q γ) s)` satisfies, eventually
-as `s → t`, the chart-phase geodesic ODE `HasDerivAt c (chartPhaseVF g q (c s)) s`
-with `c s` staying inside the chart-target interior product. -/
+
 theorem chartPhase_eventually_of_geodesicOn
     (g : SmoothRiemannianMetric I M) (q : M) {γ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
@@ -545,12 +449,6 @@ theorem chartPhase_eventually_of_geodesicOn
     exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
       (I := I) q hp_target
 
-/-- **Chart-phase ODE uniqueness re-centred at a base time `t`.**  The
-neighbourhood-of-`0` chart-coordinate ODE uniqueness
-`Geodesic.chartPhaseVF_orbit_uniqueness` re-based at an arbitrary base time `t`
-by the time-shift `s ↦ s + t`.  Two chart-phase ODE solutions agreeing at `t` and
-staying in the chart-target interior product near `t` agree on a neighbourhood of
-`t`. -/
 theorem chartPhaseVF_orbit_uniqueness_at
     {g : SmoothRiemannianMetric I M} {q : M}
     {c₁ c₂ : ℝ → E × E} {z₀ : E × E} {t : ℝ}
@@ -602,10 +500,7 @@ theorem chartPhaseVF_orbit_uniqueness_at
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Local continuity of the chart-`q`-phase curve of a moving-foot geodesic.**
-Under the hypotheses of `chartPhase_eventually_of_geodesicOn`, the chart-`q`-phase
-curve `c(s) = (chartCurve q γ s, deriv (chartCurve q γ) s)` is continuous at `t`.
-This is the closedness input for the clopen agreement-set propagation. -/
+
 private theorem chartPhase_continuousAt_of_geodesicOn
     (g : SmoothRiemannianMetric I M) (q : M) {γ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
@@ -619,11 +514,7 @@ private theorem chartPhase_continuousAt_of_geodesicOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Local agreement of two moving-foot geodesics with matching chart-`q`
-phase.**  Fix a chart basepoint `q`.  If `γ₁, γ₂` are continuous moving-foot
-geodesics on an open neighbourhood `O` of `t`, both keeping their feet in
-`(chartAt H q).source` on `O`, and their chart-`q`-phase curves agree at `t`,
-then `γ₁ =ᶠ[𝓝 t] γ₂`. -/
+
 private theorem geodesic_eventuallyEq_of_chartPhase_eq
     (g : SmoothRiemannianMetric I M) (q : M) {γ₁ γ₂ : ℝ → M} {O : Set ℝ} {t : ℝ}
     (hO_open : IsOpen O) (htO : t ∈ O)
@@ -666,10 +557,7 @@ private theorem geodesic_eventuallyEq_of_chartPhase_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Chart-`q`-velocity at a foot point from `mfderiv`.**  If `γ` is
-`MDifferentiableAt 𝓘(ℝ,ℝ) I` at `0`, has foot `γ 0 = q`, and launch velocity
-`(mfderiv 𝓘(ℝ,ℝ) I γ 0 1 : E) = v`, then its chart-`q`-velocity at `0` is the
-trivialization-`q` coordinate of `v`, a quantity depending only on `q` and `v`. -/
+
 theorem chartCurve_deriv_zero_eq
     (q : M) {γ : ℝ → M} {v : E}
     (hγ_mdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ 0)
@@ -693,19 +581,7 @@ theorem chartCurve_deriv_zero_eq
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Agreement of `maximalGeodesic` and `intrinsicGeodesic` on `[0, 1]`
-(semantic-hypothesis form).**  Fix a chart basepoint `q`, and let `a < 0 ≤ 1 < b`
-so that the closed interval `[0, 1]` lies inside the open interval `O = Ioo a b`.
-Suppose, throughout `O`, both the home-chart maximal geodesic and the intrinsic
-geodesic with initial data `(q, v)` satisfy the moving-foot geodesic equation and
-keep their feet inside the home chart source `(chartAt H q).source`, and that the
-home-chart maximal geodesic is continuous on `O`.  Then they agree at `t = 1`,
-hence `expMapIntrinsic g hEnorm q v = expMap g q v`.
 
-The argument is a clopen propagation along the preconnected interval `[0, 1]` of
-the chart-`q`-phase agreement set; the open step is chart-`q`-coordinate ODE
-uniqueness, the closed step continuity, and the base point `0 ∈ [0, 1]` is anchored
-by the shared launch data `(q, v)`. -/
 theorem expMapIntrinsic_eq_expMap_of_geodesicOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -852,11 +728,6 @@ theorem expMapIntrinsic_eq_expMap_of_geodesicOn
   have hgoal : γI 1 = γM 1 := hγ1.symm
   simpa [expMapIntrinsic, expMap, hγI_def, hγM_def] using hgoal
 
-/-- **Home-chart maximal-geodesic data on an open interval, for small velocity.**
-There is `ρ > 0` such that for every `v` with `‖v‖ < ρ` there are `a < 0 < 1 < b`
-with: the maximal geodesic `maximalGeodesic g q v` is continuous on `Ioo a b`,
-launches with velocity `v` at `0`, and keeps its foot inside `(chartAt H q).source`
-throughout `Ioo a b`. -/
 theorem exists_maximalGeodesic_data_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -960,13 +831,6 @@ theorem exists_maximalGeodesic_data_of_small
     rw [show (t' • vb : TangentSpace I q) = v from hvb_resc] at hEq
     rw [← hEq]; exact hsrc'
 
-/-- **Coercivity of `g.inner q`.**  The positive-definite continuous bilinear form
-`g.inner q` on a finite-dimensional space is bounded below by a multiple of the
-squared Euclidean norm: there is `c > 0` with `c · ‖x‖² ≤ g_q(x, x)` for all `x : E`.
-The unit sphere is compact (finite dimension), `g_q(x, x) > 0` there, and its minimum
-is the constant `c`.  Stated with the Euclidean `E`-norm `‖x‖` (no fibre-norm
-attribute removal), it converts a `g`-norm smallness `√(g_q(v,v)) < ρ` into the
-Euclidean smallness consumed by the small-velocity home-chart data. -/
 private lemma gq_coercive (g : SmoothRiemannianMetric I M) (q : M) :
     ∃ c : ℝ, 0 < c ∧ ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner q x x := by
   classical
@@ -1014,15 +878,7 @@ private lemma gq_coercive (g : SmoothRiemannianMetric I M) (q : M) :
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Foot-in-source on `(-1, 2)` for small velocity (intrinsic geodesic).**
-There is `ρ > 0` such that for every launch velocity `v` with `√(g_q(v,v)) < ρ`,
-the intrinsic geodesic `t ↦ intrinsicGeodesic g hEnorm q v t` keeps its foot
-inside the home chart source `(chartAt H q).source` for every `t ∈ Ioo (-1) 2`.
 
-This discharges the cross-chart confinement hypothesis `hsrc_I` of
-`expMapIntrinsic_eq_expMap_of_small` (so the latter becomes side-condition free on
-small velocities).  The proof is the combined agree-and-confine clopen propagation
-of the chart-`q` phase agreement set, anchored at the launch time `0`. -/
 theorem intrinsicGeodesic_foot_in_source_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1266,20 +1122,7 @@ theorem intrinsicGeodesic_foot_in_source_of_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`expMapIntrinsic = expMap` for small velocity (cross-chart agreement bridge).**
-For a small launch velocity `v` (`√(g_q(v,v)) < ρ` for an explicit `ρ > 0`) whose
-intrinsic geodesic stays inside the home chart `(chartAt H q).source` throughout the
-open interval `(-1, 2) ⊇ [0, 1]`, the intrinsic exponential map agrees with the
-chart-fixed exponential map:
-`expMapIntrinsic g hEnorm q v = expMap g q v`.
 
-The smallness is stated in the `g`-norm `√(g_q(v,v))`; coercivity of `g_q` converts it
-to the Euclidean smallness consumed by the small-velocity home-chart data and the
-Gauss-lemma radial geodesic equation.  The home-chart side (continuity, launch
-velocity, foot-in-source, moving-foot geodesic equation of `maximalGeodesic g q v` on
-an open interval) is then in hand; the remaining input is the intrinsic geodesic's
-home-chart confinement `hsrc_I`, the genuine cross-chart datum.  The equality is the
-geodesic-uniqueness clopen propagation of `expMapIntrinsic_eq_expMap_of_geodesicOn`. -/
 theorem expMapIntrinsic_eq_expMap_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -1341,11 +1184,7 @@ theorem expMapIntrinsic_eq_expMap_of_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Affine time-rescaling of the moving-foot geodesic equation.**  If `γ`
-satisfies the moving-foot geodesic equation at `c · t`, then the rescaled curve
-`s ↦ γ (c · s)` satisfies it at `t`.  The new velocity is `c` times the old,
-the new acceleration `c²` times the old, and the quadratic Christoffel scaling
-makes the geodesic identity persist. -/
+
 private theorem hasGeodesicEquationAt_comp_const_smul
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} (c t : ℝ)
     (hgeo : Geodesic.HasGeodesicEquationAt (I := I) g γ (c * t)) :
@@ -1414,13 +1253,7 @@ private theorem hasGeodesicEquationAt_comp_const_smul
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Local agreement of two moving-foot geodesics from matching initial data at
-`t₀`.**  If `γ₁, γ₂` are continuous moving-foot geodesics on all of `ℝ`, share the
-foot `γ₁ t₀ = γ₂ t₀` and the chart-`(γ₁ t₀)` velocity
-`deriv (chartCurve (γ₁ t₀) γ₁) t₀ = deriv (chartCurve (γ₁ t₀) γ₂) t₀`, then
-`γ₁ =ᶠ[𝓝 t₀] γ₂`.  This is the open-propagation engine for the global
-uniqueness theorem below; it is chart-`(γ₁ t₀)`-coordinate ODE uniqueness
-specialised to the chart centred at the common foot. -/
+
 private theorem geodesic_eventuallyEq_of_initial_local
     (g : SmoothRiemannianMetric I M) {γ₁ γ₂ : ℝ → M} {t₀ : ℝ}
     (hγ₁_cont : Continuous γ₁) (hγ₂_cont : Continuous γ₂)
@@ -1460,16 +1293,7 @@ private theorem geodesic_eventuallyEq_of_initial_local
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Global uniqueness of complete geodesics from initial data.**  Two
-moving-foot geodesics on all of `ℝ`, both continuous, sharing the initial point
-`Γ₁ 0 = Γ₂ 0` and the launch velocity
-`(mfderiv 𝓘(ℝ,ℝ) I Γ₁ 0 1 : E) = (mfderiv 𝓘(ℝ,ℝ) I Γ₂ 0 1 : E)`, coincide on all
-of `ℝ`.
 
-The proof is a clopen propagation along the preconnected line of the
-local-agreement set `S = {t | Γ₁ =ᶠ[𝓝 t] Γ₂}`: openness is immediate, closedness
-is chart-`(Γ₁ t)`-coordinate ODE uniqueness at each cluster point, and the base
-point `0` is anchored by the shared launch data. -/
 theorem isGeodesic_eq_of_initial
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     (g : SmoothRiemannianMetric I M) {Γ₁ Γ₂ : ℝ → M}
@@ -1598,11 +1422,7 @@ theorem isGeodesic_eq_of_initial
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Spray homogeneity of the intrinsic geodesic.**  For every scalar `t`,
-`intrinsicGeodesic g hEnorm p (t • u) 1 = intrinsicGeodesic g hEnorm p u t`.
-Equivalently `expMapIntrinsic p (t • u) = intrinsicGeodesic p u t`, so the radial
-ray `s ↦ expMapIntrinsic p (s • u)` is the single smooth geodesic
-`intrinsicGeodesic p u`. -/
+
 theorem intrinsicGeodesic_smul
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

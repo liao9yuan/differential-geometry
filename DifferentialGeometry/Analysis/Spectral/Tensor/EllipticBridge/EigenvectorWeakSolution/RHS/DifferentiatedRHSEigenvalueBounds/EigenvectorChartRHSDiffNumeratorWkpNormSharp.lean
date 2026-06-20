@@ -4,49 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 
-/-!
-# Sharp `wkpNorm`-graded bound for the differentiated chart-RHS numerator
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis
-chart-effective-previous-level data `fChartEffPrev`, a chart center `α : M`,
-a component multi-index `P₀`, a level `m`, a regularity order `K`, and a
-direction multi-index `l : Fin (m + 1) → Fin n`, the level-`m` differentiated
-chart-RHS numerator `eigenvectorChartRHSDiffNumerator g r s i α P₀ m l
-(fChartEffPrev i)` is the explicit five-layer Leibniz combination
-`A + B − C + D + E` produced by one more integration by parts in the new
-direction `lₙ := l (Fin.last m)`.
-
-This file records the **sharp** order-`K` `wkpNorm` bound: given five
-direct quantitative `wkpNorm K`-bounds — one per layer — pegging each
-layer's atom to the eigenvalue and the eigenvector data via
-
-```
-wkpNorm K 2 atom (chartTargetEuclid α)
-  ≤ ENNReal.ofReal (CatomX · (i.fst.val)⁻¹^eAtomX) ·
-      ENNReal.ofReal ‖tensorResolventEigenbasisVec … i‖,
-```
-
-together with the structural regularity / support hypotheses on the
-previous-level data `fChartEffPrev i` (membership in `W^{K+1, 2}` and
-ae-vanishing off the partition-of-unity kernel), there is a single
-nonnegative constant `C : ℝ` and exponent `e : ℕ` — both geometric, the
-first depending on the smooth chart coefficients and the per-layer
-constants, the second depending only on the per-layer exponents — such
-that, for *every* eigenbasis index `i`,
-
-```
-wkpNorm K 2 (eigenvectorChartRHSDiffNumerator … m l (fChartEffPrev i))
-    (chartTargetEuclid α)
-  ≤ ENNReal.ofReal (C · (i.fst.val)⁻¹^e) ·
-      ENNReal.ofReal ‖tensorResolventEigenbasisVec … i‖.
-```
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -238,9 +195,7 @@ lemma sharp_wkpNorm_coef_mul_factor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- A finite-`Finset` sum of `MemWkp K 2` functions on an open set is also
-`MemWkp K 2`. Mirrors the public `BootstrapMixed.memWkp_finset_sum` but is
-private to this file to avoid namespace overloading. -/
+
 private lemma sharp_memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -269,10 +224,7 @@ private lemma sharp_memWkp_finset_sum
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
 omit [CompleteSpace E] in
-/-- The wkpNorm triangle inequality for subtraction: rewrites `u - v` as
-`u + (-v)` and applies `wkpNorm_add_le` together with `MemWkp.neg`. Mirrors
-the private subtraction-triangle inequality of
-`EigenvectorDifferentiatedRHSWkpNorm` but is local to this file. -/
+
 private lemma sharp_wkpNorm_sub_le
     {K : ℕ} {Ω : Set EuclN}
     (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
@@ -297,8 +249,7 @@ private lemma sharp_wkpNorm_sub_le
   rw [h_neg_eq]
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- The layer-`A` coefficient `∂_b (weightedInvGramDerivOnEuclid g α a b lₙ)`
-is `C^∞` on the open chart target. -/
+
 private lemma sharp_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -324,7 +275,6 @@ private lemma sharp_layerA_coeff_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single b (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
-/-- Chart-locality-free twin of `sharp_eigen_inv_one_le`. -/
 lemma sharp_eigen_inv_one_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -348,7 +298,6 @@ lemma sharp_eigen_inv_one_le
         exact one_ne_zero h_norm.symm)
   exact (one_le_inv₀ hμ_unit.1).mpr hμ_unit.2
 
-/-- Chart-locality-free twin of `sharp_ofReal_const_pow_eigen_inv_le`. -/
 lemma sharp_ofReal_const_pow_eigen_inv_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -360,7 +309,6 @@ lemma sharp_ofReal_const_pow_eigen_inv_le
   exact pow_le_pow_right₀
     (sharp_eigen_inv_one_le (I := I) (M := M) g r s i) hke
 
-/-- Chart-locality-free twin of `sharp_iter_memWkp`. -/
 private lemma sharp_iter_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -378,7 +326,6 @@ private lemma sharp_iter_memWkp
   exact (eigenvectorChartIteratedPartial_wkpNorm_le_of_memWkp
     (I := I) (M := M) g r s i α P₀ j K h_chart_cpt idx).1
 
-/-- Chart-locality-free twin of `sharp_layerA_wkpNorm_le`. -/
 lemma sharp_layerA_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -609,7 +556,6 @@ lemma sharp_layerA_wkpNorm_le
     rw [Finset.sum_mul, Finset.sum_mul]
   rw [hpull1, hpull2, hcollapse]
 
-/-- Chart-locality-free twin of `sharp_layerB_wkpNorm_le`. -/
 lemma sharp_layerB_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -870,7 +816,6 @@ lemma sharp_layerB_wkpNorm_le
     rw [Finset.sum_mul, Finset.sum_mul]
   rw [hpull1, hpull2, hcollapse]
 
-/-- Chart-locality-free twin of `sharp_layerC_wkpNorm_le`. -/
 lemma sharp_layerC_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -922,7 +867,6 @@ lemma sharp_layerC_wkpNorm_le
   refine le_trans (mul_le_mul' (le_refl _) (hAtomC_bd i)) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hKc_nn, mul_assoc Kc CatomC]
 
-/-- Chart-locality-free twin of `sharp_layerD_wkpNorm_le`. -/
 lemma sharp_layerD_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -966,7 +910,6 @@ lemma sharp_layerD_wkpNorm_le
   refine le_trans (mul_le_mul' (le_refl _) (hAtomD_bd i)) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hKc_nn, mul_assoc Kc CatomD]
 
-/-- Chart-locality-free twin of `sharp_layerE_wkpNorm_le`. -/
 lemma sharp_layerE_wkpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)
@@ -1032,8 +975,7 @@ lemma sharp_layerE_wkpNorm_le
 
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp`. -/
+
 theorem eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

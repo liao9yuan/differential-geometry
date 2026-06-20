@@ -10,45 +10,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.Topology.Algebra.Support
 
-/-!
-# Divergence theorem on a closed Riemannian manifold
-
-For a smooth Riemannian metric `g` on a closed (compact and boundaryless)
-smooth manifold `M`, and a smooth tangent section `X`, the integral of the
-global divergence `divergence_g g X` against the canonical Riemannian volume
-measure vanishes:
-$$\int_M \operatorname{div}_g(X)\,d\mu_g = 0.$$
-
-This is the divergence theorem for a manifold without boundary. The proof
-proceeds by chart-localization through the canonical chart-atlas partition of
-unity:
-
-1. Decompose the global integral into a finite sum of chart-local integrals
-   weighted by the partition of unity (from `Family.lean`).
-2. On each chart, identify the global divergence with the Voss–Weyl chart-local
-   divergence (`voss_weyl_divergence_formula`).
-3. Apply the chart-local integration-by-parts identity (`chart_local_ibp`)
-   with the partition function as the test function — this turns each summand
-   into the integral of `tangentSectionAction X (ρ_α)` against the chart-local
-   measure.
-4. Use chart-invariance of the chart-local measure on overlap to rewrite each
-   chart-local integral as an integral against the global measure.
-5. Sum over the partition: by linearity of the tangent action and the fact
-   that the partition sums to `1`, the total integrand is `tangentSectionAction
-   X` of a constant function, which vanishes.
-
-## Main results
-
-* `chartLocalMeasure_integral_eq_of_support_in_overlap`: Bochner analogue of
-  `chartLocalMeasure_lintegral_eq_of_support_in_overlap`.
-* `integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart`: for a
-  function `f : M → ℝ` continuous and supported inside a single chart, the
-  integral against the global measure equals the integral against the
-  chart-local measure at any chart whose source contains the support.
-* `integral_divergence_eq_zero_of_compact`: the divergence theorem on a closed
-  Riemannian manifold.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -70,9 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Bochner version of `chartLocalMeasure_lintegral_eq_of_support_in_overlap`:
-if `f : M → ℝ` vanishes outside the overlap of two chart sources, its Bochner
-integrals against the two chart-local measures agree. -/
 lemma chartLocalMeasure_integral_eq_of_support_in_overlap
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M)
     (f : M → ℝ)
@@ -91,10 +49,6 @@ lemma chartLocalMeasure_integral_eq_of_support_in_overlap
       = ∫ x, f x ∂((chartLocalMeasure (I := I) g x₁).restrict U)
   rw [chartLocalMeasure_restrict_overlap_eq (I := I) g x₀ x₁]
 
-/-- A continuous real-valued function on a compact manifold whose topological
-support sits inside a chart source is integrable against the chart-local
-measure at that chart. The chart-local measure is finite on the support
-because the support is compact and contained in the chart source. -/
 private lemma integrable_of_compactSupport_subset_chartSource
     [CompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -135,11 +89,6 @@ private lemma integrable_of_compactSupport_subset_chartSource
           rw [setLIntegral_const, one_mul]
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
-/-- If `f : M → ℝ` is continuous on a closed `M` and `tsupport f ⊆ (chartAt H
-α₀).source`, then `∫ f dμ_g = ∫ f d(chartLocalMeasure g α₀)`. The identity
-holds because the global measure decomposes as a finite sum over the
-chart-atlas partition of unity, each summand can be transferred to the chart at
-`α₀` via the overlap-equality lemma, and the partition sums to `1`. -/
 lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -213,10 +162,6 @@ lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart
     exact ρ.sum_finsupport' x (mem_univ x) hfins
   rw [hsum_one, mul_one]
 
-/-- **Divergence theorem on a closed Riemannian manifold.**
-For any smooth tangent section `X` on a closed (compact and boundaryless)
-smooth Riemannian manifold `(M, g)`, the integral of the divergence
-`divergence_g g X` against the canonical Riemannian volume measure vanishes. -/
 theorem integral_divergence_eq_zero_of_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

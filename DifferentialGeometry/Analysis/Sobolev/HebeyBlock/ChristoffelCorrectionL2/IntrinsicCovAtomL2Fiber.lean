@@ -1,52 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2Atoms
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberFromModelOpNorm
 
-/-!
-# Fibre-form covariant-derivative atom `L²` bound
-
-The per-`α` covariant-derivative atom `L²` bound
-`exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq`
-controls the `L²`-norm of the partition-of-unity-weighted square-root sum
-
-```
-ρ_α(b) · √(∑ₖ ‖(triv α).continuousLinearMapAt b (∇^chart_k S)‖²)
-```
-
-where the per-`k` covariant-derivative atoms `∇^chart_k S` are measured
-through the chart-`α` forward trivialisation in the honest model-space norm on
-`TensorRSModel r s ℝ E`.
-
-This file converts that bound into the **intrinsic fibre-norm form**, in which
-each per-`k` atom is measured by the genuine Riemannian fibre norm on
-`TensorRSSpace r s I b` induced by the tangent-bundle metric `g`:
-
-```
-ρ_α(b) · √(∑ₖ ‖∇^chart_k S‖²_Riem).
-```
-
-The conversion is unconditional (no chart-locality predicate). The engine is
-the unconditional uniform op-norm bound on the chart-`(r, s)` inverse
-trivialisation
-`tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional`,
-applied over the compact `tsupport` of the chart-`α` partition of unity. The
-round-trip identity `(triv α).symmL (continuousLinearMapAt X) = X` on the
-trivialisation base set turns the inverse-trivialisation op-norm bound into a
-pointwise estimate `‖X‖_Riem ≤ C · ‖(triv α).continuousLinearMapAt X‖_model`
-on the fibre, which is then squared, summed over `k`, square-rooted, and
-integrated. The squared op-norm constant is absorbed into the final per-`α`
-`L²` constant.
-
-The resulting atom matches, up to the `eLpNorm`-vs-squared-integral packaging,
-the covariant-derivative summand in the intrinsic G1 fibre-norm gradient
-decomposition `g_inner_gradFun_le_pou_weighted_fiber_norm_atoms_on_pouTsupport_h1`,
-so it is directly consumable by the downstream A.3 assembly.
-
-## Public theorem
-
-* `exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm` — the
-  fibre-norm per-`α` covariant-derivative atom `L²` bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -81,23 +35,17 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-compact (closed in a compact ambient space). -/
 private lemma covAtom_pouTsupport_isCompact (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact
 
-/-- The `tsupport` of the chart-atlas partition-of-unity weight at `α` is
-contained in the chart-`α` source. -/
 private lemma covAtom_pouTsupport_subset_chartSource (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   chartAtlasPOU_isSubordinate (I := I) (M := M) α
 
-/-- Membership in the chart-`α` source upgrades to membership in the
-chart-`(r, s)` trivialisation base set. -/
 private lemma covAtom_mem_baseSet_of_mem_chartSource
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source) :
     b ∈ (trivializationAt (TensorRSModel r s ℝ E)
@@ -117,24 +65,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-`α` fibre-norm covariant-derivative atom `L²` bound.** For a closed
-Riemannian manifold `(M, g)`, ranks `(r, s)`, and a chart base point `α`,
-there is a non-negative real constant `C` (depending only on `(g, r, s, α)`)
-such that for every smooth compactly-supported `H¹` tensor section
-`S : SmoothCcTensorH1 g r s` and all multi-indices `Idx, Jdx`,
 
-```
-eLpNorm
-    (fun b ↦ ρ_α(b) · √(∑ₖ ‖∇^chart_k S(b)‖²))
-    2 (riemannianVolumeMeasure g) ≤
-  ENNReal.ofReal C · (‖S‖₊ : ℝ≥0∞),
-```
-
-where `ρ_α` is the chart-atlas partition-of-unity weight at `α` and the fibre
-norm `‖·‖` on `TensorRSSpace r s I b` is the `g`-induced
-`Bundle.RiemannianBundle` norm (installed via `letI`), matching the convention
-of the unconditional op-norm bounds. The constant `C` is independent of `S`,
-of the multi-indices, and of the base point. -/
 theorem exists_eLpNorm_pou_mul_sum_fiber_chart_cov_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

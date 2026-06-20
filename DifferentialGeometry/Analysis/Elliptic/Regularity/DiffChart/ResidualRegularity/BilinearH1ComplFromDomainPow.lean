@@ -5,61 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalIdentityIntegral
 
-/-!
-# Constructor for `DiffChartBilinearH1ComplData` from `laplacianDomainPow g 2`
-
-For `u_h ∈ laplacianDomainPow g 2` on a closed Riemannian manifold `(M, g)`,
-this file constructs an instance of `DiffChartBilinearH1ComplData g α`.
-
-The constructor proceeds in two layers:
-
-* The "base" portion is built unconditionally from
-  `chartBilinearH1ComplData_of_laplacianDomain` applied to the underlying
-  `laplacianDomain` membership of `u_h`. This gives `base`, and lets us set
-  `u_chart_deriv := base.weak_partial direction` so that the
-  `u_chart_deriv_isWeakPartial` and `u_chart_deriv_locally_memLp` fields
-  follow directly from the corresponding `base.weak_partial_*` fields.
-
-* The second-order weak partials `weak_partial_deriv i` are built from
-  `chosenWeakPartial'` applied twice to the canonical chart-pushed
-  representative. Their local-`L²` regularity is discharged unconditionally
-  via the two-sided `H²` regularity from `laplacianDomainPow_two_h2_plus_rhs_h2`.
-  The `_isWeakPartial` witnesses (relating the chosen second weak partials
-  to the base data `weak_partial i`) are discharged via a ball-cover
-  uniqueness bridge that relates the chosen weak partial of
-  `chartPushed POU α u_h.coeFn` to `D.base.weak_partial i` on every open
-  ball with compact closure in the chart target. This avoids the boundary
-  degeneracy of the chart-pulled weighted measure.
-
-* The chart-side first-order derivative `f_chart_deriv` is constructed
-  canonically as `chosenWeakPartial' 2 direction base.f_chart chartTarget`.
-  Both its weak-partial witness (`f_chart_deriv_isWeakPartial`) and its
-  local-`L²` regularity (`f_chart_deriv_locally_memLp`) are discharged from
-  a single `MemW1p 2` hypothesis on `D.base.f_chart`.
-
-* This module also provides a *simplified* constructor variant
-  `diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_residual` whose
-  `MemW1p 2` hypothesis is on a smaller "residual" function: the chart-pulled
-  combination `-2 g(∇ρα, ∇u_h) - Δρα · u_h` (i.e. `fHLeibniz` with its
-  `ρα · (1-Δ_g) u_h` summand removed). The Piece-1 contribution
-  `chartPushed POU α (laplacianDomain.preimage u_h).coeFn` is recovered
-  unconditionally from the two-sided `H²` regularity of
-  `laplacianDomainPow g 2` (see `laplacianDomainPow_two_h2_plus_rhs_h2`).
-  Closure of `MemW1p 2` under addition then yields `MemW1p 2 base.f_chart`,
-  matching the original hypothesis. This reduces the chart-side analytical
-  burden to the two Leibniz cross-terms only.
-
-The differentiated variational identity is accepted as the second remaining
-input hypothesis.
-
-## Main definitions
-
-* `diffChartBilinearH1ComplData_of_laplacianDomainPow_two` — the original
-  constructor taking the full `MemW1p 2 base.f_chart` hypothesis.
-* `diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_residual` — the
-  simplified constructor taking `MemW1p 2 fChartResidual` instead.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -96,8 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The canonical chosen second weak partial of `chartPushed POU α u_h.coeFn`
-in coordinate directions `j, i`. -/
 noncomputable def chosenSecondPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -114,8 +57,6 @@ noncomputable def chosenSecondPartialChartPushedU
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
 
-/-- The canonical chosen second weak partial lies in `MemLp 2` of the plain
-volume restricted to `chartTargetEuclid α` (globally). -/
 private lemma chosenSecondPartialChartPushedU_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -152,8 +93,6 @@ private lemma chosenSecondPartialChartPushedU_memLp_two
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_inner_memW1p j
 
-/-- Local-`L²` regularity: the canonical chosen second weak partial lies in
-`MemLp 2` of `volume.restrict K` for every compact `K ⊆ chartTargetEuclid α`. -/
 theorem chosenSecondPartialChartPushedU_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -182,9 +121,6 @@ theorem chosenSecondPartialChartPushedU_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-- The inner chosen weak partial of `chartPushed POU α u_h.coeFn` on the chart
-target — defined as `chosenWeakPartial' 2 i` applied to that function on
-`chartTargetEuclid α`. -/
 private noncomputable def chosenInnerPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -197,8 +133,6 @@ private noncomputable def chosenInnerPartialChartPushedU
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
 
-/-- The chart-pushed function `chartPushed POU α u_h.coeFn` is in `MemW1p 2`
-on the chart target for `u_h ∈ laplacianDomainPow g 2`. -/
 private lemma chartPushed_memW1p_of_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -222,8 +156,6 @@ private lemma chartPushed_memW1p_of_laplacianDomainPow_two
     exact h_memWkpChart α
   exact h_memWkp_2.memW1p
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the inner chosen weak partial is `MemW1p 2`
-on the chart target. -/
 private lemma chosenInnerPartialChartPushedU_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -248,8 +180,6 @@ private lemma chosenInnerPartialChartPushedU_memW1p
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h_step
   exact h_step
 
-/-- The inner chosen weak partial is a weak `i`-partial of
-`chartPushed POU α u_h.coeFn` on the chart target. -/
 private lemma chosenInnerPartialChartPushedU_isWeakPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -267,8 +197,6 @@ private lemma chosenInnerPartialChartPushedU_isWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
     h_chartPushed_memW1p i
 
-/-- Conversion: a function in `MemLp 2 (volume.restrict K)` for compact `K`
-has `LocallyIntegrable f (volume.restrict Ω')` for every open `Ω' ⊆ K`. -/
 private lemma locallyIntegrable_of_memLp_two_compact_open_subset
     (K Ω' : Set EuclN) (_hK_compact : IsCompact K) (hΩ'_subset_K : Ω' ⊆ K)
     (hΩ'_meas : MeasurableSet Ω')
@@ -284,9 +212,6 @@ private lemma locallyIntegrable_of_memLp_two_compact_open_subset
     rw [← h_eq]; exact hf_memLp_K.restrict Ω'
   exact hf_memLp_Ω'.locallyIntegrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
 
-/-- **Ball-cover uniqueness bridge**: on every open ball `Ω'` with compact
-closure `K ⊆ chartTargetEuclid α`, the chart-pushed weak partial coercion
-and the inner chosen weak partial are ae-equal w.r.t. `volume.restrict Ω'`. -/
 private lemma chartPushedWeakPartialLp_ae_eq_chosenInner_on_open
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -375,10 +300,6 @@ private lemma chartPushedWeakPartialLp_ae_eq_chosenInner_on_open
     h_chartPushed_restr h_chosenInner_restr
     h_chartPushed_locInt h_chosenInner_locInt
 
-/-- The canonical second chosen weak partial is a weak `k`-partial of
-`(chartPushedWeakPartialLp g α i _ u_h).coeFn` (=
-`(chartBilinearH1ComplData_of_laplacianDomain ..).weak_partial i`) on
-`chartTargetEuclid α`, unconditionally. -/
 theorem hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -579,8 +500,6 @@ theorem hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
   rw [h_LHS_eq, h_RHS_eq]
   exact h_identity
 
-/-- The canonical chart-side derivative: the chosen weak `direction`-partial
-of `D.base.f_chart` on `chartTargetEuclid α`. -/
 noncomputable def chosenFChartDeriv
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -594,9 +513,6 @@ noncomputable def chosenFChartDeriv
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
       (I := I) (M := M) α)
 
-/-- Given a `MemW1p 2` witness for `D.base.f_chart` on `chartTargetEuclid α`,
-the canonical chart-side derivative is a weak `direction`-partial of
-`D.base.f_chart` on `chartTargetEuclid α`. -/
 lemma chosenFChartDeriv_isWeakPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -619,9 +535,6 @@ lemma chosenFChartDeriv_isWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
     h_memW1p direction
 
-/-- Given a `MemW1p 2` witness for `D.base.f_chart` on `chartTargetEuclid α`,
-the canonical chart-side derivative is in `MemLp 2` of the volume restricted
-to the whole chart target. -/
 private lemma chosenFChartDeriv_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -641,8 +554,6 @@ private lemma chosenFChartDeriv_memLp
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_memW1p direction
 
-/-- Local `L²` regularity for `chosenFChartDeriv` on every compact subset of
-`chartTargetEuclid α`. -/
 private lemma chosenFChartDeriv_locally_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -672,24 +583,6 @@ private lemma chosenFChartDeriv_locally_memLp
   rw [← h_eq]
   exact h_global.restrict K
 
-/-- **Constructor for `DiffChartBilinearH1ComplData g α` from
-`u_h ∈ laplacianDomainPow g 2`.**
-
-The constructor fills the `base` data and the first-order `u_chart_deriv`
-field directly from `u_h ∈ laplacianDomainPow g 2`. The first-order
-`f_chart_deriv` is constructed canonically via `chosenWeakPartial'` from a
-single `MemW1p 2` hypothesis on `D.base.f_chart`, and both its weak-partial
-witness and local-`L²` regularity are discharged. The second-order
-`weak_partial_deriv` is constructed canonically from the chart-pushed
-`MemWkp 2 2` data, and both its local-`L²` regularity and its
-`weak_partial`-witness against `D.base.weak_partial i` are discharged
-unconditionally (via the ball-cover uniqueness bridge).
-
-The residual hypotheses are:
-* `h_base_f_chart_memW1p`: a `MemW1p 2` witness for `D.base.f_chart` on
-  `chartTargetEuclid α`. Requires chart-side `H¹` analysis of `fHLeibniz`.
-* `h_identity`: the differentiated variational identity. Requires an
-  integration-by-parts argument applied to the base identity. -/
 noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -775,9 +668,6 @@ noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two
       (I := I) (M := M) g α hu_h i direction hK_compact hK_in
   differentiated_variational_identity := h_identity
 
-/-- The canonical chart-pushed function associated with the `(1-Δ_g)`-preimage
-piece of `fHLeibniz`: `chartPushed POU α (laplacianDomain.preimage u_h).coeFn`.
-This is the chart-pullback of `ρα · (1-Δ_g) u_h`. -/
 noncomputable def fChartPiecePreimage
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -789,8 +679,6 @@ noncomputable def fChartPiecePreimage
           (I := I) (M := M) g 1 hu_h⟩ :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)
 
-/-- `fChartPiecePreimage` lies in `MemWkp 2 2` on the chart target,
-unconditionally for `u_h ∈ laplacianDomainPow g 2`. -/
 lemma fChartPiecePreimage_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -804,8 +692,6 @@ lemma fChartPiecePreimage_memWkp_two_two
   exact (laplacianDomainPow_two_h2_plus_rhs_h2
     (I := I) (M := M) g hu_h).2.1 α
 
-/-- `fChartPiecePreimage` lies in `MemW1p 2` on the chart target,
-unconditionally for `u_h ∈ laplacianDomainPow g 2`. -/
 private lemma fChartPiecePreimage_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -818,9 +704,6 @@ private lemma fChartPiecePreimage_memW1p
     (I := I) (M := M) g α hu_h
   exact h_memWkp.memW1p
 
-/-- The `Lp` class realising `ρα · (1-Δ_g) u_h`: the smooth-coefficient
-multiplication of `(laplacianDomain.preimage u_h)` by the partition-of-unity
-weight `ρα`. -/
 private noncomputable def smoothMulLpRhoPreimage
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -831,9 +714,6 @@ private noncomputable def smoothMulLpRhoPreimage
       ⟨u_h, laplacianDomainPow_succ_subset_laplacianDomain
         (I := I) (M := M) g 1 hu_h⟩)
 
-/-- The `Lp` class realising the residual `fHLeibniz − ρα · (1-Δ_g) u_h`,
-which equals `-2 • gradInnerCLM ρα u_h - smoothMulLp Δρα u_h_Lp` as an `Lp`
-class. -/
 noncomputable def fHLeibnizResidualLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -844,8 +724,6 @@ noncomputable def fHLeibnizResidualLp
       (laplacianOfChartPOU (I := I) (M := M) g α)
       (H1ComplToLp (I := I) (M := M) g u_h)
 
-/-- Decomposition of `fHLeibniz` as an `Lp` class: it splits into the
-"ρα · (1-Δ_g) u_h" piece plus the residual. -/
 private lemma fHLeibniz_eq_piecePreimage_add_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -871,10 +749,6 @@ private lemma fHLeibniz_eq_piecePreimage_add_residual
   rw [h_diff_eq]
   abel
 
-/-- `chartPushedRawLpFromLp` is additive at the coefficient level.
-Specifically, `chartPushedRawLpFromLp (F + G) =ᵐ chartPushedRawLpFromLp F +
-chartPushedRawLpFromLp G` on the chart-pulled weighted measure restricted to
-the chart target. -/
 private lemma chartPushedRawLpFromLp_coeFn_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (F G : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -948,10 +822,6 @@ private lemma chartPushedRawLpFromLp_coeFn_add
   rw [hy_FG, hy_chart, h_chartPushedRaw_sum_pointwise y]
   rw [← hy_F, ← hy_G]
 
-/-- The chart-pullback of `smoothMulLpRhoPreimage g α hu_h` is ae-equal to
-`fChartPiecePreimage g α hu_h` on the chart-pulled weighted measure restricted
-to chartTarget. Hence the chart-pushed Lp class of `ρα · (1-Δ_g) u_h` is the
-canonical chart-pushed function with POU multiplier of `(1-Δ_g) u_h`. -/
 private lemma chartPushedRawLpFromLp_smoothMulLpRhoPreimage_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1030,9 +900,6 @@ private lemma chartPushedRawLpFromLp_smoothMulLpRhoPreimage_coeFn_aeEq
         (I := I) (M := M) g 1 hu_h⟩ :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) hy_in).symm
 
-/-- **Key decomposition lemma**: `base.f_chart` equals
-`fChartPiecePreimage g α hu_h + chartPushedRawLpFromLp (fHLeibnizResidualLp g α u_h).coeFn`
-as functions on the chart target (ae w.r.t. plain volume restricted to chartTarget). -/
 private lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1066,8 +933,6 @@ private lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled
   filter_upwards [h_chartPushedRaw_add_ae, h_piece1] with y hy_add hy_piece1
   rw [hy_add, hy_piece1]
 
-/-- Mutual absolute continuity: `volume.restrict chartTarget ≪
-chartPulledWeightedMeasure.restrict chartTarget`. -/
 private lemma vol_abs_chartPulledWeighted_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict
@@ -1109,9 +974,6 @@ private lemma vol_abs_chartPulledWeighted_on_chartTarget
     densityOnEuclid_pos (I := I) g α hy_chart
   exact (ENNReal.ofReal_pos.mpr h_pos).ne'
 
-/-- `base.f_chart` equals `fChartPiecePreimage + (chartPushedRawLpFromLp
-fHLeibnizResidualLp).coeFn` ae with respect to plain volume restricted to
-`chartTarget`. -/
 lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled_on_vol
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1132,8 +994,6 @@ lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled_on_vol
     (base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled
       (I := I) (M := M) g α hu_h)
 
-/-- The chart-pulled "residual" function: the coeFn of
-`chartPushedRawLpFromLp (fHLeibnizResidualLp g α u_h)`. -/
 noncomputable def fChartResidual
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) : EuclN → ℝ :=
@@ -1143,8 +1003,6 @@ noncomputable def fChartResidual
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α))) : EuclN → ℝ)
 
-/-- **Reduction lemma**: given `MemW1p 2 fChartResidual chartTarget`, we get
-`MemW1p 2 base.f_chart chartTarget`. -/
 lemma base_f_chart_memW1p_from_residual_memW1p
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1179,14 +1037,6 @@ lemma base_f_chart_memW1p_from_residual_memW1p
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemW1p_congr_ae hΩ
     h_decomp.symm).mp h_sum_memW1p
 
-/-- **Constructor for `DiffChartBilinearH1ComplData g α` from
-`u_h ∈ laplacianDomainPow g 2`, simplified residual hypothesis variant.**
-
-This variant takes a `MemW1p 2` hypothesis only on the chart-pulled residual
-`fChartResidual` (the chart-pullback of `-2 g(∇ρα, ∇u_h) - Δρα · u_h`), rather
-than the full `MemW1p 2 base.f_chart`. The Piece 1 (chart-pulled `ρα · (1-Δ_g)
-u_h`) is handled unconditionally via the two-sided `H²` regularity from
-`laplacianDomainPow_two_h2_plus_rhs_h2`. -/
 noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -1243,8 +1093,6 @@ noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_res
       (I := I) (M := M) g α hu_h h_residual_memW1p)
     h_identity
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the canonical chart-pushed function
-of `u_h` lies in `MemWkp 2 2 chartTargetEuclid` at every chart point `α`. -/
 theorem laplacianDomainPow_two_chartPushed_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1261,9 +1109,6 @@ theorem laplacianDomainPow_two_chartPushed_memWkp_two_two
     (I := I) (M := M) g hu_h).1.1
   exact h_memWkpChart α
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, the canonical chart-pushed function
-of the `Lp`-side preimage `(1 - Δ_g) u_h` lies in
-`MemWkp 2 2 chartTargetEuclid` at every chart point `α`. -/
 theorem laplacianDomainPow_two_preimage_chartPushed_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

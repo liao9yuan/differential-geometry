@@ -1,41 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.ChartAlphaPouAlphaPouBetaCovBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBound
 
-/-!
-# Chart-`α` POU(α)²-weighted L² bound for the chart-pulled representation by the
-# order-`0` tensor Sobolev norm
-
-For a closed Riemannian manifold `(M, g)` modelled on a finite-dimensional real
-inner-product space `E`, fixed tensor ranks `(r, s)`, and a chart base point
-`α : M`, this file ships the headline bound
-
-```
-∫⁻ y in chartTargetEuclid α,
-    ENNReal.ofReal
-      ((POU(α)((extChartAt α).symm (toEuclidean.symm y)))^2 *
-        ‖tensorRSChartE_section_repr r s α T.toSection
-            ((extChartAt α).symm (toEuclidean.symm y))‖^2)
-    ∂(volume : Measure EuclN) ≤
-  ENNReal.ofReal K * (wtwokTwoNorm g 0 T) ^ 2
-```
-
-with `K ≥ 0` depending only on the manifold, the metric, and the ranks —
-independent of the chart base point `α` and the tensor section `T`.
-
-## Strategy
-
-The bound chains the order-0 chart-target POU-weighted L² bound
-`chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq` (which bounds
-the LHS by a constant times the finite double sum
-`Σ_(Idx, Jdx) (wkpNorm 0 2 α Idx Jdx)²`) with the elementary
-`ℝ≥0∞`-Cauchy–Schwarz double bound and an `ENNReal.le_tsum` step to package the
-finite double sum into the squared aggregated norm `(wtwokTwoNorm g 0 T)²`.
-
-The headline LHS shape `ENNReal.ofReal (POU² · ‖repr‖²)` is identified with the
-existing `ENNReal.ofReal POU² · ENNReal.ofReal ‖repr‖²` factorisation via
-`ENNReal.ofReal_mul`.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -70,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 private local instance : MeasurableSpace E := borel E
@@ -78,9 +42,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- For any fixed chart base point `α : M`, the finite double sum of squared
-chart-component `wkpNorm 0 2` is bounded by the squared aggregated tensor
-Sobolev norm `(wtwokTwoNorm g 0 T)²`. -/
 private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -166,31 +127,6 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     _ = (S α) ^ 2 := by rw [hSα_eq]
     _ ≤ (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := h_Sα_sq_le_wt_sq
 
-/-- **Chart-`α` POU(α)²-weighted L² bound for the chart-pulled representation
-by the order-`0` tensor Sobolev norm.**
-
-For any closed Riemannian manifold `(M, g)`, fixed tensor ranks `(r, s)`, and
-chart base point `α : M`, there exists a non-negative real constant `K`
-(depending only on the manifold, the metric, and the ranks; independent of the
-tensor section `T`) such that for every smooth compactly-supported
-`(r, s)`-tensor section `T : SmoothCcTensor g r s`,
-
-```
-∫⁻ y in chartTargetEuclid α,
-    ENNReal.ofReal
-      ((POU(α)((extChartAt α).symm (toEuclidean.symm y)))^2 *
-        ‖tensorRSChartE_section_repr r s α T.toSection
-            ((extChartAt α).symm (toEuclidean.symm y))‖^2)
-    ∂(volume : Measure EuclN) ≤
-  ENNReal.ofReal K * (wtwokTwoNorm g 0 T) ^ 2.
-```
-
-The bound applies the order-`0` chart-target POU-weighted L² bound
-`chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq` to obtain the
-finite double sum `Σ_(Idx, Jdx) (wkpNorm 0 2 α Idx Jdx)²` on the right, then
-bounds this finite double sum by the squared aggregated tensor Sobolev norm
-`(wtwokTwoNorm g 0 T)²` via the elementary `ℝ≥0∞`-Cauchy–Schwarz double bound
-and the `ENNReal.le_tsum` chart-aggregation step. -/
 theorem chart_α_pou_sq_repr_L2_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

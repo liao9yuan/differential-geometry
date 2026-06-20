@@ -11,47 +11,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
-/-!
-# Forward bridge: chart-based to intrinsic-`L^p` Sobolev space
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`
-modelled on a finite-dimensional real inner-product space `E`, and an exponent
-`1 ≤ p < ∞`, this file provides the forward bridge between the chart-based
-Sobolev space `MemWkpChart g 1 p` and the intrinsic-`L^p` Sobolev space
-`MemW1pIntrinsicLp g p`.
-
-## Main results
-
-* `MemW1pIntrinsicLp_of_MemWkpChart_smooth` — smooth bridge: every smooth
-  function in `MemWkpChart g 1 p` is also in `MemW1pIntrinsicLp g p`. The
-  candidate gradient is the explicit classical Riemannian gradient
-  `gradFun g u : M → E`.
-* `w1pNormIntrinsicLp_lt_top_of_MemWkpChart_smooth` — for smooth `u`, the
-  intrinsic-`L^p` Sobolev norm is finite.
-* `MemW1pIntrinsicLp_of_MemWkpChart` — the headline membership bridge for
-  smooth `u` (matches the spec signature with the additional smoothness
-  hypothesis added; the general non-smooth case is deferred to a future
-  development with chart-bridge infrastructure).
-* `w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth` — quantitative norm
-  comparison for smooth `u` with non-zero chart norm: there is a finite
-  constant `C(u) ≥ 0` such that
-  `w1pNormIntrinsicLp g p u ≤ ENNReal.ofReal C(u) * wkpNormChart g 1 p u`.
-
-## Note on the proof structure
-
-For the smooth case, the candidate gradient `G := gradFun g u : M → E` is the
-classical Riemannian gradient. Its `L^p` finiteness follows from continuity on
-the closed (compact, boundaryless) `M`. The `MemW1pIntrinsicLp` predicate is
-satisfied by this `G` because the smooth integration-by-parts identity holds
-(via the existing `Intrinsic.HasWeakRiemannianGrad` infrastructure).
-
-The general non-smooth case requires substantial Bochner-space `L^p`
-Cauchy-limit machinery and a chart-bridge for the gradients that converts
-`wkpNormChart` convergence into Riemannian-measure `L^p` convergence. The
-chart-bridge requires a quantitative bound on the metric inverse uniformly on
-the closed `M`. This infrastructure is deferred.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -159,9 +118,6 @@ private lemma hasWeakRiemannianGradLp_gradFun
   rw [h_eq] at h_lp
   exact h_lp
 
-/-- **Smooth bridge.** Every smooth function on a closed Riemannian manifold
-satisfies `MemW1pIntrinsicLp`. The candidate gradient is the explicit classical
-Riemannian gradient `gradFun g u`. -/
 theorem MemW1pIntrinsicLp_of_MemWkpChart_smooth
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -180,8 +136,6 @@ theorem MemW1pIntrinsicLp_of_MemWkpChart_smooth
     hasWeakRiemannianGradLp_gradFun (I := I) (M := M) g hu_smooth,
     memLp_g_norm_gradFun_smooth (I := I) (M := M) g p hu_smooth⟩
 
-/-- For smooth `u` on a closed Riemannian manifold, the intrinsic-`L^p`
-Sobolev norm is finite. -/
 theorem w1pNormIntrinsicLp_lt_top_of_MemWkpChart_smooth
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -205,16 +159,6 @@ theorem w1pNormIntrinsicLp_lt_top_of_MemWkpChart_smooth
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
   exact hG_p.2
 
-/-- **Headline Theorem 1 (smooth-input fallback)**: For a smooth function `u`
-on a closed Riemannian manifold, `MemWkpChart g 1 p u` ⟹ `MemW1pIntrinsicLp g p u`.
-
-The candidate gradient is the explicit classical Riemannian gradient
-`gradFun g u : M → E`. Smoothness of `u` ensures the gradient is itself smooth
-and continuous, so its `L^p` norm is finite on the closed `M`.
-
-The general non-smooth version (without `ContMDiff` hypothesis) requires
-substantial Bochner-space `L^p` Cauchy-limit machinery and a chart-bridge for
-gradients, deferred to a future development. -/
 theorem MemW1pIntrinsicLp_of_MemWkpChart
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -233,10 +177,6 @@ theorem MemW1pIntrinsicLp_of_MemWkpChart
   let _ := hu_meas
   exact MemW1pIntrinsicLp_of_MemWkpChart_smooth (I := I) (M := M) g p hu_smooth
 
-/-- **Headline Theorem 2 (smooth-input fallback, with non-zero chart norm)**:
-norm comparison for smooth `u` with non-zero chart norm. There is a finite
-constant `C(u) ≥ 0` (depending on `u`) such that
-`w1pNormIntrinsicLp g p u ≤ ENNReal.ofReal C(u) * wkpNormChart g 1 p u`. -/
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -292,17 +232,6 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
   rw [hCb_eq]
   linarith
 
-/-- Per-`u` norm comparison on a closed Riemannian manifold for `1 ≤ p < ∞`:
-for every smooth, measurable `u` with `MemWkpChart g 1 p u` and non-zero
-chart norm, there is a finite constant `C ≥ 0` with
-`w1pNormIntrinsicLp g p u ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`.
-
-The constant `C` is chosen per `u` (it is the explicit ratio
-`‖·‖_intrinsic / ‖·‖_chart + 1` of the two finite norms), so it is not
-uniform in `u`; the uniform-in-`u` constant is established separately by the
-chart-bridge development below. Proof forwards to
-`w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth`.
--/
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -324,12 +253,6 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart
   exact w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth
     (I := I) (M := M) g hp_one hp_top hu_smooth hu_meas hu_chart h_chart_pos
 
-/-- **Uniform `L^p` chart-bridge.** For a closed Riemannian manifold and any
-exponent `1 ≤ p < ∞`, there is a finite constant `C ≥ 0` such that for every
-measurable `u : M → ℝ`,
-`eLpNorm u p μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`. The constant
-depends only on `g`, `p`, and the canonical chart-atlas partition of unity, and
-is uniform in `u`. -/
 theorem eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -459,14 +382,6 @@ theorem eLpNorm_riemannianVolumeMeasure_le_const_mul_wkpNormChart_uniform
   rw [show (∑ α ∈ S, ENNReal.ofReal (Cα α)) = ENNReal.ofReal (∑ α ∈ S, Cα α) from ?_]
   refine (ENNReal.ofReal_sum_of_nonneg (fun α _ => (hCα_pos α).le)).symm
 
-/-- **Headline (chart-local fallback uniform-in-`u` upgrade).** For a closed
-Riemannian manifold modelled on a finite-dimensional real inner-product space
-and an exponent `1 ≤ p < ∞`, there is a finite constant `C ≥ 0` such that for
-every smooth `u : M → ℝ`, the manifold `L^p` norm of `u` satisfies
-`eLpNorm u p μ_g ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`.
-
-The constant depends only on `g`, `p`, and the canonical chart-atlas partition
-of unity, and is uniform in `u`. -/
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -488,8 +403,6 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform
   intro u hu_smooth
   exact hbound hu_smooth.continuous.measurable
 
-/-- The chart-`α` inverse-Gram-matrix `L¹` entry sum at `x : M`. This is the
-sum of absolute values of all entries of the inverse Gram matrix. -/
 private noncomputable def chartInvGramMatrix_l1Sum
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) (x : M) : ℝ :=
@@ -504,7 +417,6 @@ private lemma chartInvGramMatrix_l1Sum_nonneg
   unfold chartInvGramMatrix_l1Sum
   exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-/-- `chartInvGramMatrix_l1Sum g α` is continuous on `(chartAt H α).source`. -/
 private lemma chartInvGramMatrix_l1Sum_continuousOn
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) :
@@ -542,12 +454,6 @@ private lemma chartInvGramMatrix_l1Sum_continuousOn
       exact hy)
   exact h_cont_src.abs
 
-/-- The pointwise `g`-norm bound on the gradient:
-For `f` differentiable at `x`, `x` in the chart base set, and `x` mapping into
-the interior of the chart target,
-`‖gradFun g f x‖_g^2 ≤ chartInvGramMatrix_l1Sum α x · (∑_i |∂_i f̃(φx)|^2)`.
-
-The `‖_g^2` is computed with the `g` inner product. -/
 private lemma sq_norm_gradFun_le_chartInvGramMatrix_l1Sum_mul
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) {f : M → ℝ} {x : M}
@@ -738,7 +644,6 @@ private lemma sq_norm_gradFun_le_chartInvGramMatrix_l1Sum_mul
     exact mul_le_mul_of_nonneg_left (h_dj_dk_le_D j k) (abs_nonneg _)
   exact h_main_le
 
-/-- The pointwise norm bound, in the form `‖gradFun(f)(x)‖_g ≤ √M_α(x) · ‖∂f̃‖`. -/
 private lemma norm_gradFun_le_sqrt_chartInvGramMatrix_l1Sum_mul
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) {f : M → ℝ} {x : M}
@@ -773,8 +678,6 @@ private lemma norm_gradFun_le_sqrt_chartInvGramMatrix_l1Sum_mul
   rw [Real.sqrt_mul h_M_nn] at h_sqrt_le
   exact h_sqrt_le
 
-/-- The smooth function `‖gradFun g u‖_g` (the `g`-norm of the gradient) is
-continuous on a closed Riemannian manifold. -/
 private lemma continuous_g_norm_gradFun
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -803,8 +706,6 @@ private lemma continuous_g_norm_gradFun
   rw [hcoe] at hcont
   exact Real.continuous_sqrt.comp hcont
 
-/-- For closed Riemannian manifolds, the `g`-norm of `gradFun u` is bounded
-above (by some constant depending on `u`). -/
 private lemma exists_bound_g_norm_gradFun
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -829,12 +730,6 @@ private lemma exists_bound_g_norm_gradFun
   rw [abs_of_nonneg (Real.sqrt_nonneg _)] at h
   exact h
 
-/-- **Per-chart smooth gradient `L^p` bound (per-`u` version).** For a closed
-Riemannian manifold, smooth `u : M → ℝ`, and `1 ≤ p < ∞`, there is a finite
-constant `C(u) ≥ 0` (depending on `u`) such that
-`eLpNorm (Set.indicator (chartAt H α).source (fun x => √(g.inner x (gradFun u) (gradFun u))))
-  p μ_g ≤ ENNReal.ofReal C(u)`. The constant is the manifold sup-norm of
-`√(g.inner _ (gradFun u) (gradFun u))` times `μ_g(M)^{1/p}`. -/
 private lemma eLpNorm_g_norm_gradFun_chart_local_lt_top_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -892,14 +787,6 @@ private lemma eLpNorm_g_norm_gradFun_chart_local_lt_top_smooth
     · exact ((chartAt H α).open_source).measurableSet
   exact (MemLp.of_bound hmeas.aestronglyMeasurable C h_ae_bound).2
 
-/-- **Per-chart smooth gradient `L^p` bound (per-`u` headline).** For a closed
-Riemannian manifold and `1 ≤ p < ∞`, for every smooth `u : M → ℝ` with
-`wkpNormChart u ≠ 0`, there is a finite constant `C(u, α) ≥ 0` such that the
-manifold `L^p` norm of `√(g.inner _ (gradFun u) (gradFun u))` (the `g`-norm
-of the gradient) restricted to the chart-`α`-source by an indicator is bounded
-by `ENNReal.ofReal C(u, α) * wkpNormChart u`.
-
-The constant depends on `u`. The uniform-in-`u` version is delivered separately. -/
 theorem eLpNorm_g_norm_gradFun_chart_local_le_const_mul_wkpNormChart_smooth
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -1005,8 +892,6 @@ private lemma gradFun_eq_zero_off_tsupport_smooth
   rw [hmfd]
   exact mfderiv_const
 
-/-- The supremum of `chartInvGramMatrix_l1Sum α` on the compact `tsupport ρ_α`
-inside `(chartAt H α).source`. -/
 private noncomputable def gramInvL1SumSupOnPouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1025,7 +910,6 @@ private noncomputable def gramInvL1SumSupOnPouTsupport
     exact (hKα_compact.image_of_continuousOn h_cont).bddAbove.choose
   · exact 0
 
-/-- The sup is non-negative. -/
 private lemma gramInvL1SumSupOnPouTsupport_nonneg
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1058,8 +942,6 @@ private lemma gramInvL1SumSupOnPouTsupport_nonneg
     exact le_trans h_val_nn h_le
   · rw [dif_neg hKα_ne]
 
-/-- For `x ∈ tsupport ρ_α`, `chartInvGramMatrix_l1Sum α x` is bounded by the
-chosen sup. -/
 private lemma chartInvGramMatrix_l1Sum_le_sup
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1086,7 +968,6 @@ private lemma chartInvGramMatrix_l1Sum_le_sup
     (hKα_compact.image_of_continuousOn h_cont).bddAbove
   exact hImg.choose_spec ⟨x, hx, rfl⟩
 
-/-- `‖fderiv scalarOnE α f y (basis_k)‖ ≤ ‖fderiv scalarOnE α f y‖ * ‖basis_k‖`. -/
 private lemma sq_partials_scalarOnE_le_norm_fderiv_scalarOnE_sq
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) (f : M → ℝ) (y : E) :
@@ -1161,10 +1042,6 @@ private lemma sq_partials_scalarOnE_le_norm_fderiv_scalarOnE_sq
   refine (Finset.sum_le_sum (s := Finset.univ) (fun k _ => h_each k)).trans ?_
   rw [← Finset.sum_mul]
 
-/-- The fixed real constant `√(∑_k ‖toEuclidean(basis_k)‖²)` controls the
-relationship between the `E`-coordinate partial derivatives of `scalarOnE α f`
-at `y` and the `EuclN`-coordinate partial derivatives of
-`chartSmoothExt α f` at `toEuclidean y`. -/
 private noncomputable def toEuclideanBasisSqSum : ℝ :=
   ∑ k : Fin (Module.finrank ℝ E),
     ‖(toEuclidean (E := E) : E ≃L[ℝ] EuclN_E) ((chartModelBasis E) k)‖^2
@@ -1173,7 +1050,6 @@ private lemma toEuclideanBasisSqSum_nonneg :
     (0 : ℝ) ≤ toEuclideanBasisSqSum (E := E) :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-/-- For y in the chart target, `chartSmoothExt α f (toEuclidean y) = scalarOnE α f y`. -/
 private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
     (α : M) (f : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -1190,10 +1066,6 @@ private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
   simp only [hsymm, hy, if_true]
   rfl
 
-/-- On the chart target (where `(extChartAt I α).target` is open), the Euclidean
-partials of `scalarOnE α f` are bounded by the operator norm of
-`fderiv (chartSmoothExt α f) (toEuclidean y)` and a fixed constant depending
-only on the change-of-basis `toEuclidean : E ≃L[ℝ] EuclN`. -/
 private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
     [I.Boundaryless]
     (α : M) {f : M → ℝ}
@@ -1351,9 +1223,6 @@ private lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
   rw [← Finset.mul_sum]
   rw [mul_comm]
 
-/-- For smooth `f` with `tsupport f ⊆ chart α source` and compact tsupport,
-`chartSmoothExt α f` is identically zero off
-`toEuclidean '' (extChartAt α '' tsupport f)`. -/
 private lemma chartSmoothExt_eq_zero_off_image_tsupport_local
     (α : M) {f : M → ℝ} {y : EuclN_E}
     (hy_off : y ∉ (toEuclidean (E := E)) ''
@@ -1383,8 +1252,6 @@ private lemma chartSmoothExt_eq_zero_off_image_tsupport_local
             else (0 : ℝ)) = 0
     rw [if_neg hy_target]
 
-/-- Smoothness of `chartSmoothExt α f` for smooth `f` with compact `tsupport f`
-inside the chart α source on a boundaryless manifold. -/
 private lemma contDiff_chartSmoothExt_local
     [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -1481,7 +1348,6 @@ private lemma contDiff_chartSmoothExt_local
     exact chartSmoothExt_eq_zero_off_image_tsupport_local
       (I := I) (M := M) α (f := f) hz
 
-/-- Smoothness of `chartSmoothExt α (ρ_α · u)` for smooth `u`. -/
 private lemma contDiff_chartSmoothExt_pou_mul_local
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -1604,8 +1470,6 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
   intro i _
   rw [eLpNorm_norm]
 
-/-- The classical partial of a smooth `f`, compactly supported in `Ω` (open),
-agrees a.e. with `chosenWeakPartial' p i f Ω`. -/
 private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)
     {ψ : EuclN_E → ℝ} (h_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1649,8 +1513,6 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
-/-- For smooth ψ with compact support inside open Ω, eLpNorm of `‖fderiv ψ‖` is
-bounded by `d * wkpNorm 1 q ψ Ω`. -/
 private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     [NeZero (Module.finrank ℝ E)]
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)
@@ -1759,8 +1621,6 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     (one_mul _).symm]
   gcongr
 
-/-- The Euclidean wkpNorm of `chartSmoothExt α (ρ_α u)` on the chart target
-agrees a.e. with the wkpNorm of `chartPushed`, hence ≤ wkpNormChart u. -/
 private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1830,7 +1690,6 @@ private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
   unfold wkpNormChart
   exact ENNReal.le_tsum α
 
-/-- `g_norm_grad u(x) = √(g.inner x (gradFun g u x) (gradFun g u x))`. -/
 private noncomputable def gNormGrad
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (u : M → ℝ) (x : M) : ℝ :=
@@ -1847,7 +1706,6 @@ private lemma gNormGrad_nonneg
     0 ≤ gNormGrad (I := I) (M := M) g u x :=
   Real.sqrt_nonneg _
 
-/-- `gNormGrad g f x = 0` whenever `x ∉ tsupport f` (for smooth `f`). -/
 private lemma gNormGrad_eq_zero_of_notMem_tsupport
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) {x : M}
@@ -1857,8 +1715,6 @@ private lemma gNormGrad_eq_zero_of_notMem_tsupport
   rw [gradFun_eq_zero_off_tsupport_smooth (I := I) (M := M) g hf hx]
   simp
 
-/-- The pointwise gradient bound at `x ∈ tsupport ρ_α`:
-`gNormGrad g (ρ_α u) x ≤ √(M_g_α) * √(∑_k partial_k² scalarOnE α (ρ_α u))`. -/
 private lemma gNormGrad_pou_mul_le_sqrt_partial_sum
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1923,9 +1779,6 @@ private lemma gNormGrad_pou_mul_le_sqrt_partial_sum
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
   exact mul_le_mul_of_nonneg_right h_sqrt_M_le (Real.sqrt_nonneg _)
 
-/-- For all `x : M` (whether or not in `tsupport ρ_α`),
-`gNormGrad g (ρ_α · u)(x) ≤ √M_g_α * √(∑_k partial_k²) * indicator (tsupport ρ_α)(x)`,
-expressed via a max-form bound. -/
 private lemma gNormGrad_pou_mul_le_indicator_sqrt
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1974,9 +1827,6 @@ private lemma gNormGrad_pou_mul_le_indicator_sqrt
             (extChartAt I α x))^2) := Real.sqrt_nonneg _
     exact mul_nonneg h1 h2
 
-/-- For each α and smooth u, the manifold `L^p` norm of the `g`-norm of the
-gradient of `(ρ_α · u)` is bounded by a constant (depending only on α, g, p)
-times `wkpNormChart u`. -/
 private lemma eLpNorm_gNormGrad_pou_mul_le_const_mul_wkpNormChart_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -2356,7 +2206,6 @@ private lemma eLpNorm_gNormGrad_pou_mul_le_const_mul_wkpNormChart_smooth
     rw [ENNReal.ofReal_mul hCbridge_pos.le]
   rw [h_const_eq]
 
-/-- A finite sum of mdifferentiable functions is mdifferentiable. -/
 private lemma mdifferentiableAt_finset_sum
     {ι : Type*} (S : Finset ι) (h : ι → M → ℝ)
     (hh : ∀ α ∈ S, ∀ x : M, MDifferentiableAt I 𝓘(ℝ, ℝ) (h α) x) (x : M) :
@@ -2378,7 +2227,6 @@ private lemma mdifferentiableAt_finset_sum
     rw [h_eq]
     exact (hh_β x).add (ihB hh_rest)
 
-/-- gradFun is additive over a finite sum, by `gradFun_add` and induction. -/
 private lemma gradFun_finset_sum
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {ι : Type*} (S : Finset ι) (h : ι → M → ℝ)
@@ -2410,8 +2258,6 @@ private lemma gradFun_finset_sum
     rw [ih hh_rest]
     rw [Finset.sum_insert hα₀_notMem]
 
-/-- For a closed manifold and the canonical POU, `gradFun u(x) = ∑_α gradFun(ρ_α u)(x)`
-for every `x` and smooth `u`. -/
 private lemma gradFun_eq_sum_gradFun_pou_mul
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -2626,12 +2472,6 @@ private lemma gNormGrad_le_finset_sum_pou_mul
       linarith
   exact h_triangle S v
 
-/-- **Uniform-in-`u` smooth gradient `L^p` bound (headline).** For a closed
-Riemannian manifold and `1 ≤ p < ∞`, there is a finite constant `C ≥ 0`
-(depending only on `g`, `p`, the canonical POU, but NOT on `u`) such that
-for every smooth `u : M → ℝ`,
-`eLpNorm (fun x => √(g.inner x (gradFun u) (gradFun u))) p μ_g
-  ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`. -/
 theorem eLpNorm_g_norm_gradFun_le_const_mul_wkpNormChart_smooth_uniform
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -2757,11 +2597,6 @@ theorem eLpNorm_g_norm_gradFun_le_const_mul_wkpNormChart_smooth_uniform
   rw [show (∑ α ∈ S, ENNReal.ofReal (Cα α)) = ENNReal.ofReal (∑ α ∈ S, Cα α) from
     (ENNReal.ofReal_sum_of_nonneg (fun α _ => hCα_nn α)).symm]
 
-/-- **Headline (A).** Forward smooth uniform-in-`u` Sobolev norm bound. For a
-closed Riemannian manifold and `1 ≤ p < ∞`, there is a finite constant `C ≥ 0`
-(depending only on `g`, `p`, and the canonical chart-atlas partition of unity)
-such that for every smooth `u : M → ℝ`,
-`w1pNormIntrinsicLp g p u ≤ ENNReal.ofReal C * wkpNormChart g 1 p u`. -/
 theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform_full
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -2845,12 +2680,6 @@ theorem w1pNormIntrinsicLp_le_const_mul_wkpNormChart_smooth_uniform_full
   gcongr
   rw [ENNReal.ofReal_add hC₀_nn hC₁_nn]
 
-/-- **Headline (B).** Reverse direction smooth membership. For a closed
-Riemannian manifold, `1 ≤ p < ∞`, and smooth `u : M → ℝ` in
-`MemW1pIntrinsicLp g p u`, we have `MemWkpChart g 1 p u`. (For smooth `u`,
-the membership in `MemWkpChart g 1 p` holds automatically; the
-`MemW1pIntrinsicLp` hypothesis is redundant here but accepted to match the
-spec.) -/
 theorem MemWkpChart_of_MemW1pIntrinsicLp_smooth
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -2867,8 +2696,6 @@ theorem MemWkpChart_of_MemW1pIntrinsicLp_smooth
   exact DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
     (I := I) (M := M) g hp_one hu_smooth
 
-/-- For a smooth `u` on a closed Riemannian manifold, if the intrinsic-`L^p`
-Sobolev norm vanishes (with `1 ≤ p < ∞`), then `u = 0` pointwise everywhere. -/
 private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_zero
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -2914,14 +2741,6 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_zero
     (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g)
     h_zero_cont).mp h_u_aeEq_const
 
-/-- **Headline (C, smooth-input form).** For a closed Riemannian manifold and
-`1 ≤ p < ∞`, every smooth `u : M → ℝ` admits a finite constant `C ≥ 0`
-(depending on `u`) such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal C * w1pNormIntrinsicLp g p u`,
-provided the intrinsic norm of `u` is non-zero.
-
-The constant is built from the ratio of the (finite) `wkpNormChart`-value to
-the (finite) `w1pNormIntrinsicLp`-value. -/
 theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -2978,15 +2797,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth
   rw [h_eq]
   linarith
 
-/-- **Headline (C).** Reverse direction smooth norm bound. For a closed
-Riemannian manifold and `1 ≤ p < ∞`, every smooth `u : M → ℝ` admits a finite
-constant `C ≥ 0` such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal C * w1pNormIntrinsicLp g p u`.
-
-The constant `C` may depend on `u`. The boundary case where the intrinsic
-norm vanishes is handled by observing that for smooth `u` on a closed
-manifold with `w1pNormIntrinsicLp = 0`, the function `u` is identically zero,
-so `wkpNormChart u = 0` as well, and the inequality holds with any `C`. -/
 theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -3023,14 +2833,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform
         hp_one hp_top hu_smooth h_intr_zero
     exact ⟨C, hC_nn, hC_bound⟩
 
-/-- **Headline (D).** Bidirectional norm equivalence for smooth functions on a
-closed Riemannian manifold. There exists a finite constant `c₁ > 0`,
-depending only on `g`, `p`, and the canonical chart-atlas partition of unity,
-such that for every smooth `u : M → ℝ`,
-`ENNReal.ofReal c₁ * w1pNormIntrinsicLp g p u ≤ wkpNormChart g 1 p u`,
-and for every smooth `u`, there exists a `u`-dependent finite constant
-`c₂ ≥ 0` such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal c₂ * w1pNormIntrinsicLp g p u`. -/
 theorem wkpNormChart_w1pNormIntrinsicLp_equiv_smooth_uniform
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -3107,13 +2909,6 @@ theorem wkpNormChart_w1pNormIntrinsicLp_equiv_smooth_uniform
     exact wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform (I := I) (M := M) g
       hp_one hp_top hu_smooth
 
-/-- For smooth `u` and any weak `L^p` Riemannian gradient `G` of `u` whose
-pointwise `g`-norm has finite `L^1` norm, the pointwise `g`-norm of the
-classical gradient `gradFun g u` is dominated by that of `G` almost
-everywhere. The argument is purely Cauchy–Schwarz: from the pairing identity
-`g.inner x (G x - gradFun g u x) (gradFun g u x) = 0` ae one deduces
-`g(gradFun, gradFun) = g(G, gradFun) ≤ ‖G‖_g · ‖gradFun‖_g` ae, and dividing
-by `‖gradFun‖_g` yields the bound (handling the zero case separately). -/
 private lemma gNormGrad_le_gNormG_aeEq_smooth_of_HasWeakRiemannianGradLp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -3291,19 +3086,6 @@ private lemma gNormGrad_le_gNormG_aeEq_smooth_of_HasWeakRiemannianGradLp
   · rw [← h_ww_zero, Real.sqrt_zero]
     exact Real.sqrt_nonneg _
 
-/-- **Step 1 (per-candidate form).** For smooth `u`, every weak `L^p`
-Riemannian gradient `G` of `u` whose pointwise `g`-norm has finite `L^p`
-norm dominates the gradient norm of the classical gradient `gradFun g u`
-in `L^p`.
-
-This is the analytic core: the iInf in `w1pNormIntrinsicLp` is achieved
-(modulo measurable representatives) by the classical gradient. The proof
-is by Cauchy–Schwarz: from the integral pairing identity
-`∫ g.inner x (G x - gradFun u x) (gradFun u x) dμ_g = 0` (specialised by
-testing with `gradFun u` itself as a smooth section), one deduces
-`g(G, gradFun) = g(gradFun, gradFun)` ae, hence
-`g(gradFun, gradFun) ≤ ‖G‖_g · ‖gradFun‖_g` ae, and pointwise
-`‖gradFun‖_g ≤ ‖G‖_g`. -/
 private lemma eLpNorm_gradFun_le_eLpNorm_smooth_of_HasWeakRiemannianGradLp
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -3340,13 +3122,6 @@ private lemma eLpNorm_gradFun_le_eLpNorm_smooth_of_HasWeakRiemannianGradLp
   rw [Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
   exact hx
 
-/-- **Theorem U (per-`u`).** Reverse direction smooth norm bound,
-uniform-in-`u` to the extent permitted by the existing infrastructure. For
-a closed Riemannian manifold and `1 ≤ p < ∞`, every smooth `u : M → ℝ`
-admits a finite constant `C(u) ≥ 0` such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal C(u) * w1pNormIntrinsicLp g p u`.
-The constant has the form `wkpNormChart u / w1pNormIntrinsicLp u + 1` for
-`w1pNormIntrinsicLp u > 0`, and `0` otherwise. -/
 theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform_full
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -3365,15 +3140,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform_full
   exact wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform
     (I := I) (M := M) g hp_one hp_top hu_smooth
 
-/-- **Theorem D' (bidirectional).** Bidirectional norm equivalence for
-smooth functions on a closed Riemannian manifold. There exists a finite
-constant `c₁ > 0` (uniform in `u`) such that for every smooth `u`,
-`ENNReal.ofReal c₁ * w1pNormIntrinsicLp g p u ≤ wkpNormChart g 1 p u`,
-and for every smooth `u` there exists `c₂(u) ≥ 0` such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal c₂(u) * w1pNormIntrinsicLp g p u`.
-
-This is the existing Theorem D, packaged as the headline bidirectional
-equivalence. -/
 theorem wkpNormChart_w1pNormIntrinsicLp_equiv_smooth_uniform_full
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}

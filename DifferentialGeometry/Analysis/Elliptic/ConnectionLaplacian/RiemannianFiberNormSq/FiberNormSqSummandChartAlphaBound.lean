@@ -3,28 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 
-/-!
-# Bound on `fiberNormSqSummand` at the chart-`α` frame by raw chart components
-
-For a closed Riemannian manifold `(M, g)`, a chart base point `α : M`, and a smooth
-compactly-supported `(r, s)`-tensor section `S : SmoothCcTensor g r s`, this file
-provides a uniform bound on each fiber-norm-squared summand evaluated at the
-chart-`α` frame `e i = chartBasisVecFiber α i b` by the sum of squares of the raw
-chart-`α` components.
-
-Concretely: on the closed support of the chart-atlas partition-of-unity weight at
-`α`, an elementary uniform Gram bound combined with a Cauchy–Schwarz expansion
-yields
-
-```
-fiberNormSqSummand g b r s (S.toSection b) n (chartBasisVecFiber α · b) Idx Jdx
-  ≤ C · ∑ Idx' Jdx', (tensorChartComponentRaw g r s S α Idx' Jdx' b)^2
-```
-
-with `C = n^r · C_G^(2r)` where `n = Module.finrank ℝ E` and `C_G` is the
-elementwise Gram bound on the closed POU support.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -100,9 +78,6 @@ private lemma chartGramMatrix_pou_uniform_entry_bound
     hK_le (i, j) b hb
   linarith
 
-/-- Applying `triv.continuousLinearMapAt ℝ b` to a chart-`α`-basis tangent
-vector returns the corresponding constant model basis vector, provided `b` lies
-in the trivialization base set. -/
 private lemma trivAt_cLMA_chartBasisVecFiber
     (α : M) (i : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -221,11 +196,6 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
     dualCovariantCMM_apply, smul_eq_mul]
   rw [← Finset.prod_mul_distrib]
 
-/-- For `b` in the chart base set at `α`, the value of `S.toSection b` (regarded as
-a `Tensor0SSpace r b → Tensor0SSpace s b` linear map) at a covariant input of
-the form `(dualCovariantCMM r Idx').compCLM (fun _ => triv.cLMA b)`, evaluated at
-the chart-`α`-basis tuple `(chartBasisVecFiber α (Jdx ·) b)`, equals the raw
-chart component `tensorChartComponentRaw g r s S α Idx' Jdx b`. -/
 private lemma section_compCLM_eval_eq_tensorChartComponentRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -324,15 +294,6 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
   unfold tensorTrivProj
   rw [hForward]
 
-/-- For `b` in the chart base set at `α`, the value of `(S.toSection b) ω_e_Idx`
-at the chart-`α`-basis tuple expands as a finite sum:
-
-```
-((S.toSection b) ω_e_Idx) (chartBasisVecFiber α (Jdx ·) b)
-  = Σ_{Idx' : Fin r → Fin n}
-      (∏_k chartGramMatrix g α b (Idx k) (Idx' k))
-        · tensorChartComponentRaw g r s S α Idx' Jdx b
-``` -/
 private lemma section_omega_eIdx_apply_eq_sum_gram_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -429,22 +390,6 @@ private lemma sum_prod_gram_sq_le_uniform_const
         push_cast
         rfl
 
-/-- **`fiberNormSqSummand` at the chart-`α` frame is bounded by raw-component squares.**
-
-For a closed Riemannian manifold `(M, g)`, smooth tensor `S : SmoothCcTensor g r s`,
-chart base point `α : M`, and any point `b` in the closed support of the chart-atlas
-partition-of-unity weight at `α`, the chart-`α`-frame fiber-norm-squared summand
-of `S.toSection b` is bounded by a uniform constant times the sum of squared raw
-chart-`α` components of `tensorTrivProj S α b`:
-
-```
-fiberNormSqSummand g b r s (S.toSection b) n (chartBasisVecFiber α · b) Idx Jdx
-  ≤ C · ∑ Idx' Jdx', (tensorChartComponentRaw g r s S α Idx' Jdx' b)^2
-```
-
-The constant `C = n^r · C_G^(2r)` depends on the metric and chart but not on `S`,
-`b`, or the multi-index pair `(Idx, Jdx)`. Here `n = Module.finrank ℝ E` and `C_G`
-is the elementwise Gram bound on the POU tsupport. -/
 theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

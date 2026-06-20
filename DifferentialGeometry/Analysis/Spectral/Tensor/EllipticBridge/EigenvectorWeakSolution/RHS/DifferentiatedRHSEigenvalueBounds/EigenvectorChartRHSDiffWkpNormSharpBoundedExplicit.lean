@@ -1,18 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHSEigenvalueBounds.EigenvectorChartRHSDiffWkpNormSharpBounded
 
-/-!
-# Explicit-exponent variant of the bounded sharp `wkpNorm K` bound
-
-Refines `eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd`,
-replacing its existentially-quantified exponent with the explicit
-closed-form `eAtomMax + 1`, where `eAtomMax` is a user-supplied
-uniform upper bound on the seven per-`K'`-family atom exponents of
-the bounded hypothesis bundle.
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -53,7 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- Triangle inequality for `wkpNorm` of a difference. -/
+
 private lemma sharpDiffExplicit_wkpNorm_sub_le
     {K : ℕ} {Ω : Set EuclN}
     (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
@@ -78,7 +65,7 @@ private lemma sharpDiffExplicit_wkpNorm_sub_le
   rw [h_neg_eq]
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
-/-- Layer-`A` coefficient is `C^∞` on the open chart target. -/
+
 private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -107,7 +94,7 @@ private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `rhsZeroAggregate_le_at_target`. -/
+
 private lemma rhsZeroAggregate_le_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K N target : ℕ)
@@ -724,7 +711,7 @@ private lemma rhsZeroAggregate_le_at_target
   rw [hRhs_eff_def, ← mul_assoc, ← ENNReal.ofReal_mul hCagg_nn]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiffBdd_level_zero_wkpNorm_at_target`. -/
+
 private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (K N target : ℕ)
@@ -795,7 +782,7 @@ private lemma sharpDiffBdd_level_zero_wkpNorm_at_target
   exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiffExplicit_iter_memWkp`. -/
+
 private lemma sharpDiffExplicit_iter_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -816,8 +803,7 @@ private lemma sharpDiffExplicit_iter_memWkp
 set_option maxHeartbeats 8000000 in
 set_option synthInstance.maxHeartbeats 2000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target`. -/
+
 private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K target : ℕ)
@@ -1215,7 +1201,7 @@ private lemma eigenvectorChartRHSDiffNumerator_wkpNorm_le_chartcpt_at_target
   rw [h_pull]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiffExplicit_diff_memWkp`. -/
+
 private lemma sharpDiffExplicit_diff_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ)
@@ -1230,7 +1216,7 @@ private lemma sharpDiffExplicit_diff_memWkp
 
 set_option maxHeartbeats 32000000 in
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of `sharpDiffBdd_recursion_at_target`. -/
+
 private lemma sharpDiffBdd_recursion_at_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N eAtomMax : ℕ)
@@ -1538,8 +1524,7 @@ private lemma sharpDiffBdd_recursion_at_target
       exact le_refl _
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
-/-- Chart-locality-free twin of
-`eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd_explicit`. -/
+
 theorem eigenvectorChartRHSDiff_wkpNorm_le_chartcpt_sharp_bdd_explicit
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m K : ℕ)

@@ -1,60 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 
-/-!
-# Off-centre chart-`α` discharge of the chart-Christoffel Riemann/Ricci identity
-
-`Geometry.Connection.ChartBridge.RiemannBasisIdentity` proves, unconditionally, the
-*centred* basis-coordinate identification of the abstract Riemann operator of the
-Levi-Civita connection with the chart-Christoffel Riemann tensor:
-`riemannOp (LeviCivita g) x e_j e_k e_i = ∑ l R^l{}_{ijk}(g, x)(ϕ_x x) • e_l`, where the
-chart used is the chart **at `x`** and the basis is the canonical model basis
-`chartModelBasis E`.
-
-This file establishes the **off-centre** chart-`α` analogue: for a fixed chart base point
-`α : M` and a manifold point `x ∈ chartLeviCivitaGoodSet α`, the abstract Riemann operator
-evaluated on the chart-`α` pushforward frame vectors
-`chartBasisVecFiber α · x` agrees with the chart-`α` Christoffel Riemann tensor evaluated
-**off-centre** at `extChartAt I α x`:
-```
-riemannOp (LeviCivita g) x (e^α_j x) (e^α_k x) (e^α_i x)
-  = ∑ l, R^l{}_{ijk}(g, α)(ϕ_α x) • e^α_l x.
-```
-Tracing this on the chart-`α` frame produces the chart-`α` off-centre Ricci identity
-```
-ricciTensor (LeviCivita g) x (e^α_p x) (e^α_q x) = chartRicciTensor g α p q (ϕ_α x),
-```
-on `chartLeviCivitaGoodSet α`.
-
-## Strategy
-
-We mirror the four sub-pieces of the centred file, replacing the chart-at-`x` by the
-chart-at-`α` and the model basis `chartModelBasis E` by the chart-`α` frame
-`chartBasisVecFiber α · x` (which is NOT the model basis at off-centre `x`).
-
-* An **off-centre directional-derivative engine**
-  `extDerivFun_comp_extChartAt_apply_basis_alpha`: the manifold directional derivative
-  along `e^α_a x` of a chart-`α`-pullback scalar `b ↦ gE (ϕ_α b)` is the Euclidean partial
-  derivative `∂_a gE (ϕ_α x)`. This rests on `mfderiv_chartBasisVecFiber_of_mdifferentiableAt`.
-* An **off-centre second covariant derivative**
-  `LeviCivita_chartBasisVec_secondCovDeriv_alpha`, the chart-`α` twin of
-  `LeviCivita_chartBasisVec_secondCovDeriv`, built on the off-centre first covariant
-  derivative `LeviCivita_chartBasisVec_alpha_basis_apply`.
-* **Off-centre Lie-bracket vanishing**
-  `mlieBracket_chartBasisVec_ext_self_eq_zero_alpha`, via the chart-`α` Lie-bracket
-  formula `mlieBracket_eq_chart_fderiv_diff_general` and the constant-representation
-  fact `fderiv_chartE_chartBasisVec_alpha_eq_zero`.
-* The **Riemann assembly + Ricci-trace contraction**: assemble the previous pieces into the
-  chart-`α` Riemann entry, then take the Levi-Civita trace against the chart-`α` frame basis
-  `chartBasisFamily α` to obtain the Ricci identity.
-
-## Main results
-
-* `LeviCivita_chartBasisVec_secondCovDeriv_alpha` — the off-centre second covariant
-  derivative of the chart-`α` frame section in coordinates.
-* `riemannOp_chartBasisVec_alpha_eq` — the off-centre basis-coordinate Riemann identity.
-* `ricciTensor_chartBasisVec_alpha_eq` — the off-centre chart-`α` Ricci identity.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -78,9 +23,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The manifold directional derivative along the chart-`α` frame vector
-`chartBasisVecFiber α a x` of the chart-`α` pullback `b ↦ gE (ϕ_α b)`, at a chart-`α`
-good-set point `x`, equals the Euclidean partial derivative `∂_a gE (ϕ_α x)`. -/
 lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (α : M) {gE : E → ℝ} {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -121,7 +63,6 @@ lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (fderiv ℝ gE (extChartAt I α x)) ((chartModelBasis E) a)
   rw [hscalar_eq.fderiv_eq]
 
-/-- The chart-`α` Christoffel symbol is `C^∞` at `ϕ_α x` for `x ∈ chartLeviCivitaGoodSet α`. -/
 lemma chartChristoffel_contDiffAt_alpha
     (g : SmoothRiemannianMetric I M) (α : M)
     (b i m : Fin (Module.finrank ℝ E)) {x : M}
@@ -135,9 +76,6 @@ lemma chartChristoffel_contDiffAt_alpha
     chartChristoffel_contDiffOn_interior (I := I) g α b i m
   exact hon.contDiffAt (isOpen_interior.mem_nhds hxint)
 
-/-- A globally smooth tangent field `Xext = χ • chartBasisVecFiber α j` agreeing with
-`chartBasisVecFiber α j` on an open neighbourhood `U ∋ x` inside `chartLeviCivitaGoodSet α`,
-for any `x ∈ chartLeviCivitaGoodSet α`. -/
 lemma exists_globalSmooth_chartBasisVec_ext_alpha
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -168,12 +106,6 @@ lemma exists_globalSmooth_chartBasisVec_ext_alpha
     chartBasisVecFiber (I := I) α j y
   rw [hχ_one_y, one_smul]
 
-/-- **Off-centre second covariant derivative of a chart-`α` frame section.** Let `Xa, Xb,
-Xi` be globally smooth tangent fields agreeing with the chart-`α` frame fields
-`e^α_a, e^α_b, e^α_i` on an open neighbourhood `U ∋ x` inside `chartLeviCivitaGoodSet α`.
-Then
-`∇_{e^α_a}(∇_{e^α_b} e^α_i)(x) =
-   ∑_l (∂_a Γ^l{}_{bi}(α, ϕ_α x) + ∑_m Γ^l{}_{am}(α, ϕ_α x) Γ^m{}_{bi}(α, ϕ_α x)) • e^α_l(x)`. -/
 lemma LeviCivita_chartBasisVec_secondCovDeriv_alpha [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b i : Fin (Module.finrank ℝ E)) {x : M}
@@ -345,9 +277,6 @@ lemma LeviCivita_chartBasisVec_secondCovDeriv_alpha [I.Boundaryless]
           refine Finset.sum_congr rfl (fun m _ => ?_)
           rw [mul_comm]
 
-/-- The chart-`α`-trivialised representation of a tangent field that agrees with
-`chartBasisVecFiber α j` on a neighbourhood of `x ∈ chartLeviCivitaGoodSet α` has vanishing
-chart-`α` pullback `fderiv` at `ϕ_α x`. -/
 lemma fderiv_chartE_section_repr_alpha_eq_zero_of_eventuallyEq [I.Boundaryless]
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -387,8 +316,6 @@ lemma fderiv_chartE_section_repr_alpha_eq_zero_of_eventuallyEq [I.Boundaryless]
   rw [hev.fderiv_eq]
   exact fderiv_chartE_chartBasisVec_alpha_eq_zero (I := I) α j hx
 
-/-- The Lie bracket of two tangent fields agreeing with the chart-`α` frame fields
-`e^α_j, e^α_k` on a neighbourhood of `x ∈ chartLeviCivitaGoodSet α` vanishes at `x`. -/
 lemma mlieBracket_chartBasisVec_ext_self_eq_zero_alpha [I.Boundaryless]
     (α : M) (j k : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -417,12 +344,6 @@ lemma mlieBracket_chartBasisVec_ext_self_eq_zero_alpha [I.Boundaryless]
   rw [ContinuousLinearMap.zero_apply, ContinuousLinearMap.zero_apply, sub_self,
     ContinuousLinearMap.map_zero]
 
-/-- **Off-centre basis identity on a chart-`α` frame triple.** For `x ∈ chartLeviCivitaGoodSet
-α`, the abstract Riemann operator of the Levi-Civita connection on the chart-`α` frame
-triple `(e^α_j x, e^α_k x, e^α_i x)` agrees with the chart-`α` Christoffel Riemann entry
-evaluated off-centre at `ϕ_α x`:
-`riemannOp (LeviCivita g) x (e^α_j x) (e^α_k x) (e^α_i x)
-   = ∑ l, R^l{}_{ijk}(g, α)(ϕ_α x) • e^α_l x`. -/
 lemma riemannOp_chartBasisVec_alpha_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {x : M}
@@ -517,10 +438,6 @@ lemma riemannOp_chartBasisVec_alpha_eq [I.Boundaryless]
   rw [← hcoeff l]
   exact (sub_smul _ _ _).symm
 
-/-- **Off-centre chart-`α` Ricci identity.** For `x ∈ chartLeviCivitaGoodSet α`, the abstract
-Ricci tensor evaluated on the chart-`α` frame pair `(e^α_p x, e^α_q x)` equals the chart-`α`
-Christoffel Ricci entry evaluated off-centre at `ϕ_α x`:
-`ricciTensor (LeviCivita g) x (e^α_p x) (e^α_q x) = chartRicciTensor g α p q (ϕ_α x)`. -/
 theorem ricciTensor_chartBasisVec_alpha_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q : Fin (Module.finrank ℝ E)) {x : M}

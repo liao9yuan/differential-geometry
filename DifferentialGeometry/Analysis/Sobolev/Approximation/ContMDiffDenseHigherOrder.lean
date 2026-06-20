@@ -2,28 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkpHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Smooth-density theorem for `W^{k,p}_chart(M)` at arbitrary order `k`
-
-Generalisation of `contMDiff_dense_in_WkpChart` (order 1) to arbitrary `k ∈ ℕ`.
-For a closed Riemannian manifold `M` modelled on a finite-dimensional real
-inner-product space, `1 ≤ p < ∞`, and `u ∈ W^{k,p}_chart(M)`, smooth functions
-are dense: for every `ε > 0` there is a `C^∞` `v : M → ℝ` with
-`wkpNormChart g k p (u - v) ≤ ENNReal.ofReal ε`.
-
-The proof mirrors the order-1 version but invokes the order-`k` analogues of
-each ingredient:
-
-* `cross_chart_bound_strict_strong_memWkp_k` for the cross-chart bound at
-  order `k`;
-* `MemWkp.exists_smooth_compactSupport_approx` for the per-chart Euclidean
-  smooth-density theorem (already general-`k`);
-* `MemWkp_of_smooth_compactSupport_pub` for `MemWkp k p` of smooth
-  compactly-supported functions (already general-`k`);
-* `wkpNorm_smul_smooth_bounded_le` for the quantitative Leibniz bound at
-  order `k`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -46,10 +24,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Order-`k` analogue of `chartCutoff_smul_chartPushed_memWkp`. The cutoff
-product `η · chartPushed g α u` is in `MemWkp k p` of the chart target, given a
-uniform bound on the iterated derivatives `‖∇^j η‖` (`j ≤ k`) on the chart
-target. -/
 private lemma chartCutoff_smul_chartPushed_memWkp_k
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -71,11 +45,6 @@ private lemma chartCutoff_smul_chartPushed_memWkp_k
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     hη_smooth (C := C) hη_bound hu_α
 
-/-- Order-`k` analogue of `exists_smooth_strong_support_approx`. For each `α`
-and each `MemWkpChart g k p u` function on a closed manifold, the chart-pushed
-function `chartPushed g α u` admits a smooth Euclidean approximant `χ_α` with
-`tsupport χ_α ⊆ chartTargetEuclid α`, `χ_α ∈ C^∞`, and `W^{k,p}`-distance to
-`chartPushed g α u` bounded by `ε_per`. -/
 private theorem exists_smooth_strong_support_approx_k
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
@@ -163,7 +132,6 @@ private theorem exists_smooth_strong_support_approx_k
   rw [h_norm_eq]
   exact hχ_close
 
-/-- Order-`k` analogue of `tightenedChartPushed_memWkp`. -/
 private lemma tightenedChartPushed_memWkp_k
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -191,7 +159,6 @@ private lemma tightenedChartPushed_memWkp_k
   exact chartCutoff_smul_chartPushed_memWkp_k (I := I) (M := M) g k hp_one hu α
     hηE_smooth hC_target
 
-/-- Order-`k` analogue of `wkpNorm_tightenedChartPushed_sub_eq`. -/
 private lemma wkpNorm_tightenedChartPushed_sub_eq_k
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -576,11 +543,6 @@ private theorem MemWkp_of_cross_chart_pushforward_k
     (d := Module.finrank ℝ E) hp_one
     (chartTargetEuclid_isOpen (I := I) (M := M) γ) h_ae_eq).mpr hψ_mem_target
 
-/-- **Smooth-density theorem in `W^{k,p}_chart(M)`** (general order `k ∈ ℕ`).
-For a closed Riemannian manifold `M` modelled on a finite-dimensional real
-inner-product space, every function `u : M → ℝ` in `W^{k,p}_chart(M)` (with
-`1 ≤ p < ∞`) admits, for any `ε > 0`, a smooth `v : M → ℝ` with
-`wkpNormChart g k p (u - v) ≤ ε`. -/
 theorem contMDiff_dense_in_WkpChart_k
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]

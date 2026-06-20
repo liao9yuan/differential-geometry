@@ -5,34 +5,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-/-!
-# Smooth-extension witness for the chart-pushed-partial map
-
-For a closed Riemannian manifold `(M, g)`, a chart `α : M`, and a coordinate
-direction `j`, this file packages the smooth global extension of the
-chart-pushed function `(ρα · v.toFun)` for `v : SmoothScalar g`. The
-extension `smoothChartExt α v` is `ContDiff ℝ ∞`, has compact support, and
-agrees pointwise with `chartPushed POU α v.toFun` on the open chart-target
-image `chartTargetEuclid α`. The j-th classical Fréchet partial of the
-extension `smoothChartExtPartial α j v` is in `MemLp 2` of the chart-pulled
-weighted measure restricted to `chartTargetEuclid α`, and agrees a.e. with
-`chartPushedPartial g α j v` on the same restricted measure.
-
-## Main results
-
-* `smoothChartExt`: the smooth extension of `(ρα · v.toFun)` to all of `EuclN`.
-* `smoothChartExt_contDiff`, `smoothChartExt_hasCompactSupport`: the extension
-  is `ContDiff ℝ ∞` with compact support.
-* `smoothChartExtPartial`: the classical j-th partial of the smooth extension.
-* `chartPushedPartial_aeEq_smoothChartExtPartial`: equality with the
-  chart-pushed partial a.e. on the chart-target image.
-* `smoothChartExtPartial_memLp_chartWeighted_restrict`: the smooth-extension
-  partial is in `MemLp 2` against the chart-pulled weighted measure restricted
-  to `chartTargetEuclid α`.
-* `chartPushedPartial_memLp`: the chart-pushed partial inherits this `MemLp`
-  membership via the a.e.-equality.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -65,8 +37,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The smooth extension of the chart-pushed function for `v : SmoothScalar g`
-on the chart at `α`. -/
 noncomputable def smoothChartExt (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) : EuclN → ℝ := by
   classical
@@ -104,7 +74,6 @@ lemma smoothChartExt_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
-/-- On `chartTargetEuclid α`, the smooth extension agrees with `chartPushed`. -/
 private lemma smoothChartExt_eq_chartPushed_on_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) :
@@ -423,8 +392,6 @@ private lemma smoothChartExt_sub
   funext y
   exact smoothChartExt_sub_apply (I := I) (M := M) g α v w y
 
-/-- The classical j-th partial of `smoothChartExt α v`, a smooth, compactly
-supported function on `EuclN`. -/
 noncomputable def smoothChartExtPartial
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) : EuclN → ℝ := fun y =>
@@ -451,7 +418,6 @@ theorem smoothChartExtPartial_continuous
     Continuous (smoothChartExtPartial (I := I) (M := M) g α j v) :=
   (smoothChartExtPartial_contDiff (I := I) (M := M) g α j v).continuous
 
-/-- The smooth-extension's j-th partial is linear in `v` (function-wise sum). -/
 theorem smoothChartExtPartial_add
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v w : SmoothScalar g) :
@@ -737,8 +703,6 @@ theorem smoothChartExtPartial_memLp_chartWeighted_restrict
       (ENNReal.mul_lt_top ENNReal.ofReal_lt_top h_cpw_K_lt_top)
   exact h_lint_lt_top.ne
 
-/-- The chart-pushed partial inherits `MemLp 2` from the smooth-extension
-partial via the a.e.-equality. -/
 theorem chartPushedPartial_memLp
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -752,7 +716,6 @@ theorem chartPushedPartial_memLp
     (I := I) (M := M) g α j v
   exact h_smoothMemLp.ae_eq h_aeEq.symm
 
-/-- The MemLp witness for the difference. -/
 theorem chartPushedPartial_diff_memLp
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v w : SmoothScalar g) :

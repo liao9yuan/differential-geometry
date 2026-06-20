@@ -2,34 +2,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Analysis.ODE.Gronwall
 
-/-!
-# Forward (one-sided) uniqueness of integral curves
-
-Mathlib's manifold integral-curve uniqueness
-(`isMIntegralCurveOn_Ioo_eqOn_of_contMDiff_boundaryless`) is stated on a **two-sided** open
-interval `Ioo a b` with agreement at an interior time.  A *forward* flow — one that solves its
-ODE only for times `> 0`, starting from a fixed value at time `0` (the diffeomorphism family
-`Φ_fam` of the Hamilton–DeTurck construction is exactly such a flow: `Φ_fam 0 = id`, and the
-bare flow equation holds only on `(0, T)`) — cannot be plugged into the two-sided theorem with
-agreement time `0`, because the ODE is not available on a two-sided neighbourhood of `0`.
-
-This file develops the missing **forward** uniqueness on a closed interval `Icc a b`, with
-agreement at the *left* endpoint `a`, by reading both curves into the local chart at their
-common value `γ a` and invoking the Euclidean forward Grönwall uniqueness
-`ODE_solution_unique_of_mem_Icc_right` (genuinely one-sided: `HasDerivWithinAt … (Ici t)` and
-agreement at the initial time `a`).
-
-* `isMIntegralCurveOn_forward_eqOn_Icc_of_contMDiffAt` — forward local uniqueness on a short
-  closed interval `Icc t₁ (t₁ + δ)` with agreement at the left endpoint `t₁`, via the chart
-  reading and `ODE_solution_unique_of_mem_Icc_right`.
-* `isMIntegralCurveOn_Icc_eqOn_left_of_contMDiff` — forward uniqueness on `Icc a b` for an
-  autonomous `C¹` field, agreement at the left endpoint, on a boundaryless manifold (a sup /
-  least-counterexample globalisation of the local result).
-* `bare_forward_flow_eqOn_of_jointC1` — the manifold-level forward uniqueness for the **bare**
-  time-dependent flow, obtained by lifting both curves to the autonomous field
-  `autonomizedFlowVF X` on `ℝ × M`.  The forward analogue of `bare_integral_flow_eqOn_of_jointC1`.
--/
-
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Set Function Manifold Bundle Filter
@@ -42,19 +14,6 @@ variable {HN : Type*} [TopologicalSpace HN] {IN : ModelWithCorners ℝ EN HN}
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace HN N] [IsManifold IN 1 N]
   [T2Space N]
 
-/-- **Forward local integral-curve uniqueness on a closed interval, agreement at the left
-endpoint.**
-
-If `v` is a `C¹` autonomous vector field at the point `γ t₁` (an interior point of the
-boundaryless manifold `N`), and `γ`, `γ'` are integral curves of `v` on `Icc t₁ b` agreeing at
-the left endpoint `t₁`, then there is a positive `δ` (with `t₁ + δ ≤ b`) such that `γ` and `γ'`
-agree on `Icc t₁ (t₁ + δ)`.
-
-The proof reads both curves into the local chart at the common value `γ t₁`, where they become
-Euclidean solutions of the chart-pushforward field `v'` with `HasDerivWithinAt … (Ici t)`, both
-confined to a fixed ball on which `v'` is Lipschitz, agreeing at `t₁`; the one-sided Euclidean
-Grönwall uniqueness `ODE_solution_unique_of_mem_Icc_right` then forces chart-coordinate agreement,
-which pulls back to manifold agreement. -/
 theorem isMIntegralCurveOn_forward_eqOn_Icc_of_contMDiffAt [BoundarylessManifold IN N]
     {v : (x : N) → TangentSpace IN x} {γ γ' : ℝ → N} {t₁ b : ℝ} (ht₁b : t₁ < b)
     (hv : ContMDiffAt IN IN.tangent 1 (fun x ↦ (⟨x, v x⟩ : TangentBundle IN N)) (γ t₁))
@@ -192,15 +151,6 @@ theorem isMIntegralCurveOn_forward_eqOn_Icc_of_contMDiffAt [BoundarylessManifold
   have : (extChartAt IN p₀).symm (f x) = (extChartAt IN p₀).symm (g x) := by rw [hfx]
   rwa [hf, hg, (extChartAt IN p₀).left_inv hγsrc, (extChartAt IN p₀).left_inv hγ'src] at this
 
-/-- **Forward integral-curve uniqueness on a closed interval, agreement at the left endpoint.**
-
-If a `C¹` autonomous vector field `v` on a boundaryless manifold `N` admits two integral curves
-`γ`, `γ'` on `Icc a b` that agree at the left endpoint `a`, then they agree on all of `Icc a b`.
-
-The agreement set `S := {t ∈ Icc a b | γ t = γ' t}` contains `a`; a least-counterexample (sup)
-argument together with the forward *local* uniqueness
-`isMIntegralCurveOn_forward_eqOn_Icc_of_contMDiffAt` (applied at the supremum of the agreement)
-propagates the agreement all the way to `b`. -/
 theorem isMIntegralCurveOn_Icc_eqOn_left_of_contMDiff [BoundarylessManifold IN N]
     {v : (x : N) → TangentSpace IN x} {γ γ' : ℝ → N} {a b : ℝ}
     (hv : ContMDiff IN IN.tangent 1
@@ -284,22 +234,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
-/-- **Forward uniqueness of the bare integral flow.**
-
-The forward analogue of `bare_integral_flow_eqOn_of_jointC1`.  Suppose two curves `s ↦ Φ s x`
-and `s ↦ Φ' s x'` both satisfy the bare flow equation of `X` on `Icc a b` (in the
-`HasMFDerivWithinAt … (Icc a b)` form), agree at the *left endpoint* `a`, and the autonomised
-field is jointly `C¹`.  Then the two curves agree on all of `Icc a b`.
-
-The proof lifts both curves to `ℝ × M` via the autonomisation
-(`autonomizedLift_isMIntegralCurveOn_of_bareFlow`), where they are integral curves of the
-autonomous field `autonomizedFlowVF X`; the forward `Icc` uniqueness
-`isMIntegralCurveOn_Icc_eqOn_left_of_contMDiff` on the boundaryless product manifold `ℝ × M`
-gives equality of the lifts, and projecting onto the second coordinate yields the statement.
-
-Unlike the two-sided version, the agreement is required only at the *left* endpoint, so this
-applies to forward-only flows (e.g. the diffeomorphism family `Φ_fam` with `Φ_fam 0 = id`, whose
-bare flow equation holds only for positive times). -/
 theorem bare_forward_flow_eqOn_of_jointC1 [CompleteSpace E]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : AutonomizedFieldJointC1 (I := I) X)

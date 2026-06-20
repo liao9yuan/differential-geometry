@@ -1,40 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTrace
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
-/-!
-# The parabolic energy identity and the unconditional cross-scale trace estimate
-
-For a `CrossScaleField` (top scale `L²([0,T]; H^{a+2})`, carrier
-`H¹([0,T]; Hᵃ)`, a.e. cross-scale link), the companion file produces the
-intermediate-scale representative `repr t ∈ H^{a+1}` from the continuous
-per-mode coordinates `cᵢ(t) = (lo.toFun t).coeff i`, with uniform `H^{a+1}`
-summability.  This file discharges the parabolic **energy identity** for that
-representative and turns it into the **unconditional** sharp Lions–Magenes
-energy estimate.
-
-## The genuine sub-lemma
-
-**Mode-sum / time-integral interchange** (`tsum_intervalIntegral_energyIntegrand_eq`).
-The squared `H^{a+1}` norm is the eigenmode tsum of the per-mode weighted
-squares, and the energy identity is the tsum over modes of the per-mode scalar
-fundamental theorem of calculus (`coeffFun_sq_eq`, established on the companion
-file).  The sum over the (countable) eigenmodes commutes with the time integral
-by `MeasureTheory.integral_tsum_of_summable_integral_norm`; the dominating
-series is summable because the per-mode integrand tsum is bounded a.e. in time
-by `2‖hiL2 s‖_{H^{a+2}}·‖lo.deriv s‖_{Hᵃ}`, which is time-integrable.
-
-## Main results
-
-* `CrossScaleField.energyIdentity` — the parabolic energy identity
-  `‖repr t‖² = ‖repr 0‖² + ∫₀ᵗ (∑ᵢ 2·(1+λᵢ)^{a+1} cᵢ(s)·(lo.deriv s).coeff i) ds`.
-* `CrossScaleField.normSq_repr_le_init_add_integral` — the **unconditional** sharp
-  Lions–Magenes energy estimate
-  `‖repr t‖² ≤ ‖repr 0‖² + ∫₀ᵗ 2·‖hiL2 s‖_{H^{a+2}}·‖lo.deriv s‖_{Hᵃ} ds`, valid
-  for every `t ∈ [0,T]`; taking the supremum over `t` (the right side is monotone
-  in `t`) gives the sup-in-time bound by the full `∫₀ᵀ` integral, with the
-  continuous representative `repr` (built on the companion file) as **output**.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter intervalIntegral
@@ -71,10 +37,6 @@ namespace CrossScaleField
 
 variable (u : CrossScaleField (I := I) (M := M) g r s a T)
 
-/-- **Per-mode energy identity.**  For each eigenmode `i` and `t ∈ [0,T]`,
-
-  `wᵢ^{a+1} · cᵢ(t)² = wᵢ^{a+1} · cᵢ(0)² +
-      ∫₀ᵗ 2 wᵢ^{a+1} · cᵢ(s) · (lo.deriv s).coeff i ds`. -/
 theorem perMode_energyIdentity
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
@@ -91,23 +53,17 @@ theorem perMode_energyIdentity
   refine intervalIntegral.integral_congr (fun x _ => ?_)
   ring
 
-/-- The countability of the eigen-index type, supplied unconditionally by the
-intrinsic resolvent-compactness witness. -/
 private lemma countable_eigenIdx :
     Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
   DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx
     (I := I) (M := M) (g := g) (r := r) (s := s)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
 
-/-- The per-mode energy integrand, as a function of `(mode, time)`:
-
-  `Fᵢ(s) = 2 wᵢ^{a+1} · cᵢ(s) · (lo.deriv s).coeff i`. -/
 def energyIntegrand
     (i : TensorEigenIdx (I := I) (M := M) g r s) (τ : ℝ) : ℝ :=
   2 * (tensorSobolevWeight (I := I) (M := M) i (a + 1) *
     ((u.coeffFun i τ) * (u.lo.deriv τ).coeff i))
 
-/-- The mode-tsum of the per-mode energy integrand. -/
 lemma tsum_energyIntegrand_eq (τ : ℝ) :
     ∑' i, u.energyIntegrand i τ =
       2 * ∑' i, tensorSobolevWeight (I := I) (M := M) i (a + 1) *
@@ -115,8 +71,6 @@ lemma tsum_energyIntegrand_eq (τ : ℝ) :
   unfold energyIntegrand
   rw [← tsum_mul_left]
 
-/-- The finite-set partial sum of the absolute per-mode energy integrand is
-bounded, almost everywhere in `τ`, by `2‖hiL2 τ‖_{H^{a+2}}·‖lo.deriv τ‖_{Hᵃ}`. -/
 lemma ae_finset_abs_energyIntegrand_le :
     ∀ᵐ τ ∂(volume.restrict (Set.Icc (0 : ℝ) T)),
       ∀ S : Finset (TensorEigenIdx (I := I) (M := M) g r s),
@@ -169,9 +123,6 @@ lemma ae_finset_abs_energyIntegrand_le :
     rwa [abs_of_nonneg hsumfd_nonneg] at this
   linarith [hfd_le]
 
-/-- Each per-mode energy integrand `τ ↦ Fᵢ τ` is integrable on `Ioc 0 t` for
-`t ∈ [0,T]`: it is the (constant-scaled) product of the continuous, bounded
-factor `cᵢ` with the interval-integrable derivative coordinate `dᵢ`. -/
 lemma integrableOn_energyIntegrand
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
@@ -197,19 +148,10 @@ lemma integrableOn_energyIntegrand
   rw [heq]
   exact hprod.const_mul _
 
-/-- The dominating bound `s ↦ 2‖hiL2 s‖·‖lo.deriv s‖` is integrable on `[0,T]`. -/
 lemma integrableOn_energyBound :
     IntegrableOn (fun s => 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖)) (Set.Icc (0 : ℝ) T) volume :=
   u.integrableOn_normMul.const_mul 2
 
-/-- **Mode-sum / time-integral interchange.**  For `t ∈ [0,T]`,
-
-  `∑'ᵢ ∫₀ᵗ Fᵢ s ds = ∫₀ᵗ ∑'ᵢ Fᵢ s ds`.
-
-The eigen-index type is countable (intrinsic resolvent compactness), each `Fᵢ`
-is time-integrable on `Ioc 0 t`, and the dominating series `∑'ᵢ ∫ |Fᵢ|` is
-summable because the finite-set partial sums `∑_{i∈S}|Fᵢ s|` are bounded a.e. by
-the time-integrable `2‖hiL2 s‖·‖lo.deriv s‖`. -/
 theorem tsum_intervalIntegral_energyIntegrand_eq
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ∑' i, (∫ s in (0 : ℝ)..t, u.energyIntegrand i s) =
@@ -247,8 +189,6 @@ theorem tsum_intervalIntegral_energyIntegrand_eq
   refine tsum_congr (fun i => ?_)
   rw [intervalIntegral.integral_of_le ht.1]
 
-/-- The family of per-mode `L¹`-norm integrals `i ↦ ∫_{Ioc 0 t} ‖Fᵢ‖` is summable
-for `t ∈ [0,T]`. -/
 lemma summable_integral_norm_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     Summable (fun i => ∫ s, ‖u.energyIntegrand i s‖ ∂(volume.restrict (Set.Ioc (0 : ℝ) t))) := by
   set μ : Measure ℝ := volume.restrict (Set.Ioc (0 : ℝ) t) with hμ
@@ -271,8 +211,6 @@ lemma summable_integral_norm_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : ℝ)
         refine Finset.sum_congr rfl (fun i _ => ?_); rw [Real.norm_eq_abs]
     _ ≤ 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := hs S
 
-/-- The family of per-mode time integrals `i ↦ ∫₀ᵗ Fᵢ` is summable for
-`t ∈ [0,T]`. -/
 lemma summable_intervalIntegral_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     Summable (fun i => ∫ s in (0 : ℝ)..t, u.energyIntegrand i s) := by
   refine (u.summable_integral_norm_energyIntegrand ht).of_norm_bounded ?_
@@ -281,14 +219,6 @@ lemma summable_intervalIntegral_energyIntegrand {t : ℝ} (ht : t ∈ Icc (0 : �
   refine (MeasureTheory.abs_integral_le_integral_abs).trans (le_of_eq ?_)
   refine integral_congr_ae (ae_of_all _ (fun s => (Real.norm_eq_abs _).symm))
 
-/-- **The parabolic energy identity.**  For `0 < T` and `t ∈ [0,T]`,
-
-  `‖repr t‖²_{H^{a+1}} = ‖repr 0‖²_{H^{a+1}} + ∑ᵢ ∫₀ᵗ Fᵢ s ds`,
-
-where `Fᵢ s = 2 (1+λᵢ)^{a+1} cᵢ(s) (lo.deriv s).coeff i`.  This is the eigenmode
-tsum of the per-mode scalar fundamental theorem of calculus
-(`perMode_energyIdentity`).  No regularity hypothesis beyond the `CrossScaleField`
-data is required (`0 < T` makes the produced representative available). -/
 theorem energyIdentity (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.repr t‖ ^ 2 = ‖u.repr 0‖ ^ 2 +
       ∑' i, ∫ s in (0 : ℝ)..t, u.energyIntegrand i s := by
@@ -309,18 +239,6 @@ theorem energyIdentity (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     rfl
   rw [hpermode, hsum_init.tsum_add hsum_int, ← hnorm_0]
 
-/-- **Unconditional sharp Lions–Magenes sup-in-time energy estimate.**  For
-`0 < T` and `t ∈ [0,T]`,
-
-  `‖repr t‖²_{H^{a+1}} ≤ ‖repr 0‖²_{H^{a+1}} +
-      ∫₀ᵗ 2·‖hiL2 s‖_{H^{a+2}}·‖lo.deriv s‖_{Hᵃ} ds`,
-
-with the continuous intermediate representative `repr` (and in particular its
-trace `repr 0 ∈ H^{a+1}`) **produced** from the `L²`-in-time top-scale datum, not
-assumed.  This is the energy identity (`energyIdentity`) with its per-mode
-integrals' tsum controlled, finite-set by finite-set, by the cross-scale
-Cauchy–Schwarz bound; the supremum over `t` (the right side is monotone in `t`)
-bounds the sup-in-time `H^{a+1}` norm by the full `∫₀ᵀ` integral. -/
 theorem normSq_repr_le_init_add_integral (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.repr t‖ ^ 2 ≤ ‖u.repr 0‖ ^ 2 +
       ∫ s in (0 : ℝ)..t, 2 * (‖u.hiL2 s‖ * ‖u.lo.deriv s‖) := by
@@ -355,8 +273,6 @@ theorem normSq_repr_le_init_add_integral (hT : 0 < T) {t : ℝ} (ht : t ∈ Icc 
   have htsum_le := (u.summable_intervalIntegral_energyIntegrand ht).tsum_le_of_sum_le hpartial
   linarith [htsum_le]
 
-/-- Each per-mode indefinite time integral `t ↦ ∫₀ᵗ Fᵢ` is continuous on
-`[0,T]`. -/
 lemma continuousOn_intervalIntegral_energyIntegrand
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ContinuousOn (fun t => ∫ s in (0 : ℝ)..t, u.energyIntegrand i s) (Icc (0 : ℝ) T) := by
@@ -370,7 +286,6 @@ lemma continuousOn_intervalIntegral_energyIntegrand
     rwa [uIcc_of_le hT'] at hcont
   · rw [Icc_eq_empty (by linarith)]; exact continuousOn_empty _
 
-/-- The per-mode `L¹`-norm bound `‖∫₀ᵗ Fᵢ‖ ≤ ∫_{Ioc 0 T} ‖Fᵢ‖` on `[0,T]`. -/
 lemma norm_intervalIntegral_energyIntegrand_le (hT : 0 < T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖∫ s in (0 : ℝ)..t, u.energyIntegrand i s‖ ≤
@@ -386,10 +301,6 @@ lemma norm_intervalIntegral_energyIntegrand_le (hT : 0 < T)
           ((u.integrableOn_energyIntegrand i ⟨hT.le, le_rfl⟩).norm)
           (ae_of_all _ (fun s => norm_nonneg _)) (HasSubset.Subset.eventuallyLE hsub)
 
-/-- **The squared `H^{a+1}` norm of the representative is continuous on `[0,T]`.**
-By the energy identity `‖repr t‖² = ‖repr 0‖² + ∑ᵢ ∫₀ᵗ Fᵢ`; each per-mode
-indefinite integral `t ↦ ∫₀ᵗ Fᵢ` is continuous, and the mode series converges
-uniformly on `[0,T]` (its sup-norm is the summable family `∫_{Ioc 0 T}‖Fᵢ‖`). -/
 theorem continuousOn_normSq_repr (hT : 0 < T) :
     ContinuousOn (fun t => ‖u.repr t‖ ^ 2) (Icc (0 : ℝ) T) := by
   have hT' : (0 : ℝ) ≤ T := hT.le

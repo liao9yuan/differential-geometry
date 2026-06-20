@@ -8,32 +8,6 @@ import Mathlib.LinearAlgebra.Multilinear.Basis
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Sqrt
 
-/-!
-# Algebraic properties of the pointwise tensor inner product
-
-Let `M` be a smooth finite-dimensional manifold modelled on a real normed
-space `E` equipped with a smooth Riemannian metric `g`. This file gathers
-the algebraic properties of the metric-induced pointwise inner products
-defined in `PointwiseInner.Defs`:
-
-* additivity, `ℝ`-homogeneity, symmetry, and zero-on-zero of
-  `tensorInnerPointwise_0s` on covariant `(0, s)`-tensors;
-* non-negativity on the diagonal and the zero-iff characterisation
-  `⟨S, S⟩ = 0 ↔ S = 0`, both proved by induction on the arity using the
-  spectral decomposition of the inverse Gram matrix of `g(x)` on the
-  fixed model-space basis;
-* the analogous algebraic properties of the mixed `(r, s)` pointwise
-  inner product `tensorInnerPointwise`, derived from the covariant case
-  via the index-lowering map `lowerAllUpperIndices`;
-* the **pointwise Cauchy–Schwarz inequality** in both squared form
-  (`B(S, T)² ≤ B(S, S) · B(T, T)`) and absolute-value form
-  (`|B(S, T)| ≤ ‖S‖ · ‖T‖`), proved from first principles using
-  bilinearity, symmetry, non-negativity, and positive-definiteness.
-
-The file contains no integration theory; the global `L²` pairing and
-its properties live in companion files.
--/
-
 noncomputable section
 
 open Manifold Set Filter Bundle Tensor0SBundle
@@ -50,8 +24,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-- Left additivity: the pointwise `(0, s)` inner product is additive in the
-first argument. -/
 theorem tensorInnerPointwise_0s_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S₁ S₂ T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -82,8 +54,6 @@ theorem tensorInnerPointwise_0s_add_left
       rw [hcurry, ih]
       ring
 
-/-- Right additivity: the pointwise `(0, s)` inner product is additive in
-the second argument. -/
 theorem tensorInnerPointwise_0s_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T₁ T₂ : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -114,8 +84,6 @@ theorem tensorInnerPointwise_0s_add_right
       rw [hcurry, ih]
       ring
 
-/-- Left `ℝ`-homogeneity: the pointwise `(0, s)` inner product is scalar
-homogeneous in the first argument. -/
 theorem tensorInnerPointwise_0s_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (c : ℝ) (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -143,8 +111,6 @@ theorem tensorInnerPointwise_0s_smul_left
       rw [hcurry, ih]
       ring
 
-/-- Right `ℝ`-homogeneity: the pointwise `(0, s)` inner product is scalar
-homogeneous in the second argument. -/
 theorem tensorInnerPointwise_0s_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (c : ℝ) (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -172,7 +138,6 @@ theorem tensorInnerPointwise_0s_smul_right
       rw [hcurry, ih]
       ring
 
-/-- Symmetry of the pointwise `(0, s)` inner product. -/
 theorem tensorInnerPointwise_0s_symm
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -197,8 +162,6 @@ theorem tensorInnerPointwise_0s_symm
         simpa [star_trivial] using this
       rw [ih, hG]
 
-/-- Left zero: the pointwise `(0, s)` inner product vanishes when the first
-argument is zero. -/
 theorem tensorInnerPointwise_0s_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -208,8 +171,6 @@ theorem tensorInnerPointwise_0s_zero_left
   rw [h₀] at h
   linarith
 
-/-- Right zero: the pointwise `(0, s)` inner product vanishes when the
-second argument is zero. -/
 theorem tensorInnerPointwise_0s_zero_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -217,8 +178,6 @@ theorem tensorInnerPointwise_0s_zero_right
   rw [tensorInnerPointwise_0s_symm]
   exact tensorInnerPointwise_0s_zero_left (I := I) (M := M) g x s S
 
-/-- The pointwise inner product on scalar-valued `(0, 0)`-tensors is
-non-negative on the diagonal: `⟨S, S⟩ = S ⋅ S ≥ 0`. -/
 theorem tensorInnerPointwise_0s_zero_arity_nonneg
     (g : SmoothRiemannianMetric I M) (x : M)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
@@ -226,8 +185,6 @@ theorem tensorInnerPointwise_0s_zero_arity_nonneg
   change 0 ≤ S (fun i => Fin.elim0 i) * S (fun i => Fin.elim0 i)
   exact mul_self_nonneg _
 
-/-- Zero-iff characterisation on the diagonal in the arity-zero case:
-`⟨S, S⟩ = 0 ↔ S` is the zero multilinear map. -/
 theorem tensorInnerPointwise_0s_zero_arity_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
@@ -248,8 +205,6 @@ theorem tensorInnerPointwise_0s_zero_arity_eq_zero_iff
     rw [h]
     simp
 
-/-- Bilinear expansion of the pointwise `(0, s)` inner product over a finite
-sum in the first argument. -/
 private lemma tensorInnerPointwise_0s_sum_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι)
@@ -270,8 +225,6 @@ private lemma tensorInnerPointwise_0s_sum_left
           tensorInnerPointwise_0s_smul_left,
           ih, Finset.sum_insert hi]
 
-/-- Bilinear expansion of the pointwise `(0, s)` inner product over a finite
-sum in the second argument. -/
 private lemma tensorInnerPointwise_0s_sum_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι)
@@ -292,8 +245,6 @@ private lemma tensorInnerPointwise_0s_sum_right
           tensorInnerPointwise_0s_smul_right,
           ih, Finset.sum_insert hi]
 
-/-- Bilinear expansion of the pointwise `(0, s)` inner product with two
-finite sums. -/
 private lemma tensorInnerPointwise_0s_sum_sum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι₁ ι₂ : Type*}
@@ -314,16 +265,6 @@ private lemma tensorInnerPointwise_0s_sum_sum
   intro j _
   ring
 
-/-- **Non-negativity of the pointwise `(0, s)` inner product on the
-diagonal**. The proof proceeds by induction on `s`. The base case is
-immediate from `tensorInnerPointwise_0s_zero_arity_nonneg`. The inductive
-step uses the spectral decomposition of the inverse Gram matrix of `g(x)`
-on the fixed model-space basis: writing `(G(x))⁻¹ = Σₖ μₖ eₖ eₖᵀ` with
-`μₖ ≥ 0` (since `(G(x))⁻¹` is positive semi-definite, being the inverse of
-the positive-definite Gram matrix), the sum
-`Σᵢⱼ (G(x)⁻¹)ᵢⱼ ⟨Sᵢ, Sⱼ⟩` rewrites by bilinearity into a sum of squares
-`Σₖ μₖ ⟨Tₖ, Tₖ⟩` with `Tₖ := Σᵢ (eₖ)ᵢ Sᵢ`, each term non-negative by the
-inductive hypothesis. -/
 theorem tensorInnerPointwise_0s_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -454,10 +395,6 @@ theorem tensorInnerPointwise_0s_nonneg
       refine mul_nonneg (hμ_nonneg k) ?_
       exact ih (∑ i : Fin n, U i k • Sfam i)
 
-/-- **Positive-definiteness of the pointwise `(0, s)` inner product on the
-diagonal**: `⟨S, S⟩ = 0 ↔ S = 0`. Proved by induction on the arity, using
-the spectral decomposition of the inverse Gram matrix of `g(x)`, whose
-eigenvalues are strictly positive. -/
 theorem tensorInnerPointwise_0s_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -712,7 +649,6 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
         exact tensorInnerPointwise_0s_zero_left
           (I := I) (M := M) g x (s + 1) 0
 
-/-- Symmetry of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :
@@ -721,7 +657,6 @@ theorem tensorInnerPointwise_symm
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_symm (I := I) (M := M) g x (r + s) _ _
 
-/-- Left additivity of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S₁ S₂ T : TensorRSModel r s ℝ E) :
@@ -732,7 +667,6 @@ theorem tensorInnerPointwise_add_left
   rw [ContinuousLinearMap.map_add]
   exact tensorInnerPointwise_0s_add_left (I := I) (M := M) g x (r + s) _ _ _
 
-/-- Right additivity of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_add_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -743,7 +677,6 @@ theorem tensorInnerPointwise_add_right
   rw [ContinuousLinearMap.map_add]
   exact tensorInnerPointwise_0s_add_right (I := I) (M := M) g x (r + s) _ _ _
 
-/-- Left `ℝ`-homogeneity of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (S T : TensorRSModel r s ℝ E) :
@@ -753,7 +686,6 @@ theorem tensorInnerPointwise_smul_left
   rw [ContinuousLinearMap.map_smul]
   exact tensorInnerPointwise_0s_smul_left (I := I) (M := M) g x (r + s) c _ _
 
-/-- Right `ℝ`-homogeneity of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (S T : TensorRSModel r s ℝ E) :
@@ -763,7 +695,6 @@ theorem tensorInnerPointwise_smul_right
   rw [ContinuousLinearMap.map_smul]
   exact tensorInnerPointwise_0s_smul_right (I := I) (M := M) g x (r + s) c _ _
 
-/-- Left zero of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_zero_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -774,7 +705,6 @@ theorem tensorInnerPointwise_zero_left
   rw [h₀] at h
   linarith
 
-/-- Right zero of the mixed pointwise inner product. -/
 theorem tensorInnerPointwise_zero_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -782,7 +712,6 @@ theorem tensorInnerPointwise_zero_right
   rw [tensorInnerPointwise_symm]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x S
 
-/-- Non-negativity of the mixed pointwise inner product on the diagonal. -/
 theorem tensorInnerPointwise_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -790,9 +719,6 @@ theorem tensorInnerPointwise_nonneg
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x (r + s) _
 
-/-- **Positive-definiteness of the mixed pointwise inner product on the
-diagonal**: `⟨S, S⟩ = 0 ↔ S = 0`. Combines the analogous result on the
-covariant side with injectivity of the index-lowering map. -/
 theorem tensorInnerPointwise_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -804,9 +730,6 @@ theorem tensorInnerPointwise_eq_zero_iff
       (h.trans (map_zero _).symm)
   · rw [h, map_zero]
 
-/-- **Cauchy–Schwarz** for the pointwise metric-induced inner product on
-covariant `(0, s)`-tensors at a point: the squared inner product is bounded
-by the product of the diagonal inner products. -/
 theorem tensorInnerPointwise_0s_sq_le_mul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -883,9 +806,6 @@ theorem tensorInnerPointwise_0s_sq_le_mul
     rw [hb_zero, hc_eq, mul_zero]
     simp
 
-/-- **Cauchy–Schwarz** for the pointwise metric-induced inner product on
-mixed `(r, s)`-tensors at a point: the squared inner product is bounded by
-the product of the diagonal inner products. -/
 theorem tensorInnerPointwise_sq_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :
@@ -895,8 +815,6 @@ theorem tensorInnerPointwise_sq_le_mul
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_sq_le_mul (I := I) (M := M) g (r + s) x _ _
 
-/-- **Cauchy–Schwarz** in absolute-value form: the absolute value of the
-pointwise inner product is bounded by the product of the pointwise norms. -/
 theorem abs_tensorInnerPointwise_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :

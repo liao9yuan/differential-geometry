@@ -4,46 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.MemW1pRe
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 
-/-!
-# Smooth-density-based `MemW1p 2` discharge for `fChartResidual`
-
-For a closed Riemannian manifold `(M, g)`, chart point `α : M`, and an element
-`u_h ∈ laplacianDomainPow g 2`, this file packages the chart-pulled residual
-`MemW1p 2 chartTargetEuclid α` discharge into a form parametrized by the
-smooth-approximator chart-W^{1,2}-Cauchy / identification hypothesis. The
-smooth-density theorem `contMDiff_dense_in_WkpChart_k` supplies the
-chart-W^{2,2}-converging smooth approximator sequence; the residual
-chart-target W^{1,2}-Cauchy property is then a bilinear-continuity statement
-of the smooth-residual operator from chart-W^{2,2} to chart-target W^{1,2}.
-
-## Key infrastructure
-
-* `contMDiff_dense_in_WkpChart_k` (from `Sobolev.Approximation`): for every
-  `u : M → ℝ` in `MemWkpChart g k p`, the smooth functions are `wkpNormChart`-
-  dense.
-* `memW1p_fChartResidual_of_wkpNorm_cauchy_identification` (from
-  `DiffChartBilinearH1ComplResidual`): for a smooth approximator
-  sequence satisfying the chart-W^{1,2}-Cauchy + identification hypothesis,
-  the residual is in `MemW1p 2 chartTargetEuclid α`.
-* `memW1p_fChartResidual_smoothToH1Compl` (from
-  `DiffChartBilinearH1ComplResidualMemW1p`): unconditional smooth-case
-  discharge.
-
-## Main results
-
-* `exists_smoothApprox_chartW22` — for `u_h ∈ laplacianDomainPow g 2` and any
-  `ε > 0`, there exists a smooth scalar `v` with `wkpNormChart g 2 2`-
-  approximation level `ε` to the canonical function representative of `u_h`.
-* `smoothApproxSeq` — the chosen smooth approximator sequence at level `1/(n+1)`.
-* `smoothApproxSeq_wkpNormChart_le` — the per-`n` approximation bound.
-* `smoothApproxSeq_wkpNormChart_diff_le` — the chart-W^{2,2}-Cauchy property
-  of the approximating sequence.
-* `fChartResidual_memW1p_unconditional` — the headline `MemW1p 2` discharge
-  of `fChartResidual g α u_h` from the chart-target W^{1,2}-Cauchy +
-  identification hypothesis on the smooth-residual sequence applied to
-  `smoothApproxSeq`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -81,8 +41,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- For `u_h ∈ laplacianDomainPow g 2`, a smooth approximator at any `ε > 0`
-in chart-W^{2,2} norm. -/
 theorem exists_smoothApprox_chartW22
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -105,7 +63,6 @@ theorem exists_smoothApprox_chartW22
   refine ⟨⟨w, hw_smooth⟩, ?_⟩
   exact hw_le
 
-/-- For each `n : ℕ`, choose a smooth approximator at level `1/(n+1)`. -/
 noncomputable def smoothApproxSeq
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -114,7 +71,6 @@ noncomputable def smoothApproxSeq
   (exists_smoothApprox_chartW22 (I := I) (M := M) g hu_h
     (by positivity : (0 : ℝ) < 1 / ((n : ℝ) + 1))).choose
 
-/-- The chart-W^{2,2}-norm approximation bound for the approximator sequence. -/
 theorem smoothApproxSeq_wkpNormChart_le
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -128,7 +84,6 @@ theorem smoothApproxSeq_wkpNormChart_le
   (exists_smoothApprox_chartW22 (I := I) (M := M) g hu_h
     (by positivity : (0 : ℝ) < 1 / ((n : ℝ) + 1))).choose_spec
 
-/-- The chart-W^{2,2}-Cauchy property of the approximating sequence. -/
 theorem smoothApproxSeq_wkpNormChart_diff_le
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -198,15 +153,6 @@ theorem smoothApproxSeq_wkpNormChart_diff_le
     rw [add_comm]
   exact le_trans h_add (le_of_le_of_eq h_bound1 h_comm)
 
-/-- **Headline discharge (from bilinear continuity hypothesis).**
-
-For `u_h ∈ laplacianDomainPow g 2` and a chart-target W^{1,2} bilinear
-continuity hypothesis on the smooth-residual operator applied to the
-chart-W^{2,2} smooth-density approximator sequence `smoothApproxSeq`, the
-chart-pulled residual `fChartResidual g α u_h` is in `MemW1p 2 chartTargetEuclid α`.
-
-The bilinear continuity hypothesis (chart-target W^{1,2}-Cauchy + identification)
-captures the elliptic regularity content via the smooth-density approximation. -/
 theorem fChartResidual_memW1p_unconditional
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

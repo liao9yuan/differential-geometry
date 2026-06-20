@@ -1,66 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-/-!
-# Codifferential and form Laplacian on a Riemannian manifold
-
-For a smooth Riemannian metric `g` on a smooth manifold `M`, the **codifferential**
-`δ` is the formal adjoint of the exterior derivative with respect to the `L²`
-inner product on differential forms. On a closed Riemannian manifold,
-$$\int_M \langle d\omega, \eta\rangle_g \, dV_g
-  = \int_M \langle \omega, \delta\eta\rangle_g \, dV_g,$$
-which characterises `δ` uniquely (modulo `L²`-extensions).
-
-The **form Laplacian** (Hodge Laplacian) is then
-`Δ_H = d δ + δ d` on differential forms; on functions (0-forms) it reduces to
-`Δ_H f = δ d f`, which equals `−Δ_g f` (with the geometer convention used
-throughout the project, where `Δ_g = div ∘ grad` is non-positive).
-
-## Scope of this file
-
-The full algebraic apparatus for differential forms of arbitrary degree is
-substantial. This file develops the codifferential and the form Laplacian on
-**0-forms** and **1-forms** — the simplest case — using chart-local
-infrastructure:
-
-* For a smooth tangent section `X` (which represents the metric-dual `1`-form
-  `X^♭ = g(X, \cdot)`), the codifferential of `X^♭` is `-div_g X`.
-* For a smooth scalar function `f` (a 0-form), the differential `d f` is the
-  1-form whose metric-dual is `grad_g f`. Hence the form Laplacian on a 0-form
-  is `δ d f = -div_g(grad_g f) = -Δ_g f`.
-
-The general `k`-form codifferential, expressed in chart coordinates via the
-Christoffel symbols of the metric, is a separate development that requires
-chart-Christoffel infrastructure for tensorial divergence on higher-rank forms.
-
-## Main definitions
-
-* `codifferentialOfVectorField g X` : the codifferential of the metric-dual
-  `1`-form of a smooth tangent section `X`, defined as `−divergence_g g X`.
-  This is a smooth real-valued function on `M`.
-* `formLaplacianScalar g hf` : the form Laplacian (Hodge Laplacian) of a smooth
-  scalar function `f`, defined as the codifferential of its differential.
-
-## Main results
-
-* `codifferentialOfVectorField_contMDiff` : the codifferential of (the dual of)
-  a smooth vector field is `C^∞`.
-* `codifferentialOfVectorField_add` : additivity in the vector-field argument.
-* `codifferentialOfVectorField_zero` : the codifferential of the zero
-  vector field vanishes.
-* `formLaplacianScalar_eq_neg_Δ_g` : the form Laplacian of a 0-form is the
-  negative of the Laplace–Beltrami operator with the geometer sign convention,
-  $$\Delta_H f \;=\; -\Delta_g f.$$
-* `formLaplacianScalar_contMDiff` : smoothness of the form Laplacian on 0-forms.
-
-## Sign convention
-
-The geometer convention is used: `Δ_g = div ∘ grad`, so `Δ_g` is non-positive
-on a closed manifold. With this choice the form Laplacian `Δ_H = δ d + d δ`
-is non-negative on closed manifolds, and on 0-forms one has
-`Δ_H f = δ d f = -Δ_g f`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -79,8 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
-/-- The codifferential of the `1`-form dual to a smooth tangent section `X`,
-defined chart-locally as `δ X^♭(y) := -div_g X(y)`. -/
 def codifferentialOfVectorField [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
@@ -92,8 +30,6 @@ def codifferentialOfVectorField [I.Boundaryless] [T2Space M]
     codifferentialOfVectorField (I := I) g X y =
       -divergence_g (I := I) g X y := rfl
 
-/-- The codifferential of (the metric-dual `1`-form of) a smooth tangent
-section is `C^∞`. -/
 theorem codifferentialOfVectorField_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -104,8 +40,6 @@ theorem codifferentialOfVectorField_contMDiff [I.Boundaryless] [T2Space M]
     hdiv.neg
   exact hneg
 
-/-- The codifferential of (the metric-dual `1`-form of) a sum of smooth tangent
-sections is the sum of the codifferentials. -/
 theorem codifferentialOfVectorField_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -117,8 +51,6 @@ theorem codifferentialOfVectorField_add [I.Boundaryless] [T2Space M]
   rw [divergence_g_add (I := I) g X Y y]
   ring
 
-/-- The codifferential of (the metric-dual `1`-form of) the zero tangent
-section vanishes pointwise. -/
 @[simp] theorem codifferentialOfVectorField_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (y : M) :
     codifferentialOfVectorField (I := I) g
@@ -128,9 +60,6 @@ section vanishes pointwise. -/
   rw [divergence_g_zero (I := I) g y]
   exact neg_zero
 
-/-- The Hodge–Laplace operator (form Laplacian) applied to a smooth scalar
-function `f` (a 0-form): `Δ_H f := δ (d f)`. With `d f` represented through its
-metric dual `grad_g f`, this is `−div_g (grad_g f) = −Δ_g f`. -/
 def formLaplacianScalar [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) : M → ℝ :=
@@ -142,12 +71,6 @@ def formLaplacianScalar [I.Boundaryless] [T2Space M]
     formLaplacianScalar (I := I) g hf y =
       codifferentialOfVectorField (I := I) g (grad_g (I := I) g hf) y := rfl
 
-/-- At each point `y`, the form Laplacian of a smooth `0`-form `f` equals the
-negative of its Laplace–Beltrami operator: `Δ_H f y = -Δ_g f y`. With the
-project's geometer sign convention `Δ_g = div_g ∘ grad_g`, both sides unfold to
-`-div_g (grad_g f) y`, so the identity holds by definition (`formLaplacianScalar`
-is defined here as `-div_g ∘ grad_g`, and `Δ_g` in `Geometry/Operator/Laplacian.lean` as
-`div_g ∘ grad_g`). -/
 theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
@@ -158,14 +81,12 @@ theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
   rw [codifferentialOfVectorField_def (I := I) g (grad_g (I := I) g hf) y]
   rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hf y]
 
-/-- The form Laplacian of a smooth 0-form is smooth. -/
 theorem formLaplacianScalar_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff I 𝓘(ℝ) ∞ (formLaplacianScalar (I := I) g hf) :=
   codifferentialOfVectorField_contMDiff (I := I) g (grad_g (I := I) g hf)
 
-/-- `Δ_H` of the zero function vanishes. -/
 @[simp] theorem formLaplacianScalar_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (h0 : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (0 : ℝ))) (y : M) :
@@ -186,7 +107,6 @@ theorem formLaplacianScalar_contMDiff [I.Boundaryless] [T2Space M]
   rw [divergence_g_zero (I := I) g y]
   exact neg_zero
 
-/-- Additivity of `Δ_H` on 0-forms (sum rule). -/
 theorem formLaplacianScalar_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}

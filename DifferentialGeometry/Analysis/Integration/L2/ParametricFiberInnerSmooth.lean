@@ -10,33 +10,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Deriv
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Analysis.Normed.Group.Bounded
 
-/-!
-# Smoothness in time of a parametric fibre-inner Bochner integral
-
-For a compact Riemannian manifold `(M, g₀)` with finite volume measure, this file
-provides the time-parameter `C^∞` smoothness of a parametric Bochner integral over `M`.
-
-## Main results
-
-* `DifferentialGeometry.contMDiff_partial_deriv_snd` — the partial derivative along the
-  second (real) factor of a jointly `C^∞` real-valued function on `M × ℝ` is itself
-  jointly `C^∞`. (The `M × ℝ`-orientation companion of `contMDiff_partial_deriv_fst`.)
-* `DifferentialGeometry.contDiff_integral_of_jointContMDiff` — **the general first-class
-  brick**: for a finite measure `μ` on a compact manifold `M` and a jointly smooth
-  integrand `f : M → ℝ → ℝ` (smooth as a function on `M × ℝ`), the parameter integral
-  `t ↦ ∫ x, f x t ∂μ` is `C^∞`. The proof is by induction on the smoothness order,
-  differentiating under the integral sign via
-  `hasDerivAt_integral_of_dominated_loc_of_deriv_le` (uniform domination is trivial on the
-  compact `M`), with the `t`-derivative of the integrand again jointly smooth by
-  `contMDiff_partial_deriv_snd`.
-* `DifferentialGeometry.Integral.L2.contDiff_integral_fiberInner_of_jointContMDiffOn` —
-  **C3**: the time-parameter `L²` pairing `t ↦ ⟪b, R t⟫` of a fixed tensor `b` with a
-  curve `R : ℝ → SmoothCcTensor g₀ 0 2` is `C^∞`, given joint `(x, t)`-smoothness of the
-  pointwise fibre-inner integrand `(x, t) ↦ ⟨b(x), R(t)(x)⟩_{g₀(x)}`.  This unfolds the
-  `SmoothCcTensor` inner product to the Bochner integral of its pointwise fibre inner
-  product and applies the general parametric-integral brick.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -50,9 +23,6 @@ open scoped Manifold Topology ContDiff BigOperators Matrix
 
 namespace DifferentialGeometry
 
-/-- The partial derivative along the second (real) factor of a jointly smooth real-valued
-function on `M × ℝ` is itself jointly smooth. This is the `M × ℝ`-orientation companion of
-`contMDiff_partial_deriv_fst` (which handles `ℝ × M`). -/
 theorem contMDiff_partial_deriv_snd
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -60,8 +30,8 @@ theorem contMDiff_partial_deriv_snd
     (F : C^∞⟮I.prod 𝓘(ℝ, ℝ), M × ℝ; ℝ⟯) :
     ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ => deriv (fun s => F (p.1, s)) p.2) := by
-  -- Rewrite `deriv` as `mfderiv ... 1`, then use smoothness of `mfderiv` of a jointly
-  -- smooth function.
+  
+  
   have hrw : (fun p : M × ℝ => deriv (fun s => F (p.1, s)) p.2) =
       fun p : M × ℝ => (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s => F (p.1, s)) p.2) (1 : ℝ) := by
     funext p
@@ -91,11 +61,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [T2Space M] [MeasurableSpace M] [OpensMeasurableSpace M]
 
-/-- Differentiation under the integral sign: for a jointly smooth integrand on `M × ℝ` over
-a finite measure on the compact `M`, the parameter integral is differentiable at every
-`t₀`, with derivative the integral of the `t`-derivative of the integrand. Uniform
-domination is trivial because the jointly smooth `t`-derivative is continuous, hence bounded
-on the compact slab `M × closedBall t₀ 1`. -/
 private theorem hasDerivAt_integral_param
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ)
     (hf : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)) (t₀ : ℝ) :
@@ -134,15 +99,6 @@ private theorem hasDerivAt_integral_param
       exact (hcd.differentiable (by norm_num)).differentiableAt.hasDerivAt))
   exact key.2
 
-/-- **Parametric Bochner integral over a compact manifold is `C^∞` in the parameter.**
-For a finite measure `μ` on a compact manifold `M` and a jointly smooth integrand
-`f : M → ℝ → ℝ` (smooth as a function on `M × ℝ`), the parameter integral
-`t ↦ ∫ x, f x t ∂μ` is `C^∞`.
-
-The proof inducts on the smoothness order. At each step the derivative passes through the
-integral (`hasDerivAt_integral_param`), and the differentiated integrand
-`(x, t) ↦ ∂ₜ f x t` is again jointly smooth (`contMDiff_partial_deriv_snd`), so the
-inductive hypothesis applies to it. -/
 theorem contDiff_integral_of_jointContMDiff
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ)
     (hf : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)) :
@@ -185,17 +141,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
-/-- **C3 — `C^∞`-in-time of the parametric fibre-inner pairing.**
-For a fixed compactly-supported smooth `(0, 2)`-tensor `b` and a curve
-`R : ℝ → SmoothCcTensor g₀ 0 2`, the time-parameter `L²` inner product
-`t ↦ ⟪b, R t⟫_ℝ` is `C^∞`.
 
-The `SmoothCcTensor` inner product unfolds to the Bochner integral over `M` of the pointwise
-fibre inner product `(x, t) ↦ ⟨b(x), R(t)(x)⟩_{g₀(x)}`; given that this integrand is jointly
-`(x, t)`-smooth over `M × ℝ` (the chain-rule hypothesis a consumer derives from the joint
-section-smoothness of the curve `R` together with smoothness of `b`), `C^∞`-in-time follows
-from the general parametric-integral brick `contDiff_integral_of_jointContMDiff` (the volume
-measure is finite by compactness of `M`). -/
 theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (b : SmoothCcTensor g₀ 0 2)

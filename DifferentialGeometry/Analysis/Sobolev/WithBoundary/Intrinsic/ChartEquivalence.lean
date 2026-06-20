@@ -9,50 +9,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
-/-!
-# Smooth bridge: chart-based to intrinsic-`L^p` Sobolev space (with boundary)
-
-For a closed (compact) smooth Riemannian manifold `(M, g)` whose model `I` may
-carry a smooth boundary, this file delivers the smooth-input bridge between the
-chart-based and intrinsic-`L^p` Sobolev spaces in the with-boundary setting.
-
-## Main results
-
-* `MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior` — for a smooth scalar
-  `u : M → ℝ` with topological support contained in the manifold interior
-  `I.interior M`, the function lies in `MemW1pIntrinsicLp_withBoundary g p` for
-  every exponent `p`. The candidate gradient is the intrinsic Riemannian
-  gradient `gradFun g u`.
-
-* `MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior` — the same
-  theorem packaged with the (smooth-input) chart-membership signature,
-  mirroring the boundaryless headline theorem under the additional hypothesis
-  that `u` has interior support.
-
-## Proof structure
-
-Under the hypothesis `tsupport u ⊆ I.interior M`, the intrinsic pointwise
-gradient `gradFun g u : M → E` packages as a globally smooth tangent section
-`grad_g_with_boundary_section g hu hu_int : Cₛ^∞⟮I; E, TangentSpace I⟯`. This
-gives global smoothness of `gradFun u` as a tangent-bundle section, which is
-exactly the smooth-section infrastructure assumed by the existing
-boundary-aware integration-by-parts identity.
-
-The smooth bridge then follows the same pattern as the boundaryless smooth
-bridge:
-
-1. `u` is in `L^p` (continuous on a compact manifold).
-2. `√(g.inner (gradFun u) (gradFun u))` is continuous on `M`
-   (`TangentBundle.continuous_g_inner_of_smooth_sections` applied to
-   `grad_g_with_boundary_section`), hence in `L^p` on the compact `M`.
-3. `gradFun u` is a weak `L^p` Riemannian gradient with boundary: the IBP
-   identity follows from the boundary-aware
-   `integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary`
-   applied with `f = u` (smooth, interior-supported) and `X` (smooth,
-   interior-supported), combined with the gradient-tangent-action duality
-   `tangentSectionAction_grad_g_with_boundary_eq_inner_left`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -164,13 +120,6 @@ private lemma tangentSectionAction_continuous_of_X_interior_support
       exact (mfderiv I 𝓘(ℝ, ℝ) u y).map_zero
     exact (continuous_const.continuousAt.congr hev_zero.symm)
 
-/-- **Integration by parts (with-boundary, no interior-support on the scalar).**
-For a smooth scalar `u : M → ℝ` and a smooth tangent test field `X` with compact
-support contained in `I.interior M`,
-$$\int_M X(u)\,d\mu_g = -\int_M u \cdot \operatorname{div}_g^{(\partial)}(X)\,d\mu_g.$$
-
-This drops the `tsupport u ⊆ I.interior M` hypothesis from the existing helper
-`integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary`. -/
 private theorem integral_tangentSectionAction_eq_neg_no_u_interior_support
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -297,9 +246,6 @@ private lemma memLp_g_norm_gradFun_interior_smooth
     Real.continuous_sqrt.comp hgrad_inner_cont
   exact continuous_memLp_of_compactSpace g p hG_cont
 
-/-- For a smooth `u : M → ℝ` with `tsupport u ⊆ I.interior M`, the intrinsic
-gradient `gradFun u : M → E` is a weak `L^p` Riemannian gradient with boundary
-of `u`. -/
 private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -335,10 +281,6 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
     exact integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary
       (I := I) g hu hu_int X hX hX_int
 
-/-- **Smooth bridge (interior-supported case).** Every smooth function with
-topological support contained in the manifold interior on a closed Riemannian
-manifold with smooth boundary satisfies `MemW1pIntrinsicLp_withBoundary`. The
-candidate gradient is the intrinsic Riemannian gradient `gradFun g u`. -/
 theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
     [Module.Finite ℝ E] [FiniteDimensional ℝ E]
@@ -363,7 +305,6 @@ theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
       memLp_g_norm_gradFun_interior_smooth
         (I := I) (M := M) g p hu hu_int⟩
 
-/-- Headline alias mirroring the boundaryless headline name. -/
 theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
     [Module.Finite ℝ E] [FiniteDimensional ℝ E]
@@ -379,10 +320,6 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
   MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     (I := I) (M := M) g p hu_smooth hu_int
 
-/-- The within-partial of the chart pullback is continuous on the full
-chart target. Direct from `partialDerivWithin_contDiffOn_top_of_uniqueDiffOn`
-applied to the smooth chart-pulled-back function `scalarOnE α u`, on the
-chart target `(extChartAt I α).target` which has unique-diff-within. -/
 private lemma partialDerivWithin_scalarOnE_continuousOn_target
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (j : Fin (Module.finrank ℝ E)) :
@@ -402,8 +339,6 @@ private lemma partialDerivWithin_scalarOnE_continuousOn_target
     partialDerivWithin_contDiffOn_top_of_uniqueDiffOn (i := j) hbase hUD
   exact hpartial_target.continuousOn
 
-/-- The within-partial pulled back through the chart is continuous on the
-chart source. -/
 private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (j : Fin (Module.finrank ℝ E)) :
@@ -431,8 +366,6 @@ private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     exact (extChartAt I α).map_source hxsrc
   exact hpartial.comp hchart hmaps
 
-/-- The chart-coefficient `gradChartCoeffWithin g α u i` is continuous on the
-chart source `(chartAt H α).source`. -/
 private lemma gradChartCoeffWithin_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -463,7 +396,6 @@ private lemma gradChartCoeffWithin_continuousOn_source
   · exact partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
       (I := I) α hu j
 
-/-- The chart-Gram-matrix entry is continuous on the chart source. -/
 private lemma chartGramMatrix_entry_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -477,8 +409,6 @@ private lemma chartGramMatrix_entry_continuousOn_source
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hy
 
-/-- The metric pairing `g.inner x (gradFun u x) (gradFun u x)` is continuous
-on `(chartAt H α).source`, expanded chart-by-chart. -/
 private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -553,14 +483,6 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hu j
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
 
-/-- For a smooth scalar `u : M → ℝ` on a smooth manifold whose model `I` may
-have a non-trivial boundary, the metric pairing
-`g.inner x (gradFun u x) (gradFun u x)` is continuous on `M`.
-
-Continuity is a local property: at every `x : M`, the chart at `x` provides
-an open neighbourhood `(chartAt H x).source` on which the pairing is
-continuous via the chart-coordinate expansion (see
-`g_inner_gradFun_gradFun_continuousOn_chart_source`). -/
 private lemma g_inner_gradFun_gradFun_continuous
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -575,9 +497,6 @@ private lemma g_inner_gradFun_gradFun_continuous
     g_inner_gradFun_gradFun_continuousOn_chart_source (I := I) g x hu
   exact (hcontOn x hx_chart).continuousAt (hopen.mem_nhds hx_chart)
 
-/-- For a smooth scalar `u : M → ℝ` on a compact Riemannian manifold with
-smooth boundary, `√(g.inner (gradFun u) (gradFun u))` is in `L^p` for every
-exponent `p`. -/
 private lemma memLp_g_norm_gradFun_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞)
@@ -588,8 +507,6 @@ private lemma memLp_g_norm_gradFun_smooth
   have hcont := g_inner_gradFun_gradFun_continuous (I := I) (M := M) g hu
   exact continuous_memLp_of_compactSpace g p (Real.continuous_sqrt.comp hcont)
 
-/-- Within-version of the chart-local representation of `tangentSectionAction`,
-valid at every chart-source point. -/
 private lemma tangentSectionAction_chartLocal_within
     (α : M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -620,7 +537,6 @@ private lemma tangentSectionAction_chartLocal_within
   rw [mfderiv_chartBasisVecFiber_within_of_smooth (I := I) α hu hx i]
   rfl
 
-/-- The `chartCoeff α Y i` is continuous on the chart source. -/
 private lemma chartCoeff_continuousOn_source
     (α : M) (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) :
@@ -633,7 +549,6 @@ private lemma chartCoeff_continuousOn_source
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hy
 
-/-- `tangentSectionAction Y u` is continuous on `(chartAt H α).source`. -/
 private lemma tangentSectionAction_continuousOn_chart_source
     (α : M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -654,7 +569,6 @@ private lemma tangentSectionAction_continuousOn_chart_source
   · exact partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
       (I := I) α hu i
 
-/-- `tangentSectionAction Y u` is continuous on `M`. -/
 private lemma tangentSectionAction_continuous
     [T2Space M]
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -667,7 +581,6 @@ private lemma tangentSectionAction_continuous
   have hcontOn := tangentSectionAction_continuousOn_chart_source (I := I) x Y hu
   exact (hcontOn x hx_chart).continuousAt (hopen.mem_nhds hx_chart)
 
-/-- The pairing `g.inner x (gradFun u x) (Y x)` is continuous globally on `M`. -/
 private lemma continuous_g_inner_gradFun_section
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -683,8 +596,6 @@ private lemma continuous_g_inner_gradFun_section
   exact (tangentSectionAction_continuous (I := I) (M := M) Y hu).congr
     (fun x => (h_eq x).symm)
 
-/-- `gradFun u` is a weak `L^p` Riemannian gradient with boundary of smooth
-`u`, with no interior-support hypothesis. -/
 private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_smooth
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -706,10 +617,6 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_smooth
     exact integral_tangentSectionAction_eq_neg_no_u_interior_support
       (I := I) g hu X hX hX_int
 
-/-- **Smooth bridge (general smooth case).** Every smooth function on a closed
-Riemannian manifold with smooth boundary lies in `MemW1pIntrinsicLp_withBoundary`
-for every exponent `p`. The candidate gradient is the intrinsic Riemannian
-gradient `gradFun g u`. -/
 theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
     [Module.Finite ℝ E] [FiniteDimensional ℝ E]
@@ -732,8 +639,6 @@ theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff
         (I := I) (M := M) g hu,
       memLp_g_norm_gradFun_smooth (I := I) (M := M) g p hu⟩
 
-/-- Headline alias: same as `MemW1pIntrinsicLp_withBoundary_of_contMDiff` but
-named to mirror the boundaryless headline `MemW1pIntrinsicLp_of_MemWkpChart_smooth`. -/
 theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
     [Module.Finite ℝ E] [FiniteDimensional ℝ E]
@@ -748,8 +653,6 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth
   MemW1pIntrinsicLp_withBoundary_of_contMDiff
     (I := I) (M := M) g p hu_smooth
 
-/-- For a smooth `u` on a closed Riemannian manifold with smooth boundary, the
-intrinsic-`L^p` Sobolev norm is finite. -/
 theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
     [Module.Finite ℝ E] [FiniteDimensional ℝ E]
@@ -776,8 +679,6 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
   exact hG_p.2
 
-/-- For a smooth interior-supported `u` on a closed Riemannian manifold with
-smooth boundary, the intrinsic-`L^p` Sobolev norm is finite. -/
 theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
     [Module.Finite ℝ E] [FiniteDimensional ℝ E]
@@ -806,9 +707,6 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
   refine lt_of_le_of_lt (iInf_le_of_le G (iInf_le _ hG_weak)) ?_
   exact hG_p.2
 
-/-- For a smooth `u` on a closed Riemannian manifold-with-boundary, if the
-intrinsic-`L^p` Sobolev norm with boundary vanishes (with `1 ≤ p < ∞`), then
-`u = 0` pointwise everywhere. -/
 private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -850,15 +748,6 @@ private lemma smooth_u_eq_zero_of_w1pNormIntrinsicLp_withBoundary_zero
   exact (hu_cont.ae_eq_iff_eq (riemannianVolumeMeasure I M g) h_zero_cont).mp
     h_u_aeEq_const
 
-/-- **Reverse direction (per-`u`, chart-finite case).** For a closed
-Riemannian manifold-with-boundary modelled on `EuclideanHalfSpace n` and
-`1 ≤ p < ∞`, every smooth `u : M → ℝ` whose chart-based norm
-`wkpNormChart g 1 p u` is finite admits a finite constant `C ≥ 0`
-(depending on `u`) such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal C * w1pNormIntrinsicLp_withBoundary g p u`,
-provided the intrinsic-`L^p` norm of `u` is non-zero.
-
-The constant `C := (wkpNormChart u).toReal / (w1pNormIntrinsicLp u).toReal + 1`. -/
 theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
     {n : ℕ} [NeZero n]
     {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanHalfSpace n) M]
@@ -921,18 +810,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_finite
   rw [h_eq]
   linarith
 
-/-- **Reverse direction (per-`u`).** For a closed Riemannian manifold-with-
-boundary modelled on `EuclideanHalfSpace n` and `1 ≤ p < ∞`, every smooth
-`u : M → ℝ` whose canonical-POU chart-pushed functions all have
-`tsupport` strictly inside the open interior parts of the chart targets
-(`AllChartsInteriorSupport u`) admits a finite constant `C ≥ 0` such that
-`wkpNormChart g 1 p u ≤ ENNReal.ofReal C * w1pNormIntrinsicLp_withBoundary g p u`.
-
-The constant `C` may depend on `u`. The boundary case where the intrinsic
-norm vanishes is handled by observing that for smooth `u` on a closed
-manifold-with-boundary with `w1pNormIntrinsicLp_withBoundary u = 0`, the
-function `u` is identically zero, so `wkpNormChart u = 0` as well, and the
-inequality holds with `C = 0`. -/
 theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
     {n : ℕ} [NeZero n]
     {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanHalfSpace n) M]
@@ -978,11 +855,6 @@ theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth
         (n := n) (M := M) g hp_one hp_top hu_smooth h_chart_lt_top h_intr_zero
     exact ⟨C, hC_nn, hC_bound⟩
 
-/-- **Reverse direction (per-`u`, packaged uniform-in-`u` form).** Equivalent
-ergonomic packaging of `wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth`:
-the per-`u` constant `C(u)` is exposed inside the universal-`u` quantifier,
-matching the boundaryless headline theorem
-`wkpNormChart_le_const_mul_w1pNormIntrinsicLp_smooth_uniform_full`. -/
 theorem wkpNormChart_le_const_mul_w1pNormIntrinsicLp_withBoundary_smooth_uniform_full
     {n : ℕ} [NeZero n]
     {M : Type*} [TopologicalSpace M] [ChartedSpace (EuclideanHalfSpace n) M]

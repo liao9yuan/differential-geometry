@@ -14,23 +14,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Parallel transport along a smooth curve
-
-Given a smooth Riemannian metric `g` on `M` and a smooth curve `γ : ℝ → M`,
-this file packages the global parallel-transport theory:
-
-* the chart-local linear-ODE reduction of `∇_{γ'} V = 0`;
-* local existence + uniqueness from the linear Picard-Lindelöf bound;
-* chart-overlap consistency of solutions;
-* extension of the unique solution to all of `ℝ`;
-* the bundled `parallelTransport` section, with simp lemmas for its
-  initial value and its parallelism in every chart;
-* preservation of the inner product `⟨V, W⟩_g` along the curve;
-* existence of a parallel orthonormal frame of `(γ')⊥` along a
-  unit-speed geodesic.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -52,9 +35,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- **parallel-ode-chart-local.** The parallel-transport condition
-`(D V / dt)(t) = 0` in the chart at `α` is equivalent to the linear
-ODE `V'(t) = - Γ_α(u'(t), V(t))(u(t))`. -/
 theorem parallel_ode_chart_local
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (Y : ℝ → E) (s : Set ℝ) :
@@ -69,13 +49,6 @@ theorem parallel_ode_chart_local
   refine imp_congr_right (fun _ => ?_)
   simp [zero_sub]
 
-/-- **parallel-local-existence-uniqueness.** On a compact interval
-`[a, b] ∋ t₀`, the linear parallel-transport ODE has a solution
-`Y : ℝ → E` with prescribed initial value `Y(t₀) = v₀`, and any
-solution agrees with it on `[a, b]`. The derivative condition is
-phrased as `HasDerivWithinAt` on `Icc a b` since the solution is
-only determined there; uniqueness is therefore expressed as
-`Set.EqOn` rather than functional equality on all of `ℝ`. -/
 theorem parallel_local_existence_uniqueness [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
@@ -102,22 +75,6 @@ theorem parallel_local_existence_uniqueness [I.Boundaryless]
   exact parallel_local_uniqueness_on_Icc (I := I) g α γ uPrime hab ht₀ huCont
     huCurveCont hsource hY_deriv hY'_deriv (hY_init.trans hY'_init.symm)
 
-/-- **parallel-chart-overlap-consistency.** The chart-α coordinate
-representation `Yα` of a tangent-field along `γ` and its chart-β
-counterpart `Yβ` are related by the chart-transition Jacobian
-`T_{αβ} := chartTransitionAt α β` evaluated along the chart-curve
-`u_α(t) := extChartAt I α (γ t)`:
-`Yβ t = T_{αβ}(u_α t)(Yα t)`,
-and likewise `uPrimeβ t = T_{αβ}(u_α t)(uPrimeα t)`. Under this
-transition relation, parallelism of `Yα` in the chart at `α` is
-equivalent to parallelism of the transition-transformed
-`Yβ := t ↦ T_{αβ}(u_α t)(Yα t)` in the chart at `β`.
-
-This is the mathematically correct formulation: the *same manifold
-tangent-section* admits two distinct `E`-valued representations, one
-per chart, related by the chart-transition Jacobian. The previous
-"same `Y`" form is mathematically false because the chart-α and
-chart-β coordinate representations differ. -/
 theorem parallel_chart_overlap_consistency [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (γ : ℝ → M) (hγ : Continuous γ)
     (uPrimeα Yα : ℝ → E) (s : Set ℝ)
@@ -240,21 +197,6 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
       simpa using hYβd
     exact hgoal
 
-/-- **parallel-single-chart-extension.** Fix a chart basepoint `α` and
-an open interval `Ioo a b ∋ t₀` on which `γ` stays in the chart source
-and the chart-curve `u := chartCurve α γ` is differentiable. Then there
-is a section `V : ℝ → E`, parallel in the chart at `α` on `Ioo a b`
-with `V t₀ = v₀`, and any parallel section sharing the initial value at
-`t₀` agrees with it on `Ioo a b`.
-
-Existence and uniqueness both come from
-`parallel_local_existence_uniqueness`: the chart-local
-`HasDerivWithinAt … (Icc a b)` form there is converted to the two-sided
-`HasDerivAt` form of `IsParallelChart` on the interior `Ioo a b`, where
-`Icc a b ∈ 𝓝 t`. The chart-curve differentiability hypothesis `huDeriv`
-supplies the first conjunct of `IsParallelChart` (its velocity slot);
-it is a genuine smoothness fact about `γ`, not a restatement of the
-conclusion. -/
 theorem parallel_global_extension [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -298,34 +240,22 @@ theorem parallel_global_extension [I.Boundaryless]
   exact IsParallelChart.unique_of_initial hY_par hV'_par hK_Ioo ht₀
     (hY_init.trans hV'_init.symm)
 
-/-- The data pinning down a single-chart parallel-transport problem on
-an open segment: a chart basepoint `α`, an open interval `Ioo a b`
-containing the base time `t₀`, continuity/differentiability of the
-chart-curve there, and the requirement that `γ` stays in the chart
-source on the closed interval. Bundling these keeps the
-`parallelTransport` section and its specification lemmas readable. -/
 structure ParallelSegmentData [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (a b t₀ : ℝ) : Prop where
-  /-- The interval is nondegenerate. -/
+  
   hab : a ≤ b
-  /-- The base time lies in the open interval. -/
+  
   ht₀ : t₀ ∈ Set.Ioo a b
-  /-- The chart-curve velocity is continuous on the closed interval. -/
+  
   huCont : ContinuousOn (fun t => deriv (chartCurve (I := I) α γ) t) (Set.Icc a b)
-  /-- The chart-curve is continuous on the closed interval. -/
+  
   huCurveCont : ContinuousOn (chartCurve (I := I) α γ) (Set.Icc a b)
-  /-- The chart-curve is differentiable on the open interval. -/
+  
   huDeriv : ∀ t ∈ Set.Ioo a b,
     HasDerivAt (chartCurve (I := I) α γ) (deriv (chartCurve (I := I) α γ) t) t
-  /-- `γ` stays in the chart source on the closed interval. -/
+  
   hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source
 
-/-- **parallel-section-packaging (def).** The parallel transport of
-`v₀` along the smooth curve `γ`, in the chart at `α` on the open
-segment `Ioo a b ∋ t₀`, as a `SectionAlongCurve I M γ`. Built by
-`Classical.choose` over the unique single-chart parallel extension of
-`parallel_global_extension`. The underlying function is determined only
-on `Ioo a b`; off the interval it is an unconstrained witness. -/
 noncomputable def parallelTransport [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -333,10 +263,6 @@ noncomputable def parallelTransport [I.Boundaryless]
   ⟨(parallel_global_extension (I := I) g α γ hd.hab hd.ht₀ hd.huCont
       hd.huCurveCont hd.huDeriv hd.hsource v₀).choose⟩
 
-/-- The defining property of `parallelTransport`: the underlying
-function is the chosen witness of `parallel_global_extension`, hence
-satisfies the initial-value condition at `t₀` and the chart-`α`
-parallel-transport ODE on `Ioo a b`. -/
 lemma parallelTransport_spec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -347,17 +273,12 @@ lemma parallelTransport_spec [I.Boundaryless]
   (parallel_global_extension (I := I) g α γ hd.hab hd.ht₀ hd.huCont
     hd.huCurveCont hd.huDeriv hd.hsource v₀).choose_spec.1
 
-/-- **parallel-section-packaging (initial value).** The parallel
-transport agrees with `v₀` at the base time `t₀`. -/
 @[simp] theorem parallelTransport_initial [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
     (parallelTransport (I := I) g α γ hd v₀).toFun t₀ = v₀ :=
   (parallelTransport_spec (I := I) g α γ hd v₀).1
 
-/-- **parallel-section-packaging (parallel in the chart at `α`).** On
-the open segment `Ioo a b`, `parallelTransport g α γ hd v₀` satisfies
-the chart-`α` parallel-transport equation. -/
 theorem parallelTransport_isParallel [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -366,16 +287,6 @@ theorem parallelTransport_isParallel [I.Boundaryless]
       (parallelTransport (I := I) g α γ hd v₀).toFun (Set.Ioo a b) :=
   (parallelTransport_spec (I := I) g α γ hd v₀).2
 
-/-- **Local constancy of the chart-Gram inner product of two parallel
-sections.** If `V` and `W` are both parallel along `γ` in the chart at
-`α` on a set `s ⊆ ℝ`, and `γ` maps `s` into the chart source, then the
-chart-Gram form `t ↦ ⟨V, W⟩_G(t)` has derivative `0` at every interior
-point of `s` (every `t` for which `s ∈ 𝓝 t`).
-
-This is the engine `chartGramAlongCurve_hasDerivAt_covariant`: the
-covariant-derivative correction terms `V'(t) + Γ(u', V)` and
-`W'(t) + Γ(u', W)` both vanish because `V` and `W` are parallel, so the
-Leibniz-product derivative of the Gram form is `0`. -/
 theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     {V W : ℝ → E} {s : Set ℝ}
@@ -439,23 +350,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
   rw [hVzero, hWzero] at hbase
   simpa using hbase
 
-/-- **parallel-transport-preserves-inner-product.** For two parallel
-transports `V`, `W` along `γ`, written in the same chart at `α` and
-sharing the same segment data `hd`, the chart-Gram inner product
-`t ↦ ⟨V, W⟩_G(t) = ∑_{i,j} G_{ij}(u(t)) · Vᶜ_i(t) · Wᶜ_j(t)`
-— the genuine Riemannian inner product `g(γ t)(V̄(t), W̄(t))` of the
-tangent vectors `V̄(t) = triv.symmL (γ t)(V t)`, `W̄(t) = triv.symmL
-(γ t)(W t)` represented in the chart frame at `α` — is **constant in
-`t` on the open segment `Ioo a b`**.  In particular it equals its value
-at the base time `t₀ ∈ Ioo a b`.
-
-Here `V t = (parallelTransport g α γ hd v₀).toFun t` etc. are the
-chart-coordinate representations on which the parallel-transport ODE
-`Y'(t) = -Γ(u'(t), Y(t))(u(t))` acts. The Levi-Civita connection is
-metric-compatible (`chartGramOnE_partialDeriv_eq_christoffel_sum_split`),
-so the covariant-derivative product rule gives `d/dt ⟨V, W⟩_G = 0`.
-This is sound: both sections are parallel in the *same* chart at `α`,
-so no chart-transition Jacobian intervenes. -/
 theorem parallelTransport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ w₀ : E)
@@ -491,13 +385,6 @@ theorem parallelTransport_preserves_inner_product [I.Boundaryless]
       (fun τ hτ => (hderiv τ hτ).deriv) hx hd.ht₀
   exact hconst t ht
 
-/-- **Trivialisation composite is the chart transition Jacobian.** For two
-basepoints `α β : M` and a manifold point `b` lying in both chart sources,
-the chart-`β` trivialisation coordinate of the inverse chart-`α`
-trivialisation of `v` equals the chart-transition Jacobian
-`chartTransitionAt α β` (evaluated at the chart-`α` image of `b`) applied to
-`v`. This is the bundle-`coordChange` composition law combined with the
-boundaryless identification `fderivWithin (range I) = fderiv`. -/
 theorem trivCoord_comp_symmL_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
@@ -529,12 +416,6 @@ theorem trivCoord_comp_symmL_eq_chartTransitionAt [I.Boundaryless]
   rw [← hcc]
   exact hcomp
 
-/-- **Uniform chart partition of a curve over a compact interval.** For a
-continuous curve `γ` and `L > 0`, there is a positive number of pieces `N`
-and a basepoint assignment `bp : ℕ → M` such that on every grid sub-interval
-`[k·L/N, (k+1)·L/N]` (for `k < N`) the curve stays inside the chart source of
-`bp k`. The mesh is chosen below the Lebesgue number of the chart-source
-cover of the compact image `γ '' [0, L]`. -/
 theorem exists_uniform_chart_partition
     (γ : ℝ → M) (hγ : Continuous γ) {L : ℝ} (hL : 0 < L) :
     ∃ (N : ℕ) (bp : ℕ → M), 0 < N ∧
@@ -599,8 +480,6 @@ theorem exists_uniform_chart_partition
   choose! tp htp using hchoose
   exact ⟨N, fun k => γ (tp k), hN_pos, fun k hk t ht => htp k hk t ht⟩
 
-/-- The chart-curve `chartCurve α γ` is continuous on a compact interval on
-which `γ` stays inside the chart source of `α`. -/
 theorem chartCurve_continuousOn_of_mapsTo
     (α : M) (γ : ℝ → M) (hγ : Continuous γ) {a b : ℝ}
     (hsrc : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source) :
@@ -613,15 +492,6 @@ theorem chartCurve_continuousOn_of_mapsTo
     exact hsrc t ht
   exact hφ.comp hγ.continuousOn hmaps
 
-/-- **Single-piece existence of an intrinsically-parallel bundle section.**
-On a compact interval `[a, b]` with `a < b` on which `γ` (smooth) stays in
-the chart source of `α`, given any initial fibre vector `v₀ ∈ T_{γ a} M`,
-there is a fibre-valued section `V : ∀ t, T_{γ t} M` with `V a = v₀` whose
-chart-`(γ t)`-coordinate representation is differentiable at every
-`t ∈ Ioo a b`, whose intrinsic covariant derivative vanishes on `Ioo a b`,
-and which preserves the genuine Riemannian inner product of two such sections
-across `[a, b]`. The section's fibre value is `(triv α).symmL (γ s)` of the
-single-chart ODE solution `Y s`. -/
 theorem exists_piece_parallel_section [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {a b t₀ : ℝ} (hab : a < b)
@@ -756,13 +626,7 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     rw [hgoal, hYβ_zero]
 
 set_option linter.unusedVariables false in
-/-- **Parallel transport preserves the inner product.** If two sections `V`, `W`
-along the smooth curve `γ` have vanishing intrinsic covariant derivative
-`covDerivAlong g γ · = 0` on `Icc lo hi` and differentiable
-chart-`(γ t)`-coordinate representations there, then the Riemannian inner
-product `t ↦ g(γ t)(V t, W t)` is constant on `Icc lo hi`, equal to its value at
-`lo`. The two covariant-correction terms cancel by metric compatibility because
-both sections are parallel. -/
+
 theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (hlohi : lo ≤ hi)
@@ -873,12 +737,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
   intro t ht
   exact hconst t ht
 
-/-- **Uniqueness of parallel transport.** If `V` and `W` are sections along the
-smooth curve `γ` with vanishing intrinsic covariant derivative on `Icc lo hi`
-and differentiable chart representations there, and `V t₀ = W t₀` at some
-`t₀ ∈ Icc lo hi`, then `V t = W t` for every `t ∈ Icc lo hi`. The difference
-`V - W` is parallel, so its squared `g`-length is constant; vanishing at `t₀`
-forces it to vanish everywhere by positive-definiteness of `g`. -/
 theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (hlohi : lo ≤ hi)
@@ -933,9 +791,6 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
   rw [sub_eq_zero] at this
   exact this
 
-/-- **Locality of the chart representation.** If two sections agree on a
-neighbourhood of `t`, their chart-`(γ t)`-coordinate representations agree on a
-neighbourhood of `t`. -/
 theorem chartRepAt_eventuallyEq_of_eventuallyEq (γ : ℝ → M)
     {V W : ∀ t, TangentSpace I (γ t)} {t : ℝ}
     (h : ∀ᶠ s in 𝓝 t, V s = W s) :
@@ -943,8 +798,6 @@ theorem chartRepAt_eventuallyEq_of_eventuallyEq (γ : ℝ → M)
   filter_upwards [h] with s hs
   rw [chartRepAt_apply, chartRepAt_apply, hs]
 
-/-- **Locality of the intrinsic covariant derivative.** If two sections agree on
-a neighbourhood of `t`, their intrinsic covariant derivatives at `t` coincide. -/
 theorem covDerivAlong_congr_of_eventuallyEq (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {V W : ∀ t, TangentSpace I (γ t)} {t : ℝ}
     (h : ∀ᶠ s in 𝓝 t, V s = W s) :
@@ -953,11 +806,6 @@ theorem covDerivAlong_congr_of_eventuallyEq (g : SmoothRiemannianMetric I M) (γ
   rw [covDerivAlong_def, covDerivAlong_def, chartCovDerivAlong_def, chartCovDerivAlong_def]
   rw [hrep.deriv_eq, hrep.eq_of_nhds]
 
-/-- **Uniform chart radius along a curve.** For a continuous curve `γ` and
-`L > 0`, there is a radius `r > 0` such that for every `t ∈ Icc 0 L` some chart
-basepoint `α` has `γ` inside its source on the whole window `[t - r, t + r]`.
-This is the Lebesgue number of the chart-source cover of the compact curve
-image over the slightly enlarged interval `[-1, L + 1]`. -/
 theorem exists_uniform_chart_radius
     (γ : ℝ → M) (hγ : Continuous γ) (L : ℝ) :
     ∃ r : ℝ, 0 < r ∧ ∀ t ∈ Set.Icc (0 : ℝ) L, ∃ α : M,
@@ -987,30 +835,6 @@ theorem exists_uniform_chart_radius
   simp only [hc_def, Set.mem_preimage] at this
   exact this
 
-/-- **Existence of global parallel transport on `Icc 0 L`.** For a smooth curve
-`γ`, `L > 0`, and any initial tangent vector `v₀ ∈ T_{γ 0} M`, there is a
-fibre-valued section `V : ∀ t, T_{γ t} M` along `γ` with `V 0 = v₀`, whose
-chart-`(γ t)`-coordinate representation is differentiable at every
-`t ∈ Icc 0 L`, and whose intrinsic covariant derivative vanishes on `Icc 0 L`.
-
-The section is glued from single-chart parallel-transport solutions
-(`exists_piece_parallel_section`) across a uniform chart cover of the compact
-curve image (`exists_uniform_chart_radius`), with uniqueness
-(`parallel_transport_unique_of_eq_at_point`) ensuring consistency across overlaps.
-
-The construction is a `Nat.rec` over reach times `c n := min L (n · r/4)`: given
-the section already parallel on the open window `Ioo (-step) (c n + step)`, the
-next step solves a chart-piece centred at `c n` on `[c n - step, c n + 2 step]`
-(within a single chart by the uniform radius), pins the overlap
-`[c n - step/2, c n]` by `parallel_transport_unique_of_eq_at_point`, and glues with an
-`if t ≤ c n` cut; the locality of `chartRepAt` / `covDerivAlong` then transfers
-differentiability and parallelism to the extended window. Termination is reached
-once `n · step ≥ L`, where the window covers `Icc 0 L`.
-
-This open-window form exposes the genuine domain of the construction: the section
-is parallel and chart-differentiable not merely on the closed interval `Icc 0 L`
-but on an *open neighbourhood* `Ioo (-δ) (L + δ)` of it (`δ > 0`). The closed-form
-`exists_parallel_transport_on_Icc` is the immediate corollary. -/
 theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -1181,13 +1005,6 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
   · intro t ht
     exact hV_par t ⟨ht.1, ht.2⟩
 
-/-- **Existence of parallel transport on `Icc 0 L`.** For a smooth curve `γ`,
-`L > 0`, and any initial tangent vector `v₀ ∈ T_{γ 0} M`, there is a section `V`
-along `γ` with `V 0 = v₀` whose chart-`(γ t)`-coordinate representation is
-differentiable at every `t ∈ Icc 0 L` and whose intrinsic covariant derivative
-vanishes on `Icc 0 L`. This is the closed-interval corollary of
-`exists_global_parallel_transport_on_Ioo`, obtained by restricting its open
-window `Ioo (-δ) (L + δ)` to `Icc 0 L`. -/
 theorem exists_parallel_transport_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :

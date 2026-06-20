@@ -1,50 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
 
-/-!
-# The chart Voss-Weyl formula for the Laplace-Beltrami operator
-
-For a smooth Riemannian metric `g` on a smooth boundaryless manifold `M`,
-a smooth scalar function `f : M → ℝ`, and a chart based at `α : M`, this file
-establishes the chart-coordinate Voss-Weyl formula:
-$$
-(\Delta_g f)(x) = \frac{1}{\sqrt{\det g_\alpha(x)}}
-  \sum_i \partial_i \Bigl(\sqrt{\det g_\alpha}\,
-    \sum_j g^{ij}_\alpha\, \partial_j \tilde f\Bigr)(\varphi_\alpha(x)),
-$$
-where `\tilde f := f \circ \varphi_\alpha^{-1}` is the chart pullback of `f`,
-`g^{ij}_\alpha` is the inverse of the chart Gram matrix
-`(g_\alpha)_{ij} = g.inner (e_i, e_j)` of the chart-basis frame, and
-`\sqrt{\det g_\alpha}` is the chart density.
-
-The proof combines:
-
-* the Voss-Weyl chart formula for the divergence
-  (`voss_weyl_divergence_formula`), which computes
-  `divergence_g g X x` as `localDivergence g α X x` for `x` in the chart source;
-* the chart-coordinate decomposition of the gradient
-  (`gradChartLocal_eq_gradFun`), which writes
-  `gradFun g f x = ∑_i \mathrm{gradChartCoeff}_i\, e_i(x)`;
-* the identification of the divergence chart-coefficient
-  `chartCoeff α (grad_g g hf) i x` with `gradChartCoeff g α f i x`, by
-  uniqueness of basis decomposition.
-
-## Main definitions
-
-* `chartVossWeylLaplacian g α f x` : the chart Voss-Weyl right-hand side, as a
-  scalar function of `x : M`.
-
-## Main results
-
-* `chartCoeff_grad_g_eq_gradChartCoeff` : on the chart base set, the Voss-Weyl
-  chart coefficient of `grad_g g hf` agrees with `gradChartCoeff g α f`.
-* `localDivergence_grad_g_eq_chartVossWeylLaplacian` : the chart-local
-  Voss-Weyl divergence of `grad_g g hf` rewrites as the chart Voss-Weyl
-  Laplacian.
-* `voss_weyl_laplacian_formula_of_closed` : the headline identity
-  `Δ_g g hf x = chartVossWeylLaplacian g α f x` on the chart source.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -61,8 +17,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-/-- The pulled-back inverse Gram matrix entry on the chart target
-`(extChartAt I α).target ⊆ E`. -/
 def chartInvGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
@@ -73,8 +27,6 @@ def chartInvGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     chartInvGramOnE (I := I) g α i j y =
       chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) i j := rfl
 
-/-- The chart-pulled-back chart-local gradient component, viewed as a function
-on the chart target. -/
 def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y =>
@@ -90,8 +42,6 @@ def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
         chartInvGramOnE (I := I) g α i j y *
           partialDeriv (E := E) j (scalarOnE (I := I) α f) y := rfl
 
-/-- The integrand of the chart Voss-Weyl Laplacian: in chart coordinates,
-the `i`-th term reads `gradChartCoeffOnE g α f i · chartDensityOnE g α`. -/
 def chartVossWeylIntegrand (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y =>
@@ -104,7 +54,6 @@ def chartVossWeylIntegrand (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
       gradChartCoeffOnE (I := I) g α f i y *
         chartDensityOnE (I := I) g α y := rfl
 
-/-- The chart Voss-Weyl right-hand side for the Laplace-Beltrami operator. -/
 def chartVossWeylLaplacian (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (x : M) : ℝ :=
   (∑ i : Fin (Module.finrank ℝ E),
@@ -122,9 +71,6 @@ def chartVossWeylLaplacian (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
             (extChartAt I α x))
         / chartDensity (I := I) g α x := rfl
 
-/-- On the chart base set with `extChartAt` value in the interior of the chart
-target, the Voss-Weyl chart coefficient of `grad_g g hf` agrees with the
-gradient chart coefficient `gradChartCoeff g α f`. -/
 lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -189,10 +135,6 @@ lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
   rw [hLgrad]
   exact hrepr_basis_combo
 
-/-- Pointwise rewriting on the chart target: the chart-local divergence
-coefficient `chartCoeffOnE α (grad_g g hf) i` for `grad_g g hf` matches the
-chart Voss-Weyl gradient coefficient `gradChartCoeffOnE g α f i`, at any point
-of the chart target. -/
 private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -226,8 +168,6 @@ private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
   rw [hext_z]
   rw [chartInvGramOnE_def]
 
-/-- On the chart source, the chart-local Voss-Weyl divergence of
-`grad_g g hf` agrees with the chart Voss-Weyl Laplacian. -/
 lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -258,13 +198,6 @@ lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
   unfold partialDeriv
   rw [hev.fderiv_eq]
 
-/-- **Chart Voss-Weyl formula for the Laplace-Beltrami operator.** For a smooth
-scalar `f`, a chart `α`, and `x` in the source of the chart at `α`, the
-Laplacian `Δ_g g hf x` equals the chart Voss-Weyl right-hand side
-`chartVossWeylLaplacian g α f x`. Stated here on a closed manifold: `M` is
-boundaryless, `T2`, `σ`-compact, and compact. (The compactness hypothesis is
-not actually needed for the chart-local conclusion; see
-`voss_weyl_laplacian_formula_pointwise` for the σ-compact-only variant.) -/
 theorem voss_weyl_laplacian_formula_of_closed
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -275,8 +208,6 @@ theorem voss_weyl_laplacian_formula_of_closed
   rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
-/-- A `σ`-compact (not necessarily compact) variant: same conclusion, with
-compactness dropped. -/
 theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -287,14 +218,6 @@ theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
   rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
-/-- **Pointwise chart Voss-Weyl formula.** Same conclusion as
-`voss_weyl_laplacian_formula_of_closed` — `Δ_g g hf x = chartVossWeylLaplacian g α f x` for
-`x` in the source of the chart at `α` — but on a manifold that is only
-boundaryless, `T2`, and `σ`-compact, dropping `[CompactSpace M]`. The chart
-Voss-Weyl identity is chart-source-pointwise, so global compactness plays no
-role in the derivation. This is the variant consumed by downstream theorems
-(e.g. the chart Hessian-trace identity) that do not assume global
-compactness. -/
 theorem voss_weyl_laplacian_formula_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

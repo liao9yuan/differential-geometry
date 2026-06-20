@@ -1,38 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 
-/-!
-# The maximal-regularity operator solves the inhomogeneous heat equation
-
-This file completes the construction of the `L²`-maximal-regularity operator
-(`Operator.lean`) by proving that its output `u = maximalRegularityOp f` solves
-the inhomogeneous heat equation
-
-  `∂_t u = Δ_∇ u + f`
-
-in the time-`L²` sense, as an identity of `L²([0,T]; Hᵃ)` elements.
-
-## The rough Laplacian on the spectral scale
-
-The connection (rough) Laplacian `Δ_∇` acts diagonally on the eigenbasis: on the
-`i`-th eigen-coordinate it is multiplication by the connection-Laplacian
-eigenvalue, with the geometer sign convention `Δ_∇ = -∇*∇` giving eigenvalue
-`-λᵢ` (`λᵢ ≥ 0`).  Squaring the eigen-coordinate, the `Hˢ`-weight `(1 + λᵢ)ˢ`
-absorbs two factors of `(1 + λᵢ)`, so `Δ_∇` maps `H^{τ+2}` boundedly to `Hᵗ`:
-it gains exactly two Sobolev derivatives of room — equivalently, it loses two.
-
-* `tensorScaleLaplacian τ` — the diagonal operator `Δ_∇ : H^{τ+2}
-  →L[ℝ] Hᵗ`, multiplying the `i`-th coordinate by `-λᵢ`.
-* `timeScaleLaplacian τ` — its action on time-`L²` tensor fields,
-  `L²([0,T]; H^{τ+2}) →L[ℝ] L²([0,T]; Hᵗ)`.
-
-## Main result
-
-* `maximalRegularityOp_solves` — `∂_t u = Δ_∇ u + f`: the time derivative of the
-  solution equals the rough Laplacian of the solution plus the forcing, as an
-  identity in `L²([0,T]; Hᵃ)`.  Mode by mode this is the per-mode scalar ODE
-  `φᵢ' = -λᵢ·φᵢ + fᵢ`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -65,15 +32,12 @@ variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 variable {τ : ℝ}
 
-/-- The base inequality `λᵢ² ≤ (1 + λᵢ)²` for the connection-Laplacian
-eigenvalue `λᵢ ≥ 0`. -/
 private theorem lambda_sq_le (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 ≤
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ 2 := by
   have hlam := tensor_lambda_nonneg (I := I) (M := M) i
   nlinarith
 
-/-- The spectral weight identity `(1 + λᵢ)ᵗ · (1 + λᵢ)² = (1 + λᵢ)^{τ+2}`. -/
 private theorem scaleLaplacianWeightMulTwo
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     tensorSobolevWeight (I := I) (M := M) i τ *
@@ -86,7 +50,6 @@ private theorem scaleLaplacianWeightMulTwo
     ← Real.rpow_add hbase_pos]
   norm_num
 
-/-- The pointwise bound `(1 + λᵢ)ᵗ · (λᵢ · v_i)² ≤ (1 + λᵢ)^{τ+2} · v_i²`. -/
 private theorem weightLambdaMulSqLe
     (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -107,8 +70,6 @@ private theorem weightLambdaMulSqLe
     _ = tensorSobolevWeight (I := I) (M := M) i (τ + 2) * (v.coeff i) ^ 2 := by
         rw [← mul_assoc, scaleLaplacianWeightMulTwo (I := I) (M := M) i]
 
-/-- The coordinate family `i ↦ -λᵢ · v_i` is weighted-summable at the scale
-`τ` whenever `v ∈ H^{τ+2}`: the rough Laplacian of `v` lies in `Hᵗ`. -/
 private theorem scaleLaplacianWeightedSummable
     (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i τ *
@@ -118,9 +79,6 @@ private theorem scaleLaplacianWeightedSummable
       (sq_nonneg _)
   · exact weightLambdaMulSqLe (I := I) (M := M) v i
 
-/-- The underlying coordinate function of the rough Laplacian on the spectral
-scale: it multiplies the `i`-th coordinate by `-λᵢ`, carrying `H^{τ+2}` into
-`Hᵗ`. -/
 def scaleLaplacianFun (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     tensorHs (I := I) (M := M) g r s τ where
   coeff i := -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i
@@ -132,7 +90,6 @@ def scaleLaplacianFun (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     (scaleLaplacianFun (I := I) (M := M) v).coeff i =
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i := rfl
 
-/-- The rough Laplacian on the scale is additive. -/
 theorem scaleLaplacianFun_add
     (v w : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     scaleLaplacianFun (I := I) (M := M) (v + w) =
@@ -141,7 +98,6 @@ theorem scaleLaplacianFun_add
   simp only [scaleLaplacianFun_coeff, tensorHs.add_coeff]
   ring
 
-/-- The rough Laplacian on the scale is `ℝ`-homogeneous. -/
 theorem scaleLaplacianFun_smul (c : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     scaleLaplacianFun (I := I) (M := M) (c • v) =
@@ -150,8 +106,6 @@ theorem scaleLaplacianFun_smul (c : ℝ)
   simp only [scaleLaplacianFun_coeff, tensorHs.smul_coeff]
   ring
 
-/-- The rough Laplacian on the scale is norm-non-increasing:
-`‖Δ_∇ v‖_{Hᵗ} ≤ ‖v‖_{H^{τ+2}}`. -/
 theorem norm_scaleLaplacianFun_le
     (v : tensorHs (I := I) (M := M) g r s (τ + 2)) :
     ‖scaleLaplacianFun (I := I) (M := M) v‖ ≤ ‖v‖ := by
@@ -166,10 +120,6 @@ theorem norm_scaleLaplacianFun_le
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at h
 
-/-- **The rough Laplacian on the spectral Sobolev scale**, as a continuous
-linear operator `Δ_∇ : H^{τ+2} →L[ℝ] Hᵗ`.  It multiplies the `i`-th
-eigen-coordinate by `-λᵢ` (geometer convention `Δ_∇ = -∇*∇`), losing exactly two
-Sobolev derivatives.  Its operator norm is at most `1`. -/
 def tensorScaleLaplacian (τ : ℝ) :
     tensorHs (I := I) (M := M) g r s (τ + 2) →L[ℝ]
       tensorHs (I := I) (M := M) g r s τ :=
@@ -188,8 +138,6 @@ def tensorScaleLaplacian (τ : ℝ) :
     tensorScaleLaplacian (I := I) (M := M) τ v =
       scaleLaplacianFun (I := I) (M := M) v := rfl
 
-/-- The coordinate formula for the rough Laplacian: `Δ_∇` multiplies the `i`-th
-coordinate by `-λᵢ`. -/
 @[simp] theorem tensorScaleLaplacian_coeff (τ : ℝ)
     (v : tensorHs (I := I) (M := M) g r s (τ + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -198,16 +146,11 @@ coordinate by `-λᵢ`. -/
 
 variable {τ : ℝ} {T : ℝ}
 
-/-- **The rough Laplacian on time-`L²` tensor fields**, as a continuous linear
-map `L²([0,T]; H^{τ+2}) →L[ℝ] L²([0,T]; Hᵗ)`: the rough Laplacian `Δ_∇` applied
-pointwise in time. -/
 def timeScaleLaplacian (τ : ℝ) {T : ℝ} :
     timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T →L[ℝ]
       timeL2 (tensorHs (I := I) (M := M) g r s τ) T :=
   (tensorScaleLaplacian (I := I) (M := M) τ).compLpL 2 (timeMeasure T)
 
-/-- `timeScaleLaplacian τ v` is represented a.e. by the pointwise rough
-Laplacian `t ↦ Δ_∇ (v t)`. -/
 theorem timeScaleLaplacian_coeFn
     (v : timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T) :
     timeScaleLaplacian (I := I) (M := M) τ v =ᵐ[timeMeasure T]
@@ -215,8 +158,6 @@ theorem timeScaleLaplacian_coeFn
   (tensorScaleLaplacian (I := I) (M := M) τ).coeFn_compLpL
     (p := 2) (μ := timeMeasure T) v
 
-/-- The time-mode coordinate of the rough Laplacian of a field: the rough
-Laplacian multiplies the `i`-th time-mode coordinate by `-λᵢ`. -/
 theorem timeModeCoeff_timeScaleLaplacian
     (v : timeL2 (tensorHs (I := I) (M := M) g r s (τ + 2)) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -235,8 +176,6 @@ theorem timeModeCoeff_timeScaleLaplacian
   filter_upwards [hlhs, hΔ, hsmul, hvcoe] with t ht hΔt hsmt hvt
   rw [ht, hΔt, tensorScaleLaplacian_coeff, hsmt, Pi.smul_apply, hvt, smul_eq_mul]
 
-/-- Chart-locality-free version of `maximalRegularityOp_solves_perMode`,
-parameterized on resolvent compactness `h_compact`. -/
 theorem maximalRegularityOp_solves_perMode {a : ℝ} (hT : 0 ≤ T)
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
@@ -255,9 +194,6 @@ theorem maximalRegularityOp_solves_perMode {a : ℝ} (hT : 0 ≤ T)
   rw [derivModeCoeff, perModeConvDerivL2_apply, solModeCoeff, neg_smul,
     ← sub_eq_neg_add]
 
-/-- Chart-locality-free version of `maximalRegularityOp_solves`, parameterized
-on resolvent compactness `h_compact`: `∂_t u = Δ_∇ u + f` as an identity in
-`L²([0,T]; Hᵃ)`. -/
 theorem maximalRegularityOp_solves {a : ℝ}
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))

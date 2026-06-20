@@ -1,40 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
 
-/-!
-# Integration by parts for the covariant derivative of `(r, s)`-tensor fields
-
-For a closed smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file establishes the **covariant integration-by-parts
-identity** for the metric-induced pointwise inner product on `(r, s)`-tensor
-fields:
-
-  `∫_M ⟨W, ∇_V S⟩ dvol_g
-     = -∫_M ⟨∇_V W, S⟩ dvol_g - ∫_M ⟨W, S⟩ · divᵍ V dvol_g`,
-
-for a smooth tangent vector field `V` and smooth `(r, s)`-tensor sections
-`W`, `S`. Here `∇_V` is the metric-lowered directional covariant derivative
-`loweredCovDerivAt` and `⟨·, ·⟩` is the covariant `(0, r + s)` inner product of
-the metric-lowered tensors (`tensorInnerPointwise_0s`).
-
-The proof applies the scalar integration-by-parts identity
-`integral_tangentSectionAction_eq_neg_integral_smul_divergence` to the scalar
-function `f := y ↦ ⟨W y, S y⟩` and the vector field `V`, then rewrites the
-directional derivative `V(f)` via the directional metric-compatibility identity
-`tensorInnerPointwise_hasMFDerivAt_metricCompatible`.
-
-## Main results
-
-* `integral_tensorInner_tangentAction_add_smul_divergence_eq_zero` — the
-  **combined integration-by-parts identity**: the integral of
-  `⟨∇_V W, S⟩ + ⟨W, ∇_V S⟩ + ⟨W, S⟩ · divᵍ V` vanishes. This form requires no
-  separate integrability hypotheses.
-* `integral_tensorInner_covDeriv_integrationByParts` — the **split integration-by-parts
-  identity** in the form `∫ ⟨W, ∇_V S⟩ = -∫ ⟨∇_V W, S⟩ - ∫ ⟨W, S⟩ · divᵍ V`,
-  obtained from the combined identity once the two cross terms are known to be
-  integrable.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -66,8 +32,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The pointwise metric inner product of two smooth `(r, s)`-tensor sections,
-as a scalar function on `M`. -/
 def tensorInnerScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯) :
@@ -84,11 +48,6 @@ lemma tensorInnerScalar_apply
       tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y)) := rfl
 
-/-- **The tangent action on the inner-product scalar decomposes by the covariant
-Leibniz rule.** For a smooth vector field `V` and smooth `(r, s)`-tensor
-sections `W`, `S`, the directional derivative `V⟨W, S⟩` equals
-`⟨∇_V W, S⟩ + ⟨W, ∇_V S⟩`, where `∇_V` is the metric-lowered directional
-covariant derivative. -/
 lemma tangentSectionAction_tensorInnerScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -109,18 +68,6 @@ lemma tangentSectionAction_tensorInnerScalar
   exact tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g r s W S x (V x)
 
-/-- **Combined covariant integration by parts.** For a closed smooth Riemannian
-manifold `(M, g)`, a smooth tangent vector field `V`, and smooth `(r, s)`-tensor
-sections `W`, `S` such that the pointwise inner product `y ↦ ⟨W y, S y⟩` is
-smooth, the integral of the covariant Leibniz expression vanishes:
-
-  `∫_M (⟨∇_V W, S⟩ + ⟨W, ∇_V S⟩ + ⟨W, S⟩ · divᵍ V) dvol_g = 0`.
-
-The proof applies the scalar integration-by-parts identity
-`integral_tangentSectionAction_eq_neg_integral_smul_divergence` to the smooth
-scalar `y ↦ ⟨W y, S y⟩` and the (automatically compactly-supported, on a closed
-manifold) vector field `V`, then rewrites the tangent action via the directional
-metric-compatibility identity. -/
 theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -241,19 +188,6 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
   rw [integral_add hAB_int hC_int, hsum]
   ring
 
-/-- **Covariant integration by parts (split form).** On a closed smooth
-Riemannian manifold `(M, g)`, for a smooth tangent vector field `V` and smooth
-`(r, s)`-tensor sections `W`, `S`,
-
-  `∫_M ⟨W, ∇_V S⟩ dvol_g
-     = -∫_M ⟨∇_V W, S⟩ dvol_g - ∫_M ⟨W, S⟩ · divᵍ V dvol_g`,
-
-where `∇_V` is the metric-lowered directional covariant derivative
-`loweredCovDerivAt` and `⟨·, ·⟩` is the covariant inner product of the
-metric-lowered tensors. The hypotheses are that the pointwise inner product
-`y ↦ ⟨W y, S y⟩` is smooth (`hWS`) and that the two covariant cross terms
-`⟨∇_V W, S⟩` and `⟨W, ∇_V S⟩` are integrable against `dvol_g` (`hWcov_int`,
-`hScov_int`); these let the combined identity be split term by term. -/
 theorem integral_tensorInner_covDeriv_integrationByParts
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

@@ -9,30 +9,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.Algebra.Support
 
-/-!
-# Smooth-section integration by parts on a boundaryless Riemannian manifold
-
-For a smooth Riemannian metric `g` on a σ-compact Hausdorff smooth manifold `M`
-without boundary, smooth scalar functions `f, h : M → ℝ` (without compact
-support assumptions on the scalars), and a smooth tangent section `X` with
-**compact support**, we establish the two integration-by-parts identities:
-
-* `integral_tangentSectionAction_eq_neg_integral_smul_divergence`:
-  $$\int_M X(f)\,d\mu_g = -\int_M f \cdot \operatorname{div}_g(X)\,d\mu_g.$$
-
-* `integral_tangentSectionAction_mul_add_eq_neg`:
-  $$\int_M \bigl(X(f)\,h + f\,X(h)\bigr)\,d\mu_g
-       = -\int_M f\,h \cdot \operatorname{div}_g(X)\,d\mu_g.$$
-
-The proof of (a) writes `divergence_g g (smoothSmul f hf X)` via the Leibniz
-rule (`divergence_g_smoothSmul`) and integrates against the volume measure;
-since `smoothSmul f hf X` has compact support inherited from `X`, the integral
-of its divergence vanishes by `integral_divergence_eq_zero_of_hasCompactSupport`.
-
-Identity (b) follows from (a) applied to the smooth product `f · h`, combined
-with the Leibniz rule for the tangent action `tangentSectionAction_mul`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -54,8 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- A continuous function with compact support is integrable against the
-canonical Riemannian volume measure on a σ-compact Hausdorff manifold. -/
 lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -65,14 +39,6 @@ lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact hf.integrable_of_hasCompactSupport hcs
 
-/-- Leibniz rule for `tangentSectionAction` on a product of smooth scalars.
-For `f, h : M → ℝ` smooth and `X` a smooth tangent section,
-`X(f · h)(x) = X(f)(x) · h(x) + f(x) · X(h)(x)`.
-
-The proof uses `HasMFDerivAt.mul` for the model space `ℝ` (a normed
-commutative ring) at `x`, evaluated at the vector `X x`. We work via the
-identification `TangentSpace 𝓘(ℝ, ℝ) (·) = ℝ` (which holds definitionally),
-exposing both differentials as continuous linear maps with codomain `ℝ`. -/
 theorem tangentSectionAction_mul
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f h : M → ℝ}
@@ -99,15 +65,6 @@ theorem tangentSectionAction_mul
   rw [smul_eq_mul, smul_eq_mul]
   ring
 
-/-- **Integration by parts (basic).** For a smooth scalar `f : M → ℝ`
-(no compact support assumption) and a smooth tangent section `X` with compact
-support on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)` without
-boundary,
-$$\int_M X(f)\,d\mu_g = -\int_M f \cdot \operatorname{div}_g(X)\,d\mu_g.$$
-The proof applies the divergence-Leibniz rule
-`divergence_g_smoothSmul` to the section `smoothSmul f hf X` (which has
-compact support inherited from `X`), so the integral of its divergence
-vanishes by `integral_divergence_eq_zero_of_hasCompactSupport`. -/
 theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -188,14 +145,6 @@ theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence
     rw [← h_int_split, ← h_div_Y_split]; exact h_div_Y_zero
   linarith [h_sum_zero]
 
-/-- **Integration by parts (symmetric form).** For smooth scalars `f, h : M → ℝ`
-(no compact support assumption) and a smooth tangent section `X` with compact
-support on a σ-compact Hausdorff smooth Riemannian manifold `(M, g)` without
-boundary,
-$$\int_M \bigl(X(f)\,h + f\,X(h)\bigr)\,d\mu_g
-       = -\int_M f\,h \cdot \operatorname{div}_g(X)\,d\mu_g.$$
-The proof applies identity (a) to the smooth product `f · h` and uses the
-tangent-action Leibniz rule `tangentSectionAction_mul`. -/
 theorem integral_tangentSectionAction_mul_add_eq_neg
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

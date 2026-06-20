@@ -3,51 +3,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import Mathlib.Analysis.Normed.Operator.FredholmAlternative
 
-/-!
-# Spectrum of the L²-side tensor resolvent
-
-For a closed Riemannian manifold `(M, g)` and ranks `(r, s)`, this file
-develops the spectral decomposition of the L²-side resolvent
-
-  `R := tensorResolventL2 g r s : TensorL2 r s g →L[ℝ] TensorL2 r s g`
-
-of the variational tensor Laplacian. Given resolvent compactness, the
-operator `R` is a compact self-adjoint operator on the Hilbert space
-`TensorL2 r s g`, so Mathlib's compact self-adjoint spectral theorem
-yields:
-
-* the eigenspaces of `R` at non-zero eigenvalues are finite-dimensional;
-* the eigenspaces of `R` (across all eigenvalues) span a dense subspace
-  of `TensorL2 r s g` (their orthogonal complement is trivial);
-* on each shell `{|μ| ≥ ε}`, `ε > 0`, only finitely many eigenvalues
-  occur, so the nonzero eigenvalues form a discrete set with `0` as the
-  sole possible accumulation point.
-
-## Main definitions
-
-* `tensorResolventEigenspace g r s μ` — the eigenspace of
-  `tensorResolventL2 g r s` at the scalar `μ`, packaged as a
-  `Submodule ℝ (TensorL2 r s g)`.
-
-## Main results
-
-* `tensorResolventEigenspace_finiteDim` — given resolvent
-  compactness, each non-zero eigenspace is finite-dimensional.
-* `tensorResolventEigenspaces_iSup_orthogonal_eq_bot` — given
-  resolvent compactness, the orthogonal complement of the supremum of
-  eigenspaces is trivial.
-* `tensorResolvent_eigenvalues_finite_above` — given resolvent
-  compactness, for every `ε > 0`, only finitely many eigenvalues `μ` of
-  `R` satisfy `|μ| ≥ ε`.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`),
-and `tensorResolventL2 g r s` is its restriction-and-corestriction to
-`TensorL2 r s g`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -73,24 +28,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The eigenspace of the L²-side tensor resolvent
-`R = tensorResolventL2 g r s` at the scalar `μ`, viewed as an
-`ℝ`-submodule of `TensorL2 r s g`.
-
-For `μ ≠ 0`, given resolvent compactness on
-`R` this submodule is finite-dimensional
-(`tensorResolventEigenspace_finiteDim`). The eigenspaces across
-all `μ` span a dense subspace of `TensorL2 r s g`
-(`tensorResolventEigenspaces_iSup_orthogonal_eq_bot`). -/
 noncomputable def tensorResolventEigenspace
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (μ : ℝ) :
     Submodule ℝ (TensorL2 r s g) :=
   Module.End.eigenspace
     ((tensorResolventL2 (I := I) (M := M) g r s).toLinearMap) μ
 
-/-- Membership in the resolvent eigenspace:
-`u ∈ tensorResolventEigenspace g r s μ`
-iff `R u = μ • u`. -/
 lemma mem_tensorResolventEigenspace_iff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (μ : ℝ)
     (u : TensorL2 r s g) :
@@ -100,11 +43,6 @@ lemma mem_tensorResolventEigenspace_iff
   rw [Module.End.mem_eigenspace_iff]
   rfl
 
-/-- **Finite-dimensionality of nonzero eigenspaces (HLCC-free).**
-Parameterized directly on resolvent compactness `h_compact` (instead of
-the locally-constant chart hypothesis), each eigenspace of
-`R = tensorResolventL2 g r s` at a non-zero scalar is finite-dimensional.
-This is the spectral theorem for compact operators applied to `R`. -/
 theorem tensorResolventEigenspace_finiteDim
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -114,14 +52,6 @@ theorem tensorResolventEigenspace_finiteDim
       (I := I) (M := M) g r s μ) :=
   ContinuousLinearMap.finite_dimensional_eigenspace h_compact μ hμ
 
-/-- **Spectral theorem (totality of eigenspaces, HLCC-free).** Given
-resolvent compactness `h_compact` (instead of the locally-constant chart
-hypothesis), the eigenspaces of `R = tensorResolventL2 g r s` span
-`TensorL2 r s g` densely: the orthogonal complement of their supremum is
-trivial.
-
-This applies `ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot`
-to the (unconditional) self-adjointness of `R` plus `h_compact`. -/
 theorem tensorResolventEigenspaces_iSup_orthogonal_eq_bot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -134,7 +64,6 @@ theorem tensorResolventEigenspaces_iSup_orthogonal_eq_bot
   exact ContinuousLinearMap.orthogonalComplement_iSup_eigenspaces_eq_bot
     h_compact hSymm
 
-/-- An eigenvalue of `R` admits a unit eigenvector (we choose one). -/
 private lemma tensor_exists_unit_eigenvector
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ : ℝ}
     (hμ : Module.End.HasEigenvalue
@@ -154,11 +83,6 @@ private lemma tensor_exists_unit_eigenvector
   · rw [norm_smul, norm_inv, norm_norm]
     exact inv_mul_cancel₀ (ne_of_gt hu_pos)
 
-/-- Eigenvectors with distinct eigenvalues are L²-orthogonal.
-
-This is a standard consequence of self-adjointness; the eigenspaces are
-mutually orthogonal. We cite the underlying Mathlib result
-`LinearMap.IsSymmetric.orthogonalFamily_eigenspaces`. -/
 private lemma tensorResolvent_eigenvectors_orthogonal
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ ν : ℝ} (hμν : μ ≠ ν)
     {u v : TensorL2 r s g}
@@ -172,8 +96,6 @@ private lemma tensorResolvent_eigenvectors_orthogonal
   have hortho := hSymm.orthogonalFamily_eigenspaces hμν
   exact hortho ⟨u, hu⟩ ⟨v, hv⟩
 
-/-- The image of an `R`-eigenvector at eigenvalue `μ` (with eigenvector
-`u`) under `R` is `μ • u`. -/
 private lemma tensorResolventL2_apply_eigenvector
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ : ℝ}
     {u : TensorL2 r s g}
@@ -181,9 +103,6 @@ private lemma tensorResolventL2_apply_eigenvector
     tensorResolventL2 (I := I) (M := M) g r s u = μ • u :=
   (mem_tensorResolventEigenspace_iff (I := I) (M := M) g r s μ u).mp hu
 
-/-- For an injection `f : ℕ → ℝ` of distinct eigenvalues with `|f n| ≥ ε`,
-together with chosen unit eigenvectors `v n`, the images `R (v n)` are
-mutually `√2 ε`-separated. -/
 private lemma tensorResolventL2_image_separated_of_distinct_eigenvalues
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {ε : ℝ} (hε : 0 < ε)
@@ -247,15 +166,6 @@ private lemma tensorResolventL2_image_separated_of_distinct_eigenvalues
   rw [← h_sqrt_eq]
   exact h_target
 
-/-- **Discreteness of the resolvent spectrum (HLCC-free).** Parameterized
-directly on resolvent compactness `h_compact` (instead of the locally-
-constant chart hypothesis): for every `ε > 0`, only finitely many
-eigenvalues `μ` of `R = tensorResolventL2 g r s` satisfy `|μ| ≥ ε`.
-
-The argument is the standard compactness contradiction: if infinitely many
-distinct eigenvalues `μ_n` with `|μ_n| ≥ ε` existed, the corresponding unit
-eigenvectors `v_n` would have `√2 ε`-separated images `R v_n`, contradicting
-the existence of a Cauchy subsequence guaranteed by `h_compact`. -/
 theorem tensorResolvent_eigenvalues_finite_above
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -323,9 +233,6 @@ theorem tensorResolvent_eigenvalues_finite_above
     dist_eq_norm _ _] at h_dist
   linarith [h_sep_specific, h_dist]
 
-/-- The image of the bounded inclusion
-`TensorH1ComplToTensorL2 g r s : TensorH1Compl g r s →L[ℝ] TensorL2 r s g`
-is dense in `TensorL2 r s g`. -/
 private lemma denseRange_TensorH1ComplToTensorL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange (TensorH1ComplToTensorL2 (I := I) (M := M) g r s) := by
@@ -351,16 +258,6 @@ private lemma denseRange_TensorH1ComplToTensorL2
     rw [← h_toL2, hS]
   exact h_dense_toL2.mono h_subset
 
-/-- **Injectivity of `tensorResolvent`.** As a continuous linear map
-`TensorL2 r s g →L[ℝ] TensorH1Compl g r s`, `tensorResolvent g r s` is
-injective on `TensorL2 r s g`.
-
-Argument: from `tensorResolvent g r s u = 0`, the variational identity
-gives `⟨TensorH1ComplToTensorL2 v, u⟩_{L²} = 0` for every
-`v ∈ TensorH1Compl g r s`. By density of
-`range (TensorH1ComplToTensorL2 g r s)` in `TensorL2 r s g`, the L²
-functional `w ↦ ⟨w, u⟩_ℝ` vanishes on a dense subset, hence everywhere,
-so `⟨u, u⟩ = 0` and `u = 0`. -/
 theorem tensorResolvent_injective
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Function.Injective (tensorResolvent (I := I) (M := M) g r s) := by
@@ -401,15 +298,6 @@ theorem tensorResolvent_injective
     exact pow_eq_zero_iff (two_ne_zero) |>.mp h_pow_zero
   exact norm_eq_zero.mp h_norm_zero
 
-/-- **Injectivity of `tensorResolventL2`.** The L²-side tensor resolvent
-`tensorResolventL2 g r s = TensorH1ComplToTensorL2 ∘ tensorResolvent` is
-injective on `TensorL2 r s g`.
-
-Argument: from `tensorResolventL2 u = 0`, the variational identity
-applied with `v = tensorResolvent u` gives
-`‖tensorResolvent u‖²_{H¹} = ⟨tensorResolventL2 u, u⟩_{L²} = 0`,
-so `tensorResolvent u = 0`. Then `tensorResolvent_injective` yields
-`u = 0`. -/
 theorem tensorResolventL2_injective
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Function.Injective (tensorResolventL2 (I := I) (M := M) g r s) := by
@@ -437,9 +325,6 @@ theorem tensorResolventL2_injective
   rw [(tensorResolvent (I := I) (M := M) g r s).map_zero]
   exact h_resolvent_zero
 
-/-- The eigenspace of the L²-side tensor resolvent at the eigenvalue `0`
-is trivial. Equivalently, the kernel of `tensorResolventL2 g r s` is
-`{0}`. -/
 theorem tensorResolventEigenspace_zero_eq_bot
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     tensorResolventEigenspace (I := I) (M := M) g r s 0 = ⊥ := by
@@ -448,9 +333,6 @@ theorem tensorResolventEigenspace_zero_eq_bot
   rw [LinearMap.ker_eq_bot]
   exact tensorResolventL2_injective (I := I) (M := M) g r s
 
-/-- For a `tensorResolventL2`-eigenvector `u` with eigenvalue `μ`, the
-defining variational identity
-`μ * ‖u‖² = ⟨R u, u⟩_{L²} = ‖tensorResolvent g r s u‖²_{H¹}`. -/
 private lemma mul_norm_sq_eq_h1Norm_tensorResolvent_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ : ℝ}
     {u : TensorL2 r s g}
@@ -480,7 +362,6 @@ private lemma mul_norm_sq_eq_h1Norm_tensorResolvent_sq
   rw [real_inner_self_eq_norm_sq] at h_h1
   linarith
 
-/-- Every resolvent eigenvalue (with eigenvector `u ≠ 0`) is non-negative. -/
 private lemma tensorResolvent_eigenvalue_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ : ℝ}
     {u : TensorL2 r s g}
@@ -497,9 +378,6 @@ private lemma tensorResolvent_eigenvalue_nonneg
   have h_prod_nn : 0 ≤ μ * (‖u‖ ^ 2) := h.symm ▸ h_rhs_nn
   exact (mul_nonneg_iff_of_pos_right hu_pos).mp h_prod_nn
 
-/-- For a resolvent eigenvalue `μ` with non-zero eigenvector `u`, the bound
-`μ ≤ 1` holds (by the L²-to-H¹ operator-norm bound for
-`TensorH1ComplToTensorL2`). -/
 private lemma tensorResolvent_eigenvalue_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ : ℝ}
     {u : TensorL2 r s g}
@@ -555,9 +433,6 @@ private lemma tensorResolvent_eigenvalue_le_one
   have h_lt : μ < μ ^ 2 := by nlinarith
   linarith
 
-/-- Every non-zero eigenvalue of `tensorResolventL2 g r s` is strictly
-positive. Combining injectivity (excluding `μ = 0`) with the non-negativity
-bound. -/
 private lemma tensorResolvent_eigenvalue_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {μ : ℝ}
     {u : TensorL2 r s g}
@@ -579,14 +454,6 @@ private lemma tensorResolvent_eigenvalue_pos
         (by rw [hRu, (tensorResolventL2 (I := I) (M := M) g r s).map_zero])
     exact hu_ne hu_zero
 
-/-- **Resolvent eigenvalues lie in `(0, 1]`.** For every eigenvector `u ≠ 0`
-of `tensorResolventL2 g r s` with eigenvalue `μ`, the eigenvalue
-satisfies `0 < μ ≤ 1`.
-
-The lower bound follows from the variational identity (eigenvalues are
-non-negative) combined with injectivity of `tensorResolventL2` (excluding
-`μ = 0`). The upper bound follows from coercivity of the H¹ inner product
-and the L²-to-H¹ operator-norm bound for `TensorH1ComplToTensorL2`. -/
 theorem tensorResolvent_eigenvalue_mem_unit_interval
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {μ : ℝ} {u : TensorL2 r s g}
@@ -596,20 +463,8 @@ theorem tensorResolvent_eigenvalue_mem_unit_interval
   ⟨tensorResolvent_eigenvalue_pos (I := I) (M := M) g r s hu hu_ne,
     tensorResolvent_eigenvalue_le_one (I := I) (M := M) g r s hu hu_ne⟩
 
-/-- Translation of a non-zero resolvent eigenvalue `μ` to the corresponding
-connection-Laplacian eigenvalue `λ := (1 - μ)/μ`.
-
-Mathematical content: if `R u = μ u` with `R = (1 - Δ_∇)⁻¹` and `μ ≠ 0`,
-then `(1 - Δ_∇) u = μ⁻¹ u`, hence `Δ_∇ u = -((1 - μ)/μ) u`. With the
-geometer convention `spectrum(Δ_∇) ⊆ (-∞, 0]`, the corresponding
-non-negative connection-Laplacian eigenvalue is `λ`. -/
 def tensorLaplacianEigenvalueOf (μ : ℝ) : ℝ := (1 - μ) / μ
 
-/-- The translation `λ = (1 - μ)/μ` of a resolvent eigenvalue `μ ∈ (0, 1]`
-yields a non-negative connection-Laplacian eigenvalue.
-
-Proof: by hypothesis `μ ∈ (0, 1]`, so `0 < μ ≤ 1`, hence `1 - μ ≥ 0` and
-`μ > 0`, hence `(1 - μ)/μ ≥ 0`. -/
 theorem tensorLaplacianEigenvalueOf_nonneg_of_resolventEigenvalue
     {μ : ℝ} (hμ : μ ∈ Set.Ioc (0 : ℝ) 1) :
     0 ≤ tensorLaplacianEigenvalueOf μ := by

@@ -1,60 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
 
-/-!
-# The chart-component formula for the covariant *second* gradient of a `(0,2)`-tensor
-
-For a closed Riemannian manifold `(M, g)` modelled on a real inner-product space
-`E` and a smooth compactly-supported `(0, 2)`-tensor section `h`, the iterated
-covariant gradient `iteratedCovGrad g 0 2 2 h = ∇²h` is a smooth
-compactly-supported `(0, 4)`-tensor section.  This file relates its raw
-chart-frame components to the *chart Hessian* of the chart components of `h` —
-the bridge underpinning the mean-value transfer (relating the chart Hessian
-`∂²h` to the covariant second gradient `∇₀²h`).
-
-## The bridge
-
-By the recursion `iteratedCovGrad g 0 2 2 h = covGrad g 0 3 (covGrad g 0 2 h)`
-(`iteratedCovGrad_succ`/`iteratedCovGrad_zero`) and the single-`covGrad` raw
-chart-component formula `tensorChartComponentRaw_covGrad` (covariant derivative =
-chart partial − Christoffel correction), the raw chart component of `∇²h` at a
-target multi-index `Jdx : Fin 3 → Fin n` (no contravariant slots since `r = 0`),
-read at the chart-source preimage of a chart-target point `y`, decomposes as
-follows.
-
-* `chartCovariantSecondGrad_eq` (outer step): the `(Jdx 0)`-th chart-Euclidean
-  partial of the Euclidean push-forward of the raw chart component of the *first*
-  covariant gradient `covGrad g 0 2 h` (at the tail multi-index `vecTail Jdx`),
-  plus the zeroth-order Christoffel correction term `covDerivLowerOrderTerm` for
-  that first gradient.
-
-* `chartCovariantSecondGrad_inner` (inner step): the same single-`covGrad`
-  formula applied to `covGrad g 0 2 h`, expressing its chart component as a
-  chart-Euclidean partial of the raw component of `h` plus the Christoffel
-  correction for `h`.
-
-Substituting the inner step pointwise inside the lower-order term, and (using
-that `chartTargetEuclid α` is open and the inner identity holds on it) under the
-outer partial derivative via `fderiv` congruence, exhibits the leading term as
-the genuine chart Hessian `∂_{Jdx 0} ∂_{Jdx 1}` of the chart component of `h`
-itself.  This is the standard "covariant Hessian = chart Hessian − Christoffel
-corrections" decomposition for a `(0,2)`-tensor; the corrections are exactly the
-`Γ·∂h + (∂Γ + ΓΓ)·h` structure (numerically: 5 `Γ·∂h`, 2 `(∂Γ)·h`, 6 `ΓΓ·h`
-terms when fully expanded by slot), grouped here as the two
-`covDerivLowerOrderTerm` applications.
-
-## Layering note
-
-The reasoning here is chart-Sobolev component analysis: both ingredients
-(`iteratedCovGrad`, whose recursion lives with the `C^m` tensor Sobolev
-embedding, and `tensorChartComponentRaw_covGrad`) are analytic.  The file
-therefore lives in the analysis pillar, next to the single-`covGrad` chart
-identity it iterates.  It cannot live under `Geometry/Connection/TensorNabla/`:
-the covariant-gradient chart machinery in `Analysis/` transitively imports back
-into `Geometry/Connection/TensorNabla/`, so importing it from there would form a
-Lean import cycle.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -82,23 +28,6 @@ open DifferentialGeometry.PDE.RicciFlow
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **The raw chart-component formula for the covariant second gradient of a
-`(0,2)`-tensor (outer step).**
-
-For a smooth compactly-supported `(0, 2)`-tensor section `h`, a chart center `α`,
-a target covariant multi-index `Jdx : Fin 3 → Fin n`, and a chart-target point
-`y`, the raw chart-frame scalar component of the covariant second gradient
-`iteratedCovGrad g 0 2 2 h` (a `(0, 4)`-tensor; `r = 0`, so the contravariant
-multi-index is the unique `Fin 0` map `Idx`), read at the chart-source preimage
-`b := (extChartAt I α).symm (toEuclidean.symm y)` of `y`, equals the `(Jdx 0)`-th
-chart-Euclidean partial derivative of the Euclidean push-forward of the raw chart
-component of the first covariant gradient `covGrad g 0 2 h` at the tail
-multi-index `Matrix.vecTail Jdx`, plus the zeroth-order Christoffel correction
-term `covDerivLowerOrderTerm` for `covGrad g 0 2 h`.
-
-This is one application of the single-`covGrad` formula
-`tensorChartComponentRaw_covGrad` to the outer covariant gradient of
-`iteratedCovGrad g 0 2 2 h = covGrad g 0 3 (covGrad g 0 2 h)`. -/
 theorem chartCovariantSecondGrad_eq
     (g : SmoothRiemannianMetric I M) (h : SmoothCcTensor g 0 2) (α : M)
     (Idx : Fin 0 → Fin (Module.finrank ℝ E))
@@ -120,17 +49,6 @@ theorem chartCovariantSecondGrad_eq
   exact tensorChartComponentRaw_covGrad (I := I) (M := M) g 0 3
     (covGrad (I := I) (M := M) g 0 2 h) α Idx Jdx hy
 
-/-- **The raw chart-component formula for the first covariant gradient of a
-`(0,2)`-tensor (inner step).**
-
-This is `tensorChartComponentRaw_covGrad` specialised to `r = 0`, `s = 2`, applied
-to `h` itself: the raw chart component of `covGrad g 0 2 h` (a `(0, 3)`-tensor) at
-a multi-index `Kdx : Fin 3 → Fin n`, read at the chart-source preimage of `y`,
-equals the `(Kdx 0)`-th chart-Euclidean partial of the Euclidean push-forward of
-the raw chart component of `h` at `Matrix.vecTail Kdx`, plus the Christoffel
-correction `covDerivLowerOrderTerm` for `h`.  It supplies the inner expansion
-substituted into `chartCovariantSecondGrad_eq` to expose the chart Hessian of
-`h`. -/
 theorem chartCovariantSecondGrad_inner
     (g : SmoothRiemannianMetric I M) (h : SmoothCcTensor g 0 2) (α : M)
     (Idx : Fin 0 → Fin (Module.finrank ℝ E))
@@ -146,32 +64,6 @@ theorem chartCovariantSecondGrad_inner
             (Matrix.vecTail Kdx) y :=
   tensorChartComponentRaw_covGrad (I := I) (M := M) g 0 2 h α Idx Kdx hy
 
-/-- **The covariant Hessian = chart Hessian − Christoffel corrections
-decomposition for a `(0,2)`-tensor.**
-
-Composing the outer step `chartCovariantSecondGrad_eq` with the inner step
-`chartCovariantSecondGrad_inner` (substituted *under* the outer chart partial via
-the eventually-equal congruence `euclidPartial_congr_of_eqOn_open`, valid because
-`chartTargetEuclid α` is open and the inner identity holds throughout it), the raw
-chart component of the covariant second gradient `iteratedCovGrad g 0 2 2 h` at a
-target multi-index `Jdx : Fin 4 → Fin n` decomposes as:
-
-* the **chart Hessian** of `h`'s own raw chart component — the iterated
-  chart-Euclidean partial `euclidPartial (Jdx 0) (euclidPartial ((vecTail Jdx) 0)
-  (chartPushedRaw h-component))`, the term that would be the whole answer were the
-  connection flat — written here as the `(Jdx 0)`-partial of the
-  *Christoffel-corrected first-gradient component* (the inner step is kept under
-  the outer partial, so the term reads `∂_{Jdx 0}[∂_{(vecTail Jdx) 0}(chartComp h)
-  + Γ·h]`, which is `∂²(chartComp h) + ∂(Γ·h)`, i.e. the chart Hessian plus the
-  derivative of the first-order Christoffel correction);
-
-* **minus / plus the zeroth-order Christoffel correction** of the *outer*
-  covariant gradient, `covDerivLowerOrderTerm g 0 3 (covGrad g 0 2 h) …`, the
-  `Γ·∇h` term.
-
-Together these are precisely the `Γ·∂h + (∂Γ + ΓΓ)·h` correction structure for a
-`(0,2)`-tensor's covariant Hessian; the leading `euclidPartial ∘ euclidPartial`
-of `h`'s component is the genuine chart Hessian `∂²h`. -/
 theorem chartCovariantSecondGrad_chartHessian_sub_correction
     (g : SmoothRiemannianMetric I M) (h : SmoothCcTensor g 0 2) (α : M)
     (Idx : Fin 0 → Fin (Module.finrank ℝ E))

@@ -19,65 +19,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-/-! # Order-dropping completion-norm bounds for the rough tensor connection Laplacian
-
-This file ships the intrinsic chart-Sobolev (`SmoothCcTensor.toHs`) boundedness of the rough
-tensor connection Laplacian `Δ_∇ = rawTensorConnLapSmooth`, in the **easy** (differentiation)
-direction needed by the order-`a` chart-RHS spectral tower.
-
-The rough Laplacian is the frame trace of the second covariant derivative
-(`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), hence a *single* second-order operator: it
-maps `H^{2(k+1)} → H^{2k}` boundedly, losing exactly **one** `toHs`-order (`= 2` derivatives),
-not two.  This is the elliptic-boundedness primitive `exists_rawConnLapSmooth_toHs_le_toHs_succ`
-(the order-`k` analogue of the on-disk `L²`/`H¹` instance
-`rawTensorConnLapIter_intrinsicL2_le_tensorPouSobolevNorm_sq_one`, which is the `k = 0` case in
-`∫⁻`-form): the tight single-step `H^σ(Δ_∇ T) ≤ C · H^{σ+1}(T)` bound, with no curvature
-commutator / Gårding regularity (no `Order2GardingFamily`, no `CommutatorDefectBound`).  It is the
-rough-Laplacian counterpart of the covariant-derivative order-dropping bound `covGrad_toHs_norm_le`
-— but tight at `+1` `toHs`-order, since `Δ_∇` is a single second-order operator whereas a naive
-`covGrad ∘ covGrad` composition would charge `+2`.
-
-The `ℝ≥0∞` form `exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le`, and on top of it the
-completion-norm forms `exists_rawConnLapSmooth_toHs_le_toHs_succ` and the iterated bound
-`exists_rawConnLapIter_toHs_le_toHs` (`H^k(Δ_∇^i T) ≤ C · H^{k+i}(T)`, the mirror of
-`iteratedCovGrad_toHs_norm_le`), are proved by assembling the per-chart order-drop
-`exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart` over the chart base points.  The
-per-chart order-drop is itself assembled — Tonelli for finite sums plus a monotone `lintegral` of a
-pointwise integrand bound — from the pointwise second-order rough-Laplacian chart-component
-operator-norm primitive `exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent`,
-which is proved here (Leibniz on each chart block + compact-kernel coefficient sup-bounds + finite
-active-set assembly) on top of the open-good-set `T₀`-linear chart-coordinate formula
-`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet`.  That formula is itself proved here,
-sorry-free, by substituting the open-good-set second-covariant-derivative chart expansion
-`secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` (good-set-wide on disk) into the
-inverse-Gram coordinate metric-trace identity
-`rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_goodSet` and collecting the
-`T₀`-independent smooth coefficients (`C_2 = chartInvGramMatrix`, the inverse-Gram contraction tensor;
-`C_1`, `C_0` the inverse-Gram-weighted correction sums).  That metric-trace identity is in turn proved
-here, sorry-free, by substituting `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` into the
-(frame-independent) chart-`α` inverse-Gram principal sum `chartInvGramPrincipalSum` of the open-good-set
-projected principal-sum identity `rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet`, which
-is the single remaining `sorry` of this chart-port: the open-good-set strengthening (dropping the
-inessential partition-of-unity-tsupport restriction) of the on-disk
-`chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`, true because the
-connection Laplacian is — *unconditionally* at every base point — the metric trace of the second
-covariant derivative (`rawTensorConnLap_eq_metricTraceHessian`), and the metric trace of a fibre
-bilinear form is basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis
-trace `chartInvGramPrincipalSum` at every good-set point.  The tsupport restriction of the on-disk
-version is inessential: it was inherited only from the *bumped* globally smooth chart frame
-`chartFrameNormGlobalSmooth` used to package the residual remainder, whose orthonormality is localised
-to the partition-of-unity tsupport; the principal sum itself is frame-independent.
-
-The companion primitive `exists_l2Norm_le_toHs_zero` records the reverse of the on-disk
-`tensorPouSobolevHsNorm_zero_le_tensorL2Norm`: the global metric `L²` norm of a smooth
-compactly-supported section is controlled by its order-`0` partition-of-unity chart-Sobolev
-norm (the partition of unity sums to one, so the chart-`H⁰` norm recovers the full `L²` norm up
-to the bounded metric-density factor on the compact manifold).  It is proved sorry-free, by
-composing the on-disk reverse fibre-norm component bound
-`tensorL2Norm_sq_le_const_mul_sum_componentL2Norm_sq` with the reverse measure-bridge comparison
-`exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero` (itself proved here from the
-reverse change-of-variables bridge `eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw`). -/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -113,8 +54,6 @@ open Tensor0SBundle
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The Euclidean pull-back of a raw `(r, s)`-component of `T` to the chart target: the leaf's
-chart-pulled integrand factor `raw_{IJ} ∘ chart⁻¹ ∘ toEuclidean⁻¹`. -/
 private noncomputable def rawConnLapPull (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -123,7 +62,6 @@ private noncomputable def rawConnLapPull (g : SmoothRiemannianMetric I M) (r s :
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
-/-- `rawConnLapPull` is definitionally the chart-pulled raw component. -/
 private lemma rawConnLapPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -133,7 +71,6 @@ private lemma rawConnLapPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
         ∘ (toEuclidean (E := E)).symm) =
       rawConnLapPull (I := I) (M := M) g r s T α Idx Jdx := rfl
 
-/-- `rawConnLapPull` is `C^∞` on the (open) Euclidean chart target. -/
 private lemma rawConnLapPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -145,7 +82,6 @@ private lemma rawConnLapPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : 
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
   rfl
 
-/-- `rawConnLapPull` is `C^∞` at every point of the (open) Euclidean chart target. -/
 private lemma rawConnLapPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -155,9 +91,6 @@ private lemma rawConnLapPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : 
   (rawConnLapPull_contDiffOn (I := I) (M := M) g r s T α Idx Jdx).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
-/-- The order-`(k + 1)` Hilbert-Schmidt content of `T` at chart `α`, at a fixed target point `y`:
-the finite sum over component multi-index pairs `q`, over Fréchet orders `l ≤ 2(k + 1)`, and over
-basis-index tuples, of the squared basis-evaluation of `D^l (rawConnLapPull q)`. -/
 private noncomputable def rawConnLapRhsHsContent (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
   ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -168,15 +101,12 @@ private noncomputable def rawConnLapRhsHsContent (g : SmoothRiemannianMetric I M
             (fun i => EuclideanSpace.basisFun
               (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2
 
-/-- `rawConnLapRhsHsContent` is non-negative. -/
 private lemma rawConnLapRhsHsContent_nonneg (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y :=
   Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg
     (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _)))
 
-/-- A single iterated-derivative operator-norm squared of a raw component of `T`, at order
-`l ≤ 2(k + 1)`, is dominated by the full order-`(k + 1)` Hilbert-Schmidt content. -/
 private lemma rawConnLapPull_iteratedFDeriv_norm_sq_le_rhsContent
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -214,12 +144,9 @@ private lemma rawConnLapPull_iteratedFDeriv_norm_sq_le_rhsContent
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
     (Finset.mem_univ q)
 
-/-- `euclidPartial l u` is, as a function, the direction-`l` evaluation of the Fréchet derivative
-of `u`. -/
 private lemma euclidPartial_eq_fderiv_apply (l : Fin (Module.finrank ℝ E)) (u : EuclN → ℝ) :
     euclidPartial (E := E) l u = fun z => fderiv ℝ u z (EuclideanSpace.single l 1) := rfl
 
-/-- If `u` is `C^∞` at `y`, then so is `euclidPartial l u`. -/
 private lemma euclidPartial_contDiffAt
     (l : Fin (Module.finrank ℝ E)) {u : EuclN → ℝ} {y : EuclN}
     (hu : ContDiffAt ℝ ∞ u y) :
@@ -232,8 +159,6 @@ private lemma euclidPartial_contDiffAt
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single l (1 : ℝ))).contDiff.contDiffAt.comp y h_fderiv_cdAt
 
-/-- One `euclidPartial` costs exactly one Fréchet order in operator norm: if `u` is `C^∞` at `y`,
-then `‖D^m (euclidPartial l u) y‖ ≤ ‖D^{m + 1} u y‖`. -/
 private lemma euclidPartial_iteratedFDeriv_norm_le
     (l : Fin (Module.finrank ℝ E)) {u : EuclN → ℝ} {y : EuclN}
     (hu : ContDiffAt ℝ ∞ u y) (m : ℕ) :
@@ -256,19 +181,12 @@ private lemma euclidPartial_iteratedFDeriv_norm_le
           ‖iteratedFDeriv ℝ m (fun z => fderiv ℝ u z) y‖ := h_clm
     _ = ‖iteratedFDeriv ℝ (m + 1) u y‖ := by rw [h_single_norm, one_mul, h_fderiv_iter]
 
-/-- A `C^∞` (on the chart target) coefficient family is `C^∞` at every interior point. -/
 private lemma contDiffAt_of_contDiffOn_chartTarget (α : M)
     {C : EuclN → ℝ} (hC : ContDiffOn ℝ ∞ C (chartTargetEuclid (I := I) (M := M) α))
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     ContDiffAt ℝ ∞ C y :=
   hC.contDiffAt ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
-/-- **The product-summand Leibniz operator-norm bound.** For a `T`-independent `C^∞` coefficient
-`C`, a component pair `q`, an interior point `y`, and a derivative-loss `a ∈ {0, 1, 2}` encoded as
-the `a`-fold `euclidPartial` iterate of the chart pull-back `F = rawConnLapPull g r s T α q`, the
-order-`j` Fréchet derivative of `C · (euclidPartial^a F)` is dominated, by the Leibniz product rule,
-by the sum over split orders `i ≤ j` of `C(j, i) · ‖D^i C y‖ · ‖D^{(j - i) + a} F y‖`.  The
-`euclidPartial` iterate costs exactly `a` Fréchet orders. -/
 private lemma rawConnLapProductSummand_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (C : EuclN → ℝ) (hC : ContDiffOn ℝ ∞ C (chartTargetEuclid (I := I) (M := M) α))
@@ -311,9 +229,6 @@ private lemma rawConnLapProductSummand_iteratedFDeriv_norm_le
             (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ :=
         mul_le_mul_of_nonneg_left hFa_le h_coeff_nn
 
-/-- Near an interior point of the chart target, the chart-pushed raw `q`-component of `T` agrees
-with the plain `rawConnLapPull` of that component, so their iterated Fréchet derivatives coincide
-there. -/
 private lemma chartPushedRaw_eventuallyEq_rawConnLapPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -328,7 +243,6 @@ private lemma chartPushedRaw_eventuallyEq_rawConnLapPull
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
   rfl
 
-/-- `rawConnLapPull g r s T α q` is `C^∞` at every interior point of the chart target. -/
 private lemma rawConnLapPull_contDiffAt'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -337,10 +251,6 @@ private lemma rawConnLapPull_contDiffAt'
     ContDiffAt ℝ ∞ (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y :=
   rawConnLapPull_contDiffAt (I := I) (M := M) g r s T α q.1 q.2 hy
 
-/-- `euclidPartial^a (chartPushedRaw raw_q T)` agrees, near an interior point, with
-`euclidPartial^a (rawConnLapPull T α q)`; combined with the one-order `euclidPartial` cost this
-yields the operator-norm bound `‖D^m (euclidPartial^a (chartPushedRaw raw_q T)) z‖ ≤
-‖D^{m + a} (rawConnLapPull T α q) z‖` for `a = 0, 1, 2`. -/
 private lemma euclidPartialIter_chartPushedRaw_norm_le_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -443,7 +353,6 @@ private lemma euclidPartialIter_chartPushedRaw_norm_le_two
         euclidPartial_iteratedFDeriv_norm_le (E := E) k (hu_cdAt hz) (m + 1)
     _ = ‖iteratedFDeriv ℝ (m + 2) u z‖ := by ring_nf
 
-/-- `chartPushedRaw (raw_q T)` is `C^∞` at interior points of the chart target. -/
 private lemma chartPushedRaw_raw_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -455,8 +364,6 @@ private lemma chartPushedRaw_raw_contDiffAt
   (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g r s T α q.1 q.2).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hz)
 
-/-- The `a`-fold `euclidPartial` iterate of `chartPushedRaw (raw_q T)` is `C^∞` at interior points
-of the chart target (`a = 0, 1, 2`). -/
 private lemma euclidPartialIter1_chartPushedRaw_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -482,8 +389,6 @@ private lemma euclidPartialIter2_chartPushedRaw_contDiffAt
   euclidPartial_contDiffAt (E := E) l
     (euclidPartialIter1_chartPushedRaw_contDiffAt (I := I) (M := M) g r s T α q k hz)
 
-/-- The principal inverse-Gram coordinate-trace coefficient `C_2 k l := chartInvGramMatrix`,
-pulled back to the Euclidean chart target. -/
 private noncomputable def invGramCoeffPull
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
@@ -509,8 +414,6 @@ private lemma invGramCoeffPull_at_b
   unfold invGramCoeffPull
   rw [(toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hb_src]
 
-/-- The principal-block `GlobalCorr` correction family from the open-good-set second-covariant
-derivative chart expansion `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn`. -/
 private noncomputable def naiveSCD_GlobalCorr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -523,8 +426,6 @@ private noncomputable def naiveSCD_GlobalCorr
     (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
       (I := I) (M := M) g r s α Idx Jdx k l) I' J' m
 
-/-- The zeroth-block `GlobalCorr0` correction family from the open-good-set second-covariant
-derivative chart expansion. -/
 private noncomputable def naiveSCD_GlobalCorr0
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -576,13 +477,6 @@ set_option maxHeartbeats 800000
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The chart-`α` coordinate matrix of the **centred** smooth orthonormal frame
-`smoothOrthoFrame g c i` (centred at `c`), expressing it in the chart-`α` coordinate basis
-`chartBasisVecFiber α k`. The `(i, k)`-th entry is the `k`-th coordinate of
-`smoothOrthoFrame g c i b` against the chart-`α` basis `chartBasisFamily α hb` at a base-set
-point; off the chart-`α` base set it is the junk value `0`. This is the centred-frame analogue of
-`chartFrameNormGlobalSmoothCoordMatrix`, used with `c = b` so that the frame is `g_b`-orthonormal
-at `b` unconditionally (`smoothOrthoFrame_orthonormal_center`). -/
 private noncomputable def centredOrthoFrameCoordMatrix
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) (b : M) : ℝ := by
@@ -593,8 +487,6 @@ private noncomputable def centredOrthoFrameCoordMatrix
         (smoothOrthoFrame (I := I) g c i b) k
     else 0
 
-/-- On the chart-`α` base set, the centred-frame coordinate matrix unfolds as the `Basis.repr`
-of the frame vector in the chart-`α` basis. -/
 private lemma centredOrthoFrameCoordMatrix_of_mem
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -606,9 +498,6 @@ private lemma centredOrthoFrameCoordMatrix_of_mem
   unfold centredOrthoFrameCoordMatrix
   rw [dif_pos hb]
 
-/-- **Coordinate-basis expansion of the centred orthonormal frame.** At a chart-`α` base-set
-point, the centred smooth orthonormal frame vector `smoothOrthoFrame g c i b` is the chart-`α`
-coordinate-matrix-weighted sum of the chart-`α` coordinate basis vectors. -/
 private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i : Fin (Module.finrank ℝ E)) {b : M}
@@ -626,9 +515,6 @@ private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
   rw [centredOrthoFrameCoordMatrix_of_mem (I := I) (M := M) g α c i k hb]
   rw [chartBasisFamily_apply (I := I) α hb k]
 
-/-- **Gram form of the centred-frame bilinear expansion.** At a chart-`α` base-set point, the
-`g_b`-inner product of two centred-frame vectors expands as the double sum of coordinate-matrix
-entries weighted by the chart-`α` Gram matrix. -/
 private lemma centredFrame_gram_expand
     (g : SmoothRiemannianMetric I M) (α c : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -667,15 +553,11 @@ private lemma centredFrame_gram_expand
   rw [chartGramMatrix_apply]
   ring
 
-/-- The centred-frame coordinate matrix at a base-set point, packaged as a `Matrix`. -/
 private noncomputable def centredCoordMatrix
     (g : SmoothRiemannianMetric I M) (α c : M) (b : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of (fun i k => centredOrthoFrameCoordMatrix (I := I) (M := M) g α c i k b)
 
-/-- **Matrix orthonormality form for the centred frame.** At a chart-`α` base-set point, with the
-frame centred at `b` itself (so `smoothOrthoFrame_orthonormal_center` applies), the centred
-coordinate matrix `C(b)` satisfies `C(b) · G(b) · C(b)ᵀ = 1`, `G(b) = chartGramMatrix g α b`. -/
 private lemma centredCoordMatrix_orthonormal_form
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -721,12 +603,6 @@ private lemma centredCoordMatrix_orthonormal_form
   simp only [centredCoordMatrix, Matrix.of_apply]
   ring
 
-/-- **The centred-frame orthonormality contraction.** At a chart-`α` Levi-Civita good-set point,
-the centred-frame coordinate matrix `C(b)` of the `g_b`-orthonormal frame `smoothOrthoFrame g b`
-satisfies `Σ_i C(b)^k_i · C(b)^l_i = g^{kl}(b)` with `g^{kl}(b) = chartInvGramMatrix g α b k l`.
-This is the inverse-Gram identity that carries the orthonormal-frame trace to the chart-coordinate
-metric trace; it holds on the **whole** good set (no partition-of-unity tsupport restriction),
-because the centred frame is orthonormal at its centre `b` unconditionally. -/
 private lemma centredOrthoFrameCoordMatrix_orthonormality
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -758,8 +634,6 @@ private lemma centredOrthoFrameCoordMatrix_orthonormality
   refine Finset.sum_congr rfl (fun i _ => ?_)
   simp only [hA_def, centredCoordMatrix, Matrix.of_apply]
 
-/-- The linear functional `v ↦ ((chartModelBasis E).repr v) k`, packaged as a continuous linear
-map `E →L[ℝ] ℝ`. -/
 private noncomputable def modelBasisProj (k : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
     (((LinearMap.proj k).comp ((chartModelBasis E).equivFun.toLinearMap)) : E →ₗ[ℝ] ℝ)
@@ -772,8 +646,6 @@ private noncomputable def modelBasisProj (k : Fin (Module.finrank ℝ E)) : E �
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-/-- On the chart-`α` base set, the centred-frame coordinate matrix equals
-`modelBasisProj k ((triv α).clmAt b (smoothOrthoFrame g c i b))`. -/
 private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -795,8 +667,6 @@ private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
   exact congrArg (fun (f : TangentSpace I b → E) => f
       (smoothOrthoFrame (I := I) g c i b)) h
 
-/-- The centred-frame coordinate matrix `b ↦ C^k_i(b)` (centre `c` fixed) is `ContMDiffOn` on the
-chart-`α` trivialization base set. -/
 private lemma centredOrthoFrameCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -866,8 +736,6 @@ private lemma centredOrthoFrameCoordMatrix_contMDiffOn
   intro b hb
   exact centredOrthoFrameCoordMatrix_eq_clmAt_proj (I := I) (M := M) g α c i k hb
 
-/-- The centred-frame coordinate matrix `b ↦ C^k_i(b)` is `MDifferentiableAt` at any chart-`α`
-Levi-Civita good-set point. -/
 private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -886,8 +754,6 @@ private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
-/-- `MDifferentiableAt`-witness for the chart-`α` coordinate vector field `chartBasisVecFiber α k`
-viewed as a tangent-bundle section, at any chart-`α` base-set point. -/
 private lemma centred_chartBasisVecFiber_mdiffAt
     (α : M) (k : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -903,8 +769,6 @@ private lemma centred_chartBasisVecFiber_mdiffAt
     (h_contMDiffOn b hb).contMDiffAt (h_open.mem_nhds hb)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
-/-- `MDifferentiableAt`-witness for the bundle section
-`covApply cov_RS (chartBasisVecFiber α k) T₀.toSection` at any chart-`α` base-set point. -/
 private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -948,10 +812,6 @@ private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
 
-/-- **Coordinate-sum expansion of `covApply cov_RS (smoothOrthoFrame g c i) T₀` on the good set.**
-The bundle covariant derivative `covApply cov_RS (smoothOrthoFrame g c i) T₀` at `y` is the
-chart-`α` coordinate-matrix-weighted sum (over `k`) of `covApply cov_RS ∂_k T₀`, by `C^∞`-linearity
-of `covApply` in its vector-field slot and the coordinate-basis expansion of the frame vector. -/
 private lemma centred_covApply_frameVec_eq_coord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -987,7 +847,6 @@ private lemma centred_covApply_frameVec_eq_coord_sum
   intro k _
   rw [L.map_smul]
 
-/-- Generic differentiability of a finite `Σ fᵢ • σᵢ` bundle section (frame-agnostic helper). -/
 private lemma centred_finsum_smul_section_mdiffAt
     {ι : Type*} (s_finset : Finset ι)
     (r s : ℕ) (f : ι → M → ℝ)
@@ -1046,8 +905,6 @@ private lemma centred_finsum_smul_section_mdiffAt
       exact this
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
-/-- Generic finite-sum section-Leibniz expansion of `cov_RS (Σ fᵢ • σᵢ)` applied to `v`
-(frame-agnostic helper). -/
 private lemma centred_cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1133,17 +990,6 @@ private lemma centred_cov_RS_finsum_smul_section_leibniz_apply
     rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
-/-- **Inner-Leibniz coordinate expansion for the centred orthonormal frame.** For
-`b ∈ chartLeviCivitaGoodSet α`, the value `cov_RS (covApply cov_RS (smoothOrthoFrame g c i) T₀) b`
-applied to `∂_l b` decomposes into the chart-coordinate principal sum plus the
-derivative-of-coordinate-matrix cross term:
-```
-Σ_k C^k_i(b) · cov_RS (covApply cov_RS ∂_k T₀) b (∂_l b)
-  + Σ_k (∂_l C^k_i)(b) · (covApply cov_RS ∂_k T₀) b.
-```
-This is the centred-frame counterpart of the on-disk
-`cov_RS_covApply_frameVec_eq_coord_expansion`, with `smoothOrthoFrame g c i` (a globally smooth
-section) in place of the chart-`α` bumped frame; it is good-set-wide. -/
 private lemma centred_cov_RS_covApply_frameVec_eq_coord_expansion
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -1310,8 +1156,6 @@ private lemma centred_cov_RS_covApply_frameVec_eq_coord_expansion
   rw [hLeibniz]
   rw [Finset.sum_add_distrib]
 
-/-- Abbreviation for the chart-`α` `(Idx, Jdx)` scalar-component continuous linear functional on
-the tensor fibre at `b`: `tensorChartComponentProjection ∘ (triv α).clmAt b`. -/
 private noncomputable def chartProjCLM (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M) :
@@ -1329,8 +1173,6 @@ private noncomputable def chartProjCLM (r s : ℕ) (α : M)
         ((trivializationAt (TensorRSModel r s ℝ E)
             (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b w) := rfl
 
-/-- The chart-`α` `(Idx, Jdx)` raw scalar component of `Δ_∇ T₀` at `b` is the projection CLM
-applied to `rawTensorConnLap`. -/
 private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1344,16 +1186,6 @@ private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
   rw [rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b]
   rfl
 
-/-- **Frame-trace expansion of the chart-`α` raw component of `Δ_∇ T₀` via the centred orthonormal
-frame, valid on the whole good set.** For `b ∈ chartLeviCivitaGoodSet α`, the chart-`α`
-`(Idx, Jdx)` raw scalar component of `Δ_∇ T₀` equals the finite sum, over the centred frame index
-`i`, of the projection of the `i`-th fixed-frame summand built from the centred orthonormal frame
-`B_i := smoothOrthoFrame g b i`.  This is the unconditional (good-set-wide) counterpart of the
-tsupport-restricted on-disk
-`tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum`: the centred frame is
-`g_b`-orthonormal at its centre `b` unconditionally (`smoothOrthoFrame_orthonormal_center`) and is a
-globally smooth section (`smoothOrthoFrame_smooth`), so the fixed-frame trace identity
-`rawTensorConnLap_eq_fixedFrame_of_orthonormal` applies with no partition-of-unity restriction. -/
 private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1384,14 +1216,6 @@ private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
     (smoothOrthoFrame (I := I) g b) (fun z : M => T₀.toSection z) b]
   rw [map_sum]
 
-/-- **First-covariant-derivative chart expansion (good-set form).** For `b ∈ goodSet α`, the
-chart-`α` `(Idx, Jdx)` scalar projection of the first covariant derivative `covApply cov_RS ∂_m T₀`
-at `b` equals the `m`-th chart-Euclidean partial of the chart-pushed raw `(Idx, Jdx)` component plus
-a `T₀`-linear zeroth-order `covDerivLowerOrderTerm`.  This bridges the abstract first covariant
-derivative `covApply cov_RS ∂_m T₀` (which is `cov_RS T₀.toSection b (∂_m b)`) to the chart-local
-covariant derivative `chartTensorRSCovariantDerivative` (`tensorCovDerivAt_def` +
-`tensorCovDerivAt_eq_chartTensorRSCovariantDerivative`), then applies the component formula
-`covDerivComponent_eq_euclidPartial_add_lowerOrder`. -/
 private lemma chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1452,21 +1276,6 @@ set_option maxHeartbeats 800000
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- **Per-frame-index projected expansion of the centred-frame second-covariant-derivative
-summand.** For `b ∈ chartLeviCivitaGoodSet α` and a frame index `i`, the chart-`α` `(Idx, Jdx)`
-projection of the `i`-th centred-frame summand `cov_RS (covApply cov_RS Bᵢ T₀) b (Bᵢ b)`
-(`Bᵢ := smoothOrthoFrame g b i`, the frame centred at `b`) splits into:
-
-* a **double-coordinate principal block** weighted by the product `C^l_i(b)·C^k_i(b)` of the
-  centred-frame coordinate-matrix entries (which contracts to the chart inverse Gram matrix after
-  summing over `i`); and
-* a **first-order cross block** weighted by `C^l_i(b)·(∂_l C^k_i)(b)` (the moving-centre derivative
-  of the coordinate matrix), applied to the first covariant derivative `covApply cov_RS ∂_k T₀ b`.
-
-Obtained by expanding the evaluation vector `Bᵢ b = Σ_l C^l_i(b) ∂_l b`
-(`smoothOrthoFrame_eq_centredCoordMatrix_sum` at the centre `c = b`), pushing the projection CLM
-through the resulting finite sum, and applying the inner-Leibniz coordinate expansion
-`centred_cov_RS_covApply_frameVec_eq_coord_expansion` (`c = b`) to each `∂_l`-evaluation. -/
 private lemma centredFrame_proj_summand_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1623,15 +1432,6 @@ private lemma centredFrame_proj_summand_expand
   rw [Finset.sum_congr rfl (fun l _ => hsummand l)]
   rw [Finset.sum_add_distrib]
 
-/-- **The centred-frame principal block collapses to the chart-`α` inverse-Gram principal sum.**
-Summing the double-coordinate principal block of `centredFrame_proj_summand_expand` over the frame
-index `i`, the coordinate-matrix product `C^l_i(b)·C^k_i(b)` contracts — over `i` — to the chart-`α`
-inverse Gram matrix `g^{kl}(b) = chartInvGramMatrix g α b k l`
-(`centredOrthoFrameCoordMatrix_orthonormality`, the un-bumped, good-set-wide orthonormality
-identity), so the whole block equals `chartInvGramPrincipalSum`.  This is the inverse-Gram
-contraction that carries the orthonormal-frame metric trace to the chart-coordinate metric trace,
-and it is the genuine frame-independence content of the bridge: the chartJ-looking centred-frame
-coordinate-matrix data cancels against itself precisely here. -/
 private lemma centredFrame_proj_principal_eq_invGramPrincipalSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -1686,50 +1486,6 @@ private lemma centredFrame_proj_principal_eq_invGramPrincipalSum
   simp only [hP_def]
   rw [chartProjCLM_apply]
 
-/-- **The frame-independent good-set-wide first-order/zeroth-order chart-coordinate form of
-`Δ_∇` after the inverse-Gram principal block is removed.**
-
-There exist `T₀`-independent `C^∞` coefficient families `B_1`, `B_0` on the Euclidean chart target
-such that, for every smooth compactly-supported section `T₀` and every base point `b` in the
-chart-`α` Levi-Civita good set, the difference between the chart-`α` `(Idx, Jdx)` raw scalar
-component of `Δ_∇ T₀` and the chart-`α` inverse-Gram principal sum equals the canonical first-order
-chart-coordinate form
-```
-raw_{IJ}(Δ_∇ T₀)(b) − chartInvGramPrincipalSum g r s α T₀ Idx Jdx b
-  = Σ_{I', J', m} B_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
-  + Σ_{I', J'} B_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
-```
-
-This is the **frame-independent** genuine remaining differential-geometric content (it mentions no
-frame at all — neither the bumped chart frame nor the centred orthonormal frame).  It is TRUE and
-standard: the connection Laplacian is, *unconditionally* at every base point, the metric trace of
-the Hessian (`rawTensorConnLap_eq_metricTraceHessian`); the inverse-Gram principal sum
-`chartInvGramPrincipalSum = Σ_{k,l} g^{kl}·proj(∇_{∂_l}(∇_{∂_k} T₀))` is the inverse-Gram-weighted
-*naive iterated* second covariant derivative, which shares the principal symbol `Σ_{k,l} g^{kl}∂_l∂_k`
-of the metric trace, so their difference is purely first order.  Concretely, by the Hessian formula
-`tensorSecondCovDeriv X Y T = ∇_Y(∇·T)(X) − ∇_T(∇_Y X)` (`tensorSecondCovDeriv_def`,
-`tensorSecondCovDeriv_eq_firstSlotHessMap`) and `g`-symmetry of the `(k,l)`-contraction, the
-difference is the chart-coordinate Christoffel correction
-`−Σ_{k,l} g^{kl}·proj(∇_T(∇_{∂_l}∂_k))` — a *single* first covariant derivative of `T₀` contracted
-against the smooth chart-Christoffel-trace field `Σ_{k,l} g^{kl}·∇_{∂_l}∂_k`, with `C^∞` chart
-coefficients (the frame-independent counterpart of the bumped-frame
-`chartFrameTraceΓCorrection_eq_T₀_linear`, which packages exactly such a
-`Σ_i proj(∇_T((LC g) B_i B_i))` trace against the chart-frame self-Christoffel field).
-
-Posited here as the genuine remaining DG prerequisite, *replacing* the (mathematically unavailable)
-moving-centre route: the centred orthonormal frame `smoothOrthoFrame g b i` has its centre equal to
-the base point, so the centred coordinate-matrix diagonal `b ↦ centredOrthoFrameCoordMatrix g α b i k b`
-and its base-slot directional derivative are NOT chart-smooth — `smoothOrthoFrame g c i b =
-chartBumpAt c b • chartFrameNorm g c i b` depends on the chart centred at `c` (and on a
-`SmoothBumpFunction I c`), which has no joint/diagonal smoothness in `c` (the per-point chart choice
-`chartAt c` is not even continuous in `c` on a general charted space).  Only the frame-independent
-difference `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum` admits smooth chart coefficients (the
-moving-centre cross block and the Γ-trace each individually do not, but their combination is the
-frame-independent Christoffel correction).  The bridge from the centred-frame cross-block-minus-Γ LHS
-to this frame-independent difference is discharged sorry-free in the consuming node
-`rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form` (via the centred-frame trace identities
-`rawConnLap_chartα_proj_eq_centredFrame_trace_sum`, `centredFrame_proj_summand_expand`, and
-`centredFrame_proj_principal_eq_invGramPrincipalSum`). -/
 private lemma rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1769,63 +1525,6 @@ private lemma rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form
     (I := I) (M := M) g r s α T₀ Idx Jdx hb]
   exact hEq T₀ hb
 
-/-- **The centred-frame first-order remainder admits a smooth-coefficient chart-coordinate form.**
-
-There exist `T₀`-independent `C^∞` coefficient families `B_1`, `B_0` on the Euclidean chart target
-such that, for every smooth compactly-supported section `T₀` and every base point `b` in the
-chart-`α` Levi-Civita good set, the chart-`α` `(Idx, Jdx)` *first-order remainder* of `Δ_∇ T₀` —
-the part of the centred-frame trace sum left after the inverse-Gram principal block
-`chartInvGramPrincipalSum` is extracted, namely the centred-coordinate-matrix-derivative *cross
-block* `Σ_{i, l, k} C^l_i(b)·(∂_l C^k_i)(b)·proj(∇_{∂_k} T₀)` plus the *frame-trace Γ-correction*
-`−Σ_i proj(∇_{∇_{Bᵢ}Bᵢ} T₀)` (`Bᵢ := smoothOrthoFrame g b i`) — equals the canonical first-order
-chart-coordinate form
-```
-Σ_{I', J', m} B_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
-  + Σ_{I', J'} B_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
-```
-
-This is TRUE (and standard): the connection Laplacian `Δ_∇` is, in any chart, a genuine second-order
-differential operator `g^{kl}∂_k∂_l + (smooth)·∂_m + (smooth)·id` with `C^∞` coefficients; the
-principal symbol `g^{kl}∂_k∂_l` is exactly the principal block `chartInvGramPrincipalSum` already
-extracted, so the residual is precisely its `C^∞` lower-order part. The on-disk *bumped*-frame
-counterpart of this very statement — the first-order/zeroth-order block with `T₀`-independent `C^∞`
-coefficients — is proved (on the partition-of-unity tsupport) by
-`Integral.Connection.chartLeibnizRemainder_eq_T₀_linear` together with the bumped-frame
-coordinate-matrix chart-smoothness lemmas
-`chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget` and
-`chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget`
-(and assembled into the tsupport-restricted `T₀`-linear formula
-`Integral.Connection.rawTensorConnLap_chartα_raw_eq_T₀_linear_formula`).
-
-Mechanically: both blocks are `T₀`-linear and first order in `T₀` (each carries at most one covariant
-derivative of `T₀`), so each projected first covariant derivative `proj(∇_{∂_k} T₀)` rewrites, via
-`chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder`, as
-`∂_k(chartPushedRaw raw_{Idx,Jdx}(T₀))` plus a zeroth-order `covDerivLowerOrderTerm`
-(itself `Σ_{I',J'} covDerivLowerOrderCoeff · chartPushedRaw raw_{I'J'}(T₀)`, with `C^∞` coefficient by
-`covDerivLowerOrderCoeff_contDiffOn` and `tensorComponentEuclid_def`), and the Γ-correction (a first
-covariant derivative of `T₀` contracted against the smooth tangent field `∇_{Bᵢ}Bᵢ`) likewise. The
-weighting factors — the moving-centre coordinate-matrix derivative contraction
-`Σ_{i,l} C^l_i·∂_l C^k_i` and the Christoffel-trace `Σ_i ∇_{Bᵢ}Bᵢ` — are `T₀`-independent and
-chart-smooth (the chartJ-looking moving-centre derivative does NOT survive as an unbounded
-operator-norm factor: it enters only as a bounded chart-smooth coordinate coefficient, distinct from
-the principal block where it cancels by orthonormality).
-
-The remaining DG content is the **frame-independent** good-set-wide first-order/zeroth-order
-chart-coordinate form of `Δ_∇` after the principal block `chartInvGramPrincipalSum` is removed —
-namely the `T₀`-linear smooth-coefficient identity for the difference
-`raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`, supplied by the frame-independent node
-`rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form`.  The connection Laplacian is,
-*unconditionally* at every base point, the metric trace of the Hessian
-(`rawTensorConnLap_eq_metricTraceHessian`); the inverse-Gram-weighted naive iterated second
-covariant derivative `chartInvGramPrincipalSum` is its principal part, and the difference is the
-chart-coordinate Christoffel correction `−Σ_{k,l} g^{kl}·proj(∇_T(∇_{∂_l}∂_k))` — a *first* covariant
-derivative of `T₀` contracted against the smooth chart-Christoffel-trace field, with `C^∞` chart
-coefficients (the frame-independent analogue of `chartFrameTraceΓCorrection_eq_T₀_linear`).  This
-node bridges the centred-frame cross-block-minus-Γ-trace LHS to that frame-independent difference,
-via the parent's own centred-frame trace identities, *without* any moving-centre frame smoothness:
-the dropped principal-block Gram collapse (`centredFrame_proj_principal_eq_invGramPrincipalSum`) and
-the centred-frame trace sum (`rawConnLap_chartα_proj_eq_centredFrame_trace_sum`) carry the
-centred-frame data to `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`, which is then frame-independent. -/
 private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1879,9 +1578,9 @@ private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
       (I := I) (M := M) g r s α Idx Jdx
   refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
   intro T₀ b hb
-  -- Step 1 (proven outright, frame-dependent → frame-independent reduction):
-  -- the centred-frame cross-block minus Γ-trace equals `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`,
-  -- via the parent's centred-frame trace identities (NO moving-centre frame smoothness used).
+  
+  
+  
   have hReduce :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -1964,45 +1663,6 @@ private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
   rw [hReduce]
   exact hDiff T₀ hb
 
-/-- **The open-good-set projected inverse-Gram principal-sum metric-trace identity for the
-connection-Laplacian raw component (the genuine remaining differential-geometric content).**
-
-There exist `T₀`-independent `C^∞` coefficient families `B_1`, `B_0` on the Euclidean chart target
-such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in the
-chart-`α` Levi-Civita good set, the chart-`α` `(Idx, Jdx)` raw scalar component of `Δ_∇ T₀` equals
-the (frame-independent) chart-`α` inverse-Gram principal sum `chartInvGramPrincipalSum` — the
-inverse-Gram-matrix-weighted trace, over the chart coordinate basis `∂_k = chartBasisVecFiber α k`,
-of the projected *naive* iterated covariant derivative `cov_RS (∇_{∂_k} T₀) b (∂_l b)` — plus a
-`T₀`-linear first-partial block and a `T₀`-linear zeroth-order block:
-```
-raw_{IJ}(Δ_∇ T₀)(b)
-  = chartInvGramPrincipalSum g r s α T₀ Idx Jdx b
-  + Σ_{I', J', m} B_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
-  + Σ_{I', J'}    B_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
-```
-
-This is the open-good-set strengthening of the tsupport-restricted on-disk identity
-`chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`, which reads
-`raw_{IJ}(Δ_∇ T₀)(b) = (chartInvGramPrincipalSum + chartLeibnizRemainder) − chartFrameTraceΓCorrection`
-only on the partition-of-unity tsupport.  The principal sum `chartInvGramPrincipalSum` is itself
-frame-independent (it weights the chart coordinate-basis naive second covariant derivative by the
-un-bumped chart inverse Gram matrix `chartInvGramMatrix`), so it is the correct principal term on the
-whole good set; the rough Laplacian is, *unconditionally* at every base point `b`, the metric trace
-of the second covariant derivative against the `g_b`-orthonormal frame `Bᵢ := smoothOrthoFrame g b i`
-(`rawTensorConnLap_eq_metricTraceHessian`), and the metric trace of a fibre bilinear form is
-basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis trace at every
-good-set point.  The residual `(chartLeibnizRemainder − chartFrameTraceΓCorrection)` is `T₀`-linear
-with `T₀`-independent smooth chart-coordinate coefficients, absorbed here into `B_1`, `B_0`.  The
-tsupport restriction of the on-disk version is inessential to this trace identity: it was inherited
-only from the *bumped* globally smooth chart frame `chartFrameNormGlobalSmooth` used to package the
-remainder, whose orthonormality is localised to the partition-of-unity tsupport; the
-centred-orthonormal-frame metric trace used here is unconditional.
-
-Posited here as the genuine remaining DG prerequisite (the bilinear-trace change of basis from the
-orthonormal frame to the chart coordinate basis, with inner-slot tensoriality, removing the bumped
-frame's tsupport restriction); the principal-block substitution of
-`secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` and the coefficient collection are discharged
-sorry-free below on top of it. -/
 theorem rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -2100,46 +1760,6 @@ theorem rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet
 
 end B4Bridge
 
-/-- **The open-good-set inverse-Gram coordinate metric-trace identity for the connection-Laplacian
-raw component (a genuine differential-geometric prerequisite).**
-
-There exist `T₀`-independent `C^∞` coefficient families `A_1`, `A_0` on the Euclidean chart target
-such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in the
-chart-`α` Levi-Civita good set, the chart-`α` `(Idx, Jdx)` raw scalar component of
-`Δ_∇ T₀ = rawTensorConnLapSmooth g r s T₀` equals the chart-`α` inverse-Gram-matrix-weighted trace,
-over the coordinate basis `∂_k = chartBasisVecFiber α k`, of the chart-coordinate expansion of the
-naive iterated covariant derivative `∇_{∂_l}(∇_{∂_k} T₀)` (the open-good-set second-covariant
-derivative chart expansion `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn`, whose principal
-term is the mixed second partial of the chart-pushed raw component and whose `naiveSCD_GlobalCorr`,
-`naiveSCD_GlobalCorr0` corrections are the `T₀`-independent smooth coefficient families), plus a
-first-partial block and a zeroth-order block:
-```
-raw_{IJ}(Δ_∇ T₀)(b)
-  = Σ_{k, l} g^{kl}(b) · ( ∂_l ∂_k (chartPushedRaw raw_{IJ}(T₀))
-        + Σ_{I', J', m} GlobalCorr_{k,l} I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
-        + Σ_{I', J'}   GlobalCorr0_{k,l} I' J' · chartPushedRaw raw_{I'J'}(T₀) )
-  + Σ_{I', J', m} A_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
-  + Σ_{I', J'}    A_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)),
-```
-with `g^{kl} := chartInvGramMatrix g α b k l`.
-
-This is the open-good-set strengthening, at the level of the metric-trace identity, of the
-tsupport-restricted on-disk identity
-`chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`.  The rough
-Laplacian is, *unconditionally* at every base point `b`, the metric trace of the second covariant
-derivative against the `g_b`-orthonormal frame centred at `b`
-(`rawTensorConnLap_eq_metricTraceHessian`); the metric trace of a fibre bilinear form is
-basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis trace
-`Σ_{k,l} g^{kl}(b) (∇²T₀)(∂_k, ∂_l)(b)` at every good-set point, with the difference between the
-Hessian `(∇²T₀)(∂_k,∂_l)` and the naive iterated derivative `∇_{∂_l}∇_{∂_k}T₀` (the Christoffel
-`∇_{∇_{∂_l}∂_k}T₀` term) absorbed, together with the first-derivative cross-terms, into the
-`T₀`-independent smooth coefficient families `A_1`, `A_0`.  The tsupport restriction of the on-disk
-version is inessential to this trace identity: it was inherited only from the *bumped* globally
-smooth chart frame `chartFrameNormGlobalSmooth`, whose orthonormality is localised to the
-partition-of-unity tsupport; the centred-frame metric trace used here is unconditional, and the
-un-bumped chart Gram matrix `chartInvGramMatrix` is the correct contraction tensor on the whole good
-set.  Posited here as the genuine remaining DG prerequisite; the chart-coordinate `∂²`-form formula
-below is proved sorry-free on top of it. -/
 theorem rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -2211,14 +1831,6 @@ theorem rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_good
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).2.2 T₀ hb
 
-/-- **Inverse-Gram contraction–reorder for the first-derivative correction block.** Moving the
-inverse-Gram double sum `Σ_{k, l}` past the correction triple sum `Σ_{I', J', m}` and factoring the
-`(k, l)`-independent partial-derivative factor `p I' J' m`:
-```
-Σ_{k, l} c k l · (Σ_{I', J', m} d k l I' J' m · p I' J' m)
-  = Σ_{I', J', m} (Σ_{k, l} c k l · d k l I' J' m) · p I' J' m.
-```
-Pure finite-sum commutativity and distributivity over `ℝ`. -/
 private lemma invGram_reorder_firstDeriv
     {ι κ μ : Type*} [Fintype ι] [Fintype κ] [Fintype μ]
     (c : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ)
@@ -2257,14 +1869,6 @@ private lemma invGram_reorder_firstDeriv
   rw [← Finset.sum_product' (f := fun k l => c k l * d k l i j m),
     Finset.univ_product_univ]
 
-/-- **Inverse-Gram contraction–reorder for the zeroth-order correction block.** Moving the
-inverse-Gram double sum `Σ_{k, l}` past the correction double sum `Σ_{I', J'}` and factoring the
-`(k, l)`-independent raw-component factor `q I' J'`:
-```
-Σ_{k, l} c k l · (Σ_{I', J'} d k l I' J' · q I' J')
-  = Σ_{I', J'} (Σ_{k, l} c k l · d k l I' J') · q I' J'.
-```
-Pure finite-sum commutativity and distributivity over `ℝ`. -/
 private lemma invGram_reorder_zeroth
     {ι κ : Type*} [Fintype ι] [Fintype κ]
     (c : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ)
@@ -2298,32 +1902,6 @@ private lemma invGram_reorder_zeroth
   rw [← Finset.sum_product' (f := fun k l => c k l * d k l i j),
     Finset.univ_product_univ]
 
-/-- **The open-good-set `T₀`-linear chart-coordinate formula for the connection-Laplacian raw
-component.**
-
-There exist `T₀`-independent `C^∞` coefficient families `C_2`, `C_1`, `C_0` on the Euclidean chart
-target such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in
-the chart-`α` Levi-Civita good set (the open chart source on a boundaryless manifold), the chart-`α`
-`(Idx, Jdx)` raw scalar component of `Δ_∇ T₀ = rawTensorConnLapSmooth g r s T₀` equals the explicit
-mixed-second-partial principal block plus a first-partial block plus a zeroth-order block:
-```
-raw_{IJ}(Δ_∇ T₀)(b)
-  = Σ_{k, l} C_2 k l · ∂_l ∂_k (chartPushedRaw raw_{IJ}(T₀))
-  + Σ_{I', J', m} C_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
-  + Σ_{I', J'} C_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
-```
-
-This is the open-good-set strengthening of the tsupport-restricted on-disk formula
-`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula`: the connection Laplacian is the metric trace of
-the second covariant derivative — a pointwise identity at *every* point of the good set,
-`Δ_∇ T₀ = Σ_{k, l} g^{kl} (∇² T₀)(∂_k, ∂_l)` — and each chart-projected `(∇² T₀)(∂_k, ∂_l)` expands,
-by the open-good-set second-covariant-derivative chart expansion
-`secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn`, into the principal mixed-second partial plus
-`T₀`-independent-coefficient first- and zeroth-order chart blocks.  The tsupport restriction in the
-on-disk version is inessential to the trace identity (it is inherited from the global orthonormal
-frame's support-localised orthonormality, removable by using the chart inverse-Gram contraction in
-place of that frame).  Posited here as the genuine remaining DG prerequisite; the pointwise
-operator-norm bound below is proved sorry-free on top of it. -/
 theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -2506,8 +2084,6 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
         invGram_reorder_zeroth (E := E) IG GC0 R]
     abel
 
-/-- A `C^∞` function on an open set has, on any compact subset, a uniform bound on all its iterated
-Fréchet derivative norms up to a fixed order `N`. -/
 private lemma exists_iteratedFDeriv_norm_bound_on_compact
     {f : EuclN → ℝ} {sset : Set EuclN} (hf : ContDiffOn ℝ ∞ f sset) (hs : IsOpen sset)
     {K : Set EuclN} (hK : IsCompact K) (hKs : K ⊆ sset) (N : ℕ) :
@@ -2538,9 +2114,6 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
-/-- For `y` in the chart target, the preimage base point
-`(extChartAt I α).symm (toEuclidean.symm y)` lies in the chart-`α` Levi-Civita good set (the chart
-source, on a boundaryless manifold), and its chart image recovers `y`. -/
 private lemma chartTargetEuclid_preimage_mem_goodSet
     (α : M) {y : EuclN} (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ chartLeviCivitaGoodSet (I := I) α ∧
@@ -2558,9 +2131,6 @@ private lemma chartTargetEuclid_preimage_mem_goodSet
     (extChartAt I α).right_inv hy_pre
   rw [h_round]; simp
 
-/-- A finite sum of product summands `C_ι · Fa_ι`, each with order-`j` Fréchet derivative
-operator-norm bounded by `Mb` at an interior point `y`, has total order-`j` Fréchet derivative
-operator norm at `y` bounded by `(card ι) · Mb`. -/
 private lemma block_iteratedFDeriv_norm_le
     {ι : Type*} [Fintype ι] (α : M) (Cf Faf : ι → EuclN → ℝ) {y : EuclN}
     (hCf_cd : ∀ i : ι, ContDiffOn ℝ ∞ (Cf i) (chartTargetEuclid (I := I) (M := M) α))
@@ -2595,20 +2165,6 @@ private lemma block_iteratedFDeriv_norm_le
   refine le_trans (Finset.sum_le_sum hsummand') ?_
   rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
 
-/-- **The per-chart pointwise second-order rough-Laplacian chart-component operator-norm bound.**
-
-The chart-`α`-localised form of the headline pointwise bound: for each fixed chart base point `α`,
-there is a non-negative constant `B_α` such that on the compact kernel `chartImagePOUTsupport α`,
-every order-`j` (`j ≤ 2k`) Fréchet derivative operator norm of the chart-pulled raw `(Idx, Jdx)`
-component of `Δ_∇ T` is square-bounded by `B_α` times the order-`(k + 1)` Hilbert-Schmidt content of
-`T`.  Proved sorry-free on top of the open-good-set `T₀`-linear formula
-`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet`: the chart pull-back agrees on the open
-chart target with the explicit principal-`∂²` plus first-`∂` plus zeroth blocks; an order-`j` Fréchet
-derivative of each block is dominated, by the Leibniz product rule, by uniformly-bounded coefficient
-derivatives times order-`≤ j + 2 ≤ 2(k + 1)` derivatives of the raw components of `T`, the latter
-controlled by the Hilbert-Schmidt content; the coefficients are uniformly bounded on the compact
-kernel.  The atlas-uniform constant is assembled from this per-chart form over the finite active set
-of the partition of unity. -/
 private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent_perAlpha
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -2630,7 +2186,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Uniform coefficient sup-bounds on the compact kernel, up to order `2k`.
+  
   obtain ⟨B2, hB2_nn, hB2⟩ : ∃ C : ℝ, 0 ≤ C ∧
       ∀ (k' l' : Fin n), ∀ i ≤ 2 * k, ∀ y ∈ K,
         ‖iteratedFDeriv ℝ i (C_2 k' l') y‖ ≤ C := by
@@ -2677,7 +2233,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
       exact (hCf ⟨I', J'⟩ i hi y hy).trans
         (Finset.le_sup'_of_le Cf (Finset.mem_univ
           (⟨I', J'⟩ : (Fin r → Fin n) × (Fin s → Fin n))) le_rfl)
-  -- Uniform coefficient bound and combinatorial cardinalities.
+  
   set Bmax : ℝ := max B2 (max B1 B0) with hBmax_def
   have hBmax_nn : 0 ≤ Bmax := le_trans hB2_nn (le_max_left _ _)
   have hB2_le : B2 ≤ Bmax := le_max_left _ _
@@ -2693,7 +2249,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
   have hR_nn : 0 ≤ R := rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y
   have hsqrtR_nn : 0 ≤ Real.sqrt R := Real.sqrt_nonneg _
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hK_sub hyK
-  -- The chart pull-back of `Δ_∇ T`, as a function near `y`, equals the explicit three-block sum.
+  
   set Δpull : EuclN → ℝ := rawConnLapPull (I := I) (M := M) g r s
     (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx with hΔpull_def
   set RHSfun : EuclN → ℝ := fun z =>
@@ -2722,7 +2278,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) = RHSfun z
     rw [hform_z, hb_round, hRHSfun_def]
   rw [(h_evEq.iteratedFDeriv ℝ j).self_of_nhds]
-  -- A single summand operator-norm bound, after Leibniz: ≤ 2^{2k} · Bmax · √R.
+  
   have hraw_sqrt : ∀ (q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E))) (m : ℕ), m ≤ 2 * (k + 1) →
       ‖iteratedFDeriv ℝ m (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ≤
@@ -2783,7 +2339,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
         ≤ (2 : ℝ) ^ (2 * k) * (Bmax * Real.sqrt R) :=
           mul_le_mul_of_nonneg_right h2j_le (by positivity)
       _ = (2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R := by ring
-  -- Bound `‖D^j RHSfun y‖` by `Ktot · √R` via the three blocks.
+  
   have h_block2_le :
       ‖iteratedFDeriv ℝ j (fun z =>
         ∑ p : Fin n × Fin n,
@@ -2874,7 +2430,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
       (fun z hz => chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α p hz)
       (fun m z hz => euclidPartialIter_chartPushedRaw_norm_le_zero (I := I) (M := M)
         g r s T α p m hz)
-  -- Assemble: ‖D^j RHSfun‖ ≤ Ktot · √R, then square.
+  
   have h_norm_le : ‖iteratedFDeriv ℝ j RHSfun y‖ ≤ Ktot * Real.sqrt R := by
     set b2fn : EuclN → ℝ := fun z =>
       ∑ p : Fin n × Fin n,
@@ -2970,34 +2526,6 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
       ≤ (Ktot * Real.sqrt R) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h_norm_le 2
     _ = Ktot ^ 2 * R := by rw [mul_pow, Real.sq_sqrt hR_nn]
 
-/-- **The pointwise second-order rough-Laplacian chart-component operator-norm bound (the genuine
-atomic 2nd-order elliptic-boundedness primitive).**
-
-For a closed Riemannian manifold and ranks `(r, s)`, there is a non-negative constant `B`, uniform
-in the tensor `T` and the chart base point `α`, such that on the compact chart image of the
-chart-`α` partition-of-unity support, every order-`j` (`j ≤ 2k`) Fréchet derivative operator norm of
-the chart-pulled raw `(Idx, Jdx)`-component of the smooth rough Laplacian `Δ_∇ T =
-rawTensorConnLapSmooth g r s T` is square-bounded by `B` times the order-`(k + 1)` Hilbert-Schmidt
-content of the raw components of `T`:
-```
-‖D^j (raw_{IJ}(Δ_∇ T) ∘ chart⁻¹ ∘ toEuclidean⁻¹) y‖²
-  ≤ B · rawConnLapRhsHsContent g r s k T α y      (y ∈ chartImagePOUTsupport α,  j ≤ 2k).
-```
-
-This is the genuine analytic single-step (`+1` `toHs`-order) rough-Laplacian content.  It is proved
-on top of the open-good-set `T₀`-linear chart-coordinate formula
-`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet`: on the open chart target the chart
-pull-back of `Δ_∇ T` agrees (eventually, by `chartTargetEuclid_preimage_mem_goodSet`) with the
-explicit sum of a principal mixed-second-partial block `Σ C_2 · ∂²(chartPushedRaw raw)`, a
-first-partial block `Σ C_1 · ∂(chartPushedRaw raw)`, and a zeroth block `Σ C_0 · chartPushedRaw raw`,
-with `T`-independent `C^∞` coefficients.  An order-`j` (`j ≤ 2k`) Fréchet derivative of each block is
-dominated, by the Leibniz product rule (`norm_iteratedFDerivWithin_mul_le`) and the one-order
-`euclidPartial` cost, by uniformly-bounded (on the compact kernel) coefficient derivatives times
-order-`(j - i) + a ≤ 2(k + 1)` Fréchet derivatives of the raw components of `T` (with block arity
-`a ∈ {2, 1, 0}`), the latter controlled by the order-`(k + 1)` Hilbert-Schmidt content.  The
-atlas-uniform constant `B` is assembled from the per-chart constant over the finite active set of the
-partition of unity (`chartAtlasPOU_activeFinset`), the kernel being empty off it.  It carries no
-spectral nonlinearity and no Weyl dependence. -/
 theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ B : ℝ, 0 ≤ B ∧
@@ -3010,7 +2538,7 @@ theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
                 (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) y‖ ^ 2 ≤
             B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y := by
   classical
-  -- Per-chart constants, assembled into an atlas-uniform `B` over the finite active set.
+  
   have hperα : ∀ w : M × (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)), ∃ Bα : ℝ, 0 ≤ Bα ∧
       ∀ (T : Integral.L2.SmoothCcTensor g r s) (j : ℕ), j ≤ 2 * k →
@@ -3029,8 +2557,7 @@ theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
       Finset.sum_nonneg (fun Jdx _ => hBfun_nn ⟨α, Idx, Jdx⟩))), ?_⟩
   intro T α Idx Jdx j hj y hyK
   by_cases hα : α ∈ actF
-  · -- Active chart: dominate `Bfun ⟨α, Idx, Jdx⟩` by the finite nonnegative sum.
-    have hBle : Bfun ⟨α, Idx, Jdx⟩ ≤
+  · have hBle : Bfun ⟨α, Idx, Jdx⟩ ≤
         ∑ α' ∈ actF, ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E), Bfun ⟨α', Idx', Jdx'⟩ := by
       have h_inner : Bfun ⟨α, Idx, Jdx⟩ ≤
@@ -3058,8 +2585,7 @@ theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
     refine le_trans hpt ?_
     exact mul_le_mul_of_nonneg_right hBle
       (rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y)
-  · -- Inactive chart: the kernel is empty, so the bound is vacuous at `y`.
-    exfalso
+  · exfalso
     have hρ0 : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 :=
       chartAtlasPOU_eq_zero_of_notMem_activeFinset (I := I) (M := M) hα
     have h_tsupp_empty : tsupport (fun x : M =>
@@ -3072,9 +2598,6 @@ theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
     rw [h_tsupp_empty] at hx_supp
     exact hx_supp
 
-/-- The pushed partition-of-unity weight `ρ_α` (read at the chart-source preimage of a target point
-`y`) vanishes when `y` lies in the chart target but outside the compact kernel
-`chartImagePOUTsupport α`. -/
 private lemma rawConnLapPouPull_eq_zero_off_kernel (α : M) (y : EuclN)
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
@@ -3094,7 +2617,6 @@ private lemma rawConnLapPouPull_eq_zero_off_kernel (α : M) (y : EuclN)
   refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
   rw [h_round]; simp
 
-/-- Continuity of the chart-pushed partition-of-unity weight on the chart target. -/
 private lemma rawConnLapPouPullCont (α : M) :
     ContinuousOn
       (fun y : EuclN =>
@@ -3114,7 +2636,6 @@ private lemma rawConnLapPouPullCont (α : M) :
     exact hy
   exact hPOU_cont.comp_continuousOn h_inner
 
-/-- AEMeasurability of one Hilbert-Schmidt integrand term on the chart-target-restricted volume. -/
 private lemma rawConnLapPullIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -3154,8 +2675,6 @@ private lemma rawConnLapPullIntegrand_aemeasurable
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
-/-- The chart-`α` Hilbert-Schmidt inner double-sum-of-integrals of a tensor `S` equals the integral
-of the partition-of-unity-weighted full Hilbert-Schmidt content.  (Tonelli for finite sums.) -/
 private lemma rawConnLapSumIntegrals_eq_integral_sum
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : Integral.L2.SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -3352,11 +2871,6 @@ private lemma rawConnLapSumIntegrals_eq_integral_sum
         rw [Finset.mul_sum,
           ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
 
-/-- **The per-chart pointwise integrand bound.** For `y` in the chart target, the
-partition-of-unity-weighted full Hilbert-Schmidt content (over all components, orders `≤ 2k`, and
-basis tuples) of the chart-pulled `Δ_∇ T` component is bounded by `Ccomb · ρ_α ·
-rawConnLapRhsHsContent`, where `Ccomb = (#pairs) · (2k + 1) · n^{2k} · B` and the right side is the
-order-`(k + 1)` Hilbert-Schmidt content of `T`. -/
 private lemma rawConnLap_pointwise_integrand_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -3405,8 +2919,7 @@ private lemma rawConnLap_pointwise_integrand_le
                 (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2 with hLHSsum_def
   change ρ * LHSsum ≤ Ccomb * (ρ * R)
   by_cases hyK : y ∈ chartImagePOUTsupport (I := I) (M := M) α
-  · -- Per-component, per-order basis-sum bound from the pointwise primitive.
-    have h_perIJorder : ∀ (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+  · have h_perIJorder : ∀ (IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E))) (j : ℕ), j ≤ 2 * k →
         (∑ bIdx : Fin j → Fin (Module.finrank ℝ E),
           |(iteratedFDeriv ℝ j
@@ -3495,10 +3008,6 @@ private lemma rawConnLap_pointwise_integrand_le
       rawConnLapPouPull_eq_zero_off_kernel (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
-/-- **The per-chart inner-sum bound** assembled from the pointwise integrand bound: integrating the
-pointwise bound over the chart target (Tonelli for finite sums + monotone `lintegral`), turning the
-chart-`α` order-`k` inner sum of `Δ_∇ T` into `ofReal Ccomb` times the chart-`α` order-`(k + 1)`
-inner sum of `T`.  On inactive charts the partition of unity vanishes, killing the left side. -/
 private lemma rawConnLap_per_alpha_inner_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (B : ℝ) (hB_nn : 0 ≤ B)
@@ -3593,45 +3102,6 @@ private lemma rawConnLap_per_alpha_inner_bound
   rw [← ENNReal.ofReal_mul hCcomb_nn]
   exact ENNReal.ofReal_le_ofReal hpt
 
-/-- **The per-chart inner-sum order-drop for the rough connection Laplacian (the genuine atomic
-analytic primitive).**
-
-For a closed Riemannian manifold and ranks `(r, s)`, there is a non-negative constant `C` such
-that, for every smooth compactly-supported `(r, s)`-tensor section `T` and every chart base point
-`α : M`, the chart-`α` order-`k` Hilbert-Schmidt partition-of-unity-weighted summand of
-`Δ_∇ T = rawTensorConnLapSmooth g r s T` is bounded by `ofReal C` times the chart-`α`
-order-`(k + 1)` summand of `T`:
-```
-∑_{IJ} ∑_{j ≤ 2k} ∑_{bIdx} ∫_{ChTE α} ρ_α · |D^j (raw_{IJ}(Δ_∇ T))(bIdx)|²
-  ≤ ofReal C · ∑_{IJ} ∑_{j ≤ 2(k+1)} ∑_{bIdx} ∫_{ChTE α} ρ_α · |D^j (raw_{IJ}(T))(bIdx)|² .
-```
-The constant `C` is uniform in `(T, α)`.
-
-This is the genuine analytic single-step rough-Laplacian chart-Sobolev order-dropping content,
-localised per chart.  The rough Laplacian `Δ_∇` is the frame trace of the second covariant
-derivative (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`); in chart-Euclidean coordinates its
-raw `(Idx, Jdx)`-component is a finite linear combination of *second* Euclidean partials of the raw
-components of `T` with smooth (volume-weighted inverse-Gram) coefficients plus a lower-order
-correction (`tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`).  An order-`j`
-(`j ≤ 2k`) Fréchet derivative of such a component is therefore dominated by order-`(j + 2) ≤
-2(k + 1)` Fréchet derivatives of the raw components of `T` (the second-order operator costs exactly
-two Fréchet, hence one `tensorPouSobolevHsNorm`-order); the smooth coefficients are uniformly bounded
-on the compact chart image of the partition-of-unity support.  This is the exact rough-Laplacian
-analogue of the per-chart bound underlying `exists_covGrad_tensorPouSobolevHsNorm_le`, tight at `+1`
-order.
-
-It is assembled — sorry-free — from the genuine pointwise second-order elliptic-boundedness primitive
-`exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent` (the only remaining `sorry`
-in this chart-port): that primitive states that, on the compact chart image of the
-partition-of-unity support, every order-`j` (`j ≤ 2k`) Fréchet derivative operator norm of the
-chart-pulled raw `(Idx, Jdx)`-component of `Δ_∇ T` is square-bounded by a `T`-uniform constant times
-the order-`(k + 1)` Hilbert-Schmidt content of the raw components of `T`.  Squaring the basis
-evaluations, summing over the basis tuples / Fréchet orders / component multi-index pairs, weighting
-by the partition of unity (which vanishes off the chart image of its support, by
-`rawConnLapPouPull_eq_zero_off_kernel`), and integrating against the chart-Euclidean volume measure
-(Tonelli for finite sums, `rawConnLapSumIntegrals_eq_integral_sum`) turns the pointwise bound into
-the stated chart-`α` inner-sum inequality.  It carries no spectral nonlinearity and no Weyl
-dependence. -/
 theorem exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3681,27 +3151,6 @@ theorem exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart
   · rfl
   · rfl
 
-/-- **The tight single-step order-dropping `ℝ≥0∞` chart-Sobolev norm bound for the rough
-connection Laplacian (the genuine analytic primitive).**
-
-For a closed Riemannian manifold and ranks `(r, s)`, there is a non-negative constant `C` such
-that for every smooth compactly-supported `(r, s)`-tensor section `T`,
-```
-tensorPouSobolevHsNorm g k (Δ_∇ T) ≤ ENNReal.ofReal C · tensorPouSobolevHsNorm g (k + 1) T ,
-```
-where `Δ_∇ = rawTensorConnLapSmooth g r s`.  This is the `ℝ≥0∞`-level (`tensorPouSobolevHsNorm`)
-form of the tight single-step bound: the rough Laplacian is the frame trace of the second
-covariant derivative (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), hence a single
-second-order operator `H^{2(k+1)} → H^{2k}`, losing exactly **one** `toHs`-order.  It is the
-rough-Laplacian counterpart of `exists_covGrad_tensorPouSobolevHsNorm_le`, tight at `+1` order.
-
-It is assembled from the per-chart order-drop
-`exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le_perChart`: unfolding both
-`tensorPouSobolevHsNorm`s via `tensorPouSobolevHsNorm_eq`, the per-chart inner-summand bound is
-summed over the chart base points (`ENNReal.tsum_le_tsum` and `ENNReal.tsum_mul_left`), and the
-outer `^(1/2)` is distributed (`ENNReal.mul_rpow_of_nonneg`), turning `ofReal C` into
-`ofReal (√C)`.  The completion-norm forms `exists_rawConnLapSmooth_toHs_le_toHs_succ` and
-`exists_rawConnLapIter_toHs_le_toHs` are proved on top of it via `tensorPouSobolevHilbert_norm_eq`. -/
 theorem exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3768,22 +3217,6 @@ theorem exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le
 
 end RawConnLapOrderDrop
 
-/-- **The tight single-step order-dropping completion-norm bound for the rough connection
-Laplacian (the genuine atomic elliptic-boundedness primitive).**
-
-For a closed Riemannian manifold and an order `k`, there is a non-negative constant `C` such
-that for every smooth compactly-supported `(0, 2)`-tensor section `T`,
-```
-‖(Δ_∇ T).toHs k‖ ≤ C · ‖T.toHs (k + 1)‖ ,
-```
-where `Δ_∇ = rawTensorConnLapSmooth g 0 2`.  This is the intrinsic `H^{2k}(Δ_∇ T) ≤
-C · H^{2(k+1)}(T)` order-dropping inequality: the rough Laplacian is the frame trace of the
-second covariant derivative (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), hence a *single*
-second-order operator, so it loses exactly **one** `toHs`-order (`= 2` derivatives) — the tight
-count, as opposed to the `+2` a naive `covGrad ∘ covGrad` composition would charge.  It is proved
-on top of the `ℝ≥0∞`-level primitive `exists_rawConnLapSmooth_tensorPouSobolevHsNorm_le` via
-`tensorPouSobolevHilbert_norm_eq`, exactly as `covGrad_toHs_norm_le` is built from
-`exists_covGrad_tensorPouSobolevHsNorm_le`. -/
 theorem exists_rawConnLapSmooth_toHs_le_toHs_succ
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3812,17 +3245,6 @@ theorem exists_rawConnLapSmooth_toHs_le_toHs_succ
     _ = C * (tensorPouSobolevHsNorm (I := I) (M := M) g (k + 1) T).toReal := by
         rw [ENNReal.toReal_ofReal hC_nn]
 
-/-- **The iterated order-dropping completion-norm bound for the rough connection Laplacian.**
-
-For each iteration count `i` and each order `k` there is a non-negative constant `C` such that
-for every smooth compactly-supported `(0, 2)`-tensor section `T`,
-```
-‖(Δ_∇^i T).toHs k‖ ≤ C · ‖T.toHs (k + i)‖ ,
-```
-where `Δ_∇^i = rawTensorConnLapIter g 0 2 i`.  The proof iterates the tight single-step bound
-`exists_rawConnLapSmooth_toHs_le_toHs_succ` exactly `i` times (peeling one `Δ_∇` at each step
-and raising the inner order by one), the constant being the product of the single-step
-constants.  This is the rough-Laplacian mirror of `iteratedCovGrad_toHs_norm_le`. -/
 theorem exists_rawConnLapIter_toHs_le_toHs
     (g : SmoothRiemannianMetric I M) (i k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3838,8 +3260,8 @@ theorem exists_rawConnLapIter_toHs_le_toHs
       obtain ⟨Ci, hCi_nn, hCi⟩ := ih (k + 1)
       obtain ⟨C1, hC1_nn, hC1⟩ := exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g k
       refine ⟨C1 * Ci, mul_nonneg hC1_nn hCi_nn, fun T => ?_⟩
-      -- One peel: `Δ_∇^{i+1} T = Δ_∇ (Δ_∇^i T)`, then single-step at order `k` and `ih` at
-      -- order `k+1`.
+      
+      
       have hpeel : rawTensorConnLapIter (I := I) g 0 2 (i + 1) T
           = rawTensorConnLapSmooth (I := I) g 0 2 (rawTensorConnLapIter (I := I) g 0 2 i T) := by
         rw [rawTensorConnLapIter_succ]
@@ -3856,19 +3278,13 @@ theorem exists_rawConnLapIter_toHs_le_toHs
         _ = C1 * Ci * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2)
               (k + (i + 1)) T‖ := by ring
 
-/-- **Monotonicity of the order-`k` chart-Sobolev completion norm in the order `k`.**
-
-For `m ≤ n`, the order-`m` chart-Sobolev (`toHs`) norm is dominated by the order-`n` one:
-`‖T.toHs m‖ ≤ ‖T.toHs n‖`.  This is the completion-norm reflection of the monotonicity
-`tensorPouSobolevHsNorm_le_succ` of the partition-of-unity chart-Sobolev `ℝ≥0∞`-norm in the
-order, transported through `tensorPouSobolevHilbert_norm_eq`. -/
 theorem toHs_norm_mono (g : SmoothRiemannianMetric I M) {r s : ℕ} {m n : ℕ} (hmn : m ≤ n)
     (T : Integral.L2.SmoothCcTensor g r s) :
     ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) m T‖ ≤
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) n T‖ := by
   rw [tensorPouSobolevHilbert_norm_eq, tensorPouSobolevHilbert_norm_eq]
   refine ENNReal.toReal_mono (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g n T).ne ?_
-  -- Monotone in the order via the successor step, by induction on the gap `n - m`.
+  
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hmn
   clear hmn
   induction d with
@@ -3879,9 +3295,6 @@ theorem toHs_norm_mono (g : SmoothRiemannianMetric I M) {r s : ℕ} {m n : ℕ} 
       rw [← this]
       exact tensorPouSobolevHsNorm_le_succ (I := I) (M := M) g (m + d) T
 
-/-- The intrinsic order-`k` chart-Sobolev completion embedding `SmoothCcTensor.toHs` is additive:
-`(R₁ + R₂).toHs k = R₁.toHs k + R₂.toHs k`.  Both sides are the completion coercion of the
-`SmoothCcTensorHs`-wrapper addition (`UniformSpace.Completion.coe_add`). -/
 theorem SmoothCcTensor.toHs_add {g : SmoothRiemannianMetric I M} {r s : ℕ} (k : ℕ)
     (R₁ R₂ : Integral.L2.SmoothCcTensor g r s) :
     IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) k (R₁ + R₂)
@@ -3891,8 +3304,6 @@ theorem SmoothCcTensor.toHs_add {g : SmoothRiemannianMetric I M} {r s : ℕ} (k 
   rw [← UniformSpace.Completion.coe_add]
   rfl
 
-/-- The intrinsic order-`k` chart-Sobolev completion embedding `SmoothCcTensor.toHs` commutes with
-subtraction: `(R₁ − R₂).toHs k = R₁.toHs k − R₂.toHs k` (`UniformSpace.Completion.coe_sub`). -/
 theorem SmoothCcTensor.toHs_sub {g : SmoothRiemannianMetric I M} {r s : ℕ} (k : ℕ)
     (R₁ R₂ : Integral.L2.SmoothCcTensor g r s) :
     IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) k (R₁ - R₂)
@@ -3910,8 +3321,6 @@ set_option backward.isDefEq.respectTransparency false
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The unconditional smoothness witness of the total-space form of `rawTensorConnLap` applied to a
-bundled smooth section `T : SmoothCcTensor g r s`. -/
 private lemma rawConnLap_smooth_witness (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : Integral.L2.SmoothCcTensor g r s) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -3921,17 +3330,6 @@ private lemma rawConnLap_smooth_witness (g : SmoothRiemannianMetric I M) {r s : 
   rawTensorConnLap_contMDiff (I := I) g r s
     (fun z : M => T.toSection z) T.toSection.contMDiff_toFun
 
-/-- **Subtraction-linearity of the bundled rough connection Laplacian on `SmoothCcTensor`
-(an atomic algebraic linearity primitive).**
-
-`Δ_∇ (T − T') = Δ_∇ T − Δ_∇ T'`, where `Δ_∇ = rawTensorConnLapSmooth g r s`.  The rough
-Laplacian is the section-level packaging of the fibrewise-linear pointwise operator
-`rawTensorConnLap`, which is additive (`tensorConnLaplacian_of_contMDiff_add`) and `smul`-linear
-(`tensorConnLaplacian_of_contMDiff_smul`); hence so is its bundled form.  Writing
-`T − T' = T + (-1) • T'` and reducing by `SmoothCcTensor.ext`/`ContMDiffSection.ext` to the
-pointwise `.toSection`, the bundled additivity and scalar-homogeneity (mirroring the on-disk
-`connLaplacianL2Action.map_add'`/`map_smul'`) assemble the subtraction identity.  This splits off
-the linear part of the second-order DeTurck right-hand side. -/
 theorem rawTensorConnLapSmooth_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T T' : Integral.L2.SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s (T - T')
@@ -3992,8 +3390,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- For a real-valued function the squared `L²` seminorm equals the `lintegral` of the squared
-enorm. -/
 private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq'
     {β : Type*} [MeasurableSpace β] (μ : Measure β) (f : β → ℝ) :
     (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
@@ -4011,9 +3407,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq'
   rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
-/-- The order-`0` chart-Sobolev summand integral for chart `α` and component `(Idx, Jdx)` equals
-the squared chart-Euclidean `L²` norm of the chart-push of the square-root-weighted raw component
-`√ρ_α · raw_{IJ}`.  This is the integrand identity underlying the order-`0` reverse comparison. -/
 private lemma hsNorm_zero_summand_eq_sq_eLpNorm_chartPushedSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -4072,7 +3465,6 @@ private lemma hsNorm_zero_summand_eq_sq_eLpNorm_chartPushedSqrtPou
     rw [sq_abs, sq_abs, hw_sq]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy]
 
-/-- The support of `√ρ_α` equals the support of `ρ_α`. -/
 private lemma support_sqrt_pou_eq' (α : M) :
     Function.support
         (fun b : M => Real.sqrt
@@ -4088,7 +3480,6 @@ private lemma support_sqrt_pou_eq' (α : M) :
       (chartAtlasPOU I M).nonneg α b
     exact hb (le_antisymm hle hρ_nn)
 
-/-- The square-root-weighted raw component is supported in `tsupport ρ_α`. -/
 private lemma tsupport_sqrtPou_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -4108,7 +3499,6 @@ private lemma tsupport_sqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq' (I := I) (M := M) α]
 
-/-- The square-root-weighted raw component is globally continuous on `M`. -/
 private lemma continuous_sqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -4154,7 +3544,6 @@ private lemma continuous_sqrtPou
       by_contra hne; exact hy_notsupp hne
     exact hzero.symm
 
-/-- The square-root-weighted raw component is measurable. -/
 private lemma measurable_sqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -4164,10 +3553,6 @@ private lemma measurable_sqrtPou
       (tensorChartComponentSqrtPou (I := I) (M := M) g r s T α Idx Jdx) :=
   (continuous_sqrtPou (I := I) (M := M) g r s T α Idx Jdx).measurable
 
-/-- **The per-chart-and-component reverse comparison.** For every chart `α` there is a
-non-negative constant `C_α` so that for every `T`, `(Idx, Jdx)`, the squared intrinsic metric
-`L²` norm of `ρ_α · raw_{IJ}` is bounded by `ofReal C_α` times the order-`0` chart-Sobolev summand
-integral (at the `ℝ≥0∞` level). -/
 private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -4205,7 +3590,7 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     measurable_sqrtPou (I := I) (M := M) g r s T α Idx Jdx
   have hw_supp : tsupport w ⊆ Kα :=
     tsupport_sqrtPou_subset (I := I) (M := M) g r s T α Idx Jdx
-  -- Pointwise: `|Scalar = ρ·raw| ≤ |w = √ρ·raw|`, hence `eLpNorm Scalar ≤ eLpNorm w`.
+  
   have h_ptwise : ∀ x : M,
       ‖tensorChartComponentScalar (I := I) (M := M) g r s T α Idx Jdx x‖ ≤ ‖w x‖ := by
     intro x
@@ -4242,13 +3627,13 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         eLpNorm w 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     eLpNorm_mono h_ptwise
-  -- Reverse measure bridge for `w`.
+  
   have h_bridge := hCbr (u := w) hw_meas hw_supp
   rw [show DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
         = DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g
       from rfl] at h_bridge
-  -- Chain at the `ℝ≥0∞` level.
+  
   set lhsE : ℝ≥0∞ :=
     eLpNorm (tensorChartComponentScalar (I := I) (M := M) g r s T α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) with hlhsE_def
@@ -4280,31 +3665,6 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     _ = (ENNReal.ofReal Cbr) ^ 2 * chE ^ 2 := by rw [mul_pow]
     _ = ENNReal.ofReal (Cbr ^ 2) * chE ^ 2 := by rw [← ENNReal.ofReal_pow hCbr_pos.le]
 
-/-- **The reverse measure-bridge comparison at chart-Sobolev order `0` (the genuine atomic
-analytic primitive).**
-
-For a closed Riemannian manifold and ranks `(r, s)` there is a non-negative constant `C` such
-that for every smooth compactly-supported `(r, s)`-tensor section `T`, the finite double sum,
-over the active charts `α ∈ chartAtlasPOU_finset` and the component multi-index pairs
-`(Idx, Jdx)`, of the squared intrinsic metric `L²` norm of the partition-of-unity-weighted raw
-chart-frame scalar component `tensorChartComponentScalar = ρ_α · raw_{IJ}` is controlled by the
-squared order-`0` Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm:
-```
-∑_{α} ∑_{IJ} ((eLpNorm (ρ_α · raw_{IJ}) 2 dVol_g).toReal)²
-  ≤ C · (tensorPouSobolevHsNormSq g 0 T).toReal .
-```
-This is the genuine reverse change-of-variables (intrinsic Riemannian `L²` → chart-Euclidean
-`L²`) comparison: the chart-frame raw component `raw_{IJ}` is the chart-`α`-frame coordinate of
-the trivialised tensor, the partition-of-unity weight `ρ_α ≤ 1` so `|ρ_α · raw|² ≤ ρ_α · |raw|²`
-matches the (first-power) weight of the order-`0` chart-Sobolev integrand, and the reverse
-measure bridge `eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset`
-on the compact chart image of the partition-of-unity support transfers the intrinsic `L²` norm to
-the chart-Euclidean `L²` norm appearing in `tensorPouSobolevHsNormSq g 0`.
-
-It is proved by composing the pointwise weight inequality `|ρ_α · raw|² ≤ ρ_α · |raw|² =
-(√ρ_α · raw)²`, the reverse measure bridge, and the order-`0` chart-Sobolev integrand identity:
-each chart-component intrinsic `L²` norm squared is dominated by the corresponding order-`0`
-chart-Sobolev summand integral, uniformly over the finitely many active charts. -/
 theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -4321,14 +3681,14 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
   classical
   set Sf : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
     (I := I) (M := M) with hSf_def
-  -- A uniform constant: the finset-sum of the per-chart reverse-bridge constants.
+  
   choose Cα hCα_nn hCα using fun α (_ : α ∈ Sf) =>
     sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand (I := I) (M := M) (E := E) g r s α
   set Cmax : ℝ := ∑ α ∈ Sf.attach, Cα α.val α.property with hCmax_def
   have hCmax_nn : 0 ≤ Cmax :=
     Finset.sum_nonneg (fun α _ => hCα_nn α.val α.property)
   refine ⟨Cmax, hCmax_nn, fun T => ?_⟩
-  -- Abbreviation for the order-`0` chart-Sobolev summand at chart `α`, component `(Idx, Jdx)`.
+  
   set summand : M → (Fin r → Fin (Module.finrank ℝ E)) →
       (Fin s → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
     fun α Idx Jdx =>
@@ -4353,7 +3713,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
             (I := I) (M := M) g r s T α Idx Jdx) 2
           (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
             (I := I) (M := M) g)) ^ 2 with hlhsEsq_def
-  -- Per-`(α ∈ Sf, Idx, Jdx)`: `lhsEsq ≤ ofReal Cmax · summand`.
+  
   have h_perchart : ∀ α ∈ Sf, ∀ Idx Jdx,
       lhsEsq α Idx Jdx ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
     intro α hα Idx Jdx
@@ -4365,7 +3725,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
         ≤ ENNReal.ofReal (Cα α hα) * summand α Idx Jdx := hCα α hα T Idx Jdx
       _ ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
           gcongr
-  -- Sum over `(Idx, Jdx)` and `α ∈ Sf`.
+  
   have h_sum_le :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx) ≤
         ENNReal.ofReal Cmax * ∑ α ∈ Sf, ∑ Idx, ∑ Jdx, summand α Idx Jdx := by
@@ -4375,8 +3735,8 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     refine Finset.sum_le_sum (fun Idx _ => ?_)
     rw [Finset.mul_sum]
     exact Finset.sum_le_sum (fun Jdx _ => h_perchart α hα Idx Jdx)
-  -- The finset double sum of summands is `≤` the full `tsum` representation, which is
-  -- `tensorPouSobolevHsNormSq g 0 T`.
+  
+  
   have h_summand_eq_normSq :
       tensorPouSobolevHsNormSq (I := I) (M := M) g 0 T =
         ∑' α : M, ∑ Idx, ∑ Jdx, summand α Idx Jdx := by
@@ -4413,7 +3773,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     rw [h_summand_eq_normSq]
     refine h_sum_le.trans ?_
     gcongr
-  -- Transport to `ℝ` via `.toReal`.
+  
   have h_lhsEsq_ne_top : ∀ α Idx Jdx, lhsEsq α Idx Jdx ≠ ⊤ := by
     intro α Idx Jdx
     rw [hlhsEsq_def]
@@ -4428,7 +3788,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_normSq_ne_top
   have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_total_le
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hCmax_nn] at h_toReal
-  -- Identify the `.toReal` of the finset double sum with the real-valued goal LHS.
+  
   have h_lhs_toReal :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx).toReal =
         ∑ α ∈ Sf, ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
@@ -4454,27 +3814,6 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
 
 end ReverseOrderZeroBridge
 
-/-- **The reverse order-`0` partition-of-unity completeness comparison (the genuine analytic
-primitive).**
-
-For a closed Riemannian manifold and ranks `(r, s)` there is a non-negative constant `C` such
-that for every smooth compactly-supported `(r, s)`-tensor section `T`,
-```
-‖T‖ ≤ C · (tensorPouSobolevHsNorm g 0 T).toReal ,
-```
-where `‖T‖ = tensorL2Norm g r s T.toFun` is the global metric `L²` (semi-)norm.  This is the
-reverse (lower) partition-of-unity completeness bound: the partition of unity sums to one, so the
-chart-`H⁰` norm recovers the full metric `L²` norm up to the bounded metric-density factor on the
-compact manifold.  It is the exact reverse of the on-disk forward comparison
-`tensorPouSobolevHsNorm_zero_le_tensorL2Norm`, and is precisely the seminorm hypothesis `h_norm_le`
-left open by `TensorPouSobolevHilbert.toTensorL2_continuousLinearEquiv`.
-
-It is proved by composing the (on-disk, sorry-free) reverse fibre-norm component bound
-`tensorL2Norm_sq_le_const_mul_sum_componentL2Norm_sq` (the metric `L²` norm squared is dominated
-by the partition-of-unity-weighted chart-component `L²` sum) with the reverse measure-bridge
-comparison `exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero` (that chart-component
-`L²` sum is dominated by the order-`0` chart-Sobolev norm squared), then taking square roots.  The
-completion-norm form `exists_l2Norm_le_toHs_zero` is proved on top of it. -/
 theorem exists_l2Norm_le_tensorPouSobolevHsNorm_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -4487,7 +3826,7 @@ theorem exists_l2Norm_le_tensorPouSobolevHsNorm_zero
   obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
     exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero (I := I) (M := M) g r s
   refine ⟨Real.sqrt (C₁ * C₂), Real.sqrt_nonneg _, fun T => ?_⟩
-  -- `‖T‖² ≤ C₁ · (component sum) ≤ C₁ · C₂ · ‖·‖²_{H⁰_chart}`, then take square roots.
+  
   set L : ℝ := tensorL2Norm (I := I) (M := M) g r s T.toFun with hL_def
   have hL_eq : ‖T‖ = L := (tensorL2Norm_toFun_eq_norm (I := I) (M := M) g T).symm
   set N : ℝ := (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal with hN_def
@@ -4518,22 +3857,6 @@ theorem exists_l2Norm_le_tensorPouSobolevHsNorm_zero
     _ = Real.sqrt (C₁ * C₂) * N := by
         rw [Real.sqrt_mul (mul_nonneg hC₁_nn hC₂_nn), Real.sqrt_sq hN_nn]
 
-/-- **The reverse order-`0` comparison: the global metric `L²` norm is controlled by the
-order-`0` partition-of-unity chart-Sobolev completion norm (the genuine atomic comparison
-primitive).**
-
-For a closed Riemannian manifold there is a non-negative constant `C` such that for every smooth
-compactly-supported `(0, 2)`-tensor section `T`,
-```
-‖T.toL2‖ ≤ C · ‖T.toHs 0‖ .
-```
-`‖T.toL2‖ = ‖T‖` is the global metric `L²` (semi-)norm (`norm_toL2`) and `‖T.toHs 0‖` is the
-order-`0` partition-of-unity chart-Sobolev completion norm.  This is the reverse of the on-disk
-forward comparison `tensorPouSobolevHsNorm_zero_le_tensorL2Norm` (`H⁰_chart ≤ C · L²`): the
-partition of unity sums to one, so the chart-`H⁰` norm recovers the full `L²` norm up to the
-metric-density factor, bounded on the compact manifold.  It is proved on top of the underlying
-seminorm primitive `exists_l2Norm_le_tensorPouSobolevHsNorm_zero` via `norm_toL2` and
-`tensorPouSobolevHilbert_norm_eq`. -/
 theorem exists_l2Norm_le_toHs_zero
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧

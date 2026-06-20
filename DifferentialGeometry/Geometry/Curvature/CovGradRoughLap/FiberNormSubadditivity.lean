@@ -1,57 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.L2Bound
 
-/-!
-# Sub-additivity of the intrinsic tensor fibre norm
-
-For a smooth Riemannian metric `g` on a manifold `M` modelled on a real inner-product space
-`E`, the intrinsic squared tensor fibre norm `riemannianFiberNormSq g r s x T` coincides with
-the model Gram-matrix-based pointwise inner product
-`tensorInnerPointwise g r s x (toModel T) (toModel T)`
-(the bridge `riemannianFiberNormSq_eq_tensorInnerPointwise`). Because `tensorInnerPointwise`
-is a genuine symmetric, bilinear, positive-semidefinite form (its diagonal is `≥ 0`, with
-pointwise Cauchy–Schwarz `⟨S, T⟩² ≤ ⟨S, S⟩ ⟨T, T⟩`), the squared fibre norm inherits the
-elementary inner-product inequalities: it is `2`-sub-additive on a sum of two tensors, and
-`n`-sub-additive on a finite frame sum of `n` tensors.
-
-These are the analytic packaging used to turn a *decomposition of a tensor section value into a
-fixed finite number of curvature-contraction summands* into a fibre-norm bound by the sum of
-the summands' fibre norms — the form in which the per-summand curvature controls
-(`Tensor3rdCurvFiberNormBound.lean`, `RiemannianFiberNormSqRiemannOpHigherRankParseval.lean`)
-are consumed. Specifically, once the pointwise curried identity
-```
-covGradRoughLapCurv g T₀ (x) (unit) curried along w
-  = Tensor3rdCurv g 0 2 (smoothExtensionTangent x w) T₀ x (unit) − residual(x, w)
-```
-is established (`CurvatureDefect.lean`), the `n`-sub-additivity here reduces the
-curvature defect's fibre norm to the sum of the `Tensor3rdCurv` summands' fibre norms (each a
-curvature contraction, controlled by `RiemannianFiberNormSqRiemannOpHigherRankParseval.lean`)
-plus the moving-frame residual's fibre norm, yielding the pointwise `hpt` hypothesis of
-`secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound` (`L2Bound.lean`).
-
-The single ingredient gating that curried identity is the slot-`0` frame-trace matching
-`Δ_∇(∇T₀)(x)(unit) curried along w = ∑ᵢ ∇_{Bᵢ}∇_{Bᵢ}(∇_W T₀)(x)(unit)` (with
-`B_i := smoothOrthoFrame g x i`, `W := smoothExtensionTangent x w`); it is the genuine
-third-order tensor Weitzenböck Christoffel cancellation documented as open in
-`FreeDirectionReduction.lean` / `CurvatureDefect.lean`, and is **not** discharged here. This file supplies
-the frame-sum fibre-norm packaging so that closing that matching immediately delivers `hpt`.
-
-## Main results
-
-* `riemannianFiberNormSq_add_le` — the `2`-sub-additivity
-  `rfns g r s x (a + b) ≤ 2 · rfns g r s x a + 2 · rfns g r s x b`.
-
-* `riemannianFiberNormSq_sub_le` — the same on a difference,
-  `rfns g r s x (a − b) ≤ 2 · rfns g r s x a + 2 · rfns g r s x b`.
-
-* `riemannianFiberNormSq_sum_le_card_mul` — the `n`-sub-additivity on a finite indexed sum,
-  `rfns g r s x (∑ i ∈ I, F i) ≤ I.card · ∑ i ∈ I, rfns g r s x (F i)`.
-
-## Conventions
-
-All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq` — never a
-model-space norm or a bundle continuous-linear-map operator norm.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -77,10 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The squared fibre norm of a sum, expanded by bilinearity of the underlying pointwise inner
-product through the bridge:
-`rfns(a + b) = rfns(a) + 2 ⟨a, b⟩ + rfns(b)`, where `⟨a, b⟩` is the pointwise inner product of
-the trivialized model tensors. -/
 lemma riemannianFiberNormSq_add_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -105,9 +49,6 @@ lemma riemannianFiberNormSq_add_expand
   rw [hsymm]
   ring
 
-/-- **`2`-sub-additivity of the squared fibre norm.** For any two `(r, s)`-tensors `a, b` at
-`x`, `rfns(a + b) ≤ 2 · rfns(a) + 2 · rfns(b)`. This is the inner-product inequality
-`‖a + b‖² ≤ 2‖a‖² + 2‖b‖²`, transported through the fibre-norm bridge. -/
 theorem riemannianFiberNormSq_add_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -136,7 +77,6 @@ theorem riemannianFiberNormSq_add_le
     exact tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r s x am bm
   nlinarith [hCS, hA_nn, hB_nn, sq_nonneg (A - B), sq_nonneg (C - A), sq_nonneg (C - B)]
 
-/-- **`2`-sub-additivity on a difference.** `rfns(a − b) ≤ 2 · rfns(a) + 2 · rfns(b)`. -/
 theorem riemannianFiberNormSq_sub_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -162,10 +102,6 @@ theorem riemannianFiberNormSq_sub_le
     _ = 2 * riemannianFiberNormSq (I := I) (M := M) g r s x a +
           2 * riemannianFiberNormSq (I := I) (M := M) g r s x b := by rw [hneg]
 
-/-- Bilinearity of `tensorInnerPointwise` in the left argument over a *plain* finite sum
-(without scalar coefficients), proved by direct induction from the two-term additivity. This
-self-contained version avoids the `[CompactSpace M]` section assumption attached to the
-scalar-coefficient `tensorInnerPointwise_sum_left` of `PreHilbert.lean`. -/
 private lemma tensorInnerPointwise_plain_sum_left
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (s : Finset ι) (A : ι → TensorRSModel r s' ℝ E) (B : TensorRSModel r s' ℝ E) :
@@ -177,7 +113,6 @@ private lemma tensorInnerPointwise_plain_sum_left
   | insert i₀ s'' hi₀ ih =>
       rw [Finset.sum_insert hi₀, tensorInnerPointwise_add_left, ih, Finset.sum_insert hi₀]
 
-/-- Bilinearity of `tensorInnerPointwise` in the right argument over a *plain* finite sum. -/
 private lemma tensorInnerPointwise_plain_sum_right
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (A : TensorRSModel r s' ℝ E) (s : Finset ι) (B : ι → TensorRSModel r s' ℝ E) :
@@ -189,8 +124,6 @@ private lemma tensorInnerPointwise_plain_sum_right
   | insert j₀ s'' hj₀ ih =>
       rw [Finset.sum_insert hj₀, tensorInnerPointwise_add_right, ih, Finset.sum_insert hj₀]
 
-/-- The squared fibre norm of a finite indexed sum, expanded by bilinearity through the bridge
-as the double sum of pointwise inner products of the trivialized model tensors. -/
 lemma riemannianFiberNormSq_sum_eq_double_sum
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (s : Finset ι) (F : ι → TensorRSSpace r s' I x) :
@@ -212,11 +145,6 @@ lemma riemannianFiberNormSq_sum_eq_double_sum
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [tensorInnerPointwise_plain_sum_right (I := I) (M := M) g r s' x _ s _]
 
-/-- **`n`-sub-additivity of the squared fibre norm on a finite indexed sum.** For a finite
-index set `s` and a family `F` of `(r, s')`-tensors at `x`,
-`rfns(∑ i ∈ s, F i) ≤ s.card · ∑ i ∈ s, rfns(F i)`. The proof expands the squared norm into the
-double sum of pointwise inner products, bounds each cross term by the AM–GM consequence of
-pointwise Cauchy–Schwarz `⟨Fᵢ, Fⱼ⟩ ≤ ½(rfns Fᵢ + rfns Fⱼ)`, and sums. -/
 theorem riemannianFiberNormSq_sum_le_card_mul
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (s : Finset ι) (F : ι → TensorRSSpace r s' I x) :

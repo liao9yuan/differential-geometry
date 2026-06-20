@@ -2,34 +2,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
 
 set_option linter.unusedSectionVars false
 
-/-!
-# `C^∞`-in-time regularity of parallel transport along a smooth curve
-
-The global parallel-transport section `V` of `exists_parallel_transport_on_Icc`
-along a smooth curve `γ : ℝ → M` is built from chart-local linear-ODE solutions and
-comes packaged with only `C¹` time-regularity (chart-rep differentiability) plus the
-intrinsic parallelism `covDerivAlong g γ V = 0`. This file upgrades the regularity to
-the full bundle smoothness `ContMDiffOn 𝓘(ℝ, ℝ) I.tangent ∞` of the total-space map
-`t ↦ ⟨γ t, V t⟩`.
-
-The mechanism is the standard ODE bootstrap.  Pin the chart at a fixed foot `α := γ t₀`.
-The fixed-chart-`α` representation `Y := chartRepAtBase α γ V` of the section satisfies,
-on a neighbourhood of `t₀`, the **first-order linear** ODE
-`Y'(s) = - Γ_α(u'(s), Y(s))(u(s))`, with `u := chartCurve α γ`.  The right-hand side is
-`C^∞` jointly in `(s, Y)` (the chart-`α` curve `u` is `C^∞`, its derivative `u'` is
-`C^∞`, and the chart-Christoffel symbols are `C^∞` on the chart-target interior), so
-Mathlib's `ODE.contDiffOn_enat_Icc_of_hasDerivWithinAt` upgrades the `C¹` solution `Y`
-to `C^∞`.  The bundle smoothness of `t ↦ ⟨γ t, V t⟩` then follows from
-`Bundle.contMDiffWithinAt_totalSpace`: the base component is the smooth curve `γ`, and
-the fibre component read in the trivialisation pinned at `γ t₀` coincides, near `t₀`,
-with `Y` — whose `C^∞` regularity we have just established.
-
-## Main result
-
-* `parallelTransport_section_contMDiffOn` — the global parallel-transport section is
-  bundle-`C^∞` on `Icc 0 L`.
--/
-
 noncomputable section
 
 open Set Function Filter Manifold Bundle
@@ -51,27 +23,11 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-/-- The right-hand side of the chart-`α` parallel-transport ODE as a time-dependent
-linear vector field on the model fibre: at time `s` and fibre value `y`,
-`parallelTransportVF g α γ s y = - Γ_α(u'(s), y)(u(s))`, where `u := chartCurve α γ`.
-A `C¹` solution `Y` of `Y'(s) = parallelTransportVF g α γ s (Y s)` is exactly a
-fixed-chart-`α` parallel section. -/
 def parallelTransportVF (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (s : ℝ) (y : E) : E :=
   - chartChristoffelContraction (I := I) g α
       (deriv (chartCurve (I := I) α γ) s) y (chartCurve (I := I) α γ s)
 
-/-- **Joint `C^∞` smoothness of the chart-`α` parallel-transport vector field.**
-On an open time set `W` over which the chart-`α` curve `u := chartCurve α γ` is `C^∞`
-(`hu_cd`) and lands in the chart-target interior (`hu_int`), the uncurried vector field
-`(s, y) ↦ parallelTransportVF g α γ s y` is `C^∞` on `W ×ˢ univ`.
-
-The proof expands `chartChristoffelContraction` as `∑_k (∑_{ij} Γ^k_{ij}(u s) · u'(s)^i
-· y^j) • e_k`; each scalar factor is `C^∞` in `(s, y)`: the Christoffel symbol
-`Γ^k_{ij}(u s)` is `C^∞` on `W ×ˢ univ` because `u` lands in the chart-target interior
-there and `chartChristoffel` is `C^∞` on that interior; the velocity coordinate
-`u'(s)^i` is `C^∞` in `s` (the open-set derivative `ContDiffOn.deriv_of_isOpen`); and
-the fibre coordinate `y^j` is a continuous linear functional of `y`, hence `C^∞`. -/
 theorem parallelTransportVF_contDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {W : Set ℝ}
     (hW : IsOpen W)
@@ -138,15 +94,7 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`C^∞`-in-time bundle regularity of global parallel transport.**  For a smooth
-curve `γ : ℝ → M`, `L > 0`, and any initial tangent vector `v₀ ∈ T_{γ 0} M`, there is a
-section `V : ∀ t, T_{γ t} M` along `γ` with `V 0 = v₀`, intrinsic parallelism
-`covDerivAlong g γ V = 0` on `Icc 0 L`, and **bundle-`C^∞`** total-space map
-`t ↦ ⟨γ t, V t⟩` on `Icc 0 L`.
 
-The section is the one produced by `exists_parallel_transport_on_Icc` (which
-supplies the first three clauses); the new content is the bundle smoothness, obtained by
-the ODE bootstrap described in the module docstring. -/
 theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -292,12 +240,7 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **`C^∞`-in-time bundle regularity of global parallel transport on an open
-neighbourhood.**  For a smooth curve `γ`, `L > 0`, and any initial tangent
-vector `v₀ ∈ T_{γ 0} M`, there is `δ > 0` and a section `V` along `γ` with
-`V 0 = v₀`, intrinsic parallelism on `Ioo (-δ) (L + δ)`, chart-differentiability
-on `Ioo (-δ) (L + δ)`, and **bundle-`C^∞`** total-space map
-`t ↦ ⟨γ t, V t⟩` on the open neighbourhood `Ioo (-δ) (L + δ)` of `Icc 0 L`. -/
+
 theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :

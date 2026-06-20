@@ -2,26 +2,6 @@
 Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Multilinear.Bundle
-/-!
-# Currying of Continuous Multilinear Maps
-
-This file defines currying and uncurrying operations for the fibers of the multilinear bundle.
-
-Given a normed space `F`, the space `ContinuousMultilinearMap 𝕜 (fun _ : Fin (r+r') => F) 𝕜`
-is isometrically isomorphic to `ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F)
-(ContinuousMultilinearMap 𝕜 (fun _ : Fin r' => F) 𝕜)` via the currying isomorphism
-along `Fin (r+r') ≃ Fin r ⊕ Fin r'`.
-
-## Main Definitions
-
-* `continuousMultilinearMap_curryEquiv r r'` : the currying linear isometry equivalence.
-* `continuousMultilinearMap_curryLeft r r'` : currying as a CLM.
-* `continuousMultilinearMap_uncurryLeft r r'` : uncurrying as a CLM.
-
-## Tags
-
-currying, multilinear map, continuous multilinear map
--/
 
 noncomputable section
 
@@ -32,9 +12,6 @@ open scoped Manifold Topology Bundle ContDiff BigOperators
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 
-/-- The currying linear isometry equivalence: a `(r+r')`-multilinear form on `F` is isometric to
-a multilinear map from `r` copies of `F` to `r'`-multilinear forms on `F`, via the decomposition
-`Fin (r+r') ≃ Fin r ⊕ Fin r'`. -/
 noncomputable def continuousMultilinearMap_curryEquiv (r r' : ℕ) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin (r + r') => F) 𝕜 ≃ₗᵢ[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F)
@@ -42,14 +19,12 @@ noncomputable def continuousMultilinearMap_curryEquiv (r r' : ℕ) :
   (ContinuousMultilinearMap.domDomCongrₗᵢ 𝕜 F 𝕜 finSumFinEquiv.symm).trans
     (ContinuousMultilinearMap.currySumEquiv 𝕜 (Fin r) (Fin r') F 𝕜)
 
-/-- Currying as a continuous linear map. -/
 noncomputable def continuousMultilinearMap_curryLeft (r r' : ℕ) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin (r + r') => F) 𝕜 →L[𝕜]
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F)
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r' => F) 𝕜) :=
   (continuousMultilinearMap_curryEquiv r r' (𝕜 := 𝕜) (F := F)).toContinuousLinearEquiv
 
-/-- Uncurrying as a continuous linear map. -/
 noncomputable def continuousMultilinearMap_uncurryLeft (r r' : ℕ) :
     ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F)
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin r' => F) 𝕜) →L[𝕜]

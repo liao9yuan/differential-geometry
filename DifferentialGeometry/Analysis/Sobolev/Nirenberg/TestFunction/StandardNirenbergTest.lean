@@ -1,28 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-/-!
-# Symmetric Nirenberg test function `v_h := D_{-h}^k(η² · D_h^k u)`
-
-For `u ∈ H¹` (only weakly differentiable in coordinate `k`) and a smooth
-compactly supported cutoff `η`, the *symmetric* Nirenberg test function
-
-  `v_h(x) := (D_{-h}^k F)(x)
-           = (F(x + (-h) e_k) − F(x)) / (−h)
-           = (F(x) − F(x − h e_k)) / h`,
-
-where `F(y) := η(y)² · (D_h^k u)(y)`, is the standard test object used in
-the cross-bound argument that yields second-order interior regularity for
-divergence-form equations. This file establishes the structural properties
-of this test function: a closed-form pointwise expression, compact support,
-the discrete chain/product rule for its weak `j`-partial, and an `L²` bound.
-
-The companion file `Nirenberg/DiffQuotTestFunction.lean` covers the
-*translated* variant `τ_{-h e_k}(η² · D_h^k u)`. The present file uses
-`diffQuot k (-h)` (a true difference quotient, not just a translate) and so
-expressing the weak-partial structurally requires combining
-`hasWeakPartialDeriv_diffQuot` with `hasWeakPartialDeriv_eta_sq_diffQuot`.
--/
-
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function
@@ -36,18 +13,12 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
-/-- The symmetric Nirenberg test function
-`v_h := D_{-h}^k(η² · D_h^k u)`. -/
 noncomputable def standardNirenbergTest
     (k : Fin d) (h : ℝ) (η u : EuclN → ℝ) : EuclN → ℝ :=
   diffQuot k (-h) (fun x => (η x)^2 * diffQuot k h u x)
 
 omit [NeZero d] in
-/-- Pointwise expansion of `standardNirenbergTest` when `h ≠ 0`:
 
-  `v_h(x) = (F(x + (-h) e_k) − F(x)) / (−h)`,
-
-where `F(y) = η(y)² · (D_h^k u)(y)`. -/
 theorem standardNirenbergTest_apply
     (k : Fin d) (h : ℝ) (η u : EuclN → ℝ) (x : EuclN) (hh : h ≠ 0) :
     standardNirenbergTest k h η u x =
@@ -66,8 +37,7 @@ omit [NeZero d] in
   simp [diffQuot]
 
 omit [NeZero d] in
-/-- Support inclusion: if `v_h(x) ≠ 0`, then either `x ∈ tsupport η` or
-`x − h e_k ∈ tsupport η`. -/
+
 theorem standardNirenbergTest_support_subset
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (_hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -105,7 +75,7 @@ theorem standardNirenbergTest_support_subset
       exact subset_tsupport η hηx
 
 omit [NeZero d] in
-/-- Closed-support inclusion: `tsupport v_h ⊆ tsupport η ∪ {x | x − h e_k ∈ tsupport η}`. -/
+
 theorem standardNirenbergTest_tsupport_subset
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -126,7 +96,7 @@ theorem standardNirenbergTest_tsupport_subset
   exact standardNirenbergTest_support_subset (d := d) k h hη_cs u
 
 omit [NeZero d] in
-/-- `v_h` has compact support whenever `η` does. -/
+
 theorem standardNirenbergTest_hasCompactSupport
     (k : Fin d) (h : ℝ) {η : EuclN → ℝ} (hη_cs : HasCompactSupport η)
     (u : EuclN → ℝ) :
@@ -163,7 +133,7 @@ theorem standardNirenbergTest_hasCompactSupport
   exact h_union_compact.of_isClosed_subset (isClosed_tsupport _) h_sub
 
 omit [NeZero d] in
-/-- `D_h^k u` is locally integrable when `u` is. -/
+
 private lemma locallyIntegrable_diffQuot
     (k : Fin d) (h : ℝ) {u : EuclN → ℝ}
     (hu_locInt : LocallyIntegrable u (volume : Measure EuclN)) :
@@ -216,8 +186,7 @@ private lemma locallyIntegrable_diffQuot
     exact h1.add h2
 
 omit [NeZero d] in
-/-- A continuous function times a locally-integrable function is locally
-integrable, on `EuclN`. -/
+
 private lemma locallyIntegrable_continuous_mul
     {η f : EuclN → ℝ} (hη : Continuous η)
     (hf_locInt : LocallyIntegrable f (volume : Measure EuclN)) :
@@ -228,8 +197,7 @@ private lemma locallyIntegrable_continuous_mul
   exact LocallyIntegrableOn.continuousOn_mul hf_locInt hη.continuousOn hcl
 
 omit [NeZero d] in
-/-- `LocallyIntegrable f ((volume).restrict Set.univ)` is the same as
-`LocallyIntegrable f volume` (after `Measure.restrict_univ`). -/
+
 private lemma locallyIntegrable_of_restrict_univ
     {f : EuclN → ℝ}
     (hf : LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ)) :
@@ -237,21 +205,14 @@ private lemma locallyIntegrable_of_restrict_univ
   rwa [Measure.restrict_univ] at hf
 
 omit [NeZero d] in
-/-- The restricted form follows from the unrestricted form. -/
+
 private lemma locallyIntegrable_to_restrict_univ
     {f : EuclN → ℝ} (hf : LocallyIntegrable f (volume : Measure EuclN)) :
     LocallyIntegrable f ((volume : Measure EuclN).restrict Set.univ) := by
   rwa [Measure.restrict_univ]
 
 omit [NeZero d] in
-/-- The weak `j`-partial of the symmetric Nirenberg test function. By
-combining `hasWeakPartialDeriv_diffQuot` with the inner product/chain
-rule `hasWeakPartialDeriv_eta_sq_diffQuot`, the weak `j`-partial of
-`v_h := D_{-h}^k(η² · D_h^k u)` is the symmetric difference quotient
 
-  `D_{-h}^k [η² · D_h^k g_j + 2 η · ∂_j η · D_h^k u]`,
-
-where `g_j` is the weak `j`-partial of `u` on `Set.univ`. -/
 theorem hasWeakPartialDeriv_standardNirenbergTest
     (k j : Fin d) (h : ℝ) {η u g_j : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -344,8 +305,7 @@ theorem hasWeakPartialDeriv_standardNirenbergTest
     h_F_locInt_restrict h_partial_locInt_restrict h_inner_wp
 
 omit [NeZero d] in
-/-- `eLpNorm` of `c • f` is `|c|` times `eLpNorm` of `f` (specialised real
-scalar form, no measurability needed). -/
+
 private lemma eLpNorm_const_mul
     (c : ℝ) (f : EuclN → ℝ) :
     eLpNorm (fun x => c * f x) 2 (volume : Measure EuclN) =
@@ -357,9 +317,7 @@ private lemma eLpNorm_const_mul
   simp [Real.enorm_eq_ofReal_abs]
 
 omit [NeZero d] in
-/-- Translation invariance of `eLpNorm` (specialised to `EuclN` and the
-canonical translation by `h • e_k`). No measurability hypothesis on `F`
-is needed because translation is a measurable embedding. -/
+
 private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
     eLpNorm (translate k h F) 2 (volume : Measure EuclN) =
       eLpNorm F 2 (volume : Measure EuclN) := by
@@ -377,10 +335,7 @@ private lemma eLpNorm_translate_eq (k : Fin d) (h : ℝ) (F : EuclN → ℝ) :
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
 omit [NeZero d] in
-/-- For `F : EuclN → ℝ` AE-strongly-measurable, the difference quotient
-`D_{-h}^k F = (-h)⁻¹ • (τ_{-h} F - F)` admits the Minkowski-style L² bound
 
-  `‖D_{-h}^k F‖_{L²} ≤ (2/|h|) · ‖F‖_{L²}`. -/
 private lemma eLpNorm_diffQuot_neg_le
     (k : Fin d) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -436,9 +391,7 @@ private lemma eLpNorm_diffQuot_neg_le
         rw [ENNReal.div_eq_inv_mul]
 
 omit [NeZero d] in
-/-- L² bound for `η² · D_h^k u` in terms of `D_h^k u`:
 
-  `‖η² · D_h^k u‖_{L²} ≤ M_η² · ‖D_h^k u‖_{L²}`. -/
 private lemma eLpNorm_eta_sq_diffQuot_le
     (k : Fin d) (h : ℝ) {η u : EuclN → ℝ}
     {M_η : ℝ} (_hM_η_nn : 0 ≤ M_η) (hM_η : ∀ x, |η x| ≤ M_η) :
@@ -549,9 +502,7 @@ private lemma eLpNorm_eta_sq_diffQuot_le
   rw [h_sqrt_M4]
 
 omit [NeZero d] in
-/-- L² bound for the symmetric Nirenberg test function:
 
-  `‖v_h‖_{L²} ≤ (2/|h|) · M_η² · ‖D_h^k u‖_{L²}`. -/
 theorem eLpNorm_standardNirenbergTest_le
     (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     {η u : EuclN → ℝ}

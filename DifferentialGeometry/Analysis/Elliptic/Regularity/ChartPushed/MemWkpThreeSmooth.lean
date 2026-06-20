@@ -7,75 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-/-!
-# Final unconditional chart-`H³` regularity of the chart-pushed function
-
-For a closed Riemannian manifold `(M, g)`, a chart point `α : M`, and an
-element `u_h ∈ laplacianDomainPow g 2`, the canonical chart-pushed
-representative
-
-`chartPushed POU α (H1ComplToLp g u_h).coeFn`
-
-lies in `MemWkp 3 2 (chartTargetEuclid α)`, **unconditionally** — i.e. with
-no extra Sobolev or smoothness hypothesis on `u_h.coeFn`.
-
-## Strategy
-
-By the structural unfolding `MemWkp_succ`, this regularity claim splits
-into the conjunction
-
-* `MemW1p 2 (chartPushed POU α u_h.coeFn) chartTargetEuclid`, and
-* for every coordinate direction `i : Fin (Module.finrank ℝ E)`,
-  `MemWkp 2 2 (chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn)
-    chartTargetEuclid) chartTargetEuclid`.
-
-The first conjunct is already unconditional via
-`chartPushed_memW1p_two_of_laplacianDomainPow_two`.
-
-For the second conjunct, fix a direction `i` and let
-
-`D_eff := derivedChartBilinearH1ComplDataUnconditional g α i hu_h`.
-
-By `derivedChartBilinear_memWkp_two_two_interior`, there is an open
-precompact `Ω''_i ⊆ chartTargetEuclid α` containing the chart-pushed POU
-support `K_α := chartImagePOUTsupport α` with
-
-`MemWkp 2 2 D_eff.u_chart Ω''_i`.
-
-Geometrically, `D_eff.u_chart` is `(base).weak_partial i` — the chart-pushed
-weak `i`-partial coercion of `u_h`. It is **ae-zero** off `K_α` (witness:
-`base_weak_partial_ae_zero_off_K_α`). We promote the `MemWkp 2 2`
-membership from `Ω''_i` to the entire chart target by multiplying
-`D_eff.u_chart` against a smooth cutoff `η_i` that equals `1` on a
-neighborhood of `K_α` and is supported pointwise inside `Ω''_i`:
-
-* `η_i · D_eff.u_chart` is `MemWkp 2 2 Ω''_i` by
-  `MemWkp.smul_smooth_bounded`;
-* `η_i · D_eff.u_chart` has compact pointwise topological support inside
-  `Ω''_i`, so it extends by zero via `MemWkp.extend_zero` to the entire
-  chart target;
-* `η_i · D_eff.u_chart` agrees a.e. with `D_eff.u_chart` on
-  `chartTargetEuclid α` (since `η_i = 1` on a neighborhood of `K_α` and
-  `D_eff.u_chart = 0` a.e. on the complement of `K_α`), and
-* `D_eff.u_chart` agrees a.e. with `chartPushedChosenFirstPartial g α u_h i`
-  on the chart target via
-  `chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_chartTarget`.
-
-Transferring via `MemWkp_congr_ae` gives
-`MemWkp 2 2 (chosenWeakPartial' 2 i (chartPushed POU α u_h.coeFn)
-chartTargetEuclid) chartTargetEuclid`.
-
-## Main result
-
-`chartPushed_memWkp_three_two_of_laplacianDomainPow_two` — for any chart
-point `α : M`, the canonical chart-pushed POU-cut representative of
-`H1ComplToLp g u_h` lies in `MemWkp 3 2 (chartTargetEuclid α)` for every
-`u_h ∈ laplacianDomainPow g 2`.
-
-This headline is **fully unconditional**: no extra Sobolev or smoothness
-hypothesis on `u_h` is required.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology Function
@@ -113,10 +44,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- Given a function `u : EuclN → ℝ` that lies in `MemWkp k 2` of an open
-precompact `Ω' ⊆ Ω` (both open, `Ω' ⊆ Ω`, closure of `Ω'` inside `Ω`),
-and that vanishes a.e. on `Ω \ K` for some compact `K ⊆ Ω'`, `u` lies in
-`MemWkp k 2 Ω`. -/
 private theorem MemWkp_two_extend_via_cutoff
     (k : ℕ)
     {Ω Ω' K : Set EuclN}
@@ -213,18 +140,6 @@ private theorem MemWkp_two_extend_via_cutoff
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
 
-/-- For every coordinate direction `i`, the canonical chosen first weak
-partial `chartPushedChosenFirstPartial g α u_h i` lies in
-`MemWkp 2 2 (chartTargetEuclid α)` unconditionally for
-`u_h ∈ laplacianDomainPow g 2`.
-
-The proof uses the chart-bilinear "interior" `MemWkp 2 2` regularity of
-the once-differentiated chart-bilinear data on a precompact open
-neighborhood `Ω''_i ⊆ chartTargetEuclid α` of the POU-cut support
-`chartImagePOUTsupport α`, combined with the ae-zero support of the
-chart-pushed weak partial coercion outside the POU-cut support, plus the
-unconditional ae-equality of the chart-pushed weak partial coercion and
-the chosen first weak partial on the chart target. -/
 theorem chartPushed_chosenFirstPartial_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -302,13 +217,6 @@ theorem chartPushed_chosenFirstPartial_memWkp_two_two
       h_D_uChart_ae_eq_chosen).mp h_D_uChart_memWkp22_chart
   exact h_chosenFirst_memWkp22
 
-/-- **Final chart-`H³` regularity of the canonical chart-pushed function,
-unconditional for `u_h ∈ laplacianDomainPow g 2`.**
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)`
-and any element `u_h ∈ laplacianDomainPow g 2`, the canonical chart-pushed
-POU-cut representative `chartPushed POU α u_h.coeFn` lies in
-`MemWkp 3 2 (chartTargetEuclid α)`, unconditionally. -/
 theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -327,13 +235,6 @@ theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two
   exact chartPushed_chosenFirstPartial_memWkp_two_two
     (I := I) (M := M) g α hu_h i
 
-/-- **Headline (renamed for compatibility): chart-`H³` of the canonical
-chart-pushed function, unconditional for `u_h ∈ laplacianDomainPow g 2`.**
-
-This is the precise statement required to discharge the residual
-hypothesis `h_chartPushed_memWkp32` in downstream consumers; the headline
-re-states `chartPushed_memWkp_three_two_of_laplacianDomainPow_two` in the
-canonical form. -/
 theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two'
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

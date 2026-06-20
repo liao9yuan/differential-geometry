@@ -1,44 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.SpectralDefs
 
-/-!
-# Continuous inclusions of the spectral `Hˢ` Sobolev scale (scalar fields)
-
-For a closed Riemannian manifold `(M, g)`, the spectral Sobolev spaces
-`scalarHs g σ` form a decreasing scale: a larger exponent `σ` imposes
-faster decay of the eigenbasis coordinates, so `Hˢ ⊆ Hᵗ` whenever
-`τ ≤ σ`. Concretely, since the weight `(1 + λᵢ)^σ` is monotone in the
-exponent (the base is `≥ 1`), weighted square-summability at `σ`
-implies it at any `τ ≤ σ`, and the `Hᵗ` norm of a vector is bounded by
-its `Hˢ` norm.
-
-This file constructs the continuous linear inclusion
-`scalarHsInclusion`, proves it is a coordinate-preserving contraction
-(operator norm `≤ 1`) and injective, establishes its functoriality
-(identity at `τ = σ`, composition for `ρ ≤ τ ≤ σ`), and shows it is
-compatible with the `L²` inclusion `scalarHsToL2`.
-
-The `σ = 0` identification `H⁰ ≃ₗᵢ L²(M, vol_g)` is also established
-via the rescaling isometry and the inverse Hilbert-basis representation.
-
-## Main definitions
-
-* `scalarHsInclusion hτσ` — the continuous linear inclusion
-  `Hˢ →L[ℝ] Hᵗ` for `τ ≤ σ`.
-* `scalarHsToL2 hσ` — the continuous linear inclusion
-  `Hˢ →L[ℝ] L²(M, vol_g)` for `σ ≥ 0`.
-* `scalarHsZeroEquivL2 g` — the isometric identification
-  `H⁰ ≃ₗᵢ L²(M, vol_g)`.
-
-## Main results
-
-* `scalarHsInclusion_coeff` — the inclusion preserves coordinates.
-* `scalarHsInclusion_opNorm_le_one` — it is a norm-non-increasing
-  contraction.
-* `scalarHsInclusion_trans` — functoriality.
-* `scalarHsToL2_comp_scalarHsInclusion` — the `L²` inclusion factors
-  through any intermediate `Hᵗ`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -65,8 +26,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- The Sobolev weight `(1 + λᵢ)^σ` is monotone in the exponent: for
-`τ ≤ σ` the base `1 + λᵢ ≥ 1` gives `(1 + λᵢ)^τ ≤ (1 + λᵢ)^σ`. -/
 lemma scalarSobolevWeight_mono {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) {τ σ : ℝ} (hτσ : τ ≤ σ) :
     scalarSobolevWeight (I := I) (M := M) i τ ≤
@@ -79,8 +38,6 @@ namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M}
 
-/-- For `τ ≤ σ`, the coordinate family of an `Hˢ` element is
-weighted-square-summable at the smaller exponent `τ`. -/
 lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     Summable (fun i : EigenIdx (I := I) (M := M) g =>
@@ -96,9 +53,6 @@ lemma weighted_summable_of_le {τ σ : ℝ} (hτσ : τ ≤ σ)
       scalarSobolevWeight_mono (I := I) (M := M) i hτσ
     exact mul_le_mul_of_nonneg_right hmono (sq_nonneg _)
 
-/-- The underlying function of the inclusion `Hˢ → Hᵗ` (`τ ≤ σ`): an
-`Hˢ` element is sent to the `Hᵗ` element with the *same* coordinate
-family. -/
 def inclusionFun {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     scalarHs (I := I) (M := M) g τ where
@@ -109,7 +63,6 @@ def inclusionFun {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     (inclusionFun (I := I) (M := M) hτσ T).coeff = T.coeff := rfl
 
-/-- `inclusionFun` is additive. -/
 lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
     (S T : scalarHs (I := I) (M := M) g σ) :
     inclusionFun (I := I) (M := M) hτσ (S + T) =
@@ -118,7 +71,6 @@ lemma inclusionFun_add {τ σ : ℝ} (hτσ : τ ≤ σ)
   ext i
   simp only [inclusionFun_coeff, add_coeff]
 
-/-- `inclusionFun` is `ℝ`-homogeneous. -/
 lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
     (T : scalarHs (I := I) (M := M) g σ) :
     inclusionFun (I := I) (M := M) hτσ (c • T) =
@@ -126,8 +78,6 @@ lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
   ext i
   simp only [inclusionFun_coeff, smul_coeff]
 
-/-- For `τ ≤ σ`, the `Hᵗ` norm of `inclusionFun T` is bounded by the
-`Hˢ` norm of `T`: the inclusion is norm-non-increasing. -/
 lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     ‖inclusionFun (I := I) (M := M) hτσ T‖ ≤ ‖T‖ := by
@@ -159,8 +109,6 @@ lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
 
 end scalarHs
 
-/-- For `τ ≤ σ`, the continuous linear inclusion of the spectral
-Sobolev space `Hˢ` into the larger space `Hᵗ`. -/
 def scalarHsInclusion {g : SmoothRiemannianMetric I M} {τ σ : ℝ}
     (hτσ : τ ≤ σ) :
     scalarHs (I := I) (M := M) g σ →L[ℝ]
@@ -180,41 +128,31 @@ namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M}
 
-/-- `scalarHsInclusion` applied to `T` is the underlying
-`inclusionFun T`. -/
 @[simp] lemma scalarHsInclusion_apply {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     scalarHsInclusion (I := I) (M := M) (g := g) hτσ T =
       inclusionFun (I := I) (M := M) hτσ T := rfl
 
-/-- The inclusion `Hˢ → Hᵗ` preserves the eigenbasis coordinate
-family (functional form). -/
 @[simp] theorem scalarHsInclusion_coeff_fun {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     (scalarHsInclusion (I := I) (M := M) (g := g) hτσ T).coeff =
       T.coeff := rfl
 
-/-- The eigenbasis coordinate of `scalarHsInclusion … T` at `i`. -/
 @[simp] theorem scalarHsInclusion_coeff {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ)
     (i : EigenIdx (I := I) (M := M) g) :
     (scalarHsInclusion (I := I) (M := M) (g := g) hτσ T).coeff i =
       T.coeff i := rfl
 
-/-- The operator norm of the inclusion `Hˢ → Hᵗ` is at most `1` for
-`τ ≤ σ`. -/
 theorem scalarHsInclusion_opNorm_le_one {τ σ : ℝ} (hτσ : τ ≤ σ) :
     ‖scalarHsInclusion (I := I) (M := M) (g := g) hτσ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-- For `τ ≤ σ`, the inclusion is norm-non-increasing:
-`‖incl T‖_{Hᵗ} ≤ ‖T‖_{Hˢ}`. -/
 theorem scalarHsInclusion_norm_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     ‖scalarHsInclusion (I := I) (M := M) (g := g) hτσ T‖ ≤ ‖T‖ :=
   norm_inclusionFun_le (I := I) (M := M) hτσ T
 
-/-- The inclusion `Hˢ → Hᵗ` is injective for `τ ≤ σ`. -/
 theorem scalarHsInclusion_injective {τ σ : ℝ} (hτσ : τ ≤ σ) :
     Function.Injective
       (scalarHsInclusion (I := I) (M := M) (g := g) hτσ) := by
@@ -223,8 +161,6 @@ theorem scalarHsInclusion_injective {τ σ : ℝ} (hτσ : τ ≤ σ) :
   have h := congrArg (fun U => scalarHs.coeff U i) hST
   simpa only [scalarHsInclusion_coeff] using h
 
-/-- The inclusion at the reflexive exponent `σ ≤ σ` is the identity
-continuous linear map. -/
 @[simp] theorem scalarHsInclusion_refl {σ : ℝ} :
     scalarHsInclusion (I := I) (M := M) (g := g) (le_refl σ) =
       ContinuousLinearMap.id ℝ
@@ -234,16 +170,12 @@ continuous linear map. -/
   funext i
   rw [scalarHsInclusion_coeff, ContinuousLinearMap.id_apply]
 
-/-- Reflexive inclusion, applied form: `scalarHsInclusion (le_refl σ)`
-fixes every vector. -/
 @[simp] theorem scalarHsInclusion_refl_apply {σ : ℝ}
     (T : scalarHs (I := I) (M := M) g σ) :
     scalarHsInclusion (I := I) (M := M) (g := g) (le_refl σ) T = T := by
   ext i
   simp only [scalarHsInclusion_coeff]
 
-/-- The inclusions compose: for `τ₁ ≤ σ ≤ τ₂`, the inclusion `Hᵗ² → Hᵗ¹`
-factors as `Hᵗ² → Hˢ → Hᵗ¹`. -/
 theorem scalarHsInclusion_trans {τ₁ σ τ₂ : ℝ}
     (h₁ : τ₁ ≤ σ) (h₂ : σ ≤ τ₂) :
     scalarHsInclusion (I := I) (M := M) (g := g) (h₁.trans h₂) =
@@ -253,7 +185,6 @@ theorem scalarHsInclusion_trans {τ₁ σ τ₂ : ℝ}
   simp only [scalarHsInclusion_coeff, ContinuousLinearMap.coe_comp',
     Function.comp_apply]
 
-/-- The inclusions compose, applied form. -/
 theorem scalarHsInclusion_trans_apply {τ₁ σ τ₂ : ℝ}
     (h₁ : τ₁ ≤ σ) (h₂ : σ ≤ τ₂)
     (T : scalarHs (I := I) (M := M) g τ₂) :
@@ -263,8 +194,6 @@ theorem scalarHsInclusion_trans_apply {τ₁ σ τ₂ : ℝ}
   ext i
   simp only [scalarHsInclusion_coeff]
 
-/-- For `σ ≥ 0`, the (unweighted) coordinate family of an `Hˢ` element
-is square-summable. -/
 lemma coeff_summable_sq_of_nonneg {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     Summable (fun i : EigenIdx (I := I) (M := M) g =>
@@ -277,8 +206,6 @@ lemma coeff_summable_sq_of_nonneg {σ : ℝ} (hσ : 0 ≤ σ)
   have hsq : 0 ≤ (T.coeff i) ^ 2 := sq_nonneg _
   nlinarith [hw, hsq]
 
-/-- For `σ ≥ 0`, the coordinate family of an `Hˢ` element, viewed in
-`ℓ²(EigenIdx g, ℝ)`. -/
 def toL2Seq {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     lp (fun _ : EigenIdx (I := I) (M := M) g => ℝ) 2 :=
@@ -300,17 +227,12 @@ def toL2Seq {σ : ℝ} (hσ : 0 ≤ σ)
     (i : EigenIdx (I := I) (M := M) g) :
     (toL2Seq (I := I) (M := M) hσ T : _ → ℝ) i = T.coeff i := rfl
 
-/-- The underlying function of the inclusion `Hˢ → L²`: it sends an
-`Hˢ` element to the `L²` function with the same eigenbasis coordinate
-family, reconstructed via the inverse Hilbert-basis representation. -/
 def toL2Fun {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (resolventHilbertEigenbasisSigma (I := I) (M := M) g).repr.symm
     (toL2Seq (I := I) (M := M) hσ T)
 
-/-- The `L²` eigenbasis coordinate of `toL2Fun T` is the `Hˢ`
-coordinate of `T`. -/
 @[simp] lemma scalarL2Coeff_toL2Fun {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -320,7 +242,6 @@ coordinate of `T`. -/
   rw [LinearIsometryEquiv.apply_symm_apply]
   rfl
 
-/-- `toL2Seq` is additive. -/
 lemma toL2Seq_add {σ : ℝ} (hσ : 0 ≤ σ)
     (S T : scalarHs (I := I) (M := M) g σ) :
     toL2Seq (I := I) (M := M) hσ (S + T) =
@@ -329,7 +250,6 @@ lemma toL2Seq_add {σ : ℝ} (hσ : 0 ≤ σ)
   funext i
   simp only [toL2Seq_apply, lp.coeFn_add, Pi.add_apply, add_coeff]
 
-/-- `toL2Seq` is `ℝ`-homogeneous. -/
 lemma toL2Seq_smul {σ : ℝ} (hσ : 0 ≤ σ) (c : ℝ)
     (T : scalarHs (I := I) (M := M) g σ) :
     toL2Seq (I := I) (M := M) hσ (c • T) =
@@ -339,7 +259,6 @@ lemma toL2Seq_smul {σ : ℝ} (hσ : 0 ≤ σ) (c : ℝ)
   simp only [toL2Seq_apply, lp.coeFn_smul, Pi.smul_apply, smul_coeff,
     smul_eq_mul]
 
-/-- `toL2Fun` is additive. -/
 lemma toL2Fun_add {σ : ℝ} (hσ : 0 ≤ σ)
     (S T : scalarHs (I := I) (M := M) g σ) :
     toL2Fun (I := I) (M := M) hσ (S + T) =
@@ -363,7 +282,6 @@ lemma toL2Fun_add {σ : ℝ} (hσ : 0 ≤ σ)
     _ = toL2Fun (I := I) (M := M) hσ S +
           toL2Fun (I := I) (M := M) hσ T := rfl
 
-/-- `toL2Fun` is `ℝ`-homogeneous. -/
 lemma toL2Fun_smul {σ : ℝ} (hσ : 0 ≤ σ) (c : ℝ)
     (T : scalarHs (I := I) (M := M) g σ) :
     toL2Fun (I := I) (M := M) hσ (c • T) =
@@ -382,8 +300,6 @@ lemma toL2Fun_smul {σ : ℝ} (hσ : 0 ≤ σ) (c : ℝ)
     _ = c • b.repr.symm (toL2Seq (I := I) (M := M) hσ T) := h_map
     _ = c • toL2Fun (I := I) (M := M) hσ T := rfl
 
-/-- Parseval identity for the scalar eigenbasis: the squared `L²`-norm
-of `u` equals the sum of the squared basis coefficients. -/
 private lemma scalarParseval_norm_sq
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     ‖u‖ ^ 2 =
@@ -402,8 +318,6 @@ private lemma scalarParseval_norm_sq
   rw [h_eq] at h_par
   linarith [h_par, h_sq]
 
-/-- For `σ ≥ 0`, the `L²` norm of `toL2Fun T` is bounded by the `Hˢ`
-norm of `T`: the inclusion is norm-non-increasing. -/
 lemma norm_toL2Fun_le {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     ‖toL2Fun (I := I) (M := M) hσ T‖ ≤ ‖T‖ := by
@@ -457,8 +371,6 @@ lemma norm_toL2Fun_le {σ : ℝ} (hσ : 0 ≤ σ)
 
 end scalarHs
 
-/-- For `σ ≥ 0`, the inclusion of the spectral Sobolev space `Hˢ` into
-`L²(M, vol_g)`, as a continuous linear map. -/
 def scalarHsToL2 {g : SmoothRiemannianMetric I M} {σ : ℝ} (hσ : 0 ≤ σ) :
     scalarHs (I := I) (M := M) g σ →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -476,20 +388,15 @@ namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M}
 
-/-- `scalarHsToL2` applied to `T` is the underlying `toL2Fun T`. -/
 @[simp] lemma scalarHsToL2_apply {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     scalarHsToL2 (I := I) (M := M) (g := g) hσ T =
       toL2Fun (I := I) (M := M) hσ T := rfl
 
-/-- The operator norm of the inclusion `Hˢ →L[ℝ] L²` is at most `1` for
-`σ ≥ 0`. -/
 theorem scalarHsToL2_opNorm_le_one {σ : ℝ} (hσ : 0 ≤ σ) :
     ‖scalarHsToL2 (I := I) (M := M) (g := g) hσ‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-- The `L²` eigenbasis coordinate of the image of `T` under the
-inclusion equals the `Hˢ` coordinate of `T`. -/
 @[simp] theorem scalarL2Coeff_scalarHsToL2 {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -498,7 +405,6 @@ inclusion equals the `Hˢ` coordinate of `T`. -/
   rw [scalarHsToL2_apply]
   exact scalarL2Coeff_toL2Fun (I := I) (M := M) hσ T i
 
-/-- The inclusion `Hˢ →L[ℝ] L²` is injective for `σ ≥ 0`. -/
 theorem scalarHsToL2_injective {σ : ℝ} (hσ : 0 ≤ σ) :
     Function.Injective
       (scalarHsToL2 (I := I) (M := M) (g := g) hσ) := by
@@ -510,8 +416,6 @@ theorem scalarHsToL2_injective {σ : ℝ} (hσ : 0 ≤ σ) :
 
 end scalarHs
 
-/-- The spectral `H⁰` Sobolev space is isometrically isomorphic to
-`L²(M, vol_g)`. -/
 def scalarHsZeroEquivL2 (g : SmoothRiemannianMetric I M) :
     scalarHs (I := I) (M := M) g 0 ≃ₗᵢ[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -523,8 +427,6 @@ namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M}
 
-/-- The `H⁰`-to-`L²` identification sends `T` to the `L²` function with
-the same eigenbasis coordinates. -/
 theorem scalarHsZeroEquivL2_scalarL2Coeff
     (T : scalarHs (I := I) (M := M) g 0)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -538,9 +440,6 @@ theorem scalarHsZeroEquivL2_scalarL2Coeff
   rw [scalarHs.rescaleEquivL2_apply]
   simp only [scalarSobolevWeight_zero, Real.sqrt_one, one_mul]
 
-/-- The `H⁰`-to-`L²` identification, read backwards: the `L²` function
-`u` becomes the `H⁰` element whose coordinate family is `u`'s eigenbasis
-coordinate family. -/
 @[simp] theorem scalarHsZeroEquivL2_symm_coeff
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (i : EigenIdx (I := I) (M := M) g) :
@@ -553,8 +452,6 @@ coordinate family. -/
 
 end scalarHs
 
-/-- For `0 ≤ τ ≤ σ`, the `L²` inclusion of `Hˢ` factors through `Hᵗ`:
-`scalarHsToL2 hτ ∘ scalarHsInclusion hτσ = scalarHsToL2 (hτ.trans hτσ)`. -/
 theorem scalarHsToL2_comp_scalarHsInclusion
     {g : SmoothRiemannianMetric I M} {τ σ : ℝ}
     (hτ : 0 ≤ τ) (hτσ : τ ≤ σ) :
@@ -584,8 +481,6 @@ theorem scalarHsToL2_comp_scalarHsInclusion
     simpa only [scalarL2Coeff] using h
   rw [hlhs, hrhs]
 
-/-- For `0 ≤ τ ≤ σ`, the `L²` inclusion of `Hˢ` factors through `Hᵗ`,
-applied form. -/
 theorem scalarHsToL2_scalarHsInclusion
     {g : SmoothRiemannianMetric I M} {τ σ : ℝ}
     (hτ : 0 ≤ τ) (hτσ : τ ≤ σ)

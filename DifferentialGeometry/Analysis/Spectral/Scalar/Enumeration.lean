@@ -1,47 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 
-/-!
-# Ascending enumeration of the nonzero Laplacian spectrum
-
-For a closed Riemannian manifold `(M, g)`, the variational Laplacian
-`Δ_g = div_g ∘ grad_g` has a discrete spectrum
-`{-λ_n}_{n ≥ 0} ⊆ (-∞, 0]` with `0` as the only accumulation point and each
-nonzero eigenspace finite-dimensional. This file extracts the strictly
-ascending enumeration `n ↦ λ_n` of the distinct nonzero Laplacian eigenvalues.
-
-## Main definitions
-
-* `nonzeroLaplacianEigenvalueSet g : Set ℝ` — the set of distinct nonzero
-  Laplacian eigenvalues, equivalently `{ (1 - μ) / μ | μ ∈ Spec(R), μ ∈ (0, 1) }`
-  where `R = resolventL2 g`.
-* `laplacianEigenvalueAscending g : ℕ → ℝ` — the ascending enumeration. When
-  `nonzeroLaplacianEigenvalueSet g` is nonempty, the value at `n = 0` is the
-  smallest nonzero Laplacian eigenvalue; the value at `n + 1` is the smallest
-  eigenvalue strictly above the previous one, with junk value `0` once the
-  set is exhausted (or if the set is empty).
-
-## Main results
-
-* `nonzeroLaplacianEigenvalueSet_finite_below`: for every threshold `N`, only
-  finitely many distinct nonzero Laplacian eigenvalues are `≤ N`.
-* `laplacianEigenvalueAscending_strictMono_of_infinite`: if the eigenvalue set
-  is infinite, `laplacianEigenvalueAscending g` is strictly increasing.
-* `laplacianEigenvalueAscending_mem_of_infinite`: each iterate lies in the
-  eigenvalue set.
-* `laplacianEigenvalueAscending_tendsto_atTop_of_infinite`: under the same hypothesis,
-  `laplacianEigenvalueAscending g n → ∞` as `n → ∞`.
-* `laplacianEigenvalueAscending_zero_eq_sInf`: the first iterate equals the
-  infimum of the eigenvalue set when it is nonempty (`λ_0 = λ_1` in the
-  classical notation; we index from zero).
-
-## Sign convention
-
-Geometer convention `Δ_g = div_g ∘ grad_g`, with spectrum
-`⊆ (-∞, 0]`. The resolvent is `(1 - Δ_g)⁻¹` with eigenvalues `μ ∈ (0, 1]`,
-and the Laplacian eigenvalues are `λ = (1 - μ) / μ ∈ [0, ∞)`. Nonzero
-Laplacian eigenvalues correspond to `μ < 1`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -67,15 +25,10 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-/-- The set of distinct nonzero Laplacian eigenvalues, defined as the image of
-the resolvent-eigenvalue subtype `{μ ∈ Spec(R) | μ ≠ 0, μ < 1}` under the map
-`μ ↦ (1 - μ) / μ`. The condition `μ < 1` excludes the trivial Laplacian
-eigenvalue `0` (corresponding to `μ = 1`). -/
 def nonzeroLaplacianEigenvalueSet (g : SmoothRiemannianMetric I M) : Set ℝ :=
   { lam : ℝ | ∃ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
       μ.val < 1 ∧ laplacianEigenvalueOf μ.val = lam }
 
-/-- Every element of `nonzeroLaplacianEigenvalueSet g` is strictly positive. -/
 theorem nonzeroLaplacianEigenvalueSet_pos
     (g : SmoothRiemannianMetric I M) {lam : ℝ}
     (h : lam ∈ nonzeroLaplacianEigenvalueSet (I := I) (M := M) g) :
@@ -87,8 +40,6 @@ theorem nonzeroLaplacianEigenvalueSet_pos
   have h_num_pos : 0 < 1 - μ.val := by linarith
   exact div_pos h_num_pos h_pos
 
-/-- Given a positive Laplacian eigenvalue candidate `lam = (1 - μ)/μ` with
-`μ ∈ (0, 1)`, the resolvent eigenvalue is recovered as `μ = 1 / (lam + 1)`. -/
 private lemma resolvent_val_eq_of_laplacianEigenvalueOf
     {μ : ℝ} (hμ_pos : 0 < μ) (hμ_lt : μ < 1) (lam : ℝ)
     (hlam_eq : (1 - μ) / μ = lam) :
@@ -108,12 +59,6 @@ private lemma resolvent_val_eq_of_laplacianEigenvalueOf
   field_simp
   linarith
 
-/-- For any threshold `N`, the set of distinct nonzero Laplacian eigenvalues
-that are `≤ N` is finite.
-
-The proof translates `λ = (1 - μ)/μ ≤ N` (with `μ ∈ (0, 1)`) into the bound
-`μ ≥ 1 / (N + 1)`, then applies the finiteness of the resolvent eigenvalues on
-the shell `{|μ| ≥ ε}` with `ε = 1 / (N + 1)`. -/
 theorem nonzeroLaplacianEigenvalueSet_finite_below
     (g : SmoothRiemannianMetric I M) (N : ℝ) :
     Set.Finite { lam : ℝ |
@@ -189,7 +134,6 @@ theorem nonzeroLaplacianEigenvalueSet_finite_below
     rw [h_empty]
     exact Set.finite_empty
 
-/-- The intersection of `nonzeroLaplacianEigenvalueSet g` with `Iic N` is finite. -/
 theorem nonzeroLaplacianEigenvalueSet_inter_Iic_finite
     (g : SmoothRiemannianMetric I M) (N : ℝ) :
     Set.Finite ((nonzeroLaplacianEigenvalueSet (I := I) (M := M) g) ∩ Set.Iic N) := by
@@ -198,17 +142,6 @@ theorem nonzeroLaplacianEigenvalueSet_inter_Iic_finite
   intro lam hlam
   exact ⟨hlam.1, hlam.2⟩
 
-/-- The recursive ascending enumeration of `nonzeroLaplacianEigenvalueSet g`.
-
-* `n = 0`: returns `sInf S` if `S` is nonempty, otherwise junk `0`.
-* `n + 1`: returns `sInf (S ∩ Ioi prev)` if nonempty, otherwise junk `0`,
-  where `prev = laplacianEigenvalueAscending g n`.
-
-If the set is empty, all values are `0`. If the set is nonempty and finite
-with exactly `k` elements, the first `k` values enumerate them in ascending
-order; subsequent values are `0`. If the set is infinite, the function is a
-strictly increasing bijection from `ℕ` onto the set (proved below under
-the infinity hypothesis). -/
 noncomputable def laplacianEigenvalueAscending
     (g : SmoothRiemannianMetric I M) : ℕ → ℝ
   | 0 =>
@@ -243,7 +176,6 @@ lemma laplacianEigenvalueAscending_succ
               Set.Ioi (laplacianEigenvalueAscending (I := I) (M := M) g n))
        else 0) := rfl
 
-/-- The first iterate equals the infimum of the set, when the set is nonempty. -/
 theorem laplacianEigenvalueAscending_zero_eq_sInf
     (g : SmoothRiemannianMetric I M)
     (h_nonempty : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Nonempty) :
@@ -251,16 +183,12 @@ theorem laplacianEigenvalueAscending_zero_eq_sInf
       sInf (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g) := by
   rw [laplacianEigenvalueAscending_zero, if_pos h_nonempty]
 
-/-- When the set is empty, the first iterate is `0`. -/
 theorem laplacianEigenvalueAscending_zero_of_empty
     (g : SmoothRiemannianMetric I M)
     (h_empty : ¬ (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Nonempty) :
     laplacianEigenvalueAscending (I := I) (M := M) g 0 = 0 := by
   rw [laplacianEigenvalueAscending_zero, if_neg h_empty]
 
-/-- The csInf of a nonempty set `T ⊆ ℝ` that is bounded below and such that
-`T ∩ Iic a` is finite for some `a ∈ T`, lies in `T`. This is the key
-"discrete attainment of infimum" lemma we'll reuse. -/
 private lemma csInf_mem_of_finite_slice
     {T : Set ℝ} (hT_bddBelow : BddBelow T) (a : ℝ) (ha : a ∈ T)
     (hT_slice_fin : Set.Finite (T ∩ Set.Iic a)) :
@@ -284,8 +212,6 @@ private lemma csInf_mem_of_finite_slice
   rw [h_eq]
   exact h_csInf_in_slice.1
 
-/-- If the eigenvalue set is infinite, the intersection
-`S ∩ Ioi t` is infinite for any `t ∈ ℝ`. -/
 private lemma nonzeroLaplacianEigenvalueSet_inter_Ioi_infinite
     (g : SmoothRiemannianMetric I M)
     (h_inf : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Infinite)
@@ -314,7 +240,6 @@ private lemma nonzeroLaplacianEigenvalueSet_inter_Ioi_infinite
   rw [h_S_eq]
   exact h_below_fin.union h_fin
 
-/-- The csInf of `S ∩ Ioi t`, when nonempty, lies in `S ∩ Ioi t`. -/
 private lemma sInf_inter_Ioi_mem
     (g : SmoothRiemannianMetric I M) (t : ℝ)
     (h_nonempty : ((nonzeroLaplacianEigenvalueSet (I := I) (M := M) g) ∩
@@ -334,7 +259,6 @@ private lemma sInf_inter_Ioi_mem
     exact ⟨hlam_S, hlam_a⟩
   exact csInf_mem_of_finite_slice hT_bddBelow a ha_T hT_slice_fin
 
-/-- Each iterate (under the infinity hypothesis) lies in the eigenvalue set. -/
 theorem laplacianEigenvalueAscending_mem_of_infinite
     (g : SmoothRiemannianMetric I M)
     (h_inf : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Infinite)
@@ -365,8 +289,6 @@ theorem laplacianEigenvalueAscending_mem_of_infinite
       rw [if_pos h_inter_nonempty]
       exact (sInf_inter_Ioi_mem (I := I) (M := M) g prev h_inter_nonempty).1
 
-/-- Under the infinity hypothesis, the ascending enumeration is strictly
-increasing. -/
 theorem laplacianEigenvalueAscending_strictMono_of_infinite
     (g : SmoothRiemannianMetric I M)
     (h_inf : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Infinite) :
@@ -383,9 +305,6 @@ theorem laplacianEigenvalueAscending_strictMono_of_infinite
   rw [if_pos h_inter_nonempty]
   exact (sInf_inter_Ioi_mem (I := I) (M := M) g prev h_inter_nonempty).2
 
-/-- If the set of distinct nonzero Laplacian eigenvalues is infinite, then the
-ascending enumeration `laplacianEigenvalueAscending g n` tends to `+∞` as
-`n → ∞`. -/
 theorem laplacianEigenvalueAscending_tendsto_atTop_of_infinite
     (g : SmoothRiemannianMetric I M)
     (h_inf : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Infinite) :

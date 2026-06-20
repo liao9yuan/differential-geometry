@@ -2,47 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberFromModelOpNorm
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleLocalityIdentities
 
-/-!
-# Uniform comparability of model-fiber norm and Riemannian fiber norm
-
-On a compact Riemannian manifold `(M, g)`, the model-fiber norm
-`‖TensorRSSpace.toModel T‖` and the g-induced Riemannian bundle norm `‖T‖_g`
-(from `tensorRS_riemannianBundle g r s`) are uniformly comparable.
-
-## Strategy
-
-At each point `x₀ ∈ M`, the forward-trivialization locality identity
-(`tensorRS_trivAt_continuousLinearMapAt_apply_eq_self_on_locality`) shows
-that the trivialization CLM at chart `x₀` evaluated at `x₀` itself
-agrees pointwise with `TensorRSSpace.toModel`:
-
-  `triv_{x₀}.CLM_{x₀}(T) = toModel(T)`
-
-Combining with the unconditional forward triv op-norm bound
-(`tensorRSChartFiberToModel_opNorm_isBounded_on_compact_unconditional`)
-applied to the compact singleton `K = {x₀}`, we obtain:
-
-  `‖toModel(T)‖ ≤ C_{x₀} * ‖T‖_g`
-
-at the single point `x₀`. For the reverse direction, the inverse locality
-identity (`tensorRS_trivAt_symmL_apply_eq_self_on_locality`) gives:
-
-  `triv_{x₀}.symmL_{x₀}(toModel(T)) = T`
-
-and the unconditional inverse triv bound gives:
-
-  `‖T‖_g ≤ D_{x₀} * ‖toModel(T)‖`
-
-## Main results
-
-* `triv_eq_toModel_at_chartCenter` — the trivialization at chart center
-  equals `TensorRSSpace.toModel`.
-* `symmL_toModel_eq_self_at_chartCenter` — the inverse trivialization
-  applied to `toModel(T)` recovers `T` at the chart center.
-* `modelNorm_le_gNorm_pointwise` — per-point forward bound.
-* `gNorm_le_modelNorm_pointwise` — per-point reverse bound.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -70,9 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 set_option linter.unusedSectionVars false in
-/-- At the chart center `b₀`, the forward trivialization of the `(r,s)`-tensor
-bundle equals `TensorRSSpace.toModel` as CLMs. This follows from the locality
-identity with `b = b₀`, since `chartAt H b₀ = chartAt H b₀` trivially. -/
+
 theorem triv_eq_toModel_at_chartCenter
     (r s : ℕ) (b₀ : M) (T : TensorRSSpace r s I b₀) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -88,8 +45,7 @@ theorem triv_eq_toModel_at_chartCenter
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- At the chart center `b₀`, the inverse trivialization applied to
-`TensorRSSpace.toModel T` recovers `T`. -/
+
 theorem symmL_toModel_eq_self_at_chartCenter
     (r s : ℕ) (b₀ : M) (T : TensorRSSpace r s I b₀) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -109,8 +65,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-point forward bound.** At each point `x₀ ∈ M`, there exists `C > 0`
-such that `‖toModel(T)‖ ≤ C * ‖T‖_g` for all `T` in the fiber at `x₀`. -/
+
 theorem modelNorm_le_gNorm_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x₀ : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -135,8 +90,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Per-point reverse bound.** At each point `x₀ ∈ M`, there exists `D > 0`
-such that `‖T‖_g ≤ D * ‖toModel(T)‖` for all `T` in the fiber at `x₀`. -/
+
 theorem gNorm_le_modelNorm_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x₀ : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

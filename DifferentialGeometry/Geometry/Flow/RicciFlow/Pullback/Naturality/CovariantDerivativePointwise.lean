@@ -6,44 +6,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.Covarian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 
-/-!
-# Pointwise connection-pullback chain rule for the Levi-Civita derivative
-
-For a smooth Riemannian metric `g` on `M` and a smooth diffeomorphism
-`Φ : M ≃ₘ⟮I, I⟯ M`, the Levi-Civita connection of the pullback metric `Φ*g`
-intertwines with the Levi-Civita connection of `g` through the manifold
-derivative of `Φ` and the pushforward of vector fields:
-
-  `dΦ(∇^{Φ*g}_v X) = ∇^g_{dΦ v}(Φ_*X)`.
-
-This is the missing pointwise chain rule that complements
-`covariant_derivative_of_pullback_vf_naturality`, which records the
-connection-equality `LeviCivita (Φ*g) = pullback_connection_construct g Φ`
-as a definitional `rfl` (the bundled identity), without exposing the
-pointwise transport of values.
-
-## Proof strategy
-
-We define the unbundled *conjugate* function
-`conjCovFun g Φ Y x v := (mfderiv Φ.symm (Φ x))
-  ((LeviCivita g).toFun (Φ_* Y) (Φ x) (mfderiv Φ x v))`
-and verify it satisfies, on differentiable inputs at a point:
-
-* the torsion-free identity
-  `conjCovFun Y x (X x) - conjCovFun X x (Y x) = mlieBracket I X Y x`
-  via `LeviCivita_torsion_eq_zero` applied to `(Φ_* X, Φ_* Y)` and
-  `mlie_bracket_pullback_naturality`;
-
-* metric compatibility with `pullbackMetric g Φ` via the chain rule for
-  `mfderiv` applied to `b ↦ g_{Φ b}((Φ_* Y)(Φ b), (Φ_* Z)(Φ b))` together
-  with `LeviCivita_isMetricCompatible`.
-
-`koszul_local_uniqueness` then identifies `conjCovFun` with
-`(LeviCivita (Φ*g)).toFun` pointwise on smooth sections, after which
-applying `mfderiv Φ x` to the resulting identity collapses the inner
-`mfderiv Φ.symm (Φ x)` and yields the claimed chain rule.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
@@ -62,8 +24,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
-/-- Composing the manifold derivative of `Φ` after that of `Φ.symm` at `Φ x` returns the
-identity on `T_x M`. The output type `T_x M →L T_x M` is matched by composing in this order. -/
 private lemma mfderiv_self_after_symm_at_image
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) :
     (mfderiv I I (⇑Φ) x).comp (mfderiv I I (⇑Φ.symm) (Φ x))
@@ -83,7 +43,6 @@ private lemma mfderiv_self_after_symm_at_image
   rw [hΦatx] at hchain
   exact hchain.symm
 
-/-- Applied form: `mfderiv Φ x (mfderiv Φ.symm (Φ x) w) = w`. -/
 private lemma mfderiv_apply_mfderiv_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (w : TangentSpace I (Φ x)) :
     mfderiv I I (⇑Φ) x (mfderiv I I (⇑Φ.symm) (Φ x) w) = w := by
@@ -91,7 +50,6 @@ private lemma mfderiv_apply_mfderiv_symm
   have := congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I x => f w) h
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-/-- The reverse direction: `mfderiv Φ.symm (Φ x) (mfderiv Φ x v) = v`. -/
 private lemma mfderiv_symm_apply_mfderiv
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (⇑Φ.symm) (Φ x) (mfderiv I I (⇑Φ) x v) = v := by
@@ -105,8 +63,6 @@ private lemma mfderiv_symm_apply_mfderiv
   have := congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I x => f v) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
-/-- The pushforward of `Y` at `Φ x` equals `mfderiv Φ x (Y x)`, after handling the
-`Eq.rec` transport that appears in `Diffeomorph.pushforward`. -/
 private lemma pushforward_at_image
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ Y (Φ x) = mfderiv I I (⇑Φ) x (Y x) := by
@@ -119,16 +75,6 @@ private lemma pushforward_at_image
     ((mfderiv I I (⇑Φ) (Φ.symm (Φ x))) (Y (Φ.symm (Φ x))))).trans ?_
   rw [hbase]
 
-/-- The conjugate-by-`Φ` of the Levi-Civita connection of `g`. As an unbundled function
-of a section and a basepoint with a CLM value, this is
-$$
-  (\text{conjCovFun}\,g\,\Phi\,Y)(x)\,v
-    = \mathrm{d}\Phi^{-1}_{\Phi x}\bigl(\nabla^g_{\mathrm{d}\Phi_x v}(\Phi_*Y)\bigr).
-$$
-The output type is `TangentSpace I x →L[ℝ] TangentSpace I x`; the inner application
-to `Φ_*Y` produces a value in `T_{Φ x} M`, transported back by `mfderiv Φ.symm (Φ x)`.
-The CLM is composed as `(mfderiv Φ.symm (Φ x)) ∘ ((LeviCivita g).toFun (Φ_*Y) (Φ x)) ∘
-(mfderiv Φ x)`. -/
 def conjCovFun
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (Y : ∀ x : M, TangentSpace I x) (x : M) :
@@ -146,10 +92,6 @@ def conjCovFun
         ((LeviCivita (I := I) g).toFun (Diffeomorph.pushforward Φ Y) (Φ x)
           (mfderiv I I (⇑Φ) x v)) := rfl
 
-/-- For a diffeomorphism `Φ`, the pushforward of a vector field equals the manifold
-pullback of the same vector field by the inverse diffeomorphism. This is the function-level
-version of the pointwise lemma `pushforward_eq_mpullback_symm` (which is `private` in
-`MLieBracketNaturality.lean`). -/
 private lemma pushforward_eq_mpullback_symm_fun
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
     (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
@@ -272,7 +214,6 @@ private lemma conjCovFun_torsion_free
     _ = (VectorField.mlieBracket I X Y) x :=
         mfderiv_symm_apply_mfderiv (I := I) Φ x ((VectorField.mlieBracket I X Y) x)
 
-/-- Pointwise version of `pullbackInner_eval`. -/
 private lemma pullbackMetric_inner_eval
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (Y Z : ∀ x : M, TangentSpace I x) (b : M) :
@@ -419,21 +360,6 @@ private lemma conjCovFun_eq_LeviCivita_pullback
     exact (LeviCivita_isMetricCompatible (I := I) (Diffeomorph.pullbackMetric g Φ))
   exact koszul_local_uniqueness (s := Set.univ) hTF₁ hTF₂ hMC₁ hMC₂ hX hY (Set.mem_univ _)
 
-/-- The Levi-Civita covariant derivative is natural under a diffeomorphism: for a smooth
-Riemannian metric `g`, a smooth diffeomorphism `Φ : M ≃ₘ⟮I, I⟯ M`, a section
-`X : ∀ y, T_y M` whose total-space lift is manifold-differentiable at `x`, and a tangent
-vector `v ∈ T_x M`,
-$$
-  \mathrm{d}\Phi_x\bigl(\nabla^{\Phi^*g}_v X\bigr)
-    = \nabla^g_{\mathrm{d}\Phi_x v}(\Phi_*X).
-$$
-On the left `∇^{Φ*g}_v X` is `(LeviCivita (pullbackMetric g Φ)).toFun X x v`, the
-pullback-metric Levi-Civita derivative of `X` in direction `v`, transported by `dΦ_x`; on
-the right `∇^g(Φ_*X)` is `(LeviCivita g).toFun (pushforward Φ X) (Φ x) (mfderiv Φ x v)`,
-the `g`-Levi-Civita derivative of the pushed-forward section `Φ_*X` in direction `dΦ_x v`.
-The direction `v` is arbitrary; the proof extends it to a smooth global section and
-identifies the pullback connection with the conjugated connection `conjCovFun` via Koszul
-local uniqueness. -/
 theorem LeviCivita_covariant_derivative_natural_under_diffeomorphism_pointwise
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     {X : ∀ y : M, TangentSpace I y} {x : M} (v : TangentSpace I x)

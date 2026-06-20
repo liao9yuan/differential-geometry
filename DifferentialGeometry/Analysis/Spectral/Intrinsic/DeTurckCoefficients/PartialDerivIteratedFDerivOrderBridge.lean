@@ -1,31 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedFDerivProductDifferenceBound
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
-/-!
-# Order bridge: the iterated derivative of a partial derivative
-
-The chart Christoffel/Ricci/Lie–DeTurck expressions are built from the chart-Gram
-entries and their *partial* derivatives `partialDeriv i u = fun y ↦ fderiv ℝ u y eᵢ`
-(directional derivative in the `i`-th model-basis direction).  In the all-order
-(Faà-di-Bruno) chart-jet estimate one must control the order-`N` iterated derivative of
-such a partial derivative by the order-`(N+1)` iterated derivative of the underlying
-field.
-
-On an *open* set `s`, the directional derivative is a fixed continuous-linear image of
-`fderivWithin ℝ u s`, so the order-`N` iterated derivative of `partialDeriv i u` is, up
-to the constant `‖eᵢ‖`, the order-`N` iterated derivative of `fderivWithin ℝ u s`, which
-by `norm_iteratedFDerivWithin_fderivWithin` *equals* the order-`(N+1)` iterated derivative
-of `u`.  This raises the seminorm order by exactly one — the analytic source of the `+1`
-in the Christoffel estimate and the `+2` in the Ricci estimate.
-
-## Main results
-
-* `norm_iteratedFDerivWithin_partialDeriv_le` — on an open set,
-  `‖iteratedFDerivWithin ℝ N (partialDeriv i u) s y‖ ≤ ‖eᵢ‖ · ‖iteratedFDerivWithin ℝ (N+1) u s y‖`.
-* `iteratedFDerivSeminorm_partialDeriv_le` — the same bound transported to the order-`N`
-  seminorm: it is dominated by `‖eᵢ‖` times the order-`(N+1)` seminorm of `u`.
--/
-
 noncomputable section
 
 open Set
@@ -43,8 +18,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 
-/-- On an open set `s`, the directional derivative `partialDeriv i u` of a `ContDiffOn ℝ ∞`
-field is itself `ContDiffOn ℝ ∞`. -/
 lemma partialDeriv_contDiffOn_of_isOpen
     {u : E → ℝ} {s : Set E} (hs : IsOpen s) (hu : ContDiffOn ℝ ∞ u s)
     (i : Fin (Module.finrank ℝ E)) :
@@ -54,9 +27,6 @@ lemma partialDeriv_contDiffOn_of_isOpen
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-/-- On an open set `s`, the directional derivative `partialDeriv i (u − v)` of a difference
-agrees with the difference of directional derivatives, when both fields are differentiable
-on `s`. -/
 lemma partialDeriv_sub_eqOn
     {u v : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (hv : ContDiffOn ℝ ∞ v s)
@@ -74,8 +44,6 @@ lemma partialDeriv_sub_eqOn
     simpa using this
   rw [hfd, ContinuousLinearMap.sub_apply]
 
-/-- On an open set `s`, the directional derivative `partialDeriv i u` agrees with the
-`eᵢ`-evaluation of the within-derivative `fderivWithin ℝ u s`. -/
 lemma partialDeriv_eqOn_fderivWithin_apply
     {u : E → ℝ} {s : Set E} (hs : IsOpen s) (i : Fin (Module.finrank ℝ E)) :
     EqOn (partialDeriv (E := E) i u)
@@ -83,14 +51,6 @@ lemma partialDeriv_eqOn_fderivWithin_apply
   intro y hy
   simp only [partialDeriv, fderivWithin_of_isOpen hs hy]
 
-/-- **Order bridge for the partial derivative.**  On an open set `s`, the order-`N`
-iterated derivative of the directional derivative `partialDeriv i u` is bounded by `‖eᵢ‖`
-times the order-`(N+1)` iterated derivative of `u`:
-```
-‖iteratedFDerivWithin ℝ N (partialDeriv i u) s y‖ ≤
-    ‖(chartModelBasis E) i‖ * ‖iteratedFDerivWithin ℝ (N + 1) u s y‖ .
-```
-The raise-by-one is exactly the `+1` order budget of the Christoffel estimate. -/
 theorem norm_iteratedFDerivWithin_partialDeriv_le
     {u : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (i : Fin (Module.finrank ℝ E))
@@ -115,8 +75,6 @@ theorem norm_iteratedFDerivWithin_partialDeriv_le
     norm_iteratedFDerivWithin_fderivWithin hs.uniqueDiffOn hy
   rw [heq]
 
-/-- The order bridge transported to the order-`N` seminorm: the order-`N` seminorm of
-`partialDeriv i u` is bounded by `‖eᵢ‖` times the order-`(N+1)` seminorm of `u`. -/
 theorem iteratedFDerivSeminorm_partialDeriv_le
     {u : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (i : Fin (Module.finrank ℝ E))

@@ -1,32 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 
-/-!
-# Chart-α frame identity for the metric Lie-derivative matrix
-
-For a smooth Riemannian metric `g`, a smooth tangent vector field `W`, a chart base
-point `α : M`, indices `i, j`, and a manifold point `x ∈ chartLeviCivitaGoodSet α`,
-the chart-`α` coordinate matrix entry `chartLieDerivMetricMatrix g W α i j x`
-agrees with the intrinsic bilinear form `lieDerivMetric g W x` evaluated against
-the chart-`α` basis-frame vectors at `x`:
-$$
-  (\mathcal L_W g)^{(α)}_{ij}(x)
-    = (\mathcal L_W g)(x)\bigl(e^{(α)}_i(x),\,e^{(α)}_j(x)\bigr),
-$$
-where $e^{(α)}_i(x) = (\text{triv}\,α).\text{symm}\,x\,(e_i)$ is the chart-`α`
-basis-frame vector at `x` (`chartBasisVecFiber α i x`).
-
-The proof combines the Cartan formula `cartan_formula_for_lie_deriv_metric`
-$$
-  (\mathcal L_W g)(X, Y) = g(\nabla_X W, Y) + g(X, \nabla_Y W)
-$$
-with the chart-`α` Christoffel expansion of the Levi-Civita covariant derivative
-$\nabla W$ at the chart-`α` frame, the chart-`α` form of the inner product
-`g_inner_eq_chart_sum`, and the chart-`α` form of metric compatibility
-`partialDeriv_chartGramOnE_eq_chartChristoffel_sum`. The algebraic recombination
-is identical in shape to `cartan_formula_chart_algebra`, here written for a
-chart base point `α` distinct (in general) from the evaluation point `x`.
--/
-
 noncomputable section
 
 namespace DifferentialGeometry
@@ -47,9 +20,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- On a neighborhood of `extChartAt I α x` (with `x ∈ chartLeviCivitaGoodSet α`),
-`chartCoeffOnE α W i` equals the composition of the linear coord functional
-`b.coord i` with the chart pullback of `chartE_section_repr α W`. -/
 private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -94,15 +64,6 @@ private lemma differentiableAt_chartE_pullback_W_alpha
   have hW_at : MDiffAt (T% fun y => W y) x := W.mdifferentiableAt
   exact differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hW_at
 
-/-- At a chart-`α` good-set point `x`, the Levi-Civita covariant derivative of `W`
-in the direction of the chart-`α` basis-frame vector `chartBasisVecFiber α j x`
-reads, in the chart-`α` model basis, as
-$$
-  ((\nabla_{e^{(α)}_j} W)_x)^k_α
-    = \partial_j W^k_α(φ_α x) + ∑_l Γ^{k}_{j l}(α, φ_α x)\,W^l_α(x).
-$$
-Here `W^k_α := chartCoeff α W k` and `∂_j` is the Fréchet partial along the
-`j`-th model-basis vector. -/
 private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -270,9 +231,6 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     refine Finset.sum_congr rfl (fun j' _ => ?_)
     rw [hrepr_chartCoeff j']
 
-/-- Chart-`α` metric compatibility: at a chart-`α` good-set point `x`, the partial
-derivative of the chart-`α` Gram entry along the `k`-th model-basis direction
-decomposes through the chart-`α` Christoffel symbol of the second kind. -/
 private lemma metric_compat_coord_identity_alpha
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -289,10 +247,6 @@ private lemma metric_compat_coord_identity_alpha
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
-/-- Chart-`α` algebraic form of `chartLieDerivMetricMatrix g W α i j x` at a
-chart-`α` good-set point. The right-hand side mirrors the symbolic shape used in
-the chart-`α` Cartan expansion: after `δ`-collapses and metric-compatibility,
-this matches the chart-`α` form of `g(∇_{e_i^α} W, e_j^α) + g(e_i^α, ∇_{e_j^α} W)`. -/
 private lemma chartLieDerivMetricMatrix_alpha_algebraic
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -473,16 +427,6 @@ private lemma chartLieDerivMetricMatrix_alpha_algebraic
   rw [hreshape_H1, hreshape_H2]
   ring
 
-/-- **Chart-`α` frame identity for the metric Lie-derivative matrix
-(chart-basis-frame form).**  For a smooth Riemannian metric `g`, a smooth tangent
-vector field `W`, a chart base point `α : M`, indices `i, j`, and a manifold
-point `x ∈ chartLeviCivitaGoodSet α`,
-$$
-  (\mathcal L_W g)^{(α)}_{ij}(x)
-    = (\mathcal L_W g)(x)\bigl(e^{(α)}_i(x),\,e^{(α)}_j(x)\bigr),
-$$
-where $e^{(α)}_i(x) = (\text{triv}\,α).\text{symm}\,x\,(e_i)$ is the chart-`α`
-basis-frame vector at `x` (`chartBasisVecFiber α i x`). -/
 theorem chartLieDerivMetricMatrix_eq_lieDerivMetric_chartBasis
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

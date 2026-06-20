@@ -7,52 +7,6 @@ import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Closing `expMap_contMDiffAt_zero_of_uniformChartFlowBridge`
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, this file delivers the
-analytic ingredients needed to combine the chart-flow candidate's
-`C^1` smoothness at `v = 0` with the manifold-side identification of
-`expMap g p v` and `maximalGeodesic g p v 1`, closing the headline
-`ContMDiffAt 𝓘(ℝ, E) I 1 (expMap g p) 0`.
-
-## Components
-
-* **Chart-coordinate geodesic rescaling**: at the chart-phase ODE level
-  on `E × E`, the rescaling `(x, v) ↦ (x, a • v)` together with the
-  time-rescaling `s ↦ a * s` preserves the chart-phase ODE. This is the
-  chart-coord form of the standard geodesic invariance
-  `γ_{p, a • v}(t) = γ_{p, v}(a t)`.
-
-* **`UniformChartFlowBridge`**: a packaged uniform-in-`v` identification
-  of the chart-flow candidate at time `t' = 1` with `expMap g p` on a
-  neighbourhood of `0`. This is the substantive analytic input.
-
-* **Headline**: `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` is closed via
-  `ContMDiffAt.congr_of_eventuallyEq` applied to the candidate's `C^1`
-  smoothness.
-
-The uniform-bridge input combines the per-`v` bridge
-`chartPushedFlow_eq_maximalGeodesicChosenCurve_eventually_unconditional`
-with chart-coordinate ODE uniqueness and the rescaling identity to
-identify `expMap g p v` with the chart-flow candidate. Producing the
-uniform bridge as an unconditional theorem is the next downstream step.
-
-## Main results
-
-* `chartPhaseVF_rescale` — `chartPhaseVF g α (x, a • v) =
-  (a • v, -(a * a) • Γ_α(v, v)(x))`.
-
-* `hasDerivAt_rescaled_orbit` — chain-rule chart-phase derivative of a
-  rescaled orbit.
-
-* `UniformChartFlowBridge` — packaged uniform-in-`v` identification.
-
-* `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` — the headline `ContMDiffAt 1` smoothness
-  of `expMap g p` at `v = 0`, under the uniform-bridge hypothesis.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -76,8 +30,6 @@ section ChartCoordRescaling
 
 variable [I.Boundaryless]
 
-/-- The chart-phase rescaling on `E × E`: scale the velocity component
-by `a`. -/
 def rescaleChartOrbit (a : ℝ) : E × E → E × E :=
   fun z => (z.1, a • z.2)
 
@@ -87,9 +39,6 @@ def rescaleChartOrbit (a : ℝ) : E × E → E × E :=
 @[simp] lemma rescaleChartOrbit_mk (a : ℝ) (x v : E) :
     rescaleChartOrbit (E := E) a (x, v) = (x, a • v) := rfl
 
-/-- **Chart-phase vector field at a rescaled point.** The chart-phase
-vector field evaluated at `(x, a • v)`:
-`chartPhaseVF g α (x, a • v) = (a • v, -(a * a) • Γ_α(v, v)(x))`. -/
 lemma chartPhaseVF_rescale
     (g : SmoothRiemannianMetric I M) (α : M)
     (a : ℝ) (x v : E) :
@@ -107,11 +56,6 @@ lemma chartPhaseVF_rescale
       -(a * a) • chartChristoffelContraction (I := I) g α v v x
   rw [hΓ, neg_smul]
 
-/-- **Rescaled-orbit chain-rule chart-phase derivative.** If a curve
-`c : ℝ → E × E` has a chart-phase derivative at the rescaled time
-`a * s₀`, then the rescaled-orbit
-`s ↦ rescaleChartOrbit a (c (a * s))` has a chart-phase derivative at
-`s₀`. -/
 lemma hasDerivAt_rescaled_orbit
     {g : SmoothRiemannianMetric I M} {α : M}
     {c : ℝ → E × E} {s₀ a : ℝ}
@@ -170,23 +114,6 @@ section UniformBridge
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Packaged uniform-in-`v` chart-flow bridge at a small time `t'`.**
-The existence of a chart-flow `Φ`, a fixed time `t' > 0`, and a radius
-`ρ > 0` such that:
-
-* the manifold-valued chart-flow candidate at time `t'`,
-  `chartFlowCandidate Φ p t' : E → M`, is `ContMDiffAt 𝓘(ℝ, E) I 1` at
-  `v = 0`;
-
-* and for all `v` in the ball of radius `ρ`,
-  `expMap g p (t' • v) = chartFlowCandidate Φ p t' v` (the rescaled
-  identification: the chart-flow's value at time `t'` along `(p, v)`
-  equals the exponential map at `t' • v`).
-
-This packages the analytic input for closing `expMap_contMDiffAt_zero_of_uniformChartFlowBridge`
-via the chain rule: `expMap g p w = chartFlowCandidate Φ p t' (w / t')`
-for `w` near `0`.
--/
 def UniformChartFlowBridge (g : SmoothRiemannianMetric I M) (p : M) : Prop :=
   ∃ (Φ : (E × E) × ℝ → E × E) (t' ρ : ℝ), 0 < t' ∧ 0 < ρ ∧
     ContMDiffAt 𝓘(ℝ, E) I 1
@@ -202,16 +129,6 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **`expMap_contMDiffAt_zero_of_uniformChartFlowBridge` via the uniform chart-flow bridge.**
-The exponential map `expMap g p`, viewed as a function `E → M` (using
-`TangentSpace I p = E` definitionally), is `ContMDiffAt 𝓘(ℝ, E) I 1` at
-the zero vector, provided the uniform-in-`v` bridge at some `t' > 0`
-holds.
-
-The proof composes the candidate's `C^1` smoothness with the smooth
-scalar-multiplication `w ↦ w / t'`. Concretely, by the bridge,
-`expMap g p w = chartFlowCandidate Φ p t' (w / t')` on a neighbourhood
-of `w = 0`, and the right-hand side is `C^1` at `w = 0`. -/
 theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : UniformChartFlowBridge (I := I) g p) :
@@ -266,8 +183,6 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     exact hheq
   exact hF_cd.congr_of_eventuallyEq hev
 
-/-- **Existence-form variant.** The headline packaged as taking an
-explicit `∃`-statement. -/
 theorem expMap_contMDiffAt_zero_exists
     (g : SmoothRiemannianMetric I M) (p : M)
     (huniform : ∃ (Φ : (E × E) × ℝ → E × E) (t' ρ : ℝ), 0 < t' ∧ 0 < ρ ∧
@@ -288,9 +203,6 @@ section UniformBridgePointwise
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- At `v = 0` and `t' = 0`, the chart-flow candidate value matches
-`expMap g p 0 = p`, provided the chart-flow has the correct initial
-condition. -/
 lemma chartFlowCandidate_zero_matches_expMap_at_origin
     (g : SmoothRiemannianMetric I M) (p : M)
     {Φ : (E × E) × ℝ → E × E}

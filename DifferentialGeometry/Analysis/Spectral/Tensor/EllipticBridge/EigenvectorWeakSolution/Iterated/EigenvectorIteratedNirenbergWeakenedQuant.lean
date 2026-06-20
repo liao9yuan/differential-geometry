@@ -2,65 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorNonSmoothDiffQuotQuant
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-/-!
-# Quantitative weakened Nirenberg interior `W^{2,2}` regularity of the iterated mixed partial
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, the uniform-Sobolev
-hypothesis `h_atlas`, an eigenbasis index `i`, a chart center `α : M`, and a
-component multi-index `P₀`, the iterated divergence-form datum
-`eigenvectorIteratedTensorChartBilinearData g r s h_atlas i α P₀ m` packages the
-`m`-fold-differentiated weak-elliptic identity satisfied by the eigenvector
-chart component, with principal factor the recursive `m`-fold mixed weak partial
-`eigenvectorChartIteratedPartial g r s h_atlas i α P₀ m directions`.
-
-The qualitative headline `eigenvectorChartIteratedPartial_memWkp_two_two` shows
-that, under chart-`H^{m+1}` regularity of the eigenvector chart component, the
-`m`-fold mixed weak partial lies in `MemWkp 2 2 … (chartTargetEuclid α)`.
-
-This module supplies the **quantitative** analogue: an explicit norm bound. The
-`W^{2,2}`-norm of the `m`-fold mixed weak partial on the chart target is
-controlled by its `W^{1,2}`-norm on the chart target plus the `L²`-norm of the
-carrier's effective source `f_chart`, with an explicit (existential) constant.
-
-## Strategy
-
-The qualitative proof bridges the iterated carrier `D_m` into a genuine
-`TensorChartBilinearH1ComplData` via
-`eigenvectorIteratedTensorChartBilinearData_toData`, runs the qualitative
-order-2 interior elliptic engine `tensorChartBilinear_chartComponent_regularity_of_data`
-(which builds its Nirenberg cutoff internally) on a precompact subdomain `Ω''`,
-and promotes the interior `W^{2,2}` to global `W^{2,2}` via the support-aware
-promotion `MemWkp_of_memWkp_precompact_of_ae_zero_off_compact`.
-
-The quantitative proof keeps the same region setup but replaces the qualitative
-engine with the **quantitative** interior order-2 engine
-`tensor_h2_chart_loc_of_data_quantitative`, which requires a smooth Nirenberg
-cutoff `η` (with a precompact target `Ω'` inside the chart target, a
-difference-quotient radius `R₀`, and a subregion `Ω'' ⊆ Ω'` on which `η ≡ 1`)
-supplied as hypotheses, and delivers — for every pair `(i, k)` — a weak
-`k`-partial `g_{i,k} ∈ L²(Ω'')` of `D.weak_partial i` with an explicit norm
-bound. The cutoff and regions are constructed internally, mirroring the cutoff
-construction of `eigenvectorTensorChartBilinear_uniform_diffQuot_bound`. The
-interior `W^{2,2}`-norm is then assembled from the order-`(k+1)` `wkpNorm`
-decomposition `wkpNorm_succ_eq_eLpNorm_add_sum_partial`, and the quantitative
-support-aware promotion `wkpNorm_le_of_memWkp_precompact_of_ae_zero_off_compact`
-raises it to a global `wkpNorm`-bound on the chart target.
-
-## Main result
-
-* `eigenvectorChartIteratedPartial_wkpNorm_two_two_le` — the explicit-norm-bound
-  analogue of `eigenvectorChartIteratedPartial_memWkp_two_two`: the `m`-fold
-  mixed weak partial lies in `MemWkp 2 2 … (chartTargetEuclid α)` *and* its
-  `W^{2,2}`-norm on the chart target is bounded by an explicit constant times
-  the sum of its `W^{1,2}`-norm on the chart target and the `L²`-norm of the
-  carrier's effective source.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -92,10 +33,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Geometric-energy `√`-to-linear conversion.** For nonnegative reals `A`,
-`B`, `K_f`, a finite family `a : Fin n → ℝ` with `0 ≤ a l ≤ A`, and nonnegative
-reals `a_u ≤ A`, `a_f ≤ K_f · B`, the square root of the energy expression
-`∑ l, (a l)² + a_u² + a_f²` is bounded by `√(n + 1 + K_f²) · (A + B)`. -/
 private lemma sqrt_geometricEnergy_le
     {n : ℕ} {A B K_f : ℝ} {a : Fin n → ℝ} {a_u a_f : ℝ}
     (hA : 0 ≤ A) (hB : 0 ≤ B) (_hK_f : 0 ≤ K_f)
@@ -144,10 +81,6 @@ private lemma sqrt_geometricEnergy_le
     _ = C₂ * (A + B) := by
         rw [hC₂_def, Real.sqrt_sq (by linarith [hA, hB])]
 
-/-- **Density comparison for the `f_chart` `L²`-norm.** For a compact subset
-`K ⊆ chartTargetEuclid α`, the plain-volume `L²`-norm of any `f` on `K` is
-bounded by a nonnegative scalar times the chart-pulled weighted `L²`-norm of `f`
-on the chart target. -/
 private lemma eLpNorm_volume_restrict_compact_le_weighted
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -194,14 +127,6 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
 
-/-- **Function-uniform density comparison for the `f_chart` `L²`-norm.** For a
-compact subset `K ⊆ chartTargetEuclid α`, there is a single nonnegative scalar
-`c_d` — depending only on `g`, `α`, and `K`, never on the integrand — such that
-the plain-volume `L²`-norm on `K` of *every* function `f` is bounded by
-`ENNReal.ofReal c_d` times the chart-pulled weighted `L²`-norm of `f` on the
-chart target. This is the integrand-uniform companion of
-`eLpNorm_volume_restrict_compact_le_weighted`: the dominating-measure scalar is
-independent of the integrand, so the same `c_d` works for all `f`. -/
 private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -250,8 +175,7 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
   exact h_mono
 
 set_option maxHeartbeats 1600000 in
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_wkpNorm_two_two_le`. -/
+
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -911,8 +835,7 @@ theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le
         rw [← mul_assoc, ← ENNReal.ofReal_mul hK_prom_pos.le]
 
 set_option maxHeartbeats 1600000 in
-/-- Chart-locality-free twin of
-`eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform`. -/
+
 theorem eigenvectorChartIteratedPartial_wkpNorm_two_two_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ} :

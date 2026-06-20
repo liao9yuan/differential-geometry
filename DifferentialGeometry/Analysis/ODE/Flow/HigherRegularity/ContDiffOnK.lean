@@ -1,63 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 
-/-!
-# `ContDiffOn ℝ k` regularity of the local flow
-
-For a time-dependent vector field `f : ℝ → E → E` on a Banach space `E` and a local
-Picard–Lindelöf flow `Φ : E × ℝ → E` packaged by `IsLocalFlow`, the previous file
-`Flow/C1Regularity/ContDiffOnOne.lean` established the joint `C^1` regularity of `Φ` on a strictly
-interior open neighbourhood of `(x₀, t₀)`, under the assumption that `f` is jointly
-`C^1`.
-
-This file is the entry-point for the *general* `C^k` regularity question: if `f` is
-jointly `C^k`, then `Φ` is jointly `C^k`.  The mathematical content has two stages.
-
-## Stage 1: `C^1` headline theorem (proved here).
-
-The headline theorem `contDiffOn_flow_of_isLocalFlow_of_contDiff` takes a `ContDiffOn ℝ k`
-hypothesis on `f` for any `k ∈ ℕ∞` with `1 ≤ k`, and delivers `ContDiffOn ℝ 1 Φ U` on the
-same strictly-interior neighbourhood as `ContDiffOnOne`.  Internally it reduces to
-`contDiffOn_flow_of_isLocalFlow` via `ContDiffOn.of_le`.
-
-## Stage 2: induction `k → k + 1` (deferred).
-
-The genuine `C^k` claim is proved by induction on `k`.  The inductive step requires that
-the joint Fréchet derivative `D Φ : E × ℝ → ((E × ℝ) →L[ℝ] E)` is itself jointly `C^{k-1}`.
-By V.2.c.2 the derivative decomposes as a coproduct
-
-```
-D Φ (x, t) = Lsp (x, t) .coprod (Lti (x, t))
-```
-
-where
-
-* `Lti (x, t) : ℝ →L[ℝ] E` is the time-direction CLM `(id_ℝ).smulRight (f t (Φ ⟨x, t⟩))`.
-  Its smoothness in `(x, t)` reduces to the smoothness of the composition
-  `(x, t) ↦ f t (Φ ⟨x, t⟩)` — straightforward from `ContDiff.comp` once `Φ` is `C^k` and
-  `f` is `C^{k+1}`.  The CLM-construction `v ↦ (id_ℝ).smulRight v` is itself a bounded
-  linear map, hence smooth.  This piece is fully addressed in the preparatory section
-  `TimePieceSmoothness` below.
-
-* `Lsp (x, t) : E →L[ℝ] E` is the variational linear map at `(x, t)`, defined by the
-  variational ODE `y'(t) = (D_x f)(t, Φ(x, t)) y(t)`.  Proving that `Lsp` is jointly
-  `C^{k-1}` on its parameter domain requires a *smooth dependence on parameters* theorem
-  for linear ODEs: if the coefficient map `A : E × ℝ → (E →L[ℝ] E)` is `C^j` jointly
-  (here `A (x, t) = (D_x f)(t, Φ(x, t))`), the solution `y_δ (x, t)` of `y'(x, t) =
-  A(x, t) y(x, t)` with `y_δ(x, t₀) = δ` is `C^j` jointly in `(x, t)`.  This is itself
-  an inductive theorem; its core inductive step in turn requires the parameter version
-  of `contDiffOn_enat_Icc_of_hasDerivWithinAt` for solutions of `t`-dependent linear
-  ODEs.  That infrastructure is not yet present and is left for a follow-up.
-
-## Files
-
-This file imports `Flow/C1Regularity/ContDiffOnOne.lean` and provides the headline `C^1` theorem in the
-unified `C^k` signature, together with the preparatory smoothness lemma for the time
-piece `(x, t) ↦ f t (Φ ⟨x, t⟩)` which will plug into the eventual induction.
-
-All theorems are formulated on a generic Banach space `E`; `[InnerProductSpace ℝ E]` is
-*not* used.  No manifold or tensor file is imported.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real
@@ -74,18 +16,12 @@ section TimePieceSmoothness
 
 variable {f : ℝ → E → E} {Φ : E × ℝ → E}
 
-/-- The "graph map" `(x, t) ↦ (t, Φ ⟨x, t⟩)` is jointly `C^k` on the open neighbourhood
-`U`, provided `Φ` is jointly `C^k` on `U`.  This is a building block for showing the
-time piece of the Fréchet derivative is `C^k`. -/
 lemma contDiffOn_graphMap_of_contDiffOn_flow
     {k : ℕ∞} {U : Set (E × ℝ)} (hΦ_Ck : ContDiffOn ℝ k Φ U) :
     ContDiffOn ℝ k (fun q : E × ℝ => ((q.2, Φ q) : ℝ × E)) U := by
   refine ContDiffOn.prodMk ?_ hΦ_Ck
   exact contDiff_snd.contDiffOn
 
-/-- **Smoothness of the time piece `(x, t) ↦ f t (Φ ⟨x, t⟩)`.**  If `f` is jointly
-`C^k` on `Set.univ` and `Φ` is jointly `C^k` on the open set `U`, then the composition
-`(x, t) ↦ f t (Φ ⟨x, t⟩)` is jointly `C^k` on `U`. -/
 theorem contDiffOn_orbit_composition
     {k : ℕ∞} {U : Set (E × ℝ)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -97,9 +33,6 @@ theorem contDiffOn_orbit_composition
   have hcomp : ContDiffOn ℝ k (uncurry f ∘ g) U := hf_Ck.comp hg hmaps
   convert hcomp using 1
 
-/-- The CLM-valued time piece `(x, t) ↦ (id_ℝ).smulRight (f t (Φ ⟨x, t⟩))` is
-jointly `C^k` on `U` whenever `(x, t) ↦ f t (Φ ⟨x, t⟩)` is `C^k`.  The construction
-`v ↦ (id_ℝ).smulRight v` is a bounded linear map `E →L[ℝ] (ℝ →L[ℝ] E)` and so smooth. -/
 theorem contDiffOn_timePiece_CLM
     {k : ℕ∞} {U : Set (E × ℝ)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -128,18 +61,6 @@ section MainTheorem
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Local flow of a `C^k` vector field is locally `C^1` (and hence `C^min(k, 1)`).**
-
-For a time-dependent vector field `f : ℝ → E → E` that is jointly `ContDiffOn ℝ k` on
-`Set.univ` with `1 ≤ k`, and a local Picard–Lindelöf flow `Φ` packaged by `IsLocalFlow`,
-the flow `Φ` is jointly `C^1` on the strictly-interior open neighbourhood
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` provided by V.2.c.2.
-
-The conclusion is stated at the constant regularity `1`, not at `k` itself.  Promoting
-the conclusion to `C^k` for `k ≥ 2` requires a separate smooth-dependence-on-parameters
-theorem for linear ODEs (the spatial piece of the Fréchet derivative is the variational
-linear map of a linear ODE with parameter-dependent coefficients).  This promotion is
-left for a follow-up; see the file header. -/
 theorem contDiffOn_flow_of_isLocalFlow_of_contDiff
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {k : ℕ∞} (hk : 1 ≤ k)
@@ -162,14 +83,6 @@ theorem contDiffOn_flow_of_isLocalFlow_of_contDiff
     (tmin := tmin) (tmax := tmax) (Φ := Φ) hΦ hf_C1 hT hT_lt_mid hT_mid_lt_out hM hMT_mid
     hsub hr' hρ_lt_mid hρ_mid_lt_out hρρ' hρ_out_le_r hA_bd
 
-/-- **Convenient packaged form.**  Existence of an open neighbourhood of `(x₀, t₀)` on
-which the flow is jointly `C^1`, from `ContDiffOn ℝ k` of the vector field for any
-`k ∈ ℕ∞` with `1 ≤ k`.
-
-The neighbourhood is `ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` with strictly positive `ρ` and
-`T` extracted from the local flow's regularity data.  Hypotheses `hbnd` packages a uniform
-bound on the spatial derivative of `f` along the orbits in a closed ball / closed time
-interval; in concrete applications this follows from compactness + joint continuity. -/
 theorem exists_contDiffOn_flow_of_contDiff
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {k : ℕ∞} (hk : 1 ≤ k)
@@ -200,10 +113,6 @@ section InductiveStep
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- The **time piece** of the joint Fréchet derivative: the CLM `s ↦ s • f t (Φ ⟨x, t⟩)`
-viewed as a function of `(x, t)`.  This is total on `E × ℝ` and, by V.2.c.2's joint
-derivative formula, agrees with the time-direction partial Fréchet derivative of `Φ` at
-every interior `(x, t)`. -/
 def timePieceFn (f : ℝ → E → E) (Φ : E × ℝ → E) : E × ℝ → (ℝ →L[ℝ] E) :=
   fun q => (ContinuousLinearMap.id ℝ ℝ).smulRight (f q.2 (Φ q))
 
@@ -211,8 +120,6 @@ def timePieceFn (f : ℝ → E → E) (Φ : E × ℝ → E) : E × ℝ → (ℝ 
 lemma timePieceFn_apply (f : ℝ → E → E) (Φ : E × ℝ → E) (q : E × ℝ) :
     timePieceFn f Φ q = (ContinuousLinearMap.id ℝ ℝ).smulRight (f q.2 (Φ q)) := rfl
 
-/-- The **time piece** is jointly `C^k` on any open set on which both `f` (on `Set.univ`)
-and `Φ` are jointly `C^k`. -/
 theorem contDiffOn_timePieceFn
     {k : ℕ∞} {U : Set (E × ℝ)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -220,8 +127,6 @@ theorem contDiffOn_timePieceFn
     ContDiffOn ℝ k (timePieceFn f Φ) U :=
   contDiffOn_timePiece_CLM hf_Ck hΦ_Ck
 
-/-- **Inductive promotion.**  If `Φ` is differentiable on the open set `U` and its Fréchet
-derivative is jointly `C^j` on `U`, then `Φ` is jointly `C^{j+1}` on `U`. -/
 theorem contDiffOn_succ_of_contDiffOn_fderiv
     {U : Set (E × ℝ)} (hU_open : IsOpen U) {j : ℕ∞}
     (hΦ_diff : DifferentiableOn ℝ Φ U)
@@ -232,16 +137,6 @@ theorem contDiffOn_succ_of_contDiffOn_fderiv
   intro h
   exact absurd h (by exact_mod_cast WithTop.coe_ne_top)
 
-/-- **Inductive step (coproduct form).**
-
-If on the open set `U`:
-
-* `Φ` is differentiable;
-* `Lsp : E × ℝ → (E →L[ℝ] E)` is jointly `C^k`;
-* the time piece `timePieceFn f Φ` is jointly `C^k`;
-* the joint Fréchet derivative of `Φ` agrees with `Lsp.coprod (timePieceFn f Φ)`,
-
-then `Φ` is jointly `C^{k+1}` on `U`. -/
 theorem contDiffOn_succ_of_fderiv_coprod_smooth
     {U : Set (E × ℝ)} (hU_open : IsOpen U) {k : ℕ∞}
     {Lsp : E × ℝ → (E →L[ℝ] E)}
@@ -277,21 +172,6 @@ section GeneralHeadline
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **The inductive headline.**
-
-Suppose `Φ` is a local flow of a jointly `C^{k+1}` vector field `f`.  The flow is jointly
-`C^{k+1}` on the strictly-interior open neighbourhood `U = ball x₀ ρ ×ˢ Ioo (t₀-T) (t₀+T)`
-of `(x₀, t₀)` given by V.2.c.2's three-layer nested setup, provided:
-
-* the inductive hypothesis: `Φ` is already jointly `C^k` on `U`;
-* a spatial-piece candidate `Lsp : E × ℝ → (E →L[ℝ] E)` is jointly `C^k` on `U`, and
-  agrees on `U` with the spatial partial Fréchet derivative of `Φ`.
-
-The agreement condition is phrased via the explicit coproduct identity for the joint
-Fréchet derivative.  Combined with `hasFDerivAt_flow_jointly_at` (V.2.c.1), it pins
-`Lsp(x, t)` down as the variational linear map at the orbit `Φ ⟨x, ·⟩` evaluated at
-time `t`, at every `(x, t) ∈ U`.  Hence the user-supplied `Lsp` is essentially the
-variational linear map. -/
 theorem contDiffOn_flow_succ_of_spatial_smooth
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -335,21 +215,6 @@ theorem contDiffOn_flow_succ_of_spatial_smooth
     contDiffOn_timePieceFn hf_Ck hΦ_Ck
   exact contDiffOn_succ_of_fderiv_coprod_smooth hU_open hΦ_diff hLsp_Ck hLti_Ck hLsp_eq
 
-/-- **The generic `C^k` headline driven by a parametric-smoothness sequence.**
-
-Given, for every level `j < k`, the spatial-piece smoothness at level `j` together with
-the coproduct identity for the Fréchet derivative, the flow is jointly `C^k` on the
-strictly-interior open neighbourhood, for any `k : ℕ`.
-
-The hypothesis is a *sequence* of candidate spatial-piece functions
-`Lsp_seq : ℕ → E × ℝ → (E →L[ℝ] E)`, one per inductive level: at level `j` the candidate
-`Lsp_seq j` must be jointly `C^j` and agree with the spatial partial of `Φ` on the open
-neighbourhood (in the coproduct form with the time piece).
-
-In practice all of these candidates are equal — the unique spatial partial Fréchet
-derivative of `Φ`, by uniqueness of the Fréchet derivative once it exists — so this
-sequence-of-hypotheses formulation captures exactly the parametric-smoothness Mathlib
-gap. -/
 theorem contDiffOn_flow_of_spatial_smooth_seq
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {T_out T_mid T M : ℝ} (hT : 0 < T) (hT_lt_mid : T < T_mid) (hT_mid_lt_out : T_mid < T_out)
@@ -428,20 +293,6 @@ section PublicHeadline
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
-/-- **Joint `C^k` regularity of the local flow** (general `k : ℕ`, conditional on
-parametric-smoothness hypotheses).
-
-For a time-dependent vector field `f : ℝ → E → E` that is jointly `ContDiffOn ℝ k` on
-`Set.univ` and a local Picard–Lindelöf flow `Φ` packaged by `IsLocalFlow`, the flow `Φ`
-is jointly `C^k` on the strictly-interior open neighbourhood
-`ball x₀ ρ ×ˢ Ioo (t₀ - T) (t₀ + T)` provided by V.2.c.2's three-layer nested setup,
-*provided* a parametric-smoothness sequence `(Lsp_seq j)` for the spatial partial
-Fréchet derivative is supplied.
-
-For `k = 1` the parametric-smoothness hypothesis is satisfied automatically: the
-spatial piece is jointly continuous, by V.2.c.2's
-`continuousOn_fderiv_flow_of_isLocalFlow`.  For `k ≥ 2` the hypothesis is a Mathlib gap
-to be discharged by parametric-ODE-smoothness theorems for variational linear ODEs. -/
 theorem contDiffOn_flow_of_isLocalFlow_of_contDiff_general
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (k : ℕ)

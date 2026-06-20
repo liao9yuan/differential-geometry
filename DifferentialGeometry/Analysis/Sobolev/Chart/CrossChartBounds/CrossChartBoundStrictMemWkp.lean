@@ -4,31 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.TransitionDif
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
-/-!
-# Strict per-pair cross-chart `W^{1,p}` bound — non-smooth (`MemWkp`) inputs
-
-Extension of the smooth-input cross-chart bound `cross_chart_bound_strict_strong`
-to the full Sobolev class. For two chart points `γ α : M` on a closed
-Riemannian manifold and a fixed compact set `K_α ⊆ (chartAt H α).source`, the
-chart-γ pushed cross-pullback `chartPushed γ (chartPullback I α v)` is bounded
-in `W^{1,p}(chartTargetEuclid γ)` by a constant times
-`‖v‖_{W^{1,p}(chartTargetEuclid α)}` for every `v ∈ MemWkp 1 p (chartTargetEuclid α)`
-whose closed support sits inside the chart-α image of `K_α`.
-
-The proof mirrors the smooth-input version but replaces the smooth tools by
-their non-smooth counterparts:
-
-* the qualitative chain rule `MemWkp.comp_smoothDiffeoBoundedAtOrder` and the
-  quantitative chain rule `SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le`;
-* the qualitative Leibniz lemma `MemWkp.smul_smooth_bounded` and the
-  quantitative Leibniz bound `wkpNorm_smul_smooth_bounded_le_one` for a
-  smooth bounded factor;
-* a non-smooth open-set monotonicity helper `wkpNorm_le_of_tsupport_subset`
-  giving the bound `wkpNorm f Ω ≤ wkpNorm f Ω'` whenever `Ω' ⊆ Ω` are open
-  and `tsupport f ⊆ Ω'`. Combined with the matching forward equality on the
-  smaller side, this avoids the smooth open-set monotonicity lemma.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -40,8 +15,6 @@ namespace Sobolev
 
 namespace Euclidean
 
-/-- For a function `f` whose closed support lies inside an open set `Ω' ⊆ Ω`, the
-indicator on `Ω` agrees pointwise with the indicator on `Ω'`. -/
 private lemma indicator_eq_of_tsupport_subset
     {α : Type*} [Zero α]
     {X : Type*} [TopologicalSpace X] {f : X → α}
@@ -58,8 +31,6 @@ private lemma indicator_eq_of_tsupport_subset
       exact image_eq_zero_of_notMem_tsupport hx_off
     · simp [Set.indicator_of_notMem hxΩ]
 
-/-- For a function `f` whose closed support lies inside an open set `Ω' ⊆ Ω`,
-the `eLpNorm` on `volume.restrict Ω` agrees with the one on `volume.restrict Ω'`. -/
 private lemma eLpNorm_restrict_eq_of_tsupport_subset_aux
     {X : Type*} [MeasurableSpace X] [TopologicalSpace X] {μ : Measure X}
     {α : Type*} [NormedAddCommGroup α] {p : ℝ≥0∞}
@@ -71,8 +42,6 @@ private lemma eLpNorm_restrict_eq_of_tsupport_subset_aux
       ← eLpNorm_indicator_eq_eLpNorm_restrict hΩ'_meas]
   rw [indicator_eq_of_tsupport_subset hΩΩ' hf_supp]
 
-/-- A weak version: if `f` is a.e. zero outside `Ω'` (rather than having
-closed-support inclusion), the same `eLpNorm` equality holds. -/
 private lemma eLpNorm_restrict_eq_of_ae_zero_off
     {X : Type*} [MeasurableSpace X] [TopologicalSpace X] {μ : Measure X}
     {α : Type*} [NormedAddCommGroup α] {p : ℝ≥0∞}
@@ -118,12 +87,6 @@ private lemma eLpNorm_restrict_eq_of_ae_zero_off
     exact h_ae'
   exact eLpNorm_congr_ae h_ae
 
-/-- For a function `u : EuclideanSpace ℝ (Fin d) → ℝ` with `tsupport u ⊆ Ω' ⊆ Ω`
-(both open) and `u ∈ MemWkp 1 p Ω`, the `wkpNorm 1 p` on `Ω` agrees with the
-one on `Ω'`. The `MemWkp` membership on `Ω'` is also delivered.
-
-This is the non-smooth analogue of `wkpNorm_eq_of_compactSupport_smooth_subset`.
-The proof goes via uniqueness of weak partials up to a.e. equality. -/
 lemma wkpNorm_eq_of_tsupport_subset
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -314,18 +277,6 @@ lemma wkpNorm_eq_of_tsupport_subset
   rw [h_iter1_Ω, h_iter1_Ω']
   exact h_partial_eLp_eq (α 0)
 
-/-- **Larger-set monotonicity inequality.** For `Ω', Ω` open, `Ω' ⊆ Ω`, `f` with
-`tsupport f ⊆ Ω'`, and `f ∈ MemWkp 1 p Ω'` (note: only on the smaller open set),
-`wkpNorm 1 p f Ω ≤ wkpNorm 1 p f Ω'`.
-
-The non-trivial case is `f ∈ MemW1p p f Ω`, where the chosen weak partial on `Ω`
-is a.e. zero outside `Ω'` (using uniqueness of weak partials on the open set
-`Ω \ tsupport f`, where `f = 0`). The eLpNorm of the partial on `Ω` then equals
-its eLpNorm on `Ω'`, which equals the eLpNorm of the chosen partial on `Ω'`.
-
-If `f ∉ MemW1p p f Ω`, the chosen weak partial on `Ω` is the junk zero function,
-hence its eLpNorm vanishes; only the `eLpNorm f Ω = eLpNorm f Ω'` part contributes,
-and `eLpNorm f Ω' ≤ wkpNorm f Ω'` (the latter being the full Sobolev norm). -/
 lemma wkpNorm_le_of_tsupport_subset_mem_small
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -509,8 +460,6 @@ lemma wkpNorm_le_of_tsupport_subset_mem_small
   rw [h_iter1_Ω, h_iter1_Ω']
   exact h_partial_le (α 0)
 
-/-- If `u ∈ MemW1p p Ω` and `Ω' ⊆ Ω` is open, then `chosenWeakPartial'` on
-`Ω` agrees a.e. with `chosenWeakPartial'` on `Ω'` when restricted to `Ω'`. -/
 private lemma chosenWeakPartial_ae_eq_on_subset
     {d : ℕ} [NeZero d]
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -548,9 +497,6 @@ private lemma chosenWeakPartial_ae_eq_on_subset
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ' hP_Ω_restricted hP_Ω'
     hP_Ω_loc_Ω' hP_Ω'_loc_Ω'
 
-/-- For `u ∈ MemWkp (h+1) p Ω` that is a.e. zero on an open set `U ⊆ Ω`
-with `Ω \ Ω' ⊆ U`, the iterated weak partials of `u` on `Ω` and `Ω'`
-agree a.e. on `Ω'`. The proof uses induction on the order `h`. -/
 private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
     {d : ℕ} [NeZero d]
     {h : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -604,9 +550,6 @@ private lemma iterWeakPartial_ae_eq_of_ae_zero_open_subset
           (fun i : Fin h => α i.succ) h_ae_fg
       exact h_ih.trans h_congr
 
-/-- Variant of `iterWeakPartial_ae_eq_of_ae_zero_open_subset` specialised to
-the case where the open set `U` is `Ω \ tsupport u`, which always works when
-`tsupport u ⊆ Ω'`. This is the lemma most callers need. -/
 private lemma iterWeakPartial_ae_eq_tsupport_subset
     {d : ℕ} [NeZero d]
     {j : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -634,10 +577,6 @@ private lemma iterWeakPartial_ae_eq_tsupport_subset
   exact iterWeakPartial_ae_eq_of_ae_zero_open_subset (d := d) hp_one
     hΩ hΩ' hU_open hΩΩ' hU_sub hU_contains hu_mem hu_zero α
 
-/-- **General-k version of `wkpNorm_eq_of_tsupport_subset`.** For a function
-`u : EuclideanSpace ℝ (Fin d) → ℝ` with `tsupport u ⊆ Ω' ⊆ Ω` (both open)
-and `u ∈ MemWkp k p Ω`, the `wkpNorm k p` on `Ω` agrees with the one on `Ω'`.
-The `MemWkp` membership on `Ω'` is also delivered. -/
 lemma wkpNorm_eq_of_tsupport_subset_general
     {d : ℕ} [NeZero d]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -808,11 +747,6 @@ lemma wkpNorm_eq_of_tsupport_subset_general
     rw [h_eLp_Ω_eq_Ω', h_eLp_eq_on_Ω']
   exact ⟨h_mem_Ω', h_norm_eq⟩
 
-/-- For `u ∈ MemWkp j p Ω'` with `u =ᵐ 0` on an open set `U ⊆ Ω` that contains
-`Ω \ Ω'` (where `Ω' ⊆ Ω` open), every iterated weak partial on `Ω` has
-`eLpNorm` on `Ω'` at most that of the same-order iterated weak partial on `Ω'`.
-The proof inducts on the order `j` and uses `U` to propagate the a.e.-zero
-property to all higher-order weak partials. -/
 private lemma eLpNorm_iterWeakPartial_Ω_le_Ω'_with_U
     {d : ℕ} [NeZero d]
     {j : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -887,13 +821,6 @@ private lemma eLpNorm_iterWeakPartial_Ω_le_Ω'_with_U
         rw [eLpNorm_congr_ae h_zero_iter]
         simp
 
-/-- **General-k version of `wkpNorm_le_of_tsupport_subset_mem_small`.** For
-`Ω', Ω` open, `Ω' ⊆ Ω`, `u` with `tsupport u ⊆ Ω'`, and `u ∈ MemWkp k p Ω'`
-(note: only on the smaller open set), `wkpNorm k p u Ω ≤ wkpNorm k p u Ω'`.
-
-The proof uses the per-term `eLpNorm` comparison lemma above, together with
-the fact that `iterWeakPartial` on `Ω` is a.e. zero on `Ω \ Ω'` (since `u`
-vanishes there), so the `eLpNorm` on `Ω` equals the one on `Ω'`. -/
 lemma wkpNorm_le_of_tsupport_subset_mem_small_general
     {d : ℕ} [NeZero d]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -1019,13 +946,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Headline theorem (`MemWkp` inputs).** For two chart points `γ α : M` on a
-closed Riemannian manifold and a fixed compact set `K_α ⊆ (chartAt H α).source`,
-there exists a positive constant `K` (depending only on `γ`, `α`, `K_α`, the
-chart-atlas partition of unity, and `p`) such that for every `v ∈ MemWkp 1 p`
-on the chart-α Euclidean target whose closed support sits inside the chart-α
-Euclidean image of `K_α`, the chart-γ pushed cross-pullback satisfies the
-`W^{1,p}` bound. -/
 theorem cross_chart_bound_strict_strong_memWkp
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

@@ -3,67 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDiv
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartComponentWkpNorm
 
-/-!
-# Eigenbasis-uniform per-`K'`-family atom converters for the partial,
-# component, and cutoff-partial limit-atom Sobolev bounds
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an order ceiling
-`N : ℕ`, an eigenbasis-uniform Sobolev hypothesis `hCN_bd` on the eigenvector
-chart components at order `N` — a single nonnegative constant `CN`, an exponent
-`eN`, with the bound holding β-uniformly over every base point and component
-multi-index — and a β-uniform `MemWkp` regularity input for the resolvent chart
-components, this file ships three per-`K'`-family atom converters needed to
-populate the per-`K`-family atom families of the level-`(m+1)` carrier
-hypothesis bundle.
-
-## The three atoms
-
-* `eigenvector_componentLpLimit_perK_from_uniform_β_unconditional` — the
-  component-limit atom, at order `K' ≤ N`. The atom is
-  `i.fst.val •` the canonical eigenvector chart component; its iterated Sobolev
-  norm reduces to that of the chart component (the chart-component converter at
-  order `K' ≤ N`) times the scalar `μ := i.fst.val`, which is absorbed into
-  `μ⁻¹^eN` via the `μ · μ⁻¹^eN ≤ μ⁻¹^eN` inequality (`μ ∈ (0, 1]`).
-* `eigenvector_partialLpLimit_perK_from_uniform_β_unconditional` — the
-  partial-limit atom, at order `K' ≤ N - 1` (or
-  equivalently `K' + 1 ≤ N`). The atom is `i.fst.val •` the eigenvector weak
-  chart partial; the latter is a genuine weak `k`-th partial of the chart
-  component (`eigenvectorChartWeakPartial_hasWeakPartialDeriv`), so it agrees
-  almost everywhere with the canonical chosen weak partial of the chart
-  component, whose iterated Sobolev norm at order `K'` is at most the order
-  `K' + 1` Sobolev norm of the chart component itself
-  (`wkpNorm_chosenWeakPartial_le`). The chart-component converter then
-  supplies the order-`(K' + 1)` chart-component bound, and the scalar `μ` is
-  absorbed exactly as in the component case.
-* `eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional` — the
-  cutoff partial-limit atom, at order
-  `K' ≤ N - 1`. The atom is `i.fst.val •` the eigenvector cutoff chart
-  partial; the latter is a genuine weak `l`-th partial of the cutoff chart
-  component (`eigenvectorCutoffChartPartialLp_hasWeakPartialDeriv`). The
-  input-uniform cutoff ↔ partition-of-unity iterated-Sobolev bound
-  `wkpNorm_tensorL2ChartComponentCutoff_le_of_pou_uniform` bounds the cutoff
-  chart component's order-`(K' + 1)` Sobolev norm by a single (α, P₀, K')
-  -dependent constant times a finite sum, over transport chart centres `β` and
-  component multi-indices `Q`, of order-`(K' + 1)` Sobolev norms of the
-  partition-of-unity chart components of the eigenvector. Each summand is then
-  dominated by the chart-component converter at `(β, Q)` and order
-  `K' + 1 ≤ N`. The resulting output constant depends on `K'` (and on
-  `α, P₀, N`), packaged as a function `CN' : ℕ → ℝ`.
-
-## β-uniformity
-
-The output bounds are uniform over the eigenbasis index `i` — the cutoff
-multiplier in the third headline is supplied by an `i`-uniform cutoff bridge,
-so a single constant per `K'` serves every eigenvector. The absorption identity
-`μ · μ⁻¹^eN ≤ μ⁻¹^eN` keeps the exponent stable at `eN` across all three
-headlines.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -103,7 +42,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] in
-/-- `μ · μ⁻¹^eN ≤ μ⁻¹^eN` whenever `0 < μ ≤ 1`. -/
+
 private lemma mu_mul_inv_pow_le_inv_pow_local
     {μ : ℝ} (hμ_pos : 0 < μ) (hμ_le_one : μ ≤ 1) (eN : ℕ) :
     μ * μ⁻¹ ^ eN ≤ μ⁻¹ ^ eN := by
@@ -113,7 +52,6 @@ private lemma mu_mul_inv_pow_le_inv_pow_local
     mul_le_mul_of_nonneg_right hμ_le_one hμ_inv_pow_nn
   simpa using h
 
-/-- The chart-locality-free eigenbasis vector has unit norm. -/
 private lemma vec_norm_eq_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -125,7 +63,6 @@ private lemma vec_norm_eq_one_local
     (tensorResolventL2_isCompactOperator (I := I) (M := M)
       g r s)).norm_eq_one i
 
-/-- The chart-locality-free resolvent eigenvalue is strictly positive. -/
 private lemma eigenval_pos_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -141,7 +78,6 @@ private lemma eigenval_pos_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).1
 
-/-- The chart-locality-free resolvent eigenvalue is at most `1`. -/
 private lemma eigenval_le_one_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -157,9 +93,6 @@ private lemma eigenval_le_one_local
       rw [h_zero, norm_zero] at h_norm
       exact one_ne_zero h_norm.symm)).2
 
-/-- The chart-locality-free eigenvector-pou-`MemWkp` bridge: a `MemWkp N 2`
-hypothesis on the resolvent chart components transfers to a `MemWkp N 2`
-statement on the eigenvector chart components. -/
 private lemma eigenvectorVec_pou_memWkp_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (N : ℕ)
@@ -219,8 +152,6 @@ private lemma eigenvectorVec_pou_memWkp_local
     (MemWkp.const_smul (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
 
-/-- **Chart-locality-free per-`K'`-family component-limit-atom Sobolev bound,
-derived from a β-uniform order-`N` chart-component Sobolev hypothesis.** -/
 theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)
@@ -395,8 +326,6 @@ theorem eigenvector_componentLpLimit_perK_from_uniform_β_unconditional
                 g r s) i‖ :=
       h_step2
 
-/-- **Chart-locality-free per-`K'`-family partial-limit-atom Sobolev bound,
-derived from a β-uniform order-`N` chart-component Sobolev hypothesis.** -/
 theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)
@@ -634,8 +563,6 @@ theorem eigenvector_partialLpLimit_perK_from_uniform_β_unconditional
                 g r s) i‖ :=
       h_step_absorb
 
-/-- **Chart-locality-free per-`K'`-family cutoff partial-limit-atom Sobolev
-bound, derived from a β-uniform order-`N` chart-component Sobolev hypothesis.** -/
 theorem eigenvector_cutoffPartialLpLimit_perK_from_uniform_β_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (N : ℕ)

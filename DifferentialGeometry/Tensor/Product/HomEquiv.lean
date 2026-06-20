@@ -15,30 +15,10 @@ import Mathlib.Analysis.Normed.Operator.Banach
 import Mathlib.Topology.Algebra.Module.Equiv
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
-/-!
-# Tensor-Hom Equivalence and Induced Norm
-
-This file establishes the tensor-hom equivalence for finite-dimensional normed spaces
-and uses it to induce a normed space structure on the tensor product `F₁ ⊗[𝕜] F₂`.
-
-## Main Definitions
-
-* `tensorHomEquiv` : linear equivalence `F₁ ⊗ F₂ ≃ₗ (Dual F₁ →ₗ F₂)`.
-* `cDual` : the normed (continuous) dual `F₁ →L[𝕜] 𝕜`.
-* `clmEquiv` : linear equivalence `F₁ ⊗ F₂ ≃ₗ (cDual F₁ →L F₂)`.
-* `instNormedAddCommGroup_tensor` : induced normed group structure on `F₁ ⊗ F₂`.
-* `instNormedSpace_tensor` : induced normed space structure on `F₁ ⊗ F₂`.
-
-## Tags
-
-tensor product, hom equivalence, normed space, dual
--/
 
 open scoped Topology TensorProduct
 
 noncomputable section
-
-/-! ## Induced norm on tensor product -/
 
 section TensorNorm
 
@@ -47,13 +27,12 @@ variable (F₁ : Type*) [NormedAddCommGroup F₁] [NormedSpace 𝕜 F₁] [Finit
 variable (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [FiniteDimensional 𝕜 F₂]
 
 omit [FiniteDimensional 𝕜 F₂] in
-/-- In finite dimensions, finrank of continuous linear maps equals the product of finranks. -/
+
 lemma finrank_continuousLinearMap' :
     Module.finrank 𝕜 (F₁ →L[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ := by
   have e : (F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
   rw [e.finrank_eq, Module.finrank_linearMap 𝕜 𝕜]
 
-/-- Linear equivalence between tensor product and Hom from dual, by dimension counting. -/
 noncomputable def tensorHomEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] ((Module.Dual 𝕜 F₁) →ₗ[𝕜] F₂) := by
   let f : Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ≃ₗ[𝕜] F₁ := (Module.evalEquiv 𝕜 F₁).symm
   have h₀ : (Module.Dual 𝕜 (Module.Dual 𝕜 F₁)) ⊗[𝕜] F₂ ≃ₗ[𝕜] (F₁ ⊗[𝕜] F₂) :=
@@ -86,23 +65,14 @@ noncomputable def tensorHomEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] ((Module.D
     LinearEquiv.mk g ginv left_inv right_inv
   have h₁ := (dualTensorHomEquiv 𝕜 (Module.Dual 𝕜 F₁) F₂)
   exact LinearEquiv.trans (LinearEquiv.symm h₀) h₁
--- note jack's ones
 
-/-- The normed (continuous) dual of `F₁`. -/
 abbrev cDual := F₁ →L[𝕜] 𝕜
 
-/--
-Auxiliary bilinear map for the tensor–hom adjunction:
-`v : F₁`, `w : F₂` ↦ (φ ↦ φ v • w) as a *continuous* linear map `cDual →L F₂`.
-
-We build it as a linear map and use `LinearMap.toContinuousLinearMap` relying on
-finite-dimensionality of the domain.
--/
 noncomputable def toHomAux :
     F₁ →ₗ[𝕜] F₂ →ₗ[𝕜] (cDual (𝕜:=𝕜) (F₁:=F₁) →L[𝕜] F₂) :=
 by
   classical
-  -- First: for each `v w`, define a linear map `cDual →ₗ F₂`, then make it continuous.
+  
   refine
     { toFun := fun v =>
         { toFun := fun w =>
@@ -113,7 +83,7 @@ by
                 simp [add_smul]
               map_smul' := by
                 intro a φ
-                -- (a•φ) v = a*(φ v)
+                
                 simp [mul_smul]
             } : (cDual (𝕜:=𝕜) (F₁:=F₁) →ₗ[𝕜] F₂)).toContinuousLinearMap
           map_add' := by
@@ -131,75 +101,58 @@ by
       map_smul' := by
         intro a v
         ext w φ
-        -- φ (a•v) = a*(φ v)
+        
         simp [mul_smul] }
 
-/--
-The induced linear map `F₁ ⊗[𝕜] F₂ →ₗ[𝕜] (cDual →L[𝕜] F₂)` by the universal property.
--/
 noncomputable def toHom :
     (F₁ ⊗[𝕜] F₂) →ₗ[𝕜] (cDual (𝕜:=𝕜) (F₁:=F₁) →L[𝕜] F₂) :=
 _root_.TensorProduct.lift (toHomAux (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂))
 
-
 omit [FiniteDimensional 𝕜 F₂]
-/-- In finite dimensions, finrank of continuous linear maps equals the product of finranks. -/
+
 lemma finrank_continuousLinearMap :
     Module.finrank 𝕜 (F₁ →L[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ := by
-  -- In finite dimensions, E →L[𝕜] F ≃ₗ E →ₗ[𝕜] F
+  
   haveI : Module.Free 𝕜 F₁ := inferInstance
   haveI : Module.Free 𝕜 F₂ := inferInstance
   have e : (F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
   rw [e.finrank_eq]
   rw [Module.finrank_linearMap 𝕜 𝕜]
 
-/-- The continuous dual `cDual 𝕜 F₁` is linearly equivalent to the algebraic dual
-`Module.Dual 𝕜 F₁`, since all linear maps are continuous in finite dimensions. -/
 def cDual_eqiv_dual : cDual 𝕜 F₁ ≃ₗ[𝕜] Module.Dual 𝕜 F₁ := by
   unfold cDual Module.Dual
   exact (@LinearMap.toContinuousLinearMap 𝕜 _ F₁ _ _ _ _ _ 𝕜 _ _ _ _ _ _ _ _).symm
 
-/-- Continuous linear maps out of the continuous dual are equivalent to linear maps out of
-the algebraic dual, since `cDual ≃ₗ Module.Dual` in finite dimensions. -/
 def cDual_clm_equiv_dual_lm : (cDual 𝕜 F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (Module.Dual 𝕜 F₁ →ₗ[𝕜] F₂) := by
   have e : (cDual 𝕜 F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (cDual 𝕜 F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
   have e' : (cDual 𝕜 F₁ →ₗ[𝕜] F₂) ≃ₗ[𝕜] (Module.Dual 𝕜 F₁ →ₗ[𝕜] F₂) :=
     LinearEquiv.congrLeft F₂ 𝕜 (cDual_eqiv_dual 𝕜 F₁)
   exact LinearEquiv.trans e e'
 
-/--
-A *linear equivalence* `F₁ ⊗ F₂ ≃ₗ (cDual →L F₂)` obtained by dimension counting.
-
-This matches your "equivalence by finrank" pattern.  (It's coordinate-free: no
-`Fin n → 𝕜` coordinates.)
--/
 noncomputable def clmEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] (cDual 𝕜 F₁ →L[𝕜] F₂) :=
   LinearEquiv.trans (tensorHomEquiv 𝕜 F₁ F₂) (cDual_clm_equiv_dual_lm 𝕜 F₁ F₂).symm
 
-/-- Induced normed additive commutative group structure on `F₁ ⊗[𝕜] F₂`, pulled back
-along the equivalence `clmEquiv : F₁ ⊗ F₂ ≃ₗ (cDual F₁ →L F₂)`. -/
 noncomputable instance instNormedAddCommGroup_tensor :
     NormedAddCommGroup (F₁ ⊗[𝕜] F₂) :=
 by
   classical
   let e := clmEquiv (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂)
-  -- pick 𝓕 := AddMonoidHom
+  
   refine NormedAddCommGroup.induced
     (𝓕 := (F₁ ⊗[𝕜] F₂) →+ (cDual 𝕜 F₁ →L[𝕜] F₂))
     (E := (F₁ ⊗[𝕜] F₂))
     (F := (cDual 𝕜 F₁ →L[𝕜] F₂))
     (f := e.toLinearMap.toAddMonoidHom)
     ?_
-  -- injectivity of the underlying function
+  
   exact e.injective
 
-/-- Induced normed `𝕜`-module structure on `F₁ ⊗[𝕜] F₂`, pulled back along `clmEquiv`. -/
 noncomputable instance instNormedSpace_tensor :
     NormedSpace 𝕜 (F₁ ⊗[𝕜] F₂) :=
 by
   classical
   let e := clmEquiv (𝕜:=𝕜) (F₁:=F₁) (F₂:=F₂)
-  -- Choose the "linear map-like" type explicitly:
+  
   refine NormedSpace.induced
     (F := (F₁ ⊗[𝕜] F₂) →ₗ[𝕜] (cDual 𝕜 F₁ →L[𝕜] F₂))
     (𝕜 := 𝕜)

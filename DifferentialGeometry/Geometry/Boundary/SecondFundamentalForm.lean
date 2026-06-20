@@ -1,80 +1,6 @@
 import DifferentialGeometry.Geometry.Boundary.OutwardNormal
 import DifferentialGeometry.Geometry.Operator.Hessian
 
-/-!
-# The second fundamental form of the boundary submanifold
-
-Let `M` be a smooth manifold modelled on `(E, H, I)` whose model with corners
-admits a smooth boundary stratum (`[hI : HasSmoothBoundary E H I]`), and let
-`g` be a smooth Riemannian metric on the tangent bundle of `M`. At each
-boundary point `x : BoundaryManifold I M`, this file constructs the *second
-fundamental form*
-
-  `secondFundamentalForm g x νChart : T_x M →ₗ[ℝ] T_x M →ₗ[ℝ] ℝ`
-
-associated with a chart-coordinate extension `νChart : E → E` of the outward
-unit normal field. Mathematically, the form is
-
-$$\mathrm{II}(X, Y) = g\bigl(\nabla_X \tilde{\nu},\, Y\bigr),$$
-
-where `∇` is the Levi-Civita connection of `g`, `X, Y` are vectors tangent to
-the boundary `∂M` at `x`, and `\tilde{\nu}` is any smooth extension of the
-outward unit normal to a neighbourhood of `x` in `M`.
-
-In chart coordinates the formula reads, for `X, Y ∈ T_x M` decomposed in the
-canonical model basis `e_i := Module.finBasis ℝ E`:
-
-$$\mathrm{II}(X, Y) = \sum_{i, j, k} g_{kj}(x)\,X^i\,Y^j\,
-    \bigl[\partial_i \nu^k(\varphi(x)) +
-        \sum_l \Gamma^k{}_{il}(g)(\varphi(x))\,\nu^l(\varphi(x))\bigr],$$
-
-where `g_{kj} = g.inner x (e_k) (e_j)` are the chart Gram-matrix entries,
-`Γ^k{}_{il}` are the chart Christoffel symbols (defined in
-`Geometry.Hessian`), and `ν^k(y) := νChart y k` are the
-chart-coordinate components of the supplied normal-field extension.
-
-Because the construction is hypothesis-bearing in the chart-coordinate
-extension `νChart`, the file delivers:
-
-* a definition of the chart-Christoffel-Weingarten matrix entries
-  `chartSecondFundamentalFormEntry`;
-* the bilinear form `secondFundamentalForm` obtained by basis decomposition;
-* a symmetry theorem `secondFundamentalForm_symm` deduced from a hypothesis
-  packaging the standard Codazzi-symmetry condition (which holds, for
-  instance, when `νChart` is the chart-coordinate gradient — modulo
-  normalisation — of a smooth defining function of the boundary).
-
-The chart-Christoffel symmetry of the lower indices (the torsion-free
-property of the Levi-Civita connection) is already encoded in
-`chartChristoffel_symm` and is consumed below.
-
-## Main definitions
-
-* `chartSecondFundamentalFormEntry g x νChart i j` — the chart-coordinate
-  matrix entry `II_{ij}(x)`.
-* `secondFundamentalForm g x νChart` — the bilinear form on `T_x M`,
-  computed via basis decomposition.
-
-## Main theorems
-
-* `secondFundamentalForm_apply` — the explicit formula.
-* `secondFundamentalForm_symm` — symmetry under the supplied
-  Codazzi-symmetry hypothesis.
-
-## Implementation notes
-
-* The chart-coordinate "normal field" is supplied as a function `νChart : E → E`,
-  giving the chart-coordinate components of an extension of the outward unit
-  normal. The user is responsible for supplying a normal field consistent with
-  `outwardNormal g x`; the formulas below remain meaningful for arbitrary
-  smooth `νChart`.
-* The Christoffel symbol used is `chartChristoffel g x i j k y`, the
-  chart-Christoffel symbol of the second kind associated with the chart at
-  the basepoint `x : M` and evaluated at the chart-coordinate point `y ∈ E`.
-* The basis used to read off coordinate vectors is `Module.finBasis ℝ E`,
-  matching the convention of `chartHessianTensor` and `hessFun`.
--/
-
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory
@@ -94,8 +20,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
-/-- The `k`-th chart-coordinate component of a normal-field extension
-`νChart : E → E`, read off in the basis `Module.finBasis ℝ E`. -/
 def normalFieldComp (νChart : E → E) (k : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => ((Module.finBasis ℝ E).repr (νChart y)) k
 
@@ -104,8 +28,6 @@ def normalFieldComp (νChart : E → E) (k : Fin (Module.finrank ℝ E)) : E →
     normalFieldComp (E := E) νChart k y =
       ((Module.finBasis ℝ E).repr (νChart y)) k := rfl
 
-/-- The chart-coordinate "linear-correction" sum
-`∑ l, Γ^k_{il}(x, y) · ν^l(y)`. -/
 def chartChristoffelNormalCorrection
     (g : SmoothRiemannianMetric I M) (α : M)
     (νChart : E → E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
@@ -121,13 +43,6 @@ def chartChristoffelNormalCorrection
         chartChristoffel (I := I) g α i l k y *
           normalFieldComp (E := E) νChart l y := rfl
 
-/-- The chart-coordinate "Weingarten" expression
-`∂_i ν^k(y) + ∑_l Γ^k_{il}(g)(y) · ν^l(y)`, the `k`-th component of the
-covariant derivative `(∇_{e_i} ν)^k` of the chart-coordinate normal field.
-
-Here the partial derivative `∂_i` is the Fréchet directional derivative of
-the chart-coordinate component function `y ↦ ν^k(y)` in the basis direction
-`e_i := (Module.finBasis ℝ E) i`. -/
 def chartCovariantDerivativeOfNormal
     (g : SmoothRiemannianMetric I M) (α : M)
     (νChart : E → E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
@@ -141,12 +56,6 @@ def chartCovariantDerivativeOfNormal
       partialDeriv (E := E) i (normalFieldComp (E := E) νChart k) y +
         chartChristoffelNormalCorrection (I := I) g α νChart i k y := rfl
 
-/-- The chart-coordinate matrix entry `II_{ij}(x)` of the second fundamental
-form, computed against the canonical basis `Module.finBasis ℝ E` at the
-chart-coordinate point `extChartAt I (x : M) (x : M)`:
-
-$$\mathrm{II}_{ij}(x) = \sum_{k} g_{kj}(x) \cdot (\nabla_{e_i} \nu)^k(\varphi(x)).$$
--/
 def chartSecondFundamentalFormEntry
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E) (i j : Fin (Module.finrank ℝ E)) : ℝ :=
@@ -164,11 +73,6 @@ def chartSecondFundamentalFormEntry
           chartCovariantDerivativeOfNormal (I := I) g (x : M) νChart i k
             (extChartAt I (x : M) (x : M)) := rfl
 
-/-- The second fundamental form of `∂M` in `M` at a boundary point `x`,
-parameterised by a chart-coordinate extension `νChart : E → E` of the outward
-unit normal field. The bilinear form is defined on the full ambient tangent
-space `T_x M = E`; its restriction to the boundary tangent space recovers the
-classical second fundamental form. -/
 def secondFundamentalForm
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E) :
@@ -250,7 +154,6 @@ def secondFundamentalForm
         Finset.sum_congr rfl (fun j _ => hpull j)]
       rw [← Finset.mul_sum])
 
-/-- The defining formula of the second fundamental form. -/
 @[simp] lemma secondFundamentalForm_apply
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)
@@ -262,13 +165,6 @@ def secondFundamentalForm
             ((Module.finBasis ℝ E).repr Y) j *
             chartSecondFundamentalFormEntry (I := I) (M := M) g x νChart i j := rfl
 
-/-- **Symmetry of the second fundamental form** under the Codazzi
-matrix-symmetry hypothesis. If the chart-Christoffel-Weingarten matrix entries
-are symmetric in `(i, j)`, then so is the bilinear form `secondFundamentalForm`.
-
-Mathematically, the hypothesis encodes the standard fact that `II` is
-symmetric whenever `ν` is the unit-normalised gradient of a defining function
-of `∂M` — a property automatic in the half-space model. -/
 theorem secondFundamentalForm_symm
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)
@@ -288,7 +184,6 @@ theorem secondFundamentalForm_symm
   rw [h_codazzi j i]
   ring
 
-/-- The second fundamental form restricted to two boundary tangent vectors. -/
 def secondFundamentalFormBoundary
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)
@@ -304,8 +199,6 @@ def secondFundamentalFormBoundary
       secondFundamentalForm (I := I) (M := M) g x νChart
         (dincl (M := M) x Xb) (dincl (M := M) x Yb) := rfl
 
-/-- **Symmetry on boundary tangent vectors** under the Codazzi matrix-symmetry
-hypothesis. -/
 theorem secondFundamentalFormBoundary_symm
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)

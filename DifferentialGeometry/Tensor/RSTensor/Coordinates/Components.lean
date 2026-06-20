@@ -5,13 +5,6 @@ set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
-/-!
-# Pointwise tensor components
-
-This file provides component maps and extensionality for the realized Hom model
-`TensorRSSpace r s I x = Tensor0SSpace r I x ->L Tensor0SSpace s I x`.
--/
-
 noncomputable section
 
 namespace Tensor0SBundle
@@ -45,7 +38,6 @@ theorem component0S_smul
       c * component0S (I := I) basis A slots := by
   rfl
 
-/-- Component theorem for the pointwise product of covariant tensors. -/
 theorem component0S_product
     (A : Tensor0SSpace s I x) (B : Tensor0SSpace q I x)
     (slots : Fin (s + q) -> Idx) :
@@ -67,10 +59,6 @@ section Mixed
 variable {r s : Nat}
 variable (basis : Module.Basis Idx Real (TangentSpace I x))
 
-/-- Conventional component of a mixed tensor in the Hom model.
-
-The `upper` indices select the covariant basis tensor used as Hom input; the
-`lower` indices evaluate the covariant output on basis vectors. -/
 def componentRS
     (T : TensorRSSpace r s I x)
     (upper : Fin r -> Idx) (lower : Fin s -> Idx) : Real :=
@@ -120,14 +108,13 @@ private theorem componentRS_expand_input
           rw [map_sum]
           simp [map_smul]
 
-/-- Extensionality for mixed tensors from equality of all Hom-model components. -/
 theorem extRS_basis
     {A B : TensorRSSpace r s I x}
     (h : ∀ upper : Fin r -> Idx, ∀ lower : Fin s -> Idx,
       componentRS (I := I) basis A upper lower =
         componentRS (I := I) basis B upper lower) :
     A = B := by
-  -- Show that A input = B input for every input via the basis decomposition
+  
   have key : ∀ input : Tensor0SSpace r I x, A input = B input := by
     intro input
     apply ext0S_basis (I := I) basis

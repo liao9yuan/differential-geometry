@@ -2,50 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SIntrinsicChartRank0
 
-/-!
-# Chart-frame `(0, r)`-tensor covariant derivative on a chart-parallel extension
-
-Given a smooth Riemannian manifold `(M, g)`, a chart center `α : M`, a basepoint
-`b : M` on the chart-α Levi-Civita good set, a `(0, r)`-tensor `T₀ : Tensor0SSpace
-r I b`, and a tangent vector field `X`, this file establishes that the
-chart-frame `(0, r)`-tensor covariant derivative of the chart-α-parallel
-extension of `T₀` along `X` at `b` reduces to the negated sum of the chart-α
-Christoffel slot corrections.
-
-This is the higher-rank analog of `chartLeviCivita_chartParallelExtend` (for
-tangent vectors) from `ChartLeviCivitaParallelExtend.lean`. The Fréchet
-derivative of the chart pullback of the trivialised representation vanishes
-because the trivialised representation of the chart-α-parallel extension is
-locally constant on the trivialisation base set. As a consequence, only the
-per-slot Christoffel correction terms survive.
-
-## Main result
-
-* `chartTensor0SCovariantDerivative_chartTensor0SParallelExtend`: the headline
-  identity. For `b` on the chart-α Levi-Civita good set, the chart-frame
-  `(0, r)`-tensor covariant derivative at `b` of
-  `chartTensor0SParallelExtend r α b T₀` along `X b` equals the negated sum
-  of the per-slot Christoffel corrections applied to
-  `chartTensor0SParallelExtend r α b T₀`.
-
-## Strategy
-
-The proof splits on the rank `r`.
-
-* For `r = 0`: by `chartTensor0SCovariantDerivative_zero_apply`, the value of
-  the chart-frame derivative evaluates, on the unique empty tuple, to the
-  manifold-Fréchet derivative of the scalar evaluation
-  `b' ↦ T_parallel b' (Fin.elim0)` at `b`. Using local constancy of the
-  chart pullback (`chartTensor0SParallelExtend_repr_eventuallyEq_const`),
-  this scalar is locally constant on the chart pullback, so the
-  manifold-Fréchet derivative vanishes. The slot sum is empty.
-* For `r = s + 1`: by `chartTensor0SCovariantDerivative_succ_apply`, the
-  value decomposes as `tensor0SIntrinsicChartCLM ... b (X b) - ∑ k, slot k`.
-  The intrinsic chart-α Fréchet derivative CLM vanishes by
-  `chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero`, leaving only
-  the negated slot sum.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -72,9 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- The scalar evaluation `b' ↦ (T_parallel b') (Fin.elim0)` of the chart-α-
-parallel extension of a rank-0 tensor `T₀` is locally constant near `b` (in
-the chart pullback). -/
 private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -140,9 +93,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
         (chartTensor0SParallelExtend (I := I) 0 α b T₀) b' =
       e.continuousLinearMapAt ℝ b T₀ from hy_repr]
 
-/-- Pointwise reduction of the scalar evaluation on the trivialisation base set:
-`(T_parallel b') (Fin.elim0) = (e.continuousLinearMapAt ℝ b T₀) (Fin.elim0)`
-for `b'` on the chart-α trivialisation base set. -/
 private lemma chartTensor0SParallelExtend_zero_scalar_apply
     (α : M) {b b' : M} (T₀ : Tensor0SSpace 0 I b)
     (hb' : b' ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -179,8 +129,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_apply
       (fun i : Fin 0 => Fin.elim0 i)
   rw [hrepr]
 
-/-- The scalar function `b' ↦ (T_parallel b') (Fin.elim0)` is
-manifold-Fréchet-differentiable at `b` (it is locally constant near `b`). -/
 private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -209,9 +157,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
       (I := I) α (b := b) (b' := b') T₀ hb'_U
   exact (mdifferentiableAt_const).congr_of_eventuallyEq hev
 
-/-- The scalar manifold-Fréchet derivative of the chart-α-parallel extension
-of a rank-0 tensor `T₀` at `b` vanishes, evaluated on any tangent vector `v`
-at `b`, provided `b` lies on the chart-α Levi-Civita good set. -/
 private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) (v : TangentSpace I b) :
@@ -250,10 +195,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
   rw [hkey, hFderiv]
   rfl
 
-/-- **Rank-0 case.** For `b` on the chart-α Levi-Civita good set, the
-chart-frame `(0, 0)`-tensor covariant derivative of the chart-α-parallel
-extension of `T₀` along `X` at `b` is zero. The empty slot sum is also zero,
-so the identity `LHS = - ∑ k : Fin 0, _ = 0` holds. -/
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -286,10 +227,6 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
   exact chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (I := I) α hb T₀ (X b)
 
-/-- **Vanishing of the intrinsic chart Fréchet piece on a chart-parallel
-extension.** For `b` on the chart-α Levi-Civita good set, the intrinsic
-chart-α Fréchet derivative CLM of `chartTensor0SParallelExtend r α b T₀` at
-`b` is the zero CLM. -/
 private lemma tensor0SIntrinsicChartCLM_chartTensor0SParallelExtend_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -302,10 +239,6 @@ private lemma tensor0SIntrinsicChartCLM_chartTensor0SParallelExtend_eq_zero
   ext v
   simp
 
-/-- **Successor case.** For `b` on the chart-α Levi-Civita good set, the
-chart-frame `(0, s + 1)`-tensor covariant derivative of the chart-α-parallel
-extension along `X` at `b` reduces to the negated sum of per-slot
-Christoffel corrections. -/
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -327,16 +260,6 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
   rw [hintr]
   rw [zero_sub]
 
-/-- **Headline.** For a smooth Riemannian manifold `(M, g)`, a chart center
-`α : M`, a basepoint `b : M` on the chart-α Levi-Civita good set, a
-`(0, r)`-tensor `T₀ : Tensor0SSpace r I b`, and a tangent vector field `X`,
-the chart-frame `(0, r)`-tensor covariant derivative of the chart-α-parallel
-extension of `T₀` along `X` at `b` equals the negated sum of the per-slot
-Christoffel corrections of the chart-α-parallel extension.
-
-For `r = 0` the slot sum is empty and the identity reads `0 = 0`. For
-`r = s + 1` the intrinsic chart Fréchet derivative piece vanishes (by D.1)
-and only the slot-sum survives. -/
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

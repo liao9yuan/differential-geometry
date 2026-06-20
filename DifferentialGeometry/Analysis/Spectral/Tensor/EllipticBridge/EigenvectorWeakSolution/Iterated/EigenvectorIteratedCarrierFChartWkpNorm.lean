@@ -4,59 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.ChartRHSBounds.EigenvectorChartRHSMemWkp
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.EigenvectorChartWeightedMemLp
 
-/-!
-# The weighted-`L²` bound for the iterated carrier's effective source field
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i` with resolvent eigenvalue `μ := i.fst.val`, a chart center `α : M`, and a
-component multi-index `P₀`, the interior elliptic-regularity bootstrap packages
-the `m`-fold-differentiated chart `P₀`-component of a resolvent eigenvector by
-the iterated divergence-form carrier
-`eigenvectorIteratedTensorChartBilinearData g r s i α P₀ m`.
-
-The quantitative interior `W^{2,2}` headline
-`eigenvectorChartIteratedPartial_wkpNorm_two_two_le` bounds the `W^{2,2}`-norm of
-the `m`-fold mixed weak partial by its `W^{1,2}`-norm plus the `L²`-norm of the
-carrier's effective source `f_chart`, measured in the chart-pulled weighted
-measure `μw := (chartPulledWeightedMeasure g α).restrict (chartTargetEuclid α)`.
-
-This module supplies the standalone control of that weighted `L²`-norm: for a
-level-`m` carrier `D_m` whose effective source field `fChartEff` equals the
-level-`m` differentiated chart right-hand side
-`eigenvectorChartRHSDiff g r s i α P₀ m directions` — exactly the
-carrier produced by `exists_eigenvectorIteratedCarrier` — the
-weighted `L²`-norm of the carrier's `f_chart` is bounded by
-`ENNReal.ofReal (μ⁻¹ · C)` times the finite order-`0` aggregate
-`diffRHSAggregate g r s i α P₀ m 0 directions`.
-
-## Strategy
-
-The bound composes three facts:
-
-* the carrier identity `f_chart = D_m.fChartEff = eigenvectorChartRHSDiff …
-  m directions` (`(eigenvectorIteratedTensorChartBilinearData_toData …).f_chart`
-  is `D_m.fChartEff` definitionally);
-* the weighted-versus-volume `eLpNorm` comparison restricted to the support: the
-  level-`m` differentiated right-hand side vanishes almost everywhere off the
-  compact partition-of-unity kernel `chartPouKernel α`, on which the chart
-  density `densityOnEuclid g α` is bounded above, so its weighted `L²`-norm is a
-  multiple of its plain-volume `L²`-norm;
-* the weighted-`eLpNorm` bound `eigenvectorChartRHSDiff_eLpNorm_le`
-  for the differentiated chart right-hand side against the plain Lebesgue volume.
-
-## Main results
-
-* `eigenvectorIteratedCarrier_fChartEff_eLpNorm_le` — the
-  weighted-`L²` bound for the iterated carrier's effective source field.
-* `diffRHSAggregate_ne_top` — the finiteness of the order-`K`
-  aggregate `diffRHSAggregate` of primitive regularity data.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -93,9 +40,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- On the compact partition-of-unity kernel `chartPouKernel α`, the chart-pulled
-weighted measure restricted to the kernel is dominated by a nonnegative scalar
-multiple of `volume` restricted to the kernel. -/
 private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ c : ℝ, 0 ≤ c ∧
@@ -135,19 +79,7 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
 omit [CompleteSpace E] in
-/-- **Weighted-versus-volume `eLpNorm` comparison on the kernel.** Let
-`f : EuclN → ℝ` vanish almost everywhere — with respect to the plain Lebesgue
-volume restricted to `chartTargetEuclid α \ chartPouKernel α` — off the compact
-partition-of-unity kernel `chartPouKernel α`. Then there is a nonnegative
-constant `C` with `eLpNorm f 2 (μw.restrict (chartTargetEuclid α)) ≤
-ENNReal.ofReal C · eLpNorm f 2 (volume.restrict (chartTargetEuclid α))`, where
-`μw = chartPulledWeightedMeasure g α`.
 
-On the compact partition-of-unity kernel the chart density is bounded above, so
-the weighted measure restricted there is dominated by a multiple of `volume`; off
-the kernel `f` vanishes almost everywhere, and the weighted restricted measure is
-absolutely continuous with respect to the plain restricted volume, so the
-a.e.-vanishing transfers. -/
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
     (hf : f =ᵐ[(volume : Measure EuclN).restrict
@@ -217,22 +149,7 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel
   rw [h_pow_eq, smul_eq_mul]
 
 omit [CompleteSpace E] in
-/-- **Eigenbasis-uniform weighted-versus-volume `eLpNorm` comparison on the
-kernel.** The constant-uniform twin of
-`eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel`: given a family of
-functions `f i : EuclN → ℝ`, indexed by an arbitrary type `ι`, each vanishing
-almost everywhere — with respect to the plain Lebesgue volume restricted to
-`chartTargetEuclid α \ chartPouKernel α` — off the compact partition-of-unity
-kernel `chartPouKernel α`, there is a *single* nonnegative constant `C` such that
-`eLpNorm (f i) 2 (μw.restrict (chartTargetEuclid α)) ≤ ENNReal.ofReal C ·
-eLpNorm (f i) 2 (volume.restrict (chartTargetEuclid α))` holds for *every* index
-`i`, where `μw = chartPulledWeightedMeasure g α`.
 
-The comparison constant is the square root of the kernel-domination constant `c`
-from `chartPulledWeightedMeasure_restrict_le_volume_on_chartPouKernel`, which
-depends only on `g` and `α`, not on the function. Hoisting that constant before
-the index, the per-index comparison proof is exactly the per-function proof of
-`eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel` for `f i`. -/
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_uniform
     {ι : Type*} (g : SmoothRiemannianMetric I M) (α : M) {f : ι → EuclN → ℝ}
     (hf : ∀ i, f i =ᵐ[(volume : Measure EuclN).restrict
@@ -305,8 +222,6 @@ private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_chartPouKernel_unifo
 
 section MainBoundUnconditional
 
-/-- Chart-locality-free twin of
-`eigenvectorIteratedCarrier_fChartEff_eLpNorm_le`. -/
 theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -385,8 +300,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
           congr 2
           ring
 
-/-- Chart-locality-free twin of
-`eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform`. -/
 theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) {m : ℕ}
@@ -471,7 +384,6 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
 
 end MainBoundUnconditional
 
-/-- Chart-locality-free twin of `diffRHSHead_ne_top`. -/
 private lemma diffRHSHead_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -501,7 +413,6 @@ private lemma diffRHSHead_ne_top
   · exact ne_of_lt (wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E)
       (h_iter (2 + K) m (Fin.init l)))
 
-/-- Chart-locality-free twin of `rhsZeroAggregate_ne_top`. -/
 private lemma rhsZeroAggregate_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -553,7 +464,6 @@ private lemma rhsZeroAggregate_ne_top
       (cutoffPartialLpLimit_memWkp (I := I) (M := M)
         g r s i α P l K h_pou)
 
-/-- Chart-locality-free twin of `diffRHSAggregate_ne_top`. -/
 theorem diffRHSAggregate_ne_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

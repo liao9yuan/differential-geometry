@@ -9,37 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Chart-transition metric transformation laws (Gram, inverse-Gram, Christoffel)
-
-For two basepoints `α β : M` on a smooth manifold, the chart-transition map
-$$T_{\alpha\beta}\;:=\;\varphi_\beta\,\circ\,\varphi_\alpha^{-1}\;:\;E\to E$$
-and its Fréchet-derivative CLM `chartTransitionAt α β x : E →L[ℝ] E` are
-developed in the upstream sibling `ChartTransitionMap`; the index-level
-Jacobian entries `chartTransitionJacEntry` and their Kronecker-delta identities
-are developed in `ChartTransitionJacobian`. Both are re-exported automatically
-through the imports below.
-
-This file develops the *metric* transformation laws under `T_{αβ}`:
-
-* `chartInvGramMatrix_eq_sum_chartTransition` — the contravariant
-  transformation law for the inverse Gram matrix.
-* `partialDeriv_chartGramOnE_eq_sum_chartTransition` — the differentiated
-  covariant Gram-pullback identity.
-* `chartChristoffel_transform` and `chartChristoffelContraction_transform` —
-  the chart-Christoffel transformation law (symbol level and
-  bilinear-contraction level), with the inhomogeneous second-derivative
-  correction `chartTransitionSecondDerivCorrection`.
-* the moving-foot chain rules `chartTransitionJacEntry_comp_hasDerivAt`,
-  `chartCoord_chartTransitionAt_comp_hasDerivAt`, and the foot-slot
-  cancellation `fderiv_chartTransitionAt_apply_eq_pushCorrection`.
-
-These derivations unfold the chart-coordinate Christoffel symbol from the
-metric and apply the change-of-variable formula for second derivatives, on
-top of the smoothness and inverse-Jacobian prerequisites supplied by the two
-upstream sibling files.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory
@@ -66,9 +35,6 @@ private lemma fderivWithin_range_I_eq_fderiv' [I.Boundaryless]
     ModelWithCorners.Boundaryless.range_eq_univ (I := I)
   rw [h, fderivWithin_univ]
 
-/-- Bridge: on the chart overlap, the manifold-level Jacobian `tangentCoordChange`
-agrees with the chart-level Jacobian `chartTransitionAt` (in the boundaryless
-setting, where `fderivWithin (range I) = fderiv`). -/
 private lemma tangentCoordChange_eq_chartTransitionAt' [I.Boundaryless]
     (α β : M) (p : M) :
     tangentCoordChange I α β p =
@@ -138,8 +104,6 @@ private theorem chartGramOnE_eq_sum_chartTransition' [I.Boundaryless]
     rw [tangentCoordChange_eq_chartTransitionAt' (I := I) α β p]
     simp only [chartTransitionJacEntry_def, hx_eq]
 
-/-- The candidate inverse-Gram pullback matrix at a chart-α point `x`, built
-from the reverse Jacobian entries and the chart-β inverse Gram matrix at `T x`. -/
 private def invGramPullbackCandidate [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) (p : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
@@ -152,8 +116,6 @@ private def invGramPullbackCandidate [NeZero (Module.finrank ℝ E)]
         (chartTransitionMap (I := I) α β (extChartAt I α p)) j b *
       chartInvGramMatrix (I := I) g β p a b
 
-/-- Right-inverse relation: the chart-α Gram matrix times the candidate equals
-the identity matrix, at a point `p` in both chart sources. -/
 private theorem chartGramMatrix_mul_invGramPullbackCandidate [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -324,12 +286,6 @@ private theorem chartGramMatrix_mul_invGramPullbackCandidate [I.Boundaryless]
         · rw [if_pos h, if_pos h.symm]
         · rw [if_neg h, if_neg (fun hh : l = k => h hh.symm)]
 
-/-- **Inverse Gram-matrix pullback under chart transition.** The contravariant
-transformation law for the inverse metric: at a manifold point `p` lying in both
-chart sources, the chart-α inverse Gram matrix entry decomposes against the
-chart-β inverse Gram matrix at `T x` via the reverse chart-transition Jacobian:
-`G_α⁻¹(p)^{ij} = ∑ a b, K^i_a K^j_b G_β⁻¹(p)^{ab}`, where
-`K^i_a = chartTransitionJacEntry β α (T x) i a` and `x = extChartAt I α p`. -/
 theorem chartInvGramMatrix_eq_sum_chartTransition [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -352,9 +308,6 @@ theorem chartInvGramMatrix_eq_sum_chartTransition [I.Boundaryless]
   rw [hentry]
   rfl
 
-/-- Every point of the open chart-transition source `chartTransitionSource α β`
-lies in the chart-α image of the chart overlap. This lets us apply the Gram
-pullback at every point of a neighbourhood, not just a single overlap image. -/
 lemma mem_overlap_image_of_mem_chartTransitionSource
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
     y ∈ (extChartAt I α) ''
@@ -372,9 +325,6 @@ lemma mem_overlap_image_of_mem_chartTransitionSource
   rw [hp_def]
   exact (extChartAt I α).right_inv hy_tgt
 
-/-- The covariant Gram pullback holds at every point `y` of the open
-chart-transition source `chartTransitionSource α β`. This is the
-neighbourhood-wide version of `chartGramOnE_eq_sum_chartTransition'`. -/
 lemma chartGramOnE_eq_sum_chartTransition_on_source [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) {y : E}
     (hy : y ∈ chartTransitionSource (I := I) α β)
@@ -388,11 +338,6 @@ lemma chartGramOnE_eq_sum_chartTransition_on_source [I.Boundaryless]
   chartGramOnE_eq_sum_chartTransition' (I := I) g α β y
     (mem_overlap_image_of_mem_chartTransitionSource (I := I) α β hy) i j
 
-/-- The chart-transition Jacobian entry `y ↦ chartTransitionJacEntry α β y a i`
-is `ContDiffOn ℝ ∞` on the open chart-transition source. It is the composition
-of the smooth CLM-valued map `chartTransitionAt α β` with the (continuous,
-linear, hence smooth) evaluation-and-coordinate functional
-`L ↦ (chartModelBasis E).repr (L (e_a)) i`. -/
 lemma chartTransitionJacEntry_contDiffOn [I.Boundaryless]
     (α β : M) (a i : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -413,8 +358,6 @@ lemma chartTransitionJacEntry_contDiffOn [I.Boundaryless]
   rw [hfun]
   exact evalCoord.contDiff.comp_contDiffOn (chartTransitionAt_smooth (I := I) α β)
 
-/-- The chart-transition Jacobian entry is `DifferentiableAt` at any point of
-the open chart-transition source. -/
 lemma chartTransitionJacEntry_differentiableAt [I.Boundaryless]
     (α β : M) (a i : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ chartTransitionSource (I := I) α β) :
@@ -428,9 +371,6 @@ lemma chartTransitionJacEntry_differentiableAt [I.Boundaryless]
     chartTransitionJacEntry_contDiffOn (I := I) α β a i
   exact (hcd.contDiffAt (h_open.mem_nhds hy)).differentiableAt (by simp)
 
-/-- The image `chartTransitionMap α β y` of a chart-transition-source point lies
-in the interior of `(extChartAt I β).target` (which, being open in the
-boundaryless setting, equals its own interior). -/
 lemma chartTransitionMap_mem_interior_target [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
     chartTransitionMap (I := I) α β y ∈ interior (extChartAt I β).target := by
@@ -441,11 +381,6 @@ lemma chartTransitionMap_mem_interior_target [I.Boundaryless]
   rw [(isOpen_extChartAt_target (I := I) β).interior_eq]
   exact hTy_tgt
 
-/-- **Chain rule for the Gram pullback.** The chart-coordinate partial derivative
-`∂_k` of the composite `y ↦ G_β(a b)(T y)` (where `T = chartTransitionMap α β`)
-at a chart-transition-source point `y` distributes over the chart-transition
-Jacobian:
-`∂_k (G_β(a b) ∘ T)(y) = ∑ c, J^c_k(y) · (∂_c G_β(a b))(T y)`. -/
 lemma partialDeriv_chartGramOnE_comp_chartTransitionMap [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -500,7 +435,7 @@ lemma partialDeriv_chartGramOnE_comp_chartTransitionMap [I.Boundaryless]
   rw [smul_eq_mul]
 
 omit [IsManifold I ∞ M] in
-/-- Leibniz rule for `partialDeriv` of a product of two differentiable functions. -/
+
 lemma partialDeriv_mul (k : Fin (Module.finrank ℝ E)) (u v : E → ℝ) {y : E}
     (hu : DifferentiableAt ℝ u y) (hv : DifferentiableAt ℝ v y) :
     partialDeriv (E := E) k (fun z => u z * v z) y =
@@ -513,9 +448,6 @@ lemma partialDeriv_mul (k : Fin (Module.finrank ℝ E)) (u v : E → ℝ) {y : E
     smul_eq_mul]
   ring
 
-/-- Each summand of the Gram pullback, `y ↦ J^a_i(y) · J^b_j(y) · G_β(a b)(T y)`,
-is a triple product of functions differentiable on the chart-transition source.
-This packages the Leibniz expansion of its `∂_k`. -/
 lemma partialDeriv_chartTransition_pullback_summand [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -569,7 +501,7 @@ lemma partialDeriv_chartTransition_pullback_summand [I.Boundaryless]
   ring
 
 omit [IsManifold I ∞ M] in
-/-- `partialDeriv` commutes with a finite sum of differentiable functions. -/
+
 lemma partialDeriv_finset_sum {ι : Type*} (s : Finset ι)
     (k : Fin (Module.finrank ℝ E)) (f : ι → E → ℝ) {y : E}
     (hf : ∀ i ∈ s, DifferentiableAt ℝ (f i) y) :
@@ -580,7 +512,7 @@ lemma partialDeriv_finset_sum {ι : Type*} (s : Finset ι)
   rw [ContinuousLinearMap.sum_apply]
 
 omit [IsManifold I ∞ M] in
-/-- `partialDeriv` of a double finite sum of differentiable functions. -/
+
 lemma partialDeriv_double_finset_sum {ι κ : Type*} (s : Finset ι) (t : Finset κ)
     (k : Fin (Module.finrank ℝ E)) (f : ι → κ → E → ℝ) {y : E}
     (hf : ∀ a ∈ s, ∀ b ∈ t, DifferentiableAt ℝ (f a b) y) :
@@ -592,11 +524,6 @@ lemma partialDeriv_double_finset_sum {ι κ : Type*} (s : Finset ι) (t : Finset
   intro a ha
   exact partialDeriv_finset_sum t k (fun b z => f a b z) (fun b hb => hf a ha b hb)
 
-/-- **Differentiated Gram pullback.** Differentiating the covariant Gram-pullback
-identity at a chart-transition-source point `y`, the chart-coordinate partial
-derivative `∂_k G_α(y)_{ij}` expands as the sum of three groups of terms: the
-two Jacobian-derivative ("second derivative of `T`") terms, and the
-chart-rule term that pulls `∂_c G_β(T y)_{ab}` through the Jacobian. -/
 theorem partialDeriv_chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -683,10 +610,6 @@ theorem partialDeriv_chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
   rw [partialDeriv_chartTransition_pullback_summand (I := I) g α β a b i j k hy]
   rw [partialDeriv_chartGramOnE_comp_chartTransitionMap (I := I) g α β a b k hy]
 
-/-- The chart-β coordinate `a` of the Jacobian pushforward
-`chartTransitionAt α β x v` is the contraction of the forward Jacobian entries
-against the chart-α coordinates of `v`:
-`(chartTransitionAt α β x v)^a = ∑ i, J^a_i(x) · v^i`. -/
 lemma chartCoord_chartTransitionAt (α β : M) (x : E) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) a (chartTransitionAt (I := I) α β x v) =
@@ -710,12 +633,6 @@ lemma chartCoord_chartTransitionAt (α β : M) (x : E) (v : E)
   rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
   ring
 
-/-- The second-derivative ("`D²T`") inhomogeneous correction in the
-chart-Christoffel transformation law, as an `E`-valued bilinear contraction.
-With `K = `reverse Jacobian at `T x`, `J = `forward Jacobian at `x`, and
-`∂_i J^c_j(x)` the chart-coordinate partial derivative of the forward Jacobian
-entry, it is
-`∑ k c, K^k_c(T x) · (∑_{ij} (∂_i J^c_j x) v^i w^j) • e_k`. -/
 def chartTransitionSecondDerivCorrection (α β : M) (v w : E) (x : E) : E :=
   ∑ k : Fin (Module.finrank ℝ E),
     (∑ c : Fin (Module.finrank ℝ E),
@@ -739,10 +656,6 @@ def chartTransitionSecondDerivCorrection (α β : M) (v w : E) (x : E) : E :=
                 chartCoord (E := E) i v * chartCoord (E := E) j w)) •
           chartModelBasis E k := rfl
 
-/-- **Schwarz symmetry of the chart-transition Jacobian entry.** The mixed
-second derivative of the chart-transition map is symmetric: differentiating the
-forward Jacobian entry `z ↦ J^a_l(z)` in direction `i` equals differentiating
-`z ↦ J^a_i(z)` in direction `l`, at any point of the open source. -/
 lemma partialDeriv_chartTransitionJacEntry_swap [I.Boundaryless]
     (α β : M) (a i l : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ chartTransitionSource (I := I) α β) :
@@ -791,9 +704,6 @@ lemma partialDeriv_chartTransitionJacEntry_swap [I.Boundaryless]
   rw [hkey i l, hkey l i]
   rw [hsymm ((chartModelBasis E) i) ((chartModelBasis E) l)]
 
-/-- The chart-β inverse picture of the transition image returns the base
-point: `(extChartAt I β).symm (T x) = p` whenever `x = extChartAt I α p` and
-`p` lies in both chart sources. -/
 lemma chartTransitionMap_extChartAt_symm
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source) :
@@ -804,10 +714,6 @@ lemma chartTransitionMap_extChartAt_symm
     rw [extChartAt_source (I := I)]; exact hp_β
   exact (extChartAt I β).left_inv hp_β_src
 
-/-- Diagonal contraction of the chart-β inverse Gram at `p` against the chart-β
-Gram pulled to the transition image `T x`: `∑_d Ḡ⁻¹(p)^{cd} Ḡ_{db}(T x) = δ_{cb}`,
-where `x = extChartAt I α p`, `T x = chartTransitionMap α β x`, and we use
-`(extChartAt I β).symm (T x) = p`. -/
 lemma chartInvGramBeta_mul_chartGramOnE_diag
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -837,13 +743,6 @@ lemma chartInvGramBeta_mul_chartGramOnE_diag
   rw [Matrix.mul_apply] at this
   rw [this, Matrix.one_apply]
 
-/-- **The raw collapse identity.** Contracting the chart-α symmetrised metric
-derivative bundle `S(i,j,l) := ∂_i G_α(l,j) + ∂_j G_α(l,i) - ∂_l G_α(i,j)` against
-the reverse Jacobian `K^l_d` reproduces the chart-β symmetrised bundle
-`S̄(a,b,d) := ∂_a Ḡ(d,b) + ∂_b Ḡ(d,a) - ∂_d Ḡ(a,b)` evaluated at `T x` and
-contracted with the forward Jacobian, plus twice the chart-β Gram against the
-second derivative of the Jacobian:
-`∑_l K^l_d S(i,j,l) = ∑_{ab} S̄(a,b,d)(T x) J^a_i J^b_j + 2 ∑_b Ḡ_{db}(T x) ∂_i J^b_j`. -/
 lemma chartTransition_raw_collapse [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -1145,11 +1044,6 @@ lemma chartTransition_raw_collapse [I.Boundaryless]
       2 * BB from rfl]
   ring
 
-/-- **Chart-Christoffel transformation law (symbol level).** At `x = extChartAt I α p`
-with `p` in both chart sources, the chart-α Christoffel symbol decomposes into the
-covariant pullback of the chart-β Christoffel symbol at `T x` plus the
-second-derivative inhomogeneous correction:
-`Γ_α^k_{ij}(x) = ∑_c K^k_c (∑_{ab} Γ̄^c_{ab}(T x) J^a_i J^b_j) + ∑_c K^k_c (∂_i J^c_j)`. -/
 theorem chartChristoffel_transform [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -1345,10 +1239,6 @@ theorem chartChristoffel_transform [I.Boundaryless]
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_; intro c _; ring]
 
-/-- The `l`-th chart-coordinate of the Christoffel contraction:
-`chartCoord l (Γ_α(v, w)(y)) = ∑_{i,j} Γ^l_{ij}(y) · vⁱ · wʲ`. This is the
-coordinate read-out of `chartChristoffelContraction`, reproved locally so the
-contraction-level transformation law can be assembled in this file. -/
 lemma chartCoord_chartChristoffelContraction
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α : M) (v w y : E)
@@ -1383,8 +1273,6 @@ lemma chartCoord_chartChristoffelContraction
         · intro k _ hkl; rw [hbasis k, if_neg hkl]; ring
         · intro hl; exact absurd (Finset.mem_univ l) hl
 
-/-- Reorder a five-fold finite sum, moving the fourth and fifth summation indices
-to the front. -/
 private lemma sum5_reorder {n : ℕ}
     (F : Fin n → Fin n → Fin n → Fin n → Fin n → ℝ) :
     (∑ c, ∑ a, ∑ b, ∑ i, ∑ j, F c a b i j) =
@@ -1421,8 +1309,6 @@ private lemma sum5_reorder {n : ℕ}
     rw [Finset.sum_comm]
   rw [t1, t2, t3]
 
-/-- Reorder a three-fold finite sum, moving the second and third indices to the
-front. -/
 private lemma sum3_reorder {n : ℕ} (F : Fin n → Fin n → Fin n → ℝ) :
     (∑ c, ∑ i, ∑ j, F c i j) = ∑ i, ∑ j, ∑ c, F c i j := by
   classical
@@ -1432,9 +1318,6 @@ private lemma sum3_reorder {n : ℕ} (F : Fin n → Fin n → Fin n → ℝ) :
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [Finset.sum_comm]
 
-/-- Reorganization helper: a `∑ c`-weighted bilinear contraction of the velocity
-coordinates can be moved outside the velocity sums. Both sides equal the
-fully-expanded five-fold sum `∑ i ∑ j ∑ c K^l_c (∑ab Γ̄ J^a_i J^b_j) v^i w^j`. -/
 private lemma chartTransitionContractionReorderMain
     {n : ℕ} (K : Fin n → ℝ) (Γ : Fin n → Fin n → Fin n → ℝ)
     (J : Fin n → Fin n → ℝ) (vi wj : Fin n → ℝ) :
@@ -1476,9 +1359,6 @@ private lemma chartTransitionContractionReorderMain
   exact sum5_reorder
     (fun c a b i j => K c * (Γ a b c * (J a i * vi i) * (J b j * wj j)))
 
-/-- Reorganization helper for the inhomogeneous correction term: a `∑ c`-weighted
-bilinear contraction of the second-derivative bundle moves outside the velocity
-sums, both sides equalling `∑ i ∑ j (∑ c K^l_c ∂_i J^c_j) v^i w^j`. -/
 private lemma chartTransitionContractionReorderCorr
     {n : ℕ} (K : Fin n → ℝ) (D : Fin n → Fin n → Fin n → ℝ)
     (vi wj : Fin n → ℝ) :
@@ -1503,18 +1383,6 @@ private lemma chartTransitionContractionReorderCorr
   rw [hLHS, hRHS]
   exact sum3_reorder (fun c i j => K c * (D c i j * vi i * wj j))
 
-/-- **The chart-Christoffel transformation law, bilinear-contraction form.**
-Fix a manifold point `p` lying in both chart sources, write `x := extChartAt I α p`
-and `T x := chartTransitionMap α β x`, and let `v w : E` be velocity vectors in
-the chart-α picture. The chart-α Christoffel contraction at `x` equals the
-chart-β contraction at `T x` evaluated on the Jacobian-pushforwards
-`chartTransitionAt α β x v`, `chartTransitionAt α β x w`, then pulled back through
-the reverse Jacobian `chartTransitionAt β α (T x)`, plus the inhomogeneous
-second-derivative correction `chartTransitionSecondDerivCorrection`:
-`Γ_α(v, w)(x) =
-   (chartTransitionAt β α (T x)) (Γ_β(J v, J w)(T x))
-     + D²T(v, w)(x)`.
-This is `chartChristoffel_transform` contracted against the velocity vectors. -/
 theorem chartChristoffelContraction_transform [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -1642,8 +1510,6 @@ theorem chartChristoffelContraction_transform [I.Boundaryless]
         refine Finset.sum_congr rfl (fun j _ => ?_)
         ring
 
-/-- Expansion of the Fréchet derivative of the Jacobian entry along a vector in
-the model basis: `fderiv ℝ (J^a_i) y v = ∑_k vᵏ · ∂_k J^a_i(y)`. -/
 lemma fderiv_chartTransitionJacEntry_eq_sum_partialDeriv
     (α β : M) (a i : Fin (Module.finrank ℝ E)) (y v : E) :
     fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a i) y v =
@@ -1662,12 +1528,6 @@ lemma fderiv_chartTransitionJacEntry_eq_sum_partialDeriv
   rw [map_smul, smul_eq_mul]
   rfl
 
-/-- **Moving-foot chain rule for the chart-transition Jacobian entry.** For a
-smooth curve `cE : ℝ → E` differentiable at `t` with `cE t` in the open
-chart-transition source, the composite `s ↦ J^a_i(cE s)` has derivative
-`∑_k (cE' t)ᵏ · ∂_k J^a_i(cE t)`, where `cE' t` is the curve velocity (the
-foot velocity in the fixed chart at `α`) and `∂_k J^a_i` is the spatial
-transition derivative. -/
 theorem chartTransitionJacEntry_comp_hasDerivAt [I.Boundaryless]
     (α β : M) (a i : Fin (Module.finrank ℝ E))
     {cE : ℝ → E} {cE' : ℝ → E} {t : ℝ}
@@ -1690,12 +1550,6 @@ theorem chartTransitionJacEntry_comp_hasDerivAt [I.Boundaryless]
   rw [fderiv_chartTransitionJacEntry_eq_sum_partialDeriv (I := I) α β a i] at hchain
   exact hchain
 
-/-- **Moving-foot chain rule for the chart-transition pushforward, coordinatewise.**
-For a fixed model vector `v : E` and a smooth curve `cE : ℝ → E` differentiable
-at `t` with `cE t` in the chart-transition source, each chart-`β` coordinate `a`
-of the foot-dependent pushforward `s ↦ chartTransitionAt α β (cE s) v` has
-derivative `∑_i (∑_k (cE' t)ᵏ · ∂_k J^a_i(cE t)) · vⁱ`. The foot motion `cE'`
-enters only through the spatial transition derivative `∂_k J^a_i`. -/
 theorem chartCoord_chartTransitionAt_comp_hasDerivAt [I.Boundaryless]
     (α β : M) (a : Fin (Module.finrank ℝ E)) (v : E)
     {cE : ℝ → E} {cE' : ℝ → E} {t : ℝ}
@@ -1727,11 +1581,6 @@ theorem chartCoord_chartTransitionAt_comp_hasDerivAt [I.Boundaryless]
     chartTransitionJacEntry_comp_hasDerivAt (I := I) α β a i hc hmem
   simpa using hJ.mul_const (chartCoord (E := E) i v)
 
-/-- **Coordinate of the foot-slot derivative of the transition Jacobian.**
-For `x` in the chart-transition source, the `a`-th chart coordinate of the
-foot-slot derivative `(fderiv (chartTransitionAt α β ·) x v) w` equals the
-second-derivative sum `∑_{i,j} (∂_i J^a_j x) vⁱ wʲ`, where
-`J = chartTransitionJacEntry α β`. -/
 lemma chartCoord_fderiv_chartTransitionAt_general [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β)
     (a : Fin (Module.finrank ℝ E)) (v w : E) :
@@ -1809,13 +1658,6 @@ lemma chartCoord_fderiv_chartTransitionAt_general [I.Boundaryless]
   rw [hLHS_expand]
   rw [Finset.sum_comm]
 
-/-- **Foot-slot derivative of the transition Jacobian = pushforward of the
-second-derivative correction.** For `x` in the chart-transition source, the
-foot-slot derivative `(fderiv (chartTransitionAt α β ·) x v) w` equals the
-forward Jacobian `chartTransitionAt α β x` applied to the second-derivative
-correction `chartTransitionSecondDerivCorrection α β v w x`. This is the
-vector-valued cancellation identity that converts the moving-foot Jacobian
-derivative into the Christoffel-transformation correction term. -/
 lemma fderiv_chartTransitionAt_apply_eq_pushCorrection [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) (v w : E) :
     (fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w =

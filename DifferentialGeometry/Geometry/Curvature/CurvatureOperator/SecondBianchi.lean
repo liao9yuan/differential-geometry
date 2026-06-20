@@ -1,56 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 
-/-!
-# The second (differential) Bianchi identity for the Levi-Civita connection
-
-For the Levi-Civita covariant derivative `cov := LeviCivita g` on the tangent bundle of a
-smooth Riemannian manifold `M`, this file proves the **second Bianchi identity**: the cyclic
-sum of the covariant derivative of the Riemann curvature in its first (derivative) slot and
-the two antisymmetric vector-field slots vanishes,
-$$
-  (\nabla_X R)(Y, Z) W + (\nabla_Y R)(Z, X) W + (\nabla_Z R)(X, Y) W = 0 .
-$$
-This is the differential analogue of the algebraic first Bianchi identity
-(`riemannSec_first_bianchi_levi_civita`, `CurvatureOperator/Defs.lean`); it is the
-fundamental classical curvature identity one derivative up.
-
-## Main definitions
-
-* `nablaCurvSec cov X Y Z W x` — the covariant derivative of the section-level Riemann
-  curvature, contracted on its three input slots, via the standard Leibniz formula
-  $$
-    (\nabla_X R)(Y, Z) W := \nabla_X\bigl(R(Y, Z) W\bigr)
-      - R(\nabla_X Y, Z) W - R(Y, \nabla_X Z) W - R(Y, Z)(\nabla_X W),
-  $$
-  written with Mathlib's argument convention `cov.toFun σ x v ≅ (∇_v σ)(x)`. Here
-  `R(Y, Z) W = riemannSec cov Y Z W` is the section-level curvature operator.
-
-## Main theorems
-
-* `nablaCurvSec_expand` — the expansion of `nablaCurvSec` into pure `cov.toFun` monomials,
-  obtained by distributing the outer covariant derivative over the three-term curvature
-  section `R(Y, Z) W = ∇_Y(∇_Z W) - ∇_Z(∇_Y W) - ∇_{[Y, Z]} W`.
-
-* `second_bianchi_levi_civita` — the second Bianchi identity for the Levi-Civita
-  covariant derivative, in section form.
-
-## Proof outline
-
-The proof is frame-free and purely algebraic, mirroring the first Bianchi identity one
-derivative up. After expanding each cyclic term into `cov.toFun` monomials, the cyclic sum
-groups into three vanishing families:
-
-* the **pure third-derivative terms** `∇_X ∇_Y ∇_Z W` cancel cyclically against the
-  reordered terms produced by the `R(Y, Z)(∇_X W)` correction;
-* the **outer-derivative-of-torsion terms** `∇_a\bigl((∇_{\nabla_b c} - ∇_{\nabla_c b}
-  - ∇_{[b, c]}) W\bigr)` vanish termwise by torsion-freeness
-  (`covApply_sub_eq_mlieBracket`) and the direction-linearity of `cov.toFun`;
-* the **mixed and bracket terms** combine, by torsion-freeness, into the covariant
-  derivative of the Jacobi combination `[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0` of
-  vector-field brackets, which is zero by the manifold Jacobi identity
-  (`VectorField.leibniz_identity_mlieBracket_apply`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter
@@ -72,8 +21,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [∀ x, IsTopologicalAddGroup (V x)] [∀ x, ContinuousSMul ℝ (V x)]
   [FiberBundle F V] [VectorBundle ℝ F V]
 
-/-- The covariant derivative annihilates the negated section: `∇(-σ) = -∇σ` at a point of
-differentiability, as a continuous linear map. -/
 lemma cov_toFun_neg (cov : CovariantDerivative I F V)
     {σ : Π b : M, V b} {x : M} (hσ : MDiffAt (T% σ) x) :
     cov.toFun (-σ) x = - cov.toFun σ x := by
@@ -86,8 +33,6 @@ lemma cov_toFun_neg (cov : CovariantDerivative I F V)
   rw [hzero] at hsum
   exact eq_neg_of_add_eq_zero_right hsum.symm
 
-/-- The covariant derivative distributes over a section difference: `∇(σ - τ) = ∇σ - ∇τ`
-at a point where both sections are differentiable, as a continuous linear map. -/
 lemma cov_toFun_sub (cov : CovariantDerivative I F V)
     {σ τ : Π b : M, V b} {x : M} (hσ : MDiffAt (T% σ) x) (hτ : MDiffAt (T% τ) x) :
     cov.toFun (σ - τ) x = cov.toFun σ x - cov.toFun τ x := by
@@ -106,17 +51,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The covariant derivative of the Riemann curvature**, contracted on its three input
-slots. For a tangent-bundle covariant derivative `cov` and tangent vector fields
-`X, Y, Z, W`, this is the standard Leibniz formula
-$$
-  (\nabla_X R)(Y, Z) W := \nabla_X\bigl(R(Y, Z) W\bigr)
-    - R(\nabla_X Y, Z) W - R(Y, \nabla_X Z) W - R(Y, Z)(\nabla_X W),
-$$
-with `R(Y, Z) W = riemannSec cov Y Z W` and Mathlib's convention
-`cov.toFun σ x v ≅ (∇_v σ)(x)`. The first term `∇_X(R(Y,Z)W)` is `cov.toFun` of the
-curvature section `b ↦ riemannSec cov Y Z W b` along `X(x)`; the three correction terms
-subtract the curvature with the covariant derivative `∇_X` inserted into each input slot. -/
 def nablaCurvSec (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z W : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
   cov.toFun (fun b => riemannSec cov Y Z W b) x (X x)
@@ -126,7 +60,7 @@ def nablaCurvSec (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
 
 omit [CompleteSpace E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
-/-- Definitional unfolding of `nablaCurvSec`. -/
+
 lemma nablaCurvSec_def (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y Z W : Π b : M, TangentSpace I b) (x : M) :
     nablaCurvSec cov X Y Z W x =
@@ -135,10 +69,6 @@ lemma nablaCurvSec_def (cov : CovariantDerivative I E (TangentSpace I : M → Ty
         - riemannSec cov Y (covApply cov X Z) W x
         - riemannSec cov Y Z (covApply cov X W) x := rfl
 
-/-- Expansion of the leading term `∇_X(R(Y,Z)W)` of `nablaCurvSec` into pure `cov.toFun`
-monomials, by writing the curvature section
-`R(Y, Z) W = ∇_Y(∇_Z W) - ∇_Z(∇_Y W) - ∇_{[Y, Z]} W` and distributing the outer covariant
-derivative over the three-term section difference. -/
 lemma covApply_riemannSec_section_distrib
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -172,10 +102,7 @@ lemma covApply_riemannSec_section_distrib
   simp only [ContinuousLinearMap.sub_apply]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- **Torsion-zero inner section collapse.** For a torsion-free covariant derivative, the
-inner section `∇_{∇_A B} W - ∇_{∇_B A} W - ∇_{[A, B]} W` is the zero section: the directions
-`∇_A B - ∇_B A - [A, B]` vanish by torsion-freeness, and `∇_· W` is linear in the
-direction. -/
+
 lemma covApply_torsionFree_inner_section_eq_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -198,11 +125,6 @@ lemma covApply_torsionFree_inner_section_eq_zero
   simp only [covApply_apply]
   abel
 
-/-- **Group-1 vanishing.** For a torsion-free `C^∞` covariant derivative, the outer covariant
-derivative `∇_a` of the torsion-zero inner section
-`∇_{∇_A B} W - ∇_{∇_B A} W - ∇_{[A, B]} W` is zero (pointwise, evaluated along any
-direction `a`). This is the family of terms produced by differentiating the curvature in its
-antisymmetric slots; they cancel termwise. -/
 lemma covApply_outer_torsionFree_collapse
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -247,10 +169,6 @@ lemma covApply_outer_torsionFree_collapse
   have := congrFun (congrArg DFunLike.coe hd.symm) (a x)
   simpa [ContinuousLinearMap.sub_apply] using this
 
-/-- **Flat `cov.toFun`-monomial expansion of `nablaCurvSec`.** Expanding the leading term
-via `covApply_riemannSec_section_distrib` and the three curvature corrections via
-`riemannSec_def`, `(∇_X R)(Y, Z) W` becomes a sum of twelve `cov.toFun` monomials. This is
-the form on which the cyclic cancellation is carried out. -/
 lemma nablaCurvSec_flat
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -277,9 +195,7 @@ lemma nablaCurvSec_flat
       riemannSec_def (cov := cov) Y Z (covApply cov X W) x]
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- **Vector-argument torsion collapse.** For a torsion-free covariant derivative, applying
-`cov.toFun S x` (which is linear in its tangent-vector argument) to the torsion combination
-`∇_A B - ∇_B A - [A, B]` gives zero, since that combination vanishes at `x`. -/
+
 lemma cov_toFun_torsionFree_vector_collapse
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -297,8 +213,7 @@ lemma cov_toFun_torsionFree_vector_collapse
   abel
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- **Section-level torsion-free identity.** As sections, `∇_A B = ∇_B A + [A, B]` for the
-torsion-free covariant derivative `cov`, on smooth vector fields `A, B`. -/
+
 lemma covApply_eq_swap_add_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -317,10 +232,7 @@ lemma covApply_eq_swap_add_mlieBracket
   rw [← htf]; abel
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
-/-- **Bracket pairing under torsion-freeness.** Pairing the two brackets in which the
-covariant derivative `∇_A B` (resp. its swap `∇_B A`) appears collapses, via torsion-freeness,
-to a double Lie bracket:
-`[∇_A B, C] + [C, ∇_B A] = [[A, B], C]`. -/
+
 lemma mlieBracket_covApply_pair
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -340,11 +252,6 @@ lemma mlieBracket_covApply_pair
   rw [VectorField.mlieBracket_add_left hcBA hbrAB]
   abel
 
-/-- **The bracket Jacobi sum (third Group of the cyclic cancellation) vanishes.** The six
-brackets carrying a single covariant derivative in one slot, produced by the curvature
-corrections, regroup by `mlieBracket_covApply_pair` into the cyclic sum of double Lie
-brackets `[[X, Y], Z] + [[Z, X], Y] + [[Y, Z], X]`, which is zero by the manifold Jacobi
-identity (`VectorField.leibniz_identity_mlieBracket_apply`). -/
 lemma bianchi_bracket_jacobi_sum_eq_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -434,23 +341,6 @@ lemma bianchi_bracket_jacobi_sum_eq_zero
         rw [p1, p2, p3]
     _ = 0 := hJac_cyc
 
-/-- **The second (differential) Bianchi identity for the Levi-Civita connection.**
-
-For the Levi-Civita covariant derivative `cov := LeviCivita g` on the tangent bundle of a
-smooth closed Riemannian manifold, and smooth tangent vector fields `X, Y, Z, W`, the cyclic
-sum of the covariant derivative of the Riemann curvature in its derivative slot and its two
-antisymmetric vector-field slots vanishes:
-$$
-  (\nabla_X R)(Y, Z) W + (\nabla_Y R)(Z, X) W + (\nabla_Z R)(X, Y) W = 0 .
-$$
-
-This is the differential analogue of the algebraic first Bianchi identity
-(`riemannSec_first_bianchi_levi_civita`). The proof is frame-free: after expanding each
-cyclic term into `cov.toFun` monomials (`nablaCurvSec_flat`), the cyclic sum splits, by exact
-linear algebra over the tangent space, into three vanishing families — the outer-derivative
-torsion collapse (`covApply_outer_torsionFree_collapse`), the vector-argument torsion
-collapse (`cov_toFun_torsionFree_vector_collapse`), and the bracket Jacobi sum
-(`bianchi_bracket_jacobi_sum_eq_zero`). -/
 theorem second_bianchi_levi_civita
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -465,14 +355,14 @@ theorem second_bianchi_levi_civita
   classical
   rw [nablaCurvSec_flat cov hY hZ hW, nablaCurvSec_flat cov hZ hX hW,
       nablaCurvSec_flat cov hX hY hW]
-  -- the three Group-1 (outer-derivative torsion) collapses
+  
   have g1XYZ := covApply_outer_torsionFree_collapse cov htor (a := X) (A := Y) (B := Z)
     (x := x) hY hZ hW
   have g1YZX := covApply_outer_torsionFree_collapse cov htor (a := Y) (A := Z) (B := X)
     (x := x) hZ hX hW
   have g1ZXY := covApply_outer_torsionFree_collapse cov htor (a := Z) (A := X) (B := Y)
     (x := x) hX hY hW
-  -- the three Group-2 (vector-argument torsion) collapses
+  
   have hXat : MDiffAt (T% X) x := (hX x).mdifferentiableAt (by simp)
   have hYat : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
   have hZat : MDiffAt (T% Z) x := (hZ x).mdifferentiableAt (by simp)
@@ -482,7 +372,7 @@ theorem second_bianchi_levi_civita
     (S := covApply cov X W) hYat hZat
   have g2ZXY := cov_toFun_torsionFree_vector_collapse cov htor (A := Z) (B := X)
     (S := covApply cov Y W) hZat hXat
-  -- the Group-3 bracket Jacobi sum, pushed through the (additive) map `cov.toFun W x`
+  
   have g3 := bianchi_bracket_jacobi_sum_eq_zero cov htor (x := x) hX hY hZ
   have g3W : cov.toFun W x (VectorField.mlieBracket I (covApply cov X Y) Z x)
       + cov.toFun W x (VectorField.mlieBracket I Y (covApply cov X Z) x)
@@ -504,17 +394,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- **The second Bianchi identity for the Levi-Civita connection of a metric.** The
-consumable form: for `g` a smooth Riemannian metric on a closed manifold and smooth tangent
-vector fields `X, Y, Z, W`, the cyclic sum of the covariant derivative of the Riemann
-curvature of `LeviCivita g` vanishes,
-$$
-  (\nabla_X R)(Y, Z) W + (\nabla_Y R)(Z, X) W + (\nabla_Z R)(X, Y) W = 0 .
-$$
-This specialises `second_bianchi_levi_civita` to `cov := LeviCivita g`, discharging the
-torsion-free hypothesis via `LeviCivita_torsion_eq_zero` (the `C^∞`-covariant-derivative
-instance is `LeviCivita_isContMDiff`). It is the named driver for the `(∇R)`-cross-terms in
-the curvature-tower telescoping. -/
 theorem second_bianchi_levi_civita_metric
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {X Y Z W : Π b : M, TangentSpace I b} {x : M}

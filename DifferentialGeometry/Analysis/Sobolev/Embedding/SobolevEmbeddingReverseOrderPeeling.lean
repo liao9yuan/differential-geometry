@@ -1,57 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 
-/-!
-# Reverse-Christoffel order-peeling: order-`2k` chart Hilbert-Schmidt control
-by the order-`0` content of the iterated covariant gradients
-
-The forward order-dropping bound `covGrad_toHs_norm_le` shows that one covariant
-derivative *costs* one Sobolev order: `‖∇T‖_{H^σ} ≤ C · ‖T‖_{H^{σ+1}}`.  This
-file proves the **opposite** (order-peeling) inequality, the analytic heart of
-the reverse Sobolev bridge:
-
-  `tensorPouSobolevHsNorm g k T
-     ≤ C · ∑_{j ∈ range (2k + 1)} tensorPouSobolevHsNorm g 0 (∇^j T)`,
-
-i.e. the order-`2k` Hilbert-Schmidt chart-Sobolev norm of `T` is controlled by
-the order-`0` chart-Sobolev norms (the bare `L²` content of the chart-frame
-scalar components) of the iterated covariant gradients `∇^j T`, `j ≤ 2k`.
-
-## The peeling identity (reverse of the chart formula)
-
-The bidirectional chart formula `tensorChartComponentRaw_covGrad` reads, for a
-smooth compactly-supported `(r, s)`-tensor `S`,
-
-  `raw(∇S)_{Idx, (m ::ᵥ Jdx')}
-     = euclidPartial m (chartPushedRaw I α (raw S_{Idx, Jdx'}))
-       + covDerivLowerOrderTerm`.
-
-Rearranged it expresses one chart-Euclidean coordinate partial of a component of
-`S` as a component of `∇S` minus a zeroth-order Christoffel correction:
-
-  `euclidPartial m (raw S_{Idx, Jdx'})
-     = raw(∇S)_{Idx, (m ::ᵥ Jdx')} - covDerivLowerOrderTerm`.
-
-Iterating this, every order-`j` Fréchet derivative of a chart-pulled component of
-`T` is, up to lower-order Christoffel-coefficient corrections of all the `∇^i T`
-(`i ≤ j`), an order-`0` component of `∇^j T`.  The corrections are controlled by
-the uniform `C^•` Christoffel data of the compact manifold
-(`exists_lowerOrderCoeff_uniform_bound`), exactly as in the forward direction.
-
-## Main results
-
-* `iteratedFDeriv_rawPull_norm_le_iteratedCovGrad_content` — the **pointwise
-  operator-norm reverse-peeling**: the order-`j` Fréchet-derivative operator norm
-  of a chart-pulled component of any smooth compactly-supported tensor `S` is
-  bounded by a uniform constant times the sum over `i ≤ j` of the order-`0`
-  content (sum of component magnitudes) of `∇^i S`, on the compact
-  partition-of-unity kernel.
-
-* `exists_tensorPouSobolevHsNorm_le_iteratedCovGrad_zero_sum` — the **headline
-  reverse-bridge order-peeling**:
-  `tensorPouSobolevHsNorm g k T ≤ ENNReal.ofReal C ·
-    ∑_{j ∈ range (2k+1)} tensorPouSobolevHsNorm g 0 (∇^j T)`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -88,7 +36,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- Expansion of a vector in `EuclN` along the standard basis. -/
 private lemma euclN_basis_expansion (v : EuclN) :
     v = ∑ j : Fin (Module.finrank ℝ E), v j • EuclideanSpace.single j (1 : ℝ) := by
   classical
@@ -115,25 +62,20 @@ private lemma euclN_basis_expansion (v : EuclN) :
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [LinearEquiv.map_smul]
 
-/-- The standard Euclidean basis tuple at a multi-index `α : Fin m → Fin n`. -/
 private def basisTupleE {m : ℕ} (α : Fin m → Fin (Module.finrank ℝ E)) :
     Fin m → EuclN :=
   fun i => EuclideanSpace.single (α i) (1 : ℝ)
 
-/-- Each component of `basisTupleE α` has norm one. -/
 private lemma basisTupleE_norm_one {m : ℕ}
     (α : Fin m → Fin (Module.finrank ℝ E)) (i : Fin m) :
     ‖basisTupleE (E := E) α i‖ = 1 := by
   simp only [basisTupleE, PiLp.norm_single]; simp
 
-/-- The product of the component norms of `basisTupleE α` is one. -/
 private lemma basisTupleE_prod_norms {m : ℕ}
     (α : Fin m → Fin (Module.finrank ℝ E)) :
     (∏ i : Fin m, ‖basisTupleE (E := E) α i‖) = 1 :=
   Finset.prod_eq_one (fun i _ => basisTupleE_norm_one (E := E) α i)
 
-/-- Each coordinate of a vector in `EuclN` has absolute value bounded by the
-norm. -/
 private lemma euclN_coord_abs_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     |v i| ≤ ‖v‖ := by
   classical
@@ -151,9 +93,6 @@ private lemma euclN_coord_abs_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E
   rw [h_norm_eq, ← Real.sqrt_sq_eq_abs]
   exact Real.sqrt_le_sqrt h_sq
 
-/-- **The L¹ basis bound for a continuous multilinear map on `EuclN`.** The
-operator norm is bounded by the sum of the absolute values of the
-basis-tuple evaluations. -/
 private theorem opNorm_le_sum_basisE {m : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ) :
     ‖f‖ ≤ ∑ α : Fin m → Fin (Module.finrank ℝ E), |f (basisTupleE (E := E) α)| := by
@@ -210,7 +149,6 @@ private theorem opNorm_le_sum_basisE {m : ℕ}
   refine le_trans (Finset.sum_le_sum (fun α _ => h_each α)) ?_
   rw [← Finset.sum_mul]
 
-/-- The basis-tuple evaluation is bounded by the operator norm. -/
 private lemma abs_apply_basisTupleE_le_opNorm {m : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ)
     (α : Fin m → Fin (Module.finrank ℝ E)) :
@@ -219,10 +157,6 @@ private lemma abs_apply_basisTupleE_le_opNorm {m : ℕ}
   rw [basisTupleE_prod_norms (E := E) α, mul_one] at h
   exact h
 
-/-- The Euclidean pull-back of a raw `(r, s)`-component of a tensor `S`:
-the chart-frame scalar component post-composed with the chart inverse and the
-Euclidean representation map.  (A non-private analogue of the forward file's
-`rawPull`, usable across tensor valences.) -/
 def rawPullR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -240,7 +174,6 @@ lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
         ∘ (toEuclidean (E := E)).symm) =
       rawPullR (I := I) (M := M) g r s S α Idx Jdx := rfl
 
-/-- `rawPullR` is `C^∞` on the (open) Euclidean chart target. -/
 lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -260,9 +193,6 @@ lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (rawPullR_contDiffOn (I := I) (M := M) g r s S α Idx Jdx).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
-/-- Near an interior point of the chart target, `chartPushedRaw I α (raw S
-component)` agrees with the plain `rawPullR` of the same component, so their
-iterated Fréchet derivatives coincide there. -/
 private lemma chartPushedRaw_eventuallyEq_rawPullR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -274,10 +204,6 @@ private lemma chartPushedRaw_eventuallyEq_rawPullR (g : SmoothRiemannianMetric I
   filter_upwards [(chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy] with z hz
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]; rfl
 
-/-- The order-`0` chart content of `S` at chart `α` and point `y`: the sum over
-all component multi-index pairs of the magnitude of the chart-pulled raw
-component.  This is the (square-root-free) `L¹` analogue of the order-`0`
-Hilbert-Schmidt content. -/
 def zeroContentR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
   ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -289,8 +215,6 @@ lemma zeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     0 ≤ zeroContentR (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
-/-- A single chart-pulled raw component magnitude is bounded by the order-`0`
-content. -/
 lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -305,10 +229,6 @@ lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
     Finset.single_le_sum (f := f) (fun q _ => abs_nonneg _) (Finset.mem_univ _)
   simpa [zeroContentR, hf] using h
 
-/-- **The rearranged chart formula.** At an interior chart-target point `y`, the
-`m`-th coordinate partial of a chart-pulled raw component of `S` equals the
-chart-pulled raw `(m ::ᵥ Jdx')`-component of `covGrad S` minus the zeroth-order
-Christoffel correction `covDerivLowerOrderTerm`. -/
 lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -379,12 +299,6 @@ lemma exists_iteratedFDeriv_norm_bound_on_compactR
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
-/-- **The uniform lower-order Christoffel-coefficient bound** (re-derived).  Over
-all the lower-order correction coefficients `covDerivLowerOrderCoeff` — for the
-differentiation direction `m`, the source input multi-index `Idx`, the source
-output multi-index `Jdx'`, and the target multi-index pair `p` — up to iterated
-Fréchet order `N`, the operator norm is bounded by a single non-negative `C` on
-the compact partition-of-unity kernel `chartImagePOUTsupport α`. -/
 lemma exists_lowerOrderCoeff_uniform_boundR
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -430,8 +344,6 @@ lemma exists_lowerOrderCoeff_uniform_boundR
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
-/-- **One-order Fréchet peeling.** For `u` smooth on the open chart target and
-`y` in it, `‖D^{j+1} u y‖ ≤ n^j · ∑_m ‖D^j (euclidPartial m u) y‖`. -/
 lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
     {u : EuclN → ℝ} {O : Set EuclN} (hO : IsOpen O) (hu : ContDiffOn ℝ ∞ u O)
     (j : ℕ) {y : EuclN} (hy : y ∈ O) :
@@ -627,14 +539,6 @@ lemma exists_christoffel_bound_valence_range
     exact (hΓf p m Idx Jdx' q l hl y hy).trans
       (Finset.le_sup' Γf (Finset.mem_range.mpr (by omega)))
 
-/-- **The pointwise reverse-peeling.** Fix a smooth compactly-supported tensor
-`T`, a chart `α`, and an order bound `P`.  For every Fréchet order `j ≤ P` there
-is a non-negative constant `C` such that for every order `l ≤ j`, every `p` with
-`p + l ≤ P`, every component `(Idx, Jdx)` of `∇^p T`, and every `y` in the
-compact kernel `chartImagePOUTsupport α`,
-`‖D^l (rawPullR (∇^p T) Idx Jdx) y‖ ≤ C · ∑_{i ≤ l} zeroContentR (∇^{p+i} T) α y`.
-The single constant `C` covers all orders `l ≤ j`, which is what the Leibniz
-lower-order term of the inductive step consumes. -/
 lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : ℕ) :
@@ -938,8 +842,6 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
         refine le_trans h_final ?_
         apply mul_le_mul_of_nonneg_right (le_max_right _ _) hRHSsum_nn
 
-/-- The order-`0` Hilbert-Schmidt content of `S` at chart `α`, point `y`: the sum
-over all component pairs of the *squared* chart-pulled raw component. -/
 private def hsZeroContentR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
   ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -951,8 +853,6 @@ private lemma hsZeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     0 ≤ hsZeroContentR (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-/-- **Cauchy–Schwarz on the order-`0` content.** `zeroContentR² ≤ Np ·
-hsZeroContentR`, where `Np` is the number of component pairs of `S`. -/
 private lemma zeroContentR_sq_le_card_mul_hsZeroContentR
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
@@ -977,8 +877,6 @@ private lemma zeroContentR_sq_le_card_mul_hsZeroContentR
   rw [Finset.card_univ] at hcs
   exact hcs
 
-/-- The pushed partition-of-unity weight `ρ_α` vanishes at chart-target points
-outside the compact kernel `chartImagePOUTsupport α`. -/
 private lemma pouPull_eq_zero_off_kernelR (α : M) (y : EuclN)
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
@@ -998,10 +896,6 @@ private lemma pouPull_eq_zero_off_kernelR (α : M) (y : EuclN)
   refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
   rw [h_round]; simp
 
-/-- **The per-chart pointwise integrand bound.** For a chart `α`, an order `k`,
-and `y` in the chart target, the partition-of-unity-weighted full order-`2k`
-Hilbert-Schmidt sum of the chart-pulled `(r, s)`-components of `T` is bounded by
-`C · ρ_α · ∑_{i ≤ 2k} hsZeroContentR (∇^i T)`. -/
 private lemma reverse_pointwise_integrand_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g r s) {y : EuclN},
@@ -1224,8 +1118,6 @@ private lemma reverse_pointwise_integrand_le
       pouPull_eq_zero_off_kernelR (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
-/-- AEMeasurability of one Hilbert-Schmidt integrand term (a partition-of-unity-
-weighted squared basis-evaluation of an iterated derivative of a raw component). -/
 private lemma rawPullRIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1280,9 +1172,6 @@ private lemma rawPullRIntegrand_aemeasurable
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
-/-- The chart-`α` Hilbert-Schmidt inner double-sum-of-integrals of a tensor `S`
-equals the integral of the partition-of-unity-weighted full Hilbert-Schmidt
-content.  (Tonelli for finite sums + `ofReal` of a non-negative finite sum.) -/
 private lemma sumIntegrals_eq_integral_sumR
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -1478,8 +1367,6 @@ private lemma sumIntegrals_eq_integral_sumR
         rw [Finset.mul_sum,
           ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
 
-/-- The chart-`α` order-`0` inner sum of `∇^i T` equals the integral of the
-partition-of-unity-weighted order-`0` Hilbert-Schmidt content `hsZeroContentR`. -/
 private lemma rhsInner_eq_integral_hsZeroContent
     (g : SmoothRiemannianMetric I M) (r s i : ℕ) (T : SmoothCcTensor g r s)
     (α : M) :
@@ -1521,9 +1408,6 @@ private lemma rhsInner_eq_integral_hsZeroContent
       (fun ii => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (bIdx ii))| ^ 2)]
   rw [iteratedFDeriv_zero_apply]
 
-/-- **The per-chart inner bound.** For each chart `α`, the chart-`α` order-`2k`
-Hilbert-Schmidt inner sum of `T` is bounded by `ofReal C` times the sum over
-`i ≤ 2k` of the chart-`α` order-`0` inner sums of `∇^i T`. -/
 private lemma reverse_per_alpha_inner_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (C : ℝ) (hC_nn : 0 ≤ C)
@@ -1673,8 +1557,6 @@ private lemma reverse_per_alpha_inner_bound
   rw [← ENNReal.ofReal_mul hC_nn, ← Finset.mul_sum]
   exact ENNReal.ofReal_le_ofReal hpt'
 
-/-- The chart-`α` order-`2k` Hilbert-Schmidt inner sum of `T` (the per-chart
-summand of `tensorPouSobolevHsNormSq g k T`). -/
 @[reducible] private def reverseLhsInner (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (T : SmoothCcTensor g r s) (α : M) : ℝ≥0∞ :=
   ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1694,8 +1576,6 @@ summand of `tensorPouSobolevHsNormSq g k T`). -/
                     (Fin (Module.finrank ℝ E)) ℝ (basisIdx i))| ^ 2)
           ∂(volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
 
-/-- The chart-`α` order-`0` Hilbert-Schmidt inner sum of `∇^i T` (the per-chart
-summand of `tensorPouSobolevHsNormSq g 0 (∇^i T)`). -/
 @[reducible] private def reverseRhsInner (g : SmoothRiemannianMetric I M) (r s _k : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (i : ℕ) : ℝ≥0∞ :=
   ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1716,10 +1596,6 @@ summand of `tensorPouSobolevHsNormSq g 0 (∇^i T)`). -/
                     (Fin (Module.finrank ℝ E)) ℝ (basisIdx ii))| ^ 2)
           ∂(volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
 
-/-- **The squared-norm reverse order-peeling.** There is a non-negative constant
-`C` such that for every smooth compactly-supported `(r, s)`-tensor `T`,
-`tensorPouSobolevHsNormSq g k T ≤ ENNReal.ofReal C ·
-  ∑_{i ∈ range (2k+1)} tensorPouSobolevHsNormSq g 0 (∇^i T)`. -/
 private lemma exists_tensorPouSobolevHsNormSq_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1770,8 +1646,6 @@ private lemma exists_tensorPouSobolevHsNormSq_le
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [tensorPouSobolevHsNormSq_eq_inner_sum]
 
-/-- For a finite family of `ℝ≥0∞`, the sum of squares is bounded by the square of
-the sum (cross terms are non-negative). -/
 private lemma enn_sum_sq_le_sq_sum {ι : Type*} (s : Finset ι) (f : ι → ℝ≥0∞) :
     ∑ i ∈ s, f i ^ 2 ≤ (∑ i ∈ s, f i) ^ 2 := by
   classical
@@ -1784,17 +1658,6 @@ private lemma enn_sum_sq_le_sq_sum {ι : Type*} (s : Finset ι) (f : ι → ℝ�
     _ = (∑ i ∈ s, f i) * (∑ j ∈ s, f j) := by rw [← Finset.sum_mul]
     _ = (∑ i ∈ s, f i) ^ 2 := by rw [sq]
 
-/-- **The reverse-Christoffel order-peeling.** There is a non-negative constant
-`C` such that for every smooth compactly-supported `(r, s)`-tensor `T`, the
-order-`2k` Hilbert-Schmidt chart-Sobolev norm of `T` is bounded by `C` times the
-sum, over `j ≤ 2k`, of the order-`0` Hilbert-Schmidt chart-Sobolev norms of the
-iterated covariant gradients `∇^j T`:
-`tensorPouSobolevHsNorm g k T ≤ ENNReal.ofReal C ·
-  ∑_{j ∈ range (2k+1)} tensorPouSobolevHsNorm g 0 (∇^j T)`.
-
-This is the order-peeling half of the reverse Sobolev bridge: the higher-order
-chart-Sobolev content of `T` is recovered, up to uniform Christoffel-controlled
-constants, from the order-`0` content of its iterated covariant gradients. -/
 theorem exists_tensorPouSobolevHsNorm_le_iteratedCovGrad_zero_sum
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

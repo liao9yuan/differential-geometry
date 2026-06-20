@@ -1,68 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedRegularityHigher
 
-/-!
-# Weakened Nirenberg interior `W^{2,2}` regularity of the iterated mixed partial
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, and a component multi-index `P₀`, the iterated
-divergence-form datum
-`eigenvectorIteratedTensorChartBilinearData g r s i α P₀ m`
-packages the `m`-fold-differentiated weak-elliptic identity satisfied by the
-eigenvector chart component. Its principal factor is the recursive `m`-fold
-mixed weak partial
-`eigenvectorChartIteratedPartial g r s i α P₀ m directions`.
-
-To raise the regularity of that `m`-fold mixed weak partial by two — running the
-order-2 interior elliptic engine on it — we need a `TensorChartBilinearH1ComplData`,
-the per-component scalar divergence-form datum the engine consumes. The iterated
-carrier `eigenvectorIteratedTensorChartBilinearData` is **not** such
-a datum: it carries the level index `m` and its principal block is the
-*level-`(m+1)`* mixed weak partial
-`eigenvectorChartIteratedPartial … (m+1) (Fin.cons a directions)`,
-which differentiates the new direction `a` innermost.
-
-This module builds the missing bridge. It is the eigenvector/tensor mirror of
-the scalar campaign's weakened Nirenberg interior module
-(`iteratedChartBilinearH1ComplData_weak`,
-`iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened`).
-
-## The bridge
-
-`eigenvectorIteratedTensorChartBilinearData_toData` converts the
-iterated carrier `D_m` into a genuine `TensorChartBilinearH1ComplData`, under the
-single regularity hypothesis chart-`H^{m+1}` of the eigenvector chart component.
-Its chart component `u_chart` is the `m`-fold mixed weak partial
-`eigenvectorChartIteratedPartial … m D_m.directions`, its
-right-hand side `f_chart` is the carrier's effective `L²` source `D_m.fChartEff`,
-and its weak partials `weak_partial j` are the canonical chosen weak `j`-partials
-of the `m`-fold mixed weak partial. The level-`(m+1)` principal block of the
-carrier's variational identity is re-expressed as those chosen weak partials via
-the polymorphic Schwarz reindexing
-`eigenvectorChartIteratedPartial_cons_eq_chosenWeakPartial_ae`.
-
-## Main definitions
-
-* `eigenvectorIteratedTensorChartBilinearData_toData` — the bridge:
-  an iterated carrier `D_m`, together with chart-`H^{m+1}` of the chart component,
-  becomes a `TensorChartBilinearH1ComplData` for the `m`-fold mixed weak partial.
-
-## Main theorems
-
-* `eigenvectorChartIteratedPartial_memWkp_two_two` — the global
-  `W^{2,2}` of the `m`-fold mixed weak partial: the order-2 interior elliptic
-  engine applied to
-  `eigenvectorIteratedTensorChartBilinearData_toData D_m h_parent`
-  delivers interior `W^{2,2}` on a precompact subdomain, which the support-aware
-  promotion `MemWkp_of_memWkp_precompact_of_ae_zero_off_compact` raises to global
-  `W^{2,2}` of the chart target.
-
-## Sign convention
-
-We follow the geometer convention `Δ_∇ = -∇* ∇`, with spectrum `⊆ (-∞, 0]`. The
-resolvent is `(1 - Δ_∇)⁻¹` (spectrum `⊆ (0, 1]`).
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function
@@ -94,9 +32,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- The underlying scalar `ChartBilinearH1ComplData` of
-`eigenvectorIteratedTensorChartBilinearData_toData`: the
-per-component scalar divergence-form datum for the `m`-fold mixed weak partial. -/
 private def eigenvectorIteratedChartBilinearH1ComplData
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -244,24 +179,6 @@ private def eigenvectorIteratedChartBilinearH1ComplData
       rw [h_principal_eq] at h_in
       exact h_in
 
-/-- **The iterated carrier as a `TensorChartBilinearH1ComplData`.**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, a component multi-index `P₀`, a level `m : ℕ`, an
-iterated carrier
-`D_m : eigenvectorIteratedTensorChartBilinearData g r s i α P₀ m`,
-and chart-`H^{m+1}` regularity `h_parent` of the eigenvector chart component, this
-is the per-component scalar divergence-form datum
-`TensorChartBilinearH1ComplData g r s α P₀` whose
-
-* chart component `u_chart` is the `m`-fold mixed weak partial
-  `eigenvectorChartIteratedPartial g r s i α P₀ m D_m.directions`;
-* right-hand side `f_chart` is the carrier's effective `L²` source `D_m.fChartEff`;
-* weak partials `weak_partial j` are the canonical chosen weak `j`-partials of
-  the `m`-fold mixed weak partial.
-
-This is the eigenvector/tensor mirror of the scalar campaign's
-`iteratedChartBilinearH1ComplData_weak`. -/
 def eigenvectorIteratedTensorChartBilinearData_toData
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -277,31 +194,6 @@ def eigenvectorIteratedTensorChartBilinearData_toData
     eigenvectorIteratedChartBilinearH1ComplData
       (I := I) (M := M) g r s i α P₀ D_m h_parent
 
-/-- **Global `W^{2,2}` of the iterated mixed weak partial.**
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an eigenbasis index
-`i`, a chart center `α : M`, a component multi-index `P₀`, a level `m : ℕ`, a
-direction multi-index `directions`, an iterated carrier `D_m` whose direction
-multi-index is `directions`, and chart-`H^{m+1}` regularity of the eigenvector
-chart component, the `m`-fold mixed weak partial
-`eigenvectorChartIteratedPartial g r s i α P₀ m directions` lies in
-`MemWkp 2 2 … (chartTargetEuclid α)` — it has global `W^{2,2}` regularity on the
-chart target.
-
-The proof bridges the iterated carrier `D_m` into a genuine
-`TensorChartBilinearH1ComplData` via
-`eigenvectorIteratedTensorChartBilinearData_toData`, applies the
-order-2 interior elliptic engine
-`tensorChartBilinear_chartComponent_regularity_of_data` for interior `W^{2,2}` on
-a precompact subdomain `Ω''` (a thickening of the compact partition-of-unity
-kernel inside the chart target), and promotes that interior regularity to global
-`W^{2,2}` of the chart target via the support-aware promotion
-`MemWkp_of_memWkp_precompact_of_ae_zero_off_compact` — the `m`-fold mixed weak
-partial vanishes almost everywhere off the compact kernel.
-
-This is the eigenvector/tensor mirror of the scalar campaign's
-`iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened` (followed by the
-support-aware global promotion). -/
 theorem eigenvectorChartIteratedPartial_memWkp_two_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

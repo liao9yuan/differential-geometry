@@ -2,48 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Sectional curvature
-
-For a smooth Riemannian metric `g` on a smooth manifold `M`, the **sectional
-curvature** at `p : M` of the 2-plane spanned by `v, w ∈ T_p M` is the scalar
-$$K_g(p; v, w) := \frac{g\bigl(R(v, w)\,w,\ v\bigr)}{g(v, v)\, g(w, w) - g(v, w)^2},$$
-where `R` is the Riemann curvature tensor of the Levi-Civita connection.
-
-The denominator is the squared `g`-area of the parallelogram spanned by `v` and
-`w`; by Cauchy–Schwarz it vanishes precisely when `v, w` are linearly dependent.
-
-We express the definition in chart coordinates: lowering the upper index of the
-chart Riemann tensor `R^l{}_{ijk}` by the chart Gram matrix produces the (0,4)
-tensor `R_{ijkl}`, and the numerator is the quartic
-$\sum_{i,j,k,l} v^l w^i v^j w^k\, R_{ijkl}(p, \varphi_p(p))$
-in the model-basis components.
-
-## Main definitions
-
-* `chartRiemannLower g p i j k l y` — the lowered chart Riemann tensor.
-* `sectionalCurvatureNumerator g p v w` — the numerator `⟨R(v, w) w, v⟩_g`.
-* `sectionalCurvatureDenominator g p v w` — the Gram determinant
-  `g(v, v) g(w, w) - g(v, w)^2`.
-* `sectionalCurvature g p v w` — the quotient. Junk value `0` on linearly
-  dependent inputs.
-
-## Main results
-
-* `sectionalCurvatureDenominator_nonneg` — Cauchy–Schwarz: the denominator is
-  non-negative.
-* `sectionalCurvature_of_linearly_dependent_{left,right}`,
-  `sectionalCurvature_self`, `sectionalCurvature_zero_{left,right}` — junk
-  value identities.
-* `sectionalCurvatureNumerator_smul_{left,right}` and the corresponding
-  denominator and quotient lemmas — quadratic scaling in each argument and
-  the resulting scaling invariance of `K`.
-* `sectionalCurvature_symm_of_chartRiemannLower_second_pair_antisymm` —
-  hypothesis-bearing symmetry `K(v, w) = K(w, v)`. The metric-compatibility
-  antisymmetry of the second pair of `R_{ijkl}` is supplied externally, in
-  the same style as `ricciFun_symm_of_chartRicciTensor_symm`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set Finset
@@ -61,10 +19,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-/-- **The lowered chart-coordinate Riemann tensor**
-`R_{ijkl}(α, y) := ∑_m g_{lm}(α, y) · R^m{}_{ijk}(α, y)`.
-Inherits the project's convention: `(j, k)` is the antisymmetric pair,
-`i` is the "vector" index, `l` is the new lowered index. -/
 def chartRiemannLower (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ m : Fin (Module.finrank ℝ E),
@@ -79,7 +33,6 @@ def chartRiemannLower (g : SmoothRiemannianMetric I M) (α : M)
         chartGramOnE (I := I) g α l m y *
           chartRiemannTensor (I := I) g α i j k m y := rfl
 
-/-- Antisymmetry in the antisymmetric pair `(j, k)`; inherited. -/
 theorem chartRiemannLower_antisymm_jk
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -92,13 +45,6 @@ theorem chartRiemannLower_antisymm_jk
   rw [chartRiemannTensor_antisymm_jk]
   ring
 
-/-- **The numerator `⟨R(v, w) w, v⟩_g` of the sectional curvature**,
-expressed in chart coordinates as
-`∑_{i,j,k,l} v^l w^i v^j w^k R_{ijkl}(p, ϕ_p(p))`.
-Components are read off in `chartModelBasis E`: `i` is the Z-slot index of
-the Riemann operator (contracted with `w^i`), `(j, k)` is the antisymmetric
-pair (contracted with `(v^j, w^k)`), `l` is the lowered output index
-(contracted with `v^l`). -/
 def sectionalCurvatureNumerator (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
@@ -126,9 +72,6 @@ def sectionalCurvatureNumerator (g : SmoothRiemannianMetric I M) (p : M)
                       chartRiemannLower (I := I) g p i j k l
                         (extChartAt I p p) := rfl
 
-/-- **The denominator of the sectional curvature**: the `g`-Gram
-determinant `g(v, v) g(w, w) - g(v, w)^2`. By Cauchy–Schwarz this is
-non-negative, and vanishes iff `v, w` are linearly dependent. -/
 def sectionalCurvatureDenominator (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) : ℝ :=
   g.inner p v v * g.inner p w w - (g.inner p v w) ^ 2
@@ -139,10 +82,6 @@ def sectionalCurvatureDenominator (g : SmoothRiemannianMetric I M) (p : M)
     sectionalCurvatureDenominator (I := I) g p v w =
       g.inner p v v * g.inner p w w - (g.inner p v w) ^ 2 := rfl
 
-/-- **The sectional curvature of the 2-plane spanned by `v, w ∈ T_p M`**:
-the quotient `sectionalCurvatureNumerator / sectionalCurvatureDenominator`.
-Junk value `0` is returned when the denominator vanishes (i.e. `v, w`
-linearly dependent). -/
 def sectionalCurvature (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) : ℝ :=
   sectionalCurvatureNumerator (I := I) g p v w /
@@ -155,8 +94,6 @@ def sectionalCurvature (g : SmoothRiemannianMetric I M) (p : M)
       sectionalCurvatureNumerator (I := I) g p v w /
         sectionalCurvatureDenominator (I := I) g p v w := rfl
 
-/-- **Cauchy–Schwarz for `g`**: `g(v, w)^2 ≤ g(v, v) * g(w, w)`. Discriminant
-argument on the non-negative quadratic `t ↦ g(t • v + w, t • v + w)`. -/
 private lemma chart_metric_cauchy_schwarz
     (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) :
@@ -215,7 +152,6 @@ private lemma chart_metric_cauchy_schwarz
     rw [h_expand] at h_mul
     linarith
 
-/-- The sectional-curvature denominator is non-negative (Cauchy–Schwarz). -/
 theorem sectionalCurvatureDenominator_nonneg
     (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) :
@@ -223,8 +159,6 @@ theorem sectionalCurvatureDenominator_nonneg
   rw [sectionalCurvatureDenominator_def]
   linarith [chart_metric_cauchy_schwarz (I := I) g p v w]
 
-/-- The pair `(c • v, v)` has zero `g`-Gram determinant: Cauchy–Schwarz is an
-equality on collinear vectors. -/
 theorem sectionalCurvatureDenominator_eq_zero_of_left_smul
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v : TangentSpace I p) :
@@ -238,7 +172,6 @@ theorem sectionalCurvatureDenominator_eq_zero_of_left_smul
     rw [h1, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [hLL, hL]; ring
 
-/-- The pair `(v, c • v)` has zero `g`-Gram determinant. -/
 theorem sectionalCurvatureDenominator_eq_zero_of_right_smul
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v : TangentSpace I p) :
@@ -252,7 +185,6 @@ theorem sectionalCurvatureDenominator_eq_zero_of_right_smul
     rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   rw [hRR, hR]; ring
 
-/-- Quadratic scaling of the numerator in `v`: `Num(c • v, w) = c^2 · Num(v, w)`. -/
 theorem sectionalCurvatureNumerator_smul_left
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v w : TangentSpace I p) :
@@ -271,7 +203,6 @@ theorem sectionalCurvatureNumerator_smul_left
   simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
   ring
 
-/-- Quadratic scaling of the numerator in `w`: `Num(v, c • w) = c^2 · Num(v, w)`. -/
 theorem sectionalCurvatureNumerator_smul_right
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v w : TangentSpace I p) :
@@ -290,7 +221,6 @@ theorem sectionalCurvatureNumerator_smul_right
   simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
   ring
 
-/-- Quadratic scaling of the denominator in `v`. -/
 theorem sectionalCurvatureDenominator_smul_left
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v w : TangentSpace I p) :
@@ -305,7 +235,6 @@ theorem sectionalCurvatureDenominator_smul_left
     rw [h1, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [hLL, hL]; ring
 
-/-- Quadratic scaling of the denominator in `w`. -/
 theorem sectionalCurvatureDenominator_smul_right
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v w : TangentSpace I p) :
@@ -320,8 +249,6 @@ theorem sectionalCurvatureDenominator_smul_right
     rw [ContinuousLinearMap.map_smul, smul_eq_mul]
   rw [hRR, hR]; ring
 
-/-- **Scaling invariance of `K` in the left argument**: `K(c • v, w) = K(v, w)`
-for `c ≠ 0`. -/
 theorem sectionalCurvature_smul_left
     (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ} (hc : c ≠ 0)
     (v w : TangentSpace I p) :
@@ -332,8 +259,6 @@ theorem sectionalCurvature_smul_left
       sectionalCurvatureDenominator_smul_left,
       mul_div_mul_left _ _ (pow_ne_zero 2 hc)]
 
-/-- **Scaling invariance of `K` in the right argument**: `K(v, c • w) = K(v, w)`
-for `c ≠ 0`. -/
 theorem sectionalCurvature_smul_right
     (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ} (hc : c ≠ 0)
     (v w : TangentSpace I p) :
@@ -344,7 +269,6 @@ theorem sectionalCurvature_smul_right
       sectionalCurvatureDenominator_smul_right,
       mul_div_mul_left _ _ (pow_ne_zero 2 hc)]
 
-/-- Junk value on `(c • v, v)`: `K(c • v, v) = 0`. -/
 theorem sectionalCurvature_of_linearly_dependent_left
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v : TangentSpace I p) :
@@ -353,7 +277,6 @@ theorem sectionalCurvature_of_linearly_dependent_left
       sectionalCurvatureDenominator_eq_zero_of_left_smul]
   exact div_zero _
 
-/-- Junk value on `(v, c • v)`: `K(v, c • v) = 0`. -/
 theorem sectionalCurvature_of_linearly_dependent_right
     (g : SmoothRiemannianMetric I M) (p : M) (c : ℝ)
     (v : TangentSpace I p) :
@@ -362,7 +285,6 @@ theorem sectionalCurvature_of_linearly_dependent_right
       sectionalCurvatureDenominator_eq_zero_of_right_smul]
   exact div_zero _
 
-/-- Junk value on the diagonal: `K(v, v) = 0`. -/
 theorem sectionalCurvature_self
     (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) :
@@ -370,7 +292,6 @@ theorem sectionalCurvature_self
   have h := sectionalCurvature_of_linearly_dependent_left (I := I) g p 1 v
   rw [one_smul] at h; exact h
 
-/-- Junk value when the left argument is zero. -/
 theorem sectionalCurvature_zero_left
     (g : SmoothRiemannianMetric I M) (p : M)
     (w : TangentSpace I p) :
@@ -378,7 +299,6 @@ theorem sectionalCurvature_zero_left
   have h := sectionalCurvature_of_linearly_dependent_left (I := I) g p 0 w
   rw [zero_smul] at h; exact h
 
-/-- Junk value when the right argument is zero. -/
 theorem sectionalCurvature_zero_right
     (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) :
@@ -386,8 +306,6 @@ theorem sectionalCurvature_zero_right
   have h := sectionalCurvature_of_linearly_dependent_right (I := I) g p 0 v
   rw [zero_smul] at h; exact h
 
-/-- **Sign invariance of `K` in the left argument**: `K(-v, w) = K(v, w)`.
-Follows from `sectionalCurvature_smul_left` applied with `c = -1`. -/
 theorem sectionalCurvature_neg_left
     (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) :
@@ -398,8 +316,6 @@ theorem sectionalCurvature_neg_left
   rw [neg_one_smul] at h
   exact h
 
-/-- **Sign invariance of `K` in the right argument**: `K(v, -w) = K(v, w)`.
-Follows from `sectionalCurvature_smul_right` applied with `c = -1`. -/
 theorem sectionalCurvature_neg_right
     (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) :
@@ -410,9 +326,6 @@ theorem sectionalCurvature_neg_right
   rw [neg_one_smul] at h
   exact h
 
-/-- **Double-slot sign invariance of `K`**: `K(-v, -w) = K(v, w)`.
-Follows by composing `sectionalCurvature_neg_left` and
-`sectionalCurvature_neg_right`. -/
 theorem sectionalCurvature_neg_neg
     (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) :
@@ -421,9 +334,6 @@ theorem sectionalCurvature_neg_neg
   rw [sectionalCurvature_neg_left (I := I) g p v (-w),
       sectionalCurvature_neg_right (I := I) g p v w]
 
-/-- **Joint scaling invariance of `K`**: `K(c • v, d • w) = K(v, w)` for
-`c ≠ 0` and `d ≠ 0`. Follows by composing `sectionalCurvature_smul_left`
-and `sectionalCurvature_smul_right`. -/
 theorem sectionalCurvature_smul_smul
     (g : SmoothRiemannianMetric I M) (p : M) {c d : ℝ}
     (hc : c ≠ 0) (hd : d ≠ 0) (v w : TangentSpace I p) :
@@ -432,9 +342,6 @@ theorem sectionalCurvature_smul_smul
   rw [sectionalCurvature_smul_left (I := I) g p hc v (d • w),
       sectionalCurvature_smul_right (I := I) g p hd v w]
 
-/-- **Negated-scaling invariance of `K` in the left argument**:
-`K(-(c • v), w) = K(v, w)` for `c ≠ 0`. Follows by composing
-`sectionalCurvature_neg_left` and `sectionalCurvature_smul_left`. -/
 theorem sectionalCurvature_neg_smul_left
     (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ} (hc : c ≠ 0)
     (v w : TangentSpace I p) :
@@ -443,9 +350,6 @@ theorem sectionalCurvature_neg_smul_left
   rw [sectionalCurvature_neg_left (I := I) g p (c • v) w,
       sectionalCurvature_smul_left (I := I) g p hc v w]
 
-/-- **Negated-scaling invariance of `K` in the right argument**:
-`K(v, -(c • w)) = K(v, w)` for `c ≠ 0`. Follows by composing
-`sectionalCurvature_neg_right` and `sectionalCurvature_smul_right`. -/
 theorem sectionalCurvature_neg_smul_right
     (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ} (hc : c ≠ 0)
     (v w : TangentSpace I p) :
@@ -454,8 +358,6 @@ theorem sectionalCurvature_neg_smul_right
   rw [sectionalCurvature_neg_right (I := I) g p v (c • w),
       sectionalCurvature_smul_right (I := I) g p hc v w]
 
-/-- **Reindex helper.** Complete-reversal reindex of a 4-fold sum, obtained
-by six adjacent-swap applications of `Finset.sum_comm`. -/
 private lemma chartFourFold_reverse_sum
     {n : ℕ}
     (α β : Fin n → ℝ) (T : Fin n → Fin n → Fin n → Fin n → ℝ) :
@@ -476,9 +378,6 @@ private lemma chartFourFold_reverse_sum
   refine Finset.sum_congr rfl ?_; intro i _
   ring
 
-/-- Hypothesis-bearing symmetry of the numerator: given the second-pair
-antisymmetry `R_{ijkl} = -R_{ljki}` (metric-compatibility identity), the
-numerator is symmetric in `(v, w)`. -/
 theorem sectionalCurvatureNumerator_symm_of_chartRiemannLower_second_pair_antisymm
     (g : SmoothRiemannianMetric I M) (p : M)
     (h_pair : ∀ i j k l : Fin (Module.finrank ℝ E),
@@ -506,7 +405,6 @@ theorem sectionalCurvatureNumerator_symm_of_chartRiemannLower_second_pair_antisy
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [h_combined i j k l]
 
-/-- The denominator is symmetric in `(v, w)` (unconditional, by `g.symm`). -/
 theorem sectionalCurvatureDenominator_symm
     (g : SmoothRiemannianMetric I M) (p : M)
     (v w : TangentSpace I p) :
@@ -516,8 +414,6 @@ theorem sectionalCurvatureDenominator_symm
   rw [g.symm p v w]
   ring
 
-/-- Hypothesis-bearing symmetry `K(v, w) = K(w, v)`: given the second-pair
-antisymmetry `R_{ijkl} = -R_{ljki}` (metric-compatibility identity). -/
 theorem sectionalCurvature_symm_of_chartRiemannLower_second_pair_antisymm
     (g : SmoothRiemannianMetric I M) (p : M)
     (h_pair : ∀ i j k l : Fin (Module.finrank ℝ E),

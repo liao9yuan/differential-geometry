@@ -1,46 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
 
-/-!
-# Partition-of-unity Leibniz identity for chart-Euclidean tensor components
-
-For a closed Riemannian manifold `(M, g)` and a smooth compactly-supported
-`(r, s)`-tensor section `S : SmoothCcTensor g r s`, the chart-Euclidean
-`(Idx, Jdx)`-component
-
-  `tensorChartComponent g r s S α Idx Jdx
-     = chartPushedRaw I α (chartAtlasPOU I M α · tensorChartComponentRaw g r s S α Idx Jdx)`
-
-is, on the open Euclidean chart target, the pointwise product of two factors:
-
-* the chart-pushed partition-of-unity weight
-  `chartPushedRaw I α (chartAtlasPOU I M α)`, and
-* the chart-pushed raw component
-  `chartPushedRaw I α (tensorChartComponentRaw g r s S α Idx Jdx)`.
-
-Both factors are `C^∞` on the open chart target (the partition-of-unity weight
-is smooth on `M`, the raw component is smooth on the chart source; both pushed
-forward through the inverse chart and the linear isometry `toEuclidean.symm`).
-The Leibniz product rule for the chart-Euclidean partial derivative
-`euclidPartial` therefore splits `euclidPartial k` of the component into the
-partition-of-unity weight times the derivative of the chart-pushed raw
-component, plus a cross term.
-
-## Main result
-
-* `chartPushedRaw_pou_mul_euclidPartial_eq` — on the open Euclidean chart
-  target,
-
-    `(chartPushedRaw I α POU_α) · ∂ₖ(chartPushedRaw I α rawComp)
-       = ∂ₖ(tensorChartComponent g r s S α Idx Jdx)
-         − (∂ₖ chartPushedRaw I α POU_α) · (chartPushedRaw I α rawComp)`,
-
-  the Leibniz product rule for the chart-pushed component, rearranged.
-
-The result is an unconditional pointwise identity: its only hypothesis is the
-genuine domain condition `y ∈ chartTargetEuclid α`. No new axioms are
-introduced.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -75,10 +34,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- On the Euclidean chart target, `tensorChartComponent g r s S α Idx Jdx`
-agrees pointwise with the product of the chart-pushed partition-of-unity weight
-`chartPushedRaw I α (chartAtlasPOU I M α)` and the chart-pushed raw component
-`chartPushedRaw I α (tensorChartComponentRaw …)`. -/
 theorem tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M)
@@ -99,9 +54,6 @@ theorem tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_tar
       (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hy]
   rfl
 
-/-- Filter-eventual form: on the neighbourhood filter of any chart-target point,
-`tensorChartComponent g r s S α Idx Jdx` equals the product of the chart-pushed
-partition-of-unity weight and the chart-pushed raw component. -/
 theorem tensorChartComponent_eventuallyEq_chartPushedRaw_pou_mul_chartPushedRaw_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M)
@@ -121,8 +73,6 @@ theorem tensorChartComponent_eventuallyEq_chartPushedRaw_pou_mul_chartPushedRaw_
   exact tensorChartComponent_eq_chartPushedRaw_pou_mul_chartPushedRaw_raw_on_target
     (I := I) (M := M) g r s S α Idx Jdx hz
 
-/-- The chart-pushed partition-of-unity weight `chartPushedRaw I α (chartAtlasPOU …)`
-is `ContDiffOn ℝ ∞` on the Euclidean chart target. -/
 theorem chartPushedRaw_chartAtlasPOU_contDiffOn (α : M) :
     ContDiffOn ℝ ∞
       (chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
@@ -137,8 +87,6 @@ theorem chartPushedRaw_chartAtlasPOU_contDiffOn (α : M) :
     hPOU_global.contMDiffOn
   exact chartPushedRaw_bump_contDiffOn (I := I) (M := M) α hPOU_src
 
-/-- Fréchet differentiability of the chart-pushed partition-of-unity weight at
-any chart-target point. -/
 theorem differentiableAt_chartPushedRaw_chartAtlasPOU
     (α : M) {y : EuclN E} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     DifferentiableAt ℝ
@@ -151,8 +99,6 @@ theorem differentiableAt_chartPushedRaw_chartAtlasPOU
       (hopen.mem_nhds hy)
   exact hcontDiffAt.differentiableAt (by decide)
 
-/-- Fréchet differentiability of the chart-pushed raw component at any
-chart-target point. -/
 theorem differentiableAt_chartPushedRaw_tensorChartComponentRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M)
@@ -171,16 +117,6 @@ theorem differentiableAt_chartPushedRaw_tensorChartComponentRaw
       g r s S α Idx Jdx y hy).contDiffAt (hopen.mem_nhds hy)
   exact hcontDiffAt.differentiableAt (by decide)
 
-/-- **Partition-of-unity Leibniz identity for the chart-Euclidean tensor
-component.** On the open Euclidean chart target,
-
-  `(chartPushedRaw I α POU_α) · ∂ₖ(chartPushedRaw I α rawComp)
-     = ∂ₖ(tensorChartComponent g r s S α Idx Jdx)
-       − (∂ₖ chartPushedRaw I α POU_α) · (chartPushedRaw I α rawComp)`,
-
-the Leibniz product rule for `euclidPartial k` applied to the chart-pushed
-component `tensorChartComponent = chartPushedRaw I α (POU_α · rawComp)`,
-rearranged. -/
 theorem chartPushedRaw_pou_mul_euclidPartial_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

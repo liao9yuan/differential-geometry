@@ -8,76 +8,6 @@ import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Unconditional reduction of `UniformChartFlowBridge`
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, this file assembles the
-chart-coordinate ingredients of the `UniformChartFlowBridge g p`
-discharge:
-
-* **Zero-section orbit constancy**: by chart-coordinate ODE uniqueness on
-  the chart-phase ODE, the V.4 chart-pushed flow's orbit through
-  `(x₀, 0)` is the constant curve `(x₀, 0)` on the flow's time interval.
-  This is the chart-coord image of the stationary geodesic `t ↦ p` at
-  `(p, 0) ∈ TM`.
-
-* **Slice smoothness at arbitrary time**: the chart-flow candidate at
-  any time `t'` in the flow's time interval is `ContMDiffAt 1` at
-  `v = 0`. (At general `t'`, the candidate's value at `v = 0` is still
-  `p`, by the zero-section orbit constancy.)
-
-* **Rescaled-orbit chart-phase ODE**: the chart-coord rescaling
-  `c_v(s) := rescaleChartOrbit t' (Φ((x₀, v), t' s))` satisfies the
-  chart-phase ODE on a neighbourhood of `s = 0`, with initial value
-  `(x₀, t' • v)`.
-
-These are the chart-coord ingredients of the bridge. The final step —
-identifying the rescaled chart-flow's manifold projection at `s = 1`
-with `expMap g p (t' • v)` uniformly in `v` — is packaged as a named
-manifold-side identification, the **only remaining gap** for the full
-unconditional discharge.
-
-The named gap is reduced to a single clean statement:
-
-> `ChartFlowGeodesicMatchAt g p Φ t' ρ`: for every `v ∈ Metric.ball 0 ρ`,
-> the chart-flow candidate at time `t'` applied to `v` equals
-> `expMap g p (t' • v)`.
-
-Granted this property at any `Φ, t', ρ` coming from the V.4 flow, the
-bridge is discharged and the headline `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` is
-unconditional. The named identification reduces to: lifting a chart-coord
-solution of the chart-phase ODE back to `TangentBundle I M` as a local
-integral curve of `geodesicVectorFieldChart g p`, then applying the
-per-`v` uniqueness against `maximalGeodesicChosenCurve` (already
-available unconditionally) together with the chart-coord rescaling
-identity. This is the manifold-side inverse-chart construction; we
-expose it cleanly so that downstream development can fill it in.
-
-## Main results
-
-* `chartFlowOrbitRescaled` — the chart-coord rescaling of a chart-pushed
-  flow's orbit, viewed as a chart-coord solution with rescaled initial
-  data.
-
-* `chartFlowOrbitRescaled_zero` / `chartFlowOrbitRescaled_hasDerivAt` —
-  the rescaled orbit's initial value and chart-phase ODE.
-
-* `chartFlowCandidate_at_zero_eq_p` — the chart-flow candidate at `v = 0`
-  equals `p` for any time in the flow's time interval (provided the
-  flow's spatial radius admits the zero-section orbit, which is the
-  case for the V.4 flow at base `(x₀, 0)`).
-
-* `ChartFlowGeodesicMatchAt` — the named manifold-side identification
-  Prop.
-
-* `exists_uniformChartFlowBridge_of_match` — bridge discharge,
-  conditional on `ChartFlowGeodesicMatchAt`.
-
-* `expMap_contMDiffAt_zero_of_uniformChartFlowBridge` — headline,
-  unconditional once the bridge is supplied.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -101,8 +31,6 @@ section RescaledOrbit
 
 variable [I.Boundaryless]
 
-/-- The rescaled orbit of the V.4 flow at scale `t'` and initial fibre
-component `v`: `s ↦ rescaleChartOrbit t' (Φ((x₀, v), t' s))`. -/
 def chartFlowOrbitRescaled (Φ : (E × E) × ℝ → E × E) (x₀ : E) (v : E) (t' : ℝ) :
     ℝ → E × E :=
   fun s => rescaleChartOrbit (E := E) t' (Φ (((x₀, v) : E × E), t' * s))
@@ -112,8 +40,6 @@ def chartFlowOrbitRescaled (Φ : (E × E) × ℝ → E × E) (x₀ : E) (v : E) 
     chartFlowOrbitRescaled (E := E) Φ x₀ v t' s =
       rescaleChartOrbit (E := E) t' (Φ (((x₀, v) : E × E), t' * s)) := rfl
 
-/-- Initial value: the rescaled orbit at `s = 0` is `(x₀, t' • v)`,
-provided the flow satisfies its initial-value identity at `(x₀, v)`. -/
 lemma chartFlowOrbitRescaled_zero
     {Φ : (E × E) × ℝ → E × E} {x₀ v : E} {t' : ℝ}
     (hinit : Φ (((x₀, v) : E × E), 0) = (x₀, v)) :
@@ -122,10 +48,6 @@ lemma chartFlowOrbitRescaled_zero
   rw [mul_zero, hinit]
   rfl
 
-/-- **Rescaled orbit satisfies the chart-phase ODE.** Given that the
-chart-flow's orbit through `(x₀, v)` satisfies the chart-phase ODE on a
-neighbourhood of the rescaled time `t' * s₀`, the rescaled orbit
-satisfies the chart-phase ODE at `s₀`. -/
 lemma chartFlowOrbitRescaled_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {p : M}
     {Φ : (E × E) × ℝ → E × E} {x₀ v : E} {t' s₀ : ℝ}
@@ -145,8 +67,6 @@ section ZeroSectionOrbit
 
 variable [I.Boundaryless]
 
-/-- The chart-phase vector field vanishes at the zero section: at
-`(x₀, 0)` where `x₀ := extChartAt I p p`, `chartPhaseVF g p (x₀, 0) = 0`. -/
 lemma chartPhaseVF_zero_section
     (g : SmoothRiemannianMetric I M) (p : M) :
     chartPhaseVF (I := I) g p
@@ -166,8 +86,6 @@ section FlowZeroSectionConstancy
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- **Zero-section orbit constancy (eventually).** The V.4 flow's orbit
-through `(x₀, 0)` is eventually equal to `(x₀, 0)` near `s = 0`. -/
 lemma chartFlow_zero_section_eventually_const
     {g : SmoothRiemannianMetric I M} {p : M}
     {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump
@@ -276,8 +194,6 @@ section FlowAtZeroEval
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-/-- For `t'` near `0` (in the flow's time interval), the value
-`Φ((x₀, 0), t')` equals `(x₀, 0)`. -/
 lemma chartFlow_zero_section_apply_eventually_eq_origin
     {g : SmoothRiemannianMetric I M} {p : M}
     {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump
@@ -301,10 +217,6 @@ section CandidateSliceSmoothness
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Chart-coord rewrite of the candidate at general time.** For `t'`
-such that `(Φ((x₀, 0), t')).1` lies in the chart-target, the
-chart-coord image of the manifold-valued candidate agrees with the
-chart-flow's first coordinate on a neighbourhood of `v = 0`. -/
 lemma extChartAt_symm_comp_chartFlowCandidate_at_zero_general
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -336,9 +248,6 @@ lemma extChartAt_symm_comp_chartFlowCandidate_at_zero_general
   simp only [chartFlowCandidate_apply]
   exact (extChartAt I p).right_inv hv
 
-/-- **Chart-coord `C^1` smoothness of the candidate at general time.**
-For `t'` such that `(Φ((x₀, 0), t')).1 ∈ (extChartAt I p).target`, the
-chart-coord image of the candidate is `C^1` at `v = 0`. -/
 lemma chartFlowCandidate_chart_contDiffAt_zero_at_general_time
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -367,18 +276,6 @@ section ManifoldGap
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Manifold-side identification predicate.** For `Φ : (E × E) × ℝ → E × E`
-a chart-pushed flow, `t', ρ > 0`, the predicate asserts:
-
-> For every `v ∈ Metric.ball 0 ρ`,
-> `expMap g p (t' • v) = chartFlowCandidate Φ p t' v`.
-
-This is the manifold-side identification between the exponential map at
-the rescaled tangent vector and the chart-pushed flow's projection at
-time `t'`. It reduces to: lifting a chart-coord solution back to TM as a
-local integral curve of `geodesicVectorFieldChart g p` together with the
-already-available per-`v` unconditional bridge against
-`maximalGeodesicChosenCurve`. -/
 def ChartFlowGeodesicMatchAt
     (g : SmoothRiemannianMetric I M) (p : M)
     (Φ : (E × E) × ℝ → E × E) (t' ρ : ℝ) : Prop :=
@@ -393,10 +290,6 @@ section ConditionalDischarge
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Discharge of `UniformChartFlowBridge`, conditional on
-`ChartFlowGeodesicMatchAt`.** Given a V.4 flow `Φ`, a positive time `t'`
-in the flow's time interval, and the manifold-side identification at
-`(Φ, t', ρ)`, the bridge holds. -/
 theorem uniformChartFlowBridge_of_match
     (g : SmoothRiemannianMetric I M) (p : M)
     {Φ : (E × E) × ℝ → E × E} {ρ T t' ρ' : ℝ}
@@ -468,17 +361,6 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Headline conditional form (consumes the named manifold-side
-match).** For any base point `p : M`, given a witness of
-`ChartFlowGeodesicMatchAt g p Φ t' ρ` for some V.4 chart-pushed flow `Φ`
-at some positive time `t'` and some positive radius `ρ`, the exponential
-map is `ContMDiffAt 𝓘(ℝ, E) I 1` at the zero vector.
-
-The full unconditional discharge of the manifold-side match — and thus
-the full unconditional headline — reduces to a single named manifold-
-side identification step, expressible as the inverse-chart lift of a
-chart-coord solution to a `TM`-integral curve of
-`geodesicVectorFieldChart g p`. -/
 theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' ρ' : ℝ),

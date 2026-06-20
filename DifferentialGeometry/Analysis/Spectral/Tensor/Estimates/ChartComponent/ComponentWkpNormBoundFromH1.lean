@@ -5,29 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.WeakPartial.Chose
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.AtlasIndependence
 
-/-!
-# Uniform-in-`S` chart-Sobolev `W^{1,2}` bound for tensor chart-frame scalar
-components from the H¹ norm
-
-For a closed Riemannian manifold `(M, g)`, ranks `(r, s)`, an extraction
-chart `α : M`, and the chart-frame scalar component
-`tensorChartComponentScalar g r s S.toCcTensor α Idx Jdx`, this file
-delivers a uniform-in-`(S, Idx, Jdx)` bound on the chart-based Sobolev
-`W^{1,2}` norm of the component, conditional on a uniform-in-`(S, Idx, Jdx)`
-`L²` gradient-norm bound for the same component.
-
-The chart-based norm `wkpNormChart g 1 2 u` is a `tsum` over chart base
-points `β : M`. Summands outside the canonical POU finset vanish because
-`(chartAtlasPOU I M β) = 0` there. Per `β` in the finset, the order-one
-Euclidean Sobolev norm splits into an `L²` piece and a sum-over-directions
-of chosen weak partials. The `L²` piece is handled by the chart-pushed
-reverse bridge in `ComponentSobolevBoundFromH1`; the partial pieces by
-the chosen-weak-partial / `fderiv chartSmoothExt` bridge combined with
-the generic Frechet envelope from `Analysis.Sobolev.EquivalenceReverse`,
-both parametric in the push chart `β`. The C_grad hypothesis enters
-through the right-hand side of the generic envelope.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -62,12 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-/-- **Headline uniform-in-`(S, Idx, Jdx)` chart-Sobolev `W^{1,2}` bound.**
-Conditional on a uniform-in-`(S, Idx, Jdx)` `L²` bound for the manifold-
-side gradient of the chart-frame scalar component, the chart-based
-Sobolev `W^{1,2}` norm of the chart-frame scalar component is bounded by
-`ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)`, with `C` depending only on
-`(g, r, s, α, C_grad)`. -/
 theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {C_grad : ℝ} (hC_grad_nn : 0 ≤ C_grad)

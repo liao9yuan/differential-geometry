@@ -2,34 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 
-/-!
-# Uniform bound on the chart-α coefficient functions of the raw tensor
-connection Laplacian's chart-`(Idx, Jdx)` chart-coordinate formula on the
-partition-of-unity tsupport at `α`.
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a
-smooth compactly-supported `(r, s)`-tensor section `T₀ : SmoothCcTensor g r s`,
-a chart base point `α : M`, and component multi-indices `(Idx, Jdx)`, this file
-ships a uniform `K`-bound on the squared chart-α `(Idx, Jdx)` raw component of
-`rawTensorConnLapSmooth g r s T₀` at every point of the chart-α
-partition-of-unity tsupport intersected with the chart-α Levi-Civita good set.
-
-The bound is obtained by:
-
-* invoking `tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula`
-  to rewrite the LHS as a principal second-derivative sum plus a smooth
-  lower-order correction on the chart-α Levi-Civita good set;
-* extracting uniform sup-bounds for the principal-part coefficients and the
-  lower-order correction on the chart-α image of the (compact) partition of
-  unity tsupport, using `IsCompact.bddAbove_image` and the `ContDiffOn ℝ ∞`
-  smoothness of those coefficients on the open chart-Euclidean target;
-* combining the sup-bounds via `(a + b)^2 ≤ 2 a^2 + 2 b^2` and a
-  Cauchy-Schwarz step.
-
-The bound is unconditional in the chart atlas: no chart-locality predicate is
-required.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -61,9 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The chart-α image of the partition-of-unity tsupport, transferred to the
-chart-Euclidean target via `toEuclidean`, is a compact subset of
-`chartTargetEuclid α`. -/
 lemma pouTsupport_image_isCompact (α : M) :
     IsCompact
       ((fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
@@ -104,9 +73,6 @@ lemma pouTsupport_image_isCompact (α : M) :
   rw [h_image_eq]
   exact h_te_image_compact
 
-/-- The chart-α image of the partition-of-unity tsupport (via `toEuclidean ∘
-extChartAt I α`) is contained in the chart-Euclidean target
-`chartTargetEuclid α`. -/
 lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
     ((fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
       tsupport (fun x : M =>
@@ -122,8 +88,6 @@ lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
     (extChartAt I α).map_source hb_src
   exact ⟨(extChartAt I α) b, hb_tgt, rfl⟩
 
-/-- Auxiliary: a function that is `ContDiffOn ℝ ∞` on a set `U` is continuous
-on `U`, hence bounded on any compact subset `K ⊆ U`. -/
 lemma exists_sup_bound_of_contDiffOn_on_compact_subset
     {U : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
     {K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))} (hK : IsCompact K)
@@ -139,27 +103,6 @@ lemma exists_sup_bound_of_contDiffOn_on_compact_subset
   intro y hy
   exact (hB ⟨y, hy, rfl⟩).trans (le_max_left _ _)
 
-/-- **Uniform bound on the squared chart-α `(Idx, Jdx)` raw component of the
-tensor connection Laplacian on the partition-of-unity tsupport.**
-
-For a smooth closed Riemannian manifold `(M, g)`, fixed ranks `(r, s)`, a
-smooth compactly-supported `(r, s)`-tensor section `T₀`, a chart base point
-`α : M`, and component multi-indices `(Idx, Jdx)`, there exists a constant
-`K ≥ 0` depending on `g`, `r`, `s`, `α`, `Idx`, `Jdx`, and `T₀` (but
-independent of `b`), such that for every `b` in the intersection of the
-chart-α partition-of-unity tsupport and the chart-α Levi-Civita good set,
-```
-(tensorChartComponentRaw g r s (rawTensorConnLapSmooth g r s T₀) α idx jdx b)^2
-  ≤ K * (Σ_{k, l}
-        (euclidPartial l (euclidPartial k
-          (chartPushedRaw I α (tensorChartComponentRaw g r s T₀ α idx jdx)))
-          (toEuclidean (extChartAt I α) b))^2 + 1).
-```
-
-The proof composes the chart-α coordinate identity from
-`tensorChartComponentRaw_rawTensorConnLap_eq_chart_α_coord_formula` with
-uniform sup-bounds on the smooth coefficient functions over the (compact)
-chart-α image of the partition-of-unity tsupport. -/
 theorem rawTensorConnLap_chartα_coeffs_uniform_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (idx : Fin r → Fin (Module.finrank ℝ E))

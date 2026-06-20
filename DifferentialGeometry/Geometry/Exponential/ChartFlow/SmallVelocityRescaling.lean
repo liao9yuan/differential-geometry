@@ -5,55 +5,6 @@ import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Side-condition-free small-velocity geodesic rescaling
-
-For a smooth Riemannian metric `g` on a boundaryless smooth manifold `M`
-modelled on a complete inner-product space `E`, this file produces the
-**uniform small-velocity** form of the classical geodesic rescaling
-identity
-
-```
-maximalGeodesic g p (t • v) 1 = maximalGeodesic g p v t   (t ∈ [0, 1])
-```
-
-with the *only* hypothesis being that the initial velocity `v` is small
-(`‖v‖ < ρ` for an explicit `ρ > 0` depending on `g` and `p`).
-
-The earlier `Geodesic/MaximalRescaling.lean` rescaling at time `1` carries
-a chart-coordinate-agreement side condition (`h1_in_agreement`) that is
-only known near `0`. Here we sidestep that side condition entirely by
-routing both sides of the identity through the **same** chart-pushed flow
-orbit `Φ` provided by `Exponential/UniformExistence.lean`.
-
-## Strategy
-
-Fix the uniform chart-pushed flow `(ρ, T, Φ)` of
-`exists_uniform_existence_interval`, and pick the working scale
-`t' := T / 2 ∈ (0, T)`, so the rescaled interval `Ioo (-T/t') (T/t')`
-equals `Ioo (-2) 2 ⊇ [0, 1]`. For a small velocity `v` with
-`‖v‖ < t' * ρ`, set `v_base := (1/t') • v`, so `‖v_base‖ < ρ` and
-`t' • v_base = v`.
-
-The rescaled manifold lift `chartFlowOrbitLiftRescaled Φ p · v_base` then
-identifies, on `Ioo (-T/t') (T/t')`, the maximal geodesic with the orbit
-projection (`chartFlowOrbitLiftRescaled_proj_eq_maximalGeodesic_on_Ioo`).
-Because the orbit projection only depends on the orbit's *first*
-component (`chartFlowOrbitLiftRescaled_proj`), which the time-rescaling
-leaves untouched, both `maximalGeodesic g p (t • v) 1` (rescaling factor
-`t * t'`) and `maximalGeodesic g p v t` (rescaling factor `t'`) reduce to
-the **single** value `(extChartAt I p).symm (Φ ((x₀, v_base), t * t')).1`,
-yielding the identity without any chart-coordinate-agreement input.
-
-## Main results
-
-* `foot_in_source_throughout` — there is `ρ > 0` such that for every
-  `v` with `‖v‖ < ρ`, the geodesic arc `t ↦ maximalGeodesic g p v t`
-  stays in `(chartAt H p).source` for all `t ∈ [0, 1]`.
-* `maximalGeodesic_rescale_at_one_of_small` — the uniform small-velocity
-  rescaling identity at time `1`.
--/
-
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold
@@ -76,11 +27,6 @@ section UniformSmallRescaling
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-/-- **Orbit-projection value of the rescaled geodesic.** For the uniform
-chart-pushed flow data `Φ` and a base velocity `v` in the uniform ball,
-the maximal geodesic at the rescaled velocity `t' • v` evaluated at any
-`s ∈ Ioo (-T/t') (T/t')` equals the inverse extended chart of the
-orbit's first component at time `t' * s`. -/
 private theorem maximalGeodesic_rescaled_eq_orbit_proj
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -109,17 +55,6 @@ private theorem maximalGeodesic_rescaled_eq_orbit_proj
     chartFlowOrbitLiftRescaled_proj (I := I) p v t' (Φ := Φ) s hΦ_target_ts
   rw [← h_proj_eq, h_proj]
 
-/-- **Foot-in-source throughout `[0, 1]` for small velocity.** There
-exists `ρ > 0` such that for every initial velocity `v` with `‖v‖ < ρ`
-the entire geodesic arc `t ↦ maximalGeodesic g p v t`, `t ∈ [0, 1]`,
-stays in the home chart's source `(chartAt H p).source`.
-
-The radius `ρ = (T / 2) * ρ₀`, where `(ρ₀, T, Φ)` is the uniform
-chart-pushed flow of `exists_uniform_existence_interval`. Writing
-`v = t' • v_base` with `t' = T / 2 < T` and `v_base = (1/t') • v ∈
-ball 0 ρ₀`, the geodesic on `[0, 1] ⊆ Ioo (-T/t') (T/t')` is the
-projection of the rescaled manifold lift, which is confined to the
-chart source. -/
 theorem foot_in_source_throughout
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -176,19 +111,6 @@ theorem foot_in_source_throughout
   rw [chartFlowOrbitLiftRescaled_proj (I := I) p vb t' t hΦ_target_tt] at hsrc
   exact hsrc
 
-/-- **Uniform small-velocity geodesic rescaling at time `1`.** There is
-an explicit `ρ > 0` (namely `(T / 2) * ρ₀` for the uniform flow radii
-`(ρ₀, T)` of `exists_uniform_existence_interval`) such that for every
-initial velocity `v` with `‖v‖ < ρ` and every `t ∈ [0, 1]`,
-
-```
-maximalGeodesic g p (t • v) 1 = maximalGeodesic g p v t.
-```
-
-Unlike `Geodesic.maximalGeodesic_rescale_at_one`, this carries **no**
-chart-coordinate-agreement side condition: both sides are reduced to the
-same chart-pushed flow orbit value `(extChartAt I p).symm
-(Φ ((x₀, v_base), t * t')).1`. -/
 theorem maximalGeodesic_rescale_at_one_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧

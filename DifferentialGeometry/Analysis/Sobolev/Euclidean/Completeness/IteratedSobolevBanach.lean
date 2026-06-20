@@ -1,22 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobolevCauchy
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 
-/-!
-# Sequential completeness of the iterated Euclidean Sobolev space `W^{k,p}`
-
-We package together the structural lemmas of `EuclideanIteratedSobolevCauchy`
-(`L^p` limits of iterated weak partials of a `wkpNorm`-Cauchy sequence exist) and
-`WeakPartialLimit` (those `L^p` limits are themselves the iterated weak partials
-of the order-`0` limit) into a single statement: every Cauchy sequence in
-`wkpNorm`, with members in `MemWkp k p`, has a limit in `MemWkp k p`, and the
-convergence is in `wkpNorm`.
-
-The result holds for `1 ≤ p < ∞`. We pass through a subsequence extraction step
-to convert the εδ Cauchy criterion into the summable bound form required by
-Mathlib's `cauchy_complete_eLpNorm`, then transfer convergence from the
-subsequence back to the full sequence.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology
@@ -31,8 +15,6 @@ variable {d : ℕ}
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Extract a strictly-monotone subsequence index `φ` such that consecutive
-`wkpNorm` differences along the subsequence are bounded by `1/2^(i+1)`. -/
 private theorem exists_subseq_geom_bound
     {k : ℕ} {p : ℝ≥0∞} {Ω : Set E} {u : ℕ → E → ℝ}
     (hu_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
@@ -74,7 +56,6 @@ private theorem exists_subseq_geom_bound
     exact le_trans h_φi (le_trans (Nat.le_succ _) (le_max_right _ _))
   exact hN_spec i (φ (i + 1)) (φ i) h_φi1 h_φi
 
-/-- The series `(1/2)^i` is summable in `ℝ`. -/
 private lemma summable_geom_pow_two : Summable (fun i : ℕ => (1 : ℝ) / 2 ^ i) := by
   have hgeom : Summable (fun i : ℕ => ((1 : ℝ) / 2) ^ i) := by
     have h2 : ‖((1 : ℝ) / 2)‖ < 1 := by
@@ -86,12 +67,10 @@ private lemma summable_geom_pow_two : Summable (fun i : ℕ => (1 : ℝ) / 2 ^ i
     funext i; rw [div_pow, one_pow]
   rwa [heq] at hgeom
 
-/-- `2 * (1/2)^N` is summable. -/
 private lemma summable_2_div_pow : Summable (fun N : ℕ => 2 * (1 : ℝ) / 2 ^ N) := by
   have h := summable_geom_pow_two.const_smul (2 : ℝ)
   simpa [smul_eq_mul] using h
 
-/-- `∑' i, ENNReal.ofReal (2 * (1/2)^i) ≠ ∞`. -/
 private lemma tsum_ofReal_2_div_pow_ne_top :
     ∑' i : ℕ, ENNReal.ofReal (2 * (1 : ℝ) / 2 ^ i) ≠ ∞ := by
   have h_nn : ∀ i : ℕ, 0 ≤ 2 * (1 : ℝ) / 2 ^ i := fun _ => by positivity
@@ -101,8 +80,6 @@ private lemma tsum_ofReal_2_div_pow_ne_top :
   rw [h_eq]
   exact ENNReal.ofReal_ne_top
 
-/-- Telescoping triangle inequality for `wkpNorm`: bound the distance between
-two elements of a sequence by the sum of consecutive differences. -/
 private theorem wkpNorm_telescope_sum
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -175,7 +152,6 @@ private theorem wkpNorm_telescope_sum
               wkpNorm (d := d) k p
                 (fun x => v (n + i + 1) x - v (n + i) x) Ω := h_succ_eq
 
-/-- `wkpNorm k p (a - b) = wkpNorm k p (b - a)`. -/
 private theorem wkpNorm_sub_comm
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -194,7 +170,6 @@ private theorem wkpNorm_sub_comm
     simp
   rw [h_norm_neg_one, one_mul]
 
-/-- The partial geometric sum closed form: `∑_{i=0}^{ℓ-1} (1/2)^i = 2 - 2 * (1/2)^ℓ`. -/
 private lemma partial_geom_sum_eq (ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, ((1 : ℝ) / 2) ^ i = 2 - 2 * ((1 : ℝ) / 2) ^ ℓ := by
   induction ℓ with
@@ -207,14 +182,12 @@ private lemma partial_geom_sum_eq (ℓ : ℕ) :
       rw [hpow]
       ring
 
-/-- The partial geometric sum `∑_{i=0}^{ℓ-1} (1/2)^i < 2`. -/
 private lemma partial_geom_sum_lt_two (ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, ((1 : ℝ) / 2) ^ i < 2 := by
   rw [partial_geom_sum_eq]
   have hpow_pos : (0 : ℝ) < ((1 : ℝ) / 2) ^ ℓ := by positivity
   linarith
 
-/-- The partial geometric sum scaled by `1 / 2^(n+1)`: bounded strictly by `1/2^n`. -/
 private lemma scaled_partial_geom_sum_lt
     (n ℓ : ℕ) :
     ∑ i ∈ Finset.range ℓ, (1 : ℝ) / 2 ^ (n + i + 1) < (1 : ℝ) / 2 ^ n := by
@@ -242,8 +215,6 @@ private lemma scaled_partial_geom_sum_lt
           rw [pow_succ]
           field_simp
 
-/-- The Cauchy bound for the subsequence: for `n, m ≥ N`, the `wkpNorm`
-difference of `u ∘ φ` is strictly less than `2 / 2 ^ N`. -/
 private theorem wkpNorm_subseq_lt
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -313,8 +284,6 @@ private theorem wkpNorm_subseq_lt
       exact h_strict_real m hm
     exact lt_of_le_of_lt h_le h_strict
 
-/-- For each `(j, β)` with `j ≤ k`, the iterated weak partial of order `j`
-along `β` of the subsequence has an `L^p` limit `v j β`. -/
 private theorem exists_iter_limits_subseq
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -367,8 +336,6 @@ private theorem exists_iter_limits_subseq
     rw [dif_pos hj]
     exact (h_each j β hj).choose_spec.2
 
-/-- The order-0 limit `v 0 ![]` of the subsequence is in `MemWkp k p`, and the
-subsequence converges to it in `wkpNorm`. -/
 private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
     [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
@@ -476,8 +443,6 @@ private theorem subseq_limit_memWkp_and_wkpNorm_tendsto
   have hfinal := tendsto_finset_sum (Finset.range (k + 1)) h_inner_tendsto
   simpa using hfinal
 
-/-- If `(a_n)` is `wkpNorm`-Cauchy and a subsequence `(a_{φ(n)})` converges to
-`a_lim` in `wkpNorm`, then `(a_n)` itself converges to `a_lim` in `wkpNorm`. -/
 private theorem wkpNorm_tendsto_of_cauchy_of_subseq
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -545,9 +510,6 @@ private theorem wkpNorm_tendsto_of_cauchy_of_subseq
         ring
     _ = ε := ENNReal.ofReal_toReal hε_ne
 
-/-- **Cauchy completeness** of the iterated Euclidean Sobolev space `W^{k,p}(Ω)`:
-every Cauchy sequence with respect to the `wkpNorm` semi-distance has a limit in
-`MemWkp k p Ω`, with `wkpNorm`-convergence. -/
 theorem MemWkp.exists_limit_of_wkpNorm_cauchy
     [NeZero d]
     {Ω : Set E} (hΩ_open : IsOpen Ω)

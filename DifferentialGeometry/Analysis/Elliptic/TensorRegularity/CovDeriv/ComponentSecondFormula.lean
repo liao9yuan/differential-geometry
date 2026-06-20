@@ -2,66 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
 
-/-!
-# The chart-coordinate second covariant-derivative component formula
-
-For a smooth, compactly-supported `(r, s)`-tensor section `S` over a closed
-Riemannian manifold `(M, g)`, a chart center `α : M`, and a pair of chart
-directions `(m, n)`, the chart-coordinate `(Idx, Jdx)`-component of the
-covariant derivative along `chartBasisVecFiber α m` pulls back to a scalar
-function on the Euclidean chart target
-
-```
-covDerivComponentEuclid g r s S α m Idx Jdx :
-  chartTargetEuclid α → ℝ
-```
-
-whose value at `y` is, by the headline of `CovDerivComponentFormula.lean`,
-`∂_m raw_α^{Idx,Jdx}(y) + covDerivLowerOrderTerm(y)`. Differentiating again in
-the `n`-th chart-Euclidean direction expresses this function's `n`-th
-Euclidean partial derivative as
-
-```
-∂_n ∂_m raw_α^{Idx,Jdx}(y)
-  + ∑_{(Idx', Jdx')} (∂_n covDerivLowerOrderCoeff)(y) · raw_α^{Idx',Jdx'}(y)
-  + ∑_{(Idx', Jdx')} covDerivLowerOrderCoeff(y) · ∂_n raw_α^{Idx',Jdx'}(y)
-```
-
-— a finite linear combination of the principal mixed partial `∂_n ∂_m raw`,
-first-order partials `∂_n raw_α^p` of raw chart components, and undifferentiated
-raw chart components, with coefficients `C^∞` on the Euclidean chart target.
-
-This is the precise chart-coordinate-coefficient formula that lifts pointwise
-scalar `H²`-style regularity statements (mixed second partials on chart-pulled
-push-forwards) to chart-α coordinate-frame second covariant-derivative
-components — the input shape that the downstream elliptic-regularity bootstrap
-consumes.
-
-## Main definitions
-
-* `covDerivComponentEuclid g r s S α m Idx Jdx y` — the wrapped raw chart
-  component of the `m`-direction chart-coordinate covariant derivative,
-  evaluated at the chart-pull-back of `y ∈ chartTargetEuclid α`.
-* `covDerivLowerOrderTermEuclid g r s S α m Idx Jdx` — the lower-order term
-  `covDerivLowerOrderTerm` viewed as a function on the Euclidean chart target.
-* `secondCovDerivLO_gradCoeff g r s α m n Idx Idx' Jdx Jdx'` — the smooth
-  coefficient multiplying `∂_n raw_α^{Idx', Jdx'}` in the formula (the
-  un-differentiated `covDerivLowerOrderCoeff`).
-* `secondCovDerivLO_valueCoeff g r s α m n Idx Idx' Jdx Jdx'` — the smooth
-  coefficient multiplying `raw_α^{Idx', Jdx'}` in the formula (the
-  `n`-th Euclidean partial of `covDerivLowerOrderCoeff`).
-
-## Main results
-
-* `covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder` — the headline:
-  the `n`-th Euclidean partial of `covDerivComponentEuclid` is the second
-  mixed partial `∂_n ∂_m raw_α^{Idx,Jdx}` plus a finite linear combination of
-  `∂_n raw_α^{Idx',Jdx'}` and `raw_α^{Idx',Jdx'}` with `C^∞` coefficients.
-* `secondCovDerivLO_gradCoeff_contDiffOn`,
-  `secondCovDerivLO_valueCoeff_contDiffOn` — the lower-order coefficients are
-  `C^∞` on the Euclidean chart target.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -92,8 +32,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- The `n`-th chart-Euclidean partial derivative of a function `C^∞` on the
-Euclidean chart target is again `C^∞` on the Euclidean chart target. -/
 private lemma euclidPartial_contDiffOn_chartTarget'
     (α : M) (n : Fin (Module.finrank ℝ E))
     {u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -123,10 +61,6 @@ private lemma euclidPartial_contDiffOn_chartTarget'
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
-/-- The wrapped `(Idx, Jdx)`-raw chart component of the chart-coordinate
-covariant derivative `chartTensorRSCovariantDerivative … (chartBasisVecFiber α
-m)`, viewed as a function of `y ∈ EuclideanSpace ℝ (Fin n)` by pulling back
-through `(extChartAt I α).symm ∘ toEuclidean.symm`. -/
 noncomputable def covDerivComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -143,7 +77,6 @@ noncomputable def covDerivComponentEuclid
           (chartBasisVecFiber (I := I) α m)
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))
 
-/-- Unfolding lemma for `covDerivComponentEuclid`. -/
 lemma covDerivComponentEuclid_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -160,10 +93,6 @@ lemma covDerivComponentEuclid_def
             (chartBasisVecFiber (I := I) α m)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) := rfl
 
-/-- **The first-derivative formula in functional form.** As functions on
-`chartTargetEuclid α`, `covDerivComponentEuclid g r s S α m Idx Jdx` agrees
-with `euclidPartial m (chartPushedRaw I α (tensorChartComponentRaw …))
-+ covDerivLowerOrderTerm`. -/
 lemma covDerivComponentEuclid_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -182,9 +111,6 @@ lemma covDerivComponentEuclid_eqOn
   exact covDerivComponent_eq_euclidPartial_add_lowerOrder
     (I := I) (M := M) g r s S α m Idx Jdx hy
 
-/-- **The wrapped covariant-derivative chart-component is `C^∞` on the
-Euclidean chart target.** Equal on that open set to the sum
-`euclidPartial m (chartPushedRaw …) + covDerivLowerOrderTerm`, both `C^∞`. -/
 theorem covDerivComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -211,9 +137,6 @@ theorem covDerivComponentEuclid_contDiffOn
   refine hsum.congr (fun y hy => ?_)
   exact covDerivComponentEuclid_eqOn (I := I) (M := M) g r s α S m Idx Jdx hy
 
-/-- The raw chart-α component `tensorChartComponentRaw g r s S α Idx Jdx` pulled
-back to a function on the Euclidean model space through
-`(extChartAt I α).symm ∘ toEuclidean.symm`. -/
 noncomputable def rawComponentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -224,7 +147,6 @@ noncomputable def rawComponentEuclid
     tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-/-- Unfolding lemma for `rawComponentEuclid`. -/
 @[simp] lemma rawComponentEuclid_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -235,8 +157,6 @@ noncomputable def rawComponentEuclid
       tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := rfl
 
-/-- On the Euclidean chart target, `rawComponentEuclid` agrees with the chart-
-pushed raw component `chartPushedRaw I α (tensorChartComponentRaw …)`. -/
 lemma rawComponentEuclid_eqOn_chartPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -251,9 +171,6 @@ lemma rawComponentEuclid_eqOn_chartPushed
   exact (chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hy).symm
 
-/-- `rawComponentEuclid` is `C^∞` on the Euclidean chart target — it agrees
-there with the `C^∞` push-forward `chartPushedRaw I α (tensorChartComponentRaw
-…)`. -/
 theorem rawComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -269,8 +186,6 @@ theorem rawComponentEuclid_contDiffOn
   exact rawComponentEuclid_eqOn_chartPushed (I := I) (M := M)
     g r s α S Idx Jdx hy
 
-/-- The Euclidean partial of `rawComponentEuclid` is `C^∞` on the Euclidean
-chart target. -/
 lemma euclidPartial_rawComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -284,9 +199,6 @@ lemma euclidPartial_rawComponentEuclid_contDiffOn
   euclidPartial_contDiffOn_chartTarget' (I := I) (M := M) α n
     (rawComponentEuclid_contDiffOn (I := I) (M := M) g r s α S Idx Jdx)
 
-/-- On the Euclidean chart target, the `n`-th Euclidean partial of
-`rawComponentEuclid` equals that of `chartPushedRaw I α (tensorChartComponentRaw
-…)`. -/
 lemma euclidPartial_rawComponentEuclid_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -317,9 +229,6 @@ lemma euclidPartial_rawComponentEuclid_eqOn
       (heq.eventuallyEq_of_mem (hopen.mem_nhds hy))
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
-/-- The `(p₁, p₂)`-summand of the lower-order term as a function on the
-Euclidean model space: `covDerivLowerOrderCoeff … y · rawComponentEuclid …
-y`. -/
 noncomputable def lowerOrderSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -333,7 +242,6 @@ noncomputable def lowerOrderSummand
     covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx p.2 y *
       rawComponentEuclid (I := I) (M := M) g r s α S p.1 p.2 y
 
-/-- Unfolding lemma for `lowerOrderSummand`. -/
 @[simp] lemma lowerOrderSummand_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -347,8 +255,6 @@ noncomputable def lowerOrderSummand
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx p.2 y *
         rawComponentEuclid (I := I) (M := M) g r s α S p.1 p.2 y := rfl
 
-/-- Each `lowerOrderSummand` summand is `C^∞` on the Euclidean chart target —
-a product of the `C^∞` coefficient and `rawComponentEuclid`. -/
 lemma lowerOrderSummand_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -362,8 +268,6 @@ lemma lowerOrderSummand_contDiffOn
   (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx p.1 Jdx p.2).mul
     (rawComponentEuclid_contDiffOn (I := I) (M := M) g r s α S p.1 p.2)
 
-/-- The lower-order term `covDerivLowerOrderTerm` equals the finite sum over
-component multi-index pairs of `lowerOrderSummand`. -/
 lemma covDerivLowerOrderTerm_eq_sum_lowerOrderSummand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -378,8 +282,6 @@ lemma covDerivLowerOrderTerm_eq_sum_lowerOrderSummand
   rw [covDerivLowerOrderTerm_def]
   rfl
 
-/-- The smooth coefficient multiplying `∂_n raw_α^{Idx',Jdx'}` in the second-
-derivative formula: just the original `covDerivLowerOrderCoeff`. -/
 noncomputable def secondCovDerivLO_gradCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -388,8 +290,6 @@ noncomputable def secondCovDerivLO_gradCoeff
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx Idx' Jdx Jdx'
 
-/-- The smooth coefficient multiplying `raw_α^{Idx',Jdx'}` in the second-
-derivative formula: the `n`-th Euclidean partial of `covDerivLowerOrderCoeff`. -/
 noncomputable def secondCovDerivLO_valueCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m n : Fin (Module.finrank ℝ E))
@@ -399,8 +299,6 @@ noncomputable def secondCovDerivLO_valueCoeff
   euclidPartial (E := E) n
     (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx Idx' Jdx Jdx')
 
-/-- The `secondCovDerivLO_gradCoeff` coefficient is `C^∞` on the Euclidean
-chart target. -/
 theorem secondCovDerivLO_gradCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -411,8 +309,6 @@ theorem secondCovDerivLO_gradCoeff_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx Idx' Jdx Jdx'
 
-/-- The `secondCovDerivLO_valueCoeff` coefficient is `C^∞` on the Euclidean
-chart target. -/
 theorem secondCovDerivLO_valueCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m n : Fin (Module.finrank ℝ E))
@@ -424,7 +320,6 @@ theorem secondCovDerivLO_valueCoeff_contDiffOn
   euclidPartial_contDiffOn_chartTarget' (I := I) (M := M) α n
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx Idx' Jdx Jdx')
 
-/-- The Leibniz rule for the lower-order summand at a chart-target point. -/
 lemma euclidPartial_lowerOrderSummand_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -478,10 +373,6 @@ lemma euclidPartial_lowerOrderSummand_apply
   unfold secondCovDerivLO_valueCoeff secondCovDerivLO_gradCoeff
   ring
 
-/-- The `n`-th Euclidean partial of `covDerivComponentEuclid` at a chart-target
-point equals the `n`-th Euclidean partial of `euclidPartial m (chartPushedRaw
-…) + covDerivLowerOrderTerm`. The Fréchet derivative is local on the open
-chart target. -/
 private lemma euclidPartial_covDerivComponentEuclid_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -514,9 +405,6 @@ private lemma euclidPartial_covDerivComponentEuclid_eq
       (heq.eventuallyEq_of_mem (hopen.mem_nhds hy))
   rw [euclidPartial_def, euclidPartial_def, hfderiv]
 
-/-- The `n`-th Euclidean partial of the sum `∂_m chartPushedRaw +
-covDerivLowerOrderTerm` decomposes as the sum of the partials, since both
-factors are `C^∞` (hence differentiable) at any chart-target point. -/
 private lemma euclidPartial_sum_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -574,9 +462,6 @@ private lemma euclidPartial_sum_split
   rw [fderiv_fun_add h1_diff h2_diff]
   rw [ContinuousLinearMap.add_apply]
 
-/-- The `n`-th Euclidean partial of `covDerivLowerOrderTerm`, which is the
-finite sum of `lowerOrderSummand` over multi-index pairs, equals the finite
-sum of the partials of the individual summands. -/
 private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -644,25 +529,6 @@ private lemma euclidPartial_covDerivLowerOrderTerm_eq_sum
     rw [ContinuousLinearMap.sum_apply]]
   rfl
 
-/-- **The chart-coordinate second covariant-derivative component formula.**
-For `y ∈ chartTargetEuclid α`, the `n`-th Euclidean partial of the function
-`covDerivComponentEuclid g r s α S m Idx Jdx`, which equals on the chart target
-the wrapped `(Idx, Jdx)`-raw chart component of the chart-coordinate covariant
-derivative `chartTensorRSCovariantDerivative … (chartBasisVecFiber α m)` pulled
-back through `(extChartAt I α).symm ∘ toEuclidean.symm`, decomposes as
-
-* the mixed second partial `∂_n ∂_m raw_α^{Idx, Jdx}` of the chart-pushed raw
-  component, plus
-* a finite sum, over component multi-index pairs `(Idx', Jdx')`, of the
-  product `secondCovDerivLO_valueCoeff · raw_α^{Idx', Jdx'}`
-  (zeroth-order-in-`S` term: the `n`-th Euclidean partial of the original
-  Christoffel coefficient times the undifferentiated raw component), plus
-* a finite sum, over component multi-index pairs `(Idx', Jdx')`, of the
-  product `secondCovDerivLO_gradCoeff · ∂_n raw_α^{Idx', Jdx'}` (first-order-
-  in-`S` term: the original Christoffel coefficient times the `n`-th Euclidean
-  partial of the raw component).
-
-All `secondCovDerivLO_*` coefficients are `C^∞` on the Euclidean chart target. -/
 theorem covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -714,17 +580,6 @@ theorem covDerivComponent_second_eq_iteratedFDeriv_add_lowerOrder
   rw [Finset.sum_add_distrib]
   ring
 
-/-- **Existential form of the chart-coordinate second covariant-derivative
-component formula.** For each chart-target point `y`, there exist `C^∞`
-coefficient families such that the `n`-th Euclidean partial of
-`covDerivComponentEuclid` equals the mixed second partial `∂_n ∂_m raw` plus a
-finite linear combination of `∂_n raw_p` and `raw_p` with `C^∞`
-coefficients.
-
-The coefficients are indexed by component multi-index pairs `p = (Idx', Jdx')`:
-the `valueCoeff p` multiplies `raw_p` (a derivative of the Christoffel
-coefficient), and the `gradCoeff p` multiplies `∂_n raw_p` (the original
-Christoffel coefficient). -/
 theorem covDerivComponent_second_existential
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

@@ -2,36 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.Intrinsic
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
-/-!
-# Dirichlet form and shifted form on the intrinsic `H¹` space
-
-For an `H¹` element `u : H1Intrinsic g`, the Dirichlet form is
-$$Q(u, v) = \int_M g(\nabla u, \nabla v)\, d\mu_g.$$
-The shifted form is
-$$B(u, v) = Q(u, v) + \int_M u\, v\, d\mu_g.$$
-
-This file defines both forms and proves the basic algebraic properties:
-symmetry and non-negativity (for `Q`).
-
-The shifted form recovers the natural intrinsic `H¹` quadratic form for
-the Riemannian metric `g`. The ambient `H1Intrinsic g` carries the
-inherited L²-product Hilbert structure (whose inner product on the
-gradient slot uses the Euclidean inner product on the model fiber `E`,
-not the Riemannian metric `g`); the shifted form is provided here as a
-distinct bilinear form that captures the intrinsic Riemannian H¹ pairing.
-
-## Main definitions
-
-* `dirichletForm g u v` : the Dirichlet form `Q(u, v)`.
-* `shiftedForm g u v` : the shifted form `B(u, v) = Q(u, v) +
-  ⟨toLp u, toLp v⟩_{L²(ℝ)}`.
-
-## Main results
-
-* Symmetry of both forms.
-* Non-negativity on the diagonal of both forms.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Function
@@ -58,7 +28,6 @@ namespace H1Intrinsic
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-/-- The Dirichlet form `Q(u, v) := ∫_M g(∇u, ∇v) dμ_g`. -/
 def dirichletForm (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) : ℝ :=
   ∫ x : M,
@@ -66,7 +35,6 @@ def dirichletForm (g : SmoothRiemannianMetric I M)
       ((gradL2 (I := I) (M := M) g v : M → E) x)
     ∂(riemannianVolumeMeasure I M g)
 
-/-- Symmetry of the Dirichlet form. -/
 theorem dirichletForm_symm (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u v =
@@ -76,7 +44,6 @@ theorem dirichletForm_symm (g : SmoothRiemannianMetric I M)
   refine Filter.Eventually.of_forall (fun x => ?_)
   exact g.symm x _ _
 
-/-- The Dirichlet form on the diagonal is non-negative. -/
 theorem dirichletForm_self_nonneg (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     0 ≤ dirichletForm (I := I) (M := M) g u u := by
@@ -95,7 +62,6 @@ theorem dirichletForm_self_nonneg (g : SmoothRiemannianMetric I M)
     linarith [h_zero]
   · exact (g.pos x _ h0).le
 
-/-- The Dirichlet form vanishes on the zero element (left slot). -/
 theorem dirichletForm_zero_left (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g 0 u = 0 := by
@@ -121,16 +87,12 @@ theorem dirichletForm_zero_left (g : SmoothRiemannianMetric I M)
   rw [integral_congr_ae h_ae]
   simp
 
-/-- The Dirichlet form vanishes on the zero element (right slot). -/
 theorem dirichletForm_zero_right (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u 0 = 0 := by
   rw [dirichletForm_symm (I := I) (M := M) g u 0]
   exact dirichletForm_zero_left (I := I) (M := M) g u
 
-/-- The shifted form `B(u, v) := Q(u, v) + ⟨toLp u, toLp v⟩_{L²}`. The L²
-inner product term `⟨toLp u, toLp v⟩_{L²}` is realized as a Bochner
-integral of `u · v`. -/
 def shiftedForm (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) : ℝ :=
   dirichletForm (I := I) (M := M) g u v +
@@ -138,7 +100,6 @@ def shiftedForm (g : SmoothRiemannianMetric I M)
       ((toLp (I := I) (M := M) g v : M → ℝ) x)
     ∂(riemannianVolumeMeasure I M g)
 
-/-- Symmetry of the shifted form. -/
 theorem shiftedForm_symm (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u v =
@@ -149,7 +110,6 @@ theorem shiftedForm_symm (g : SmoothRiemannianMetric I M)
   refine integral_congr_ae ?_
   refine Filter.Eventually.of_forall (fun x => mul_comm _ _)
 
-/-- The shifted form is non-negative on the diagonal. -/
 theorem shiftedForm_self_nonneg (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     0 ≤ shiftedForm (I := I) (M := M) g u u := by
@@ -159,7 +119,6 @@ theorem shiftedForm_self_nonneg (g : SmoothRiemannianMetric I M)
   intro x
   exact mul_self_nonneg _
 
-/-- The shifted form vanishes on the zero element (left slot). -/
 theorem shiftedForm_zero_left (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g 0 u = 0 := by
@@ -184,15 +143,12 @@ theorem shiftedForm_zero_left (g : SmoothRiemannianMetric I M)
   rw [integral_congr_ae h_ae]
   simp
 
-/-- The shifted form vanishes on the zero element (right slot). -/
 theorem shiftedForm_zero_right (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u 0 = 0 := by
   rw [shiftedForm_symm (I := I) (M := M) g u 0]
   exact shiftedForm_zero_left (I := I) (M := M) g u
 
-/-- Pointwise bilinear expansion: `g.inner b (G_{u₁+u₂}(b)) (G_v(b)) =
-g.inner b (G_{u₁}(b)) (G_v(b)) + g.inner b (G_{u₂}(b)) (G_v(b))` (a.e.). -/
 private lemma dirichletForm_integrand_add_left
     (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
@@ -263,7 +219,6 @@ private lemma dirichletForm_integrand_smul_left
     _ = c * g.inner x ((gradL2 g u : M → E) x) ((gradL2 g v : M → E) x) := by
           rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-/-- Additivity of the Dirichlet form in the left argument. -/
 theorem dirichletForm_add_left (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g (u₁ + u₂) v =
@@ -303,7 +258,6 @@ theorem dirichletForm_add_left (g : SmoothRiemannianMetric I M)
         g x ((gradL2 g u₂ : M → E) x) ((gradL2 g v : M → E) x)
       rwa [show ‖_‖ = |_| from Real.norm_eq_abs _]
 
-/-- Scalar homogeneity of the Dirichlet form in the left argument. -/
 theorem dirichletForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g (c • u) v =
@@ -313,7 +267,6 @@ theorem dirichletForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     (I := I) (M := M) g c u v)]
   rw [integral_const_mul]
 
-/-- Additivity in the right argument (via symmetry). -/
 theorem dirichletForm_add_right (g : SmoothRiemannianMetric I M)
     (u v₁ v₂ : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u (v₁ + v₂) =
@@ -324,7 +277,6 @@ theorem dirichletForm_add_right (g : SmoothRiemannianMetric I M)
   rw [dirichletForm_symm (I := I) (M := M) g v₁ u,
     dirichletForm_symm (I := I) (M := M) g v₂ u]
 
-/-- Scalar homogeneity in the right argument (via symmetry). -/
 theorem dirichletForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u (c • v) =
@@ -333,7 +285,6 @@ theorem dirichletForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     dirichletForm_smul_left (I := I) (M := M) g c v u,
     dirichletForm_symm (I := I) (M := M) g v u]
 
-/-- The Dirichlet form `Q : H¹(M, g) →ₗ[ℝ] H¹(M, g) →ₗ[ℝ] ℝ`. -/
 def dirichletFormLM (g : SmoothRiemannianMetric I M) :
     H1Intrinsic (I := I) (M := M) g →ₗ[ℝ]
       H1Intrinsic (I := I) (M := M) g →ₗ[ℝ] ℝ where
@@ -360,7 +311,6 @@ def dirichletFormLM (g : SmoothRiemannianMetric I M) :
     dirichletFormLM (I := I) (M := M) g u v =
       dirichletForm (I := I) (M := M) g u v := rfl
 
-/-- Additivity of the shifted form in the left argument. -/
 theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g (u₁ + u₂) v =
@@ -415,7 +365,6 @@ theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
   rw [h_int_eq]
   ring
 
-/-- Scalar homogeneity of the shifted form in the left argument. -/
 theorem shiftedForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g (c • u) v =
@@ -450,7 +399,6 @@ theorem shiftedForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     rw [integral_congr_ae h_ae, integral_const_mul]
   rw [h_int_eq]; ring
 
-/-- Additivity in the right argument (via symmetry). -/
 theorem shiftedForm_add_right (g : SmoothRiemannianMetric I M)
     (u v₁ v₂ : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u (v₁ + v₂) =
@@ -461,7 +409,6 @@ theorem shiftedForm_add_right (g : SmoothRiemannianMetric I M)
   rw [shiftedForm_symm (I := I) (M := M) g v₁ u,
     shiftedForm_symm (I := I) (M := M) g v₂ u]
 
-/-- Scalar homogeneity in the right argument (via symmetry). -/
 theorem shiftedForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u (c • v) =
@@ -470,7 +417,6 @@ theorem shiftedForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     shiftedForm_smul_left (I := I) (M := M) g c v u,
     shiftedForm_symm (I := I) (M := M) g v u]
 
-/-- The shifted form `B : H¹(M, g) →ₗ[ℝ] H¹(M, g) →ₗ[ℝ] ℝ`. -/
 def shiftedFormLM (g : SmoothRiemannianMetric I M) :
     H1Intrinsic (I := I) (M := M) g →ₗ[ℝ]
       H1Intrinsic (I := I) (M := M) g →ₗ[ℝ] ℝ where

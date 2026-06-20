@@ -3,80 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
-/-!
-# Intrinsic frame-factorisation of the tensor curvature operator's fibre norm
-
-For a smooth Riemannian metric `g` on a manifold `M`, the bundled curvature operator
-`riemannOp (tensorCov g 0 2) x` of the `(0, 2)`-tensor covariant derivative is a
-continuous trilinear form `T_x M × T_x M × (T^0_2)_x → (T^0_2)_x`. The order-`2`
-Gårding estimate must absorb its action `R_x(v, w) T` with an absorbing constant that
-is **independent of the tensor `T` and the vectors `v, w`** (the Gårding constants
-`C₁, C₂` are fixed, uniform over all smooth fields). The per-section bound
-`exists_bound_riemannianFiberNormSq_smoothCcTensor` and the per-section curvature
-bound `exists_bound_riemannianFiberNormSq_riemannOp_tensorCov` only give a
-constant that depends on the chosen fields; this file isolates the genuinely
-`(v, w, T)`-uniform structure.
-
-## Why the model-norm route is unavailable
-
-The per-point witness `riemannianFiberNormSq_riemannOp_tensorCov_le_witness` controls
-`riemannianFiberNormSq g 0 2 x (R_x(v, w) T)` by `‖R_x(v, w) T‖² · A(x)²`, where both
-factors involve the model (`E`-induced) fibre norm and the ambient frame scalar
-`A(x)` — the latter being the `E`-norm sum of the `g`-orthonormal frame, equivalently
-the operator norm of the chart trivialisation. On a multi-chart manifold this scalar
-is *genuinely unbounded* on compact sets, so any bound routed through it cannot yield a
-uniform `C_g`. The correct, chart-locality-free route works entirely inside the
-intrinsic `riemannianFiberNormSq` and the `g`-inner products `g.inner x v v`,
-`g.inner x w w`.
-
-## Strategy (`(v, w)`-factorisation)
-
-Fix a `g`-orthonormal frame `e` of `(T_x M, g.inner x)`, as chosen inside the
-definition of `riemannianFiberNormSq`. For `(0, 2)`-tensors the intrinsic fibre norm
-squared is the sum over the frame of squared frame components,
-`riemannianFiberNormSq g 0 2 x S = ∑_{K, J} fiberNormSqSummand … S … K J`, and each
-frame component `S ↦ fiberNormSqSummand … S … K J` is the square of an `ℝ`-linear
-functional `L_{K, J}(S)` of `S`.
-
-The curvature operator `riemannOp (tensorCov g 0 2) x` is continuous and linear in each
-of its three slots, so expanding `v = ∑_i ⟨e_i, v⟩_g e_i`, `w = ∑_j ⟨e_j, w⟩_g e_j`
-(orthonormal-frame representation) and applying `L_{K, J}` gives
-
-```
-L_{K, J}(R_x(v, w) T) = ∑_{i, j} ⟨e_i, v⟩_g ⟨e_j, w⟩_g · L_{K, J}(R_x(e_i, e_j) T).
-```
-
-The Cauchy–Schwarz inequality over the `(i, j)`-index together with Parseval's identity
-`∑_i ⟨e_i, v⟩_g² = g.inner x v v` (and likewise for `w`) yields
-
-```
-L_{K, J}(R_x(v, w) T)² ≤ (g.inner x v v) · (g.inner x w w)
-    · ∑_{i, j} L_{K, J}(R_x(e_i, e_j) T)².
-```
-
-Summing over `(K, J)` gives the **intrinsic `(v, w)`-factorised bound**
-
-```
-riemannianFiberNormSq g 0 2 x (R_x(v, w) T)
-  ≤ (g.inner x v v) · (g.inner x w w) · ∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T),
-```
-
-where the right-hand sum is the intrinsic fibre-norm energy of the curvature acting on
-`T` through the *frame pairs* `(e_i, e_j)`, with `e` the `g`-orthonormal frame at `x`.
-This is `(v, w)`-uniform: the only place `(v, w)` enters is through the intrinsic
-quadratic factors `g.inner x v v = ‖v‖_g²` and `g.inner x w w = ‖w‖_g²`.
-
-## Main results
-
-* `riemannianFiberNormSq_eq_sum_fiberNormSqSummand_orthonormal_witness` — the
-  intrinsic fibre-norm squared written as a frame double sum over a `g`-orthonormal
-  frame.
-* `fiberNormSqSummand_linearFunctional` — the per-frame-component functional and the
-  fact that the summand is its square.
-* `riemannianFiberNormSq_riemannOp_tensorCov_vw_factor_le` — the intrinsic
-  `(v, w)`-factorised bound above.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -102,8 +28,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-/-- The per-frame-component scalar functional of a tensor `S` at the frame `e` and
-multi-indices `(K, J)`: `L_{K, J}(S) = S(ω^K)(e_J)`. -/
 noncomputable def fiberNormSqComponent
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (S : TensorRSSpace r s I b)
@@ -114,7 +38,6 @@ noncomputable def fiberNormSqComponent
         (fun k => g.inner b (e (K k))))
       (fun k => e (J k))
 
-/-- The frame summand is the square of the frame component. -/
 lemma fiberNormSqSummand_eq_component_sq
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (S : TensorRSSpace r s I b)
@@ -123,7 +46,6 @@ lemma fiberNormSqSummand_eq_component_sq
     fiberNormSqSummand (I := I) (M := M) g b r s S n e K J =
       fiberNormSqComponent (I := I) (M := M) g b r s S n e K J ^ 2 := rfl
 
-/-- The frame component is additive in the tensor argument. -/
 lemma fiberNormSqComponent_add
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (S S' : TensorRSSpace r s I b)
@@ -145,7 +67,6 @@ lemma fiberNormSqComponent_add
           (fun k => g.inner b (e (K k)))) from rfl]
   rfl
 
-/-- The frame component is homogeneous in the tensor argument. -/
 lemma fiberNormSqComponent_smul
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (c : ℝ) (S : TensorRSSpace r s I b)
@@ -163,7 +84,6 @@ lemma fiberNormSqComponent_smul
           (fun k => g.inner b (e (K k)))) from rfl]
   rfl
 
-/-- The frame component of the zero tensor is zero. -/
 lemma fiberNormSqComponent_zero
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (n : ℕ) (e : Fin n → TangentSpace I b)
@@ -171,7 +91,6 @@ lemma fiberNormSqComponent_zero
     fiberNormSqComponent (I := I) (M := M) g b r s
       (0 : TensorRSSpace r s I b) n e K J = 0 := rfl
 
-/-- The frame component commutes with finite sums in the tensor argument. -/
 lemma fiberNormSqComponent_sum
     {ι : Type*} (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (t : Finset ι) (F : ι → TensorRSSpace r s I b)
@@ -185,12 +104,6 @@ lemma fiberNormSqComponent_sum
   · intro a s' ha ih
     rw [Finset.sum_cons, Finset.sum_cons, fiberNormSqComponent_add, ih]
 
-/-- **Strengthened witness: `g`-orthonormal frame representation of
-`riemannianFiberNormSq`.** There is a frame `e : Fin n → TangentSpace I b` with
-`n = Module.finrank ℝ (TangentSpace I b)` that is `g`-orthonormal
-(`g.inner b (e i) (e j) = if i = j then 1 else 0`) and represents the intrinsic fibre
-norm squared as the double frame sum, simultaneously for *all* tensors `S` (the frame
-does not depend on `S`). -/
 lemma exists_orthonormal_frame_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I b),
@@ -238,9 +151,6 @@ lemma exists_orthonormal_frame_riemannianFiberNormSq
   · intro S
     rfl
 
-/-- A tangent vector expands in the `g`-orthonormal frame chosen by
-`exists_orthonormal_frame_riemannianFiberNormSq`. The expansion is stated for the same
-local-inner-product frame; we extract it from `OrthonormalBasis.sum_repr'`. -/
 lemma tangent_frame_expansion
     (g : SmoothRiemannianMetric I M) (b : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I b),
@@ -297,10 +207,6 @@ lemma tangent_frame_expansion
   · intro S
     rfl
 
-/-- **Frame expansion of the curvature operator action.** For the `g`-orthonormal frame
-`e` and a tensor `T`, with `v = ∑_i ⟨e_i, v⟩_g e_i`, `w = ∑_j ⟨e_j, w⟩_g e_j`, the
-curvature value expands as
-`R_x(v, w) T = ∑_{i, j} (⟨e_i, v⟩_g · ⟨e_j, w⟩_g) • R_x(e_i, e_j) T`. -/
 lemma riemannOp_tensorCov_frame_expand
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -341,18 +247,6 @@ lemma riemannOp_tensorCov_frame_expand
   refine Finset.sum_congr rfl (fun j _ => ?_)
   rw [ContinuousLinearMap.smul_apply, smul_smul]
 
-/-- **Per-frame-component Cauchy–Schwarz bound.** For the `g`-orthonormal frame `e`
-(with Parseval) and a fixed frame index pair `(K, J)`, the squared frame component of
-the curvature value `R_x(v, w) T` is bounded by the intrinsic quadratic factors
-`g.inner x v v`, `g.inner x w w` times the sum over frame pairs of the squared frame
-components of `R_x(e_i, e_j) T`:
-
-```
-fiberNormSqSummand g x 0 2 (R_x(v, w) T) n e K J
-  ≤ (g.inner x v v) · (g.inner x w w)
-      · ∑_{i, j} fiberNormSqSummand g x 0 2 (R_x(e_i, e_j) T) n e K J.
-```
--/
 lemma fiberNormSqSummand_riemannOp_tensorCov_vw_le
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -412,22 +306,6 @@ lemma fiberNormSqSummand_riemannOp_tensorCov_vw_le
     rw [ha_def, fiberNormSqSummand_eq_component_sq]
   rw [hcsq, hasq]
 
-/-- **Intrinsic `(v, w)`-factorised fibre-norm bound for the tensor curvature operator.**
-For a smooth Riemannian metric `g` on a manifold `M`, any point `x`, any tangent vectors
-`v, w` and any `(0, 2)`-tensor `T`, the intrinsic Riemannian fibre norm squared of the
-curvature value `R_x(v, w) T = riemannOp (tensorCov g 0 2) x v w T` is bounded by the
-intrinsic quadratic factors `g.inner x v v = ‖v‖_g²` and `g.inner x w w = ‖w‖_g²` times
-a `(v, w)`-uniform residual: the sum over the `g`-orthonormal frame pairs `(e_i, e_j)` of
-the intrinsic fibre-norm energies of the curvature acting on `T`:
-
-```
-riemannianFiberNormSq g 0 2 x (R_x(v, w) T)
-  ≤ (g.inner x v v) · (g.inner x w w)
-      · ∑_{i, j} riemannianFiberNormSq g 0 2 x (R_x(e_i, e_j) T).
-```
-
-This is the chart-locality-free, model-norm-free, `(v, w)`-uniform form: the dependence
-on `(v, w)` is entirely through the intrinsic `g`-norms `‖v‖_g²`, `‖w‖_g²`. -/
 theorem riemannianFiberNormSq_riemannOp_tensorCov_vw_factor_le
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) (T : TensorRSSpace 0 2 I x) :

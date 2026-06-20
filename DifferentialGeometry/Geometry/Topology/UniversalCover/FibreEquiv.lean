@@ -15,16 +15,6 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Logic.Equiv.Basic
 import Mathlib.Data.Finite.Defs
 
-/-!
-# Fibre / fundamental-group bijection for covering maps
-
-For any covering map with path-connected and simply connected total space, the
-monodromy evaluation at a chosen lift is a bijection from the fundamental group
-at the base point onto the fibre. Specialised to the universal-cover projection
-as a noncomputable type-level equivalence
-`(proj⁻¹{x}) ≃ FundamentalGroup X x`.
--/
-
 open Set Function Filter Bundle
 open scoped Topology ContDiff
 open DifferentialGeometry.Integral.Measure (SmoothRiemannianMetric chartModelBasis)
@@ -51,12 +41,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [DifferentialGeometry.Geometry.Riemannian.Topology.SemilocallySimplyConnectedSpace M]
   [Inhabited M] [PseudoEMetricSpace M] [SecondCountableTopology M]
 
-/-- **The fibre of a covering map over a compact total space is finite.**
-For any covering map `p : E → X` with `E` compact and `X` a `T1Space`, the
-fibre `p⁻¹{x}` is closed in `E` (preimage of a point under a continuous map
-into a `T1Space`), hence compact (`IsClosed.isCompact` in the compact space
-`E`), and discrete (`IsCoveringMap` implies discrete fibres). A compact and
-discrete topological space is finite. -/
 theorem isCoveringMap_fibre_finite_of_compact
     {X E : Type*} [TopologicalSpace X] [T1Space X]
     [TopologicalSpace E] [CompactSpace E]
@@ -70,13 +54,6 @@ theorem isCoveringMap_fibre_finite_of_compact
     isCompact_iff_compactSpace.mp hclosed.isCompact
   exact finite_of_compact_of_discrete
 
-/-- **Surjectivity of the monodromy evaluation.**
-For any covering map `p : E → X` with `PathConnectedSpace E`, the
-evaluation `γ ↦ hp.monodromy γ e'` at a chosen lift `e' ∈ p⁻¹{x}` is
-surjective onto `p⁻¹{x}`. Proof: given `e'' ∈ p⁻¹{x}`, path-connectedness
-of `E` yields `δ : Path e' e''`; the composite `p ∘ δ` is a loop at `x`, and
-uniqueness of path lifting identifies the lift of `p ∘ δ` starting at `e'`
-with `δ`, so monodromy along `⟦p ∘ δ⟧` sends `e'` to `e''`. -/
 theorem action_eval_surjective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [PathConnectedSpace E]
@@ -108,14 +85,6 @@ theorem action_eval_surjective
     simpa using this.trans δ.target
   exact hval
 
-/-- **Injectivity of the monodromy evaluation.**
-For any covering map `p : E → X` with `SimplyConnectedSpace E`, the
-evaluation `γ ↦ hp.monodromy γ e'` at a chosen lift `e' ∈ p⁻¹{x}` is
-injective. Proof: two homotopy classes `γ₁, γ₂` whose monodromies agree at
-`e'` lift to paths in `E` with the same endpoints; simple connectedness of
-`E` makes the homotopy class of such a path unique, so the two lifts are
-homotopic; pushing the homotopy down via composition with `p` recovers
-`γ₁ = γ₂` in the loop quotient. -/
 theorem action_eval_injective
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [SimplyConnectedSpace E]
@@ -162,11 +131,6 @@ theorem action_eval_injective
   rw [hp_eq₁, hp_eq₂] at hp_comp
   exact hp_comp
 
-/-- **Fibre / loop-quotient bijection.**
-Packaging `action_eval_surjective` + `action_eval_injective` via
-`Equiv.ofBijective`. The monodromy evaluation at `e'` is therefore a
-bijection between the fibre `p⁻¹{x}` and the loop-homotopy quotient
-`Path.Homotopic.Quotient x x`. -/
 noncomputable def fibreEquivLoopQuotient
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [PathConnectedSpace E] [SimplyConnectedSpace E]
@@ -176,13 +140,6 @@ noncomputable def fibreEquivLoopQuotient
       (fun γ : Path.Homotopic.Quotient x x => hp.monodromy γ e')
       ⟨action_eval_injective hp x e', action_eval_surjective hp x e'⟩).symm
 
-/-- **Fibre / fundamental-group bijection.**
-Compose `fibreEquivLoopQuotient` with the standard identification
-`Path.Homotopic.Quotient x x ≃ FundamentalGroup X x` (via
-`FundamentalGroup.toPath` / `FundamentalGroup.fromPath`) to obtain a
-type-level bijection between the fibre of a covering map with
-path-connected simply connected total space and the fundamental group
-of the base at the chosen base point. -/
 noncomputable def fibreEquivFundamentalGroup
     {X E : Type*} [TopologicalSpace X] [TopologicalSpace E]
     [ConnectedSpace X] [LocPathConnectedSpace X]

@@ -1,52 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartAlphaChristoffelCorrection
 
-/-!
-# Smooth-case Hessian bridge: Lp class assembly under the Christoffel discharge
-
-This module assembles the **smooth-case Lp class bridge**
-
-```
-hessPairingLpOnLapDom g φ ⟨smoothToH1Compl v, _⟩ = hessPairingSmoothLp g φ v
-```
-
-from the **Christoffel discharge hypothesis** `christoffelDischargeSmoothCase`
-(packaged in `HessianChartAlphaChristoffelDischarge`) together with the
-**per-chart ae-transferability hypothesis** which lifts the chart-target ae
-equality of the chart-local LapDom pairing with the chart-α Euclidean
-pairing to a manifold-side ae equality.
-
-The two hypotheses, when combined, yield the unconditional smooth-case
-Hessian bridge needed for the unconditional smooth-case Laplacian
-regularity theorem.
-
-## Hypotheses
-
-The Lp class bridge needs two ingredients:
-
-1. **Christoffel discharge** (`christoffelDischargeSmoothCase g φ v`): the POU-
-   weighted sum of `smoothPairingChristoffelDiff` vanishes pointwise.
-
-2. **Per-chart ae-transferability** (`perChartAeTransferableSmoothCase g φ v`):
-   for each chart `α`, the LapDom-side chart contribution
-   `hessPairingMChartContribution g φ α (smooth-mem-LD)` ae-equals the
-   POU-weighted chart-α Euclidean pairing pulled back to M
-   (a manifold-side ae equality on `μ_g`).
-
-## Main results
-
-* `hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable`
-  — given the per-chart transferability hypothesis, the global LapDom pairing
-  function ae-equals the POU-weighted Euclidean pairing summed over the
-  chart atlas POU finset.
-
-* `hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both`
-  — combining the two hypotheses, the LapDom global pairing function
-  ae-equals the chart-invariant smooth pairing.
-
-* `hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both`
-  — the headline Lp class equality, conditional on both hypotheses.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function FiberBundle
@@ -90,9 +43,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Per-chart ae-transferability (unconditional).** For smooth `φ` and `v`,
-the chart contribution function (LapDom side, weighted by POU) ae-equals the
-POU-weighted chart-α Euclidean pairing at the chart-α image of `x`. -/
 theorem perChartAeTransferable_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (α : M) :
@@ -165,11 +115,6 @@ theorem perChartAeTransferable_smoothCase
     rw [hρ_zero]
     ring
 
-/-- **Per-chart ae-transferability hypothesis (legacy form).** For smooth `φ`
-and `v`, the chart contribution function (LapDom side, weighted by POU)
-ae-equals the POU-weighted chart-α Euclidean pairing at the chart-α image of
-`x`. This predicate is now **automatic** (`perChartAeTransferable_smoothCase`
-discharges it unconditionally). -/
 def perChartAeTransferableSmoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     Prop :=
@@ -193,17 +138,12 @@ omit [NeZero (Module.finrank ℝ E)] in
             smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v
               ((toEuclidean (E := E)) (extChartAt I α x))) := Iff.rfl
 
-/-- **The per-chart ae-transferability hypothesis holds unconditionally.** -/
 theorem perChartAeTransferableSmoothCase_holds
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     perChartAeTransferableSmoothCase (I := I) (M := M) g φ v := by
   intro α _hα
   exact perChartAeTransferable_smoothCase (I := I) (M := M) g φ v α
 
-/-- **Global ae-equality from per-chart ae-equalities.** Given the per-chart
-ae-transferability hypothesis, the LapDom global pairing function `hessPairingMOnLapDom`
-ae-equals the POU-weighted sum of chart-α Euclidean pairings on the chart-α
-images of `x`. -/
 theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v) :
@@ -253,9 +193,6 @@ theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_tran
   intro α hα
   exact h_x_per_chart α hα
 
-/-- **Global ae-equality from both hypotheses.** Given both the per-chart
-ae-transferability and the Christoffel discharge, the LapDom global pairing
-function ae-equals the chart-invariant smooth pairing on the manifold. -/
 theorem hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -281,9 +218,6 @@ theorem hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
   rw [hx_eq1]
   exact h_pointwise x
 
-/-- **Headline Lp class bridge, conditional on both hypotheses.** For smooth
-`φ` and `v`, given the per-chart ae-transferability and the Christoffel
-discharge, the LapDom Lp class equals the smooth Lp class. -/
 theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -296,8 +230,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
     (hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_both
       (I := I) (M := M) g φ v h_transfer h_discharge)
 
-/-- **Connector form of the headline bridge** using the membership-proof variant
-expected by `BochnerPolarisedLpFull.lean`. -/
 theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v)
@@ -311,9 +243,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_both
     (I := I) (M := M) g φ v h_transfer h_discharge
 
-/-- **Global ae-equality from per-chart unconditional transferability.** This
-is the unconditional version of `hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable`,
-discharging the transferability hypothesis automatically. -/
 theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     hessPairingMOnLapDom (I := I) (M := M) g φ
@@ -327,8 +256,6 @@ theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v)
 
-/-- **Global ae-equality from Christoffel discharge alone.** Combines the
-unconditional transferability with the Christoffel discharge. -/
 theorem hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -341,7 +268,6 @@ theorem hessPairingMOnLapDom_aeEq_hessPairingChart_smoothCase_of_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
-/-- **Headline Lp class bridge from Christoffel discharge alone.** -/
 theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :
@@ -352,7 +278,6 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_of_discharge
     (I := I) (M := M) g φ v
     (perChartAeTransferableSmoothCase_holds (I := I) (M := M) g φ v) h_discharge
 
-/-- **Connector form from Christoffel discharge alone.** -/
 theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_smoothCase_connector_of_discharge
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_discharge : christoffelDischargeSmoothCase (I := I) (M := M) g φ v) :

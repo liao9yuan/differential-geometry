@@ -18,52 +18,6 @@ import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 
-/-!
-# Intrinsic Sobolev space `W^{1,p}_{int}(M)` via the weak Riemannian gradient
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and an
-exponent `1 ≤ p ≤ ∞`, this file defines the intrinsic Sobolev space
-`W^{1,p}_{int}(M)` via the **weak Riemannian gradient**.
-
-A smooth tangent section `G` is a *weak Riemannian gradient* of `u : M → ℝ`
-when the integration-by-parts identity
-$$\int_M g(G(x), X(x))\,d\mu_g = -\int_M u(x) \cdot \operatorname{div}_g(X)(x)\,d\mu_g$$
-holds for every smooth compactly-supported tangent test field `X`. Together
-with `u ∈ L^p(M, μ_g)` and a Riemannian-norm `L^p`-bound on `G`, this defines
-the intrinsic Sobolev space.
-
-In this file we restrict to smooth weak gradients; this captures the case of
-smooth functions and is sufficient for the algebraic-closure properties under
-addition and scalar multiplication. The general measurable / non-smooth weak
-gradient is treated in a companion file (not included here).
-
-## Main definitions
-
-* `HasWeakRiemannianGrad g u G` : `G : Cₛ^∞⟮I; E, TangentSpace I⟯` is a weak
-  Riemannian gradient of `u : M → ℝ`.
-* `MemW1pIntrinsic g p u` : the predicate `u ∈ W^{1,p}_{int}(M)`.
-* `w1pNormIntrinsic g p u` : the intrinsic Sobolev norm.
-
-## Main results
-
-* `MemW1pIntrinsic_of_contMDiff` : every smooth function on a closed
-  Riemannian manifold lies in `W^{1,p}_{int}` for every exponent `p`, with
-  weak gradient given by the classical Riemannian gradient `grad_g g hu`.
-* `MemW1pIntrinsic.zero`, `MemW1pIntrinsic.add`, `MemW1pIntrinsic.const_smul` :
-  algebraic closure of the predicate under the standard `ℝ`-vector-space
-  operations on functions.
-* `w1pNormIntrinsic_zero`, `w1pNormIntrinsic_add_le` : structural properties
-  of the norm.
-* `HasWeakRiemannianGrad.pairing_inner_eq` : two weak Riemannian gradients of
-  the same function pair identically against every smooth compactly-supported
-  tangent test section.
-
-The Riemannian-norm `L^p`-bound on `G` is phrased via the *metric inner product
-squared* `b ↦ g.inner b (G b) (G b)` (which is continuous and hence in `L^p`
-for every `p` on a closed manifold). The pointwise `g`-norm is
-`Real.sqrt (g.inner b (G b) (G b))`.
--/
-
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter
@@ -87,30 +41,24 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Continuity of `b ↦ g.inner b (G b) (X b)` for two smooth tangent
-sections `G, X`. Re-exports
-`TangentBundle.continuous_g_inner_of_smooth_sections`. -/
 private lemma continuous_g_inner_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (G X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (G b) (X b)) :=
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g G X
 
-/-- The pointwise `g`-norm-squared of a smooth tangent section is continuous. -/
 private lemma continuous_g_norm_sq_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (G b) (G b)) :=
   continuous_g_inner_smooth_sections g G G
 
-/-- The pointwise `g`-norm of a smooth tangent section is continuous. -/
 private lemma continuous_g_norm_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => Real.sqrt (g.inner b (G b) (G b))) :=
   Real.continuous_sqrt.comp (continuous_g_norm_sq_smooth_section g G)
 
-/-- Continuous functions on a compact manifold are bounded. -/
 private lemma exists_bound_continuous_compactSpace
     [CompactSpace M] {f : M → ℝ} (hf : Continuous f) :
     ∃ C : ℝ, ∀ x : M, |f x| ≤ C := by
@@ -131,7 +79,6 @@ private lemma exists_bound_continuous_compactSpace
     intro x
     exact (hM ⟨x⟩).elim
 
-/-- A continuous function on a closed manifold lies in `L^p` for every `p`. -/
 private lemma continuous_memLp_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -146,7 +93,6 @@ private lemma continuous_memLp_of_compactSpace
   obtain ⟨C, hC⟩ := exists_bound_continuous_compactSpace hf
   exact MemLp.of_bound hmeas C (Filter.Eventually.of_forall (fun x => hC x))
 
-/-- A continuous function on a closed manifold is integrable. -/
 private lemma continuous_integrable_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -159,12 +105,6 @@ private lemma continuous_integrable_of_compactSpace
     continuous_memLp_of_compactSpace g 1 hf
   exact memLp_one_iff_integrable.mp h_one
 
-/-- A smooth tangent section
-`G : Cₛ^∞⟮I; E, TangentSpace I⟯` is a **weak Riemannian gradient** of
-`u : M → ℝ` with respect to a smooth Riemannian metric `g` if for every smooth
-compactly-supported tangent vector field `X`, the pairing identity
-$$\int_M g(G, X)\,d\mu_g = -\int_M u \cdot \operatorname{div}_g(X)\,d\mu_g$$
-holds, where `g(·,·) = g.inner b` is the fibrewise metric inner product. -/
 def HasWeakRiemannianGrad
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ)
@@ -175,7 +115,6 @@ def HasWeakRiemannianGrad
         -∫ x, u x * divergence_g (I := I) g X x
           ∂(riemannianVolumeMeasure I M g)
 
-/-- The integral pairing identity. -/
 lemma HasWeakRiemannianGrad.pairing_eq
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -187,11 +126,6 @@ lemma HasWeakRiemannianGrad.pairing_eq
       -∫ x, u x * divergence_g (I := I) g X x
         ∂(riemannianVolumeMeasure I M g) := h X hX
 
-/-- `MemW1pIntrinsic g p u` means:
-* `u : M → ℝ` is in `L^p` against the Riemannian volume measure `μ_g`;
-* there exists a smooth tangent section `G` which is a weak Riemannian gradient
-  of `u`, and whose pointwise `g`-norm `b ↦ √(g.inner b (G b) (G b))` is in
-  `L^p` against `μ_g`. -/
 def MemW1pIntrinsic
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) : Prop :=
@@ -201,15 +135,12 @@ def MemW1pIntrinsic
       MemLp (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-/-- The `L^p` membership component of `MemW1pIntrinsic`. -/
 lemma MemW1pIntrinsic.memLp_self
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsic (I := I) (M := M) g p u) :
     MemLp u p (riemannianVolumeMeasure I M g) := h.1
 
-/-- The pairing identity for the classical Riemannian gradient of a smooth
-function on a closed manifold. -/
 theorem integral_inner_gradFun_eq_neg_integral_mul_divergence
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -231,8 +162,6 @@ theorem integral_inner_gradFun_eq_neg_integral_mul_divergence
   exact integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) (M := M) g hu X hX
 
-/-- A smooth function on a closed Riemannian manifold has the smooth gradient
-`grad_g g hu` as a weak Riemannian gradient. -/
 theorem hasWeakRiemannianGrad_grad_g_of_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -250,8 +179,6 @@ theorem hasWeakRiemannianGrad_grad_g_of_contMDiff
   exact integral_inner_gradFun_eq_neg_integral_mul_divergence
     (I := I) (M := M) g hu X hX
 
-/-- **Smooth bridge:** every smooth function on a closed Riemannian manifold
-lies in `W^{1,p}_{int}` for every exponent `p`. -/
 theorem MemW1pIntrinsic_of_contMDiff
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞)
@@ -263,7 +190,6 @@ theorem MemW1pIntrinsic_of_contMDiff
   · have hcont := continuous_g_norm_smooth_section g (grad_g (I := I) g hu)
     exact continuous_memLp_of_compactSpace g p hcont
 
-/-- A weak Riemannian gradient of `u + v` is the sum of weak gradients. -/
 theorem HasWeakRiemannianGrad.add
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M}
@@ -336,7 +262,6 @@ theorem HasWeakRiemannianGrad.add
   intro x
   ring
 
-/-- Closure of `MemW1pIntrinsic` under addition. -/
 theorem MemW1pIntrinsic.add
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -351,7 +276,6 @@ theorem MemW1pIntrinsic.add
   · have hcont := continuous_g_norm_smooth_section g (G + G')
     exact continuous_memLp_of_compactSpace g p hcont
 
-/-- The zero section is a weak Riemannian gradient of the zero function. -/
 theorem HasWeakRiemannianGrad.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -370,7 +294,6 @@ theorem HasWeakRiemannianGrad.zero
       (fun _ : M => (0 : ℝ)) from by funext x; simp]
   simp [integral_zero]
 
-/-- The zero function is in `W^{1,p}_{int}`. -/
 theorem MemW1pIntrinsic.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -391,7 +314,6 @@ theorem MemW1pIntrinsic.zero
     rw [hcongr]
     exact MemLp.zero
 
-/-- A constant scalar multiple of a weak Riemannian gradient. -/
 theorem HasWeakRiemannianGrad.const_smul
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -433,7 +355,6 @@ theorem HasWeakRiemannianGrad.const_smul
   rw [hcong, integral_const_mul]
   ring
 
-/-- Closure of `MemW1pIntrinsic` under scalar multiplication. -/
 theorem MemW1pIntrinsic.const_smul
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -446,8 +367,6 @@ theorem MemW1pIntrinsic.const_smul
   · have hcont := continuous_g_norm_smooth_section g (c • G)
     exact continuous_memLp_of_compactSpace g p hcont
 
-/-- Two weak Riemannian gradients of the same function pair identically with
-every smooth compactly supported tangent test field. -/
 theorem HasWeakRiemannianGrad.pairing_inner_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -460,9 +379,6 @@ theorem HasWeakRiemannianGrad.pairing_inner_eq
       ∫ x, g.inner x (G' x) (X x) ∂(riemannianVolumeMeasure I M g) := by
   rw [h₁.pairing_eq X hX, h₂.pairing_eq X hX]
 
-/-- Pairing the difference of two weak Riemannian gradients of the same
-function against any smooth compactly-supported tangent test field gives
-zero. -/
 theorem HasWeakRiemannianGrad.pairing_inner_diff_eq_zero
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -487,7 +403,6 @@ theorem HasWeakRiemannianGrad.pairing_inner_diff_eq_zero
   rw [integral_sub h_int_G h_int_G']
   rw [HasWeakRiemannianGrad.pairing_inner_eq h₁ h₂ X hX, sub_self]
 
-/-- The `W^{1,p}_{int}` norm of `u`. -/
 def w1pNormIntrinsic
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) : ℝ≥0∞ :=
@@ -497,7 +412,6 @@ def w1pNormIntrinsic
         eLpNorm (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
           (riemannianVolumeMeasure I M g)
 
-/-- Auxiliary: the gradient infimum component of the norm. -/
 private def gradInfimum
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) : ℝ≥0∞ :=
@@ -513,8 +427,6 @@ private lemma w1pNormIntrinsic_def
       eLpNorm u p (riemannianVolumeMeasure I M g) +
         gradInfimum (I := I) (M := M) g p u := rfl
 
-/-- The infimum is bounded above by the `eLpNorm` of any specific weak
-gradient. -/
 private lemma gradInfimum_le_of_weakGrad
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} {u : M → ℝ}
@@ -526,7 +438,6 @@ private lemma gradInfimum_le_of_weakGrad
   unfold gradInfimum
   exact iInf_le_of_le G (iInf_le _ hG)
 
-/-- The norm of the zero function is zero. -/
 theorem w1pNormIntrinsic_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -561,7 +472,6 @@ theorem w1pNormIntrinsic_zero
     exact le_of_eq h_zero_norm
   · exact zero_le _
 
-/-- For functions in `MemW1pIntrinsic`, the `eLpNorm u` component is finite. -/
 theorem MemW1pIntrinsic.eLpNorm_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -569,8 +479,6 @@ theorem MemW1pIntrinsic.eLpNorm_lt_top
     eLpNorm u p (riemannianVolumeMeasure I M g) < ⊤ :=
   h.memLp_self.2
 
-/-- The infimum of weak-gradient norms is finite for `MemW1pIntrinsic`
-functions. -/
 theorem MemW1pIntrinsic.gradInfimum_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -581,7 +489,6 @@ theorem MemW1pIntrinsic.gradInfimum_lt_top
     (gradInfimum_le_of_weakGrad g hG_weak) ?_
   exact hG_p.2
 
-/-- The norm is finite for functions in `MemW1pIntrinsic`. -/
 theorem MemW1pIntrinsic.w1pNormIntrinsic_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -590,9 +497,6 @@ theorem MemW1pIntrinsic.w1pNormIntrinsic_lt_top
   rw [w1pNormIntrinsic_def]
   exact ENNReal.add_lt_top.mpr ⟨h.eLpNorm_lt_top, h.gradInfimum_lt_top⟩
 
-/-- For two `MemW1pIntrinsic` functions with weak gradients `G, G'`, the
-infimum of weak-gradient norms of `u + v` is bounded by
-`eLpNorm |G|_g + eLpNorm |G'|_g`. -/
 private lemma gradInfimum_add_le_of_weakGrads
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -750,7 +654,6 @@ private lemma gradInfimum_add_le_of_weakGrads
   refine le_trans ?_ (hmono.trans htri)
   exact gradInfimum_le_of_weakGrad g hsum_weak
 
-/-- Triangle inequality for the intrinsic norm on a closed manifold. -/
 theorem w1pNormIntrinsic_add_le
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} (hp : 1 ≤ p)

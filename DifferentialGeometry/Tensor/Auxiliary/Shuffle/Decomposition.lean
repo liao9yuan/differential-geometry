@@ -10,49 +10,10 @@ import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.Tactic.Group
 
-/-!
-# Shuffle decomposition for `Fin (m+1) ⊕ Fin (n+1)`
-
-For each shuffle coset `σ : Equiv.Perm.ModSumCongr (Fin (m+1)) (Fin (n+1))`, the
-distinguished element `Sum.inl 0` is mapped (via `σ⁻¹`) into either the left block
-`Fin (m+1)` or the right block `Fin (n+1)`. This file constructs the bijection
-between
-
-* the **left** subset of cosets — those with `σ⁻¹(inl 0) ∈ inl _` —
-  and `Equiv.Perm.ModSumCongr (Fin m) (Fin (n+1))`, and
-* the **right** subset of cosets — those with `σ⁻¹(inl 0) ∈ inr _` —
-  and `Equiv.Perm.ModSumCongr (Fin (m+1)) (Fin n)`.
-
-These bijections are the combinatorial heart of the graded Leibniz rule
-for the wedge product / interior product.
-
-## Main definitions
-
-* `shuffleLeftRestrict` — the left bijection.
-* `shuffleRightRestrict` — the right bijection.
-* `restrictComplement`, `restrictComplementRight` — restriction of a perm
-  fixing `inl 0` (resp. `inr 0`) to the complement.
-* `normalizeLeft`, `normalizeRight` — normalize a representative so that it fixes
-  the distinguished element.
-
-## Implementation
-
-The forward direction goes through a "normalize and restrict" process:
-1. Compose `σ` with a block-permutation `swap 0 k` so the result fixes `inl 0`
-   (resp. `inr 0`).
-2. Apply `Equiv.removeNone` after rewriting through `Option`-equivalences.
-
-The backward direction extends a perm of the smaller type via `Equiv.optionCongr`.
--/
-
 namespace ContinuousAlternatingMap
 
 variable {m n : ℕ}
 
-/-! ### Side classification: well-defined on cosets -/
-
-/-- Whether `σ⁻¹(inl 0)` lies in the left block is invariant under right-multiplication
-by block-permutations, hence well-defined on `ModSumCongr` cosets. -/
 theorem shuffle_side_well_defined
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (τ : (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin (n + 1))).range) :
@@ -76,7 +37,6 @@ theorem shuffle_side_well_defined
           Equiv.sumCongr_apply, Sum.map_inr]
       rw [hk] at this; simp at this
 
-/-- Right-side analogue of `shuffle_side_well_defined`. -/
 theorem shuffle_side_well_defined_right
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (τ : (Equiv.Perm.sumCongrHom (Fin (m + 1)) (Fin (n + 1))).range) :
@@ -92,10 +52,6 @@ theorem shuffle_side_well_defined_right
       obtain ⟨j', hj'⟩ := this; rw [hk] at hj'; exact absurd hj' (by simp)
     · exact ⟨j, h.symm ▸ rfl⟩
 
-/-! ### Left-side decomposition -/
-
-/-- The equivalence `Fin(m+1) ⊕ Fin(n+1) ≃ Option(Fin m ⊕ Fin(n+1))` sending
-`Sum.inl 0 ↦ none`, used to apply `decomposeOption` machinery. -/
 noncomputable def finSuccSumOptionEquiv {m n : ℕ} :
     Fin (m + 1) ⊕ Fin (n + 1) ≃ Option (Fin m ⊕ Fin (n + 1)) :=
   (Equiv.sumCongr (finSuccEquiv' 0) (Equiv.refl _)).trans ShuffleSplit.optionSumEquiv
@@ -110,9 +66,6 @@ noncomputable def finSuccSumOptionEquiv {m n : ℕ} :
       Sum.inl 0 := by
   simp [finSuccSumOptionEquiv]
 
-/-- Normalize a representative: given σ with `σ⁻¹(inl 0) = inl k`,
-compose with the block-permutation `sumCongr (swap 0 k) 1` to get a
-permutation fixing `inl 0`. -/
 def normalizeLeft (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (k : Fin (m + 1)) (_hk : σ⁻¹ (Sum.inl 0) = Sum.inl k) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)) :=
@@ -134,15 +87,12 @@ theorem normalizeLeft_coset (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
   refine ⟨⟨(Equiv.swap 0 k)⁻¹, 1⟩, ?_⟩
   simp [normalizeLeft, Equiv.Perm.sumCongrHom_apply]
 
-/-- Restrict a permutation fixing `inl 0` to the complement `Fin m ⊕ Fin(n+1)`.
-Uses `removeNone` via `finSuccSumOptionEquiv`. -/
 noncomputable def restrictComplement
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (_hfix : σ (Sum.inl 0) = Sum.inl 0) :
     Equiv.Perm (Fin m ⊕ Fin (n + 1)) :=
   Equiv.removeNone (Equiv.permCongr finSuccSumOptionEquiv σ)
 
-/-- `restrictComplement` preserves the sign. -/
 theorem restrictComplement_sign
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hfix : σ (Sum.inl 0) = Sum.inl 0) :
@@ -152,8 +102,6 @@ theorem restrictComplement_sign
   show finSuccSumOptionEquiv (σ (finSuccSumOptionEquiv.symm none)) = none
   rw [finSuccSumOptionEquiv_symm_none, hfix, finSuccSumOptionEquiv_inl_zero]
 
-/-- A block-permutation `sumCongr τ_l τ_r` with `τ_l 0 = 0` restricts (via
-`restrictComplement`) to a block-permutation. -/
 theorem restrictComplement_sumCongr_mem
     (τ_l : Equiv.Perm (Fin (m + 1))) (τ_r : Equiv.Perm (Fin (n + 1)))
     (hτ_fix : τ_l 0 = 0) :
@@ -196,7 +144,6 @@ theorem restrictComplement_sumCongr_mem
     (finSuccEquiv'_succAbove 0 a ▸ (finSuccEquiv' 0).symm_apply_apply _).symm,
     ha']; rfl
 
-/-- Raw forward map at the permutation level: normalize, then restrict. -/
 noncomputable def shuffleLeftFwd
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inl k) :
@@ -205,7 +152,6 @@ noncomputable def shuffleLeftFwd
   let hk := hσ.choose_spec
   restrictComplement (normalizeLeft σ k hk) (normalizeLeft_fixes σ k hk)
 
-/-- The forward map is well-defined on `ModSumCongr` cosets. -/
 theorem shuffleLeftFwd_wd
     (σ₁ σ₂ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ₁ : ∃ k, σ₁⁻¹ (Sum.inl 0) = Sum.inl k)
@@ -272,8 +218,6 @@ theorem shuffleLeftFwd_wd
   rw [this]
   exact restrictComplement_sumCongr_mem τ_l τ_r hτ_fix
 
-/-- Raw backward map: extend a permutation of `Fin m ⊕ Fin(n+1)` to
-`Fin(m+1) ⊕ Fin(n+1)` fixing `inl 0`. -/
 noncomputable def shuffleLeftBwd
     (σ' : Equiv.Perm (Fin m ⊕ Fin (n + 1))) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)) :=
@@ -289,7 +233,6 @@ theorem shuffleLeftBwd_isLeft (σ' : Equiv.Perm (Fin m ⊕ Fin (n + 1))) :
     ∃ k, (shuffleLeftBwd σ')⁻¹ (Sum.inl 0) = Sum.inl k :=
   ⟨0, by rw [← shuffleLeftBwd_fixes σ']; exact (shuffleLeftBwd σ').symm_apply_apply _⟩
 
-/-- `restrictComplement ∘ shuffleLeftBwd = id`. -/
 theorem restrictComplement_shuffleLeftBwd
     (σ' : Equiv.Perm (Fin m ⊕ Fin (n + 1))) :
     restrictComplement (shuffleLeftBwd σ') (shuffleLeftBwd_fixes σ') = σ' := by
@@ -301,7 +244,6 @@ theorem restrictComplement_shuffleLeftBwd
   rw [this]
   exact Equiv.removeNone_optionCongr σ'
 
-/-- `shuffleLeftBwd ∘ restrictComplement = id` for perms fixing `inl 0`. -/
 theorem shuffleLeftBwd_restrictComplement
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hfix : σ (Sum.inl 0) = Sum.inl 0) :
@@ -316,12 +258,10 @@ theorem shuffleLeftBwd_restrictComplement
     rw [map_equiv_removeNone, h_fixes_none]; simp
   ext x; simp [Equiv.permCongr_apply, h_round]
 
-/-- Embedding `Perm(Fin m)` into `Perm(Fin(m+1))` via `optionCongr` through `finSuccEquiv' 0`. -/
 noncomputable def liftPermSucc (τ : Equiv.Perm (Fin m)) :
     Equiv.Perm (Fin (m + 1)) :=
   Equiv.permCongr (finSuccEquiv' 0).symm τ.optionCongr
 
-/-- The backward map is well-defined on `ModSumCongr` cosets. -/
 theorem shuffleLeftBwd_wd
     (s1 s2 : Equiv.Perm (Fin m ⊕ Fin (n + 1)))
     (h_rel : QuotientGroup.leftRel
@@ -373,7 +313,6 @@ theorem shuffleLeftBwd_wd
   · simp [shuffleLeftBwd, Equiv.permCongr_apply, Equiv.sumCongr_apply,
       Equiv.optionCongr_apply, finSuccSumOptionEquiv, ShuffleSplit.optionSumEquiv]
 
-/-- Round-trip: `fwd ∘ bwd = id` (exact equality). -/
 theorem shuffleLeft_fwd_bwd_eq
     (σ' : Equiv.Perm (Fin m ⊕ Fin (n + 1))) :
     shuffleLeftFwd (shuffleLeftBwd σ') (shuffleLeftBwd_isLeft σ') = σ' := by
@@ -392,7 +331,6 @@ theorem shuffleLeft_fwd_bwd_eq
   simp only [this]
   exact restrictComplement_shuffleLeftBwd σ'
 
-/-- Round-trip: `bwd ∘ fwd = id` at the coset level. -/
 theorem shuffleLeft_bwd_fwd
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inl k) :
@@ -409,8 +347,6 @@ theorem shuffleLeft_bwd_fwd
   refine ⟨⟨(Equiv.swap 0 k)⁻¹, 1⟩, ?_⟩
   simp [normalizeLeft, Equiv.Perm.sumCongrHom_apply]
 
-/-- **Left restriction bijection.** Cosets in `ModSumCongr (Fin(m+1)) (Fin(n+1))`
-that send `inl 0` to the left side biject with `ModSumCongr (Fin m) (Fin(n+1))`. -/
 noncomputable def shuffleLeftRestrict :
     {σ : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin (n + 1)) //
       ∀ τ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)),
@@ -461,7 +397,6 @@ noncomputable def shuffleLeftRestrict :
       _ = Quotient.mk'' q.out := by rw [shuffleLeft_fwd_bwd_eq]
       _ = q := Quotient.out_eq q
 
-/-- The coset of `σ` lies in the left subtype iff *some* representative does. -/
 theorem shuffleLeftRestrict_subtype_of_inv
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inl k)
@@ -475,7 +410,6 @@ theorem shuffleLeftRestrict_subtype_of_inv
   rw [h_eq] at hσ
   exact (shuffle_side_well_defined τ ⟨_, ⟨(tl, tr), rfl⟩⟩).mpr hσ
 
-/-- The `symm` of `finSuccSumOptionEquiv` on `some z` "lifts" `z`. -/
 @[simp] theorem finSuccSumOptionEquiv_symm_some
     (z : Fin m ⊕ Fin (n + 1)) :
     (finSuccSumOptionEquiv : Fin (m + 1) ⊕ Fin (n + 1) ≃ _).symm (some z) =
@@ -484,8 +418,6 @@ theorem shuffleLeftRestrict_subtype_of_inv
   · simp [finSuccSumOptionEquiv, ShuffleSplit.optionSumEquiv]
   · simp [finSuccSumOptionEquiv, ShuffleSplit.optionSumEquiv]
 
-/-- Lift relation: for `ν` fixing `inl 0`, `restrictComplement ν` and `ν` agree
-under the lift `Sum.map Fin.succ id`. -/
 theorem restrictComplement_lift
     (ν : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hν : ν (Sum.inl 0) = Sum.inl 0)
@@ -510,10 +442,6 @@ theorem restrictComplement_lift
   rw [Equiv.symm_apply_apply, finSuccSumOptionEquiv_symm_some] at h_inv
   exact h_inv
 
-/-! ### Right-side decomposition -/
-
-/-- The equivalence `Fin(m+1) ⊕ Fin(n+1) ≃ Option(Fin(m+1) ⊕ Fin n)` sending
-`Sum.inr 0 ↦ none`. -/
 noncomputable def finSumSuccOptionEquiv {m n : ℕ} :
     Fin (m + 1) ⊕ Fin (n + 1) ≃ Option (Fin (m + 1) ⊕ Fin n) :=
   (Equiv.sumComm _ _).trans <|
@@ -559,8 +487,6 @@ noncomputable def finSumSuccOptionEquiv {m n : ℕ} :
   apply (finSumSuccOptionEquiv (m := m) (n := n)).injective
   rw [Equiv.apply_symm_apply]; exact (finSumSuccOptionEquiv_inr_succ b).symm
 
-/-- Normalize for the right case: compose with block-perm `sumCongr 1 (swap 0 k)` and
-then `swap (inl 0) (inr 0)` to get a perm fixing `inr 0`. -/
 def normalizeRight (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (k : Fin (n + 1)) (_hk : σ⁻¹ (Sum.inl 0) = Sum.inr k) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)) :=
@@ -574,14 +500,12 @@ theorem normalizeRight_fixes (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     Equiv.sumCongr_apply, Sum.map_inr, Equiv.swap_apply_left]
   rw [← hk]; simp
 
-/-- Restriction analogue for the right case. -/
 noncomputable def restrictComplementRight
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (_hfix : σ (Sum.inr 0) = Sum.inr 0) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin n) :=
   Equiv.removeNone (Equiv.permCongr finSumSuccOptionEquiv σ)
 
-/-- `restrictComplementRight` preserves sign. -/
 theorem restrictComplementRight_sign
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hfix : σ (Sum.inr 0) = Sum.inr 0) :
@@ -591,8 +515,6 @@ theorem restrictComplementRight_sign
   show finSumSuccOptionEquiv (σ (finSumSuccOptionEquiv.symm none)) = none
   rw [finSumSuccOptionEquiv_symm_none, hfix, finSumSuccOptionEquiv_inr_zero]
 
-/-- Lift relation: for `ν` fixing `inr 0`, `restrictComplementRight ν` and `ν` agree
-under the lift `Sum.map id Fin.succ`. -/
 theorem restrictComplementRight_lift
     (ν : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hν : ν (Sum.inr 0) = Sum.inr 0)
@@ -629,7 +551,6 @@ theorem restrictComplementRight_lift
   rw [h_lift_rn] at h_inv
   exact h_inv
 
-/-- Right-side raw forward map. -/
 noncomputable def shuffleRightFwd
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inr k) :
@@ -637,7 +558,6 @@ noncomputable def shuffleRightFwd
   let k := hσ.choose; let hk := hσ.choose_spec
   restrictComplementRight (normalizeRight σ k hk) (normalizeRight_fixes σ k hk)
 
-/-- Right-side raw backward map. -/
 noncomputable def shuffleRightBwd
     (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)) :=
@@ -661,8 +581,6 @@ theorem shuffleRightBwd_isRight (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) :
     rw [← Equiv.optionCongr_symm]; rfl]
   exact finSumSuccOptionEquiv_symm_none
 
-/-- A block-permutation `sumCongr τ_l τ_r` with `τ_r 0 = 0` restricts (via
-`restrictComplementRight`) to a block-permutation. -/
 theorem restrictComplementRight_sumCongr_mem
     (τ_l : Equiv.Perm (Fin (m + 1))) (τ_r : Equiv.Perm (Fin (n + 1)))
     (hτ_fix : τ_r 0 = 0) :
@@ -703,7 +621,6 @@ theorem restrictComplementRight_sumCongr_mem
   simp only [Equiv.sumCongr_apply, Sum.map_inl]
   exact h_fwd_τ
 
-/-- The right-side forward map is well-defined on `ModSumCongr` cosets. -/
 theorem shuffleRightFwd_wd
     (σ₁ σ₂ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ₁ : ∃ k, σ₁⁻¹ (Sum.inl 0) = Sum.inr k)
@@ -778,12 +695,10 @@ theorem shuffleRightFwd_wd
   rw [this]
   exact restrictComplementRight_sumCongr_mem τ_l τ_r hτ_fix
 
-/-- The right-side lift: embed `Perm(Fin n)` in `Perm(Fin(n+1))`. -/
 noncomputable def liftPermSuccR (τ : Equiv.Perm (Fin n)) :
     Equiv.Perm (Fin (n + 1)) :=
   Equiv.permCongr (finSuccEquiv' 0).symm τ.optionCongr
 
-/-- The right-side backward map is well-defined on `ModSumCongr` cosets. -/
 theorem shuffleRightBwd_wd
     (σ₁' σ₂' : Equiv.Perm (Fin (m + 1) ⊕ Fin n))
     (h_rel : QuotientGroup.leftRel
@@ -866,7 +781,6 @@ theorem shuffleRightBwd_wd
       rw [h1]
       simp [Equiv.optionCongr_apply]
 
-/-- `restrictComplementRight ∘ shuffleRightBwd` simplifies to a no-swap inverse. -/
 theorem restrictComplementRight_shuffleRightBwd
     (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) :
     restrictComplementRight
@@ -878,7 +792,6 @@ theorem restrictComplementRight_shuffleRightBwd
       σ'.optionCongr := by ext x; simp [Equiv.permCongr_apply]
   rw [this]; exact Equiv.removeNone_optionCongr σ'
 
-/-- Right-side round-trip: `fwd ∘ bwd = id`. -/
 theorem shuffleRight_fwd_bwd_eq
     (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) :
     shuffleRightFwd (shuffleRightBwd σ') (shuffleRightBwd_isRight σ') = σ' := by
@@ -917,7 +830,6 @@ theorem shuffleRight_fwd_bwd_eq
   simp only [h_norm]
   exact restrictComplementRight_shuffleRightBwd σ'
 
-/-- `shuffleRightBwd ∘ restrictComplementRight = swap * σ` for σ fixing `inr 0`. -/
 theorem shuffleRightBwd_restrictComplementRight
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hfix : σ (Sum.inr 0) = Sum.inr 0) :
@@ -937,7 +849,6 @@ theorem shuffleRightBwd_restrictComplementRight
     ext x; simp [Equiv.permCongr_apply]
   rw [h_cancel]
 
-/-- Right-side round-trip: `bwd ∘ fwd = id` at the coset level. -/
 theorem shuffleRight_bwd_fwd
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inr k) :
@@ -969,8 +880,6 @@ theorem shuffleRight_bwd_fwd
       Equiv.swap (Sum.inl 0) (Sum.inr 0) = 1 from Equiv.swap_mul_self _ _]
   group
 
-/-- **Right restriction bijection**, defined via the left bijection's machinery
-applied symmetrically. -/
 noncomputable def shuffleRightRestrict :
     {σ : Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin (n + 1)) //
       ∀ τ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)),
@@ -1016,7 +925,6 @@ noncomputable def shuffleRightRestrict :
       _ = Quotient.mk'' q.out := by rw [shuffleRight_fwd_bwd_eq]
       _ = q := Quotient.out_eq q
 
-/-- The coset of `σ` lies in the right subtype iff *some* representative does. -/
 theorem shuffleRightRestrict_subtype_of_inv
     (σ : Equiv.Perm (Fin (m + 1) ⊕ Fin (n + 1)))
     (hσ : ∃ k, σ⁻¹ (Sum.inl 0) = Sum.inr k)

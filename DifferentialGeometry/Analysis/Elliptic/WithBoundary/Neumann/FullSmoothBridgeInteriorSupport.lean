@@ -4,87 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorSmoothScalarP
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenWithBoundary
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Green
 
-/-!
-# Smooth bridge for the variational Laplacian
-(with-boundary, half-space model, full-scope Neumann variant on
-interior-supported smooth scalars)
-
-This file connects the full Neumann variational Laplacian via Lax-Milgram
-(`resolventFullNeumann`) to the classical with-boundary Laplace–Beltrami
-operator `Δ_g_with_boundary` for smooth scalars `u : FullSmoothScalar g`
-whose underlying function has *interior* topological support
-(`tsupport u.toFun ⊆ (I_half n).interior M`). The bridge identity
-expresses the H¹-completion lift of `u` as the resolvent of the L²-class
-of `(u - Δ_g u)` evaluated on the full Neumann test space.
-
-## Scope of this file
-
-The full Neumann Hilbert completion `H1ComplFullNeumann g` is the
-completion of *all* smooth scalars on a closed manifold-with-boundary
-(no support restriction on the test function), packaging the natural
-variational space for the Neumann Laplacian. The bridge identity for a
-smooth `u : FullSmoothScalar g`,
-$$
-\mathrm{smoothToH1ComplFullNeumann}\,u
-   \;=\;
-\mathrm{resolventFullNeumann}\,g\,(\mathrm{oneSubLapFullClassicalLp}\,u),
-$$
-requires expressing `(1 - \Delta_g)\,u` as an L² class on `M`. The
-classical with-boundary Laplacian `Δ_g_with_boundary` is currently
-defined only for inputs whose topological support lies inside the
-manifold interior (the gradient of a fully boundary-touching smooth
-scalar is not, in the present infrastructure, a globally smooth tangent
-section). We therefore deliver the bridge under the additional
-hypothesis that `u` has interior support; the test function `v` (which
-ranges over the full Neumann space) carries no such restriction.
-
-The interior-support hypothesis on `u` is the natural Neumann analogue
-of the boundaryless smooth-bridge regime: when `u` is interior-supported
-the gradient section `∇u` vanishes on (a neighbourhood of) the entire
-boundary, so the formal Neumann condition `g(∇u, ν) = 0` holds
-*automatically* on the boundary. Lifting the interior-support hypothesis
-on `u` is a separate problem — it requires either (a) packaging the
-gradient of a non-interior-supported smooth scalar as a globally smooth
-tangent section, or (b) identifying the chart-by-chart `boundaryFaceSum`
-with an intrinsic surface integral against `outwardNormal` and
-`surfaceMeasure` — and is left to a follow-up file.
-
-## Strategy
-
-Step 1: define the L² class `oneSubLapFullClassicalLp u hu_int` for a
-full smooth scalar `u : FullSmoothScalar g` whose underlying function
-has interior support, as the L² class of the continuous function
-`x ↦ u.toFun x - Δ_g_with_boundary g u.smooth hu_int x`.
-
-Step 2: prove the Green-identity computation
-`fullSmoothScalarH1Inner u v = ∫ v · (u - Δ_g u)` for full smooth `v`
-when `u` has interior support. The key technical fact:
-`green_first_with_boundary` accepts a *full smooth* test scalar and an
-interior-supported gradient section (a hypothesis pattern we use here
-with `f = v` and `h = u.toFun`); together with the vanishing of the
-chart-by-chart `boundaryFaceSum` for an interior-supported gradient
-section (regardless of the multiplier `f`'s support — observed by
-inspection of the proof of `green_first_with_boundary_face_sum_eq_zero_of_interior_support`,
-which uses only the section's interior support), this collapses to the
-classical-Laplacian identity.
-
-Step 3: package the variational identity at smooth lifts and combine
-with density of `smoothToH1ComplFullNeumann` and the defining property
-of `resolventFullNeumann`.
-
-## Main definitions and results
-
-* `oneSubLapFullClassicalLp u hu_int` — the L² class of
-  `u - Δ_g_with_boundary u`, for a full smooth scalar `u` with interior
-  support.
-* `fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support` —
-  the H¹ inner product for `u` (interior support) and `v` (full smooth)
-  expressed as an L² integral against `(u - Δ_g u)`.
-* `smoothToH1ComplFullNeumann_eq_resolventFullNeumann_of_interior_support`
-  — the smooth bridge: `smoothToH1ComplFullNeumann u =
-  resolventFullNeumann g (oneSubLapFullClassicalLp u hu_int)`.
--/
-
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter
@@ -112,7 +31,6 @@ private local instance : BorelSpace (EuclideanSpace ℝ (Fin n)) := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- Local abbreviation for the canonical Euclidean half-space model. -/
 private abbrev I_half (n : ℕ) [NeZero n] :
     ModelWithCorners ℝ (EuclideanSpace ℝ (Fin n)) (EuclideanHalfSpace n) :=
   modelWithCornersEuclideanHalfSpace n
@@ -153,9 +71,6 @@ private theorem boundaryFaceSum_smoothSmul_grad_eq_zero_of_h_interior_support
   rw [h_div_Y_zero] at h_stokes
   exact h_stokes.symm
 
-/-- Continuity on a closed manifold-with-boundary of `u - Δ_g_with_boundary u`
-for a full smooth scalar `u` whose underlying function has interior
-support. -/
 lemma FullSmoothScalar.oneSubLap_continuous_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g)
     (hu_int : tsupport u.toFun ⊆ (I_half n).interior M) :
@@ -164,8 +79,6 @@ lemma FullSmoothScalar.oneSubLap_continuous_of_interior_support
   u.smooth.continuous.sub
     (Δ_g_with_boundary_continuous (I := I_half n) g u.smooth hu_int)
 
-/-- L²-membership of `(u - Δ_g_with_boundary u)` for a full smooth
-scalar `u` with interior support. -/
 lemma FullSmoothScalar.oneSubLap_memLp_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g)
     (hu_int : tsupport u.toFun ⊆ (I_half n).interior M) :
@@ -178,17 +91,12 @@ lemma FullSmoothScalar.oneSubLap_memLp_of_interior_support
   exact (u.oneSubLap_continuous_of_interior_support hu_int).memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-/-- The L² class of `(u - Δ_g_with_boundary u)` for a full smooth scalar
-`u` whose underlying function has interior support. -/
 noncomputable def FullSmoothScalar.oneSubLapFullClassicalLp
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g)
     (hu_int : tsupport u.toFun ⊆ (I_half n).interior M) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I_half n) (M := M) g) :=
   (u.oneSubLap_memLp_of_interior_support hu_int).toLp _
 
-/-- The Green-identity computation for full smooth `v` against an
-interior-supported full smooth `u`:
-`fullSmoothScalarH1Inner u v = ∫ (u - Δ_g_with_boundary u) · v dμ_g`. -/
 theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : FullSmoothScalar g)
@@ -277,7 +185,6 @@ theorem fullSmoothScalarH1Inner_eq_integral_oneSubLap_mul_of_interior_support
   rw [h_grad_eq]
   ring
 
-/-- Reformulation as an L² inner product. -/
 theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLap_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : FullSmoothScalar g)
@@ -315,8 +222,6 @@ theorem fullSmoothScalarH1Inner_eq_lpInner_oneSubLap_of_interior_support
       from RCLike.inner_apply _ _]
   ring
 
-/-- Inner product on `H1ComplFullNeumann g` of two smooth lifts equals
-the smooth H¹ inner product. -/
 @[simp] lemma inner_smoothToH1ComplFullNeumann_smoothToH1ComplFullNeumann
     {g : SmoothRiemannianMetric (I_half n) M} (u v : FullSmoothScalar g) :
     ⟪smoothToH1ComplFullNeumann g u, smoothToH1ComplFullNeumann g v⟫_ℝ =
@@ -328,8 +233,6 @@ the smooth H¹ inner product. -/
   rw [UniformSpace.Completion.inner_coe (𝕜 := ℝ) u v]
   rfl
 
-/-- Variational identity for smooth lifts (with-boundary, full Neumann
-variant), evaluated against a full smooth test function. -/
 @[simp] lemma H1ComplFullNeumannBilin_smoothToH1ComplFullNeumann_smoothToH1ComplFullNeumann
     {g : SmoothRiemannianMetric (I_half n) M} (u v : FullSmoothScalar g) :
     H1ComplFullNeumannBilin g
@@ -339,7 +242,6 @@ variant), evaluated against a full smooth test function. -/
   rw [H1ComplFullNeumannBilin_apply]
   exact inner_smoothToH1ComplFullNeumann_smoothToH1ComplFullNeumann u v
 
-/-- The variational identity at smooth test functions. -/
 theorem fullSmoothScalar_bilin_eq_lpFunctional_smooth_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M}
     (u v : FullSmoothScalar g)
@@ -356,8 +258,6 @@ theorem fullSmoothScalar_bilin_eq_lpFunctional_smooth_of_interior_support
     H1ComplFullNeumannToLp_smoothToH1ComplFullNeumann]
   exact real_inner_comm _ _
 
-/-- The image of the smooth-inclusion is dense in the H¹ Hilbert
-completion. -/
 theorem denseRange_smoothToH1ComplFullNeumann
     (g : SmoothRiemannianMetric (I_half n) M) :
     DenseRange (smoothToH1ComplFullNeumann g) := by
@@ -369,11 +269,6 @@ theorem denseRange_smoothToH1ComplFullNeumann
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-/-- The bilinear form on the smooth lift of an interior-supported
-`u : FullSmoothScalar g` agrees with the L² functional of
-`(u - Δ_g_with_boundary u)`, evaluated on *every* element of the H¹
-completion (not just smooth lifts). The proof extends the smooth-lift
-identity by density. -/
 theorem smoothToH1ComplFullNeumann_bilin_eq_lpFunctional_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M}
     (u : FullSmoothScalar g)
@@ -400,23 +295,6 @@ theorem smoothToH1ComplFullNeumann_bilin_eq_lpFunctional_of_interior_support
     ((denseRange_smoothToH1ComplFullNeumann g).equalizer hL_cont hR_cont
       hLR_smooth) w
 
-/-- **Smooth bridge (full Neumann, interior-supported smooth scalar).**
-For a full smooth scalar `u : FullSmoothScalar g` whose underlying
-function has interior topological support, the H¹-completion lift of
-`u` is the resolvent of `(1 - Δ_g)` applied to the L² class of
-`(u - Δ_g_with_boundary u)`.
-
-The interior-support hypothesis on `u` corresponds, on the
-boundary-touching geometric side, to the case where the Neumann
-boundary value `g(\nabla u, \nu) = 0` holds *automatically* at every
-boundary point — the gradient section vanishes on a neighbourhood of
-the boundary. Lifting this hypothesis to a smooth `u` with non-trivial
-boundary trace whose normal derivative happens to vanish requires
-either packaging the gradient of a non-interior-supported smooth scalar
-as a smooth tangent section, or identifying the chart-by-chart
-`boundaryFaceSum` with an intrinsic surface integral against
-`outwardNormal` and `surfaceMeasure`; both routes are outside the scope
-of the present file. -/
 theorem smoothToH1ComplFullNeumann_eq_resolventFullNeumann_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M}
     (u : FullSmoothScalar g)

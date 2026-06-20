@@ -5,41 +5,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Data.Nat.Choose.Bounds
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 
-/-!
-# Smooth bounded diffeomorphism with per-order derivative bounds and the chart-transition constructor
-
-This file refines `SmoothDiffeoBounded` to a per-order variant
-`SmoothDiffeoBoundedAtOrder`, where derivatives only need to be uniformly
-bounded up to a fixed finite order `kmax`. Such per-order boundedness is
-sufficient to apply the higher-order Sobolev chain rule for `W^{k,p}` with
-`k ≤ kmax`.
-
-This per-order variant is essential for chart-transition modifications:
-smoothly-cutoff-extended chart transitions on a manifold have iterated
-derivatives whose magnitudes grow factorially with the order, so they fail
-the uniform `SmoothDiffeoBounded` requirement at *all* orders. They do,
-however, satisfy the `SmoothDiffeoBoundedAtOrder kmax` requirement for
-each fixed `kmax`.
-
-## Main definitions
-
-* `SmoothDiffeoBoundedAtOrder d Ω Ω' kmax`: a smooth bijection with derivatives
-  uniformly bounded only up to order `kmax`.
-* `SmoothDiffeoBounded.toAtOrder`: every uniform-at-all-orders structure is in
-  particular a per-order one.
-* `SmoothDiffeoBoundedAtOrder.weaken`: the per-order structure is monotone
-  in the order.
-
-## Main results
-
-* `MemWkp.comp_smoothDiffeoBoundedAtOrder`: the chain rule for `W^{k,p}` under
-  a `SmoothDiffeoBoundedAtOrder kmax` structure, for `k ≤ kmax`.
-* `chartTransition_smoothDiffeoBoundedAtOrder`: for two charts `α, β` on a
-  closed manifold and a compact `K ⊆ chart-α-source ∩ chart-β-source`, there
-  is a `SmoothDiffeoBoundedAtOrder kmax` structure realising the chart
-  transition on a neighbourhood of the chart-α image of `K`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold
@@ -50,47 +15,38 @@ namespace Analysis
 namespace Sobolev
 namespace Euclidean
 
-/-- A `C^∞` diffeomorphism between two open subsets of
-`E = EuclideanSpace ℝ (Fin d)`, equipped with uniform bounds on iterated
-derivatives **only up to order `kmax`** (orders `> kmax` may be unbounded).
-
-Compared to `SmoothDiffeoBounded`, the bound `iter_deriv_bounded_at` is
-restricted to orders `i ≤ kmax`. This is enough to apply the chain rule
-for `W^{k,p}` whenever `k ≤ kmax`. -/
 structure SmoothDiffeoBoundedAtOrder
     (d : ℕ) (Ω Ω' : Set (EuclideanSpace ℝ (Fin d))) (kmax : ℕ) where
-  /-- The forward map. -/
+  
   toFun : EuclideanSpace ℝ (Fin d) → EuclideanSpace ℝ (Fin d)
-  /-- The inverse map. -/
+  
   invFun : EuclideanSpace ℝ (Fin d) → EuclideanSpace ℝ (Fin d)
-  /-- Smoothness of the forward map. -/
+  
   toFun_smooth : ContDiff ℝ (⊤ : ℕ∞) toFun
-  /-- Smoothness of the inverse map. -/
+  
   invFun_smooth : ContDiff ℝ (⊤ : ℕ∞) invFun
-  /-- The forward map sends `Ω` bijectively onto `Ω'`. -/
+  
   bijOn : Set.BijOn toFun Ω Ω'
-  /-- The inverse map sends `Ω'` bijectively onto `Ω`. -/
+  
   invFun_bijOn : Set.BijOn invFun Ω' Ω
-  /-- Left inverse on `Ω`. -/
+  
   left_inv : Set.LeftInvOn invFun toFun Ω
-  /-- Right inverse on `Ω'`. -/
+  
   right_inv : Set.RightInvOn invFun toFun Ω'
-  /-- Uniform upper bound for iterated derivatives of orders `≤ kmax`. -/
+  
   deriv_bound : ℝ
-  /-- The bound is strictly positive. -/
+  
   deriv_bound_pos : 0 < deriv_bound
-  /-- Iterated derivatives of `toFun` up to order `kmax` are globally bounded
-  by `deriv_bound`. Higher orders may fail to be uniformly bounded. -/
+  
   iter_deriv_bounded_at : ∀ i ≤ kmax, ∀ x, ‖iteratedFDeriv ℝ i toFun x‖ ≤ deriv_bound
-  /-- Iterated derivatives of `invFun` up to order `kmax` are globally bounded
-  by `deriv_bound`. Higher orders may fail to be uniformly bounded. -/
+  
   iter_deriv_invFun_bounded_at :
     ∀ i ≤ kmax, ∀ x, ‖iteratedFDeriv ℝ i invFun x‖ ≤ deriv_bound
-  /-- Uniform positive lower bound for `|det DΦ|` on `Ω`. -/
+  
   jacobian_lower_bound : ℝ
-  /-- The Jacobian lower bound is strictly positive. -/
+  
   jacobian_lower_bound_pos : 0 < jacobian_lower_bound
-  /-- `|det DΦ(x)| ≥ jacobian_lower_bound` for `x ∈ Ω`. -/
+  
   jacobian_lower : ∀ x ∈ Ω, jacobian_lower_bound ≤ |(fderiv ℝ toFun x).det|
 
 namespace SmoothDiffeoBoundedAtOrder
@@ -98,42 +54,31 @@ namespace SmoothDiffeoBoundedAtOrder
 variable {d : ℕ} {kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
 
-/-- The image of `Ω` under `toFun` is `Ω'`. -/
 lemma image_toFun : Φ.toFun '' Ω = Ω' := Φ.bijOn.image_eq
 
-/-- `toFun` restricted to `Ω` is injective. -/
 lemma injOn_toFun : Set.InjOn Φ.toFun Ω := Φ.bijOn.injOn
 
-/-- For `x ∈ Ω`, `toFun x ∈ Ω'`. -/
 lemma mapsTo_toFun {x : EuclideanSpace ℝ (Fin d)} (hx : x ∈ Ω) :
     Φ.toFun x ∈ Ω' := Φ.bijOn.mapsTo hx
 
-/-- For `y ∈ Ω'`, `invFun y ∈ Ω`. -/
 lemma mapsTo_invFun {y : EuclideanSpace ℝ (Fin d)} (hy : y ∈ Ω') :
     Φ.invFun y ∈ Ω := Φ.invFun_bijOn.mapsTo hy
 
-/-- Continuity of `toFun`. -/
 lemma continuous_toFun : Continuous Φ.toFun := Φ.toFun_smooth.continuous
 
-/-- Continuity of `invFun`. -/
 lemma continuous_invFun : Continuous Φ.invFun := Φ.invFun_smooth.continuous
 
-/-- Differentiability of `toFun`. -/
 lemma differentiable_toFun : Differentiable ℝ Φ.toFun :=
   Φ.toFun_smooth.differentiable (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
 
-/-- Differentiability of `invFun`. -/
 lemma differentiable_invFun : Differentiable ℝ Φ.invFun :=
   Φ.invFun_smooth.differentiable (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0)
 
-/-- The composition `u ∘ Φ.toFun` is `C^∞` whenever `u` is. -/
 lemma comp_toFun_contDiff {u : EuclideanSpace ℝ (Fin d) → ℝ}
     (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
     ContDiff ℝ (⊤ : ℕ∞) (fun x => u (Φ.toFun x)) :=
   hu.comp Φ.toFun_smooth
 
-/-- The geometric constant used in the iterated-derivative bound:
-`max Φ.deriv_bound 1`. This is `≥ 1`, so its powers are increasing. -/
 def derivBoundMaxOne : ℝ := max Φ.deriv_bound 1
 
 lemma derivBoundMaxOne_pos : 0 < Φ.derivBoundMaxOne := by
@@ -147,8 +92,6 @@ lemma derivBoundMaxOne_ge_one : 1 ≤ Φ.derivBoundMaxOne :=
 lemma deriv_bound_le_derivBoundMaxOne : Φ.deriv_bound ≤ Φ.derivBoundMaxOne :=
   le_max_left _ _
 
-/-- The preimage of a set under `Φ.toFun`, intersected with `Ω`,
-is the image of the original set under `invFun`, intersected with `Ω'`. -/
 lemma toFun_preimage_inter_eq_invFun_image
     (s : Set (EuclideanSpace ℝ (Fin d))) :
     Φ.toFun ⁻¹' s ∩ Ω = Φ.invFun '' (s ∩ Ω') := by
@@ -162,8 +105,6 @@ lemma toFun_preimage_inter_eq_invFun_image
     · rw [← hxy, Φ.right_inv hyΩ']; exact hys
     · rw [← hxy]; exact Φ.mapsTo_invFun hyΩ'
 
-/-- A measure-zero subset of `Ω'` has measure-zero preimage (intersected with `Ω`)
-under `Φ.toFun`. -/
 lemma toFun_preimage_null
     {s : Set (EuclideanSpace ℝ (Fin d))} (hs : volume (s ∩ Ω') = 0) :
     volume (Φ.toFun ⁻¹' s ∩ Ω) = 0 := by
@@ -171,8 +112,6 @@ lemma toFun_preimage_null
   exact MeasureTheory.addHaar_image_eq_zero_of_differentiableOn_of_addHaar_eq_zero
     (volume) Φ.differentiable_invFun.differentiableOn hs
 
-/-- `Φ.toFun` is quasi-measure-preserving from `volume.restrict Ω` to
-`volume.restrict Ω'`. -/
 lemma toFun_quasiMeasurePreserving :
     MeasureTheory.Measure.QuasiMeasurePreserving Φ.toFun
       (volume.restrict Ω) (volume.restrict Ω') := by
@@ -188,8 +127,6 @@ lemma toFun_quasiMeasurePreserving :
   rw [h_step1]
   exact Φ.toFun_preimage_null hs_zero
 
-/-- If `Φ` has bounds for derivatives up to order `kmax`, then it also has bounds
-for derivatives up to any smaller order `kmax' ≤ kmax`. -/
 def weaken {kmax' : ℕ} (h : kmax' ≤ kmax) :
     SmoothDiffeoBoundedAtOrder d Ω Ω' kmax' where
   toFun := Φ.toFun
@@ -210,8 +147,6 @@ def weaken {kmax' : ℕ} (h : kmax' ≤ kmax) :
 
 end SmoothDiffeoBoundedAtOrder
 
-/-- A `SmoothDiffeoBounded` (with bounds for **all** orders) is a fortiori a
-`SmoothDiffeoBoundedAtOrder` for any `kmax`. -/
 def SmoothDiffeoBounded.toAtOrder
     {d kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (Φ : SmoothDiffeoBounded d Ω Ω') :
@@ -232,8 +167,6 @@ def SmoothDiffeoBounded.toAtOrder
   jacobian_lower_bound_pos := Φ.jacobian_lower_bound_pos
   jacobian_lower := Φ.jacobian_lower
 
-/-- Change of variables for `lintegral` adapted to a smooth bounded
-diffeomorphism with per-order bounds. -/
 lemma SmoothDiffeoBoundedAtOrder.lintegral_image_eq
     {d kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (hΩ : IsOpen Ω) (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
@@ -254,10 +187,6 @@ lemma SmoothDiffeoBoundedAtOrder.lintegral_image_eq
   rw [hΦ_image] at h_chg
   exact h_chg
 
-/-- The Faà di Bruno-style cruder bound for `SmoothDiffeoBoundedAtOrder`:
-`‖∂^n (u ∘ Φ.toFun)(x)‖ ≤ n! · C · D^n` for `n ≤ kmax`,
-where `C` bounds `‖∂^i u(Φ x)‖` for all `i ≤ n` and
-`D = max Φ.deriv_bound 1`. -/
 lemma SmoothDiffeoBoundedAtOrder.norm_iteratedFDeriv_comp_toFun_le
     {d kmax : ℕ} {Ω Ω' : Set (EuclideanSpace ℝ (Fin d))}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
@@ -299,10 +228,6 @@ lemma SmoothDiffeoBoundedAtOrder.norm_iteratedFDeriv_comp_toFun_le
     (x := x) hu_smooth_top hΦ_smooth_top hn_le
     (C := C) (D := D) (fun i hi => hC i hi) hΦ_iter
 
-/-- Quantitative L^p change-of-variables bound for the per-order structure:
-for `1 ≤ p < ∞`,
-`eLpNorm (f ∘ Φ.toFun) p (vol.restrict Ω) ≤ K_chg · eLpNorm f p (vol.restrict Ω')`,
-where `K_chg = (1 / Φ.jacobian_lower_bound) ^ (1 / p.toReal)`. -/
 theorem SmoothDiffeoBoundedAtOrder.eLpNorm_comp_toFun_le_const
     {d kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -389,8 +314,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-- Pointwise sum form of the iterated chain-rule bound for `ψ ∘ Φ.toFun` at
-order `j ≤ kmax`. -/
 private lemma SmoothDiffeoBoundedAtOrder.norm_iteratedFDeriv_comp_toFun_le_sum
     {kmax : ℕ} {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
@@ -414,8 +337,6 @@ private lemma SmoothDiffeoBoundedAtOrder.norm_iteratedFDeriv_comp_toFun_le_sum
   rw [h_rearrange] at h
   exact h
 
-/-- Pointwise bound of `‖iterClassicalPartial j β (ψ ∘ Φ) x‖` by an explicit
-constant times `Σ_{i ≤ k} ‖iteratedFDeriv ℝ i ψ (Φ x)‖`, valid for `j ≤ k ≤ kmax`. -/
 private lemma SmoothDiffeoBoundedAtOrder.norm_iterClassicalPartial_comp_le_uniform
     {kmax : ℕ} {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
@@ -468,9 +389,6 @@ private lemma SmoothDiffeoBoundedAtOrder.norm_iterClassicalPartial_comp_le_unifo
     exact mul_nonneg h_kf_nn (pow_nonneg hD_nonneg k)
   exact mul_le_mul_of_nonneg_left h_inner_sum_le h_outer_nn
 
-/-- For `ψ` smooth + compactly supported with `tsupport ψ ⊆ Ωtarget`, there
-exists a smooth cutoff `η` with `tsupport η ⊆ Ωsource` such that
-`η · (ψ ∘ Φ.toFun)` agrees with `ψ ∘ Φ.toFun` on all of `Ωsource`. -/
 private lemma SmoothDiffeoBoundedAtOrder.exists_cutoff_for_comp
     {kmax : ℕ} {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ωsource Ωtarget kmax) (hΩ_open : IsOpen Ωsource)
@@ -512,8 +430,6 @@ private lemma SmoothDiffeoBoundedAtOrder.exists_cutoff_for_comp
       image_eq_zero_of_notMem_tsupport h_φx_not_Ktarget
     rw [hψ_zero, mul_zero]
 
-/-- For any open `Ω`, two smooth functions agreeing on `Ω` have the same
-iterated classical partials at every point of `Ω`. -/
 private lemma iterClassicalPartial_eqOn_of_eqOn_local
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {g h : E → ℝ},
@@ -551,8 +467,6 @@ private lemma iterClassicalPartial_eqOn_of_eqOn_local
       exact ih (fun i : Fin j => β i.succ)
         h_inner_g_smooth h_inner_h_smooth h_partial_eqOn hx
 
-/-- The chosen weak partial of a smooth function `ψ ∈ W^{1,p}(Ω)` agrees
-almost everywhere on `Ω` with the classical partial. -/
 private theorem chosenWeakPartial_smooth_ae_local
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -577,7 +491,6 @@ private theorem chosenWeakPartial_smooth_ae_local
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_loc h_classical_loc
 
-/-- For smooth, compactly supported `ψ` with `tsupport ψ ⊆ Ω`, `ψ ∈ MemWkp k p Ω`. -/
 private theorem MemWkp_of_smooth_compactSupport_local'
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -625,8 +538,6 @@ private theorem MemWkp_of_smooth_compactSupport_local'
       have h_ih_classical := ih h_classical_smooth h_classical_cpt h_classical_supp
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
-/-- For smooth, compactly supported `ψ` with `tsupport ψ ⊆ Ω`, the iterated weak
-partial agrees almost everywhere on `Ω` with the iterated classical partial. -/
 private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_loc
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
@@ -665,8 +576,6 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_loc
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
-/-- For ψ smooth + compactly supported with `tsupport ψ ⊆ Ωtarget`, the
-composition `ψ ∘ Φ.toFun` lies in `MemWkp k p Ωsource`. -/
 private theorem SmoothDiffeoBoundedAtOrder.comp_smooth_compactSupport_memWkp
     {kmax : ℕ} {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ωsource Ωtarget kmax) (hΩ_open : IsOpen Ωsource)
@@ -694,9 +603,6 @@ private theorem SmoothDiffeoBoundedAtOrder.comp_smooth_compactSupport_memWkp
     rw [h_eq_on_Ω x hx]
   exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr hg_mem
 
-/-- For smooth `ψ` compactly supported with `tsupport ψ ⊆ Ω'`, the iterated
-weak partial of `ψ ∘ Φ` on `Ω` agrees a.e. with the iterated classical
-partial of `ψ ∘ Φ`. -/
 private theorem SmoothDiffeoBoundedAtOrder.iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     {kmax : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -746,8 +652,6 @@ private theorem SmoothDiffeoBoundedAtOrder.iterWeakPartial_comp_smooth_ae_eq_ite
   intro x hx
   exact h_classical_eqOn hx
 
-/-- `eLpNorm`-bound for the iterated weak partial of the composition
-under `SmoothDiffeoBoundedAtOrder kmax`, valid for `j ≤ k ≤ kmax`. -/
 private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iterWeakPartial_comp_le
     {kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -823,8 +727,6 @@ private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iterWeakPartial_comp_le
   rw [h_pointwise_eq]
   exact eLpNorm_sum_le h_strong_meas hp_one
 
-/-- For smooth `ψ`, the `L^p`-norm over `Ω` of `‖iteratedFDeriv n ψ ∘ Φ‖` is
-bounded by `K_chg` times the `L^p`-norm of `‖iteratedFDeriv n ψ‖` over `Ω'`. -/
 private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iteratedFDeriv_comp_le
     {kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -839,10 +741,6 @@ private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iteratedFDeriv_comp_le
   Φ.eLpNorm_comp_toFun_le_const hp_one hp_top hΩ
     (fun y => ‖iteratedFDeriv ℝ n ψ y‖)
 
-/-- Generalised induction step: `iteratedFDeriv ℝ n` of a CLM-valued function
-`g : E → CLM(F, ℝ)`, evaluated at a tuple of basis vectors of `EuclideanSpace`,
-factors through `iteratedFDeriv ℝ n` of the real-valued function
-`y ↦ g(y)(v)`. -/
 private lemma iteratedFDeriv_clm_apply_basis_local
     {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : E → F →L[ℝ] ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -858,8 +756,6 @@ private lemma iteratedFDeriv_clm_apply_basis_local
     hg (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤))
   exact h.symm
 
-/-- Core identity: for smooth `f`, the iteratedFDeriv evaluated at standard basis
-vectors equals `iterClassicalPartial` along the reversed index. -/
 private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev_local :
     ∀ (n : ℕ) (β : Fin n → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ y : E,
@@ -903,8 +799,6 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev_local :
         rw [Fin.rev_zero]
       rw [h_index_eq, h_first_eq]
 
-/-- For smooth + compactly supported ψ with `tsupport ψ ⊆ Ω'`, the L^p norm
-of `‖iteratedFDeriv ℝ n ψ‖` over `Ω'` is bounded by `wkpNorm k p ψ Ω'`. -/
 private lemma eLpNorm_iteratedFDeriv_le_wkpNorm_local
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -1085,8 +979,6 @@ private lemma eLpNorm_iteratedFDeriv_le_wkpNorm_local
       rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_abs]
   rw [h_norm_eq, eLpNorm_congr_ae h_ae.symm]
 
-/-- The "geometric" constant for the per-order chain rule: combines factorials,
-the derivative bound, the Jacobian lower bound, and a count of multi-indices. -/
 noncomputable def SmoothDiffeoBoundedAtOrder.wkpComp_const'
     {kmax : ℕ} {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax) (k : ℕ) (p : ℝ≥0∞) : ℝ :=
@@ -1131,8 +1023,6 @@ private lemma SmoothDiffeoBoundedAtOrder.wkpComp_const'_pos
   have h_k1_pos : (0 : ℝ) < ((k + 1 : ℕ) : ℝ) := by exact_mod_cast Nat.zero_lt_succ k
   positivity
 
-/-- **Step S1 (per-order)**: `wkpNorm`-bound for smooth compactly-supported
-compositions under `SmoothDiffeoBoundedAtOrder kmax`, valid for `k ≤ kmax`. -/
 theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_smooth_le
     {kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -1277,10 +1167,6 @@ theorem SmoothDiffeoBoundedAtOrder.wkpNorm_comp_smooth_le
   calc A * W = A * 1 * W := by ring
     _ ≤ A * ((k + 1 : ℕ) : ℝ≥0∞) * W := by gcongr
 
-/-- **Headline (per-order)**: For a smooth bounded diffeomorphism `Φ : Ω → Ω'`
-with derivatives bounded only up to order `kmax`, and a function `u ∈ W^{k,p}(Ω')`
-with compact support `tsupport u ⊆ Ω'`, where `k ≤ kmax`, the composition
-`u ∘ Φ` lies in `W^{k,p}(Ω)`. -/
 theorem MemWkp.comp_smoothDiffeoBoundedAtOrder
     {kmax : ℕ} (k : ℕ) (hk : k ≤ kmax)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -1602,7 +1488,6 @@ theorem MemWkp.comp_smoothDiffeoBoundedAtOrder
     linarith
   exact (MemWkp_congr_ae (d := d) hp_one hΩ h_v_eq_uΦ).mp hv_mem
 
-/-- Constructor for `SmoothDiffeoBoundedAtOrder` from concrete smooth data. -/
 def SmoothDiffeoBoundedAtOrder.mk_from_concrete
     {kmax : ℕ} {Ω Ω' : Set E}
     (toFun invFun : E → E)
@@ -1636,9 +1521,6 @@ def SmoothDiffeoBoundedAtOrder.mk_from_concrete
   jacobian_lower_bound_pos := jacobian_lower_bound_pos
   jacobian_lower := jacobian_lower
 
-/-- For a smooth + compactly supported function `f` and a fixed natural number
-`kmax`, the iterated derivatives of `f` up to order `kmax` are uniformly bounded
-on all of `E`. -/
 theorem exists_iter_deriv_bound_of_smooth_compactSupport_atOrder
     {f : E → E} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
     (hf_cpt : HasCompactSupport f) (kmax : ℕ) :
@@ -1692,12 +1574,6 @@ theorem exists_iter_deriv_bound_of_smooth_compactSupport_atOrder
     have h2 : M_seq i ≤ Mf - 1 := hMf_ge i hi
     linarith
 
-/-- Constructor for `SmoothDiffeoBoundedAtOrder` from globally smooth
-data with explicit per-order bounds. This is the canonical entry point
-for cutoff-modified chart-transition maps: the cutoff modification yields
-a globally smooth function whose iterated derivatives at orders ≤ kmax are
-all uniformly bounded (since each iteratedFDeriv is continuous and has
-compact support / equals a constant outside compact set). -/
 theorem mk_smoothDiffeoBoundedAtOrder_of_per_order_bounds
     {kmax : ℕ} {Ω Ω' : Set E}
     {T Tinv : E → E}
@@ -1718,9 +1594,6 @@ theorem mk_smoothDiffeoBoundedAtOrder_of_per_order_bounds
     deriv_bound hbound_pos hT_iter_bound hTinv_iter_bound
     jacobian_lower_bound hj_pos hj_lower⟩
 
-/-- For a smooth function `T : E → E` that equals a constant `y₀` outside a
-compact set (so `T - const_y₀` has compact support), the iterated derivatives
-at orders ≤ kmax are uniformly bounded. -/
 theorem iter_deriv_bound_of_eq_const_offCompactSupport_atOrder
     {T : E → E} (hT_smooth : ContDiff ℝ (⊤ : ℕ∞) T)
     {y₀ : E} (hT_diff_cpt : HasCompactSupport (fun y => T y - y₀))
