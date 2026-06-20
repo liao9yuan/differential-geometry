@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegInte
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
 
 noncomputable section
 
@@ -59,6 +60,8 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -95,6 +98,8 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJet
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -111,7 +116,7 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJet
           =ᵐ[timeMeasure T] g i) := by
   obtain ⟨φ, hφ_ctrl, hφ_ball, hφ_ae⟩ :=
     deTurckForcing_solCoeff_jetSpectralMass (I := I) (M := M)
-      g₀ g_bg a ha_super ha_even hT hT1 gforce hforce
+      g₀ g_bg a ha_super ha_even hT hT1 hTT₀ gforce hforce
   obtain ⟨ψ, hψ_ctrl, hψ_ae⟩ :=
     deTurckSobolevNHa2_jetSpectralMass_preserving (I := I) (M := M)
       g₀ g_bg a ha_super ha_even hT
@@ -131,6 +136,8 @@ theorem deTurckForcing_smoothCoordinate_aeTimeJet
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -146,7 +153,7 @@ theorem deTurckForcing_smoothCoordinate_aeTimeJet
       (∀ i, (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T] f i) := by
   obtain ⟨g, hg_smooth, hg_mass, hg_ae⟩ :=
     deTurckForcing_timeModeCoeff_smooth_allOrderJet (I := I) (M := M)
-      g₀ g_bg a ha_super ha_even hT hT1 gforce hforce
+      g₀ g_bg a ha_super ha_even hT hT1 hTT₀ gforce hforce
   refine ⟨g, hg_smooth, hg_mass, fun i => ?_⟩
   exact (timeModeCoeff_coeFn (I := I) (M := M) gforce i).symm.trans (hg_ae i)
 

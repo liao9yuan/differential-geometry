@@ -39,6 +39,8 @@ theorem deTurckForcing_smoothTimeCoordinateField
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -57,7 +59,7 @@ theorem deTurckForcing_smoothTimeCoordinateField
   classical
   obtain ⟨f, hf_smooth, hf_mass, hf_ae⟩ :=
     deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
-      gforce hforce
+      hTT₀ gforce hforce
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
   obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 (a : ℝ) (Nat.cast_nonneg a)
@@ -96,6 +98,8 @@ theorem deTurckForcing_forcingMass_partialSum_contraction
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -116,9 +120,9 @@ theorem deTurckForcing_forcingMass_partialSum_contraction
   
   obtain ⟨f, hf_smooth, hf_mass, hf_ae⟩ :=
     deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
-      gforce hforce
-  
-  
+      hTT₀ gforce hforce
+
+
   obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 (d + 2) hd2_nonneg
   
   
@@ -192,6 +196,8 @@ theorem deTurckForcing_forcingMass_summable_succ
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -203,7 +209,7 @@ theorem deTurckForcing_forcingMass_summable_succ
   classical
   obtain ⟨θ, hθ_nn, hθ_lt, Kd, hKd_nn, hcontract⟩ :=
     deTurckForcing_forcingMass_partialSum_contraction (I := I) (M := M) g₀ g_bg a ha_super ha_even
-      hT hT1 gforce hforce d hda hd
+      hT hT1 hTT₀ gforce hforce d hda hd
   have hone_sub_θ_pos : 0 < 1 - θ := by linarith
   refine summable_of_sum_le (c := Kd / (1 - θ))
     (fun i => forcingMass_nonneg (I := I) (M := M) gforce (d + 2) i) (fun s => ?_)
@@ -215,6 +221,8 @@ theorem deTurckForcing_allOrderForcingMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -239,7 +247,7 @@ theorem deTurckForcing_allOrderForcingMass
         have : (0 : ℝ) ≤ 2 * (k : ℝ) := by positivity
         linarith
       have hadv := deTurckForcing_forcingMass_summable_succ (I := I) (M := M) g₀ g_bg a
-        ha_super ha_even hT hT1 gforce hforce ((a : ℝ) + 2 * (k : ℝ)) hda ih
+        ha_super ha_even hT hT1 hTT₀ gforce hforce ((a : ℝ) + 2 * (k : ℝ)) hda ih
       have hrw : (a : ℝ) + 2 * (k : ℝ) + 2 = (a : ℝ) + 2 * ((k : ℕ) + 1 : ℕ) := by
         push_cast; ring
       rwa [hrw] at hadv
@@ -265,6 +273,8 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -284,7 +294,7 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) := by
   obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coeff⟩ :=
     deTurckForcing_smoothTimeCoordinateField (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
-      gforce hforce
+      hTT₀ gforce hforce
   have hF_coord_cont : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
       ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T) := by
     intro i
@@ -294,7 +304,7 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
       exact hF_coeff t ht i
   refine ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, ?_, hF_coeff⟩
   exact deTurckForcing_allOrderForcingMass (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
-    gforce hforce
+    hTT₀ gforce hforce
 
 end IntrinsicSpectral
 end RicciFlow
