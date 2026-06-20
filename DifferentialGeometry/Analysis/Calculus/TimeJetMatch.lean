@@ -41,6 +41,18 @@ theorem iteratedDerivWithin_clm_comp {A B : Type*}
     show (fun t => L (f t)) = ⇑L ∘ f from rfl, L.iteratedFDerivWithin_comp_left hf hs hx le_rfl]
   rfl
 
+/-- `iteratedDerivWithin` of a pair-valued curve is the pair of the component derivatives. -/
+theorem iteratedDerivWithin_prodMk {A B : Type*}
+    [NormedAddCommGroup A] [NormedSpace ℝ A] [NormedAddCommGroup B] [NormedSpace ℝ B]
+    {f : ℝ → A} {g : ℝ → B} {s : Set ℝ} {x : ℝ} {n : ℕ}
+    (hf : ContDiffWithinAt ℝ n f s x) (hg : ContDiffWithinAt ℝ n g s x)
+    (hs : UniqueDiffOn ℝ s) (hx : x ∈ s) :
+    iteratedDerivWithin n (fun t => (f t, g t)) s x
+      = (iteratedDerivWithin n f s x, iteratedDerivWithin n g s x) :=
+  Prod.ext
+    (iteratedDerivWithin_clm_comp (ContinuousLinearMap.fst ℝ A B) (hf.prodMk hg) hs hx).symm
+    (iteratedDerivWithin_clm_comp (ContinuousLinearMap.snd ℝ A B) (hf.prodMk hg) hs hx).symm
+
 variable {J F' : Type*}
     [NormedAddCommGroup J] [NormedSpace ℝ J] [NormedAddCommGroup F'] [NormedSpace ℝ F']
 

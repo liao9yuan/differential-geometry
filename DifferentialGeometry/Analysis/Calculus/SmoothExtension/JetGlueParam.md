@@ -170,6 +170,23 @@ These are the two real frontiers; both live in **other lanes**. This file builds
     CLM-commute `iteratedDerivWithin_clm_comp` (`iteratedDerivWithin n (L∘f) = L (iteratedDerivWithin
     n f)`, via `ContinuousLinearMap.iteratedFDerivWithin_comp_left`). `jetMatch_of_evolution` is now
     pure WIRING of these.
+  - [x] **`jetMatch_of_evolution` PROVEN** (`Analysis/Calculus/TimeJetEvolution.lean`, sorry-free,
+    2056 jobs) — corollary (a)'s main induction: `GL,GR` with the same evolution `∂ₜG = Φ(jet2 G)`
+    (smooth Φ) + equal boundary ⇒ equal one-sided time jets `∂ₜⁿG(0,·)` at the seam. Strong induction
+    (`Nat.strong_induction_on`) + `iteratedDerivWithin_succ'` + evolution-`iteratedDerivWithin_congr`
+    + the core `iteratedDerivWithin_comp_jet_eq`. The curve-jet match is factored as the explicit
+    hypothesis `hcurveJet`.
+  - [x] **Discharge `hcurveJet`** (`curveJet_match`, TimeJetEvolution.lean) — **DONE, sorry-free**
+    (2026-06-20). `simp only [jet2]` then nested `iteratedDerivWithin_prodMk` (pair decomposition via
+    single `fst`/`snd` CLMs — NOT `.comp`, which left a metavar) to split the 2-jet triple; component
+    `C∞` via `ContDiffWithinAt.fst/.snd` on `hcurveL`. value slot = `hval`; fderiv slot =
+    `← fderiv_iteratedDerivWithin_time_comm` ×2 + `heqf.fderiv_eq` (value-jet fns `=ᶠ[𝓝 w]` on open
+    `V`); fderiv² slot = outer commute via NEW `spatialFDeriv_contDiffOn` (spatial `fderiv` of a
+    jointly-`C∞` family is jointly `C∞`: `(fderivWithin (uncurry G) S ·).comp inr` + `((compL).flip
+    inr)` postcomp) + inner commute under the `𝓝 w` binder (`filter_upwards`, each `y∈V`) +
+    `eventuallyEq_of_mem`.fderiv_eq. The `G := fun t y => fderiv ℝ (GL t) y` beta-redex matched under
+    `rw` without massaging. `jetMatch_of_evolution` now folds this inline — NO abstract `hcurveJet`
+    hyp; takes hGL/hGR/haccL/haccR/hV. **Corollary (a) FULLY PROVEN, self-contained.**
   - [ ] **Corollary (a) (jet match) — EXECUTABLE DESIGN** (all analysis bricks above are verified).
     Abstract `Hₙ` lemma `jetMatch_of_evolution` (component-scalar level; `F'` = ℝ or matrix entry):
     HYPS — `GL : ℝ→E→F'` `C∞` on `sₜL ×ˢ V`, `GR` on `sₜR ×ˢ V` (`sₜL=Iic 0`, `sₜR=Ici 0`, `V` open,

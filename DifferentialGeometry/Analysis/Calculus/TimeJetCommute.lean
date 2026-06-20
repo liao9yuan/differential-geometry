@@ -231,6 +231,32 @@ theorem fderiv_iteratedDerivWithin_time_comm {G : ℝ → E → F} {sₜ : Set �
     refine iteratedDerivWithin_congr (fun t ht => ?_) ht₀
     exact fderiv_derivWithin_time_comm hsₜ hsacc hV ht hx hG
 
+/-- The spatial Fréchet derivative of a jointly-`C∞` family is again jointly `C∞`: if `uncurry G` is
+`C∞` on `sₜ ×ˢ V` (`V` open), then `(t, y) ↦ fderiv ℝ (G t) y` is `C∞` on `sₜ ×ˢ V`. Lets the
+time/space commute be iterated to second spatial order (the `fderiv²` slot of the 2-jet match). The
+spatial partial is read off as `(fderivWithin (uncurry G) S ·).comp inr`, a `C∞` post-composition of
+the (jointly-`C∞`) full within-derivative. -/
+theorem spatialFDeriv_contDiffOn {G : ℝ → E → F} {sₜ : Set ℝ} {V : Set E}
+    (hsₜ : UniqueDiffOn ℝ sₜ) (hV : IsOpen V)
+    (hG : ContDiffOn ℝ ∞ (Function.uncurry G) (sₜ ×ˢ V)) :
+    ContDiffOn ℝ ∞ (Function.uncurry (fun t y => fderiv ℝ (G t) y)) (sₜ ×ˢ V) := by
+  set S : Set (ℝ × E) := sₜ ×ˢ V with hSdef
+  have hUD : UniqueDiffOn ℝ S := UniqueDiffOn.prod hsₜ hV.uniqueDiffOn
+  have hHcdOn1 : ContDiffOn ℝ ∞ (fderivWithin ℝ (Function.uncurry G) S) S :=
+    hG.fderivWithin hUD (by simp)
+  have heq : Set.EqOn (Function.uncurry (fun t y => fderiv ℝ (G t) y))
+      (fun p : ℝ × E => (fderivWithin ℝ (Function.uncurry G) S p).comp
+        (ContinuousLinearMap.inr ℝ ℝ E)) S := by
+    rintro ⟨t, y⟩ ⟨ht, hy⟩
+    have hmaps : Set.MapsTo (fun y' : E => ((t, y') : ℝ × E)) V S := fun y' hy' => ⟨ht, hy'⟩
+    have hpair : HasFDerivWithinAt (fun y' : E => ((t, y') : ℝ × E))
+        (ContinuousLinearMap.inr ℝ ℝ E) V y :=
+      ((hasFDerivAt_const (t : ℝ) y).prodMk (hasFDerivAt_id y)).hasFDerivWithinAt
+    exact (((hG.differentiableOn (by simp) (t, y) ⟨ht, hy⟩).hasFDerivWithinAt.comp y hpair
+      hmaps).hasFDerivAt (hV.mem_nhds hy)).fderiv
+  exact (((ContinuousLinearMap.compL ℝ E (ℝ × E) F).flip
+    (ContinuousLinearMap.inr ℝ ℝ E)).contDiff.comp_contDiffOn hHcdOn1).congr heq
+
 end Analysis
 end DifferentialGeometry
 
