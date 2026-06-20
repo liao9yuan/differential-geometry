@@ -121,6 +121,72 @@ private theorem appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
+/-- The unit read-off `unitModel` is `ℝ`-homogeneous in the `(0, s)`-tensor argument:
+`unitModel (c • S) = c • unitModel S`.  Re-derived locally (the `RicciDeTurckRicciArm` version is
+`private`). -/
+private lemma unitModel_smul_local (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (c : ℝ) (W : SmoothCcTensor g 0 s) (x : M) :
+    unitModel (I := I) (M := M) g s (c • W) x =
+      c • unitModel (I := I) (M := M) g s W x := by
+  rw [unitModel, unitModel]
+  have hsec : (c • W).toSection x = c • W.toSection x := by
+    rw [SmoothCcTensor.toSection_smul]; rfl
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from (c • W).toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+      c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x) from by
+    rw [hsec]; rfl]
+  rw [Tensor0SSpace.toModel_smul]
+
+/-- The operator-field action `appCc` is `ℝ`-homogeneous in the operator-field (coefficient) factor:
+`appCc (c • Φ) W = c • appCc Φ W`.  Re-derived locally (the `RicciDeTurckRicciArm` version is
+`private`). -/
+private theorem appCc_smul_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s (c • Φ) W =
+      c • appCc (I := I) (M := M) g r s Φ W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((c • appCc (I := I) (M := M) g r s Φ W).toSection x) =
+      c • (appCc (I := I) (M := M) g r s Φ W).toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [appCc_toSection, appCc_toSection]
+  rw [show ((c • Φ).toSection x : TensorRSSpace r s I x) = c • Φ.toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [ContinuousLinearMap.smul_comp]
+
+set_option linter.unusedSectionVars false in
+/-- Joint `(s, x)`-smoothness of the constant `ℝ`-scaling of a jointly-smooth `(r, s)`-operator family.
+A local copy of the `RicciDeTurckRicciArm` private combinator `jointRSsmul`, needed here to scale the
+unscaled bare three-slot coefficient families by `(-2)`. -/
+private theorem jointRSsmul_local {r s : ℕ} {S : Set ℝ} (a : ℝ)
+    (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p)) ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (a • A p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hA p₀ hp₀)
+  refine ((contMDiffWithinAt_const (c := a)).smul hA'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by rw [he]; exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hx
+    exact (e.linear ℝ hx).map_smul a (A p)
+  · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
+      a (A p₀)
+
 /-- **The per-arm `unitModel`/`appCc` read-off is continuous in `s` whenever the model-fibre value of
 the coefficient family is.**  Re-derived locally (the `RicciDeTurckRicciArm` version is `private`):
 the scalar read-off `s ↦ unitModel g₀ 2 (appCc g₀ r 2 (Ψ s) W) x v` factors through the fixed
@@ -265,6 +331,88 @@ private theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
   rw [hfun]
   exact hsum.deriv
 
+/-- **(Posited single irreducible bare-Ricci chart→covariant transfer — the per-`s` three-slot
+`appCc` read-off of the UNSCALED bare chart-Ricci symbol.)**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s`, there are order-graded coefficient families
+```
+Q₀fib : ℝ → SmoothCcTensor g₀ 2 2,  Q₁fib : ℝ → SmoothCcTensor g₀ 3 2,  Q₂fib : ℝ → SmoothCcTensor g₀ 4 2,
+```
+such that, at every interior parameter `s ∈ (0,1)` and every realized chart velocity `h`
+(`IsRealizedChartVelocity`), the UNSCALED bare chart-Ricci-symbol read-off
+`∑ᵢₖ repr·repr·(chartRicciSecondOrderPart g_s h + ricciDerivFirstOrderRemainder g_s h)` is the three-slot
+`unitModel`/`appCc` read-off of `(Q₀fib s, Q₁fib s, Q₂fib s)` on the iterated covariant gradients
+`Wₘ = iteratedCovGrad g₀ 0 2 m (T − T')`; the per-slot read-offs are jointly `(s, x)`-smooth on the slab
+`univ ×ˢ realizedSmallSet` and continuous in `s` on `realizedSmallSet`.
+
+This is the **single irreducible covariant content** of the bare-Ricci chart → intrinsic transfer, the
+bare-Ricci mirror of the combined `rebased_chartSymbol_eq_appCc_pointwise` (`RicciDeTurckRicciArm`).
+Its genuine differential-geometric core is the bare three-slot covariant Lichnerowicz bridge: the bare
+chart Ricci principal symbol `ricciSymbolComp_eq_closedForm` splits into the order-`2` rough Laplacian
+`−½|ξ|² h` (slot `Q₂`), the **two order-`1` divergence terms** `½ξᵢ(ξh)ₖ + ½ξₖ(ξh)ᵢ` (slot `Q₁`, the
+gauge terms that the combined chart symbol cancels but the bare symbol keeps), and the order-`0`
+trace term `−½ξᵢξₖ tr h` plus the curvature remainder (slot `Q₀`), each transferred from the chart
+trace to the intrinsic `∇₀`-covariant `appCc` form.  Unlike the combined arm, the bare symbol has NO
+gauge cancellation, so the order-`1` slot `Q₁` is GENUINELY NONZERO and there is no on-disk order-`1`
+covariant read-off bridge (`chartCovariantFirstGrad_partialDeriv_form`) to reuse; this bare three-slot
+transfer is therefore irreducible here and posited as the lone sorry-child, to be recursed into
+downstream via the bare order-`1` covariant divergence read-off.  The `(-2)`-scaling that the
+consumer `exists_negTwoRicciArm_chartSymbolSum_appCc_families` needs is NOT part of this transfer: it is
+discharged separately by the consumer pushing the scalar `(-2)` through the `appCc`/`unitModel`
+multilinear read-off.  The predicate genuinely constrains the families to reproduce the bare
+chart-Ricci-symbol value, so it is non-vacuous: the zero families fail it on any background where the
+bare chart Ricci symbol is nonzero. -/
+private theorem bareChartRicci_threeSlot_appCc_covariantTransfer
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (Q₀fib : ℝ → SmoothCcTensor g₀ 2 2) (Q₁fib : ℝ → SmoothCcTensor g₀ 3 2)
+      (Q₂fib : ℝ → SmoothCcTensor g₀ 4 2),
+      (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (v : Fin 2 → TangentSpace I x)
+          (h : DifferentialGeometry.PDE.DeTurck.RicciLinearization.ChartMetricPerturbation E),
+          IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h →
+          (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+                (DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciSecondOrderPart
+                    (I := I) (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+                      (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                  DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.ricciDerivFirstOrderRemainder
+                    (I := I) (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+                      (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x))) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 (Q₀fib s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Q₁fib s)
+                    (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2 (Q₂fib s)
+                    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1 ((Q₀fib p.2).toSection p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1 ((Q₁fib p.2).toSection p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1 ((Q₂fib p.2).toSection p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+      (∀ x : M, ContinuousOn
+        (fun t : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((Q₀fib t).toSection x))
+        (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+      (∀ x : M, ContinuousOn
+        (fun t : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((Q₁fib t).toSection x))
+        (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+      (∀ x : M, ContinuousOn
+        (fun t : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((Q₂fib t).toSection x))
+        (realizedSmallSet (δ := δ) (δ' := δ'))) :=
+  sorry
+
 /-- **(Posited deep bare-Ricci input — the per-`s` three-slot Lichnerowicz `appCc` read-off of the bare
 chart-Ricci symbol, with order-graded `(-2)`-scaled coefficient families and their path-integration
 controls.)**
@@ -282,21 +430,19 @@ gradients `Wₘ = iteratedCovGrad g₀ 0 2 m (T − T')`; the per-slot read-offs
 on the slab `univ ×ˢ realizedSmallSet` (the `hjoint*` controls, consumed by `exists_pathIntegralCoeffField`)
 and continuous in `s` on `realizedSmallSet` (the `hcont*` slices).
 
-This is the **bare-Ricci** mirror of the combined `rebased_chartSymbol_eq_appCc_pointwise`
-(`RicciDeTurckRicciArm`) packaged together with its coefficient families and the joint
-`(s, x)`-smoothness keystones (`ricciArmOrder0Coeff_realizedFam_jointContMDiff` etc.).  The genuine
-differential-geometric content is the three-slot covariant Lichnerowicz bridge: the bare chart Ricci
-principal symbol `ricciSymbolComp_eq_closedForm` splits into the order-`2` rough Laplacian
-`−½|ξ|² h` (slot `P₂`), the **two order-`1` divergence terms** `½ξᵢ(ξh)ₖ + ½ξₖ(ξh)ᵢ` (slot `P₁`, the
-gauge terms that the combined chart symbol cancels but the bare symbol keeps), and the order-`0`
-trace term `−½ξᵢξₖ tr h` plus the curvature remainder (slot `P₀`), each transferred from the chart
-trace to the intrinsic `∇₀`-covariant `appCc` form.  The bare order-`1` coefficient family and its
-joint `(s, x)`-smoothness — the genuinely new pieces over the combined arm — are part of this posited
-input.  It is *posited* here and recursed into downstream; the re-basing half
-`deriv_realizedRicciChartSum_eq_rebased_chartSymbol` above (which it composes with) is already proved
-sorry-free.  The predicate genuinely constrains the families to reproduce the bare chart-Ricci-symbol
-value, so it is non-vacuous: the zero families fail it on any background where the bare chart Ricci
-symbol is nonzero. -/
+This `(-2)`-scaled packaging is now assembled on disk from the single irreducible chart→covariant
+transfer `bareChartRicci_threeSlot_appCc_covariantTransfer` (the UNSCALED three-slot read-off plus the
+joint smoothness/continuity of its coefficient families): the `(-2)`-scaling is pushed through the
+`appCc`/`unitModel` multilinear read-off (`appCc_smul_local`/`unitModel_smul_local`), and the joint
+smoothness/continuity of the `(-2)`-scaled families follow from the unscaled controls by the
+`(-2)`-`smul` smoothness combinator (`jointRSsmul_local`) and the model-fibre `smul` continuity.  The
+genuine differential-geometric content remains the bare three-slot covariant Lichnerowicz bridge —
+the order-`2` rough Laplacian (slot `P₂`), the **two order-`1` divergence terms** `½ξᵢ(ξh)ₖ + ½ξₖ(ξh)ᵢ`
+(slot `P₁`, the gauge terms that the combined chart symbol cancels but the bare symbol keeps), and the
+order-`0` trace plus curvature remainder (slot `P₀`) — which is the lone sorry-child
+`bareChartRicci_threeSlot_appCc_covariantTransfer`.  The predicate genuinely constrains the families to
+reproduce the bare chart-Ricci-symbol value, so it is non-vacuous: the zero families fail it on any
+background where the bare chart Ricci symbol is nonzero. -/
 private theorem exists_negTwoRicciArm_chartSymbolSum_appCc_families
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -345,8 +491,71 @@ private theorem exists_negTwoRicciArm_chartSymbolSum_appCc_families
         (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
       (∀ x : M, ContinuousOn
         (fun t : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((P₂fib t).toSection x))
-        (realizedSmallSet (δ := δ) (δ' := δ'))) :=
-  sorry
+        (realizedSmallSet (δ := δ) (δ' := δ'))) := by
+  classical
+  -- The single irreducible UNSCALED bare three-slot chart→covariant transfer: its coefficient families
+  -- `Q₀/Q₁/Q₂` together with the unscaled per-`s` value identity and their joint smoothness/continuity.
+  obtain ⟨Q₀fib, Q₁fib, Q₂fib, hQval, hQj₀, hQj₁, hQj₂, hQc₀, hQc₁, hQc₂⟩ :=
+    bareChartRicci_threeSlot_appCc_covariantTransfer (I := I) (M := M) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  -- The `(-2)`-scaled families are the constant-`smul` of the unscaled ones.
+  refine ⟨fun s => (-2 : ℝ) • Q₀fib s, fun s => (-2 : ℝ) • Q₁fib s, fun s => (-2 : ℝ) • Q₂fib s,
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · -- Value identity: push the scalar `(-2)` through the `appCc`/`unitModel` multilinear read-off and
+    -- apply the unscaled transfer identity `hQval`.
+    intro s hs x v h hvel
+    rw [show ((-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            (DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciSecondOrderPart
+                (I := I) (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+                  (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+              DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.ricciDerivFirstOrderRemainder
+                (I := I) (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+                  (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x))) =
+        (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 (Q₀fib s)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 3 2 (Q₁fib s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+              + appCc (I := I) (M := M) g₀ 4 2 (Q₂fib s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v from by
+      rw [hQval s hs x v h hvel]]
+    -- LHS: `-2 * unitModel(appCc Q₀ W₀ + appCc Q₁ W₁ + appCc Q₂ W₂) x v` → `-2 * (u₀ + u₁ + u₂)`.
+    rw [unitModel_add_local, unitModel_add_local, ContinuousMultilinearMap.add_apply,
+      ContinuousMultilinearMap.add_apply]
+    -- RHS: replace each `appCc ((-2)•Qₖ) Wₖ` by `(-2)•(appCc Qₖ Wₖ)`, then distribute `unitModel`.
+    rw [show (fun (s : ℝ) => (-2 : ℝ) • Q₀fib s) s = (-2 : ℝ) • Q₀fib s from rfl,
+      show (fun (s : ℝ) => (-2 : ℝ) • Q₁fib s) s = (-2 : ℝ) • Q₁fib s from rfl,
+      show (fun (s : ℝ) => (-2 : ℝ) • Q₂fib s) s = (-2 : ℝ) • Q₂fib s from rfl,
+      appCc_smul_local, appCc_smul_local, appCc_smul_local,
+      unitModel_add_local, unitModel_add_local, ContinuousMultilinearMap.add_apply,
+      ContinuousMultilinearMap.add_apply,
+      unitModel_smul_local, unitModel_smul_local, unitModel_smul_local]
+    simp only [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    ring
+  · -- Joint smoothness of `(-2)•Q₀`.
+    exact jointRSsmul_local (r := 2) (s := 2) (-2 : ℝ)
+      (fun p : M × ℝ => (Q₀fib p.2).toSection p.1) hQj₀
+  · -- Joint smoothness of `(-2)•Q₁`.
+    exact jointRSsmul_local (r := 3) (s := 2) (-2 : ℝ)
+      (fun p : M × ℝ => (Q₁fib p.2).toSection p.1) hQj₁
+  · -- Joint smoothness of `(-2)•Q₂`.
+    exact jointRSsmul_local (r := 4) (s := 2) (-2 : ℝ)
+      (fun p : M × ℝ => (Q₂fib p.2).toSection p.1) hQj₂
+  · -- Continuity of `(-2)•Q₀`: a constant `smul` of the unscaled continuity slice.
+    intro x
+    refine ((hQc₀ x).const_smul (-2 : ℝ)).congr (fun t _ => ?_)
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+      Tensor0SBundle.TensorRSSpace.toModel_smul]
+  · -- Continuity of `(-2)•Q₁`.
+    intro x
+    refine ((hQc₁ x).const_smul (-2 : ℝ)).congr (fun t _ => ?_)
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+      Tensor0SBundle.TensorRSSpace.toModel_smul]
+  · -- Continuity of `(-2)•Q₂`.
+    intro x
+    refine ((hQc₂ x).const_smul (-2 : ℝ)).congr (fun t _ => ?_)
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+      Tensor0SBundle.TensorRSSpace.toModel_smul]
 
 private theorem integratedLinearizedRicci_negTwo_chartSum_appCc_eq
     (g₀ : SmoothRiemannianMetric I M)
