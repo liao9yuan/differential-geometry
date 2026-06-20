@@ -1,0 +1,106 @@
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
+
+set_option autoImplicit false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+
+/-!
+# P4 assembly: the smooth-flow-limit upgrade from structured frontier inputs
+
+The MSM135 Theorem 3.10 backend (`SmoothFlowLimitInput.upgrade`) assembled from
+the genuine frontier ingredients, given the time-zero Cheeger--Gromov
+compactness conclusion `mc : MetricCompactnessConclusion (X.atZero)`:
+
+* `L` — the limit Ricci flow (Brick A: limit-is-a-solution);
+* `maps` — the spacetime comparison maps (Brick B, from `mc.maps`);
+* `scalar` — scalar-curvature pullback convergence (Brick E);
+* `conv` — the window-uniform `C^p` convergence of the pulled-back metrics
+  (Brick D: the norm bridge, consuming the moving-Shi bound `hShi`).
+
+These are bundled in `FlowLimitData`; `flowLimit_upgrade` assembles them through
+the already-built `SmoothCGHConverges.ofRestrictPullback`, and
+`smoothFlowLimitInput_of_flowLimitData` produces the theorem-facing
+`SmoothFlowLimitInput`.  The hard frontiers (A, D, E) remain honest input fields
+here (the `hShi`/Theorem-3.9 scope); discharging them is the per-brick work.
+-/
+
+noncomputable section
+
+universe u uE uH
+
+namespace DifferentialGeometry
+namespace HCGCompactness
+
+open scoped Manifold ContDiff
+
+variable {E : Type uE} [NormedAddCommGroup E]
+variable [InnerProductSpace Real E] [Module.Finite Real E] [FiniteDimensional Real E]
+variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable [I.Boundaryless]
+
+/-- The structured frontier ingredients of the smooth-flow-limit upgrade, given
+the time-zero metric Cheeger--Gromov compactness conclusion `mc`.  Each field is
+one P4 brick; the hard frontiers (the limit flow `L`, the window convergence
+`conv`, the scalar convergence `scalar`) are honest inputs here. -/
+structure FlowLimitData
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))) where
+  /-- Brick A: the limit Ricci flow on the time-zero limit manifold. -/
+  L : PointedFlowData.{u, uE, uH} (I := I) X.D
+  /-- Brick B: the spacetime comparison maps. -/
+  maps : PointedCGHMaps (I := I) X L mc.subseq
+  /-- Brick E: scalar-curvature pullback convergence. -/
+  scalar : ScalarPullbackTendsto (I := I) maps
+  /-- Source/target σ-compactness (Brick C inputs). -/
+  hσsrc : forall k : Nat,
+    letI : TopologicalSpace L.M := L.topology
+    IsSigmaCompact (maps.source k)
+  hσtgt : forall k : Nat,
+    letI : TopologicalSpace (X.term (mc.subseq k)).M :=
+      (X.term (mc.subseq k)).topology
+    IsSigmaCompact (maps.target k)
+  /-- The per-`k` reference metric on the source domain (Brick C input). -/
+  refMetric : forall k : Nat,
+    letI : TopologicalSpace (SourceDomain (I := I) maps k) := sourceDomTop (I := I) maps k
+    letI : ChartedSpace H (SourceDomain (I := I) maps k) := sourceDomCharted (I := I) maps k
+    letI : IsManifold I ∞ (SourceDomain (I := I) maps k) := sourceDomSmooth (I := I) maps k
+    Real -> SmoothRiemannianMetric I (SourceDomain (I := I) maps k)
+  /-- Brick D: window-uniform `C^p` convergence of the pulled-back metrics
+  (the moving-Shi norm bridge output). -/
+  conv : forall K : Set L.M,
+    forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+    forall p : Nat,
+    forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
+      forall ε : Real, 0 < ε ->
+        exists k0 : Nat, forall k : Nat, k0 <= k ->
+          forall t : Real, t ∈ Set.Icc a b ->
+            ((SourceDomainMetricData.ofRestrictPullback (I := I)
+              (Φ := maps) (k := k) (hσsrc k) (hσtgt k)
+              (refMetric k)).derivNormSupOn (I := I) K p t) < ε
+
+/-- **The smooth-flow-limit upgrade, assembled.**  From the structured frontier
+ingredients (Brick A–E) the time-zero conclusion `mc` upgrades to full smooth
+Cheeger--Gromov--Hamilton convergence of the flows, via the canonical
+restrict/pullback assembly `SmoothCGHConverges.ofRestrictPullback`. -/
+theorem flowLimit_upgrade
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
+    (d : FlowLimitData (I := I) X mc) :
+    CompactnessConclusion (I := I) X :=
+  ⟨d.L, mc.subseq, mc.strictMono,
+    ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
+      d.maps d.scalar d.hσsrc d.hσtgt d.refMetric d.conv⟩⟩
+
+/-- Produce the theorem-facing `SmoothFlowLimitInput` from the structured
+frontier ingredients, available at every time-zero conclusion. -/
+theorem smoothFlowLimitInput_of_flowLimitData
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (build : forall mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)),
+      FlowLimitData (I := I) X mc) :
+    SmoothFlowLimitInput (I := I) X :=
+  ⟨fun mc => flowLimit_upgrade (I := I) X mc (build mc)⟩
+
+end HCGCompactness
+end DifferentialGeometry
