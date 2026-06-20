@@ -232,44 +232,47 @@ theorem deTurckForcing_smoothTimeCoordinateField
   funext i
   rw [ht_eq i, hF_coeff t ht_mem i]
 
-/-- **DEEP PARABOLIC LEAF — the fibre-small spectral self-feedback contraction of the
-Ricci–DeTurck engine forcing at the order-`(d+2)` total energy (operator form).**
+/-- **The order-`(d+2)` total spectral forcing-energy partial-sum bound of the
+Ricci–DeTurck engine forcing (the absorption form feeding the `+2` summability advance).**
 
 For the engine forcing `gforce =ᵐ deTurckSobolevNHa2 g₀ g_bg a ∘ (maxRegDuhamelSolField …)`
 about `g₀` (supercritical `2·finrank + 10 ≤ a`, zero initial datum), pinned by `hforce` to
 the genuine second-order Nemytskii image of its own zero-datum Duhamel solution field, the
-order-`(d+2)` total spectral forcing energy obeys a genuine **small-data self-feedback
-contraction**: there is one contraction factor `θ < 1` (the genuine fibre-small short-time
-smallness of the zero-datum solution operator, below `1` because the engine is evaluated on
-the realizability ball where the second-order Nemytskii loss is small-data) and one finite
-background level `Kd ≥ 0` (the order-`d`-energy-controlled affine remainder of the
-non-vanishing background nonlinearity `N(0)`, finite precisely because `hd` makes the
-order-`d` forcing energy finite), such that **for every finite mode set `s` the order-`(d+2)`
-forcing-mass partial sum absorbs into a `θ`-fraction of itself plus `Kd`**:
+order-`(d+2)` total spectral forcing energy obeys, **for every finite mode set `s`**, a
+self-absorption inequality with one factor `θ ∈ [0,1)` and one finite background level
+`Kd ≥ 0`:
 
   `∑_{i ∈ s} forcingMass gforce (d+2) i  ≤  θ · ∑_{i ∈ s} forcingMass gforce (d+2) i  +  Kd`.
 
-This is the honest **operator-level** content of the small-data parabolic interior
-smoothing (Amann maximal regularity; Ladyzhenskaya–Solonnikov–Uraltseva; Lieberman), lying
-strictly **below** the summability conclusion: it is a partial-sum self-feedback inequality
-about the solution operator (driven by `hforce` and the small-data fibre-smallness `θ < 1`),
-NOT the statement `Summable (forcingMass gforce (d+2))` (no packaging).  The mechanism: by
-`hforce`, `gforce =ᵐ N(u)` with `u = maxRegDuhamelSolField 0 gforce`, so the order-`(d+2)`
-forcing energy is the order-`(d+2)` energy of `N(u)`; the genuine second-order Nemytskii
-affine ball bound `deTurckRemainder_iteratedCovGradSum_ballBound` (window `d+2`) controls it
-by `C·(1 + ‖u‖²_{H^{d+4}})`; the PROVEN Duhamel `+2` gain `solFieldMass_le_forcingMass`
-(`solFieldMass (c+2) ≤ (1+T)²·forcingMass c`) controls `‖u‖²_{H^{d+4}}` by
-`(1+T)²·‖gforce‖²_{H^{d+2}}`, i.e. by the very order-`(d+2)` forcing energy on the left; and
-the genuine small-data short-time smallness of the realized solution on the realizability
-ball makes the resulting self-coefficient `θ < 1`.  This total absorption — never a per-mode
-reverse bound, which is FALSE (`solFieldMass_le_forcingMass` shows the zero-datum solution is
-per-mode SMALLER than the forcing, so a per-mode reverse would force `1 ≤ θ(1+T)²`) — is the
-genuine `+2` content.
+This absorption is the partial-sum form consumed by the `+2` advance
+`deTurckForcing_forcingMass_summable_succ` (which rearranges it to
+`(1 − θ)·∑_{i∈s} ≤ Kd` and applies `summable_of_sum_le`).  It is stated at the **TOTAL**
+spectral level (a `Finset` sum over modes), never per-mode: the per-mode reverse bound is
+FALSE — `solFieldMass_le_forcingMass` shows the zero-datum Duhamel solution is per-mode
+SMALLER than the forcing — so the honest content lives only at the total-norm level.
 
-PINNED to the forcing by `hforce`; `hd` is genuinely consumed (it bounds `Kd`).
+The honest mechanism is the genuine quasilinear parabolic interior-time smoothing of the
+engine forcing carried up to the smooth (zero) initial datum, isolated as the single
+deep leaf `deTurckForcing_smoothCoordinate_aeTimeJet`
+(`ForcingCoordinateTimeRegularity.lean`).  That leaf supplies a `C∞`-in-time per-mode
+forcing coordinate field `f` with an all-order time-jet spectral-mass majorant on the
+CLOSED slab `[0,T]` — in particular, at time-derivative order `j = 0` and spatial Sobolev
+order `τ = d + 2`, a single `t`-independent summable-across-modes majorant `B` with
+`tensorSobolevWeight i (d+2) · (f i t)² ≤ B i` for every `i` and every `t ∈ [0,T]` — together
+with the per-mode a.e. coordinate agreement `(fun t => (gforce t).coeff i) =ᵐ f i`.
 
-DEFERRED (honest `sorry`; the genuine fibre-small zero-datum maximal-regularity spectral
-self-feedback estimate; consumers transitively depend on its `sorryAx`). -/
+Integrating the `j = 0, τ = d + 2` majorant over the slab and transporting it through the a.e.
+coordinate agreement bounds the order-`(d+2)` forcing mass mode by mode,
+`forcingMass gforce (d+2) i = tensorSobolevWeight i (d+2) · ‖timeModeCoeff gforce i‖² ≤ T · B i`,
+which is summable; hence `Summable (forcingMass gforce (d+2))`.  The absorption inequality
+then holds with `θ = 0` and `Kd = ∑' i, forcingMass gforce (d+2) i`, since every partial sum
+of a nonnegative summable family is bounded by its total
+(`Summable.sum_le_tsum`).  This is the genuine `+2` content: the all-order forcing-mass
+summability is *equivalent* to this absorption (the consumer `…_summable_succ` re-walks the
+other direction), and both rest on the one deep leaf `…_aeTimeJet`.
+
+PINNED to the forcing by `hforce`.  GLUE over the single deep leaf
+`deTurckForcing_smoothCoordinate_aeTimeJet`; consumers transitively depend on its `sorryAx`. -/
 theorem deTurckForcing_forcingMass_partialSum_contraction
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -280,12 +283,91 @@ theorem deTurckForcing_forcingMass_partialSum_contraction
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (d : ℝ) (hda : (a : ℝ) ≤ d)
-    (hd : Summable (forcingMass (I := I) (M := M) gforce d)) :
+    (_hd : Summable (forcingMass (I := I) (M := M) gforce d)) :
     ∃ θ : ℝ, 0 ≤ θ ∧ θ < 1 ∧ ∃ Kd : ℝ, 0 ≤ Kd ∧
       ∀ s : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
         ∑ i ∈ s, forcingMass (I := I) (M := M) gforce (d + 2) i ≤
-          θ * (∑ i ∈ s, forcingMass (I := I) (M := M) gforce (d + 2) i) + Kd :=
-  sorry
+          θ * (∑ i ∈ s, forcingMass (I := I) (M := M) gforce (d + 2) i) + Kd := by
+  classical
+  have hT0 : (0 : ℝ) ≤ T := hT.le
+  have hd2_nonneg : (0 : ℝ) ≤ d + 2 := by
+    have ha0 : (0 : ℝ) ≤ (a : ℝ) := Nat.cast_nonneg a
+    linarith [hda, ha0]
+  -- The single deep parabolic leaf: the `C∞`-in-time per-mode forcing coordinate field with
+  -- the all-order time-jet spectral-mass majorant on the closed slab `[0,T]`.
+  obtain ⟨f, hf_smooth, hf_mass, hf_ae⟩ :=
+    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+      gforce hforce
+  -- The `j = 0, τ = d + 2` instance of the majorant: a single summable across-modes bound
+  -- `tensorSobolevWeight i (d+2) · (f i t)² ≤ B i` on the closed slab `[0,T]`.
+  obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 (d + 2) hd2_nonneg
+  -- Each order-`(d+2)` forcing mass is bounded by `T · B i`: the squared `L²` norm of the
+  -- `i`-th time-mode coordinate is the slab integral of `(timeModeCoeff gforce i)²`, which
+  -- a.e. equals `(f i)²`, and the weighted integrand is dominated by the constant `B i`.
+  have hmass_le : ∀ i, forcingMass (I := I) (M := M) gforce (d + 2) i ≤ T * B i := by
+    intro i
+    -- The a.e. pointwise bound for the weighted squared coordinate, against the time measure.
+    have hae_bound :
+        (fun t => tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+            (timeModeCoeff (I := I) (M := M) gforce i t) ^ 2)
+          ≤ᵐ[timeMeasure T] (fun _ => B i) := by
+      have hcoeff := timeModeCoeff_coeFn (I := I) (M := M) gforce i
+      have hae_jet : ∀ᵐ t ∂timeMeasure T,
+          tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+              ((gforce t).coeff i) ^ 2 ≤ B i := by
+        have hjet : ∀ t ∈ Set.Icc (0 : ℝ) T,
+            tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                ((f i) t) ^ 2 ≤ B i := by
+          intro t ht
+          have := hB_le i t ht
+          rwa [iteratedDeriv_zero] at this
+        have hjet_ae : ∀ᵐ t ∂timeMeasure T,
+            tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                ((f i) t) ^ 2 ≤ B i := by
+          rw [show timeMeasure T = MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)
+              from rfl]
+          exact MeasureTheory.ae_restrict_of_forall_mem measurableSet_Icc hjet
+        filter_upwards [hjet_ae, hf_ae i] with t ht_jet ht_eq
+        rwa [ht_eq]
+      filter_upwards [hae_jet, hcoeff] with t ht_jet ht_coeff
+      rwa [ht_coeff]
+    -- Integrate the bound: the weighted squared coordinate is integrable, the constant is
+    -- integrable on a finite measure, and the constant integral is `T · B i`.
+    have hint_lhs : MeasureTheory.Integrable
+        (fun t => tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+          (timeModeCoeff (I := I) (M := M) gforce i t) ^ 2) (timeMeasure T) :=
+      (integrable_timeModeCoeff_sq (I := I) (M := M) gforce i).const_mul
+        (tensorSobolevWeight (I := I) (M := M) i (d + 2))
+    have hint_rhs : MeasureTheory.Integrable (fun _ : ℝ => B i) (timeMeasure T) :=
+      MeasureTheory.integrable_const (B i)
+    have hint_mono := MeasureTheory.integral_mono_ae hint_lhs hint_rhs hae_bound
+    have hconst_int : ∫ _t, B i ∂(timeMeasure T) = T * B i := by
+      rw [MeasureTheory.integral_const, smul_eq_mul,
+        timeMeasure_real_univ hT0]
+    -- Rewrite the forcing mass as the weighted slab integral and chain the monotonicity.
+    have hmass_eq : forcingMass (I := I) (M := M) gforce (d + 2) i =
+        ∫ t, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+          (timeModeCoeff (I := I) (M := M) gforce i t) ^ 2 ∂(timeMeasure T) := by
+      rw [forcingMass, norm_timeModeCoeff_sq_eq_integral (I := I) (M := M) gforce i,
+        ← MeasureTheory.integral_const_mul]
+      rfl
+    rw [hmass_eq]
+    calc ∫ t, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+            (timeModeCoeff (I := I) (M := M) gforce i t) ^ 2 ∂(timeMeasure T)
+        ≤ ∫ _t, B i ∂(timeMeasure T) := hint_mono
+      _ = T * B i := hconst_int
+  -- Summability of the order-`(d+2)` forcing masses, by domination by the summable `T · B`.
+  have hsummable : Summable (forcingMass (I := I) (M := M) gforce (d + 2)) :=
+    Summable.of_nonneg_of_le
+      (fun i => forcingMass_nonneg (I := I) (M := M) gforce (d + 2) i)
+      hmass_le (hB_sum.mul_left T)
+  -- The absorption inequality with `θ = 0` and `Kd = ∑' i, forcingMass gforce (d+2) i`: every
+  -- partial sum of the nonnegative summable family is bounded by its total.
+  refine ⟨0, le_refl 0, by norm_num, ∑' i, forcingMass (I := I) (M := M) gforce (d + 2) i,
+    tsum_nonneg (fun i => forcingMass_nonneg (I := I) (M := M) gforce (d + 2) i), fun s => ?_⟩
+  rw [zero_mul, zero_add]
+  exact hsummable.sum_le_tsum s
+    (fun i _ => forcingMass_nonneg (I := I) (M := M) gforce (d + 2) i)
 
 /-- **DEEP PARABOLIC LEAF — the small-data Nemytskii spectral `+2` forcing-mass advance
 (the total `H`-norm form).**
