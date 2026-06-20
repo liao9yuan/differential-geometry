@@ -3128,6 +3128,93 @@ private theorem reindexCoeffGen_jointContMDiffOn {r : ℕ} {S : Set ℝ}
       (show Tensor0SBundle.Tensor0SSpace r I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
         (R p.2).toSection p.1) (Y p.1)).symm
 
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Joint `(x, s)`-smoothness of the chart-frame Riemann component along the realized family.**
+For a fixed chart `α` and chart indices `(i, j, k, l)`, the chart-Christoffel Riemann entry
+`(x, s) ↦ R^l{}_{ijk}(g_s, α)(ϕ_α x)` is jointly `C^∞` on the chart-`α` source × the realized small
+set.  The exact Riemann mirror of `realizedFam_chartRicciTensor_jointContMDiffOn`: it is the manifold
+read-off of the chart Euclidean joint Riemann smoothness `gen_joint_riemann` (from the joint-Gram tower
+`realizedFam_genJointGram_free`), threaded through the smooth moving point `(x, s) ↦ (s, ϕ_α x)`. -/
+theorem realizedFam_chartRiemannTensor_jointContMDiffOn [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (i j k l : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartRiemannTensor (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α i j k l (extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hG := realizedFam_genJointGram_free (I := I) g₀ T T' hδ hδ' α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_riemann (I := I)
+    (realizedFam (I := I) g₀ T T' hδ hδ') α hG i j k l hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartRiemannTensor (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' r.1) α i j k l r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
+    (fun q _ => rfl) rfl
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Joint `(x, s)`-smoothness of the chart-frame Gram entry along the realized family.**  On the
+product of the chart-`α` source and the realized small set, the intrinsic chart Gram entry
+`(x, s) ↦ g_{ij}(realizedFam g₀ T T' s)(α, x)` is jointly `C^∞`.  The non-inverted mirror of
+`realizedFam_chartInvGramMatrix_jointContMDiffOn_free`: the chart-Gram entry `GenJointGram.1` of the
+realized family (`realizedFam_genJointGram_free`) read off the smooth moving point `(x, s) ↦ (s, ϕ_α x)`. -/
+theorem realizedFam_chartGramMatrix_jointContMDiffOn_free [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartGramMatrix (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 i j)
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hG := realizedFam_genJointGram_free (I := I) g₀ T T' hδ hδ' α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := hG.1 i j hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartGramOnE (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' r.1) α i j r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  refine (hentryM.comp_contMDiffWithinAt p hmoveAt).congr ?_ ?_
+  · intro q hq
+    have hqx : q.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hq.1
+    rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hqx]
+  · rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hxsrc]
+
 set_option linter.unusedSectionVars false in
 /-- **(Posited keystone adjustment — joint smoothness of the symm-absorbed order-`0` coefficient.)**
 The symm-absorbed order-`0` curvature coefficient family `s ↦ symmAbsorbedOrder0CurvCoeff g₀ g_s (T − T')`
@@ -3249,6 +3336,66 @@ theorem symmAbsorbedPrincipalCoeffPure_realizedFam_toModel_continuous [Boundaryl
   exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2
     (fun t => symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+
+open DifferentialGeometry.Integral.Connection in
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Off-centre chart expansion of the abstract Riemann kernel.**  For a base point `w` in the
+chart-`α` source, the `g`-paired abstract Riemann kernel on the chart-`α` frame quadruple equals the
+finite chart-coordinate sum of the chart-Riemann tensor against the chart-Gram entry.  The
+load-bearing algebraic identity behind the joint Riemann kernel smoothness, via the off-centre
+basis bridge `riemannOp_chartBasisVec_alpha_eq` and `chartGramMatrix_apply`. -/
+private theorem riemannKernelChartα_eq [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M) (α : M) (a c pp qq : Fin (Module.finrank ℝ E))
+    {w : M} (hx : w ∈ (chartAt H α).source) :
+    g.inner w
+        (riemannOp (cov := LeviCivita (I := I) g) w
+          (chartBasisVecFiber (I := I) α a w) (chartBasisVecFiber (I := I) α pp w)
+          (chartBasisVecFiber (I := I) α qq w))
+        (chartBasisVecFiber (I := I) α c w) =
+      ∑ l : Fin (Module.finrank ℝ E),
+        chartRiemannTensor (I := I) g α qq a pp l (extChartAt I α w) *
+          chartGramMatrix (I := I) g α w l c := by
+  have hxgood : w ∈ chartLeviCivitaGoodSet (I := I) α := by
+    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α, extChartAt_source (I := I)]
+    exact hx
+  rw [riemannOp_chartBasisVec_alpha_eq (I := I) g α qq a pp hxgood]
+  rw [map_sum, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, chartGramMatrix_apply g α w l c]
+
+open DifferentialGeometry.Integral.Connection in
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Joint `(x, s)`-smoothness of the chart-frame Riemann kernel along the realized family.**  For
+fixed chart-`α` frame indices `(a, c, pp, qq)`, the `g_s`-paired abstract Riemann kernel on the
+chart-`α` frame quadruple `(x, s) ↦ ⟨R_{g_s}(∂_a, ∂_pp, ∂_qq), ∂_c⟩_{g_s}` is jointly `C^∞` on the
+chart-`α` source × the realized small set.  The off-centre chart expansion `riemannKernelChartα_eq`
+turns it into a finite sum of products of the joint chart-Riemann tensor
+(`realizedFam_chartRiemannTensor_jointContMDiffOn`) and the joint chart-Gram entry
+(`realizedFam_chartGramMatrix_jointContMDiffOn_free`). -/
+private theorem riemannKernelChartα_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (a c pp qq : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun w : M × ℝ =>
+        (realizedFam (I := I) g₀ T T' hδ hδ' w.2).inner w.1
+          (riemannOp (cov := LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' w.2)) w.1
+            (chartBasisVecFiber (I := I) α a w.1) (chartBasisVecFiber (I := I) α pp w.1)
+            (chartBasisVecFiber (I := I) α qq w.1))
+          (chartBasisVecFiber (I := I) α c w.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hsum : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun w : M × ℝ => ∑ l : Fin (Module.finrank ℝ E),
+        chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' w.2) α qq a pp l
+            (extChartAt I α w.1) *
+          chartGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' w.2) α w.1 l c)
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+    contMDiffOn_finset_sum (fun l _ =>
+      (realizedFam_chartRiemannTensor_jointContMDiffOn (I := I) g₀ T T' hδ hδ' α qq a pp l).mul
+        (realizedFam_chartGramMatrix_jointContMDiffOn_free (I := I) g₀ T T' hδ hδ' α l c))
+  refine hsum.congr (fun w hw => ?_)
+  exact riemannKernelChartα_eq (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' w.2) α a c pp qq hw.1
 
 set_option linter.unusedSectionVars false in
 /-- **(Posited STEP-1 keystone — joint `(x, s)`-smoothness of the symm-absorbed order-`0` Riemann
