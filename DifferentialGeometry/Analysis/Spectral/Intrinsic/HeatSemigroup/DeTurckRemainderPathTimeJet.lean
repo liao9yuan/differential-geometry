@@ -84,10 +84,11 @@ private theorem deTurckRemainder_pathCoeff_timeContDiff
           tensorSobolevWeight (I := I) (M := M) i σ *
               (iteratedDeriv j (φ i) t) ^ 2 ≤ B i) :
     ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-      ContDiff ℝ ∞ (fun t => tensorL2Coeff (I := I) (M := M)
+      ContDiffOn ℝ ∞ (fun t => tensorL2Coeff (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
         (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-          (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i) :=
+          (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)
+        (Set.Icc (0 : ℝ) T) :=
   sorry
 
 private theorem deTurckRemainder_pathCoeff_timeJet_allOrderMass
@@ -111,10 +112,11 @@ private theorem deTurckRemainder_pathCoeff_timeJet_allOrderMass
       ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
           tensorSobolevWeight (I := I) (M := M) i σ *
-              (iteratedDeriv j (fun s => tensorL2Coeff (I := I) (M := M)
+              (iteratedDerivWithin j (fun s => tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-                  (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i) t) ^ 2 ≤ B i :=
+                  (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+                (Set.Icc (0 : ℝ) T) t) ^ 2 ≤ B i :=
   sorry
 
 theorem deTurckRemainder_path_coeff_timeJet_withMass
@@ -136,16 +138,18 @@ theorem deTurckRemainder_path_coeff_timeJet_withMass
               (iteratedDeriv j (φ i) t) ^ 2 ≤ B i) :
     ∃ Rjet : ℕ → ℝ → SmoothCcTensor g₀ 0 2,
       (∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-          ContDiff ℝ ∞ (fun t => tensorL2Coeff (I := I) (M := M)
+          ContDiffOn ℝ ∞ (fun t => tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-              (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)) ∧
+              (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)
+            (Set.Icc (0 : ℝ) T)) ∧
         (∀ (j : ℕ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
           ∀ t ∈ Set.Icc (0 : ℝ) T,
-            iteratedDeriv j (fun s => tensorL2Coeff (I := I) (M := M)
+            iteratedDerivWithin j (fun s => tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-                (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i) t =
+                (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+              (Set.Icc (0 : ℝ) T) t =
               tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i) ∧
@@ -162,31 +166,31 @@ theorem deTurckRemainder_path_coeff_timeJet_withMass
     fun i t => tensorL2Coeff (I := I) (M := M) hc
       (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
         (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i with hcpath_def
-  have hsmooth : ∀ i, ContDiff ℝ ∞ (cpath i) :=
+  have hsmooth : ∀ i, ContDiffOn ℝ ∞ (cpath i) (Set.Icc (0 : ℝ) T) :=
     deTurckRemainder_pathCoeff_timeContDiff (I := I) (M := M)
       g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
   have hmass : ∀ (j : ℕ) (σ : ℝ), 0 ≤ σ →
       ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
           tensorSobolevWeight (I := I) (M := M) i σ *
-              (iteratedDeriv j (cpath i) t) ^ 2 ≤ B i :=
+              (iteratedDerivWithin j (cpath i) (Set.Icc (0 : ℝ) T) t) ^ 2 ≤ B i :=
     deTurckRemainder_pathCoeff_timeJet_allOrderMass (I := I) (M := M)
       g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
   have hconstruct : ∀ (j : ℕ) (t : ℝ), t ∈ Set.Icc (0 : ℝ) T →
       ∃ S : SmoothCcTensor g₀ 0 2, ∀ i,
         tensorL2Coeff (I := I) (M := M) hc
             (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S) i =
-          iteratedDeriv j (cpath i) t := by
+          iteratedDerivWithin j (cpath i) (Set.Icc (0 : ℝ) T) t := by
     intro j t ht
     refine exists_smoothCcTensor_of_allOrder_spectralMass (I := I) (M := M)
-      g₀ (fun i => iteratedDeriv j (cpath i) t) (fun σ hσ => ?_)
+      g₀ (fun i => iteratedDerivWithin j (cpath i) (Set.Icc (0 : ℝ) T) t) (fun σ hσ => ?_)
     obtain ⟨B, hBs, hBle⟩ := hmass j σ hσ
     exact ⟨B, hBs, fun i => hBle i t ht⟩
   choose! Rjet hRjet using hconstruct
   have hR_coeff : ∀ (j : ℕ) (t : ℝ), t ∈ Set.Icc (0 : ℝ) T → ∀ i,
       tensorL2Coeff (I := I) (M := M) hc
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i =
-        iteratedDeriv j (cpath i) t := by
+        iteratedDerivWithin j (cpath i) (Set.Icc (0 : ℝ) T) t := by
     intro j t ht i
     exact hRjet j t ht i
   refine ⟨Rjet, hsmooth, ?_, ?_⟩
