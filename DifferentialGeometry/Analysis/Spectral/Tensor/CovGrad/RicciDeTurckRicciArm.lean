@@ -3644,6 +3644,234 @@ theorem exists_pathIntegralCoeffField
   -- Its `appCc`/`unitModel` read-off is the `s`-integral of the per-`s` read-offs (the swap).
   exact pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ r 2 Φ W S hS hSI hjoint hcont x v
 
+private theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v w : TangentSpace I x) :
+    ∃ h : ChartMetricPerturbation E,
+      IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h ∧
+        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s =
+          ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+              (((-2 : ℝ) * chartRicciSecondOrderPart (I := I)
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                  chartDeTurckCorrSecondOrderPart (I := I)
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) +
+                metricFamilyDeTurckRicciFirstOrderRemainder (I := I)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) := by
+  classical
+  obtain ⟨h, gfam, hfam, hvel, _hlocRic, hloc⟩ :=
+    exists_rebased_cutoffMetricPerturbationFamily (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x
+  refine ⟨h, hvel, ?_⟩
+  set gs : SmoothRiemannianMetric I M :=
+    realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
+  set y₀ : E := extChartAt I x x with hy₀
+  have hy : y₀ ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  set Pval : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun i k => ((-2 : ℝ) * chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+        chartDeTurckCorrSecondOrderPart (I := I) gs g_bg x h i k y₀) +
+      metricFamilyDeTurckRicciFirstOrderRemainder (I := I) gs g_bg x h i k y₀ with hPval
+  have hper : ∀ i k : Fin (Module.finrank ℝ E),
+      HasDerivAt (fun t : ℝ => chartFComponentOnE (I := I)
+          (deTurckRicciRHS (I := I) g_bg)
+          (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
+        (Pval i k) s := by
+    intro i k
+    have hsplit : HasDerivAt
+        (fun σ : ℝ => chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg) (gfam σ) x i k y₀)
+        (Pval i k) 0 := by
+      rw [hPval, hgs]
+      exact hasDerivAt_chartFComponentOnE_deTurckRicciRHS (I := I) hfam g_bg i k hy
+    have htrans : HasDerivAt
+        (fun σ : ℝ => chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg)
+          (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k y₀)
+        (Pval i k) 0 :=
+      hsplit.congr_of_eventuallyEq (hloc i k).symm
+    have htrans' : HasDerivAt
+        (fun σ : ℝ => chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg)
+          (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k y₀)
+        (Pval i k) (s - s) := by
+      rwa [sub_self]
+    have hsub := htrans'.comp_sub_const s s
+    have hcongr : (fun t : ℝ => chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg)
+          (realizedFam (I := I) g₀ T T' hδ hδ' (s + (t - s))) x i k y₀) =
+        (fun t : ℝ => chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg)
+          (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
+      funext t; rw [add_sub_cancel]
+    rwa [hcongr] at hsub
+  have hsum : HasDerivAt
+      (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
+      (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i * (Pval i k)) s := by
+    refine HasDerivAt.fun_sum (fun i _ => HasDerivAt.fun_sum (fun k _ => ?_))
+    exact (hper i k).const_mul _
+  have hfun : realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w =
+      (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          chartFComponentOnE (I := I) (deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
+    funext t
+    rw [realizedDeTurckRicciChartSum, hy₀]
+  rw [hfun, hsum.deriv]
+
+private theorem deTurckRicci_chartSymbolSum_eq_appCc_intrinsic
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (v : Fin 2 → TangentSpace I x)
+    (h : ChartMetricPerturbation E)
+    (hvel : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+      ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+        (((-2 : ℝ) * chartRicciSecondOrderPart (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+            chartDeTurckCorrSecondOrderPart (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) +
+          metricFamilyDeTurckRicciFirstOrderRemainder (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x))) =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+              + (-1 : ℝ) • symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+              + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+              (ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
+private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+            ((R₀fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+            ((R₂fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₀fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₂fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        ∀ s : ℝ, s ∈ Set.Ioo (0 : ℝ) 1 →
+          ∀ (x : M) (v : Fin 2 → TangentSpace I x)
+            (h : ChartMetricPerturbation E),
+            IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h →
+            (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+                (((-2 : ℝ) * chartRicciSecondOrderPart (I := I)
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                    chartDeTurckCorrSecondOrderPart (I := I)
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) +
+                  metricFamilyDeTurckRicciFirstOrderRemainder (I := I)
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x))) =
+              unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
+                    (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                  + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  classical
+  refine ⟨fun s =>
+      symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+        + (-1 : ℝ) • symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+        + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'),
+    fun s => ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s),
+    ?_, ?_, ?_, ?_, ?_⟩
+  · have hR := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+    have hC := jointRSsmul (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (-1 : ℝ)
+      (fun p : M × ℝ => (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
+    have hL := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ'
+    have hRC := jointRSadd (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (A := fun p : M × ℝ =>
+        (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (B := fun p : M × ℝ =>
+        (-1 : ℝ) • (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1) hR hC
+    have hRCL := jointRSadd (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (A := fun p : M × ℝ =>
+        (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1
+          + (-1 : ℝ) • (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (B := fun p : M × ℝ =>
+        (symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1) hRC hL
+    refine hRCL.congr (fun p _ => ?_)
+    congr 1
+  · exact ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  · intro x
+    have hR := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+    have hC := jointRSsmul (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (-1 : ℝ)
+      (fun p : M × ℝ => (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
+    have hL := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ'
+    have hRC := jointRSadd (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (A := fun p : M × ℝ =>
+        (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (B := fun p : M × ℝ =>
+        (-1 : ℝ) • (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1) hR hC
+    have hRCL := jointRSadd (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (A := fun p : M × ℝ =>
+        (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1
+          + (-1 : ℝ) • (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (B := fun p : M × ℝ =>
+        (symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1) hRC hL
+    have hjoint := hRCL.congr (fun p _ => by congr 1)
+    exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+      (fun s => symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+          + (-1 : ℝ) • symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+          + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
+      (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+  · exact ricciArmPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ'
+  · intro s hs x v h hvel
+    exact deTurckRicci_chartSymbolSum_eq_appCc_intrinsic (I := I) g₀ g_bg T T' hδ hδ' s hs x v h hvel
+
 theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -3674,8 +3902,16 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
               (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
-                    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+                    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  classical
+  obtain ⟨R₀fib, R₂fib, hjoint₀, hjoint₂, hcont₀, hcont₂, hpt⟩ :=
+    deTurckRicci_threeSlot_appCc_covariantTransfer (I := I) g₀ g_bg T T' hδ hδ'
+  refine ⟨R₀fib, R₂fib, hjoint₀, hjoint₂, hcont₀, hcont₂, fun s hs x v => ?_⟩
+  obtain ⟨h, hvel, hderiv⟩ :=
+    deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ g_bg T T'
+      hδ_lt hδ hδ'_lt hδ' hs x (v 0) (v 1)
+  rw [hderiv]
+  exact hpt s hs x v h hvel
 
 theorem integratedLinearizedRicci_appCc_eq
     (g₀ g_bg : SmoothRiemannianMetric I M)
