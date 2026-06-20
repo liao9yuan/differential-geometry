@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJet
+import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 
 noncomputable section
 
@@ -38,6 +39,39 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+private theorem contDiffOn_Icc_scalar_globalExtend
+    {T : ℝ} (hT : 0 < T) {φ : ℝ → ℝ} (hφ : ContDiffOn ℝ ∞ φ (Set.Icc (0 : ℝ) T)) :
+    ∃ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ ∧ Set.EqOn φ ψ (Set.Icc (0 : ℝ) T) := by
+  classical
+  set K : Set ℝ := Metric.closedBall (0 : ℝ) 1 with hK_def
+  have hK_cpt : IsCompact K := isCompact_closedBall (0 : ℝ) 1
+  have hz₀ : (0 : ℝ) ∈ interior K := by
+    rw [hK_def, interior_closedBall' (0 : ℝ) 1]
+    exact Metric.mem_ball_self (by norm_num)
+  have huncurry : ContDiffOn ℝ ∞ (Function.uncurry (fun (t : ℝ) (_ : ℝ) => φ t))
+      (Set.Icc (0 : ℝ) T ×ˢ K) := by
+    have hcomp : ContDiffOn ℝ ∞ (φ ∘ (Prod.fst : ℝ × ℝ → ℝ)) (Set.Icc (0 : ℝ) T ×ˢ K) :=
+      hφ.comp contDiff_fst.contDiffOn Set.mapsTo_fst_prod
+    exact hcomp
+  obtain ⟨gext, V, hV_nhds, hgext_smooth, hgext_eq⟩ :=
+    DifferentialGeometry.Analysis.borel_interval_extend_param
+      (fun (t : ℝ) (_ : ℝ) => φ t) T hT K hK_cpt (0 : ℝ) hz₀ huncurry
+  have h0V : (0 : ℝ) ∈ V := mem_of_mem_nhds hV_nhds
+  refine ⟨fun t => gext t 0, ?_, ?_⟩
+  · have hmaps : Set.MapsTo (fun t : ℝ => (t, (0 : ℝ))) (Set.univ : Set ℝ)
+        ((Set.univ : Set ℝ) ×ˢ V) :=
+      fun t _ => Set.mk_mem_prod (Set.mem_univ t) h0V
+    have hpair : ContDiffOn ℝ ∞ (fun t : ℝ => (t, (0 : ℝ)))
+        (Set.univ : Set ℝ) := (contDiff_fun_id.prodMk contDiff_const).contDiffOn
+    have hcomp : ContDiffOn ℝ ∞ (Function.uncurry gext ∘ (fun t : ℝ => (t, (0 : ℝ))))
+        (Set.univ : Set ℝ) := hgext_smooth.comp hpair hmaps
+    refine contDiffOn_univ.mp ?_
+    refine hcomp.congr (fun t _ => ?_)
+    simp [Function.uncurry_apply_pair]
+  · intro t ht
+    have h := hgext_eq t ht 0 h0V
+    exact h.symm
 
 private def JetSpectralMassControl
     (g₀ : SmoothRiemannianMetric I M)
@@ -105,16 +139,18 @@ private theorem deTurckRemainder_path_timeJet_section
               (iteratedDeriv j (φ i) t) ^ 2 ≤ B i) :
     ∃ Rjet : ℕ → ℝ → SmoothCcTensor g₀ 0 2,
       (∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-          ContDiff ℝ ∞ (fun t => tensorL2Coeff (I := I) (M := M)
+          ContDiffOn ℝ ∞ (fun t => tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-              (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)) ∧
+              (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)
+            (Set.Icc (0 : ℝ) T)) ∧
         (∀ (j : ℕ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
           ∀ t ∈ Set.Icc (0 : ℝ) T,
-            iteratedDeriv j (fun s => tensorL2Coeff (I := I) (M := M)
+            iteratedDerivWithin j (fun s => tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-                (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i) t =
+                (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+              (Set.Icc (0 : ℝ) T) t =
               tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i) ∧
@@ -192,13 +228,23 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   set Rem : ℝ → SmoothCcTensor g₀ 0 2 :=
     fun t => deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t) with hRem_def
-  set ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+  set cpath : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i t => tensorL2Coeff (I := I) (M := M) hc
-      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rem t)) i with hψ_def
+      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rem t)) i with hcpath_def
   obtain ⟨Rjet, hsmooth, hjet, hcovbnd⟩ :=
     deTurckRemainder_path_timeJet_section (I := I) (M := M)
       g₀ g_bg a ha_super ha_even hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
-  refine ⟨ψ, ⟨fun i => hsmooth i, ?_⟩, ?_⟩
+  have hext : ∀ i, ∃ ψi : ℝ → ℝ, ContDiff ℝ ∞ ψi ∧
+      Set.EqOn (cpath i) ψi (Set.Icc (0 : ℝ) T) :=
+    fun i => contDiffOn_Icc_scalar_globalExtend hT (hsmooth i)
+  choose ψ hψ_smooth hψ_eqOn using hext
+  have hjetEq : ∀ (j : ℕ) (i) (t), t ∈ Set.Icc (0 : ℝ) T →
+      iteratedDeriv j (ψ i) t = iteratedDerivWithin j (cpath i) (Set.Icc (0 : ℝ) T) t := by
+    intro j i t ht
+    rw [iteratedDerivWithin_congr (hψ_eqOn i) ht]
+    exact (iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Icc hT)
+      ((hψ_smooth i).contDiffAt.of_le (mod_cast le_top)) ht).symm
+  refine ⟨ψ, ⟨fun i => hψ_smooth i, ?_⟩, ?_⟩
   · intro j σ hσ
     obtain ⟨k, hk⟩ : ∃ k : ℕ, σ + (((weylSobolevExp (E := E) : ℕ) : ℝ) + 1) ≤ (2 * k : ℕ) := by
       obtain ⟨k, hk⟩ := exists_nat_gt
@@ -228,7 +274,7 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
       ?_, ?_⟩
     · exact (tensorEigen_summable_negpow (I := I) (M := M) g₀ (σ' - σ) hσσ').mul_right (K ^ 2)
     · intro i t ht
-      rw [hjet j i t ht]
+      rw [hjetEq j i t ht, hjet j i t ht]
       set u : ℝ := tensorL2Coeff (I := I) (M := M) hc
         (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i with hu_def
       have hcoeff_eq : (smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).coeff i = u := by
@@ -261,6 +307,7 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
               (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
   · intro t ht i
     rw [deTurckSmoothN_coeff]
+    exact hψ_eqOn i ht
 
 private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
