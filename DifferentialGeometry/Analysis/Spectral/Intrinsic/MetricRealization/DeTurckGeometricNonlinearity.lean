@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
 
 /-!
 # The geometric Ricci–DeTurck nonlinearity on the spectral Sobolev scale
@@ -222,6 +224,222 @@ theorem deTurckGeometricN_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
         (0 : SmoothCcTensor g_bg 0 2) = 0 from map_zero _,
     tensorL2Coeff_eq_inner, inner_zero_right]
   rfl
+
+/-! ## Joint `(x, t)`-smoothness of the geometric Ricci–DeTurck right-hand side along the
+realized metric family
+
+The Amann/Picard strong-existence route for the realized nonlinearity needs the geometric
+Ricci–DeTurck right-hand side
+`deTurckRicciRHS g_bg (g₀ + h(F t)) = −2·Ric(g₀ + h(F t)) + 𝓛_{deTurckVF(g₀ + h(F t), g_bg)}(g₀ + h(F t))`
+to depend *jointly* `C^∞` on the base point and the time parameter, for the realized metric
+family `realizedFam g₀ T T' t` (the convex realization path `t ↦ g₀ + h(convexPerturbation T T' t)`).
+
+This is assembled, chart-locality-free, from the joint chart-Gram smoothness tower of the
+realized family (`RicciLinearization.gen_joint_chartDeTurckRicciRHS` over
+`realizedFam_genJointGram_free`): the chart-coordinate inverse Gram (Cramer), Christoffel symbols
+(first chart partials), Riemann/Ricci curvature (`∂Γ + Γ·Γ`), DeTurck vector field and its Lie
+derivative are each finite chart polynomials of the chart-Gram entries, jointly `C^∞` once the
+chart-Gram entries are.  The chart scalar `chartDeTurckRicciRHS` is grounded against the intrinsic
+operator by `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`, and the bundle section is
+read off the multilinear-basis coordinates through the chart-center trivialization. -/
+
+section JointSmoothness
+
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.RicciFlow
+open TensorMultilinear Tensor0SBundle
+
+/-- The chart-`α`-pushforward frame vector `(triv α).symmL ℝ x (chartModelBasis E i)` equals the
+chart-basis fibre `chartBasisVecFiber α i x` (the `symmL`/`symm` agreement on the trivialization). -/
+private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
+    (i : Fin (Module.finrank ℝ E)) (x : M) :
+    (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
+      = chartBasisVecFiber (I := I) α i x := by
+  rw [chartBasisVecFiber, Trivialization.symmL_apply]
+
+/-- **Joint `(x, t)`-smoothness of the chart-coordinate DeTurck–Ricci right-hand side along the
+realized family.**  On the chart-`α` source × the realized small set, the chart scalar
+`(x, t) ↦ chartDeTurckRicciRHS (realizedFam g₀ T T' t) g_bg α i k (ϕ_α x)` is jointly `C^∞`.
+
+The DeTurck-arm mirror of `RicciLinearization.realizedFam_chartRicciTensor_jointContMDiffOn`:
+the chart Euclidean joint smoothness `RicciLinearization.gen_joint_chartDeTurckRicciRHS` (over the
+δ-free joint Gram `realizedFam_genJointGram_free`), threaded through the smooth moving point
+`(x, t) ↦ (t, ϕ_α x)`. -/
+theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
+    (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (i k : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartDeTurckRicciRHS (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg α i k (extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hG := realizedFam_genJointGram_free (I := I) g₀ T T' hδ hδ' α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_chartDeTurckRicciRHS (I := I)
+    (realizedFam (I := I) g₀ T T' hδ hδ') α hG g_bg i k hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartDeTurckRicciRHS (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' r.1) g_bg α i k r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
+    (fun q _ => rfl) rfl
+
+set_option maxHeartbeats 3200000 in
+set_option linter.unusedSectionVars false in
+/-- **C1 — joint `(x, t)`-smoothness of the geometric Ricci–DeTurck right-hand side field along
+the realized metric family.**  As a section of the `(0, 2)`-tensor bundle over `M × ℝ`,
+`(x, t) ↦ deTurckRHSField g_bg (realizedFam g₀ T T' t) x` is jointly `C^∞` on the slab
+`univ ×ˢ realizedSmallSet` (the realized family is junk-extended to `g₀` off the small set, so the
+joint smoothness holds on the open parameter set containing the integration interval, not globally
+in `t`).
+
+The geometric nonlinearity keystone: it lifts the chart-scalar joint smoothness
+`realizedFam_chartDeTurckRicciRHS_jointContMDiffOn` to the intrinsic bundle section.  Worked
+pointwise through `Bundle.contMDiffWithinAt_totalSpace` at the moving chart-center trivialization
+`α = p₀.1`: the trivialized fibre coordinate is reconstructed from its multilinear-basis
+coordinates (`continuousMultilinearMap_basis`/`equivFun.symm`), each coordinate being the chart
+scalar `deTurckRicciRHS g_bg (g_t) x (e_{σ 0}, e_{σ 1}) = chartDeTurckRicciRHS (g_t) g_bg α (σ 0)
+(σ 1) (ϕ_α x)` (the chart read-off `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS` on
+the Levi-Civita good set), jointly `C^∞` by the chart-scalar lemma. -/
+theorem deTurckRHSField_realizeMetric_jointContMDiffOn
+    (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1
+        (deTurckRHSField (I := I) g_bg
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+  refine contMDiffOn_of_locally_contMDiffOn ?_
+  rintro ⟨x₀, s₀⟩ ⟨_, hs₀⟩
+  refine ⟨(chartAt H x₀).source ×ˢ (Set.univ : Set ℝ),
+    (chartAt H x₀).open_source.prod isOpen_univ,
+    ⟨mem_chart_source H x₀, Set.mem_univ _⟩, ?_⟩
+  have hinter : ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∩
+      ((chartAt H x₀).source ×ˢ (Set.univ : Set ℝ)) =
+      (chartAt H x₀).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ') := by
+    ext ⟨y, u⟩
+    simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_univ, true_and, and_true]
+    tauto
+  rw [hinter]
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set α : M := p₀.1 with hα
+  set Bb := continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2 with hBb
+  set e := trivializationAt (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) α with he
+  have hcoord : ∀ σ : Fin 2 → Fin (Module.finrank ℝ E),
+      ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+        (fun p : M × ℝ => Bb.repr
+          (e ⟨p.1, deTurckRHSField (I := I) g_bg
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1⟩).2 σ)
+        ((chartAt H x₀).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p₀ := by
+    intro σ
+    have hP1 := realizedFam_chartDeTurckRicciRHS_jointContMDiffOn (I := I) g_bg g₀ T T' hδ hδ'
+      α (σ 0) (σ 1)
+    have hp₀_in_α : p₀ ∈ (chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ') := by
+      refine ⟨?_, hp₀.2⟩
+      rw [hα]; exact mem_chart_source H p₀.1
+    have hP1at : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+        (fun p : M × ℝ => chartDeTurckRicciRHS (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg α (σ 0) (σ 1) (extChartAt I α p.1))
+        ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p₀ := hP1 p₀ hp₀_in_α
+    have hαsrc_nhd : ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∈
+        nhdsWithin p₀ ((chartAt H x₀).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+      have h := inter_mem_nhdsWithin
+        ((chartAt H x₀).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ'))
+        (((chartAt H α).open_source.prod realizedSmallSet_isOpen).mem_nhds hp₀_in_α)
+      refine Filter.mem_of_superset h ?_
+      intro q hq; exact hq.2
+    refine (hP1at.mono_of_mem_nhdsWithin hαsrc_nhd).congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [hαsrc_nhd] with p hp
+      obtain ⟨hpx, hps⟩ := hp
+      have hpgood : p.1 ∈ chartLeviCivitaGoodSet (I := I) α := by
+        rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α, extChartAt_source (I := I)]
+        exact hpx
+      rw [continuousMultilinearMap_basis_repr]
+      rw [trivializationAt_tensor0SBundle_succ_fibre]
+      rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+      change Tensor0SBundle.Tensor0SSpace.toModel
+          (deTurckRHSField (I := I) g_bg (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)
+          (fun i => (trivializationAt E (TangentSpace I) α).symmL ℝ p.1
+            ((chartModelBasis E) (σ i))) = _
+      rw [deTurckRHSField_toModel_apply]
+      rw [chartFrameVec_eq_chartBasisVecFiber_helper,
+        chartFrameVec_eq_chartBasisVecFiber_helper]
+      rw [deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg α (σ 0) (σ 1) hpgood]
+    · have hpgood : p₀.1 ∈ chartLeviCivitaGoodSet (I := I) α := by
+        rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α, extChartAt_source (I := I)]
+        rw [hα]; exact mem_chart_source H p₀.1
+      rw [continuousMultilinearMap_basis_repr]
+      rw [trivializationAt_tensor0SBundle_succ_fibre]
+      rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
+      change Tensor0SBundle.Tensor0SSpace.toModel
+          (deTurckRHSField (I := I) g_bg (realizedFam (I := I) g₀ T T' hδ hδ' p₀.2) p₀.1)
+          (fun i => (trivializationAt E (TangentSpace I) α).symmL ℝ p₀.1
+            ((chartModelBasis E) (σ i))) = _
+      rw [deTurckRHSField_toModel_apply]
+      rw [chartFrameVec_eq_chartBasisVecFiber_helper,
+        chartFrameVec_eq_chartBasisVecFiber_helper]
+      rw [deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p₀.2) g_bg α (σ 0) (σ 1) hpgood]
+  have hpi : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ))
+      𝓘(ℝ, (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ) ∞
+      (fun p : M × ℝ => (Bb.repr
+        (e ⟨p.1, deTurckRHSField (I := I) g_bg
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1⟩).2 :
+          (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ))
+      ((chartAt H x₀).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p₀ :=
+    contMDiffWithinAt_pi_space.2 (fun σ => hcoord σ)
+  have hsymm : ContMDiff 𝓘(ℝ, (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ)
+      𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E) ∞
+      (fun c : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ => Bb.equivFun.symm c) :=
+    (Bb.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap).contMDiff
+  refine (hsymm.contMDiffAt.comp_contMDiffWithinAt p₀ hpi).congr_of_eventuallyEq ?_ ?_
+  · filter_upwards [self_mem_nhdsWithin] with p _
+    simp only [Function.comp_apply]
+    rw [show ((Bb.repr (e ⟨p.1, deTurckRHSField (I := I) g_bg
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1⟩).2) :
+          (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ) =
+        Bb.equivFun (e ⟨p.1, deTurckRHSField (I := I) g_bg
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1⟩).2 from
+        (Bb.equivFun_apply _).symm]
+    exact (Bb.equivFun.symm_apply_apply _).symm
+  · simp only [Function.comp_apply]
+    rw [show ((Bb.repr (e ⟨p₀.1, deTurckRHSField (I := I) g_bg
+        (realizedFam (I := I) g₀ T T' hδ hδ' p₀.2) p₀.1⟩).2) :
+          (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ) =
+        Bb.equivFun (e ⟨p₀.1, deTurckRHSField (I := I) g_bg
+          (realizedFam (I := I) g₀ T T' hδ hδ' p₀.2) p₀.1⟩).2 from
+        (Bb.equivFun_apply _).symm]
+    exact (Bb.equivFun.symm_apply_apply _).symm
+
+end JointSmoothness
 
 end MetricRealization
 end IntrinsicSpectral
