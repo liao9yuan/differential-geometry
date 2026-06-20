@@ -2,6 +2,10 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEi
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPointwiseFlowDeriv
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
+import DifferentialGeometry.Analysis.Integration.L2.ParametricFiberInnerSmooth
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
+import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
 
 noncomputable section
 
@@ -16,6 +20,7 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
@@ -66,6 +71,44 @@ private theorem exists_smoothCcTensor_of_allOrder_spectralMass
         = (S : TensorL2 0 2 g₀) from rfl, hS]
   rw [hSL2, hu_coeff i]
 
+private def deTurckRHSReconSection (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    SmoothCcTensor g₀ 0 2 :=
+  { toSection :=
+      (deTurckRHSSection (I := I) g_bg
+        (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection
+    hasCompactSupport :=
+      (deTurckRHSSection (I := I) g_bg
+        (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).hasCompactSupport }
+
+private theorem deTurckRHSSection_realize_path_tensorInner_eigenSmooth_jointContMDiffOn
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ) (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ =>
+        DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 p.1
+          ((Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i).toFun
+            p.1)
+          ((deTurckRHSReconSection (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2)).toFun p.1))
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
+  sorry
+
 private theorem deTurckRemainder_pathCoeff_timeContDiff
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -88,8 +131,62 @@ private theorem deTurckRemainder_pathCoeff_timeContDiff
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
         (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
           (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)
-        (Set.Icc (0 : ℝ) T) :=
-  sorry
+        (Set.Icc (0 : ℝ) T) := by
+  classical
+  intro i
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  have hsplit : ∀ t : ℝ,
+      tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i =
+        tensorL2Coeff (I := I) (M := M) hc
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+              (deTurckRHSReconSection (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i
+          - tensorL2Coeff (I := I) (M := M) hc
+              (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                (rawTensorConnLapSmooth (I := I) g₀ 0 2 (F t))) i := by
+    intro t
+    have hrem :
+        deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t)
+          = deTurckRHSReconSection (I := I) g₀ g_bg (F t) hδ_lt (hδ t)
+            - rawTensorConnLapSmooth (I := I) g₀ 0 2 (F t) := by
+      rfl
+    rw [hrem, SmoothCcTensor.toL2_sub]
+    unfold tensorL2Coeff
+    rw [map_sub]
+    rfl
+  refine ContDiffOn.congr ?_ (fun t _ => hsplit t)
+  refine ContDiffOn.sub ?_ ?_
+  · have hbridge : ∀ t : ℝ,
+        tensorL2Coeff (I := I) (M := M) hc
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+              (deTurckRHSReconSection (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i =
+          (inner ℝ (Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i)
+            (deTurckRHSReconSection (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) : ℝ) := by
+      intro t
+      rw [tensorL2Coeff_eq_inner,
+        Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma_apply,
+        ← Analysis.Parabolic.TensorSpectral.eigenvectorSmooth_toL2 (I := I) (M := M) g₀ 0 2 i,
+        ← SmoothCcTensor.toL2_apply
+          (Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i),
+        SmoothCcTensor.inner_toL2]
+    refine ContDiffOn.congr ?_ (fun t _ => hbridge t)
+    exact DifferentialGeometry.Integral.L2.contDiffOn_integral_fiberInner_of_jointContMDiffOn_Icc
+      (I := I) (M := M) g₀
+      (Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i)
+      (fun t => deTurckRHSReconSection (I := I) g₀ g_bg (F t) hδ_lt (hδ t))
+      (deTurckRHSSection_realize_path_tensorInner_eigenSmooth_jointContMDiffOn (I := I) (M := M)
+        g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass i)
+  · have hraw : ∀ t ∈ Set.Icc (0 : ℝ) T,
+        tensorL2Coeff (I := I) (M := M) hc
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+              (rawTensorConnLapSmooth (I := I) g₀ 0 2 (F t))) i =
+          -i.lambda * φ i t := by
+      intro t ht
+      rw [tensorL2Coeff_ofCompact_rawTensorConnLapSmooth (I := I) (M := M) g₀ hc (F t) i,
+        hcoeff t ht i]
+    refine ContDiffOn.congr ?_ (fun t ht => hraw t ht)
+    exact contDiffOn_const.mul (hφ_smooth i).contDiffOn
 
 private theorem deTurckRemainder_pathCoeff_timeJet_allOrderMass
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
