@@ -2512,75 +2512,6 @@ theorem symmAbsorbedPrincipalCoeffPure_realizedFam_toModel_continuous [Boundaryl
       (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
 
 set_option linter.unusedSectionVars false in
-/-- **(Posited STEP-1 keystone slice — continuity of the symm-absorbed order-`0` Riemann coefficient.)**
-At every fixed base point `x`, the model-fibre value of the symm-absorbed order-`0` Riemann coefficient
-family `s ↦ symmAbsorbedOrder0RiemannCoeff g₀ g_s (T − T')` is continuous in `s` on the realized small
-set.  The continuity slice of the (posited, separate-worker) joint `(s, x)`-smoothness keystone of the
-GT Riemann arm `ricciArmOrder0RiemannCoeff`, mirroring
-`symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous`; posited here as the precise keystone slice,
-to be discharged by recursing into the Riemann-arm joint-smoothness tower. -/
-theorem symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
-    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (x : M) :
-    ContinuousOn (fun t : ℝ =>
-      Tensor0SBundle.TensorRSSpace.toModel
-        ((symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')).toSection x))
-      (realizedSmallSet (δ := δ) (δ' := δ')) :=
-  sorry
-
-set_option linter.unusedSectionVars false in
-/-- **(Posited STEP-1 keystone slice — continuity of the symm-absorbed order-`0` DeTurck-Lie coefficient.)**
-At every fixed base point `x`, the model-fibre value of the symm-absorbed order-`0` DeTurck-Lie coefficient
-family `s ↦ symmAbsorbedOrder0DeTurckLieCoeff g₀ g_s g_bg (T − T')` is continuous in `s` on the realized
-small set.  The continuity slice of the (posited, separate-worker) joint `(s, x)`-smoothness keystone of the
-GT DeTurck-Lie arm `ricciArmOrder0DeTurckLieCoeff` (the connection-difference / DeTurck-VF covariant-gradient
-tower, jointly `(s, x)`-smooth via `gen_joint_christoffel`/`gen_joint_riemann`), mirroring
-`symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous`; posited here as the precise keystone slice,
-to be discharged by recursing into the DeTurck-Lie-arm joint-smoothness tower. -/
-theorem symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
-    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (x : M) :
-    ContinuousOn (fun t : ℝ =>
-      Tensor0SBundle.TensorRSSpace.toModel
-        ((symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg (T - T')).toSection x))
-      (realizedSmallSet (δ := δ) (δ' := δ')) :=
-  sorry
-
-set_option linter.unusedSectionVars false in
-/-- **Continuity slice of the assembled GT order-`0` coefficient.**  At every fixed base point `x`, the
-model-fibre value of the assembled three-arm order-`0` coefficient family
-`s ↦ ricciArmOrder0Coeff g₀ g_bg T T' s = −1·Curv + 2·Riemann + Lie` is continuous in `s` on the realized
-small set.  The sum of the three per-arm continuity slices
-(`symmAbsorbedOrder0CurvCoeff`/`Riemann`/`DeTurckLieCoeff_realizedFam_toModel_continuous`), distributing the
-model read-off `toModel` over the `(−1)•`, `2•`, and `+` of the coefficient sum. -/
-theorem ricciArmOrder0Coeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
-    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (x : M) :
-    ContinuousOn (fun t : ℝ =>
-      Tensor0SBundle.TensorRSSpace.toModel
-        ((ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' t).toSection x))
-      (realizedSmallSet (δ := δ) (δ' := δ')) := by
-  have hCurv := symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x
-  have hRm := symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x
-  have hLie := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_toModel_continuous (I := I) g₀ g_bg T T'
-    hδ hδ' x
-  have hsum := ((hCurv.const_smul (-1 : ℝ)).add (hRm.const_smul (2 : ℝ))).add hLie
-  refine hsum.congr (fun t _ => ?_)
-  rw [ricciArmOrder0Coeff]
-  rw [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add,
-    SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]
-  simp only [ContMDiffSection.coe_add, ContMDiffSection.coe_smul, Pi.add_apply, Pi.smul_apply,
-    Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_smul]
-
-set_option linter.unusedSectionVars false in
 /-- **(Posited STEP-1 keystone — joint `(x, s)`-smoothness of the symm-absorbed order-`0` Riemann
 coefficient.)**  The symm-absorbed order-`0` Riemann coefficient family
 `s ↦ symmAbsorbedOrder0RiemannCoeff g₀ g_s (T − T')` is jointly `C^∞` in `(x, s)` on the realized small
@@ -2619,6 +2550,81 @@ theorem symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_jointContMDiff [Boundaryle
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
   sorry
+
+set_option linter.unusedSectionVars false in
+/-- **(Posited STEP-1 keystone slice — continuity of the symm-absorbed order-`0` Riemann coefficient.)**
+At every fixed base point `x`, the model-fibre value of the symm-absorbed order-`0` Riemann coefficient
+family `s ↦ symmAbsorbedOrder0RiemannCoeff g₀ g_s (T − T')` is continuous in `s` on the realized small
+set.  The continuity slice of the (posited, separate-worker) joint `(s, x)`-smoothness keystone of the
+GT Riemann arm `ricciArmOrder0RiemannCoeff`, mirroring
+`symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous`; posited here as the precise keystone slice,
+to be discharged by recursing into the Riemann-arm joint-smoothness tower. -/
+theorem symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hjoint := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+    (fun t => symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+
+set_option linter.unusedSectionVars false in
+/-- **(Posited STEP-1 keystone slice — continuity of the symm-absorbed order-`0` DeTurck-Lie coefficient.)**
+At every fixed base point `x`, the model-fibre value of the symm-absorbed order-`0` DeTurck-Lie coefficient
+family `s ↦ symmAbsorbedOrder0DeTurckLieCoeff g₀ g_s g_bg (T − T')` is continuous in `s` on the realized
+small set.  The continuity slice of the (posited, separate-worker) joint `(s, x)`-smoothness keystone of the
+GT DeTurck-Lie arm `ricciArmOrder0DeTurckLieCoeff` (the connection-difference / DeTurck-VF covariant-gradient
+tower, jointly `(s, x)`-smooth via `gen_joint_christoffel`/`gen_joint_riemann`), mirroring
+`symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous`; posited here as the precise keystone slice,
+to be discharged by recursing into the DeTurck-Lie-arm joint-smoothness tower. -/
+theorem symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg (T - T')).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hjoint := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ'
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+    (fun t => symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg (T - T')) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+
+set_option linter.unusedSectionVars false in
+/-- **Continuity slice of the assembled GT order-`0` coefficient.**  At every fixed base point `x`, the
+model-fibre value of the assembled three-arm order-`0` coefficient family
+`s ↦ ricciArmOrder0Coeff g₀ g_bg T T' s = −1·Curv + 2·Riemann + Lie` is continuous in `s` on the realized
+small set.  The sum of the three per-arm continuity slices
+(`symmAbsorbedOrder0CurvCoeff`/`Riemann`/`DeTurckLieCoeff_realizedFam_toModel_continuous`), distributing the
+model read-off `toModel` over the `(−1)•`, `2•`, and `+` of the coefficient sum. -/
+theorem ricciArmOrder0Coeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' t).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hCurv := symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x
+  have hRm := symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x
+  have hLie := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_toModel_continuous (I := I) g₀ g_bg T T'
+    hδ hδ' x
+  have hsum := ((hCurv.const_smul (-1 : ℝ)).add (hRm.const_smul (2 : ℝ))).add hLie
+  refine hsum.congr (fun t _ => ?_)
+  rw [ricciArmOrder0Coeff]
+  rw [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add,
+    SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]
+  simp only [ContMDiffSection.coe_add, ContMDiffSection.coe_smul, Pi.add_apply, Pi.smul_apply,
+    Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_smul]
 
 set_option linter.unusedSectionVars false in
 /-- **Joint `(x, s)`-smoothness of the assembled GT order-`0` coefficient.**  The assembled three-arm
