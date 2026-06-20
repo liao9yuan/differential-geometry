@@ -6654,36 +6654,6 @@ theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric 
               else smoothOrthoFrame (I := I) g₁ x b x) :=
   Classical.choose_spec (exists_ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W x v
 
-/-! ## The GT-validated order-`0` DeTurck-Lie coefficient `(𝓛_{δW} g_bg)` (STEP 2 Lie arm)
-
-The DeTurck Lie arm of the GT order-`0` is the value-level (no-`∂h`) part of
-`(d/ds)(𝓛_{deTurckVF g_s g_bg} g_s)` along `g_s = g_bg + s·h`, namely the symmetrized covariant gradient
-of the linearized DeTurck vector field `δW = D(deTurckVF · g_bg)[h]`:
-`(𝓛_{δW} g_bg)_{ik} = ∇_i δW_k + ∇_k δW_i`.  The exact dim-3/4/5 fit shows this is a symmetric
-`(0, 2)`-structure that is **not** in the span of `{Ric♯h + hRic♯, R_{ipkq}h^{pq}}` (residual `O(1)`) and
-that **depends genuinely on `g_bg`** (a dim-3/4/5 test varying `g_bg`'s curvature changes the value-level
-Lie order-`0` by `≈ 76%` of its norm) — it is its own carrier, depending on **both** `g_s` and `g_bg`.
-
-This is the precise sub-child posited here as a smooth `(2, 2)`-operator-field carrier
-`R_Lie(g_s, g_bg)`: it is `deTurckVF`-built (the `deTurckVF g_s g_bg` first-order linearization + its
-symmetrized covariant gradient) and is non-vacuous (its read-off is the GT Lie value-level, which is
-nonzero where the DeTurck gauge curvature of `(g_s, g_bg)` acts nontrivially on `h`). -/
-
-/-- **(Posited STEP-2 Lie-arm sub-child — the smooth DeTurck-Lie order-`0` symmetric `(0, 2)` value
-field.)**  There is a smooth `(0, 2)`-value field `Λ(g₁, g_bg)` — the value-level DeTurck-Lie order-`0`
-action `(𝓛_{δW} g_bg)` — that is **`g_bg`-genuinely-dependent**: there exist a base point and a value at
-which `Λ(g₁, g_bg)` and `Λ(g₁, g_bg')` DIFFER for some pair of backgrounds `g_bg ≠ g_bg'`.  The genuine
-`g_bg`-dependence rejects the degenerate zero/`g_bg`-free witness (the GT value-level Lie order-`0` varies
-with `g_bg` by `≈ 76%`), so this is non-vacuous.  Posited so the order-`0` re-mint and bridge 3 assemble on
-the genuine `g_bg`-dependent Lie field; to be discharged by the DeTurck-VF first-order linearization
-(`deTurckVF g_s g_bg` derivative) and its symmetrized covariant gradient `∇_i δW_k + ∇_k δW_i`. -/
-theorem exists_ricciArmOrder0DeTurckLieField :
-    ∃ Λ : SmoothRiemannianMetric I M → SmoothRiemannianMetric I M → (x : M) →
-        (Fin 2 → TangentSpace I x) → ℝ,
-      ∃ (g₁ g_bg g_bg' : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x),
-        Λ g₁ g_bg x v ≠ Λ g₁ g_bg' x v :=
-  sorry
-
 /-! ## The symmetrizer-absorbed Ricci-arm coefficients (order-`2` pure rough Laplacian, order-`0`
 two-slot curvature)
 
@@ -6850,31 +6820,881 @@ noncomputable def deTurckLieCovDerivW (g₁ g_bg : SmoothRiemannianMetric I M)
   (LeviCivita (I := I) g₁).toFun
     (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b) x (X x)
 
-/-- **(Posited STEP-1 sub-child — the smooth DeTurck-Lie order-`0` `(2, 2)`-coefficient `Δ_Lie`.)**
-There is a smooth compactly-supported `(2, 2)`-tensor field `R_Lie` whose `appCc`/`unitModel` read-off
-on any `(0, 2)`-tensor field `W` is the boxed GT DeTurck-Lie order-`0` action `Δ_Lie(D)` of `(g₁, g_bg)`
-on the unit-form `D = unitModel g₀ 2 W x`, written frame-free through the connection-difference
-`connDiff g₁ g_bg`, the DeTurck vector field `deTurckVF g₁ g_bg`, their `∇^{g₁}`-covariant derivatives
-(`deTurckLieCovDerivA`, `deTurckLieCovDerivW`), and a `g₁`-orthonormal frame `e a = smoothOrthoFrame g₁ x a x`:
-```
-unitModel g₀ 2 (appCc g₀ 2 2 R_Lie W) x v
-  = -- DLa : − h^{pq}(∇_{v0} A_{v1, ·, ·} + ∇_{v1} A_{v0, ·, ·}), h^{pq} raised by the o.n. frame
-    (- ∑_{a, b} D(e a, e b) *
-        ( g₁.inner x (deTurckLieCovDerivA g₁ g_bg (ext (v 0)) (ext (e a)) (ext (e b)) x) (v 1)
-        + g₁.inner x (deTurckLieCovDerivA g₁ g_bg (ext (v 1)) (ext (e a)) (ext (e b)) x) (v 0) ))
-    -- DLb : h_{pj} ∇_{v0} W^p + h_{ip} ∇_{v1} W^p
-    + ( D(deTurckLieCovDerivW g₁ g_bg (ext (v 0)) x, v 1)
-      + D(v 0, deTurckLieCovDerivW g₁ g_bg (ext (v 1)) x) ),
-  ext u := smoothExtensionTangent x u,  e a := smoothOrthoFrame g₁ x a x,  D = unitModel g₀ 2 W x.
-```
-This is the GT DeTurck-Lie order-`0` building block (DLa + DLb, each coeff `+1`).  The carrier is built
-from `connDiff g₁ g_bg`/`deTurckVF g₁ g_bg` and their covariant gradients contracted across both
-covariant slots; its base-point smoothness routes through `connDiff_contMDiff`/`deTurckVF` smoothness
-exactly as `ricciArmOrder0CurvCoeffFib`/`ricEndoRaisedFib` route their endomorphism fields.  Posited as a
-precise existence sub-child so the order-`0` re-mint and bridge 3 can assemble on it; to be discharged by
-the connection-difference/DeTurck-VF covariant-gradient construction.  It is non-vacuous and
-`g_bg`-genuine: at `g_bg = g₁` the read-off vanishes (`connDiff g₁ g₁ = 0`, `deTurckVF g₁ g₁ = 0`), and on a
-curved background with `g_bg ≠ g₁` it is nonzero (numeric `≈ 0.12` at a random `(g₁, g_bg, h)`). -/
+
+/-! ### The raw connection-difference operator-field smoothness -/
+
+/-- The raw connection-difference `(1, 2)`-operator field `b ↦ connDiff g₁ g_bg b` is a smooth
+Hom²-section, via `cotangentCov_clmSection_smooth_aux` twice over `connDiff_contMDiff`. -/
+theorem connDiffOp_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E)) ∞
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] TangentSpace I z) b
+        (PDE.DeTurck.connDiff (I := I) g₁ g_bg b)) := by
+  classical
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z)
+    (φ := fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g_bg b)
+  intro Y
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun z : M => TangentSpace I z)
+    (φ := fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b))
+  intro Z
+  exact PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg Y.contMDiff Z.contMDiff
+
+/-- Pointwise differentiability of the raw connDiff operator field, total-space form. -/
+theorem connDiffOp_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E))
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z →L[ℝ] TangentSpace I z) b
+        (PDE.DeTurck.connDiff (I := I) g₁ g_bg b)) x :=
+  (connDiffOp_homSection_contMDiff (I := I) g₁ g_bg).contMDiffAt.mdifferentiableAt (by simp)
+
+/-- The modified vector section `b ↦ connDiff g₁ g_bg b (Y b) (Z b)` is differentiable at `x` from
+the pointwise differentiability of `Y`, `Z` and the smooth connDiff operator field (two
+`clm_bundle_apply`s). Explicit total-space form (mirrors `HomConnection.mdiffAt_apply`). -/
+theorem connDiff_pairing_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M)
+    {Y Z : Π b : M, TangentSpace I b} {x : M}
+    (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (Y b)) x)
+    (hZ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (Z b)) x) :
+    MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+        (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b))) x := by
+  have h1 : MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E))
+      (fun b => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z) b
+        (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b))) x :=
+    MDifferentiableAt.clm_bundle_apply
+      (F₁ := E) (F₂ := E →L[ℝ] E)
+      (E₁ := fun z : M => TangentSpace I z)
+      (E₂ := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z)
+      (b := fun b : M => b)
+      (ϕ := fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b) (v := fun b => Y b)
+      (connDiffOp_mdiffAt (I := I) g₁ g_bg x) hY
+  exact MDifferentiableAt.clm_bundle_apply
+    (F₁ := E) (F₂ := E)
+    (E₁ := fun z : M => TangentSpace I z) (E₂ := fun z : M => TangentSpace I z)
+    (b := fun b : M => b)
+    (ϕ := fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b)) (v := fun b => Z b) h1 hZ
+
+/-! ### Tensoriality of `deTurckLieCovDerivA g₁ g_bg X · · x` in the two covariant slots -/
+
+/-- `deTurckLieCovDerivA g₁ g_bg X · Z x` is tensorial in the `Y`-slot at `x`. The Leibniz
+cross-term of `∇^{g₁}_X (A(Y, Z))` cancels against the cross-term of `A(∇^{g₁}_X Y, Z)` (both equal to
+`(extDerivFun f x)(X x) • A_x(Y x, Z x)`). Vector-valued analogue of `tensor02Scalar_tensorialAt_Y`. -/
+theorem deTurckLieCovDerivA_tensorialAt_Y (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X Z : Π b : M, TangentSpace I b) (x : M)
+    (hZ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (Z b)) x) :
+    TensorialAt I E
+      (fun Y : Π b : M, TangentSpace I b =>
+        deTurckLieCovDerivA (I := I) g₁ g_bg X Y Z x) x where
+  smul {f Y} hf hY := by
+    classical
+    set cov := LeviCivita (I := I) g₁ with hcov_def
+    have hcovOn := cov.isCovariantDerivativeOnUniv
+    set G : Π b : M, TangentSpace I b :=
+      fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b) with hG_def
+    have hG : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun b => TotalSpace.mk' E (E := TangentSpace I) b (G b)) x :=
+      connDiff_pairing_mdiffAt (I := I) g₁ g_bg hY hZ
+    have hfYG : (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b ((f • Y) b) (Z b)) = f • G := by
+      funext b
+      change PDE.DeTurck.connDiff (I := I) g₁ g_bg b (f b • Y b) (Z b) = f b • G b
+      rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply]
+    change cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b ((f • Y) b) (Z b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun (f • Y) x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x ((f • Y) x) (cov.toFun Z x (X x)) =
+      f x • (cov.toFun G x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun Z x (X x)))
+    rw [hfYG]
+    rw [hcovOn.leibniz hG hf (Set.mem_univ x)]
+    rw [hcovOn.leibniz hY hf (Set.mem_univ x)]
+    have hfY_x : (f • Y) x = f x • Y x := rfl
+    rw [hfY_x]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.map_add,
+      ContinuousLinearMap.map_smul, hG_def]
+    rw [smul_sub, smul_sub]
+    abel
+  add {Y Y'} hY hY' := by
+    classical
+    set cov := LeviCivita (I := I) g₁ with hcov_def
+    have hcovOn := cov.isCovariantDerivativeOnUniv
+    have hGY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+          (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b))) x :=
+      connDiff_pairing_mdiffAt (I := I) g₁ g_bg hY hZ
+    have hGY' : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+          (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y' b) (Z b))) x :=
+      connDiff_pairing_mdiffAt (I := I) g₁ g_bg hY' hZ
+    have hadd_fun : (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b ((Y + Y') b) (Z b)) =
+        (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b)) +
+          (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y' b) (Z b)) := by
+      funext b
+      change PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b + Y' b) (Z b) =
+        PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b) +
+          PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y' b) (Z b)
+      rw [ContinuousLinearMap.map_add, ContinuousLinearMap.add_apply]
+    change cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b ((Y + Y') b) (Z b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun (Y + Y') x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x ((Y + Y') x) (cov.toFun Z x (X x)) =
+      (cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun Z x (X x))) +
+      (cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y' b) (Z b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y' x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y' x) (cov.toFun Z x (X x)))
+    rw [hadd_fun, hcovOn.add hGY hGY' (Set.mem_univ x)]
+    rw [hcovOn.add hY hY' (Set.mem_univ x)]
+    have hYY'_x : (Y + Y') x = Y x + Y' x := rfl
+    rw [hYY'_x]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
+    abel
+
+/-- `deTurckLieCovDerivA g₁ g_bg X Y · x` is tensorial in the `Z`-slot at `x`. Symmetric to `Y`. -/
+theorem deTurckLieCovDerivA_tensorialAt_Z (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X Y : Π b : M, TangentSpace I b) (x : M)
+    (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (Y b)) x) :
+    TensorialAt I E
+      (fun Z : Π b : M, TangentSpace I b =>
+        deTurckLieCovDerivA (I := I) g₁ g_bg X Y Z x) x where
+  smul {f Z} hf hZ := by
+    classical
+    set cov := LeviCivita (I := I) g₁ with hcov_def
+    have hcovOn := cov.isCovariantDerivativeOnUniv
+    set G : Π b : M, TangentSpace I b :=
+      fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b) with hG_def
+    have hG : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun b => TotalSpace.mk' E (E := TangentSpace I) b (G b)) x :=
+      connDiff_pairing_mdiffAt (I := I) g₁ g_bg hY hZ
+    have hfZG : (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) ((f • Z) b)) = f • G := by
+      funext b
+      change PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (f b • Z b) = f b • G b
+      rw [ContinuousLinearMap.map_smul]
+    change cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) ((f • Z) b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) ((f • Z) x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun (f • Z) x (X x)) =
+      f x • (cov.toFun G x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun Z x (X x)))
+    rw [hfZG]
+    rw [hcovOn.leibniz hG hf (Set.mem_univ x)]
+    rw [hcovOn.leibniz hZ hf (Set.mem_univ x)]
+    have hfZ_x : (f • Z) x = f x • Z x := rfl
+    rw [hfZ_x]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.map_add,
+      ContinuousLinearMap.map_smul, hG_def]
+    rw [smul_sub, smul_sub]
+    abel
+  add {Z Z'} hZ hZ' := by
+    classical
+    set cov := LeviCivita (I := I) g₁ with hcov_def
+    have hcovOn := cov.isCovariantDerivativeOnUniv
+    have hGZ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+          (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b))) x :=
+      connDiff_pairing_mdiffAt (I := I) g₁ g_bg hY hZ
+    have hGZ' : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+          (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z' b))) x :=
+      connDiff_pairing_mdiffAt (I := I) g₁ g_bg hY hZ'
+    have hadd_fun : (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) ((Z + Z') b)) =
+        (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b)) +
+          (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z' b)) := by
+      funext b
+      change PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b + Z' b) =
+        PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b) +
+          PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z' b)
+      rw [ContinuousLinearMap.map_add]
+    change cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) ((Z + Z') b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) ((Z + Z') x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun (Z + Z') x (X x)) =
+      (cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) (Z x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun Z x (X x))) +
+      (cov.toFun (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z' b)) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (cov.toFun Y x (X x)) (Z' x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x) (cov.toFun Z' x (X x)))
+    rw [hadd_fun, hcovOn.add hGZ hGZ' (Set.mem_univ x)]
+    rw [hcovOn.add hZ hZ' (Set.mem_univ x)]
+    have hZZ'_x : (Z + Z') x = Z x + Z' x := rfl
+    rw [hZZ'_x]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
+    abel
+
+/-! ### The pointwise DLa covariant-derivative kernel -/
+
+/-- The pointwise DLa covariant-derivative kernel CLM₂ in the two curvature slots `(p, q)`, for a
+frozen direction `v0` (extended to `ext v0`): built via `TensorialAt.mkHom₂` from the `Y`/`Z`
+tensoriality of `deTurckLieCovDerivA`. -/
+noncomputable def dLaCovKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (v0 : TangentSpace I x) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
+  TensorialAt.mkHom₂ (F := E) (F' := E)
+    (V := (TangentSpace I : M → Type _)) (V' := (TangentSpace I : M → Type _))
+    (A := TangentSpace I x)
+    (fun Y Z => deTurckLieCovDerivA (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Y Z x) x
+    (fun Z hZ => deTurckLieCovDerivA_tensorialAt_Y (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Z x hZ)
+    (fun Y hY => deTurckLieCovDerivA_tensorialAt_Z (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Y x hY)
+
+/-- The DLa covariant-derivative kernel applied to extensions of `p, q` reproduces the raw value. -/
+theorem dLaCovKernel_apply_extend (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (v0 p q : TangentSpace I x) :
+    dLaCovKernel (I := I) g₁ g_bg x v0 p q =
+      deTurckLieCovDerivA (I := I) g₁ g_bg
+        (smoothExtensionTangent (I := I) x v0)
+        (smoothExtensionTangent (I := I) x p)
+        (smoothExtensionTangent (I := I) x q) x := by
+  have hp := smoothExtensionTangent_mdiff (I := I) x p x
+  have hq := smoothExtensionTangent_mdiff (I := I) x q x
+  have h := TensorialAt.mkHom₂_apply (F := E) (F' := E)
+    (V := (TangentSpace I : M → Type _)) (V' := (TangentSpace I : M → Type _))
+    (Φ := fun Y Z => deTurckLieCovDerivA (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Y Z x)
+    (hΦ₁ := fun Z hZ => deTurckLieCovDerivA_tensorialAt_Y (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Z x hZ)
+    (hΦ₂ := fun Y hY => deTurckLieCovDerivA_tensorialAt_Z (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Y x hY)
+    (σ := smoothExtensionTangent (I := I) x p)
+    (τ := smoothExtensionTangent (I := I) x q) hp hq
+  rw [smoothExtensionTangent_eq, smoothExtensionTangent_eq] at h
+  exact h
+
+/-- The DLa covariant-derivative kernel applied to GLOBAL smooth fields `V_field, W_field` (not
+their point-extensions) reproduces the raw value `deTurckLieCovDerivA (ext v0) V_field W_field x`. -/
+theorem dLaCovKernel_apply_field (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (v0 : TangentSpace I x) (V_field W_field : Π b : M, TangentSpace I b)
+    (hV : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (V_field b)) x)
+    (hW : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (W_field b)) x) :
+    dLaCovKernel (I := I) g₁ g_bg x v0 (V_field x) (W_field x) =
+      deTurckLieCovDerivA (I := I) g₁ g_bg
+        (smoothExtensionTangent (I := I) x v0) V_field W_field x :=
+  TensorialAt.mkHom₂_apply (F := E) (F' := E)
+    (V := (TangentSpace I : M → Type _)) (V' := (TangentSpace I : M → Type _))
+    (Φ := fun Y Z => deTurckLieCovDerivA (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Y Z x)
+    (hΦ₁ := fun Z hZ => deTurckLieCovDerivA_tensorialAt_Y (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Z x hZ)
+    (hΦ₂ := fun Y hY => deTurckLieCovDerivA_tensorialAt_Z (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) Y x hY)
+    (σ := V_field) (τ := W_field) hV hW
+
+/-! ### `X`-value linearity of `deTurckLieCovDerivA` and `dLaCovKernel` -/
+
+/-- `deTurckLieCovDerivA X Y Z x` depends on `X` only through its value `X x`. -/
+theorem deTurckLieCovDerivA_X_congr (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X X' Y Z : Π b : M, TangentSpace I b) (x : M) (hXX : X x = X' x) :
+    deTurckLieCovDerivA (I := I) g₁ g_bg X Y Z x =
+      deTurckLieCovDerivA (I := I) g₁ g_bg X' Y Z x := by
+  rw [deTurckLieCovDerivA, deTurckLieCovDerivA, hXX]
+
+/-- `deTurckLieCovDerivA · Y Z x` is additive in the `X x` value (the three covariant terms are each a
+CLM applied to `X x`). -/
+theorem deTurckLieCovDerivA_X_add (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X X' Y Z : Π b : M, TangentSpace I b) (x : M) :
+    deTurckLieCovDerivA (I := I) g₁ g_bg (X + X') Y Z x =
+      deTurckLieCovDerivA (I := I) g₁ g_bg X Y Z x +
+        deTurckLieCovDerivA (I := I) g₁ g_bg X' Y Z x := by
+  have h : (X + X') x = X x + X' x := rfl
+  unfold deTurckLieCovDerivA
+  rw [h]
+  simp only [map_add, ContinuousLinearMap.add_apply]
+  abel
+
+/-- `deTurckLieCovDerivA · Y Z x` is homogeneous in the `X x` value. -/
+theorem deTurckLieCovDerivA_X_smul (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X Y Z cX : Π b : M, TangentSpace I b) (c : ℝ) (x : M) (hcX : cX x = c • X x) :
+    deTurckLieCovDerivA (I := I) g₁ g_bg cX Y Z x =
+      c • deTurckLieCovDerivA (I := I) g₁ g_bg X Y Z x := by
+  unfold deTurckLieCovDerivA
+  rw [hcX]
+  simp only [map_smul, ContinuousLinearMap.smul_apply]
+  rw [smul_sub, smul_sub]
+
+/-- `dLaCovKernel x · p q` is additive in `v0`: the kernel depends on `v0` only through the value
+`(ext v0) x = v0`, which is additive. -/
+theorem dLaCovKernel_add_left (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (v0 v0' p q : TangentSpace I x) :
+    dLaCovKernel (I := I) g₁ g_bg x (v0 + v0') p q =
+      dLaCovKernel (I := I) g₁ g_bg x v0 p q + dLaCovKernel (I := I) g₁ g_bg x v0' p q := by
+  rw [dLaCovKernel_apply_extend, dLaCovKernel_apply_extend, dLaCovKernel_apply_extend]
+  rw [deTurckLieCovDerivA_X_congr (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x (v0 + v0'))
+      (smoothExtensionTangent (I := I) x v0 + smoothExtensionTangent (I := I) x v0')
+      _ _ x (by
+        change smoothExtensionTangent (I := I) x (v0 + v0') x =
+          smoothExtensionTangent (I := I) x v0 x + smoothExtensionTangent (I := I) x v0' x
+        rw [smoothExtensionTangent_eq, smoothExtensionTangent_eq, smoothExtensionTangent_eq])]
+  rw [deTurckLieCovDerivA_X_add]
+
+/-- `dLaCovKernel x · p q` is homogeneous in `v0`. -/
+theorem dLaCovKernel_smul_left (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (c : ℝ) (v0 p q : TangentSpace I x) :
+    dLaCovKernel (I := I) g₁ g_bg x (c • v0) p q = c • dLaCovKernel (I := I) g₁ g_bg x v0 p q := by
+  rw [dLaCovKernel_apply_extend, dLaCovKernel_apply_extend]
+  rw [deTurckLieCovDerivA_X_smul (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x v0) _ _
+      (smoothExtensionTangent (I := I) x (c • v0)) c x (by
+        rw [smoothExtensionTangent_eq, smoothExtensionTangent_eq])]
+
+/-! ### The symmetrized DLa inner-product kernel bilinear form (in `v0, v1`) -/
+
+/-- The DLa kernel bilinear form `(v0, v1) ↦ ⟨A_lie(v0, p, q), v1⟩`, continuous bilinear in `(v0, v1)`,
+for fixed frame vectors `p q : T_x` (the `v0`-linearity routes through `dLaCovKernel_add_left/smul_left`).
+The symmetrization in `v0 ↔ v1` is added later at the read-off. -/
+def dLaKernelBilin (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v0 => g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v0 p q)
+      map_add' := fun v0 v0' => by
+        rw [dLaCovKernel_add_left, map_add]
+      map_smul' := fun c v0 => by
+        rw [dLaCovKernel_smul_left, map_smul, RingHom.id_apply] }
+
+@[simp] theorem dLaKernelBilin_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (p q v0 v1 : TangentSpace I x) :
+    dLaKernelBilin (I := I) g₁ g_bg x p q v0 v1 =
+      g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v0 p q) v1 := by
+  rw [dLaKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+
+/-- The symmetrized DLa kernel bilinear form `(v0, v1) ↦ ⟨A_lie(v0, p, q), v1⟩ + ⟨A_lie(v1, p, q),
+v0⟩`, for fixed frame vectors `p q`. -/
+def dLaKernelBilinSym (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  dLaKernelBilin (I := I) g₁ g_bg x p q +
+    ContinuousLinearMap.flip (dLaKernelBilin (I := I) g₁ g_bg x p q)
+
+@[simp] theorem dLaKernelBilinSym_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (p q v0 v1 : TangentSpace I x) :
+    dLaKernelBilinSym (I := I) g₁ g_bg x p q v0 v1 =
+      g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v0 p q) v1 +
+        g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v1 p q) v0 := by
+  rw [dLaKernelBilinSym, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.flip_apply, dLaKernelBilin_apply, dLaKernelBilin_apply]
+
+/-! ### The per-`(a,b)` DLa summand and the frozen-frame DLa operator -/
+
+/-- The per-`(a, b)` DLa summand operator, for fixed frame vectors `p q : T_x`:
+`D ↦ (toModel D ![p, q]) • ofModel(bilinFormToModel (dLaKernelBilinSym g₁ g_bg x p q))`.
+A rank-one-in-`D` continuous linear endomorphism of the `(0, 2)`-tensor fibre (mirrors
+`riemannSummandFib`). -/
+def dLaSummandFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (p q : TangentSpace I x) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D =>
+        (Tensor0SSpace.toModel D ![(p : E), (q : E)]) •
+          Tensor0SSpace.ofModel (I := I) (x := x)
+            (bilinFormToModel E (dLaKernelBilinSym (I := I) g₁ g_bg x p q))
+      map_add' := fun D D' => by
+        rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, add_smul]
+      map_smul' := fun c D => by
+        rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
+          RingHom.id_apply, mul_smul] }
+
+@[simp] theorem dLaSummandFib_toModel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel (dLaSummandFib (I := I) g₁ g_bg x p q D) v =
+      (Tensor0SSpace.toModel D ![(p : E), (q : E)]) *
+        (g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (v 0) p q) (v 1) +
+          g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (v 1) p q) (v 0)) := by
+  rw [dLaSummandFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+    Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, Tensor0SSpace.toModel_ofModel,
+    bilinFormToModel_apply, smul_eq_mul]
+  rw [dLaKernelBilinSym]
+  rfl
+
+/-- The frozen-frame DLa fibre operator: `(-1) ·` the double sum over the frame `B` of the per-`(a, b)`
+DLa summands evaluated at the frame vectors `B a x, B b x`. -/
+def dLaBiContrFibFixedFrame (g₁ g_bg : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  (-1 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+    dLaSummandFib (I := I) g₁ g_bg x (B a x) (B b x)
+
+/-- Read-off of the frozen-frame DLa fibre operator on a tuple `v`. -/
+theorem dLaBiContrFibFixedFrame_toModel (g₁ g_bg : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel (dLaBiContrFibFixedFrame (I := I) g₁ g_bg B x D) v =
+      (-1 : ℝ) * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        (g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (v 0) (B a x) (B b x)) (v 1) +
+          g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (v 1) (B a x) (B b x)) (v 0)) *
+          Tensor0SSpace.toModel D ![(B a x : E), (B b x : E)] := by
+  classical
+  rw [dLaBiContrFibFixedFrame, ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  congr 1
+  rw [ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply, map_sum,
+    ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, Tensor0SSpace.toModelL_apply, ← Tensor0SSpace.toModelL_apply,
+    map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [Tensor0SSpace.toModelL_apply, dLaSummandFib_toModel]
+  ring
+
+/-! ### Smoothness of the DLa covariant-derivative vector field and kernel -/
+
+/-- The DLa covariant-derivative vector field `b ↦ deTurckLieCovDerivA g₁ g_bg V0 p q b` is a smooth
+global section, expanded as `covApply (LeviCivita g₁) V0 (A(p, q)) − A(∇V0 p, q) − A(p, ∇V0 q)` and
+assembled from `covApply_contMDiff` and `connDiff_contMDiff`. -/
+theorem deTurckLieCovDerivA_section_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
+    (V0 p q : Π b : M, TangentSpace I b)
+    (hV0 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V0))
+    (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
+    (hq : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% q)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b => deTurckLieCovDerivA (I := I) g₁ g_bg V0 p q b)) := by
+  have hcd_pq : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun y => PDE.DeTurck.connDiff (I := I) g₁ g_bg y (p y) (q y))) :=
+    PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg hp hq
+  have hterm1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b => covApply (LeviCivita (I := I) g₁) V0
+        (fun y => PDE.DeTurck.connDiff (I := I) g₁ g_bg y (p y) (q y)) b)) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g₁) (X := V0) hV0 hcd_pq
+  have hcovV0p : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b => covApply (LeviCivita (I := I) g₁) V0 p b)) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g₁) (X := V0) hV0 hp
+  have hcovV0q : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b => covApply (LeviCivita (I := I) g₁) V0 q b)) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g₁) (X := V0) hV0 hq
+  have hterm2 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b
+        (covApply (LeviCivita (I := I) g₁) V0 p b) (q b))) :=
+    PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg hcovV0p hq
+  have hterm3 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (p b)
+        (covApply (LeviCivita (I := I) g₁) V0 q b))) :=
+    PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg hp hcovV0q
+  refine ((hterm1.sub_section hterm2).sub_section hterm3).congr (fun b => ?_)
+  rfl
+
+/-- The DLa covariant-derivative kernel applied to GLOBAL smooth fields in all three slots reproduces
+the raw value `deTurckLieCovDerivA V0 p q x` (the first slot via `apply_field` then `X`-congr). -/
+theorem dLaCovKernel_apply_field3 (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (V0 V_field W_field : Π b : M, TangentSpace I b)
+    (_hV0 : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (V0 b)) x)
+    (hV : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (V_field b)) x)
+    (hW : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (W_field b)) x) :
+    dLaCovKernel (I := I) g₁ g_bg x (V0 x) (V_field x) (W_field x) =
+      deTurckLieCovDerivA (I := I) g₁ g_bg V0 V_field W_field x := by
+  rw [dLaCovKernel_apply_field (I := I) g₁ g_bg x (V0 x) V_field W_field hV hW]
+  exact deTurckLieCovDerivA_X_congr (I := I) g₁ g_bg
+    (smoothExtensionTangent (I := I) x (V0 x)) V0 V_field W_field x
+    (smoothExtensionTangent_eq (I := I) x (V0 x))
+
+/-- Global scalar smoothness of the DLa kernel `x ↦ ⟨A_lie(V0(x), p(x), q(x)), W(x)⟩_{g₁}` for smooth
+global fields `V0, p, q, W`, via `apply_field3` then `contMDiff_g_inner_of_smooth_sections`. -/
+theorem dLaKernelScalar_global (g₁ g_bg : SmoothRiemannianMetric I M)
+    {V0 W p q : Π b : M, TangentSpace I b}
+    (hV0 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V0))
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% W))
+    (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
+    (hq : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% q)) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => g₁.inner x
+        (dLaCovKernel (I := I) g₁ g_bg x (V0 x) (p x) (q x)) (W x)) := by
+  classical
+  have hAsec := deTurckLieCovDerivA_section_contMDiff (I := I) g₁ g_bg V0 p q hV0 hp hq
+  have hcongr : (fun x : M => g₁.inner x
+        (dLaCovKernel (I := I) g₁ g_bg x (V0 x) (p x) (q x)) (W x)) =
+      (fun x : M => g₁.inner x (deTurckLieCovDerivA (I := I) g₁ g_bg V0 p q x) (W x)) := by
+    funext x
+    rw [dLaCovKernel_apply_field3 (I := I) g₁ g_bg x V0 p q
+      (hV0.contMDiffAt.mdifferentiableAt (by simp))
+      (hp.contMDiffAt.mdifferentiableAt (by simp))
+      (hq.contMDiffAt.mdifferentiableAt (by simp))]
+  rw [hcongr]
+  exact contMDiff_g_inner_of_smooth_sections (I := I) g₁
+    ⟨fun b => deTurckLieCovDerivA (I := I) g₁ g_bg V0 p q b, hAsec⟩ ⟨fun b => W b, hW⟩
+
+/-- The DLa kernel Hom²-section smoothness `x ↦ ⟨x, dLaKernelBilinSym g₁ g_bg x (p x)(q x)⟩` for
+smooth global fields `p, q`, via `cotangentCov_clmSection_smooth_aux` twice over
+`dLaKernelScalar_global` (in both `v0` and `v1`). -/
+theorem dLaKernelBilinSym_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
+    {p q : Π b : M, TangentSpace I b}
+    (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
+    (hq : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% q)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
+        x (dLaKernelBilinSym (I := I) g₁ g_bg x (p x) (q x))) := by
+  classical
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
+    (φ := fun x : M => dLaKernelBilinSym (I := I) g₁ g_bg x (p x) (q x))
+  intro V0
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun _ : M => ℝ)
+    (φ := fun x : M => dLaKernelBilinSym (I := I) g₁ g_bg x (p x) (q x) (V0 x))
+  intro W
+  have h_scalar0 := dLaKernelScalar_global (I := I) g₁ g_bg V0.contMDiff W.contMDiff hp hq
+  have h_scalar1 := dLaKernelScalar_global (I := I) g₁ g_bg W.contMDiff V0.contMDiff hp hq
+  have h_scalar := h_scalar0.add h_scalar1
+  intro x
+  rw [contMDiffAt_section]
+  refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_
+  filter_upwards with y
+  change dLaKernelBilinSym (I := I) g₁ g_bg y (p y) (q y) (V0 y) (W y) =
+    (trivializationAt ℝ (Bundle.Trivial M ℝ) x ⟨y, _⟩).2
+  rw [dLaKernelBilinSym_apply]
+  rfl
+
+/-! ### Smoothness of the frozen-frame DLa operator -/
+
+/-- The `(0, 2)`-section value `x ↦ dLaBiContrFibFixedFrame g₁ g_bg B x (Y x)` of the frozen-frame DLa
+operator on a smooth `(0, 2)`-section `Y`, as a `(-1) •` double sum of scalar-times-bilinForm-sections
+(mirrors `riemannBiContrFibFixedFrame_apply_section_contMDiff`). -/
+theorem dLaBiContrFibFixedFrame_apply_section_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
+    (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        (dLaBiContrFibFixedFrame (I := I) g₁ g_bg B x (Y x))) := by
+  classical
+  have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
+      ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SSpace 2 I z) x
+          (dLaSummandFib (I := I) g₁ g_bg x (B a x) (B b x) (Y x))) := by
+    intro a b
+    have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun x : M => Tensor0SSpace.toModel (Y x) ![(B a x : E), (B b x : E)]) := by
+      have h := TensorMultilinear.contMDiff_section_apply (n := 2)
+        (fun b => Y b) Y.contMDiff
+        (![fun z => B a z, fun z => B b z])
+        (by
+          intro i
+          fin_cases i
+          · exact hB a
+          · exact hB b)
+      refine h.congr ?_
+      intro x
+      congr 1
+      funext i
+      fin_cases i <;> rfl
+    have hbilin := contMDiff_bilinSection_of_homSection (I := I)
+      (fun x => dLaKernelBilinSym (I := I) g₁ g_bg x (B a x) (B b x))
+      (dLaKernelBilinSym_homSection_contMDiff (I := I) g₁ g_bg (hB a) (hB b))
+    have hsmul := ContMDiff.smul_section (f := fun x => Tensor0SSpace.toModel (Y x)
+        ![(B a x : E), (B b x : E)])
+      (s := fun x => Tensor0SSpace.ofModel (I := I) (x := x)
+        (bilinFormToModel (TangentSpace I x) (dLaKernelBilinSym (I := I) g₁ g_bg x (B a x) (B b x))))
+      hscalar hbilin
+    refine hsmul.congr ?_
+    intro x
+    rfl
+  set S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
+    fun a b =>
+      { toFun := fun x : M => dLaSummandFib (I := I) g₁ g_bg x (B a x) (B b x) (Y x)
+        contMDiff_toFun := hsummand a b } with hS_def
+  set Stot : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
+    (-1 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b with hStot_def
+  have hStot := Stot.contMDiff
+  refine hStot.congr ?_
+  intro x
+  refine congrArg (TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SSpace 2 I z) x) ?_
+  rw [dLaBiContrFibFixedFrame, hStot_def, ContMDiffSection.coe_smul, Pi.smul_apply]
+  have hcoeOuter : ((∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b :
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+        Π z : M, Tensor0SSpace 2 I z) =
+      ∑ a : Fin (Module.finrank ℝ E),
+        ((∑ b : Fin (Module.finrank ℝ E), S a b :
+          Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+          Π z : M, Tensor0SSpace 2 I z) :=
+    map_sum (ContMDiffSection.coeAddHom I (Tensor0SModel 2 ℝ E) ∞
+      (fun z : M => Tensor0SSpace 2 I z))
+      (fun a => ∑ b : Fin (Module.finrank ℝ E), S a b) Finset.univ
+  have hcoeInner : ∀ a : Fin (Module.finrank ℝ E),
+      ((∑ b : Fin (Module.finrank ℝ E), S a b :
+        Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+        Π z : M, Tensor0SSpace 2 I z) =
+      ∑ b : Fin (Module.finrank ℝ E), ((S a b : Π z : M, Tensor0SSpace 2 I z)) := fun a =>
+    map_sum (ContMDiffSection.coeAddHom I (Tensor0SModel 2 ℝ E) ∞
+      (fun z : M => Tensor0SSpace 2 I z)) (fun b => S a b) Finset.univ
+  have hsum : ((∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b :
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+        Π z : M, Tensor0SSpace 2 I z) x =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        (S a b : Π z : M, Tensor0SSpace 2 I z) x := by
+    rw [hcoeOuter, Finset.sum_apply]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [hcoeInner a, Finset.sum_apply]
+  rw [hsum, ContinuousLinearMap.smul_apply, ContinuousLinearMap.sum_apply]
+  congr 1
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [ContinuousLinearMap.sum_apply]
+  rfl
+
+/-- `(2, 2)`-operator-field smoothness of the frozen-frame DLa operator, via
+`contMDiff_clm_section_of_pointwise` over `dLaBiContrFibFixedFrame_apply_section_contMDiff`. -/
+theorem dLaBiContrFibFixedFrame_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (dLaBiContrFibFixedFrame (I := I) g₁ g_bg B x))) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I)
+    (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun z : M => Tensor0SSpace 2 I z)
+    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SSpace 2 I z)
+    (φ := fun x : M => dLaBiContrFibFixedFrame (I := I) g₁ g_bg B x)
+  intro Y
+  exact dLaBiContrFibFixedFrame_apply_section_contMDiff (I := I) g₁ g_bg B hB Y
+
+/-! ### The moving-frame DLa operator and its frame-independence freeze -/
+
+/-- The symmetrized frame-kernel bilinear form `(p, q) ↦ ⟨A_lie(v0, p, q), v1⟩ + ⟨A_lie(v1, p, q),
+v0⟩`, bilinear in the two curvature frame slots `(p, q)` (with `v0, v1` frozen), via the `(p, q)`-CLM₂
+`dLaCovKernel`. -/
+def frameDLaKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) (v0 v1 : TangentSpace I x) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap
+    { toFun := fun p =>
+        ContinuousLinearMap.comp ((g₁.inner x).flip v1) (dLaCovKernel (I := I) g₁ g_bg x v0 p) +
+        ContinuousLinearMap.comp ((g₁.inner x).flip v0) (dLaCovKernel (I := I) g₁ g_bg x v1 p)
+      map_add' := fun p p' => by
+        ext q
+        simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
+          (dLaCovKernel (I := I) g₁ g_bg x v0).map_add p p',
+          (dLaCovKernel (I := I) g₁ g_bg x v1).map_add p p', ContinuousLinearMap.add_apply,
+          map_add]
+        ring
+      map_smul' := fun c p => by
+        ext q
+        simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.comp_apply,
+          RingHom.id_apply, (dLaCovKernel (I := I) g₁ g_bg x v0).map_smul c p,
+          (dLaCovKernel (I := I) g₁ g_bg x v1).map_smul c p, map_smul,
+          ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+        ring }
+
+theorem frameDLaKernel_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (v0 v1 p q : TangentSpace I x) :
+    frameDLaKernel (I := I) g₁ g_bg x v0 v1 p q =
+      g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v0 p q) v1 +
+        g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x v1 p q) v0 := by
+  rw [frameDLaKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+    ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
+
+/-- The moving-frame DLa operator at `x`: the frozen operator with the frame `B = smoothOrthoFrame g₁ x`
+(orthonormal at its centre `x`). -/
+def dLaBiContrFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  dLaBiContrFibFixedFrame (I := I) g₁ g_bg (smoothOrthoFrame (I := I) g₁ x) x
+
+/-- On `smoothOrthoFrameNbhd x₀`, the moving DLa operator equals the frozen-frame operator against
+`smoothOrthoFrame g₁ x₀`. Frame-independence of the `g₁`-metric double trace
+(`double_frame_bilin_trace_indep`) applied to the symmetrized frame-kernel and the unit-form. -/
+theorem dLaBiContrFib_eq_fixedFrame_on_nbhd (g₁ g_bg : SmoothRiemannianMetric I M) (x₀ : M)
+    {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
+    dLaBiContrFib (I := I) g₁ g_bg y =
+      dLaBiContrFibFixedFrame (I := I) g₁ g_bg (smoothOrthoFrame (I := I) g₁ x₀) y := by
+  classical
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [dLaBiContrFib, dLaBiContrFibFixedFrame_toModel, dLaBiContrFibFixedFrame_toModel]
+  congr 1
+  have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        (g₁.inner y (dLaCovKernel (I := I) g₁ g_bg y (v 0) (Bf a) (Bf b)) (v 1) +
+          g₁.inner y (dLaCovKernel (I := I) g₁ g_bg y (v 1) (Bf a) (Bf b)) (v 0)) *
+          Tensor0SSpace.toModel D ![(Bf a : E), (Bf b : E)] =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        frameDLaKernel (I := I) g₁ g_bg y (v 0) (v 1) (Bf a) (Bf b) *
+          (bilinFormToModel (TangentSpace I y)).symm (Tensor0SSpace.toModel D) (Bf a) (Bf b) := by
+    intro Bf
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [frameDLaKernel_apply (I := I) g₁ g_bg y (v 0) (v 1) (Bf a) (Bf b),
+      bilinFormToModel_symm_apply (TangentSpace I y) (Tensor0SSpace.toModel D) (Bf a) (Bf b)]
+    rfl
+  rw [hrewrite (fun a => smoothOrthoFrame (I := I) g₁ y a y),
+    hrewrite (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)]
+  exact double_frame_bilin_trace_indep (I := I) g₁ y
+    (frameDLaKernel (I := I) g₁ g_bg y (v 0) (v 1))
+    ((bilinFormToModel (TangentSpace I y)).symm (Tensor0SSpace.toModel D))
+    (fun a => smoothOrthoFrame (I := I) g₁ y a y)
+    (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)
+    (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
+    (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
+
+/-- `(2, 2)`-operator-field smoothness of the moving-frame DLa operator `dLaBiContrFib`, by the
+moving→frozen freeze (`dLaBiContrFib_eq_fixedFrame_on_nbhd`) + `congr_of_eventuallyEq`. -/
+theorem dLaBiContrFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x))) := by
+  classical
+  intro x₀
+  have h_fixed : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (dLaBiContrFibFixedFrame (I := I) g₁ g_bg
+          (smoothOrthoFrame (I := I) g₁ x₀) x))) x₀ :=
+    dLaBiContrFibFixedFrame_contMDiff (I := I) g₁ g_bg (smoothOrthoFrame (I := I) g₁ x₀)
+      (fun i => smoothOrthoFrame_smooth (I := I) g₁ x₀ i) x₀
+  refine h_fixed.congr_of_eventuallyEq ?_
+  filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
+  exact congrArg (TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+    (E := fun z : M => TensorRSSpace 2 2 I z) y)
+    (congrArg TensorRSSpace.ofCLM
+      (dLaBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₁ g_bg x₀ hy))
+
+/-! ### The DLb slot-insertion endomorphism (transplanted) -/
+
+/-- The DLb endomorphism `Wd_endo g₁ g_bg x : T_x → T_x`, `v ↦ (LeviCivita g₁).toFun (deTurckVF
+g₁ g_bg) x v` (so `deTurckLieCovDerivW g₁ g_bg (ext v) x = Wd_endo g₁ g_bg x v`). -/
+def deTurckLieWEndo (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I x :=
+  (LeviCivita (I := I) g₁).toFun
+    (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b) x
+
+theorem deTurckLieWEndo_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    deTurckLieWEndo (I := I) g₁ g_bg x v =
+      deTurckLieCovDerivW (I := I) g₁ g_bg (smoothExtensionTangent (I := I) x v) x := by
+  rw [deTurckLieWEndo, deTurckLieCovDerivW, smoothExtensionTangent_eq]
+
+/-- The DLb endomorphism Hom-section is smooth, via `cotangentCov_clmSection_smooth_aux` over
+`covApply_contMDiff` of the smooth `deTurckVF` section. -/
+theorem deTurckLieWEndo_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z) x
+        (deTurckLieWEndo (I := I) g₁ g_bg x)) := by
+  classical
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun z : M => TangentSpace I z)
+    (φ := fun x : M => deTurckLieWEndo (I := I) g₁ g_bg x)
+  intro Y
+  have hdvf : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg
+        : Π b : M, TangentSpace I b) b)) :=
+    (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg).contMDiff
+  have hcov := covApply_contMDiff (cov := LeviCivita (I := I) g₁)
+    (X := fun b => Y b)
+    (T := fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg
+      : Π b : M, TangentSpace I b) b)
+    Y.contMDiff hdvf
+  exact hcov
+
+/-- The DLb fibre operator: slot-0 plus slot-1 insertion of the DLb endomorphism. -/
+def deTurckLieDLbFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  slotInsertEndoFib (I := I) (M := M) 2 0 x (deTurckLieWEndo (I := I) g₁ g_bg x) +
+    slotInsertEndoFib (I := I) (M := M) 2 1 x (deTurckLieWEndo (I := I) g₁ g_bg x)
+
+theorem deTurckLieDLbFib_toModel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel (deTurckLieDLbFib (I := I) g₁ g_bg x D) v =
+      Tensor0SSpace.toModel D
+          (Function.update v 0 (deTurckLieWEndo (I := I) g₁ g_bg x (v 0))) +
+        Tensor0SSpace.toModel D
+          (Function.update v 1 (deTurckLieWEndo (I := I) g₁ g_bg x (v 1))) := by
+  rw [deTurckLieDLbFib, ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply,
+    slotInsertEndoFib_apply_eval, slotInsertEndoFib_apply_eval]
+
+theorem deTurckLieDLbFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x))) := by
+  classical
+  have h0 := slotInsertEndoFib_contMDiff (I := I) (M := M) g₁ 2 0
+    (fun x => deTurckLieWEndo (I := I) g₁ g_bg x)
+    (deTurckLieWEndo_homSection_contMDiff (I := I) g₁ g_bg)
+  have h1 := slotInsertEndoFib_contMDiff (I := I) (M := M) g₁ 2 1
+    (fun x => deTurckLieWEndo (I := I) g₁ g_bg x)
+    (deTurckLieWEndo_homSection_contMDiff (I := I) g₁ g_bg)
+  have hadd := ContMDiff.add_section
+    (s := fun x => (show TensorRSSpace 2 2 I x from
+      TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x
+        (deTurckLieWEndo (I := I) g₁ g_bg x))))
+    (t := fun x => (show TensorRSSpace 2 2 I x from
+      TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 1 x
+        (deTurckLieWEndo (I := I) g₁ g_bg x))))
+    h0 h1
+  refine hadd.congr ?_
+  intro x
+  refine congrArg (TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+    (E := fun z : M => TensorRSSpace 2 2 I z) x) ?_
+  rw [deTurckLieDLbFib]
+  rfl
+
+/-! ### The combined DLa + DLb order-`0` DeTurck-Lie operator field and its existence read-off -/
+
+/-- The combined DLa + DLb fibre operator at `x`: the symmetrized covariant-gradient Lie kernel
+double-contraction plus the slot-insertion endomorphism. -/
+def deTurckLieFib (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  dLaBiContrFib (I := I) g₁ g_bg x + deTurckLieDLbFib (I := I) g₁ g_bg x
+
+theorem deTurckLieFib_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x))) := by
+  classical
+  have hadd := ContMDiff.add_section
+    (s := fun x => (show TensorRSSpace 2 2 I x from
+      TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x)))
+    (t := fun x => (show TensorRSSpace 2 2 I x from
+      TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x)))
+    (dLaBiContrFib_contMDiff (I := I) g₁ g_bg)
+    (deTurckLieDLbFib_contMDiff (I := I) g₁ g_bg)
+  refine hadd.congr ?_
+  intro x
+  refine congrArg (TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+    (E := fun z : M => TensorRSSpace 2 2 I z) x) ?_
+  rw [deTurckLieFib]
+  rfl
+
+/-- The genuine combined order-`0` DeTurck-Lie coefficient field as a smooth, compactly supported
+`(2, 2)`-tensor. Its fibre value at `x` is `deTurckLieFib g₁ g_bg x`. -/
+def deTurckLieCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 2 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x))
+      contMDiff_toFun := deTurckLieFib_contMDiff (I := I) g₁ g_bg }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+@[simp] theorem deTurckLieCoeffField_toSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+    (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
+      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x)) :=
+  rfl
+
+/-- **The smooth DLa + DLb order-`0` DeTurck-Lie `(2, 2)`-coefficient `Δ_Lie`** existence + read-off:
+its `appCc`/`unitModel` read-off on any `(0, 2)`-field `W` is the boxed GT DeTurck-Lie order-`0`
+action of `(g₁, g_bg)` on the unit-form `D = unitModel g₀ 2 W x`. -/
 theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     ∃ R_Lie : SmoothCcTensor g₀ 2 2,
       ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
@@ -6902,8 +7722,87 @@ theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianM
                 + unitModel (I := I) (M := M) g₀ 2 W x
                   (fun j => if j = 0 then v 0
                     else deTurckLieCovDerivW (I := I) g₁ g_bg
-                      (smoothExtensionTangent (I := I) x (v 1)) x)) :=
-  sorry
+                      (smoothExtensionTangent (I := I) x (v 1)) x)) := by
+  classical
+  refine ⟨deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg, fun W x v => ?_⟩
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x))
+        (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [deTurckLieCoeffField_toSection]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x)))
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) =
+      deTurckLieFib (I := I) g₁ g_bg x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  -- Split into DLa + DLb
+  set D : Tensor0SSpace 2 I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+      (unitTensor (I := I) (M := M) x) with hD_def
+  rw [deTurckLieFib, ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply]
+  congr 1
+  · -- DLa half
+    change Tensor0SSpace.toModel (dLaBiContrFib (I := I) g₁ g_bg x D) v = _
+    rw [dLaBiContrFib, dLaBiContrFibFixedFrame_toModel, neg_one_mul]
+    rw [show (- ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                else smoothOrthoFrame (I := I) g₁ x b x) *
+            (g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 1)
+              + g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 1))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 0))) =
+        - ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                else smoothOrthoFrame (I := I) g₁ x b x) *
+            (g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 1)
+              + g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 1))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 0)) from rfl]
+    refine congrArg (fun t => -t) ?_
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [dLaCovKernel_apply_extend, dLaCovKernel_apply_extend, mul_comm]
+    congr 1
+    rw [unitModel]
+    congr 1
+    funext j
+    fin_cases j <;> simp
+  · -- DLb half
+    change Tensor0SSpace.toModel (deTurckLieDLbFib (I := I) g₁ g_bg x D) v = _
+    rw [deTurckLieDLbFib_toModel]
+    rw [deTurckLieWEndo_apply, deTurckLieWEndo_apply]
+    congr 1
+    · rw [unitModel]
+      congr 1
+      funext j
+      fin_cases j <;> simp
+    · rw [unitModel]
+      congr 1
+      funext j
+      fin_cases j <;> simp
+
 
 /-- **The GT-validated order-`0` DeTurck-Lie coefficient `R_Lie = Δ_Lie`**, chosen from
 `exists_ricciArmOrder0DeTurckLieCoeff`.  Its `appCc` read-off is the boxed GT DeTurck-Lie order-`0`
