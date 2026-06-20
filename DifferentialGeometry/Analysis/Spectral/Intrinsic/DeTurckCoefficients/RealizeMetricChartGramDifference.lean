@@ -64,7 +64,7 @@ symmetrized extracted bilinear form of the perturbation.**
 For a fibre-small perturbation `T` and a base point `x`, the chart-`α` Gram matrix entry of the
 realized metric `tensorSectionRealizeMetric g_bg T` is `chartGramMatrix g_bg α x a b` plus the
 symmetrized extracted bilinear form `ccTensorBilinSymm g_bg T x (e^α_a x) (e^α_b x)`. -/
-private theorem chartGramMatrix_realize_apply
+theorem chartGramMatrix_realize_apply
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)

@@ -3397,6 +3397,538 @@ private theorem riemannKernelChartα_realizedFam_jointContMDiffOn [BoundarylessM
   refine hsum.congr (fun w hw => ?_)
   exact riemannKernelChartα_eq (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' w.2) α a c pp qq hw.1
 
+/-- Off-centre chart-`α` coordinate matrix of a tangent family `F` at `y`: the `(i, m)` entry is the
+`m`-th `chartModelBasis` coordinate of the trivialization-at-`α` read-off of `F i`.  At base-set
+points this is the change-of-basis matrix to the chart-`α` frame `chartBasisVecFiber α · y`. -/
+private def offFamCoord (α : M) {y : M} (F : Fin (Module.finrank ℝ E) → TangentSpace I y) :
+    Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+  Matrix.of fun i m =>
+    ((chartModelBasis E).repr
+      ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ y (F i))) m
+
+set_option linter.unusedSectionVars false in
+/-- **Off-centre `Cᵀ C = G_α⁻¹` for an orthonormal frame.**  For a `g_y`-orthonormal tangent family
+`F` at a base-set point `y` of the trivialization at `α`, the column inner product of the chart-`α`
+coordinate matrix `C = offFamCoord α F` equals the chart-`α` inverse-Gram entry
+`chartInvGramMatrix g α y m n` (the off-centre analog of `ricciArm_sum_famCoord_eq_chartInvGram`,
+via `g_inner_eq_chart_sum` and `C G_α Cᵀ = 1`). -/
+private theorem off_sum_famCoord_eq_chartInvGram (g : SmoothRiemannianMetric I M) (α : M) {y : M}
+    (hy : y ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (hysrc : y ∈ (extChartAt I α).source)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I y)
+    (hF : ∀ i j, g.inner y (F i) (F j) = if i = j then (1 : ℝ) else 0)
+    (m n : Fin (Module.finrank ℝ E)) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        offFamCoord (I := I) α F i m * offFamCoord (I := I) α F i n) =
+      chartInvGramMatrix (I := I) g α y m n := by
+  classical
+  have hCGCt : offFamCoord (I := I) α F *
+      chartGramMatrix (I := I) g α y * (offFamCoord (I := I) α F)ᵀ = 1 := by
+    ext i j
+    rw [Matrix.one_apply]
+    have hexp := g_inner_eq_chart_sum (I := I) g α hy hysrc (F i) (F j)
+    rw [hF i j] at hexp
+    have hchart : ∀ a b : Fin (Module.finrank ℝ E),
+        chartGramOnE (I := I) g α a b (extChartAt I α y) =
+          chartGramMatrix (I := I) g α y a b := by
+      intro a b; unfold chartGramOnE; rw [(extChartAt I α).left_inv hysrc]
+    rw [Matrix.mul_apply]
+    rw [show (∑ a, (offFamCoord (I := I) α F *
+          chartGramMatrix (I := I) g α y) i a *
+          (offFamCoord (I := I) α F)ᵀ a j) =
+        ∑ a, ∑ b, offFamCoord (I := I) α F i a * offFamCoord (I := I) α F j b *
+          chartGramMatrix (I := I) g α y a b from by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun a _ => ?_)
+      rw [Matrix.mul_apply, Finset.sum_mul]
+      refine Finset.sum_congr rfl (fun b _ => ?_)
+      rw [Matrix.transpose_apply]; ring]
+    rw [hexp]
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    rw [hchart a b]; rfl
+  have hC : offFamCoord (I := I) α F *
+        (chartGramMatrix (I := I) g α y * (offFamCoord (I := I) α F)ᵀ) = 1 := by
+    rw [← Matrix.mul_assoc]; exact hCGCt
+  have h2 : (chartGramMatrix (I := I) g α y * (offFamCoord (I := I) α F)ᵀ) *
+        offFamCoord (I := I) α F = 1 :=
+    mul_eq_one_comm.mp hC
+  rw [Matrix.mul_assoc] at h2
+  have hinv : (offFamCoord (I := I) α F)ᵀ * offFamCoord (I := I) α F =
+      (chartGramMatrix (I := I) g α y)⁻¹ :=
+    (Matrix.inv_eq_right_inv h2).symm
+  have hmn := congrFun (congrFun hinv m) n
+  rw [Matrix.mul_apply] at hmn
+  rw [chartInvGramMatrix, ← hmn]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Matrix.transpose_apply]
+
+set_option linter.unusedSectionVars false in
+/-- Off-centre recomposition: `F i = ∑_m offFamCoord α F i m • chartBasisVecFiber α m y` at a
+base-set point `y` (`chartBasisVecFiber_recompose`). -/
+private lemma off_recompose (α : M) {y : M}
+    (hy : y ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I y) (i : Fin (Module.finrank ℝ E)) :
+    (F i : TangentSpace I y) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        offFamCoord (I := I) α F i m • chartBasisVecFiber (I := I) α m y := by
+  classical
+  exact chartBasisVecFiber_recompose (I := I) α hy (F i)
+
+set_option linter.unusedSectionVars false in
+/-- **Off-centre scalar orthonormal-frame diagonal trace = chart-`α` inverse-Gram trace.**  For a
+`g_y`-orthonormal tangent family `F` at a base-set point `y` (centre `α`) and a scalar bilinear `A`
+(additive and `ℝ`-homogeneous in each slot), the diagonal frame sum `∑ᵢ A(F i, F i)` equals the
+chart-`α` inverse-Gram trace against the OFF-CENTRE chart-`α` frame `∂_m = chartBasisVecFiber α m y`.
+The off-centre analog of `ricciArm_scalarBilin_ortho_diag_eq_chartInvGram_trace`. -/
+private theorem off_scalarBilin_ortho_diag_eq_chartInvGram_trace
+    (g : SmoothRiemannianMetric I M) (α : M) {y : M}
+    (hy : y ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (hysrc : y ∈ (extChartAt I α).source)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I y)
+    (hF : ∀ i j, g.inner y (F i) (F j) = if i = j then (1 : ℝ) else 0)
+    (A : TangentSpace I y → TangentSpace I y → ℝ)
+    (hAl : ∀ (c : ℝ) (a b w : TangentSpace I y), A (c • a + b) w = c * A a w + A b w)
+    (hAr : ∀ (c : ℝ) (a w w' : TangentSpace I y), A a (c • w + w') = c * A a w + A a w') :
+    (∑ i : Fin (Module.finrank ℝ E), A (F i) (F i)) =
+      ∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g α y m n *
+          A (chartBasisVecFiber (I := I) α m y) (chartBasisVecFiber (I := I) α n y) := by
+  classical
+  have hAl0 : ∀ w, A (0 : TangentSpace I y) w = 0 := by
+    intro w; have h := hAl 1 0 0 w; rw [smul_zero, add_zero, one_mul] at h; linarith
+  have hAr0 : ∀ a, A a (0 : TangentSpace I y) = 0 := by
+    intro a; have h := hAr 1 a 0 0; rw [smul_zero, add_zero, one_mul] at h; linarith
+  have hAl_sum : ∀ (cs : Fin (Module.finrank ℝ E) → ℝ) (w : TangentSpace I y),
+      A (∑ m, cs m • chartBasisVecFiber (I := I) α m y) w =
+        ∑ m, cs m * A (chartBasisVecFiber (I := I) α m y) w := by
+    intro cs w
+    induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+    | empty => rw [Finset.sum_empty, Finset.sum_empty, hAl0]
+    | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, hAl, ih]
+  have hAr_sum : ∀ (a : TangentSpace I y) (cs : Fin (Module.finrank ℝ E) → ℝ),
+      A a (∑ n, cs n • chartBasisVecFiber (I := I) α n y) =
+        ∑ n, cs n * A a (chartBasisVecFiber (I := I) α n y) := by
+    intro a cs
+    induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+    | empty => rw [Finset.sum_empty, Finset.sum_empty, hAr0]
+    | insert b s hb ih => rw [Finset.sum_insert hb, Finset.sum_insert hb, hAr, ih]
+  have hsummand : ∀ i, A (F i) (F i) =
+      ∑ m, ∑ n, (offFamCoord (I := I) α F i m * offFamCoord (I := I) α F i n) *
+        A (chartBasisVecFiber (I := I) α m y) (chartBasisVecFiber (I := I) α n y) := by
+    intro i
+    conv_lhs => rw [off_recompose (I := I) α hy F i]
+    rw [hAl_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [hAr_sum, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun n _ => ?_)
+    rw [mul_assoc]
+  rw [Finset.sum_congr rfl (fun i _ => hsummand i)]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun n _ => ?_)
+  rw [← Finset.sum_mul]
+  congr 1
+  rw [← off_sum_famCoord_eq_chartInvGram (I := I) g α hy hysrc F hF m n]
+
+set_option linter.unusedSectionVars false in
+/-- **Off-centre double-frame bilinear trace = chart-`α` 4-fold inverse-Gram trace.**  The
+double-orthonormal-frame trace `∑_{a,b} K(F a, F b)·Dd(F a, F b)` over a `g_y`-orthonormal frame `F`
+equals the chart-`α` 4-fold inverse-Gram trace against the off-centre chart-`α` frame.  Two nested
+applications of `off_scalarBilin_ortho_diag_eq_chartInvGram_trace` (the off-centre analog of
+`double_frame_bilin_trace_eq_fixed`). -/
+private theorem off_double_frame_bilin_trace_eq_chartAlpha
+    (g : SmoothRiemannianMetric I M) (α : M) {y : M}
+    (hy : y ∈ (trivializationAt E (TangentSpace I) α).baseSet)
+    (hysrc : y ∈ (extChartAt I α).source)
+    (K Dd : TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I y)
+    (hF : ∀ i j, g.inner y (F i) (F j) = if i = j then (1 : ℝ) else 0) :
+    ∑ a, ∑ b, K (F a) (F b) * Dd (F a) (F b) =
+      ∑ m, ∑ n, chartInvGramMatrix (I := I) g α y m n *
+        (∑ k, ∑ l, chartInvGramMatrix (I := I) g α y k l *
+          (K (chartBasisVecFiber (I := I) α m y) (chartBasisVecFiber (I := I) α k y) *
+            Dd (chartBasisVecFiber (I := I) α n y) (chartBasisVecFiber (I := I) α l y))) := by
+  classical
+  have hinner : ∀ a, ∑ b, K (F a) (F b) * Dd (F a) (F b) =
+      ∑ k, ∑ l, chartInvGramMatrix (I := I) g α y k l *
+        (K (F a) (chartBasisVecFiber (I := I) α k y) *
+          Dd (F a) (chartBasisVecFiber (I := I) α l y)) := by
+    intro a
+    exact off_scalarBilin_ortho_diag_eq_chartInvGram_trace (I := I) g α hy hysrc F hF
+      (fun p q => K (F a) p * Dd (F a) q)
+      (by intro c p q w; simp only [map_add, map_smul, smul_eq_mul]; ring)
+      (by intro c p q w; simp only [map_add, map_smul, smul_eq_mul]; ring)
+  rw [Finset.sum_congr rfl (fun a _ => hinner a)]
+  set Φ : TangentSpace I y → TangentSpace I y → ℝ :=
+    fun X X' => ∑ k, ∑ l, chartInvGramMatrix (I := I) g α y k l *
+        (K X (chartBasisVecFiber (I := I) α k y) *
+          Dd X' (chartBasisVecFiber (I := I) α l y)) with hΦ
+  have hΦl : ∀ (c : ℝ) (p w w' : TangentSpace I y), Φ (c • p + w) w' = c * Φ p w' + Φ w w' := by
+    intro c p w w'
+    rw [hΦ]
+    simp only
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]; apply Finset.sum_congr rfl; intro k _
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]; apply Finset.sum_congr rfl; intro l _
+    rw [map_add, map_smul]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    ring
+  have hΦr : ∀ (c : ℝ) (p w w' : TangentSpace I y), Φ p (c • w + w') = c * Φ p w + Φ p w' := by
+    intro c p w w'
+    rw [hΦ]
+    simp only
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]; apply Finset.sum_congr rfl; intro k _
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]; apply Finset.sum_congr rfl; intro l _
+    rw [map_add, map_smul]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    ring
+  exact off_scalarBilin_ortho_diag_eq_chartInvGram_trace (I := I) g α hy hysrc F hF Φ hΦl hΦr
+
+set_option linter.unusedSectionVars false in
+/-- **Joint over-slab bilinForm-section bridge.**  A joint `(0, 2)`-bilinForm-section
+`(y, s) ↦ ofModel(bilinFormToModel (Hb (y, s)))` over `M × ℝ` is jointly `C^∞` on `univ ×ˢ S`, provided
+that for every trivialization-centre `α` and every basis pair `σ`, the joint chart scalar
+`(y, s) ↦ Hb (y, s) (chartBasisVecFiber α (σ 0) y) (chartBasisVecFiber α (σ 1) y)` is `ContMDiffOn` on the
+trivialization base set × `S`.  The over-slab (`ContMDiffOn (univ ×ˢ S)`) analog of
+`contMDiff_bilinSection_of_chartScalar`, threading the joint chart scalar through the basis-coordinate
+characterization of the multilinear bundle section. -/
+private theorem contMDiffOn_bilinSection_of_jointChartScalar {S : Set ℝ}
+    (Hb : (p : M × ℝ) → TangentSpace I p.1 →L[ℝ] TangentSpace I p.1 →L[ℝ] ℝ)
+    (hscalar : ∀ (α : M) (σ : Fin 2 → Fin (Module.finrank ℝ E)),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+        (fun p : M × ℝ => Hb p (chartBasisVecFiber (I := I) α (σ 0) p.1)
+          (chartBasisVecFiber (I := I) α (σ 1) p.1))
+        ((trivializationAt E (TangentSpace I) α).baseSet ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1
+        (Tensor0SBundle.Tensor0SSpace.ofModel (I := I) (x := p.1)
+          (bilinFormToModel (TangentSpace I p.1) (Hb p)))) ((Set.univ : Set M) ×ˢ S) := by
+  classical
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+  intro p₀ hp₀
+  have hs₀ : p₀.2 ∈ S := hp₀.2
+  set x₀ := p₀.1 with hx₀
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
+  set Bb := continuousMultilinearMap_basis b 2 with hBb
+  set f := fun p : M × ℝ => Tensor0SBundle.Tensor0SSpace.ofModel (I := I) (x := p.1)
+      (bilinFormToModel (TangentSpace I p.1) (Hb p)) with hf
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set g := fun p : M × ℝ => (trivializationAt (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+      (fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x₀ ⟨p.1, f p⟩).2 with hg
+  change ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E) ∞ g
+    ((Set.univ : Set M) ×ˢ S) p₀
+  rw [show g = fun p => Bb.equivFun.symm (Bb.equivFun (g p)) from
+      funext fun p => (Bb.equivFun.symm_apply_apply (g p)).symm]
+  refine (Bb.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap.contMDiff.contMDiffAt).comp_contMDiffWithinAt
+    p₀ ?_
+  rw [contMDiffWithinAt_pi_space]
+  intro σ
+  have hbase : x₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+    mem_baseSet_trivializationAt E (TangentSpace I) x₀
+  have hsc := hscalar x₀ σ
+  have hsc_at : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => Hb p (chartBasisVecFiber (I := I) x₀ (σ 0) p.1)
+        (chartBasisVecFiber (I := I) x₀ (σ 1) p.1))
+      ((trivializationAt E (TangentSpace I) x₀).baseSet ×ˢ S) p₀ :=
+    hsc p₀ ⟨by rw [← hx₀]; exact hbase, hs₀⟩
+  have hmem : (trivializationAt E (TangentSpace I) x₀).baseSet ×ˢ S ∈
+      nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S) := by
+    have h1 : (trivializationAt E (TangentSpace I) x₀).baseSet ×ˢ S =
+        ((Set.univ : Set M) ×ˢ S) ∩
+          ((trivializationAt E (TangentSpace I) x₀).baseSet ×ˢ (Set.univ : Set ℝ)) := by
+      ext q
+      simp only [Set.mem_prod, Set.mem_univ, true_and, and_true, Set.mem_inter_iff]
+      tauto
+    rw [h1]
+    exact inter_mem_nhdsWithin ((Set.univ : Set M) ×ˢ S)
+      (((trivializationAt E (TangentSpace I) x₀).open_baseSet.prod isOpen_univ).mem_nhds
+        ⟨by rw [← hx₀]; exact hbase, trivial⟩)
+  have hsc_univ := hsc_at.mono_of_mem_nhdsWithin hmem
+  -- the σ-coordinate of `g` equals the joint chart scalar, on the base-set neighborhood
+  have hcoord : ∀ {p : M × ℝ}, p.1 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet →
+      Bb.equivFun (g p) σ =
+        Hb p (chartBasisVecFiber (I := I) x₀ (σ 0) p.1)
+          (chartBasisVecFiber (I := I) x₀ (σ 1) p.1) := by
+    intro p hp
+    have hrepr : Bb.equivFun (g p) σ = (g p) (fun j => b (σ j)) := by
+      rw [hBb]; exact continuousMultilinearMap_basis_repr b 2 (g p) σ
+    rw [hrepr, hg]
+    change Tensor0SBundle.Tensor0SSpace.toModel (f p)
+        (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ p.1 (b (σ j))) = _
+    rw [hf, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+    exact bilinFormToModel_apply (TangentSpace I p.1) (Hb p)
+      (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ p.1 (b (σ j)))
+  refine hsc_univ.congr_of_eventuallyEq ?_ (hcoord (by rw [← hx₀]; exact hbase))
+  have h_base_nhd : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S),
+      p.1 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+    (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+      ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds (by rw [← hx₀]; exact hbase))
+  filter_upwards [h_base_nhd] with p hp
+  exact hcoord hp
+
+open DifferentialGeometry.Integral.Connection in
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Off-centre chart expansion of the moving-frame Riemann read-off.**  For a base point `w` in the
+chart-`α` source, the moving-frame two-slot Riemann read-off
+`toModel(riemannBiContrFib g w Dw)[∂_{σ 0}, ∂_{σ 1}]` against the chart-`α` frame equals the finite
+chart-`α` 4-fold inverse-Gram contraction of the abstract Riemann kernel against the off-centre
+`Dw`-components.  The Riemann analog of `riemannKernelChartα_eq`: the moving-frame double trace
+(`riemannBiContrFibFixedFrame_toModel`) is frame-swapped from the `g`-orthonormal `smoothOrthoFrame` to
+the chart-`α` frame by `off_double_frame_bilin_trace_eq_chartAlpha`. -/
+private theorem riemannBiContrFib_toModel_chartα_eq [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M) (α : M) (σ : Fin 2 → Fin (Module.finrank ℝ E))
+    {w : M} (hx : w ∈ (chartAt H α).source)
+    (Dw : Tensor0SBundle.Tensor0SSpace 2 I w) :
+    Tensor0SBundle.Tensor0SSpace.toModel (riemannBiContrFib (I := I) g w Dw)
+        (fun i => chartBasisVecFiber (I := I) α (σ i) w) =
+      2 * ∑ m, ∑ n, chartInvGramMatrix (I := I) g α w m n *
+        (∑ k, ∑ l, chartInvGramMatrix (I := I) g α w k l *
+          (g.inner w
+              (riemannOp (cov := LeviCivita (I := I) g) w
+                (chartBasisVecFiber (I := I) α (σ 0) w) (chartBasisVecFiber (I := I) α m w)
+                (chartBasisVecFiber (I := I) α k w))
+              (chartBasisVecFiber (I := I) α (σ 1) w) *
+            Tensor0SBundle.Tensor0SSpace.toModel Dw
+              ![chartBasisVecFiber (I := I) α n w, chartBasisVecFiber (I := I) α l w])) := by
+  classical
+  have hxbase : w ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+      TangentBundle.trivializationAt_baseSet (I := I) α]
+    exact hx
+  have hxsrc : w ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  rw [riemannBiContrFib, riemannBiContrFibFixedFrame_toModel]
+  set v0 := chartBasisVecFiber (I := I) α (σ 0) w with hv0
+  set v1 := chartBasisVecFiber (I := I) α (σ 1) w with hv1
+  have hrewrite : (∑ a, ∑ b,
+        g.inner w (riemannOp (LeviCivita (I := I) g) w v0
+          (smoothOrthoFrame (I := I) g w a w) (smoothOrthoFrame (I := I) g w b w)) v1 *
+          Tensor0SBundle.Tensor0SSpace.toModel Dw
+            ![(smoothOrthoFrame (I := I) g w a w : E), (smoothOrthoFrame (I := I) g w b w : E)]) =
+      ∑ a, ∑ b,
+        frameRiemannKernel (I := I) g w v0 v1
+            (smoothOrthoFrame (I := I) g w a w) (smoothOrthoFrame (I := I) g w b w) *
+          (bilinFormToModel (TangentSpace I w)).symm (Tensor0SBundle.Tensor0SSpace.toModel Dw)
+            (smoothOrthoFrame (I := I) g w a w) (smoothOrthoFrame (I := I) g w b w) := by
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    rw [frameRiemannKernel_apply]
+    congr 1
+    rw [bilinFormToModel_symm_apply (TangentSpace I w) (Tensor0SBundle.Tensor0SSpace.toModel Dw)
+      (smoothOrthoFrame (I := I) g w a w) (smoothOrthoFrame (I := I) g w b w)]
+    rfl
+  rw [hrewrite]
+  refine congrArg (fun t => (2 : ℝ) * t) ?_
+  rw [off_double_frame_bilin_trace_eq_chartAlpha (I := I) g α hxbase hxsrc
+      (frameRiemannKernel (I := I) g w v0 v1)
+      ((bilinFormToModel (TangentSpace I w)).symm (Tensor0SBundle.Tensor0SSpace.toModel Dw))
+      (fun a => smoothOrthoFrame (I := I) g w a w)
+      (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g w i j)]
+  refine Finset.sum_congr rfl (fun m _ => Finset.sum_congr rfl (fun n _ => ?_))
+  congr 1
+  refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
+  congr 1
+  rw [frameRiemannKernel_apply]
+  congr 1
+  rw [bilinFormToModel_symm_apply (TangentSpace I w) (Tensor0SBundle.Tensor0SSpace.toModel Dw)
+    (chartBasisVecFiber (I := I) α n w) (chartBasisVecFiber (I := I) α l w)]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **Joint `(x, s)`-smoothness of a global `(0, 2)`-section's chart-`α` frame components.**  For a
+fixed chart `α` and frame indices `(n, l)`, the chart-`α` component
+`(p) ↦ toModel(Y p.1)[∂_n p.1, ∂_l p.1]` of a globally smooth `(0, 2)`-section `Y` (metric-independent,
+constant in `s`) is `ContMDiffOn` on the trivialization base set × `S`.  Via the single-base evaluation
+`contMDiffAt_section_apply` (on `Y` against the smooth chart frame fields `chartBasisVec`) composed with
+the projection `fst`. -/
+private theorem realizedFam_YchartComponent_jointContMDiffOn {S : Set ℝ} (α : M)
+    (Y : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 2 ℝ E, fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z⟯)
+    (n l : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)
+        ![chartBasisVecFiber (I := I) α n p.1, chartBasisVecFiber (I := I) α l p.1])
+      ((trivializationAt E (TangentSpace I) α).baseSet ×ˢ S) := by
+  classical
+  have hbase : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => Tensor0SBundle.Tensor0SSpace.toModel (Y x)
+        ![chartBasisVecFiber (I := I) α n x, chartBasisVecFiber (I := I) α l x])
+      (trivializationAt E (TangentSpace I) α).baseSet := by
+    intro x hx
+    have hY : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+        (fun b : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) b (Y b)) x :=
+      Y.contMDiff x
+    have hv0 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+          (chartBasisVecFiber (I := I) α n b)) x :=
+      ((chartBasisVec_contMDiffOn (I := I) α n) x hx).contMDiffAt
+        ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx)
+    have hv1 : ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+          (chartBasisVecFiber (I := I) α l b)) x :=
+      ((chartBasisVec_contMDiffOn (I := I) α l) x hx).contMDiffAt
+        ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx)
+    have happ := TensorMultilinear.contMDiffAt_section_apply (n := 2) (x₀ := x) (fun b => Y b) hY
+      (![fun b => chartBasisVecFiber (I := I) α n b, fun b => chartBasisVecFiber (I := I) α l b])
+      (by
+        intro i
+        fin_cases i
+        · exact hv0
+        · exact hv1)
+    refine (happ.congr_of_eventuallyEq ?_).contMDiffWithinAt
+    filter_upwards with b
+    congr 1
+    funext i
+    fin_cases i <;> rfl
+  exact hbase.comp contMDiffOn_fst (fun p hp => hp.1)
+
+set_option linter.unusedSectionVars false in
+/-- **(STEP-1 keystone — joint `(x, s)`-smoothness of the bare GT Riemann-action coefficient.)**  For
+the realized metric family `g_s`, the GT order-`0` Riemann-action coefficient field
+`ricciArmOrder0RiemannCoeff g₀ g_s` (the moving-frame two-slot Riemann action `riemannBiContrFib g_s`) is
+jointly `C^∞` in `(x, s)` on the slab `univ ×ˢ realizedSmallSet`.  The joint-parameter lift of the
+single-metric `riemannBiContrFib_contMDiff`, routed through the chart-coordinate tower: the operator
+section reduces (`contMDiffOn_clm_section_of_pointwise_jointMR`) to the joint `(0, 2)`-section
+`(p) ↦ riemannBiContrFib g_s p.1 (Y p.1)`, which the joint bilinForm bridge
+`contMDiffOn_bilinSection_of_jointChartScalar` reduces to the joint chart scalar; the off-centre Riemann
+read-off `riemannBiContrFib_toModel_chartα_eq` then turns that scalar into a finite chart-`α` 4-fold
+inverse-Gram contraction of the joint-smooth Riemann kernel (`riemannKernelChartα_realizedFam`), the
+joint chart inverse-Gram (`realizedFam_chartInvGramMatrix`), and the joint `Y`-component
+(`realizedFam_YchartComponent`). -/
+theorem ricciArmOrder0RiemannCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        ((ricciArmOrder0RiemannCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  -- the (2,2)-operator section is `ofCLM (riemannBiContrFib g_s x)`; reduce to per-Y joint (0,2)-section.
+  have hsection :
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+          (Tensor0SBundle.TensorRSSpace.ofCLM
+            (riemannBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+      (F₁ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)
+      (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)
+      (φ := fun p : M × ℝ => riemannBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    intro Y
+    -- the joint (0,2)-section `(p) ↦ riemannBiContrFib g_s p.1 (Y p.1)` via the bilinForm bridge.
+    have hbridge := contMDiffOn_bilinSection_of_jointChartScalar (I := I) (M := M)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (Hb := fun p : M × ℝ => (bilinFormToModel (TangentSpace I p.1)).symm
+        (Tensor0SBundle.Tensor0SSpace.toModel
+          (riemannBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1))))
+      (by
+        intro α σ
+        rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+          TangentBundle.trivializationAt_baseSet (I := I) α]
+        -- the joint chart scalar equals the off-centre chart-α 4-fold Riemann contraction.
+        have hsum : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+            (fun p : M × ℝ => 2 * ∑ m, ∑ n,
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 m n *
+                (∑ k, ∑ l,
+                  chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 k l *
+                  ((realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
+                      (riemannOp (cov := LeviCivita (I := I)
+                          (realizedFam (I := I) g₀ T T' hδ hδ' p.2)) p.1
+                        (chartBasisVecFiber (I := I) α (σ 0) p.1) (chartBasisVecFiber (I := I) α m p.1)
+                        (chartBasisVecFiber (I := I) α k p.1))
+                      (chartBasisVecFiber (I := I) α (σ 1) p.1) *
+                    Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)
+                      ![chartBasisVecFiber (I := I) α n p.1, chartBasisVecFiber (I := I) α l p.1])))
+            ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+          have hYcomp : ∀ n l : Fin (Module.finrank ℝ E),
+              ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+              (fun p : M × ℝ => Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)
+                ![chartBasisVecFiber (I := I) α n p.1, chartBasisVecFiber (I := I) α l p.1])
+              ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+            intro n l
+            have h := realizedFam_YchartComponent_jointContMDiffOn (I := I)
+              (S := realizedSmallSet (δ := δ) (δ' := δ')) α Y n l
+            rwa [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+              TangentBundle.trivializationAt_baseSet (I := I) α] at h
+          have hInvGram : ∀ i j : Fin (Module.finrank ℝ E),
+              ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+              (fun p : M × ℝ =>
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 i j)
+              ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := fun i j =>
+            realizedFam_chartInvGramMatrix_jointContMDiffOn_free (I := I) g₀ T T' hδ hδ' α i j
+          have hinner : ∀ m n k l : Fin (Module.finrank ℝ E),
+              ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+              (fun p : M × ℝ =>
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 k l *
+                  ((realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
+                      (riemannOp (cov := LeviCivita (I := I)
+                          (realizedFam (I := I) g₀ T T' hδ hδ' p.2)) p.1
+                        (chartBasisVecFiber (I := I) α (σ 0) p.1) (chartBasisVecFiber (I := I) α m p.1)
+                        (chartBasisVecFiber (I := I) α k p.1))
+                      (chartBasisVecFiber (I := I) α (σ 1) p.1) *
+                    Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)
+                      ![chartBasisVecFiber (I := I) α n p.1, chartBasisVecFiber (I := I) α l p.1]))
+              ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+            intro m n k l
+            exact (hInvGram k l).mul ((riemannKernelChartα_realizedFam_jointContMDiffOn (I := I)
+              g₀ T T' hδ hδ' α (σ 0) (σ 1) m k).mul (hYcomp n l))
+          have hmiddle : ∀ m n : Fin (Module.finrank ℝ E),
+              ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+              (fun p : M × ℝ =>
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 m n *
+                (∑ k, ∑ l,
+                  chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 k l *
+                  ((realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
+                      (riemannOp (cov := LeviCivita (I := I)
+                          (realizedFam (I := I) g₀ T T' hδ hδ' p.2)) p.1
+                        (chartBasisVecFiber (I := I) α (σ 0) p.1) (chartBasisVecFiber (I := I) α m p.1)
+                        (chartBasisVecFiber (I := I) α k p.1))
+                      (chartBasisVecFiber (I := I) α (σ 1) p.1) *
+                    Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)
+                      ![chartBasisVecFiber (I := I) α n p.1, chartBasisVecFiber (I := I) α l p.1])))
+              ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+            intro m n
+            exact (hInvGram m n).mul (contMDiffOn_finset_sum (fun k _ =>
+              contMDiffOn_finset_sum (fun l _ => hinner m n k l)))
+          have hbody : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+              (fun p : M × ℝ => ∑ m, ∑ n,
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 m n *
+                (∑ k, ∑ l,
+                  chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 k l *
+                  ((realizedFam (I := I) g₀ T T' hδ hδ' p.2).inner p.1
+                      (riemannOp (cov := LeviCivita (I := I)
+                          (realizedFam (I := I) g₀ T T' hδ hδ' p.2)) p.1
+                        (chartBasisVecFiber (I := I) α (σ 0) p.1) (chartBasisVecFiber (I := I) α m p.1)
+                        (chartBasisVecFiber (I := I) α k p.1))
+                      (chartBasisVecFiber (I := I) α (σ 1) p.1) *
+                    Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)
+                      ![chartBasisVecFiber (I := I) α n p.1, chartBasisVecFiber (I := I) α l p.1])))
+              ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+            contMDiffOn_finset_sum (fun m _ => contMDiffOn_finset_sum (fun n _ => hmiddle m n))
+          exact (contMDiffOn_const.mul hbody)
+        refine hsum.congr (fun p hp => ?_)
+        rw [bilinFormToModel_symm_apply (TangentSpace I p.1)
+          (Tensor0SBundle.Tensor0SSpace.toModel
+            (riemannBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1)))]
+        have hpsrc : p.1 ∈ (chartAt H α).source := by
+          rw [← TangentBundle.trivializationAt_baseSet (I := I) α]; exact hp.1
+        rw [show (![chartBasisVecFiber (I := I) α (σ 0) p.1, chartBasisVecFiber (I := I) α (σ 1) p.1] :
+              Fin 2 → TangentSpace I p.1) =
+            (fun i => chartBasisVecFiber (I := I) α (σ i) p.1) from by
+          funext i; fin_cases i <;> rfl]
+        exact riemannBiContrFib_toModel_chartα_eq (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α σ hpsrc (Y p.1))
+    refine hbridge.congr (fun p _ => ?_)
+    congr 1
+    rw [LinearEquiv.apply_symm_apply, Tensor0SBundle.Tensor0SSpace.ofModel_toModel]
+  refine hsection.congr (fun p _ => ?_)
+  rw [ricciArmOrder0RiemannCoeff_toSection]
+
 set_option linter.unusedSectionVars false in
 /-- **(Posited STEP-1 keystone — joint `(x, s)`-smoothness of the symm-absorbed order-`0` Riemann
 coefficient.)**  The symm-absorbed order-`0` Riemann coefficient family
@@ -3413,8 +3945,30 @@ theorem symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff [BoundarylessM
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
         ((symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1))
-      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-  sorry
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  set σ' : Equiv.Perm (Fin (2 + 0)) :=
+    Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) (T - T') 0) with hσ'
+  set R : ℝ → SmoothCcTensor g₀ (2 + 0) 2 := fun s =>
+    ricciArmOrder0RiemannCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) with hR
+  have hbare := ricciArmOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  have hReind := reindexCoeffGen_jointContMDiffOn (I := I) (M := M) (r := 2 + 0)
+    (S := realizedSmallSet (δ := δ) (δ' := δ')) g₀ R σ' hbare
+  have hsum := jointRSadd (I := I) (r := 2 + 0) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (A := fun p : M × ℝ => (1 / 2 : ℝ) • (R p.2).toSection p.1)
+    (B := fun p : M × ℝ =>
+      (1 / 2 : ℝ) • (reindexCoeffGen (I := I) (M := M) g₀ (2 + 0) 2 (R p.2) σ').toSection p.1)
+    (jointRSsmul (I := I) (r := 2 + 0) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (1 / 2 : ℝ)
+      (fun p : M × ℝ => (R p.2).toSection p.1) hbare)
+    (jointRSsmul (I := I) (r := 2 + 0) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (1 / 2 : ℝ)
+      (fun p : M × ℝ => (reindexCoeffGen (I := I) (M := M) g₀ (2 + 0) 2 (R p.2) σ').toSection p.1)
+      hReind)
+  refine hsum.congr (fun p _ => ?_)
+  rfl
 
 set_option linter.unusedSectionVars false in
 /-- **(Posited STEP-1 keystone — joint `(x, s)`-smoothness of the symm-absorbed order-`0` DeTurck-Lie
