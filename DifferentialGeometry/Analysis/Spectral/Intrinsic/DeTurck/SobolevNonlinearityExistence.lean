@@ -571,17 +571,17 @@ Nemytskii `sorryAx`. -/
 theorem smoothRemainderDiff_ballLipschitz_Ha2
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
-    {R : ℝ} (hR : 0 < R) :
+    {R : ℝ} (hR : 0 < R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
-      {δ : ℝ} (hδ_lt : δ < 1)
+      {δ : ℝ} (hδ_le : δ ≤ δ₀)
       (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-      {δ' : ℝ} (hδ'_lt : δ' < 1)
+      {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
       (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ)
-          (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
-            deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+            deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ')‖ ≤
         (K : ℝ) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T -
           smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ := by
   classical
@@ -599,10 +599,12 @@ theorem smoothRemainderDiff_ballLipschitz_Ha2
   -- The single-arm full-column tower at covariant ball radius `R' := Cb · R`.
   have hR'_nn : (0 : ℝ) ≤ Cb * R := mul_nonneg hCb_nn hR.le
   obtain ⟨Ccol, hCcol_nn, hCcol⟩ :=
-    deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz (I := I) (M := M) g₀ g_bg a ha_super hR'_nn
+    deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz (I := I) (M := M) g₀ g_bg a ha_super hR'_nn hδ₀
   -- The Lipschitz constant.
   refine ⟨Real.toNNReal (Ca * Real.sqrt (((a : ℝ) + 1) * (Ccol * Cb ^ 2))), ?_⟩
-  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
   set W : SmoothCcTensor g₀ 0 2 := T - T' with hW_def
   set D : SmoothCcTensor g₀ 0 2 :=
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
@@ -634,7 +636,7 @@ theorem smoothRemainderDiff_ballLipschitz_Ha2
   have hT'cov : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ Cb * R :=
     hball_conv T' hT'ball
   -- The full-column squared bound, in `W`-distance form.
-  have hcol := hCcol T T' hδ_lt hδ hδ'_lt hδ' hTcov hT'cov
+  have hcol := hCcol T T' hδ_le hδ hδ'_le hδ' hTcov hT'cov
   rw [← hD_def] at hcol
   -- Bridge B squared: `∑_{i ≤ a+2} ‖∇^i W‖² ≤ Cb² · Ndist²`.
   have hWsum := hCb W
@@ -728,25 +730,27 @@ the remainder-level ball-Lipschitz bound `smoothRemainderDiff_ballLipschitz_Ha2`
 `deTurckSmoothN`. -/
 theorem deTurckSmoothN_ballLipschitz_Ha2 (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
-    {R : ℝ} (hR : 0 < R) :
+    {R : ℝ} (hR : 0 < R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
-      {δ : ℝ} (hδ_lt : δ < 1)
+      {δ : ℝ} (hδ_le : δ ≤ δ₀)
       (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-      {δ' : ℝ} (hδ'_lt : δ' < 1)
+      {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
       (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
-      ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
-          deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ'‖ ≤
+      ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg a T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+          deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' (lt_of_le_of_lt hδ'_le hδ₀) hδ'‖ ≤
         (K : ℝ) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T -
           smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ := by
   obtain ⟨K, hK⟩ :=
-    smoothRemainderDiff_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR
+    smoothRemainderDiff_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR hδ₀
   refine ⟨K, ?_⟩
-  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
   rw [deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
     (I := I) (M := M) g₀ g_bg a T T' hδ_lt hδ hδ'_lt hδ']
-  exact hK T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  exact hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball
 
 /-- The smooth-tensor embedding `smoothCcToTensorHs` is `ℝ`-homogeneous in its tensor
 argument: `ι(c • T) = c • ι T`.  Its spectral coordinates are the `L²` coordinates of the
@@ -992,6 +996,11 @@ theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric
       smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T') :
     deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ =
       deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ' := by
+  -- The common ball-outer-uniform smallness `δ₀ := max δ δ' < 1` capping both metrics.
+  set δ₀ : ℝ := max δ δ' with hδ₀_def
+  have hδ₀ : δ₀ < 1 := by rw [hδ₀_def]; exact max_lt hδ_lt hδ'_lt
+  have hδ_le : δ ≤ δ₀ := by rw [hδ₀_def]; exact le_max_left _ _
+  have hδ'_le : δ' ≤ δ₀ := by rw [hδ₀_def]; exact le_max_right _ _
   set R : ℝ := max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ + 1 with hR_def
   have hR_pos : 0 < R := by
@@ -1000,14 +1009,14 @@ theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric
       le_trans (norm_nonneg _) (le_max_left _ _)
     rw [hR_def]; linarith
   obtain ⟨K, hK⟩ :=
-    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR_pos
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR_pos hδ₀
   have hTball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R := by
     rw [hR_def]; linarith [le_max_left ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖]
   have hT'ball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R := by
     rw [hR_def]; linarith [le_max_right ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖]
-  have hbound := hK T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  have hbound := hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball
   rw [hTT', sub_self, norm_zero, mul_zero] at hbound
   have hzero : ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
       deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ'‖ = 0 :=
@@ -1130,6 +1139,7 @@ theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M
   have hδ₀_lt : (Classical.choose h).2 < 1 := (Classical.choose_spec h).2.1
   obtain ⟨K, hK⟩ :=
     deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR₀
+      (Classical.choose_spec h).2.1
   -- the dense-subset function
   set F : (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
@@ -1155,10 +1165,10 @@ theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M
     have hbound := hK
       (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
       (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose y.2))
-      (Classical.choose_spec h).2.1
+      (le_refl _)
       ((Classical.choose_spec h).2.2 _
         (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
-      (Classical.choose_spec h).2.1
+      (le_refl _)
       ((Classical.choose_spec h).2.2 _
         (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
       (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _)
@@ -1287,6 +1297,7 @@ theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (
   -- `F` is continuous (same Lipschitz argument as in `deTurckSobolevNHa2_lipschitzWith`)
   obtain ⟨K, hK⟩ :=
     deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR₀
+      (Classical.choose_spec h).2.1
   have hembed : ∀ x : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
       smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
         (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) =
@@ -1299,10 +1310,10 @@ theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (
     have hbound := hK
       (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
       (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose y.2))
-      (Classical.choose_spec h).2.1
+      (le_refl _)
       ((Classical.choose_spec h).2.2 _
         (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
-      (Classical.choose_spec h).2.1
+      (le_refl _)
       ((Classical.choose_spec h).2.2 _
         (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
       (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _)

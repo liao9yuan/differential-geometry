@@ -84,24 +84,27 @@ regularity of `deTurckForcing_smoothTimeCoordinateFamily`: the Nemytskii forcing
 solution data in `H^{d+2}`, the fibre-smallness contraction (`C·δ < 1`) bootstrapping the order. -/
 theorem deTurckRemainder_iteratedCovGradSum_ballBound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (d : ℕ) (hda : a ≤ d) {R : ℝ} (hR : 0 ≤ R) :
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (d : ℕ) (hda : a ≤ d) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀_nn : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_lt : δ < 1)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ),
         (∀ j : ℕ, j ≤ d + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∑ q ∈ Finset.range (d + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 q
-              (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)‖ ^ 2) ≤
+              (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ)‖ ^ 2) ≤
           C * (1 + ∑ i ∈ Finset.range (d + 2 + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 i T‖ ^ 2) := by
   classical
-  -- The order-`d` difference tower: its ball-uniform constant `Cdiff` is hoisted outside `∀ T`.
+  -- The order-`d` difference tower at the ball-outer-uniform smallness `δ₀` (capping both the
+  -- perturbation `T` at `δ ≤ δ₀` and the affine-zero datum `0` at `0 ≤ δ₀`); `Cdiff` outside `∀ T`.
   obtain ⟨Cdiff, hCdiff_nn, hCdiff⟩ :=
     deTurckRemainderDiff_iteratedCovGradSum_ballBound_order (I := I) (M := M) g₀ g_bg a ha_super d
-      hda hR
-  -- The affine-zero datum `T' = 0` is fibre-small with `δ' = 0 < 1`, and all its jets vanish.
+      hda hR hδ₀
+  -- The affine-zero datum `T' = 0` is fibre-small with `δ' = 0 ≤ δ₀`, and all its jets vanish.
   have hδ0_lt : (0 : ℝ) < 1 := by norm_num
+  have hδ0_le : (0 : ℝ) ≤ δ₀ := hδ₀_nn
   have hδ0 : gFibreOpBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) 0 :=
     gFibreOpBound_ccTensorBilinSymm_zero (I := I) (M := M) g₀
@@ -119,7 +122,8 @@ theorem deTurckRemainder_iteratedCovGradSum_ballBound
     ‖iteratedCovGrad (I := I) g₀ 0 2 q N0‖ ^ 2 with hK0_def
   have hK0_nn : 0 ≤ K0 := Finset.sum_nonneg fun q _ => sq_nonneg _
   refine ⟨2 * Cdiff + 2 * K0, by positivity, ?_⟩
-  intro T δ hδ_lt hδ hTball
+  intro T δ hδ_le hδ hTball
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
   -- The order-`(d+2)` covariant jet column of `T`.
   set Scol : ℝ := ∑ i ∈ Finset.range (d + 2 + 1),
     ‖iteratedCovGrad (I := I) g₀ 0 2 i T‖ ^ 2 with hScol_def
@@ -133,7 +137,7 @@ theorem deTurckRemainder_iteratedCovGradSum_ballBound
   set D : SmoothCcTensor g₀ 0 2 :=
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ - N0 with hD_def
   -- The difference tower at `T' = 0`: `∑_{q ≤ d} ‖∇^q D‖² ≤ Cdiff · ∑_{i ≤ d+2} ‖∇^i (T − 0)‖²`.
-  have hdiff := hCdiff T (0 : SmoothCcTensor g₀ 0 2) hδ_lt hδ hδ0_lt hδ0 hTball hT'ball
+  have hdiff := hCdiff T (0 : SmoothCcTensor g₀ 0 2) hδ_le hδ hδ0_le hδ0 hTball hT'ball
   -- `T − 0 = T`, so the right-hand column is `Scol`.
   have hdiff' : (∑ q ∈ Finset.range (d + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2) ≤ Cdiff * Scol := by
