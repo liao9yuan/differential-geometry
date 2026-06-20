@@ -511,6 +511,220 @@ def IsRealizedChartVelocity (g₀ : SmoothRiemannianMetric I M)
         (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) α i j y)
         (h i j y) s
 
+/-! ## Chart-Gram germ locality of the chart curvature read-offs
+
+The chart Ricci tensor and the chart DeTurck–Ricci right-hand side are local functionals of the chart
+Gram germ: they are built from `chartGramOnE`, `chartInvGramMatrix` (the pointwise matrix inverse of the
+Gram), and the first/second `partialDeriv` of `chartGramOnE`.  Two metrics whose chart-Gram entries agree
+on a neighbourhood of a chart point therefore have equal chart Christoffel, Riemann, Ricci, DeTurck
+vector-field, and DeTurck–Ricci read-offs at that point.  These congruences are the engine of the cutoff
+family's base-point locality. -/
+
+/-- If two metrics' chart-Gram entries agree near `y` (for all index pairs), their chart Christoffel
+symbols agree at `y`. -/
+private lemma chartChristoffel_congr_of_chartGramOnE_eventuallyEq
+    {g g' : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hG : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (i j k : Fin (Module.finrank ℝ E)) :
+    chartChristoffel (I := I) g α i j k y = chartChristoffel (I := I) g' α i j k y := by
+  classical
+  -- pointwise Gram values at y agree (from the germ equality)
+  have hGpt : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b y = chartGramOnE (I := I) g' α a b y :=
+    fun a b => (hG a b).eq_of_nhds
+  -- pointwise inverse-Gram values at y agree (inverse of the agreeing Gram matrix value)
+  have hInv : ∀ a b : Fin (Module.finrank ℝ E),
+      chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) k a =
+        chartInvGramMatrix (I := I) g' α ((extChartAt I α).symm y) k a := by
+    intro a _b
+    have hmat : chartGramMatrix (I := I) g α ((extChartAt I α).symm y) =
+        chartGramMatrix (I := I) g' α ((extChartAt I α).symm y) := by
+      ext p q
+      have := hGpt p q
+      simpa only [chartGramOnE_def] using this
+    simp only [chartInvGramMatrix, hmat]
+  -- partial derivatives of the agreeing Gram germs agree at y
+  have hpart : ∀ (p a b : Fin (Module.finrank ℝ E)),
+      partialDeriv (E := E) p (chartGramOnE (I := I) g α a b) y =
+        partialDeriv (E := E) p (chartGramOnE (I := I) g' α a b) y := by
+    intro p a b
+    simp only [partialDeriv]
+    rw [(hG a b).fderiv_eq]
+  rw [chartChristoffel_def, chartChristoffel_def]
+  refine congrArg (fun t => (1 / 2 : ℝ) * t) ?_
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [hInv l k, hpart i l j, hpart j l i, hpart l i j]
+
+/-- The first `partialDeriv` of the chart Christoffel symbol is also a germ-local functional of the
+chart Gram: under chart-Gram germ agreement near `y`, the chart Christoffel symbols agree on a whole
+neighbourhood of `y`, so their `partialDeriv` agree at `y`. -/
+private lemma partialDeriv_chartChristoffel_congr_of_chartGramOnE_eventuallyEq
+    {g g' : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (i j k p : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) p (chartChristoffel (I := I) g α i j k) y =
+      partialDeriv (E := E) p (chartChristoffel (I := I) g' α i j k) y := by
+  classical
+  -- the chart Christoffel symbols agree on a whole neighbourhood of `y`
+  have hchr : (fun z => chartChristoffel (I := I) g α i j k z) =ᶠ[nhds y]
+      (fun z => chartChristoffel (I := I) g' α i j k z) := by
+    -- propagate the germ equality of each Gram entry to a common neighbourhood
+    have hself : ∀ a b : Fin (Module.finrank ℝ E),
+        ∀ᶠ z in nhds y, chartGramOnE (I := I) g α a b =ᶠ[nhds z] chartGramOnE (I := I) g' α a b :=
+      fun a b => (hGnhd a b).eventually_nhds
+    have hall : ∀ᶠ z in nhds y, ∀ a b : Fin (Module.finrank ℝ E),
+        chartGramOnE (I := I) g α a b =ᶠ[nhds z] chartGramOnE (I := I) g' α a b := by
+      rw [eventually_all]
+      intro a
+      rw [eventually_all]
+      intro b
+      exact hself a b
+    filter_upwards [hall] with z hz
+    exact chartChristoffel_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (α := α) (y := z)
+      hz i j k
+  simp only [partialDeriv]
+  rw [hchr.fderiv_eq]
+
+/-- If two metrics' chart-Gram entries agree near `y` (for all index pairs), their chart Riemann tensor
+agrees at `y`. -/
+private lemma chartRiemannTensor_congr_of_chartGramOnE_eventuallyEq
+    {g g' : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (i j k l : Fin (Module.finrank ℝ E)) :
+    chartRiemannTensor (I := I) g α i j k l y = chartRiemannTensor (I := I) g' α i j k l y := by
+  classical
+  have hchr : ∀ a b c : Fin (Module.finrank ℝ E),
+      chartChristoffel (I := I) g α a b c y = chartChristoffel (I := I) g' α a b c y :=
+    fun a b c => chartChristoffel_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (α := α)
+      (y := y) hGnhd a b c
+  have hdchr : ∀ a b c p : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) p (chartChristoffel (I := I) g α a b c) y =
+        partialDeriv (E := E) p (chartChristoffel (I := I) g' α a b c) y :=
+    fun a b c p => partialDeriv_chartChristoffel_congr_of_chartGramOnE_eventuallyEq
+      (g := g) (g' := g') (α := α) (y := y) hGnhd a b c p
+  rw [chartRiemannTensor_def, chartRiemannTensor_def]
+  rw [hdchr i k l j, hdchr i j l k]
+  refine congrArg _ ?_
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [hchr j m l, hchr i k m, hchr k m l, hchr i j m]
+
+/-- If two metrics' chart-Gram entries agree near `y` (for all index pairs), their chart Ricci tensor
+agrees at `y`. -/
+private lemma chartRicciTensor_congr_of_chartGramOnE_eventuallyEq
+    {g g' : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (i k : Fin (Module.finrank ℝ E)) :
+    chartRicciTensor (I := I) g α i k y = chartRicciTensor (I := I) g' α i k y := by
+  classical
+  rw [chartRicciTensor_def, chartRicciTensor_def]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  exact chartRiemannTensor_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (α := α) (y := y)
+    hGnhd i j k j
+
+/-- If two metrics' chart-Gram entries agree near `y` (for all index pairs), their chart DeTurck
+vector-field components (against a FIXED background `g_bg`) agree at `y`. -/
+private lemma chartDeTurckVFComp_congr_of_chartGramOnE_eventuallyEq
+    {g g' g_bg : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (k : Fin (Module.finrank ℝ E)) :
+    chartDeTurckVFComp (I := I) g g_bg α k y = chartDeTurckVFComp (I := I) g' g_bg α k y := by
+  classical
+  rw [chartDeTurckVFComp_def, chartDeTurckVFComp_def]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  have hInvOnE : chartInvGramOnE (I := I) g α a b y = chartInvGramOnE (I := I) g' α a b y := by
+    have hmat : chartGramMatrix (I := I) g α ((extChartAt I α).symm y) =
+        chartGramMatrix (I := I) g' α ((extChartAt I α).symm y) := by
+      ext p q
+      have := (hGnhd p q).eq_of_nhds
+      simpa only [chartGramOnE_def] using this
+    simp only [chartInvGramOnE_def, chartInvGramMatrix, hmat]
+  have hchr : chartChristoffel (I := I) g α a b k y = chartChristoffel (I := I) g' α a b k y :=
+    chartChristoffel_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (α := α) (y := y) hGnhd
+      a b k
+  rw [hInvOnE, hchr]
+
+/-- The first `partialDeriv` of the chart DeTurck vector-field component is germ-local in the chart Gram
+(against a FIXED background `g_bg`): under chart-Gram germ agreement near `y`, the components agree on a
+whole neighbourhood, so their `partialDeriv` agree at `y`. -/
+private lemma partialDeriv_chartDeTurckVFComp_congr_of_chartGramOnE_eventuallyEq
+    {g g' g_bg : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (k p : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) p (chartDeTurckVFComp (I := I) g g_bg α k) y =
+      partialDeriv (E := E) p (chartDeTurckVFComp (I := I) g' g_bg α k) y := by
+  classical
+  have hcomp : (fun z => chartDeTurckVFComp (I := I) g g_bg α k z) =ᶠ[nhds y]
+      (fun z => chartDeTurckVFComp (I := I) g' g_bg α k z) := by
+    have hself : ∀ a b : Fin (Module.finrank ℝ E),
+        ∀ᶠ z in nhds y, chartGramOnE (I := I) g α a b =ᶠ[nhds z] chartGramOnE (I := I) g' α a b :=
+      fun a b => (hGnhd a b).eventually_nhds
+    have hall : ∀ᶠ z in nhds y, ∀ a b : Fin (Module.finrank ℝ E),
+        chartGramOnE (I := I) g α a b =ᶠ[nhds z] chartGramOnE (I := I) g' α a b := by
+      rw [eventually_all]; intro a; rw [eventually_all]; intro b; exact hself a b
+    filter_upwards [hall] with z hz
+    exact chartDeTurckVFComp_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (g_bg := g_bg)
+      (α := α) (y := z) hz k
+  simp only [partialDeriv]
+  rw [hcomp.fderiv_eq]
+
+/-- If two metrics' chart-Gram entries agree near `y` (for all index pairs), their chart DeTurck Lie
+summand `chartLieDeTurckComp · g_bg` agrees at `y` (FIXED background `g_bg`). -/
+private lemma chartLieDeTurckComp_congr_of_chartGramOnE_eventuallyEq
+    {g g' g_bg : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (i j : Fin (Module.finrank ℝ E)) :
+    chartLieDeTurckComp (I := I) g g_bg α i j y = chartLieDeTurckComp (I := I) g' g_bg α i j y := by
+  classical
+  have hGpt : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b y = chartGramOnE (I := I) g' α a b y :=
+    fun a b => (hGnhd a b).eq_of_nhds
+  have hVF : ∀ c : Fin (Module.finrank ℝ E),
+      chartDeTurckVFComp (I := I) g g_bg α c y = chartDeTurckVFComp (I := I) g' g_bg α c y :=
+    fun c => chartDeTurckVFComp_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (g_bg := g_bg)
+      (α := α) (y := y) hGnhd c
+  have hdVF : ∀ (c p : Fin (Module.finrank ℝ E)),
+      partialDeriv (E := E) p (chartDeTurckVFComp (I := I) g g_bg α c) y =
+        partialDeriv (E := E) p (chartDeTurckVFComp (I := I) g' g_bg α c) y :=
+    fun c p => partialDeriv_chartDeTurckVFComp_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g')
+      (g_bg := g_bg) (α := α) (y := y) hGnhd c p
+  have hdG : ∀ (p a b : Fin (Module.finrank ℝ E)),
+      partialDeriv (E := E) p (chartGramOnE (I := I) g α a b) y =
+        partialDeriv (E := E) p (chartGramOnE (I := I) g' α a b) y := by
+    intro p a b
+    simp only [partialDeriv]
+    rw [(hGnhd a b).fderiv_eq]
+  rw [chartLieDeTurckComp_def, chartLieDeTurckComp_def]
+  congr 1
+  · congr 1
+    · refine Finset.sum_congr rfl (fun c _ => ?_)
+      rw [hVF c, hdG c i j]
+    · refine Finset.sum_congr rfl (fun c _ => ?_)
+      rw [hGpt c j, hdVF c i]
+  · refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [hGpt i c, hdVF c j]
+
+/-- The chart DeTurck–Ricci right-hand side `chartDeTurckRicciRHS · g_bg` is a germ-local functional of
+the chart Gram: under chart-Gram germ agreement near `y`, it agrees at `y` (FIXED background `g_bg`). -/
+private lemma chartDeTurckRicciRHS_congr_of_chartGramOnE_eventuallyEq
+    {g g' g_bg : SmoothRiemannianMetric I M} {α : M} {y : E}
+    (hGnhd : ∀ a b : Fin (Module.finrank ℝ E),
+      chartGramOnE (I := I) g α a b =ᶠ[nhds y] chartGramOnE (I := I) g' α a b)
+    (i k : Fin (Module.finrank ℝ E)) :
+    chartDeTurckRicciRHS (I := I) g g_bg α i k y = chartDeTurckRicciRHS (I := I) g' g_bg α i k y := by
+  rw [chartDeTurckRicciRHS_def, chartDeTurckRicciRHS_def,
+    chartRicciTensor_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (α := α) (y := y)
+      hGnhd i k,
+    chartLieDeTurckComp_congr_of_chartGramOnE_eventuallyEq (g := g) (g' := g') (g_bg := g_bg)
+      (α := α) (y := y) hGnhd i k]
+
 /-- **(Posited deep input — the cutoff metric-perturbation family of the re-base metric `g_s`,
 with the locality agreement to the realized family near `x`.)**
 
