@@ -3929,7 +3929,7 @@ private theorem chartDeTurckRicciRHS_realize_value_le_bareChartJetContentOnE_bal
   -- ball window `jmax := a + 2` (decoupled from the output order `0`).
   obtain ⟨C, hC_pos, hC⟩ :=
     (DeTurckCoefficients.hasChartJetLipBall_chartDeTurckRicciRHS (I := I) (M := M) g₀ g_bg
-      (R := R) (jmax := a + 2) α hK hKsub i k).seminorm_le 0
+      (R := R) (jmax := a + 2) (by omega) α hK hKsub i k).seminorm_le 0 (by omega)
   refine ⟨C * ((Module.finrank ℝ E) : ℝ), by positivity, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball y hy
   have hyint : y ∈ interior (extChartAt I α).target := hKsub hy
