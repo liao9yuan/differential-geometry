@@ -248,7 +248,7 @@ theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
       set η : Fin (Module.finrank ℝ E) → ℝ := fun i => ξ i / rr with hη_def
       have hη_sph : η ∈ Sph := by
         rw [hSph_def]
-        show ∑ i : Fin (Module.finrank ℝ E), η i ^ 2 = 1
+        change ∑ i : Fin (Module.finrank ℝ E), η i ^ 2 = 1
         have hcalc : ∑ i : Fin (Module.finrank ℝ E), η i ^ 2 =
             (∑ i, ξ i ^ 2) / rr ^ 2 := by
           rw [Finset.sum_div]
@@ -261,7 +261,7 @@ theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
           (∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               chartGramMatrix (I := I) g α b i j * ξ i * ξ j) / rr ^ 2 := by
-        show (∑ i : Fin (Module.finrank ℝ E),
+        change (∑ i : Fin (Module.finrank ℝ E),
               ∑ j : Fin (Module.finrank ℝ E),
                 chartGramMatrix (I := I) g α b i j * η i * η j) =
             (∑ i : Fin (Module.finrank ℝ E),
@@ -288,7 +288,7 @@ theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     intro b hb
     have hSph_ne : Sph.Nonempty := by
       refine ⟨fun i => if i = ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩ then 1 else 0, ?_⟩
-      show ∑ i : Fin (Module.finrank ℝ E),
+      change ∑ i : Fin (Module.finrank ℝ E),
           (if i = ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩ then (1 : ℝ) else 0) ^ 2 = 1
       rw [Finset.sum_eq_single ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩]
       · simp
@@ -413,7 +413,7 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
       Fin (Module.finrank ℝ E) → TangentSpace I x :=
     fun i j k l => (c i * a j * b k *
       chartRiemannTensor (I := I) g α i j k l (extChartAt I α x)) • eα l with ht_def
-  show (∑ i, ∑ k, ∑ j, ∑ l, t i j k l) =
+  change (∑ i, ∑ k, ∑ j, ∑ l, t i j k l) =
       ∑ l, (∑ i, ∑ j, ∑ k, (c i * a j * b k *
         chartRiemannTensor (I := I) g α i j k l (extChartAt I α x))) • eα l
   have hRHS_distr : (∑ l, (∑ i, ∑ j, ∑ k, (c i * a j * b k *
