@@ -169,7 +169,7 @@ summability); its body is `sorry`-free and consumers transitively depend only on
 `sorryAx`. -/
 private theorem forcingSmoothTimeCoords
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -197,7 +197,7 @@ private theorem forcingSmoothTimeCoords
   -- smoothing output (NOT a one-order coupling bootstrap, whose net advance is `0`), so it
   -- is carried by the input directly rather than re-derived here.
   obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩ :=
-    deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+    deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
       gforce hforce
   exact ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩
 
@@ -224,7 +224,7 @@ representative by the smooth `f`.  PINNED to the solution by `hduh`/`hforce`/`ht
 (`htrace` is part of the frozen consumer interface and is not consumed by this glue). -/
 private theorem forcingSmoothCoordsRealize
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
@@ -255,7 +255,7 @@ private theorem forcingSmoothCoordsRealize
   -- a time-continuous `Hᵃ`-representative `F` of `gforce` whose `i`-th mode coordinate is
   -- the smooth `f i` on `[0,T]`, and the all-order time-jet spectral-mass majorant.
   obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩ :=
-    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super hT hT1 gforce hforce
+    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 gforce hforce
   -- The forcing-coordinate a.e. link: `(gforce t).coeff i = f i t` a.e., from the
   -- everywhere representative `gforce =ᵐ F` and the slab coordinate identity
   -- `(F t).coeff i = f i t`.
@@ -721,7 +721,7 @@ private theorem realizedFamily_flowDeriv
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   -- DEEP INPUT 1: the smooth forcing eigen-coordinate family realizing the solution value.
   obtain ⟨f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
-    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 u gforce
       hduh hforce htrace
   -- The smooth eigen-coordinate family `φ i = perModeConv λᵢ (f i)` of the solution.
   set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
@@ -1131,7 +1131,7 @@ regularity / Ladyzhenskaya–Solonnikov–Uraltseva); consumers transitively dep
 those inputs' `sorryAx`. -/
 private theorem realizedSol_solField_smallnessHorizon_Ha2
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
@@ -1155,7 +1155,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2
   -- `f i` `C∞`, the all-order time-jet mass majorant `hf_mass`, and the coordinate identity
   -- `tensorL2Coeff (tensorHsToL2 (u.toFun t)) i = perModeConv λᵢ (f i) t` on `[0,T]`.
   obtain ⟨f, hf_smooth, hf_mass, hf_id, _⟩ :=
-    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 u gforce
       hduh hforce htrace
   -- The order-`(a+2)` mass majorant: the `(j, τ) = (0, a+2)` instance of `hf_mass`.
   obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 ((a : ℝ) + 2) (by positivity)
@@ -1245,7 +1245,7 @@ theorem maxreg_solution_jointly_smooth_representative
   have hu0 : timeH1.toFun u 0 = 0 := by rw [timeH1.toFun_zero, hinit]
   -- DEEP INPUT 1: the smooth forcing eigen-coordinate family realizing the solution value.
   obtain ⟨f, hf_smooth, hf_mass, hf_id, _⟩ :=
-    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 u gforce
       hduh hforce htrace
   -- The smooth eigen-coordinate family `φ i = perModeConv λᵢ (f i)` of the solution.
   set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
@@ -1356,7 +1356,7 @@ theorem maxreg_solution_jointly_smooth_representative
       (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
   -- The order-`(a+2)` smallness horizon `d₂` (deep parabolic input).
   obtain ⟨d₂, hd₂_pos, hd₂_le, hd₂⟩ :=
-    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u
+    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 u
       gforce hduh hforce htrace hR₀_pos
   set T₁ : ℝ := min (min T (d / 2)) d₂ with hT₁_def
   have hT₁_pos : 0 < T₁ := lt_min (lt_min hT (by positivity)) hd₂_pos

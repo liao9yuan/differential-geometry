@@ -177,7 +177,7 @@ majorant pass straight through.  Consumers transitively depend on the `sorryAx` 
 deep leaf. -/
 theorem deTurckForcing_smoothTimeCoordinateField
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -196,7 +196,7 @@ theorem deTurckForcing_smoothTimeCoordinateField
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) := by
   classical
   obtain ⟨f, hf_smooth, hf_mass, hf_ae⟩ :=
-    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
       gforce hforce
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -275,7 +275,7 @@ PINNED to the forcing by `hforce`.  GLUE over the single deep leaf
 `deTurckForcing_smoothCoordinate_aeTimeJet`; consumers transitively depend on its `sorryAx`. -/
 theorem deTurckForcing_forcingMass_partialSum_contraction
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -296,7 +296,7 @@ theorem deTurckForcing_forcingMass_partialSum_contraction
   -- The single deep parabolic leaf: the `C∞`-in-time per-mode forcing coordinate field with
   -- the all-order time-jet spectral-mass majorant on the closed slab `[0,T]`.
   obtain ⟨f, hf_smooth, hf_mass, hf_ae⟩ :=
-    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
       gforce hforce
   -- The `j = 0, τ = d + 2` instance of the majorant: a single summable across-modes bound
   -- `tensorSobolevWeight i (d+2) · (f i t)² ≤ B i` on the closed slab `[0,T]`.
@@ -424,7 +424,7 @@ background level `Kd` of the contraction node.  Consumers transitively depend on
 of the deep contraction node. -/
 theorem deTurckForcing_forcingMass_summable_succ
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -436,7 +436,7 @@ theorem deTurckForcing_forcingMass_summable_succ
     Summable (forcingMass (I := I) (M := M) gforce (d + 2)) := by
   classical
   obtain ⟨θ, hθ_nn, hθ_lt, Kd, hKd_nn, hcontract⟩ :=
-    deTurckForcing_forcingMass_partialSum_contraction (I := I) (M := M) g₀ g_bg a ha_super
+    deTurckForcing_forcingMass_partialSum_contraction (I := I) (M := M) g₀ g_bg a ha_super ha_even
       hT hT1 gforce hforce d hda hd
   have hone_sub_θ_pos : 0 < 1 - θ := by linarith
   refine summable_of_sum_le (c := Kd / (1 - θ))
@@ -479,7 +479,7 @@ order `c ≥ 0` from a sufficiently high `a + 2 n ≥ c`.  Consumers transitivel
 `sorryAx` of the deep `+2` advance. -/
 theorem deTurckForcing_allOrderForcingMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -505,7 +505,7 @@ theorem deTurckForcing_allOrderForcingMass
         have : (0 : ℝ) ≤ 2 * (k : ℝ) := by positivity
         linarith
       have hadv := deTurckForcing_forcingMass_summable_succ (I := I) (M := M) g₀ g_bg a
-        ha_super hT hT1 gforce hforce ((a : ℝ) + 2 * (k : ℝ)) hda ih
+        ha_super ha_even hT hT1 gforce hforce ((a : ℝ) + 2 * (k : ℝ)) hda ih
       have hrw : (a : ℝ) + 2 * (k : ℝ) + 2 = (a : ℝ) + 2 * ((k : ℕ) + 1 : ℕ) := by
         push_cast; ring
       rwa [hrw] at hadv
@@ -570,7 +570,7 @@ and the all-order spatial forcing-mass summability is `deTurckForcing_allOrderFo
 Consumers transitively depend on the `sorryAx` of those two deep parabolic leaves. -/
 theorem deTurckForcing_smoothTimeCoordinateFamily
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -590,7 +590,7 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
       (∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) := by
   obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coeff⟩ :=
-    deTurckForcing_smoothTimeCoordinateField (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+    deTurckForcing_smoothTimeCoordinateField (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
       gforce hforce
   have hF_coord_cont : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
       ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T) := by
@@ -600,7 +600,7 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
     · intro t ht
       exact hF_coeff t ht i
   refine ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, ?_, hF_coeff⟩
-  exact deTurckForcing_allOrderForcingMass (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+  exact deTurckForcing_allOrderForcingMass (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
     gforce hforce
 
 end IntrinsicSpectral
