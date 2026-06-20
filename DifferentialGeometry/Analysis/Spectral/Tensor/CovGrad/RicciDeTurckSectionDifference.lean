@@ -6629,17 +6629,29 @@ theorem exists_ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I 
   funext j
   fin_cases j <;> simp
 
-/-- **The GT-validated order-`0` Riemann-action coefficient `R_Rm = 2·R(·)`**, chosen from
-`exists_ricciArmOrder0RiemannCoeff`.  Its `appCc` read-off is the two-slot Riemann action `2·R_{ipkq}h^{pq}`
-of `g₁` (`ricciArmOrder0RiemannCoeff_appCc_eq`).  This is the `c_Rm = +2` Riemann arm of the GT
-Lichnerowicz–DeTurck order-`0`. -/
+/-- **The GT-validated order-`0` Riemann-action coefficient `R_Rm = 2·R(·)`**, the concrete
+`riemannBiContrFib`-built field `ricciArmOrder0RiemannCoeffField` (the same carrier produced by
+`exists_ricciArmOrder0RiemannCoeff`).  Its fibre value at `x` is `riemannBiContrFib g₁ x`
+(`ricciArmOrder0RiemannCoeff_toSection`), so the joint `(s, x)`-smoothness keystone can extract a
+joint-smooth carrier — unlike an opaque `Classical.choose`.  Its `appCc` read-off is the two-slot Riemann
+action `2·R_{ipkq}h^{pq}` of `g₁` (`ricciArmOrder0RiemannCoeff_appCc_eq`).  This is the `c_Rm = +2`
+Riemann arm of the GT Lichnerowicz–DeTurck order-`0`. -/
 noncomputable def ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
-  Classical.choose (exists_ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+  ricciArmOrder0RiemannCoeffField (I := I) (M := M) g₀ g₁
+
+/-- The underlying section value of `ricciArmOrder0RiemannCoeff g₀ g₁` at `x` is the concrete fibre
+operator `riemannBiContrFib g₁ x`.  Definitional (the coefficient IS its concrete field). -/
+@[simp] theorem ricciArmOrder0RiemannCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁).toSection x =
+      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)) :=
+  rfl
 
 set_option linter.unusedSectionVars false in
 /-- The `appCc`/`unitModel` read-off of the order-`0` Riemann-action coefficient is the two-slot Riemann
-action `2·R_{ipkq}h^{pq}` of `g₁` (`Classical.choose_spec` of `exists_ricciArmOrder0RiemannCoeff`). -/
+action `2·R_{ipkq}h^{pq}` of `g₁`.  Reproved directly on the concrete `riemannBiContrFib`-built field
+(no `Classical.choose_spec`): it is the `W x v`-instance of `exists_ricciArmOrder0RiemannCoeff`'s
+read-off, whose witness is exactly `ricciArmOrder0RiemannCoeffField`. -/
 theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -6651,8 +6663,33 @@ theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric 
               (smoothOrthoFrame (I := I) g₁ x b x)) (v 1) *
           unitModel (I := I) (M := M) g₀ 2 W x
             (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
-              else smoothOrthoFrame (I := I) g₁ x b x) :=
-  Classical.choose_spec (exists_ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W x v
+              else smoothOrthoFrame (I := I) g₁ x b x) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x))
+        (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁).toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmOrder0RiemannCoeff_toSection]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)))
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) =
+      riemannBiContrFib (I := I) g₁ x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [riemannBiContrFib, riemannBiContrFibFixedFrame_toModel]
+  refine congrArg (fun t => (2 : ℝ) * t) ?_
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  congr 1
+  rw [unitModel]
+  congr 1
+  funext j
+  fin_cases j <;> simp
 
 /-! ## The symmetrizer-absorbed Ricci-arm coefficients (order-`2` pure rough Laplacian, order-`0`
 two-slot curvature)
@@ -7804,18 +7841,30 @@ theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianM
       fin_cases j <;> simp
 
 
-/-- **The GT-validated order-`0` DeTurck-Lie coefficient `R_Lie = Δ_Lie`**, chosen from
-`exists_ricciArmOrder0DeTurckLieCoeff`.  Its `appCc` read-off is the boxed GT DeTurck-Lie order-`0`
-action of `(g₁, g_bg)` (`ricciArmOrder0DeTurckLieCoeff_appCc_eq`).  This is the `DLa + DLb` arm of the GT
-Lichnerowicz–DeTurck order-`0`, `g_bg`-genuine (vanishing at `g_bg = g₁`). -/
+/-- **The GT-validated order-`0` DeTurck-Lie coefficient `R_Lie = Δ_Lie`**, the concrete
+`deTurckLieFib`-built field `deTurckLieCoeffField` (the same carrier produced by
+`exists_ricciArmOrder0DeTurckLieCoeff`).  Its fibre value at `x` is `deTurckLieFib g₁ g_bg x`
+(`ricciArmOrder0DeTurckLieCoeff_toSection`), so the joint `(s, x)`-smoothness keystone can extract a
+joint-smooth carrier — unlike an opaque `Classical.choose`.  Its `appCc` read-off is the boxed GT
+DeTurck-Lie order-`0` action of `(g₁, g_bg)` (`ricciArmOrder0DeTurckLieCoeff_appCc_eq`).  This is the
+`DLa + DLb` arm of the GT Lichnerowicz–DeTurck order-`0`, `g_bg`-genuine (vanishing at `g_bg = g₁`). -/
 noncomputable def ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
-  Classical.choose (exists_ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg)
+  deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg
+
+/-- The underlying section value of `ricciArmOrder0DeTurckLieCoeff g₀ g₁ g_bg` at `x` is the concrete
+fibre operator `deTurckLieFib g₁ g_bg x`.  Definitional (the coefficient IS its concrete field). -/
+@[simp] theorem ricciArmOrder0DeTurckLieCoeff_toSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (x : M) :
+    (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg).toSection x =
+      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x)) :=
+  rfl
 
 set_option linter.unusedSectionVars false in
 /-- The `appCc`/`unitModel` read-off of the order-`0` DeTurck-Lie coefficient is the boxed GT DeTurck-Lie
-order-`0` action `Δ_Lie` of `(g₁, g_bg)` (`Classical.choose_spec` of
-`exists_ricciArmOrder0DeTurckLieCoeff`). -/
+order-`0` action `Δ_Lie` of `(g₁, g_bg)`.  Reproved directly on the concrete `deTurckLieFib`-built field
+(no `Classical.choose_spec`): it is the `W x v`-instance of `exists_ricciArmOrder0DeTurckLieCoeff`'s
+read-off, whose witness is exactly `deTurckLieCoeffField`. -/
 theorem ricciArmOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
@@ -7843,8 +7892,81 @@ theorem ricciArmOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannia
             + unitModel (I := I) (M := M) g₀ 2 W x
               (fun j => if j = 0 then v 0
                 else deTurckLieCovDerivW (I := I) g₁ g_bg
-                  (smoothExtensionTangent (I := I) x (v 1)) x)) :=
-  Classical.choose_spec (exists_ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg) W x v
+                  (smoothExtensionTangent (I := I) x (v 1)) x)) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg).toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x))
+        (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmOrder0DeTurckLieCoeff_toSection]
+  rw [show (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (deTurckLieFib (I := I) g₁ g_bg x)))
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) =
+      deTurckLieFib (I := I) g₁ g_bg x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  set D : Tensor0SSpace 2 I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+      (unitTensor (I := I) (M := M) x) with hD_def
+  rw [deTurckLieFib, ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply]
+  congr 1
+  · change Tensor0SSpace.toModel (dLaBiContrFib (I := I) g₁ g_bg x D) v = _
+    rw [dLaBiContrFib, dLaBiContrFibFixedFrame_toModel, neg_one_mul]
+    rw [show (- ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                else smoothOrthoFrame (I := I) g₁ x b x) *
+            (g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 1)
+              + g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 1))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 0))) =
+        - ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                else smoothOrthoFrame (I := I) g₁ x b x) *
+            (g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 1)
+              + g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 1))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 0)) from rfl]
+    refine congrArg (fun t => -t) ?_
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [dLaCovKernel_apply_extend, dLaCovKernel_apply_extend, mul_comm]
+    congr 1
+    rw [unitModel]
+    congr 1
+    funext j
+    fin_cases j <;> simp
+  · change Tensor0SSpace.toModel (deTurckLieDLbFib (I := I) g₁ g_bg x D) v = _
+    rw [deTurckLieDLbFib_toModel]
+    rw [deTurckLieWEndo_apply, deTurckLieWEndo_apply]
+    congr 1
+    · rw [unitModel]
+      congr 1
+      funext j
+      fin_cases j <;> simp
+    · rw [unitModel]
+      congr 1
+      funext j
+      fin_cases j <;> simp
 
 /-- **The symmetrizer-absorbed order-`0` DeTurck-Lie coefficient (STEP 1).**  For a `(0, 2)`-section `S`
 and the metrics `(g₀, g₁, g_bg)`, the half-sum symmetrizer-absorbed `(2, 2)`-coefficient of the GT
