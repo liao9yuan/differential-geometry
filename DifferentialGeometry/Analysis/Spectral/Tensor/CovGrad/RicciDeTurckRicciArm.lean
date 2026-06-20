@@ -3650,17 +3650,31 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
-    deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
-      unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
-            (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
-              (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T'))
-            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-          + appCc (I := I) (M := M) g₀ 4 2
-              (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+            ((R₀fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+            ((R₂fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₀fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₂fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        ∀ s : ℝ, s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+          deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
+                    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
   sorry
 
 theorem integratedLinearizedRicci_appCc_eq
@@ -3680,26 +3694,9 @@ theorem integratedLinearizedRicci_appCc_eq
               + appCc (I := I) (M := M) g₀ 4 2 R₂
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
-  
-  
-  
-  
-  set R₀fib : ℝ → SmoothCcTensor g₀ 2 2 := fun s =>
-    symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T') with hR₀fib
-  set R₂fib : ℝ → SmoothCcTensor g₀ 4 2 := ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' with hR₂fib
-  -- Pointwise combined Lichnerowicz `appCc` form on `Ioo 0 1` (combined chart-derivative → intrinsic
-  -- two-term form, gauge cancelled).
-  have hpt : ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
-      deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
-        unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
-              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-            + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
-    intro s hs x v
-    exact deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise (I := I) g₀ g_bg T T'
-      hδ_lt hδ hδ'_lt hδ' hs x v
+  obtain ⟨R₀fib, R₂fib, hjoint₀, hjoint₂, hcont₀, hcont₂, hpt⟩ :=
+    deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise (I := I) g₀ g_bg T T'
+      hδ_lt hδ hδ'_lt hδ'
 
   have hcontRead₀ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), ContinuousOn
       (fun s => unitModel (I := I) (M := M) g₀ 2
@@ -3710,9 +3707,7 @@ theorem integratedLinearizedRicci_appCc_eq
     have hIcc : Set.Icc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
       Icc_subset_realizedSmallSet hδ_lt hδ'_lt
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 2
-      R₀fib (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      (symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
-      v).mono hIcc
+      R₀fib (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) (hcont₀ x) v).mono hIcc
   have hcontRead₂ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), ContinuousOn
       (fun s => unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
@@ -3722,9 +3717,7 @@ theorem integratedLinearizedRicci_appCc_eq
     have hIcc : Set.Icc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
       Icc_subset_realizedSmallSet hδ_lt hδ'_lt
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 4
-      R₂fib (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
-      (symmAbsorbedPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
-      v).mono hIcc
+      R₂fib (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) (hcont₂ x) v).mono hIcc
   have hint₀ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), IntervalIntegrable
       (fun s => unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
@@ -3745,17 +3738,13 @@ theorem integratedLinearizedRicci_appCc_eq
   obtain ⟨IΦ₀, heval₀⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 2 R₀fib
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
-      (symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
-      (fun x => symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint₀ hcont₀
   obtain ⟨IΦ₂, heval₂⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 4 R₂fib
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
-      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
-      (symmAbsorbedPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
-      (fun x => symmAbsorbedPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
-  -- The integrated coefficient fields are the fibre path integrals (the combined operator already
-  -- carries the `−2` Ricci scaling, so no extra scaling is needed here).
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint₂ hcont₂
+  
+  
   refine ⟨IΦ₀, IΦ₂, fun x v => ?_⟩
   set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
   set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
