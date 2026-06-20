@@ -170,6 +170,84 @@ theorem contDiff_integral_of_jointContMDiff
           simpa [hFd] using this
         exact ih Fd hFd_joint
 
+private theorem fiber_contDiffOn_Icc
+    (f : M → ℝ → ℝ) {T : ℝ}
+    (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)) (x : M) :
+    ContDiffOn ℝ ∞ (fun u : ℝ => f x u) (Set.Icc (0 : ℝ) T) := by
+  have harg : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) ∞ (fun u : ℝ => (x, u))
+      (Set.Icc (0 : ℝ) T) :=
+    (contMDiffOn_const (c := x)).prodMk contMDiffOn_id
+  have hmaps : Set.MapsTo (fun u : ℝ => (x, u)) (Set.Icc (0 : ℝ) T)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := fun u hu => ⟨Set.mem_univ _, hu⟩
+  have hcomp := hf.comp harg hmaps
+  rw [contMDiffOn_iff_contDiffOn] at hcomp
+  exact hcomp
+
+private theorem partialSnd_contMDiffOn_Icc
+    (μ : Measure M) (f : M → ℝ → ℝ) {T : ℝ}
+    (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => derivWithin (fun s => f p.1 s) (Set.Icc (0 : ℝ) T) p.2)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := by
+  sorry
+
+private theorem hasDerivWithinAt_integral_param_Icc
+    (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ} (hT : 0 < T)
+    (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T))
+    {t₀ : ℝ} (ht₀ : t₀ ∈ Set.Icc (0 : ℝ) T) :
+    HasDerivWithinAt (fun t => ∫ x, f x t ∂μ)
+      (∫ x, derivWithin (fun s => f x s) (Set.Icc (0 : ℝ) T) t₀ ∂μ) (Set.Icc (0 : ℝ) T) t₀ := by
+  sorry
+
+private theorem contDiffOn_integral_of_jointContMDiffOn_Icc_pos
+    (μ : Measure M) [IsFiniteMeasure μ] {T : ℝ} (hT : 0 < T) :
+    ∀ (N : ℕ) (f : M → ℝ → ℝ),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
+        ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) →
+      ContDiffOn ℝ (N : WithTop ℕ∞) (fun t : ℝ => ∫ x, f x t ∂μ) (Set.Icc (0 : ℝ) T) := by
+  have hUD : UniqueDiffOn ℝ (Set.Icc (0 : ℝ) T) := uniqueDiffOn_Icc hT
+  intro N
+  induction N with
+  | zero =>
+      intro f hf
+      rw [Nat.cast_zero, contDiffOn_zero]
+      exact fun t₀ ht₀ =>
+        (hasDerivWithinAt_integral_param_Icc μ f hT hf ht₀).continuousWithinAt
+  | succ n ih =>
+      intro f hf
+      rw [Nat.cast_succ, contDiffOn_succ_iff_derivWithin hUD]
+      refine ⟨?_, ?_, ?_⟩
+      · exact fun t₀ ht₀ =>
+          (hasDerivWithinAt_integral_param_Icc μ f hT hf ht₀).differentiableWithinAt
+      · intro hcontra; exact absurd hcontra (by simp)
+      · have hderiv_eq : Set.EqOn (derivWithin (fun t : ℝ => ∫ x, f x t ∂μ) (Set.Icc (0 : ℝ) T))
+            (fun t : ℝ => ∫ x, derivWithin (fun s => f x s) (Set.Icc (0 : ℝ) T) t ∂μ)
+            (Set.Icc (0 : ℝ) T) := by
+          intro t₀ ht₀
+          exact (hasDerivWithinAt_integral_param_Icc μ f hT hf ht₀).derivWithin (hUD t₀ ht₀)
+        refine ContDiffOn.congr ?_ hderiv_eq
+        exact ih (fun x t => derivWithin (fun s => f x s) (Set.Icc (0 : ℝ) T) t)
+          (partialSnd_contMDiffOn_Icc μ f hf)
+
+theorem contDiffOn_integral_of_jointContMDiffOn_Icc
+    (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ}
+    (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)) :
+    ContDiffOn ℝ ∞ (fun t : ℝ => ∫ x, f x t ∂μ) (Set.Icc (0 : ℝ) T) := by
+  rcases lt_trichotomy T 0 with hT0 | hT0 | hT
+  · rw [Set.Icc_eq_empty (not_le.mpr hT0)]; exact contDiffOn_empty
+  · subst hT0
+    rw [Set.Icc_self]
+    intro t₀ ht₀
+    rw [Set.mem_singleton_iff] at ht₀
+    subst ht₀
+    exact contDiffWithinAt_singleton (𝕜 := ℝ) (f := fun t : ℝ => ∫ x, f x t ∂μ)
+  · refine contDiffOn_infty.mpr (fun N => ?_)
+    exact contDiffOn_integral_of_jointContMDiffOn_Icc_pos μ hT N f hf
+
 end ParamIntegral
 
 namespace Integral
@@ -218,6 +296,33 @@ theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     rfl
   rw [hpt]
   exact DifferentialGeometry.contDiff_integral_of_jointContMDiff
+    (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀)
+    (fun x t => tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x (b.toFun x) ((R t).toFun x))
+    h_integrand_joint
+
+theorem contDiffOn_integral_fiberInner_of_jointContMDiffOn_Icc
+    (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
+    (b : SmoothCcTensor g₀ 0 2)
+    (R : ℝ → SmoothCcTensor g₀ 0 2)
+    (h_integrand_joint :
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+        (fun p : M × ℝ =>
+          tensorInnerPointwise (I := I) (M := M) g₀ 0 2 p.1
+            (b.toFun p.1) ((R p.2).toFun p.1))
+        ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)) :
+    ContDiffOn ℝ ∞ (fun t => (inner ℝ b (R t) : ℝ)) (Set.Icc (0 : ℝ) T) := by
+  haveI : IsFiniteMeasure
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
+  have hpt : (fun t => (inner ℝ b (R t) : ℝ)) =
+      fun t => ∫ x, tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
+        (b.toFun x) ((R t).toFun x)
+        ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    funext t
+    rw [SmoothCcTensor.inner_def]
+    rfl
+  rw [hpt]
+  exact DifferentialGeometry.contDiffOn_integral_of_jointContMDiffOn_Icc
     (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀)
     (fun x t => tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x (b.toFun x) ((R t).toFun x))
     h_integrand_joint
