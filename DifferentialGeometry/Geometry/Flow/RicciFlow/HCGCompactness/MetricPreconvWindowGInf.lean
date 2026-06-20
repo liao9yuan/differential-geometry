@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
-set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Window limit metrics from fixed-time spatial precompactness
@@ -325,7 +324,7 @@ theorem metricDerivNorm_symm
   have hneg :
       metricDiffCovDerivAt (I := I) a B A gRef x =
         -metricDiffCovDerivAt (I := I) a A B gRef x := by
-    simp [metricDiffCovDerivAt, sub_eq_add_neg]
+    simp [metricDiffCovDerivAt]
   rw [metricDerivNorm, metricDerivNorm, hneg, normSq0S_neg]
 
 /-- Dense-net convergence plus uniform time-Lipschitz control makes the chosen
