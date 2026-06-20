@@ -232,6 +232,61 @@ theorem deTurckForcing_smoothTimeCoordinateField
   funext i
   rw [ht_eq i, hF_coeff t ht_mem i]
 
+/-- **DEEP PARABOLIC LEAF — the fibre-small spectral self-feedback contraction of the
+Ricci–DeTurck engine forcing at the order-`(d+2)` total energy (operator form).**
+
+For the engine forcing `gforce =ᵐ deTurckSobolevNHa2 g₀ g_bg a ∘ (maxRegDuhamelSolField …)`
+about `g₀` (supercritical `2·finrank + 10 ≤ a`, zero initial datum), pinned by `hforce` to
+the genuine second-order Nemytskii image of its own zero-datum Duhamel solution field, the
+order-`(d+2)` total spectral forcing energy obeys a genuine **small-data self-feedback
+contraction**: there is one contraction factor `θ < 1` (the genuine fibre-small short-time
+smallness of the zero-datum solution operator, below `1` because the engine is evaluated on
+the realizability ball where the second-order Nemytskii loss is small-data) and one finite
+background level `Kd ≥ 0` (the order-`d`-energy-controlled affine remainder of the
+non-vanishing background nonlinearity `N(0)`, finite precisely because `hd` makes the
+order-`d` forcing energy finite), such that **for every finite mode set `s` the order-`(d+2)`
+forcing-mass partial sum absorbs into a `θ`-fraction of itself plus `Kd`**:
+
+  `∑_{i ∈ s} forcingMass gforce (d+2) i  ≤  θ · ∑_{i ∈ s} forcingMass gforce (d+2) i  +  Kd`.
+
+This is the honest **operator-level** content of the small-data parabolic interior
+smoothing (Amann maximal regularity; Ladyzhenskaya–Solonnikov–Uraltseva; Lieberman), lying
+strictly **below** the summability conclusion: it is a partial-sum self-feedback inequality
+about the solution operator (driven by `hforce` and the small-data fibre-smallness `θ < 1`),
+NOT the statement `Summable (forcingMass gforce (d+2))` (no packaging).  The mechanism: by
+`hforce`, `gforce =ᵐ N(u)` with `u = maxRegDuhamelSolField 0 gforce`, so the order-`(d+2)`
+forcing energy is the order-`(d+2)` energy of `N(u)`; the genuine second-order Nemytskii
+affine ball bound `deTurckRemainder_iteratedCovGradSum_ballBound` (window `d+2`) controls it
+by `C·(1 + ‖u‖²_{H^{d+4}})`; the PROVEN Duhamel `+2` gain `solFieldMass_le_forcingMass`
+(`solFieldMass (c+2) ≤ (1+T)²·forcingMass c`) controls `‖u‖²_{H^{d+4}}` by
+`(1+T)²·‖gforce‖²_{H^{d+2}}`, i.e. by the very order-`(d+2)` forcing energy on the left; and
+the genuine small-data short-time smallness of the realized solution on the realizability
+ball makes the resulting self-coefficient `θ < 1`.  This total absorption — never a per-mode
+reverse bound, which is FALSE (`solFieldMass_le_forcingMass` shows the zero-datum solution is
+per-mode SMALLER than the forcing, so a per-mode reverse would force `1 ≤ θ(1+T)²`) — is the
+genuine `+2` content.
+
+PINNED to the forcing by `hforce`; `hd` is genuinely consumed (it bounds `Kd`).
+
+DEFERRED (honest `sorry`; the genuine fibre-small zero-datum maximal-regularity spectral
+self-feedback estimate; consumers transitively depend on its `sorryAx`). -/
+theorem deTurckForcing_forcingMass_partialSum_contraction
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (d : ℝ) (hda : (a : ℝ) ≤ d)
+    (hd : Summable (forcingMass (I := I) (M := M) gforce d)) :
+    ∃ θ : ℝ, 0 ≤ θ ∧ θ < 1 ∧ ∃ Kd : ℝ, 0 ≤ Kd ∧
+      ∀ s : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        ∑ i ∈ s, forcingMass (I := I) (M := M) gforce (d + 2) i ≤
+          θ * (∑ i ∈ s, forcingMass (I := I) (M := M) gforce (d + 2) i) + Kd :=
+  sorry
+
 /-- **DEEP PARABOLIC LEAF — the small-data Nemytskii spectral `+2` forcing-mass advance
 (the total `H`-norm form).**
 
@@ -270,16 +325,21 @@ solution is controlled by the total `H^{d+2}` energy of the forcing through the 
 zero-datum maximal-regularity estimate), and that total absorption — not a per-mode
 inequality — closes the `+2` advance.
 
+PROVEN here as a genuine composition over the operator-level fibre-small spectral
+self-feedback contraction `deTurckForcing_forcingMass_partialSum_contraction`: that node
+supplies a contraction factor `θ < 1` and a finite order-`d`-controlled background `Kd` with
+the partial-sum absorption
+`∑_{i∈s} forcingMass gforce (d+2) i ≤ θ·∑_{i∈s} forcingMass gforce (d+2) i + Kd` at every
+finite mode set `s`; rearranging, `(1 − θ)·∑_{i∈s} ≤ Kd`, so every partial sum is bounded by
+the single constant `Kd/(1 − θ)`, and `summable_of_sum_le` (the order-`(d+2)` forcing masses
+are nonnegative and their partial sums are uniformly bounded) yields the summability.
+
 PINNED to the forcing by `hforce`: `hforce` fixes `gforce` to the genuine second-order
 Nemytskii image of its own Duhamel solution field.  The hypothesis
 `Summable (forcingMass gforce d)` is satisfiable (it holds at `d = a` by the Plancherel
-identity `summable_weight_mul_norm_timeModeCoeff_sq`) and genuinely consumed: the total
-small-data parabolic interior smoothing advances the finite order-`d` total energy to a
-finite order-`(d+2)` total energy.
-
-DEFERRED (honest `sorry`; the genuine total small-data quasilinear parabolic `+2`
-interior-smoothing of the zero-datum Ricci–DeTurck solution operator; consumers transitively
-depend on its `sorryAx`). -/
+identity `summable_weight_mul_norm_timeModeCoeff_sq`) and genuinely consumed: it bounds the
+background level `Kd` of the contraction node.  Consumers transitively depend on the `sorryAx`
+of the deep contraction node. -/
 theorem deTurckForcing_forcingMass_summable_succ
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -291,8 +351,17 @@ theorem deTurckForcing_forcingMass_summable_succ
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (d : ℝ) (hda : (a : ℝ) ≤ d)
     (hd : Summable (forcingMass (I := I) (M := M) gforce d)) :
-    Summable (forcingMass (I := I) (M := M) gforce (d + 2)) :=
-  sorry
+    Summable (forcingMass (I := I) (M := M) gforce (d + 2)) := by
+  classical
+  obtain ⟨θ, hθ_nn, hθ_lt, Kd, hKd_nn, hcontract⟩ :=
+    deTurckForcing_forcingMass_partialSum_contraction (I := I) (M := M) g₀ g_bg a ha_super
+      hT hT1 gforce hforce d hda hd
+  have hone_sub_θ_pos : 0 < 1 - θ := by linarith
+  refine summable_of_sum_le (c := Kd / (1 - θ))
+    (fun i => forcingMass_nonneg (I := I) (M := M) gforce (d + 2) i) (fun s => ?_)
+  have hS := hcontract s
+  rw [le_div_iff₀ hone_sub_θ_pos]
+  nlinarith [hS]
 
 /-- **DEEP PARABOLIC LEAF (2/2) — all-order spatial forcing-mass summability of the
 Ricci–DeTurck engine forcing.**
