@@ -98,8 +98,34 @@ def tensorPointwiseSeminorm
 
 theorem tensorPointwiseNorm_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
-    Continuous (tensorPointwiseNorm (I := I) (M := M) g r s x) :=
-  sorry
+    Continuous (tensorPointwiseNorm (I := I) (M := M) g r s x) := by
+  haveI : NormedSpace ℝ (TensorRSModel r s ℝ E) :=
+    Tensor0SBundle.tensorRSModel_normedSpace r s
+  haveI : FiniteDimensional ℝ (TensorRSModel r s ℝ E) :=
+    Tensor0SBundle.tensorRSModel_finiteDimensional r s
+  set b : TensorRSModel r s ℝ E → TensorRSModel r s ℝ E → ℝ :=
+    fun S T => tensorInnerPointwise (I := I) (M := M) g r s x S T with hb
+  haveI : IsModuleTopology ℝ (TensorRSModel r s ℝ E) := isModuleTopologyOfFiniteDimensional
+  haveI : IsModuleTopology ℝ ℝ := isModuleTopologyOfFiniteDimensional
+  let bl : TensorRSModel r s ℝ E →ₗ[ℝ] TensorRSModel r s ℝ E →ₗ[ℝ] ℝ :=
+    LinearMap.mk₂ ℝ b
+      (fun S₁ S₂ T => tensorInnerPointwise_add_left (I := I) (M := M) g r s x S₁ S₂ T)
+      (fun c S T => by
+        simp only [hb, smul_eq_mul]
+        exact tensorInnerPointwise_smul_left (I := I) (M := M) g r s x c S T)
+      (fun S T₁ T₂ => tensorInnerPointwise_add_right (I := I) (M := M) g r s x S T₁ T₂)
+      (fun c S T => by
+        simp only [hb, smul_eq_mul]
+        exact tensorInnerPointwise_smul_right (I := I) (M := M) g r s x c S T)
+  have hbil : Continuous
+      (fun p : TensorRSModel r s ℝ E × TensorRSModel r s ℝ E => bl p.1 p.2) :=
+    IsModuleTopology.continuous_bilinear_of_finite_left bl
+  have hdiag : Continuous (fun S : TensorRSModel r s ℝ E => b S S) := by
+    have hcomp : Continuous (fun S : TensorRSModel r s ℝ E => bl S S) :=
+      hbil.comp (continuous_id.prodMk continuous_id)
+    exact hcomp
+  unfold tensorPointwiseNorm
+  exact Real.continuous_sqrt.comp hdiag
 
 theorem tensorPointwiseNorm_intervalIntegral_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
