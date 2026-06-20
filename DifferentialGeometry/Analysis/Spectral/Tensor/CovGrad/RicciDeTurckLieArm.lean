@@ -122,6 +122,62 @@ private theorem appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 /-! ## The pure `−2 Ric`-arm order-graded `appCc` eval-matching (posited deep mean-value input) -/
 
+/-- **(Posited deep input — the pure `(−2)`-scaled integrated linearized-Ricci operator in
+order-graded `appCc` form.)**
+
+For the convex realized metric path `g_s = realize(g₀, (1 − s)·T' + s·T)`, the `(−2)`-scaled
+`s`-integral over `[0,1]` of the bare linearized Ricci integrand `linearizedRicciAt g_s (T − T')`
+(the integrand of the bare-Ricci mean-value reduction
+`ricciTensor_realized_sub_eq_integral_linearizedRicci`) is the order-graded `unitModel`/`appCc`
+read-off on the iterated covariant gradients `Wₘ = iteratedCovGrad g₀ 0 2 m (T − T')` of the
+perturbation difference `S = T − T'`:
+```
+(−2)·∫₀¹ DRic(g_s)[T − T']_x(v 0, v 1) ds
+  = unitModel g₀ 2 (appCc g₀ 2 2 P₀ W₀ + appCc g₀ 3 2 P₁ W₁ + appCc g₀ 4 2 P₂ W₂) x v.
+```
+
+This is the **bare-Ricci** analogue of the combined-operator integrated Lichnerowicz form
+`integratedLinearizedRicci_appCc_eq` (whose integrand is the COMBINED chart-sum derivative
+`deriv (realizedDeTurckRicciChartSum …)`, i.e. `−2 Ric + 𝓛_W` AFTER the DeTurck gauge cancellation,
+hence has no genuine order-`1` slot).  Here the integrand is the **bare** linearized Ricci
+`linearizedRicciAt` (equivalently `deriv (realizedRicciChartSum …)` on `(0,1)` by
+`linearizedRicciAt_eq_deriv_chartSum_on_Ioo`), which keeps its genuine order-`1` connection-coupling
+slot `P₁` (the gauge terms that the combined chart symbol cancels survive in the bare Ricci symbol).
+
+**The genuine differential-geometric content.**  The bare-Ricci Lichnerowicz decomposition of the
+chart Ricci symbol — the pointwise-in-`s` `appCc` form of `DRic(g_s)` reading off the order-`0`
+curvature multiplier `P₀`, the order-`1` connection-coupling multiplier `P₁`, and the order-`2`
+rough-Laplacian principal `P₂` — together with the operator-field path integration producing the
+exact endpoint coefficient fields `(P₀, P₁, P₂)` as smooth compactly-supported tensors (the path
+metric `g_s` stays `g₀`-fibre small with constant `< 1` on `[0,1]`, so the coefficient families are
+jointly `(s, x)`-smooth and their fibre Bochner path integrals are again smooth fields).  This is the
+bare-Ricci mirror of the combined chart-symbol → intrinsic `appCc` tower
+(`deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise` + `exists_pathIntegralCoeffField`), recursed
+into downstream.  It is *posited* here as the single deferred bare-Ricci input.  The predicate
+genuinely constrains `(P₀, P₁, P₂)` to *reproduce the actual `(−2)`-scaled integrated bare linearized
+Ricci value*, so it is non-vacuous: the zero triple fails it on any background where the integrated
+linearized Ricci is nonzero. -/
+private theorem integratedLinearizedRicci_negTwo_appCc_eq
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (P₀ : SmoothCcTensor g₀ 2 2) (P₁ : SmoothCcTensor g₀ 3 2) (P₂ : SmoothCcTensor g₀ 4 2),
+      ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+        ((-2 : ℝ) * ∫ s in (0 : ℝ)..1,
+              DifferentialGeometry.PDE.DeTurck.RicciLinearization.linearizedRicciAt (I := I)
+                g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s) =
+          unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 P₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 3 2 P₁
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+              + appCc (I := I) (M := M) g₀ 4 2 P₂
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
 /-- **(Posited deep input — the pure `(−2)·Ric`-arm order-graded `appCc` eval-matching.)**
 
 There exist endpoint-dependent operator coefficient fields
@@ -182,8 +238,32 @@ theorem negTwoRicciArm_appCc_eval
               + appCc (I := I) (M := M) g₀ 3 2 P₁
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
               + appCc (I := I) (M := M) g₀ 4 2 P₂
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  classical
+  -- The bare-Ricci integrated Lichnerowicz `appCc` form supplies the order-graded coefficient fields.
+  obtain ⟨P₀, P₁, P₂, heq⟩ :=
+    integratedLinearizedRicci_negTwo_appCc_eq (I := I) (M := M) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  refine ⟨P₀, P₁, P₂, fun x v => ?_⟩
+  -- `smoothRiemannianMetricToInfty` is the definitional alias `:= g`, so it is transparent to
+  -- `ricciTensor`; unfold it to expose the bare realized metrics.
+  show ((-2 : ℝ) * ricciTensor (I := I)
+          (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
+        - (-2 : ℝ) * ricciTensor (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1)) = _
+  -- Pull out the `(−2)` scalar and rewrite the bare Ricci-tensor difference as the FTC integral of the
+  -- bare linearized Ricci integrand along the convex realized metric path (`RicciDifferenceMeanValue`).
+  rw [show ((-2 : ℝ) * ricciTensor (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
+          - (-2 : ℝ) * ricciTensor (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1)) =
+        (-2 : ℝ) * (ricciTensor (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
+            - ricciTensor (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1)) from by ring]
+  rw [DifferentialGeometry.PDE.DeTurck.RicciLinearization.ricciTensor_realized_sub_eq_integral_linearizedRicci
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)]
+  -- The `(−2)`-scaled integrated bare linearized Ricci is the order-graded `appCc` read-off.
+  exact heq x v
 
 /-! ## The order-graded `appCc` eval-matching (Lie arm) -/
 
