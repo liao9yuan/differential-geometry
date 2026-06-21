@@ -40,6 +40,24 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
+/-- **Brick B: the spacetime comparison maps from the time-zero maps.**  The
+Cheeger--Gromov comparison maps are time-INDEPENDENT diffeomorphisms of the
+underlying manifolds, and `PointedFlowData.atTime` preserves `M`/topology/
+charted/basepoint definitionally, so the time-zero `PointedRiemannianCGMaps`
+(over the time-zero slice `L.atTime 0` of the limit flow) transport
+field-for-field to the spacetime `PointedCGHMaps` over `L`. -/
+def pointedCGHMaps_of_atZero
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (L : PointedFlowData.{u, uE, uH} (I := I) X.D)
+    (subseq : Nat -> Nat)
+    (rmaps : PointedRiemannianCGMaps (I := I) (X.atZero (I := I))
+      (L.atTime (I := I) 0) subseq) :
+    PointedCGHMaps (I := I) X L subseq where
+  partialDiffeomorph := rmaps.partialDiffeomorph
+  source_exhausts := rmaps.source_exhausts
+  base_mem := rmaps.base_mem
+  basepoint_map := rmaps.basepoint_map
+
 /-- The structured frontier ingredients of the smooth-flow-limit upgrade, given
 the time-zero metric Cheeger--Gromov compactness conclusion `mc`.  Each field is
 one P4 brick; the hard frontiers (the limit flow `L`, the window convergence

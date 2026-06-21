@@ -22,10 +22,15 @@ theorem modulo the explicit honest frontier fields.
 ## Remaining — discharge the `FlowLimitData` fields (the per-brick work)
 
 - **Brick A** (`L`): the limit Ricci flow on `mc.limit.M` with metric `gInf`
-  (Lemma 3.11 output) + `IsSolutionOn` (limit-is-a-solution — HARD).
-- **Brick B** (`maps`): transport `mc.maps : PointedRiemannianCGMaps` (time-0) →
-  `PointedCGHMaps` (time-independent diffeos; manifold-type identification
-  `L.M = mc.limit.M`, `(X.term k).M = (X.atZero.obj k).M`).
+  (Lemma 3.11 output) + `IsSolutionOn` (limit-is-a-solution — HARD). Build `L`
+  so that `L.atTime 0 = mc.limit` (then Brick B's `rmaps := hL0 ▸ mc.maps`).
+- **Brick B** (`maps`): ✅ DONE — `pointedCGHMaps_of_atZero` (2026-06-21, build
+  green). **The feared manifold-type-identification wall does NOT exist**:
+  `PointedFlowData.atTime` preserves `M`/topology/charted/basepoint
+  *definitionally* (Basic.lean:72, only `metric` changes), so the time-0
+  `PointedRiemannianCGMaps` over `L.atTime 0` transport field-for-field to
+  `PointedCGHMaps X L subseq` by defeq — a 4-field copy, no casts. Consume it
+  with `rmaps := hL0 ▸ mc.maps` where `hL0 : L.atTime 0 = mc.limit` (Brick A).
 - **Brick C** (`hσsrc`/`hσtgt`/`refMetric`): σ-compactness of the open
   source/target + a reference metric. Mechanical.
 - **Brick D** (`conv`): apply `winGInfOfSol` to the pulled-back flows `Φ_k* g_k`,
