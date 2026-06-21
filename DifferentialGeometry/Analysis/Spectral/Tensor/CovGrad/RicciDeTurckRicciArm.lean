@@ -3297,6 +3297,125 @@ private theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
     rw [realizedDeTurckRicciChartSum, hy₀]
   rw [hfun, hsum.deriv]
 
+private theorem exists_chartRicciDeTurckOrder1CoeffField
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ R₁fib : ℝ → SmoothCcTensor g₀ 3 2,
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+            ((R₁fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₁fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        ∀ s : ℝ, s ∈ Set.Ioo (0 : ℝ) 1 →
+          ∀ (x : M) (v : Fin 2 → TangentSpace I x)
+            (h : ChartMetricPerturbation E),
+            IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h →
+            (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+                (((-2 : ℝ) * chartRicciSecondOrderPart (I := I)
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                    chartDeTurckCorrSecondOrderPart (I := I)
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) +
+                  metricFamilyDeTurckRicciFirstOrderRemainder (I := I)
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x))) =
+              unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 2 2
+                    (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+                        (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+                      + (-1 : ℝ) • symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+                        (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+                      + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+                        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
+                    (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                  + appCc (I := I) (M := M) g₀ 3 2 (R₁fib s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                  + appCc (I := I) (M := M) g₀ 4 2
+                      (ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
+private noncomputable def chartRicciDeTurckOrder1CoeffField
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ℝ → SmoothCcTensor g₀ 3 2 :=
+  Classical.choose (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')
+
+private theorem chartRicciDeTurckOrder1CoeffField_jointContMDiff
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+        ((chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+  (Classical.choose_spec (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')).1
+
+private theorem chartRicciDeTurckOrder1CoeffField_toModel_continuous
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' t).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) :=
+  (Classical.choose_spec (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')).2.1 x
+
+private theorem chartRicciDeTurckOrder1CoeffField_readout
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ}
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (v : Fin 2 → TangentSpace I x)
+    (h : ChartMetricPerturbation E)
+    (hvel : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+      ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+        (((-2 : ℝ) * chartRicciSecondOrderPart (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+            chartDeTurckCorrSecondOrderPart (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) +
+          metricFamilyDeTurckRicciFirstOrderRemainder (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x))) =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+              + (-1 : ℝ) • symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+              + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 3 2
+              (chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+              (ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  (Classical.choose_spec (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')).2.2
+    s hs x v h hvel
+
 private theorem deTurckRicci_chartSymbolSum_eq_appCc_intrinsic
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -3325,10 +3444,13 @@ private theorem deTurckRicci_chartSymbolSum_eq_appCc_intrinsic
               + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 3 2
+              (chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+  chartRicciDeTurckOrder1CoeffField_readout (I := I) g₀ g_bg T T' hδ hδ' s hs x v h hvel
 
 private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -3337,11 +3459,17 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ}
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
+    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₁fib : ℝ → SmoothCcTensor g₀ 3 2)
+      (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
           (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
             (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
             ((R₀fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+            ((R₁fib p.2).toSection p.1))
           ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
         ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
           (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -3350,6 +3478,9 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
           ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
         (∀ x : M, ContinuousOn (fun t : ℝ =>
             Tensor0SBundle.TensorRSSpace.toModel ((R₀fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₁fib t).toSection x))
             (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
         (∀ x : M, ContinuousOn (fun t : ℝ =>
             Tensor0SBundle.TensorRSSpace.toModel ((R₂fib t).toSection x))
@@ -3369,6 +3500,8 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
               unitModel (I := I) (M := M) g₀ 2
                 (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
                     (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                  + appCc (I := I) (M := M) g₀ 3 2 (R₁fib s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                   + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
                       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
@@ -3378,8 +3511,9 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
             (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
         + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'),
+    fun s => chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' s,
     fun s => ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s),
-    ?_, ?_, ?_, ?_, ?_⟩
+    ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · have hR := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
     have hC := jointRSsmul (I := I) (r := 2) (s := 2)
       (S := realizedSmallSet (δ := δ) (δ' := δ')) (-1 : ℝ)
@@ -3407,6 +3541,7 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
           (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1) hRC hL
     refine hRCL.congr (fun p _ => ?_)
     congr 1
+  · exact chartRicciDeTurckOrder1CoeffField_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ'
   · exact ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
   · intro x
     have hR := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
@@ -3443,6 +3578,7 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
           + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+  · exact chartRicciDeTurckOrder1CoeffField_toModel_continuous (I := I) g₀ g_bg T T' hδ hδ'
   · exact ricciArmPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ'
   · intro s hs x v h hvel
     exact deTurckRicci_chartSymbolSum_eq_appCc_intrinsic (I := I) g₀ g_bg T T' hδ hδ' s hs x v h hvel
@@ -3454,11 +3590,17 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
+    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₁fib : ℝ → SmoothCcTensor g₀ 3 2)
+      (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
           (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
             (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
             ((R₀fib p.2).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+            ((R₁fib p.2).toSection p.1))
           ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
         ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
           (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -3469,6 +3611,9 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
             Tensor0SBundle.TensorRSSpace.toModel ((R₀fib t).toSection x))
             (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
         (∀ x : M, ContinuousOn (fun t : ℝ =>
+            Tensor0SBundle.TensorRSSpace.toModel ((R₁fib t).toSection x))
+            (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
+        (∀ x : M, ContinuousOn (fun t : ℝ =>
             Tensor0SBundle.TensorRSSpace.toModel ((R₂fib t).toSection x))
             (realizedSmallSet (δ := δ) (δ' := δ'))) ∧
         ∀ s : ℝ, s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
@@ -3476,12 +3621,14 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
             unitModel (I := I) (M := M) g₀ 2
               (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (R₁fib s)
+                    (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
                     (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
-  obtain ⟨R₀fib, R₂fib, hjoint₀, hjoint₂, hcont₀, hcont₂, hpt⟩ :=
+  obtain ⟨R₀fib, R₁fib, R₂fib, hjoint₀, hjoint₁, hjoint₂, hcont₀, hcont₁, hcont₂, hpt⟩ :=
     deTurckRicci_threeSlot_appCc_covariantTransfer (I := I) g₀ g_bg T T' hδ hδ'
-  refine ⟨R₀fib, R₂fib, hjoint₀, hjoint₂, hcont₀, hcont₂, fun s hs x v => ?_⟩
+  refine ⟨R₀fib, R₁fib, R₂fib, hjoint₀, hjoint₁, hjoint₂, hcont₀, hcont₁, hcont₂, fun s hs x v => ?_⟩
   obtain ⟨h, hvel, hderiv⟩ :=
     deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ g_bg T T'
       hδ_lt hδ hδ'_lt hδ' hs x (v 0) (v 1)
@@ -3495,17 +3642,19 @@ theorem integratedLinearizedRicci_appCc_eq
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₂ : SmoothCcTensor g₀ 4 2),
+    ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2) (R₂ : SmoothCcTensor g₀ 4 2),
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
         (∫ s in (0 : ℝ)..1,
               deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s) =
           unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 R₀
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 3 2 R₁
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
               + appCc (I := I) (M := M) g₀ 4 2 R₂
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
-  obtain ⟨R₀fib, R₂fib, hjoint₀, hjoint₂, hcont₀, hcont₂, hpt⟩ :=
+  obtain ⟨R₀fib, R₁fib, R₂fib, hjoint₀, hjoint₁, hjoint₂, hcont₀, hcont₁, hcont₂, hpt⟩ :=
     deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise (I := I) g₀ g_bg T T'
       hδ_lt hδ hδ'_lt hδ'
 
@@ -3519,6 +3668,16 @@ theorem integratedLinearizedRicci_appCc_eq
       Icc_subset_realizedSmallSet hδ_lt hδ'_lt
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 2
       R₀fib (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) (hcont₀ x) v).mono hIcc
+  have hcontRead₁ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), ContinuousOn
+      (fun s => unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 3 2 (R₁fib s)
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v)
+      (Set.Icc (0 : ℝ) 1) := by
+    intro x v
+    have hIcc : Set.Icc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
+      Icc_subset_realizedSmallSet hδ_lt hδ'_lt
+    exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 3
+      R₁fib (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) (hcont₁ x) v).mono hIcc
   have hcontRead₂ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), ContinuousOn
       (fun s => unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
@@ -3535,6 +3694,12 @@ theorem integratedLinearizedRicci_appCc_eq
           (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v)
       MeasureTheory.volume 0 1 :=
     fun x v => ((hcontRead₀ x v)).intervalIntegrable_of_Icc zero_le_one
+  have hint₁ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), IntervalIntegrable
+      (fun s => unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 3 2 (R₁fib s)
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v)
+      MeasureTheory.volume 0 1 :=
+    fun x v => ((hcontRead₁ x v)).intervalIntegrable_of_Icc zero_le_one
   have hint₂ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), IntervalIntegrable
       (fun s => unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
@@ -3550,44 +3715,55 @@ theorem integratedLinearizedRicci_appCc_eq
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 2 R₀fib
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint₀ hcont₀
+  obtain ⟨IΦ₁, heval₁⟩ :=
+    exists_pathIntegralCoeffField (I := I) (M := M) g₀ 3 R₁fib
+      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint₁ hcont₁
   obtain ⟨IΦ₂, heval₂⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 4 R₂fib
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint₂ hcont₂
-  
-  
-  refine ⟨IΦ₀, IΦ₂, fun x v => ?_⟩
+
+
+  refine ⟨IΦ₀, IΦ₁, IΦ₂, fun x v => ?_⟩
   set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
+  set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
   set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
-  
-  
+
+
   have hrhs :
       unitModel (I := I) (M := M) g₀ 2
           (appCc (I := I) (M := M) g₀ 2 2 IΦ₀ W₀
+            + appCc (I := I) (M := M) g₀ 3 2 IΦ₁ W₁
             + appCc (I := I) (M := M) g₀ 4 2 IΦ₂ W₂) x v =
-        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 IΦ₀ W₀) x v +
+        (unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 IΦ₀ W₀) x v +
+          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 IΦ₁ W₁) x v) +
           unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 IΦ₂ W₂) x v := by
-    rw [unitModel_add_left, ContinuousMultilinearMap.add_apply]
+    rw [unitModel_add_left, ContinuousMultilinearMap.add_apply, unitModel_add_left,
+      ContinuousMultilinearMap.add_apply]
   rw [hrhs]
-  
-  rw [heval₀ x v, heval₂ x v]
-  
-  
+
+  rw [heval₀ x v, heval₁ x v, heval₂ x v]
+
+
   have hii₀ : IntervalIntegrable
       (fun s => unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s) W₀) x v)
       MeasureTheory.volume 0 1 := hint₀ x v
+  have hii₁ : IntervalIntegrable
+      (fun s => unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (R₁fib s) W₁) x v)
+      MeasureTheory.volume 0 1 := hint₁ x v
   have hii₂ : IntervalIntegrable
       (fun s => unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s) W₂) x v)
       MeasureTheory.volume 0 1 := hint₂ x v
-  rw [← intervalIntegral.integral_add hii₀ hii₂]
-  
-  
-  
+  rw [← intervalIntegral.integral_add hii₀ hii₁, ← intervalIntegral.integral_add (hii₀.add hii₁) hii₂]
+
+
+
   refine intervalIntegral.integral_congr_ae ?_
-  
+
   refine MeasureTheory.measure_mono_null (t := {(1 : ℝ)}) (fun s hs => ?_)
     (MeasureTheory.measure_singleton 1)
-  
+
   rw [Set.mem_singleton_iff]
   by_contra hne1
   apply hs
@@ -3595,6 +3771,7 @@ theorem integratedLinearizedRicci_appCc_eq
   rw [Set.mem_uIoc] at hsmem
   rcases hsmem with ⟨hs0, hs1⟩ | ⟨hs1, hs0⟩
   · rw [hpt s ⟨hs0, lt_of_le_of_ne hs1 hne1⟩ x v, unitModel_add_left,
+      ContinuousMultilinearMap.add_apply, unitModel_add_left,
       ContinuousMultilinearMap.add_apply]
   · exact absurd (lt_of_lt_of_le hs1 hs0) (by norm_num)
 
@@ -3755,15 +3932,14 @@ theorem deTurckRicciArm_appCc_eval
   classical
   
   
-  obtain ⟨R₀, R₂, heval⟩ :=
+  obtain ⟨R₀, R₁, R₂, heval⟩ :=
     integratedLinearizedRicci_appCc_eq (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
-  refine ⟨R₀, 0, R₂, fun x v => ?_⟩
-  
+  refine ⟨R₀, R₁, R₂, fun x v => ?_⟩
+
   rw [deTurckRicciRHS_realized_sub_eq_integral_chartDeriv (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
     x (v 0) (v 1)]
-  
-  
-  rw [appCc_zero_left, add_zero]
+
+
   exact heval x v
 
 theorem deTurckRicciArm_appCc_graded
