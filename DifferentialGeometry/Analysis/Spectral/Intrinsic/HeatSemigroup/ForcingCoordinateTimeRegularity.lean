@@ -140,7 +140,8 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
-    ∃ c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
+    ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+      ∃ c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (c i)) ∧
       (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
         ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
@@ -148,7 +149,7 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (c i) t) ^ 2 ≤ B i) ∧
       (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
-          =ᵐ[timeMeasure T] c i) :=
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] c i) :=
   sorry
 
 private theorem deTurckForcing_solCoeff_jetSpectralMass
@@ -171,13 +172,13 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
             deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super) ∧
         ∀ i, (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
-            =ᵐ[timeMeasure T] φ i := by
+            =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i := by
   classical
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M)
       (g := g₀) (r := 0) (s := 2)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-  obtain ⟨c, hc_smooth, hc_mass, hc_ae⟩ :=
+  obtain ⟨dleaf, hdleaf_pos, hdleaf_le, c, hc_smooth, hc_mass, hc_ae⟩ :=
     deTurckForcing_fixedPoint_coeff_smooth_and_mass (I := I) (M := M)
       g₀ g_bg a ha_super ha_even hT hT1 hTT₀ gforce hforce
   set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
@@ -189,10 +190,21 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
     intro i s hs
     have := hB₀_le i s hs
     rwa [iteratedDeriv_zero] at this
-  obtain ⟨d₂, hd₂_pos, hd₂_le, hbound⟩ :=
+  obtain ⟨dsmall, hdsmall_pos, hdsmall_le, hbound⟩ :=
     tensorHs_smallTime_norm_le_of_perModeConv (I := I) (M := M)
       (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT c
       (fun i => (hc_smooth i).continuous) hB₀_sum hB₀_le' hR₀_pos
+  set d₂ : ℝ := min dleaf dsmall with hd₂_def
+  have hd₂_pos : 0 < d₂ := lt_min hdleaf_pos hdsmall_pos
+  have hd₂_le : d₂ ≤ T := le_trans (min_le_right dleaf dsmall) hdsmall_le
+  have hd₂_dleaf : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) dleaf :=
+    Set.Icc_subset_Icc le_rfl (min_le_left dleaf dsmall)
+  have hd₂_dsmall : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) dsmall :=
+    Set.Icc_subset_Icc le_rfl (min_le_right dleaf dsmall)
+  have hc_ae_d₂ : ∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
+      =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] c i := fun i =>
+    MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+      hd₂_dleaf (hc_ae i)
   refine ⟨d₂, hd₂_pos, hd₂_le,
     fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i),
     ⟨fun i => perModeConv_contDiff_top _ (c i) (hc_smooth i),
@@ -201,24 +213,33 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
   · have hsolFieldcoeff : ∀ i,
         (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
-          =ᵐ[timeMeasure T]
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
         fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := by
       intro i
-      refine (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M)
-        (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 h_compact gforce i).trans ?_
-      filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
-        (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with t ht
-      exact perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
-        (hc_ae i) ht
-    have hsub : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) T := Set.Icc_subset_Icc le_rfl hd₂_le
+      have h1 : (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
+          fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun s => (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ) s) t :=
+        MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+          (Set.Icc_subset_Icc le_rfl hd₂_le)
+          (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M)
+            (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 h_compact gforce i)
+      have h2 : (fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun s => (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ) s) t)
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
+          fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := by
+        filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+          (measurableSet_Icc (a := (0 : ℝ)) (b := d₂))] with t ht
+        exact perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
+          (hc_ae_d₂ i) ht
+      exact h1.trans h2
     have hae_all : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)), ∀ i,
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i =
           perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := by
       rw [MeasureTheory.ae_all_iff]
       intro i
-      refine MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
-        hsub ?_
       exact hsolFieldcoeff i
     have hmem : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
         t ∈ Set.Icc (0 : ℝ) d₂ :=
@@ -229,16 +250,28 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t with hW_def
     have hWcoeff : ∀ i, W.coeff i =
         perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := htall
-    have hle := hbound t htmem W hWcoeff
+    have hle := hbound t (hd₂_dsmall htmem) W hWcoeff
     rw [hW_def] at hle
     exact hle
   · intro i
-    refine (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M)
-      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 h_compact gforce i).trans ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
-      (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with t ht
-    exact perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
-      (hc_ae i) ht
+    have h1 : (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
+        fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+          (fun s => (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ) s) t :=
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+        (Set.Icc_subset_Icc le_rfl hd₂_le)
+        (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M)
+          (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 h_compact gforce i)
+    have h2 : (fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+          (fun s => (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ) s) t)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
+        fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := by
+      filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+        (measurableSet_Icc (a := (0 : ℝ)) (b := d₂))] with t ht
+      exact perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (hc_ae_d₂ i) ht
+    exact h1.trans h2
 
 set_option linter.unusedVariables false in
 private theorem deTurckRemainder_path_timeJet_section
@@ -441,7 +474,8 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       ‖w t‖ ≤ deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hφ : JetSpectralMassControl (I := I) (M := M) g₀ φ T)
-    (hw : ∀ i, (fun t => (w t).coeff i) =ᵐ[timeMeasure T] φ i) :
+    (hw : ∀ i, (fun t => (w t).coeff i)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i) :
     ∃ ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ ψ d₂ ∧
         ∀ i, (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (w t)).coeff i)
@@ -541,8 +575,6 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
         ∀ i, (w t).coeff i = φ i t := by
       rw [MeasureTheory.ae_all_iff]
       intro i
-      refine MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
-        hd₂_sub ?_
       exact hw i
     have hae_mem : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
         t ∈ Set.Icc (0 : ℝ) d₂ := MeasureTheory.ae_restrict_mem measurableSet_Icc
@@ -608,8 +640,6 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       ∀ j, (w t).coeff j = φ j t := by
     rw [MeasureTheory.ae_all_iff]
     intro j
-    refine MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
-      hd₂_sub ?_
     exact hw j
   have hae_mem : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
       t ∈ Set.Icc (0 : ℝ) d₂ := MeasureTheory.ae_restrict_mem measurableSet_Icc
