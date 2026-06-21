@@ -3300,9 +3300,9 @@ private theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
 private theorem exists_chartRicciDeTurckOrder1CoeffField
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ R₁fib : ℝ → SmoothCcTensor g₀ 3 2,
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
@@ -3344,47 +3344,50 @@ private theorem exists_chartRicciDeTurckOrder1CoeffField
 private noncomputable def chartRicciDeTurckOrder1CoeffField
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ℝ → SmoothCcTensor g₀ 3 2 :=
-  Classical.choose (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')
+  Classical.choose
+    (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')
 
 private theorem chartRicciDeTurckOrder1CoeffField_jointContMDiff
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
-        ((chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' p.2).toSection p.1))
+        ((chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' p.2).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-  (Classical.choose_spec (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')).1
+  (Classical.choose_spec
+    (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')).1
 
 private theorem chartRicciDeTurckOrder1CoeffField_toModel_continuous
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) :
     ContinuousOn (fun t : ℝ =>
       Tensor0SBundle.TensorRSSpace.toModel
-        ((chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' t).toSection x))
+        ((chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' t).toSection x))
       (realizedSmallSet (δ := δ) (δ' := δ')) :=
-  (Classical.choose_spec (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')).2.1 x
+  (Classical.choose_spec
+    (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')).2.1 x
 
 private theorem chartRicciDeTurckOrder1CoeffField_readout
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (x : M) (v : Fin 2 → TangentSpace I x)
@@ -3408,20 +3411,21 @@ private theorem chartRicciDeTurckOrder1CoeffField_readout
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 3 2
-              (chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' s)
+              (chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  (Classical.choose_spec (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ')).2.2
+  (Classical.choose_spec
+    (exists_chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')).2.2
     s hs x v h hvel
 
 private theorem deTurckRicci_chartSymbolSum_eq_appCc_intrinsic
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (x : M) (v : Fin 2 → TangentSpace I x)
@@ -3445,19 +3449,19 @@ private theorem deTurckRicci_chartSymbolSum_eq_appCc_intrinsic
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 3 2
-              (chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' s)
+              (chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  chartRicciDeTurckOrder1CoeffField_readout (I := I) g₀ g_bg T T' hδ hδ' s hs x v h hvel
+  chartRicciDeTurckOrder1CoeffField_readout (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' s hs x v h hvel
 
 private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ}
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ}
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₁fib : ℝ → SmoothCcTensor g₀ 3 2)
       (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
@@ -3511,7 +3515,7 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
             (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
         + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'),
-    fun s => chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ hδ' s,
+    fun s => chartRicciDeTurckOrder1CoeffField (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' s,
     fun s => ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s),
     ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · have hR := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
@@ -3541,7 +3545,7 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
           (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1) hRC hL
     refine hRCL.congr (fun p _ => ?_)
     congr 1
-  · exact chartRicciDeTurckOrder1CoeffField_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ'
+  · exact chartRicciDeTurckOrder1CoeffField_jointContMDiff (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   · exact ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
   · intro x
     have hR := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
@@ -3578,10 +3582,10 @@ private theorem deTurckRicci_threeSlot_appCc_covariantTransfer
           + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
-  · exact chartRicciDeTurckOrder1CoeffField_toModel_continuous (I := I) g₀ g_bg T T' hδ hδ'
+  · exact chartRicciDeTurckOrder1CoeffField_toModel_continuous (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   · exact ricciArmPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ'
   · intro s hs x v h hvel
-    exact deTurckRicci_chartSymbolSum_eq_appCc_intrinsic (I := I) g₀ g_bg T T' hδ hδ' s hs x v h hvel
+    exact deTurckRicci_chartSymbolSum_eq_appCc_intrinsic (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' s hs x v h hvel
 
 theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -3627,7 +3631,7 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_riemann_appCc_pointwise
                     (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   obtain ⟨R₀fib, R₁fib, R₂fib, hjoint₀, hjoint₁, hjoint₂, hcont₀, hcont₁, hcont₂, hpt⟩ :=
-    deTurckRicci_threeSlot_appCc_covariantTransfer (I := I) g₀ g_bg T T' hδ hδ'
+    deTurckRicci_threeSlot_appCc_covariantTransfer (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   refine ⟨R₀fib, R₁fib, R₂fib, hjoint₀, hjoint₁, hjoint₂, hcont₀, hcont₁, hcont₂, fun s hs x v => ?_⟩
   obtain ⟨h, hvel, hderiv⟩ :=
     deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ g_bg T T'
