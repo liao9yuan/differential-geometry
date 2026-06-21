@@ -710,6 +710,14 @@ theorem smoothRemainderDiff_ballLipschitz_Ha2
         mul_le_mul_of_nonneg_left hDsum_le hCa_nn
     _ = Ca * Real.sqrt (((a : ℝ) + 1) * (Ccol * Cb ^ 2)) * Ndist := by ring
 
+theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general
+    (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g₀ 0 2,
+        ∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤
+          C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ) S‖ :=
+  sorry
+
 theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -727,8 +735,124 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
               (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
                 deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ')‖ ≤
             C * (δ₀ * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ +
-              ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖) :=
-  sorry
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖) := by
+  classical
+  rcases le_or_gt 0 δ₀ with hδ₀_nn | hδ₀_neg
+  · obtain ⟨Ccov, hCcov_nn, hCcov⟩ :=
+      deTurckSmoothRemainderDiff_iteratedCovGrad_l2_weighted_ballUniform
+        (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀ hδ₀_nn
+    obtain ⟨Cb2, hCb2_nn, hCb2⟩ :=
+      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g₀ (a + 2)
+    obtain ⟨Cb1, hCb1_nn, hCb1⟩ :=
+      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g₀ (a + 1)
+    refine ⟨Ccov * max Cb2 Cb1, by positivity, ?_⟩
+    intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball q hq
+    set H2 : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ with hH2_def
+    set H1 : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖ with hH1_def
+    have hH2_nn : 0 ≤ H2 := norm_nonneg _
+    have hH1_nn : 0 ≤ H1 := norm_nonneg _
+    have hsqrt2_le : Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ≤ max Cb2 Cb1 * H2 := by
+      have hsq_le_sum : (∑ i ∈ Finset.range (a + 2 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ≤
+          (∑ i ∈ Finset.range (a + 2 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖) ^ 2 :=
+        Finset.sum_sq_le_sq_sum_of_nonneg (fun i _ => norm_nonneg _)
+      have hcastord : ((a + 2 : ℕ) : ℝ) = (a : ℝ) + 2 := by push_cast; ring
+      have hsum_le : (∑ i ∈ Finset.range (a + 2 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖) ≤ Cb2 * H2 := by
+        have h := hCb2 (T - T')
+        rw [hcastord] at h
+        exact h
+      have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (a + 2 + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ :=
+        Finset.sum_nonneg fun i _ => norm_nonneg _
+      calc Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2)
+          ≤ Real.sqrt ((∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖) ^ 2) := Real.sqrt_le_sqrt hsq_le_sum
+        _ = ∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ := Real.sqrt_sq hsum_nn
+        _ ≤ Cb2 * H2 := hsum_le
+        _ ≤ max Cb2 Cb1 * H2 := mul_le_mul_of_nonneg_right (le_max_left _ _) hH2_nn
+    have hsqrt1_le : Real.sqrt (∑ i ∈ Finset.range (a + 1 + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ≤ max Cb2 Cb1 * H1 := by
+      have hsq_le_sum : (∑ i ∈ Finset.range (a + 1 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ≤
+          (∑ i ∈ Finset.range (a + 1 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖) ^ 2 :=
+        Finset.sum_sq_le_sq_sum_of_nonneg (fun i _ => norm_nonneg _)
+      have hcastord : ((a + 1 : ℕ) : ℝ) = (a : ℝ) + 1 := by push_cast; ring
+      have hsum_le : (∑ i ∈ Finset.range (a + 1 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖) ≤ Cb1 * H1 := by
+        have h := hCb1 (T - T')
+        rw [hcastord] at h
+        exact h
+      have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (a + 1 + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ :=
+        Finset.sum_nonneg fun i _ => norm_nonneg _
+      calc Real.sqrt (∑ i ∈ Finset.range (a + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2)
+          ≤ Real.sqrt ((∑ i ∈ Finset.range (a + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖) ^ 2) := Real.sqrt_le_sqrt hsq_le_sum
+        _ = ∑ i ∈ Finset.range (a + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ := Real.sqrt_sq hsum_nn
+        _ ≤ Cb1 * H1 := hsum_le
+        _ ≤ max Cb2 Cb1 * H1 := mul_le_mul_of_nonneg_right (le_max_right _ _) hH1_nn
+    have hcov := hCcov T T' hδ_le hδ hδ'_le hδ' hTball hT'ball q hq
+    refine hcov.trans ?_
+    have hmaxnn : 0 ≤ max Cb2 Cb1 := le_max_of_le_left hCb2_nn
+    have hstep : δ₀ * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) +
+          Real.sqrt (∑ i ∈ Finset.range (a + 1 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ≤
+        max Cb2 Cb1 * (δ₀ * H2 + H1) := by
+      have ht2 := mul_le_mul_of_nonneg_left hsqrt2_le hδ₀_nn
+      calc δ₀ * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) +
+            Real.sqrt (∑ i ∈ Finset.range (a + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2)
+          ≤ δ₀ * (max Cb2 Cb1 * H2) + max Cb2 Cb1 * H1 := add_le_add ht2 hsqrt1_le
+        _ = max Cb2 Cb1 * (δ₀ * H2 + H1) := by ring
+    calc Ccov * (δ₀ * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) +
+            Real.sqrt (∑ i ∈ Finset.range (a + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2))
+        ≤ Ccov * (max Cb2 Cb1 * (δ₀ * H2 + H1)) :=
+          mul_le_mul_of_nonneg_left hstep hCcov_nn
+      _ = Ccov * max Cb2 Cb1 * (δ₀ * H2 + H1) := by ring
+  · refine ⟨0, le_refl 0, ?_⟩
+    intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball q hq
+    have hδ_neg : δ < 0 := lt_of_le_of_lt hδ_le hδ₀_neg
+    by_cases hM : Nonempty M
+    · obtain ⟨x₀⟩ := hM
+      obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
+        haveI : Nontrivial (TangentSpace I x₀) := by
+          have hfr : 0 < Module.finrank ℝ (TangentSpace I x₀) := by
+            have : Module.finrank ℝ (TangentSpace I x₀) = Module.finrank ℝ E := rfl
+            rw [this]; exact Nat.pos_of_ne_zero (NeZero.ne _)
+          exact Module.nontrivial_of_finrank_pos hfr
+        exact exists_ne 0
+      have hpos : 0 < g₀.inner x₀ v v := g₀.pos x₀ v hv
+      have hbound := hδ x₀ v v
+      have hsqrt_pos : 0 < Real.sqrt (g₀.inner x₀ v v) := Real.sqrt_pos.mpr hpos
+      have habs_nn : 0 ≤ |ccTensorBilinSymm (I := I) g₀ T x₀ v v| := abs_nonneg _
+      have hδ_nonneg : 0 ≤ δ := by
+        by_contra hδc
+        have hδc' : δ < 0 := lt_of_not_ge hδc
+        have hrhs_neg : δ * Real.sqrt (g₀.inner x₀ v v) * Real.sqrt (g₀.inner x₀ v v) < 0 := by
+          have h1 : δ * Real.sqrt (g₀.inner x₀ v v) < 0 :=
+            mul_neg_of_neg_of_pos hδc' hsqrt_pos
+          exact mul_neg_of_neg_of_pos h1 hsqrt_pos
+        linarith [le_trans habs_nn hbound]
+      linarith
+    · rw [not_nonempty_iff] at hM
+      have hzero : ∀ (r s : ℕ) (P : SmoothCcTensor g₀ r s), ‖P‖ = 0 := by
+        intro r s P
+        rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
+          MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+      rw [zero_mul]
+      exact le_of_eq (hzero _ _ _)
 
 set_option linter.unusedVariables false in
 
