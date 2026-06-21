@@ -385,6 +385,72 @@ set_option linter.unusedSectionVars false in
       (Tensor0SBundle.Tensor0SSpace.toModel D) (V : E)) w = _
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
+set_option linter.unusedSectionVars false in
+theorem tensorChartComponentRaw_domDomCongrSection_swap
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
+    (α : M) (a b : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ (chartAt H α).source) :
+    tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S) α ![] ![a, b] x =
+      tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] ![b, a] x := by
+  classical
+  rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g 0 2
+      (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S) α hx
+      (![] : Fin 0 → Fin (Module.finrank ℝ E)) (![a, b] : Fin 2 → _)]
+  rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g 0 2
+      S α hx (![] : Fin 0 → Fin (Module.finrank ℝ E)) (![b, a] : Fin 2 → _)]
+  have hframe : chartFrameBasisModel (I := I) (M := M) α x 0
+        (![] : Fin 0 → Fin (Module.finrank ℝ E)) =
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) := by
+    apply ContinuousMultilinearMap.ext
+    intro v
+    have h := chartFrameBasisModel_apply (I := I) (M := M) α x 0
+      (![] : Fin 0 → Fin (Module.finrank ℝ E)) v
+    rw [Fin.prod_univ_zero] at h
+    rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+    exact h
+  rw [hframe]
+  have hLHS :
+      ((((domDomCongrSection (I := I) g (Equiv.swap (0:Fin 2) 1) S).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) fun j =>
+          chartBasisVecFiber (I := I) α ((![a, b] : Fin 2 → _) j) x) =
+        unitModel (I := I) (M := M) g 2
+            (domDomCongrSection (I := I) g (Equiv.swap (0:Fin 2) 1) S) x
+          (fun j => chartBasisVecFiber (I := I) α ((![a, b] : Fin 2 → _) j) x) := rfl
+  have hRHS :
+      ((((S).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) fun j =>
+          chartBasisVecFiber (I := I) α ((![b, a] : Fin 2 → _) j) x) =
+        unitModel (I := I) (M := M) g 2 S x
+          (fun j => chartBasisVecFiber (I := I) α ((![b, a] : Fin 2 → _) j) x) := rfl
+  rw [hLHS, hRHS]
+  rw [domDomCongrSection_unitModel (I := I) g (Equiv.swap (0:Fin 2) 1) S x]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  congr 1
+  funext j
+  fin_cases j <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
+
+set_option linter.unusedSectionVars false in
+theorem tensorChartComponentRaw_symmS_eq_half_swap
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
+    (α : M) (a b : Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ (chartAt H α).source) :
+    tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (symmS (I := I) g S) α ![] ![a, b] x =
+      (1 / 2 : ℝ) *
+        (tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] ![a, b] x +
+          tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] ![b, a] x) := by
+  classical
+  rw [symmS, tensorChartComponentRaw_smul (I := I) (M := M) g 0 2 (1 / 2 : ℝ)
+      (S + domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S) α ![] ![a, b] x,
+    tensorChartComponentRaw_add (I := I) (M := M) g 0 2 S
+      (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) S) α ![] ![a, b] x,
+    tensorChartComponentRaw_domDomCongrSection_swap (I := I) (M := M) g S α a b hx]
+  rw [smul_eq_mul]
+
 end TensorSpectral
 end Parabolic
 end Analysis
