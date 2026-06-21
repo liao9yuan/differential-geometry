@@ -65,7 +65,7 @@ theorem deTurckForcing_ballForcing_admits_smoothDriver
       (∀ i, ContDiff ℝ ∞ (c i)) ∧
       (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
         ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
-          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d',
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (c i) t) ^ 2 ≤ B i) ∧
       (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)

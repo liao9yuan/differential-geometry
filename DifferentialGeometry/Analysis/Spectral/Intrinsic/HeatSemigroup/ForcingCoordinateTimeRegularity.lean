@@ -148,7 +148,7 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
       (∀ i, ContDiff ℝ ∞ (c i)) ∧
       (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
         ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
-          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂,
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (c i) t) ^ 2 ≤ B i) ∧
       (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
@@ -216,7 +216,7 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
-      JetSpectralMassControl (I := I) (M := M) g₀ φ T ∧
+      JetSpectralMassControl (I := I) (M := M) g₀ φ d₂ ∧
         (∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
           ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ≤
@@ -236,22 +236,30 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
   set R₀ : ℝ := deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super with hR₀_def
   have hR₀_pos : 0 < R₀ := deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a ha_super
   obtain ⟨B₀, hB₀_sum, hB₀_le⟩ := hc_mass 0 ((a : ℝ) + 2) (by positivity)
-  have hB₀_le' : ∀ i, ∀ s ∈ Set.Icc (0 : ℝ) T,
+  have hB₀_le' : ∀ i, ∀ s ∈ Set.Icc (0 : ℝ) dleaf,
       tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) * (c i s) ^ 2 ≤ B₀ i := by
     intro i s hs
     have := hB₀_le i s hs
     rwa [iteratedDeriv_zero] at this
   obtain ⟨dsmall, hdsmall_pos, hdsmall_le, hbound⟩ :=
     tensorHs_smallTime_norm_le_of_perModeConv (I := I) (M := M)
-      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT c
+      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hdleaf_pos c
       (fun i => (hc_smooth i).continuous) hB₀_sum hB₀_le' hR₀_pos
   set d₂ : ℝ := min dleaf dsmall with hd₂_def
   have hd₂_pos : 0 < d₂ := lt_min hdleaf_pos hdsmall_pos
-  have hd₂_le : d₂ ≤ T := le_trans (min_le_right dleaf dsmall) hdsmall_le
+  have hd₂_le : d₂ ≤ T := le_trans (min_le_left dleaf dsmall) hdleaf_le
   have hd₂_dleaf : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) dleaf :=
     Set.Icc_subset_Icc le_rfl (min_le_left dleaf dsmall)
   have hd₂_dsmall : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) dsmall :=
     Set.Icc_subset_Icc le_rfl (min_le_right dleaf dsmall)
+  have hc_mass_d₂ : ∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂,
+          tensorSobolevWeight (I := I) (M := M) i τ *
+              (iteratedDeriv j (c i) t) ^ 2 ≤ B i := by
+    intro j τ hτ
+    obtain ⟨B, hB_sum, hB_le⟩ := hc_mass j τ hτ
+    exact ⟨B, hB_sum, fun i t ht => hB_le i t (hd₂_dleaf ht)⟩
   have hc_ae_d₂ : ∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] c i := fun i =>
     MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
@@ -260,7 +268,7 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
     fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i),
     ⟨fun i => perModeConv_contDiff_top _ (c i) (hc_smooth i),
       perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
-        (g := g₀) (r := 0) (s := 2) hT.le c hc_smooth hc_mass⟩, ?_, ?_⟩
+        (g := g₀) (r := 0) (s := 2) hd₂_pos.le c hc_smooth hc_mass_d₂⟩, ?_, ?_⟩
   · have hsolFieldcoeff : ∀ i,
         (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
@@ -519,12 +527,12 @@ private theorem deTurckSmoothN_path_coeff_jetSpectralMass
 private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
-    {T : ℝ} (_hT : 0 < T) {d₂ : ℝ} (hd₂_pos : 0 < d₂) (hd₂_le : d₂ ≤ T)
+    {T : ℝ} (_hT : 0 < T) {d₂ : ℝ} (hd₂_pos : 0 < d₂) (_hd₂_le : d₂ ≤ T)
     (w : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
     (hw_ball : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
       ‖w t‖ ≤ deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
-    (hφ : JetSpectralMassControl (I := I) (M := M) g₀ φ T)
+    (hφ : JetSpectralMassControl (I := I) (M := M) g₀ φ d₂)
     (hw : ∀ i, (fun t => (w t).coeff i)
         =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i) :
     ∃ ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
@@ -539,7 +547,6 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   set R₀ : ℝ := deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super with hR₀_def
   have hR₀_pos : 0 < R₀ := deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a ha_super
-  have hd₂_sub : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) T := Set.Icc_subset_Icc le_rfl hd₂_le
   obtain ⟨hφ_smooth, hφ_mass⟩ := hφ
   have hmass0 : ∀ (σ : ℝ), 0 ≤ σ →
       ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
@@ -548,7 +555,7 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
     intro σ hσ
     obtain ⟨B, hBs, hBle⟩ := hφ_mass 0 σ hσ
     refine ⟨B, hBs, fun i t ht => ?_⟩
-    have := hBle i t (hd₂_sub ht)
+    have := hBle i t ht
     rwa [iteratedDeriv_zero] at this
   have hsum_pt : ∀ t, t ∈ Set.Icc (0 : ℝ) d₂ →
       ∀ σ : ℝ, 0 ≤ σ →
@@ -674,18 +681,10 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       refine hp_ball (F t) ?_
       rw [hF0, hsmoothZero, norm_zero]
       exact hp_pos.le
-  have hφ_mass_d2 : ∀ (j : ℕ) (σ : ℝ), 0 ≤ σ →
-      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
-        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂,
-          tensorSobolevWeight (I := I) (M := M) i σ *
-              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i := by
-    intro j σ hσ
-    obtain ⟨B, hBs, hBle⟩ := hφ_mass j σ hσ
-    exact ⟨B, hBs, fun i t ht => hBle i t (hd₂_sub ht)⟩
   obtain ⟨ψ, hψ_ctrl, hψ_coeff⟩ :=
     deTurckSmoothN_path_coeff_jetSpectralMass (I := I) (M := M)
       g₀ g_bg a ha_super ha_even hd₂_pos F hδ_lt hδ_all φ hφ_smooth
-      hF_coeff hφ_mass_d2
+      hF_coeff hφ_mass
   refine ⟨ψ, hψ_ctrl, fun i => ?_⟩
   have hae_all : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
       ∀ j, (w t).coeff j = φ j t := by
