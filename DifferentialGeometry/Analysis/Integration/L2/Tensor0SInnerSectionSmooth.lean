@@ -70,14 +70,7 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
     NormedAddCommGroup (Tensor0SModel n ℝ E) := inferInstance
 
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace r s
-
-private instance tensorRSModelNormedAddCommGroup_local {r s : ℕ} :
-    NormedAddCommGroup (TensorRSModel r s ℝ E) := inferInstance
-
-/-! ## Per-basis-tuple scalar smoothness from smoothness into the model fibre
+set_option linter.unusedSectionVars false in
 
 The chart-local `(0, r + s)` smoothness lemma
 `chartTensorInnerPointwise_0s_contMDiffOn_smooth_args` takes its arguments in the
@@ -246,10 +239,6 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
     NormedSpace ℝ (Tensor0SModel n ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace n
 
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace r s
-
 set_option linter.unusedSectionVars false in
 /-- Global smoothness of the pointwise inner product on `(r, s)`-tensor
 sections. The hypothesis at each `α : M` is the smoothness of the
@@ -304,10 +293,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace r s
 
 set_option linter.unusedSectionVars false in
 /-- **Smoothness of the pointwise tensor inner product on smooth tensor sections.**

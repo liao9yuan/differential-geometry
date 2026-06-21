@@ -104,13 +104,6 @@ private instance tensor0SModelNormedSpace_local {nn : ℕ} :
     NormedSpace ℝ (Tensor0SBundle.Tensor0SModel nn ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace nn
 
-private instance tensorRSModelNormedAddCommGroup_local {rr ss : ℕ} :
-    NormedAddCommGroup (TensorRSModel rr ss ℝ E) := inferInstance
-
-private instance tensorRSModelNormedSpace_local {rr ss : ℕ} :
-    NormedSpace ℝ (TensorRSModel rr ss ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace rr ss
-
 private theorem contMDiffWithinAt_curriedSection_prod_full {n : ℕ}
     {s : Set (M × ℝ)} {p₀ : M × ℝ}
     (T : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace (n + 1) I p.1)

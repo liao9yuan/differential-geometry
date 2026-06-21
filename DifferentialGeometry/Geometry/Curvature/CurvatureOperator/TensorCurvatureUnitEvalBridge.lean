@@ -66,17 +66,6 @@ private instance tensor0SModelNormedSpace_local {s : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) := by
-  unfold TensorRSModel
-  infer_instance
-
-private instance tensorRSModelNormedAddCommGroup_local {r s : ℕ} :
-    NormedAddCommGroup (TensorRSModel r s ℝ E) := by
-  unfold TensorRSModel
-  infer_instance
-
-/-- Non-negativity of `g.inner x v v`. -/
 private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : 0 ≤ g.inner x v v := by
   rcases eq_or_ne v 0 with hv0 | hv0
