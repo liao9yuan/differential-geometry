@@ -37,13 +37,6 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
     NormedAddCommGroup (Tensor0SModel n ℝ E) := inferInstance
 
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace r s
-
-private instance tensorRSModelNormedAddCommGroup_local {r s : ℕ} :
-    NormedAddCommGroup (TensorRSModel r s ℝ E) := inferInstance
-
 set_option linter.unusedSectionVars false in
 
 lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
@@ -179,10 +172,6 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
     NormedSpace ℝ (Tensor0SModel n ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace n
 
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace r s
-
 set_option linter.unusedSectionVars false in
 
 theorem contMDiff_inner_of_smooth_sections
@@ -233,10 +222,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [Module.Finite ℝ E] [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-private instance tensorRSModelNormedSpace_local {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) :=
-  Tensor0SBundle.tensorRSModel_normedSpace r s
 
 set_option linter.unusedSectionVars false in
 

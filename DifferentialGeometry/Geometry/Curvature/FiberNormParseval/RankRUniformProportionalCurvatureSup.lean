@@ -33,11 +33,6 @@ private instance tensor0SModelNormedSpace_local2 {s : ℕ} :
     NormedSpace ℝ (Tensor0SModel s ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace s
 
-private instance tensorRSModelNormedSpace_local2 {r s : ℕ} :
-    NormedSpace ℝ (TensorRSModel r s ℝ E) := by
-  unfold TensorRSModel
-  infer_instance
-
 private instance tensorRSModelFiniteDimensional_local2 {r s : ℕ} :
     FiniteDimensional ℝ (TensorRSModel r s ℝ E) :=
   Tensor0SBundle.tensorRSModel_finiteDimensional r s
