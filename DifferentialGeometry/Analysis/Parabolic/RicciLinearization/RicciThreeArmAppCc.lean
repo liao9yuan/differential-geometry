@@ -869,8 +869,10 @@ theorem linearizedRicci_arm2FieldLichnerowicz_jointSmooth (g₀ : SmoothRiemanni
 
 theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2),
       linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀ (δ := δ) (δ' := δ') ∧
       linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
@@ -914,7 +916,7 @@ theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
                 + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨Φ₀, Φ₁, hΦ₀joint, hΦ₁joint, hΦ₀cont, hΦ₁cont, hident⟩ :=
-    realizedRicci_threeArm_lowerOrder_residual (I := I) g₀ T T' hδ hδ'
+    realizedRicci_threeArm_lowerOrder_residual (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
   refine ⟨Φ₀, Φ₁,
     linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ',
     hΦ₀joint, hΦ₁joint,
