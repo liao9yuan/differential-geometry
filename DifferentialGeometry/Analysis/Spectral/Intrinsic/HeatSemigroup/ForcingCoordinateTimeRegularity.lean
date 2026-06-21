@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegInte
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPointwiseFlowDeriv
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
@@ -175,34 +176,65 @@ private theorem deTurckRealizabilityRadius_pos
   (Classical.choose_spec
     (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super)).1
 
-/-- **POSIT (A) — all-orders interior-time smoothing of the zero-datum quasilinear
-maximal-regularity solution field, at the level of its eigen-coordinates.**
+private theorem perModeConv_sq_le_time_mul_integral' (lam : ℝ) (hlam : 0 ≤ lam)
+    {c : ℝ → ℝ} (hc : Continuous c) {t : ℝ} (ht : 0 ≤ t) :
+    (perModeConv lam c t) ^ 2 ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 := by
+  set k : ℝ → ℝ := fun s => Real.exp (-(lam * (t - s))) * c s with hk_def
+  have hk_cont : Continuous k := by fun_prop
+  have hconv_eq : perModeConv lam c t = ∫ s in (0 : ℝ)..t, k s := by
+    rw [perModeConv]
+  have hCS : (∫ s in (0 : ℝ)..t, (1 : ℝ) * k s) ^ 2
+      ≤ (∫ s in (0 : ℝ)..t, (1 : ℝ)) * ∫ s in (0 : ℝ)..t, (1 : ℝ) * (k s) ^ 2 :=
+    weighted_cauchy_schwarz ht continuous_const hk_cont (fun _ _ => zero_le_one)
+  simp only [one_mul] at hCS
+  rw [intervalIntegral.integral_const, smul_eq_mul, mul_one, sub_zero] at hCS
+  have hk_sq_le : ∀ s ∈ Set.Icc (0 : ℝ) t, (k s) ^ 2 ≤ (c s) ^ 2 := by
+    intro s hs
+    have hexp : Real.exp (-(lam * (t - s))) ≤ 1 :=
+      Real.exp_le_one_iff.mpr (by nlinarith [hs.1, hs.2, mul_nonneg hlam (sub_nonneg.mpr hs.2)])
+    have hexp_nonneg : 0 ≤ Real.exp (-(lam * (t - s))) := (Real.exp_pos _).le
+    rw [hk_def, mul_pow]
+    have hsq_le_one : Real.exp (-(lam * (t - s))) ^ 2 ≤ 1 := by
+      nlinarith [hexp, hexp_nonneg]
+    nlinarith [sq_nonneg (c s), hsq_le_one]
+  have hk_sq_int : (∫ s in (0 : ℝ)..t, (k s) ^ 2) ≤ ∫ s in (0 : ℝ)..t, (c s) ^ 2 := by
+    refine intervalIntegral.integral_mono_on ht ?_ ?_ ?_
+    · exact (hk_cont.pow 2).intervalIntegrable 0 t
+    · exact (hc.pow 2).intervalIntegrable 0 t
+    · exact hk_sq_le
+  calc (perModeConv lam c t) ^ 2
+      = (∫ s in (0 : ℝ)..t, k s) ^ 2 := by rw [hconv_eq]
+    _ ≤ t * ∫ s in (0 : ℝ)..t, (k s) ^ 2 := hCS
+    _ ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 :=
+        mul_le_mul_of_nonneg_left hk_sq_int ht
 
-For the `H^{a+2}`-valued maximal-regularity Duhamel solution field
-`u = maxRegDuhamelSolField (a : ℝ) hT hT1 0 gforce` of the zero-datum quasilinear Ricci–DeTurck
-forcing problem (`gforce` pinned to its own Nemytskii image by `hforce`), the per-eigenmode
-time-coordinate family `i ↦ (t ↦ (u t).coeff i)` carries a `C∞`-in-time representative `φ` that
-is jet-spectral-mass controlled on `[0,T]` — i.e. `u` is `C∞`-in-time into **every** spatial
-order `Hᵗ` (not merely `H^{a+2}`), uniformly up to `t = 0`, with the full all-order
-time-jet/all-order spatial spectral-mass majorant.  It additionally certifies that the solution
-field stays inside the Nemytskii **realizability ball** on `[0,T]`
-(`‖u t‖_{H^{a+2}} ≤ deTurckRealizabilityRadius`), the in-ball guard the order-preserving Nemytskii
-smoothness (POSIT (B)) requires of its input — a genuine a-priori bound on the small-time
-zero-datum quasilinear solution, supplied by the same fixed-point construction that produces it.
+private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+    ∃ c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
+      (∀ i, ContDiff ℝ ∞ (c i)) ∧
+      (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+        ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+            tensorSobolevWeight (I := I) (M := M) i τ *
+                (iteratedDeriv j (c i) t) ^ 2 ≤ B i) ∧
+      (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
+          =ᵐ[timeMeasure T] c i) ∧
+      (∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) * (c i t) ^ 2 ≤ B i) ∧
+        T * (T * (∑' i, B i)) ≤
+          (deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super) ^ 2) :=
+  sorry
 
-WHY this is genuinely irreducible.  This is the all-orders **parabolic interior smoothing** of a
-zero-datum quasilinear solution: the smooth (zero) initial perturbation makes the solution
-`C∞`-up-to-`t = 0`, lying in `⋂_τ Hᵗ` in the interior, with every time-derivative spatially
-controlled summably across modes.  The supercritical order `2·finrank + 10 ≤ a` places `Hᵃ` in a
-Sobolev algebra, the regime in which the Amann / Ladyzhenskaya–Solonnikov–Uraltseva / Lieberman
-quasilinear-parabolic bootstrap closes.  The **linear** template is
-`solField_into_all_tensorHs_interior` (`ParabolicInteriorSmoothing.lean`), which supplies the
-order-`σ` *spatial* summability of the maximal-regularity field at every `σ` from the base
-regularity plus the first-order coupling; this posit is its genuinely **quasilinear / all-order
-time-jet** strengthening (the nonlinear coupling of the modes through the Nemytskii fixed point
-forbids reducing it to the per-mode scalar ODE recursion of the linear theory).
-
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
 private theorem deTurckForcing_solCoeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
@@ -216,14 +248,128 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
     ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ φ T ∧
-        (∀ t ∈ Set.Icc (0 : ℝ) T,
+        (∀ᵐ t ∂(timeMeasure T),
           ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ≤
             deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super) ∧
         ∀ i, (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
-            =ᵐ[timeMeasure T] φ i :=
-  sorry
+            =ᵐ[timeMeasure T] φ i := by
+  classical
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+  obtain ⟨c, hc_smooth, hc_mass, hc_ae, B₀, hB₀_sum, hB₀_le, hB₀_small⟩ :=
+    deTurckForcing_fixedPoint_coeff_smooth_and_mass (I := I) (M := M)
+      g₀ g_bg a ha_super ha_even hT hT1 hTT₀ gforce hforce
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  set R₀ : ℝ := deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super with hR₀_def
+  have hR₀_pos : 0 < R₀ := deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a ha_super
+  refine ⟨fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i),
+    ⟨fun i => perModeConv_contDiff_top _ (c i) (hc_smooth i),
+      perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
+        (g := g₀) (r := 0) (s := 2) hT.le c hc_smooth hc_mass⟩, ?_, ?_⟩
+  · have hsolFieldcoeff : ∀ i,
+        (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
+          =ᵐ[timeMeasure T]
+        fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := by
+      intro i
+      refine (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M)
+        (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 h_compact gforce i).trans ?_
+      filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+        (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with t ht
+      exact perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (hc_ae i) ht
+    have hae_all : ∀ᵐ t ∂(timeMeasure T), ∀ i,
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i =
+          perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t :=
+      MeasureTheory.ae_all_iff.mpr hsolFieldcoeff
+    have hmem : ∀ᵐ t ∂(timeMeasure T), t ∈ Set.Icc (0 : ℝ) T := by
+      rw [timeMeasure, MeasureTheory.ae_restrict_iff' measurableSet_Icc]
+      exact MeasureTheory.ae_of_all _ (fun t ht => ht)
+    filter_upwards [hae_all, hmem] with t htall htmem
+    set W : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) :=
+      maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t with hW_def
+    have hWcoeff : ∀ i, W.coeff i =
+        perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (c i) t := htall
+    obtain ⟨ht0, htT⟩ := htmem
+    have hper_mode : ∀ i,
+        tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) * (W.coeff i) ^ 2 ≤
+          t * (T * B₀ i) := by
+      intro i
+      rw [hWcoeff i]
+      set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
+      have hlam_nn : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
+      have hwt_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) :=
+        tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 2)
+      have hCS : (perModeConv lam (c i) t) ^ 2 ≤ t * ∫ s in (0 : ℝ)..t, (c i s) ^ 2 :=
+        perModeConv_sq_le_time_mul_integral' lam hlam_nn (hc_smooth i).continuous ht0
+      have hstep1 : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+            (perModeConv lam (c i) t) ^ 2 ≤
+          t * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+            ∫ s in (0 : ℝ)..t, (c i s) ^ 2) := by
+        calc tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+              (perModeConv lam (c i) t) ^ 2
+            ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+                (t * ∫ s in (0 : ℝ)..t, (c i s) ^ 2) :=
+              mul_le_mul_of_nonneg_left hCS hwt_nn
+          _ = t * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+                ∫ s in (0 : ℝ)..t, (c i s) ^ 2) := by ring
+      have hweight_int : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+            ∫ s in (0 : ℝ)..t, (c i s) ^ 2 ≤ t * B₀ i := by
+        rw [← intervalIntegral.integral_const_mul]
+        have hmono : (∫ s in (0 : ℝ)..t,
+              tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) * (c i s) ^ 2)
+            ≤ ∫ _s in (0 : ℝ)..t, B₀ i := by
+          refine intervalIntegral.integral_mono_on ht0 ?_ intervalIntegrable_const ?_
+          · exact ((((hc_smooth i).continuous).pow 2).const_mul _).intervalIntegrable 0 t
+          · intro s hs
+            exact hB₀_le i s ⟨hs.1, le_trans hs.2 htT⟩
+        rw [intervalIntegral.integral_const, smul_eq_mul, sub_zero] at hmono
+        exact hmono
+      have hB₀_nn : 0 ≤ B₀ i := by
+        refine le_trans ?_ (hB₀_le i 0 ⟨le_rfl, hT.le⟩)
+        exact mul_nonneg hwt_nn (sq_nonneg _)
+      calc tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+            (perModeConv lam (c i) t) ^ 2
+          ≤ t * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+              ∫ s in (0 : ℝ)..t, (c i s) ^ 2) := hstep1
+        _ ≤ t * (t * B₀ i) := mul_le_mul_of_nonneg_left hweight_int ht0
+        _ ≤ t * (T * B₀ i) := by
+            refine mul_le_mul_of_nonneg_left ?_ ht0
+            exact mul_le_mul_of_nonneg_right htT hB₀_nn
+    have hW_sum : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+        (W.coeff i) ^ 2) := W.weighted_summable
+    have hmaj_sum : Summable (fun i => t * (T * B₀ i)) :=
+      (hB₀_sum.mul_left T).mul_left t
+    have hnorm_sq_le : ‖W‖ ^ 2 ≤ t * (T * (∑' i, B₀ i)) := by
+      rw [tensorHs.norm_sq_eq_tsum]
+      calc (∑' i, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) * (W.coeff i) ^ 2)
+          ≤ ∑' i, t * (T * B₀ i) := Summable.tsum_le_tsum hper_mode hW_sum hmaj_sum
+        _ = t * (T * (∑' i, B₀ i)) := by rw [tsum_mul_left, tsum_mul_left]
+    have hB₀tsum_nn : 0 ≤ ∑' i, B₀ i :=
+      tsum_nonneg (fun i => le_trans
+        (mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 2)) (sq_nonneg _))
+        (hB₀_le i 0 ⟨le_rfl, hT.le⟩))
+    have htTMass_le : t * (T * (∑' i, B₀ i)) ≤ T * (T * (∑' i, B₀ i)) :=
+      mul_le_mul_of_nonneg_right htT (mul_nonneg hT.le hB₀tsum_nn)
+    have hnorm_sq_le_R₀ : ‖W‖ ^ 2 ≤ R₀ ^ 2 :=
+      le_trans hnorm_sq_le (le_trans htTMass_le hB₀_small)
+    have hWnn : 0 ≤ ‖W‖ := norm_nonneg W
+    have : ‖W‖ ≤ R₀ := by nlinarith [hWnn, hR₀_pos.le, hnorm_sq_le_R₀]
+    rw [hW_def] at this
+    exact this
+  · intro i
+    refine (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 h_compact gforce i).trans ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+      (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with t ht
+    exact perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
+      (hc_ae i) ht
 
 set_option linter.unusedVariables false in
 private theorem deTurckRemainder_path_timeJet_section
@@ -422,7 +568,7 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T)
     (w : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-    (hw_ball : ∀ t ∈ Set.Icc (0 : ℝ) T,
+    (hw_ball : ∀ᵐ t ∂(timeMeasure T),
       ‖w t‖ ≤ deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hφ : JetSpectralMassControl (I := I) (M := M) g₀ φ T)
@@ -526,11 +672,11 @@ private theorem deTurckSobolevNHa2_jetSpectralMass_preserving
     have hae_mem : ∀ᵐ t ∂(timeMeasure T), t ∈ Set.Icc (0 : ℝ) T := by
       rw [timeMeasure, MeasureTheory.ae_restrict_iff' measurableSet_Icc]
       exact MeasureTheory.ae_of_all _ (fun t ht => ht)
-    filter_upwards [hae_all, hae_mem] with t htall htmem
+    filter_upwards [hw_ball, hae_all, hae_mem] with t hwball_t htall htmem
     have heq : smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t) = w t := by
       refine tensorHs.ext (funext fun i => ?_)
       rw [hF_smoothCc_coeff t htmem i, ← htall i]
-    rw [heq]; exact hw_ball t htmem
+    rw [heq]; exact hwball_t
   have hcont_norm : ContinuousOn
       (fun t => ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖)
       (Set.Icc (0 : ℝ) T) := continuous_norm.comp_continuousOn hfield_cont
