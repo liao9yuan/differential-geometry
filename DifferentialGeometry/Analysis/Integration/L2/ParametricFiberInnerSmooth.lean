@@ -185,8 +185,8 @@ private theorem fiber_contDiffOn_Icc
   exact hcomp
 
 set_option linter.unusedVariables false in
-private theorem partialSnd_contMDiffOn_Icc
-    (μ : Measure M) (f : M → ℝ → ℝ) {T : ℝ}
+theorem partialSnd_contMDiffOn_Icc
+    (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
       ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
@@ -262,7 +262,7 @@ private theorem hasDerivWithinAt_integral_param_Icc
   have hf_cont : ContinuousOn (fun p : M × ℝ => f p.1 p.2)
       ((Set.univ : Set M) ×ˢ s) := hf.continuousOn
   have hFd_joint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => Fd p.1 p.2)
-      ((Set.univ : Set M) ×ˢ s) := partialSnd_contMDiffOn_Icc μ f hf
+      ((Set.univ : Set M) ×ˢ s) := partialSnd_contMDiffOn_Icc f hf
   have hFd_cont : ContinuousOn (fun p : M × ℝ => Fd p.1 p.2)
       ((Set.univ : Set M) ×ˢ s) := hFd_joint.continuousOn
   have hKcompact : IsCompact ((Set.univ : Set M) ×ˢ s) :=
@@ -368,7 +368,7 @@ private theorem contDiffOn_integral_of_jointContMDiffOn_Icc_pos
           exact (hasDerivWithinAt_integral_param_Icc μ f hT hf ht₀).derivWithin (hUD t₀ ht₀)
         refine ContDiffOn.congr ?_ hderiv_eq
         exact ih (fun x t => derivWithin (fun s => f x s) (Set.Icc (0 : ℝ) T) t)
-          (partialSnd_contMDiffOn_Icc μ f hf)
+          (partialSnd_contMDiffOn_Icc f hf)
 
 theorem contDiffOn_integral_of_jointContMDiffOn_Icc
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ}
