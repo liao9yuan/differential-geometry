@@ -342,6 +342,8 @@ theorem metricDiffCovDerivAt_pullback
         (fun q : Fin (a + 2) => mfderiv I I (Phi : M -> N) x (slots q)) := by
   simp [metricDiffCovDerivAt, metricCovDeriv_pullback]
 
+private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
+
 /-- Squared norms of covariant tensors are preserved by a pullback metric, in
 an orthonormal source basis.  The tensor on the source is supplied by its
 evaluated pullback relation `hT`, avoiding a separate cross-manifold tensor
@@ -377,13 +379,15 @@ theorem normSq0S_pullback_eval_of_orthonormal
     have h :=
       Diffeomorph.mfderivToContinuousLinearEquiv_coe
         (Φ := Phi) (x := x) infty_ne_zero
-    exact congrArg (fun f : TangentSpace I x ->L[Real] TangentSpace I (Phi x) => f v) h
+    exact congrArg (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f v) h
   have hbasis'_apply : ∀ i : Idx,
       basis' i = mfderiv I I (Phi : M -> N) x (basis i) := by
     intro i
-    rw [← hdPhi_apply (basis i)]
-    change basis' i = dPhi.toLinearEquiv (basis i)
-    rw [basis', Basis.map_apply]
+    have hmap : basis' i = dPhi (basis i) := by
+      show (basis.map dPhi.toLinearEquiv) i = dPhi (basis i)
+      rw [Module.Basis.map_apply]
+      rfl
+    rw [hmap, hdPhi_apply (basis i)]
   have hON' : ∀ i j : Idx,
       g.inner (Phi x) (basis' i) (basis' j) =
         if i = j then (1 : Real) else 0 := by
@@ -411,9 +415,7 @@ theorem normSq0S_pullback_eval_of_orthonormal
   intro slots _
   congr 1
   rw [component0S_apply, component0S_apply, hT]
-  congr 1
-  funext q
-  exact (hbasis'_apply (slots q)).symm
+  exact congrArg T (funext fun q => (hbasis'_apply (slots q)).symm)
 
 /-- Pointwise `metricDerivNorm` is preserved under pullback by a diffeomorphism,
 once the source tensor norm is evaluated in an orthonormal basis for the
