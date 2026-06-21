@@ -11,6 +11,8 @@ import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieMatrixChartBridge
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
+import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
 import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Real
 import Mathlib.Analysis.Calculus.ContDiff.Comp
@@ -763,5 +765,230 @@ theorem deTurckRicci_chartRegularity_of_jointChartGramSmooth
   · -- C7: supplied by the named Euclidean iterated-FDeriv lift
     exact deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
       (I := I) T g_DT hJ
+
+private lemma param_spatial_partialDeriv_contDiffOn
+    (G : ℝ × E → ℝ) (T : ℝ) (V : Set E) (hVopen : IsOpen V)
+    (hG : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ V)) (m : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun q : ℝ × E => Integral.DivergenceTheorem.partialDeriv (E := E) m
+        (fun y => G (q.1, y)) q.2)
+      (Set.Icc 0 T ×ˢ V) := by
+  classical
+  set S := Set.Icc (0 : ℝ) T ×ˢ V with hS_def
+  suffices h : ContDiffOn ℝ ∞
+      (fun q : ℝ × E => fderiv ℝ (fun y' => G (q.1, y')) q.2 (chartModelBasis E m)) S from
+    h.congr (fun ⟨t, y⟩ _ => by rw [Integral.DivergenceTheorem.partialDeriv])
+  rcases lt_trichotomy T 0 with hT | rfl | hT_pos
+  · have hSempty : S = ∅ := by
+      rw [hS_def, Set.Icc_eq_empty (not_le.mpr hT), Set.empty_prod]
+    rw [hSempty]; exact contDiffOn_empty
+  · have hslice0 : ContDiffOn ℝ ∞ (fun y => G (0, y)) V :=
+      hG.comp (contDiff_prodMk_right (0 : ℝ)).contDiffOn
+        (fun y hy => Set.mk_mem_prod (Set.left_mem_Icc.mpr (le_refl 0)) hy)
+    exact ((hslice0.fderiv_of_isOpen hVopen (by exact_mod_cast le_top)).clm_apply
+        (contDiffOn_const (c := chartModelBasis E m))).comp
+      contDiffOn_snd (fun q hq => hq.2) |>.congr
+      (fun ⟨t, y⟩ ⟨ht, _⟩ => by
+        have ht0 : t = 0 := le_antisymm ht.2 ht.1; subst ht0; rfl)
+  · have hUD : UniqueDiffOn ℝ S :=
+      UniqueDiffOn.prod (uniqueDiffOn_Icc hT_pos) hVopen.uniqueDiffOn
+    exact ((hG.fderivWithin hUD (by exact_mod_cast le_top)).clm_apply
+        (contDiffOn_const (c := ContinuousLinearMap.inr ℝ ℝ E (chartModelBasis E m)))).congr
+      (fun ⟨t, y⟩ ⟨ht, hy⟩ => by
+        rw [← fderivWithin_of_isOpen (𝕜 := ℝ) hVopen hy]
+        exact fderivWithin_spatial_slice_eq G t y hVopen hy
+          (fun y' hy' => Set.mk_mem_prod ht hy')
+          (hG.differentiableOn infty_ne_zero_withTop (t, y) ⟨ht, hy⟩) _)
+
+private lemma jointChartChristoffel_partialDeriv_contDiffOn
+    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (m i j k : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (fun q : ℝ × E =>
+      Integral.DivergenceTheorem.partialDeriv (E := E) m
+        (chartChristoffel (I := I) (g_DT q.1) α i j k) q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+  have hbase := jointChristoffel_contDiffOn T g_DT hJ α i j k
+  exact (param_spatial_partialDeriv_contDiffOn
+    (fun q : ℝ × E => chartChristoffel (I := I) (g_DT q.1) α i j k q.2)
+    T (interior (extChartAt I α).target) isOpen_interior hbase m).congr
+    (fun ⟨t, y⟩ _ => rfl)
+
+private lemma jointChartRiemann_contDiffOn
+    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (i j k l : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun q : ℝ × E =>
+        Integral.DivergenceTheorem.chartRiemannTensor (I := I) (g_DT q.1) α i j k l q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+  classical
+  have hexp : (fun q : ℝ × E =>
+        Integral.DivergenceTheorem.chartRiemannTensor (I := I) (g_DT q.1) α i j k l q.2) =
+      fun q : ℝ × E =>
+        Integral.DivergenceTheorem.partialDeriv (E := E) j
+          (chartChristoffel (I := I) (g_DT q.1) α i k l) q.2 -
+        Integral.DivergenceTheorem.partialDeriv (E := E) k
+          (chartChristoffel (I := I) (g_DT q.1) α i j l) q.2 +
+        (∑ m : Fin (Module.finrank ℝ E),
+          (chartChristoffel (I := I) (g_DT q.1) α j m l q.2 *
+              chartChristoffel (I := I) (g_DT q.1) α i k m q.2 -
+            chartChristoffel (I := I) (g_DT q.1) α k m l q.2 *
+              chartChristoffel (I := I) (g_DT q.1) α i j m q.2)) := by
+    funext q; rw [Integral.DivergenceTheorem.chartRiemannTensor_def]
+  rw [hexp]
+  refine ((jointChartChristoffel_partialDeriv_contDiffOn T g_DT hJ α j i k l).sub
+    (jointChartChristoffel_partialDeriv_contDiffOn T g_DT hJ α k i j l)).add ?_
+  refine ContDiffOn.sum (fun m _ => ?_)
+  exact ((jointChristoffel_contDiffOn T g_DT hJ α j m l).mul
+      (jointChristoffel_contDiffOn T g_DT hJ α i k m)).sub
+    ((jointChristoffel_contDiffOn T g_DT hJ α k m l).mul
+      (jointChristoffel_contDiffOn T g_DT hJ α i j m))
+
+private lemma jointChartRicci_contDiffOn
+    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (i k : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun q : ℝ × E =>
+        Integral.DivergenceTheorem.chartRicciTensor (I := I) (g_DT q.1) α i k q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+  classical
+  have hexp : (fun q : ℝ × E =>
+        Integral.DivergenceTheorem.chartRicciTensor (I := I) (g_DT q.1) α i k q.2) =
+      fun q : ℝ × E => ∑ j : Fin (Module.finrank ℝ E),
+        Integral.DivergenceTheorem.chartRiemannTensor (I := I) (g_DT q.1) α i j k j q.2 := by
+    funext q; rw [Integral.DivergenceTheorem.chartRicciTensor_def]
+  rw [hexp]
+  exact ContDiffOn.sum (fun j _ => jointChartRiemann_contDiffOn T g_DT hJ α i j k j)
+
+private lemma jointChartGramOnE_contDiffOn
+    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (fun q : ℝ × E =>
+      Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
+  (jointGramEntry_euclidean_contDiffOn T g_DT hJ α i j).congr
+    (fun ⟨t, y⟩ _ => by rw [chartGramOnE_def])
+
+private lemma jointChartDeTurckVFComp_partialDeriv_contDiffOn
+    (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (m k : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (fun q : ℝ × E =>
+      Integral.DivergenceTheorem.partialDeriv (E := E) m
+        (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k) q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+  have hbase := jointDeTurckVFComp_contDiffOn g_bg T g_DT hJ α k
+  exact (param_spatial_partialDeriv_contDiffOn
+    (fun q : ℝ × E => DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k q.2)
+    T (interior (extChartAt I α).target) isOpen_interior hbase m).congr
+    (fun ⟨t, y⟩ _ => rfl)
+
+private lemma jointChartGramOnE_partialDeriv_contDiffOn
+    (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (m i j : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (fun q : ℝ × E =>
+      Integral.DivergenceTheorem.partialDeriv (E := E) m
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j) q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
+  gramOnE_partialDeriv_joint_contDiffOn T g_DT hJ α m i j
+
+private lemma jointChartLieDeTurckComp_contDiffOn
+    (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun q : ℝ × E =>
+        IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp (I := I) (g_DT q.1) g_bg α i j q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+  classical
+  have hexp : (fun q : ℝ × E =>
+        IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp
+          (I := I) (g_DT q.1) g_bg α i j q.2) =
+      fun q : ℝ × E =>
+        (∑ k : Fin (Module.finrank ℝ E),
+            DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k q.2 *
+              Integral.DivergenceTheorem.partialDeriv (E := E) k
+                (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j) q.2)
+        + (∑ k : Fin (Module.finrank ℝ E),
+            Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α k j q.2 *
+              Integral.DivergenceTheorem.partialDeriv (E := E) i
+                (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k) q.2)
+        + (∑ k : Fin (Module.finrank ℝ E),
+            Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i k q.2 *
+              Integral.DivergenceTheorem.partialDeriv (E := E) j
+                (DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k) q.2) := by
+    funext q
+    rw [IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp_def]
+  rw [hexp]
+  refine ((ContDiffOn.sum (fun k _ => ?_)).add (ContDiffOn.sum (fun k _ => ?_))).add
+    (ContDiffOn.sum (fun k _ => ?_))
+  · exact (jointDeTurckVFComp_contDiffOn g_bg T g_DT hJ α k).mul
+      (jointChartGramOnE_partialDeriv_contDiffOn T g_DT hJ α k i j)
+  · exact (jointChartGramOnE_contDiffOn T g_DT hJ α k j).mul
+      (jointChartDeTurckVFComp_partialDeriv_contDiffOn g_bg T g_DT hJ α i k)
+  · exact (jointChartGramOnE_contDiffOn T g_DT hJ α i k).mul
+      (jointChartDeTurckVFComp_partialDeriv_contDiffOn g_bg T g_DT hJ α j k)
+
+private lemma jointChartDeTurckRicciRHS_contDiffOn
+    (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (i k : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun q : ℝ × E =>
+        IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS
+          (I := I) (g_DT q.1) g_bg α i k q.2)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+  classical
+  have hexp : (fun q : ℝ × E =>
+        IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS
+          (I := I) (g_DT q.1) g_bg α i k q.2) =
+      fun q : ℝ × E =>
+        -2 * Integral.DivergenceTheorem.chartRicciTensor (I := I) (g_DT q.1) α i k q.2 +
+          IntrinsicSpectral.DeTurckCoefficients.chartLieDeTurckComp
+            (I := I) (g_DT q.1) g_bg α i k q.2 := by
+    funext q
+    rw [IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS_def]
+  rw [hexp]
+  exact (contDiffOn_const.mul (jointChartRicci_contDiffOn T g_DT hJ α i k)).add
+    (jointChartLieDeTurckComp_contDiffOn g_bg T g_DT hJ α i k)
+
+theorem jointChartDeTurckRicciRHS_alongChart_contMDiffOn
+    (g_bg : SmoothRiemannianMetric I M) (T : ℝ)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
+    (i k : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+      (fun q : ℝ × M =>
+        IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k
+          (extChartAt I α q.2))
+      (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+  set G : ℝ × E → ℝ :=
+    fun q : ℝ × E =>
+      IntrinsicSpectral.DeTurckCoefficients.chartDeTurckRicciRHS (I := I) (g_DT q.1) g_bg α i k q.2
+    with hG_def
+  have hGEuclid : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
+    jointChartDeTurckRicciRHS_contDiffOn g_bg T g_DT hJ α i k
+  set f : ℝ × M → ℝ × E := fun q : ℝ × M => (q.1, extChartAt I α q.2) with hf_def
+  have hf_smooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ × E) ∞ f
+      (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
+    refine ContMDiffOn.prodMk_space contMDiffOn_fst ?_
+    refine (contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)).comp contMDiffOn_snd ?_
+    rintro ⟨t, x⟩ ⟨_, hx⟩
+    exact chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hx
+  have hmaps : Set.MapsTo f (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)
+      (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
+    rintro ⟨t, x⟩ ⟨ht, hx⟩
+    exact ⟨ht, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx⟩
+  intro q hq
+  have hGf : ContDiffWithinAt ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) (f q) :=
+    hGEuclid.contDiffWithinAt (hmaps hq)
+  exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
 
 end DifferentialGeometry.PDE.RicciFlow
