@@ -140,6 +140,7 @@ private theorem fiber_contDiffOn_Icc
   rw [contMDiffOn_iff_contDiffOn] at hcomp
   exact hcomp
 
+set_option linter.unusedVariables false in
 private theorem partialSnd_contMDiffOn_Icc
     (μ : Measure M) (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -147,7 +148,61 @@ private theorem partialSnd_contMDiffOn_Icc
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ => derivWithin (fun s => f p.1 s) (Set.Icc (0 : ℝ) T) p.2)
       ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := by
-  sorry
+  rcases le_or_gt T 0 with hT0 | hT0
+  · have hzero : Set.EqOn
+        (fun p : M × ℝ => derivWithin (fun s => f p.1 s) (Set.Icc (0 : ℝ) T) p.2)
+        (fun _ : M × ℝ => (0 : ℝ)) ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := by
+      intro p hp
+      have hnacc : ¬ AccPt p.2 (Filter.principal (Set.Icc (0 : ℝ) T)) := by
+        rw [accPt_principal_iff_nhdsWithin]
+        have hempty : Set.Icc (0 : ℝ) T \ {p.2} = ∅ := by
+          rw [Set.eq_empty_iff_forall_notMem]
+          intro y hy
+          exact hy.2 (Set.mem_singleton_iff.mpr
+            ((Set.subsingleton_Icc_of_ge hT0) hy.1 hp.2))
+        rw [hempty, nhdsWithin_empty]
+        exact not_neBot.mpr rfl
+      exact derivWithin_zero_of_not_accPt hnacc
+    exact (contMDiffOn_const (c := (0 : ℝ))).congr hzero
+  have hUM : UniqueMDiffOn 𝓘(ℝ, ℝ) (Set.Icc (0 : ℝ) T) :=
+    (uniqueDiffOn_Icc hT0).uniqueMDiffOn
+  have hrw : (fun p : M × ℝ => derivWithin (fun s => f p.1 s) (Set.Icc (0 : ℝ) T) p.2) =
+      fun p : M × ℝ =>
+        (mfderivWithin 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s => f p.1 s) (Set.Icc (0 : ℝ) T) p.2) (1 : ℝ) := by
+    funext p
+    rw [mfderivWithin_eq_fderivWithin]
+    exact (fderivWithin_derivWithin (𝕜 := ℝ) (f := fun s => f p.1 s)
+      (s := Set.Icc (0 : ℝ) T) (x := p.2)).symm
+  rw [hrw, contMDiffOn_infty]
+  intro n p₀ hp₀
+  have hf' : ContMDiffWithinAt ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (n + 1 : WithTop ℕ∞)
+      (Function.uncurry (fun (p : M × ℝ) (s : ℝ) => f p.1 s))
+      (((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) ×ˢ Set.Icc (0 : ℝ) T) (p₀, p₀.2) := by
+    have harg : ContMDiffWithinAt ((I.prod 𝓘(ℝ, ℝ)).prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
+        (fun q : (M × ℝ) × ℝ => (q.1.1, q.2))
+        (((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) ×ˢ Set.Icc (0 : ℝ) T) (p₀, p₀.2) :=
+      (contMDiffWithinAt_fst.fst).prodMk contMDiffWithinAt_snd
+    have hmaps : Set.MapsTo (fun q : (M × ℝ) × ℝ => (q.1.1, q.2))
+        (((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) ×ˢ Set.Icc (0 : ℝ) T)
+        ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
+      fun q hq => ⟨Set.mem_univ _, hq.2⟩
+    have hcomp := (hf (p₀.1, p₀.2) ⟨Set.mem_univ _, hp₀.2⟩).comp (p₀, p₀.2) harg hmaps
+    exact hcomp.of_le (by exact_mod_cast le_top : ((n : WithTop ℕ∞) + 1) ≤ ∞)
+  have h_apply :=
+    ContMDiffWithinAt.mfderivWithin_apply
+      (I := 𝓘(ℝ, ℝ)) (I' := 𝓘(ℝ, ℝ))
+      (f := fun (p : M × ℝ) (s : ℝ) => f p.1 s)
+      (g := fun p : M × ℝ => p.2) (g₁ := fun p : M × ℝ => p)
+      (g₂ := fun _ : M × ℝ => (1 : ℝ))
+      (t := (Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)
+      (u := Set.Icc (0 : ℝ) T)
+      (v := (Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)
+      (x₀ := p₀) (n := (n : WithTop ℕ∞) + 1) (m := (n : WithTop ℕ∞))
+      hf'
+      contMDiffWithinAt_snd contMDiffWithinAt_id contMDiffWithinAt_const le_rfl
+      (Set.mapsTo_id _) hp₀
+      (fun q hq => hq.2) hUM
+  simpa [inTangentCoordinates_model_space] using h_apply
 
 private theorem hasDerivWithinAt_integral_param_Icc
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ} (hT : 0 < T)
@@ -156,7 +211,90 @@ private theorem hasDerivWithinAt_integral_param_Icc
     {t₀ : ℝ} (ht₀ : t₀ ∈ Set.Icc (0 : ℝ) T) :
     HasDerivWithinAt (fun t => ∫ x, f x t ∂μ)
       (∫ x, derivWithin (fun s => f x s) (Set.Icc (0 : ℝ) T) t₀ ∂μ) (Set.Icc (0 : ℝ) T) t₀ := by
-  sorry
+  set s : Set ℝ := Set.Icc (0 : ℝ) T with hs_def
+  have hconv : Convex ℝ s := convex_Icc 0 T
+  have hUD : UniqueDiffOn ℝ s := uniqueDiffOn_Icc hT
+  set Fd : M → ℝ → ℝ := fun x t => derivWithin (fun u => f x u) s t with hFd
+  have hf_cont : ContinuousOn (fun p : M × ℝ => f p.1 p.2)
+      ((Set.univ : Set M) ×ˢ s) := hf.continuousOn
+  have hFd_joint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => Fd p.1 p.2)
+      ((Set.univ : Set M) ×ˢ s) := partialSnd_contMDiffOn_Icc μ f hf
+  have hFd_cont : ContinuousOn (fun p : M × ℝ => Fd p.1 p.2)
+      ((Set.univ : Set M) ×ˢ s) := hFd_joint.continuousOn
+  have hKcompact : IsCompact ((Set.univ : Set M) ×ˢ s) :=
+    isCompact_univ.prod (isCompact_Icc)
+  obtain ⟨C, hC⟩ := hKcompact.exists_bound_of_continuousOn hFd_cont
+  have hfiber_deriv : ∀ x : M, ∀ y ∈ s, HasDerivWithinAt (fun u => f x u) (Fd x y) s y := by
+    intro x y hy
+    have hcd : ContDiffOn ℝ ∞ (fun u : ℝ => f x u) s := fiber_contDiffOn_Icc f hf x
+    exact ((hcd.differentiableOn (by simp) y hy)).hasDerivWithinAt
+  have hfiber : ∀ x : M, HasDerivWithinAt (fun u => f x u) (Fd x t₀) s t₀ :=
+    fun x => hfiber_deriv x t₀ ht₀
+  have hbound : ∀ x : M, ∀ t ∈ s, ‖f x t - f x t₀‖ ≤ C * ‖t - t₀‖ := by
+    intro x t ht
+    refine Convex.norm_image_sub_le_of_norm_hasDerivWithin_le
+      (fun y hy => hfiber_deriv x y hy) (fun y hy => ?_) hconv ht₀ ht
+    exact hC (x, y) ⟨Set.mem_univ _, hy⟩
+  have hf_slice_cont : ∀ t ∈ s, Continuous (fun x : M => f x t) := by
+    intro t ht
+    have harg : ContinuousOn (fun x : M => (x, t)) (Set.univ : Set M) := by fun_prop
+    have hmaps : Set.MapsTo (fun x : M => (x, t)) (Set.univ : Set M)
+        ((Set.univ : Set M) ×ˢ s) := fun x _ => ⟨Set.mem_univ _, ht⟩
+    have := (hf_cont.comp harg hmaps)
+    rw [continuousOn_univ] at this
+    exact this
+  have hf_int : ∀ t ∈ s, Integrable (fun x : M => f x t) μ := by
+    intro t ht
+    exact integrableOn_univ.mp
+      ((hf_slice_cont t ht).continuousOn.integrableOn_compact isCompact_univ)
+  set G : ℝ → ℝ := fun t => ∫ x, f x t ∂μ with hG
+  set G' : ℝ := ∫ x, Fd x t₀ ∂μ with hG'
+  rw [hasDerivWithinAt_iff_tendsto_slope]
+  have hslope_eq : ∀ t : ℝ, t ∈ s \ {t₀} →
+      slope G t₀ t = ∫ x, slope (fun u => f x u) t₀ t ∂μ := by
+    intro t ht
+    have htne : t ≠ t₀ := fun h => ht.2 (Set.mem_singleton_iff.mpr h)
+    rw [slope_def_field, hG]
+    simp only []
+    rw [show (∫ x, f x t ∂μ) - ∫ x, f x t₀ ∂μ
+        = ∫ x, (f x t - f x t₀) ∂μ from
+      (integral_sub (hf_int t ht.1) (hf_int t₀ ht₀)).symm]
+    rw [div_eq_inv_mul, ← integral_const_mul]
+    refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [slope_def_field, div_eq_inv_mul]
+  have heq : (fun t => ∫ x, slope (fun u => f x u) t₀ t ∂μ) =ᶠ[𝓝[s \ {t₀}] t₀]
+      slope G t₀ := by
+    rw [Filter.eventuallyEq_iff_exists_mem]
+    exact ⟨s \ {t₀}, self_mem_nhdsWithin, fun t ht => (hslope_eq t ht).symm⟩
+  refine Filter.Tendsto.congr' heq ?_
+  · have hctbl : (𝓝[s \ {t₀}] t₀).IsCountablyGenerated := by infer_instance
+    have hmeas : ∀ᶠ t in 𝓝[s \ {t₀}] t₀,
+        AEStronglyMeasurable (fun x : M => slope (fun u => f x u) t₀ t) μ := by
+      refine eventually_nhdsWithin_of_forall (fun t ht => ?_)
+      have : Continuous (fun x : M => slope (fun u => f x u) t₀ t) := by
+        simp only [slope_def_field]
+        exact ((hf_slice_cont t ht.1).sub (hf_slice_cont t₀ ht₀)).div_const _
+      exact this.aestronglyMeasurable
+    have hbnd : ∀ᶠ t in 𝓝[s \ {t₀}] t₀,
+        ∀ᵐ x ∂μ, ‖slope (fun u => f x u) t₀ t‖ ≤ C := by
+      refine eventually_nhdsWithin_of_forall (fun t ht => ?_)
+      refine Filter.Eventually.of_forall (fun x => ?_)
+      have htne : t ≠ t₀ := fun h => ht.2 (Set.mem_singleton_iff.mpr h)
+      have hpos : 0 < ‖t - t₀‖ := by
+        rw [norm_pos_iff]; exact sub_ne_zero.mpr htne
+      rw [slope_def_field, norm_div, div_le_iff₀ hpos]
+      exact hbound x t ht.1
+    have hlim : ∀ᵐ x ∂μ, Filter.Tendsto
+        (fun t => slope (fun u => f x u) t₀ t) (𝓝[s \ {t₀}] t₀)
+        (𝓝 (Fd x t₀)) := by
+      refine Filter.Eventually.of_forall (fun x => ?_)
+      exact (hasDerivWithinAt_iff_tendsto_slope.mp (hfiber x))
+    have := MeasureTheory.tendsto_integral_filter_of_dominated_convergence
+      (μ := μ) (bound := fun _ : M => C)
+      (F := fun t x => slope (fun u => f x u) t₀ t)
+      (f := fun x => Fd x t₀)
+      hmeas hbnd (integrable_const C) hlim
+    simpa [hG'] using this
 
 private theorem contDiffOn_integral_of_jointContMDiffOn_Icc_pos
     (μ : Measure M) [IsFiniteMeasure μ] {T : ℝ} (hT : 0 < T) :
