@@ -19,6 +19,39 @@ Plan: `C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md`.
 So the P4 assembly is verified; the previously-opaque `upgrade` is now a proved
 theorem modulo the explicit honest frontier fields.
 
+## The `FlowLimitData` builder (2026-06-21, axiom-clean, build green 3789 jobs)
+
+`cghMaps_of_hL0 X mc L hL0 : PointedCGHMaps X L mc.subseq` — the **Brick-A →
+Brick-B handoff** and the last missing producer of the `maps` field. Given the
+limit flow `L` with `hL0 : L.atTime 0 = mc.limit` (Brick A's output contract),
+the time-zero comparison maps `mc.maps` transport along `hL0.symm` to
+`PointedRiemannianCGMaps (X.atZero) (L.atTime 0) mc.subseq`, which
+`pointedCGHMaps_of_atZero` (Brick B) carries to the spacetime maps. The `▸`
+transport is over the `L`-index of `PointedRiemannianCGMaps`; it introduces **no
+axiom** (`#print axioms cghMaps_of_hL0 = [propext, Classical.choice,
+Quot.sound]`, no `sorryAx`).
+
+**Design decision (item #3 of the work list).** No verbose re-typed
+`flowLimitData_of_…` wrapper was added. With `cghMaps_of_hL0` in hand,
+`FlowLimitData`'s **own anonymous constructor IS the builder** — the structure-
+instance syntax infers the frontier field types from the supplied `maps`:
+
+```lean
+flowLimit_upgrade X mc
+  { L := L
+    maps := cghMaps_of_hL0 X mc L hL0   -- Brick A+B, the only non-frontier field
+    scalar := …      -- Brick E (honest frontier input)
+    hσsrc := …; hσtgt := …; refMetric := …   -- Brick C inputs
+    conv := … }      -- Brick D (honest frontier input, consumes hShi)
+  : CompactnessConclusion X
+```
+
+A positional 5-argument builder would only restate the verbose field types and
+duplicate `cghMaps_of_hL0 X mc L hL0` five times (CLAUDE.md: shortest correct
+implementation, no redundant adapters). The honest frontier fields stay as
+`FlowLimitData` fields (item #4), so the structure itself is the intended input
+interface; `cghMaps_of_hL0` is the producer that makes it constructible.
+
 ## Remaining — discharge the `FlowLimitData` fields (the per-brick work)
 
 - **Brick A** (`L`): the limit Ricci flow on `mc.limit.M` with metric `gInf`

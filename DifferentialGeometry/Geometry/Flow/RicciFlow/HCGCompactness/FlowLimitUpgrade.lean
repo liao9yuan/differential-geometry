@@ -58,6 +58,23 @@ def pointedCGHMaps_of_atZero
   base_mem := rmaps.base_mem
   basepoint_map := rmaps.basepoint_map
 
+/-- **The Brick-A → Brick-B handoff: spacetime maps from the time-zero
+conclusion.**  Once the limit flow `L` (Brick A) is built so that its time-zero
+slice is the Cheeger--Gromov limit (`hL0 : L.atTime 0 = mc.limit`), the time-zero
+comparison maps `mc.maps` transport along that equality to
+`PointedRiemannianCGMaps (X.atZero) (L.atTime 0) mc.subseq`, which Brick B carries
+to the spacetime `PointedCGHMaps`.  This is the producer of the `FlowLimitData`
+`maps` field: with it, `FlowLimitData`'s own constructor (plus this `maps`) and
+`flowLimit_upgrade` assemble `CompactnessConclusion X` from `L`, `hL0`, and the
+honest frontier fields. -/
+def cghMaps_of_hL0
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
+    (L : PointedFlowData.{u, uE, uH} (I := I) X.D)
+    (hL0 : L.atTime (I := I) 0 = mc.limit) :
+    PointedCGHMaps (I := I) X L mc.subseq :=
+  pointedCGHMaps_of_atZero (I := I) X L mc.subseq (hL0.symm ▸ mc.maps)
+
 /-- The structured frontier ingredients of the smooth-flow-limit upgrade, given
 the time-zero metric Cheeger--Gromov compactness conclusion `mc`.  Each field is
 one P4 brick; the hard frontiers (the limit flow `L`, the window convergence
