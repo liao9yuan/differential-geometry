@@ -9,6 +9,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJet
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFixedPointParabolicSmoothing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralMassUniformSup
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 
 /-!
@@ -209,6 +211,7 @@ private theorem perModeConv_sq_le_time_mul_integral' (lam : ℝ) (hlam : 0 ≤ l
     _ ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 :=
         mul_le_mul_of_nonneg_left hk_sq_int ht
 
+set_option linter.unusedVariables false in
 private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
@@ -229,8 +232,56 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (c i) t) ^ 2 ≤ B i) ∧
       (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
-          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] c i) :=
-  sorry
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] c i) := by
+  classical
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+  have hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) (a := (a : ℝ)) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) (a := (a : ℝ)) gforce d) :=
+    fun d hsol => deTurckForcing_solFieldMass_forcingMass_couple
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 gforce hforce d hsol
+  have hbase : Summable (solFieldMass (I := I) (M := M)
+      (a := (a : ℝ)) hT.le gforce (a : ℝ)) := by
+    have hforce_sum : Summable (forcingMass (I := I) (M := M)
+        (a := (a : ℝ)) gforce (a : ℝ)) :=
+      summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M)
+        (f := gforce) (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+    refine Summable.of_nonneg_of_le
+      (fun i => solFieldMass_nonneg (I := I) (M := M) hT.le gforce (a : ℝ) i)
+      (fun i => ?_) (hforce_sum.mul_left (T ^ 2))
+    have hnorm : ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le gforce i‖ ≤
+        T * ‖timeModeCoeff (I := I) (M := M) gforce i‖ :=
+      norm_solModeCoeff_le (I := I) (M := M) (a := (a : ℝ)) hT.le gforce i
+    have hsol_nn : 0 ≤ ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le gforce i‖ :=
+      norm_nonneg _
+    have hT_nn : (0 : ℝ) ≤ T := hT.le
+    have hsq : ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le gforce i‖ ^ 2 ≤
+        T ^ 2 * ‖timeModeCoeff (I := I) (M := M) gforce i‖ ^ 2 := by
+      nlinarith [hnorm, hsol_nn, norm_nonneg (timeModeCoeff (I := I) (M := M) gforce i),
+        mul_nonneg hT_nn (norm_nonneg (timeModeCoeff (I := I) (M := M) gforce i))]
+    calc solFieldMass (I := I) (M := M) (a := (a : ℝ)) hT.le gforce (a : ℝ) i
+        = tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le gforce i‖ ^ 2 := rfl
+      _ ≤ tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            (T ^ 2 * ‖timeModeCoeff (I := I) (M := M) gforce i‖ ^ 2) :=
+          mul_le_mul_of_nonneg_left hsq
+            (tensorSobolevWeight_nonneg (I := I) (M := M) i (a : ℝ))
+      _ = T ^ 2 * forcingMass (I := I) (M := M) (a := (a : ℝ)) gforce (a : ℝ) i := by
+          rw [forcingMass]; ring
+  have huniformMass : ∀ σ : ℝ, ∃ C : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
+          (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2) ∧
+        ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
+            (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 ≤ C :=
+    spectralMass_sup_le_of_timeL2_allHs (I := I) (M := M)
+      (a := (a : ℝ)) hT gforce hcouple hbase
+  exact deTurckForcing_ballForcing_admits_smoothDriver (I := I) (M := M)
+    g₀ g_bg a ha_super ha_even hT hT1 gforce hforce huniformMass
 
 private theorem deTurckForcing_solCoeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
