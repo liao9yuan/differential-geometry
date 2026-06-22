@@ -1225,6 +1225,86 @@ set_option linter.unusedVariables false in
 /-- **Jointly-smooth representative of the maximal-regularity DeTurck–Ricci solution
 (the single deep classical parabolic-regularity leaf).**
 
+theorem deTurckRicci_forcingBootstrap
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
+    ∀ {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+        (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a)
+          (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
+            a ha_super)
+          (deTurckSobolevNHa2_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
+            a ha_super)).choose)
+        (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+        (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+        (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+        (hforce : gforce =ᵐ[timeMeasure T]
+          (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+        (htrace : timeH1.trace0 _ T u = 0),
+      ∃ (d₂F : ℝ), 0 < d₂F ∧ d₂F ≤ T ∧
+        ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ),
+          (∀ i, ContDiff ℝ ∞ (f i)) ∧
+          (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+            ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+              ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂F,
+                tensorSobolevWeight (I := I) (M := M) i τ *
+                    (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
+          (∀ t ∈ Set.Icc (0 : ℝ) d₂F, ∀ i,
+            tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
+              perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) ∧
+          ∃ (R₀ : ℝ), 0 < R₀ ∧
+            (∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+              ∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ S : SmoothCcTensor g₀ 0 2,
+                SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
+                  tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                    (Nat.cast_nonneg a) (timeH1.toFun u t) →
+                  ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀) ∧
+            (∀ {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
+                (hT₁_le_d2F : T₁ ≤ d₂F)
+                (Ffam : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+                (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+                  (ccTensorBilinSymm (I := I) g₀ (Ffam t)) δ)
+                (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+                  SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Ffam t) =
+                    tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                      (Nat.cast_nonneg a) (timeH1.toFun u t))
+                (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+                  ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Ffam t)‖ ≤ R₀),
+              ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ i,
+                f i t = tensorL2Coeff (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                    (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                      (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (Ffam t) hδ_lt (hδ t))) i) := by
+  classical
+  intro T hT hT1 hTT₀ u gforce hduh hforce htrace
+  obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
+      hduh hforce htrace
+  refine ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, ?_⟩
+  set R₀ : ℝ := (Classical.choose
+    (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1 with hR₀_def
+  have hR₀_pos : 0 < R₀ :=
+    (Classical.choose_spec
+      (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
+  refine ⟨R₀, hR₀_pos, ?_, ?_⟩
+  · exact realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+      hTT₀ u gforce hduh hforce htrace hR₀_pos
+  · intro T₁ hT₁_pos hT₁_le hT₁_le_d2F Ffam δ hδ_lt hδ h_pin hball
+    exact realizedForcingCoord_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
+      hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
+      Ffam hδ_lt hδ f hf_id hf_smooth hf_mass hforce_coord h_pin hball
+
+set_option linter.unusedVariables false in
+
 theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
