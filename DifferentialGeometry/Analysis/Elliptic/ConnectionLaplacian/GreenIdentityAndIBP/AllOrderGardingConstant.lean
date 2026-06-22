@@ -610,7 +610,7 @@ private theorem exists_iteratedCovGrad_rawConnLap_l2Norm_le
 
 set_option linter.unusedSectionVars false in
 
-private theorem exists_iteratedCovGrad_rawConnLapIter_l2Norm_le
+theorem exists_iteratedCovGrad_rawConnLapIter_l2Norm_le
     (g : SmoothRiemannianMetric I M) (i : ℕ) :
     ∀ s : ℕ, ∃ Cfun : ℕ → ℝ, (∀ p, 0 ≤ Cfun p) ∧
       ∀ (p : ℕ) (S : SmoothCcTensor g 0 s),
