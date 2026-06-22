@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.SecondCovGradChartHessian
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
 
 noncomputable section
@@ -78,6 +80,78 @@ private lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
       unitModel (I := I) (M := M) g₀ 2 S x v + unitModel (I := I) (M := M) g₀ 2 S' x v := by
   rw [unitModel_add2_local, ContinuousMultilinearMap.add_apply]
+
+set_option linter.unusedSectionVars false in
+
+private lemma cmm_two_basis_expand
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
+    (v : Fin 2 → E) :
+    f v =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          f ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+  classical
+  have hexpand : ∀ k : Fin 2,
+      v k = ∑ i : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr (v k)) i • chartModelBasis E i := by
+    intro k; exact ((chartModelBasis E).sum_repr (v k)).symm
+  have h_v_eq : v =
+      fun k : Fin 2 => ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v k)) i • chartModelBasis E i := by
+    funext k; exact hexpand k
+  rw [show f v = f (fun k : Fin 2 =>
+        ∑ i : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v k)) i • chartModelBasis E i) from
+    congrArg f h_v_eq]
+  rw [ContinuousMultilinearMap.map_sum
+    (f := f)
+    (g := fun (k : Fin 2) (i : Fin (Module.finrank ℝ E)) =>
+      ((chartModelBasis E).repr (v k)) i • chartModelBasis E i)]
+  have h_pull : ∀ Jdx : Fin 2 → Fin (Module.finrank ℝ E),
+      f (fun k : Fin 2 =>
+          ((chartModelBasis E).repr (v k)) (Jdx k) • chartModelBasis E (Jdx k)) =
+        (∏ k : Fin 2, ((chartModelBasis E).repr (v k)) (Jdx k)) *
+          f (fun k : Fin 2 => chartModelBasis E (Jdx k)) := by
+    intro Jdx
+    have hpull := f.toMultilinearMap.map_smul_univ
+      (c := fun k : Fin 2 => ((chartModelBasis E).repr (v k)) (Jdx k))
+      (m := fun k : Fin 2 => chartModelBasis E (Jdx k))
+    have hpull' :
+        f (fun k : Fin 2 => ((chartModelBasis E).repr (v k)) (Jdx k) •
+            chartModelBasis E (Jdx k)) =
+        (∏ k : Fin 2, ((chartModelBasis E).repr (v k)) (Jdx k)) •
+          f (fun k : Fin 2 => chartModelBasis E (Jdx k)) := hpull
+    rw [hpull']; rfl
+  rw [Finset.sum_congr rfl (fun Jdx _ => h_pull Jdx)]
+  rw [← (finTwoArrowEquiv (Fin (Module.finrank ℝ E))).symm.sum_comp
+    (fun Jdx : Fin 2 → Fin (Module.finrank ℝ E) =>
+      (∏ k : Fin 2, ((chartModelBasis E).repr (v k)) (Jdx k)) *
+        f (fun k : Fin 2 => chartModelBasis E (Jdx k)))]
+  rw [Fintype.sum_prod_type]
+  refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun i _ => ?_))
+  have hbasis : (fun j : Fin 2 =>
+        chartModelBasis E (((finTwoArrowEquiv (Fin (Module.finrank ℝ E))).symm (k, i)) j)) =
+      ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+    funext j; fin_cases j <;> rfl
+  have hprod : (∏ k' : Fin 2,
+        ((chartModelBasis E).repr (v k'))
+          (((finTwoArrowEquiv (Fin (Module.finrank ℝ E))).symm (k, i)) k')) =
+      ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i := by
+    rw [Fin.prod_univ_two]; rfl
+  rw [hbasis, hprod]
+
+set_option linter.unusedSectionVars false in
+
+private lemma unitModel_basis_expand_two (g₀ : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          unitModel (I := I) (M := M) g₀ 2 W x
+            ![(chartModelBasis E) k, (chartModelBasis E) i]) =
+      unitModel (I := I) (M := M) g₀ 2 W x v := by
+  classical
+  rw [Finset.sum_comm]
+  exact (cmm_two_basis_expand (unitModel (I := I) (M := M) g₀ 2 W x) v).symm
 
 def linearizedRicciThreeArmHjoint (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ} : Prop :=
@@ -868,6 +942,33 @@ theorem linearizedRicci_arm2FieldLichnerowicz_jointSmooth (g₀ : SmoothRiemanni
   rw [linearizedRicciArm2FieldLichnerowicz, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
+theorem exists_chartRicciTraceDeriv_threeArm_covariant_component
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ Φ₁ : ℝ → SmoothCcTensor g₀ 3 2,
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (i k : Fin (Module.finrank ℝ E)),
+          (∑ j : Fin (Module.finrank ℝ E),
+              deriv (fun s' : ℝ =>
+                chartRiemannTensor (I := I)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s') x i j k j (extChartAt I x x)) s) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2
+                  (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2
+                  (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+                ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  sorry
+
 theorem chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -893,8 +994,42 @@ theorem chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  obtain ⟨Φ₁, hΦ₁joint, hcomp⟩ :=
+    exists_chartRicciTraceDeriv_threeArm_covariant_component (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ'
+  refine ⟨Φ₁, hΦ₁joint, fun s hs x v => ?_⟩
+  set Wsum : SmoothCcTensor g₀ 0 2 :=
+    appCc (I := I) (M := M) g₀ 2 2
+        (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+      + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+      + appCc (I := I) (M := M) g₀ 4 2
+        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hWsum
+  have hcomp' : ∀ i k : Fin (Module.finrank ℝ E),
+      (∑ j : Fin (Module.finrank ℝ E),
+          deriv (fun s' : ℝ =>
+            chartRiemannTensor (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s') x i j k j (extChartAt I x x)) s) =
+        unitModel (I := I) (M := M) g₀ 2 Wsum x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] := fun i k => hcomp s hs x i k
+  calc
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          (∑ j : Fin (Module.finrank ℝ E),
+            deriv (fun s' : ℝ =>
+              chartRiemannTensor (I := I)
+                (realizedFam (I := I) g₀ T T' hδ hδ' s') x i j k j (extChartAt I x x)) s))
+        = ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+              unitModel (I := I) (M := M) g₀ 2 Wsum x
+                ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+          refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+          rw [hcomp' i k]
+      _ = unitModel (I := I) (M := M) g₀ 2 Wsum x v := by
+          rw [unitModel_basis_expand_two (I := I) (M := M) g₀ Wsum x v]
 
 theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
