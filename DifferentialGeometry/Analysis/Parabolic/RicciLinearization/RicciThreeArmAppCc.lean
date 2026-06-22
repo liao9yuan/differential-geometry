@@ -1162,6 +1162,311 @@ private lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric 
     Bundle.contMDiff_zeroSection ℝ (fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z)
   exact (hzero.comp contMDiff_fst).contMDiffOn
 
+set_option linter.unusedSectionVars false in
+private lemma partialDeriv_chartGramOnE_differentiableAt_local
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (p l b : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    DifferentiableAt ℝ (partialDeriv (E := E) p (chartGramOnE (I := I) g α l b)) y₀ := by
+  have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l b) (extChartAt I α).target :=
+    chartGramOnE_contDiffOn (I := I) g α l b
+  have hcd_int : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l b)
+      (interior (extChartAt I α).target) := hcd.mono interior_subset
+  have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ (chartGramOnE (I := I) g α l b))
+      (interior (extChartAt I α).target) :=
+    hcd_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+  have hpd : ContDiffOn ℝ ∞ (partialDeriv (E := E) p (chartGramOnE (I := I) g α l b))
+      (interior (extChartAt I α).target) := by
+    unfold partialDeriv
+    exact hfderiv.clm_apply contDiffOn_const
+  exact (hpd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
+
+set_option linter.unusedSectionVars false in
+private lemma chartGramOnE_differentiableAt_local
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (l b : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    DifferentiableAt ℝ (chartGramOnE (I := I) g α l b) y₀ := by
+  have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l b) (extChartAt I α).target :=
+    chartGramOnE_contDiffOn (I := I) g α l b
+  have hcd_int : ContDiffOn ℝ ∞ (chartGramOnE (I := I) g α l b)
+      (interior (extChartAt I α).target) := hcd.mono interior_subset
+  exact (hcd_int.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
+
+set_option linter.unusedSectionVars false in
+private lemma partialDeriv_realizedGramDeriv_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (p a b : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) :
+    DifferentiableAt ℝ
+      (partialDeriv (E := E) p
+        (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b)) y₀ := by
+  have heq : (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b) =
+      fun y => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b y -
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b y := rfl
+  rw [heq]
+  have hsub : (partialDeriv (E := E) p
+        (fun y => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b y -
+          chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b y))
+        =ᶠ[nhds y₀]
+      fun y => partialDeriv (E := E) p
+            (chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b) y -
+          partialDeriv (E := E) p
+            (chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b) y := by
+    filter_upwards [isOpen_interior.mem_nhds hy] with y hyy
+    rw [partialDeriv_sub
+        (chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b)
+        (chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b)
+        (chartGramOnE_differentiableAt_local (I := I) _ x a b hyy)
+        (chartGramOnE_differentiableAt_local (I := I) _ x a b hyy)]
+  refine (Filter.EventuallyEq.differentiableAt_iff hsub).mpr ?_
+  exact (partialDeriv_chartGramOnE_differentiableAt_local (I := I)
+      (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x p a b hy).sub
+    (partialDeriv_chartGramOnE_differentiableAt_local (I := I)
+      (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x p a b hy)
+
+set_option linter.unusedSectionVars false in
+private lemma realizedLinearizedChristoffelPrincipal_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i j k : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) {s₀ : ℝ} :
+    DifferentiableAt ℝ
+      (fun y => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+        x i j k y s₀) y₀ := by
+  classical
+  have hrw : (fun y => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+        x i j k y s₀) =
+      fun y => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k l y *
+          (partialDeriv (E := E) i
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j) y +
+            partialDeriv (E := E) j
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i) y -
+            partialDeriv (E := E) l
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j) y) := by
+    funext y; rw [realizedLinearizedChristoffelPrincipal]
+  rw [hrw]
+  refine DifferentiableAt.const_mul ?_ _
+  refine DifferentiableAt.fun_sum (fun l _ => ?_)
+  refine DifferentiableAt.mul
+    (chartInvGramOnE_differentiableAt_interior (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k l hy) ?_
+  exact ((partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x i l j hy).add
+      (partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x j l i hy)).sub
+    (partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x l i j hy)
+
+set_option linter.unusedSectionVars false in
+private lemma christoffelSlope_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i j k : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) {s₀ : ℝ}
+    (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
+    DifferentiableAt ℝ
+      (fun y => deriv (fun s : ℝ =>
+        chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k y) s₀) y₀ := by
+  classical
+  set Φ : ℝ × E → ℝ := fun r =>
+    chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' r.1) x i j k r.2 with hΦ
+  have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
+  have hjoint : ContDiffAt ℝ ∞ Φ (s₀, y₀) :=
+    gen_joint_christoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ') x hG i j k hs₀ hy
+  have hΦ_dfderiv : ContDiffAt ℝ ∞ (fderiv ℝ Φ) (s₀, y₀) := hjoint.fderiv_right (by simp)
+  have get_diff_nhd : ∀ᶠ p : ℝ × E in nhds (s₀, y₀), DifferentiableAt ℝ Φ p := by
+    obtain ⟨f', u, hu, _, hfu⟩ :=
+      contDiffAt_one_iff.mp (hjoint.of_le (by exact_mod_cast le_top : (1 : WithTop ℕ∞) ≤ ∞))
+    exact Filter.eventually_of_mem hu fun p hp => (hfu p hp).differentiableAt
+  have hΦ_y : ∀ᶠ y : E in nhds y₀, DifferentiableAt ℝ Φ (s₀, y) :=
+    (continuous_const (y := s₀) |>.prodMk continuous_id).continuousAt get_diff_nhd
+  have h_eq : (fun y => deriv (fun s : ℝ => Φ (s, y)) s₀) =ᶠ[nhds y₀]
+      (fun y => fderiv ℝ Φ (s₀, y) ((1 : ℝ), (0 : E))) := by
+    filter_upwards [hΦ_y] with y hy
+    have := hy.hasFDerivAt.comp_hasDerivAt (s₀ : ℝ)
+      (hasFDerivAt_prodMk_left s₀ y).hasDerivAt
+    exact this.deriv
+  have hdiff_rhs : DifferentiableAt ℝ
+      (fun y => fderiv ℝ Φ (s₀, y) ((1 : ℝ), (0 : E))) y₀ := by
+    have h_chain : HasFDerivAt (fun y => fderiv ℝ Φ (s₀, y) ((1 : ℝ), (0 : E)))
+        ((ContinuousLinearMap.apply ℝ ℝ ((1 : ℝ), (0 : E))).comp
+          ((fderiv ℝ (fderiv ℝ Φ) (s₀, y₀)).comp (ContinuousLinearMap.inr ℝ ℝ E))) y₀ :=
+      (ContinuousLinearMap.apply ℝ ℝ ((1 : ℝ), (0 : E))).hasFDerivAt.comp y₀
+        ((hΦ_dfderiv.differentiableAt (by norm_num)).hasFDerivAt.comp y₀
+          (hasFDerivAt_prodMk_right s₀ y₀))
+    exact h_chain.differentiableAt
+  exact (Filter.EventuallyEq.differentiableAt_iff h_eq).mpr hdiff_rhs
+
+set_option linter.unusedSectionVars false in
+private lemma realizedChristoffelNonPrincipal_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i j k : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) {s₀ : ℝ}
+    (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
+    DifferentiableAt ℝ
+      (fun y => realizedChristoffelNonPrincipal (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+        x i j k y s₀) y₀ := by
+  classical
+  have hNPeq : (fun y => realizedChristoffelNonPrincipal (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+        x i j k y s₀) =ᶠ[nhds y₀]
+      (fun y => deriv (fun s : ℝ =>
+          chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k y) s₀ -
+        realizedLinearizedChristoffelPrincipal (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+          x i j k y s₀) := by
+    have hopen : IsOpen (interior (extChartAt I x).target) := isOpen_interior
+    filter_upwards [hopen.mem_nhds hy] with y hyy
+    rw [linearizedChristoffel_eq_principal_add_nonPrincipal (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x i j k hyy hs₀]
+    ring
+  refine (Filter.EventuallyEq.differentiableAt_iff hNPeq).mpr ?_
+  exact (christoffelSlope_differentiableAt_local (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+      x i j k hy hs₀).sub
+    (realizedLinearizedChristoffelPrincipal_differentiableAt_local (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x i j k hy)
+
+def chartSlopeSecondOrderContribution (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) (y : E) (s₀ : ℝ) : ℝ :=
+  ∑ j : Fin (Module.finrank ℝ E),
+    (partialDeriv (E := E) j
+        (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i k j y' s₀) y -
+      partialDeriv (E := E) k
+        (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i j j y' s₀) y)
+
+def chartSlopeOrder0Contribution (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) (y : E) (s₀ : ℝ) : ℝ :=
+  ∑ j : Fin (Module.finrank ℝ E),
+    (partialDeriv (E := E) j
+        (fun y' => realizedChristoffelNonPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i k j y' s₀) y -
+      partialDeriv (E := E) k
+        (fun y' => realizedChristoffelNonPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i j j y' s₀) y +
+      (∑ m : Fin (Module.finrank ℝ E),
+        (deriv (fun s : ℝ =>
+              chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j m j y) s₀ *
+            chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i k m y +
+          chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j m j y *
+            deriv (fun s : ℝ =>
+              chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k m y) s₀ -
+          deriv (fun s : ℝ =>
+              chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x k m j y) s₀ *
+            chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j m y -
+          chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k m j y *
+            deriv (fun s : ℝ =>
+              chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j m y) s₀)))
+
+set_option linter.unusedSectionVars false in
+theorem chartRicciTraceChristoffelSlope_eq_secondOrder_add_order0
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
+    (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
+    chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y s₀ =
+      chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y s₀ +
+        chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y s₀ := by
+  classical
+  rw [chartRicciTraceChristoffelSlope, chartSlopeSecondOrderContribution,
+    chartSlopeOrder0Contribution]
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  have hsplit : ∀ (c a b : Fin (Module.finrank ℝ E)),
+      partialDeriv (E := E) c
+          (fun y' => deriv (fun s : ℝ =>
+            chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i b a y') s₀) y =
+        partialDeriv (E := E) c
+            (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+              hδ_lt hδ hδ'_lt hδ' x i b a y' s₀) y +
+          partialDeriv (E := E) c
+            (fun y' => realizedChristoffelNonPrincipal (I := I) g₀ T T'
+              hδ_lt hδ hδ'_lt hδ' x i b a y' s₀) y := by
+    intro c a b
+    have hfun : (fun y' => deriv (fun s : ℝ =>
+          chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i b a y') s₀) =ᶠ[nhds y]
+        (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x i b a y' s₀ +
+          realizedChristoffelNonPrincipal (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x i b a y' s₀) := by
+      filter_upwards [isOpen_interior.mem_nhds hy] with y' hyy
+      exact linearizedChristoffel_eq_principal_add_nonPrincipal (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x i b a hyy hs₀
+    have hpartialeq : partialDeriv (E := E) c
+          (fun y' => deriv (fun s : ℝ =>
+            chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i b a y') s₀) y =
+        partialDeriv (E := E) c
+          (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+              hδ_lt hδ hδ'_lt hδ' x i b a y' s₀ +
+            realizedChristoffelNonPrincipal (I := I) g₀ T T'
+              hδ_lt hδ hδ'_lt hδ' x i b a y' s₀) y := by
+      unfold partialDeriv
+      rw [Filter.EventuallyEq.fderiv_eq hfun]
+    rw [hpartialeq]
+    rw [partialDeriv_add
+        (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i b a y' s₀)
+        (fun y' => realizedChristoffelNonPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i b a y' s₀)
+        (realizedLinearizedChristoffelPrincipal_differentiableAt_local (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i b a hy)
+        (realizedChristoffelNonPrincipal_differentiableAt_local (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i b a hy hs₀)]
+  rw [hsplit j j k, hsplit k j j]
+  ring
+
+theorem chartSlopeContributions_eq_threeArm_component
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  sorry
+
 theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -1180,8 +1485,24 @@ theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
           + appCc (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-          ((chartModelBasis E) k) ((chartModelBasis E) i) :=
-  sorry
+          ((chartModelBasis E) k) ((chartModelBasis E) i) := by
+  classical
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  have hmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    abs_convex_smallConstant_lt_one hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩
+  rw [chartRicciTraceChristoffelSlope_eq_secondOrder_add_order0 (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x i k hy hmem]
+  rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀
+    (appCc (I := I) (M := M) g₀ 2 2
+        (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+      + appCc (I := I) (M := M) g₀ 4 2
+        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+    ((chartModelBasis E) k) ((chartModelBasis E) i)]
+  exact chartSlopeContributions_eq_threeArm_component (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' s hs x i k
 
 theorem exists_chartSlope_component_threeArm_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M)
