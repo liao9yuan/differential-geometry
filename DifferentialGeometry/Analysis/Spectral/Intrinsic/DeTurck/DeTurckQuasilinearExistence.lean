@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SubcriticalSmallTime
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.FieldHa1TimeSupTrace
 
 /-!
 # Quasilinear maximal-regularity existence for the DeTurck–Ricci flow (mixed-view contraction)
@@ -220,16 +221,16 @@ POSITED (recursion frontier — the genuine missing analytic prerequisite; the s
 translation tower of the on-disk covariant-`L²` two-arm bound). -/
 theorem deTurckSobolevNHa2_mixed_lipschitz_pointwise (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
-    ∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
-      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
-        ‖f‖ ≤ R → ‖f'‖ ≤ R →
-        ∀ᵐ t ∂(timeMeasure T),
-          ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (f t) -
-              deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (f' t)‖ ≤
-            (C₁ : ℝ) * R * ‖(f - f') t‖ +
-              (C₂ : ℝ) *
-                ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                    (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ :=
+    ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+      ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a u -
+          deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a u'‖ ≤
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
+          * ‖u - u'‖ +
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖ :=
   sorry
 
 theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -265,16 +266,23 @@ private theorem nemytskii_time_mixed_bound (g₀ : SmoothRiemannianMetric I M) (
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
     (hLip : LipschitzWith L Nfun) {C₁ C₂ : ℝ≥0}
-    (hpt : ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
-      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
-        ‖f‖ ≤ R → ‖f'‖ ≤ R → ∀ᵐ t ∂(timeMeasure T),
-          ‖Nfun (f t) - Nfun (f' t)‖ ≤
-            (C₁ : ℝ) * R * ‖(f - f') t‖ +
-              (C₂ : ℝ) * ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖)
-    {T : ℝ} (hT : 0 < T) (R : ℝ) (hR : 0 ≤ R)
+    (hsingle : ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+      ‖Nfun u - Nfun u'‖ ≤
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
+          * ‖u - u'‖ +
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖)
+    {T : ℝ} (R : ℝ) (hR : 0 ≤ R)
     (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T)
-    (hf : ‖f‖ ≤ R) (hf' : ‖f'‖ ≤ R) :
+    (hfR : ∀ᵐ t ∂(timeMeasure T),
+      ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) f) t‖ ≤ R)
+    (hf'R : ∀ᵐ t ∂(timeMeasure T),
+      ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) f') t‖ ≤ R) :
     ‖nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f'‖ ≤
       (C₁ : ℝ) * R * ‖f - f'‖ +
         (C₂ : ℝ) *
@@ -284,15 +292,81 @@ private theorem nemytskii_time_mixed_bound (g₀ : SmoothRiemannianMetric I M) (
   have hNf' := nemytskii_coeFn (I := I) (M := M) hLip f'
   have hsub := Lp.coeFn_sub
     (nemytskii (I := I) (M := M) hLip f) (nemytskii (I := I) (M := M) hLip f')
+  have hsubff' := Lp.coeFn_sub f f'
+  have hinclf :
+      ⇑(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) f) =ᵐ[timeMeasure T]
+        fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f t) :=
+    (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)).coeFn_compLpL
+      (p := 2) (μ := timeMeasure T) f
+  have hinclf' :
+      ⇑(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) f') =ᵐ[timeMeasure T]
+        fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f' t) :=
+    (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)).coeFn_compLpL
+      (p := 2) (μ := timeMeasure T) f'
+  have hincldiff :
+      ⇑(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) =ᵐ[timeMeasure T]
+        fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((f - f') t) :=
+    (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith)).coeFn_compLpL
+      (p := 2) (μ := timeMeasure T) (f - f')
   have hbound : ∀ᵐ t ∂(timeMeasure T),
       ‖(nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f') t‖ ≤
         (C₁ : ℝ) * R * ‖(f - f') t‖ +
           (C₂ : ℝ) *
             ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                 (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ := by
-    filter_upwards [hsub, hNf, hNf', hpt hT R hR f f' hf hf'] with t ht htf htf' htpt
+    filter_upwards [hsub, hNf, hNf', hsubff', hfR, hf'R, hinclf, hinclf', hincldiff]
+      with t ht htf htf' htsubff' htfR htf'R htinclf htinclf' htincldiff
     rw [ht, Pi.sub_apply, htf, htf']
-    exact htpt
+    have hsg := hsingle (f t) (f' t)
+    have hmax_le :
+        max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f t)‖
+               ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f' t)‖ ≤ R := by
+      refine max_le ?_ ?_
+      · rw [← htinclf]; exact htfR
+      · rw [← htinclf']; exact htf'R
+    have hstep1 :
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f t)‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f' t)‖
+            * ‖(f t) - (f' t)‖ ≤ (C₁ : ℝ) * R * ‖(f t) - (f' t)‖ := by
+      have hnn : (0 : ℝ) ≤ ‖(f t) - (f' t)‖ := norm_nonneg _
+      have hmul : (C₁ : ℝ) * max _ _ ≤ (C₁ : ℝ) * R :=
+        mul_le_mul_of_nonneg_left hmax_le C₁.coe_nonneg
+      exact mul_le_mul_of_nonneg_right hmul hnn
+    have hff'eq : ‖(f t) - (f' t)‖ = ‖(f - f') t‖ := by
+      rw [htsubff', Pi.sub_apply]
+    have hstep2 :
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((f t) - (f' t))‖
+          = (C₂ : ℝ) * ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ := by
+      rw [htincldiff, htsubff', Pi.sub_apply]
+    calc ‖Nfun (f t) - Nfun (f' t)‖
+        ≤ (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                            (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f t)‖
+                         ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                            (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f' t)‖
+            * ‖(f t) - (f' t)‖ +
+          (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                        (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) ((f t) - (f' t))‖ := hsg
+      _ ≤ (C₁ : ℝ) * R * ‖(f - f') t‖ +
+            (C₂ : ℝ) * ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ := by
+          refine add_le_add ?_ (le_of_eq hstep2)
+          rw [← hff'eq]
+          exact hstep1
   exact timeL2_norm_le_of_ae_mixed_bound (T := T)
     (nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f')
     (f - f')
@@ -327,34 +401,47 @@ private theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric 
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
     (hLip : LipschitzWith L Nfun) {C₁ C₂ : ℝ≥0}
-    (hpt : ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
-      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
-        ‖f‖ ≤ R → ‖f'‖ ≤ R → ∀ᵐ t ∂(timeMeasure T),
-          ‖Nfun (f t) - Nfun (f' t)‖ ≤
-            (C₁ : ℝ) * R * ‖(f - f') t‖ +
-              (C₂ : ℝ) * ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖)
+    (hsingle : ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+      ‖Nfun u - Nfun u'‖ ≤
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
+          * ‖u - u'‖ +
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     {ρ : ℝ} (hρ : 0 ≤ ρ)
     (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hF : ‖F‖ ≤ ρ) (hF' : ‖F'‖ ≤ ρ) :
     ‖nemytskiiMixedForcingMap (I := I) (M := M) g₀ a hLip hT hT1 F -
         nemytskiiMixedForcingMap (I := I) (M := M) g₀ a hLip hT hT1 F'‖ ≤
-      ((C₁ : ℝ) * (1 + T) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
+      ((C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
   classical
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   set z : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) := 0 with hz
   set fF := maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1 z F with hfF
   set fF' := maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1 z F' with hfF'
-  set R := (1 + T) * ρ with hR
+  set R := Real.sqrt (1 + T) * ρ with hR
   have hT_pos : (0 : ℝ) < 1 + T := by linarith
-  have hRnn : 0 ≤ R := mul_nonneg (by linarith) hρ
-  have hfFball : ‖fF‖ ≤ R := by
-    refine le_trans (norm_maxRegDuhamelSolField_zero_le (I := I) (M := M) hT hT1 F) ?_
-    rw [hR]; exact mul_le_mul_of_nonneg_left hF (by linarith)
-  have hfF'ball : ‖fF'‖ ≤ R := by
-    refine le_trans (norm_maxRegDuhamelSolField_zero_le (I := I) (M := M) hT hT1 F') ?_
-    rw [hR]; exact mul_le_mul_of_nonneg_left hF' (by linarith)
+  have hsqrtnn : 0 ≤ Real.sqrt (1 + T) := Real.sqrt_nonneg _
+  have hRnn : 0 ≤ R := mul_nonneg hsqrtnn hρ
+  have hfR : ∀ᵐ t ∂(timeMeasure T),
+      ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) fF) t‖ ≤ R := by
+    filter_upwards [maxRegDuhamelSolField_inclusion_Ha1_ae_pointwise_le
+      (I := I) (M := M) (g₀ := g₀) hT hT1 F] with t ht
+    refine le_trans ht ?_
+    rw [hR]
+    exact mul_le_mul_of_nonneg_left hF hsqrtnn
+  have hf'R : ∀ᵐ t ∂(timeMeasure T),
+      ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) fF') t‖ ≤ R := by
+    filter_upwards [maxRegDuhamelSolField_inclusion_Ha1_ae_pointwise_le
+      (I := I) (M := M) (g₀ := g₀) hT hT1 F'] with t ht
+    refine le_trans ht ?_
+    rw [hR]
+    exact mul_le_mul_of_nonneg_left hF' hsqrtnn
   have hfield_dist : ‖fF - fF'‖ ≤ (1 + T) * ‖F - F'‖ :=
     maxRegDuhamelSolField_dist_le (I := I) (M := M) (h_compact := h_compact) (a := (a : ℝ))
       hT hT1 z F F'
@@ -366,8 +453,8 @@ private theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric 
       timeL2Inclusion_maxRegDuhamelSolField (I := I) (M := M) hT hT1 z F']
     exact maxRegDuhamelSolFieldHa1_dist_le (I := I) (M := M) (h_compact := h_compact)
       (a := (a : ℝ)) hT hT1 z F F'
-  have hmain := nemytskii_time_mixed_bound (I := I) (M := M) g₀ a hLip hpt hT R hRnn fF fF'
-    hfFball hfF'ball
+  have hmain := nemytskii_time_mixed_bound (I := I) (M := M) g₀ a hLip hsingle R hRnn fF fF'
+    hfR hf'R
   calc ‖nemytskiiMixedForcingMap (I := I) (M := M) g₀ a hLip hT hT1 F -
           nemytskiiMixedForcingMap (I := I) (M := M) g₀ a hLip hT hT1 F'‖
       = ‖nemytskii (I := I) (M := M) hLip fF -
@@ -381,7 +468,7 @@ private theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric 
         refine add_le_add ?_ ?_
         · exact mul_le_mul_of_nonneg_left hfield_dist (mul_nonneg C₁.coe_nonneg hRnn)
         · exact mul_le_mul_of_nonneg_left hincl_dist C₂.coe_nonneg
-    _ = ((C₁ : ℝ) * (1 + T) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
+    _ = ((C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) * ‖F - F'‖ := by
         rw [hR]; ring
 
 private theorem norm_nemytskiiMixedForcingMap_zero_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -408,13 +495,15 @@ theorem quasilinear_maxreg_solution_of_nemytskii
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (hLip : LipschitzWith L Nfun)
-    (hmix : ∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
-      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
-        ‖f‖ ≤ R → ‖f'‖ ≤ R → ∀ᵐ t ∂(timeMeasure T),
-          ‖Nfun (f t) - Nfun (f' t)‖ ≤
-            (C₁ : ℝ) * R * ‖(f - f') t‖ +
-              (C₂ : ℝ) * ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖) :
+    (hmix : ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+      ‖Nfun u - Nfun u'‖ ≤
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
+          * ‖u - u'‖ +
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖) :
     ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
       ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
         (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
@@ -432,13 +521,15 @@ theorem quasilinear_maxreg_solution_of_nemytskii
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   set C₁ := hmix.choose with hC₁def
   set C₂ := hmix.choose_spec.choose with hC₂def
-  have hpt : ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
-      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
-        ‖f‖ ≤ R → ‖f'‖ ≤ R → ∀ᵐ t ∂(timeMeasure T),
-          ‖Nfun (f t) - Nfun (f' t)‖ ≤
-            (C₁ : ℝ) * R * ‖(f - f') t‖ +
-              (C₂ : ℝ) * ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ :=
+  have hsingle : ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
+      ‖Nfun u - Nfun u'‖ ≤
+        (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
+                       ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                          (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u'‖
+          * ‖u - u'‖ +
+        (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖ :=
     hmix.choose_spec.choose_spec
   set M₀ := ‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hM₀def
   have hM₀ : 0 ≤ M₀ := norm_nonneg _
@@ -462,16 +553,22 @@ theorem quasilinear_maxreg_solution_of_nemytskii
   have hT_stay : T ≤ (ρ / (2 * (M₀ + 1))) ^ 2 :=
     le_trans hTT₀ (le_trans (min_le_right _ _) (min_le_right _ _))
 
-  set Λ : ℝ := (C₁ : ℝ) * (1 + T) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T) with hΛdef
+  set Λ : ℝ := (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T) with hΛdef
   have hΛnn : 0 ≤ Λ := by
     rw [hΛdef]; have : (0:ℝ) ≤ 1 + T := by linarith
     positivity
 
   have h1T : (1 : ℝ) + T ≤ 2 := by linarith
-  have harm1 : (C₁ : ℝ) * (1 + T) * ρ * (1 + T) ≤ 1 / 4 := by
-    have hle : (C₁ : ℝ) * (1 + T) * ρ * (1 + T) ≤ (C₁ : ℝ) * 2 * ρ * 2 := by
+  have hsqrt1T_le : Real.sqrt (1 + T) ≤ 1 + T := by
+    have h1le : (1 : ℝ) ≤ 1 + T := by linarith
+    calc Real.sqrt (1 + T) ≤ Real.sqrt ((1 + T) ^ 2) :=
+          Real.sqrt_le_sqrt (by nlinarith [sq_nonneg (1 + T)])
+      _ = 1 + T := Real.sqrt_sq (by linarith)
+  have harm1 : (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) ≤ 1 / 4 := by
+    have hle : (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) ≤ (C₁ : ℝ) * 2 * ρ * 2 := by
       have hc1 : (0:ℝ) ≤ (C₁:ℝ) := C₁.coe_nonneg
       have h0 : (0:ℝ) ≤ 1 + T := by linarith
+      have hsqrt2 : Real.sqrt (1 + T) ≤ 2 := le_trans hsqrt1T_le h1T
       gcongr
     refine le_trans hle ?_
     rw [hρdef]
@@ -513,7 +610,7 @@ theorem quasilinear_maxreg_solution_of_nemytskii
   have hΨ_ball : ∀ (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ‖F‖ ≤ ρ → ‖F'‖ ≤ ρ → ‖Ψ F - Ψ F'‖ ≤ Λ * ‖F - F'‖ := by
     intro F F' hF hF'
-    have h := nemytskiiMixedForcingMap_dist_le (I := I) (M := M) g₀ a hLip hpt
+    have h := nemytskiiMixedForcingMap_dist_le (I := I) (M := M) g₀ a hLip hsingle
       hT hT1 hρpos.le F F' hF hF'
     rw [hΛdef]
     exact h
