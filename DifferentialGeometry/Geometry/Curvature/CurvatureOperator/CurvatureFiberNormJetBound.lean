@@ -83,6 +83,71 @@ private lemma sqrt_riemannianFiberNormSq_le_sub_add
   rw [hsum]
   exact tensorPointwiseNorm_add_le (I := I) (M := M) g r s x _ _
 
+private lemma g1OrthoFrame_parseval_expand
+    (g₁ : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) :
+    u = ∑ a : Fin (Module.finrank ℝ E),
+      g₁.inner x (smoothOrthoFrame (I := I) g₁ x a x) u •
+        (smoothOrthoFrame (I := I) g₁ x a x) := by
+  classical
+  haveI : Nonempty (Fin (Module.finrank ℝ E)) :=
+    ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
+  set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun a => smoothOrthoFrame (I := I) g₁ x a x with he_def
+  have horth : ∀ i j : Fin (Module.finrank ℝ E),
+      g₁.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0 := fun i j =>
+    smoothOrthoFrame_orthonormal_at_center (I := I) g₁ x i j
+  have he_li : LinearIndependent ℝ e := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g₁.inner x (e k) (∑ j ∈ fs, c j • e j) = 0 := by rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g₁.inner x (e k) (c j • e j) = c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g₁.inner x (e k)).map_smul (c j) (e j), smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk; rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ (TangentSpace I x) := by
+    rw [Fintype.card_fin]; rfl
+  set bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
+    basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
+  have hbse_eq : ∀ i, bse i = e i := by
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+  conv_lhs => rw [← bse.sum_repr u]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [hbse_eq a]
+  congr 1
+  have hrepr : g₁.inner x (e a) u =
+      ∑ b : Fin (Module.finrank ℝ E), bse.repr u b * g₁.inner x (e a) (e b) := by
+    conv_lhs => rw [show u = ∑ b : Fin (Module.finrank ℝ E),
+      bse.repr u b • bse b from (bse.sum_repr u).symm]
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [(g₁.inner x (e a)).map_smul (bse.repr u b) (bse b), smul_eq_mul, hbse_eq b]
+  rw [hrepr, Finset.sum_eq_single a]
+  · rw [horth a a, if_pos rfl, mul_one]
+  · intro b _ hba; rw [horth a b, if_neg (fun h => hba h.symm), mul_zero]
+  · intro h; exact absurd (Finset.mem_univ a) h
+
+private lemma invSharpFlat_eq_g1frame_g0sum
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) :
+    inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x u) =
+      ∑ a : Fin (Module.finrank ℝ E),
+        g₀.inner x u (smoothOrthoFrame (I := I) g₁ x a x) •
+          (smoothOrthoFrame (I := I) g₁ x a x) := by
+  classical
+  set Φ : TangentSpace I x :=
+    inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x u) with hΦ
+  rw [g1OrthoFrame_parseval_expand (I := I) (M := M) g₁ x Φ]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  congr 1
+  have hg1 : g₁.inner x (smoothOrthoFrame (I := I) g₁ x a x) Φ =
+      g₀.inner x u (smoothOrthoFrame (I := I) g₁ x a x) := by
+    rw [g₁.symm x (smoothOrthoFrame (I := I) g₁ x a x) Φ, hΦ,
+      inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
+  rw [hg1]
+
+set_option linter.unusedVariables false in
 theorem riemannBiContrFib_fiberComponent_g0frame_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -97,8 +162,84 @@ theorem riemannBiContrFib_fiberComponent_g0frame_eq
         (riemannOp (LeviCivita (I := I) g₁) x (e (J 0))
           (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 0))))
           (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 1)))))
-        (e (J 1)) :=
-  sorry
+        (e (J 1)) := by
+  classical
+  have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)) n e K J =
+      Tensor0SBundle.Tensor0SSpace.toModel
+        ((riemannBiContrFib (I := I) g₁ x) (coframeS (I := I) (M := M) g₀ x 2 e K))
+        (fun k : Fin 2 => ((e (J k) : TangentSpace I x) : E)) := by
+    unfold fiberNormSqComponent coframeS
+    rfl
+  rw [hcomp]
+  rw [show riemannBiContrFib (I := I) g₁ x =
+      riemannBiContrFibFixedFrame (I := I) g₁ (smoothOrthoFrame (I := I) g₁ x) x from rfl]
+  rw [riemannBiContrFibFixedFrame_toModel (I := I) g₁ (smoothOrthoFrame (I := I) g₁ x) x
+    (coframeS (I := I) (M := M) g₀ x 2 e K) (fun k : Fin 2 => ((e (J k) : TangentSpace I x) : E))]
+  have hframe : ∀ (a b : Fin (Module.finrank ℝ E)),
+      (coframeS (I := I) (M := M) g₀ x 2 e K).toModel
+        ![smoothOrthoFrame (I := I) g₁ x a x, smoothOrthoFrame (I := I) g₁ x b x] =
+      g₀.inner x (e (K 0)) (smoothOrthoFrame (I := I) g₁ x a x) *
+        g₀.inner x (e (K 1)) (smoothOrthoFrame (I := I) g₁ x b x) := by
+    intro a b
+    have hcf : (coframeS (I := I) (M := M) g₀ x 2 e K).toModel
+          ![smoothOrthoFrame (I := I) g₁ x a x, smoothOrthoFrame (I := I) g₁ x b x]
+        = ∏ k : Fin 2, g₀.inner x (e (K k))
+            ((![smoothOrthoFrame (I := I) g₁ x a x, smoothOrthoFrame (I := I) g₁ x b x] :
+              Fin 2 → TangentSpace I x) k) :=
+      coframeS_apply (I := I) (M := M) g₀ x 2 e K
+        ![smoothOrthoFrame (I := I) g₁ x a x, smoothOrthoFrame (I := I) g₁ x b x]
+    rw [hcf, Fin.prod_univ_two]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  rw [Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => by
+    rw [hframe a b]))]
+  congr 1
+  have hcollapse :
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))
+            (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x) *
+          (g₀.inner x (e (K 0)) (smoothOrthoFrame (I := I) g₁ x a x) *
+            g₀.inner x (e (K 1)) (smoothOrthoFrame (I := I) g₁ x b x)) =
+      frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))
+        (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 0))))
+        (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 1)))) := by
+    have hP : inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 0))) =
+        ∑ a : Fin (Module.finrank ℝ E),
+          g₀.inner x (e (K 0)) (smoothOrthoFrame (I := I) g₁ x a x) •
+            (smoothOrthoFrame (I := I) g₁ x a x) :=
+      invSharpFlat_eq_g1frame_g0sum (I := I) (M := M) g₀ g₁ x (e (K 0))
+    have hQ : inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 1))) =
+        ∑ b : Fin (Module.finrank ℝ E),
+          g₀.inner x (e (K 1)) (smoothOrthoFrame (I := I) g₁ x b x) •
+            (smoothOrthoFrame (I := I) g₁ x b x) :=
+      invSharpFlat_eq_g1frame_g0sum (I := I) (M := M) g₀ g₁ x (e (K 1))
+    rw [hP, hQ]
+    rw [map_sum (frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))),
+      ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [map_smul (frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))),
+      ContinuousLinearMap.smul_apply,
+      map_sum (frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))
+        (smoothOrthoFrame (I := I) g₁ x a x))]
+    rw [smul_eq_mul, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [map_smul (frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))
+        (smoothOrthoFrame (I := I) g₁ x a x)), smul_eq_mul]
+    ring
+  rw [show (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        g₁.inner x (riemannOp (LeviCivita (I := I) g₁) x (e (J 0))
+            (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)) (e (J 1)) *
+          (g₀.inner x (e (K 0)) (smoothOrthoFrame (I := I) g₁ x a x) *
+            g₀.inner x (e (K 1)) (smoothOrthoFrame (I := I) g₁ x b x))) =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        frameRiemannKernel (I := I) g₁ x (e (J 0)) (e (J 1))
+            (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x) *
+          (g₀.inner x (e (K 0)) (smoothOrthoFrame (I := I) g₁ x a x) *
+            g₀.inner x (e (K 1)) (smoothOrthoFrame (I := I) g₁ x b x)) from by
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    rw [frameRiemannKernel_apply]]
+  rw [hcollapse, frameRiemannKernel_apply]
 
 theorem riemannBiContrFib_diff_fiberNormSq_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
