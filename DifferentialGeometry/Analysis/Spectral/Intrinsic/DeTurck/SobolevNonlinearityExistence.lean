@@ -870,6 +870,296 @@ theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general
     subst hn
     exact hC S
 
+private theorem rawConnLapIter_l2NormSq_eq_tsum
+    (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (S : SmoothCcTensor g₀ 0 2) :
+    ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ^ 2 =
+      ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (2 * t) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (SmoothCcTensor.toL2 S) m) ^ 2 := by
+  classical
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  rw [← tensorParseval_l2Coeff_ofCompact_sq (I := I) (M := M) h_compact
+    (SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S))]
+  refine tsum_congr (fun m => ?_)
+  rw [tensorL2Coeff_ofCompact_rawTensorConnLapIter (I := I) (M := M) g₀ h_compact S m t]
+  set c := tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m with hc_def
+  set L := TensorEigenIdx.lambda (I := I) (M := M) m with hL_def
+  rw [mul_pow, ← pow_mul, mul_comm t 2, (even_two_mul t).neg_pow L]
+
+private theorem exists_spectralModeTsum_le_iteratedCovGrad_sum_sq
+    (g₀ : SmoothRiemannianMetric I M) (j : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g₀ 0 2,
+        ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+          (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+            (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (SmoothCcTensor.toL2 S) m) ^ 2 ≤
+          C * (∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 := by
+  classical
+  rcases Nat.even_or_odd j with ⟨t, ht⟩ | ⟨t, ht⟩
+  · obtain ⟨Cfun, hCfun_nn, hCfun⟩ :=
+      exists_iteratedCovGrad_rawConnLapIter_l2Norm_le (I := I) (M := M) g₀ t 2
+    refine ⟨(Cfun 0) ^ 2, by positivity, fun S => ?_⟩
+    have hj2t : j = 2 * t := by omega
+    have htsum : ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+          (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+            (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (SmoothCcTensor.toL2 S) m) ^ 2 =
+        ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ^ 2 := by
+      rw [rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ t S, hj2t]
+    rw [htsum]
+    have hnorm_le : ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ≤
+        Cfun 0 * ∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖ := by
+      have h := hCfun 0 S
+      rw [iteratedCovGrad_zero (I := I) g₀ 0 2
+        (rawTensorConnLapIter (I := I) g₀ 0 2 t S)] at h
+      rw [SmoothCcTensor.norm_toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)]
+      have hrange : 2 * t + 0 + 1 = j + 1 := by omega
+      rw [hrange] at h
+      exact h
+    have hsum_nn : 0 ≤ ∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖ :=
+      Finset.sum_nonneg (fun a _ => norm_nonneg _)
+    have hnn : 0 ≤ ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ :=
+      norm_nonneg _
+    calc ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ^ 2
+        ≤ (Cfun 0 * ∑ a ∈ Finset.range (j + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 := by
+          apply sq_le_sq'
+          · linarith [mul_nonneg (hCfun_nn 0) hsum_nn]
+          · exact hnorm_le
+      _ = (Cfun 0) ^ 2 * (∑ a ∈ Finset.range (j + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 := by ring
+  · obtain ⟨Cfun, hCfun_nn, hCfun⟩ :=
+      exists_iteratedCovGrad_rawConnLapIter_l2Norm_le (I := I) (M := M) g₀ t 2
+    refine ⟨(Cfun 1) ^ 2, by positivity, fun S => ?_⟩
+    have hj2t : j = 2 * t + 1 := by omega
+    have htsum : ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+          (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+            (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (SmoothCcTensor.toL2 S) m) ^ 2 =
+        ‖covGrad (I := I) (M := M) g₀ 0 2
+            (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ^ 2 := by
+      rw [covGrad_rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ t S, hj2t]
+    rw [htsum]
+    have hnorm_le : ‖covGrad (I := I) (M := M) g₀ 0 2
+          (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ≤
+        Cfun 1 * ∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖ := by
+      have h := hCfun 1 S
+      have hcov : iteratedCovGrad (I := I) g₀ 0 2 1
+            (rawTensorConnLapIter (I := I) g₀ 0 2 t S) =
+          covGrad (I := I) (M := M) g₀ 0 2
+            (rawTensorConnLapIter (I := I) g₀ 0 2 t S) := rfl
+      rw [hcov] at h
+      have hrange : 2 * t + 1 + 1 = j + 1 := by omega
+      rw [hrange] at h
+      exact h
+    have hsum_nn : 0 ≤ ∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖ :=
+      Finset.sum_nonneg (fun a _ => norm_nonneg _)
+    have hnn : 0 ≤ ‖covGrad (I := I) (M := M) g₀ 0 2
+        (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ := norm_nonneg _
+    calc ‖covGrad (I := I) (M := M) g₀ 0 2
+            (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ^ 2
+        ≤ (Cfun 1 * ∑ a ∈ Finset.range (j + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 := by
+          apply sq_le_sq'
+          · linarith [mul_nonneg (hCfun_nn 1) hsum_nn]
+          · exact hnorm_le
+      _ = (Cfun 1) ^ 2 * (∑ a ∈ Finset.range (j + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 := by ring
+
+theorem exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general
+    (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g₀ 0 2,
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ) S‖ ≤
+          C * ∑ j ∈ Finset.range (n + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by
+  classical
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  set Cmode : ℕ → ℝ := fun j =>
+    (exists_spectralModeTsum_le_iteratedCovGrad_sum_sq (I := I) (M := M) g₀ j).choose
+    with hCmode_def
+  have hCmode_nn : ∀ j, 0 ≤ Cmode j := fun j =>
+    (exists_spectralModeTsum_le_iteratedCovGrad_sum_sq (I := I) (M := M) g₀ j).choose_spec.1
+  have hCmode : ∀ j, ∀ S : SmoothCcTensor g₀ 0 2,
+      ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+          (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 ≤
+        Cmode j * (∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 :=
+    fun j => (exists_spectralModeTsum_le_iteratedCovGrad_sum_sq (I := I) (M := M) g₀ j).choose_spec.2
+  set Csum : ℝ := ∑ j ∈ Finset.range (n + 1), Cmode j with hCsum_def
+  have hCsum_nn : 0 ≤ Csum := Finset.sum_nonneg (fun j _ => hCmode_nn j)
+  refine ⟨Real.sqrt ((2 : ℝ) ^ n * Csum), Real.sqrt_nonneg _, fun S => ?_⟩
+  set Sall : ℝ := ∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖
+    with hSall_def
+  have hSall_nn : 0 ≤ Sall := Finset.sum_nonneg (fun j _ => norm_nonneg _)
+  have hembed_eq : smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ) S =
+      ccSpectralEmbed (I := I) (M := M) g₀ (n : ℝ) S :=
+    tensorHs.ext (funext (fun i => rfl))
+  set Nspec : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ (n : ℝ) S‖ with hNspec_def
+  have hNspec_nn : 0 ≤ Nspec := norm_nonneg _
+  have hweight_eq : ∀ m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) m (n : ℝ) =
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ n := by
+    intro m
+    unfold tensorSobolevWeight
+    rw [Real.rpow_natCast]
+  have hsq_tsum : Nspec ^ 2 =
+      ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ n *
+          (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 := by
+    rw [hNspec_def, hembed_eq, ccSpectralEmbed_norm_sq_eq_tsum]
+    exact tsum_congr (fun m => by rw [hweight_eq m])
+  have hmode_summable : ∀ j : ℕ, Summable
+      (fun m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2 =>
+        (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+          (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2) := by
+    intro j
+    have hfull := (ccSpectralEmbed (I := I) (M := M) g₀ (j : ℝ) S).weighted_summable
+    refine Summable.of_nonneg_of_le ?_ ?_ hfull
+    · intro m
+      have hbase_nn : (0 : ℝ) ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      positivity
+    · intro m
+      have hbase_nn : (0 : ℝ) ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      have hbase_le : TensorEigenIdx.lambda (I := I) (M := M) m ≤
+          1 + TensorEigenIdx.lambda (I := I) (M := M) m := by linarith
+      have hweightj : tensorSobolevWeight (I := I) (M := M) m (j : ℝ) =
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ j := by
+        unfold tensorSobolevWeight
+        rw [Real.rpow_natCast]
+      rw [hweightj, ccSpectralEmbed_coeff]
+      exact mul_le_mul_of_nonneg_right
+        (pow_le_pow_left₀ hbase_nn hbase_le j) (sq_nonneg _)
+  have hbinom_summable : Summable
+      (fun m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2 =>
+        (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1),
+          (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+            (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2) := by
+    apply Summable.mul_left
+    exact summable_sum (fun j _ => hmode_summable j)
+  have hlhs_summable : Summable
+      (fun m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2 =>
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ n *
+          (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2) := by
+    have hfull := (ccSpectralEmbed (I := I) (M := M) g₀ (n : ℝ) S).weighted_summable
+    refine (summable_congr (fun m => ?_)).mp hfull
+    rw [hweight_eq m, ccSpectralEmbed_coeff]
+  have hsq_le : Nspec ^ 2 ≤ (2 : ℝ) ^ n * Csum * Sall ^ 2 := by
+    have hstep1 : Nspec ^ 2 ≤
+        ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+          (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1),
+            (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+              (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 := by
+      rw [hsq_tsum]
+      refine Summable.tsum_le_tsum (fun m => ?_) hlhs_summable hbinom_summable
+      · set c := tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m with hc_def
+        set L := TensorEigenIdx.lambda (I := I) (M := M) m with hL_def
+        have hL_nn : 0 ≤ L := tensor_lambda_nonneg (I := I) (M := M) m
+        have hbinom : (1 + L) ^ n ≤ (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1), L ^ j := by
+          rw [add_comm, add_pow, Finset.mul_sum]
+          refine Finset.sum_le_sum (fun p hp => ?_)
+          rw [one_pow, mul_one]
+          have hch : ((n.choose p : ℕ) : ℝ) ≤ (2 : ℝ) ^ n := by
+            have hbnd := Nat.choose_le_two_pow n p
+            calc ((n.choose p : ℕ) : ℝ) ≤ ((2 ^ n : ℕ) : ℝ) := by exact_mod_cast hbnd
+              _ = (2 : ℝ) ^ n := by push_cast; ring
+          calc L ^ p * (n.choose p) ≤ L ^ p * (2 : ℝ) ^ n :=
+                mul_le_mul_of_nonneg_left hch (pow_nonneg hL_nn p)
+            _ = (2 : ℝ) ^ n * L ^ p := by ring
+        have hc2_nn : 0 ≤ c ^ 2 := sq_nonneg c
+        calc (1 + L) ^ n * c ^ 2
+            ≤ ((2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1), L ^ j) * c ^ 2 :=
+              mul_le_mul_of_nonneg_right hbinom hc2_nn
+          _ = (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1), L ^ j * c ^ 2 := by
+              rw [mul_assoc, Finset.sum_mul]
+    have hstep2 : ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+          (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1),
+            (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+              (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 =
+        (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1),
+          ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+            (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+              (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 := by
+      rw [tsum_mul_left]
+      congr 1
+      exact Summable.tsum_finsetSum (fun j _ => hmode_summable j)
+    rw [hstep2] at hstep1
+    refine hstep1.trans ?_
+    have hsum_le : ∑ j ∈ Finset.range (n + 1),
+          ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+            (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+              (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2 ≤
+        Csum * Sall ^ 2 := by
+      have hSmono : ∀ j ∈ Finset.range (n + 1),
+          (∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 ≤ Sall ^ 2 := by
+        intro j hj
+        have hjn : j ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
+        have hsub : ∑ a ∈ Finset.range (j + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖ ≤ Sall := by
+          rw [hSall_def]
+          refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun a _ _ => norm_nonneg _)
+          intro a ha; rw [Finset.mem_range] at ha ⊢; omega
+        have hlow_nn : 0 ≤ ∑ a ∈ Finset.range (j + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖ :=
+          Finset.sum_nonneg (fun a _ => norm_nonneg _)
+        exact pow_le_pow_left₀ hlow_nn hsub 2
+      calc ∑ j ∈ Finset.range (n + 1),
+            ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+                (I := I) (M := M) g₀ 0 2,
+              (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+                (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2
+          ≤ ∑ j ∈ Finset.range (n + 1),
+              Cmode j * (∑ a ∈ Finset.range (j + 1),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 a S‖) ^ 2 :=
+            Finset.sum_le_sum (fun j _ => hCmode j S)
+        _ ≤ ∑ j ∈ Finset.range (n + 1), Cmode j * Sall ^ 2 :=
+            Finset.sum_le_sum (fun j hj =>
+              mul_le_mul_of_nonneg_left (hSmono j hj) (hCmode_nn j))
+        _ = Csum * Sall ^ 2 := by rw [hCsum_def, Finset.sum_mul]
+    calc (2 : ℝ) ^ n * ∑ j ∈ Finset.range (n + 1),
+          ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+            (TensorEigenIdx.lambda (I := I) (M := M) m) ^ j *
+              (tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m) ^ 2
+        ≤ (2 : ℝ) ^ n * (Csum * Sall ^ 2) :=
+          mul_le_mul_of_nonneg_left hsum_le (by positivity)
+      _ = (2 : ℝ) ^ n * Csum * Sall ^ 2 := by ring
+  have hrhs_nn : 0 ≤ Real.sqrt ((2 : ℝ) ^ n * Csum) * Sall :=
+    mul_nonneg (Real.sqrt_nonneg _) hSall_nn
+  have hsqrt_sq : (Real.sqrt ((2 : ℝ) ^ n * Csum) * Sall) ^ 2 =
+      (2 : ℝ) ^ n * Csum * Sall ^ 2 := by
+    rw [mul_pow, Real.sq_sqrt (by positivity)]
+  have hNspec_sq_le : Nspec ^ 2 ≤ (Real.sqrt ((2 : ℝ) ^ n * Csum) * Sall) ^ 2 := by
+    rw [hsqrt_sq]; exact hsq_le
+  have := Real.sqrt_le_sqrt hNspec_sq_le
+  rw [Real.sqrt_sq hNspec_nn, Real.sqrt_sq hrhs_nn] at this
+  calc Nspec ≤ Real.sqrt ((2 : ℝ) ^ n * Csum) * Sall := this
+    _ = Real.sqrt ((2 : ℝ) ^ n * Csum) * ∑ j ∈ Finset.range (n + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by rw [hSall_def]
+
 theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
