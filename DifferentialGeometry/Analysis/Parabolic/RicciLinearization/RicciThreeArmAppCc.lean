@@ -868,6 +868,34 @@ theorem linearizedRicci_arm2FieldLichnerowicz_jointSmooth (g₀ : SmoothRiemanni
   rw [linearizedRicciArm2FieldLichnerowicz, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
+theorem chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ Φ₁ : ℝ → SmoothCcTensor g₀ 3 2,
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+          (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+                (∑ j : Fin (Module.finrank ℝ E),
+                  deriv (fun s' : ℝ =>
+                    chartRiemannTensor (I := I)
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s') x i j k j (extChartAt I x x)) s)) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2
+                  (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2
+                  (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
 theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -894,8 +922,21 @@ theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianM
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  obtain ⟨Φ₁, hΦ₁joint, hident⟩ :=
+    chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ'
+  refine ⟨linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ', Φ₁,
+    linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ',
+    hΦ₁joint, ?_, ?_, hident⟩
+  · intro x
+    exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+      (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ')
+      (realizedSmallSet (δ := δ) (δ' := δ'))
+      (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ') x
+  · intro x
+    exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 3 2 Φ₁
+      (realizedSmallSet (δ := δ) (δ' := δ')) hΦ₁joint x
 
 theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
