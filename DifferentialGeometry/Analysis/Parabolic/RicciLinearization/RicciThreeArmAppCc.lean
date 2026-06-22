@@ -867,6 +867,29 @@ theorem linearizedRicci_arm2FieldLichnerowicz_jointSmooth (g₀ : SmoothRiemanni
   rw [linearizedRicciArm2FieldLichnerowicz, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
+theorem exists_realizedRicci_order1_field_transfer (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ Φ₁ : ℝ → SmoothCcTensor g₀ 3 2,
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+          deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x (v 0) (v 1)) s =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2
+                  (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2
+                  (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
 theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -888,8 +911,16 @@ theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetri
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  obtain ⟨Φ₁, hΦ₁joint, hΦ₁cont, hident⟩ :=
+    exists_realizedRicci_order1_field_transfer (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  refine ⟨linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ', Φ₁,
+    linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ', hΦ₁joint, ?_, hΦ₁cont, hident⟩
+  intro x
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+    (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ')
+    (realizedSmallSet (δ := δ) (δ' := δ'))
+    (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ') x
 
 theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
