@@ -43,6 +43,76 @@ theorem deTurckRicci_solution_with_jointReg
   rw [hcongr]
   exact (hflow t ht x v w).const_add (g₀.inner x v w)
 
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
+open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+
+theorem deTurckRicci_strictlyParabolic_and_mixedLipschitz [I.Boundaryless]
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
+    IsStrictlyParabolicMetricRHS (I := I)
+      (deTurckRicciRHS (I := I) g_bg) g₀ ∧
+    (∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
+      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
+        ‖f‖ ≤ R → ‖f'‖ ≤ R →
+        ‖deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f -
+            deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f'‖ ≤
+          (C₁ : ℝ) * R * ‖f - f'‖ +
+            (C₂ : ℝ) *
+              ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')‖) :=
+  sorry
+
+theorem quasilinear_strictlyParabolic_mixedLipschitz_shortTimeExistence [I.Boundaryless]
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (hP : IsStrictlyParabolicMetricRHS (I := I)
+        (deTurckRicciRHS (I := I) g_bg) g₀ ∧
+      (∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
+        ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
+          ‖f‖ ≤ R → ‖f'‖ ≤ R →
+          ‖deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f -
+              deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f'‖ ≤
+            (C₁ : ℝ) * R * ‖f - f'‖ +
+              (C₂ : ℝ) *
+                ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                    (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')‖)) :
+    ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
+      IsQuasilinearMetricParabolicSolution (I := I)
+        (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+        (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+          : TangentBundle I M))
+        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+        (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+          : TangentBundle I M))
+        (Set.Icc 0 T ×ˢ Set.univ) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun q : ℝ × M =>
+            Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
+              (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
+      (∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
+        ContinuousOn
+          (fun q : ℝ × M => iteratedFDeriv ℝ k
+            (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+            (extChartAt I α q.2))
+          (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) :=
+  sorry
+
 theorem deturck_ricci_flow_parabolic_short_time_existence
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
@@ -78,8 +148,11 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
             (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
             (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := by
-  obtain ⟨T, g_DT, hex, hJ⟩ := deTurckRicci_solution_with_jointReg (I := I) g₀ g_bg
-  exact ⟨T, g_DT, hex,
-    deTurckRicci_chartRegularity_of_jointChartGramSmooth (I := I) g_bg T g_DT hJ⟩
+  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ 2 * Module.finrank ℝ E + 10 := le_refl _
+  have ha_even : Even (2 * Module.finrank ℝ E + 10) := ⟨Module.finrank ℝ E + 5, by ring⟩
+  exact quasilinear_strictlyParabolic_mixedLipschitz_shortTimeExistence (I := I) g₀ g_bg
+    (2 * Module.finrank ℝ E + 10) ha_super ha_even
+    (deTurckRicci_strictlyParabolic_and_mixedLipschitz (I := I) g₀ g_bg
+      (2 * Module.finrank ℝ E + 10) ha_super ha_even)
 
 end DifferentialGeometry.PDE.RicciFlow
