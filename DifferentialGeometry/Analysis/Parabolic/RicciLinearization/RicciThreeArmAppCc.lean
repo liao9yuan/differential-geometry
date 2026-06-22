@@ -27,6 +27,8 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -1080,6 +1082,71 @@ theorem deriv_chartRicciTrace_realizedFam_eq_chartSlope (g₀ : SmoothRiemannian
   exact (hasDerivAt_realizedFam_chartRiemannTensor_chartSlope
     (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j k j hy hmem).deriv
 
+set_option linter.unusedSectionVars false in
+private lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
+    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
+  rw [ccTensorBilin_apply (I := I) g₀ S b u w, ccTensorModel]
+  rw [show ccTensorMultilinear (I := I) g₀ S b =
+      (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from S.toSection b)
+        (unitZeroSec (I := I) (M := M) b) from rfl]
+  rw [unitModel]
+  refine congrArg _ ?_
+  funext k
+  fin_cases k <;> rfl
+
+set_option linter.unusedSectionVars false in
+theorem iteratedCovGrad2_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
+    (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin (2 + 2) → Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 h) x ![] Jdx
+        ((extChartAt I x).symm
+          ((toEuclidean (E := E)).symm (toEuclidean (E := E) (extChartAt I x x)))) =
+      euclidPartial (E := E) (Jdx 0)
+          (fun y' =>
+            euclidPartial (E := E) ((Matrix.vecTail Jdx) 0)
+                (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+                  h x ![] (Matrix.vecTail (Matrix.vecTail Jdx)))) y'
+              + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
+                  ((Matrix.vecTail Jdx) 0) ![]
+                  (Matrix.vecTail (Matrix.vecTail Jdx)) y')
+          (toEuclidean (E := E) (extChartAt I x x))
+        + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3
+            (covGrad (I := I) (M := M) g₀ 0 2 h) x (Jdx 0) ![]
+            (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x)) := by
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hy : toEuclidean (E := E) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hmemsrc
+  exact chartCovariantSecondGrad_chartHessian_sub_correction (I := I) (M := M) g₀ h x
+    ![] Jdx hy
+
+theorem exists_chartSlope_component_threeArm_ccTensorBilin
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ Φ₁ : ℝ → SmoothCcTensor g₀ 3 2,
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (i k : Fin (Module.finrank ℝ E)),
+          chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+              (extChartAt I x x) s =
+            ccTensorBilin (I := I) g₀
+              (appCc (I := I) (M := M) g₀ 2 2
+                  (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2
+                  (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+                ((chartModelBasis E) k) ((chartModelBasis E) i) :=
+  sorry
+
 theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -1102,8 +1169,14 @@ theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
                 + appCc (I := I) (M := M) g₀ 4 2
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-                ![(chartModelBasis E) k, (chartModelBasis E) i] :=
-  sorry
+                ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+  obtain ⟨Φ₁, hΦ₁joint, hcomp⟩ :=
+    exists_chartSlope_component_threeArm_ccTensorBilin (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ'
+  refine ⟨Φ₁, hΦ₁joint, fun s hs x i k => ?_⟩
+  rw [hcomp s hs x i k,
+    ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ _ x
+      ((chartModelBasis E) k) ((chartModelBasis E) i)]
 
 theorem exists_chartRicciTraceDeriv_threeArm_covariant_component
     (g₀ : SmoothRiemannianMetric I M)
