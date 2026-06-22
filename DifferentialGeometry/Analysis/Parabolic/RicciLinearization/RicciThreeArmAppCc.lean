@@ -1097,6 +1097,61 @@ private lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I 
   fin_cases k <;> rfl
 
 set_option linter.unusedSectionVars false in
+theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMetric I M)
+    (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M)
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g s W x (fun k => chartModelBasis E (Jdx k)) =
+      tensorChartComponentRaw (I := I) (M := M) g 0 s W x ![] Jdx x := by
+  rw [tensorChartComponentRaw_def, tensorChartComponentProjection_apply]
+  unfold tensorTrivProj
+  rw [DifferentialGeometry.Tensor.tensorRS_trivAt_continuousLinearMapAt_apply_eq_self_on_locality
+        (I := I) (M := M) 0 s x (b := x) rfl (mem_chart_source H x)
+        (W.toSection x) (dualCovariantCMM (E := E) 0 ![])]
+  unfold unitModel
+  congr 2
+
+set_option linter.unusedSectionVars false in
+theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g 0 2) (x : M) (k i : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g 2 W x ![chartModelBasis E k, chartModelBasis E i] =
+      tensorChartComponentRaw (I := I) (M := M) g 0 2 W x ![] ![k, i] x := by
+  have h := unitModel_basisChart_eq_tensorChartComponentRaw (I := I) (M := M) g 2 W x ![k, i]
+  have hfun : (fun j : Fin 2 => chartModelBasis E (![k, i] j)) =
+      ![chartModelBasis E k, chartModelBasis E i] := by
+    funext j; fin_cases j <;> rfl
+  rwa [hfun] at h
+
+set_option linter.unusedSectionVars false in
+theorem unitModel_basisChart_eq_tensorChartComponent4 (g : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g 0 4) (x : M) (Jdx : Fin 4 → Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g 4 W x
+        ![chartModelBasis E (Jdx 0), chartModelBasis E (Jdx 1),
+          chartModelBasis E (Jdx 2), chartModelBasis E (Jdx 3)] =
+      tensorChartComponentRaw (I := I) (M := M) g 0 4 W x ![] Jdx x := by
+  have h := unitModel_basisChart_eq_tensorChartComponentRaw (I := I) (M := M) g 4 W x Jdx
+  have hfun : (fun j : Fin 4 => chartModelBasis E (Jdx j)) =
+      ![chartModelBasis E (Jdx 0), chartModelBasis E (Jdx 1),
+        chartModelBasis E (Jdx 2), chartModelBasis E (Jdx 3)] := by
+    funext j; fin_cases j <;> rfl
+  rwa [hfun] at h
+
+set_option linter.unusedSectionVars false in
+theorem cometricLmodel_covectorOfCLM_inner (g₁ : SmoothRiemannianMetric I M) (y : M)
+    (φ : E →L[ℝ] ℝ) (u : TangentSpace I y) :
+    g₁.inner y (cometricLmodel (I := I) g₁ y
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) u = φ (u : E) := by
+  have h1 : cometricLmodel (I := I) g₁ y
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ) =
+      inverseMetricSharpFib (I := I) g₁ y
+        ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) := rfl
+  rw [h1, inverseMetricSharpFib_inner (I := I) g₁ y _ u, cotangentToDualLinear_apply,
+    cotangentToDual_apply]
+  change (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)
+      (fun _ : Fin 1 => (u : E)) = φ (u : E)
+  rw [Tensor0SBundle.model_covectorOfCLM_apply]
+
+set_option linter.unusedSectionVars false in
 theorem iteratedCovGrad2_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
     (h : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin (2 + 2) → Fin (Module.finrank ℝ E)) :
