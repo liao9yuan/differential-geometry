@@ -67,11 +67,11 @@ theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
 
 theorem realizedDeTurck_timeRegular_family
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -104,7 +104,7 @@ theorem realizedDeTurck_timeRegular_family
   
   
   obtain ⟨T₁, hT₁_pos, hT₁_le, F, δ, hδ_lt, hδ, hF_zero, hF_pin_icc, hF_flow, hF_joint⟩ :=
-    maxreg_solution_jointly_smooth_representative (I := I) (M := M) g₀ g_bg a ha_super ha_even
+    maxreg_solution_jointly_smooth_representative (I := I) (M := M) g₀ g_bg a ha_super
       ha_eq hT hT1 hTT₀ u gforce hduh hforce htrace
   refine ⟨T₁, hT₁_pos, hT₁_le, F, δ, hδ_lt, hδ, hF_zero, ?_, hF_flow, hF_joint⟩
   intro t ht
@@ -135,13 +135,12 @@ theorem realizedDeTurckFamily_exists
   set a : ℕ := 2 * Module.finrank ℝ E + 10 with ha_def
   have ha_super : 2 * Module.finrank ℝ E + 10 ≤ a := by rw [ha_def]
   have ha_eq : a = 2 * Module.finrank ℝ E + 10 := ha_def
-  have ha_even : Even a := by rw [ha_def]; exact ⟨Module.finrank ℝ E + 5, by ring⟩
   
   
   set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution
-    (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose with hT₀_def
+    (I := I) (M := M) g₀ g_bg a ha_super).choose with hT₀_def
   obtain ⟨hT₀_pos, hsol⟩ :=
-    (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose_spec
+    (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
   set T : ℝ := min T₀ 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀_pos one_pos
   have hT_le₀ : T ≤ T₀ := min_le_left _ _
@@ -151,7 +150,7 @@ theorem realizedDeTurckFamily_exists
   
   
   obtain ⟨T₁, hT₁_pos, _hT₁_le, T_rep, δ, hδ_lt, hδ, hrep_zero, _htrep_pin, hflow, hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_even ha_eq hT_pos hT_le1
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_eq hT_pos hT_le1
       hT_le₀ u gforce hduh hforce htrace
   
   

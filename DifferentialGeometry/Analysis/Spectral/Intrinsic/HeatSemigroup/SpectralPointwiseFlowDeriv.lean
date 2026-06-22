@@ -127,7 +127,7 @@ theorem norm_smoothCcToTensorHs_eigenSmooth (g : SmoothRiemannianMetric I M) (σ
       tensorL2Coeff_ofCompact_eigenSmooth (I := I) (M := M) g j i]
   rw [heq, norm_tensorHsBasisVec (I := I) (M := M) i]
 
-theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ) (hm_even : Even m)
+theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ)
     (h_lossy : 2 * Module.finrank ℝ E + 4 ≤ m)
     (x : M) (v w : TangentSpace I x) :
     ∃ C : ℝ, 0 < C ∧ ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
@@ -135,7 +135,7 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ) (hm_e
         C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by
   obtain ⟨C, hC_pos, hC⟩ :=
-    ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g m hm_even h_lossy
+    ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g m h_lossy
   refine ⟨C, hC_pos, fun i => ?_⟩
   have hb := hC (eigenSmooth (I := I) (M := M) g i) x v w
   rw [norm_smoothCcToTensorHs_eigenSmooth (I := I) (M := M) g (m : ℝ) i] at hb
