@@ -169,10 +169,10 @@ summability); its body is `sorry`-free and consumers transitively depend only on
 `sorryAx`. -/
 private theorem forcingSmoothTimeCoords
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -192,7 +192,7 @@ private theorem forcingSmoothTimeCoords
       (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i, (F t).coeff i = f i t) := by
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
-    deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
+    deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super hT hT1
       hTT₀ gforce hforce
   exact ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩
 
@@ -219,10 +219,10 @@ representative by the smooth `f`.  PINNED to the solution by `hduh`/`hforce`/`ht
 (`htrace` is part of the frozen consumer interface and is not consumed by this glue). -/
 private theorem forcingSmoothCoordsRealize
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -251,7 +251,7 @@ private theorem forcingSmoothCoordsRealize
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i) := by
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
-    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 hTT₀ gforce hforce
+    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
   have hforce_coord : ∀ i, (fun t => (gforce t).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i := by
     intro i
@@ -389,10 +389,10 @@ horizon `realizedSol_solField_smallnessHorizon_Ha2`); consumers transitively dep
 `sorryAx`. -/
 private theorem realizedForcingCoord_eq_smoothN
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
     {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -543,11 +543,11 @@ private theorem realizedForcingCoord_eq_smoothN
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i = RHS t := by
     intro t ht
     rw [hRHS_smoothN t,
-      deTurckSobolevNHa2_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super ha_even (F t)
+      deTurckSobolevNHa2_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super (F t)
         hδ_lt (hδ t) (hball t ht)]
-  -- RHS continuity on `Ico 0 T₁`: via the field continuity and the `deTurckSobolevNHa2`
-  -- Lipschitz, read off through the continuous coordinate functional `coeffCLM`.
-  obtain ⟨KN, hKN⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super ha_even
+  
+  
+  obtain ⟨KN, hKN⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
   have hRHS_cont : ContinuousOn RHS (Set.Ico (0 : ℝ) T₁) := by
     have hcomp : ContinuousOn
         (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -685,10 +685,10 @@ is `realizedForcingCoord_eq_smoothN` (the pointwise a.e.→everywhere forcing-co
 upgrade, honest `sorry`); consumers transitively depend on its `sorryAx`. -/
 private theorem realizedFamily_flowDeriv
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
     {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -791,7 +791,7 @@ private theorem realizedFamily_flowDeriv
       exact h
 
   have hforcing := realizedForcingCoord_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
-    ha_even hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
+    hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
     F hδ_lt hδ f hf_id hf_smooth hf_mass hforce_coord h_pin hball
   
   have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by omega
@@ -807,7 +807,7 @@ private theorem realizedFamily_flowDeriv
   -- The fixed per-mode scalar `ψ i = ccTensorBilinSymm g₀ (eigenSmooth i) x v w` and its
   -- spectral-`a` Sobolev-weight bound.
   obtain ⟨C, hC_pos, hC_bd⟩ :=
-    abs_eigenBilinScalar_le (I := I) (M := M) g₀ a ha_even ha_lossy x v w
+    abs_eigenBilinScalar_le (I := I) (M := M) g₀ a ha_lossy x v w
   set K : ℝ := Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) with hK_def
   have hK_nn : 0 ≤ K := mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   -- The per-mode scalar bound: `|ψ i| ≤ (C·K) · √(weight i a)`.
@@ -1148,10 +1148,10 @@ regularity / Ladyzhenskaya–Solonnikov–Uraltseva); consumers transitively dep
 those inputs' `sorryAx`. -/
 private theorem realizedSol_solField_smallnessHorizon_Ha2
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -1174,7 +1174,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2
   
   
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, _⟩ :=
-    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 hTT₀ u gforce
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
       hduh hforce htrace
 
   obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 ((a : ℝ) + 2) (by positivity)
@@ -1225,11 +1225,11 @@ depend on those inputs' `sorryAx`.
 consumed by this decomposition glue.) -/
 theorem maxreg_solution_jointly_smooth_representative
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -1264,7 +1264,7 @@ theorem maxreg_solution_jointly_smooth_representative
   have hu0 : timeH1.toFun u 0 = 0 := by rw [timeH1.toFun_zero, hinit]
   
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
-    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 hTT₀ u gforce
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
       hduh hforce htrace
 
   set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
@@ -1357,10 +1357,10 @@ theorem maxreg_solution_jointly_smooth_representative
     intro t ht
     simp only [hFdef_def, dif_pos ht]
     exact hF₀ t ht
-  -- Short-time fibre smallness about the zero initial datum.
-  have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by rw [ha_eq]; omega
+  
+  have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by omega
   obtain ⟨C, hC_pos, hC⟩ :=
-    ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g₀ a ha_even ha_lossy
+    ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g₀ a ha_lossy
   have hcontU : ContinuousOn (timeH1.toFun u) (Set.Icc (0 : ℝ) T) :=
     timeH1.continuousOn_toFun u
   have hwithin : ContinuousWithinAt (timeH1.toFun u) (Set.Icc (0 : ℝ) T) 0 :=
@@ -1375,7 +1375,7 @@ theorem maxreg_solution_jointly_smooth_representative
       (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
   -- The order-`(a+2)` smallness horizon `d₂` (deep parabolic input).
   obtain ⟨d₂, hd₂_pos, hd₂_le, hd₂⟩ :=
-    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
+    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hT hT1
       hTT₀ u gforce hduh hforce htrace hR₀_pos
   set T₁ : ℝ := min (min (min T (d / 2)) d₂) d₂F with hT₁_def
   have hT₁_pos : 0 < T₁ := lt_min (lt_min (lt_min hT (by positivity)) hd₂_pos) hd₂F_pos
@@ -1487,7 +1487,7 @@ theorem maxreg_solution_jointly_smooth_representative
     have ht_icc₁ : t ∈ Set.Icc (0 : ℝ) T₁ := ⟨ht.1, ht.2.le⟩
     exact hd₂ t ht_d2 (F t) (hF_pin t ht_icc₁)
   
-  have hF_flow := realizedFamily_flowDeriv (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 hTT₀
+  have hF_flow := realizedFamily_flowDeriv (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀
     hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace F hδ_lt hF_small hF_zero
     hF_pin hF_cont hball f hf_smooth hf_mass hf_id hforce_coord
 

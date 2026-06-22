@@ -177,10 +177,10 @@ majorant pass straight through.  Consumers transitively depend on the `sorryAx` 
 deep leaf. -/
 theorem deTurckForcing_smoothTimeCoordinateField
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -199,7 +199,7 @@ theorem deTurckForcing_smoothTimeCoordinateField
       (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i, (F t).coeff i = f i t) := by
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, hf_smooth, hf_mass, hf_ae⟩ :=
-    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
+    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super hT hT1
       hTT₀ gforce hforce
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -238,10 +238,10 @@ theorem deTurckForcing_smoothTimeCoordinateField
 
 theorem deTurckForcing_smoothTimeCoordinateFamily
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
@@ -260,7 +260,7 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
       (∀ i, ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) d₂)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i, (F t).coeff i = f i t) := by
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coeff⟩ :=
-    deTurckForcing_smoothTimeCoordinateField (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
+    deTurckForcing_smoothTimeCoordinateField (I := I) (M := M) g₀ g_bg a ha_super hT hT1
       hTT₀ gforce hforce
   have hF_coord_cont : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
       ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) d₂) := by

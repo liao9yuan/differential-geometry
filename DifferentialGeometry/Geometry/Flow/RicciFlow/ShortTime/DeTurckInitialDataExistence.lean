@@ -91,14 +91,14 @@ open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 
 theorem deTurckRicci_strictlyParabolic_and_mixedLipschitz [I.Boundaryless]
     (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     IsStrictlyParabolicMetricRHS (I := I)
       (deTurckRicciRHS (I := I) g_bg) g₀ ∧
     (∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
       ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
         ‖f‖ ≤ R → ‖f'‖ ≤ R →
-        ‖deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f -
-            deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f'‖ ≤
+        ‖deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super f -
+            deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super f'‖ ≤
           (C₁ : ℝ) * R * ‖f - f'‖ +
             (C₂ : ℝ) *
               ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -107,14 +107,14 @@ theorem deTurckRicci_strictlyParabolic_and_mixedLipschitz [I.Boundaryless]
 
 theorem quasilinear_strictlyParabolic_mixedLipschitz_shortTimeExistence [I.Boundaryless]
     (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (hP : IsStrictlyParabolicMetricRHS (I := I)
         (deTurckRicciRHS (I := I) g_bg) g₀ ∧
       (∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
         ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
           ‖f‖ ≤ R → ‖f'‖ ≤ R →
-          ‖deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f -
-              deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f'‖ ≤
+          ‖deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super f -
+              deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super f'‖ ≤
             (C₁ : ℝ) * R * ‖f - f'‖ +
               (C₂ : ℝ) *
                 ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -190,10 +190,9 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
             (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := by
   have ha_super : 2 * Module.finrank ℝ E + 10 ≤ 2 * Module.finrank ℝ E + 10 := le_refl _
-  have ha_even : Even (2 * Module.finrank ℝ E + 10) := ⟨Module.finrank ℝ E + 5, by ring⟩
   exact quasilinear_strictlyParabolic_mixedLipschitz_shortTimeExistence (I := I) g₀ g_bg
-    (2 * Module.finrank ℝ E + 10) ha_super ha_even
+    (2 * Module.finrank ℝ E + 10) ha_super
     (deTurckRicci_strictlyParabolic_and_mixedLipschitz (I := I) g₀ g_bg
-      (2 * Module.finrank ℝ E + 10) ha_super ha_even)
+      (2 * Module.finrank ℝ E + 10) ha_super)
 
 end DifferentialGeometry.PDE.RicciFlow
