@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamLinearizedChristoffel
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.SecondCovGradChartHessian
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
@@ -1122,6 +1123,66 @@ theorem iteratedCovGrad2_chartComponent_readout (g₀ : SmoothRiemannianMetric I
   exact chartCovariantSecondGrad_chartHessian_sub_correction (I := I) (M := M) g₀ h x
     ![] Jdx hy
 
+set_option linter.unusedSectionVars false in
+private lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
+      (0 : SmoothCcTensor g 0 s) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCc_toSection]
+  rw [show ((0 : SmoothCcTensor g r s).toSection x : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) =
+      (0 : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) from rfl]
+  rw [ContinuousLinearMap.zero_comp]
+  rw [show ((0 : SmoothCcTensor g 0 s).toSection x : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) =
+      (0 : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) from rfl]
+
+set_option linter.unusedSectionVars false in
+private lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
+    {δ δ' : ℝ} :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
+      (fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) (δ := δ) (δ' := δ') := by
+  rw [linearizedRicciThreeArmHjoint]
+  have heq : (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+        (((fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) p.2).toSection p.1)) =
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+          (0 : Tensor0SBundle.TensorRSSpace 3 2 I p.1)) := by
+    funext p
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1 t) ?_
+    rw [show ((0 : SmoothCcTensor g₀ 3 2).toSection : ContMDiffSection I _ ∞ _) = 0 from rfl]
+    rfl
+  rw [heq]
+  have hzero : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+      (Bundle.zeroSection (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z)) :=
+    Bundle.contMDiff_zeroSection ℝ (fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z)
+  exact (hzero.comp contMDiff_fst).contMDiffOn
+
+theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+        (extChartAt I x x) s =
+      ccTensorBilin (I := I) g₀
+        (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+          ((chartModelBasis E) k) ((chartModelBasis E) i) :=
+  sorry
+
 theorem exists_chartSlope_component_threeArm_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -1144,8 +1205,31 @@ theorem exists_chartSlope_component_threeArm_ccTensorBilin
                 + appCc (I := I) (M := M) g₀ 4 2
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-                ((chartModelBasis E) k) ((chartModelBasis E) i) :=
-  sorry
+                ((chartModelBasis E) k) ((chartModelBasis E) i) := by
+  classical
+  refine ⟨fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2),
+    linearizedRicciThreeArmHjoint_zero (I := I) (M := M) g₀, fun s hs x i k => ?_⟩
+  rw [chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s hs x i k]
+  have hzero : appCc (I := I) (M := M) g₀ 3 2 (0 : SmoothCcTensor g₀ 3 2)
+      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) = (0 : SmoothCcTensor g₀ 0 2) :=
+    appCc_zero_left_local (I := I) (M := M) g₀ 3 2 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+  rw [hzero]
+  have hcollapse : (appCc (I := I) (M := M) g₀ 2 2
+        (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+      + (0 : SmoothCcTensor g₀ 0 2)
+      + appCc (I := I) (M := M) g₀ 4 2
+        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) =
+      (appCc (I := I) (M := M) g₀ 2 2
+        (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+      + appCc (I := I) (M := M) g₀ 4 2
+        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) := by
+    rw [add_zero]
+  rw [hcollapse]
 
 theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
     (g₀ : SmoothRiemannianMetric I M)
