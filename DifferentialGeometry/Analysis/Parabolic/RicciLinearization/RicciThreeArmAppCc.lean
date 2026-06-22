@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
 
 noncomputable section
@@ -867,6 +868,35 @@ theorem linearizedRicci_arm2FieldLichnerowicz_jointSmooth (g₀ : SmoothRiemanni
   rw [linearizedRicciArm2FieldLichnerowicz, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
+theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2),
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀ (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 2 Φ₀ (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+          (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+              ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+                (∑ j : Fin (Module.finrank ℝ E),
+                  deriv (fun s' : ℝ =>
+                    chartRiemannTensor (I := I)
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s') x i j k j (extChartAt I x x)) s)) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2
+                  (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
 theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -888,8 +918,13 @@ theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetri
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  obtain ⟨Φ₀, Φ₁, hΦ₀joint, hΦ₁joint, hΦ₀cont, hΦ₁cont, hident⟩ :=
+    chartRiemannTraceDeriv_threeArm_appCc_transfer (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  refine ⟨Φ₀, Φ₁, hΦ₀joint, hΦ₁joint, hΦ₀cont, hΦ₁cont, fun s hs x v => ?_⟩
+  rw [(DifferentialGeometry.PDE.DeTurck.RicciLinearization.hasDerivAt_realizedRicciChartSum_general
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) hs).deriv]
+  exact hident s hs x v
 
 theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
