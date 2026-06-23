@@ -3902,6 +3902,16 @@ private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : �
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
 set_option linter.unusedSectionVars false in
+
+theorem iteratedCovGrad_symmS_eq (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
+    iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T) =
+      (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k T +
+        (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) := by
+  rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
+
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 /-- The operator-field action is `ℝ`-homogeneous in the operator-field factor:
 `appCc (c • Φ) W = c • appCc Φ W`.  Mirrors `appCc_add_left`. -/
