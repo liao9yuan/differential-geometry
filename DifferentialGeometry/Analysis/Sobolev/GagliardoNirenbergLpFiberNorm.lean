@@ -3151,22 +3151,8 @@ private theorem rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame
   rw [pow_two]
 
 set_option maxHeartbeats 1600000 in
-/-- **The forward frame-sum reconstruction of the fibre norm of a covariant-gradient bundle image
-(general valence `r`).** The general-`r` analogue of
-`Integral.Connection.riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame` (contravariant `0` only):
-for a `g_x`-orthonormal frame `e` (δ-form Gram, `n = finrank ℝ E` directions), the intrinsic
-`(r, s + 1)` fibre norm of `covGradBundleEquiv r s x Φ` is the frame-sum, over the slot-`0` direction,
-of the per-direction fibre norms `Φ (e a)`:
-```
-rfns(covGradBundleEquiv r s x Φ)(x) = ∑ a, rfns(Φ (e a))(x).
-```
-Both fibre norms are Parseval-expanded in `e` (`rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame`);
-the slot-`0` evaluation bridge `covGradBundleEquiv_symm_apply_eval` (already general-`r`, packaged in
-`reading_fiberNormSqComponent_eq`) identifies the `(K, Fin.cons a J)`-component of the bundle image
-with the `(K, J)`-component of `Φ (e a) = (covGradBundleEquiv r s x).symm (covGradBundleEquiv r s x Φ)
-(e a)`, and the `(a, J) ↦ Fin.cons a J` re-indexing (`Fin.consEquiv`) reassembles the full
-multi-index sum. -/
-private theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
+
+theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -3238,8 +3224,50 @@ private theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
   conv_rhs => rw [Finset.sum_comm]
   exact (Finset.sum_congr rfl (fun K _ => hperK K)).symm
 
-/-- `Matrix.vecTail (Fin.cons a v) = v` (inline mirror of the private helper in
-`HomFieldCurvatureJetDecomposition`). -/
+theorem riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x) (b : ℝ)
+    (hbound : ∀ v : TangentSpace I x, g.inner x v v = 1 →
+      riemannianFiberNormSq (I := I) (M := M) g r s x (Φ v) ≤ b) :
+    riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+        (Tensor0SBundle.covGradBundleEquiv (I := I) (M := M) r s x Φ) ≤
+      (Module.finrank ℝ E : ℝ) * b := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _
+    with heob_def
+  set e : Fin n → TangentSpace I x := fun i => eob i with he_def
+  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
+    fun u v => rfl
+  have horth : ∀ a c : Fin n, g.inner x (e a) (e c) = if a = c then (1 : ℝ) else 0 := by
+    intro a c
+    have horthb : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
+    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horthb a c
+    rw [he_def, ← hinner_eq (eob a) (eob c)]
+    exact hite
+  have hfr : Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E := rfl
+  have hn : n = Module.finrank ℝ E := by rw [hn_def, hfr]
+  rw [riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs (I := I) (M := M) g r s x Φ e hn
+    horth]
+  have hper : ∀ a : Fin n,
+      riemannianFiberNormSq (I := I) (M := M) g r s x (Φ (e a)) ≤ b := by
+    intro a
+    refine hbound (e a) ?_
+    have := horth a a; rwa [if_pos rfl] at this
+  refine le_trans (Finset.sum_le_sum (fun a _ => hper a)) ?_
+  rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  rw [hn_def, hfr]
+
 private lemma vecTail_cons_rs {nn : ℕ} {α : Type*} (a : α) (v : Fin nn → α) :
     Matrix.vecTail (Fin.cons a v) = v := by
   funext j
