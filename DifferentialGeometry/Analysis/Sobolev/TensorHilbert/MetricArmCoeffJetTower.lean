@@ -1000,6 +1000,249 @@ theorem covGrad_gInvDiffSlotCoeff_endoCov_apply
                 ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v)).toLinearMap) :=
   endoCov_gInvDiffRaisedField_apply (I := I) (M := M) g₀ g₁ Y x v
 
+set_option linter.unusedSectionVars false in
+private lemma tensor0SOne_apply_add_comp (x : M) (om : Tensor0SSpace 1 I x)
+    (a b : TangentSpace I x) :
+    om (fun _ : Fin 1 => a + b) = om (fun _ : Fin 1 => a) + om (fun _ : Fin 1 => b) := by
+  let φ := continuousMultilinearCurryFin1 ℝ (TangentSpace I x) ℝ
+    (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+  have ha : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ : Fin 1 => a) = φ a := by rw [continuousMultilinearCurryFin1_apply]; rfl
+  have hb : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ : Fin 1 => b) = φ b := by rw [continuousMultilinearCurryFin1_apply]; rfl
+  have hab : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ : Fin 1 => a + b) = φ (a + b) := by rw [continuousMultilinearCurryFin1_apply]; rfl
+  change (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ => a + b) = _
+  rw [hab, ha, hb, map_add]
+
+set_option linter.unusedSectionVars false in
+private lemma tensor0SOne_apply_smul_comp (x : M) (om : Tensor0SSpace 1 I x)
+    (c : ℝ) (a : TangentSpace I x) :
+    om (fun _ : Fin 1 => c • a) = c • om (fun _ : Fin 1 => a) := by
+  let φ := continuousMultilinearCurryFin1 ℝ (TangentSpace I x) ℝ
+    (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+  have ha : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ : Fin 1 => a) = φ a := by rw [continuousMultilinearCurryFin1_apply]; rfl
+  have hca : (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ : Fin 1 => c • a) = φ (c • a) := by rw [continuousMultilinearCurryFin1_apply]; rfl
+  change (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)
+      (fun _ => c • a) = _
+  rw [hca, ha, map_smul]
+
+set_option linter.unusedSectionVars false in
+private lemma tensor0SOne_apply_neg_comp (x : M) (om : Tensor0SSpace 1 I x)
+    (a : TangentSpace I x) :
+    om (fun _ : Fin 1 => -a) = -om (fun _ : Fin 1 => a) := by
+  have h := tensor0SOne_apply_smul_comp (I := I) x om (-1) a
+  simp only [neg_smul, one_smul] at h
+  exact h
+
+set_option backward.isDefEq.respectTransparency true in
+def gInvCompPairing (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) : Tensor0SSpace 2 I x :=
+  (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
+    { toFun := fun YZ => om (fun _ : Fin 1 =>
+        PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (gInvRaisedEndo (I := I) g₀ g₁ x (YZ 0)) (YZ 1))
+      map_update_add' := by
+        have hne10 : (1 : Fin 2) ≠ 0 := by decide
+        have hne01 : (0 : Fin 2) ≠ 1 := by decide
+        intro _ YZ i Y Y'
+        fin_cases i <;>
+          · simp only [Fin.isValue, Fin.mk_zero, Fin.mk_one, Function.update_self,
+              Function.update_of_ne, ne_eq, hne10, hne01, not_false_eq_true,
+              ContinuousLinearMap.add_apply, map_add]
+            rw [tensor0SOne_apply_add_comp (I := I) x om]
+      map_update_smul' := by
+        have hne10 : (1 : Fin 2) ≠ 0 := by decide
+        have hne01 : (0 : Fin 2) ≠ 1 := by decide
+        intro _ YZ i c Y
+        fin_cases i <;>
+          · simp only [Fin.isValue, Fin.mk_zero, Fin.mk_one, Function.update_self,
+              Function.update_of_ne, ne_eq, hne10, hne01, not_false_eq_true,
+              ContinuousLinearMap.smul_apply, map_smul]
+            rw [tensor0SOne_apply_smul_comp (I := I) x om]
+      cont := by
+        have hpair : Continuous (fun YZ : Fin 2 → TangentSpace I x => (YZ 0, YZ 1)) :=
+          (continuous_apply 0).prodMk (continuous_apply 1)
+        have hRaised : Continuous (gInvRaisedEndo (I := I) g₀ g₁ x) :=
+          (gInvRaisedEndo (I := I) g₀ g₁ x).continuous
+        have hbil : Continuous (fun YZ : Fin 2 → TangentSpace I x =>
+            PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+              (gInvRaisedEndo (I := I) g₀ g₁ x (YZ 0)) (YZ 1)) := by
+          have hc : Continuous (fun p : TangentSpace I x × TangentSpace I x =>
+              PDE.DeTurck.connDiff (I := I) g₁ g₀ x p.1 p.2) :=
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x).continuous₂
+          have hcomp : Continuous (fun YZ : Fin 2 → TangentSpace I x =>
+              (gInvRaisedEndo (I := I) g₀ g₁ x (YZ 0), YZ 1)) :=
+            (hRaised.comp (continuous_apply 0)).prodMk (continuous_apply 1)
+          exact hc.comp hcomp
+        exact ((ContinuousMultilinearMap.coe_continuous
+          (om : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => TangentSpace I x) ℝ)).comp
+          (continuous_pi (fun _ => hbil))) } : Tensor0SSpace 2 I x)
+
+set_option linter.unusedSectionVars false in
+@[simp] lemma gInvCompPairing_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
+    (gInvCompPairing (I := I) g₀ g₁ x om) YZ =
+      om (fun _ : Fin 1 =>
+        PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (gInvRaisedEndo (I := I) g₀ g₁ x (YZ 0)) (YZ 1)) := rfl
+
+set_option linter.unusedSectionVars false in
+lemma gInvCompPairing_add (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om om' : Tensor0SSpace 1 I x) :
+    gInvCompPairing (I := I) g₀ g₁ x (om + om') =
+      gInvCompPairing (I := I) g₀ g₁ x om + gInvCompPairing (I := I) g₀ g₁ x om' := by
+  apply ContinuousMultilinearMap.ext
+  intro YZ
+  exact ContinuousMultilinearMap.add_apply om om' _
+
+set_option linter.unusedSectionVars false in
+lemma gInvCompPairing_smul (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (c : ℝ) (om : Tensor0SSpace 1 I x) :
+    gInvCompPairing (I := I) g₀ g₁ x (c • om) =
+      c • gInvCompPairing (I := I) g₀ g₁ x om := by
+  apply ContinuousMultilinearMap.ext
+  intro YZ
+  exact ContinuousMultilinearMap.smul_apply om c _
+
+def connDiffGInvCompositeFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    TensorRSSpace 1 2 I x :=
+  TensorRSSpace.ofCLM
+    (LinearMap.toContinuousLinearMap
+      { toFun := fun om => gInvCompPairing (I := I) g₀ g₁ x om
+        map_add' := gInvCompPairing_add (I := I) g₀ g₁ x
+        map_smul' := gInvCompPairing_smul (I := I) g₀ g₁ x })
+
+set_option linter.unusedSectionVars false in
+@[simp] lemma connDiffGInvCompositeFib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) :
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+        connDiffGInvCompositeFib (I := I) g₀ g₁ x) om =
+      gInvCompPairing (I := I) g₀ g₁ x om := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem gInvRaisedEndo_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+        (gInvRaisedEndo (I := I) g₀ g₁ b (Y b))) := by
+  refine (inverseMetricSharpFib_g0FlatY_contMDiff (I := I) g₀ g₁ Y).congr (fun b => ?_)
+  rw [gInvRaisedEndo_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+theorem connDiffGInvCompositeFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 1 2 I z) x
+        (connDiffGInvCompositeFib (I := I) g₀ g₁ x)) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
+    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
+    (φ := fun x : M => (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+      connDiffGInvCompositeFib (I := I) g₀ g₁ x))
+  intro om
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+  have hsec : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        (gInvCompPairing (I := I) g₀ g₁ x (om x))) := by
+    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x : M => (gInvCompPairing (I := I) g₀ g₁ x (om x) :
+        Bundle.continuousMultilinearMap ℝ 2 E (TangentSpace I) x))).mpr ?_
+    intro σ x₀
+    set b := Module.finBasis ℝ E with hb
+    set e₁ := trivializationAt E (TangentSpace I : M → Type _) x₀ with he₁def
+    have he₁ : x₀ ∈ e₁.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x₀
+    have hframe := e₁.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) b
+    obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
+    have hconn : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+          (((PDE.DeTurck.connDiff (I := I) g₁ g₀ x)
+            (gInvRaisedEndo (I := I) g₀ g₁ x (Y (σ 0) x))) (Y (σ 1) x))) :=
+      PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀
+        (gInvRaisedEndo_section_contMDiff (I := I) g₀ g₁ (Y (σ 0))) (Y (σ 1)).contMDiff
+    have hscalar : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+        (fun x : M => Tensor0SSpace.toModel (om x)
+          (fun _ : Fin 1 => ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x)
+            (gInvRaisedEndo (I := I) g₀ g₁ x (Y (σ 0) x))) (Y (σ 1) x))) x₀ :=
+      TensorMultilinear.contMDiffAt_section_apply (n := 1) (x₀ := x₀)
+        (fun x : M => om x) (om.contMDiff x₀)
+        (fun _ : Fin 1 => fun x : M => ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x)
+          (gInvRaisedEndo (I := I) g₀ g₁ x (Y (σ 0) x))) (Y (σ 1) x))
+        (fun _ => (hconn x₀))
+    refine hscalar.congr_of_eventuallyEq ?_
+    have h_base₁ : ∀ᶠ x in 𝓝 x₀, x ∈ e₁.baseSet := e₁.open_baseSet.mem_nhds he₁
+    filter_upwards [h_base₁, hY] with x hx₁ hYx
+    rw [continuousMultilinearMap_basis_repr]
+    have hframe0 : e₁.symmL ℝ x (b (σ 0)) = (Y (σ 0)) x := by
+      rw [hYx (σ 0), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
+      simp [Trivialization.basisAt]
+    have hframe1 : e₁.symmL ℝ x (b (σ 1)) = (Y (σ 1)) x := by
+      rw [hYx (σ 1), Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
+      simp [Trivialization.basisAt]
+    change (gInvCompPairing (I := I) g₀ g₁ x (om x))
+        (fun j : Fin 2 => e₁.symmL ℝ x (b (σ j))) = _
+    rw [gInvCompPairing_apply]
+    rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+    rw [hframe0, hframe1]
+    rfl
+  refine hsec.congr ?_
+  intro x
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+def connDiffGInvComposite (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 2 where
+  toSection :=
+    { toFun := fun x : M => connDiffGInvCompositeFib (I := I) g₀ g₁ x
+      contMDiff_toFun := connDiffGInvCompositeFib_contMDiff (I := I) g₀ g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+@[simp] lemma connDiffGInvComposite_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (connDiffGInvComposite (I := I) g₀ g₁).toSection x =
+      connDiffGInvCompositeFib (I := I) g₀ g₁ x := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+lemma connDiffGInvComposite_pairing_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
+    ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (connDiffGInvComposite (I := I) g₀ g₁).toSection x) om) YZ =
+      om (fun _ : Fin 1 =>
+        PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (gInvRaisedEndo (I := I) g₀ g₁ x (YZ 0)) (YZ 1)) := by
+  rw [connDiffGInvComposite_toSection, connDiffGInvCompositeFib_apply, gInvCompPairing_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+theorem covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x)
+    (om : Tensor0SSpace 1 I x) :
+    om (fun _ : Fin 1 =>
+        ((endoCovariantDerivative (I := I) (M := M) g₀)
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁) x v) (Y x)) =
+      - ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (connDiffGInvComposite (I := I) g₀ g₁).toSection x) om)
+            (fun j : Fin 2 => if j = 0 then Y x else v)
+      + om (fun _ : Fin 1 =>
+          inverseMetricSharpFib (I := I) g₁ x
+            (dualToCotangent (I := I)
+              (-(cotangentToCLM (I := I) (g0FlatCLM (I := I) g₀ x (Y x))).comp
+                  ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v)).toLinearMap)) := by
+  rw [covGrad_gInvDiffSlotCoeff_endoCov_apply (I := I) g₀ g₁ Y x v]
+  rw [tensor0SOne_apply_add_comp (I := I) x om,
+    tensor0SOne_apply_neg_comp (I := I) x om]
+  rw [connDiffGInvComposite_pairing_apply (I := I) g₀ g₁ x om
+    (fun j : Fin 2 => if j = 0 then Y x else v)]
+  simp only [Fin.isValue, if_true, if_neg (by decide : (1 : Fin 2) ≠ 0)]
+
 end Connection
 end Integral
 end DifferentialGeometry
