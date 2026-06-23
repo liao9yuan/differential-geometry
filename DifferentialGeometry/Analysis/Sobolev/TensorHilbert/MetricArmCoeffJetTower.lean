@@ -254,6 +254,95 @@ private theorem endoCov_gInvDiffRaisedField_apply
     rw [hβdef, gInvRaisedEndo_apply]]
   abel
 
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+private theorem endoCompSection_contMDiff
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z) x
+        ((A x).comp (B x))) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
+    (F₂ := E) (V₂ := fun z : M => TangentSpace I z)
+    (φ := fun x => (A x).comp (B x))
+  intro Y
+  have hBY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y ((B y) (Y y))) :=
+    endoApplySection_contMDiff (I := I) (M := M) B Y
+  let BY : Cₛ^∞⟮I; E, (fun y : M => TangentSpace I y)⟯ := ⟨fun y : M => (B y) (Y y), hBY⟩
+  have hABY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y ((A y) (BY y))) :=
+    endoApplySection_contMDiff (I := I) (M := M) A BY
+  refine hABY.congr (fun x => ?_)
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+def endoCompField (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
+    ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
+  toFun := fun x : M => (A x).comp (B x)
+  contMDiff_toFun := endoCompSection_contMDiff (I := I) (M := M) A B
+
+set_option linter.unusedSectionVars false in
+@[simp] lemma endoCompField_apply
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) (x : M) :
+    (endoCompField (I := I) (M := M) A B x) = (A x).comp (B x) := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+theorem endoCovariantDerivative_comp
+    (g₀ : SmoothRiemannianMetric I M)
+    (A B : ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
+    (x : M) (v : TangentSpace I x) :
+    ((endoCovariantDerivative (I := I) (M := M) g₀)
+        (endoCompField (I := I) (M := M) A B) x v) =
+      ((endoCovariantDerivative (I := I) (M := M) g₀) A x v).comp (B x) +
+        (A x).comp ((endoCovariantDerivative (I := I) (M := M) g₀) B x v) := by
+  classical
+  apply ContinuousLinearMap.ext
+  intro a
+  obtain ⟨Y, hYx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+    (F := E) (V := (TangentSpace I : M → Type _)) x a
+  have hBY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y ((B y) (Y y))) :=
+    endoApplySection_contMDiff (I := I) (M := M) B Y
+  let BY : Cₛ^∞⟮I; E, (fun y : M => TangentSpace I y)⟯ := ⟨fun y : M => (B y) (Y y), hBY⟩
+  have hYmd := Y.mdifferentiableAt (x := x)
+  have hABcomp := endoCovariantDerivative_apply (I := I) (M := M) g₀
+    (endoCompField (I := I) (M := M) A B) Y x v
+  have hAonBY := endoCovariantDerivative_apply (I := I) (M := M) g₀ A BY x v
+  have hBonY := endoCovariantDerivative_apply (I := I) (M := M) g₀ B Y x v
+  have hfun_eq : (fun y : M => (endoCompField (I := I) (M := M) A B y) (Y y)) =
+      (fun y : M => (A y) ((B y) (Y y))) := by
+    funext y
+    rw [endoCompField_apply, ContinuousLinearMap.comp_apply]
+  have hcompval : ((endoCovariantDerivative (I := I) (M := M) g₀)
+        (endoCompField (I := I) (M := M) A B) x v) (Y x) =
+      (LeviCivita (I := I) g₀) (fun y : M => (A y) ((B y) (Y y))) x v -
+        (endoCompField (I := I) (M := M) A B x) ((LeviCivita (I := I) g₀) (fun y => Y y) x v) := by
+    rw [hABcomp, hfun_eq]
+  have hgradY : (LeviCivita (I := I) g₀) (fun y => Y y) x v =
+      (LeviCivita (I := I) g₀).toFun (fun y : M => Y y) x v := rfl
+  have hBgrad : (LeviCivita (I := I) g₀) (fun y : M => (B y) (Y y)) x v =
+      ((endoCovariantDerivative (I := I) (M := M) g₀) B x v) (Y x) +
+        (B x) ((LeviCivita (I := I) g₀) (fun y => Y y) x v) := by
+    rw [eq_sub_iff_add_eq] at hBonY
+    rw [← hBonY]
+  have hAonBY' : ((endoCovariantDerivative (I := I) (M := M) g₀) A x v) ((B x) (Y x)) =
+      (LeviCivita (I := I) g₀) (fun y : M => (A y) ((B y) (Y y))) x v -
+        (A x) ((LeviCivita (I := I) g₀) (fun y : M => (B y) (Y y)) x v) := hAonBY
+  rw [← hYx]
+  rw [hcompval]
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.comp_apply, endoCompField_apply, ContinuousLinearMap.comp_apply]
+  rw [hAonBY', hBgrad, map_add]
+  abel
+
 set_option linter.unusedSectionVars false in
 private lemma sqrt_g0_inner_add_le'
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
