@@ -846,6 +846,162 @@ theorem exists_gInvDiffFibreEndo_neumannFibreBound
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v :=
         mul_le_mul_of_nonneg_right hslot_le' hv_nn
 
+def gInvRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I x :=
+  (inverseMetricSharpFib (I := I) g₁ x).comp (g0FlatCLM (I := I) g₀ x)
+
+@[simp] lemma gInvRaisedEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvRaisedEndo (I := I) g₀ g₁ x v =
+      inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v) := by
+  rw [gInvRaisedEndo, ContinuousLinearMap.comp_apply]
+
+lemma gInvRaisedEndo_eq_diff_add_id (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvRaisedEndo (I := I) g₀ g₁ x v = gInvDiffRaisedEndo (I := I) g₀ g₁ x v + v := by
+  rw [gInvRaisedEndo_apply, gInvDiffRaisedEndo_apply, sub_add_cancel]
+
+theorem sqrt_inner_gInvRaisedEndo_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) (v : TangentSpace I x) :
+    Real.sqrt (g₀.inner x (gInvRaisedEndo (I := I) g₀ g₁ x v)
+        (gInvRaisedEndo (I := I) g₀ g₁ x v))
+      ≤ (1 / (1 - δ)) * Real.sqrt (g₀.inner x v v) := by
+  have hcoeff : 0 < 1 - δ := by linarith
+  rw [gInvRaisedEndo_eq_diff_add_id]
+  set Dv : TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x v with hDv
+  set Nv : ℝ := Real.sqrt (g₀.inner x v v) with hNv
+  have hNv_nn : 0 ≤ Nv := Real.sqrt_nonneg _
+  have haa_nn : 0 ≤ g₀.inner x Dv Dv := metric_inner_self_nonneg (I := I) (M := M) g₀ x Dv
+  have hbb_nn : 0 ≤ g₀.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
+  have hsum_nn : 0 ≤ g₀.inner x (Dv + v) (Dv + v) :=
+    metric_inner_self_nonneg (I := I) (M := M) g₀ x (Dv + v)
+  have hND_nn : 0 ≤ Real.sqrt (g₀.inner x Dv Dv) := Real.sqrt_nonneg _
+  have hND_sq : (Real.sqrt (g₀.inner x Dv Dv)) ^ 2 = g₀.inner x Dv Dv :=
+    Real.sq_sqrt haa_nn
+  have hNv_sq : Nv ^ 2 = g₀.inner x v v := by rw [hNv, Real.sq_sqrt hbb_nn]
+  have hcross : g₀.inner x Dv v ≤ Real.sqrt (g₀.inner x Dv Dv) * Nv := by
+    have habs := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x Dv v
+    rw [← hNv] at habs
+    exact le_trans (le_abs_self _) habs
+  have hexpand : g₀.inner x (Dv + v) (Dv + v) =
+      g₀.inner x Dv Dv + 2 * g₀.inner x Dv v + g₀.inner x v v := by
+    have h1 : g₀.inner x (Dv + v) (Dv + v)
+        = g₀.inner x Dv (Dv + v) + g₀.inner x v (Dv + v) := by
+      rw [map_add (g₀.inner x), ContinuousLinearMap.add_apply]
+    have h2 : g₀.inner x Dv (Dv + v) = g₀.inner x Dv Dv + g₀.inner x Dv v :=
+      map_add (g₀.inner x Dv) Dv v
+    have h3 : g₀.inner x v (Dv + v) = g₀.inner x v Dv + g₀.inner x v v :=
+      map_add (g₀.inner x v) Dv v
+    have h4 : g₀.inner x v Dv = g₀.inner x Dv v := g₀.symm x v Dv
+    rw [h1, h2, h3, h4]; ring
+  have htri : Real.sqrt (g₀.inner x (Dv + v) (Dv + v)) ≤
+      Real.sqrt (g₀.inner x Dv Dv) + Nv := by
+    have hsum_pos_nn : 0 ≤ Real.sqrt (g₀.inner x Dv Dv) + Nv := add_nonneg hND_nn hNv_nn
+    have hle_sq : g₀.inner x (Dv + v) (Dv + v) ≤ (Real.sqrt (g₀.inner x Dv Dv) + Nv) ^ 2 := by
+      rw [hexpand]
+      have hexp2 : (Real.sqrt (g₀.inner x Dv Dv) + Nv) ^ 2 =
+          (Real.sqrt (g₀.inner x Dv Dv)) ^ 2 + 2 * (Real.sqrt (g₀.inner x Dv Dv) * Nv) + Nv ^ 2 := by
+        ring
+      rw [hexp2, hND_sq, hNv_sq]
+      nlinarith [hcross]
+    calc Real.sqrt (g₀.inner x (Dv + v) (Dv + v))
+        ≤ Real.sqrt ((Real.sqrt (g₀.inner x Dv Dv) + Nv) ^ 2) := Real.sqrt_le_sqrt hle_sq
+      _ = Real.sqrt (g₀.inner x Dv Dv) + Nv := by rw [Real.sqrt_sq hsum_pos_nn]
+  have hdiff := sqrt_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v
+  rw [← hDv, ← hNv] at hdiff
+  calc Real.sqrt (g₀.inner x (Dv + v) (Dv + v))
+      ≤ Real.sqrt (g₀.inner x Dv Dv) + Nv := htri
+    _ ≤ (δ / (1 - δ)) * Nv + Nv := by linarith [hdiff]
+    _ = (1 / (1 - δ)) * Nv := by
+        have hne : (1 - δ) ≠ 0 := ne_of_gt hcoeff
+        field_simp
+        ring
+
+set_option backward.isDefEq.respectTransparency false in
+
+def gInvSlotEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  slotInsertEndoFib (I := I) (M := M) 2 0 x (gInvRaisedEndo (I := I) g₀ g₁ x)
+
+set_option backward.isDefEq.respectTransparency false in
+
+theorem gInvSlotEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (gInvSlotEndo (I := I) g₀ g₁ x))) := by
+  apply slotInsertEndoFib_contMDiff (I := I) (M := M) g₀ 2 0
+    (fun x : M => gInvRaisedEndo (I := I) g₀ g₁ x)
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
+    (F₂ := E) (V₂ := fun z : M => TangentSpace I z)
+    (φ := fun x => gInvRaisedEndo (I := I) g₀ g₁ x)
+  intro Y
+  have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E
+        (E := fun z : M => TangentSpace I z) b
+        (metricSharp (I := I) g₁ b (g₀.inner b (Y b)).toLinearMap)) := by
+    apply metricSharp_contMDiff_total (I := I) g₁
+    intro γ j
+    exact metricFlat_chartComponent_contMDiffOn (I := I) g₀ Y γ j
+  refine hsharpY.congr (fun x => ?_)
+  rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM_eq_metricSharp]
+
+set_option linter.unusedSectionVars false in
+
+theorem riemannianFiberNormSq_gInvSlotEndo_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        (show TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (gInvSlotEndo (I := I) g₀ g₁ x))
+      ≤ ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ))) ^ 2 := by
+  classical
+  set Λ : TangentSpace I x →L[ℝ] TangentSpace I x := gInvRaisedEndo (I := I) g₀ g₁ x with hΛ
+  obtain ⟨n, e, hn, horth, hpar, heq⟩ :=
+    riemannianFiberNormSq_slotInsert_eq_dim_mul (I := I) g₀ x Λ
+  have hnE : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by rw [hn]
+  rw [show gInvSlotEndo (I := I) g₀ g₁ x = slotInsertEndoFib (I := I) (M := M) 2 0 x Λ from rfl, heq]
+  set r : ℝ := 1 / (1 - δ) with hr
+  have hcoeff : 0 < 1 - δ := by linarith
+  have hr_nn : 0 ≤ r := by rw [hr]; positivity
+  have hper : ∀ i : Fin n, g₀.inner x (Λ (e i)) (Λ (e i)) ≤ r ^ 2 := by
+    intro i
+    have hsqrt := sqrt_inner_gInvRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x (e i)
+    rw [← hΛ] at hsqrt
+    have he1 : g₀.inner x (e i) (e i) = 1 := by rw [horth i i]; simp
+    rw [he1, Real.sqrt_one, mul_one] at hsqrt
+    have hLnn : 0 ≤ g₀.inner x (Λ (e i)) (Λ (e i)) :=
+      metric_inner_self_nonneg (I := I) (M := M) g₀ x (Λ (e i))
+    have hsq := Real.sq_sqrt hLnn
+    nlinarith [Real.sqrt_nonneg (g₀.inner x (Λ (e i)) (Λ (e i))), hsqrt, hsq, hr_nn]
+  have hJsplit : (∑ J : Fin 2 → Fin n, (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2)
+      = ∑ a : Fin n, ∑ b : Fin n, (g₀.inner x (Λ (e a)) (e b)) ^ 2 := by
+    rw [← (finTwoArrowEquiv (Fin n)).symm.sum_comp
+      (fun J : Fin 2 → Fin n => (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2)]
+    rw [Fintype.sum_prod_type]; rfl
+  have hParseval : (∑ a : Fin n, ∑ b : Fin n, (g₀.inner x (Λ (e a)) (e b)) ^ 2)
+      = ∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)) :=
+    Finset.sum_congr rfl (fun a _ => hpar (Λ (e a)))
+  have hsum_le : (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a))) ≤ (n : ℝ) * r ^ 2 := by
+    calc (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
+        ≤ ∑ _a : Fin n, r ^ 2 := Finset.sum_le_sum (fun a _ => hper a)
+      _ = (n : ℝ) * r ^ 2 := by rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]; ring
+  rw [hJsplit, hParseval]
+  have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  calc (n : ℝ) * (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
+      ≤ (n : ℝ) * ((n : ℝ) * r ^ 2) := mul_le_mul_of_nonneg_left hsum_le hn_nn
+    _ = ((Module.finrank ℝ E : ℝ) * r) ^ 2 := by rw [← hnE]; ring
+
 end DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 end
