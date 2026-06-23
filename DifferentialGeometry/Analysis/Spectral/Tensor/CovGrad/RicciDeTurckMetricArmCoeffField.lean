@@ -17,6 +17,8 @@ namespace Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open TensorRSNabla
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (gFibreOpBound)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -76,6 +78,58 @@ theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetri
             (Cnorm * δ) ^ 2 *
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v :=
   exists_gInvDiffFibreEndo_neumannFibreBound (I := I) g₀
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+
+theorem covGrad_gInvDiffSlotCoeff_toSection_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x =
+      covGradBundleEquiv (I := I) (M := M) 2 2 x
+        (tensorRSCovariantDerivative I M 2 2 (LeviCivita (I := I) g₀)
+          (fun y : M => (gInvDiffSlotCoeff (I := I) g₀ g₁).toSection y) x) :=
+  covGrad_toSection_apply (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) x
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+
+theorem covGrad_gInvDiffSlotCoeff_leibniz
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (w : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, (fun x : M => Tensor0SSpace 2 I x)⟯)
+    (x : M) (v : TangentSpace I x) :
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        tensorCovDerivAt (I := I) (M := M) g₀ 2 2
+          (gInvDiffSlotCoeff (I := I) g₀ g₁) x v) (w x) =
+      Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+        (fun y => gInvDiffSlotEndo (I := I) g₀ g₁ y (w y)) x v -
+      gInvDiffSlotEndo (I := I) g₀ g₁ x
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀) w x v) := by
+  rw [tensorCovDerivAt_def]
+  exact tensorRSCovariantDerivative_apply I M 2 2 (LeviCivita (I := I) g₀)
+    (gInvDiffSlotCoeff (I := I) g₀ g₁).toSection w x v
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+
+theorem covGrad_gInvDiffSlotCoeff_leibniz_value
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x)
+    (D : Tensor0SSpace 2 I x) :
+    ∃ w : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, (fun x : M => Tensor0SSpace 2 I x)⟯,
+      w x = D ∧
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          tensorCovDerivAt (I := I) (M := M) g₀ 2 2
+            (gInvDiffSlotCoeff (I := I) g₀ g₁) x v) D =
+        Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+          (fun y => gInvDiffSlotEndo (I := I) g₀ g₁ y (w y)) x v -
+        gInvDiffSlotEndo (I := I) g₀ g₁ x
+          (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀) w x v) := by
+  obtain ⟨w, hw⟩ := ContMDiffSection.exists_eq_at (I := I)
+    (F := Tensor0SModel 2 ℝ E) (V := fun y : M => Tensor0SSpace 2 I y)
+    (n := (⊤ : ℕ∞)) x D
+  refine ⟨w, hw, ?_⟩
+  rw [← hw, tensorCovDerivAt_def]
+  exact tensorRSCovariantDerivative_apply I M 2 2 (LeviCivita (I := I) g₀)
+    (gInvDiffSlotCoeff (I := I) g₀ g₁).toSection w x v
 
 end Connection
 end Integral
