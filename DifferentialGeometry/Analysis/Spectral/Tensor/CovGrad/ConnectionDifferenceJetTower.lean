@@ -409,6 +409,125 @@ private lemma connDiffPairing_eq_raisedKoszul_sharpFlat (g₀ g₁ : SmoothRiema
   rw [hPinner, cotangentToDual_g0FlatCLM (I := I) g₁ x D u]
   rw [g₁.symm x D u, hu]
 
+private lemma connDiffVec_eq_invSharp_koszul
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (X x) =
+      inverseMetricSharpFib (I := I) g₁ x
+        (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) :=
+  connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ X Y x
+
+theorem connDiffInner_g1_eq_half_covGradSymmS
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
+      g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
+    (x : M) (a b c : TangentSpace I x) :
+    g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b) c =
+      (1 / 2 : ℝ) *
+        (unitModel (I := I) (M := M) g₀ 3
+            (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![b, a, c]
+          + unitModel (I := I) (M := M) g₀ 3
+              (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![a, b, c]
+          - unitModel (I := I) (M := M) g₀ 3
+              (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![c, b, a]) := by
+  have hbil : ∀ (b' : M) (u w : TangentSpace I b'),
+      ccTensorBilin (I := I) g₀ (symmS (I := I) g₀ T) b' u w =
+        g₁.inner b' u w - g₀.inner b' u w :=
+    symmS_hbil_of_realize (I := I) (M := M) g₀ g₁ T hg₁
+  set af : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x a, smoothExtensionTangent_contMDiff (I := I) x a⟩ with haf
+  set bf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x b, smoothExtensionTangent_contMDiff (I := I) x b⟩ with hbf
+  set cf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x c, smoothExtensionTangent_contMDiff (I := I) x c⟩ with hcf
+  have haa : af x = a := smoothExtensionTangent_eq (I := I) x a
+  have hbb : bf x = b := smoothExtensionTangent_eq (I := I) x b
+  have hcc : cf x = c := smoothExtensionTangent_eq (I := I) x c
+  have h := koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁
+    (symmS (I := I) g₀ T) hbil bf af cf x
+  rw [koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ bf af x (cf x)] at h
+  rw [haa, hbb, hcc] at h
+  rw [h]
+  rw [show unitModel (I := I) (M := M) g₀ 3
+        (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![b, a, c]
+      = unitModel (I := I) (M := M) g₀ 3
+          (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![bf x, af x, cf x] from by
+    rw [haa, hbb, hcc]]
+  rw [show unitModel (I := I) (M := M) g₀ 3
+        (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![a, b, c]
+      = unitModel (I := I) (M := M) g₀ 3
+          (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![af x, bf x, cf x] from by
+    rw [haa, hbb, hcc]]
+  rw [show unitModel (I := I) (M := M) g₀ 3
+        (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![c, b, a]
+      = unitModel (I := I) (M := M) g₀ 3
+          (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)) x ![cf x, bf x, af x] from by
+    rw [haa, hbb, hcc]]
+  rfl
+
+theorem covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
+    g₁.inner x
+        (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x) ζ =
+      ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+          (fun b : M => cotangentToCLM (I := I)
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ
+        - g₁.inner x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+            (inverseMetricSharpFib (I := I) g₁ x
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X
+                ⟨smoothExtensionTangent (I := I) x ζ,
+                  smoothExtensionTangent_contMDiff (I := I) x ζ⟩ x))
+        - g₁.inner x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x)
+              ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))) ζ
+        - g₁.inner x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+              ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)) ζ
+        - g₁.inner x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+              (inverseMetricSharpFib (I := I) g₁ x
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)) (X x)) ζ := by
+  rw [covDerivConnDiff_eq_invGramSharp_graded (I := I) (M := M) g₀ g₁ X Y Z x]
+  rw [map_sub, map_sub, map_sub, ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply,
+    ContinuousLinearMap.sub_apply]
+  rw [inverseMetricSharpFib_inner (I := I) g₁ x _ ζ, cotangentToDualLinear_apply,
+    cotangentToDual_apply]
+  rw [show (dualToCotangent (I := I)
+        ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+          (fun b : M => cotangentToCLM (I := I)
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x))) (fun _ : Fin 1 => ζ)
+      = ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+          (fun b : M => cotangentToCLM (I := I)
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ from by
+    rw [← cotangentToDual_apply, cotangentToDual_dualToCotangent, ContinuousLinearMap.coe_coe]]
+  rw [covDerivConnDiff_principal_align (I := I) (M := M) g₀ g₁ X Y Z x ζ]
+  rw [show cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ (X x))
+      = g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ (X x)) from by
+    rw [show cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ (X x))
+        = cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ (X x)) from rfl]
+    exact koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ Z Y x _]
+  rw [show PDE.DeTurck.connDiff (I := I) g₁ g₀ x ζ (X x)
+      = inverseMetricSharpFib (I := I) g₁ x
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X
+            ⟨smoothExtensionTangent (I := I) x ζ,
+              smoothExtensionTangent_contMDiff (I := I) x ζ⟩ x) from by
+    have hζfx : (⟨smoothExtensionTangent (I := I) x ζ,
+        smoothExtensionTangent_contMDiff (I := I) x ζ⟩
+        : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x = ζ :=
+      smoothExtensionTangent_eq (I := I) x ζ
+    have h := connDiffVec_eq_invSharp_koszul (I := I) (M := M) g₀ g₁ X
+      ⟨smoothExtensionTangent (I := I) x ζ,
+        smoothExtensionTangent_contMDiff (I := I) x ζ⟩ x
+    rw [hζfx] at h
+    exact h]
+  ring
+
 set_option linter.unusedSectionVars false in
 theorem connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc
     (g₀ g₁ : SmoothRiemannianMetric I M) :
