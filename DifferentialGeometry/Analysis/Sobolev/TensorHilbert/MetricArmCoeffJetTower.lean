@@ -1971,6 +1971,21 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
       nlinarith [mul_le_mul_of_nonneg_left hstep (by positivity : (0:ℝ) ≤ 2 * Gj), hGj_nn',
         hstep]
 
+set_option linter.unusedSectionVars false in
+theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_succ_le_arms
+    (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + (m + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 (m + 1) (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+      2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 ((2 + 1) + m) x
+            ((iteratedCovGrad (I := I) g₀ 2 3 m (connArmCc (I := I) g₀ g₁)).toSection x) +
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 ((2 + 1) + m) x
+            ((iteratedCovGrad (I := I) g₀ 2 3 m (sharpArmCc (I := I) g₀ g₁)).toSection x) := by
+  rw [← rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 2 2 m
+    (gInvDiffSlotCoeff (I := I) g₀ g₁) x]
+  rw [covGrad_gInvDiffSlotCoeff_eq_slotInsert_section (I := I) g₀ g₁]
+  rw [iteratedCovGrad_add]
+  exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 ((2 + 1) + m) x _ _
+
 end Connection
 end Integral
 end DifferentialGeometry
