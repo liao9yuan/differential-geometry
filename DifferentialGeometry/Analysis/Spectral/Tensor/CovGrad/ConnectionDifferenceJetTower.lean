@@ -435,6 +435,53 @@ theorem rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
   exact rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le (I := I) (M := M) g₀ j 1 1 2
     (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) x
 
+set_option linter.unusedSectionVars false in
+theorem rfns_iteratedCovGrad_connDiffSection_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)
+    (B S : ℕ → ℝ)
+    (hKos : ∀ i ≤ j,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x) ≤ B i)
+    (hSharp : ∀ l ≤ j,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + l) x
+          ((iteratedCovGrad (I := I) g₀ 1 1 l
+            (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x) ≤ S l)
+    (hS0 : ∀ l, 0 ≤ S l) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+      appCcGdiag (E := E) j *
+        ∑ i ∈ Finset.range (j + 1), B i * ∑ l ∈ Finset.range (j + 1 - i), S l := by
+  refine (rfns_iteratedCovGrad_connDiffSection_diagonalProductGrid_le (I := I) (M := M)
+    g₀ g₁ j x).trans ?_
+  refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) j)
+  refine Finset.sum_le_sum (fun i hi => ?_)
+  have hile : i ≤ j := by simp only [Finset.mem_range] at hi; omega
+  have hKi_nn : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 (2 + i) x _
+  have hinner : (∑ l ∈ Finset.range (j + 1 - i),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + l) x
+          ((iteratedCovGrad (I := I) g₀ 1 1 l
+            (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x)) ≤
+      ∑ l ∈ Finset.range (j + 1 - i), S l := by
+    refine Finset.sum_le_sum (fun l hl => ?_)
+    have hlj : l ≤ j := by simp only [Finset.mem_range] at hl; omega
+    exact hSharp l hlj
+  have hinnerS_nn : (0 : ℝ) ≤ ∑ l ∈ Finset.range (j + 1 - i), S l :=
+    Finset.sum_nonneg (fun l _ => hS0 l)
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x) *
+        ∑ l ∈ Finset.range (j + 1 - i),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + l) x
+            ((iteratedCovGrad (I := I) g₀ 1 1 l
+              (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x)
+      ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 - i), S l :=
+        mul_le_mul_of_nonneg_left hinner hKi_nn
+    _ ≤ B i * ∑ l ∈ Finset.range (j + 1 - i), S l :=
+        mul_le_mul_of_nonneg_right (hKos i hile) hinnerS_nn
+
 end TensorSpectral
 end Parabolic
 end Analysis
