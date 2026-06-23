@@ -141,6 +141,229 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
           mul_nonneg (by positivity) (mul_nonneg hΛ₀ hSc_nn)
         rw [hexp]; linarith
 
+set_option maxHeartbeats 1600000 in
+theorem exists_moserTameProduct_three_iteratedCovGrad_l2Norm_le
+    (g : SmoothRiemannianMetric I M) (p q r k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (a : Integral.L2.SmoothCcTensor g 0 p) (b : Integral.L2.SmoothCcTensor g 0 q)
+        (c : Integral.L2.SmoothCcTensor g 0 r)
+        (P : Integral.L2.SmoothCcTensor g 0 (p + q + r)) (Λa Λb Λc : ℝ),
+        0 ≤ Λa → 0 ≤ Λb → 0 ≤ Λc →
+        (∀ (x : M) (i : ℕ), i ≤ k →
+          riemannianFiberNormSq (I := I) (M := M) g 0 (p + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a).toSection x) ≤ Λa ^ 2) →
+        (∀ (x : M) (j : ℕ), j ≤ k →
+          riemannianFiberNormSq (I := I) (M := M) g 0 (q + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q j b).toSection x) ≤ Λb ^ 2) →
+        (∀ (x : M) (l : ℕ), l ≤ k →
+          riemannianFiberNormSq (I := I) (M := M) g 0 (r + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r l c).toSection x) ≤ Λc ^ 2) →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + r + k) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toSection x) ≤
+            (∑ i ∈ Finset.range (k + 1),
+              ((k.choose i : ℝ)) ^ 2 *
+                (riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) *
+                  (∑ j ∈ Finset.range (i + 1),
+                    ((i.choose j : ℝ)) ^ 2 *
+                      (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                        riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x)))))) →
+        Integral.L2.tensorL2Norm (I := I) g 0 (p + q + r + k)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toFun ≤
+          C * (Λb * Λc * ∑ i ∈ Finset.range (k + 1),
+                  Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
+                    (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a).toFun
+              + Λa * Λc * ∑ j ∈ Finset.range (k + 1),
+                  Integral.L2.tensorL2Norm (I := I) g 0 (q + j)
+                    (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q j b).toFun
+              + Λa * Λb * ∑ l ∈ Finset.range (k + 1),
+                  Integral.L2.tensorL2Norm (I := I) g 0 (r + l)
+                    (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r l c).toFun) := by
+  classical
+  refine ⟨Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k), by positivity, ?_⟩
+  intro a b c P Λa Λb Λc hΛa hΛb hΛc ha hb hc hP
+
+  set Ta : ∀ i, Integral.L2.SmoothCcTensor g 0 (p + (k - i)) :=
+    fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a with hTa_def
+
+  set D : ℝ := Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k) * (Λb * Λc) with hD_def
+  have hD_nn : 0 ≤ D := by rw [hD_def]; positivity
+
+  have hpt :
+      ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + r + k) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toSection x) ≤
+          D ^ 2 * ∑ i ∈ Finset.range (k + 1),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x ((Ta i).toSection x) := by
+    intro x
+    refine le_trans (hP x) ?_
+    rw [Finset.mul_sum]
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    have hi_le : i ≤ k := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hi
+    have ha_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) :=
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (p + (k - i)) x _
+    have hinner :
+        (∑ j ∈ Finset.range (i + 1),
+            ((i.choose j : ℝ)) ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x)))
+          ≤ ((k : ℝ) + 1) * ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2) := by
+      have hbound : ∀ j ∈ Finset.range (i + 1),
+          ((i.choose j : ℝ)) ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x))
+            ≤ ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2) := by
+        intro j hj
+        have hj_le : j ≤ i := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hj
+        have hjk : j ≤ k := le_trans hj_le hi_le
+        have hij_k : i - j ≤ k := le_trans (Nat.sub_le i j) hi_le
+        have hbΛ : riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) ≤ Λb ^ 2 :=
+          hb x (i - j) hij_k
+        have hcΛ : riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x) ≤ Λc ^ 2 :=
+          hc x j hjk
+        have hb_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) :=
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (i - j)) x _
+        have hc_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x) :=
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + j) x _
+        have hchoose_i : ((i.choose j : ℝ)) ^ 2 ≤ ((2 : ℝ) ^ k) ^ 2 := by
+          have h1 : (i.choose j : ℝ) ≤ (2 : ℝ) ^ k := by
+            have hle := Nat.choose_le_two_pow (n := i) (k := j)
+            calc (i.choose j : ℝ) ≤ ((2 ^ i : ℕ) : ℝ) := by exact_mod_cast hle
+              _ = (2 : ℝ) ^ i := by push_cast; ring
+              _ ≤ (2 : ℝ) ^ k := by
+                  apply pow_le_pow_right₀ (by norm_num) hi_le
+          have h0 : (0 : ℝ) ≤ (i.choose j : ℝ) := by positivity
+          nlinarith [h1, h0]
+        have hprod_le : riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x)
+            ≤ Λb ^ 2 * Λc ^ 2 := by
+          apply mul_le_mul hbΛ hcΛ hc_nn (by positivity)
+        have hprod_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x) :=
+          mul_nonneg hb_nn hc_nn
+        exact mul_le_mul hchoose_i hprod_le hprod_nn (by positivity)
+      refine le_trans (Finset.sum_le_sum hbound) ?_
+      rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+      have hik : ((i + 1 : ℕ) : ℝ) ≤ (k : ℝ) + 1 := by
+        have hii : i + 1 ≤ k + 1 := by omega
+        calc ((i + 1 : ℕ) : ℝ) ≤ ((k + 1 : ℕ) : ℝ) := by exact_mod_cast hii
+          _ = (k : ℝ) + 1 := by push_cast; ring
+      have hrest_nn : 0 ≤ ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2) := by positivity
+      nlinarith [hik, hrest_nn]
+    have hchoose_k : ((k.choose i : ℝ)) ^ 2 ≤ ((2 : ℝ) ^ k) ^ 2 := by
+      have h1 : (k.choose i : ℝ) ≤ (2 : ℝ) ^ k := by
+        have hle := Nat.choose_le_two_pow (n := k) (k := i)
+        calc (k.choose i : ℝ) ≤ ((2 ^ k : ℕ) : ℝ) := by exact_mod_cast hle
+          _ = (2 : ℝ) ^ k := by push_cast; ring
+      have h0 : (0 : ℝ) ≤ (k.choose i : ℝ) := by positivity
+      nlinarith [h1, h0]
+    have hinner_nn : 0 ≤ (∑ j ∈ Finset.range (i + 1),
+        ((i.choose j : ℝ)) ^ 2 *
+          (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x))) := by
+      apply Finset.sum_nonneg
+      intro j _
+      apply mul_nonneg (by positivity)
+      exact mul_nonneg
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (q + (i - j)) x _)
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + j) x _)
+    have hDsq : D ^ 2 = ((k : ℝ) + 1) * (((2 : ℝ) ^ k) ^ 2 * ((2 : ℝ) ^ k) ^ 2) * (Λb ^ 2 * Λc ^ 2) := by
+      rw [hD_def]
+      have hsq : Real.sqrt ((k : ℝ) + 1) ^ 2 = (k : ℝ) + 1 := Real.sq_sqrt (by positivity)
+      have h2 : ((2 : ℝ) ^ (2 * k)) = ((2 : ℝ) ^ k) * ((2 : ℝ) ^ k) := by
+        rw [two_mul, pow_add]
+      rw [mul_pow, mul_pow, hsq, h2]; ring
+    calc ((k.choose i : ℝ)) ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) *
+              (∑ j ∈ Finset.range (i + 1),
+                ((i.choose j : ℝ)) ^ 2 *
+                  (riemannianFiberNormSq (I := I) (M := M) g 0 (q + (i - j)) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (i - j) b).toSection x) *
+                    riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r j c).toSection x))))
+        ≤ ((2 : ℝ) ^ k) ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p (k - i) a).toSection x) *
+              (((k : ℝ) + 1) * ((2 : ℝ) ^ k) ^ 2 * (Λb ^ 2 * Λc ^ 2))) := by
+          apply mul_le_mul hchoose_k _ _ (by positivity)
+          · apply mul_le_mul_of_nonneg_left hinner ha_nn
+          · exact mul_nonneg ha_nn hinner_nn
+      _ = D ^ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (p + (k - i)) x
+            ((Ta i).toSection x) := by
+          rw [hDsq, hTa_def]; ring
+
+  have hpack :
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P‖ ≤
+        D * ∑ i ∈ Finset.range (k + 1), ‖Ta i‖ :=
+    tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum (I := I) (M := M) g (k + 1)
+      (fun i => p + (k - i)) Ta
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P)
+      D hD_nn hpt
+
+  have hreindex : (∑ i ∈ Finset.range (k + 1), ‖Ta i‖) =
+      ∑ i ∈ Finset.range (k + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖ := by
+    have := Finset.sum_range_reflect
+      (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖) (k + 1)
+    simpa [hTa_def, Nat.succ_sub_one] using this
+  rw [hreindex] at hpack
+
+  rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P)] at hpack
+  have hsum_a_eq : (∑ i ∈ Finset.range (k + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a‖) =
+      ∑ i ∈ Finset.range (k + 1),
+        Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a).toFun :=
+    Finset.sum_congr rfl (fun i _ => Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) _)
+  rw [hsum_a_eq] at hpack
+  set Sa : ℝ := ∑ i ∈ Finset.range (k + 1),
+      Integral.L2.tensorL2Norm (I := I) g 0 (p + i)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 p i a).toFun with hSa_def
+  set Sb : ℝ := ∑ j ∈ Finset.range (k + 1),
+      Integral.L2.tensorL2Norm (I := I) g 0 (q + j)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q j b).toFun with hSb_def
+  set Sc : ℝ := ∑ l ∈ Finset.range (k + 1),
+      Integral.L2.tensorL2Norm (I := I) g 0 (r + l)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 r l c).toFun with hSc_def
+  have hSa_nn : 0 ≤ Sa :=
+    Finset.sum_nonneg (fun i _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (p + i) _)
+  have hSb_nn : 0 ≤ Sb :=
+    Finset.sum_nonneg (fun j _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (q + j) _)
+  have hSc_nn : 0 ≤ Sc :=
+    Finset.sum_nonneg (fun l _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (r + l) _)
+  set C : ℝ := Real.sqrt (k + 1) * (2 : ℝ) ^ (2 * k) with hC_def
+  have hC_nn : 0 ≤ C := by rw [hC_def]; positivity
+  have hDeq : D = C * (Λb * Λc) := by rw [hD_def, hC_def]
+  calc Integral.L2.tensorL2Norm (I := I) g 0 (p + q + r + k)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q + r) k P).toFun
+      ≤ D * Sa := hpack
+    _ = C * (Λb * Λc * Sa) := by rw [hDeq]; ring
+    _ ≤ C * (Λb * Λc * Sa + Λa * Λc * Sb + Λa * Λb * Sc) := by
+        have hnn1 : 0 ≤ Λa * Λc * Sb := by positivity
+        have hnn2 : 0 ≤ Λa * Λb * Sc := by positivity
+        apply mul_le_mul_of_nonneg_left _ hC_nn
+        linarith
+
 section DiscreteLogConvex
 
 private lemma slope_spread (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
