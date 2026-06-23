@@ -103,7 +103,9 @@ theorem deTurckRicci_strictlyParabolic_and_mixedLipschitz [I.Boundaryless]
             (C₂ : ℝ) *
               ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                   (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')‖) :=
-  sorry
+  ⟨deTurckRicciRHS_isStrictlyParabolic_at_self (I := I) g₀ g_bg,
+    IntrinsicSpectral.deTurckSobolevNHa2_mixed_lipschitz (I := I) (M := M)
+      (g₀ := g₀) (g_bg := g_bg) a ha_super⟩
 
 theorem quasilinear_strictlyParabolic_mixedLipschitz_shortTimeExistence [I.Boundaryless]
     (g₀ g_bg : SmoothRiemannianMetric I M)
