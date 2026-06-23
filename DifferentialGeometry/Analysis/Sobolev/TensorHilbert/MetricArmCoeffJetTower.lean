@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Pack
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 
 noncomputable section
 
@@ -875,6 +876,89 @@ theorem riemannianFiberNormSq_covGrad_gInvDiffSlotCoeff_le
     have hlhs : (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) ^ 2 * (4 * C₀ * G) ^ 2) =
         (Module.finrank ℝ E : ℝ) ^ 3 * (4 * C₀ * G) ^ 2 := by ring
     rw [hlhs, hrhs]
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem norm_toSection_eq_sqrt_riemannianFiberNormSq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (W : SmoothCcTensor g r s) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    ‖(W.toSection x : TensorRSSpace r s I x)‖ =
+      Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r s x (W.toSection x)) := by
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  rw [norm_eq_sqrt_tensorInnerPointwise (I := I) (M := M) g r s x (W.toSection x),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (W.toSection x)]
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_zero
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
+    (h : ∀ y v w, g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) (x : M) (R : ℝ) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 2 2 I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 2
+    ‖((iteratedCovGrad (I := I) g₀ 2 2 0 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x :
+        TensorRSSpace 2 2 I x)‖ ≤
+      (Module.finrank ℝ E : ℝ) * (1 + R) ^ 0 := by
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 2 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 2
+  rw [iteratedCovGrad_zero, pow_zero, mul_one,
+    norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      (gInvDiffSlotCoeff (I := I) g₀ g₁)]
+  have hb := riemannianFiberNormSq_gInvDiffSlotCoeff_le (I := I) (M := M) g₀ g₁ T hδ hδ0 h hbound x
+  have hfr0 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+  calc Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          ((gInvDiffSlotCoeff (I := I) g₀ g₁).toSection x))
+      ≤ Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 2) := Real.sqrt_le_sqrt hb
+    _ = (Module.finrank ℝ E : ℝ) := Real.sqrt_sq hfr0
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_one
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
+      (h : ∀ y v w, g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) (x : M) {R : ℝ}
+      (hR0 : 0 ≤ R)
+      (hjet : letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 3 I b) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+        ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x : TensorRSSpace 0 3 I x)‖ ≤ R),
+      letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 2 3 I b) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 3
+      ‖((iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x :
+          TensorRSSpace 2 3 I x)‖ ≤ C * (1 + R) ^ 1 := by
+  obtain ⟨C, hC0, hbnd⟩ := riemannianFiberNormSq_covGrad_gInvDiffSlotCoeff_le (I := I) (M := M) g₀
+  refine ⟨C, hC0, ?_⟩
+  intro g₁ T δ hδ hδ0 h hbound x R hR0 hjet
+  letI inst3 : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 3 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI inst23 : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 2 3 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 3
+  have hb := hbnd g₁ T hδ hδ0 h hbound x
+  have hiter1 : iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁) =
+      covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) := by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
+  rw [pow_one,
+    norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 3 x
+      (iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁)), hiter1]
+  set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x : TensorRSSpace 0 3 I x)‖ with hG
+  have hG0 : 0 ≤ G := norm_nonneg _
+  have hsqrt_le : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 3 x
+      ((covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x)) ≤
+      Real.sqrt (C ^ 2 * G ^ 2) := Real.sqrt_le_sqrt hb
+  refine hsqrt_le.trans ?_
+  rw [show C ^ 2 * G ^ 2 = (C * G) ^ 2 from by ring, Real.sqrt_sq (mul_nonneg hC0 hG0)]
+  have hGR : G ≤ R := hjet
+  calc C * G ≤ C * R := mul_le_mul_of_nonneg_left hGR hC0
+    _ ≤ C * (1 + R) := by
+        refine mul_le_mul_of_nonneg_left ?_ hC0; linarith
 
 end Connection
 end Integral
