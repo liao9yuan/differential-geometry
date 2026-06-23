@@ -645,6 +645,161 @@ private lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul
           Fintype.card_fin, nsmul_eq_mul, ← hnE]
         push_cast; ring
 
+set_option linter.unusedSectionVars false in
+private lemma fiberComponent_slotInsertEndoFib_eq_general
+    (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (K J : Fin s → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x s s
+        (show TensorRSSpace s s I x from
+          TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) n e K J =
+      g₀.inner x (e (K k)) (Λ (e (J k))) *
+        ∏ l ∈ Finset.univ.erase k, (if K l = J l then (1 : ℝ) else 0) := by
+  have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x s s
+      (show TensorRSSpace s s I x from
+        TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) n e K J =
+      Tensor0SSpace.toModel
+        ((slotInsertEndoFib (I := I) (M := M) s k x Λ) (coframeS (I := I) (M := M) g₀ x s e K))
+        (fun l => e (J l)) := by
+    unfold fiberNormSqComponent coframeS; rfl
+  rw [hcomp, slotInsertEndoFib_apply_eval]
+  rw [show (coframeS (I := I) (M := M) g₀ x s e K).toModel
+        (Function.update (fun l => e (J l)) k (Λ (e (J k))))
+      = coframeS (I := I) (M := M) g₀ x s e K
+        (Function.update (fun l => e (J l)) k (Λ (e (J k)))) from rfl]
+  rw [coframeS_apply]
+  rw [← Finset.prod_erase_mul Finset.univ
+    (fun l => g₀.inner x (e (K l))
+      (Function.update (fun l => e (J l)) k (Λ (e (J k))) l)) (Finset.mem_univ k)]
+  rw [Function.update_self]
+  rw [g₀.symm x (e (K k)) (Λ (e (J k)))]
+  rw [mul_comm]
+  congr 1
+  refine Finset.prod_congr rfl (fun l hl => ?_)
+  have hlk : l ≠ k := Finset.ne_of_mem_erase hl
+  rw [Function.update_of_ne hlk, horth (K l) (J l)]
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+private lemma sum_compSq_slotInsertEndoFib_eq_normSq
+    (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (hpars : ∀ v : TangentSpace I x, ∑ i : Fin n, g₀.inner x (e i) v ^ 2 = g₀.inner x v v)
+    (J : Fin s → Fin n) :
+    (∑ K : Fin s → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g₀ x s s
+          (show TensorRSSpace s s I x from
+            TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) n e K J) ^ 2) =
+      g₀.inner x (Λ (e (J k))) (Λ (e (J k))) := by
+  classical
+  have hcompsq : ∀ K : Fin s → Fin n,
+      (fiberNormSqComponent (I := I) (M := M) g₀ x s s
+        (show TensorRSSpace s s I x from
+          TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) n e K J) ^ 2 =
+        (g₀.inner x (e (K k)) (Λ (e (J k)))) ^ 2 *
+          ∏ l ∈ Finset.univ.erase k, (if K l = J l then (1 : ℝ) else 0) := by
+    intro K
+    rw [fiberComponent_slotInsertEndoFib_eq_general (I := I) g₀ x s k Λ e horth K J]
+    rw [mul_pow]
+    congr 1
+    rw [← Finset.prod_pow]
+    refine Finset.prod_congr rfl (fun l _ => ?_)
+    by_cases hkj : K l = J l
+    · simp [hkj]
+    · simp [hkj]
+  rw [Finset.sum_congr rfl (fun K _ => hcompsq K)]
+  set ee := Equiv.funSplitAt k (Fin n) with hee
+  rw [← (Equiv.sum_comp ee.symm
+    (fun K : Fin s → Fin n => (g₀.inner x (e (K k)) (Λ (e (J k)))) ^ 2 *
+      ∏ l ∈ Finset.univ.erase k, (if K l = J l then (1 : ℝ) else 0)))]
+  rw [Fintype.sum_prod_type]
+  have hkval : ∀ (m : Fin n) (ρ : {i : Fin s // i ≠ k} → Fin n), (ee.symm (m, ρ)) k = m := by
+    intro m ρ; rw [hee]; simp [Equiv.funSplitAt, Equiv.piSplitAt]
+  have hinner : ∀ m : Fin n,
+      (∑ ρ : {i : Fin s // i ≠ k} → Fin n,
+        (g₀.inner x (e ((ee.symm (m, ρ)) k)) (Λ (e (J k)))) ^ 2 *
+          ∏ l ∈ Finset.univ.erase k,
+            (if (ee.symm (m, ρ)) l = J l then (1 : ℝ) else 0)) =
+        (g₀.inner x (e m) (Λ (e (J k)))) ^ 2 := by
+    intro m
+    have hcoe : ∀ (ρ : {i : Fin s // i ≠ k} → Fin n) (l : Fin s) (hl : l ≠ k),
+        (ee.symm (m, ρ)) l = ρ ⟨l, hl⟩ := by
+      intro ρ l hl
+      rw [hee]; simp [Equiv.funSplitAt, Equiv.piSplitAt, hl]
+    have hindic : ∀ ρ : {i : Fin s // i ≠ k} → Fin n,
+        (∏ l ∈ Finset.univ.erase k,
+          (if (ee.symm (m, ρ)) l = J l then (1 : ℝ) else 0)) =
+          (if ρ = (fun j : {i : Fin s // i ≠ k} => J j) then (1 : ℝ) else 0) := by
+      intro ρ
+      by_cases hρ : ρ = (fun j : {i : Fin s // i ≠ k} => J j)
+      · rw [if_pos hρ]
+        refine Finset.prod_eq_one (fun l hl => ?_)
+        have hlk : l ≠ k := Finset.ne_of_mem_erase hl
+        rw [hcoe ρ l hlk, hρ, if_pos rfl]
+      · rw [if_neg hρ]
+        obtain ⟨j, hj⟩ : ∃ j : {i : Fin s // i ≠ k}, ρ j ≠ J j := by
+          by_contra hcon
+          exact hρ (funext (fun j => not_not.mp (fun h => hcon ⟨j, h⟩)))
+        refine Finset.prod_eq_zero (i := (j : Fin s))
+          (Finset.mem_erase.mpr ⟨j.2, Finset.mem_univ _⟩) ?_
+        rw [hcoe ρ (j : Fin s) j.2, if_neg hj]
+    rw [Finset.sum_congr rfl (fun ρ _ => by rw [hkval m ρ, hindic ρ] :
+      ∀ ρ ∈ Finset.univ,
+        (g₀.inner x (e ((ee.symm (m, ρ)) k)) (Λ (e (J k)))) ^ 2 *
+          ∏ l ∈ Finset.univ.erase k,
+            (if (ee.symm (m, ρ)) l = J l then (1 : ℝ) else 0) =
+        (g₀.inner x (e m) (Λ (e (J k)))) ^ 2 *
+          (if ρ = (fun j : {i : Fin s // i ≠ k} => J j) then (1 : ℝ) else 0))]
+    rw [← Finset.mul_sum,
+      Finset.sum_ite_eq' Finset.univ (fun j : {i : Fin s // i ≠ k} => J j) (fun _ => (1 : ℝ))]
+    simp
+  rw [Finset.sum_congr rfl (fun m _ => hinner m)]
+  exact hpars (Λ (e (J k)))
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+private lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul_general
+    (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (B : ℝ)
+    (hΛ : ∀ a : TangentSpace I x, g₀.inner x a a = 1 → g₀.inner x (Λ a) (Λ a) ≤ B)
+    (hB : 0 ≤ B) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ s s x
+        (show TensorRSSpace s s I x from
+          TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) ≤
+      ((Module.finrank ℝ E : ℝ)) ^ s * B := by
+  classical
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum⟩ :=
+    tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
+  have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ s s x
+    (show TensorRSSpace s s I x from
+      TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) e bse hnE hbse horth]
+  rw [Finset.sum_comm]
+  have hsumeq : (∑ J : Fin s → Fin n, ∑ K : Fin s → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g₀ x s s
+          (show TensorRSSpace s s I x from
+            TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) n e K J) ^ 2) =
+      ∑ J : Fin s → Fin n, g₀.inner x (Λ (e (J k))) (Λ (e (J k))) := by
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    exact sum_compSq_slotInsertEndoFib_eq_normSq (I := I) g₀ x s k Λ e horth hpars J
+  rw [hsumeq]
+  have hJbound : ∀ J : Fin s → Fin n,
+      g₀.inner x (Λ (e (J k))) (Λ (e (J k))) ≤ B := by
+    intro J
+    refine hΛ (e (J k)) ?_
+    rw [horth (J k) (J k)]; simp
+  calc (∑ J : Fin s → Fin n, g₀.inner x (Λ (e (J k))) (Λ (e (J k))))
+      ≤ ∑ _J : Fin s → Fin n, B := Finset.sum_le_sum (fun J _ => hJbound J)
+    _ = ((Module.finrank ℝ E : ℝ)) ^ s * B := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_fin,
+          Fintype.card_fin, nsmul_eq_mul, ← hnE]
+        push_cast; ring
+
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
