@@ -212,11 +212,13 @@ stand-in). -/
     gInvDiffRaisedEndo (I := I) g₀ g₀ x v = 0 := by
   rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM, sub_self]
 
-/-- **The defining `g₁`-pairing of the raised representative: `g₁(D v, w) = g₀(v, w) − g₁(v, w)`.**
-Pairing `D v = g₁^♯(g₀^♭ v) − v` against `w` with the `g₁`-metric: the sharp's inverse property
-(`inverseMetricSharpFib_inner` for `g₁`) gives `g₁(g₁^♯(g₀^♭ v), w) = (g₀^♭ v)(w) = g₀(v, w)`, and the
-identity slot gives `−g₁(v, w)`.  This is the resolvent identity in pairing form: the `g₁`-pairing of
-the raised cometric difference reads off the *negative* metric difference `g₀ − g₁`. -/
+lemma gInvDiffRaisedEndo_eq_sharp_sub (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvDiffRaisedEndo (I := I) g₀ g₁ x v =
+      inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v)
+        - inverseMetricSharpFib (I := I) g₀ x (g0FlatCLM (I := I) g₀ x v) := by
+  rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]
+
 lemma inner_g1_gInvDiffRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g₁.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) w =
