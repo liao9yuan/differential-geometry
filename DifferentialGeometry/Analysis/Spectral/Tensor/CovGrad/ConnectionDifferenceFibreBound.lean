@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 
 noncomputable section
 
@@ -530,6 +532,116 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       mul_le_mul_of_nonneg_right hf hNv_nn
     exact mul_le_mul_of_nonneg_right hf2 hNw_nn
   exact h3
+
+set_option linter.unusedSectionVars false in
+private lemma fiberNormSqComponent_connDiffFib
+    (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
+    (e : Fin n → TangentSpace I x)
+    (K : Fin 1 → Fin n) (J : Fin 2 → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
+        (connDiffFib (I := I) g₁ g₀ x) n e K J =
+      g₀.inner x (e (K 0))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (e (J 0)) (e (J 1))) := by
+  rw [show fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
+        (connDiffFib (I := I) g₁ g₀ x) n e K J =
+      ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+          connDiffFib (I := I) g₁ g₀ x)
+        ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 1) ℝ).compContinuousLinearMap
+          (fun k => g₀.inner x (e (K k)))))
+        (fun k => e (J k)) from rfl]
+  rw [connDiffFib_apply_eval]
+  rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 1) ℝ).compContinuousLinearMap
+        (fun k => g₀.inner x (e (K k))))
+      (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+        ((fun k => e (J k)) 0) ((fun k => e (J k)) 1)) =
+      ∏ k : Fin 1, g₀.inner x (e (K k))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (e (J 0)) (e (J 1))) from rfl]
+  rw [Fin.prod_univ_one]
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
+      (T : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
+      (h : ∀ y v w, g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (x : M),
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+          ((connDiffSection (I := I) g₁ g₀).toSection x) ≤
+        C ^ 2 * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+            Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 := by
+  classical
+  letI instTens : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  obtain ⟨C₀, hC₀0, hpw⟩ := connDiff_gFibreNorm_le_iteratedCovGrad (I := I) (M := M) g₀
+  refine ⟨Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) * C₀, by positivity, ?_⟩
+  intro g₁ T δ hδ hδ0 h hbound x
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum⟩ :=
+    tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
+  have hnE : n = Module.finrank ℝ E := hn
+  set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
+  have hG_nn : 0 ≤ G := norm_nonneg _
+  have hconnDiffSec : (connDiffSection (I := I) g₁ g₀).toSection x =
+      connDiffFib (I := I) g₁ g₀ x :=
+    connDiffSection_toSection (I := I) g₁ g₀ x
+  rw [hconnDiffSec]
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
+    (connDiffFib (I := I) g₁ g₀ x) e bse hnE hbse horth]
+  have heach : ∀ (K : Fin 1 → Fin n) (J : Fin 2 → Fin n),
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
+        (connDiffFib (I := I) g₁ g₀ x) n e K J) ^ 2 ≤ C₀ ^ 2 * G ^ 2 := by
+    intro K J
+    rw [fiberNormSqComponent_connDiffFib]
+    set u : TangentSpace I x :=
+      PDE.DeTurck.connDiff (I := I) g₁ g₀ x (e (J 0)) (e (J 1)) with hu_def
+    have hcs := metric_inner_cauchy_schwarz_sq (I := I) (M := M) g₀ x (e (K 0)) u
+    have hkk : g₀.inner x (e (K 0)) (e (K 0)) = 1 := by
+      rw [horth (K 0) (K 0)]; simp
+    rw [hkk, one_mul] at hcs
+    have hsqrt := hpw g₁ T h hδ hδ0 hbound x (e (J 0)) (e (J 1))
+    have hJ0 : g₀.inner x (e (J 0)) (e (J 0)) = 1 := by rw [horth (J 0) (J 0)]; simp
+    have hJ1 : g₀.inner x (e (J 1)) (e (J 1)) = 1 := by rw [horth (J 1) (J 1)]; simp
+    rw [hJ0, hJ1, Real.sqrt_one, mul_one, mul_one] at hsqrt
+    have huu_nn : 0 ≤ g₀.inner x u u := metric_inner_self_nonneg (I := I) (M := M) g₀ x u
+    have hsqrt_eq : Real.sqrt (g₀.inner x u u) ^ 2 = g₀.inner x u u :=
+      Real.sq_sqrt huu_nn
+    have hsqrt_nn : 0 ≤ Real.sqrt (g₀.inner x u u) := Real.sqrt_nonneg _
+    have hsq_le : g₀.inner x u u ≤ (C₀ * G) ^ 2 := by
+      rw [← hsqrt_eq]
+      have := mul_self_le_mul_self hsqrt_nn hsqrt
+      nlinarith [this, hsqrt]
+    calc (g₀.inner x (e (K 0)) u) ^ 2
+        ≤ g₀.inner x u u := hcs
+      _ ≤ (C₀ * G) ^ 2 := hsq_le
+      _ = C₀ ^ 2 * G ^ 2 := by ring
+  calc ∑ K : Fin 1 → Fin n, ∑ J : Fin 2 → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
+          (connDiffFib (I := I) g₁ g₀ x) n e K J) ^ 2
+      ≤ ∑ K : Fin 1 → Fin n, ∑ J : Fin 2 → Fin n, C₀ ^ 2 * G ^ 2 :=
+        Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => heach K J))
+    _ = (Fintype.card (Fin 1 → Fin n) : ℝ) * (Fintype.card (Fin 2 → Fin n) : ℝ) *
+        (C₀ ^ 2 * G ^ 2) := by
+        rw [Finset.sum_const, Finset.sum_const]
+        simp only [Finset.card_univ, nsmul_eq_mul]
+        ring
+    _ = (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) * C₀) ^ 2 * G ^ 2 := by
+        rw [Fintype.card_fun, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+        rw [Fintype.card_fin, ← hnE]
+        have hsq : Real.sqrt ((n : ℝ) ^ 3) ^ 2 = (n : ℝ) ^ 3 :=
+          Real.sq_sqrt (by positivity)
+        rw [mul_pow, hsq]
+        push_cast
+        ring
 
 end TensorSpectral
 end Parabolic
