@@ -1681,6 +1681,84 @@ theorem rfns_iteratedCovGrad_connDiffSection_le
     _ ≤ B i * ∑ l ∈ Finset.range (j + 1 - i), S l :=
         mul_le_mul_of_nonneg_right (hKos i hile) hinnerS_nn
 
+private lemma riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (c : ℝ) (v : TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
+      c ^ 2 * riemannianFiberNormSq (I := I) (M := M) g r s x v := by
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (c • v),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x v]
+  rw [TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left,
+    tensorInnerPointwise_smul_right]
+  ring
+
+set_option linter.unusedSectionVars false in
+theorem rfns_iteratedCovGrad_sharpFlatEndoCc_succ_le_arms
+    (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + (m + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 1 1 (m + 1)
+          (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x) ≤
+      2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 ((1 + 1) + m) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 m
+              (flatArmCc (I := I) g₀ g₁ true)).toSection x) +
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 ((1 + 1) + m) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 m
+              (flatArmCc (I := I) g₀ g₁ false)).toSection x) := by
+  rw [← rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 1 1 m
+    (sharpFlatEndoCc (I := I) g₀ g₁) x]
+  rw [covGrad_sharpFlatEndoCc_eq_arms (I := I) g₀ g₁]
+  rw [iteratedCovGrad_add]
+  exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 1 ((1 + 1) + m) x _ _
+
+private lemma diagonalGrid_power_closure (G Bc : ℝ) (hG : 0 ≤ G) (hB : 0 ≤ Bc)
+    (j : ℕ) (r : ℝ) (hr : 1 ≤ r) (Q : ℕ → ℝ)
+    (hQ_nn : ∀ i, 0 ≤ Q i)
+    (hQ_le : ∀ i ≤ j, Q i ≤ Bc * r ^ (2 * (i + 1))) :
+    G * ∑ i ∈ Finset.range (j + 1), Q i *
+        ∑ l ∈ Finset.range (j + 1 - i), Q l ≤
+      (G * (↑(j + 1) * Bc) ^ 2) * r ^ (2 * (j + 2)) := by
+  have hBr_nn : ∀ k, 0 ≤ Bc * r ^ (2 * (k + 1)) := fun k => by positivity
+  have hcell : ∀ i ∈ Finset.range (j + 1),
+      Q i * ∑ l ∈ Finset.range (j + 1 - i), Q l ≤
+        (↑(j + 1) * Bc ^ 2) * r ^ (2 * (j + 2)) := by
+    intro i hi
+    have hij : i ≤ j := by simp only [Finset.mem_range] at hi; omega
+    have hQi : Q i ≤ Bc * r ^ (2 * (i + 1)) := hQ_le i hij
+    have hQi_nn : 0 ≤ Q i := hQ_nn i
+    have hinner : ∑ l ∈ Finset.range (j + 1 - i), Q l ≤
+        ↑(j + 1) * (Bc * r ^ (2 * (j - i + 1))) := by
+      have hterm : ∀ l ∈ Finset.range (j + 1 - i),
+          Q l ≤ Bc * r ^ (2 * (j - i + 1)) := by
+        intro l hl
+        have hlj : l ≤ j - i := by simp only [Finset.mem_range] at hl; omega
+        have hlj' : l ≤ j := by omega
+        refine le_trans (hQ_le l hlj') ?_
+        refine mul_le_mul_of_nonneg_left ?_ hB
+        exact pow_le_pow_right₀ hr (by omega)
+      refine le_trans (Finset.sum_le_card_nsmul _ _ _ hterm) ?_
+      rw [Finset.card_range, nsmul_eq_mul]
+      refine mul_le_mul_of_nonneg_right ?_ (hBr_nn _)
+      exact_mod_cast Nat.cast_le.mpr (by omega : j + 1 - i ≤ j + 1)
+    have hinner_nn : 0 ≤ ∑ l ∈ Finset.range (j + 1 - i), Q l :=
+      Finset.sum_nonneg (fun l _ => hQ_nn l)
+    calc Q i * ∑ l ∈ Finset.range (j + 1 - i), Q l
+        ≤ (Bc * r ^ (2 * (i + 1))) * (↑(j + 1) * (Bc * r ^ (2 * (j - i + 1)))) :=
+          mul_le_mul hQi hinner hinner_nn (hBr_nn _)
+      _ = (↑(j + 1) * Bc ^ 2) * (r ^ (2 * (i + 1)) * r ^ (2 * (j - i + 1))) := by ring
+      _ ≤ (↑(j + 1) * Bc ^ 2) * r ^ (2 * (j + 2)) := by
+          refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+          rw [← pow_add]
+          exact pow_le_pow_right₀ hr (by omega)
+  have hsum : ∑ i ∈ Finset.range (j + 1), Q i *
+        ∑ l ∈ Finset.range (j + 1 - i), Q l ≤
+      ↑(j + 1) * ((↑(j + 1) * Bc ^ 2) * r ^ (2 * (j + 2))) := by
+    refine le_trans (Finset.sum_le_sum hcell) ?_
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  calc G * ∑ i ∈ Finset.range (j + 1), Q i *
+          ∑ l ∈ Finset.range (j + 1 - i), Q l
+      ≤ G * (↑(j + 1) * ((↑(j + 1) * Bc ^ 2) * r ^ (2 * (j + 2)))) :=
+        mul_le_mul_of_nonneg_left hsum hG
+    _ = (G * (↑(j + 1) * Bc) ^ 2) * r ^ (2 * (j + 2)) := by ring
+
 end TensorSpectral
 end Parabolic
 end Analysis
