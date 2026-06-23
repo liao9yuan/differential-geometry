@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
 
 noncomputable section
 set_option linter.style.setOption false
@@ -214,6 +215,51 @@ theorem covGrad_slotInsertEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g (s + 1) (s + 1)
     (slotInsertEndoCc (I := I) (M := M) g s Λ) x D v]
   rw [tensorCovDerivAt_slotInsertEndoCc_eq (I := I) (M := M) g s Λ x (v 0)]
+
+set_option linter.unusedSectionVars false in
+def idHomTensorRSField (r a : ℕ) :
+    HomTensorRSField (E := E) (M := M) r a a I where
+  toFun := fun x : M => (ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) :
+    HomTensorRSSpace r a a I x)
+  contMDiff_toFun :=
+    contMDiff_clm_section_of_pointwise (I := I) (M := M)
+      (V₁ := fun x : M => TensorRSSpace r a I x)
+      (V₂ := fun x : M => TensorRSSpace r a I x)
+      (φ := fun x : M => ContinuousLinearMap.id ℝ (TensorRSSpace r a I x))
+      (fun Y => Y.contMDiff)
+
+set_option linter.unusedSectionVars false in
+@[simp] lemma idHomTensorRSField_apply (r a : ℕ) (x : M) :
+    (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r a I x from
+        idHomTensorRSField (E := E) (M := M) (I := I) r a x) =
+      ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) := rfl
+
+set_option linter.unusedSectionVars false in
+lemma appFullSec_idHomTensorRSField (g : SmoothRiemannianMetric I M) (r a : ℕ)
+    (W : SmoothCcTensor g r a) :
+    appFullSec (I := I) (M := M) g r a a (idHomTensorRSField (E := E) (M := M) (I := I) r a) W = W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appFullSec_toSection, idHomTensorRSField_apply, ContinuousLinearMap.id_apply]
+
+set_option linter.unusedSectionVars false in
+theorem iteratedCovGrad_slotInsertEndoCc_expansion (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
+    (k : ℕ) :
+    ∃ D : (i : ℕ) → HomTensorRSField (E := E) (M := M) (s + 1) (s + 1 + i) (s + 1 + k) I,
+      iteratedCovGrad g (s + 1) (s + 1) k (slotInsertEndoCc (I := I) (M := M) g s Λ) =
+        ∑ i ∈ Finset.range (k + 1),
+          appFullSec (I := I) (M := M) g (s + 1) (s + 1 + i) (s + 1 + k) (D i)
+            (iteratedCovGrad g (s + 1) (s + 1) i (slotInsertEndoCc (I := I) (M := M) g s Λ)) := by
+  obtain ⟨D, hD⟩ :=
+    homFieldAction_iteratedCovGrad_expansion (I := I) (M := M) g (s + 1) (s + 1) (s + 1)
+      (idHomTensorRSField (E := E) (M := M) (I := I) (s + 1) (s + 1)) k
+  refine ⟨D, ?_⟩
+  have hbase := hD (slotInsertEndoCc (I := I) (M := M) g s Λ)
+  rw [appFullSec_idHomTensorRSField (I := I) (M := M) g (s + 1) (s + 1)
+    (slotInsertEndoCc (I := I) (M := M) g s Λ)] at hbase
+  exact hbase
 
 end Connection
 end Integral
