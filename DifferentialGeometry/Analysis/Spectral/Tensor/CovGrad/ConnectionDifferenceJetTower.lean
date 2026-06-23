@@ -150,6 +150,24 @@ private lemma tensor0SOne_apply_smul' (x : M) (om : Tensor0SSpace 1 I x)
       (fun _ => c • a) = _
   rw [hca, ha, map_smul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma tensor0SOne_apply_neg' (x : M) (om : Tensor0SSpace 1 I x)
+    (a : TangentSpace I x) :
+    om (fun _ : Fin 1 => -a) = -om (fun _ : Fin 1 => a) := by
+  have h := tensor0SOne_apply_smul' (I := I) x om (-1) a
+  simp only [neg_smul, one_smul] at h
+  exact h
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private lemma tensor0SOne_apply_sub' (x : M) (om : Tensor0SSpace 1 I x)
+    (a b : TangentSpace I x) :
+    om (fun _ : Fin 1 => a - b) = om (fun _ : Fin 1 => a) - om (fun _ : Fin 1 => b) := by
+  rw [show (fun _ : Fin 1 => a - b) = (fun _ : Fin 1 => a + (-b)) from by
+    funext _; rw [sub_eq_add_neg]]
+  rw [tensor0SOne_apply_add' (I := I) x om, tensor0SOne_apply_neg' (I := I) x om, sub_eq_add_neg]
+
 def sharpFlatRaiseEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
   (inverseMetricSharpFib (I := I) g₀ x).comp (g0FlatCLM (I := I) g₁ x)
@@ -807,6 +825,103 @@ def flatArmCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : SmoothCcT
 @[simp] lemma flatArmCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
     (flatArmCc (I := I) g₀ g₁ kind).toSection x = flatArmFib (I := I) g₀ g₁ kind x := rfl
 
+theorem raisedKoszulVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
+    {σ τ : Π x : M, TangentSpace I x}
+    (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun x : M =>
+      TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x (σ x)))
+    (hτ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun x : M =>
+      TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x (τ x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+        (raisedKoszulVec (I := I) g₀ g₁ x (σ x) (τ x))) := by
+  have hconn : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (σ x) (τ x))) :=
+    PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ hσ hτ
+  have hraise : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+        (sharpFlatRaiseEndo (I := I) g₀ g₁ x
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (σ x) (τ x)))) :=
+    ContMDiff.clm_bundle_apply (b := id)
+      (sharpFlatRaiseEndo_contMDiff (I := I) g₀ g₁) hconn
+  refine hraise.congr (fun x => ?_)
+  rw [raisedKoszulVec_apply]
+  rfl
+
+set_option linter.unusedSectionVars false in
+private lemma raisedKoszul_tensorCovDerivAt_homSplit
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+        tensorCovDerivAt (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) x (X x))
+        (om x) =
+      Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+          (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) x (X x) -
+        raisedKoszulPairing (I := I) g₀ g₁ x
+          (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+            (fun y : M => om y) x (X x)) := by
+  have hτ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 1 2 I z) y
+        ((raisedKoszul (I := I) g₀ g₁).toSection y)) x :=
+    (raisedKoszul (I := I) g₀ g₁).toSection.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hw : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E))
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SSpace 1 I z) y (om y)) x :=
+    om.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hV : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (X y)) x :=
+    X.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  rw [tensorCovDerivAt_def (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) x (X x)]
+  have hsplit := TensorRSNabla.tensorRSCovariantDerivative_apply_of_mdifferentiableAt
+    (I := I) (M := M) 1 2 (LeviCivita (I := I) g₀)
+    (fun y : M => (raisedKoszul (I := I) g₀ g₁).toSection y) (fun y : M => om y)
+    (fun y : M => X y) hτ hw hV
+  have hval : (fun y : M =>
+        (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 2 I y from
+          (raisedKoszul (I := I) g₀ g₁).toSection y) (om y)) =
+      (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) := by
+    funext y
+    rw [raisedKoszul_toSection]
+    rfl
+  rw [hsplit, hval]
+  rfl
+
+set_option linter.unusedSectionVars false in
+private lemma tensorSectionMDiffAt_raisedKoszulPairing
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯) (x : M) :
+    Integral.Connection.TensorSectionMDiffAt (I := I) 2
+      (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) x := by
+  classical
+  have hval : (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) =
+      (fun y : M => (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 2 I y from
+        (raisedKoszul (I := I) g₀ g₁).toSection y) (om y)) := by
+    funext y
+    rw [raisedKoszul_toSection]
+    rfl
+  rw [hval]
+  unfold Integral.Connection.TensorSectionMDiffAt
+  have hτ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel 1 2 ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel 1 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 1 2 I z) y
+        ((raisedKoszul (I := I) g₀ g₁).toSection y)) x :=
+    (raisedKoszul (I := I) g₀ g₁).toSection.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hw : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E))
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SSpace 1 I z) y (om y)) x :=
+    om.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  exact MDifferentiableAt.clm_bundle_apply (𝕜 := ℝ)
+    (F₁ := Tensor0SModel 1 ℝ E) (F₂ := Tensor0SModel 2 ℝ E)
+    (E₁ := fun y : M => Tensor0SSpace 1 I y)
+    (E₂ := fun y : M => Tensor0SSpace 2 I y)
+    (IM := I) (IB := I)
+    (b := id)
+    (ϕ := fun y : M => (show Tensor0SSpace 1 I y →L[ℝ] Tensor0SSpace 2 I y from
+      (raisedKoszul (I := I) g₀ g₁).toSection y))
+    (v := fun y : M => om y) hτ hw
+
 theorem cotangentToCLMField_contMDiff
     (Dsec : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun x : M => Tensor0SSpace 1 I x)) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -1084,6 +1199,258 @@ private lemma toModel_tensor0SOne_eq_cotangentToCLM (x : M)
   rw [cotangentToCLM_apply_vec]
   congr 1
   funext i; fin_cases i; rfl
+
+set_option linter.unusedSectionVars false in
+private lemma raisedKoszulPairing_covariantDerivative02_eval
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+          (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) x (X x))
+        (Fin.cons (Y x) ![Z x]) =
+      Integral.Connection.directionalDeriv (I := I)
+          (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x)
+        - om x (fun _ : Fin 1 =>
+            raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x))
+        - om x (fun _ : Fin 1 =>
+            raisedKoszulVec (I := I) g₀ g₁ x (Y x) ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
+      := by
+  classical
+  set V : Π b : M, Tensor0SSpace 2 I b :=
+    fun b => raisedKoszulPairing (I := I) g₀ g₁ b (om b) with hVdef
+  have hV : Integral.Connection.TensorSectionMDiffAt (I := I) 2 V x :=
+    tensorSectionMDiffAt_raisedKoszulPairing (I := I) g₀ g₁ om x
+  set W₁ : Π b : M, Tensor0SSpace 1 I b :=
+    fun b => Tensor0SNabla.curriedSection I M V b (Y b) with hW₁
+  have hW₁_mdiff : Integral.Connection.TensorSectionMDiffAt (I := I) 1 W₁ x := by
+    have hY' : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+        (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
+      Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+    unfold Integral.Connection.TensorSectionMDiffAt
+    have hCurried := Integral.Connection.mdifferentiableAt_curriedSection_of_section
+      (I := I) (M := M) 1 V hV
+    exact MDifferentiableAt.clm_bundle_apply (𝕜 := ℝ)
+      (F₁ := E) (F₂ := Tensor0SModel 1 ℝ E)
+      (E₁ := fun b : M => TangentSpace I b)
+      (E₂ := fun b : M => Tensor0SSpace 1 I b)
+      (IM := I) (IB := I)
+      (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M V y)
+      (v := fun y : M => Y y) hCurried hY'
+  have hpeel1 := Integral.Connection.tensor0SCovariantDerivative_succ_consEval_peel
+    (I := I) (M := M) g₀ 1 V hV Y (X x) ![Z x]
+  have hpeel2 := Integral.Connection.tensor0SCovariantDerivative_succ_consEval_peel
+    (I := I) (M := M) g₀ 0 W₁ hW₁_mdiff Z (X x) (fun i => Fin.elim0 i)
+  have hbase : Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
+          (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (Z b)) x (X x))
+        (fun i => Fin.elim0 i) =
+      Integral.Connection.directionalDeriv (I := I)
+        (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x) := by
+    rw [Integral.Connection.tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
+      (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (Z b)) x (X x)]
+    rw [Integral.Connection.directionalDeriv_eq]
+    refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_
+    funext b
+    rw [Integral.Connection.scalarFn_eq_toModel_elim0 (I := I) (M := M)]
+    show Tensor0SSpace.toModel
+        (Tensor0SNabla.curriedSection I M W₁ b (Z b))
+        (fun i => Fin.elim0 i) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 0) (T := W₁)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+          (T := W₁ b) (v0 := Z b) (vs := (fun i => Fin.elim0 i))]
+    change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M V b (Y b))
+        (Fin.cons (Z b) (fun i => Fin.elim0 i)) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 1) (T := V)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+          (T := V b) (v0 := Y b) (vs := Fin.cons (Z b) (fun i => Fin.elim0 i))]
+    simp only [hVdef]
+    rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+    rfl
+  have hcorr2 : Tensor0SSpace.toModel (W₁ x)
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) (fun i => Fin.elim0 i)) =
+      om x (fun _ : Fin 1 =>
+        raisedKoszulVec (I := I) g₀ g₁ x (Y x) ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
+      := by
+    have hW₁x : W₁ x = Tensor0SNabla.curriedSection I M V x (Y x) := rfl
+    rw [hW₁x, Tensor0SNabla.curriedSection_apply]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := V x) (v0 := Y x)
+      (vs := Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
+        (fun i => Fin.elim0 i))]
+    simp only [hVdef]
+    rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+    rfl
+  have hcorr1 : Tensor0SSpace.toModel (V x)
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x))
+          (Fin.cons (Z x) (fun i => Fin.elim0 i))) =
+      om x (fun _ : Fin 1 =>
+        raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x))
+      := by
+    simp only [hVdef]
+    rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+    rfl
+  rw [hpeel1]
+  rw [show (fun y : M => Tensor0SNabla.curriedSection I M V y (Y y)) = W₁ from rfl]
+  rw [show (![Z x] : Fin 1 → E) = Fin.cons (Z x) (fun i => Fin.elim0 i) from by
+    funext k; refine Fin.cases rfl (fun j => j.elim0) k]
+  rw [hpeel2, hbase, hcorr2, hcorr1]
+  ring
+
+set_option linter.unusedSectionVars false in
+private lemma raisedKoszulPairing_covariantDerivative01_eval
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    raisedKoszulPairing (I := I) g₀ g₁ x
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+          (fun y : M => om y) x (X x))
+        (Fin.cons (Y x) ![Z x]) =
+      Integral.Connection.directionalDeriv (I := I)
+          (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x)
+        - om x (fun _ : Fin 1 =>
+            (LeviCivita (I := I) g₀).toFun
+              (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)) := by
+  classical
+  have hWYZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+        (raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) :=
+    raisedKoszulVec_contMDiff (I := I) g₀ g₁ Y.contMDiff Z.contMDiff
+  set WYZ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ContMDiffSection.mk (fun b : M => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) hWYZ with hWYZdef
+  have hom_mdiff : Integral.Connection.TensorSectionMDiffAt (I := I) 1 (fun y : M => om y) x :=
+    om.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hpeel := Integral.Connection.tensor0SCovariantDerivative_succ_consEval_peel
+    (I := I) (M := M) g₀ 0 (fun y : M => om y) hom_mdiff WYZ (X x) (fun i => Fin.elim0 i)
+  have hLHS : raisedKoszulPairing (I := I) g₀ g₁ x
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+          (fun y : M => om y) x (X x))
+        (Fin.cons (Y x) ![Z x]) =
+      Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+          (fun y : M => om y) x (X x))
+        (Fin.cons (WYZ x) (fun i => Fin.elim0 i)) := by
+    rw [raisedKoszulPairing_apply]
+    rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]
+    refine congrArg _ ?_
+    funext k
+    refine Fin.cases ?_ (fun j => j.elim0) k
+    rw [hWYZdef]
+    rfl
+  rw [hLHS, hpeel]
+  have hbase : Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)
+          (fun y : M => Tensor0SNabla.curriedSection I M (fun y : M => om y) y (WYZ y)) x (X x))
+        (fun i => Fin.elim0 i) =
+      Integral.Connection.directionalDeriv (I := I)
+        (fun b : M => om b (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b))) x (X x) := by
+    rw [Integral.Connection.tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
+      (fun y : M => Tensor0SNabla.curriedSection I M (fun y : M => om y) y (WYZ y)) x (X x)]
+    rw [Integral.Connection.directionalDeriv_eq]
+    refine congrArg (fun f => (mfderiv I 𝓘(ℝ, ℝ) f x) (X x)) ?_
+    funext b
+    rw [Integral.Connection.scalarFn_eq_toModel_elim0 (I := I) (M := M)]
+    show Tensor0SSpace.toModel
+        (Tensor0SNabla.curriedSection I M (fun y : M => om y) b (WYZ b))
+        (fun i => Fin.elim0 i) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 0) (T := fun y : M => om y)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := om b) (v0 := WYZ b) (vs := (fun i => Fin.elim0 i))]
+    refine congrArg _ ?_
+    funext k
+    refine Fin.cases ?_ (fun j => j.elim0) k
+    rw [hWYZdef]
+    rfl
+  have hcorr : Tensor0SSpace.toModel ((fun y : M => om y) x)
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => WYZ b) x (X x)) (fun i => Fin.elim0 i)) =
+      om x (fun _ : Fin 1 =>
+        (LeviCivita (I := I) g₀).toFun
+          (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)) := by
+    change Tensor0SSpace.toModel (om x)
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => WYZ b) x (X x))
+          (fun i => Fin.elim0 i)) = _
+    refine congrArg _ ?_
+    funext k
+    refine Fin.cases ?_ (fun j => j.elim0) k
+    rw [hWYZdef]
+    rfl
+  rw [hbase, hcorr]
+
+def covDerivRaisedKoszulVec (g₀ g₁ : SmoothRiemannianMetric I M)
+    (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
+  (LeviCivita (I := I) g₀).toFun (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)
+    - raisedKoszulVec (I := I) g₀ g₁ x ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
+    - raisedKoszulVec (I := I) g₀ g₁ x (Y x)
+        ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
+
+set_option linter.unusedSectionVars false in
+theorem raisedKoszul_covGrad_eq_covDerivRaisedKoszulVec
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (covGrad (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁)).toSection x)
+          (om x))
+        (Fin.cons (X x) (Fin.cons (Y x) ![Z x])) =
+      om x (fun _ : Fin 1 => covDerivRaisedKoszulVec (I := I) g₀ g₁ X Y Z x) := by
+  classical
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) x
+    (om x) (Fin.cons (X x) (Fin.cons (Y x) ![Z x]))]
+  rw [show (Fin.cons (X x) (Fin.cons (Y x) ![Z x]) : Fin 3 → TangentSpace I x) 0 = X x from rfl]
+  rw [show Matrix.vecTail (Fin.cons (X x) (Fin.cons (Y x) ![Z x]) : Fin 3 → TangentSpace I x)
+        = Fin.cons (Y x) ![Z x] from by
+      funext k; simp only [Matrix.vecTail, Function.comp]
+      refine Fin.cases rfl (fun j => ?_) k
+      refine Fin.cases rfl (fun j' => ?_) j
+      exact j'.elim0]
+  rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+      tensorCovDerivAt (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) x (X x)) (om x)
+      = _ from raisedKoszul_tensorCovDerivAt_homSplit (I := I) g₀ g₁ om X x]
+  rw [show Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+            (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) x (X x) -
+          raisedKoszulPairing (I := I) g₀ g₁ x
+            (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+              (fun y : M => om y) x (X x)))
+        (Fin.cons (Y x) ![Z x]) =
+      Tensor0SSpace.toModel
+          (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+            (fun y : M => raisedKoszulPairing (I := I) g₀ g₁ y (om y)) x (X x))
+          (Fin.cons (Y x) ![Z x])
+        - Tensor0SSpace.toModel
+            (raisedKoszulPairing (I := I) g₀ g₁ x
+              (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+                (fun y : M => om y) x (X x)))
+            (Fin.cons (Y x) ![Z x]) from by
+      rw [Tensor0SSpace.toModel_sub]; rfl]
+  rw [raisedKoszulPairing_covariantDerivative02_eval (I := I) g₀ g₁ om X Y Z x]
+  rw [show Tensor0SSpace.toModel
+        (raisedKoszulPairing (I := I) g₀ g₁ x
+          (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+            (fun y : M => om y) x (X x)))
+        (Fin.cons (Y x) ![Z x]) =
+      raisedKoszulPairing (I := I) g₀ g₁ x
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 1 (LeviCivita (I := I) g₀)
+          (fun y : M => om y) x (X x))
+        (Fin.cons (Y x) ![Z x]) from rfl]
+  rw [raisedKoszulPairing_covariantDerivative01_eval (I := I) g₀ g₁ om X Y Z x]
+  have hvec : covDerivRaisedKoszulVec (I := I) g₀ g₁ X Y Z x =
+      (LeviCivita (I := I) g₀).toFun (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)
+        - raisedKoszulVec (I := I) g₀ g₁ x
+            ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
+        - raisedKoszulVec (I := I) g₀ g₁ x (Y x)
+            ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) := rfl
+  rw [show (fun _ : Fin 1 => covDerivRaisedKoszulVec (I := I) g₀ g₁ X Y Z x)
+      = (fun _ : Fin 1 =>
+          (LeviCivita (I := I) g₀).toFun (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x)
+            - raisedKoszulVec (I := I) g₀ g₁ x
+                ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
+            - raisedKoszulVec (I := I) g₀ g₁ x (Y x)
+                ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
+      from by funext k; rw [hvec]]
+  rw [tensor0SOne_apply_sub' (I := I) x (om x), tensor0SOne_apply_sub' (I := I) x (om x)]
+  ring
 
 set_option maxHeartbeats 6400000 in
 theorem covGrad_sharpFlatEndoCc_eq_arms (g₀ g₁ : SmoothRiemannianMetric I M) :
