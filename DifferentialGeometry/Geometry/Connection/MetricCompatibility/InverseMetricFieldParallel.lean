@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
+import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 
 /-!
 # The inverse-metric sharp field is `∇`-parallel (the cometric parallelism `∇g⁻¹ = 0`)
@@ -57,7 +58,7 @@ set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
-open Bundle Manifold Set Filter
+open Bundle Manifold Set Filter FiberBundle
 open scoped Manifold Topology ContDiff BigOperators
 open Tensor0SBundle
 
@@ -162,6 +163,105 @@ theorem inverseMetricSharpField_covGrad_eq_zero (g : SmoothRiemannianMetric I M)
   rw [← hcore]
   rw [inverseMetricSharpFib_apply]
   congr 1
+
+private theorem dualToCotangent_add' {x : M}
+    (a b : Module.Dual ℝ (TangentSpace I x)) :
+    dualToCotangent (I := I) (a + b) =
+      dualToCotangent (I := I) a + dualToCotangent (I := I) b := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  rw [map_add]
+  rw [cotangentToDualLinear_apply, cotangentToDualLinear_apply, cotangentToDualLinear_apply]
+  rw [cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent,
+    cotangentToDual_dualToCotangent]
+
+theorem cotangentCov_leviCivita_connDiff
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
+    (hθ : MDiffAtCotangent (I := I) θ x)
+    (v w : TangentSpace I x) :
+    ((cotangentCov (LeviCivita (I := I) g₁)).toFun θ x v) w -
+        ((cotangentCov (LeviCivita (I := I) g₀)).toFun θ x v) w =
+      -θ x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v) := by
+  classical
+  set Y : Π b : M, TangentSpace I b := FiberBundle.extend E w with hYdef
+  have hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (Y y)) x :=
+    mdifferentiableAt_extend ..
+  have hYx : Y x = w := by rw [hYdef]; simp [FiberBundle.extend]
+  have hpair₁ := cotangentCov_dualPairing (LeviCivita (I := I) g₁) hθ hY v
+  have hpair₀ := cotangentCov_dualPairing (LeviCivita (I := I) g₀) hθ hY v
+  have hsub : ((cotangentCov (LeviCivita (I := I) g₁)).toFun θ x v) (Y x) -
+        ((cotangentCov (LeviCivita (I := I) g₀)).toFun θ x v) (Y x) =
+      θ x ((LeviCivita (I := I) g₀).toFun Y x v) -
+        θ x ((LeviCivita (I := I) g₁).toFun Y x v) := by
+    have h := hpair₁.symm.trans hpair₀
+    linarith [h]
+  have hconn : PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) v =
+      (LeviCivita (I := I) g₁).toFun Y x v - (LeviCivita (I := I) g₀).toFun Y x v :=
+    PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := Y) hY v
+  rw [hYx] at hsub hconn
+  rw [hsub, hconn, map_sub]
+  ring
+
+theorem covGrad_inverseMetricSharpFib_cross
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (β : Π b : M, Tensor0SSpace 1 I b) {x : M}
+    (hβ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
+        ((inverseMetricSharpFib (I := I) g₁ y) (β y))) x)
+    (hβcot : MDiffAtCotangent (I := I)
+      (fun b : M => cotangentToCLM (I := I) (β b)) x)
+    (v : TangentSpace I x) :
+    (LeviCivita (I := I) g₀).toFun
+        (fun b : M => (inverseMetricSharpFib (I := I) g₁ b) (β b)) x v =
+      inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+              (fun b : M => cotangentToCLM (I := I) (β b)) x v))
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            ((inverseMetricSharpFib (I := I) g₁ x) (β x)) v
+        + inverseMetricSharpFib (I := I) g₁ x
+            (dualToCotangent (I := I)
+              (-(cotangentToCLM (I := I) (β x)).comp
+                  ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v)).toLinearMap) := by
+  classical
+  set X : Π b : M, TangentSpace I b :=
+    fun b : M => (inverseMetricSharpFib (I := I) g₁ b) (β b) with hX
+  set D : TangentSpace I x →L[ℝ] ℝ :=
+    -(cotangentToCLM (I := I) (β x)).comp
+        ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v) with hD
+  have hg₀ : (LeviCivita (I := I) g₀).toFun X x v =
+      (LeviCivita (I := I) g₁).toFun X x v -
+        PDE.DeTurck.connDiff (I := I) g₁ g₀ x (X x) v := by
+    have h := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := X) hβ v
+    rw [h]; abel
+  have hpar := inverseMetricSharpField_covGrad_eq_zero (I := I) g₁ β hβ v
+  have hbridge :
+      ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+          (fun b : M => cotangentToCLM (I := I) (β b)) x v).toLinearMap =
+        ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+            (fun b : M => cotangentToCLM (I := I) (β b)) x v).toLinearMap
+          + D.toLinearMap := by
+    refine LinearMap.ext (fun w => ?_)
+    have hb := cotangentCov_leviCivita_connDiff (I := I) g₀ g₁ hβcot v w
+    simp only [hD, LinearMap.add_apply, ContinuousLinearMap.coe_coe,
+      ContinuousLinearMap.neg_apply, ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.flip_apply]
+    linarith [hb]
+  have hsharp_split :
+      inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+              (fun b : M => cotangentToCLM (I := I) (β b)) x v).toLinearMap) =
+        inverseMetricSharpFib (I := I) g₁ x
+            (dualToCotangent (I := I)
+              ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+                (fun b : M => cotangentToCLM (I := I) (β b)) x v).toLinearMap)
+          + inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I) D.toLinearMap) := by
+    rw [hbridge, dualToCotangent_add', map_add]
+  rw [hg₀, hpar, hsharp_split, hX, hD]
+  abel
 
 end Connection
 end Integral
