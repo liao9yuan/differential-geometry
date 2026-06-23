@@ -129,6 +129,13 @@ def gInvDiffRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     gInvDiffRaisedEndo (I := I) g₀ g₀ x v = 0 := by
   rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM, sub_self]
 
+lemma gInvDiffRaisedEndo_eq_sharp_sub (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvDiffRaisedEndo (I := I) g₀ g₁ x v =
+      inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v)
+        - inverseMetricSharpFib (I := I) g₀ x (g0FlatCLM (I := I) g₀ x v) := by
+  rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]
+
 lemma inner_g1_gInvDiffRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g₁.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) w =
