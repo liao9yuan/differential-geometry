@@ -6388,6 +6388,55 @@ theorem symmAbsorbedOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiema
       (Equiv.swap (0 : Fin 2) 1) S 0)) x v
 
 
+set_option linter.unusedSectionVars false in
+
+theorem connDiffQuad_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (p q r : TangentSpace I x) :
+    PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x p q) r
+      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+        (PDE.DeTurck.connDiff (I := I) g₁' g₀ x p q) r =
+      PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (PDE.DeTurck.connDiff (I := I) g₁ g₁' x p q) r
+        + PDE.DeTurck.connDiff (I := I) g₁ g₁' x
+            (PDE.DeTurck.connDiff (I := I) g₁' g₀ x p q) r := by
+  rw [csArm_split (I := I) g₀ g₁ g₁' x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x p q)
+        (PDE.DeTurck.connDiff (I := I) g₁' g₀ x p q) r]
+  rw [connDiff_endpoint_cocycle (I := I) g₀ g₁ g₁' x p q]
+
+set_option linter.unusedSectionVars false in
+
+theorem block3LegSummand_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (Xv0 Xv1 Xei : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁) Xv0 Xv1 x) (Xei x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁) Xei Xv1 x) (Xv0 x))
+      - (PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+          (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁') Xv0 Xv1 x) (Xei x)
+        - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+          (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁') Xei Xv1 x) (Xv0 x)) =
+      (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₁' x (Xv1 x) (Xv0 x)) (Xei x)
+          + PDE.DeTurck.connDiff (I := I) g₁ g₁' x
+              (PDE.DeTurck.connDiff (I := I) g₁' g₀ x (Xv1 x) (Xv0 x)) (Xei x))
+        - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+              (PDE.DeTurck.connDiff (I := I) g₁ g₁' x (Xv1 x) (Xei x)) (Xv0 x)
+            + PDE.DeTurck.connDiff (I := I) g₁ g₁' x
+                (PDE.DeTurck.connDiff (I := I) g₁' g₀ x (Xv1 x) (Xei x)) (Xv0 x)) := by
+  have h1 := connDiffQuad_telescope (I := I) g₀ g₁ g₁' x (Xv1 x) (Xv0 x) (Xei x)
+  have h2 := connDiffQuad_telescope (I := I) g₀ g₁ g₁' x (Xv1 x) (Xei x) (Xv0 x)
+  change (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Xv1 x) (Xv0 x)) (Xei x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Xv1 x) (Xei x)) (Xv0 x))
+      - (PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+          (PDE.DeTurck.connDiff (I := I) g₁' g₀ x (Xv1 x) (Xv0 x)) (Xei x)
+        - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+          (PDE.DeTurck.connDiff (I := I) g₁' g₀ x (Xv1 x) (Xei x)) (Xv0 x)) = _
+  rw [sub_sub_sub_comm, h1, h2]
+
 end TensorSpectral
 end Parabolic
 end Analysis
