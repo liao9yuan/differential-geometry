@@ -960,6 +960,46 @@ theorem norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_one
     _ ≤ C * (1 + R) := by
         refine mul_le_mul_of_nonneg_left ?_ hC0; linarith
 
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+theorem covGrad_gInvDiffSlotCoeff_eq_covGrad_slotInsertEndoCc
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) =
+      covGrad (I := I) (M := M) g₀ 2 2
+        (slotInsertEndoCc (I := I) (M := M) g₀ 1 (gInvDiffRaisedEndoField (I := I) g₀ g₁)) := by
+  rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g₀ g₁]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+theorem covGrad_gInvDiffSlotCoeff_toSection_eval
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 3 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (covGrad (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) D) v =
+      Tensor0SSpace.toModel
+        ((slotInsertEndoFib (I := I) (M := M) 2 0 x
+            ((endoCovariantDerivative (I := I) (M := M) g₀)
+              (gInvDiffRaisedEndoField (I := I) g₀ g₁) x (v 0))) D)
+        (Matrix.vecTail v) := by
+  rw [covGrad_gInvDiffSlotCoeff_eq_covGrad_slotInsertEndoCc (I := I) g₀ g₁]
+  exact covGrad_slotInsertEndoCc_toSection_eq (I := I) (M := M) g₀ 1
+    (gInvDiffRaisedEndoField (I := I) g₀ g₁) x D v
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+theorem covGrad_gInvDiffSlotCoeff_endoCov_apply
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
+    ((endoCovariantDerivative (I := I) (M := M) g₀)
+        (gInvDiffRaisedEndoField (I := I) g₀ g₁) x v) (Y x) =
+      - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (gInvRaisedEndo (I := I) g₀ g₁ x (Y x)) v
+      + inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            (-(cotangentToCLM (I := I) (g0FlatCLM (I := I) g₀ x (Y x))).comp
+                ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x).flip v)).toLinearMap) :=
+  endoCov_gInvDiffRaisedField_apply (I := I) (M := M) g₀ g₁ Y x v
+
 end Connection
 end Integral
 end DifferentialGeometry
