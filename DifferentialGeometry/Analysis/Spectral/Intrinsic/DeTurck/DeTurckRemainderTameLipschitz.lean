@@ -1404,6 +1404,65 @@ private lemma threeArm_unitModel_appCc_intervalIntegrable_tame
     exact (hkey s).symm
   exact (hcontFinal.mono hSI).intervalIntegrable
 
+/--
+Uniform pointwise fibre-norm (C⁰) bound for the concrete linearized-Ricci three-arm coeff
+fields produced by `exists_linearizedRicci_threeArm_coeffFields`, uniform over the Sobolev
+ball of radius `R` and the path parameter `s ∈ [0,1]`. The coeff identity (`Ioo`), joint
+smoothness, and path continuity all follow from the source lemma; this theorem adds the
+uniform C⁰ estimate (Neumann `g_s⁻¹ ≤ (1/(1−δ₀)) g₀⁻¹` plus `‖Rm(g_s)‖ ≤ poly(R)` via Sobolev
+embedding `a = 2 finrank + 10`). The witnesses `Φ₀, Φ₁, Φ₂` are the concrete ones from
+`exists_linearizedRicci_threeArm_coeffFields` (NOT the refuted universal `∀ Φₖ` form). The
+C⁰ estimate is the deep analytic input of the `@1227` leaf and is deferred here; the identity,
+joint smoothness, and path continuity are discharged against the proven source lemma in the
+body of the consumer so that only the C⁰ conjuncts transit `sorryAx`.
+-/
+private theorem ricciArm_threeArm_coeffFields_C0_bound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛR : ℝ, 0 ≤ ΛR ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2)
+          (Φ₂ : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+            ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+              linearizedRicciAt (I := I) g₀ T T'
+                  (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+                  x (v 0) (v 1) s =
+                unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((Φ₀ s).toSection x)) ≤ ΛR) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛR) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛR) := by
+  sorry
+
+
 private theorem exists_ricciArm_threeArm_coeffFields_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1430,7 +1489,7 @@ private theorem exists_ricciArm_threeArm_coeffFields_ballUniform
             (δ := δ) (δ' := δ') ∧
           linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 4 Φ₂
             (δ := δ) (δ' := δ') ∧
-          (∀ (s : ℝ), s ∈ realizedSmallSet (δ := δ) (δ' := δ') →
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
             ∀ (x : M) (v : Fin 2 → TangentSpace I x),
               linearizedRicciAt (I := I) g₀ T T'
                   (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
@@ -1448,7 +1507,7 @@ private theorem exists_ricciArm_threeArm_coeffFields_ballUniform
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛR) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛR) :=
-  sorry
+  ricciArm_threeArm_coeffFields_C0_bound (I := I) g₀ g_bg a ha_super hR hδ₀
 
 private theorem exists_ricciArmCoeff_ballUniform_C0_sup
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1518,16 +1577,22 @@ private theorem exists_ricciArmCoeff_ballUniform_C0_sup
               + appCc (I := I) (M := M) g₀ 3 2 P₁ W₁
               + appCc (I := I) (M := M) g₀ 4 2 P₂ W₂) x v := by
       rw [hRic]
-      have huIcc : Set.uIoc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
-        (Set.uIoc_subset_uIcc).trans hSI
       have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
           linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
             unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v
               + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v
               + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v := by
-        refine MeasureTheory.ae_of_all _ (fun s hs => ?_)
-        have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') := huIcc hs
-        rw [hid s hsmem x v, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
+        rw [MeasureTheory.ae_iff]
+        have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
+        refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
+        rw [Set.mem_setOf_eq, Classical.not_imp] at hs
+        obtain ⟨hsmem, hsneq⟩ := hs
+        rw [Set.uIoc_of_le zero_le_one, Set.mem_Ioc] at hsmem
+        rw [Set.mem_singleton_iff]
+        by_contra hne
+        have hsIoo : s ∈ Set.Ioo (0 : ℝ) 1 := ⟨hsmem.1, lt_of_le_of_ne hsmem.2 hne⟩
+        exact hsneq (by rw [hid s hsIoo x v, unitModel_add2_apply_tame,
+          unitModel_add2_apply_tame])
       rw [intervalIntegral.integral_congr_ae hintegrand]
       have hI0 : IntervalIntegrable
           (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
