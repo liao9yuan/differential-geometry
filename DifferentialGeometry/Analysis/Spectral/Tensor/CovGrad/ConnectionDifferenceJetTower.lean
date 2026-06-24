@@ -944,6 +944,87 @@ def flatArmCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : SmoothCcT
 @[simp] lemma flatArmCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
     (flatArmCc (I := I) g₀ g₁ kind).toSection x = flatArmFib (I := I) g₀ g₁ kind x := rfl
 
+def omRecoverEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 1 where
+  toSection :=
+    { toFun := fun x : M => TensorRSSpace.ofCLM
+        ((g0FlatCLM (I := I) g₁ x).comp (inverseMetricSharpFib (I := I) g₀ x))
+      contMDiff_toFun := sharpFlatEndoCcFib_contMDiff (I := I) g₁ g₀ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+@[simp] lemma omRecoverEndoCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (omRecoverEndoCc (I := I) g₀ g₁).toSection x =
+      TensorRSSpace.ofCLM
+        ((g0FlatCLM (I := I) g₁ x).comp (inverseMetricSharpFib (I := I) g₀ x)) := rfl
+
+private lemma omRecoverEndoCc_apply_covec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 1 I x) :
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (omRecoverEndoCc (I := I) g₀ g₁).toSection x) D =
+      g0FlatCLM (I := I) g₁ x (inverseMetricSharpFib (I := I) g₀ x D) := by
+  rw [omRecoverEndoCc_toSection]
+  rfl
+
+private lemma sharpFlatEndoCc_toSection_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 1 I x) :
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (sharpFlatEndoCc (I := I) g₀ g₁).toSection x) D =
+      g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₁ x D) := by
+  rw [sharpFlatEndoCc_toSection]
+  rfl
+
+private lemma omRecoverEndoCc_comp_sharpFlatEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (omRecoverEndoCc (I := I) g₀ g₁).toSection x).comp
+      (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (sharpFlatEndoCc (I := I) g₀ g₁).toSection x) =
+      ContinuousLinearMap.id ℝ (Tensor0SSpace 1 I x) := by
+  apply ContinuousLinearMap.ext
+  intro om
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply]
+  rw [sharpFlatEndoCc_toSection_apply (I := I) g₀ g₁ x om]
+  rw [omRecoverEndoCc_apply_covec (I := I) g₀ g₁ x
+    (g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₁ x om))]
+  rw [inverseMetricSharpFib_g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₁ x om)]
+  rw [g0FlatCLM_inverseMetricSharpFib (I := I) g₁ x om]
+
+def flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : SmoothCcTensor g₀ 1 2 :=
+  appCcRS (I := I) (M := M) g₀ 1 1 2
+    (flatArmCc (I := I) g₀ g₁ kind) (omRecoverEndoCc (I := I) g₀ g₁)
+
+@[simp] lemma flatArmCoeffCc_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
+    (flatArmCoeffCc (I := I) g₀ g₁ kind).toSection x =
+      (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (flatArmCc (I := I) g₀ g₁ kind).toSection x).comp
+        (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (omRecoverEndoCc (I := I) g₀ g₁).toSection x) := by
+  rw [flatArmCoeffCc, appCcRS_toSection]
+
+set_option linter.unusedSectionVars false in
+theorem flatArmCc_eq_appCcRS_flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) :
+    flatArmCc (I := I) g₀ g₁ kind =
+      appCcRS (I := I) (M := M) g₀ 1 1 2
+        (flatArmCoeffCc (I := I) g₀ g₁ kind) (sharpFlatEndoCc (I := I) g₀ g₁) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCcRS_toSection, flatArmCoeffCc_toSection]
+  rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (flatArmCc (I := I) g₀ g₁ kind).toSection x).comp
+          (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (omRecoverEndoCc (I := I) g₀ g₁).toSection x))).comp
+        (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (sharpFlatEndoCc (I := I) g₀ g₁).toSection x)
+      = (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (flatArmCc (I := I) g₀ g₁ kind).toSection x).comp
+          ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+              (omRecoverEndoCc (I := I) g₀ g₁).toSection x).comp
+            (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+              (sharpFlatEndoCc (I := I) g₀ g₁).toSection x)) from
+    (ContinuousLinearMap.comp_assoc _ _ _).symm]
+  rw [omRecoverEndoCc_comp_sharpFlatEndoCc (I := I) g₀ g₁ x]
+  rw [ContinuousLinearMap.comp_id]
+
 theorem raisedKoszulVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     {σ τ : Π x : M, TangentSpace I x}
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (fun x : M =>
