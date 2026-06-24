@@ -2106,7 +2106,7 @@ private theorem exists_lieArm_threeArm_coeffFields_ballUniform
             (δ := δ) (δ' := δ') ∧
           linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 4 Φ₂
             (δ := δ) (δ' := δ') ∧
-          (∀ (s : ℝ), s ∈ realizedSmallSet (δ := δ) (δ' := δ') →
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
             ∀ (x : M) (v : Fin 2 → TangentSpace I x),
               linearizedDeTurckLieAt (I := I) g₀ g_bg T T'
                   (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
@@ -2190,16 +2190,22 @@ private theorem exists_lieArmCoeff_ballUniform_C0_sup
       lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie (I := I) g₀ g_bg T T'
         hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)
     rw [hLie]
-    have huIcc : Set.uIoc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
-      Set.uIoc_subset_uIcc.trans hSI
     have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
         linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
           unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v
             + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v
             + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v := by
-      refine MeasureTheory.ae_of_all _ (fun s hs => ?_)
-      have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') := huIcc hs
-      rw [hid s hsmem x v, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
+      rw [MeasureTheory.ae_iff]
+      have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
+      refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
+      rw [Set.mem_setOf_eq, Classical.not_imp] at hs
+      obtain ⟨hsmem, hsneq⟩ := hs
+      rw [Set.uIoc_of_le zero_le_one, Set.mem_Ioc] at hsmem
+      rw [Set.mem_singleton_iff]
+      by_contra hne
+      have hsIoo : s ∈ Set.Ioo (0 : ℝ) 1 :=
+        ⟨hsmem.1, lt_of_le_of_ne hsmem.2 hne⟩
+      exact hsneq (by rw [hid s hsIoo x v, unitModel_add2_apply_tame, unitModel_add2_apply_tame])
     rw [intervalIntegral.integral_congr_ae hintegrand]
     have hI0 : IntervalIntegrable
         (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
