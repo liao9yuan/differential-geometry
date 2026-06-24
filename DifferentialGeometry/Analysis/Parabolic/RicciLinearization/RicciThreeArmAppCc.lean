@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamLin
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.SecondCovGradChartHessian
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
+import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
@@ -222,6 +224,72 @@ def linearizedRicciArm0Field (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothC
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
     - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+
+noncomputable def linearizedRicciArm1Fib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SSpace 3 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
+  (show Tensor0SBundle.Tensor0SSpace 1 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+      raisedKoszulFib (I := I) g₀ g₁ x).comp
+    (cometricDoubleTraceFib (I := I) g₁ 1 x)
+
+set_option linter.unusedSectionVars false in
+
+@[simp] theorem linearizedRicciArm1Fib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SBundle.Tensor0SSpace 3 I x) :
+    linearizedRicciArm1Fib (I := I) g₀ g₁ x D =
+      (show Tensor0SBundle.Tensor0SSpace 1 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+          raisedKoszulFib (I := I) g₀ g₁ x)
+        (cometricDoubleTraceFib (I := I) g₁ 1 x D) := by
+  rw [linearizedRicciArm1Fib, ContinuousLinearMap.comp_apply]
+
+theorem linearizedRicciArm1Fib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) x
+        (linearizedRicciArm1Fib (I := I) g₀ g₁ x)) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun x : M => linearizedRicciArm1Fib (I := I) g₀ g₁ x)
+  intro Y
+  have hdt : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x
+        (cometricDoubleTraceFib (I := I) g₁ 1 x (Y x))) :=
+    ContMDiff.clm_bundle_apply (b := id)
+      (cometricDoubleTraceFib_contMDiff (I := I) g₁ 1) Y.contMDiff
+  have hkos : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x
+        ((show Tensor0SBundle.Tensor0SSpace 1 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+            raisedKoszulFib (I := I) g₀ g₁ x)
+          (cometricDoubleTraceFib (I := I) g₁ 1 x (Y x)))) :=
+    ContMDiff.clm_bundle_apply (b := id)
+      (raisedKoszulFib_contMDiff (I := I) g₀ g₁) hdt
+  refine hkos.congr (fun x => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) ?_
+  rw [linearizedRicciArm1Fib, ContinuousLinearMap.comp_apply]
+
+noncomputable def ricciArmOrder1KoszulCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 3 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace 3 2 I x from linearizedRicciArm1Fib (I := I) g₀ g₁ x)
+      contMDiff_toFun := linearizedRicciArm1Fib_contMDiff (I := I) g₀ g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+
+@[simp] theorem ricciArmOrder1KoszulCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁).toSection x =
+      (show Tensor0SBundle.TensorRSSpace 3 2 I x from linearizedRicciArm1Fib (I := I) g₀ g₁ x) := rfl
+
+def linearizedRicciArm1Field (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) : SmoothCcTensor g₀ 3 2 :=
+  ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
 def traceHessianSlotPerm : Equiv.Perm (Fin 4) :=
   Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3
@@ -906,6 +974,325 @@ private lemma riemannBiContrFibAppY_realizedFam_jointContMDiffOn
     · exact (Bcmm.equivFun.symm_apply_apply _).symm
   exact hfinal
 
+private lemma raisedKoszulVec_realizedFam_chartα
+    (g₀ : SmoothRiemannianMetric I M) (g₁ : SmoothRiemannianMetric I M) (α : M)
+    {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
+    (j k : Fin (Module.finrank ℝ E)) :
+    raisedKoszulVec (I := I) g₀ g₁ x
+        (chartBasisVecFiber (I := I) α j x)
+        (chartBasisVecFiber (I := I) α k x) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g₀ α x p l *
+            (∑ q : Fin (Module.finrank ℝ E),
+              (chartChristoffel (I := I) g₁ α k j q (extChartAt I α x) -
+                chartChristoffel (I := I) g₀ α k j q (extChartAt I α x)) *
+                chartGramMatrix (I := I) g₁ α x q l)) •
+          chartBasisVecFiber (I := I) α p x := by
+  classical
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  set W : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+    (chartBasisVecFiber (I := I) α j x) (chartBasisVecFiber (I := I) α k x) with hW
+  set cvx : TangentSpace I x →ₗ[ℝ] ℝ := (g₁.inner x W).toLinearMap with hcvx
+  have hraisedeq : raisedKoszulVec (I := I) g₀ g₁ x
+        (chartBasisVecFiber (I := I) α j x) (chartBasisVecFiber (I := I) α k x) =
+      metricSharp (I := I) g₀ x cvx := by
+    rw [raisedKoszulVec_apply, inverseMetricSharpFib_apply]
+    refine congrArg (fun t => metricSharp (I := I) g₀ x t) ?_
+    ext w
+    rw [cotangentToDualLinear_apply,
+      DifferentialGeometry.Analysis.Sobolev.TensorHilbert.cotangentToDual_g0FlatCLM]
+    rfl
+  rw [hraisedeq]
+  have hlocal := metricSharpChartLocal_eq_metricSharp (I := I) g₀ α (fun _ : M => cvx) hxbase
+  rw [← hlocal]
+  rw [metricSharpChartLocal]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  congr 1
+  rw [metricSharpChartCoeff_def]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  congr 1
+  show cvx (chartBasisVecFiber (I := I) α l x) = _
+  rw [hcvx]
+  change g₁.inner x W (chartBasisVecFiber (I := I) α l x) = _
+  rw [hW, DifferentialGeometry.PDE.DeTurck.connDiff_chartBasis_pair_eq_sum (I := I) g₁ g₀ α hx j k]
+  rw [map_sum, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun q _ => ?_)
+  rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+  rw [g_inner_eq_chartGramMatrix_basis (I := I) g₁ α x q l]
+
+private lemma genJointGram_const_g0
+    (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
+    GenJointGram (I := I) (fun _ : ℝ => g₀) α S := by
+  refine ⟨?_, ?_⟩
+  · intro a b s₀ y₀ _hs hy
+    have hsnd : ContDiffAt ℝ ∞ (Prod.snd : ℝ × E → E) (s₀, y₀) := contDiffAt_snd
+    exact (((chartGramOnE_contDiffOn (I := I) g₀ α a b).mono interior_subset).contDiffAt
+      (isOpen_interior.mem_nhds hy)).comp (s₀, y₀) hsnd
+  · intro s₀ _ x hx
+    exact chartGramMatrix_det_pos (I := I) g₀ α hx
+
+private lemma chartChristoffel_g0_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartChristoffel (I := I) g₀ α i j k (extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ S) := by
+  classical
+  have hG := genJointGram_const_g0 (I := I) g₀ α (S := S)
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ S) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_christoffel (I := I) (fun _ : ℝ => g₀) α hG i j k hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartChristoffel (I := I) g₀ α i j k r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ S) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
+
+private lemma chartInvGramMatrix_g0_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartInvGramMatrix (I := I) g₀ α p.1 i j)
+      ((chartAt H α).source ×ˢ S) := by
+  classical
+  have hG := genJointGram_const_g0 (I := I) g₀ α (S := S)
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ S) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_invGram (I := I) (fun _ : ℝ => g₀) α hG i j hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartInvGramOnE (I := I) g₀ α i j r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ S) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  refine (hentryM.comp_contMDiffWithinAt p hmoveAt).congr ?_ ?_
+  · intro q hq
+    have hqx : q.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hq.1
+    rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
+  · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
+
+private lemma omAppChartBasisVec_jointContMDiffOn
+    (om : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E, fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x⟯)
+    (α : M) (p : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun q : M × ℝ => (om q.1) (fun _ : Fin 1 => chartBasisVecFiber (I := I) α p q.1))
+      ((chartAt H α).source ×ˢ S) := by
+  classical
+  intro p₀ hp₀
+  have hOmon : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) q.1 (om q.1))
+      ((chartAt H α).source ×ˢ S) :=
+    (om.contMDiff.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
+  have hOmAt := hOmon p₀ hp₀
+  have hvbasis : ∀ i : Fin 1, ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
+        (![fun b : M => chartBasisVecFiber (I := I) α p b] i q.1))
+      ((chartAt H α).source ×ˢ S) p₀ := by
+    intro i
+    fin_cases i
+    exact (chartBasisVec_jointContMDiffOn (I := I) α p p₀
+      ⟨hp₀.1, Set.mem_univ _⟩).mono (fun q hq => ⟨hq.1, Set.mem_univ _⟩)
+  have happly := TensorMultilinear.contMDiffWithinAt_section_apply_prod (I := I) 1
+    (s := (chartAt H α).source ×ˢ S) (p₀ := p₀)
+    (fun b : M => om b) hOmAt
+    (![fun b : M => chartBasisVecFiber (I := I) α p b]) hvbasis
+  have hcoe : ∀ q : M × ℝ,
+      Tensor0SBundle.Tensor0SSpace.toModel (om q.1)
+          (fun i : Fin 1 => ![fun b : M => chartBasisVecFiber (I := I) α p b] i q.1) =
+        (om q.1) (fun _ : Fin 1 => chartBasisVecFiber (I := I) α p q.1) := by
+    intro q
+    rw [Tensor0SBundle.Tensor0SSpace.toModel]
+    rw [tensor0SSpace_continuousLinearEquiv_apply]
+    refine congrArg (fun w : Fin 1 → TangentSpace I q.1 => (om q.1) w) ?_
+    funext i
+    fin_cases i
+    rfl
+  refine happly.congr_of_eventuallyEq ?_ ?_
+  · filter_upwards [self_mem_nhdsWithin] with q _
+    exact (hcoe q).symm
+  · exact (hcoe p₀).symm
+
+private lemma raisedKoszulFibAppOm_chartCoord_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (om : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E, fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x⟯)
+    (α : M) (σ : Fin 2 → Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => (om p.1) (fun _ : Fin 1 =>
+        raisedKoszulVec (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1
+          (chartBasisVecFiber (I := I) α (σ 0) p.1)
+          (chartBasisVecFiber (I := I) α (σ 1) p.1)))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  have hcomb : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => ∑ r : Fin (Module.finrank ℝ E),
+        (∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g₀ α p.1 r l *
+            (∑ q : Fin (Module.finrank ℝ E),
+              (chartChristoffel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α (σ 1) (σ 0) q
+                  (extChartAt I α p.1) -
+                chartChristoffel (I := I) g₀ α (σ 1) (σ 0) q (extChartAt I α p.1)) *
+                chartGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 q l)) *
+          (om p.1) (fun _ : Fin 1 => chartBasisVecFiber (I := I) α r p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    refine contMDiffOn_finset_sum (fun r _ => ?_)
+    refine ContMDiffOn.mul ?_ (omAppChartBasisVec_jointContMDiffOn (I := I) om α r)
+    refine contMDiffOn_finset_sum (fun l _ => ?_)
+    refine (chartInvGramMatrix_g0_jointContMDiffOn (I := I) g₀ α r l).mul ?_
+    refine contMDiffOn_finset_sum (fun q _ => ?_)
+    refine ContMDiffOn.mul ?_ (realizedFam_chartGramMatrix_jointContMDiffOn (I := I) g₀ T T' hδ hδ' α q l)
+    refine ContMDiffOn.sub ?_ ?_
+    · have hΓs := realizedFam_chartChristoffel_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
+        α (σ 1) (σ 0) q
+      exact hΓs.mono (fun z hz => ⟨hz.1, hz.2⟩)
+    · exact chartChristoffel_g0_jointContMDiffOn (I := I) g₀ α (σ 1) (σ 0) q
+  refine hcomb.congr (fun p hp => ?_)
+  obtain ⟨hx, _hs⟩ := hp
+  have hxgood : p.1 ∈ chartLeviCivitaGoodSet (I := I) α := by
+    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α, extChartAt_source (I := I)]
+    exact hx
+  rw [raisedKoszulVec_realizedFam_chartα (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2)
+    α hxgood (σ 0) (σ 1)]
+  set φ : TangentSpace I p.1 →L[ℝ] ℝ :=
+    continuousMultilinearCurryFin1 ℝ (TangentSpace I p.1) ℝ (om p.1) with hφ
+  have hφapply : ∀ v : TangentSpace I p.1, (om p.1) (fun _ : Fin 1 => v) = φ v := by
+    intro v; rw [hφ, continuousMultilinearCurryFin1_apply]; rfl
+  rw [hφapply]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun r _ => ?_)
+  rw [map_smul, smul_eq_mul, hφapply, mul_comm]
+
+private lemma raisedKoszulFibAppOm_realizedFam_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (om : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E, fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x⟯) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1
+        ((show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+            raisedKoszulFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1) (om p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+  set gfam : ℝ → SmoothRiemannianMetric I M := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s
+    with hgfam
+  set S := realizedSmallSet (δ := δ) (δ' := δ') with hS
+  intro p₀ hp₀
+  set α := p₀.1 with hα
+  set e := trivializationAt (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) α with he
+  set Bcmm := continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2 with hBcmm
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  have hαsrc : α ∈ (chartAt H α).source := mem_chart_source H α
+  have hαbaseT : α ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    mem_baseSet_trivializationAt E (TangentSpace I) α
+  have hαbase : α ∈ e.baseSet := by
+    rw [he]; exact mem_baseSet_trivializationAt _ _ α
+  have hnhd : (chartAt H α).source ×ˢ S ∈ nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S) := by
+    refine mem_nhdsWithin.mpr ⟨(chartAt H α).source ×ˢ S,
+      (chartAt H α).open_source.prod realizedSmallSet_isOpen, ⟨hαsrc, hp₀.2⟩, fun q hq => hq.1⟩
+  have hcoordEach : ∀ σ : Fin 2 → Fin (Module.finrank ℝ E),
+      ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => Bcmm.repr
+          (e ⟨p.1, (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+            raisedKoszulFib (I := I) g₀ (gfam p.2) p.1) (om p.1)⟩).2 σ)
+        ((Set.univ : Set M) ×ˢ S) p₀ := by
+    intro σ
+    have hscal := raisedKoszulFibAppOm_chartCoord_jointContMDiffOn (I := I) g₀ T T' hδ hδ' om α σ
+    have hscalAt := (hscal p₀ ⟨hαsrc, hp₀.2⟩).mono_of_mem_nhdsWithin hnhd
+    have hreadout : ∀ {q : M × ℝ}, q.1 ∈ e.baseSet →
+        Bcmm.repr (e ⟨q.1, (show Tensor0SBundle.Tensor0SSpace 1 I q.1 →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 2 I q.1 from
+          raisedKoszulFib (I := I) g₀ (gfam q.2) q.1) (om q.1)⟩).2 σ =
+          (om q.1) (fun _ : Fin 1 => raisedKoszulVec (I := I) g₀ (gfam q.2) q.1
+            (chartBasisVecFiber (I := I) α (σ 0) q.1)
+            (chartBasisVecFiber (I := I) α (σ 1) q.1)) := by
+      intro q hqbase
+      rw [continuousMultilinearMap_basis_repr]
+      have hcoe : (e ⟨q.1, (show Tensor0SBundle.Tensor0SSpace 1 I q.1 →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 2 I q.1 from
+          raisedKoszulFib (I := I) g₀ (gfam q.2) q.1) (om q.1)⟩).2 =
+          (e.linearMapAt ℝ q.1) ((show Tensor0SBundle.Tensor0SSpace 1 I q.1 →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 2 I q.1 from
+            raisedKoszulFib (I := I) g₀ (gfam q.2) q.1) (om q.1)) :=
+        (congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e) hqbase) _).symm
+      rw [hcoe]
+      have happly := TensorMultilinear.tensor0SBundle_linearMapAt_apply_of_mem (I := I) α q.1 hqbase
+        ((show Tensor0SBundle.Tensor0SSpace 1 I q.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I q.1 from
+          raisedKoszulFib (I := I) g₀ (gfam q.2) q.1) (om q.1))
+        (fun j => (chartModelBasis E) (σ j))
+      rw [tensor0SSpace_continuousLinearEquiv_symm_apply] at happly
+      rw [happly]
+      rw [raisedKoszulFib_apply]
+      rw [show (fun j => (trivializationAt E (TangentSpace I) α).symmL ℝ q.1
+            ((chartModelBasis E) (σ j))) =
+          (fun j => chartBasisVecFiber (I := I) α (σ j) q.1) from by
+        funext j; rfl]
+      rfl
+    refine hscalAt.congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [hnhd] with q hq
+      have hqbaseT : q.1 ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+        rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]; exact hq.1
+      have hqbase : q.1 ∈ e.baseSet := by rw [he]; exact hqbaseT
+      exact hreadout hqbase
+    · exact hreadout hαbase
+  have hcoordVec : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ))
+      𝓘(ℝ, (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ) ∞
+      (fun p : M × ℝ => fun σ : Fin 2 → Fin (Module.finrank ℝ E) =>
+        Bcmm.repr (e ⟨p.1, (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+          raisedKoszulFib (I := I) g₀ (gfam p.2) p.1) (om p.1)⟩).2 σ)
+      ((Set.univ : Set M) ×ˢ S) p₀ :=
+    contMDiffWithinAt_pi_space.mpr (fun σ => hcoordEach σ)
+  have hfinal : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E) ∞
+      (fun p : M × ℝ => (e ⟨p.1, (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        raisedKoszulFib (I := I) g₀ (gfam p.2) p.1) (om p.1)⟩).2)
+      ((Set.univ : Set M) ×ˢ S) p₀ := by
+    have hequiv := (Bcmm.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap.contMDiffAt
+      (x := Bcmm.equivFun
+        (e ⟨p₀.1, (show Tensor0SBundle.Tensor0SSpace 1 I p₀.1 →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 2 I p₀.1 from
+          raisedKoszulFib (I := I) g₀ (gfam p₀.2) p₀.1) (om p₀.1)⟩).2)).comp_contMDiffWithinAt
+      p₀ hcoordVec
+    refine hequiv.congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [self_mem_nhdsWithin] with q _
+      exact (Bcmm.equivFun.symm_apply_apply _).symm
+    · exact (Bcmm.equivFun.symm_apply_apply _).symm
+  exact hfinal
+
 theorem ricciArmOrder0RiemannCoeff_realizedFam_jointContMDiff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -948,6 +1335,53 @@ theorem linearizedRicci_arm0Field_jointSmooth (g₀ : SmoothRiemannianMetric I M
     (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1 t) ?_
   rw [linearizedRicciArm0Field, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply]
+
+theorem raisedKoszulFib_realizedFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 1 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 1 2 I z) p.1
+        ((show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+          raisedKoszulFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ =>
+      (show Tensor0SBundle.Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        raisedKoszulFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1))
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+  intro om
+  exact raisedKoszulFibAppOm_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ' om
+
+theorem linearizedRicci_arm1Field_jointSmooth (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
+      (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ') (δ := δ) (δ' := δ') := by
+  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ =>
+      (show Tensor0SBundle.Tensor0SSpace 3 I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        linearizedRicciArm1Fib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1))
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (fun Y => by
+      have hZ := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 1) g₀ T T' hδ hδ'
+        (fun q : M × ℝ => Y q.1) (Y.contMDiff.comp_contMDiffOn contMDiffOn_fst)
+      have hkos := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
+        (raisedKoszulFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ') hZ
+      refine hkos.congr (fun q _ => ?_)
+      refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) q.1 t) ?_
+      rw [linearizedRicciArm1Fib_apply])
+  refine hCLM.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1 t) ?_
+  rw [linearizedRicciArm1Field, ricciArmOrder1KoszulCoeff_toSection]
 
 def linearizedRicciArm2FieldLichnerowicz (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -1035,6 +1469,27 @@ theorem riemannianFiberNormSq_traceHessianFib_le
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
       ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+
+theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λarm1 :=
   sorry
 
 set_option linter.unusedSectionVars false in
@@ -1794,6 +2249,9 @@ theorem chartSlopeContributions_eq_threeArm_component
         (appCc (I := I) (M := M) g₀ 2 2
             (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 3 2
+            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
@@ -1815,6 +2273,9 @@ theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
         (appCc (I := I) (M := M) g₀ 2 2
             (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 3 2
+            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
@@ -1830,6 +2291,9 @@ theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
     (appCc (I := I) (M := M) g₀ 2 2
         (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
         (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+      + appCc (I := I) (M := M) g₀ 3 2
+        (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
       + appCc (I := I) (M := M) g₀ 4 2
         (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
         (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
@@ -1861,29 +2325,10 @@ theorem exists_chartSlope_component_threeArm_ccTensorBilin
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
                 ((chartModelBasis E) k) ((chartModelBasis E) i) := by
   classical
-  refine ⟨fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2),
-    linearizedRicciThreeArmHjoint_zero (I := I) (M := M) g₀, fun s hs x i k => ?_⟩
-  rw [chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
-    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s hs x i k]
-  have hzero : appCc (I := I) (M := M) g₀ 3 2 (0 : SmoothCcTensor g₀ 3 2)
-      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) = (0 : SmoothCcTensor g₀ 0 2) :=
-    appCc_zero_left_local (I := I) (M := M) g₀ 3 2 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-  rw [hzero]
-  have hcollapse : (appCc (I := I) (M := M) g₀ 2 2
-        (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
-        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      + (0 : SmoothCcTensor g₀ 0 2)
-      + appCc (I := I) (M := M) g₀ 4 2
-        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) =
-      (appCc (I := I) (M := M) g₀ 2 2
-        (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
-        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      + appCc (I := I) (M := M) g₀ 4 2
-        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) := by
-    rw [add_zero]
-  rw [hcollapse]
+  refine ⟨linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ',
+    linearizedRicci_arm1Field_jointSmooth (I := I) g₀ T T' hδ hδ', fun s hs x i k => ?_⟩
+  exact chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s hs x i k
 
 theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
     (g₀ : SmoothRiemannianMetric I M)
