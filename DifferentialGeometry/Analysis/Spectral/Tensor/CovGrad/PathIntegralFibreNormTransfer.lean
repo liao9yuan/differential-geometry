@@ -1,8 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 import Mathlib.Analysis.Convex.Integral
+import Mathlib.Analysis.Convex.Mul
 import Mathlib.Analysis.Seminorm
+import Mathlib.MeasureTheory.Integral.Prod
 
 noncomputable section
 
@@ -205,6 +208,306 @@ theorem riemannianFiberNormSq_pathIntegralCoeffField_le_sq
   have hsqnn : 0 ≤ tensorPointwiseNorm (I := I) (M := M) g₀ r s x (∫ t in (0 : ℝ)..1, f t) :=
     tensorPointwiseNorm_nonneg (I := I) (M := M) g₀ r s x _
   nlinarith [hbound, hsqnn, hΛ_nn]
+
+private theorem sq_intervalIntegral_le_intervalIntegral_sq
+    (h : ℝ → ℝ) (hcont : ContinuousOn h (Set.Icc (0 : ℝ) 1)) :
+    (∫ t in (0 : ℝ)..1, h t) ^ 2 ≤ ∫ t in (0 : ℝ)..1, (h t) ^ 2 := by
+  classical
+  haveI hprob : IsProbabilityMeasure (volume.restrict (Set.Ioc (0:ℝ) 1)) := by
+    refine ⟨?_⟩
+    rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc]
+    norm_num
+  have hcontIoc : ContinuousOn h (Set.Ioc (0 : ℝ) 1) := hcont.mono Set.Ioc_subset_Icc_self
+  have hint : Integrable h (volume.restrict (Set.Ioc (0:ℝ) 1)) :=
+    (hcont.integrableOn_Icc).mono_set Set.Ioc_subset_Icc_self
+  have hintsq : Integrable (fun t => (h t) ^ 2) (volume.restrict (Set.Ioc (0:ℝ) 1)) :=
+    (((continuous_pow 2).comp_continuousOn hcont).integrableOn_Icc).mono_set
+      Set.Ioc_subset_Icc_self
+  have hconvex : ConvexOn ℝ (Set.univ : Set ℝ) (fun x : ℝ => x ^ 2) :=
+    Even.convexOn_pow (by decide)
+  have hjensen :
+      (∫ t, h t ∂(volume.restrict (Set.Ioc (0:ℝ) 1))) ^ 2 ≤
+        ∫ t, (h t) ^ 2 ∂(volume.restrict (Set.Ioc (0:ℝ) 1)) := by
+    have := hconvex.map_integral_le (f := h) (by fun_prop) isClosed_univ
+      (Filter.Eventually.of_forall (fun _ => Set.mem_univ _)) hint hintsq
+    simpa using this
+  rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1),
+    intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact hjensen
+
+theorem riemannianFiberNormSq_pathIntegralCoeffField_le_intervalIntegral
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
+    (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
+      ((Set.univ : Set M) ×ˢ S))
+    (x : M)
+    (hcont : ContinuousOn (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x))
+      (Set.Icc (0 : ℝ) 1)) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ r s x
+        ((pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection x) ≤
+      ∫ t in (0 : ℝ)..1,
+        riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x) := by
+  classical
+  set f : ℝ → TensorRSModel r s ℝ E :=
+    fun t => TensorRSSpace.toModel ((Φ t).toSection x) with hf_def
+  have hfns : riemannianFiberNormSq (I := I) (M := M) g₀ r s x
+      ((pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection x) =
+      tensorPointwiseNorm (I := I) (M := M) g₀ r s x (∫ t in (0 : ℝ)..1, f t) ^ 2 := by
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise]
+    rw [pathIntegralCoeffField_toSection, pathIntegralFib_toModel]
+    unfold tensorPointwiseNorm
+    rw [Real.sq_sqrt (tensorInnerPointwise_nonneg (I := I) (M := M) g₀ r s x _)]
+  have hpt : ∀ t : ℝ,
+      tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t) ^ 2 =
+        riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x) := by
+    intro t
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise]
+    unfold tensorPointwiseNorm
+    rw [Real.sq_sqrt (tensorInnerPointwise_nonneg (I := I) (M := M) g₀ r s x _)]
+  have hnormcont : ContinuousOn (fun t : ℝ =>
+      tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t)) (Set.Icc (0 : ℝ) 1) :=
+    (tensorPointwiseNorm_continuous (I := I) (M := M) g₀ r s x).comp_continuousOn hcont
+  rw [hfns]
+  have hjensen : tensorPointwiseNorm (I := I) (M := M) g₀ r s x (∫ t in (0 : ℝ)..1, f t) ≤
+      ∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t) :=
+    tensorPointwiseNorm_intervalIntegral_le (I := I) (M := M) g₀ r s x f hcont
+  have hnn : 0 ≤ tensorPointwiseNorm (I := I) (M := M) g₀ r s x (∫ t in (0 : ℝ)..1, f t) :=
+    tensorPointwiseNorm_nonneg (I := I) (M := M) g₀ r s x _
+  have hsqmono :
+      tensorPointwiseNorm (I := I) (M := M) g₀ r s x (∫ t in (0 : ℝ)..1, f t) ^ 2 ≤
+        (∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t)) ^ 2 := by
+    have hrhs_nn : 0 ≤ ∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t) :=
+      le_trans hnn hjensen
+    nlinarith [hjensen, hnn, hrhs_nn]
+  have hcs :
+      (∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t)) ^ 2 ≤
+        ∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t) ^ 2 :=
+    sq_intervalIntegral_le_intervalIntegral_sq
+      (fun t => tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t)) hnormcont
+  have heqint :
+      (∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t) ^ 2) =
+        ∫ t in (0 : ℝ)..1,
+          riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x) := by
+    refine intervalIntegral.integral_congr (fun t _ => ?_)
+    exact hpt t
+  calc tensorPointwiseNorm (I := I) (M := M) g₀ r s x (∫ t in (0 : ℝ)..1, f t) ^ 2
+      ≤ (∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t)) ^ 2 := hsqmono
+    _ ≤ ∫ t in (0 : ℝ)..1, tensorPointwiseNorm (I := I) (M := M) g₀ r s x (f t) ^ 2 := hcs
+    _ = ∫ t in (0 : ℝ)..1,
+          riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x) := heqint
+
+open DifferentialGeometry.Integral.Measure in
+
+theorem tensorL2NormSq_pathIntegralCoeffField_le_intervalIntegral_normSq
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
+    (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
+      ((Set.univ : Set M) ×ˢ S))
+    (hcont : ∀ x : M, ContinuousOn (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x))
+      (Set.Icc (0 : ℝ) 1))
+    (hjrfns : ContinuousOn
+      (fun p : ℝ × M =>
+        riemannianFiberNormSq (I := I) (M := M) g₀ r s p.2 ((Φ p.1).toSection p.2))
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M))) :
+    ‖pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint‖ ^ 2 ≤
+      ∫ t in (0 : ℝ)..1, ‖Φ t‖ ^ 2 := by
+  classical
+  letI : MeasurableSpace M := borel M
+  haveI : BorelSpace M := ⟨rfl⟩
+  letI : MeasurableSpace ℝ := borel ℝ
+  haveI : BorelSpace ℝ := ⟨rfl⟩
+  set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
+  haveI : IsFiniteMeasure μ :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g₀
+  set Ξ := pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint with hΞ
+  set F : ℝ → M → ℝ :=
+    fun t x => riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((Φ t).toSection x) with hF
+  have hΞnormsq : ‖Ξ‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (Ξ.toSection x) ∂μ := by
+    rw [SmoothCcTensor.norm_def]
+    have hbridge := tensorL2Norm_sq_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) g₀ r s (fun x => Ξ.toSection x)
+    rw [show Ξ.toFun = fun x => TensorRSSpace.toModel (Ξ.toSection x) from rfl]
+    exact hbridge
+  have hΦnormsq : ∀ t : ℝ, ‖Φ t‖ ^ 2 = ∫ x, F t x ∂μ := by
+    intro t
+    rw [SmoothCcTensor.norm_def]
+    have hbridge := tensorL2Norm_sq_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) g₀ r s (fun x => (Φ t).toSection x)
+    rw [show (Φ t).toFun = fun x => TensorRSSpace.toModel ((Φ t).toSection x) from rfl]
+    exact hbridge
+  have hperx : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ r s x (Ξ.toSection x) ≤
+        ∫ t in (0 : ℝ)..1, F t x := fun x =>
+    riemannianFiberNormSq_pathIntegralCoeffField_le_intervalIntegral
+      (I := I) (M := M) g₀ r s Φ S hS hSI hjoint x (hcont x)
+  have hFnn : ∀ t x, 0 ≤ F t x := fun t x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r s x ((Φ t).toSection x)
+  have hFcont : ContinuousOn (Function.uncurry F)
+      (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) := hjrfns
+  have hcompact : IsCompact (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)) :=
+    isCompact_Icc.prod isCompact_univ
+  obtain ⟨Cb, hCb⟩ := (hcompact.image_of_continuousOn hFcont.norm).bddAbove
+  have huIoc : Set.uIoc (0:ℝ) 1 = Set.Ioc (0:ℝ) 1 := Set.uIoc_of_le (by norm_num)
+  haveI hfintime : IsFiniteMeasure (volume.restrict (Set.uIoc (0:ℝ) 1)) := by
+    constructor
+    rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, huIoc, Real.volume_Ioc]
+    simp
+  haveI hfinprod : IsFiniteMeasure ((volume.restrict (Set.uIoc (0:ℝ) 1)).prod μ) :=
+    inferInstance
+  have hprod_eq :
+      (volume.restrict (Set.uIoc (0:ℝ) 1)).prod μ
+        = (volume.prod μ).restrict (Set.uIoc (0:ℝ) 1 ×ˢ (Set.univ : Set M)) := by
+    conv_lhs => rw [← Measure.restrict_univ (μ := μ)]
+    rw [Measure.prod_restrict]
+  have hmeas : AEStronglyMeasurable (Function.uncurry F)
+      ((volume.restrict (Set.uIoc (0:ℝ) 1)).prod μ) := by
+    rw [hprod_eq]
+    refine ContinuousOn.aestronglyMeasurable ?_ (measurableSet_uIoc.prod MeasurableSet.univ)
+    exact hFcont.mono (Set.prod_mono (huIoc ▸ Set.Ioc_subset_Icc_self) (subset_refl _))
+  have hint : Integrable (Function.uncurry F)
+      ((volume.restrict (Set.uIoc (0:ℝ) 1)).prod μ) := by
+    refine Integrable.of_mem_Icc 0 Cb hmeas.aemeasurable ?_
+    rw [hprod_eq]
+    have hae : ∀ᵐ p ∂((volume.prod μ).restrict
+        (Set.uIoc (0:ℝ) 1 ×ˢ (Set.univ : Set M))),
+        p ∈ Set.uIoc (0:ℝ) 1 ×ˢ (Set.univ : Set M) :=
+      ae_restrict_mem (measurableSet_uIoc.prod MeasurableSet.univ)
+    filter_upwards [hae] with p hp
+    obtain ⟨hp1, _⟩ := hp
+    refine ⟨hFnn p.1 p.2, ?_⟩
+    have hmem : p ∈ Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M) :=
+      ⟨(huIoc ▸ Set.Ioc_subset_Icc_self) hp1, Set.mem_univ _⟩
+    have hb := hCb (Set.mem_image_of_mem _ hmem)
+    rw [Real.norm_eq_abs] at hb
+    exact le_trans (le_abs_self _) hb
+  have hswap :
+      ∫ x, (∫ t in (0 : ℝ)..1, F t x) ∂μ
+        = ∫ t in (0 : ℝ)..1, ∫ x, F t x ∂μ :=
+    (MeasureTheory.intervalIntegral_integral_swap (μ := μ) (f := F) hint).symm
+  have hΞle : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (Ξ.toSection x) ∂μ)
+      ≤ ∫ x, (∫ t in (0 : ℝ)..1, F t x) ∂μ := by
+    refine integral_mono_of_nonneg ?_ ?_ ?_
+    · exact Filter.Eventually.of_forall (fun x =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r s x (Ξ.toSection x))
+    · have hpr := hint.integral_prod_right
+        (μ := volume.restrict (Set.uIoc (0:ℝ) 1)) (ν := μ)
+      have heqfun : (fun x => ∫ t, Function.uncurry F (t, x)
+            ∂(volume.restrict (Set.uIoc (0:ℝ) 1)))
+          = fun x => ∫ t in (0 : ℝ)..1, F t x := by
+        funext x
+        rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1), ← huIoc]
+        rfl
+      rw [heqfun] at hpr
+      exact hpr
+    · exact Filter.Eventually.of_forall hperx
+  rw [hΞnormsq]
+  calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ r s x (Ξ.toSection x) ∂μ)
+      ≤ ∫ x, (∫ t in (0 : ℝ)..1, F t x) ∂μ := hΞle
+    _ = ∫ t in (0 : ℝ)..1, ∫ x, F t x ∂μ := hswap
+    _ = ∫ t in (0 : ℝ)..1, ‖Φ t‖ ^ 2 := by
+        refine intervalIntegral.integral_congr (fun t _ => ?_)
+        rw [hΦnormsq t]
+
+open DifferentialGeometry.PDE.RicciFlow (iteratedCovGrad)
+
+theorem iteratedCovGrad_pathIntegralCoeffField_jetL2_le
+    (g₀ : SmoothRiemannianMetric I M) (r sIdx a : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r sIdx) (B : ℝ) (_hB : 0 ≤ B)
+    (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r sIdx ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r sIdx ℝ E)
+        (E := fun z : M => TensorRSSpace r sIdx I z) q.1 ((Φ q.2).toSection q.1))
+      ((Set.univ : Set M) ×ˢ S))
+    (hΦ : ∀ s ∈ Set.Icc (0:ℝ) 1,
+      (∑ i ∈ Finset.range (a+1),
+        ‖iteratedCovGrad g₀ r sIdx i (Φ s)‖ ^ 2) ≤ B ^ 2)
+    (hji : ∀ i ∈ Finset.range (a+1),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, TensorRSModel r (sIdx + i) ℝ E)) ∞
+        (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r (sIdx + i) ℝ E)
+          (E := fun z : M => TensorRSSpace r (sIdx + i) I z) q.1
+          ((iteratedCovGrad g₀ r sIdx i (Φ q.2)).toSection q.1))
+        ((Set.univ : Set M) ×ˢ S))
+    (hci : ∀ i ∈ Finset.range (a+1), ∀ x : M,
+      ContinuousOn (fun t : ℝ =>
+        TensorRSSpace.toModel ((iteratedCovGrad g₀ r sIdx i (Φ t)).toSection x))
+        (Set.Icc (0 : ℝ) 1))
+    (hri : ∀ i ∈ Finset.range (a+1),
+      ContinuousOn (fun p : ℝ × M =>
+        riemannianFiberNormSq (I := I) (M := M) g₀ r (sIdx + i) p.2
+          ((iteratedCovGrad g₀ r sIdx i (Φ p.1)).toSection p.2))
+        (Set.Icc (0 : ℝ) 1 ×ˢ (Set.univ : Set M)))
+    (hii : ∀ i ∈ Finset.range (a+1),
+      IntervalIntegrable
+        (fun t : ℝ => ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2) volume 0 1)
+    (hcomm : ∀ (i : ℕ) (hi : i ∈ Finset.range (a+1)),
+      iteratedCovGrad g₀ r sIdx i
+          (pathIntegralCoeffField (I := I) (M := M) g₀ r sIdx Φ S hS hSI hjoint) =
+        pathIntegralCoeffField (I := I) (M := M) g₀ r (sIdx + i)
+          (fun t => iteratedCovGrad g₀ r sIdx i (Φ t)) S hS hSI (hji i hi)) :
+    (∑ i ∈ Finset.range (a+1),
+      ‖iteratedCovGrad g₀ r sIdx i
+        (pathIntegralCoeffField (I := I) (M := M) g₀ r sIdx Φ S hS hSI hjoint)‖ ^ 2) ≤ B ^ 2 := by
+  classical
+  have hperi : ∀ i ∈ Finset.range (a+1),
+      ‖iteratedCovGrad g₀ r sIdx i
+          (pathIntegralCoeffField (I := I) (M := M) g₀ r sIdx Φ S hS hSI hjoint)‖ ^ 2 ≤
+        ∫ t in (0 : ℝ)..1, ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2 := by
+    intro i hi
+    rw [hcomm i hi]
+    exact tensorL2NormSq_pathIntegralCoeffField_le_intervalIntegral_normSq
+      (I := I) (M := M) g₀ r (sIdx + i)
+      (fun t => iteratedCovGrad g₀ r sIdx i (Φ t)) S hS hSI (hji i hi)
+      (hci i hi) (hri i hi)
+  have hsumle :
+      (∑ i ∈ Finset.range (a+1),
+        ‖iteratedCovGrad g₀ r sIdx i
+          (pathIntegralCoeffField (I := I) (M := M) g₀ r sIdx Φ S hS hSI hjoint)‖ ^ 2) ≤
+      ∑ i ∈ Finset.range (a+1),
+        ∫ t in (0 : ℝ)..1, ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2 :=
+    Finset.sum_le_sum hperi
+  have hsumswap :
+      (∑ i ∈ Finset.range (a+1),
+        ∫ t in (0 : ℝ)..1, ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2) =
+      ∫ t in (0 : ℝ)..1,
+        ∑ i ∈ Finset.range (a+1), ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2 :=
+    (intervalIntegral.integral_finset_sum (s := Finset.range (a+1)) hii).symm
+  have hintsumle :
+      (∫ t in (0 : ℝ)..1,
+        ∑ i ∈ Finset.range (a+1), ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2) ≤
+      ∫ _t in (0 : ℝ)..1, B ^ 2 := by
+    refine intervalIntegral.integral_mono_on (by norm_num) ?_ intervalIntegrable_const ?_
+    · have hsum := IntervalIntegrable.sum (μ := volume) (a := 0) (b := 1)
+        (Finset.range (a+1))
+        (f := fun i t => ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2)
+        (fun i hi => hii i hi)
+      have heqfun : (∑ i ∈ Finset.range (a+1),
+            fun t : ℝ => ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2)
+          = fun t : ℝ => ∑ i ∈ Finset.range (a+1),
+              ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2 := by
+        funext t
+        simp only [Finset.sum_apply]
+      rw [heqfun] at hsum
+      exact hsum
+    · intro t ht
+      exact hΦ t ht
+  have hconst : (∫ _t in (0 : ℝ)..1, B ^ 2) = B ^ 2 := by
+    rw [intervalIntegral.integral_const]; simp
+  calc (∑ i ∈ Finset.range (a+1),
+          ‖iteratedCovGrad g₀ r sIdx i
+            (pathIntegralCoeffField (I := I) (M := M) g₀ r sIdx Φ S hS hSI hjoint)‖ ^ 2)
+      ≤ ∑ i ∈ Finset.range (a+1),
+          ∫ t in (0 : ℝ)..1, ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2 := hsumle
+    _ = ∫ t in (0 : ℝ)..1,
+          ∑ i ∈ Finset.range (a+1), ‖iteratedCovGrad g₀ r sIdx i (Φ t)‖ ^ 2 := hsumswap
+    _ ≤ ∫ _t in (0 : ℝ)..1, B ^ 2 := hintsumle
+    _ = B ^ 2 := hconst
 
 end L2
 end Integral
