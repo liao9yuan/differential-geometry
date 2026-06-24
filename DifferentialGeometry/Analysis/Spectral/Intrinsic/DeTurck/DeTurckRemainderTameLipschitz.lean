@@ -84,9 +84,10 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc)
+open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm2FieldLichnerowicz linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component deriv_chartRicciTrace_realizedFam_eq_chartSlope chartRicciTraceChristoffelSlope cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
-open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci)
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -1405,6 +1406,205 @@ private lemma threeArm_unitModel_appCc_intervalIntegrable_tame
   exact (hcontFinal.mono hSI).intervalIntegrable
 
 /--
+Uniform pointwise fibre-norm (C⁰) bound on the CONCRETE Lichnerowicz linearized-Ricci coeff fields
+`linearizedRicciArm0Field` and `linearizedRicciArm2FieldLichnerowicz`, uniform over the Sobolev ball
+of radius `R`, the path parameter `s ∈ [0,1]`, and `x ∈ M`. Unlike a universal-`Φₖ` statement (which
+is FALSE when `T = T'`), this bounds the two specific fields built from `realizedFam g₀ T T' s`.
+
+The coeff fields are polynomial in the chart Christoffel symbols, Riemann-tensor components, gram and
+inverse-gram matrices of the path metric `g_s = realizedFam g₀ T T' s`. The Neumann bound
+`perturbedInner_self_lower_bound` gives `g_s⁻¹ ≤ (1/(1−δ₀)) g₀⁻¹` uniformly; the Sobolev embedding
+`iteratedCovGrad_toSobolev_embedding_Cm` (with `a = 2 finrank + 10` supercritical) gives uniform
+pointwise `C²` bounds on `T, T'` and hence on `∂g_s, ∂²g_s`; the chart-geometry perturbation bounds
+(`chartChristoffel_sub_abs_le`, `chartInvGramMatrix_entry_sub_abs_le`,
+`exists_chartRiemannData_uniform_bound_compact`) then yield
+`rfns(Φₖ(s,x)) ≤ poly(finrank, R, 1/(1−δ₀), ‖Rm(g₀)‖)` uniformly. This is the genuine analytic bedrock.
+-/
+private theorem uniform_C0_bound_concrete_lichnerowicz_coeffFields
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛC : ℝ, 0 ≤ ΛC ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC ∧
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            ((linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC := by
+  sorry
+
+/--
+Parent glue for the coeff-field existence + identity + joint-smoothness + path-continuity + uniform
+C⁰ package. Provides the concrete Lichnerowicz witness `Φ₀ = linearizedRicciArm0Field`,
+`Φ₁ = fun _ => 0` (the order-1 arm vanishes by the Lichnerowicz / curvature-component identity
+`chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component`), `Φ₂ = linearizedRicciArm2FieldLichnerowicz`.
+The 3 joint-smoothness conjuncts cite the sorry-free per-field lemmas; the 3 path-continuity conjuncts
+follow via `jointContMDiff_toModel_continuous_slice`; the `Ioo`-identity re-derives the two-arm collapse
+via `chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component` (transiting the chart-slope-component
+identity leaf); the Φ₁ C⁰ bound is trivial (`rfns 0 = 0`); the Φ₀/Φ₂ C⁰ bounds cite the concrete
+uniform-bound child `uniform_C0_bound_concrete_lichnerowicz_coeffFields`.
+-/
+private theorem uniform_rfns_bound_lichnerowicz_coeffFields
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛC : ℝ, 0 ≤ ΛC ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2)
+          (Φ₂ : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+            ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+              linearizedRicciAt (I := I) g₀ T T'
+                  (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+                  x (v 0) (v 1) s =
+                unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((Φ₀ s).toSection x)) ≤ ΛC) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛC) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛC) := by
+  classical
+  obtain ⟨ΛC, hΛC_nn, hC0⟩ :=
+    uniform_C0_bound_concrete_lichnerowicz_coeffFields (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨ΛC, hΛC_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  set Φ₀ : ℝ → SmoothCcTensor g₀ 2 2 := linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ'
+  set Φ₁ : ℝ → SmoothCcTensor g₀ 3 2 := fun _ => 0
+  set Φ₂ : ℝ → SmoothCcTensor g₀ 4 2 :=
+    linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ'
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  refine ⟨Φ₀, Φ₁, Φ₂, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · exact linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ'
+  · exact linearizedRicciThreeArmHjoint_zero (I := I) (M := M) g₀
+  · exact linearizedRicci_arm2FieldLichnerowicz_jointSmooth (I := I) g₀ T T' hδ hδ'
+  · exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2 Φ₀
+      (realizedSmallSet (δ := δ) (δ' := δ'))
+      (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ')
+  · exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 3 2 Φ₁
+      (realizedSmallSet (δ := δ) (δ' := δ'))
+      (linearizedRicciThreeArmHjoint_zero (I := I) (M := M) g₀)
+  · exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2 Φ₂
+      (realizedSmallSet (δ := δ) (δ' := δ'))
+      (linearizedRicci_arm2FieldLichnerowicz_jointSmooth (I := I) g₀ T T' hδ hδ')
+  · intro s hs x v
+    have hderiv := (linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) hs)
+    rw [hderiv]
+    have hchartSumDeriv :=
+      hasDerivAt_realizedRicciChartSum_general (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+        x (v 0) (v 1) hs
+    rw [hchartSumDeriv.deriv]
+    have hslope : ∀ (i k : Fin (Module.finrank ℝ E)),
+        (∑ j : Fin (Module.finrank ℝ E),
+            deriv (fun s : ℝ =>
+              chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k j
+                (extChartAt I x x)) s) =
+          chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+            (extChartAt I x x) s := fun i k =>
+      deriv_chartRicciTrace_realizedFam_eq_chartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+        x i k hs
+    have hccBilin : ∀ (i k : Fin (Module.finrank ℝ E)),
+        chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s =
+        ccTensorBilin (I := I) g₀
+          (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+            + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+            ((chartModelBasis E) k) ((chartModelBasis E) i) := fun i k =>
+      chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' s hs x i k
+    have happCcZero : appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) = (0 : SmoothCcTensor g₀ 0 2) := by
+      change appCc (I := I) (M := M) g₀ 3 2 ((fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) s)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) = 0
+      rw [show ((fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) s) = (0 : SmoothCcTensor g₀ 3 2) from rfl]
+      exact appCc_zero_left_local (I := I) (M := M) g₀ 3 2
+        (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+    set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
+    set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
+    set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
+    have hcollapse : (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀ +
+        appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁ +
+        appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) =
+      (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀ +
+        appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) := by
+      rw [happCcZero, add_zero]
+    set Wsum : SmoothCcTensor g₀ 0 2 :=
+      appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀ +
+        appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂ with hWsum
+    have hsumForm : (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          ccTensorBilin (I := I) g₀ Wsum x
+            ((chartModelBasis E) k) ((chartModelBasis E) i)) =
+      unitModel (I := I) (M := M) g₀ 2 Wsum x v := by
+      have hunitBasis : (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            unitModel (I := I) (M := M) g₀ 2 Wsum x
+              ![(chartModelBasis E) k, (chartModelBasis E) i]) =
+        unitModel (I := I) (M := M) g₀ 2 Wsum x v :=
+        unitModel_basis_expand_two (I := I) (M := M) g₀ Wsum x v
+      rw [← hunitBasis]
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+      rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ Wsum x
+          ((chartModelBasis E) k) ((chartModelBasis E) i)]
+    rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            (∑ j : Fin (Module.finrank ℝ E),
+              deriv (fun s : ℝ =>
+                chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k j
+                  (extChartAt I x x)) s)) =
+        (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            ccTensorBilin (I := I) g₀ Wsum x
+              ((chartModelBasis E) k) ((chartModelBasis E) i)) from
+      Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => by
+        rw [hslope i k, hccBilin i k]))]
+    rw [hsumForm, ← hcollapse]
+  · intro s hs x
+    have h := hC0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+    exact h.1
+  · intro s hs x
+    rw [show ((Φ₁ s).toSection x : TensorRSSpace 3 2 I x) = (0 : TensorRSSpace 3 2 I x) from rfl,
+      riemannianFiberNormSq_zero, Real.sqrt_zero]
+    exact hΛC_nn
+  · intro s hs x
+    have h := hC0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+    exact h.2
+
+/--
 Uniform pointwise fibre-norm (C⁰) estimate for the concrete linearized-Ricci three-arm coeff
 fields built from the path metric `realizedFam g₀ T T' s`. The coeff fields are polynomial in
 the chart Christoffel symbols, Riemann-tensor components, gram matrices and inverse gram
@@ -1414,18 +1614,6 @@ matrices of the perturbed metric; the Neumann bound `g_s⁻¹ ≤ (1/(1−δ₀)
 C² bound on `T,T'` and hence uniform `∂g_s`, `∂²g_s`) yield `‖Rm(g_s)‖ ≤ poly(R, 1/(1−δ₀))`
 uniformly in `s ∈ [0,1]` and `x ∈ M`, so each coeff field has fibre norm bounded by a constant
 `ΛR` depending only on `(g₀, finrank, R, δ₀)`.
-
-This is the deep analytic bedrock leaf deferred from `ricciArm_threeArm_coeffFields_C0_bound`.
-It carries the full field-existence + identity + smoothness + continuity + C⁰ package because the
-source `exists_linearizedRicci_threeArm_coeffFields` packages the coeff fields `Φ₀, Φ₁`
-existentially (down to `chartRiemannTraceDeriv_threeArm_appCc_transfer`), so the C⁰ estimate
-cannot be cleanly stated as a separate sub-lemma over abstract `Φₖ` (a universal-`Φₖ` form is
-FALSE: when `T = T'` the linearized-Ricci identity is vacuous, so arbitrary large `Φₖ` satisfy
-all non-C⁰ conjuncts). The proof should construct the witness concretely (`Φ₀` =
-`linearizedRicciArm0Field`, `Φ₂` = `linearizedRicciArm2FieldLichnerowicz`, `Φ₁` from
-`chartRiemannTraceDeriv_threeArm_appCc_transfer`), discharge the seven non-C⁰ conjuncts against
-the proven source lemmas, and establish the three C⁰ bounds via the uniform-curvature estimate
-for the perturbed path metric.
 -/
 private theorem ricciArm_threeArm_coeffFields_uniformC0
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1471,7 +1659,7 @@ private theorem ricciArm_threeArm_coeffFields_uniformC0
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛR) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛR) := by
-  sorry
+  exact uniform_rfns_bound_lichnerowicz_coeffFields (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
 
 /--
 Uniform pointwise fibre-norm (C⁰) bound for the concrete linearized-Ricci three-arm coeff
@@ -1530,6 +1718,7 @@ private theorem ricciArm_threeArm_coeffFields_C0_bound
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛR) := by
   exact ricciArm_threeArm_coeffFields_uniformC0 (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+
 
 
 private theorem exists_ricciArm_threeArm_coeffFields_ballUniform
@@ -4555,3 +4744,4 @@ theorem deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
+

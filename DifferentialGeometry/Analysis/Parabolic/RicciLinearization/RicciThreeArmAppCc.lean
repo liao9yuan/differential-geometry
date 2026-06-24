@@ -86,7 +86,7 @@ private lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 
-private lemma cmm_two_basis_expand
+lemma cmm_two_basis_expand
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
     (v : Fin 2 → E) :
     f v =
@@ -145,7 +145,7 @@ private lemma cmm_two_basis_expand
 
 set_option linter.unusedSectionVars false in
 
-private lemma unitModel_basis_expand_two (g₀ : SmoothRiemannianMetric I M)
+lemma unitModel_basis_expand_two (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
@@ -1084,7 +1084,7 @@ theorem deriv_chartRicciTrace_realizedFam_eq_chartSlope (g₀ : SmoothRiemannian
     (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j k j hy hmem).deriv
 
 set_option linter.unusedSectionVars false in
-private lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
+lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
   rw [ccTensorBilin_apply (I := I) g₀ S b u w, ccTensorModel]
@@ -1179,7 +1179,7 @@ theorem iteratedCovGrad2_chartComponent_readout (g₀ : SmoothRiemannianMetric I
     ![] Jdx hy
 
 set_option linter.unusedSectionVars false in
-private lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g 0 r) :
     appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
       (0 : SmoothCcTensor g 0 s) := by
@@ -1194,7 +1194,7 @@ private lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
       (0 : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) from rfl]
 
 set_option linter.unusedSectionVars false in
-private lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
+lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
     {δ δ' : ℝ} :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
       (fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) (δ := δ) (δ' := δ') := by
