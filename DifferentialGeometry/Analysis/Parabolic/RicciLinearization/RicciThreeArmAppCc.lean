@@ -961,6 +961,47 @@ private lemma riemannianFiberNormSq_smul_value_appCc
   ring
 
 set_option linter.unusedSectionVars false in
+private lemma gFibreOpBound_mono_local
+    (g₀ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    {δ δ' : ℝ} (hle : δ ≤ δ') (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) :
+    gFibreOpBound (I := I) (M := M) g₀ h δ' := by
+  intro x v w
+  refine le_trans (hδ x v w) ?_
+  have hsv : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+  have hsw : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+  have hprod : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+    mul_nonneg hsv hsw
+  nlinarith [hle, hprod]
+
+set_option linter.unusedSectionVars false in
+theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        (show TensorRSSpace 4 2 I x from
+          TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+      ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+theorem riemannianFiberNormSq_traceHessianFib_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
+      ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 :=
+  sorry
+
+set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 
 theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
@@ -1005,8 +1046,47 @@ theorem exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcom ∧
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
               ((traceHessianCoeff (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcom :=
-  sorry
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcom := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_nn : 0 ≤ δ₁ := le_max_right _ _
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
+  have hcoeff : 0 < 1 - δ₁ := by linarith
+  refine ⟨((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ₁))) ^ 2, sq_nonneg _, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    abs_convex_smallConstant_lt_one hδ_lt hδ'_lt hs
+  set g₁ : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hg₁
+  set hpert : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ :=
+    fun y => ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y with hpert_def
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + hpert y v w := by
+    intro y v w
+    rw [hg₁, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hs_mem y v w]
+  have hδs_raw : gFibreOpBound (I := I) (M := M) g₀ hpert (|1 - s| * δ' + |s| * δ) :=
+    convexPerturbation_gFibreOpBound_abs (I := I) g₀ T T' hδ hδ' s
+  obtain ⟨hs0, hs1⟩ := hs
+  have habs_eq : |1 - s| * δ' + |s| * δ = (1 - s) * δ' + s * δ := by
+    rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+  have hsmall_le : (1 - s) * δ' + s * δ ≤ δ₁ := by
+    have h1 : (1 - s) * δ' ≤ (1 - s) * δ₀ :=
+      mul_le_mul_of_nonneg_left hδ'_le (by linarith)
+    have h2 : s * δ ≤ s * δ₀ :=
+      mul_le_mul_of_nonneg_left hδ_le hs0
+    have hδ₀_le : δ₀ ≤ δ₁ := le_max_left _ _
+    nlinarith [h1, h2, hδ₀_le]
+  have hδs : gFibreOpBound (I := I) (M := M) g₀ hpert δ₁ := by
+    refine gFibreOpBound_mono_local (I := I) g₀ hpert ?_ hδs_raw
+    rw [habs_eq]; exact hsmall_le
+  have hbP := riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
+    (I := I) g₀ g₁ hpert htie hδ₁_lt hδ₁_nn hδs x
+  have hbH := riemannianFiberNormSq_traceHessianFib_le
+    (I := I) g₀ g₁ hpert htie hδ₁_lt hδ₁_nn hδs x
+  refine ⟨?_, ?_⟩
+  · rw [ricciArmPrincipalCoeff_toSection]; exact hbP
+  · rw [traceHessianCoeff_toSection]; exact hbH
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
