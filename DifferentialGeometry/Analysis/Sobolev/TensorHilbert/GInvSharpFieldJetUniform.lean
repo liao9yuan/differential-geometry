@@ -94,23 +94,75 @@ theorem gInvSharpJetBound_mono_δ (R δ δ' : ℝ) (hR : 0 ≤ R) (hδ_lt : δ <
     · exact pow_nonneg (Nat.cast_nonneg _) 2
     · exact pow_nonneg (by linarith) (2 * i + 4)
 
+/-- Deferred base-case child (order `k = 0`): the pointwise fibre-norm of the
+`connDiffGInvComposite` section at order 0 is bounded by `gInvSharpJetBound R δ 0`.
+
+At order 0 the fibre is `connDiffGInvCompositeFib`, a `(1,2)` CLM whose action is the
+`gInvCompPairing` built from `connDiff g₁ g₀` (bounded by `R` via the order-1 jet of `T`,
+since `connDiff` is `O(∇T)`) and `gInvRaisedEndo g₁` (bounded by `1/(1-δ)`). The bound
+`gInvSharpJetBound R δ 0 = finrank² · (1+R)^4 · (1/(1-δ))^8` is gross but valid. This is
+NOT `riemannianFiberNormSq_gInvSlotEndo_le` (which bounds the `(2,2)` `gInvSlotEndo`); the
+composite here additionally carries the `connDiff` factor, so its base case needs the
+order-1 jet hypothesis on `T`. -/
+private theorem rfns_connDiffGInvComposite_zero_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {R : ℝ} (hR : 0 ≤ R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ_lt : δ < 1)
+    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+        ((connDiffGInvComposite (I := I) g₀
+          (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection x) ≤
+      gInvSharpJetBound (E := E) R δ 0 := by
+  sorry
+
+/-- Deferred inductive-step child: the bound at order `k + 1` in terms of the bound at
+every order `j ≤ k`. This is the genuine deep leaf.
+
+The covariant derivative of the `(1,2)` CLM section `connDiffGInvComposite` expands via
+the 3-factor covariant Leibniz on its `gInvCompPairing` building blocks
+(`g₁⁻¹`-raised-endomorphism × `connDiff` × slot insertion): each factor family is
+strictly order-decreasing (the `g₁`-cometric parallelism
+`inverseMetricSharpField_covGrad_eq_zero` kills the same-order self-term, and the Koszul
+structure of `covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms` has no same-order
+`∇connDiff` term). The `connDiff` factors are bounded by the order-`(j+1)` jet of `T`
+(`≤ R`, with `j + 1 ≤ k + 2 ≤ a + 2`), and the `g₁⁻¹` factors recurse to lower orders of
+the composite itself (consumed by `ih`). Subadditivity `riemannianFiberNormSq_add_le`
+and the compRS norm product `riemannianFiberNormSq_compRS_le_mul` close the finite
+binomial sum against `gInvSharpJetBound R δ (k + 1)`, which dominates
+`gInvSharpJetBound R δ j` for all `j ≤ k` (gross growth in `k`). -/
+private theorem rfns_iteratedCovGrad_connDiffGInvComposite_succ_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {R : ℝ} (hR : 0 ≤ R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ_lt : δ < 1)
+    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (k : ℕ) (hk_succ : k + 1 ≤ a + 1) (x : M)
+    (ih : ∀ j : ℕ, j ≤ k →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (connDiffGInvComposite (I := I) g₀
+              (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))).toSection x) ≤
+        gInvSharpJetBound (E := E) R δ j) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + (k + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 (k + 1)
+          (connDiffGInvComposite (I := I) g₀
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))).toSection x) ≤
+      gInvSharpJetBound (E := E) R δ (k + 1) := by
+  sorry
+
 /-- Consumer-minimal child: the simultaneous strong-induction form of the g1⁻¹
 sharp-field iterated-jet bound, giving the bound for ALL orders up to `i` at once.
 
-This is the natural strong-induction statement (the hypothesis shape): proving the bound
-at order `i` consumes the bound at every order `< i`. It is genuinely different from the
-single-order conclusion of the target leaf, which the glue extracts by specialization.
-Genuine self-referential induction leaf. The single-step identity
-`covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite` expresses
-`∇(g1⁻¹ slot) = -connDiffGInvComposite · (g1⁻¹ slot) + 0-order connDiff arm`; iterating
-via the covariant Leibniz `iteratedCovGrad_appCcRS_eq` expands `∇ᵏ(g1⁻¹)` into binomial
-products of lower-order g1⁻¹ factors (order `< k`, by this lemma) and connDiff factors
-(bounded via `covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms`, whose Koszul
-structure has no same-order `∇connDiff` term). The g1-cometric parallelism
-`inverseMetricSharpField_covGrad_eq_zero` kills the same-order self-term. Base case
-`k = 0` is `riemannianFiberNormSq_gInvSlotEndo_le`. Strictly order-decreasing on both
-factor families, so the induction is well-founded and closes against
-`gInvSharpJetBound R δ k`. -/
+This is the strong-induction glue: it assembles the base case
+`rfns_connDiffGInvComposite_zero_le` (order 0) and the inductive step
+`rfns_iteratedCovGrad_connDiffGInvComposite_succ_le` (order `k + 1`, consuming the bound at
+every order `j ≤ k`) via well-founded strong induction on the order `k` (capped by `i`).
+The step is strictly order-decreasing on both factor families of the 3-factor Leibniz, so
+the induction is well-founded. -/
 private theorem rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {R : ℝ} (hR : 0 ≤ R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -125,7 +177,19 @@ private theorem rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
             (connDiffGInvComposite (I := I) g₀
               (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))).toSection x) ≤
         gInvSharpJetBound (E := E) R δ k := by
-  sorry
+  intro k hk
+  induction k using Nat.strongRecOn with
+  | _ k ih =>
+    by_cases hk0 : k = 0
+    · subst hk0
+      exact rfns_connDiffGInvComposite_zero_le (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ
+        hδ_lt hTjet x
+    · obtain ⟨m, hm⟩ : ∃ m : ℕ, k = m + 1 := Nat.exists_eq_succ_of_ne_zero hk0
+      subst hm
+      refine rfns_iteratedCovGrad_connDiffGInvComposite_succ_le (I := I) g₀ a ha_super hR
+        hδ₀ T hδ_le hδ hδ_lt hTjet m (by omega) x ?_
+      intro j hj
+      exact ih j (by omega) (by omega)
 
 /-- Deferred leaf: the uniform pointwise fibre-norm bound on the g1⁻¹ sharp-field
 covariant jet, of order `i`, uniformly over the perturbation `T`.
