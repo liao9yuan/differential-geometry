@@ -2071,7 +2071,7 @@ private theorem lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie
     intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
   rw [hFTC, realizedDeTurckLiePathValue_one, realizedDeTurckLiePathValue_zero]
 
-private theorem exists_lieArm_threeArm_coeffFields_ballUniform
+private theorem lieArm_threeArm_coeffFields_C0_engine
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
@@ -2116,6 +2116,52 @@ private theorem exists_lieArm_threeArm_coeffFields_ballUniform
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛL) :=
   sorry
+
+private theorem exists_lieArm_threeArm_coeffFields_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛL : ℝ, 0 ≤ ΛL ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2)
+          (Φ₂ : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+            ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+              linearizedDeTurckLieAt (I := I) g₀ g_bg T T'
+                  (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+                  x (v 0) (v 1) s =
+                unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((Φ₀ s).toSection x)) ≤ ΛL) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛL) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛL) :=
+  lieArm_threeArm_coeffFields_C0_engine (I := I) g₀ g_bg a ha_super hR hδ₀
 
 private theorem exists_lieArmCoeff_ballUniform_C0_sup
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
