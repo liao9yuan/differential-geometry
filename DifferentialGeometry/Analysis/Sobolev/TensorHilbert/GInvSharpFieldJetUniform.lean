@@ -58,7 +58,7 @@ order `i` — a polynomial in `R`, `Module.finrank ℝ E`, and `(1/(1-δ))^(i+2)
 `Classical.choose` or a T-dependent compactness supremum, so it preserves uniformity in
 the perturbation `T`. -/
 noncomputable def gInvSharpJetBound (R δ : ℝ) (i : ℕ) : ℝ :=
-  (Module.finrank ℝ E : ℝ) ^ 2 * (1 + R) ^ i * (1 / (1 - δ)) ^ (i + 2)
+  (Module.finrank ℝ E : ℝ) ^ 2 * (1 + R) ^ (2 * i + 4) * (1 / (1 - δ)) ^ (4 * i + 8)
 
 lemma gInvSharpJetBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ : δ < 1) (i : ℕ) :
     0 ≤ gInvSharpJetBound (E := E) R δ i := by
@@ -68,8 +68,8 @@ lemma gInvSharpJetBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ : δ < 1) (i : �
   apply mul_nonneg
   · apply mul_nonneg
     · exact pow_nonneg (Nat.cast_nonneg _) 2
-    · exact pow_nonneg (by linarith) i
-  · exact pow_nonneg hinv_nn (i + 2)
+    · exact pow_nonneg (by linarith) (2 * i + 4)
+  · exact pow_nonneg hinv_nn (4 * i + 8)
 
 /-- The pointwise bound is monotone increasing in the perturbation size: larger `δ`
 (closer to 1) gives a larger jet bound, since `1/(1-δ)` grows. This is pure algebra on
@@ -84,40 +84,57 @@ theorem gInvSharpJetBound_mono_δ (R δ δ' : ℝ) (hR : 0 ≤ R) (hδ_lt : δ <
   have hr_inv : 1 / (1 - δ) ≤ 1 / (1 - δ') :=
     (one_div_le_one_div hpos_δ hpos_δ').mpr (by linarith)
   simp only [gInvSharpJetBound]
-  -- (finrank² * (1+R)^i) * (1/(1-δ))^(i+2) ≤ (finrank² * (1+R)^i) * (1/(1-δ'))^(i+2)
   apply mul_le_mul_of_nonneg_left
-  · -- (1/(1-δ))^(i+2) ≤ (1/(1-δ'))^(i+2) by monotonicity on [0,∞)
-    induction i + 2 with
+  · induction 4 * i + 8 with
     | zero => simp
     | succ n ih =>
       rw [pow_succ, pow_succ]
       exact mul_le_mul ih hr_inv hinv_δ_nn (pow_nonneg hinv_δ'_nn n)
   · apply mul_nonneg
     · exact pow_nonneg (Nat.cast_nonneg _) 2
-    · exact pow_nonneg (by linarith) i
+    · exact pow_nonneg (by linarith) (2 * i + 4)
+
+/-- Consumer-minimal child: the simultaneous strong-induction form of the g1⁻¹
+sharp-field iterated-jet bound, giving the bound for ALL orders up to `i` at once.
+
+This is the natural strong-induction statement (the hypothesis shape): proving the bound
+at order `i` consumes the bound at every order `< i`. It is genuinely different from the
+single-order conclusion of the target leaf, which the glue extracts by specialization.
+Genuine self-referential induction leaf. The single-step identity
+`covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite` expresses
+`∇(g1⁻¹ slot) = -connDiffGInvComposite · (g1⁻¹ slot) + 0-order connDiff arm`; iterating
+via the covariant Leibniz `iteratedCovGrad_appCcRS_eq` expands `∇ᵏ(g1⁻¹)` into binomial
+products of lower-order g1⁻¹ factors (order `< k`, by this lemma) and connDiff factors
+(bounded via `covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms`, whose Koszul
+structure has no same-order `∇connDiff` term). The g1-cometric parallelism
+`inverseMetricSharpField_covGrad_eq_zero` kills the same-order self-term. Base case
+`k = 0` is `riemannianFiberNormSq_gInvSlotEndo_le`. Strictly order-decreasing on both
+factor families, so the induction is well-founded and closes against
+`gInvSharpJetBound R δ k`. -/
+private theorem rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {R : ℝ} (hR : 0 ≤ R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ_lt : δ < 1)
+    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (i : ℕ) (hi : i ≤ a + 1) (x : M) :
+    ∀ k : ℕ, k ≤ i →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + k) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 k
+            (connDiffGInvComposite (I := I) g₀
+              (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))).toSection x) ≤
+        gInvSharpJetBound (E := E) R δ k := by
+  sorry
 
 /-- Deferred leaf: the uniform pointwise fibre-norm bound on the g1⁻¹ sharp-field
 covariant jet, of order `i`, uniformly over the perturbation `T`.
 
-This is the genuine covariant-jet leaf. The proof is the forward strong induction on
-`i` (the strictly order-decreasing, non-circular route):
-
-* Base case `i = 0`: the C⁰ Neumann bound `riemannianFiberNormSq_gInvSlotEndo_le`
-  controls the fibre norm of the g1⁻¹ slot endomorphism by
-  `(finrank * (1/(1-δ)))²`.
-* Inductive step `i ≥ 1`: the inverse-metric covariant-derivative identity
-  `covGrad_gInvDiffSlotCoeff_eq_appCcRS_composite` expresses
-  `∇(g1⁻¹ slot) = -connDiffGInvComposite · (g1⁻¹ slot) + (0-order connDiff term)`;
-  iterating via the 3-factor covariant Leibniz (derived from the 2-factor
-  `CovariantBilinearLeibniz`) reduces `∇ⁱ(g1⁻¹)` to binomial products of
-  `∇^a (g1⁻¹)` (a < i) and `∇^b connDiff` (b ≤ i-1). The connDiff jets reduce further
-  via `covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms` and
-  `connDiffInner_g1_eq_half_covGradSymmS` to `∇^{≤j+1} T` (bounded by hypothesis)
-  and lower-order connDiff terms. Both sides are strictly lower order, so the induction
-  closes with the explicit polynomial `gInvSharpJetBound R δ i`.
-
-The consumer's hypothesis on `T` is `∀ j ≤ a+2, ‖iteratedCovGrad g0 0 2 j T‖ ≤ R`;
-at order `i` the induction uses orders up to `i+1 ≤ a+2`, which are in range. -/
+This is the assembly glue: it specializes the simultaneous strong-induction child
+`rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le` (which carries the bound for
+ALL orders `k ≤ i`, the natural induction-hypothesis shape) to the target order
+`k = i`. The child is the genuine self-referential induction leaf; this theorem is its
+single-order projection. -/
 theorem rfns_iteratedCovGrad_connDiffGInvComposite_uniform_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {R : ℝ} (hR : 0 ≤ R) {δ₀ : ℝ} (hδ₀ : δ₀ < 1)
@@ -131,7 +148,8 @@ theorem rfns_iteratedCovGrad_connDiffGInvComposite_uniform_le
           (connDiffGInvComposite (I := I) g₀
             (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))).toSection x) ≤
       gInvSharpJetBound (E := E) R δ i := by
-  sorry
+  exact rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
+    (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet i hi x i (le_refl i)
 
 /-- Uniform L²-sum bound for the g1⁻¹ sharp-field covariant jet, in the form the
 consumer `deTurckRHSArmDiff_threeArm_coeffC0_jetL2_ballUniform` (conjunct (c)) accepts:
