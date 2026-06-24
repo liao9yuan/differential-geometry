@@ -1181,16 +1181,85 @@ private lemma threeArm_unitModel_appCc_intervalIntegrable_tame
   exact (hcontFinal.mono hSI).intervalIntegrable
 
 /--
+Uniform pointwise fibre-norm (C⁰) estimate for the concrete linearized-Ricci three-arm coeff
+fields built from the path metric `realizedFam g₀ T T' s`. The coeff fields are polynomial in
+the chart Christoffel symbols, Riemann-tensor components, gram matrices and inverse gram
+matrices of the perturbed metric; the Neumann bound `g_s⁻¹ ≤ (1/(1−δ₀)) g₀⁻¹`
+(`perturbedInner_self_lower_bound`) plus the Sobolev embedding
+`iteratedCovGrad_toSobolev_embedding_Cm` (a = 2 finrank + 10 supercritical, giving a uniform
+C² bound on `T,T'` and hence uniform `∂g_s`, `∂²g_s`) yield `‖Rm(g_s)‖ ≤ poly(R, 1/(1−δ₀))`
+uniformly in `s ∈ [0,1]` and `x ∈ M`, so each coeff field has fibre norm bounded by a constant
+`ΛR` depending only on `(g₀, finrank, R, δ₀)`.
+
+This is the deep analytic bedrock leaf deferred from `ricciArm_threeArm_coeffFields_C0_bound`.
+It carries the full field-existence + identity + smoothness + continuity + C⁰ package because the
+source `exists_linearizedRicci_threeArm_coeffFields` packages the coeff fields `Φ₀, Φ₁`
+existentially (down to `chartRiemannTraceDeriv_threeArm_appCc_transfer`), so the C⁰ estimate
+cannot be cleanly stated as a separate sub-lemma over abstract `Φₖ` (a universal-`Φₖ` form is
+FALSE: when `T = T'` the linearized-Ricci identity is vacuous, so arbitrary large `Φₖ` satisfy
+all non-C⁰ conjuncts). The proof should construct the witness concretely (`Φ₀` =
+`linearizedRicciArm0Field`, `Φ₂` = `linearizedRicciArm2FieldLichnerowicz`, `Φ₁` from
+`chartRiemannTraceDeriv_threeArm_appCc_transfer`), discharge the seven non-C⁰ conjuncts against
+the proven source lemmas, and establish the three C⁰ bounds via the uniform-curvature estimate
+for the perturbed path metric.
+-/
+private theorem ricciArm_threeArm_coeffFields_uniformC0
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛR : ℝ, 0 ≤ ΛR ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2)
+          (Φ₂ : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 2 Φ₀
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 3 Φ₁
+            (δ := δ) (δ' := δ') ∧
+          linearizedRicciThreeArmHcont (I := I) (M := M) g₀ 4 Φ₂
+            (δ := δ) (δ' := δ') ∧
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+            ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+              linearizedRicciAt (I := I) g₀ T T'
+                  (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+                  x (v 0) (v 1) s =
+                unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((Φ₀ s).toSection x)) ≤ ΛR) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛR) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛR) := by
+  sorry
+
+/--
 Uniform pointwise fibre-norm (C⁰) bound for the concrete linearized-Ricci three-arm coeff
 fields produced by `exists_linearizedRicci_threeArm_coeffFields`, uniform over the Sobolev
-ball of radius `R` and the path parameter `s ∈ [0,1]`. The coeff identity (`Ioo`), joint
-smoothness, and path continuity all follow from the source lemma; this theorem adds the
-uniform C⁰ estimate (Neumann `g_s⁻¹ ≤ (1/(1−δ₀)) g₀⁻¹` plus `‖Rm(g_s)‖ ≤ poly(R)` via Sobolev
-embedding `a = 2 finrank + 10`). The witnesses `Φ₀, Φ₁, Φ₂` are the concrete ones from
-`exists_linearizedRicci_threeArm_coeffFields` (NOT the refuted universal `∀ Φₖ` form). The
-C⁰ estimate is the deep analytic input of the `@1227` leaf and is deferred here; the identity,
-joint smoothness, and path continuity are discharged against the proven source lemma in the
-body of the consumer so that only the C⁰ conjuncts transit `sorryAx`.
+ball of radius `R` and the path parameter `s ∈ [0,1]`. This theorem is the consumer-facing
+wrapper; its body forwards to `ricciArm_threeArm_coeffFields_uniformC0`, which carries the full
+field-existence + identity (`Ioo`) + joint smoothness + path continuity + uniform C⁰ estimate
+package. The forward is forced because the source `exists_linearizedRicci_threeArm_coeffFields`
+packages the coeff fields `Φ₀, Φ₁` existentially, so the C⁰ estimate cannot be separated into a
+sub-lemma over abstract `Φₖ` (a universal-`Φₖ` form is FALSE: when `T = T'` the linearized-Ricci
+identity is vacuous and arbitrary `Φₖ` satisfy the non-C⁰ conjuncts). See the child's docstring
+for the concrete proof strategy.
 -/
 private theorem ricciArm_threeArm_coeffFields_C0_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1236,7 +1305,7 @@ private theorem ricciArm_threeArm_coeffFields_C0_bound
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x)) ≤ ΛR) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x)) ≤ ΛR) := by
-  sorry
+  exact ricciArm_threeArm_coeffFields_uniformC0 (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
 
 
 private theorem exists_ricciArm_threeArm_coeffFields_ballUniform
@@ -3839,3 +3908,7 @@ theorem deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz
       ≤ ∑ _q ∈ Finset.range (a + 1), C ^ 2 * Scol := Finset.sum_le_sum hper
     _ = (a + 1 : ℕ) * C ^ 2 * Scol := by
         rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; ring
+
+end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
+
+end
