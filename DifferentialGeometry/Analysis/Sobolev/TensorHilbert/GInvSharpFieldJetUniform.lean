@@ -185,7 +185,7 @@ theorem l2Sum_iteratedCovGrad_connDiffGInvComposite_uniform_le
   set P : ℕ → ℝ := gInvSharpJetBound (E := E) R δ₀ with hP_def
   set Γ : ℝ := Real.sqrt (V * ∑ i ∈ Finset.range (a + 1), P i) with hΓ_def
   refine ⟨Γ, ?_, ?_⟩
-  · -- non-negativity of Γ
+  ·
     have hPsum_nn : 0 ≤ ∑ i ∈ Finset.range (a + 1), P i :=
       Finset.sum_nonneg (fun i _ => gInvSharpJetBound_nonneg R δ₀ hR hδ₀ i)
     have hVP_nn : 0 ≤ V * ∑ i ∈ Finset.range (a + 1), P i :=
@@ -193,8 +193,6 @@ theorem l2Sum_iteratedCovGrad_connDiffGInvComposite_uniform_le
     exact Real.sqrt_nonneg _
   · intro T δ hδ_le hδ hδ_lt hTjet
     set g₁ := tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ with hg₁_def
-    -- Per-order: ‖∇ⁱC‖² ≤ (rfns bound at δ) * V ≤ P i * V, via pointwise-to-L² packaging.
-    -- The δ → δ₀ step uses the sign-agnostic monotonicity (only needs δ < 1, δ ≤ δ₀).
     have hper_order : ∀ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 1 2 i
           (connDiffGInvComposite (I := I) g₀ g₁)‖ ^ 2 ≤ P i * V := by
