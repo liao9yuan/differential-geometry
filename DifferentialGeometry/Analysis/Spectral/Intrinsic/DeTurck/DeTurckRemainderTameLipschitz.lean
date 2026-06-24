@@ -3160,6 +3160,113 @@ private lemma jetTowerSum_add_le (g₀ : SmoothRiemannianMetric I M) (r s n : �
           2 * (∑ i ∈ Finset.range n, ‖iteratedCovGrad (I := I) g₀ r s i B‖ ^ 2) := by
         rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
 
+private theorem iteratedCovGrad_smul' (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) =
+      c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih =>
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
+
+private theorem armField_pathIntegral_jetL2_tower_le
+    (g₀ : SmoothRiemannianMetric I M) (r a : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ'))
+    (hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')))
+    (hjoint : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r Φ (δ := δ) (δ' := δ'))
+    {B : ℝ} (hB : 0 ≤ B)
+    (hΦjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+      (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2) ≤ B ^ 2) :
+    (∑ i ∈ Finset.range (a + 1),
+      ‖iteratedCovGrad (I := I) g₀ r 2 i
+        (pathIntegralCoeffField (I := I) (M := M) g₀ r 2 Φ
+          (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint)‖ ^ 2) ≤ B ^ 2 :=
+  sorry
+
+private theorem exists_ricciArm_threeArm_coeffFields_jetL2_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ B : ℝ, 0 ≤ B ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2)
+          (Φ₂ : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀ (δ := δ) (δ' := δ') →
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') →
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂ (δ := δ) (δ' := δ') →
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+            ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+              linearizedRicciAt (I := I) g₀ T T'
+                  (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+                  x (v 0) (v 1) s =
+                unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) →
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 2 2 i (Φ₀ s)‖ ^ 2) ≤ B ^ 2) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 3 2 i (Φ₁ s)‖ ^ 2) ≤ B ^ 2) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 4 2 i (Φ₂ s)‖ ^ 2) ≤ B ^ 2) :=
+  sorry
+
+private theorem exists_lieArm_threeArm_coeffFields_jetL2_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ B : ℝ, 0 ≤ B ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2)
+          (Φ₂ : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀ (δ := δ) (δ' := δ') →
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁ (δ := δ) (δ' := δ') →
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂ (δ := δ) (δ' := δ') →
+          (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+            ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+              linearizedDeTurckLieAt (I := I) g₀ g_bg T T'
+                  (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+                  x (v 0) (v 1) s =
+                unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                    + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) →
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 2 2 i (Φ₀ s)‖ ^ 2) ≤ B ^ 2) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 3 2 i (Φ₁ s)‖ ^ 2) ≤ B ^ 2) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 4 2 i (Φ₂ s)‖ ^ 2) ≤ B ^ 2) :=
+  sorry
+
+set_option maxHeartbeats 1000000 in
 private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -3188,9 +3295,179 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R₂.toSection x) ≤ ΛR ^ 2) ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i R₀‖ ^ 2) ≤ ΓR ^ 2 ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i R₁‖ ^ 2) ≤ ΓR ^ 2 ∧
-          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i R₂‖ ^ 2) ≤ ΓR ^ 2 :=
-  sorry
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i R₂‖ ^ 2) ≤ ΓR ^ 2 := by
+  classical
+  obtain ⟨ΛR, hΛR_nn, hbrick⟩ :=
+    exists_ricciArm_threeArm_coeffFields_ballUniform (I := I) g₀ g_bg a ha_super hR hδ₀
+  obtain ⟨B, hB_nn, hjet⟩ :=
+    exists_ricciArm_threeArm_coeffFields_jetL2_ballUniform (I := I) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨2 * ΛR, 2 * B, by positivity, by positivity, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  obtain ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hc0, hc1, hc2, hid, hb0, hb1, hb2⟩ :=
+    hbrick T T' hδ_le hδ hδ'_le hδ' hTball hT'ball
+  obtain ⟨hjet0, hjet1, hjet2⟩ :=
+    hjet T T' hδ_le hδ hδ'_le hδ' hTball hT'ball Φ₀ Φ₁ Φ₂ hj0 hj1 hj2 hid
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') := by
+    rw [Set.uIcc_of_le zero_le_one]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt
+  have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
+  set P₀ : SmoothCcTensor g₀ 2 2 :=
+    pathIntegralCoeffField (I := I) (M := M) g₀ 2 2 Φ₀
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 with hP₀
+  set P₁ : SmoothCcTensor g₀ 3 2 :=
+    pathIntegralCoeffField (I := I) (M := M) g₀ 3 2 Φ₁
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 with hP₁
+  set P₂ : SmoothCcTensor g₀ 4 2 :=
+    pathIntegralCoeffField (I := I) (M := M) g₀ 4 2 Φ₂
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 with hP₂
+  refine ⟨(-2 : ℝ) • P₀, (-2 : ℝ) • P₁, (-2 : ℝ) • P₂, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro x v
+    set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
+    set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
+    set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
+    have hRic :=
+      ricciTensor_realized_sub_eq_integral_linearizedRicci (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)
+    have hPidentity :
+        ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1) -
+            ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1) =
+          unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 P₀ W₀
+              + appCc (I := I) (M := M) g₀ 3 2 P₁ W₁
+              + appCc (I := I) (M := M) g₀ 4 2 P₂ W₂) x v := by
+      rw [hRic]
+      have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
+          linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+            unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v
+              + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v
+              + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v := by
+        rw [MeasureTheory.ae_iff]
+        have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
+        refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
+        rw [Set.mem_setOf_eq, Classical.not_imp] at hs
+        obtain ⟨hsmem, hsneq⟩ := hs
+        rw [Set.uIoc_of_le zero_le_one, Set.mem_Ioc] at hsmem
+        rw [Set.mem_singleton_iff]
+        by_contra hne
+        have hsIoo : s ∈ Set.Ioo (0 : ℝ) 1 := ⟨hsmem.1, lt_of_le_of_ne hsmem.2 hne⟩
+        exact hsneq (by rw [hid s hsIoo x v, unitModel_add2_apply_tame,
+          unitModel_add2_apply_tame])
+      rw [intervalIntegral.integral_congr_ae hintegrand]
+      have hI0 : IntervalIntegrable
+          (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v)
+          MeasureTheory.volume 0 1 :=
+        threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 2 Φ₀ W₀ hSI hc0 x v
+      have hI1 : IntervalIntegrable
+          (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v)
+          MeasureTheory.volume 0 1 :=
+        threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 3 Φ₁ W₁ hSI hc1 x v
+      have hI2 : IntervalIntegrable
+          (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v)
+          MeasureTheory.volume 0 1 :=
+        threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 4 Φ₂ W₂ hSI hc2 x v
+      rw [intervalIntegral.integral_add (hI0.add hI1) hI2,
+        intervalIntegral.integral_add hI0 hI1]
+      have he0 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 2 2 Φ₀ W₀
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 hc0 x v
+      have he1 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 3 2 Φ₁ W₁
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 hc1 x v
+      have he2 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 4 2 Φ₂ W₂
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 hc2 x v
+      rw [← hP₀] at he0
+      rw [← hP₁] at he1
+      rw [← hP₂] at he2
+      rw [← he0, ← he1, ← he2, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
+    rw [unitModel_add2_apply_tame, unitModel_add2_apply_tame,
+      unitModel_appCc_smul_left_apply_tame, unitModel_appCc_smul_left_apply_tame,
+      unitModel_appCc_smul_left_apply_tame]
+    rw [unitModel_add2_apply_tame, unitModel_add2_apply_tame] at hPidentity
+    rw [smul_sub, smul_eq_mul, smul_eq_mul]
+    linarith [hPidentity]
+  · intro x
+    have hsmul : ((-2 : ℝ) • P₀).toSection x = (-2 : ℝ) • P₀.toSection x := by
+      rw [SmoothCcTensor.toSection_smul]; rfl
+    rw [hsmul, riemannianFiberNormSq_smul_value_tame]
+    have hPbound : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (P₀.toSection x) ≤ ΛR ^ 2 := by
+      rw [hP₀]
+      exact riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M) g₀ 2 2 Φ₀
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 x ΛR hΛR_nn
+        ((hc0 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
+        (fun t ht => hb0 t ht x)
+    nlinarith [hPbound, sq_nonneg ΛR, riemannianFiberNormSq_nonneg
+      (I := I) (M := M) g₀ 2 2 x (P₀.toSection x)]
+  · intro x
+    have hsmul : ((-2 : ℝ) • P₁).toSection x = (-2 : ℝ) • P₁.toSection x := by
+      rw [SmoothCcTensor.toSection_smul]; rfl
+    rw [hsmul, riemannianFiberNormSq_smul_value_tame]
+    have hPbound : riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (P₁.toSection x) ≤ ΛR ^ 2 := by
+      rw [hP₁]
+      exact riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M) g₀ 3 2 Φ₁
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 x ΛR hΛR_nn
+        ((hc1 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
+        (fun t ht => hb1 t ht x)
+    nlinarith [hPbound, sq_nonneg ΛR, riemannianFiberNormSq_nonneg
+      (I := I) (M := M) g₀ 3 2 x (P₁.toSection x)]
+  · intro x
+    have hsmul : ((-2 : ℝ) • P₂).toSection x = (-2 : ℝ) • P₂.toSection x := by
+      rw [SmoothCcTensor.toSection_smul]; rfl
+    rw [hsmul, riemannianFiberNormSq_smul_value_tame]
+    have hPbound : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (P₂.toSection x) ≤ ΛR ^ 2 := by
+      rw [hP₂]
+      exact riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M) g₀ 4 2 Φ₂
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 x ΛR hΛR_nn
+        ((hc2 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
+        (fun t ht => hb2 t ht x)
+    nlinarith [hPbound, sq_nonneg ΛR, riemannianFiberNormSq_nonneg
+      (I := I) (M := M) g₀ 4 2 x (P₂.toSection x)]
+  · have htower : (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i P₀‖ ^ 2) ≤ B ^ 2 := by
+      rw [hP₀]
+      exact armField_pathIntegral_jetL2_tower_le (I := I) g₀ 2 a Φ₀ hSI hSopen hj0 hB_nn hjet0
+    have hscale : (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i ((-2 : ℝ) • P₀)‖ ^ 2) =
+        4 * ∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i P₀‖ ^ 2 := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [iteratedCovGrad_smul', norm_smul]
+      rw [show ‖(-2 : ℝ)‖ = 2 by rw [Real.norm_eq_abs]; norm_num]
+      ring
+    rw [hscale]
+    nlinarith [htower, sq_nonneg B, hB_nn]
+  · have htower : (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 3 2 i P₁‖ ^ 2) ≤ B ^ 2 := by
+      rw [hP₁]
+      exact armField_pathIntegral_jetL2_tower_le (I := I) g₀ 3 a Φ₁ hSI hSopen hj1 hB_nn hjet1
+    have hscale : (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 3 2 i ((-2 : ℝ) • P₁)‖ ^ 2) =
+        4 * ∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i P₁‖ ^ 2 := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [iteratedCovGrad_smul', norm_smul]
+      rw [show ‖(-2 : ℝ)‖ = 2 by rw [Real.norm_eq_abs]; norm_num]
+      ring
+    rw [hscale]
+    nlinarith [htower, sq_nonneg B, hB_nn]
+  · have htower : (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i P₂‖ ^ 2) ≤ B ^ 2 := by
+      rw [hP₂]
+      exact armField_pathIntegral_jetL2_tower_le (I := I) g₀ 4 a Φ₂ hSI hSopen hj2 hB_nn hjet2
+    have hscale : (∑ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i ((-2 : ℝ) • P₂)‖ ^ 2) =
+        4 * ∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i P₂‖ ^ 2 := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [iteratedCovGrad_smul', norm_smul]
+      rw [show ‖(-2 : ℝ)‖ = 2 by rw [Real.norm_eq_abs]; norm_num]
+      ring
+    rw [hscale]
+    nlinarith [htower, sq_nonneg B, hB_nn]
 
+set_option maxHeartbeats 1000000 in
 private theorem deTurckLieArm_appCc_graded_jetL2_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -3226,9 +3503,112 @@ private theorem deTurckLieArm_appCc_graded_jetL2_ballUniform
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (L₂.toSection x) ≤ ΛL ^ 2) ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i L₀‖ ^ 2) ≤ ΓL ^ 2 ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i L₁‖ ^ 2) ≤ ΓL ^ 2 ∧
-          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i L₂‖ ^ 2) ≤ ΓL ^ 2 :=
-  sorry
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i L₂‖ ^ 2) ≤ ΓL ^ 2 := by
+  classical
+  obtain ⟨ΛL, hΛL_nn, hbrick⟩ :=
+    exists_lieArm_threeArm_coeffFields_ballUniform (I := I) g₀ g_bg a ha_super hR hδ₀
+  obtain ⟨B, hB_nn, hjet⟩ :=
+    exists_lieArm_threeArm_coeffFields_jetL2_ballUniform (I := I) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨ΛL, B, hΛL_nn, hB_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  obtain ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hc0, hc1, hc2, hid, hb0, hb1, hb2⟩ :=
+    hbrick T T' hδ_le hδ hδ'_le hδ' hTball hT'ball
+  obtain ⟨hjet0, hjet1, hjet2⟩ :=
+    hjet T T' hδ_le hδ hδ'_le hδ' hTball hT'ball Φ₀ Φ₁ Φ₂ hj0 hj1 hj2 hid
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') := by
+    rw [Set.uIcc_of_le zero_le_one]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt
+  have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
+  set P₀ : SmoothCcTensor g₀ 2 2 :=
+    pathIntegralCoeffField (I := I) (M := M) g₀ 2 2 Φ₀
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 with hP₀
+  set P₁ : SmoothCcTensor g₀ 3 2 :=
+    pathIntegralCoeffField (I := I) (M := M) g₀ 3 2 Φ₁
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 with hP₁
+  set P₂ : SmoothCcTensor g₀ 4 2 :=
+    pathIntegralCoeffField (I := I) (M := M) g₀ 4 2 Φ₂
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 with hP₂
+  refine ⟨P₀, P₁, P₂, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · intro x v
+    set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
+    set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
+    set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
+    have hLie :=
+      lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie (I := I) g₀ g_bg T T'
+        hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)
+    rw [hLie]
+    have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
+        linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v
+            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v
+            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v := by
+      rw [MeasureTheory.ae_iff]
+      have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
+      refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
+      rw [Set.mem_setOf_eq, Classical.not_imp] at hs
+      obtain ⟨hsmem, hsneq⟩ := hs
+      rw [Set.uIoc_of_le zero_le_one, Set.mem_Ioc] at hsmem
+      rw [Set.mem_singleton_iff]
+      by_contra hne
+      have hsIoo : s ∈ Set.Ioo (0 : ℝ) 1 :=
+        ⟨hsmem.1, lt_of_le_of_ne hsmem.2 hne⟩
+      exact hsneq (by rw [hid s hsIoo x v, unitModel_add2_apply_tame, unitModel_add2_apply_tame])
+    rw [intervalIntegral.integral_congr_ae hintegrand]
+    have hI0 : IntervalIntegrable
+        (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀) x v)
+        MeasureTheory.volume 0 1 :=
+      threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 2 Φ₀ W₀ hSI hc0 x v
+    have hI1 : IntervalIntegrable
+        (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁) x v)
+        MeasureTheory.volume 0 1 :=
+      threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 3 Φ₁ W₁ hSI hc1 x v
+    have hI2 : IntervalIntegrable
+        (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂) x v)
+        MeasureTheory.volume 0 1 :=
+      threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 4 Φ₂ W₂ hSI hc2 x v
+    rw [intervalIntegral.integral_add (hI0.add hI1) hI2,
+      intervalIntegral.integral_add hI0 hI1]
+    have he0 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 2 2 Φ₀ W₀
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 hc0 x v
+    have he1 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 3 2 Φ₁ W₁
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 hc1 x v
+    have he2 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 4 2 Φ₂ W₂
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 hc2 x v
+    rw [← hP₀] at he0
+    rw [← hP₁] at he1
+    rw [← hP₂] at he2
+    rw [← he0, ← he1, ← he2, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
+  · intro x
+    rw [hP₀]
+    exact riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M) g₀ 2 2 Φ₀
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 x ΛL hΛL_nn
+      ((hc0 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
+      (fun t ht => hb0 t ht x)
+  · intro x
+    rw [hP₁]
+    exact riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M) g₀ 3 2 Φ₁
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 x ΛL hΛL_nn
+      ((hc1 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
+      (fun t ht => hb1 t ht x)
+  · intro x
+    rw [hP₂]
+    exact riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M) g₀ 4 2 Φ₂
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 x ΛL hΛL_nn
+      ((hc2 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ'_lt))
+      (fun t ht => hb2 t ht x)
+  · rw [hP₀]
+    exact armField_pathIntegral_jetL2_tower_le (I := I) g₀ 2 a Φ₀ hSI hSopen hj0 hB_nn hjet0
+  · rw [hP₁]
+    exact armField_pathIntegral_jetL2_tower_le (I := I) g₀ 3 a Φ₁ hSI hSopen hj1 hB_nn hjet1
+  · rw [hP₂]
+    exact armField_pathIntegral_jetL2_tower_le (I := I) g₀ 4 a Φ₂ hSI hSopen hj2 hB_nn hjet2
 
+set_option maxHeartbeats 1000000 in
 private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
