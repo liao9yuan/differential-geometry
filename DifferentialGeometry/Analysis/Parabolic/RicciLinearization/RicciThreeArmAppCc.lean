@@ -515,6 +515,42 @@ theorem realizedFam_chartRiemannTensor_jointContMDiffOn
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
     (fun q _ => rfl) rfl
 
+theorem realizedFam_chartChristoffel_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (i j k : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartChristoffel (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α i j k (extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hG := realizedFam_genJointGram_free (I := I) g₀ T T' hδ hδ' α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_christoffel (I := I)
+    (realizedFam (I := I) g₀ T T' hδ hδ') α hG i j k hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartChristoffel (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' r.1) α i j k r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
+    (fun q _ => rfl) rfl
+
 private noncomputable def outerPairBilinChartα (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
