@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamLin
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrderPart
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.SecondCovGradChartHessian
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
 noncomputable section
 
@@ -944,6 +946,166 @@ theorem linearizedRicci_arm2FieldLichnerowicz_jointSmooth (g₀ : SmoothRiemanni
     (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1 t) ?_
   rw [linearizedRicciArm2FieldLichnerowicz, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+
+set_option linter.unusedSectionVars false in
+
+private lemma riemannianFiberNormSq_smul_value_appCc
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (c : ℝ)
+    (v : Tensor0SBundle.TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
+      c ^ 2 * riemannianFiberNormSq (I := I) (M := M) g r s x v := by
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (c • v),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x v]
+  rw [TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left,
+    tensorInnerPointwise_smul_right]
+  ring
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+
+theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λcurv : ℝ, 0 ≤ Λcurv ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv ∧
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+
+theorem exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λcom : ℝ, 0 ≤ Λcom ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+              ((ricciArmPrincipalCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcom ∧
+          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+              ((traceHessianCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcom :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+set_option maxHeartbeats 3200000 in
+
+theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛC : ℝ, 0 ≤ ΛC ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC ∧
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            ((linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC := by
+  classical
+  obtain ⟨Λcurv, hΛcurv_nn, hcurv⟩ :=
+    exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨Λcom, hΛcom_nn, hcom⟩ :=
+    exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  set K : ℝ := max Λcurv Λcom with hK_def
+  have hK_nn : 0 ≤ K := le_trans hΛcurv_nn (le_max_left _ _)
+  refine ⟨Real.sqrt (4 * K), Real.sqrt_nonneg _, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
+  obtain ⟨hRm, hCurvFib⟩ := hcurv T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+  obtain ⟨hPrin, hTH⟩ := hcom T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+  have hRm' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ K :=
+    le_trans hRm (le_max_left _ _)
+  have hCurvFib' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ K :=
+    le_trans hCurvFib (le_max_left _ _)
+  have hPrin' : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+      ((ricciArmPrincipalCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ K :=
+    le_trans hPrin (le_max_right _ _)
+  have hTH' : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+      ((traceHessianCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ K :=
+    le_trans hTH (le_max_right _ _)
+  constructor
+  · have hsec : (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s).toSection x =
+        ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+          - ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) := by
+      rw [linearizedRicciArm0Field, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
+        Pi.sub_apply]
+    rw [hsec]
+    have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x
+      ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+      ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+    have hbound : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        (((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+          - ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤ 4 * K := by
+      nlinarith [hsub, hRm', hCurvFib', hK_nn]
+    refine Real.sqrt_le_sqrt hbound
+  · have hsec : (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s).toSection x =
+        ((ricciArmPrincipalCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+          - (1 / 2 : ℝ) • ((traceHessianCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) := by
+      rw [linearizedRicciArm2FieldLichnerowicz, SmoothCcTensor.toSection_sub,
+        ContMDiffSection.coe_sub, Pi.sub_apply, SmoothCcTensor.toSection_smul,
+        ContMDiffSection.coe_smul, Pi.smul_apply]
+    rw [hsec]
+    have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 4 2 x
+      ((ricciArmPrincipalCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+      ((1 / 2 : ℝ) • ((traceHessianCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x))
+    have hsmul : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        ((1 / 2 : ℝ) • ((traceHessianCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) =
+        (1 / 2 : ℝ) ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+          ((traceHessianCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) :=
+      riemannianFiberNormSq_smul_value_appCc (I := I) (M := M) g₀ 4 2 x (1 / 2 : ℝ) _
+    have hbound : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        (((ricciArmPrincipalCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+          - (1 / 2 : ℝ) • ((traceHessianCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤ 4 * K := by
+      rw [hsmul] at hsub
+      nlinarith [hsub, hPrin', hTH', hK_nn]
+    refine Real.sqrt_le_sqrt hbound
 
 set_option linter.unusedVariables false in
 def chartRicciTraceChristoffelSlope (g₀ : SmoothRiemannianMetric I M)
