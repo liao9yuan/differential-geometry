@@ -231,7 +231,7 @@ theorem deTurckSobolevNHa2_mixed_lipschitz_pointwise (a : ℕ)
           * ‖u - u'‖ +
         (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖ :=
-  sorry
+  deTurckSobolevNHa2_mixed_lipschitz_pointwise_aux (I := I) (M := M) g₀ g_bg a ha_super
 
 theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
