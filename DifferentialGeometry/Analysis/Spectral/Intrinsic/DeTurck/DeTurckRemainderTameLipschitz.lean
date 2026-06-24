@@ -2073,6 +2073,223 @@ private noncomputable def linearizedDeTurckLieAt
     (x : M) (v w : TangentSpace I x) (s₀ : ℝ) : ℝ :=
   deriv (realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w) s₀
 
+private noncomputable def realizedDeTurckLieChartSum
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
+  ∑ i, ∑ j,
+    ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+      DeTurckCoefficients.chartLieDeTurckComp (I := I)
+        (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+          (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)
+
+private theorem realizedDeTurckLieChartSum_contDiffAt
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) {s₀ : ℝ}
+    (hs : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
+    ContDiffAt ℝ ∞ (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s₀ := by
+  have hG := DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam_genJointGram
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  unfold realizedDeTurckLieChartSum
+  refine ContDiffAt.sum (fun i _ => ContDiffAt.sum (fun j _ => ?_))
+  refine contDiffAt_const.mul ?_
+  have hjoint := DifferentialGeometry.PDE.DeTurck.RicciLinearization.gen_joint_chartLieDeTurckComp
+    (I := I) (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+      (I := I) g₀ T T' hδ hδ') x hG g_bg i j hs hy
+  have hcomp : (fun s : ℝ =>
+        DeTurckCoefficients.chartLieDeTurckComp (I := I)
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+            (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) =
+      (fun p : ℝ × E =>
+        DeTurckCoefficients.chartLieDeTurckComp (I := I)
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+            (I := I) g₀ T T' hδ hδ' p.1) g_bg x i j p.2) ∘
+        (fun s : ℝ => (s, extChartAt I x x)) := by funext s; rfl
+  rw [hcomp]
+  exact hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)
+
+private theorem realizedDeTurckLiePathValue_eq_chartSum_on_Icc
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Set.Icc (0:ℝ) 1) :
+    realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
+      realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w s := by
+  obtain ⟨h0, h1⟩ := hs
+  have hmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨h0, h1⟩
+  have hclamp : max 0 (min s 1) = s := by rw [min_eq_left h1, max_eq_right h0]
+  have hxgood : x ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) x :=
+    DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hmetric :
+      DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedMetricPath
+          (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+          (le_max_left 0 (min s 1))
+          (max_le zero_le_one (min_le_right s 1)) =
+        DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+          (I := I) g₀ T T' hδ hδ' s := by
+    refine DifferentialGeometry.PDE.DeTurck.RicciLinearization.riemannianMetric_eq_of_inner
+      _ _ (fun b u z => ?_)
+    rw [DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedMetricPath_inner,
+      DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam_inner_of_mem
+        (I := I) g₀ T T' hδ hδ' hmem, hclamp]
+  rw [realizedDeTurckLiePathValue, hmetric, lieDerivMetricClm_apply,
+    realizedDeTurckLieChartSum]
+  rw [DifferentialGeometry.PDE.DeTurck.lieDerivMetric_apply]
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+  simp only [smoothRiemannianMetricToInfty]
+  rw [DifferentialGeometry.PDE.DeTurck.lieDerivMetricMatrix_def_chart,
+    DeTurckCoefficients.chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
+      (I := I)
+      (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
+        (I := I) g₀ T T' hδ hδ' s) g_bg x i j hxgood]
+
+private theorem realizedDeTurckLiePathValue_differentiableAt_Ioo
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0:ℝ) 1) :
+    DifferentiableAt ℝ
+      (realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w) s₀ := by
+  have heq : realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+      =ᶠ[nhds s₀] realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w := by
+    filter_upwards [isOpen_Ioo.mem_nhds hs₀] with s hs
+    exact realizedDeTurckLiePathValue_eq_chartSum_on_Icc (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      x v w (Set.mem_Icc_of_Ioo hs)
+  have hmem : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨hs₀.1.le, hs₀.2.le⟩
+  exact ((realizedDeTurckLieChartSum_contDiffAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+    hmem).differentiableAt (by simp)).congr_of_eventuallyEq heq
+
+private theorem linearizedDeTurckLieAt_eq_deriv_chartSum_on_Ioo
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) {s : ℝ} (hs : s ∈ Set.Ioo (0:ℝ) 1) :
+    linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
+      deriv (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s := by
+  have heq : realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+      =ᶠ[nhds s] realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w := by
+    filter_upwards [isOpen_Ioo.mem_nhds hs] with t ht
+    exact realizedDeTurckLiePathValue_eq_chartSum_on_Icc (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      x v w (Set.mem_Icc_of_Ioo ht)
+  rw [linearizedDeTurckLieAt]
+  exact Filter.EventuallyEq.deriv_eq heq
+
+private theorem deriv_realizedDeTurckLieChartSum_continuousOn
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) :
+    ContinuousOn (deriv (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hcd : ContDiffOn ℝ ∞ (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w)
+      (realizedSmallSet (δ := δ) (δ' := δ')) := fun s hs =>
+    (realizedDeTurckLieChartSum_contDiffAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+      hs).contDiffWithinAt
+  exact hcd.continuousOn_deriv_of_isOpen realizedSmallSet_isOpen (by exact_mod_cast le_top)
+
+private theorem linearizedDeTurckLieAt_intervalIntegrable
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) :
+    IntervalIntegrable
+      (linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w)
+      MeasureTheory.volume 0 1 := by
+  have hcont : ContinuousOn (deriv (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w))
+      (Set.Icc (0:ℝ) 1) :=
+    (deriv_realizedDeTurckLieChartSum_continuousOn (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w).mono
+      (Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
+  have hii : IntervalIntegrable
+      (deriv (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w))
+      MeasureTheory.volume 0 1 :=
+    hcont.intervalIntegrable_of_Icc zero_le_one
+  refine hii.congr_ae ?_
+  have hsub : Set.Ioo (0:ℝ) 1 ⊆
+      {s | deriv (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s =
+        linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s} := by
+    intro s hs
+    exact (linearizedDeTurckLieAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      x v w hs).symm
+  have hnull : (MeasureTheory.volume.restrict (Set.uIoc (0:ℝ) 1)) (Set.Ioo (0:ℝ) 1)ᶜ = 0 := by
+    rw [Set.uIoc_of_le zero_le_one]
+    rw [MeasureTheory.Measure.restrict_apply (measurableSet_Ioo.compl)]
+    have hsub1 : (Set.Ioo (0:ℝ) 1)ᶜ ∩ Set.Ioc 0 1 ⊆ {1} := by
+      intro t ht
+      obtain ⟨htc, ht0, ht1⟩ := ht
+      rw [Set.mem_compl_iff, Set.mem_Ioo, not_and_or, not_lt, not_lt] at htc
+      rcases htc with h | h
+      · exact absurd ht0 (not_lt.mpr h)
+      · exact (le_antisymm ht1 h) ▸ rfl
+    exact MeasureTheory.measure_mono_null hsub1 (by simp)
+  refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
+  exact fun hs' => hs (hsub hs')
+
+private theorem realizedDeTurckLiePathValue_continuousOn_Icc
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) :
+    ContinuousOn (realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w)
+      (Set.Icc (0:ℝ) 1) := by
+  refine ContinuousOn.congr
+    (f := realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) ?_ ?_
+  · exact fun s hs =>
+      (realizedDeTurckLieChartSum_contDiffAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+        (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs)).continuousAt.continuousWithinAt
+  · intro s hs
+    exact realizedDeTurckLiePathValue_eq_chartSum_on_Icc (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      x v w hs
+
+private theorem hasDerivAt_lieDeTurck_realizedMetricPath
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) :
+    (∀ s₀ ∈ Set.Ioo (0 : ℝ) 1,
+        HasDerivAt
+          (realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w)
+          (linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s₀) s₀) ∧
+      IntervalIntegrable
+        (linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w)
+        MeasureTheory.volume 0 1 := by
+  refine ⟨fun s₀ hs₀ => ?_, ?_⟩
+  · rw [linearizedDeTurckLieAt]
+    exact (realizedDeTurckLiePathValue_differentiableAt_Ioo (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      x v w hs₀).hasDerivAt
+  · exact linearizedDeTurckLieAt_intervalIntegrable (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+
 private theorem lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -2094,8 +2311,18 @@ private theorem lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie
             (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ'))
           (smoothRiemannianMetricToInfty (I := I) g_bg)) x v w =
       ∫ s in (0 : ℝ)..1,
-        linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s :=
-  sorry
+        linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s := by
+  obtain ⟨hderiv, hint⟩ :=
+    hasDerivAt_lieDeTurck_realizedMetricPath (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+  have hcont :=
+    realizedDeTurckLiePathValue_continuousOn_Icc (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w
+  have hFTC :
+      ∫ s in (0 : ℝ)..1,
+          linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w s =
+        realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w 1 -
+          realizedDeTurckLiePathValue (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w 0 :=
+    intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
+  rw [hFTC, realizedDeTurckLiePathValue_one, realizedDeTurckLiePathValue_zero]
 
 private theorem exists_lieArm_threeArm_coeffFields_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
