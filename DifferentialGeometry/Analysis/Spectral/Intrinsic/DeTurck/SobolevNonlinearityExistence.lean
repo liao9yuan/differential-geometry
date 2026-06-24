@@ -1513,6 +1513,30 @@ theorem smoothRemainderDiff_ballLipschitz_Ha1_weighted
         mul_le_mul_of_nonneg_left hDsum_le hCa_nn
     _ = Ca * (((a : ℝ) + 1) * Ccol) * rhs := by ring
 
+theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ q : ℕ, q ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+                deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ')‖ ≤
+            C * (max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T‖
+                     ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T'‖
+                   * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ +
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖) :=
+  sorry
+
+set_option linter.unusedVariables false in
+
 theorem smoothRemainderDiff_ballLipschitz_Ha1_dataWeighted
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -1531,8 +1555,76 @@ theorem smoothRemainderDiff_ballLipschitz_Ha1_dataWeighted
           (max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T‖
                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T'‖
              * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ +
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖) :=
-  sorry
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖) := by
+  classical
+  have hordB : (((a + 2 : ℕ)) : ℝ) = (a : ℝ) + 2 := by push_cast; ring
+  obtain ⟨Ca, hCa_nn, hCa⟩ :=
+    exists_smoothCcToTensorHs_le_iteratedCovGrad_sum_general (I := I) (M := M) g₀ a
+  obtain ⟨Cb, hCb_nn, hCb⟩ :=
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g₀ (a + 2)
+  have hR'_nn : (0 : ℝ) ≤ Cb * R := mul_nonneg hCb_nn hR.le
+  obtain ⟨Ccol, hCcol_nn, hCcol⟩ :=
+    deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted
+      (I := I) (M := M) g₀ g_bg a ha_super hR'_nn hδ₀
+  refine ⟨Real.toNNReal (Ca * (((a : ℝ) + 1) * Ccol)), ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  set W : SmoothCcTensor g₀ 0 2 := T - T' with hW_def
+  set D : SmoothCcTensor g₀ 0 2 :=
+    deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+      deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' with hD_def
+  set rhs : ℝ :=
+    max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T‖
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T'‖
+      * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ +
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖ with hrhs_def
+  have hball_conv : ∀ (S : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R →
+      ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤ Cb * R := by
+    intro S hSball j hj
+    have hsum := hCb S
+    rw [hordB] at hsum
+    have hterm : ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤
+        ∑ i ∈ Finset.range (a + 2 + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 i S‖ := by
+      refine Finset.single_le_sum (f := fun i => ‖iteratedCovGrad (I := I) g₀ 0 2 i S‖)
+        (fun i _ => norm_nonneg _) ?_
+      rw [Finset.mem_range]; omega
+    calc ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖
+        ≤ ∑ i ∈ Finset.range (a + 2 + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 i S‖ := hterm
+      _ ≤ Cb * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ := hsum
+      _ ≤ Cb * R := mul_le_mul_of_nonneg_left hSball hCb_nn
+  have hTcov : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ Cb * R :=
+    hball_conv T hTball
+  have hT'cov : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ Cb * R :=
+    hball_conv T' hT'ball
+  have hcol := hCcol T T' hδ_le hδ hδ'_le hδ' hTcov hT'cov
+  set Dsum : ℝ := ∑ q ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ with hDsum_def
+  have hDsum_nn : 0 ≤ Dsum := Finset.sum_nonneg fun q _ => norm_nonneg _
+  have hper : ∀ q ∈ Finset.range (a + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ≤ Ccol * rhs := by
+    intro q hq
+    have hqa : q ≤ a := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)
+    have hb := hcol q hqa
+    rw [← hD_def, ← hrhs_def] at hb
+    exact hb
+  have hDsum_le : Dsum ≤ ((a : ℝ) + 1) * (Ccol * rhs) := by
+    calc Dsum = ∑ q ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ := hDsum_def
+      _ ≤ ∑ _q ∈ Finset.range (a + 1), Ccol * rhs := Finset.sum_le_sum hper
+      _ = ((a + 1 : ℕ) : ℝ) * (Ccol * rhs) := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+      _ = ((a : ℝ) + 1) * (Ccol * rhs) := by push_cast; ring
+  have hbridgeA := hCa D
+  rw [← hDsum_def] at hbridgeA
+  have hKcoe : (Real.toNNReal (Ca * (((a : ℝ) + 1) * Ccol)) : ℝ) =
+      Ca * (((a : ℝ) + 1) * Ccol) :=
+    Real.coe_toNNReal _ (by positivity)
+  rw [hKcoe]
+  calc ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) D‖
+      ≤ Ca * Dsum := hbridgeA
+    _ ≤ Ca * (((a : ℝ) + 1) * (Ccol * rhs)) :=
+        mul_le_mul_of_nonneg_left hDsum_le hCa_nn
+    _ = Ca * (((a : ℝ) + 1) * Ccol) * rhs := by ring
 
 theorem tensorHsInclusion_smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M)
     {τ σ : ℝ} (hτσ : τ ≤ σ) (T : SmoothCcTensor g₀ 0 2) :

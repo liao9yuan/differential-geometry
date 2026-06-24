@@ -377,6 +377,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.JointContinuity
 import DifferentialGeometry.Analysis.ODE.Flow.ParametricLinearODE
 import DifferentialGeometry.Analysis.ODE.Flow.SolutionOperator
 import DifferentialGeometry.Analysis.ODE.Flow.Variational
+import DifferentialGeometry.Analysis.ODE.EnergyHierarchy
 import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
 import DifferentialGeometry.Analysis.ODE.IntegralGronwall
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
@@ -703,6 +704,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMat
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRealizeUnitModel
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderHigherOrderTame
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
@@ -1180,6 +1182,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.UniformRiemannO
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvatureUnitEvalBridge
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
+import DifferentialGeometry.Geometry.Curvature.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalFrameField
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalLaplacianSlot0Expansion
