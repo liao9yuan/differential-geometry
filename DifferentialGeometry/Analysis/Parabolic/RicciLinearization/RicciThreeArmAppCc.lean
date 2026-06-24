@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 
 noncomputable section
 
@@ -1445,6 +1446,86 @@ private lemma gFibreOpBound_mono_local
   nlinarith [hle, hprod]
 
 set_option linter.unusedSectionVars false in
+private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
+      (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
+      (∀ i : Fin (Module.finrank ℝ E), bse i = e i) ∧
+      (∀ a b : Fin (Module.finrank ℝ E),
+        g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) := by
+  classical
+  obtain ⟨n, e0, hn, horth0, _hpars, _hrepr⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_orthonormal_frame_riemannianFiberNormSq
+      (I := I) (M := M) g 0 0 x
+  have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
+  subst hnE
+  set e : Fin (Module.finrank ℝ E) → TangentSpace I x := e0 with he_def
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := horth0
+  haveI : Nonempty (Fin (Module.finrank ℝ (TangentSpace I x))) :=
+    ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
+  have he_li : LinearIndependent ℝ e := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g.inner x (e k) (∑ j ∈ fs, c j • e j) = 0 := by rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g.inner x (e k) (c j • e j) = c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [map_smul, horth k j, smul_eq_mul]
+    rw [Finset.sum_congr rfl h_pull] at h_zero
+    rw [Finset.sum_eq_single k (fun j _ hj => by rw [if_neg (Ne.symm hj), mul_zero])
+      (fun hk => absurd hk_mem hk)] at h_zero
+    rwa [if_pos rfl, mul_one] at h_zero
+  have hcard : Fintype.card (Fin (Module.finrank ℝ (TangentSpace I x))) =
+      Module.finrank ℝ (TangentSpace I x) := Fintype.card_fin _
+  refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
+  rw [coe_basisOfLinearIndependentOfCardEqFinrank]
+
+set_option linter.unusedSectionVars false in
+private theorem rfns_le_of_Ksum_sq_le
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
+    (C : ℝ)
+    (hKsum : ∀ (e : Fin (Module.finrank ℝ E) → TangentSpace I x),
+      (∀ a b : Fin (Module.finrank ℝ E),
+        g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) →
+      ∀ (K : Fin r → Fin (Module.finrank ℝ E)),
+        (∑ J : Fin s → Fin (Module.finrank ℝ E),
+          (fiberNormSqComponent (I := I) (M := M) g₀ x r s S (Module.finrank ℝ E) e K J) ^ 2)
+          ≤ C ^ 2) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ r s x S
+      ≤ ((Module.finrank ℝ E : ℝ) ^ r) * C ^ 2 := by
+  classical
+  obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis_local (I := I) (M := M) g₀ x
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
+  calc (∑ K : Fin r → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
+          (fiberNormSqComponent (I := I) (M := M) g₀ x r s S (Module.finrank ℝ E) e K J) ^ 2)
+      ≤ ∑ _K : Fin r → Fin (Module.finrank ℝ E), C ^ 2 :=
+        Finset.sum_le_sum (fun K _ => hKsum e horth K)
+    _ = ((Module.finrank ℝ E : ℝ) ^ r) * C ^ 2 := by
+        rw [Finset.sum_const]
+        simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul,
+          Nat.cast_pow]
+
+set_option linter.unusedSectionVars false in
+theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
+    (K : Fin 4 → Fin (Module.finrank ℝ E)) :
+    (∑ J : Fin 2 → Fin (Module.finrank ℝ E),
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
+        (show TensorRSSpace 4 2 I x from
+          TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+        (Module.finrank ℝ E) e K J) ^ 2)
+      ≤ ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ))) ^ 2 :=
+  sorry
+
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -1455,7 +1536,34 @@ theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
-      ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 :=
+      ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 := by
+  have hbound := rfns_le_of_Ksum_sq_le (I := I) (M := M) g₀ 4 2 x
+    (show TensorRSSpace 4 2 I x from
+      TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+    ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ)))
+    (fun e horth K =>
+      ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le (I := I) (M := M) g₀ g₁ h htie hδ_lt
+        hδ_nn hδ x e horth K)
+  refine hbound.trans (le_of_eq ?_)
+  ring
+
+set_option linter.unusedSectionVars false in
+theorem traceHessianFib_fiberComponent_Ksum_sq_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
+    (K : Fin 4 → Fin (Module.finrank ℝ E)) :
+    (∑ J : Fin 2 → Fin (Module.finrank ℝ E),
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
+        (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
+        (Module.finrank ℝ E) e K J) ^ 2)
+      ≤ ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ))) ^ 2 :=
   sorry
 
 set_option linter.unusedSectionVars false in
@@ -1468,7 +1576,37 @@ theorem riemannianFiberNormSq_traceHessianFib_le
     (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
-      ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 :=
+      ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 := by
+  have hbound := rfns_le_of_Ksum_sq_le (I := I) (M := M) g₀ 4 2 x
+    (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
+    ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ)))
+    (fun e horth K =>
+      traceHessianFib_fiberComponent_Ksum_sq_le (I := I) (M := M) g₀ g₁ h htie hδ_lt
+        hδ_nn hδ x e horth K)
+  refine hbound.trans (le_of_eq ?_)
+  ring
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
+    (hB : 0 ≤ B) :
+    ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
+        (∑ j ∈ Finset.range 3,
+            (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+              Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+            ‖(iteratedCovGrad (I := I) g₀ 0 2 j
+                (convexPerturbation (I := I) g₀ T T' s)).toSection x‖)) ≤ B →
+          riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λarm1 :=
   sorry
 
 set_option linter.unusedSectionVars false in
@@ -1489,7 +1627,43 @@ theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
               ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λarm1 :=
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λarm1 := by
+  classical
+  obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
+      (I := I) (M := M) g₀ a ha_super
+  obtain ⟨Λarm1, hΛarm1_nn, hΛarm1⟩ :=
+    exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀
+      (Csob * R) (by positivity)
+  refine ⟨Λarm1, hΛarm1_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
+  refine hΛarm1 T T' hδ_le hδ hδ'_le hδ' s hs x ?_
+  exact hCsob T T' hR hTball hT'ball s hs x
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
+    (hB : 0 ≤ B) :
+    ∃ Λcurv : ℝ, 0 ≤ Λcurv ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
+        (∑ j ∈ Finset.range 3,
+            (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+              Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+            ‖(iteratedCovGrad (I := I) g₀ 0 2 j
+                (convexPerturbation (I := I) g₀ T T' s)).toSection x‖)) ≤ B →
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv ∧
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv :=
   sorry
 
 set_option linter.unusedSectionVars false in
@@ -1513,8 +1687,18 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv ∧
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
               ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv :=
-  sorry
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv := by
+  classical
+  obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.exists_Csob_convexPerturbation_pointwise_C2_le
+      (I := I) (M := M) g₀ a ha_super
+  obtain ⟨Λcurv, hΛcurv_nn, hΛcurv⟩ :=
+    exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀
+      (Csob * R) (by positivity)
+  refine ⟨Λcurv, hΛcurv_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
+  refine hΛcurv T T' hδ_le hδ hδ'_le hδ' s hs x ?_
+  exact hCsob T T' hR hTball hT'ball s hs x
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
