@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Geometry.Curvature.RealizedFamCurvatureJetBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 
 noncomputable section
 
@@ -3436,6 +3437,294 @@ theorem chartSlopeSecondOrderContribution_eq_principal_add_remainder
     rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
   · rw [chartSlopeFirstOrderRemainderContribution]
     rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
+
+set_option linter.unusedSectionVars false in
+private lemma order0Rhs_split_appCc (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)) (T - T')) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i]
+        - unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)) (T - T')) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+  rw [linearizedRicciArm0Field]
+  rw [show iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') = T - T' from rfl]
+  have hsplit :
+      (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)) =
+        ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          + (-1 : ℝ) • ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) := by
+    rw [neg_one_smul, ← sub_eq_add_neg]
+  rw [hsplit]
+  rw [appCc_add_left, appCc_smul_left_local, unitModel_add2_apply, unitModel_smul_local]
+  rw [ContinuousMultilinearMap.smul_apply, neg_one_smul, ← sub_eq_add_neg]
+
+set_option linter.unusedSectionVars false in
+private lemma ricEndoRaisedFib_eq_chartBasis_sum
+    (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (p : Fin (Module.finrank ℝ E)) :
+    ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E p) =
+      ∑ a : Fin (Module.finrank ℝ E),
+        (∑ b : Fin (Module.finrank ℝ E),
+            chartInvGramMatrix (I := I) g₁ x x a b *
+              chartRicciTensor (I := I) g₁ x p b (extChartAt I x x)) •
+          (chartModelBasis E a) := by
+  classical
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x := by
+    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) x, extChartAt_source (I := I)]
+    exact mem_chart_source H x
+  have hself : ∀ t : Fin (Module.finrank ℝ E),
+      chartBasisVecFiber (I := I) x t x = chartModelBasis E t := fun t =>
+    chartBasisVecFiber_self (I := I) x t
+  have hsharp := metricSharpChartLocal_eq_metricSharp (I := I) g₁ x
+    (fun b : M => (ricciTensor (I := I) g₁ b (chartModelBasis E p)).toLinearMap) hxbase
+  rw [ricEndoRaisedFib_apply, ← hsharp, metricSharpChartLocal]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [hself a, metricSharpChartCoeff_def]
+  refine congrArg (fun c : ℝ => c • (chartModelBasis E a)) ?_
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  refine congrArg (fun t : ℝ => chartInvGramMatrix (I := I) g₁ x x a b * t) ?_
+  have hricapply :
+      (ricciTensor (I := I) g₁ x (chartModelBasis E p)).toLinearMap
+          (chartBasisVecFiber (I := I) x b x) =
+        ricciTensor (I := I) g₁ x (chartBasisVecFiber (I := I) x p x)
+          (chartBasisVecFiber (I := I) x b x) := by
+    rw [show (chartModelBasis E p : TangentSpace I x) =
+      chartBasisVecFiber (I := I) x p x from (hself p).symm]
+    rfl
+  rw [hricapply]
+  rw [ricciTensor_chartBasisVec_alpha_eq (I := I) g₁ x p b hxgood]
+
+set_option linter.unusedSectionVars false in
+private lemma ccTensorBilin_chartBasis_eq_tensorChartComponent
+    (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b : Fin (Module.finrank ℝ E)) :
+    ccTensorBilin (I := I) g₀ W x (chartModelBasis E a) (chartModelBasis E b) =
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 W x ![] ![a, b] x := by
+  rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ W x
+    (chartModelBasis E a) (chartModelBasis E b)]
+  exact unitModel_basisChart_eq_tensorChartComponent (I := I) (M := M) g₀ W x a b
+
+set_option linter.unusedSectionVars false in
+private lemma order0RicciArm_basis_eq
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    (g₁ : SmoothRiemannianMetric I M) (x : M) (k i : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+          (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) (T - T')) x
+        ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      (∑ a : Fin (Module.finrank ℝ E),
+          (∑ b : Fin (Module.finrank ℝ E),
+              chartInvGramMatrix (I := I) g₁ x x a b *
+                chartRicciTensor (I := I) g₁ x k b (extChartAt I x x)) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![a, i] x) +
+        (∑ a : Fin (Module.finrank ℝ E),
+          (∑ b : Fin (Module.finrank ℝ E),
+              chartInvGramMatrix (I := I) g₁ x x a b *
+                chartRicciTensor (I := I) g₁ x i b (extChartAt I x x)) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![k, a] x) := by
+  classical
+  rw [ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction (I := I) (M := M) g₀ g₁ (T - T') x
+    (![(chartModelBasis E) k, (chartModelBasis E) i])]
+  have hv0 : (![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 0 =
+      chartModelBasis E k := rfl
+  have hv1 : (![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 1 =
+      chartModelBasis E i := rfl
+  rw [hv0, hv1]
+  have hupd0 : (Function.update
+        (![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 0
+        (ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E k))) =
+      ![ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E k), chartModelBasis E i] := by
+    funext j; fin_cases j <;> simp [Function.update]
+  have hupd1 : (Function.update
+        (![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 1
+        (ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E i))) =
+      ![chartModelBasis E k, ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E i)] := by
+    funext j; fin_cases j <;> simp [Function.update]
+  rw [hupd0, hupd1]
+  rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ (T - T') x
+      (ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E k)) (chartModelBasis E i),
+    unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ (T - T') x
+      (chartModelBasis E k) (ricEndoRaisedFib (I := I) g₁ x (chartModelBasis E i))]
+  rw [ricEndoRaisedFib_eq_chartBasis_sum (I := I) g₁ x k,
+    ricEndoRaisedFib_eq_chartBasis_sum (I := I) g₁ x i]
+  congr 1
+  · rw [map_sum, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul,
+      ccTensorBilin_chartBasis_eq_tensorChartComponent (I := I) (M := M) g₀ (T - T') x a i]
+  · rw [map_sum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [map_smul, smul_eq_mul,
+      ccTensorBilin_chartBasis_eq_tensorChartComponent (I := I) (M := M) g₀ (T - T') x k a]
+
+set_option linter.unusedSectionVars false in
+private lemma order0RiemannArm_eq_riemannBiContrFib_toModel
+    (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
+    (g₁ : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+          (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W) x v =
+      Tensor0SSpace.toModel
+        (riemannBiContrFib (I := I) g₁ x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+            (unitTensor (I := I) (M := M) x)))
+        (fun j => (v j : E)) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x))
+        (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁).toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmOrder0RiemannCoeff_toSection]
+  rfl
+
+set_option linter.unusedSectionVars false in
+private lemma riemannBiContrFib_toModel_basis_center
+    (g₁ : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SSpace 2 I x)
+    (k i : Fin (Module.finrank ℝ E)) :
+    Tensor0SSpace.toModel (riemannBiContrFib (I := I) g₁ x D)
+        ![((chartModelBasis E) k : E), ((chartModelBasis E) i : E)] =
+      2 * ∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x m n *
+          (∑ p : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            chartInvGramMatrix (I := I) g₁ x x p l *
+              ((∑ q : Fin (Module.finrank ℝ E),
+                  chartRiemannTensor (I := I) g₁ x p k m q (extChartAt I x x) *
+                    chartGramMatrix (I := I) g₁ x x q i) *
+                Tensor0SSpace.toModel D
+                  ![((chartModelBasis E) n : E), ((chartModelBasis E) l : E)])) := by
+  classical
+  have hxbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x := by
+    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) x, extChartAt_source (I := I)]
+    exact mem_chart_source H x
+  have hself : ∀ t : Fin (Module.finrank ℝ E),
+      chartBasisVecFiber (I := I) x t x = chartModelBasis E t := fun t =>
+    chartBasisVecFiber_self (I := I) x t
+  rw [riemannBiContrFib_toModel_chartα (I := I) g₁ x hxbase D
+    (![((chartModelBasis E) k : E), ((chartModelBasis E) i : E)])]
+  have hv0 : (![((chartModelBasis E) k : E), ((chartModelBasis E) i : E)] : Fin 2 → E) 0 =
+      (chartModelBasis E) k := rfl
+  have hv1 : (![((chartModelBasis E) k : E), ((chartModelBasis E) i : E)] : Fin 2 → E) 1 =
+      (chartModelBasis E) i := rfl
+  refine congrArg (fun t => (2 : ℝ) * t) ?_
+  refine Finset.sum_congr rfl (fun m _ => Finset.sum_congr rfl (fun n _ => ?_))
+  refine congrArg (fun t => chartInvGramMatrix (I := I) g₁ x x m n * t) ?_
+  refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun l _ => ?_))
+  refine congrArg (fun t => chartInvGramMatrix (I := I) g₁ x x p l * t) ?_
+  congr 1
+  · rw [hv0, hv1]
+    rw [show (chartModelBasis E k : TangentSpace I x) = chartBasisVecFiber (I := I) x k x from
+        (hself k).symm,
+      show (chartModelBasis E i : TangentSpace I x) = chartBasisVecFiber (I := I) x i x from
+        (hself i).symm]
+    rw [riemannOp_chartBasisVec_alpha_eq (I := I) g₁ x p k m hxgood]
+    rw [map_sum, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun q _ => ?_)
+    rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [g_inner_eq_chartGramMatrix_basis (I := I) g₁ x x q i]
+  · rw [hself n, hself l]
+
+set_option linter.unusedSectionVars false in
+private lemma order0RHS_chart_eq
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      (2 * ∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x m n *
+          (∑ p : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x p l *
+              ((∑ q : Fin (Module.finrank ℝ E),
+                  chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                      x p k m q (extChartAt I x x) *
+                    chartGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x q i) *
+                tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![n, l] x))) -
+        ((∑ a : Fin (Module.finrank ℝ E),
+            (∑ b : Fin (Module.finrank ℝ E),
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x a b *
+                  chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                    x k b (extChartAt I x x)) *
+              tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![a, i] x) +
+          (∑ a : Fin (Module.finrank ℝ E),
+            (∑ b : Fin (Module.finrank ℝ E),
+                chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x a b *
+                  chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                    x i b (extChartAt I x x)) *
+              tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![k, a] x)) := by
+  classical
+  rw [linearizedRicciArm0Field, show iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') = T - T' from rfl]
+  have hsplit :
+      (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)) =
+        ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          + (-1 : ℝ) • ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) := by
+    rw [neg_one_smul, ← sub_eq_add_neg]
+  rw [hsplit]
+  rw [appCc_add_left, appCc_smul_left_local, unitModel_add2_apply, unitModel_smul_local,
+    ContinuousMultilinearMap.smul_apply, neg_one_smul, ← sub_eq_add_neg]
+  congr 1
+  · rw [order0RiemannArm_eq_riemannBiContrFib_toModel (I := I) (M := M) g₀ (T - T')
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+        (![(chartModelBasis E) k, (chartModelBasis E) i])]
+    rw [show (fun j => ((![(chartModelBasis E) k, (chartModelBasis E) i] :
+            Fin 2 → TangentSpace I x) j : E)) =
+        ![((chartModelBasis E) k : E), ((chartModelBasis E) i : E)] from by
+      funext j; fin_cases j <;> rfl]
+    rw [riemannBiContrFib_toModel_basis_center (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from (T - T').toSection x)
+        (unitTensor (I := I) (M := M) x)) k i]
+    refine congrArg (fun t => (2 : ℝ) * t) ?_
+    refine Finset.sum_congr rfl (fun m _ => Finset.sum_congr rfl (fun n _ => ?_))
+    refine congrArg (fun t => chartInvGramMatrix (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x x m n * t) ?_
+    refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun l _ => ?_))
+    refine congrArg (fun t => chartInvGramMatrix (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x x p l * t) ?_
+    refine congrArg (fun t => (∑ q : Fin (Module.finrank ℝ E),
+        chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+            x p k m q (extChartAt I x x) *
+          chartGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x q i) * t) ?_
+    rw [show Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from (T - T').toSection x)
+            (unitTensor (I := I) (M := M) x))
+          ![((chartModelBasis E) n : E), ((chartModelBasis E) l : E)] =
+        unitModel (I := I) (M := M) g₀ 2 (T - T') x
+          ![(chartModelBasis E) n, (chartModelBasis E) l] from rfl]
+    rw [unitModel_basisChart_eq_tensorChartComponent (I := I) (M := M) g₀ (T - T') x n l]
+  · exact order0RicciArm_basis_eq (I := I) (M := M) g₀ T T'
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) x k i
 
 theorem chartSlopeOrder0Contribution_eq_curvatureArm_component
     (g₀ : SmoothRiemannianMetric I M)
