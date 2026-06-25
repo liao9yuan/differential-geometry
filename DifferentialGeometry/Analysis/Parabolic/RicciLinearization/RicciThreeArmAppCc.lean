@@ -2210,6 +2210,178 @@ theorem riemannianFiberNormSq_traceHessianFib_le
   ring
 
 set_option linter.unusedSectionVars false in
+private lemma cometricDoubleTraceFib_fiberComponent_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
+    (K : Fin 3 → Fin (Module.finrank ℝ E)) (J : Fin 1 → Fin (Module.finrank ℝ E)) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 3 1
+        (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+        (Module.finrank ℝ E) e K J =
+      (if K 2 = J 0 then (1 : ℝ) else 0) *
+        g₀.inner x (e (K 0))
+          (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 1)))) := by
+  classical
+  have hread : fiberNormSqComponent (I := I) (M := M) g₀ x 3 1
+        (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+        (Module.finrank ℝ E) e K J =
+      Tensor0SSpace.toModel
+        ((cometricDoubleTraceFib (I := I) g₁ 1 x) (coframeS (I := I) (M := M) g₀ x 3 e K))
+        (fun k => e (J k)) := by
+    unfold fiberNormSqComponent coframeS; rfl
+  rw [hread, cometricDoubleTraceFib_toModel]
+  rw [modelDoubleTrace_apply (E := E) 1 (cometricLmodel (I := I) g₁ x) _ (fun k => e (J k))]
+  have hterm : ∀ k : Fin (Module.finrank ℝ E),
+      Tensor0SBundle.Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K)
+        (Fin.cons (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+          (Fin.cons ((Module.finBasis ℝ E) k) (fun l => e (J l)))) =
+        g₀.inner x (e (K 2)) (e (J 0)) *
+          (g₀.inner x (e (K 1)) ((Module.finBasis ℝ E) k) *
+            g₀.inner x (e (K 0)) (cometricLmodel (I := I) g₁ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))) := by
+    intro k
+    set base : Fin 3 → E :=
+      Fin.cons (cometricLmodel (I := I) g₁ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)))
+        (Fin.cons ((Module.finBasis ℝ E) k) (fun l => e (J l))) with hbase
+    have hcfeval : Tensor0SBundle.Tensor0SSpace.toModel
+          (coframeS (I := I) (M := M) g₀ x 3 e K) base =
+        ∏ i : Fin 3, g₀.inner x (e (K i)) (base i) :=
+      coframeS_apply (I := I) (M := M) g₀ x 3 e K base
+    rw [hcfeval, Fin.prod_univ_three]
+    have hb0 : base 0 = cometricLmodel (I := I) g₁ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)) := by rw [hbase, Fin.cons_zero]
+    have hb1 : base 1 = (Module.finBasis ℝ E) k := by
+      rw [hbase, show (1 : Fin 3) = Fin.succ 0 from rfl, Fin.cons_succ, Fin.cons_zero]
+    have hb2 : base 2 = e (J 0) := by
+      rw [hbase, show (2 : Fin 3) = Fin.succ 1 from rfl, Fin.cons_succ,
+        show (1 : Fin 2) = Fin.succ 0 from rfl, Fin.cons_succ]
+    rw [hb0, hb1, hb2]; ring
+  rw [Finset.sum_congr rfl (fun k _ => hterm k)]
+  have hpull : (∑ k : Fin (Module.finrank ℝ E),
+      g₀.inner x (e (K 2)) (e (J 0)) *
+        (g₀.inner x (e (K 1)) ((Module.finBasis ℝ E) k) *
+          g₀.inner x (e (K 0)) (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k))))) =
+      g₀.inner x (e (K 2)) (e (J 0)) *
+        (∑ k : Fin (Module.finrank ℝ E),
+          g₀.inner x (e (K 1)) ((Module.finBasis ℝ E) k) *
+            g₀.inner x (e (K 0)) (cometricLmodel (I := I) g₁ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))) := by
+    rw [Finset.mul_sum]
+  rw [hpull, cometric_dualsum_inner_collapse (I := I) g₀ g₁ x (e (K 0)) (e (K 1)),
+    horth (K 2) (J 0)]
+
+set_option linter.unusedSectionVars false in
+private lemma cometricDoubleTraceFib_fiberComponent_Ksum_sq_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
+    (K : Fin 3 → Fin (Module.finrank ℝ E)) :
+    (∑ J : Fin 1 → Fin (Module.finrank ℝ E),
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 3 1
+        (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+        (Module.finrank ℝ E) e K J) ^ 2)
+      ≤ (1 / (1 - δ)) ^ 2 := by
+  classical
+  set R : ℝ := 1 / (1 - δ) with hR
+  set q : ℝ := g₀.inner x (e (K 0))
+    (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e (K 1)))) with hq
+  have hqbound : |q| ≤ R := by
+    rw [hR, hq]
+    refine abs_g0_inner_invSharp_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x
+      (e (K 0)) (e (K 1)) ?_ ?_
+    · rw [horth (K 0) (K 0)]; simp
+    · rw [horth (K 1) (K 1)]; simp
+  have hcomp : ∀ J : Fin 1 → Fin (Module.finrank ℝ E),
+      fiberNormSqComponent (I := I) (M := M) g₀ x 3 1
+        (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+        (Module.finrank ℝ E) e K J =
+      (if K 2 = J 0 then (1 : ℝ) else 0) * q := by
+    intro J
+    rw [cometricDoubleTraceFib_fiberComponent_eq (I := I) g₀ g₁ x e horth K J, hq]
+  rw [Finset.sum_congr rfl (fun J _ => by rw [hcomp J])]
+  have hsingle : (∑ J : Fin 1 → Fin (Module.finrank ℝ E),
+        ((if K 2 = J 0 then (1 : ℝ) else 0) * q) ^ 2) ≤ q ^ 2 := by
+    have hbij : (∑ J : Fin 1 → Fin (Module.finrank ℝ E),
+          ((if K 2 = J 0 then (1 : ℝ) else 0) * q) ^ 2)
+        = ∑ j0 : Fin (Module.finrank ℝ E),
+            ((if K 2 = j0 then (1 : ℝ) else 0) * q) ^ 2 := by
+      apply Fintype.sum_equiv (Equiv.funUnique (Fin 1) (Fin (Module.finrank ℝ E)))
+      intro J; rfl
+    rw [hbij]
+    have hcollapse : ∀ j0 : Fin (Module.finrank ℝ E),
+        ((if K 2 = j0 then (1 : ℝ) else 0) * q) ^ 2 =
+        (if K 2 = j0 then (1 : ℝ) else 0) * q ^ 2 := by
+      intro j0
+      by_cases h0 : K 2 = j0 <;> simp [h0]
+    rw [Finset.sum_congr rfl (fun j0 _ => hcollapse j0)]
+    rw [← Finset.sum_mul, Finset.sum_ite_eq Finset.univ (K 2) (fun _ => (1 : ℝ))]
+    simp
+  refine hsingle.trans ?_
+  have hcoeff : 0 < 1 - δ := by linarith
+  have hRnn : 0 ≤ R := by rw [hR]; positivity
+  have hqsq : q ^ 2 ≤ R ^ 2 := by
+    have habs := sq_abs q
+    nlinarith [hqbound, abs_nonneg q]
+  exact hqsq
+
+set_option linter.unusedSectionVars false in
+private lemma riemannianFiberNormSq_cometricDoubleTraceFib_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
+        (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+      ≤ ((Module.finrank ℝ E : ℝ) ^ 3) * (1 / (1 - δ)) ^ 2 := by
+  exact rfns_le_of_Ksum_sq_le (I := I) (M := M) g₀ 3 1 x
+    (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+    (1 / (1 - δ))
+    (fun e horth K =>
+      cometricDoubleTraceFib_fiberComponent_Ksum_sq_le (I := I) g₀ g₁ h htie hδ_lt
+        hδ_nn hδ x e horth K)
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+private lemma jetEnvelope_covGrad_one_le (g₀ : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2) (x : M) (B : ℝ)
+    (henv : (∑ j ∈ Finset.range 3,
+        (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+        ‖(iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x‖)) ≤ B) :
+    (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + 1) I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + 1)
+    ‖(iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x‖) ≤ B := by
+  refine le_trans ?_ henv
+  exact Finset.single_le_sum (f := fun j =>
+      letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+      ‖(iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x‖)
+      (fun j _ =>
+        letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+        norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x))
+      (by simp : (1 : ℕ) ∈ Finset.range 3)
+
+set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
@@ -2229,8 +2401,80 @@ theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
             ‖(iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x‖)) ≤ B →
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
               (show TensorRSSpace 3 2 I x from
-                linearizedRicciArm1Fib (I := I) g₀ g₁ x) ≤ Λ :=
-  sorry
+                linearizedRicciArm1Fib (I := I) g₀ g₁ x) ≤ Λ := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_nn : 0 ≤ δ₁ := le_max_right _ _
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ (by norm_num)
+  obtain ⟨Ckos, hCkos_nn, hKos⟩ :=
+    rfns_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₁_nn hδ₁_lt
+  refine ⟨Ckos ^ 2 * B ^ 2 * ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ₁)) ^ 2),
+    by positivity, ?_⟩
+  intro g₁ P δ hδ_le hδ htie x henv
+  set δ' : ℝ := max δ 0 with hδ'_def
+  have hδ'_nn : 0 ≤ δ' := le_max_right _ _
+  have hδ'_le_δ₁ : δ' ≤ δ₁ := by
+    rw [hδ'_def]
+    exact (max_le_max hδ_le (le_refl 0)).trans (le_of_eq (max_eq_left hδ₁_nn))
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le_δ₁ hδ₁_lt
+  have hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ' :=
+    gFibreOpBound_mono_local (I := I) g₀ _ (le_max_left _ _) hδ
+  have hcoeff₁ : 0 < 1 - δ₁ := by linarith
+  have hcoeff' : 0 < 1 - δ' := by linarith
+  have hcomp := riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 3 1 2 x
+    (raisedKoszulFib (I := I) g₀ g₁ x) (cometricDoubleTraceFib (I := I) g₁ 1 x)
+  have hlin_eq : (show TensorRSSpace 3 2 I x from linearizedRicciArm1Fib (I := I) g₀ g₁ x) =
+      (show TensorRSSpace 3 2 I x from
+        (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+            raisedKoszulFib (I := I) g₀ g₁ x).comp
+          (show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 1 I x from
+            cometricDoubleTraceFib (I := I) g₁ 1 x)) := rfl
+  rw [hlin_eq]
+  refine hcomp.trans ?_
+  letI instTens12 : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + 1) I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + 1)
+  set N : ℝ := ‖(iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x‖ with hN_def
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  have hnorm_le : N ≤ B := jetEnvelope_covGrad_one_le (I := I) g₀ P x B henv
+  have hsq : N ^ 2 ≤ B ^ 2 := by nlinarith [hnorm_le, hN_nn, hB]
+  have hkosB : riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+      (raisedKoszulFib (I := I) g₀ g₁ x) ≤ Ckos ^ 2 * B ^ 2 := by
+    have hKosx := hKos g₁ P htie hδ'_le_δ₁ hδ'_nn hδ' x
+    rw [raisedKoszul_toSection] at hKosx
+    refine hKosx.trans ?_
+    have hCkos_sq_nn : 0 ≤ Ckos ^ 2 := sq_nonneg _
+    have hgoal : Ckos ^ 2 * N ^ 2 ≤ Ckos ^ 2 * B ^ 2 :=
+      mul_le_mul_of_nonneg_left hsq hCkos_sq_nn
+    exact hgoal
+  have hcometB : riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
+      (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x) ≤
+      (Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ₁)) ^ 2 := by
+    have hcm := riemannianFiberNormSq_cometricDoubleTraceFib_le (I := I) g₀ g₁
+      (ccTensorBilinSymm (I := I) g₀ P) htie hδ'_lt hδ'_nn hδ' x
+    refine hcm.trans ?_
+    have hmono : 1 / (1 - δ') ≤ 1 / (1 - δ₁) :=
+      div_le_div_of_nonneg_left (by norm_num) hcoeff₁ (by linarith)
+    have hinv_nn : 0 ≤ 1 / (1 - δ') := by positivity
+    have hsq_le : (1 / (1 - δ')) ^ 2 ≤ (1 / (1 - δ₁)) ^ 2 := by
+      have hinv₁_nn : 0 ≤ 1 / (1 - δ₁) := by positivity
+      nlinarith [hmono, hinv_nn, hinv₁_nn]
+    have hfin_nn : 0 ≤ (Module.finrank ℝ E : ℝ) ^ 3 := by positivity
+    exact mul_le_mul_of_nonneg_left hsq_le hfin_nn
+  have hrfns_kos_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+      (raisedKoszulFib (I := I) g₀ g₁ x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 2 x _
+  have hrfns_com_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
+      (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 3 1 x _
+  have hCkosB_nn : 0 ≤ Ckos ^ 2 * B ^ 2 := by positivity
+  have hfinal : riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+        (raisedKoszulFib (I := I) g₀ g₁ x) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
+          (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
+      ≤ Ckos ^ 2 * B ^ 2 *
+          ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ₁)) ^ 2) :=
+    mul_le_mul hkosB hcometB hrfns_com_nn hCkosB_nn
+  exact hfinal
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
@@ -5703,8 +5947,161 @@ private lemma eP2_swap
   exact (hsymm2 _ _).symm
 
 set_option linter.unusedSectionVars false in
+private lemma rawComponentTwo_swap_of_symm
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (hSsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ S p v w = ccTensorBilin (I := I) g₀ S p w v)
+    (x : M) (c d : Fin (Module.finrank ℝ E)) :
+    chartPushedRaw I x
+        (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![c, d]) =
+      chartPushedRaw I x
+        (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![d, c]) := by
+  classical
+  have hpt : ∀ p : M, p ∈ (chartAt H x).source →
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![c, d] p =
+        tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![d, c] p := by
+    intro p hp
+    have hrawCD := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g₀ 0 2
+      S x hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
+      (![c, d] : Fin 2 → Fin (Module.finrank ℝ E))
+    have hrawDC := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g₀ 0 2
+      S x hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
+      (![d, c] : Fin 2 → Fin (Module.finrank ℝ E))
+    have hframe : chartFrameBasisModel (I := I) (M := M) x p 0
+        (![] : Fin 0 → Fin (Module.finrank ℝ E)) =
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I p) (1 : ℝ)) := by
+      apply ContinuousMultilinearMap.ext
+      intro v
+      have h := chartFrameBasisModel_apply (I := I) (M := M) x p 0
+        (![] : Fin 0 → Fin (Module.finrank ℝ E)) v
+      rw [Fin.prod_univ_zero] at h
+      rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+      exact h
+    rw [hframe] at hrawCD hrawDC
+    have hbilin : ∀ (a b : Fin (Module.finrank ℝ E)),
+        (S.toSection p
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I p) (1 : ℝ)) :
+          ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I p) ℝ)
+            (fun j : Fin 2 =>
+              chartBasisVecFiber (I := I) x ((![a, b] : Fin 2 → _) j) p) =
+          ccTensorBilin (I := I) g₀ S p
+              (chartBasisVecFiber (I := I) x a p) (chartBasisVecFiber (I := I) x b p) := by
+      intro a b
+      have hvec : (fun j : Fin 2 =>
+          chartBasisVecFiber (I := I) x ((![a, b] : Fin 2 → _) j) p) =
+          ![chartBasisVecFiber (I := I) x a p, chartBasisVecFiber (I := I) x b p] := by
+        funext j; fin_cases j <;> rfl
+      rw [hvec, ccTensorBilin_apply]
+      rfl
+    rw [hrawCD, hrawDC, hbilin c d, hbilin d c]
+    exact hSsymm p (chartBasisVecFiber (I := I) x c p) (chartBasisVecFiber (I := I) x d p)
+  funext y
+  by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) x
+  · rw [chartPushedRaw_apply_of_mem _ _ hy, chartPushedRaw_apply_of_mem _ _ hy]
+    exact hpt _ (symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) x hy)
+  · rw [chartPushedRaw_apply_of_notMem _ _ hy, chartPushedRaw_apply_of_notMem _ _ hy]
+
+set_option linter.unusedSectionVars false in
+private lemma eP2_componentSwap_of_symm
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (hSsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ S p v w = ccTensorBilin (I := I) g₀ S p w v)
+    (x : M) (a b c d : Fin (Module.finrank ℝ E)) :
+    euclidPartial (E := E) a
+        (fun y' => euclidPartial (E := E) b
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![c, d]))
+          y')
+        (toEuclidean (E := E) (extChartAt I x x)) =
+      euclidPartial (E := E) a
+        (fun y' => euclidPartial (E := E) b
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![d, c]))
+          y')
+        (toEuclidean (E := E) (extChartAt I x x)) := by
+  rw [rawComponentTwo_swap_of_symm (I := I) (M := M) g₀ S hSsymm x c d]
+
+set_option linter.unusedSectionVars false in
+private lemma ccTensorBilin_sub_symm_of_symm
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T p v w = ccTensorBilin (I := I) g₀ T p w v)
+    (hT'symm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T' p v w = ccTensorBilin (I := I) g₀ T' p w v)
+    (p : M) (v w : TangentSpace I p) :
+    ccTensorBilin (I := I) g₀ (T - T') p v w =
+      ccTensorBilin (I := I) g₀ (T - T') p w v := by
+  have hsub : ∀ (u₁ u₂ : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ (T - T') p u₁ u₂ =
+        ccTensorBilin (I := I) g₀ T p u₁ u₂ - ccTensorBilin (I := I) g₀ T' p u₁ u₂ := by
+    intro u₁ u₂
+    have hTT' : (T - T' : SmoothCcTensor g₀ 0 2) = T + (-1 : ℝ) • T' := by
+      rw [neg_one_smul, ← sub_eq_add_neg]
+    rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, hTT',
+      ccTensorModel_add, ccTensorModel_smul, ContinuousMultilinearMap.add_apply,
+      ContinuousMultilinearMap.smul_apply]
+    rw [neg_one_smul, ← sub_eq_add_neg]
+  rw [hsub v w, hsub w v, hTsymm p v w, hT'symm p v w]
+
+private lemma arm2_eP2_abstract_sum_identity {n : ℕ}
+    (A : Fin n → Fin n → ℝ) (hAsymm : ∀ j l, A j l = A l j)
+    (e : Fin n → Fin n → Fin n → Fin n → ℝ)
+    (hswap1 : ∀ a b c d, e a b c d = e b a c d)
+    (hcomp : ∀ a b c d, e a b c d = e a b d c)
+    (i k : Fin n) :
+    (1 / 2 : ℝ) * (∑ j : Fin n, ∑ l : Fin n,
+          A j l * (e j i l k + e j k l i - e j l i k)) -
+      (1 / 2 : ℝ) * (∑ j : Fin n, ∑ l : Fin n,
+          A j l * (e k i l j + e k j l i - e k l i j)) =
+      (1 / 2 : ℝ) * (∑ k₁ : Fin n, ∑ l : Fin n,
+          A k₁ l * (e l k i k₁ + e l i k k₁ - e l k₁ k i)) -
+        (1 / 2 : ℝ) * (∑ k₁ : Fin n, ∑ l : Fin n,
+          A k₁ l * e k i l k₁) := by
+  classical
+  have hL1 : (∑ j : Fin n, ∑ l : Fin n, A j l * e j i l k) =
+      ∑ j : Fin n, ∑ l : Fin n, A j l * e l i k j := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => ?_))
+    rw [hAsymm l j, hcomp l i j k]
+  have hLexp : (∑ j : Fin n, ∑ l : Fin n,
+        A j l * (e j i l k + e j k l i - e j l i k)) -
+      (∑ j : Fin n, ∑ l : Fin n,
+        A j l * (e k i l j + e k j l i - e k l i j)) =
+      ((∑ j : Fin n, ∑ l : Fin n, A j l * e j i l k)
+        + (∑ j : Fin n, ∑ l : Fin n, A j l * e j k l i)
+        - (∑ j : Fin n, ∑ l : Fin n, A j l * e j l i k))
+      - ((∑ j : Fin n, ∑ l : Fin n, A j l * e k i l j)
+        + (∑ j : Fin n, ∑ l : Fin n, A j l * e k j l i)
+        - (∑ j : Fin n, ∑ l : Fin n, A j l * e k l i j)) := by
+    simp only [mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  have hRexp : (∑ k₁ : Fin n, ∑ l : Fin n,
+        A k₁ l * (e l k i k₁ + e l i k k₁ - e l k₁ k i)) -
+      (∑ k₁ : Fin n, ∑ l : Fin n, A k₁ l * e k i l k₁) =
+      ((∑ j : Fin n, ∑ l : Fin n, A j l * e l k i j)
+        + (∑ j : Fin n, ∑ l : Fin n, A j l * e l i k j)
+        - (∑ j : Fin n, ∑ l : Fin n, A j l * e l j k i))
+      - (∑ j : Fin n, ∑ l : Fin n, A j l * e k i l j) := by
+    simp only [mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  have hT2 : (∑ j : Fin n, ∑ l : Fin n, A j l * e j k l i) =
+      ∑ j : Fin n, ∑ l : Fin n, A j l * e k j l i :=
+    Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => by rw [hswap1 j k l i]))
+  have hT3 : (∑ j : Fin n, ∑ l : Fin n, A j l * e j l i k) =
+      ∑ j : Fin n, ∑ l : Fin n, A j l * e l j k i :=
+    Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => by
+      rw [hswap1 j l i k, hcomp l j i k]))
+  have hT6 : (∑ j : Fin n, ∑ l : Fin n, A j l * e k l i j) =
+      ∑ j : Fin n, ∑ l : Fin n, A j l * e l k i j :=
+    Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => by rw [hswap1 k l i j]))
+  rw [← mul_sub, ← mul_sub, hLexp, hRexp, hL1, hT2, hT3, hT6]
+  ring
+
+set_option linter.unusedSectionVars false in
 theorem arm2_principalSymbol_chartSlope_eP2_identity
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T p v w = ccTensorBilin (I := I) g₀ T p w v)
+    (hT'symm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T' p v w = ccTensorBilin (I := I) g₀ T' p w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -5736,11 +6133,79 @@ theorem arm2_principalSymbol_chartSlope_eP2_identity
                   (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
                     (T - T') x ![] ![c, d])) y')
                 (toEuclidean (E := E) (extChartAt I x x))) k i l k₁ := by
-  sorry
+  classical
+  set eP2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b c d => euclidPartial (E := E) a
+        (fun y' => euclidPartial (E := E) b
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (T - T') x ![] ![c, d])) y')
+        (toEuclidean (E := E) (extChartAt I x x)) with heP2
+  set A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun j l => chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x j l
+    with hA_def
+  have hTT'symm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ (T - T') p v w =
+        ccTensorBilin (I := I) g₀ (T - T') p w v :=
+    ccTensorBilin_sub_symm_of_symm (I := I) g₀ T T' hTsymm hT'symm
+  have hcomp : ∀ a b c d, eP2 a b c d = eP2 a b d c := by
+    intro a b c d
+    rw [heP2]
+    exact eP2_componentSwap_of_symm (I := I) g₀ (T - T') hTT'symm x a b c d
+  have hAsymm : ∀ j l, A j l = A l j := by
+    intro j l
+    rw [hA_def]
+    have hHerm : (chartInvGramMatrix (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x x).IsHermitian := by
+      unfold chartInvGramMatrix
+      exact (chartGramMatrix_isHermitian (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x x).inv
+    have hentry := hHerm.apply l j
+    rwa [star_trivial] at hentry
+  have hP : ∀ (m₂ m₁ a b : Fin (Module.finrank ℝ E)),
+      partialDeriv (E := E) m₂
+          (partialDeriv (E := E) m₁
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b))
+          (extChartAt I x x) = eP2 m₂ m₁ a b := by
+    intro m₂ m₁ a b
+    rw [partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2 (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x m₁ m₂ a b]
+    rw [heP2]
+    rw [show euclidPartial (E := E) m₂
+            (fun y' => euclidPartial (E := E) m₁
+              (chartPushedRaw I x
+                (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![b, a])) y')
+            (toEuclidean (E := E) (extChartAt I x x)) =
+          euclidPartial (E := E) m₂
+            (fun y' => euclidPartial (E := E) m₁
+              (chartPushedRaw I x
+                (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![a, b])) y')
+            (toEuclidean (E := E) (extChartAt I x x)) from
+      (eP2_componentSwap_of_symm (I := I) g₀ (T - T') hTT'symm x m₂ m₁ a b).symm]
+    ring
+  have hAval : ∀ (j l : Fin (Module.finrank ℝ E)),
+      chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+          (extChartAt I x x) = A j l := by
+    intro j l
+    rw [hA_def, chartInvGramOnE_def, (extChartAt I x).left_inv (mem_extChartAt_source x)]
+  have hAmat : ∀ (j l : Fin (Module.finrank ℝ E)),
+      chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x j l = A j l :=
+    fun j l => rfl
+  have hswap1 : ∀ a b c d, eP2 a b c d = eP2 b a c d := by
+    intro a b c d
+    rw [heP2]
+    exact eP2_swap (I := I) g₀ (T - T') x a b c d
+  rw [chartSlopePrincipalSymbolContribution]
+  simp only [hAval, hP, hAmat]
+  exact arm2_eP2_abstract_sum_identity A hAsymm eP2 hswap1 hcomp i k
 
 set_option linter.unusedSectionVars false in
 theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T p v w = ccTensorBilin (I := I) g₀ T p w v)
+    (hT'symm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T' p v w = ccTensorBilin (I := I) g₀ T' p w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -5905,7 +6370,8 @@ theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
           C k₁ l * (eP2 l k i k₁ + eP2 l i k k₁ - eP2 l k₁ k i) -
         (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
           C k₁ l * eP2 k i l k₁ :=
-    arm2_principalSymbol_chartSlope_eP2_identity (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s x i k
+    arm2_principalSymbol_chartSlope_eP2_identity (I := I) g₀ T T' hTsymm hT'symm
+      hδ_lt hδ hδ'_lt hδ' s x i k
   rw [hresid, hprin]
   simp only [hC, smul_eq_mul]
   have key : ∀ (cf : ℝ) (G : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ),
@@ -5926,6 +6392,10 @@ theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
 set_option linter.unusedSectionVars false in
 theorem arm2_principalSymbol_chart_match
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T p v w = ccTensorBilin (I := I) g₀ T p w v)
+    (hT'symm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T' p v w = ccTensorBilin (I := I) g₀ T' p w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -5941,7 +6411,7 @@ theorem arm2_principalSymbol_chart_match
         arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
   rw [arm2_appCc_eq_combinedTrace_unitModel4 (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s x i k]
   rw [arm2_combinedTrace_eq_chartSlopePrincipal_add_residual (I := I) g₀ T T'
-        hδ_lt hδ hδ'_lt hδ' s x i k]
+        hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s x i k]
 
 end TensorSpectral
 end Parabolic
