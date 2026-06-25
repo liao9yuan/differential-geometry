@@ -3700,6 +3700,33 @@ theorem exists_Csob_sub_pointwise_jet3_le
         mul_le_mul_of_nonneg_left hMn_le hCc_pos.le
     _ = (Cc * Ch * ((4 * k + 1 : ℕ) : ℝ) * 2) * R := by ring
 
+set_option linter.unusedSectionVars false in
+theorem traceHessianCoeff_appCc_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2 (traceHessianCoeff (I := I) (M := M) g₀ g₁) W) x v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        ContinuousMultilinearMap.domDomCongr traceHessianSlotPerm
+            (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+                W.toSection x) (unitTensor (I := I) (M := M) x)))
+            (Fin.cons (cometricLmodel (I := I) g₁ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)))
+              (Fin.cons ((Module.finBasis ℝ E) k) v)) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (traceHessianCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          W.toSection x)) (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (traceHessianCoeff (I := I) (M := M) g₀ g₁).toSection x)
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [traceHessianCoeff_toSection, traceHessianFib_toModel,
+    modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g₁ x)]
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
