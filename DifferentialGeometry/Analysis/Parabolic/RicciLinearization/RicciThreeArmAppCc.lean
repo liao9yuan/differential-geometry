@@ -3944,24 +3944,6 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
   linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
       (fun s => linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + C1 s)
       (δ := δ) (δ' := δ') ∧
-  (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
-      ∀ (x : M) (i k : Fin (Module.finrank ℝ E))
-        (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
-        chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-              (extChartAt I x x) s +
-            chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-              (extChartAt I x x) s =
-          unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2
-                (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + C0 s)
-                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + appCc (I := I) (M := M) g₀ 3 2
-                (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + C1 s)
-                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-              + appCc (I := I) (M := M) g₀ 4 2
-                (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-              ![(chartModelBasis E) k, (chartModelBasis E) i]) ∧
   (∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
       Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0 s).toSection x)) ≤
         CΓ * Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
@@ -4002,38 +3984,6 @@ theorem exists_arm0_arm1_corrField_data (g₀ : SmoothRiemannianMetric I M)
       corrFieldDataSpec (I := I) (M := M) g₀
         (corrFieldChristoffelConst (I := I) (M := M) g₀) T T' hδ hδ' C0 C1 :=
   (exists_corrFieldChristoffelConst (I := I) (M := M) g₀).choose_spec.2 T T' hδ hδ'
-
-theorem exists_arm0_arm1_foldCorrection (g₀ : SmoothRiemannianMetric I M)
-    (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ∃ (C0 : ℝ → SmoothCcTensor g₀ 2 2) (C1 : ℝ → SmoothCcTensor g₀ 3 2),
-      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
-        (fun s => linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + C0 s)
-        (δ := δ) (δ' := δ') ∧
-      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
-        (fun s => linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + C1 s)
-        (δ := δ) (δ' := δ') ∧
-      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
-        ∀ (x : M) (i k : Fin (Module.finrank ℝ E))
-          (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
-          chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-                (extChartAt I x x) s +
-              chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-                (extChartAt I x x) s =
-            unitModel (I := I) (M := M) g₀ 2
-              (appCc (I := I) (M := M) g₀ 2 2
-                  (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + C0 s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-                + appCc (I := I) (M := M) g₀ 3 2
-                  (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + C1 s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-                + appCc (I := I) (M := M) g₀ 4 2
-                  (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-                ![(chartModelBasis E) k, (chartModelBasis E) i] := by
-  obtain ⟨C0, C1, hspec⟩ := exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ'
-  exact ⟨C0, C1, hspec.1, hspec.2.1, hspec.2.2.1⟩
 
 noncomputable def linearizedRicciArm0CorrField (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -4079,9 +4029,42 @@ theorem linearizedRicci_arm1Field_jointSmooth (g₀ : SmoothRiemannianMetric I M
       (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ') (δ := δ) (δ' := δ') :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.2.1
 
+theorem exists_corrField_identity_of_symm
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+      ∀ (x : M) (i k : Fin (Module.finrank ℝ E))
+        (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
+        chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+              (extChartAt I x x) s +
+            chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+              (extChartAt I x x) s =
+          unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2
+                (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 3 2
+                (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+              + appCc (I := I) (M := M) g₀ 4 2
+                (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+              ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  sorry
+
 theorem chartSlopeContributions_eq_threeArm_component
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4102,12 +4085,9 @@ theorem chartSlopeContributions_eq_threeArm_component
           + appCc (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] := by
-  have hspec := (exists_arm0_arm1_corrField_data (I := I) g₀ T T'
-    hδ hδ').choose_spec.choose_spec.2.2.1 s hs x i k hδ_lt hδ'_lt
-  rw [linearizedRicciArm0Field, linearizedRicciArm1Field,
-    linearizedRicciArm0CorrField, linearizedRicciArm1CorrField]
-  exact hspec
+          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  exists_corrField_identity_of_symm (I := I) g₀ T T' hTsymm hT'symm hδ hδ'
+    s hs x i k hδ_lt hδ'_lt
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
@@ -4279,7 +4259,7 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
   obtain ⟨hbase0, hbase2⟩ := hbase T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
   have harm1' := harm1 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
   have hdata := hCsub T T' hR hTball hT'ball x
-  obtain ⟨_hj0, _hj1, _hfold, hbound⟩ :=
+  obtain ⟨_hj0, _hj1, hbound⟩ :=
     (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
   obtain ⟨hb0, hb1⟩ := hbound s hs x
   have hdata_nn : 0 ≤ (∑ j ∈ Finset.range 3,
@@ -4419,6 +4399,10 @@ theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
 theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4457,11 +4441,15 @@ theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
         (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
     ((chartModelBasis E) k) ((chartModelBasis E) i)]
   exact chartSlopeContributions_eq_threeArm_component (I := I) g₀ T T'
-    hδ_lt hδ hδ'_lt hδ' s hs x i k
+    hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s hs x i k
 
 theorem exists_chartSlope_component_threeArm_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4486,11 +4474,15 @@ theorem exists_chartSlope_component_threeArm_ccTensorBilin
   refine ⟨linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ',
     linearizedRicci_arm1Field_jointSmooth (I := I) g₀ T T' hδ hδ', fun s hs x i k => ?_⟩
   exact chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
-    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s hs x i k
+    (I := I) g₀ T T' hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s hs x i k
 
 theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4513,7 +4505,7 @@ theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
                 ![(chartModelBasis E) k, (chartModelBasis E) i] := by
   obtain ⟨Φ₁, hΦ₁joint, hcomp⟩ :=
     exists_chartSlope_component_threeArm_ccTensorBilin (I := I) g₀ T T'
-      hδ_lt hδ hδ'_lt hδ'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨Φ₁, hΦ₁joint, fun s hs x i k => ?_⟩
   rw [hcomp s hs x i k,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ _ x
@@ -4522,6 +4514,10 @@ theorem chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
 theorem exists_chartRicciTraceDeriv_threeArm_covariant_component
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4546,7 +4542,7 @@ theorem exists_chartRicciTraceDeriv_threeArm_covariant_component
                 ![(chartModelBasis E) k, (chartModelBasis E) i] := by
   obtain ⟨Φ₁, hΦ₁joint, hΦ₁transfer⟩ :=
     chartRicciTraceChristoffelSlope_threeArm_covariant_transfer
-      (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+      (I := I) g₀ T T' hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨Φ₁, hΦ₁joint, fun s hs x i k => ?_⟩
   rw [deriv_chartRicciTrace_realizedFam_eq_chartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k hs]
   exact hΦ₁transfer s hs x i k
@@ -4554,6 +4550,10 @@ theorem exists_chartRicciTraceDeriv_threeArm_covariant_component
 theorem chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4579,7 +4579,7 @@ theorem chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨Φ₁, hΦ₁joint, hcomp⟩ :=
     exists_chartRicciTraceDeriv_threeArm_covariant_component (I := I) g₀ T T'
-      hδ_lt hδ hδ'_lt hδ'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨Φ₁, hΦ₁joint, fun s hs x v => ?_⟩
   set Wsum : SmoothCcTensor g₀ 0 2 :=
     appCc (I := I) (M := M) g₀ 2 2
@@ -4615,6 +4615,10 @@ theorem chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne
 
 theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4642,7 +4646,7 @@ theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianM
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨Φ₁, hΦ₁joint, hident⟩ :=
     chartRiemannTraceDeriv_threeArm_appCc_transfer_orderOne (I := I) g₀ T T'
-      hδ_lt hδ hδ'_lt hδ'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ', Φ₁,
     linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ',
     hΦ₁joint, ?_, ?_, hident⟩
@@ -4657,6 +4661,10 @@ theorem chartRiemannTraceDeriv_threeArm_appCc_transfer (g₀ : SmoothRiemannianM
 
 theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4678,7 +4686,8 @@ theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetri
                   (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨Φ₀, Φ₁, hΦ₀joint, hΦ₁joint, hΦ₀cont, hΦ₁cont, hident⟩ :=
-    chartRiemannTraceDeriv_threeArm_appCc_transfer (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+    chartRiemannTraceDeriv_threeArm_appCc_transfer (I := I) g₀ T T'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨Φ₀, Φ₁, hΦ₀joint, hΦ₁joint, hΦ₀cont, hΦ₁cont, fun s hs x v => ?_⟩
   rw [(DifferentialGeometry.PDE.DeTurck.RicciLinearization.hasDerivAt_realizedRicciChartSum_general
     (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) hs).deriv]
@@ -4686,6 +4695,10 @@ theorem realizedRicci_threeArm_lowerOrder_residual (g₀ : SmoothRiemannianMetri
 
 theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4709,7 +4722,8 @@ theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
                 + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨Φ₀, Φ₁, hΦ₀joint, hΦ₁joint, hΦ₀cont, hΦ₁cont, hident⟩ :=
-    realizedRicci_threeArm_lowerOrder_residual (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+    realizedRicci_threeArm_lowerOrder_residual (I := I) g₀ T T'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨Φ₀, Φ₁,
     linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ',
     hΦ₀joint, hΦ₁joint,
@@ -4727,6 +4741,10 @@ theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
 
 theorem linearizedRicci_lichnerowicz_arm1_identity (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4749,11 +4767,15 @@ theorem linearizedRicci_lichnerowicz_arm1_identity (g₀ : SmoothRiemannianMetri
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  exists_linearizedRicciOrder1DivCoeff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  exists_linearizedRicciOrder1DivCoeff (I := I) g₀ T T' hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
 
 set_option linter.unusedVariables false in
 theorem exists_linearizedRicci_threeArm_coeffFields
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4776,12 +4798,17 @@ theorem exists_linearizedRicci_threeArm_coeffFields
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
-  exact linearizedRicci_lichnerowicz_arm1_identity (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  exact linearizedRicci_lichnerowicz_arm1_identity (I := I) g₀ T T'
+    hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
 
 set_option linter.unusedSectionVars false in
 
 theorem exists_ricciArmOrder1Coeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4797,7 +4824,7 @@ theorem exists_ricciArmOrder1Coeff
   classical
   obtain ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hc0, hc1, hc2, hid⟩ :=
     exists_linearizedRicci_threeArm_coeffFields (I := I) (M := M) g₀ g_bg T T'
-      hδ_lt hδ hδ'_lt hδ'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') := by
     rw [Set.uIcc_of_le (zero_le_one)]
     exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt
@@ -4866,6 +4893,10 @@ set_option linter.unusedSectionVars false in
 
 theorem ricciTensor_realize_sub_eq_threeArm_appCc
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
@@ -4884,7 +4915,8 @@ theorem ricciTensor_realize_sub_eq_threeArm_appCc
               + appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   obtain ⟨R₀, R₁, R₂, hR⟩ :=
-    exists_ricciArmOrder1Coeff (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+    exists_ricciArmOrder1Coeff (I := I) (M := M) g₀ g_bg T T'
+      hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
   refine ⟨(-2 : ℝ) • R₀, (-2 : ℝ) • R₁, (-2 : ℝ) • R₂, fun x v => ?_⟩
   set A₀ : SmoothCcTensor g₀ 0 2 :=
     appCc (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) with hA₀
