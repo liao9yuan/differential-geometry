@@ -4904,6 +4904,274 @@ theorem ricciTensor_realize_sub_eq_threeArm_appCc
   rw [htoinfty, htoinfty, hA₀, hA₁, hA₂, ← hR x v]
   ring
 
+set_option linter.unusedSectionVars false in
+private lemma unitModel4_consMetricSlot0_eq_chartInvGram_sum
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4) (x : M)
+    (k₁ : Fin (Module.finrank ℝ E)) (w : Fin 3 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 4 W x
+        (Fin.cons (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((chartModelBasis E).cDualBasis k₁))) w) =
+      ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x k₁ l *
+          unitModel (I := I) (M := M) g₀ 4 W x
+            (Fin.cons ((chartModelBasis E l : TangentSpace I x)) w) := by
+  classical
+  set D : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => TangentSpace I x) ℝ :=
+    Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+        W.toSection x) (unitTensor (I := I) (M := M) x)) with hD_def
+  have hUM : ∀ v : Fin 4 → TangentSpace I x,
+      unitModel (I := I) (M := M) g₀ 4 W x v = D v := fun v => rfl
+  rw [hUM]
+  rw [show D (Fin.cons (cometricLmodel (I := I) g₁ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((chartModelBasis E).cDualBasis k₁))) w) =
+        D.curryLeft (cometricLmodel (I := I) g₁ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((chartModelBasis E).cDualBasis k₁))) w from rfl]
+  rw [cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum (I := I) g₁ x k₁]
+  rw [map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [hUM]
+  rfl
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+private lemma arm2_appCc_eq_combinedTrace_unitModel4
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E),
+          (unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+              (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k₁)))
+                ![(chartModelBasis E) k, (chartModelBasis E) i, (Module.finBasis ℝ E) k₁])
+            + unitModel (I := I) (M := M) g₀ 4
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+                (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k₁)))
+                  ![(chartModelBasis E) i, (chartModelBasis E) k, (Module.finBasis ℝ E) k₁])
+            - unitModel (I := I) (M := M) g₀ 4
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+                (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k₁)))
+                  (Fin.cons ((Module.finBasis ℝ E) k₁)
+                    ![(chartModelBasis E) k, (chartModelBasis E) i]))) +
+        -(1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+            ![(chartModelBasis E) k, (chartModelBasis E) i,
+              cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k₁)),
+              (Module.finBasis ℝ E) k₁] := by
+  rw [linearizedRicciArm2FieldLichnerowicz]
+  have hsplit :
+      (ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+        - (1 / 2 : ℝ) • traceHessianCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s)) =
+      ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+        + (-(1 / 2) : ℝ) • traceHessianCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) := by
+    rw [neg_smul, ← sub_eq_add_neg]
+  rw [hsplit, appCc_add_left, appCc_smul_left_local, unitModel_add2_apply, unitModel_smul_local,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [covDerivConnDiff_tracedPrincipal_eq_appCc (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T') x
+        (![(chartModelBasis E) k, (chartModelBasis E) i])]
+  rw [traceHessianCoeff_appCc_eq (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+        (![(chartModelBasis E) k, (chartModelBasis E) i])]
+  have htrace_to_unitModel : ∀ k₁ : Fin (Module.finrank ℝ E),
+      ContinuousMultilinearMap.domDomCongr traceHessianSlotPerm
+          (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace 4 I x from
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')).toSection x)
+              (unitTensor (I := I) (M := M) x)))
+          (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k₁)))
+            (Fin.cons ((Module.finBasis ℝ E) k₁)
+              ![(chartModelBasis E) k, (chartModelBasis E) i])) =
+        unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i,
+            cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k₁)),
+            (Module.finBasis ℝ E) k₁] := by
+    intro k₁
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    set base : Fin 4 → TangentSpace I x :=
+      Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k₁)))
+        (Fin.cons ((Module.finBasis ℝ E) k₁)
+          ![(chartModelBasis E) k, (chartModelBasis E) i]) with hbase
+    have hbeq : (fun i_1 : Fin 4 => base (traceHessianSlotPerm i_1)) =
+        ![(chartModelBasis E) k, (chartModelBasis E) i,
+            cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k₁)),
+            (Module.finBasis ℝ E) k₁] := by
+      funext i_1
+      fin_cases i_1 <;> rfl
+    rw [hbeq]
+    rfl
+  rw [Finset.sum_congr rfl (fun k₁ _ => htrace_to_unitModel k₁)]
+  have hprin : ∀ k₁ : Fin (Module.finrank ℝ E),
+      (unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+            (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k₁)))
+              ![(![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 0,
+                (![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 1,
+                (Module.finBasis ℝ E) k₁])
+          + unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+              (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k₁)))
+                ![(![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 1,
+                  (![(chartModelBasis E) k, (chartModelBasis E) i] : Fin 2 → TangentSpace I x) 0,
+                  (Module.finBasis ℝ E) k₁])
+          - unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+              (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k₁)))
+                (Fin.cons ((Module.finBasis ℝ E) k₁)
+                  ![(chartModelBasis E) k, (chartModelBasis E) i]))) =
+        (unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+            (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k₁)))
+              ![(chartModelBasis E) k, (chartModelBasis E) i, (Module.finBasis ℝ E) k₁])
+          + unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+              (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k₁)))
+                ![(chartModelBasis E) i, (chartModelBasis E) k, (Module.finBasis ℝ E) k₁])
+          - unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+              (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k₁)))
+                (Fin.cons ((Module.finBasis ℝ E) k₁)
+                  ![(chartModelBasis E) k, (chartModelBasis E) i]))) := by
+    intro k₁
+    congr 2
+  rw [Finset.sum_congr rfl (fun k₁ _ => hprin k₁)]
+
+set_option linter.unusedSectionVars false in
+noncomputable def arm2ReadoutCovDerivPair (g₀ : SmoothRiemannianMetric I M)
+    (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin (2 + 2) → Fin (Module.finrank ℝ E)) : ℝ :=
+  euclidPartial (E := E) (Jdx 0)
+      (fun y' => covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
+        ((Matrix.vecTail Jdx) 0) ![]
+        (Matrix.vecTail (Matrix.vecTail Jdx)) y')
+      (toEuclidean (E := E) (extChartAt I x x))
+    + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3
+        (covGrad (I := I) (M := M) g₀ 0 2 h) x (Jdx 0) ![]
+        (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
+
+set_option linter.unusedSectionVars false in
+noncomputable def arm2ChartReadoutResidual (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) (s : ℝ) : ℝ :=
+  (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+      chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x k₁ l *
+        (arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![l, k, i, k₁]
+          + arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![l, i, k, k₁]
+          - arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![l, k₁, k, i]) -
+    (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+      chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x k₁ l *
+        arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![k, i, l, k₁]
+
+set_option linter.unusedSectionVars false in
+theorem arm2_combinedTrace_eq_chartSlopeSecondOrder_add_residual
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E),
+          (unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+              (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k₁)))
+                ![(chartModelBasis E) k, (chartModelBasis E) i, (Module.finBasis ℝ E) k₁])
+            + unitModel (I := I) (M := M) g₀ 4
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+                (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k₁)))
+                  ![(chartModelBasis E) i, (chartModelBasis E) k, (Module.finBasis ℝ E) k₁])
+            - unitModel (I := I) (M := M) g₀ 4
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+                (Fin.cons (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k₁)))
+                  (Fin.cons ((Module.finBasis ℝ E) k₁)
+                    ![(chartModelBasis E) k, (chartModelBasis E) i]))) +
+        -(1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+            ![(chartModelBasis E) k, (chartModelBasis E) i,
+              cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k₁)),
+              (Module.finBasis ℝ E) k₁] =
+      chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+theorem arm2_principalSymbol_chart_match
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
+  rw [arm2_appCc_eq_combinedTrace_unitModel4 (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s x i k]
+  rw [arm2_combinedTrace_eq_chartSlopeSecondOrder_add_residual (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' s x i k]
+  rw [chartSlopeSecondOrderContribution_eq_principal_add_remainder (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x i k
+        (extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)) s]
+
 end TensorSpectral
 end Parabolic
 end Analysis
