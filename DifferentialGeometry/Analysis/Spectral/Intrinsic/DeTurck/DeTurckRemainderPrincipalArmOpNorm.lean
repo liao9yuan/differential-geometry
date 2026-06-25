@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 
 noncomputable section
 
@@ -16,6 +18,7 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
@@ -33,6 +36,107 @@ theorem smoothCcToTensorHs_norm_order_congr (g₀ : SmoothRiemannianMetric I M)
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' T‖ := by
   subst hσ; rfl
 
+theorem smoothCcToTensorHs_rawTensorConnLapSmooth_le
+    (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) (T : SmoothCcTensor g₀ 0 2) :
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T‖ := by
+  classical
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  set lam : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+      (I := I) (M := M) i with hlam_def
+  set c : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 T) i
+    with hc_def
+  have hnn : 0 ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T‖ := norm_nonneg _
+  have hlam_nn : ∀ i, 0 ≤ lam i := fun i =>
+    DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensor_lambda_nonneg
+      (I := I) (M := M) i
+  have hLHS_term : ∀ i,
+      tensorSobolevWeight (I := I) (M := M) i σ *
+          (tensorL2Coeff (I := I) (M := M) h_compact
+            (SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)) i) ^ 2 =
+        tensorSobolevWeight (I := I) (M := M) i σ * (lam i) ^ 2 * (c i) ^ 2 := by
+    intro i
+    rw [tensorL2Coeff_ofCompact_rawTensorConnLapSmooth (I := I) (M := M) g₀ h_compact T i]
+    rw [show (- lam i * c i) ^ 2 = (lam i) ^ 2 * (c i) ^ 2 by ring]
+    ring
+  have hRHS_term : ∀ i,
+      tensorSobolevWeight (I := I) (M := M) i (σ + 2) * (c i) ^ 2 =
+        tensorSobolevWeight (I := I) (M := M) i σ * (1 + lam i) ^ 2 * (c i) ^ 2 := by
+    intro i
+    rw [tensorHs.tensorSobolevWeight_add (I := I) (M := M) i σ 2]
+    have hw2 : tensorSobolevWeight (I := I) (M := M) i (2 : ℝ) = (1 + lam i) ^ 2 := by
+      unfold tensorSobolevWeight
+      rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    rw [hw2]
+  have hsummable_RHS : Summable (fun i =>
+      tensorSobolevWeight (I := I) (M := M) i σ * (1 + lam i) ^ 2 * (c i) ^ 2) := by
+    have hw := (ccSpectralEmbed (I := I) (M := M) g₀ (σ + 2) T).weighted_summable
+    refine hw.congr (fun i => ?_)
+    rw [ccSpectralEmbed_coeff,
+      show tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 T) i = c i from rfl]
+    exact hRHS_term i
+  have hsummable_LHS : Summable (fun i =>
+      tensorSobolevWeight (I := I) (M := M) i σ * (lam i) ^ 2 * (c i) ^ 2) := by
+    refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hsummable_RHS
+    · have := tensorSobolevWeight_pos (I := I) (M := M) i σ
+      have := hlam_nn i
+      positivity
+    · have hwpos : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
+        le_of_lt (tensorSobolevWeight_pos (I := I) (M := M) i σ)
+      have hbase : (lam i) ^ 2 ≤ (1 + lam i) ^ 2 := by
+        have := hlam_nn i; nlinarith
+      have hc2 : 0 ≤ (c i) ^ 2 := sq_nonneg _
+      nlinarith [mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left hbase hwpos) hc2]
+  have hsq : ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)‖ ^ 2 ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T‖ ^ 2 := by
+    rw [tensorHs.norm_sq_eq_tsum, tensorHs.norm_sq_eq_tsum]
+    rw [show (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
+          ((smoothCcToTensorHs (I := I) (M := M) g₀ σ
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)).coeff i) ^ 2) =
+        fun i => tensorSobolevWeight (I := I) (M := M) i σ * (lam i) ^ 2 * (c i) ^ 2 by
+      funext i
+      rw [smoothCcToTensorHs_coeff, ← hcompact_def]
+      exact hLHS_term i]
+    rw [show (fun i => tensorSobolevWeight (I := I) (M := M) i (σ + 2) *
+          ((smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T).coeff i) ^ 2) =
+        fun i => tensorSobolevWeight (I := I) (M := M) i σ * (1 + lam i) ^ 2 * (c i) ^ 2 by
+      funext i
+      rw [smoothCcToTensorHs_coeff, ← hcompact_def,
+        show tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 T) i = c i from rfl]
+      exact hRHS_term i]
+    refine Summable.tsum_le_tsum (fun i => ?_) hsummable_LHS hsummable_RHS
+    have hwpos : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
+      le_of_lt (tensorSobolevWeight_pos (I := I) (M := M) i σ)
+    have hbase : (lam i) ^ 2 ≤ (1 + lam i) ^ 2 := by
+      have := hlam_nn i; nlinarith
+    have hc2 : 0 ≤ (c i) ^ 2 := sq_nonneg _
+    nlinarith [mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hbase hwpos) hc2]
+  exact le_of_sq_le_sq hsq hnn
+
+theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
+    (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
+    ∃ Clower : ℝ, 0 ≤ Clower ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M)
+        (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + h y v w) →
+        ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+        ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+              (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖ ≤
+            (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+                (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
+              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ :=
+  sorry
+
 theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_opNorm_le
     (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
     ∃ Clower : ℝ, 0 ≤ Clower ∧
@@ -45,8 +149,24 @@ theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_opNorm_le
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
               (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖ ≤
             (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T₀‖ +
-              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ :=
-  sorry
+              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ := by
+  obtain ⟨Clower, hClower_nn, hbound⟩ :=
+    exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
+      (I := I) (M := M) g₀ σ
+  refine ⟨Clower, hClower_nn, fun g₁ h htie δ hδ_lt hδ_nn hδ T₀ => ?_⟩
+  refine le_trans (hbound g₁ h htie hδ_lt hδ_nn hδ T₀) ?_
+  have hshift : ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T₀‖ :=
+    smoothCcToTensorHs_rawTensorConnLapSmooth_le (I := I) (M := M) g₀ σ T₀
+  have hκ_nn : 0 ≤ δ / (1 - δ) := by
+    have hpos : 0 < 1 - δ := by linarith
+    exact div_nonneg hδ_nn (le_of_lt hpos)
+  have htop : (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+      (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T₀‖ :=
+    mul_le_mul_of_nonneg_left hshift hκ_nn
+  linarith
 
 theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_tame
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
