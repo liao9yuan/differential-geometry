@@ -1025,7 +1025,11 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ q : ℕ, q ≤ a →
@@ -1044,7 +1048,7 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
     obtain ⟨Cb1, hCb1_nn, hCb1⟩ :=
       exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g₀ (a + 1)
     refine ⟨Ccov * max Cb2 Cb1, by positivity, ?_⟩
-    intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball q hq
+    intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTsymm hT'symm hTball hT'ball q hq
     set H2 : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ with hH2_def
     set H1 : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) (T - T')‖ with hH1_def
     have hH2_nn : 0 ≤ H2 := norm_nonneg _
@@ -1097,7 +1101,7 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
               ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ := Real.sqrt_sq hsum_nn
         _ ≤ Cb1 * H1 := hsum_le
         _ ≤ max Cb2 Cb1 * H1 := mul_le_mul_of_nonneg_right (le_max_right _ _) hH1_nn
-    have hcov := hCcov T T' hδ_le hδ hδ'_le hδ' hTball hT'ball q hq
+    have hcov := hCcov T T' hδ_le hδ hδ'_le hδ' hTsymm hT'symm hTball hT'ball q hq
     refine hcov.trans ?_
     have hmaxnn : 0 ≤ max Cb2 Cb1 := le_max_of_le_left hCb2_nn
     have hstep : δ₀ * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
@@ -1120,7 +1124,7 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
           mul_le_mul_of_nonneg_left hstep hCcov_nn
       _ = Ccov * max Cb2 Cb1 * (δ₀ * H2 + H1) := by ring
   · refine ⟨0, le_refl 0, ?_⟩
-    intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball q hq
+    intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTsymm hT'symm hTball hT'ball q hq
     have hδ_neg : δ < 0 := lt_of_le_of_lt hδ_le hδ₀_neg
     by_cases hM : Nonempty M
     · obtain ⟨x₀⟩ := hM
@@ -1297,7 +1301,11 @@ theorem smoothRemainderDiff_ballLipschitz_Ha1_weighted
       {δ : ℝ} (hδ_le : δ ≤ δ₀)
       (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+      (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+      (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ)
@@ -1316,7 +1324,7 @@ theorem smoothRemainderDiff_ballLipschitz_Ha1_weighted
     deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_weighted
       (I := I) (M := M) g₀ g_bg a ha_super hR'_nn hδ₀
   refine ⟨Real.toNNReal (Ca * (((a : ℝ) + 1) * Ccol)), ?_⟩
-  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTsymm hT'symm hTball hT'ball
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
   have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
   set W : SmoothCcTensor g₀ 0 2 := T - T' with hW_def
@@ -1344,7 +1352,7 @@ theorem smoothRemainderDiff_ballLipschitz_Ha1_weighted
     hball_conv T hTball
   have hT'cov : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ Cb * R :=
     hball_conv T' hT'ball
-  have hcol := hCcol T T' hδ_le hδ hδ'_le hδ' hTcov hT'cov
+  have hcol := hCcol T T' hδ_le hδ hδ'_le hδ' hTsymm hT'symm hTcov hT'cov
   set Dsum : ℝ := ∑ q ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ with hDsum_def
   have hDsum_nn : 0 ≤ Dsum := Finset.sum_nonneg fun q _ => norm_nonneg _
   have hper : ∀ q ∈ Finset.range (a + 1),
