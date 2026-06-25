@@ -223,6 +223,191 @@ theorem abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt
     ring
 
 set_option linter.unusedSectionVars false in
+private lemma frame04_data
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      (∀ v : TangentSpace I x, ∑ i : Fin n, g.inner x (e i) v ^ 2 = g.inner x v v) ∧
+      (∀ v : TangentSpace I x, v = ∑ i : Fin n, g.inner x (e i) v • e i) ∧
+      ∀ S : TensorRSSpace 0 4 I x,
+        riemannianFiberNormSq (I := I) (M := M) g 0 4 x S =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin 4 → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g x 0 4 S n e K J := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set e : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with he_def
+  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
+    fun u v => rfl
+  refine ⟨n, fun i => e i, ?_, ?_, ?_⟩
+  · intro v
+    have hpars : ∑ i : Fin n, (inner ℝ (e i) v : ℝ) ^ 2 = ‖v‖ ^ 2 :=
+      OrthonormalBasis.sum_sq_inner_right e v
+    have hnorm_sq : (‖v‖ : ℝ) ^ 2 = g.inner x v v := by
+      have hri : (inner ℝ v v : ℝ) = ‖v‖ ^ 2 := real_inner_self_eq_norm_sq v
+      rw [hinner_eq v v] at hri
+      exact hri.symm
+    calc
+      ∑ i : Fin n, g.inner x (e i) v ^ 2
+          = ∑ i : Fin n, (inner ℝ (e i) v : ℝ) ^ 2 := by
+            refine Finset.sum_congr rfl (fun i _ => ?_); rw [hinner_eq (e i) v]
+      _ = ‖v‖ ^ 2 := hpars
+      _ = g.inner x v v := hnorm_sq
+  · intro v
+    have hrepr : ∑ i : Fin n, (inner ℝ (e i) v : ℝ) • e i = v :=
+      OrthonormalBasis.sum_repr' e v
+    have hcongr : (∑ i : Fin n, g.inner x (e i) v • e i) =
+        ∑ i : Fin n, (inner ℝ (e i) v : ℝ) • e i := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [hinner_eq (e i) v]
+    rw [hcongr, hrepr]
+  · intro S
+    rfl
+
+set_option linter.unusedSectionVars false in
+private lemma tensor04_component_eq_toModel
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (W : TensorRSSpace 0 4 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
+    (J : Fin 4 → Fin n) (K₀ : Fin 0 → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 0 4 W n e K₀ J =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from W)
+          (unitZeroSec (I := I) (M := M) x))
+        (fun i : Fin 4 => e (J i)) := by
+  classical
+  unfold fiberNormSqComponent
+  rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun l : Fin 0 => g₀.inner x (e (K₀ l))) : Tensor0SSpace 0 I x) =
+      coframeS (I := I) (M := M) g₀ x 0 e K₀ from rfl]
+  rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g₀ x e K₀]
+  rfl
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem abs_tensor04_unit_eval_le_fibreNorm_mul_sqrt
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (W : TensorRSSpace 0 4 I x) (a b c d : TangentSpace I x) :
+    letI : Bundle.RiemannianBundle
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+    |Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from W)
+          (unitZeroSec (I := I) (M := M) x))
+        (Fin.cons a (Fin.cons b (Fin.cons c ![d])))| ≤
+      ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ *
+        Real.sqrt (g₀.inner x a a) * Real.sqrt (g₀.inner x b b) *
+          Real.sqrt (g₀.inner x c c) * Real.sqrt (g₀.inner x d d) := by
+  classical
+  letI instTens : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+  obtain ⟨n, e, hpars, hexpand, hrfns⟩ := frame04_data (I := I) (M := M) g₀ x
+  set vec : Fin 4 → TangentSpace I x := ![a, b, c, d] with hvec_def
+  set Bcmm : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ :=
+    Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from W)
+        (unitZeroSec (I := I) (M := M) x)) with hBcmm_def
+  set coef : (Fin 4 → Fin n) → ℝ :=
+    fun J => ∏ i : Fin 4, g₀.inner x (e (J i)) (vec i) with hcoef_def
+  set comp : (Fin 4 → Fin n) → ℝ :=
+    fun J => Bcmm (fun i : Fin 4 => e (J i)) with hcomp_def
+  have hBval : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from W)
+        (unitZeroSec (I := I) (M := M) x))
+      (Fin.cons a (Fin.cons b (Fin.cons c ![d]))) = Bcmm vec := by
+    rw [hBcmm_def]
+    congr 1
+  rw [hBval]
+  have hexp : ∀ i : Fin 4, vec i = ∑ j : Fin n, g₀.inner x (e j) (vec i) • e j :=
+    fun i => hexpand (vec i)
+  have hvalue : Bcmm vec = ∑ J : Fin 4 → Fin n, coef J * comp J := by
+    have hrw : Bcmm vec = Bcmm (fun i : Fin 4 => ∑ j : Fin n, g₀.inner x (e j) (vec i) • e j) := by
+      congr 1
+      funext i
+      exact hexp i
+    rw [hrw, ContinuousMultilinearMap.map_sum]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [hcoef_def, hcomp_def]
+    rw [ContinuousMultilinearMap.map_smul_univ]
+    rw [smul_eq_mul]
+  have hCS : (∑ J : Fin 4 → Fin n, coef J * comp J) ^ 2 ≤
+      (∑ J : Fin 4 → Fin n, coef J ^ 2) * ∑ J : Fin 4 → Fin n, comp J ^ 2 :=
+    Finset.sum_mul_sq_le_sq_mul_sq Finset.univ coef comp
+  have hcoefsq : (∑ J : Fin 4 → Fin n, coef J ^ 2) =
+      g₀.inner x a a * g₀.inner x b b * g₀.inner x c c * g₀.inner x d d := by
+    have hpow : ∀ J : Fin 4 → Fin n, coef J ^ 2 =
+        ∏ i : Fin 4, g₀.inner x (e (J i)) (vec i) ^ 2 := by
+      intro J
+      rw [hcoef_def, ← Finset.prod_pow]
+    rw [Finset.sum_congr rfl (fun J _ => hpow J)]
+    rw [show (∑ J : Fin 4 → Fin n, ∏ i : Fin 4, g₀.inner x (e (J i)) (vec i) ^ 2) =
+        ∑ J ∈ Fintype.piFinset (fun _ : Fin 4 => (Finset.univ : Finset (Fin n))),
+          ∏ i : Fin 4, g₀.inner x (e (J i)) (vec i) ^ 2 from by
+      rw [Fintype.piFinset_univ]]
+    rw [← Finset.prod_univ_sum (fun _ : Fin 4 => (Finset.univ : Finset (Fin n)))
+      (fun i j => g₀.inner x (e j) (vec i) ^ 2)]
+    have hfac : ∏ i : Fin 4, (∑ j : Fin n, g₀.inner x (e j) (vec i) ^ 2) =
+        g₀.inner x (vec 0) (vec 0) * (g₀.inner x (vec 1) (vec 1) *
+          (g₀.inner x (vec 2) (vec 2) * (g₀.inner x (vec 3) (vec 3) * 1))) := by
+      rw [Fin.prod_univ_four]
+      rw [hpars (vec 0), hpars (vec 1), hpars (vec 2), hpars (vec 3)]
+      ring
+    rw [hfac]
+    have h0 : vec 0 = a := rfl
+    have h1 : vec 1 = b := rfl
+    have h2 : vec 2 = c := rfl
+    have h3 : vec 3 = d := rfl
+    rw [h0, h1, h2, h3]; ring
+  have hcompsq : (∑ J : Fin 4 → Fin n, comp J ^ 2) =
+      ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2 := by
+    rw [← riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 4 x W]
+    rw [hrfns W]
+    rw [Fintype.sum_unique (fun K : Fin 0 → Fin n =>
+      ∑ J : Fin 4 → Fin n,
+        fiberNormSqSummand (I := I) (M := M) g₀ x 0 4 W n e K J)]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [fiberNormSqSummand_eq_component_sq,
+      tensor04_component_eq_toModel (I := I) (M := M) g₀ x W e J (default : Fin 0 → Fin n)]
+  have hnorm_nn : 0 ≤ ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ := norm_nonneg _
+  have haa_nn : 0 ≤ g₀.inner x a a := metric_inner_self_nonneg (I := I) (M := M) g₀ x a
+  have hbb_nn : 0 ≤ g₀.inner x b b := metric_inner_self_nonneg (I := I) (M := M) g₀ x b
+  have hcc_nn : 0 ≤ g₀.inner x c c := metric_inner_self_nonneg (I := I) (M := M) g₀ x c
+  have hdd_nn : 0 ≤ g₀.inner x d d := metric_inner_self_nonneg (I := I) (M := M) g₀ x d
+  have habs_sq : (Bcmm vec) ^ 2 ≤
+      ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2 *
+        (g₀.inner x a a * g₀.inner x b b * g₀.inner x c c * g₀.inner x d d) := by
+    rw [hvalue]
+    calc (∑ J : Fin 4 → Fin n, coef J * comp J) ^ 2
+        ≤ (∑ J : Fin 4 → Fin n, coef J ^ 2) *
+            ∑ J : Fin 4 → Fin n, comp J ^ 2 := hCS
+      _ = (g₀.inner x a a * g₀.inner x b b * g₀.inner x c c * g₀.inner x d d) *
+            ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2 := by
+            rw [hcoefsq, hcompsq]
+      _ = ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2 *
+            (g₀.inner x a a * g₀.inner x b b * g₀.inner x c c * g₀.inner x d d) := by ring
+  rw [← Real.sqrt_sq (abs_nonneg (Bcmm vec)), sq_abs]
+  rw [show ‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ *
+        Real.sqrt (g₀.inner x a a) * Real.sqrt (g₀.inner x b b) *
+          Real.sqrt (g₀.inner x c c) * Real.sqrt (g₀.inner x d d) =
+      Real.sqrt (‖(W : Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2 *
+        (g₀.inner x a a * g₀.inner x b b * g₀.inner x c c * g₀.inner x d d)) from ?_]
+  · exact Real.sqrt_le_sqrt habs_sq
+  · rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq hnorm_nn]
+    rw [Real.sqrt_mul (mul_nonneg (mul_nonneg haa_nn hbb_nn) hcc_nn),
+      Real.sqrt_mul (mul_nonneg haa_nn hbb_nn), Real.sqrt_mul haa_nn]
+    ring
+
+
+set_option linter.unusedSectionVars false in
 lemma g0FlatCLM_inverseMetricSharpFib
     (g₀ : SmoothRiemannianMetric I M) (x : M) (θ : Tensor0SSpace 1 I x) :
     g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₀ x θ) = θ := by

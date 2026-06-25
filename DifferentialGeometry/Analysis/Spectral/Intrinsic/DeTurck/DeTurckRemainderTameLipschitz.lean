@@ -1436,6 +1436,8 @@ private theorem uniform_C0_bound_concrete_lichnerowicz_coeffFields
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
             ((linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC ∧
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+            ((linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC ∧
           Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
             ((linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤ ΛC :=
   DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
@@ -1531,11 +1533,9 @@ private theorem uniform_rfns_bound_lichnerowicz_coeffFields
   classical
   obtain ⟨ΛC, hΛC_nn, hC0⟩ :=
     uniform_C0_bound_concrete_lichnerowicz_coeffFields (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
-  obtain ⟨Λarm1, hΛarm1_nn, hArm1⟩ :=
-    exists_arm1Koszul_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
   obtain ⟨B, hB_nn, hJet⟩ :=
     linearizedRicciArm_concreteField_jetL2_ballUniform (I := I) g₀ a ha_super hR hδ₀
-  refine ⟨max ΛC (Real.sqrt Λarm1), B, le_trans hΛC_nn (le_max_left _ _), hB_nn, ?_⟩
+  refine ⟨ΛC, B, hΛC_nn, hB_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
   set Φ₀ : ℝ → SmoothCcTensor g₀ 2 2 := linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ'
   set Φ₁ : ℝ → SmoothCcTensor g₀ 3 2 := linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ'
@@ -1624,13 +1624,13 @@ private theorem uniform_rfns_bound_lichnerowicz_coeffFields
     rw [hsumForm]
   · intro s hs x
     have h := hC0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
-    exact le_trans h.1 (le_max_left _ _)
-  · intro s hs x
-    have hb := hArm1 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
-    refine le_trans (Real.sqrt_le_sqrt hb) (le_max_right _ _)
+    exact h.1
   · intro s hs x
     have h := hC0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
-    exact le_trans h.2 (le_max_left _ _)
+    exact h.2.1
+  · intro s hs x
+    have h := hC0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+    exact h.2.2
   · exact hJet0
   · exact hJet1
   · exact hJet2
