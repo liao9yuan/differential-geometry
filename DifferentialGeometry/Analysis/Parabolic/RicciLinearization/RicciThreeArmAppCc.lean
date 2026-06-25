@@ -5080,6 +5080,177 @@ private lemma arm2_appCc_eq_combinedTrace_unitModel4
   rw [Finset.sum_congr rfl (fun k₁ _ => hprin k₁)]
 
 set_option linter.unusedSectionVars false in
+private lemma cometricFinBasisTrace_eq_chartInvGram_bilin
+    (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (F : E →L[ℝ] E →L[ℝ] ℝ) :
+    (∑ k₁ : Fin (Module.finrank ℝ E),
+        F (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k₁)))
+          ((Module.finBasis ℝ E) k₁)) =
+      ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x k₁ l •
+          F (chartModelBasis E l) (chartModelBasis E k₁) := by
+  classical
+  set L₁ : (E →L[ℝ] ℝ) →L[ℝ] E :=
+    (cometricLmodel (I := I) g₁ x).comp
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)) with hL₁
+  set F' : (E →L[ℝ] ℝ) →L[ℝ] E →L[ℝ] ℝ := F.comp L₁ with hF'
+  have hFapp : ∀ (φ : E →L[ℝ] ℝ) (v : E),
+      F' φ v = F (cometricLmodel (I := I) g₁ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) φ)) v := by
+    intro φ v
+    rfl
+  have htrace := (cDualBasis_trace_basis_indep (E := E) (chartModelBasis E) F').symm
+  rw [show (∑ k₁ : Fin (Module.finrank ℝ E),
+        F (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k₁)))
+          ((Module.finBasis ℝ E) k₁)) =
+      ∑ k₁ : Fin (Module.finrank ℝ E),
+        F' ((Module.finBasis ℝ E).cDualBasis k₁) ((Module.finBasis ℝ E) k₁) from
+    Finset.sum_congr rfl (fun k₁ _ => (hFapp _ _).symm)]
+  rw [htrace]
+  refine Finset.sum_congr rfl (fun k₁ _ => ?_)
+  rw [hFapp ((chartModelBasis E).cDualBasis k₁) (chartModelBasis E k₁)]
+  rw [cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum (I := I) g₁ x k₁]
+  rw [map_sum, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [map_smul, ContinuousLinearMap.smul_apply]
+
+set_option linter.unusedSectionVars false in
+private def unitModel4SlotBilin
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
+    (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun c => LinearMap.toContinuousLinearMap
+        { toFun := fun v => f (Function.update (Function.update base i c) j v)
+          map_add' := fun v1 v2 => by
+            rw [f.map_update_add (Function.update base i c) j v1 v2]
+          map_smul' := fun r v => by
+            rw [f.map_update_smul (Function.update base i c) j r v]; rfl }
+      map_add' := fun c1 c2 => by
+        ext v
+        show f (Function.update (Function.update base i (c1 + c2)) j v) =
+          f (Function.update (Function.update base i c1) j v) +
+          f (Function.update (Function.update base i c2) j v)
+        rw [Function.update_comm hij c1 v base, Function.update_comm hij c2 v base,
+          Function.update_comm hij (c1 + c2) v base]
+        rw [f.map_update_add (Function.update base j v) i c1 c2]
+      map_smul' := fun r c => by
+        ext v
+        show f (Function.update (Function.update base i (r • c)) j v) =
+          r • f (Function.update (Function.update base i c) j v)
+        rw [Function.update_comm hij c v base, Function.update_comm hij (r • c) v base]
+        rw [f.map_update_smul (Function.update base j v) i r c] }
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel4SlotBilin_apply
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
+    (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) (c v : E) :
+    unitModel4SlotBilin (E := E) f i j hij base c v =
+      f (Function.update (Function.update base i c) j v) := rfl
+
+set_option linter.unusedSectionVars false in
+private lemma euclidPartial_add_local
+    (l : Fin (Module.finrank ℝ E))
+    {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
+    euclidPartial (E := E) l (fun z => f z + h z) y =
+      euclidPartial (E := E) l f y + euclidPartial (E := E) l h y := by
+  rw [euclidPartial_def, euclidPartial_def, euclidPartial_def, fderiv_fun_add hf hh,
+    ContinuousLinearMap.add_apply]
+
+set_option linter.unusedSectionVars false in
+private lemma euclidPartial_sub_local
+    (l : Fin (Module.finrank ℝ E))
+    {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hf : DifferentiableAt ℝ f y) (hh : DifferentiableAt ℝ h y) :
+    euclidPartial (E := E) l (fun z => f z - h z) y =
+      euclidPartial (E := E) l f y - euclidPartial (E := E) l h y := by
+  rw [euclidPartial_def, euclidPartial_def, euclidPartial_def, fderiv_fun_sub hf hh,
+    ContinuousLinearMap.sub_apply]
+
+set_option linter.unusedSectionVars false in
+private lemma partialDeriv_scalarOnE_eq_euclidPartial_local
+    (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
+    {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
+    partialDeriv (E := E) m (scalarOnE (I := I) α f)
+        (extChartAt I α ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) =
+      euclidPartial (E := E) m
+        (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f) y := by
+  classical
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  have hy_pre : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target :=
+    DifferentialGeometry.Analysis.Laplacian.MetricExtension.toEuclidean_symm_mem_target
+      (I := I) hy
+  have hphi_b : extChartAt I α b = (toEuclidean (E := E)).symm y := by
+    rw [hb_def]; exact (extChartAt I α).right_inv hy_pre
+  rw [euclidPartial_def]
+  have hpushed_eq :
+      DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α f =ᶠ[𝓝 y]
+        ((scalarOnE (I := I) α f) ∘ (toEuclidean (E := E)).symm) := by
+    have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
+      DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid_isOpen
+        (I := I) (M := M) α
+    filter_upwards [hopen.mem_nhds hy] with z hz
+    rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
+      (I := I) (M := M) α f hz]
+    rfl
+  rw [Filter.EventuallyEq.fderiv_eq hpushed_eq]
+  rw [(toEuclidean (E := E)).symm.comp_right_fderiv
+    (f := scalarOnE (I := I) α f) (x := y)]
+  rw [ContinuousLinearMap.comp_apply]
+  rw [show (toEuclidean (E := E)).symm.toContinuousLinearMap
+      (EuclideanSpace.single m (1 : ℝ)) = (chartModelBasis E) m from by
+    rw [chartModelBasis_apply]; rfl]
+  rw [partialDeriv]
+  rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel4_consMetricSlot2_eq_chartInvGram_sum
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4) (x : M)
+    (k₁ : Fin (Module.finrank ℝ E)) (a b c : TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 4 W x
+        ![a, b, cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((chartModelBasis E).cDualBasis k₁)), c] =
+      ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x k₁ l *
+          unitModel (I := I) (M := M) g₀ 4 W x
+            ![a, b, (chartModelBasis E l : TangentSpace I x), c] := by
+  classical
+  set D : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => TangentSpace I x) ℝ :=
+    Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+        W.toSection x) (unitTensor (I := I) (M := M) x)) with hD_def
+  have hUM : ∀ v : Fin 4 → TangentSpace I x,
+      unitModel (I := I) (M := M) g₀ 4 W x v = D v := fun v => rfl
+  rw [hUM]
+  rw [show D ![a, b, cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((chartModelBasis E).cDualBasis k₁)), c] =
+        (D.toContinuousLinearMap ![a, b, (0 : TangentSpace I x), c] 2)
+          (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((chartModelBasis E).cDualBasis k₁))) from ?_]
+  · rw [cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum (I := I) g₁ x k₁]
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [map_smul, smul_eq_mul]
+    rw [hUM]
+    congr 1
+    rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
+    congr 1
+    funext j; fin_cases j <;> simp [Function.update]
+  · rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
+    congr 1
+    funext j; fin_cases j <;> simp [Function.update]
+
+set_option linter.unusedSectionVars false in
 noncomputable def arm2ReadoutCovDerivPair (g₀ : SmoothRiemannianMetric I M)
     (h : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin (2 + 2) → Fin (Module.finrank ℝ E)) : ℝ :=
@@ -5091,6 +5262,344 @@ noncomputable def arm2ReadoutCovDerivPair (g₀ : SmoothRiemannianMetric I M)
     + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3
         (covGrad (I := I) (M := M) g₀ 0 2 h) x (Jdx 0) ![]
         (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
+
+set_option linter.unusedSectionVars false in
+private lemma covDerivLowerOrderTerm_differentiableAt_center
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g₀ r s) (x : M)
+    (m : Fin (Module.finrank ℝ E))
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    DifferentiableAt ℝ
+      (covDerivLowerOrderTerm (I := I) (M := M) g₀ r s S x m Idx Jdx)
+      (toEuclidean (E := E) (extChartAt I x x)) := by
+  have hmem : (toEuclidean (E := E)) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x (mem_chart_source H x)
+  have hcd : ContDiffOn ℝ ∞
+      (covDerivLowerOrderTerm (I := I) (M := M) g₀ r s S x m Idx Jdx)
+      (chartTargetEuclid (I := I) (M := M) x) :=
+    covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M) g₀ r s S x m Idx Jdx
+      (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
+        (I := I) (M := M) g₀ r s S x Idx' Jdx')
+  exact (hcd.contDiffAt
+    ((DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
+      (I := I) (M := M) x).mem_nhds hmem)).differentiableAt (by simp)
+
+set_option linter.unusedSectionVars false in
+private lemma euclidPartial_chartPushedRaw_differentiableAt_center
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g₀ r s) (x : M)
+    (k : Fin (Module.finrank ℝ E))
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    DifferentiableAt ℝ
+      (euclidPartial (E := E) k
+        (chartPushedRaw I x
+          (tensorChartComponentRaw (I := I) (M := M) g₀ r s S x Idx Jdx)))
+      (toEuclidean (E := E) (extChartAt I x x)) := by
+  have hmem : (toEuclidean (E := E)) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x (mem_chart_source H x)
+  have hcd : ContDiffOn ℝ ∞
+      (euclidPartial (E := E) k
+        (chartPushedRaw I x
+          (tensorChartComponentRaw (I := I) (M := M) g₀ r s S x Idx Jdx)))
+      (chartTargetEuclid (I := I) (M := M) x) :=
+    euclidPartial_chartPushedRaw_contDiffOn (I := I) (M := M) g₀ r s S x k Idx Jdx
+  exact (hcd.contDiffAt
+    ((DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
+      (I := I) (M := M) x).mem_nhds hmem)).differentiableAt (by simp)
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel4_basisChart_readout_split
+    (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b c d : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 h) x
+        ![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c, chartModelBasis E d] =
+      euclidPartial (E := E) a
+          (fun y' => euclidPartial (E := E) b
+            (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+              h x ![] ![c, d])) y')
+          (toEuclidean (E := E) (extChartAt I x x))
+        + arm2ReadoutCovDerivPair (I := I) (M := M) g₀ h x ![a, b, c, d] := by
+  classical
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hroundtrip : (extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
+    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
+  rw [show (![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c,
+        chartModelBasis E d] : Fin 4 → TangentSpace I x) =
+      (fun j => chartModelBasis E ((![a, b, c, d] : Fin 4 → Fin (Module.finrank ℝ E)) j)) from by
+    funext j; fin_cases j <;> rfl]
+  rw [unitModel_basisChart_eq_tensorChartComponentRaw (I := I) (M := M) g₀ (2 + 2)
+    (iteratedCovGrad (I := I) g₀ 0 2 2 h) x (![a, b, c, d])]
+  rw [show tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 h) x ![] (![a, b, c, d]) x =
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 h) x ![] (![a, b, c, d])
+        ((extChartAt I x).symm
+          ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x)))) from by
+    rw [hroundtrip] ]
+  rw [iteratedCovGrad2_chartComponent_readout (I := I) g₀ h x (![a, b, c, d])]
+  have hJ0 : (![a, b, c, d] : Fin (2 + 2) → Fin (Module.finrank ℝ E)) 0 = a := rfl
+  have hJ1 : (Matrix.vecTail (![a, b, c, d] : Fin (2 + 2) → Fin (Module.finrank ℝ E))) 0 = b := rfl
+  have hJtail2 : Matrix.vecTail (Matrix.vecTail
+      (![a, b, c, d] : Fin (2 + 2) → Fin (Module.finrank ℝ E))) = ![c, d] := by
+    funext j; fin_cases j <;> rfl
+  simp only [arm2ReadoutCovDerivPair, hJ0, hJ1, hJtail2, hroundtrip]
+  have hPdiff : DifferentiableAt ℝ
+      (euclidPartial (E := E) b
+        (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![c, d])))
+      (toEuclidean (E := E) (extChartAt I x x)) :=
+    euclidPartial_chartPushedRaw_differentiableAt_center (I := I) (M := M) g₀ 0 2 h x b ![] ![c, d]
+  have hQdiff : DifferentiableAt ℝ
+      (covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x b ![] ![c, d])
+      (toEuclidean (E := E) (extChartAt I x x)) :=
+    covDerivLowerOrderTerm_differentiableAt_center (I := I) (M := M) g₀ 0 2 h x b ![] ![c, d]
+  rw [euclidPartial_add_local a hPdiff hQdiff]
+  ring
+
+set_option linter.unusedSectionVars false in
+private lemma euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (m₁ m₂ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :
+    euclidPartial (E := E) m₂
+        (fun y' => euclidPartial (E := E) m₁
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b]))
+          y')
+        (toEuclidean (E := E) (extChartAt I x x)) =
+      partialDeriv (E := E) m₂
+        (partialDeriv (E := E) m₁
+          (scalarOnE (I := I) x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b])))
+        (extChartAt I x x) := by
+  classical
+  set f : M → ℝ := tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b] with hf_def
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) x) :=
+    DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) x
+  have hYmem : (toEuclidean (E := E)) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x (mem_chart_source H x)
+  set gm : M → ℝ := fun p =>
+    partialDeriv (E := E) m₁ (scalarOnE (I := I) x f) (extChartAt I x p) with hgm_def
+  have hinner_eqOn : Set.EqOn
+      (fun y' => euclidPartial (E := E) m₁ (chartPushedRaw I x f) y')
+      (chartPushedRaw I x gm)
+      (chartTargetEuclid (I := I) (M := M) x) := by
+    intro y' hy'
+    rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
+      (I := I) (M := M) x gm hy']
+    show euclidPartial (E := E) m₁ (chartPushedRaw I x f) y' =
+      partialDeriv (E := E) m₁ (scalarOnE (I := I) x f)
+        (extChartAt I x ((extChartAt I x).symm ((toEuclidean (E := E)).symm y')))
+    rw [partialDeriv_scalarOnE_eq_euclidPartial_local f x m₁ hy']
+  have hinner_ev :
+      (fun y' => euclidPartial (E := E) m₁ (chartPushedRaw I x f) y') =ᶠ[𝓝
+        ((toEuclidean (E := E)) (extChartAt I x x))]
+      (chartPushedRaw I x gm) :=
+    Filter.eventuallyEq_of_mem (hopen.mem_nhds hYmem) hinner_eqOn
+  rw [show euclidPartial (E := E) m₂
+        (fun y' => euclidPartial (E := E) m₁ (chartPushedRaw I x f) y')
+        ((toEuclidean (E := E)) (extChartAt I x x)) =
+      euclidPartial (E := E) m₂ (chartPushedRaw I x gm)
+        ((toEuclidean (E := E)) (extChartAt I x x)) from by
+    rw [euclidPartial_def, euclidPartial_def, hinner_ev.fderiv_eq] ]
+  rw [← partialDeriv_scalarOnE_eq_euclidPartial_local gm x m₂ hYmem]
+  have hscalarOnE_gm : scalarOnE (I := I) x gm =ᶠ[𝓝 (extChartAt I x x)]
+      partialDeriv (E := E) m₁ (scalarOnE (I := I) x f) := by
+    have htarget : extChartAt I x x ∈ (extChartAt I x).target :=
+      (extChartAt I x).map_source
+        (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x)
+    have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
+      extChartAt_target_subset_interior_of_boundaryless (I := I) x htarget
+    filter_upwards [isOpen_interior.mem_nhds hint] with z hz
+    have hzt : z ∈ (extChartAt I x).target := interior_subset hz
+    show partialDeriv (E := E) m₁ (scalarOnE (I := I) x f)
+        (extChartAt I x ((extChartAt I x).symm z)) =
+      partialDeriv (E := E) m₁ (scalarOnE (I := I) x f) z
+    rw [(extChartAt I x).right_inv hzt]
+  have hround : extChartAt I x ((extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x)))) =
+      extChartAt I x x := by
+    rw [(toEuclidean (E := E)).symm_apply_apply]
+    have htarget : extChartAt I x x ∈ (extChartAt I x).target :=
+      (extChartAt I x).map_source
+        (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x)
+    rw [(extChartAt I x).right_inv htarget]
+  rw [hround]
+  rw [partialDeriv, partialDeriv]
+  rw [Filter.EventuallyEq.fderiv_eq hscalarOnE_gm]
+
+set_option linter.unusedSectionVars false in
+private lemma realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (a b : Fin (Module.finrank ℝ E)) :
+    realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b =ᶠ[𝓝 (extChartAt I x x)]
+      (fun y => (1 / 2 : ℝ) *
+        (scalarOnE (I := I) x
+            (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![a, b]) y +
+          scalarOnE (I := I) x
+            (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![b, a]) y)) := by
+  classical
+  have hx_src : x ∈ (extChartAt I x).source := by
+    rw [extChartAt_source (I := I)]; exact mem_chart_source H x
+  have htarget : extChartAt I x x ∈ (extChartAt I x).target :=
+    (extChartAt I x).map_source hx_src
+  have htarget_open : IsOpen ((extChartAt I x).target : Set E) :=
+    isOpen_extChartAt_target (I := I) x
+  filter_upwards [htarget_open.mem_nhds htarget] with y hy_tgt
+  have hp : (extChartAt I x).symm y ∈ (chartAt H x).source := by
+    rw [← extChartAt_source (I := I)]
+    exact (extChartAt I x).map_target hy_tgt
+  rw [realizedGramDeriv]
+  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b y hp]
+  rw [scalarOnE_def, scalarOnE_def]
+
+set_option linter.unusedSectionVars false in
+private lemma scalarOnE_contDiffOn_tensorChartComponentRaw
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (scalarOnE (I := I) x
+        (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] Jdx))
+      (extChartAt I x).target := by
+  classical
+  set f : M → ℝ := tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] Jdx with hf_def
+  have hpush : ContDiffOn ℝ ∞ (chartPushedRaw I x f)
+      (chartTargetEuclid (I := I) (M := M) x) :=
+    chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g₀ 0 2 S x ![] Jdx
+  have hcomp : ContDiffOn ℝ ∞ ((chartPushedRaw I x f) ∘ (toEuclidean (E := E)))
+      (extChartAt I x).target := by
+    refine hpush.comp (toEuclidean (E := E)).contDiff.contDiffOn ?_
+    intro z hz
+    refine ⟨z, hz, rfl⟩
+  refine hcomp.congr (fun z hz => ?_)
+  have hzeucl : (toEuclidean (E := E)) z ∈ chartTargetEuclid (I := I) (M := M) x := ⟨z, hz, rfl⟩
+  rw [Function.comp_apply,
+    DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
+      (I := I) (M := M) x f hzeucl]
+  rw [(toEuclidean (E := E)).symm_apply_apply]
+  rw [scalarOnE_def]
+
+set_option linter.unusedSectionVars false in
+private lemma partialDeriv_scalarOnE_tensorChartComponentRaw_differentiableAt
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (m : Fin (Module.finrank ℝ E)) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
+    DifferentiableAt ℝ
+      (partialDeriv (E := E) m
+        (scalarOnE (I := I) x
+          (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] Jdx)))
+      (extChartAt I x x) := by
+  classical
+  set u : E → ℝ := scalarOnE (I := I) x
+    (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] Jdx) with hu_def
+  have hcd : ContDiffOn ℝ ∞ u (extChartAt I x).target :=
+    scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ S x Jdx
+  have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x
+      ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+  have hcd_int : ContDiffOn ℝ ∞ u (interior (extChartAt I x).target) := hcd.mono interior_subset
+  have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ u) (interior (extChartAt I x).target) :=
+    hcd_int.fderiv_of_isOpen isOpen_interior (by rw [ENat.coe_top_add_one])
+  have hpd : ContDiffOn ℝ ∞ (partialDeriv (E := E) m u) (interior (extChartAt I x).target) := by
+    unfold partialDeriv
+    exact hfderiv.clm_apply contDiffOn_const
+  exact (hpd.contDiffAt (isOpen_interior.mem_nhds hint)).differentiableAt (by simp)
+
+set_option linter.unusedSectionVars false in
+private lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (m₁ m₂ a b : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) m₂
+        (partialDeriv (E := E) m₁
+          (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b))
+        (extChartAt I x x) =
+      (1 / 2 : ℝ) * euclidPartial (E := E) m₂
+          (fun y' => euclidPartial (E := E) m₁
+            (chartPushedRaw I x
+              (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![a, b])) y')
+          (toEuclidean (E := E) (extChartAt I x x)) +
+        (1 / 2 : ℝ) * euclidPartial (E := E) m₂
+          (fun y' => euclidPartial (E := E) m₁
+            (chartPushedRaw I x
+              (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![b, a])) y')
+          (toEuclidean (E := E) (extChartAt I x x)) := by
+  classical
+  rw [euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE (I := I) g₀ (T - T') x m₁ m₂ a b]
+  rw [euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE (I := I) g₀ (T - T') x m₁ m₂ b a]
+  set fab : M → ℝ := tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![a, b]
+    with hfab_def
+  set fba : M → ℝ := tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (T - T') x ![] ![b, a]
+    with hfba_def
+  set Pab : E → ℝ := partialDeriv (E := E) m₁ (scalarOnE (I := I) x fab) with hPab_def
+  set Pba : E → ℝ := partialDeriv (E := E) m₁ (scalarOnE (I := I) x fba) with hPba_def
+  have hev := realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x a b
+  have hev1 : partialDeriv (E := E) m₁
+        (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b) =ᶠ[𝓝 (extChartAt I x x)]
+      (fun y => (1 / 2 : ℝ) * (Pab y + Pba y)) := by
+    have hdab : ∀ᶠ y in 𝓝 (extChartAt I x x),
+        DifferentiableAt ℝ (scalarOnE (I := I) x fab) y := by
+      have hcd : ContDiffOn ℝ ∞ (scalarOnE (I := I) x fab) (extChartAt I x).target :=
+        scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ (T - T') x ![a, b]
+      have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
+        extChartAt_target_subset_interior_of_boundaryless (I := I) x
+          ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+      filter_upwards [isOpen_interior.mem_nhds hint] with z hz
+      exact ((hcd.mono interior_subset).contDiffAt
+        (isOpen_interior.mem_nhds hz)).differentiableAt (by simp)
+    have hdba : ∀ᶠ y in 𝓝 (extChartAt I x x),
+        DifferentiableAt ℝ (scalarOnE (I := I) x fba) y := by
+      have hcd : ContDiffOn ℝ ∞ (scalarOnE (I := I) x fba) (extChartAt I x).target :=
+        scalarOnE_contDiffOn_tensorChartComponentRaw (I := I) (M := M) g₀ (T - T') x ![b, a]
+      have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
+        extChartAt_target_subset_interior_of_boundaryless (I := I) x
+          ((extChartAt I x).map_source (by rw [extChartAt_source (I := I)]; exact mem_chart_source H x))
+      filter_upwards [isOpen_interior.mem_nhds hint] with z hz
+      exact ((hcd.mono interior_subset).contDiffAt
+        (isOpen_interior.mem_nhds hz)).differentiableAt (by simp)
+    have hpd_ev : partialDeriv (E := E) m₁
+          (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b) =ᶠ[𝓝 (extChartAt I x x)]
+        partialDeriv (E := E) m₁
+          (fun y => (1 / 2 : ℝ) * (scalarOnE (I := I) x fab y + scalarOnE (I := I) x fba y)) := by
+      filter_upwards [hev.eventuallyEq_nhds] with z hz
+      unfold partialDeriv
+      rw [hz.fderiv_eq]
+    filter_upwards [hpd_ev, hdab, hdba] with z hz hdz_ab hdz_ba
+    rw [hz]
+    rw [partialDeriv_const_mul (1 / 2 : ℝ)
+        (fun y => scalarOnE (I := I) x fab y + scalarOnE (I := I) x fba y)
+        (hdz_ab.add hdz_ba)]
+    rw [partialDeriv_add (scalarOnE (I := I) x fab) (scalarOnE (I := I) x fba) hdz_ab hdz_ba]
+  have hfinal : partialDeriv (E := E) m₂
+        (partialDeriv (E := E) m₁
+          (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b))
+        (extChartAt I x x) =
+      partialDeriv (E := E) m₂ (fun y => (1 / 2 : ℝ) * (Pab y + Pba y)) (extChartAt I x x) := by
+    show fderiv ℝ
+        (partialDeriv (E := E) m₁
+          (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b))
+        (extChartAt I x x) ((chartModelBasis E) m₂) =
+      fderiv ℝ (fun y => (1 / 2 : ℝ) * (Pab y + Pba y)) (extChartAt I x x) ((chartModelBasis E) m₂)
+    rw [hev1.fderiv_eq]
+  rw [hfinal]
+  have hPab_diff : DifferentiableAt ℝ Pab (extChartAt I x x) :=
+    partialDeriv_scalarOnE_tensorChartComponentRaw_differentiableAt (I := I) (M := M) g₀
+      (T - T') x m₁ ![a, b]
+  have hPba_diff : DifferentiableAt ℝ Pba (extChartAt I x x) :=
+    partialDeriv_scalarOnE_tensorChartComponentRaw_differentiableAt (I := I) (M := M) g₀
+      (T - T') x m₁ ![b, a]
+  rw [partialDeriv_const_mul (1 / 2 : ℝ) (fun y => Pab y + Pba y)
+      (hPab_diff.add hPba_diff)]
+  rw [partialDeriv_add Pab Pba hPab_diff hPba_diff]
+  ring
 
 set_option linter.unusedSectionVars false in
 noncomputable def arm2ChartReadoutResidual (g₀ : SmoothRiemannianMetric I M)
@@ -5106,6 +5615,96 @@ noncomputable def arm2ChartReadoutResidual (g₀ : SmoothRiemannianMetric I M)
     (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x k₁ l *
         arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![k, i, l, k₁]
+
+set_option linter.unusedSectionVars false in
+private lemma eP2_swap
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b c d : Fin (Module.finrank ℝ E)) :
+    euclidPartial (E := E) a
+        (fun y' => euclidPartial (E := E) b
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![c, d]))
+          y')
+        (toEuclidean (E := E) (extChartAt I x x)) =
+      euclidPartial (E := E) b
+        (fun y' => euclidPartial (E := E) a
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![c, d]))
+          y')
+        (toEuclidean (E := E) (extChartAt I x x)) := by
+  classical
+  set u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![c, d])
+    with hu_def
+  set Y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
+    toEuclidean (E := E) (extChartAt I x x) with hY_def
+  have hmem : Y ∈ chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x (mem_chart_source H x)
+  have hopen : IsOpen (chartTargetEuclid (I := I) (M := M) x) :=
+    DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) x
+  have hcd : ContDiffOn ℝ ∞ u (chartTargetEuclid (I := I) (M := M) x) :=
+    chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g₀ 0 2 S x ![] ![c, d]
+  have hcdAt : ContDiffAt ℝ ∞ u Y :=
+    hcd.contDiffAt (hopen.mem_nhds hmem)
+  have hsymm2 : IsSymmSndFDerivAt ℝ u Y := by
+    refine ContDiffAt.isSymmSndFDerivAt hcdAt ?_
+    rw [minSmoothness_of_isRCLikeNormedField]
+    decide
+  have hg_diff : DifferentiableAt ℝ (fderiv ℝ u) Y := by
+    have hcd_int : ContDiffOn ℝ ∞ u (chartTargetEuclid (I := I) (M := M) x) := hcd
+    have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ u) (chartTargetEuclid (I := I) (M := M) x) :=
+      hcd_int.fderiv_of_isOpen hopen (by rw [ENat.coe_top_add_one])
+    exact (hfderiv.contDiffAt (hopen.mem_nhds hmem)).differentiableAt (by simp)
+  have hkey : ∀ r t : Fin (Module.finrank ℝ E),
+      euclidPartial (E := E) r
+          (fun y' => euclidPartial (E := E) t u y') Y =
+        (fderiv ℝ (fderiv ℝ u) Y (EuclideanSpace.single r 1))
+          (EuclideanSpace.single t 1) := by
+    intro r t
+    rw [euclidPartial_def]
+    set L : (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) →L[ℝ] ℝ) →L[ℝ] ℝ :=
+      ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single t 1) with hL
+    have hcomp_eq : (fun z => euclidPartial (E := E) t u z) =
+        L ∘ (fderiv ℝ u) := by
+      funext z; rw [euclidPartial_def]; rfl
+    rw [hcomp_eq, fderiv_comp Y L.differentiableAt hg_diff, L.fderiv]
+    rfl
+  rw [hkey a b, hkey b a]
+  exact (hsymm2 _ _).symm
+
+set_option linter.unusedSectionVars false in
+theorem arm2_principalSymbol_chartSlope_eP2_identity
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+        (extChartAt I x x) s =
+      (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x k₁ l *
+            ((fun a b c d => euclidPartial (E := E) a
+                (fun y' => euclidPartial (E := E) b
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+                    (T - T') x ![] ![c, d])) y')
+                (toEuclidean (E := E) (extChartAt I x x))) l k i k₁ +
+              (fun a b c d => euclidPartial (E := E) a
+                (fun y' => euclidPartial (E := E) b
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+                    (T - T') x ![] ![c, d])) y')
+                (toEuclidean (E := E) (extChartAt I x x))) l i k k₁ -
+              (fun a b c d => euclidPartial (E := E) a
+                (fun y' => euclidPartial (E := E) b
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+                    (T - T') x ![] ![c, d])) y')
+                (toEuclidean (E := E) (extChartAt I x x))) l k₁ k i) -
+        (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x k₁ l *
+            (fun a b c d => euclidPartial (E := E) a
+                (fun y' => euclidPartial (E := E) b
+                  (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+                    (T - T') x ![] ![c, d])) y')
+                (toEuclidean (E := E) (extChartAt I x x))) k i l k₁ := by
+  sorry
 
 set_option linter.unusedSectionVars false in
 theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
@@ -5145,7 +5744,152 @@ theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
       chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
           (extChartAt I x x) s +
         arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
-  sorry
+  classical
+  set W : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW_def
+  set g₁ : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hg₁_def
+  set fW : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => TangentSpace I x) ℝ :=
+    Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+        W.toSection x) (unitTensor (I := I) (M := M) x)) with hfW_def
+  have hfW_eq : ∀ v : Fin 4 → TangentSpace I x,
+      unitModel (I := I) (M := M) g₀ 4 W x v = fW v := fun v => rfl
+  set bch : Fin (Module.finrank ℝ E) → TangentSpace I x := fun t => chartModelBasis E t with hbch
+  have hbk : (chartModelBasis E k : TangentSpace I x) = bch k := rfl
+  have hbi : (chartModelBasis E i : TangentSpace I x) = bch i := rfl
+  set covec : Fin (Module.finrank ℝ E) → TangentSpace I x := fun k₁ =>
+    cometricLmodel (I := I) g₁ x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k₁)) with hcovec
+  have hreadout : ∀ a b c d : Fin (Module.finrank ℝ E),
+      fW ![bch a, bch b, bch c, bch d] =
+        euclidPartial (E := E) a
+            (fun y' => euclidPartial (E := E) b
+              (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+                (T - T') x ![] ![c, d])) y')
+            (toEuclidean (E := E) (extChartAt I x x))
+          + arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![a, b, c, d] := by
+    intro a b c d
+    rw [← hfW_eq]
+    exact unitModel4_basisChart_readout_split (I := I) (M := M) g₀ (T - T') x a b c d
+  have h03 : (0 : Fin 4) ≠ 3 := by decide
+  have h01 : (0 : Fin 4) ≠ 1 := by decide
+  have h23 : (2 : Fin 4) ≠ 3 := by decide
+  set F1 : E →L[ℝ] E →L[ℝ] ℝ :=
+    unitModel4SlotBilin (E := E) fW 0 3 h03 ![0, bch k, bch i, 0] with hF1
+  set F2 : E →L[ℝ] E →L[ℝ] ℝ :=
+    unitModel4SlotBilin (E := E) fW 0 3 h03 ![0, bch i, bch k, 0] with hF2
+  set F3 : E →L[ℝ] E →L[ℝ] ℝ :=
+    unitModel4SlotBilin (E := E) fW 0 1 h01 ![0, 0, bch k, bch i] with hF3
+  set F4 : E →L[ℝ] E →L[ℝ] ℝ :=
+    unitModel4SlotBilin (E := E) fW 2 3 h23 ![bch k, bch i, 0, 0] with hF4
+  have hF1app : ∀ c v : TangentSpace I x, F1 c v = fW ![c, bch k, bch i, v] := by
+    intro c v
+    rw [hF1, unitModel4SlotBilin_apply]
+    congr 1; funext j; fin_cases j <;> simp [Function.update]
+  have hF2app : ∀ c v : TangentSpace I x, F2 c v = fW ![c, bch i, bch k, v] := by
+    intro c v
+    rw [hF2, unitModel4SlotBilin_apply]
+    congr 1; funext j; fin_cases j <;> simp [Function.update]
+  have hF3app : ∀ c v : TangentSpace I x, F3 c v = fW ![c, v, bch k, bch i] := by
+    intro c v
+    rw [hF3, unitModel4SlotBilin_apply]
+    congr 1; funext j; fin_cases j <;> simp [Function.update]
+  have hF4app : ∀ c v : TangentSpace I x, F4 c v = fW ![bch k, bch i, c, v] := by
+    intro c v
+    rw [hF4, unitModel4SlotBilin_apply]
+    congr 1; funext j; fin_cases j <;> simp [Function.update]
+  have htraceFirst := cometricFinBasisTrace_eq_chartInvGram_bilin (I := I) g₁ x (F1 + F2 - F3)
+  have htraceT4 := cometricFinBasisTrace_eq_chartInvGram_bilin (I := I) g₁ x F4
+  have hLHS_first : ∑ k₁ : Fin (Module.finrank ℝ E),
+        (unitModel (I := I) (M := M) g₀ 4 W x
+            (Fin.cons (covec k₁)
+              ![bch k, bch i, (Module.finBasis ℝ E) k₁])
+          + unitModel (I := I) (M := M) g₀ 4 W x
+              (Fin.cons (covec k₁)
+                ![bch i, bch k, (Module.finBasis ℝ E) k₁])
+          - unitModel (I := I) (M := M) g₀ 4 W x
+              (Fin.cons (covec k₁)
+                (Fin.cons ((Module.finBasis ℝ E) k₁) ![bch k, bch i]))) =
+      ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x k₁ l •
+          (fW ![bch l, bch k, bch i, bch k₁] + fW ![bch l, bch i, bch k, bch k₁]
+            - fW ![bch l, bch k₁, bch k, bch i]) := by
+    have hper : ∀ k₁ : Fin (Module.finrank ℝ E),
+        (unitModel (I := I) (M := M) g₀ 4 W x
+              (Fin.cons (covec k₁) ![bch k, bch i, (Module.finBasis ℝ E) k₁])
+            + unitModel (I := I) (M := M) g₀ 4 W x
+                (Fin.cons (covec k₁) ![bch i, bch k, (Module.finBasis ℝ E) k₁])
+            - unitModel (I := I) (M := M) g₀ 4 W x
+                (Fin.cons (covec k₁)
+                  (Fin.cons ((Module.finBasis ℝ E) k₁) ![bch k, bch i]))) =
+          (F1 + F2 - F3) (covec k₁) ((Module.finBasis ℝ E) k₁) := by
+      intro k₁
+      simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply]
+      rw [hF1app, hF2app, hF3app, hfW_eq, hfW_eq, hfW_eq]
+      congr 1
+    rw [Finset.sum_congr rfl (fun k₁ _ => hper k₁)]
+    simp only [hcovec]
+    rw [htraceFirst]
+    refine Finset.sum_congr rfl (fun k₁ _ => Finset.sum_congr rfl (fun l _ => ?_))
+    simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply]
+    rw [hF1app, hF2app, hF3app]
+  have hLHS_T4 : ∑ k₁ : Fin (Module.finrank ℝ E),
+        unitModel (I := I) (M := M) g₀ 4 W x
+          ![bch k, bch i, covec k₁, (Module.finBasis ℝ E) k₁] =
+      ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x k₁ l • fW ![bch k, bch i, bch l, bch k₁] := by
+    have hper : ∀ k₁ : Fin (Module.finrank ℝ E),
+        unitModel (I := I) (M := M) g₀ 4 W x
+            ![bch k, bch i, covec k₁, (Module.finBasis ℝ E) k₁] =
+          F4 (covec k₁) ((Module.finBasis ℝ E) k₁) := by
+      intro k₁
+      rw [hF4app, hfW_eq]
+    rw [Finset.sum_congr rfl (fun k₁ _ => hper k₁)]
+    simp only [hcovec]
+    rw [htraceT4]
+    refine Finset.sum_congr rfl (fun k₁ _ => Finset.sum_congr rfl (fun l _ => ?_))
+    rw [hF4app]
+  rw [hLHS_first, hLHS_T4]
+  simp only [hreadout]
+  set eP2 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b c d => euclidPartial (E := E) a
+        (fun y' => euclidPartial (E := E) b
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (T - T') x ![] ![c, d])) y')
+        (toEuclidean (E := E) (extChartAt I x x)) with heP2
+  set Rd : (Fin (2 + 2) → Fin (Module.finrank ℝ E)) → ℝ :=
+    fun Jdx => arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x Jdx with hRd
+  set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b => chartInvGramMatrix (I := I) g₁ x x a b with hC
+  have hresid : arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s =
+        (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          C k₁ l * (Rd ![l, k, i, k₁] + Rd ![l, i, k, k₁] - Rd ![l, k₁, k, i]) -
+        (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          C k₁ l * Rd ![k, i, l, k₁] := rfl
+  have hprin : chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+        (extChartAt I x x) s =
+      (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          C k₁ l * (eP2 l k i k₁ + eP2 l i k k₁ - eP2 l k₁ k i) -
+        (1 / 2 : ℝ) * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          C k₁ l * eP2 k i l k₁ :=
+    arm2_principalSymbol_chartSlope_eP2_identity (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s x i k
+  rw [hresid, hprin]
+  simp only [hC, smul_eq_mul]
+  have key : ∀ (cf : ℝ) (G : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ),
+      cf * ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), G k₁ l =
+        ∑ k₁ : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), cf * G k₁ l := by
+    intro cf G
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun k₁ _ => Finset.mul_sum _ _ _)
+  simp only [neg_mul, key]
+  rw [← Finset.sum_add_distrib]
+  rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun k₁ _ => ?_)
+  rw [← Finset.sum_add_distrib]
+  rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  ring
 
 set_option linter.unusedSectionVars false in
 theorem arm2_principalSymbol_chart_match
