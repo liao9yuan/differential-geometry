@@ -3726,78 +3726,6 @@ private lemma order0RHS_chart_eq
   · exact order0RicciArm_basis_eq (I := I) (M := M) g₀ T T'
       (realizedFam (I := I) g₀ T T' hδ hδ' s) x k i
 
-theorem chartSlopeOrder0Contribution_eq_curvatureArm_component
-    (g₀ : SmoothRiemannianMetric I M)
-    (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
-    (x : M) (i k : Fin (Module.finrank ℝ E)) :
-    chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-          (extChartAt I x x) s =
-      unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
-            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
-            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
-  sorry
-
-theorem chartSlopePrincipalRemainder_eq_principalKoszul_arm_component
-    (g₀ : SmoothRiemannianMetric I M)
-    (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
-    (x : M) (i k : Fin (Module.finrank ℝ E)) :
-    chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-          (extChartAt I x x) s +
-        chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-          (extChartAt I x x) s =
-      unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 3 2
-            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
-            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] +
-        unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2
-            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
-  sorry
-
-theorem chartSlopeSecondOrderContribution_eq_principalKoszul_arm_component
-    (g₀ : SmoothRiemannianMetric I M)
-    (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
-    (x : M) (i k : Fin (Module.finrank ℝ E)) :
-    chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-          (extChartAt I x x) s =
-      unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 3 2
-            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
-            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] +
-        unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2
-            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] := by
-  classical
-  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
-    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
-  rw [chartSlopeSecondOrderContribution_eq_principal_add_remainder (I := I) g₀ T T'
-    hδ_lt hδ hδ'_lt hδ' x i k hy s]
-  exact chartSlopePrincipalRemainder_eq_principalKoszul_arm_component (I := I) g₀ T T'
-    hδ_lt hδ hδ'_lt hδ' s hs x i k
-
 theorem chartSlopeContributions_eq_threeArm_component
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -3821,14 +3749,8 @@ theorem chartSlopeContributions_eq_threeArm_component
           + appCc (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] := by
-  classical
-  rw [chartSlopeSecondOrderContribution_eq_principalKoszul_arm_component
-      (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s hs x i k,
-    chartSlopeOrder0Contribution_eq_curvatureArm_component
-      (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s hs x i k,
-    unitModel_add2_apply, unitModel_add2_apply]
-  ring
+          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  sorry
 
 theorem chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component
     (g₀ : SmoothRiemannianMetric I M)
