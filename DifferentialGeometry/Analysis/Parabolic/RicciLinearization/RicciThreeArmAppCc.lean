@@ -2211,6 +2211,30 @@ theorem riemannianFiberNormSq_traceHessianFib_le
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
+    (hB : 0 ≤ B) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w +
+            ccTensorBilinSymm (I := I) g₀ P x v w)
+        (x : M),
+        (∑ j ∈ Finset.range 3,
+            (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
+              Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+            ‖(iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x‖)) ≤ B →
+          riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              (show TensorRSSpace 3 2 I x from
+                linearizedRicciArm1Fib (I := I) g₀ g₁ x) ≤ Λ :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_rfns_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
     (hB : 0 ≤ B) :
@@ -2229,8 +2253,48 @@ theorem exists_rfns_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
               (show TensorRSSpace 3 2 I x from
                 linearizedRicciArm1Fib (I := I) g₀
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x) ≤ Λ :=
-  sorry
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x) ≤ Λ := by
+  classical
+  obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
+    exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+  refine ⟨Λ, hΛ_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    abs_convex_smallConstant_lt_one hδ_lt hδ'_lt hs
+  set g₁ : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hg₁
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w +
+        ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w := by
+    intro y v w
+    rw [hg₁, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hs_mem y v w]
+  have hδs_raw : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
+      (|1 - s| * δ' + |s| * δ) :=
+    convexPerturbation_gFibreOpBound_abs (I := I) g₀ T T' hδ hδ' s
+  obtain ⟨hs0, hs1⟩ := hs
+  have habs_eq : |1 - s| * δ' + |s| * δ = (1 - s) * δ' + s * δ := by
+    rw [abs_of_nonneg (by linarith : (0:ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+  have hsmall_le : (1 - s) * δ' + s * δ ≤ δ₁ := by
+    have h1 : (1 - s) * δ' ≤ (1 - s) * δ₀ :=
+      mul_le_mul_of_nonneg_left hδ'_le (by linarith)
+    have h2 : s * δ ≤ s * δ₀ :=
+      mul_le_mul_of_nonneg_left hδ_le hs0
+    have hδ₀_le : δ₀ ≤ δ₁ := le_max_left _ _
+    nlinarith [h1, h2, hδ₀_le]
+  have hδs : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) δ₁ := by
+    intro y v w
+    refine le_trans (hδs_raw y v w) ?_
+    have hsv : 0 ≤ Real.sqrt (g₀.inner y v v) := Real.sqrt_nonneg _
+    have hsw : 0 ≤ Real.sqrt (g₀.inner y w w) := Real.sqrt_nonneg _
+    have hprod : 0 ≤ Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) :=
+      mul_nonneg hsv hsw
+    have hle' : |1 - s| * δ' + |s| * δ ≤ δ₁ := by rw [habs_eq]; exact hsmall_le
+    nlinarith [hle', hprod]
+  exact hΛ g₁ (convexPerturbation (I := I) g₀ T T' s) (le_of_eq hδ₁_def) hδs htie x henv
 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -3081,6 +3145,298 @@ theorem chartRicciTraceChristoffelSlope_eq_secondOrder_add_order0
   rw [hsplit j j k, hsplit k j j]
   ring
 
+def chartSlopePrincipalSymbolContribution (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) (y : E) (s₀ : ℝ) : ℝ :=
+  (1 / 2 : ℝ) * ∑ j : Fin (Module.finrank ℝ E),
+    ∑ l : Fin (Module.finrank ℝ E),
+      chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+        (partialDeriv (E := E) j
+            (partialDeriv (E := E) i
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l k)) y +
+         partialDeriv (E := E) j
+            (partialDeriv (E := E) k
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+         partialDeriv (E := E) j
+            (partialDeriv (E := E) l
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k)) y) -
+  (1 / 2 : ℝ) * ∑ j : Fin (Module.finrank ℝ E),
+    ∑ l : Fin (Module.finrank ℝ E),
+      chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+        (partialDeriv (E := E) k
+            (partialDeriv (E := E) i
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j)) y +
+         partialDeriv (E := E) k
+            (partialDeriv (E := E) j
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+         partialDeriv (E := E) k
+            (partialDeriv (E := E) l
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j)) y)
+
+def chartSlopeFirstOrderRemainderContribution (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) (y : E) (s₀ : ℝ) : ℝ :=
+  (1 / 2 : ℝ) * ∑ j : Fin (Module.finrank ℝ E),
+    ∑ l : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) j
+          (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+        (partialDeriv (E := E) i
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l k) y +
+         partialDeriv (E := E) k
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i) y -
+         partialDeriv (E := E) l
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k) y) -
+  (1 / 2 : ℝ) * ∑ j : Fin (Module.finrank ℝ E),
+    ∑ l : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) k
+          (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+        (partialDeriv (E := E) i
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j) y +
+         partialDeriv (E := E) j
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i) y -
+         partialDeriv (E := E) l
+            (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j) y)
+
+private lemma partialDeriv_realizedLinearizedChristoffelPrincipal
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (a b j d : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ} :
+    partialDeriv (E := E) d
+        (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x a b j y' s₀) y =
+      (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) d
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) a
+                (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l b) y +
+             partialDeriv (E := E) b
+                (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l a) y -
+             partialDeriv (E := E) l
+                (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b) y) +
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) d
+                (partialDeriv (E := E) a
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l b)) y +
+             partialDeriv (E := E) d
+                (partialDeriv (E := E) b
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l a)) y -
+             partialDeriv (E := E) d
+                (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b)) y)) := by
+  classical
+  set S : Fin (Module.finrank ℝ E) → E → ℝ := fun l y' =>
+    partialDeriv (E := E) a (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l b) y' +
+      partialDeriv (E := E) b (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l a) y' -
+      partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b) y'
+    with hS
+  set G : Fin (Module.finrank ℝ E) → E → ℝ := fun l =>
+    chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l with hG
+  have hS_diff : ∀ l : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (S l) y := by
+    intro l
+    exact ((partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x a l b hy).add
+        (partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x b l a hy)).sub
+      (partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x l a b hy)
+  have hG_diff : ∀ l : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (G l) y :=
+    fun l => chartInvGramOnE_differentiableAt_interior (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l hy
+  have hsummand_diff : ∀ l : Fin (Module.finrank ℝ E),
+      DifferentiableAt ℝ (fun y' => G l y' * S l y') y :=
+    fun l => (hG_diff l).mul (hS_diff l)
+  have hrewrite : (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x a b j y' s₀) =
+      fun y' => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E), G l y' * S l y' := by
+    funext y'
+    rw [realizedLinearizedChristoffelPrincipal]
+  rw [hrewrite]
+  rw [partialDeriv_const_mul (1 / 2 : ℝ)
+        (fun y' => ∑ l : Fin (Module.finrank ℝ E), G l y' * S l y')
+        (DifferentiableAt.fun_sum (fun l _ => hsummand_diff l))]
+  congr 1
+  rw [partialDeriv_sum Finset.univ (fun l y' => G l y' * S l y')
+        (fun l _ => hsummand_diff l)]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [partialDeriv_mul (G l) (S l) (hG_diff l) (hS_diff l)]
+  have hSderiv : partialDeriv (E := E) d (S l) y =
+      partialDeriv (E := E) d
+          (partialDeriv (E := E) a (realizedGramDeriv (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x l b)) y +
+        partialDeriv (E := E) d
+          (partialDeriv (E := E) b (realizedGramDeriv (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x l a)) y -
+        partialDeriv (E := E) d
+          (partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x a b)) y := by
+    have h1 := partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x a l b hy
+    have h2 := partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x b l a hy
+    have h3 := partialDeriv_realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x l a b hy
+    rw [hS]
+    rw [partialDeriv_sub (E := E)
+          (fun y' => partialDeriv (E := E) a
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l b) y' +
+            partialDeriv (E := E) b
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l a) y')
+          (partialDeriv (E := E) l
+              (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b)) (h1.add h2) h3]
+    rw [partialDeriv_add (E := E)
+          (partialDeriv (E := E) a (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l b))
+          (partialDeriv (E := E) b (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l a))
+          h1 h2]
+  rw [hSderiv, hS, hG]
+
+theorem chartSlopeSecondOrderContribution_eq_principal_add_remainder
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I x).target) (s₀ : ℝ) :
+    chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y s₀ =
+      chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y s₀ +
+        chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k y s₀ := by
+  classical
+  rw [chartSlopeSecondOrderContribution]
+  have hexpand : ∀ j : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) j
+          (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x i k j y' s₀) y -
+        partialDeriv (E := E) k
+          (fun y' => realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+            hδ_lt hδ hδ'_lt hδ' x i j j y' s₀) y =
+      ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) j
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) i (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l k) y +
+             partialDeriv (E := E) k (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l i) y -
+             partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x i k) y) +
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) j (partialDeriv (E := E) i
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l k)) y +
+             partialDeriv (E := E) j (partialDeriv (E := E) k
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+             partialDeriv (E := E) j (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k)) y))) -
+      ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) k
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) i (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l j) y +
+             partialDeriv (E := E) j (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l i) y -
+             partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x i j) y) +
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) k (partialDeriv (E := E) i
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j)) y +
+             partialDeriv (E := E) k (partialDeriv (E := E) j
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+             partialDeriv (E := E) k (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j)) y))) := by
+    intro j
+    rw [partialDeriv_realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x i k j j hy,
+      partialDeriv_realizedLinearizedChristoffelPrincipal (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x i j j k hy]
+  rw [Finset.sum_congr rfl (fun j _ => hexpand j)]
+  have hsplit : ∀ j : Fin (Module.finrank ℝ E),
+      ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) j
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) i (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l k) y +
+             partialDeriv (E := E) k (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l i) y -
+             partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x i k) y) +
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) j (partialDeriv (E := E) i
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l k)) y +
+             partialDeriv (E := E) j (partialDeriv (E := E) k
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+             partialDeriv (E := E) j (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k)) y))) -
+      ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) k
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) i (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l j) y +
+             partialDeriv (E := E) j (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l i) y -
+             partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x i j) y) +
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) k (partialDeriv (E := E) i
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j)) y +
+             partialDeriv (E := E) k (partialDeriv (E := E) j
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+             partialDeriv (E := E) k (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j)) y))) =
+      ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) j (partialDeriv (E := E) i
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l k)) y +
+             partialDeriv (E := E) j (partialDeriv (E := E) k
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+             partialDeriv (E := E) j (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k)) y) -
+        (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l y *
+            (partialDeriv (E := E) k (partialDeriv (E := E) i
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l j)) y +
+             partialDeriv (E := E) k (partialDeriv (E := E) j
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x l i)) y -
+             partialDeriv (E := E) k (partialDeriv (E := E) l
+                  (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i j)) y)) +
+      ((1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+          partialDeriv (E := E) j
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) i (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l k) y +
+             partialDeriv (E := E) k (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l i) y -
+             partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x i k) y) -
+        (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+          partialDeriv (E := E) k
+            (chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l) y *
+            (partialDeriv (E := E) i (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l j) y +
+             partialDeriv (E := E) j (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x l i) y -
+             partialDeriv (E := E) l (realizedGramDeriv (I := I) g₀ T T'
+                hδ_lt hδ hδ'_lt hδ' x i j) y)) := by
+    intro j
+    rw [Finset.sum_add_distrib, Finset.sum_add_distrib, mul_add, mul_add]
+    ring
+  rw [Finset.sum_congr rfl (fun j _ => hsplit j)]
+  rw [Finset.sum_add_distrib]
+  congr 1
+  · rw [chartSlopePrincipalSymbolContribution]
+    rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
+  · rw [chartSlopeFirstOrderRemainderContribution]
+    rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
+
 theorem chartSlopeOrder0Contribution_eq_curvatureArm_component
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -3096,6 +3452,31 @@ theorem chartSlopeOrder0Contribution_eq_curvatureArm_component
         (appCc (I := I) (M := M) g₀ 2 2
             (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  sorry
+
+theorem chartSlopePrincipalRemainder_eq_principalKoszul_arm_component
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 3 2
+            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] +
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
           ![(chartModelBasis E) k, (chartModelBasis E) i] :=
   sorry
 
@@ -3119,8 +3500,14 @@ theorem chartSlopeSecondOrderContribution_eq_principalKoszul_arm_component
           (appCc (I := I) (M := M) g₀ 4 2
             (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-          ![(chartModelBasis E) k, (chartModelBasis E) i] :=
-  sorry
+          ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+  classical
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  rw [chartSlopeSecondOrderContribution_eq_principal_add_remainder (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x i k hy s]
+  exact chartSlopePrincipalRemainder_eq_principalKoszul_arm_component (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' s hs x i k
 
 theorem chartSlopeContributions_eq_threeArm_component
     (g₀ : SmoothRiemannianMetric I M)

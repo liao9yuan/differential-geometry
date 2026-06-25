@@ -534,6 +534,174 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
   exact h3
 
 set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
+      (T : SmoothCcTensor g₀ 0 2)
+      (h : ∀ y v w, g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (x : M) (v w : TangentSpace I x),
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w)
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w)) ≤
+        C * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+            Tensor0SBundle.TensorRSSpace 0 3 I x)‖ *
+          Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+  classical
+  letI instTens : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  have hceil0 : 0 < 1 - δ₀ := by linarith
+  refine ⟨(1 / (1 - δ₀)) * (3 / 2), by positivity, ?_⟩
+  intro g₁ T h δ hδ hδ0 hbound x v w
+  have hcoeff : 0 < 1 - δ := by linarith
+  have hg₁ : ∀ (b : M) (u₁ u₂ : TangentSpace I b),
+      g₁.inner b u₁ u₂ = g₀.inner b u₁ u₂ + ccTensorBilinSymm (I := I) g₀ T b u₁ u₂ :=
+    fun b u₁ u₂ => h b u₁ u₂
+  set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) x w).choose with hX_def
+  set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) x v).choose with hY_def
+  have hXx : X x = w := (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) x w).choose_spec
+  have hYx : Y x = v := (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) x v).choose_spec
+  set u : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x v w with hu_def
+  have hu_eq : PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (X x) = u := by
+    rw [hXx, hYx]
+  set θ : Tensor0SSpace 1 I x := koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
+    with hθ_def
+  have hu_sharp : u = inverseMetricSharpFib (I := I) g₁ x θ := by
+    rw [← hu_eq, hθ_def]
+    exact connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ X Y x
+  set p : TangentSpace I x := inverseMetricSharpFib (I := I) g₀ x θ with hp_def
+  have hθ_flat : θ = g0FlatCLM (I := I) g₀ x p := by
+    rw [hp_def, g0FlatCLM_inverseMetricSharpFib (I := I) g₀ x θ]
+  set Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) x p).choose with hZ_def
+  have hZx : Z x = p := (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
+      (F := E) (V := (TangentSpace I : M → Type _)) x p).choose_spec
+  set Nv : ℝ := Real.sqrt (g₀.inner x v v) with hNv_def
+  set Nw : ℝ := Real.sqrt (g₀.inner x w w) with hNw_def
+  set Np : ℝ := Real.sqrt (g₀.inner x p p) with hNp_def
+  set Gnorm : ℝ := ‖((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hGnorm_def
+  have hNv_nn : 0 ≤ Nv := Real.sqrt_nonneg _
+  have hNw_nn : 0 ≤ Nw := Real.sqrt_nonneg _
+  have hNp_nn : 0 ≤ Np := Real.sqrt_nonneg _
+  have hGnorm_nn : 0 ≤ Gnorm := norm_nonneg _
+  have hpp_eq : g₀.inner x p p = g₁.inner x u (Z x) := by
+    have h1 : g₀.inner x p p =
+        cotangentToDualLinear (I := I) θ p := by
+      rw [hp_def, inverseMetricSharpFib_inner (I := I) g₀ x θ p]
+    rw [h1, cotangentToDualLinear_apply]
+    rw [show cotangentToDual (I := I) θ p = cotangentToDual (I := I) θ (Z x) from by
+      rw [hZx]]
+    rw [hθ_def]
+    rw [koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ X Y x (Z x)]
+    rw [hu_eq]
+  have hkoszul : 2 * g₁.inner x u (Z x) =
+      covGrad3Eval (I := I) (M := M) g₀ T X Y Z x
+        + covGrad3Eval (I := I) (M := M) g₀ T Y X Z x
+        - covGrad3Eval (I := I) (M := M) g₀ T Z X Y x := by
+    have h := connDiff_inner_eq_half_covGrad3Eval (I := I) (M := M) g₀ g₁ T hg₁ X Y Z x
+    rw [hu_eq] at h
+    exact h
+  have hbd1 := abs_covGrad3Eval_le (I := I) (M := M) g₀ T X Y Z x
+  have hbd2 := abs_covGrad3Eval_le (I := I) (M := M) g₀ T Y X Z x
+  have hbd3 := abs_covGrad3Eval_le (I := I) (M := M) g₀ T Z X Y x
+  rw [hXx, hYx, hZx, ← hGnorm_def, ← hNv_def, ← hNw_def, ← hNp_def] at hbd1 hbd2 hbd3
+  have htriple : |2 * g₀.inner x p p| ≤ 3 * Gnorm * Nv * Nw * Np := by
+    rw [hpp_eq, hkoszul]
+    have hsum : |covGrad3Eval (I := I) (M := M) g₀ T X Y Z x
+          + covGrad3Eval (I := I) (M := M) g₀ T Y X Z x
+          - covGrad3Eval (I := I) (M := M) g₀ T Z X Y x| ≤
+        |covGrad3Eval (I := I) (M := M) g₀ T X Y Z x|
+          + |covGrad3Eval (I := I) (M := M) g₀ T Y X Z x|
+          + |covGrad3Eval (I := I) (M := M) g₀ T Z X Y x| := by
+      have ht1 := abs_sub (covGrad3Eval (I := I) (M := M) g₀ T X Y Z x
+          + covGrad3Eval (I := I) (M := M) g₀ T Y X Z x)
+        (covGrad3Eval (I := I) (M := M) g₀ T Z X Y x)
+      have ht2 := abs_add_le (covGrad3Eval (I := I) (M := M) g₀ T X Y Z x)
+        (covGrad3Eval (I := I) (M := M) g₀ T Y X Z x)
+      linarith [ht1, ht2]
+    refine hsum.trans ?_
+    nlinarith [hbd1, hbd2, hbd3, hGnorm_nn, hNv_nn, hNw_nn, hNp_nn]
+  have hNp_le : Np ≤ (3 / 2) * Gnorm * Nv * Nw := by
+    have hpp_nn : 0 ≤ g₀.inner x p p := metric_inner_self_nonneg (I := I) (M := M) g₀ x p
+    have hNp_sq : Np ^ 2 = g₀.inner x p p := by
+      rw [hNp_def, Real.sq_sqrt hpp_nn]
+    have htriple' : 2 * g₀.inner x p p ≤ 3 * Gnorm * Nv * Nw * Np := by
+      have := (abs_le.mp htriple).2
+      linarith [this]
+    have hK_nn : 0 ≤ (3 / 2) * Gnorm * Nv * Nw :=
+      mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hGnorm_nn) hNv_nn) hNw_nn
+    nlinarith [htriple', hNp_sq, hNp_nn, hK_nn]
+  have hneumann : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * Np := by
+    have hsfib := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
+      (I := I) (M := M) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
+      (by linarith : δ < 1) hδ0 hbound x p
+    rw [← hNp_def] at hsfib
+    have huu : g₀.inner x u u =
+        g₀.inner x (inverseMetricSharpFib (I := I) g₁ x
+            (g0FlatCLM (I := I) g₀ x p))
+          (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x p)) := by
+      rw [hu_sharp, ← hθ_flat]
+    rw [huu]
+    exact hsfib
+  have hsymmnorm := norm_covGrad_symmS_le (I := I) (M := M) g₀ T x
+  rw [← hGnorm_def] at hsymmnorm
+  have hiter_norm : ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ =
+      ‖((covGrad (I := I) (M := M) g₀ 0 2 T).toSection x :
+        Tensor0SBundle.TensorRSSpace 0 3 I x)‖ := by
+    have hiter : iteratedCovGrad (I := I) g₀ 0 2 1 T =
+        covGrad (I := I) (M := M) g₀ 0 2 T := by
+      rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
+    rw [hiter]
+  rw [hiter_norm]
+  set Gt : ℝ := ‖((covGrad (I := I) (M := M) g₀ 0 2 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hGt_def
+  have hGt_nn : 0 ≤ Gt := norm_nonneg _
+  have hGle : Gnorm ≤ Gt := hsymmnorm
+  have hinv_le : 1 / (1 - δ) ≤ 1 / (1 - δ₀) := by
+    rw [div_le_div_iff₀ hcoeff hceil0]; linarith
+  have hstep : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * ((3 / 2) * Gnorm * Nv * Nw) := by
+    refine hneumann.trans ?_
+    have hinv_nn : 0 ≤ 1 / (1 - δ) := by positivity
+    exact mul_le_mul_of_nonneg_left hNp_le hinv_nn
+  refine hstep.trans ?_
+  have hbase_nn : 0 ≤ (3 / 2) * Gnorm * Nv * Nw :=
+    mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hGnorm_nn) hNv_nn) hNw_nn
+  have h1 : (1 / (1 - δ)) * ((3 / 2) * Gnorm * Nv * Nw) ≤
+      (1 / (1 - δ₀)) * ((3 / 2) * Gnorm * Nv * Nw) :=
+    mul_le_mul_of_nonneg_right hinv_le hbase_nn
+  refine h1.trans ?_
+  have hinv₀_nn : 0 ≤ 1 / (1 - δ₀) := by positivity
+  have hGmul : (3 / 2) * Gnorm * Nv * Nw ≤ (3 / 2) * Gt * Nv * Nw := by
+    have hf : (3 / 2 : ℝ) * Gnorm ≤ (3 / 2) * Gt := by linarith
+    have hf2 : (3 / 2) * Gnorm * Nv ≤ (3 / 2) * Gt * Nv :=
+      mul_le_mul_of_nonneg_right hf hNv_nn
+    exact mul_le_mul_of_nonneg_right hf2 hNw_nn
+  have hcombine : (1 / (1 - δ₀)) * ((3 / 2) * Gnorm * Nv * Nw) ≤
+      (1 / (1 - δ₀)) * ((3 / 2) * Gt * Nv * Nw) :=
+    mul_le_mul_of_nonneg_left hGmul hinv₀_nn
+  refine hcombine.trans ?_
+  have hfinal : (1 / (1 - δ₀)) * ((3 / 2) * Gt * Nv * Nw) =
+      (1 / (1 - δ₀)) * (3 / 2) * Gt * Nv * Nw := by ring
+  rw [hfinal]
+
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_connDiffFib
     (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
     (e : Fin n → TangentSpace I x)
@@ -583,6 +751,92 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
   obtain ⟨C₀, hC₀0, hpw⟩ := connDiff_gFibreNorm_le_iteratedCovGrad (I := I) (M := M) g₀
+  refine ⟨Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) * C₀, by positivity, ?_⟩
+  intro g₁ T δ hδ hδ0 h hbound x
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum⟩ :=
+    tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
+  have hnE : n = Module.finrank ℝ E := hn
+  set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
+  have hG_nn : 0 ≤ G := norm_nonneg _
+  have hconnDiffSec : (connDiffSection (I := I) g₁ g₀).toSection x =
+      connDiffFib (I := I) g₁ g₀ x :=
+    connDiffSection_toSection (I := I) g₁ g₀ x
+  rw [hconnDiffSec]
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
+    (connDiffFib (I := I) g₁ g₀ x) e bse hnE hbse horth]
+  have heach : ∀ (K : Fin 1 → Fin n) (J : Fin 2 → Fin n),
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
+        (connDiffFib (I := I) g₁ g₀ x) n e K J) ^ 2 ≤ C₀ ^ 2 * G ^ 2 := by
+    intro K J
+    rw [fiberNormSqComponent_connDiffFib]
+    set u : TangentSpace I x :=
+      PDE.DeTurck.connDiff (I := I) g₁ g₀ x (e (J 0)) (e (J 1)) with hu_def
+    have hcs := metric_inner_cauchy_schwarz_sq (I := I) (M := M) g₀ x (e (K 0)) u
+    have hkk : g₀.inner x (e (K 0)) (e (K 0)) = 1 := by
+      rw [horth (K 0) (K 0)]; simp
+    rw [hkk, one_mul] at hcs
+    have hsqrt := hpw g₁ T h hδ hδ0 hbound x (e (J 0)) (e (J 1))
+    have hJ0 : g₀.inner x (e (J 0)) (e (J 0)) = 1 := by rw [horth (J 0) (J 0)]; simp
+    have hJ1 : g₀.inner x (e (J 1)) (e (J 1)) = 1 := by rw [horth (J 1) (J 1)]; simp
+    rw [hJ0, hJ1, Real.sqrt_one, mul_one, mul_one] at hsqrt
+    have huu_nn : 0 ≤ g₀.inner x u u := metric_inner_self_nonneg (I := I) (M := M) g₀ x u
+    have hsqrt_eq : Real.sqrt (g₀.inner x u u) ^ 2 = g₀.inner x u u :=
+      Real.sq_sqrt huu_nn
+    have hsqrt_nn : 0 ≤ Real.sqrt (g₀.inner x u u) := Real.sqrt_nonneg _
+    have hsq_le : g₀.inner x u u ≤ (C₀ * G) ^ 2 := by
+      rw [← hsqrt_eq]
+      have := mul_self_le_mul_self hsqrt_nn hsqrt
+      nlinarith [this, hsqrt]
+    calc (g₀.inner x (e (K 0)) u) ^ 2
+        ≤ g₀.inner x u u := hcs
+      _ ≤ (C₀ * G) ^ 2 := hsq_le
+      _ = C₀ ^ 2 * G ^ 2 := by ring
+  calc ∑ K : Fin 1 → Fin n, ∑ J : Fin 2 → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
+          (connDiffFib (I := I) g₁ g₀ x) n e K J) ^ 2
+      ≤ ∑ K : Fin 1 → Fin n, ∑ J : Fin 2 → Fin n, C₀ ^ 2 * G ^ 2 :=
+        Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => heach K J))
+    _ = (Fintype.card (Fin 1 → Fin n) : ℝ) * (Fintype.card (Fin 2 → Fin n) : ℝ) *
+        (C₀ ^ 2 * G ^ 2) := by
+        rw [Finset.sum_const, Finset.sum_const]
+        simp only [Finset.card_univ, nsmul_eq_mul]
+        ring
+    _ = (Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) * C₀) ^ 2 * G ^ 2 := by
+        rw [Fintype.card_fun, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]
+        rw [Fintype.card_fin, ← hnE]
+        have hsq : Real.sqrt ((n : ℝ) ^ 3) ^ 2 = (n : ℝ) ^ 3 :=
+          Real.sq_sqrt (by positivity)
+        rw [mul_pow, hsq]
+        push_cast
+        ring
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad_of_lt_one
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
+      (T : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+      (h : ∀ y v w, g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (x : M),
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+          ((connDiffSection (I := I) g₁ g₀).toSection x) ≤
+        C ^ 2 * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+            Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 := by
+  classical
+  letI instTens : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  obtain ⟨C₀, hC₀0, hpw⟩ :=
+    connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
   refine ⟨Real.sqrt ((Module.finrank ℝ E : ℝ) ^ 3) * C₀, by positivity, ?_⟩
   intro g₁ T δ hδ hδ0 h hbound x
   obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum⟩ :=
