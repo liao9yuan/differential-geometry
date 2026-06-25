@@ -1865,18 +1865,18 @@ order `m ≤ a + 2` by `ccSpectralEmbed_norm_mono` bounds the fibre operator nor
 `C · ‖ι_{a+2} T‖`, and the realizability radius is `R₀ = 1 / (2C)` with smallness `δ₀ = 1/2`. -/
 theorem sobolevBall_smooth_fibreSmall (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
-    ∃ R₀ : ℝ, 0 < R₀ ∧ ∃ δ₀ : ℝ, δ₀ < 1 ∧
+    ∃ R₀ : ℝ, 0 < R₀ ∧ ∃ δ₀ : ℝ, δ₀ ≤ 1 / 3 ∧
       ∀ (T : SmoothCcTensor g₀ 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R₀ →
         gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ₀ := by
   classical
-  -- the even spectral order just above the supercritical threshold
+
   set m : ℕ := 2 * Module.finrank ℝ E + 4 with hm_def
   have hm_lossy : 2 * Module.finrank ℝ E + 4 ≤ m := by rw [hm_def]
   have hm_le : (m : ℕ) ≤ a + 2 := by rw [hm_def]; omega
   obtain ⟨C, hC_pos, hC⟩ :=
     ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g₀ m hm_lossy
-  refine ⟨1 / (3 * C), by positivity, 1 / 3, by norm_num, fun T hTball => ?_⟩
+  refine ⟨1 / (3 * C), by positivity, 1 / 3, le_refl _, fun T hTball => ?_⟩
   
   have hmono : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ ≤
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ := by
@@ -2034,7 +2034,7 @@ def deTurckSobolevNHa2 (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
     tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
   fun v =>
-    if h : ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 < 1 ∧
+    if h : ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 ≤ 1 / 3 ∧
         ∀ (T : SmoothCcTensor g₀ 0 2),
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ p.1 →
           gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) p.2 then
@@ -2043,7 +2043,7 @@ def deTurckSobolevNHa2 (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
           deTurckSmoothN (I := I) (M := M) g₀ g_bg a
             (radialScaleSmooth (I := I) (M := M) g₀ a (Classical.choose h).1
               (Classical.choose x.2))
-            (Classical.choose_spec h).2.1
+            (lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
             ((Classical.choose_spec h).2.2 _
               (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M)
                 g₀ a (Classical.choose_spec h).1.le (Classical.choose x.2))))
@@ -2055,13 +2055,13 @@ def deTurckSobolevNHa2 (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
 `∃ p`-witness that drives the `then` branch of `deTurckSobolevNHa2`. -/
 theorem deTurckSobolevNHa2_exists_of_super (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
-    ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 < 1 ∧
+    ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 ≤ 1 / 3 ∧
       ∀ (T : SmoothCcTensor g₀ 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ p.1 →
         gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) p.2 := by
-  obtain ⟨R₀, hR₀, δ₀, hδ₀_lt, hball⟩ :=
+  obtain ⟨R₀, hR₀, δ₀, hδ₀_le, hball⟩ :=
     sobolevBall_smooth_fibreSmall (I := I) (M := M) g₀ a ha_super
-  exact ⟨(R₀, δ₀), hR₀, hδ₀_lt, hball⟩
+  exact ⟨(R₀, δ₀), hR₀, hδ₀_le, hball⟩
 
 /-- **`deTurckSobolevNHa2` is globally Lipschitz** (under the supercritical order).
 
@@ -2080,17 +2080,18 @@ theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M
   have h := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super
   set R₀ := (Classical.choose h).1 with hR₀_def
   have hR₀ : 0 < R₀ := (Classical.choose_spec h).1
-  have hδ₀_lt : (Classical.choose h).2 < 1 := (Classical.choose_spec h).2.1
+  have hδ₀_lt : (Classical.choose h).2 < 1 :=
+    lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1)
   obtain ⟨K, hK⟩ :=
     deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR₀
-      (Classical.choose_spec h).2.1
-  -- the dense-subset function
+      hδ₀_lt
+
   set F : (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
     fun x =>
       deTurckSmoothN (I := I) (M := M) g₀ g_bg a
         (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
-        (Classical.choose_spec h).2.1
+        hδ₀_lt
         ((Classical.choose_spec h).2.2 _
           (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M)
             g₀ a hR₀.le (Classical.choose x.2))) with hF_def
@@ -2227,21 +2228,23 @@ theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (
   have h := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super
   set R₀ := (Classical.choose h).1 with hR₀_def
   have hR₀ : 0 < R₀ := (Classical.choose_spec h).1
-  -- abbreviations matching the definition's `then` branch
+  have hδ₀_lt : (Classical.choose h).2 < 1 :=
+    lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1)
+
   set hdense := smoothCcToTensorHs_denseRange (I := I) (M := M) g₀ ((a : ℝ) + 2) with hdense_def
   set F : (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
     fun x =>
       deTurckSmoothN (I := I) (M := M) g₀ g_bg a
         (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
-        (Classical.choose_spec h).2.1
+        (lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
         ((Classical.choose_spec h).2.2 _
           (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M)
             g₀ a hR₀.le (Classical.choose x.2))) with hF_def
-  -- `F` is continuous (same Lipschitz argument as in `deTurckSobolevNHa2_lipschitzWith`)
+
   obtain ⟨K, hK⟩ :=
     deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR₀
-      (Classical.choose_spec h).2.1
+      hδ₀_lt
   have hembed : ∀ x : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
       smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
         (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) =
@@ -2314,8 +2317,8 @@ theorem deTurckSobolevNHa2_smoothEmbed_eq (g₀ g_bg : SmoothRiemannianMetric I 
         (radialScaleSmooth (I := I) (M := M) g₀ a
           (Classical.choose (deTurckSobolevNHa2_exists_of_super
             (I := I) (M := M) g₀ a ha_super)).1 T)
-        (Classical.choose_spec (deTurckSobolevNHa2_exists_of_super
-          (I := I) (M := M) g₀ a ha_super)).2.1
+        (lt_of_le_of_lt (Classical.choose_spec (deTurckSobolevNHa2_exists_of_super
+          (I := I) (M := M) g₀ a ha_super)).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
         ((Classical.choose_spec (deTurckSobolevNHa2_exists_of_super
           (I := I) (M := M) g₀ a ha_super)).2.2 _
           (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a
@@ -2331,9 +2334,12 @@ theorem deTurckSobolevNHa2_smoothEmbed_eq (g₀ g_bg : SmoothRiemannianMetric I 
   have hSfibre := (Classical.choose_spec h).2.2 _ hSball
   have hSeq : deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
       (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S) =
-        deTurckSmoothN (I := I) (M := M) g₀ g_bg a S (Classical.choose_spec h).2.1 hSfibre :=
+        deTurckSmoothN (I := I) (M := M) g₀ g_bg a S
+          (lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
+          hSfibre :=
     deTurckSobolevNHa2_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super S
-      (Classical.choose_spec h).2.1 hSfibre hSball
+      (lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
+      hSfibre hSball
   have hbr : smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S =
       recenteredBallRetraction (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) R₀
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) := by
@@ -2375,7 +2381,7 @@ theorem deTurckSobolevNHa2_mixed_lipschitz_pointwise_aux
   set J := tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hτσ with hJ_def
   obtain ⟨K, hK⟩ :=
     deTurckSmoothN_ballLipschitz_Ha2_dataWeighted (I := I) (M := M) g₀ g_bg a ha_super hR₀
-      (Classical.choose_spec hex).2.1
+      (lt_of_le_of_lt (Classical.choose_spec hex).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
   set C₂ : ℝ≥0 := K with hC₂_def
   set C₁ : ℝ≥0 := K + K * Real.toNNReal (1 / R₀) with hC₁_def
   refine ⟨C₁, C₂, ?_⟩
