@@ -455,6 +455,209 @@ private lemma fiberNormSqComponent_covGrad_raisedKoszul
   rw [cotangentToDual_g0FlatCLM (I := I) g₀ x (e (K 0))]
 
 set_option linter.unusedSectionVars false in
+private lemma sqrt_g0_inner_add_le_arm
+    (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
+    Real.sqrt (g₀.inner x (a + b) (a + b)) ≤
+      Real.sqrt (g₀.inner x a a) + Real.sqrt (g₀.inner x b b) := by
+  set na := Real.sqrt (g₀.inner x a a) with hna
+  set nb := Real.sqrt (g₀.inner x b b) with hnb
+  have haa_nn : 0 ≤ g₀.inner x a a := metric_inner_self_nonneg (I := I) (M := M) g₀ x a
+  have hbb_nn : 0 ≤ g₀.inner x b b := metric_inner_self_nonneg (I := I) (M := M) g₀ x b
+  have hna_nn : 0 ≤ na := Real.sqrt_nonneg _
+  have hnb_nn : 0 ≤ nb := Real.sqrt_nonneg _
+  have hna_sq : na ^ 2 = g₀.inner x a a := by rw [hna, Real.sq_sqrt haa_nn]
+  have hnb_sq : nb ^ 2 = g₀.inner x b b := by rw [hnb, Real.sq_sqrt hbb_nn]
+  have hcross : g₀.inner x a b ≤ na * nb := by
+    have habs := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x a b
+    rw [← hna, ← hnb] at habs
+    exact le_trans (le_abs_self _) habs
+  have hexpand : g₀.inner x (a + b) (a + b) =
+      g₀.inner x a a + 2 * g₀.inner x a b + g₀.inner x b b := by
+    have h1 : g₀.inner x (a + b) (a + b)
+        = g₀.inner x a (a + b) + g₀.inner x b (a + b) := by
+      rw [map_add (g₀.inner x), ContinuousLinearMap.add_apply]
+    have h2 : g₀.inner x a (a + b) = g₀.inner x a a + g₀.inner x a b :=
+      map_add (g₀.inner x a) a b
+    have h3 : g₀.inner x b (a + b) = g₀.inner x b a + g₀.inner x b b :=
+      map_add (g₀.inner x b) a b
+    have h4 : g₀.inner x b a = g₀.inner x a b := g₀.symm x b a
+    rw [h1, h2, h3, h4]; ring
+  have hle_sq : g₀.inner x (a + b) (a + b) ≤ (na + nb) ^ 2 := by
+    rw [hexpand]
+    have hsq : (na + nb) ^ 2 = na ^ 2 + 2 * (na * nb) + nb ^ 2 := by ring
+    rw [hsq, hna_sq, hnb_sq]
+    nlinarith [hcross]
+  have hsum_pos_nn : 0 ≤ na + nb := add_nonneg hna_nn hnb_nn
+  calc Real.sqrt (g₀.inner x (a + b) (a + b))
+      ≤ Real.sqrt ((na + nb) ^ 2) := Real.sqrt_le_sqrt hle_sq
+    _ = na + nb := by rw [Real.sqrt_sq hsum_pos_nn]
+
+def sharpFlatRaiseEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiffSection I (E →L[ℝ] E) ∞
+      (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
+  toFun := fun x : M => sharpFlatRaiseEndo (I := I) g₀ g₁ x
+  contMDiff_toFun := sharpFlatRaiseEndo_contMDiff (I := I) g₀ g₁
+
+@[simp] lemma sharpFlatRaiseEndoField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁ x) =
+      sharpFlatRaiseEndo (I := I) g₀ g₁ x := rfl
+
+set_option linter.unusedSectionVars false in
+private lemma covDerivRaisedKoszulVec_eq_endoCov_add_sharpFlat
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    covDerivRaisedKoszulVec (I := I) g₀ g₁ X Y Z x =
+      ((endoCovariantDerivative (I := I) (M := M) g₀)
+          (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+      + sharpFlatRaiseEndo (I := I) g₀ g₁ x
+          (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x) := by
+  classical
+  set S : Π b : M, TangentSpace I b →L[ℝ] TangentSpace I b :=
+    fun b => sharpFlatRaiseEndo (I := I) g₀ g₁ b with hS_def
+  have hDsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b))) :=
+    PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
+  set Dsec : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b), hDsm⟩ with hDsec_def
+  have hDsecx : Dsec x = PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x) := rfl
+  have hLeib := endoCovariantDerivative_apply (I := I) (M := M) g₀
+    (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) Dsec x (X x)
+  have hΛapp : (fun y : M => (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁ y) (Dsec y)) =
+      (fun y : M => raisedKoszulVec (I := I) g₀ g₁ y (Y y) (Z y)) := by
+    funext y
+    rw [sharpFlatRaiseEndoField_apply, hDsec_def]
+    change sharpFlatRaiseEndo (I := I) g₀ g₁ y
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ y (Y y) (Z y)) = _
+    rw [raisedKoszulVec]
+  rw [hΛapp] at hLeib
+  rw [sharpFlatRaiseEndoField_apply, hDsecx] at hLeib
+  rw [covDerivRaisedKoszulVec]
+  have hgrad_eq : (LeviCivita (I := I) g₀).toFun
+        (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x) =
+      ((endoCovariantDerivative (I := I) (M := M) g₀)
+          (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+      + sharpFlatRaiseEndo (I := I) g₀ g₁ x
+          ((LeviCivita (I := I) g₀).toFun (fun b => Dsec b) x (X x)) := by
+    have h : ((endoCovariantDerivative (I := I) (M := M) g₀)
+          (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+          (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x)) =
+        (LeviCivita (I := I) g₀).toFun
+            (fun b => raisedKoszulVec (I := I) g₀ g₁ b (Y b) (Z b)) x (X x) -
+          sharpFlatRaiseEndo (I := I) g₀ g₁ x
+            ((LeviCivita (I := I) g₀).toFun (fun b => Dsec b) x (X x)) := hLeib
+    rw [h]; abel
+  rw [hgrad_eq]
+  set ET : TangentSpace I x :=
+    ((endoCovariantDerivative (I := I) (M := M) g₀)
+        (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+      (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x)) with hET_def
+  set gradY : TangentSpace I x :=
+    (LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x) with hgradY_def
+  set gradZ : TangentSpace I x :=
+    (LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x) with hgradZ_def
+  set gradD : TangentSpace I x :=
+    (LeviCivita (I := I) g₀).toFun (fun b => Dsec b) x (X x) with hgradD_def
+  have hrkY : raisedKoszulVec (I := I) g₀ g₁ x gradY (Z x) =
+      sharpFlatRaiseEndo (I := I) g₀ g₁ x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x gradY (Z x)) := by
+    rw [raisedKoszulVec]
+  have hrkZ : raisedKoszulVec (I := I) g₀ g₁ x (Y x) gradZ =
+      sharpFlatRaiseEndo (I := I) g₀ g₁ x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) gradZ) := by
+    rw [raisedKoszulVec]
+  rw [hrkY, hrkZ]
+  have hcollapse :
+      ET + sharpFlatRaiseEndo (I := I) g₀ g₁ x gradD
+        - sharpFlatRaiseEndo (I := I) g₀ g₁ x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x gradY (Z x))
+        - sharpFlatRaiseEndo (I := I) g₀ g₁ x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) gradZ) =
+      ET + sharpFlatRaiseEndo (I := I) g₀ g₁ x
+          (gradD - PDE.DeTurck.connDiff (I := I) g₁ g₀ x gradY (Z x)
+            - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) gradZ) := by
+    rw [map_sub, map_sub]; abel
+  rw [hcollapse]
+  congr 1
+  rw [covDerivConnDiff, covDerivDiff]
+  have hdiffSec_x : diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+        (fun b => Z b) (fun b => Y b) = fun b => Dsec b := by
+    funext b
+    rw [diffSec]
+    rfl
+  rw [hdiffSec_x, ← hgradD_def]
+  have hcovApplyZ : covApply (LeviCivita (I := I) g₀) (fun b => X b) (fun b => Z b) x = gradZ := by
+    rw [covApply_apply, hgradZ_def]
+  have hcovApplyY : covApply (LeviCivita (I := I) g₀) (fun b => X b) (fun b => Y b) x = gradY := by
+    rw [covApply_apply, hgradY_def]
+  rw [hcovApplyZ, hcovApplyY]
+  rw [show CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) x
+        (Y x) gradZ = PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) gradZ from rfl]
+  rw [show CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) x
+        gradY (Z x) = PDE.DeTurck.connDiff (I := I) g₁ g₀ x gradY (Z x) from rfl]
+  abel
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+private lemma sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
+      (T : SmoothCcTensor g₀ 0 2)
+      (h : ∀ y v w, g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (x : M) (v w : TangentSpace I x),
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      Real.sqrt (g₀.inner x
+          (((endoCovariantDerivative (I := I) (M := M) g₀)
+            (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x v) w)
+          (((endoCovariantDerivative (I := I) (M := M) g₀)
+            (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x v) w)) ≤
+        C * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+            Tensor0SBundle.TensorRSSpace 0 3 I x)‖ *
+          Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+private lemma sqrt_inner_covDerivConnDiff_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
+      (T : SmoothCcTensor g₀ 0 2)
+      (h : ∀ y v w, g₁.inner y v w =
+        g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (x : M)
+      (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+      letI : Bundle.RiemannianBundle
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+      Real.sqrt (g₀.inner x
+          (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x)
+          (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x)) ≤
+        C *
+          Real.sqrt (‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+                Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 +
+              ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+                Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2) *
+          Real.sqrt (g₀.inner x (X x) (X x)) * Real.sqrt (g₀.inner x (Y x) (Y x)) *
+          Real.sqrt (g₀.inner x (Z x) (Z x)) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -491,7 +694,107 @@ private lemma sqrt_inner_covDerivRaisedKoszulVec_le
                 Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 +
               ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
                 Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ^ 2) := by
-  sorry
+  classical
+  letI inst3 : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI inst4 : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+  obtain ⟨Cendo, hCendo0, hendo⟩ :=
+    sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le (I := I) (M := M) g₀ hδ₀0 hδ₀
+  obtain ⟨Cconn, hCconn0, hconn⟩ :=
+    connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+  obtain ⟨Ccdc, hCcdc0, hcdc⟩ :=
+    sqrt_inner_covDerivConnDiff_le (I := I) (M := M) g₀ hδ₀0 hδ₀
+  refine ⟨Cendo * Cconn + (1 + δ₀) * Ccdc, by positivity, ?_⟩
+  intro g₁ T h δ hδ hδ0 hbound x X Y Z hX hY hZ R hR0 hjet
+  set G1 : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG1_def
+  set G2 : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 4 I x)‖ with hG2_def
+  have hG1_nn : 0 ≤ G1 := norm_nonneg _
+  have hG2_nn : 0 ≤ G2 := norm_nonneg _
+  set Q : ℝ := Real.sqrt (G1 ^ 2 + G2 ^ 2) with hQ_def
+  have hQ_nn : 0 ≤ Q := Real.sqrt_nonneg _
+  have hG1_le_Q : G1 ≤ Q := by
+    rw [hQ_def]
+    have : G1 = Real.sqrt (G1 ^ 2) := by rw [Real.sqrt_sq hG1_nn]
+    rw [this]
+    exact Real.sqrt_le_sqrt (by nlinarith [hG2_nn])
+  have hjet' : G1 ≤ R := hjet
+  have hR1_nn : 0 ≤ 1 + R := by linarith
+  set A : TangentSpace I x :=
+    ((endoCovariantDerivative (I := I) (M := M) g₀)
+        (sharpFlatRaiseEndoField (I := I) (M := M) g₀ g₁) x (X x))
+      (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x)) with hA_def
+  set B : TangentSpace I x :=
+    sharpFlatRaiseEndo (I := I) g₀ g₁ x
+      (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x)
+    with hB_def
+  have hsplit : covDerivRaisedKoszulVec (I := I) g₀ g₁ X Y Z x = A + B := by
+    rw [hA_def, hB_def]
+    exact covDerivRaisedKoszulVec_eq_endoCov_add_sharpFlat (I := I) (M := M) g₀ g₁ X Y Z x
+  set NA : ℝ := Real.sqrt (g₀.inner x A A) with hNA_def
+  have hNA_le : NA ≤ Cendo * Cconn * G1 ^ 2 := by
+    have hAbound := hendo g₁ T h hδ hδ0 hbound x (X x)
+      (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+    rw [← hA_def, ← hG1_def] at hAbound
+    rw [hX, Real.sqrt_one, mul_one] at hAbound
+    have hcn := hconn g₁ T h hδ hδ0 hbound x (Y x) (Z x)
+    rw [← hG1_def, hY, hZ, Real.sqrt_one, mul_one, mul_one] at hcn
+    have hcd_nn : 0 ≤ Real.sqrt (g₀.inner x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))) := Real.sqrt_nonneg _
+    rw [hNA_def]
+    calc Real.sqrt (g₀.inner x A A)
+        ≤ Cendo * G1 * Real.sqrt (g₀.inner x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))) := hAbound
+      _ ≤ Cendo * G1 * (Cconn * G1) := by
+          refine mul_le_mul_of_nonneg_left hcn (mul_nonneg hCendo0 hG1_nn)
+      _ = Cendo * Cconn * G1 ^ 2 := by ring
+  set NB : ℝ := Real.sqrt (g₀.inner x B B) with hNB_def
+  have hNB_le : NB ≤ (1 + δ₀) * Ccdc * Q := by
+    set D : TangentSpace I x :=
+      covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x with hD_def
+    have hBeq : B = sharpFlatRaiseEndo (I := I) g₀ g₁ x D := by rw [hB_def, hD_def]
+    have hneumann := sqrt_inner_sharpFlatRaiseEndo_le (I := I) g₀ g₁ T h hδ0 hbound x D
+    rw [← hBeq] at hneumann
+    have hDbound := hcdc g₁ T h hδ hδ0 hbound x X Y Z
+    rw [← hD_def, ← hG1_def, ← hG2_def, ← hQ_def, hX, hY, hZ, Real.sqrt_one,
+      mul_one, mul_one, mul_one] at hDbound
+    have hD_sqrt_nn : 0 ≤ Real.sqrt (g₀.inner x D D) := Real.sqrt_nonneg _
+    have h1delta_nn : 0 ≤ 1 + δ := by linarith
+    rw [hNB_def]
+    calc Real.sqrt (g₀.inner x B B)
+        ≤ (1 + δ) * Real.sqrt (g₀.inner x D D) := hneumann
+      _ ≤ (1 + δ) * (Ccdc * Q) := mul_le_mul_of_nonneg_left hDbound h1delta_nn
+      _ ≤ (1 + δ₀) * (Ccdc * Q) := by
+          refine mul_le_mul_of_nonneg_right (by linarith) (mul_nonneg hCcdc0 hQ_nn)
+      _ = (1 + δ₀) * Ccdc * Q := by ring
+  have htri : Real.sqrt (g₀.inner x (A + B) (A + B)) ≤ NA + NB := by
+    rw [hNA_def, hNB_def]
+    exact sqrt_g0_inner_add_le_arm (I := I) (M := M) g₀ x A B
+  rw [hsplit]
+  refine htri.trans ?_
+  have hδ₀1_nn : 0 ≤ 1 + δ₀ := by linarith
+  have hCcdc_Q_nn : 0 ≤ (1 + δ₀) * Ccdc * Q := by positivity
+  have hG1sq_le : G1 ^ 2 ≤ (1 + R) * Q := by
+    have hG1_le_R1Q : G1 ≤ (1 + R) := le_trans hjet' (by linarith)
+    have : G1 * G1 ≤ (1 + R) * Q := by
+      refine mul_le_mul hG1_le_R1Q ?_ hG1_nn hR1_nn
+      exact hG1_le_Q
+    nlinarith [this]
+  calc NA + NB
+      ≤ Cendo * Cconn * G1 ^ 2 + (1 + δ₀) * Ccdc * Q := add_le_add hNA_le hNB_le
+    _ ≤ Cendo * Cconn * ((1 + R) * Q) + (1 + δ₀) * Ccdc * ((1 + R) * Q) := by
+        refine add_le_add ?_ ?_
+        · exact mul_le_mul_of_nonneg_left hG1sq_le (by positivity)
+        · have hQ_le : Q ≤ (1 + R) * Q := by
+            nlinarith [hQ_nn, hR0]
+          exact mul_le_mul_of_nonneg_left hQ_le (by positivity)
+    _ = (Cendo * Cconn + (1 + δ₀) * Ccdc) * (1 + R) * Q := by ring
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
