@@ -5108,7 +5108,7 @@ noncomputable def arm2ChartReadoutResidual (g₀ : SmoothRiemannianMetric I M)
         arm2ReadoutCovDerivPair (I := I) (M := M) g₀ (T - T') x ![k, i, l, k₁]
 
 set_option linter.unusedSectionVars false in
-theorem arm2_combinedTrace_eq_chartSlopeSecondOrder_add_residual
+theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -5142,7 +5142,7 @@ theorem arm2_combinedTrace_eq_chartSlopeSecondOrder_add_residual
                 (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                   ((Module.finBasis ℝ E).cDualBasis k₁)),
               (Module.finBasis ℝ E) k₁] =
-      chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+      chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
           (extChartAt I x x) s +
         arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
   sorry
@@ -5162,15 +5162,10 @@ theorem arm2_principalSymbol_chart_match
           ![(chartModelBasis E) k, (chartModelBasis E) i] =
       chartSlopePrincipalSymbolContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
           (extChartAt I x x) s +
-        chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-          (extChartAt I x x) s +
         arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
   rw [arm2_appCc_eq_combinedTrace_unitModel4 (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s x i k]
-  rw [arm2_combinedTrace_eq_chartSlopeSecondOrder_add_residual (I := I) g₀ T T'
+  rw [arm2_combinedTrace_eq_chartSlopePrincipal_add_residual (I := I) g₀ T T'
         hδ_lt hδ hδ'_lt hδ' s x i k]
-  rw [chartSlopeSecondOrderContribution_eq_principal_add_remainder (I := I) g₀ T T'
-        hδ_lt hδ hδ'_lt hδ' x i k
-        (extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)) s]
 
 end TensorSpectral
 end Parabolic
