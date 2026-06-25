@@ -1687,7 +1687,7 @@ theorem sobolevBall_smooth_fibreSmall (g₀ : SmoothRiemannianMetric I M) (a : �
   have hm_le : (m : ℕ) ≤ a + 2 := by rw [hm_def]; omega
   obtain ⟨C, hC_pos, hC⟩ :=
     ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g₀ m hm_lossy
-  refine ⟨1 / (2 * C), by positivity, 1 / 2, by norm_num, fun T hTball => ?_⟩
+  refine ⟨1 / (3 * C), by positivity, 1 / 3, by norm_num, fun T hTball => ?_⟩
   
   have hmono : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ ≤
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ := by
@@ -1707,24 +1707,24 @@ theorem sobolevBall_smooth_fibreSmall (g₀ : SmoothRiemannianMetric I M) (a : �
   
   intro x v w
   have hlossy := hC T x v w
-  have hNm_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ ≤ 1 / (2 * C) :=
+  have hNm_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ ≤ 1 / (3 * C) :=
     le_trans hmono hTball
   have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
   have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
   have hmul_nn : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
     mul_nonneg hsv_nn hsw_nn
   refine hlossy.trans ?_
-  have hCN_le : C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ ≤ 1 / 2 := by
+  have hCN_le : C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ ≤ 1 / 3 := by
     calc C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖
-        ≤ C * (1 / (2 * C)) := mul_le_mul_of_nonneg_left hNm_le hC_pos.le
-      _ = 1 / 2 := by field_simp
+        ≤ C * (1 / (3 * C)) := mul_le_mul_of_nonneg_left hNm_le hC_pos.le
+      _ = 1 / 3 := by field_simp
   calc (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖) *
         Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)
       = (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖) *
           (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) := by ring
-    _ ≤ (1 / 2 : ℝ) * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) :=
+    _ ≤ (1 / 3 : ℝ) * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) :=
         mul_le_mul_of_nonneg_right hCN_le hmul_nn
-    _ = 1 / 2 * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by ring
+    _ = 1 / 3 * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by ring
 
 theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
