@@ -1840,6 +1840,104 @@ private lemma diagonalGrid_power_closure (G Bc : ℝ) (hG : 0 ≤ G) (hB : 0 ≤
         mul_le_mul_of_nonneg_left hsum hG
     _ = (G * (↑(j + 1) * Bc) ^ 2) * r ^ (2 * (j + 2)) := by ring
 
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem norm_iteratedCovGrad_two_symmS_le
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M) :
+    letI : Bundle.RiemannianBundle
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+    ‖((iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)).toSection x :
+        Tensor0SBundle.TensorRSSpace 0 4 I x)‖ ≤
+      ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+          Tensor0SBundle.TensorRSSpace 0 4 I x)‖ := by
+  letI instTens : Bundle.RiemannianBundle
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
+  set Tsw : SmoothCcTensor g₀ 0 2 :=
+    domDomCongrSection (I := I) g₀ (Equiv.swap 0 1) T with hTsw_def
+  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T) =
+      (1 / 2 : ℝ) • (iteratedCovGrad (I := I) g₀ 0 2 2 T +
+        iteratedCovGrad (I := I) g₀ 0 2 2 Tsw) := by
+    rw [hTsw_def, smul_add]
+    exact iteratedCovGrad_symmS_eq (I := I) (M := M) g₀ T 2
+  have htoSec : ((iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)).toSection x :
+        Tensor0SBundle.TensorRSSpace 0 4 I x) =
+      (1 / 2 : ℝ) • ((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x +
+        (iteratedCovGrad (I := I) g₀ 0 2 2 Tsw).toSection x) := by
+    rw [hiter_eq]
+    rfl
+  have hsw_norm : ‖((iteratedCovGrad (I := I) g₀ 0 2 2 Tsw).toSection x :
+        Tensor0SBundle.TensorRSSpace 0 4 I x)‖ =
+      ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+          Tensor0SBundle.TensorRSSpace 0 4 I x)‖ := by
+    have hfib := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection
+      (I := I) (M := M) g₀ (s := 2) (Equiv.swap 0 1) T 2 x
+    rw [← hTsw_def] at hfib
+    rw [riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 4 x,
+        riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 4 x] at hfib
+    have hnn1 : (0 : ℝ) ≤ ‖((iteratedCovGrad (I := I) g₀ 0 2 2 Tsw).toSection x :
+        Tensor0SBundle.TensorRSSpace 0 4 I x)‖ := norm_nonneg _
+    have hnn2 : (0 : ℝ) ≤ ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+        Tensor0SBundle.TensorRSSpace 0 4 I x)‖ := norm_nonneg _
+    nlinarith [hfib, hnn1, hnn2]
+  rw [htoSec, norm_smul]
+  have habs : ‖(1 / 2 : ℝ)‖ = 1 / 2 := by
+    rw [Real.norm_eq_abs]; norm_num
+  rw [habs]
+  have htri := norm_add_le
+    ((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 4 I x)
+    ((iteratedCovGrad (I := I) g₀ 0 2 2 Tsw).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 4 I x)
+  rw [hsw_norm] at htri
+  nlinarith [htri, norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
+    Tensor0SBundle.TensorRSSpace 0 4 I x)]
+
+theorem covDerivConnDiff_g1inner_eq_half_secondCovGrad_sub_connDiffSq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
+      g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (x : M) (ζ : TangentSpace I x) :
+    g₁.inner x
+        (covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x) ζ =
+      (1 / 2 : ℝ) *
+        ( unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, Z x, Y x, ζ]
+        + unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, Y x, Z x, ζ]
+        - unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, ζ, Z x, Y x] )
+      - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x))
+          (inverseMetricSharpFib (I := I) g₁ x
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X
+              ⟨smoothExtensionTangent (I := I) x ζ,
+                smoothExtensionTangent_contMDiff (I := I) x ζ⟩ x))
+      - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            (inverseMetricSharpFib (I := I) g₁ x
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)) (X x)) ζ := by
+  rw [covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms (I := I) (M := M) g₀ g₁ X Y Z x ζ]
+  have hbil := symmS_hbil_of_realize (I := I) (M := M) g₀ g₁ T hg₁
+  have hTerm1 := koszulCovGradCovec_covDeriv_eq_secondCovGrad (I := I) (M := M) g₀ g₁
+    (symmS (I := I) g₀ T) hbil X Y Z x ζ
+  have e1 : ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b : M => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ
+      = (cotangentToDual (I := I) (x := x)
+          (dualToCotangent (I := I)
+            ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+              (fun b : M => cotangentToCLM (I := I)
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)))) ζ := by
+    rw [cotangentToDual_dualToCotangent, ContinuousLinearMap.coe_coe]
+  rw [e1, hTerm1]
+  rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ T hg₁ x
+        (Y x) ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)) ζ]
+  rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ T hg₁ x
+        ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) ζ]
+  ring
+
 end TensorSpectral
 end Parabolic
 end Analysis
