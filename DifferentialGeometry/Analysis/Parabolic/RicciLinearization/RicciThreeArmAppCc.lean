@@ -2927,6 +2927,220 @@ theorem unitModel_basisChart_eq_tensorChartComponent4 (g : SmoothRiemannianMetri
     funext j; fin_cases j <;> rfl
   rwa [hfun] at h
 
+private def chartCoeffModel2 (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D : Tensor0SSpace 2 I x) : Tensor0SModel 2 ℝ E :=
+  (continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.symm
+    (fun σ : Fin 2 → Fin (Module.finrank ℝ E) =>
+      ∑ p : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        A (σ 0) (σ 1) p l *
+          Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) l])
+
+private lemma chartCoeffModel2_repr (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D : Tensor0SSpace 2 I x) (k i : Fin (Module.finrank ℝ E)) :
+    chartCoeffModel2 (I := I) (M := M) A x D ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      ∑ p : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        A k i p l *
+          Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) l] := by
+  classical
+  set c : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ :=
+    fun σ => ∑ p : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+      A (σ 0) (σ 1) p l *
+        Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) l] with hc
+  have hbasis : ((continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.symm c :
+        ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
+      (fun j => (chartModelBasis E) ((![k, i] : Fin 2 → Fin (Module.finrank ℝ E)) j)) =
+        c (![k, i] : Fin 2 → Fin (Module.finrank ℝ E)) := by
+    rw [← continuousMultilinearMap_basis_repr (𝕜 := ℝ) (F := E) (chartModelBasis E) 2
+      ((continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.symm c)
+      (![k, i] : Fin 2 → Fin (Module.finrank ℝ E))]
+    rw [← (continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun_apply,
+      (continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.apply_symm_apply]
+  have hvec : (fun j : Fin 2 =>
+      (chartModelBasis E) ((![k, i] : Fin 2 → Fin (Module.finrank ℝ E)) j)) =
+      ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+    funext j; fin_cases j <;> rfl
+  rw [hvec] at hbasis
+  rw [chartCoeffModel2, hbasis, hc]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+private lemma chartCoeffModel2_add (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D D' : Tensor0SSpace 2 I x) :
+    chartCoeffModel2 (I := I) (M := M) A x (D + D') =
+      chartCoeffModel2 (I := I) (M := M) A x D + chartCoeffModel2 (I := I) (M := M) A x D' := by
+  classical
+  rw [chartCoeffModel2, chartCoeffModel2, chartCoeffModel2, ← map_add]
+  congr 1
+  funext σ
+  simp only [Pi.add_apply]
+  rw [Tensor0SSpace.toModel_add]
+  simp only [ContinuousMultilinearMap.add_apply]
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  ring
+
+private lemma chartCoeffModel2_smul (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (c : ℝ) (D : Tensor0SSpace 2 I x) :
+    chartCoeffModel2 (I := I) (M := M) A x (c • D) =
+      c • chartCoeffModel2 (I := I) (M := M) A x D := by
+  classical
+  rw [chartCoeffModel2, chartCoeffModel2, ← map_smul]
+  congr 1
+  funext σ
+  simp only [Pi.smul_apply, smul_eq_mul]
+  rw [Tensor0SSpace.toModel_smul]
+  simp only [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  ring
+
+private def ofChartCoeff22Fib (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D => Tensor0SSpace.ofModel (I := I) (x := x)
+        (chartCoeffModel2 (I := I) (M := M) A x D)
+      map_add' := fun D D' => by
+        rw [chartCoeffModel2_add (I := I) (M := M) A x D D']
+        rw [Tensor0SSpace.ofModel, Tensor0SSpace.ofModel, Tensor0SSpace.ofModel, map_add]
+      map_smul' := fun c D => by
+        rw [chartCoeffModel2_smul (I := I) (M := M) A x c D, RingHom.id_apply]
+        rw [Tensor0SSpace.ofModel, Tensor0SSpace.ofModel, map_smul] }
+
+private lemma ofChartCoeff22Fib_apply_toModel
+    (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D : Tensor0SSpace 2 I x) (k i : Fin (Module.finrank ℝ E)) :
+    Tensor0SSpace.toModel (ofChartCoeff22Fib (I := I) (M := M) A x D)
+        ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      ∑ p : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        A k i p l *
+          Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) l] := by
+  rw [ofChartCoeff22Fib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+    Tensor0SSpace.toModel_ofModel]
+  exact chartCoeffModel2_repr (I := I) (M := M) A x D k i
+
+private def chartCoeffModel3 (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D : Tensor0SSpace 3 I x) : Tensor0SModel 2 ℝ E :=
+  (continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.symm
+    (fun σ : Fin 2 → Fin (Module.finrank ℝ E) =>
+      ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
+        ∑ r : Fin (Module.finrank ℝ E),
+        A (σ 0) (σ 1) p q r *
+          Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) q,
+            (chartModelBasis E) r])
+
+private lemma chartCoeffModel3_repr (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D : Tensor0SSpace 3 I x) (k i : Fin (Module.finrank ℝ E)) :
+    chartCoeffModel3 (I := I) (M := M) A x D ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
+        ∑ r : Fin (Module.finrank ℝ E),
+        A k i p q r *
+          Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) q,
+            (chartModelBasis E) r] := by
+  classical
+  set c : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ :=
+    fun σ => ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
+      ∑ r : Fin (Module.finrank ℝ E),
+      A (σ 0) (σ 1) p q r *
+        Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) q,
+          (chartModelBasis E) r] with hc
+  have hbasis : ((continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.symm c :
+        ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
+      (fun j => (chartModelBasis E) ((![k, i] : Fin 2 → Fin (Module.finrank ℝ E)) j)) =
+        c (![k, i] : Fin 2 → Fin (Module.finrank ℝ E)) := by
+    rw [← continuousMultilinearMap_basis_repr (𝕜 := ℝ) (F := E) (chartModelBasis E) 2
+      ((continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.symm c)
+      (![k, i] : Fin 2 → Fin (Module.finrank ℝ E))]
+    rw [← (continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun_apply,
+      (continuousMultilinearMap_basis (𝕜 := ℝ) (F := E) (chartModelBasis E) 2).equivFun.apply_symm_apply]
+  have hvec : (fun j : Fin 2 =>
+      (chartModelBasis E) ((![k, i] : Fin 2 → Fin (Module.finrank ℝ E)) j)) =
+      ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+    funext j; fin_cases j <;> rfl
+  rw [hvec] at hbasis
+  rw [chartCoeffModel3, hbasis, hc]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+
+private lemma chartCoeffModel3_add (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D D' : Tensor0SSpace 3 I x) :
+    chartCoeffModel3 (I := I) (M := M) A x (D + D') =
+      chartCoeffModel3 (I := I) (M := M) A x D + chartCoeffModel3 (I := I) (M := M) A x D' := by
+  classical
+  rw [chartCoeffModel3, chartCoeffModel3, chartCoeffModel3, ← map_add]
+  congr 1
+  funext σ
+  simp only [Pi.add_apply]
+  rw [Tensor0SSpace.toModel_add]
+  simp only [ContinuousMultilinearMap.add_apply]
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun q _ => ?_)
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun r _ => ?_)
+  ring
+
+private lemma chartCoeffModel3_smul (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (c : ℝ) (D : Tensor0SSpace 3 I x) :
+    chartCoeffModel3 (I := I) (M := M) A x (c • D) =
+      c • chartCoeffModel3 (I := I) (M := M) A x D := by
+  classical
+  rw [chartCoeffModel3, chartCoeffModel3, ← map_smul]
+  congr 1
+  funext σ
+  simp only [Pi.smul_apply, smul_eq_mul]
+  rw [Tensor0SSpace.toModel_smul]
+  simp only [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun q _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun r _ => ?_)
+  ring
+
+private def ofChartCoeff32Fib (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M) :
+    Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace 3 I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D => Tensor0SSpace.ofModel (I := I) (x := x)
+        (chartCoeffModel3 (I := I) (M := M) A x D)
+      map_add' := fun D D' => by
+        rw [chartCoeffModel3_add (I := I) (M := M) A x D D']
+        rw [Tensor0SSpace.ofModel, Tensor0SSpace.ofModel, Tensor0SSpace.ofModel, map_add]
+      map_smul' := fun c D => by
+        rw [chartCoeffModel3_smul (I := I) (M := M) A x c D, RingHom.id_apply]
+        rw [Tensor0SSpace.ofModel, Tensor0SSpace.ofModel, map_smul] }
+
+private lemma ofChartCoeff32Fib_apply_toModel
+    (A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) (x : M)
+    (D : Tensor0SSpace 3 I x) (k i : Fin (Module.finrank ℝ E)) :
+    Tensor0SSpace.toModel (ofChartCoeff32Fib (I := I) (M := M) A x D)
+        ![(chartModelBasis E) k, (chartModelBasis E) i] =
+      ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
+        ∑ r : Fin (Module.finrank ℝ E),
+        A k i p q r *
+          Tensor0SSpace.toModel D ![(chartModelBasis E) p, (chartModelBasis E) q,
+            (chartModelBasis E) r] := by
+  rw [ofChartCoeff32Fib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+    Tensor0SSpace.toModel_ofModel]
+  exact chartCoeffModel3_repr (I := I) (M := M) A x D k i
+
 set_option linter.unusedSectionVars false in
 theorem cometricLmodel_covectorOfCLM_inner (g₁ : SmoothRiemannianMetric I M) (y : M)
     (φ : E →L[ℝ] ℝ) (u : TangentSpace I y) :
