@@ -278,6 +278,26 @@ theorem oneMinusConnLapSmooth_l2Inner_selfAdjoint (g : SmoothRiemannianMetric I 
       (rawTensorConnLapSmooth (I := I) g r s v)]
   rw [rawConnLap_selfAdjoint (I := I) (M := M) g r s T v]
 
+theorem oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (A B : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s
+        (oneMinusConnLapSmooth (I := I) g r s A).toFun B.toFun =
+      tensorL2Inner (I := I) (M := M) g r s A.toFun B.toFun +
+        tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (covGrad (I := I) (M := M) g r s A).toFun
+          (covGrad (I := I) (M := M) g r s B).toFun := by
+  have hAfun : (oneMinusConnLapSmooth (I := I) g r s A).toFun =
+      A.toFun - (rawTensorConnLapSmooth (I := I) g r s A).toFun := by
+    unfold oneMinusConnLapSmooth
+    rw [SmoothCcTensor.toFun_sub]
+  have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
+    (I := I) (M := M) g r s A B
+  rw [hAfun,
+    tensorL2Inner_sub_left_smoothCc (I := I) (M := M) g r s A
+      (rawTensorConnLapSmooth (I := I) g r s A) B,
+    hgreen]
+  ring
+
 theorem oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) (v : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s k (oneMinusConnLapSmooth (I := I) g r s v) =
@@ -348,6 +368,23 @@ private theorem armPrincipalSlotPairing_eq_neg_inner
     tensorL2Inner_smul_right (I := I) (M := M) g₀ 0 ((2 + n) + 1) (-1 : ℝ) A.toFun B.toFun]
   ring
 
+private theorem exists_oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound_core
+    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    ∃ Ccomm : ℝ, 0 ≤ Ccomm ∧
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        tensorL2Inner (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
+        Ccomm *
+          (∑ j ∈ Finset.range (n + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 :=
+  sorry
+
 private theorem exists_oneMinusConnLapIter_arm_balancedFold
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -367,8 +404,18 @@ private theorem exists_oneMinusConnLapIter_arm_balancedFold
                   (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) + rem ∧
             rem ≤ Ccomm *
               (∑ j ∈ Finset.range (n + 1),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 := by
+  obtain ⟨Ccomm, hCcomm_nn, hbound⟩ :=
+    exists_oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound_core
+      (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
+  refine ⟨Ccomm, hCcomm_nn, fun u₀ => ?_⟩
+  refine ⟨tensorL2Inner (I := I) (M := M) g₀ 0 2
+        (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+        (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+      armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀, ?_, ?_⟩
+  · rw [armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ n u₀]
+    ring
+  · exact hbound u₀
 
 private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
