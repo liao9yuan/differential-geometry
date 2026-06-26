@@ -5404,6 +5404,250 @@ theorem arm2_combinedTrace_eq_chartSlopePrincipal_add_residual
   ring
 
 set_option linter.unusedSectionVars false in
+theorem iteratedCovGrad1_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
+    (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] Jdx
+        ((extChartAt I x).symm
+          ((toEuclidean (E := E)).symm (toEuclidean (E := E) (extChartAt I x x)))) =
+      euclidPartial (E := E) (Jdx 0)
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            h x ![] (Matrix.vecTail Jdx)))
+          (toEuclidean (E := E) (extChartAt I x x))
+        + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
+            (Jdx 0) ![] (Matrix.vecTail Jdx)
+            (toEuclidean (E := E) (extChartAt I x x)) := by
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hy : toEuclidean (E := E) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hmemsrc
+  have hcg : iteratedCovGrad (I := I) g₀ 0 2 1 h = covGrad (I := I) (M := M) g₀ 0 2 h := by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
+  rw [hcg]
+  exact tensorChartComponentRaw_covGrad (I := I) (M := M) g₀ 0 2 h x ![] Jdx hy
+
+set_option linter.unusedSectionVars false in
+noncomputable def arm1ReadoutCovDeriv (g₀ : SmoothRiemannianMetric I M)
+    (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) : ℝ :=
+  covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
+    (Jdx 0) ![] (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel3_basisChart_readout_split
+    (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b c : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 3 (iteratedCovGrad (I := I) g₀ 0 2 1 h) x
+        ![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c] =
+      euclidPartial (E := E) a
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            h x ![] ![b, c]))
+          (toEuclidean (E := E) (extChartAt I x x))
+        + arm1ReadoutCovDeriv (I := I) (M := M) g₀ h x ![a, b, c] := by
+  classical
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hroundtrip : (extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
+    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
+  rw [show (![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c] :
+        Fin 3 → TangentSpace I x) =
+      (fun j => chartModelBasis E ((![a, b, c] : Fin 3 → Fin (Module.finrank ℝ E)) j)) from by
+    funext j; fin_cases j <;> rfl]
+  rw [unitModel_basisChart_eq_tensorChartComponentRaw (I := I) (M := M) g₀ (2 + 1)
+    (iteratedCovGrad (I := I) g₀ 0 2 1 h) x (![a, b, c])]
+  rw [show tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] (![a, b, c]) x =
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] (![a, b, c])
+        ((extChartAt I x).symm
+          ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x)))) from by
+    rw [hroundtrip] ]
+  rw [iteratedCovGrad1_chartComponent_readout (I := I) g₀ h x (![a, b, c])]
+  have hJ0 : (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) 0 = a := rfl
+  have hJtail : Matrix.vecTail (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) = ![b, c] := by
+    funext j; fin_cases j <;> rfl
+  simp only [arm1ReadoutCovDeriv, hJ0, hJtail]
+
+set_option linter.unusedSectionVars false in
+private def unitModel3SlotBilin
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
+    (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun c => LinearMap.toContinuousLinearMap
+        { toFun := fun v => f (Function.update (Function.update base i c) j v)
+          map_add' := fun v1 v2 => by
+            rw [f.map_update_add (Function.update base i c) j v1 v2]
+          map_smul' := fun r v => by
+            rw [f.map_update_smul (Function.update base i c) j r v]; rfl }
+      map_add' := fun c1 c2 => by
+        ext v
+        change f (Function.update (Function.update base i (c1 + c2)) j v) =
+          f (Function.update (Function.update base i c1) j v) +
+          f (Function.update (Function.update base i c2) j v)
+        rw [Function.update_comm hij c1 v base, Function.update_comm hij c2 v base,
+          Function.update_comm hij (c1 + c2) v base]
+        rw [f.map_update_add (Function.update base j v) i c1 c2]
+      map_smul' := fun r c => by
+        ext v
+        change f (Function.update (Function.update base i (r • c)) j v) =
+          r • f (Function.update (Function.update base i c) j v)
+        rw [Function.update_comm hij c v base, Function.update_comm hij (r • c) v base]
+        rw [f.map_update_smul (Function.update base j v) i r c] }
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel3SlotBilin_apply
+    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
+    (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) (c v : E) :
+    unitModel3SlotBilin (E := E) f i j hij base c v =
+      f (Function.update (Function.update base i c) j v) := rfl
+
+set_option linter.unusedSectionVars false in
+theorem ricciArmOrder1KoszulCoeff_appCc_chartBasis_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
+    (x : M) (k' i' : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 3 2 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) W) x
+        ![(chartModelBasis E) k', (chartModelBasis E) i'] =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g₁ x x k l *
+            unitModel (I := I) (M := M) g₀ 3 W x
+              ![(chartModelBasis E) l, (chartModelBasis E) k,
+                raisedKoszulVec (I := I) g₀ g₁ x (chartModelBasis E k') (chartModelBasis E i')] := by
+  classical
+  rw [ricciArmOrder1KoszulCoeff_appCc_eq (I := I) (M := M) g₀ g₁ W x
+    (![(chartModelBasis E) k', (chartModelBasis E) i'] : Fin 2 → TangentSpace I x)]
+  set Wm : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => TangentSpace I x) ℝ :=
+    Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
+        W.toSection x) (unitTensor (I := I) (M := M) x)) with hWm
+  have hWm_eq : ∀ w : Fin 3 → TangentSpace I x,
+      unitModel (I := I) (M := M) g₀ 3 W x w = Wm w := fun w => rfl
+  set kvec : TangentSpace I x :=
+    raisedKoszulVec (I := I) g₀ g₁ x (chartModelBasis E k') (chartModelBasis E i') with hkvec
+  have hv0 : (![(chartModelBasis E) k', (chartModelBasis E) i'] : Fin 2 → TangentSpace I x) 0 =
+      chartModelBasis E k' := rfl
+  have hv1 : (![(chartModelBasis E) k', (chartModelBasis E) i'] : Fin 2 → TangentSpace I x) 1 =
+      chartModelBasis E i' := rfl
+  rw [hv0, hv1]
+  have h01 : (0 : Fin 3) ≠ 1 := by decide
+  set F : E →L[ℝ] E →L[ℝ] ℝ :=
+    unitModel3SlotBilin (E := E) Wm 0 1 h01 ![0, 0, kvec] with hF
+  have hFapp : ∀ c v : TangentSpace I x, F c v = Wm ![c, v, kvec] := by
+    intro c v
+    rw [hF, unitModel3SlotBilin_apply]
+    congr 1
+    funext j; fin_cases j <;> simp [Function.update]
+  have hkey : ∀ k : Fin (Module.finrank ℝ E),
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
+            W.toSection x) (unitTensor (I := I) (M := M) x))
+          (Fin.cons (cometricLmodel (I := I) g₁ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            ![(Module.finBasis ℝ E) k, kvec]) =
+        F (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+          ((Module.finBasis ℝ E) k) := by
+    intro k
+    rw [hFapp]
+    rfl
+  rw [Finset.sum_congr rfl (fun k _ => hkey k)]
+  rw [cometricFinBasisTrace_eq_chartInvGram_bilin (I := I) g₁ x F]
+  refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
+  rw [smul_eq_mul, hFapp, hWm_eq]
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel3_slot2_chartBasis_sum
+    (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
+    (l k : Fin (Module.finrank ℝ E)) (w : Fin (Module.finrank ℝ E) → ℝ) :
+    unitModel (I := I) (M := M) g₀ 3 W x
+        ![(chartModelBasis E) l, (chartModelBasis E) k,
+          ∑ p : Fin (Module.finrank ℝ E), w p • (chartModelBasis E p : TangentSpace I x)] =
+      ∑ p : Fin (Module.finrank ℝ E),
+        w p * unitModel (I := I) (M := M) g₀ 3 W x
+          ![(chartModelBasis E) l, (chartModelBasis E) k, (chartModelBasis E) p] := by
+  classical
+  set Wm : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => TangentSpace I x) ℝ :=
+    Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
+        W.toSection x) (unitTensor (I := I) (M := M) x)) with hWm
+  have hWm_eq : ∀ v : Fin 3 → TangentSpace I x,
+      unitModel (I := I) (M := M) g₀ 3 W x v = Wm v := fun v => rfl
+  rw [hWm_eq]
+  rw [show Wm ![(chartModelBasis E l : TangentSpace I x), (chartModelBasis E k : TangentSpace I x),
+          ∑ p : Fin (Module.finrank ℝ E), w p • (chartModelBasis E p : TangentSpace I x)] =
+        (Wm.toContinuousLinearMap
+          ![(chartModelBasis E l : TangentSpace I x), (chartModelBasis E k : TangentSpace I x),
+            (0 : TangentSpace I x)] 2)
+          (∑ p : Fin (Module.finrank ℝ E), w p • (chartModelBasis E p : TangentSpace I x)) from by
+    rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
+    congr 1
+    funext j; fin_cases j <;> simp [Function.update] ]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [map_smul, smul_eq_mul, hWm_eq]
+  refine congrArg (fun t : ℝ => w p * t) ?_
+  rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
+  congr 1
+  funext j; fin_cases j <;> simp [Function.update]
+
+set_option linter.unusedSectionVars false in
+theorem ricciArmOrder1KoszulCoeff_appCc_chartBasis_koszulExpanded
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
+    (x : M) (k' i' : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 3 2 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) W) x
+        ![(chartModelBasis E) k', (chartModelBasis E) i'] =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        ∑ p : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g₁ x x k l *
+            ((∑ l₁ : Fin (Module.finrank ℝ E),
+                chartInvGramMatrix (I := I) g₀ x x p l₁ *
+                  (∑ q : Fin (Module.finrank ℝ E),
+                    (chartChristoffel (I := I) g₁ x i' k' q (extChartAt I x x) -
+                      chartChristoffel (I := I) g₀ x i' k' q (extChartAt I x x)) *
+                      chartGramMatrix (I := I) g₁ x x q l₁)) *
+              unitModel (I := I) (M := M) g₀ 3 W x
+                ![(chartModelBasis E) l, (chartModelBasis E) k, (chartModelBasis E) p]) := by
+  classical
+  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x := by
+    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) x, extChartAt_source (I := I)]
+    exact mem_chart_source H x
+  have hself : ∀ t : Fin (Module.finrank ℝ E),
+      chartBasisVecFiber (I := I) x t x = chartModelBasis E t := fun t =>
+    chartBasisVecFiber_self (I := I) x t
+  rw [ricciArmOrder1KoszulCoeff_appCc_chartBasis_eq (I := I) (M := M) g₀ g₁ W x k' i']
+  have hkos : raisedKoszulVec (I := I) g₀ g₁ x (chartModelBasis E k') (chartModelBasis E i') =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (fun p => ∑ l₁ : Fin (Module.finrank ℝ E),
+          chartInvGramMatrix (I := I) g₀ x x p l₁ *
+            (∑ q : Fin (Module.finrank ℝ E),
+              (chartChristoffel (I := I) g₁ x i' k' q (extChartAt I x x) -
+                chartChristoffel (I := I) g₀ x i' k' q (extChartAt I x x)) *
+                chartGramMatrix (I := I) g₁ x x q l₁)) p •
+          (chartModelBasis E p : TangentSpace I x) := by
+    rw [show (chartModelBasis E k' : TangentSpace I x) = chartBasisVecFiber (I := I) x k' x from
+        (hself k').symm,
+      show (chartModelBasis E i' : TangentSpace I x) = chartBasisVecFiber (I := I) x i' x from
+        (hself i').symm]
+    rw [raisedKoszulVec_realizedFam_chartα (I := I) g₀ g₁ x hxgood k' i']
+    refine Finset.sum_congr rfl (fun p _ => ?_)
+    rw [hself p]
+  refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
+  rw [← Finset.mul_sum]
+  refine congrArg (fun t : ℝ => chartInvGramMatrix (I := I) g₁ x x k l * t) ?_
+  rw [hkos]
+  rw [unitModel3_slot2_chartBasis_sum (I := I) (M := M) g₀ W x l k
+    (fun p => ∑ l₁ : Fin (Module.finrank ℝ E),
+      chartInvGramMatrix (I := I) g₀ x x p l₁ *
+        (∑ q : Fin (Module.finrank ℝ E),
+          (chartChristoffel (I := I) g₁ x i' k' q (extChartAt I x x) -
+            chartChristoffel (I := I) g₀ x i' k' q (extChartAt I x x)) *
+            chartGramMatrix (I := I) g₁ x x q l₁))]
+
+set_option linter.unusedSectionVars false in
 theorem arm2_principalSymbol_chart_match
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (p : M) (v w : TangentSpace I p),
@@ -5426,6 +5670,37 @@ theorem arm2_principalSymbol_chart_match
   rw [arm2_appCc_eq_combinedTrace_unitModel4 (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' s x i k]
   rw [arm2_combinedTrace_eq_chartSlopePrincipal_add_residual (I := I) g₀ T T'
         hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s x i k]
+
+theorem chartRicciSlope_eq_threeArmBase_component
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T p v w = ccTensorBilin (I := I) g₀ T p w v)
+    (hT'symm : ∀ (p : M) (v w : TangentSpace I p),
+      ccTensorBilin (I := I) g₀ T' p v w = ccTensorBilin (I := I) g₀ T' p w v)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (i k : Fin (Module.finrank ℝ E)) :
+    chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+        (extChartAt I x x) s =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] +
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 3 2
+            (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] +
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+  sorry
 
 theorem chartSlopeRemainderOrder0_eq_baseArms_add_residual
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -5454,7 +5729,20 @@ theorem chartSlopeRemainderOrder0_eq_baseArms_add_residual
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
           ![(chartModelBasis E) k, (chartModelBasis E) i]) +
       arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
-  sorry
+  classical
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  have hmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    abs_convex_smallConstant_lt_one hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩
+  have hFOR := chartSlopeSecondOrderContribution_eq_principal_add_remainder (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x i k hy s
+  have hslope := chartRicciTraceChristoffelSlope_eq_secondOrder_add_order0 (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x i k hy hmem
+  have harm2 := arm2_principalSymbol_chart_match (I := I) g₀ T T' hTsymm hT'symm
+    hδ_lt hδ hδ'_lt hδ' s x i k
+  have hthree := chartRicciSlope_eq_threeArmBase_component (I := I) g₀ T T' hTsymm hT'symm
+    hδ_lt hδ hδ'_lt hδ' s hs x i k
+  linarith [hFOR, hslope, harm2, hthree]
 
 theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
     ∃ CΓ : ℝ, 0 ≤ CΓ ∧
@@ -6579,250 +6867,6 @@ private lemma unitModel4_consMetricSlot2_eq_chartInvGram_sum
   · rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
     congr 1
     funext j; fin_cases j <;> simp [Function.update]
-
-set_option linter.unusedSectionVars false in
-theorem iteratedCovGrad1_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
-    (h : SmoothCcTensor g₀ 0 2) (x : M)
-    (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) :
-    tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
-        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] Jdx
-        ((extChartAt I x).symm
-          ((toEuclidean (E := E)).symm (toEuclidean (E := E) (extChartAt I x x)))) =
-      euclidPartial (E := E) (Jdx 0)
-          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
-            h x ![] (Matrix.vecTail Jdx)))
-          (toEuclidean (E := E) (extChartAt I x x))
-        + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
-            (Jdx 0) ![] (Matrix.vecTail Jdx)
-            (toEuclidean (E := E) (extChartAt I x x)) := by
-  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
-  have hy : toEuclidean (E := E) (extChartAt I x x) ∈
-      chartTargetEuclid (I := I) (M := M) x :=
-    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hmemsrc
-  have hcg : iteratedCovGrad (I := I) g₀ 0 2 1 h = covGrad (I := I) (M := M) g₀ 0 2 h := by
-    rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
-  rw [hcg]
-  exact tensorChartComponentRaw_covGrad (I := I) (M := M) g₀ 0 2 h x ![] Jdx hy
-
-set_option linter.unusedSectionVars false in
-noncomputable def arm1ReadoutCovDeriv (g₀ : SmoothRiemannianMetric I M)
-    (h : SmoothCcTensor g₀ 0 2) (x : M)
-    (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) : ℝ :=
-  covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
-    (Jdx 0) ![] (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
-
-set_option linter.unusedSectionVars false in
-private lemma unitModel3_basisChart_readout_split
-    (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
-    (a b c : Fin (Module.finrank ℝ E)) :
-    unitModel (I := I) (M := M) g₀ 3 (iteratedCovGrad (I := I) g₀ 0 2 1 h) x
-        ![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c] =
-      euclidPartial (E := E) a
-          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
-            h x ![] ![b, c]))
-          (toEuclidean (E := E) (extChartAt I x x))
-        + arm1ReadoutCovDeriv (I := I) (M := M) g₀ h x ![a, b, c] := by
-  classical
-  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
-  have hroundtrip : (extChartAt I x).symm
-      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
-    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
-  rw [show (![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c] :
-        Fin 3 → TangentSpace I x) =
-      (fun j => chartModelBasis E ((![a, b, c] : Fin 3 → Fin (Module.finrank ℝ E)) j)) from by
-    funext j; fin_cases j <;> rfl]
-  rw [unitModel_basisChart_eq_tensorChartComponentRaw (I := I) (M := M) g₀ (2 + 1)
-    (iteratedCovGrad (I := I) g₀ 0 2 1 h) x (![a, b, c])]
-  rw [show tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
-        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] (![a, b, c]) x =
-      tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
-        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] (![a, b, c])
-        ((extChartAt I x).symm
-          ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x)))) from by
-    rw [hroundtrip] ]
-  rw [iteratedCovGrad1_chartComponent_readout (I := I) g₀ h x (![a, b, c])]
-  have hJ0 : (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) 0 = a := rfl
-  have hJtail : Matrix.vecTail (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) = ![b, c] := by
-    funext j; fin_cases j <;> rfl
-  simp only [arm1ReadoutCovDeriv, hJ0, hJtail]
-
-set_option linter.unusedSectionVars false in
-private def unitModel3SlotBilin
-    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
-    (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
-  LinearMap.toContinuousLinearMap
-    { toFun := fun c => LinearMap.toContinuousLinearMap
-        { toFun := fun v => f (Function.update (Function.update base i c) j v)
-          map_add' := fun v1 v2 => by
-            rw [f.map_update_add (Function.update base i c) j v1 v2]
-          map_smul' := fun r v => by
-            rw [f.map_update_smul (Function.update base i c) j r v]; rfl }
-      map_add' := fun c1 c2 => by
-        ext v
-        change f (Function.update (Function.update base i (c1 + c2)) j v) =
-          f (Function.update (Function.update base i c1) j v) +
-          f (Function.update (Function.update base i c2) j v)
-        rw [Function.update_comm hij c1 v base, Function.update_comm hij c2 v base,
-          Function.update_comm hij (c1 + c2) v base]
-        rw [f.map_update_add (Function.update base j v) i c1 c2]
-      map_smul' := fun r c => by
-        ext v
-        change f (Function.update (Function.update base i (r • c)) j v) =
-          r • f (Function.update (Function.update base i c) j v)
-        rw [Function.update_comm hij c v base, Function.update_comm hij (r • c) v base]
-        rw [f.map_update_smul (Function.update base j v) i r c] }
-
-set_option linter.unusedSectionVars false in
-private lemma unitModel3SlotBilin_apply
-    (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
-    (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) (c v : E) :
-    unitModel3SlotBilin (E := E) f i j hij base c v =
-      f (Function.update (Function.update base i c) j v) := rfl
-
-set_option linter.unusedSectionVars false in
-theorem ricciArmOrder1KoszulCoeff_appCc_chartBasis_eq
-    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
-    (x : M) (k' i' : Fin (Module.finrank ℝ E)) :
-    unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) W) x
-        ![(chartModelBasis E) k', (chartModelBasis E) i'] =
-      ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
-          chartInvGramMatrix (I := I) g₁ x x k l *
-            unitModel (I := I) (M := M) g₀ 3 W x
-              ![(chartModelBasis E) l, (chartModelBasis E) k,
-                raisedKoszulVec (I := I) g₀ g₁ x (chartModelBasis E k') (chartModelBasis E i')] := by
-  classical
-  rw [ricciArmOrder1KoszulCoeff_appCc_eq (I := I) (M := M) g₀ g₁ W x
-    (![(chartModelBasis E) k', (chartModelBasis E) i'] : Fin 2 → TangentSpace I x)]
-  set Wm : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => TangentSpace I x) ℝ :=
-    Tensor0SBundle.Tensor0SSpace.toModel
-      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
-        W.toSection x) (unitTensor (I := I) (M := M) x)) with hWm
-  have hWm_eq : ∀ w : Fin 3 → TangentSpace I x,
-      unitModel (I := I) (M := M) g₀ 3 W x w = Wm w := fun w => rfl
-  set kvec : TangentSpace I x :=
-    raisedKoszulVec (I := I) g₀ g₁ x (chartModelBasis E k') (chartModelBasis E i') with hkvec
-  have hv0 : (![(chartModelBasis E) k', (chartModelBasis E) i'] : Fin 2 → TangentSpace I x) 0 =
-      chartModelBasis E k' := rfl
-  have hv1 : (![(chartModelBasis E) k', (chartModelBasis E) i'] : Fin 2 → TangentSpace I x) 1 =
-      chartModelBasis E i' := rfl
-  rw [hv0, hv1]
-  have h01 : (0 : Fin 3) ≠ 1 := by decide
-  set F : E →L[ℝ] E →L[ℝ] ℝ :=
-    unitModel3SlotBilin (E := E) Wm 0 1 h01 ![0, 0, kvec] with hF
-  have hFapp : ∀ c v : TangentSpace I x, F c v = Wm ![c, v, kvec] := by
-    intro c v
-    rw [hF, unitModel3SlotBilin_apply]
-    congr 1
-    funext j; fin_cases j <;> simp [Function.update]
-  have hkey : ∀ k : Fin (Module.finrank ℝ E),
-      Tensor0SBundle.Tensor0SSpace.toModel
-          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
-            W.toSection x) (unitTensor (I := I) (M := M) x))
-          (Fin.cons (cometricLmodel (I := I) g₁ x
-              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-                ((Module.finBasis ℝ E).cDualBasis k)))
-            ![(Module.finBasis ℝ E) k, kvec]) =
-        F (cometricLmodel (I := I) g₁ x
-            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-              ((Module.finBasis ℝ E).cDualBasis k)))
-          ((Module.finBasis ℝ E) k) := by
-    intro k
-    rw [hFapp]
-    rfl
-  rw [Finset.sum_congr rfl (fun k _ => hkey k)]
-  rw [cometricFinBasisTrace_eq_chartInvGram_bilin (I := I) g₁ x F]
-  refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
-  rw [smul_eq_mul, hFapp, hWm_eq]
-
-set_option linter.unusedSectionVars false in
-private lemma unitModel3_slot2_chartBasis_sum
-    (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
-    (l k : Fin (Module.finrank ℝ E)) (w : Fin (Module.finrank ℝ E) → ℝ) :
-    unitModel (I := I) (M := M) g₀ 3 W x
-        ![(chartModelBasis E) l, (chartModelBasis E) k,
-          ∑ p : Fin (Module.finrank ℝ E), w p • (chartModelBasis E p : TangentSpace I x)] =
-      ∑ p : Fin (Module.finrank ℝ E),
-        w p * unitModel (I := I) (M := M) g₀ 3 W x
-          ![(chartModelBasis E) l, (chartModelBasis E) k, (chartModelBasis E) p] := by
-  classical
-  set Wm : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => TangentSpace I x) ℝ :=
-    Tensor0SBundle.Tensor0SSpace.toModel
-      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
-        W.toSection x) (unitTensor (I := I) (M := M) x)) with hWm
-  have hWm_eq : ∀ v : Fin 3 → TangentSpace I x,
-      unitModel (I := I) (M := M) g₀ 3 W x v = Wm v := fun v => rfl
-  rw [hWm_eq]
-  rw [show Wm ![(chartModelBasis E l : TangentSpace I x), (chartModelBasis E k : TangentSpace I x),
-          ∑ p : Fin (Module.finrank ℝ E), w p • (chartModelBasis E p : TangentSpace I x)] =
-        (Wm.toContinuousLinearMap
-          ![(chartModelBasis E l : TangentSpace I x), (chartModelBasis E k : TangentSpace I x),
-            (0 : TangentSpace I x)] 2)
-          (∑ p : Fin (Module.finrank ℝ E), w p • (chartModelBasis E p : TangentSpace I x)) from by
-    rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
-    congr 1
-    funext j; fin_cases j <;> simp [Function.update] ]
-  rw [map_sum]
-  refine Finset.sum_congr rfl (fun p _ => ?_)
-  rw [map_smul, smul_eq_mul, hWm_eq]
-  refine congrArg (fun t : ℝ => w p * t) ?_
-  rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
-  congr 1
-  funext j; fin_cases j <;> simp [Function.update]
-
-set_option linter.unusedSectionVars false in
-theorem ricciArmOrder1KoszulCoeff_appCc_chartBasis_koszulExpanded
-    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
-    (x : M) (k' i' : Fin (Module.finrank ℝ E)) :
-    unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) W) x
-        ![(chartModelBasis E) k', (chartModelBasis E) i'] =
-      ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
-        ∑ p : Fin (Module.finrank ℝ E),
-          chartInvGramMatrix (I := I) g₁ x x k l *
-            ((∑ l₁ : Fin (Module.finrank ℝ E),
-                chartInvGramMatrix (I := I) g₀ x x p l₁ *
-                  (∑ q : Fin (Module.finrank ℝ E),
-                    (chartChristoffel (I := I) g₁ x i' k' q (extChartAt I x x) -
-                      chartChristoffel (I := I) g₀ x i' k' q (extChartAt I x x)) *
-                      chartGramMatrix (I := I) g₁ x x q l₁)) *
-              unitModel (I := I) (M := M) g₀ 3 W x
-                ![(chartModelBasis E) l, (chartModelBasis E) k, (chartModelBasis E) p]) := by
-  classical
-  have hxgood : x ∈ chartLeviCivitaGoodSet (I := I) x := by
-    rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) x, extChartAt_source (I := I)]
-    exact mem_chart_source H x
-  have hself : ∀ t : Fin (Module.finrank ℝ E),
-      chartBasisVecFiber (I := I) x t x = chartModelBasis E t := fun t =>
-    chartBasisVecFiber_self (I := I) x t
-  rw [ricciArmOrder1KoszulCoeff_appCc_chartBasis_eq (I := I) (M := M) g₀ g₁ W x k' i']
-  have hkos : raisedKoszulVec (I := I) g₀ g₁ x (chartModelBasis E k') (chartModelBasis E i') =
-      ∑ p : Fin (Module.finrank ℝ E),
-        (fun p => ∑ l₁ : Fin (Module.finrank ℝ E),
-          chartInvGramMatrix (I := I) g₀ x x p l₁ *
-            (∑ q : Fin (Module.finrank ℝ E),
-              (chartChristoffel (I := I) g₁ x i' k' q (extChartAt I x x) -
-                chartChristoffel (I := I) g₀ x i' k' q (extChartAt I x x)) *
-                chartGramMatrix (I := I) g₁ x x q l₁)) p •
-          (chartModelBasis E p : TangentSpace I x) := by
-    rw [show (chartModelBasis E k' : TangentSpace I x) = chartBasisVecFiber (I := I) x k' x from
-        (hself k').symm,
-      show (chartModelBasis E i' : TangentSpace I x) = chartBasisVecFiber (I := I) x i' x from
-        (hself i').symm]
-    rw [raisedKoszulVec_realizedFam_chartα (I := I) g₀ g₁ x hxgood k' i']
-    refine Finset.sum_congr rfl (fun p _ => ?_)
-    rw [hself p]
-  refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
-  rw [← Finset.mul_sum]
-  refine congrArg (fun t : ℝ => chartInvGramMatrix (I := I) g₁ x x k l * t) ?_
-  rw [hkos]
-  rw [unitModel3_slot2_chartBasis_sum (I := I) (M := M) g₀ W x l k
-    (fun p => ∑ l₁ : Fin (Module.finrank ℝ E),
-      chartInvGramMatrix (I := I) g₀ x x p l₁ *
-        (∑ q : Fin (Module.finrank ℝ E),
-          (chartChristoffel (I := I) g₁ x i' k' q (extChartAt I x x) -
-            chartChristoffel (I := I) g₀ x i' k' q (extChartAt I x x)) *
-            chartGramMatrix (I := I) g₁ x x q l₁))]
 
 end TensorSpectral
 end Parabolic
