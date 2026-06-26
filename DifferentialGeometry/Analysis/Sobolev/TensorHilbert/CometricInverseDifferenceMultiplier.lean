@@ -305,7 +305,92 @@ lemma sqrt_inner_gInvDiffRaisedEndo_le
     rw [div_mul_eq_mul_div, le_div_iff₀ hcoeff]
     rw [mul_comm N (1 - δ)]; exact hNN
 
-/-! ## Base-point smoothness of the raised representative -/
+private lemma g0_cross_inverseMetricSharp_eq_g1
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (a b : TangentSpace I x) :
+    g₀.inner x (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x a)) b
+      = g₁.inner x (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x b))
+            (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x a)) := by
+  rw [g₀.symm x _ b, ← cotangentToDual_g0FlatCLM (I := I) g₀ x b
+    (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x a)),
+    inverseMetricSharpFib_inner, cotangentToDualLinear_apply]
+
+theorem gInvDiffRaisedEndo_g0_self_adjoint (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) w
+      = g₀.inner x v (gInvDiffRaisedEndo (I := I) g₀ g₁ x w) := by
+  rw [gInvDiffRaisedEndo_apply, gInvDiffRaisedEndo_apply, map_sub, map_sub,
+    ContinuousLinearMap.sub_apply]
+  have hcross :
+      g₀.inner x (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v)) w
+        = g₀.inner x v (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x w)) := by
+    rw [g0_cross_inverseMetricSharp_eq_g1 (I := I) g₀ g₁ x v w]
+    rw [g₀.symm x v _, g0_cross_inverseMetricSharp_eq_g1 (I := I) g₀ g₁ x w v]
+    exact g₁.symm x _ _
+  rw [hcross]
+
+theorem abs_sum_g0_inner_gInvDiffRaisedEndo_le
+    {n : ℕ} (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) (u v : Fin n → TangentSpace I x) :
+    |∑ a, g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x (u a)) (v a)|
+      ≤ (δ / (1 - δ)) * Real.sqrt (∑ a, g₀.inner x (u a) (u a))
+          * Real.sqrt (∑ a, g₀.inner x (v a) (v a)) := by
+  classical
+  set Λ : TangentSpace I x →L[ℝ] TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x with hΛ
+  set κ : ℝ := δ / (1 - δ) with hκ_def
+  have hκ : 0 ≤ κ := div_nonneg hδ_nn (by linarith)
+  have hper : ∀ a, Real.sqrt (g₀.inner x (Λ (u a)) (Λ (u a)))
+      ≤ κ * Real.sqrt (g₀.inner x (u a) (u a)) := by
+    intro a
+    have hsqrt := sqrt_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x (u a)
+    rw [← hΛ, ← hκ_def] at hsqrt
+    exact hsqrt
+  set αu : Fin n → ℝ := fun a => Real.sqrt (g₀.inner x (u a) (u a)) with hαu
+  set βv : Fin n → ℝ := fun a => Real.sqrt (g₀.inner x (v a) (v a)) with hβv
+  have hαu_nn : ∀ a, 0 ≤ αu a := fun a => Real.sqrt_nonneg _
+  have hβv_nn : ∀ a, 0 ≤ βv a := fun a => Real.sqrt_nonneg _
+  have hterm : ∀ a, |g₀.inner x (Λ (u a)) (v a)| ≤ κ * αu a * βv a := by
+    intro a
+    have hCS := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x (Λ (u a)) (v a)
+    have h1 : Real.sqrt (g₀.inner x (Λ (u a)) (Λ (u a))) * βv a ≤ (κ * αu a) * βv a :=
+      mul_le_mul_of_nonneg_right (hper a) (hβv_nn a)
+    calc |g₀.inner x (Λ (u a)) (v a)|
+        ≤ Real.sqrt (g₀.inner x (Λ (u a)) (Λ (u a))) * βv a := hCS
+      _ ≤ (κ * αu a) * βv a := h1
+      _ = κ * αu a * βv a := by ring
+  have hsum1 : |∑ a, g₀.inner x (Λ (u a)) (v a)| ≤ ∑ a, κ * αu a * βv a := by
+    refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+    exact Finset.sum_le_sum (fun a _ => hterm a)
+  have hCSsum : (∑ a, αu a * βv a)
+      ≤ Real.sqrt (∑ a, αu a ^ 2) * Real.sqrt (∑ a, βv a ^ 2) := by
+    have hsq := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ αu βv
+    have hL_nn : 0 ≤ ∑ a, αu a * βv a :=
+      Finset.sum_nonneg (fun a _ => mul_nonneg (hαu_nn a) (hβv_nn a))
+    have hA_nn : 0 ≤ ∑ a, αu a ^ 2 := Finset.sum_nonneg (fun a _ => sq_nonneg _)
+    calc ∑ a, αu a * βv a
+        = Real.sqrt ((∑ a, αu a * βv a) ^ 2) := (Real.sqrt_sq hL_nn).symm
+      _ ≤ Real.sqrt ((∑ a, αu a ^ 2) * (∑ a, βv a ^ 2)) := Real.sqrt_le_sqrt hsq
+      _ = Real.sqrt (∑ a, αu a ^ 2) * Real.sqrt (∑ a, βv a ^ 2) := Real.sqrt_mul hA_nn _
+  have hαsq : (∑ a, αu a ^ 2) = ∑ a, g₀.inner x (u a) (u a) := by
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [hαu]; exact Real.sq_sqrt (metric_inner_self_nonneg (I := I) (M := M) g₀ x (u a))
+  have hβsq : (∑ a, βv a ^ 2) = ∑ a, g₀.inner x (v a) (v a) := by
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [hβv]; exact Real.sq_sqrt (metric_inner_self_nonneg (I := I) (M := M) g₀ x (v a))
+  calc |∑ a, g₀.inner x (Λ (u a)) (v a)|
+      ≤ ∑ a, κ * αu a * βv a := hsum1
+    _ = κ * ∑ a, αu a * βv a := by
+        rw [Finset.mul_sum]; refine Finset.sum_congr rfl (fun a _ => by ring)
+    _ ≤ κ * (Real.sqrt (∑ a, αu a ^ 2) * Real.sqrt (∑ a, βv a ^ 2)) :=
+        mul_le_mul_of_nonneg_left hCSsum hκ
+    _ = κ * Real.sqrt (∑ a, g₀.inner x (u a) (u a)) * Real.sqrt (∑ a, g₀.inner x (v a) (v a)) := by
+        rw [hαsq, hβsq]; ring
+
+omit [CompactSpace M] in
 
 omit [CompactSpace M] in
 /-- **On-chart-source smoothness of the metric-flat covector field's chart components.**  For a
