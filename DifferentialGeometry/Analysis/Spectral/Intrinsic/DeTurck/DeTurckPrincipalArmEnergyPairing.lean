@@ -8,6 +8,8 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
+import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 
 noncomputable section
 
@@ -126,8 +128,62 @@ private theorem armPrincipalSlotPairing_le_dirichlet_top
     (u₀ : SmoothCcTensor g₀ 0 2) :
     armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
       (δ / (1 - δ)) *
-        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 :=
-  sorry
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  set A : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
+    iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀ with hA_def
+  set B : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
+    appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+        (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁)) A with hB_def
+  have hBfun : ∀ x : M,
+      B.toFun x =
+        TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotApplied
+            (I := I) g₀ g₁ (2 + n) x (A.toSection x)) := by
+    intro x
+    rfl
+  have hWS_int : Integrable
+      (fun x => tensorInnerPointwise (I := I) (M := M) g₀ 0 ((2 + n) + 1) x
+        (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
+        (TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotApplied
+            (I := I) g₀ g₁ (2 + n) x (A.toSection x))))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    have hcross := DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+      (I := I) (M := M) (g := g₀) (r := 0) (s := (2 + n) + 1) A B
+    refine hcross.congr ?_
+    filter_upwards with x
+    rw [hBfun x]
+    rfl
+  have hWW_int : Integrable
+      (fun x => tensorInnerPointwise (I := I) (M := M) g₀ 0 ((2 + n) + 1) x
+        (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
+        (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+      (I := I) (M := M) (g := g₀) (r := 0) (s := (2 + n) + 1) A A
+  have htool := DifferentialGeometry.Analysis.Sobolev.TensorHilbert.tensorL2Inner_gInvDiffSlot_le
+    (I := I) (M := M) g₀ g₁ h htie hδ_lt hδ_nn hδ (2 + n)
+    (fun x => A.toSection x) hWS_int hWW_int
+  have hnorm :
+      tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
+          (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
+          (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)) =
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 := by
+    have hAA : tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1) A.toFun A.toFun =
+        (⟪A, A⟫_ℝ : ℝ) := (SmoothCcTensor.inner_def (I := I) (M := M) A A).symm
+    rw [show (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)) = A.toFun from rfl,
+      hAA, real_inner_self_eq_norm_sq, SmoothCcTensor.norm_toL2]
+  have hslot :
+      armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
+        (δ / (1 - δ)) *
+          tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
+            (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
+            (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)) := htool
+  rw [hnorm] at hslot
+  exact hslot
 
 private theorem dirichlet_top_le_spectral_add_lower
     [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
