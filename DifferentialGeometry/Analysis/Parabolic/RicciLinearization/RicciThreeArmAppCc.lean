@@ -3566,6 +3566,140 @@ private lemma partialDeriv_realizedLinearizedChristoffelPrincipal
           h1 h2]
   rw [hSderiv, hS, hG]
 
+set_option linter.unusedSectionVars false in
+private lemma realizedGramDeriv_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (a b : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) :
+    DifferentiableAt ℝ (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b) y₀ := by
+  have hrw : realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b =
+      fun y => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b y -
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b y := by
+    funext y; rw [realizedGramDeriv]
+  rw [hrw]
+  exact (chartGramOnE_differentiableAt_local (I := I)
+      (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b hy).sub
+    (chartGramOnE_differentiableAt_local (I := I)
+      (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b hy)
+
+set_option linter.unusedSectionVars false in
+private lemma gramBracket_realizedFam_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i j l : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) (s₀ : ℝ) :
+    DifferentiableAt ℝ
+      (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.gramBracket
+        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j l) y₀ := by
+  have hrw :
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.gramBracket
+        (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j l =
+      fun y => partialDeriv (E := E) i
+          (chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x l j) y +
+        partialDeriv (E := E) j
+          (chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x l i) y -
+        partialDeriv (E := E) l
+          (chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j) y := by
+    funext y
+    rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.gramBracket]
+  rw [hrw]
+  exact ((partialDeriv_chartGramOnE_differentiableAt_local (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i l j hy).add
+      (partialDeriv_chartGramOnE_differentiableAt_local (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x j l i hy)).sub
+    (partialDeriv_chartGramOnE_differentiableAt_local (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x l i j hy)
+
+set_option linter.unusedSectionVars false in
+private lemma realizedChristoffelNonPrincipalInner_differentiableAt_local
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (k l : Fin (Module.finrank ℝ E)) {y₀ : E}
+    (hy : y₀ ∈ interior (extChartAt I x).target) (s₀ : ℝ) :
+    DifferentiableAt ℝ
+      (fun y => -(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p y *
+            realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x p q y *
+            chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x q l y)) y₀ := by
+  refine DifferentiableAt.fun_neg ?_
+  refine DifferentiableAt.fun_sum (fun q _ => ?_)
+  refine DifferentiableAt.fun_sum (fun p _ => ?_)
+  exact ((chartInvGramOnE_differentiableAt_interior (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p hy).mul
+      (realizedGramDeriv_differentiableAt_local (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x p q hy)).mul
+    (chartInvGramOnE_differentiableAt_interior (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x q l hy)
+
+set_option linter.unusedSectionVars false in
+private lemma partialDeriv_realizedChristoffelNonPrincipal
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (i j k d : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ interior (extChartAt I x).target) (s₀ : ℝ) :
+    partialDeriv (E := E) d
+        (fun y' => realizedChristoffelNonPrincipal (I := I) g₀ T T'
+          hδ_lt hδ hδ'_lt hδ' x i j k y' s₀) y =
+      (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) d
+            (fun y' => -(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p y' *
+                realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x p q y' *
+                chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x q l y')) y *
+            DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.gramBracket
+              (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j l y +
+          (-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p y *
+                realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x p q y *
+                chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x q l y)) *
+            DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.gramBracketDeriv
+              (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x d i j l y) := by
+  classical
+  set F : Fin (Module.finrank ℝ E) → E → ℝ := fun l y' =>
+    -(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
+      chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x k p y' *
+        realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x p q y' *
+        chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x q l y') with hF
+  set B : Fin (Module.finrank ℝ E) → E → ℝ := fun l =>
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.gramBracket
+      (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j l with hB
+  have hF_diff : ∀ l : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (F l) y := fun l =>
+    realizedChristoffelNonPrincipalInner_differentiableAt_local (I := I) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ' x k l hy s₀
+  have hB_diff : ∀ l : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (B l) y := fun l =>
+    gramBracket_realizedFam_differentiableAt_local (I := I) g₀ T T' hδ hδ' x i j l hy s₀
+  have hsummand_diff : ∀ l : Fin (Module.finrank ℝ E),
+      DifferentiableAt ℝ (fun y' => F l y' * B l y') y :=
+    fun l => (hF_diff l).mul (hB_diff l)
+  have hrewrite : (fun y' => realizedChristoffelNonPrincipal (I := I) g₀ T T'
+        hδ_lt hδ hδ'_lt hδ' x i j k y' s₀) =
+      fun y' => (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E), F l y' * B l y' := by
+    funext y'
+    rw [realizedChristoffelNonPrincipal]
+  rw [hrewrite]
+  rw [partialDeriv_const_mul (1 / 2 : ℝ)
+        (fun y' => ∑ l : Fin (Module.finrank ℝ E), F l y' * B l y')
+        (DifferentiableAt.fun_sum (fun l _ => hsummand_diff l))]
+  congr 1
+  rw [partialDeriv_sum Finset.univ (fun l y' => F l y' * B l y')
+        (fun l _ => hsummand_diff l)]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [partialDeriv_mul (F l) (B l) (hF_diff l) (hB_diff l)]
+  rw [hF, hB]
+  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.partialDeriv_gramBracket_eq
+    (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x d i j l hy]
+
 theorem chartSlopeSecondOrderContribution_eq_principal_add_remainder
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
