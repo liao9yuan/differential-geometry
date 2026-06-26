@@ -4202,7 +4202,29 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
           (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
-            ‖(iteratedCovGrad (I := I) g₀ 0 2 j (T - T')).toSection x‖)))
+            ‖(iteratedCovGrad (I := I) g₀ 0 2 j (T - T')).toSection x‖))) ∧
+  ((∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v) →
+    (∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v) →
+    ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+      ∀ (x : M) (i k : Fin (Module.finrank ℝ E))
+        (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
+        chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+              (extChartAt I x x) s +
+            chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+              (extChartAt I x x) s =
+          unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2
+                (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + C0 s)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 3 2
+                (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + C1 s)
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+              + appCc (I := I) (M := M) g₀ 4 2
+                (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+              ![(chartModelBasis E) k, (chartModelBasis E) i])
 
 theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
     ∃ CΓ : ℝ, 0 ≤ CΓ ∧
@@ -4299,8 +4321,19 @@ theorem exists_corrField_identity_of_symm
               + appCc (I := I) (M := M) g₀ 4 2
                 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-              ![(chartModelBasis E) k, (chartModelBasis E) i] :=
-  sorry
+              ![(chartModelBasis E) k, (chartModelBasis E) i] := by
+  intro s hs x i k hδ_lt hδ'_lt
+  obtain ⟨_hj0, _hj1, _hbound, hident⟩ :=
+    exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ'
+      |>.choose_spec.choose_spec
+  have hkey := hident hTsymm hT'symm s hs x i k hδ_lt hδ'_lt
+  rw [show linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s =
+      linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
+        + linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s from rfl,
+    show linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s =
+      linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s
+        + linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s from rfl]
+  exact hkey
 
 theorem chartSlopeContributions_eq_threeArm_component
     (g₀ : SmoothRiemannianMetric I M)
@@ -4503,7 +4536,7 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
   obtain ⟨hbase0, hbase2⟩ := hbase T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
   have harm1' := harm1 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
   have hdata := hCsub T T' hR hTball hT'ball x
-  obtain ⟨_hj0, _hj1, hbound⟩ :=
+  obtain ⟨_hj0, _hj1, hbound, _hident⟩ :=
     (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
   obtain ⟨hb0, hb1⟩ := hbound s hs x
   have hdata_nn : 0 ≤ (∑ j ∈ Finset.range 3,
