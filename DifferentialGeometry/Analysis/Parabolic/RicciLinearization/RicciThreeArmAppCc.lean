@@ -6802,6 +6802,17 @@ private lemma firstOrderRemainder_add_order0_eq_baseArms_add_arm2residual
     abs_convex_smallConstant_lt_one hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩
   simp only [linearizedChristoffel_eq_principal_add_nonPrincipal (I := I) g₀ T T'
     hδ_lt hδ hδ'_lt hδ' x _ _ _ hyint hmem]
+  simp only [partialDeriv_realizedChristoffelNonPrincipal (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x _ _ _ _ hyint s]
+  simp only [realizedLinearizedChristoffelPrincipal, realizedChristoffelNonPrincipal,
+    arm2ReadoutCovDerivPair_center_eq (I := I) (M := M) g₀ (T - T') x,
+    arm1ReadoutCovDeriv_center_eq (I := I) (M := M) g₀ (T - T') x,
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.chartChristoffel_eq_sum_invGramOnE_bracket
+      (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x,
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.chartChristoffel_eq_sum_invGramOnE_bracket
+      (I := I) g₀ x]
+  simp only [partialDeriv_realizedGramDeriv_eq_half_sum_euclidPartial (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x]
   sorry
 
 theorem chartRicciSlope_eq_threeArmBase_component
