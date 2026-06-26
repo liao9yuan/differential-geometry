@@ -185,6 +185,21 @@ private theorem tensorInnerPointwise_negGInvDiffSlot_le
     (fun v => negGInvDiffRaisedEndo_inner_self_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v)
     W e bse hbse horth
 
+theorem rawConnLap_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T v : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s T).toFun v.toFun =
+      tensorL2Inner (I := I) (M := M) g r s T.toFun
+        (rawTensorConnLapSmooth (I := I) g r s v).toFun := by
+  have hTv := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
+    (I := I) (M := M) g r s T v
+  have hvT := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
+    (I := I) (M := M) g r s v T
+  have hsymm1 := tensorL2Inner_symm (I := I) (M := M) g r (s + 1)
+    (covGrad (I := I) (M := M) g r s T).toFun (covGrad (I := I) (M := M) g r s v).toFun
+  have hsymm2 := tensorL2Inner_symm (I := I) (M := M) g r s
+    (rawTensorConnLapSmooth (I := I) g r s v).toFun T.toFun
+  rw [hsymm1, hvT] at hTv; rw [← hsymm2]; linarith [hTv]
+
 private noncomputable def armPrincipalSlotPairing
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) : ℝ :=
   tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
