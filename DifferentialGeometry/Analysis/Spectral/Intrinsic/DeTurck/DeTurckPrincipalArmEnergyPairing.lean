@@ -200,6 +200,108 @@ theorem rawConnLap_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (rawTensorConnLapSmooth (I := I) g r s v).toFun T.toFun
   rw [hsymm1, hvT] at hTv; rw [← hsymm2]; linarith [hTv]
 
+private theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S₁ S₂ T : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s (S₁.toFun - S₂.toFun) T.toFun =
+      tensorL2Inner (I := I) (M := M) g r s S₁.toFun T.toFun -
+        tensorL2Inner (I := I) (M := M) g r s S₂.toFun T.toFun := by
+  have hsub : (S₁.toFun - S₂.toFun) = S₁.toFun + (-1 : ℝ) • S₂.toFun := by
+    funext x
+    rw [Pi.sub_apply, Pi.add_apply, Pi.smul_apply]
+    module
+  have hint2 : MeasureTheory.Integrable (fun x =>
+      tensorInnerPointwise (I := I) (M := M) g r s x (((-1 : ℝ) • S₂.toFun) x) (T.toFun x))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g) := by
+    have hbase := DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+      (I := I) (M := M) S₂ T
+    have heq : (fun x => tensorInnerPointwise (I := I) (M := M) g r s x
+          (((-1 : ℝ) • S₂.toFun) x) (T.toFun x))
+        = (fun x => (-1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s x
+          (S₂.toFun x) (T.toFun x)) := by
+      funext x
+      show tensorInnerPointwise (I := I) (M := M) g r s x ((-1 : ℝ) • S₂.toFun x) (T.toFun x) = _
+      rw [tensorInnerPointwise_smul_left]
+    rw [heq]
+    exact hbase.const_mul (-1 : ℝ)
+  rw [hsub, tensorL2Inner_add_left (I := I) (M := M) g r s S₁.toFun ((-1 : ℝ) • S₂.toFun) T.toFun
+    (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+      (I := I) (M := M) S₁ T) hint2,
+    tensorL2Inner_smul_left]
+  ring
+
+private theorem tensorL2Inner_sub_right_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S T₁ T₂ : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s S.toFun (T₁.toFun - T₂.toFun) =
+      tensorL2Inner (I := I) (M := M) g r s S.toFun T₁.toFun -
+        tensorL2Inner (I := I) (M := M) g r s S.toFun T₂.toFun := by
+  have hsub : (T₁.toFun - T₂.toFun) = T₁.toFun + (-1 : ℝ) • T₂.toFun := by
+    funext x
+    rw [Pi.sub_apply, Pi.add_apply, Pi.smul_apply]
+    module
+  have hint2 : MeasureTheory.Integrable (fun x =>
+      tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) (((-1 : ℝ) • T₂.toFun) x))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g) := by
+    have hbase := DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+      (I := I) (M := M) S T₂
+    have heq : (fun x => tensorInnerPointwise (I := I) (M := M) g r s x
+          (S.toFun x) (((-1 : ℝ) • T₂.toFun) x))
+        = (fun x => (-1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s x
+          (S.toFun x) (T₂.toFun x)) := by
+      funext x
+      show tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) ((-1 : ℝ) • T₂.toFun x) = _
+      rw [tensorInnerPointwise_smul_right]
+    rw [heq]
+    exact hbase.const_mul (-1 : ℝ)
+  rw [hsub, tensorL2Inner_add_right (I := I) (M := M) g r s S.toFun T₁.toFun ((-1 : ℝ) • T₂.toFun)
+    (DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+      (I := I) (M := M) S T₁) hint2,
+    tensorL2Inner_smul_right]
+  ring
+
+theorem oneMinusConnLapSmooth_l2Inner_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T v : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s (oneMinusConnLapSmooth (I := I) g r s T).toFun v.toFun =
+      tensorL2Inner (I := I) (M := M) g r s T.toFun
+        (oneMinusConnLapSmooth (I := I) g r s v).toFun := by
+  have hTfun : (oneMinusConnLapSmooth (I := I) g r s T).toFun =
+      T.toFun - (rawTensorConnLapSmooth (I := I) g r s T).toFun := by
+    unfold oneMinusConnLapSmooth
+    rw [SmoothCcTensor.toFun_sub]
+  have hvfun : (oneMinusConnLapSmooth (I := I) g r s v).toFun =
+      v.toFun - (rawTensorConnLapSmooth (I := I) g r s v).toFun := by
+    unfold oneMinusConnLapSmooth
+    rw [SmoothCcTensor.toFun_sub]
+  rw [hTfun, hvfun,
+    tensorL2Inner_sub_left_smoothCc (I := I) (M := M) g r s T
+      (rawTensorConnLapSmooth (I := I) g r s T) v,
+    tensorL2Inner_sub_right_smoothCc (I := I) (M := M) g r s T v
+      (rawTensorConnLapSmooth (I := I) g r s v)]
+  rw [rawConnLap_selfAdjoint (I := I) (M := M) g r s T v]
+
+theorem oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) (v : SmoothCcTensor g r s) :
+    oneMinusConnLapSmoothIter (I := I) g r s k (oneMinusConnLapSmooth (I := I) g r s v) =
+      oneMinusConnLapSmooth (I := I) g r s (oneMinusConnLapSmoothIter (I := I) g r s k v) := by
+  induction k with
+  | zero => simp only [oneMinusConnLapSmoothIter_zero]
+  | succ p ih =>
+    rw [oneMinusConnLapSmoothIter_succ, ih, oneMinusConnLapSmoothIter_succ]
+
+theorem oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (n : ℕ) (T v : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s
+        (oneMinusConnLapSmoothIter (I := I) g r s n T).toFun v.toFun =
+      tensorL2Inner (I := I) (M := M) g r s T.toFun
+        (oneMinusConnLapSmoothIter (I := I) g r s n v).toFun := by
+  induction n generalizing v with
+  | zero => simp only [oneMinusConnLapSmoothIter_zero]
+  | succ k ih =>
+    rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_succ]
+    rw [oneMinusConnLapSmooth_l2Inner_selfAdjoint (I := I) (M := M) g r s
+      (oneMinusConnLapSmoothIter (I := I) g r s k T) v]
+    rw [ih (oneMinusConnLapSmooth (I := I) g r s v),
+      oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm]
+
 private noncomputable def armPrincipalSlotPairing
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) : ℝ :=
   tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
