@@ -208,9 +208,8 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound
             (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
           armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
         Ccomm *
-          (‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ *
-            ∑ j ∈ Finset.range (n + 1),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) :=
+          (∑ j ∈ Finset.range (n + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 :=
   sorry
 
 private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le
@@ -230,53 +229,36 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le
   obtain ⟨Ccomm, hCcomm_nn, hcomm⟩ :=
     oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound
       (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
-  obtain ⟨Ctop, hCtop_nn, htop⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.exists_iteratedCovGrad_sum_le_smoothCcToTensorHs
-      (I := I) (M := M) g₀ (n + 1)
   obtain ⟨Clow, hClow_nn, hlow⟩ :=
     DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.exists_iteratedCovGrad_sum_le_smoothCcToTensorHs
       (I := I) (M := M) g₀ n
-  refine ⟨Ccomm ^ 2 * (Ctop ^ 2 * Clow ^ 2), by positivity, fun u₀ => ?_⟩
+  refine ⟨Ccomm * Clow ^ 2, by positivity, fun u₀ => ?_⟩
   set Mtop := ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u₀‖ with hMtop_def
   set Mlow := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ with hMlow_def
   have hMtop_nn : 0 ≤ Mtop := norm_nonneg _
   have hMlow_nn : 0 ≤ Mlow := norm_nonneg _
-  have hgtop_nn : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ := norm_nonneg _
   have hsumlow_nn : 0 ≤ ∑ j ∈ Finset.range (n + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ :=
     Finset.sum_nonneg (fun j _ => norm_nonneg _)
-  have hgtop_le : ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ ≤ Ctop * Mtop := by
-    have hju := htop u₀
-    have hcast : ((n + 1 : ℕ) : ℝ) = ((n : ℕ) : ℝ) + 1 := by push_cast; ring
-    rw [hcast] at hju
-    refine le_trans ?_ hju
-    rw [Finset.sum_range_succ]
-    have : 0 ≤ ∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := hsumlow_nn
-    linarith
   have hsumlow_le : ∑ j ∈ Finset.range (n + 1),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ ≤ Clow * Mlow := hlow u₀
-  have hcross :
-      ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ *
-          ∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖
-        ≤ (Ctop * Mtop) * (Clow * Mlow) :=
-    mul_le_mul hgtop_le hsumlow_le hsumlow_nn (mul_nonneg hCtop_nn hMtop_nn)
+  have hsumlow_sq :
+      (∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2
+        ≤ (Clow * Mlow) ^ 2 := by
+    apply sq_le_sq'
+    · nlinarith [hsumlow_nn, mul_nonneg hClow_nn hMlow_nn]
+    · exact hsumlow_le
   have hcu := hcomm u₀
-  have hyoung : Ccomm * ((Ctop * Mtop) * (Clow * Mlow)) ≤
-      (1 / 4 : ℝ) * Mtop ^ 2 + Ccomm ^ 2 * (Ctop ^ 2 * Clow ^ 2) * Mlow ^ 2 := by
-    nlinarith [sq_nonneg (Mtop - 2 * Ccomm * (Ctop * (Clow * Mlow))),
-      mul_nonneg hCtop_nn hMtop_nn, mul_nonneg hClow_nn hMlow_nn, hCcomm_nn,
-      sq_nonneg Mtop, sq_nonneg Mlow]
+  have hMtop_sq_nn : 0 ≤ (1 / 4 : ℝ) * Mtop ^ 2 := by positivity
   calc tensorL2Inner (I := I) (M := M) g₀ 0 2
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
           (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
         armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀
       ≤ Ccomm *
-          (‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ *
-            ∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) := hcu
-    _ ≤ Ccomm * ((Ctop * Mtop) * (Clow * Mlow)) :=
-        mul_le_mul_of_nonneg_left hcross hCcomm_nn
-    _ ≤ (1 / 4 : ℝ) * Mtop ^ 2 +
-          Ccomm ^ 2 * (Ctop ^ 2 * Clow ^ 2) * Mlow ^ 2 := hyoung
+          (∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 := hcu
+    _ ≤ Ccomm * (Clow * Mlow) ^ 2 :=
+        mul_le_mul_of_nonneg_left hsumlow_sq hCcomm_nn
+    _ ≤ (1 / 4 : ℝ) * Mtop ^ 2 + Ccomm * Clow ^ 2 * Mlow ^ 2 := by nlinarith [hMtop_sq_nn]
 
 private theorem oneMinusConnLapIter_pairing_fold
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
