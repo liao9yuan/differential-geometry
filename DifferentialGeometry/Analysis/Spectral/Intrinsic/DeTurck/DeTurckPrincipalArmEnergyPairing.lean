@@ -210,6 +210,64 @@ private noncomputable def armPrincipalSlotPairing
         (I := I) g₀ g₁ (2 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x)))
 
+private theorem armPrincipalSlotPairing_eq_neg_inner
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) :
+    armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
+      - (⟪iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀,
+          appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+            (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+              (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁))
+            (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) := by
+  classical
+  set A : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
+    iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀ with hA_def
+  set B : SmoothCcTensor g₀ 0 ((2 + n) + 1) :=
+    appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+      (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+        (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁)) A with hB_def
+  have hBfun : ∀ x : M,
+      B.toFun x =
+        TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+          (gInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x)) := fun x => rfl
+  rw [SmoothCcTensor.inner_def (I := I) (M := M) A B]
+  rw [armPrincipalSlotPairing]
+  have heq :
+      (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+          (negGInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x)))
+        = (fun x => - B.toFun x) := by
+    funext x
+    rw [hBfun x,
+      toModel_negGInvDiffSlotApplied_eq (I := I) g₀ g₁ (2 + n) x (A.toSection x)]
+  rw [show (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x)) = A.toFun from rfl,
+    heq]
+  have hsmul : (fun x => - B.toFun x) = (-1 : ℝ) • B.toFun := by
+    funext x; rw [Pi.smul_apply, neg_one_smul]
+  rw [hsmul,
+    tensorL2Inner_smul_right (I := I) (M := M) g₀ 0 ((2 + n) + 1) (-1 : ℝ) A.toFun B.toFun]
+  ring
+
+private theorem exists_oneMinusConnLapIter_arm_balancedFold
+    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    ∃ Ccomm : ℝ, 0 ≤ Ccomm ∧
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        ∃ rem : ℝ,
+          tensorL2Inner (I := I) (M := M) g₀ 0 2
+              (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+              (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun =
+            - (⟪iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀,
+                appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
+                  (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
+                    (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁))
+                  (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) + rem ∧
+            rem ≤ Ccomm *
+              (∑ j ∈ Finset.range (n + 1),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 :=
+  sorry
+
 private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -224,8 +282,14 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound
           armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
         Ccomm *
           (∑ j ∈ Finset.range (n + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 :=
-  sorry
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 := by
+  obtain ⟨Ccomm, hCcomm_nn, hfold⟩ :=
+    exists_oneMinusConnLapIter_arm_balancedFold
+      (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
+  refine ⟨Ccomm, hCcomm_nn, fun u₀ => ?_⟩
+  obtain ⟨rem, hrem_eq, hrem_le⟩ := hfold u₀
+  rw [hrem_eq, armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ n u₀]
+  linarith [hrem_le]
 
 private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
