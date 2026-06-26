@@ -5752,6 +5752,340 @@ private lemma partialDeriv_realizedGramDeriv_eq_half_sum_euclidPartial
   rw [hPab, hPba]
   ring
 
+private lemma sum_pi_fin_succ' {n : ℕ} {β : Type*} [AddCommMonoid β]
+    {N : ℕ} (g : (Fin (N + 1) → Fin n) → β) :
+    (∑ p : Fin (N + 1) → Fin n, g p)
+      = ∑ a : Fin n, ∑ q : Fin N → Fin n, g (Fin.cons a q) := by
+  classical
+  rw [← (Fin.consEquiv (fun _ : Fin (N + 1) => Fin n)).sum_comp g]
+  rw [Fintype.sum_prod_type]
+  rfl
+
+set_option linter.unusedSectionVars false in
+private lemma covDerivLowerOrderTerm02_center_eq
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (m p q : Fin (Module.finrank ℝ E)) :
+    covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S x m ![] ![p, q]
+        (toEuclidean (E := E) (extChartAt I x x)) =
+      (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x m p r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![r, q] x)
+      + (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x m q r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![p, r] x) := by
+  classical
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hround : (extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
+    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
+  have hcenter : (toEuclidean (E := E)) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hmemsrc
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hmemsrc
+  rw [covDerivLowerOrderTerm_def]
+  rw [hround]
+  haveI : Unique (Fin 0 → Fin (Module.finrank ℝ E)) :=
+    ⟨⟨![]⟩, fun f => by funext j; exact absurd j.2 (by simp)⟩
+  rw [Fintype.sum_prod_type]
+  rw [Finset.sum_eq_single (![] : Fin 0 → Fin (Module.finrank ℝ E))]
+  · -- inner sum over J' : Fin 2 → _, with coeff(![], J')
+    simp only [covDerivLowerOrderCoeff_def]
+    simp only [Finset.univ_eq_empty, Finset.sum_empty, if_true, mul_one, zero_sub]
+    have hout : ∀ J' : Fin 2 → Fin (Module.finrank ℝ E),
+        (∑ l : Fin 2, outputSlotCoeff (I := I) (M := M) g₀ 2 x m l ![p, q] J'
+            (toEuclidean (E := E) (extChartAt I x x))) =
+          chartChristoffel (I := I) g₀ x p m (J' 0) (extChartAt I x x) *
+              (if q = J' 1 then (1 : ℝ) else 0) +
+            chartChristoffel (I := I) g₀ x q m (J' 1) (extChartAt I x x) *
+              (if p = J' 0 then (1 : ℝ) else 0) := by
+      intro J'
+      rw [Fin.sum_univ_two]
+      rw [outputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g₀ 2 x m 0 ![p, q] J' hcenter,
+        outputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g₀ 2 x m 1 ![p, q] J' hcenter]
+      rw [hround]
+      simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+      rw [chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hbase m (J' 0) p,
+        chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hbase m (J' 1) q]
+      have herase0 : (Finset.univ.erase (0 : Fin 2)) = {(1 : Fin 2)} := by decide
+      have herase1 : (Finset.univ.erase (1 : Fin 2)) = {(0 : Fin 2)} := by decide
+      rw [herase0, herase1]
+      simp only [Finset.prod_singleton, Matrix.cons_val_zero, Matrix.cons_val_one]
+    rw [Finset.sum_congr rfl (fun J' _ => by rw [hout J'] :
+      ∀ J' ∈ Finset.univ,
+        (-∑ x_2, outputSlotCoeff (I := I) (M := M) g₀ 2 x m x_2 ![p, q] J'
+            (toEuclidean (E := E) (extChartAt I x x))) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] J' x =
+        (-(chartChristoffel (I := I) g₀ x p m (J' 0) (extChartAt I x x) *
+              (if q = J' 1 then (1 : ℝ) else 0) +
+            chartChristoffel (I := I) g₀ x q m (J' 1) (extChartAt I x x) *
+              (if p = J' 0 then (1 : ℝ) else 0))) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] J' x)]
+    rw [← (finTwoArrowEquiv (Fin (Module.finrank ℝ E))).symm.sum_comp
+      (fun J' : Fin 2 → Fin (Module.finrank ℝ E) =>
+        (-(chartChristoffel (I := I) g₀ x p m (J' 0) (extChartAt I x x) *
+              (if q = J' 1 then (1 : ℝ) else 0) +
+            chartChristoffel (I := I) g₀ x q m (J' 1) (extChartAt I x x) *
+              (if p = J' 0 then (1 : ℝ) else 0))) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] J' x)]
+    rw [Fintype.sum_prod_type]
+    simp only [finTwoArrowEquiv_symm_apply, Matrix.cons_val_zero, Matrix.cons_val_one]
+    have hsplit : ∀ a : Fin (Module.finrank ℝ E),
+        (∑ b : Fin (Module.finrank ℝ E),
+          -((chartChristoffel (I := I) g₀ x p m a (extChartAt I x x) *
+                  (if q = b then (1 : ℝ) else 0)) +
+              chartChristoffel (I := I) g₀ x q m b (extChartAt I x x) *
+                (if p = a then (1 : ℝ) else 0)) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b] x) =
+          (-(chartChristoffel (I := I) g₀ x p m a (extChartAt I x x) *
+              tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, q] x)) +
+          (if p = a then (1 : ℝ) else 0) *
+            (-∑ b : Fin (Module.finrank ℝ E),
+              chartChristoffel (I := I) g₀ x q m b (extChartAt I x x) *
+                tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b] x) := by
+      intro a
+      rw [show (∑ b : Fin (Module.finrank ℝ E),
+            -((chartChristoffel (I := I) g₀ x p m a (extChartAt I x x) *
+                    (if q = b then (1 : ℝ) else 0)) +
+                chartChristoffel (I := I) g₀ x q m b (extChartAt I x x) *
+                  (if p = a then (1 : ℝ) else 0)) *
+              tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b] x) =
+          (∑ b : Fin (Module.finrank ℝ E),
+            -(chartChristoffel (I := I) g₀ x p m a (extChartAt I x x) *
+                (if q = b then (1 : ℝ) else 0)) *
+              tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b] x) +
+          (∑ b : Fin (Module.finrank ℝ E),
+            (if p = a then (1 : ℝ) else 0) *
+              -(chartChristoffel (I := I) g₀ x q m b (extChartAt I x x) *
+                tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![a, b] x)) from by
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun b _ => ?_); ring]
+      congr 1
+      · rw [Finset.sum_eq_single q]
+        · rw [if_pos rfl]; ring
+        · intro b _ hbq; rw [if_neg (fun h => hbq h.symm)]; ring
+        · intro h; exact absurd (Finset.mem_univ q) h
+      · rw [← Finset.mul_sum, Finset.sum_neg_distrib]
+    rw [Finset.sum_congr rfl (fun a _ => hsplit a)]
+    rw [Finset.sum_add_distrib]
+    congr 1
+    · rw [← Finset.sum_neg_distrib]
+      refine Finset.sum_congr rfl (fun a _ => ?_)
+      rw [chartChristoffel_symm (I := I) g₀ x p m a (extChartAt I x x)]
+    · rw [Finset.sum_eq_single p]
+      · rw [if_pos rfl, one_mul]
+        congr 1
+        refine Finset.sum_congr rfl (fun b _ => ?_)
+        rw [chartChristoffel_symm (I := I) g₀ x q m b (extChartAt I x x)]
+      · intro a _ hap; rw [if_neg (fun h => hap h.symm), zero_mul]
+      · intro h; exact absurd (Finset.mem_univ p) h
+  · intro b _ hb
+    exact absurd (Subsingleton.elim b ![]) hb
+  · intro h; exact absurd (Finset.mem_univ _) h
+
+set_option linter.unusedSectionVars false in
+private lemma covDerivLowerOrderTerm03_center_hout
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (m b c d : Fin (Module.finrank ℝ E))
+    (J' : Fin 3 → Fin (Module.finrank ℝ E)) :
+    (∑ l : Fin 3, outputSlotCoeff (I := I) (M := M) g₀ 3 x m l ![b, c, d] J'
+        (toEuclidean (E := E) (extChartAt I x x))) =
+      chartChristoffel (I := I) g₀ x m b (J' 0) (extChartAt I x x) *
+          ((if c = J' 1 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0)) +
+      chartChristoffel (I := I) g₀ x m c (J' 1) (extChartAt I x x) *
+          ((if b = J' 0 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0)) +
+      chartChristoffel (I := I) g₀ x m d (J' 2) (extChartAt I x x) *
+          ((if b = J' 0 then (1 : ℝ) else 0) * (if c = J' 1 then (1 : ℝ) else 0)) := by
+  classical
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hround : (extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
+    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
+  have hcenter : (toEuclidean (E := E)) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hmemsrc
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]; exact hmemsrc
+  rw [Fin.sum_univ_three]
+  rw [outputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g₀ 3 x m 0 ![b, c, d] J' hcenter,
+    outputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g₀ 3 x m 1 ![b, c, d] J' hcenter,
+    outputSlotCoeff_eq_entry_mul_const (I := I) (M := M) g₀ 3 x m 2 ![b, c, d] J' hcenter]
+  rw [hround]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two,
+    Matrix.tail_cons]
+  rw [chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hbase m (J' 0) b,
+    chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hbase m (J' 1) c,
+    chartLeviCivitaParallelCLM_coordEntry_eq_chartChristoffel (I := I) g₀ x hbase m (J' 2) d]
+  have herase0 : (Finset.univ.erase (0 : Fin 3)) = {(1 : Fin 3), (2 : Fin 3)} := by decide
+  have herase1 : (Finset.univ.erase (1 : Fin 3)) = {(0 : Fin 3), (2 : Fin 3)} := by decide
+  have herase2 : (Finset.univ.erase (2 : Fin 3)) = {(0 : Fin 3), (1 : Fin 3)} := by decide
+  rw [herase0, herase1, herase2]
+  rw [Finset.prod_insert (by decide), Finset.prod_insert (by decide),
+    Finset.prod_insert (by decide)]
+  simp only [Finset.prod_singleton, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    Matrix.cons_val_two, Matrix.tail_cons]
+  rw [chartChristoffel_symm (I := I) g₀ x b m (J' 0) (extChartAt I x x),
+    chartChristoffel_symm (I := I) g₀ x c m (J' 1) (extChartAt I x x),
+    chartChristoffel_symm (I := I) g₀ x d m (J' 2) (extChartAt I x x)]
+
+set_option linter.unusedSectionVars false in
+private lemma sum_fin3_collapse_gen
+    (F : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → ℝ) :
+    (∑ J' : Fin 3 → Fin (Module.finrank ℝ E), F (J' 0) (J' 1) (J' 2)) =
+      ∑ a0 : Fin (Module.finrank ℝ E), ∑ a1 : Fin (Module.finrank ℝ E),
+        ∑ a2 : Fin (Module.finrank ℝ E), F a0 a1 a2 := by
+  classical
+  rw [sum_pi_fin_succ']
+  refine Finset.sum_congr rfl (fun a0 _ => ?_)
+  rw [sum_pi_fin_succ']
+  refine Finset.sum_congr rfl (fun a1 _ => ?_)
+  refine Fintype.sum_equiv (Equiv.funUnique (Fin 1) (Fin (Module.finrank ℝ E))) _ _ (fun q => ?_)
+  simp only [Equiv.funUnique_apply, Fin.cons_zero,
+    show ((1 : Fin 3) = (Fin.succ 0)) from rfl,
+    show ((2 : Fin 3) = (Fin.succ 1)) from rfl,
+    show ((1 : Fin 2) = (Fin.succ 0)) from rfl, Fin.cons_succ]
+  rw [show (default : Fin 1) = (0 : Fin 1) from rfl]
+
+set_option linter.unusedSectionVars false in
+private lemma covDerivLowerOrderTerm03_center_eq
+    (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
+    (m b c d : Fin (Module.finrank ℝ E)) :
+    covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3 W x m ![] ![b, c, d]
+        (toEuclidean (E := E) (extChartAt I x x)) =
+      (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x m b r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![r, c, d] x)
+      + (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x m c r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![b, r, d] x)
+      + (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x m d r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![b, c, r] x) := by
+  classical
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hround : (extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
+    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
+  rw [covDerivLowerOrderTerm_def]
+  rw [hround]
+  haveI : Unique (Fin 0 → Fin (Module.finrank ℝ E)) :=
+    ⟨⟨![]⟩, fun f => by funext j; exact absurd j.2 (by simp)⟩
+  rw [Fintype.sum_prod_type]
+  rw [Finset.sum_eq_single (![] : Fin 0 → Fin (Module.finrank ℝ E))]
+  · simp only [covDerivLowerOrderCoeff_def]
+    simp only [Finset.univ_eq_empty, Finset.sum_empty, if_true, mul_one, zero_sub]
+    rw [Finset.sum_congr rfl (fun J' _ => by
+        rw [covDerivLowerOrderTerm03_center_hout (I := I) (M := M) g₀ x m b c d J'] :
+      ∀ J' ∈ Finset.univ,
+        (-∑ x_2, outputSlotCoeff (I := I) (M := M) g₀ 3 x m x_2 ![b, c, d] J'
+            (toEuclidean (E := E) (extChartAt I x x))) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] J' x =
+        (-(chartChristoffel (I := I) g₀ x m b (J' 0) (extChartAt I x x) *
+              ((if c = J' 1 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0)) +
+            chartChristoffel (I := I) g₀ x m c (J' 1) (extChartAt I x x) *
+              ((if b = J' 0 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0)) +
+            chartChristoffel (I := I) g₀ x m d (J' 2) (extChartAt I x x) *
+              ((if b = J' 0 then (1 : ℝ) else 0) * (if c = J' 1 then (1 : ℝ) else 0)))) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] J' x)]
+    rw [Finset.sum_congr rfl (fun J' _ =>
+      show (-(chartChristoffel (I := I) g₀ x m b (J' 0) (extChartAt I x x) *
+              ((if c = J' 1 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0)) +
+            chartChristoffel (I := I) g₀ x m c (J' 1) (extChartAt I x x) *
+              ((if b = J' 0 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0)) +
+            chartChristoffel (I := I) g₀ x m d (J' 2) (extChartAt I x x) *
+              ((if b = J' 0 then (1 : ℝ) else 0) * (if c = J' 1 then (1 : ℝ) else 0)))) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] J' x =
+        (-(chartChristoffel (I := I) g₀ x m b (J' 0) (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![J' 0, J' 1, J' 2] x) *
+            ((if c = J' 1 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0))) +
+        (-(chartChristoffel (I := I) g₀ x m c (J' 1) (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![J' 0, J' 1, J' 2] x) *
+            ((if b = J' 0 then (1 : ℝ) else 0) * (if d = J' 2 then (1 : ℝ) else 0))) +
+        (-(chartChristoffel (I := I) g₀ x m d (J' 2) (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![J' 0, J' 1, J' 2] x) *
+            ((if b = J' 0 then (1 : ℝ) else 0) * (if c = J' 1 then (1 : ℝ) else 0)))
+        from by
+          rw [show (![J' 0, J' 1, J' 2] : Fin 3 → Fin (Module.finrank ℝ E)) = J' from by
+            funext j; fin_cases j <;> rfl]
+          ring)]
+    rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
+    rw [sum_fin3_collapse_gen
+        (fun a0 a1 a2 => -(chartChristoffel (I := I) g₀ x m b a0 (extChartAt I x x) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![a0, a1, a2] x) *
+          ((if c = a1 then (1 : ℝ) else 0) * (if d = a2 then (1 : ℝ) else 0))),
+      sum_fin3_collapse_gen
+        (fun a0 a1 a2 => -(chartChristoffel (I := I) g₀ x m c a1 (extChartAt I x x) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![a0, a1, a2] x) *
+          ((if b = a0 then (1 : ℝ) else 0) * (if d = a2 then (1 : ℝ) else 0))),
+      sum_fin3_collapse_gen
+        (fun a0 a1 a2 => -(chartChristoffel (I := I) g₀ x m d a2 (extChartAt I x x) *
+          tensorChartComponentRaw (I := I) (M := M) g₀ 0 3 W x ![] ![a0, a1, a2] x) *
+          ((if b = a0 then (1 : ℝ) else 0) * (if c = a1 then (1 : ℝ) else 0)))]
+    congr 1
+    congr 1
+    · -- slot b: collapse a1=c, a2=d
+      rw [← Finset.sum_neg_distrib]
+      refine Finset.sum_congr rfl (fun a0 _ => ?_)
+      rw [Finset.sum_eq_single c]
+      · rw [Finset.sum_eq_single d]
+        · rw [if_pos rfl, if_pos rfl]; ring
+        · intro a2 _ ha2; rw [if_neg (show ¬ d = a2 from fun h => ha2 h.symm), mul_zero]; ring
+        · intro h; exact absurd (Finset.mem_univ d) h
+      · intro a1 _ ha1
+        refine Finset.sum_eq_zero (fun a2 _ => ?_)
+        rw [if_neg (show ¬ c = a1 from fun h => ha1 h.symm), zero_mul]; ring
+      · intro h; exact absurd (Finset.mem_univ c) h
+    · -- slot c: collapse a0=b, a2=d
+      rw [← Finset.sum_neg_distrib]
+      rw [Finset.sum_eq_single b]
+      · refine Finset.sum_congr rfl (fun a1 _ => ?_)
+        rw [Finset.sum_eq_single d]
+        · rw [if_pos rfl, if_pos rfl]; ring
+        · intro a2 _ ha2; rw [if_neg (show ¬ d = a2 from fun h => ha2 h.symm), mul_zero]; ring
+        · intro h; exact absurd (Finset.mem_univ d) h
+      · intro a0 _ ha0
+        refine Finset.sum_eq_zero (fun a1 _ => ?_)
+        refine Finset.sum_eq_zero (fun a2 _ => ?_)
+        rw [if_neg (show ¬ b = a0 from fun h => ha0 h.symm), zero_mul]; ring
+      · intro h; exact absurd (Finset.mem_univ b) h
+    · -- slot d: collapse a0=b, a1=c
+      rw [← Finset.sum_neg_distrib]
+      rw [Finset.sum_eq_single b]
+      · rw [Finset.sum_eq_single c]
+        · refine Finset.sum_congr rfl (fun a2 _ => ?_)
+          rw [if_pos rfl, if_pos rfl]; ring
+        · intro a1 _ ha1
+          refine Finset.sum_eq_zero (fun a2 _ => ?_)
+          rw [if_neg (show ¬ c = a1 from fun h => ha1 h.symm), mul_zero]; ring
+        · intro h; exact absurd (Finset.mem_univ c) h
+      · intro a0 _ ha0
+        refine Finset.sum_eq_zero (fun a1 _ => ?_)
+        refine Finset.sum_eq_zero (fun a2 _ => ?_)
+        rw [if_neg (show ¬ b = a0 from fun h => ha0 h.symm), zero_mul]; ring
+      · intro h; exact absurd (Finset.mem_univ b) h
+  · intro b' _ hb'
+    exact absurd (Subsingleton.elim b' ![]) hb'
+  · intro h; exact absurd (Finset.mem_univ _) h
+
+set_option linter.unusedSectionVars false in
+private lemma arm1ReadoutCovDeriv_center_eq
+    (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b c : Fin (Module.finrank ℝ E)) :
+    arm1ReadoutCovDeriv (I := I) (M := M) g₀ h x ![a, b, c] =
+      (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x a b r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![r, c] x)
+      + (- ∑ r : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₀ x a c r (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 h x ![] ![b, r] x) := by
+  classical
+  rw [arm1ReadoutCovDeriv]
+  rw [show (Matrix.vecTail (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E))) = ![b, c] from by
+    funext j; fin_cases j <;> rfl]
+  rw [show (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) 0 = a from rfl]
+  exact covDerivLowerOrderTerm02_center_eq (I := I) (M := M) g₀ h x a b c
+
 set_option linter.unusedSectionVars false in
 private lemma firstOrderRemainder_add_order0_eq_baseArms_add_arm2residual
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
