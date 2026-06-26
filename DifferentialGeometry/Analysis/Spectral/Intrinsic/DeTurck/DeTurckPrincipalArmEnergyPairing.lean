@@ -11,7 +11,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 
 noncomputable section
 
-open Bundle Manifold MeasureTheory Set Filter
+open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
 
@@ -90,6 +90,54 @@ private theorem spectralPairing_tsum_eq_oneMinusConnLapIter_l2Inner
   rw [hweight]
   ring
 
+private noncomputable def armPrincipalSlotPairing
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) : ℝ :=
+  tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
+    (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+      ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x))
+    (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+      (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotApplied
+        (I := I) g₀ g₁ (2 + n) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x)))
+
+private theorem oneMinusConnLapIter_pairing_fold
+    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    ∃ rem : SmoothCcTensor g₀ 0 2 → ℝ,
+      (∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        tensorL2Inner (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun =
+          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ + rem u₀) ∧
+      ∃ Clower : ℝ, 0 ≤ Clower ∧
+        ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+          rem u₀ ≤ Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 :=
+  sorry
+
+private theorem armPrincipalSlotPairing_le_dirichlet_top
+    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (u₀ : SmoothCcTensor g₀ 0 2) :
+    armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
+      (δ / (1 - δ)) *
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 :=
+  sorry
+
+private theorem dirichlet_top_le_spectral_add_lower
+    [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
+    ∃ Cgap : ℝ, 0 ≤ Cgap ∧
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 ≤
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u₀‖ ^ 2 +
+            Cgap * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 :=
+  sorry
+
 private theorem oneMinusConnLapIter_l2Inner_deTurckPrincipalCometricArm_le
     [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∀ (g₁ : SmoothRiemannianMetric I M)
@@ -104,8 +152,38 @@ private theorem oneMinusConnLapIter_l2Inner_deTurckPrincipalCometricArm_le
               (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun ≤
             (δ / (1 - δ)) *
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u₀‖ ^ 2 +
-              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 :=
-  sorry
+              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 := by
+  intro g₁ h htie δ hδ_lt hδ_nn hδ
+  obtain ⟨rem, hsplit, Clower₁, hClower₁_nn, hrem⟩ :=
+    oneMinusConnLapIter_pairing_fold (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
+  obtain ⟨Cgap, hCgap_nn, hgap⟩ :=
+    dirichlet_top_le_spectral_add_lower (I := I) (M := M) g₀ n
+  have hκ_nn : 0 ≤ δ / (1 - δ) := div_nonneg hδ_nn (by linarith)
+  refine ⟨(δ / (1 - δ)) * Cgap + Clower₁, by positivity, fun u₀ => ?_⟩
+  rw [hsplit u₀]
+  have htop := armPrincipalSlotPairing_le_dirichlet_top
+    (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ u₀
+  have hg := hgap u₀
+  have hr := hrem u₀
+  have hMn_nn : 0 ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 :=
+    sq_nonneg _
+  have hstep : armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
+      (δ / (1 - δ)) *
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u₀‖ ^ 2 +
+        (δ / (1 - δ)) * Cgap *
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 := by
+    calc armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀
+        ≤ (δ / (1 - δ)) *
+            ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)‖ ^ 2 := htop
+      _ ≤ (δ / (1 - δ)) *
+            (‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u₀‖ ^ 2 +
+              Cgap * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2) :=
+            mul_le_mul_of_nonneg_left hg hκ_nn
+      _ = (δ / (1 - δ)) *
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u₀‖ ^ 2 +
+          (δ / (1 - δ)) * Cgap *
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 := by ring
+  nlinarith [hstep, hr, hMn_nn]
 
 theorem deTurckPrincipalCometricArm_spectralPairing_tsum_le
     [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
