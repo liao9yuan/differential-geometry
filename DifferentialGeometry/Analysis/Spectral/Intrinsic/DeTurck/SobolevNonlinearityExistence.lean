@@ -1566,6 +1566,126 @@ theorem appCcTwoArmQUniform
       ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ^ 2 := by positivity
   linarith
 
+set_option maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+
+theorem ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy
+    (g₀ : SmoothRiemannianMetric I M) (m : ℕ)
+    (h_lossy : 2 * Module.finrank ℝ E + 4 ≤ m) :
+    ∃ C : ℝ, 0 < C ∧ ∀ (T : SmoothCcTensor g₀ 0 2),
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T)
+        (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖) := by
+  classical
+  set kE : ℕ := Module.finrank ℝ E / 2 + 1 with hkE_def
+  have hkE_super : 2 * kE > Module.finrank ℝ E + 2 * 0 := by
+    rw [hkE_def]; omega
+  have h4kEm : (4 * kE : ℕ) ≤ m := by
+    rw [hkE_def]; omega
+
+  obtain ⟨C₁, hC₁_pos, hC₁⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.tensorPouSobolevHilbert_embedding_Ck_gNorm
+      (I := I) (M := M) g₀ 0 2 kE 0 hkE_super
+
+  obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
+    tensorPouSobolevHsNorm_le_ccSpectralEmbed (I := I) (M := M) g₀ (2 * kE)
+  refine ⟨C₁ * (C₂ + 1), by positivity, fun T => ?_⟩
+  letI : Bundle.RiemannianBundle
+      (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+
+
+
+  have hupper : C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+        (g := g₀) (r := 0) (s := 2) (2 * kE) T‖ ≤
+      (C₁ * (C₂ + 1)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ := by
+    have hstep2 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+          (g := g₀) (r := 0) (s := 2) (2 * kE) T‖ =
+        (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal :=
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
+        (I := I) (M := M) g₀ (2 * kE) T
+    have hstep3 : (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal ≤
+        C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ := hC₂ T
+    have hstep4 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ ≤
+        ‖ccSpectralEmbed (I := I) (M := M) g₀ (m : ℝ) T‖ := by
+      refine ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ ?_ T
+      have : (2 * (2 * kE) : ℕ) ≤ m := by omega
+      exact_mod_cast this
+    have hembed_eq : ccSpectralEmbed (I := I) (M := M) g₀ (m : ℝ) T =
+        smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T :=
+      tensorHs.ext (funext (fun i => rfl))
+    set Nm : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ with hNm_def
+    have hNm_nn : 0 ≤ Nm := norm_nonneg _
+    have hspec_le : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ ≤ Nm := by
+      rw [hNm_def, ← hembed_eq]; exact hstep4
+    calc C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) (2 * kE) T‖
+        = C₁ * (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal := by rw [hstep2]
+      _ ≤ C₁ * (C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖) :=
+          mul_le_mul_of_nonneg_left hstep3 hC₁_pos.le
+      _ ≤ C₁ * (C₂ * Nm) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hspec_le hC₂_nn) hC₁_pos.le
+      _ ≤ (C₁ * (C₂ + 1)) * Nm := by nlinarith [hNm_nn, hC₁_pos.le, hC₂_nn]
+
+  have hfibre := fun x : M => le_trans (hC₁ T x) hupper
+
+  intro x v w
+  have hcs := ccTensorBilin_abs_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ T x
+  have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+  have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+  have hmul_nn : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+    mul_nonneg hsv_nn hsw_nn
+
+
+  have hvw := hcs v w
+  have hwv := hcs w v
+  have hfx := hfibre x
+
+  rw [ccTensorBilinSymm_apply]
+  have habs : |(1 / 2 : ℝ) *
+      (ccTensorBilin (I := I) g₀ T x v w + ccTensorBilin (I := I) g₀ T x w v)| ≤
+      (1 / 2 : ℝ) * (|ccTensorBilin (I := I) g₀ T x v w| +
+        |ccTensorBilin (I := I) g₀ T x w v|) := by
+    rw [abs_mul, abs_of_pos (by norm_num : (0:ℝ) < 1/2)]
+    exact mul_le_mul_of_nonneg_left (abs_add_le _ _) (by norm_num)
+  refine habs.trans ?_
+
+
+  nlinarith [hvw, hwv, hfx, hsv_nn, hsw_nn, hmul_nn, mul_nonneg hsw_nn hsv_nn,
+    mul_le_mul_of_nonneg_right hfx hmul_nn,
+    mul_le_mul_of_nonneg_right hfx (mul_nonneg hsw_nn hsv_nn)]
+
+theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_fibreWeighted_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_nn : 0 ≤ δ₀) :
+    ∃ ΛC Γ : ℝ, 0 ≤ ΛC ∧ 0 ≤ Γ ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        {βT βT' : ℝ} (hβT_nn : 0 ≤ βT) (hβT'_nn : 0 ≤ βT')
+        (hβT : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) βT)
+        (hβT' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') βT'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+              deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ') =
+            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+              appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ ΛC ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (C₁.toSection x) ≤ ΛC ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤
+            (ΛC * max βT βT') ^ 2) ∧
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2) ≤ Γ ^ 2 ∧
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i C₁‖ ^ 2) ≤ Γ ^ 2 ∧
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 :=
+  sorry
+
 theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_dataWeighted_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1591,8 +1711,42 @@ theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_dataWeighted_ballUnifo
                  ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T'‖) ^ 2) ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2) ≤ Γ ^ 2 ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i C₁‖ ^ 2) ≤ Γ ^ 2 ∧
-          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 :=
-  sorry
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 := by
+  classical
+  obtain ⟨Ksob, hKsob_pos, hKsob⟩ :=
+    ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g₀ (a + 1)
+      (by omega)
+  obtain ⟨ΛC, Γ, hΛC_nn, hΓ_nn, hfib⟩ :=
+    deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_fibreWeighted_ballUniform
+      (I := I) g₀ g_bg a ha_super hR hδ₀ hδ₀_nn
+  refine ⟨ΛC * (Ksob + 1), Γ, by positivity, hΓ_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  set βT : ℝ := Ksob * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a + 1 : ℕ) : ℝ) T‖ with hβT_def
+  set βT' : ℝ := Ksob * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a + 1 : ℕ) : ℝ) T'‖ with hβT'_def
+  have hβT_nn : 0 ≤ βT := by rw [hβT_def]; positivity
+  have hβT'_nn : 0 ≤ βT' := by rw [hβT'_def]; positivity
+  have hcastord : ((a + 1 : ℕ) : ℝ) = (a : ℝ) + 1 := by push_cast; ring
+  have hβTfib : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) βT := by
+    rw [hβT_def]; exact hKsob T
+  have hβT'fib : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') βT' := by
+    rw [hβT'_def]; exact hKsob T'
+  obtain ⟨C₀, C₁, C₂, hid, hC₀sup, hC₁sup, hC₂sup, hC₀jet, hC₁jet, hC₂jet⟩ :=
+    hfib T T' hδ_le hδ hδ'_le hδ' hβT_nn hβT'_nn hβTfib hβT'fib hTball hT'ball
+  set Dm : ℝ := max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T‖
+                    ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T'‖ with hDm_def
+  have hDm_nn : 0 ≤ Dm := le_trans (norm_nonneg _) (le_max_left _ _)
+  have hΛle : ΛC ^ 2 ≤ (ΛC * (Ksob + 1)) ^ 2 := by
+    refine pow_le_pow_left₀ hΛC_nn ?_ 2
+    nlinarith [hΛC_nn, hKsob_pos.le]
+  have hβmax_eq : max βT βT' = Ksob * Dm := by
+    rw [hβT_def, hβT'_def, hDm_def, hcastord, mul_max_of_nonneg _ _ hKsob_pos.le]
+  refine ⟨C₀, C₁, C₂, hid, fun x => le_trans (hC₀sup x) hΛle,
+    fun x => le_trans (hC₁sup x) hΛle, ?_, hC₀jet, hC₁jet, hC₂jet⟩
+  intro x
+  refine le_trans (hC₂sup x) ?_
+  rw [hβmax_eq]
+  refine pow_le_pow_left₀ (mul_nonneg hΛC_nn (mul_nonneg hKsob_pos.le hDm_nn)) ?_ 2
+  nlinarith [hΛC_nn, hKsob_pos.le, hDm_nn, mul_nonneg hKsob_pos.le hDm_nn]
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -2282,141 +2436,6 @@ theorem tensorHs_norm_smul (g₀ : SmoothRiemannianMetric I M) {σ : ℝ} (c : �
       (σ := σ)).norm_map x
   rw [h1, map_smul, norm_smul, Real.norm_eq_abs, h2]
 
-set_option maxHeartbeats 1600000 in
-attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
-  Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The fibre operator-norm of the symmetrized perturbation is controlled by the spectral
-`H^m` norm (the lossy `C⁰`-control bridge).**
-
-For an even spectral order `m` above the supercritical threshold `2·finrank E + 4 ≤ m`, there is
-a uniform constant `C > 0` such that, for **every** smooth compactly-supported `(0,2)`-tensor
-`T`, the symmetrized extracted bilinear form `ccTensorBilinSymm g₀ T` is `g₀`-fibre bounded by
-`C · ‖smoothCcToTensorHs g₀ m T‖`:
-
-  `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) (C · ‖ι_m T‖)`.
-
-This is the spectral transport of the supercritical Sobolev embedding `H ↪ C⁰`.  Concretely,
-pick the smallest chart order `kE = finrank/2 + 1` (so `2·kE > finrank`); then
-`tensorPouSobolevHilbert_embedding_Ck_gNorm` (chart `H^{2·kE} ↪ C⁰`) bounds the pointwise fibre
-norm `‖T.toSection x‖` by `C₁ · ‖T.toHs (2·kE)‖`, the Hilbert-norm identity
-`tensorPouSobolevHilbert_norm_eq` rewrites the latter as the PoU norm, the PoU → spectral
-comparison `tensorPouSobolevHsNorm_le_ccSpectralEmbed` (N1) lifts it to `C₂ · ‖ccSpectralEmbed
-g₀ (4·kE) T‖`, and spectral monotonicity `ccSpectralEmbed_norm_mono` raises the order `4·kE ≤ m`
-to `m`.  Finally the pointwise tensor Cauchy–Schwarz `ccTensorBilin_abs_le_fibreNorm_mul_sqrt`
-converts the fibre-norm bound on `T.toSection x` into the `gFibreOpBound` operator-norm form
-(`ccSpectralEmbed g₀ m = smoothCcToTensorHs g₀ m` by definition). -/
-theorem ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy
-    (g₀ : SmoothRiemannianMetric I M) (m : ℕ)
-    (h_lossy : 2 * Module.finrank ℝ E + 4 ≤ m) :
-    ∃ C : ℝ, 0 < C ∧ ∀ (T : SmoothCcTensor g₀ 0 2),
-      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T)
-        (C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖) := by
-  classical
-  set kE : ℕ := Module.finrank ℝ E / 2 + 1 with hkE_def
-  have hkE_super : 2 * kE > Module.finrank ℝ E + 2 * 0 := by
-    rw [hkE_def]; omega
-  have h4kEm : (4 * kE : ℕ) ≤ m := by
-    rw [hkE_def]; omega
-  -- chart `H^{2 kE} ↪ C⁰`
-  obtain ⟨C₁, hC₁_pos, hC₁⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.tensorPouSobolevHilbert_embedding_Ck_gNorm
-      (I := I) (M := M) g₀ 0 2 kE 0 hkE_super
-  -- PoU → spectral comparison (N1)
-  obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
-    tensorPouSobolevHsNorm_le_ccSpectralEmbed (I := I) (M := M) g₀ (2 * kE)
-  refine ⟨C₁ * (C₂ + 1), by positivity, fun T => ?_⟩
-  letI : Bundle.RiemannianBundle
-      (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
-    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
-  -- the per-point upper bound `C₁ · ‖toHs‖ ≤ (C₁ (C₂ + 1)) · ‖ι_m T‖`, stated WITHOUT the
-  -- fibre norm (whose instance must come from `hC₁`/N3 by unification, never from a written
-  -- type annotation — the default `TensorRSSpace` NACG is suppressed above)
-  have hupper : C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
-        (g := g₀) (r := 0) (s := 2) (2 * kE) T‖ ≤
-      (C₁ * (C₂ + 1)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ := by
-    have hstep2 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
-          (g := g₀) (r := 0) (s := 2) (2 * kE) T‖ =
-        (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal :=
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
-        (I := I) (M := M) g₀ (2 * kE) T
-    have hstep3 : (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal ≤
-        C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ := hC₂ T
-    have hstep4 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ ≤
-        ‖ccSpectralEmbed (I := I) (M := M) g₀ (m : ℝ) T‖ := by
-      refine ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ ?_ T
-      have : (2 * (2 * kE) : ℕ) ≤ m := by omega
-      exact_mod_cast this
-    have hembed_eq : ccSpectralEmbed (I := I) (M := M) g₀ (m : ℝ) T =
-        smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T :=
-      tensorHs.ext (funext (fun i => rfl))
-    set Nm : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ) T‖ with hNm_def
-    have hNm_nn : 0 ≤ Nm := norm_nonneg _
-    have hspec_le : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖ ≤ Nm := by
-      rw [hNm_def, ← hembed_eq]; exact hstep4
-    calc C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
-            (g := g₀) (r := 0) (s := 2) (2 * kE) T‖
-        = C₁ * (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g₀ (2 * kE) T).toReal := by rw [hstep2]
-      _ ≤ C₁ * (C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) T‖) :=
-          mul_le_mul_of_nonneg_left hstep3 hC₁_pos.le
-      _ ≤ C₁ * (C₂ * Nm) :=
-          mul_le_mul_of_nonneg_left
-            (mul_le_mul_of_nonneg_left hspec_le hC₂_nn) hC₁_pos.le
-      _ ≤ (C₁ * (C₂ + 1)) * Nm := by nlinarith [hNm_nn, hC₁_pos.le, hC₂_nn]
-  -- the fibre-norm bound, type inferred from `hC₁ T x` (no norm annotation written)
-  have hfibre := fun x : M => le_trans (hC₁ T x) hupper
-  -- convert the fibre-norm bound into the `gFibreOpBound` operator-norm form via N3
-  intro x v w
-  have hcs := ccTensorBilin_abs_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ T x
-  have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
-  have hsw_nn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
-  have hmul_nn : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
-    mul_nonneg hsv_nn hsw_nn
-  -- the N3 fibre Cauchy–Schwarz on both index orders, and the `hfibre` norm bound,
-  -- all sharing the same fibre-norm term (so no instance restatement is needed)
-  have hvw := hcs v w
-  have hwv := hcs w v
-  have hfx := hfibre x
-  -- symmetrization: `|½(B v w + B w v)| ≤ ‖T.toSection x‖ · √(g v v) · √(g w w)`
-  rw [ccTensorBilinSymm_apply]
-  have habs : |(1 / 2 : ℝ) *
-      (ccTensorBilin (I := I) g₀ T x v w + ccTensorBilin (I := I) g₀ T x w v)| ≤
-      (1 / 2 : ℝ) * (|ccTensorBilin (I := I) g₀ T x v w| +
-        |ccTensorBilin (I := I) g₀ T x w v|) := by
-    rw [abs_mul, abs_of_pos (by norm_num : (0:ℝ) < 1/2)]
-    exact mul_le_mul_of_nonneg_left (abs_add_le _ _) (by norm_num)
-  refine habs.trans ?_
-  -- `hvw`, `hwv` bound the two summands by `‖T.toSection x‖ · √·√` (commuted in `hwv`);
-  -- `hfx` bounds `‖T.toSection x‖` by `(C₁(C₂+1)) · ‖ι_m T‖`; combine by `nlinarith`
-  nlinarith [hvw, hwv, hfx, hsv_nn, hsw_nn, hmul_nn, mul_nonneg hsw_nn hsv_nn,
-    mul_le_mul_of_nonneg_right hfx hmul_nn,
-    mul_le_mul_of_nonneg_right hfx (mul_nonneg hsw_nn hsv_nn)]
-
-/-- **A spectral `H^{a+2}`-ball of smooth perturbations is uniformly fibre-small (the
-quasilinear realizability radius).**
-
-There is a positive radius `R₀` and a smallness constant `δ₀ < 1` such that **every** smooth
-compactly-supported `(0,2)`-tensor `T` whose order-`(a+2)` spectral embedding has norm
-`‖smoothCcToTensorHs g₀ (a+2) T‖ ≤ R₀` has its symmetrization `ccTensorBilinSymm g₀ T`
-uniformly `g₀`-fibre bounded by `δ₀ < 1`.  Equivalently, on this ball the realized metric
-`g₀ + T` is a genuine `SmoothRiemannianMetric` (via `tensorSectionRealizeMetric`), so the
-genuine smooth Ricci–DeTurck nonlinearity `deTurckSmoothN g₀ g_bg a T` is defined.
-
-This is the **realizability radius** that makes the dense extension of `deTurckSmoothN`
-non-vacuous: inside it, smooth data is fibre-small (hence dense-able and Lipschitz-controlled
-by `deTurckSmoothN_ballLipschitz_Ha2`), and the recentred ball retraction maps all of `H^{a+2}`
-into it.
-
-Classically this is the supercritical Sobolev embedding `H ↪ C⁰`: the pointwise fibre norm of
-a smooth tensor is bounded by a constant times a high spectral norm, so a sufficiently small
-ball forces the operator-norm smallness `gFibreOpBound … δ₀`.  The transport of the on-disk
-chart `C⁰` embedding to the spectral scale is the lossy bridge
-`ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy`: at any even spectral order `m` above the
-supercritical threshold `2·finrank E + 4 ≤ m` there is a uniform `C` with
-`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) (C · ‖ι_m T‖)`.  Under the strengthened
-`ha_super : 2·finrank E + 10 ≤ a` the order `a + 2` is `≥ 2·finrank E + 12`, so there is an even
-`m` with `2·finrank E + 4 ≤ m ≤ a + 2`; instantiating the lossy bridge at `m` and raising the
-order `m ≤ a + 2` by `ccSpectralEmbed_norm_mono` bounds the fibre operator norm by
-`C · ‖ι_{a+2} T‖`, and the realizability radius is `R₀ = 1 / (2C)` with smallness `δ₀ = 1/2`. -/
 theorem sobolevBall_smooth_fibreSmall (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ R₀ : ℝ, 0 < R₀ ∧ ∃ δ₀ : ℝ, δ₀ ≤ 1 / 3 ∧
