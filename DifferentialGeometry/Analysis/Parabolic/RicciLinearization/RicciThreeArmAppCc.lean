@@ -5668,6 +5668,72 @@ private lemma unitModel4_basisChart_readout_split
   ring
 
 set_option linter.unusedSectionVars false in
+theorem iteratedCovGrad1_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
+    (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] Jdx
+        ((extChartAt I x).symm
+          ((toEuclidean (E := E)).symm (toEuclidean (E := E) (extChartAt I x x)))) =
+      euclidPartial (E := E) (Jdx 0)
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            h x ![] (Matrix.vecTail Jdx)))
+          (toEuclidean (E := E) (extChartAt I x x))
+        + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
+            (Jdx 0) ![] (Matrix.vecTail Jdx)
+            (toEuclidean (E := E) (extChartAt I x x)) := by
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hy : toEuclidean (E := E) (extChartAt I x x) ∈
+      chartTargetEuclid (I := I) (M := M) x :=
+    toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hmemsrc
+  have hcg : iteratedCovGrad (I := I) g₀ 0 2 1 h = covGrad (I := I) (M := M) g₀ 0 2 h := by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
+  rw [hcg]
+  exact tensorChartComponentRaw_covGrad (I := I) (M := M) g₀ 0 2 h x ![] Jdx hy
+
+set_option linter.unusedSectionVars false in
+noncomputable def arm1ReadoutCovDeriv (g₀ : SmoothRiemannianMetric I M)
+    (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) : ℝ :=
+  covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 h x
+    (Jdx 0) ![] (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
+
+set_option linter.unusedSectionVars false in
+private lemma unitModel3_basisChart_readout_split
+    (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b c : Fin (Module.finrank ℝ E)) :
+    unitModel (I := I) (M := M) g₀ 3 (iteratedCovGrad (I := I) g₀ 0 2 1 h) x
+        ![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c] =
+      euclidPartial (E := E) a
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            h x ![] ![b, c]))
+          (toEuclidean (E := E) (extChartAt I x x))
+        + arm1ReadoutCovDeriv (I := I) (M := M) g₀ h x ![a, b, c] := by
+  classical
+  have hmemsrc : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hroundtrip : (extChartAt I x).symm
+      ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x))) = x :=
+    symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) x hmemsrc
+  rw [show (![chartModelBasis E a, chartModelBasis E b, chartModelBasis E c] :
+        Fin 3 → TangentSpace I x) =
+      (fun j => chartModelBasis E ((![a, b, c] : Fin 3 → Fin (Module.finrank ℝ E)) j)) from by
+    funext j; fin_cases j <;> rfl]
+  rw [unitModel_basisChart_eq_tensorChartComponentRaw (I := I) (M := M) g₀ (2 + 1)
+    (iteratedCovGrad (I := I) g₀ 0 2 1 h) x (![a, b, c])]
+  rw [show tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] (![a, b, c]) x =
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 1)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 h) x ![] (![a, b, c])
+        ((extChartAt I x).symm
+          ((toEuclidean (E := E)).symm ((toEuclidean (E := E)) (extChartAt I x x)))) from by
+    rw [hroundtrip] ]
+  rw [iteratedCovGrad1_chartComponent_readout (I := I) g₀ h x (![a, b, c])]
+  have hJ0 : (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) 0 = a := rfl
+  have hJtail : Matrix.vecTail (![a, b, c] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) = ![b, c] := by
+    funext j; fin_cases j <;> rfl
+  simp only [arm1ReadoutCovDeriv, hJ0, hJtail]
+
+set_option linter.unusedSectionVars false in
 private lemma euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m₁ m₂ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :
