@@ -322,6 +322,50 @@ theorem oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (g : SmoothRiemannianMetri
     rw [ih (oneMinusConnLapSmooth (I := I) g r s v),
       oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm]
 
+theorem oneMinusConnLapSmoothIter_add (g : SmoothRiemannianMetric I M) (r s : ℕ) (a b : ℕ)
+    (T : SmoothCcTensor g r s) :
+    oneMinusConnLapSmoothIter (I := I) g r s (a + b) T =
+      oneMinusConnLapSmoothIter (I := I) g r s a
+        (oneMinusConnLapSmoothIter (I := I) g r s b T) := by
+  induction a with
+  | zero => simp only [Nat.zero_add, oneMinusConnLapSmoothIter_zero]
+  | succ k ih =>
+    rw [show k + 1 + b = (k + b) + 1 from by omega, oneMinusConnLapSmoothIter_succ,
+      oneMinusConnLapSmoothIter_succ, ih]
+
+theorem oneMinusConnLapSmoothIter_l2Inner_sym_split
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a b : ℕ)
+    (A B : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s
+        (oneMinusConnLapSmoothIter (I := I) g r s (a + b) A).toFun B.toFun =
+      tensorL2Inner (I := I) (M := M) g r s
+        (oneMinusConnLapSmoothIter (I := I) g r s b A).toFun
+        (oneMinusConnLapSmoothIter (I := I) g r s a B).toFun := by
+  rw [oneMinusConnLapSmoothIter_add (I := I) (M := M) g r s a b A]
+  rw [oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (I := I) (M := M) g r s a
+    (oneMinusConnLapSmoothIter (I := I) g r s b A) B]
+
+theorem oneMinusConnLapSmoothIter_l2Inner_eq_add_sum_covGrad
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (n : ℕ)
+    (A B : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r s
+        (oneMinusConnLapSmoothIter (I := I) g r s n A).toFun B.toFun =
+      tensorL2Inner (I := I) (M := M) g r s A.toFun B.toFun +
+        ∑ m ∈ Finset.range n,
+          tensorL2Inner (I := I) (M := M) g r (s + 1)
+            (covGrad (I := I) (M := M) g r s
+              (oneMinusConnLapSmoothIter (I := I) g r s m A)).toFun
+            (covGrad (I := I) (M := M) g r s B).toFun := by
+  induction n with
+  | zero =>
+    simp only [oneMinusConnLapSmoothIter_zero, Finset.range_zero, Finset.sum_empty, add_zero]
+  | succ k ih =>
+    rw [oneMinusConnLapSmoothIter_succ,
+      oneMinusConnLapSmooth_l2Inner_eq_add_covGrad (I := I) (M := M) g r s
+        (oneMinusConnLapSmoothIter (I := I) g r s k A) B,
+      ih, Finset.sum_range_succ]
+    ring
+
 private noncomputable def armPrincipalSlotPairing
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) : ℝ :=
   tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
