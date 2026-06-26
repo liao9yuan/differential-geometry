@@ -13,6 +13,10 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantN
 
 noncomputable section
 
+set_option linter.style.setOption false
+set_option synthInstance.maxHeartbeats 800000
+set_option maxHeartbeats 1600000
+
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
@@ -28,6 +32,8 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+open DifferentialGeometry.Analysis.Laplacian
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -92,15 +98,115 @@ private theorem spectralPairing_tsum_eq_oneMinusConnLapIter_l2Inner
   rw [hweight]
   ring
 
+private noncomputable def negGInvDiffSlotApplied
+    (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (W : TensorRSSpace 0 (s + 1) I x) : TensorRSSpace 0 (s + 1) I x :=
+  TensorRSSpace.ofCLM
+    ((slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
+        (-gInvDiffRaisedEndo (I := I) g₀ g₁ x)).comp
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from W))
+
+private theorem slotInsertEndoFib_neg_left (s : ℕ) (k : Fin s) (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
+    slotInsertEndoFib (I := I) (M := M) s k x (-Λ) =
+      - slotInsertEndoFib (I := I) (M := M) s k x Λ := by
+  rw [show (-Λ) = (-1 : ℝ) • Λ from by rw [neg_one_smul],
+    slotInsertEndoFib_smul_left (I := I) (M := M) s k x (-1 : ℝ) Λ, neg_one_smul]
+
+private theorem negGInvDiffSlotApplied_eq_neg
+    (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (W : TensorRSSpace 0 (s + 1) I x) :
+    negGInvDiffSlotApplied (I := I) g₀ g₁ s x W =
+      - gInvDiffSlotApplied (I := I) g₀ g₁ s x W := by
+  rw [negGInvDiffSlotApplied, gInvDiffSlotApplied,
+    slotInsertEndoFib_neg_left (I := I) (M := M) (s + 1) 0 x
+      (gInvDiffRaisedEndo (I := I) g₀ g₁ x),
+    ContinuousLinearMap.neg_comp]
+  rfl
+
+private theorem toModel_negGInvDiffSlotApplied_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (W : TensorRSSpace 0 (s + 1) I x) :
+    TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+        (negGInvDiffSlotApplied (I := I) g₀ g₁ s x W) =
+      - TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+          (gInvDiffSlotApplied (I := I) g₀ g₁ s x W) := by
+  rw [negGInvDiffSlotApplied_eq_neg (I := I) g₀ g₁ s x W, TensorRSSpace.toModel_neg]
+
+private theorem negGInvDiffRaisedEndo_g0_self_adjoint
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (a b : TangentSpace I x) :
+    g₀.inner x ((-gInvDiffRaisedEndo (I := I) g₀ g₁ x) a) b
+      = g₀.inner x a ((-gInvDiffRaisedEndo (I := I) g₀ g₁ x) b) := by
+  simp only [ContinuousLinearMap.neg_apply, map_neg]
+  rw [gInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ x a b]
+
+private theorem negGInvDiffRaisedEndo_inner_self_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) (v : TangentSpace I x) :
+    g₀.inner x ((-gInvDiffRaisedEndo (I := I) g₀ g₁ x) v) v
+      ≤ (δ / (1 - δ)) * g₀.inner x v v := by
+  rw [ContinuousLinearMap.neg_apply, map_neg]
+  have hbnd := abs_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v v
+  have hv_nn : 0 ≤ g₀.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
+  have hsq : Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x v v) = g₀.inner x v v := by
+    rw [← Real.sqrt_mul hv_nn, Real.sqrt_mul_self hv_nn]
+  have hle : -g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v
+      ≤ |g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v| := neg_le_abs _
+  calc -g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v
+      ≤ |g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) v| := hle
+    _ ≤ (δ / (1 - δ)) * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x v v)) := hbnd
+    _ = (δ / (1 - δ)) * g₀.inner x v v := by rw [hsq]
+
+private theorem tensorInnerPointwise_negGInvDiffSlot_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (s : ℕ) (x : M) (W : TensorRSSpace 0 (s + 1) I x) :
+    tensorInnerPointwise (I := I) (M := M) g₀ 0 (s + 1) x
+        (TensorRSSpace.toModel W)
+        (TensorRSSpace.toModel (negGInvDiffSlotApplied (I := I) g₀ g₁ s x W))
+      ≤ (δ / (1 - δ)) * tensorInnerPointwise (I := I) (M := M) g₀ 0 (s + 1) x
+          (TensorRSSpace.toModel W) (TensorRSSpace.toModel W) := by
+  obtain ⟨e, bse, hbse, horth⟩ :=
+    DifferentialGeometry.Analysis.Sobolev.TensorHilbert.exists_orthoFrame_basis_E
+      (I := I) (M := M) g₀ x
+  exact DifferentialGeometry.Analysis.Sobolev.TensorHilbert.tensorInnerPointwise_slotΛ_le
+    (I := I) (M := M) g₀ s x (-gInvDiffRaisedEndo (I := I) g₀ g₁ x)
+    (negGInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ x)
+    (fun v => negGInvDiffRaisedEndo_inner_self_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v)
+    W e bse hbse horth
+
 private noncomputable def armPrincipalSlotPairing
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) (u₀ : SmoothCcTensor g₀ 0 2) : ℝ :=
   tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
     (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
       ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x))
     (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
-      (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotApplied
+      (negGInvDiffSlotApplied
         (I := I) g₀ g₁ (2 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀).toSection x)))
+
+private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le
+    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    ∃ Clower : ℝ, 0 ≤ Clower ∧
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        tensorL2Inner (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
+        Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 :=
+  sorry
 
 private theorem oneMinusConnLapIter_pairing_fold
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
@@ -116,8 +222,17 @@ private theorem oneMinusConnLapIter_pairing_fold
           armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ + rem u₀) ∧
       ∃ Clower : ℝ, 0 ≤ Clower ∧
         ∀ (u₀ : SmoothCcTensor g₀ 0 2),
-          rem u₀ ≤ Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 :=
-  sorry
+          rem u₀ ≤ Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u₀‖ ^ 2 := by
+  refine ⟨fun u₀ =>
+      tensorL2Inner (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+          (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+        armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀,
+    fun u₀ => by ring, ?_⟩
+  obtain ⟨Clower, hClower_nn, hbound⟩ :=
+    oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le
+      (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
+  exact ⟨Clower, hClower_nn, hbound⟩
 
 private theorem armPrincipalSlotPairing_le_dirichlet_top
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
@@ -140,23 +255,36 @@ private theorem armPrincipalSlotPairing_le_dirichlet_top
   have hBfun : ∀ x : M,
       B.toFun x =
         TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
-          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotApplied
-            (I := I) g₀ g₁ (2 + n) x (A.toSection x)) := by
+          (gInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x)) := by
     intro x
     rfl
   have hWS_int : Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g₀ 0 ((2 + n) + 1) x
         (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
         (TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
-          (DifferentialGeometry.Analysis.Sobolev.TensorHilbert.gInvDiffSlotApplied
-            (I := I) g₀ g₁ (2 + n) x (A.toSection x))))
+          (negGInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x))))
       (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) := by
     have hcross := DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
       (I := I) (M := M) (g := g₀) (r := 0) (s := (2 + n) + 1) A B
-    refine hcross.congr ?_
-    filter_upwards with x
-    rw [hBfun x]
-    rfl
+    have heq :
+        (fun x => tensorInnerPointwise (I := I) (M := M) g₀ 0 ((2 + n) + 1) x
+            (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
+            (TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+              (negGInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x))))
+          = (fun x => - tensorInnerPointwise (I := I) (M := M) g₀ 0 ((2 + n) + 1) x
+              (A.toFun x) (B.toFun x)) := by
+      funext x
+      rw [hBfun x, SmoothCcTensor.toFun_apply,
+        toModel_negGInvDiffSlotApplied_eq (I := I) g₀ g₁ (2 + n) x (A.toSection x),
+        show (- TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+              (gInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x)))
+            = (-1 : ℝ) • TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+              (gInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x)) from
+          (neg_one_smul ℝ _).symm,
+        tensorInnerPointwise_smul_right]
+      ring
+    rw [heq]
+    exact hcross.neg
   have hWW_int : Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g₀ 0 ((2 + n) + 1) x
         (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
@@ -164,9 +292,14 @@ private theorem armPrincipalSlotPairing_le_dirichlet_top
       (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
       (I := I) (M := M) (g := g₀) (r := 0) (s := (2 + n) + 1) A A
-  have htool := DifferentialGeometry.Analysis.Sobolev.TensorHilbert.tensorL2Inner_gInvDiffSlot_le
-    (I := I) (M := M) g₀ g₁ h htie hδ_lt hδ_nn hδ (2 + n)
-    (fun x => A.toSection x) hWS_int hWW_int
+  have htool := DifferentialGeometry.Analysis.Sobolev.TensorHilbert.tensorL2Inner_slotΛ_le
+    (I := I) (M := M) g₀ (2 + n) (κ := δ / (1 - δ))
+    (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
+    (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+      (negGInvDiffSlotApplied (I := I) g₀ g₁ (2 + n) x (A.toSection x)))
+    (fun x => tensorInnerPointwise_negGInvDiffSlot_le
+      (I := I) (M := M) g₀ g₁ h htie hδ_lt hδ_nn hδ (2 + n) x (A.toSection x))
+    hWS_int hWW_int
   have hnorm :
       tensorL2Inner (I := I) (M := M) g₀ 0 ((2 + n) + 1)
           (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (A.toSection x))
