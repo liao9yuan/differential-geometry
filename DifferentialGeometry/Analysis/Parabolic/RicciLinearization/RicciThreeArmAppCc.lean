@@ -5800,6 +5800,10 @@ private lemma firstOrderRemainder_add_order0_eq_baseArms_add_arm2residual
   simp only [chartRicciTensor_def, chartRiemannTensor_def]
   simp only [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients.partialDeriv_chartChristoffel_eq
     (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ _ _ _ hyint]
+  have hmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    abs_convex_smallConstant_lt_one hδ_lt hδ'_lt ⟨hs.1.le, hs.2.le⟩
+  simp only [linearizedChristoffel_eq_principal_add_nonPrincipal (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x _ _ _ hyint hmem]
   sorry
 
 theorem chartRicciSlope_eq_threeArmBase_component
