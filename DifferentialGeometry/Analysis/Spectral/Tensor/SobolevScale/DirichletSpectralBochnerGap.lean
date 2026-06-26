@@ -590,6 +590,18 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general_local
     subst hn
     exact hC S
 
+private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower
+    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 2),
+      ‖rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k)
+          (iteratedCovGrad (I := I) g₀ 0 2 k u)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 2 k
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)‖ ^ 2
+        + C * (∑ a ∈ Finset.range (k + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖) ^ 2 :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
 private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
     (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 2),
@@ -597,8 +609,136 @@ private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
         ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 k
             (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2
         + C * (∑ a ∈ Finset.range (k + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖) ^ 2 :=
-  sorry
+            ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖) ^ 2 := by
+  classical
+  obtain ⟨Cgap, hCgap_nn, hgap⟩ :=
+    rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower
+      (I := I) (M := M) g₀ k
+  obtain ⟨K, hK_nn, hK⟩ :=
+    exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le (I := I) (M := M) g₀ (2 + k)
+  refine ⟨Cgap + K 0, add_nonneg hCgap_nn (hK_nn 0), fun u => ?_⟩
+  set P : SmoothCcTensor g₀ 0 (2 + k) := iteratedCovGrad (I := I) g₀ 0 2 k u with hP_def
+  set SUM : ℝ := ∑ a ∈ Finset.range (k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ with hSUM
+  have hSUM_nn : (0 : ℝ) ≤ SUM := Finset.sum_nonneg (fun a _ => norm_nonneg _)
+  have hPnorm : ‖P‖ ≤ SUM := by
+    rw [hP_def, hSUM]
+    refine Finset.single_le_sum (f := fun a => ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖)
+      (fun a _ => norm_nonneg _) ?_
+    rw [Finset.mem_range]; omega
+  have hgradP_eq : covGrad (I := I) (M := M) g₀ 0 (2 + k) P =
+      iteratedCovGrad (I := I) g₀ 0 2 (k + 1) u := by
+    rw [hP_def, iteratedCovGrad_succ]
+  have hgradPnorm : ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ ≤ SUM := by
+    rw [hgradP_eq, hSUM]
+    refine Finset.single_le_sum (f := fun a => ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖)
+      (fun a _ => norm_nonneg _) ?_
+    rw [Finset.mem_range]; omega
+  have hLHS_eq : iteratedCovGrad (I := I) g₀ 0 2 (k + 2) u =
+      covGrad (I := I) (M := M) g₀ 0 (2 + k + 1)
+        (covGrad (I := I) (M := M) g₀ 0 (2 + k) P) := by
+    rw [hP_def]
+    rfl
+  have hLHS_norm_sq :
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (k + 2) u)‖ ^ 2 =
+        tensorL2Norm (I := I) (M := M) g₀ 0 (2 + k + 1 + 1)
+            (covGrad (I := I) (M := M) g₀ 0 (2 + k + 1)
+              (covGrad (I := I) (M := M) g₀ 0 (2 + k) P)).toFun ^ 2 := by
+    rw [SmoothCcTensor.norm_toL2, hLHS_eq,
+      DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
+        (I := I) (M := M) g₀
+        (covGrad (I := I) (M := M) g₀ 0 (2 + k + 1)
+          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P))]
+  have hweitz := weitzenbock_integrated_covGrad_l2_normSq (I := I) (M := M) g₀ (2 + k) P
+  have hcurv_eq :
+      rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k + 1)
+          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P) -
+        covGrad (I := I) (M := M) g₀ 0 (2 + k)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P) =
+      pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P := rfl
+  rw [hcurv_eq] at hweitz
+  have hbase_eq :
+      tensorL2Norm (I := I) (M := M) g₀ 0 (2 + k)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P).toFun ^ 2 =
+        ‖rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P‖ ^ 2 := by
+    rw [DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
+      (I := I) (M := M) g₀ (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P)]
+  have hpair_le :
+      |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
+          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun| ≤
+        ‖pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P‖ *
+          ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ := by
+    have habs :
+        tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
+            (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun =
+          (⟪pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P,
+              covGrad (I := I) (M := M) g₀ 0 (2 + k) P⟫_ℝ : ℝ) :=
+      (SmoothCcTensor.inner_def (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P)
+        (covGrad (I := I) (M := M) g₀ 0 (2 + k) P)).symm
+    rw [habs]
+    exact abs_real_inner_le_norm
+      (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P)
+      (covGrad (I := I) (M := M) g₀ 0 (2 + k) P)
+  have hcurvnorm :
+      ‖pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P‖ ≤ K 0 * SUM := by
+    have hKb := hK 0 P
+    have hsumexp :
+        ∑ a ∈ Finset.range (0 + 2), ‖iteratedCovGrad (I := I) g₀ 0 (2 + k) a P‖ =
+          ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ := by
+      rw [show (0 + 2) = 2 by ring, Finset.sum_range_succ, Finset.sum_range_one]
+      simp only [iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
+    rw [iteratedCovGrad_zero] at hKb
+    rw [hsumexp] at hKb
+    refine le_trans hKb ?_
+    have hsum_le : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ ≤ SUM := by
+      have hPexpand : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ =
+          ‖iteratedCovGrad (I := I) g₀ 0 2 k u‖ +
+            ‖iteratedCovGrad (I := I) g₀ 0 2 (k + 1) u‖ := by
+        rw [hgradP_eq, hP_def]
+      rw [hPexpand, hSUM]
+      have hpair : ({k, k + 1} : Finset ℕ) ⊆ Finset.range (k + 2) := by
+        intro a ha
+        rw [Finset.mem_insert, Finset.mem_singleton] at ha
+        rw [Finset.mem_range]; omega
+      have hsub :=
+        Finset.sum_le_sum_of_subset_of_nonneg hpair
+          (fun a _ _ => norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 a u))
+      have hpairsum :
+          ∑ a ∈ ({k, k + 1} : Finset ℕ), ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ =
+            ‖iteratedCovGrad (I := I) g₀ 0 2 k u‖ +
+              ‖iteratedCovGrad (I := I) g₀ 0 2 (k + 1) u‖ := by
+        rw [Finset.sum_insert (by simp), Finset.sum_singleton]
+      rw [hpairsum] at hsub
+      exact hsub
+    nlinarith [hsum_le, hK_nn 0, hSUM_nn]
+  have hpair_bound :
+      |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
+          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun| ≤ K 0 * SUM ^ 2 := by
+    calc |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
+            (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun|
+        ≤ ‖pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P‖ *
+            ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ := hpair_le
+      _ ≤ (K 0 * SUM) * SUM := by
+          refine mul_le_mul hcurvnorm hgradPnorm (norm_nonneg _) ?_
+          exact mul_nonneg (hK_nn 0) hSUM_nn
+      _ = K 0 * SUM ^ 2 := by ring
+  have hbase_le := hgap u
+  rw [← hP_def] at hbase_le
+  have hbase_toL2 :
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 k
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2 =
+        ‖iteratedCovGrad (I := I) g₀ 0 2 k
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)‖ ^ 2 := by
+    rw [SmoothCcTensor.norm_toL2]
+  rw [hLHS_norm_sq, hweitz, hbase_eq, hbase_toL2]
+  have hneg_le := neg_abs_le
+    (tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
+      (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
+      (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun)
+  nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hCgap_nn, hK_nn 0]
 
 private theorem spectralModeMass_base0
     (g₀ : SmoothRiemannianMetric I M) (u : SmoothCcTensor g₀ 0 2) :
