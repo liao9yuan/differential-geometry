@@ -115,6 +115,30 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedVariables false in
+theorem maxRegSolField_parabolicInterior_jetSpectralMass
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+    ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+      ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
+      JetSpectralMassControl (I := I) (M := M) g₀ φ d₂ ∧
+        (∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
+          ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ≤
+            deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super) ∧
+        ∀ i, (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
+            =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i :=
+  sorry
+
+set_option linter.unusedVariables false in
 private theorem deTurckForcing_smoothForcingDriver
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -135,8 +159,28 @@ private theorem deTurckForcing_smoothForcingDriver
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
       (∀ i, (fun t => (gforce t).coeff i)
-          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₀)] f i) :=
-  sorry
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₀)] f i) := by
+  classical
+  obtain ⟨d₂, hd₂_pos, hd₂_le, φ, hφ_ctrl, hφ_ball, hφ_ae⟩ :=
+    maxRegSolField_parabolicInterior_jetSpectralMass (I := I) (M := M)
+      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+  obtain ⟨ψ, hψ_ctrl, hψ_ae⟩ :=
+    deTurckSobolevNHa2_jetSpectralMass_preserving (I := I) (M := M)
+      g₀ g_bg a ha_super hT hd₂_pos hd₂_le
+      (fun t => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)
+      hφ_ball φ hφ_ctrl hφ_ae
+  refine ⟨d₂, hd₂_pos, hd₂_le, ψ, hψ_ctrl.1, hψ_ctrl.2, fun i => ?_⟩
+  have hsub : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) T :=
+    Set.Icc_subset_Icc le_rfl hd₂_le
+  have hforce_coeff : (fun t => (gforce t).coeff i)
+      =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
+    MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub
+      (hforce.fun_comp (fun w => w.coeff i))
+  exact hforce_coeff.trans (hψ_ae i)
 
 set_option linter.unusedVariables false in
 private theorem deTurckForcing_solCoeff_jetSpectralMass
