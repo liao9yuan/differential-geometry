@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmSpectralGarding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
@@ -120,22 +121,6 @@ theorem smoothCcToTensorHs_rawTensorConnLapSmooth_le
     have hc2 : 0 ≤ (c i) ^ 2 := sq_nonneg _
     nlinarith [mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hbase hwpos) hc2]
   exact le_of_sq_le_sq hsq hnn
-
-theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
-    (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
-    ∃ Clower : ℝ, 0 ≤ Clower ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M)
-        (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
-        (∀ (y : M) (v w : TangentSpace I y),
-          g₁.inner y v w = g₀.inner y v w + h y v w) →
-        ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
-        ∀ (T₀ : SmoothCcTensor g₀ 0 2),
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
-              (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖ ≤
-            (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
-                (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
-              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ :=
-  sorry
 
 theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_opNorm_le
     (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
