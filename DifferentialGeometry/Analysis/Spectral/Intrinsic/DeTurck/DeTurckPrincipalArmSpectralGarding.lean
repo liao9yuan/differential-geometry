@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmEnergyCrossTerm
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
@@ -43,7 +44,7 @@ theorem deTurckPrincipalCometricArm_spectralGarding_kernel
             (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
                 (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
               Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ :=
-  sorry
+  deTurckPrincipalCometricArm_spectralGarding_of_weightedCoeffSq (I := I) (M := M) g₀ σ
 
 theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
     (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :

@@ -274,6 +274,33 @@ theorem unifIntegrable_of_uniform_norm_bound {α β : Type*} {m : MeasurableSpac
   rw [eLpNorm_congr_ae hzero, eLpNorm_zero]
   exact zero_le _
 
+theorem galerkinForcing_aeTendsto_modeRep
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
+    (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
+    (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+      ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T))
+    (hUderiv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+        HasDerivWithinAt (fun r => U N r i)
+          (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
+            deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i)
+          (Set.Ici t) t)
+    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    ∃ gRep : ℝ → ℝ, ContinuousOn gRep (Set.Icc (0 : ℝ) T) ∧
+      (timeModeCoeff (I := I) (M := M) gforce i =ᵐ[timeMeasure T] gRep) ∧
+      (∀ᵐ t ∂(timeMeasure T),
+        Tendsto (fun N => deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i)
+          atTop (𝓝 (gRep t))) :=
+  sorry
+
 theorem galerkinForcing_uniformOn_tendsto_modeRep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -300,8 +327,79 @@ theorem galerkinForcing_uniformOn_tendsto_modeRep
         Tendsto (fun N => deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i)
           atTop (𝓝 (gRep t))) ∧
       ∃ C : ℝ, ∀ N, ∀ᵐ t ∂(timeMeasure T),
-        ‖deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i‖ ≤ C :=
-  sorry
+        ‖deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i‖ ≤ C := by
+  classical
+  obtain ⟨gRep, hRep_cont, hRep_ae, hRep_conv⟩ :=
+    galerkinForcing_aeTendsto_modeRep (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+      gforce hforce U hUinit hUcont hUderiv i
+  refine ⟨gRep, hRep_cont, hRep_ae, hRep_conv, ?_⟩
+  obtain ⟨Cδ, Cmid, seed, B0, hCδ, hCmid, hclosure, hinitB⟩ :=
+    deTurckGalerkin_forcing_closure_perScale (I := I) (M := M) g₀ g_bg a ha_super (T := T) U hUinit
+  obtain ⟨Bound, hBound⟩ :=
+    galerkin_energy_uniform_bound_perScale (I := I) (M := M) (g := g₀)
+      (U := U) (Fseq := deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U)
+      (sseq := eigenIdxFinset (I := I) (M := M) g₀)
+      (T := T) (σ₀ := (a : ℝ)) (Cδ := Cδ) (Cmid := Cmid) (seed := seed) (B0 := B0)
+      hCδ hCmid hUcont hUderiv hclosure hinitB 2
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  set wi : ℝ := Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) with hwi
+  have hwi_nonneg : 0 ≤ wi := Real.sqrt_nonneg _
+  have hKnn : (0 : ℝ) ≤ (K : ℝ) := NNReal.coe_nonneg K
+  set C : ℝ := wi⁻¹ * (‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖
+      + (K : ℝ) * Real.sqrt Bound) with hC
+  have hC_nonneg : 0 ≤ C := by
+    rw [hC]
+    refine mul_nonneg (inv_nonneg.2 hwi_nonneg) ?_
+    have h1 : 0 ≤ (K : ℝ) * Real.sqrt Bound := mul_nonneg hKnn (Real.sqrt_nonneg _)
+    have h2 : 0 ≤ ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖ := norm_nonneg _
+    linarith
+  refine ⟨C, fun N => ?_⟩
+  have hpt : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ‖deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i‖ ≤ C := by
+    intro t ht
+    rw [deTurckGalerkinForcing_apply]
+    by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g₀ N
+    · rw [if_pos hi]
+      set V := finiteEigenComboHs (I := I) (M := M) g₀
+        (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2) with hV
+      have hEbound : galerkinEnergy (I := I) (M := M)
+          (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + 2) t ≤ Bound := by
+        have h := hBound N t ht
+        rwa [show (a : ℝ) + ((2 : ℕ) : ℝ) = (a : ℝ) + 2 by norm_num] at h
+      have hVnorm_sq : ‖V‖ ^ 2 = galerkinEnergy (I := I) (M := M)
+          (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + 2) t := by
+        rw [hV, finiteEigenCombo_spectral_normSq]
+        rfl
+      have hVnorm_le : ‖V‖ ≤ Real.sqrt Bound := by
+        have h1 : ‖V‖ ^ 2 ≤ Bound := by rw [hVnorm_sq]; exact hEbound
+        calc ‖V‖ = Real.sqrt (‖V‖ ^ 2) := (Real.sqrt_sq (norm_nonneg V)).symm
+          _ ≤ Real.sqrt Bound := Real.sqrt_le_sqrt h1
+      have hNbound : ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V‖ ≤
+          ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖ + (K : ℝ) * ‖V‖ := by
+        have hd := hK.dist_le_mul V 0
+        rw [dist_eq_norm, dist_eq_norm, sub_zero] at hd
+        have hsub := norm_sub_norm_le
+          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V)
+          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0)
+        linarith
+      have hcoeff : ‖(deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V).coeff i‖ ≤
+          wi⁻¹ * ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V‖ := by
+        rw [Real.norm_eq_abs, hwi]
+        exact tensorHsAbsCoeffLe (I := I) (M := M)
+          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V) i
+      calc ‖(deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V).coeff i‖
+          ≤ wi⁻¹ * ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a V‖ := hcoeff
+        _ ≤ wi⁻¹ * (‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖
+              + (K : ℝ) * Real.sqrt Bound) := by
+            refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.2 hwi_nonneg)
+            have hKV : (K : ℝ) * ‖V‖ ≤ (K : ℝ) * Real.sqrt Bound :=
+              mul_le_mul_of_nonneg_left hVnorm_le hKnn
+            linarith
+        _ = C := hC.symm
+    · rw [if_neg hi, norm_zero]
+      exact hC_nonneg
+  unfold timeMeasure
+  exact (ae_restrict_iff' measurableSet_Icc).2 (Eventually.of_forall (fun t ht => hpt t ht))
 
 theorem galerkinForcing_ofContinuousOn_tendsto_modeCoeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
