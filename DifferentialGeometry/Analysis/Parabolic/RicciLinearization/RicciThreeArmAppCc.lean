@@ -525,6 +525,38 @@ private theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+private theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
+    (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p)) ((Set.univ : Set M) ×ˢ S))
+    (hB : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (B p)) ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p + B p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hA p₀ hp₀)
+  have hB' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hB p₀ hp₀)
+  refine (hA'.2.add hB'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by rw [he]; exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hx
+    exact (e.linear ℝ hx).map_add (A p) (B p)
+  · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
+      (A p₀) (B p₀)
+
 private theorem jointTotalSpaceRS_const_smul_local {r s : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -6823,14 +6855,104 @@ def corrFieldFreshResidualSpec (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
                 ![(chartModelBasis E) k, (chartModelBasis E) i]
             + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s)
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem exists_corrFieldFreshResidual_absorption (g₀ : SmoothRiemannianMetric I M) :
+    ∃ CΓ : ℝ, 0 ≤ CΓ ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        ∃ (corr0 : ℝ → SmoothCcTensor g₀ 2 2) (corr1 : ℝ → SmoothCcTensor g₀ 3 2),
+          ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+            (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+              (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+              ((corr0 p.2).toSection p.1))
+            ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+          ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+            (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+              (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+              ((corr1 p.2).toSection p.1))
+            ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+          (∀ {a : ℕ}, 2 * Module.finrank ℝ E + 10 ≤ a → ∀ {R : ℝ}, 0 ≤ R →
+              (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+              (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+              ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+                Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+                    ((corr0 s).toSection x)) ≤ CΓ * (1 + R) ^ 2 ∧
+                Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+                    ((corr1 s).toSection x)) ≤ CΓ * (1 + R) ^ 2) ∧
+          ((∀ (x : M) (v w : TangentSpace I x),
+              ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v) →
+            (∀ (x : M) (v w : TangentSpace I x),
+              ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v) →
+            ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+              ∀ (x : M) (i k : Fin (Module.finrank ℝ E))
+                (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
+                chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+                      (extChartAt I x x) s +
+                    chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+                      (extChartAt I x x) s =
+                  unitModel (I := I) (M := M) g₀ 2
+                      (appCc (I := I) (M := M) g₀ 2 2
+                        (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr0 s)
+                        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+                      ![(chartModelBasis E) k, (chartModelBasis E) i]
+                    + unitModel (I := I) (M := M) g₀ 2
+                        (appCc (I := I) (M := M) g₀ 3 2
+                          (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr1 s)
+                          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
+                        ![(chartModelBasis E) k, (chartModelBasis E) i]
+                    + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s) :=
+  sorry
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_corrFieldFreshResidual (g₀ : SmoothRiemannianMetric I M) :
     ∃ CΓ : ℝ, 0 ≤ CΓ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         ∃ (Φ₀ : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁ : ℝ → SmoothCcTensor g₀ 3 2),
-          corrFieldFreshResidualSpec (I := I) (M := M) g₀ CΓ T T' hδ hδ' Φ₀ Φ₁ :=
-  sorry
+          corrFieldFreshResidualSpec (I := I) (M := M) g₀ CΓ T T' hδ hδ' Φ₀ Φ₁ := by
+  classical
+  obtain ⟨CΓ, hCΓ_nn, habs⟩ := exists_corrFieldFreshResidual_absorption (I := I) (M := M) g₀
+  refine ⟨CΓ, hCΓ_nn, ?_⟩
+  intro T T' δ hδ δ' hδ'
+  obtain ⟨corr0, corr1, hsm0, hsm1, hbound, hident⟩ := habs T T' hδ hδ'
+  refine ⟨fun s => linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr0 s,
+    fun s => linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr1 s, ?_, ?_, ?_, ?_⟩
+  · refine (jointTotalSpaceRS_add_local (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (fun p : M × ℝ =>
+        (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' p.2).toSection p.1)
+      (fun p : M × ℝ => (corr0 p.2).toSection p.1)
+      (linearizedRicci_arm0BaseCoeff_jointSmooth (I := I) g₀ T T' hδ hδ') hsm0).congr
+      (fun p _ => ?_)
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1 t) ?_
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  · refine (jointTotalSpaceRS_add_local (I := I) (r := 3) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (fun p : M × ℝ =>
+        (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' p.2).toSection p.1)
+      (fun p : M × ℝ => (corr1 p.2).toSection p.1)
+      (linearizedRicci_arm1BaseCoeff_jointSmooth (I := I) g₀ T T' hδ hδ') hsm1).congr
+      (fun p _ => ?_)
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1 t) ?_
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  · intro a ha_super R hR hTball hT'ball s hs x
+    obtain ⟨hb0, hb1⟩ := hbound ha_super hR hTball hT'ball s hs x
+    constructor
+    · have heq : ((linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr0 s)
+            - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s) = corr0 s := by
+        rw [add_sub_cancel_left]
+      rw [heq]; exact hb0
+    · have heq : ((linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr1 s)
+            - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s) = corr1 s := by
+        rw [add_sub_cancel_left]
+      rw [heq]; exact hb1
+  · exact hident
 
 theorem exists_corrFieldFreshConst (g₀ : SmoothRiemannianMetric I M) :
     ∃ CΓ : ℝ, 0 ≤ CΓ ∧
