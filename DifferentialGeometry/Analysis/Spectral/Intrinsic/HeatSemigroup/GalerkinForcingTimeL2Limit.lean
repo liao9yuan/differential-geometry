@@ -274,6 +274,56 @@ theorem unifIntegrable_of_uniform_norm_bound {α β : Type*} {m : MeasurableSpac
   rw [eLpNorm_congr_ae hzero, eLpNorm_zero]
   exact zero_le _
 
+theorem deTurckGalerkinNonlinearity_aeTendsto_force
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
+    (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
+    (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+      ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T))
+    (hUderiv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+        HasDerivWithinAt (fun r => U N r i)
+          (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
+            deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i)
+          (Set.Ici t) t) :
+    ∀ᵐ t ∂(timeMeasure T),
+      Tendsto (fun N => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
+            (U N t) ((a : ℝ) + 2)))
+        atTop (𝓝 (gforce t)) :=
+  sorry
+
+theorem deTurckForce_timeModeCoeff_continuousRep
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
+    (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
+    (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+      ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T))
+    (hUderiv : ∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T,
+      ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+        HasDerivWithinAt (fun r => U N r i)
+          (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
+            deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i)
+          (Set.Ici t) t)
+    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    ∃ gRep : ℝ → ℝ, ContinuousOn gRep (Set.Icc (0 : ℝ) T) ∧
+      timeModeCoeff (I := I) (M := M) gforce i =ᵐ[timeMeasure T] gRep :=
+  sorry
+
 theorem galerkinForcing_aeTendsto_modeRep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -298,8 +348,28 @@ theorem galerkinForcing_aeTendsto_modeRep
       (timeModeCoeff (I := I) (M := M) gforce i =ᵐ[timeMeasure T] gRep) ∧
       (∀ᵐ t ∂(timeMeasure T),
         Tendsto (fun N => deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i)
-          atTop (𝓝 (gRep t))) :=
-  sorry
+          atTop (𝓝 (gRep t))) := by
+  classical
+  obtain ⟨gRep, hRep_cont, hRep_ae⟩ :=
+    deTurckForce_timeModeCoeff_continuousRep (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+      gforce hforce U hUinit hUcont hUderiv i
+  refine ⟨gRep, hRep_cont, hRep_ae, ?_⟩
+  have hfield := deTurckGalerkinNonlinearity_aeTendsto_force (I := I) (M := M) g₀ g_bg a ha_super
+    hT hT1 gforce hforce U hUinit hUcont hUderiv
+  have hcoeFn := timeModeCoeff_coeFn (I := I) (M := M) gforce i
+  obtain ⟨N₀, hN₀⟩ := exists_mem_eigenIdxFinset (I := I) (M := M) g₀ i
+  filter_upwards [hfield, hRep_ae, hcoeFn] with t ht_field ht_ae ht_coeFn
+  have hgRep_eq : gRep t = (gforce t).coeff i := ht_ae.symm.trans ht_coeFn
+  rw [hgRep_eq]
+  have hcoeff : Tendsto (fun N => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
+          (U N t) ((a : ℝ) + 2))).coeff i) atTop (𝓝 ((gforce t).coeff i)) := by
+    have hcont := (tensorHsCoeffL (I := I) (M := M) (a := (a : ℝ)) i).continuous.tendsto (gforce t)
+    have hcomp := hcont.comp ht_field
+    simpa only [Function.comp_def, tensorHsCoeffL_apply] using hcomp
+  refine hcoeff.congr' ?_
+  filter_upwards [eventually_ge_atTop N₀] with N hN
+  rw [deTurckGalerkinForcing_apply, if_pos (eigenIdxFinset_mono (I := I) (M := M) g₀ hN hN₀)]
 
 theorem galerkinForcing_uniformOn_tendsto_modeRep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
