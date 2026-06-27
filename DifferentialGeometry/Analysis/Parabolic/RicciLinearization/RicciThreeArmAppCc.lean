@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.ConvexPerturbationPointwi
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Geometry.Curvature.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciCurvatureCoeffREnvelope
 
 noncomputable section
 
@@ -6855,6 +6856,24 @@ def corrFieldFreshResidualSpec (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
                 ![(chartModelBasis E) k, (chartModelBasis E) i]
             + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s)
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem exists_arm1Koszul_realizedFam_rfns_REnvelope (g₀ : SmoothRiemannianMetric I M) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        ∀ {a : ℕ}, 2 * Module.finrank ℝ E + 10 ≤ a → ∀ {R : ℝ}, 0 ≤ R →
+          (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+          (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+          ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+                ((linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
+              K * (1 + R) ^ 2 :=
+  sorry
+
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_corrFieldFreshResidual_curvConst (g₀ : SmoothRiemannianMetric I M) :
@@ -6871,8 +6890,20 @@ theorem exists_corrFieldFreshResidual_curvConst (g₀ : SmoothRiemannianMetric I
                   (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤ CΓ * (1 + R) ^ 2 ∧
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
                 ((linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
-              CΓ * (1 + R) ^ 2 :=
-  sorry
+              CΓ * (1 + R) ^ 2 := by
+  classical
+  obtain ⟨KR, hKR_nn, hKR⟩ :=
+    exists_ricciArmOrder0Riemann_realizedFam_rfns_REnvelope (I := I) (M := M) g₀
+  obtain ⟨KK, hKK_nn, hKK⟩ :=
+    exists_arm1Koszul_realizedFam_rfns_REnvelope (I := I) (M := M) g₀
+  refine ⟨max KR KK, le_trans hKR_nn (le_max_left _ _), ?_⟩
+  intro T T' δ hδ δ' hδ' a ha_super R hR hTball hT'ball s hs x
+  have hpow_nn : 0 ≤ (1 + R) ^ 2 := by positivity
+  refine ⟨?_, ?_⟩
+  · refine le_trans (hKR T T' hδ hδ' ha_super hR hTball hT'ball s hs x) ?_
+    exact mul_le_mul_of_nonneg_right (le_max_left _ _) hpow_nn
+  · refine le_trans (hKK T T' hδ hδ' ha_super hR hTball hT'ball s hs x) ?_
+    exact mul_le_mul_of_nonneg_right (le_max_right _ _) hpow_nn
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
