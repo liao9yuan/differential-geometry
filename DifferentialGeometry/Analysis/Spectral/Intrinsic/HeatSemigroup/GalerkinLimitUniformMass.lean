@@ -17,6 +17,9 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
+open DifferentialGeometry.Analysis.Parabolic
+open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
+open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -24,6 +27,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+variable {T : ℝ}
 
 theorem fatou_weighted_sq_mass_le {ι : Type*} (S : ℕ → Finset ι)
     (hS : Tendsto S atTop atTop) (w : ι → ℝ) (hw : ∀ i, 0 ≤ w i)
@@ -160,7 +164,7 @@ theorem deTurckGalerkin_solField_uniformSpatialMass_allOrder
   set wσ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
     fun i => tensorSobolevWeight (I := I) (M := M) i σ with hwσ
   have hwσ_nn : ∀ i, 0 ≤ wσ i := fun i => tensorSobolevWeight_nonneg (I := I) (M := M) i σ
-  have hweight_dom : ∀ i,
+  have hweight_dom : ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
       tensorSobolevWeight (I := I) (M := M) i σ ≤
         tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) := by
     intro i
