@@ -101,6 +101,38 @@ theorem tensorL2Inner_appCc_slotExtend_input_covGrad_eq (g : SmoothRiemannianMet
   rw [hgreen] at hsplit
   linarith [hsplit]
 
+theorem tensorL2Inner_rawConnLap_appCc_eq_neg_covGrad_split (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) (A : SmoothCcTensor g 0 s) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    tensorL2Inner (I := I) (M := M) g 0 s
+        (rawTensorConnLapSmooth (I := I) g 0 s A).toFun
+        (appCc (I := I) (M := M) g r s Φ W).toFun =
+      - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (covGrad (I := I) (M := M) g 0 s A).toFun
+          (appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ)
+            (covGrad (I := I) (M := M) g 0 r W)).toFun -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (covGrad (I := I) (M := M) g 0 s A).toFun
+          (appCc (I := I) (M := M) g r (s + 1)
+            (covGrad (I := I) (M := M) g r s Φ) W).toFun := by
+  classical
+  have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
+    (I := I) (M := M) g 0 s A (appCc (I := I) (M := M) g r s Φ W)
+  have hsplit := tensorL2Inner_covGrad_appCc_eq_add (I := I) (M := M) g r s Φ W
+    (covGrad (I := I) (M := M) g 0 s A)
+  have hsymm0 := tensorL2Inner_symm (I := I) (M := M) g 0 (s + 1)
+    (covGrad (I := I) (M := M) g 0 s A).toFun
+    (covGrad (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W)).toFun
+  have hsymm1 := tensorL2Inner_symm (I := I) (M := M) g 0 (s + 1)
+    (appCc (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) W).toFun
+    (covGrad (I := I) (M := M) g 0 s A).toFun
+  have hsymm2 := tensorL2Inner_symm (I := I) (M := M) g 0 (s + 1)
+    (appCc (I := I) (M := M) g (r + 1) (s + 1)
+      (slotExtend (I := I) (M := M) g r s Φ)
+      (covGrad (I := I) (M := M) g 0 r W)).toFun
+    (covGrad (I := I) (M := M) g 0 s A).toFun
+  linarith [hgreen, hsplit, hsymm0, hsymm1, hsymm2]
+
 end Connection
 end Integral
 end DifferentialGeometry
