@@ -1570,10 +1570,9 @@ private theorem linearizedRicciArm0BaseCoeff_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 2 2 i
-                (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i :=
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
 private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
@@ -1588,10 +1587,9 @@ private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 2 2 i
-                (linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i :=
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
 private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
@@ -1606,10 +1604,9 @@ private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 3 2 i
-                (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i :=
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 3 2 i
+              (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
 private theorem linearizedRicciArm1CorrField_perOrder_rfns_ballUniform
@@ -1624,10 +1621,9 @@ private theorem linearizedRicciArm1CorrField_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 3 2 i
-                (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i :=
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 3 2 i
+              (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
 private theorem ricciArmPrincipalCoeff_realizedFam_perOrder_rfns_ballUniform
@@ -1642,11 +1638,10 @@ private theorem ricciArmPrincipalCoeff_realizedFam_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 4 2 i
-                (ricciArmPrincipalCoeff (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s))).toSection x) ≤ P i :=
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (ricciArmPrincipalCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ P i :=
   sorry
 
 private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
@@ -1661,36 +1656,26 @@ private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 4 2 i
-                (traceHessianCoeff (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s))).toSection x) ≤ P i :=
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (traceHessianCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ P i :=
   sorry
 
-private lemma rfns_iteratedCovGrad_add_le_tame
-    (g₀ : SmoothRiemannianMetric I M) (r i : ℕ)
-    (A B : SmoothCcTensor g₀ r 2) (x : M) (PA PB : ℝ)
-    (hA : riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection x) ≤ PA)
-    (hB : riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x) ≤ PB) :
-    riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i (A + B)).toSection x) ≤ 2 * PA + 2 * PB := by
-  rw [iteratedCovGrad_add, SmoothCcTensor.toSection_add]
-  have hsec : ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection
-        + (iteratedCovGrad (I := I) g₀ r 2 i B).toSection) x =
-      (iteratedCovGrad (I := I) g₀ r 2 i A).toSection x
-        + (iteratedCovGrad (I := I) g₀ r 2 i B).toSection x := rfl
-  rw [hsec]
-  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ r (2 + i) x
-    ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection x)
-    ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x)
-  nlinarith [hadd, hA, hB,
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection x),
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x)]
+private lemma normSq_iteratedCovGrad_add_le_tame
+    (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
+    (A B : SmoothCcTensor g₀ r s) (PA PB : ℝ)
+    (hA : ‖iteratedCovGrad (I := I) g₀ r s i A‖ ^ 2 ≤ PA)
+    (hB : ‖iteratedCovGrad (I := I) g₀ r s i B‖ ^ 2 ≤ PB) :
+    ‖iteratedCovGrad (I := I) g₀ r s i (A + B)‖ ^ 2 ≤ 2 * PA + 2 * PB := by
+  rw [iteratedCovGrad_add]
+  have htri : ‖iteratedCovGrad (I := I) g₀ r s i A + iteratedCovGrad (I := I) g₀ r s i B‖ ≤
+      ‖iteratedCovGrad (I := I) g₀ r s i A‖ + ‖iteratedCovGrad (I := I) g₀ r s i B‖ :=
+    norm_add_le _ _
+  nlinarith [htri, hA, hB, norm_nonneg (iteratedCovGrad (I := I) g₀ r s i A),
+    norm_nonneg (iteratedCovGrad (I := I) g₀ r s i B),
+    norm_nonneg (iteratedCovGrad (I := I) g₀ r s i A + iteratedCovGrad (I := I) g₀ r s i B),
+    sq_nonneg (‖iteratedCovGrad (I := I) g₀ r s i A‖ - ‖iteratedCovGrad (I := I) g₀ r s i B‖)]
 
 private theorem iteratedCovGrad_smul_tame (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
@@ -1702,35 +1687,53 @@ private theorem iteratedCovGrad_smul_tame (g : SmoothRiemannianMetric I M) (r s 
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-private lemma rfns_iteratedCovGrad_sub_smul_le_tame
-    (g₀ : SmoothRiemannianMetric I M) (r i : ℕ)
-    (A B : SmoothCcTensor g₀ r 2) (c : ℝ) (x : M) (PA PB : ℝ)
-    (hA : riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection x) ≤ PA)
-    (hB : riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x) ≤ PB) :
-    riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i (A - c • B)).toSection x) ≤ 2 * PA + 2 * c ^ 2 * PB := by
-  rw [iteratedCovGrad_sub, iteratedCovGrad_smul_tame, SmoothCcTensor.toSection_sub,
-    SmoothCcTensor.toSection_smul]
-  have hsec : ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection
-        - c • (iteratedCovGrad (I := I) g₀ r 2 i B).toSection) x =
-      (iteratedCovGrad (I := I) g₀ r 2 i A).toSection x
-        - c • (iteratedCovGrad (I := I) g₀ r 2 i B).toSection x := rfl
-  rw [hsec]
-  have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ r (2 + i) x
-    ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection x)
-    (c • (iteratedCovGrad (I := I) g₀ r 2 i B).toSection x)
-  rw [riemannianFiberNormSq_smul_value_tame (I := I) g₀ r (2 + i) x c
-    ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x)] at hsub
-  nlinarith [hsub, hA, hB, sq_nonneg c,
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i A).toSection x),
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r (2 + i) x
-      ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x),
-    mul_nonneg (sq_nonneg c)
-      (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r (2 + i) x
-        ((iteratedCovGrad (I := I) g₀ r 2 i B).toSection x))]
+private lemma normSq_iteratedCovGrad_sub_smul_le_tame
+    (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
+    (A B : SmoothCcTensor g₀ r s) (c : ℝ) (PA PB : ℝ)
+    (hA : ‖iteratedCovGrad (I := I) g₀ r s i A‖ ^ 2 ≤ PA)
+    (hB : ‖iteratedCovGrad (I := I) g₀ r s i B‖ ^ 2 ≤ PB) :
+    ‖iteratedCovGrad (I := I) g₀ r s i (A - c • B)‖ ^ 2 ≤ 2 * PA + 2 * c ^ 2 * PB := by
+  rw [iteratedCovGrad_sub, iteratedCovGrad_smul_tame]
+  have htri : ‖iteratedCovGrad (I := I) g₀ r s i A - c • iteratedCovGrad (I := I) g₀ r s i B‖ ≤
+      ‖iteratedCovGrad (I := I) g₀ r s i A‖ + ‖c • iteratedCovGrad (I := I) g₀ r s i B‖ := by
+    rw [sub_eq_add_neg]
+    refine (norm_add_le _ _).trans_eq ?_
+    rw [norm_neg]
+  rw [norm_smul, Real.norm_eq_abs] at htri
+  have habs : |c| * ‖iteratedCovGrad (I := I) g₀ r s i B‖ ≤
+      |c| * Real.sqrt PB := by
+    refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg c)
+    rw [show ‖iteratedCovGrad (I := I) g₀ r s i B‖ =
+        Real.sqrt (‖iteratedCovGrad (I := I) g₀ r s i B‖ ^ 2) from
+      (Real.sqrt_sq (norm_nonneg _)).symm]
+    exact Real.sqrt_le_sqrt hB
+  have hAsqrt : ‖iteratedCovGrad (I := I) g₀ r s i A‖ ≤ Real.sqrt PA := by
+    rw [show ‖iteratedCovGrad (I := I) g₀ r s i A‖ =
+        Real.sqrt (‖iteratedCovGrad (I := I) g₀ r s i A‖ ^ 2) from
+      (Real.sqrt_sq (norm_nonneg _)).symm]
+    exact Real.sqrt_le_sqrt hA
+  have hPA_nn : 0 ≤ PA := le_trans (sq_nonneg _) hA
+  have hPB_nn : 0 ≤ PB := le_trans (sq_nonneg _) hB
+  have hsumbnd : ‖iteratedCovGrad (I := I) g₀ r s i A - c • iteratedCovGrad (I := I) g₀ r s i B‖ ≤
+      Real.sqrt PA + |c| * Real.sqrt PB := by
+    refine htri.trans ?_
+    have := add_le_add hAsqrt habs
+    linarith [this]
+  have hsum_nn : 0 ≤ Real.sqrt PA + |c| * Real.sqrt PB :=
+    add_nonneg (Real.sqrt_nonneg _) (mul_nonneg (abs_nonneg c) (Real.sqrt_nonneg _))
+  have hnorm_nn : 0 ≤ ‖iteratedCovGrad (I := I) g₀ r s i A - c • iteratedCovGrad (I := I) g₀ r s i B‖ :=
+    norm_nonneg _
+  have hsq : ‖iteratedCovGrad (I := I) g₀ r s i A - c • iteratedCovGrad (I := I) g₀ r s i B‖ ^ 2 ≤
+      (Real.sqrt PA + |c| * Real.sqrt PB) ^ 2 := by
+    have := mul_self_le_mul_self hnorm_nn hsumbnd
+    nlinarith [this]
+  have hsqrtPA : Real.sqrt PA ^ 2 = PA := Real.sq_sqrt hPA_nn
+  have hsqrtPB : Real.sqrt PB ^ 2 = PB := Real.sq_sqrt hPB_nn
+  have habsc : |c| ^ 2 = c ^ 2 := sq_abs c
+  refine hsq.trans ?_
+  nlinarith [hsqrtPA, hsqrtPB, habsc, Real.sqrt_nonneg PA, Real.sqrt_nonneg PB,
+    abs_nonneg c, sq_nonneg (Real.sqrt PA - |c| * Real.sqrt PB),
+    mul_nonneg (abs_nonneg c) (mul_nonneg (Real.sqrt_nonneg PA) (Real.sqrt_nonneg PB))]
 
 private theorem linearizedRicciArm_concreteField_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1744,16 +1747,13 @@ private theorem linearizedRicciArm_concreteField_perOrder_rfns_ballUniform
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 2 2 i
-                (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i ∧
-          riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 3 2 i
-                (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i ∧
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 4 2 i
-                (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ P i := by
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i ∧
+          ‖iteratedCovGrad (I := I) g₀ 3 2 i
+              (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i ∧
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i := by
   classical
   obtain ⟨P0b, hP0b_nn, hP0b⟩ :=
     linearizedRicciArm0BaseCoeff_perOrder_rfns_ballUniform (I := I) g₀ a ha_super hR hδ₀
@@ -1772,29 +1772,29 @@ private theorem linearizedRicciArm_concreteField_perOrder_rfns_ballUniform
   · intro i
     refine le_max_of_le_left ?_
     nlinarith [hP0b_nn i, hP0c_nn i]
-  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs x
-    have hb0 := hP0b T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x
-    have hc0 := hP0c T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x
-    have hb1 := hP1b T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x
-    have hc1 := hP1c T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x
-    have hp := hPp T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x
-    have hh := hPh T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x
+  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+    have hb0 := hP0b T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+    have hc0 := hP0c T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+    have hb1 := hP1b T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+    have hc1 := hP1c T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+    have hp := hPp T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
+    have hh := hPh T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
     refine ⟨?_, ?_, ?_⟩
     · rw [linearizedRicciArm0Field]
-      exact (rfns_iteratedCovGrad_add_le_tame (I := I) g₀ 2 i
+      exact (normSq_iteratedCovGrad_add_le_tame (I := I) g₀ 2 2 i
         (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)
-        (linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s) x (P0b i) (P0c i) hb0 hc0).trans
+        (linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s) (P0b i) (P0c i) hb0 hc0).trans
         (le_max_left _ _)
     · rw [linearizedRicciArm1Field]
-      refine (rfns_iteratedCovGrad_add_le_tame (I := I) g₀ 3 i
+      refine (normSq_iteratedCovGrad_add_le_tame (I := I) g₀ 3 2 i
         (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)
-        (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s) x (P1b i) (P1c i) hb1 hc1).trans ?_
+        (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s) (P1b i) (P1c i) hb1 hc1).trans ?_
       exact le_max_of_le_right (le_max_left _ _)
     · rw [linearizedRicciArm2FieldLichnerowicz]
-      refine (rfns_iteratedCovGrad_sub_smul_le_tame (I := I) g₀ 4 i
+      refine (normSq_iteratedCovGrad_sub_smul_le_tame (I := I) g₀ 4 2 i
         (ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (traceHessianCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))
-        (1 / 2 : ℝ) x (Pp i) (Ph i) hp hh).trans ?_
+        (1 / 2 : ℝ) (Pp i) (Ph i) hp hh).trans ?_
       exact le_max_of_le_right (le_max_right _ _)
 
 private theorem linearizedRicciArm_concreteField_jetL2_ballUniform
@@ -1822,53 +1822,37 @@ private theorem linearizedRicciArm_concreteField_jetL2_ballUniform
             ‖iteratedCovGrad (I := I) g₀ 4 2 i
               (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)‖ ^ 2) ≤ B ^ 2) := by
   classical
-  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨P, hP_nn, hP⟩ :=
     linearizedRicciArm_concreteField_perOrder_rfns_ballUniform (I := I) g₀ a ha_super hR hδ₀
-  set V : ℝ := (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal with hV_def
-  have hV_nn : 0 ≤ V := ENNReal.toReal_nonneg
   set Psum : ℝ := ∑ i ∈ Finset.range (a + 1), P i with hPsum_def
   have hPsum_nn : 0 ≤ Psum := Finset.sum_nonneg (fun i _ => hP_nn i)
-  refine ⟨Real.sqrt (V * Psum), Real.sqrt_nonneg _, ?_⟩
+  refine ⟨Real.sqrt Psum, Real.sqrt_nonneg _, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
-  have hB_sq : Real.sqrt (V * Psum) ^ 2 = V * Psum :=
-    Real.sq_sqrt (mul_nonneg hV_nn hPsum_nn)
+  have hB_sq : Real.sqrt Psum ^ 2 = Psum := Real.sq_sqrt hPsum_nn
   have hkey : ∀ (r : ℕ) (Φ : ℝ → SmoothCcTensor g₀ r 2)
       (s : ℝ),
-      (∀ (i : ℕ), i ∈ Finset.range (a + 1) → ∀ x : M,
-        riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-          ((iteratedCovGrad (I := I) g₀ r 2 i (Φ s)).toSection x) ≤ P i) →
+      (∀ (i : ℕ), i ∈ Finset.range (a + 1) →
+        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ P i) →
       (∑ i ∈ Finset.range (a + 1),
-        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2) ≤ Real.sqrt (V * Psum) ^ 2 := by
+        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2) ≤ Real.sqrt Psum ^ 2 := by
     intro r Φ s hbound
     rw [hB_sq]
-    have hper : ∀ i ∈ Finset.range (a + 1),
-        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ P i * V := by
-      intro i hi
-      have hpt := hbound i hi
-      have hbd := norm_le_of_pointwise_fiberNormSq_bound_rs (I := I) g₀ r (2 + i)
-        (iteratedCovGrad (I := I) g₀ r 2 i (Φ s)) (P i) hpt
-      calc ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2
-          ≤ P i * (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal := hbd
-        _ = P i * V := by rw [hV_def]
     calc ∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2
-        ≤ ∑ i ∈ Finset.range (a + 1), P i * V := Finset.sum_le_sum hper
-      _ = (∑ i ∈ Finset.range (a + 1), P i) * V := by rw [Finset.sum_mul]
-      _ = V * Psum := by rw [hPsum_def]; ring
+        ≤ ∑ i ∈ Finset.range (a + 1), P i := Finset.sum_le_sum hbound
+      _ = Psum := hPsum_def.symm
   refine ⟨?_, ?_, ?_⟩
   · intro s hs
     exact hkey 2 (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ') s
-      (fun i hi x => (hP T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
-        (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs x).1)
+      (fun i hi => (hP T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
+        (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs).1)
   · intro s hs
     exact hkey 3 (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ') s
-      (fun i hi x => (hP T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
-        (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs x).2.1)
+      (fun i hi => (hP T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
+        (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs).2.1)
   · intro s hs
     exact hkey 4 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ') s
-      (fun i hi x => (hP T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
-        (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs x).2.2)
+      (fun i hi => (hP T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
+        (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs).2.2)
 
 private theorem uniform_rfns_bound_lichnerowicz_coeffFields
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
