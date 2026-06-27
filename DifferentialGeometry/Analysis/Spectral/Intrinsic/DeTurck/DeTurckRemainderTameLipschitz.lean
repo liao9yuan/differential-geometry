@@ -21,6 +21,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArmCoeffPerOrderJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 
 /-!
 # The intrinsic covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -91,6 +92,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChar
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component deriv_chartRicciTrace_realizedFam_eq_chartSlope chartRicciTraceChristoffelSlope cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local symmS symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_rfns_le symmAbsorbedCoeff_jet_le)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -6582,8 +6584,80 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2) ≤ Γ ^ 2 ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i C₁‖ ^ 2) ≤ Γ ^ 2 ∧
-          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 :=
-  sorry
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 := by
+  classical
+  obtain ⟨ΛC, Γ, hΛC_nn, hΓ_nn, hsymm⟩ :=
+    deTurckRHSArmDiff_threeArm_coeffC0_jetL2_ballUniform (I := I) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨ΛC, Γ, hΛC_nn, hΓ_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  have hδ_s : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) g₀ T)) δ :=
+    gFibreOpBound_ccTensorBilinSymm_symmS g₀ T hδ
+  have hδ'_s : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) g₀ T')) δ' :=
+    gFibreOpBound_ccTensorBilinSymm_symmS g₀ T' hδ'
+  obtain ⟨C₀, C₁, C₂, hid, h0s, h1s, h2s, h0j, h1j, h2j⟩ :=
+    hsymm (symmS (I := I) g₀ T) (symmS (I := I) g₀ T') hδ_le hδ_s hδ'_le hδ'_s
+      (ccTensorBilin_symmS_symm g₀ T) (ccTensorBilin_symmS_symm g₀ T')
+      (fun j hj => le_trans (tensorL2Norm_iteratedCovGrad_symmS_le g₀ T j) (hTball j hj))
+      (fun j hj => le_trans (tensorL2Norm_iteratedCovGrad_symmS_le g₀ T' j) (hT'ball j hj))
+  obtain ⟨σ'₀, hσ'₀⟩ :=
+    exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) (T - T') 0
+  obtain ⟨σ'₁, hσ'₁⟩ :=
+    exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) (T - T') 1
+  obtain ⟨σ'₂, hσ'₂⟩ :=
+    exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) (T - T') 2
+  refine ⟨symmAbsorbedCoeff (I := I) (M := M) g₀ 0 C₀ σ'₀,
+    symmAbsorbedCoeff (I := I) (M := M) g₀ 1 C₁ σ'₁,
+    symmAbsorbedCoeff (I := I) (M := M) g₀ 2 C₂ σ'₂, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · have he0 : appCc (I := I) (M := M) g₀ 2 2
+          (symmAbsorbedCoeff (I := I) (M := M) g₀ 0 C₀ σ'₀)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) =
+        appCc (I := I) (M := M) g₀ 2 2 C₀
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) g₀ (T - T'))) := by
+      apply smoothCcTensor_ext_of_unitModel
+      intro x
+      apply ContinuousMultilinearMap.ext
+      intro v
+      exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 (T - T') C₀ σ'₀ hσ'₀ x v
+    have he1 : appCc (I := I) (M := M) g₀ 3 2
+          (symmAbsorbedCoeff (I := I) (M := M) g₀ 1 C₁ σ'₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) =
+        appCc (I := I) (M := M) g₀ 3 2 C₁
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (symmS (I := I) g₀ (T - T'))) := by
+      apply smoothCcTensor_ext_of_unitModel
+      intro x
+      apply ContinuousMultilinearMap.ext
+      intro v
+      exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 1 (T - T') C₁ σ'₁ hσ'₁ x v
+    have he2 : appCc (I := I) (M := M) g₀ 4 2
+          (symmAbsorbedCoeff (I := I) (M := M) g₀ 2 C₂ σ'₂)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) =
+        appCc (I := I) (M := M) g₀ 4 2 C₂
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ (T - T'))) := by
+      apply smoothCcTensor_ext_of_unitModel
+      intro x
+      apply ContinuousMultilinearMap.ext
+      intro v
+      exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 2 (T - T') C₂ σ'₂ hσ'₂ x v
+    rw [he0, he1, he2, symmS_sub g₀ T T',
+      ← deTurckRHSArmG0_symmS_eq g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ
+        (lt_of_le_of_lt hδ_le hδ₀) hδ_s,
+      ← deTurckRHSArmG0_symmS_eq g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ'
+        (lt_of_le_of_lt hδ'_le hδ₀) hδ'_s]
+    exact hid
+  · intro x
+    exact (symmAbsorbedCoeff_rfns_le g₀ 0 C₀ σ'₀ x).trans (h0s x)
+  · intro x
+    exact (symmAbsorbedCoeff_rfns_le g₀ 1 C₁ σ'₁ x).trans (h1s x)
+  · intro x
+    exact (symmAbsorbedCoeff_rfns_le g₀ 2 C₂ σ'₂ x).trans (h2s x)
+  · exact (symmAbsorbedCoeff_jet_le g₀ 0 (a + 1) C₀ σ'₀).trans h0j
+  · exact (symmAbsorbedCoeff_jet_le g₀ 1 (a + 1) C₁ σ'₁).trans h1j
+  · exact (symmAbsorbedCoeff_jet_le g₀ 2 (a + 1) C₂ σ'₂).trans h2j
 
 set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUniform

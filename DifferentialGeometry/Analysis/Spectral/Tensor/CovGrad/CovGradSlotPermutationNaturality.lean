@@ -395,13 +395,7 @@ private lemma domDomCongr_finsum_smul
   rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- **Abstract `(0, s + 1)`-covariant-derivative σ-naturality.**  For two smooth `(0, s + 1)`
-sections `ŝ, ŝ'` related fibrewise by the constant slot reindexing `σ` (i.e. `ŝ' y = domDomCongr σ
-(ŝ y)`), the directional bundled covariant derivatives are related by the same reindexing.  Proven
-on each chart-frame vector through the agreement `chartTensor0SCovariantDerivative_eq_abstract_succ_aux`
-(at `α = x`) and the chart-frame σ-naturality, then extended to an arbitrary direction by the
-frame decomposition and linearity. -/
-private lemma tensor0SCovariantDerivative_succ_domDomCongr
+lemma tensor0SCovariantDerivative_succ_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1)))
     (ŝ ŝ' : Π y : M, Tensor0SSpace (s + 1) I y) (x : M) (v : TangentSpace I x)
     (hŝ : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) (s + 1) ŝ x)
