@@ -77,6 +77,25 @@ theorem norm_le_of_pointwise_fiberNormSq_bound_rs
           MeasureTheory.measureReal_def, mul_comm]
 
 set_option linter.unusedSectionVars false in
+theorem normSq_le_integral_of_pointwise_fiberNormSq_le_rs
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (C : SmoothCcTensor g r s) (F : M → ℝ)
+    (hF_int : MeasureTheory.Integrable F (riemannianVolumeMeasure (I := I) (M := M) g))
+    (hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g r s x (C.toSection x) ≤ F x) :
+    ‖C‖ ^ 2 ≤ ∫ x, F x ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  rw [SmoothCcTensor.norm_def (I := I) (M := M) C,
+    tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r s C]
+  have hint : MeasureTheory.Integrable
+      (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (C.toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g r s C
+  exact MeasureTheory.integral_mono hint hF_int (fun x => hpt x)
+
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_gInvDiffSlotCoeff_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
