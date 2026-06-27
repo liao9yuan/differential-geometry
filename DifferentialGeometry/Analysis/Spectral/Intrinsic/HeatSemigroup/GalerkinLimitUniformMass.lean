@@ -146,11 +146,11 @@ theorem deTurckGalerkin_solField_uniformSpatialMass_allOrder
     intro N i hi
     rw [hUinit_coeff N i hi]; rfl
   obtain ⟨Cδ, Cmid, seed, B0, hCδ, hCmid, hclosure, hinitB⟩ :=
-    deTurckGalerkin_forcing_closure (I := I) (M := M) g₀ g_bg a ha_super (T := T) U hUinit
+    deTurckGalerkin_forcing_closure_perScale (I := I) (M := M) g₀ g_bg a ha_super (T := T) U hUinit
   have hUmass : ∀ k : ℕ, ∃ Bound : ℝ, ∀ N, ∀ t ∈ Set.Icc (0 : ℝ) T,
       galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
         (U N) ((a : ℝ) + (k : ℝ)) t ≤ Bound :=
-    galerkin_energy_uniform_bound (I := I) (M := M) (g := g₀)
+    galerkin_energy_uniform_bound_perScale (I := I) (M := M) (g := g₀)
       (U := U)
       (Fseq := deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U)
       (sseq := eigenIdxFinset (I := I) (M := M) g₀)
