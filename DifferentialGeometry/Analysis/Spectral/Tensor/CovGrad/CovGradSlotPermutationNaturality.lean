@@ -293,7 +293,7 @@ private lemma domDomCongr_finsum_smul
   rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-private lemma tensor0SCovariantDerivative_succ_domDomCongr
+lemma tensor0SCovariantDerivative_succ_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin (s + 1)))
     (ŝ ŝ' : Π y : M, Tensor0SSpace (s + 1) I y) (x : M) (v : TangentSpace I x)
     (hŝ : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) (s + 1) ŝ x)
