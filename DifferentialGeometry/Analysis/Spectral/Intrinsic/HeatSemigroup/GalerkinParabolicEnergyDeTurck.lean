@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinPa
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderSpectralMultiplierSplit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderRealizeBallUniformSplit
 import DifferentialGeometry.Analysis.Sobolev.Tensor.CrossScaleCauchySchwarz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.ODE.GlobalLipschitzAffineExistence
@@ -726,7 +727,7 @@ theorem deTurckSmoothRemainder_spectralCoercive_split
                   T₀).coeff i) ^ 2) := by
   classical
   obtain ⟨Cδ₀, Crem, hCδ₀_nn, hCδ₀_lt, hCrem_nn, hker⟩ :=
-    deTurckSmoothRemainderDiff_spectralMultiplier_split (I := I) (M := M) g₀ g_bg a ha_super
+    deTurckSmoothRemainderDiff_ballUniform_spectralSplit (I := I) (M := M) g₀ g_bg a ha_super
       hR₀ hδ_le hδ_fibre
   refine ⟨Cδ₀, Crem, hCδ₀_nn, hCδ₀_lt, hCrem_nn, ?_⟩
   intro S k T₀ hball hsupp
