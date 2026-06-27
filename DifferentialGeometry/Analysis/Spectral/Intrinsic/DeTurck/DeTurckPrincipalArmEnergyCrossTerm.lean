@@ -56,6 +56,62 @@ theorem smoothCcToTensorHs_zero_norm_eq (g₀ : SmoothRiemannianMetric I M)
   nlinarith [hsq, hnn_lhs, hnn_rhs, sq_nonneg
     (‖smoothCcToTensorHs (I := I) (M := M) g₀ 0 X‖ - ‖SmoothCcTensor.toL2 X‖)]
 
+theorem deTurckPrincipalCometricArm_Hs_inner_le
+    [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
+    ∃ Clower : ℝ, 0 ≤ Clower ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M)
+        (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + h y v w) →
+        ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+        ∀ (φ T₀ : SmoothCcTensor g₀ 0 2),
+          (inner ℝ (smoothCcToTensorHs (I := I) (M := M) g₀ σ φ)
+              (smoothCcToTensorHs (I := I) (M := M) g₀ σ
+                (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)) : ℝ) ≤
+            (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+                  (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖
+                * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ φ‖ +
+              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖
+                * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ φ‖ :=
+  sorry
+
+theorem deTurckPrincipalCometricArm_Hs_norm_le
+    [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
+    ∃ Clower : ℝ, 0 ≤ Clower ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M)
+        (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + h y v w) →
+        ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+        ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+              (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖ ≤
+            (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+                (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
+              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ := by
+  obtain ⟨Clower, hCl, hpair⟩ :=
+    deTurckPrincipalCometricArm_Hs_inner_le (I := I) (M := M) g₀ σ
+  refine ⟨Clower, hCl, fun g₁ h htie δ hδ_lt hδ_nn hδ T₀ => ?_⟩
+  have hpair' := hpair g₁ h htie hδ_lt hδ_nn hδ
+    (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀) T₀
+  rw [real_inner_self_eq_norm_sq] at hpair'
+  have hκ_nn : (0 : ℝ) ≤ δ / (1 - δ) := div_nonneg hδ_nn (by linarith)
+  rcases eq_or_lt_of_le (norm_nonneg (smoothCcToTensorHs (I := I) (M := M) g₀ σ
+      (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀))) with hA0 | hApos
+  · rw [← hA0]
+    exact add_nonneg (mul_nonneg hκ_nn (norm_nonneg _)) (mul_nonneg hCl (norm_nonneg _))
+  · have hmul : ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+          (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖
+          * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖
+        ≤ ((δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+              (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
+            Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖)
+          * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖ := by
+      nlinarith [hpair']
+    exact le_of_mul_le_mul_right hmul hApos
+
 theorem deTurckPrincipalCometricArm_spectralWeighted_coeffSq_le
     [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
     ∃ Clower : ℝ, 0 ≤ Clower ∧
@@ -72,8 +128,13 @@ theorem deTurckPrincipalCometricArm_spectralWeighted_coeffSq_le
                   (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)).coeff i) ^ 2 ≤
             ((δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
                   (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
-                Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖) ^ 2 :=
-  sorry
+                Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖) ^ 2 := by
+  obtain ⟨Clower, hCl, hnorm⟩ :=
+    deTurckPrincipalCometricArm_Hs_norm_le (I := I) (M := M) g₀ σ
+  refine ⟨Clower, hCl, fun g₁ h htie δ hδ_lt hδ_nn hδ T₀ => ?_⟩
+  rw [← tensorHs.norm_sq_eq_tsum]
+  exact pow_le_pow_left₀ (norm_nonneg _)
+    (hnorm g₁ h htie hδ_lt hδ_nn hδ T₀) 2
 
 theorem deTurckPrincipalCometricArm_spectralGarding_of_weightedCoeffSq
     [Nonempty M] (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :

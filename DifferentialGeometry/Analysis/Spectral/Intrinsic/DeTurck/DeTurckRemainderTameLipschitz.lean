@@ -6558,6 +6558,66 @@ theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_weighted_ballUniform
     mul_nonneg hsb_nn hs1_nn, mul_nonneg hsb_nn hs2_nn,
     mul_nonneg (mul_nonneg hδ₀_nn hsb_nn) hs2_nn]
 
+set_option maxHeartbeats 1000000 in
+private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ ΛC Γ : ℝ, 0 ≤ ΛC ∧ 0 ≤ Γ ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+          (deTurckRHSArmG0 (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ') =
+            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+              appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ ΛC ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (C₁.toSection x) ≤ ΛC ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) ∧
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2) ≤ Γ ^ 2 ∧
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i C₁‖ ^ 2) ≤ Γ ^ 2 ∧
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 :=
+  sorry
+
+set_option maxHeartbeats 1000000 in
+private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {ΛC Γ : ℝ} (hΛC_nn : 0 ≤ ΛC) (hΓ_nn : 0 ≤ Γ)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λw Γw : ℝ, 0 ≤ Λw ∧ 0 ≤ Γw ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂arm : SmoothCcTensor g₀ 4 2),
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂arm.toSection x) ≤ ΛC ^ 2) →
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂arm‖ ^ 2) ≤ Γ ^ 2 →
+          (deTurckRHSArmG0 (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ') =
+            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+              appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              appCc (I := I) (M := M) g₀ 4 2 C₂arm (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) →
+          ∃ C₂' : SmoothCcTensor g₀ 4 2,
+            (deTurckSmoothRemainder (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
+                deTurckSmoothRemainder (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ') =
+              (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+                appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                appCc (I := I) (M := M) g₀ 4 2 C₂' (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+            (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂'.toSection x) ≤ Λw ^ 2) ∧
+            (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂'‖ ^ 2) ≤ Γw ^ 2 :=
+  sorry
+
+set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_intrinsicPalatini_coeffC0_jetL2_crude_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6581,8 +6641,35 @@ private theorem deTurckSmoothRemainderDiff_intrinsicPalatini_coeffC0_jetL2_crude
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2) ≤ Γ ^ 2 ∧
           (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 3 2 i C₁‖ ^ 2) ≤ Γ ^ 2 ∧
-          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 :=
-  sorry
+          (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂‖ ^ 2) ≤ Γ ^ 2 := by
+  classical
+  obtain ⟨ΛC, Γ, hΛC_nn, hΓ_nn, harm⟩ :=
+    deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform (I := I) g₀ g_bg a ha_super hR hδ₀
+  obtain ⟨Λw, Γw, hΛw_nn, hΓw_nn, hresid⟩ :=
+    deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUniform
+      (I := I) g₀ g_bg a ha_super hR hΛC_nn hΓ_nn hδ₀
+  refine ⟨max ΛC Λw, max Γ Γw, le_trans hΛC_nn (le_max_left _ _),
+    le_trans hΓ_nn (le_max_left _ _), ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
+  obtain ⟨C₀, C₁, C₂arm, hidArm, hC₀sup, hC₁sup, hC₂armsup, hC₀jet, hC₁jet, hC₂armjet⟩ :=
+    harm T T' hδ_le hδ hδ'_le hδ' hTball hT'ball
+  obtain ⟨C₂', hidRem, hC₂'sup, hC₂'jet⟩ :=
+    hresid T T' hδ_le hδ hδ'_le hδ' hTball hT'ball C₀ C₁ C₂arm hC₂armsup hC₂armjet hidArm
+  have hΛCsq : ΛC ^ 2 ≤ max ΛC Λw ^ 2 := by
+    have h1 : ΛC ≤ max ΛC Λw := le_max_left _ _
+    nlinarith [h1, hΛC_nn]
+  have hΛwsq : Λw ^ 2 ≤ max ΛC Λw ^ 2 := by
+    have h2 : Λw ≤ max ΛC Λw := le_max_right _ _
+    nlinarith [h2, hΛw_nn]
+  have hΓsq : Γ ^ 2 ≤ max Γ Γw ^ 2 := by
+    have h1 : Γ ≤ max Γ Γw := le_max_left _ _
+    nlinarith [h1, hΓ_nn]
+  have hΓwsq : Γw ^ 2 ≤ max Γ Γw ^ 2 := by
+    have h2 : Γw ≤ max Γ Γw := le_max_right _ _
+    nlinarith [h2, hΓw_nn]
+  exact ⟨C₀, C₁, C₂', hidRem, fun x => le_trans (hC₀sup x) hΛCsq,
+    fun x => le_trans (hC₁sup x) hΛCsq, fun x => le_trans (hC₂'sup x) hΛwsq,
+    le_trans hC₀jet hΓsq, le_trans hC₁jet hΓsq, le_trans hC₂'jet hΓwsq⟩
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -6882,4 +6969,5 @@ theorem deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
+
 
