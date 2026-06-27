@@ -130,7 +130,9 @@ private theorem rfns_iteratedCovGrad_connDiffGInvComposite_succ_step
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ_lt : δ < 1)
-    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (hTjet_pt : ∀ j : ℕ, j ≤ a + 2 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
     (k : ℕ) (hk : k + 1 ≤ a + 1) (x : M)
     (hIH : ∀ j : ℕ, j ≤ k →
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
@@ -158,7 +160,9 @@ private theorem rfns_iteratedCovGrad_connDiffGInvComposite_base
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ_lt : δ < 1)
-    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (hTjet_pt : ∀ j : ℕ, j ≤ a + 2 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
     (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 0) x
         ((iteratedCovGrad (I := I) g₀ 1 2 0
@@ -181,7 +185,9 @@ private theorem rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ_lt : δ < 1)
-    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (hTjet_pt : ∀ j : ℕ, j ≤ a + 2 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
     (i : ℕ) (hi : i ≤ a + 1) (x : M) :
     ∀ k : ℕ, k ≤ i →
       riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + k) x
@@ -196,11 +202,11 @@ private theorem rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
     match k, hk_le with
     | 0, _ =>
         exact rfns_iteratedCovGrad_connDiffGInvComposite_base
-          (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet x
+          (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet_pt x
     | (k + 1), hk_le =>
         have hk1_le_a1 : k + 1 ≤ a + 1 := le_trans hk_le hi
         refine rfns_iteratedCovGrad_connDiffGInvComposite_succ_step
-          (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet k hk1_le_a1 x ?_
+          (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet_pt k hk1_le_a1 x ?_
         intro j hj
         exact hstrong j (Nat.lt_succ_of_le hj) (le_trans hj (le_trans (Nat.le_succ k) hk_le))
 
@@ -218,7 +224,9 @@ theorem rfns_iteratedCovGrad_connDiffGInvComposite_uniform_le
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδ_lt : δ < 1)
-    (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
+    (hTjet_pt : ∀ j : ℕ, j ≤ a + 2 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
     (i : ℕ) (hi : i ≤ a + 1) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
         ((iteratedCovGrad (I := I) g₀ 1 2 i
@@ -226,7 +234,7 @@ theorem rfns_iteratedCovGrad_connDiffGInvComposite_uniform_le
             (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))).toSection x) ≤
       gInvSharpJetBound (E := E) R δ i := by
   exact rfns_iteratedCovGrad_gInvSlotEndo_allOrders_uniform_le
-    (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet i hi x i (le_refl i)
+    (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet_pt i hi x i (le_refl i)
 
 /-- Uniform L²-sum bound for the g1⁻¹ sharp-field covariant jet, in the form the
 consumer `deTurckRHSArmDiff_threeArm_coeffC0_jetL2_ballUniform` (conjunct (c)) accepts:
@@ -244,7 +252,9 @@ theorem l2Sum_iteratedCovGrad_connDiffGInvComposite_uniform_le
       ∀ (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδ_lt : δ < 1)
-        (hTjet : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R),
+        (hTjet_pt : ∀ j : ℕ, j ≤ a + 2 → ∀ y : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+            ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2),
         ∑ i ∈ Finset.range (a + 1),
             ‖iteratedCovGrad (I := I) g₀ 1 2 i
               (connDiffGInvComposite (I := I) g₀
@@ -268,7 +278,7 @@ theorem l2Sum_iteratedCovGrad_connDiffGInvComposite_uniform_le
     have hVP_nn : 0 ≤ V * ∑ i ∈ Finset.range (a + 1), P i :=
       mul_nonneg hV_nn hPsum_nn
     exact Real.sqrt_nonneg _
-  · intro T δ hδ_le hδ hδ_lt hTjet
+  · intro T δ hδ_le hδ hδ_lt hTjet_pt
     set g₁ := tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ with hg₁_def
     have hper_order : ∀ i ∈ Finset.range (a + 1),
         ‖iteratedCovGrad (I := I) g₀ 1 2 i
@@ -280,7 +290,7 @@ theorem l2Sum_iteratedCovGrad_connDiffGInvComposite_uniform_le
           riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x (Ci.toSection x) ≤
             gInvSharpJetBound R δ i :=
         fun x => rfns_iteratedCovGrad_connDiffGInvComposite_uniform_le
-          (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet i hi_le x
+          (I := I) g₀ a ha_super hR hδ₀ T hδ_le hδ hδ_lt hTjet_pt i hi_le x
       have hPle : gInvSharpJetBound R δ i ≤ P i :=
         gInvSharpJetBound_mono_δ R δ δ₀ hR hδ_lt hδ_le hδ₀ i
       have hptwise_P : ∀ x : M,

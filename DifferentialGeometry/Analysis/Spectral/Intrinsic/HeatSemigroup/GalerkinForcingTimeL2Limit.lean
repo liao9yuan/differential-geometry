@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.ForcingFixedPoint
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import Mathlib.Analysis.ODE.Gronwall
 
 noncomputable section
@@ -276,6 +277,190 @@ theorem unifIntegrable_of_uniform_norm_bound {α β : Type*} {m : MeasurableSpac
   rw [eLpNorm_congr_ae hzero, eLpNorm_zero]
   exact zero_le _
 
+private theorem tensorHs_norm_tendsto_zero_of_coeff_tendsto_of_uniform
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
+    (hσ'σ'' : σ' < σ'')
+    (d : ℕ → tensorHs (I := I) (M := M) g r s σ'')
+    {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ n, ‖d n‖ ≤ C)
+    (hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0)) :
+    Tendsto (fun n => ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
+  classical
+  set ι := TensorEigenIdx (I := I) (M := M) g r s
+  have hnormsq : ∀ n,
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (d n)‖ ^ 2 =
+        ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' *
+          ((d n).coeff i) ^ 2 := by
+    intro n
+    have h := tensorHs.norm_sq_eq_tsum (I := I) (M := M)
+      (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n))
+    rwa [tensorHsInclusion_coeff] at h
+  have hsumm' : ∀ n, Summable (fun i : ι =>
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) :=
+    fun n => tensorHs.weighted_summable_of_le (I := I) (M := M) hσ'σ''.le (d n)
+  have hmass'' : ∀ n,
+      ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2
+        = ‖d n‖ ^ 2 :=
+    fun n => (tensorHs.norm_sq_eq_tsum (I := I) (M := M) (d n)).symm
+  suffices hsq : Tendsto (fun n =>
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)‖ ^ 2) atTop (𝓝 0) by
+    have hnn : ∀ n,
+        0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (d n)‖ := fun n => norm_nonneg _
+    have hsqrt :
+        Tendsto (fun n => Real.sqrt
+          (‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+            hσ'σ''.le (d n)‖ ^ 2)) atTop (𝓝 (Real.sqrt 0)) :=
+      (Real.continuous_sqrt.tendsto 0).comp hsq
+    rw [Real.sqrt_zero] at hsqrt
+    refine hsqrt.congr (fun n => ?_)
+    rw [Real.sqrt_sq (hnn n)]
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  have hexp : σ' - σ'' < 0 := by linarith
+  obtain ⟨Λ, hΛgt1, hΛtail⟩ :
+      ∃ Λ : ℝ, 1 < Λ ∧ Λ ^ (σ' - σ'') * C ^ 2 < ε / 2 := by
+    set δ : ℝ := (ε / 2) / (C ^ 2 + 1) with hδ_def
+    have hδ_pos : 0 < δ := by
+      have : (0 : ℝ) < C ^ 2 + 1 := by positivity
+      rw [hδ_def]; positivity
+    have htend : Tendsto (fun x : ℝ => x ^ (σ' - σ'')) atTop (𝓝 0) := by
+      have h := tendsto_rpow_neg_atTop (y := σ'' - σ') (by linarith)
+      rwa [show -(σ'' - σ') = σ' - σ'' by ring] at h
+    have hev : ∀ᶠ x : ℝ in atTop, x ^ (σ' - σ'') < δ :=
+      htend.eventually_lt_const hδ_pos
+    obtain ⟨Λ, hΛ1, hΛδ⟩ := ((eventually_gt_atTop 1).and hev).exists
+    refine ⟨Λ, hΛ1, ?_⟩
+    have hΛδ_nn : 0 ≤ Λ ^ (σ' - σ'') := Real.rpow_nonneg (by linarith) _
+    have hCsq_nn : 0 ≤ C ^ 2 := sq_nonneg C
+    have h1 : Λ ^ (σ' - σ'') * C ^ 2 ≤ δ * C ^ 2 :=
+      mul_le_mul_of_nonneg_right hΛδ.le hCsq_nn
+    have h2 : δ * C ^ 2 < ε / 2 := by
+      rw [hδ_def]
+      rw [div_mul_eq_mul_div, div_lt_iff₀ (by positivity : (0 : ℝ) < C ^ 2 + 1)]
+      have hεpos : 0 < ε / 2 := by linarith
+      nlinarith [hεpos, hCsq_nn]
+    linarith
+  set F : Finset ι :=
+    (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g r s Λ).toFinset
+    with hF_def
+  have hmemF : ∀ i : ι, i ∈ F ↔
+      1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ := by
+    intro i; rw [hF_def, Set.Finite.mem_toFinset]; rfl
+  have hcompl_bd : ∀ (n : ℕ) (i : ι), i ∉ F →
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 ≤
+        Λ ^ (σ' - σ'') *
+          (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) := by
+    intro n i hi
+    have hΛle : Λ ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+      by_contra hcon
+      exact hi ((hmemF i).2 (lt_of_not_ge hcon))
+    have hsplit : tensorSobolevWeight (I := I) (M := M) i σ' =
+        tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') *
+          tensorSobolevWeight (I := I) (M := M) i σ'' := by
+      rw [← tensorHs.tensorSobolevWeight_add (I := I) (M := M)]
+      congr 1; ring
+    have hratio : tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') ≤
+        Λ ^ (σ' - σ'') := by
+      unfold tensorSobolevWeight
+      exact Real.rpow_le_rpow_of_nonpos (by linarith) hΛle hexp.le
+    have hw''_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ'' :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i σ''
+    have hcoeff_nn : 0 ≤ ((d n).coeff i) ^ 2 := sq_nonneg _
+    calc
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2
+          = tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') *
+              (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) := by
+            rw [hsplit]; ring
+      _ ≤ Λ ^ (σ' - σ'') *
+              (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) :=
+            mul_le_mul_of_nonneg_right hratio (by positivity)
+  have htail : ∀ n,
+      ∑' i : { i : ι // i ∉ F },
+          tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 ≤
+        Λ ^ (σ' - σ'') * C ^ 2 := by
+    intro n
+    have hsub_summ' : Summable (fun i : { i : ι // i ∉ F } =>
+        tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2) :=
+      (hsumm' n).subtype _
+    have hsub_summ'' : Summable (fun i : { i : ι // i ∉ F } =>
+        Λ ^ (σ' - σ'') *
+          (tensorSobolevWeight (I := I) (M := M) (i : ι) σ'' * ((d n).coeff i) ^ 2)) :=
+      ((d n).weighted_summable.subtype _).mul_left _
+    calc
+      ∑' i : { i : ι // i ∉ F },
+            tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2
+          ≤ ∑' i : { i : ι // i ∉ F },
+              Λ ^ (σ' - σ'') *
+                (tensorSobolevWeight (I := I) (M := M) (i : ι) σ'' *
+                  ((d n).coeff i) ^ 2) :=
+            hsub_summ'.tsum_le_tsum
+              (fun i => hcompl_bd n i.1 i.2) hsub_summ''
+      _ = Λ ^ (σ' - σ'') *
+            ∑' i : { i : ι // i ∉ F },
+              tensorSobolevWeight (I := I) (M := M) (i : ι) σ'' * ((d n).coeff i) ^ 2 :=
+            (tsum_mul_left)
+      _ ≤ Λ ^ (σ' - σ'') *
+            ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' *
+              ((d n).coeff i) ^ 2 := by
+            apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
+            refine ((d n).weighted_summable.subtype _).tsum_le_tsum_of_inj
+              Subtype.val Subtype.val_injective (fun i _ => ?_) (fun i => le_refl _)
+              (d n).weighted_summable
+            have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ'' :=
+              tensorSobolevWeight_nonneg (I := I) (M := M) i σ''
+            positivity
+      _ ≤ Λ ^ (σ' - σ'') * C ^ 2 := by
+            rw [hmass'' n]
+            apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
+            have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
+            nlinarith [hCbd n, hnn, hC]
+  have hfin0 : Tendsto (fun n =>
+      ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
+      atTop (𝓝 0) := by
+    have h := tendsto_finset_sum (s := F)
+      (f := fun i n => tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
+      (a := fun _ : ι => (0 : ℝ))
+      (fun i _ => by
+        have hc : Tendsto (fun n => ((d n).coeff i) ^ 2) atTop (𝓝 (0 ^ 2)) :=
+          (hcoeff0 i).pow 2
+        rw [show (0 : ℝ) ^ 2 = 0 by ring] at hc
+        have := hc.const_mul (tensorSobolevWeight (I := I) (M := M) i σ')
+        simpa using this)
+    simpa using h
+  rw [Metric.tendsto_atTop] at hfin0
+  obtain ⟨N, hN⟩ := hfin0 (ε / 2) (by linarith)
+  refine ⟨N, fun n hn => ?_⟩
+  have hsplit_sum :
+      ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 =
+        (∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) +
+          ∑' i : { i : ι // i ∉ F },
+            tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 :=
+    ((hsumm' n).sum_add_tsum_subtype_compl F).symm
+  have hfin_lt : ∑ i ∈ F,
+      tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 < ε / 2 := by
+    have hd := hN n hn
+    rw [Real.dist_eq, sub_zero] at hd
+    calc ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2
+        ≤ |∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2| :=
+          le_abs_self _
+      _ < ε / 2 := hd
+  have htail_lt : ∑' i : { i : ι // i ∉ F },
+      tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 < ε / 2 :=
+    lt_of_le_of_lt (htail n) hΛtail
+  have hbound : ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+      hσ'σ''.le (d n)‖ ^ 2 < ε := by
+    rw [hnormsq n, hsplit_sum]
+    linarith
+  rw [Real.dist_eq, sub_zero]
+  have hnn : 0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+      hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
+  rwa [abs_of_nonneg hnn]
+
 theorem tendsto_finiteEigenComboHs_of_coeff_tendsto_of_succWeighted_bound
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (S : ℕ → Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -287,8 +472,123 @@ theorem tendsto_finiteEigenComboHs_of_coeff_tendsto_of_succWeighted_bound
         (fun N => (finiteEigenComboHs (I := I) (M := M) g (S N) (c N) σ).coeff i)
         atTop (𝓝 (W.coeff i))) :
     Tendsto (fun N => finiteEigenComboHs (I := I) (M := M) g (S N) (c N) σ)
-      atTop (𝓝 W) :=
-  sorry
+      atTop (𝓝 W) := by
+  classical
+  set u : ℕ → tensorHs (I := I) (M := M) g 0 2 (σ + 1) :=
+    fun N => finiteEigenComboHs (I := I) (M := M) g (S N) (c N) (σ + 1) with hu_def
+  have hu_coeff : ∀ N i, (u N).coeff i =
+      (finiteEigenComboHs (I := I) (M := M) g (S N) (c N) σ).coeff i := by
+    intro N i
+    simp only [hu_def, finiteEigenComboHs_coeff]
+  have hconv_coeff : ∀ i, Tendsto (fun N => (u N).coeff i) atTop (𝓝 (W.coeff i)) := by
+    intro i
+    exact (hcoeff i).congr (fun N => (hu_coeff N i).symm)
+  have hu_normSq_le : ∀ N, ‖u N‖ ^ 2 ≤ B := by
+    intro N
+    have heq : ‖u N‖ ^ 2 = ∑ i ∈ S N,
+        tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (c N i) ^ 2 := by
+      simp only [hu_def]
+      rw [finiteEigenCombo_spectral_normSq]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rfl
+    rw [heq]; exact hbound N
+  have hbd_finset : ∀ t : Finset (TensorEigenIdx (I := I) (M := M) g 0 2),
+      ∑ i ∈ t, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (W.coeff i) ^ 2 ≤ B := by
+    intro t
+    have hlim : Tendsto
+        (fun N => ∑ i ∈ t,
+          tensorSobolevWeight (I := I) (M := M) i (σ + 1) * ((u N).coeff i) ^ 2)
+        atTop
+        (𝓝 (∑ i ∈ t,
+          tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (W.coeff i) ^ 2)) := by
+      refine tendsto_finset_sum t (fun i _ => ?_)
+      exact ((hconv_coeff i).pow 2).const_mul _
+    have hle : ∀ N, ∑ i ∈ t,
+        tensorSobolevWeight (I := I) (M := M) i (σ + 1) * ((u N).coeff i) ^ 2 ≤ B := by
+      intro N
+      calc ∑ i ∈ t,
+            tensorSobolevWeight (I := I) (M := M) i (σ + 1) * ((u N).coeff i) ^ 2
+          = ∑ i ∈ t, (if i ∈ S N then
+              tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (c N i) ^ 2 else 0) := by
+            refine Finset.sum_congr rfl (fun i _ => ?_)
+            rw [hu_coeff, finiteEigenComboHs_coeff]
+            by_cases hi : i ∈ S N <;> simp [hi]
+        _ = ∑ i ∈ t ∩ S N,
+              tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (c N i) ^ 2 :=
+            Finset.sum_ite_mem t (S N) _
+        _ ≤ ∑ i ∈ S N,
+              tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (c N i) ^ 2 :=
+            Finset.sum_le_sum_of_subset_of_nonneg (Finset.inter_subset_right)
+              (fun i _ _ => mul_nonneg
+                (tensorSobolevWeight_nonneg (I := I) (M := M) i (σ + 1)) (sq_nonneg _))
+        _ ≤ B := hbound N
+    exact le_of_tendsto' hlim hle
+  have hnn : (0 : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) ≤
+      fun i => tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (W.coeff i) ^ 2 :=
+    fun i => mul_nonneg
+      (tensorSobolevWeight_nonneg (I := I) (M := M) i (σ + 1)) (sq_nonneg _)
+  have hWp_summ : Summable
+      (fun i => tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (W.coeff i) ^ 2) :=
+    summable_of_sum_le hnn hbd_finset
+  set Wp : tensorHs (I := I) (M := M) g 0 2 (σ + 1) :=
+    ⟨W.coeff, hWp_summ⟩ with hWp_def
+  have hWp_coeff : ∀ i, Wp.coeff i = W.coeff i := by
+    intro i; rw [hWp_def]
+  have hWp_normSq_le : ‖Wp‖ ^ 2 ≤ B := by
+    rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M) Wp]
+    simp only [hWp_coeff]
+    exact Real.tsum_le_of_sum_le hnn hbd_finset
+  have hsubcoeff : ∀ (a b : tensorHs (I := I) (M := M) g 0 2 (σ + 1)) i,
+      (a - b).coeff i = a.coeff i - b.coeff i := by
+    intro a b i
+    simp only [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
+  have hCbd : ∀ N, ‖u N - Wp‖ ≤ 2 * Real.sqrt B := by
+    intro N
+    have huN : ‖u N‖ ≤ Real.sqrt B := by
+      calc ‖u N‖ = Real.sqrt (‖u N‖ ^ 2) := (Real.sqrt_sq (norm_nonneg _)).symm
+        _ ≤ Real.sqrt B := Real.sqrt_le_sqrt (hu_normSq_le N)
+    have hWpn : ‖Wp‖ ≤ Real.sqrt B := by
+      calc ‖Wp‖ = Real.sqrt (‖Wp‖ ^ 2) := (Real.sqrt_sq (norm_nonneg _)).symm
+        _ ≤ Real.sqrt B := Real.sqrt_le_sqrt hWp_normSq_le
+    calc ‖u N - Wp‖ ≤ ‖u N‖ + ‖Wp‖ := norm_sub_le _ _
+      _ ≤ Real.sqrt B + Real.sqrt B := add_le_add huN hWpn
+      _ = 2 * Real.sqrt B := by ring
+  have hcoeff0 : ∀ i, Tendsto (fun N => (u N - Wp).coeff i) atTop (𝓝 0) := by
+    intro i
+    have h := (hconv_coeff i).sub_const (W.coeff i)
+    rw [sub_self] at h
+    refine h.congr (fun N => ?_)
+    rw [hsubcoeff (u N) Wp i, hWp_coeff i]
+  have hlt : (σ : ℝ) < σ + 1 := by linarith
+  have hsqrtB_nn : (0 : ℝ) ≤ 2 * Real.sqrt B := by positivity
+  have hhelper := tensorHs_norm_tendsto_zero_of_coeff_tendsto_of_uniform
+    (I := I) (M := M) (g := g) (r := 0) (s := 2) (σ' := σ) (σ'' := σ + 1)
+    hlt (fun N => u N - Wp) hsqrtB_nn hCbd hcoeff0
+  have hincl_uN : ∀ N,
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+          hlt.le (u N) = finiteEigenComboHs (I := I) (M := M) g (S N) (c N) σ := by
+    intro N
+    refine tensorHs.ext ?_
+    funext i
+    rw [tensorHsInclusion_coeff_apply, hu_coeff N i]
+  have hincl_Wp :
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2) hlt.le Wp = W := by
+    refine tensorHs.ext ?_
+    funext i
+    rw [tensorHsInclusion_coeff_apply, hWp_coeff i]
+  have hincl_eq : ∀ N,
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+          hlt.le (u N - Wp) =
+        finiteEigenComboHs (I := I) (M := M) g (S N) (c N) σ - W := by
+    intro N
+    rw [map_sub, hincl_uN N, hincl_Wp]
+  have hNorm : Tendsto
+      (fun N => ‖finiteEigenComboHs (I := I) (M := M) g (S N) (c N) σ - W‖)
+      atTop (𝓝 0) := by
+    refine hhelper.congr (fun N => ?_)
+    rw [hincl_eq N]
+  have hSub := tendsto_zero_iff_norm_tendsto_zero.mpr hNorm
+  exact tendsto_sub_nhds_zero_iff.mp hSub
 
 theorem perMode_aeTendsto_of_galerkinODE
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
