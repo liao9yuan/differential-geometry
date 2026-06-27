@@ -20,6 +20,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectio
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNormTransfer
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArmCoeffPerOrderJetTower
 
 /-!
 # The intrinsic covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -1572,8 +1573,19 @@ private theorem linearizedRicciArm0BaseCoeff_perOrder_rfns_ballUniform
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-              (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
-  sorry
+              (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    DifferentialGeometry.Integral.Connection.linearizedRicciArm0BaseCoeff_realizedFam_perOrder_rfns_pointwise_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => K i * (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal, ?_, ?_⟩
+  · intro i
+    exact mul_nonneg (hK_nn i)
+      (ENNReal.toReal_nonneg)
+  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+    exact DifferentialGeometry.Integral.Connection.l2_of_pointwise_rfns_iteratedCovGrad_perOrder
+      (I := I) (M := M) g₀ 2 i (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s) (K i)
+      (fun x => hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x)
 
 private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1606,8 +1618,18 @@ private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
-  sorry
+              (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    DifferentialGeometry.Integral.Connection.linearizedRicciArm1BaseCoeff_realizedFam_perOrder_rfns_pointwise_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => K i * (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal, ?_, ?_⟩
+  · intro i
+    exact mul_nonneg (hK_nn i) (ENNReal.toReal_nonneg)
+  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+    exact DifferentialGeometry.Integral.Connection.l2_of_pointwise_rfns_iteratedCovGrad_perOrder
+      (I := I) (M := M) g₀ 3 i (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s) (K i)
+      (fun x => hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x)
 
 private theorem linearizedRicciArm1CorrField_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1641,8 +1663,19 @@ private theorem ricciArmPrincipalCoeff_realizedFam_perOrder_rfns_ballUniform
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
               (ricciArmPrincipalCoeff (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ P i :=
-  sorry
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ P i := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    DifferentialGeometry.Integral.Connection.ricciArmPrincipalCoeff_realizedFam_perOrder_rfns_pointwise_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => K i * (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal, ?_, ?_⟩
+  · intro i
+    exact mul_nonneg (hK_nn i) (ENNReal.toReal_nonneg)
+  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+    exact DifferentialGeometry.Integral.Connection.l2_of_pointwise_rfns_iteratedCovGrad_perOrder
+      (I := I) (M := M) g₀ 4 i
+      (ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)) (K i)
+      (fun x => hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x)
 
 private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1659,8 +1692,19 @@ private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
               (traceHessianCoeff (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ P i :=
-  sorry
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤ P i := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    DifferentialGeometry.Integral.Connection.traceHessianCoeff_realizedFam_perOrder_rfns_pointwise_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => K i * (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal, ?_, ?_⟩
+  · intro i
+    exact mul_nonneg (hK_nn i) (ENNReal.toReal_nonneg)
+  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+    exact DifferentialGeometry.Integral.Connection.l2_of_pointwise_rfns_iteratedCovGrad_perOrder
+      (I := I) (M := M) g₀ 4 i
+      (traceHessianCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)) (K i)
+      (fun x => hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs x)
 
 private lemma normSq_iteratedCovGrad_add_le_tame
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
