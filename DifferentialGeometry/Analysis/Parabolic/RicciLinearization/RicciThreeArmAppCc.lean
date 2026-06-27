@@ -6857,6 +6857,85 @@ def corrFieldFreshResidualSpec (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem exists_corrFieldFreshResidual_curvConst (g₀ : SmoothRiemannianMetric I M) :
+    ∃ CΓ : ℝ, 0 ≤ CΓ ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        ∀ {a : ℕ}, 2 * Module.finrank ℝ E + 10 ≤ a → ∀ {R : ℝ}, 0 ≤ R →
+          (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+          (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+          ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+                ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤ CΓ * (1 + R) ^ 2 ∧
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+                ((linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
+              CΓ * (1 + R) ^ 2 :=
+  sorry
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem corrFieldFreshResidual_realize (g₀ : SmoothRiemannianMetric I M) (CΓ : ℝ)
+    (hCΓ : 0 ≤ CΓ)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hcurv : ∀ {a : ℕ}, 2 * Module.finrank ℝ E + 10 ≤ a → ∀ {R : ℝ}, 0 ≤ R →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤ CΓ * (1 + R) ^ 2 ∧
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              ((linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
+            CΓ * (1 + R) ^ 2) :
+    ∃ (corr0 : ℝ → SmoothCcTensor g₀ 2 2) (corr1 : ℝ → SmoothCcTensor g₀ 3 2),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+          ((corr0 p.2).toSection p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+          ((corr1 p.2).toSection p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) ∧
+      (∀ {a : ℕ}, 2 * Module.finrank ℝ E + 10 ≤ a → ∀ {R : ℝ}, 0 ≤ R →
+          (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+          (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+          ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+                ((corr0 s).toSection x)) ≤ CΓ * (1 + R) ^ 2 ∧
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+                ((corr1 s).toSection x)) ≤ CΓ * (1 + R) ^ 2) ∧
+      ((∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v) →
+        ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+          ∀ (x : M) (i k : Fin (Module.finrank ℝ E))
+            (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
+            chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+                  (extChartAt I x x) s +
+                chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+                  (extChartAt I x x) s =
+              unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 2 2
+                    (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr0 s)
+                    (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+                  ![(chartModelBasis E) k, (chartModelBasis E) i]
+                + unitModel (I := I) (M := M) g₀ 2
+                    (appCc (I := I) (M := M) g₀ 3 2
+                      (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr1 s)
+                      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
+                    ![(chartModelBasis E) k, (chartModelBasis E) i]
+                + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s) :=
+  sorry
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_corrFieldFreshResidual_absorption (g₀ : SmoothRiemannianMetric I M) :
     ∃ CΓ : ℝ, 0 ≤ CΓ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
@@ -6902,8 +6981,13 @@ theorem exists_corrFieldFreshResidual_absorption (g₀ : SmoothRiemannianMetric 
                           (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr1 s)
                           (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
                         ![(chartModelBasis E) k, (chartModelBasis E) i]
-                    + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s) :=
-  sorry
+                    + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s) := by
+  classical
+  obtain ⟨CΓ, hCΓ_nn, hcurv⟩ := exists_corrFieldFreshResidual_curvConst (I := I) (M := M) g₀
+  refine ⟨CΓ, hCΓ_nn, ?_⟩
+  intro T T' δ hδ δ' hδ'
+  exact corrFieldFreshResidual_realize (I := I) (M := M) g₀ CΓ hCΓ_nn T T' hδ hδ'
+    (hcurv T T' hδ hδ')
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
