@@ -50,9 +50,10 @@ theorem deTurckForcing_solCoeff_continuous_smallTimeBase
             (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
               (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 ≤ Cσ) :
     ∃ d : ℝ, 0 < d ∧ d ≤ T ∧
-      (∀ i, ContDiff ℝ (0 : ℕ)
-          (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
-            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u))) ∧
+      (∀ i, ∃ c : ℝ → ℝ, Continuous c ∧
+          c =ᵐ[timeMeasure T]
+            (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u))) ∧
       (∀ τ : ℝ, 0 ≤ τ →
         ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
           ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d,
@@ -67,8 +68,421 @@ theorem deTurckForcing_solCoeff_continuous_smallTimeBase
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d)]
             (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
-              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u))) :=
-  sorry
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u))) := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc_def
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc
+  set R₀ : ℝ := deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super with hR₀_def
+  have hR₀_pos : 0 < R₀ := deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a ha_super
+  have hhalf_pos : (0 : ℝ) < R₀ ^ 2 / 2 := div_pos (pow_pos hR₀_pos 2) (by norm_num)
+  set ρ : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) + 1 with hρ_def
+  have hρ_gt : ((weylSobolevExp (E := E) : ℕ) : ℝ) < ρ := by rw [hρ_def]; linarith
+  set σ' : ℝ := ((a : ℝ) + 2) + ρ with hσ'_def
+  obtain ⟨Cσ', hCσ'⟩ := hspatial σ'
+  set B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => Cσ' * tensorSobolevWeight (I := I) (M := M) i (-ρ) with hB_def
+  have hB_sum : Summable B :=
+    (tensorEigen_summable_negpow (I := I) (M := M) g₀ ρ hρ_gt).mul_left Cσ'
+  have hweight_split : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+        = tensorSobolevWeight (I := I) (M := M) i (-ρ)
+          * tensorSobolevWeight (I := I) (M := M) i σ' := by
+    intro i
+    rw [← tensorHs.tensorSobolevWeight_add (I := I) (M := M) i (-ρ) σ']
+    congr 1
+    rw [hσ'_def]; ring
+  have hB_le : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+          * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 ≤ B i := by
+    intro i t htT
+    obtain ⟨hsum_t, hbd_t⟩ := hCσ' t htT
+    have hterm : tensorSobolevWeight (I := I) (M := M) i σ'
+        * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 ≤ Cσ' :=
+      le_trans (hsum_t.le_tsum i (fun j _ => mul_nonneg
+        (tensorSobolevWeight_nonneg (I := I) (M := M) j σ') (sq_nonneg _))) hbd_t
+    calc tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+            * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+                (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2
+        = tensorSobolevWeight (I := I) (M := M) i (-ρ)
+            * (tensorSobolevWeight (I := I) (M := M) i σ'
+              * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+                  (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2) := by
+          rw [hweight_split i]; ring
+      _ ≤ tensorSobolevWeight (I := I) (M := M) i (-ρ) * Cσ' :=
+          mul_le_mul_of_nonneg_left hterm
+            (tensorSobolevWeight_nonneg (I := I) (M := M) i (-ρ))
+      _ = B i := by rw [hB_def]; ring
+  have hpmc_contOn : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      ContinuousOn (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u)) (Set.Icc (0 : ℝ) T) := fun i =>
+    continuousOn_perModeConv_timeL2 (TensorEigenIdx.lambda (I := I) (M := M) i)
+      (timeModeCoeff (I := I) (M := M) gforce i) hT.le
+  have htend : Filter.Tendsto
+      (fun s : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2) => ∑ i ∈ s, B i)
+      Filter.atTop (nhds (∑' i, B i)) := hB_sum.hasSum
+  obtain ⟨s₀, hs₀⟩ :=
+    ((tendsto_order.1 htend).1 _ (by linarith [hhalf_pos] :
+      (∑' i, B i) - R₀ ^ 2 / 2 < ∑' i, B i)).exists
+  have htail_B_small :
+      (∑' x : ↑((↑s₀ : Set (TensorEigenIdx (I := I) (M := M) g₀ 0 2))ᶜ), B ↑x)
+        ≤ R₀ ^ 2 / 2 := by
+    have hcompl : (∑ i ∈ s₀, B i)
+        + (∑' x : ↑((↑s₀ : Set (TensorEigenIdx (I := I) (M := M) g₀ 0 2))ᶜ), B ↑x)
+        = ∑' i, B i := hB_sum.sum_add_tsum_compl (s := s₀)
+    linarith [hcompl, hs₀]
+  have hg_contOn : ContinuousOn
+      (fun t => ∑ i ∈ s₀, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+        * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2)
+      (Set.Icc (0 : ℝ) T) :=
+    continuousOn_finset_sum s₀ (fun i _ =>
+      ContinuousOn.mul continuousOn_const ((hpmc_contOn i).pow 2))
+  have hg0 : (∑ i ∈ s₀, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+        * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) 0) ^ 2) = 0 :=
+    Finset.sum_eq_zero (fun i _ => by rw [perModeConv_zero_left]; ring)
+  have hcwa := hg_contOn 0 ⟨le_rfl, hT.le⟩
+  rw [Metric.continuousWithinAt_iff] at hcwa
+  obtain ⟨δ, hδ_pos, hδ⟩ := hcwa (R₀ ^ 2 / 2) hhalf_pos
+  set d : ℝ := min T (δ / 2) with hd_def
+  have hd_pos : 0 < d := lt_min hT (by linarith)
+  have hd_le : d ≤ T := min_le_left _ _
+  have hd_le2 : d ≤ δ / 2 := min_le_right _ _
+  have hcont_head : ∀ t ∈ Set.Icc (0 : ℝ) d,
+      (∑ i ∈ s₀, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+        * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2) ≤ R₀ ^ 2 / 2 := by
+    intro t ht
+    have htT : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, le_trans ht.2 hd_le⟩
+    have hdist : dist t 0 < δ := by
+      rw [Real.dist_eq, sub_zero, abs_of_nonneg ht.1]
+      have : t ≤ δ / 2 := le_trans ht.2 hd_le2
+      linarith
+    have hh := hδ htT hdist
+    simp only [hg0, Real.dist_eq, sub_zero] at hh
+    exact le_of_lt (lt_of_le_of_lt (le_abs_self _) hh)
+  have hball_d : ∀ t ∈ Set.Icc (0 : ℝ) d,
+      (∑' i, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+          * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2) ≤ R₀ ^ 2 := by
+    intro t ht
+    have htT : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, le_trans ht.2 hd_le⟩
+    set f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
+      fun i => tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+        * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 with hf_def
+    have hf_le_B : ∀ i, f i ≤ B i := fun i => hB_le i t htT
+    have hf_nonneg : ∀ i, 0 ≤ f i := fun i =>
+      mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 2)) (sq_nonneg _)
+    have hf_sum : Summable f := Summable.of_nonneg_of_le hf_nonneg hf_le_B hB_sum
+    have hhead_le : (∑ i ∈ s₀, f i) ≤ R₀ ^ 2 / 2 := hcont_head t ht
+    have htail_le :
+        (∑' x : ↑((↑s₀ : Set (TensorEigenIdx (I := I) (M := M) g₀ 0 2))ᶜ), f ↑x)
+          ≤ (∑' x : ↑((↑s₀ : Set (TensorEigenIdx (I := I) (M := M) g₀ 0 2))ᶜ), B ↑x) :=
+      Summable.tsum_le_tsum (fun x => hf_le_B ↑x) (hf_sum.subtype _) (hB_sum.subtype _)
+    have hsplit_f : (∑' i, f i)
+        = (∑ i ∈ s₀, f i)
+          + (∑' x : ↑((↑s₀ : Set (TensorEigenIdx (I := I) (M := M) g₀ 0 2))ᶜ), f ↑x) :=
+      (hf_sum.sum_add_tsum_compl (s := s₀)).symm
+    calc (∑' i, f i)
+        = (∑ i ∈ s₀, f i)
+            + (∑' x : ↑((↑s₀ : Set (TensorEigenIdx (I := I) (M := M) g₀ 0 2))ᶜ), f ↑x) :=
+          hsplit_f
+      _ ≤ R₀ ^ 2 / 2 + R₀ ^ 2 / 2 :=
+          add_le_add hhead_le (le_trans htail_le htail_B_small)
+      _ = R₀ ^ 2 := by ring
+  refine ⟨d, hd_pos, hd_le, ?_, ?_, ?_, ?_⟩
+  · intro i
+    refine ⟨Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) =>
+        perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+          (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) p.1), ?_, ?_⟩
+    · exact Continuous.Icc_extend' ((hpmc_contOn i).restrict)
+    · filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+        (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with t ht
+      exact Set.IccExtend_of_mem hT.le _ ht
+  · intro τ hτ
+    obtain ⟨Cτ, hCτ⟩ := hspatial (τ + ρ)
+    refine ⟨fun i => Cτ * tensorSobolevWeight (I := I) (M := M) i (-ρ),
+      (tensorEigen_summable_negpow (I := I) (M := M) g₀ ρ hρ_gt).mul_left Cτ, ?_⟩
+    intro i t ht
+    have htT : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, le_trans ht.2 hd_le⟩
+    obtain ⟨hsum_t, hbd_t⟩ := hCτ t htT
+    have hterm : tensorSobolevWeight (I := I) (M := M) i (τ + ρ)
+        * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 ≤ Cτ :=
+      le_trans (hsum_t.le_tsum i (fun j _ => mul_nonneg
+        (tensorSobolevWeight_nonneg (I := I) (M := M) j (τ + ρ)) (sq_nonneg _))) hbd_t
+    have hsplit_τ : tensorSobolevWeight (I := I) (M := M) i τ
+        = tensorSobolevWeight (I := I) (M := M) i (-ρ)
+          * tensorSobolevWeight (I := I) (M := M) i (τ + ρ) := by
+      rw [← tensorHs.tensorSobolevWeight_add (I := I) (M := M) i (-ρ) (τ + ρ)]
+      congr 1; ring
+    calc tensorSobolevWeight (I := I) (M := M) i τ
+          * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2
+        = tensorSobolevWeight (I := I) (M := M) i (-ρ)
+            * (tensorSobolevWeight (I := I) (M := M) i (τ + ρ)
+              * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+                  (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2) := by
+          rw [hsplit_τ]; ring
+      _ ≤ tensorSobolevWeight (I := I) (M := M) i (-ρ) * Cτ :=
+          mul_le_mul_of_nonneg_left hterm
+            (tensorSobolevWeight_nonneg (I := I) (M := M) i (-ρ))
+      _ = Cτ * tensorSobolevWeight (I := I) (M := M) i (-ρ) := by ring
+  · have hae_coeff : ∀ i, (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d)]
+          (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+            (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u)) := fun i =>
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+        (Set.Icc_subset_Icc le_rfl hd_le)
+        (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M) hT hT1 hc gforce i)
+    have hae_all : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d)),
+        ∀ i, (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i
+          = perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+              (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t :=
+      (MeasureTheory.ae_all_iff).2 hae_coeff
+    filter_upwards [hae_all, MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+      (measurableSet_Icc (a := (0 : ℝ)) (b := d))] with t ht_coeff ht_mem
+    have hnorm_sq : ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ^ 2
+        = ∑' i, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+            * (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+                (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t) ^ 2 := by
+      rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M)]
+      exact tsum_congr (fun i => by rw [ht_coeff i])
+    have hWsq_le : ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ^ 2 ≤ R₀ ^ 2 := by
+      rw [hnorm_sq]; exact hball_d t ht_mem
+    nlinarith [norm_nonneg (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t), hR₀_pos.le, hWsq_le]
+  · intro i
+    exact MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+      (Set.Icc_subset_Icc le_rfl hd_le)
+      (timeModeCoeff_eq_perModeConv_forcing (I := I) (M := M) hT hT1 hc gforce i)
+
+private theorem perModeConv_contDiff_succ_of_contDiff (lam : ℝ) (k : ℕ) {f : ℝ → ℝ}
+    (hf : ContDiff ℝ (k : ℕ) f) : ContDiff ℝ ((k + 1 : ℕ)) (perModeConv lam f) := by
+  have hfcont : Continuous f := hf.continuous
+  have hphi_low : ContDiff ℝ (k : ℕ) (perModeConv lam f) :=
+    perModeConv_contDiff_of_contDiff (k : ℕ∞) lam f hf
+  have hderiv_eq : deriv (perModeConv lam f)
+      = fun t => f t - lam * perModeConv lam f t :=
+    deriv_eq (fun t => perModeConv_hasDerivAt lam hfcont t)
+  have hdiff : Differentiable ℝ (perModeConv lam f) :=
+    fun t => (perModeConv_hasDerivAt lam hfcont t).differentiableAt
+  rw [Nat.cast_succ, contDiff_succ_iff_deriv]
+  refine ⟨hdiff, fun hω => absurd hω (by simp), ?_⟩
+  rw [hderiv_eq]
+  exact hf.sub (contDiff_const.mul hphi_low)
+
+private theorem perModeConv_iteratedDeriv_succ_finiteOrder (lam : ℝ) {f : ℝ → ℝ}
+    (p : ℕ) (hf : ContDiff ℝ (p : ℕ) f) :
+    iteratedDeriv (p + 1) (perModeConv lam f)
+      = fun t => iteratedDeriv p f t - lam * iteratedDeriv p (perModeConv lam f) t := by
+  have hfcont : Continuous f := hf.continuous
+  have hphi_smooth : ContDiff ℝ (p : ℕ) (perModeConv lam f) :=
+    perModeConv_contDiff_of_contDiff (p : ℕ∞) lam f hf
+  have hderiv_eq : deriv (perModeConv lam f)
+      = fun t => f t - lam * perModeConv lam f t :=
+    deriv_eq (fun t => perModeConv_hasDerivAt lam hfcont t)
+  rw [iteratedDeriv_succ', hderiv_eq]
+  funext t
+  have hcd_f : ContDiffAt ℝ (p : WithTop ℕ∞) f t := hf.contDiffAt
+  have hcd_phi : ContDiffAt ℝ (p : WithTop ℕ∞) (perModeConv lam f) t :=
+    hphi_smooth.contDiffAt
+  have hcd_lp : ContDiffAt ℝ (p : WithTop ℕ∞)
+      (fun t => lam * perModeConv lam f t) t :=
+    hcd_phi.const_smul lam
+  have hsub :
+      iteratedDeriv p (fun t => f t - lam * perModeConv lam f t) t
+        = iteratedDeriv p f t
+          - iteratedDeriv p (fun t => lam * perModeConv lam f t) t := by
+    have hshow :
+        (fun t => f t - lam * perModeConv lam f t)
+          = f - fun t => lam * perModeConv lam f t := by
+      funext u; simp
+    rw [hshow, iteratedDeriv_sub hcd_f hcd_lp]
+  rw [hsub]
+  have hconst :
+      iteratedDeriv p (fun t => lam * perModeConv lam f t) t
+        = lam * iteratedDeriv p (perModeConv lam f) t := by
+    have hsmul := iteratedDeriv_const_smul (𝕜 := ℝ) (F := ℝ) (R := ℝ)
+      (n := p) (f := perModeConv lam f) hcd_phi lam
+    simp only [smul_eq_mul] at hsmul
+    exact hsmul
+  rw [hconst]
+
+private theorem perModeConv_sq_le_T_mul_int (lam : ℝ) (hlam : 0 ≤ lam) {T : ℝ}
+    {c : ℝ → ℝ} (hc : Continuous c) (hT : 0 ≤ T) {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
+    (perModeConv lam c t) ^ 2 ≤ T * ∫ s in (0 : ℝ)..T, (c s) ^ 2 := by
+  obtain ⟨ht0, htT⟩ := ht
+  have hbase : (perModeConv lam c t) ^ 2 ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 :=
+    perModeConv_sq_le_time_mul_integral' lam hlam hc ht0
+  have hint_t_nn : 0 ≤ ∫ s in (0 : ℝ)..t, (c s) ^ 2 :=
+    intervalIntegral.integral_nonneg ht0 (fun s _ => sq_nonneg _)
+  have hint_le : (∫ s in (0 : ℝ)..t, (c s) ^ 2) ≤ ∫ s in (0 : ℝ)..T, (c s) ^ 2 := by
+    rw [← intervalIntegral.integral_add_adjacent_intervals
+        (b := t) (c := T)
+        ((hc.pow 2).intervalIntegrable 0 t)
+        ((hc.pow 2).intervalIntegrable t T)]
+    have htail : 0 ≤ ∫ s in t..T, (c s) ^ 2 :=
+      intervalIntegral.integral_nonneg htT (fun s _ => sq_nonneg _)
+    linarith
+  calc (perModeConv lam c t) ^ 2
+      ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 := hbase
+    _ ≤ T * ∫ s in (0 : ℝ)..T, (c s) ^ 2 := by
+        exact mul_le_mul htT hint_le hint_t_nn hT
+
+private theorem perModeConv_finiteOrder_timeDeriv_spectralMass_le
+    (g : SmoothRiemannianMetric I M) {r s : ℕ} {T : ℝ} (hT : 0 ≤ T) (k : ℕ)
+    (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
+    (hf_smooth : ∀ i, ContDiff ℝ (k : ℕ) (f i))
+    (hf_mass : ∀ (j : ℕ), j ≤ k → ∀ (τ : ℝ), 0 ≤ τ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g r s → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i τ *
+              (iteratedDeriv j (f i) t) ^ 2 ≤ B i) :
+    ∀ (m : ℕ), m ≤ k + 1 → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g r s → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv m
+                (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i)) t) ^ 2
+            ≤ Cmaj i := by
+  intro m
+  induction m with
+  | zero =>
+      intro _ σ hσ
+      obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 (Nat.zero_le k) σ hσ
+      refine ⟨fun i => T * (T * B i), (hB_sum.mul_left T).mul_left T, ?_⟩
+      intro i t ht
+      set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
+      have hlam_nn : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
+      have hwt_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
+        tensorSobolevWeight_nonneg (I := I) (M := M) i σ
+      have hcont : Continuous (f i) := (hf_smooth i).continuous
+      have hbound : (perModeConv lam (f i) t) ^ 2 ≤ T * ∫ s in (0 : ℝ)..T, f i s ^ 2 :=
+        perModeConv_sq_le_T_mul_int lam hlam_nn hcont hT ht
+      have hintegral_le :
+          tensorSobolevWeight (I := I) (M := M) i σ * ∫ s in (0 : ℝ)..T, f i s ^ 2
+            ≤ T * B i := by
+        have hpoint : ∀ s ∈ Set.Icc (0 : ℝ) T,
+            tensorSobolevWeight (I := I) (M := M) i σ * f i s ^ 2 ≤ B i := by
+          intro s hs
+          have := hB_le i s hs
+          rwa [iteratedDeriv_zero] at this
+        have hi_lhs : IntervalIntegrable
+            (fun s => tensorSobolevWeight (I := I) (M := M) i σ * f i s ^ 2)
+            volume 0 T :=
+          ((hcont.pow 2).const_mul _).intervalIntegrable 0 T
+        have hi_const : IntervalIntegrable (fun _ : ℝ => B i) volume 0 T :=
+          intervalIntegrable_const
+        have hmono : ∫ s in (0 : ℝ)..T,
+              tensorSobolevWeight (I := I) (M := M) i σ * f i s ^ 2
+            ≤ ∫ _s in (0 : ℝ)..T, B i := by
+          refine intervalIntegral.integral_mono_on hT hi_lhs hi_const ?_
+          intro s hs
+          exact hpoint s hs
+        rw [intervalIntegral.integral_const_mul] at hmono
+        simp only [intervalIntegral.integral_const, smul_eq_mul] at hmono
+        calc tensorSobolevWeight (I := I) (M := M) i σ * ∫ s in (0 : ℝ)..T, f i s ^ 2
+            ≤ (T - 0) * B i := hmono
+          _ = T * B i := by ring
+      calc tensorSobolevWeight (I := I) (M := M) i σ *
+            (iteratedDeriv 0 (perModeConv lam (f i)) t) ^ 2
+          = tensorSobolevWeight (I := I) (M := M) i σ * (perModeConv lam (f i) t) ^ 2 := by
+            rw [iteratedDeriv_zero]
+        _ ≤ tensorSobolevWeight (I := I) (M := M) i σ * (T * ∫ s in (0 : ℝ)..T, f i s ^ 2) :=
+            mul_le_mul_of_nonneg_left hbound hwt_nn
+        _ = T * (tensorSobolevWeight (I := I) (M := M) i σ * ∫ s in (0 : ℝ)..T, f i s ^ 2) := by
+            ring
+        _ ≤ T * (T * B i) := by
+            apply mul_le_mul_of_nonneg_left hintegral_le hT
+  | succ p ih =>
+      intro hm σ hσ
+      have hp_le_k : p ≤ k := by omega
+      obtain ⟨Bf, hBf_sum, hBf_le⟩ := hf_mass p hp_le_k σ hσ
+      obtain ⟨Cprev, hCprev_sum, hCprev_le⟩ := ih (by omega) (σ + 2) (by linarith)
+      refine ⟨fun i => 2 * Bf i + 2 * Cprev i,
+        (hBf_sum.mul_left 2).add (hCprev_sum.mul_left 2), ?_⟩
+      intro i t ht
+      set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
+      have hlam_nn : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
+      have hwtσ_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ :=
+        tensorSobolevWeight_nonneg (I := I) (M := M) i σ
+      have hfp : ContDiff ℝ (p : ℕ) (f i) := (hf_smooth i).of_le (by exact_mod_cast hp_le_k)
+      have hrec := perModeConv_iteratedDeriv_succ_finiteOrder lam p hfp
+      have hval : iteratedDeriv (p + 1) (perModeConv lam (f i)) t
+          = iteratedDeriv p (f i) t - lam * iteratedDeriv p (perModeConv lam (f i)) t := by
+        rw [hrec]
+      have hexpand_sq :
+          (iteratedDeriv (p + 1) (perModeConv lam (f i)) t) ^ 2
+            ≤ 2 * (iteratedDeriv p (f i) t) ^ 2
+              + 2 * (lam * iteratedDeriv p (perModeConv lam (f i)) t) ^ 2 := by
+        rw [hval]
+        nlinarith [sq_nonneg (iteratedDeriv p (f i) t
+            + lam * iteratedDeriv p (perModeConv lam (f i)) t),
+          sq_nonneg (iteratedDeriv p (f i) t
+            - lam * iteratedDeriv p (perModeConv lam (f i)) t)]
+      have hforce_term :
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv p (f i) t) ^ 2 ≤ Bf i :=
+        hBf_le i t ht
+      have hphi_term :
+          tensorSobolevWeight (I := I) (M := M) i (σ + 2) *
+              (iteratedDeriv p (perModeConv lam (f i)) t) ^ 2 ≤ Cprev i :=
+        hCprev_le i t ht
+      have hweight_step :
+          tensorSobolevWeight (I := I) (M := M) i σ * lam ^ 2
+            ≤ tensorSobolevWeight (I := I) (M := M) i (σ + 2) := by
+        have h1le : (1 : ℝ) ≤ 1 + lam := by linarith
+        have hlamsq_le : lam ^ 2 ≤ (1 + lam) ^ 2 := by nlinarith [hlam_nn]
+        have hwtσ_pos : 0 < tensorSobolevWeight (I := I) (M := M) i σ :=
+          tensorSobolevWeight_pos (I := I) (M := M) i σ
+        have hsplit : tensorSobolevWeight (I := I) (M := M) i (σ + 2)
+            = tensorSobolevWeight (I := I) (M := M) i σ * (1 + lam) ^ 2 := by
+          unfold tensorSobolevWeight
+          rw [hlam_def] at *
+          rw [Real.rpow_add (by linarith)]
+          congr 1
+          rw [show ((2 : ℝ)) = ((2 : ℕ) : ℝ) by norm_num,
+            Real.rpow_natCast]
+        rw [hsplit]
+        exact mul_le_mul_of_nonneg_left hlamsq_le hwtσ_nn
+      have hlam_sq_term :
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (lam * iteratedDeriv p (perModeConv lam (f i)) t) ^ 2
+            ≤ Cprev i := by
+        have heq : (lam * iteratedDeriv p (perModeConv lam (f i)) t) ^ 2
+            = lam ^ 2 * (iteratedDeriv p (perModeConv lam (f i)) t) ^ 2 := by ring
+        calc tensorSobolevWeight (I := I) (M := M) i σ *
+              (lam * iteratedDeriv p (perModeConv lam (f i)) t) ^ 2
+            = (tensorSobolevWeight (I := I) (M := M) i σ * lam ^ 2) *
+                (iteratedDeriv p (perModeConv lam (f i)) t) ^ 2 := by
+              rw [heq]; ring
+          _ ≤ tensorSobolevWeight (I := I) (M := M) i (σ + 2) *
+                (iteratedDeriv p (perModeConv lam (f i)) t) ^ 2 := by
+              apply mul_le_mul_of_nonneg_right hweight_step (sq_nonneg _)
+          _ ≤ Cprev i := hphi_term
+      calc tensorSobolevWeight (I := I) (M := M) i σ *
+            (iteratedDeriv (p + 1) (perModeConv lam (f i)) t) ^ 2
+          ≤ tensorSobolevWeight (I := I) (M := M) i σ *
+              (2 * (iteratedDeriv p (f i) t) ^ 2
+                + 2 * (lam * iteratedDeriv p (perModeConv lam (f i)) t) ^ 2) :=
+            mul_le_mul_of_nonneg_left hexpand_sq hwtσ_nn
+        _ = 2 * (tensorSobolevWeight (I := I) (M := M) i σ *
+                (iteratedDeriv p (f i) t) ^ 2)
+              + 2 * (tensorSobolevWeight (I := I) (M := M) i σ *
+                (lam * iteratedDeriv p (perModeConv lam (f i)) t) ^ 2) := by ring
+        _ ≤ 2 * Bf i + 2 * Cprev i := by
+            have h1 := mul_le_mul_of_nonneg_left hforce_term (by norm_num : (0 : ℝ) ≤ 2)
+            have h2 := mul_le_mul_of_nonneg_left hlam_sq_term (by norm_num : (0 : ℝ) ≤ 2)
+            linarith
 
 set_option linter.unusedVariables false in
 theorem perModeConv_finiteOrder_timeJet_spectralMass_gain
@@ -87,8 +501,13 @@ theorem perModeConv_finiteOrder_timeJet_spectralMass_gain
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
           tensorSobolevWeight (I := I) (M := M) i τ *
               (iteratedDeriv j
-                (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i)) t) ^ 2 ≤ B i) :=
-  sorry
+                (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i)) t) ^ 2 ≤ B i) := by
+  refine ⟨fun i =>
+    perModeConv_contDiff_succ_of_contDiff (TensorEigenIdx.lambda (I := I) (M := M) i) k
+      (hf_smooth i), ?_⟩
+  intro j hj τ hτ
+  exact perModeConv_finiteOrder_timeDeriv_spectralMass_le (I := I) (M := M)
+    g hT k f hf_smooth hf_mass j hj τ hτ
 
 set_option linter.unusedVariables false in
 theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
@@ -347,6 +766,22 @@ theorem deTurckForcing_finiteOrderSmoothDriver
   obtain ⟨d, hd_pos, hd_le, hs_cont, hs_mass, hball, hcoeff_id⟩ :=
     deTurckForcing_solCoeff_continuous_smallTimeBase (I := I) (M := M)
       g₀ a ha_super hT hT1 gforce hspatial
+  choose c hc_cont hc_ae using hs_cont
+  have hae_d : ∀ i, c i =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d)]
+      (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u)) := fun i =>
+    MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+      (Set.Icc_subset_Icc le_rfl hd_le) (hc_ae i)
+  have hcont_pmc : ∀ i, ContinuousOn
+      (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u)) (Set.Icc (0 : ℝ) d) := fun i =>
+    (continuousOn_perModeConv_timeL2 (TensorEigenIdx.lambda (I := I) (M := M) i)
+      (timeModeCoeff (I := I) (M := M) gforce i) hT.le).mono (Set.Icc_subset_Icc le_rfl hd_le)
+  have heqOn_d : ∀ i, Set.EqOn (c i)
+      (perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u)) (Set.Icc (0 : ℝ) d) := fun i =>
+    MeasureTheory.Measure.eqOn_Icc_of_ae_eq (MeasureTheory.volume : MeasureTheory.Measure ℝ)
+      (ne_of_lt hd_pos) (hae_d i) (hc_cont i).continuousOn (hcont_pmc i)
   refine ⟨d, hd_pos, hd_le, ?_⟩
   have hsub : Set.Icc (0 : ℝ) d ⊆ Set.Icc (0 : ℝ) T := Set.Icc_subset_Icc le_rfl hd_le
   have hforce_coeff : ∀ i, (fun t => (gforce t).coeff i)
@@ -372,16 +807,15 @@ theorem deTurckForcing_finiteOrderSmoothDriver
         (fun t => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)
         hball 0
-        (fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
-          (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u))
-        hs_cont
+        c
+        (fun i => by rw [Nat.cast_zero, contDiff_zero]; exact hc_cont i)
         (fun j hj τ hτ => by
           obtain rfl := Nat.le_zero.mp hj
           obtain ⟨B, hBs, hBle⟩ := hs_mass τ hτ
           refine ⟨B, hBs, fun i t ht => ?_⟩
-          rw [iteratedDeriv_zero]
+          rw [iteratedDeriv_zero, heqOn_d i ht]
           exact hBle i t ht)
-        hcoeff_id
+        (fun i => (hcoeff_id i).trans (hae_d i).symm)
     exact ⟨ψ, hψ_smooth, hψ_mass, fun i => (hforce_coeff i).trans (hψ_ae i)⟩
   | succ k ih =>
     obtain ⟨fk, hfk_cont, hfk_mass, hfk_ae⟩ := ih
