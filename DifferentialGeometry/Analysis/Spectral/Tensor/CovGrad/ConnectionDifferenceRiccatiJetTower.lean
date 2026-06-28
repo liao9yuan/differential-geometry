@@ -187,6 +187,67 @@ private lemma riccati_closure (R δ : ℝ) (hR : 0 ≤ R) (hδ0 : 0 ≤ δ) (hδ
   rw [hcjb]
   exact hgoal
 
+private def connDiffRiccatiSource (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
+    SmoothCcTensor g₀ 1 3 :=
+  cometricRaiseSlot0Field (I := I) (M := M) g₀ 2
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T))
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+private theorem connDiffRiccatiSource_iteratedCovGrad_rfns_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    {R : ℝ} (hR : 0 ≤ R)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (j : ℕ) (hj : j + 1 ≤ a) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 j
+          (connDiffRiccatiSource (I := I) g₀ T)).toSection x) ≤
+      R ^ 2 :=
+  sorry
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+private theorem connDiffRiccatiRemainder_iteratedCovGrad_rfns_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hδ : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (j : ℕ) (hj : j + 1 ≤ a) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + j) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 j
+          (connDiffRiccatiSource (I := I) g₀ T -
+            covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀))).toSection x) ≤
+      inverseEndoBase (E := E) R δ ^ 10
+      + (1 / 2 : ℝ) * (appCcGdiag (E := E) (j + 1) *
+          ∑ p ∈ Finset.range (j + 1), (100 * R ^ 2) *
+            ∑ l ∈ Finset.range (j + 1 - p),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+                ((iteratedCovGrad (I := I) g₀ 1 2 l (connDiffSection (I := I) g₁ g₀)).toSection x)) :=
+  sorry
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+private theorem connDiffSection_iteratedCovGrad_rfns_order0_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hδ : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
+        ((connDiffSection (I := I) g₁ g₀).toSection x) ≤
+      inverseEndoBase (E := E) R δ ^ 11 :=
+  sorry
+
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
 theorem rfns_iteratedCovGrad_connDiffSection_riccati_recursion_le
@@ -206,8 +267,61 @@ theorem rfns_iteratedCovGrad_connDiffSection_riccati_recursion_le
             ∑ p ∈ Finset.range i, (100 * R ^ 2) *
               ∑ l ∈ Finset.range (i - p),
                 riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
-                  ((iteratedCovGrad (I := I) g₀ 1 2 l (connDiffSection (I := I) g₁ g₀)).toSection x) :=
-  sorry
+                  ((iteratedCovGrad (I := I) g₀ 1 2 l (connDiffSection (I := I) g₁ g₀)).toSection x) := by
+  intro i hi x
+  set B := inverseEndoBase (E := E) R δ with hBdef
+  rcases i with _ | m
+  · simp only [iteratedCovGrad_zero, Finset.range_zero, Finset.sum_empty, mul_zero, add_zero,
+      Nat.add_zero]
+    exact connDiffSection_iteratedCovGrad_rfns_order0_le (I := I) (M := M) g₀ g₁ a T htie hR hδ0 hδ1
+      hδ hTjet x
+  · have hmle : m + 1 ≤ a := hi
+    have hB4 : (4 : ℝ) ≤ B := four_le_inverseEndoBase R δ hR hδ0 hδ1
+    have hB1 : (1 : ℝ) ≤ B := by linarith
+    have hBnn : (0 : ℝ) ≤ B := by linarith
+    have hRB : R ≤ B := by
+      rw [hBdef]
+      unfold inverseEndoBase
+      have hr_pos : 0 < 1 - δ := by linarith
+      have hfr : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by
+        have hne : Module.finrank ℝ E ≠ 0 := NeZero.ne _
+        exact_mod_cast Nat.one_le_iff_ne_zero.mpr hne
+      have hr1 : (1 : ℝ) ≤ 1 / (1 - δ) := by rw [le_div_iff₀ hr_pos]; linarith
+      have h2n1 : (1 : ℝ) ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) := by linarith [hfr]
+      have hbase_nn : 0 ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) * (1 + R) := by positivity
+      calc R ≤ 1 + R := by linarith
+        _ = 1 * (1 + R) := by ring
+        _ ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) * (1 + R) :=
+            mul_le_mul_of_nonneg_right h2n1 (by linarith [hR])
+        _ = 2 * ((Module.finrank ℝ E : ℝ) + 1) * (1 + R) * 1 := by ring
+        _ ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) * (1 + R) * (1 / (1 - δ)) :=
+            mul_le_mul_of_nonneg_left hr1 hbase_nn
+    have hkey : 2 * R ^ 2 + 2 * B ^ 10 ≤ B ^ 11 := by
+      have hRb2 : R ^ 2 ≤ B ^ 2 := pow_le_pow_left₀ hR hRB 2
+      have hB2_10 : B ^ 2 ≤ B ^ 10 := pow_le_pow_right₀ hB1 (by norm_num)
+      have hB10_nn : 0 ≤ B ^ 10 := pow_nonneg hBnn 10
+      have h4 : 4 * B ^ 10 ≤ B ^ 11 := by
+        have hb11 : B ^ 11 = B * B ^ 10 := by ring
+        rw [hb11]; nlinarith [hB4, hB10_nn]
+      nlinarith [hRb2, hB2_10, hB10_nn, h4]
+    have hcomm := rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 1 2 m
+      (connDiffSection (I := I) g₁ g₀) x
+    rw [← hcomm]
+    have hsplit : covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀) =
+        connDiffRiccatiSource (I := I) g₀ T -
+          (connDiffRiccatiSource (I := I) g₀ T -
+            covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)) :=
+      (sub_sub_cancel _ _).symm
+    rw [hsplit, iteratedCovGrad_sub, SmoothCcTensor.toSection_sub]
+    refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 1 (3 + m) x _ _) ?_
+    have hP1 := connDiffRiccatiSource_iteratedCovGrad_rfns_le (I := I) (M := M) g₀ a T hR hTjet m
+      hmle x
+    have hP2 := connDiffRiccatiRemainder_iteratedCovGrad_rfns_le (I := I) (M := M) g₀ g₁ a T htie
+      hR hδ0 hδ1 hδ hTjet m hmle x
+    have hsum := add_le_add (mul_le_mul_of_nonneg_left hP1 (by norm_num : (0 : ℝ) ≤ 2))
+      (mul_le_mul_of_nonneg_left hP2 (by norm_num : (0 : ℝ) ≤ 2))
+    refine le_trans hsum ?_
+    nlinarith [hkey]
 
 set_option linter.unusedSectionVars false in
 theorem rfns_iteratedCovGrad_connDiffSection_riccati_le
