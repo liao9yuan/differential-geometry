@@ -182,6 +182,7 @@ theorem realizedDeTurck_timeRegular_family
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
     (htrace : timeH1.trace0 _ T u = 0) :
     ∃ (T₁ : ℝ), 0 < T₁ ∧ T₁ ≤ T ∧
       ∃ (T_rep : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
@@ -207,7 +208,7 @@ theorem realizedDeTurck_timeRegular_family
   -- Ricci–DeTurck pointwise flow derivative, and the joint chart-Gram interior regularity.
   obtain ⟨T₁, hT₁_pos, hT₁_le, F, δ, hδ_lt, hδ, hF_zero, hF_pin_icc, hF_flow, hF_joint⟩ :=
     maxreg_solution_jointly_smooth_representative (I := I) (M := M) g₀ g_bg a ha_super
-      ha_eq hT hT1 hTT₀ u gforce hduh hforce htrace
+      ha_eq hT hT1 hTT₀ u gforce hduh hforce hgforce htrace
   refine ⟨T₁, hT₁_pos, hT₁_le, F, δ, hδ_lt, hδ, hF_zero, ?_, hF_flow, hF_joint⟩
   intro t ht
   exact hF_pin_icc t ⟨ht.1.le, le_of_lt ht.2⟩
@@ -278,21 +279,21 @@ theorem realizedDeTurckFamily_exists
   
   set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution
     (I := I) (M := M) g₀ g_bg a ha_super).choose with hT₀_def
-  obtain ⟨hT₀_pos, hsol⟩ :=
+  obtain ⟨_, hT₀_pos, hsol⟩ :=
     (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
   set T : ℝ := min T₀ 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀_pos one_pos
   have hT_le₀ : T ≤ T₀ := min_le_left _ _
   have hT_le1 : T ≤ 1 := min_le_right _ _
-  obtain ⟨u, gforce, hduh, hforce, htrace, _hderiv⟩ := hsol hT_pos hT_le₀ hT_le1
-  -- The single time-regular realized family on the smallness horizon `T₁ ≤ T`: the `C∞`
-  -- representative family `T_rep` (uniformly `g₀`-fibre small with `δ < 1`), together with
-  -- the four data conjuncts the realized metric must carry — obtained in ONE call.
+  obtain ⟨u, gforce, hduh, hforce, htrace, _hderiv, hgforce⟩ := hsol hT_pos hT_le₀ hT_le1
+  
+  
+  
   obtain ⟨T₁, hT₁_pos, _hT₁_le, T_rep, δ, hδ_lt, hδ, hrep_zero, _htrep_pin, hflow, hJ⟩ :=
     realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_eq hT_pos hT_le1
-      hT_le₀ u gforce hduh hforce htrace
-  -- The realized metric family on the smallness horizon: realize the `C∞` representative
-  -- directly.
+      hT_le₀ u gforce hduh hforce hgforce htrace
+  
+  
   refine
     ⟨T₁, fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t),
       T_rep, hT₁_pos, ?_, ?_, hflow, hJ⟩

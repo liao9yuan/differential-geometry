@@ -185,7 +185,8 @@ theorem deTurckForcing_smoothTimeCoordinateField
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
       (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
@@ -200,7 +201,7 @@ theorem deTurckForcing_smoothTimeCoordinateField
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, hf_smooth, hf_mass, hf_ae⟩ :=
     deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super hT hT1
-      hTT₀ gforce hforce
+      hTT₀ gforce hforce hgforce
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
   obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 (a : ℝ) (Nat.cast_nonneg a)
@@ -246,7 +247,8 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
       (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
@@ -261,7 +263,7 @@ theorem deTurckForcing_smoothTimeCoordinateFamily
       (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i, (F t).coeff i = f i t) := by
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coeff⟩ :=
     deTurckForcing_smoothTimeCoordinateField (I := I) (M := M) g₀ g_bg a ha_super hT hT1
-      hTT₀ gforce hforce
+      hTT₀ gforce hforce hgforce
   have hF_coord_cont : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
       ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) d₂) := by
     intro i

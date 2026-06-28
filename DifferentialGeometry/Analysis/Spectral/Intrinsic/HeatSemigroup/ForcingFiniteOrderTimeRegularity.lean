@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
+import DifferentialGeometry.Analysis.Calculus.ContDiffExtendInterval
 
 noncomputable section
 
@@ -509,6 +510,219 @@ theorem perModeConv_finiteOrder_timeJet_spectralMass_gain
   exact perModeConv_finiteOrder_timeDeriv_spectralMass_le (I := I) (M := M)
     g hT k f hf_smooth hf_mass j hj τ hτ
 
+private theorem exists_smoothCcTensor_of_allOrder_spectralMass_local
+    (g₀ : SmoothRiemannianMetric I M)
+    (d : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
+    (hmass : ∀ σ : ℝ, 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, tensorSobolevWeight (I := I) (M := M) i σ * (d i) ^ 2 ≤ B i) :
+    ∃ S : SmoothCcTensor g₀ 0 2, ∀ i,
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S) i = d i := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  obtain ⟨B0, hB0s, hB0le⟩ := hmass 0 le_rfl
+  set v0 : tensorHs (I := I) (M := M) g₀ 0 2 0 :=
+    tensorHs_of_spectralMass_majorant (I := I) (M := M) d B0 hB0s hB0le with hv0_def
+  set u : TensorL2 0 2 g₀ :=
+    tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc le_rfl v0 with hu_def
+  have hu_coeff : ∀ i, tensorL2Coeff (I := I) (M := M) hc u i = d i := by
+    intro i
+    rw [hu_def, tensorHsToL2_tensorL2Coeff]
+    simp only [hv0_def, tensorHs_of_spectralMass_majorant_coeff]
+  have hsum_u : ∀ σ : ℝ, 0 ≤ σ →
+      Summable (fun i : TensorEigenIdx (I := I) (M := M) g₀ 0 2 =>
+        tensorSobolevWeight (I := I) (M := M) i σ *
+          (tensorL2Coeff (I := I) (M := M) hc u i) ^ 2) := by
+    intro σ hσ
+    obtain ⟨B, hBs, hBle⟩ := hmass σ hσ
+    refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hBs
+    · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _)
+    · rw [hu_coeff i]; exact hBle i
+  have hmem : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
+      ∃ vσ : tensorHs (I := I) (M := M) g₀ 0 2 σ,
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc hσ vσ = u :=
+    allHs_of_weighted_summable_pub (I := I) (M := M) g₀ u hsum_u
+  obtain ⟨S, hS⟩ := spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) (g := g₀) u hmem
+  refine ⟨S, fun i => ?_⟩
+  have hSL2 : SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S = u := by
+    rw [show SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S
+        = (S : TensorL2 0 2 g₀) from rfl, hS]
+  rw [hSL2, hu_coeff i]
+
+set_option linter.unusedVariables false in
+private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i) :
+    (∀ i, ContDiffOn ℝ (k : ℕ)
+        (fun t => tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)
+        (Set.Icc (0 : ℝ) T)) ∧
+    (∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDerivWithin j
+                (fun s => tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                    (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+                (Set.Icc (0 : ℝ) T) t) ^ 2 ≤ B i) :=
+  sorry
+
+set_option linter.unusedVariables false in
+private theorem deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (k : ℕ)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i) :
+    ∃ (ψ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+      (Rjet : ℕ → ℝ → SmoothCcTensor g₀ 0 2),
+      (∀ i, ContDiff ℝ (k : ℕ) (ψ i)) ∧
+      (∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+        ψ i t = tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i) ∧
+      (∀ (j : ℕ), j ≤ k → ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+        iteratedDeriv j (ψ i) t =
+          tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i) ∧
+      (∀ (j : ℕ), j ≤ k → ∀ (q : ℕ), ∃ K : ℝ, 0 ≤ K ∧ ∀ t ∈ Set.Icc (0 : ℝ) T,
+        ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖ ≤ K) := by
+  classical
+  obtain ⟨hcpath_smooth, hcpath_mass⟩ :=
+    deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass (I := I) (M := M)
+      g₀ g_bg hT k F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+  have hext : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      ∃ G : ℝ → ℝ, ContDiff ℝ (k : ℕ) G ∧
+        Set.EqOn G
+          (fun t => tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+              (deTurckSmoothRemainder (I := I) g₀ g_bg (F t) hδ_lt (hδ t))) i)
+          (Set.Icc (0 : ℝ) T) := fun i =>
+    DifferentialGeometry.Analysis.exists_contDiff_extend_of_contDiffOn_Icc hT k _ (hcpath_smooth i)
+  choose ψ hψ_cd hψ_eqOn using hext
+  have hconstruct : ∀ (j : ℕ) (t : ℝ),
+      ∃ S : SmoothCcTensor g₀ 0 2,
+        (j ≤ k → t ∈ Set.Icc (0 : ℝ) T → ∀ i,
+          tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S) i =
+            iteratedDerivWithin j
+              (fun s => tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                  (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+              (Set.Icc (0 : ℝ) T) t) := by
+    intro j t
+    by_cases hjk : j ≤ k
+    · by_cases ht : t ∈ Set.Icc (0 : ℝ) T
+      · obtain ⟨S, hS⟩ := exists_smoothCcTensor_of_allOrder_spectralMass_local (I := I) (M := M) g₀
+          (fun i => iteratedDerivWithin j
+            (fun s => tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+            (Set.Icc (0 : ℝ) T) t)
+          (fun σ hσ => by
+            obtain ⟨B, hBs, hBle⟩ := hcpath_mass j hjk σ hσ
+            exact ⟨B, hBs, fun i => hBle i t ht⟩)
+        exact ⟨S, fun _ _ i => hS i⟩
+      · exact ⟨0, fun _ ht' => absurd ht' ht⟩
+    · exact ⟨0, fun hjk' => absurd hjk' hjk⟩
+  choose Rjet hRjet using hconstruct
+  have hbridge : ∀ (j : ℕ), j ≤ k → ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+      iteratedDeriv j (ψ i) t =
+        iteratedDerivWithin j
+          (fun s => tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+              (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+          (Set.Icc (0 : ℝ) T) t := by
+    intro j hjk i t ht
+    have hcongr := iteratedDerivWithin_congr (n := j) (hψ_eqOn i) ht
+    have heq : iteratedDerivWithin j (ψ i) (Set.Icc (0 : ℝ) T) t = iteratedDeriv j (ψ i) t :=
+      iteratedDerivWithin_eq_iteratedDeriv (uniqueDiffOn_Icc hT)
+        ((hψ_cd i).contDiffAt.of_le (by exact_mod_cast hjk)) ht
+    rw [← heq, hcongr]
+  refine ⟨ψ, Rjet, hψ_cd, ?_, ?_, ?_⟩
+  · intro i t ht
+    exact hψ_eqOn i ht
+  · intro j hjk i t ht
+    rw [hbridge j hjk i t ht]
+    exact (hRjet j t hjk ht i).symm
+  · intro j hjk q
+    obtain ⟨C, hC_nn, hCle⟩ :=
+      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ q
+    obtain ⟨B, hBs, hBle⟩ := hcpath_mass j hjk ((2 * q : ℕ) : ℝ) (by positivity)
+    refine ⟨C * Real.sqrt (∑' i, B i),
+      mul_nonneg hC_nn (Real.sqrt_nonneg _), fun t ht => ?_⟩
+    have hptwise : ∀ i, tensorSobolevWeight (I := I) (M := M) i ((2 * q : ℕ) : ℝ) *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * q : ℕ) : ℝ) (Rjet j t)).coeff i) ^ 2 ≤
+          B i := by
+      intro i
+      have hco : (smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * q : ℕ) : ℝ) (Rjet j t)).coeff i =
+          iteratedDerivWithin j
+            (fun s => tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                (deTurckSmoothRemainder (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+            (Set.Icc (0 : ℝ) T) t := by
+        rw [smoothCcToTensorHs_coeff]; exact hRjet j t hjk ht i
+      rw [hco]; exact hBle i t ht
+    have hnorm_le :
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * q : ℕ) : ℝ) (Rjet j t)‖ ≤
+          Real.sqrt (∑' i, B i) := by
+      rw [tensorHs.norm_eq_sqrt_tsum (I := I) (M := M)
+        (smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * q : ℕ) : ℝ) (Rjet j t))]
+      exact Real.sqrt_le_sqrt (Summable.tsum_le_tsum hptwise
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * q : ℕ) : ℝ) (Rjet j t)).weighted_summable)
+        hBs)
+    have hqmem : q ∈ Finset.range (2 * q + 1) := Finset.mem_range.mpr (by omega)
+    calc ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖
+        ≤ ∑ j' ∈ Finset.range (2 * q + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j' (Rjet j t)‖ :=
+          Finset.single_le_sum
+            (f := fun j' => ‖iteratedCovGrad (I := I) g₀ 0 2 j' (Rjet j t)‖)
+            (fun j' _ => norm_nonneg _) hqmem
+      _ ≤ C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * q : ℕ) : ℝ) (Rjet j t)‖ :=
+          hCle (Rjet j t)
+      _ ≤ C * Real.sqrt (∑' i, B i) := mul_le_mul_of_nonneg_left hnorm_le hC_nn
+
 set_option linter.unusedVariables false in
 theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -537,8 +751,75 @@ theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
             tensorSobolevWeight (I := I) (M := M) i σ *
                 (iteratedDeriv j (ψ i) t) ^ 2 ≤ B i) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i,
-        (deTurckSmoothN (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i = ψ i t) :=
-  sorry
+        (deTurckSmoothN (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i = ψ i t) := by
+  classical
+  obtain ⟨ψ, Rjet, hψ_smooth, hψ_eq, hjet, hcovbnd⟩ :=
+    deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection (I := I) (M := M)
+      g₀ g_bg a ha_super hT k F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+  refine ⟨ψ, hψ_smooth, ?_, ?_⟩
+  · intro j hj σ hσ
+    obtain ⟨k', hk'⟩ : ∃ k' : ℕ,
+        σ + (((weylSobolevExp (E := E) : ℕ) : ℝ) + 1) ≤ (2 * k' : ℕ) := by
+      obtain ⟨k', hk'⟩ := exists_nat_gt (σ + (((weylSobolevExp (E := E) : ℕ) : ℝ) + 1))
+      exact ⟨k', by push_cast; linarith⟩
+    set σ' : ℝ := ((2 * k' : ℕ) : ℝ) with hσ'_def
+    have hσσ' : ((weylSobolevExp (E := E) : ℕ) : ℝ) < σ' - σ := by rw [hσ'_def]; linarith
+    obtain ⟨C, hC_nn, hCle⟩ :=
+      exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum (I := I) (M := M) g₀ k'
+    have hcovsum_bnd : ∃ K : ℝ, 0 ≤ K ∧ ∀ t ∈ Set.Icc (0 : ℝ) T,
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)‖ ≤ K := by
+      have hbnds : ∀ q ∈ Finset.range (2 * k' + 1), ∃ Kq : ℝ, 0 ≤ Kq ∧
+          ∀ t ∈ Set.Icc (0 : ℝ) T,
+            ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖ ≤ Kq :=
+        fun q _ => hcovbnd j hj q
+      choose! Kq hKq_nn hKq using hbnds
+      refine ⟨C * ∑ q ∈ Finset.range (2 * k' + 1), Kq q,
+        mul_nonneg hC_nn (Finset.sum_nonneg (fun q hq => hKq_nn q hq)), ?_⟩
+      intro t ht
+      refine le_trans (hCle (Rjet j t)) ?_
+      refine mul_le_mul_of_nonneg_left ?_ hC_nn
+      refine Finset.sum_le_sum (fun q hq => ?_)
+      exact hKq q hq t ht
+    obtain ⟨K, hK_nn, hKle⟩ := hcovsum_bnd
+    refine ⟨fun i => tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ)) * K ^ 2, ?_, ?_⟩
+    · exact (tensorEigen_summable_negpow (I := I) (M := M) g₀ (σ' - σ) hσσ').mul_right (K ^ 2)
+    · intro i t ht
+      rw [hjet j hj i t ht]
+      set u : ℝ := tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i with hu_def
+      have hcoeff_eq : (smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).coeff i = u := by
+        rw [smoothCcToTensorHs_coeff]
+      have hbase : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+        lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i)
+      have hsplit : tensorSobolevWeight (I := I) (M := M) i σ =
+          tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ)) *
+            tensorSobolevWeight (I := I) (M := M) i σ' := by
+        unfold tensorSobolevWeight
+        rw [← Real.rpow_add hbase, show -(σ' - σ) + σ' = σ from by ring]
+      have hterm_le : tensorSobolevWeight (I := I) (M := M) i σ' * u ^ 2 ≤ K ^ 2 := by
+        have hmass : tensorSobolevWeight (I := I) (M := M) i σ' * u ^ 2 ≤
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)‖ ^ 2 := by
+          rw [tensorHs.norm_sq_eq_tsum]
+          have hsummable :=
+            (smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).weighted_summable
+          have hle := hsummable.le_tsum i (fun i' _ =>
+            mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i' σ') (sq_nonneg _))
+          rw [hcoeff_eq] at hle
+          exact hle
+        refine le_trans hmass ?_
+        have hnn : 0 ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)‖ := norm_nonneg _
+        have := hKle t ht
+        nlinarith [this, hnn, hK_nn]
+      calc tensorSobolevWeight (I := I) (M := M) i σ * u ^ 2
+          = tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ)) *
+              (tensorSobolevWeight (I := I) (M := M) i σ' * u ^ 2) := by rw [hsplit]; ring
+        _ ≤ tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ)) * K ^ 2 :=
+            mul_le_mul_of_nonneg_left hterm_le
+              (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
+  · intro t ht i
+    rw [deTurckSmoothN_coeff]
+    exact (hψ_eq i t ht).symm
 
 set_option linter.unusedVariables false in
 theorem deTurckSobolevNHa2_finiteOrder_jetSpectralMass_preserving

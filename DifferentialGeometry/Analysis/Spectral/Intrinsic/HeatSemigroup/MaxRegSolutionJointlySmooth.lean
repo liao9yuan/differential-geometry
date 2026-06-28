@@ -177,7 +177,8 @@ private theorem forcingSmoothTimeCoords
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
       (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
@@ -193,7 +194,7 @@ private theorem forcingSmoothTimeCoords
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
     deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super hT hT1
-      hTT₀ gforce hforce
+      hTT₀ gforce hforce hgforce
   exact ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩
 
 set_option linter.unusedVariables false in
@@ -231,6 +232,7 @@ private theorem forcingSmoothCoordsRealize
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
     (htrace : timeH1.trace0 _ T u = 0) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
@@ -251,7 +253,7 @@ private theorem forcingSmoothCoordsRealize
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i) := by
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
-    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
   have hforce_coord : ∀ i, (fun t => (gforce t).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i := by
     intro i
@@ -1178,6 +1180,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
     (htrace : timeH1.trace0 _ T u = 0)
     {R₀ : ℝ} (hR₀ : 0 < R₀) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
@@ -1193,7 +1196,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2
   
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, _⟩ :=
     forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
-      hduh hforce htrace
+      hduh hforce hgforce htrace
 
   obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 ((a : ℝ) + 2) (by positivity)
 
@@ -1243,6 +1246,7 @@ theorem deTurckRicci_forcingBootstrap
           (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
             (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+        (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
         (htrace : timeH1.trace0 _ T u = 0),
       ∃ (d₂F : ℝ), 0 < d₂F ∧ d₂F ≤ T ∧
         ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ),
@@ -1285,10 +1289,10 @@ theorem deTurckRicci_forcingBootstrap
                     (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
                       (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (Ffam t) hδ_lt (hδ t))) i) := by
   classical
-  intro T hT hT1 hTT₀ u gforce hduh hforce htrace
+  intro T hT hT1 hTT₀ u gforce hduh hforce hgforce htrace
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
     forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
-      hduh hforce htrace
+      hduh hforce hgforce htrace
   refine ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, ?_⟩
   set R₀ : ℝ := (Classical.choose
     (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1 with hR₀_def
@@ -1297,7 +1301,7 @@ theorem deTurckRicci_forcingBootstrap
       (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
   refine ⟨R₀, hR₀_pos, ?_, ?_⟩
   · exact realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hT hT1
-      hTT₀ u gforce hduh hforce htrace hR₀_pos
+      hTT₀ u gforce hduh hforce hgforce htrace hR₀_pos
   · intro T₁ hT₁_pos hT₁_le hT₁_le_d2F Ffam δ hδ_lt hδ h_pin hball
     exact realizedForcingCoord_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
       hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
@@ -1667,6 +1671,7 @@ theorem maxreg_solution_jointly_smooth_representative
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
     (htrace : timeH1.trace0 _ T u = 0) :
     ∃ (T₁ : ℝ), 0 < T₁ ∧ T₁ ≤ T ∧
       ∃ (F : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
@@ -1690,7 +1695,7 @@ theorem maxreg_solution_jointly_smooth_representative
   have hinit : u.init = 0 := by have := htrace; rwa [timeH1.trace0_apply] at this
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
     forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
-      hduh hforce htrace
+      hduh hforce hgforce htrace
   set R₀ : ℝ := (Classical.choose
     (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1 with hR₀_def
   have hR₀_pos : 0 < R₀ :=
@@ -1704,7 +1709,7 @@ theorem maxreg_solution_jointly_smooth_representative
             (Nat.cast_nonneg a) (timeH1.toFun u t) →
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ :=
     realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hT hT1
-      hTT₀ u gforce hduh hforce htrace hR₀_pos
+      hTT₀ u gforce hduh hforce hgforce htrace hR₀_pos
   have hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ' : ℝ} (hδ'_lt : δ' < 1)
       (hδ' : gFibreOpBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ S) δ')

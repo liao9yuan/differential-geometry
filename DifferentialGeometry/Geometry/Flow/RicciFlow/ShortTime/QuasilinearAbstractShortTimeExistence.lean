@@ -64,6 +64,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
         (hforce : gforce =ᵐ[timeMeasure T]
           (fun t => Nfun (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+        (hgforce : ‖gforce‖ ≤ 1 / (16 * ((H2.choose : ℝ) + 1)))
         (htrace : timeH1.trace0 _ T u = 0),
       ∃ (d₂F : ℝ), 0 < d₂F ∧ d₂F ≤ T ∧
         ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ),
@@ -108,13 +109,13 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I) F g₀ T g_DT ∧ JointChartGramSmooth (I := I) T g_DT := by
   classical
-  obtain ⟨hT₀pos, hsol⟩ := (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose_spec
+  obtain ⟨_, hT₀pos, hsol⟩ := (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose_spec
   set T : ℝ := min (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀pos one_pos
   have hT_le₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a Nfun hLipN H2).choose :=
     min_le_left _ _
   have hT_le1 : T ≤ 1 := min_le_right _ _
-  obtain ⟨u, gforce, hduh, hforce, htrace, hderiv⟩ := hsol hT_pos hT_le₀ hT_le1
+  obtain ⟨u, gforce, hduh, hforce, htrace, hderiv, hgforce⟩ := hsol hT_pos hT_le₀ hT_le1
   have hForce2 :
       ∃ (d₂F : ℝ), 0 < d₂F ∧ d₂F ≤ T ∧
         ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ),
@@ -156,7 +157,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
                     (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                     (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
                       (Nsec (Ffam t) hδ_lt (hδ t))) i) :=
-    hForce hT_pos hT_le1 hT_le₀ u gforce hduh hforce htrace
+    hForce hT_pos hT_le1 hT_le₀ u gforce hduh hforce hgforce htrace
   obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, R₀, hR₀pos, hHorizon, hForceRepr_fam⟩ :=
     hForce2
   obtain ⟨T₁, hT₁pos, hT₁le, F_fam, δ, hδ_lt, hδ, hF_zero, hF_pin, hF_flow, hF_joint⟩ :=
