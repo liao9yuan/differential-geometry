@@ -260,6 +260,43 @@ private lemma inverseEndo_succ_closure (R δ : ℝ) (hR : 0 ≤ R) (hδ0 : 0 ≤
     _ ≤ F ^ (3 + (m + 1)) * B0 ^ (2 * (m + 2) ^ 2) :=
         diagGrid_quadratic_closure B0 F hB0 hF1 hFB m
 
+private theorem rfns_iteratedCovGrad_flatArmCoeffCc_base
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hδ : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (kind : Bool) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + 0) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 0
+          (flatArmCoeffCc (I := I) g₀ g₁ kind)).toSection x) ≤
+      inverseEndoJetBound (E := E) R δ 0 := by
+  sorry
+
+private theorem rfns_iteratedCovGrad_flatArmCoeffCc_succ_step
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hδ : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (kind : Bool) (m : ℕ) (hm : m + 1 ≤ a) (x : M)
+    (hIH : ∀ j : ℕ, j ≤ m →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 j
+            (flatArmCoeffCc (I := I) g₀ g₁ kind)).toSection x) ≤
+        inverseEndoJetBound (E := E) R δ j) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + (m + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 (m + 1)
+          (flatArmCoeffCc (I := I) g₀ g₁ kind)).toSection x) ≤
+      inverseEndoJetBound (E := E) R δ (m + 1) := by
+  sorry
+
 theorem rfns_iteratedCovGrad_flatArmCoeffCc_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -275,7 +312,17 @@ theorem rfns_iteratedCovGrad_flatArmCoeffCc_le
           ((iteratedCovGrad (I := I) g₀ 1 2 i
             (flatArmCoeffCc (I := I) g₀ g₁ kind)).toSection x) ≤
         inverseEndoJetBound (E := E) R δ i := by
-  sorry
+  intro i
+  induction i using Nat.strong_induction_on with
+  | _ i hstrong =>
+    intro hi_le x
+    match i, hi_le with
+    | 0, _ =>
+        exact rfns_iteratedCovGrad_flatArmCoeffCc_base (I := I) g₀ g₁ a T htie hR hδ0 hδ1 hδ
+          hTjet kind x
+    | (m + 1), hm =>
+        exact rfns_iteratedCovGrad_flatArmCoeffCc_succ_step (I := I) g₀ g₁ a T htie hR hδ0 hδ1 hδ
+          hTjet kind m hm x (fun j hj => hstrong j (by omega) (by omega) x)
 
 private theorem rfns_iteratedCovGrad_sharpFlatEndoCc_allOrders
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
