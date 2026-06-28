@@ -60,6 +60,28 @@ lemma curvatureCoeffJetBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) 
     (curvatureCoeffComponentBound_nonneg R δ hR hδ1 i)
 
 set_option linter.unusedVariables false in
+theorem rfns_iteratedCovGrad_ricciArmPrincipalCoeff_Ksum_sq_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hδ : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (i : ℕ) (hi : i ≤ a + 1) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
+    (horth : ∀ a b : Fin n, g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
+    (K : Fin 4 → Fin n) :
+    (∑ J : Fin (2 + i) → Fin n,
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 4 (2 + i)
+        ((iteratedCovGrad (I := I) g₀ 4 2 i
+          (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)).toSection x)
+        n e K J) ^ 2) ≤
+      curvatureCoeffComponentBound (E := E) R δ i :=
+  sorry
+
+set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmPrincipalCoeff_perComponent_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -77,8 +99,15 @@ theorem rfns_iteratedCovGrad_ricciArmPrincipalCoeff_perComponent_le
         ((iteratedCovGrad (I := I) g₀ 4 2 i
           (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)).toSection x)
         n e K J) ^ 2 ≤
-      curvatureCoeffComponentBound (E := E) R δ i :=
-  sorry
+      curvatureCoeffComponentBound (E := E) R δ i := by
+  refine le_trans (Finset.single_le_sum
+      (f := fun J' : Fin (2 + i) → Fin n =>
+        (fiberNormSqComponent (I := I) (M := M) g₀ x 4 (2 + i)
+          ((iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)).toSection x) n e K J') ^ 2)
+      (fun J' _ => sq_nonneg _) (Finset.mem_univ J))
+    (rfns_iteratedCovGrad_ricciArmPrincipalCoeff_Ksum_sq_le
+      (I := I) g₀ g₁ a T htie hR hδ0 hδ1 hδ hTjet i hi x e hn horth K)
 
 set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmPrincipalCoeff_le
