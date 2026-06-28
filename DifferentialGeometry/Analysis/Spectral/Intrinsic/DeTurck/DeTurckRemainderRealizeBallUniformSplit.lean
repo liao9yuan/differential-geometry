@@ -25,6 +25,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedVariables false in
 theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_norm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -42,8 +43,57 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_norm_le
                 (hδ_fibre T₀ hball)) T₀)‖ ≤
           (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
                 (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ +
-            Clower k * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) T₀‖ :=
-  sorry
+            Clower k * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) T₀‖ := by
+  have hδ_lt1 : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
+  refine ⟨fun k => (exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
+        (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)).choose,
+    fun k => (exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
+        (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)).choose_spec.1,
+    fun k T₀ hball => ?_⟩
+  rcases isEmpty_or_nonempty M with hM | hM
+  · have hzero : ∀ (σ : ℝ) (X : SmoothCcTensor g₀ 0 2),
+        smoothCcToTensorHs (I := I) (M := M) g₀ σ X = 0 := by
+      intro σ X
+      have hL2norm : ‖SmoothCcTensor.toL2 X‖ = 0 := by
+        rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_def, tensorL2Norm,
+          tensorL2Inner, MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+      have hL2 : SmoothCcTensor.toL2 X = 0 := norm_eq_zero.mp hL2norm
+      refine tensorHs.ext (funext fun i => ?_)
+      rw [smoothCcToTensorHs_coeff, tensorHs.zero_coeff, hL2, tensorL2Coeff_eq_inner,
+        inner_zero_right]
+    simp only [hzero, norm_zero, mul_zero, add_zero, le_refl]
+  · have hδ_nn : 0 ≤ δ := by
+      obtain ⟨x₀⟩ := hM
+      obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
+        haveI : Nontrivial (TangentSpace I x₀) := by
+          have hfr : 0 < Module.finrank ℝ (TangentSpace I x₀) := by
+            have hrk : Module.finrank ℝ (TangentSpace I x₀) = Module.finrank ℝ E := rfl
+            rw [hrk]; exact Nat.pos_of_ne_zero (NeZero.ne _)
+          exact Module.nontrivial_of_finrank_pos hfr
+        exact exists_ne 0
+      have hpos : 0 < g₀.inner x₀ v v := g₀.pos x₀ v hv
+      have hbound := hδ_fibre T₀ hball x₀ v v
+      have hsqrt_pos : 0 < Real.sqrt (g₀.inner x₀ v v) := Real.sqrt_pos.mpr hpos
+      have habs_nn : 0 ≤ |ccTensorBilinSymm (I := I) g₀ T₀ x₀ v v| := abs_nonneg _
+      by_contra hδc
+      have hδc' : δ < 0 := lt_of_not_ge hδc
+      have hrhs_neg : δ * Real.sqrt (g₀.inner x₀ v v) * Real.sqrt (g₀.inner x₀ v v) < 0 := by
+        have h1 : δ * Real.sqrt (g₀.inner x₀ v v) < 0 :=
+          mul_neg_of_neg_of_pos hδc' hsqrt_pos
+        exact mul_neg_of_neg_of_pos h1 hsqrt_pos
+      linarith [le_trans habs_nn hbound]
+    have hbound := (exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
+        (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)).choose_spec.2
+      (tensorSectionRealizeMetric (I := I) g₀ T₀ hδ_lt1 (hδ_fibre T₀ hball))
+      (fun y => ccTensorBilinSymm (I := I) g₀ T₀ y)
+      (fun y v w => tensorSectionRealizeMetric_inner (I := I) g₀ T₀ hδ_lt1
+        (hδ_fibre T₀ hball) y v w)
+      hδ_lt1 hδ_nn (hδ_fibre T₀ hball) T₀
+    have heq : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1 + 1) T₀‖ =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) T₀‖ :=
+      smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by ring) T₀
+    rw [heq] at hbound
+    exact hbound
 
 theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_inner_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

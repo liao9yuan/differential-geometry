@@ -176,7 +176,7 @@ theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : 
   rw [norm_zero, mul_zero] at h
   exact norm_le_zero_iff.mp h
 
-private theorem nemytskii_time_mixed_bound (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
+theorem nemytskii_time_mixed_bound (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
     (hLip : LipschitzWith L Nfun) {C₁ C₂ : ℝ≥0}
@@ -311,7 +311,7 @@ def nemytskiiMixedForcingMap (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : 
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F) :=
   rfl
 
-private theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
+theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
     (hLip : LipschitzWith L Nfun) {C₁ C₂ : ℝ≥0}
@@ -404,6 +404,11 @@ private theorem norm_nemytskiiMixedForcingMap_zero_le (g₀ : SmoothRiemannianMe
   filter_upwards [hcoe, hzero] with t ht htz
   rw [ht, htz, Pi.zero_apply]
 
+def deTurckForceBallRadius (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) : ℝ :=
+  1 / (16 * (((deTurckSobolevNHa2_mixed_lipschitz_pointwise (I := I) (M := M)
+    (g₀ := g₀) (g_bg := g_bg) a ha_super).choose : ℝ) + 1))
+
 theorem quasilinear_maxreg_solution_of_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
@@ -418,7 +423,11 @@ theorem quasilinear_maxreg_solution_of_nemytskii
           * ‖u - u'‖ +
         (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖) :
-    ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
+    ∃ T₀ : ℝ,
+      T₀ = min 1 (min (1 / (64 * ((hmix.choose_spec.choose : ℝ) + 1) ^ 2))
+        ((1 / (16 * ((hmix.choose : ℝ) + 1)) /
+            (2 * (‖Nfun (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ + 1))) ^ 2)) ∧
+      0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
       ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
         (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
         u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -430,7 +439,8 @@ theorem quasilinear_maxreg_solution_of_nemytskii
           timeH1.timeDeriv _ T u =
             timeScaleLaplacian (I := I) (M := M) (a : ℝ)
                 (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-                  (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce) + gforce := by
+                  (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce) + gforce ∧
+          ‖gforce‖ ≤ 1 / (16 * ((hmix.choose : ℝ) + 1)) := by
   classical
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   set C₁ := hmix.choose with hC₁def
@@ -458,7 +468,8 @@ theorem quasilinear_maxreg_solution_of_nemytskii
     · positivity
     · have : 0 < ρ / (2 * (M₀ + 1)) := by positivity
       positivity
-  refine ⟨T₀, hT₀pos, ?_⟩
+  refine ⟨T₀, ?_, hT₀pos, ?_⟩
+  · rw [hT₀def, hρdef, hC₁def, hC₂def, hM₀def]
   intro T hT hTT₀ hT1
 
   have hT_le1 : T ≤ 1 := hT1
@@ -609,7 +620,7 @@ theorem quasilinear_maxreg_solution_of_nemytskii
     rw [← hΨFstar, hΨdef, nemytskiiMixedForcingMap_apply]
 
   refine ⟨maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar, Fstar, rfl, ?_, ?_, ?_⟩
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar, Fstar, rfl, ?_, ?_, ?_, ?_⟩
   · have hcoe := nemytskii_coeFn (I := I) (M := M) hLip field
     have hforce_ae : ⇑Fstar =ᵐ[timeMeasure T]
         ⇑(nemytskii (I := I) (M := M) hLip field) := by
@@ -620,10 +631,20 @@ theorem quasilinear_maxreg_solution_of_nemytskii
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar, map_zero]
   · rw [maxRegDuhamelMap_timeDeriv_eq (I := I) (M := M) (h_compact := h_compact)
       (a := (a : ℝ)) (T := T) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) Fstar]
+  · exact hFstar_mem
+
+def deTurckForceShortTime (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) : ℝ :=
+  min 1 (min (1 / (64 * (((deTurckSobolevNHa2_mixed_lipschitz_pointwise
+            (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super).choose_spec.choose : ℝ) + 1) ^ 2))
+    ((deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super /
+        (2 * (‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ + 1))) ^ 2))
 
 theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
-    ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
+    ∃ T₀ : ℝ, T₀ = deTurckForceShortTime (I := I) (M := M) g₀ g_bg a ha_super ∧
+      0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
       ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
         (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
         u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -637,13 +658,174 @@ theorem deTurckRicci_quasilinear_maxreg_solution (g₀ g_bg : SmoothRiemannianMe
             timeScaleLaplacian (I := I) (M := M) (a : ℝ)
                 (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
                   (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce) +
-              gforce :=
-  quasilinear_maxreg_solution_of_nemytskii (I := I) (M := M) g₀ a
+              gforce ∧
+          ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super := by
+  obtain ⟨T₀, hT₀eq, hT₀pos, hsol⟩ := quasilinear_maxreg_solution_of_nemytskii (I := I) (M := M) g₀ a
     (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a)
     (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super)
     (deTurckSobolevNHa2_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super)
+  exact ⟨T₀, hT₀eq, hT₀pos, hsol⟩
+
+theorem deTurckRicci_maxreg_solution_choose_eq_shortTime
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
+    (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose =
+      deTurckForceShortTime (I := I) (M := M) g₀ g_bg a ha_super :=
+  (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose_spec.1
+
+theorem deTurckForceShortTime_pos (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
+    0 < deTurckForceShortTime (I := I) (M := M) g₀ g_bg a ha_super := by
+  have h := (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
+  rw [deTurckRicci_maxreg_solution_choose_eq_shortTime (I := I) (M := M) g₀ g_bg a ha_super] at h
+  exact h.2.1
+
+theorem deTurckForceShortTime_le_sq (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
+    deTurckForceShortTime (I := I) (M := M) g₀ g_bg a ha_super ≤
+      1 / (64 * (((deTurckSobolevNHa2_mixed_lipschitz_pointwise
+            (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super).choose_spec.choose : ℝ) + 1) ^ 2) :=
+  le_trans (min_le_right _ _) (min_le_left _ _)
+
+def deTurckForceRetractedMap (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
+    timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
+      timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T :=
+  fun F => nemytskiiMixedForcingMap (I := I) (M := M) g₀ a
+    (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
+    hT hT1
+    (recenteredBallRetraction (0 : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+      (deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) F)
+
+theorem deTurckForceRetractedMap_apply (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) :
+    deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1 F =
+      nemytskiiMixedForcingMap (I := I) (M := M) g₀ a
+        (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
+        hT hT1
+        (recenteredBallRetraction (0 : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+          (deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) F) :=
+  rfl
+
+theorem deTurckForceRetractedMap_eq_of_mem_ball (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hF : ‖F‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1 F =
+      nemytskiiMixedForcingMap (I := I) (M := M) g₀ a
+        (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
+        hT hT1 F := by
+  rw [deTurckForceRetractedMap_apply,
+    recenteredBallRetraction_eq_self_of_mem
+      (Metric.mem_closedBall.2 (by rw [dist_zero_right]; exact hF))]
+
+theorem deTurckForceRetractedMap_dist_le_half (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTsh : T ≤ deTurckForceShortTime (I := I) (M := M) g₀ g_bg a ha_super)
+    (F F' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) :
+    ‖deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1 F -
+        deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1 F'‖ ≤
+      (1 / 2) * ‖F - F'‖ := by
+  classical
+  set hmix := deTurckSobolevNHa2_mixed_lipschitz_pointwise (I := I) (M := M)
+    (g₀ := g₀) (g_bg := g_bg) a ha_super with hmix_def
+  set C₁ : ℝ≥0 := hmix.choose with hC₁def
+  set C₂ : ℝ≥0 := hmix.choose_spec.choose with hC₂def
+  set ρ : ℝ := deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super with hρdef
+  have hsingle := hmix.choose_spec.choose_spec
+  have hρeq : ρ = 1 / (16 * ((C₁ : ℝ) + 1)) := rfl
+  have hρpos : 0 < ρ := by rw [hρeq]; positivity
+  set z₀ : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T := 0 with hz₀
+  have hρt_mem : ∀ G, recenteredBallRetraction z₀ ρ G ∈ Metric.closedBall z₀ ρ := fun G =>
+    recenteredBallRetraction_mapsTo (X := _) hρpos.le z₀ (Set.mem_univ G)
+  have hρt_norm : ∀ G, ‖recenteredBallRetraction z₀ ρ G‖ ≤ ρ := by
+    intro G
+    have := hρt_mem G
+    rw [Metric.mem_closedBall, hz₀, dist_zero_right] at this
+    exact this
+  have hρt_lip : LipschitzWith 1 (recenteredBallRetraction z₀ ρ) :=
+    recenteredBallRetraction_lipschitzWith hρpos.le z₀
+  have hT_lo : T ≤ 1 / (64 * ((C₂ : ℝ) + 1) ^ 2) :=
+    le_trans hTsh (deTurckForceShortTime_le_sq (I := I) (M := M) g₀ g_bg a ha_super)
+  have h1T : (1 : ℝ) + T ≤ 2 := by linarith
+  have hsqrt1T_le : Real.sqrt (1 + T) ≤ 1 + T := by
+    have h1le : (1 : ℝ) ≤ 1 + T := by linarith
+    calc Real.sqrt (1 + T) ≤ Real.sqrt ((1 + T) ^ 2) :=
+          Real.sqrt_le_sqrt (by nlinarith [sq_nonneg (1 + T)])
+      _ = 1 + T := Real.sqrt_sq (by linarith)
+  have harm1 : (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) ≤ 1 / 4 := by
+    have hle : (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) ≤ (C₁ : ℝ) * 2 * ρ * 2 := by
+      have hc1 : (0:ℝ) ≤ (C₁:ℝ) := C₁.coe_nonneg
+      have h0 : (0:ℝ) ≤ 1 + T := by linarith
+      have hsqrt2 : Real.sqrt (1 + T) ≤ 2 := le_trans hsqrt1T_le h1T
+      have hρnn : 0 ≤ ρ := hρpos.le
+      gcongr
+    refine le_trans hle ?_
+    rw [hρeq]
+    rw [show (C₁ : ℝ) * 2 * (1 / (16 * ((C₁ : ℝ) + 1))) * 2 =
+        (C₁ : ℝ) / ((C₁ : ℝ) + 1) * (4 / 16) by field_simp; ring]
+    have hfrac : (C₁ : ℝ) / ((C₁ : ℝ) + 1) ≤ 1 := by
+      rw [div_le_one (by positivity)]; linarith [C₁.coe_nonneg]
+    nlinarith [hfrac, div_nonneg C₁.coe_nonneg (by positivity : (0:ℝ) ≤ (C₁:ℝ)+1)]
+  have hsqrtT : Real.sqrt T ≤ 1 / (8 * ((C₂ : ℝ) + 1)) := by
+    rw [show (1 : ℝ) / (8 * ((C₂ : ℝ) + 1)) =
+        Real.sqrt ((1 / (8 * ((C₂ : ℝ) + 1))) ^ 2) from (Real.sqrt_sq (by positivity)).symm]
+    refine Real.sqrt_le_sqrt (le_trans hT_lo ?_)
+    rw [div_pow, one_pow, mul_pow]; norm_num
+  have harm2 : (C₂ : ℝ) * (2 * Real.sqrt T) ≤ 1 / 4 := by
+    have hc2 : (0:ℝ) ≤ (C₂:ℝ) := C₂.coe_nonneg
+    calc (C₂ : ℝ) * (2 * Real.sqrt T)
+        = 2 * (C₂ : ℝ) * Real.sqrt T := by ring
+      _ ≤ 2 * (C₂ : ℝ) * (1 / (8 * ((C₂ : ℝ) + 1))) := by
+          apply mul_le_mul_of_nonneg_left hsqrtT (by positivity)
+      _ = (C₂ : ℝ) / ((C₂ : ℝ) + 1) * (1 / 4) := by
+          have hne : ((C₂ : ℝ) + 1) ≠ 0 := by positivity
+          field_simp
+          ring
+      _ ≤ 1 / 4 := by
+          have hfrac : (C₂ : ℝ) / ((C₂ : ℝ) + 1) ≤ 1 := by
+            rw [div_le_one (by positivity)]; linarith
+          nlinarith [hfrac, div_nonneg hc2 (by positivity : (0:ℝ) ≤ (C₂:ℝ)+1)]
+  have hΛ_le : (C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) +
+      (C₂ : ℝ) * (2 * Real.sqrt T) ≤ 1 / 2 := by linarith
+  have hbase := nemytskiiMixedForcingMap_dist_le (I := I) (M := M) g₀ a
+    (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
+    hsingle hT hT1 hρpos.le (recenteredBallRetraction z₀ ρ F) (recenteredBallRetraction z₀ ρ F')
+    (hρt_norm F) (hρt_norm F')
+  have hretr : ‖recenteredBallRetraction z₀ ρ F - recenteredBallRetraction z₀ ρ F'‖ ≤ ‖F - F'‖ := by
+    have := hρt_lip.dist_le_mul F F'
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at this
+    exact this
+  calc ‖deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1 F -
+          deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1 F'‖
+      = ‖nemytskiiMixedForcingMap (I := I) (M := M) g₀ a
+            (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
+              a ha_super) hT hT1 (recenteredBallRetraction z₀ ρ F) -
+          nemytskiiMixedForcingMap (I := I) (M := M) g₀ a
+            (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
+              a ha_super) hT hT1 (recenteredBallRetraction z₀ ρ F')‖ := rfl
+    _ ≤ ((C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) *
+          ‖recenteredBallRetraction z₀ ρ F - recenteredBallRetraction z₀ ρ F'‖ := hbase
+    _ ≤ (1 / 2) * ‖F - F'‖ := by
+        have h1 : ((C₁ : ℝ) * (Real.sqrt (1 + T)) * ρ * (1 + T) + (C₂ : ℝ) * (2 * Real.sqrt T)) *
+            ‖recenteredBallRetraction z₀ ρ F - recenteredBallRetraction z₀ ρ F'‖ ≤
+            (1 / 2) * ‖recenteredBallRetraction z₀ ρ F - recenteredBallRetraction z₀ ρ F'‖ :=
+          mul_le_mul_of_nonneg_right hΛ_le (norm_nonneg _)
+        have h2 : (1 / 2) * ‖recenteredBallRetraction z₀ ρ F - recenteredBallRetraction z₀ ρ F'‖ ≤
+            (1 / 2) * ‖F - F'‖ := mul_le_mul_of_nonneg_left hretr (by norm_num)
+        linarith
+
+theorem deTurckForceRetractedMap_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTsh : T ≤ deTurckForceShortTime (I := I) (M := M) g₀ g_bg a ha_super) :
+    LipschitzWith (1 / 2 : ℝ≥0)
+      (deTurckForceRetractedMap (I := I) (M := M) g₀ g_bg a ha_super hT hT1) := by
+  refine LipschitzWith.of_dist_le_mul (fun F F' => ?_)
+  rw [dist_eq_norm, dist_eq_norm, show ((1 / 2 : ℝ≥0) : ℝ) = 1 / 2 by norm_num]
+  exact deTurckForceRetractedMap_dist_le_half (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTsh F F'
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

@@ -131,7 +131,8 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMass
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ φ d₂ ∧
@@ -147,7 +148,7 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMass
     maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass (I := I) (M := M)
       g₀ g_bg a ha_super hT hT1 gforce hforce
       (deTurckGalerkin_solField_uniformSpatialMass_allOrder (I := I) (M := M)
-        g₀ g_bg a ha_super hT hT1 gforce hforce)
+        g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce)
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc_def
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc
@@ -263,7 +264,8 @@ private theorem deTurckForcing_smoothForcingDriver
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₀ : ℝ, 0 < d₀ ∧ d₀ ≤ T ∧
       ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (f i)) ∧
@@ -277,7 +279,7 @@ private theorem deTurckForcing_smoothForcingDriver
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, φ, hφ_ctrl, hφ_ball, hφ_ae⟩ :=
     maxRegSolField_parabolicInterior_jetSpectralMass (I := I) (M := M)
-      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
   obtain ⟨ψ, hψ_ctrl, hψ_ae⟩ :=
     deTurckSobolevNHa2_jetSpectralMass_preserving (I := I) (M := M)
       g₀ g_bg a ha_super hT hd₂_pos hd₂_le
@@ -307,7 +309,8 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ φ d₂ ∧
@@ -321,7 +324,7 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
   classical
   obtain ⟨d₀, hd₀_pos, hd₀_le, f, hf_smooth, hf_mass, hf_ae⟩ :=
     deTurckForcing_smoothForcingDriver (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀
-      gforce hforce
+      gforce hforce hgforce
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc_def
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc
@@ -437,7 +440,8 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (c i)) ∧
@@ -451,7 +455,7 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
   classical
   obtain ⟨d₂, hd₂_pos, hd₂_le, φ, hφ_ctrl, hφ_ball, hφ_ae⟩ :=
     deTurckForcing_solCoeff_jetSpectralMass (I := I) (M := M)
-      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
   exact deTurckForcing_ballForcing_admits_smoothDriver (I := I) (M := M)
     g₀ g_bg a ha_super hT hT1 gforce hforce d₂ hd₂_pos hd₂_le φ hφ_ctrl hφ_ball hφ_ae
 
@@ -465,7 +469,8 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJet
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ g : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (g i)) ∧
@@ -477,7 +482,7 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJet
       (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] g i) :=
   deTurckForcing_fixedPoint_coeff_smooth_and_mass (I := I) (M := M)
-    g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+    g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
 
 theorem deTurckForcing_smoothCoordinate_aeTimeJet
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -489,7 +494,8 @@ theorem deTurckForcing_smoothCoordinate_aeTimeJet
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (f i)) ∧
@@ -502,7 +508,7 @@ theorem deTurckForcing_smoothCoordinate_aeTimeJet
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i) := by
   obtain ⟨d₂, hd₂_pos, hd₂_le, g, hg_smooth, hg_mass, hg_ae⟩ :=
     deTurckForcing_timeModeCoeff_smooth_allOrderJet (I := I) (M := M)
-      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+      g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
   refine ⟨d₂, hd₂_pos, hd₂_le, g, hg_smooth, hg_mass, fun i => ?_⟩
   have htmc : (fun t => (gforce t).coeff i)
       =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
