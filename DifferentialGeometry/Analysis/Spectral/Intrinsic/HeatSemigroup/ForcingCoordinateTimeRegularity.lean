@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSm
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SmoothCoordinateJetPreservation
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFixedPointParabolicSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralMassUniformSup
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularity
@@ -453,11 +452,18 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
       (∀ i, (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
           =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] c i) := by
   classical
-  obtain ⟨d₂, hd₂_pos, hd₂_le, φ, hφ_ctrl, hφ_ball, hφ_ae⟩ :=
-    deTurckForcing_solCoeff_jetSpectralMass (I := I) (M := M)
+  obtain ⟨d₀, hd₀_pos, hd₀_le, f, hf_smooth, hf_mass, hf_ae⟩ :=
+    deTurckForcing_smoothForcingDriver (I := I) (M := M)
       g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
-  exact deTurckForcing_ballForcing_admits_smoothDriver (I := I) (M := M)
-    g₀ g_bg a ha_super hT hT1 gforce hforce d₂ hd₂_pos hd₂_le φ hφ_ctrl hφ_ball hφ_ae
+  refine ⟨d₀, hd₀_pos, hd₀_le, f, hf_smooth, hf_mass, fun i => ?_⟩
+  have hsub : Set.Icc (0 : ℝ) d₀ ⊆ Set.Icc (0 : ℝ) T :=
+    Set.Icc_subset_Icc le_rfl hd₀_le
+  have hbridge : (timeModeCoeff (I := I) (M := M) gforce i : ℝ → ℝ)
+      =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₀)]
+        (fun t => (gforce t).coeff i) :=
+    MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub
+      (timeModeCoeff_coeFn (I := I) (M := M) gforce i)
+  exact hbridge.trans (hf_ae i)
 
 theorem deTurckForcing_timeModeCoeff_smooth_allOrderJet
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
