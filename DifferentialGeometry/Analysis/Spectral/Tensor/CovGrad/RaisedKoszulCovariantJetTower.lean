@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceArmRfnsBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulParallelRaiseJetBound
+import DifferentialGeometry.Geometry.Connection.TensorNabla.CometricRaiseSlot0CovariantParallelism
 
 noncomputable section
 
@@ -355,6 +356,105 @@ private lemma raisedKoszul_eq_cometricRaiseSlot0Field_koszulCovecCc
   rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ T htie x (YZ 0) (YZ 1) u]
   rw [symmSCovGrad3]
 
+private theorem rfns_heq_congr_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
+    (h : a = b) {Y : SmoothCcTensor g₀ r a} {Z : SmoothCcTensor g₀ r b} (hYZ : HEq Y Z) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ r a x (Y.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ r b x (Z.toSection x) := by
+  subst h; rw [eq_of_heq hYZ]
+
+private theorem covGrad_heq_congr_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
+    (h : a = b) {Y : SmoothCcTensor g₀ r a} {Z : SmoothCcTensor g₀ r b} (hYZ : HEq Y Z) :
+    HEq (covGrad (I := I) (M := M) g₀ r a Y) (covGrad (I := I) (M := M) g₀ r b Z) := by
+  subst h; rw [eq_of_heq hYZ]
+
+private theorem rfns_castRankCc_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
+    (h : a = b) (Y : SmoothCcTensor g₀ r a) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ r b x ((castRankCc g₀ r h Y).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ r a x (Y.toSection x) := by
+  subst h; rfl
+
+private theorem covGrad_castRankCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
+    (h : a = b) (Y : SmoothCcTensor g₀ r a) :
+    covGrad (I := I) (M := M) g₀ r b (castRankCc g₀ r h Y) =
+      castRankCc g₀ r (congrArg (· + 1) h) (covGrad (I := I) (M := M) g₀ r a Y) := by
+  subst h; rfl
+
+private theorem domDomCongrSection_refl_rk (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g₀ 0 s) :
+    domDomCongrSection (I := I) g₀ (Equiv.refl (Fin s)) S = S := by
+  apply smoothCcTensor_ext_of_unitModel
+  intro x
+  rw [domDomCongrSection_unitModel]
+  ext m
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rfl
+
+private theorem domDomCongrSection_comp_rk (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (σ τ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) :
+    domDomCongrSection (I := I) g₀ σ (domDomCongrSection (I := I) g₀ τ S) =
+      domDomCongrSection (I := I) g₀ (τ.trans σ) S := by
+  apply smoothCcTensor_ext_of_unitModel
+  intro x
+  rw [domDomCongrSection_unitModel, domDomCongrSection_unitModel, domDomCongrSection_unitModel]
+  ext m
+  rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  rfl
+
+private theorem covGrad_domDomCongrSection_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) :
+    ∃ σ' : Equiv.Perm (Fin (s + 1)),
+      covGrad (I := I) (M := M) g₀ 0 s (domDomCongrSection (I := I) g₀ σ S) =
+        domDomCongrSection (I := I) g₀ σ' (covGrad (I := I) (M := M) g₀ 0 s S) := by
+  obtain ⟨σ', hσ'⟩ :=
+    exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀ σ S 1
+  refine ⟨σ', ?_⟩
+  apply smoothCcTensor_ext_of_unitModel
+  intro x
+  have h1 := hσ' x
+  rw [iteratedCovGrad_succ, iteratedCovGrad_zero, iteratedCovGrad_succ, iteratedCovGrad_zero] at h1
+  rw [domDomCongrSection_unitModel]
+  exact h1
+
+private theorem rfns_domDomCongrSection_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x
+        ((domDomCongrSection (I := I) g₀ σ S).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (S.toSection x) := by
+  have h := riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀ σ S 0 x
+  simpa using h
+
+private lemma iteratedCovGrad_cometricRaise_koszul_heq (g₀ : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 3) (i : ℕ) :
+    ∃ σ : Equiv.Perm (Fin ((1 + i) + 2)),
+      HEq (iteratedCovGrad (I := I) g₀ 1 2 i
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 1 W))
+        (cometricRaiseSlot0Field (I := I) (M := M) g₀ (1 + i)
+          (domDomCongrSection (I := I) g₀ σ
+            (castRankCc g₀ 0 (by omega : (3 : ℕ) + i = (1 + i) + 2)
+              (iteratedCovGrad (I := I) g₀ 0 3 i W)))) := by
+  induction i with
+  | zero =>
+      refine ⟨Equiv.refl _, ?_⟩
+      simp only [iteratedCovGrad_zero]
+      rw [domDomCongrSection_refl_rk]
+      exact HEq.rfl
+  | succ i ih =>
+      obtain ⟨σ, hσ⟩ := ih
+      obtain ⟨σ', hσ'⟩ := covGrad_domDomCongrSection_eq (I := I) (M := M) g₀ ((1 + i) + 2) σ
+        (castRankCc g₀ 0 (by omega : (3 : ℕ) + i = (1 + i) + 2) (iteratedCovGrad (I := I) g₀ 0 3 i W))
+      refine ⟨σ'.trans (Equiv.swap (0 : Fin ((1 + i) + 2 + 1)) 1), ?_⟩
+      rw [iteratedCovGrad_succ]
+      refine HEq.trans (covGrad_heq_congr_rk (I := I) (M := M) g₀ 1
+        (by omega : 2 + i = (1 + i) + 1) hσ) ?_
+      apply heq_of_eq
+      rw [covGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ (1 + i)]
+      rw [hσ']
+      rw [covGrad_castRankCc_eq]
+      rw [← iteratedCovGrad_succ]
+      rw [domDomCongrSection_comp_rk]
+      rfl
+
 private lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
@@ -362,8 +462,13 @@ private lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
           (cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
             (koszulCovecCc (I := I) g₀ T))).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
-        ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovecCc (I := I) g₀ T)).toSection x) :=
-  sorry
+        ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovecCc (I := I) g₀ T)).toSection x) := by
+  obtain ⟨σ, hσ⟩ :=
+    iteratedCovGrad_cometricRaise_koszul_heq (I := I) (M := M) g₀ (koszulCovecCc (I := I) g₀ T) i
+  rw [rfns_heq_congr_rk (I := I) (M := M) g₀ 1 (by omega : 2 + i = (1 + i) + 1) hσ x]
+  rw [rfns_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ (1 + i) x]
+  rw [rfns_domDomCongrSection_eq]
+  rw [rfns_castRankCc_rk]
 
 set_option linter.unusedVariables false in
 private lemma fiberNormSqComponent_sq_iteratedCovGrad_raisedKoszul_le_koszul_rfns
