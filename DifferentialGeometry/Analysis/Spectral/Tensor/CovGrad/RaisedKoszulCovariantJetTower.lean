@@ -293,7 +293,7 @@ private lemma rfns_cometricRaiseSlot0Field_eq
   rw [Fintype.sum_prod_type]
 
 set_option linter.unusedSectionVars false in
-private lemma raisedKoszul_eq_cometricRaiseSlot0Field_koszulCovecCc
+lemma raisedKoszul_eq_cometricRaiseSlot0Field_koszulCovecCc
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
