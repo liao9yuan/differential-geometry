@@ -6874,6 +6874,40 @@ def corrFieldFreshResidualSpec (g₀ : SmoothRiemannianMetric I M)
                 ![(chartModelBasis E) k, (chartModelBasis E) i]
             + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s)
 
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem chartRicciTraceChristoffelSlope_eq_threeArm_readout
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (i k : Fin (Module.finrank ℝ E))
+    (hδ_lt : δ < 1) (hδ'_lt : δ' < 1) :
+    chartSlopeFirstOrderRemainderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s))
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i]
+        + unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 3 2
+              (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
+            ![(chartModelBasis E) k, (chartModelBasis E) i]
+        + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s :=
+  sorry
+
+set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem corrFieldFreshResidual_realize (g₀ : SmoothRiemannianMetric I M)
@@ -6933,8 +6967,65 @@ theorem corrFieldFreshResidual_realize (g₀ : SmoothRiemannianMetric I M)
                       (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + corr1 s)
                       (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
                     ![(chartModelBasis E) k, (chartModelBasis E) i]
-                + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s) :=
-  sorry
+                + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s) := by
+  classical
+  refine ⟨fun s => ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s),
+      fun _ => 0, ?_, ?_, ?_, ?_⟩
+  · exact ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  · refine (((Bundle.contMDiff_zeroSection ℝ
+        (fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z)).comp
+        contMDiff_fst).contMDiffOn).congr (fun p _ => ?_)
+    change TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+        (((fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) p.2).toSection p.1) =
+      TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1
+        (0 : Tensor0SBundle.TensorRSSpace 3 2 I p.1)
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) p.1 t) ?_
+    simp only [SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply]
+  · intro a ha_super R hR δ₀ hδ₀ hδ_le hδ'_le hTball hT'ball s hs x
+    have hcond : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 := ⟨ha_super, hR, hδ₀⟩
+    have hbnd : corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ =
+        Real.sqrt (Classical.choose (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2))
+          + Real.sqrt (Classical.choose (exists_arm1Koszul_realizedFam_rfns_ballUniform
+            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := by
+      unfold corrFieldChristoffelBound
+      rw [dif_pos hcond]
+    have hr := (Classical.choose_spec (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+        (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
+        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+    refine ⟨?_, ?_⟩
+    · rw [hbnd]
+      exact le_trans (Real.sqrt_le_sqrt hr.2) (le_add_of_nonneg_right (Real.sqrt_nonneg _))
+    · have hz : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+          (((fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) s).toSection x)) = 0 := by
+        have hzz : riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+            (((fun _ : ℝ => (0 : SmoothCcTensor g₀ 3 2)) s).toSection x) = 0 := by
+          change riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              ((0 : SmoothCcTensor g₀ 3 2).toSection x) = 0
+          rw [SmoothCcTensor.toSection_zero]
+          simp only [ContMDiffSection.coe_zero, Pi.zero_apply]
+          exact riemannianFiberNormSq_zero (I := I) (M := M) g₀ 3 2 x
+        rw [hzz, Real.sqrt_zero]
+      rw [hz, hbnd]
+      positivity
+  · intro hTsymm hT'symm s hs x i k hδ_lt hδ'_lt
+    have key := chartRicciTraceChristoffelSlope_eq_threeArm_readout (I := I) (M := M) g₀ T T'
+      hTsymm hT'symm hδ hδ' s hs x i k hδ_lt hδ'_lt
+    rw [show ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) =
+          linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
+            + ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) from by
+        unfold linearizedRicciArm0BaseCoeff; abel,
+      show ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) =
+          linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + (0 : SmoothCcTensor g₀ 3 2)
+          from by unfold linearizedRicciArm1BaseCoeff; abel] at key
+    exact key
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
