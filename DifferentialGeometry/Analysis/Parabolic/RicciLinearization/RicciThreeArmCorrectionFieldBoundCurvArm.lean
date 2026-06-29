@@ -129,13 +129,649 @@ private lemma fiveSlotAtom_component (g₀ g₁ : SmoothRiemannianMetric I M) (x
     smul_eq_mul, Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply]
   rfl
 
+private noncomputable def fiveSlotCometricCoeffVec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (va vb : TangentSpace I x) : ℝ :=
+  g₀.inner x
+    (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x va)) vb
+
+private noncomputable def fiveSlotKernelBilinVec (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (vc vd : TangentSpace I x) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  ((g₀.inner x).flip vc).smulRight ((g₀.inner x).flip vd)
+
+private lemma fiveSlotKernelBilinVec_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (vc vd : TangentSpace I x) (v0 v1 : TangentSpace I x) :
+    fiveSlotKernelBilinVec (I := I) g₀ x vc vd v0 v1 =
+      g₀.inner x v0 vc * g₀.inner x v1 vd := by
+  rw [fiveSlotKernelBilinVec, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply, smul_eq_mul]
+
+set_option linter.unusedVariables false in
+private noncomputable def fiveSlotTripleVec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (va vb vc vd : TangentSpace I x) (call : Fin 4) (contrib : Fin 5) : Fin 3 → E :=
+  let args : Fin 4 →
+      TangentSpace I x × TangentSpace I x × TangentSpace I x × TangentSpace I x :=
+    ![(va, vc, vb, vd), (va, vd, vb, vc), (va, vb, vc, vd), (vc, vd, va, vb)]
+  let α := (args call).1
+  let β := (args call).2.1
+  let γ := (args call).2.2.1
+  let δ := (args call).2.2.2
+  let cd : TangentSpace I x → TangentSpace I x → TangentSpace I x :=
+    fun p q => PDE.DeTurck.connDiff (I := I) g₁ g₀ x p q
+  (![ ![(α : E), (cd β γ : E), (δ : E)],
+      ![(α : E), (γ : E), (cd β δ : E)],
+      ![(cd α β : E), (γ : E), (δ : E)],
+      ![(β : E), (cd α γ : E), (δ : E)],
+      ![(β : E), (γ : E), (cd α δ : E)] ] : Fin 5 → Fin 3 → E) contrib
+
+private noncomputable def fiveSlotAtomVec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (va vb vc vd : TangentSpace I x) (call : Fin 4) (contrib : Fin 5) :
+    Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  (((-(1 : ℝ) / 2) * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x va vb * fiveSlotSign call) •
+      fiveSlotEvalCLM (I := I) x
+        (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib)).smulRight
+    (Tensor0SSpace.ofModel (I := I) (x := x)
+      (bilinFormToModel E (fiveSlotKernelBilinVec (I := I) g₀ x vc vd)))
+
+private lemma fiveSlotAtomVec_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (va vb vc vd : TangentSpace I x) (call : Fin 4) (contrib : Fin 5)
+    (D : Tensor0SSpace 3 I x) :
+    fiveSlotAtomVec (I := I) g₀ g₁ x va vb vc vd call contrib D =
+      (((-(1 : ℝ) / 2) * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x va vb * fiveSlotSign call) *
+          Tensor0SSpace.toModel D
+            (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib)) •
+        Tensor0SSpace.ofModel (I := I) (x := x)
+          (bilinFormToModel E (fiveSlotKernelBilinVec (I := I) g₀ x vc vd)) := by
+  rw [fiveSlotAtomVec, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    fiveSlotEvalCLM_apply, smul_eq_mul]
+
+private lemma fiveSlotAtomVec_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (va vb vc vd : TangentSpace I x) (call : Fin 4) (contrib : Fin 5)
+    (D : Tensor0SSpace 3 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel (fiveSlotAtomVec (I := I) g₀ g₁ x va vb vc vd call contrib D) v =
+      ((-(1 : ℝ) / 2) * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x va vb * fiveSlotSign call) *
+          Tensor0SSpace.toModel D
+            (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib) *
+        fiveSlotKernelBilinVec (I := I) g₀ x vc vd (v 0) (v 1) := by
+  simp only [fiveSlotAtomVec, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    fiveSlotEvalCLM_apply, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul, Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply]
+  rfl
+
+private noncomputable def arm1FiveSlotFibVec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x) :
+    Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  ∑ i : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+        Fin (Module.finrank ℝ E) × Fin 4 × Fin 5,
+    fiveSlotAtomVec (I := I) g₀ g₁ x (F i.1) (F i.2.1) (F i.2.2.1) (F i.2.2.2.1)
+      i.2.2.2.2.1 i.2.2.2.2.2
+
+private lemma arm1FiveSlotFib_eq_fibVec_diag (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    arm1FiveSlotFib (I := I) g₀ g₁ x =
+      arm1FiveSlotFibVec (I := I) g₀ g₁ x
+        (fun a => smoothOrthoFrame (I := I) g₀ x a x) := rfl
+
+private lemma arm1FiveSlotFibVec_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (D : Tensor0SSpace 3 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel (arm1FiveSlotFibVec (I := I) g₀ g₁ x F D) v =
+      ∑ i : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+            Fin (Module.finrank ℝ E) × Fin 4 × Fin 5,
+        ((-(1 : ℝ) / 2) * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (F i.1) (F i.2.1) *
+              fiveSlotSign i.2.2.2.2.1) *
+            Tensor0SSpace.toModel D
+              (fiveSlotTripleVec (I := I) g₀ g₁ x (F i.1) (F i.2.1) (F i.2.2.1) (F i.2.2.2.1)
+                i.2.2.2.2.1 i.2.2.2.2.2) *
+          fiveSlotKernelBilinVec (I := I) g₀ x (F i.2.2.1) (F i.2.2.2.1) (v 0) (v 1) := by
+  classical
+  rw [arm1FiveSlotFibVec, ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply,
+    map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Tensor0SSpace.toModelL_apply]
+  exact fiveSlotAtomVec_toModel (I := I) g₀ g₁ x (F i.1) (F i.2.1) (F i.2.2.1) (F i.2.2.2.1)
+    i.2.2.2.2.1 i.2.2.2.2.2 D v
+
+private lemma frame_basis_of_orthonormal (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0) :
+    ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
+      ∀ i, bse i = F i := by
+  classical
+  have he_li : LinearIndependent ℝ F := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g₀.inner x (F k) (∑ j ∈ fs, c j • F j) = 0 := by rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g₀.inner x (F k) (c j • F j) =
+        c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g₀.inner x (F k)).map_smul (c j), smul_eq_mul, hF k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk; rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ E :=
+    Fintype.card_fin _
+  exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
+    fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
+
+private lemma ortho_expand (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0)
+    (u : TangentSpace I x) :
+    u = ∑ i : Fin (Module.finrank ℝ E), g₀.inner x u (F i) • F i := by
+  classical
+  obtain ⟨bse, hbse⟩ := frame_basis_of_orthonormal (I := I) g₀ x F hF
+  have hcoeff : ∀ j : Fin (Module.finrank ℝ E),
+      g₀.inner x u (F j) = bse.repr u j := by
+    intro j
+    rw [g₀.symm x u (F j)]
+    conv_lhs => rw [← bse.sum_repr u]
+    rw [map_sum]
+    rw [Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) => by
+      rw [(g₀.inner x (F j)).map_smul (bse.repr u i), smul_eq_mul, hbse i, hF j i])]
+    rw [Finset.sum_eq_single_of_mem j (Finset.mem_univ j)]
+    · rw [if_pos rfl, mul_one]
+    · intro i _ hij; rw [if_neg (fun h => hij h.symm), mul_zero]
+  calc u = ∑ i : Fin (Module.finrank ℝ E), bse.repr u i • bse i := (bse.sum_repr u).symm
+    _ = ∑ i : Fin (Module.finrank ℝ E), g₀.inner x u (F i) • F i := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        rw [hcoeff i, hbse i]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_entry_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π z : M, TangentSpace I z)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
+    (a b c d : Fin (Module.finrank ℝ E)) (call : Fin 4) (contrib : Fin 5) (i : Fin 3) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun x : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+        (fiveSlotTripleVec (E := E) (I := I) g₀ g₁ x (B a x) (B b x) (B c x) (B d x)
+          call contrib i)) := by
+  fin_cases call <;> fin_cases contrib <;> fin_cases i <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons,
+      Matrix.cons_val_fin_one, Matrix.head_fin_const] <;>
+    first
+      | exact hB a
+      | exact hB b
+      | exact hB c
+      | exact hB d
+      | (refine PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ ?_ ?_ <;>
+          first | exact hB a | exact hB b | exact hB c | exact hB d)
+
+private lemma fiveSlotKernelBilinVec_homSection_contMDiff (g₀ : SmoothRiemannianMetric I M)
+    {pc pd : Π z : M, TangentSpace I z}
+    (hpc : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% pc))
+    (hpd : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% pd)) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
+        x (fiveSlotKernelBilinVec (I := I) g₀ x (pc x) (pd x))) := by
+  classical
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
+    (φ := fun x : M => fiveSlotKernelBilinVec (I := I) g₀ x (pc x) (pd x))
+  intro V0
+  apply cotangentCov_clmSection_smooth_aux
+    (V₂ := fun _ : M => ℝ)
+    (φ := fun x : M => fiveSlotKernelBilinVec (I := I) g₀ x (pc x) (pd x) (V0 x))
+  intro W
+  have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => fiveSlotKernelBilinVec (I := I) g₀ x (pc x) (pd x) (V0 x) (W x)) := by
+    have hprod : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun x : M => g₀.inner x (V0 x) (pc x) * g₀.inner x (W x) (pd x)) :=
+      (contMDiff_g_inner_of_smooth_sections (I := I) g₀
+        ⟨fun x => V0 x, V0.contMDiff⟩ ⟨fun x => pc x, hpc⟩).mul
+      (contMDiff_g_inner_of_smooth_sections (I := I) g₀
+        ⟨fun x => W x, W.contMDiff⟩ ⟨fun x => pd x, hpd⟩)
+    refine hprod.congr (fun x => ?_)
+    rw [fiveSlotKernelBilinVec_apply]
+  intro x
+  rw [contMDiffAt_section]
+  refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_
+  filter_upwards with y
+  change fiveSlotKernelBilinVec (I := I) g₀ y (pc y) (pd y) (V0 y) (W y) =
+    (trivializationAt ℝ (Bundle.Trivial M ℝ) x ⟨y, _⟩).2
+  rfl
+
+set_option linter.unusedVariables false in
+private lemma fiveSlotAtomVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π z : M, TangentSpace I z)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
+    (a b c d : Fin (Module.finrank ℝ E)) (call : Fin 4) (contrib : Fin 5)
+    (Y : Cₛ^∞⟮I; Tensor0SModel 3 ℝ E, fun z : M => Tensor0SSpace 3 I z⟯) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        (fiveSlotAtomVec (I := I) g₀ g₁ x (B a x) (B b x) (B c x) (B d x) call contrib (Y x))) := by
+  classical
+  have hflat_a := ContMDiff.clm_bundle_apply (b := id) (g0FlatField_contMDiff (I := I) g₀) (hB a)
+  have hsharp_a := ContMDiff.clm_bundle_apply (b := id)
+    (inverseMetricSharpField_contMDiff (I := I) g₁) hflat_a
+  have hcometric : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (B a x) (B b x)) :=
+    contMDiff_g_inner_of_smooth_sections (I := I) g₀
+      ⟨fun x => inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (B a x)), hsharp_a⟩
+      ⟨fun x => B b x, hB b⟩
+  have htriple : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => Tensor0SSpace.toModel (Y x)
+        (fiveSlotTripleVec (I := I) g₀ g₁ x (B a x) (B b x) (B c x) (B d x) call contrib)) :=
+    TensorMultilinear.contMDiff_section_apply (n := 3) (fun z => Y z) Y.contMDiff
+      (fun i x => (fiveSlotTripleVec (E := E) (I := I) g₀ g₁ x (B a x) (B b x) (B c x) (B d x)
+        call contrib i : TangentSpace I x))
+      (fun i => tripleVec_entry_section_contMDiff (I := I) g₀ g₁ B hB a b c d call contrib i)
+  have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun x : M => (-(1 : ℝ) / 2) * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (B a x) (B b x) *
+          fiveSlotSign call *
+        Tensor0SSpace.toModel (Y x)
+          (fiveSlotTripleVec (I := I) g₀ g₁ x (B a x) (B b x) (B c x) (B d x) call contrib)) :=
+    (((contMDiff_const.mul hcometric).mul contMDiff_const).mul htriple)
+  have hbilin : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        (Tensor0SSpace.ofModel (I := I) (x := x)
+          (bilinFormToModel E (fiveSlotKernelBilinVec (I := I) g₀ x (B c x) (B d x))))) :=
+    contMDiff_bilinSection_of_homSection (I := I)
+      (fun x => fiveSlotKernelBilinVec (I := I) g₀ x (B c x) (B d x))
+      (fiveSlotKernelBilinVec_homSection_contMDiff (I := I) g₀ (hB c) (hB d))
+  have hsmul := ContMDiff.smul_section
+    (f := fun x : M => (-(1 : ℝ) / 2) * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (B a x) (B b x) *
+        fiveSlotSign call *
+      Tensor0SSpace.toModel (Y x)
+        (fiveSlotTripleVec (I := I) g₀ g₁ x (B a x) (B b x) (B c x) (B d x) call contrib))
+    (s := fun x : M => Tensor0SSpace.ofModel (I := I) (x := x)
+      (bilinFormToModel E (fiveSlotKernelBilinVec (I := I) g₀ x (B c x) (B d x))))
+    hscalar hbilin
+  refine hsmul.congr (fun x => ?_)
+  refine congrArg (TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SSpace 2 I z) x) ?_
+  rw [fiveSlotAtomVec_apply]
+  rfl
+
+private theorem arm1FiveSlotFibVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
+    (B : Fin (Module.finrank ℝ E) → Π z : M, TangentSpace I z)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) x
+        (arm1FiveSlotFibVec (I := I) g₀ g₁ x (fun a => B a x))) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E)
+    (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)
+    (φ := fun x => arm1FiveSlotFibVec (I := I) g₀ g₁ x (fun a => B a x))
+  intro Y
+  set S : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+        Fin (Module.finrank ℝ E) × Fin 4 × Fin 5 →
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
+    fun i =>
+      { toFun := fun x : M =>
+          fiveSlotAtomVec (I := I) g₀ g₁ x (B i.1 x) (B i.2.1 x) (B i.2.2.1 x) (B i.2.2.2.1 x)
+            i.2.2.2.2.1 i.2.2.2.2.2 (Y x)
+        contMDiff_toFun := fiveSlotAtomVec_section_contMDiff (I := I) g₀ g₁ B hB
+          i.1 i.2.1 i.2.2.1 i.2.2.2.1 i.2.2.2.2.1 i.2.2.2.2.2 Y } with hS
+  have hStot := (∑ i, S i).contMDiff
+  refine hStot.congr (fun x => ?_)
+  refine congrArg (TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SSpace 2 I z) x) ?_
+  rw [ContMDiffSection.finset_sum_apply, arm1FiveSlotFibVec, ContinuousLinearMap.sum_apply]
+  rfl
+
+private lemma toModel3_smul_matrix0 (x : M) (D : Tensor0SSpace 3 I x) (c : ℝ) (u q r : E) :
+    Tensor0SSpace.toModel D ![c • u, q, r] = c * Tensor0SSpace.toModel D ![u, q, r] := by
+  have h1 : (![c • u, q, r] : Fin 3 → E) = Function.update ![u, q, r] 0 (c • u) := by
+    funext j; fin_cases j <;> simp
+  have h2 : Function.update (![u, q, r] : Fin 3 → E) 0 u = ![u, q, r] := by
+    funext j; fin_cases j <;> simp
+  rw [h1, (Tensor0SSpace.toModel D).map_update_smul ![u, q, r] 0 c u, h2, smul_eq_mul]
+
+private lemma toModel3_smul_matrix1 (x : M) (D : Tensor0SSpace 3 I x) (c : ℝ) (p u r : E) :
+    Tensor0SSpace.toModel D ![p, c • u, r] = c * Tensor0SSpace.toModel D ![p, u, r] := by
+  have h1 : (![p, c • u, r] : Fin 3 → E) = Function.update ![p, u, r] 1 (c • u) := by
+    funext j; fin_cases j <;> simp
+  have h2 : Function.update (![p, u, r] : Fin 3 → E) 1 u = ![p, u, r] := by
+    funext j; fin_cases j <;> simp
+  rw [h1, (Tensor0SSpace.toModel D).map_update_smul ![p, u, r] 1 c u, h2, smul_eq_mul]
+
+private lemma toModel3_smul_matrix2 (x : M) (D : Tensor0SSpace 3 I x) (c : ℝ) (p q u : E) :
+    Tensor0SSpace.toModel D ![p, q, c • u] = c * Tensor0SSpace.toModel D ![p, q, u] := by
+  have h1 : (![p, q, c • u] : Fin 3 → E) = Function.update ![p, q, u] 2 (c • u) := by
+    funext j; fin_cases j <;> simp
+  have h2 : Function.update (![p, q, u] : Fin 3 → E) 2 u = ![p, q, u] := by
+    funext j; fin_cases j <;> simp
+  rw [h1, (Tensor0SSpace.toModel D).map_update_smul ![p, q, u] 2 c u, h2, smul_eq_mul]
+
+private lemma toModel3_add_matrix0 (x : M) (D : Tensor0SSpace 3 I x) (u u' q r : E) :
+    Tensor0SSpace.toModel D ![u + u', q, r] =
+      Tensor0SSpace.toModel D ![u, q, r] + Tensor0SSpace.toModel D ![u', q, r] := by
+  have h1 : (![u + u', q, r] : Fin 3 → E) = Function.update ![u, q, r] 0 (u + u') := by
+    funext j; fin_cases j <;> simp
+  have h2 : Function.update (![u, q, r] : Fin 3 → E) 0 u = ![u, q, r] := by
+    funext j; fin_cases j <;> simp
+  have h3 : Function.update (![u, q, r] : Fin 3 → E) 0 u' = ![u', q, r] := by
+    funext j; fin_cases j <;> simp
+  rw [h1, (Tensor0SSpace.toModel D).map_update_add ![u, q, r] 0 u u', h2, h3]
+
+private lemma toModel3_add_matrix1 (x : M) (D : Tensor0SSpace 3 I x) (p u u' r : E) :
+    Tensor0SSpace.toModel D ![p, u + u', r] =
+      Tensor0SSpace.toModel D ![p, u, r] + Tensor0SSpace.toModel D ![p, u', r] := by
+  have h1 : (![p, u + u', r] : Fin 3 → E) = Function.update ![p, u, r] 1 (u + u') := by
+    funext j; fin_cases j <;> simp
+  have h2 : Function.update (![p, u, r] : Fin 3 → E) 1 u = ![p, u, r] := by
+    funext j; fin_cases j <;> simp
+  have h3 : Function.update (![p, u, r] : Fin 3 → E) 1 u' = ![p, u', r] := by
+    funext j; fin_cases j <;> simp
+  rw [h1, (Tensor0SSpace.toModel D).map_update_add ![p, u, r] 1 u u', h2, h3]
+
+private lemma toModel3_add_matrix2 (x : M) (D : Tensor0SSpace 3 I x) (p q u u' : E) :
+    Tensor0SSpace.toModel D ![p, q, u + u'] =
+      Tensor0SSpace.toModel D ![p, q, u] + Tensor0SSpace.toModel D ![p, q, u'] := by
+  have h1 : (![p, q, u + u'] : Fin 3 → E) = Function.update ![p, q, u] 2 (u + u') := by
+    funext j; fin_cases j <;> simp
+  have h2 : Function.update (![p, q, u] : Fin 3 → E) 2 u = ![p, q, u] := by
+    funext j; fin_cases j <;> simp
+  have h3 : Function.update (![p, q, u] : Fin 3 → E) 2 u' = ![p, q, u'] := by
+    funext j; fin_cases j <;> simp
+  rw [h1, (Tensor0SSpace.toModel D).map_update_add ![p, q, u] 2 u u', h2, h3]
+
+private lemma toModel3_finsetSum_matrix0 (x : M) (D : Tensor0SSpace 3 I x) {ι : Type*}
+    (s : Finset ι) (cf : ι → ℝ) (G : ι → E) (q r : E) :
+    Tensor0SSpace.toModel D ![∑ j ∈ s, cf j • G j, q, r] =
+      ∑ j ∈ s, cf j * Tensor0SSpace.toModel D ![G j, q, r] := by
+  induction s using Finset.cons_induction with
+  | empty =>
+    rw [Finset.sum_empty, Finset.sum_empty]
+    exact (Tensor0SSpace.toModel D).map_coord_zero 0 (by simp)
+  | cons k s hk ih =>
+    rw [Finset.sum_cons, Finset.sum_cons, toModel3_add_matrix0, toModel3_smul_matrix0, ih]
+
+private lemma toModel3_finsetSum_matrix1 (x : M) (D : Tensor0SSpace 3 I x) {ι : Type*}
+    (s : Finset ι) (cf : ι → ℝ) (G : ι → E) (p r : E) :
+    Tensor0SSpace.toModel D ![p, ∑ j ∈ s, cf j • G j, r] =
+      ∑ j ∈ s, cf j * Tensor0SSpace.toModel D ![p, G j, r] := by
+  induction s using Finset.cons_induction with
+  | empty =>
+    rw [Finset.sum_empty, Finset.sum_empty]
+    exact (Tensor0SSpace.toModel D).map_coord_zero 1 (by simp)
+  | cons k s hk ih =>
+    rw [Finset.sum_cons, Finset.sum_cons, toModel3_add_matrix1, toModel3_smul_matrix1, ih]
+
+private lemma toModel3_finsetSum_matrix2 (x : M) (D : Tensor0SSpace 3 I x) {ι : Type*}
+    (s : Finset ι) (cf : ι → ℝ) (G : ι → E) (p q : E) :
+    Tensor0SSpace.toModel D ![p, q, ∑ j ∈ s, cf j • G j] =
+      ∑ j ∈ s, cf j * Tensor0SSpace.toModel D ![p, q, G j] := by
+  induction s using Finset.cons_induction with
+  | empty =>
+    rw [Finset.sum_empty, Finset.sum_empty]
+    exact (Tensor0SSpace.toModel D).map_coord_zero 2 (by simp)
+  | cons k s hk ih =>
+    rw [Finset.sum_cons, Finset.sum_cons, toModel3_add_matrix2, toModel3_smul_matrix2, ih]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_add_a (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (va va' vb vc vd : TangentSpace I x) (call : Fin 4) (contrib : Fin 5) :
+    Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x (va + va') vb vc vd call contrib) =
+      Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib) +
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va' vb vc vd call contrib) := by
+  fin_cases call <;> fin_cases contrib <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons, map_add, ContinuousLinearMap.add_apply,
+      toModel3_add_matrix0, toModel3_add_matrix1, toModel3_add_matrix2]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_smul_a (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (c : ℝ) (va vb vc vd : TangentSpace I x) (call : Fin 4)
+    (contrib : Fin 5) :
+    Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x (c • va) vb vc vd call contrib) =
+      c * Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib) := by
+  fin_cases call <;> fin_cases contrib <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons, map_smul, ContinuousLinearMap.smul_apply,
+      toModel3_smul_matrix0, toModel3_smul_matrix1, toModel3_smul_matrix2]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_add_b (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (va vb vb' vc vd : TangentSpace I x) (call : Fin 4) (contrib : Fin 5) :
+    Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va (vb + vb') vc vd call contrib) =
+      Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib) +
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb' vc vd call contrib) := by
+  fin_cases call <;> fin_cases contrib <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons, map_add, ContinuousLinearMap.add_apply,
+      toModel3_add_matrix0, toModel3_add_matrix1, toModel3_add_matrix2]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_smul_b (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (c : ℝ) (va vb vc vd : TangentSpace I x) (call : Fin 4)
+    (contrib : Fin 5) :
+    Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va (c • vb) vc vd call contrib) =
+      c * Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc vd call contrib) := by
+  fin_cases call <;> fin_cases contrib <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons, map_smul, ContinuousLinearMap.smul_apply,
+      toModel3_smul_matrix0, toModel3_smul_matrix1, toModel3_smul_matrix2]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_finsetSum_c (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (va vb vd : TangentSpace I x) {ι : Type*} (s : Finset ι)
+    (cf : ι → ℝ) (G : ι → TangentSpace I x) (call : Fin 4) (contrib : Fin 5) :
+    Tensor0SSpace.toModel D
+        (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (∑ j ∈ s, cf j • G j) vd call contrib) =
+      ∑ j ∈ s, cf j *
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (G j) vd call contrib) := by
+  fin_cases call <;> fin_cases contrib <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons, map_sum, ContinuousLinearMap.sum_apply,
+      map_smul, ContinuousLinearMap.smul_apply, toModel3_finsetSum_matrix0,
+      toModel3_finsetSum_matrix1, toModel3_finsetSum_matrix2]
+
+set_option linter.unusedVariables false in
+private lemma tripleVec_finsetSum_d (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (va vb vc : TangentSpace I x) {ι : Type*} (s : Finset ι)
+    (cf : ι → ℝ) (G : ι → TangentSpace I x) (call : Fin 4) (contrib : Fin 5) :
+    Tensor0SSpace.toModel D
+        (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc (∑ j ∈ s, cf j • G j) call contrib) =
+      ∑ j ∈ s, cf j *
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc (G j) call contrib) := by
+  fin_cases call <;> fin_cases contrib <;>
+    simp only [fiveSlotTripleVec, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+      Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, Matrix.head_cons, map_sum, ContinuousLinearMap.sum_apply,
+      map_smul, ContinuousLinearMap.smul_apply, toModel3_finsetSum_matrix0,
+      toModel3_finsetSum_matrix1, toModel3_finsetSum_matrix2]
+
+private lemma collapse_d (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SSpace 3 I x)
+    (va vb vc w : TangentSpace I x)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0)
+    (call : Fin 4) (contrib : Fin 5) :
+    ∑ j : Fin (Module.finrank ℝ E), g₀.inner x w (F j) *
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc (F j) call contrib) =
+      Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb vc w call contrib) := by
+  conv_rhs => rw [ortho_expand (I := I) g₀ x F hF w]
+  rw [tripleVec_finsetSum_d (I := I) g₀ g₁ x D va vb vc Finset.univ
+    (fun j => g₀.inner x w (F j)) F call contrib]
+
+private lemma collapse_c (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SSpace 3 I x)
+    (va vb vd w : TangentSpace I x)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0)
+    (call : Fin 4) (contrib : Fin 5) :
+    ∑ j : Fin (Module.finrank ℝ E), g₀.inner x w (F j) *
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (F j) vd call contrib) =
+      Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb w vd call contrib) := by
+  conv_rhs => rw [ortho_expand (I := I) g₀ x F hF w]
+  rw [tripleVec_finsetSum_c (I := I) g₀ g₁ x D va vb vd Finset.univ
+    (fun j => g₀.inner x w (F j)) F call contrib]
+
+private noncomputable def fiveSlotDdCLM (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (v0 v1 : TangentSpace I x) (call : Fin 4) (contrib : Fin 5) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap
+    ((LinearMap.toContinuousLinearMap :
+          (TangentSpace I x →ₗ[ℝ] ℝ) ≃ₗ[ℝ] (TangentSpace I x →L[ℝ] ℝ)).toLinearMap.comp
+      (LinearMap.mk₂ ℝ
+        (fun wa wb : TangentSpace I x =>
+          Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x wa wb v0 v1 call contrib))
+        (fun wa wa' wb => tripleVec_add_a (I := I) g₀ g₁ x D wa wa' wb v0 v1 call contrib)
+        (fun c wa wb =>
+          (tripleVec_smul_a (I := I) g₀ g₁ x D c wa wb v0 v1 call contrib).trans
+            (smul_eq_mul c _).symm)
+        (fun wa wb wb' => tripleVec_add_b (I := I) g₀ g₁ x D wa wb wb' v0 v1 call contrib)
+        (fun c wa wb =>
+          (tripleVec_smul_b (I := I) g₀ g₁ x D c wa wb v0 v1 call contrib).trans
+            (smul_eq_mul c _).symm)))
+
+private lemma fiveSlotDdCLM_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (v0 v1 : TangentSpace I x) (call : Fin 4) (contrib : Fin 5)
+    (wa wb : TangentSpace I x) :
+    fiveSlotDdCLM (I := I) g₀ g₁ x D v0 v1 call contrib wa wb =
+      Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x wa wb v0 v1 call contrib) := by
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  simp only [fiveSlotDdCLM, LinearMap.coe_toContinuousLinearMap', LinearMap.comp_apply,
+    LinearEquiv.coe_coe, LinearMap.mk₂_apply]
+
+private lemma collapse_cd (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (D : Tensor0SSpace 3 I x)
+    (va vb v0 v1 : TangentSpace I x) (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0)
+    (call : Fin 4) (contrib : Fin 5) :
+    ∑ c : Fin (Module.finrank ℝ E), ∑ d : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (F c) (F d) call contrib) *
+          fiveSlotKernelBilinVec (I := I) g₀ x (F c) (F d) v0 v1 =
+      Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb v0 v1 call contrib) := by
+  have inner_d : ∀ c : Fin (Module.finrank ℝ E),
+      ∑ d : Fin (Module.finrank ℝ E),
+          Tensor0SSpace.toModel D
+              (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (F c) (F d) call contrib) *
+            fiveSlotKernelBilinVec (I := I) g₀ x (F c) (F d) v0 v1 =
+        g₀.inner x v0 (F c) *
+          Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (F c) v1 call contrib) := by
+    intro c
+    have hreorder : ∀ d : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel D
+            (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (F c) (F d) call contrib) *
+          fiveSlotKernelBilinVec (I := I) g₀ x (F c) (F d) v0 v1 =
+          g₀.inner x v0 (F c) *
+            (g₀.inner x v1 (F d) *
+              Tensor0SSpace.toModel D
+                (fiveSlotTripleVec (I := I) g₀ g₁ x va vb (F c) (F d) call contrib)) := by
+      intro d; rw [fiveSlotKernelBilinVec_apply]; ring
+    rw [Finset.sum_congr rfl (fun d _ => hreorder d), ← Finset.mul_sum,
+      collapse_d (I := I) g₀ g₁ x D va vb (F c) v1 F hF call contrib]
+  rw [Finset.sum_congr rfl (fun c _ => inner_d c),
+    collapse_c (I := I) g₀ g₁ x D va vb v1 v0 F hF call contrib]
+
+set_option linter.unusedVariables false in
+private lemma fiveSlot_inner_indep (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 3 I x) (v0 v1 : TangentSpace I x) (call : Fin 4) (contrib : Fin 5)
+    (F F' : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0)
+    (hF' : ∀ a b, g₀.inner x (F' a) (F' b) = if a = b then (1 : ℝ) else 0) :
+    (∑ a, ∑ b, ∑ c, ∑ d,
+        (-(1 : ℝ) / 2 * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (F a) (F b) * fiveSlotSign call) *
+            Tensor0SSpace.toModel D
+              (fiveSlotTripleVec (I := I) g₀ g₁ x (F a) (F b) (F c) (F d) call contrib) *
+          fiveSlotKernelBilinVec (I := I) g₀ x (F c) (F d) v0 v1) =
+      (∑ a, ∑ b, ∑ c, ∑ d,
+        (-(1 : ℝ) / 2 * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (F' a) (F' b) * fiveSlotSign call) *
+            Tensor0SSpace.toModel D
+              (fiveSlotTripleVec (I := I) g₀ g₁ x (F' a) (F' b) (F' c) (F' d) call contrib) *
+          fiveSlotKernelBilinVec (I := I) g₀ x (F' c) (F' d) v0 v1) := by
+  set Dd := fiveSlotDdCLM (I := I) g₀ g₁ x D v0 v1 call contrib with hDd_def
+  set Kc : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+    (g₀.inner x).comp ((inverseMetricSharpFib (I := I) g₁ x).comp (g0FlatCLM (I := I) g₀ x))
+    with hKc_def
+  have hK : ∀ wa wb, Kc wa wb = fiveSlotCometricCoeffVec (I := I) g₀ g₁ x wa wb := fun _ _ => rfl
+  have hDdv : ∀ wa wb,
+      Dd wa wb = Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x wa wb v0 v1 call contrib) :=
+    fun wa wb => fiveSlotDdCLM_apply (I := I) g₀ g₁ x D v0 v1 call contrib wa wb
+  have reduce : ∀ (G : Fin (Module.finrank ℝ E) → TangentSpace I x),
+      (∀ a b, g₀.inner x (G a) (G b) = if a = b then (1 : ℝ) else 0) →
+      (∑ a, ∑ b, ∑ c, ∑ d,
+        (-(1 : ℝ) / 2 * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (G a) (G b) * fiveSlotSign call) *
+            Tensor0SSpace.toModel D
+              (fiveSlotTripleVec (I := I) g₀ g₁ x (G a) (G b) (G c) (G d) call contrib) *
+          fiveSlotKernelBilinVec (I := I) g₀ x (G c) (G d) v0 v1) =
+        (-(1 : ℝ) / 2 * fiveSlotSign call) * ∑ a, ∑ b, Kc (G a) (G b) * Dd (G a) (G b) := by
+    intro G hG
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun a _ => ?_
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun b _ => ?_
+    have hAB : (∑ c, ∑ d,
+          (-(1 : ℝ) / 2 * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (G a) (G b) * fiveSlotSign call) *
+              Tensor0SSpace.toModel D
+                (fiveSlotTripleVec (I := I) g₀ g₁ x (G a) (G b) (G c) (G d) call contrib) *
+            fiveSlotKernelBilinVec (I := I) g₀ x (G c) (G d) v0 v1) =
+        (-(1 : ℝ) / 2 * fiveSlotCometricCoeffVec (I := I) g₀ g₁ x (G a) (G b) * fiveSlotSign call) *
+          Tensor0SSpace.toModel D (fiveSlotTripleVec (I := I) g₀ g₁ x (G a) (G b) v0 v1 call contrib) := by
+      rw [← collapse_cd (I := I) g₀ g₁ x D (G a) (G b) v0 v1 G hG call contrib, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun c _ => ?_
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun d _ => ?_
+      ring
+    rw [hAB, hK, hDdv]
+    ring
+  rw [reduce F hF, reduce F' hF', double_frame_bilin_trace_indep (I := I) g₀ x Kc Dd F F' hF hF']
+
+private lemma tuple_sum_reindex {α : Type*} [AddCommMonoid α]
+    (f : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+        Fin (Module.finrank ℝ E) × Fin 4 × Fin 5 → α) :
+    (∑ i, f i) =
+      ∑ call : Fin 4, ∑ contrib : Fin 5, ∑ a, ∑ b, ∑ c, ∑ d,
+        f (a, b, c, d, call, contrib) := by
+  let e : (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+      Fin (Module.finrank ℝ E) × Fin 4 × Fin 5) ≃
+      ((Fin 4 × Fin 5) × (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+        Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))) :=
+    { toFun := fun i => ((i.2.2.2.2.1, i.2.2.2.2.2), (i.1, i.2.1, i.2.2.1, i.2.2.2.1))
+      invFun := fun p => (p.2.1, p.2.2.1, p.2.2.2.1, p.2.2.2.2, p.1.1, p.1.2)
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
+  rw [Fintype.sum_equiv e f (fun p => f (e.symm p))
+    (fun i => (congrArg f (e.symm_apply_apply i)).symm)]
+  simp only [Fintype.sum_prod_type]
+  rfl
+
+private lemma arm1FiveSlotFibVec_frame_indep (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (F F' : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ a b, g₀.inner x (F a) (F b) = if a = b then (1 : ℝ) else 0)
+    (hF' : ∀ a b, g₀.inner x (F' a) (F' b) = if a = b then (1 : ℝ) else 0) :
+    arm1FiveSlotFibVec (I := I) g₀ g₁ x F = arm1FiveSlotFibVec (I := I) g₀ g₁ x F' := by
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [arm1FiveSlotFibVec_toModel, arm1FiveSlotFibVec_toModel, tuple_sum_reindex, tuple_sum_reindex]
+  refine Finset.sum_congr rfl fun call _ => Finset.sum_congr rfl fun contrib _ => ?_
+  exact fiveSlot_inner_indep (I := I) g₀ g₁ x D (v 0) (v 1) call contrib F F' hF hF'
+
 set_option linter.unusedVariables false in
 theorem arm1FiveSlotFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) x
-        (arm1FiveSlotFib (I := I) g₀ g₁ x)) :=
-  sorry
+        (arm1FiveSlotFib (I := I) g₀ g₁ x)) := by
+  intro x₀
+  have h_fixed : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) x
+        (arm1FiveSlotFibVec (I := I) g₀ g₁ x
+          (fun a => smoothOrthoFrame (I := I) g₀ x₀ a x))) x₀ :=
+    arm1FiveSlotFibVec_contMDiff (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₀ x₀)
+      (fun i => smoothOrthoFrame_smooth (I := I) g₀ x₀ i) x₀
+  refine h_fixed.congr_of_eventuallyEq ?_
+  filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
+  refine congrArg (TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z) y) ?_
+  rw [arm1FiveSlotFib_eq_fibVec_diag]
+  exact arm1FiveSlotFibVec_frame_indep (I := I) g₀ g₁ y
+    (fun a => smoothOrthoFrame (I := I) g₀ y a y)
+    (fun a => smoothOrthoFrame (I := I) g₀ x₀ a y)
+    (fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g₀ y a b)
+    (fun a b => smoothOrthoFrame_orthonormal (I := I) g₀ x₀ hy a b)
 
 def arm1FiveSlotCoeff (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 3 2 where
   toSection :=
