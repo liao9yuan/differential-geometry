@@ -290,7 +290,132 @@ private theorem appCcRS_slotExtend_raisedKoszul_flatArmCc_false_eq_neg
       - appCcRS (I := I) (M := M) g₀ 1 2 3
           (armSlotEndoPassZeroCc (I := I) (M := M) g₀ (connDiffArmField (I := I) g₀ g₁))
           (connDiffSection (I := I) g₁ g₀) := by
-  sorry
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  have hg0 : ∀ (η : TangentSpace I x) (w : Fin 1 → TangentSpace I x),
+      Tensor0SSpace.toModel (g0FlatCLM (I := I) g₀ x η) w = g₀.inner x η (w 0) := by
+    intro η w
+    have hw : w = (fun _ : Fin 1 => w 0) := by funext i; fin_cases i; rfl
+    rw [hw]
+    change (g0FlatCLM (I := I) g₀ x η) (fun _ : Fin 1 => w 0) = g₀.inner x η (w 0)
+    rw [show (g0FlatCLM (I := I) g₀ x η) (fun _ : Fin 1 => w 0)
+          = cotangentToDual (I := I) (x := x) (g0FlatCLM (I := I) g₀ x η) (w 0) from
+        (cotangentToDual_apply (I := I) (g0FlatCLM (I := I) g₀ x η) (w 0)).symm]
+    rw [cotangentToDual_g0FlatCLM]
+  have hcovec : ∀ (om : Tensor0SSpace 1 I x) (v0 w' : TangentSpace I x),
+      flatArmCovec (I := I) g₀ g₁ x om v0 (fun _ : Fin 1 => w')
+        = - om (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x w' v0) := by
+    intro om v0 w'
+    rw [flatArmCovec, dualToCotangent_apply, ContinuousLinearMap.coe_neg, LinearMap.neg_apply,
+      ContinuousLinearMap.coe_comp, LinearMap.comp_apply, ContinuousLinearMap.coe_coe,
+      ContinuousLinearMap.coe_coe, ContinuousLinearMap.flip_apply]
+    rw [show cotangentToCLM (I := I) om (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w' v0)
+          = cotangentToDual (I := I) om (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w' v0) from rfl,
+      cotangentToDual_apply]
+  have hRHSval : ∀ (om : Tensor0SSpace 1 I x) (v : Fin 3 → TangentSpace I x),
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (appCcRS (I := I) (M := M) g₀ 1 2 3
+            (armSlotEndoPassZeroCc (I := I) (M := M) g₀ (connDiffArmField (I := I) g₀ g₁))
+            (connDiffSection (I := I) g₁ g₀)).toSection x) om) v
+      = om (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (v 1) (v 2)) (v 0)) := by
+    intro om v
+    rw [toModel_appCcRS_armSlotEndoPassZeroCc_eval]
+    rw [connDiffSection_toSection]
+    change connDiffPairing (I := I) g₁ g₀ x om
+        (fun j : Fin 2 => if j = 0 then PDE.DeTurck.connDiff (I := I) g₁ g₀ x (v 1) (v 2) else v 0)
+      = om (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (v 1) (v 2)) (v 0))
+    rw [connDiffPairing_apply]
+    norm_num
+  have hLHSval : ∀ (om : Tensor0SSpace 1 I x) (v : Fin 3 → TangentSpace I x),
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (appCcRS (I := I) (M := M) g₀ 1 2 3
+            (slotExtend (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁))
+            (flatArmCc (I := I) g₀ g₁ false)).toSection x) om) v
+      = - om (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (v 1) (v 2)) (v 0)) := by
+    intro om v
+    rw [appCcRS_toSection, ContinuousLinearMap.comp_apply, flatArmCc_toSection]
+    rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+          flatArmFib (I := I) g₀ g₁ false x) om = flatArmPairing (I := I) g₀ g₁ false x om from
+      flatArmFib_apply (I := I) g₀ g₁ false x om]
+    rw [slotExtend_toSection]
+    have hslot := slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 2 x
+      (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from (raisedKoszul (I := I) g₀ g₁).toSection x)
+      (flatArmPairing (I := I) g₀ g₁ false x om) (v 0) (Matrix.vecTail v)
+    rw [show Fin.cons (v 0) (Matrix.vecTail v) = v from Fin.cons_self_tail v] at hslot
+    rw [hslot]
+    have hcurry : tensor0S_curry (I := I) (M := M) 1 x
+          (flatArmPairing (I := I) g₀ g₁ false x om) (v 0)
+        = (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (sharpFlatEndoCc (I := I) g₀ g₁).toSection x)
+            (flatArmCovec (I := I) g₀ g₁ x om (v 0)) := by
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro w
+      rw [TensorMultilinear.tensor0S_curry_apply_eval]
+      have hL : Tensor0SSpace.toModel (flatArmPairing (I := I) g₀ g₁ false x om)
+            (Fin.cons (v 0) w)
+          = g₀.inner x (flatArmVec (I := I) g₀ g₁ false x om (v 0)) (w 0) := by
+        change flatArmPairing (I := I) g₀ g₁ false x om (Fin.cons (v 0) w)
+          = g₀.inner x (flatArmVec (I := I) g₀ g₁ false x om (v 0)) (w 0)
+        rw [flatArmPairing_apply, Fin.cons_zero, Fin.cons_one]
+      rw [hL]
+      rw [sharpFlatEndoCc_toSection]
+      rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            TensorRSSpace.ofCLM
+              ((g0FlatCLM (I := I) g₀ x).comp (inverseMetricSharpFib (I := I) g₁ x)))
+            (flatArmCovec (I := I) g₀ g₁ x om (v 0))
+          = g0FlatCLM (I := I) g₀ x
+              (inverseMetricSharpFib (I := I) g₁ x (flatArmCovec (I := I) g₀ g₁ x om (v 0)))
+          from rfl]
+      rw [hg0]
+      rfl
+    rw [hcurry]
+    have hbridge : (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (raisedKoszul (I := I) g₀ g₁).toSection x)
+          ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (sharpFlatEndoCc (I := I) g₀ g₁).toSection x)
+            (flatArmCovec (I := I) g₀ g₁ x om (v 0)))
+        = (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (connDiffSection (I := I) g₁ g₀).toSection x)
+            (flatArmCovec (I := I) g₀ g₁ x om (v 0)) := by
+      rw [connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc (I := I) (M := M) g₀ g₁,
+        appCcRS_toSection, ContinuousLinearMap.comp_apply]
+    rw [hbridge, connDiffSection_toSection]
+    change connDiffPairing (I := I) g₁ g₀ x (flatArmCovec (I := I) g₀ g₁ x om (v 0))
+        (Matrix.vecTail v) = _
+    rw [connDiffPairing_apply]
+    rw [show (Matrix.vecTail v) 0 = v 1 from rfl, show (Matrix.vecTail v) 1 = v 2 from rfl]
+    rw [hcovec]
+  apply tensorRSSpace_ext
+  intro om
+  refine Tensor0SSpace.toModel_injective ?_
+  apply ContinuousMultilinearMap.ext
+  intro v
+  have he : (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (- appCcRS (I := I) (M := M) g₀ 1 2 3
+          (armSlotEndoPassZeroCc (I := I) (M := M) g₀ (connDiffArmField (I := I) g₀ g₁))
+          (connDiffSection (I := I) g₁ g₀)).toSection x) om
+      = - ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (appCcRS (I := I) (M := M) g₀ 1 2 3
+            (armSlotEndoPassZeroCc (I := I) (M := M) g₀ (connDiffArmField (I := I) g₀ g₁))
+            (connDiffSection (I := I) g₁ g₀)).toSection x) om) := rfl
+  show Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (appCcRS (I := I) (M := M) g₀ 1 2 3
+            (slotExtend (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁))
+            (flatArmCc (I := I) g₀ g₁ false)).toSection x) om) v
+      = Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (- appCcRS (I := I) (M := M) g₀ 1 2 3
+            (armSlotEndoPassZeroCc (I := I) (M := M) g₀ (connDiffArmField (I := I) g₀ g₁))
+            (connDiffSection (I := I) g₁ g₀)).toSection x) om) v
+  rw [he, Tensor0SSpace.toModel_neg, ContinuousMultilinearMap.neg_apply, hLHSval om v, hRHSval om v]
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
