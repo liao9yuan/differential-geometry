@@ -6877,6 +6877,43 @@ def corrFieldFreshResidualSpec (g₀ : SmoothRiemannianMetric I M)
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+theorem chartSlopeSecondOrderOrder0_eq_ricciArmReadout
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (hs : s ∈ Set.Ioo (0 : ℝ) 1)
+    (x : M) (i k : Fin (Module.finrank ℝ E))
+    (hδ_lt : δ < 1) (hδ'_lt : δ' < 1) :
+    chartSlopeSecondOrderContribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s +
+        chartSlopeOrder0Contribution (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+          (extChartAt I x x) s =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s))
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x
+          ![(chartModelBasis E) k, (chartModelBasis E) i]
+        + unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 3 2
+              (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
+            ![(chartModelBasis E) k, (chartModelBasis E) i]
+        + unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 4 2
+              (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
+            ![(chartModelBasis E) k, (chartModelBasis E) i] :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem chartRicciTraceChristoffelSlope_eq_threeArm_readout
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -6904,8 +6941,16 @@ theorem chartRicciTraceChristoffelSlope_eq_threeArm_readout
                 (realizedFam (I := I) g₀ T T' hδ hδ' s))
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x
             ![(chartModelBasis E) k, (chartModelBasis E) i]
-        + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s :=
-  sorry
+        + arm2ChartReadoutResidual (I := I) g₀ T T' hδ hδ' x i k s := by
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  have hsecond := chartSlopeSecondOrderContribution_eq_principal_add_remainder (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x i k hy s
+  have harm2 := arm2_principalSymbol_chart_match (I := I) g₀ T T' hTsymm hT'symm
+    hδ_lt hδ hδ'_lt hδ' s x i k
+  have hmaster := chartSlopeSecondOrderOrder0_eq_ricciArmReadout (I := I) g₀ T T'
+    hTsymm hT'symm hδ hδ' s hs x i k hδ_lt hδ'_lt
+  linear_combination hmaster - hsecond + harm2
 
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
