@@ -273,7 +273,7 @@ private lemma iteratedCovGrad_cometricRaise_heq (g₀ : SmoothRiemannianMetric I
       rw [domDomCongrSection_comp_rk]
       rfl
 
-private lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
+lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g₀ 0 (s + 2)) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 ((s + 1) + i) x
         ((iteratedCovGrad (I := I) g₀ 1 (s + 1) i
