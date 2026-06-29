@@ -154,6 +154,33 @@ def arm1FiveSlotField (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor
     (s : ℝ) : SmoothCcTensor g₀ 3 2 :=
   arm1FiveSlotCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
+private lemma fiberNormSqComponent_arm1FiveSlotFib
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
+    (e : Fin n → TangentSpace I x) (K : Fin 3 → Fin n) (J : Fin 2 → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
+        (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x)
+        n e K J =
+      ∑ i : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+            Fin (Module.finrank ℝ E) × Fin 4 × Fin 5,
+        ((-(1 : ℝ) / 2) * fiveSlotCometricCoeff (I := I) g₀ g₁ x i.1 i.2.1 *
+              fiveSlotSign i.2.2.2.2.1) *
+            Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K)
+              (fiveSlotTriple (I := I) g₀ g₁ x i.1 i.2.1 i.2.2.1 i.2.2.2.1
+                i.2.2.2.2.1 i.2.2.2.2.2) *
+          fiveSlotKernelBilin (I := I) g₀ x i.2.2.1 i.2.2.2.1 (e (J 0)) (e (J 1)) := by
+  classical
+  have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
+      (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x) n e K J =
+      Tensor0SSpace.toModel
+        ((arm1FiveSlotFib (I := I) g₀ g₁ x) (coframeS (I := I) (M := M) g₀ x 3 e K))
+        (fun j => e (J j)) := rfl
+  rw [hcomp, arm1FiveSlotFib, ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply,
+    map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Tensor0SSpace.toModelL_apply]
+  exact fiveSlotAtom_component (I := I) g₀ g₁ x i.1 i.2.1 i.2.2.1 i.2.2.2.1
+    i.2.2.2.2.1 i.2.2.2.2.2 e K J
+
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -171,8 +198,171 @@ theorem rfns_arm1FiveSlotFib_le_of_lt_one
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
           (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x) ≤
         C * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x :
-            Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 :=
-  sorry
+            Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ^ 2 := by
+  classical
+  have h1δ : (0 : ℝ) < 1 - δ₀ := by linarith
+  have hinv_pos : (0 : ℝ) < 1 / (1 - δ₀) := div_pos one_pos h1δ
+  obtain ⟨C₀, hC₀0, hpw⟩ :=
+    connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+  set Mc : ℝ := ((Module.finrank ℝ E : ℝ) ^ 4 * 20) * ((1 / 2) * (1 / (1 - δ₀)) * C₀) with hMc
+  refine ⟨(Module.finrank ℝ E : ℝ) ^ 5 * Mc ^ 2,
+    mul_nonneg (by positivity) (sq_nonneg _), ?_⟩
+  intro g₁ P h δ hδ hδ0 hbound x
+  letI instTens : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum_rfns⟩ :=
+    tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
+  have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ hδ₀
+  have h1δ' : (0 : ℝ) < 1 - δ := by linarith
+  set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
+  have hG_nn : 0 ≤ G := norm_nonneg _
+  have hframe1 : ∀ z : Fin (Module.finrank ℝ E),
+      g₀.inner x (smoothOrthoFrame (I := I) g₀ x z x)
+        (smoothOrthoFrame (I := I) g₀ x z x) = 1 := by
+    intro z; rw [smoothOrthoFrame_orthonormal_at_center]; simp
+  have he1 : ∀ i : Fin n, g₀.inner x (e i) (e i) = 1 := by
+    intro i; rw [horth i i]; simp
+  have hsign : ∀ call : Fin 4, |fiveSlotSign call| = 1 := by
+    intro call; unfold fiveSlotSign; split_ifs <;> norm_num
+  have hcometric : ∀ a b : Fin (Module.finrank ℝ E),
+      |fiveSlotCometricCoeff (I := I) g₀ g₁ x a b| ≤ 1 / (1 - δ₀) := by
+    intro a b
+    rw [fiveSlotCometricCoeff]
+    have hcs := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x
+      (inverseMetricSharpFib (I := I) g₁ x
+        (g0FlatCLM (I := I) g₀ x (smoothOrthoFrame (I := I) g₀ x a x)))
+      (smoothOrthoFrame (I := I) g₀ x b x)
+    rw [hframe1 b, Real.sqrt_one, mul_one] at hcs
+    have hsharp := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le (I := I) (M := M) g₀ g₁
+      (fun y => ccTensorBilinSymm (I := I) g₀ P y) h hδ_lt hδ0 hbound x
+      (smoothOrthoFrame (I := I) g₀ x a x)
+    rw [hframe1 a, Real.sqrt_one, mul_one] at hsharp
+    refine le_trans hcs (le_trans hsharp ?_)
+    exact one_div_le_one_div_of_le h1δ (by linarith)
+  have hsqrt_cd : ∀ z w : Fin (Module.finrank ℝ E),
+      Real.sqrt (g₀.inner x
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (smoothOrthoFrame (I := I) g₀ x z x)
+          (smoothOrthoFrame (I := I) g₀ x w x))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (smoothOrthoFrame (I := I) g₀ x z x)
+          (smoothOrthoFrame (I := I) g₀ x w x))) ≤ C₀ * G := by
+    intro z w
+    have ht := hpw g₁ P h hδ hδ0 hbound x (smoothOrthoFrame (I := I) g₀ x z x)
+      (smoothOrthoFrame (I := I) g₀ x w x)
+    rw [hframe1 z, hframe1 w, Real.sqrt_one, mul_one, mul_one, ← hG_def] at ht
+    exact ht
+  have key3 : ∀ (K : Fin 3 → Fin n) (u : Fin 3 → E),
+      |Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K) u| ≤
+        Real.sqrt (g₀.inner x (u 0) (u 0)) * Real.sqrt (g₀.inner x (u 1) (u 1)) *
+          Real.sqrt (g₀.inner x (u 2) (u 2)) := by
+    intro K u
+    rw [show Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K) u =
+        coframeS (I := I) (M := M) g₀ x 3 e K u from rfl, coframeS_apply,
+      Fin.prod_univ_three, abs_mul, abs_mul]
+    have b0 := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x (e (K 0)) (u 0)
+    have b1 := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x (e (K 1)) (u 1)
+    have b2 := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x (e (K 2)) (u 2)
+    rw [he1 (K 0), Real.sqrt_one, one_mul] at b0
+    rw [he1 (K 1), Real.sqrt_one, one_mul] at b1
+    rw [he1 (K 2), Real.sqrt_one, one_mul] at b2
+    exact mul_le_mul (mul_le_mul b0 b1 (abs_nonneg _) (Real.sqrt_nonneg _)) b2 (abs_nonneg _)
+      (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))
+  have htriple : ∀ (K : Fin 3 → Fin n) (a b c d : Fin (Module.finrank ℝ E))
+      (call : Fin 4) (contrib : Fin 5),
+      |Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K)
+          (fiveSlotTriple (I := I) g₀ g₁ x a b c d call contrib)| ≤ C₀ * G := by
+    intro K a b c d call contrib
+    refine le_trans (key3 K (fiveSlotTriple (I := I) g₀ g₁ x a b c d call contrib)) ?_
+    fin_cases call <;> fin_cases contrib <;>
+      simp only [fiveSlotTriple, Fin.isValue, Fin.mk_one, Fin.reduceFinMk, Fin.zero_eta,
+        Matrix.cons_val, Matrix.cons_val_one, Matrix.cons_val_zero, hframe1, Real.sqrt_one,
+        one_mul, mul_one] <;>
+      exact hsqrt_cd _ _
+  have heach_abs : ∀ (K : Fin 3 → Fin n) (J : Fin 2 → Fin n),
+      |fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
+          (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x)
+          n e K J| ≤ Mc * G := by
+    intro K J
+    rw [fiberNormSqComponent_arm1FiveSlotFib (I := I) g₀ g₁ x e K J]
+    have hkernel : ∀ c d : Fin (Module.finrank ℝ E),
+        |fiveSlotKernelBilin (I := I) g₀ x c d (e (J 0)) (e (J 1))| ≤ 1 := by
+      intro c d
+      rw [fiveSlotKernelBilin_apply, abs_mul]
+      have h0 := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x (e (J 0))
+        (smoothOrthoFrame (I := I) g₀ x c x)
+      have h1 := abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g₀ x (e (J 1))
+        (smoothOrthoFrame (I := I) g₀ x d x)
+      rw [he1 (J 0), hframe1 c, Real.sqrt_one, mul_one] at h0
+      rw [he1 (J 1), hframe1 d, Real.sqrt_one, mul_one] at h1
+      calc |g₀.inner x (e (J 0)) (smoothOrthoFrame (I := I) g₀ x c x)| *
+              |g₀.inner x (e (J 1)) (smoothOrthoFrame (I := I) g₀ x d x)|
+          ≤ 1 * 1 := mul_le_mul h0 h1 (abs_nonneg _) (by norm_num)
+        _ = 1 := by norm_num
+    have hsummand_bd : ∀ i : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+          Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin 4 × Fin 5,
+        |((-(1 : ℝ) / 2) * fiveSlotCometricCoeff (I := I) g₀ g₁ x i.1 i.2.1 *
+              fiveSlotSign i.2.2.2.2.1) *
+            Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K)
+              (fiveSlotTriple (I := I) g₀ g₁ x i.1 i.2.1 i.2.2.1 i.2.2.2.1
+                i.2.2.2.2.1 i.2.2.2.2.2) *
+            fiveSlotKernelBilin (I := I) g₀ x i.2.2.1 i.2.2.2.1 (e (J 0)) (e (J 1))| ≤
+          (1 / 2) * (1 / (1 - δ₀)) * C₀ * G := by
+      intro i
+      obtain ⟨a, b, c, d, call, contrib⟩ := i
+      rw [abs_mul, abs_mul]
+      have hX : |(-(1 : ℝ) / 2) * fiveSlotCometricCoeff (I := I) g₀ g₁ x a b *
+          fiveSlotSign call| ≤ (1 / 2) * (1 / (1 - δ₀)) := by
+        rw [abs_mul, abs_mul, hsign call, mul_one,
+          show |(-(1 : ℝ) / 2)| = 1 / 2 from by norm_num]
+        exact mul_le_mul_of_nonneg_left (hcometric a b) (by norm_num)
+      have hX_nn : (0 : ℝ) ≤ (1 / 2) * (1 / (1 - δ₀)) :=
+        mul_nonneg (by norm_num) (le_of_lt hinv_pos)
+      calc |(-(1 : ℝ) / 2) * fiveSlotCometricCoeff (I := I) g₀ g₁ x a b *
+                fiveSlotSign call| *
+              |Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K)
+                (fiveSlotTriple (I := I) g₀ g₁ x a b c d call contrib)| *
+              |fiveSlotKernelBilin (I := I) g₀ x c d (e (J 0)) (e (J 1))|
+          ≤ (1 / 2) * (1 / (1 - δ₀)) * (C₀ * G) * 1 :=
+            mul_le_mul
+              (mul_le_mul hX (htriple K a b c d call contrib) (abs_nonneg _) hX_nn)
+              (hkernel c d) (abs_nonneg _)
+              (mul_nonneg hX_nn (mul_nonneg hC₀0 hG_nn))
+        _ = (1 / 2) * (1 / (1 - δ₀)) * C₀ * G := by ring
+    refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+    refine le_trans (Finset.sum_le_sum (fun i _ => hsummand_bd i)) ?_
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hMc]
+    have hcardT : (Fintype.card (Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+        Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin 4 × Fin 5) : ℝ) =
+        (Module.finrank ℝ E : ℝ) ^ 4 * 20 := by
+      simp only [Fintype.card_prod, Fintype.card_fin]; push_cast; ring
+    rw [hcardT]; exact le_of_eq (by ring)
+  have heach : ∀ (K : Fin 3 → Fin n) (J : Fin 2 → Fin n),
+      (fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
+          (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x)
+          n e K J) ^ 2 ≤ (Mc * G) ^ 2 := by
+    intro K J
+    rw [← sq_abs]
+    exact pow_le_pow_left₀ (abs_nonneg _) (heach_abs K J) 2
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 3 2 x
+    (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x)
+    e bse hnE hbse horth]
+  calc ∑ K : Fin 3 → Fin n, ∑ J : Fin 2 → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
+          (show Tensor0SBundle.TensorRSSpace 3 2 I x from arm1FiveSlotFib (I := I) g₀ g₁ x)
+          n e K J) ^ 2
+      ≤ ∑ K : Fin 3 → Fin n, ∑ J : Fin 2 → Fin n, (Mc * G) ^ 2 :=
+        Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => heach K J))
+    _ = (Fintype.card (Fin 3 → Fin n) : ℝ) * (Fintype.card (Fin 2 → Fin n) : ℝ) *
+          (Mc * G) ^ 2 := by
+        rw [Finset.sum_const, Finset.sum_const]
+        simp only [Finset.card_univ, nsmul_eq_mul]; ring
+    _ = (Module.finrank ℝ E : ℝ) ^ 5 * Mc ^ 2 * G ^ 2 := by
+        have hcard : (Fintype.card (Fin 3 → Fin n) : ℝ) * (Fintype.card (Fin 2 → Fin n) : ℝ) =
+            (n : ℝ) ^ 5 := by
+          simp only [Fintype.card_fun, Fintype.card_fin]
+          push_cast; ring
+        rw [hcard, ← hnE]; ring
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
