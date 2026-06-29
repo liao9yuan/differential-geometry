@@ -28,6 +28,9 @@ namespace TensorSpectral
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
@@ -42,10 +45,89 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private noncomputable def fiveSlotCometricCoeff (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (a b : Fin (Module.finrank ℝ E)) : ℝ :=
+  g₀.inner x
+    (inverseMetricSharpFib (I := I) g₁ x
+      (g0FlatCLM (I := I) g₀ x (smoothOrthoFrame (I := I) g₀ x a x)))
+    (smoothOrthoFrame (I := I) g₀ x b x)
+
+private noncomputable def fiveSlotEvalCLM (x : M) (u : Fin 3 → E) :
+    Tensor0SSpace 3 I x →L[ℝ] ℝ :=
+  (ContinuousMultilinearMap.apply ℝ (fun _ : Fin 3 => E) ℝ u).comp
+    (Tensor0SSpace.toModelL 3 x)
+
+private lemma fiveSlotEvalCLM_apply (x : M) (u : Fin 3 → E) (D : Tensor0SSpace 3 I x) :
+    fiveSlotEvalCLM (I := I) x u D = Tensor0SSpace.toModel D u := rfl
+
+private noncomputable def fiveSlotKernelBilin (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (c d : Fin (Module.finrank ℝ E)) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  ((g₀.inner x).flip (smoothOrthoFrame (I := I) g₀ x c x)).smulRight
+    ((g₀.inner x).flip (smoothOrthoFrame (I := I) g₀ x d x))
+
+private lemma fiveSlotKernelBilin_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (c d : Fin (Module.finrank ℝ E)) (v0 v1 : TangentSpace I x) :
+    fiveSlotKernelBilin (I := I) g₀ x c d v0 v1 =
+      g₀.inner x v0 (smoothOrthoFrame (I := I) g₀ x c x) *
+        g₀.inner x v1 (smoothOrthoFrame (I := I) g₀ x d x) := by
+  rw [fiveSlotKernelBilin, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply, smul_eq_mul]
+
+private noncomputable def fiveSlotTriple (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : Fin (Module.finrank ℝ E)) (call : Fin 4) (contrib : Fin 5) : Fin 3 → E :=
+  let va := smoothOrthoFrame (I := I) g₀ x a x
+  let vb := smoothOrthoFrame (I := I) g₀ x b x
+  let vc := smoothOrthoFrame (I := I) g₀ x c x
+  let vd := smoothOrthoFrame (I := I) g₀ x d x
+  let args : Fin 4 →
+      TangentSpace I x × TangentSpace I x × TangentSpace I x × TangentSpace I x :=
+    ![(va, vc, vb, vd), (va, vd, vb, vc), (va, vb, vc, vd), (vc, vd, va, vb)]
+  let α := (args call).1
+  let β := (args call).2.1
+  let γ := (args call).2.2.1
+  let δ := (args call).2.2.2
+  let cd : TangentSpace I x → TangentSpace I x → TangentSpace I x :=
+    fun p q => PDE.DeTurck.connDiff (I := I) g₁ g₀ x p q
+  (![ ![(α : E), (cd β γ : E), (δ : E)],
+      ![(α : E), (γ : E), (cd β δ : E)],
+      ![(cd α β : E), (γ : E), (δ : E)],
+      ![(β : E), (cd α γ : E), (δ : E)],
+      ![(β : E), (γ : E), (cd α δ : E)] ] : Fin 5 → Fin 3 → E) contrib
+
+private def fiveSlotSign (call : Fin 4) : ℝ := if (call : ℕ) < 2 then 1 else -1
+
+private noncomputable def fiveSlotAtom (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : Fin (Module.finrank ℝ E)) (call : Fin 4) (contrib : Fin 5) :
+    Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  (((-(1 : ℝ) / 2) * fiveSlotCometricCoeff (I := I) g₀ g₁ x a b * fiveSlotSign call) •
+      fiveSlotEvalCLM (I := I) x
+        (fiveSlotTriple (I := I) g₀ g₁ x a b c d call contrib)).smulRight
+    (Tensor0SSpace.ofModel (I := I) (x := x)
+      (bilinFormToModel E (fiveSlotKernelBilin (I := I) g₀ x c d)))
+
 set_option linter.unusedVariables false in
 def arm1FiveSlotFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 2 I x :=
-  sorry
+  ∑ i : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E) ×
+        Fin (Module.finrank ℝ E) × Fin 4 × Fin 5,
+    fiveSlotAtom (I := I) g₀ g₁ x i.1 i.2.1 i.2.2.1 i.2.2.2.1 i.2.2.2.2.1 i.2.2.2.2.2
+
+private lemma fiveSlotAtom_component (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (a b c d : Fin (Module.finrank ℝ E)) (call : Fin 4) (contrib : Fin 5)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 3 → Fin n) (J : Fin 2 → Fin n) :
+    Tensor0SSpace.toModel
+        (fiveSlotAtom (I := I) g₀ g₁ x a b c d call contrib
+          (coframeS (I := I) (M := M) g₀ x 3 e K))
+        (fun j => e (J j)) =
+      ((-(1 : ℝ) / 2) * fiveSlotCometricCoeff (I := I) g₀ g₁ x a b * fiveSlotSign call) *
+          Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 3 e K)
+            (fiveSlotTriple (I := I) g₀ g₁ x a b c d call contrib) *
+        fiveSlotKernelBilin (I := I) g₀ x c d (e (J 0)) (e (J 1)) := by
+  simp only [fiveSlotAtom, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    fiveSlotEvalCLM_apply, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul, Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply]
+  rfl
 
 set_option linter.unusedVariables false in
 theorem arm1FiveSlotFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
