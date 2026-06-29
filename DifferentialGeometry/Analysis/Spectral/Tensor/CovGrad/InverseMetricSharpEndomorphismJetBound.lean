@@ -604,6 +604,347 @@ private lemma master_isolation (g₀ g₁ : SmoothRiemannianMetric I M) (w : ℕ
   rw [slotExtendIter_sharpFlat_omRecover_comp_eq_id (I := I) g₀ g₁ w x]
   rw [ContinuousLinearMap.id_comp]
 
+set_option linter.unusedSectionVars false in
+private lemma rfns_iteratedCovGrad_exp_congr (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (x : M) {e₁ e₂ : ℕ} (h : e₁ = e₂) :
+    riemannianFiberNormSq (I := I) (M := M) g r (s + e₁) x
+        ((iteratedCovGrad (I := I) g r s e₁ Φ).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r (s + e₂) x
+        ((iteratedCovGrad (I := I) g r s e₂ Φ).toSection x) := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
+    (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D) w =
+      Tensor0SSpace.toModel D (Fin.cons (show E from v) (fun k => (show E from w k))) := by
+  have h1 : Tensor0SSpace.toModel
+      (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D) =
+      Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s (show E from v)
+        (Tensor0SSpace.toModel D) := rfl
+  rw [h1]
+  rfl
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+  (ccTensorBilin ccTensorModel ccTensorMultilinear ccTensorBilin_apply) in
+set_option linter.unusedSectionVars false in
+private lemma unitModel_eq_ccTensorBilin_loc (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
+    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
+  rw [ccTensorBilin_apply (I := I) g₀ S b u w, ccTensorModel]
+  rw [show ccTensorMultilinear (I := I) g₀ S b =
+      (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from S.toSection b)
+        (unitZeroSec (I := I) (M := M) b) from rfl]
+  rw [unitModel]
+  refine congrArg _ ?_
+  funext k
+  fin_cases k <;> rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+private lemma omRecoverEndoCc_eq_idEndo_add_raise
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w) :
+    omRecoverEndoCc (I := I) g₀ g₁ =
+      sharpFlatEndoCc (I := I) g₀ g₀ +
+        cometricRaiseSlot0Field (I := I) (M := M) g₀ 0 (symmS (I := I) (M := M) g₀ T) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensorRSSpace_ext 1 1 x
+  intro om
+  rw [show (sharpFlatEndoCc (I := I) g₀ g₀ +
+        cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+          (symmS (I := I) (M := M) g₀ T)).toSection x =
+      (sharpFlatEndoCc (I := I) g₀ g₀).toSection x +
+        (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+          (symmS (I := I) (M := M) g₀ T)).toSection x from by
+    rw [SmoothCcTensor.toSection_add]; rfl]
+  rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        ((sharpFlatEndoCc (I := I) g₀ g₀).toSection x +
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (symmS (I := I) (M := M) g₀ T)).toSection x)) om =
+      (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (sharpFlatEndoCc (I := I) g₀ g₀).toSection x) om +
+        (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (symmS (I := I) (M := M) g₀ T)).toSection x) om from rfl]
+  have hL : (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (omRecoverEndoCc (I := I) g₀ g₁).toSection x) om =
+      g0FlatCLM (I := I) g₁ x (inverseMetricSharpFib (I := I) g₀ x om) := by
+    rw [omRecoverEndoCc_toSection]; rfl
+  have hS : (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (sharpFlatEndoCc (I := I) g₀ g₀).toSection x) om =
+      g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₀ x om) := by
+    rw [sharpFlatEndoCc_toSection]; rfl
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  apply LinearMap.ext
+  intro w
+  rw [cotangentToDualLinear_apply, cotangentToDualLinear_apply]
+  rw [show cotangentToDual (I := I)
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (sharpFlatEndoCc (I := I) g₀ g₀).toSection x) om +
+          (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+              (symmS (I := I) (M := M) g₀ T)).toSection x) om) w =
+      cotangentToDual (I := I)
+          ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (sharpFlatEndoCc (I := I) g₀ g₀).toSection x) om) w +
+        cotangentToDual (I := I)
+          ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+            (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+              (symmS (I := I) (M := M) g₀ T)).toSection x) om) w from by
+    rw [← cotangentToDualLinear_apply, ← cotangentToDualLinear_apply,
+      ← cotangentToDualLinear_apply, map_add, LinearMap.add_apply]]
+  rw [hL, cotangentToDual_g0FlatCLM]
+  rw [hS, cotangentToDual_g0FlatCLM]
+  rw [show cotangentToDual (I := I)
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (symmS (I := I) (M := M) g₀ T)).toSection x) om) w =
+      ccTensorBilinSymm (I := I) g₀ T x (inverseMetricSharpFib (I := I) g₀ x om) w from by
+    rw [cotangentToDual_apply]
+    rw [cometricRaiseSlot0Field_toSection]
+    rw [cometricRaiseSlot0Fib_clm_apply (I := I) g₀ 0 x _ om]
+    rw [show (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (0 + 1) x
+            (inverseMetricSharpFib (I := I) g₀ x om)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
+                (symmS (I := I) (M := M) g₀ T).toSection x)
+              (unitTensor (I := I) (M := M) x)) (fun _ : Fin 1 => w) : ℝ) =
+        Tensor0SSpace.toModel
+          (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (0 + 1) x
+            (inverseMetricSharpFib (I := I) g₀ x om)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
+                (symmS (I := I) (M := M) g₀ T).toSection x)
+              (unitTensor (I := I) (M := M) x)))
+          (fun _ : Fin 1 => w) from rfl]
+    rw [interior_product_toModel_eval (I := I) (M := M) (0 + 1) x
+      (inverseMetricSharpFib (I := I) g₀ x om)
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
+          (symmS (I := I) (M := M) g₀ T).toSection x)
+        (unitTensor (I := I) (M := M) x)) (fun _ : Fin 1 => w)]
+    rw [show Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (0 + 2) I x from
+              (symmS (I := I) (M := M) g₀ T).toSection x)
+            (unitTensor (I := I) (M := M) x))
+          (Fin.cons (show E from inverseMetricSharpFib (I := I) g₀ x om)
+            (fun _ : Fin 1 => (show E from w))) =
+        unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ T) x
+          ![inverseMetricSharpFib (I := I) g₀ x om, w] from by
+      rw [unitModel]
+      congr 1
+      funext k
+      refine Fin.cases ?_ (fun j => ?_) k
+      · simp only [Fin.cons_zero, Matrix.cons_val_zero]
+      · simp only [Fin.cons_succ]
+        fin_cases j
+        rfl]
+    rw [unitModel_eq_ccTensorBilin_loc, ccTensorBilin_symmS]]
+  rw [htie]
+
+set_option linter.unusedSectionVars false in
+private lemma rfns_iteratedCovGrad_omRecoverEndoCc_succ_le
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ}
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
+    (j : ℕ) (hj : j + 1 ≤ a + 1) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + (j + 1)) x
+        ((iteratedCovGrad (I := I) g₀ 1 1 (j + 1)
+          (omRecoverEndoCc (I := I) g₀ g₁)).toSection x) ≤ R ^ 2 := by
+  rw [omRecoverEndoCc_eq_idEndo_add_raise (I := I) (M := M) g₀ g₁ T htie, iteratedCovGrad_add]
+  rw [show ((iteratedCovGrad (I := I) g₀ 1 1 (j + 1) (sharpFlatEndoCc (I := I) g₀ g₀) +
+        iteratedCovGrad (I := I) g₀ 1 1 (j + 1)
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (symmS (I := I) (M := M) g₀ T))).toSection x) =
+      (iteratedCovGrad (I := I) g₀ 1 1 (j + 1) (sharpFlatEndoCc (I := I) g₀ g₀)).toSection x +
+        (iteratedCovGrad (I := I) g₀ 1 1 (j + 1)
+          (cometricRaiseSlot0Field (I := I) (M := M) g₀ 0
+            (symmS (I := I) (M := M) g₀ T))).toSection x from by
+    rw [SmoothCcTensor.toSection_add]; rfl]
+  rw [iteratedCovGrad_sharpFlatEndoCc_self_eq_zero (I := I) g₀ j]
+  rw [show ((0 : SmoothCcTensor g₀ 1 (1 + (j + 1))).toSection x) =
+      (0 : TensorRSSpace 1 (1 + (j + 1)) I x) from by rw [SmoothCcTensor.toSection_zero]; rfl]
+  rw [zero_add]
+  refine le_trans (le_of_eq ?_)
+    (rfns_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ a T hTjet (j + 1) hj x)
+  exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 0
+    (symmS (I := I) (M := M) g₀ T) (j + 1) x
+
+set_option linter.unusedSectionVars false in
+private lemma rfns_iteratedCovGrad_appCcLeibnizPsi_le
+    (g : SmoothRiemannianMetric I M) (b c : ℕ) (Φ : SmoothCcTensor g b c) (x : M) :
+    ∀ i k p d : ℕ, k + d = i →
+      riemannianFiberNormSq (I := I) (M := M) g (b + k) ((c + i) + p) x
+          ((iteratedCovGrad (I := I) g (b + k) (c + i) p
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k)).toSection x) ≤
+        (4 : ℝ) ^ i * (Module.finrank ℝ E : ℝ) ^ k *
+          riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+            ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x) := by
+  intro i
+  induction i with
+  | zero =>
+    intro k p d hkd
+    obtain rfl : k = 0 := by omega
+    obtain rfl : d = 0 := by omega
+    have happ : appCcLeibnizPsi (I := I) (M := M) g b c Φ 0 0 = Φ := rfl
+    rw [happ]
+    simp only [pow_zero, one_mul]
+    exact le_of_eq rfl
+  | succ i ih =>
+    intro k p d hkd
+    match k, hkd with
+    | 0, hkd =>
+      obtain rfl : d = i + 1 := by omega
+      have h0 : appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) 0 =
+          covGrad (I := I) (M := M) g (b + 0) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0) := rfl
+      rw [h0]
+      have hcomm : riemannianFiberNormSq (I := I) (M := M) g (b + 0) ((c + (i + 1)) + p) x
+            ((iteratedCovGrad (I := I) g (b + 0) (c + (i + 1)) p
+              (covGrad (I := I) (M := M) g (b + 0) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0))).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g (b + 0) ((c + i) + (p + 1)) x
+            ((iteratedCovGrad (I := I) g (b + 0) (c + i) (p + 1)
+              (appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0)).toSection x) :=
+        rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g (b + 0) (c + i) p
+          (appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0) x
+      rw [hcomm]
+      have hih := ih 0 (p + 1) i (by omega)
+      rw [rfns_iteratedCovGrad_exp_congr (I := I) (M := M) g b c Φ x
+        (show (p + 1) + i = p + (i + 1) by omega)] at hih
+      refine le_trans hih ?_
+      refine mul_le_mul_of_nonneg_right ?_
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g b (c + (p + (i + 1))) x _)
+      exact mul_le_mul_of_nonneg_right
+        (pow_le_pow_right₀ (by norm_num) (by omega)) (by positivity)
+    | (j + 1), hkd =>
+      have hjd : j + d = i := by omega
+      have hrec : appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
+          (if j + 1 < i + 1 then
+              covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))
+            else 0) +
+            slotExtend (I := I) (M := M) g (b + j) (c + i)
+              (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) := by
+        rw [show appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
+            (if j + 1 < i + 1 then
+                covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))
+              else 0) +
+              castSrcCc g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
+                (castRankCc_db g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+                  (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                    (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))) from rfl]
+        rw [show castSrcCc g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
+              (castRankCc_db g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+                (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))) =
+            slotExtend (I := I) (M := M) g (b + j) (c + i)
+              (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) from by
+          rw [castRankCc_db, castSrcCc]]
+      rw [hrec]
+      by_cases hji : j < i
+      · rw [if_pos (by omega : j + 1 < i + 1)]
+        rw [iteratedCovGrad_add]
+        rw [show ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+              (covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))) +
+            iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+              (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))).toSection x) =
+            (iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+              (covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1)))).toSection x +
+              (iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+                (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))).toSection x from by
+          rw [SmoothCcTensor.toSection_add]; rfl]
+        refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g (b + (j + 1))
+          ((c + (i + 1)) + p) x _ _) ?_
+        obtain ⟨e, he⟩ : ∃ e, (j + 1) + e = i := ⟨i - (j + 1), by omega⟩
+        have hcommA : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1)) ((c + (i + 1)) + p) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+                (covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1)))).toSection x) =
+            riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1)) ((c + i) + (p + 1)) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + i) (p + 1)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))).toSection x) :=
+          rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g (b + (j + 1)) (c + i) p
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1)) x
+        have bA : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1)) ((c + (i + 1)) + p) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+                (covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1)))).toSection x) ≤
+            (4 : ℝ) ^ i * (Module.finrank ℝ E : ℝ) ^ (j + 1) *
+              riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+                ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x) := by
+          rw [hcommA]
+          have hihA := ih (j + 1) (p + 1) e he
+          rw [rfns_iteratedCovGrad_exp_congr (I := I) (M := M) g b c Φ x
+            (show (p + 1) + e = p + d by omega)] at hihA
+          exact hihA
+        have hsl : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1)) ((c + (i + 1)) + p) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+                (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))).toSection x) ≤
+            (Module.finrank ℝ E : ℝ) *
+              riemannianFiberNormSq (I := I) (M := M) g (b + j) ((c + i) + p) x
+                ((iteratedCovGrad (I := I) g (b + j) (c + i) p
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j)).toSection x) :=
+          rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g (b + j) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) p x
+        have bB : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1)) ((c + (i + 1)) + p) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+                (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))).toSection x) ≤
+            (4 : ℝ) ^ i * (Module.finrank ℝ E : ℝ) ^ (j + 1) *
+              riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+                ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x) := by
+          refine le_trans hsl ?_
+          refine le_trans (mul_le_mul_of_nonneg_left (ih j p d hjd) (by positivity))
+            (le_of_eq ?_)
+          rw [pow_succ]; ring
+        rw [show (4 : ℝ) ^ (i + 1) * (Module.finrank ℝ E : ℝ) ^ (j + 1) *
+              riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+                ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x) =
+            4 * ((4 : ℝ) ^ i * (Module.finrank ℝ E : ℝ) ^ (j + 1) *
+              riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+                ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x)) from by
+          rw [pow_succ]; ring]
+        linarith [bA, bB]
+      · have hji' : ¬ (j + 1 < i + 1) := by omega
+        rw [if_neg hji', zero_add]
+        have hsl : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1)) ((c + (i + 1)) + p) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) p
+                (slotExtend (I := I) (M := M) g (b + j) (c + i)
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))).toSection x) ≤
+            (Module.finrank ℝ E : ℝ) *
+              riemannianFiberNormSq (I := I) (M := M) g (b + j) ((c + i) + p) x
+                ((iteratedCovGrad (I := I) g (b + j) (c + i) p
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j)).toSection x) :=
+          rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g (b + j) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) p x
+        refine le_trans hsl ?_
+        refine le_trans (mul_le_mul_of_nonneg_left (ih j p d hjd) (by positivity)) ?_
+        rw [show (Module.finrank ℝ E : ℝ) *
+              ((4 : ℝ) ^ i * (Module.finrank ℝ E : ℝ) ^ j *
+                riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+                  ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x)) =
+            (4 : ℝ) ^ i * (Module.finrank ℝ E : ℝ) ^ (j + 1) *
+              riemannianFiberNormSq (I := I) (M := M) g b (c + (p + d)) x
+                ((iteratedCovGrad (I := I) g b c (p + d) Φ).toSection x) from by
+          rw [pow_succ]; ring]
+        refine mul_le_mul_of_nonneg_right ?_
+          (riemannianFiberNormSq_nonneg (I := I) (M := M) g b (c + (p + d)) x _)
+        exact mul_le_mul_of_nonneg_right
+          (pow_le_pow_right₀ (by norm_num) (by omega)) (by positivity)
+
 set_option linter.unusedVariables false in
 private lemma rfns_appCcLeibnizPsi_omRecover_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
@@ -619,7 +960,15 @@ private lemma rfns_appCcLeibnizPsi_omRecover_le
         ((appCcLeibnizPsi (I := I) (M := M) g₀ 1 1
           (omRecoverEndoCc (I := I) g₀ g₁) (m + 1) k).toSection x) ≤
       4 ^ (m + 1) * (Module.finrank ℝ E : ℝ) ^ k * R ^ 2 := by
-  sorry
+  have hkey := rfns_iteratedCovGrad_appCcLeibnizPsi_le (I := I) (M := M) g₀ 1 1
+    (omRecoverEndoCc (I := I) g₀ g₁) x (m + 1) k 0 ((m + 1) - k) (by omega)
+  refine le_trans (le_of_eq ?_) (le_trans hkey ?_)
+  · rfl
+  · refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+    rw [rfns_iteratedCovGrad_exp_congr (I := I) (M := M) g₀ 1 1
+      (omRecoverEndoCc (I := I) g₀ g₁) x (show 0 + ((m + 1) - k) = (m - k) + 1 by omega)]
+    exact rfns_iteratedCovGrad_omRecoverEndoCc_succ_le (I := I) g₀ g₁ a T htie hTjet (m - k)
+      (by omega) x
 
 set_option linter.unusedVariables false in
 private lemma rfns_iteratedCovGrad_sharpFlatEndoCc_leibniz_grid_bound
