@@ -747,6 +747,34 @@ private theorem connDiffSection_iteratedCovGrad_rfns_tight_order0_le
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
+private theorem connDiffSection_covGrad_quadratic_decomp_repr
+    (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    (hδ : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
+        ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2) :
+    ∃ (P : SmoothCcTensor g₀ 1 3) (K₁ K₂ : SmoothCcTensor g₀ 2 3),
+      covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)
+          = P - appCcRS (I := I) (M := M) g₀ 1 2 3 K₁ (connDiffSection (I := I) g₁ g₀)
+            - appCcRS (I := I) (M := M) g₀ 1 2 3 K₂ (connDiffSection (I := I) g₁ g₀)
+      ∧ (∀ (j : ℕ), j ≤ a → ∀ (y : M),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + j) y
+              ((iteratedCovGrad (I := I) g₀ 1 3 j P).toSection y) ≤ (9 / 4 : ℝ) * R ^ 2)
+      ∧ (∀ (j : ℕ), j ≤ a → ∀ (y : M),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + j) y
+              ((iteratedCovGrad (I := I) g₀ 2 3 j K₁).toSection y) ≤ 10 * R ^ 2)
+      ∧ (∀ (j : ℕ), j ≤ a → ∀ (y : M),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + j) y
+              ((iteratedCovGrad (I := I) g₀ 2 3 j K₂).toSection y) ≤
+            2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) y
+                ((iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀)).toSection y)) :=
+  sorry
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
 private theorem connDiffSection_succ_iteratedCovGrad_rfns_quadratic_recursion_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -771,8 +799,99 @@ private theorem connDiffSection_succ_iteratedCovGrad_rfns_quadratic_recursion_le
               ((iteratedCovGrad (I := I) g₀ 1 2 i (connDiffSection (I := I) g₁ g₀)).toSection x) *
             ∑ l ∈ Finset.range (m + 1 - i),
               riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
-                ((iteratedCovGrad (I := I) g₀ 1 2 l (connDiffSection (I := I) g₁ g₀)).toSection x)) :=
-  sorry
+                ((iteratedCovGrad (I := I) g₀ 1 2 l (connDiffSection (I := I) g₁ g₀)).toSection x)) := by
+  obtain ⟨P, K₁, K₂, hPK, hP, hK₁, hK₂⟩ :=
+    connDiffSection_covGrad_quadratic_decomp_repr (I := I) (M := M) g₀ g₁ a T htie hR hδ0 hδ1 hδ hTjet
+  set cds := connDiffSection (I := I) g₁ g₀ with hcds
+  have hgd_nn : (0 : ℝ) ≤ appCcGdiag (E := E) m := appCcGdiag_nonneg m
+  have hSnn : ∀ i : ℕ, (0 : ℝ) ≤ ∑ l ∈ Finset.range (m + 1 - i),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x) :=
+    fun i => Finset.sum_nonneg (fun l _ =>
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 1 (2 + l) x _)
+  rw [← rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 1 2 m cds x]
+  have hval : (iteratedCovGrad (I := I) g₀ 1 3 m
+        (covGrad (I := I) (M := M) g₀ 1 2 cds)).toSection x
+      = (iteratedCovGrad (I := I) g₀ 1 3 m P).toSection x
+          - (iteratedCovGrad (I := I) g₀ 1 3 m
+              (appCcRS (I := I) (M := M) g₀ 1 2 3 K₁ cds)).toSection x
+          - (iteratedCovGrad (I := I) g₀ 1 3 m
+              (appCcRS (I := I) (M := M) g₀ 1 2 3 K₂ cds)).toSection x := by
+    rw [hPK, iteratedCovGrad_sub, iteratedCovGrad_sub, SmoothCcTensor.toSection_sub,
+      SmoothCcTensor.toSection_sub]
+    simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [hval]
+  set uP := (iteratedCovGrad (I := I) g₀ 1 3 m P).toSection x with huP
+  set u1 := (iteratedCovGrad (I := I) g₀ 1 3 m
+    (appCcRS (I := I) (M := M) g₀ 1 2 3 K₁ cds)).toSection x with hu1
+  set u2 := (iteratedCovGrad (I := I) g₀ 1 3 m
+    (appCcRS (I := I) (M := M) g₀ 1 2 3 K₂ cds)).toSection x with hu2
+  have hrP : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x uP ≤ (9 / 4 : ℝ) * R ^ 2 := by
+    rw [huP]; exact hP m (by omega) x
+  have hr1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x u1 ≤
+      appCcGdiag (E := E) m *
+        ∑ i ∈ Finset.range (m + 1), (10 * R ^ 2) *
+          ∑ l ∈ Finset.range (m + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x) := by
+    rw [hu1]
+    refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+      (I := I) (M := M) g₀ m 1 2 3 K₁ cds x) ?_
+    refine mul_le_mul_of_nonneg_left ?_ hgd_nn
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    rw [Finset.mem_range] at hi
+    exact mul_le_mul_of_nonneg_right (hK₁ i (by omega) x) (hSnn i)
+  have hr2 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x u2 ≤
+      2 * (appCcGdiag (E := E) m *
+        ∑ i ∈ Finset.range (m + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 i cds).toSection x) *
+          ∑ l ∈ Finset.range (m + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x)) := by
+    rw [hu2]
+    refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+      (I := I) (M := M) g₀ m 1 2 3 K₂ cds x) ?_
+    have hbnd : appCcGdiag (E := E) m *
+          ∑ i ∈ Finset.range (m + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + i) x
+                ((iteratedCovGrad (I := I) g₀ 2 3 i K₂).toSection x) *
+              ∑ l ∈ Finset.range (m + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+                  ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x)
+        ≤ appCcGdiag (E := E) m *
+            ∑ i ∈ Finset.range (m + 1),
+              (2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+                  ((iteratedCovGrad (I := I) g₀ 1 2 i cds).toSection x)) *
+                ∑ l ∈ Finset.range (m + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+                    ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x) := by
+      refine mul_le_mul_of_nonneg_left ?_ hgd_nn
+      refine Finset.sum_le_sum (fun i hi => ?_)
+      rw [Finset.mem_range] at hi
+      exact mul_le_mul_of_nonneg_right (hK₂ i (by omega) x) (hSnn i)
+    refine le_trans hbnd (le_of_eq ?_)
+    have hcongr : (∑ i ∈ Finset.range (m + 1),
+          (2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 1 2 i cds).toSection x)) *
+            ∑ l ∈ Finset.range (m + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+                ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x))
+        = 2 * ∑ i ∈ Finset.range (m + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 1 2 i cds).toSection x) *
+            ∑ l ∈ Finset.range (m + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+                ((iteratedCovGrad (I := I) g₀ 1 2 l cds).toSection x) := by
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl (fun i _ => by ring)
+    rw [hcongr]; ring
+  have hsi : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x (uP - u1)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x uP
+        + 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x u1 :=
+    riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 1 (3 + m) x uP u1
+  refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 1 (3 + m) x (uP - u1) u2) ?_
+  linarith [hsi, hrP, hr1, hr2]
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
