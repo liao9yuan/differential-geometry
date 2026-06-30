@@ -1097,6 +1097,36 @@ theorem ricciArmPrincipalCoeff_sub_perOrder_rfns_le_gInvDiffSlotCoeff
                 ((iteratedCovGrad (I := I) g₀ 2 2 l
                   (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) := by ring
 
+set_option linter.unusedSectionVars false in
+
+theorem deTurckPrincipalCometricCoeff_toSection_clm_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁).toSection x) =
+      cometricDoubleTraceFib (I := I) g₁ 2 x - cometricDoubleTraceFib (I := I) g₀ 2 x :=
+  deTurckCoeff_clm_eq_doubleTrace_sub (I := I) (M := M) g₀ g₁ x
+
+set_option linter.unusedSectionVars false in
+
+theorem deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧ ∀ (g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)).toSection x) ≤
+        C i * ∑ j ∈ Finset.range (i + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + j) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) := by
+  obtain ⟨K, hK_nn, hK_bound⟩ := exists_bound_riemannianFiberNormSq_smoothCcTensor
+    (I := I) (M := M) g₀ 4 2 (cometricDoubleTraceField (I := I) g₀ 2)
+  refine ⟨fun i => appCcGdiag (E := E) i * K * (Module.finrank ℝ E : ℝ) ^ 2, ?_, ?_⟩
+  · intro i
+    have happ : (0 : ℝ) ≤ appCcGdiag (E := E) i := by rw [appCcGdiag]; positivity
+    exact mul_nonneg (mul_nonneg happ hK_nn) (sq_nonneg _)
+  · intro g₁ i x
+    exact rfns_iteratedCovGrad_deTurckPrincipalCometricCoeff_le (I := I) (M := M)
+      g₀ g₁ hK_nn hK_bound i x
+
 end TensorSpectral
 end Parabolic
 end Analysis
