@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RoughLaplacianCometricDoubleTrace
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldDifferentiatedTowerNormalForm
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
 
@@ -303,6 +304,32 @@ private lemma deTurckCoeff_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M) (
   congr 2
   rw [cometricLmodel_sub_eq_gInvDiffRaisedEndo (I := I) g₀ g₁ x
     ((Module.finBasis ℝ E).cDualBasis k)]
+
+set_option linter.unusedSectionVars false in
+
+private lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁ =
+      DifferentialGeometry.Integral.Connection.appCcRS (I := I) (M := M) g₀ 4 4 2
+        (cometricDoubleTraceField (I := I) g₀ 2)
+        (DifferentialGeometry.Integral.Connection.slotInsertEndoCc (I := I) (M := M) g₀ 3
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁)) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  refine tensorRSSpace_ext 4 2 x (fun w => ?_)
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  beta_reduce
+  rw [deTurckCoeff_toModel_eq (I := I) (M := M) g₀ g₁ x w m,
+    DifferentialGeometry.Integral.Connection.appCcRS_toSection,
+    ContinuousLinearMap.comp_apply, cometricDoubleTraceField_toSection,
+    cometricDoubleTraceFib_toModel, modelDoubleTrace_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [DifferentialGeometry.Integral.Connection.slotInsertEndoCc_toSection,
+    slotInsertEndoFib_apply_eval, Fin.cons_zero, Fin.update_cons_zero]
+  rfl
 
 set_option linter.unusedSectionVars false in
 
