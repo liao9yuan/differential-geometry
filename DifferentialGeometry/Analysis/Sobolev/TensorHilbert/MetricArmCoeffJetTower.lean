@@ -2689,6 +2689,54 @@ theorem riemannianFiberNormSq_iteratedCovGrad_armSlotEndoPassZeroCc_eq
   rw [hsec]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g 2 (3 + j) x τ _
 
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+theorem rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (slotInsertEndoCc (I := I) (M := M) g₀ 1
+                (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
+theorem rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+          C i * ∑ n ∈ Finset.range (i + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
+  obtain ⟨C, hC, hbnd⟩ :=
+    rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalProductGrid_le
+      (I := I) (M := M) g₀ hδ₀
+  refine ⟨C, hC, fun g₁ T htie δ hδ_le hδ0 hbound i x => ?_⟩
+  rw [gInvDiffSlotCoeff_eq_slotInsertEndoCc (I := I) g₀ g₁]
+  exact hbnd g₁ T htie hδ_le hδ0 hbound i x
+
 end Connection
 end Integral
 end DifferentialGeometry
