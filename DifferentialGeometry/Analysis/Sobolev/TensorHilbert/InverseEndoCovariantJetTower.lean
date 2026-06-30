@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceArmRfnsBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricSharpEndomorphismJetBound
 
 noncomputable section
 
@@ -477,8 +478,8 @@ theorem rfns_iteratedCovGrad_sharpFlatEndoCc_uniform_le
             (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x) ≤
         inverseEndoJetBound (E := E) R δ l := by
   intro l hl x
-  exact rfns_iteratedCovGrad_sharpFlatEndoCc_allOrders (I := I) g₀ g₁ a T htie hR hδ0 hδ1 hδ
-    hTjet l hl x l (le_refl l)
+  exact rfns_iteratedCovGrad_sharpFlatEndoCc_jetBound_le (I := I) g₀ g₁ a T htie hR hδ0 hδ1 hδ
+    hTjet l hl x
 
 end TensorSpectral
 end Parabolic
