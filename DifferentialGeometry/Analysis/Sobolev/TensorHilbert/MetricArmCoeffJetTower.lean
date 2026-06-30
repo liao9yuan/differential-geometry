@@ -2690,6 +2690,85 @@ theorem riemannianFiberNormSq_iteratedCovGrad_armSlotEndoPassZeroCc_eq
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g 2 (3 + j) x τ _
 
 set_option linter.unusedSectionVars false in
+private lemma metricCovDeriv_symm_right
+    (g : SmoothRiemannianMetric I M)
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (X Y Z : Π b : M, TangentSpace I b) (x : M) :
+    metricCovDeriv (I := I) g cov X Y Z x = metricCovDeriv (I := I) g cov X Z Y x := by
+  unfold metricCovDeriv
+  rw [show (fun b : M => g.inner b (Z b) (Y b)) = (fun b : M => g.inner b (Y b) (Z b)) from by
+    funext b; rw [g.symm b (Z b) (Y b)]]
+  rw [g.symm x (cov.toFun Y x (X x)) (Z x), g.symm x (Y x) (cov.toFun Z x (X x))]
+  ring
+
+set_option linter.unusedSectionVars false in
+private lemma metricDiffCovDeriv_symm_right
+    (g₁ g₀ : SmoothRiemannianMetric I M)
+    (X Y Z : Π b : M, TangentSpace I b) (x : M) :
+    metricDiffCovDeriv (I := I) g₁ g₀ X Y Z x =
+      metricDiffCovDeriv (I := I) g₁ g₀ X Z Y x := by
+  unfold metricDiffCovDeriv
+  rw [metricCovDeriv_symm_right (I := I) g₁ (LeviCivita (I := I) g₀) X Y Z x,
+    metricCovDeriv_symm_right (I := I) g₀ (LeviCivita (I := I) g₀) X Y Z x]
+
+set_option linter.unusedSectionVars false in
+theorem endoCovariantDerivative_gInvDiffRaisedEndoField_resolvent
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (V W Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    g₁.inner x
+        (((endoCovariantDerivative (I := I) (M := M) g₀)
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁) x (V x)) (W x)) (Z x) =
+      - metricDiffCovDeriv (I := I) g₁ g₀
+          (fun y : M => V y)
+          (fun y : M => gInvRaisedEndo (I := I) g₀ g₁ y (W y))
+          (fun y : M => Z y) x := by
+  classical
+  have hg1gir : ∀ u : TangentSpace I x,
+      g₁.inner x (gInvRaisedEndo (I := I) g₀ g₁ x (W x)) u = g₀.inner x (W x) u := by
+    intro u
+    rw [gInvRaisedEndo_apply, inverseMetricSharpFib_inner, cotangentToDualLinear_apply,
+      cotangentToDual_g0FlatCLM]
+  have hpair : g₁.inner x
+        (((endoCovariantDerivative (I := I) (M := M) g₀)
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁) x (V x)) (W x)) (Z x) =
+      - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          (gInvRaisedEndo (I := I) g₀ g₁ x (W x)) (V x)) (Z x)
+        - g₀.inner x (W x) (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x)) := by
+    rw [endoCov_gInvDiffRaisedField_fibrewise (I := I) g₀ g₁ x (V x) (W x)]
+    rw [map_add, ContinuousLinearMap.add_apply, map_neg, ContinuousLinearMap.neg_apply,
+      inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]
+    simp only [ContinuousLinearMap.coe_coe, ContinuousLinearMap.neg_apply,
+      ContinuousLinearMap.comp_apply, ContinuousLinearMap.flip_apply]
+    rw [show (cotangentToCLM (I := I) (g0FlatCLM (I := I) g₀ x (W x)))
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x)) =
+          g₀.inner x (W x) (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x)) from
+      cotangentToDual_g0FlatCLM (I := I) g₀ x (W x)
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x))]
+    ring
+  have hk1 := connDiff_koszul_metricDiff (I := I) g₁ g₀
+    (X := fun y : M => V y) (Y := fun y : M => gInvRaisedEndo (I := I) g₀ g₁ y (W y))
+    (Z := fun y : M => Z y) V.mdifferentiableAt
+    ((gInvRaisedEndo_section_contMDiff (I := I) g₀ g₁ W x).mdifferentiableAt (by norm_num))
+    Z.mdifferentiableAt
+  have hk2 := connDiff_koszul_metricDiff (I := I) g₁ g₀
+    (X := fun y : M => V y) (Y := fun y : M => Z y)
+    (Z := fun y : M => gInvRaisedEndo (I := I) g₀ g₁ y (W y)) V.mdifferentiableAt
+    Z.mdifferentiableAt
+    ((gInvRaisedEndo_section_contMDiff (I := I) g₀ g₁ W x).mdifferentiableAt (by norm_num))
+  have hsym := metricDiffCovDeriv_symm_right (I := I) g₁ g₀
+    (fun y : M => V y) (fun y : M => Z y)
+    (fun y : M => gInvRaisedEndo (I := I) g₀ g₁ y (W y)) x
+  have hconv : g₀.inner x (W x) (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x)) =
+      g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x))
+        (gInvRaisedEndo (I := I) g₀ g₁ x (W x)) := by
+    rw [← hg1gir (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x)),
+      g₁.symm x (gInvRaisedEndo (I := I) g₀ g₁ x (W x))
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Z x) (V x))]
+  rw [hpair, hconv]
+  simp only [] at hk1 hk2
+  linarith [hk1, hk2, hsym]
+
+set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_gInvDiffRaisedEndoField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
