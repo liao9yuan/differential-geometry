@@ -62,6 +62,19 @@ theorem linearizedRicciArm1BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
               (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
+theorem ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 4 2 i
+              (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)).toSection x) ≤
+          C i * ∑ j ∈ Finset.range (i + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + j) x
+              ((iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) :=
+  sorry
+
 theorem ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -70,8 +83,39 @@ theorem ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
             (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
               - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤
           C i * ∑ j ∈ Finset.range (i + 1),
-            ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 :=
-  sorry
+            ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 := by
+  obtain ⟨C, hC_nn, hP⟩ :=
+    ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
+      (I := I) (M := M) g₀
+  refine ⟨C, hC_nn, ?_⟩
+  intro g₁ i
+  have hF_int : MeasureTheory.Integrable
+      (fun x => C i * ∑ j ∈ Finset.range (i + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + j) x
+          ((iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    (MeasureTheory.integrable_finset_sum (Finset.range (i + 1))
+      (fun j _ => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 2 (2 + j)
+        (iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)))).const_mul (C i)
+  have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 4 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 4 2 i
+      (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+        - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀))
+    (fun x => C i * ∑ j ∈ Finset.range (i + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + j) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x))
+    hF_int (fun x => hP g₁ i x)
+  refine le_trans key (le_of_eq ?_)
+  rw [MeasureTheory.integral_const_mul]
+  congr 1
+  rw [MeasureTheory.integral_finset_sum (Finset.range (i + 1))
+    (fun j _ => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 2 (2 + j)
+      (iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)))]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [SmoothCcTensor.norm_def (I := I) (M := M)
+    (iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁))]
+  exact (tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 2 (2 + j)
+    (iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁))).symm
 
 set_option linter.unusedVariables false in
 theorem ricciArmPrincipalCoeff_realizedFam_sub_background_jetL2_perOrder_ballUniform
