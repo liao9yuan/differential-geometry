@@ -804,6 +804,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractio
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionLeibnizGridConstruction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionParallelProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedDiffOpProportionalBound
