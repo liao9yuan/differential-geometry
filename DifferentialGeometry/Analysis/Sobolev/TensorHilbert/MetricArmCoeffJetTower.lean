@@ -8,6 +8,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
+import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
@@ -2909,6 +2910,35 @@ theorem rfns_iteratedCovGrad_slotInsertEndoCc_le_endo
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
+private theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_convolution_recursion
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ (A : ℝ) (B : ℕ → ℝ), 0 ≤ A ∧ (∀ m, 0 ≤ B m) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ y v w, g₁.inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (x : M),
+        (riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + 0) x
+            ((iteratedCovGrad (I := I) g₀ 1 1 0
+              (slotInsertEndoCc (I := I) (M := M) g₀ 0
+                (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤ A) ∧
+        (∀ m : ℕ,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + (m + 1)) x
+              ((iteratedCovGrad (I := I) g₀ 1 1 (m + 1)
+                (slotInsertEndoCc (I := I) (M := M) g₀ 0
+                  (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) ≤
+            B m * ∑ k ∈ Finset.range (m + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + ((m - k) + 1)) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 ((m - k) + 1) T).toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + k) x
+                  ((iteratedCovGrad (I := I) g₀ 1 1 k
+                    (slotInsertEndoCc (I := I) (M := M) g₀ 0
+                      (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x)) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
 private theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -2926,8 +2956,25 @@ private theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoFie
             ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
               ∏ m : Fin n,
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) :=
-  sorry
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := by
+  obtain ⟨A, B, hA, hB, hrec⟩ :=
+    rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_convolution_recursion
+      (I := I) (M := M) g₀ hδ₀
+  refine ⟨fun i => (DifferentialGeometry.Combinatorics.recGridCS A B i).1,
+    fun i => (DifferentialGeometry.Combinatorics.recGridCS_nonneg A B hA hB i).1, ?_⟩
+  intro g₁ T htie δ hδ_le hδ0 hbound i x
+  obtain ⟨hbase, hstep⟩ := hrec g₁ T htie hδ_le hδ0 hbound x
+  have hmain := DifferentialGeometry.Combinatorics.antidiagonalTupleGrid_convolution_bound
+    (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection x))
+    (fun j => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x _)
+    (fun i => riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + i) x
+      ((iteratedCovGrad (I := I) g₀ 1 1 i
+        (slotInsertEndoCc (I := I) (M := M) g₀ 0
+          (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x))
+    A hA B hB hbase hstep i
+  rw [DifferentialGeometry.Combinatorics.antidiagonalTupleGrid] at hmain
+  exact hmain
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
