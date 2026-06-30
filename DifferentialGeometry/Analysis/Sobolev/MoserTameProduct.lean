@@ -369,7 +369,8 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
     (g : SmoothRiemannianMetric I M) {n : ℕ} (hn : 0 < n) (p : Fin n → ℕ) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (c : (m : Fin n) → Integral.L2.SmoothCcTensor g 0 (p m))
-        (P : Integral.L2.SmoothCcTensor g 0 (∑ m, p m)) (Λ : Fin n → ℝ),
+        (P : Integral.L2.SmoothCcTensor g 0 (∑ m, p m)) (Λ : Fin n → ℝ) (K : ℝ),
+        0 ≤ K →
         (∀ m, 0 ≤ Λ m) →
         (∀ (m : Fin n) (x : M) (i : ℕ), i ≤ k →
           riemannianFiberNormSq (I := I) (M := M) g 0 (p m + i) x
@@ -378,35 +379,38 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g 0 ((∑ m, p m) + k) x
               ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toSection x) ≤
-            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
-              (Nat.multinomial Finset.univ e : ℝ) ^ 2 *
-                ∏ m : Fin n,
-                  riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)) →
+            K * ∑ k' ∈ Finset.range (k + 1),
+                  ∑ e ∈ Finset.Nat.antidiagonalTuple n k',
+                    ∏ m : Fin n,
+                      riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)) →
         Integral.L2.tensorL2Norm (I := I) g 0 ((∑ m, p m) + k)
             (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toFun ≤
-          C * ∑ m : Fin n,
+          (C * Real.sqrt K) * ∑ m : Fin n,
                 (∏ j ∈ Finset.univ.erase m, Λ j) *
                   ∑ i ∈ Finset.range (k + 1),
                     Integral.L2.tensorL2Norm (I := I) g 0 (p m + i)
                       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
   classical
-  refine ⟨Real.sqrt ((Finset.Nat.antidiagonalTuple n k).card : ℝ) * (Nat.factorial k : ℝ),
-    by positivity, ?_⟩
-  intro c P Λ hΛ hjet hP
+  refine ⟨Real.sqrt (∑ k' ∈ Finset.range (k + 1),
+      ((Finset.Nat.antidiagonalTuple n k').card : ℝ)), by positivity, ?_⟩
+  intro c P Λ K hK hΛ hjet hP
   set i₀ : Fin n := ⟨0, hn⟩ with hi₀
-  set B : ℝ := (Nat.factorial k : ℝ) with hB
-  have hB_nn : 0 ≤ B := by rw [hB]; positivity
-  set card : ℝ := ((Finset.Nat.antidiagonalTuple n k).card : ℝ) with hcard
-  have hcard_nn : 0 ≤ card := by rw [hcard]; positivity
-  set C : ℝ := Real.sqrt card * B with hC
-  have hC_nn : 0 ≤ C := by rw [hC]; exact mul_nonneg (Real.sqrt_nonneg _) hB_nn
+  set Tcard : ℝ := ∑ k' ∈ Finset.range (k + 1),
+      ((Finset.Nat.antidiagonalTuple n k').card : ℝ) with hTcard
+  have hTcard_nn : 0 ≤ Tcard := by rw [hTcard]; positivity
+  set C : ℝ := Real.sqrt Tcard with hC
+  have hC_nn : 0 ≤ C := by rw [hC]; exact Real.sqrt_nonneg _
+  set sK : ℝ := Real.sqrt K with hsK
+  have hsK_nn : 0 ≤ sK := by rw [hsK]; exact Real.sqrt_nonneg _
   set PΛ : ℝ := ∏ j ∈ Finset.univ.erase i₀, Λ j with hPΛ
   have hPΛ_nn : 0 ≤ PΛ := Finset.prod_nonneg (fun j _ => hΛ j)
-  set D : ℝ := C * PΛ with hD
-  have hD_nn : 0 ≤ D := by rw [hD]; exact mul_nonneg hC_nn hPΛ_nn
-  have hC2 : C ^ 2 = card * B ^ 2 := by rw [hC, mul_pow, Real.sq_sqrt hcard_nn]
-  have hD2 : D ^ 2 = card * (B ^ 2 * PΛ ^ 2) := by rw [hD, mul_pow, hC2]; ring
+  set D : ℝ := C * sK * PΛ with hD
+  have hD_nn : 0 ≤ D := by rw [hD]; exact mul_nonneg (mul_nonneg hC_nn hsK_nn) hPΛ_nn
+  have hC2 : C ^ 2 = Tcard := by rw [hC]; exact Real.sq_sqrt hTcard_nn
+  have hsK2 : sK ^ 2 = K := by rw [hsK]; exact Real.sq_sqrt hK
+  have hD2 : D ^ 2 = Tcard * K * PΛ ^ 2 := by
+    rw [hD, mul_pow, mul_pow, hC2, hsK2]
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 ((∑ m, p m) + k) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P).toSection x) ≤
@@ -420,32 +424,20 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
     have hJet0_nn : 0 ≤ Jet0 :=
       Finset.sum_nonneg (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 _ x _)
     refine le_trans (hP x) ?_
-    have hterm : ∀ e ∈ Finset.Nat.antidiagonalTuple n k,
-        (Nat.multinomial Finset.univ e : ℝ) ^ 2 *
-          ∏ m : Fin n,
+    have hterm : ∀ k' ∈ Finset.range (k + 1), ∀ e ∈ Finset.Nat.antidiagonalTuple n k',
+        ∏ m : Fin n,
             riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)
-          ≤ B ^ 2 * PΛ ^ 2 * Jet0 := by
-      intro e he
-      have hsum_e : ∑ i, e i = k := Finset.Nat.mem_antidiagonalTuple.mp he
+          ≤ PΛ ^ 2 * Jet0 := by
+      intro k' hk' e he
+      have hk'_le : k' ≤ k := by simpa [Nat.lt_succ_iff] using Finset.mem_range.mp hk'
+      have hsum_e : ∑ i, e i = k' := Finset.Nat.mem_antidiagonalTuple.mp he
       have he_le : ∀ m, e m ≤ k := by
         intro m
-        calc e m ≤ ∑ i, e i :=
-              Finset.single_le_sum (f := e) (fun i _ => Nat.zero_le _) (Finset.mem_univ _)
-          _ = k := hsum_e
-      have hmulti : (Nat.multinomial Finset.univ e : ℝ) ≤ B := by
-        rw [hB]
-        have hspec := Nat.multinomial_spec (Finset.univ : Finset (Fin n)) e
-        rw [hsum_e] at hspec
-        have hprodpos : 0 < ∏ i ∈ (Finset.univ : Finset (Fin n)), Nat.factorial (e i) :=
-          Nat.prod_factorial_pos (Finset.univ : Finset (Fin n)) e
-        have hle : Nat.multinomial Finset.univ e ≤ Nat.factorial k :=
-          calc Nat.multinomial Finset.univ e
-              ≤ (∏ i ∈ (Finset.univ : Finset (Fin n)), Nat.factorial (e i)) *
-                  Nat.multinomial Finset.univ e := Nat.le_mul_of_pos_left _ hprodpos
-            _ = Nat.factorial k := hspec
-        exact_mod_cast hle
-      have hmulti_nn : (0 : ℝ) ≤ (Nat.multinomial Finset.univ e : ℝ) := by positivity
+        have hsm : e m ≤ ∑ i, e i :=
+          Finset.single_le_sum (f := e) (fun i _ => Nat.zero_le _) (Finset.mem_univ _)
+        rw [hsum_e] at hsm
+        exact le_trans hsm hk'_le
       set f : Fin n → ℝ := fun m =>
         riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x) with hf
@@ -469,24 +461,31 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
           (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 _ x _) hmem
         rw [← hJet0] at hss
         simpa [hf] using hss
-      calc (Nat.multinomial Finset.univ e : ℝ) ^ 2 * ∏ m : Fin n, f m
-          = (Nat.multinomial Finset.univ e : ℝ) ^ 2 *
-              (f i₀ * ∏ m ∈ Finset.univ.erase i₀, f m) := by rw [hsplit]
-        _ ≤ B ^ 2 * (Jet0 * PΛ ^ 2) := by
-            apply mul_le_mul (pow_le_pow_left₀ hmulti_nn hmulti 2) _
-              (mul_nonneg (hf_nn i₀) hprod_erase_nn) (by positivity)
+      calc ∏ m : Fin n, f m
+          = f i₀ * ∏ m ∈ Finset.univ.erase i₀, f m := hsplit
+        _ ≤ Jet0 * PΛ ^ 2 := by
             apply mul_le_mul hfi0 _ hprod_erase_nn hJet0_nn
             rw [← hprodΛ_eq]; exact herase
-        _ = B ^ 2 * PΛ ^ 2 * Jet0 := by ring
-    calc ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
-            (Nat.multinomial Finset.univ e : ℝ) ^ 2 *
-              ∏ m : Fin n,
-                riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)
-        ≤ ∑ _e ∈ Finset.Nat.antidiagonalTuple n k, B ^ 2 * PΛ ^ 2 * Jet0 :=
-          Finset.sum_le_sum hterm
-      _ = card * (B ^ 2 * PΛ ^ 2 * Jet0) := by
-          rw [Finset.sum_const, nsmul_eq_mul, ← hcard]
+        _ = PΛ ^ 2 * Jet0 := by ring
+    have hinner : ∀ k' ∈ Finset.range (k + 1),
+        (∑ _e ∈ Finset.Nat.antidiagonalTuple n k', PΛ ^ 2 * Jet0)
+          = ((Finset.Nat.antidiagonalTuple n k').card : ℝ) * (PΛ ^ 2 * Jet0) := by
+      intro k' _; rw [Finset.sum_const, nsmul_eq_mul]
+    calc K * ∑ k' ∈ Finset.range (k + 1),
+              ∑ e ∈ Finset.Nat.antidiagonalTuple n k',
+                ∏ m : Fin n,
+                  riemannianFiberNormSq (I := I) (M := M) g 0 (p m + e m) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) (e m) (c m)).toSection x)
+        ≤ K * ∑ k' ∈ Finset.range (k + 1),
+              ∑ _e ∈ Finset.Nat.antidiagonalTuple n k', PΛ ^ 2 * Jet0 := by
+          apply mul_le_mul_of_nonneg_left _ hK
+          apply Finset.sum_le_sum
+          intro k' hk'
+          apply Finset.sum_le_sum
+          intro e he
+          exact hterm k' hk' e he
+      _ = K * (Tcard * (PΛ ^ 2 * Jet0)) := by
+          rw [Finset.sum_congr rfl hinner, ← Finset.sum_mul, ← hTcard]
       _ = D ^ 2 * Jet0 := by rw [hD2]; ring
   have hpack : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (∑ m, p m) k P‖ ≤
       D * ∑ i ∈ Finset.range (k + 1),
@@ -509,17 +508,17 @@ theorem exists_moserTameProduct_pi_iteratedCovGrad_l2Norm_le
       ≤ D * ∑ i ∈ Finset.range (k + 1),
             Integral.L2.tensorL2Norm (I := I) g 0 (p i₀ + i)
               (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toFun := hpack
-    _ = C * ((∏ j ∈ Finset.univ.erase i₀, Λ j) *
+    _ = (C * sK) * ((∏ j ∈ Finset.univ.erase i₀, Λ j) *
               ∑ i ∈ Finset.range (k + 1),
                 Integral.L2.tensorL2Norm (I := I) g 0 (p i₀ + i)
                   (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p i₀) i (c i₀)).toFun) := by
           rw [hD, hPΛ]; ring
-    _ ≤ C * ∑ m : Fin n,
+    _ ≤ (C * sK) * ∑ m : Fin n,
             (∏ j ∈ Finset.univ.erase m, Λ j) *
               ∑ i ∈ Finset.range (k + 1),
                 Integral.L2.tensorL2Norm (I := I) g 0 (p m + i)
                   (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p m) i (c m)).toFun := by
-          apply mul_le_mul_of_nonneg_left _ hC_nn
+          apply mul_le_mul_of_nonneg_left _ (mul_nonneg hC_nn hsK_nn)
           exact Finset.single_le_sum
             (f := fun m : Fin n => (∏ j ∈ Finset.univ.erase m, Λ j) *
                 ∑ i ∈ Finset.range (k + 1),
