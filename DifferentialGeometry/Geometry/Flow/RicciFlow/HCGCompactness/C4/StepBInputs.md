@@ -1,5 +1,17 @@
 # StepBInputs.lean — Step B honest input (S6 / lbl418), native rebuild
 
+## 2026-06-22 — added `C∞` normal chart inverse (section `NormalChartInftySmooth`)
+
+`normalChartAt_contMDiffAt_infty` / `normalChartAt_contMDiffOn_infty`: the normal chart inverse
+is `C∞` (was only `C¹`), via a fresh Banach IFT at `∞` on `extChartAt q ∘ expMap` (chart centred
+at the image point `q`, so `extChartAt`-invertibility is at its centre via
+`isInvertible_mfderiv_extChartAt`). The per-point equiv is taken from
+`(fderiv ℝ (extChartAt q ∘ expMap) v₀).IsInvertible` (genuinely `E ≃L E`) to dodge the
+`TangentSpace 𝓘(ℝ,E) (χ q) = E` defeq wall the `mfderiv`-composite hit in the `HasFDerivAt` slot.
+Added `import …Comparison.ExpBallDiffeo` (for `exp_isLocalDiffeomorphOn_ball`). Consumed by
+`StepBTransition.contDiffOn_normalTransition`. See `StepBTransition.md` (2026-06-22) for the full
+route + soundness note (ball-`C∞` is off the ChainedFlowContinuity sorries).
+
 2026-06-09. Rebuilt the S6 exp⁻¹-derivative honest input on the NATIVE
 normal-coordinate API (`Geometry.Riemannian.NormalCoordinates.expMapDiffeo` /
 `normalChartAt`), replacing the never-compiling `GeometricInputs.lean` section that

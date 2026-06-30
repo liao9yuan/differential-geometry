@@ -23,10 +23,14 @@ Verification passed, sorry-free (2026-06-13). The B5 layer-bridge from the Step 
 
 Item 3 COMPLETE at the brick level: 3a = `exists_expBall_diffeo_of_lt` (unconditional);
 3b = `ConvexBalls.isConvexWith_smallNormalBall` (modulo §5 honest-inputs); net wiring =
-`exists_seqItem3Diffeo` (modulo the §5 radius honest-input + the existing Hopf–Rinow black
-box in `ProperMetricOn`). Optional follow-up: fold `exists_seqItem3Diffeo` in as a field of
-the capstone `GoodCoveringSeq.exists_stableNetData` (which intentionally omitted item 3) —
-a presentation choice; the math is done.
+`exists_seqItem3Diffeo` (modulo the §5 radius honest-input; `ProperMetricOn` is now produced
+by the intrinsic Hopf--Rinow adapter rather than a deferred black box). Optional follow-up:
+fold `exists_seqItem3Diffeo` in as a field of the capstone `GoodCoveringSeq.exists_stableNetData`
+(which intentionally omitted item 3) — a presentation choice; the math is done.
+
+Targeted build of `GoodCoveringItem3` passed after the Hopf--Rinow proper-realization
+replacement, confirming the new `properMetricOn` producer assumptions do not affect this
+packaged-data consumer.
 
 ## Lean gotchas
 

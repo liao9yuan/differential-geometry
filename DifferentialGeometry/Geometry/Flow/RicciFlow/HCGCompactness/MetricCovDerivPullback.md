@@ -83,3 +83,62 @@ Third resumed check: the same global build is still live; Lean worker CPU
 counters increased again.  This satisfies the repeated-tooling-blocker stop
 condition for the current goal.  No new Lean diagnostic for this file is
 available yet because the focused check still cannot be started safely.
+
+2026-06-21 focused check: the global lock was clear and the check reached the
+new seminorm transport section.  The verified part remains the earlier
+all-orders `metricCovDeriv_pullback` block.  The current blocker is local
+elaboration in `normSq0S_pullback_eval_of_orthonormal`: the proof references an
+out-of-scope `infty_ne_zero` helper, then the transported-basis step hits a
+coercion/index-validation issue around
+`Diffeomorph.mfderivToContinuousLinearEquiv_coe` and an invalid `rw [basis']`.
+The downstream `metricDerivNorm_pullback` and
+`metricDerivNormSupOn_pullback_image` lemmas are therefore not yet checked.
+
+## 2026-06-29 — P1.3 tower engine DONE; Ricci-`M≃N` is the gating frontier
+
+Whole file now builds green (3638 jobs) — the earlier `normSq0S`/seminorm blockers
+above are resolved in the current tree.
+
+NEW (verified):
+- `covDerivOfField_succ_eval_smooth_slots` — general single-`covStep` recursion on an
+  arbitrary rank-2 base (generalises the private metric-only recursion).
+- **`covDerivOfField_pullback`** — the P1.3 engine: general base tower naturality `M≃N`
+  (base supplied via `hA0 : A0M y slots = A0N (Φ y)(dΦ slots)`). Faithful mirror of
+  `metricCovDeriv_pullback`, base abstracted. This is what `ricCovTower_pullback` needs
+  (`ricCovTower g g s = covDerivOfField g (ricciSection (leviCivita g)) s`).
+
+GATING REMAINING = `ricciSection_pullback` (`M≃N`): need
+`ricciSection (leviCivita (Φ^*g)) y slots = ricciSection (leviCivita g)(Φ y)(dΦ slots)`,
+i.e. **Ricci-tensor naturality for a non-endo diffeomorphism**. Verified bridges:
+`ricciSection_apply`; `metricCov = leviCivitaConnectionOfMetric` (defeq, Metric.lean:47);
+`metricRicciAt_apply_eq_ricciTensor` (`metricRicciAt g x (vec2 v w) = ricciTensor g x v w`).
+MISSING = a curvature pullback at `M≃N` Ricci level. `ricci_tensor_pullback_natural`/
+`ricciTensor_pullback_conjugation` are **endo-only** (`M≃M`; core `riemannOp_pullback_pointwise`
++ `Diffeomorph.pushforward` are `M≃M`). But `metricRm04Std_pullback` (PullbackNaturality.lean:479)
+IS `M≃N` (0,4) Riemann, proven via `riemannCurvature04At_apply_smooth` + `pushFwdSection`.
+Two routes: (1) generalise the endo conjugation chain to `M≃N` (multi-lemma: needs a
+`pushFwdSection`-based pushforward + `riemannSec_pullback_pointwise` at `M≃N`); (2) build a
+`riemannCurvatureAt` (1,3) `M≃N` pullback mirroring `metricRm04Std_pullback`, then
+`ricciFromRm13At` trace naturality. Route 2 reuses the proven `M≃N` smooth-section machinery;
+the trace-naturality step is the new content. Then `ricCovTower_pullback` (engine + base) →
+MovingShiBoundOn transfer (+ `normSq0S_pullback_eval_of_orthonormal`, already here).
+
+### Update: `ricciSection_eq_ricciTensor` DONE; wall pinned (build green 3705)
+
+NEW verified: `ricciSection_eq_ricciTensor` — `ricciSection (leviCivita g) x (vec2 v w)
+= ricciTensor g x v w` (route-independent reduction base; needs import
+`Curvature.MetricLeviCivitaReconcile` + `[SigmaCompactSpace M][T2Space M][BoundarylessManifold I M]`).
+
+**All 3 routes for `ricciTensor_pullback` (`M≃N`) converge on ONE missing sub-lemma**:
+`riemannOp_pullback_pointwise` at `M≃N` (= `riemannSec_pullback_pointwise` at `M≃N`),
+`dΦ(riemannOp (LeviCivita (Φ^*g)) x u v w) = riemannOp (LeviCivita g)(Φx)(dΦu)(dΦv)(dΦw)`.
+Route 2's orthonormal-trace summand (`ricciTensor_eq_orthonormal_trace` =
+`∑ᵢ g.inner x (riemannOp (LeviCivita g) x Bᵢ v w) Bᵢ`) needs it too — NOT just route 1.
+**SMALLEST UNBLOCK = `riemannSec_pullback_pointwise` at `M≃N`**: a dedicated-session
+generalisation of the endo-only `Pullback/Conjugation/Riemann.lean` layer (swap
+`Diffeomorph.pushforward` (`M≃M`) → `pushFwdSection` (`M≃N`); generalise the
+`riemannSec_pullback_pointwise` + `riemannOp_apply_smooth` plumbing). The `M≃N` smooth-section
+route is proven viable by `metricRm04Std_pullback`/`covDerivOfField_pullback`, so it is plausible
+— but it is a multi-lemma build, not a quick fill. Everything downstream of it
+(`ricciSection_pullback` → `ricCovTower_pullback` → MovingShiBoundOn transfer) is mechanical
+given the banked engine.

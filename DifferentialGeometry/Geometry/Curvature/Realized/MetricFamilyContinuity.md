@@ -181,3 +181,26 @@ sections); (ii) apply `tensor0SFamilyContinuousOnSet_of_chartBasisComp (N := goo
 (= `metricRicciAt (g t)`), rewriting the chart-frame component via (i), then
 `ricciChartFrameComp_jointContinuousOn`.  No analytic/typeclass wall remains — (i) is a
 curvature-algebra lift and (ii) is mechanical.
+
+## 2026-07-01: `Tensor0SFamilyContinuousOnSet.pullback` (P1.4 bundle-section pullback transport)
+
+NEW, verified sorry-free (targeted build 3490 jobs).  In the `Tensor0SFamilyContinuousOnSet`
+namespace: for `hA : Tensor0SFamilyContinuousOnSet (M := N) s K A` and `Φ : M ≃ₘ⟮I,I⟯ N`,
+the Φ-pullback `(t, x) ↦ (A t (Φ x)).compContinuousLinearMap (fun _ => mfderiv I I Φ x)` is jointly
+continuous over `{t∈K}×M`.  THIS is the keystone P1.4 needed (last session's "bundle-section pullback
+frontier" — the survey had MISSED that the converse builder `…_of_chartBasisComp` already exists here;
+with it the lemma is ~30 lines).
+
+Route (mirrors the metric consumer): `apply tensor0SFamilyContinuousOnSet_of_chartBasisComp` with
+`N := baseSet`; per `(x₀, idx)`, `continuousOn_iff_continuous_restrict` to the subtype
+`{q // q.2 ∈ baseSet x₀}`; then `hA.eval_continuous` with `τ q := q.1.1.1`, `b q := Φ q.1.2`,
+slot `v k q := mfderiv I I Φ q.1.2 (chartBasisVecFiber x₀ (idx k) q.1.2)`.  Slot continuity (`hv`):
+the pushed chart-basis section equals `tangentMap I I Φ ∘ (fun q => chartBasisVec x₀ (idx k) q.1.2)`
+(by `rfl` — `tangentMap f ⟨y,w⟩ = ⟨f y, mfderiv f y w⟩` = `mk'`), continuous via
+`(Φ.contMDiff.continuous_tangentMap (by simp)).comp` of `chartBasisVec_contMDiffOn x₀ (idx k)
+|>.continuousOn.comp_continuous … (fun p => p.2)`.  Final `hev.congr` + `simp only [Set.restrict_apply,
+ContinuousMultilinearMap.compContinuousLinearMap_apply]`.
+
+Consumed in `HCGCompactness/SolutionPullback.lean` for `metricTensor_cont` (via `metricTensorField_apply`
++ `pullbackMetric_inner`), `ricciCont` (via `metricRicci_pullback_eval`), `rm04Cont` (via
+`metricRm04_pullback_eval`).  See SolutionPullback.md.

@@ -71,18 +71,22 @@ theorem exists_metricLimit_on
 
 Wires `NormalCoordMetricBoundInput` (B-input) into `exists_metricLimit_on`, for a fixed
 sequence of chart centers `c k : (X.obj k).M` (one `β`) on a fixed open domain `U`.  The
-two **honestly-exposed** missing facts — the `C^∞` smoothness of `normalCoordMetric` on
-`U` (`hsmooth`) and the containment `U ⊆ ball 0 (radius k (c k))` (`hdom`) — are explicit
-hypotheses (the bare statements, NOT renamed predicates).  `hsmooth` is the frontier-1
-gap: `normalCoordMetric` is a pullback via `mfderiv (expMapDiffeo)`, and `expMap` has only
-per-order `C^n` smoothness on an `n`-dependent ball (`expMap_contMDiffAtN_of_norm_lt`); a
-single-radius `ContMDiffOn ⊤` (i.e. `ContMDiffAt ∞` on a uniform ball, the
-`JacobiVariation.md` TODO) is the missing foundational theorem. -/
+two remaining hypotheses are now both **honest geometric containments** of `U` in a
+per-term ball: `hdom` (`U ⊆ ball 0 (input.radius k (c k))`, where the `lbl395`
+derivative/equivalence bounds apply) and `hsub` (`U ⊆ ball 0 (expMapC2Radius … (c k))`,
+where the pulled-back metric is `C^∞`).  The previous `hsmooth` hypothesis — the
+`C^∞` smoothness of `normalCoordMetric` on `U` — is **no longer a frontier**: it is
+discharged internally from `hsub` via `contDiffOn_normalCoordMetric_of_subset_expBall`
+(`StepBInputs`), which rests on the now-available single-radius
+`expMap_contMDiffAt_infty_of_norm_lt_radius`.  The only remaining Step-A wiring is a
+uniform positive lower bound on the two radii across the sequence so a single `U` works
+(recorded in `StepBLocalMetrics.md`). -/
 
 section HCGNormalCoord
 
 open Bundle
 open scoped Manifold ContDiff Bundle
+open DifferentialGeometry.Geometry.Riemannian
 
 universe u uE uH
 
@@ -95,26 +99,32 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 set_option synthInstance.maxHeartbeats 800000 in
 /-- **`normalCoordMetric` local metric limit** (`lbl394` metric part, fixed-`β` HCG
 form).  For a fixed sequence of chart centers `c k : (X.obj k).M` on a fixed open `U`
-contained in every chart ball (`hdom`), with the `lbl395` derivative/equivalence input
-(`input`) and the honestly-exposed `C^∞` smoothness of each pulled-back metric
-(`hsmooth`, the frontier-1 gap), a subsequence of `normalCoordMetric (X.obj k) (c k)`
-converges in `C^∞` on compacts of `U` to a limit metric that is `C^∞` on `U` and retains
-the `½δ ≤ g ≤ 2δ` equivalence (hence positive definite on `U`).  Fixed-`β` only — NOT the
-finite diagonal over all `β`. -/
+contained in every `lbl395` bound ball (`hdom`) and in every `expMapC2Radius` smoothness
+ball (`hsub`), with the `lbl395` derivative/equivalence input (`input`), a subsequence of
+`normalCoordMetric (X.obj k) (c k)` converges in `C^∞` on compacts of `U` to a limit
+metric that is `C^∞` on `U` and retains the `½δ ≤ g ≤ 2δ` equivalence (hence positive
+definite on `U`).  `C^∞` smoothness on `U` is discharged from `hsub` internally (no
+`hsmooth` frontier).  Fixed-`β` only — NOT the finite diagonal over all `β`. -/
 theorem exists_metricLimit_normalCoord
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : NormalCoordMetricBoundInput (I := I) X)
     (c : ∀ k : ℕ, (X.obj k).M)
     {U : Set E} (hU : IsOpen U)
     (hdom : ∀ k, U ⊆ Metric.ball (0 : E) (input.radius k (c k)))
-    (hsmooth : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (normalCoordMetric (I := I) (X.obj k) (c k)) U) :
+    (hsub : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (c k))) :
     ∃ (φ : ℕ → ℕ) (gInf : E → (E →L[ℝ] E →L[ℝ] ℝ)),
       StrictMono φ ∧ ContDiffOn ℝ (⊤ : ℕ∞) gInf U ∧
         MapCInfConvOnCompacts U
           (fun k => normalCoordMetric (I := I) (X.obj (φ k)) (c (φ k))) gInf ∧
         ∀ z ∈ U, ∀ v : E,
           (1 / 2 : ℝ) * ‖v‖ ^ 2 ≤ gInf z v v ∧ gInf z v v ≤ 2 * ‖v‖ ^ 2 :=
-  exists_metricLimit_on hU (fun k => normalCoordMetric (I := I) (X.obj k) (c k)) hsmooth
+  exists_metricLimit_on hU (fun k => normalCoordMetric (I := I) (X.obj k) (c k))
+    (contDiffOn_normalCoordMetric_of_subset_expBall (I := I) c hsub)
     (fun r _K _hKcpt hKU =>
       ⟨input.metricC r, fun k z hz => input.metric_deriv k r (c k) z (hdom k (hKU hz))⟩)
     (fun k z hz v => input.metric_equiv k (c k) z (hdom k hz) v)

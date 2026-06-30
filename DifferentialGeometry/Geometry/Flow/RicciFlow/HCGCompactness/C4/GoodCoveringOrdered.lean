@@ -1,5 +1,6 @@
 import Mathlib.Topology.MetricSpace.HausdorffDistance
 import Mathlib.Topology.MetricSpace.ProperSpace
+import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCovering
 
 set_option autoImplicit false
@@ -15,9 +16,8 @@ API (`infDist`, `isCompact_closedBall`).  This avoids the `ℝ≥0∞`/`toReal` 
 the Riemannian emetric.  The greedy minimiser `r^α = d(S^α,O)` is then a *genuine*
 theorem (`exists_min_dist_base`, from `ProperSpace`), not a black box.
 
-The single geometric black box — that a complete pointed Riemannian manifold is a proper
-metric space under its Riemannian distance (Hopf–Rinow) — is deferred to the
-instantiation layer (separate, not in this abstract core).
+The geometric Hopf--Rinow instantiation is isolated to the instantiation layer;
+the abstract ordered-net core below is a pure proper-metric-space argument.
 -/
 
 noncomputable section
@@ -27,6 +27,7 @@ namespace HCGCompactness
 namespace OrderedNet
 
 open Metric Set
+open scoped Bundle Manifold ContDiff
 
 variable {M : Type*} [MetricSpace M] [ProperSpace M]
 
@@ -710,26 +711,18 @@ section Instantiation
 universe u uE uH
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [Module.Finite Real E]
+variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type uH} [TopologicalSpace H]
 
-/-- **Hopf--Rinow black box (deferred).**  A complete, connected pointed Riemannian
-manifold carries a proper metric-space structure realizing its Riemannian emetric
-(`PointedRiemannianManifold.emetricSpace`), in which moreover every value in
-`[0, d(p,O)]` is attained as a distance to the basepoint (along a minimizing
-geodesic).  These are the `[ProperSpace]` and `hint` inputs of the abstract
-`OrderedNet` layer.
-
-The proof is deferred (`sorry`): it is the Hopf--Rinow chain of
-`Comparison/HopfRinow.lean` (geodesic completeness, minimizing geodesics,
-exp-surjectivity on closed balls ⟹ closed balls compact), agreed to be used as an
-honest black box; consumers transparently depend on `sorryAx` until that file's
-deferred proofs land.  Connectivity is genuinely required: on a disconnected manifold
-the emetric takes the value `⊤` and no real-valued metric realizes it. -/
-theorem exists_proper_realization {I : ModelWithCorners Real E H}
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private theorem exists_proper_realization_aux {I : ModelWithCorners Real E H}
+    (ip : InnerProductSpace Real E)
+    [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
-    (_hc : MetricComplete (I := I) Y)
-    (_hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M) :
+    (hc : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M) :
     ∃ ms : MetricSpace Y.M,
       (∀ x y : Y.M,
         (letI : EMetricSpace Y.M := Y.emetricSpace
@@ -741,11 +734,79 @@ theorem exists_proper_realization {I : ModelWithCorners Real E H}
       (letI : MetricSpace Y.M := ms
        ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
          ∃ q : Y.M, dist q Y.basepoint = t) := by
-  sorry
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I (↑(⊤ : ℕ∞) : WithTop ℕ∞) Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M :=
+    IsManifold.of_le (I := I) (M := Y.M) (n := (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+      (by decide : (1 : WithTop ℕ∞) ≤ (↑(⊤ : ℕ∞) : WithTop ℕ∞))
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  haveI : TopologicalSpace.MetrizableSpace Y.M := Manifold.metrizableSpace I Y.M
+  haveI : T3Space Y.M := inferInstance
+  haveI : ConnectedSpace Y.M := hconn
+  letI rb := Y.riemBundle (I := I)
+  letI hInner := Y.riemInner (I := I)
+  haveI hCont := Y.riemBundle_cont (I := I)
+  letI : InnerProductSpace Real E := ip
+  have hcomplete :
+      (letI : EMetricSpace Y.M := EMetricSpace.ofRiemannianMetric I Y.M
+       CompleteSpace Y.M) := by
+    simpa [MetricComplete] using hc
+  refine ⟨DifferentialGeometry.Geometry.Riemannian.HopfRinow.riemMetricSpace
+      (I := I) (M := Y.M), ?_, ?_, ?_⟩
+  · intro x y
+    have hreal :=
+      DifferentialGeometry.Geometry.Riemannian.HopfRinow.riemMetric_realizes
+        (I := I) (M := Y.M) x y
+    simpa [PointedRiemannianManifold.emetricSpace] using hreal
+  · have hproper :=
+      DifferentialGeometry.Geometry.Riemannian.HopfRinow.properSpace_riemMetric
+        (I := I) (M := Y.M) hcomplete Y.metric (by
+          intro x v
+          simpa using
+            (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+              (I := I) Y.metric x v))
+    simpa using hproper
+  · have hhint :=
+      DifferentialGeometry.Geometry.Riemannian.HopfRinow.intermediateDist_riemMetric
+        (I := I) (M := Y.M) hcomplete Y.metric (by
+          intro x v
+          simpa using
+            (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+              (I := I) Y.metric x v)) Y.basepoint
+    simpa using hhint
+
+/-- A complete, connected pointed Riemannian
+manifold carries a proper metric-space structure realizing its Riemannian emetric
+(`PointedRiemannianManifold.emetricSpace`), in which moreover every value in
+`[0, d(p,O)]` is attained as a distance to the basepoint (along a minimizing
+geodesic).  These are the `[ProperSpace]` and `hint` inputs of the abstract
+`OrderedNet` layer. -/
+theorem exists_proper_realization {I : ModelWithCorners Real E H}
+    [InnerProductSpace Real E]
+    [I.Boundaryless]
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hc : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M) :
+    ∃ ms : MetricSpace Y.M,
+      (∀ x y : Y.M,
+        (letI : EMetricSpace Y.M := Y.emetricSpace
+         edist x y) =
+        ENNReal.ofReal (letI : MetricSpace Y.M := ms
+         dist x y)) ∧
+      (letI : MetricSpace Y.M := ms
+       ProperSpace Y.M) ∧
+      (letI : MetricSpace Y.M := ms
+       ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
+         ∃ q : Y.M, dist q Y.basepoint = t) := by
+  exact exists_proper_realization_aux (I := I) (ip := inferInstance) Y hc hconn
 
 /-- The realized proper metric package on one pointed Riemannian manifold: the
 `MetricSpace` realizing the Riemannian emetric, its properness, and the
-intermediate-distance property.  Produced from the Hopf--Rinow black box by choice. -/
+intermediate-distance property.  Produced from the checked Hopf--Rinow adapter by choice. -/
 structure ProperMetricOn {I : ModelWithCorners Real E H}
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) where
   ms : MetricSpace Y.M
@@ -760,8 +821,10 @@ structure ProperMetricOn {I : ModelWithCorners Real E H}
     ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
       ∃ q : Y.M, dist q Y.basepoint = t
 
-/-- Choice form of the Hopf--Rinow black box (inherits its deferred `sorry`). -/
+/-- Choice form of Hopf--Rinow proper metric realization. -/
 noncomputable def properMetricOn {I : ModelWithCorners Real E H}
+    [InnerProductSpace Real E]
+    [I.Boundaryless]
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
     (hc : MetricComplete (I := I) Y)
     (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M) :

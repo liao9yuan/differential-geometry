@@ -1,9 +1,9 @@
-# StepBApproxIso.lean — B-Falpha (`lbl399`) `C⁰` core + `lbl404` frontier (2026-06-13)
+# StepBApproxIso.lean — B-Falpha (`lbl399`) `C⁰` core + `C^∞` upgrade
 
-## Status: `lbl399` `C⁰` core COMPLETE; full `C^∞` `lbl399` and `lbl404` = one reported frontier
+## Status: `lbl399` `C⁰` core COMPLETE; `C^∞` two-parameter upgrade COMPLETE
 
-**Verification PASSED**: focused check + targeted build green (no warnings); axiom-clean
-(`[propext, Classical.choice, Quot.sound]`) for `comp_tendsto_id_on`.
+**Verification PASSED** for the focused file checks.  The new `C^∞` endpoint is
+`comp_cInf_id_on`.
 
 ## Delivered (`lbl399`, `C⁰` core)
 - `comp_tendsto_id_on` — two-parameter composition converges to the identity, **order-0
@@ -20,26 +20,20 @@
 For the book's `F_{kℓ,β}^α = J̄_ℓ^{αβ} ∘ J_k^{βα}`: `B := J^{βα}`, `A := J̄^{αβ}`, the
 limit cocycle `A∞ ∘ B∞ = id` is `exists_transitionLimit_on`'s output.
 
-## Reported frontier (full `C^∞` `lbl399` AND `lbl404`) — Faà-di-Bruno composition convergence
+## Delivered (`lbl399`, `C^∞` upgrade)
 
-The book's `lbl399` is `C^∞` convergence; `comp_tendsto_id_on` gives only `C⁰`. Upgrading
-needs a **Faà-di-Bruno composition-convergence** lemma:
+- `comp_cInf_id_on` — two-parameter `C^∞` convergence to the identity.  For every
+  compact `K ⊆ U`, finite order `p`, and `ε > 0`, there is one threshold `N` such
+  that for all `k,l ≥ N`, all `r ≤ p`, and all `x ∈ K`,
+  `mapDerivNorm r (A_l ∘ B_k) id x ≤ ε`.
+- Proof route: use `MapConvergenceComp.lean`'s same-index
+  `MapCInfConvOnCompacts.comp`, then prove the two-parameter tail by
+  contradiction.  A bad tail would choose `k_N,l_N ≥ N`; the reindexing lemmas
+  turn `A_{l_N}` and `B_{k_N}` back into valid convergent sequences, contradicting
+  same-index composition convergence.
 
-> if `B_k → B∞` and `A_k → A∞` in `C^∞` on compacts (open domains, uniform derivative
-> bounds), then `A_ℓ ∘ B_k → A∞ ∘ B∞` in `C^∞` on compacts (two-parameter / tail).
+## Remaining Frontier
 
-`∇ʳ(A_ℓ ∘ B_k)` is the static Faà-di-Bruno polynomial in `(∇^{≤r}A_ℓ)∘B_k` and
-`∇^{≤r}B_k`; the content is pushing two-parameter uniform-on-compacts convergence through
-it **with the moving evaluation point `B_k x`** (the `C⁰` corralling above, applied at
-every order, plus uniform continuity of each `∇^j A∞`). Mathlib has the static formula
-(`Mathlib.Analysis.Calculus.ContDiff.FaaDiBruno`) but **no convergence version**.
-
-**`lbl404`** (almost-identity pullback `φ_k^* h_k → hInf`) reduces to the **same** lemma:
-`(φ_k^* h_k)(z)(u,v) = h_k(φ_k z)(dφ_k u, dφ_k v)` is a composition `h_k ∘ φ_k` times the
-bilinear factor `dφ_k ⊗ dφ_k`; its `C^p` convergence is exactly the composition + product
-convergence the same Faà-di-Bruno lemma supplies. So **one** lemma unblocks both.
-
-Per the plan ("do not invent a broad convergence framework; stop with the smallest
-missing lemma"), `lbl404` was **not** attempted and the `C^∞` `lbl399` upgrade is left to
-this single missing lemma. (Both also sit downstream of the Step-C-gated `lbl397`, the
-hard stop.)
+`lbl404` is still not attempted here.  The composition-convergence analysis
+needed by `lbl399` is now available, but the pullback/source-domain layer still
+needs its own product and domain bookkeeping for the metric pullback expression.

@@ -144,9 +144,10 @@ exp⁻¹ deriv — `ExpInverseDerivBoundInput`, temporary).
 
 ## §5 Supporting: distance / exp⁻¹ derivatives — PARKED
 
-Blocked on GlobalGeometry `sorry`s (minimal geodesics `HopfRinow.lean:119`; Gauss
-lemma `GaussLemma.lean:687`) + no Mathlib cut-locus/Riemannian-gradient/exp API.
-Leave as-is; merge external global-geometry code later, then revisit.
+The proper-realization Hopf--Rinow route is no longer blocked: C4 now uses the
+checked intrinsic minimizing-exponential endpoint through `HopfRinowProper.lean`.
+This §5 distance/exp-inverse layer remains parked on the separate Gauss/cut-locus/
+Riemannian-gradient API surface and the convexity-specific inputs.
 
 - [ ] S1 `lbl411` ∇d² · S2 `lbl412` Hess d² · [~] S3 `lbl413` Hess comparison (honest-input)
       · S4 local convexity · S5 `lbl417` convex balls · [~] S6 `lbl418` exp⁻¹ deriv (honest-input).
@@ -161,9 +162,10 @@ distance-ORDERED greedy net (`GoodCoveringOrdered.lean`, abstract
 `[MetricSpace][ProperSpace]`), A3 cover/count, A4 finite cover, A5/A6, A7 `lbl390`
 window, A8 `lbl391` radii, A9–A13, and the **capstone
 `GoodCoveringSeq.lean:exists_stableNetData`** = `lbl383` items 1,2,4,5,6,7 on a
-diagonal subsequence. ONE deferred `sorry`: `GoodCoveringOrdered.lean:
-exists_proper_realization` (the user-approved Hopf–Rinow black box). Honest inputs:
-A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballMult (Bishop–Gromov), RealizesEdist.
+diagonal subsequence. The old `GoodCoveringOrdered.lean:exists_proper_realization`
+Hopf--Rinow deferral is discharged through `HopfRinowProper.lean` and the intrinsic
+exp endpoint. Honest inputs: A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballMult
+(Bishop–Gromov), RealizesEdist.
 
 - [ ] **A-item3 — `lbl383` item 3** (exp∘L diffeo at λ-scale + geodesic convexity):
       the ONLY remaining Step A content. UN-PARKED 2026-06-11 (user: full 3a+3b);
@@ -197,7 +199,8 @@ A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballMult (Bishop–Gromov), Realiz
       field (presentation only). The Jacobi/Grönwall bricks (keystone, ExpNonsingular, ∞→N
       refactor) are reusable analysis, now relevant to Step B `lbl395`, not item 3.
       **⟹ STEP A (faithful, book-benchmark) = COMPLETE modulo the declared black boxes**
-      (Hopf–Rinow, A0/A0' decay+volume, §5 `lbl413`/`lbl416` convexity + C²-radius scale).
+      (A0/A0' decay+volume, §5 `lbl413`/`lbl416` convexity + C²-radius scale; the
+      former proper-realization Hopf--Rinow black box is discharged).
 
 ## Convergence spine — canonical analytic interface (RULING 2026-06-17)
 
@@ -253,6 +256,30 @@ assembly-`sorry`. **LIVE frontier:** `B1→…→B6  →  C1→…→C4  →  D1
 `metricCompactness`), all on the convergence-spine ruling above. Remaining non-B/C/D todo:
 F2-book, F4-assembly.
 
+### 2026-06-22 — `lbl394` DONE (both halves); B1 scoped (intertwines with C)
+
+`lbl394` (local metric limits `exists_metricLimit_normalCoord` + transition limits
+`exists_transitionLimit_normalTransition`) is COMPLETE and verified — both now rest only on
+honest geometric containments (metric: `hsub`; transition: `hUx`/`hVy`/`hmapsJ`/`hmapsJbar`),
+the `C∞` normal chart inverse having been built (`StepBInputs.normalChartAt_contMDiffAt_infty`,
+fresh IFT-at-∞). See `StepBLocalMetrics.md` / `StepBTransition.md` / `StepBInputs.md` (2026-06-22).
+
+**B1↔C correction (book L1531):** `lbl397` (B1, "approx-iso on a large ball") is the map
+`F_{kℓ;r}` built BY AVERAGING the local maps `F_{kℓ}^α` via center of mass — i.e. B1's proof
+USES Step C's averaging (`lbl434`). So B1 and C are NOT cleanly sequential; the plan's
+`B1→…→B6 → C` ordering is a labeling artifact. Actual structure:
+`lbl394 (J,J̄ limits, done) → lbl398/lbl399 (local maps F^α_{kℓ,β}=J̄∘J → id) → [C averaging] → lbl397`.
+
+**Precise next brick:** lbl399's `C⁰` core is DONE (`StepBApproxIso.comp_tendsto_id_on`:
+`A_ℓ∘B_k → id` uniformly on compacts). The open frontier is the **`C⁰→C∞` upgrade = a
+Faà-di-Bruno composition-convergence lemma** for `MapCInfConvOnCompacts`: from `A_ℓ→A_∞`,
+`B_k→B_∞` in `C∞`-on-compacts, conclude `A_ℓ∘B_k → A_∞∘B_∞` in `C∞`-on-compacts (push the
+two-parameter uniform-on-compacts convergence through `∇ʳ(A∘B)`'s chain-rule polynomial, moving
+eval point `B_k x` corralled as in the `C⁰` proof). Mathlib has static Faà-di-Bruno, no
+convergence version. This single reusable lemma (belongs in the `MapConvergence` engine,
+Analysis-promotable) unblocks BOTH lbl399-`C∞` AND lbl404. It is the recommended next focused
+brick for the B-track.
+
 **Off the critical path (reusable analysis, do NOT re-couple to Thm 3.9):** the
 Jacobi/Grönwall nonsingularity tower (`CovariantGronwall`/`ExpNonsingular`/`InnerExpansion`
 /∞→finite parallel-transport) — item-3a is unconditional without it; it is instead the
@@ -263,9 +290,10 @@ The remaining §5 surface is honest-input only.
 
 Honest-input boundary (total): A0 `lbl384`, A0' Rauch/volume, `lbl395` ([H6] Cor 4.12
 normal-coord metric bounds), S3 `lbl413` / `lbl416` (convexity + C²-radius scale), S6
-`lbl418` (`ExpInverseDerivBoundInput`), F8 `lbl375`/[H6] §5 (`IsometryDerivBounds`), Step A
-Hopf–Rinow (`exists_proper_realization`). *(Open question for Step B: whether S6 is
-derivable from `lbl395` + the F8 bound-propagation, shrinking this set.)*
+`lbl418` (`ExpInverseDerivBoundInput`), F8 `lbl375`/[H6] §5 (`IsometryDerivBounds`).
+The former Step A Hopf--Rinow `exists_proper_realization` input is discharged.
+*(Open question for Step B: whether S6 is derivable from `lbl395` + the F8
+bound-propagation, shrinking this set.)*
 
 **Shared with Chapter 3:** the good-frame producer (`RicBoundGoodFrame.lean`) is the
 same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`);

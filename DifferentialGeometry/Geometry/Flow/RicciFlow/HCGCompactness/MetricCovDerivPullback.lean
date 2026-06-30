@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Curvature.PullbackNaturality
 import DifferentialGeometry.Geometry.Curvature.Components.RicciTrace
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
+import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
@@ -24,6 +26,7 @@ namespace HCGCompactness
 
 open scoped Manifold ContDiff BigOperators
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Connection.CovariantDerivative
 open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
@@ -154,6 +157,39 @@ private theorem metricCovDeriv_succ_eval_smooth_slots'
     (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
     (leviCivitaConnectionOfMetric (I := I) gRef) X V
     (metricCovDeriv (I := I) h gRef a) x
+
+/-- Boundaryless-free smooth-slot recursion for one `covDerivOfField` step on an
+arbitrary rank-`2` base field `A0`.  Generalises
+`metricCovDeriv_succ_eval_smooth_slots'` (whose base is the metric tensor field)
+to any base; the invariant formula needed by the general pullback induction. -/
+private theorem covDerivOfField_succ_eval_smooth_slots
+    [SigmaCompactSpace M] [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (a : Nat)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (V : Fin (a + 2) -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    covDerivOfField (I := I) gRef A0 (a + 1) x
+        (Fin.cons (X x) (fun q : Fin (a + 2) => V q x)) =
+      extDerivFun (I := I)
+          (fun y : M => covDerivOfField (I := I) gRef A0 a y
+            (fun q : Fin (a + 2) => V q y)) x (X x) -
+        ∑ p : Fin (a + 2),
+          covDerivOfField (I := I) gRef A0 a x
+            (Function.update (fun q : Fin (a + 2) => V q x) p
+              (((leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun y : M => V p y) x) (X x))) := by
+  rw [covDerivOfField_succ, metricCovDerivStep_apply,
+    Tensor0SBundle.totalNabla0SFun_apply_section]
+  exact Tensor0SBundle.nabla0SFun_eval_smooth_slots
+    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (leviCivitaConnectionOfMetric (I := I) gRef) X V
+    (covDerivOfField (I := I) gRef A0 a) x
 
 /-- Pointwise naturality of the full background metric-covariant derivative
 tower under pullback by a diffeomorphism. -/
@@ -321,6 +357,281 @@ theorem metricCovDeriv_pullback
         · rw [Fin.cons_succ]
       rw [hpushSlots, hslots]
       simpa [hX, hV, pushFwdSection_apply_at_image] using hsmooth
+
+/-- **General base naturality of the `covDerivOfField` tower under pullback.**
+For any rank-`2` base field whose values transport under `Φ`
+(`hA0 : A0M x = A0N (Φ x) ∘ dΦ`), the full `gRef`-covariant-derivative tower of
+`A0` transports under the simultaneous pullback by `Φ`.  This generalises
+`metricCovDeriv_pullback` (metric base) to an arbitrary base, so it applies to
+the Ricci-tensor base of `ricCovTower`. -/
+theorem covDerivOfField_pullback
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 N] [IsManifold I 2 N]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+    (gRef : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
+    (A0M : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (A0N : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := N) (n := (∞ : WithTop ℕ∞)) 2)
+    (hA0 : ∀ (y : M) (slots : Fin 2 -> TangentSpace I y),
+      A0M y slots = A0N (Phi y)
+        (fun q : Fin 2 => mfderiv I I (Phi : M -> N) y (slots q))) :
+    ∀ a : Nat, ∀ x : M, ∀ slots : Fin (a + 2) -> TangentSpace I x,
+      covDerivOfField (I := I) (Diffeomorph.pullbackMetric (I := I) gRef Phi) A0M a x slots =
+        covDerivOfField (I := I) gRef A0N a (Phi x)
+          (fun q : Fin (a + 2) => mfderiv I I (Phi : M -> N) x (slots q)) := by
+  classical
+  intro a
+  induction a with
+  | zero =>
+      intro x slots
+      exact hA0 x slots
+  | succ a ih =>
+      intro x slots
+      obtain ⟨X, hX⟩ :=
+        ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+          (n := (⊤ : ℕ∞)) x (slots 0)
+      let V : Fin (a + 2) ->
+          ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
+        fun q =>
+          (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+            (n := (⊤ : ℕ∞)) x (slots q.succ)).choose
+      have hV : ∀ q : Fin (a + 2), V q x = slots q.succ := by
+        intro q
+        exact
+          (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+            (n := (⊤ : ℕ∞)) x (slots q.succ)).choose_spec
+      have hsmooth :
+          covDerivOfField (I := I) (Diffeomorph.pullbackMetric (I := I) gRef Phi) A0M (a + 1) x
+              (Fin.cons (X x) (fun q : Fin (a + 2) => V q x)) =
+            covDerivOfField (I := I) gRef A0N (a + 1) (Phi x)
+              (Fin.cons ((pushFwdSection (I := I) Phi X) (Phi x))
+                (fun q : Fin (a + 2) =>
+                  (pushFwdSection (I := I) Phi (V q)) (Phi x))) := by
+        let refPb : SmoothRiemannianMetric I M :=
+          Diffeomorph.pullbackMetric (I := I) gRef Phi
+        have hleft :=
+          covDerivOfField_succ_eval_smooth_slots (I := I) refPb A0M a X V x
+        have hright :=
+          covDerivOfField_succ_eval_smooth_slots (I := I) gRef A0N a
+            (pushFwdSection (I := I) Phi X)
+            (fun q : Fin (a + 2) => pushFwdSection (I := I) Phi (V q)) (Phi x)
+        rw [hleft, hright]
+        have hderiv :
+            extDerivFun (I := I)
+                (fun y : M => covDerivOfField (I := I) refPb A0M a y
+                  (fun q : Fin (a + 2) => V q y)) x (X x) =
+              extDerivFun (I := I)
+                (fun z : N => covDerivOfField (I := I) gRef A0N a z
+                  (fun q : Fin (a + 2) =>
+                    pushFwdSection (I := I) Phi (V q) z)) (Phi x)
+                ((pushFwdSection (I := I) Phi X) (Phi x)) := by
+          have hscalar :
+              (fun y : M => covDerivOfField (I := I) refPb A0M a y
+                (fun q : Fin (a + 2) => V q y)) =
+                fun y : M => covDerivOfField (I := I) gRef A0N a (Phi y)
+                  (fun q : Fin (a + 2) =>
+                    pushFwdSection (I := I) Phi (V q) (Phi y)) := by
+            funext y
+            simpa [refPb, pushFwdSection_apply_at_image] using
+              ih y (fun q : Fin (a + 2) => V q y)
+          have hf : MDifferentiableAt I 𝓘(Real, Real)
+              (fun z : N => covDerivOfField (I := I) gRef A0N a z
+                (fun q : Fin (a + 2) => pushFwdSection (I := I) Phi (V q) z))
+              (Phi x) :=
+            (Tensor0SBundle.tensor0SField_eval_smooth_slots_contMDiffAt
+              (I := I) (covDerivOfField (I := I) gRef A0N a)
+              (fun q : Fin (a + 2) => pushFwdSection (I := I) Phi (V q))
+              (Phi x)).mdifferentiableAt (by simp)
+          rw [hscalar]
+          simpa [pushFwdSection_apply_at_image] using
+            extDerivFun_comp_diffeomorph (I := I)
+              (f := fun z : N => covDerivOfField (I := I) gRef A0N a z
+                (fun q : Fin (a + 2) => pushFwdSection (I := I) Phi (V q) z))
+              Phi x (X x) hf
+        have hsum :
+            (∑ p : Fin (a + 2),
+              covDerivOfField (I := I) refPb A0M a x
+                (Function.update (fun q : Fin (a + 2) => V q x) p
+                  (((leviCivitaConnectionOfMetric (I := I) refPb)
+                      (fun y : M => V p y) x) (X x)))) =
+              ∑ p : Fin (a + 2),
+                covDerivOfField (I := I) gRef A0N a (Phi x)
+                  (Function.update
+                    (fun q : Fin (a + 2) =>
+                      pushFwdSection (I := I) Phi (V q) (Phi x)) p
+                    (((leviCivitaConnectionOfMetric (I := I) gRef)
+                        (fun z : N => pushFwdSection (I := I) Phi (V p) z)
+                        (Phi x))
+                      (pushFwdSection (I := I) Phi X (Phi x)))) := by
+          apply Finset.sum_congr rfl
+          intro p _
+          let covL : TangentSpace I x :=
+            ((leviCivitaConnectionOfMetric (I := I) refPb)
+              (fun y : M => V p y) x) (X x)
+          let covR : TangentSpace I (Phi x) :=
+            ((leviCivitaConnectionOfMetric (I := I) gRef)
+              (fun z : N => pushFwdSection (I := I) Phi (V p) z) (Phi x))
+              (pushFwdSection (I := I) Phi X (Phi x))
+          have hcov : mfderiv I I (Phi : M -> N) x covL = covR := by
+            have hcov' := metricCov_pullback (I := I) gRef Phi (V p) x (X x)
+            simpa [covL, covR, refPb, metricCov, pushFwdSection_apply_at_image] using hcov'
+          have hslots : (fun q : Fin (a + 2) =>
+              mfderiv I I (Phi : M -> N) x
+                (Function.update (fun q : Fin (a + 2) => V q x) p covL q)) =
+              Function.update
+                (fun q : Fin (a + 2) => pushFwdSection (I := I) Phi (V q) (Phi x))
+                p covR := by
+            funext q
+            by_cases hqp : q = p
+            · subst q
+              simpa [Function.update] using hcov
+            · rw [Function.update_of_ne hqp, Function.update_of_ne hqp]
+              simp [pushFwdSection_apply_at_image]
+          have hih := ih x (Function.update (fun q : Fin (a + 2) => V q x) p covL)
+          calc
+            covDerivOfField (I := I) refPb A0M a x
+                (Function.update (fun q : Fin (a + 2) => V q x) p covL) =
+              covDerivOfField (I := I) gRef A0N a (Phi x)
+                (fun q : Fin (a + 2) =>
+                  mfderiv I I (Phi : M -> N) x
+                    (Function.update (fun q : Fin (a + 2) => V q x) p covL q)) := by
+                simpa [refPb, covL] using hih
+            _ =
+              covDerivOfField (I := I) gRef A0N a (Phi x)
+                (Function.update
+                  (fun q : Fin (a + 2) =>
+                    pushFwdSection (I := I) Phi (V q) (Phi x))
+                  p covR) := by
+                rw [hslots]
+        rw [hderiv, hsum]
+      have hslots :
+          slots = Fin.cons (slots 0) (fun q : Fin (a + 2) => slots q.succ) := by
+        funext q
+        refine Fin.cases ?_ (fun p => ?_) q
+        · rw [Fin.cons_zero]
+        · rw [Fin.cons_succ]
+      have hpushSlots :
+          (fun q : Fin ((a + 1) + 2) =>
+              mfderiv I I (Phi : M -> N) x (slots q)) =
+            Fin.cons (mfderiv I I (Phi : M -> N) x (slots 0))
+              (fun q : Fin (a + 2) =>
+                mfderiv I I (Phi : M -> N) x (slots q.succ)) := by
+        funext q
+        refine Fin.cases ?_ (fun p => ?_) q
+        · rw [Fin.cons_zero]
+        · rw [Fin.cons_succ]
+      rw [hpushSlots, hslots]
+      simpa [hX, hV, pushFwdSection_apply_at_image] using hsmooth
+
+/-- **Reduction of the Ricci section to the metric Ricci tensor.**  The realized
+Ricci section of the Levi-Civita connection of `g`, evaluated on `vec2 v w`,
+equals the canonical metric Ricci tensor `ricciTensor g x v w`.  Bridges
+`ricciSection_apply` (→ `ricciCurvatureAt`) with `metricRicciAt_apply_eq_ricciTensor`
+(using `metricCov = leviCivitaConnectionOfMetric` definitionally). -/
+theorem ricciSection_eq_ricciTensor
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+        (I := I) (M := M)
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+          (I := I) (M := M) g) x (vec2 (I := I) v w)
+      = ricciTensor (I := I) g x v w := by
+  rw [DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection_apply]
+  exact metricRicciAt_apply_eq_ricciTensor (I := I) g x v w
+
+/-- **The `(0,4)` Std curvature as the lowered Riemann operator.**  Extracted from the
+first half of `metricRm04StdAt_eq_chartRiemannCLM`: `metricRm04StdAt g x X Y Z W` is the
+`g`-inner product of `W` with the Riemann operator `riemannOp (LeviCivita g) x X Y Z`. -/
+theorem metricRm04StdAt_eq_inner_riemannOp
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M) (x : M) (X Y Z W : TangentSpace I x) :
+    metricRm04StdAt (I := I) g x X Y Z W
+      = g.inner x W (riemannOp (cov := LeviCivita (I := I) g) x X Y Z) := by
+  rw [metricRm04StdAt_apply,
+    show metricRm04At (I := I) g x
+        = riemannCurvature04At g (metricCov (I := I) g) (metricCov_smooth (I := I) g) x from rfl,
+    riemannCurvature04At_apply_const]
+  haveI : CovariantDerivative.ContMDiffCovariantDerivative (metricCov (I := I) g) ∞ :=
+    LeviCivita_isContMDiff g
+  rw [riemannCurvatureAux_tangentConst_eq_riemannOp (metricCov (I := I) g)
+      (metricCov_smooth (I := I) g) x X Y Z,
+    show riemannOp (cov := metricCov (I := I) g) x X Y Z
+        = riemannOp (cov := LeviCivita (I := I) g) x X Y Z from rfl]
+
+/-- **Naturality of the Ricci tensor under a non-endo diffeomorphism `M ≃ₘ N`.**
+The Ricci tensor of a pullback metric is the pullback of the Ricci tensor.  Proved
+by the orthonormal-trace formula on both sides, bridged term-by-term through the
+proven `M ≃ₘ N` `(0,4)` pullback `metricRm04Std_pullback` (via
+`metricRm04StdAt_eq_inner_riemannOp`), with the source orthonormal frame pushed to
+a target orthonormal frame by `pullbackMetric_inner`.  Generalises the endo-only
+`ricciTensor_pullback_conjugation`. -/
+theorem ricciTensor_pullback
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
+    (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N)
+    (x : M) (v w : TangentSpace I x) :
+    ricciTensor (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ) x v w
+      = ricciTensor (I := I) g (Φ x)
+          (mfderiv I I (Φ : M → N) x v) (mfderiv I I (Φ : M → N) x w) := by
+  classical
+  obtain ⟨B, hB⟩ := exists_gOrthonormalBasis (Diffeomorph.pullbackMetric (I := I) g Φ) x
+  have hB' : ∀ i j, g.inner (Φ x)
+        (mfderiv I I (Φ : M → N) x (B i)) (mfderiv I I (Φ : M → N) x (B j))
+      = if i = j then (1 : ℝ) else 0 := by
+    intro i j
+    rw [← Diffeomorph.pullbackMetric_inner (I := I) g Φ x (B i) (B j)]
+    exact hB i j
+  rw [ricciTensor_eq_orthonormal_trace (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ)
+        x v w (fun i => B i) hB,
+      ricciTensor_eq_orthonormal_trace (I := I) g (Φ x)
+        (mfderiv I I (Φ : M → N) x v) (mfderiv I I (Φ : M → N) x w)
+        (fun i => mfderiv I I (Φ : M → N) x (B i)) hB']
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [(Diffeomorph.pullbackMetric (I := I) g Φ).symm x
+        (riemannOp (cov := LeviCivita (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ))
+          x (B i) v w) (B i),
+      ← metricRm04StdAt_eq_inner_riemannOp (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ)
+        x (B i) v w (B i),
+      metricRm04Std_pullback (I := I) g Φ x (B i) v w (B i),
+      metricRm04StdAt_eq_inner_riemannOp (I := I) g (Φ x)
+        (mfderiv I I (Φ : M → N) x (B i)) (mfderiv I I (Φ : M → N) x v)
+        (mfderiv I I (Φ : M → N) x w) (mfderiv I I (Φ : M → N) x (B i)),
+      g.symm (Φ x) (mfderiv I I (Φ : M → N) x (B i))
+        (riemannOp (cov := LeviCivita (I := I) g) (Φ x)
+          (mfderiv I I (Φ : M → N) x (B i)) (mfderiv I I (Φ : M → N) x v)
+          (mfderiv I I (Φ : M → N) x w))]
+
+/-- **Naturality of the Ricci section (`vec2`-slot form) under `M ≃ₘ N`.**  The base
+case `hA0` that `covDerivOfField_pullback` consumes for the `ricCovTower` (Ricci) base. -/
+theorem ricciSection_pullback
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
+    (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N)
+    (y : M) (slots : Fin 2 → TangentSpace I y) :
+    CovariantDerivative.ricciSection (I := I)
+        (leviCivitaConnectionOfMetric (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ))
+        (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I)
+          (Diffeomorph.pullbackMetric (I := I) g Φ)) y slots
+      = CovariantDerivative.ricciSection (I := I)
+          (leviCivitaConnectionOfMetric (I := I) g)
+          (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) g)
+          (Φ y) (fun q : Fin 2 => mfderiv I I (Φ : M → N) y (slots q)) := by
+  have hLHS := ricciSection_eq_ricciTensor (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ)
+    y (slots 0) (slots 1)
+  have hRHS := ricciSection_eq_ricciTensor (I := I) g (Φ y)
+    (mfderiv I I (Φ : M → N) y (slots 0)) (mfderiv I I (Φ : M → N) y (slots 1))
+  have hpb := ricciTensor_pullback (I := I) g Φ y (slots 0) (slots 1)
+  rw [show vec2 (I := I) (slots 0) (slots 1) = slots from by funext i; fin_cases i <;> rfl] at hLHS
+  rw [show vec2 (I := I) (mfderiv I I (Φ : M → N) y (slots 0))
+            (mfderiv I I (Φ : M → N) y (slots 1))
+          = (fun q : Fin 2 => mfderiv I I (Φ : M → N) y (slots q)) from by
+        funext i; fin_cases i <;> rfl] at hRHS
+  rw [hLHS, hpb, ← hRHS]
 
 /-- The metric-covariant difference tower transports under pullback by a
 diffeomorphism, evaluated on arbitrary slots.  This is the algebraic bridge
@@ -506,6 +817,66 @@ theorem metricDerivNormSupOn_pullback_image
     refine ⟨a, ha, x, hxK, ?_⟩
     rw [metricDerivNorm_pullback (I := I) gk gInf gRef Phi a x]
     exact hr
+
+set_option maxHeartbeats 400000 in
+/-- **Naturality of the scalar curvature under `M ≃ₘ N`.**  Scalar curvature is an isometry
+invariant: `metricScalarAt (Φ^*g) x = metricScalarAt g (Φ x)`.  The scalar analog of
+`ricciTensor_pullback`: orthonormal-trace of the Ricci tensor (`metricTracePair0SAt_eq_sum_basis`
+on a `Φ^*g`-orthonormal basis, pushed to a `g`-orthonormal basis at `Φ x` by `pullbackMetric_inner`)
+plus per-summand `ricciTensor_pullback`. -/
+theorem metricScalarAt_pullback
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 N] [IsManifold I 2 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+    (g : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N) (x : M) :
+    metricScalarAt (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi) x
+      = metricScalarAt (I := I) g (Phi x) := by
+  classical
+  obtain ⟨basis, hON⟩ :=
+    exists_gOrthonormalBasis (Diffeomorph.pullbackMetric (I := I) g Phi) x
+  let dPhi : TangentSpace I x ≃L[Real] TangentSpace I (Phi x) :=
+    Diffeomorph.mfderivToContinuousLinearEquiv Phi infty_ne_zero x
+  let basis' : Module.Basis _ Real (TangentSpace I (Phi x)) := basis.map dPhi.toLinearEquiv
+  have hbasis'_apply : ∀ i, basis' i = mfderiv I I (Phi : M → N) x (basis i) := by
+    intro i
+    have hco :=
+      Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Phi) (x := x) infty_ne_zero
+    show (basis.map dPhi.toLinearEquiv) i = _
+    rw [Module.Basis.map_apply]
+    exact congrArg
+      (fun f : TangentSpace I x →L[Real] TangentSpace I (Phi x) => f (basis i)) hco
+  have hON' : ∀ i j,
+      g.inner (Phi x) (basis' i) (basis' j) = if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hsrc := hON i j
+    rw [Diffeomorph.pullbackMetric_inner] at hsrc
+    simpa [hbasis'_apply i, hbasis'_apply j] using hsrc
+  have hinv :
+      MetricInverseInBasis_gen (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi) x basis
+        identityInvMetric := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal
+        (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi) basis hON
+  have hinv' :
+      MetricInverseInBasis_gen (I := I) g (Phi x) basis' identityInvMetric := by
+    simpa [identityInvMetric, diagonalInvMetric] using
+      metricInverseInBasis_of_orthonormal (I := I) g basis' hON'
+  rw [metricScalarAt_def, metricScalarAt_def,
+    metricTracePair0SAt_eq_sum_basis (I := I)
+      (Diffeomorph.pullbackMetric (I := I) g Phi) basis identityInvMetric hinv
+      (metricRicciAt (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi) x),
+    metricTracePair0SAt_eq_sum_basis (I := I) g basis' identityInvMetric hinv'
+      (metricRicciAt (I := I) g (Phi x))]
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+  have hric :
+      metricRicciAt (I := I) (Diffeomorph.pullbackMetric (I := I) g Phi) x
+          (vec2 (basis i) (basis j))
+        = metricRicciAt (I := I) g (Phi x) (vec2 (basis' i) (basis' j)) := by
+    rw [metricRicciAt_apply_eq_ricciTensor, metricRicciAt_apply_eq_ricciTensor,
+      hbasis'_apply i, hbasis'_apply j]
+    exact ricciTensor_pullback (I := I) g Phi x (basis i) (basis j)
+  rw [hric]
 
 end HCGCompactness
 end DifferentialGeometry

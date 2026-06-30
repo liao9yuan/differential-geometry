@@ -1,5 +1,24 @@
 # StepBLocalMetrics.lean — B-metric local metric limits (`lbl394` metric part, 2026-06-13)
 
+## UPDATE 2026-06-21 — `hsmooth` frontier CLOSED; wrapper now rests on honest containments
+
+The "frontier-1 smoothness gap" recorded below is **gone**. `exists_metricLimit_normalCoord`
+no longer takes an `hsmooth : ContDiffOn ℝ ⊤ (normalCoordMetric …) U` hypothesis. It now
+takes the honest geometric containment `hsub : ∀ k, U ⊆ ball 0 (expMapC2Radius (X.obj k).metric (c k))`
+and discharges the `C^∞` smoothness internally via
+`StepBInputs.contDiffOn_normalCoordMetric_of_subset_expBall`. That bridge rests on
+`normalCoordMetric_contDiffOn_expBall` (StepBInputs), which is the FORWARD-only pullback
+`C^∞` on the named ball — built from `expMap_contMDiffAt_infty_of_norm_lt_radius` (the
+single-radius `C^∞` forward exp, which already exists in `GaussLemmaPullback`/`OffZero`).
+The note below claiming "expMapDiffeo is only `C^1` so even proving the field is real work"
+was correct for the inverse but NOT for the metric: the metric pullback uses only the
+forward map, so it is `C^∞` unconditionally. Verified green (targeted build, no new sorry).
+
+**Remaining metric-side frontier** (now the ONLY one): the uniform-radius wiring — a single
+open `U` with `U ⊆ ball 0 (input.radius k (c k))` (hdom) AND `U ⊆ ball 0 (expMapC2Radius …)`
+(hsub) for all `k`, i.e. a uniform positive lower bound on both radii across the sequence.
+That is Step-A geometric input (bounded geometry + inj-radius lower bound), not analysis.
+
 ## Status: generic theorem COMPLETE; HCG `β`-wrapper deferred on two named B-input gaps
 
 **Verification PASSED**: focused check + targeted build green (no warnings); axiom-clean

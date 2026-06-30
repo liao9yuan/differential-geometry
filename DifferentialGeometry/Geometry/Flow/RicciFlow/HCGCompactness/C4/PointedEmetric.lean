@@ -36,7 +36,7 @@ variable {H : Type uH} [TopologicalSpace H]
 /-- The `EMetricSpace` on a pointed Riemannian manifold induced by its stored smooth
 Riemannian metric (Mathlib's `EMetricSpace.ofRiemannianMetric`).  This is the same
 emetric whose completeness `MetricComplete` asserts. -/
-def PointedRiemannianManifold.emetricSpace
+@[reducible] def PointedRiemannianManifold.emetricSpace
     {I : ModelWithCorners Real E H}
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) : EMetricSpace Y.M := by
   letI : TopologicalSpace Y.M := Y.topology
@@ -54,6 +54,57 @@ def PointedRiemannianManifold.emetricSpace
   letI : IsContinuousRiemannianBundle E (fun x : Y.M => TangentSpace I x) :=
     ⟨⟨Y.metric.inner, Y.metric.contMDiff.continuous, by intro x v w; rfl⟩⟩
   exact EMetricSpace.ofRiemannianMetric I Y.M
+
+/-- The `RiemannianBundle` instance on the tangent bundle determined by the stored
+smooth Riemannian metric.  This is separated from `emetricSpace` so downstream
+Hopf--Rinow consumers can reuse the same instance package. -/
+@[reducible] def PointedRiemannianManifold.riemBundle
+    {I : ModelWithCorners Real E H}
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    Bundle.RiemannianBundle (fun x : Y.M => TangentSpace I x) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  exact ⟨Y.metric.toRiemannianMetric⟩
+
+/-- The per-fiber inner-product instances induced by the stored metric's
+`RiemannianBundle`. -/
+@[reducible] def PointedRiemannianManifold.riemInner
+    {I : ModelWithCorners Real E H}
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : Bundle.RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+      Y.riemBundle (I := I)
+    (x : Y.M) → InnerProductSpace Real (TangentSpace I x) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : Bundle.RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+    Y.riemBundle (I := I)
+  exact fun _ => inferInstance
+
+/-- Continuity of the tangent-bundle Riemannian structure determined by the
+stored metric. -/
+@[reducible] def PointedRiemannianManifold.riemBundle_cont
+    {I : ModelWithCorners Real E H}
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : Bundle.RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+      Y.riemBundle (I := I)
+    IsContinuousRiemannianBundle E (fun x : Y.M => TangentSpace I x) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : Bundle.RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+    Y.riemBundle (I := I)
+  exact ⟨⟨Y.metric.inner, Y.metric.contMDiff.continuous, by intro x v w; rfl⟩⟩
 
 end HCGCompactness
 end DifferentialGeometry

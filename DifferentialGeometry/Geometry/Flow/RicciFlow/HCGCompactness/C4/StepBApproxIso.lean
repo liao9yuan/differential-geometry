@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBLocalizedAA
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceComp
 
 set_option autoImplicit false
 
@@ -96,6 +97,58 @@ theorem comp_tendsto_id_on
         · refine hδ (B k x) hBkxK' (Binf x) hBinfxK' ?_
           rw [dist_comm]; exact lt_of_lt_of_le hBkx (min_le_left _ _)
     _ = ε := by ring
+
+omit [FiniteDimensional ℝ E] in
+/-- **Local maps converge to the identity in `C^∞`** (`lbl399`, two-parameter
+form).  This upgrades `comp_tendsto_id_on` from order `0` to every finite order:
+for every compact `K ⊆ U`, order `p`, and `ε > 0`, all derivatives up to order
+`p` of `A_l ∘ B_k - id` are uniformly `≤ ε` on `K` once both indices are large.
+
+The proof uses the reusable same-index composition theorem in
+`MapConvergenceComp.lean`: if such a two-parameter threshold failed, choosing bad
+indices `k_N,l_N ≥ N` would give reindexed sequences still tending to infinity,
+contradicting same-index `C^∞` convergence of `A_{l_N} ∘ B_{k_N}` to
+`A∞ ∘ B∞ = id`. -/
+theorem comp_cInf_id_on
+    {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
+    (B : ℕ → E → F) (Binf : E → F) (A : ℕ → F → E) (Ainf : F → E)
+    (hB : MapCInfConvOnCompacts U B Binf) (hA : MapCInfConvOnCompacts V A Ainf)
+    (hBc : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (B k) U)
+    (hBinfc : ContDiffOn ℝ (⊤ : ℕ∞) Binf U)
+    (hAc : ∀ k, ContDiffOn ℝ (⊤ : ℕ∞) (A k) V)
+    (hAinfc : ContDiffOn ℝ (⊤ : ℕ∞) Ainf V)
+    (hmap : Set.MapsTo Binf U V) (hmapk : ∀ k, Set.MapsTo (B k) U V)
+    (hid : ∀ x ∈ U, Ainf (Binf x) = x)
+    {K : Set E} (hKcpt : IsCompact K) (hKU : K ⊆ U) :
+    ∀ p : ℕ, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ r ≤ p, ∀ x ∈ K,
+      mapDerivNorm r (fun y => A l (B k y)) (fun y : E => y) x ≤ ε := by
+  classical
+  intro p ε hε
+  by_contra hbad
+  push Not at hbad
+  choose k hk hbad using hbad
+  choose l hl hbad using hbad
+  choose r hr hbad using hbad
+  choose x hx hbad using hbad
+  have hk_tendsto : Tendsto k atTop atTop := tendsto_atTop_mono hk tendsto_id
+  have hl_tendsto : Tendsto l atTop atTop := tendsto_atTop_mono hl tendsto_id
+  have hB' : MapCInfConvOnCompacts U (fun n => B (k n)) Binf :=
+    hB.comp_tendsto_atTop hk_tendsto
+  have hA' : MapCInfConvOnCompacts V (fun n => A (l n)) Ainf :=
+    hA.comp_tendsto_atTop hl_tendsto
+  have hcomp :
+      MapCInfConvOnCompacts U
+        (fun n y => A (l n) (B (k n) y)) (fun y => Ainf (Binf y)) :=
+    MapCInfConvOnCompacts.comp hU hV hB' hA'
+      (fun n => hBc (k n)) hBinfc (fun n => hAc (l n)) hAinfc hmap
+      (fun n => hmapk (k n))
+  have hcomp_id :
+      MapCInfConvOnCompacts U
+        (fun n y => A (l n) (B (k n) y)) (fun y : E => y) :=
+    hcomp.congr hU (fun _ _ _ => rfl) (fun y hy => (hid y hy).symm)
+  obtain ⟨N, hN⟩ := hcomp_id K hKcpt hKU p ε hε
+  have hgood := hN N le_rfl (r N) (hr N) (x N) (hx N)
+  exact not_lt_of_ge hgood (hbad N)
 
 end HCGCompactness
 end DifferentialGeometry

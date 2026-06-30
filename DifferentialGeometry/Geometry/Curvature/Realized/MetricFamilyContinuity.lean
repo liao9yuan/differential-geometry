@@ -204,4 +204,66 @@ theorem metricTensorCont_of_chartGram
   rw [heq]
   exact hgram x₀ (idx 0) (idx 1)
 
+namespace Tensor0SFamilyContinuousOnSet
+
+/-- **Pullback of bundle continuity under a diffeomorphism.**  If a time-dependent `(0,s)` tensor
+family `A` on `N` is jointly continuous, then so is its `Φ`-pullback on `M`,
+`(t, x) ↦ (A t (Φ x)).compContinuousLinearMap (fun _ => dΦₓ)`.
+
+Proved through the component constructor `tensor0SFamilyContinuousOnSet_of_chartBasisComp` on `M`:
+in each `M`-chart, the pullback component on a chart-basis slot is `A` evaluated at `Φ x` on the
+pushed-forward slots `dΦₓ (chartBasisVecFiber …)`, whose continuity is `hA.eval_continuous` with the
+pushed chart-basis section `tangentMap Φ ∘ chartBasisVec` (smooth on the chart, then `Φ.continuous_tangentMap`). -/
+theorem pullback
+    {s : Nat} {K : Set Real}
+    {N : Type*} [TopologicalSpace N] [ChartedSpace H N]
+    [IsManifold I ∞ N] [IsManifold I 1 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+    (A : (t : Real) → (x : N) →
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := N) s x)
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := N) s K A)
+    (Φ : M ≃ₘ⟮I, I⟯ N) :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K
+      (fun t x => (A t (Φ x)).compContinuousLinearMap
+        (fun _ : Fin s => mfderiv I I (Φ : M → N) x)) := by
+  apply tensor0SFamilyContinuousOnSet_of_chartBasisComp
+    (N := fun x₀ => (trivializationAt E (TangentSpace I) x₀).baseSet)
+    (hN := fun x₀ => (Trivialization.open_baseSet _).mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) x₀))
+  intro x₀ idx
+  rw [continuousOn_iff_continuous_restrict]
+  have hslot : ∀ k : Fin s, Continuous
+      (fun p : {q : {t : Real // t ∈ K} × M //
+            q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>
+        TotalSpace.mk' E (E := fun y : N => TangentSpace I y) (Φ p.1.2)
+          (mfderiv I I (Φ : M → N) p.1.2
+            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2))) := by
+    intro k
+    have hcomp :
+        (fun p : {q : {t : Real // t ∈ K} × M //
+              q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>
+          TotalSpace.mk' E (E := fun y : N => TangentSpace I y) (Φ p.1.2)
+            (mfderiv I I (Φ : M → N) p.1.2
+              (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2)))
+          = (tangentMap I I (Φ : M → N)) ∘
+              (fun p => DifferentialGeometry.Integral.Measure.chartBasisVec (I := I) x₀ (idx k) p.1.2) := by
+      funext p; rfl
+    rw [hcomp]
+    refine (Φ.contMDiff.continuous_tangentMap (by simp)).comp ?_
+    exact (DifferentialGeometry.Integral.Measure.chartBasisVec_contMDiffOn
+        (I := I) x₀ (idx k)).continuousOn.comp_continuous
+      (continuous_snd.comp continuous_subtype_val) (fun p => p.2)
+  have hev := hA.eval_continuous
+      (P := {q : {t : Real // t ∈ K} × M //
+        q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet})
+      (τ := fun p => p.1.1.1) (b := fun p => Φ p.1.2)
+      (continuous_subtype_val.comp (continuous_fst.comp continuous_subtype_val))
+      (fun p => p.1.1.2)
+      (Φ.continuous.comp (continuous_snd.comp continuous_subtype_val))
+      hslot
+  refine hev.congr ?_
+  intro p
+  simp only [Set.restrict_apply, ContinuousMultilinearMap.compContinuousLinearMap_apply]
+
+end Tensor0SFamilyContinuousOnSet
+
 end DifferentialGeometry.Integral.Connection

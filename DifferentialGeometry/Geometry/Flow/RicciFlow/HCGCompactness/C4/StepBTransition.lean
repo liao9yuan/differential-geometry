@@ -78,7 +78,9 @@ section HCGNormalTransition
 
 open Bundle
 open scoped Manifold ContDiff Bundle
+open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
+open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 universe u uE uH
 
@@ -102,14 +104,54 @@ def NormalOverlapOn
     z ∈ (expMapDiffeo (I := I) Y.metric x).source ∧
       expMapDiffeo (I := I) Y.metric x z ∈ (normalChartAt (I := I) Y.metric y).source
 
+/-- **`normalTransition` smoothness producer** (the `hsmoothJ` frontier, discharged).  On an
+open `U` contained in `x`'s `expMapC2Radius` ball — so the forward `expMapDiffeo x` is `C∞` on
+`U` (`expMapDiffeo_contMDiffOn_expBall`) — and mapped by `expMapDiffeo x` into `y`'s
+normal-coordinate neighbourhood `expMap y '' (ball 0 (expMapC2Radius y))` — where the chart
+inverse `normalChartAt y` is `C∞` (`normalChartAt_contMDiffOn_infty`) — the transition map
+`normalTransition Y x y = normalChartAt y ∘ expMapDiffeo x` is `ContDiffOn ℝ ⊤`.  This is the
+`C∞`-chart-inverse discharge of the former frontier-1 `hsmoothJ` hypothesis. -/
+theorem contDiffOn_normalTransition
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : Y.M) {U : Set E}
+    (hUx :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x))
+    (hmaps :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Set.MapsTo (fun z => expMapDiffeo (I := I) Y.metric x z) U
+        ((fun v : E => (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M)) ''
+          Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y))) :
+    ContDiffOn ℝ (⊤ : ℕ∞) (normalTransition (I := I) Y x y) U := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  rw [← contMDiffOn_iff_contDiffOn]
+  have hexp : ContMDiffOn 𝓘(ℝ, E) I ∞ (fun z => expMapDiffeo (I := I) Y.metric x z) U :=
+    (expMapDiffeo_contMDiffOn_expBall (I := I) Y x).mono hUx
+  have hchart : ContMDiffOn I 𝓘(ℝ, E) ∞ (normalChartAt (I := I) Y.metric y)
+      ((fun v : E => (expMap (I := I) Y.metric y (show TangentSpace I y from v) : Y.M)) ''
+        Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric y)) :=
+    normalChartAt_contMDiffOn_infty (I := I) Y.metric y
+  exact hchart.comp hexp hmaps
+
 /-- **`normalTransition` transition-limit** (`lbl394` transition, fixed-pair HCG form).
 For center sequences `x k, y k : (X.obj k).M` on nested open domains `U, V`, with the
-`lbl418` exp⁻¹-derivative input (`input`), the honestly-exposed `C^∞` smoothness of each
-transition map (`hsmoothJ`/`hsmoothJbar`, the frontier-1 gap), the chart-overlap inputs
-(`hovlJ`/`hovlJbar`), and the conditional cocycle (`hLeft`/`hRight`, valid on the
-overlaps), a subsequence of the transition maps converges in `C^∞` on compacts to limit
-transition maps with the limit cocycle (conditional on domain membership).  Fixed-pair
-only — NOT the finite diagonal over all `α, β`. -/
+`lbl418` exp⁻¹-derivative input (`input`), the chart-overlap inputs (`hovlJ`/`hovlJbar`),
+the honest geometric containments `hUx`/`hVy` (`U, V` inside the forward `expMapC2Radius`
+balls) and overlap maps-to inputs `hmapsJ`/`hmapsJbar` (each forward `expMapDiffeo` carries
+its domain into the other centre's normal-coordinate neighbourhood), and the conditional
+cocycle (`hLeft`/`hRight`, valid on the overlaps), a subsequence of the transition maps
+converges in `C^∞` on compacts to limit transition maps with the limit cocycle (conditional
+on domain membership).  `C^∞` smoothness of the transition maps is discharged internally via
+`contDiffOn_normalTransition` (no `hsmoothJ` frontier).  Fixed-pair only — NOT the finite
+diagonal over all `α, β`. -/
 theorem exists_transitionLimit_normalTransition
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (input : ExpInverseDerivBoundInput (I := I) X)
@@ -117,10 +159,36 @@ theorem exists_transitionLimit_normalTransition
     {U V : Set E} (hU : IsOpen U) (hV : IsOpen V)
     (hovlJ : ∀ k, NormalOverlapOn (I := I) (X.obj k) (x k) (y k) U)
     (hovlJbar : ∀ k, NormalOverlapOn (I := I) (X.obj k) (y k) (x k) V)
-    (hsmoothJ : ∀ k,
-      ContDiffOn ℝ (⊤ : ℕ∞) (normalTransition (I := I) (X.obj k) (x k) (y k)) U)
-    (hsmoothJbar : ∀ k,
-      ContDiffOn ℝ (⊤ : ℕ∞) (normalTransition (I := I) (X.obj k) (y k) (x k)) V)
+    (hUx : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (x k)))
+    (hmapsJ : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+      Set.MapsTo (fun z => expMapDiffeo (I := I) (X.obj k).metric (x k) z) U
+        ((fun v : E => (expMap (I := I) (X.obj k).metric (y k)
+            (show TangentSpace I (y k) from v) : (X.obj k).M)) ''
+          Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (y k))))
+    (hVy : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+      V ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (y k)))
+    (hmapsJbar : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+      Set.MapsTo (fun z => expMapDiffeo (I := I) (X.obj k).metric (y k) z) V
+        ((fun v : E => (expMap (I := I) (X.obj k).metric (x k)
+            (show TangentSpace I (x k) from v) : (X.obj k).M)) ''
+          Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (x k))))
     (hLeft : ∀ k, ∀ z ∈ U,
       normalTransition (I := I) (X.obj k) (y k) (x k)
         (normalTransition (I := I) (X.obj k) (x k) (y k) z) = z)
@@ -138,7 +206,8 @@ theorem exists_transitionLimit_normalTransition
   exists_transitionLimit_on hU hV
     (fun k => normalTransition (I := I) (X.obj k) (x k) (y k))
     (fun k => normalTransition (I := I) (X.obj k) (y k) (x k))
-    hsmoothJ hsmoothJbar
+    (fun k => contDiffOn_normalTransition (I := I) (X.obj k) (x k) (y k) (hUx k) (hmapsJ k))
+    (fun k => contDiffOn_normalTransition (I := I) (X.obj k) (y k) (x k) (hVy k) (hmapsJbar k))
     (fun r _K _hK hKU => ⟨input.derivC r, fun k z hz =>
       input.exp_inv_deriv k r (x k) (y k) z (hovlJ k z (hKU hz)).1 (hovlJ k z (hKU hz)).2⟩)
     (fun r _K _hK hKU => ⟨input.derivC r, fun k z hz =>

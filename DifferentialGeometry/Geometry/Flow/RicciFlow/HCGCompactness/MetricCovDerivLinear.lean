@@ -107,6 +107,36 @@ theorem metricCovDerivStep_apply
           (leviCivitaConnectionOfMetric (I := I) gRef) A x :=
   rfl
 
+/-- Boundaryless-free smooth-slot recursion for one `metricCovDeriv` step.
+
+This is the invariant evaluation formula for the successor tower: the leading
+slot gives the scalar directional derivative of the previous tower level, and
+the remaining terms are the usual connection corrections in the non-leading
+slots. -/
+theorem metricCovDeriv_succ_eval_smooth_slots_gen
+    (h gRef : SmoothRiemannianMetric I M) (a : Nat)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (V : Fin (a + 2) -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _))
+    (x : M) :
+    metricCovDeriv (I := I) h gRef (a + 1) x
+        (Fin.cons (X x) (fun q : Fin (a + 2) => V q x)) =
+      extDerivFun (I := I)
+          (fun y : M => metricCovDeriv (I := I) h gRef a y
+            (fun q : Fin (a + 2) => V q y)) x (X x) -
+        ∑ p : Fin (a + 2),
+          metricCovDeriv (I := I) h gRef a x
+            (Function.update (fun q : Fin (a + 2) => V q x) p
+              (((leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun y : M => V p y) x) (X x))) := by
+  rw [metricCovDeriv_succ, metricCovDerivStep_apply,
+    Tensor0SBundle.totalNabla0SFun_apply_section]
+  exact Tensor0SBundle.nabla0SFun_eval_smooth_slots
+    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (leviCivitaConnectionOfMetric (I := I) gRef) X V
+    (metricCovDeriv (I := I) h gRef a) x
+
 /-- One covariant-derivative step is scalar-homogeneous in the tensor field. -/
 theorem metricCovDerivStep_smul
     (gRef : SmoothRiemannianMetric I M) (c : Real) (a : Nat)

@@ -1,11 +1,10 @@
 # GoodCoveringOrdered.lean — faithful (book-ordered) Step A redo
 
 Decision (2026-06-08, user): redo Step A faithfully to MSM135 Ch4, using the book's
-**distance-ordered greedy net** (not the Zorn packing), by **black-boxing HopfRinow**.
-Vetted: `Comparison/HopfRinow.lean`'s minimizing-geodesic / exp-surjectivity theorems
-are correctly stated (section vars `[PseudoEMetricSpace M][IsRiemannianManifold I M]
-[CompleteSpace M]`), so their conclusions are honest true Hopf–Rinow facts; black-boxing
-them = honest deferral (downstream inherits `sorryAx`, disclosed).
+**distance-ordered greedy net** (not the Zorn packing). The original plan isolated the
+complete-pointed-Riemannian-to-proper-metric step as the sole Hopf--Rinow deferral.
+That deferral is now discharged by `Comparison/HopfRinowProper.lean`, using the
+intrinsic endpoint `hopf_rinow_expMapIntrinsic_surjective_minimizing`.
 
 ## Reuse (verified, correct) from `GoodCovering.lean`
 λ (A1), `lambda_ratio_le`, the dist=pseudometric bridge (`RealizesEdist`), `lambdaBall`,
@@ -13,8 +12,9 @@ them = honest deferral (downstream inherits `sorryAx`, disclosed).
 built on it change to the ordered version.
 
 ## Plan (faithful, book-exact)
-1. **Keystone** `exists_min_edist_base` — HopfRinow-backed (sorry): complete ⟹ the
-   distance-to-O minimum over a nonempty closed set is attained. (Properness.)
+1. **Keystone** `exists_min_dist_base`: in a proper metric space, the distance-to-`O`
+   minimum over a nonempty closed set is attained. Riemannian properness is supplied
+   by the checked Hopf--Rinow adapter at the instantiation layer.
 2. **`S^α` closed** — the varying-radius λ-ball disjointness set is closed (book: "balls
    open ⟹ S^α closed"; really a lower-semicontinuity lemma).
 3. **Ordered net** (book L897–955): greedy `Nat.rec` with `r^α = d(S^α,O)` the attained
@@ -25,13 +25,14 @@ built on it change to the ordered version.
 
 ## Honest scope
 This is the largest single piece of Step A; (2)+(3) are intricate (dependent recursion +
-topology). Building methodically, verified per step. The keystone + any §5-convexity for
-lbl383 item 3 stay HopfRinow/§5 black boxes.
+topology). Building methodically, verified per step. The properness keystone is no
+longer a black box. The remaining Step A item-3 geometric scale/convexity inputs stay
+with the separate `GoodCoveringItem3`/§5 boundary.
 
 ## Status — abstract net FOUNDATION DONE + verified + sorry-free (2026-06-08)
 **Architecture revised:** build abstractly in `[MetricSpace M][ProperSpace M]` (Mathlib metric API); the
-minimiser is then a GENUINE theorem (no black box) — only "complete pointed Riemannian manifold ->
-ProperSpace under its Riemannian distance" (Hopf-Rinow) stays a black box, isolated to instantiation.
+minimiser is then a GENUINE theorem (no black box). The old "complete pointed Riemannian manifold ->
+ProperSpace under its Riemannian distance" Hopf--Rinow black box is now discharged in the instantiation.
 The earlier emetric keystone was the wrong abstraction; dropped. Done + sorry-free: `availSet` (S^alpha),
 `isClosed_availSet` (closed via `isClosed_le` + `infDist`), `exists_min_dist_base` (greedy minimiser of
 `d(.,O)` over a closed nonempty set, from `ProperSpace` + `IsCompact.exists_isMinOn` on the compact slice
@@ -78,18 +79,19 @@ fails when a @[simp] lemma (netList_zero) normalizes the goal but not hemp's LHS
   (meets + λ≤λ(0)) ⟹ `d(q,O) < 2λ0 + 2λ0·α` = its own value. nlinarith closes the cast arithmetic.
 All `#print axioms` clean.
 
-**INSTANTIATION FOUNDATION DONE (2026-06-09):**
+**INSTANTIATION FOUNDATION DONE (2026-06-09; properness deferral discharged 2026-06-21):**
 - `GoodCovering.lambda_continuous` (clean, `fun_prop`) — the abstract layer's `hlam` input; `hanti` =
   `lambda_antitone`, `hpos` = `lambda_pos` (already proved).
-- **`exists_proper_realization`** (Instantiation section; **the ONE Hopf–Rinow `sorry`, L461**): a
+- **`exists_proper_realization`** (Instantiation section): a
   complete CONNECTED pointed Riemannian manifold carries a `MetricSpace` realizing its Riemannian
   emetric (`edist = ofReal dist`), which is `ProperSpace`, and in which every `t ∈ [0, d(p,O)]` is an
   attained distance (the `hint` input). Connectivity is genuinely required (disconnected ⟹ edist = ⊤,
-  no real metric realizes it). Type-checks; consumers inherit `sorryAx` transparently — the agreed
-  honest deferral, to be discharged by `Comparison/HopfRinow.lean`'s chain later.
+  no real metric realizes it). This is now proved through `HopfRinowProper.lean` and the intrinsic
+  exponential endpoint; consumers no longer inherit a Hopf--Rinow `sorryAx` from this producer.
 
-So the abstract ordered-net layer's inputs are all sourced: `[MetricSpace]+[ProperSpace]`+`hint` ← black
-box; `hlam/hanti/hpos` ← lambda lemmas; `pack` ← `PackingBound`-style honest input (Bishop–Gromov).
+So the abstract ordered-net layer's inputs are all sourced: `[MetricSpace]+[ProperSpace]`+`hint` ←
+checked intrinsic Hopf--Rinow adapter; `hlam/hanti/hpos` ← lambda lemmas; `pack` ←
+`PackingBound`-style honest input (Bishop–Gromov).
 
 (lbl391 tilde-disjoint done as `netList_disjoint_of_le`, 2026-06-09.)
 
@@ -114,7 +116,7 @@ box; `hlam/hanti/hpos` ← lambda lemmas; `pack` ← `PackingBound`-style honest
 - **L2 — instantiation glue** (same file, `Instantiation` section):
   - `structure ProperMetricOn (Y)`: data `ms : MetricSpace Y.M` + props `realizes` (edist = ofReal dist),
     `proper`, `hint` — exactly `exists_proper_realization`'s conjunction; producer
-    `properMetricOn Y hc hconn : ProperMetricOn Y` by choice on the black box (inherits the ONE sorry).
+    `properMetricOn Y hc hconn : ProperMetricOn Y` by choice on the checked intrinsic Hopf--Rinow adapter.
   - `orderedNet (P : ∀ k, ProperMetricOn (X.obj k)) (k α) : List (X.obj k).M :=`
     `letI := (P k).ms; OrderedNet.netList (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α`.
   - Per-k specializations: disjoint/sorted/cover/count/dist_le/dist_ge with `hanti := lambda_antitone`,
@@ -145,7 +147,7 @@ box; `hlam/hanti/hpos` ← lambda lemmas; `pack` ← `PackingBound`-style honest
       multiplicity from A0'), item 6 (from NetLimitData), item 7 (nesting `B ⊂ B̄ ⊂ B⃗`, constants
       `45e^{10cC}`, `205e^{20cC}`: λ-ratio `lambda_ratio_le` + triangle; book's slack absorbs the
       factor 2s — checked: 10e^{10cC}+5 ≤ 45e^{10cC}, 45e^{10cC}·e^{10cC}+10·... ≤ 205e^{20cC}).
-    - **Item 3 (exp-diffeo + geodesic convexity) intentionally ABSENT** — it is the §5/Hopf–Rinow
+    - **Item 3 (exp-diffeo + geodesic convexity) intentionally ABSENT** — it is the §5 scale/convexity
       frontier; the bundle is named `OrderedCoverCore` (not "lbl383") so the name does not overclaim.
       Step B will take item 3 separately when §5 lands.
 
@@ -160,8 +162,8 @@ Proposal: generalize to `ballMult : ∀ (m : ℝ) ..., (sep ≥ r) → (within m
 ## Order of implementation (each step = focused check + build)
 1. L1 abstract additions → 2. L2 glue → 3. DiagonalSubseq engine → 4. StepAInputs ballMult
 generalization → 5. NetLimitData + producer → 6. OrderedCoverCore items (2,4 first; 5,7 next; 6 last).
-New sorries: NONE (everything genuinely proved except the already-standing Hopf–Rinow black box, which
-L2's producer consumes by choice).
+New sorries: NONE. The former L2 Hopf--Rinow black box has been replaced by the checked
+intrinsic-exp adapter.
 
 ## IMPLEMENTATION STATUS (2026-06-09): steps 1–5 DONE + verified; step 6 remains
 
@@ -169,7 +171,7 @@ L2's producer consumes by choice).
   `netList_length_full`, `netList_alive_of_le`, `netList_nodup`, `netCenter`(+`_eq`,`_lt_length`,
   `_mem`,`_of_stage`,`_stable`), `netRadius`(+`_of_center`,`_mem`), `netCenter_index_lt`
   (index-vs-count via sortedness-prefix + pack), `netList_passes` (saturation).
-- **L2 DONE**: `ProperMetricOn` + `properMetricOn` (choice on the black box), `orderedNet`,
+- **L2 DONE**: `ProperMetricOn` + `properMetricOn` (choice on the checked adapter), `orderedNet`,
   `ProperMetricOn.dist_eq` (ms-dist = hd.dist via double realization), `packingBound_pack`.
 - **DiagonalSubseq.lean DONE, sorry-free**: `exists_subseq_tendsto_pi` (countably many bounded real
   sequences converge along ONE subsequence — Tychonoff `Π n, Icc 0 (C n)` compact + first-countable +
@@ -204,7 +206,8 @@ abstract layer, `lambda_exp_le` pure-radius ratio in GoodCovering.lean):
   **`NetLimitData.rInf_close`** (limit closeness `r∞^β ≤ r∞^α + 5λ^α+5λ^β`, proved along the meeting
   subfilter: `frequently_iff_neBot` + `eventually_inf_principal` + `le_of_tendsto_of_tendsto`) +
   `lambda_exp_le` ratio + explicit E1/E2 = exp algebra (`E1*E1 = E2`) + nlinarith chains.
-Build green; sorry count = the ONE Hopf–Rinow black box (+ pre-existing upstream Field.lean:282, not ours).
+Build green; the former proper-realization Hopf--Rinow black box is discharged. Remaining `sorry`
+warnings in broader targets are pre-existing upstream/frontier items, not this producer.
 Lean gotchas: **`λ` is a KEYWORD — cannot appear in identifiers** (`hλβpos` → parse error); `_` metavars
 don't unfold `lamInf`-style defs in elaboration (give explicit args); `rw [hxx, hyy] at hmeet` instead of
 `subst` for statement variables.
@@ -219,14 +222,36 @@ don't unfold `lamInf`-style defs in elaboration (give explicit args); `rw [hxx, 
 - **capstone `exists_stableNetData`**: ONE diagonal datum L with the item-6 stability; items 1/2/4/5/7
   apply to it as theorems (lamInf transported along rInf-equality).
 - Axiom-check: inter_count/nesting/hat_cover/tilde_disjoint/exists_stableNetData all
-  `[propext, Classical.choice, Quot.sound]`, **sorryAx = 0** (the layer is conditional on `P`; the ONE
-  Hopf–Rinow sorry enters only via `properMetricOn`).
+  `[propext, Classical.choice, Quot.sound]`, **sorryAx = 0** (the layer is conditional on `P`;
+  `properMetricOn` is now produced sorry-free by the intrinsic Hopf--Rinow adapter).
 - Lean gotchas this pass: `choose!` totalization needs `Nonempty M` (provide `⟨basepoint⟩`); linarith
   sees `lamInf` vs `lambda (rInf ·)` as DIFFERENT atoms (defeq ≠ syntactic — align with rfl-rewrites);
   `ballMult`'s index type is `Type u` — a `Finset ℕ` subtype needs `ULift.{u}` + `ULift.down_injective`
   + `Fintype.card_ulift`.
 
-**Step A boundary (honest):** item 3 (exp-diffeo + geodesic convexity) = the §5/Hopf–Rinow frontier,
-intentionally absent (Step B takes it with §5). The ONE deferred sorry = `exists_proper_realization`
-(Hopf–Rinow). Inputs carried honestly: A0 `InjRadiusDecayInput` (CGT, book-external), `PackingBound` +
-ratio-`ballMult` (Bishop–Gromov, book-external), `RealizesEdist` (dist realization).
+**Step A boundary (honest):** item 3 (exp-diffeo + geodesic convexity) = the §5 radius/convexity
+frontier, intentionally absent from the Step A capstone and supplied separately by `GoodCoveringItem3`.
+The former `exists_proper_realization` Hopf--Rinow deferral is discharged. Inputs carried honestly:
+A0 `InjRadiusDecayInput` (CGT, book-external), `PackingBound` + ratio-`ballMult`
+(Bishop–Gromov, book-external), `RealizesEdist` (dist realization).
+
+## 2026-06-21: Hopf--Rinow proper realization discharged
+
+The old `exists_proper_realization` deferral is discharged via the intrinsic
+endpoint in `Geometry/Exponential/MinimizingGeodesic.lean`, through the new
+comparison adapter `Geometry/Comparison/HopfRinowProper.lean`.
+
+The public C4 producer now honestly requires the extra hypotheses consumed by
+that endpoint: model inner product, finite rank nonzero, and boundarylessness.
+`ProperMetricOn` itself is unchanged, so downstream consumers that already take
+`P : forall k, ProperMetricOn ...` do not need new fields.
+
+The delicate proof point was not Hopf--Rinow mathematics but tangent-instance
+selection. The C4 proof uses `PointedRiemannianManifold.riemBundle`,
+`riemInner`, and `riemBundle_cont` with unannotated `letI` bindings under the
+standard local suppression of the project tangent norm instances. Annotating
+those instances makes Lean choose the wrong `Tensor0SBundle` normed group and
+reopens the diamond.
+
+Focused verification passed for `GoodCoveringOrdered.lean` after this wiring. Targeted downstream
+builds also passed for `GoodCoveringSeq` and `GoodCoveringItem3`.
