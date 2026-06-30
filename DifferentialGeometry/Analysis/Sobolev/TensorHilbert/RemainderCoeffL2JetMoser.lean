@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCc
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArmCoeffPerOrderJetTower
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 
 noncomputable section
 
@@ -61,6 +62,17 @@ theorem linearizedRicciArm1BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
               (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
+theorem ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (i : ℕ),
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤
+          C i * ∑ j ∈ Finset.range (i + 1),
+            ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 :=
+  sorry
+
 set_option linter.unusedVariables false in
 theorem ricciArmPrincipalCoeff_realizedFam_sub_background_jetL2_perOrder_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -78,8 +90,26 @@ theorem ricciArmPrincipalCoeff_realizedFam_sub_background_jetL2_perOrder_ballUni
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
               (ricciArmPrincipalCoeff (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s)
-                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ D i :=
-  sorry
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ D i := by
+  obtain ⟨K, hK_nn, hK⟩ :=
+    gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform (I := I) g₀ a ha_super hR hδ₀
+  obtain ⟨C, hC_nn, hC⟩ :=
+    ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2 (I := I) (M := M) g₀
+  refine ⟨fun i => C i * ∑ j ∈ Finset.range (i + 1), K j,
+    fun i => mul_nonneg (hC_nn i) (Finset.sum_nonneg fun j _ => hK_nn j), ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  calc ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+            - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2
+      ≤ C i * ∑ j ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 2 2 j
+            (gInvDiffSlotCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 :=
+        hC (realizedFam (I := I) g₀ T T' hδ hδ' s) i
+    _ ≤ C i * ∑ j ∈ Finset.range (i + 1), K j := by
+        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum ?_) (hC_nn i)
+        intro j hj
+        exact hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball j
+          (le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)) hi) s hs
 
 set_option linter.unusedVariables false in
 theorem ricciArmPrincipalCoeff_realizedFam_jetL2_perOrder_ballUniform
