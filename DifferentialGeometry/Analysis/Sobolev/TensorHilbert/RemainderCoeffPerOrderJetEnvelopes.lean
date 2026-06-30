@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArmCoeffPerOrderJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 
 noncomputable section
 
@@ -171,6 +172,30 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
 set_option linter.unusedVariables false in
+theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (P : SmoothCcTensor g₀ 0 2),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          MeasureTheory.Integrable
+              (fun x => ∑ n ∈ Finset.range (i + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+                  ∏ m : Fin n,
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+              (riemannianVolumeMeasure (I := I) (M := M) g₀) ∧
+            (∫ x, ∑ n ∈ Finset.range (i + 1),
+                  ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+                    ∏ m : Fin n,
+                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                        ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤ K i :=
+  sorry
+
+set_option linter.unusedVariables false in
 theorem gInvDiffSlotCoeff_perOrder_l2_ballUniform_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -183,8 +208,63 @@ theorem gInvDiffSlotCoeff_perOrder_l2_ballUniform_generic
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
-          ‖iteratedCovGrad (I := I) g₀ 2 2 i (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 ≤ K i :=
-  sorry
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 ≤ K i := by
+  obtain ⟨Cgrid, hCgrid_nn, hgrid⟩ :=
+    rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le (I := I) (M := M) g₀ hδ₀
+  obtain ⟨Kgrid, hKgrid_nn, hKgrid⟩ :=
+    diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => Cgrid i * Kgrid i,
+    fun i => mul_nonneg (hCgrid_nn i) (hKgrid_nn i), ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
+  by_cases hM : Nonempty M
+  · obtain ⟨x₀⟩ := hM
+    obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
+      haveI : Nontrivial (TangentSpace I x₀) := by
+        have hfr : 0 < Module.finrank ℝ (TangentSpace I x₀) := by
+          have heq : Module.finrank ℝ (TangentSpace I x₀) = Module.finrank ℝ E := rfl
+          rw [heq]; exact Nat.pos_of_ne_zero (NeZero.ne _)
+        exact Module.nontrivial_of_finrank_pos hfr
+      exact exists_ne 0
+    have hpos : 0 < g₀.inner x₀ v v := g₀.pos x₀ v hv
+    have hbound := hδ x₀ v v
+    have hsqrt_pos : 0 < Real.sqrt (g₀.inner x₀ v v) := Real.sqrt_pos.mpr hpos
+    have habs_nn : 0 ≤ |ccTensorBilinSymm (I := I) g₀ P x₀ v v| := abs_nonneg _
+    have hδ0 : 0 ≤ δ := by
+      by_contra hδc
+      have hδc' : δ < 0 := lt_of_not_ge hδc
+      have hrhs_neg : δ * Real.sqrt (g₀.inner x₀ v v) * Real.sqrt (g₀.inner x₀ v v) < 0 := by
+        have h1 : δ * Real.sqrt (g₀.inner x₀ v v) < 0 :=
+          mul_neg_of_neg_of_pos hδc' hsqrt_pos
+        exact mul_neg_of_neg_of_pos h1 hsqrt_pos
+      linarith [le_trans habs_nn hbound]
+    obtain ⟨hgrid_int, hgrid_bound⟩ := hKgrid P hPball i hi
+    have hF_int : MeasureTheory.Integrable
+        (fun x => Cgrid i * ∑ n ∈ Finset.range (i + 1),
+          ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+            ∏ m : Fin n,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+        (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+      hgrid_int.const_mul (Cgrid i)
+    have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (2 + i)
+      (iteratedCovGrad (I := I) g₀ 2 2 i (gInvDiffSlotCoeff (I := I) g₀ g₁))
+      (fun x => Cgrid i * ∑ n ∈ Finset.range (i + 1),
+        ∑ e ∈ Finset.Nat.antidiagonalTuple n i,
+          ∏ m : Fin n,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+      hF_int
+      (fun x => hgrid g₁ P htie hδ_le hδ0 hδ i x)
+    refine le_trans key ?_
+    rw [MeasureTheory.integral_const_mul]
+    exact mul_le_mul_of_nonneg_left hgrid_bound (hCgrid_nn i)
+  · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
+    have hz : ‖iteratedCovGrad (I := I) g₀ 2 2 i (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ = 0 := by
+      rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
+        MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+    rw [hz]
+    simpa using mul_nonneg (hCgrid_nn i) (hKgrid_nn i)
 
 set_option linter.unusedVariables false in
 theorem gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform
