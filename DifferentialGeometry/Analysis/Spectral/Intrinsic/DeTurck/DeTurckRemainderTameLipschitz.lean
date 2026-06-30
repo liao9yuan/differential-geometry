@@ -22,6 +22,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.PathIntegralFibreNo
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMoser
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciArmPrincipalCoeffBackgroundJetBound
+import DifferentialGeometry.Analysis.Sobolev.Embedding.ContinuousSobolevRealization
 
 /-!
 # The intrinsic covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -6620,6 +6622,7 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform
   · exact (symmAbsorbedCoeff_jet_le g₀ 1 (a + 1) C₁ σ'₁).trans h1j
   · exact (symmAbsorbedCoeff_jet_le g₀ 2 (a + 1) C₂ σ'₂).trans h2j
 
+set_option linter.unusedVariables false in
 set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -6649,8 +6652,97 @@ private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUn
                 appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
                 appCc (I := I) (M := M) g₀ 4 2 C₂' (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
             (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂'.toSection x) ≤ Λw ^ 2) ∧
-            (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂'‖ ^ 2) ≤ Γw ^ 2 :=
-  sorry
+            (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂'‖ ^ 2) ≤ Γw ^ 2 := by
+  classical
+  obtain ⟨Λpure, Γpure, hΛpure_nn, hΓpure_nn, hpuresup, hpurejet⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_ricciArmPrincipalCoeffPure_self_fibre_jetL2_bound
+      (I := I) (M := M) g₀ a
+  refine ⟨Real.sqrt (2 * ΛC ^ 2 + 2 * Λpure ^ 2), Real.sqrt (2 * Γ ^ 2 + 2 * Γpure ^ 2),
+    Real.sqrt_nonneg _, Real.sqrt_nonneg _, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball C₀ C₁ C₂arm hC₂armsup hC₂armjet hidArm
+  refine ⟨C₂arm - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+      (I := I) (M := M) g₀ g₀, ?_, ?_, ?_⟩
+  · have hlift : rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') =
+        appCc (I := I) (M := M) g₀ 4 2
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+            (I := I) (M := M) g₀ g₀)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) := by
+      apply smoothCcTensor_ext_of_unitModel
+      intro x
+      apply ContinuousMultilinearMap.ext
+      intro v
+      exact
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace
+          (I := I) (M := M) g₀ (T - T') x v
+    rw [deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff (I := I) g₀ g_bg T T'
+        (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ', hidArm, hlift,
+      appCc_sub_left]
+    abel
+  · intro x
+    rw [Real.sq_sqrt (by positivity)]
+    have hsec : (C₂arm -
+          DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+            (I := I) (M := M) g₀ g₀).toSection x =
+        C₂arm.toSection x -
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+            (I := I) (M := M) g₀ g₀).toSection x := by
+      have h1 := smoothCcTensor_toSection_add_apply g₀ C₂arm
+        (-(DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+          (I := I) (M := M) g₀ g₀)) x
+      rw [smoothCcTensor_toSection_neg_apply, ← sub_eq_add_neg, ← sub_eq_add_neg] at h1
+      exact h1
+    rw [hsec]
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            (C₂arm.toSection x -
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                (I := I) (M := M) g₀ g₀).toSection x)
+        ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂arm.toSection x) +
+            2 * riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+              ((DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                (I := I) (M := M) g₀ g₀).toSection x) :=
+          riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 4 2 x _ _
+      _ ≤ 2 * ΛC ^ 2 + 2 * Λpure ^ 2 := by
+          have h1 := hC₂armsup x
+          have h2 := hpuresup x
+          linarith [h1, h2]
+  · rw [Real.sq_sqrt (by positivity)]
+    have hpi : ∀ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (C₂arm -
+              DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤
+          2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂arm‖ ^ 2 +
+            2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                (I := I) (M := M) g₀ g₀)‖ ^ 2 := by
+      intro i _
+      have h := normSq_iteratedCovGrad_sub_smul_le_tame (I := I) g₀ 4 2 i C₂arm
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+          (I := I) (M := M) g₀ g₀) 1
+        (‖iteratedCovGrad (I := I) g₀ 4 2 i C₂arm‖ ^ 2)
+        (‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+            (I := I) (M := M) g₀ g₀)‖ ^ 2) (le_refl _) (le_refl _)
+      rw [one_smul] at h
+      simp only [one_pow, mul_one] at h
+      linarith [h]
+    calc (∑ i ∈ Finset.range (a + 1),
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (C₂arm -
+              DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                (I := I) (M := M) g₀ g₀)‖ ^ 2)
+        ≤ ∑ i ∈ Finset.range (a + 1),
+            (2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂arm‖ ^ 2 +
+              2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+                (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                  (I := I) (M := M) g₀ g₀)‖ ^ 2) := Finset.sum_le_sum hpi
+      _ = 2 * (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂arm‖ ^ 2) +
+            2 * (∑ i ∈ Finset.range (a + 1),
+              ‖iteratedCovGrad (I := I) g₀ 4 2 i
+                (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
+                  (I := I) (M := M) g₀ g₀)‖ ^ 2) := by
+          rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+      _ ≤ 2 * Γ ^ 2 + 2 * Γpure ^ 2 := by linarith [hC₂armjet, hpurejet]
 
 set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_intrinsicPalatini_coeffC0_jetL2_crude_ballUniform
