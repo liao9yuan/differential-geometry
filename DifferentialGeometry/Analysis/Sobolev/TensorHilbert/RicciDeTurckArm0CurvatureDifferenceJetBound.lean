@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrderJetEnvelopes
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
 
 noncomputable section
 
@@ -46,7 +47,8 @@ private theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ball
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
               - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ K i :=
-  sorry
+  ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform
+    (I := I) (M := M) g₀ a ha_super hR hδ₀
 
 set_option linter.unusedVariables false in
 private theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform_g1
@@ -64,7 +66,8 @@ private theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUni
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
             (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
               - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ K i :=
-  sorry
+  ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
+    (I := I) (M := M) g₀ a ha_super hR hδ₀
 
 set_option linter.unusedVariables false in
 private theorem ricciArmOrder0RiemannCoeff_perOrder_l2_ballUniform_g1
