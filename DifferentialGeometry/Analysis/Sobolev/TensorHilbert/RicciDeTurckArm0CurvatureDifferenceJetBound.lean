@@ -29,6 +29,146 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   have huv : 0 ≤ u + v := by linarith
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
+theorem exists_coeffMixedRm_pinned (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ∃ mixed : SmoothCcTensor g₀ 2 2,
+      ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 mixed W) x v =
+          2 * ∑ a' : Fin (Module.finrank ℝ E), ∑ b' : Fin (Module.finrank ℝ E),
+            g₁.inner x (riemannOp (LeviCivita (I := I) g₀) x (v 0)
+                (smoothOrthoFrame (I := I) g₁ x a' x)
+                (smoothOrthoFrame (I := I) g₁ x b' x)) (v 1) *
+              DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+                (I := I) (M := M) g₀ 2 W x
+                (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a' x
+                  else smoothOrthoFrame (I := I) g₁ x b' x) :=
+  sorry
+
+noncomputable def coeffMixedRm (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 2 :=
+  Classical.choose (exists_coeffMixedRm_pinned (I := I) (M := M) g₀ g₁)
+
+theorem coeffMixedRm_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (coeffMixedRm (I := I) (M := M) g₀ g₁) W) x v =
+      2 * ∑ a' : Fin (Module.finrank ℝ E), ∑ b' : Fin (Module.finrank ℝ E),
+        g₁.inner x (riemannOp (LeviCivita (I := I) g₀) x (v 0)
+            (smoothOrthoFrame (I := I) g₁ x a' x)
+            (smoothOrthoFrame (I := I) g₁ x b' x)) (v 1) *
+          DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+            (I := I) (M := M) g₀ 2 W x
+            (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a' x
+              else smoothOrthoFrame (I := I) g₁ x b' x) :=
+  Classical.choose_spec (exists_coeffMixedRm_pinned (I := I) (M := M) g₀ g₁) W x v
+
+theorem exists_coeffMixedCurv_pinned (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ∃ mixed : SmoothCcTensor g₀ 2 2,
+      ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 mixed W) x v =
+          DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+              (I := I) (M := M) g₀ 2 W x
+              (Function.update v 0
+                (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+                  (ricciTensor (I := I) g₀ x (v 0)).toLinearMap)) +
+            DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+              (I := I) (M := M) g₀ 2 W x
+              (Function.update v 1
+                (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+                  (ricciTensor (I := I) g₀ x (v 1)).toLinearMap)) :=
+  sorry
+
+noncomputable def coeffMixedCurv (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 2 :=
+  Classical.choose (exists_coeffMixedCurv_pinned (I := I) (M := M) g₀ g₁)
+
+theorem coeffMixedCurv_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (coeffMixedCurv (I := I) (M := M) g₀ g₁) W) x v =
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+          (I := I) (M := M) g₀ 2 W x
+          (Function.update v 0
+            (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+              (ricciTensor (I := I) g₀ x (v 0)).toLinearMap)) +
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+          (I := I) (M := M) g₀ 2 W x
+          (Function.update v 1
+            (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+              (ricciTensor (I := I) g₀ x (v 1)).toLinearMap)) :=
+  Classical.choose_spec (exists_coeffMixedCurv_pinned (I := I) (M := M) g₀ g₁) W x v
+
+set_option linter.unusedVariables false in
+theorem coeffMixedRm_sub_g1coeff_perOrder_l2_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C1 : ℕ → ℝ, (∀ i, 0 ≤ C1 i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+              - coeffMixedRm (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ C1 i :=
+  sorry
+
+set_option linter.unusedVariables false in
+theorem coeffMixedRm_sub_g0coeff_perOrder_l2_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C2 : ℕ → ℝ, (∀ i, 0 ≤ C2 i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (coeffMixedRm (I := I) (M := M) g₀ g₁
+              - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i :=
+  sorry
+
+set_option linter.unusedVariables false in
+theorem coeffMixedCurv_sub_g1coeff_perOrder_l2_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C1 : ℕ → ℝ, (∀ i, 0 ≤ C1 i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+              - coeffMixedCurv (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ C1 i :=
+  sorry
+
+set_option linter.unusedVariables false in
+theorem coeffMixedCurv_sub_g0coeff_perOrder_l2_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C2 : ℕ → ℝ, (∀ i, 0 ≤ C2 i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (coeffMixedCurv (I := I) (M := M) g₀ g₁
+              - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i :=
+  sorry
+
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0RiemannCoeff_frameSplit_perOrder_l2_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -57,8 +197,17 @@ theorem ricciArmOrder0RiemannCoeff_frameSplit_perOrder_l2_ballUniform
             ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ - mixed)‖ ^ 2 ≤ C1 i ∧
             ‖iteratedCovGrad (I := I) g₀ 2 2 i
-              (mixed - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i :=
-  sorry
+              (mixed - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i := by
+  obtain ⟨C1, hC1nn, hb1⟩ :=
+    coeffMixedRm_sub_g1coeff_perOrder_l2_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨C2, hC2nn, hb2⟩ :=
+    coeffMixedRm_sub_g0coeff_perOrder_l2_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨C1, C2, hC1nn, hC2nn, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball
+  refine ⟨coeffMixedRm (I := I) (M := M) g₀ g₁,
+    coeffMixedRm_appCc_eq (I := I) (M := M) g₀ g₁, ?_⟩
+  intro i hi
+  exact ⟨hb1 g₁ P hδ_le hδ htie hPball i hi, hb2 g₁ P hδ_le hδ htie hPball i hi⟩
 
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0CurvCoeff_frameSplit_perOrder_l2_ballUniform
@@ -90,8 +239,17 @@ theorem ricciArmOrder0CurvCoeff_frameSplit_perOrder_l2_ballUniform
             ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ - mixed)‖ ^ 2 ≤ C1 i ∧
             ‖iteratedCovGrad (I := I) g₀ 2 2 i
-              (mixed - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i :=
-  sorry
+              (mixed - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i := by
+  obtain ⟨C1, hC1nn, hb1⟩ :=
+    coeffMixedCurv_sub_g1coeff_perOrder_l2_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨C2, hC2nn, hb2⟩ :=
+    coeffMixedCurv_sub_g0coeff_perOrder_l2_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨C1, C2, hC1nn, hC2nn, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball
+  refine ⟨coeffMixedCurv (I := I) (M := M) g₀ g₁,
+    coeffMixedCurv_appCc_eq (I := I) (M := M) g₀ g₁, ?_⟩
+  intro i hi
+  exact ⟨hb1 g₁ P hδ_le hδ htie hPball i hi, hb2 g₁ P hδ_le hδ htie hPball i hi⟩
 
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0RiemannCoeff_sub_background_perOrder_l2_ballUniform_generic
