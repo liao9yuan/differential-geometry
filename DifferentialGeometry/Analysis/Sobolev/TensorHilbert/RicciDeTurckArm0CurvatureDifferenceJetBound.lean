@@ -24,6 +24,75 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) (hv : 0 ≤ v)
+    (htri : t ≤ u + v) (h1 : u ^ 2 ≤ c1) (h2 : v ^ 2 ≤ c2) : t ^ 2 ≤ 2 * (c1 + c2) := by
+  have huv : 0 ≤ u + v := by linarith
+  nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
+
+set_option linter.unusedVariables false in
+theorem ricciArmOrder0RiemannCoeff_frameSplit_perOrder_l2_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C1 C2 : ℕ → ℝ, (∀ i, 0 ≤ C1 i) ∧ (∀ i, 0 ≤ C2 i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∃ mixed : SmoothCcTensor g₀ 2 2,
+          (∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
+            DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 2 2 mixed W) x v =
+              2 * ∑ a' : Fin (Module.finrank ℝ E), ∑ b' : Fin (Module.finrank ℝ E),
+                g₁.inner x (riemannOp (LeviCivita (I := I) g₀) x (v 0)
+                    (smoothOrthoFrame (I := I) g₁ x a' x)
+                    (smoothOrthoFrame (I := I) g₁ x b' x)) (v 1) *
+                  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+                    (I := I) (M := M) g₀ 2 W x
+                    (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a' x
+                      else smoothOrthoFrame (I := I) g₁ x b' x)) ∧
+          ∀ (i : ℕ), i ≤ a →
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ - mixed)‖ ^ 2 ≤ C1 i ∧
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (mixed - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i :=
+  sorry
+
+set_option linter.unusedVariables false in
+theorem ricciArmOrder0CurvCoeff_frameSplit_perOrder_l2_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C1 C2 : ℕ → ℝ, (∀ i, 0 ≤ C1 i) ∧ (∀ i, 0 ≤ C2 i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∃ mixed : SmoothCcTensor g₀ 2 2,
+          (∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
+            DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 2 2 mixed W) x v =
+              DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+                  (I := I) (M := M) g₀ 2 W x
+                  (Function.update v 0
+                    (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+                      (ricciTensor (I := I) g₀ x (v 0)).toLinearMap)) +
+                DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel
+                  (I := I) (M := M) g₀ 2 W x
+                  (Function.update v 1
+                    (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+                      (ricciTensor (I := I) g₀ x (v 1)).toLinearMap))) ∧
+          ∀ (i : ℕ), i ≤ a →
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ - mixed)‖ ^ 2 ≤ C1 i ∧
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (mixed - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C2 i :=
+  sorry
+
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0RiemannCoeff_sub_background_perOrder_l2_ballUniform_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -39,8 +108,30 @@ theorem ricciArmOrder0RiemannCoeff_sub_background_perOrder_l2_ballUniform_generi
         ∀ (i : ℕ), i ≤ a →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
-              - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C i :=
-  sorry
+              - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C i := by
+  obtain ⟨C1, C2, hC1nn, hC2nn, hbd⟩ :=
+    ricciArmOrder0RiemannCoeff_frameSplit_perOrder_l2_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => 2 * (C1 i + C2 i),
+    fun i => by have h1 := hC1nn i; have h2 := hC2nn i; linarith, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
+  obtain ⟨mixed, _hpin, hpieces⟩ := hbd g₁ P hδ_le hδ htie hPball
+  obtain ⟨hp1, hp2⟩ := hpieces i hi
+  have hsplit : (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+        - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)
+      = (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ - mixed)
+        + (mixed - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) := by abel
+  have e1 := iteratedCovGrad_add (I := I) g₀ 2 2 i
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ - mixed)
+    (mixed - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)
+  rw [hsplit, e1]
+  set u := iteratedCovGrad (I := I) g₀ 2 2 i
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ - mixed) with hu
+  set v := iteratedCovGrad (I := I) g₀ 2 2 i
+    (mixed - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) with hv
+  clear_value u v
+  exact sq_le_two_add ‖u + v‖ ‖u‖ ‖v‖ (C1 i) (C2 i)
+    (norm_nonneg _) (norm_nonneg u) (norm_nonneg v) (norm_add_le u v) hp1 hp2
 
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0CurvCoeff_sub_background_perOrder_l2_ballUniform_generic
@@ -57,8 +148,30 @@ theorem ricciArmOrder0CurvCoeff_sub_background_perOrder_l2_ballUniform_generic
         ∀ (i : ℕ), i ≤ a →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
             (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
-              - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C i :=
-  sorry
+              - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ C i := by
+  obtain ⟨C1, C2, hC1nn, hC2nn, hbd⟩ :=
+    ricciArmOrder0CurvCoeff_frameSplit_perOrder_l2_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => 2 * (C1 i + C2 i),
+    fun i => by have h1 := hC1nn i; have h2 := hC2nn i; linarith, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
+  obtain ⟨mixed, _hpin, hpieces⟩ := hbd g₁ P hδ_le hδ htie hPball
+  obtain ⟨hp1, hp2⟩ := hpieces i hi
+  have hsplit : (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+        - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)
+      = (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ - mixed)
+        + (mixed - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀) := by abel
+  have e1 := iteratedCovGrad_add (I := I) g₀ 2 2 i
+    (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ - mixed)
+    (mixed - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)
+  rw [hsplit, e1]
+  set u := iteratedCovGrad (I := I) g₀ 2 2 i
+    (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ - mixed) with hu
+  set v := iteratedCovGrad (I := I) g₀ 2 2 i
+    (mixed - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀) with hv
+  clear_value u v
+  exact sq_le_two_add ‖u + v‖ ‖u‖ ‖v‖ (C1 i) (C2 i)
+    (norm_nonneg _) (norm_nonneg u) (norm_nonneg v) (norm_add_le u v) hp1 hp2
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
