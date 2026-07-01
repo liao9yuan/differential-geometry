@@ -309,7 +309,7 @@ private lemma deTurckCoeff_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M) (
 
 set_option linter.unusedSectionVars false in
 
-private lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
+lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁ =
       DifferentialGeometry.Integral.Connection.appCcRS (I := I) (M := M) g₀ 4 4 2
