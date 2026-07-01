@@ -31,6 +31,42 @@ private theorem sq_le_two_add (t u v c1 c2 : ℝ) (ht : 0 ≤ t) (hu : 0 ≤ u) 
   nlinarith [mul_le_mul htri htri ht huv, sq_nonneg (u - v), h1, h2, hu, hv]
 
 set_option linter.unusedVariables false in
+private theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform_g1
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ K i :=
+  sorry
+
+set_option linter.unusedVariables false in
+private theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform_g1
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), i ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤ K i :=
+  sorry
+
+set_option linter.unusedVariables false in
 private theorem ricciArmOrder0RiemannCoeff_perOrder_l2_ballUniform_g1
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -44,8 +80,42 @@ private theorem ricciArmOrder0RiemannCoeff_perOrder_l2_ballUniform_g1
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ K i :=
-  sorry
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ K i := by
+  obtain ⟨KD, hKD_nn, hKD⟩ :=
+    ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform_g1
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => 2 * (‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 + KD i),
+    fun i => by
+      linarith [hKD_nn i, sq_nonneg ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖], ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
+  have hD := hKD g₁ P hδ_le hδ htie hPball i hi
+  have hsplit : ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ =
+      ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ +
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) := by
+    abel
+  rw [hsplit, iteratedCovGrad_add (I := I) g₀ 2 2 i
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+      - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)]
+  exact sq_le_two_add
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)
+      + iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖
+    (‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2)
+    (KD i)
+    (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+    (norm_add_le _ _) le_rfl hD
 
 set_option linter.unusedVariables false in
 private theorem ricciArmOrder0CurvCoeff_perOrder_l2_ballUniform_g1
@@ -61,8 +131,42 @@ private theorem ricciArmOrder0CurvCoeff_perOrder_l2_ballUniform_g1
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-            (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ K i :=
-  sorry
+            (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤ K i := by
+  obtain ⟨KD, hKD_nn, hKD⟩ :=
+    ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform_g1
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => 2 * (‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 + KD i),
+    fun i => by
+      linarith [hKD_nn i, sq_nonneg ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖], ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
+  have hD := hKD g₁ P hδ_le hδ htie hPball i hi
+  have hsplit : ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ =
+      ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀ +
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀) := by
+    abel
+  rw [hsplit, iteratedCovGrad_add (I := I) g₀ 2 2 i
+    (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)
+    (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+      - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)]
+  exact sq_le_two_add
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)
+      + iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖
+    ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖
+    (‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2)
+    (KD i)
+    (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
+    (norm_add_le _ _) le_rfl hD
 
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_ballUniform_generic
