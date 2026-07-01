@@ -50,6 +50,18 @@ theorem linearizedRicciArm0BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
               (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
   sorry
 
+private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
+    (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
+
+set_option linter.unusedVariables false in
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+  (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
+    Icc_subset_realizedSmallSet) in
 theorem linearizedRicciArm1BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -64,8 +76,55 @@ theorem linearizedRicciArm1BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
-  sorry
+              (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i := by
+  obtain ⟨K, hK_nn, hK⟩ := ricciArmOrder1KoszulCoeff_perOrder_l2_ballUniform_generic
+    (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨K, hK_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  have hs0 : (0 : ℝ) ≤ s := hs.1
+  have hs1 : s ≤ 1 := hs.2
+  have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
+      ((1 - s) * δ' + s * δ) :=
+    convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
+  have hδP_le : (1 - s) * δ' + s * δ ≤ δ₀ := by
+    have e1 : (1 - s) * δ' ≤ (1 - s) * δ₀ := mul_le_mul_of_nonneg_left hδ'_le h1ms
+    have e2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
+    have e3 : (1 - s) * δ₀ + s * δ₀ = δ₀ := by ring
+    linarith [e1, e2, e3]
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T T' hδ hδ' s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w :=
+    fun y v w =>
+      realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ'
+        (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs) y v w
+  have hPball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ≤ R := by
+    intro j hj
+    have heq : iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)
+        = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+          + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+      rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+    rw [heq]
+    calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+            + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+        ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+      _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+          rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+            abs_of_nonneg h1ms, abs_of_nonneg hs0]
+      _ ≤ (1 - s) * R + s * R :=
+          add_le_add (mul_le_mul_of_nonneg_left (hT'ball j hj) h1ms)
+            (mul_le_mul_of_nonneg_left (hTball j hj) hs0)
+      _ = R := by ring
+  exact hK (realizedFam (I := I) g₀ T T' hδ hδ' s) (convexPerturbation (I := I) g₀ T T' s)
+    hδP_le hδP htie hPball i hi
 
 theorem ricciArmPrincipalCoeff_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
     (g₀ : SmoothRiemannianMetric I M) :
