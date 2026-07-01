@@ -261,6 +261,116 @@ theorem coeffMixedRmField_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
                 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) :=
   sorry
 
+open DifferentialGeometry.Integral.DivergenceTheorem in
+private lemma metricSharp_flat_selfL (g : SmoothRiemannianMetric I M) (x : M)
+    (w : TangentSpace I x) :
+    metricSharp (I := I) g x ((g.inner x w).toLinearMap) = w := by
+  have hflat : ((g.inner x w).toLinearMap : TangentSpace I x →ₗ[ℝ] ℝ)
+      = metricFlatMap (I := I) g x w := by
+    ext y; simp [metricFlatMap_apply]
+  rw [metricSharp_def, hflat, LinearEquiv.symm_apply_apply]
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+private lemma flat_metricSharp_selfL (g : SmoothRiemannianMetric I M) (x : M)
+    (α : TangentSpace I x →ₗ[ℝ] ℝ) :
+    ((g.inner x (metricSharp (I := I) g x α)).toLinearMap : TangentSpace I x →ₗ[ℝ] ℝ) = α := by
+  ext y; simpa using inner_metricSharp (I := I) g x α y
+
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
+open DifferentialGeometry.Integral.DivergenceTheorem in
+private lemma gInvDiffRaisedEndo_metricSharpL (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (α : TangentSpace I x →ₗ[ℝ] ℝ) :
+    gInvDiffRaisedEndo (I := I) g₀ g₁ x (metricSharp (I := I) g₀ x α)
+      = metricSharp (I := I) g₁ x α - metricSharp (I := I) g₀ x α := by
+  rw [gInvDiffRaisedEndo_eq_metricSharp_flatDiff, flat_metricSharp_selfL,
+    show metricSharp (I := I) g₁ x (α - (g₁.inner x (metricSharp (I := I) g₀ x α)).toLinearMap)
+        = metricSharp (I := I) g₁ x α
+          - metricSharp (I := I) g₁ x ((g₁.inner x (metricSharp (I := I) g₀ x α)).toLinearMap)
+      from by simp only [metricSharp_def, map_sub],
+    metricSharp_flat_selfL]
+
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
+private lemma bgRic_sub_ricEndo_eqL (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (u : TangentSpace I x) :
+    bgRicEndoRaisedFib (I := I) g₁ g₀ x u - ricEndoRaisedFib (I := I) g₀ x u
+      = gInvDiffRaisedEndo (I := I) g₀ g₁ x (ricEndoRaisedFib (I := I) g₀ x u) := by
+  simp only [bgRicEndoRaisedFib_apply, ricEndoRaisedFib_apply]
+  rw [gInvDiffRaisedEndo_metricSharpL]
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
+private lemma appCcRS_ricSlot0_gInvDiff_toModelL (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (appCcRS (I := I) (M := M) g₀ 2 2 2
+              (ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 0)
+              (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) D) v =
+      Tensor0SSpace.toModel D
+        (Function.update v 0
+          (gInvDiffRaisedEndo (I := I) g₀ g₁ x (ricEndoRaisedFib (I := I) g₀ x (v 0)))) := by
+  have hval : (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (appCcRS (I := I) (M := M) g₀ 2 2 2
+            (ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 0)
+            (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) D =
+      ricciArmOrder0CurvCoeffFibSlot (I := I) g₀ 0 x (gInvDiffSlotEndo (I := I) g₀ g₁ x D) := by
+    rw [appCcRS_toSection]; rfl
+  rw [hval, ricciArmOrder0CurvCoeffFibSlot_toModel,
+    show gInvDiffSlotEndo (I := I) g₀ g₁ x D
+        = slotInsertEndoFib (I := I) (M := M) 2 0 x (gInvDiffRaisedEndo (I := I) g₀ g₁ x) D
+      from rfl,
+    slotInsertEndoFib_apply_eval, Function.update_self, Function.update_idem]
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
+private lemma reindexSwap_appCcRS_ricSlot0_toModelL
+    (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.reindexCoeffGen
+              (I := I) (M := M) g₀ 2 2
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
+              (appCcRS (I := I) (M := M) g₀ 2 2 2
+                (ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 0)
+                (gInvDiffSlotCoeff (I := I) g₀ g₁)))
+            (Equiv.swap (0 : Fin 2) 1)).toSection x) D) v =
+      Tensor0SSpace.toModel D
+        (Function.update v 1
+          (gInvDiffRaisedEndo (I := I) g₀ g₁ x (ricEndoRaisedFib (I := I) g₀ x (v 1)))) := by
+  classical
+  rw [reindexCoeffGen_toSection, reindexCoeffFibGen_apply, rsDomDomCongrSection_toSection,
+    toModel_rsDomDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    appCcRS_ricSlot0_gInvDiff_toModelL, Tensor0SSpace.toModel_ofModel,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  congr 1
+  funext i
+  fin_cases i <;>
+    simp [Function.update_apply, Equiv.swap_apply_left, Equiv.swap_apply_right]
+
+set_option backward.isDefEq.respectTransparency false in
+private lemma smoothCc22_toSection_add_clm (g₀ : SmoothRiemannianMetric I M)
+    (P Q : SmoothCcTensor g₀ 2 2) (x : M) :
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from (P + Q).toSection x)
+      = (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from P.toSection x)
+        + (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from Q.toSection x) := by
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
+set_option backward.isDefEq.respectTransparency false in
+private lemma coeffMixedCurv_sub_ricci_toSection_clm (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (coeffMixedCurvField (I := I) (M := M) g₀ g₁ g₀
+          - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀).toSection x)
+      = (coeffMixedCurvFib (I := I) g₁ g₀ x)
+        - (ricciArmOrder0CurvCoeffFib (I := I) g₀ x) := by
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    coeffMixedCurvField_toSection, ricciArmOrder0CurvCoeff_toSection]
+  rfl
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
+open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
+set_option backward.isDefEq.respectTransparency false in
 theorem coeffMixedCurvField_sub_background_eq_appCcRS_add_reindexSwap
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Φ : SmoothCcTensor g₀ 2 2, ∀ (g₁ : SmoothRiemannianMetric I M),
@@ -271,8 +381,26 @@ theorem coeffMixedCurvField_sub_background_eq_appCcRS_add_reindexSwap
               (I := I) (M := M) g₀ 2 2
             (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
               (appCcRS (I := I) (M := M) g₀ 2 2 2 Φ (gInvDiffSlotCoeff (I := I) g₀ g₁)))
-            (Equiv.swap (0 : Fin 2) 1) :=
-  sorry
+            (Equiv.swap (0 : Fin 2) 1) := by
+  classical
+  refine ⟨ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 0, fun g₁ => ?_⟩
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  refine tensorRSSpace_ext 2 2 x (fun D => ?_)
+  rw [coeffMixedCurv_sub_ricci_toSection_clm (I := I) (M := M) g₀ g₁ x,
+    smoothCc22_toSection_add_clm (I := I) (M := M) g₀]
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply,
+    Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.add_apply,
+    coeffMixedCurvFib_toModel, ricciArmOrder0CurvCoeffFib_toModel,
+    appCcRS_ricSlot0_gInvDiff_toModelL, reindexSwap_appCcRS_ricSlot0_toModelL]
+  rw [← bgRic_sub_ricEndo_eqL (I := I) g₀ g₁ x (v 0),
+    ← bgRic_sub_ricEndo_eqL (I := I) g₀ g₁ x (v 1),
+    ContinuousMultilinearMap.map_update_sub, ContinuousMultilinearMap.map_update_sub]
+  ring
 
 set_option backward.isDefEq.respectTransparency false in
 theorem coeffMixedCurvField_sub_background_perOrder_rfns_le_gInvDiffSlotCoeff_rfns
