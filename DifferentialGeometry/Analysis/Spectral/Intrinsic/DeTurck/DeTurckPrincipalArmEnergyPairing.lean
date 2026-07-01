@@ -457,6 +457,23 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_squaredLower
   rw [armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ n u₀, sub_neg_eq_add]
   exact hbound u₀
 
+private theorem arm_residual_cross_decomp
+    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
+    ∃ Cop : ℝ, 0 ≤ Cop ∧
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        ∃ Z : SmoothCcTensor g₀ 0 (2 + n),
+          tensorL2Inner (I := I) (M := M) g₀ 0 2
+              (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+              (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+            armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
+            (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀, Z⟫_ℝ : ℝ) ∧
+          ‖Z‖ ≤ Cop * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ :=
+  sorry
+
 private theorem arm_residual_cross_bound
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -471,8 +488,23 @@ private theorem arm_residual_cross_bound
           armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
         Ccross *
           (‖iteratedCovGrad (I := I) g₀ 0 2 n u₀‖ *
-            ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖) :=
-  sorry
+            ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖) := by
+  obtain ⟨Cop, hCop_nn, hCop⟩ :=
+    arm_residual_cross_decomp (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
+  refine ⟨Cop, hCop_nn, fun u₀ => ?_⟩
+  obtain ⟨Z, hZeq, hZbnd⟩ := hCop u₀
+  rw [hZeq]
+  have habs : (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀, Z⟫_ℝ : ℝ) ≤
+      ‖iteratedCovGrad (I := I) g₀ 0 2 n u₀‖ * ‖Z‖ :=
+    real_inner_le_norm _ _
+  calc (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀, Z⟫_ℝ : ℝ)
+      ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 n u₀‖ * ‖Z‖ := habs
+    _ ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 n u₀‖ *
+        (Cop * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖) :=
+      mul_le_mul_of_nonneg_left hZbnd (norm_nonneg _)
+    _ = Cop *
+        (‖iteratedCovGrad (I := I) g₀ 0 2 n u₀‖ *
+          ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖) := by ring
 
 private theorem exists_oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound_core
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
