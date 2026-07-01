@@ -457,6 +457,41 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_squaredLower
   rw [armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ n u₀, sub_neg_eq_add]
   exact hbound u₀
 
+private theorem deTurckArm_residual_ibp_zero
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ∃ F₀ : SmoothCcTensor g₀ (2 + 1) (2 + 0),
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        tensorL2Inner (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0 u₀).toFun
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ 0 u₀ =
+        (⟪iteratedCovGrad (I := I) g₀ 0 2 0 u₀,
+            appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) F₀
+              (iteratedCovGrad (I := I) g₀ 0 2 1 u₀)⟫_ℝ : ℝ) :=
+  sorry
+
+private theorem deTurckArm_residual_ibp_succ
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
+    (F_n : SmoothCcTensor g₀ (2 + (n + 1)) (2 + n))
+    (hF_n : ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+      tensorL2Inner (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+          (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+        armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
+      (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀,
+          appCc (I := I) (M := M) g₀ (2 + (n + 1)) (2 + n) F_n
+            (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ)) :
+    ∃ F : SmoothCcTensor g₀ (2 + ((n + 1) + 1)) (2 + (n + 1)),
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        tensorL2Inner (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (n + 1) u₀).toFun
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ (n + 1) u₀ =
+        (⟪iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀,
+            appCc (I := I) (M := M) g₀ (2 + ((n + 1) + 1)) (2 + (n + 1)) F
+              (iteratedCovGrad (I := I) g₀ 0 2 ((n + 1) + 1) u₀)⟫_ℝ : ℝ) :=
+  sorry
+
 private theorem deTurckArm_residual_ibp
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ F : SmoothCcTensor g₀ (2 + (n + 1)) (2 + n),
@@ -467,8 +502,15 @@ private theorem deTurckArm_residual_ibp
           armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
         (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀,
             appCc (I := I) (M := M) g₀ (2 + (n + 1)) (2 + n) F
-              (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) :=
-  sorry
+              (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) := by
+  induction n with
+  | zero =>
+    exact deTurckArm_residual_ibp_zero (I := I) (M := M) g₀ g₁
+  | succ k ih =>
+    obtain ⟨F_k, hF_k⟩ := ih
+    obtain ⟨F, hF⟩ :=
+      deTurckArm_residual_ibp_succ (I := I) (M := M) g₀ g₁ k F_k hF_k
+    exact ⟨F, hF⟩
 
 set_option linter.unusedVariables false in
 private theorem arm_residual_cross_decomp
