@@ -457,6 +457,20 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_squaredLower
   rw [armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ n u₀, sub_neg_eq_add]
   exact hbound u₀
 
+private theorem deTurckArm_residual_ibp
+    (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
+    ∃ F : SmoothCcTensor g₀ (2 + (n + 1)) (2 + n),
+      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
+        tensorL2Inner (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
+          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
+        (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀,
+            appCc (I := I) (M := M) g₀ (2 + (n + 1)) (2 + n) F
+              (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) :=
+  sorry
+
+set_option linter.unusedVariables false in
 private theorem arm_residual_cross_decomp
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -471,8 +485,62 @@ private theorem arm_residual_cross_decomp
               (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
             armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ =
             (⟪iteratedCovGrad (I := I) g₀ 0 2 n u₀, Z⟫_ℝ : ℝ) ∧
-          ‖Z‖ ≤ Cop * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ :=
-  sorry
+          ‖Z‖ ≤ Cop * ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀‖ := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  obtain ⟨F, hF⟩ := deTurckArm_residual_ibp (I := I) (M := M) g₀ g₁ n
+  obtain ⟨CopF, hCopF_nn, hCopF⟩ :=
+    exists_uniform_riemannianFiberNormSq_appCc_le (I := I) (M := M) g₀ (2 + (n + 1)) (2 + n) F
+  refine ⟨Real.sqrt CopF, Real.sqrt_nonneg _, fun u₀ => ?_⟩
+  set Z : SmoothCcTensor g₀ 0 (2 + n) :=
+    appCc (I := I) (M := M) g₀ (2 + (n + 1)) (2 + n) F
+      (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀) with hZ_def
+  refine ⟨Z, hF u₀, ?_⟩
+  set W : SmoothCcTensor g₀ 0 (2 + (n + 1)) :=
+    iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀ with hW_def
+  have hZn : ‖Z‖ = tensorL2Norm (I := I) (M := M) g₀ 0 (2 + n) Z.toFun :=
+    SmoothCcTensor.norm_def (I := I) (M := M) Z
+  have hWn : ‖W‖ = tensorL2Norm (I := I) (M := M) g₀ 0 (2 + (n + 1)) W.toFun :=
+    SmoothCcTensor.norm_def (I := I) (M := M) W
+  have hZL2 : ‖Z‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x (Z.toSection x)
+        ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    rw [hZn, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ (2 + n) Z]
+  have hWL2 : ‖W‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x (W.toSection x)
+        ∂(DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+    rw [hWn,
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ (2 + (n + 1)) W]
+  have hpt : ∀ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x (Z.toSection x) ≤
+      CopF * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x (W.toSection x) := by
+    intro x
+    exact hCopF W x
+  have hWint : MeasureTheory.Integrable
+      (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x (W.toSection x))
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    DifferentialGeometry.Integral.Connection.integrable_riemannianFiberNormSq_toSection
+      (I := I) (M := M) g₀ 0 (2 + (n + 1)) W
+  have hZsq_le : ‖Z‖ ^ 2 ≤ CopF * ‖W‖ ^ 2 := by
+    rw [hZL2, hWL2]
+    have hg_int : MeasureTheory.Integrable
+        (fun x => CopF * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x (W.toSection x))
+        (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+      hWint.const_mul CopF
+    have hmono :=
+      MeasureTheory.integral_mono_of_nonneg
+        (Filter.Eventually.of_forall (fun x => riemannianFiberNormSq_nonneg (I := I) (M := M)
+          g₀ 0 (2 + n) x _)) hg_int
+        (Filter.Eventually.of_forall hpt)
+    rw [integral_const_mul] at hmono
+    linarith
+  have hWnn : 0 ≤ ‖W‖ := norm_nonneg _
+  have hZnn : 0 ≤ ‖Z‖ := norm_nonneg _
+  have hCopW_nn : 0 ≤ CopF * ‖W‖ ^ 2 := mul_nonneg hCopF_nn (sq_nonneg _)
+  have hkey : ‖Z‖ ≤ Real.sqrt CopF * ‖W‖ := by
+    rw [← Real.sqrt_sq hZnn, ← Real.sqrt_sq hWnn]
+    refine le_trans (Real.sqrt_le_sqrt hZsq_le) ?_
+    rw [Real.sqrt_mul hCopF_nn]
+  exact hkey
 
 private theorem arm_residual_cross_bound
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
