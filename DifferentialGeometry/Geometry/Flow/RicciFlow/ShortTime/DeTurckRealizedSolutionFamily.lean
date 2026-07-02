@@ -170,7 +170,7 @@ Consumers transitively depend on the `sorryAx` carried by the single deep leaf
 theorem realizedDeTurck_timeRegular_family
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
+    (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super).choose)
@@ -266,15 +266,15 @@ theorem realizedDeTurckFamily_exists
           (Set.Ici 0) t) ∧
       JointChartGramSmooth (I := I) T g_DT := by
   classical
-  -- The genuine second-order quasilinear maximal-regularity engine, with zero initial
-  -- perturbation (so `g_DT 0 = g₀`) and the even supercritical spectral order
-  -- `a = 2·finrank E + 10` (so the Sobolev tame estimates of the second-order Nemytskii
-  -- nonlinearity close, the order-`a` lossy fibre-embedding bridge fires for the
-  -- short-time smallness via continuity, and the supercritical C² embedding of the
-  -- realized perturbation closes after the order-doubling reverse-Hebey step).
-  set a : ℕ := 2 * Module.finrank ℝ E + 10 with ha_def
-  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ a := by rw [ha_def]
-  have ha_eq : a = 2 * Module.finrank ℝ E + 10 := ha_def
+  
+  
+  
+  
+  
+  
+  set a : ℕ := 4 * Module.finrank ℝ E + 10 with ha_def
+  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ a := by omega
+  have ha_eq : a = 4 * Module.finrank ℝ E + 10 := ha_def
   
   
   set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution
