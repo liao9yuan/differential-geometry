@@ -5076,7 +5076,7 @@ private theorem deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection
     exact (hRjet j t hjk ht i).symm
   · intro j hjk q
     obtain ⟨C, hC_nn, hCle⟩ :=
-      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ q
+      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ (2 * q)
     obtain ⟨B, hBs, hBle⟩ := hcpath_mass j hjk ((2 * q : ℕ) : ℝ) (by positivity)
     refine ⟨C * Real.sqrt (∑' i, B i),
       mul_nonneg hC_nn (Real.sqrt_nonneg _), fun t ht => ?_⟩

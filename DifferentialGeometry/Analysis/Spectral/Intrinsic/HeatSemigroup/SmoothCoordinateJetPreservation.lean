@@ -178,7 +178,7 @@ theorem deTurckRemainder_path_timeJet_section
   have hσ'_nn : (0 : ℝ) ≤ σ' := by rw [hσ'_def]; positivity
   obtain ⟨B, hB_sum, hBle⟩ := hmass j σ' hσ'_nn
   obtain ⟨Csum, hCsum_nn, hCsum⟩ :=
-    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ k
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ (2 * k)
   have hBtsum_nn : 0 ≤ ∑' i, B i :=
     tsum_nonneg (fun i =>
       le_trans (mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ') (sq_nonneg _))
