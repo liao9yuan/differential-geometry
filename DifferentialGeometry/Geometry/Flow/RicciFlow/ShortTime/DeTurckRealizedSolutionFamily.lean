@@ -68,7 +68,7 @@ theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
 theorem realizedDeTurck_timeRegular_family
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
+    (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super).choose)
@@ -133,9 +133,9 @@ theorem realizedDeTurckFamily_exists
   
   
   
-  set a : ℕ := 2 * Module.finrank ℝ E + 10 with ha_def
-  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ a := by rw [ha_def]
-  have ha_eq : a = 2 * Module.finrank ℝ E + 10 := ha_def
+  set a : ℕ := 4 * Module.finrank ℝ E + 10 with ha_def
+  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ a := by omega
+  have ha_eq : a = 4 * Module.finrank ℝ E + 10 := ha_def
   
   
   set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution

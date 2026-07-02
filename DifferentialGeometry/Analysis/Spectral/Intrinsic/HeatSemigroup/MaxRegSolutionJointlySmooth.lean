@@ -1070,7 +1070,7 @@ set_option linter.unusedVariables false in
 theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
+    (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (F_RHS : SmoothRiemannianMetric I M →
@@ -1412,7 +1412,7 @@ set_option linter.unusedVariables false in
 theorem maxreg_solution_jointly_smooth_representative
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
+    (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super).choose)

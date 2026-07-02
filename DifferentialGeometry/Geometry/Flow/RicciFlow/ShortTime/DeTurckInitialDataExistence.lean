@@ -39,7 +39,7 @@ theorem deTurckRicci_solution_with_jointReg
       IsQuasilinearMetricParabolicSolution (I := I)
         (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT ∧
       JointChartGramSmooth (I := I) T g_DT := by
-  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ 2 * Module.finrank ℝ E + 10 := le_refl _
+  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ 4 * Module.finrank ℝ E + 10 := by omega
   have hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
       (hδ : gFibreOpBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ S) δ)
@@ -63,19 +63,19 @@ theorem deTurckRicci_solution_with_jointReg
         (by rw [hR_def, deTurckRHSSectionBg_toSection]) x v w]
     exact deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS (I := I) g_bg gDT x v w
   exact quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence (I := I)
-    (deTurckRicciRHS (I := I) g_bg) g₀ (2 * Module.finrank ℝ E + 10) ha_super rfl
-    (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg (2 * Module.finrank ℝ E + 10))
+    (deTurckRicciRHS (I := I) g_bg) g₀ (4 * Module.finrank ℝ E + 10) ha_super rfl
+    (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg (4 * Module.finrank ℝ E + 10))
     (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg)
     (fun g x v w => deTurckRicciRHS_symm (I := I) g_bg g x v w)
     (deTurckRicciRHS_isStrictlyParabolic_at_self (I := I) g₀ g_bg)
     (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
-      (2 * Module.finrank ℝ E + 10) ha_super)
+      (4 * Module.finrank ℝ E + 10) ha_super)
     (deTurckSobolevNHa2_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
-      (2 * Module.finrank ℝ E + 10) ha_super)
+      (4 * Module.finrank ℝ E + 10) ha_super)
     (deTurckRicciRHS_isSmoothQuasilinear (I := I) g_bg)
     hRepr
     (deTurckRicci_forcingBootstrap (I := I) (M := M) g₀ g_bg
-      (2 * Module.finrank ℝ E + 10) ha_super)
+      (4 * Module.finrank ℝ E + 10) ha_super)
 
 theorem deturck_ricci_flow_parabolic_short_time_existence
     (g₀ g_bg : SmoothRiemannianMetric I M) :
