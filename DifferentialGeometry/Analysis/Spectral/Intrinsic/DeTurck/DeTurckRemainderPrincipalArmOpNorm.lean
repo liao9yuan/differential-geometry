@@ -34,12 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-theorem smoothCcToTensorHs_norm_order_congr (g₀ : SmoothRiemannianMetric I M)
-    {σ σ' : ℝ} (hσ : σ = σ') (T : SmoothCcTensor g₀ 0 2) :
-    ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ T‖ =
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' T‖ := by
-  subst hσ; rfl
-
 theorem smoothCcToTensorHs_rawTensorConnLapSmooth_le
     (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) (T : SmoothCcTensor g₀ 0 2) :
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
@@ -126,35 +120,61 @@ theorem smoothCcToTensorHs_rawTensorConnLapSmooth_le
   exact le_of_sq_le_sq hsq hnn
 
 theorem exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_opNorm_le
-    (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
-    ∃ Clower : ℝ, 0 ≤ Clower ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M)
-        (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
-        (∀ (y : M) (v w : TangentSpace I y),
-          g₁.inner y v w = g₀.inner y v w + h y v w) →
-        ∀ {δ : ℝ}, δ < 1 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
-        ∀ (T₀ : SmoothCcTensor g₀ 0 2),
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
-              (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ T₀)‖ ≤
-            (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T₀‖ +
-              Clower * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 1) T₀‖ := by
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
+    (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+    ∃ Clower : ℕ → ℝ, (∀ m, 0 ≤ Clower m) ∧
+      ∀ (m : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
+        (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+            (deTurckPrincipalCometricArm (I := I) (M := M) g₀
+              (tensorSectionRealizeMetric (I := I) g₀ T₀
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+                (hδ_fibre T₀ hball)) T₀)‖ ≤
+          deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) *
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
+            Clower m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
+  classical
   obtain ⟨Clower, hClower_nn, hbound⟩ :=
     exists_smoothCcToTensorHs_deTurckPrincipalCometricArm_principal_le
-      (I := I) (M := M) g₀ σ
-  refine ⟨Clower, hClower_nn, fun g₁ h htie δ hδ_lt hδ_nn hδ T₀ => ?_⟩
-  refine le_trans (hbound g₁ h htie hδ_lt hδ_nn hδ T₀) ?_
-  have hshift : ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
-        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
-      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T₀‖ :=
-    smoothCcToTensorHs_rawTensorConnLapSmooth_le (I := I) (M := M) g₀ σ T₀
-  have hκ_nn : 0 ≤ δ / (1 - δ) := by
-    have hpos : 0 < 1 - δ := by linarith
-    exact div_nonneg hδ_nn (le_of_lt hpos)
-  have htop : (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ
-        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
-      (δ / (1 - δ)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (σ + 2) T₀‖ :=
-    mul_le_mul_of_nonneg_left hshift hκ_nn
-  linarith
+      (I := I) (M := M) g₀ a ha_super hR₀ hδ_le hδ_fibre
+  refine ⟨Clower, hClower_nn, fun m T₀ hball => ?_⟩
+  rcases isEmpty_or_nonempty M with hM | hM
+  · have hzero : ∀ (τ : ℝ) (X : SmoothCcTensor g₀ 0 2),
+        smoothCcToTensorHs (I := I) (M := M) g₀ τ X = 0 := by
+      intro τ X
+      have hL2norm : ‖SmoothCcTensor.toL2 X‖ = 0 := by
+        rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_def,
+          DifferentialGeometry.Integral.L2.tensorL2Norm,
+          DifferentialGeometry.Integral.L2.tensorL2Inner,
+          MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+      have hL2 : SmoothCcTensor.toL2 X = 0 := norm_eq_zero.mp hL2norm
+      refine tensorHs.ext (funext fun i => ?_)
+      rw [smoothCcToTensorHs_coeff, tensorHs.zero_coeff,
+        hL2, tensorL2Coeff_eq_inner, inner_zero_right]
+    rw [hzero, hzero, hzero]
+    simp
+  · have hδ_nn : 0 ≤ δ :=
+      delta_nonneg_of_ball_gFibreOpBound (I := I) (M := M) g₀ a hR₀ hδ_fibre
+    have hδ_lt1 : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
+    have hκ_nn : 0 ≤ δ / (1 - δ) := div_nonneg hδ_nn (by linarith)
+    have hCEκ_nn : 0 ≤ deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) :=
+      mul_nonneg (deTurckArmFibreConst_nonneg _) hκ_nn
+    refine le_trans (hbound m T₀ hball) ?_
+    have hshift : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ :=
+      smoothCcToTensorHs_rawTensorConnLapSmooth_le (I := I) (M := M) g₀ (m : ℝ) T₀
+    have htop : deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) *
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+        deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) *
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ :=
+      mul_le_mul_of_nonneg_left hshift hCEκ_nn
+    linarith
 
 theorem exists_appCc_iteratedCovGrad_l2_dataJetWindow_le
     (g₀ : SmoothRiemannianMetric I M) (m : ℕ) :
