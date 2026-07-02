@@ -802,7 +802,170 @@ private theorem contDiffOn_integral_of_jointContMDiffOn_Icc_finiteOrder
         exact ih (fun x t => derivWithin (fun s => f x s) (Set.Icc (0 : ℝ) T) t)
           (partialSnd_contMDiffOn_Icc_finiteOrder f n hfsucc)
 
+private local instance tensorRSModelNormedAddCommGroup_local :
+    NormedAddCommGroup (Tensor0SBundle.TensorRSModel 0 2 ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup 0 2
+
+private local instance tensorRSModelNormedSpace_local :
+    NormedSpace ℝ (Tensor0SBundle.TensorRSModel 0 2 ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace 0 2
+
+private theorem clm_comm_iteratedDerivWithin_finiteOrder {V W : Type*} [NormedAddCommGroup V]
+    [NormedSpace ℝ V] [NormedAddCommGroup W] [NormedSpace ℝ W]
+    (L : V →L[ℝ] W) (γ : ℝ → V) {T : ℝ} (hT : 0 < T)
+    {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) (j : ℕ)
+    (hγ : ContDiffWithinAt ℝ (j : WithTop ℕ∞) γ (Set.Icc (0 : ℝ) T) t) :
+    iteratedDerivWithin j (fun s => L (γ s)) (Set.Icc (0 : ℝ) T) t =
+      L (iteratedDerivWithin j γ (Set.Icc (0 : ℝ) T) t) := by
+  have hUD : UniqueDiffOn ℝ (Set.Icc (0 : ℝ) T) := uniqueDiffOn_Icc hT
+  have hcomp : (fun s => L (γ s)) = L ∘ γ := rfl
+  rw [iteratedDerivWithin_eq_iteratedFDerivWithin, hcomp,
+    L.iteratedFDerivWithin_comp_left hγ hUD ht le_rfl,
+    ContinuousLinearMap.compContinuousMultilinearMap_coe,
+    iteratedDerivWithin_eq_iteratedFDerivWithin]
+  rfl
+
+private theorem iteratedDerivWithin_integral_param_Icc_finiteOrder
+    (μ : Measure M) [IsFiniteMeasure μ] {T : ℝ} (hT : 0 < T) :
+    ∀ (j : ℕ) (f : M → ℝ → ℝ),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (j : WithTop ℕ∞) (fun p : M × ℝ => f p.1 p.2)
+        ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) →
+      ∀ t₀ ∈ Set.Icc (0 : ℝ) T,
+        iteratedDerivWithin j (fun t => ∫ x, f x t ∂μ) (Set.Icc (0 : ℝ) T) t₀ =
+          ∫ x, iteratedDerivWithin j (fun s => f x s) (Set.Icc (0 : ℝ) T) t₀ ∂μ := by
+  have hUD : UniqueDiffOn ℝ (Set.Icc (0 : ℝ) T) := uniqueDiffOn_Icc hT
+  intro j
+  induction j with
+  | zero =>
+      intro f _ t₀ _
+      simp only [iteratedDerivWithin_zero]
+  | succ n ih =>
+      intro f hf t₀ ht₀
+      have hf1 : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞)
+          (fun p : M × ℝ => f p.1 p.2) ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
+        hf.of_le (by exact_mod_cast Nat.succ_le_succ (Nat.zero_le n))
+      have hfsucc : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ((n : WithTop ℕ∞) + 1)
+          (fun p : M × ℝ => f p.1 p.2) ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := by
+        rw [Nat.cast_succ] at hf
+        exact hf
+      rw [iteratedDerivWithin_succ']
+      set Fd : M → ℝ → ℝ := fun x t => derivWithin (fun u => f x u) (Set.Icc (0 : ℝ) T) t
+        with hFd
+      have hFd_joint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (n : WithTop ℕ∞)
+          (fun p : M × ℝ => Fd p.1 p.2) ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
+        partialSnd_contMDiffOn_Icc_finiteOrder f n hfsucc
+      have hderiv_eqOn : Set.EqOn (derivWithin (fun t => ∫ x, f x t ∂μ) (Set.Icc (0 : ℝ) T))
+          (fun t => ∫ x, Fd x t ∂μ) (Set.Icc (0 : ℝ) T) := by
+        intro t ht
+        exact (hasDerivWithinAt_integral_param_Icc_finiteOrder μ f hT hf1 ht).derivWithin
+          (hUD t ht)
+      rw [iteratedDerivWithin_congr hderiv_eqOn ht₀, ih Fd hFd_joint t₀ ht₀]
+      refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+      exact (iteratedDerivWithin_succ').symm
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private theorem smoothCcTensor_path_toFun_contDiffWithinAt
+    (g₀ : SmoothRiemannianMetric I M) {T : ℝ} {N : WithTop ℕ∞}
+    (Sfam : ℝ → SmoothCcTensor g₀ 0 2)
+    (hSfam : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)) N
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1 ((Sfam p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T))
+    (x : M) {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
+    ContDiffWithinAt ℝ N (fun s => (Sfam s).toFun x) (Set.Icc (0 : ℝ) T) t := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 0 2
+  have harg : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) N (fun u : ℝ => (x, u))
+      (Set.Icc (0 : ℝ) T) :=
+    (contMDiffOn_const (c := x)).prodMk contMDiffOn_id
+  have hmaps : Set.MapsTo (fun u : ℝ => (x, u)) (Set.Icc (0 : ℝ) T)
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := fun u hu => ⟨Set.mem_univ _, hu⟩
+  have h1 : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)) N
+      (fun s : ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) x ((Sfam s).toSection x))
+      (Set.Icc (0 : ℝ) T) :=
+    hSfam.comp harg hmaps
+  have h2 := (Bundle.contMDiffWithinAt_totalSpace
+    (F := Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z)
+    (IB := I) (IM := 𝓘(ℝ, ℝ))).mp (h1 t ht) |>.2
+  rw [contMDiffWithinAt_iff_contDiffWithinAt] at h2
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) x with he
+  have hxbase : x ∈ e.baseSet := by
+    rw [he]
+    change x ∈ ((trivializationAt (Tensor0SBundle.Tensor0SModel 0 ℝ E)
+        (fun y : M => Tensor0SBundle.Tensor0SSpace 0 I y) x).baseSet) ∩
+        ((trivializationAt (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+          (fun y : M => Tensor0SBundle.Tensor0SSpace 2 I y) x).baseSet)
+    refine ⟨?_, ?_⟩ <;>
+      · change x ∈ (trivializationAt E (TangentSpace I) x).baseSet
+        rw [show (trivializationAt E (TangentSpace I) x).baseSet = (chartAt H x).source from
+          TangentBundle.trivializationAt_baseSet (I := I) x]
+        exact mem_chart_source H x
+  set L : Tensor0SBundle.TensorRSModel 0 2 ℝ E →L[ℝ] Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
+    (Tensor0SBundle.TensorRSSpace.toModelL (𝕜 := ℝ) 0 2 x).comp (e.symmL ℝ x) with hL
+  have hLeq : ∀ s : ℝ, L ((e ⟨x, (Sfam s).toSection x⟩).2) = (Sfam s).toFun x := by
+    intro s
+    have h3 : e.continuousLinearMapAt ℝ x ((Sfam s).toSection x)
+        = (e ⟨x, (Sfam s).toSection x⟩).2 := by
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply,
+        Trivialization.coe_linearMapAt_of_mem _ hxbase]
+    rw [hL, ContinuousLinearMap.comp_apply, ← h3,
+      Bundle.Trivialization.symmL_continuousLinearMapAt _ hxbase]
+    rfl
+  have h4 : ContDiffWithinAt ℝ N (fun s : ℝ => L ((e ⟨x, (Sfam s).toSection x⟩).2))
+      (Set.Icc (0 : ℝ) T) t :=
+    L.contDiff.comp_contDiffWithinAt h2
+  exact h4.congr (fun s _ => (hLeq s).symm) (hLeq t).symm
+
 set_option linter.unusedVariables false in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private theorem deTurckRHSReconSectionFO_path_timeJet_mixed_regularity
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E))
+      ((k : ℕ) : WithTop ℕ∞)
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1
+        ((deTurckRHSReconSectionFO (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) ∧
+    ∃ Rjet : ℕ → ℝ → SmoothCcTensor g₀ 0 2,
+      (∀ j : ℕ, j ≤ k → ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ x : M,
+        (Rjet j t).toFun x = iteratedDerivWithin j
+          (fun s => (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x)
+          (Set.Icc (0 : ℝ) T) t) ∧
+      (∀ j : ℕ, j ≤ k → ∀ κ : ℕ,
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E))
+          ((0 : ℕ) : WithTop ℕ∞)
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1
+            ((oneMinusConnLapSmoothIter (I := I) g₀ 0 2 κ (Rjet j p.2)).toSection p.1))
+          ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T)) :=
+  sorry
+
+set_option linter.unusedVariables false in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 private theorem deTurckRHSReconSectionFO_eigenPairing_jointCk_timeJet_realization
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -842,8 +1005,120 @@ private theorem deTurckRHSReconSectionFO_eigenPairing_jointCk_timeJet_realizatio
       (∀ κ : ℕ, ContinuousOn
         (fun t => ‖SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 κ (Rjt t))‖ ^ 2)
-        (Set.Icc (0 : ℝ) T))) :=
-  sorry
+        (Set.Icc (0 : ℝ) T))) := by
+  classical
+  obtain ⟨hjointP, Rjet, hRjet_eq, hRjet_lap⟩ :=
+    deTurckRHSReconSectionFO_path_timeJet_mixed_regularity (I := I) (M := M)
+      g₀ g_bg hT k F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+  have hkinf : ((k : ℕ) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
+  have hpairing : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ((k : ℕ) : WithTop ℕ∞)
+        (fun p : M × ℝ =>
+          DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 p.1
+            ((Analysis.Parabolic.TensorSpectral.eigenvectorSmooth
+              (I := I) (M := M) g₀ 0 2 i).toFun p.1)
+            ((deTurckRHSReconSectionFO (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2)).toFun p.1))
+        ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := by
+    intro i
+    have heigM := Analysis.Parabolic.TensorSpectral.eigenvectorSmooth_contMDiff
+      (I := I) (M := M) g₀ 0 2 i
+    have heigP : ContMDiff (I.prod 𝓘(ℝ, ℝ))
+        (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1
+          ((Analysis.Parabolic.TensorSpectral.eigenvectorSmooth
+            (I := I) (M := M) g₀ 0 2 i).toSection p.1)) :=
+      heigM.comp contMDiff_fst
+    exact tensorInnerPointwise_pair_section_jointContMDiffOn (I := I) (M := M) hkinf g₀
+      (fun _ : ℝ => Analysis.Parabolic.TensorSpectral.eigenvectorSmooth
+        (I := I) (M := M) g₀ 0 2 i)
+      (fun s : ℝ => deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s))
+      ((heigP.contMDiffOn).of_le hkinf) hjointP
+  haveI : IsFiniteMeasure
+      (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      g₀
+  set μ := DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀
+    with hμ
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  refine ⟨hpairing, ?_⟩
+  intro j hjk
+  have hjW : ((j : ℕ) : WithTop ℕ∞) ≤ ((k : ℕ) : WithTop ℕ∞) := by exact_mod_cast hjk
+  refine ⟨Rjet j, ?_, ?_⟩
+  · intro i t ht
+    set eig := Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i
+      with heig
+    have hcoeffInt : ∀ S : SmoothCcTensor g₀ 0 2,
+        tensorL2Coeff (I := I) (M := M) hc
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S) i =
+          ∫ x, DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
+            (eig.toFun x) (S.toFun x) ∂μ := by
+      intro S
+      rw [tensorL2Coeff_eq_inner,
+        Analysis.Parabolic.TensorSpectral.tensorResolventHilbertEigenbasisSigma_apply,
+        ← Analysis.Parabolic.TensorSpectral.eigenvectorSmooth_toL2 (I := I) (M := M) g₀ 0 2 i,
+        ← SmoothCcTensor.toL2_apply
+          (Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i),
+        SmoothCcTensor.inner_toL2, SmoothCcTensor.inner_def]
+      rfl
+    have hγfam : ∀ x : M, ContDiffWithinAt ℝ ((j : ℕ) : WithTop ℕ∞)
+        (fun s => (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x)
+        (Set.Icc (0 : ℝ) T) t := fun x =>
+      (smoothCcTensor_path_toFun_contDiffWithinAt (I := I) (M := M) g₀
+        (fun s => deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s))
+        hjointP x ht).of_le hjW
+    have hfib : ∀ x : M,
+        iteratedDerivWithin j
+            (fun s => DifferentialGeometry.Integral.L2.tensorInnerPointwise
+              (I := I) (M := M) g₀ 0 2 x (eig.toFun x)
+              ((deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x))
+            (Set.Icc (0 : ℝ) T) t
+          = DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
+              (eig.toFun x) ((Rjet j t).toFun x) := by
+      intro x
+      have hL := clm_comm_iteratedDerivWithin_finiteOrder
+        (DifferentialGeometry.Tensor.TensorRSRiemannianBundle.innerModelCLMRS
+          (I := I) (M := M) g₀ 0 2 x (eig.toFun x))
+        (fun s => (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x)
+        hT ht j (hγfam x)
+      rw [hRjet_eq j hjk t ht x]
+      exact hL
+    have hLHSfun : (fun s : ℝ => tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s))) i)
+        = (fun s : ℝ => ∫ x, DifferentialGeometry.Integral.L2.tensorInnerPointwise
+            (I := I) (M := M) g₀ 0 2 x (eig.toFun x)
+            ((deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x) ∂μ) :=
+      funext fun s => hcoeffInt (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s))
+    have hinter := iteratedDerivWithin_integral_param_Icc_finiteOrder μ hT j
+      (fun x s => DifferentialGeometry.Integral.L2.tensorInnerPointwise
+        (I := I) (M := M) g₀ 0 2 x (eig.toFun x)
+        ((deTurckRHSReconSectionFO (I := I) g₀ g_bg (F s) hδ_lt (hδ s)).toFun x))
+      ((hpairing i).of_le hjW) t ht
+    rw [hLHSfun, hinter, hcoeffInt (Rjet j t)]
+    exact integral_congr_ae (Filter.Eventually.of_forall (fun x => hfib x))
+  · intro κ
+    set Sfam : ℝ → SmoothCcTensor g₀ 0 2 :=
+      fun t => oneMinusConnLapSmoothIter (I := I) g₀ 0 2 κ (Rjet j t) with hSfam
+    have hpair0 := tensorInnerPointwise_pair_section_jointContMDiffOn (I := I) (M := M)
+      (N := ((0 : ℕ) : WithTop ℕ∞)) (by exact_mod_cast le_top) g₀ Sfam Sfam
+      (hRjet_lap j hjk κ) (hRjet_lap j hjk κ)
+    have hnormeq : (fun t : ℝ => ‖SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Sfam t)‖ ^ 2)
+        = fun t : ℝ => ∫ x, DifferentialGeometry.Integral.L2.tensorInnerPointwise
+            (I := I) (M := M) g₀ 0 2 x ((Sfam t).toFun x) ((Sfam t).toFun x) ∂μ := by
+      funext t
+      rw [SmoothCcTensor.norm_toL2,
+        Analysis.Parabolic.TensorSpectral.SmoothCcTensor.norm_sq_eq_inner_self]
+      rfl
+    have hcd := contDiffOn_integral_of_jointContMDiffOn_Icc_finiteOrder μ hT 0
+      (fun x t => DifferentialGeometry.Integral.L2.tensorInnerPointwise
+        (I := I) (M := M) g₀ 0 2 x ((Sfam t).toFun x) ((Sfam t).toFun x)) hpair0
+    have hfinal : ContinuousOn
+        (fun t => ‖SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Sfam t)‖ ^ 2)
+        (Set.Icc (0 : ℝ) T) := by
+      rw [hnormeq]
+      exact hcd.continuousOn
+    exact hfinal
 
 set_option linter.unusedVariables false in
 private theorem deTurckRHSRecon_pathCoeff_finiteOrder_timeContDiff_withinMass
