@@ -15,6 +15,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.DirichletSpect
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibniz
 import DifferentialGeometry.Geometry.Connection.TensorNabla.EndoCovariantDerivativeSelfAdjoint
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotInsertSelfAdjointPairing
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovDivergenceRoughLaplacianCommutation
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 
 noncomputable section
 
@@ -1624,6 +1628,137 @@ private theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric
               (by omega) (by omega) (by omega) u₀
           · exact mul_nonneg (hCfL_nn 0)
               (mul_nonneg (hCfR_nn 0) (Finset.sum_nonneg (fun q _ => hCfG_nn q)))
+
+private theorem armLadder_rawConnLap_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (A B : SmoothCcTensor g r s) :
+    rawTensorConnLapSmooth (I := I) g r s (A + B) =
+      rawTensorConnLapSmooth (I := I) g r s A + rawTensorConnLapSmooth (I := I) g r s B := by
+  have h0 : rawTensorConnLapSmooth (I := I) g r s (0 : SmoothCcTensor g r s) = 0 := by
+    have h := rawTensorConnLapSmooth_sub (I := I) (M := M) g r s A A
+    rw [sub_self, sub_self] at h
+    exact h
+  have hAB : A + B = A - (0 - B) := by abel
+  rw [hAB, rawTensorConnLapSmooth_sub (I := I) (M := M) g r s A (0 - B),
+    rawTensorConnLapSmooth_sub (I := I) (M := M) g r s 0 B, h0]
+  abel
+
+private theorem armLadder_oneMinusConnLapSmooth_add (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) (A B : SmoothCcTensor g r s) :
+    oneMinusConnLapSmooth (I := I) g r s (A + B) =
+      oneMinusConnLapSmooth (I := I) g r s A + oneMinusConnLapSmooth (I := I) g r s B := by
+  unfold oneMinusConnLapSmooth
+  rw [armLadder_rawConnLap_add (I := I) (M := M) g r s A B]
+  abel
+
+private theorem armLadder_iterL_add (g : SmoothRiemannianMetric I M) (r s : ℕ) (j : ℕ)
+    (A B : SmoothCcTensor g r s) :
+    oneMinusConnLapSmoothIter (I := I) g r s j (A + B) =
+      oneMinusConnLapSmoothIter (I := I) g r s j A +
+        oneMinusConnLapSmoothIter (I := I) g r s j B := by
+  induction j with
+  | zero => simp only [oneMinusConnLapSmoothIter_zero]
+  | succ k ih =>
+    rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_succ,
+      oneMinusConnLapSmoothIter_succ, ih,
+      armLadder_oneMinusConnLapSmooth_add (I := I) (M := M) g r s]
+
+private theorem armLadder_covGrad_oneMinusConnLapSmooth (g : SmoothRiemannianMetric I M)
+    (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    covGrad (I := I) (M := M) g 0 s (oneMinusConnLapSmooth (I := I) g 0 s S) =
+      oneMinusConnLapSmooth (I := I) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) +
+        pointwiseTensorCurv (I := I) (M := M) g s S := by
+  have hcomm := pointwiseTensorCurv_commutator_eq (I := I) (M := M) g s S
+  unfold oneMinusConnLapSmooth
+  rw [covGrad_sub (I := I) (M := M) g 0 s S (rawTensorConnLapSmooth (I := I) g 0 s S)]
+  rw [hcomm]
+  abel
+
+private theorem armLadder_iterL_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : SmoothCcTensor g r s) :
+    oneMinusConnLapSmoothIter (I := I) g r s 1 S = oneMinusConnLapSmooth (I := I) g r s S := by
+  rw [oneMinusConnLapSmoothIter_succ, oneMinusConnLapSmoothIter_zero]
+
+private theorem armLadder_covGrad_iterL_expansion (g : SmoothRiemannianMetric I M)
+    (s : ℕ) (j : ℕ) :
+    ∀ S : SmoothCcTensor g 0 s,
+      covGrad (I := I) (M := M) g 0 s (oneMinusConnLapSmoothIter (I := I) g 0 s j S) =
+        oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) j
+            (covGrad (I := I) (M := M) g 0 s S) +
+          ∑ i ∈ Finset.range j,
+            oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
+              (pointwiseTensorCurv (I := I) (M := M) g s
+                (oneMinusConnLapSmoothIter (I := I) g 0 s (j - 1 - i) S)) := by
+  induction j with
+  | zero =>
+    intro S
+    simp only [oneMinusConnLapSmoothIter_zero, Finset.range_zero, Finset.sum_empty, add_zero]
+  | succ k ih =>
+    intro S
+    have hsplit : oneMinusConnLapSmoothIter (I := I) g 0 s (k + 1) S =
+        oneMinusConnLapSmoothIter (I := I) g 0 s k (oneMinusConnLapSmooth (I := I) g 0 s S) := by
+      rw [oneMinusConnLapSmoothIter_add (I := I) (M := M) g 0 s k 1 S,
+        armLadder_iterL_one (I := I) (M := M) g 0 s S]
+    rw [hsplit, ih (oneMinusConnLapSmooth (I := I) g 0 s S)]
+    rw [armLadder_covGrad_oneMinusConnLapSmooth (I := I) (M := M) g s S]
+    rw [armLadder_iterL_add (I := I) (M := M) g 0 (s + 1) k
+      (oneMinusConnLapSmooth (I := I) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S))
+      (pointwiseTensorCurv (I := I) (M := M) g s S)]
+    have hL : oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) k
+        (oneMinusConnLapSmooth (I := I) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)) =
+        oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) (k + 1)
+          (covGrad (I := I) (M := M) g 0 s S) := by
+      rw [oneMinusConnLapSmoothIter_add (I := I) (M := M) g 0 (s + 1) k 1,
+        armLadder_iterL_one (I := I) (M := M) g 0 (s + 1)]
+    rw [hL]
+    have hsum : ∑ i ∈ Finset.range k,
+        oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
+          (pointwiseTensorCurv (I := I) (M := M) g s
+            (oneMinusConnLapSmoothIter (I := I) g 0 s (k - 1 - i)
+              (oneMinusConnLapSmooth (I := I) g 0 s S))) =
+        ∑ i ∈ Finset.range k,
+          oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
+            (pointwiseTensorCurv (I := I) (M := M) g s
+              (oneMinusConnLapSmoothIter (I := I) g 0 s (k + 1 - 1 - i) S)) := by
+      refine Finset.sum_congr rfl (fun i hi => ?_)
+      rw [Finset.mem_range] at hi
+      have hidx : k + 1 - 1 - i = (k - 1 - i) + 1 := by omega
+      rw [hidx, oneMinusConnLapSmoothIter_add (I := I) (M := M) g 0 s (k - 1 - i) 1 S,
+        armLadder_iterL_one (I := I) (M := M) g 0 s S]
+    rw [hsum]
+    rw [Finset.sum_range_succ
+      (fun i => oneMinusConnLapSmoothIter (I := I) g 0 (s + 1) i
+        (pointwiseTensorCurv (I := I) (M := M) g s
+          (oneMinusConnLapSmoothIter (I := I) g 0 s (k + 1 - 1 - i) S))) k]
+    rw [show k + 1 - 1 - k = 0 from by omega, oneMinusConnLapSmoothIter_zero]
+    abel
+
+private theorem armLadder_pairing_transport (g : SmoothRiemannianMetric I M) (σ a r : ℕ)
+    (hr : r ≤ a) (X Y : SmoothCcTensor g 0 σ) :
+    tensorL2Inner (I := I) (M := M) g 0 σ
+        (oneMinusConnLapSmoothIter (I := I) g 0 σ a X).toFun Y.toFun =
+      tensorL2Inner (I := I) (M := M) g 0 σ
+        (oneMinusConnLapSmoothIter (I := I) g 0 σ (a - r) X).toFun
+        (oneMinusConnLapSmoothIter (I := I) g 0 σ r Y).toFun := by
+  have hsplit : oneMinusConnLapSmoothIter (I := I) g 0 σ a X =
+      oneMinusConnLapSmoothIter (I := I) g 0 σ r
+        (oneMinusConnLapSmoothIter (I := I) g 0 σ (a - r) X) := by
+    rw [← oneMinusConnLapSmoothIter_add (I := I) (M := M) g 0 σ r (a - r) X]
+    congr 1
+    omega
+  rw [hsplit]
+  exact oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (I := I) (M := M) g 0 σ r
+    (oneMinusConnLapSmoothIter (I := I) g 0 σ (a - r) X) Y
+
+private theorem armLadder_pairing_abs_le_transport (g : SmoothRiemannianMetric I M)
+    (σ a r : ℕ) (hr : r ≤ a) (X Y : SmoothCcTensor g 0 σ) :
+    |tensorL2Inner (I := I) (M := M) g 0 σ
+        (oneMinusConnLapSmoothIter (I := I) g 0 σ a X).toFun Y.toFun| ≤
+      ‖oneMinusConnLapSmoothIter (I := I) g 0 σ (a - r) X‖ *
+        ‖oneMinusConnLapSmoothIter (I := I) g 0 σ r Y‖ := by
+  rw [armLadder_pairing_transport (I := I) (M := M) g σ a r hr X Y]
+  exact armJet_abs_pairing_le (I := I) (M := M) g σ
+    (oneMinusConnLapSmoothIter (I := I) g 0 σ (a - r) X)
+    (oneMinusConnLapSmoothIter (I := I) g 0 σ r Y)
 
 private theorem oneMinusConnLapIter_dirichletSlotForm_add_armPrincipalSlotPairing_abs_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ) :
