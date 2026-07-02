@@ -1185,6 +1185,242 @@ theorem appCc_iteratedCovGrad_diagonalProductGrid_le (g : SmoothRiemannianMetric
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g b₀ s₀ C W]
   exact rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (I := I) (M := M) g j b₀ s₀ C W x
 
+private lemma sum_finZeroFun_eq {N : ℕ} (f : (Fin 0 → Fin N) → ℝ) :
+    ∑ K : Fin 0 → Fin N, f K = f (fun k : Fin 0 => k.elim0) := by
+  refine Finset.sum_eq_single (fun k : Fin 0 => k.elim0) ?_ ?_
+  · exact fun K _ hK => absurd (funext (fun k : Fin 0 => k.elim0)) hK
+  · exact fun h => absurd (Finset.mem_univ _) h
+
+private lemma sum_consEquiv {N t : ℕ} (F : (Fin (t + 1) → Fin N) → ℝ) :
+    ∑ J : Fin (t + 1) → Fin N, F J =
+      ∑ j0 : Fin N, ∑ J' : Fin t → Fin N, F (Fin.cons j0 J') := by
+  rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (t + 1) => Fin N))
+      (fun pr : Fin N × (Fin t → Fin N) => F (Fin.cons pr.1 pr.2)) F
+      (fun pr => by simp [Fin.consEquiv])]
+  rw [Fintype.sum_prod_type]
+
+set_option linter.unusedSectionVars false in
+
+private lemma tensor00Scalar_coframe0_eq_one (g : SmoothRiemannianMetric I M) (x : M)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (K : Fin 0 → Fin N) :
+    tensor00Scalar (I := I) (M := M) x (coframeS (I := I) (M := M) g x 0 e K) = 1 := by
+  rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0),
+    coframeS_apply (I := I) (M := M) g x 0 e K (fun k : Fin 0 => k.elim0)]
+  simp
+
+set_option linter.unusedSectionVars false in
+
+private lemma rfns_zero_eq_sum_componentSq
+    (g : SmoothRiemannianMetric I M) (x : M) (m : ℕ) (S : TensorRSSpace 0 m I x)
+    {N : ℕ} (e : Fin N → TangentSpace I x)
+    (bse : Module.Basis (Fin N) ℝ (TangentSpace I x))
+    (hn : N = Module.finrank ℝ E) (hbse : ∀ i : Fin N, bse i = e i)
+    (horth : ∀ a b : Fin N, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 m x S =
+      ∑ J : Fin m → Fin N,
+        (fiberNormSqComponent (I := I) (M := M) g x 0 m S N e (fun k : Fin 0 => k.elim0) J) ^ 2 := by
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g 0 m x S e bse hn hbse horth]
+  rw [sum_finZeroFun_eq]
+
+private noncomputable def appCcSlice (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (W : SmoothCcTensor g 0 (r + 1))
+    (j0 : Fin N) : TensorRSSpace 0 r I x :=
+  (tensor00Scalar (I := I) (M := M) x).smulRight
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+        (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+      (show E from e j0))
+
+set_option linter.unusedSectionVars false in
+
+private lemma appCcSlice_apply_coframe0 (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (W : SmoothCcTensor g 0 (r + 1))
+    (j0 : Fin N) (K : Fin 0 → Fin N) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from appCcSlice (I := I) (M := M) g r x e W j0)
+        (coframeS (I := I) (M := M) g x 0 e K) =
+      tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+          (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+        (show E from e j0) := by
+  rw [appCcSlice, ContinuousLinearMap.smulRight_apply,
+    tensor00Scalar_coframe0_eq_one (I := I) (M := M) g x e K, one_smul]
+
+set_option linter.unusedSectionVars false in
+
+private lemma fiberNormSqComponent_zero_eq_toModel
+    (g : SmoothRiemannianMetric I M) (x : M) (m : ℕ) (S : TensorRSSpace 0 m I x)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (K : Fin 0 → Fin N) (J : Fin m → Fin N) :
+    fiberNormSqComponent (I := I) (M := M) g x 0 m S N e K J =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from S)
+          (coframeS (I := I) (M := M) g x 0 e K))
+        (fun k => (show E from e (J k))) := rfl
+
+set_option maxHeartbeats 6400000 in
+
+theorem riemannianFiberNormSq_appCc_slotExtend_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 (r + 1)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+        ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) ≤
+      riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
+  classical
+  obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis (I := I) (M := M) g x
+  have hdiamond : ∀ (j0 : Fin (Module.finrank ℝ E))
+      (J' : Fin s → Fin (Module.finrank ℝ E)),
+      fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1)
+          ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ) W).toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 J') =
+        fiberNormSqComponent (I := I) (M := M) g x 0 s
+          (show TensorRSSpace 0 s I x from
+            (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                appCcSlice (I := I) (M := M) g r x e W j0))
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) J' := by
+    intro j0 J'
+    have hL : fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1)
+          ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ) W).toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 J') =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+                (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+              (show E from e j0)))
+          (fun k : Fin s => (show E from e (J' k))) := by
+      rw [fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x (s + 1)
+        ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) e (fun k : Fin 0 => k.elim0)
+        (Fin.cons j0 J')]
+      rw [appCc_toSection, slotExtend_toSection, ContinuousLinearMap.comp_apply]
+      rw [show (fun k => (show E from
+            e ((Fin.cons j0 J' : Fin (s + 1) → Fin (Module.finrank ℝ E)) k))) =
+          Fin.cons (show E from e j0) (fun k : Fin s => (show E from e (J' k))) from by
+        funext k
+        rcases Fin.eq_zero_or_eq_succ k with rfl | ⟨i, rfl⟩
+        · simp only [Fin.cons_zero]
+        · simp only [Fin.cons_succ]]
+      rw [slotExtendFib_apply_eval (I := I) (M := M) g r s x
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+          (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+        (show E from e j0) (fun k : Fin s => (show E from e (J' k)))]
+    have hR : fiberNormSqComponent (I := I) (M := M) g x 0 s
+          (show TensorRSSpace 0 s I x from
+            (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                appCcSlice (I := I) (M := M) g r x e W j0))
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) J' =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+                (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+              (show E from e j0)))
+          (fun k : Fin s => (show E from e (J' k))) := by
+      rw [fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x s
+        (show TensorRSSpace 0 s I x from
+          (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+            (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+              appCcSlice (I := I) (M := M) g r x e W j0)) e (fun k : Fin 0 => k.elim0) J']
+      rw [ContinuousLinearMap.comp_apply,
+        appCcSlice_apply_coframe0 (I := I) (M := M) g r x e W j0 (fun k : Fin 0 => k.elim0)]
+    rw [hL, hR]
+  have hVW : ∀ (j0 : Fin (Module.finrank ℝ E))
+      (P : Fin r → Fin (Module.finrank ℝ E)),
+      fiberNormSqComponent (I := I) (M := M) g x 0 r
+          (appCcSlice (I := I) (M := M) g r x e W j0)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) P =
+        fiberNormSqComponent (I := I) (M := M) g x 0 (r + 1) (W.toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 P) := by
+    intro j0 P
+    have hL : fiberNormSqComponent (I := I) (M := M) g x 0 r
+          (appCcSlice (I := I) (M := M) g r x e W j0)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) P =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+            (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+          (Fin.cons (show E from e j0) (fun k : Fin r => (show E from e (P k)))) := by
+      rw [fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x r
+        (appCcSlice (I := I) (M := M) g r x e W j0) e (fun k : Fin 0 => k.elim0) P]
+      rw [appCcSlice_apply_coframe0 (I := I) (M := M) g r x e W j0 (fun k : Fin 0 => k.elim0)]
+      rw [tensor0S_curry_apply_eval
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+          (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+        (show E from e j0) (fun k : Fin r => (show E from e (P k)))]
+    have hR : fiberNormSqComponent (I := I) (M := M) g x 0 (r + 1) (W.toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 P) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+            (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+          (fun k => (show E from
+            e ((Fin.cons j0 P : Fin (r + 1) → Fin (Module.finrank ℝ E)) k))) :=
+      fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x (r + 1) (W.toSection x)
+        e (fun k : Fin 0 => k.elim0) (Fin.cons j0 P)
+    rw [hL, hR]
+    congr 1
+    funext k
+    rcases Fin.eq_zero_or_eq_succ k with rfl | ⟨i, rfl⟩
+    · simp only [Fin.cons_zero]
+    · simp only [Fin.cons_succ]
+  have hLHS : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) =
+        ∑ j0 : Fin (Module.finrank ℝ E),
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (show TensorRSSpace 0 s I x from
+              (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                  appCcSlice (I := I) (M := M) g r x e W j0)) := by
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x (s + 1)
+      ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+        (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) e bse rfl hbse horth]
+    rw [sum_consEquiv]
+    refine Finset.sum_congr rfl (fun j0 _ => ?_)
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x s
+      (show TensorRSSpace 0 s I x from
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+            appCcSlice (I := I) (M := M) g r x e W j0)) e bse rfl hbse horth]
+    refine Finset.sum_congr rfl (fun J' _ => ?_)
+    rw [hdiamond j0 J']
+  have hsum : ∑ j0 : Fin (Module.finrank ℝ E),
+        riemannianFiberNormSq (I := I) (M := M) g 0 r x
+          (appCcSlice (I := I) (M := M) g r x e W j0) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x (r + 1) (W.toSection x)
+      e bse rfl hbse horth]
+    rw [sum_consEquiv]
+    refine Finset.sum_congr rfl (fun j0 _ => ?_)
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x r
+      (appCcSlice (I := I) (M := M) g r x e W j0) e bse rfl hbse horth]
+    refine Finset.sum_congr rfl (fun P _ => ?_)
+    rw [hVW j0 P]
+  rw [hLHS]
+  calc ∑ j0 : Fin (Module.finrank ℝ E),
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (show TensorRSSpace 0 s I x from
+              (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                  appCcSlice (I := I) (M := M) g r x e W j0))
+      ≤ ∑ j0 : Fin (Module.finrank ℝ E),
+          riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 r x
+              (appCcSlice (I := I) (M := M) g r x e W j0) :=
+        Finset.sum_le_sum (fun j0 _ => riemannianFiberNormSq_compRS_le_mul (I := I) (M := M)
+          g 0 r s x (Φ.toSection x) (appCcSlice (I := I) (M := M) g r x e W j0))
+    _ = riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+          ∑ j0 : Fin (Module.finrank ℝ E),
+            riemannianFiberNormSq (I := I) (M := M) g 0 r x
+              (appCcSlice (I := I) (M := M) g r x e W j0) := by
+        rw [Finset.mul_sum]
+    _ = riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
+        rw [hsum]
+
 end Connection
 end Integral
 end DifferentialGeometry
