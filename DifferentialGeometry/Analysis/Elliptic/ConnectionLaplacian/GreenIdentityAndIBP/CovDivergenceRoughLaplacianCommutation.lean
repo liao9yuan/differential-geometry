@@ -121,7 +121,7 @@ private lemma secondCovDeriv_frame_unitEval_eq_iteratedCovGrad_gen
     (smoothOrthoFrame_smooth (I := I) g₀ x i) (smoothOrthoFrame_smooth (I := I) g₀ x i) x v
   exact hbridge.symm
 
-private lemma unitModel_rawConnLap_eq_frame_sum_gen
+lemma unitModel_rawConnLap_eq_frame_sum_gen
     (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (W : SmoothCcTensor g₀ 0 t) (x : M)
     (v : Fin t → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ t (rawTensorConnLapSmooth (I := I) g₀ 0 t W) x v =
