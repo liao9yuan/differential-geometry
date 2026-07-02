@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.DirichletSpectralBochnerGap
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralNormLIterateLadder
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricDifferenceSlotPairing
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
@@ -624,6 +625,10 @@ private theorem arm_commutator_Hs_tame [Nonempty M]
           CEcomm j * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ :=
   sorry
 
+set_option synthInstance.maxHeartbeats 800000 in
+set_option maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem arm_covGrad_coeffLower_l2_tame [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -642,8 +647,109 @@ private theorem arm_covGrad_coeffLower_l2_tame [Nonempty M]
                   (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
                   (hδ_fibre T₀ hball))))
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)‖ ≤
-          Cgrad * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ :=
-  sorry
+          Cgrad * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ := by
+  classical
+  letI inst03 : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 3 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
+  letI inst23 : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 2 3 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 3
+  obtain ⟨Cpo, hCpo_nn, hCpo⟩ :=
+    deTurckPrincipalCometricCoeff_perOrder_rfns_le_gInvDiffSlotCoeff (I := I) (M := M) g₀
+  obtain ⟨Cenv, hCenv_nn, hCenv⟩ :=
+    norm_iteratedCovGrad_gInvDiffSlotCoeff_le_envelope_one (I := I) (M := M) g₀
+  have hm_super : 2 * (2 * (Module.finrank ℝ E / 2 + 1) + 1) ≤ a + 2 := by omega
+  obtain ⟨Cq, hCq_nn, hCq⟩ :=
+    exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq (I := I) (M := M) g₀ 1 (a + 2) hm_super
+  obtain ⟨Cj0, hCj0_nn, hCj0⟩ := iteratedCovGrad_le_connLap_add (I := I) (M := M) g₀ 0
+  have hδ_lt1 : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)
+  have hδ_nn : 0 ≤ δ := delta_nonneg_of_ball_gFibreOpBound (I := I) (M := M) g₀ a hR₀ hδ_fibre
+  have hδ_half : δ < 1 / 2 := lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1 / 2)
+  set R : ℝ := Cq * R₀ with hR_def
+  have hR_nn : 0 ≤ R := mul_nonneg hCq_nn hR₀
+  set Bsq : ℝ := Cpo 1 * ((Module.finrank ℝ E : ℝ) ^ 2 + (Cenv * (1 + R)) ^ 2) with hBsq_def
+  have hBsq_nn : 0 ≤ Bsq := mul_nonneg (hCpo_nn 1) (by positivity)
+  set B : ℝ := Real.sqrt Bsq with hB_def
+  have hB_nn : 0 ≤ B := Real.sqrt_nonneg _
+  have hBsqeq : B ^ 2 = Bsq := Real.sq_sqrt hBsq_nn
+  refine ⟨B * (1 + Cj0), mul_nonneg hB_nn (by linarith [hCj0_nn]), fun T₀ hball S => ?_⟩
+  set g₁ := tensorSectionRealizeMetric (I := I) g₀ T₀ hδ_lt1 (hδ_fibre T₀ hball) with hg₁_def
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₀ y v w :=
+    fun y v w => tensorSectionRealizeMetric_inner (I := I) g₀ T₀ hδ_lt1 (hδ_fibre T₀ hball) y v w
+  have hδC : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ :=
+    hδ_fibre T₀ hball
+  have hHsle : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a + 2 : ℕ) : ℝ) T₀‖ ≤ R₀ := by
+    rw [smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+      (show ((a + 2 : ℕ) : ℝ) = (a : ℝ) + 2 by push_cast; ring) T₀]
+    exact hball
+  have hjet_x : ∀ x : M, ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T₀).toSection x :
+      Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ≤ R := by
+    intro x
+    have hc2 := hCq T₀ x
+    have hrfns_le : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 1 T₀).toSection x) ≤ R ^ 2 := by
+      refine le_trans hc2 ?_
+      rw [hR_def, mul_pow]
+      exact mul_le_mul_of_nonneg_left (pow_le_pow_left₀ (norm_nonneg _) hHsle 2) (sq_nonneg Cq)
+    rw [norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      (iteratedCovGrad (I := I) g₀ 0 2 1 T₀)]
+    calc Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+            ((iteratedCovGrad (I := I) g₀ 0 2 1 T₀).toSection x))
+        ≤ Real.sqrt (R ^ 2) := Real.sqrt_le_sqrt hrfns_le
+      _ = R := Real.sqrt_sq hR_nn
+  have hΦ : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 3 x
+      ((covGrad (I := I) (M := M) g₀ 4 2
+        (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)).toSection x) ≤ B ^ 2 := by
+    intro x
+    have hperord := hCpo g₁ 1 x
+    rw [Finset.sum_range_succ, Finset.sum_range_one] at hperord
+    have hj0 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + 0) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 0 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+        (Module.finrank ℝ E : ℝ) ^ 2 :=
+      riemannianFiberNormSq_gInvDiffSlotCoeff_le (I := I) (M := M) g₀ g₁ T₀ hδ_half hδ_nn htie hδC x
+    have hj1 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + 1) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+        (Cenv * (1 + R)) ^ 2 := by
+      have henv := hCenv g₁ T₀ hδ_half hδ_nn htie hδC x hR_nn (hjet_x x)
+      rw [pow_one, norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 3 x
+        (iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁))] at henv
+      have hnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 3 x
+        ((iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x)
+      have key : riemannianFiberNormSq (I := I) (M := M) g₀ 2 3 x
+          ((iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+          (Cenv * (1 + R)) ^ 2 := by
+        nlinarith [henv, Real.sq_sqrt hnn, Real.sqrt_nonneg
+          (riemannianFiberNormSq (I := I) (M := M) g₀ 2 3 x
+            ((iteratedCovGrad (I := I) g₀ 2 2 1 (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x)),
+          mul_nonneg hCenv_nn (by linarith [hR_nn] : (0 : ℝ) ≤ 1 + R)]
+      exact key
+    refine le_trans hperord ?_
+    rw [hBsqeq, hBsq_def]
+    exact mul_le_mul_of_nonneg_left (add_le_add hj0 hj1) (hCpo_nn 1)
+  refine le_trans (appCc_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g₀ 4 3
+    (covGrad (I := I) (M := M) g₀ 4 2 (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁))
+    (iteratedCovGrad (I := I) g₀ 0 2 2 S) B hB_nn hΦ) ?_
+  have hjet := hCj0 S
+  have hdrop := smoothCcToTensorHs_rawConnLap_order_le (I := I) (M := M) g₀ 0 S
+  have hdrop_congr : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((0 + 2 : ℕ) : ℝ) S‖ =
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ :=
+    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) S
+  have hmono : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((0 + 1 : ℕ) : ℝ) S‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ :=
+    smoothCcToTensorHs_norm_mono (I := I) (M := M) g₀ (by push_cast; norm_num) S
+  have hΔ0 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((0 : ℕ) : ℝ)
+      (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ := by
+    rw [← hdrop_congr]; exact hdrop
+  have h2jet : ‖iteratedCovGrad (I := I) g₀ 0 2 2 S‖ ≤
+      (1 + Cj0) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ := by
+    nlinarith [hjet, hΔ0, hmono, hCj0_nn,
+      norm_nonneg (smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S),
+      mul_le_mul_of_nonneg_left hmono hCj0_nn]
+  calc B * ‖iteratedCovGrad (I := I) g₀ 0 2 2 S‖
+      ≤ B * ((1 + Cj0) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖) :=
+        mul_le_mul_of_nonneg_left h2jet hB_nn
+    _ = B * (1 + Cj0) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 : ℕ) : ℝ) S‖ := by ring
 
 private lemma appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
