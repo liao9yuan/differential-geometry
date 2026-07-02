@@ -790,19 +790,7 @@ private lemma succ_step_cast_transposition_eq {r a b : ℕ} (h : a = b)
   simp only [DifferentialGeometry.Integral.Connection.castRankCc_db]
   rw [hPQ, rsDomDomCongr_rsDomDomCongr]
 
-/-- **The structural slot-extension naturality invariant for the iterated covariant gradient.**  At
-every gradient order `i`, the iterated covariant gradient `∇^i (slotExtend Φ)` is a covariant-output-
-slot reindexing of (the covariant-rank cast of) `slotExtend (∇^i Φ)`:
-```
-∃ σ, (∇^i (slotExtend g r s Φ)).toSection x =
-  rsDomDomCongr σ ((castRankCc_db g (r+1) h (slotExtend g r (s+i) (∇^i Φ))).toSection x).
-```
-Induction on `i`: order `0` is the identity; the step pushes one covariant gradient through the inner
-reindexing by the general-rank `covGrad`-naturality `covGrad_rs_toModel_domDomCongr` (the positive
-contravariant rank `r + 1` makes the rank-`0` naturality inapplicable), then absorbs the leading
-gradient/passenger transposition of `covGrad (slotExtend (∇^i Φ))` via
-`covGrad_slotExtend_toSection_rsDomDomCongr`. -/
-private lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
+lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (i : ℕ) :
     ∃ σ : Equiv.Perm (Fin ((s + 1) + i)),
       ∀ x : M,
