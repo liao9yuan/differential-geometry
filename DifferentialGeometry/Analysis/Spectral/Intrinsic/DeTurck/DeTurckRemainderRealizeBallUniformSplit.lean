@@ -27,7 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_norm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
@@ -70,7 +70,7 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_norm_le
 
 theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_inner_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
@@ -133,7 +133,7 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_inner_le
 
 theorem deTurckPrincipalCometricArm_realize_ballUniform_spectralShift_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
@@ -203,7 +203,7 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_spectralShift_le
 
 theorem deTurckSmoothRemainderDiff_ballUniform_spectralSplit
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
@@ -236,7 +236,7 @@ theorem deTurckSmoothRemainderDiff_ballUniform_spectralSplit
     le_trans hδ_le (deTurckArmContractionThreshold_le_third' (Module.finrank ℝ E))
   obtain ⟨Ctame, hCtame_nn, htame⟩ :=
     exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_tame
-      (I := I) (M := M) g₀ g_bg a ha_super hR₀ hδ_le13 hδ_fibre
+      (I := I) (M := M) g₀ g_bg a (by omega) hR₀ hδ_le13 hδ_fibre
   obtain ⟨Clower, hClower_nn, harm⟩ :=
     deTurckPrincipalCometricArm_realize_ballUniform_spectralShift_le
       (I := I) (M := M) g₀ a ha_super hR₀ hδ_le hδ_fibre

@@ -1407,16 +1407,16 @@ theorem perMode_aeTendsto_of_galerkinODE
 
 theorem galerkinSolField_aeTendsto_maxRegSolField_core
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1442,7 +1442,7 @@ theorem galerkinSolField_aeTendsto_maxRegSolField_core
           (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2)).coeff i)
         atTop (𝓝 ((maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)) :=
-    fun i => perMode_aeTendsto_of_galerkinODE (I := I) (M := M) g₀ g_bg a ha_super
+    fun i => perMode_aeTendsto_of_galerkinODE (I := I) (M := M) g₀ g_bg a (by omega)
       hT hT1 hTT₀ gforce hforce hgforce U hUinit hUcont hUderiv i
   have hpermode' : ∀ᵐ t ∂(timeMeasure T), ∀ i,
       Tendsto (fun N => (finiteEigenComboHs (I := I) (M := M) g₀
@@ -1474,16 +1474,16 @@ theorem galerkinSolField_aeTendsto_maxRegSolField_core
 
 theorem galerkinSolField_tendsto_maxRegSolField_timeL2
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1561,16 +1561,16 @@ theorem galerkinSolField_tendsto_maxRegSolField_timeL2
 
 theorem deTurckGalerkinForcing_field_tendsto_force_timeL2
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1587,7 +1587,7 @@ theorem deTurckGalerkinForcing_field_tendsto_force_timeL2
           (U N t) ((a : ℝ) + 2))) (Set.Icc (0 : ℝ) T)) :
     Tendsto (fun N => TimeSobolev.ofContinuousOn (hcontField N)) atTop (𝓝 gforce) := by
   classical
-  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a (by omega)
   have hsol := galerkinSolField_tendsto_maxRegSolField_timeL2 (I := I) (M := M)
     g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce U hUinit hUcont hUderiv
   have hcomp := ((nemytskii_lipschitzWith (I := I) (M := M) hK).continuous.tendsto
@@ -1621,16 +1621,16 @@ theorem deTurckGalerkinForcing_field_tendsto_force_timeL2
 
 theorem galerkinForcing_ofContinuousOn_tendsto_timeModeCoeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1643,11 +1643,11 @@ theorem galerkinForcing_ofContinuousOn_tendsto_timeModeCoeff
           (Set.Ici t) t)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     Tendsto (fun N => TimeSobolev.ofContinuousOn
-        (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a ha_super U N (hUcont N) i))
+        (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a (by omega) U N (hUcont N) i))
       atTop (𝓝 (timeModeCoeff (I := I) (M := M) gforce i)) := by
   classical
   obtain ⟨N₀, hN₀⟩ := exists_mem_eigenIdxFinset (I := I) (M := M) g₀ i
-  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a (by omega)
   have hcontField : ∀ N, ContinuousOn
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
@@ -1670,23 +1670,23 @@ theorem galerkinForcing_ofContinuousOn_tendsto_timeModeCoeff
     (TimeSobolev.ofContinuousOn (hcontField N)) i
   have hF := TimeSobolev.coeFn_ofContinuousOn (hcontField N)
   have hG := TimeSobolev.coeFn_ofContinuousOn
-    (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a ha_super U N (hUcont N) i)
+    (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a (by omega) U N (hUcont N) i)
   refine hL.trans (Filter.EventuallyEq.trans ?_ hG.symm)
   filter_upwards [hF] with t ht
   rw [ht, deTurckGalerkinForcing_apply, if_pos hi]
 
 theorem galerkin_perMode_aeTendsto_maxRegCoeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1719,7 +1719,7 @@ theorem galerkin_perMode_aeTendsto_maxRegCoeff
   have hpconv := tendsto_perModeConv_of_tendsto_timeL2 (T := T) lam hlam_nonneg hforcing htmem'
   have hev : (fun N => perModeConv lam
         (fun s => (TimeSobolev.ofContinuousOn
-          (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a ha_super U N
+          (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a (by omega) U N
             (hUcont N) i)) s) t)
       =ᶠ[atTop]
       (fun N => (finiteEigenComboHs (I := I) (M := M) g₀
@@ -1728,13 +1728,13 @@ theorem galerkin_perMode_aeTendsto_maxRegCoeff
     have hi : i ∈ eigenIdxFinset (I := I) (M := M) g₀ N :=
       eigenIdxFinset_mono (I := I) (M := M) g₀ hN hN₀
     rw [finiteEigenComboHs_coeff, if_pos hi,
-      galerkinPerMode_eq_perModeConv (I := I) (M := M) g₀ g_bg a ha_super hT U N
+      galerkinPerMode_eq_perModeConv (I := I) (M := M) g₀ g_bg a (by omega) hT U N
         (hUinit N) (hUcont N) (hUderiv N) i hi htmem']
     refine perModeConv_timeL2_congr lam ?_ htmem'
     have hcoe := TimeSobolev.coeFn_ofContinuousOn
-      (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a ha_super U N (hUcont N) i)
+      (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a (by omega) U N (hUcont N) i)
     have hcoe' : ⇑(TimeSobolev.ofContinuousOn
-          (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a ha_super U N (hUcont N) i))
+          (continuousOn_galerkinForcing (I := I) (M := M) g₀ g_bg a (by omega) U N (hUcont N) i))
         =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)]
         (fun s => deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N s i) := hcoe
     have hext : (Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) =>
@@ -1754,16 +1754,16 @@ theorem galerkin_perMode_aeTendsto_maxRegCoeff
 
 theorem galerkinSolField_aeTendsto_maxRegSolField
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1821,16 +1821,16 @@ theorem galerkinSolField_aeTendsto_maxRegSolField
 
 theorem deTurckGalerkinNonlinearity_aeTendsto_force
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1847,7 +1847,7 @@ theorem deTurckGalerkinNonlinearity_aeTendsto_force
             (U N t) ((a : ℝ) + 2)))
         atTop (𝓝 (gforce t)) := by
   classical
-  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a (by omega)
   have hsol := galerkinSolField_aeTendsto_maxRegSolField (I := I) (M := M) g₀ g_bg a ha_super
     hT hT1 hTT₀ gforce hforce hgforce U hUinit hUcont hUderiv
   filter_upwards [hsol, hforce] with t ht_sol ht_force
@@ -1859,16 +1859,16 @@ theorem deTurckGalerkinNonlinearity_aeTendsto_force
 
 theorem galerkinForcing_aeTendsto_modeRep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1904,16 +1904,16 @@ theorem galerkinForcing_aeTendsto_modeRep
 
 theorem galerkinForcing_uniformOn_tendsto_modeRep
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
@@ -1945,7 +1945,7 @@ theorem galerkinForcing_uniformOn_tendsto_modeRep
       (sseq := eigenIdxFinset (I := I) (M := M) g₀)
       (T := T) (σ₀ := (a : ℝ)) (Cδ := Cδ) (Cmid := Cmid) (seed := seed) (B0 := B0)
       hCδ hCmid hUcont hUderiv hclosure hinitB 2
-  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a (by omega)
   set wi : ℝ := Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) with hwi
   have hwi_nonneg : 0 ≤ wi := Real.sqrt_nonneg _
   have hKnn : (0 : ℝ) ≤ (K : ℝ) := NNReal.coe_nonneg K
@@ -2007,16 +2007,16 @@ theorem galerkinForcing_uniformOn_tendsto_modeRep
 
 theorem galerkinForcing_ofContinuousOn_tendsto_modeCoeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M)
-      g₀ g_bg a ha_super).choose)
+      g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super)
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega))
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hUinit : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0)
     (hUcont : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,

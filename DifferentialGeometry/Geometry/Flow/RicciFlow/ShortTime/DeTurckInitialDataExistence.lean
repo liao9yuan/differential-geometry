@@ -75,7 +75,7 @@ theorem deTurckRicci_solution_with_jointReg
     (deTurckRicciRHS_isSmoothQuasilinear (I := I) g_bg)
     hRepr
     (deTurckRicci_forcingBootstrap (I := I) (M := M) g₀ g_bg
-      (4 * Module.finrank ℝ E + 10) ha_super)
+      (4 * Module.finrank ℝ E + 10) (by omega))
 
 theorem deturck_ricci_flow_parabolic_short_time_existence
     (g₀ g_bg : SmoothRiemannianMetric I M) :
