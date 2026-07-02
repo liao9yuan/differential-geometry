@@ -504,6 +504,7 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Approximation.H1WeakSolutionApprox
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothApproximationConstruction
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
+import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.Atlas
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.AtlasIndependence
 import DifferentialGeometry.Analysis.Sobolev.Chart.AtlasNorm.HolderMonoExponent

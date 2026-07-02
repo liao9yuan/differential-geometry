@@ -615,7 +615,7 @@ private lemma succ_step_cast_transposition_eq {r a b : ℕ} (h : a = b)
   simp only [DifferentialGeometry.Integral.Connection.castRankCc_db]
   rw [hPQ, rsDomDomCongr_rsDomDomCongr]
 
-private lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
+lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (i : ℕ) :
     ∃ σ : Equiv.Perm (Fin ((s + 1) + i)),
       ∀ x : M,
