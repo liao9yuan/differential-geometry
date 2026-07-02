@@ -3897,6 +3897,227 @@ private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
       rw [← hWm_b]
       simp only [hQm_def, hWm_def, euclidPartial_eq_pdDir]
 
+set_option maxHeartbeats 1600000 in
+private theorem reconFOIter_rawChartComponent_jointContMDiffOn_pou
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (m : ℕ) (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (k : ℕ)
+      (fun p : M × ℝ =>
+        tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2)))
+          α ![] Jdx p.1)
+      ({x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+        Set.Icc (0 : ℝ) T) := by
+  classical
+  set U : Set M :=
+    {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} with hU_def
+  set R : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
+    (toEuclidean (E := E)) '' ((extChartAt I α) '' U) with hR_def
+  have hR_sub : R ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    pouRegion_subset_chartTargetEuclid (I := I) (M := M) α
+  have hU_src : U ⊆ (chartAt H α).source := by
+    intro x hx
+    refine (chartAtlasPOU_isSubordinate (I := I) (M := M) α) ?_
+    exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hx))
+  set G : ℝ × EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+    fun q => chartPushedRaw I α
+      (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+        (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+          (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F q.1) hδ_lt (hδ q.1)))
+        α ![] Jdx) q.2 with hG_def
+  have hG : ContDiffOn ℝ (k : ℕ) G (Set.Icc (0 : ℝ) T ×ˢ R) :=
+    (anisoOn_pushed_oneMinusConnLapIter_reconFOPath (I := I) (M := M) g₀ g_bg hT k F
+      hδ_lt hδ φ hφ_smooth hcoeff hmodemass α m Jdx).joint
+  set f : M × ℝ → ℝ × EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
+    fun p : M × ℝ => (p.2, toEuclidean (E := E) ((extChartAt I α) p.1)) with hf_def
+  have hf_smooth : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      𝓘(ℝ, ℝ × EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) (k : ℕ) f
+      (U ×ˢ Set.Icc (0 : ℝ) T) := by
+    refine ContMDiffOn.prodMk_space contMDiffOn_snd ?_
+    have hchart : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) (k : ℕ)
+        (fun p : M × ℝ => extChartAt I α p.1) (U ×ˢ Set.Icc (0 : ℝ) T) :=
+      ((contMDiffOn_extChartAt (I := I) (n := ∞) (x := α)).comp contMDiffOn_fst
+        (fun p hp => hU_src hp.1)).of_le (by exact_mod_cast le_top)
+    exact (toEuclidean (E := E)).toContinuousLinearMap.contMDiff.comp_contMDiffOn hchart
+  have hmaps : Set.MapsTo f (U ×ˢ Set.Icc (0 : ℝ) T) (Set.Icc (0 : ℝ) T ×ˢ R) := by
+    rintro ⟨x, t⟩ ⟨hx, ht⟩
+    exact ⟨ht, ⟨(extChartAt I α) x, ⟨x, hx, rfl⟩, rfl⟩⟩
+  have heq : Set.EqOn
+      (fun p : M × ℝ =>
+        tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2)))
+          α ![] Jdx p.1)
+      (G ∘ f) (U ×ˢ Set.Icc (0 : ℝ) T) := by
+    rintro ⟨x, t⟩ ⟨hx, -⟩
+    have hx_src : x ∈ (extChartAt I α).source := by
+      rw [extChartAt_source (I := I)]
+      exact hU_src hx
+    have hxR : toEuclidean (E := E) ((extChartAt I α) x) ∈ R :=
+      ⟨(extChartAt I α) x, ⟨x, hx, rfl⟩, rfl⟩
+    simp only [Function.comp, hG_def, hf_def]
+    rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ (hR_sub hxR),
+      (toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hx_src]
+  intro q hq
+  refine (ContMDiffWithinAt.congr ?_ (fun y hy => heq hy) (heq hq))
+  have hGf : ContDiffWithinAt ℝ (k : ℕ) G (Set.Icc (0 : ℝ) T ×ˢ R) (f q) :=
+    hG.contDiffWithinAt (hmaps hq)
+  exact hGf.comp_contMDiffWithinAt (hf_smooth q hq) hmaps
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private theorem sectionPath_jointContMDiffOn_of_rawChartComponent_pou
+    (g : SmoothRiemannianMetric I M) {T : ℝ} (k : ℕ)
+    (T_rep : ℝ → SmoothCcTensor g 0 2)
+    (hraw : ∀ (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (k : ℕ)
+        (fun p : M × ℝ =>
+          tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α ![] Jdx p.1)
+        ({x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+          Set.Icc (0 : ℝ) T)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E))
+      ((k : ℕ) : WithTop ℕ∞)
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1
+        ((T_rep p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) := by
+  classical
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H)
+    (I := I) (M := M) 0 2
+  refine contMDiffOn_of_locally_contMDiffOn ?_
+  rintro ⟨x₀, s₀⟩ ⟨-, -⟩
+  obtain ⟨α, hα_pos⟩ :=
+    (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ x₀)
+  have hU_open : IsOpen
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} :=
+    isOpen_lt continuous_const (chartAtlasPOU I M α).contMDiff.continuous
+  have hU_src : {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ⊆
+      (chartAt H α).source := by
+    intro x hx
+    refine (chartAtlasPOU_isSubordinate (I := I) (M := M) α) ?_
+    exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hx))
+  refine ⟨{x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+    (Set.univ : Set ℝ), hU_open.prod isOpen_univ, ⟨hα_pos, Set.mem_univ _⟩, ?_⟩
+  have hsub_eq : ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) ∩
+      ({x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+        (Set.univ : Set ℝ)) =
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+        Set.Icc (0 : ℝ) T := by
+    ext ⟨y, u⟩
+    simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_univ, true_and, and_true]
+    tauto
+  rw [hsub_eq]
+  have hSum : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+      ((k : ℕ) : WithTop ℕ∞)
+      (fun p : M × ℝ => ∑ Q : CompIdx E 0 2,
+        tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α Q.1 Q.2 p.1 •
+          tensorChartBasisElement (E := E) 0 2 Q.1 Q.2)
+      ({x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+        Set.Icc (0 : ℝ) T) := by
+    refine contMDiffOn_finset_sum (fun Q _ => ?_)
+    have hQ1 : Q.1 = (![] : Fin 0 → Fin (Module.finrank ℝ E)) := funext fun i0 => i0.elim0
+    have hrawQ := hraw α Q.2
+    rw [hQ1]
+    exact hrawQ.smul contMDiffOn_const
+  intro p₀ hp₀
+  obtain ⟨hx₀src, hs₀'⟩ := hp₀
+  have hbaseSet : p₀.1 ∈ (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).baseSet := by
+    change p₀.1 ∈ ((trivializationAt (Tensor0SBundle.Tensor0SModel 0 ℝ E)
+        (fun y : M => Tensor0SBundle.Tensor0SSpace 0 I y) α).baseSet) ∩
+        ((trivializationAt (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+          (fun y : M => Tensor0SBundle.Tensor0SSpace 2 I y) α).baseSet)
+    refine ⟨?_, ?_⟩ <;>
+      · change p₀.1 ∈ (trivializationAt E (TangentSpace I) α).baseSet
+        rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+          TangentBundle.trivializationAt_baseSet (I := I) α]
+        exact hU_src hx₀src
+  have hsource : (⟨p₀.1, (T_rep p₀.2).toSection p₀.1⟩ :
+      TotalSpace (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z)) ∈
+      (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).source := by
+    rw [Bundle.Trivialization.mem_source]; exact hbaseSet
+  have hfibeq : ∀ p : M × ℝ,
+      p.1 ∈ {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} →
+      ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α)
+        ⟨p.1, (T_rep p.2).toSection p.1⟩).2 =
+        ∑ Q : CompIdx E 0 2,
+          tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α Q.1 Q.2 p.1 •
+            tensorChartBasisElement (E := E) 0 2 Q.1 Q.2 := by
+    intro p hpU
+    have hpx : p.1 ∈ (chartAt H α).source := hU_src hpU
+    have hpbase : p.1 ∈ (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).baseSet := by
+      change p.1 ∈ ((trivializationAt (Tensor0SBundle.Tensor0SModel 0 ℝ E)
+          (fun y : M => Tensor0SBundle.Tensor0SSpace 0 I y) α).baseSet) ∩
+          ((trivializationAt (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+            (fun y : M => Tensor0SBundle.Tensor0SSpace 2 I y) α).baseSet)
+      refine ⟨?_, ?_⟩ <;>
+        · change p.1 ∈ (trivializationAt E (TangentSpace I) α).baseSet
+          rw [show (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source from
+            TangentBundle.trivializationAt_baseSet (I := I) α]
+          exact hpx
+    have h1 : ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α)
+        ⟨p.1, (T_rep p.2).toSection p.1⟩).2 =
+        (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt
+          ℝ p.1 ((T_rep p.2).toSection p.1) := by
+      rw [Bundle.Trivialization.continuousLinearMapAt_apply,
+        Bundle.Trivialization.coe_linearMapAt_of_mem _ hpbase]
+    rw [h1, toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 (T_rep p.2) α hpx,
+      map_sum]
+    refine Finset.sum_congr rfl (fun Q _ => ?_)
+    rw [map_smul]
+    congr 1
+    have hbs : chartBasisFiberSection (I := I) (M := M) 0 2 α Q p.1 =
+        (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+          (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).symmL ℝ p.1
+          (tensorChartBasisElement (E := E) 0 2 Q.1 Q.2) := rfl
+    rw [hbs]
+    exact Bundle.Trivialization.continuousLinearMapAt_symmL _ hpbase _
+  have hfib : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ))
+      𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ((k : ℕ) : WithTop ℕ∞)
+      (fun p : M × ℝ =>
+        ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+            (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α)
+          ⟨p.1, (T_rep p.2).toSection p.1⟩).2)
+      ({x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+        Set.Icc (0 : ℝ) T) p₀ := by
+    refine (hSum p₀ ⟨hx₀src, hs₀'⟩).congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [self_mem_nhdsWithin] with p hp
+      exact hfibeq p hp.1
+    · exact hfibeq p₀ hx₀src
+  exact ((Bundle.Trivialization.contMDiffWithinAt_iff
+    (IM := I.prod 𝓘(ℝ, ℝ)) (n := ((k : ℕ) : WithTop ℕ∞))
+    (f := fun p : M × ℝ => (⟨p.1, (T_rep p.2).toSection p.1⟩ :
+      TotalSpace (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z)))
+    (s := {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ×ˢ
+      Set.Icc (0 : ℝ) T) (x₀ := p₀)
+    (e := trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+      (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α) hsource).mpr
+    ⟨contMDiffWithinAt_fst, hfib⟩)
+
 end IterLaplacianInduction
 
 end FiniteOrderAnisotropicReconstruction
@@ -3930,7 +4151,12 @@ private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiff
         ((oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
           (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F p.2) hδ_lt (hδ p.2))).toSection p.1))
       ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
-  sorry
+  sectionPath_jointContMDiffOn_of_rawChartComponent_pou (I := I) (M := M) (T := T) g₀ k
+    (fun t => oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+      (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+    (fun α Jdx =>
+      reconFOIter_rawChartComponent_jointContMDiffOn_pou (I := I) (M := M)
+        g₀ g_bg hT k F hδ_lt hδ φ hφ_smooth hcoeff hmodemass m α Jdx)
 
 end FiniteOrderReconJetEnergy
 
