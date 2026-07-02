@@ -2780,6 +2780,125 @@ private theorem lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie
     intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
   rw [hFTC, realizedDeTurckLiePathValue_one, realizedDeTurckLiePathValue_zero]
 
+private theorem hasDerivAt_realizedDeTurckLieChartSum_general
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1) :
+    HasDerivAt (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w)
+      (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+          deriv (fun s : ℝ =>
+            DeTurckCoefficients.chartLieDeTurckComp (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) s₀) s₀ := by
+  have hmem : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨hs₀.1.le, hs₀.2.le⟩
+  have hG := DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam_genJointGram
+    (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  have hbody : (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) =
+      (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) i * ((chartModelBasis E).repr w) j *
+          DeTurckCoefficients.chartLieDeTurckComp (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) := by
+    funext s; rw [realizedDeTurckLieChartSum]
+  rw [hbody]
+  refine HasDerivAt.fun_sum (fun i _ => ?_)
+  refine HasDerivAt.fun_sum (fun j _ => ?_)
+  have hcontdiff : ContDiffAt ℝ ∞
+      (fun s : ℝ => DeTurckCoefficients.chartLieDeTurckComp (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) s₀ := by
+    have hjoint := DifferentialGeometry.PDE.DeTurck.RicciLinearization.gen_joint_chartLieDeTurckComp
+      (I := I) (realizedFam (I := I) g₀ T T' hδ hδ') x hG g_bg i j hmem hy
+    have hcomp : (fun s : ℝ =>
+          DeTurckCoefficients.chartLieDeTurckComp (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) =
+        (fun p : ℝ × E =>
+          DeTurckCoefficients.chartLieDeTurckComp (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.1) g_bg x i j p.2) ∘
+          (fun s : ℝ => (s, extChartAt I x x)) := by funext s; rfl
+    rw [hcomp]
+    exact hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)
+  exact ((hcontdiff.differentiableAt (by simp)).hasDerivAt).const_mul _
+
+private noncomputable def deTurckLieArm0Field
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField (I := I) (M := M)
+    g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+
+private theorem deTurckLieArm0Field_eq_coeffField
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) :
+    deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ' s =
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieCoeffField (I := I) (M := M)
+        g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg :=
+  rfl
+
+private theorem realizedDeTurckLie_threeArm_covariant_identity
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (Φ₁L : ℝ → SmoothCcTensor g₀ 3 2) (Φ₂L : ℝ → SmoothCcTensor g₀ 4 2),
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+        (deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ') (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁L (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂L (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+          (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr (v 0)) i * ((chartModelBasis E).repr (v 1)) j *
+              deriv (fun s : ℝ =>
+                DeTurckCoefficients.chartLieDeTurckComp (I := I)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) s) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 (deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ' s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁L s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2 (Φ₂L s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
+private theorem realizedDeTurckLie_threeArm_lowerOrder_residual
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (Φ₀L : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁L : ℝ → SmoothCcTensor g₀ 3 2)
+      (Φ₂L : ℝ → SmoothCcTensor g₀ 4 2),
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀L (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁L (δ := δ) (δ' := δ') ∧
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂L (δ := δ) (δ' := δ') ∧
+      ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
+        ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+          deriv (realizedDeTurckLieChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 (Φ₀L s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+                + appCc (I := I) (M := M) g₀ 3 2 (Φ₁L s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+                + appCc (I := I) (M := M) g₀ 4 2 (Φ₂L s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  obtain ⟨Φ₁L, Φ₂L, hj0, hj1, hj2, hident⟩ :=
+    realizedDeTurckLie_threeArm_covariant_identity (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+  refine ⟨deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ', Φ₁L, Φ₂L, hj0, hj1, hj2,
+    fun s hs x v => ?_⟩
+  rw [(hasDerivAt_realizedDeTurckLieChartSum_general (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+    x (v 0) (v 1) hs).deriv]
+  exact hident s hs x v
+
 private theorem lieArm_threeArm_coeffFields_perOrder_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

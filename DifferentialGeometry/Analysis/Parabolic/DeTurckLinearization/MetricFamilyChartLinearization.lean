@@ -647,12 +647,7 @@ private lemma chartGramOnE_gfam_zero
     chartGramOnE (I := I) (gfam 0) α i j y = chartGramOnE (I := I) g₀ α i j y := by
   rw [hfam.1]
 
-/-- The **first-order Christoffel correction**: the `(∂G⁻¹)·S` branch of the `s`-derivative
-of the chart Christoffel symbol along the family, where the `s`-derivative lands on the
-inverse-Gram factor.  It carries **no** chart derivative of `h` beyond the bracket
-`gramBracket g₀`, so it is genuinely first order in `h` (it vanishes when the value of `h`
-vanishes). -/
-private def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : M)
+def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
     (-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
@@ -1137,14 +1132,7 @@ private lemma joint_contDiffAt_chartDeTurckVFComp
   exact (joint_contDiffAt_chartChristoffel (I := I) hfam a b k hy).sub
     (joint_contDiffAt_const_s_chartChristoffel (I := I) g_bg α a b k hy)
 
-/-! ### `s`-derivative of the chart DeTurck Lie summand along the family -/
-
-/-- The **DeTurck vector-field first-order correction**: the `s`-derivative of the DeTurck
-vector-field component along the family, minus the principal
-`chartLinearizedDeTurckVFPrincipal g₀ g_bg h k` part.  It collects the
-`(∂G⁻¹)·(Γ-Γ_bg)` branch and the Christoffel first-order corrections — both first order in
-`h`. -/
-private def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
+def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     ((-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
@@ -1277,11 +1265,7 @@ private lemma hasDerivAt_partial_chartDeTurckVFComp
   rw [hrhs] at hcomm
   exact hcomm
 
-/-- The **Lie first-order remainder** of the chart DeTurck Lie-summand `s`-derivative: the
-part not captured by the on-disk `chartDeTurckCorrSecondOrderPart g₀ g_bg h`.  It collects
-the convective `W·∂G` deformation, the metric-factor deformations, and the DeTurck-VF
-first-order corrections — all first order in `h`. -/
-private def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
+def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
       ((chartLinearizedDeTurckVFPrincipal (I := I) g₀ g_bg α h k y +
@@ -1301,11 +1285,7 @@ private def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
           partialDeriv (E := E) j
             (fun y' => deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y') y))
 
-/-- **`s`-derivative of the chart DeTurck Lie summand along the family.**  At a chart
-interior point, `s ↦ chartLieDeTurckComp (gfam s) g_bg α i j y` has derivative at `0` the
-on-disk DeTurck-correction second-order part `chartDeTurckCorrSecondOrderPart g₀ g_bg h i j y`
-plus the `lieDerivFirstOrderRemainder`. -/
-private lemma hasDerivAt_chartLieDeTurckComp
+lemma hasDerivAt_chartLieDeTurckComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
     (hfam : IsMetricPerturbationFamily (I := I) g₀ α h gfam)
