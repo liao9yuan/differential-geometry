@@ -687,7 +687,7 @@ private lemma finiteEigenComboHs_eq_smoothCcToTensorHs
 set_option maxHeartbeats 1600000 in
 theorem deTurckSmoothRemainder_spectralCoercive_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
@@ -819,7 +819,7 @@ theorem deTurckSmoothRemainder_spectralCoercive_split
 set_option maxHeartbeats 1600000 in
 theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
     ∃ (Cδ₀ : ℝ) (Crem : ℕ → ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ (∀ k, 0 ≤ Crem k) ∧
       ∀ (N : ℕ) (k : ℕ) (t : ℝ),
@@ -835,7 +835,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
             Crem k * Real.sqrt (galerkinEnergy (I := I) (M := M)
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ)) t) := by
   classical
-  set hex := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super with hhex
+  set hex := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega) with hhex
   set R₀ := (Classical.choose hex).1 with hR₀_def
   have hR₀ : 0 < R₀ := (Classical.choose_spec hex).1
   have hδ_le : (Classical.choose hex).2 ≤ deTurckArmContractionThreshold (Module.finrank ℝ E) :=
@@ -898,7 +898,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
         (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
           (deTurckSmoothRemainder (I := I) g₀ g_bg T₀ hδ_lt (hδ_fibre T₀ hball))).coeff i := by
       rw [hbridge ((a : ℝ) + 2),
-        deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super Tb,
+        deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a (by omega) Tb,
         deTurckSmoothN_coeff, smoothCcToTensorHs_coeff]
     have hN0 : (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i =
@@ -934,7 +934,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
               deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2) hδ_lt hp0 := by
         rw [hscale0]; intro hp hp0; rfl
       rw [hembed0,
-        deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super
+        deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a (by omega)
           (0 : SmoothCcTensor g₀ 0 2), deTurckSmoothN_coeff, smoothCcToTensorHs_coeff,
         hRemEq]
     rw [hNT, hN0]
@@ -999,7 +999,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
 
 theorem deTurckGalerkinForcing_tame_diff_mass_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
     ∃ (Cδ₀ : ℝ) (Ctame : ℕ → ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ (∀ k, 0 ≤ Ctame k) ∧
       ∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -1060,7 +1060,7 @@ theorem deTurckGalerkinForcing_tame_diff_mass_perScale
 
 theorem deTurckGalerkin_forcing_dissipation_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
     ∃ (Cδ : ℝ) (Cmid seed : ℕ → ℝ), Cδ < 2 ∧ (∀ k, 0 ≤ Cmid k) ∧
       ∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -1079,7 +1079,7 @@ theorem deTurckGalerkin_forcing_dissipation_perScale
     deTurckGalerkinForcing_tame_diff_mass_perScale (I := I) (M := M) g₀ g_bg a ha_super
       (T := T) U
   obtain ⟨Cseed, hCseed_nn, hseed⟩ :=
-    deTurckGalerkinForcing_seed_mass (I := I) (M := M) g₀ g_bg a ha_super
+    deTurckGalerkinForcing_seed_mass (I := I) (M := M) g₀ g_bg a (by omega)
   refine ⟨1 + Cδ₀ ^ 2, fun k => Ctame k ^ 2, fun k => 2 * Cseed k,
     by nlinarith [hCδ₀_lt, hCδ₀_nn], fun k => by positivity, ?_⟩
   intro N k t ht
@@ -1177,7 +1177,7 @@ theorem deTurckGalerkin_forcing_dissipation_perScale
 
 theorem deTurckGalerkin_forcing_closure_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
     (hU0 : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0) :
     ∃ (Cδ : ℝ) (Cmid seed B0 : ℕ → ℝ), Cδ < 2 ∧ (∀ k, 0 ≤ Cmid k) ∧
@@ -1210,14 +1210,14 @@ theorem deTurckGalerkin_forcing_closure_perScale
 
 theorem deTurckGalerkin_energy_uniform_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 ≤ T) :
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 ≤ T) :
     ∃ U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ,
       (∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0) ∧
       ∀ k : ℕ, ∃ Bound : ℝ, ∀ N, ∀ t ∈ Set.Icc (0 : ℝ) T,
         galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
           (U N) ((a : ℝ) + (k : ℝ)) t ≤ Bound := by
   obtain ⟨U, hcont, hderiv, hinit_coeff⟩ :=
-    deTurckGalerkin_solution_exists (I := I) (M := M) g₀ g_bg a ha_super
+    deTurckGalerkin_solution_exists (I := I) (M := M) g₀ g_bg a (by omega)
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) hT
   have hinit_zero : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0 := by
     intro N i hi

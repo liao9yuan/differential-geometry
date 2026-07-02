@@ -191,30 +191,30 @@ theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass
 set_option linter.unusedVariables false in
 theorem maxRegSolField_parabolicInterior_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega)) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ φ d₂ ∧
         (∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
           ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ≤
-            deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super) ∧
+            deTurckRealizabilityRadius (I := I) (M := M) g₀ a (by omega)) ∧
         ∀ i, (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
             =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i := by
   classical
   obtain ⟨d₀, hd₀_pos, hd₀_le, f, hf_smooth, hf_mass, hf_ae⟩ :=
     maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass (I := I) (M := M)
-      g₀ g_bg a ha_super hT hT1 gforce hforce
+      g₀ g_bg a (by omega) hT hT1 gforce hforce
       (deTurckGalerkin_solField_uniformSpatialMass_allOrder (I := I) (M := M)
         g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce)
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc_def
@@ -232,7 +232,7 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMass
       (fun i s hs => by
         have h := hB0_le i s hs
         rwa [iteratedDeriv_zero] at h)
-      (deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a ha_super)
+      (deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a (by omega))
   have hd₂_le : d₂ ≤ T := le_trans hd₂_le_d₀ hd₀_le
   have hd₂_le_d₀' : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) d₀ :=
     Set.Icc_subset_Icc le_rfl hd₂_le_d₀
@@ -324,16 +324,16 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMass
 set_option linter.unusedVariables false in
 private theorem deTurckForcing_smoothForcingDriver
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega)) :
     ∃ d₀ : ℝ, 0 < d₀ ∧ d₀ ≤ T ∧
       ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (f i)) ∧
@@ -350,7 +350,7 @@ private theorem deTurckForcing_smoothForcingDriver
       g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
   obtain ⟨ψ, hψ_ctrl, hψ_ae⟩ :=
     deTurckSobolevNHa2_jetSpectralMass_preserving (I := I) (M := M)
-      g₀ g_bg a ha_super hT hd₂_pos hd₂_le
+      g₀ g_bg a (by omega) hT hd₂_pos hd₂_le
       (fun t => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)
       hφ_ball φ hφ_ctrl hφ_ae
@@ -369,23 +369,23 @@ private theorem deTurckForcing_smoothForcingDriver
 set_option linter.unusedVariables false in
 private theorem deTurckForcing_solCoeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega)) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       JetSpectralMassControl (I := I) (M := M) g₀ φ d₂ ∧
         (∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
           ‖maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t‖ ≤
-            deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super) ∧
+            deTurckRealizabilityRadius (I := I) (M := M) g₀ a (by omega)) ∧
         ∀ i, (fun t => (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i)
             =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] φ i := by
@@ -408,7 +408,7 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
       (fun i s hs => by
         have h := hB0_le i s hs
         rwa [iteratedDeriv_zero] at h)
-      (deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a ha_super)
+      (deTurckRealizabilityRadius_pos (I := I) (M := M) g₀ a (by omega))
   have hd₂_le : d₂ ≤ T := le_trans hd₂_le_d₀ hd₀_le
   have hd₂_le_d₀' : Set.Icc (0 : ℝ) d₂ ⊆ Set.Icc (0 : ℝ) d₀ :=
     Set.Icc_subset_Icc le_rfl hd₂_le_d₀
@@ -500,16 +500,16 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
 set_option linter.unusedVariables false in
 private theorem deTurckForcing_fixedPoint_coeff_smooth_and_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega)) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (c i)) ∧
@@ -583,16 +583,16 @@ time-jet majorant, and the a.e. conjunct chains `timeModeCoeff gforce i =ᵐ (gf
 `=ᵐ ψ i`.  Consumers transitively depend on (A) and (B)'s `sorryAx`. -/
 theorem deTurckForcing_timeModeCoeff_smooth_allOrderJet
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega)) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ g : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (g i)) ∧
@@ -634,16 +634,16 @@ coordinate-representative brick `timeModeCoeff_coeFn`
 Consumers transitively depend on the core's `sorryAx` through this assembly. -/
 theorem deTurckForcing_smoothCoordinate_aeTimeJet
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a (by omega)).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a ha_super) :
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadius (I := I) (M := M) g₀ g_bg a (by omega)) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (f i)) ∧
