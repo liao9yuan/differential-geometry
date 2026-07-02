@@ -541,7 +541,7 @@ private lemma chartGramOnE_gfam_zero
     chartGramOnE (I := I) (gfam 0) α i j y = chartGramOnE (I := I) g₀ α i j y := by
   rw [hfam.1]
 
-private def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : M)
+def christoffelFirstOrderCorr (g₀ : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
     (-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
@@ -985,7 +985,7 @@ private lemma joint_contDiffAt_chartDeTurckVFComp
   exact (joint_contDiffAt_chartChristoffel (I := I) hfam a b k hy).sub
     (joint_contDiffAt_const_s_chartChristoffel (I := I) g_bg α a b k hy)
 
-private def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
+def deTurckVFFirstOrderCorr (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     ((-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
@@ -1110,7 +1110,7 @@ private lemma hasDerivAt_partial_chartDeTurckVFComp
   rw [hrhs] at hcomm
   exact hcomm
 
-private def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
+def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),
       ((chartLinearizedDeTurckVFPrincipal (I := I) g₀ g_bg α h k y +
@@ -1130,7 +1130,7 @@ private def lieDerivFirstOrderRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
           partialDeriv (E := E) j
             (fun y' => deTurckVFFirstOrderCorr (I := I) g₀ g_bg α h k y') y))
 
-private lemma hasDerivAt_chartLieDeTurckComp
+lemma hasDerivAt_chartLieDeTurckComp
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
     (hfam : IsMetricPerturbationFamily (I := I) g₀ α h gfam)
