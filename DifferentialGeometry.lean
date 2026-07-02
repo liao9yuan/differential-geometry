@@ -661,6 +661,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.AppCcJetWindowTame
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.BanachAlgebraSmoothness
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArmCoeffPerOrderJetTower
