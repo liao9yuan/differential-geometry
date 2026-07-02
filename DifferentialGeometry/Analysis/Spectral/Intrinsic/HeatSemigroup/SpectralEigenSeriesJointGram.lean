@@ -1737,6 +1737,494 @@ theorem jointChartGramSmooth_of_spectralSmooth_timeSmooth
   rw [chartGramMatrix_apply, chartGramMatrix_apply,
     tensorSectionRealizeMetric_inner]
 
+section FiniteOrderEigenSeries
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth
+  tensorChartComponentRaw tensorChartComponentRaw_add tensorChartComponentRaw_smul
+  tensorChartComponentProjection tensorChartBasisElement
+  toEuclidean_extChartAt_mem_chartTargetEuclid)
+
+private local instance tensorRSModel02NormedAddCommGroup_local :
+    NormedAddCommGroup (Tensor0SBundle.TensorRSModel 0 2 ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedAddCommGroup 0 2
+
+private local instance tensorRSModel02NormedSpace_local :
+    NormedSpace ℝ (Tensor0SBundle.TensorRSModel 0 2 ℝ E) :=
+  Tensor0SBundle.tensorRSModel_normedSpace 0 2
+
+omit [BoundarylessManifold I M] in
+private lemma weight_two_rpow_eq_sq (g : SmoothRiemannianMetric I M)
+    (i : TensorEigenIdx (I := I) (M := M) g 0 2) (pp : ℝ) :
+    tensorSobolevWeight (I := I) (M := M) i (2 * pp)
+      = ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pp) ^ 2 := by
+  have hbase_pos : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+    have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
+  unfold tensorSobolevWeight
+  rw [show (2 : ℝ) * pp = pp * 2 by ring, Real.rpow_mul hbase_pos.le, Real.rpow_two]
+
+omit [BoundarylessManifold I M] in
+lemma abs_le_sqrt_of_weight_sq_le (g : SmoothRiemannianMetric I M)
+    (i : TensorEigenIdx (I := I) (M := M) g 0 2) (pp : ℝ) {v C : ℝ}
+    (h : tensorSobolevWeight (I := I) (M := M) i (2 * pp) * v ^ 2 ≤ C) :
+    |v| ≤ Real.sqrt C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-pp) := by
+  have hbase_pos : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
+    have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
+  have hw := weight_two_rpow_eq_sq (I := I) (M := M) g i pp
+  rw [hw] at h
+  set W : ℝ := (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pp with hW_def
+  have hW_pos : 0 < W := Real.rpow_pos_of_pos hbase_pos _
+  have hC_nn : 0 ≤ C := le_trans (by positivity) h
+  have habs : |v| ≤ Real.sqrt C / W := by
+    rw [le_div_iff₀ hW_pos]
+    have h2 : (|v| * W) ^ 2 ≤ (Real.sqrt C) ^ 2 := by
+      rw [Real.sq_sqrt hC_nn, mul_pow, sq_abs]
+      nlinarith [h, hW_pos.le]
+    have hlhs_nn : 0 ≤ |v| * W := by positivity
+    nlinarith [Real.sqrt_nonneg C, h2, hlhs_nn,
+      sq_nonneg (|v| * W - Real.sqrt C)]
+  rw [Real.rpow_neg hbase_pos.le]
+  rw [div_eq_mul_inv] at habs
+  rwa [← hW_def]
+
+omit [BoundarylessManifold I M] in
+lemma summable_sqrt_mul_weight_neg (g : SmoothRiemannianMetric I M)
+    (Cm : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (hCm : Summable Cm)
+    (hCm_nn : ∀ i, 0 ≤ Cm i) {sW : ℝ} (hsW : ((weylSobolevExp (E := E) : ℕ) : ℝ) < sW) :
+    Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>
+      Real.sqrt (Cm i) * tensorSobolevWeight (I := I) (M := M) i (-sW)) := by
+  have hbase_pos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+      (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := fun i => by
+    have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
+  have hweyl : Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>
+      tensorSobolevWeight (I := I) (M := M) i (-(2 * sW))) := by
+    refine tensorEigen_summable_negpow (I := I) (M := M) g (2 * sW) ?_
+    have h0 : (0 : ℝ) ≤ ((weylSobolevExp (E := E) : ℕ) : ℝ) := by positivity
+    nlinarith [h0]
+  have hw_sq : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+      tensorSobolevWeight (I := I) (M := M) i (-sW) ^ 2
+        = tensorSobolevWeight (I := I) (M := M) i (-(2 * sW)) := by
+    intro i
+    unfold tensorSobolevWeight
+    rw [← Real.rpow_natCast ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-sW)) 2,
+      ← Real.rpow_mul (hbase_pos i).le]
+    congr 1; push_cast; ring
+  have hbound : ∀ i, Real.sqrt (Cm i) * tensorSobolevWeight (I := I) (M := M) i (-sW)
+      ≤ (Cm i + tensorSobolevWeight (I := I) (M := M) i (-(2 * sW))) / 2 := by
+    intro i
+    have h1 : Real.sqrt (Cm i) * tensorSobolevWeight (I := I) (M := M) i (-sW)
+        ≤ (Real.sqrt (Cm i) ^ 2 + tensorSobolevWeight (I := I) (M := M) i (-sW) ^ 2) / 2 := by
+      nlinarith [sq_nonneg (Real.sqrt (Cm i) - tensorSobolevWeight (I := I) (M := M) i (-sW)),
+        Real.sq_sqrt (hCm_nn i)]
+    rw [Real.sq_sqrt (hCm_nn i), hw_sq i] at h1
+    exact h1
+  have hnn : ∀ i, 0 ≤ Real.sqrt (Cm i) * tensorSobolevWeight (I := I) (M := M) i (-sW) :=
+    fun i => mul_nonneg (Real.sqrt_nonneg _)
+      (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
+  exact Summable.of_nonneg_of_le hnn hbound ((hCm.add hweyl).div_const 2)
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
+private lemma norm_iteratedFDerivWithin_compFst_le_ofOrder
+    (kk : ℕ) (f : ℝ → ℝ) (hf : ContDiff ℝ (kk : ℕ) f) {a bb : ℝ} {B : Set E}
+    (hUD : UniqueDiffOn ℝ (Set.Icc a bb ×ˢ B)) (hab : a < bb)
+    (n : ℕ) (hn : n ≤ kk) (q : ℝ × E) (hq : q ∈ Set.Icc a bb ×ˢ B)
+    (C : ℝ) (hC : ∀ j ≤ n, ‖iteratedDeriv j f q.1‖ ≤ C) :
+    ‖iteratedFDerivWithin ℝ n (fun p : ℝ × E => f p.1) (Set.Icc a bb ×ˢ B) q‖ ≤
+      (n.factorial : ℝ) * C * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ n := by
+  classical
+  set s := Set.Icc a bb ×ˢ B with hs_def
+  set t := Set.Icc a bb with ht_def
+  set L : (ℝ × E) →L[ℝ] ℝ := ContinuousLinearMap.fst ℝ ℝ E with hL_def
+  have hUDt : UniqueDiffOn ℝ t := uniqueDiffOn_Icc hab
+  have hmaps : Set.MapsTo (fun p : ℝ × E => p.1) s t := fun p hp => hp.1
+  have hbound := norm_iteratedFDerivWithin_comp_le (𝕜 := ℝ) (g := f)
+    (f := fun p : ℝ × E => p.1) (n := n) (s := s) (t := t) (x := q)
+    (N := ((kk : ℕ) : WithTop ℕ∞))
+    hf.contDiffOn contDiffOn_fst (by exact_mod_cast hn) hUDt hUD hmaps hq
+    (C := C) (D := ‖L‖ + 1)
+    (fun i hi => by
+      have heq : iteratedFDerivWithin ℝ i f t q.1 = iteratedFDeriv ℝ i f q.1 :=
+        iteratedFDerivWithin_eq_iteratedFDeriv hUDt
+          (hf.contDiffAt.of_le (by exact_mod_cast le_trans hi hn)) (hmaps hq)
+      rw [heq, norm_iteratedFDeriv_eq_norm_iteratedDeriv]
+      exact hC i hi)
+    (fun i hi1 hin => by
+      have hwithin : iteratedFDerivWithin ℝ i (fun p : ℝ × E => p.1) s q =
+          iteratedFDeriv ℝ i (fun p : ℝ × E => p.1) q :=
+        iteratedFDerivWithin_eq_iteratedFDeriv hUD
+          ((contDiff_fst (𝕜 := ℝ)).contDiffAt.of_le (by exact_mod_cast le_top)) hq
+      rw [hwithin]
+      exact norm_iteratedFDeriv_clm_le L i hi1 q)
+  have hcomp : (f ∘ (fun p : ℝ × E => p.1)) = (fun p : ℝ × E => f p.1) := rfl
+  rw [hcomp] at hbound
+  exact hbound
+
+set_option maxHeartbeats 1600000 in
+private lemma exists_rawCompOnE_eigen_jet_le_lambda_pow
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ)
+    {B : Set E} (hB_compact : IsCompact B) (hB : B ⊆ interior (extChartAt I α).target) :
+    ∃ (C : ℝ) (p : ℕ), 0 ≤ C ∧
+      ∀ (m' : ℕ), m' ≤ m → ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ y ∈ B,
+        ‖iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx)
+            (interior (extChartAt I α).target) y‖ ≤
+          C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p := by
+  classical
+  set kE : ℕ := Module.finrank ℝ E + 2 * m + 1 with hkE_def
+  obtain ⟨Cdec, hCdec_nn, hCdec⟩ :=
+    eigenvectorSmooth_toHs_norm_le_lambda_pow (I := I) (M := M) g kE
+  have hper : ∀ m' : ℕ, m' ≤ m → ∃ Cm' : ℝ, 0 ≤ Cm' ∧
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ y ∈ B,
+        ‖iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx)
+            (interior (extChartAt I α).target) y‖ ≤
+          Cm' * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) := by
+    intro m' hm'
+    have h_super : 2 * kE > Module.finrank ℝ E + 2 * m' := by rw [hkE_def]; omega
+    obtain ⟨Cj, hCj_nn, hCj⟩ :=
+      exists_rawCompOnE_jet_le_toHs_on_compact (I := I) (M := M) g α Jdx m' kE h_super
+        hB_compact hB
+    refine ⟨Cj * Cdec, by positivity, fun i y hy => ?_⟩
+    have h1 := hCj (eigenvectorSmooth (I := I) (M := M) g 0 2 i) y hy
+    have h2 := hCdec i
+    have hbase_nn : (0 : ℝ) ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) := by
+      have := tensor_lambda_nonneg (I := I) (M := M) i; positivity
+    calc ‖iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx)
+            (interior (extChartAt I α).target) y‖
+        ≤ Cj * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * kE)
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i)‖ := h1
+      _ ≤ Cj * (Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE)) :=
+          mul_le_mul_of_nonneg_left h2 hCj_nn
+      _ = Cj * Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) := by ring
+  choose Cf hCf_nn hCf using hper
+  set Cmax : ℝ := (Finset.range (m + 1)).sup'
+    (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero m))
+    (fun b => if hb : b ≤ m then Cf b hb else 0) with hCmax_def
+  have hCmax_ge : ∀ (m' : ℕ) (h : m' ≤ m), Cf m' h ≤ Cmax := by
+    intro m' h
+    rw [hCmax_def]
+    refine le_trans (le_of_eq ?_) (Finset.le_sup' (fun b => if hb : b ≤ m then Cf b hb else 0)
+      (Finset.mem_range.mpr (by omega : m' < m + 1)))
+    rw [dif_pos h]
+  refine ⟨Cmax, 2 * kE, ?_, fun m' hm' i y hy => ?_⟩
+  · exact le_trans (hCf_nn 0 (Nat.zero_le m)) (hCmax_ge 0 (Nat.zero_le m))
+  · refine le_trans (hCf m' hm' i y hy) ?_
+    refine mul_le_mul_of_nonneg_right (hCmax_ge m' hm') ?_
+    have := tensor_lambda_nonneg (I := I) (M := M) i; positivity
+
+def eigenRawIncrementMode
+    (g : SmoothRiemannianMetric I M)
+    (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
+    (i : TensorEigenIdx (I := I) (M := M) g 0 2) : ℝ × E → ℝ :=
+  fun q : ℝ × E =>
+    φ i q.1 * rawCompOnE (I := I) (M := M) g
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx q.2
+
+lemma eigenRawIncrementMode_contDiffOn_ofOrder
+    (g : SmoothRiemannianMetric I M) {T : ℝ} (kk : ℕ)
+    (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (kk : ℕ) (φ i))
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
+    (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
+    ContDiffOn ℝ (kk : ℕ) (eigenRawIncrementMode (I := I) (M := M) g φ α Jdx i)
+      (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
+  have htime : ContDiffOn ℝ (kk : ℕ) (fun q : ℝ × E => φ i q.1)
+      (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
+    ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
+  have hspace : ContDiffOn ℝ (kk : ℕ)
+      (fun q : ℝ × E => rawCompOnE (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx q.2)
+      (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
+    ((rawCompOnE_contDiffOn (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx).of_le
+      (by exact_mod_cast le_top)).comp contDiffOn_snd (Set.mapsTo_snd_prod)
+  exact htime.mul hspace
+
+set_option maxHeartbeats 1600000 in
+theorem eigenRawIncrementMode_iteratedFDerivWithin_summable_majorant_ofOrder
+    (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
+    (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (kk : ℕ) (φ i))
+    (hmodemass : ∀ (j : ℕ), j ≤ kk → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ Cmaj i)
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
+    {B : Set E} (hB_compact : IsCompact B) (hB_uniq : UniqueDiffOn ℝ B)
+    (hB : B ⊆ interior (extChartAt I α).target) :
+    ∀ n : ℕ, n ≤ kk →
+      ∃ v : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable v ∧
+        ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2) (q : ℝ × E),
+          q ∈ Set.Icc (0 : ℝ) T ×ˢ B →
+          ‖iteratedFDerivWithin ℝ n (eigenRawIncrementMode (I := I) (M := M) g φ α Jdx i)
+              (Set.Icc (0 : ℝ) T ×ˢ B) q‖ ≤ v i := by
+  classical
+  intro n hn
+  set O : Set E := interior (extChartAt I α).target with hO_def
+  set s : Set (ℝ × E) := Set.Icc (0 : ℝ) T ×ˢ B with hs_def
+  have hUD : UniqueDiffOn ℝ s := (uniqueDiffOn_Icc hT).prod hB_uniq
+  obtain ⟨Csp, pSp, hCsp_nn, hCsp⟩ :=
+    exists_rawCompOnE_eigen_jet_le_lambda_pow (I := I) (M := M) g α Jdx n hB_compact hB
+  set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
+  have hsW_gt : ((weylSobolevExp (E := E) : ℕ) : ℝ) < (sW : ℝ) := by
+    rw [hsW_def]; push_cast; linarith
+  set σ0 : ℝ := 2 * ((pSp : ℝ) + (sW : ℝ)) with hσ0_def
+  have hσ0_nn : (0 : ℝ) ≤ σ0 := by rw [hσ0_def]; positivity
+  have htime : ∀ a : ℕ, ∃ Cm : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ,
+      a ≤ kk → Summable Cm ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ0 * (iteratedDeriv a (φ i) t) ^ 2 ≤ Cm i := by
+    intro a
+    by_cases ha : a ≤ kk
+    · obtain ⟨Cm, h1, h2⟩ := hmodemass a ha σ0 hσ0_nn
+      exact ⟨Cm, fun _ => ⟨h1, h2⟩⟩
+    · exact ⟨fun _ => 0, fun h => absurd h ha⟩
+  choose Cmf hCmf using htime
+  have hbase_pos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+      (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := fun i => by
+    have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
+  have hCm_nn : ∀ (a : ℕ), a ≤ kk →
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), 0 ≤ Cmf a i := by
+    intro a ha i
+    have h := (hCmf a ha).2 i 0 (Set.left_mem_Icc.mpr hT.le)
+    have hw := tensorSobolevWeight_pos (I := I) (M := M) i σ0
+    nlinarith [sq_nonneg (iteratedDeriv a (φ i) 0), hw.le, h]
+  have htime_pt : ∀ (j : ℕ), j ≤ kk →
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ t ∈ Set.Icc (0 : ℝ) T,
+      |iteratedDeriv j (φ i) t| ≤
+        Real.sqrt (Cmf j i) *
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((pSp : ℝ) + (sW : ℝ))) := by
+    intro j hj i t ht
+    exact abs_le_sqrt_of_weight_sq_le (I := I) (M := M) g i ((pSp : ℝ) + (sW : ℝ))
+      (by rw [← hσ0_def]; exact (hCmf j hj).2 i t ht)
+  set Kconst : ℝ := (2 : ℝ) ^ n * (n.factorial : ℝ) * (n.factorial : ℝ) *
+    (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ n * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ n *
+    Csp with hKconst_def
+  have hKconst_nn : 0 ≤ Kconst := by rw [hKconst_def]; positivity
+  set wfun : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun i => tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) with hwfun_def
+  have hwfun_nn : ∀ i, 0 ≤ wfun i := fun i => by
+    rw [hwfun_def]; exact (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
+  have hsqrt_summable : ∀ j : ℕ, j ≤ kk →
+      Summable (fun i => Real.sqrt (Cmf j i) * wfun i) := by
+    intro j hj
+    exact summable_sqrt_mul_weight_neg (I := I) (M := M) g (Cmf j) (hCmf j hj).1
+      (hCm_nn j hj) hsW_gt
+  set termf : ℕ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun a i => Kconst * ((∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i)) * wfun i)
+    with htermf_def
+  have htermf_summable : ∀ a : ℕ, a ≤ kk → Summable (termf a) := by
+    intro a ha
+    refine Summable.mul_left Kconst ?_
+    have heq : (fun i => (∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i)) * wfun i) =
+        (fun i => ∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i) * wfun i) := by
+      funext i; rw [Finset.sum_mul]
+    rw [heq]
+    exact summable_sum (fun j hj => hsqrt_summable j
+      (le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)) ha))
+  refine ⟨fun i => ∑ a ∈ Finset.range (n + 1), termf a i, ?_, ?_⟩
+  · exact summable_sum (fun a ha => htermf_summable a
+      (le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp ha)) hn))
+  · intro i q hq
+    have hqt : q.1 ∈ Set.Icc (0 : ℝ) T := hq.1
+    have hqB : q.2 ∈ B := hq.2
+    have hbase_nn : (0 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+      (hbase_pos i).le
+    have hcd_fst : ContDiffOn ℝ (kk : ℕ) (fun p : ℝ × E => φ i p.1) s :=
+      ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
+    have hcd_snd : ContDiffOn ℝ (kk : ℕ)
+        (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+          (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s := by
+      refine (((rawCompOnE_contDiffOn (I := I) (M := M) g
+          (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx).of_le
+        (by exact_mod_cast le_top)).comp contDiffOn_snd ?_)
+      intro p hp; exact hB hp.2
+    have heqmode : eigenRawIncrementMode (I := I) (M := M) g φ α Jdx i =
+        (fun p : ℝ × E => φ i p.1) *
+          (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) := by
+      funext p; rw [eigenRawIncrementMode]; rfl
+    rw [heqmode]
+    have hleib := norm_iteratedFDerivWithin_mul_le (𝕜 := ℝ)
+      (f := fun p : ℝ × E => φ i p.1)
+      (g := fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2)
+      hcd_fst hcd_snd hUD (x := q) hq (n := n) (by exact_mod_cast hn)
+    refine le_trans hleib ?_
+    change _ ≤ ∑ a ∈ Finset.range (n + 1), termf a i
+    refine Finset.sum_le_sum (fun a ha => ?_)
+    have han : a ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp ha)
+    have hak : a ≤ kk := le_trans han hn
+    set Cφa : ℝ := (∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i)) *
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((pSp : ℝ) + (sW : ℝ)))
+      with hCφa_def
+    have hCφa_nn : 0 ≤ Cφa := by
+      rw [hCφa_def]
+      exact mul_nonneg (Finset.sum_nonneg (fun j _ => Real.sqrt_nonneg _))
+        (Real.rpow_nonneg hbase_nn _)
+    have hfst_bnd := norm_iteratedFDerivWithin_compFst_le_ofOrder
+      kk (φ i) (hφ_smooth i) hUD hT a hak q hq Cφa
+      (fun jj hjj => by
+        rw [Real.norm_eq_abs]
+        refine le_trans (htime_pt jj (le_trans hjj hak) i q.1 hqt) ?_
+        rw [hCφa_def]
+        refine mul_le_mul_of_nonneg_right ?_ (Real.rpow_nonneg hbase_nn _)
+        refine Finset.single_le_sum (f := fun j => Real.sqrt (Cmf j i))
+          (fun j _ => Real.sqrt_nonneg _) (Finset.mem_range.mpr (by omega)))
+    have hsnd_bnd := norm_iteratedFDerivWithin_compSnd_le
+      (rawCompOnE (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) isOpen_interior
+      (rawCompOnE_contDiffOn (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) hB hUD (n - a) q hq
+      (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)
+      (fun jj hjj => hCsp jj (by omega) i q.2 hqB)
+    have hgn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ (n - a)
+        (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+          (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖ := norm_nonneg _
+    have hchoose_nn : (0:ℝ) ≤ (n.choose a : ℝ) := by positivity
+    have hprod : ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
+          ‖iteratedFDerivWithin ℝ (n - a)
+            (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+              (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖ ≤
+        ((a.factorial : ℝ) * Cφa * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
+          (((n - a).factorial : ℝ) *
+            (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp) *
+            (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (n - a)) := by
+      refine mul_le_mul hfst_bnd hsnd_bnd hgn_nn ?_
+      positivity
+    calc (n.choose a : ℝ) * ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
+            ‖iteratedFDerivWithin ℝ (n - a)
+              (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+                (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖
+        = (n.choose a : ℝ) * (‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
+            ‖iteratedFDerivWithin ℝ (n - a)
+              (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+                (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖) := by ring
+      _ ≤ (n.choose a : ℝ) *
+            (((a.factorial : ℝ) * Cφa * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
+            (((n - a).factorial : ℝ) *
+              (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp) *
+              (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (n - a))) :=
+          mul_le_mul_of_nonneg_left hprod hchoose_nn
+      _ ≤ termf a i := by
+          simp only [htermf_def, hCφa_def, hKconst_def, hwfun_def]
+          have hcollapse :
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((pSp : ℝ) + (sW : ℝ))) *
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp =
+              tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) := by
+            unfold tensorSobolevWeight
+            rw [← Real.rpow_natCast (1 + TensorEigenIdx.lambda (I := I) (M := M) i) pSp,
+              ← Real.rpow_add (hbase_pos i)]
+            congr 1; ring
+          set Ssqrt : ℝ := ∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i) with hSs_def
+          have hSs_nn : 0 ≤ Ssqrt := Finset.sum_nonneg (fun j _ => Real.sqrt_nonneg _)
+          have hbinom : (n.choose a : ℝ) ≤ (2 : ℝ) ^ n := by
+            calc (n.choose a : ℝ) ≤ ((2 ^ n : ℕ) : ℝ) := by
+                  exact_mod_cast Nat.choose_le_two_pow n a
+              _ = (2:ℝ) ^ n := by push_cast; ring
+          have hfa : (a.factorial : ℝ) ≤ (n.factorial : ℝ) := by
+            exact_mod_cast Nat.factorial_le han
+          have hfka : ((n-a).factorial : ℝ) ≤ (n.factorial : ℝ) := by
+            exact_mod_cast Nat.factorial_le (by omega)
+          have hfst_pow : (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a ≤
+              (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ n :=
+            pow_le_pow_right₀
+              (by linarith [norm_nonneg (ContinuousLinearMap.fst ℝ ℝ E)]) han
+          have hsnd_pow : (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (n - a) ≤
+              (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ n :=
+            pow_le_pow_right₀
+              (by linarith [norm_nonneg (ContinuousLinearMap.snd ℝ ℝ E)]) (by omega)
+          have hlhs_eq : (n.choose a : ℝ) * (((a.factorial : ℝ) *
+                (Ssqrt *
+                  (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+                    (-((pSp : ℝ) + (sW : ℝ)))) *
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
+              (((n - a).factorial : ℝ) *
+                (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp) *
+                (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (n - a))) =
+              ((n.choose a : ℝ) * (a.factorial : ℝ) * ((n-a).factorial : ℝ) *
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a *
+                (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (n - a) * Csp) *
+              (Ssqrt *
+                ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^
+                    (-((pSp : ℝ) + (sW : ℝ))) *
+                  (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)) := by ring
+          rw [hlhs_eq, hcollapse]
+          have hrhs_eq : (2 : ℝ) ^ n * (n.factorial : ℝ) * (n.factorial : ℝ) *
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ n *
+                (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ n * Csp *
+              (Ssqrt * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) =
+              ((2 : ℝ) ^ n * (n.factorial : ℝ) * (n.factorial : ℝ) *
+                (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ n *
+                (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ n * Csp) *
+              (Ssqrt * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by ring
+          rw [hrhs_eq]
+          refine mul_le_mul ?_ (le_refl _) ?_ (by positivity)
+          · have hfst_nn : (0:ℝ) ≤ (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) := by positivity
+            have hsnd_nn : (0:ℝ) ≤ (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) := by positivity
+            gcongr
+          · exact mul_nonneg hSs_nn (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
+
+lemma exists_rawComponentRaw_eigen_pointwise_le_lambda_pow
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ (chartAt H α).source) :
+    ∃ (C : ℝ) (p : ℕ), 0 ≤ C ∧
+      ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+        |tensorChartComponentRaw (I := I) (M := M) g 0 2
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![] Jdx x| ≤
+          C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p := by
+  have hx' : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]; exact hx
+  set y : E := extChartAt I α x with hy_def
+  have hy_int : y ∈ interior (extChartAt I α).target := by
+    rw [(isOpen_extChartAt_target (I := I) α).interior_eq]
+    exact (extChartAt I α).map_source hx'
+  obtain ⟨C, p, hC_nn, hC⟩ := exists_rawCompOnE_eigen_jet_le_lambda_pow (I := I) (M := M)
+    g α Jdx 0 isCompact_singleton (Set.singleton_subset_iff.mpr hy_int)
+  refine ⟨C, p, hC_nn, fun i => ?_⟩
+  have h0 := hC 0 le_rfl i y (Set.mem_singleton y)
+  rw [iteratedFDerivWithin_zero_eq_comp, Function.comp_apply,
+    LinearIsometryEquiv.norm_map] at h0
+  have heq : rawCompOnE (I := I) (M := M) g
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx y =
+      tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![] Jdx
+        ((extChartAt I α).symm y) := rfl
+  have hxy : (extChartAt I α).symm y = x := (extChartAt I α).left_inv hx'
+  rw [heq, hxy, Real.norm_eq_abs] at h0
+  exact h0
+
+lemma tensorChartComponentRaw_finiteEigenCombo
+    (g : SmoothRiemannianMetric I M)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
+    (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (α : M)
+    (Idx : Fin 0 → Fin (Module.finrank ℝ E))
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (x : M) :
+    tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (finiteEigenCombo (I := I) (M := M) g F c) α Idx Jdx x =
+      ∑ i ∈ F, c i * tensorChartComponentRaw (I := I) (M := M) g 0 2
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Idx Jdx x := by
+  classical
+  rw [finiteEigenCombo_eq]
+  induction F using Finset.induction with
+  | empty =>
+      simp only [Finset.sum_empty]
+      have h0 : (0 : SmoothCcTensor g 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g 0 2) := by
+        rw [zero_smul]
+      rw [h0, tensorChartComponentRaw_smul (I := I) (M := M)]
+      simp
+  | insert a s ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha,
+        tensorChartComponentRaw_add (I := I) (M := M),
+        tensorChartComponentRaw_smul (I := I) (M := M), ih]
+      simp [smul_eq_mul]
+
+end FiniteOrderEigenSeries
+
 end IntrinsicSpectral
 end RicciFlow
 end PDE
