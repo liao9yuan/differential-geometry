@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzTruncation
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitz
@@ -316,70 +317,6 @@ theorem exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum
     _ = Cl2 * Cdrop * Chebey * ∑ j ∈ Finset.range (2 * k + 1),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by ring
 
-theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs
-    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ S : SmoothCcTensor g₀ 0 2,
-        ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤
-          C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ := by
-  classical
-  obtain ⟨Cg, hCg_nn, hCg⟩ := exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter (I := I) g₀ 2 k
-  refine ⟨((2 * k + 1 : ℕ) : ℝ) * (Cg * (k + 1)), by positivity, fun S => ?_⟩
-  have hembed_eq : ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S =
-      smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S :=
-    tensorHs.ext (funext (fun i => rfl))
-  set Nspec : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ with hNspec_def
-  have hNspec_nn : 0 ≤ Nspec := norm_nonneg _
-  
-  have hlap_le : ∀ i ∈ Finset.range (k + 1),
-      tensorL2Norm (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun ≤
-        Nspec := by
-    intro i hi
-    have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
-    have heq : tensorL2Norm (I := I) (M := M) g₀ 0 2
-          (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun =
-        ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S)‖ :=
-      (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
-        (I := I) (M := M) g₀ (rawTensorConnLapIter (I := I) g₀ 0 2 i S)).trans
-        (SmoothCcTensor.norm_toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S)).symm
-    rw [heq]
-    have h1 : ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S)‖ ≤
-        ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i : ℕ) : ℝ) S‖ :=
-      rawConnLapIter_l2_le_ccSpectralEmbed_even (I := I) (M := M) g₀ i S
-    have h2 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i : ℕ) : ℝ) S‖ ≤ Nspec := by
-      rw [hNspec_def, ← hembed_eq]
-      refine ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ ?_ S
-      have : (2 * i : ℕ) ≤ (2 * k : ℕ) := by omega
-      exact_mod_cast this
-    exact le_trans h1 h2
-  
-  have hlapsum : ∑ i ∈ Finset.range (k + 1),
-      tensorL2Norm (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun ≤
-        ((k + 1 : ℕ) : ℝ) * Nspec := by
-    calc ∑ i ∈ Finset.range (k + 1),
-          tensorL2Norm (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun
-        ≤ ∑ _i ∈ Finset.range (k + 1), Nspec := Finset.sum_le_sum hlap_le
-      _ = ((k + 1 : ℕ) : ℝ) * Nspec := by
-          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
-  
-  have hjet_le : ∀ j ∈ Finset.range (2 * k + 1),
-      ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤ Cg * (((k + 1 : ℕ) : ℝ) * Nspec) := by
-    intro j hj
-    have hj2k : j ≤ 2 * k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
-    have hgj := hCg j hj2k S
-    have heqj : tensorL2Norm (I := I) (M := M) g₀ 0 (2 + j)
-          (iteratedCovGrad (I := I) g₀ 0 2 j S).toFun =
-        ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ :=
-      (SmoothCcTensor.norm_def (iteratedCovGrad (I := I) g₀ 0 2 j S)).symm
-    rw [heqj] at hgj
-    exact le_trans hgj (mul_le_mul_of_nonneg_left hlapsum hCg_nn)
-  calc ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖
-      ≤ ∑ _j ∈ Finset.range (2 * k + 1), Cg * (((k + 1 : ℕ) : ℝ) * Nspec) :=
-        Finset.sum_le_sum hjet_le
-    _ = ((2 * k + 1 : ℕ) : ℝ) * (Cg * (((k + 1 : ℕ) : ℝ) * Nspec)) := by
-        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
-    _ = ((2 * k + 1 : ℕ) : ℝ) * (Cg * (k + 1)) * Nspec := by push_cast; ring
-
 private theorem tensorL2Inner_eq_tsum_tensorL2Coeff_cross
     (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 0 2) :
@@ -544,11 +481,11 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_odd
           C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k + 1 : ℕ) : ℝ) S‖ := by
   classical
   obtain ⟨Clow, hClow_nn, hClow⟩ :=
-    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ k
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ (2 * k)
   obtain ⟨Cgard, hCgard_nn, hCgard⟩ :=
     exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter (I := I) (M := M) g₀ 3 k
   obtain ⟨Ceven, hCeven_nn, hCeven⟩ :=
-    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ k
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ (2 * k)
   have hcommfam : ∀ i : ℕ, ∃ C : ℝ, 0 ≤ C ∧
       ∀ S : SmoothCcTensor g₀ 0 2,
         ‖rawTensorConnLapIter (I := I) g₀ 0 (2 + 1) i (covGrad (I := I) (M := M) g₀ 0 2 S) -
@@ -714,7 +651,7 @@ theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general
   classical
   rcases Nat.even_or_odd n with ⟨k, hk⟩ | ⟨k, hk⟩
   · obtain ⟨C, hC_nn, hC⟩ :=
-      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ k
+      exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ (2 * k)
     refine ⟨C, hC_nn, fun S => ?_⟩
     have hn2k : n = 2 * k := by omega
     subst hn2k
