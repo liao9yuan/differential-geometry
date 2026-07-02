@@ -1764,6 +1764,36 @@ theorem exists_pointwiseTensorCurvRS_homField_jetDecomposition
   rw [sub_add_eq_sub_sub, sub_right_comm, hhead S]
   abel
 
+set_option backward.isDefEq.respectTransparency false in
+
+theorem exists_secondCovGrad_swap_ricciDefect_homField (g : SmoothRiemannianMetric I M)
+    (r t : ℕ) :
+    ∃ (F : HomTensorRSField (E := E) (M := M) r (t + 2) (t + 2) I)
+      (R : HomTensorRSField (E := E) (M := M) r t (t + 2) I),
+      (∀ (x : M) (T : TensorRSSpace r (t + 2) I x) (D : Tensor0SSpace r I x)
+        (a b : TangentSpace I x) (m : Fin t → TangentSpace I x),
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
+              (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from F x) T) D)
+            (Fin.cons a (Fin.cons b m)) =
+          Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from T) D)
+            (Fin.cons b (Fin.cons a m))) ∧
+      ∀ W : SmoothCcTensor g r t,
+        iteratedCovGrad g r t 2 W =
+          appFullSec (I := I) (M := M) g r (t + 2) (t + 2) F (iteratedCovGrad g r t 2 W) +
+            appFullSec (I := I) (M := M) g r t (t + 2) R W := by
+  classical
+  obtain ⟨R, hR⟩ := exists_ricciDefect_homField (I := I) (M := M) g r t
+  refine ⟨swapTwoSec (I := I) (M := M) (E := E) r t, R, ?_, fun W => ?_⟩
+  · intro x T D a b m
+    rw [show (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from
+        swapTwoSec (I := I) (M := M) (E := E) r t x) = swapTwoFib (I := I) (M := M) r t x from
+      swapTwoSec_apply (I := I) (M := M) (E := E) r t x]
+    exact swapTwoFib_eval (I := I) (M := M) r t x T a b D m
+  · have h := hR W
+    exact sub_eq_iff_eq_add'.mp h
+
 end Connection
 end Integral
 end DifferentialGeometry
