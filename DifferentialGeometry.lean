@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 import DifferentialGeometry.Analysis.Calculus.ContDiffOnTsum
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLine
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam

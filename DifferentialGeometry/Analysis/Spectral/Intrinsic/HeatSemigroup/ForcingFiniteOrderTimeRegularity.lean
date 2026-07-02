@@ -2777,6 +2777,1130 @@ private theorem smoothCcTensorPath_eigenPairing_timeJet_uniform_bound
   rw [Real.norm_eq_abs] at h1
   linarith [h1, h2, h3, h4]
 
+section FiniteOrderAnisotropicReconstruction
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth
+  tensorChartComponentRaw tensorChartComponentProjection tensorChartBasisElement
+  toEuclidean_extChartAt_mem_chartTargetEuclid)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
+
+private lemma iteratedFDerivWithin_isOpen_eq_of_isOpen
+    {O₁ O₂ : Set E} (h₁ : IsOpen O₁) (h₂ : IsOpen O₂) (n : ℕ) (f : E → ℝ) {z : E}
+    (hz₁ : z ∈ O₁) (hz₂ : z ∈ O₂) :
+    iteratedFDerivWithin ℝ n f O₁ z = iteratedFDerivWithin ℝ n f O₂ z := by
+  rw [iteratedFDerivWithin_of_isOpen n h₁ hz₁, iteratedFDerivWithin_of_isOpen n h₂ hz₂]
+
+set_option maxHeartbeats 1600000 in
+private theorem pdIter_rawCompOnE_eigenSeries_tsum_eq_local
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
+    (d : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
+    (hd : ∀ i, tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+        (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) S) i = d i)
+    (hmass : ∀ σ : ℝ, 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
+        ∀ i, tensorSobolevWeight (I := I) (M := M) i σ * (d i) ^ 2 ≤ B i)
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (L : List E) {y : E}
+    (hy : y ∈ interior (extChartAt I α).target) :
+    DifferentialGeometry.Analysis.pdIter L
+        (rawCompOnE (I := I) (M := M) g S α Jdx) y
+      = ∑' i, d i * DifferentialGeometry.Analysis.pdIter L
+          (rawCompOnE (I := I) (M := M) g
+            (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) y := by
+  classical
+  set Ω : Set E := interior (extChartAt I α).target with hΩ_def
+  have hΩ_open : IsOpen Ω := isOpen_interior
+  have hzero : ∀ z ∈ Ω, rawCompOnE (I := I) (M := M) g S α Jdx z
+      = ∑' i, d i * rawCompOnE (I := I) (M := M) g
+          (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx z := by
+    intro z hz
+    have hz_src : (extChartAt I α).symm z ∈ (chartAt H α).source := by
+      have hzt : z ∈ (extChartAt I α).target := interior_subset hz
+      have := (extChartAt I α).map_target hzt
+      rwa [extChartAt_source (I := I)] at this
+    exact smoothCcTensor_rawChartComponent_eigenSeries_tsum_eq_local (I := I) (M := M)
+      g S d hd hmass α Jdx hz_src
+  obtain ⟨r, hr_pos, hball⟩ := Metric.isOpen_iff.mp hΩ_open y hy
+  set Bo : Set E := Metric.ball y (r / 2) with hBo_def
+  set Bc : Set E := Metric.closedBall y (r / 2) with hBc_def
+  have hBo_open : IsOpen Bo := Metric.isOpen_ball
+  have hBoBc : Bo ⊆ Bc := Metric.ball_subset_closedBall
+  have hBc_sub : Bc ⊆ Ω := by
+    intro z hz
+    rw [hBc_def, Metric.mem_closedBall] at hz
+    exact hball (by rw [Metric.mem_ball]; linarith)
+  have hBo_sub : Bo ⊆ Ω := hBoBc.trans hBc_sub
+  have hyBo : y ∈ Bo := Metric.mem_ball_self (by positivity)
+  set ψ : TensorEigenIdx (I := I) (M := M) g 0 2 → E → ℝ :=
+    fun i => rawCompOnE (I := I) (M := M) g
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx with hψ_def
+  have hψ_smooth : ∀ i, ContDiffOn ℝ ∞ (ψ i) Ω := fun i =>
+    rawCompOnE_contDiffOn (I := I) (M := M) g
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx
+  obtain ⟨C, p, hC_nn, hC⟩ := exists_pdIter_rawCompOnE_eigen_jet_le_lambda_pow
+    (I := I) (M := M) g α Jdx L.length ([] : List E)
+    (isCompact_closedBall y (r / 2)) hBc_sub
+  have hbase_pos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+      (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := fun i => by
+    have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
+  set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
+  have hsW_gt : ((weylSobolevExp (E := E) : ℕ) : ℝ) < (sW : ℝ) := by
+    rw [hsW_def]; push_cast; linarith
+  obtain ⟨Bd, hBd_sum, hBd_le⟩ := hmass (2 * ((p : ℝ) + (sW : ℝ))) (by positivity)
+  have hBd_nn : ∀ i, 0 ≤ Bd i := by
+    intro i
+    have h := hBd_le i
+    have hw := tensorSobolevWeight_pos (I := I) (M := M) i (2 * ((p : ℝ) + (sW : ℝ)))
+    nlinarith [sq_nonneg (d i), hw.le]
+  have hd_abs : ∀ i, |d i| ≤ Real.sqrt (Bd i) *
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((p : ℝ) + (sW : ℝ))) :=
+    fun i => abs_le_sqrt_of_weight_sq_le (I := I) (M := M) g i ((p : ℝ) + (sW : ℝ))
+      (hBd_le i)
+  set vmode : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun i => C * (Real.sqrt (Bd i) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))
+    with hvmode_def
+  have hvmode_sum : Summable vmode :=
+    (summable_sqrt_mul_weight_neg (I := I) (M := M) g Bd hBd_sum hBd_nn hsW_gt).mul_left C
+  have hcollapse : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((p : ℝ) + (sW : ℝ))) *
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p =
+      tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) := by
+    intro i
+    unfold tensorSobolevWeight
+    rw [← Real.rpow_natCast (1 + TensorEigenIdx.lambda (I := I) (M := M) i) p,
+      ← Real.rpow_add (hbase_pos i)]
+    congr 1; ring
+  have hmode_le : ∀ i, |d i| * (C *
+      (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p) ≤ vmode i := by
+    intro i
+    have hpow_nn : (0 : ℝ) ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p :=
+      pow_nonneg (hbase_pos i).le p
+    calc |d i| * (C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p)
+        ≤ (Real.sqrt (Bd i) *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((p : ℝ) + (sW : ℝ)))) *
+          (C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p) := by
+          refine mul_le_mul_of_nonneg_right (hd_abs i) (by positivity)
+      _ = C * (Real.sqrt (Bd i) *
+            ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-((p : ℝ) + (sW : ℝ))) *
+              (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p)) := by ring
+      _ = vmode i := by rw [hcollapse i, hvmode_def]
+  set fm : TensorEigenIdx (I := I) (M := M) g 0 2 → E → ℝ :=
+    fun i z => d i * ψ i z with hfm_def
+  have hfm_cd : ∀ i, ContDiffOn ℝ ((L.length : ℕ∞) : ℕ∞) (fm i) Bo := by
+    intro i
+    exact contDiffOn_const.mul (((hψ_smooth i).mono hBo_sub).of_le
+      (by exact_mod_cast le_top))
+  have hfm_bound : ∀ (n : ℕ) (i : TensorEigenIdx (I := I) (M := M) g 0 2) (z : E),
+      z ∈ Bo → (n : ℕ∞) ≤ (L.length : ℕ∞) →
+      ‖iteratedFDerivWithin ℝ n (fm i) Bo z‖ ≤ vmode i := by
+    intro n i z hz hn
+    have hn' : n ≤ L.length := by exact_mod_cast hn
+    set Ad : ℝ →L[ℝ] ℝ := (d i) • ContinuousLinearMap.id ℝ ℝ with hAd_def
+    have hAd_norm : ‖Ad‖ ≤ |d i| := by
+      refine ContinuousLinearMap.opNorm_le_bound _ (abs_nonneg (d i)) (fun x => ?_)
+      rw [hAd_def]
+      simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.id_apply,
+        smul_eq_mul, Real.norm_eq_abs, abs_mul, le_refl]
+    have hcomp : Set.EqOn (fm i) (Ad ∘ (ψ i)) Bo := by
+      intro z' _
+      simp only [hfm_def, hAd_def, Function.comp_apply,
+        ContinuousLinearMap.smul_apply, ContinuousLinearMap.id_apply, smul_eq_mul]
+    have hψi_cw : ContDiffWithinAt ℝ ((n : ℕ) : ℕ∞) (ψ i) Bo z :=
+      (((hψ_smooth i).mono hBo_sub) z hz).of_le (by exact_mod_cast le_top)
+    have h1 : ‖iteratedFDerivWithin ℝ n (fm i) Bo z‖
+        ≤ ‖Ad‖ * ‖iteratedFDerivWithin ℝ n (ψ i) Bo z‖ := by
+      rw [iteratedFDerivWithin_congr hcomp hz]
+      exact Ad.norm_iteratedFDerivWithin_comp_left hψi_cw hBo_open.uniqueDiffOn hz
+        (le_refl _)
+    have h2 : ‖iteratedFDerivWithin ℝ n (ψ i) Bo z‖
+        = ‖iteratedFDerivWithin ℝ n (ψ i) Ω z‖ := by
+      rw [iteratedFDerivWithin_isOpen_eq_of_isOpen hBo_open hΩ_open n (ψ i) hz
+        (hBo_sub hz)]
+    have h3 := hC n hn' i z (hBoBc hz)
+    simp only [DifferentialGeometry.Analysis.pdIter_nil] at h3
+    refine le_trans h1 ?_
+    rw [h2]
+    calc ‖Ad‖ * ‖iteratedFDerivWithin ℝ n (ψ i) Ω z‖
+        ≤ |d i| * (C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p) :=
+          mul_le_mul hAd_norm h3 (norm_nonneg _) (abs_nonneg (d i))
+      _ ≤ vmode i := hmode_le i
+  have htsum_deriv := DifferentialGeometry.Analysis.iteratedFDerivWithin_tsum
+    (f := fm) (v := fun _ i => vmode i) (s := Bo) (N := (L.length : ℕ∞))
+    hBo_open.uniqueDiffOn (convex_ball y (r / 2)) hfm_cd
+    (fun n _ => hvmode_sum) hfm_bound hyBo (le_refl _) hyBo
+  have hbridgeS := DifferentialGeometry.Analysis.pdIter_eq_iteratedFDerivWithin_apply
+    hΩ_open (rawCompOnE_contDiffOn (I := I) (M := M) g S α Jdx) L hy
+  have hswitchS : iteratedFDerivWithin ℝ L.length
+        (rawCompOnE (I := I) (M := M) g S α Jdx) Ω y
+      = iteratedFDerivWithin ℝ L.length
+        (rawCompOnE (I := I) (M := M) g S α Jdx) Bo y :=
+    iteratedFDerivWithin_isOpen_eq_of_isOpen hΩ_open hBo_open L.length _ hy hyBo
+  have hcongrS : iteratedFDerivWithin ℝ L.length
+        (rawCompOnE (I := I) (M := M) g S α Jdx) Bo y
+      = iteratedFDerivWithin ℝ L.length (fun z => ∑' i, fm i z) Bo y := by
+    refine iteratedFDerivWithin_congr (fun z hz => ?_) hyBo L.length
+    exact hzero z (hBo_sub hz)
+  have hsummable_fd : Summable (fun i => iteratedFDerivWithin ℝ L.length (fm i) Bo y) :=
+    Summable.of_norm_bounded hvmode_sum
+      (fun i => hfm_bound L.length i y hyBo (le_refl _))
+  have heval : (∑' i, iteratedFDerivWithin ℝ L.length (fm i) Bo y)
+        (DifferentialGeometry.Analysis.pdVec L)
+      = ∑' i, (iteratedFDerivWithin ℝ L.length (fm i) Bo y)
+          (DifferentialGeometry.Analysis.pdVec L) :=
+    (ContinuousMultilinearMap.hasSum_eval hsummable_fd.hasSum
+      (DifferentialGeometry.Analysis.pdVec L)).tsum_eq.symm
+  have hmode_eval : ∀ i, (iteratedFDerivWithin ℝ L.length (fm i) Bo y)
+        (DifferentialGeometry.Analysis.pdVec L)
+      = d i * DifferentialGeometry.Analysis.pdIter L (ψ i) y := by
+    intro i
+    have hsmul : fm i = (d i) • (ψ i) := by
+      funext z'
+      simp only [hfm_def, Pi.smul_apply, smul_eq_mul]
+    have hψi_cw : ContDiffWithinAt ℝ ((L.length : ℕ) : ℕ∞) (ψ i) Bo y :=
+      (((hψ_smooth i).mono hBo_sub) y hyBo).of_le (by exact_mod_cast le_top)
+    have h1 : iteratedFDerivWithin ℝ L.length (fm i) Bo y
+        = (d i) • iteratedFDerivWithin ℝ L.length (ψ i) Bo y := by
+      rw [hsmul]
+      exact iteratedFDerivWithin_const_smul_apply hψi_cw hBo_open.uniqueDiffOn hyBo
+    have hbridge_i := DifferentialGeometry.Analysis.pdIter_eq_iteratedFDerivWithin_apply
+      hΩ_open (hψ_smooth i) L hy
+    have hswitch_i : iteratedFDerivWithin ℝ L.length (ψ i) Ω y
+        = iteratedFDerivWithin ℝ L.length (ψ i) Bo y :=
+      iteratedFDerivWithin_isOpen_eq_of_isOpen hΩ_open hBo_open L.length (ψ i) hy hyBo
+    rw [h1]
+    have : ((d i) • iteratedFDerivWithin ℝ L.length (ψ i) Bo y)
+        (DifferentialGeometry.Analysis.pdVec L)
+        = d i * ((iteratedFDerivWithin ℝ L.length (ψ i) Bo y)
+            (DifferentialGeometry.Analysis.pdVec L)) := rfl
+    rw [this, ← hswitch_i, ← hbridge_i]
+  calc DifferentialGeometry.Analysis.pdIter L
+        (rawCompOnE (I := I) (M := M) g S α Jdx) y
+      = (iteratedFDerivWithin ℝ L.length
+          (rawCompOnE (I := I) (M := M) g S α Jdx) Ω y)
+          (DifferentialGeometry.Analysis.pdVec L) := hbridgeS
+    _ = (iteratedFDerivWithin ℝ L.length (fun z => ∑' i, fm i z) Bo y)
+          (DifferentialGeometry.Analysis.pdVec L) := by rw [hswitchS, hcongrS]
+    _ = (∑' i, iteratedFDerivWithin ℝ L.length (fm i) Bo y)
+          (DifferentialGeometry.Analysis.pdVec L) := by rw [htsum_deriv]
+    _ = ∑' i, (iteratedFDerivWithin ℝ L.length (fm i) Bo y)
+          (DifferentialGeometry.Analysis.pdVec L) := heval
+    _ = ∑' i, d i * DifferentialGeometry.Analysis.pdIter L (ψ i) y := by
+        refine tsum_congr (fun i => hmode_eval i)
+
+set_option maxHeartbeats 1600000 in
+private theorem spectralPathFO_rawCompOnE_pdIter_euclidean_contDiffOn_local
+    (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
+    (T_rep : ℝ → SmoothCcTensor g 0 2)
+    (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (kk : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+            (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ kk → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (L : List E) :
+    ContDiffOn ℝ (kk : ℕ)
+      (fun q : ℝ × E => DifferentialGeometry.Analysis.pdIter L
+        (rawCompOnE (I := I) (M := M) g (T_rep q.1) α Jdx) q.2)
+      (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
+  classical
+  set Ω : Set E := interior (extChartAt I α).target with hΩ_def
+  have hΩ_open : IsOpen Ω := isOpen_interior
+  set ψ : TensorEigenIdx (I := I) (M := M) g 0 2 → E → ℝ :=
+    fun i => DifferentialGeometry.Analysis.pdIter L
+      (rawCompOnE (I := I) (M := M) g
+        (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) with hψ_def
+  have hψ_smooth : ∀ i, ContDiffOn ℝ ∞ (ψ i) Ω := fun i =>
+    pdIter_rawCompOnE_contDiffOn (I := I) (M := M) g
+      (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx L
+  refine contDiffOn_of_locally_contDiffOn ?_
+  rintro ⟨t₀, y₀⟩ hmem
+  obtain ⟨_ht₀, hy₀⟩ := hmem
+  obtain ⟨r, hr_pos, hball_sub⟩ := Metric.isOpen_iff.mp hΩ_open y₀ hy₀
+  refine ⟨Set.univ ×ˢ Metric.ball y₀ (r / 2), isOpen_univ.prod Metric.isOpen_ball,
+    ⟨Set.mem_univ t₀, Metric.mem_ball_self (by positivity)⟩, ?_⟩
+  set B : Set E := Metric.ball y₀ (r / 2) with hB_def
+  set Bc : Set E := Metric.closedBall y₀ (r / 2) with hBc_def
+  have hball_le : B ⊆ Bc := Metric.ball_subset_closedBall
+  have hBc_sub : Bc ⊆ Ω := by
+    intro z hz
+    rw [hBc_def, Metric.mem_closedBall] at hz
+    exact hball_sub (by rw [Metric.mem_ball]; linarith)
+  have hB_sub : B ⊆ Ω := hball_le.trans hBc_sub
+  have hBc_compact : IsCompact Bc := isCompact_closedBall y₀ (r / 2)
+  have hslab_inter :
+      (Set.Icc (0 : ℝ) T ×ˢ Ω) ∩ (Set.univ ×ˢ B) = Set.Icc (0 : ℝ) T ×ˢ B := by
+    rw [Set.prod_inter_prod, Set.inter_univ, Set.inter_eq_right.mpr hB_sub]
+  rw [hslab_inter]
+  have hBc_int_ne : (interior Bc).Nonempty := by
+    rw [hBc_def, interior_closedBall y₀ (by positivity : (r / 2) ≠ 0)]
+    exact ⟨y₀, Metric.mem_ball_self (by positivity)⟩
+  have hconv : Convex ℝ (Set.Icc (0 : ℝ) T ×ˢ Bc) :=
+    (convex_Icc (0 : ℝ) T).prod (convex_closedBall y₀ (r / 2))
+  have huniqBc : UniqueDiffOn ℝ Bc :=
+    uniqueDiffOn_convex (convex_closedBall y₀ (r / 2)) hBc_int_ne
+  have huniq : UniqueDiffOn ℝ (Set.Icc (0 : ℝ) T ×ˢ Bc) :=
+    (uniqueDiffOn_Icc hT).prod huniqBc
+  obtain ⟨Csp, pSp, hCsp_nn, hCsp⟩ := exists_pdIter_rawCompOnE_eigen_jet_le_lambda_pow
+    (I := I) (M := M) g α Jdx kk L hBc_compact hBc_sub
+  have hmajorant := eigenTimeSpatialProductMode_iteratedFDerivWithin_summable_majorant_ofOrder
+    (I := I) (M := M) g hT kk φ hφ_smooth hmodemass ψ hΩ_open hψ_smooth
+    huniqBc hBc_sub Csp pSp hCsp_nn
+    (fun n hn i y hy => hCsp n hn i y hy)
+  set v : ℕ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
+    fun n => if hn : n ≤ kk then Classical.choose (hmajorant n hn) else 0 with hv_def
+  have hv_spec : ∀ (n : ℕ) (hn : n ≤ kk), Summable (v n) ∧
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2) (q : ℝ × E),
+        q ∈ Set.Icc (0 : ℝ) T ×ˢ Bc →
+        ‖iteratedFDerivWithin ℝ n (fun p : ℝ × E => φ i p.1 * ψ i p.2)
+            (Set.Icc (0 : ℝ) T ×ˢ Bc) q‖ ≤ v n i := by
+    intro n hn
+    have hspec := Classical.choose_spec (hmajorant n hn)
+    have hveq : v n = Classical.choose (hmajorant n hn) := by
+      rw [hv_def]; exact dif_pos hn
+    rw [hveq]
+    exact hspec
+  have htsum_Bc : ContDiffOn ℝ (kk : ℕ)
+      (fun q : ℝ × E => ∑' i, φ i q.1 * ψ i q.2)
+      (Set.Icc (0 : ℝ) T ×ˢ Bc) := by
+    have hmode_cd : ∀ i, ContDiffOn ℝ ((kk : ℕ) : ℕ∞)
+        (fun q : ℝ × E => φ i q.1 * ψ i q.2) (Set.Icc (0 : ℝ) T ×ˢ Bc) := by
+      intro i
+      have hfst : ContDiffOn ℝ (kk : ℕ) (fun q : ℝ × E => φ i q.1)
+          (Set.Icc (0 : ℝ) T ×ˢ Bc) :=
+        ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
+      have hsnd : ContDiffOn ℝ (kk : ℕ) (fun q : ℝ × E => ψ i q.2)
+          (Set.Icc (0 : ℝ) T ×ˢ Bc) := by
+        refine (((hψ_smooth i).mono hBc_sub).of_le
+          (by exact_mod_cast le_top)).comp contDiffOn_snd ?_
+        intro q hq; exact hq.2
+      exact hfst.mul hsnd
+    have h := DifferentialGeometry.Analysis.contDiffOn_tsum
+      (f := fun i (q : ℝ × E) => φ i q.1 * ψ i q.2) (v := v)
+      (s := Set.Icc (0 : ℝ) T ×ˢ Bc) (N := (kk : ℕ∞))
+      huniq hconv hmode_cd
+      (fun n hn => (hv_spec n (by exact_mod_cast hn)).1)
+      (fun n i q hq hn => (hv_spec n (by exact_mod_cast hn)).2 i q hq)
+      (x₀ := ((0 : ℝ), y₀))
+      ⟨Set.left_mem_Icc.mpr hT.le, Metric.mem_closedBall_self (by positivity)⟩
+    exact h.of_le (by exact_mod_cast le_rfl)
+  have htsum : ContDiffOn ℝ (kk : ℕ)
+      (fun q : ℝ × E => ∑' i, φ i q.1 * ψ i q.2)
+      (Set.Icc (0 : ℝ) T ×ˢ B) :=
+    htsum_Bc.mono (Set.prod_mono (le_refl _) hball_le)
+  refine htsum.congr ?_
+  rintro ⟨t, y⟩ ⟨ht, hyB⟩
+  have hyΩ : y ∈ Ω := hB_sub hyB
+  have hid := pdIter_rawCompOnE_eigenSeries_tsum_eq_local (I := I) (M := M)
+    g (T_rep t) (fun i => φ i t) (hcoeff t ht)
+    (fun σ hσ => by
+      obtain ⟨B', hB'_sum, hB'_le⟩ := hmodemass 0 (Nat.zero_le kk) σ hσ
+      refine ⟨B', hB'_sum, fun i => ?_⟩
+      have h := hB'_le i t ht
+      rwa [iteratedDeriv_zero] at h)
+    α Jdx L hyΩ
+  exact hid
+
+private theorem anisoOn_rawCompOnE_spectralPath
+    (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (kk : ℕ)
+    (T_rep : ℝ → SmoothCcTensor g 0 2)
+    (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (kk : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+            (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ kk → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn kk T (interior (extChartAt I α).target)
+      (fun t => rawCompOnE (I := I) (M := M) g (T_rep t) α Jdx) :=
+  ⟨fun t _ => rawCompOnE_contDiffOn (I := I) (M := M) g (T_rep t) α Jdx,
+   fun L => spectralPathFO_rawCompOnE_pdIter_euclidean_contDiffOn_local (I := I) (M := M)
+     g hT kk T_rep φ hφ_smooth hcoeff hmodemass α Jdx L⟩
+
+section RealizedChartAtoms
+
+variable {g₀ g_bg : SmoothRiemannianMetric I M} {T : ℝ} {k : ℕ}
+  {F : ℝ → SmoothCcTensor g₀ 0 2} {δ : ℝ}
+  {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ}
+
+private theorem anisoOn_chartGramOnE_realizePath
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (a b : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => Integral.DivergenceTheorem.chartGramOnE (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α a b y) := by
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hbase := DifferentialGeometry.Analysis.anisoOn_timeIndep (k := k) (T := T) hV
+    (chartGramOnE_contDiffOn_int (I := I) g₀ α a b)
+  have hraw1 := anisoOn_rawCompOnE_spectralPath (I := I) (M := M) g₀ hT k F φ
+    hφ_smooth hcoeff hmodemass α ![a, b]
+  have hraw2 := anisoOn_rawCompOnE_spectralPath (I := I) (M := M) g₀ hT k F φ
+    hφ_smooth hcoeff hmodemass α ![b, a]
+  have hsum := hbase.add hV ((hraw1.add hV hraw2).smul hV (1 / 2 : ℝ))
+  refine hsum.congr hV _ (fun t ht y hy => ?_)
+  exact (chartGramOnE_realize_eq_add_half_rawCompOnE (I := I) (M := M) g₀ (F t)
+    hδ_lt (hδ t) α a b hy).symm
+
+private theorem anisoOn_realizeGram_det
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => (Integral.Measure.chartGramMatrix (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+        ((extChartAt I α).symm y)).det) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hterm : ∀ σp : Equiv.Perm (Fin (Module.finrank ℝ E)),
+      DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+        (fun t y => (((Equiv.Perm.sign σp : ℤ) : ℝ)) *
+          ∏ i : Fin (Module.finrank ℝ E),
+            Integral.DivergenceTheorem.chartGramOnE (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α (σp i) i y) := by
+    intro σp
+    refine DifferentialGeometry.Analysis.AnisoOn.smul hV ?_ _
+    exact DifferentialGeometry.Analysis.anisoOn_finsetProd hV Finset.univ
+      (fun i _ => anisoOn_chartGramOnE_realizePath hT hδ_lt hδ hφ_smooth hcoeff
+        hmodemass α (σp i) i)
+  have hsum := DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+    (fun σp _ => hterm σp)
+  refine hsum.congr hV _ (fun t ht y hy => ?_)
+  beta_reduce
+  rw [Matrix.det_apply']
+  rfl
+
+private theorem anisoOn_realizeGram_adjugate
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (a b : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => (Integral.Measure.chartGramMatrix (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+        ((extChartAt I α).symm y)).adjugate a b) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hentry : ∀ (r c : Fin (Module.finrank ℝ E)),
+      DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+        (fun t y => ((Integral.Measure.chartGramMatrix (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+            ((extChartAt I α).symm y)).updateRow b (Pi.single a 1)) r c) := by
+    intro r c
+    by_cases hr : r = b
+    · have hconst := DifferentialGeometry.Analysis.anisoOn_const (k := k) (T := T)
+        (V := interior (extChartAt I α).target)
+        (@Pi.single (Fin (Module.finrank ℝ E)) (fun _ => ℝ) _ _ a 1 c)
+      refine hconst.congr hV _ (fun t ht y hy => ?_)
+      beta_reduce
+      rw [Matrix.updateRow_apply, if_pos hr]
+    · refine (anisoOn_chartGramOnE_realizePath hT hδ_lt hδ hφ_smooth hcoeff
+        hmodemass α r c).congr hV _ (fun t ht y hy => ?_)
+      beta_reduce
+      rw [Matrix.updateRow_apply, if_neg hr]
+      rfl
+  have hterm : ∀ σp : Equiv.Perm (Fin (Module.finrank ℝ E)),
+      DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+        (fun t y => (((Equiv.Perm.sign σp : ℤ) : ℝ)) *
+          ∏ i : Fin (Module.finrank ℝ E),
+            ((Integral.Measure.chartGramMatrix (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+              ((extChartAt I α).symm y)).updateRow b (Pi.single a 1)) (σp i) i) := by
+    intro σp
+    refine DifferentialGeometry.Analysis.AnisoOn.smul hV ?_ _
+    exact DifferentialGeometry.Analysis.anisoOn_finsetProd hV Finset.univ
+      (fun i _ => hentry (σp i) i)
+  have hsum := DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+    (fun σp _ => hterm σp)
+  refine hsum.congr hV _ (fun t ht y hy => ?_)
+  beta_reduce
+  rw [Matrix.adjugate_apply, Matrix.det_apply']
+
+private theorem anisoOn_realizeGram_inv
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (a b : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => Integral.DivergenceTheorem.chartInvGramMatrix (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+        ((extChartAt I α).symm y) a b) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hdet := anisoOn_realizeGram_det hT hδ_lt hδ hφ_smooth hcoeff hmodemass α
+  have hdet_ne : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ y ∈ interior (extChartAt I α).target,
+      (Integral.Measure.chartGramMatrix (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+        ((extChartAt I α).symm y)).det ≠ 0 := by
+    intro t _ y hy
+    have hy_t : y ∈ (extChartAt I α).target := interior_subset hy
+    have hsrc : (extChartAt I α).symm y ∈ (chartAt H α).source := by
+      have := (extChartAt I α).map_target hy_t
+      rwa [extChartAt_source (I := I)] at this
+    have hbase : (extChartAt I α).symm y ∈
+        (trivializationAt E (TangentSpace I) α).baseSet := by
+      rw [Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I)]
+      exact hsrc
+    exact ne_of_gt (chartGramMatrix_det_pos (I := I)
+      (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α hbase)
+  have hinv := hdet.inv hV hdet_ne
+  have hadj := anisoOn_realizeGram_adjugate hT hδ_lt hδ hφ_smooth hcoeff hmodemass α a b
+  refine (hinv.mul hV hadj).congr hV _ (fun t ht y hy => ?_)
+  rw [Integral.DivergenceTheorem.chartInvGramMatrix, Matrix.inv_def, Matrix.smul_apply, smul_eq_mul,
+    Ring.inverse_eq_inv]
+
+private theorem anisoOn_realize_chartChristoffel
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (i j c : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => Integral.DivergenceTheorem.chartChristoffel (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j c y) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hgram := fun a b => anisoOn_chartGramOnE_realizePath hT hδ_lt hδ hφ_smooth
+    hcoeff hmodemass α a b
+  have hinv := fun a b => anisoOn_realizeGram_inv hT hδ_lt hδ hφ_smooth hcoeff
+    hmodemass α a b
+  have hterm : ∀ l : Fin (Module.finrank ℝ E),
+      DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+        (fun t y => Integral.DivergenceTheorem.chartInvGramMatrix (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+            ((extChartAt I α).symm y) c l *
+          (DifferentialGeometry.Analysis.pdDir (chartModelBasis E i)
+              (Integral.DivergenceTheorem.chartGramOnE (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α l j) y +
+            DifferentialGeometry.Analysis.pdDir (chartModelBasis E j)
+              (Integral.DivergenceTheorem.chartGramOnE (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α l i) y -
+            DifferentialGeometry.Analysis.pdDir (chartModelBasis E l)
+              (Integral.DivergenceTheorem.chartGramOnE (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j) y)) := by
+    intro l
+    refine (hinv c l).mul hV ?_
+    exact (((hgram l j).pdShift hV (chartModelBasis E i)).add hV
+      ((hgram l i).pdShift hV (chartModelBasis E j))).sub hV
+      ((hgram i j).pdShift hV (chartModelBasis E l))
+  have hsum := (DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+    (fun l _ => hterm l)).smul hV (1 / 2 : ℝ)
+  refine hsum.congr hV _ (fun t ht y hy => ?_)
+  rw [Integral.DivergenceTheorem.chartChristoffel_def]
+  rfl
+
+private theorem anisoOn_realize_chartDeTurckVFComp
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (c : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => chartDeTurckVFComp (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α c y) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hterm : ∀ a b : Fin (Module.finrank ℝ E),
+      DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+        (fun t y => Integral.DivergenceTheorem.chartInvGramMatrix (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α
+            ((extChartAt I α).symm y) a b *
+          (Integral.DivergenceTheorem.chartChristoffel (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α a b c y -
+            Integral.DivergenceTheorem.chartChristoffel (I := I) g_bg α a b c y)) := by
+    intro a b
+    refine (anisoOn_realizeGram_inv hT hδ_lt hδ hφ_smooth hcoeff hmodemass α a b).mul hV ?_
+    refine (anisoOn_realize_chartChristoffel hT hδ_lt hδ hφ_smooth hcoeff hmodemass
+      α a b c).sub hV ?_
+    exact DifferentialGeometry.Analysis.anisoOn_timeIndep hV
+      (Integral.DivergenceTheorem.chartChristoffel_contDiffOn_interior (I := I) g_bg α a b c)
+  have hsum := DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+    (fun a (_ : a ∈ Finset.univ) =>
+      DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+        (fun b (_ : b ∈ Finset.univ) => hterm a b))
+  refine hsum.congr hV _ (fun t ht y hy => ?_)
+  rw [chartDeTurckVFComp_def]
+  rfl
+
+private theorem anisoOn_realize_chartRicci
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (i c : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => Integral.DivergenceTheorem.chartRicciTensor (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i c y) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hchr := fun a b d => anisoOn_realize_chartChristoffel hT hδ_lt hδ hφ_smooth
+    hcoeff hmodemass α a b d
+  have hriem : ∀ j : Fin (Module.finrank ℝ E),
+      DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+        (fun t y => Integral.DivergenceTheorem.chartRiemannTensor (I := I)
+          (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j c j y) := by
+    intro j
+    have hterm : DifferentialGeometry.Analysis.AnisoOn k T
+        (interior (extChartAt I α).target)
+        (fun t y =>
+          DifferentialGeometry.Analysis.pdDir (chartModelBasis E j)
+            (Integral.DivergenceTheorem.chartChristoffel (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i c j) y -
+          DifferentialGeometry.Analysis.pdDir (chartModelBasis E c)
+            (Integral.DivergenceTheorem.chartChristoffel (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j j) y +
+          (∑ m : Fin (Module.finrank ℝ E),
+            (Integral.DivergenceTheorem.chartChristoffel (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α j m j y *
+              Integral.DivergenceTheorem.chartChristoffel (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i c m y -
+              Integral.DivergenceTheorem.chartChristoffel (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α c m j y *
+              Integral.DivergenceTheorem.chartChristoffel (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j m y))) := by
+      refine (((hchr i c j).pdShift hV (chartModelBasis E j)).sub hV
+        ((hchr i j j).pdShift hV (chartModelBasis E c))).add hV ?_
+      refine DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+        (fun m _ => ?_)
+      exact ((hchr j m j).mul hV (hchr i c m)).sub hV ((hchr c m j).mul hV (hchr i j m))
+    refine hterm.congr hV _ (fun t ht y hy => ?_)
+    rw [Integral.DivergenceTheorem.chartRiemannTensor_def]
+    rfl
+  have hsum := DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+    (fun j (_ : j ∈ Finset.univ) => hriem j)
+  refine hsum.congr hV _ (fun t ht y hy => ?_)
+  rw [Integral.DivergenceTheorem.chartRicciTensor_def]
+
+private theorem anisoOn_realize_chartLieDeTurckComp
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => chartLieDeTurckComp (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α i j y) := by
+  classical
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hgram := fun a b => anisoOn_chartGramOnE_realizePath hT hδ_lt hδ hφ_smooth
+    hcoeff hmodemass α a b
+  have hvf := fun c => anisoOn_realize_chartDeTurckVFComp (g_bg := g_bg) hT hδ_lt hδ
+    hφ_smooth hcoeff hmodemass α c
+  have h1 : DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => ∑ c : Fin (Module.finrank ℝ E),
+        chartDeTurckVFComp (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α c y *
+          DifferentialGeometry.Analysis.pdDir (chartModelBasis E c)
+            (Integral.DivergenceTheorem.chartGramOnE (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i j) y) :=
+    DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+      (fun c _ => (hvf c).mul hV ((hgram i j).pdShift hV (chartModelBasis E c)))
+  have h2 : DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => ∑ c : Fin (Module.finrank ℝ E),
+        Integral.DivergenceTheorem.chartGramOnE (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α c j y *
+          DifferentialGeometry.Analysis.pdDir (chartModelBasis E i)
+            (chartDeTurckVFComp (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α c) y) :=
+    DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+      (fun c _ => (hgram c j).mul hV ((hvf c).pdShift hV (chartModelBasis E i)))
+  have h3 : DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => ∑ c : Fin (Module.finrank ℝ E),
+        Integral.DivergenceTheorem.chartGramOnE (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) α i c y *
+          DifferentialGeometry.Analysis.pdDir (chartModelBasis E j)
+            (chartDeTurckVFComp (I := I)
+              (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α c) y) :=
+    DifferentialGeometry.Analysis.anisoOn_finsetSum hV Finset.univ
+      (fun c _ => (hgram i c).mul hV ((hvf c).pdShift hV (chartModelBasis E j)))
+  refine ((h1.add hV h2).add hV h3).congr hV _ (fun t ht y hy => ?_)
+  rw [chartLieDeTurckComp_def]
+  rfl
+
+private theorem anisoOn_realize_chartDeTurckRicciRHS
+    (hT : 0 < T) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    DifferentialGeometry.Analysis.AnisoOn k T (interior (extChartAt I α).target)
+      (fun t y => chartDeTurckRicciRHS (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α i j y) := by
+  have hV : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+  have hric := anisoOn_realize_chartRicci hT hδ_lt hδ hφ_smooth hcoeff hmodemass α i j
+  have hlie := anisoOn_realize_chartLieDeTurckComp (g_bg := g_bg) hT hδ_lt hδ hφ_smooth
+    hcoeff hmodemass α i j
+  refine ((hric.smul hV (-2 : ℝ)).add hV hlie).congr hV _ (fun t ht y hy => ?_)
+  rw [chartDeTurckRicciRHS_def]
+
+end RealizedChartAtoms
+
+section IterLaplacianInduction
+
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private lemma tensorChartComponentRaw_congr_toSection
+    {g₁ g₂ : SmoothRiemannianMetric I M}
+    (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
+    (h : ∀ x : M, S₁.toSection x = S₂.toSection x) (α : M)
+    (Idx : Fin 0 → Fin (Module.finrank ℝ E))
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (x : M) :
+    tensorChartComponentRaw (I := I) (M := M) g₁ 0 2 S₁ α Idx Jdx x =
+      tensorChartComponentRaw (I := I) (M := M) g₂ 0 2 S₂ α Idx Jdx x := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H)
+    (I := I) (M := M) 0 2
+  change tensorChartComponentProjection (E := E) 0 2 Idx Jdx
+      ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt
+        ℝ x (S₁.toSection x)) =
+    tensorChartComponentProjection (E := E) 0 2 Idx Jdx
+      ((trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+        (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).continuousLinearMapAt
+        ℝ x (S₂.toSection x))
+  rw [h x]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private lemma tensorChartComponentRaw_sub_eq
+    (g : SmoothRiemannianMetric I M) (S₁ S₂ : SmoothCcTensor g 0 2) (α : M)
+    (Idx : Fin 0 → Fin (Module.finrank ℝ E))
+    (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (x : M) :
+    tensorChartComponentRaw (I := I) (M := M) g 0 2 (S₁ - S₂) α Idx Jdx x =
+      tensorChartComponentRaw (I := I) (M := M) g 0 2 S₁ α Idx Jdx x -
+        tensorChartComponentRaw (I := I) (M := M) g 0 2 S₂ α Idx Jdx x := by
+  have hrepr : S₁ - S₂ = S₁ + (-1 : ℝ) • S₂ := by
+    rw [neg_one_smul]
+    abel
+  rw [hrepr,
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw_add
+      (I := I) (M := M),
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw_smul
+      (I := I) (M := M)]
+  simp only [smul_eq_mul, neg_one_mul]
+  ring
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private lemma reconFO_raw_eq_chartRHS
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδS : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+    (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) {x : M}
+    (hx : x ∈ (chartAt H α).source) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+        (deTurckRHSReconSectionFO (I := I) g₀ g_bg S hδ_lt hδS) α ![] Jdx x =
+      chartDeTurckRicciRHS (I := I)
+        (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδS) g_bg α (Jdx 0) (Jdx 1)
+        (extChartAt I α x) := by
+  have hgood : x ∈ chartLeviCivitaGoodSet (I := I) α := by
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+      (I := I) α, extChartAt_source (I := I)]
+    exact hx
+  have hcongr := tensorChartComponentRaw_congr_toSection
+    (deTurckRHSReconSectionFO (I := I) g₀ g_bg S hδ_lt hδS)
+    (DifferentialGeometry.PDE.RicciFlow.deTurckRHSSectionBg (I := I) g_bg
+      (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδS))
+    (fun z => rfl) α ![] Jdx x
+  rw [hcongr,
+    tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie (I := I) (M := M)
+      g_bg (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδS) α hgood ![] Jdx,
+    chartDeTurckRicciRHS_def]
+
+private lemma pouRegion_open (α : M) :
+    IsOpen ((toEuclidean (E := E)) '' ((extChartAt I α) ''
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x})) := by
+  classical
+  set pou : M → ℝ := fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x
+    with hpou
+  have hpou_cont : Continuous pou := (chartAtlasPOU I M α).contMDiff.continuous
+  set U : Set M := {x : M | 0 < pou x} with hU
+  have hU_open : IsOpen U := isOpen_lt continuous_const hpou_cont
+  have hU_src : U ⊆ (extChartAt I α).source := by
+    intro x hx
+    rw [extChartAt_source (I := I)]
+    refine (chartAtlasPOU_isSubordinate (I := I) (M := M) α) ?_
+    exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hx))
+  have himg : (extChartAt I α) '' U =
+      (extChartAt I α).target ∩ (extChartAt I α).symm ⁻¹' U :=
+    (extChartAt I α).image_eq_target_inter_inv_preimage hU_src
+  have himg_open : IsOpen ((extChartAt I α) '' U) := by
+    rw [himg]
+    exact (continuousOn_extChartAt_symm (I := I) α).isOpen_inter_preimage
+      (isOpen_extChartAt_target (I := I) α) hU_open
+  exact (toEuclidean (E := E)).isOpenMap _ himg_open
+
+private lemma pouRegion_subset_chartTargetEuclid (α : M) :
+    (toEuclidean (E := E)) '' ((extChartAt I α) ''
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x}) ⊆
+      chartTargetEuclid (I := I) (M := M) α := by
+  rintro ŷ ⟨z, ⟨x, hx, rfl⟩, rfl⟩
+  have hx_src : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]
+    refine (chartAtlasPOU_isSubordinate (I := I) (M := M) α) ?_
+    exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hx))
+  exact ⟨extChartAt I α x, (extChartAt I α).map_source hx_src, rfl⟩
+
+private lemma pouRegion_mem_facts (α : M)
+    {ŷ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
+    (hŷ : ŷ ∈ (toEuclidean (E := E)) '' ((extChartAt I α) ''
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x})) :
+    (extChartAt I α).symm (toEuclidean.symm ŷ) ∈
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x} ∧
+    toEuclidean.symm ŷ ∈ (extChartAt I α).target ∧
+    (extChartAt I α) ((extChartAt I α).symm (toEuclidean.symm ŷ)) =
+      toEuclidean.symm ŷ ∧
+    (toEuclidean (E := E)) ((extChartAt I α)
+      ((extChartAt I α).symm (toEuclidean.symm ŷ))) = ŷ := by
+  obtain ⟨z, ⟨x, hx, rfl⟩, rfl⟩ := hŷ
+  have hx_src : x ∈ (extChartAt I α).source := by
+    rw [extChartAt_source (I := I)]
+    refine (chartAtlasPOU_isSubordinate (I := I) (M := M) α) ?_
+    exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hx))
+  have hz_t : (extChartAt I α) x ∈ (extChartAt I α).target :=
+    (extChartAt I α).map_source hx_src
+  have hsymm_te : (toEuclidean (E := E)).symm
+      ((toEuclidean (E := E)) ((extChartAt I α) x)) = (extChartAt I α) x :=
+    (toEuclidean (E := E)).symm_apply_apply _
+  have hround : (extChartAt I α).symm ((extChartAt I α) x) = x :=
+    (extChartAt I α).left_inv hx_src
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [hsymm_te, hround]; exact hx
+  · rw [hsymm_te]; exact hz_t
+  · rw [hsymm_te, hround]
+  · rw [hsymm_te, hround]
+
+private lemma euclidPartial_eq_pdDir (i : Fin (Module.finrank ℝ E))
+    (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
+    euclidPartial (E := E) i u
+      = DifferentialGeometry.Analysis.pdDir (EuclideanSpace.single i 1) u := rfl
+
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+private theorem anisoOn_pushed_oneMinusConnLapIter_reconFOPath
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ (k : ℕ) (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (j : ℕ), j ≤ k → ∀ (σ : ℝ), 0 ≤ σ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
+    (α : M) (m : ℕ) :
+    ∀ Jdx : Fin 2 → Fin (Module.finrank ℝ E),
+    DifferentialGeometry.Analysis.AnisoOn k T
+      ((toEuclidean (E := E)) '' ((extChartAt I α) ''
+        {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x}))
+      (fun t ŷ => chartPushedRaw I α
+        (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+          α ![] Jdx) ŷ) := by
+  classical
+  set R : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
+    (toEuclidean (E := E)) '' ((extChartAt I α) ''
+      {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x}) with hR_def
+  have hR_open : IsOpen R := pouRegion_open (I := I) (M := M) α
+  have hR_sub : R ⊆ chartTargetEuclid (I := I) (M := M) α :=
+    pouRegion_subset_chartTargetEuclid (I := I) (M := M) α
+  induction m with
+  | zero =>
+      intro Jdx
+      have hE_aniso : DifferentialGeometry.Analysis.AnisoOn k T
+          (interior (extChartAt I α).target)
+          (fun t => rawCompOnE (I := I) (M := M) g₀
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) α Jdx) := by
+        have hVE : IsOpen (interior (extChartAt I α).target) := isOpen_interior
+        refine (anisoOn_realize_chartDeTurckRicciRHS (g_bg := g_bg) hT hδ_lt hδ
+          hφ_smooth hcoeff hmodemass α (Jdx 0) (Jdx 1)).congr hVE _
+          (fun t ht y hy => ?_)
+        have hy_t : y ∈ (extChartAt I α).target := interior_subset hy
+        have hsymm_src : (extChartAt I α).symm y ∈ (chartAt H α).source := by
+          have := (extChartAt I α).map_target hy_t
+          rwa [extChartAt_source (I := I)] at this
+        have hkey := reconFO_raw_eq_chartRHS (I := I) (M := M) g₀ g_bg (F t)
+          hδ_lt (hδ t) α Jdx hsymm_src
+        have hRI : (extChartAt I α) ((extChartAt I α).symm y) = y :=
+          (extChartAt I α).right_inv hy_t
+        change chartDeTurckRicciRHS (I := I)
+            (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) g_bg α
+            (Jdx 0) (Jdx 1) y =
+          rawCompOnE (I := I) (M := M) g₀
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) α Jdx y
+        rw [show rawCompOnE (I := I) (M := M) g₀
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) α Jdx y =
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+              (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) α ![] Jdx
+              ((extChartAt I α).symm y) from rfl, hkey, hRI]
+      have htrans := hE_aniso.comp_clequiv (toEuclidean (E := E)).symm isOpen_interior
+      have hR_sub' : R ⊆ (((toEuclidean (E := E)).symm : EuclideanSpace ℝ
+          (Fin (Module.finrank ℝ E)) ≃L[ℝ] E) : EuclideanSpace ℝ
+          (Fin (Module.finrank ℝ E)) → E) ⁻¹' (interior (extChartAt I α).target) := by
+        intro ŷ hŷ
+        obtain ⟨-, hmem, -, -⟩ := pouRegion_mem_facts (I := I) (M := M) α hŷ
+        rw [Set.mem_preimage, (isOpen_extChartAt_target (I := I) α).interior_eq]
+        exact hmem
+      refine ((htrans.mono hR_sub').congr hR_open _ (fun t ht ŷ hŷ => ?_))
+      obtain ⟨-, hmem, -, hround⟩ := pouRegion_mem_facts (I := I) (M := M) α hŷ
+      have happ := chartPushedRaw_apply_of_mem (I := I) (M := M) α
+        (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+          (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0
+            (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+          α ![] Jdx) (hR_sub hŷ)
+      change rawCompOnE (I := I) (M := M) g₀
+          (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) α Jdx
+          ((toEuclidean (E := E)).symm ŷ) =
+        chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 0
+              (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+            α ![] Jdx) ŷ
+      rw [happ]
+      rfl
+  | succ m ih =>
+      intro Jdx
+      obtain ⟨C₂, C₁, C₀, hC₂s, hC₁s, hC₀s, hformula⟩ :=
+        rawTensorConnLap_chartα_raw_eq_T₀_linear_formula (I := I) (M := M)
+          g₀ 0 2 α ![] Jdx
+      set Wm : (Fin 0 → Fin (Module.finrank ℝ E)) →
+          (Fin 2 → Fin (Module.finrank ℝ E)) →
+          ℝ → EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
+        fun Idx' Jdx' t ŷ => chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+              (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+            α Idx' Jdx') ŷ
+        with hWm_def
+      have hWm_aniso : ∀ (Idx' : Fin 0 → Fin (Module.finrank ℝ E))
+          (Jdx' : Fin 2 → Fin (Module.finrank ℝ E)),
+          DifferentialGeometry.Analysis.AnisoOn k T R (Wm Idx' Jdx') := by
+        intro Idx' Jdx'
+        have hIdx' : Idx' = (![] : Fin 0 → Fin (Module.finrank ℝ E)) :=
+          funext fun i0 => i0.elim0
+        rw [hWm_def, hIdx']
+        exact ih Jdx'
+      have h2sum : DifferentialGeometry.Analysis.AnisoOn k T R
+          (fun t ŷ => ∑ c : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            C₂ c l ŷ * DifferentialGeometry.Analysis.pdDir
+              (EuclideanSpace.single l 1)
+              (DifferentialGeometry.Analysis.pdDir (EuclideanSpace.single c 1)
+                (Wm ![] Jdx t)) ŷ) := by
+        refine DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open Finset.univ
+          (fun c _ => DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open
+            Finset.univ (fun l _ => ?_))
+        refine (DifferentialGeometry.Analysis.anisoOn_timeIndep hR_open
+          ((hC₂s c l).mono hR_sub)).mul hR_open ?_
+        exact ((hWm_aniso ![] Jdx).pdShift hR_open
+          (EuclideanSpace.single c 1)).pdShift hR_open (EuclideanSpace.single l 1)
+      have h1sum : DifferentialGeometry.Analysis.AnisoOn k T R
+          (fun t ŷ => ∑ Idx' : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin 2 → Fin (Module.finrank ℝ E),
+            ∑ c : Fin (Module.finrank ℝ E),
+            C₁ Idx' Jdx' c ŷ * DifferentialGeometry.Analysis.pdDir
+              (EuclideanSpace.single c 1) (Wm Idx' Jdx' t) ŷ) := by
+        refine DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open Finset.univ
+          (fun Idx' _ => DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open
+            Finset.univ (fun Jdx' _ =>
+              DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open Finset.univ
+                (fun c _ => ?_)))
+        refine (DifferentialGeometry.Analysis.anisoOn_timeIndep hR_open
+          ((hC₁s Idx' Jdx' c).mono hR_sub)).mul hR_open ?_
+        exact (hWm_aniso Idx' Jdx').pdShift hR_open (EuclideanSpace.single c 1)
+      have h0sum : DifferentialGeometry.Analysis.AnisoOn k T R
+          (fun t ŷ => ∑ Idx' : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin 2 → Fin (Module.finrank ℝ E),
+            C₀ Idx' Jdx' ŷ * Wm Idx' Jdx' t ŷ) := by
+        refine DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open Finset.univ
+          (fun Idx' _ => DifferentialGeometry.Analysis.anisoOn_finsetSum hR_open
+            Finset.univ (fun Jdx' _ => ?_))
+        refine (DifferentialGeometry.Analysis.anisoOn_timeIndep hR_open
+          ((hC₀s Idx' Jdx').mono hR_sub)).mul hR_open ?_
+        exact hWm_aniso Idx' Jdx'
+      have hlap_aniso := (h2sum.add hR_open h1sum).add hR_open h0sum
+      refine ((hWm_aniso ![] Jdx).sub hR_open hlap_aniso).congr hR_open _
+        (fun t ht ŷ hŷ => ?_)
+      obtain ⟨hbU, hbT, hbRI, hbround⟩ := pouRegion_mem_facts (I := I) (M := M) α hŷ
+      set b : M := (extChartAt I α).symm (toEuclidean.symm ŷ) with hb_def
+      have hb_supp : b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
+          chartLeviCivitaGoodSet (I := I) α := by
+        constructor
+        · exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hbU))
+        · rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+            (I := I) α]
+          exact (extChartAt I α).map_target hbT
+      set Qm : SmoothCcTensor g₀ 0 2 :=
+        oneMinusConnLapSmoothIter (I := I) g₀ 0 2 m
+          (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)) with hQm_def
+      have hform := hformula Qm hb_supp
+      have hte : (toEuclidean (E := E)) ((extChartAt I α) b) = ŷ := hbround
+      have hpushed_succ : chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (m + 1)
+              (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+            α ![] Jdx) ŷ
+          = tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 Qm α ![] Jdx b -
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+              (rawTensorConnLapSmooth (I := I) g₀ 0 2 Qm) α ![] Jdx b := by
+        rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ (hR_sub hŷ)]
+        rw [oneMinusConnLapSmoothIter_succ, ← hQm_def]
+        change tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmooth (I := I) g₀ 0 2 Qm) α ![] Jdx b = _
+        rw [show oneMinusConnLapSmooth (I := I) g₀ 0 2 Qm =
+            Qm - rawTensorConnLapSmooth (I := I) g₀ 0 2 Qm from rfl]
+        exact tensorChartComponentRaw_sub_eq (I := I) (M := M) g₀ Qm
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 Qm) α ![] Jdx b
+      change Wm ![] Jdx t ŷ -
+          ((∑ c : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            C₂ c l ŷ * DifferentialGeometry.Analysis.pdDir (EuclideanSpace.single l 1)
+              (DifferentialGeometry.Analysis.pdDir (EuclideanSpace.single c 1)
+                (Wm ![] Jdx t)) ŷ) +
+          (∑ Idx' : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin 2 → Fin (Module.finrank ℝ E),
+            ∑ c : Fin (Module.finrank ℝ E),
+            C₁ Idx' Jdx' c ŷ * DifferentialGeometry.Analysis.pdDir
+              (EuclideanSpace.single c 1) (Wm Idx' Jdx' t) ŷ) +
+          (∑ Idx' : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx' : Fin 2 → Fin (Module.finrank ℝ E),
+            C₀ Idx' Jdx' ŷ * Wm Idx' Jdx' t ŷ)) =
+        chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (m + 1)
+              (deTurckRHSReconSectionFO (I := I) g₀ g_bg (F t) hδ_lt (hδ t)))
+            α ![] Jdx) ŷ
+      rw [hpushed_succ, hform, hte]
+      have hWm_b : Wm ![] Jdx t ŷ
+          = tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 Qm α ![] Jdx b := by
+        simp only [hWm_def]
+        rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ (hR_sub hŷ)]
+      rw [← hWm_b]
+      simp only [hQm_def, hWm_def, euclidPartial_eq_pdDir]
+
+end IterLaplacianInduction
+
+end FiniteOrderAnisotropicReconstruction
+
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
