@@ -51,7 +51,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-private theorem tensorL2Inner_eq_tsum_l2Coeff_cross_arm
+theorem tensorL2Inner_eq_tsum_l2Coeff_cross_arm
     (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 0 2) :
     tensorL2Inner (I := I) (M := M) g₀ 0 2 A.toFun B.toFun =

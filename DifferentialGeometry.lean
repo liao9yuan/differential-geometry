@@ -960,6 +960,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.EigensectionSo
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.MercerProjectorTrace
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralNormLIterateLadder
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Equivalence
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2SpectralIterateEquiv
