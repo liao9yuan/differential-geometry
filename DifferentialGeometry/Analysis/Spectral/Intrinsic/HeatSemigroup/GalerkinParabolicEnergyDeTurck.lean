@@ -435,7 +435,7 @@ theorem deTurckGalerkinForcing_seed_mass
     deTurckSmoothRemainder (I := I) g₀ g_bg
       (radialScaleSmooth (I := I) (M := M) g₀ a (Classical.choose h).1
         (0 : SmoothCcTensor g₀ 0 2))
-      (lt_of_le_of_lt (Classical.choose_spec h).2.1 (by norm_num : (1 : ℝ) / 3 < 1))
+      (lt_of_le_of_lt (Classical.choose_spec h).2.1 (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)))
       ((Classical.choose_spec h).2.2 _
         (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a
           (Classical.choose_spec h).1.le (0 : SmoothCcTensor g₀ 0 2)))
@@ -688,7 +688,7 @@ set_option maxHeartbeats 1600000 in
 theorem deTurckSmoothRemainder_spectralCoercive_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
-    {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
+    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
       DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
@@ -705,12 +705,12 @@ theorem deTurckSmoothRemainder_spectralCoercive_split
             tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
               ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
                   (deTurckSmoothRemainder (I := I) g₀ g_bg T₀
-                    (lt_of_le_of_lt hδ_le oneThird_lt_one)
+                    (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)))
                     (hδ_fibre T₀ hball))).coeff i -
                 (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
                   (deTurckSmoothRemainder (I := I) g₀ g_bg
                     (0 : SmoothCcTensor g₀ 0 2)
-                    (lt_of_le_of_lt hδ_le oneThird_lt_one)
+                    (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)))
                     (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
                       (by
                         rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
@@ -733,9 +733,9 @@ theorem deTurckSmoothRemainder_spectralCoercive_split
   intro S k T₀ hball hsupp
   set Rdiff : SmoothCcTensor g₀ 0 2 :=
     deTurckSmoothRemainder (I := I) g₀ g_bg T₀
-        (lt_of_le_of_lt hδ_le oneThird_lt_one) (hδ_fibre T₀ hball) -
+        (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E))) (hδ_fibre T₀ hball) -
       deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
-        (lt_of_le_of_lt hδ_le oneThird_lt_one)
+        (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)))
         (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
           (by
             rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
@@ -744,10 +744,10 @@ theorem deTurckSmoothRemainder_spectralCoercive_split
   have hLHS_coeff : ∀ i,
       (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
             (deTurckSmoothRemainder (I := I) g₀ g_bg T₀
-              (lt_of_le_of_lt hδ_le oneThird_lt_one) (hδ_fibre T₀ hball))).coeff i -
+              (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E))) (hδ_fibre T₀ hball))).coeff i -
           (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
             (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
-              (lt_of_le_of_lt hδ_le oneThird_lt_one)
+              (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)))
               (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
                 (by
                   rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
@@ -801,10 +801,10 @@ theorem deTurckSmoothRemainder_spectralCoercive_split
           tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
             ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
                 (deTurckSmoothRemainder (I := I) g₀ g_bg T₀
-                  (lt_of_le_of_lt hδ_le oneThird_lt_one) (hδ_fibre T₀ hball))).coeff i -
+                  (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E))) (hδ_fibre T₀ hball))).coeff i -
               (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
                 (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
-                  (lt_of_le_of_lt hδ_le oneThird_lt_one)
+                  (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)))
                   (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
                     (by
                       rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
@@ -838,8 +838,9 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
   set hex := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super with hhex
   set R₀ := (Classical.choose hex).1 with hR₀_def
   have hR₀ : 0 < R₀ := (Classical.choose_spec hex).1
-  have hδ_le : (Classical.choose hex).2 ≤ 1 / 3 := (Classical.choose_spec hex).2.1
-  have hδ_lt : (Classical.choose hex).2 < 1 := lt_of_le_of_lt hδ_le oneThird_lt_one
+  have hδ_le : (Classical.choose hex).2 ≤ deTurckArmContractionThreshold (Module.finrank ℝ E) :=
+    (Classical.choose_spec hex).2.1
+  have hδ_lt : (Classical.choose hex).2 < 1 := lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E))
   have hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
       DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound

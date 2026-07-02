@@ -69,6 +69,79 @@ def smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
         (SmoothCcTensor.toL2 T) i :=
   rfl
 
+def deTurckArmFibreConst (n : ℕ) : ℝ := Real.sqrt ((n : ℝ) ^ 3)
+
+lemma deTurckArmFibreConst_nonneg (n : ℕ) : 0 ≤ deTurckArmFibreConst n :=
+  Real.sqrt_nonneg _
+
+lemma one_le_deTurckArmFibreConst {n : ℕ} (hn : 1 ≤ n) :
+    1 ≤ deTurckArmFibreConst n := by
+  have hn' : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+  have h1 : (1 : ℝ) ≤ (n : ℝ) ^ 3 := by
+    calc (1 : ℝ) = 1 ^ 3 := (one_pow 3).symm
+      _ ≤ (n : ℝ) ^ 3 := pow_le_pow_left₀ zero_le_one hn' 3
+  calc (1 : ℝ) = Real.sqrt 1 := Real.sqrt_one.symm
+    _ ≤ Real.sqrt ((n : ℝ) ^ 3) := Real.sqrt_le_sqrt h1
+
+lemma sq_deTurckArmFibreConst (n : ℕ) :
+    deTurckArmFibreConst n ^ 2 = (n : ℝ) ^ 3 :=
+  Real.sq_sqrt (by positivity)
+
+def deTurckArmContractionThreshold (n : ℕ) : ℝ :=
+  1 / (1 + 2 * deTurckArmFibreConst n)
+
+lemma deTurckArmContractionThreshold_pos (n : ℕ) :
+    0 < deTurckArmContractionThreshold n := by
+  have h := deTurckArmFibreConst_nonneg n
+  unfold deTurckArmContractionThreshold
+  positivity
+
+lemma deTurckArmContractionThreshold_le_third {n : ℕ} (hn : 1 ≤ n) :
+    deTurckArmContractionThreshold n ≤ 1 / 3 := by
+  have h1 := one_le_deTurckArmFibreConst hn
+  unfold deTurckArmContractionThreshold
+  rw [div_le_div_iff₀ (by linarith) (by norm_num : (0 : ℝ) < 3)]
+  linarith
+
+lemma deTurckArmContractionThreshold_lt_one {n : ℕ} (hn : 1 ≤ n) :
+    deTurckArmContractionThreshold n < 1 :=
+  lt_of_le_of_lt (deTurckArmContractionThreshold_le_third hn)
+    (by norm_num : (1 : ℝ) / 3 < 1)
+
+lemma deTurckArmContractionThreshold_le_third' (n : ℕ) [NeZero n] :
+    deTurckArmContractionThreshold n ≤ 1 / 3 :=
+  deTurckArmContractionThreshold_le_third (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
+
+lemma deTurckArmContractionThreshold_lt_one' (n : ℕ) [NeZero n] :
+    deTurckArmContractionThreshold n < 1 :=
+  deTurckArmContractionThreshold_lt_one (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
+
+lemma deTurckArmFibreConst_mul_div_le_half {n : ℕ} (hn : 1 ≤ n) {δ : ℝ}
+    (hδ_le : δ ≤ deTurckArmContractionThreshold n) :
+    deTurckArmFibreConst n * (δ / (1 - δ)) ≤ 1 / 2 := by
+  have hC := one_le_deTurckArmFibreConst hn
+  set C := deTurckArmFibreConst n with hC_def
+  have hden : (0 : ℝ) < 1 + 2 * C := by linarith
+  have hthr_lt : deTurckArmContractionThreshold n < 1 :=
+    deTurckArmContractionThreshold_lt_one hn
+  have hδ_lt1 : δ < 1 := lt_of_le_of_lt hδ_le hthr_lt
+  have h1δ_pos : (0 : ℝ) < 1 - δ := by linarith
+  by_cases hδ0 : δ ≤ 0
+  · have hratio_np : δ / (1 - δ) ≤ 0 := div_nonpos_of_nonpos_of_nonneg hδ0 h1δ_pos.le
+    have : C * (δ / (1 - δ)) ≤ 0 :=
+      mul_nonpos_of_nonneg_of_nonpos (by linarith) hratio_np
+    linarith
+  · have hδ_mul : δ * (1 + 2 * C) ≤ 1 := by
+      have := (le_div_iff₀ hden).mp
+        (show δ ≤ 1 / (1 + 2 * C) from hδ_le)
+      linarith
+    have hratio : δ / (1 - δ) ≤ 1 / (2 * C) := by
+      rw [div_le_div_iff₀ h1δ_pos (by linarith : (0 : ℝ) < 2 * C)]
+      nlinarith
+    calc C * (δ / (1 - δ)) ≤ C * (1 / (2 * C)) :=
+          mul_le_mul_of_nonneg_left hratio (by linarith)
+      _ = 1 / 2 := by field_simp
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
