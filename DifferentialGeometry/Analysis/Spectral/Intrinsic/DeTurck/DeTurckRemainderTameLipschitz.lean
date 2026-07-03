@@ -29,6 +29,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCha
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieCoeffAppCcValue
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedGramDerivChartEvaluation
 
 noncomputable section
 
