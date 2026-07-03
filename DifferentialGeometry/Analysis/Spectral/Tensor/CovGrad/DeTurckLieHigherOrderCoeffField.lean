@@ -944,7 +944,7 @@ private theorem jointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       (f p₀.2) (A p₀)
 
-private theorem jointTensor0SProd_local {p q : ℕ} {S : Set ℝ}
+theorem jointTensor0SProd_local {p q : ℕ} {S : Set ℝ}
     (A : ∀ pp : M × ℝ, Tensor0SBundle.Tensor0SSpace p I pp.1)
     (B : ∀ pp : M × ℝ, Tensor0SBundle.Tensor0SSpace q I pp.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel p ℝ E)) ∞
@@ -1299,7 +1299,7 @@ private theorem metricConnDiffLowered_fixedPair_affine (g₀ : SmoothRiemannianM
   simp only [smul_eq_mul]
   ring
 
-private theorem metricConnDiffLowered_selfFam_jointContMDiffOn
+theorem metricConnDiffLowered_selfFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
@@ -1389,7 +1389,7 @@ private theorem metricConnDiffLowered_selfFam_jointContMDiffOn
   rw [hv012]
   simp only [smul_eq_mul]
 
-private theorem metricConnDiffLowered_bgFam_jointContMDiffOn
+theorem metricConnDiffLowered_bgFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -2804,7 +2804,7 @@ private theorem dLieTheta_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   simp only [map_sub, ContinuousLinearMap.sub_apply]
   ring
 
-private theorem dLieFlatFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
+theorem dLieFlatFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
