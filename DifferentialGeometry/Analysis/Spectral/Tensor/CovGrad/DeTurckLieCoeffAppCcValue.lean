@@ -827,6 +827,372 @@ theorem deTurckLieDLbCoeffField_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetri
     funext j
     fin_cases j <;> simp
 
+set_option linter.unusedSectionVars false in
+
+private lemma christoffelCorrection_chartModelBasis_pair_self
+    (g : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) :
+    christoffelCorrection (I := I) g x x ((chartModelBasis E) j) ((chartModelBasis E) i) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g x i j m (extChartAt I x x) • (chartModelBasis E) m := by
+  classical
+  rw [christoffelCorrection_apply, trivToE_self_apply (I := I) x ((chartModelBasis E) i)]
+  rw [Finset.sum_eq_single i]
+  · rw [Finset.sum_eq_single j]
+    · refine Finset.sum_congr rfl (fun m _ => ?_)
+      rw [Module.Basis.repr_self, Module.Basis.repr_self, Finsupp.single_eq_same,
+        Finsupp.single_eq_same, one_mul, one_mul]
+    · intro j' _ hj'
+      refine Finset.sum_eq_zero (fun m _ => ?_)
+      rw [Module.Basis.repr_self, Module.Basis.repr_self, Finsupp.single_eq_same, one_mul,
+        Finsupp.single_apply, if_neg (Ne.symm hj'), zero_mul, zero_smul]
+    · intro h
+      exact absurd (Finset.mem_univ j) h
+  · intro i' _ hi'
+    refine Finset.sum_eq_zero (fun j' _ => Finset.sum_eq_zero (fun m _ => ?_))
+    rw [Module.Basis.repr_self, Finsupp.single_apply, if_neg (Ne.symm hi'), zero_mul, zero_mul,
+      zero_smul]
+  · intro h
+    exact absurd (Finset.mem_univ i) h
+
+set_option linter.unusedSectionVars false in
+
+private lemma leviCivita_toFun_chartBasis_eval_of_localComponents
+    (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (σ : Π b : M, TangentSpace I b)
+    (c : Fin (Module.finrank ℝ E) → E → ℝ)
+    (hσ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b (σ b)) x)
+    (hc : ∀ p : Fin (Module.finrank ℝ E), DifferentiableAt ℝ (c p) (extChartAt I x x))
+    (hloc : ∀ b ∈ chartLeviCivitaGoodSet (I := I) x,
+      σ b = ∑ p : Fin (Module.finrank ℝ E),
+        c p (extChartAt I x b) • chartBasisVecFiber (I := I) x p b)
+    (i : Fin (Module.finrank ℝ E)) :
+    (LeviCivita (I := I) g₁).toFun σ x ((chartModelBasis E) i) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) i (c p) (extChartAt I x x) +
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g₁ x i m p (extChartAt I x x) *
+              c m (extChartAt I x x)) •
+          chartBasisVecFiber (I := I) x p x := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hy0_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx_good
+  have hreprY : ∀ jj : Fin (Module.finrank ℝ E),
+      ((chartModelBasis E).repr (∑ m : Fin (Module.finrank ℝ E),
+        c m (extChartAt I x x) • (chartModelBasis E) m)) jj = c jj (extChartAt I x x) := by
+    intro jj
+    rw [Module.Basis.repr_sum_self]
+  have hσx : σ x = ∑ m : Fin (Module.finrank ℝ E),
+      c m (extChartAt I x x) • (chartModelBasis E) m := by
+    rw [hloc x hx_good]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [chartBasisVecFiber_self (I := I) x m]
+  have hrepr_x : chartE_section_repr (I := I) x σ x =
+      ∑ m : Fin (Module.finrank ℝ E),
+        c m (extChartAt I x x) • (chartModelBasis E) m := by
+    rw [chartE_section_repr_eq_trivToE, trivToE_self_apply (I := I) x (σ x), hσx]
+  have hev : (chartE_section_repr (I := I) x σ ∘ (extChartAt I x).symm) =ᶠ[𝓝 (extChartAt I x x)]
+      fun y : E => ∑ p : Fin (Module.finrank ℝ E), c p y • (chartModelBasis E) p := by
+    have hopen : IsOpen (interior ((extChartAt I x).target : Set E) ∩
+        (extChartAt I x).symm ⁻¹' chartLeviCivitaGoodSet (I := I) x) :=
+      ContinuousOn.isOpen_inter_preimage
+        ((continuousOn_extChartAt_symm x).mono interior_subset)
+        isOpen_interior (chartLeviCivitaGoodSet_isOpen (I := I) x)
+    have hmem : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) ∩
+        (extChartAt I x).symm ⁻¹' chartLeviCivitaGoodSet (I := I) x := by
+      refine ⟨hy0_int, ?_⟩
+      change (extChartAt I x).symm (extChartAt I x x) ∈ chartLeviCivitaGoodSet (I := I) x
+      rw [(extChartAt I x).left_inv (mem_extChartAt_source x)]
+      exact hx_good
+    filter_upwards [hopen.mem_nhds hmem] with y hy
+    obtain ⟨hy_int, hy_pre⟩ := hy
+    have hb_good : (extChartAt I x).symm y ∈ chartLeviCivitaGoodSet (I := I) x := hy_pre
+    have hb_base : (extChartAt I x).symm y ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+      chartLeviCivitaGoodSet_mem_baseSet (I := I) hb_good
+    have hby : extChartAt I x ((extChartAt I x).symm y) = y :=
+      (extChartAt I x).right_inv (interior_subset hy_int)
+    change chartE_section_repr (I := I) x σ ((extChartAt I x).symm y) =
+      ∑ p : Fin (Module.finrank ℝ E), c p y • (chartModelBasis E) p
+    rw [chartE_section_repr_eq_trivToE, hloc _ hb_good, hby, map_sum]
+    refine Finset.sum_congr rfl (fun p _ => ?_)
+    rw [ContinuousLinearMap.map_smul]
+    congr 1
+    change trivToE (I := I) x ((extChartAt I x).symm y)
+        (trivFromE (I := I) x ((extChartAt I x).symm y) ((chartModelBasis E) p)) =
+      (chartModelBasis E) p
+    exact trivToE_trivFromE (I := I) x hb_base ((chartModelBasis E) p)
+  have hfder : fderiv ℝ (chartE_section_repr (I := I) x σ ∘ (extChartAt I x).symm)
+      (extChartAt I x x) ((chartModelBasis E) i) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        partialDeriv (E := E) i (c p) (extChartAt I x x) • (chartModelBasis E) p := by
+    rw [hev.fderiv_eq]
+    have hhas : HasFDerivAt
+        (fun y : E => ∑ p : Fin (Module.finrank ℝ E), c p y • (chartModelBasis E) p)
+        (∑ p : Fin (Module.finrank ℝ E),
+          (fderiv ℝ (c p) (extChartAt I x x)).smulRight ((chartModelBasis E) p))
+        (extChartAt I x x) :=
+      HasFDerivAt.fun_sum (fun p _ =>
+        ((hc p).hasFDerivAt.smul_const ((chartModelBasis E) p)))
+    rw [hhas.fderiv, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun p _ => ?_)
+    rw [ContinuousLinearMap.smulRight_apply]
+    rfl
+  have hchris : christoffelCorrection (I := I) g₁ x x
+      (∑ m : Fin (Module.finrank ℝ E),
+        c m (extChartAt I x x) • (chartModelBasis E) m) ((chartModelBasis E) i) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (∑ m : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₁ x i m p (extChartAt I x x) *
+            c m (extChartAt I x x)) • (chartModelBasis E) p := by
+    rw [christoffelCorrection_apply, trivToE_self_apply (I := I) x ((chartModelBasis E) i)]
+    rw [Finset.sum_eq_single i]
+    · rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun p _ => ?_)
+      rw [← Finset.sum_smul]
+      congr 1
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      rw [Module.Basis.repr_self, Finsupp.single_eq_same, one_mul, hreprY m, mul_comm]
+    · intro i' _ hi'
+      refine Finset.sum_eq_zero (fun j' _ => Finset.sum_eq_zero (fun p _ => ?_))
+      rw [Module.Basis.repr_self, Finsupp.single_apply, if_neg (Ne.symm hi'), zero_mul,
+        zero_mul, zero_smul]
+    · intro h
+      exact absurd (Finset.mem_univ i) h
+  rw [LeviCivita_chart_apply (I := I) g₁ x hx_good hσ ((chartModelBasis E) i),
+    chartLeviCivita_apply (I := I) g₁ x σ hx_good ((chartModelBasis E) i),
+    trivToE_self_apply (I := I) x ((chartModelBasis E) i), hfder, hrepr_x, hchris,
+    ← Finset.sum_add_distrib, map_sum]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [chartBasisVecFiber_self (I := I) x p, map_add, ContinuousLinearMap.map_smul,
+    ContinuousLinearMap.map_smul, trivFromE_self_apply (I := I) x ((chartModelBasis E) p),
+    ← add_smul]
+
+set_option linter.unusedSectionVars false in
+
+open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
+theorem deTurckLieCovDerivW_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
+    (x : M) (i : Fin (Module.finrank ℝ E)) :
+    deTurckLieCovDerivW (I := I) g₁ g_bg
+        (smoothExtensionTangent (I := I) x ((chartModelBasis E) i)) x =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) i
+            (fun y => chartDeTurckVFComp (I := I) g₁ g_bg x p y) (extChartAt I x x) +
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g₁ x i m p (extChartAt I x x) *
+              chartDeTurckVFComp (I := I) g₁ g_bg x m (extChartAt I x x)) •
+          chartBasisVecFiber (I := I) x p x := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hy0_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx_good
+  have hσ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+        ((PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b)) x :=
+    (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg).mdifferentiableAt
+  rw [deTurckLieCovDerivW, smoothExtensionTangent_eq]
+  exact leviCivita_toFun_chartBasis_eval_of_localComponents (I := I) g₁ x
+    (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b)
+    (fun p y => chartDeTurckVFComp (I := I) g₁ g_bg x p y)
+    hσ
+    (fun p => chartDeTurckVFComp_differentiableAt_interior (I := I) g₁ g_bg x p hy0_int)
+    (fun b hb => PDE.DeTurck.deTurckVF_apply_eq_chartDeTurckVFComp_sum (I := I) g₁ g_bg x hb)
+    i
+
+set_option linter.unusedSectionVars false in
+
+theorem deTurckLieCovDerivA_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
+    (x : M) (i j k : Fin (Module.finrank ℝ E)) :
+    deTurckLieCovDerivA (I := I) g₁ g_bg
+        (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+        (smoothExtensionTangent (I := I) x ((chartModelBasis E) j))
+        (smoothExtensionTangent (I := I) x ((chartModelBasis E) k)) x =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) i
+            (fun y => chartChristoffel (I := I) g₁ x k j p y -
+              chartChristoffel (I := I) g_bg x k j p y) (extChartAt I x x) +
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g₁ x i m p (extChartAt I x x) *
+              (chartChristoffel (I := I) g₁ x k j m (extChartAt I x x) -
+                chartChristoffel (I := I) g_bg x k j m (extChartAt I x x)) -
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g₁ x i j m (extChartAt I x x) *
+              (chartChristoffel (I := I) g₁ x k m p (extChartAt I x x) -
+                chartChristoffel (I := I) g_bg x k m p (extChartAt I x x)) -
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g₁ x i k m (extChartAt I x x) *
+              (chartChristoffel (I := I) g₁ x m j p (extChartAt I x x) -
+                chartChristoffel (I := I) g_bg x m j p (extChartAt I x x))) •
+          chartBasisVecFiber (I := I) x p x := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
+  have hx_base : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
+  have hy0_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E) :=
+    chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx_good
+  have hΓ : ∀ (g : SmoothRiemannianMetric I M) (a b d : Fin (Module.finrank ℝ E)),
+      DifferentiableAt ℝ (chartChristoffel (I := I) g x a b d) (extChartAt I x x) := by
+    intro g a b d
+    exact ((chartChristoffel_contDiffOn_interior (I := I) g x a b d).contDiffAt
+      (isOpen_interior.mem_nhds hy0_int)).differentiableAt (by simp)
+  have hYm : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+        (chartBasisVecFiber (I := I) x j b)) x :=
+    PDE.DeTurck.chartBasisVecFiber_mdifferentiableAt (I := I) x j hx_base
+  have hZm : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+        (chartBasisVecFiber (I := I) x k b)) x :=
+    PDE.DeTurck.chartBasisVecFiber_mdifferentiableAt (I := I) x k hx_base
+  have hσA : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b => TotalSpace.mk' E (E := TangentSpace I) b
+        (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (chartBasisVecFiber (I := I) x j b)
+          (chartBasisVecFiber (I := I) x k b))) x :=
+    connDiff_pairing_mdiffAt (I := I) g₁ g_bg hYm hZm
+  have hswap : deTurckLieCovDerivA (I := I) g₁ g_bg
+      (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+      (smoothExtensionTangent (I := I) x ((chartModelBasis E) j))
+      (smoothExtensionTangent (I := I) x ((chartModelBasis E) k)) x =
+      deTurckLieCovDerivA (I := I) g₁ g_bg
+        (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+        (fun b => chartBasisVecFiber (I := I) x j b)
+        (fun b => chartBasisVecFiber (I := I) x k b) x := by
+    have h1 := dLaCovKernel_apply_extend (I := I) g₁ g_bg x
+      ((chartModelBasis E) i) ((chartModelBasis E) j) ((chartModelBasis E) k)
+    have h2 := dLaCovKernel_apply_field (I := I) g₁ g_bg x ((chartModelBasis E) i)
+      (fun b => chartBasisVecFiber (I := I) x j b)
+      (fun b => chartBasisVecFiber (I := I) x k b) hYm hZm
+    rw [← h1, ← h2]
+    rw [show (fun b => chartBasisVecFiber (I := I) x j b) x = (chartModelBasis E) j from
+        chartBasisVecFiber_self (I := I) x j,
+      show (fun b => chartBasisVecFiber (I := I) x k b) x = (chartModelBasis E) k from
+        chartBasisVecFiber_self (I := I) x k]
+  have hterm1 : (LeviCivita (I := I) g₁).toFun
+      (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g_bg b
+        (chartBasisVecFiber (I := I) x j b) (chartBasisVecFiber (I := I) x k b)) x
+      ((chartModelBasis E) i) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (partialDeriv (E := E) i
+            (fun y => chartChristoffel (I := I) g₁ x k j p y -
+              chartChristoffel (I := I) g_bg x k j p y) (extChartAt I x x) +
+          ∑ m : Fin (Module.finrank ℝ E),
+            chartChristoffel (I := I) g₁ x i m p (extChartAt I x x) *
+              (chartChristoffel (I := I) g₁ x k j m (extChartAt I x x) -
+                chartChristoffel (I := I) g_bg x k j m (extChartAt I x x))) •
+          chartBasisVecFiber (I := I) x p x :=
+    leviCivita_toFun_chartBasis_eval_of_localComponents (I := I) g₁ x
+      (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g_bg b
+        (chartBasisVecFiber (I := I) x j b) (chartBasisVecFiber (I := I) x k b))
+      (fun p y => chartChristoffel (I := I) g₁ x k j p y -
+        chartChristoffel (I := I) g_bg x k j p y)
+      hσA
+      (fun p => (hΓ g₁ k j p).fun_sub (hΓ g_bg k j p))
+      (fun b hb => PDE.DeTurck.connDiff_chartBasis_pair_eq_sum (I := I) g₁ g_bg x hb j k)
+      i
+  have hLCj : (LeviCivita (I := I) g₁).toFun
+      (fun b => chartBasisVecFiber (I := I) x j b) x ((chartModelBasis E) i) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g₁ x i j m (extChartAt I x x) •
+          chartBasisVecFiber (I := I) x m x := by
+    rw [PDE.DeTurck.LeviCivita_chartBasisVecFiber_eq (I := I) g₁ x hx_good j
+      ((chartModelBasis E) i)]
+    rw [christoffelCorrection_chartModelBasis_pair_self (I := I) g₁ x i j, map_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [chartBasisVecFiber_self (I := I) x m, ContinuousLinearMap.map_smul,
+      trivFromE_self_apply (I := I) x ((chartModelBasis E) m)]
+  have hLCk : (LeviCivita (I := I) g₁).toFun
+      (fun b => chartBasisVecFiber (I := I) x k b) x ((chartModelBasis E) i) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        chartChristoffel (I := I) g₁ x i k m (extChartAt I x x) •
+          chartBasisVecFiber (I := I) x m x := by
+    rw [PDE.DeTurck.LeviCivita_chartBasisVecFiber_eq (I := I) g₁ x hx_good k
+      ((chartModelBasis E) i)]
+    rw [christoffelCorrection_chartModelBasis_pair_self (I := I) g₁ x i k, map_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [chartBasisVecFiber_self (I := I) x m, ContinuousLinearMap.map_smul,
+      trivFromE_self_apply (I := I) x ((chartModelBasis E) m)]
+  have hterm2 : PDE.DeTurck.connDiff (I := I) g₁ g_bg x
+      ((LeviCivita (I := I) g₁).toFun
+        (fun b => chartBasisVecFiber (I := I) x j b) x ((chartModelBasis E) i))
+      (chartBasisVecFiber (I := I) x k x) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (∑ m : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₁ x i j m (extChartAt I x x) *
+            (chartChristoffel (I := I) g₁ x k m p (extChartAt I x x) -
+              chartChristoffel (I := I) g_bg x k m p (extChartAt I x x))) •
+        chartBasisVecFiber (I := I) x p x := by
+    rw [hLCj, map_sum, ContinuousLinearMap.sum_apply]
+    have hstep : ∀ m : Fin (Module.finrank ℝ E),
+        PDE.DeTurck.connDiff (I := I) g₁ g_bg x
+          (chartChristoffel (I := I) g₁ x i j m (extChartAt I x x) •
+            chartBasisVecFiber (I := I) x m x)
+          (chartBasisVecFiber (I := I) x k x) =
+        ∑ p : Fin (Module.finrank ℝ E),
+          (chartChristoffel (I := I) g₁ x i j m (extChartAt I x x) *
+            (chartChristoffel (I := I) g₁ x k m p (extChartAt I x x) -
+              chartChristoffel (I := I) g_bg x k m p (extChartAt I x x))) •
+          chartBasisVecFiber (I := I) x p x := by
+      intro m
+      rw [ContinuousLinearMap.map_smul, ContinuousLinearMap.smul_apply]
+      rw [PDE.DeTurck.connDiff_chartBasis_pair_eq_sum (I := I) g₁ g_bg x hx_good m k]
+      rw [Finset.smul_sum]
+      refine Finset.sum_congr rfl (fun p _ => ?_)
+      rw [smul_smul]
+    rw [Finset.sum_congr rfl (fun m _ => hstep m), Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun p _ => ?_)
+    rw [← Finset.sum_smul]
+  have hterm3 : PDE.DeTurck.connDiff (I := I) g₁ g_bg x
+      (chartBasisVecFiber (I := I) x j x)
+      ((LeviCivita (I := I) g₁).toFun
+        (fun b => chartBasisVecFiber (I := I) x k b) x ((chartModelBasis E) i)) =
+      ∑ p : Fin (Module.finrank ℝ E),
+        (∑ m : Fin (Module.finrank ℝ E),
+          chartChristoffel (I := I) g₁ x i k m (extChartAt I x x) *
+            (chartChristoffel (I := I) g₁ x m j p (extChartAt I x x) -
+              chartChristoffel (I := I) g_bg x m j p (extChartAt I x x))) •
+        chartBasisVecFiber (I := I) x p x := by
+    rw [hLCk, map_sum]
+    have hstep : ∀ m : Fin (Module.finrank ℝ E),
+        PDE.DeTurck.connDiff (I := I) g₁ g_bg x (chartBasisVecFiber (I := I) x j x)
+          (chartChristoffel (I := I) g₁ x i k m (extChartAt I x x) •
+            chartBasisVecFiber (I := I) x m x) =
+        ∑ p : Fin (Module.finrank ℝ E),
+          (chartChristoffel (I := I) g₁ x i k m (extChartAt I x x) *
+            (chartChristoffel (I := I) g₁ x m j p (extChartAt I x x) -
+              chartChristoffel (I := I) g_bg x m j p (extChartAt I x x))) •
+          chartBasisVecFiber (I := I) x p x := by
+      intro m
+      rw [ContinuousLinearMap.map_smul]
+      rw [PDE.DeTurck.connDiff_chartBasis_pair_eq_sum (I := I) g₁ g_bg x hx_good j m]
+      rw [Finset.smul_sum]
+      refine Finset.sum_congr rfl (fun p _ => ?_)
+      rw [smul_smul]
+    rw [Finset.sum_congr rfl (fun m _ => hstep m), Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun p _ => ?_)
+    rw [← Finset.sum_smul]
+  rw [hswap]
+  have hXeq : smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x =
+      (chartModelBasis E) i :=
+    smoothExtensionTangent_eq (I := I) x ((chartModelBasis E) i)
+  change (LeviCivita (I := I) g₁).toFun
+      (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g_bg b
+        (chartBasisVecFiber (I := I) x j b) (chartBasisVecFiber (I := I) x k b)) x
+      (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+    - PDE.DeTurck.connDiff (I := I) g₁ g_bg x
+        ((LeviCivita (I := I) g₁).toFun
+          (fun b => chartBasisVecFiber (I := I) x j b) x
+          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+        (chartBasisVecFiber (I := I) x k x)
+    - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (chartBasisVecFiber (I := I) x j x)
+        ((LeviCivita (I := I) g₁).toFun
+          (fun b => chartBasisVecFiber (I := I) x k b) x
+          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)) = _
+  rw [hXeq, hterm1, hterm2, hterm3, ← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun p _ => ?_)
+  rw [← sub_smul, ← sub_smul]
+
 end TensorSpectral
 end Parabolic
 end Analysis
