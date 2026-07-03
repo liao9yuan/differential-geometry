@@ -24,6 +24,10 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMo
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciArmPrincipalCoeffBackgroundJetBound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.ContinuousSobolevRealization
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartLieDeriv
+import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 
 /-!
 # The intrinsic covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
