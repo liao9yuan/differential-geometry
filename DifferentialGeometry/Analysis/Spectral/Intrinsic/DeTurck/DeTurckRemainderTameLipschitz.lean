@@ -2849,9 +2849,9 @@ private theorem realizedDeTurckLie_threeArm_covariant_identity
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ∃ (Φ₁L : ℝ → SmoothCcTensor g₀ 3 2) (Φ₂L : ℝ → SmoothCcTensor g₀ 4 2),
-      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
-        (deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ') (δ := δ) (δ' := δ') ∧
+    ∃ (Φ₀L : ℝ → SmoothCcTensor g₀ 2 2) (Φ₁L : ℝ → SmoothCcTensor g₀ 3 2)
+      (Φ₂L : ℝ → SmoothCcTensor g₀ 4 2),
+      linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Φ₀L (δ := δ) (δ' := δ') ∧
       linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Φ₁L (δ := δ) (δ' := δ') ∧
       linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ₂L (δ := δ) (δ' := δ') ∧
       ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
@@ -2862,7 +2862,7 @@ private theorem realizedDeTurckLie_threeArm_covariant_identity
                 DeTurckCoefficients.chartLieDeTurckComp (I := I)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) s) =
             unitModel (I := I) (M := M) g₀ 2
-              (appCc (I := I) (M := M) g₀ 2 2 (deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ' s)
+              (appCc (I := I) (M := M) g₀ 2 2 (Φ₀L s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
                 + appCc (I := I) (M := M) g₀ 3 2 (Φ₁L s)
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
@@ -2891,10 +2891,9 @@ private theorem realizedDeTurckLie_threeArm_lowerOrder_residual
                   (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                 + appCc (I := I) (M := M) g₀ 4 2 (Φ₂L s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
-  obtain ⟨Φ₁L, Φ₂L, hj0, hj1, hj2, hident⟩ :=
+  obtain ⟨Φ₀L, Φ₁L, Φ₂L, hj0, hj1, hj2, hident⟩ :=
     realizedDeTurckLie_threeArm_covariant_identity (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
-  refine ⟨deTurckLieArm0Field (I := I) g₀ g_bg T T' hδ hδ', Φ₁L, Φ₂L, hj0, hj1, hj2,
-    fun s hs x v => ?_⟩
+  refine ⟨Φ₀L, Φ₁L, Φ₂L, hj0, hj1, hj2, fun s hs x v => ?_⟩
   rw [(hasDerivAt_realizedDeTurckLieChartSum_general (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
     x (v 0) (v 1) hs).deriv]
   exact hident s hs x v
@@ -2931,13 +2930,14 @@ private theorem lieArm_threeArm_coeffFields_perOrder_data
                       (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
                     + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
                       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
-          (∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 2 2 i (Φ₀ s)).toSection x) ≤ P i ∧
-            riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 3 2 i (Φ₁ s)).toSection x) ≤ P i ∧
-            riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 4 2 i (Φ₂ s)).toSection x) ≤ P i) :=
+          (∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((Φ₀ s).toSection x) ≤ P 0 ∧
+            riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((Φ₁ s).toSection x) ≤ P 0 ∧
+            riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((Φ₂ s).toSection x) ≤ P 0) ∧
+          (∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i (Φ₀ s)‖ ^ 2 ≤ P i ∧
+            ‖iteratedCovGrad (I := I) g₀ 3 2 i (Φ₁ s)‖ ^ 2 ≤ P i ∧
+            ‖iteratedCovGrad (I := I) g₀ 4 2 i (Φ₂ s)‖ ^ 2 ≤ P i) :=
   sorry
 
 private theorem lieArm_threeArm_coeffFields_C0_engine_data
@@ -2985,69 +2985,36 @@ private theorem lieArm_threeArm_coeffFields_C0_engine_data
           (∀ s ∈ Set.Icc (0 : ℝ) 1,
             (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 4 2 i (Φ₂ s)‖ ^ 2) ≤ B ^ 2) := by
   classical
-  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨P, hP_nn, hData⟩ :=
     lieArm_threeArm_coeffFields_perOrder_data (I := I) g₀ g_bg a ha_super hR hδ₀
-  set V : ℝ := (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal with hV_def
-  have hV_nn : 0 ≤ V := ENNReal.toReal_nonneg
   set Psum : ℝ := ∑ i ∈ Finset.range (a + 1), P i with hPsum_def
   have hPsum_nn : 0 ≤ Psum := Finset.sum_nonneg (fun i _ => hP_nn i)
-  refine ⟨Real.sqrt (P 0), Real.sqrt (V * Psum), Real.sqrt_nonneg _, Real.sqrt_nonneg _, ?_⟩
+  refine ⟨Real.sqrt (P 0), Real.sqrt Psum, Real.sqrt_nonneg _, Real.sqrt_nonneg _, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball
-  obtain ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hid, hPbound⟩ :=
+  obtain ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hid, hPt0, hL2⟩ :=
     hData T T' hδ_le hδ hδ'_le hδ' hTball hT'ball
-  have hB_sq : Real.sqrt (V * Psum) ^ 2 = V * Psum :=
-    Real.sq_sqrt (mul_nonneg hV_nn hPsum_nn)
-  have hC0 : ∀ (r : ℕ) (Φ : ℝ → SmoothCcTensor g₀ r 2)
-      (hb : ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
-        riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + 0) x
-          ((iteratedCovGrad (I := I) g₀ r 2 0 (Φ s)).toSection x) ≤ P 0),
-      ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
-        Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ r 2 x ((Φ s).toSection x)) ≤
-          Real.sqrt (P 0) := by
-    intro r Φ hb s hs x
-    have h := hb s hs x
-    rw [iteratedCovGrad_zero] at h
-    exact Real.sqrt_le_sqrt (by simpa using h)
-  have hkey : ∀ (r : ℕ) (Φ : ℝ → SmoothCcTensor g₀ r 2)
-      (s : ℝ),
-      (∀ (i : ℕ), i ∈ Finset.range (a + 1) → ∀ x : M,
-        riemannianFiberNormSq (I := I) (M := M) g₀ r (2 + i) x
-          ((iteratedCovGrad (I := I) g₀ r 2 i (Φ s)).toSection x) ≤ P i) →
+  have hB_sq : Real.sqrt Psum ^ 2 = Psum := Real.sq_sqrt hPsum_nn
+  have hkey : ∀ (r : ℕ) (Φ : ℝ → SmoothCcTensor g₀ r 2) (s : ℝ),
+      (∀ i ∈ Finset.range (a + 1),
+        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ P i) →
       (∑ i ∈ Finset.range (a + 1),
-        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2) ≤ Real.sqrt (V * Psum) ^ 2 := by
+        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2) ≤ Real.sqrt Psum ^ 2 := by
     intro r Φ s hbound
-    rw [hB_sq]
-    have hper : ∀ i ∈ Finset.range (a + 1),
-        ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ P i * V := by
-      intro i hi
-      have hpt := hbound i hi
-      have hbd := norm_le_of_pointwise_fiberNormSq_bound_rs (I := I) g₀ r (2 + i)
-        (iteratedCovGrad (I := I) g₀ r 2 i (Φ s)) (P i) hpt
-      calc ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2
-          ≤ P i * (riemannianVolumeMeasure (I := I) (M := M) g₀ Set.univ).toReal := hbd
-        _ = P i * V := by rw [hV_def]
-    calc ∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2
-        ≤ ∑ i ∈ Finset.range (a + 1), P i * V := Finset.sum_le_sum hper
-      _ = (∑ i ∈ Finset.range (a + 1), P i) * V := by rw [Finset.sum_mul]
-      _ = V * Psum := by rw [hPsum_def]; ring
+    rw [hB_sq, hPsum_def]
+    exact Finset.sum_le_sum hbound
   refine ⟨Φ₀, Φ₁, Φ₂, hj0, hj1, hj2, hid, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · exact hC0 2 Φ₀ (fun s hs x =>
-      (hPbound 0 (Nat.zero_le a) s hs x).1)
-  · exact hC0 3 Φ₁ (fun s hs x =>
-      (hPbound 0 (Nat.zero_le a) s hs x).2.1)
-  · exact hC0 4 Φ₂ (fun s hs x =>
-      (hPbound 0 (Nat.zero_le a) s hs x).2.2)
+  · exact fun s hs x => Real.sqrt_le_sqrt (hPt0 s hs x).1
+  · exact fun s hs x => Real.sqrt_le_sqrt (hPt0 s hs x).2.1
+  · exact fun s hs x => Real.sqrt_le_sqrt (hPt0 s hs x).2.2
   · intro s hs
-    exact hkey 2 Φ₀ s (fun i hi x =>
-      (hPbound i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs x).1)
+    exact hkey 2 Φ₀ s (fun i hi =>
+      (hL2 i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs).1)
   · intro s hs
-    exact hkey 3 Φ₁ s (fun i hi x =>
-      (hPbound i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs x).2.1)
+    exact hkey 3 Φ₁ s (fun i hi =>
+      (hL2 i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs).2.1)
   · intro s hs
-    exact hkey 4 Φ₂ s (fun i hi x =>
-      (hPbound i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs x).2.2)
+    exact hkey 4 Φ₂ s (fun i hi =>
+      (hL2 i (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs).2.2)
 
 private theorem lieArm_threeArm_coeffFields_C0_engine
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
