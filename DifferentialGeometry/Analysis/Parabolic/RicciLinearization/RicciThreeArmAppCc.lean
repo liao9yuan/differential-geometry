@@ -5646,7 +5646,7 @@ private lemma unitModel3_basisChart_readout_split
   simp only [arm1ReadoutCovDeriv, hJ0, hJtail]
 
 set_option linter.unusedSectionVars false in
-private def unitModel3SlotBilin
+def unitModel3SlotBilin
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
