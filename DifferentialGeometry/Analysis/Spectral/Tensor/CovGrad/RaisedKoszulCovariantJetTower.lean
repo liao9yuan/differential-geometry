@@ -455,7 +455,7 @@ private lemma iteratedCovGrad_cometricRaise_koszul_heq (g₀ : SmoothRiemannianM
       rw [domDomCongrSection_comp_rk]
       rfl
 
-private lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
+lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
         ((iteratedCovGrad (I := I) g₀ 1 2 i

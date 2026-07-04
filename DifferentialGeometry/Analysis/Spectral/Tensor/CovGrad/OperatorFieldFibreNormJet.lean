@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedAppCcLeibniz
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRReadingDominationUniformSup
 
@@ -613,7 +615,7 @@ private lemma succ_step_cast_transposition_eq {r a b : ℕ} (h : a = b)
   simp only [DifferentialGeometry.Integral.Connection.castRankCc_db]
   rw [hPQ, rsDomDomCongr_rsDomDomCongr]
 
-private lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
+lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (i : ℕ) :
     ∃ σ : Equiv.Perm (Fin ((s + 1) + i)),
       ∀ x : M,
@@ -1166,6 +1168,585 @@ theorem riemannianFiberNormSq_appCc_slotExtend_le (g : SmoothRiemannianMetric I 
     _ = riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
         rw [hsum]
+
+private lemma rfns_iteratedCovGrad_order_congr (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
+        ((iteratedCovGrad (I := I) g r s n S).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r (s + n') x
+        ((iteratedCovGrad (I := I) g r s n' S).toSection x) := by
+  subst h; rfl
+
+private lemma iteratedCovGrad_zero_arg (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
+    iteratedCovGrad (I := I) g r s m (0 : SmoothCcTensor g r s) = 0 := by
+  induction m with
+  | zero => rfl
+  | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
+
+set_option linter.unusedSectionVars false in
+
+private lemma one_le_appCcGdiag (j : ℕ) : (1 : ℝ) ≤ appCcGdiag (E := E) j := by
+  have hbase : (1 : ℝ) ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) := by
+    have h0 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+    linarith
+  calc (1 : ℝ) = 1 ^ j := (one_pow j).symm
+    _ ≤ (2 * ((Module.finrank ℝ E : ℝ) + 1)) ^ j :=
+        pow_le_pow_left₀ (by norm_num) hbase j
+    _ = appCcGdiag (E := E) j := by rw [appCcGdiag]
+
+set_option linter.unusedSectionVars false in
+
+private lemma appCcGdiag_succ_eq (j : ℕ) :
+    appCcGdiag (E := E) (j + 1) =
+      2 * ((Module.finrank ℝ E : ℝ) + 1) * appCcGdiag (E := E) j := by
+  rw [appCcGdiag, appCcGdiag, pow_succ]
+  ring
+
+set_option linter.unusedSectionVars false in
+
+theorem appCcLeibnizPsi_zero_right_eq (g : SmoothRiemannianMetric I M) (b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (i : ℕ) :
+    appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0 =
+      iteratedCovGrad (I := I) g b c i Φ := by
+  induction i with
+  | zero => rfl
+  | succ i ih =>
+      rw [show appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) 0 =
+          covGrad (I := I) (M := M) g (b + 0) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0) from rfl]
+      rw [ih]
+      rfl
+
+set_option linter.unusedSectionVars false in
+
+private lemma appCcLeibnizPsi_succ_succ_eq (g : SmoothRiemannianMetric I M) (b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (i j : ℕ) :
+    appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
+      (if j + 1 < i + 1 then
+          covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))
+        else 0) +
+        slotExtend (I := I) (M := M) g (b + j) (c + i)
+          (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) := by
+  rw [show appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
+      (if j + 1 < i + 1 then
+          covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))
+        else 0) +
+        castSrcCc g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
+          (castRankCc_db g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+            (slotExtend (I := I) (M := M) g (b + j) (c + i)
+              (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))) from rfl]
+  rw [castRankCc_db, castSrcCc]
+
+theorem rfns_iteratedCovGrad_appCcLeibnizPsi_window_le (g : SmoothRiemannianMetric I M) (b c : ℕ)
+    (Φ : SmoothCcTensor g b c) :
+    ∀ (i k m : ℕ), k ≤ i → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g (b + k) ((c + i) + m) x
+          ((iteratedCovGrad (I := I) g (b + k) (c + i) m
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k)).toSection x) ≤
+        appCcGdiag (E := E) i *
+          riemannianFiberNormSq (I := I) (M := M) g b (c + ((i - k) + m)) x
+            ((iteratedCovGrad (I := I) g b c ((i - k) + m) Φ).toSection x) := by
+  intro i
+  induction i with
+  | zero =>
+      intro k m hk x
+      obtain rfl : k = 0 := Nat.le_zero.mp hk
+      rw [rfns_iteratedCovGrad_order_congr (I := I) (M := M) g b c
+        (show (0 - 0) + m = m from by omega) Φ x]
+      rw [show appCcGdiag (E := E) 0 = (1 : ℝ) from by rw [appCcGdiag, pow_zero], one_mul]
+      exact le_of_eq rfl
+  | succ i ih =>
+      intro k m hk x
+      cases k with
+      | zero =>
+          rw [appCcLeibnizPsi_zero_right_eq (I := I) (M := M) g b c Φ (i + 1)]
+          rw [rfns_iteratedCovGrad_order_congr (I := I) (M := M) g b c
+            (show ((i + 1) - 0) + m = (i + 1) + m from by omega) Φ x]
+          have hcomp : riemannianFiberNormSq (I := I) (M := M) g (b + 0) ((c + (i + 1)) + m) x
+              ((iteratedCovGrad (I := I) g (b + 0) (c + (i + 1)) m
+                (iteratedCovGrad (I := I) g b c (i + 1) Φ)).toSection x) =
+              riemannianFiberNormSq (I := I) (M := M) g b (c + ((i + 1) + m)) x
+                ((iteratedCovGrad (I := I) g b c ((i + 1) + m) Φ).toSection x) :=
+            rfns_iteratedCovGrad_comp (I := I) (M := M) g b c (i + 1) m Φ x
+          rw [hcomp]
+          exact le_mul_of_one_le_left
+            (riemannianFiberNormSq_nonneg (I := I) (M := M) g b (c + ((i + 1) + m)) x _)
+            (one_le_appCcGdiag (E := E) (i + 1))
+      | succ j =>
+          have hji : j ≤ i := by omega
+          rw [appCcLeibnizPsi_succ_succ_eq (I := I) (M := M) g b c Φ i j]
+          set Aif := (if j + 1 < i + 1 then
+              covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))
+            else 0) with hAif_def
+          set Bse := slotExtend (I := I) (M := M) g (b + j) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) with hBse_def
+          rw [iteratedCovGrad_add (I := I) g (b + (j + 1)) (c + (i + 1)) m Aif Bse]
+          rw [show ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m Aif +
+                iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m Bse).toSection x) =
+              (iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m Aif).toSection x +
+                (iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m Bse).toSection x from by
+            rw [SmoothCcTensor.toSection_add]; rfl]
+          refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g (b + (j + 1))
+            ((c + (i + 1)) + m) x _ _) ?_
+          set R := riemannianFiberNormSq (I := I) (M := M) g b
+            (c + (((i + 1) - (j + 1)) + m)) x
+            ((iteratedCovGrad (I := I) g b c (((i + 1) - (j + 1)) + m) Φ).toSection x) with hR_def
+          have hR_nn : 0 ≤ R := riemannianFiberNormSq_nonneg (I := I) (M := M) g b _ x _
+          have hG_nn : (0 : ℝ) ≤ appCcGdiag (E := E) i := appCcGdiag_nonneg (E := E) i
+          have hB : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1))
+              ((c + (i + 1)) + m) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m Bse).toSection x) ≤
+              (Module.finrank ℝ E : ℝ) * (appCcGdiag (E := E) i * R) := by
+            refine le_trans
+              (rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g (b + j) (c + i)
+                (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j) m x)
+              (mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _))
+            have hbound := ih j m hji x
+            rw [rfns_iteratedCovGrad_order_congr (I := I) (M := M) g b c
+              (show (i - j) + m = ((i + 1) - (j + 1)) + m from by omega) Φ x] at hbound
+            exact hbound
+          have hA : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1))
+              ((c + (i + 1)) + m) x
+              ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m Aif).toSection x) ≤
+              appCcGdiag (E := E) i * R := by
+            rcases lt_or_ge (j + 1) (i + 1) with hlt | hge
+            · rw [hAif_def, if_pos hlt]
+              have hcomp : riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1))
+                  ((c + (i + 1)) + m) x
+                  ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + (i + 1)) m
+                    (covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
+                      (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1)))).toSection x) =
+                  riemannianFiberNormSq (I := I) (M := M) g (b + (j + 1))
+                    ((c + i) + (1 + m)) x
+                    ((iteratedCovGrad (I := I) g (b + (j + 1)) (c + i) (1 + m)
+                      (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))).toSection x) :=
+                rfns_iteratedCovGrad_comp (I := I) (M := M) g (b + (j + 1)) (c + i) 1 m
+                  (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1)) x
+              rw [hcomp]
+              have hbound := ih (j + 1) (1 + m) (by omega : j + 1 ≤ i) x
+              rw [rfns_iteratedCovGrad_order_congr (I := I) (M := M) g b c
+                (show (i - (j + 1)) + (1 + m) = ((i + 1) - (j + 1)) + m from by omega) Φ x]
+                at hbound
+              exact hbound
+            · have hji' : j = i := by omega
+              subst hji'
+              rw [hAif_def, if_neg (by omega : ¬ (j + 1 < j + 1))]
+              rw [iteratedCovGrad_zero_arg (I := I) (M := M) g (b + (j + 1)) (c + (j + 1)) m]
+              rw [show ((0 : SmoothCcTensor g (b + (j + 1)) (c + (j + 1) + m)).toSection x :
+                  TensorRSSpace (b + (j + 1)) (c + (j + 1) + m) I x) = 0 from by
+                rw [SmoothCcTensor.toSection_zero]; rfl]
+              rw [riemannianFiberNormSq_zero (I := I) (M := M) g (b + (j + 1))
+                (c + (j + 1) + m) x]
+              exact mul_nonneg hG_nn hR_nn
+          rw [appCcGdiag_succ_eq (E := E) i]
+          nlinarith [hA, hB, hR_nn, hG_nn,
+            mul_le_mul_of_nonneg_left hA (by norm_num : (0 : ℝ) ≤ 2),
+            mul_le_mul_of_nonneg_left hB (by norm_num : (0 : ℝ) ≤ 2)]
+
+set_option linter.unusedSectionVars false in
+
+theorem iteratedCovGrad_appCc_eq_coeffCorner_add_lower (g : SmoothRiemannianMetric I M)
+    (b s : ℕ) (Φ : SmoothCcTensor g b s) (W : SmoothCcTensor g 0 b) (i : ℕ) :
+    iteratedCovGrad (I := I) g 0 s i (appCc (I := I) (M := M) g b s Φ W) =
+      appCc (I := I) (M := M) g b (s + i) (iteratedCovGrad (I := I) g b s i Φ) W +
+        ∑ k ∈ Finset.range i,
+          appCcRS (I := I) (M := M) g 0 (b + (k + 1)) (s + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b s Φ i (k + 1))
+            (iteratedCovGrad (I := I) g 0 b (k + 1) W) := by
+  rw [iteratedCovGrad_appCc_eq (I := I) (M := M) g b s Φ W i]
+  rw [Finset.sum_range_succ' (fun k =>
+    appCcRS (I := I) (M := M) g 0 (b + k) (s + i)
+      (appCcLeibnizPsi (I := I) (M := M) g b s Φ i k)
+      (iteratedCovGrad (I := I) g 0 b k W)) i]
+  have hf0 : appCcRS (I := I) (M := M) g 0 (b + 0) (s + i)
+      (appCcLeibnizPsi (I := I) (M := M) g b s Φ i 0)
+      (iteratedCovGrad (I := I) g 0 b 0 W) =
+      appCc (I := I) (M := M) g b (s + i) (iteratedCovGrad (I := I) g b s i Φ) W := by
+    rw [appCcLeibnizPsi_zero_right_eq (I := I) (M := M) g b s Φ i]
+    exact appCcRS_zero_eq_appCc (I := I) (M := M) g b (s + i)
+      (iteratedCovGrad (I := I) g b s i Φ) W
+  rw [hf0]
+  exact add_comm _ _
+
+set_option linter.unusedSectionVars false in
+
+theorem rfns_iteratedCovGrad_appCc_coeffLower_le (g : SmoothRiemannianMetric I M)
+    (b s : ℕ) (Φ : SmoothCcTensor g b s) (W : SmoothCcTensor g 0 b) (i : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+        ((∑ k ∈ Finset.range i,
+          appCcRS (I := I) (M := M) g 0 (b + (k + 1)) (s + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b s Φ i (k + 1))
+            (iteratedCovGrad (I := I) g 0 b (k + 1) W)).toSection x) ≤
+      (i : ℝ) * appCcGdiag (E := E) i *
+        ∑ k ∈ Finset.range i,
+          riemannianFiberNormSq (I := I) (M := M) g b (s + (i - (k + 1))) x
+              ((iteratedCovGrad (I := I) g b s (i - (k + 1)) Φ).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 (b + (k + 1)) x
+              ((iteratedCovGrad (I := I) g 0 b (k + 1) W).toSection x) := by
+  rw [SmoothCcTensor.toSection_sum_apply]
+  refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 (s + i) x
+    (Finset.range i) (fun k =>
+      (appCcRS (I := I) (M := M) g 0 (b + (k + 1)) (s + i)
+        (appCcLeibnizPsi (I := I) (M := M) g b s Φ i (k + 1))
+        (iteratedCovGrad (I := I) g 0 b (k + 1) W)).toSection x)) ?_
+  rw [Finset.card_range, mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg i)
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum (fun k hk => ?_)
+  have hk_le : k + 1 ≤ i := by
+    simp only [Finset.mem_range] at hk
+    omega
+  rw [appCcRS_toSection (I := I) (M := M) g 0 (b + (k + 1)) (s + i)
+    (appCcLeibnizPsi (I := I) (M := M) g b s Φ i (k + 1))
+    (iteratedCovGrad (I := I) g 0 b (k + 1) W) x]
+  refine le_trans (riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g 0 (b + (k + 1))
+    (s + i) x _ _) ?_
+  rw [← mul_assoc]
+  refine mul_le_mul_of_nonneg_right ?_
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (b + (k + 1)) x _)
+  exact rfns_iteratedCovGrad_appCcLeibnizPsi_window_le (I := I) (M := M) g b s Φ i (k + 1) 0 hk_le x
+
+set_option linter.unusedSectionVars false in
+
+theorem iteratedCovGrad_appCcRS_eq_argCorner_add_lower (g : SmoothRiemannianMetric I M)
+    (p a b : ℕ) (Θ : SmoothCcTensor g a b) (X : SmoothCcTensor g p a) (i : ℕ) :
+    iteratedCovGrad (I := I) g p b i (appCcRS (I := I) (M := M) g p a b Θ X) =
+      appCcRS (I := I) (M := M) g p (a + i) (b + i)
+          (appCcLeibnizPsi (I := I) (M := M) g a b Θ i i)
+          (iteratedCovGrad (I := I) g p a i X) +
+        ∑ k ∈ Finset.range i,
+          appCcRS (I := I) (M := M) g p (a + k) (b + i)
+            (appCcLeibnizPsi (I := I) (M := M) g a b Θ i k)
+            (iteratedCovGrad (I := I) g p a k X) := by
+  rw [iteratedCovGrad_appCcRS_eq (I := I) (M := M) g p a b Θ X i]
+  rw [Finset.sum_range_succ]
+  exact add_comm _ _
+
+set_option linter.unusedSectionVars false in
+
+theorem rfns_appCcRS_argLower_le (g : SmoothRiemannianMetric I M)
+    (p a b : ℕ) (Θ : SmoothCcTensor g a b) (X : SmoothCcTensor g p a) (i : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g p (b + i) x
+        ((∑ k ∈ Finset.range i,
+          appCcRS (I := I) (M := M) g p (a + k) (b + i)
+            (appCcLeibnizPsi (I := I) (M := M) g a b Θ i k)
+            (iteratedCovGrad (I := I) g p a k X)).toSection x) ≤
+      (i : ℝ) * appCcGdiag (E := E) i *
+        ∑ k ∈ Finset.range i,
+          riemannianFiberNormSq (I := I) (M := M) g a (b + (i - k)) x
+              ((iteratedCovGrad (I := I) g a b (i - k) Θ).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g p (a + k) x
+              ((iteratedCovGrad (I := I) g p a k X).toSection x) := by
+  rw [SmoothCcTensor.toSection_sum_apply]
+  refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g p (b + i) x
+    (Finset.range i) (fun k =>
+      (appCcRS (I := I) (M := M) g p (a + k) (b + i)
+        (appCcLeibnizPsi (I := I) (M := M) g a b Θ i k)
+        (iteratedCovGrad (I := I) g p a k X)).toSection x)) ?_
+  rw [Finset.card_range, mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg i)
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum (fun k hk => ?_)
+  have hk_le : k ≤ i := by
+    simp only [Finset.mem_range] at hk
+    omega
+  rw [appCcRS_toSection (I := I) (M := M) g p (a + k) (b + i)
+    (appCcLeibnizPsi (I := I) (M := M) g a b Θ i k)
+    (iteratedCovGrad (I := I) g p a k X) x]
+  refine le_trans (riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g p (a + k)
+    (b + i) x _ _) ?_
+  rw [← mul_assoc]
+  refine mul_le_mul_of_nonneg_right ?_
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g p (a + k) x _)
+  have hbound := rfns_iteratedCovGrad_appCcLeibnizPsi_window_le (I := I) (M := M) g a b Θ i k 0 hk_le x
+  rw [rfns_iteratedCovGrad_order_congr (I := I) (M := M) g a b
+    (show (i - k) + 0 = i - k from by omega) Θ x] at hbound
+  exact hbound
+
+private def slotExtendIterFib (g : SmoothRiemannianMetric I M) (b c : ℕ) (x : M)
+    (A : Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x) :
+    ∀ w : ℕ, Tensor0SSpace (b + w) I x →L[ℝ] Tensor0SSpace (c + w) I x
+  | 0 => A
+  | (w + 1) => slotExtendFib (I := I) (M := M) g (b + w) (c + w) x
+      (slotExtendIterFib g b c x A w)
+
+set_option linter.unusedSectionVars false in
+
+private lemma fiberNormSqComponent_comp_eq
+    (g : SmoothRiemannianMetric I M) (p a c : ℕ) (x : M)
+    (Φx : TensorRSSpace a c I x) (Wx : TensorRSSpace p a I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (bse : Module.Basis (Fin n) ℝ (TangentSpace I x))
+    (hbse : ∀ i : Fin n, bse i = e i)
+    (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (K : Fin p → Fin n) (J : Fin c → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g x p c
+        (show TensorRSSpace p c I x from
+          (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx).comp
+            (show Tensor0SSpace p I x →L[ℝ] Tensor0SSpace a I x from Wx)) n e K J =
+      ∑ P : Fin a → Fin n,
+        fiberNormSqComponent (I := I) (M := M) g x p a Wx n e K P *
+          fiberNormSqComponent (I := I) (M := M) g x a c Φx n e P J := by
+  classical
+  change (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx)
+      ((show Tensor0SSpace p I x →L[ℝ] Tensor0SSpace a I x from Wx)
+        ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin p) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e (K k)))))
+      (fun k => e (J k)) = _
+  set wval : Tensor0SSpace a I x :=
+    (show Tensor0SSpace p I x →L[ℝ] Tensor0SSpace a I x from Wx)
+      ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin p) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K k)))) with hwval
+  have hexp := tensorS_coframe_expansion (I := I) (M := M) g x a e bse hbse horth wval
+  conv_lhs => rw [hexp]
+  rw [map_sum]
+  rw [show (∑ P : Fin a → Fin n,
+        (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx)
+          ((wval (fun k : Fin a => e (P k))) • coframeS (I := I) (M := M) g x a e P)) =
+      ∑ P : Fin a → Fin n, (wval (fun k : Fin a => e (P k))) •
+        (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx)
+          (coframeS (I := I) (M := M) g x a e P) from by
+    refine Finset.sum_congr rfl (fun P _ => ?_); rw [map_smul]]
+  rw [show ((∑ P : Fin a → Fin n, (wval (fun k : Fin a => e (P k))) •
+        (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx)
+          (coframeS (I := I) (M := M) g x a e P)) (fun k => e (J k)) : ℝ) =
+      Tensor0SSpace.toModel (∑ P : Fin a → Fin n, (wval (fun k : Fin a => e (P k))) •
+        (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx)
+          (coframeS (I := I) (M := M) g x a e P)) (fun k => e (J k)) from rfl]
+  rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun P _ => ?_)
+  rw [Tensor0SSpace.toModelL_apply, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply]
+  have hΦcomp : Tensor0SSpace.toModel
+      ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from Φx)
+        (coframeS (I := I) (M := M) g x a e P)) (fun k => e (J k)) =
+      fiberNormSqComponent (I := I) (M := M) g x a c Φx n e P J := rfl
+  rw [hΦcomp]
+  have hwcomp : wval (fun k : Fin a => e (P k)) =
+      fiberNormSqComponent (I := I) (M := M) g x p a Wx n e K P := rfl
+  rw [hwcomp, smul_eq_mul]
+
+set_option linter.unusedSectionVars false in
+
+private lemma sum_sq_component_slotExtendIterFib_le (g : SmoothRiemannianMetric I M) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) :
+    ∀ (w b c : ℕ) (A : Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x)
+      (V : (Fin (b + w) → Fin n) → ℝ),
+      ∑ J : Fin (c + w) → Fin n,
+          (∑ P : Fin (b + w) → Fin n,
+            V P * fiberNormSqComponent (I := I) (M := M) g x (b + w) (c + w)
+              (show TensorRSSpace (b + w) (c + w) I x from
+                slotExtendIterFib (I := I) (M := M) g b c x A w) n e P J) ^ 2 ≤
+        (∑ P : Fin (b + w) → Fin n, (V P) ^ 2) *
+          ∑ Q : Fin b → Fin n, ∑ L : Fin c → Fin n,
+            (fiberNormSqComponent (I := I) (M := M) g x b c
+              (show TensorRSSpace b c I x from A) n e Q L) ^ 2 := by
+  intro w
+  induction w with
+  | zero =>
+      intro b c A V
+      refine le_trans (Finset.sum_le_sum (fun J (_ : J ∈ Finset.univ) =>
+        Finset.sum_mul_sq_le_sq_mul_sq (R := ℝ) Finset.univ
+          (fun P : Fin (b + 0) → Fin n => V P)
+          (fun P : Fin (b + 0) → Fin n =>
+            fiberNormSqComponent (I := I) (M := M) g x (b + 0) (c + 0)
+              (show TensorRSSpace (b + 0) (c + 0) I x from
+                slotExtendIterFib (I := I) (M := M) g b c x A 0) n e P J))) ?_
+      rw [← Finset.mul_sum]
+      refine mul_le_mul_of_nonneg_left (le_of_eq ?_)
+        (Finset.sum_nonneg (fun P _ => sq_nonneg _))
+      rw [Finset.sum_comm]
+      rfl
+  | succ w ihw =>
+      intro b c A V
+      set cw : (Fin (b + w) → Fin n) → (Fin (c + w) → Fin n) → ℝ := fun P J =>
+        fiberNormSqComponent (I := I) (M := M) g x (b + w) (c + w)
+          (show TensorRSSpace (b + w) (c + w) I x from
+            slotExtendIterFib (I := I) (M := M) g b c x A w) n e P J with hcw_def
+      have hpeel : ∀ (P : Fin (b + (w + 1)) → Fin n) (J : Fin (c + (w + 1)) → Fin n),
+          fiberNormSqComponent (I := I) (M := M) g x (b + (w + 1)) (c + (w + 1))
+              (show TensorRSSpace (b + (w + 1)) (c + (w + 1)) I x from
+                slotExtendIterFib (I := I) (M := M) g b c x A (w + 1)) n e P J =
+            (if J 0 = P 0 then (1 : ℝ) else 0) *
+              cw (fun k => P (Fin.succ k)) (fun k => J (Fin.succ k)) := fun P J =>
+        fiberNormSqComponent_slotExtendFib_eq (I := I) (M := M) g (b + w) (c + w) x
+          (slotExtendIterFib (I := I) (M := M) g b c x A w) e horth P J
+      have hstep : ∀ J : Fin (c + (w + 1)) → Fin n,
+          (∑ P : Fin (b + (w + 1)) → Fin n,
+            V P * fiberNormSqComponent (I := I) (M := M) g x (b + (w + 1)) (c + (w + 1))
+              (show TensorRSSpace (b + (w + 1)) (c + (w + 1)) I x from
+                slotExtendIterFib (I := I) (M := M) g b c x A (w + 1)) n e P J) =
+          ∑ P' : Fin (b + w) → Fin n,
+            V (Fin.cons (J 0) P') * cw P' (fun k => J (Fin.succ k)) := by
+        intro J
+        calc (∑ P : Fin (b + (w + 1)) → Fin n,
+              V P * fiberNormSqComponent (I := I) (M := M) g x (b + (w + 1)) (c + (w + 1))
+                (show TensorRSSpace (b + (w + 1)) (c + (w + 1)) I x from
+                  slotExtendIterFib (I := I) (M := M) g b c x A (w + 1)) n e P J)
+            = ∑ P : Fin (b + (w + 1)) → Fin n,
+                V P * ((if J 0 = P 0 then (1 : ℝ) else 0) *
+                  cw (fun k => P (Fin.succ k)) (fun k => J (Fin.succ k))) :=
+              Finset.sum_congr rfl (fun P _ => by rw [hpeel P J])
+          _ = ∑ pr : Fin n × (Fin (b + w) → Fin n),
+                V (Fin.cons pr.1 pr.2) * ((if J 0 = pr.1 then (1 : ℝ) else 0) *
+                  cw pr.2 (fun k => J (Fin.succ k))) :=
+              (Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (b + w + 1) => Fin n))
+                (fun pr : Fin n × (Fin (b + w) → Fin n) =>
+                  V (Fin.cons pr.1 pr.2) * ((if J 0 = pr.1 then (1 : ℝ) else 0) *
+                    cw pr.2 (fun k => J (Fin.succ k))))
+                (fun P => V P * ((if J 0 = P 0 then (1 : ℝ) else 0) *
+                  cw (fun k => P (Fin.succ k)) (fun k => J (Fin.succ k))))
+                (fun pr => by simp [Fin.consEquiv])).symm
+          _ = ∑ p₀ : Fin n, ∑ P' : Fin (b + w) → Fin n,
+                V (Fin.cons p₀ P') * ((if J 0 = p₀ then (1 : ℝ) else 0) *
+                  cw P' (fun k => J (Fin.succ k))) := Fintype.sum_prod_type _
+          _ = ∑ P' : Fin (b + w) → Fin n, ∑ p₀ : Fin n,
+                V (Fin.cons p₀ P') * ((if J 0 = p₀ then (1 : ℝ) else 0) *
+                  cw P' (fun k => J (Fin.succ k))) := Finset.sum_comm
+          _ = ∑ P' : Fin (b + w) → Fin n,
+                V (Fin.cons (J 0) P') * cw P' (fun k => J (Fin.succ k)) := by
+              refine Finset.sum_congr rfl (fun P' _ => ?_)
+              simp only [mul_ite, ite_mul, one_mul, zero_mul, mul_zero]
+              rw [Finset.sum_ite_eq Finset.univ (J 0) (fun p₀ =>
+                V (Fin.cons p₀ P') * cw P' (fun k => J (Fin.succ k)))]
+              rw [if_pos (Finset.mem_univ (J 0))]
+      calc (∑ J : Fin (c + (w + 1)) → Fin n,
+            (∑ P : Fin (b + (w + 1)) → Fin n,
+              V P * fiberNormSqComponent (I := I) (M := M) g x (b + (w + 1)) (c + (w + 1))
+                (show TensorRSSpace (b + (w + 1)) (c + (w + 1)) I x from
+                  slotExtendIterFib (I := I) (M := M) g b c x A (w + 1)) n e P J) ^ 2)
+          = ∑ J : Fin (c + (w + 1)) → Fin n,
+              (∑ P' : Fin (b + w) → Fin n,
+                V (Fin.cons (J 0) P') * cw P' (fun k => J (Fin.succ k))) ^ 2 :=
+            Finset.sum_congr rfl (fun J _ => by rw [hstep J])
+        _ = ∑ pr : Fin n × (Fin (c + w) → Fin n),
+              (∑ P' : Fin (b + w) → Fin n,
+                V (Fin.cons pr.1 P') * cw P' pr.2) ^ 2 :=
+            (Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (c + w + 1) => Fin n))
+              (fun pr : Fin n × (Fin (c + w) → Fin n) =>
+                (∑ P' : Fin (b + w) → Fin n, V (Fin.cons pr.1 P') * cw P' pr.2) ^ 2)
+              (fun J => (∑ P' : Fin (b + w) → Fin n,
+                V (Fin.cons (J 0) P') * cw P' (fun k => J (Fin.succ k))) ^ 2)
+              (fun pr => by simp [Fin.consEquiv])).symm
+        _ = ∑ j₀ : Fin n, ∑ J' : Fin (c + w) → Fin n,
+              (∑ P' : Fin (b + w) → Fin n,
+                V (Fin.cons j₀ P') * cw P' J') ^ 2 := Fintype.sum_prod_type _
+        _ ≤ ∑ j₀ : Fin n,
+              ((∑ P' : Fin (b + w) → Fin n, (V (Fin.cons j₀ P')) ^ 2) *
+                ∑ Q : Fin b → Fin n, ∑ L : Fin c → Fin n,
+                  (fiberNormSqComponent (I := I) (M := M) g x b c
+                    (show TensorRSSpace b c I x from A) n e Q L) ^ 2) :=
+            Finset.sum_le_sum (fun j₀ _ => ihw b c A (fun P' => V (Fin.cons j₀ P')))
+        _ = (∑ j₀ : Fin n, ∑ P' : Fin (b + w) → Fin n, (V (Fin.cons j₀ P')) ^ 2) *
+              ∑ Q : Fin b → Fin n, ∑ L : Fin c → Fin n,
+                (fiberNormSqComponent (I := I) (M := M) g x b c
+                  (show TensorRSSpace b c I x from A) n e Q L) ^ 2 :=
+            (Finset.sum_mul _ _ _).symm
+        _ = (∑ P : Fin (b + (w + 1)) → Fin n, (V P) ^ 2) *
+              ∑ Q : Fin b → Fin n, ∑ L : Fin c → Fin n,
+                (fiberNormSqComponent (I := I) (M := M) g x b c
+                  (show TensorRSSpace b c I x from A) n e Q L) ^ 2 := by
+            refine congrArg (fun t : ℝ => t *
+              ∑ Q : Fin b → Fin n, ∑ L : Fin c → Fin n,
+                (fiberNormSqComponent (I := I) (M := M) g x b c
+                  (show TensorRSSpace b c I x from A) n e Q L) ^ 2) ?_
+            exact Eq.trans (Fintype.sum_prod_type
+                (fun pr : Fin n × (Fin (b + w) → Fin n) => (V (Fin.cons pr.1 pr.2)) ^ 2)).symm
+              (Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (b + w + 1) => Fin n))
+                (fun pr : Fin n × (Fin (b + w) → Fin n) => (V (Fin.cons pr.1 pr.2)) ^ 2)
+                (fun P => (V P) ^ 2)
+                (fun pr => by simp [Fin.consEquiv]))
+
+set_option linter.unusedSectionVars false in
+
+private theorem rfns_comp_slotExtendIterFib_le (g : SmoothRiemannianMetric I M) (x : M)
+    (w p b c : ℕ) (A : Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x)
+    (U : Tensor0SSpace p I x →L[ℝ] Tensor0SSpace (b + w) I x) :
+    riemannianFiberNormSq (I := I) (M := M) g p (c + w) x
+        (show TensorRSSpace p (c + w) I x from
+          (slotExtendIterFib (I := I) (M := M) g b c x A w).comp U) ≤
+      riemannianFiberNormSq (I := I) (M := M) g b c x (show TensorRSSpace b c I x from A) *
+        riemannianFiberNormSq (I := I) (M := M) g p (b + w) x
+          (show TensorRSSpace p (b + w) I x from U) := by
+  classical
+  obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis (I := I) (M := M) g x
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g p (c + w) x _ e bse rfl hbse horth]
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g b c x _ e bse rfl hbse horth]
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g p (b + w) x _ e bse rfl hbse horth]
+  have hcomp : ∀ (K : Fin p → Fin (Module.finrank ℝ E))
+      (J : Fin (c + w) → Fin (Module.finrank ℝ E)),
+      fiberNormSqComponent (I := I) (M := M) g x p (c + w)
+          (show TensorRSSpace p (c + w) I x from
+            (slotExtendIterFib (I := I) (M := M) g b c x A w).comp U)
+          (Module.finrank ℝ E) e K J =
+        ∑ P : Fin (b + w) → Fin (Module.finrank ℝ E),
+          fiberNormSqComponent (I := I) (M := M) g x p (b + w)
+            (show TensorRSSpace p (b + w) I x from U) (Module.finrank ℝ E) e K P *
+            fiberNormSqComponent (I := I) (M := M) g x (b + w) (c + w)
+              (show TensorRSSpace (b + w) (c + w) I x from
+                slotExtendIterFib (I := I) (M := M) g b c x A w)
+              (Module.finrank ℝ E) e P J :=
+    fun K J => fiberNormSqComponent_comp_eq (I := I) (M := M) g p (b + w) (c + w) x
+      (show TensorRSSpace (b + w) (c + w) I x from
+        slotExtendIterFib (I := I) (M := M) g b c x A w)
+      (show TensorRSSpace p (b + w) I x from U) e bse hbse horth K J
+  rw [Finset.sum_congr rfl (fun K (_ : K ∈ Finset.univ) =>
+    Finset.sum_congr rfl (fun J (_ : J ∈ Finset.univ) => by rw [hcomp K J]))]
+  refine le_trans (Finset.sum_le_sum (fun K (_ : K ∈ Finset.univ) =>
+    sum_sq_component_slotExtendIterFib_le (I := I) (M := M) g x e horth w b c A
+      (fun P => fiberNormSqComponent (I := I) (M := M) g x p (b + w)
+        (show TensorRSSpace p (b + w) I x from U) (Module.finrank ℝ E) e K P))) ?_
+  rw [← Finset.sum_mul]
+  rw [mul_comm]
+
+set_option linter.unusedSectionVars false in
+
+private lemma appCcLeibnizPsi_diag_toSection (g : SmoothRiemannianMetric I M) (b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (i : ℕ) (x : M) :
+    ((appCcLeibnizPsi (I := I) (M := M) g b c Φ i i).toSection x :
+        Tensor0SSpace (b + i) I x →L[ℝ] Tensor0SSpace (c + i) I x) =
+      slotExtendIterFib (I := I) (M := M) g b c x
+        (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x) i := by
+  induction i with
+  | zero => rfl
+  | succ i ih =>
+      have hdiag : appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (i + 1) =
+          slotExtend (I := I) (M := M) g (b + i) (c + i)
+            (appCcLeibnizPsi (I := I) (M := M) g b c Φ i i) := by
+        rw [appCcLeibnizPsi_succ_succ_eq (I := I) (M := M) g b c Φ i i]
+        rw [if_neg (by omega : ¬ (i + 1 < i + 1)), zero_add]
+      rw [hdiag]
+      rw [show (slotExtendIterFib (I := I) (M := M) g b c x
+            (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x) (i + 1)) =
+          slotExtendFib (I := I) (M := M) g (b + i) (c + i) x
+            (slotExtendIterFib (I := I) (M := M) g b c x
+              (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x) i)
+          from rfl]
+      rw [← ih]
+      rfl
+
+theorem rfns_appCcRS_appCcLeibnizPsi_diag_le (g : SmoothRiemannianMetric I M)
+    (p b c : ℕ) (Φ : SmoothCcTensor g b c) (i : ℕ)
+    (U : SmoothCcTensor g p (b + i)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g p (c + i) x
+        ((appCcRS (I := I) (M := M) g p (b + i) (c + i)
+          (appCcLeibnizPsi (I := I) (M := M) g b c Φ i i) U).toSection x) ≤
+      riemannianFiberNormSq (I := I) (M := M) g b c x (Φ.toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g p (b + i) x (U.toSection x) := by
+  rw [appCcRS_toSection (I := I) (M := M) g p (b + i) (c + i)
+    (appCcLeibnizPsi (I := I) (M := M) g b c Φ i i) U x]
+  rw [show (show Tensor0SSpace (b + i) I x →L[ℝ] Tensor0SSpace (c + i) I x from
+        (appCcLeibnizPsi (I := I) (M := M) g b c Φ i i).toSection x) =
+      slotExtendIterFib (I := I) (M := M) g b c x
+        (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x) i from
+    appCcLeibnizPsi_diag_toSection (I := I) (M := M) g b c Φ i x]
+  exact rfns_comp_slotExtendIterFib_le (I := I) (M := M) g x i p b c
+    (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x)
+    (show Tensor0SSpace p I x →L[ℝ] Tensor0SSpace (b + i) I x from U.toSection x)
 
 end Connection
 end Integral

@@ -5646,7 +5646,7 @@ private lemma unitModel3_basisChart_readout_split
   simp only [arm1ReadoutCovDeriv, hJ0, hJtail]
 
 set_option linter.unusedSectionVars false in
-private def unitModel3SlotBilin
+def unitModel3SlotBilin
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -6379,7 +6379,7 @@ private lemma valueCoeff02_center_eq
   ring
 
 set_option linter.unusedSectionVars false in
-private lemma arm1ReadoutCovDeriv_center_eq
+lemma arm1ReadoutCovDeriv_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c : Fin (Module.finrank ℝ E)) :
     arm1ReadoutCovDeriv (I := I) (M := M) g₀ h x ![a, b, c] =
@@ -6723,7 +6723,7 @@ private lemma arm2ReadoutPairTerm2_center_eq
     rw [rawCompCovGrad03_center_eq (I := I) (M := M) g₀ h x b c r] ]
 
 set_option linter.unusedSectionVars false in
-private lemma arm2ReadoutCovDerivPair_center_eq
+lemma arm2ReadoutCovDerivPair_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
     arm2ReadoutCovDerivPair (I := I) (M := M) g₀ h x ![a, b, c, d] =
