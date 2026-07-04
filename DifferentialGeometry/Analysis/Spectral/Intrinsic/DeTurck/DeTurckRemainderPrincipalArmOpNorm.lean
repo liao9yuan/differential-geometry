@@ -729,6 +729,46 @@ theorem exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_threeArmAppCc
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) :=
   sorry
 
+theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_lowOrder
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
+    ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
+      ∀ (m : ℕ), m ≤ 1 →
+      ∀ (C : SmoothCcTensor g₀ (2 + m) 2) (T₀ : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i C‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
+        ∀ q : ℕ, q + (Module.finrank ℝ E / 2 + 3) ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (appCc (I := I) (M := M) g₀ (2 + m) 2 C
+                (iteratedCovGrad (I := I) g₀ 0 2 m T₀))‖ ≤
+            Cm q * Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i T₀‖ ^ 2) :=
+  sorry
+
+theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_highOrder
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
+    ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
+      ∀ (m : ℕ), m ≤ 1 →
+      ∀ (C : SmoothCcTensor g₀ (2 + m) 2) (T₀ : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + m) 2 i C‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
+        ∀ q : ℕ, a ≤ q + (Module.finrank ℝ E / 2 + 3) →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (appCc (I := I) (M := M) g₀ (2 + m) 2 C
+                (iteratedCovGrad (I := I) g₀ 0 2 m T₀))‖ ≤
+            Cm q * Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i T₀‖ ^ 2) :=
+  sorry
+
 theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -746,8 +786,28 @@ theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
               (appCc (I := I) (M := M) g₀ (2 + m) 2 C
                 (iteratedCovGrad (I := I) g₀ 0 2 m T₀))‖ ≤
             Cm q * Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 i T₀‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i T₀‖ ^ 2) := by
+  classical
+  obtain ⟨CmA, hCmA_nn, hA⟩ :=
+    exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_lowOrder
+      (I := I) (M := M) g₀ a ha_super hR₀ Kc hKc_nn
+  obtain ⟨CmB, hCmB_nn, hB⟩ :=
+    exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_highOrder
+      (I := I) (M := M) g₀ a ha_super hR₀ Kc hKc_nn
+  refine ⟨fun q => CmA q + CmB q,
+    fun q => add_nonneg (hCmA_nn q) (hCmB_nn q), ?_⟩
+  intro m hm C T₀ hball henv q
+  have hsqrt_nn : 0 ≤ Real.sqrt (∑ i ∈ Finset.range (q + 1 + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 i T₀‖ ^ 2) := Real.sqrt_nonneg _
+  rcases le_total (q + (Module.finrank ℝ E / 2 + 3)) a with hband | hband
+  · refine le_trans (hA m hm C T₀ hball henv q hband) ?_
+    have := mul_le_mul_of_nonneg_right
+      (show CmA q ≤ CmA q + CmB q by have := hCmB_nn q; linarith) hsqrt_nn
+    linarith
+  · refine le_trans (hB m hm C T₀ hball henv q hband) ?_
+    have := mul_le_mul_of_nonneg_right
+      (show CmB q ≤ CmA q + CmB q by have := hCmA_nn q; linarith) hsqrt_nn
+    linarith
 
 theorem exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm_iteratedCovGrad_jet_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -887,6 +947,49 @@ theorem exists_smoothCcToTensorHs_deTurckSmoothRemainderDiff_sub_principalCometr
   obtain ⟨C₂, hC₂sup, hC₂jet, hwin⟩ := hjet T₀ hTsymm hball
   exact ⟨C₂, hC₂sup, hC₂jet, fun k => hCtame k _ T₀ hwin⟩
 
+theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_zero
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (εC : ℝ) (hεC_nn : 0 ≤ εC) (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
+    ∃ Cop : ℝ, 0 ≤ Cop ∧
+      ∀ (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 2) 2 x (C₂.toSection x) ≤ εC ^ 2) →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + 2) 2 i C₂‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (0 : ℝ)
+            (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂
+              (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ ≤
+          deTurckArmFibreConst (Module.finrank ℝ E) * εC *
+              ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T₀‖ +
+            Cop * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (1 : ℝ) T₀‖ :=
+  sorry
+
+theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_succ
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (εC : ℝ) (hεC_nn : 0 ≤ εC) (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
+    ∃ Cop : ℕ → ℝ, (∀ m, 0 ≤ Cop m) ∧
+      ∀ (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 2) 2 x (C₂.toSection x) ≤ εC ^ 2) →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + 2) 2 i C₂‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) →
+        ∀ m : ℕ,
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1)
+              (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂
+                (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ ≤
+            deTurckArmFibreConst (Module.finrank ℝ E) * εC *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ +
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ :=
+  sorry
+
 theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -906,8 +1009,43 @@ theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le
                 (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ ≤
             deTurckArmFibreConst (Module.finrank ℝ E) * εC *
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
-              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
-  sorry
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
+  classical
+  obtain ⟨Cop0, hCop0_nn, h0⟩ :=
+    exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_zero
+      (I := I) (M := M) g₀ a ha_super hR₀ εC hεC_nn Kc hKc_nn
+  obtain ⟨Cops, hCops_nn, hs⟩ :=
+    exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_succ
+      (I := I) (M := M) g₀ a ha_super hR₀ εC hεC_nn Kc hKc_nn
+  refine ⟨fun m => match m with
+    | 0 => Cop0
+    | (k + 1) => Cops k, fun m => ?_, fun C₂ T₀ hball hsup hjets m => ?_⟩
+  · match m with
+    | 0 => exact hCop0_nn
+    | (k + 1) => exact hCops_nn k
+  · match m with
+    | 0 =>
+      have hb := h0 C₂ T₀ hball hsup hjets
+      have hnormL := smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+        (show ((0 : ℕ) : ℝ) = (0 : ℝ) by norm_num)
+        (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))
+      have hnorm2 := smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+        (show ((0 : ℕ) : ℝ) + 2 = (2 : ℝ) by norm_num) T₀
+      have hnorm1 := smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+        (show ((0 : ℕ) : ℝ) + 1 = (1 : ℝ) by norm_num) T₀
+      rw [hnormL, hnorm2, hnorm1]
+      exact hb
+    | (k + 1) =>
+      have hb := hs C₂ T₀ hball hsup hjets k
+      have hnormL := smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+        (show ((k + 1 : ℕ) : ℝ) = (k : ℝ) + 1 by push_cast; ring)
+        (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))
+      have hnorm2 := smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+        (show ((k + 1 : ℕ) : ℝ) + 2 = (k : ℝ) + 3 by push_cast; ring) T₀
+      have hnorm1 := smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀
+        (show ((k + 1 : ℕ) : ℝ) + 1 = (k : ℝ) + 2 by push_cast; ring) T₀
+      rw [hnormL, hnorm2, hnorm1]
+      exact hb
 
 theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThirdArm_add_tame
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
