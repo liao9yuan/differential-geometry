@@ -1,0 +1,489 @@
+# ExtendShiInputs — Brick Y1 (Lemma-3.11 inputs for the interior-restart extension route)
+
+Discharges `ricci_flow_interior_restart`'s `hell` + `hC3` hypotheses from a bounded-curvature solution,
+reusing the HCGCompactness Lemma-3.11 engine instead of the retired bespoke chart-C³ producer (Brick W).
+
+## DONE this session (2026-07-02), all verified green (targeted build)
+
+1. **Import de-risk — THE key architectural result.** A new `Geometry/Flow/RicciFlow/` file importing
+   `Evolution.ExtendViaUniqueness` + `HCGCompactness.AllTimesBounds` + `HCGCompactness.RicBound` **builds
+   cycle-free** (full build green, 9459 jobs). This confirms in practice (not just theory) that the
+   extension branch can consume Lemma 3.11 — the whole "rethink the route" redirection is sound.
+2. **`ricciFlowPDE_Ici_of_soln` (sorry-free).** The solution's Ricci-flow metric PDE as a one-sided
+   right-derivative on `Ico α ω` (= Brick X's `hpde` input, `g_fam := S.base.metric`). Ported down from
+   `MaximalTime.ricciFlowPDE_Ici_of_solution` (private, above). Needed two private MaximalTime helpers
+   (`hasDerivWithinAt_Ici_boundary`, `tensor2_eval_contOn`) re-derived here (self-contained; Y2 should
+   move the MaximalTime privates down and reuse these).
+3. **`hell_of_soln` (sorry-free modulo one hypothesis).** (A)'s `hell` for a solution: a one-liner
+   `metricEquiv_of_ricBound (fun t => S.base.metric t) hαω hK (ricciFlowPDE_Ici_of_soln hS) hric`. The
+   only input is `hric : |ricciTensor (S.base.metric t) x v v| ≤ K·(S.base.metric t).inner x v v` (the
+   pointwise Ricci-vs-metric bound), taken as a hypothesis — its discharge is Y2 curvature algebra.
+
+## Confirmed shapes / namespaces (for the remaining wiring)
+
+- `hell` shape ≡ `DifferentialGeometry.HCGCompactness.MetricUniformEquivalentOn K gRef h C`
+  (`1≤C ∧ ∀x∈K,∀v, C⁻¹gRef(v,v)≤h(v,v)≤C·gRef(v,v)`), `AllTimesBounds.lean:601`; window form
+  `MetricUniformEquivalentOnWindow` (:612) = `∀ i t∈[β,ψ], …(gSeq i t)…`.
+- covariant metric-deriv bound (chart-adapter INPUT): `MetricCovDerivOrderBoundOn K a h gRef C`
+  (:691) = `∀x∈K, metricCovDerivNorm a h gRef x ≤ C`, `metricCovDerivNorm a h gRef x =
+  sqrt(normSq0S gRef x (a+2) (metricCovDeriv h gRef a x))` (:661) = `‖∇^a_{gRef} h‖_{gRef}`; window form
+  `MetricCovDerivOrderBoundOnWindow` (:773). Both namespaced `DifferentialGeometry.HCGCompactness.*`.
+- Shi predicate `DifferentialGeometry.HCGCompactness.MovingShiBoundOn U β ψ gSeq N KShi` (`RicBound.lean:141`),
+  `ricCovTower` (:117). Single-flow instantiation: `gSeq := fun _ t => S.base.metric t`.
+
+## Layering refinement discovered (reshapes the endpoint)
+
+`extends_of_rmBounded`'s hypothesis predicates `Rm04NormSqBoundedAt`, `Rm04RealizesSolutionConnectionOn`,
+and `ExtendsPastEndpoint` are defined **only in `MaximalTime.lean`**, which is ABOVE this file
+(MaximalTime imports ExtendShiInputs in Y2). So the Y1 endpoint **cannot consume them from below.**
+Fix: the Y1 endpoint takes the RAW lower-layer content (the `normSq0S (Rm04 t x) ≤ C` bound, the
+realization equation, `IsSolutionOn`), all visible here; Y2 (in MaximalTime) bridges
+`Rm04NormSqBoundedAt → raw` at the call site. Also: much solution-PDE plumbing
+(`ricciFlowPDE_…`, the two boundary helpers, the Rm04 predicates) is currently PRIVATE in MaximalTime;
+the clean Y2 refactor moves it down here and has MaximalTime reuse it.
+
+## Remaining Y1 (multi-session frontier — NOT done)
+
+- **`hric` discharge**: `Rm04NormSqBoundedAt`/raw `|Rm|²≤C` ⟹ `|Ric(v,v)| ≤ K·g(v,v)` — pointwise
+  curvature algebra (`|Ric| ≤ c(n)|Rm|` contraction + operator→quadratic). Grep the Rm04/Ricci-trace
+  norm API (`ricciComp_eq_trace_rm04_frame`, `normSq0S`, `Rm04Realizes…`). Narrow but real.
+- **Item 2 — Lemma 3.11 instantiation for `hC3`'s covariant input**: feed the single flow
+  `gSeq := fun _ t => S.base.metric t` + the cited Shi producer through `metricCovOrderWindow_of_*`
+  (`AllTimesBounds.lean:793/4168/4403`) to get `MetricCovDerivOrderBoundOnWindow`. READ those producers'
+  exact hypotheses first (they may consume evolution predicates, not just Shi — that determines the
+  cited Shi producer's shape, which is why it was NOT stubbed this session).
+- **Item 4 — the static covariant→chart adapter (the one genuinely new lemma)**:
+  `MetricCovDerivOrderBoundOn (a≤3) + MetricUniformEquivalentOn ⟹ ‖iteratedFDeriv k (chartGramOnE g α i j)
+  (extChartAt I α x)‖ ≤ Λ` on a compact `Q ⊆ chartLeviCivitaGoodSet α`, `k ≤ 3`. STATIC recursion
+  `∂ = ∇_{gRef} + Γ_{gRef}·(lower)` with FIXED `gRef = S.base.metric α` (its chart Christoffels bounded
+  with all derivatives on `Q`); `iteratedFDeriv ↔ partialDeriv` via public
+  `jet2_chartGram_d1/d2` (`Evolution/ChartRicciJetIdentity.lean`). NO time integration. `goodSet`
+  non-compactness ⇒ compact-`Q` `hC3` shape + the sanctioned (A) patch. ~150 lines; the real work.
+- **Item 1 — cited Shi producer** (sorry): shape it to match item 2's consumed hypotheses.
+- **Item 5 — endpoint** `extendInputs_of_soln`: `⟨hell_of_soln …, hC3 …⟩` from the raw solution hyps.
+
+## PLANNER ACCEPTANCE — ✅ Y1-partial ACCEPTED (Fable, 2026-07-03)
+Verified: file 0-sorry (4 declarations as reported); `ExtendViaUniqueness.lean` untouched (sorries
+= exactly (N) :85, (B) :201); `MaximalTime.lean` untouched (`hglue` :292); diff = this new pair
+only. The import de-risk (cycle-free, full build green) closes the redirection's last architectural
+risk. Remaining Y1 re-bricked below: **Y1b = the adapter (+ `hric` if room), Y1c = items 2→1→5.**
+
+## BRICK Y1b — KICKOFF PROMPT for the next Opus 4.8 executor session
+
+**Paste-pointer:** *"Work in `E:\testdifferential-geometry`. Read `CLAUDE.md`, `important_lesson.md`,
+then `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` sections 'Remaining Y1' and
+'BRICK Y1b' — implement the static covariant→chart adapter (item 4) with the DECIDED compact-`Q`
+reshape, then `hric` if the session has room. Report back. Off-limits files per 'Rules' below."*
+
+**DECIDED statement reshape (do this first, it is forced and sanctioned).** Bounds on all of
+`chartLeviCivitaGoodSet α₀` are unproducible (not relatively compact; the reference data may blow up
+at its boundary). Reshape, in `Evolution/ExtendViaUniqueness.lean`, keeping everything else fixed:
+- **(N) `ricci_flow_unif_existence`**: the box's choice becomes `∃ S : Finset M, ∃ Q : M → Set M,
+  (∀ α₀ ∈ S, IsCompact (Q α₀) ∧ Q α₀ ⊆ chartLeviCivitaGoodSet α₀) ∧ ∀ Λ, …`, and its data-bound
+  clause quantifies `∀ x ∈ Q α₀` (was: `∈ goodSet α₀`). Faithful — parabolic theory wants data
+  bounds on a compact chart cover; the box internally picks a compact refinement.
+- **(A) `ricci_flow_interior_restart`**: `hC3` becomes
+  `∀ S : Finset M, ∀ Q : M → Set M, (∀ α₀ ∈ S, IsCompact (Q α₀) ∧ Q α₀ ⊆ goodSet α₀) → ∃ Λ ≥ 1,
+  ∃ t₂ ∈ Ico α ω, ∀ s ∈ Ico t₂ ω, [same bounds, on Q α₀]`; patch (A)'s proof (local — `hC3` is
+  consumed only where the box's data hypothesis is discharged; the box now also supplies the
+  compactness/subset facts to feed `hC3 S Q`). Re-verify (A) sorry-free after the patch.
+
+**The adapter (item 4 — the real work, ~150 lines, in `ExtendShiInputs.lean`).** Target shape
+(QUANTIFIER ORDER IS THE TRAP — `Λ` must come BEFORE the metric so the tail bound is uniform):
+```
+theorem chartJets_of_covBound (gRef : SmoothRiemannianMetric I M) (C : ℝ) (hC : 1 ≤ C)
+    (α₀ : M) {Q : Set M} (hQc : IsCompact Q) (hQ : Q ⊆ chartLeviCivitaGoodSet (I := I) α₀) :
+    ∃ Λ : ℝ, 1 ≤ Λ ∧ ∀ g : SmoothRiemannianMetric I M,
+      (∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Q a g gRef C) →   -- match :691's exact shape
+      MetricUniformEquivalentOn Q gRef (fun x v w => g.inner x v w) C →  -- match :601's shape
+      ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 3 → ∀ x ∈ Q,
+        ‖iteratedFDeriv ℝ k (Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j)
+          (extChartAt I α₀ x)‖ ≤ Λ
+```
+(Adjust the two predicate applications to their true signatures — read `AllTimesBounds.lean:601/661/691`
+first.) Route: STATIC recursion `∂ = ∇_{gRef} + Γ_{gRef}·(lower)` — chart partials of the Gram of `g`
+in terms of `gRef`-covariant derivatives of `g` and the FIXED smooth reference chart data
+(`chartChristoffel gRef`, bounded with all derivatives on compact `Q` by continuity — `IsCompact.exists_bound`-style
+sup). k = 0: equivalence + `gRef`'s Gram bounds. k = 1: the chart metric-compat /
+`∇g = ∂g − Γ·g − Γ·g` rearrangement (grep `ChartGramChristoffel`, `partialDeriv.*chartGram`). k = 2, 3:
+iterate the recursion; each `∂^k(Gram g)` = polynomial(`Γ_{gRef}`-jets ≤ k−1 on `Q` [static], `∇^{≤k}g`
+[hypothesis], `Gram`-lower). `iteratedFDeriv ↔ partialDeriv`: reuse `jet2_chartGram_d1/d2`
+(`Evolution/ChartRicciJetIdentity.lean`, public) + finite-dim norm bridges (grep `UniformChartBounds/`,
+`ChartGramUniformContinuity`). NO time integration anywhere — if you find yourself integrating in `t`,
+you are off-route. The covariant-norm unpacking (`metricCovDerivNorm` = `‖·‖` via `normSq0S`, :661)
+to slot/component bounds: grep the `normSq0S` component API (`Tensor/RSTensor/`) before hand-rolling.
+**`hric` (if room):** `|Ric(v,v)| ≤ K·g(v,v)` from the raw `normSq0S`-`|Rm|²` bound — pointwise
+curvature algebra; grep `ricciComp_eq_trace`/`rm04`/Cauchy–Schwarz-on-`normSq0S` API.
+
+**Rules:** claim `ExtendShiInputs.lean` + `Evolution/ExtendViaUniqueness.lean` (the sanctioned
+reshape only). Off-limits: everything under `HCGCompactness/` (import-only), `ShortTime*/`,
+`DeTurck*`, `CinftyLimitGlue.lean`, `MaximalTime.lean`, frozen `JetGlueParam.lean`; (N)/(B) bodies
+stay `sorry`. Verify: focused checks + targeted builds of both files. **Acceptance:** adapter
+sorry-free with the Λ-before-`g` quantifier order; (A) re-verified sorry-free post-reshape; the two
+files' only sorries remain (N)/(B); report `#print axioms` for the adapter (must be the 3 standard
+axioms). Thread-crash flakes: retry, `-LeanThreads 3`. Stop per CLAUDE.md (3 failed routes ⟹ report).
+
+### Y1b SESSION PROGRESS (2026-07-03)
+
+**DONE + verified: the compact-`Q` reshape.** `Evolution/ExtendViaUniqueness.lean` (N)
+`ricci_flow_unif_existence` and (A) `ricci_flow_interior_restart` reshaped exactly as decided: (N) now
+begins `∃ S : Finset M, ∃ Q : M → Set M, (∀ α₀ ∈ S, IsCompact (Q α₀) ∧ Q α₀ ⊆ goodSet α₀) ∧ ∀ Λ, …`
+with its data clause on `∀ x ∈ Q α₀`; (A)'s `hC3` takes `∀ S, ∀ Q, (compact-cover) → ∃ Λ, …, ∀ x ∈ Q α₀`.
+(A)'s proof patched (`obtain ⟨S, Q, hSQ, hbox⟩`; `hC3 S Q hSQ`; `hC3_star` on `Q α₀`) and **re-verifies
+sorry-free** — the file's only sorries stay (N):64 and (B):179. This unblocks the adapter's consumption.
+
+**NOT done: the adapter `chartJets_of_covBound`** — confirmed a genuine fresh ~200-line multi-bridge
+brick (all pieces exist, feasible; but not one-session alongside the reshape). Recommend a dedicated
+adapter session. Execution-ready API map (all located this session):
+- **chartGram ↔ inner / bilin bridge**: `chartGramBilin_eq_innerJinv`
+  (`Analysis/Spectral/Tensor/ChartTensor/Inner/InnerBridge.lean`); chartGramMatrix↔chartGramBilin in
+  `ChartTensor/Inner/LowerAllUpperIndices.lean`, `Defs.lean`. `chartGramBilin` + `le_opNorm₂` and
+  `chartGramMatrix_entry_isBounded_on_compact` (`UniformChartBounds/ChartGramUniformContinuity.lean:151`,
+  `∃C>0, ∀b∈K, |chartGramMatrix g α b i j|≤C` for compact `K ⊆ chartSource`) +
+  `MetricUniformUpperBound.lean` (`g_inner_sqrt_uniform_upper_bound_on_compact`:224).
+- **k=0**: equivalence + gRef Gram bound on `Q`; off-diagonal needs a PSD Cauchy–Schwarz for `g.inner x`
+  (`(g(u,v))² ≤ g(u,u)g(v,v)`) — NOT found ready in `Geometry/Metric/`; likely a ~15-line new helper
+  (discriminant of `g(u+tv,u+tv) ≥ 0`).
+- **∂ = ∇_{gRef} + Γ_{gRef}·(lower) recursion (k=1,2,3)**: `metricCovDeriv_succ_component_coordFrame`
+  (`HCGCompactness/MetricCovDerivCoordStep.lean`, coordinate-frame; importable), with
+  `metricCovDeriv_succ_apply_section` / `_eval_smooth_slots`; leading connection
+  `leviCivitaConnectionOfMetric gRef`.
+- **coordComponent ↔ chartGram**: `Tensor0SInnerBridgeIdentity.lean` (`…_matrix_form`, `…_innerJinv`).
+- **`metricCovDerivNorm` → single-component bound**: `normSq0S` component/CS-eval
+  (`Tensor/RSTensor/Tensor0SRiemannian/Comparison.lean:711`; `tensor02_quadForm_abs_le` in
+  `Geometry/Curvature/RicciOperatorNormBound.lean`).
+- **iteratedFDeriv ↔ partialDeriv**: public `jet2_chartGram_d1/d2`
+  (`Evolution/ChartRicciJetIdentity.lean`); k=3 needs a d3 step or manual iterate.
+- **Γ_{gRef} jets bounded on `Q`**: `chartChristoffel gRef` continuous ⇒ `IsCompact.exists_bound` sup.
+- **Trap** (from brief): quantifier order `Λ` BEFORE `g` (uniform tail bound); NO time integration.
+
+## PLANNER ACCEPTANCE — ✅ Y1b-partial ACCEPTED (Fable, 2026-07-03): reshape landed, adapter re-dispatched
+Verified in-tree: (N) carries `∃ S, ∃ Q, (∀ α₀ ∈ S, IsCompact (Q α₀) ∧ Q α₀ ⊆ goodSet α₀) ∧ …` with
+its data clause on `∀ x ∈ Q α₀`; (A)'s `hC3` takes the `∀ S, ∀ Q, (compact cover) → …` form; (A)'s
+proof region has 0 sorries (re-proved post-patch); file sorries = exactly (N) :87 + (B) :205.
+Executor's targeted build green accepted. The adapter (primary ask) is 0% — correctly reported
+fail-loud, correctly not forced as a multi-sorry half-build. **Re-dispatched as a STANDALONE brick
+(Y1b′, below), no bundling.**
+
+## BRICK Y1b′ — KICKOFF PROMPT (adapter only; dedicated session)
+
+**Paste-pointer:** *"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — the
+pinned adapter inventory (the scoping sections) and section 'BRICK Y1b′'. Implement ONLY the
+adapter `chartJets_of_covBound`. Report back. Off-limits per the Rules below."*
+
+**Scope: exactly one deliverable.** `chartJets_of_covBound` in `ExtendShiInputs.lean`, sorry-free,
+with the Λ-BEFORE-`g` quantifier order (statement shape as specified in BRICK Y1b above, with the
+two HCG predicates applied at their true signatures — `MetricUniformEquivalentOn` :601,
+`MetricCovDerivOrderBoundOn` :691). Do NOT take on `hric`, the Shi producer, or the endpoint.
+
+**Build order (the pinned inventory makes this executable without re-scoping):**
+1. **PSD Cauchy–Schwarz helper** (`(g.inner x u v)² ≤ g.inner x u u * g.inner x v v`): FIRST grep
+   Mathlib for an applicable form (`inner_mul_le_norm_mul_norm` needs an `InnerProductSpace`
+   instance we don't have; look for bilinear-form CS: `LinearMap.BilinForm`, `_root_.abs_inner_le`,
+   `mul_self_le` variants, and the project's own `PointwiseInner`/`Comparison` layers — the report
+   already found `tensor02_quadForm_abs_le` (Comparison.lean:711), CHECK whether it already IS this
+   fact for the metric before writing anything). If genuinely absent: ~15-line discriminant proof
+   (`0 ≤ g(u+tv, u+tv)` for all `t`, `discrim_le_zero`), placed as a small public lemma in the
+   `Geometry/Metric/PointwiseInner` layer if it states cleanly there (canonical home), else
+   `private` in `ExtendShiInputs.lean` (acceptable; note it for relocation).
+2. **k = 0 base**: equivalence (`MetricUniformEquivalentOn`) + CS + the fixed `gRef` Gram bound on
+   compact `Q` (`chartGramMatrix_entry_isBounded_on_compact`) + the chartGram↔inner bridge
+   (`InnerBridge.chartGramBilin_eq_innerJinv`).
+3. **k = 1, 2, 3 recursion**: `MetricCovDerivCoordStep.metricCovDeriv_succ_component_coordFrame`
+   (the `∂ = ∇_{gRef} + Γ_{gRef}·lower` step) + `coordComponent`↔`chartGram` bridge
+   (`Tensor0SInnerBridgeIdentity`) + `normSq0S`→component (`tensor02_quadForm_abs_le`) +
+   `Γ_{gRef}`-jet sup-bounds on compact `Q` (continuity of the fixed smooth reference data) +
+   `iteratedFDeriv`↔`partialDeriv` via `jet2_chartGram_d1/d2`. NO time integration anywhere.
+4. **Uniform-Λ assembly**: collect the finitely many constants; `Λ := max(…) + 1`-style; keep every
+   per-`k` bound stated with its constant BEFORE the `∀ g`.
+
+**Rules:** claim `ExtendShiInputs.lean` only (+ the `PointwiseInner` file ONLY if the CS helper
+lands there). Off-limits: `HCGCompactness/**` (import-only), `Evolution/ExtendViaUniqueness.lean`
+(the reshape is DONE — do not touch), `MaximalTime.lean`, `ShortTime*/`, `DeTurck*`,
+`CinftyLimitGlue.lean`, `JetGlueParam.lean`. Verify: focused check + targeted build
+`+…ExtendShiInputs`; **acceptance:** adapter sorry-free, `#print axioms` = the 3 standard axioms,
+file still 0-sorry, quantifier order confirmed (Λ ∃-bound before the `∀ g`). Stop per CLAUDE.md —
+if one of the pinned bridges turns out to have the wrong shape after 3 genuinely different
+adaptation attempts, STOP and report the exact mismatch (statement, goal, error) rather than
+rebuilding that bridge from scratch.
+
+### Y1b′ SESSION PROGRESS (2026-07-03) — adapter foundations built; full adapter NOT complete
+
+**Verified sorry-free (in `ExtendShiInputs.lean`):**
+- `metricInnerSq_le` — Cauchy–Schwarz for the metric's pointwise inner product `(g(u,v))² ≤ g(u,u)g(v,v)`
+  (discriminant of the nonneg quadratic `t ↦ g(u+tv,u+tv)`; Mathlib's `InnerProductSpace` CS does NOT
+  apply — the tangent space's registered inner product is the ambient one, not `g`).
+- `chartGramEntry_le_of_equiv` — the **k=0 core**: from `MetricUniformEquivalentOn Q gRef g C` + a bound
+  `M0` on the `gRef` chart-Gram diagonal over `Q`, `|chartGramMatrix g α₀ x i j| ≤ C·M0` uniformly in `g`
+  (diagonal via equivalence; off-diagonal via `metricInnerSq_le`).
+
+**NAMESPACE / arg lessons (cost several iterations — pin for next session):**
+- `chartGramMatrix`, `chartBasisVecFiber`, `chartGramMatrix_apply` live in
+  `DifferentialGeometry.Integral.Measure` (`Geometry/Metric/ChartGram.lean`), NOT top-level. Need
+  `open DifferentialGeometry.Integral.Measure`. **`chartBasisVecFiber` REQUIRES `(I := I)`** (its `M`-valued
+  args don't determine `I`); **`chartGramMatrix` must NOT be given `(I := I)`** (inferred from the metric).
+- `MetricUniformEquivalentOn` / `MetricCovDerivOrderBoundOn` / `MovingShiBoundOn` are in
+  `DifferentialGeometry.HCGCompactness` — need `open DifferentialGeometry.HCGCompactness`; do NOT pass `(I := I)`.
+- `chartGramMatrix_apply` (`= g.inner x (chartBasisVecFiber α₀ i x) (chartBasisVecFiber α₀ j x)`, a `rfl`
+  simp lemma) is the k=0 bridge. `chartGramOnE` (`Integral.DivergenceTheorem`) reduces to `chartGramMatrix`
+  via `chartGramOnE_def` (a `rfl`).
+
+**Remaining for `chartJets_of_covBound` (still the bulk; ~250+ lines):**
+- **k=0 assembly**: build `M0` via `chartGramMatrix_entry_isBounded_on_compact` (needs `Q ⊆ (chartAt H α₀).source`
+  from `hQ` + `chartLeviCivitaGoodSet ⊆ chartSource` via `extChartAt_source`) + finite `max` over the diagonal
+  index; reduce `‖iteratedFDeriv ℝ 0 f y‖ = |f y|` (`norm_iteratedFDeriv_zero`); `y = extChartAt I α₀ x`,
+  `(extChartAt I α₀).symm y = x` by left_inv on the chart source; then `chartGramEntry_le_of_equiv`.
+- **k=1,2,3**: the `∂ = ∇_{gRef} + Γ_{gRef}·lower` recursion (`metricCovDeriv_succ_component_coordFrame`),
+  `abs_apply_le_sqrt_normSq0S` (Comparison.lean — pointwise CS `|T(v)| ≤ √normSq0S·∏√g(vₐ,vₐ)`, this IS the
+  `metricCovDerivNorm`→component bridge), the `coordComponent↔chartGram` bridge (`Tensor0SInnerBridgeIdentity`),
+  Γ-jet sup on `Q`, and the **finite-dim multilinear operator-norm bridge** `‖iteratedFDeriv k f y‖ ≤ C·max|∂ᵏf|`
+  — NOT in the project; feasible via `ContinuousMultilinearMap.opNorm_le_bound` + the multilinear expansion of
+  `iteratedFDeriv k f y v` over the basis (the genuinely-new sub-piece); k=3 has no `jet3` so needs manual iterate.
+- **assembly**: `Λ := max(Λ₀,Λ₁,Λ₂,Λ₃)`, `interval_cases k`.
+
+## PLANNER ACCEPTANCE — ✅ Y1b′-partial ACCEPTED + RULING: restate, don't bridge (Fable, 2026-07-03)
+
+Accepted: `metricInnerSq_le` (:140, metric-PSD Cauchy–Schwarz, discriminant proof — Mathlib's CS
+indeed inapplicable: the registered inner product is ambient, not `g`) and
+`chartGramEntry_le_of_equiv` (:176, the k=0 core) — both sorry-free, file 0-sorry, build green.
+Correct fail-loud stop, again. Two sessions under-delivering the same brick = the PLAN was wrong,
+not the executors: my ~150-line estimate missed that the `iteratedFDeriv`-NORM form of the bounds
+demands a finite-dim multilinear operator-norm bridge that does not exist in the project.
+
+**RULING (wall-dissolves-on-restatement):** do NOT build the norm bridge. The `iteratedFDeriv` form
+has NO consumer outside the (N)/(A)/proof triangle in `ExtendViaUniqueness.lean` (verified), and the
+project's canonical chart-jet-bound vocabulary is NESTED `partialDeriv` (the `hp0/hp1/hp2` pattern,
+`ExtendedSolutionRegularity.lean`). Entrywise partial bounds are exactly as faithful for the (N)
+box (textbook parabolic existence is stated with coordinate-derivative bounds of the coefficient
+entries; equivalent to norm bounds up to dimensional constants — the box absorbs them). Restating
+DELETES the missing bridge AND the k=3 no-`jet2` issue. The banked k=0 core plugs in directly.
+
+## BRICK Y1b″ — KICKOFF PROMPT (restate + adapter core; dedicated session)
+
+**Paste-pointer:** *"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — the
+pinned inventory/namespace sections and section 'BRICK Y1b″'. Do the restatement, then implement
+`chartJets_of_covBound` in the restated form. Report back. Off-limits per the Rules below."*
+
+**Step 1 — the restatement (planner-ruled, sanctioned; `Evolution/ExtendViaUniqueness.lean`).**
+Replace the data clause `∀ k ≤ 3, ‖iteratedFDeriv ℝ k (chartGramOnE …) (extChartAt I α₀ x)‖ ≤ Λ`
+in BOTH (N) `ricci_flow_unif_existence` and (A)'s `hC3` by the entrywise nested-`partialDeriv` form
+(mirroring `hp0/hp1/hp2` of `ExtendedSolutionRegularity.lean`, plus third order), all `≤ Λ` at
+`y := extChartAt I α₀ x`, `∀ x ∈ Q α₀`, `∀ i j` and all direction indices `m l p`:
+`|chartGramOnE g α₀ i j y|`, `|partialDeriv m (chartGramOnE g α₀ i j) y|`,
+`|partialDeriv m (partialDeriv l (chartGramOnE g α₀ i j)) y|`,
+`|partialDeriv m (partialDeriv l (partialDeriv p (chartGramOnE g α₀ i j))) y|`.
+(Four explicit conjuncts is FINE — clearer than an indexed-list encoding.) Patch (A)'s proof
+(local: only the box-hypothesis discharge step changes shape). Re-verify (A) sorry-free.
+
+**Step 2 — `chartJets_of_covBound` in the restated form (`ExtendShiInputs.lean`).** Same statement
+skeleton as BRICK Y1b but the conclusion is the four entrywise clauses (Λ-before-`∀ g` order
+UNCHANGED — still the trap). Build: k=0 = banked `chartGramEntry_le_of_equiv` + `M0` via
+`chartGramMatrix_entry_isBounded_on_compact` + finite max (+ the `extChartAt` left-inverse pin);
+k=1,2,3 = the `∂ = ∇_{gRef} + Γ_{gRef}·lower` recursion
+(`MetricCovDerivCoordStep.metricCovDeriv_succ_component_coordFrame`) + `abs_apply_le_sqrt_normSq0S`
+(confirmed right tool) + the `coordComponent`↔`chartGram` bridge (`Tensor0SInnerBridgeIdentity`) +
+`Γ_{gRef}`-jet sup-bounds on compact `Q` (fixed smooth reference data, continuity + `IsCompact`).
+NO `iteratedFDeriv`, NO operator norms, NO time integration. Use the namespace pins already
+recorded in this note (`Integral.Measure` for `chartGramMatrix`/`chartBasisVecFiber`, `(I := I)`
+placement, `open …HCGCompactness`).
+
+**Rules:** claim `ExtendShiInputs.lean` + `Evolution/ExtendViaUniqueness.lean` (restatement only).
+Off-limits: `HCGCompactness/**` (import-only), `MaximalTime.lean`, `ShortTime*/`, `DeTurck*`,
+`CinftyLimitGlue.lean`, `JetGlueParam.lean`; (N)/(B) bodies stay `sorry`. Verify: focused checks +
+targeted builds of both files. **Acceptance:** (A) re-proved sorry-free post-restatement; adapter
+sorry-free, axioms = the 3 standard; both files' only sorries = (N)/(B). If the recursion's
+component algebra walls after 3 genuinely different attempts on one identity, STOP and report the
+exact goal/error — do not widen scope.
+
+### Y1b″ SESSION PROGRESS (2026-07-04) — restatement DONE; adapter k=0 DONE; k=1,2,3 remaining
+
+**Step 1 (restatement) — DONE, verified (targeted build green, 9367 jobs).** In `ExtendViaUniqueness.lean`:
+new predicate `ChartJetBoundAt g α₀ i j y Λ` (the 4 entrywise conjuncts: `|chartGramOnE|` +
+1st/2nd/3rd nested `partialDeriv`, all `≤ Λ`) + `ChartJetBoundAt.mono` (Λ-weakening). (N) and (A)'s `hC3`
+data clauses restated to `∀ α₀∈S, ∀ i j, ∀ x∈Q α₀, ChartJetBoundAt … Λ` (dropped the `∀k≤3
+iteratedFDeriv` form). (A)'s proof patched (`hC3_star := (hC3' …).mono hΛ₂le`), **re-proves sorry-free**
+— the file's only sorries stay (N):89 + (B):196. The `iteratedFDeriv` norm form (and its missing
+finite-dim norm bridge + k=3 jet gap) is now permanently GONE from the route.
+
+**Step 2 adapter — k=0 machinery DONE, verified sorry-free (ExtendShiInputs.lean, file still 0-sorry):**
+`metricInnerSq_le` (CS), `chartGramEntry_le_of_equiv` (k=0 core), `exists_gRefDiag_bound` (the `M0`
+diagonal bound = finite `∑` of `chartGramMatrix_entry_isBounded_on_compact`), `goodSet_subset_chartSource`,
+`chartJet0_le_of_equiv` (the 0-th `ChartJetBoundAt` conjunct: `|chartGramOnE g α₀ i j (extChartAt I α₀ x)|
+≤ C·M0`, via the `extChartAt` left-inverse + the k=0 core).
+
+**More namespace pins (this session):** `partialDeriv` is `DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv`
+(same namespace as `chartGramOnE`; qualify it); `chartGramMatrix_entry_isBounded_on_compact` is in
+`DifferentialGeometry.Analysis.Parabolic.TensorSpectral` (`open` it). `chartGramOnE_def` is the
+`chartGramOnE … y = chartGramMatrix … ((extChartAt).symm y) …` reduction; `(extChartAt I α₀).left_inv`
++ `extChartAt_source` collapse it to `chartGramMatrix g α₀ x` on the goodset.
+
+**REMAINING for `chartJets_of_covBound` (the k=1,2,3 conjuncts + assembly):** prove
+`|partialDeriv m (chartGramOnE g α₀ i j) y| ≤ Λ` (and 2nd/3rd nested) via the
+`∂ = ∇_{gRef}+Γ_{gRef}·lower` recursion (`metricCovDeriv_succ_component_coordFrame`) + the
+`coordComponent↔chartGram` bridge (`Tensor0SInnerBridgeIdentity`) + `abs_apply_le_sqrt_normSq0S`
+(the `metricCovDerivNorm`→component CS) + `Γ_{gRef}`-jet sup on `Q`; then `Λ := C·M0 ⊔ Λ₁ ⊔ Λ₂ ⊔ Λ₃`
+and package the 4 conjuncts. NO `iteratedFDeriv`/operator norms. This is the remaining ~200 lines; the
+k=0 machinery above plugs straight into the first conjunct.
+
+## PLANNER ACCEPTANCE — ✅ Y1b″ ACCEPTED (Fable, 2026-07-03): restatement DONE; adapter = final slice
+Verified: `ChartJetBoundAt` (:55) + `.mono` (:68) in `ExtendViaUniqueness.lean`; (A) re-proved
+sorry-free (sorries = (N):110, (B):222 only); `ExtendShiInputs.lean` 0-sorry with the k=0 machinery
+(`exists_gRefDiag_bound` :218, `goodSet_subset_chartSource` :234, `chartJet0_le_of_equiv` :240).
+The norm-bridge blocker is permanently gone. **Risk is now fully retired (restatement ✓, k=0 ✓,
+every k≥1 ingredient pinned and importable) — per the granularity calibration, the remaining work
+is dispatched as ONE consolidated end-to-end session (below), not another partial.**
+
+## BRICK Y1b-FINAL — KICKOFF PROMPT (the whole adapter, end-to-end; last slice)
+
+**Paste-pointer:** *"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — the
+pinned inventory/namespace sections and section 'BRICK Y1b-FINAL'. State and prove
+`chartJets_of_covBound` completely. Report back. Off-limits per the Rules below."*
+
+**Scope: deliver the COMPLETE theorem** `chartJets_of_covBound` in `ExtendShiInputs.lean`,
+sorry-free, in one session. All risk is retired; this is assembly:
+- **Statement**: mirror (A)'s restated `hC3` inner clause EXACTLY — conclusion
+  `∃ Λ, 1 ≤ Λ ∧ ∀ g, (∀ a ≤ 3, MetricCovDerivOrderBoundOn Q a g gRef C) → (equiv ≤ C) →
+  ∀ x ∈ Q, ChartJetBoundAt g α₀ Λ (extChartAt I α₀ x)`-shaped (READ `hC3`'s exact current form in
+  `ExtendViaUniqueness.lean` and copy the predicate application verbatim; Λ-before-`∀ g` order).
+- **k=0 conjunct**: banked — `chartJet0_le_of_equiv` (+ `exists_gRefDiag_bound`).
+- **k=1,2,3 conjuncts**: the `∂ = ∇_{gRef} + Γ_{gRef}·(lower)` recursion
+  (`MetricCovDerivCoordStep.metricCovDeriv_succ_component_coordFrame`) + the
+  `coordComponent`↔`chartGram` bridge (`Tensor0SInnerBridgeIdentity`) + `abs_apply_le_sqrt_normSq0S`
+  (covariant-norm → component) + `Γ_{gRef}`-jet sup-bounds on compact `Q` (fixed smooth reference:
+  continuity + `IsCompact.exists_bound`-style, mirroring `exists_gRefDiag_bound`). Nested orders:
+  each `∂^{k}(Gram g)` = polynomial(`Γ_{gRef}`-jets ≤ k−1 [static sups], components of
+  `∇^{≤k}_{gRef} g` [≤ C by hypothesis via `abs_apply_le_sqrt_normSq0S`], lower Gram entries).
+- **Assembly**: `Λ := (C·M0) ⊔ Λ₁ ⊔ Λ₂ ⊔ Λ₃ ⊔ 1`; package the four conjuncts into
+  `ChartJetBoundAt`.
+- **Shape smoke-test (mandatory, ~10 lines)**: after proving, add an `example` that, given the
+  adapter + arbitrary `S Q` with the compact-cover fact + the covariant/equiv bounds on each
+  `Q α₀`, produces `hC3`'s FULL `∀ S, ∀ Q, … → ∃ Λ, …` shape for a constant tail (no time yet —
+  bind `t₂ := α` and a trivial `Ico` membership, or take the per-`s` bounds as hypotheses). This
+  catches statement drift against (A) immediately; if it does not compile, fix the adapter's
+  statement, not (A).
+- **Namespace pins (all recorded above)**: `partialDeriv` ∈ `Integral.DivergenceTheorem`;
+  `chartGramMatrix`/`chartBasisVecFiber` ∈ `Integral.Measure` (watch the `(I := I)` placement);
+  `chartGramMatrix_entry_isBounded_on_compact` ∈ `DifferentialGeometry.Analysis.Parabolic.TensorSpectral`;
+  HCG predicates need `open …HCGCompactness`.
+
+**Rules:** claim `ExtendShiInputs.lean` ONLY. `ExtendViaUniqueness.lean` is NOT to be edited (the
+restatement is done) — sole exception: a genuine shape mismatch surfaced by the smoke-test that
+cannot be fixed adapter-side; then a minimal sanctioned `hC3` patch + re-verify (A) sorry-free, and
+say so loudly in the report. Off-limits otherwise unchanged (`HCGCompactness/**` import-only,
+`MaximalTime.lean`, `ShortTime*/`, `DeTurck*`, `CinftyLimitGlue.lean`, `JetGlueParam.lean`).
+Verify: focused check + targeted build `+…ExtendShiInputs`. **Acceptance:** `chartJets_of_covBound`
+sorry-free, axioms = the 3 standard, file 0-sorry, smoke-test `example` present and green. Stop per
+CLAUDE.md: if ONE identity in the recursion walls after 3 genuinely different attempts, stop and
+report the exact goal/error/lemmas-tried — do not widen scope, do not stub.
+
+## Y1b-FINAL SESSION (2026-07-04): FRAME-MISMATCH WALL — the "assembly" plan is incomplete (4th under-estimation)
+
+**No code changed this session** (file still 0-sorry with the banked k=0 machinery). STOP-and-report per
+the brick's own stop-condition, after determining by close reading that the pinned recursion cannot be
+assembled into the target.
+
+**The obstruction (structural, not a tactic failure).** The pinned recursion
+`MetricCovDerivCoordStep.metricCovDeriv_succ_component_coordFrame` is **frame-DIAGONAL**: at point `x` it
+gives `component0S (coordinateFrameAt_toBasis x) (metricCovDeriv h gRef (a+1) x) I0 =
+coordDeriv0SAt (coordinateFrameAt x (I0 0)) x (metricCovDeriv h gRef a) (Fin.tail I0) − Σ Γ(gRef)·…`,
+where `coordDeriv0SAt (X) x₀ α slots = mfderiv … (fun y => α y (fun a => coordinateFrameAt x₀ (slots a) y)) x₀`
+(`NablaComponents/Basic.lean`) and `coordinateFrameAt x₀ = (coordinateTrivializationAt x₀).localFrame …`
+(`Coordinates/CoordinateFrame.lean`) — the **chart-at-`x₀`** frame, with the derivative taken in the
+`x₀`-chart coordinates. So the recursion lives in the **moving** frame (each eval point `x` uses ITS OWN
+chart-at-`x` frame).
+
+The adapter target is `|partialDeriv m (chartGramOnE g α₀ i j) (extChartAt I α₀ x)| ≤ Λ` — the derivative
+of `y ↦ g.inner (chartBasisVecFiber α₀ i y) (chartBasisVecFiber α₀ j y)` (pulled back through the chart)
+in the **FIXED α₀-chart** coordinates, using the **α₀-frame** vector fields `chartBasisVecFiber α₀`. Since
+the derivative of `g.inner(V_i,V_j)` depends on the vector fields `V`, and `coordinateFrameAt x ≠
+chartBasisVecFiber α₀` for `x ≠ α₀` (different charts), the moving-frame recursion does NOT equal the
+target. Confirmed: NO fixed-`α₀`-chart covariant→chart identity exists — `RealizedJet2CovGradBound.lean`
+is `realizeMetricAt`-DIFFERENCE-specialized (not general `g`); `ChartGramChristoffel.lean` is the metric's
+OWN Christoffels only (`∇_g g = 0`, no `∇_{gRef}g` term).
+
+**What bridging would require (the missing layer, NOT "assembly").** `Tensor0SInnerBridgeIdentity.lean`:
+`chartGramMatrix g α₀ b = chartJinv(α₀,b)ᵀ · gramMatrixAt(g,b) · chartJinv(α₀,b)`, where `chartJinv` is the
+chart-change Jacobian (metric-INDEPENDENT). So `partialDeriv^k (chartGramOnE g α₀)` = polynomial in
+`∂^{≤k} chartJinv` (fixed reference data, bounded on `Q` by continuity) and `∂^{≤k} gramMatrixAt(g)`
+(moving-frame Gram derivatives → the recursion). The adapter therefore needs a **chart-Jacobian jet layer**
+(`chartJinv` derivatives up to order 3, bounded on `Q`, + the change-of-frame Leibniz expansions) on top of
+the recursion. That is a genuine additional brick, ~as large as the recursion itself — the "assembly"
+estimate omitted it entirely.
+
+**Smallest unblock (planner decision needed).** One of:
+- **(a)** a **fixed-center** variant of `metricCovDeriv_succ_component_coordFrame` (frame `coordinateFrameAt
+  α₀`, derivative at `x`) — i.e. an off-diagonal coordinate-component recursion — proved in the
+  `Coordinates/NablaComponents` layer; then the adapter IS assembly. This is the clean fix but a real new
+  lemma in that layer.
+- **(b)** the `chartJinv`-jet layer above (bound `∂^{≤3} chartJinv` on `Q`, expand the triple product);
+  more terms, all metric-independent/bounded, but a substantial brick.
+- **(c)** reconsider whether `hC3` should instead be phrased in the **moving-frame** covariant-component
+  form (matching the recursion directly), pushing the fixed-α₀-chart conversion into the (N) black box
+  (where DeTurck existence lives) — another sanctioned restatement, analogous to the iteratedFDeriv→partialDeriv one.
+Classification: **missing groundwork/API** (the fixed-α₀ chart covariant-derivative identity), a real
+math/infra obstruction — not a local proof-search or coercion issue. The banked k=0 machinery
+(`chartJet0_le_of_equiv` etc.) is unaffected and plugs into whichever route is chosen.
+
+## PLANNER ACCEPTANCE — ✅ Y1b-FINAL stop ACCEPTED + RULING: covariant restatement, ADAPTER DELETED (Fable, 2026-07-03)
+
+Accepted: correct definitional stop (frame-diagonal recursion — `coordinateFrameAt x` moving frame —
+vs the fixed-α₀ chart target; verified `coordinateFrameAt` in `Coordinates/CoordinateFrame.lean:186`
+and no fixed-α₀ covariant→chart identity in the tree). No edits, lock released, file still 0-sorry.
+Fifth consecutive under-estimate on this brick ⟹ the CHART FORM ITSELF was the mistake, not any
+particular bridge.
+
+**RULING (option 3-strong).** Restate the bound clause in the producer's own intrinsic vocabulary —
+`MetricCovDerivOrderBoundOn` (verified: `K : Set M`, `∀ x ∈ K, metricCovDerivNorm a h gRef x ≤ C`;
+take `K := Set.univ`, `M` compact). Consequences, all sanctioned:
+- **(N) `ricci_flow_unif_existence`**: data clause becomes
+  `∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a g₀ gBase Λ` (keep the existing inline
+  ellipticity clause). **DELETE the `∃ S, ∃ Q` compact-cover apparatus entirely** — it existed only
+  for chart-locality. (N) becomes: `∀ Λ ≥ 1, ∃ τ₀ > 0, ∀ g₀, (ellipticity Λ) → (covariant Λ-bounds
+  ≤ order 3) → flow ≥ τ₀`. This is the MORE canonical textbook statement — "uniform short-time
+  existence under bounded geometry relative to a fixed background" — and the honest accounting is
+  that the covariant→chart conversion (true, standard coordinate bookkeeping) moves INSIDE the cited
+  axiom, where the rest of the parabolic machinery already lives. Non-circularity unaffected.
+- **(A) `ricci_flow_interior_restart`**: `hC3` → `hcov : ∃ C ≥ 1, ∃ t₂ ∈ Set.Ico α omega,
+  ∀ s ∈ Set.Ico t₂ omega, ∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a (g_fam s) (g_fam α) C`.
+  Patch (A)'s proof — SIMPLER now (all S/Q plumbing gone).
+- **DELETE `ChartJetBoundAt` + `.mono`** (no consumer remains). In `ExtendShiInputs.lean` KEEP
+  `metricInnerSq_le` (reusable metric-CS) and keep the now-unconsumed chart-k=0 lemmas with an
+  "unconsumed, banked" note (tree is uncommitted; do not destroy verified work).
+- **Import**: `Evolution/ExtendViaUniqueness.lean` now imports `HCGCompactness.AllTimesBounds`
+  (cycle-free — verified earlier: AllTimesBounds' closure never touches this branch; the dependency
+  footprint is unchanged since Y2/MaximalTime consumes HCG anyway). Directory-nominal inversion
+  accepted and documented in the module docstring.
+- **TERMINAL iteration**: this is the 4th and LAST (N)/(A) statement change — the hypothesis now
+  speaks Lemma 3.11's exact output language. Any residual mismatch (window `[β,ψ]` vs tail
+  `Ico t₂ ω`, constant bookkeeping) is absorbed PRODUCER-side in Y1c, never by another restatement.
+- **Plan effect**: the adapter brick is DELETED (second major deletion after W). Zero genuinely-new
+  lemmas remain on the route: what's left is the restatement (below), Y1c (cited Shi producer shape
+  + single-flow 3.11 instantiation + `hric` + endpoint), Y2 (rewiring).
+
+## BRICK Y1-COV — KICKOFF PROMPT (the covariant restatement; small session, then start Y1c if room)
+
+**Paste-pointer:** *"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — the
+RULING above and section 'BRICK Y1-COV'. Do the covariant restatement; then begin Y1c (read the
+`metricCovOrderWindow_of_*` hypotheses and shape the cited Shi producer) if the session has room.
+Report back."*
+
+1. In `Evolution/ExtendViaUniqueness.lean`: add the `HCGCompactness.AllTimesBounds` import (+
+   `open DifferentialGeometry.HCGCompactness` scoped as needed); restate (N)'s data clause and (A)'s
+   `hC3 → hcov` per the RULING verbatim; delete `ChartJetBoundAt` + `.mono` and the `∃ S, ∃ Q`
+   apparatus; patch (A)'s proof; docstring note on the import inversion. Re-verify: focused check +
+   targeted build; (A) sorry-free; file sorries = (N)/(B) only; `grep ChartJetBoundAt` → 0 hits.
+2. In `ExtendShiInputs.lean`: add the "unconsumed, banked" note over the chart-k=0 lemmas (no
+   deletion); file stays 0-sorry.
+3. If room, Y1c step 1 (READ ONLY, then report): the exact hypotheses of
+   `metricCovOrderWindow_of_pointwise/_of_evolution` (`AllTimesBounds.lean:793/4168/4403`) and what
+   the single-flow instantiation needs — this fixes the cited Shi producer's statement for the Y1c
+   session. Do NOT stub the producer before this read.
+**Rules:** claim both files. Off-limits unchanged (`HCGCompactness/**` import-only, `MaximalTime.lean`,
+`ShortTime*/`, `DeTurck*`, `CinftyLimitGlue.lean`, `JetGlueParam.lean`); (N)/(B) bodies stay `sorry`.
+**Acceptance:** (A) re-proved sorry-free in the covariant form; `ChartJetBoundAt` gone; both files
+build green with only the (N)/(B) sorries.
+
+## Y2 (unchanged plan)
+Rewire `MaximalTime.extends_of_rmBounded`: Y1 → (A) → restart → (B) `ricci_flow_forward_unique` on
+`[t*,ω)` → `hagree_overlap` → Brick U → `isSolutionOn_of_extendData` → `ExtendsPastEndpoint`; delete the
+`hglue`/`hLimit` leaves; move the private MaximalTime solution-PDE helpers down into this file.
