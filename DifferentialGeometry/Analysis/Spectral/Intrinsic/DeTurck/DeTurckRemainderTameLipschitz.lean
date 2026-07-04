@@ -48,7 +48,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component deriv_chartRicciTrace_realizedFam_eq_chartSlope chartRicciTraceChristoffelSlope cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local symmS symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local symmS symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_rfns_le symmAbsorbedCoeff_jet_le)
@@ -1733,70 +1733,10 @@ private theorem uniform_rfns_bound_lichnerowicz_coeffFields
       (realizedSmallSet (δ := δ) (δ' := δ'))
       (linearizedRicci_arm2FieldLichnerowicz_jointSmooth (I := I) g₀ T T' hδ hδ')
   · intro s hs x v
-    have hderiv := (linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T'
-      hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) hs)
-    rw [hderiv]
-    have hchartSumDeriv :=
-      hasDerivAt_realizedRicciChartSum_general (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
-        x (v 0) (v 1) hs
-    rw [hchartSumDeriv.deriv]
-    have hslope : ∀ (i k : Fin (Module.finrank ℝ E)),
-        (∑ j : Fin (Module.finrank ℝ E),
-            deriv (fun s : ℝ =>
-              chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k j
-                (extChartAt I x x)) s) =
-          chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-            (extChartAt I x x) s := fun i k =>
-      deriv_chartRicciTrace_realizedFam_eq_chartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
-        x i k hs
-    have hccBilin : ∀ (i k : Fin (Module.finrank ℝ E)),
-        chartRicciTraceChristoffelSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
-          (extChartAt I x x) s =
-        ccTensorBilin (I := I) g₀
-          (appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s)
-              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-            + appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s)
-              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-            + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
-            ((chartModelBasis E) k) ((chartModelBasis E) i) := fun i k =>
-      chartRicciSlope_eq_threeArm_lichnerowicz_curvature_component (I := I) g₀ T T'
-        hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s hs x i k
-    set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
-    set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
-    set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
-    set Wsum : SmoothCcTensor g₀ 0 2 :=
-      appCc (I := I) (M := M) g₀ 2 2 (Φ₀ s) W₀ +
-        appCc (I := I) (M := M) g₀ 3 2 (Φ₁ s) W₁ +
-        appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s) W₂ with hWsum
-    have hsumForm : (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
-        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
-          ccTensorBilin (I := I) g₀ Wsum x
-            ((chartModelBasis E) k) ((chartModelBasis E) i)) =
-      unitModel (I := I) (M := M) g₀ 2 Wsum x v := by
-      have hunitBasis : (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
-          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
-            unitModel (I := I) (M := M) g₀ 2 Wsum x
-              ![(chartModelBasis E) k, (chartModelBasis E) i]) =
-        unitModel (I := I) (M := M) g₀ 2 Wsum x v :=
-        unitModel_basis_expand_two (I := I) (M := M) g₀ Wsum x v
-      rw [← hunitBasis]
-      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
-      rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ Wsum x
-          ((chartModelBasis E) k) ((chartModelBasis E) i)]
-    rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
-          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
-            (∑ j : Fin (Module.finrank ℝ E),
-              deriv (fun s : ℝ =>
-                chartRiemannTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x i j k j
-                  (extChartAt I x x)) s)) =
-        (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
-          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
-            ccTensorBilin (I := I) g₀ Wsum x
-              ((chartModelBasis E) k) ((chartModelBasis E) i)) from
-      Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => by
-        rw [hslope i k, hccBilin i k]))]
-    rw [hsumForm]
+    obtain ⟨_, _, _, hident⟩ :=
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+        (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
+    exact hident hTsymm hT'symm s hs x v hδ_lt hδ'_lt
   · intro s hs x
     have h := hC0 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
     exact h.1
