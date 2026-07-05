@@ -2827,6 +2827,59 @@ theorem armField_pathIntegral_jetL2_perOrder_le
 
 end
 
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem pje_icg_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) =
+      c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih =>
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+private lemma pje_rfns_toSection_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : ℝ) (V : SmoothCcTensor g r s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x ((c • V).toSection x) =
+      c ^ 2 * riemannianFiberNormSq (I := I) (M := M) g r s x (V.toSection x) := by
+  rw [show ((c • V).toSection x) = c • (V.toSection x) from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
+      (c • V.toSection x),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (V.toSection x)]
+  rw [Tensor0SBundle.TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left,
+    tensorInnerPointwise_smul_right]
+  ring
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem pje_normSq_icg_reindex_eq (g₀ : SmoothRiemannianMetric I M)
+    (R : SmoothCcTensor g₀ 4 2) (ρ : Equiv.Perm (Fin 4)) (i : ℕ) :
+    ‖iteratedCovGrad (I := I) g₀ 4 2 i
+        (reindexCoeffGen (I := I) (M := M) g₀ 4 2 R ρ)‖ ^ 2 =
+      ‖iteratedCovGrad (I := I) g₀ 4 2 i R‖ ^ 2 := by
+  have h1 := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M)
+    g₀ 4 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 4 2 i (reindexCoeffGen (I := I) (M := M) g₀ 4 2 R ρ))
+  have h2 := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M)
+    g₀ 4 (2 + i) (iteratedCovGrad (I := I) g₀ 4 2 i R)
+  rw [← SmoothCcTensor.norm_def] at h1 h2
+  rw [h1, h2]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
+  exact rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 4 2 R ρ i x
+
+set_option maxHeartbeats 25600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization in
+open DifferentialGeometry.Integral.Measure in
 theorem exists_deTurckPhiTotPathIntegral_sub_background_coeffJetEnvelope_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -2853,8 +2906,703 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_coeffJetEnvelope_le
                       simpa using hR₀)) -
                 deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := by
+  classical
+  have hrsub : ∀ k l : ℕ, k ≤ l → Finset.range k ⊆ Finset.range l :=
+    fun k l hkl x hx => Finset.mem_range.mpr (lt_of_lt_of_le (Finset.mem_range.mp hx) hkl)
+  obtain ⟨Kg, hKg_nn, hKg⟩ :=
+    exists_gInvDiffSlotCoeff_grid_l2_jetLinear_highOrder (I := I) (M := M) g₀ a ha_super hR₀
+  obtain ⟨Cth, hCth_nn, hCth⟩ :=
+    traceHessianCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2 (I := I) (M := M) g₀
+  obtain ⟨Cr, hCr_nn, hCr⟩ :=
+    ricciArmPrincipalCoeff_sub_background_jetL2_le_gInvDiffSlotCoeff_jetL2 (I := I) (M := M) g₀
+  obtain ⟨C2, hC2_nn, hC2⟩ :=
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general (I := I) (M := M) g₀ (a + 2)
+  set B : ℝ := C2 * R₀ with hB_def
+  have hB_nn : 0 ≤ B := mul_nonneg hC2_nn hR₀
+  obtain ⟨Klo, hKlo_nn, hKlo⟩ :=
+    gInvDiffSlotCoeff_perOrder_l2_ballUniform_generic (I := I) (M := M) g₀ a ha_super hB_nn
+      (by norm_num : (1 : ℝ) / 3 < 1)
+  obtain ⟨Cg, hCg_nn, hCg⟩ :=
+    rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le (I := I) (M := M) g₀
+      (by norm_num : (1 : ℝ) / 3 < 1)
+  set KdevF : ℕ → ℝ := fun i => (6 * Cth i + 12 * Cr i) * ∑ j ∈ Finset.range (i + 1),
+    (Klo j + Cg j * Kg j) with hKdevF_def
+  have hKdevF_nn : ∀ i, 0 ≤ KdevF i := fun i =>
+    mul_nonneg (by have := hCth_nn i; have := hCr_nn i; linarith)
+      (Finset.sum_nonneg fun j _ =>
+        add_nonneg (hKlo_nn j) (mul_nonneg (hCg_nn j) (hKg_nn j)))
+  set cB : ℕ → ℝ := fun i =>
+    ‖iteratedCovGrad (I := I) g₀ 4 2 i
+      (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 with hcB_def
+  have hcB_nn : ∀ i, 0 ≤ cB i := fun i => sq_nonneg _
+  refine ⟨fun i => 4 * KdevF i + 6 * cB i,
+    fun i => by have := hKdevF_nn i; have := hcB_nn i; linarith, ?_⟩
+  intro T₀ hTsymm hball i
+  show ‖iteratedCovGrad (I := I) g₀ 4 2 i
+      (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+          (0 : SmoothCcTensor g₀ 0 2)
+          (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+          (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+          (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+            (by
+              rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                  from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                tensorHs_norm_smul]
+              simpa using hR₀)) -
+        deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 ≤
+    (4 * KdevF i + 6 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)
+  have hS_nn : 0 ≤ ∑ l ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2 :=
+    Finset.sum_nonneg fun l _ => sq_nonneg _
+  have h1S_nn : (0 : ℝ) ≤ 1 + ∑ l ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2 := by linarith
+  have h1S_ge : (1 : ℝ) ≤ 1 + ∑ l ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2 := by linarith
+  rcases isEmpty_or_nonempty M with hM | hM
+  · have hzero : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+        (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+            (0 : SmoothCcTensor g₀ 0 2)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+            (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+              (by
+                rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                    from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                  tensorHs_norm_smul]
+                simpa using hR₀)) -
+          deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ = 0 := by
+      rw [SmoothCcTensor.norm_def, DifferentialGeometry.Integral.L2.tensorL2Norm,
+        DifferentialGeometry.Integral.L2.tensorL2Inner, MeasureTheory.integral_of_isEmpty,
+        Real.sqrt_zero]
+    rw [hzero]
+    have hpos : (0 : ℝ) ≤ (4 * KdevF i + 6 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) :=
+      mul_nonneg (by have := hKdevF_nn i; have := hcB_nn i; linarith) h1S_nn
+    simpa using hpos
+  · have hδ0 : 0 ≤ δ :=
+      delta_nonneg_of_ball_gFibreOpBound (I := I) (M := M) g₀ a hR₀ hδ_fibre
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
+    have hZn : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+        (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R₀ := by
+      rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+          from (zero_smul _ _).symm, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+      simpa using hR₀
+    have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ) := by
+      rw [Set.uIcc_of_le zero_le_one]
+      exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
+    have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ)) := realizedSmallSet_isOpen
+    have hj2 := kscr_phiMet_realizedFam_jointSmooth (I := I) (M := M) g₀ g_bg T₀
+      (0 : SmoothCcTensor g₀ 0 2) (hδ_fibre T₀ hball) (hδ_fibre 0 hZn)
+    have hTball : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ≤ B := by
+      intro j hj
+      have hsum := hC2 T₀
+      have hcast : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a + 2 : ℕ) : ℝ) T₀‖ =
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ :=
+        smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+      rw [hcast] at hsum
+      have hsumB : ∑ l ∈ Finset.range (a + 2 + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ≤ B := by
+        rw [hB_def]
+        exact le_trans hsum (mul_le_mul_of_nonneg_left hball hC2_nn)
+      have hsingle : ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ≤
+          ∑ l ∈ Finset.range (a + 2 + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ :=
+        Finset.single_le_sum
+          (f := fun l => ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖)
+          (fun l _ => norm_nonneg _) (Finset.mem_range.mpr (by omega))
+      exact le_trans hsingle hsumB
+    have hdev : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+              (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+            deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 ≤
+        KdevF i * (1 + ∑ l ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+      intro s hs
+      set g₁ : SmoothRiemannianMetric I M :=
+        realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+          (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s with hg₁_def
+      have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+        Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+      have htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀
+              (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) s) y v w := by
+        intro y v w
+        rw [hg₁_def]
+        exact realizedFam_inner_of_mem (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+          (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) hsmem y v w
+      have hcp : convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) s = s • T₀ := by
+        simp [convexPerturbation, smul_zero, zero_add]
+      have hs0 : (0 : ℝ) ≤ s := hs.1
+      have hs1 : s ≤ 1 := hs.2
+      have hδP : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀
+            (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) s)) δ := by
+        have h := convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T₀
+          (0 : SmoothCcTensor g₀ 0 2) (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) hs0 hs1
+        rwa [show (1 - s) * δ + s * δ = δ by ring] at h
+      have hPball : ∀ j : ℕ, j ≤ a + 2 →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j
+            (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) s)‖ ≤ B := by
+        intro j hj
+        rw [hcp, pje_icg_smul (I := I) g₀ 0 2 j s T₀, norm_smul]
+        have habs : ‖s‖ ≤ 1 := by rw [Real.norm_eq_abs, abs_of_nonneg hs0]; exact hs1
+        calc ‖s‖ * ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖
+            ≤ 1 * B := mul_le_mul habs (hTball j hj) (norm_nonneg _) zero_le_one
+          _ = B := one_mul B
+      have hslot : ∀ j : ℕ, j ≤ i →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 ≤
+            (Klo j + Cg j * Kg j) * (1 + ∑ l ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+        intro j hj
+        rcases le_or_gt j a with hja | hja
+        · have hlo := hKlo g₁ (convexPerturbation (I := I) g₀ T₀
+            (0 : SmoothCcTensor g₀ 0 2) s) hδ_le hδP htie hPball j hja
+          calc ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2
+              ≤ Klo j := hlo
+            _ = Klo j * 1 := (mul_one _).symm
+            _ ≤ Klo j * (1 + ∑ l ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) :=
+              mul_le_mul_of_nonneg_left h1S_ge (hKlo_nn j)
+            _ ≤ (Klo j + Cg j * Kg j) * (1 + ∑ l ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+              refine mul_le_mul_of_nonneg_right ?_ h1S_nn
+              exact le_add_of_nonneg_right (mul_nonneg (hCg_nn j) (hKg_nn j))
+        · have hpt0 : ∀ x : M,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + j) x
+                ((iteratedCovGrad (I := I) g₀ 2 2 j
+                  (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+              Cg j * ∑ n' ∈ Finset.range (j + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                  ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m)
+                        (convexPerturbation (I := I) g₀ T₀
+                          (0 : SmoothCcTensor g₀ 0 2) s)).toSection x) :=
+            fun x => hCg g₁ (convexPerturbation (I := I) g₀ T₀
+              (0 : SmoothCcTensor g₀ 0 2) s) htie hδ_le hδ0 hδP j x
+          have hgm : ∀ x : M,
+              (∑ n' ∈ Finset.range (j + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                  ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m)
+                        (convexPerturbation (I := I) g₀ T₀
+                          (0 : SmoothCcTensor g₀ 0 2) s)).toSection x)) ≤
+              ∑ n' ∈ Finset.range (j + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                  ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x) := by
+            intro x
+            refine Finset.sum_le_sum fun n' _ => Finset.sum_le_sum fun e _ => ?_
+            have hfac : ∀ m : Fin n',
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m)
+                    (convexPerturbation (I := I) g₀ T₀
+                      (0 : SmoothCcTensor g₀ 0 2) s)).toSection x) =
+                s ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x) := by
+              intro m
+              rw [hcp, pje_icg_smul (I := I) g₀ 0 2 (e m) s T₀,
+                pje_rfns_toSection_smul (I := I) (M := M) g₀ 0 (2 + e m) s
+                  (iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀) x]
+            calc (∏ m : Fin n',
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m)
+                      (convexPerturbation (I := I) g₀ T₀
+                        (0 : SmoothCcTensor g₀ 0 2) s)).toSection x))
+                = ∏ m : Fin n', (s ^ 2 *
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x)) :=
+                  Finset.prod_congr rfl fun m _ => hfac m
+              _ = (s ^ 2) ^ (n' : ℕ) * ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x) := by
+                  rw [Finset.prod_mul_distrib, Finset.prod_const, Finset.card_univ,
+                    Fintype.card_fin]
+              _ ≤ 1 * ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x) := by
+                  refine mul_le_mul_of_nonneg_right ?_
+                    (Finset.prod_nonneg fun m _ =>
+                      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + e m) x _)
+                  exact pow_le_one₀ (sq_nonneg s) (by nlinarith)
+              _ = ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x) := one_mul _
+          have hpt : ∀ x : M,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + j) x
+                ((iteratedCovGrad (I := I) g₀ 2 2 j
+                  (gInvDiffSlotCoeff (I := I) g₀ g₁)).toSection x) ≤
+              Cg j * ∑ n' ∈ Finset.range (j + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                  ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x) :=
+            fun x => le_trans (hpt0 x) (mul_le_mul_of_nonneg_left (hgm x) (hCg_nn j))
+          have hcont_grid : Continuous (fun x : M =>
+              ∑ n' ∈ Finset.range (j + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                  ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x)) := by
+            refine continuous_finset_sum _ fun n' _ => continuous_finset_sum _ fun e _ =>
+              continuous_finset_prod _ fun m _ => ?_
+            have hc := Integral.L2.SmoothCcTensor.continuous_inner_self (I := I) (M := M)
+              (iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀)
+            refine hc.congr fun x => ?_
+            rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x),
+              ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M)
+                (iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀) x]
+          have hint_grid : MeasureTheory.Integrable
+              (fun x : M => ∑ n' ∈ Finset.range (j + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                  ∏ m : Fin n',
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x))
+              (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+            integrable_of_continuous_compactSpace (I := I) (M := M) g₀ hcont_grid
+          have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀
+            2 (2 + j)
+            (iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁))
+            (fun x => Cg j * ∑ n' ∈ Finset.range (j + 1),
+              ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                ∏ m : Fin n',
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x))
+            (hint_grid.const_mul (Cg j)) hpt
+          have hgridE := hKg T₀ hball j
+          have hwin : ∑ l ∈ Finset.range (j + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2 ≤
+              ∑ l ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2 :=
+            Finset.sum_le_sum_of_subset_of_nonneg (hrsub _ _ (by omega))
+              (fun l _ _ => sq_nonneg _)
+          calc ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2
+              ≤ ∫ x, (Cg j * ∑ n' ∈ Finset.range (j + 1),
+                  ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                    ∏ m : Fin n',
+                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                        ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x))
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := hkey
+            _ = Cg j * ∫ x, (∑ n' ∈ Finset.range (j + 1),
+                  ∑ e ∈ Finset.Nat.antidiagonalTuple n' j,
+                    ∏ m : Fin n',
+                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                        ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T₀).toSection x))
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+                rw [MeasureTheory.integral_const_mul]
+            _ ≤ Cg j * (Kg j * (1 + ∑ l ∈ Finset.range (j + 2),
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)) :=
+              mul_le_mul_of_nonneg_left hgridE (hCg_nn j)
+            _ ≤ Cg j * (Kg j * (1 + ∑ l ∈ Finset.range (i + 2),
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)) := by
+                refine mul_le_mul_of_nonneg_left ?_ (hCg_nn j)
+                refine mul_le_mul_of_nonneg_left ?_ (hKg_nn j)
+                linarith
+            _ = Cg j * Kg j * (1 + ∑ l ∈ Finset.range (i + 2),
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by ring
+            _ ≤ (Klo j + Cg j * Kg j) * (1 + ∑ l ∈ Finset.range (i + 2),
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+                refine mul_le_mul_of_nonneg_right ?_ h1S_nn
+                exact le_add_of_nonneg_left (hKlo_nn j)
+      have hslotSum : ∑ j ∈ Finset.range (i + 1),
+          ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2 ≤
+          (∑ j ∈ Finset.range (i + 1), (Klo j + Cg j * Kg j)) *
+            (1 + ∑ l ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+        calc (∑ j ∈ Finset.range (i + 1),
+              ‖iteratedCovGrad (I := I) g₀ 2 2 j (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2)
+            ≤ ∑ j ∈ Finset.range (i + 1), ((Klo j + Cg j * Kg j) *
+                (1 + ∑ l ∈ Finset.range (i + 2),
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)) :=
+              Finset.sum_le_sum fun j hj =>
+                hslot j (by have := Finset.mem_range.mp hj; omega)
+          _ = (∑ j ∈ Finset.range (i + 1), (Klo j + Cg j * Kg j)) *
+                (1 + ∑ l ∈ Finset.range (i + 2),
+                  ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+              rw [Finset.sum_mul]
+      have hdev_eq :
+          deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₁ -
+            deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀ =
+          reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA)
+            + reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT)
+            - ((ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)
+              + (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)) := by
+        rw [deTurckPhiMetTotal_eq_reindex_decomp_fw (I := I) (M := M) g₀ g_bg g₁,
+          deTurckPhiMetTotal_eq_reindex_decomp_fw (I := I) (M := M) g₀ g_bg g₀,
+          kscr_reindexCoeffGen_sub (I := I) (M := M) g₀ _ _
+            (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA),
+          kscr_reindexCoeffGen_sub (I := I) (M := M) g₀ _ _
+            (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT)]
+        abel
+      have hreiA := pje_normSq_icg_reindex_eq (I := I) (M := M) g₀
+        (traceHessianCoeff (I := I) (M := M) g₀ g₁
+          - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+        (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA) i
+      have hreiB := pje_normSq_icg_reindex_eq (I := I) (M := M) g₀
+        (traceHessianCoeff (I := I) (M := M) g₀ g₁
+          - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+        (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT) i
+      have hth := hCth g₁ i
+      have hr := hCr g₁ i
+      have htri : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₁ -
+            deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ≤
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA))‖ +
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT))‖ +
+          2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ := by
+        rw [hdev_eq, iteratedCovGrad_sub, iteratedCovGrad_add, iteratedCovGrad_add]
+        have h1 := norm_sub_le
+          (iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA)) +
+            iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT)))
+          (iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) +
+           iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀))
+        have h2 := norm_add_le
+          (iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA)))
+          (iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT)))
+        have h3 := norm_add_le
+          (iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀))
+          (iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀))
+        linarith
+      have hsq : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₁ -
+            deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 ≤
+          3 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA))‖ ^ 2 +
+          3 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT))‖ ^ 2 +
+          12 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 := by
+        nlinarith [htri,
+          norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₁ -
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)),
+          norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA))),
+          norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+            (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+              (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT))),
+          norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)),
+          sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA))‖ -
+            ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT))‖),
+          sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA))‖ -
+            2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖),
+          sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT))‖ -
+            2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖)]
+      calc ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₁ -
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2
+          ≤ 3 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA))‖ ^ 2 +
+            3 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (reindexCoeffGen (I := I) (M := M) g₀ 4 2
+                (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                  - traceHessianCoeff (I := I) (M := M) g₀ g₀)
+                (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT))‖ ^ 2 +
+            12 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 := hsq
+        _ = 6 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (traceHessianCoeff (I := I) (M := M) g₀ g₁
+                - traceHessianCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 +
+            12 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 := by
+            rw [hreiA, hreiB]; ring
+        _ ≤ (6 * Cth i + 12 * Cr i) * (∑ j ∈ Finset.range (i + 1),
+              ‖iteratedCovGrad (I := I) g₀ 2 2 j
+                (gInvDiffSlotCoeff (I := I) g₀ g₁)‖ ^ 2) := by
+            nlinarith [hth, hr]
+        _ ≤ (6 * Cth i + 12 * Cr i) * ((∑ j ∈ Finset.range (i + 1), (Klo j + Cg j * Kg j)) *
+              (1 + ∑ l ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)) :=
+            mul_le_mul_of_nonneg_left hslotSum
+              (by have := hCth_nn i; have := hCr_nn i; linarith)
+        _ = KdevF i * (1 + ∑ l ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+            simp only [hKdevF_def]; ring
+    have hbare : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+            (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+              (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))‖ ^ 2 ≤
+        (2 * KdevF i + 2 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+      intro s hs
+      have hsplit1 : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+            (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+              (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))‖ ≤
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+                (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                  (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ +
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ := by
+        have hid : deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+            (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+              (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) =
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+                (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                  (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀) +
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀ := (sub_add_cancel _ _).symm
+        calc ‖iteratedCovGrad (I := I) g₀ 4 2 i
+              (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+                (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                  (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))‖
+            = ‖iteratedCovGrad (I := I) g₀ 4 2 i
+                ((deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+                    (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                      (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+                  deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀) +
+                  deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ := by rw [← hid]
+          _ = ‖iteratedCovGrad (I := I) g₀ 4 2 i
+                (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+                    (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                      (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+                  deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀) +
+                iteratedCovGrad (I := I) g₀ 4 2 i
+                  (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ := by
+              rw [iteratedCovGrad_add]
+          _ ≤ _ := norm_add_le _ _
+      have hd := hdev s hs
+      have hcBi : cB i = ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 := rfl
+      have hcmul : cB i * 1 ≤ cB i * (1 + ∑ l ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) :=
+        mul_le_mul_of_nonneg_left h1S_ge (hcB_nn i)
+      nlinarith [hsplit1, hd, hcBi, hcmul,
+        norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+            (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+              (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))),
+        norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+              (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+            deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)),
+        norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)),
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+                (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+                  (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s) -
+              deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ -
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖)]
+    have hprod2_nn : (0 : ℝ) ≤ (2 * KdevF i + 2 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) :=
+      mul_nonneg (by have := hKdevF_nn i; have := hcB_nn i; linarith) h1S_nn
+    have htower := armField_pathIntegral_jetL2_perOrder_le (I := I) (M := M) g₀ 4
+      (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+        (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+          (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))
+      hSI hSopen hj2 i
+      (B := Real.sqrt ((2 * KdevF i + 2 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2)))
+      (Real.sqrt_nonneg _)
+      (fun s hs => by rw [Real.sq_sqrt hprod2_nn]; exact hbare s hs)
+    rw [Real.sq_sqrt hprod2_nn] at htower
+    have hPeq : deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+        (0 : SmoothCcTensor g₀ 0 2)
+        (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+        (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+        (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+          (by
+            rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+              tensorHs_norm_smul]
+            simpa using hR₀)) =
+        pathIntegralCoeffField (I := I) (M := M) g₀ 4 2
+          (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+            (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2)
+              (hδ_fibre T₀ hball) (hδ_fibre 0 hZn) s))
+          (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hj2 := rfl
+    have htower' : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+        (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+          (0 : SmoothCcTensor g₀ 0 2)
+          (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+          (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+          (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+            (by
+              rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                  from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                tensorHs_norm_smul]
+              simpa using hR₀)))‖ ^ 2 ≤
+        (2 * KdevF i + 2 * cB i) * (1 + ∑ l ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) := by
+      rw [hPeq]; exact htower
+    have hsplit : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+        (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+            (0 : SmoothCcTensor g₀ 0 2)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+            (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+              (by
+                rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                    from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                  tensorHs_norm_smul]
+                simpa using hR₀)) -
+          deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 ≤
+        2 * ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+            (0 : SmoothCcTensor g₀ 0 2)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+            (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+              (by
+                rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                    from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                  tensorHs_norm_smul]
+                simpa using hR₀)))‖ ^ 2 +
+        2 * cB i := by
+      have h := norm_sub_le
+        (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+            (0 : SmoothCcTensor g₀ 0 2)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+            (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+              (by
+                rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                    from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                  tensorHs_norm_smul]
+                simpa using hR₀))))
+        (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀))
+      rw [← iteratedCovGrad_sub] at h
+      have hcBi : cB i = ‖iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2 := rfl
+      nlinarith [h,
+        norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+              (0 : SmoothCcTensor g₀ 0 2)
+              (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+              (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+              (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                (by
+                  rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                      from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                    tensorHs_norm_smul]
+                  simpa using hR₀)) -
+            deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)),
+        norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+            (0 : SmoothCcTensor g₀ 0 2)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+            (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+            (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+              (by
+                rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                    from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                  tensorHs_norm_smul]
+                simpa using hR₀)))),
+        norm_nonneg (iteratedCovGrad (I := I) g₀ 4 2 i
+          (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)),
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+              (0 : SmoothCcTensor g₀ 0 2)
+              (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+              (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+              (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                (by
+                  rw [show (0 : SmoothCcTensor g₀ 0 2) =
+                      (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                      from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                    tensorHs_norm_smul]
+                  simpa using hR₀)))‖ -
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖)]
+    have hcmul : cB i * 1 ≤ cB i * (1 + ∑ l ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 l T₀‖ ^ 2) :=
+      mul_le_mul_of_nonneg_left h1S_ge (hcB_nn i)
+    nlinarith [hsplit, htower', hcmul, hKdevF_nn i, hcB_nn i, h1S_nn, hS_nn]
 
 theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoeff_coeffJetEnvelope_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
