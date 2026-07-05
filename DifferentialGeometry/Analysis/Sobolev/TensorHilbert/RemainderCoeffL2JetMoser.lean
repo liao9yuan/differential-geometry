@@ -1320,7 +1320,7 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic
               (mul_nonneg (sq_nonneg ΛS) (hFB_nn i)))))
       nlinarith [hKcC_nn, hsum_nn]
 
-private lemma tsmConvex_jet_eq (g₀ : SmoothRiemannianMetric I M)
+lemma tsmConvex_jet_eq (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (s : ℝ) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s) =
       (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T' +
