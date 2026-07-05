@@ -1783,6 +1783,20 @@ theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThird
     rw [hm1, hm2, hm3]
     exact hH3 C₂ T₀ hball hC₂sup hC₂jet (a + k - 1)
 
+theorem armField_pathIntegral_jetL2_perOrder_le
+    (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
+    (hSI : Set.uIcc (0 : ℝ) 1 ⊆ DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ'))
+    (hSopen : IsOpen (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ')))
+    (hjoint : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r Φ (δ := δ) (δ' := δ'))
+    (i : ℕ) {B : ℝ} (hB : 0 ≤ B)
+    (hΦjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
+      ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ B ^ 2) :
+    ‖iteratedCovGrad (I := I) g₀ r 2 i
+        (pathIntegralCoeffField (I := I) (M := M) g₀ r 2 Φ
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hjoint)‖ ^ 2 ≤ B ^ 2 :=
+  sorry
+
 end IntrinsicSpectral
 end RicciFlow
 end PDE
