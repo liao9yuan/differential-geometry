@@ -294,7 +294,7 @@ private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
 
 set_option linter.unusedSectionVars false in
 
-private theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
+theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
@@ -361,7 +361,7 @@ private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 
-private theorem connContrCLM_field_contMDiff (m k : ℕ)
+theorem connContrCLM_field_contMDiff (m k : ℕ)
     (Bf : ∀ x : M, Tensor0SBundle.TensorRSSpace 1 (k + 1) I x)
     (hBf : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 (k + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 1 (k + 1) ℝ E)
