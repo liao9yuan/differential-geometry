@@ -170,10 +170,17 @@ private theorem metricInnerSq_le (g : SmoothRiemannianMetric I M) (x : M)
       rwa [div_mul_cancel₀ _ hc.ne'] at this
     linarith
 
-/-- **Adapter `k = 0` core.**  From metric equivalence `g ≈_C gRef` on `Q` and a bound `M0` on the
-`gRef` chart-Gram diagonal entries over `Q`, every chart-Gram entry of `g` is bounded by `C·M0` —
-uniformly in `g`.  Diagonal via equivalence + the `gRef` bound; off-diagonal via `metricInnerSq_le`
-(Cauchy–Schwarz). -/
+-- BANKED / UNCONSUMED (2026-07-04).  The four chart-`k=0` lemmas below (`chartGramEntry_le_of_equiv`,
+-- `exists_gRefDiag_bound`, `goodSet_subset_chartSource`, `chartJet0_le_of_equiv`) were the base case of
+-- the retired chart-C³ adapter.  After the covariant restatement (Y1-COV) they have no current consumer
+-- — the (N)/(A) tail bound now speaks `MetricCovDerivOrderBoundOn` directly.  Kept (not deleted) as
+-- verified building blocks: `metricInnerSq_le` (metric Cauchy–Schwarz) is generally reusable, and these
+-- may serve a future coordinate-side bound.  See `ExtendShiInputs.md` §Y1b-FINAL / RULING.
+
+/-- **Chart-`k=0` entry bound (banked, unconsumed).**  From metric equivalence `g ≈_C gRef` on `Q` and a
+bound `M0` on the `gRef` chart-Gram diagonal entries over `Q`, every chart-Gram entry of `g` is bounded
+by `C·M0` — uniformly in `g`.  Diagonal via equivalence + the `gRef` bound; off-diagonal via
+`metricInnerSq_le` (Cauchy–Schwarz). -/
 private theorem chartGramEntry_le_of_equiv
     (gRef g : SmoothRiemannianMetric I M) {C M0 : ℝ} (hC0 : 0 ≤ C) (hM0 : 0 ≤ M0) (α₀ : M)
     {Q : Set M} (hequiv : MetricUniformEquivalentOn Q gRef g C)
@@ -235,7 +242,7 @@ private theorem goodSet_subset_chartSource (α₀ : M) :
     chartLeviCivitaGoodSet (I := I) α₀ ⊆ (chartAt H α₀).source :=
   fun _ hz => extChartAt_source I α₀ ▸ hz.1.1
 
-/-- **Adapter k=0 conjunct.**  The 0-th entry bound of `ChartJetBoundAt`, from equivalence + the fixed
+/-- **Chart-`k=0` conjunct (banked, unconsumed).**  The 0-th entry bound, from equivalence + the fixed
 `gRef` diagonal bound `M0`: `|chartGramOnE g α₀ i j (extChartAt I α₀ x)| ≤ C·M0` on `Q`. -/
 private theorem chartJet0_le_of_equiv
     (gRef g : SmoothRiemannianMetric I M) {C M0 : ℝ} (hC0 : 0 ≤ C) (hM0 : 0 ≤ M0) (α₀ : M)

@@ -483,6 +483,38 @@ Report back."*
 **Acceptance:** (A) re-proved sorry-free in the covariant form; `ChartJetBoundAt` gone; both files
 build green with only the (N)/(B) sorries.
 
+## BRICK Y1-COV — DONE (2026-07-04), verified green (targeted build, 9459 jobs)
+
+The covariant restatement landed exactly per the RULING:
+- `Evolution/ExtendViaUniqueness.lean` now imports `HCGCompactness.AllTimesBounds` (`open …HCGCompactness`)
+  — **cycle-free, build green** (docstring note on the sanctioned import inversion added).
+- **`ChartJetBoundAt` + `.mono` DELETED** (`grep ChartJetBoundAt` = 0 hits in both `.lean` files).
+- **(N) `ricci_flow_unif_existence`** restated: the whole `∃ S, ∃ Q` chart-cover apparatus is gone; the
+  data clause is now `∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a g₀ gBase Λ`.  (N) is the
+  canonical "uniform short-time existence under bounded geometry vs a fixed background."
+- **(A) `ricci_flow_interior_restart`**: `hC3 → hcov : ∃ C ≥ 1, ∃ t₂ ∈ Ico α ω, ∀ s ∈ Ico t₂ ω,
+  ∀ a ≤ 3, MetricCovDerivOrderBoundOn Set.univ a (g_fam s) (g_fam α) C`.  Proof simplified (S/Q plumbing
+  gone); `hcov_star` weakens `C → Λ` via `.trans hΛ₂le`.  **Re-proves sorry-free.**
+- `ExtendShiInputs.lean`: the chart-`k=0` lemmas kept with a "BANKED / UNCONSUMED" note; **still 0-sorry**.
+- File sorries now = exactly (N) `:74` + (B) `:175` (the file shrank when the apparatus was deleted).
+
+**Terminal statement iteration reached** — (N)/(A) now speak Lemma 3.11's exact output vocabulary.
+With the adapter deleted, **zero genuinely-new lemmas remain on the route**.
+
+## Y1c — step-1 READ done (cited Shi producer shape)
+
+`metricCovOrderWindow_of_pointwise` (`AllTimesBounds.lean:793`) is a TRIVIAL packager:
+`(∀ i t∈[β,ψ], ∀ x∈K, metricCovDerivNorm a (gSeq i t) gRef x ≤ C) → MetricCovDerivOrderBoundOnWindow …`.
+So `MetricCovDerivOrderBoundOn K a h gRef C` IS just the pointwise `∀ x∈K, metricCovDerivNorm a h gRef x
+≤ C` — and (A)'s `hcov` is exactly that on `univ` for a single flow over a tail.  **Consequence for Y1c:
+NO window↔tail conversion, NO sequence instantiation needed** — the cited Shi producer's target is
+`hcov` **verbatim**: `∃ C ≥ 1, ∃ t₂ ∈ Ico α ω, ∀ s ∈ Ico t₂ ω, ∀ a ≤ 3, MetricCovDerivOrderBoundOn univ
+a (g_fam s) (g_fam α) C`, a single cited black box (Shi's `‖∇ᵏRm‖≤Cₖ` + the standard curvature→metric
+covariant-derivative bookkeeping, GSM77 Ch.7 / Chow–Knopf).  The window producers
+(`metricCovOrderWindow_of_evolution` :4403, `metricMixedOneWindow_of_ric_bound`) are the eventual
+DISCHARGE route (evolution predicate from the solution), not needed for the cited-hypothesis shape.
+Y1c = state that producer (sorry, cited) + `hric` + endpoint `extendInputs_of_soln = ⟨hell_of_soln, that⟩`.
+
 ## Y2 (unchanged plan)
 Rewire `MaximalTime.extends_of_rmBounded`: Y1 → (A) → restart → (B) `ricci_flow_forward_unique` on
 `[t*,ω)` → `hagree_overlap` → Brick U → `isSolutionOn_of_extendData` → `ExtendsPastEndpoint`; delete the

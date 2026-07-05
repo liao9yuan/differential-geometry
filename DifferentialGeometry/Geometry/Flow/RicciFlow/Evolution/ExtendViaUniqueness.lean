@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -39,6 +40,15 @@ open scoped Manifold ContDiff Topology
 open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.HCGCompactness
+
+-- NOTE (import inversion, sanctioned): this file imports `HCGCompactness.AllTimesBounds` so the
+-- (N)/(A) tail data bound speaks the producer's own intrinsic predicate `MetricCovDerivOrderBoundOn`
+-- (Lemma 3.11's output language).  This is directory-nominally an inversion, but cycle-free —
+-- `AllTimesBounds`' import closure never touches the `CinftyLimitGlue`/`MaximalTime` branch — and the
+-- dependency footprint is unchanged since `MaximalTime` (which consumes this route) already imports HCG.
+-- It replaced the retired bespoke chart-C³ adapter: the covariant→chart bookkeeping now lives inside
+-- the cited (N) short-time-existence axiom, where the rest of the parabolic machinery already is.
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -46,31 +56,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
     [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
-
-/-- **Entrywise chart-jet bound** (order ≤ 3): the chart-Gram entry `g_{ij}` and its nested chart
-partial derivatives up to order 3, at a chart-target point `y ∈ E`, are all bounded by `Λ`.  This is
-the faithful coordinate-derivative form of the tail data bound consumed by the (N)-box / discharged by
-Brick Y1's adapter — it replaces the `iteratedFDeriv`-norm form (which has no consumer and demanded a
-missing finite-dim multilinear norm bridge). -/
-def ChartJetBoundAt (g : SmoothRiemannianMetric I M) (α₀ : M)
-    (i j : Fin (Module.finrank ℝ E)) (y : E) (Λ : ℝ) : Prop :=
-  |Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j y| ≤ Λ ∧
-  (∀ m : Fin (Module.finrank ℝ E),
-    |Integral.DivergenceTheorem.partialDeriv (E := E) m (Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j) y| ≤ Λ) ∧
-  (∀ m l : Fin (Module.finrank ℝ E),
-    |Integral.DivergenceTheorem.partialDeriv (E := E) m (Integral.DivergenceTheorem.partialDeriv (E := E) l
-      (Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j)) y| ≤ Λ) ∧
-  (∀ m l p : Fin (Module.finrank ℝ E),
-    |Integral.DivergenceTheorem.partialDeriv (E := E) m (Integral.DivergenceTheorem.partialDeriv (E := E) l (Integral.DivergenceTheorem.partialDeriv (E := E) p
-      (Integral.DivergenceTheorem.chartGramOnE (I := I) g α₀ i j))) y| ≤ Λ)
-
-/-- The entrywise chart-jet bound weakens to any larger constant. -/
-theorem ChartJetBoundAt.mono {g : SmoothRiemannianMetric I M} {α₀ : M}
-    {i j : Fin (Module.finrank ℝ E)} {y : E} {Λ Λ' : ℝ}
-    (h : ChartJetBoundAt (I := I) g α₀ i j y Λ) (hΛ : Λ ≤ Λ') :
-    ChartJetBoundAt (I := I) g α₀ i j y Λ' :=
-  ⟨h.1.trans hΛ, fun m => (h.2.1 m).trans hΛ, fun m l => (h.2.2.1 m l).trans hΛ,
-    fun m l p => (h.2.2.2 m l p).trans hΛ⟩
 
 /-- **Black box (N): uniform short-time existence on C³-bounded, uniformly-elliptic data**
 (parabolic continuous dependence — the faithful, non-circular quantitative source for the interior
@@ -87,14 +72,11 @@ blow-up criterion, so citing it for `extends_of_rmBounded` is non-circular (veri
 `ExtendViaUniqueness.md` §VERIFIED). Faithful cited PDE input, same lane as
 `deturck_ricci_flow_parabolic_short_time_existence`; may later migrate to the `ShortTime` layer. -/
 theorem ricci_flow_unif_existence (gBase : SmoothRiemannianMetric I M) :
-    ∃ S : Finset M, ∃ Q : M → Set M,
-      (∀ α₀ ∈ S, IsCompact (Q α₀) ∧ Q α₀ ⊆ chartLeviCivitaGoodSet (I := I) α₀) ∧
-      ∀ Λ : ℝ, 1 ≤ Λ → ∃ τ₀ : ℝ, 0 < τ₀ ∧
+    ∀ Λ : ℝ, 1 ≤ Λ → ∃ τ₀ : ℝ, 0 < τ₀ ∧
       ∀ g₀ : SmoothRiemannianMetric I M,
         (∀ x : M, ∀ v : TangentSpace I x,
           Λ⁻¹ * gBase.inner x v v ≤ g₀.inner x v v ∧ g₀.inner x v v ≤ Λ * gBase.inner x v v) →
-        (∀ α₀ ∈ S, ∀ i j : Fin (Module.finrank ℝ E), ∀ x ∈ Q α₀,
-          ChartJetBoundAt (I := I) g₀ α₀ i j (extChartAt I α₀ x) Λ) →
+        (∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a g₀ gBase Λ) →
         ∃ rr : ℝ → SmoothRiemannianMetric I M, rr 0 = g₀ ∧
           (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
             ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -124,11 +106,8 @@ theorem ricci_flow_interior_restart
       ∀ x : M, ∀ v : TangentSpace I x,
         Λ⁻¹ * (g_fam α).inner x v v ≤ (g_fam s).inner x v v ∧
           (g_fam s).inner x v v ≤ Λ * (g_fam α).inner x v v)
-    (hC3 : ∀ S : Finset M, ∀ Q : M → Set M,
-      (∀ α₀ ∈ S, IsCompact (Q α₀) ∧ Q α₀ ⊆ chartLeviCivitaGoodSet (I := I) α₀) →
-      ∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₂ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₂ omega,
-      ∀ α₀ ∈ S, ∀ i j : Fin (Module.finrank ℝ E), ∀ x ∈ Q α₀,
-        ChartJetBoundAt (I := I) (g_fam s) α₀ i j (extChartAt I α₀ x) Λ) :
+    (hcov : ∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico α omega, ∀ s ∈ Set.Ico t₂ omega,
+      ∀ a : ℕ, a ≤ 3 → MetricCovDerivOrderBoundOn Set.univ a (g_fam s) (g_fam α) C) :
     ∃ t_star : ℝ, t_star ∈ Set.Ico α omega ∧ ∃ TT : ℝ, omega < t_star + TT ∧
       ∃ rr : ℝ → SmoothRiemannianMetric I M, rr 0 = g_fam t_star ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -142,10 +121,10 @@ theorem ricci_flow_interior_restart
         (∀ t ∈ Set.Ico (0 : ℝ) TT, ∀ x : M, ∀ v w : TangentSpace I x,
           HasDerivWithinAt (fun u : ℝ => (rr u).inner x v w)
             ((-2 : ℝ) * ricciTensor (I := I) (rr t) x v w) (Set.Ici 0) t) := by
-  -- (N) provides a finite chart-centre family `S` and a uniform existence time `τ₀(Λ)`.
-  obtain ⟨S, Q, hSQ, hbox⟩ := ricci_flow_unif_existence (I := I) (g_fam α)
+  -- (N) provides a uniform existence time `τ₀(Λ)` over bounded-geometry data (no chart cover now).
+  have hbox := ricci_flow_unif_existence (I := I) (g_fam α)
   obtain ⟨Λ₁, hΛ₁, t₁, ht₁, hell'⟩ := hell
-  obtain ⟨Λ₂, hΛ₂, t₂, ht₂, hC3'⟩ := hC3 S Q hSQ
+  obtain ⟨Λ₂, hΛ₂, t₂, ht₂, hcov'⟩ := hcov
   -- one bound `Λ` dominating both producers; feed it to the box.
   set Λ : ℝ := max Λ₁ Λ₂ with hΛdef
   have hΛ₁le : Λ₁ ≤ Λ := by rw [hΛdef]; exact le_max_left _ _
@@ -175,12 +154,12 @@ theorem ricci_flow_interior_restart
       · exact ((g_fam α).pos x v hv).le
     obtain ⟨h1, h2⟩ := hell' t_star hstar_mem_1 x v
     exact ⟨le_trans (by gcongr) h1, le_trans h2 (by gcongr)⟩
-  have hC3_star : ∀ α₀ ∈ S, ∀ i j : Fin (Module.finrank ℝ E), ∀ x ∈ Q α₀,
-      ChartJetBoundAt (I := I) (g_fam t_star) α₀ i j (extChartAt I α₀ x) Λ := by
-    intro α₀ hα₀ i j x hx
-    exact (hC3' t_star hstar_mem_2 α₀ hα₀ i j x hx).mono hΛ₂le
+  have hcov_star : ∀ a : ℕ, a ≤ 3 →
+      MetricCovDerivOrderBoundOn Set.univ a (g_fam t_star) (g_fam α) Λ := by
+    intro a ha x hx
+    exact ((hcov' t_star hstar_mem_2 a ha) x hx).trans hΛ₂le
   -- apply the box at the restart metric; its output fields ARE the conclusion (with `TT := τ₀`).
-  obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hC3_star
+  obtain ⟨rr, hrr0, hrrS, hrrC, hrrP⟩ := hexist (g_fam t_star) hell_star hcov_star
   exact ⟨t_star, hstar_mem_αω, τ₀, hreach, rr, hrr0, hrrS, hrrC, hrrP⟩
 
 /-- **Black box (B): forward uniqueness of the Ricci flow on a closed manifold, in the smooth
