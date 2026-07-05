@@ -334,6 +334,7 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Laplacian
 import DifferentialGeometry.Analysis.Integration.L2.Basic
 import DifferentialGeometry.Analysis.Integration.L2.CompactSupport
+import DifferentialGeometry.Analysis.Integration.L2.FiniteProductHolderFiberNorm
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Defs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
