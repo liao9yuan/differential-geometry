@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinParabolicEnergy
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderSpectralMultiplierSplit
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderRealizeBallUniformSplit
 import DifferentialGeometry.Analysis.Sobolev.Tensor.CrossScaleCauchySchwarz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
@@ -996,6 +996,453 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale
   refine le_trans hkey ?_
   exact add_le_add (mul_le_mul_of_nonneg_left hRHS1_le hCδ₀_nn)
     (mul_le_mul_of_nonneg_left hRHS2_le (hCrem_nn k))
+
+section
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS symmS_smul domDomCongrSection)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (ccTensorBilin)
+
+set_option backward.isDefEq.respectTransparency false in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 1600000 in
+private lemma gscr_eigenIdxFinset_lambda_closed (g₀ : SmoothRiemannianMetric I M) (N : ℕ) :
+    ∀ i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2, i.1 = j.1 →
+      (i ∈ eigenIdxFinset (I := I) (M := M) g₀ N ↔
+        j ∈ eigenIdxFinset (I := I) (M := M) g₀ N) := by
+  intro i j hij
+  rw [mem_eigenIdxFinset, mem_eigenIdxFinset]
+  have hl : TensorEigenIdx.lambda (I := I) (M := M) i =
+      TensorEigenIdx.lambda (I := I) (M := M) j := by
+    unfold TensorEigenIdx.lambda
+    rw [hij]
+  rw [hl]
+
+
+set_option backward.isDefEq.respectTransparency false in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 1600000 in
+private lemma gscr_finiteEigenComboHs_eq_smoothCcToTensorHs
+    (g₀ : SmoothRiemannianMetric I M)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
+    (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (σ : ℝ) :
+    finiteEigenComboHs (I := I) (M := M) g₀ S c σ =
+      smoothCcToTensorHs (I := I) (M := M) g₀ σ
+        (finiteEigenCombo (I := I) (M := M) g₀ S c) := by
+  refine tensorHs.ext ?_
+  funext i
+  rw [finiteEigenComboHs_coeff_eq, smoothCcToTensorHs_coeff,
+    ← SmoothCcTensor.toL2_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 1600000 in
+/-- Primed spectral-coercive split for the DeTurck smooth remainder at the θ″
+contraction threshold, consuming the symmetry-carrying ball-uniform spectral
+split. The inner quantification gains the bilinear-symmetry hypothesis on the
+subject exactly as in the supplier. -/
+theorem deTurckSmoothRemainder_spectralCoercive_split'
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E))
+    (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+        (I := I) (M := M) g₀
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+          (I := I) g₀ T₀) δ) :
+    ∃ (Cδ₀ : ℝ) (Crem : ℕ → ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ (∀ k, 0 ≤ Crem k) ∧
+      ∀ (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) (k : ℕ)
+        (T₀ : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v)
+        (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
+        (hsupp : ∀ i, i ∉ S →
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀).coeff i = 0),
+        Real.sqrt (∑ i ∈ S,
+            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
+              ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+                  (deTurckSmoothRemainder (I := I) g₀ g_bg T₀
+                    (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
+                    (hδ_fibre T₀ hball))).coeff i -
+                (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+                  (deTurckSmoothRemainder (I := I) g₀ g_bg
+                    (0 : SmoothCcTensor g₀ 0 2)
+                    (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
+                    (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                      (by
+                        rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                            from (zero_smul _ _).symm, smoothCcToTensorHs_smul,
+                          tensorHs_norm_smul]
+                        simpa using hR₀)))).coeff i) ^ 2) ≤
+          Cδ₀ * Real.sqrt (∑ i ∈ S,
+              tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) + 1) *
+                ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) + 1)
+                  T₀).coeff i) ^ 2) +
+            Crem k * Real.sqrt (∑ i ∈ S,
+              tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
+                ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ))
+                  T₀).coeff i) ^ 2) := by
+  classical
+  obtain ⟨Cδ₀, Crem, hCδ₀_nn, hCδ₀_lt, hCrem_nn, hker⟩ :=
+    deTurckSmoothRemainderDiff_ballUniform_spectralSplit_of_symm (I := I) (M := M) g₀ g_bg a ha_super
+      hR₀ hδ_le hδ_fibre
+  refine ⟨Cδ₀, Crem, hCδ₀_nn, hCδ₀_lt, hCrem_nn, ?_⟩
+  intro S k T₀ hTsymm hball hsupp
+  set Rdiff : SmoothCcTensor g₀ 0 2 :=
+    deTurckSmoothRemainder (I := I) g₀ g_bg T₀
+        (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E))) (hδ_fibre T₀ hball) -
+      deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
+        (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
+        (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+          (by
+            rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                from (zero_smul _ _).symm, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+            simpa using hR₀)) with hRdiff_def
+  have hLHS_coeff : ∀ i,
+      (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg T₀
+              (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E))) (hδ_fibre T₀ hball))).coeff i -
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
+              (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
+              (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                (by
+                  rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                      from (zero_smul _ _).symm, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+                  simpa using hR₀)))).coeff i =
+        (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1) Rdiff).coeff i := by
+    intro i
+    rw [hRdiff_def, smoothCcToTensorHs_sub]
+    rfl
+  have hLHS_le :
+      Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
+            ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+              Rdiff).coeff i) ^ 2) ≤
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1) Rdiff‖ := by
+    rw [tensorHs.norm_eq_sqrt_tsum]
+    refine Real.sqrt_le_sqrt ?_
+    exact (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+      Rdiff).weighted_summable.sum_le_tsum _
+      (fun i _ => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i _) (sq_nonneg _))
+  have hsupp_all : ∀ (τ : ℝ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2), i ∉ S →
+      (smoothCcToTensorHs (I := I) (M := M) g₀ τ T₀).coeff i = 0 := by
+    intro τ i hi
+    rw [smoothCcToTensorHs_coeff]
+    have := hsupp i hi
+    rwa [smoothCcToTensorHs_coeff] at this
+  have hRHS_eq : ∀ (τ : ℝ),
+      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+          ((smoothCcToTensorHs (I := I) (M := M) g₀ τ T₀).coeff i) ^ 2 =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ τ T₀‖ ^ 2 := by
+    intro τ
+    rw [tensorHs.norm_sq_eq_tsum]
+    refine (tsum_eq_sum (s := S) ?_).symm
+    intro i hi
+    rw [hsupp_all τ i hi]
+    ring
+  have hRHS1 :
+      Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) + 1) *
+            ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) + 1) T₀).coeff i) ^ 2) =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) + 1) T₀‖ := by
+    rw [hRHS_eq ((a : ℝ) + (k : ℝ) + 1), Real.sqrt_sq (norm_nonneg _)]
+  have hRHS2 :
+      Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
+            ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) T₀).coeff i) ^ 2) =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) T₀‖ := by
+    rw [hRHS_eq ((a : ℝ) + (k : ℝ)), Real.sqrt_sq (norm_nonneg _)]
+  have hLHS_rw :
+      (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
+            ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+                (deTurckSmoothRemainder (I := I) g₀ g_bg T₀
+                  (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E))) (hδ_fibre T₀ hball))).coeff i -
+              (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
+                (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
+                  (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
+                  (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                    (by
+                      rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2)
+                          from (zero_smul _ _).symm, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+                      simpa using hR₀)))).coeff i) ^ 2) =
+        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
+            ((smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1) Rdiff).coeff i) ^ 2 :=
+    Finset.sum_congr rfl (fun i _ => by rw [hLHS_coeff i])
+  rw [hLHS_rw, hRHS1, hRHS2]
+  exact le_trans hLHS_le (hker k T₀ hTsymm hball)
+
+
+set_option backward.isDefEq.respectTransparency false in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 1600000 in
+/-- Primed per-scale Sobolev split for the DeTurck Galerkin nonlinearity at the
+θ″ contraction threshold, over the SYMMETRIZED eigen-ansatz: the subject is the
+symmetrization `symmS` of the finite eigen-combination, whose slot-swap
+equivariance discharges the bilinear-symmetry hypothesis of the primed
+spectral-coercive split, with the Galerkin energies on the right recovered at
+constant one through the swap-engine mass contraction.
+
+⚠ DEFERRED-TO-SWITCH INTERFACE: the hypothesis `htie` (the action of
+`deTurckSobolevNHa2` on smooth embeds at the OUTER parameters `(R₀, δ)`) is NOT
+yet dischargeable — `deTurckSobolevNHa2` currently bakes its parameters via
+`Classical.choose` at the OLD contraction threshold. `htie` becomes provable
+(and this hypothesis disappears) at the switch wave, when the operator is
+re-pinned to the θ″ parameter supplier. No reader should mistake this
+hypothesis-carrying form for the final statement. -/
+theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
+    {R₀ : ℝ} (hR₀ : 0 < R₀)
+    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E))
+    (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+        (I := I) (M := M) g₀
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+          (I := I) g₀ T₀) δ)
+    (htie : ∀ (T : SmoothCcTensor g₀ 0 2),
+      deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
+        deTurckSmoothN (I := I) (M := M) g₀ g_bg a
+          (radialScaleSmooth (I := I) (M := M) g₀ a R₀ T)
+          (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
+          (hδ_fibre _ (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a
+            hR₀.le T)))
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
+    ∃ (Cδ₀ : ℝ) (Crem : ℕ → ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ (∀ k, 0 ≤ Crem k) ∧
+      ∀ (N : ℕ) (k : ℕ) (t : ℝ),
+        Real.sqrt (∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
+              ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+                  (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+                    (symmS (I := I) (M := M) g₀
+                      (finiteEigenCombo (I := I) (M := M) g₀
+                        (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t))))).coeff i -
+                (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+                  (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2) ≤
+          Cδ₀ * Real.sqrt (galerkinEnergy (I := I) (M := M)
+              (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ) + 1) t) +
+            Crem k * Real.sqrt (galerkinEnergy (I := I) (M := M)
+              (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ)) t) := by
+  classical
+  have hδ_lt : δ < 1 :=
+    lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E))
+  obtain ⟨Cδ₀, Crem, hCδ₀_nn, hCδ₀_lt, hCrem_nn, hsplit⟩ :=
+    deTurckSmoothRemainder_spectralCoercive_split' (I := I) (M := M) g₀ g_bg a ha_super
+      hR₀.le hδ_le hδ_fibre
+  refine ⟨Cδ₀, Crem, hCδ₀_nn, hCδ₀_lt, hCrem_nn, ?_⟩
+  intro N k t
+  set S := eigenIdxFinset (I := I) (M := M) g₀ N with hS
+  set σ : ℝ := (a : ℝ) + (k : ℝ) with hσ
+  set Tb : SmoothCcTensor g₀ 0 2 := finiteEigenCombo (I := I) (M := M) g₀ S (U N t)
+    with hTb_def
+  set Ts : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ Tb with hTs_def
+  set T₀ : SmoothCcTensor g₀ 0 2 := radialScaleSmooth (I := I) (M := M) g₀ a R₀ Ts
+    with hT₀_def
+  have hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ :=
+    norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le Ts
+  set c : ℝ := min 1 (R₀ / ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts‖)
+    with hc_def
+  have hc_nn : 0 ≤ c := le_min zero_le_one (div_nonneg hR₀.le (norm_nonneg _))
+  have hc_le_one : c ≤ 1 := min_le_left _ _
+  have hsmul : T₀ = c • Ts := by rw [hT₀_def, hc_def]; rfl
+  have hT₀_symmS : T₀ = symmS (I := I) (M := M) g₀ (c • Tb) := by
+    rw [hsmul, hTs_def, symmS_smul]
+  have hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v := by
+    intro x v w
+    rw [hT₀_symmS]
+    exact ccTensorBilin_symmS_symm' (I := I) (M := M) g₀ (c • Tb) x v w
+  have hbridge : ∀ (τ : ℝ),
+      finiteEigenComboHs (I := I) (M := M) g₀ S (U N t) τ =
+        smoothCcToTensorHs (I := I) (M := M) g₀ τ Tb :=
+    fun τ => by
+      rw [hTb_def]
+      exact gscr_finiteEigenComboHs_eq_smoothCcToTensorHs g₀ S (U N t) τ
+  have hTb_coeff_off : ∀ i, i ∉ S →
+      (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Tb).coeff i = 0 := by
+    intro i hi
+    rw [← hbridge ((a : ℝ) + 2), finiteEigenComboHs_coeff, if_neg hi]
+  have hTb_L2_off : ∀ i, i ∉ S →
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (SmoothCcTensor.toL2 Tb) i = 0 := by
+    intro i hi
+    have h := hTb_coeff_off i hi
+    rwa [smoothCcToTensorHs_coeff] at h
+  have hTs_L2_off : ∀ i, i ∉ S →
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (SmoothCcTensor.toL2 Ts) i = 0 := by
+    intro i hi
+    rw [hTs_def]
+    exact tensorL2Coeff_toL2_symmS_eq_zero_of_notMem (I := I) (M := M) (g := g₀) S
+      (gscr_eigenIdxFinset_lambda_closed g₀ N) Tb hTb_L2_off i hi
+  have hTs_coeff_off : ∀ i, i ∉ S →
+      (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts).coeff i = 0 := by
+    intro i hi
+    rw [smoothCcToTensorHs_coeff]
+    exact hTs_L2_off i hi
+  have hsupp : ∀ i, i ∉ S →
+      (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀).coeff i = 0 := by
+    intro i hi
+    rw [hsmul, smoothCcToTensorHs_smul]
+    simp only [tensorHs.smul_coeff]
+    rw [hTs_coeff_off i hi, mul_zero]
+  have hzero : (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2) :=
+    (zero_smul _ _).symm
+  have hLHS_eq : ∀ i,
+      (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts)).coeff i -
+          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i =
+        (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg T₀ hδ_lt (hδ_fibre T₀ hball))).coeff i -
+          (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
+            (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2) hδ_lt
+              (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                (by
+                  rw [hzero, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+                  simpa using hR₀.le)))).coeff i := by
+    intro i
+    have hNT : (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts)).coeff i =
+        (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T₀ hδ_lt (hδ_fibre T₀ hball))).coeff i := by
+      rw [htie Ts, deTurckSmoothN_coeff, smoothCcToTensorHs_coeff]
+    have hN0 : (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i =
+        (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2) hδ_lt
+            (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+              (by
+                rw [hzero, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+                simpa using hR₀.le)))).coeff i := by
+      have hembed0 : (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) =
+          smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+            (0 : SmoothCcTensor g₀ 0 2) := by
+        refine tensorHs.ext ?_
+        funext j
+        rw [tensorHs.zero_coeff, smoothCcToTensorHs_coeff,
+          show SmoothCcTensor.toL2 (0 : SmoothCcTensor g₀ 0 2) = 0 from map_zero _,
+          tensorL2Coeff_eq_inner, inner_zero_right]
+      have hscale0 : radialScaleSmooth (I := I) (M := M) g₀ a R₀
+          (0 : SmoothCcTensor g₀ 0 2) = (0 : SmoothCcTensor g₀ 0 2) := by
+        rw [radialScaleSmooth, smul_zero]
+      have hRemEq : ∀ (hp : DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+              (I := I) (M := M) g₀
+              (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+                (I := I) g₀ (radialScaleSmooth (I := I) (M := M) g₀ a R₀
+                  (0 : SmoothCcTensor g₀ 0 2))) δ)
+            (hp0 : DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+              (I := I) (M := M) g₀
+              (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
+                (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+            deTurckSmoothRemainder (I := I) g₀ g_bg
+                (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (0 : SmoothCcTensor g₀ 0 2))
+                hδ_lt hp =
+              deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2) hδ_lt hp0 := by
+        rw [hscale0]; intro hp hp0; rfl
+      rw [hembed0, htie (0 : SmoothCcTensor g₀ 0 2), deTurckSmoothN_coeff,
+        smoothCcToTensorHs_coeff, hRemEq]
+    rw [hNT, hN0]
+  have hRHS_scale : ∀ (τ : ℝ) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+      (smoothCcToTensorHs (I := I) (M := M) g₀ τ T₀).coeff i =
+        c * (smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i := by
+    intro τ i
+    rw [hsmul, smoothCcToTensorHs_smul]
+    simp only [tensorHs.smul_coeff]
+  have hD2 : ∀ (τ : ℝ),
+      (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i) ^ 2) ≤
+      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ * (U N t i) ^ 2 := by
+    intro τ
+    have hstep1 : (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i) ^ 2) =
+        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g₀ Tb)) i) ^ 2 := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [smoothCcToTensorHs_coeff, hTs_def]
+    have hstep2 := sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
+      (I := I) (M := M) (g := g₀) τ S
+      (gscr_eigenIdxFinset_lambda_closed g₀ N) Tb hTb_L2_off
+    have hstep3 : (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+        (tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 Tb) i) ^ 2) =
+        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ * (U N t i) ^ 2 := by
+      refine Finset.sum_congr rfl (fun i hi => ?_)
+      rw [← smoothCcToTensorHs_coeff (I := I) (M := M) g₀ τ Tb i, ← hbridge τ,
+        finiteEigenComboHs_coeff, if_pos hi]
+    calc (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i) ^ 2)
+        = ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g₀ Tb)) i) ^ 2 := hstep1
+      _ ≤ ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 Tb) i) ^ 2 := hstep2
+      _ = ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ * (U N t i) ^ 2 := hstep3
+  have hRHS_le : ∀ (τ : ℝ),
+      Real.sqrt (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ τ T₀).coeff i) ^ 2) ≤
+      Real.sqrt (galerkinEnergy (I := I) (M := M) S (U N) τ t) := by
+    intro τ
+    rw [galerkinEnergy]
+    refine Real.sqrt_le_sqrt ?_
+    have hc2 : c ^ 2 ≤ 1 := by nlinarith [hc_nn, hc_le_one]
+    have hstep : (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ τ T₀).coeff i) ^ 2) ≤
+        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
+          ((smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i) ^ 2 := by
+      refine Finset.sum_le_sum (fun i hi => ?_)
+      rw [hRHS_scale τ i, mul_pow]
+      have hwnn := tensorSobolevWeight_nonneg (I := I) (M := M) i τ
+      have hsqnn : (0 : ℝ) ≤ ((smoothCcToTensorHs (I := I) (M := M) g₀ τ Ts).coeff i) ^ 2 :=
+        sq_nonneg _
+      nlinarith [mul_nonneg hwnn hsqnn, hc2, hwnn, hsqnn,
+        mul_le_mul_of_nonneg_right hc2 (mul_nonneg hwnn hsqnn)]
+    exact le_trans hstep (hD2 τ)
+  have hkey := hsplit S k T₀ hTsymm hball hsupp
+  rw [← hσ] at hkey
+  have hLHS_rw :
+      Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
+            ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+                (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+                  (symmS (I := I) (M := M) g₀
+                    (finiteEigenCombo (I := I) (M := M) g₀ S (U N t))))).coeff i -
+              (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2) =
+        Real.sqrt (∑ i ∈ S,
+          tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
+            ((smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
+                (deTurckSmoothRemainder (I := I) g₀ g_bg T₀ hδ_lt (hδ_fibre T₀ hball))).coeff i -
+              (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
+                (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2) hδ_lt
+                  (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                    (by
+                      rw [hzero, smoothCcToTensorHs_smul, tensorHs_norm_smul]
+                      simpa using hR₀.le)))).coeff i) ^ 2) := by
+    refine congrArg Real.sqrt (Finset.sum_congr rfl (fun i _ => ?_))
+    rw [show (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+        (symmS (I := I) (M := M) g₀
+          (finiteEigenCombo (I := I) (M := M) g₀ S (U N t)))) =
+        smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts from by
+      rw [hTs_def, hTb_def]]
+    rw [hLHS_eq i]
+  rw [hLHS_rw]
+  refine le_trans hkey ?_
+  exact add_le_add (mul_le_mul_of_nonneg_left (hRHS_le (σ + 1)) hCδ₀_nn)
+    (mul_le_mul_of_nonneg_left (hRHS_le σ) (hCrem_nn k))
+
+end
 
 theorem deTurckGalerkinForcing_tame_diff_mass_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
