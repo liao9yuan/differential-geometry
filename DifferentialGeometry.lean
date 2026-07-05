@@ -691,6 +691,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturbationFibreBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.L2BanachIso
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.PathIntegralWeightedFibreBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Rellich
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import DifferentialGeometry.Analysis.Sobolev.Tools.ArzelaAscoli
