@@ -383,6 +383,66 @@ theorem exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
       ‖iteratedCovGrad (I := I) g₀ 3 2 i
         (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖)]
 
+private theorem corrArm0Combination_eq_order0_add_halfRiemann
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) :
+    linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
+        - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
+        + (3 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s)
+        - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) =
+      linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s)
+        + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) := by
+  rw [show linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s =
+      linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) from rfl,
+    show linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s =
+      ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s)
+        - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) from rfl,
+    show (3 / 2 : ℝ) = 1 + 1 / 2 from by norm_num, add_smul, one_smul]
+  abel
+
+set_option linter.unusedVariables false in
+/-- All-order per-order L² tame jet envelope for the ∇A-free arm-0 combination
+`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff`, generic in a
+perturbed metric `g₁ = g₀ + P`.
+
+By the certified cancellation anatomy (witness-level: the ∇A-content of the order-zero
+connection-difference coefficient equals `-(1/2)` times that of the Riemann bi-contraction arm)
+the ∇A-linear content of this combination vanishes; the residual is the `A⋆A` bi-contraction
+plus the background-curvature commutator kernel — the prebuilt `arm0AAField` /
+`ricciArmOrder0BgRCommCoeffField` families of `RicciThreeArmCorrectionFieldBound` (with
+ball-uniform fibre sups there), so the combination is one-jet class and every covariant-gradient
+order `i` is windowed at `i + 2`.
+
+DEFERRED INPUT (`sorry`): the field-level Palatini split of the combination onto the two
+residual families and their per-order envelopes; consumers transitively depend on `sorryAx`
+until it lands. -/
+theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ),
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := sorry
+
 set_option linter.unusedVariables false in
 /-- All-order per-order L² tame jet envelope for the combined arm-0 correction subject
 `linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff
@@ -397,8 +457,11 @@ content vanishes; the residual is the `A⋆A` bi-contraction plus the background
 commutator kernel (the prebuilt `arm0AAField` / `ricciArmOrder0BgRCommCoeffField` families of
 `RicciThreeArmCorrectionFieldBound`).
 
-DEFERRED INPUT (`sorry`): the fill goes through the prebuilt residual fields above and the
-Koszul-class L² engines; consumers transitively depend on `sorryAx` until it lands. -/
+Proven by the definitional collapse of the combination onto
+`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` at the realized
+metric followed by the generic envelope at the convex perturbation. TRANSIT: the generic engine
+(`linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic`) is a
+posited `sorry` child; consumers transitively depend on `sorryAx` until it lands. -/
 theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -421,7 +484,99 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
                   (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by
+  classical
+  obtain ⟨K0, hK0_nn, hK0⟩ :=
+    linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨K0, hK0_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i s hs
+  have hs0 : (0 : ℝ) ≤ s := hs.1
+  have hs1 : s ≤ 1 := hs.2
+  have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
+      ((1 - s) * δ' + s * δ) :=
+    convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
+  have hδP_le : (1 - s) * δ' + s * δ ≤ δ₀ := by
+    have e1 : (1 - s) * δ' ≤ (1 - s) * δ₀ := mul_le_mul_of_nonneg_left hδ'_le h1ms
+    have e2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
+    have e3 : (1 - s) * δ₀ + s * δ₀ = δ₀ := by ring
+    linarith [e1, e2, e3]
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T T' hδ hδ' s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w :=
+    fun y v w =>
+      realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ'
+        (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs) y v w
+  have hPball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ≤ R := by
+    intro j hj
+    have heq : iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)
+        = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+          + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+      rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+    rw [heq]
+    calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+            + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+        ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+      _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+          rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+            abs_of_nonneg h1ms, abs_of_nonneg hs0]
+      _ ≤ (1 - s) * R + s * R :=
+          add_le_add (mul_le_mul_of_nonneg_left (hT'ball j hj) h1ms)
+            (mul_le_mul_of_nonneg_left (hTball j hj) hs0)
+      _ = R := by ring
+  have hwin : ∀ j : ℕ,
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2 := by
+    intro j
+    have heq : iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)
+        = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+          + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+      rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+        iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+    have hy_nn : 0 ≤ (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+        + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
+      add_nonneg (mul_nonneg h1ms (norm_nonneg _)) (mul_nonneg hs0 (norm_nonneg _))
+    have hnorm_le : ‖iteratedCovGrad (I := I) g₀ 0 2 j
+          (convexPerturbation (I := I) g₀ T T' s)‖ ≤
+        (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+          + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+      rw [heq]
+      calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+              + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+          ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+              + ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+        _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+              + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+            rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+              abs_of_nonneg h1ms, abs_of_nonneg hs0]
+    nlinarith [mul_le_mul hnorm_le hnorm_le (norm_nonneg
+        (iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s))) hy_nn,
+      mul_nonneg (mul_nonneg hs0 h1ms)
+        (sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ -
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖)),
+      mul_nonneg h1ms (sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖),
+      mul_nonneg hs0 (sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖)]
+  rw [corrArm0Combination_eq_order0_add_halfRiemann (I := I) (M := M) g₀ T T' hδ hδ' s]
+  have hmain := hK0 (realizedFam (I := I) g₀ T T' hδ hδ' s)
+    (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball i
+  refine le_trans hmain ?_
+  have hwinsum : ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤
+      ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) :=
+    Finset.sum_le_sum (fun j _ => hwin j)
+  exact mul_le_mul_of_nonneg_left (by linarith [hwinsum]) (hK0_nn i)
 
 end TensorSpectral
 end Parabolic
