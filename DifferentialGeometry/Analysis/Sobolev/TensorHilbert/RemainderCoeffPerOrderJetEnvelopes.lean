@@ -1599,7 +1599,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-private lemma cometricDoubleTraceFib_sub_toModel_eq
+lemma cometricDoubleTraceFib_sub_toModel_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (w : Tensor0SSpace (p + 2) I x) (m : Fin p → E) :
     Tensor0SSpace.toModel
