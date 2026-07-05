@@ -336,7 +336,7 @@ private theorem lieArm1_normSq_icg_raise_eq (g : SmoothRiemannianMetric I M) (s 
   exact rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g s W i x
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_norm_isEmpty (hM : IsEmpty M) (g : SmoothRiemannianMetric I M)
+theorem lieArm1_norm_isEmpty (hM : IsEmpty M) (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (W : SmoothCcTensor g r s) : ‖W‖ = 0 := by
   haveI := hM
   rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
@@ -376,7 +376,7 @@ private theorem lieArm1_dLTC_eq_reindex_traceHessian
   rw [harg]
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_rfns_dLTC_toSection_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+theorem lieArm1_rfns_dLTC_toSection_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ' : Equiv.Perm (Fin 4)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         ((deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ').toSection x) =
@@ -391,7 +391,7 @@ private theorem lieArm1_rfns_dLTC_toSection_eq (g₀ g₁ : SmoothRiemannianMetr
       (traceHessianCoeff (I := I) (M := M) g₀ g₁).toSection x)
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_normSq_icg_dLTC_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+theorem lieArm1_normSq_icg_dLTC_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ' : Equiv.Perm (Fin 4)) (i : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 4 2 i (deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ')‖ ^ 2 =
       ‖iteratedCovGrad (I := I) g₀ 4 2 i (traceHessianCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 := by
@@ -401,7 +401,7 @@ private theorem lieArm1_normSq_icg_dLTC_eq (g₀ g₁ : SmoothRiemannianMetric I
     (traceHessianCoeff (I := I) (M := M) g₀ g₁) (traceHessianSlotPerm⁻¹ * σ') i
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_gFibreOpBound_nonneg [Nonempty M] (g₀ : SmoothRiemannianMetric I M)
+theorem lieArm1_gFibreOpBound_nonneg [Nonempty M] (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) : 0 ≤ δ := by
   obtain ⟨x₀⟩ := ‹Nonempty M›
@@ -424,7 +424,7 @@ private theorem lieArm1_gFibreOpBound_nonneg [Nonempty M] (g₀ : SmoothRiemanni
   linarith [le_trans habs_nn hbound]
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_convexPerturbation_ball (g₀ : SmoothRiemannianMetric I M)
+theorem lieArm1_convexPerturbation_ball (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) {R : ℝ} (a : ℕ)
     (hTball : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R)
     (hT'ball : ∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R)
@@ -454,7 +454,7 @@ private theorem lieArm1_convexPerturbation_ball (g₀ : SmoothRiemannianMetric I
     _ = R := by ring
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_realizedFam_pack (g₀ : SmoothRiemannianMetric I M)
+theorem lieArm1_realizedFam_pack (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_le : δ ≤ δ₀)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -695,7 +695,7 @@ private theorem lieArm1_sharpFlat_feed (g₀ : SmoothRiemannianMetric I M) (a : 
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
-private theorem lieArm1_connDiff_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+theorem lieArm1_connDiff_feed (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
@@ -826,12 +826,12 @@ private lemma lieArm1_om_add (x : M) (om : Tensor0SSpace 1 I x) (u v : TangentSp
     ← cotangentToDual_apply (I := I) om v]
   exact lieArm1_cotangentToDual_map_add (I := I) (M := M) x om u v
 
-private def lieArm1FixCd (g₀ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 2 where
+def lieArm1FixCd (g₀ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 2 where
   toSection := (connDiffSection (I := I) g₀ g_bg).toSection
   hasCompactSupport := (connDiffSection (I := I) g₀ g_bg).hasCompactSupport
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_connDiffBg_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+theorem lieArm1_connDiffBg_decomp (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     lieArm1ConnDiffBgCc (I := I) (M := M) g₀ g₁ g_bg =
       connDiffSection (I := I) g₁ g₀ + lieArm1FixCd (I := I) (M := M) g₀ g_bg := by
   apply SmoothCcTensor.ext
@@ -869,7 +869,7 @@ private theorem lieArm1_connDiffBg_decomp (g₀ g₁ g_bg : SmoothRiemannianMetr
   exact lieArm1_om_add (I := I) (M := M) x om _ _
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_rfns_toSection_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
+theorem lieArm1_rfns_toSection_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r s x ((A + B).toSection x) ≤
       2 * riemannianFiberNormSq (I := I) (M := M) g r s x (A.toSection x) +
@@ -879,7 +879,7 @@ private theorem lieArm1_rfns_toSection_add_le (g : SmoothRiemannianMetric I M) (
   exact riemannianFiberNormSq_add_le (I := I) (M := M) g r s x _ _
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_normSq_icg_add_le (g : SmoothRiemannianMetric I M) (r s q : ℕ)
+theorem lieArm1_normSq_icg_add_le (g : SmoothRiemannianMetric I M) (r s q : ℕ)
     (A B : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g r s q (A + B)‖ ^ 2 ≤
       2 * ‖iteratedCovGrad (I := I) g r s q A‖ ^ 2 +
@@ -925,7 +925,7 @@ private theorem lieArm1_rfns_icg_sE2_le (g₀ : SmoothRiemannianMetric I M)
             ((iteratedCovGrad (I := I) g₀ 1 2 l Ψ).toSection x) := by ring
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_rfns_sE2_zero_le (g₀ : SmoothRiemannianMetric I M)
+theorem lieArm1_rfns_sE2_zero_le (g₀ : SmoothRiemannianMetric I M)
     (Ψ : SmoothCcTensor g₀ 1 2) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 4 x
         ((slotExtend (I := I) (M := M) g₀ 2 3
@@ -936,7 +936,7 @@ private theorem lieArm1_rfns_sE2_zero_le (g₀ : SmoothRiemannianMetric I M)
   simpa only [iteratedCovGrad_zero] using h
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_normSq_icg_sE2_le (g₀ : SmoothRiemannianMetric I M)
+theorem lieArm1_normSq_icg_sE2_le (g₀ : SmoothRiemannianMetric I M)
     (Ψ : SmoothCcTensor g₀ 1 2) (l : ℕ) :
     ‖iteratedCovGrad (I := I) g₀ 3 4 l
         (slotExtend (I := I) (M := M) g₀ 2 3 (slotExtend (I := I) (M := M) g₀ 1 2 Ψ))‖ ^ 2 ≤
@@ -981,7 +981,7 @@ private theorem lieArm1_piece_rfns_le (g₀ g₁ : SmoothRiemannianMetric I M)
   exact lieArm1_rfns_sE2_zero_le (I := I) (M := M) g₀ Ψ x
 
 set_option linter.unusedSectionVars false in
-private theorem lieArm1_piece_normSq_le (g₀ g₁ : SmoothRiemannianMetric I M)
+theorem lieArm1_piece_normSq_le (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ' : Equiv.Perm (Fin 4)) (ρ : Equiv.Perm (Fin 3)) (Ψ : SmoothCcTensor g₀ 1 2)
     (i : ℕ) (C2i ΛS ΛT FSi FTi : ℝ) (hC2i : 0 ≤ C2i)
     (hFS : ∑ n ∈ Finset.range (i + 1),
@@ -2159,7 +2159,7 @@ private theorem lieArm1_kappa_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a :
 
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
-private theorem lieArm1_psiB_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+theorem lieArm1_psiB_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
