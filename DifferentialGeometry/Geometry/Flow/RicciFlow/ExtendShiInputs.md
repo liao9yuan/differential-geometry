@@ -515,6 +515,32 @@ covariant-derivative bookkeeping, GSM77 Ch.7 / Chow–Knopf).  The window produc
 DISCHARGE route (evolution predicate from the solution), not needed for the cited-hypothesis shape.
 Y1c = state that producer (sorry, cited) + `hric` + endpoint `extendInputs_of_soln = ⟨hell_of_soln, that⟩`.
 
+## BRICK Y1c — DONE (2026-07-05), verified green (targeted build 9459 jobs + `#print axioms`)
+
+Three declarations added to `ExtendShiInputs.lean` (imports `Geometry.Curvature.RicciOperatorNormBound`;
+`open Tensor0SBundle`):
+- **`ric_quad_le_of_rm04` — the one real Y1c proof, SORRY-FREE** (`#print axioms` = the 3 standard,
+  no `sorryAx`). `|ricciTensor g x v v| ≤ (n²√C)·g(v,v)` from a `g`-orthonormal basis in which
+  `metricRicciAt g = trace(Rm04)` (`htrace`) + `normSq0S Rm04 ≤ C`.  Composes
+  `ricci_unitQuad_le_of_trace` (`‖Ric‖ from ‖Rm‖`) → `tensor02_quadForm_abs_le_of_unit_bound`
+  (unit-sphere → quadratic form) → `metricRicciAt_apply_eq_ricciTensor`.  This is exactly Brick X's
+  `hric`, `K := n²√C`.  (Namespace pins that cost iterations: `MetricInverseInBasis_gen`,
+  `identityInvMetric`, `normSq0S` are all in the top-level `Tensor0SBundle` namespace — `open` it.)
+- **`shiCovBound_of_soln` — the THIRD & FINAL cited black box (`sorry`, GSM77 Ch. 7 Shi estimates;
+  eventual discharge = the banked Bernstein tower).**  Raw hypotheses (`IsSolutionOn` + raw `|Rm|²`
+  bound) → `hcov` verbatim (`∃ C≥1, ∃ t₂∈Ico α ω, ∀ s∈Ico t₂ ω, ∀ a≤3, MetricCovDerivOrderBoundOn univ
+  a (S.base.metric s) (S.base.metric α) C`).
+- **`extendInputs_of_soln` — the endpoint, sorry-free body** (`#print axioms` `sorryAx` traces ONLY to
+  `shiCovBound_of_soln`).  `⟨hell_of_soln hS hK hric, shiCovBound_of_soln Rm04 hS hbound⟩` — the exact
+  `⟨hell, hcov⟩` tuple `ricci_flow_interior_restart` consumes, in raw-hypothesis form (Y2 bridges
+  `_hS`/`_hRm`/`_hbound`; `hric` discharged by `ric_quad_le_of_rm04` + the realization at the Y2 site).
+
+**Route ledger now:** the three cited black boxes are (N) `ricci_flow_unif_existence`, (B)
+`ricci_flow_forward_unique`, and (Y1c) `shiCovBound_of_soln`.  Everything else on the interior-restart
+route is proved sorry-free.  Remaining: **Y2** — rewire `MaximalTime.extends_of_rmBounded` to consume
+`extendInputs_of_soln` → (A) → (B) → Brick U → `isSolutionOn_of_extendData` → `ExtendsPastEndpoint`,
+bridging the raw hypotheses from `_hS`/`_hRm`/`_hbound` and discharging `hric` via `ric_quad_le_of_rm04`.
+
 ## Y2 (unchanged plan)
 Rewire `MaximalTime.extends_of_rmBounded`: Y1 → (A) → restart → (B) `ricci_flow_forward_unique` on
 `[t*,ω)` → `hagree_overlap` → Brick U → `isSolutionOn_of_extendData` → `ExtendsPastEndpoint`; delete the

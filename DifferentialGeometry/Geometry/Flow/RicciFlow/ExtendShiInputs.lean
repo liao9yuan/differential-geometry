@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
+import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 /-!
 # `ExtendShiInputs` — Shi/Lemma-3.11 inputs for the interior-restart extension route (Brick Y1)
@@ -26,6 +27,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.HCGCompactness
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open Tensor0SBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
     [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -259,5 +261,72 @@ private theorem chartJet0_le_of_equiv
     rw [Integral.DivergenceTheorem.chartGramOnE_def, (extChartAt I α₀).left_inv hxsrc]
   rw [hred]
   exact chartGramEntry_le_of_equiv gRef g hC0 hM0 α₀ hequiv hgRef i j hx
+
+/-- **`hric` core (the one real Y1c proof).**  In a `g`-orthonormal basis where the Ricci tensor is the
+metric trace of a lowered Riemann tensor `Rm04` (`htrace`), a bound `normSq0S Rm04 ≤ C` on `|Rm|²`
+controls the Ricci quadratic form by the metric: `|Ric(v,v)| ≤ (n²√C)·g(v,v)`.  Composes the Ricci
+operator-norm-from-`‖Rm‖` bound (`ricci_unitQuad_le_of_trace`) with the quadratic-form extension
+(`tensor02_quadForm_abs_le_of_unit_bound`).  This is exactly Brick X's `hric` input, `K := n²√C`. -/
+private theorem ric_quad_le_of_rm04
+    (g : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
+    (basis : Module.Basis (Fin n) ℝ (TangentSpace I x))
+    (hON : ∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : ℝ) else 0)
+    (hinv : MetricInverseInBasis_gen (I := I) g x basis (identityInvMetric (Idx := Fin n)))
+    (Rm04 : Tensor04At (I := I) (M := M) x) {C : ℝ}
+    (htrace : ∀ i j, metricRicciAt g x (vec2 (I := I) (basis i) (basis j))
+        = ∑ a, Rm04 (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)))
+    (hnorm : Tensor0SBundle.normSq0S (I := I) g x 4 Rm04 ≤ C)
+    (v : TangentSpace I x) :
+    |ricciTensor (I := I) g x v v| ≤ ((n : ℝ) ^ 2 * Real.sqrt C) * g.inner x v v := by
+  have hunit : ∀ u : TangentSpace I x, g.inner x u u = 1 →
+      |metricRicciAt g x (vec2 (I := I) u u)| ≤ (n : ℝ) ^ 2 * Real.sqrt C := by
+    intro u hu
+    have h := ricci_unitQuad_le_of_trace g basis hON hinv (metricRicciAt g x) Rm04 htrace u hu
+    exact h.trans (mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt hnorm) (by positivity))
+  have hquad := tensor02_quadForm_abs_le_of_unit_bound g (metricRicciAt g x) hunit v
+  rw [← metricRicciAt_apply_eq_ricciTensor g x v v]
+  exact hquad
+
+/-- **Cited producer: interior covariant metric bounds (Shi's derivative estimates, GSM77 Ch. 7).**
+Body `sorry` — a cited black box; the eventual discharge is the banked Bernstein–Bando–Shi tower
+(`Evolution/BernsteinShi*`, `Evolution/StarSum/*`).  From a bounded-curvature solution (`hS` + the raw
+`|Rm|²` bound `hbound`), the fixed-background covariant derivatives of the metric up to order 3 are
+uniformly bounded on a tail `[t₂, ω)` — exactly `ricci_flow_interior_restart`'s `hcov` for
+`g_fam := S.base.metric`.  This is the third and final cited input of the interior-restart route. -/
+theorem shiCovBound_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (Rm04 : ℝ → Tensor04Section (I := I) (M := M))
+    (_hS : IsSolutionOn (I := I) S)
+    (_hbound : ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K) :
+    ∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico alpha omega, ∀ s ∈ Set.Ico t₂ omega,
+      ∀ a : ℕ, a ≤ 3 →
+        MetricCovDerivOrderBoundOn Set.univ a (S.base.metric s) (S.base.metric alpha) C := by
+  sorry
+
+/-- **Y1 endpoint: the two `ricci_flow_interior_restart` inputs from a solution.**  Produces
+`⟨hell, hcov⟩` for `g_fam := S.base.metric`, in RAW-hypothesis form so that Y2 (in `MaximalTime`)
+bridges `_hS`/`_hRm`/`_hbound` at the call site.  `hell` is Brick X's `hell_of_soln` fed the pointwise
+Ricci-vs-metric bound `hric` (which Y2 discharges from the raw `|Rm|²` bound via `ric_quad_le_of_rm04`
++ the curvature realization); `hcov` is the cited Shi producer. -/
+theorem extendInputs_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (Rm04 : ℝ → Tensor04Section (I := I) (M := M))
+    (hS : IsSolutionOn (I := I) S)
+    {K : ℝ} (hK : 0 ≤ K)
+    (hric : ∀ t ∈ Set.Ico alpha omega, ∀ x : M, ∀ v : TangentSpace I x,
+      |ricciTensor (I := I) (S.base.metric t) x v v| ≤ K * (S.base.metric t).inner x v v)
+    (hbound : ∃ K' : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K') :
+    (∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₁ ∈ Set.Ico alpha omega, ∀ s ∈ Set.Ico t₁ omega,
+      ∀ x : M, ∀ v : TangentSpace I x,
+        Λ⁻¹ * (S.base.metric alpha).inner x v v ≤ (S.base.metric s).inner x v v ∧
+          (S.base.metric s).inner x v v ≤ Λ * (S.base.metric alpha).inner x v v) ∧
+    (∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico alpha omega, ∀ s ∈ Set.Ico t₂ omega,
+      ∀ a : ℕ, a ≤ 3 →
+        MetricCovDerivOrderBoundOn Set.univ a (S.base.metric s) (S.base.metric alpha) C) :=
+  ⟨hell_of_soln hS hK hric, shiCovBound_of_soln Rm04 hS hbound⟩
 
 end DifferentialGeometry.PDE.RicciFlow
