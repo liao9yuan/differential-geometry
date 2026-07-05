@@ -5,11 +5,13 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1Ta
 /-!
 # Tame jet envelopes for the three-arm correction fields
 
-All-order per-order L² tame jet envelopes for the arm-0 and arm-1 correction fields
-`linearizedRicciConnDiffOrder{0,1}Coeff - linearizedRicciArm{0,1}BaseCoeff` of the linearized
-Ricci three-arm decomposition along the realized family: every covariant-gradient order `i` of
-the correction field is L²-bounded by a ball-uniform constant times the tame window
-`1 + ∑_{j < i + 2} (‖∇ʲT‖² + ‖∇ʲT'‖²)`.
+All-order per-order L² tame jet envelopes for the arm-0 and arm-1 correction subjects of the
+linearized Ricci three-arm decomposition along the realized family: the arm-1 correction field
+`linearizedRicciConnDiffOrder1Coeff - linearizedRicciArm1BaseCoeff`, and the combined arm-0
+subject `linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff
++ (3/2) • ricciArmOrder0RiemannCoeff - ricciArmOrder0CurvCoeff` (curvature coefficients at the
+realized-family metric). Every covariant-gradient order `i` of the subject is L²-bounded by a
+ball-uniform constant times the tame window `1 + ∑_{j < i + 2} (‖∇ʲT‖² + ‖∇ʲT'‖²)`.
 -/
 
 noncomputable section
@@ -382,15 +384,21 @@ theorem exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
         (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖)]
 
 set_option linter.unusedVariables false in
-/-- All-order per-order L² tame jet envelope for the arm-0 correction field
-`linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff` along the realized family,
-at window `i + 2`.
+/-- All-order per-order L² tame jet envelope for the combined arm-0 correction subject
+`linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff
++ (3/2) • ricciArmOrder0RiemannCoeff - ricciArmOrder0CurvCoeff` (curvature coefficients at the
+realized-family metric) along the realized family, at window `i + 2` — the arm-0 clause of the
+reshaped correction-field spec (`corrFieldDataSpec`).
 
-DEFERRED INPUT (`sorry`, fork-gated): the `i + 2` window on the arm-0 correction field
-requires the ∇A-cancellation between the order-zero connection-difference coefficient and the
-arm-0 base coefficient (each side alone carries an `i + 3` window); its adjudication is a
-separate fork probe. Posited `sorry`-first per the corr-region design; consumers transitively
-depend on `sorryAx` until the fork lands. -/
+The combined subject is the certified one-jet subject: by the certified weight identity
+`RmArm∇ = -2 · Order0∇` the combination equals
+`linearizedRicciConnDiffOrder0Coeff + (1/2) • ricciArmOrder0RiemannCoeff`, whose ∇A-linear
+content vanishes; the residual is the `A⋆A` bi-contraction plus the background-curvature
+commutator kernel (the prebuilt `arm0AAField` / `ricciArmOrder0BgRCommCoeffField` families of
+`RicciThreeArmCorrectionFieldBound`).
+
+DEFERRED INPUT (`sorry`): the fill goes through the prebuilt residual fields above and the
+Koszul-class L² engines; consumers transitively depend on `sorryAx` until it lands. -/
 theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -406,7 +414,11 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
         ∀ (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
-                - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤
+                - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
+                + (3 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := sorry
