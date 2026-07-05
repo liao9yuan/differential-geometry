@@ -421,7 +421,7 @@ private theorem connContrCLM_field_contMDiff (m k : ℕ)
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 
-private theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
+theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 3 I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
@@ -543,7 +543,7 @@ private theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 
-private theorem ricciCometricFourTraceCLM_field_contMDiff (g₁ : SmoothRiemannianMetric I M)
+theorem ricciCometricFourTraceCLM_field_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 4 I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)

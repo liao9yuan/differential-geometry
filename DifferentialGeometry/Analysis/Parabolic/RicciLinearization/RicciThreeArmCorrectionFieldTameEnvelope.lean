@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
 
 /-!
 # Tame jet envelopes for the three-arm correction fields
@@ -54,10 +55,12 @@ set_option linter.unusedVariables false in
 /-- All-order per-order L² tame jet envelope for the order-one connection-difference
 Ricci-linearization coefficient field, generic in a perturbed metric `g₁ = g₀ + P`.
 
-DEFERRED INPUT (`sorry`): the four-trace-of-`A` refold of
-`linearizedRicciConnDiffOrder1CoeffField` into the `appCcRS` diagonal-product-grid calculus
-(mirroring `ricciArmOrder1KoszulCoeff_perOrder_l2_tameEnvelope_generic`) is not yet
-formalized. Consumers transitively depend on `sorryAx` until this lands. -/
+Proven via the four-trace `appCcRS` refold
+`linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS` and the diagonal-product-grid calculus,
+mirroring `ricciArmOrder1KoszulCoeff_perOrder_l2_tameEnvelope_generic`. TRANSIT: the two arm
+envelopes (`ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic` and
+`linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic`) are
+posited `sorry` children; consumers transitively depend on `sorryAx` until they land. -/
 theorem linearizedRicciConnDiffOrder1CoeffField_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -73,7 +76,140 @@ theorem linearizedRicciConnDiffOrder1CoeffField_perOrder_l2_tameEnvelope_generic
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
               (linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  obtain ⟨ΛΦ, KΦ, hΛΦ, hKΦ_nn, hΦfeed⟩ :=
+    ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨ΛW, KW, hΛW, hKW_nn, hWfeed⟩ :=
+    linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => appCcGdiag (E := E) i *
+      (exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+        (I := I) (M := M) g₀ 4 3 2 4 i).choose *
+      (ΛW ^ 2 * ∑ n ∈ Finset.range (i + 1), KΦ n
+        + ΛΦ ^ 2 * ∑ l ∈ Finset.range (i + 1), KW l),
+    fun i => by
+      refine mul_nonneg (mul_nonneg (appCcGdiag_nonneg (E := E) i)
+        (exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+          (I := I) (M := M) g₀ 4 3 2 4 i).choose_spec.1) (add_nonneg ?_ ?_)
+      · exact mul_nonneg (sq_nonneg _) (Finset.sum_nonneg (fun n _ => hKΦ_nn n))
+      · exact mul_nonneg (sq_nonneg _) (Finset.sum_nonneg (fun l _ => hKW_nn l)), ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i
+  obtain ⟨hΦsup, hΦtame⟩ := hΦfeed g₁ P hδ_le hδ htie hPball
+  obtain ⟨hWsup, hWtame⟩ := hWfeed g₁ P hδ_le hδ htie hPball
+  obtain ⟨hgrid_int, hgrid_bound⟩ :=
+    (exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+      (I := I) (M := M) g₀ 4 3 2 4 i).choose_spec.2
+      (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)
+      (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)
+      ΛΦ ΛW hΛΦ hΛW hΦsup hWsup
+  rw [linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS (I := I) (M := M) g₀ g₁]
+  have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 3 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 3 2 i
+      (appCcRS (I := I) (M := M) g₀ 3 4 2
+        (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)
+        (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)))
+    (fun x => appCcGdiag (E := E) i *
+      ∑ n ∈ Finset.range (i + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 4 2 n
+              (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)).toSection x)
+          * ∑ l ∈ Finset.range (i + 1 - n),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
+                ((iteratedCovGrad (I := I) g₀ 3 4 l
+                  (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)).toSection x))
+    (hgrid_int.const_mul (appCcGdiag (E := E) i))
+    (fun x => rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le (I := I) (M := M) g₀
+      i 3 4 2 (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)
+      (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁) x)
+  refine le_trans key ?_
+  rw [MeasureTheory.integral_const_mul]
+  have hAnn : (0 : ℝ) ≤ appCcGdiag (E := E) i := appCcGdiag_nonneg (E := E) i
+  have hCnn : (0 : ℝ) ≤ (exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+      (I := I) (M := M) g₀ 4 3 2 4 i).choose :=
+    (exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+      (I := I) (M := M) g₀ 4 3 2 4 i).choose_spec.1
+  have hwin2_nn : 0 ≤ ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
+    Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hSa : ∑ n ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 4 2 n
+          (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)‖ ^ 2 ≤
+      (∑ n ∈ Finset.range (i + 1), KΦ n) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_le_sum (fun n hn => ?_)
+    refine le_trans (hΦtame n) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hKΦ_nn n)
+    have hsub : ∑ j ∈ Finset.range (n + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 ≤
+        ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
+      refine Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_mono ?_) (fun j _ _ => sq_nonneg _)
+      rw [Finset.mem_range] at hn
+      omega
+    linarith
+  have hSc : ∑ l ∈ Finset.range (i + 1),
+        ‖iteratedCovGrad (I := I) g₀ 3 4 l
+          (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)‖ ^ 2 ≤
+      (∑ l ∈ Finset.range (i + 1), KW l) *
+        (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_le_sum (fun l hl => ?_)
+    refine le_trans (hWtame l) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hKW_nn l)
+    have hsub : ∑ j ∈ Finset.range (l + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 ≤
+        ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
+      refine Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_mono ?_) (fun j _ _ => sq_nonneg _)
+      rw [Finset.mem_range] at hl
+      omega
+    linarith
+  calc appCcGdiag (E := E) i * ∫ x,
+          (∑ n ∈ Finset.range (i + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + n) x
+                ((iteratedCovGrad (I := I) g₀ 4 2 n
+                  (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)).toSection x)
+              * ∑ l ∈ Finset.range (i + 1 - n),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
+                    ((iteratedCovGrad (I := I) g₀ 3 4 l
+                      (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)).toSection x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)
+      ≤ appCcGdiag (E := E) i *
+          ((exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+            (I := I) (M := M) g₀ 4 3 2 4 i).choose *
+            (ΛW ^ 2 * ∑ n ∈ Finset.range (i + 1),
+                ‖iteratedCovGrad (I := I) g₀ 4 2 n
+                  (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)‖ ^ 2
+              + ΛΦ ^ 2 * ∑ l ∈ Finset.range (i + 1),
+                ‖iteratedCovGrad (I := I) g₀ 3 4 l
+                  (linearizedRicciConnDiffOrder1KernelField (I := I) g₀ g₁)‖ ^ 2)) :=
+        mul_le_mul_of_nonneg_left hgrid_bound hAnn
+    _ ≤ appCcGdiag (E := E) i *
+          ((exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+            (I := I) (M := M) g₀ 4 3 2 4 i).choose *
+            ((ΛW ^ 2 * ∑ n ∈ Finset.range (i + 1), KΦ n
+              + ΛΦ ^ 2 * ∑ l ∈ Finset.range (i + 1), KW l) *
+              (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2))) := by
+        refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left ?_ hCnn) hAnn
+        have h1 := mul_le_mul_of_nonneg_left hSa (sq_nonneg ΛW)
+        have h2 := mul_le_mul_of_nonneg_left hSc (sq_nonneg ΛΦ)
+        nlinarith [h1, h2]
+    _ = appCcGdiag (E := E) i *
+          (exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_rs_le
+            (I := I) (M := M) g₀ 4 3 2 4 i).choose *
+          (ΛW ^ 2 * ∑ n ∈ Finset.range (i + 1), KΦ n
+            + ΛΦ ^ 2 * ∑ l ∈ Finset.range (i + 1), KW l) *
+          (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+        ring
 
 set_option linter.unusedVariables false in
 /-- All-order per-order L² tame jet envelope for the arm-1 correction field
