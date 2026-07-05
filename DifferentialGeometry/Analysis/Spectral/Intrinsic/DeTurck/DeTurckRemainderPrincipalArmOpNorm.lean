@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ConnLapCommutatorCoefficientTame
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingSharpC0JetSum
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.ChartH2GardingConstant
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Weitzenbock
@@ -1642,8 +1643,60 @@ theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_succ
                 (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ ≤
             deTurckArmFibreConst (Module.finrank ℝ E) * εC *
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ +
-              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ :=
-  sorry
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ := by
+  classical
+  obtain ⟨Clower, hClower_nn, hfam⟩ :=
+    exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le (I := I) (M := M) g₀ a
+      (by omega) hR₀ εC hεC_nn Kc hKc_nn
+  refine ⟨fun m => Clower (m + 1), fun m => hClower_nn (m + 1), ?_⟩
+  intro C₂ T₀ hball hsup hjets m
+  have hbase := hfam C₂ T₀ hball hsup hjets (m + 1) T₀
+    ⟨0, (oneMinusConnLapSmoothIter_zero (I := I) (M := M) (T := T₀)).symm⟩
+  have hΔ : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 : ℕ) : ℝ)
+      (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ := by
+    have h1 := smoothCcToTensorHs_rawTensorConnLapSmooth_le (I := I) (M := M) g₀
+      (((m + 1 : ℕ) : ℝ)) T₀
+    have h2 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((m + 1 : ℕ) : ℝ) + 2) T₀‖ =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ :=
+      smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+    rw [h2] at h1
+    exact h1
+  have hcastL : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 : ℕ) : ℝ)
+      (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂
+        (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ =
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1)
+        (appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂
+          (iteratedCovGrad (I := I) g₀ 0 2 2 T₀))‖ :=
+    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) _
+  have hcastQ : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 + 1 : ℕ) : ℝ) T₀‖ =
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ :=
+    smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+  rw [hcastL, hcastQ] at hbase
+  have hfibre1 : (1 : ℝ) ≤ deTurckArmFibreConst (Module.finrank ℝ E) :=
+    one_le_deTurckArmFibreConst (Nat.one_le_iff_ne_zero.mpr (NeZero.ne (Module.finrank ℝ E)))
+  have hH3_nn : 0 ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ :=
+    norm_nonneg _
+  have htop : εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 : ℕ) : ℝ)
+      (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+      deTurckArmFibreConst (Module.finrank ℝ E) * εC *
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ := by
+    have hstep1 : εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m + 1 : ℕ) : ℝ)
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
+        εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ :=
+      mul_le_mul_of_nonneg_left hΔ hεC_nn
+    have hstep2 : εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ ≤
+        deTurckArmFibreConst (Module.finrank ℝ E) * εC *
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ := by
+      have h2 : (1 : ℝ) * εC ≤ deTurckArmFibreConst (Module.finrank ℝ E) * εC :=
+        mul_le_mul_of_nonneg_right hfibre1 hεC_nn
+      have h3 := mul_le_mul_of_nonneg_right h2 hH3_nn
+      calc εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖
+          = 1 * εC * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ := by ring
+        _ ≤ deTurckArmFibreConst (Module.finrank ℝ E) * εC *
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 3) T₀‖ := h3
+    exact le_trans hstep1 hstep2
+  linarith [hbase, htop]
 
 theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
