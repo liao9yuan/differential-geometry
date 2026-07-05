@@ -36593,8 +36593,8 @@ private noncomputable def deTurckPhiOnePathIntegral (g₀ g_bg : SmoothRiemannia
     (by rw [Set.uIcc_of_le zero_le_one]; exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
     (deTurckPhiOne_jointSmooth_fw (I := I) (M := M) g₀ g_bg T T' hδ hδ')
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
+set_option synthInstance.maxHeartbeats 3200000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -36617,8 +36617,255 @@ private theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
           (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
         appCc (I := I) (M := M) g₀ 4 2
           (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')
-          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) :=
-  sorry
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) := by
+  classical
+  have hSsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ (T - T') x v w = ccTensorBilin (I := I) g₀ (T - T') x w v := by
+    intro x v w
+    rw [ccTensorBilin_sub_fw (I := I) (M := M) g₀ T T' x v w,
+      ccTensorBilin_sub_fw (I := I) (M := M) g₀ T T' x w v, hTsymm x v w, hT'symm x v w]
+  have hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') := by
+    rw [Set.uIcc_of_le zero_le_one]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt
+  have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
+  set Ψ₀ : ℝ → SmoothCcTensor g₀ 2 2 := fun s =>
+    (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
+      + (deTurckLieCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+        + lieCorr0Field (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) with hΨ₀def
+  set Ψ₁ : ℝ → SmoothCcTensor g₀ 3 2 := fun s =>
+    (-2 : ℝ) • linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s
+      + deTurckLieArm1Coeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg with hΨ₁def
+  set Ψ₂ : ℝ → SmoothCcTensor g₀ 4 2 := fun s =>
+    deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) with hΨ₂def
+  have hj0 : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 Ψ₀ (δ := δ) (δ' := δ') := by
+    rw [hΨ₀def]
+    exact threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 2 _ _
+      (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ')
+      (lieCorr0Phi0b_jointSmooth (I := I) g₀ T T' hδ hδ' g_bg)
+  have hj1 : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Ψ₁ (δ := δ) (δ' := δ') := by
+    rw [hΨ₁def]
+    exact threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 3 _ _
+      (linearizedRicci_arm1Field_jointSmooth (I := I) g₀ T T' hδ hδ')
+      (deTurckLieArm1Coeff_realizedFam_jointSmooth (I := I) g₀ T T' hδ hδ' g_bg)
+  have hj2 : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Ψ₂ (δ := δ) (δ' := δ') := by
+    rw [hΨ₂def]
+    exact deTurckPhiMetTotal_realizedFam_jointSmooth (I := I) (M := M) g₀ g_bg T T' hδ hδ'
+  have hc0 : ∀ x : M, ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel ((Ψ₀ t).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := fun x =>
+    jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2 Ψ₀
+      (realizedSmallSet (δ := δ) (δ' := δ')) hj0 x
+  have hc1 : ∀ x : M, ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel ((Ψ₁ t).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := fun x =>
+    jointContMDiff_toModel_continuous_slice (I := I) g₀ 3 2 Ψ₁
+      (realizedSmallSet (δ := δ) (δ' := δ')) hj1 x
+  have hc2 : ∀ x : M, ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel ((Ψ₂ t).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := fun x =>
+    jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2 Ψ₂
+      (realizedSmallSet (δ := δ) (δ' := δ')) hj2 x
+  have hPi0 : deTurckPhiZeroPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' =
+      pathIntegralCoeffField (I := I) (M := M) g₀ 2 2 Ψ₀
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 := rfl
+  have hPi1 : deTurckPhiOnePathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' =
+      pathIntegralCoeffField (I := I) (M := M) g₀ 3 2 Ψ₁
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 := rfl
+  have hPitop : deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' =
+      pathIntegralCoeffField (I := I) (M := M) g₀ 4 2 Ψ₂
+        (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 := rfl
+  rw [hPi0, hPi1, hPitop]
+  apply smoothCcTensor_ext_of_unitModel
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro v
+  set g₁ := tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ with hg₁
+  set g₁' := tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ' with hg₁'
+  rw [unitModel_sub_local (I := I) g₀ 2 _ _ x, ContinuousMultilinearMap.sub_apply]
+  rw [show (unitModel (I := I) (M := M) g₀ 2
+        (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ) x) v =
+      deTurckRicciRHS (I := I) g_bg g₁ x (v 0) (v 1) from
+    unitModel_of_deTurckRHSSection_realize (I := I) g₀ g_bg T hδ_lt hδ
+      (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ) rfl x v]
+  rw [show (unitModel (I := I) (M := M) g₀ 2
+        (deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') x) v =
+      deTurckRicciRHS (I := I) g_bg g₁' x (v 0) (v 1) from
+    unitModel_of_deTurckRHSSection_realize (I := I) g₀ g_bg T' hδ'_lt hδ'
+      (deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') rfl x v]
+  have hsplit : ∀ (g : SmoothRiemannianMetric I M),
+      deTurckRicciRHS (I := I) g_bg g x (v 0) (v 1) =
+        ((-2 : ℝ) • ricciTensor (I := I) g x (v 0) (v 1)) +
+          lieDerivMetricClm (I := I) g
+            (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g)
+              (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) := by
+    intro g
+    rw [deTurckRicciRHS, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+    rfl
+  rw [hsplit g₁, hsplit g₁']
+  rw [show ((-2 : ℝ) • ricciTensor (I := I) g₁ x (v 0) (v 1) +
+          lieDerivMetricClm (I := I) g₁
+            (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁)
+              (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1)) -
+        ((-2 : ℝ) • ricciTensor (I := I) g₁' x (v 0) (v 1) +
+          lieDerivMetricClm (I := I) g₁'
+            (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁')
+              (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1)) =
+      ((-2 : ℝ) • (ricciTensor (I := I) g₁ x (v 0) (v 1) -
+          ricciTensor (I := I) g₁' x (v 0) (v 1))) +
+        (lieDerivMetricClm (I := I) g₁
+            (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁)
+              (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) -
+          lieDerivMetricClm (I := I) g₁'
+            (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁')
+              (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1)) from by
+    simp only [smul_sub]; ring]
+  rw [hg₁, hg₁']
+  rw [ricciTensor_realized_sub_eq_integral_linearizedRicci (I := I) g₀ T T'
+    hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)]
+  rw [lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie (I := I) g₀ g_bg T T'
+    hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)]
+  rw [smul_eq_mul, ← intervalIntegral.integral_const_mul]
+  rw [← intervalIntegral.integral_add
+    ((DifferentialGeometry.PDE.DeTurck.RicciLinearization.linearizedRicciAt_intervalIntegrable
+      (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1)).const_mul (-2 : ℝ))
+    (linearizedDeTurckLieAt_intervalIntegrable (I := I) g₀ g_bg T T'
+      hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1))]
+  have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
+      (-2 : ℝ) * linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s
+        + linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
+        + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
+        + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+    rw [MeasureTheory.ae_iff]
+    have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
+    refine MeasureTheory.measure_mono_null (fun s hs => ?_) hnull
+    rw [Set.mem_setOf_eq, Classical.not_imp] at hs
+    obtain ⟨hsmem, hsneq⟩ := hs
+    rw [Set.uIoc_of_le zero_le_one, Set.mem_Ioc] at hsmem
+    rw [Set.mem_singleton_iff]
+    by_contra hne
+    have hsIoo : s ∈ Set.Ioo (0 : ℝ) 1 := ⟨hsmem.1, lt_of_le_of_ne hsmem.2 hne⟩
+    refine hsneq ?_
+    have hRid : linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+              (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+            + appCc (I := I) (M := M) g₀ 3 2
+              (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+            + appCc (I := I) (M := M) g₀ 4 2
+              (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+      obtain ⟨_, _, _, hident⟩ :=
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+          (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
+      exact hident hTsymm hT'symm s hsIoo x v hδ_lt hδ'_lt
+    have hLid := linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw (I := I) (M := M)
+      g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hSsymm hsIoo x v
+    have hRid' : linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+      rw [hRid, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
+    have hLid' : linearizedDeTurckLieAt (I := I) g₀ g_bg T T'
+          hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+            (deTurckLieCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+              + lieCorr0Field (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            (deTurckLieArm1Coeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            (deTurckLieArm2PrincipalCoeff (I := I) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+      rw [hLid, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
+    have e0 : unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v =
+        (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+            (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+            (deTurckLieCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+              + lieCorr0Field (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
+      simp only [hΨ₀def]
+      rw [appCc_add_left, unitModel_add2_apply_tame, unitModel_appCc_smul_left_apply_tame]
+    have e1 : unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v =
+        (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            (deTurckLieArm1Coeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+      simp only [hΨ₁def]
+      rw [appCc_add_left, unitModel_add2_apply_tame, unitModel_appCc_smul_left_apply_tame]
+    have e2 : unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v =
+        (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v
+          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            (deTurckLieArm2PrincipalCoeff (I := I) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+      simp only [hΨ₂def]
+      rw [deTurckPhiMetTotal_realizedFam_eq_neg_two_smul_fw (I := I) (M := M)
+        g₀ g_bg T T' hδ hδ' s]
+      rw [appCc_add_left, unitModel_add2_apply_tame, unitModel_appCc_smul_left_apply_tame]
+    rw [hRid', hLid', e0, e1, e2]
+    ring
+  rw [intervalIntegral.integral_congr_ae hintegrand]
+  have hI0 : IntervalIntegrable (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+      (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+        (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v) MeasureTheory.volume 0 1 :=
+    threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 2 Ψ₀
+      (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) hSI hc0 x v
+  have hI1 : IntervalIntegrable (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+      (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+        (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v) MeasureTheory.volume 0 1 :=
+    threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 3 Ψ₁
+      (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) hSI hc1 x v
+  have hI2 : IntervalIntegrable (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
+      (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) MeasureTheory.volume 0 1 :=
+    threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 4 Ψ₂
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) hSI hc2 x v
+  rw [intervalIntegral.integral_add (hI0.add hI1) hI2, intervalIntegral.integral_add hI0 hI1]
+  have he0 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 2 2 Ψ₀
+    (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+    (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj0 hc0 x v
+  have he1 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 3 2 Ψ₁
+    (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
+    (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj1 hc1 x v
+  have he2 := pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ 4 2 Ψ₂
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
+    (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI hj2 hc2 x v
+  rw [unitModel_add2_apply_tame, unitModel_add2_apply_tame, he0, he1, he2]
+
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
