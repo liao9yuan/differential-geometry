@@ -36489,6 +36489,339 @@ theorem deTurckSmoothRemainderDiff_threeArm_coeffC0_jetL2_fibreWeighted_ballUnif
   · exact hdevjet.trans
       (hsq_mono _ _ hΓD_nn (le_trans (le_max_right ΓA ΓD) (le_max_right _ _)))
 
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private lemma smoothCcToTensorHs_zero_norm_le_fw (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    {R₀ : ℝ} (hR₀ : 0 ≤ R₀) :
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R₀ := by
+  have hzero : smoothCcToTensorHs (I := I) (M := M) g₀ σ (0 : SmoothCcTensor g₀ 0 2) = 0 := by
+    refine DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHs.ext ?_
+    funext i
+    rw [smoothCcToTensorHs_coeff]
+    rw [show SmoothCcTensor.toL2 (0 : SmoothCcTensor g₀ 0 2) = 0 from map_zero _]
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorL2Coeff_eq_inner,
+      inner_zero_right]
+    rfl
+  rw [hzero, norm_zero]
+  exact hR₀
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private lemma ccTensorBilin_zero_symm_fw (g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x) :
+    ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =
+      ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x w v := by
+  have h0 : ∀ (u₁ u₂ : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x u₁ u₂ = 0 := by
+    intro u₁ u₂
+    have hs := ccTensorBilin_sub_fw (I := I) (M := M) g₀
+      (0 : SmoothCcTensor g₀ 0 2) (0 : SmoothCcTensor g₀ 0 2) x u₁ u₂
+    rw [sub_zero] at hs
+    linarith
+  rw [h0, h0]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem deTurckPhiZero_jointSmooth_fw (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
+        + (deTurckLieCoeffField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+          + lieCorr0Field (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)) (δ := δ) (δ' := δ') :=
+  threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 2 _ _
+    (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ')
+    (lieCorr0Phi0b_jointSmooth (I := I) g₀ T T' hδ hδ' g_bg)
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem deTurckPhiOne_jointSmooth_fw (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
+      (fun s => (-2 : ℝ) • linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s
+        + deTurckLieArm1Coeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) (δ := δ) (δ' := δ') :=
+  threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 3 _ _
+    (linearizedRicci_arm1Field_jointSmooth (I := I) g₀ T T' hδ hδ')
+    (deTurckLieArm1Coeff_realizedFam_jointSmooth (I := I) g₀ T T' hδ hδ' g_bg)
+
+set_option maxHeartbeats 6400000 in
+set_option synthInstance.maxHeartbeats 3200000 in
+set_option backward.isDefEq.respectTransparency false in
+private noncomputable def deTurckPhiZeroPathIntegral (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    SmoothCcTensor g₀ 2 2 :=
+  pathIntegralCoeffField (I := I) (M := M) g₀ 2 2
+    (fun s => (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
+      + (deTurckLieCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
+        + lieCorr0Field (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))
+    (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen
+    (by rw [Set.uIcc_of_le zero_le_one]; exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
+    (deTurckPhiZero_jointSmooth_fw (I := I) (M := M) g₀ g_bg T T' hδ hδ')
+
+set_option maxHeartbeats 6400000 in
+set_option synthInstance.maxHeartbeats 3200000 in
+set_option backward.isDefEq.respectTransparency false in
+private noncomputable def deTurckPhiOnePathIntegral (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    SmoothCcTensor g₀ 3 2 :=
+  pathIntegralCoeffField (I := I) (M := M) g₀ 3 2
+    (fun s => (-2 : ℝ) • linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s
+      + deTurckLieArm1Coeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
+    (realizedSmallSet (δ := δ) (δ' := δ')) realizedSmallSet_isOpen
+    (by rw [Set.uIcc_of_le zero_le_one]; exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt)
+    (deTurckPhiOne_jointSmooth_fw (I := I) (M := M) g₀ g_bg T T' hδ hδ')
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+    (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v) :
+    deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ' =
+      appCc (I := I) (M := M) g₀ 2 2
+          (deTurckPhiZeroPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+        appCc (I := I) (M := M) g₀ 3 2
+          (deTurckPhiOnePathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+        appCc (I := I) (M := M) g₀ 4 2
+          (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ')
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnvelope
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
+    (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+    ∃ Λ₀ : ℝ, 0 ≤ Λ₀ ∧
+    ∃ K₀c : ℕ → ℝ, (∀ i, 0 ≤ K₀c i) ∧
+      ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+        (∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v) →
+        ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₂r : SmoothCcTensor g₀ 4 2),
+          appCc (I := I) (M := M) g₀ 2 2
+              (deTurckPhiZeroPathIntegral (I := I) (M := M) g₀ g_bg T₀
+                (0 : SmoothCcTensor g₀ 0 2)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+                (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                  (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀)))
+              (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) =
+            appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) +
+              appCc (I := I) (M := M) g₀ 4 2 C₂r (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ Λ₀ ^ 2) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂r.toSection x) ≤
+              (max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2 ≤
+              K₀c i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂r‖ ^ 2 ≤
+              K₀c i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+private theorem deTurckPhiOnePathIntegral_zero_coeffSup_jetEnvelope
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
+    (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+    ∃ Λ₁' : ℝ, 0 ≤ Λ₁' ∧
+    ∃ K₁c : ℕ → ℝ, (∀ i, 0 ≤ K₁c i) ∧
+      ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+        (∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v) →
+        ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              ((deTurckPhiOnePathIntegral (I := I) (M := M) g₀ g_bg T₀
+                (0 : SmoothCcTensor g₀ 0 2)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+                (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                  (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀
+                    ((a : ℝ) + 2) hR₀))).toSection x) ≤ Λ₁' ^ 2) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g₀ 3 2 i
+              (deTurckPhiOnePathIntegral (I := I) (M := M) g₀ g_bg T₀
+                (0 : SmoothCcTensor g₀ 0 2)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+                (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                  (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀
+                    ((a : ℝ) + 2) hR₀)))‖ ^ 2 ≤
+              K₁c i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) :=
+  sorry
+
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetEnvelope_of_symm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
+    (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+    ∃ εCr : ℝ, 0 ≤ εCr ∧
+      (0 ≤ δ → εCr ≤ 19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) ∧
+    ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+    ∃ Λ₁ : ℝ, 0 ≤ Λ₁ ∧
+      ∀ (T₀ : SmoothCcTensor g₀ 0 2),
+        (∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v) →
+        ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
+        ∃ (C₀ : SmoothCcTensor g₀ (2 + 0) 2) (C₁ : SmoothCcTensor g₀ (2 + 1) 2)
+          (C₂r : SmoothCcTensor g₀ (2 + 2) 2),
+          (deTurckRHSArmG0 (I := I) g₀ g_bg T₀
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball) -
+              deTurckRHSArmG0 (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2)
+                (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+                (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                  (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀))) =
+            appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) +
+              appCc (I := I) (M := M) g₀ (2 + 1) 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 T₀) +
+              appCc (I := I) (M := M) g₀ (2 + 2) 2
+                (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
+                  (0 : SmoothCcTensor g₀ 0 2)
+                  (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+                  (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+                  (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+                    (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀)))
+                (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) +
+              appCc (I := I) (M := M) g₀ (2 + 2) 2 C₂r (iteratedCovGrad (I := I) g₀ 0 2 2 T₀) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 0) 2 x (C₀.toSection x) ≤ Λ₁ ^ 2) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 1) 2 x (C₁.toSection x) ≤ Λ₁ ^ 2) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 2) 2 x (C₂r.toSection x) ≤
+              εCr ^ 2) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g₀ (2 + 0) 2 i C₀‖ ^ 2 ≤
+              Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g₀ (2 + 1) 2 i C₁‖ ^ 2 ≤
+              Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ∧
+          (∀ i : ℕ,
+            ‖iteratedCovGrad (I := I) g₀ (2 + 2) 2 i C₂r‖ ^ 2 ≤
+              Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) := by
+  classical
+  obtain ⟨Λ₀, hΛ₀_nn, K₀c, hK₀c_nn, hN2⟩ :=
+    deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnvelope (I := I) (M := M)
+      g₀ g_bg a ha_super hR₀ hδ_le hδ_fibre
+  obtain ⟨Λ₁', hΛ₁'_nn, K₁c, hK₁c_nn, hN3⟩ :=
+    deTurckPhiOnePathIntegral_zero_coeffSup_jetEnvelope (I := I) (M := M)
+      g₀ g_bg a ha_super hR₀ hδ_le hδ_fibre
+  refine ⟨max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0,
+    le_max_right _ _, ?_, fun i => K₀c i + K₁c i,
+    fun i => add_nonneg (hK₀c_nn i) (hK₁c_nn i), max Λ₀ Λ₁',
+    le_trans hΛ₀_nn (le_max_left _ _), ?_⟩
+  · intro hδ_nn
+    refine max_le (le_refl _) ?_
+    have hfc : 0 ≤ deTurckArmFibreConst (Module.finrank ℝ E) := Real.sqrt_nonneg _
+    have hκ : 0 ≤ δ / (1 - δ) := div_nonneg hδ_nn (by linarith)
+    positivity
+  · intro T₀ hT₀symm hball
+    have hzsymm : ∀ (x : M) (v w : TangentSpace I x),
+        ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =
+          ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x w v :=
+      ccTensorBilin_zero_symm_fw (I := I) (M := M) g₀
+    obtain ⟨C₀dd, C₂r, hrefold, hC₀sup, hC₂rsup, hC₀env, hC₂renv⟩ := hN2 T₀ hT₀symm hball
+    obtain ⟨hC₁sup, hC₁env⟩ := hN3 T₀ hT₀symm hball
+    have hN1 := deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm (I := I) (M := M)
+      g₀ g_bg T₀ (0 : SmoothCcTensor g₀ 0 2)
+      (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+      (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+      (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+        (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀))
+      hT₀symm hzsymm
+    rw [sub_zero] at hN1
+    rw [hrefold] at hN1
+    refine ⟨C₀dd,
+      deTurckPhiOnePathIntegral (I := I) (M := M) g₀ g_bg T₀ (0 : SmoothCcTensor g₀ 0 2)
+        (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
+        (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1))
+        (hδ_fibre (0 : SmoothCcTensor g₀ 0 2)
+          (smoothCcToTensorHs_zero_norm_le_fw (I := I) (M := M) g₀ ((a : ℝ) + 2) hR₀)),
+      C₂r, ?_, ?_, ?_, hC₂rsup, ?_, ?_, ?_⟩
+    · rw [hN1]
+      abel
+    · intro x
+      exact le_trans (hC₀sup x)
+        (pow_le_pow_left₀ hΛ₀_nn (le_max_left _ _) 2)
+    · intro x
+      exact le_trans (hC₁sup x)
+        (pow_le_pow_left₀ hΛ₁'_nn (le_max_right _ _) 2)
+    · intro i
+      refine le_trans (hC₀env i) ?_
+      have hsum_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by positivity
+      have hle : K₀c i ≤ K₀c i + K₁c i := le_add_of_nonneg_right (hK₁c_nn i)
+      exact mul_le_mul_of_nonneg_right hle hsum_nn
+    · intro i
+      refine le_trans (hC₁env i) ?_
+      have hsum_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by positivity
+      have hle : K₁c i ≤ K₀c i + K₁c i := le_add_of_nonneg_left (hK₀c_nn i)
+      exact mul_le_mul_of_nonneg_right hle hsum_nn
+    · intro i
+      refine le_trans (hC₂renv i) ?_
+      have hsum_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by positivity
+      have hle : K₀c i ≤ K₀c i + K₁c i := le_add_of_nonneg_right (hK₁c_nn i)
+      exact mul_le_mul_of_nonneg_right hle hsum_nn
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 end
