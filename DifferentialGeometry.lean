@@ -993,6 +993,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactResolvent
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.EigenBasis
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Resolvent
+import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.CovNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
