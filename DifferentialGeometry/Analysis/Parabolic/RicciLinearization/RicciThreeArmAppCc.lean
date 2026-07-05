@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrd
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBounds
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmCorrectionFieldTameEnvelope
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.SecondCovGradChartHessian
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
@@ -2545,6 +2546,28 @@ theorem corrFieldChristoffelBound_nonneg (g₀ : SmoothRiemannianMetric I M)
     linarith
   next => exact le_refl 0
 
+noncomputable def corrFieldTameJetBound (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ) (R δ₀ : ℝ) (i : ℕ) : ℝ :=
+  if h : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 then
+    2 * Classical.choose (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
+        (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2) i
+      + 2 * Classical.choose (exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
+        (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2) i
+  else 0
+
+theorem corrFieldTameJetBound_nonneg (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ) (R δ₀ : ℝ) (i : ℕ) :
+    0 ≤ corrFieldTameJetBound (I := I) (M := M) g₀ a R δ₀ i := by
+  unfold corrFieldTameJetBound
+  split
+  next h =>
+    have h0 := (Classical.choose_spec (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
+        (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2)).1 i
+    have h1 := (Classical.choose_spec (exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
+        (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2)).1 i
+    linarith
+  next => exact le_refl 0
+
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 
@@ -2788,11 +2811,22 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M)
       ∀ {δ₀ : ℝ}, δ₀ < 1 → δ ≤ δ₀ → δ' ≤ δ₀ →
       (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
       (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-      ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
+      (∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
         Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0 s).toSection x)) ≤
           corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ ∧
         Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((C1 s).toSection x)) ≤
           corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀) ∧
+      (∀ (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0 s)‖ ^ 2 ≤
+          corrFieldTameJetBound (I := I) (M := M) g₀ a R δ₀ i *
+            (1 + ∑ j ∈ Finset.range (i + 2),
+              (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) ∧
+        ‖iteratedCovGrad (I := I) g₀ 3 2 i (C1 s)‖ ^ 2 ≤
+          corrFieldTameJetBound (I := I) (M := M) g₀ a R δ₀ i *
+            (1 + ∑ j ∈ Finset.range (i + 2),
+              (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)))) ∧
   ((∀ (x : M) (v w : TangentSpace I x),
       ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v) →
     (∀ (x : M) (v w : TangentSpace I x),
@@ -2852,134 +2886,166 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
       (δ := δ) (δ' := δ')
     rw [hfun]
     exact linearizedRicciConnDiffOrder1Coeff_threeArmHjoint (I := I) g₀ T T' hδ hδ'
-  · intro a ha_super R hR δ₀ hδ₀ hδ_le hδ'_le hTball hT'ball s hs x
-    have hcond : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 := ⟨ha_super, hR, hδ₀⟩
-    have hbnd : corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ =
-        Classical.choose (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
-            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)
-          + (Real.sqrt (Classical.choose
-                (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
-                  (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2))
-              + Real.sqrt (Classical.choose
-                (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
-                  (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)))
-          + Real.sqrt (Classical.choose (exists_arm1Koszul_realizedFam_rfns_ballUniform
-            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := by
-      unfold corrFieldChristoffelBound
-      rw [dif_pos hcond]
-    have hconn := (Classical.choose_spec
-        (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
-          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
-        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
-    have hcurv := (Classical.choose_spec
-        (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
-          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
-        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
-    have harm1 := (Classical.choose_spec
-        (exists_arm1Koszul_realizedFam_rfns_ballUniform
-          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
-        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+  · intro a ha_super R hR δ₀ hδ₀ hδ_le hδ'_le hTball hT'ball
     constructor
-    · change Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-          ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
-            - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
-        corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀
-      have htri : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+    · intro s hs x
+      have hcond : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 := ⟨ha_super, hR, hδ₀⟩
+      have hbnd : corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ =
+          Classical.choose (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)
+            + (Real.sqrt (Classical.choose
+                  (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+                    (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2))
+                + Real.sqrt (Classical.choose
+                  (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+                    (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)))
+            + Real.sqrt (Classical.choose (exists_arm1Koszul_realizedFam_rfns_ballUniform
+              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := by
+        unfold corrFieldChristoffelBound
+        rw [dif_pos hcond]
+      have hconn := (Classical.choose_spec
+          (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
+          T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+      have hcurv := (Classical.choose_spec
+          (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
+          T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+      have harm1 := (Classical.choose_spec
+          (exists_arm1Koszul_realizedFam_rfns_ballUniform
+            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
+          T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
+      constructor
+      · change Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
             ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
               - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
-          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-              ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s).toSection x))
-            + (Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-                  ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
-                    (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x))
-                + Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-                  ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
-                    (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x))) := by
-        letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 2 2 I b) :=
-          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 2
-        rw [← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _,
-          ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _,
-          ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _,
-          ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _]
-        have hsec : ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
-              - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x :
-              TensorRSSpace 2 2 I x) =
-            (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s).toSection x
-              - ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
-                    (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x
-                  - (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
-                    (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) := by
-          rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
-            linearizedRicciArm0BaseCoeff, SmoothCcTensor.toSection_sub,
-            ContMDiffSection.coe_sub, Pi.sub_apply]
-        rw [hsec]
-        refine le_trans (norm_sub_le _ _) ?_
-        have h2 := norm_sub_le
-          ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
-          ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+          corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀
+        have htri : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
+                - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+                ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s).toSection x))
+              + (Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+                    ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x))
+                  + Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+                    ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x))) := by
+          letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 2 2 I b) :=
+            Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 2 2
+          rw [← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _,
+            ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _,
+            ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _,
+            ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x _]
+          have hsec : ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
+                - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x :
+                TensorRSSpace 2 2 I x) =
+              (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s).toSection x
+                - ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x
+                    - (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+                      (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) := by
+            rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+              linearizedRicciArm0BaseCoeff, SmoothCcTensor.toSection_sub,
+              ContMDiffSection.coe_sub, Pi.sub_apply]
+          rw [hsec]
+          refine le_trans (norm_sub_le _ _) ?_
+          have h2 := norm_sub_le
+            ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+            ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)
+          linarith
+        rw [hbnd]
+        have hb1 := hconn.1
+        have hb2 : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤
+            Real.sqrt (Classical.choose
+              (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+                (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) :=
+          Real.sqrt_le_sqrt hcurv.1
+        have hb3 : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤
+            Real.sqrt (Classical.choose
+              (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+                (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) :=
+          Real.sqrt_le_sqrt hcurv.2
+        have hb4 : (0 : ℝ) ≤ Real.sqrt (Classical.choose
+            (exists_arm1Koszul_realizedFam_rfns_ballUniform
+              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := Real.sqrt_nonneg _
         linarith
-      rw [hbnd]
-      have hb1 := hconn.1
-      have hb2 : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-          ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤
-          Real.sqrt (Classical.choose
-            (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
-              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) :=
-        Real.sqrt_le_sqrt hcurv.1
-      have hb3 : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-          ((ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤
-          Real.sqrt (Classical.choose
-            (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
-              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) :=
-        Real.sqrt_le_sqrt hcurv.2
-      have hb4 : (0 : ℝ) ≤ Real.sqrt (Classical.choose
-          (exists_arm1Koszul_realizedFam_rfns_ballUniform
-            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := Real.sqrt_nonneg _
-      linarith
-    · change Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-          ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
-            - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
-        corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀
-      have htri : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+      · change Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
             ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
               - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
-          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-              ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s).toSection x))
-            + Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-              ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) := by
-        letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 3 2 I b) :=
-          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 3 2
-        rw [← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x _,
-          ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x _,
-          ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x _]
-        have hsec : ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
-              - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x :
-              TensorRSSpace 3 2 I x) =
-            (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s).toSection x
-              - (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x := by
-          rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
-            linearizedRicciArm1BaseCoeff]
-        rw [hsec]
-        exact norm_sub_le _ _
+          corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀
+        have htri : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+              ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
+                - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x)) ≤
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+                ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s).toSection x))
+              + Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+                ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) := by
+          letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 3 2 I b) :=
+            Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 3 2
+          rw [← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x _,
+            ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x _,
+            ← norm_toSection_eq_sqrt_riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x _]
+          have hsec : ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
+                - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s).toSection x :
+                TensorRSSpace 3 2 I x) =
+              (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s).toSection x
+                - (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+                    (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x := by
+            rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+              linearizedRicciArm1BaseCoeff]
+          rw [hsec]
+          exact norm_sub_le _ _
+        rw [hbnd]
+        have hb1 := hconn.2
+        have hb2 : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+            ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤
+            Real.sqrt (Classical.choose
+              (exists_arm1Koszul_realizedFam_rfns_ballUniform
+                (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) :=
+          Real.sqrt_le_sqrt harm1
+        have hb3 : (0 : ℝ) ≤ Real.sqrt (Classical.choose
+            (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
+              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := Real.sqrt_nonneg _
+        linarith
+    · intro i s hs
+      have hcond : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 := ⟨ha_super, hR, hδ₀⟩
+      have hbnd : corrFieldTameJetBound (I := I) (M := M) g₀ a R δ₀ i =
+          2 * Classical.choose (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
+              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2) i
+            + 2 * Classical.choose (exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
+              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2) i := by
+        unfold corrFieldTameJetBound
+        rw [dif_pos hcond]
+      have hK0_nn := (Classical.choose_spec (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
+          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).1 i
+      have hK1_nn := (Classical.choose_spec (exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
+          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).1 i
+      have h0 := (Classical.choose_spec (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
+          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
+        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs
+      have h1 := (Classical.choose_spec (exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
+          (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
+        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs
+      have hwin_nn : 0 ≤ ∑ j ∈ Finset.range (i + 2),
+          (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) :=
+        Finset.sum_nonneg (fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _))
+      have h1w : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+          (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) := by linarith
       rw [hbnd]
-      have hb1 := hconn.2
-      have hb2 : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
-          ((ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x)) ≤
-          Real.sqrt (Classical.choose
-            (exists_arm1Koszul_realizedFam_rfns_ballUniform
-              (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) :=
-        Real.sqrt_le_sqrt harm1
-      have hb3 : (0 : ℝ) ≤ Real.sqrt (Classical.choose
-          (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
-            (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := Real.sqrt_nonneg _
-      linarith
+      constructor
+      · exact le_trans h0 (mul_le_mul_of_nonneg_right (by linarith) h1w)
+      · exact le_trans h1 (mul_le_mul_of_nonneg_right (by linarith) h1w)
   · intro hTsymm hT'symm s hs x v hδ_lt hδ'_lt
     exact linearizedRicciAt_eq_threeArm_connDiffCoeff (I := I) g₀ T T'
       hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s hs x v
@@ -3203,7 +3269,7 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
   have harm1' := harm1 T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
   obtain ⟨_hj0, _hj1, hbound, _hident⟩ :=
     (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
-  obtain ⟨hb0, hb1⟩ := hbound ha_super hR hδ₀ hδ_le hδ'_le hTball hT'ball s hs x
+  obtain ⟨hb0, hb1⟩ := (hbound ha_super hR hδ₀ hδ_le hδ'_le hTball hT'ball).1 s hs x
   have harm1sqrt_nn : 0 ≤ Real.sqrt Λarm1 := Real.sqrt_nonneg _
   constructor
   · have htri : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
