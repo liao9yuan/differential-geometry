@@ -918,14 +918,113 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
   have t4 := norm_add_le a b
   linarith
 
+private def coreInPerm201 : Equiv.Perm (Fin 3) :=
+  ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
+
+set_option linter.unusedSectionVars false in
+/-- The slot-extension refold of the connection-contraction insertion core: the
+`connContrCLM 2 1` insertion of the connection-difference section is the two-fold
+`slotExtend` spectator extension of `connDiffSection` itself, up to a rotation of the
+rank-3 coefficient slots. This ties the core's covariant jets to the connection-difference
+jets with two spectator `finrank` factors. -/
+private theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
+    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    connDiffContrInsertionField (I := I) g₀ g₁ =
+      reindexCoeffGen (I := I) (M := M) g₀ 3 4
+        (slotExtend (I := I) (M := M) g₀ 2 3
+          (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
+        coreInPerm201 := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  refine tensorRSSpace_ext 3 4 x (fun D => ?_)
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun u => ?_)
+  have hL : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (connDiffContrInsertionField (I := I) g₀ g₁).toSection x) D) u =
+      Tensor0SSpace.toModel D
+        ![((PDE.DeTurck.connDiff (I := I) g₁ g₀ x ((u 2 : E)) ((u 3 : E)) :
+            TangentSpace I x) : E), u 0, u 1] := by
+    rw [show ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (connDiffContrInsertionField (I := I) g₀ g₁).toSection x) D) =
+        connContrCLM (I := I) 2 1 x ((connDiffSection (I := I) g₁ g₀).toSection x) D from rfl]
+    exact connContr21_insert (I := I) (M := M) g₁ g₀ x D u
+  have hR : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (reindexCoeffGen (I := I) (M := M) g₀ 3 4
+          (slotExtend (I := I) (M := M) g₀ 2 3
+            (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
+          coreInPerm201).toSection x) D) u =
+      Tensor0SSpace.toModel D
+        ![((PDE.DeTurck.connDiff (I := I) g₁ g₀ x ((u 2 : E)) ((u 3 : E)) :
+            TangentSpace I x) : E), u 0, u 1] := by
+    set D' : Tensor0SSpace 3 I x := Tensor0SSpace.ofModel (I := I) (x := x)
+      (ContinuousMultilinearMap.domDomCongr coreInPerm201
+        (Tensor0SSpace.toModel D)) with hD'_def
+    have h1 : ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (reindexCoeffGen (I := I) (M := M) g₀ 3 4
+          (slotExtend (I := I) (M := M) g₀ 2 3
+            (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
+          coreInPerm201).toSection x) D) =
+        slotExtendFib (I := I) (M := M) g₀ 2 3 x
+          (slotExtendFib (I := I) (M := M) g₀ 1 2 x
+            (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+              (connDiffSection (I := I) g₁ g₀).toSection x)) D' := by
+      rw [hD'_def]
+      exact reindexCoeffFibGen_apply (I := I) 3 4 coreInPerm201 x _ D
+    rw [h1]
+    conv_lhs => rw [show u = Fin.cons (u 0) (Matrix.vecTail u) from (Fin.cons_self_tail u).symm]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 2 3 x
+      (slotExtendFib (I := I) (M := M) g₀ 1 2 x
+        (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (connDiffSection (I := I) g₁ g₀).toSection x)) D' (u 0) (Matrix.vecTail u)]
+    conv_lhs => rw [show Matrix.vecTail u = Fin.cons (Matrix.vecTail u 0)
+      (Matrix.vecTail (Matrix.vecTail u)) from (Fin.cons_self_tail (Matrix.vecTail u)).symm]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ 1 2 x
+      (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (connDiffSection (I := I) g₁ g₀).toSection x)
+      ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x) D' (u 0))
+      (Matrix.vecTail u 0) (Matrix.vecTail (Matrix.vecTail u))]
+    rw [show Tensor0SSpace.toModel
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (connDiffSection (I := I) g₁ g₀).toSection x)
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x)
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x) D' (u 0))
+            (Matrix.vecTail u 0)))
+        (Matrix.vecTail (Matrix.vecTail u)) =
+        Tensor0SSpace.toModel
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x)
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x) D' (u 0))
+            (Matrix.vecTail u 0))
+          (fun _ : Fin 1 => ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            ((u 2 : E)) ((u 3 : E)) : TangentSpace I x) : E)) from rfl]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 1)
+      ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x) D' (u 0)) (Matrix.vecTail u 0)
+      (fun _ : Fin 1 => ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+        ((u 2 : E)) ((u 3 : E)) : TangentSpace I x) : E))]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 2) D' (u 0)
+      (Fin.cons (Matrix.vecTail u 0)
+        (fun _ : Fin 1 => ((PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+          ((u 2 : E)) ((u 3 : E)) : TangentSpace I x) : E)))]
+    rw [hD'_def, Tensor0SSpace.toModel_ofModel, ContinuousMultilinearMap.domDomCongr_apply]
+    congr 1
+    funext j
+    fin_cases j <;> rfl
+  exact hL.trans hR.symm
+
 set_option linter.unusedVariables false in
 /-- Ball-uniform order-0 sup bound and all-order per-order L² tame jet envelope for the
 connection-contraction insertion core field, generic in `g₁ = g₀ + P`.
 
-POSITED CHILD (`sorry`): the covariant-Leibniz calculus for the `connContrCLM` insertion
-against the connection-difference jets (the `armSlotFib`-shaped engine); the five arms of the
-order-one Leibniz kernel reduce to this single core by the slot-permutation jet invariances.
-Consumers transitively depend on `sorryAx` until this lands. -/
+Proven by the slot-extension refold
+(`connDiffContrInsertionField_eq_reindex_slotExtend_two`): the core is the two-fold
+`slotExtend` spectator extension of `connDiffSection g₁ g₀` up to a coefficient-slot
+rotation, so its covariant jets are controlled (with two spectator `finrank` factors) by
+the connection-difference jets, which the antidiagonal-grid tower
+(`exists_rfns_iteratedCovGrad_connDiffSection_tgrid`) tames into the `l + 2` jet window of
+`P`; the order-0 fibre sup follows from the supercritical pointwise jet embedding. -/
 theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -943,16 +1042,252 @@ theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
           ‖iteratedCovGrad (I := I) g₀ 3 4 l
               (connDiffContrInsertionField (I := I) g₀ g₁)‖ ^ 2 ≤
             K l * (1 + ∑ j ∈ Finset.range (l + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  obtain ⟨CA, hCA_nn, hCA⟩ :=
+    exists_rfns_iteratedCovGrad_connDiffSection_tgrid (I := I) (M := M) g₀ hδ₀
+  obtain ⟨K_t, hK_t_nn, hK_t⟩ :=
+    antidiagonalTupleGrid_integral_ballUniform_tameWindow (I := I) (M := M) g₀ a ha_super hR
+  obtain ⟨Cemb, hCemb_nn, hCemb⟩ :=
+    IntrinsicSpectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
+      (I := I) (M := M) g₀ a ha_super
+  set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
+  have hfr_nn : (0 : ℝ) ≤ fr := by rw [hfr_def]; exact Nat.cast_nonneg _
+  have hfr2_nn : (0 : ℝ) ≤ fr ^ 2 := sq_nonneg fr
+  have hemb_nn : (0 : ℝ) ≤ Cemb ^ 2 * ((a : ℝ) + 2) * R ^ 2 := by positivity
+  set Λ2 : ℝ := fr ^ 2 * CA 0 * (1 + Cemb ^ 2 * ((a : ℝ) + 2) * R ^ 2) with hΛ2_def
+  have hΛ2_nn : 0 ≤ Λ2 := by
+    simp only [hΛ2_def]
+    exact mul_nonneg (mul_nonneg hfr2_nn (hCA_nn 0)) (by linarith)
+  refine ⟨Real.sqrt Λ2, fun l => fr ^ 2 * CA l * (∑ k ∈ Finset.range (l + 2), K_t k),
+    Real.sqrt_nonneg _,
+    fun l => mul_nonneg (mul_nonneg hfr2_nn (hCA_nn l))
+      (Finset.sum_nonneg (fun k _ => hK_t_nn k)), ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball
+  have hwin2_nn : ∀ l : ℕ, 0 ≤ ∑ j ∈ Finset.range (l + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
+    fun l => Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  by_cases hMne : Nonempty M
+  · obtain ⟨x₀⟩ := hMne
+    have hδ0 : 0 ≤ δ := by
+      obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
+        haveI : Nontrivial (TangentSpace I x₀) := by
+          have hfr' : 0 < Module.finrank ℝ (TangentSpace I x₀) := by
+            have heq : Module.finrank ℝ (TangentSpace I x₀) = Module.finrank ℝ E := rfl
+            rw [heq]; exact Nat.pos_of_ne_zero (NeZero.ne _)
+          exact Module.nontrivial_of_finrank_pos hfr'
+        exact exists_ne 0
+      have hpos : 0 < g₀.inner x₀ v v := g₀.pos x₀ v hv
+      have hbound := hδ x₀ v v
+      have hsqrt_pos : 0 < Real.sqrt (g₀.inner x₀ v v) := Real.sqrt_pos.mpr hpos
+      have habs_nn : 0 ≤ |ccTensorBilinSymm (I := I) g₀ P x₀ v v| := abs_nonneg _
+      by_contra hδc
+      have hδc' : δ < 0 := lt_of_not_ge hδc
+      have hrhs_neg : δ * Real.sqrt (g₀.inner x₀ v v) * Real.sqrt (g₀.inner x₀ v v) < 0 := by
+        have h1 : δ * Real.sqrt (g₀.inner x₀ v v) < 0 := mul_neg_of_neg_of_pos hδc' hsqrt_pos
+        exact mul_neg_of_neg_of_pos h1 hsqrt_pos
+      linarith [le_trans habs_nn hbound]
+    have hcore_pt : ∀ (l : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 3 4 l
+              (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) ≤
+          fr ^ 2 * CA l * ∑ k ∈ Finset.range (l + 2),
+            (∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
+      intro l x
+      have h0 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
+          ((iteratedCovGrad (I := I) g₀ 3 4 l
+            (connDiffContrInsertionField (I := I) g₀ g₁)).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 3 4 l
+              (slotExtend (I := I) (M := M) g₀ 2 3
+                (slotExtend (I := I) (M := M) g₀ 1 2
+                  (connDiffSection (I := I) g₁ g₀)))).toSection x) := by
+        rw [connDiffContrInsertionField_eq_reindex_slotExtend_two (I := I) (M := M) g₀ g₁]
+        exact rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 3 4
+          (slotExtend (I := I) (M := M) g₀ 2 3
+            (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)))
+          coreInPerm201 l x
+      have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (4 + l) x
+          ((iteratedCovGrad (I := I) g₀ 3 4 l
+            (slotExtend (I := I) (M := M) g₀ 2 3
+              (slotExtend (I := I) (M := M) g₀ 1 2
+                (connDiffSection (I := I) g₁ g₀)))).toSection x) ≤
+          fr * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 3 l
+              (slotExtend (I := I) (M := M) g₀ 1 2
+                (connDiffSection (I := I) g₁ g₀))).toSection x) :=
+        rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 2 3
+          (slotExtend (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)) l x
+      have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (3 + l) x
+          ((iteratedCovGrad (I := I) g₀ 2 3 l
+            (slotExtend (I := I) (M := M) g₀ 1 2
+              (connDiffSection (I := I) g₁ g₀))).toSection x) ≤
+          fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 1 2 l
+              (connDiffSection (I := I) g₁ g₀)).toSection x) :=
+        rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 2
+          (connDiffSection (I := I) g₁ g₀) l x
+      have h3 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 1 2 l
+            (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
+          CA l * ∑ k ∈ Finset.range (l + 2),
+            (∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by
+        have h := hCA g₁ P htie hδ_le hδ0 hδ l x
+        simpa only [Combinatorics.antidiagonalTupleGrid] using h
+      rw [h0]
+      refine le_trans h1 (le_trans (mul_le_mul_of_nonneg_left h2 hfr_nn) ?_)
+      calc fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 1 2 l
+                (connDiffSection (I := I) g₁ g₀)).toSection x))
+          = fr ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 1 2 l
+                (connDiffSection (I := I) g₁ g₀)).toSection x) := by ring
+        _ ≤ fr ^ 2 * (CA l * ∑ k ∈ Finset.range (l + 2),
+              (∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+                ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))) :=
+            mul_le_mul_of_nonneg_left h3 hfr2_nn
+        _ = fr ^ 2 * CA l * ∑ k ∈ Finset.range (l + 2),
+              (∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+                ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) := by ring
+    refine ⟨?_, ?_⟩
+    · intro x
+      have h := hcore_pt 0 x
+      simp only [iteratedCovGrad_zero, Nat.add_zero, Nat.zero_add] at h
+      rw [Finset.sum_range_succ, Finset.sum_range_one] at h
+      have hS0 : (∑ n ∈ Finset.range (0 + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n 0,
+          ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) = 1 := by
+        simp
+      have hS1_le : (∑ n ∈ Finset.range (1 + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n 1,
+          ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ≤
+          Cemb ^ 2 * ((a : ℝ) + 2) * R ^ 2 := by
+        have hS1 : (∑ n ∈ Finset.range (1 + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n 1,
+            ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) =
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) := by
+          rw [Finset.sum_range_succ, Finset.sum_range_one]
+          simp
+        rw [hS1]
+        have hmem : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 1 P).toSection x) ≤
+            ∑ m ∈ Finset.range 3, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 m P).toSection x) :=
+          Finset.single_le_sum
+            (f := fun m => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 m P).toSection x))
+            (fun m _ => riemannianFiberNormSq_nonneg _ _ _ _ _)
+            (by norm_num : (1 : ℕ) ∈ Finset.range 3)
+        refine le_trans hmem (le_trans (hCemb P x) ?_)
+        have hsum_le : (∑ i ∈ Finset.range (a + 1 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i P‖ ^ 2) ≤ ((a : ℝ) + 2) * R ^ 2 := by
+          have hle : ∀ i ∈ Finset.range (a + 1 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i P‖ ^ 2 ≤ R ^ 2 := by
+            intro i hi
+            rw [Finset.mem_range] at hi
+            exact pow_le_pow_left₀ (norm_nonneg _) (hPball i (by omega)) 2
+          refine le_trans (Finset.sum_le_sum hle) ?_
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+          have hcast : ((a + 1 + 1 : ℕ) : ℝ) = (a : ℝ) + 2 := by push_cast; ring
+          rw [hcast]
+        calc Cemb ^ 2 * ∑ i ∈ Finset.range (a + 1 + 1),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 i P‖ ^ 2
+            ≤ Cemb ^ 2 * (((a : ℝ) + 2) * R ^ 2) :=
+              mul_le_mul_of_nonneg_left hsum_le (sq_nonneg Cemb)
+          _ = Cemb ^ 2 * ((a : ℝ) + 2) * R ^ 2 := by ring
+      rw [Real.sq_sqrt hΛ2_nn, hΛ2_def]
+      rw [hS0] at h
+      have hstep : fr ^ 2 * CA 0 *
+          (1 + ∑ n ∈ Finset.range (1 + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n 1,
+            ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) ≤
+          fr ^ 2 * CA 0 * (1 + Cemb ^ 2 * ((a : ℝ) + 2) * R ^ 2) :=
+        mul_le_mul_of_nonneg_left (by linarith [hS1_le])
+          (mul_nonneg hfr2_nn (hCA_nn 0))
+      linarith [h, hstep]
+    · intro l
+      have hint_k : ∀ k : ℕ, MeasureTheory.Integrable
+          (fun x => ∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+            ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+          (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+        fun k => (hK_t P hPball k).1
+      have hint : MeasureTheory.Integrable
+          (fun x => fr ^ 2 * CA l * ∑ k ∈ Finset.range (l + 2),
+            (∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)))
+          (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+        (MeasureTheory.integrable_finset_sum _ (fun k _ => hint_k k)).const_mul _
+      have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 3 (4 + l)
+        (iteratedCovGrad (I := I) g₀ 3 4 l (connDiffContrInsertionField (I := I) g₀ g₁))
+        _ hint (fun x => hcore_pt l x)
+      refine le_trans hkey ?_
+      rw [MeasureTheory.integral_const_mul,
+        MeasureTheory.integral_finset_sum _ (fun k _ => hint_k k)]
+      have hsum : (∑ k ∈ Finset.range (l + 2),
+            ∫ x, ∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+              ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+          (∑ k ∈ Finset.range (l + 2), K_t k) *
+            (1 + ∑ j ∈ Finset.range (l + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+        rw [Finset.sum_mul]
+        refine Finset.sum_le_sum (fun k hk => ?_)
+        refine le_trans (hK_t P hPball k).2 ?_
+        refine mul_le_mul_of_nonneg_left ?_ (hK_t_nn k)
+        have hmono : (∑ j ∈ Finset.range (k + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) ≤
+            ∑ j ∈ Finset.range (l + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
+          refine Finset.sum_le_sum_of_subset_of_nonneg
+            (Finset.range_mono ?_) (fun j _ _ => sq_nonneg _)
+          rw [Finset.mem_range] at hk
+          omega
+        linarith
+      calc fr ^ 2 * CA l * (∑ k ∈ Finset.range (l + 2),
+              ∫ x, ∑ n ∈ Finset.range (k + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+                ∏ m : Fin n, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+                ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+          ≤ fr ^ 2 * CA l * ((∑ k ∈ Finset.range (l + 2), K_t k) *
+              (1 + ∑ j ∈ Finset.range (l + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) :=
+            mul_le_mul_of_nonneg_left hsum (mul_nonneg hfr2_nn (hCA_nn l))
+        _ = fr ^ 2 * CA l * (∑ k ∈ Finset.range (l + 2), K_t k) *
+              (1 + ∑ j ∈ Finset.range (l + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
+  · haveI hem : IsEmpty M := not_nonempty_iff.mp hMne
+    refine ⟨fun x => (hem.false x).elim, ?_⟩
+    intro l
+    have hz : ‖iteratedCovGrad (I := I) g₀ 3 4 l
+        (connDiffContrInsertionField (I := I) g₀ g₁)‖ = 0 := by
+      rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
+        MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+    have hK_nn : 0 ≤ fr ^ 2 * CA l * (∑ k ∈ Finset.range (l + 2), K_t k) :=
+      mul_nonneg (mul_nonneg hfr2_nn (hCA_nn l)) (Finset.sum_nonneg (fun k _ => hK_t_nn k))
+    calc ‖iteratedCovGrad (I := I) g₀ 3 4 l
+            (connDiffContrInsertionField (I := I) g₀ g₁)‖ ^ 2
+        = 0 := by rw [hz]; norm_num
+      _ ≤ fr ^ 2 * CA l * (∑ k ∈ Finset.range (l + 2), K_t k) *
+            (1 + ∑ j ∈ Finset.range (l + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) :=
+          mul_nonneg hK_nn (by linarith [hwin2_nn l])
 
 set_option linter.unusedVariables false in
 /-- Ball-uniform order-0 sup bound and all-order per-order L² tame jet envelope for the
 order-one connection-difference Leibniz kernel field, generic in `g₁ = g₀ + P`.
 
 Proven by the five-arm reduction `kernelField_eq_neg_arm_combination` and the slot-permutation
-jet invariances onto the single connection-contraction core. TRANSIT: the core envelope
-(`connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic`) is a posited
-`sorry` child; consumers transitively depend on `sorryAx` until it lands. -/
+jet invariances onto the single connection-contraction core, whose envelope is
+`connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic`. -/
 theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

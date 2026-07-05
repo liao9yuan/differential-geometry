@@ -2236,7 +2236,7 @@ private lemma rfns_iteratedCovGrad_armSlotPass_connDiffArm_le
   rw [← connDiffSection_eq_armSlotEndoCc_zero (I := I) (M := M) g₀ g₁]
 
 set_option linter.unusedVariables false in
-private theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
+theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CA : ℕ → ℝ, (∀ j, 0 ≤ CA j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
