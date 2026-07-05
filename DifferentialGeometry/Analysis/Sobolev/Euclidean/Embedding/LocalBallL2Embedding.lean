@@ -620,27 +620,27 @@ theorem smooth_localBall_L2_pointwise_embedding
               (volume.restrict (Metric.ball x₀ R))).toReal := by
         rw [hT_def, hΩ_def]
 
-theorem smooth_localBall_L2_pointwise_embedding_sharp
-    (a : ℕ) (hda : (d : ℝ) < 2 * (2 * a))
+theorem smooth_localBall_L2_pointwise_embedding_supercritical
+    (m : ℕ) (hdm : (d : ℝ) < 2 * m)
     {x₀ : EuN} {R : ℝ} (hR : 0 < R) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {f : EuN → ℝ}, ContDiff ℝ (⊤ : ℕ∞) f →
         ∀ x ∈ Metric.ball x₀ (R / 4),
           ‖f x‖ ≤ C *
-            ∑ j ∈ Finset.range (2 * a + 1),
+            ∑ j ∈ Finset.range (m + 1),
               (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2
                 (volume.restrict (Metric.ball x₀ R))).toReal := by
   classical
   set Ω : Set EuN := Metric.ball x₀ R with hΩ_def
   have hΩ_open : IsOpen Ω := Metric.isOpen_ball
   have hd_pos : (0 : ℝ) < d := Nat.cast_pos.mpr (NeZero.pos d)
-  have ha_pos : 1 ≤ a := by
+  have hm_one : 1 ≤ m := by
     by_contra h
-    have ha0 : a = 0 := by omega
-    rw [ha0] at hda; simp at hda; linarith [hd_pos, hda]
-  have h2a_pos : (0 : ℝ) < 2 * a := by positivity
-  set s : ℕ := 2 * a - 1 with hs_def
-  have hs1 : s + 1 = 2 * a := by omega
+    have hm0 : m = 0 := by omega
+    rw [hm0] at hdm; simp at hdm; linarith [hd_pos, hdm]
+  have hm_pos : (0 : ℝ) < m := by exact_mod_cast Nat.lt_of_lt_of_le Nat.zero_lt_one hm_one
+  set s : ℕ := m - 1 with hs_def
+  have hs1 : s + 1 = m := by omega
   have hball_sub : Metric.closedBall x₀ (R / 2) ⊆ Ω := by
     rw [hΩ_def]
     exact Metric.closedBall_subset_ball (by linarith)
@@ -649,41 +649,38 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
       (isCompact_closedBall x₀ (R / 2)) hΩ_open hball_sub
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     exists_uniform_iteratedFDeriv_bound_of_smooth_compactSupport (d := d)
-      hχ_smooth hχ_cpt (2 * a)
-  set L : ℝ := max 1 ((d : ℝ) / (2 * a)) with hL_def
+      hχ_smooth hχ_cpt (m)
+  set L : ℝ := max 1 ((d : ℝ) / (m)) with hL_def
   have hL_lt_two : L < 2 := by
     rw [hL_def]
     refine max_lt (by norm_num) ?_
-    rw [div_lt_iff₀ h2a_pos]; linarith [hda]
+    rw [div_lt_iff₀ hm_pos]; linarith [hdm]
   have h_Ioo_inf : (Set.Ioo L 2).Infinite := Set.Ioo_infinite hL_lt_two
   obtain ⟨p', hp'_mem, hp'_notMem⟩ :=
     h_Ioo_inf.exists_notMem_finset
-      ((Finset.Icc 1 (2 * a)).image (fun m : ℕ => (d : ℝ) / (m : ℝ)))
+      ((Finset.Icc 1 m).image (fun t : ℕ => (d : ℝ) / (t : ℝ)))
   have hL_le_p' : L < p' := hp'_mem.1
   have hp'_one : (1 : ℝ) ≤ p' :=
     le_of_lt (lt_of_le_of_lt (le_max_left _ _) hL_le_p')
   have hp'_two : p' ≤ 2 := le_of_lt hp'_mem.2
   have hp'_pos : 0 < p' := by linarith
-  have hp'_lb : (d : ℝ) / (2 * a) < p' :=
+  have hp'_lb : (d : ℝ) / (m) < p' :=
     lt_of_le_of_lt (le_max_right _ _) hL_le_p'
-  have hreg : RegularExponent.IsRegular (d : ℝ) p' (2 * a) := by
-    intro m hm hm_le hmp
+  have hreg : RegularExponent.IsRegular (d : ℝ) p' (m) := by
+    intro t ht ht_le htp
     apply hp'_notMem
     rw [Finset.mem_image]
-    refine ⟨m, Finset.mem_Icc.mpr ⟨hm, hm_le⟩, ?_⟩
-    have hm_pos : 0 < (m : ℝ) := by exact_mod_cast hm
-    rw [div_eq_iff (ne_of_gt hm_pos)]
-    linarith [hmp]
+    refine ⟨t, Finset.mem_Icc.mpr ⟨ht, ht_le⟩, ?_⟩
+    have ht_pos : 0 < (t : ℝ) := by exact_mod_cast ht
+    rw [div_eq_iff (ne_of_gt ht_pos)]
+    linarith [htp]
   have hkp : (d : ℝ) < ((s + 1 : ℕ) : ℝ) * p' := by
     rw [hs1]
-    have hcast : ((2 * a : ℕ) : ℝ) = 2 * a := by push_cast; ring
-    rw [hcast]
-    have h_lb : (d : ℝ) = ((d : ℝ) / (2 * a)) * (2 * a) := by
-      field_simp
+    have h_lb : (d : ℝ) = (d : ℝ) / m * m :=
+      (div_mul_cancel₀ _ (ne_of_gt hm_pos)).symm
     rw [h_lb]
-    calc ((d : ℝ) / (2 * a)) * (2 * a) < p' * (2 * a) :=
-            mul_lt_mul_of_pos_right hp'_lb h2a_pos
-      _ = 2 * a * p' := by ring
+    calc (d : ℝ) / m * m < p' * m := mul_lt_mul_of_pos_right hp'_lb hm_pos
+      _ = (m : ℝ) * p' := by ring
   have hreg_s : RegularExponent.IsRegular (d : ℝ) p' (s + 1) := by rw [hs1]; exact hreg
   obtain ⟨q, hq_one, hq_dim, C₁, hC₁_nn, h_tower⟩ :=
     tower_to_supercritical_quant_uniform (d := d) hΩ_open 0 s hp'_one hreg_s hkp
@@ -692,12 +689,12 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
       (d := d) (p := q) hq_dim (x₀ := x₀) (R := R) hR 0
   set Vexp : ℝ := (volume Ω ^ (1 / p' - 1 / (2 : ℝ))).toReal with hVexp_def
   have hVexp_nn : 0 ≤ Vexp := ENNReal.toReal_nonneg
-  set Cleib : ℝ := (2 : ℝ) ^ (2 * a) * Cχ with hCleib_def
+  set Cleib : ℝ := (2 : ℝ) ^ (m) * Cχ with hCleib_def
   have hCleib_nn : 0 ≤ Cleib := by positivity
-  set Npairs : ℝ := ∑ j ∈ Finset.range (2 * a + 1), ((j : ℝ) + 1) with hNpairs_def
+  set Npairs : ℝ := ∑ j ∈ Finset.range (m + 1), ((j : ℝ) + 1) with hNpairs_def
   have hNpairs_nn : 0 ≤ Npairs :=
     Finset.sum_nonneg (fun j _ => by positivity)
-  set dpow : ℝ := ((d ^ (2 * a) : ℕ) : ℝ) with hdpow_def
+  set dpow : ℝ := ((d ^ (m) : ℕ) : ℝ) with hdpow_def
   have hdpow_nn : 0 ≤ dpow := by positivity
   refine ⟨C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs)))),
     by positivity, ?_⟩
@@ -707,14 +704,14 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
   have hχf_cpt : HasCompactSupport χf := hχ_cpt.mul_right
   have hχf_supp : tsupport χf ⊆ Ω :=
     (tsupport_smul_subset_left χ f).trans hχ_supp
-  have hχf_mem_p' : MemWkp (d := d) (2 * a) (ENNReal.ofReal p') χf Ω :=
+  have hχf_mem_p' : MemWkp (d := d) (m) (ENNReal.ofReal p') χf Ω :=
     MemWkp_of_smooth_compactSupport (d := d) hΩ_open hχf_smooth hχf_cpt hχf_supp
-      (by rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp'_one) (2 * a)
+      (by rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp'_one) (m)
   have hχf_mem_p'_idx : MemWkp (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω := by
-    have : 0 + 1 + s = 2 * a := by omega
+    have : 0 + 1 + s = m := by omega
     rw [this]; exact hχf_mem_p'
   obtain ⟨hχf_mem_q, h_tower_norm⟩ := h_tower hχf_cpt hχf_supp hχf_mem_p'_idx
-  set T : ℝ := ∑ j ∈ Finset.range (2 * a + 1),
+  set T : ℝ := ∑ j ∈ Finset.range (m + 1),
     (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2 (volume.restrict Ω)).toReal with hT_def
   have hT_nn : 0 ≤ T := Finset.sum_nonneg (fun j _ => ENNReal.toReal_nonneg)
   have hfin_f : ∀ (e : ℝ≥0∞) (j : ℕ),
@@ -777,7 +774,7 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
     have h_idx2 : 0 + 1 + s + 1 = s + 1 + 1 := by omega
     rw [hWsum_p'_def, hdpow_def]
     rw [h_idx1] at h_toReal ⊢
-    have h_dcast : (((d ^ (s + 1) : ℕ) : ℝ≥0∞)).toReal = ((d ^ (2 * a) : ℕ) : ℝ) := by
+    have h_dcast : (((d ^ (s + 1) : ℕ) : ℝ≥0∞)).toReal = ((d ^ (m) : ℕ) : ℝ) := by
       rw [hs1]; simp
     rw [h_dcast] at h_toReal
     rw [show (s + 1 + 1 : ℕ) = 0 + 1 + s + 1 by omega] at h_toReal ⊢
@@ -787,7 +784,7 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
           (volume.restrict Ω)).toReal ≤
         Vexp * (((j : ℝ) + 1) * (Cleib * T)) := by
     intro j hj
-    have hj_le : j ≤ 2 * a := by rw [Finset.mem_range] at hj; omega
+    have hj_le : j ≤ m := by rw [Finset.mem_range] at hj; omega
     have h_meas_χf : AEStronglyMeasurable
         (fun z => ‖iteratedFDeriv ℝ j χf z‖) (volume.restrict Ω) := by
       have h_iter_cont : Continuous (fun z : EuN => iteratedFDeriv ℝ j χf z) := by
@@ -853,21 +850,21 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
           calc (j.choose i : ℝ) ≤ ((2 ^ j : ℕ) : ℝ) := by exact_mod_cast this
             _ = (2 : ℝ) ^ j := by push_cast; ring
         calc (j.choose i : ℝ) ≤ (2 : ℝ) ^ j := h_ch
-          _ ≤ (2 : ℝ) ^ (2 * a) := pow_le_pow_right₀ (by norm_num) hj_le
+          _ ≤ (2 : ℝ) ^ (m) := pow_le_pow_right₀ (by norm_num) hj_le
       have h_b_le :
           (eLpNorm (fun z => ‖iteratedFDeriv ℝ (j - i) f z‖) 2
             (volume.restrict Ω)).toReal ≤ T := by
         rw [hT_def]
-        refine Finset.single_le_sum (f := fun m =>
-          (eLpNorm (fun z => ‖iteratedFDeriv ℝ m f z‖) 2 (volume.restrict Ω)).toReal)
-          (fun m _ => ENNReal.toReal_nonneg) ?_
+        refine Finset.single_le_sum (f := fun t =>
+          (eLpNorm (fun z => ‖iteratedFDeriv ℝ t f z‖) 2 (volume.restrict Ω)).toReal)
+          (fun t _ => ENNReal.toReal_nonneg) ?_
         rw [Finset.mem_range]; omega
       exact mul_le_mul h_a_le h_b_le ENNReal.toReal_nonneg hCleib_nn
     have h_sum_each := Finset.sum_le_sum h_each
     rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul] at h_sum_each
     refine h_sum_each.trans (le_of_eq ?_)
     push_cast; ring
-  have h_idx_range : Finset.range (s + 1 + 1) = Finset.range (2 * a + 1) := by
+  have h_idx_range : Finset.range (s + 1 + 1) = Finset.range (m + 1) := by
     congr 1; omega
   have h_Wsum_le : Wsum_p' ≤ Vexp * (Cleib * Npairs) * T := by
     have h_sum_le :
@@ -877,8 +874,8 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
     refine h_sum_le.trans (le_of_eq ?_)
     rw [h_idx_range, hNpairs_def]
     rw [← Finset.mul_sum]
-    rw [show (∑ j ∈ Finset.range (2 * a + 1), ((j : ℝ) + 1) * (Cleib * T)) =
-        (∑ j ∈ Finset.range (2 * a + 1), ((j : ℝ) + 1)) * (Cleib * T) from
+    rw [show (∑ j ∈ Finset.range (m + 1), ((j : ℝ) + 1) * (Cleib * T)) =
+        (∑ j ∈ Finset.range (m + 1), ((j : ℝ) + 1)) * (Cleib * T) from
       (Finset.sum_mul ..).symm]
     ring
   have h_wk_chain :
@@ -905,10 +902,24 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
         mul_le_mul_of_nonneg_left h_wk_chain hC₂_nn
     _ = C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs)))) * T := by ring
     _ = C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs)))) *
-          ∑ j ∈ Finset.range (2 * a + 1),
+          ∑ j ∈ Finset.range (m + 1),
             (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2
               (volume.restrict (Metric.ball x₀ R))).toReal := by
         rw [hT_def, hΩ_def]
+
+theorem smooth_localBall_L2_pointwise_embedding_sharp
+    (a : ℕ) (hda : (d : ℝ) < 2 * (2 * a))
+    {x₀ : EuN} {R : ℝ} (hR : 0 < R) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {f : EuN → ℝ}, ContDiff ℝ (⊤ : ℕ∞) f →
+        ∀ x ∈ Metric.ball x₀ (R / 4),
+          ‖f x‖ ≤ C *
+            ∑ j ∈ Finset.range (2 * a + 1),
+              (eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2
+                (volume.restrict (Metric.ball x₀ R))).toReal := by
+  have hda' : (d : ℝ) < 2 * ((2 * a : ℕ) : ℝ) := by push_cast; linarith
+  exact smooth_localBall_L2_pointwise_embedding_supercritical (2 * a) hda' hR
+
 
 end Euclidean
 end Sobolev
