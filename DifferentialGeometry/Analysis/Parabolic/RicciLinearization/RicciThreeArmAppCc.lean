@@ -2817,7 +2817,12 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M)
         Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((C1 s).toSection x)) ≤
           corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀) ∧
       (∀ (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
-        ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0 s)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (C0 s
+              + (3 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s)
+              - ricciArmOrder0CurvCoeff (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤
           corrFieldTameJetBound (I := I) (M := M) g₀ a R δ₀ i *
             (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
