@@ -38864,6 +38864,64 @@ private theorem exists_riemannPalatini_curvatureRefold_data
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedVariables false in
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField) in
+/-- Deferred input (the order-zero correction residue of the arm-split refold: the
+order-zero Lie-correction field `lieCorr0Field` plus the vector-field endomorphism arm at
+the base metric `g₀`, along the realized path). This is the sum whose `∀ i`-jet window and
+order-zero sup the arm-split assembly consumes: the endomorphism arm at `g₀` is the
+`− endoArm(g₀)` counterpart of the background-pair difference (seen from the insert arm's
+own side of the same cancellation, `lc0b_NEndoIns_decomp`), and `lieCorr0Field` is one-jet
+in the moving tensor, so the residue is a pure order-zero package — zero second-gradient
+ledger copies, no cap literal, riding entirely inside the order-zero sup slot `Λ`. The sup
+is a `δ`-rated `P`-uniform fibre cap chosen before the moving tensor (erratum-#2 class, not
+compactness on `g₁`-dependent objects), partially donor-covered by
+`lieCorr0Field_realizedFam_rfns_order0_ballUniform` and the `DLb` order-zero ball-uniform
+sup; the constant-form per-order donor
+`lieCorr0Field_realizedFam_jetL2_perOrder_ballUniform` does not convert to the `∀ i`-window
+form, so this envelope is posited. The arm-split target additionally needs the
+covariant-derivative arm (its second-gradient content and the literal-`10` cap) and the
+endomorphism-arm background-pair difference, so this residue is strictly weaker than the
+target. Every consumer transitively depends on `sorryAx` until this lands. -/
+private theorem exists_lieCorr0AddEndoArmBase_order0_data
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+          (fun s => lieCorr0Field (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            + deTurckLieEndoArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀) (δ := δ) (δ' := δ) ∧
+        (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((lieCorr0Field (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              + deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀).toSection x) ≤ Λ ^ 2) ∧
+        (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (lieCorr0Field (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              + deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+  sorry
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieEndoArmField
+  deTurckLieCovDerivArmField deTurckLieCoeffField_eq_covDerivArm_add_endoArm
+  exists_deTurckLieCovDerivArm_curvatureRefold_data
+  exists_deTurckLieEndoArm_backgroundDifference_order0_data) in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
 /-- Deferred input (dossier row LC-3, the full-subject arm-split child of the frozen
 Lie-plus-correction refold data stated below; it lives in this file because `lieCorr0Field`
 is private here and this file is downstream of the public refold children, so the full
@@ -38930,8 +38988,170 @@ private theorem exists_lieCorr_curvatureRefold_armSplit_data
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2lc s)‖ ^ 2 ≤
               Klc i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨Λda, -, Kda, hKda_nn, hDA⟩ :=
+    exists_deTurckLieCovDerivArm_curvatureRefold_data (I := I) (M := M) g₀ g_bg a
+      ha_super hR hδ₀
+  obtain ⟨Λdf, -, Kdf, hKdf_nn, hDF⟩ :=
+    exists_deTurckLieEndoArm_backgroundDifference_order0_data (I := I) (M := M) g₀ g_bg
+      a ha_super hR hδ₀
+  obtain ⟨Λrs, -, Krs, hKrs_nn, hRS⟩ :=
+    exists_lieCorr0AddEndoArmBase_order0_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  have hS_nn : (0 : ℝ) ≤ 4 * Λda ^ 2 + 4 * Λdf ^ 2 + 2 * Λrs ^ 2 := by positivity
+  refine ⟨Real.sqrt (4 * Λda ^ 2 + 4 * Λdf ^ 2 + 2 * Λrs ^ 2), Real.sqrt_nonneg _,
+    fun i => 3 * (Kda i + Kdf i + Krs i),
+    fun i => by
+      have h1 := hKda_nn i
+      have h2 := hKdf_nn i
+      have h3 := hKrs_nn i
+      linarith, ?_⟩
+  intro T δ hδ_le hδ hδZ hball
+  obtain ⟨C0da, C2da, hj0da, hj2da, hidda, hsupda, hcapda, henv0da, henv2da⟩ :=
+    hDA T hδ_le hδ hδZ hball
+  obtain ⟨hjdf, hsupdf, henvdf⟩ := hDF T hδ_le hδ hδZ hball
+  obtain ⟨hjrs, hsuprs, henvrs⟩ := hRS T hδ_le hδ hδZ hball
+  set fam := realizedFam (I := I) g₀ T 0 hδ hδZ
+  refine ⟨fun s => C0da s
+      + (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+        - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
+      + (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+        + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀),
+    C2da, ?_, hj2da, ?_, ?_, ?_, ?_, ?_⟩
+  · exact threeArmHjoint_add_fw (I := I) (M := M) g₀ 2 _ _
+      (threeArmHjoint_add_fw (I := I) (M := M) g₀ 2 _ _ hj0da hjdf) hjrs
+  · intro s hs
+    have hsplit : deTurckLieCoeffField (I := I) (M := M) g₀ (fam s) g_bg
+        + lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg =
+        deTurckLieCovDerivArmField (I := I) (M := M) g₀ (fam s) g_bg
+        + (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+          - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
+        + (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+          + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀) := by
+      rw [deTurckLieCoeffField_eq_covDerivArm_add_endoArm (I := I) (M := M) g₀
+        (fam s) g_bg]
+      abel
+    try dsimp only
+    rw [hsplit]
+    simp only [appCc_add_left]
+    rw [hidda s hs]
+    abel
+  · intro s hs x
+    have h1 := hsupda s hs x
+    have h2 := hsupdf s hs x
+    have h3 := hsuprs s hs x
+    try dsimp only
+    rw [Real.sq_sqrt hS_nn, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add,
+      Pi.add_apply, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+    refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x _ _) ?_
+    have h12 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
+      ((C0da s).toSection x)
+      ((deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+        - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀).toSection x)
+    linarith [h1, h2, h3, h12]
+  · intro s hs x
+    refine le_trans (hcapda s hs x) ?_
+    have hfC := deTurckArmFibreConst_nonneg (Module.finrank ℝ E)
+    have hδ_half : δ ≤ 1 / 2 := hδ_le.trans hδ₀_half
+    have h1mδ_pos : (0 : ℝ) < 1 - δ := by linarith
+    refine pow_le_pow_left₀ (le_max_right _ _) ?_ 2
+    refine max_le ?_ (le_max_right _ _)
+    rcases le_or_gt δ 0 with hδ0 | hδ0
+    · refine le_trans ?_ (le_max_right _ _)
+      have hq : δ / (1 - δ) ^ 2 ≤ 0 :=
+        div_nonpos_of_nonpos_of_nonneg hδ0 (sq_nonneg _)
+      nlinarith [mul_nonneg (mul_nonneg (by norm_num : (0 : ℝ) ≤ 3) hfC)
+        (neg_nonneg.mpr hq)]
+    · refine le_trans ?_ (le_max_left _ _)
+      rw [show (3 : ℝ) * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)
+            = 3 * deTurckArmFibreConst (Module.finrank ℝ E) * δ / (1 - δ) ^ 2 from by
+          ring,
+        show (10 : ℝ) * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))
+            = 10 * deTurckArmFibreConst (Module.finrank ℝ E) * δ / (1 - δ) from by
+          ring,
+        div_le_div_iff₀ (by positivity) h1mδ_pos]
+      have hP : (0 : ℝ) ≤ deTurckArmFibreConst (Module.finrank ℝ E) * δ * (1 - δ) :=
+        mul_nonneg (mul_nonneg hfC hδ0.le) h1mδ_pos.le
+      have hQ : (0 : ℝ) ≤ deTurckArmFibreConst (Module.finrank ℝ E) * δ * (1 - δ)
+          * (1 / 2 - δ) := mul_nonneg hP (by linarith)
+      nlinarith [hP, hQ]
+  · intro i s hs
+    have ha := henv0da i s hs
+    have hb := henvdf i s hs
+    have hc := henvrs i s hs
+    have hW : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+    try dsimp only
+    have e1 := iteratedCovGrad_add (I := I) (g := g₀) (r := 2) (s := 2) (j := i)
+      (C0da s
+        + (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+          - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
+      (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+        + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
+    have e2 := iteratedCovGrad_add (I := I) (g := g₀) (r := 2) (s := 2) (j := i)
+      (C0da s)
+      (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+        - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
+    rw [e1, e2]
+    have htri : ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)
+          + iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)
+          + iteratedCovGrad (I := I) g₀ 2 2 i
+            (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+              + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖
+        ≤ ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖
+          + ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+                - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖
+          + ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+                + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖ := by
+      have t1 := norm_add_le
+        (iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)
+          + iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
+        (iteratedCovGrad (I := I) g₀ 2 2 i
+          (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+            + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
+      have t2 := norm_add_le
+        (iteratedCovGrad (I := I) g₀ 2 2 i (C0da s))
+        (iteratedCovGrad (I := I) g₀ 2 2 i
+          (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+            - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))
+      linarith [t1, t2]
+    refine le_trans (pow_le_pow_left₀ (norm_nonneg _) htri 2) ?_
+    nlinarith [ha, hb, hc, mul_nonneg (hKda_nn i) hW, mul_nonneg (hKdf_nn i) hW,
+      mul_nonneg (hKrs_nn i) hW,
+      sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖
+        - ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖),
+      sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖
+        - ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+              + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖),
+      sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖
+        - ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+              + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)‖),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
+        (deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g_bg
+          - deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀)),
+      norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
+        (lieCorr0Field (I := I) (M := M) g₀ (fam s) g_bg
+          + deTurckLieEndoArmField (I := I) (M := M) g₀ (fam s) g₀))]
+  · intro i s hs
+    have hW : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+    refine le_trans (henv2da i s hs) ?_
+    try dsimp only
+    nlinarith [mul_nonneg (hKda_nn i) hW, mul_nonneg (hKdf_nn i) hW,
+      mul_nonneg (hKrs_nn i) hW]
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
