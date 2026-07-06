@@ -1086,86 +1086,6 @@ theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     ContMDiffSection.coe_smul, Pi.smul_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContMDiffSection.coe_add, Pi.add_apply]
 
-set_option linter.unusedVariables false in
-/-- Deferred input (dossier row RA-3a, conjunct 6 of the frozen Riemann-arm refold data;
-pattern class: Koszul-sharp `δ/(1−δ)` fibre bounds — `ConnectionDifferenceFibreBound` and
-the `rfns` bi-contraction bounds of `RicciThreeArmCorrectionFieldBound`, with the frame and
-weight conversions absorbed into the dimensional fibre constant; small literals checked at
-`n = 1, 2, 3` at fill): the pointwise fibre-norm cap for the DOUBLED constructed
-second-gradient refold family — the subject is `(2 : ℝ) • riemannPalatiniRefoldC2Family`,
-the exact `C₂` the refold identity carries, so the consumer cap conjunct discharges
-verbatim — at the literal `8`, for every PARTNER-PAIRED permutation-quadruple convention
-(`IsFramePairPartner`; the pairing makes the double frame
-sum see only the symmetrized weight `ccTensorBilinSymm`, which `hδ` caps — the earlier
-∀-independent form was false: an antisymmetric moving tensor at `δ = 0` defeats the cap
-through the raw unpaired weight). The rate is TWO-LEG — each monomial carries one
-inverse-metric leg through the realized-frame weight conversion and one through the frame
-vectors feeding the argument slots, measured in the background metric — so the sharp bound
-for the doubled family is `4·fC·δ/(1−δ)²` (the four-monomial Bianchi fold cancels to a
-two-term difference, halving the copy count, and the doubling restores the full fold
-weight), and the literal `8 = 4 (sharp) × 2 (headroom)` closes exactly
-under `hδ_half` (`4δ/(1−δ)² ≤ 8δ/(1−δ)` at `δ ≤ 1/2`); pointwise the doubled-family cap at
-`8` and the bare-family cap at `4` are equivalent (`rfns` is quadratic and
-`max (8u) 0 = 2 · max (4u) 0`); the `δ`-unrestricted one-leg form
-was false (exact-arithmetic witnesses: pure-trace `T = −c·g₀` at `n = 2, δ = 9/10`, and the
-circle family at `n = 1, δ = 3/4`), and the sole consumer chain holds `δ ≤ 1/3`. Every
-consumer transitively depends on `sorryAx` until this lands. -/
-theorem riemannPalatiniRefoldC2Family_rfns_le
-    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_half : δ ≤ 1 / 2)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
-      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
-    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
-    (hq : IsFramePairPartner qA qB) :
-    ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-        (((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
-          s).toSection x) ≤
-      (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2 :=
-  sorry
-
-set_option linter.unusedVariables false in
-/-- Deferred input (dossier row RA-4, conjunct 8 of the frozen Riemann-arm refold data;
-pattern class: tame-envelope technique of the curvature-coefficient jet towers with
-ball-absorption `K·(1 + Σ)` weakening; the coefficient carries the moving tensor at the
-zero jet and metric raisings at the zero jet, so `∇ⁱ` stays inside the `range (i + 2)`
-window; the pointwise fibre-norm cap of `riemannPalatiniRefoldC2Family_rfns_le` rides as
-the companion sup anchor): the two-step jet window for the DOUBLED constructed
-second-gradient refold family — both conjuncts on `(2 : ℝ) • riemannPalatiniRefoldC2Family`,
-the exact `C₂` of the refold identity — for every PARTNER-PAIRED permutation-quadruple
-convention (`IsFramePairPartner`; the anchor conjunct is exactly the paired doubled cap of
-`riemannPalatiniRefoldC2Family_rfns_le`, which is false without the pairing, and — like
-that cap — rides the TWO-LEG sharp rate `4·fC·δ/(1−δ)²` of the doubled family, closing into
-the literal `8 = 4 (sharp) × 2 (headroom)` only under `hδ_half`: `4δ/(1−δ)² ≤ 8δ/(1−δ)` at
-`δ ≤ 1/2`; the `δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at
-`n = 2, δ = 9/10` and `n = 1, δ = 3/4`, while the sole consumer chain holds `δ ≤ 1/3`).
-Every consumer transitively depends on `sorryAx` until this lands. -/
-theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (qA qB : Fin 4 → Equiv.Perm (Fin 4))
-    (hq : IsFramePairPartner qA qB) :
-    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
-      ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_half : δ ≤ 1 / 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
-        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
-        (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-            (((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
-              s).toSection x) ≤
-          (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
-        (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
-          ‖iteratedCovGrad (I := I) g₀ 4 2 i
-            ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
-              s)‖ ^ 2 ≤
-            K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
-
 /-- The constructed second-gradient refold family for the covariant-derivative arm of the
 DeTurck Lie coefficient at second endpoint zero: the moving tensor's unit value weights the
 three sharp-Koszul-gradient monomials at the realized metric's orthonormal frames, each
@@ -2026,6 +1946,365 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
   sorry
+
+set_option linter.unusedSectionVars false in
+/-- Four-term fibre-norm-square subadditivity for a signed four-monomial combination, at
+the sharp copy count `4`. -/
+private lemma riemannianFiberNormSq_addsub4_le (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) (x : M) (u v w z : TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (u + v - w - z) ≤
+      4 * (riemannianFiberNormSq (I := I) (M := M) g r s x u +
+        riemannianFiberNormSq (I := I) (M := M) g r s x v +
+        riemannianFiberNormSq (I := I) (M := M) g r s x w +
+        riemannianFiberNormSq (I := I) (M := M) g r s x z) := by
+  have hsplit : u + v - w - z = (u + v) + -(w + z) := by abel
+  rw [hsplit]
+  have houter := riemannianFiberNormSq_add_le (I := I) (M := M) g r s x (u + v) (-(w + z))
+  have hneg : riemannianFiberNormSq (I := I) (M := M) g r s x (-(w + z)) =
+      riemannianFiberNormSq (I := I) (M := M) g r s x (w + z) := by
+    rw [← neg_one_smul ℝ (w + z), riemannianFiberNormSq_smul]
+    norm_num
+  rw [hneg] at houter
+  have huv := riemannianFiberNormSq_add_le (I := I) (M := M) g r s x u v
+  have hwz := riemannianFiberNormSq_add_le (I := I) (M := M) g r s x w z
+  linarith
+
+set_option linter.unusedSectionVars false in
+/-- Under the `symmS` partner pairing the constructed Riemann-arm family is the single
+folded four-monomial kernel at the SYMMETRIZED unit-value weight, scaled by the path
+parameter: the birth certificate that the family's effective weight is `symmS` of the
+moving tensor, so the `gFibreOpBound` hypothesis on the symmetrized tensor controls the
+paired family for every partner-paired permutation-quadruple convention (the Riemann-arm
+analogue of `deTurckLieCovDerivRefoldC2Family_eq_symmS_weight`). -/
+private theorem riemannPalatiniRefoldC2Family_eq_symmS_kernel
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (hq : IsFramePairPartner qA qB) (s : ℝ) :
+    riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB s =
+      s • curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T))
+        (qA 0) (qA 1) (qA 2) (qA 3) := by
+  have h0 := curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (qA 0)
+  have h1 := curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (qA 1)
+  have h2 := curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (qA 2)
+  have h3 := curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (qA 3)
+  rw [riemannPalatiniRefoldC2Family, hq 0, hq 1, hq 2, hq 3]
+  simp only [Equiv.Perm.mul_def, curvatureRefoldKernelCoeffField]
+  rw [← h0, ← h1, ← h2, ← h3]
+  module
+
+set_option linter.unusedVariables false in
+/-- Dossier row RA-3a (conjunct 6 of the frozen Riemann-arm refold data): the pointwise
+fibre-norm cap for the DOUBLED constructed second-gradient refold family — the subject is
+`(2 : ℝ) • riemannPalatiniRefoldC2Family`, the exact `C₂` the refold identity carries, so
+the consumer cap conjunct discharges verbatim — at the literal `8`, for every
+PARTNER-PAIRED permutation-quadruple convention (`IsFramePairPartner`; by
+`riemannPalatiniRefoldC2Family_eq_symmS_kernel` the pairing makes the doubled family the
+path-scaled signed sum of four refold monomials at the SYMMETRIZED weight
+`ccTensorBilinSymm`, which `hδ` caps — the earlier ∀-independent form was false: an
+antisymmetric moving tensor at `δ = 0` defeats the cap through the raw unpaired weight).
+The rate is TWO-LEG — each monomial carries one inverse-metric leg through the
+realized-frame weight conversion and one through the frame vectors feeding the argument
+slots, measured in the background metric — so the four monomials close by the
+per-monomial bi-contraction bound `rfns_curvatureRefoldMonomialBiContrFib_le` at the sharp
+`4·fC·δ/(1−δ)²` (the four-monomial Bianchi fold cancels to a two-term difference, halving
+the copy count, and the doubling restores the full fold weight), and the literal
+`8 = 4 (sharp) × 2 (headroom)` closes exactly under `hδ_half` (`4δ/(1−δ)² ≤ 8δ/(1−δ)` at
+`δ ≤ 1/2`); the `δ`-unrestricted one-leg form was false (exact-arithmetic witnesses:
+pure-trace `T = −c·g₀` at `n = 2, δ = 9/10`, and the circle family at `n = 1, δ = 3/4`),
+and the sole consumer chain holds `δ ≤ 1/3`. -/
+theorem riemannPalatiniRefoldC2Family_rfns_le
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_half : δ ≤ 1 / 2)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (hq : IsFramePairPartner qA qB) :
+    ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+        (((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
+          s).toSection x) ≤
+      (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2 := by
+  classical
+  intro s hs x
+  have h1mδ : (0 : ℝ) < 1 - δ := by linarith
+  obtain ⟨nx, ex, hnx, horthx, hparsx, hexpx, hrfnsx⟩ :=
+    tangent_frame_expansion (I := I) (M := M) g₀ x
+  have hnx_pos : 0 < nx := by
+    have h0 : Module.finrank ℝ E ≠ 0 := NeZero.ne _
+    rw [hnx]
+    exact Nat.pos_of_ne_zero h0
+  have hδ0 : (0 : ℝ) ≤ δ := by
+    have h := hδZ x (ex ⟨0, hnx_pos⟩) (ex ⟨0, hnx_pos⟩)
+    have hunit : g₀.inner x (ex ⟨0, hnx_pos⟩) (ex ⟨0, hnx_pos⟩) = 1 := by
+      rw [horthx ⟨0, hnx_pos⟩ ⟨0, hnx_pos⟩]
+      simp
+    rw [hunit, Real.sqrt_one, mul_one, mul_one] at h
+    exact le_trans (abs_nonneg _) h
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀
+            (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+    fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+  obtain ⟨hs0, hs1⟩ := hs
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rwa [heq] at hraw
+  have hmono_cap : ∀ σp : Equiv.Perm (Fin 4),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+          ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+            (ccTensorUnitValueSection (I := I) (M := M) g₀
+              (symmS (I := I) (M := M) g₀ T))
+            (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+              (symmS (I := I) (M := M) g₀ T)) σp).toSection x) ≤
+        (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) ^ 2 := by
+    intro σp
+    rw [curvatureRefoldMonomialCoeffField_toSection]
+    exact rfns_curvatureRefoldMonomialBiContrFib_le (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (convexPerturbation (I := I) g₀ T 0 s) htie hδ_lt hδP
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      hδ0 (toModel_unitValue_symmS_abs_le (I := I) (M := M) g₀ T hδ) σp x
+  rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ
+    qA qB hq s]
+  rw [smul_smul, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+    riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
+  rw [curvatureRefoldKernelCoeffField, SmoothCcTensor.toSection_smul,
+    SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
+    ContMDiffSection.coe_smul, Pi.smul_apply, ContMDiffSection.coe_sub, Pi.sub_apply,
+    ContMDiffSection.coe_sub, Pi.sub_apply, ContMDiffSection.coe_add, Pi.add_apply,
+    riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
+  have hB := riemannianFiberNormSq_addsub4_le (I := I) (M := M) g₀ 4 2 x
+    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 0)).toSection x)
+    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 1)).toSection x)
+    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 2)).toSection x)
+    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 3)).toSection x)
+  have hc0 := hmono_cap (qA 0)
+  have hc1 := hmono_cap (qA 1)
+  have hc2 := hmono_cap (qA 2)
+  have hc3 := hmono_cap (qA 3)
+  set fC : ℝ := deTurckArmFibreConst (Module.finrank ℝ E) with hfC_def
+  have hfC_nn : (0 : ℝ) ≤ fC := deTurckArmFibreConst_nonneg _
+  have hr1_nn : (0 : ℝ) ≤ δ / (1 - δ) := div_nonneg hδ0 (le_of_lt h1mδ)
+  have hrate : δ / (1 - δ) ^ 2 ≤ 2 * (δ / (1 - δ)) := by
+    rw [div_le_iff₀ (by positivity)]
+    have hexp : 2 * (δ / (1 - δ)) * (1 - δ) ^ 2 = 2 * δ * (1 - δ) := by
+      field_simp
+    rw [hexp]
+    nlinarith [mul_nonneg hδ0 (by linarith : (0 : ℝ) ≤ 1 - 2 * δ)]
+  have hstep : 16 * (fC * (δ / (1 - δ) ^ 2)) ^ 2 ≤
+      (8 * fC * (δ / (1 - δ))) ^ 2 := by
+    have hfr2_nn : (0 : ℝ) ≤ fC * (δ / (1 - δ) ^ 2) :=
+      mul_nonneg hfC_nn (div_nonneg hδ0 (sq_nonneg _))
+    have hle : fC * (δ / (1 - δ) ^ 2) ≤ fC * (2 * (δ / (1 - δ))) :=
+      mul_le_mul_of_nonneg_left hrate hfC_nn
+    have hsq := pow_le_pow_left₀ hfr2_nn hle 2
+    nlinarith [hsq]
+  have hmax : max (8 * fC * (δ / (1 - δ))) 0 = 8 * fC * (δ / (1 - δ)) :=
+    max_eq_left (mul_nonneg (mul_nonneg (by norm_num) hfC_nn) hr1_nn)
+  rw [hmax]
+  have hs2 : s ^ 2 ≤ 1 := by nlinarith [hs0, hs1]
+  have hsum_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 2 x
+    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 0)).toSection x
+    + (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 1)).toSection x
+    - (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 2)).toSection x
+    - (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 3)).toSection x)
+  nlinarith [hB, hc0, hc1, hc2, hc3, hs2, hsum_nn, hstep, hs0, hs1,
+    sq_nonneg (fC * (δ / (1 - δ) ^ 2)),
+    mul_nonneg (mul_nonneg hδ0 hδ0) (sq_nonneg (fC * (δ / (1 - δ) ^ 2)))]
+
+set_option linter.unusedVariables false in
+/-- Dossier row RA-4 (conjunct 8 of the frozen Riemann-arm refold data): the two-step jet
+window for the DOUBLED constructed second-gradient refold family — both conjuncts on
+`(2 : ℝ) • riemannPalatiniRefoldC2Family`, the exact `C₂` of the refold identity — for
+every PARTNER-PAIRED permutation-quadruple convention (`IsFramePairPartner`; the anchor
+conjunct is exactly the paired doubled cap of `riemannPalatiniRefoldC2Family_rfns_le`,
+which is false without the pairing, and — like that cap — rides the TWO-LEG sharp rate
+`4·fC·δ/(1−δ)²` of the doubled family, closing into the literal `8 = 4 (sharp) ×
+2 (headroom)` only under `hδ_half`: `4δ/(1−δ)² ≤ 8δ/(1−δ)` at `δ ≤ 1/2`; the
+`δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at `n = 2,
+δ = 9/10` and `n = 1, δ = 3/4`, while the sole consumer chain holds `δ ≤ 1/3`). The
+window conjunct assembles by `riemannPalatiniRefoldC2Family_eq_symmS_kernel` from four
+instances of the posited per-monomial window
+`exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow` at the paired
+quadruple, so every consumer transitively depends on `sorryAx` until that per-monomial
+share lands. -/
+theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (qA qB : Fin 4 → Equiv.Perm (Fin 4))
+    (hq : IsFramePairPartner qA qB) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_half : δ ≤ 1 / 2)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            (((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
+              s).toSection x) ≤
+          (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+        (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
+              s)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨K0, hK0_nn, hK0⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (qA 0)
+  obtain ⟨K1, hK1_nn, hK1⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (qA 1)
+  obtain ⟨K2, hK2_nn, hK2⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (qA 2)
+  obtain ⟨K3, hK3_nn, hK3⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (qA 3)
+  refine ⟨fun i => 4 * (K0 i + K1 i + K2 i + K3 i), fun i => by
+    have h0 := hK0_nn i; have h1 := hK1_nn i; have h2 := hK2_nn i; have h3 := hK3_nn i
+    linarith, ?_⟩
+  intro T δ hδ_le hδ_half hδ hδZ hball
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  refine ⟨riemannPalatiniRefoldC2Family_rfns_le (I := I) (M := M) g₀ T hδ_lt hδ_half hδ hδZ
+    qA qB hq, ?_⟩
+  intro i s hs
+  obtain ⟨hs0, hs1⟩ := hs
+  rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ
+    qA qB hq s]
+  rw [curvatureRefoldKernelCoeffField, iteratedCovGrad_smul_real,
+    iteratedCovGrad_smul_real, iteratedCovGrad_smul_real,
+    iteratedCovGrad_sub, iteratedCovGrad_sub, iteratedCovGrad_add]
+  set G0 := iteratedCovGrad (I := I) g₀ 4 2 i
+    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 0)) with hG0_def
+  set G1 := iteratedCovGrad (I := I) g₀ 4 2 i
+    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 1)) with hG1_def
+  set G2 := iteratedCovGrad (I := I) g₀ 4 2 i
+    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 2)) with hG2_def
+  set G3 := iteratedCovGrad (I := I) g₀ 4 2 i
+    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T)) (qA 3)) with hG3_def
+  have hcol : (2 : ℝ) • s • (1 / 2 : ℝ) • (G0 + G1 - G2 - G3) =
+      s • (G0 + G1 - G2 - G3) := by
+    rw [smul_smul, smul_smul]
+    have h2s : (2 : ℝ) * s * (1 / 2) = s := by ring
+    rw [h2s]
+  rw [hcol]
+  have hG0w := hK0 T hδ_le hδ hδZ hball i s ⟨hs0, hs1⟩
+  have hG1w := hK1 T hδ_le hδ hδZ hball i s ⟨hs0, hs1⟩
+  have hG2w := hK2 T hδ_le hδ hδZ hball i s ⟨hs0, hs1⟩
+  have hG3w := hK3 T hδ_le hδ hδZ hball i s ⟨hs0, hs1⟩
+  rw [← hG0_def] at hG0w
+  rw [← hG1_def] at hG1w
+  rw [← hG2_def] at hG2w
+  rw [← hG3_def] at hG3w
+  have hnorm1 : ‖s • (G0 + G1 - G2 - G3)‖ ≤ ‖G0‖ + ‖G1‖ + ‖G2‖ + ‖G3‖ := by
+    have hs_abs : |s| ≤ 1 := by
+      rw [abs_of_nonneg hs0]
+      exact hs1
+    have hsm : ‖s • (G0 + G1 - G2 - G3)‖ ≤ ‖G0 + G1 - G2 - G3‖ := by
+      rw [norm_smul]
+      refine mul_le_of_le_one_left (norm_nonneg _) ?_
+      rw [Real.norm_eq_abs]
+      exact hs_abs
+    refine le_trans hsm ?_
+    calc ‖G0 + G1 - G2 - G3‖ ≤ ‖G0 + G1 - G2‖ + ‖G3‖ := norm_sub_le _ _
+      _ ≤ ‖G0 + G1‖ + ‖G2‖ + ‖G3‖ := by
+          have h := norm_sub_le (G0 + G1) G2
+          linarith
+      _ ≤ ‖G0‖ + ‖G1‖ + ‖G2‖ + ‖G3‖ := by
+          have h := norm_add_le G0 G1
+          linarith
+  have hsq : ‖s • (G0 + G1 - G2 - G3)‖ ^ 2 ≤ (‖G0‖ + ‖G1‖ + ‖G2‖ + ‖G3‖) ^ 2 :=
+    pow_le_pow_left₀ (norm_nonneg _) hnorm1 2
+  have hcauchy : (‖G0‖ + ‖G1‖ + ‖G2‖ + ‖G3‖) ^ 2 ≤
+      4 * (‖G0‖ ^ 2 + ‖G1‖ ^ 2 + ‖G2‖ ^ 2 + ‖G3‖ ^ 2) := by
+    nlinarith [sq_nonneg (‖G0‖ - ‖G1‖), sq_nonneg (‖G0‖ - ‖G2‖), sq_nonneg (‖G0‖ - ‖G3‖),
+      sq_nonneg (‖G1‖ - ‖G2‖), sq_nonneg (‖G1‖ - ‖G3‖), sq_nonneg (‖G2‖ - ‖G3‖)]
+  refine le_trans hsq (le_trans hcauchy ?_)
+  have hexp : 4 * (K0 i + K1 i + K2 i + K3 i) *
+      (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) =
+      4 * (K0 i * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)
+        + K1 i * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)
+        + K2 i * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)
+        + K3 i * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by ring
+  rw [hexp]
+  linarith [hG0w, hG1w, hG2w, hG3w]
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier rows LC-4/LC-5/LC-6, constructed-family shares at the frozen cap
