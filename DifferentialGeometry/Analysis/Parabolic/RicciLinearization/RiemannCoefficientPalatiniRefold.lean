@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetBound
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefoldMonomialFibreNormBound
 
 /-!
 # Palatini refold of the Riemann and Lie coefficients along the Ricci-linearization path
@@ -1828,6 +1829,115 @@ theorem exists_deTurckLieCovDerivArm_refold_identity_data
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
     nlinarith [hv, hd, hwin_nn]
 
+set_option linter.unusedSectionVars false in
+/-- Iterated covariant gradients commute with real scalings of the tensor. -/
+private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) =
+      c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- Sharp three-summand subadditivity of the pointwise fibre-norm square (the exact
+`card = 3` constant, so that three ledger copies close into the squared triple cap with
+zero headroom). -/
+private lemma riemannianFiberNormSq_add3_le (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) (x : M) (u v w : TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (u + v + w) ≤
+      3 * (riemannianFiberNormSq (I := I) (M := M) g r s x u +
+        (riemannianFiberNormSq (I := I) (M := M) g r s x v +
+          riemannianFiberNormSq (I := I) (M := M) g r s x w)) := by
+  classical
+  have h := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r s x
+    Finset.univ (![u, v, w])
+  rw [Fin.sum_univ_three, Fin.sum_univ_three] at h
+  rw [show (![u, v, w] : Fin 3 → TensorRSSpace r s I x) 0 = u from rfl,
+    show (![u, v, w] : Fin 3 → TensorRSSpace r s I x) 1 = v from rfl] at h
+  rw [Finset.card_univ, Fintype.card_fin] at h
+  refine le_trans h ?_
+  rw [show ((3 : ℕ) : ℝ) = (3 : ℝ) from by norm_num]
+  rw [show (![u, v, w] : Fin 3 → TensorRSSpace r s I x) 2 = w from rfl]
+  nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x u,
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x v,
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x w]
+
+set_option linter.unusedSectionVars false in
+/-- The unit-value carrier of the symmetrized moving tensor is pointwise the symmetrized
+bilinear realization, so the `gFibreOpBound` hypothesis on `ccTensorBilinSymm` is exactly
+an operator bound on the weight of the constructed refold families. -/
+private lemma toModel_unitValue_symmS_abs_le (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (y : M) (v w : TangentSpace I y) :
+    |Tensor0SSpace.toModel (𝕜 := ℝ)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T) y) ![(v : E), (w : E)]| ≤
+      δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by
+  have hval : Tensor0SSpace.toModel (𝕜 := ℝ)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T) y) ![(v : E), (w : E)] =
+      ccTensorBilinSymm (I := I) g₀ T y v w := by
+    have h1 : ccTensorUnitValueSection (I := I) (M := M) g₀
+        (symmS (I := I) (M := M) g₀ T) y =
+        (1 / 2 : ℝ) • (ccTensorUnitValueSection (I := I) (M := M) g₀ T y +
+          ccTensorUnitValueSection (I := I) (M := M) g₀
+            (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) y) := by
+      rw [show symmS (I := I) (M := M) g₀ T = (1 / 2 : ℝ) •
+          (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) from rfl]
+      rw [ccTensorUnitValueSection_smul, ccTensorUnitValueSection_add]
+    rw [h1, Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_add,
+      ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.add_apply,
+      smul_eq_mul,
+      toModel_ccTensorUnitValueSection_domDomCongrSection_swap (I := I) (M := M) g₀ T y v w]
+    have h2 : ∀ (p q' : TangentSpace I y),
+        Tensor0SSpace.toModel (𝕜 := ℝ)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ T y) ![(p : E), (q' : E)] =
+        ccTensorBilin (I := I) g₀ T y p q' := by
+      intro p q'
+      have hb : Tensor0SSpace.toModel (𝕜 := ℝ)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ T y) =
+          unitModel (I := I) (M := M) g₀ 2 T y := rfl
+      rw [hb]
+      exact unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T y p q'
+    rw [h2 v w, h2 w v, ccTensorBilinSymm_apply]
+  rw [hval]
+  exact hδ y v w
+
+set_option linter.unusedVariables false in
+/-- Deferred input (per-monomial share of the constructed-family two-step jet windows;
+pattern class: tame-envelope technique with ball absorption for the frame-summed refold
+monomial coefficient along the realized path at the symmetrized unit-value weight — the
+weight and the metric raisings ride at the zero jet, so `∇ⁱ` stays inside the
+`range (i + 2)` window; generic in the slot pattern, shared by the three covariant-derivative
+arm monomials and reusable by the Riemann-arm kernel monomials). Every consumer transitively
+depends on `sorryAx` until this lands. -/
+theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (σ : Equiv.Perm (Fin 4)) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              (ccTensorUnitValueSection (I := I) (M := M) g₀
+                (symmS (I := I) (M := M) g₀ T))
+              (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+                (symmS (I := I) (M := M) g₀ T)) σ)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier rows LC-4/LC-5/LC-6, constructed-family shares at the frozen cap
 literal `3`; pattern class: joint smoothness of the realized-family coefficient
@@ -1876,8 +1986,245 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
             (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨K0, hK0_nn, hK0⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (q 0)
+  obtain ⟨K1, hK1_nn, hK1⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (q 1)
+  obtain ⟨K2, hK2_nn, hK2⟩ :=
+    exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀ (q 2)
+  refine ⟨fun i => 3 * (K0 i + K1 i + K2 i),
+    fun i => by have h0 := hK0_nn i; have h1 := hK1_nn i; have h2 := hK2_nn i; linarith, ?_⟩
+  intro T δ hδ_le hδ hδZ hball
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have h1mδ : (0 : ℝ) < 1 - δ := by linarith
+  refine ⟨?_, ?_, ?_⟩
+  · have hmono : ∀ σp : Equiv.Perm (Fin 4),
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+            ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
+              (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+              (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) σp).toSection p.1))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) :=
+      fun σp => curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
+        (I := I) (M := M) g₀ T hδ hδZ
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) σp
+    have hpair : ∀ i : Fin 3,
+        ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+            (ε i • ((1 / 2 : ℝ) •
+              ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
+                (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+                (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+                (q i)).toSection p.1
+              + (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
+                (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+                (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+                ((q i).trans (Equiv.swap (0 : Fin 4) 1))).toSection p.1))))
+          ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) := by
+      intro i
+      have hadd := jointTotalSpaceRS_add_local (I := I) (M := M) (r := 4) (s := 2)
+        (S := realizedSmallSet (δ := δ) (δ' := δ)) _ _ (hmono (q i))
+        (hmono ((q i).trans (Equiv.swap (0 : Fin 4) 1)))
+      have hhalf := jointTotalSpaceRS_const_smul_local (I := I) (M := M) (r := 4) (s := 2)
+        (S := realizedSmallSet (δ := δ) (δ' := δ)) (1 / 2 : ℝ) _ hadd
+      exact jointTotalSpaceRS_const_smul_local (I := I) (M := M) (r := 4) (s := 2)
+        (S := realizedSmallSet (δ := δ) (δ' := δ)) (ε i) _ hhalf
+    have hsum01 := jointTotalSpaceRS_add_local (I := I) (M := M) (r := 4) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ)) _ _ (hpair 0) (hpair 1)
+    have hsum := jointTotalSpaceRS_add_local (I := I) (M := M) (r := 4) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ)) _ _ hsum01 (hpair 2)
+    have hfam := jointTotalSpaceRS_smulFun_local (I := I) (M := M) (r := 4) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ)) (f := fun t => t) contDiff_id _ hsum
+    refine hfam.congr (fun p _ => ?_)
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1 t) ?_
+    rw [deTurckLieCovDerivRefoldC2Family]
+    simp only [Fin.sum_univ_three, SmoothCcTensor.toSection_smul,
+      SmoothCcTensor.toSection_add, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
+      Pi.smul_apply, Pi.add_apply]
+  · intro s hs x
+    obtain ⟨nx, ex, hnx, horthx, hparsx, hexpx, hrfnsx⟩ :=
+      tangent_frame_expansion (I := I) (M := M) g₀ x
+    have hnx_pos : 0 < nx := by
+      have h0 : Module.finrank ℝ E ≠ 0 := NeZero.ne _
+      rw [hnx]
+      exact Nat.pos_of_ne_zero h0
+    have hδ0 : (0 : ℝ) ≤ δ := by
+      have h := hδZ x (ex ⟨0, hnx_pos⟩) (ex ⟨0, hnx_pos⟩)
+      have hunit : g₀.inner x (ex ⟨0, hnx_pos⟩) (ex ⟨0, hnx_pos⟩) = 1 := by
+        rw [horthx ⟨0, hnx_pos⟩ ⟨0, hnx_pos⟩]
+        simp
+      rw [hunit, Real.sqrt_one, mul_one, mul_one] at h
+      exact le_trans (abs_nonneg _) h
+    have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+      Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+          g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀
+              (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+      fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+    obtain ⟨hs0, hs1⟩ := hs
+    have hδP : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+      intro y v w
+      have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+      have heq : |1 - s| * δ + |s| * δ = δ := by
+        rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+        ring
+      rwa [heq] at hraw
+    have hmono_cap : ∀ σp : Equiv.Perm (Fin 4),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              (ccTensorUnitValueSection (I := I) (M := M) g₀
+                (symmS (I := I) (M := M) g₀ T))
+              (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+                (symmS (I := I) (M := M) g₀ T)) σp).toSection x) ≤
+          (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) ^ 2 := by
+      intro σp
+      rw [curvatureRefoldMonomialCoeffField_toSection]
+      exact rfns_curvatureRefoldMonomialBiContrFib_le (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (convexPerturbation (I := I) g₀ T 0 s) htie hδ_lt hδP
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        hδ0 (toModel_unitValue_symmS_abs_le (I := I) (M := M) g₀ T hδ) σp x
+    have hterm_le : ∀ (c : ℝ), |c| ≤ 1 → ∀ σp : Equiv.Perm (Fin 4),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            (c • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              (ccTensorUnitValueSection (I := I) (M := M) g₀
+                (symmS (I := I) (M := M) g₀ T))
+              (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+                (symmS (I := I) (M := M) g₀ T)) σp).toSection x)) ≤
+          (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) ^ 2 := by
+      intro c hc σp
+      rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
+      have h1 := hmono_cap σp
+      have hc2 : c ^ 2 ≤ 1 := by nlinarith [abs_nonneg c, sq_abs c, hc]
+      have h0 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 2 x
+        ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀
+            (symmS (I := I) (M := M) g₀ T))
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+            (symmS (I := I) (M := M) g₀ T)) σp).toSection x)
+      nlinarith [h1, hc2, h0, sq_nonneg c]
+    rw [deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (I := I) (M := M) g₀ T hδ hδZ q ε s]
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+      riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
+    simp only [Fin.sum_univ_three, SmoothCcTensor.toSection_add,
+      SmoothCcTensor.toSection_smul, ContMDiffSection.coe_add, ContMDiffSection.coe_smul,
+      Pi.add_apply, Pi.smul_apply]
+    have hr0 := hterm_le (ε 0) (hε 0) (q 0)
+    have hr1 := hterm_le (ε 1) (hε 1) (q 1)
+    have hr2 := hterm_le (ε 2) (hε 2) (q 2)
+    have h3 := riemannianFiberNormSq_add3_le (I := I) (M := M) g₀ 4 2 x
+      (ε 0 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 0)).toSection x))
+      (ε 1 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 1)).toSection x))
+      (ε 2 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 2)).toSection x))
+    have hs2 : s ^ 2 ≤ 1 := by nlinarith [hs0, hs1]
+    have hmax : max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) 0 =
+        3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2) :=
+      max_eq_left (mul_nonneg (mul_nonneg (by norm_num)
+        (deTurckArmFibreConst_nonneg _)) (div_nonneg hδ0 (sq_nonneg _)))
+    rw [hmax]
+    have hsum_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 2 x
+      (ε 0 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 0)).toSection x)
+      + ε 1 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 1)).toSection x)
+      + ε 2 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 2)).toSection x))
+    nlinarith [hr0, hr1, hr2, h3, hs2, hsum_nn,
+      sq_nonneg (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2))]
+  · intro i s hs
+    rw [deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (I := I) (M := M) g₀ T hδ hδZ q ε s,
+      iteratedCovGrad_smul_real]
+    simp only [Fin.sum_univ_three]
+    rw [iteratedCovGrad_add, iteratedCovGrad_add, iteratedCovGrad_smul_real,
+      iteratedCovGrad_smul_real, iteratedCovGrad_smul_real]
+    have hG0 := hK0 T hδ_le hδ hδZ hball i s hs
+    have hG1 := hK1 T hδ_le hδ hδZ hball i s hs
+    have hG2 := hK2 T hδ_le hδ hδZ hball i s hs
+    obtain ⟨hs0, hs1⟩ := hs
+    set G0 := iteratedCovGrad (I := I) g₀ 4 2 i
+      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 0)) with hG0_def
+    set G1 := iteratedCovGrad (I := I) g₀ 4 2 i
+      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 1)) with hG1_def
+    set G2 := iteratedCovGrad (I := I) g₀ 4 2 i
+      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) (q 2)) with hG2_def
+    have hnorm1 : ‖s • (ε 0 • G0 + ε 1 • G1 + ε 2 • G2)‖ ≤ ‖G0‖ + ‖G1‖ + ‖G2‖ := by
+      have hsm : ∀ (c : ℝ), |c| ≤ 1 → ∀ (G : SmoothCcTensor g₀ 4 (2 + i)),
+          ‖c • G‖ ≤ ‖G‖ := by
+        intro c hc G
+        rw [norm_smul]
+        refine mul_le_of_le_one_left (norm_nonneg _) ?_
+        rw [Real.norm_eq_abs]
+        exact hc
+      have hs_abs : |s| ≤ 1 := by
+        rw [abs_of_nonneg hs0]
+        exact hs1
+      refine le_trans (hsm s hs_abs _) ?_
+      refine le_trans (norm_add_le _ _) ?_
+      have h01 : ‖ε 0 • G0 + ε 1 • G1‖ ≤ ‖G0‖ + ‖G1‖ := by
+        refine le_trans (norm_add_le _ _) ?_
+        exact add_le_add (hsm (ε 0) (hε 0) G0) (hsm (ε 1) (hε 1) G1)
+      have h2 : ‖ε 2 • G2‖ ≤ ‖G2‖ := hsm (ε 2) (hε 2) G2
+      linarith
+    have hsq : ‖s • (ε 0 • G0 + ε 1 • G1 + ε 2 • G2)‖ ^ 2 ≤
+        (‖G0‖ + ‖G1‖ + ‖G2‖) ^ 2 :=
+      pow_le_pow_left₀ (norm_nonneg _) hnorm1 2
+    have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+    refine le_trans hsq ?_
+    nlinarith [hG0, hG1, hG2, sq_nonneg (‖G0‖ - ‖G1‖), sq_nonneg (‖G1‖ - ‖G2‖),
+      sq_nonneg (‖G0‖ - ‖G2‖), norm_nonneg G0, norm_nonneg G1, norm_nonneg G2,
+      hK0_nn i, hK1_nn i, hK2_nn i, hwin_nn]
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-1 with its arm shares of rows LC-4/LC-5/LC-6, at cap
