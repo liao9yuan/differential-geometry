@@ -367,16 +367,21 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
   sorry
 
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier row LC-2 with its arm shares of rows LC-4/LC-5/LC-6, at cap
-literal `6 = 3 + 3`; pattern class: `deTurckLieWEndo`/`slotInsertEndoFib` calculus with the
-inverse-Gram-traced, sharp-raised leading-feed endomorphism loaded from the argument, the
-two connection-difference legs of the DeTurck vector field each refolding at three ledger
-copies, the inverse-Gram one-jet and background content riding the order-zero part; sup
-anchors and two-step windows as in the Riemann-arm rows): the refold data package for the
-vector-field endomorphism arm of the DeTurck Lie coefficient along the realized path.
-Every consumer transitively depends on `sorryAx` until this lands. -/
+/-- Deferred input (dossier row LC-2 with its arm shares of rows LC-4/LC-5/LC-6: ONE GENERIC
+child in the free background parameter `gB`, at cap literal `3` PER INSTANTIATION; pattern
+class: `deTurckLieWEndo`/`slotInsertEndoFib` calculus with the inverse-Gram-traced,
+sharp-raised leading-feed endomorphism loaded from the argument; at second endpoint zero the
+moving-metric connection-difference leg of the DeTurck vector field carries the three-monomial
+sharp-Koszul rate and refolds at three ledger copies, while the `gB`-background leg is
+constant in the moving tensor and rides the order-zero part together with the inverse-Gram
+one-jet content; sup anchors and two-step windows as in the Riemann-arm rows): the refold
+data package for the vector-field endomorphism arm of the DeTurck Lie coefficient along the
+realized path, in a free background metric. The full-subject assembly instantiates this child
+TWICE — at `gB := g_bg` (the Lie coefficient's own endomorphism arm) and at `gB := g₀` (the
+correction insert arm's endomorphism content) — the dossier row's `{3 + 3}` copy count across
+the two uses. Every consumer transitively depends on `sorryAx` until this lands. -/
 theorem exists_deTurckLieEndoArm_curvatureRefold_data
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -392,7 +397,7 @@ theorem exists_deTurckLieEndoArm_curvatureRefold_data
           (∀ s ∈ Set.Icc (0 : ℝ) 1,
             appCc (I := I) (M := M) g₀ 2 2
                 (deTurckLieEndoArmField (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) gB)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
               appCc (I := I) (M := M) g₀ 2 2 (C0db s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
@@ -403,7 +408,7 @@ theorem exists_deTurckLieEndoArm_curvatureRefold_data
               Λ ^ 2) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((C2db s).toSection x) ≤
-              (max (6 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0)
+              (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0)
                 ^ 2) ∧
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0db s)‖ ^ 2 ≤

@@ -39074,6 +39074,67 @@ private theorem exists_riemannPalatini_curvatureRefold_data
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+/-- Deferred input (dossier row LC-3, the full-subject three-arm-split child of the frozen
+Lie-plus-correction refold data stated below; it lives in this file because `lieCorr0Field`
+is private here and this file is downstream of the public refold children, so the full
+subject is statable nowhere else): per-path-parameter refold data for the DeTurck Lie
+coefficient plus the order-zero Lie-correction field, with the second-gradient part
+assembled from three arm classes at three ledger copies each — the covariant-derivative arm
+(`exists_deTurckLieCovDerivArm_curvatureRefold_data`), the endomorphism arm at background
+`g_bg`, and the correction insert arm's endomorphism content at background `g₀` (the generic
+endomorphism-arm child `exists_deTurckLieEndoArm_curvatureRefold_data` instantiated twice) —
+nine copies inside the second-gradient cap literal `10` (quadrature
+`2 · (2 · 9 + 2 · 9) + 2 · 9 = 90 ≤ 100`). The correction residue — the correction field
+plus the endomorphism arm at `g₀`, whose two-jet `deTurckLieWEndo` contents cancel — is
+one-jet in the moving tensor and rides WHOLE into the order-zero part together with the
+vector-bilinear, mixed-connection, and curvature correction arms (zero second-gradient
+copies), so the order-zero part's two-step jet window is sound; the two-jet endomorphism
+content never rides an order-zero window, only the second-gradient classes. Every consumer
+transitively depends on `sorryAx` until this lands. -/
+private theorem exists_lieCorr_curvatureRefold_armSplit_data
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λlc : ℝ, 0 ≤ Λlc ∧ ∃ Klc : ℕ → ℝ, (∀ i, 0 ≤ Klc i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∃ (C0lc : ℝ → SmoothCcTensor g₀ 2 2) (C2lc : ℝ → SmoothCcTensor g₀ 4 2),
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0lc (δ := δ) (δ' := δ) ∧
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 C2lc (δ := δ) (δ' := δ) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            appCc (I := I) (M := M) g₀ 2 2
+                (deTurckLieCoeffField (I := I) (M := M) g₀
+                    (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+                  + lieCorr0Field (I := I) (M := M) g₀
+                    (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
+              appCc (I := I) (M := M) g₀ 2 2 (C0lc s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
+                appCc (I := I) (M := M) g₀ 4 2 (C2lc s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0lc s).toSection x) ≤
+              Λlc ^ 2) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((C2lc s).toSection x) ≤
+              (max (10 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0lc s)‖ ^ 2 ≤
+              Klc i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) ∧
+          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+            ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2lc s)‖ ^ 2 ≤
+              Klc i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
 /-- Deferred family input (Lie plus order-zero Lie-correction refold data, second path endpoint
 frozen at the zero tensor): per-path-parameter split of the DeTurck Lie coefficient plus the
 order-zero Lie-correction field at the realized metric into an order-zero part acting on the
