@@ -38723,11 +38723,29 @@ private theorem threeArmHjoint_add_smul_fw (g₀ : SmoothRiemannianMetric I M) (
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+private theorem threeArmHjoint_const_smul_fw (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
+    (c : ℝ) (B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
+    (hB : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r B (δ := δ) (δ' := δ')) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
+      (fun s => c • B s) (δ := δ) (δ' := δ') := by
+  have hsmul := lieArm_jointRS_const_smul_local (I := I) (r := r) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ')) c
+    (fun p : M × ℝ => (B p.2).toSection p.1) hB
+  refine hsmul.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
+  rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
 /-- Deferred family input (Riemann-leftover Palatini refold data, second path endpoint frozen at
 the zero tensor): per-path-parameter split of the order-zero Riemann coefficient at the realized
 metric into a background-curvature plus quadratic connection-difference part acting on the zeroth
 gradient and a covariant-gradient-of-connection-difference part refolded onto the second gradient
-(four ledger copies, second-gradient cap at the literal 4 in fibre-constant-times-rate units),
+(four ledger copies, second-gradient cap at the literal 8 in fibre-constant-times-rate units —
+the doubled refold family: the identity children carry `(2 : ℝ) • riemannPalatiniRefoldC2Family`
+and the doubled two-leg sharp rate `4·fC·δ/(1−δ)²` closes into `8·fC·δ/(1−δ)` at `δ ≤ 1/2`),
 with joint smoothness, pointwise fibre-norm sups for the order-zero part and for the whole moving
 Riemann coefficient, and two-step jet windows in the moving tensor. The refold over an arbitrary
 pair of path endpoints is false (the second endpoint's second-derivative content cannot be
@@ -38736,8 +38754,10 @@ consumer instantiates the zero endpoint. Route: `ricciTensor_sub_eq_connDiff_pal
 `riemannSec_difference` with the background part `ricciArmOrder0BgRCommCoeffField` and quadratic
 part `arm0AAField` (both with ball-uniform sups in `RicciThreeArmCorrectionFieldBound`). The
 `δ₀ ≤ 1/2` hypothesis is the two-leg closure threshold of the refold-family estimate children
-(their literal-`4` cap is `2 (sharp) × 2 (headroom)` on the one-leg display rate, sound only
-for `δ ≤ 1/2`, threaded down the `∀`-telescope via `δ ≤ δ₀`); the sole consumer instantiates
+(their literal-`8` cap is `4 (sharp) × 2 (headroom)` on the one-leg display rate, sound only
+for `δ ≤ 1/2`, threaded down the `∀`-telescope via `δ ≤ δ₀`); the `hTsymm` hypothesis is
+chain-supplied (every wired consumer binds the symmetry of its moving tensor; the refold
+children are false on the antisymmetric sector); the sole consumer instantiates
 `δ₀ = 1/3`. Every consumer transitively depends on `sorryAx` until this lands. -/
 private theorem exists_riemannPalatini_curvatureRefold_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -38745,6 +38765,8 @@ private theorem exists_riemannPalatini_curvatureRefold_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λra : ℝ, 0 ≤ Λra ∧ ∃ Kra : ℕ → ℝ, (∀ i, 0 ≤ Kra i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -38772,7 +38794,7 @@ private theorem exists_riemannPalatini_curvatureRefold_data
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ Λra ^ 2) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((C2ra s).toSection x) ≤
-              (max (4 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+              (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0ra s)‖ ^ 2 ≤
               Kra i * (1 + ∑ j ∈ Finset.range (i + 2),
@@ -38799,17 +38821,19 @@ private theorem exists_riemannPalatini_curvatureRefold_data
         have h1 := hKid_nn i
         have h2 := hKwin_nn i
         linarith, ?_⟩
-    intro T δ hδ_le hδ hδZ hTjets
+    intro T hTsymm δ hδ_le hδ hδZ hTjets
     have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
     have hδ_half : δ ≤ 1 / 2 := hδ_le.trans hδ₀_half
-    obtain ⟨C0ra, hjC0, hidRA, hsupC0, henvC0⟩ := hID T hδ_le hδ hδZ hTjets
+    obtain ⟨C0ra, hjC0, hidRA, hsupC0, henvC0⟩ := hID T hTsymm hδ_le hδ hδZ hTjets
     obtain ⟨-, henvC2⟩ := hWin T hδ_le hδ_half hδ hδZ hTjets
     refine ⟨C0ra,
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family
-        (I := I) (M := M) g₀ T hδ hδZ qA qB,
+      fun s => (2 : ℝ) •
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family
+          (I := I) (M := M) g₀ T hδ hδZ qA qB s,
       hjC0,
-      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_threeArmHjoint
-        (I := I) (M := M) g₀ T hδ hδZ qA qB,
+      threeArmHjoint_const_smul_fw (I := I) (M := M) g₀ 4 (2 : ℝ) _
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_threeArmHjoint
+          (I := I) (M := M) g₀ T hδ hδZ qA qB),
       hidRA, ?_, ?_,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_rfns_le
         (I := I) (M := M) g₀ T hδ_lt hδ_half hδ hδZ qA qB hqAB,
@@ -38861,12 +38885,17 @@ the same cancellation seen from the insert arm's side (`lc0b_NEndoIns_decomp`) �
 likewise one-jet and rides the order-zero part together with the vector-bilinear,
 mixed-connection, and curvature correction arms, so the order-zero part's two-step jet
 window is sound; the two-jet endomorphism content never rides an order-zero window, only
-the second-gradient class. Every consumer transitively depends on `sorryAx` until this
+the second-gradient class. The `δ₀ ≤ 1/2` hypothesis is the closure threshold of the
+second-gradient arm composition (the difference-child two-leg literal `3` closes into the
+literal-`10` cap only via `3/(1−δ) ≤ 6 ≤ 10` at `δ ≤ 1/2`, threaded down the `∀`-telescope
+via `δ ≤ δ₀`; the bare `δ₀ < 1` telescope was insufficient — at `δ = 3/4` the composed
+child cap exceeds the parent cap); the sole consumer chain instantiates `δ₀ = 1/3`. Every
+consumer transitively depends on `sorryAx` until this
 lands. -/
 private theorem exists_lieCorr_curvatureRefold_armSplit_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λlc : ℝ, 0 ≤ Λlc ∧ ∃ Klc : ℕ → ℝ, (∀ i, 0 ≤ Klc i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
@@ -38916,12 +38945,16 @@ correction insert arm; second-gradient cap at the literal 10 in fibre-constant-t
 with joint smoothness and two-step jet windows in the moving tensor. The refold over an arbitrary
 pair of path endpoints is false (the second endpoint's second-derivative content cannot be
 refolded through the second-gradient slot, which acts on the first endpoint only); the sole
-consumer instantiates the zero endpoint. Every consumer transitively depends on `sorryAx` until
+consumer instantiates the zero endpoint. The `δ₀ ≤ 1/2` hypothesis is the closure threshold
+of the second-gradient arm composition inherited from the arm-split staging twin (the
+difference-child two-leg literal `3` closes into the literal-`10` cap only via
+`3/(1−δ) ≤ 6 ≤ 10` at `δ ≤ 1/2`); the sole consumer chain instantiates `δ₀ = 1/3`. Every
+consumer transitively depends on `sorryAx` until
 this lands. -/
 private theorem exists_lieCorr_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λlc : ℝ, 0 ≤ Λlc ∧ ∃ Klc : ℕ → ℝ, (∀ i, 0 ≤ Klc i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
@@ -38958,6 +38991,7 @@ private theorem exists_lieCorr_curvatureRefold_data
               Klc i * (1 + ∑ j ∈ Finset.range (i + 2),
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
   exists_lieCorr_curvatureRefold_armSplit_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+    hδ₀_half
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -38969,6 +39003,8 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λrl : ℝ, 0 ≤ Λrl ∧ ∃ Krl : ℕ → ℝ, (∀ i, 0 ≤ Krl i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -39008,7 +39044,7 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ Λrl ^ 2) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((C2f s).toSection x) ≤
-              (max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+              (max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0f s)‖ ^ 2 ≤
               Krl i * (1 + ∑ j ∈ Finset.range (i + 2),
@@ -39023,15 +39059,16 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
       hδ₀_half
   obtain ⟨Λlc, hΛlc_nn, Klc, hKlc_nn, hLC⟩ :=
     exists_lieCorr_curvatureRefold_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+      hδ₀_half
   refine ⟨Real.sqrt (3 * Λra ^ 2 + 2 * Λlc ^ 2), Real.sqrt_nonneg _,
     fun i => 2 * Kra i + 2 * Klc i,
     fun i => by
       have h1 := hKra_nn i
       have h2 := hKlc_nn i
       linarith, ?_⟩
-  intro T δ hδ_le hδ hδZ hTjets
+  intro T hTsymm δ hδ_le hδ hδZ hTjets
   obtain ⟨C0ra, C2ra, hjC0ra, hjC2ra, hidRA, hsupC0ra, hsupRm, hsupC2ra, henvC0ra, henvC2ra⟩ :=
-    hRA T hδ_le hδ hδZ hTjets
+    hRA T hTsymm hδ_le hδ hδZ hTjets
   obtain ⟨C0lc, C2lc, hjC0lc, hjC2lc, hidLC, hsupC0lc, hsupC2lc, henvC0lc, henvC2lc⟩ :=
     hLC T hδ_le hδ hδZ hTjets
   have hsum_nn : (0 : ℝ) ≤ 3 * Λra ^ 2 + 2 * Λlc ^ 2 := by positivity
@@ -39091,33 +39128,33 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
   · intro s hs x
     try dsimp only
     have hadd := lc0b_rfns_toSection_add_le (I := I) (M := M) g₀ 4 2 (C2ra s) (C2lc s) x
-    have h4 := hsupC2ra s hs x
+    have h8 := hsupC2ra s hs x
     have h10 := hsupC2lc s hs x
     rcases le_or_gt 0 (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) with hu | hu
-    · have e4 : max (4 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 =
-          4 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) :=
+    · have e8 : max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 =
+          8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) :=
         max_eq_left (by nlinarith)
       have e10 : max (10 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 =
           10 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) :=
         max_eq_left (by nlinarith)
-      have e16 : max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 =
-          16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) :=
+      have e19 : max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 =
+          19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) :=
         max_eq_left (by nlinarith)
-      rw [e16]
-      rw [e4] at h4
+      rw [e19]
+      rw [e8] at h8
       rw [e10] at h10
-      nlinarith [hadd, h4, h10, hu,
+      nlinarith [hadd, h8, h10, hu,
         sq_nonneg (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)))]
-    · have e4 : max (4 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 = 0 :=
+    · have e8 : max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 = 0 :=
         max_eq_right (by nlinarith)
       have e10 : max (10 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 = 0 :=
         max_eq_right (by nlinarith)
-      have e16 : max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 = 0 :=
+      have e19 : max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 = 0 :=
         max_eq_right (by nlinarith)
-      rw [e16]
-      rw [e4] at h4
+      rw [e19]
+      rw [e8] at h8
       rw [e10] at h10
-      nlinarith [hadd, h4, h10]
+      nlinarith [hadd, h8, h10]
   · intro i s hs
     try dsimp only
     have hadd := lc0b_normSq_icg_add_le (I := I) g₀ 2 2 i (C0ra s) (C0lc s)
@@ -39247,7 +39284,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
     exact Icc_subset_realizedSmallSet hδ_lt hδ_lt
   have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ)) := realizedSmallSet_isOpen
   obtain ⟨C0f, C2f, hjC0, hjC2, hjCombo, hids, hsupC0, hsupRm, hsupC2, henvC0, henvC2⟩ :=
-    hchild T₀ hδ_le hδT hδZ hTball
+    hchild T₀ hsymm hδ_le hδT hδZ hTball
   set Ψ₀ : ℝ → SmoothCcTensor g₀ 2 2 := fun s =>
     (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s
       + (deTurckLieCoeffField (I := I) (M := M) g₀
@@ -39520,36 +39557,36 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
       ((hcΦ x).mono (Icc_subset_realizedSmallSet hδ_lt hδ_lt)) hsup
   · intro x
     have hb_nn : (0 : ℝ) ≤
-        max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 :=
+        max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 :=
       le_max_right _ _
     have hsup : ∀ t ∈ Set.Icc (0 : ℝ) 1,
         Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
           ((C2f t).toSection x)) ≤
-          max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 := by
+          max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 := by
       intro t ht
       have h := hsupC2 t ht x
       calc Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
             ((C2f t).toSection x))
-          ≤ Real.sqrt ((max (16 * deTurckArmFibreConst (Module.finrank ℝ E) *
+          ≤ Real.sqrt ((max (19 * deTurckArmFibreConst (Module.finrank ℝ E) *
               (δ / (1 - δ))) 0) ^ 2) := Real.sqrt_le_sqrt h
-        _ = max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 :=
+        _ = max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 :=
             Real.sqrt_sq hb_nn
     have hPIle := riemannianFiberNormSq_pathIntegralCoeffField_le_sq (I := I) (M := M)
       g₀ 4 2 C2f (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hjC2 x
-      (max (16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) hb_nn
+      (max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) hb_nn
       ((hcC2 x).mono (Icc_subset_realizedSmallSet hδ_lt hδ_lt)) hsup
     refine le_trans hPIle ?_
     refine pow_le_pow_left₀ hb_nn ?_ 2
     refine max_le ?_ (le_max_right _ _)
     rcases le_or_gt 0 (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) with h | h
-    · calc 16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))
-          = 16 * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) := by ring
+    · calc 19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))
+          = 19 * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) := by ring
         _ ≤ 19 * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) := by linarith
         _ = 19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ)) := by ring
         _ ≤ max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 :=
             le_max_left _ _
-    · calc 16 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))
-          = 16 * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) := by ring
+    · calc 19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))
+          = 19 * (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) := by ring
         _ ≤ 0 := by linarith
         _ ≤ max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0 :=
             le_max_right _ _

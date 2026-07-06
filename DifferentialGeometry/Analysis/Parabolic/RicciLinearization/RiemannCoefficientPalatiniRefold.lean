@@ -413,11 +413,15 @@ Palatini split + the exact path linearizations at second endpoint zero + the
 `appCc`/`unitModel` evaluation calculus + fixed-frame neighbourhood gluing, with the
 order-zero part `C0ra := bgRComm + arm0AA + (∇♯)K`-residual + Ricci-fold remainder): the
 per-parameter refold identity for the moving order-zero Riemann coefficient, with the
-second-gradient part the CONSTRUCTED folded four-monomial kernel family
-`riemannPalatiniRefoldC2Family` at existentially pinned, PARTNER-PAIRED permutation
+second-gradient part the DOUBLED constructed folded four-monomial kernel family
+`(2 : ℝ) • riemannPalatiniRefoldC2Family` at existentially pinned, PARTNER-PAIRED permutation
 quadruples (`IsFramePairPartner` — the leader-sanctioned posit-layer strengthening restoring
 the dossier's `symmS` partner bookkeeping; it is what the paired refold estimates below
-consume at these witnesses), and an order-zero family carrying joint smoothness, a
+consume at these witnesses; the doubling carries the identity — the family definition itself
+keeps its `½` weights — because the fold output equals TWICE the partner-family average on the
+symmetric sector), under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's
+`T` is `symmS`-representable at every wired level, so the antisymmetric escape sector is
+vacuous for chain inputs), and an order-zero family carrying joint smoothness, a
 ball-uniform pointwise fibre-norm sup, and the two-step jet window. Every consumer
 transitively depends on `sorryAx` until this lands. -/
 theorem exists_riemannPalatini_refold_identity_data
@@ -428,6 +432,8 @@ theorem exists_riemannPalatini_refold_identity_data
       ∃ qA qB : Fin 4 → Equiv.Perm (Fin 4),
       IsFramePairPartner qA qB ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -443,7 +449,8 @@ theorem exists_riemannPalatini_refold_identity_data
               appCc (I := I) (M := M) g₀ 2 2 (C0ra s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
                 appCc (I := I) (M := M) g₀ 4 2
-                  (riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB s)
+                  ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ
+                    qA qB s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0ra s).toSection x) ≤
@@ -1084,17 +1091,22 @@ set_option linter.unusedVariables false in
 pattern class: Koszul-sharp `δ/(1−δ)` fibre bounds — `ConnectionDifferenceFibreBound` and
 the `rfns` bi-contraction bounds of `RicciThreeArmCorrectionFieldBound`, with the frame and
 weight conversions absorbed into the dimensional fibre constant; small literals checked at
-`n = 1, 2, 3` at fill): the pointwise fibre-norm cap for the constructed second-gradient
-refold family at the FOLDED FOUR-MONOMIAL literal `4`, for every PARTNER-PAIRED
-permutation-quadruple convention (`IsFramePairPartner`; the pairing makes the double frame
+`n = 1, 2, 3` at fill): the pointwise fibre-norm cap for the DOUBLED constructed
+second-gradient refold family — the subject is `(2 : ℝ) • riemannPalatiniRefoldC2Family`,
+the exact `C₂` the refold identity carries, so the consumer cap conjunct discharges
+verbatim — at the literal `8`, for every PARTNER-PAIRED permutation-quadruple convention
+(`IsFramePairPartner`; the pairing makes the double frame
 sum see only the symmetrized weight `ccTensorBilinSymm`, which `hδ` caps — the earlier
 ∀-independent form was false: an antisymmetric moving tensor at `δ = 0` defeats the cap
 through the raw unpaired weight). The rate is TWO-LEG — each monomial carries one
 inverse-metric leg through the realized-frame weight conversion and one through the frame
-vectors feeding the argument slots, measured in the background metric — so the sharp family
-bound is `2·fC·δ/(1−δ)²` (the four-monomial Bianchi fold cancels to a two-term difference,
-halving the copy count), and the literal `4 = 2 (sharp) × 2 (headroom)` closes exactly
-under `hδ_half` (`2δ/(1−δ)² ≤ 4δ/(1−δ)` at `δ ≤ 1/2`); the `δ`-unrestricted one-leg form
+vectors feeding the argument slots, measured in the background metric — so the sharp bound
+for the doubled family is `4·fC·δ/(1−δ)²` (the four-monomial Bianchi fold cancels to a
+two-term difference, halving the copy count, and the doubling restores the full fold
+weight), and the literal `8 = 4 (sharp) × 2 (headroom)` closes exactly
+under `hδ_half` (`4δ/(1−δ)² ≤ 8δ/(1−δ)` at `δ ≤ 1/2`); pointwise the doubled-family cap at
+`8` and the bare-family cap at `4` are equivalent (`rfns` is quadratic and
+`max (8u) 0 = 2 · max (4u) 0`); the `δ`-unrestricted one-leg form
 was false (exact-arithmetic witnesses: pure-trace `T = −c·g₀` at `n = 2, δ = 9/10`, and the
 circle family at `n = 1, δ = 3/4`), and the sole consumer chain holds `δ ≤ 1/3`. Every
 consumer transitively depends on `sorryAx` until this lands. -/
@@ -1108,9 +1120,9 @@ theorem riemannPalatiniRefoldC2Family_rfns_le
     (hq : IsFramePairPartner qA qB) :
     ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-        ((riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB s).toSection
-          x) ≤
-      (max (4 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2 :=
+        (((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
+          s).toSection x) ≤
+      (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2 :=
   sorry
 
 set_option linter.unusedVariables false in
@@ -1119,13 +1131,14 @@ pattern class: tame-envelope technique of the curvature-coefficient jet towers w
 ball-absorption `K·(1 + Σ)` weakening; the coefficient carries the moving tensor at the
 zero jet and metric raisings at the zero jet, so `∇ⁱ` stays inside the `range (i + 2)`
 window; the pointwise fibre-norm cap of `riemannPalatiniRefoldC2Family_rfns_le` rides as
-the companion sup anchor): the two-step jet window for the constructed second-gradient
-refold family, for every PARTNER-PAIRED permutation-quadruple convention
-(`IsFramePairPartner`; the anchor conjunct is exactly the paired cap of
+the companion sup anchor): the two-step jet window for the DOUBLED constructed
+second-gradient refold family — both conjuncts on `(2 : ℝ) • riemannPalatiniRefoldC2Family`,
+the exact `C₂` of the refold identity — for every PARTNER-PAIRED permutation-quadruple
+convention (`IsFramePairPartner`; the anchor conjunct is exactly the paired doubled cap of
 `riemannPalatiniRefoldC2Family_rfns_le`, which is false without the pairing, and — like
-that cap — rides the TWO-LEG sharp rate `2·fC·δ/(1−δ)²`, closing into the literal
-`4 = 2 (sharp) × 2 (headroom)` only under `hδ_half`: `2δ/(1−δ)² ≤ 4δ/(1−δ)` at `δ ≤ 1/2`;
-the `δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at
+that cap — rides the TWO-LEG sharp rate `4·fC·δ/(1−δ)²` of the doubled family, closing into
+the literal `8 = 4 (sharp) × 2 (headroom)` only under `hδ_half`: `4δ/(1−δ)² ≤ 8δ/(1−δ)` at
+`δ ≤ 1/2`; the `δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at
 `n = 2, δ = 9/10` and `n = 1, δ = 3/4`, while the sole consumer chain holds `δ ≤ 1/3`).
 Every consumer transitively depends on `sorryAx` until this lands. -/
 theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
@@ -1142,12 +1155,13 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-            ((riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
+            (((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
               s).toSection x) ≤
-          (max (4 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+          (max (8 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
         (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
-            (riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB s)‖ ^ 2 ≤
+            ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB
+              s)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
   sorry
