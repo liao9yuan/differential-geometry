@@ -34,6 +34,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetB
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffL2JetBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm2CoeffL2JetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefold
 
 noncomputable section
 
@@ -38777,7 +38778,60 @@ private theorem exists_riemannPalatini_curvatureRefold_data
             ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2ra s)‖ ^ 2 ≤
               Kra i * (1 + ∑ j ∈ Finset.range (i + 2),
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+  by
+    classical
+    obtain ⟨Λid, hΛid_nn, Kid, hKid_nn, qA, qB, hID⟩ :=
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_riemannPalatini_refold_identity_data
+        (I := I) (M := M) g₀ a ha_super hR hδ₀
+    obtain ⟨Λrm, hΛrm_nn, hRm⟩ :=
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_ricciArmOrder0RiemannCoeff_realizedFam_rfns_ballUniform_sq
+        (I := I) (M := M) g₀ a ha_super hR hδ₀
+    obtain ⟨Kwin, hKwin_nn, hWin⟩ :=
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_riemannPalatiniRefoldC2Family_l2JetWindow
+        (I := I) (M := M) g₀ a ha_super hR hδ₀ qA qB
+    have hsum_nn : (0 : ℝ) ≤ Λid ^ 2 + Λrm ^ 2 := by positivity
+    refine ⟨Real.sqrt (Λid ^ 2 + Λrm ^ 2), Real.sqrt_nonneg _,
+      fun i => Kid i + Kwin i,
+      fun i => by
+        have h1 := hKid_nn i
+        have h2 := hKwin_nn i
+        linarith, ?_⟩
+    intro T δ hδ_le hδ hδZ hTjets
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    obtain ⟨C0ra, hjC0, hidRA, hsupC0, henvC0⟩ := hID T hδ_le hδ hδZ hTjets
+    obtain ⟨-, henvC2⟩ := hWin T hδ_le hδ hδZ hTjets
+    refine ⟨C0ra,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family
+        (I := I) (M := M) g₀ T hδ hδZ qA qB,
+      hjC0,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_threeArmHjoint
+        (I := I) (M := M) g₀ T hδ hδZ qA qB,
+      hidRA, ?_, ?_,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_rfns_le
+        (I := I) (M := M) g₀ T hδ_lt hδ hδZ qA qB,
+      ?_, ?_⟩
+    · intro s hs x
+      have h := hsupC0 s hs x
+      have h2 := sq_nonneg Λrm
+      rw [Real.sq_sqrt hsum_nn]
+      linarith
+    · intro s hs x
+      have h := hRm T hδ_le hδ hδZ hTjets s hs x
+      have h1 := sq_nonneg Λid
+      rw [Real.sq_sqrt hsum_nn]
+      linarith
+    · intro i s hs
+      try dsimp only
+      have h := henvC0 i s hs
+      have hX : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+      nlinarith [mul_nonneg (hKwin_nn i) hX]
+    · intro i s hs
+      try dsimp only
+      have h := henvC2 i s hs
+      have hX : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+      nlinarith [mul_nonneg (hKid_nn i) hX]
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
