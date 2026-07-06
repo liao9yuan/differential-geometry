@@ -38734,12 +38734,15 @@ pair of path endpoints is false (the second endpoint's second-derivative content
 refolded through the second-gradient slot, which acts on the first endpoint only); the sole
 consumer instantiates the zero endpoint. Route: `ricciTensor_sub_eq_connDiff_palatini` +
 `riemannSec_difference` with the background part `ricciArmOrder0BgRCommCoeffField` and quadratic
-part `arm0AAField` (both with ball-uniform sups in `RicciThreeArmCorrectionFieldBound`). Every
-consumer transitively depends on `sorryAx` until this lands. -/
+part `arm0AAField` (both with ball-uniform sups in `RicciThreeArmCorrectionFieldBound`). The
+`δ₀ ≤ 1/2` hypothesis is the two-leg closure threshold of the refold-family estimate children
+(their literal-`4` cap is `2 (sharp) × 2 (headroom)` on the one-leg display rate, sound only
+for `δ ≤ 1/2`, threaded down the `∀`-telescope via `δ ≤ δ₀`); the sole consumer instantiates
+`δ₀ = 1/3`. Every consumer transitively depends on `sorryAx` until this lands. -/
 private theorem exists_riemannPalatini_curvatureRefold_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λra : ℝ, 0 ≤ Λra ∧ ∃ Kra : ℕ → ℝ, (∀ i, 0 ≤ Kra i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
@@ -38798,8 +38801,9 @@ private theorem exists_riemannPalatini_curvatureRefold_data
         linarith, ?_⟩
     intro T δ hδ_le hδ hδZ hTjets
     have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hδ_half : δ ≤ 1 / 2 := hδ_le.trans hδ₀_half
     obtain ⟨C0ra, hjC0, hidRA, hsupC0, henvC0⟩ := hID T hδ_le hδ hδZ hTjets
-    obtain ⟨-, henvC2⟩ := hWin T hδ_le hδ hδZ hTjets
+    obtain ⟨-, henvC2⟩ := hWin T hδ_le hδ_half hδ hδZ hTjets
     refine ⟨C0ra,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family
         (I := I) (M := M) g₀ T hδ hδZ qA qB,
@@ -38808,7 +38812,7 @@ private theorem exists_riemannPalatini_curvatureRefold_data
         (I := I) (M := M) g₀ T hδ hδZ qA qB,
       hidRA, ?_, ?_,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_rfns_le
-        (I := I) (M := M) g₀ T hδ_lt hδ hδZ qA qB hqAB,
+        (I := I) (M := M) g₀ T hδ_lt hδ_half hδ hδZ qA qB hqAB,
       ?_, ?_⟩
     · intro s hs x
       have h := hsupC0 s hs x
@@ -38956,7 +38960,7 @@ set_option linter.unusedVariables false in
 private theorem exists_riemannLieCorr_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λrl : ℝ, 0 ≤ Λrl ∧ ∃ Krl : ℕ → ℝ, (∀ i, 0 ≤ Krl i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
@@ -39010,6 +39014,7 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
   classical
   obtain ⟨Λra, hΛra_nn, Kra, hKra_nn, hRA⟩ :=
     exists_riemannPalatini_curvatureRefold_data (I := I) (M := M) g₀ a ha_super hR hδ₀
+      hδ₀_half
   obtain ⟨Λlc, hΛlc_nn, Klc, hKlc_nn, hLC⟩ :=
     exists_lieCorr_curvatureRefold_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
   refine ⟨Real.sqrt (3 * Λra ^ 2 + 2 * Λlc ^ 2), Real.sqrt_nonneg _,
@@ -39184,7 +39189,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
       ha_super hR_nn h13
   obtain ⟨Λrl, hΛrl_nn, Krl, hKrl_nn, hchild⟩ :=
     exists_riemannLieCorr_curvatureRefold_data (I := I) (M := M) g₀ g_bg a
-      ha_super hR_nn h13
+      ha_super hR_nn h13 (by norm_num : (1 : ℝ) / 3 ≤ 1 / 2)
   obtain ⟨Kcb, hKcb_nn, hKcb⟩ :=
     linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface (I := I) (M := M) g₀ a
       ha_super hR_nn h13
