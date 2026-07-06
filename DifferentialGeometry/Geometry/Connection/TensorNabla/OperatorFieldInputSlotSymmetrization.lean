@@ -192,6 +192,22 @@ theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g
     abel]
   rw [smul_add]
 
+set_option linter.unusedSectionVars false in
+/-- The defect of a `(2,2)` coefficient field from its input-slot symmetrization is half its
+defect from its own slot-swap precomposition. -/
+lemma sub_ccInputSymm_eq_half_smul_sub_appCcRS (g : SmoothRiemannianMetric I M)
+    (C : SmoothCcTensor g 2 2) :
+    C - ccInputSymm (I := I) (M := M) g C =
+      (1 / 2 : ℝ) • (C - appCcRS (I := I) (M := M) g 2 2 2 C
+        (ccSlotSwapField (I := I) (M := M) g)) := by
+  rw [show ccInputSymm (I := I) (M := M) g C =
+      (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C
+        (ccSlotSwapField (I := I) (M := M) g)) from rfl,
+    smul_add, smul_sub]
+  nth_rewrite 1 [show C = (1 / 2 : ℝ) • C + (1 / 2 : ℝ) • C from by
+    rw [← add_smul, show (1 / 2 + 1 / 2 : ℝ) = 1 from by norm_num, one_smul]]
+  abel
+
 end Connection
 end Integral
 end DifferentialGeometry
