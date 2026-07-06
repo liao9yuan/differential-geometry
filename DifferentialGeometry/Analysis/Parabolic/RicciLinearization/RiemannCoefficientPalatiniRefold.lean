@@ -1087,11 +1087,18 @@ refold family at the FOLDED FOUR-MONOMIAL literal `4`, for every PARTNER-PAIRED
 permutation-quadruple convention (`IsFramePairPartner`; the pairing makes the double frame
 sum see only the symmetrized weight `ccTensorBilinSymm`, which `hδ` caps — the earlier
 ∀-independent form was false: an antisymmetric moving tensor at `δ = 0` defeats the cap
-through the raw unpaired weight). Every consumer transitively depends on `sorryAx` until
-this lands. -/
+through the raw unpaired weight). The rate is TWO-LEG — each monomial carries one
+inverse-metric leg through the realized-frame weight conversion and one through the frame
+vectors feeding the argument slots, measured in the background metric — so the sharp family
+bound is `2·fC·δ/(1−δ)²` (the four-monomial Bianchi fold cancels to a two-term difference,
+halving the copy count), and the literal `4 = 2 (sharp) × 2 (headroom)` closes exactly
+under `hδ_half` (`2δ/(1−δ)² ≤ 4δ/(1−δ)` at `δ ≤ 1/2`); the `δ`-unrestricted one-leg form
+was false (exact-arithmetic witnesses: pure-trace `T = −c·g₀` at `n = 2, δ = 9/10`, and the
+circle family at `n = 1, δ = 3/4`), and the sole consumer chain holds `δ ≤ 1/3`. Every
+consumer transitively depends on `sorryAx` until this lands. -/
 theorem riemannPalatiniRefoldC2Family_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_half : δ ≤ 1 / 2)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδZ : gFibreOpBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
@@ -1113,8 +1120,12 @@ window; the pointwise fibre-norm cap of `riemannPalatiniRefoldC2Family_rfns_le` 
 the companion sup anchor): the two-step jet window for the constructed second-gradient
 refold family, for every PARTNER-PAIRED permutation-quadruple convention
 (`IsFramePairPartner`; the anchor conjunct is exactly the paired cap of
-`riemannPalatiniRefoldC2Family_rfns_le`, which is false without the pairing). Every
-consumer transitively depends on `sorryAx` until this lands. -/
+`riemannPalatiniRefoldC2Family_rfns_le`, which is false without the pairing, and — like
+that cap — rides the TWO-LEG sharp rate `2·fC·δ/(1−δ)²`, closing into the literal
+`4 = 2 (sharp) × 2 (headroom)` only under `hδ_half`: `2δ/(1−δ)² ≤ 4δ/(1−δ)` at `δ ≤ 1/2`;
+the `δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at
+`n = 2, δ = 9/10` and `n = 1, δ = 3/4`, while the sole consumer chain holds `δ ≤ 1/3`).
+Every consumer transitively depends on `sorryAx` until this lands. -/
 theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1122,7 +1133,7 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     (hq : IsFramePairPartner qA qB) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_half : δ ≤ 1 / 2)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1821,16 +1832,25 @@ set_option linter.unusedVariables false in
 /-- Deferred input (dossier rows LC-4/LC-5/LC-6, constructed-family shares at the frozen cap
 literal `3`; pattern class: joint smoothness of the realized-family coefficient
 constructions through the fixed-frame patching of the refold kernel calculus; the
-Koszul-sharp `δ/(1−δ)` fibre-norm class for the cap -- the partner pairing inside the family
-definition symmetrizes the coefficient weight, so the weight is controlled by the
+Koszul-sharp TWO-LEG `δ/(1−δ)²` fibre-norm class for the cap -- the partner pairing inside
+the family definition symmetrizes the coefficient weight, so the weight is controlled by the
 `gFibreOpBound` hypothesis on the symmetrized moving tensor for EVERY permutation-and-sign
 convention (the construction carries the pairing, so the universal quantification over
 conventions is sound, unlike independent-quadruple forms); and the tame-envelope technique
 with ball absorption for the two-step window -- the coefficient carries the moving tensor
 and the metric raisings at the zero jet, so `∇ⁱ` stays inside `range (i + 2)`; small
 literals checked at `n = 1, 2, 3` at fill): joint smoothness, the pointwise fibre-norm cap
-at the three-copy literal `3`, and the two-step jet window for the constructed
-covariant-derivative-arm second-gradient family. Every consumer transitively depends on
+at the three-copy literal `3` on the two-leg rate `δ/(1−δ)²`, and the two-step jet window
+for the constructed covariant-derivative-arm second-gradient family. The family is THREE
+sharp-Koszul-gradient monomials with NO Bianchi fold (unlike the Riemann-arm four-monomial
+fold, which halves its copy count and leaves `2×` headroom), each monomial carrying one
+inverse-metric leg through the realized-frame unit-value weight and one through the frame
+vectors in the coefficient slots measured by the background metric, so the sharp rate is
+`3·fC·δ/(1−δ)²` — the denominator matches the two-leg count and the bound is TIGHT at
+`n = 1` (the pure-trace circle witness at `δ = 3/4` attains it); the one-leg denominator
+`δ/(1−δ)` was false for EVERY `δ ∈ (0, 1)` (ratio `1/(1−δ)`; exact arithmetic `36 > 9` at
+`δ = 1/2` and `9/4 > 3/2` at the consumer threshold `δ = 1/3`, so no `δ`-restriction
+short of `δ = 0` repairs it). Every consumer transitively depends on
 `sorryAx` until this lands. -/
 theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1851,7 +1871,7 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
             ((deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε
               s).toSection x) ≤
-          (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+          (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) 0) ^ 2) ∧
         (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
             (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s)‖ ^ 2 ≤
@@ -1861,13 +1881,16 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-1 with its arm shares of rows LC-4/LC-5/LC-6, at cap
-literal `3`; pattern class: connection-difference cocycle `sub_add_sub` + the exact path
-linearizations at second endpoint zero, refolding the moving-endpoint
-covariant-gradient-of-connection-difference content of the `dLaBiContrFib` bi-contraction
-onto the second gradient at three ledger copies, with the background leg and the one-jet
-sharp-gradient residual riding the order-zero part; sup anchors and two-step windows as in
-the Riemann-arm rows): the refold data package for the covariant-derivative arm of the
-DeTurck Lie coefficient along the realized path. Every consumer transitively depends on
+literal `3` on the two-leg rate `δ/(1−δ)²`; pattern class: connection-difference cocycle
+`sub_add_sub` + the exact path linearizations at second endpoint zero, refolding the
+moving-endpoint covariant-gradient-of-connection-difference content of the `dLaBiContrFib`
+bi-contraction onto the second gradient at three ledger copies, with the background leg and
+the one-jet sharp-gradient residual riding the order-zero part; sup anchors and two-step
+windows as in the Riemann-arm rows — except that the second-gradient cap rides the TWO-LEG
+denominator `(1−δ)²`: the three-monomial covariant-derivative-arm family has no Bianchi
+fold, its sharp rate `3·fC·δ/(1−δ)²` is tight at `n = 1`, and the one-leg denominator was
+false for every `δ ∈ (0, 1)`): the refold data package for the covariant-derivative arm of
+the DeTurck Lie coefficient along the realized path. Every consumer transitively depends on
 `sorryAx` until this lands. -/
 theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1897,7 +1920,7 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
               Λ ^ 2) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((C2da s).toSection x) ≤
-              (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0)
+              (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) 0)
                 ^ 2) ∧
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖ ^ 2 ≤
