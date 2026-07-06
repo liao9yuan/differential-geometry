@@ -597,20 +597,6 @@ private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) 
     tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
-private lemma sub_ccInputSymm_eq_half_smul_sub_appCcRS (g : SmoothRiemannianMetric I M)
-    (C : SmoothCcTensor g 2 2) :
-    C - ccInputSymm (I := I) (M := M) g C =
-      (1 / 2 : ℝ) • (C - appCcRS (I := I) (M := M) g 2 2 2 C
-        (ccSlotSwapField (I := I) (M := M) g)) := by
-  rw [show ccInputSymm (I := I) (M := M) g C =
-      (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C
-        (ccSlotSwapField (I := I) (M := M) g)) from rfl,
-    smul_add, smul_sub]
-  nth_rewrite 1 [show C = (1 / 2 : ℝ) • C + (1 / 2 : ℝ) • C from by
-    rw [← add_smul, show (1 / 2 + 1 / 2 : ℝ) = 1 from by norm_num, one_smul]]
-  abel
-
 private def pJetGridWindow (b : ℕ → ℝ) (i : ℕ) : ℝ :=
   ∑ k ∈ Finset.range (i + 3), Combinatorics.antidiagonalTupleGrid b k
 
