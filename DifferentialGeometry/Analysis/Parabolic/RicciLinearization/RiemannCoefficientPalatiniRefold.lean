@@ -6,6 +6,9 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalat
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieCoeffL2JetBound
 
 /-!
 # Palatini refold of the Riemann and Lie coefficients along the Ricci-linearization path
@@ -1424,6 +1427,206 @@ theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannia
   exact curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (q i)
 
+set_option linter.unusedSectionVars false in
+/-- The covariant-derivative arm field coincides with the `deTurckLieDLaCoeffField` of the
+jet-bound tower: both package the `dLaBiContrFib` bi-contraction fibre. -/
+private theorem covDerivArmField_eq_dLaCoeffField
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg =
+      deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
+  apply SmoothCcTensor.ext
+  refine ContMDiffSection.ext (fun x => ?_)
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The endomorphism arm field coincides with the `deTurckLieDLbCoeffField` of the jet-bound
+tower: both package the slot-inserted `deTurckLieWEndo` fibre. -/
+private theorem endoArmField_eq_dLbCoeffField
+    (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg =
+      deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
+  apply SmoothCcTensor.ext
+  refine ContMDiffSection.ext (fun x => ?_)
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- Joint smoothness passes through pointwise sums of coefficient families. -/
+private theorem threeArmHjoint_add_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
+    (A B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
+    (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ'))
+    (hB : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r B (δ := δ) (δ' := δ')) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
+      (fun s => A s + B s) (δ := δ) (δ' := δ') := by
+  have hadd := jointTotalSpaceRS_add_local (I := I) (M := M) (r := r) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (fun p : M × ℝ => (A p.2).toSection p.1)
+    (fun p : M × ℝ => (B p.2).toSection p.1)
+    hA hB
+  refine hadd.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+
+set_option linter.unusedSectionVars false in
+/-- Joint smoothness passes through pointwise differences of coefficient families. -/
+private theorem threeArmHjoint_sub_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
+    (A B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
+    (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ'))
+    (hB : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r B (δ := δ) (δ' := δ')) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
+      (fun s => A s - B s) (δ := δ) (δ' := δ') := by
+  have hsub := jointTotalSpaceRS_sub_local (I := I) (M := M) (r := r) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (fun p : M × ℝ => (A p.2).toSection p.1)
+    (fun p : M × ℝ => (B p.2).toSection p.1)
+    hA hB
+  refine hsub.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+
+set_option linter.unusedSectionVars false in
+/-- Joint smoothness of the covariant-derivative arm along the realized path at second
+endpoint zero, for every background: the `dLaBiContrFib` joint-smoothness engine of the
+higher-order coefficient tower, read through the arm field. -/
+private theorem covDerivArmField_realizedFam_threeArmHjoint
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (g_bg : SmoothRiemannianMetric I M) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => deTurckLieCovDerivArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg) (δ := δ) (δ' := δ) := by
+  have h := dLaBiContrFib_realizedFam_jointContMDiffOn (I := I) (M := M)
+    g₀ T 0 hδ hδZ g_bg
+  refine h.congr (fun p _ => ?_)
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- Joint smoothness of the endomorphism arm along the realized path at second endpoint
+zero, for every background: the arm is the full DeTurck Lie coefficient minus the
+covariant-derivative arm, and both carry joint-smoothness engines. -/
+private theorem endoArmField_realizedFam_threeArmHjoint
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (g_bg : SmoothRiemannianMetric I M) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => deTurckLieEndoArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg) (δ := δ) (δ' := δ) := by
+  have hC := deTurckLieCoeffField_realizedFam_jointContMDiff (I := I)
+    g₀ T 0 hδ hδZ g_bg
+  have hA := covDerivArmField_realizedFam_threeArmHjoint (I := I) (M := M)
+    g₀ T hδ hδZ g_bg
+  have hsub := jointTotalSpaceRS_sub_local (I := I) (M := M) (r := 2) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ))
+    (fun p : M × ℝ => (deTurckLieCoeffField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).toSection p.1)
+    (fun p : M × ℝ => (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).toSection p.1)
+    hC hA
+  refine hsub.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1 t) ?_
+  show (deTurckLieEndoArmField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).toSection p.1 =
+    (deTurckLieCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).toSection p.1
+      - (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).toSection p.1
+  have hsplit : deTurckLieEndoArmField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg =
+      deTurckLieCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg
+        - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg := by
+    rw [eq_sub_iff_add_eq, add_comm]
+    exact (deTurckLieCoeffField_eq_covDerivArm_add_endoArm (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).symm
+  rw [hsplit, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+
+set_option linter.unusedVariables false in
+/-- Deferred input (two-step jet window share of the covariant-derivative-arm
+background-pair difference; pattern class: the difference of the two arm instantiations
+carries no moving-metric two-jet -- by the connection-difference cocycle its kernel is the
+moving covariant gradient of the FIXED background connection difference, so the coefficient
+is one-jet in the moving tensor, with the metric raisings at the zero jet; tame-envelope
+technique at the `range (i + 2)` window with ball absorption, as in the proven
+`exists_corrArm1Field_realizedFam_jetL2_tameEnvelope` difference template and the
+`DeTurckLie*L2JetBound` per-order towers): the per-order envelope for the background-pair
+difference of the covariant-derivative arm along the realized path. Every consumer
+transitively depends on `sorryAx` until this lands. -/
+theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (dossier row LC-1 identity core at background equal to the path
+basepoint; pattern class: the connection-difference cocycle degenerates -- the arm kernel
+IS the moving covariant gradient of `connDiff (realizedFam s) g₀`, which the PROVEN
+endpoint linearization
+`covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp` expresses exactly as
+the path-parameter multiple of the sharp-Koszul covariant gradient; the second-gradient
+Koszul monomials refold onto the CONSTRUCTED partner-paired family
+`deTurckLieCovDerivRefoldC2Family` at existentially pinned permutations and signs (the
+lower-slot symmetry `connDiff_symm` folds the raw frame-pair weight onto the paired
+family), and the order-zero family carries the quadratic connection-difference corrections
+and the one-jet sharp-gradient residual with joint smoothness, a ball-uniform pointwise
+fibre-norm sup, and the two-step jet window. This is the general-background statement
+instantiated at `g_bg := g₀`: the background leg is absent, leaving exactly the moving
+refold core. Every consumer transitively depends on `sorryAx` until this lands. -/
+theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∃ (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ), (∀ i, |ε i| ≤ 1) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∃ C0da : ℝ → SmoothCcTensor g₀ 2 2,
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0da (δ := δ) (δ' := δ) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            appCc (I := I) (M := M) g₀ 2 2
+                (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
+              appCc (I := I) (M := M) g₀ 2 2 (C0da s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
+                appCc (I := I) (M := M) g₀ 4 2
+                  (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0da s).toSection x) ≤
+              Λ ^ 2) ∧
+          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖ ^ 2 ≤
+              K i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+  sorry
+
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-1, identity core with the order-zero-part shares of rows
 LC-4/LC-5/LC-6; pattern class: connection-difference cocycle `sub_add_sub` at the realized
@@ -1469,8 +1672,150 @@ theorem exists_deTurckLieCovDerivArm_refold_identity_data
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖ ^ 2 ≤
               K i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨Λv, hΛv_nn, Kv, hKv_nn, q, ε, hε, hmov⟩ :=
+    exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  obtain ⟨Λbg, hΛbg_nn, hsup_bg⟩ :=
+    deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform (I := I) (M := M)
+      g₀ g_bg a ha_super hR hδ₀
+  obtain ⟨Λz, hΛz_nn, hsup_z⟩ :=
+    deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform (I := I) (M := M)
+      g₀ g₀ a ha_super hR hδ₀
+  obtain ⟨Kd, hKd_nn, henv_d⟩ :=
+    exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow (I := I) (M := M)
+      g₀ g_bg a ha_super hR hδ₀
+  have hS_nn : (0 : ℝ) ≤ 2 * Λv ^ 2 + 2 * (2 * Λbg + 2 * Λz) := by positivity
+  refine ⟨Real.sqrt (2 * Λv ^ 2 + 2 * (2 * Λbg + 2 * Λz)), Real.sqrt_nonneg _,
+    fun i => 2 * Kv i + 2 * Kd i,
+    fun i => by have h1 := hKv_nn i; have h2 := hKd_nn i; linarith,
+    q, ε, hε, ?_⟩
+  intro T δ hδ_le hδ hδZ hball
+  obtain ⟨C0v, hjv, hidv, hsupv, henvv⟩ := hmov T hδ_le hδ hδZ hball
+  have hZball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
+    intro j hj
+    have hzero : iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2) = 0 := by
+      have h := iteratedCovGrad_sub (I := I) (g := g₀) (r := 0) (s := 2) (j := j) T T
+      rw [sub_self, sub_self] at h
+      exact h
+    rw [hzero, norm_zero]
+    exact hR
+  refine ⟨fun s => C0v s +
+      (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+        - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀), ?_, ?_, ?_, ?_⟩
+  · exact threeArmHjoint_add_local (I := I) (M := M) g₀ _ _ hjv
+      (threeArmHjoint_sub_local (I := I) (M := M) g₀ _ _
+        (covDerivArmField_realizedFam_threeArmHjoint (I := I) (M := M) g₀ T hδ hδZ g_bg)
+        (covDerivArmField_realizedFam_threeArmHjoint (I := I) (M := M) g₀ T hδ hδZ g₀))
+  · intro s hs
+    have hsplit : deTurckLieCovDerivArmField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg =
+        deTurckLieCovDerivArmField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀ +
+          (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀) := by
+      rw [add_sub_cancel]
+    conv_lhs => rw [hsplit, appCc_add_left, hidv s hs]
+    conv_rhs => rw [appCc_add_left]
+    abel
+  · intro s hs x
+    have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((deTurckLieCovDerivArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg).toSection x) ≤ Λbg := by
+      rw [covDerivArmField_eq_dLaCoeffField]
+      exact hsup_bg T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
+    have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((deTurckLieCovDerivArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀).toSection x) ≤ Λz := by
+      rw [covDerivArmField_eq_dLaCoeffField]
+      exact hsup_z T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
+    have hdiff : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((deTurckLieCovDerivArmField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+          - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀).toSection x) ≤
+        2 * Λbg + 2 * Λz := by
+      rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+      refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x _ _) ?_
+      have := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 2 x
+      linarith [h1, h2]
+    have hsum : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        (((fun s => C0v s +
+          (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)) s).toSection x) ≤
+        2 * Λv ^ 2 + 2 * (2 * Λbg + 2 * Λz) := by
+      rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+      refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x _ _) ?_
+      have h3 := hsupv s hs x
+      linarith [hdiff]
+    rw [Real.sq_sqrt hS_nn]
+    exact hsum
+  · intro i s hs
+    have hlin : iteratedCovGrad (I := I) g₀ 2 2 i
+        (C0v s +
+          (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)) =
+        iteratedCovGrad (I := I) g₀ 2 2 i (C0v s) +
+          iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀) :=
+      iteratedCovGrad_add (I := I) (g := g₀) (r := 2) (s := 2) (j := i) _ _
+    have hv := henvv i s hs
+    have hd := henv_d T hδ_le hδ hδZ hball i s hs
+    have htri : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (C0v s +
+          (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀))‖ ^ 2 ≤
+        2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0v s)‖ ^ 2 +
+          2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 := by
+      rw [hlin]
+      have hn := norm_add_le (iteratedCovGrad (I := I) g₀ 2 2 i (C0v s))
+        (iteratedCovGrad (I := I) g₀ 2 2 i
+          (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀))
+      nlinarith [mul_le_mul hn hn
+          (norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (C0v s) +
+            iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+                - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)))
+          (add_nonneg (norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i (C0v s)))
+            (norm_nonneg (iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+                - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)))),
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (C0v s)‖ -
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖)]
+    refine le_trans htri ?_
+    have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+    nlinarith [hv, hd, hwin_nn]
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier rows LC-4/LC-5/LC-6, constructed-family shares at the frozen cap
@@ -1614,6 +1959,37 @@ theorem deTurckVF_background_sub_eq_connDiff_trace
     add_sub_cancel_left]
 
 set_option linter.unusedVariables false in
+/-- Deferred input (two-step jet window share of the endomorphism-arm background-pair
+difference; pattern class: by `deTurckVF_background_sub_eq_connDiff_trace` the difference
+of the two vector fields is the inverse-Gram-traced connection difference of the
+backgrounds, so the difference coefficient is one-jet in the moving tensor with metric
+raisings at the zero jet; tame-envelope technique at the `range (i + 2)` window with ball
+absorption, as in the proven `exists_corrArm1Field_realizedFam_jetL2_tameEnvelope`
+difference template and the `DeTurckLie*L2JetBound` per-order towers): the per-order
+envelope for the background-pair difference of the endomorphism arm along the realized
+path. Every consumer transitively depends on `sorryAx` until this lands. -/
+theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- Deferred input (fork-3 remedy replacing the per-instantiation endomorphism-arm refold
 package, which is false as stated: the background-independent moving-leg two-jet content of
 `deTurckLieWEndo` is fed into the FULL moving tensor, and the mixed sector -- the
@@ -1660,8 +2036,48 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
               - deTurckLieEndoArmField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨Λbg, hΛbg_nn, hsup_bg⟩ :=
+    deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform (I := I) (M := M)
+      g₀ g_bg a ha_super hR hδ₀
+  obtain ⟨Λz, hΛz_nn, hsup_z⟩ :=
+    deTurckLieDLbCoeffField_realizedFam_rfns_order0_ballUniform (I := I) (M := M)
+      g₀ g₀ a ha_super hR hδ₀
+  obtain ⟨Ke, hKe_nn, henv⟩ :=
+    exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow (I := I) (M := M)
+      g₀ g_bg a ha_super hR hδ₀
+  have hS_nn : (0 : ℝ) ≤ 2 * Λbg + 2 * Λz := by linarith
+  refine ⟨Real.sqrt (2 * Λbg + 2 * Λz), Real.sqrt_nonneg _, Ke, hKe_nn, ?_⟩
+  intro T δ hδ_le hδ hδZ hball
+  have hZball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
+    intro j hj
+    have hzero : iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2) = 0 := by
+      have h := iteratedCovGrad_sub (I := I) (g := g₀) (r := 0) (s := 2) (j := j) T T
+      rw [sub_self, sub_self] at h
+      exact h
+    rw [hzero, norm_zero]
+    exact hR
+  refine ⟨?_, ?_, fun i s hs => henv T hδ_le hδ hδZ hball i s hs⟩
+  · exact threeArmHjoint_sub_local (I := I) (M := M) g₀ _ _
+      (endoArmField_realizedFam_threeArmHjoint (I := I) (M := M) g₀ T hδ hδZ g_bg)
+      (endoArmField_realizedFam_threeArmHjoint (I := I) (M := M) g₀ T hδ hδZ g₀)
+  · intro s hs x
+    have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((deTurckLieEndoArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg).toSection x) ≤ Λbg := by
+      rw [endoArmField_eq_dLbCoeffField]
+      exact hsup_bg T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
+    have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((deTurckLieEndoArmField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀).toSection x) ≤ Λz := by
+      rw [endoArmField_eq_dLbCoeffField]
+      exact hsup_z T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
+    rw [Real.sq_sqrt hS_nn, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
+      Pi.sub_apply]
+    refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x _ _) ?_
+    linarith [h1, h2]
 
 set_option linter.unusedVariables false in
 /-- Public re-derivation, at second endpoint zero and first path parameter zero, of the
