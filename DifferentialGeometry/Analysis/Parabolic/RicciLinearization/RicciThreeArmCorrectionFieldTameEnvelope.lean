@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder0KernelJetGrid
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
 
 /-!
@@ -646,10 +647,9 @@ arm-0 cancellation is symmetric-sector-only and plays no role at this window). T
 four-trace factors are `δ`-ball-controlled through `htie`/`hbound` exactly as in the
 `connDiffSection`/inverse-metric grid towers.
 
-DEFERRED INPUT (`sorry`): the `appCcRS` refold of the order-zero coefficient field onto the
-connection-difference and four-trace jet towers (the order-zero analogue of
-`linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS`) and its diagonal-product-grid calculus;
-consumers transitively depend on `sorryAx` until it lands. -/
+Proven by the `appCcRS` refold of the order-zero coefficient field onto the four-trace
+kernel (`linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS`) and the kernel and cast
+diagonal-product grid calculus of `RicciConnDiffOrder0KernelJetGrid`. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -667,7 +667,115 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalPro
               ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
                 ∏ m : Fin n,
                   riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x) := sorry
+                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x) := by
+  classical
+  obtain ⟨CF, hCF_nn, hCF⟩ :=
+    rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le
+      (I := I) (M := M) g₀ hδ₀
+  obtain ⟨CK, hCK_nn, hCK⟩ :=
+    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalProductGrid_le
+      (I := I) (M := M) g₀ hδ₀
+  refine ⟨fun i => appCcGdiag (E := E) i *
+      ∑ n ∈ Finset.range (i + 1), ∑ l ∈ Finset.range (i + 1 - n),
+        CF n * CK l * Combinatorics.antidiagonalTupleGridWindowMulConst n (l + 2),
+    fun i => mul_nonneg (appCcGdiag_nonneg (E := E) i)
+      (Finset.sum_nonneg (fun n _ => Finset.sum_nonneg (fun l _ =>
+        mul_nonneg (mul_nonneg (hCF_nn n) (hCK_nn l))
+          (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg n (l + 2))))), ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hbound i x
+  set b : ℕ → ℝ := fun j' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j') x
+    ((iteratedCovGrad (I := I) g₀ 0 2 j' P).toSection x) with hb_def
+  have hb : ∀ j', 0 ≤ b j' :=
+    fun j' => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j') x _
+  have hwin_nn : ∀ w : ℕ, 0 ≤ Combinatorics.antidiagonalTupleGridWindow b w :=
+    fun w => Combinatorics.antidiagonalTupleGridWindow_nonneg b hb w
+  have hF : ∀ n : ℕ, riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + n) x
+      ((iteratedCovGrad (I := I) g₀ 4 2 n
+        (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)).toSection x) ≤
+      CF n * Combinatorics.antidiagonalTupleGridWindow b (n + 1) :=
+    fun n => hCF g₁ P htie hδ_le hδ0 hbound n x
+  have hK : ∀ l : ℕ, riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+      ((iteratedCovGrad (I := I) g₀ 2 4 l
+        (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁)).toSection x) ≤
+      CK l * Combinatorics.antidiagonalTupleGridWindow b (l + 3) :=
+    fun l => hCK g₁ P htie hδ_le hδ0 hbound l x
+  rw [linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS (I := I) (M := M) g₀ g₁]
+  refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+    (I := I) (M := M) g₀ i 2 4 2 (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)
+    (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁) x) ?_
+  have hterm : ∀ n ∈ Finset.range (i + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 4 2 n
+            (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)).toSection x) *
+        ∑ l ∈ Finset.range (i + 1 - n),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 4 l
+              (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁)).toSection x) ≤
+      (∑ l ∈ Finset.range (i + 1 - n),
+        CF n * CK l * Combinatorics.antidiagonalTupleGridWindowMulConst n (l + 2)) *
+        Combinatorics.antidiagonalTupleGridWindow b (i + 3) := by
+    intro n hn
+    rw [Finset.mem_range] at hn
+    have h2 : (∑ l ∈ Finset.range (i + 1 - n),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+          ((iteratedCovGrad (I := I) g₀ 2 4 l
+            (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁)).toSection x)) ≤
+        ∑ l ∈ Finset.range (i + 1 - n),
+          CK l * Combinatorics.antidiagonalTupleGridWindow b (l + 3) :=
+      Finset.sum_le_sum (fun l _ => hK l)
+    have hprod : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + n) x
+          ((iteratedCovGrad (I := I) g₀ 4 2 n
+            (ricciCometricFourTraceCastG0 (I := I) g₀ g₁)).toSection x) *
+        (∑ l ∈ Finset.range (i + 1 - n),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 4 l
+              (linearizedRicciConnDiffOrder0KernelField (I := I) g₀ g₁)).toSection x)) ≤
+        (CF n * Combinatorics.antidiagonalTupleGridWindow b (n + 1)) *
+          ∑ l ∈ Finset.range (i + 1 - n),
+            CK l * Combinatorics.antidiagonalTupleGridWindow b (l + 3) :=
+      mul_le_mul (hF n) h2
+        (Finset.sum_nonneg (fun l _ =>
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 (4 + l) x _))
+        (mul_nonneg (hCF_nn n) (hwin_nn (n + 1)))
+    refine le_trans hprod ?_
+    rw [Finset.mul_sum, Finset.sum_mul]
+    refine Finset.sum_le_sum (fun l hl => ?_)
+    rw [Finset.mem_range] at hl
+    have hww : Combinatorics.antidiagonalTupleGridWindow b (n + 1) *
+        Combinatorics.antidiagonalTupleGridWindow b (l + 3) ≤
+        Combinatorics.antidiagonalTupleGridWindowMulConst n (l + 2) *
+          Combinatorics.antidiagonalTupleGridWindow b (n + l + 3) :=
+      Combinatorics.antidiagonalTupleGridWindow_mul_le b hb n (l + 2)
+    have hmono : Combinatorics.antidiagonalTupleGridWindow b (n + l + 3) ≤
+        Combinatorics.antidiagonalTupleGridWindow b (i + 3) :=
+      Combinatorics.antidiagonalTupleGridWindow_mono b hb (by omega)
+    have hc_nn : (0 : ℝ) ≤ CF n * CK l := mul_nonneg (hCF_nn n) (hCK_nn l)
+    calc (CF n * Combinatorics.antidiagonalTupleGridWindow b (n + 1)) *
+            (CK l * Combinatorics.antidiagonalTupleGridWindow b (l + 3))
+        = (CF n * CK l) * (Combinatorics.antidiagonalTupleGridWindow b (n + 1) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 3)) := by ring
+      _ ≤ (CF n * CK l) * (Combinatorics.antidiagonalTupleGridWindowMulConst n (l + 2) *
+            Combinatorics.antidiagonalTupleGridWindow b (n + l + 3)) :=
+          mul_le_mul_of_nonneg_left hww hc_nn
+      _ ≤ (CF n * CK l) * (Combinatorics.antidiagonalTupleGridWindowMulConst n (l + 2) *
+            Combinatorics.antidiagonalTupleGridWindow b (i + 3)) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hmono
+              (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg n (l + 2)))
+            hc_nn
+      _ = CF n * CK l * Combinatorics.antidiagonalTupleGridWindowMulConst n (l + 2) *
+            Combinatorics.antidiagonalTupleGridWindow b (i + 3) := by ring
+  refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hterm)
+    (appCcGdiag_nonneg (E := E) i)) ?_
+  rw [← Finset.sum_mul]
+  rw [show (∑ k ∈ Finset.range (i + 3),
+      ∑ n ∈ Finset.range (k + 1),
+        ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+          ∏ m : Fin n,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)) =
+      Combinatorics.antidiagonalTupleGridWindow b (i + 3) from rfl]
+  exact le_of_eq (by ring)
 
 set_option linter.unusedVariables false in
 /-- Pointwise diagonal-product-grid bound, at total-weight window `i + 3`, for the covariant
@@ -691,8 +799,7 @@ order-zero coefficient grid child
 `rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalProductGrid_le`, the
 proven moving-Rm background-difference grid bound, and compactness jet sups for the fixed
 background fields — composed through the `appCcRS` diagonal-product-grid calculus against the
-fixed slot-swap field. TRANSIT: consumers transitively depend on `sorryAx` through the posited
-order-zero coefficient grid child until it lands. -/
+fixed slot-swap field. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputAsymmRemainder_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
