@@ -1559,6 +1559,45 @@ private theorem endoArmField_realizedFam_threeArmHjoint
       (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) g_bg).symm
   rw [hsplit, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
+set_option linter.unusedSectionVars false in
+/-- Iterated covariant gradients commute with real scalings of the tensor. -/
+private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) =
+      c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
+
+set_option linter.unusedVariables false in
+/-- Deferred input (generic-in-`g₁` ladder step for the covariant-derivative-arm
+background-pair difference window; pattern class: the difference of the two arm
+instantiations carries no moving-metric two-jet — by the connection-difference cocycle its
+kernel is the moving covariant gradient of the FIXED background connection difference, so
+the coefficient is one-jet in the perturbation with the metric raisings at the zero jet and
+`∇ⁱ` stays inside the `range (i + 2)` window; diagonal-product-grid technique with ball
+absorption, as in the proven `CurvatureCoefficientDifferenceJetTower`
+background-difference envelopes). Every consumer transitively depends on `sorryAx` until
+this lands. -/
+theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ),
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg -
+                deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) :=
+  sorry
+
 set_option linter.unusedVariables false in
 /-- Deferred input (two-step jet window share of the covariant-derivative-arm
 background-pair difference; pattern class: the difference of the two arm instantiations
@@ -1588,8 +1627,53 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
               - deTurckLieCovDerivArmField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
+      (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨K, hK_nn, ?_⟩
+  intro T δ hδ_le hδ hδZ hball i s hs
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+    fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+  obtain ⟨hs0, hs1⟩ := hs
+  have habs : |s| ≤ 1 := by
+    rw [abs_of_nonneg hs0]
+    exact hs1
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rwa [heq] at hraw
+  have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+    rw [convexPerturbation, smul_zero, zero_add]
+  have hPball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T 0 s)‖ ≤ R := by
+    intro j hj
+    rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+    calc |s| * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤
+        1 * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
+          mul_le_mul_of_nonneg_right habs (norm_nonneg _)
+      _ = ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := one_mul _
+      _ ≤ R := hball j hj
+  refine le_trans (hK (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+    (convexPerturbation (I := I) g₀ T 0 s) hδ_le hδP htie hPball i) ?_
+  refine mul_le_mul_of_nonneg_left ?_ (hK_nn i)
+  refine add_le_add le_rfl ?_
+  refine Finset.sum_le_sum (fun j _ => ?_)
+  rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+  have h1 : |s| ^ 2 ≤ 1 := by nlinarith [abs_nonneg s]
+  nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
+    norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-1 identity core at background equal to the path
@@ -1828,16 +1912,6 @@ theorem exists_deTurckLieCovDerivArm_refold_identity_data
     have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
     nlinarith [hv, hd, hwin_nn]
-
-set_option linter.unusedSectionVars false in
-/-- Iterated covariant gradients commute with real scalings of the tensor. -/
-private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
-    (c : ℝ) (w : SmoothCcTensor g r s) :
-    iteratedCovGrad (I := I) g r s j (c • w) =
-      c • iteratedCovGrad (I := I) g r s j w := by
-  induction j with
-  | zero => simp only [iteratedCovGrad_zero]
-  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -2329,6 +2403,34 @@ theorem deTurckVF_background_sub_eq_connDiff_trace
     add_sub_cancel_left]
 
 set_option linter.unusedVariables false in
+/-- Deferred input (generic-in-`g₁` ladder step for the endomorphism-arm background-pair
+difference window; pattern class: by `deTurckVF_background_sub_eq_connDiff_trace` the
+difference of the two vector fields is the inverse-Gram-traced connection difference of the
+backgrounds, so the difference coefficient is one-jet in the perturbation with the metric
+raisings at the zero jet and `∇ⁱ` stays inside the `range (i + 2)` window;
+diagonal-product-grid technique with ball absorption, as in the proven
+`CurvatureCoefficientDifferenceJetTower` background-difference envelopes). Every consumer
+transitively depends on `sorryAx` until this lands. -/
+theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ),
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg -
+                deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- Deferred input (two-step jet window share of the endomorphism-arm background-pair
 difference; pattern class: by `deTurckVF_background_sub_eq_connDiff_trace` the difference
 of the two vector fields is the inverse-Gram-traced connection difference of the
@@ -2356,8 +2458,53 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
               - deTurckLieEndoArmField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
+      (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
+  refine ⟨K, hK_nn, ?_⟩
+  intro T δ hδ_le hδ hδZ hball i s hs
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+    fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+  obtain ⟨hs0, hs1⟩ := hs
+  have habs : |s| ≤ 1 := by
+    rw [abs_of_nonneg hs0]
+    exact hs1
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rwa [heq] at hraw
+  have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+    rw [convexPerturbation, smul_zero, zero_add]
+  have hPball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T 0 s)‖ ≤ R := by
+    intro j hj
+    rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs]
+    calc |s| * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤
+        1 * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
+          mul_le_mul_of_nonneg_right habs (norm_nonneg _)
+      _ = ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := one_mul _
+      _ ≤ R := hball j hj
+  refine le_trans (hK (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+    (convexPerturbation (I := I) g₀ T 0 s) hδ_le hδP htie hPball i) ?_
+  refine mul_le_mul_of_nonneg_left ?_ (hK_nn i)
+  refine add_le_add le_rfl ?_
+  refine Finset.sum_le_sum (fun j _ => ?_)
+  rw [hcP, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+  have h1 : |s| ^ 2 ≤ 1 := by nlinarith [abs_nonneg s]
+  nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
+    norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
 
 set_option linter.unusedVariables false in
 /-- Deferred input (fork-3 remedy replacing the per-instantiation endomorphism-arm refold
