@@ -463,7 +463,7 @@ theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 
-private theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
+theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 2 I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞

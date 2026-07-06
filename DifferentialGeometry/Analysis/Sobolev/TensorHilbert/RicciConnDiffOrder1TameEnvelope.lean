@@ -147,17 +147,17 @@ theorem linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
   intro x
   rfl
 
-private def fourTraceArgPerm0231 : Equiv.Perm (Fin 4) :=
+def fourTraceArgPerm0231 : Equiv.Perm (Fin 4) :=
   ⟨![0, 2, 3, 1], ![0, 3, 1, 2], by decide, by decide⟩
 
-private def fourTraceArgPerm0321 : Equiv.Perm (Fin 4) :=
+def fourTraceArgPerm0321 : Equiv.Perm (Fin 4) :=
   ⟨![0, 3, 2, 1], ![0, 3, 2, 1], by decide, by decide⟩
 
-private def fourTraceArgPerm2301 : Equiv.Perm (Fin 4) :=
+def fourTraceArgPerm2301 : Equiv.Perm (Fin 4) :=
   ⟨![2, 3, 0, 1], ![2, 3, 0, 1], by decide, by decide⟩
 
 set_option linter.unusedSectionVars false in
-private theorem ricciCometricFourTraceCastG0_eq_reindex_combination
+theorem ricciCometricFourTraceCastG0_eq_reindex_combination
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciCometricFourTraceCastG0 (I := I) g₀ g₁ =
       ((1 : ℝ) / 2) •
@@ -918,7 +918,7 @@ private lemma c3_norm_five_le {V : Type*} [SeminormedAddCommGroup V] {a b c d e 
   have t4 := norm_add_le a b
   linarith
 
-private def coreInPerm201 : Equiv.Perm (Fin 3) :=
+def coreInPerm201 : Equiv.Perm (Fin 3) :=
   ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
 
 set_option linter.unusedSectionVars false in
@@ -927,7 +927,7 @@ set_option linter.unusedSectionVars false in
 `slotExtend` spectator extension of `connDiffSection` itself, up to a rotation of the
 rank-3 coefficient slots. This ties the core's covariant jets to the connection-difference
 jets with two spectator `finrank` factors. -/
-private theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
+theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffContrInsertionField (I := I) g₀ g₁ =
       reindexCoeffGen (I := I) (M := M) g₀ 3 4

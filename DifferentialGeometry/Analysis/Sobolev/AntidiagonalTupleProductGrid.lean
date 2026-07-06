@@ -173,5 +173,163 @@ theorem antidiagonalTupleGrid_convolution_closure
   ⟨fun i => (recGridCS A B i).1, fun i => (recGridCS_nonneg A B hA hB i).1,
     antidiagonalTupleGrid_convolution_bound b hb a A hA B hB hbase hstep⟩
 
+/-- The number of antidiagonal tuples of total weight `i` (all lengths `n ≤ i`), as a real
+constant: the sharp combinatorial factor for the grid product inequality
+`antidiagonalTupleGrid_mul_le`. -/
+noncomputable def antidiagonalTupleGridCount (i : ℕ) : ℝ :=
+  ∑ n ∈ Finset.range (i + 1), ((Finset.Nat.antidiagonalTuple n i).card : ℝ)
+
+lemma antidiagonalTupleGridCount_nonneg (i : ℕ) : 0 ≤ antidiagonalTupleGridCount i :=
+  Finset.sum_nonneg (fun _ _ => Nat.cast_nonneg _)
+
+lemma prodTerm_le_antidiagonalTupleGrid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
+    (k n : ℕ) (hn : n < k + 1) (e : Fin n → ℕ)
+    (he : e ∈ Finset.Nat.antidiagonalTuple n k) :
+    (∏ m : Fin n, b (e m)) ≤ antidiagonalTupleGrid b k := by
+  rw [antidiagonalTupleGrid]
+  have h1 : (∏ m : Fin n, b (e m)) ≤
+      ∑ e' ∈ Finset.Nat.antidiagonalTuple n k, ∏ m : Fin n, b (e' m) :=
+    Finset.single_le_sum (f := fun e' : Fin n → ℕ => ∏ m : Fin n, b (e' m))
+      (fun e' _ => Finset.prod_nonneg (fun m _ => hb _)) he
+  refine le_trans h1 ?_
+  exact Finset.single_le_sum
+    (f := fun n' : ℕ => ∑ e' ∈ Finset.Nat.antidiagonalTuple n' k, ∏ m : Fin n', b (e' m))
+    (fun n' _ => Finset.sum_nonneg (fun e' _ => Finset.prod_nonneg (fun m _ => hb _)))
+    (Finset.mem_range.mpr hn)
+
+/-- Product closure of the antidiagonal product grid: the product of two grids of total
+weights `j` and `k` is dominated by the grid of total weight `j + k`, at the price of the
+tuple-count combinatorial factor (each cross product of cells concatenates, via `Fin.append`,
+to a cell of the combined weight). -/
+theorem antidiagonalTupleGrid_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j k : ℕ) :
+    antidiagonalTupleGrid b j * antidiagonalTupleGrid b k ≤
+      (antidiagonalTupleGridCount j * antidiagonalTupleGridCount k) *
+        antidiagonalTupleGrid b (j + k) := by
+  classical
+  have hpair : ∀ n ∈ Finset.range (j + 1), ∀ e ∈ Finset.Nat.antidiagonalTuple n j,
+      ∀ n' ∈ Finset.range (k + 1), ∀ e' ∈ Finset.Nat.antidiagonalTuple n' k,
+      (∏ m : Fin n, b (e m)) * (∏ m : Fin n', b (e' m)) ≤
+        antidiagonalTupleGrid b (j + k) := by
+    intro n hn e he n' hn' e' he'
+    have happend : (∏ m : Fin n, b (e m)) * (∏ m : Fin n', b (e' m)) =
+        ∏ m : Fin (n + n'), b (Fin.append e e' m) := by
+      rw [Fin.prod_univ_add]
+      congr 1
+      · exact Finset.prod_congr rfl (fun m _ => by rw [Fin.append_left])
+      · exact Finset.prod_congr rfl (fun m _ => by rw [Fin.append_right])
+    rw [happend]
+    have hmem : Fin.append e e' ∈ Finset.Nat.antidiagonalTuple (n + n') (j + k) := by
+      rw [Finset.Nat.mem_antidiagonalTuple] at he he' ⊢
+      rw [Fin.sum_univ_add]
+      have h1 : (∑ m : Fin n, Fin.append e e' (Fin.castAdd n' m)) = j := by
+        rw [← he]
+        exact Finset.sum_congr rfl (fun m _ => by rw [Fin.append_left])
+      have h2 : (∑ m : Fin n', Fin.append e e' (Fin.natAdd n m)) = k := by
+        rw [← he']
+        exact Finset.sum_congr rfl (fun m _ => by rw [Fin.append_right])
+      rw [h1, h2]
+    have hnn' : n + n' < j + k + 1 := by
+      rw [Finset.mem_range] at hn hn'
+      omega
+    exact prodTerm_le_antidiagonalTupleGrid b hb (j + k) (n + n') hnn' _ hmem
+  calc antidiagonalTupleGrid b j * antidiagonalTupleGrid b k
+      = ∑ n ∈ Finset.range (j + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n j,
+          ((∏ m : Fin n, b (e m)) * antidiagonalTupleGrid b k) := by
+        rw [antidiagonalTupleGrid, Finset.sum_mul]
+        exact Finset.sum_congr rfl (fun n _ => by rw [Finset.sum_mul])
+    _ ≤ ∑ n ∈ Finset.range (j + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n j,
+          (antidiagonalTupleGridCount k * antidiagonalTupleGrid b (j + k)) := by
+        refine Finset.sum_le_sum (fun n hn => Finset.sum_le_sum (fun e he => ?_))
+        calc (∏ m : Fin n, b (e m)) * antidiagonalTupleGrid b k
+            = ∑ n' ∈ Finset.range (k + 1), ∑ e' ∈ Finset.Nat.antidiagonalTuple n' k,
+                ((∏ m : Fin n, b (e m)) * ∏ m : Fin n', b (e' m)) := by
+              rw [antidiagonalTupleGrid, Finset.mul_sum]
+              exact Finset.sum_congr rfl (fun n' _ => by rw [Finset.mul_sum])
+          _ ≤ ∑ n' ∈ Finset.range (k + 1), ∑ e' ∈ Finset.Nat.antidiagonalTuple n' k,
+                antidiagonalTupleGrid b (j + k) := by
+              refine Finset.sum_le_sum (fun n' hn' => Finset.sum_le_sum (fun e' he' => ?_))
+              exact hpair n hn e he n' hn' e' he'
+          _ = antidiagonalTupleGridCount k * antidiagonalTupleGrid b (j + k) := by
+              rw [antidiagonalTupleGridCount, Finset.sum_mul]
+              exact Finset.sum_congr rfl (fun n' _ => by
+                rw [Finset.sum_const, nsmul_eq_mul])
+    _ = ∑ n ∈ Finset.range (j + 1), ((Finset.Nat.antidiagonalTuple n j).card : ℝ) *
+          (antidiagonalTupleGridCount k * antidiagonalTupleGrid b (j + k)) := by
+        exact Finset.sum_congr rfl (fun n _ => by rw [Finset.sum_const, nsmul_eq_mul])
+    _ = (antidiagonalTupleGridCount j * antidiagonalTupleGridCount k) *
+          antidiagonalTupleGrid b (j + k) := by
+        rw [show (antidiagonalTupleGridCount j * antidiagonalTupleGridCount k) *
+            antidiagonalTupleGrid b (j + k) =
+            antidiagonalTupleGridCount j *
+              (antidiagonalTupleGridCount k * antidiagonalTupleGrid b (j + k)) from by
+          ring]
+        rw [show antidiagonalTupleGridCount j = ∑ n ∈ Finset.range (j + 1),
+            ((Finset.Nat.antidiagonalTuple n j).card : ℝ) from rfl]
+        rw [Finset.sum_mul]
+
+/-- Truncated antidiagonal product grid window: the sum of all grids of total weight
+strictly below `w`. -/
+noncomputable def antidiagonalTupleGridWindow (b : ℕ → ℝ) (w : ℕ) : ℝ :=
+  ∑ k ∈ Finset.range w, antidiagonalTupleGrid b k
+
+lemma antidiagonalTupleGridWindow_nonneg (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (w : ℕ) :
+    0 ≤ antidiagonalTupleGridWindow b w :=
+  Finset.sum_nonneg (fun k _ => antidiagonalTupleGrid_nonneg b hb k)
+
+lemma antidiagonalTupleGridWindow_mono (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {w w' : ℕ}
+    (h : w ≤ w') :
+    antidiagonalTupleGridWindow b w ≤ antidiagonalTupleGridWindow b w' :=
+  Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_subset_range.mpr h)
+    (fun k _ _ => antidiagonalTupleGrid_nonneg b hb k)
+
+lemma antidiagonalTupleGrid_le_window (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {k w : ℕ}
+    (hk : k < w) :
+    antidiagonalTupleGrid b k ≤ antidiagonalTupleGridWindow b w :=
+  Finset.single_le_sum (fun k' _ => antidiagonalTupleGrid_nonneg b hb k')
+    (Finset.mem_range.mpr hk)
+
+lemma one_le_antidiagonalTupleGridWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {w : ℕ}
+    (hw : 0 < w) : 1 ≤ antidiagonalTupleGridWindow b w := by
+  rw [← antidiagonalTupleGrid_zero b]
+  exact antidiagonalTupleGrid_le_window b hb hw
+
+/-- The combinatorial constant of the window product inequality
+`antidiagonalTupleGridWindow_mul_le`. -/
+noncomputable def antidiagonalTupleGridWindowMulConst (a c : ℕ) : ℝ :=
+  ∑ j ∈ Finset.range (a + 1), ∑ k ∈ Finset.range (c + 1),
+    antidiagonalTupleGridCount j * antidiagonalTupleGridCount k
+
+lemma antidiagonalTupleGridWindowMulConst_nonneg (a c : ℕ) :
+    0 ≤ antidiagonalTupleGridWindowMulConst a c :=
+  Finset.sum_nonneg (fun j _ => Finset.sum_nonneg (fun k _ =>
+    mul_nonneg (antidiagonalTupleGridCount_nonneg j) (antidiagonalTupleGridCount_nonneg k)))
+
+/-- Product closure of the grid windows: the product of the weight-`< a + 1` and
+weight-`< c + 1` windows is dominated by the weight-`< a + c + 1` window, at the price of
+the tuple-count constant. -/
+theorem antidiagonalTupleGridWindow_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (a c : ℕ) :
+    antidiagonalTupleGridWindow b (a + 1) * antidiagonalTupleGridWindow b (c + 1) ≤
+      antidiagonalTupleGridWindowMulConst a c * antidiagonalTupleGridWindow b (a + c + 1) := by
+  calc antidiagonalTupleGridWindow b (a + 1) * antidiagonalTupleGridWindow b (c + 1)
+      = ∑ j ∈ Finset.range (a + 1), ∑ k ∈ Finset.range (c + 1),
+          antidiagonalTupleGrid b j * antidiagonalTupleGrid b k := by
+        rw [antidiagonalTupleGridWindow, antidiagonalTupleGridWindow, Finset.sum_mul]
+        exact Finset.sum_congr rfl (fun j _ => by rw [Finset.mul_sum])
+    _ ≤ ∑ j ∈ Finset.range (a + 1), ∑ k ∈ Finset.range (c + 1),
+          (antidiagonalTupleGridCount j * antidiagonalTupleGridCount k) *
+            antidiagonalTupleGridWindow b (a + c + 1) := by
+        refine Finset.sum_le_sum (fun j hj => Finset.sum_le_sum (fun k hk => ?_))
+        refine le_trans (antidiagonalTupleGrid_mul_le b hb j k) ?_
+        refine mul_le_mul_of_nonneg_left ?_
+          (mul_nonneg (antidiagonalTupleGridCount_nonneg j)
+            (antidiagonalTupleGridCount_nonneg k))
+        refine antidiagonalTupleGrid_le_window b hb ?_
+        rw [Finset.mem_range] at hj hk
+        omega
+    _ = antidiagonalTupleGridWindowMulConst a c *
+          antidiagonalTupleGridWindow b (a + c + 1) := by
+        rw [antidiagonalTupleGridWindowMulConst, Finset.sum_mul]
+        exact Finset.sum_congr rfl (fun j _ => by rw [Finset.sum_mul])
+
 end Combinatorics
 end DifferentialGeometry
