@@ -39018,7 +39018,7 @@ private theorem exists_riemannPalatini_curvatureRefold_data
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
   by
     classical
-    obtain ⟨Λid, hΛid_nn, Kid, hKid_nn, qA, qB, hID⟩ :=
+    obtain ⟨Λid, hΛid_nn, Kid, hKid_nn, qA, qB, hqAB, hID⟩ :=
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_riemannPalatini_refold_identity_data
         (I := I) (M := M) g₀ a ha_super hR hδ₀
     obtain ⟨Λrm, hΛrm_nn, hRm⟩ :=
@@ -39026,7 +39026,7 @@ private theorem exists_riemannPalatini_curvatureRefold_data
         (I := I) (M := M) g₀ a ha_super hR hδ₀
     obtain ⟨Kwin, hKwin_nn, hWin⟩ :=
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_riemannPalatiniRefoldC2Family_l2JetWindow
-        (I := I) (M := M) g₀ a ha_super hR hδ₀ qA qB
+        (I := I) (M := M) g₀ a ha_super hR hδ₀ qA qB hqAB
     have hsum_nn : (0 : ℝ) ≤ Λid ^ 2 + Λrm ^ 2 := by positivity
     refine ⟨Real.sqrt (Λid ^ 2 + Λrm ^ 2), Real.sqrt_nonneg _,
       fun i => Kid i + Kwin i,
@@ -39046,7 +39046,7 @@ private theorem exists_riemannPalatini_curvatureRefold_data
         (I := I) (M := M) g₀ T hδ hδZ qA qB,
       hidRA, ?_, ?_,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannPalatiniRefoldC2Family_rfns_le
-        (I := I) (M := M) g₀ T hδ_lt hδ hδZ qA qB,
+        (I := I) (M := M) g₀ T hδ_lt hδ hδZ qA qB hqAB,
       ?_, ?_⟩
     · intro s hs x
       have h := hsupC0 s hs x
