@@ -1135,6 +1135,384 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
   sorry
 
+/-- The constructed second-gradient refold family for the covariant-derivative arm of the
+DeTurck Lie coefficient at second endpoint zero: the moving tensor's unit value weights the
+three sharp-Koszul-gradient monomials at the realized metric's orthonormal frames, each
+monomial partner-paired with its leading-frame-slot swap at half weight (so the effective
+coefficient weight is the symmetrized moving tensor -- the `symmS` average carried by the
+construction itself, never by independent quantifiers), with signed monomial weights of
+magnitude at most one and an overall path-parameter scale (the connection-difference rate
+at second endpoint zero). Three monomials at half weight over partner pairs give the three
+ledger copies of the frozen cap literal `3`. The exact permutations and signs are pinned by
+the refold identity child below. -/
+def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) (s : ℝ) : SmoothCcTensor g₀ 4 2 :=
+  s • ∑ i : Fin 3, ε i • ((1 / 2 : ℝ) •
+    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) (q i)
+      + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+        ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
+
+set_option linter.unusedSectionVars false in
+/-- The constructed covariant-derivative-arm second-gradient family vanishes at path
+parameter zero: the refold carries the connection-difference rate, which vanishes at the
+path's first endpoint. -/
+@[simp] lemma deTurckLieCovDerivRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) :
+    deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε 0 = 0 := by
+  rw [deTurckLieCovDerivRefoldC2Family, zero_smul]
+
+
+set_option linter.unusedSectionVars false in
+/-- The unit-value carrier of a slot-swapped rank-two coefficient tensor is the slot-swapped
+unit-value carrier. -/
+lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
+    (p q' : TangentSpace I x) :
+    Tensor0SSpace.toModel (ccTensorUnitValueSection (I := I) (M := M) g₀
+        (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) x)
+        ![(p : E), (q' : E)] =
+      Tensor0SSpace.toModel (ccTensorUnitValueSection (I := I) (M := M) g₀ T x)
+        ![(q' : E), (p : E)] := by
+  have hbridge : ∀ (S : SmoothCcTensor g₀ 0 2),
+      Tensor0SSpace.toModel (ccTensorUnitValueSection (I := I) (M := M) g₀ S x) =
+        unitModel (I := I) (M := M) g₀ 2 S x := fun S => rfl
+  rw [hbridge, hbridge, domDomCongrSection_unitModel,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+set_option linter.unusedSectionVars false in
+/-- Leading-frame-slot partner transport for the frame-summed refold monomial at unit-value
+weights: precomposing the slot pattern with the swap of the two leading (frame) slots is the
+same coefficient as loading the slot-swapped weight tensor at the unswapped pattern — the
+double frame sum reindexes. This is the identity through which the partner-paired family
+`deTurckLieCovDerivRefoldC2Family` carries the symmetrized moving tensor as its effective
+weight. -/
+theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (σ : Equiv.Perm (Fin 4)) :
+    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+        (σ.trans (Equiv.swap (0 : Fin 4) 1)) =
+      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)) σ := by
+  classical
+  refine SmoothCcTensor.ext ?_
+  refine ContMDiffSection.ext (fun x => ?_)
+  rw [curvatureRefoldMonomialCoeffField_toSection, curvatureRefoldMonomialCoeffField_toSection]
+  refine congrArg TensorRSSpace.ofCLM ?_
+  refine ContinuousLinearMap.ext (fun G => ?_)
+  refine Tensor0SSpace.toModel_injective ?_
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialBiContrFib,
+    curvatureRefoldMonomialFibFixedFrame_toModel, curvatureRefoldMonomialFibFixedFrame_toModel]
+  have hcons : ∀ (p q' : TangentSpace I x) (j : Fin 4),
+      (Fin.cons (p : E) (Fin.cons (q' : E) v) : Fin 4 → E) ((Equiv.swap (0 : Fin 4) 1) j) =
+        (Fin.cons (q' : E) (Fin.cons (p : E) v) : Fin 4 → E) j := by
+    intro p q' j
+    fin_cases j <;> rfl
+  have hstep : ∀ a b : Fin (Module.finrank ℝ E),
+      Tensor0SSpace.toModel (𝕜 := ℝ) (ccTensorUnitValueSection (I := I) (M := M) g₀ T x)
+          ![(smoothOrthoFrame (I := I) g₁ x a x : E), (smoothOrthoFrame (I := I) g₁ x b x : E)] *
+        Tensor0SSpace.toModel (𝕜 := ℝ) G
+          (fun i => (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : E))
+            (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : E)) v) : Fin 4 → E)
+            ((σ.trans (Equiv.swap (0 : Fin 4) 1)) i)) =
+      Tensor0SSpace.toModel (𝕜 := ℝ) (ccTensorUnitValueSection (I := I) (M := M) g₀ T x)
+          ![(smoothOrthoFrame (I := I) g₁ x a x : E), (smoothOrthoFrame (I := I) g₁ x b x : E)] *
+        Tensor0SSpace.toModel (𝕜 := ℝ) G
+          (fun i => (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : E))
+            (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : E)) v) : Fin 4 → E) (σ i)) := by
+    intro a b
+    congr 1
+    refine congrArg _ ?_
+    funext i
+    exact hcons _ _ (σ i)
+  rw [Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => hstep a b))]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+  rw [toModel_ccTensorUnitValueSection_domDomCongrSection_swap]
+
+
+set_option linter.unusedSectionVars false in
+/-- Additivity of the unit-value carrier in the coefficient tensor. -/
+lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
+    (S S' : SmoothCcTensor g₀ 0 2) (y : M) :
+    ccTensorUnitValueSection (I := I) (M := M) g₀ (S + S') y =
+      ccTensorUnitValueSection (I := I) (M := M) g₀ S y +
+        ccTensorUnitValueSection (I := I) (M := M) g₀ S' y := by
+  have h : ((S + S').toSection y : TensorRSSpace 0 2 I y) =
+      (S.toSection y : TensorRSSpace 0 2 I y) + (S'.toSection y : TensorRSSpace 0 2 I y) := by
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  rw [ccTensorUnitValueSection, ccTensorUnitValueSection, ccTensorUnitValueSection, h]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- Homogeneity of the unit-value carrier in the coefficient tensor. -/
+lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ)
+    (S : SmoothCcTensor g₀ 0 2) (y : M) :
+    ccTensorUnitValueSection (I := I) (M := M) g₀ (c • S) y =
+      c • ccTensorUnitValueSection (I := I) (M := M) g₀ S y := by
+  have h : ((c • S).toSection y : TensorRSSpace 0 2 I y) =
+      c • (S.toSection y : TensorRSSpace 0 2 I y) := by
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+  rw [ccTensorUnitValueSection, ccTensorUnitValueSection, h]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- Additivity of the frame-summed refold monomial in its unit-value weight. -/
+theorem curvatureRefoldMonomialCoeffField_unitValue_add
+    (g₀ g₁ : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
+    (σ : Equiv.Perm (Fin 4)) :
+    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (S + S'))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ (S + S')) σ =
+      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ
+        + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S')
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S') σ := by
+  classical
+  refine SmoothCcTensor.ext ?_
+  refine ContMDiffSection.ext (fun x => ?_)
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+    curvatureRefoldMonomialCoeffField_toSection, curvatureRefoldMonomialCoeffField_toSection,
+    curvatureRefoldMonomialCoeffField_toSection]
+  refine tensorRSSpace_ext 4 2 x (fun G => ?_)
+  refine Tensor0SSpace.toModel_injective ?_
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  have hadd : (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x)
+        + TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S') σ x))) G =
+      curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x G
+        + curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S') σ x G := rfl
+  rw [hadd]
+  simp only [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
+    TensorRSSpace.ofCLM]
+  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialBiContrFib,
+    curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialFibFixedFrame_toModel,
+    curvatureRefoldMonomialFibFixedFrame_toModel, curvatureRefoldMonomialFibFixedFrame_toModel]
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [ccTensorUnitValueSection_add]
+  simp only [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+  rw [add_mul]
+
+set_option linter.unusedSectionVars false in
+/-- Homogeneity of the frame-summed refold monomial in its unit-value weight. -/
+theorem curvatureRefoldMonomialCoeffField_unitValue_smul
+    (g₀ g₁ : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g₀ 0 2)
+    (σ : Equiv.Perm (Fin 4)) :
+    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (c • S))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ (c • S)) σ =
+      c • curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ := by
+  classical
+  refine SmoothCcTensor.ext ?_
+  refine ContMDiffSection.ext (fun x => ?_)
+  rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+    curvatureRefoldMonomialCoeffField_toSection, curvatureRefoldMonomialCoeffField_toSection]
+  refine tensorRSSpace_ext 4 2 x (fun G => ?_)
+  refine Tensor0SSpace.toModel_injective ?_
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  have hsmul : (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (c • TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x))) G =
+      c • curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x G := rfl
+  rw [hsmul]
+  simp only [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
+    TensorRSSpace.ofCLM]
+  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialBiContrFib,
+    curvatureRefoldMonomialFibFixedFrame_toModel, curvatureRefoldMonomialFibFixedFrame_toModel]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [ccTensorUnitValueSection_smul]
+  simp only [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- The partner-paired half sum of refold monomials carries the SYMMETRIZED moving tensor
+as its effective unit-value weight: the pairing baked into the constructed family is
+exactly the `symmS` average, so the `gFibreOpBound` hypothesis on the symmetrized tensor
+controls the paired coefficient — the certificate that universal quantification over the
+permutation-and-sign conventions is sound for the partner-paired construction. -/
+theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
+    (σ : Equiv.Perm (Fin 4)) :
+    (1 / 2 : ℝ) •
+      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) σ
+        + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+          (σ.trans (Equiv.swap (0 : Fin 4) 1))) =
+      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) σ := by
+  rw [show curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) σ =
+      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ ((1 / 2 : ℝ) •
+          (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ ((1 / 2 : ℝ) •
+          (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T))) σ from by
+    congr 1]
+  rw [curvatureRefoldMonomialCoeffField_unitValue_smul,
+    curvatureRefoldMonomialCoeffField_unitValue_add,
+    curvatureRefoldMonomialCoeffField_unitValue_trans_swap]
+
+
+set_option linter.unusedSectionVars false in
+/-- The constructed covariant-derivative-arm family carries the SYMMETRIZED moving tensor
+as its effective weight: the partner pairing in the definition is the `symmS` average.
+This is the birth certificate that the family's estimate package is sound for every
+permutation-and-sign convention — the fibre-norm cap is controlled by the `gFibreOpBound`
+hypothesis on the symmetrized tensor. -/
+theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) (s : ℝ) :
+    deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s =
+      s • ∑ i : Fin 3, ε i •
+        curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+            (symmS (I := I) (M := M) g₀ T)) (q i) := by
+  rw [deTurckLieCovDerivRefoldC2Family]
+  congr 1
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  congr 1
+  exact curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS (I := I) (M := M) g₀
+    (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (q i)
+
+set_option linter.unusedVariables false in
+/-- Deferred input (dossier row LC-1, identity core with the order-zero-part shares of rows
+LC-4/LC-5/LC-6; pattern class: connection-difference cocycle `sub_add_sub` at the realized
+path plus the endpoint exact fibre linearization
+`covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp`, the lower-slot symmetry
+of the connection difference (`connDiff_symm`, which folds the raw-weight frame sum onto
+the partner-paired constructed family), and the `appCc`/`unitModel` evaluation calculus
+with fixed-frame neighbourhood gluing; the order-zero family carries the background
+connection-difference leg, the quadratic connection-difference corrections, and the one-jet
+sharp-gradient residual): the per-parameter refold identity for the covariant-derivative
+arm of the DeTurck Lie coefficient, with the second-gradient part the CONSTRUCTED
+partner-paired family `deTurckLieCovDerivRefoldC2Family` at existentially pinned
+permutations and signs, and an order-zero family carrying joint smoothness, a ball-uniform
+pointwise fibre-norm sup, and the two-step jet window. Every consumer transitively depends
+on `sorryAx` until this lands. -/
+theorem exists_deTurckLieCovDerivArm_refold_identity_data
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∃ (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ), (∀ i, |ε i| ≤ 1) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∃ C0da : ℝ → SmoothCcTensor g₀ 2 2,
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0da (δ := δ) (δ' := δ) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            appCc (I := I) (M := M) g₀ 2 2
+                (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
+              appCc (I := I) (M := M) g₀ 2 2 (C0da s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
+                appCc (I := I) (M := M) g₀ 4 2
+                  (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0da s).toSection x) ≤
+              Λ ^ 2) ∧
+          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖ ^ 2 ≤
+              K i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (dossier rows LC-4/LC-5/LC-6, constructed-family shares at the frozen cap
+literal `3`; pattern class: joint smoothness of the realized-family coefficient
+constructions through the fixed-frame patching of the refold kernel calculus; the
+Koszul-sharp `δ/(1−δ)` fibre-norm class for the cap -- the partner pairing inside the family
+definition symmetrizes the coefficient weight, so the weight is controlled by the
+`gFibreOpBound` hypothesis on the symmetrized moving tensor for EVERY permutation-and-sign
+convention (the construction carries the pairing, so the universal quantification over
+conventions is sound, unlike independent-quadruple forms); and the tame-envelope technique
+with ball absorption for the two-step window -- the coefficient carries the moving tensor
+and the metric raisings at the zero jet, so `∇ⁱ` stays inside `range (i + 2)`; small
+literals checked at `n = 1, 2, 3` at fill): joint smoothness, the pointwise fibre-norm cap
+at the three-copy literal `3`, and the two-step jet window for the constructed
+covariant-derivative-arm second-gradient family. Every consumer transitively depends on
+`sorryAx` until this lands. -/
+theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ)
+    (hε : ∀ i, |ε i| ≤ 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
+          (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε)
+          (δ := δ) (δ' := δ) ∧
+        (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
+            ((deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε
+              s).toSection x) ≤
+          (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0) ^ 2) ∧
+        (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 4 2 i
+            (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+  sorry
+
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-1 with its arm shares of rows LC-4/LC-5/LC-6, at cap
 literal `3`; pattern class: connection-difference cocycle `sub_add_sub` + the exact path
@@ -1182,8 +1560,27 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2da s)‖ ^ 2 ≤
               K i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨Λ, hΛ, KA, hKA, q, ε, hε, hmain⟩ :=
+    exists_deTurckLieCovDerivArm_refold_identity_data (I := I) (M := M) g₀ g_bg a
+      ha_super hR hδ₀
+  obtain ⟨KB, hKB, hfam⟩ :=
+    exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow (I := I) (M := M) g₀ a
+      ha_super hR hδ₀ q ε hε
+  refine ⟨Λ, hΛ, fun i => max (KA i) (KB i),
+    fun i => le_trans (hKA i) (le_max_left _ _), ?_⟩
+  intro T δ hδ_le hδ hδZ hball
+  obtain ⟨C0da, hjoint0, hid, hsup0, henv0⟩ := hmain T hδ_le hδ hδZ hball
+  obtain ⟨hjoint2, hcap2, henv2⟩ := hfam T hδ_le hδ hδZ hball
+  refine ⟨C0da, deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε,
+    hjoint0, hjoint2, hid, hsup0, hcap2, ?_, ?_⟩
+  · intro i s hs
+    refine le_trans (henv0 i s hs) (mul_le_mul_of_nonneg_right (le_max_left _ _) ?_)
+    positivity
+  · intro i s hs
+    refine le_trans (henv2 i s hs) (mul_le_mul_of_nonneg_right (le_max_right _ _) ?_)
+    positivity
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-2 with its arm shares of rows LC-4/LC-5/LC-6: ONE GENERIC
