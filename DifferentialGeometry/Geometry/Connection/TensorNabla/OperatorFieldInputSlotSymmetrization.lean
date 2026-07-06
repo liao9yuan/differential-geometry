@@ -178,6 +178,20 @@ lemma ccInputSymm_toSection (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor
           (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from C.toSection x).comp
             (slotSwapFib (I := I) (M := M) x))) := rfl
 
+set_option linter.unusedSectionVars false in
+/-- Input-slot symmetrization is additive in the coefficient. -/
+theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
+    ccInputSymm (I := I) (M := M) g (C + D) =
+      ccInputSymm (I := I) (M := M) g C + ccInputSymm (I := I) (M := M) g D := by
+  simp only [ccInputSymm]
+  rw [appCcRS_add_left]
+  rw [show C + D + (appCcRS (I := I) (M := M) g 2 2 2 C (ccSlotSwapField (I := I) (M := M) g)
+      + appCcRS (I := I) (M := M) g 2 2 2 D (ccSlotSwapField (I := I) (M := M) g)) =
+      (C + appCcRS (I := I) (M := M) g 2 2 2 C (ccSlotSwapField (I := I) (M := M) g))
+        + (D + appCcRS (I := I) (M := M) g 2 2 2 D (ccSlotSwapField (I := I) (M := M) g)) from by
+    abel]
+  rw [smul_add]
+
 end Connection
 end Integral
 end DifferentialGeometry
