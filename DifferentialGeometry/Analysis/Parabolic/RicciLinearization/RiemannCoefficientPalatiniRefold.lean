@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldSecondGradientRefold
+import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmCorrectionFieldBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciPathPalatiniLinearization
@@ -1582,22 +1583,56 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     refine le_trans (henv2 i s hs) (mul_le_mul_of_nonneg_right (le_max_right _ _) ?_)
     positivity
 
+set_option linter.unusedSectionVars false in
+/-- The background-pair difference of the DeTurck vector field at a fixed moving metric
+collapses to the inverse-Gram-traced connection difference of the two backgrounds: the
+moving-metric leg of the two instantiations cancels by the connection-difference cocycle,
+so the difference carries no derivative of the moving metric at all. This is the
+vector-field cocycle behind the endomorphism-arm background-difference child below. -/
+theorem deTurckVF_background_sub_eq_connDiff_trace
+    (g₁ gA gB : SmoothRiemannianMetric I M) (x : M) :
+    (PDE.DeTurck.deTurckVF (I := I) g₁ gA :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x -
+      (PDE.DeTurck.deTurckVF (I := I) g₁ gB :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+      ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g₁ x x j k •
+          PDE.DeTurck.connDiff (I := I) gB gA x
+            (chartBasisVecFiber (I := I) x j x)
+            (chartBasisVecFiber (I := I) x k x) := by
+  classical
+  rw [PDE.DeTurck.deTurckVF_apply_eq (I := I) g₁ gA x,
+    PDE.DeTurck.deTurckVF_apply_eq (I := I) g₁ gB x,
+    ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [← smul_sub]
+  congr 1
+  rw [PDE.DeTurck.connDiff_cocycle (I := I) gB g₁ gA x
+      (chartBasisVecFiber (I := I) x j x) (chartBasisVecFiber (I := I) x k x),
+    add_sub_cancel_left]
+
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier row LC-2 with its arm shares of rows LC-4/LC-5/LC-6: ONE GENERIC
-child in the free background parameter `gB`, at cap literal `3` PER INSTANTIATION; pattern
-class: `deTurckLieWEndo`/`slotInsertEndoFib` calculus with the inverse-Gram-traced,
-sharp-raised leading-feed endomorphism loaded from the argument; at second endpoint zero the
-moving-metric connection-difference leg of the DeTurck vector field carries the three-monomial
-sharp-Koszul rate and refolds at three ledger copies, while the `gB`-background leg is
-constant in the moving tensor and rides the order-zero part together with the inverse-Gram
-one-jet content; sup anchors and two-step windows as in the Riemann-arm rows): the refold
-data package for the vector-field endomorphism arm of the DeTurck Lie coefficient along the
-realized path, in a free background metric. The full-subject assembly instantiates this child
-TWICE — at `gB := g_bg` (the Lie coefficient's own endomorphism arm) and at `gB := g₀` (the
-correction insert arm's endomorphism content) — the dossier row's `{3 + 3}` copy count across
-the two uses. Every consumer transitively depends on `sorryAx` until this lands. -/
-theorem exists_deTurckLieEndoArm_curvatureRefold_data
-    (g₀ gB : SmoothRiemannianMetric I M) (a : ℕ)
+/-- Deferred input (fork-3 remedy replacing the per-instantiation endomorphism-arm refold
+package, which is false as stated: the background-independent moving-leg two-jet content of
+`deTurckLieWEndo` is fed into the FULL moving tensor, and the mixed sector -- the
+antisymmetric part of the moving tensor against the second gradient of its symmetrized part
+-- is controlled neither by a `δ/(1 − δ)` second-gradient cap (the `gFibreOpBound`
+hypothesis bounds only the symmetrized tensor) nor by the order-zero two-step window (the
+moving-metric two-jet screen; dead-route class: two-jet content never rides a frozen
+`range (i + 2)` order-zero window). The background-PAIR DIFFERENCE is the form the
+full-subject assembly consumes, and there the two-jet contents cancel outright: by
+`deTurckVF_background_sub_eq_connDiff_trace` the difference of the two vector fields is the
+inverse-Gram-traced connection difference of the backgrounds, so the difference arm is
+one-jet in the moving tensor -- zero second-gradient ledger copies, a pure order-zero
+package; nothing is refolded and nothing two-jet is hidden. Pattern class: background
+uniform fibre-norm bounds and convex-perturbation pointwise `C²` for the sup, parametric
+inverse-Gram joint smoothness, and the tame-envelope technique at the `range (i + 2)`
+window for the one-jet coefficient family. Every consumer transitively depends on
+`sorryAx` until this lands. -/
+theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -1607,33 +1642,25 @@ theorem exists_deTurckLieEndoArm_curvatureRefold_data
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
-        ∃ (C0db : ℝ → SmoothCcTensor g₀ 2 2) (C2db : ℝ → SmoothCcTensor g₀ 4 2),
-          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0db (δ := δ) (δ' := δ) ∧
-          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 C2db (δ := δ) (δ' := δ) ∧
-          (∀ s ∈ Set.Icc (0 : ℝ) 1,
-            appCc (I := I) (M := M) g₀ 2 2
-                (deTurckLieEndoArmField (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) gB)
-                (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
-              appCc (I := I) (M := M) g₀ 2 2 (C0db s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
-                appCc (I := I) (M := M) g₀ 4 2 (C2db s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
-          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0db s).toSection x) ≤
-              Λ ^ 2) ∧
-          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x ((C2db s).toSection x) ≤
-              (max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0)
-                ^ 2) ∧
-          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
-            ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0db s)‖ ^ 2 ≤
-              K i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) ∧
-          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
-            ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2db s)‖ ^ 2 ≤
-              K i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+        linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+          (fun s => deTurckLieEndoArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+            - deTurckLieEndoArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀) (δ := δ) (δ' := δ) ∧
+        (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀).toSection x) ≤ Λ ^ 2) ∧
+        (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg
+              - deTurckLieEndoArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
   sorry
 
 set_option linter.unusedVariables false in
