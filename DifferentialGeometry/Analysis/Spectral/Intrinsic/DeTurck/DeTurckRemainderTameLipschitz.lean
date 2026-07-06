@@ -38947,7 +38947,7 @@ private theorem exists_lieCorr_curvatureRefold_data
             ‖iteratedCovGrad (I := I) g₀ 4 2 i (C2lc s)‖ ^ 2 ≤
               Klc i * (1 + ∑ j ∈ Finset.range (i + 2),
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+  exists_lieCorr_curvatureRefold_armSplit_data (I := I) (M := M) g₀ g_bg a ha_super hR hδ₀
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
