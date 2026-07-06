@@ -38840,23 +38840,29 @@ private theorem exists_riemannPalatini_curvatureRefold_data
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- Deferred input (dossier row LC-3, the full-subject three-arm-split child of the frozen
+/-- Deferred input (dossier row LC-3, the full-subject arm-split child of the frozen
 Lie-plus-correction refold data stated below; it lives in this file because `lieCorr0Field`
 is private here and this file is downstream of the public refold children, so the full
 subject is statable nowhere else): per-path-parameter refold data for the DeTurck Lie
-coefficient plus the order-zero Lie-correction field, with the second-gradient part
-assembled from three arm classes at three ledger copies each — the covariant-derivative arm
-(`exists_deTurckLieCovDerivArm_curvatureRefold_data`), the endomorphism arm at background
-`g_bg`, and the correction insert arm's endomorphism content at background `g₀` (the generic
-endomorphism-arm child `exists_deTurckLieEndoArm_curvatureRefold_data` instantiated twice) —
-nine copies inside the second-gradient cap literal `10` (quadrature
-`2 · (2 · 9 + 2 · 9) + 2 · 9 = 90 ≤ 100`). The correction residue — the correction field
-plus the endomorphism arm at `g₀`, whose two-jet `deTurckLieWEndo` contents cancel — is
-one-jet in the moving tensor and rides WHOLE into the order-zero part together with the
-vector-bilinear, mixed-connection, and curvature correction arms (zero second-gradient
-copies), so the order-zero part's two-step jet window is sound; the two-jet endomorphism
-content never rides an order-zero window, only the second-gradient classes. Every consumer
-transitively depends on `sorryAx` until this lands. -/
+coefficient plus the order-zero Lie-correction field. The second-gradient part is carried
+by the covariant-derivative arm alone
+(`exists_deTurckLieCovDerivArm_curvatureRefold_data`, three ledger copies on the two-leg
+rate `δ/(1 − δ)²`) inside the second-gradient cap literal `10` (quadrature
+`2 · (2 · 3 + 2 · 3) + 2 · 3 = 30 ≤ 100`; absorbing the two-leg child cap into the one-leg
+display rate is the `δ ≤ 1/2`-class composition `3δ/(1 − δ)² ≤ 10δ/(1 − δ)`, a threshold
+the ambient telescope must supply). The endomorphism content assembles as the
+background-pair DIFFERENCE of the endomorphism arm at `g_bg` and at `g₀`
+(`exists_deTurckLieEndoArm_backgroundDifference_order0_data`, consumed once): by the
+vector-field cocycle `deTurckVF_background_sub_eq_connDiff_trace` the two-jet
+`deTurckLieWEndo` contents of the two instantiations cancel, so the difference is one-jet
+in the moving tensor and rides WHOLE into the order-zero part (zero second-gradient
+copies). The correction residue — the correction field plus the endomorphism arm at `g₀`,
+the same cancellation seen from the insert arm's side (`lc0b_NEndoIns_decomp`) — is
+likewise one-jet and rides the order-zero part together with the vector-bilinear,
+mixed-connection, and curvature correction arms, so the order-zero part's two-step jet
+window is sound; the two-jet endomorphism content never rides an order-zero window, only
+the second-gradient class. Every consumer transitively depends on `sorryAx` until this
+lands. -/
 private theorem exists_lieCorr_curvatureRefold_armSplit_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
