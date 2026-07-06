@@ -2816,7 +2816,7 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M)
           corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ ∧
         Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x ((C1 s).toSection x)) ≤
           corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀) ∧
-      (∀ (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+      (∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
         ‖iteratedCovGrad (I := I) g₀ 2 2 i
             (C0 s
               + (3 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
@@ -3021,7 +3021,7 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
             (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
               (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)) := Real.sqrt_nonneg _
         linarith
-    · intro i s hs
+    · intro i hi s hs
       have hcond : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 := ⟨ha_super, hR, hδ₀⟩
       have hbnd : corrFieldTameJetBound (I := I) (M := M) g₀ a R δ₀ i =
           2 * Classical.choose (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
@@ -3036,7 +3036,7 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
           (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).1 i
       have h0 := (Classical.choose_spec (exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
           (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
-        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs
+        T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hi s hs
       have h1 := (Classical.choose_spec (exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
           (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
         T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs

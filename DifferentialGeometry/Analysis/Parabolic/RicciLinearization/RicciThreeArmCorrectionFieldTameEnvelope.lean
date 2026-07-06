@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
 
 /-!
 # Tame jet envelopes for the three-arm correction fields
@@ -410,23 +411,29 @@ private theorem corrArm0Combination_eq_order0_add_halfRiemann
   abel
 
 set_option linter.unusedVariables false in
-/-- Pointwise diagonal-product-grid bound for the covariant gradients of the ∇A-free arm-0
-combination `linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff`,
-generic in a perturbed metric `g₁ = g₀ + P`, at grid window `i + 2`.
+/-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
+∇A-free arm-0 combination
+`ccInputSymm (linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff)`,
+generic in a perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the
+window `i + 3`.
 
-The window is one lower than the moving-metric Riemann grid
-(`rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le`,
-window `i + 3`): by the certified cancellation anatomy (witness-level:
-`Order0∇ = -(1/2) • RmArm∇`) the `∇²P`-linear content of the combination vanishes, and the
-residual is one-jet class — the `A⋆A` bi-contraction plus background-curvature commutator
-kernels (the `arm0AAField` / `ricciArmOrder0BgRCommCoeffField` families of
-`RicciThreeArmCorrectionFieldBound`, with ball-uniform fibre sups there).
+The symmetric sector is the honest home of the arm-0 estimate: the realized Ricci linearization
+applies its arm-0 coefficients to `ccTensorBilinSymm`-symmetrized data only, and the certified
+cancellation `Order0∇ = -(1/2) • RmArm∇` is a symmetric-sector identity. This statement is
+designed against the two machine-checked `grid_witness` constraints (`/tmp/grid_witness.lean`,
+leader-certified; PLAN dead-routes grep anchors): MECHANISM A — the cancellation is
+symmetric-sector-ONLY (antisymmetric free-Koszul datum `E₀₁ − E₁₀ ↦ 7949 ≠ 0`), so the full-field
+predecessor of this statement was false and the subject here is the `ccInputSymm` sector; and
+MECHANISM B — under total-`k` grading the quadratic one-jet residual (`A⋆A` and `(g₁⁻¹)′`
+content) occupies total weight `k = i + 2` (cells `e = (a+1, b+1)`, `a + b = i`), so the
+`−1`-window design intent survives only in max-entry grading: hence the bounded-factor cap
+`i + 1` over the window `i + 3` — every cell of this grid respects both constraints. The residual kernels are the `arm0AAField` / `ricciArmOrder0BgRCommCoeffField`
+families of `RicciThreeArmCorrectionFieldBound` (ball-uniform fibre sups there).
 
 DEFERRED INPUT (`sorry`): the field-level Palatini split (`riemannSec_difference`) of the
-combination onto the residual families and their covariant-gradient grid calculus
-(the `ConnectionDifferenceJetTower` / `CurvatureCoefficientDifferenceJetTower` towers);
-consumers transitively depend on `sorryAx` until it lands. -/
-theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_diagonalProductGrid_le
+symmetrized combination onto the residual families and their covariant-gradient capped-grid
+calculus; consumers transitively depend on `sorryAx` until it lands. -/
+theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -437,9 +444,50 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
-              (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
-                + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)).toSection x) ≤
-          C i * ∑ k ∈ Finset.range (i + 2),
+              (ccInputSymm (I := I) (M := M) g₀
+                (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                  + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁))).toSection
+              x) ≤
+          C i * Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) := sorry
+
+set_option linter.unusedVariables false in
+/-- Pointwise diagonal-product-grid bound, at total-weight window `i + 3`, for the covariant
+gradients of the input-slot-antisymmetric remainder of the ∇A-free arm-0 combination (the
+combination minus its input-slot symmetrization `ccInputSymm`).
+
+The remainder carries exactly the content named by the machine-checked `grid_witness`
+constraint (`/tmp/grid_witness.lean` MECHANISM A, sym-sector-only cancellation — PLAN dead-routes
+grep anchor): the antisymmetric-sector linear `∇²P` cells at total weight `i + 2` (single factor
+of order `i + 2` — inside the `i + 3` window, ball-absorbed under the `i ≤ a` guard of the
+consuming envelope, which is exactly why the guarded envelope survives the `grid_witness`
+MECHANISM-B total-`k` arithmetic) and antisymmetric quadratic residual cells. Moving-Rm
+content is Palatini-split onto the `RicciThreeArmCorrectionFieldBound` families exactly as in
+`rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le`
+(the window-`i + 3` sibling and proof template).
+
+DEFERRED INPUT (`sorry`): the field-level Palatini split of the remainder onto the residual
+families and their covariant-gradient grid calculus; consumers transitively depend on `sorryAx`
+until it lands. -/
+theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputAsymmRemainder_diagonalProductGrid_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              ((linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                  + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+                - ccInputSymm (I := I) (M := M) g₀
+                  (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                    + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁))).toSection
+              x) ≤
+          C i * ∑ k ∈ Finset.range (i + 3),
             ∑ n ∈ Finset.range (k + 1),
               ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
                 ∏ m : Fin n,
@@ -447,23 +495,18 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
                     ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x) := sorry
 
 set_option linter.unusedVariables false in
-/-- All-order per-order L² tame jet envelope for the ∇A-free arm-0 combination
+/-- Per-order L² tame jet envelope, at orders `i ≤ a`, for the ∇A-free arm-0 combination
 `linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff`, generic in a
 perturbed metric `g₁ = g₀ + P`.
 
-By the certified cancellation anatomy (witness-level: the ∇A-content of the order-zero
-connection-difference coefficient equals `-(1/2)` times that of the Riemann bi-contraction arm)
-the ∇A-linear content of this combination vanishes; the residual is the `A⋆A` bi-contraction
-plus the background-curvature commutator kernel — the prebuilt `arm0AAField` /
-`ricciArmOrder0BgRCommCoeffField` families of `RicciThreeArmCorrectionFieldBound` (with
-ball-uniform fibre sups there), so the combination is one-jet class and every covariant-gradient
-order `i` is windowed at `i + 2`.
-
-Proven by integrating the pointwise diagonal-product-grid bound at window `i + 2` against the
-ball-uniform grid integrals (`antidiagonalTupleGrid_integral_ballUniform_tameWindow`). TRANSIT:
-the grid engine
-(`rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_diagonalProductGrid_le`)
-is a posited `sorry` child; consumers transitively depend on `sorryAx` until it lands. -/
+GUARDED at `i ≤ a`: the unguarded all-order form is FALSE (single-mode witness family — the
+antisymmetric-sector linear `∇²P` content integrates to `‖∇^{i+2}P‖²`, ball-absorbable only for
+`i ≤ a`). Proven by the pointwise symmetric/antisymmetric split of the combination onto the two
+grid children: the symmetric-sector capped grid integrates through the capped-top-layer engine
+(`boundedFactorGridWindow_integral_ballUniform_flat_allOrders`), the antisymmetric remainder
+grid through the per-layer ball-uniform engine with the top window absorbed by the guard.
+TRANSIT: both grid children are posited `sorry` inputs; consumers transitively depend on
+`sorryAx` until they land. -/
 theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -475,21 +518,33 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnve
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
-        ∀ (i : ℕ),
+        ∀ (i : ℕ), i ≤ a →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
                 + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
   classical
-  obtain ⟨C, hC_nn, hgrid⟩ :=
-    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_diagonalProductGrid_le
+  obtain ⟨CS, hCS_nn, hgridS⟩ :=
+    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputSymm_boundedFactorGridWindow_le
       (I := I) (M := M) g₀ hδ₀
-  obtain ⟨Kg, hKg_nn, hKg⟩ :=
+  obtain ⟨CG, hCG_nn, hgridG⟩ :=
+    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputAsymmRemainder_diagonalProductGrid_le
+      (I := I) (M := M) g₀ hδ₀
+  obtain ⟨Kflat, hKflat_nn, hKflat⟩ :=
+    boundedFactorGridWindow_integral_ballUniform_flat_allOrders
+      (I := I) (M := M) g₀ a ha_super hR
+  obtain ⟨Kt, hKt_nn, hKt⟩ :=
     antidiagonalTupleGrid_integral_ballUniform_tameWindow (I := I) (M := M) g₀ a ha_super hR
-  refine ⟨fun i => C i * ∑ k ∈ Finset.range (i + 2), Kg k,
-    fun i => mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k)), ?_⟩
-  intro g₁ P δ hδ_le hδ htie hPball i
+  refine ⟨fun i => 2 * (CS i * Kflat i)
+      + 2 * (CG i * ((1 + R ^ 2) * ∑ k ∈ Finset.range (i + 3), Kt k)),
+    fun i => by
+      have h1 : (0 : ℝ) ≤ CS i * Kflat i := mul_nonneg (hCS_nn i) (hKflat_nn i)
+      have h2 : (0 : ℝ) ≤ CG i * ((1 + R ^ 2) * ∑ k ∈ Finset.range (i + 3), Kt k) :=
+        mul_nonneg (hCG_nn i) (mul_nonneg (by positivity)
+          (Finset.sum_nonneg (fun k _ => hKt_nn k)))
+      linarith, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
   have hwin_nn : 0 ≤ ∑ j ∈ Finset.range (i + 2),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
     Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -513,64 +568,136 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnve
         have h1 : δ * Real.sqrt (g₀.inner x₀ v v) < 0 := mul_neg_of_neg_of_pos hδc' hsqrt_pos
         exact mul_neg_of_neg_of_pos h1 hsqrt_pos
       linarith [le_trans habs_nn hbound]
+    obtain ⟨hWint, hWbound⟩ := hKflat P hPball i
+    have hsplit : linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+        + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ =
+        ccInputSymm (I := I) (M := M) g₀
+          (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+            + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+        + ((linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+            + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+          - ccInputSymm (I := I) (M := M) g₀
+            (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+              + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)) := by
+      abel
     have hF_int : MeasureTheory.Integrable
-        (fun x => C i * ∑ k ∈ Finset.range (i + 2),
-          ∑ n ∈ Finset.range (k + 1),
-            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
-              ∏ m : Fin n,
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
-        (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-      (MeasureTheory.integrable_finset_sum _
-        (fun k hk => (hKg P hPball k).1)).const_mul (C i)
+        (fun x => 2 * (CS i * Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3))
+          + 2 * (CG i * ∑ k ∈ Finset.range (i + 3),
+              ∑ n ∈ Finset.range (k + 1),
+                ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+                  ∏ m : Fin n,
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)))
+        (riemannianVolumeMeasure (I := I) (M := M) g₀) := by
+      refine MeasureTheory.Integrable.add ?_ ?_
+      · exact (hWint.const_mul (CS i)).const_mul 2
+      · exact ((MeasureTheory.integrable_finset_sum _
+          (fun k hk => (hKt P hPball k).1)).const_mul (CG i)).const_mul 2
     have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (2 + i)
       (iteratedCovGrad (I := I) g₀ 2 2 i
         (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
           + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁))
-      (fun x => C i * ∑ k ∈ Finset.range (i + 2),
-        ∑ n ∈ Finset.range (k + 1),
-          ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
-            ∏ m : Fin n,
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
-      hF_int
-      (fun x => hgrid g₁ P htie hδ_le hδ0 hδ i x)
-    refine le_trans key ?_
-    rw [MeasureTheory.integral_const_mul,
-      MeasureTheory.integral_finset_sum _ (fun k hk => (hKg P hPball k).1)]
-    have hsum_le : ∑ k ∈ Finset.range (i + 2),
-          (∫ x, ∑ n ∈ Finset.range (k + 1),
+      (fun x => 2 * (CS i * Combinatorics.boundedFactorGridWindow
+          (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3))
+        + 2 * (CG i * ∑ k ∈ Finset.range (i + 3),
+            ∑ n ∈ Finset.range (k + 1),
               ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
                 ∏ m : Fin n,
                   riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
-            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
-        (∑ k ∈ Finset.range (i + 2), Kg k) *
-          (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
-      rw [Finset.sum_mul]
-      refine Finset.sum_le_sum (fun k hk => ?_)
-      refine le_trans (hKg P hPball k).2 ?_
-      refine mul_le_mul_of_nonneg_left ?_ (hKg_nn k)
+                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)))
+      hF_int
+      (fun x => by
+        have hsec : (iteratedCovGrad (I := I) g₀ 2 2 i
+            (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+              + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)).toSection x =
+            (iteratedCovGrad (I := I) g₀ 2 2 i
+              (ccInputSymm (I := I) (M := M) g₀
+                (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                  + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁))).toSection x
+            + (iteratedCovGrad (I := I) g₀ 2 2 i
+                ((linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                    + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+                  - ccInputSymm (I := I) (M := M) g₀
+                    (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                      + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                        g₁))).toSection x := by
+          conv_lhs => rw [hsplit]
+          rw [iteratedCovGrad_add (I := I) g₀ 2 2 i _ _, SmoothCcTensor.toSection_add]
+          rfl
+        rw [hsec]
+        refine le_trans
+          (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 (2 + i) x _ _) ?_
+        have h1 := hgridS g₁ P htie hδ_le hδ0 hδ i x
+        have h2 := hgridG g₁ P htie hδ_le hδ0 hδ i x
+        linarith)
+    refine le_trans key ?_
+    rw [MeasureTheory.integral_add ((hWint.const_mul (CS i)).const_mul 2)
+        (((MeasureTheory.integrable_finset_sum _
+          (fun k hk => (hKt P hPball k).1)).const_mul (CG i)).const_mul 2),
+      MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul,
+      MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul,
+      MeasureTheory.integral_finset_sum _ (fun k hk => (hKt P hPball k).1)]
+    have htopP : ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ≤ R :=
+      hPball (i + 2) (by omega)
+    have hlayer : ∀ k ∈ Finset.range (i + 3),
+        (∫ x, ∑ n ∈ Finset.range (k + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+        Kt k * ((1 + R ^ 2) * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) := by
+      intro k hk
+      rw [Finset.mem_range] at hk
+      refine le_trans (hKt P hPball k).2 ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hKt_nn k)
       have hsub : ∑ j ∈ Finset.range (k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 ≤
-          ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
+          ∑ j ∈ Finset.range (i + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
         refine Finset.sum_le_sum_of_subset_of_nonneg
           (Finset.range_mono ?_) (fun j _ _ => sq_nonneg _)
-        rw [Finset.mem_range] at hk
         omega
-      linarith
-    calc C i * ∑ k ∈ Finset.range (i + 2),
-            (∫ x, ∑ n ∈ Finset.range (k + 1),
-                ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
-                  ∏ m : Fin n,
-                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
-                      ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
-              ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
-        ≤ C i * ((∑ k ∈ Finset.range (i + 2), Kg k) *
-            (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) :=
-          mul_le_mul_of_nonneg_left hsum_le (hC_nn i)
-      _ = (C i * ∑ k ∈ Finset.range (i + 2), Kg k) *
-            (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
-          ring
+      have htail : ∑ j ∈ Finset.range (i + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 =
+          (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)
+            + ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 := by
+        rw [Finset.sum_range_succ]
+      have htop_sq : ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 ≤ R ^ 2 := by
+        have := norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)
+        nlinarith [htopP]
+      nlinarith [hwin_nn, htop_sq, hsub, htail, sq_nonneg R]
+    have hsum_le : ∑ k ∈ Finset.range (i + 3),
+        (∫ x, ∑ n ∈ Finset.range (k + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+        (∑ k ∈ Finset.range (i + 3), Kt k) * ((1 + R ^ 2) * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) := by
+      rw [Finset.sum_mul]
+      exact Finset.sum_le_sum hlayer
+    have hS_le : CS i * ∫ x, Combinatorics.boundedFactorGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) ≤
+        CS i * (Kflat i * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) :=
+      mul_le_mul_of_nonneg_left hWbound (hCS_nn i)
+    have hG_le : CG i * ∑ k ∈ Finset.range (i + 3),
+        (∫ x, ∑ n ∈ Finset.range (k + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+        CG i * ((∑ k ∈ Finset.range (i + 3), Kt k) *
+          ((1 + R ^ 2) * (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2))) :=
+      mul_le_mul_of_nonneg_left hsum_le (hCG_nn i)
+    nlinarith [hS_le, hG_le]
   · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
     have hz : ‖iteratedCovGrad (I := I) g₀ 2 2 i
         (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
@@ -578,29 +705,28 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnve
       rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
         MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
     rw [hz]
-    have hK_nn : 0 ≤ C i * ∑ k ∈ Finset.range (i + 2), Kg k :=
-      mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
-    nlinarith [hwin_nn, hK_nn]
+    have h1 : (0 : ℝ) ≤ CS i * Kflat i := mul_nonneg (hCS_nn i) (hKflat_nn i)
+    have h2 : (0 : ℝ) ≤ CG i * ((1 + R ^ 2) * ∑ k ∈ Finset.range (i + 3), Kt k) :=
+      mul_nonneg (hCG_nn i) (mul_nonneg (by positivity)
+        (Finset.sum_nonneg (fun k _ => hKt_nn k)))
+    nlinarith [hwin_nn, h1, h2]
 
 set_option linter.unusedVariables false in
-/-- All-order per-order L² tame jet envelope for the combined arm-0 correction subject
+/-- Per-order L² tame jet envelope, at orders `i ≤ a`, for the combined arm-0 correction subject
 `linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff
 + (3/2) • ricciArmOrder0RiemannCoeff - ricciArmOrder0CurvCoeff` (curvature coefficients at the
 realized-family metric) along the realized family, at window `i + 2` — the arm-0 clause of the
 reshaped correction-field spec (`corrFieldDataSpec`).
 
-The combined subject is the certified one-jet subject: by the certified weight identity
-`RmArm∇ = -2 · Order0∇` the combination equals
-`linearizedRicciConnDiffOrder0Coeff + (1/2) • ricciArmOrder0RiemannCoeff`, whose ∇A-linear
-content vanishes; the residual is the `A⋆A` bi-contraction plus the background-curvature
-commutator kernel (the prebuilt `arm0AAField` / `ricciArmOrder0BgRCommCoeffField` families of
-`RicciThreeArmCorrectionFieldBound`).
-
-Proven by the definitional collapse of the combination onto
-`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` at the realized
-metric followed by the generic envelope at the convex perturbation. TRANSIT: the generic engine
-(`linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic`) is a
-posited `sorry` child; consumers transitively depend on `sorryAx` until it lands. -/
+GUARDED at `i ≤ a` in the md0 binder shape: the unguarded all-order form is FALSE (single-mode
+witness family at `i ≥ a + 1`). The combined subject collapses definitionally onto the ∇A-free
+combination `linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` at
+the realized metric; the certified cancellation that windows it at `i + 2` is a symmetric-sector
+identity, entering through the symmetric/antisymmetric split of the generic envelope. TRANSIT:
+the generic engine
+(`linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic`) rests
+on two posited `sorry` grid children; consumers transitively depend on `sorryAx` until they
+land. -/
 theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -613,7 +739,7 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∀ (i : ℕ) (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+        ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
               (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
                 - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
@@ -629,7 +755,7 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
     linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic
       (I := I) (M := M) g₀ a ha_super hR hδ₀
   refine ⟨K0, hK0_nn, ?_⟩
-  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i s hs
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
   have hs0 : (0 : ℝ) ≤ s := hs.1
   have hs1 : s ≤ 1 := hs.2
   have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
@@ -707,7 +833,7 @@ theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
       mul_nonneg hs0 (sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖)]
   rw [corrArm0Combination_eq_order0_add_halfRiemann (I := I) (M := M) g₀ T T' hδ hδ' s]
   have hmain := hK0 (realizedFam (I := I) g₀ T T' hδ hδ' s)
-    (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball i
+    (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball i hi
   refine le_trans hmain ?_
   have hwinsum : ∑ j ∈ Finset.range (i + 2),
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤
