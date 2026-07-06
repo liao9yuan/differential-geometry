@@ -410,6 +410,64 @@ private theorem corrArm0Combination_eq_order0_add_halfRiemann
     show (3 / 2 : ℝ) = 1 + 1 / 2 from by norm_num, add_smul, one_smul]
   abel
 
+set_option linter.unusedSectionVars false in
+private theorem exists_rfns_iteratedCovGrad_fixedCoeffField_bound
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 2 2) :
+    ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 i S).toSection x) ≤ c i := by
+  have h : ∀ i : ℕ, ∃ c : ℝ, 0 ≤ c ∧ ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 2 2 i S).toSection x) ≤ c := fun i =>
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 (2 + i)
+      (iteratedCovGrad (I := I) g₀ 2 2 i S)
+  choose c hc0 hcb using h
+  exact ⟨c, hc0, hcb⟩
+
+set_option linter.unusedVariables false in
+/-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
+MOVING arm-0 combination
+`ccInputSymm (linearizedRicciConnDiffOrder0CoeffField + (1/2) • (RmArm g₁ − RmArm g₀))` —
+the ∇A-free combination with the fixed background Riemann arm peeled off — generic in a
+perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the window
+`i + 3` in the `P`-jets.
+
+This subject is exactly the moving kernel content certified by the machine-checked
+`grid_witness` constraints (`/tmp/grid_witness.lean`, leader-certified; on the flat witnesses
+there the background Riemann arm vanishes, so the certified `comb` tables pin THIS field):
+MECHANISM A — the cancellation `Order0∇ = -(1/2) • RmArm∇` of the linear `∇²P` content is
+symmetric-sector-ONLY (antisymmetric free-Koszul datum `E₀₁ − E₁₀ ↦ 7949 ≠ 0`), hence the
+`ccInputSymm` wrapper; the two moving arms must stay COMBINED (on the symmetric datum `E₁₁`
+the order-0 arm alone retains linear `∇²P` content `↦ 1`, killed only by the paired
+`-(1/2) • RmArm ↦ -2`). MECHANISM B — under total-`k` grading the quadratic one-jet residual
+(`A⋆A` and `(g₁⁻¹)′` content) occupies total weight `k = i + 2` with per-factor order at most
+`i + 1`, which the bounded-factor cap `i + 1` over the window `i + 3` accommodates. The
+residual kernels are the `arm0AAField` / `ricciArmOrder0BgRCommCoeffField` families of
+`RicciThreeArmCorrectionFieldBound` (ball-uniform fibre sups there).
+
+DEFERRED INPUT (`sorry`): the field-level Palatini split (`riemannSec_difference`) of the
+symmetrized moving combination onto the residual families and their covariant-gradient
+capped-grid calculus; consumers transitively depend on `sorryAx` until it lands. -/
+theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_boundedFactorGridWindow_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (ccInputSymm (I := I) (M := M) g₀
+                (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+                  + (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+                      - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)))).toSection
+              x) ≤
+          C i * Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) := sorry
+
 set_option linter.unusedVariables false in
 /-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
 ∇A-free arm-0 combination
@@ -430,9 +488,12 @@ content) occupies total weight `k = i + 2` (cells `e = (a+1, b+1)`, `a + b = i`)
 `i + 1` over the window `i + 3` — every cell of this grid respects both constraints. The residual kernels are the `arm0AAField` / `ricciArmOrder0BgRCommCoeffField`
 families of `RicciThreeArmCorrectionFieldBound` (ball-uniform fibre sups there).
 
-DEFERRED INPUT (`sorry`): the field-level Palatini split (`riemannSec_difference`) of the
-symmetrized combination onto the residual families and their covariant-gradient capped-grid
-calculus; consumers transitively depend on `sorryAx` until it lands. -/
+Proven by peeling the fixed symmetrized background Riemann arm
+`ccInputSymm ((1/2) • ricciArmOrder0RiemannCoeff g₀ g₀)` (a `g₁`-independent smooth field,
+jet-bounded by compactness and absorbed into the grid window via
+`one_le_boundedFactorGridWindow`) off the moving-content grid child via `ccInputSymm_add`.
+TRANSIT: the moving-content grid child is a posited `sorry` input; consumers transitively
+depend on `sorryAx` until it lands. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -450,7 +511,80 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
               x) ≤
           C i * Combinatorics.boundedFactorGridWindow
             (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) := sorry
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) := by
+  classical
+  obtain ⟨C1, hC1_nn, hgrid1⟩ :=
+    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_boundedFactorGridWindow_le
+      (I := I) (M := M) g₀ hδ₀
+  obtain ⟨cbg, hcbg_nn, hcbg⟩ :=
+    exists_rfns_iteratedCovGrad_fixedCoeffField_bound (I := I) (M := M) g₀
+      (ccInputSymm (I := I) (M := M) g₀
+        ((1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))
+  refine ⟨fun i => 2 * C1 i + 2 * cbg i,
+    fun i => by have := hC1_nn i; have := hcbg_nn i; linarith, ?_⟩
+  intro g₁ P htie δ hδ_le hδ0 hbound i x
+  have hb_nn : ∀ l : ℕ, 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) :=
+    fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
+  have hW_ge1 : 1 ≤ Combinatorics.boundedFactorGridWindow
+      (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) :=
+    Combinatorics.one_le_boundedFactorGridWindow _ hb_nn (by omega)
+  have harg : linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+      + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ =
+      (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+        + (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+            - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))
+      + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀ := by
+    rw [smul_sub]
+    abel
+  have hsec : (iteratedCovGrad (I := I) g₀ 2 2 i
+      (ccInputSymm (I := I) (M := M) g₀
+        (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+          + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁))).toSection x =
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (ccInputSymm (I := I) (M := M) g₀
+          (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+            + (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)))).toSection x
+      + (iteratedCovGrad (I := I) g₀ 2 2 i
+          (ccInputSymm (I := I) (M := M) g₀
+            ((1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))).toSection x := by
+    rw [show ccInputSymm (I := I) (M := M) g₀
+        (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+          + (1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) =
+        ccInputSymm (I := I) (M := M) g₀
+          (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
+            + (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+                - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))
+        + ccInputSymm (I := I) (M := M) g₀
+            ((1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) from by
+      rw [harg, ccInputSymm_add]]
+    rw [iteratedCovGrad_add (I := I) g₀ 2 2 i _ _, SmoothCcTensor.toSection_add]
+    rfl
+  rw [hsec]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 (2 + i) x _ _) ?_
+  have h1 := hgrid1 g₁ P htie hδ_le hδ0 hbound i x
+  have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+      ((iteratedCovGrad (I := I) g₀ 2 2 i
+        (ccInputSymm (I := I) (M := M) g₀
+          ((1 / 2 : ℝ) • ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))).toSection x) ≤
+      cbg i * Combinatorics.boundedFactorGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) := by
+    refine le_trans (hcbg i x) ?_
+    nth_rewrite 1 [← mul_one (cbg i)]
+    exact mul_le_mul_of_nonneg_left hW_ge1 (hcbg_nn i)
+  rw [show (2 * C1 i + 2 * cbg i) * Combinatorics.boundedFactorGridWindow
+      (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) =
+      2 * (C1 i * Combinatorics.boundedFactorGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3))
+      + 2 * (cbg i * Combinatorics.boundedFactorGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3)) from by ring]
+  linarith
 
 set_option linter.unusedVariables false in
 /-- Pointwise diagonal-product-grid bound, at total-weight window `i + 3`, for the covariant
