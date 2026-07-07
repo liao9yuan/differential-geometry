@@ -6596,7 +6596,11 @@ family), and the order-zero family carries the quadratic connection-difference c
 and the one-jet sharp-gradient residual with joint smoothness, a ball-uniform pointwise
 fibre-norm sup, and the two-step jet window. This is the general-background statement
 instantiated at `g_bg := g₀`: the background leg is absent, leaving exactly the moving
-refold core. Every consumer transitively depends on `sorryAx` until this lands. -/
+refold core. Stated under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin
+chain's `T` is `symmS`-representable at every wired level, so the antisymmetric escape
+sector is vacuous for chain inputs): the realized path transmits only `symmS T`, so the
+raw-`∇²T` window conjunct is true only on the symmetric sector. Every consumer
+transitively depends on `sorryAx` until this lands. -/
 theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6604,6 +6608,8 @@ theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∃ (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ), (∀ i, |ε i| ≤ 1) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -6643,8 +6649,10 @@ sharp-gradient residual): the per-parameter refold identity for the covariant-de
 arm of the DeTurck Lie coefficient, with the second-gradient part the CONSTRUCTED
 partner-paired family `deTurckLieCovDerivRefoldC2Family` at existentially pinned
 permutations and signs, and an order-zero family carrying joint smoothness, a ball-uniform
-pointwise fibre-norm sup, and the two-step jet window. Every consumer transitively depends
-on `sorryAx` until this lands. -/
+pointwise fibre-norm sup, and the two-step jet window. Stated under the chain-supplied
+symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is `symmS`-representable at every
+wired level), threaded to the basepoint-background identity core. Every consumer
+transitively depends on `sorryAx` until this lands. -/
 theorem exists_deTurckLieCovDerivArm_refold_identity_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6652,6 +6660,8 @@ theorem exists_deTurckLieCovDerivArm_refold_identity_data
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∃ (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ), (∀ i, |ε i| ≤ 1) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -6694,8 +6704,8 @@ theorem exists_deTurckLieCovDerivArm_refold_identity_data
     fun i => 2 * Kv i + 2 * Kd i,
     fun i => by have h1 := hKv_nn i; have h2 := hKd_nn i; linarith,
     q, ε, hε, ?_⟩
-  intro T δ hδ_le hδ hδZ hball
-  obtain ⟨C0v, hjv, hidv, hsupv, henvv⟩ := hmov T hδ_le hδ hδZ hball
+  intro T hTsymm δ hδ_le hδ hδZ hball
+  obtain ⟨C0v, hjv, hidv, hsupv, henvv⟩ := hmov T hTsymm hδ_le hδ hδZ hball
   have hZball : ∀ j : ℕ, j ≤ a + 2 →
       ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
     intro j hj
@@ -14477,7 +14487,9 @@ windows as in the Riemann-arm rows — except that the second-gradient cap rides
 denominator `(1−δ)²`: the three-monomial covariant-derivative-arm family has no Bianchi
 fold, its sharp rate `3·fC·δ/(1−δ)²` is tight at `n = 1`, and the one-leg denominator was
 false for every `δ ∈ (0, 1)`): the refold data package for the covariant-derivative arm of
-the DeTurck Lie coefficient along the realized path. Every consumer transitively depends on
+the DeTurck Lie coefficient along the realized path. Stated under the chain-supplied
+symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is `symmS`-representable at every
+wired level), threaded to the refold identity core. Every consumer transitively depends on
 `sorryAx` until this lands. -/
 theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -14485,6 +14497,8 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -14526,8 +14540,8 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
       ha_super hR hδ₀ q ε hε
   refine ⟨Λ, hΛ, fun i => max (KA i) (KB i),
     fun i => le_trans (hKA i) (le_max_left _ _), ?_⟩
-  intro T δ hδ_le hδ hδZ hball
-  obtain ⟨C0da, hjoint0, hid, hsup0, henv0⟩ := hmain T hδ_le hδ hδZ hball
+  intro T hTsymm δ hδ_le hδ hδZ hball
+  obtain ⟨C0da, hjoint0, hid, hsup0, henv0⟩ := hmain T hTsymm hδ_le hδ hδZ hball
   obtain ⟨hjoint2, hcap2, henv2⟩ := hfam T hδ_le hδ hδZ hball
   refine ⟨C0da, deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε,
     hjoint0, hjoint2, hid, hsup0, hcap2, ?_, ?_⟩

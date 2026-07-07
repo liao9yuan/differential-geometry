@@ -40851,8 +40851,10 @@ the second-gradient class. The `δ₀ ≤ 1/2` hypothesis is the closure thresho
 second-gradient arm composition (the difference-child two-leg literal `3` closes into the
 literal-`10` cap only via `3/(1−δ) ≤ 6 ≤ 10` at `δ ≤ 1/2`, threaded down the `∀`-telescope
 via `δ ≤ δ₀`; the bare `δ₀ < 1` telescope was insufficient — at `δ = 3/4` the composed
-child cap exceeds the parent cap); the sole consumer chain instantiates `δ₀ = 1/3`. Every
-consumer transitively depends on `sorryAx` until this
+child cap exceeds the parent cap); the sole consumer chain instantiates `δ₀ = 1/3`. Stated
+under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is
+`symmS`-representable at every wired level), threaded to the covariant-derivative-arm
+child. Every consumer transitively depends on `sorryAx` until this
 lands. -/
 private theorem exists_lieCorr_curvatureRefold_armSplit_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -40860,6 +40862,8 @@ private theorem exists_lieCorr_curvatureRefold_armSplit_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λlc : ℝ, 0 ≤ Λlc ∧ ∃ Klc : ℕ → ℝ, (∀ i, 0 ≤ Klc i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -40910,9 +40914,9 @@ private theorem exists_lieCorr_curvatureRefold_armSplit_data
       have h2 := hKdf_nn i
       have h3 := hKrs_nn i
       linarith, ?_⟩
-  intro T δ hδ_le hδ hδZ hball
+  intro T hTsymm δ hδ_le hδ hδZ hball
   obtain ⟨C0da, C2da, hj0da, hj2da, hidda, hsupda, hcapda, henv0da, henv2da⟩ :=
-    hDA T hδ_le hδ hδZ hball
+    hDA T hTsymm hδ_le hδ hδZ hball
   obtain ⟨hjdf, hsupdf, henvdf⟩ := hDF T hδ_le hδ hδZ hball
   obtain ⟨hjrs, hsuprs, henvrs⟩ := hRS T hδ_le hδ hδZ hball
   set fam := realizedFam (I := I) g₀ T 0 hδ hδZ
@@ -41072,7 +41076,9 @@ refolded through the second-gradient slot, which acts on the first endpoint only
 consumer instantiates the zero endpoint. The `δ₀ ≤ 1/2` hypothesis is the closure threshold
 of the second-gradient arm composition inherited from the arm-split staging twin (the
 difference-child two-leg literal `3` closes into the literal-`10` cap only via
-`3/(1−δ) ≤ 6 ≤ 10` at `δ ≤ 1/2`); the sole consumer chain instantiates `δ₀ = 1/3`. Every
+`3/(1−δ) ≤ 6 ≤ 10` at `δ ≤ 1/2`); the sole consumer chain instantiates `δ₀ = 1/3`. Stated
+under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is
+`symmS`-representable at every wired level), matching the arm-split staging twin. Every
 consumer transitively depends on `sorryAx` until
 this lands. -/
 private theorem exists_lieCorr_curvatureRefold_data
@@ -41081,6 +41087,8 @@ private theorem exists_lieCorr_curvatureRefold_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀_half : δ₀ ≤ 1 / 2) :
     ∃ Λlc : ℝ, 0 ≤ Λlc ∧ ∃ Klc : ℕ → ℝ, (∀ i, 0 ≤ Klc i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -41194,7 +41202,7 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
   obtain ⟨C0ra, C2ra, hjC0ra, hjC2ra, hidRA, hsupC0ra, hsupRm, hsupC2ra, henvC0ra, henvC2ra⟩ :=
     hRA T hTsymm hδ_le hδ hδZ hTjets
   obtain ⟨C0lc, C2lc, hjC0lc, hjC2lc, hidLC, hsupC0lc, hsupC2lc, henvC0lc, henvC2lc⟩ :=
-    hLC T hδ_le hδ hδZ hTjets
+    hLC T hTsymm hδ_le hδ hδZ hTjets
   have hsum_nn : (0 : ℝ) ≤ 3 * Λra ^ 2 + 2 * Λlc ^ 2 := by positivity
   refine ⟨fun s => C0ra s + C0lc s, fun s => C2ra s + C2lc s,
     ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
