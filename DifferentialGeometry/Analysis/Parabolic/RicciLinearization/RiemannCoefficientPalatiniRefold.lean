@@ -6582,25 +6582,211 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
 
+
+/-- The pair-trace form of the constructed covariant-derivative-arm second-gradient refold
+family: each signed, partner-paired refold monomial re-expressed as the moving pair-trace
+operator loaded with the two-step covariant gradient of the moving tensor, slot-arranged by
+the monomial pattern composed with the argument/weight exchange (the double swap of the
+frame pair against the evaluation pair), so the coefficient acts on the moving tensor's
+zeroth gradient instead of its second. Its `appCc`-action on the moving tensor equals the
+constructed family's `appCc`-action on the two-step gradient, so subtracting it from the
+covariant-derivative arm realizes the refold identity's order-zero coefficient. -/
+def deTurckLieCovDerivRefoldPairTraceFamily (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
+  s • ∑ i : Fin 3, ε i • ((1 / 2 : ℝ) •
+    (appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (domDomCongrSection (I := I) g₀
+              ((q i).trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3))
+              (iteratedCovGrad (I := I) g₀ 0 2 2 T))))
+      + appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (domDomCongrSection (I := I) g₀
+              (((q i).trans (Equiv.swap (0 : Fin 4) 1)).trans
+                (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3))
+              (iteratedCovGrad (I := I) g₀ 0 2 2 T))))))
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private theorem bdMonoRefold_appCc_eq_pairTrace_appCc (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (G : SmoothCcTensor g₀ 0 4) (σ : Equiv.Perm (Fin 4)) :
+    appCc (I := I) (M := M) g₀ 2 2
+        (appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (domDomCongrSection (I := I) g₀
+                (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G)))) S =
+      appCc (I := I) (M := M) g₀ 4 2
+        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ) G := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCc_toSection, appCc_toSection]
+  apply ContinuousLinearMap.ext
+  intro t
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [bdTensor0S_zero_rank_decomp (I := I) (M := M) x t]
+  simp only [map_smul, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul]
+  congr 1
+  rw [bdPairTraceOp_apply_toModel (I := I) (M := M) g₀ g₁
+    (domDomCongrSection (I := I) g₀
+      (σ.trans (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3)) G) x
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x)
+      (unitTensor (I := I) (M := M) x)) v]
+  rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ).toSection x)
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from G.toSection x)
+        (unitTensor (I := I) (M := M) x))) =
+    curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from G.toSection x)
+        (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialFibFixedFrame_toModel]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun b _ => ?_
+  simp only [domDomCongrSection_unitModel, ContinuousMultilinearMap.domDomCongr_apply]
+  refine congrArg₂ (· * ·) rfl ?_
+  rw [show Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from G.toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+    unitModel (I := I) (M := M) g₀ 4 G x from rfl]
+  refine congrArg _ ?_
+  funext i
+  rw [Equiv.trans_apply]
+  generalize σ i = k
+  fin_cases k <;> rfl
+
+set_option linter.unusedSectionVars false in
+private theorem bdLiePairTraceFamily_appCc_eq_familySecondGradient
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) (s : ℝ) :
+    appCc (I := I) (M := M) g₀ 2 2
+        (deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M) g₀ T hδ hδZ q ε s) T =
+      appCc (I := I) (M := M) g₀ 4 2
+        (deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 T) := by
+  rw [deTurckLieCovDerivRefoldPairTraceFamily, deTurckLieCovDerivRefoldC2Family,
+    Fin.sum_univ_three, Fin.sum_univ_three]
+  simp only [appCc_smul_left, appCc_add_left]
+  rw [bdMonoRefold_appCc_eq_pairTrace_appCc (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T) (q 0),
+    bdMonoRefold_appCc_eq_pairTrace_appCc (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T)
+      ((q 0).trans (Equiv.swap (0 : Fin 4) 1)),
+    bdMonoRefold_appCc_eq_pairTrace_appCc (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T) (q 1),
+    bdMonoRefold_appCc_eq_pairTrace_appCc (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T)
+      ((q 1).trans (Equiv.swap (0 : Fin 4) 1)),
+    bdMonoRefold_appCc_eq_pairTrace_appCc (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T) (q 2),
+    bdMonoRefold_appCc_eq_pairTrace_appCc (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T)
+      ((q 2).trans (Equiv.swap (0 : Fin 4) 1))]
+
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier row LC-1 identity core at background equal to the path
-basepoint; pattern class: the connection-difference cocycle degenerates -- the arm kernel
-IS the moving covariant gradient of `connDiff (realizedFam s) g₀`, which the PROVEN
-endpoint linearization
-`covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp` expresses exactly as
-the path-parameter multiple of the sharp-Koszul covariant gradient; the second-gradient
-Koszul monomials refold onto the CONSTRUCTED partner-paired family
-`deTurckLieCovDerivRefoldC2Family` at existentially pinned permutations and signs (the
-lower-slot symmetry `connDiff_symm` folds the raw frame-pair weight onto the paired
-family), and the order-zero family carries the quadratic connection-difference corrections
-and the one-jet sharp-gradient residual with joint smoothness, a ball-uniform pointwise
-fibre-norm sup, and the two-step jet window. This is the general-background statement
-instantiated at `g_bg := g₀`: the background leg is absent, leaving exactly the moving
-refold core. Stated under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin
-chain's `T` is `symmS`-representable at every wired level, so the antisymmetric escape
-sector is vacuous for chain inputs): the realized path transmits only `symmS T`, so the
-raw-`∇²T` window conjunct is true only on the symmetric sector. Every consumer
-transitively depends on `sorryAx` until this lands. -/
+/-- Deferred input (dossier row LC-1 order-zero part, the residual child of the
+basepoint-background refold identity; pattern class: the connection-difference cocycle
+degenerates at basepoint background and the PROVEN endpoint linearization
+`covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp` expresses the arm kernel
+as the path-parameter multiple of the sharp-Koszul covariant gradient; on the symmetric
+sector the second-gradient Koszul monomials cancel exactly against the pair-trace form of
+the constructed family at the pinned permutations and signs, leaving the quadratic
+connection-difference corrections, the one-jet sharp-gradient residual, and the
+background-curvature fold remainder — a one-jet family): joint smoothness, a ball-uniform
+pointwise fibre-norm sup, and the two-step jet window for the difference between the moving
+covariant-derivative arm at basepoint background and the pair-trace form of the constructed
+second-gradient refold family at the pinned permutations and signs. Stated under the
+chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is
+`symmS`-representable at every wired level): without it the antisymmetric high-frequency
+escape sector rides the raw two-step gradient in the pair-trace family with no counterpart
+in the arm, and the jet window fails. Every consumer transitively depends on `sorryAx`
+until this lands. -/
+theorem exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+          (fun s => deTurckLieCovDerivArmField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀
+            - deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M) g₀ T hδ hδZ
+              ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+                Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 * Equiv.swap (0 : Fin 4) 1,
+                Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+              ![(-1 : ℝ), -1, 1] s) (δ := δ) (δ' := δ) ∧
+        (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀
+              - deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M) g₀ T hδ hδZ
+                ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+                  Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 * Equiv.swap (0 : Fin 4) 1,
+                  Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+                ![(-1 : ℝ), -1, 1] s).toSection x) ≤ Λ ^ 2) ∧
+        (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (deTurckLieCovDerivArmField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀
+              - deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M) g₀ T hδ hδZ
+                ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+                  Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 * Equiv.swap (0 : Fin 4) 1,
+                  Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+                ![(-1 : ℝ), -1, 1] s)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
+  sorry
+
+
+set_option linter.unusedVariables false in
+/-- Dossier row LC-1 identity core at background equal to the path basepoint; pattern
+class: the connection-difference cocycle degenerates -- the arm kernel IS the moving
+covariant gradient of `connDiff (realizedFam s) g₀`, and the second-gradient Koszul
+monomials refold onto the CONSTRUCTED partner-paired family
+`deTurckLieCovDerivRefoldC2Family` at the pinned permutations and signs. Proven as glue:
+the order-zero coefficient is the arm minus the pair-trace form of the family
+(`deTurckLieCovDerivRefoldPairTraceFamily`), so the identity conjunct is the exact
+argument/weight exchange reindexing of the six refold monomials
+(`bdMonoRefold_appCc_eq_pairTrace_appCc`), valid for every moving tensor; the joint
+smoothness, ball-uniform pointwise fibre-norm sup, and two-step jet window of the residual
+are the posited order-zero data
+`exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data`, which is
+where the chain-supplied symmetry hypothesis `hTsymm` is consumed (the realized path
+transmits only `symmS T`, so on the symmetric sector the arm's two-jet content cancels
+against the pair-trace family exactly and the residual is one-jet). This is the
+general-background statement instantiated at `g_bg := g₀`: the background leg is absent,
+leaving exactly the moving refold core. Every consumer transitively depends on `sorryAx`
+through the residual order-zero-data child until it lands. -/
 theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6633,8 +6819,37 @@ theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
           (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0da s)‖ ^ 2 ≤
               K i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨Λ, hΛ_nn, K, hK_nn, hres⟩ :=
+    exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨Λ, hΛ_nn, K, hK_nn,
+    ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+      Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 * Equiv.swap (0 : Fin 4) 1,
+      Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3],
+    ![(-1 : ℝ), -1, 1], ?_, ?_⟩
+  · intro i
+    fin_cases i <;> norm_num
+  intro T hTsymm δ hδ_le hδ hδZ hball
+  obtain ⟨hjoint, hcap, hwin⟩ := hres T hTsymm hδ_le hδ hδZ hball
+  refine ⟨fun s => deTurckLieCovDerivArmField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) g₀
+    - deTurckLieCovDerivRefoldPairTraceFamily (I := I) (M := M) g₀ T hδ hδZ
+      ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+        Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 * Equiv.swap (0 : Fin 4) 1,
+        Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+      ![(-1 : ℝ), -1, 1] s, hjoint, ?_, hcap, hwin⟩
+  intro s hs
+  beta_reduce
+  simp only [iteratedCovGrad_zero]
+  rw [appCc_sub_left,
+    bdLiePairTraceFamily_appCc_eq_familySecondGradient (I := I) (M := M) g₀ T hδ hδZ
+      ![Equiv.swap (0 : Fin 4) 1 * Equiv.swap (0 : Fin 4) 2,
+        Equiv.swap (2 : Fin 4) 3 * Equiv.swap (1 : Fin 4) 2 * Equiv.swap (0 : Fin 4) 1,
+        Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3]
+      ![(-1 : ℝ), -1, 1] s]
+  abel
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row LC-1, identity core with the order-zero-part shares of rows
