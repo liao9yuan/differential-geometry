@@ -541,7 +541,131 @@ route is proved sorry-free.  Remaining: **Y2** — rewire `MaximalTime.extends_o
 `extendInputs_of_soln` → (A) → (B) → Brick U → `isSolutionOn_of_extendData` → `ExtendsPastEndpoint`,
 bridging the raw hypotheses from `_hS`/`_hRm`/`_hbound` and discharging `hric` via `ric_quad_le_of_rm04`.
 
+## SHI DISCHARGE PLAN (planner, 2026-07-04) — retiring the third cited box
+
+**Goal:** replace `shiCovBound_of_soln`'s `sorry` by a proof whose only remaining citation is the
+project-wide canonical Shi interface **`MovingShiBoundOn`** (`HCGCompactness/RicBound.lean:141` —
+"the single honest analytic FRONTIER of the eq.(3.4) track", the SAME predicate the HCG P2 lane
+cites as `hShi`). End state: ONE Shi citation for the whole project, discharged once by the
+Bernstein tower for everyone. Verified shapes: `MovingShiBoundOn U β ψ gSeq N KShi =
+∀ s ≤ N, ∀ i, ∀ t ∈ Icc β ψ, ∀ x ∈ U, √(normSq0S (gSeq i t) x (2+s) (ricCovTower (gSeq i t)
+(gSeq i t) s x)) ≤ KShi` (Ric-tower in the MOVING metric);
+`metricCovOrderWindow_of_evolution` (`AllTimesBounds.lean:4403`) consumes the bundled
+`MetricCovOrderEvolutionInput K β ψ t0 gSeq gRef p` (fields incl. `Cpp Cppp timeRadius initC
+nablaRic normsq_evol t0_mem`) and outputs `MetricCovDerivOrderBoundOnWindow` with constant
+`metricCovOrderEvolutionConstant Cpp Cppp timeRadius initC`.
+
+### Phase S1 (wiring, ~1–2 sessions): single-flow Lemma-3.11 instantiation
+
+`shiCovBound_of_soln` ⇐ `metricCovOrderWindow_of_evolution` at `gSeq := fun _ t => g_fam t`,
+`gRef := g_fam α`, orders `p ≤ 3`. Work items:
+1. READ `MetricCovOrderEvolutionInput`'s fields and locate the HCG lane's producers for them —
+   especially `normsq_evol` (the evolution differential inequality for `‖∇ᵖ_{gRef} g‖²`; grep its
+   producers in `AllTimesBounds.lean` — the HCG lane builds it from the flow PDE + `MovingShiBoundOn`).
+2. Build the single-flow Input from: the new cited decl
+   `movingShi_of_soln : MovingShiBoundOn Set.univ t₂ ψ (fun _ t => g_fam t) N K_Shi` (`sorry`,
+   GSM77 Ch. 7; N per what the Input's `nablaRic` field demands for `p ≤ 3` — likely `N = 3`),
+   the PDE (`ricciFlowPDE_Ici_of_soln`), and `initC` (the `t0`-value bound — finite by continuity
+   on compact `M`; if a producer exists in the HCG lane, reuse).
+3. Window→tail bookkeeping: producers run on closed `[β,ψ]`; `hcov` wants `Ico t₂ ω`. Check the
+   constant's `ψ`-dependence: `timeRadius`-type inputs are bounded by `ω − t₂` uniformly in `ψ < ω`
+   ⟹ one constant works for all `ψ`; take the union over `ψ ↑ ω`. If a producer's constant
+   genuinely blows up in `ψ`, STOP and report (that would be a real statement problem).
+4. Endpoint: `shiCovBound_of_soln := proof from movingShi_of_soln`; the route's third box becomes
+   `movingShi_of_soln` — citation unified with HCG `hShi`.
+
+### Phase S2 (the tower — the real mathematics): discharge `MovingShiBoundOn` for the single flow
+
+From the raw `|Rm|² ≤ K'` bound (`_hbound`), via the banked Bernstein machinery, at `N ≤ 3`,
+`dim = 3` (`hdim` is available in `extends_of_rmBounded`):
+- Banked sorry-free (tasks #11–38): Bernstein max-principle core, general-m G-induction, all-k
+  heatEq bridge (`IteratedRmTowerOn`), curvature-norm evolution producers, the generic Bochner
+  stack, rank-uniform realization bridges.
+- Remaining bricks (truncate the old all-k plan to k ≤ 3): (i) spatial decomposition
+  `[Δ,∇ᵏ]Rm ∈ StarSum2 k` for k ≤ 3 (task #42, in progress); (ii) the Uhlenbeck base `∂ₜRm04`
+  3D-algebraic route (task #43 — `hdim = 3` suffices, the general-dim route stays deferred);
+  (iii) time recursion `E_k = (∂ₜ−Δ)∇ᵏRm ∈ StarSum2 k`, k ≤ 3 (task #44); (iv) assembly:
+  `∇ᵏRm` bounds → `∇ᵏRic` by contraction → the `ricCovTower`/`MovingShiBoundOn` shape (task #46
+  + a Ric-from-Rm tower contraction bridge).
+- **Standing regularity inputs** (`hSt`/`hswap`, flagged in `BBSLimitProducer.md` as
+  not-derivable-from-`IsSolutionOn`): re-assess at k ≤ 3. If still needed they surface as NAMED
+  sub-citations (DeTurck-lane facts) — do not bury them inside the tower proofs.
+- Estimate: 3–6 focused sessions on the banked machinery. The k ≤ 3 truncation is the point —
+  do NOT resume the all-k grind.
+
+**Sequencing:** S1 first (small; unifies the citation and de-risks the interface); S2 as its own
+brick series after S1 fixes `movingShi_of_soln`'s exact (U, β, ψ, N) shape. (N)/(B) remain
+user-owned DeTurck-lane decisions, untouched by this plan.
+
+### BRICK S1 — KICKOFF PROMPT
+
+*"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — section 'SHI DISCHARGE
+PLAN', Phase S1. Implement S1: read `MetricCovOrderEvolutionInput`'s fields and their HCG
+producers, then discharge `shiCovBound_of_soln` from a new cited `movingShi_of_soln`
+(`MovingShiBoundOn`, sorry) via `metricCovOrderWindow_of_evolution` at the single flow. Rules: claim
+`ExtendShiInputs.lean` only; `HCGCompactness/**` is import-only; (N)/(B) sorries untouched;
+acceptance = `shiCovBound_of_soln` sorry-free, file's only sorry = `movingShi_of_soln`, targeted
+build green, axiom check on `extendInputs_of_soln` shows sorryAx via `movingShi_of_soln` only.
+Report the window→tail constant analysis explicitly (S1 item 3). Stop per CLAUDE.md."*
+
 ## Y2 (unchanged plan)
 Rewire `MaximalTime.extends_of_rmBounded`: Y1 → (A) → restart → (B) `ricci_flow_forward_unique` on
 `[t*,ω)` → `hagree_overlap` → Brick U → `isSolutionOn_of_extendData` → `ExtendsPastEndpoint`; delete the
 `hglue`/`hLimit` leaves; move the private MaximalTime solution-PDE helpers down into this file.
+
+## BRICK Y2 — IN PROGRESS (2026-07-06): four ExtendShiInputs helpers GREEN + MaximalTime rewired
+
+Four NEW sorry-free helpers added to `ExtendShiInputs.lean` (each verified green via focused check;
+full targeted build of the module = exit 0):
+- **`ric_quad_le_of_realizes`** — the `hric` crux, realization → ricci-trace → `ric_quad_le_of_rm04`.
+  From `Rm04RealizesConnection g (metricCov g) Rm04sec` + `normSq0S ≤ C` ⟹ `|Ric(v,v)| ≤ (n²√C)·g(v,v)`.
+  Discharges `htrace` from the realization: `rm13Section_realizes` + `rm04LowersRm13At_of_realizes` +
+  `ricciFromRm13_comp_eq_rm04_trace` (orthonormal ⟹ `gInv = δ`, collapse) + `metricRicciAt =
+  ricciFromRm13At (rm13Section…)` (`ricciCurvatureAt_eq_trace` + `rm13Section_apply`, both `rfl`).
+  KEY: `hmr` closes by `rw [hRm13def, rm13Section_apply]; rfl` (default-transparency rfl through the
+  `metricCov` abbrevs); the delta-collapse is `simp only [rm04CompAt_apply, ite_mul, one_mul, zero_mul,
+  Finset.sum_ite_eq, Finset.mem_univ, if_true]`.
+- **`ric_quad_le_of_soln`** — packages the above over the solution: `∀ t ∈ Ico α ω, ∀ x v,
+  |Ric(g_fam t)| ≤ ((finrank E)²√K')·g(v,v)` from the RAW per-time realization
+  `∀ t ∈ Ico α ω, Rm04RealizesConnection (g_fam t) (metricCov (g_fam t)) (Rm04 t)` + the raw `|Rm|²`
+  bound.  `finrank (TangentSpace I x) = finrank E` is `rfl`.  (Realization taken raw because
+  `Rm04RealizesSolutionConnectionOn` is defined DOWNSTREAM in MaximalTime — the FlowTime +
+  `leviCivita = metricCov` bridge happens at the MaximalTime call site.)
+- **`chartGram_smooth_of_soln`** — `hsmooth_left`: interior joint C∞ chart-Gram on `Ioo α ω` from
+  `_hS.smoothMetric.frameCompSmooth` fed the trivialization frame `e.localFrame (chartModelBasis E)`;
+  `chartGramMatrix = inner(chartBasisVecFiber) = inner(localFrame)` via `localFrame_apply_of_mem_baseSet`
+  (`basisAt = linearEquivAt.symm = e.symm`, all `rfl`).  Model `𝓘(ℝ) ≡ 𝓘(ℝ,ℝ)` for ℝ-valued (congr
+  unified).  Metric defeq closed with `simp only [..., SolutionOn.family]`.
+- **`chartGram_cont_of_soln`** — `hcont_left`: chart-Gram continuity up to closed endpoint on `Ico α ω`
+  from `_hS.smoothMetric.metricTensor_cont.eval_continuous` on the (continuous) chart frame; mirrors
+  `Evolution/Metric/Basic.lean:coordMetricContOn` (`metricTensorField_apply` + chart-frame `contMDiffAt`).
+
+**MaximalTime.extends_of_rmBounded** rewired onto the interior-restart route (verification pending
+full build): deleted 3 private helpers (`hasDerivWithinAt_Ici_boundary`, `tensor2_eval_contOn`,
+`ricciFlowPDE_Ici_of_solution` — ported here) and the `hLimit`/`hglue`/`ricci_flow_extends_construction`
+leaves.  New body: `hleft = ricciFlowPDE_Ici_of_soln` → bridge `_hbound`→raw + `_hRm`→raw realization
+(`simpa [SolutionOn.family, SolutionFamily.connection, metricCov]`, mirroring `rm04Realizes_metric`) →
+`ric_quad_le_of_soln` (`hric`) → `extendInputs_of_soln` (`⟨hell, hcov⟩`, `K := (finrank E)²√K'`) → (A)
+`ricci_flow_interior_restart` → `chartGram_{smooth,cont}_of_soln` (`hsmooth/hcont_left`) → `hagree_overlap`
+via (B) `ricci_flow_forward_unique` on `g_fam` vs `rr(·−t*)` (time-shift regularity via Brick U's
+`hshift = (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd`; `h2pde` = `HasDerivWithinAt.comp`
+chain rule; `h1pde` = `hleft.mono (Ici_subset_Ici)`; `h1smooth/h1cont` = `hsmooth/hcont_left.mono`) →
+Brick U `extend_construction_of_restart` → Leaf 5 (unchanged).  MaximalTime imports ExtendShiInputs.
+Three cited-input `sorry`s remain in the route: (N), (B), `shiCovBound_of_soln`.
+
+## BRICK Y2 — DONE (2026-07-06), verified via real `lake build` (exit 0) + `#print axioms`
+
+`MaximalTime.extends_of_rmBounded` is now on the interior-restart route, **zero sorry in its own body**
+(the `hLimit`/`hglue`/`ricci_flow_extends_construction` leaves + the 3 private helpers are deleted;
+`ricciFlowPDE_Ici_of_soln`, `hasDerivWithinAt_Ici_boundary`, `tensor2_eval_contOn` all live here now).
+Needed `set_option maxHeartbeats 1000000 in` before the theorem (heavy `chartGramMatrix` defeq in the
+`ContinuousOn.comp` time-shift; the default 200000 timed out at `isDefEq`).
+
+**`#print axioms extends_of_rmBounded` (verbatim):**
+`'…extends_of_rmBounded' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]`
+
+The 3 standard axioms + `sorryAx` only, and `sorryAx` traces to exactly the three cited black boxes
+(N) `ricci_flow_unif_existence`, (B) `ricci_flow_forward_unique`, `shiCovBound_of_soln` — every other
+declaration on the route (the 4 new ExtendShiInputs helpers included) is verified sorry-free.  **The
+interior-restart extension route is now assembled end to end; the only remaining content is the three
+cited black boxes.**

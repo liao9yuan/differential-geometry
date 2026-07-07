@@ -287,6 +287,154 @@ private theorem ric_quad_le_of_rm04
   rw [← metricRicciAt_apply_eq_ricciTensor g x v v]
   exact hquad
 
+/-- **`hric` from the curvature realization.**  If `Rm04sec` realizes the Levi-Civita connection
+curvature of `g`, and its metric squared norm at `x` is bounded by `C`, then the Ricci quadratic
+form is controlled by the metric: `|Ric(v,v)| ≤ (n²√C)·g(v,v)` with `n = finrank`.  This discharges
+the `htrace` hypothesis of `ric_quad_le_of_rm04` directly from the realization: in a `g`-orthonormal
+basis the inverse metric is the identity, so `ricciFromRm13_comp_eq_rm04_trace` (via
+`rm04LowersRm13At_of_realizes`) collapses to `Ric = ∑ₐ Rm04(eₐ,·,·,eₐ)`.  Brick X's `hric` bound is
+`K := n²√C`. -/
+theorem ric_quad_le_of_realizes
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (Rm04sec : Tensor04Section (I := I) (M := M))
+    (hreal : Rm04RealizesConnection (I := I) g (metricCov (I := I) (M := M) g) Rm04sec)
+    {C : ℝ} (hnorm : Tensor0SBundle.normSq0S (I := I) g x 4 (Rm04sec x) ≤ C)
+    (v : TangentSpace I x) :
+    |ricciTensor (I := I) g x v v|
+      ≤ ((Module.finrank ℝ (TangentSpace I x) : ℝ) ^ 2 * Real.sqrt C) * g.inner x v v := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g x
+  have hdelta := metricInverseInBasis_of_orthonormal (I := I) g basis hON
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric (Idx := Fin (Module.finrank ℝ (TangentSpace I x)))) := by
+    have he : (fun a k : Fin (Module.finrank ℝ (TangentSpace I x)) => if a = k then (1 : ℝ) else 0)
+        = identityInvMetric (Idx := Fin (Module.finrank ℝ (TangentSpace I x))) := by
+      funext a k; simp [identityInvMetric, diagonalInvMetric]
+    rwa [he] at hdelta
+  set Rm13 := CovariantDerivative.rm13Section (I := I) (M := M)
+    (metricCov (I := I) (M := M) g) (metricCov_smooth (I := I) (M := M) g) with hRm13def
+  have hLower := rm04LowersRm13At_of_realizes (I := I) g
+    (metricCov (I := I) (M := M) g) Rm13 Rm04sec
+    (rm13Section_realizes (I := I) (metricCov (I := I) (M := M) g)
+      (metricCov_smooth (I := I) (M := M) g)) hreal x
+  have hmr : metricRicciAt g x = ricciFromRm13At (I := I) (Rm13 x) := by
+    rw [hRm13def, CovariantDerivative.rm13Section_apply]
+    rfl
+  have htrace : ∀ i j, metricRicciAt g x (vec2 (I := I) (basis i) (basis j))
+      = ∑ a, Rm04sec x (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)) := by
+    intro i j
+    have hcomp := ricciFromRm13_comp_eq_rm04_trace (I := I) g basis
+      (fun a k => if a = k then (1 : ℝ) else 0) hdelta (Rm13 x) (Rm04sec x) hLower i j
+    have hlhs : metricRicciAt g x (vec2 (I := I) (basis i) (basis j))
+        = ricciCompAt (I := I) basis (ricciFromRm13At (I := I) (Rm13 x)) i j := by
+      rw [ricciCompAt_apply, hmr]
+    rw [hlhs, hcomp]
+    simp only [rm04CompAt_apply, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq,
+      Finset.mem_univ, if_true]
+  exact ric_quad_le_of_rm04 (I := I) g x basis hON hinv (Rm04sec x) htrace hnorm v
+
+/-- **`hsmooth_left` from the solution.**  The interior joint `C∞` chart-Gram regularity of the
+solution's metric family on `Ioo α ω`, recovered from `MetricFamilySmoothOn.frameCompSmooth` fed the
+trivialization local frame `e.localFrame (chartModelBasis E)` — whose inner products are exactly the
+`chartGramMatrix` entries (`chartGramMatrix_apply` + `localFrame_apply_of_mem_baseSet`).  This is Brick
+U/(B)'s `hsmooth_left`/`h1smooth` for `g_fam := S.base.metric`. -/
+theorem chartGram_smooth_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M) (i j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+      (fun p : ℝ × M =>
+        Integral.Measure.chartGramMatrix (I := I) (S.base.metric p.1) x₀ p.2 i j)
+      (Set.Ioo alpha omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  set e := trivializationAt E (TangentSpace I) x₀ with he
+  have hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) (e.localFrame (chartModelBasis E)) e.baseSet :=
+    e.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) (chartModelBasis E)
+  have hbridge : ∀ {x : M} (hx : x ∈ e.baseSet) (k : Fin (Module.finrank ℝ E)),
+      e.localFrame (chartModelBasis E) k x
+        = Integral.Measure.chartBasisVecFiber (I := I) x₀ k x := by
+    intro x hx k
+    rw [e.localFrame_apply_of_mem_baseSet (chartModelBasis E) hx]
+    rfl
+  have h := hS.smoothMetric.frameCompSmooth (e.localFrame (chartModelBasis E)) hframe i j
+  refine h.congr fun p hp => ?_
+  have hx : p.2 ∈ e.baseSet := hp.2
+  simp only [Integral.Measure.chartGramMatrix_apply, hbridge hx i, hbridge hx j,
+    SolutionOn.family]
+
+/-- **`hcont_left` from the solution.**  Joint chart-Gram continuity of the solution's metric family
+up to the closed initial endpoint, on `Ico α ω`, from `MetricFamilySmoothOn.metricTensor_cont`
+(carrier-level tensor continuity) evaluated on the continuous chart frame via
+`Tensor0SFamilyContinuousOnSet.eval_continuous` (`chartGramMatrix = metricTensorField` on that frame).
+This is Brick U/(B)'s `hcont_left`/`h1cont` for `g_fam := S.base.metric`; mirrors `coordMetricContOn`. -/
+theorem chartGram_cont_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M) (i j : Fin (Module.finrank ℝ E)) :
+    ContinuousOn
+      (fun p : ℝ × M =>
+        Integral.Measure.chartGramMatrix (I := I) (S.base.metric p.1) x₀ p.2 i j)
+      (Set.Ico alpha omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  classical
+  rw [continuousOn_iff_continuous_restrict]
+  set s : Set (ℝ × M) :=
+    Set.Ico alpha omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet with hs
+  have hτ : Continuous (fun q : ↥s => ((q : ℝ × M)).1) :=
+    continuous_fst.comp continuous_subtype_val
+  have hb : Continuous (fun q : ↥s => ((q : ℝ × M)).2) :=
+    continuous_snd.comp continuous_subtype_val
+  have hτK : ∀ q : ↥s,
+      ((q : ℝ × M)).1 ∈ (RealTimeInterval.closedOpen alpha omega hαω).carrier :=
+    fun q => q.2.1
+  have hv : ∀ k : Fin 2,
+      Continuous (fun q : ↥s =>
+        TotalSpace.mk' E (E := fun y : M => TangentSpace I y)
+          ((q : ℝ × M)).2
+          (Integral.Measure.chartBasisVecFiber (I := I) x₀
+            (if k = 0 then i else j) ((q : ℝ × M)).2)) := by
+    intro k
+    rw [continuous_iff_continuousAt]
+    intro q
+    have hframe :=
+      (Integral.Measure.chartBasisVec_contMDiffOn (I := I) x₀ (if k = 0 then i else j)).contMDiffAt
+        ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds q.2.2)
+    exact ContinuousAt.comp
+      (g := fun y : M => TotalSpace.mk' E (E := fun y : M => TangentSpace I y) y
+        (Integral.Measure.chartBasisVecFiber (I := I) x₀ (if k = 0 then i else j) y))
+      hframe.continuousAt hb.continuousAt
+  have heval :=
+    (hS.smoothMetric.metricTensor_cont).eval_continuous (P := ↥s) hτ hτK hb hv
+  refine heval.congr (fun q => ?_)
+  rw [Tensor0SBundle.metricTensorField_apply]
+  simp [Integral.Measure.chartGramMatrix_apply, SolutionOn.family]
+
+/-- **`hric` from the solution's realization + curvature bound.**  Packages `ric_quad_le_of_realizes`
+over the solution: for every flow time `t ∈ Ico α ω` and point `x`, the Ricci quadratic form of
+`g_fam t = S.base.metric t` is controlled by the metric, with the *uniform* constant
+`(finrank E)² √K'` coming from the `|Rm|²`-bound `K'`.  This is exactly `extendInputs_of_soln`'s
+`hric` input (with `K := (finrank E)² √K'`).  Uses `hRm` at the flow time `⟨t, ht⟩`, bridging
+`finrank (TangentSpace I x) = finrank E` (`rfl`).  The realization is taken in raw per-time form
+`Rm04RealizesConnection (g_fam t) (metricCov (g_fam t)) (Rm04 t)`; the consumer bridges its solution
+realization (`Rm04RealizesSolutionConnectionOn`, `S.family.connection = metricCov`) to this. -/
+theorem ric_quad_le_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    {Rm04 : ℝ → Tensor04Section (I := I) (M := M)}
+    (hRm : ∀ t ∈ Set.Ico alpha omega,
+      Rm04RealizesConnection (I := I) (S.base.metric t)
+        (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t))
+    {K' : ℝ}
+    (hbound : ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K') :
+    ∀ t ∈ Set.Ico alpha omega, ∀ x : M, ∀ v : TangentSpace I x,
+      |ricciTensor (I := I) (S.base.metric t) x v v|
+        ≤ ((Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') * (S.base.metric t).inner x v v := by
+  intro t ht x v
+  have h := ric_quad_le_of_realizes (I := I) (S.base.metric t) x (Rm04 t) (hRm t ht)
+    (hbound t x ht.1 ht.2) v
+  rwa [show Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E from rfl] at h
+
 /-- **Cited producer: interior covariant metric bounds (Shi's derivative estimates, GSM77 Ch. 7).**
 Body `sorry` — a cited black box; the eventual discharge is the banked Bernstein–Bando–Shi tower
 (`Evolution/BernsteinShi*`, `Evolution/StarSum/*`).  From a bounded-curvature solution (`hS` + the raw

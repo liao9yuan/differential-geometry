@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ExtendShiInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BBSLimitProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
@@ -152,95 +153,7 @@ theorem rmBounded_of_not_unbounded
   intro t x ht hT
   exact hK t x ht hT
 
-/-- Generic one-sided boundary right-derivative: interior right-derivatives (`Set.Ici α`) on
-`Ioo α ω`, plus boundary continuity of `f` (on `Ico α ω`) and of the value field `e` (within
-`Ioi α` at `α`), give the right-derivative of `f` at the closed endpoint `α`.  This is the
-general-`α`, generic-`(f, e)` core of `ricci_flow_pde_at_zero`, kept here (no `ricciTensor`
-specialisation) to avoid importing the DeTurck-heavy short-time-assembly file. -/
-private theorem hasDerivWithinAt_Ici_boundary {a b : ℝ} (hab : a < b) (f e : ℝ → ℝ)
-    (h_cont : ContinuousOn f (Set.Ico a b))
-    (h_e_cont : ContinuousWithinAt e (Set.Ioi a) a)
-    (h_int : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt f (e t) (Set.Ici a) t) :
-    HasDerivWithinAt f (e a) (Set.Ici a) a := by
-  have hopen : IsOpen (Set.Ioo a b) := isOpen_Ioo
-  have hsub : Set.Ioo a b ⊆ Set.Ici a := fun y hy => le_of_lt hy.1
-  have h_within : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt f (e t) (Set.Ioo a b) t :=
-    fun t ht => (h_int t ht).mono hsub
-  have h_diff : DifferentiableOn ℝ f (Set.Ioo a b) :=
-    fun t ht => (h_within t ht).differentiableWithinAt
-  have h_derivEq : ∀ t ∈ Set.Ioo a b, deriv f t = e t := by
-    intro t ht
-    rw [← derivWithin_of_isOpen hopen ht]
-    exact (h_within t ht).derivWithin (hopen.uniqueDiffWithinAt ht)
-  refine hasDerivWithinAt_Ici_of_tendsto_deriv (s := Set.Ioo a b) h_diff ?_ ?_ ?_
-  · exact (h_cont.continuousWithinAt ⟨le_rfl, hab⟩).mono Set.Ioo_subset_Ico_self
-  · exact Ioo_mem_nhdsGT hab
-  · exact (h_e_cont.tendsto).congr'
-      (Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hab) h_derivEq).symm
-
-/-- Scalar continuity of a continuous `(0,2)`-tensor time-family `A`, evaluated against two fixed
-tangent vectors at a fixed base point, on the family's time set `K`. -/
-private theorem tensor2_eval_contOn {K : Set ℝ}
-    {A : (t : ℝ) → (x : M) →
-      Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2 x}
-    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 K A)
-    (x : M) (v w : TangentSpace I x) :
-    ContinuousOn (fun s : ℝ => A s x (vec2 v w)) K := by
-  rw [continuousOn_iff_continuous_restrict]
-  exact hA.eval_continuous (P := {s : ℝ // s ∈ K}) (τ := Subtype.val)
-    (b := fun _ => x) continuous_subtype_val (fun p => p.2) continuous_const
-    (v := fun i _ => vec2 v w i) (fun _ => continuous_const)
-
-/-- **`hleft` for `extends_of_rmBounded`.**  The Ricci-flow metric PDE of a solution, restated as a
-right-derivative `HasDerivWithinAt … (Set.Ici α)` on the closed-left carrier `Ico α ω` — the form the
-banked `ricci_flow_extends_construction` consumes — extracted from `hS` (whose `.equation` lives only
-on the open regular times `Ioo α ω`) via `metricDerivAt` on the interior and `hasDerivWithinAt_Ici_boundary`
-at the closed endpoint `α`.  The Ricci-name change `metricRicciAt ↔ ricciTensor` is the now-free
-`metricRicciAt_apply_eq_ricciTensor`. -/
-private theorem ricciFlowPDE_Ici_of_solution
-    {alpha omega : ℝ} {hαω : alpha < omega}
-    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
-    (hS : IsSolutionOn (I := I) S) :
-    ∀ t ∈ Set.Ico alpha omega, ∀ (x : M) (v w : TangentSpace I x),
-      HasDerivWithinAt (fun s : ℝ => (S.base.metric s).inner x v w)
-        ((-2 : ℝ) * ricciTensor (I := I) (S.base.metric t) x v w) (Set.Ici alpha) t := by
-  -- interior right-derivative, available at every regular time `t ∈ Ioo α ω`
-  have hinterior : ∀ t ∈ Set.Ioo alpha omega, ∀ (x : M) (v w : TangentSpace I x),
-      HasDerivWithinAt (fun s : ℝ => (S.base.metric s).inner x v w)
-        ((-2 : ℝ) * ricciTensor (I := I) (S.base.metric t) x v w) (Set.Ici alpha) t := by
-    intro t ht x v w
-    have hval : S.ricciAt t x (vec2 v w) = ricciTensor (I := I) (S.base.metric t) x v w :=
-      metricRicciAt_apply_eq_ricciTensor (S.base.metric t) x v w
-    have h := metricDerivAt (I := I) S hS ⟨t, ht⟩ x v w
-    rw [hval] at h
-    exact h.hasDerivWithinAt
-  -- scalar continuity of `s ↦ ricciTensor (g s) x v w`, on the carrier
-  have hric_cont : ∀ (x : M) (v w : TangentSpace I x),
-      ContinuousOn (fun s : ℝ => ricciTensor (I := I) (S.base.metric s) x v w)
-        (Set.Ico alpha omega) := by
-    intro x v w
-    refine (tensor2_eval_contOn hS.ricciCont x v w).congr (fun s _ => ?_)
-    have e1 : S.ricci s x = metricRicciAt (S.base.metric s) x := by
-      simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
-    rw [e1]
-    exact (metricRicciAt_apply_eq_ricciTensor (S.base.metric s) x v w).symm
-  intro t ht x v w
-  rcases eq_or_lt_of_le ht.1 with rfl | hlt
-  · refine hasDerivWithinAt_Ici_boundary hαω
-      (fun s => (S.base.metric s).inner x v w)
-      (fun s => (-2 : ℝ) * ricciTensor (I := I) (S.base.metric s) x v w) ?_ ?_
-      (fun s hs => hinterior s hs x v w)
-    · -- h_cont : metric scalar continuity
-      refine (tensor2_eval_contOn hS.smoothMetric.metricTensor_cont x v w).congr
-        (fun s _ => ?_)
-      simp [Tensor0SBundle.metricTensorField_apply, vec2]
-    · -- h_e_cont : ricci scalar continuity within `Ioi α` at `α`
-      have hmem : Set.Ico alpha omega ∈ nhdsWithin alpha (Set.Ioi alpha) :=
-        Filter.mem_of_superset (Ioo_mem_nhdsGT hαω) Set.Ioo_subset_Ico_self
-      exact (((hric_cont x v w).continuousWithinAt ⟨le_rfl, hαω⟩).mono_of_mem_nhdsWithin
-        hmem).const_mul (-2)
-  · exact hinterior t ⟨hlt, ht.2⟩ x v w
-
+set_option maxHeartbeats 1000000 in
 /-- Black Box 11.2: bounded curvature on a closed finite-endpoint Ricci flow
 lets the flow extend smoothly past the endpoint.  This is global PDE theory,
 not local tensor algebra. -/
@@ -255,45 +168,104 @@ theorem extends_of_rmBounded
     (_hbound : Rm04NormSqBoundedAt (I := I) S Rm04) :
     ExtendsPastEndpoint (I := I) hαω S := by
   let g_fam := S.base.metric
-  -- Leaf 1: Ricci-flow PDE on [α, ω) in the form ricci_flow_extends_construction needs,
-  -- extracted from the solution's `MetricVariationEquationOn` (regular times) + boundary lemma.
-  have hleft : ∀ t ∈ Set.Ico alpha omega, ∀ (x : M) (v w : TangentSpace I x),
+  -- Leaf 1: Ricci-flow PDE on [α, ω) (ported helper `ricciFlowPDE_Ici_of_soln`).
+  have hleft := ricciFlowPDE_Ici_of_soln (I := I) _hS
+  -- Bridge `_hbound` → raw `|Rm|²` bound `K'`.
+  obtain ⟨K', hK'bound⟩ := _hbound
+  have hbound_raw : ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K' := by
+    intro t x ht1 ht2
+    have h := hK'bound t x ht1 ht2
+    simpa [curvatureNormSq, SolutionOn.family] using h
+  -- Bridge `_hRm` → raw per-time realization, then produce `hric` via `ric_quad_le_of_soln`.
+  have hRmRaw : ∀ t ∈ Set.Ico alpha omega,
+      Rm04RealizesConnection (I := I) (S.base.metric t)
+        (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t) := by
+    intro t ht
+    have h := _hRm ⟨t, ht⟩
+    simpa [SolutionOn.family, SolutionFamily.connection, metricCov] using h
+  have hric := ric_quad_le_of_soln (I := I) hRmRaw hbound_raw
+  -- The two `ricci_flow_interior_restart` inputs (`hell` ellipticity, `hcov` Shi bounds).
+  obtain ⟨hell, hcov⟩ := extendInputs_of_soln (I := I) Rm04 _hS
+    (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric ⟨K', hbound_raw⟩
+  -- (A): interior restart + short-time flow `rr` on `[0, TT)` with `t* + TT > ω`.
+  obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
+    ricci_flow_interior_restart (I := I) g_fam hαω hell hcov
+  have ht1 : alpha ≤ t_star := ht_star.1
+  have ht2 : t_star < omega := ht_star.2
+  -- Left-family chart-Gram regularity, from the solution.
+  have hsmooth_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
+    chartGram_smooth_of_soln (I := I) _hS x₀ i j
+  have hcont_left := fun (x₀ : M) (i j : Fin (Module.finrank ℝ E)) =>
+    chartGram_cont_of_soln (I := I) _hS x₀ i j
+  -- `hagree_overlap` via forward uniqueness (B) on `g_fam` vs the shifted restart `rr(·−t*)`.
+  have hshift : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
+      (fun p : ℝ × M => ((p.1 - t_star, p.2) : ℝ × M)) :=
+    (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
+  have h2smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (rr (p.1 - t_star)) x₀ p.2 i j)
+        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    have hmaps : Set.MapsTo (fun q : ℝ × M => ((q.1 - t_star, q.2) : ℝ × M))
+        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
+        (Set.Ioo (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+      fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
+    exact (hrr_smooth x₀ i j).comp hshift.contMDiffOn hmaps
+  have h2cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (rr (p.1 - t_star)) x₀ p.2 i j)
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    have hmaps : Set.MapsTo (fun q : ℝ × M => ((q.1 - t_star, q.2) : ℝ × M))
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
+        (Set.Ico (0 : ℝ) TT ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+      fun q hq => ⟨⟨by linarith [hq.1.1], by linarith [hq.1.2, hreach]⟩, hq.2⟩
+    exact (hrr_cont x₀ i j).comp hshift.continuous.continuousOn hmaps
+  have h2pde : ∀ t ∈ Set.Ico t_star omega, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : ℝ => (rr (s - t_star)).inner x v w)
+        ((-2 : ℝ) * ricciTensor (I := I) (rr (t - t_star)) x v w) (Set.Ici t_star) t := by
+    intro t ht x v w
+    have hmem : t - t_star ∈ Set.Ico (0 : ℝ) TT :=
+      ⟨by linarith [ht.1], by linarith [ht.2, hreach]⟩
+    have hd := hrr_pde (t - t_star) hmem x v w
+    have hφ : HasDerivWithinAt (fun s : ℝ => s - t_star) 1 (Set.Ici t_star) t :=
+      (hasDerivWithinAt_id t (Set.Ici t_star)).sub_const t_star
+    have hmapsφ : Set.MapsTo (fun s : ℝ => s - t_star) (Set.Ici t_star) (Set.Ici 0) :=
+      fun s hs => by simp only [Set.mem_Ici] at hs ⊢; linarith
+    have hchain := hd.comp t hφ hmapsφ
+    simpa using hchain
+  have h1pde : ∀ t ∈ Set.Ico t_star omega, ∀ (x : M) (v w : TangentSpace I x),
       HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
-        ((-2 : ℝ) *
-          DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g_fam t) x v w)
-        (Set.Ici alpha) t :=
-    ricciFlowPDE_Ici_of_solution (I := I) _hS
-  -- Leaf 2: C∞ limit data from BBS all-m derivative bounds (dim-3 BBS producer)
-  have hLimit : DifferentialGeometry.PDE.RicciFlow.CinftyLimitData (I := I)
-      g_fam alpha omega hαω :=
-    cinftyLimitData_of_solution (I := I) S _hS hdim Rm04 _hRm _hbound
-  -- Leaf 3: short-time glue (DeTurck — collaborator's work)
-  have hglue : ∀ (r : ℝ → SmoothRiemannianMetric I M) (T : ℝ),
-      r 0 = hLimit.limitMetric → 0 < T →
-      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-          (fun p : ℝ × M =>
-            Integral.Measure.chartGramMatrix (I := I) (r p.1) x₀ p.2 i j)
-          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) →
-      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
-        HasDerivWithinAt (fun u : ℝ => (r u).inner x v w)
-          ((-2 : ℝ) *
-            DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (r t) x v w)
-          (Set.Ici 0) t) →
-      ∃ ε : ℝ, 0 < ε ∧ ε ≤ T ∧
-        DifferentialGeometry.PDE.RicciFlow.CinftyGlueData (I := I) g_fam r alpha omega ε := by
-    -- Gate-R is now AVAILABLE as `hr_smooth_closed`: the restart `r`'s joint chart-Gram `C∞`
-    -- up to the CLOSED initial endpoint, on `[0, T)`.  The remaining obstructions for the
-    -- `gram_smooth` field of `CinftyGlueData` are **Gate-L** (the left family's `C∞`-up-to-`ω`
-    -- from BBS, via a strengthened `CinftyLimitData`) and the **jet compatibility** (Lemma 2/3)
-    -- feeding the frozen splice `Analysis.…SmoothExtension.contDiffOn_glue_of_jet_param`.
-    -- These are left as explicit obstructions temporarily.
-    intro r T hr0 hT hr_smooth_closed hr_pde
-    sorry
-  -- Leaf 4: apply the banked construction
+        ((-2 : ℝ) * ricciTensor (I := I) (g_fam t) x v w) (Set.Ici t_star) t :=
+    fun t ht x v w =>
+      (hleft t ⟨le_trans ht1 ht.1, ht.2⟩ x v w).mono (Set.Ici_subset_Ici.mpr ht1)
+  have h1smooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+        (Set.Ioo t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (hsmooth_left x₀ i j).mono
+      (Set.prod_mono (Set.Ioo_subset_Ioo ht1 le_rfl) (le_refl _))
+  have h1cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+        (Set.Ico t_star omega ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (hcont_left x₀ i j).mono
+      (Set.prod_mono (Set.Ico_subset_Ico ht1 le_rfl) (le_refl _))
+  have h0 : g_fam t_star = (fun t : ℝ => rr (t - t_star)) t_star := by
+    simp only [sub_self]; exact hrr0.symm
+  have hagree_overlap : ∀ s ∈ Set.Ico t_star omega, rr (s - t_star) = g_fam s :=
+    fun s hs =>
+      (ricci_flow_forward_unique (I := I) g_fam (fun t => rr (t - t_star)) ht2
+        h1smooth h1cont h2smooth h2cont h1pde h2pde h0 s hs).symm
+  -- Brick U: assemble the extension tuple from the interior restart + overlap agreement.
   obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.ricci_flow_extends_construction (I := I)
-      g_fam hαω hleft hLimit hglue
+    extend_construction_of_restart (I := I) g_fam hαω hleft hsmooth_left hcont_left
+      ht1 ht2 hreach rr hrr_smooth hrr_cont hrr_pde hagree_overlap
   -- Leaf 5: wrap the raw metric data into ExtendsPastEndpoint
   have hwide : alpha < omega + ε := by linarith
   let Shat : SolutionOn (I := I) (M := M)
