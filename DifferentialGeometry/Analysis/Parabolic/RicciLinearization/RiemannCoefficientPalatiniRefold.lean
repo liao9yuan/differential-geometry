@@ -6887,14 +6887,753 @@ private lemma toModel_unitValue_symmS_abs_le (g₀ : SmoothRiemannianMetric I M)
   rw [hval]
   exact hδ y v w
 
+private def bdMonoPerm (σ : Equiv.Perm (Fin 4)) : Equiv.Perm (Fin 6) :=
+  ((finSumFinEquiv (m := 4) (n := 2)).permCongr
+    (Equiv.sumCongr σ (Equiv.refl (Fin 2)))).trans bdSigmaE0
+
+private lemma bdMonoPerm_castAdd (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
+    bdMonoPerm σ (Fin.castAdd 2 j) = (![1, 3, 4, 5] : Fin 4 → Fin 6) (σ j) := by
+  have hpad : (finSumFinEquiv (m := 4) (n := 2)).permCongr
+      (Equiv.sumCongr σ (Equiv.refl (Fin 2))) (Fin.castAdd 2 j) =
+      Fin.castAdd 2 (σ j) := by
+    rw [Equiv.permCongr_apply, finSumFinEquiv_symm_apply_castAdd]
+    rfl
+  rw [bdMonoPerm, Equiv.trans_apply, hpad]
+  exact (by decide : ∀ k : Fin 4,
+    bdSigmaE0 (Fin.castAdd 2 k) = (![1, 3, 4, 5] : Fin 4 → Fin 6) k) (σ j)
+
+private lemma bdMonoPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 2) :
+    bdMonoPerm σ (Fin.natAdd 4 k) = (![0, 2] : Fin 2 → Fin 6) k := by
+  have hpad : (finSumFinEquiv (m := 4) (n := 2)).permCongr
+      (Equiv.sumCongr σ (Equiv.refl (Fin 2))) (Fin.natAdd 4 k) =
+      Fin.natAdd 4 k := by
+    rw [Equiv.permCongr_apply, finSumFinEquiv_symm_apply_natAdd]
+    rfl
+  rw [bdMonoPerm, Equiv.trans_apply, hpad]
+  exact (by decide : ∀ k' : Fin 2,
+    bdSigmaE0 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdSlotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (x : M) (G : Tensor0SSpace 4 I x)
+    (u : Fin 6 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x) G) u =
+      Tensor0SSpace.toModel G ![u 0, u 1, u 2, u 3] *
+        unitModel (I := I) (M := M) g₀ 2 S x (fun k : Fin 2 => u (Fin.natAdd 4 k)) := by
+  rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x) G) =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 5 x).symm
+        ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G)) from rfl]
+  have hkey1 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 5)
+    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 5 x).symm
+      ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G)))
+    (v0 := u 0) (vs := Matrix.vecTail u)
+  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey1
+  rw [show (Fin.cons (u 0) (Matrix.vecTail u) : Fin 6 → TangentSpace I x) = u from by
+    funext k
+    refine Fin.cases rfl (fun i => rfl) k] at hkey1
+  rw [← hkey1]
+  rw [show ((show Tensor0SSpace 3 I x →L[ℝ] Tensor0SSpace 5 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 S).toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G) (u 0)) =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 4 x).symm
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)))) from rfl]
+  rw [show (Matrix.vecTail u : Fin 5 → TangentSpace I x) =
+      Fin.cons (u 1) (fun k : Fin 4 => u (Fin.natAdd 2 k)) from by
+    funext k
+    refine Fin.cases ?_ (fun i => ?_) k
+    · rfl
+    · change u (Fin.succ (Fin.succ i)) = u (Fin.natAdd 2 i)
+      congr 1
+      exact Fin.ext (by simp [Fin.succ, Fin.natAdd]; omega)]
+  have hkey2 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 4)
+    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 4 x).symm
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)))))
+    (v0 := u 1) (vs := fun k : Fin 4 => u (Fin.natAdd 2 k))
+  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey2
+  rw [← hkey2]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 S).toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0))) (u 1)) =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x).symm
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)))) from rfl]
+  rw [show ((fun k : Fin 4 => u (Fin.natAdd 2 k)) : Fin 4 → TangentSpace I x) =
+      Fin.cons (u 2) (fun k : Fin 3 => u (Fin.natAdd 3 k)) from by
+    funext k
+    refine Fin.cases ?_ (fun i => ?_) k
+    · rfl
+    · change u (Fin.natAdd 2 (Fin.succ i)) = u (Fin.natAdd 3 i)
+      congr 1
+      exact Fin.ext (by simp [Fin.succ, Fin.natAdd]; omega)]
+  have hkey3 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 3)
+    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x).symm
+      ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)))))
+    (v0 := u 2) (vs := fun k : Fin 3 => u (Fin.natAdd 3 k))
+  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey3
+  rw [← hkey3]
+  rw [show ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 S).toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1))) (u 2)) =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x).symm
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+                (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)))) from rfl]
+  rw [show ((fun k : Fin 3 => u (Fin.natAdd 3 k)) : Fin 3 → TangentSpace I x) =
+      Fin.cons (u 3) (fun k : Fin 2 => u (Fin.natAdd 4 k)) from by
+    funext k
+    refine Fin.cases ?_ (fun i => ?_) k
+    · rfl
+    · change u (Fin.natAdd 3 (Fin.succ i)) = u (Fin.natAdd 4 i)
+      congr 1
+      exact Fin.ext (by simp [Fin.succ, Fin.natAdd]; omega)]
+  have hkey4 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 2)
+    (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x).symm
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)))))
+    (v0 := u 3) (vs := fun k : Fin 2 => u (Fin.natAdd 4 k))
+  rw [ContinuousLinearEquiv.apply_symm_apply] at hkey4
+  rw [← hkey4]
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x).comp
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2))) (u 3)) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x)
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)) (u 3)) from rfl]
+  set t : Tensor0SSpace 0 I x :=
+    tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2)) (u 3) with ht_def
+  have htval : Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0) =
+      Tensor0SSpace.toModel G ![u 0, u 1, u 2, u 3] := by
+    rw [ht_def]
+    have h1 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 0)
+      (T := tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1)) (u 2))
+      (v0 := u 3) (vs := fun i : Fin 0 => i.elim0)
+    rw [h1]
+    have h2 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 1)
+      (T := tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0)) (u 1))
+      (v0 := u 2) (vs := Fin.cons (u 3) (fun i : Fin 0 => i.elim0))
+    rw [h2]
+    have h3 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 2)
+      (T := tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x G (u 0))
+      (v0 := u 1) (vs := Fin.cons (u 2) (Fin.cons (u 3) (fun i : Fin 0 => i.elim0)))
+    rw [h3]
+    have h4 := TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (n := 3)
+      (T := G) (v0 := u 0)
+      (vs := Fin.cons (u 1) (Fin.cons (u 2) (Fin.cons (u 3) (fun i : Fin 0 => i.elim0))))
+    rw [h4]
+    refine congrArg _ ?_
+    funext k
+    fin_cases k <;> rfl
+  have hdecomp := bdTensor0S_zero_rank_decomp (I := I) (M := M) x t
+  rw [htval] at hdecomp
+  rw [hdecomp, map_smul]
+  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (σ : Equiv.Perm (Fin 4)) :
+    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ =
+      appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S)) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro G
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  set Y : Tensor0SSpace 6 I x :=
+    (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S)).toSection x) G with hY_def
+  have hYval : ∀ w : Fin 6 → TangentSpace I x,
+      Tensor0SSpace.toModel Y w =
+        Tensor0SSpace.toModel G
+            (fun j : Fin 4 => w ((![1, 3, 4, 5] : Fin 4 → Fin 6) (σ j))) *
+          unitModel (I := I) (M := M) g₀ 2 S x ![w 0, w 2] := by
+    intro w
+    rw [hY_def]
+    rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S)).toSection x) G) =
+        ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
+          rsDomDomCongr (bdMonoPerm σ)
+            ((slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x)) G) from by
+      rw [rsDomDomCongrSection_toSection]]
+    rw [toModel_rsDomDomCongr_apply (I := I) (M := M) (bdMonoPerm σ)
+      ((slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x) G]
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rw [bdSlotExtendIterFour_toModel (I := I) (M := M) g₀ S x G
+      (fun i => w (bdMonoPerm σ i))]
+    refine congrArg₂ (· * ·) ?_ ?_
+    · refine congrArg _ ?_
+      funext j
+      fin_cases j
+      · exact congrArg w (bdMonoPerm_castAdd σ 0)
+      · exact congrArg w (bdMonoPerm_castAdd σ 1)
+      · exact congrArg w (bdMonoPerm_castAdd σ 2)
+      · exact congrArg w (bdMonoPerm_castAdd σ 3)
+    · refine congrArg _ ?_
+      funext k
+      fin_cases k
+      · exact congrArg w (bdMonoPerm_natAdd σ 0)
+      · exact congrArg w (bdMonoPerm_natAdd σ 1)
+  have hLHS : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ).toSection x) G) v =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel (𝕜 := ℝ) (ccTensorUnitValueSection (I := I) (M := M) g₀ S x)
+            ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+              (smoothOrthoFrame (I := I) g₁ x b x : E)] *
+          Tensor0SSpace.toModel (𝕜 := ℝ) G
+            (fun i => (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : E))
+              (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : E)) v) : Fin 4 → E)
+              (σ i)) := by
+    rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ).toSection x) G) =
+        curvatureRefoldMonomialFibFixedFrame (I := I) (M := M)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ
+          (smoothOrthoFrame (I := I) g₁ x) x G from rfl]
+    exact curvatureRefoldMonomialFibFixedFrame_toModel (I := I) (M := M)
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ
+      (smoothOrthoFrame (I := I) g₁ x) x G v
+  have hRHS : Tensor0SSpace.toModel
+      ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S))).toSection x) G) v =
+      ∑ b : Fin (Module.finrank ℝ E), ∑ a : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel Y
+          (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : TangentSpace I x) : E)
+              (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
+                  (fun j => (v j : E)))))) := by
+    rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S))).toSection x) G) =
+        cometricDoubleTraceFib (I := I) g₁ 2 x
+          (cometricDoubleTraceFib (I := I) g₁ 4 x Y) from by
+      rw [hY_def]
+      rw [appCcRS_toSection]
+      rfl]
+    rw [cometricDoubleTraceFib_toModel (I := I) g₁ 2 x]
+    rw [modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g₁ x)]
+    rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g₁ x
+      (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+      (Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₁ 4 x Y))
+      (fun j => (v j : E))]
+    refine Finset.sum_congr rfl fun b _ => ?_
+    rw [cometricDoubleTraceFib_toModel (I := I) g₁ 4 x Y]
+    rw [modelDoubleTrace_apply (E := E) 4 (cometricLmodel (I := I) g₁ x)]
+    rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g₁ x
+      (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+      (Tensor0SSpace.toModel Y)
+      (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
+        (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
+          (fun j => (v j : E))))]
+  rw [hLHS, hRHS]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [hYval, mul_comm]
+  refine congrArg₂ (· * ·) ?_ ?_
+  · refine congrArg _ ?_
+    funext i
+    have htuple : ∀ k : Fin 4,
+        (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : E))
+          (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : E)) v) : Fin 4 → E) k =
+        ((Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : TangentSpace I x) : E)
+          (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
+              (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
+                (fun j => (v j : E)))))) : Fin 6 → E)
+          ((![1, 3, 4, 5] : Fin 4 → Fin 6) k) := by
+      intro k
+      fin_cases k <;> rfl
+    exact htuple (σ i)
+  · have hWm : Tensor0SSpace.toModel
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ S x) =
+        unitModel (I := I) (M := M) g₀ 2 S x := rfl
+    rw [hWm]
+    refine congrArg _ ?_
+    funext j
+    fin_cases j <;> rfl
+
+set_option linter.unusedSectionVars false in
+private lemma bdGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
+    (hbb : ∀ j, b j ≤ b' j) (w : ℕ) :
+    Combinatorics.antidiagonalTupleGridWindow b w ≤
+      Combinatorics.antidiagonalTupleGridWindow b' w := by
+  rw [Combinatorics.antidiagonalTupleGridWindow, Combinatorics.antidiagonalTupleGridWindow]
+  refine Finset.sum_le_sum fun k _ => ?_
+  rw [Combinatorics.antidiagonalTupleGrid, Combinatorics.antidiagonalTupleGrid]
+  refine Finset.sum_le_sum fun n _ => ?_
+  refine Finset.sum_le_sum fun e _ => ?_
+  exact Finset.prod_le_prod (fun m _ => hb (e m)) (fun m _ => hbb (e m))
+
+set_option linter.unusedSectionVars false in
+private lemma bdSingle_b_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (q : ℕ) (hq : 1 ≤ q) :
+    b q ≤ Combinatorics.antidiagonalTupleGrid b q := by
+  have h := Combinatorics.single_factor_mul_antidiagonalTupleGrid_le b hb 0 q hq
+  rw [Combinatorics.antidiagonalTupleGrid_zero, mul_one] at h
+  rwa [zero_add] at h
+
 set_option linter.unusedVariables false in
-/-- Deferred input (per-monomial share of the constructed-family two-step jet windows;
-pattern class: tame-envelope technique with ball absorption for the frame-summed refold
-monomial coefficient along the realized path at the symmetrized unit-value weight — the
-weight and the metric raisings ride at the zero jet, so `∇ⁱ` stays inside the
-`range (i + 2)` window; generic in the slot pattern, shared by the three covariant-derivative
-arm monomials and reusable by the Riemann-arm kernel monomials). Every consumer transitively
-depends on `sorryAx` until this lands. -/
+set_option linter.unusedSectionVars false in
+private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (σ : Equiv.Perm (Fin 4)) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P S : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hboundP : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hboundS : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+        (hPS : ∀ (l : ℕ) (x : M),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l S).toSection x))
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 4 2 i
+              (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+                (ccTensorUnitValueSection (I := I) (M := M) g₀
+                  (symmS (I := I) (M := M) g₀ S))
+                (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+                  (symmS (I := I) (M := M) g₀ S)) σ)).toSection x) ≤
+          C i * Combinatorics.antidiagonalTupleGridWindow
+            (fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l' S).toSection x)) (i + 2) := by
+  classical
+  obtain ⟨CP, hCP_nn, hCP⟩ := bdPairTraceOp_tgrid (I := I) (M := M) g₀ hδ₀
+  set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
+  have hfr_nn : 0 ≤ fr := Nat.cast_nonneg _
+  set CS : ℕ → ℝ := fun l => if l = 0 then fr ^ 2 * δ₀ ^ 2 else 1 with hCS_def
+  have hCS_nn : ∀ l, 0 ≤ CS l := by
+    intro l
+    rw [hCS_def]
+    dsimp only
+    split_ifs
+    · positivity
+    · norm_num
+  refine ⟨fun i => appCcGdiag (E := E) i * ∑ i' ∈ Finset.range (i + 1),
+      CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
+        (fr * (fr * (fr * (fr * CS l)))) *
+          Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1),
+    fun i => mul_nonneg (appCcGdiag_nonneg (E := E) i)
+      (Finset.sum_nonneg fun i' _ => mul_nonneg (hCP_nn i')
+        (Finset.sum_nonneg fun l _ => mul_nonneg
+          (mul_nonneg hfr_nn (mul_nonneg hfr_nn (mul_nonneg hfr_nn
+            (mul_nonneg hfr_nn (hCS_nn l)))))
+          (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg _ _))), ?_⟩
+  intro g₁ P S htie δ hδ_le hδ0 hboundP hboundS hPS i x
+  set b : ℕ → ℝ := fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l' S).toSection x) with hb_def
+  set bP : ℕ → ℝ := fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l' P).toSection x) with hbP_def
+  have hb : ∀ l', 0 ≤ b l' :=
+    fun l' => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l') x _
+  have hbP : ∀ l', 0 ≤ bP l' :=
+    fun l' => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l') x _
+  have hbPb : ∀ l', bP l' ≤ b l' := fun l' => hPS l' x
+  set W : ℝ := Combinatorics.antidiagonalTupleGridWindow b (i + 2) with hW_def
+  have hW_nn : (0 : ℝ) ≤ W := Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (i + 2)
+  have hWtower : ∀ l : ℕ,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+        ((iteratedCovGrad (I := I) g₀ 4 6 l
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+              (symmS (I := I) (M := M) g₀ S)))).toSection x) ≤
+      (fr * (fr * (fr * (fr * CS l)))) *
+        Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+    intro l
+    have hperm : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+        ((iteratedCovGrad (I := I) g₀ 4 6 l
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+              (symmS (I := I) (M := M) g₀ S)))).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 4 6 l
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+      rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 4 6
+        (bdMonoPerm σ)
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 4 (symmS (I := I) (M := M) g₀ S))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 4 (symmS (I := I) (M := M) g₀ S)))
+        (fun y d => by
+          rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) l x
+    rw [hperm]
+    have h4 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+        ((iteratedCovGrad (I := I) g₀ 4 6 l
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+        fr * riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + l) x
+          ((iteratedCovGrad (I := I) g₀ 3 5 l
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 3
+              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+      rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 3 5
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 (symmS (I := I) (M := M) g₀ S)) l x
+    have h3 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + l) x
+        ((iteratedCovGrad (I := I) g₀ 3 5 l
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 3
+            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+        fr * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+          ((iteratedCovGrad (I := I) g₀ 2 4 l
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 2
+              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+      rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 2 4
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) l x
+    have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+        ((iteratedCovGrad (I := I) g₀ 2 4 l
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 2
+            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+        fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + l) x
+          ((iteratedCovGrad (I := I) g₀ 1 3 l
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 1
+              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+      rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 3
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 (symmS (I := I) (M := M) g₀ S)) l x
+    have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + l) x
+        ((iteratedCovGrad (I := I) g₀ 1 3 l
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 1
+            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+        fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l
+            (symmS (I := I) (M := M) g₀ S)).toSection x) :=
+      rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 2
+        (symmS (I := I) (M := M) g₀ S) l x
+    have hbase : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l
+          (symmS (I := I) (M := M) g₀ S)).toSection x) ≤
+        CS l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+      rcases Nat.eq_zero_or_pos l with hl0 | hl1
+      · subst hl0
+        have hzero := bdRfns_symmS_zero_le (I := I) (M := M) g₀ S hδ0 hboundS x
+        have hδsq : δ ^ 2 ≤ δ₀ ^ 2 := by nlinarith
+        have hone : (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (0 + 2) :=
+          Combinatorics.one_le_antidiagonalTupleGridWindow b hb (by norm_num)
+        have hCS0 : CS 0 = fr ^ 2 * δ₀ ^ 2 := by simp [hCS_def]
+        have hstep : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 0) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 0
+              (symmS (I := I) (M := M) g₀ S)).toSection x) ≤ fr ^ 2 * δ₀ ^ 2 := by
+          rw [iteratedCovGrad_zero]
+          refine le_trans hzero ?_
+          rw [hfr_def]
+          nlinarith [sq_nonneg (Module.finrank ℝ E : ℝ)]
+        rw [hCS0]
+        refine le_trans hstep ?_
+        have hcs_nn : (0 : ℝ) ≤ fr ^ 2 * δ₀ ^ 2 := by positivity
+        nlinarith [mul_le_mul_of_nonneg_left hone hcs_nn]
+      · have hsymm := bdRfns_iCG_symmS_le (I := I) (M := M) g₀ S l x
+        have hsingle : b l ≤ Combinatorics.antidiagonalTupleGrid b l :=
+          bdSingle_b_le_grid b hb l hl1
+        have hgw : Combinatorics.antidiagonalTupleGrid b l ≤
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2) :=
+          Combinatorics.antidiagonalTupleGrid_le_window b hb (by omega)
+        have hCSl : CS l = 1 := by
+          rw [hCS_def]
+          dsimp only
+          rw [if_neg (by omega)]
+        rw [hCSl, one_mul]
+        exact le_trans hsymm (le_trans hsingle hgw)
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 4 6 l
+            (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+              (symmS (I := I) (M := M) g₀ S))).toSection x)
+        ≤ fr * riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + l) x
+            ((iteratedCovGrad (I := I) g₀ 3 5 l
+              (slotExtendIter (I := I) (M := M) g₀ 0 2 3
+                (symmS (I := I) (M := M) g₀ S))).toSection x) := h4
+      _ ≤ fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 4 l
+              (slotExtendIter (I := I) (M := M) g₀ 0 2 2
+                (symmS (I := I) (M := M) g₀ S))).toSection x)) :=
+          mul_le_mul_of_nonneg_left h3 hfr_nn
+      _ ≤ fr * (fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + l) x
+            ((iteratedCovGrad (I := I) g₀ 1 3 l
+              (slotExtendIter (I := I) (M := M) g₀ 0 2 1
+                (symmS (I := I) (M := M) g₀ S))).toSection x))) := by
+          refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left h2 hfr_nn) hfr_nn
+      _ ≤ fr * (fr * (fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l
+              (symmS (I := I) (M := M) g₀ S)).toSection x)))) := by
+          refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left h1 hfr_nn) hfr_nn) hfr_nn
+      _ ≤ fr * (fr * (fr * (fr * (CS l *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2))))) := by
+          refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hbase hfr_nn)
+              hfr_nn) hfr_nn) hfr_nn
+      _ = (fr * (fr * (fr * (fr * CS l)))) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by ring
+  have hlift : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+      ((iteratedCovGrad (I := I) g₀ 4 2 i
+        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀
+            (symmS (I := I) (M := M) g₀ S))
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+            (symmS (I := I) (M := M) g₀ S)) σ)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 4 2 i
+          (appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+              (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+                (symmS (I := I) (M := M) g₀ S))))).toSection x) := by
+    rw [bdMonoRefold_eq_pairTrace (I := I) (M := M) g₀ g₁
+      (symmS (I := I) (M := M) g₀ S) σ]
+  rw [hlift]
+  refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+    (I := I) (M := M) g₀ i 4 6 2
+    (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+      (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+        (symmS (I := I) (M := M) g₀ S))) x) ?_
+  have hcell : ∀ i' ∈ Finset.range (i + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + i') x
+          ((iteratedCovGrad (I := I) g₀ 6 2 i'
+            (bdPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) *
+        ∑ l ∈ Finset.range (i + 1 - i'),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+            ((iteratedCovGrad (I := I) g₀ 4 6 l
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+                (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+                  (symmS (I := I) (M := M) g₀ S)))).toSection x) ≤
+      (CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
+        (fr * (fr * (fr * (fr * CS l)))) *
+          Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1)) * W := by
+    intro i' hi'
+    rw [Finset.mem_range] at hi'
+    have hA1 : riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + i') x
+        ((iteratedCovGrad (I := I) g₀ 6 2 i'
+          (bdPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) ≤
+        CP i' * Combinatorics.antidiagonalTupleGridWindow b (i' + 1) := by
+      refine le_trans (hCP g₁ P htie hδ_le hδ0 hboundP i' x) ?_
+      exact mul_le_mul_of_nonneg_left
+        (bdGridWindow_mono_of_le bP b hbP hbPb (i' + 1)) (hCP_nn i')
+    have hA2 : (∑ l ∈ Finset.range (i + 1 - i'),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 4 6 l
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+              (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+                (symmS (I := I) (M := M) g₀ S)))).toSection x)) ≤
+        ∑ l ∈ Finset.range (i + 1 - i'),
+          (fr * (fr * (fr * (fr * CS l)))) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2) :=
+      Finset.sum_le_sum fun l _ => hWtower l
+    have hsum_nn : (0 : ℝ) ≤ ∑ l ∈ Finset.range (i + 1 - i'),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 4 6 l
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+              (slotExtendIter (I := I) (M := M) g₀ 0 2 4
+                (symmS (I := I) (M := M) g₀ S)))).toSection x) :=
+      Finset.sum_nonneg fun l _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 (6 + l) x _
+    have hA1_rhs_nn : (0 : ℝ) ≤ CP i' *
+        Combinatorics.antidiagonalTupleGridWindow b (i' + 1) :=
+      mul_nonneg (hCP_nn i')
+        (Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (i' + 1))
+    refine le_trans (mul_le_mul hA1 hA2 hsum_nn hA1_rhs_nn) ?_
+    rw [Finset.mul_sum]
+    rw [show (CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
+        (fr * (fr * (fr * (fr * CS l)))) *
+          Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1)) * W =
+        ∑ l ∈ Finset.range (i + 1 - i'),
+          (CP i' * ((fr * (fr * (fr * (fr * CS l)))) *
+            Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1))) * W from by
+      rw [Finset.mul_sum, Finset.sum_mul]]
+    refine Finset.sum_le_sum fun l hl => ?_
+    rw [Finset.mem_range] at hl
+    have hpair : Combinatorics.antidiagonalTupleGridWindow b (i' + 1) *
+        Combinatorics.antidiagonalTupleGridWindow b (l + 1 + 1) ≤
+        Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1) *
+          Combinatorics.antidiagonalTupleGridWindow b (i' + (l + 1) + 1) :=
+      Combinatorics.antidiagonalTupleGridWindow_mul_le b hb i' (l + 1)
+    have hmono : Combinatorics.antidiagonalTupleGridWindow b (i' + (l + 1) + 1) ≤ W := by
+      rw [hW_def]
+      exact Combinatorics.antidiagonalTupleGridWindow_mono b hb (by omega)
+    have hfr4CS_nn : (0 : ℝ) ≤ fr * (fr * (fr * (fr * CS l))) :=
+      mul_nonneg hfr_nn (mul_nonneg hfr_nn (mul_nonneg hfr_nn
+        (mul_nonneg hfr_nn (hCS_nn l))))
+    calc CP i' * Combinatorics.antidiagonalTupleGridWindow b (i' + 1) *
+          ((fr * (fr * (fr * (fr * CS l)))) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2))
+        = (CP i' * (fr * (fr * (fr * (fr * CS l))))) *
+            (Combinatorics.antidiagonalTupleGridWindow b (i' + 1) *
+              Combinatorics.antidiagonalTupleGridWindow b (l + 1 + 1)) := by
+          rw [show l + 2 = l + 1 + 1 from rfl]
+          ring
+      _ ≤ (CP i' * (fr * (fr * (fr * (fr * CS l))))) *
+            (Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1) *
+              Combinatorics.antidiagonalTupleGridWindow b (i' + (l + 1) + 1)) := by
+          refine mul_le_mul_of_nonneg_left hpair ?_
+          exact mul_nonneg (hCP_nn i') hfr4CS_nn
+      _ ≤ (CP i' * (fr * (fr * (fr * (fr * CS l))))) *
+            (Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1) * W) := by
+          refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (hCP_nn i') hfr4CS_nn)
+          exact mul_le_mul_of_nonneg_left hmono
+            (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg _ _)
+      _ = (CP i' * ((fr * (fr * (fr * (fr * CS l)))) *
+            Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1))) * W := by
+          ring
+  refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hcell)
+    (appCcGdiag_nonneg (E := E) i)) ?_
+  rw [← Finset.sum_mul, ← mul_assoc]
+
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+private theorem bdL2_tameEnvelope_of_gridWindow42 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ Kg : ℕ → ℝ, (∀ k, 0 ≤ Kg k) ∧
+      ∀ (P : SmoothCcTensor g₀ 0 2),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ) (C : ℝ), 0 ≤ C → ∀ (V : SmoothCcTensor g₀ 4 2),
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 4 2 i V).toSection x) ≤
+          C * Combinatorics.antidiagonalTupleGridWindow
+            (fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l' P).toSection x)) (i + 2)) →
+        ‖iteratedCovGrad (I := I) g₀ 4 2 i V‖ ^ 2 ≤
+          (C * ∑ k ∈ Finset.range (i + 2), Kg k) *
+            (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+  classical
+  obtain ⟨Kg, hKg_nn, hKg⟩ :=
+    antidiagonalTupleGrid_integral_ballUniform_tameWindow (I := I) (M := M) g₀ a ha_super hR
+  refine ⟨Kg, hKg_nn, ?_⟩
+  intro P hPball i C hC V hpt
+  have hwin_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
+    Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hpt' : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 4 2 i V).toSection x) ≤
+        C * ∑ k ∈ Finset.range (i + 2),
+          ∑ n ∈ Finset.range (k + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x) := by
+    intro x
+    refine le_trans (hpt x) (le_of_eq ?_)
+    congr 1
+  have hF_int : MeasureTheory.Integrable
+      (fun x => C * ∑ k ∈ Finset.range (i + 2),
+        ∑ n ∈ Finset.range (k + 1),
+          ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+            ∏ m : Fin n,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+    (MeasureTheory.integrable_finset_sum _
+      (fun k hk => (hKg P hPball k).1)).const_mul C
+  have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 4 (2 + i)
+    (iteratedCovGrad (I := I) g₀ 4 2 i V)
+    (fun x => C * ∑ k ∈ Finset.range (i + 2),
+      ∑ n ∈ Finset.range (k + 1),
+        ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+          ∏ m : Fin n,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x))
+    hF_int hpt'
+  refine le_trans key ?_
+  rw [MeasureTheory.integral_const_mul,
+    MeasureTheory.integral_finset_sum _ (fun k hk => (hKg P hPball k).1)]
+  have hsum_le : ∑ k ∈ Finset.range (i + 2),
+        (∫ x, ∑ n ∈ Finset.range (k + 1),
+            ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+              ∏ m : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+      (∑ k ∈ Finset.range (i + 2), Kg k) *
+        (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+    rw [Finset.sum_mul]
+    refine Finset.sum_le_sum (fun k hk => ?_)
+    refine le_trans (hKg P hPball k).2 ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hKg_nn k)
+    have hsub : ∑ j ∈ Finset.range (k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 ≤
+        ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 := by
+      refine Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_mono ?_) (fun j _ _ => sq_nonneg _)
+      rw [Finset.mem_range] at hk
+      omega
+    linarith
+  calc C * ∑ k ∈ Finset.range (i + 2),
+          (∫ x, ∑ n ∈ Finset.range (k + 1),
+              ∑ e ∈ Finset.Nat.antidiagonalTuple n k,
+                ∏ m : Fin n,
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
+                    ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+      ≤ C * ((∑ k ∈ Finset.range (i + 2), Kg k) *
+          (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) :=
+        mul_le_mul_of_nonneg_left hsum_le hC
+    _ = (C * ∑ k ∈ Finset.range (i + 2), Kg k) *
+          (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+        ring
+
+set_option linter.unusedVariables false in
+/-- Per-monomial two-step jet window for the frame-summed refold monomial coefficient along
+the realized path at the symmetrized unit-value weight: the monomial refolds onto the moving
+pair-trace operator applied to the slot-extended, reindexed symmetrized weight, so its jets
+convert onto the perturbation jets by the diagonal-product-grid calculus with ball absorption
+inside the `range (i + 2)` window — the weight and the metric raisings ride at the zero jet,
+with the weight's zero jet capped by the `gFibreOpBound` smallness; generic in the slot
+pattern. -/
 theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6915,8 +7654,80 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
               (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
                 (symmS (I := I) (M := M) g₀ T)) σ)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
+  obtain ⟨C, hC_nn, hpt⟩ := bdMonoRefold_pointwise_gridWindow (I := I) (M := M) g₀ hδ₁_lt σ
+  obtain ⟨Kg, hKg_nn, hKg⟩ :=
+    bdL2_tameEnvelope_of_gridWindow42 (I := I) (M := M) g₀ a ha_super hR
+  refine ⟨fun i => C i * ∑ k ∈ Finset.range (i + 2), Kg k,
+    fun i => mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k), ?_⟩
+  intro T δ hδ_le hδ hδZ hball i s hs
+  have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+  by_cases hM : Nonempty M
+  · obtain ⟨x₀⟩ := hM
+    have hδ0 : 0 ≤ δ := bdDelta_nonneg (I := I) (M := M) g₀ x₀ T hδ
+    have hδ_le' : δ ≤ δ₁ := le_trans hδ_le (le_max_left _ _)
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+      Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+          g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+      fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+    obtain ⟨hs0, hs1⟩ := hs
+    have habs : |s| ≤ 1 := by
+      rw [abs_of_nonneg hs0]
+      exact hs1
+    have hδP : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+      intro y v w
+      have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+      have heq : |1 - s| * δ + |s| * δ = δ := by
+        rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+        ring
+      rwa [heq] at hraw
+    have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+      rw [convexPerturbation, smul_zero, zero_add]
+    have hPS : ∀ (l : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l
+              (convexPerturbation (I := I) g₀ T 0 s)).toSection x) ≤
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) := by
+      intro l x
+      rw [hcP, iteratedCovGrad_smul_real]
+      rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) =
+          s • ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) from by
+        rw [SmoothCcTensor.toSection_smul]
+        rfl]
+      rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 0 (2 + l) x]
+      have hs2 : s ^ 2 ≤ 1 := by nlinarith
+      nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)]
+    exact hKg T hball i (C i) (hC_nn i)
+      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+          (symmS (I := I) (M := M) g₀ T)) σ)
+      (fun x => hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (convexPerturbation (I := I) g₀ T 0 s) T htie hδ_le' hδ0 hδP hδ hPS i x)
+  · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
+    have hz : ‖iteratedCovGrad (I := I) g₀ 4 2 i
+        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
+            (symmS (I := I) (M := M) g₀ T)) σ)‖ = 0 :=
+      bdNorm_zero_of_isEmpty (I := I) (M := M) g₀ 4 (2 + i) _
+    rw [hz]
+    have hK_nn : 0 ≤ C i * ∑ k ∈ Finset.range (i + 2), Kg k :=
+      mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k)
+    nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedSectionVars false in
 /-- Four-term fibre-norm-square subadditivity for a signed four-monomial combination, at
@@ -7046,6 +7857,812 @@ private lemma norm_add_sq_le_local (g : SmoothRiemannianMetric I M) {r s : ℕ}
       (add_nonneg (norm_nonneg A) (norm_nonneg B)),
     sq_nonneg (‖A‖ - ‖B‖)]
 
+private def bdBgRArmWeight (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
+  appCcRS (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 (Equiv.swap (1 : Fin 6) 3)
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdBgRArmWeight_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+          (bdBgRArmWeight (I := I) (M := M) g₀).toSection x) D) m =
+      ∑ e : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel D
+            ![(smoothOrthoFrame (I := I) g₀ x e x : E), (m 1 : E)] *
+          g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 3))
+            (smoothOrthoFrame (I := I) g₀ x e x) := by
+  classical
+  set Y : Tensor0SSpace 6 I x :=
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 (Equiv.swap (1 : Fin 6) 3)
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))).toSection x) D with hY_def
+  have hYval : ∀ w : Fin 6 → TangentSpace I x,
+      Tensor0SSpace.toModel Y w =
+        Tensor0SSpace.toModel D ![w 0, w 3] *
+          unitModel (I := I) (M := M) g₀ 4
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x ![w 2, w 1, w 4, w 5] := by
+    intro w
+    rw [hY_def]
+    rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 (Equiv.swap (1 : Fin 6) 3)
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))).toSection x) D) =
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+          rsDomDomCongr (Equiv.swap (1 : Fin 6) 3)
+            ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)).toSection x)) D) from by
+      rw [rsDomDomCongrSection_toSection]]
+    rw [toModel_rsDomDomCongr_apply (I := I) (M := M) (Equiv.swap (1 : Fin 6) 3)
+      ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)).toSection x) D]
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rw [bdSlotExtendIter_two_toModel (I := I) (M := M) g₀
+      (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x D
+      (fun i => w ((Equiv.swap (1 : Fin 6) 3) i))]
+    refine congrArg₂ (· * ·) ?_ ?_
+    · refine congrArg _ ?_
+      funext k
+      fin_cases k <;> simp [Equiv.swap_apply_def]
+    · refine congrArg _ ?_
+      funext k
+      fin_cases k <;> simp [Equiv.swap_apply_def]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+      (bdBgRArmWeight (I := I) (M := M) g₀).toSection x) D) =
+      cometricDoubleTraceFib (I := I) g₀ 4 x Y from by
+    rw [hY_def, bdBgRArmWeight]
+    rw [appCcRS_toSection]
+    rfl]
+  rw [cometricDoubleTraceFib_toModel (I := I) g₀ 4 x Y]
+  rw [modelDoubleTrace_apply (E := E) 4 (cometricLmodel (I := I) g₀ x)]
+  rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g₀ x
+    (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+    (Tensor0SSpace.toModel Y) (fun j => (m j : E))]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rw [hYval]
+  show Tensor0SSpace.toModel D
+      ![((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E), (m 1 : E)] *
+      unitModel (I := I) (M := M) g₀ 4
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x
+        ![(m 0 : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E),
+          (m 2 : E), (m 3 : E)] = _
+  rw [riemannLoweredCc_unitModel_apply (I := I) (M := M) g₀ g₀ g₀ x
+    ![(m 0 : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E),
+      (m 2 : E), (m 3 : E)]]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private theorem bdBgRComm_eq_refold (g₀ g : SmoothRiemannianMetric I M) :
+    ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g =
+      appCcRS (I := I) (M := M) g₀ 2 4 2 (bdPureDT (I := I) (M := M) g₀ g 2)
+        (bdBgRArmWeight (I := I) (M := M) g₀) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g).toSection x) D) =
+      bgRBiContrFib (I := I) g₀ g x D from rfl]
+  rw [show bgRBiContrFib (I := I) g₀ g x =
+      bgRBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g x) x from rfl]
+  rw [bgRBiContrFibFixedFrame_toModel (I := I) g₀ (smoothOrthoFrame (I := I) g x) x D
+    (fun j => (v j : E))]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (appCcRS (I := I) (M := M) g₀ 2 4 2 (bdPureDT (I := I) (M := M) g₀ g 2)
+        (bdBgRArmWeight (I := I) (M := M) g₀)).toSection x) D) =
+      cometricDoubleTraceFib (I := I) g 2 x
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+          (bdBgRArmWeight (I := I) (M := M) g₀).toSection x) D) from by
+    rw [appCcRS_toSection]
+    rfl]
+  beta_reduce
+  rw [cometricDoubleTraceFib_toModel (I := I) g 2 x]
+  rw [modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g x)]
+  rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g x
+    (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+    (Tensor0SSpace.toModel
+      ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+        (bdBgRArmWeight (I := I) (M := M) g₀).toSection x) D))
+    (fun j => (v j : E))]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  rw [bdBgRArmWeight_toModel (I := I) (M := M) g₀ x D]
+  show Tensor0SSpace.toModel D
+      (Fin.cons (show E from riemannOp (LeviCivita (I := I) g₀) x
+          (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+        (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E)
+          (fun i : Fin 0 => i.elim0))) =
+    ∑ e : Fin (Module.finrank ℝ E),
+      Tensor0SSpace.toModel D
+          (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E)
+              (fun i : Fin 0 => i.elim0))) *
+        g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x
+            (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+          (smoothOrthoFrame (I := I) g₀ x e x)
+  have hu_exp : (show E from riemannOp (LeviCivita (I := I) g₀) x
+      (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1)) =
+      ∑ e : Fin (Module.finrank ℝ E),
+        g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x
+            (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+          (smoothOrthoFrame (I := I) g₀ x e x) •
+        ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) := by
+    rw [show (∑ e : Fin (Module.finrank ℝ E),
+        g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x
+            (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+          (smoothOrthoFrame (I := I) g₀ x e x) •
+        ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)) =
+        ((∑ e : Fin (Module.finrank ℝ E),
+          g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x
+              (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+            (smoothOrthoFrame (I := I) g₀ x e x) •
+          smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) from rfl]
+    have hrep := bdOrthoFrame_center_repr (I := I) (M := M) g₀ x
+      (riemannOp (LeviCivita (I := I) g₀) x (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+    conv_lhs => rw [hrep]
+    refine Finset.sum_congr rfl fun e _ => ?_
+    rw [g₀.symm x (smoothOrthoFrame (I := I) g₀ x e x)
+      (riemannOp (LeviCivita (I := I) g₀) x (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))]
+  rw [hu_exp]
+  rw [bdToModel_cons_sum_smul (E := E) x (Tensor0SSpace.toModel D)
+    (Module.finrank ℝ E)
+    (fun e => g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x
+        (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
+      (smoothOrthoFrame (I := I) g₀ x e x))
+    (fun e => ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E))
+    (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E)
+      (fun i : Fin 0 => i.elim0))]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rw [mul_comm]
+
+
+private def bdTauK3b : Equiv.Perm (Fin 6) :=
+  ⟨fun i => (![5, 0, 2, 1, 4, 3] : Fin 6 → Fin 6) i,
+   fun i => (![1, 3, 2, 5, 4, 0] : Fin 6 → Fin 6) i,
+   by decide, by decide⟩
+
+set_option linter.unusedSectionVars false in
+private theorem bdOrthoFrameBasis_at_center (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
+      ∀ i, bse i = smoothOrthoFrame (I := I) g₀ x i x := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner x (smoothOrthoFrame (I := I) g₀ x a x)
+        (smoothOrthoFrame (I := I) g₀ x b x) = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g₀ x a b
+  have he_li : LinearIndependent ℝ
+      (fun i => smoothOrthoFrame (I := I) g₀ x i x) := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g₀.inner x (smoothOrthoFrame (I := I) g₀ x k x)
+        (∑ j ∈ fs, c j • smoothOrthoFrame (I := I) g₀ x j x) = 0 := by
+      rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g₀.inner x (smoothOrthoFrame (I := I) g₀ x k x)
+        (c j • smoothOrthoFrame (I := I) g₀ x j x) =
+        c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g₀.inner x (smoothOrthoFrame (I := I) g₀ x k x)).map_smul (c j),
+        smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ E :=
+    Fintype.card_fin _
+  exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
+    fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
+
+set_option linter.unusedSectionVars false in
+private theorem bdOrthoFrame_expansion_at_center (g₀ : SmoothRiemannianMetric I M)
+    (x : M) (u : TangentSpace I x) :
+    u = ∑ i : Fin (Module.finrank ℝ E),
+      g₀.inner x u (smoothOrthoFrame (I := I) g₀ x i x) •
+        smoothOrthoFrame (I := I) g₀ x i x := by
+  classical
+  obtain ⟨bse, hbse⟩ := bdOrthoFrameBasis_at_center (I := I) (M := M) g₀ x
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner x (smoothOrthoFrame (I := I) g₀ x a x)
+        (smoothOrthoFrame (I := I) g₀ x b x) = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g₀ x a b
+  have hcoeff : ∀ j : Fin (Module.finrank ℝ E),
+      g₀.inner x u (smoothOrthoFrame (I := I) g₀ x j x) = bse.repr u j := by
+    intro j
+    rw [g₀.symm x u (smoothOrthoFrame (I := I) g₀ x j x)]
+    conv_lhs => rw [← bse.sum_repr u]
+    rw [map_sum]
+    rw [Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) => by
+      rw [(g₀.inner x (smoothOrthoFrame (I := I) g₀ x j x)).map_smul (bse.repr u i),
+        smul_eq_mul, hbse i, horth j i])]
+    rw [Finset.sum_eq_single_of_mem j (Finset.mem_univ j)]
+    · rw [if_pos rfl, mul_one]
+    · intro i _ hij
+      rw [if_neg (fun h => hij h.symm), mul_zero]
+  calc u = ∑ i : Fin (Module.finrank ℝ E), bse.repr u i • bse i := (bse.sum_repr u).symm
+    _ = ∑ i : Fin (Module.finrank ℝ E),
+        g₀.inner x u (smoothOrthoFrame (I := I) g₀ x i x) •
+          smoothOrthoFrame (I := I) g₀ x i x := by
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [hcoeff i, hbse i]
+
+set_option linter.unusedSectionVars false in
+private lemma bdCcTensorBilin_expand_left (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (x : M) (u w : TangentSpace I x) :
+    ccTensorBilin (I := I) g₀ S x u w =
+      ∑ e : Fin (Module.finrank ℝ E),
+        g₀.inner x u (smoothOrthoFrame (I := I) g₀ x e x) *
+          ccTensorBilin (I := I) g₀ S x (smoothOrthoFrame (I := I) g₀ x e x) w := by
+  conv_lhs => rw [bdOrthoFrame_expansion_at_center (I := I) (M := M) g₀ x u]
+  rw [map_sum (ccTensorBilin (I := I) g₀ S x) _ Finset.univ, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rw [map_smul (ccTensorBilin (I := I) g₀ S x), ContinuousLinearMap.smul_apply, smul_eq_mul]
+
+set_option linter.unusedSectionVars false in
+private lemma bdCcTensorBilin_expand_right (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (x : M) (u w : TangentSpace I x) :
+    ccTensorBilin (I := I) g₀ S x u w =
+      ∑ e : Fin (Module.finrank ℝ E),
+        g₀.inner x w (smoothOrthoFrame (I := I) g₀ x e x) *
+          ccTensorBilin (I := I) g₀ S x u (smoothOrthoFrame (I := I) g₀ x e x) := by
+  conv_lhs => rw [bdOrthoFrame_expansion_at_center (I := I) (M := M) g₀ x w]
+  rw [map_sum (ccTensorBilin (I := I) g₀ S x u) _ Finset.univ]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rw [map_smul (ccTensorBilin (I := I) g₀ S x u), smul_eq_mul]
+
+private def bdRicciFoldWeightA (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
+  appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 (Equiv.swap (1 : Fin 6) 3)
+      (appCcRS (I := I) (M := M) g₀ 0 2 6
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
+
+private def bdRicciFoldWeightB (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
+  appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdTauK3b
+      (appCcRS (I := I) (M := M) g₀ 0 2 6
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M)
+    (σ : Equiv.Perm (Fin 6)) (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
+    unitModel (I := I) (M := M) g₀ 4
+        (appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))) x m =
+      ∑ e : Fin (Module.finrank ℝ E),
+        unitModel (I := I) (M := M) g₀ 2 S x
+            ![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) m) :
+                  Fin 6 → E) (σ 0)),
+              ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) m) :
+                  Fin 6 → E) (σ 1))] *
+          unitModel (I := I) (M := M) g₀ 4
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x
+            ![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) m) :
+                  Fin 6 → E) (σ 2)),
+              ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) m) :
+                  Fin 6 → E) (σ 3)),
+              ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) m) :
+                  Fin 6 → E) (σ 4)),
+              ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E) m) :
+                  Fin 6 → E) (σ 5))] := by
+  classical
+  set R4 : SmoothCcTensor g₀ 0 4 := riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀ with hR4_def
+  set Sval : Tensor0SSpace 2 I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from S.toSection x)
+      (unitTensor (I := I) (M := M) x) with hSval_def
+  set Y : Tensor0SSpace 6 I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
+        (appCcRS (I := I) (M := M) g₀ 0 2 6
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4) S)).toSection x)
+      (unitTensor (I := I) (M := M) x) with hY_def
+  have hYval : ∀ w : Fin 6 → TangentSpace I x,
+      Tensor0SSpace.toModel Y w =
+        Tensor0SSpace.toModel Sval ![(w (σ 0) : E), (w (σ 1) : E)] *
+          unitModel (I := I) (M := M) g₀ 4 R4 x
+            ![(w (σ 2) : E), (w (σ 3) : E), (w (σ 4) : E), (w (σ 5) : E)] := by
+    intro w
+    rw [hY_def]
+    rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
+          (appCcRS (I := I) (M := M) g₀ 0 2 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4) S)).toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
+          rsDomDomCongr σ
+            ((appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4) S).toSection x))
+          (unitTensor (I := I) (M := M) x)) from by
+      rw [rsDomDomCongrSection_toSection]]
+    rw [toModel_rsDomDomCongr_apply (I := I) (M := M) σ
+      ((appCcRS (I := I) (M := M) g₀ 0 2 6
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4) S).toSection x)
+      (unitTensor (I := I) (M := M) x)]
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (appCcRS (I := I) (M := M) g₀ 0 2 6
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4) S).toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4).toSection x) Sval) from by
+      rw [appCcRS_toSection]
+      rfl]
+    rw [bdSlotExtendIter_two_toModel (I := I) (M := M) g₀ R4 x Sval (fun i => w (σ i))]
+    refine congrArg₂ (· * ·) ?_ ?_
+    · refine congrArg _ ?_
+      funext k
+      fin_cases k <;> rfl
+    · rw [show unitModel (I := I) (M := M) g₀ 4 R4 x
+          (fun k : Fin 4 => ((fun i => w (σ i)) (Fin.natAdd 2 k) : E)) =
+          unitModel (I := I) (M := M) g₀ 4 R4 x
+            ![(w (σ 2) : E), (w (σ 3) : E), (w (σ 4) : E), (w (σ 5) : E)] from by
+        refine congrArg _ ?_
+        funext k
+        fin_cases k <;> rfl]
+  rw [show unitModel (I := I) (M := M) g₀ 4
+      (appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
+          (appCcRS (I := I) (M := M) g₀ 0 2 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2 R4) S))) x =
+      Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₀ 4 x Y) from by
+    rw [unitModel, hY_def]
+    rw [appCcRS_toSection]
+    rfl]
+  rw [cometricDoubleTraceFib_toModel (I := I) g₀ 4 x Y]
+  rw [modelDoubleTrace_apply (E := E) 4 (cometricLmodel (I := I) g₀ x)]
+  rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g₀ x
+    (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+    (Tensor0SSpace.toModel Y) m]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  rw [hYval]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdRicciFoldWeights_unitModel_eq_kernel (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 4
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ S +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ S) x
+        ![(v0 : E), (v1 : E), (p : E), (q : E)] =
+      ccTensorBilin (I := I) g₀ S x (riemannOp (LeviCivita (I := I) g₀) x v0 p q) v1 +
+        ccTensorBilin (I := I) g₀ S x q (riemannOp (LeviCivita (I := I) g₀) x v0 p v1) := by
+  classical
+  rw [bdUnitModel_add (I := I) (M := M) g₀ 4
+    (bdRicciFoldWeightA (I := I) (M := M) g₀ S) (bdRicciFoldWeightB (I := I) (M := M) g₀ S) x,
+    ContinuousMultilinearMap.add_apply]
+  have hA : unitModel (I := I) (M := M) g₀ 4 (bdRicciFoldWeightA (I := I) (M := M) g₀ S) x
+      ![(v0 : E), (v1 : E), (p : E), (q : E)] =
+      ccTensorBilin (I := I) g₀ S x (riemannOp (LeviCivita (I := I) g₀) x v0 p q) v1 := by
+    rw [show bdRicciFoldWeightA (I := I) (M := M) g₀ S =
+        appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 (Equiv.swap (1 : Fin 6) 3)
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S)) from rfl]
+    rw [bdRicciFoldWeight_unitModel_gen (I := I) (M := M) g₀ (Equiv.swap (1 : Fin 6) 3) S x
+      ![(v0 : E), (v1 : E), (p : E), (q : E)]]
+    rw [bdCcTensorBilin_expand_left (I := I) (M := M) g₀ S x
+      (riemannOp (LeviCivita (I := I) g₀) x v0 p q) v1]
+    refine Finset.sum_congr rfl fun e _ => ?_
+    have h1 : unitModel (I := I) (M := M) g₀ 2 S x
+        ![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 0)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 1))] =
+        unitModel (I := I) (M := M) g₀ 2 S x
+          ![((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E), (v1 : E)] := by
+      refine congrArg _ ?_
+      funext k
+      fin_cases k <;> rfl
+    have h2 : unitModel (I := I) (M := M) g₀ 4
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x
+        ![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 2)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 3)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 4)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 5))] =
+        g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x v0 p q)
+          (smoothOrthoFrame (I := I) g₀ x e x) := by
+      rw [show (![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 2)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 3)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 4)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            ((Equiv.swap (1 : Fin 6) 3) 5))] : Fin 4 → E) =
+          ![(v0 : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E),
+            (p : E), (q : E)] from by
+        funext k
+        fin_cases k <;> rfl]
+      rw [riemannLoweredCc_unitModel_apply (I := I) (M := M) g₀ g₀ g₀ x
+        ![(v0 : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E),
+          (p : E), (q : E)]]
+      rfl
+    rw [h1, h2]
+    rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ S x
+      (smoothOrthoFrame (I := I) g₀ x e x) v1]
+    ring
+  have hB : unitModel (I := I) (M := M) g₀ 4 (bdRicciFoldWeightB (I := I) (M := M) g₀ S) x
+      ![(v0 : E), (v1 : E), (p : E), (q : E)] =
+      ccTensorBilin (I := I) g₀ S x q (riemannOp (LeviCivita (I := I) g₀) x v0 p v1) := by
+    rw [show bdRicciFoldWeightB (I := I) (M := M) g₀ S =
+        appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdTauK3b
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S)) from rfl]
+    rw [bdRicciFoldWeight_unitModel_gen (I := I) (M := M) g₀ bdTauK3b S x
+      ![(v0 : E), (v1 : E), (p : E), (q : E)]]
+    rw [bdCcTensorBilin_expand_right (I := I) (M := M) g₀ S x q
+      (riemannOp (LeviCivita (I := I) g₀) x v0 p v1)]
+    refine Finset.sum_congr rfl fun e _ => ?_
+    have h1 : unitModel (I := I) (M := M) g₀ 2 S x
+        ![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 0)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 1))] =
+        unitModel (I := I) (M := M) g₀ 2 S x
+          ![(q : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)] := by
+      refine congrArg _ ?_
+      funext k
+      fin_cases k <;> rfl
+    have h2 : unitModel (I := I) (M := M) g₀ 4
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x
+        ![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 2)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 3)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 4)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 5))] =
+        g₀.inner x (riemannOp (LeviCivita (I := I) g₀) x v0 p v1)
+          (smoothOrthoFrame (I := I) g₀ x e x) := by
+      rw [show (![((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 2)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 3)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 4)),
+          ((Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)
+              ![(v0 : E), (v1 : E), (p : E), (q : E)]) : Fin 6 → E)
+            (bdTauK3b 5))] : Fin 4 → E) =
+          ![(v0 : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E),
+            (p : E), (v1 : E)] from by
+        funext k
+        fin_cases k <;> rfl]
+      rw [riemannLoweredCc_unitModel_apply (I := I) (M := M) g₀ g₀ g₀ x
+        ![(v0 : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E),
+          (p : E), (v1 : E)]]
+      rfl
+    rw [h1, h2]
+    rw [show unitModel (I := I) (M := M) g₀ 2 S x
+        ![(q : E), ((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E)] =
+        ccTensorBilin (I := I) g₀ S x q (smoothOrthoFrame (I := I) g₀ x e x) from
+      unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ S x q
+        (smoothOrthoFrame (I := I) g₀ x e x)]
+    ring
+  rw [hA, hB]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdRicciFold_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) :
+    ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ S =
+      (-(1 / 2) : ℝ) •
+        appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ S +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ S))) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensorRSSpace_ext 2 2 x
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  beta_reduce
+  have hRHSsmul : ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (((-(1 / 2) : ℝ) •
+        appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ S +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x)) D) =
+      (-(1 / 2) : ℝ) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ S +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x) D) := by
+    rw [show ((((-(1 / 2) : ℝ) •
+        appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ S +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x)) =
+        (-(1 / 2) : ℝ) •
+          ((appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ S +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ S)))).toSection x) from by
+      rw [SmoothCcTensor.toSection_smul]; rfl]
+    rfl
+  rw [hRHSsmul, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [bdPairTraceOp_apply_toModel (I := I) (M := M) g₀ g₁
+    (bdRicciFoldWeightA (I := I) (M := M) g₀ S + bdRicciFoldWeightB (I := I) (M := M) g₀ S)
+    x D v]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ S).toSection x) D) =
+      ricciFoldBiContrFib (I := I) g₀ g₁ S x D from rfl]
+  rw [show ricciFoldBiContrFib (I := I) g₀ g₁ S x =
+      ricciFoldBiContrFibFixedFrame (I := I) g₀ S (smoothOrthoFrame (I := I) g₁ x) x from rfl]
+  rw [ricciFoldBiContrFibFixedFrame_toModel (I := I) g₀ S (smoothOrthoFrame (I := I) g₁ x) x D v]
+  rw [Finset.sum_comm]
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun b _ => ?_
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [ricciFoldKernelBilin_apply (I := I) g₀ S x
+    (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x) (v 0) (v 1)]
+  rw [show unitModel (I := I) (M := M) g₀ 4
+      (bdRicciFoldWeightA (I := I) (M := M) g₀ S + bdRicciFoldWeightB (I := I) (M := M) g₀ S) x
+      ![v 0, v 1, (smoothOrthoFrame (I := I) g₁ x a x : E),
+        (smoothOrthoFrame (I := I) g₁ x b x : E)] =
+      ccTensorBilin (I := I) g₀ S x
+          (riemannOp (LeviCivita (I := I) g₀) x (v 0) (smoothOrthoFrame (I := I) g₁ x a x)
+            (smoothOrthoFrame (I := I) g₁ x b x)) (v 1) +
+        ccTensorBilin (I := I) g₀ S x (smoothOrthoFrame (I := I) g₁ x b x)
+          (riemannOp (LeviCivita (I := I) g₀) x (v 0) (smoothOrthoFrame (I := I) g₁ x a x)
+            (v 1)) from
+    bdRicciFoldWeights_unitModel_eq_kernel (I := I) (M := M) g₀ S x
+      (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+      (v 0) (v 1)]
+  ring
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
+    bdRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
+      bdRicciFoldWeightB (I := I) (M := M) g₀ (c • T) =
+      c • (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+        bdRicciFoldWeightB (I := I) (M := M) g₀ T) := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro t
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  have hdecomp := bdTensor0S_zero_rank_decomp (I := I) (M := M) x t
+  rw [hdecomp, map_smul, map_smul]
+  beta_reduce
+  rw [Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
+  refine congrArg _ ?_
+  show unitModel (I := I) (M := M) g₀ 4
+      (bdRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
+        bdRicciFoldWeightB (I := I) (M := M) g₀ (c • T)) x m =
+    unitModel (I := I) (M := M) g₀ 4
+      (c • (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+        bdRicciFoldWeightB (I := I) (M := M) g₀ T)) x m
+  rw [bdUnitModel_smul (I := I) (M := M) g₀ 4 c
+    (bdRicciFoldWeightA (I := I) (M := M) g₀ T + bdRicciFoldWeightB (I := I) (M := M) g₀ T) x]
+  rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [show m = ![m 0, m 1, m 2, m 3] from by
+    funext k
+    fin_cases k <;> rfl]
+  rw [show unitModel (I := I) (M := M) g₀ 4
+      (bdRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
+        bdRicciFoldWeightB (I := I) (M := M) g₀ (c • T)) x ![m 0, m 1, m 2, m 3] =
+      ccTensorBilin (I := I) g₀ (c • T) x
+          (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 3)) (m 1) +
+        ccTensorBilin (I := I) g₀ (c • T) x (m 3)
+          (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 1)) from
+    bdRicciFoldWeights_unitModel_eq_kernel (I := I) (M := M) g₀ (c • T) x
+      (m 2) (m 3) (m 0) (m 1)]
+  rw [show unitModel (I := I) (M := M) g₀ 4
+      (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+        bdRicciFoldWeightB (I := I) (M := M) g₀ T) x ![m 0, m 1, m 2, m 3] =
+      ccTensorBilin (I := I) g₀ T x
+          (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 3)) (m 1) +
+        ccTensorBilin (I := I) g₀ T x (m 3)
+          (riemannOp (LeviCivita (I := I) g₀) x (m 0) (m 2) (m 1)) from
+    bdRicciFoldWeights_unitModel_eq_kernel (I := I) (M := M) g₀ T x
+      (m 2) (m 3) (m 0) (m 1)]
+  rw [ccTensorBilin_smul_local, ccTensorBilin_smul_local]
+  ring
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+set_option maxHeartbeats 12800000 in
+private lemma bdRicciFoldXi_smul (g₀ : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
+    rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ (c • T))) =
+    c • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T)) := by
+  classical
+  rw [bdRicciFoldWeights_pair_smul (I := I) (M := M) g₀ T c]
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro w
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+      ((c • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x)) D) =
+      c • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) D) from by
+    rw [show (((c • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x)) =
+        c • ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) from by
+      rw [SmoothCcTensor.toSection_smul]; rfl]
+    rfl]
+  beta_reduce
+  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  have hchain : ∀ (X : SmoothCcTensor g₀ 0 4),
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X)).toSection x) D) w =
+        Tensor0SSpace.toModel D
+            ![(fun i => w (bdSigmaE0 i)) 0, (fun i => w (bdSigmaE0 i)) 1] *
+          unitModel (I := I) (M := M) g₀ 4 X x
+            (fun k : Fin 4 => (fun i => w (bdSigmaE0 i)) (Fin.natAdd 2 k)) := by
+    intro X
+    rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X)).toSection x) D) =
+        ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+          rsDomDomCongr bdSigmaE0
+            ((slotExtendIter (I := I) (M := M) g₀ 0 4 2 X).toSection x)) D) from by
+      rw [rsDomDomCongrSection_toSection]]
+    rw [toModel_rsDomDomCongr_apply (I := I) (M := M) bdSigmaE0
+      ((slotExtendIter (I := I) (M := M) g₀ 0 4 2 X).toSection x) D]
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    exact bdSlotExtendIter_two_toModel (I := I) (M := M) g₀ X x D
+      (fun i => w (bdSigmaE0 i))
+  rw [hchain (c • (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+      bdRicciFoldWeightB (I := I) (M := M) g₀ T)),
+    hchain (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+      bdRicciFoldWeightB (I := I) (M := M) g₀ T)]
+  rw [bdUnitModel_smul (I := I) (M := M) g₀ 4 c
+    (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+      bdRicciFoldWeightB (I := I) (M := M) g₀ T) x]
+  rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  ring
+
+set_option linter.unusedSectionVars false in
+private theorem bdJointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
+    {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
+    (A : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel d ℝ E)
+        (E := fun z : M => Tensor0SSpace d I z) p.1 (A p))
+      ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel d ℝ E)
+        (E := fun z : M => Tensor0SSpace d I z) p.1 (f p.2 • A p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) d
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SModel d ℝ E)
+    (fun z : M => Tensor0SSpace d I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SModel d ℝ E)
+    (E := fun z : M => Tensor0SSpace d I z)).mp (hA p₀ hp₀)
+  have hfm : ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.2) :=
+    hf.contMDiff.comp contMDiff_snd
+  have hfj : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
+      (fun p : M × ℝ => f p.2) ((Set.univ : Set M) ×ˢ S) p₀ :=
+    (hfm.contMDiffAt).contMDiffWithinAt
+  refine (hfj.smul hA'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by rw [he]; exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hx
+    exact (e.linear ℝ hx).map_smul (f p.2) (A p)
+  · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
+      (f p₀.2) (A p₀)
+
 set_option linter.unusedVariables false in
 /-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
 pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file over the
@@ -7071,17 +8688,13 @@ theorem gInvDiffQuadResidualField_realizedFam_threeArmHjoint
   sorry
 
 set_option linter.unusedVariables false in
-/-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
-pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file, with the
-fixed-parameter smoothness `bgRBiContrFib` engine of `RicciThreeArmCorrectionFieldBound`
-as the fibre mechanism): joint smoothness in `(x, s)` over the realized small set of the
-background-curvature commutator coefficient field along the realized path — the bg-`R`
-bi-contraction at the moving `g_s`-orthonormal frames, jointly smooth through the moving
-metric. LEG-COUNT: two moving-frame legs (`g_s`-orthonormal conversions), both at the zero
-jet; no rate on this row. SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps.
-SUP-ANCHOR: not applicable. Degenerate litmus: at `s = 0` the subject is the fixed
-`ricciArmOrder0BgRCommCoeffField g₀ g₀`, whose section smoothness is the constant-family
-class. Every consumer transitively depends on `sorryAx` until this lands. -/
+/-- H1 joint-smoothness row of the Riemann-arm refold identity data: joint smoothness in
+`(x, s)` over the realized small set of the background-curvature commutator coefficient
+field along the realized path. The field refolds onto the moving cometric double trace of
+a fixed weight built from the lowered background curvature, so the joint smoothness is the
+realized-family cometric-double-trace engine applied to a fixed smooth weight section —
+the bg-`R` bi-contraction's two moving-frame legs enter at the zero jet only. Degenerate
+litmus: at `s = 0` the subject is the fixed `ricciArmOrder0BgRCommCoeffField g₀ g₀`. -/
 theorem ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -7089,8 +8702,61 @@ theorem ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) (δ := δ) (δ' := δ) :=
-  sorry
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) (δ := δ) (δ' := δ) := by
+  classical
+  have hperY : ∀ (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SSpace 2 I z) p.1
+          (bgRBiContrFib (I := I) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) p.1 (Y p.1)))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) := by
+    intro Y
+    have hWapp : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+          (E := fun z : M => Tensor0SSpace 4 I z) x
+          ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 4 I x from
+            (bdBgRArmWeight (I := I) (M := M) g₀).toSection x) (Y x))) :=
+      ContMDiff.clm_bundle_apply (b := id)
+        (bdBgRArmWeight (I := I) (M := M) g₀).toSection.contMDiff Y.contMDiff
+    have hWjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
+        (fun q : M × ℝ => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+          (E := fun z : M => Tensor0SSpace 4 I z) q.1
+          ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
+            (bdBgRArmWeight (I := I) (M := M) g₀).toSection q.1) (Y q.1)))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) :=
+      (hWapp.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
+    have hcdtf := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2)
+      g₀ T 0 hδ hδZ
+      (fun q : M × ℝ => (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
+        (bdBgRArmWeight (I := I) (M := M) g₀).toSection q.1) (Y q.1)) hWjoint
+    refine hcdtf.congr (fun q _ => ?_)
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+      (E := fun z : M => Tensor0SSpace 2 I z) q.1 t) ?_
+    calc bgRBiContrFib (I := I) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) q.1 (Y q.1)
+        = (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
+            (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ q.2)).toSection q.1) (Y q.1) := rfl
+      _ = (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
+            (appCcRS (I := I) (M := M) g₀ 2 4 2
+              (bdPureDT (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2)
+              (bdBgRArmWeight (I := I) (M := M) g₀)).toSection q.1) (Y q.1) := by
+          rw [bdBgRComm_eq_refold (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ q.2)]
+      _ = cometricDoubleTraceFib (I := I)
+            (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
+            ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
+              (bdBgRArmWeight (I := I) (M := M) g₀).toSection q.1) (Y q.1)) := by
+          rw [appCcRS_toSection]
+          rfl
+  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
+    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ => bgRBiContrFib (I := I) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) p.1)
+    (S := realizedSmallSet (δ := δ) (δ' := δ)) hperY
+  refine hCLM.congr (fun p _ => ?_)
+  rfl
 
 set_option linter.unusedVariables false in
 /-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
@@ -7115,17 +8781,15 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
   sorry
 
 set_option linter.unusedVariables false in
-/-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
-pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file, with the
-fixed-parameter `ricciFoldBiContrFib` smoothness of `RicciArmResidualCoefficientFields`
-as the fibre mechanism, jointly in `s` through BOTH the realized metric and the weight
-`s • T`): joint smoothness in `(x, s)` over the realized small set of the Ricci-fold
-remainder field along the realized path at weight `s • T`. LEG-COUNT: two moving-frame
-legs at the zero jet; the weight enters at its zero jet only; no rate on this row.
-SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps. SUP-ANCHOR: not applicable.
-Degenerate litmus: at `s = 0` the weight is `0` and the subject vanishes
-(`ricciArmRicciFoldRemainderField_zero_weight`). Every consumer transitively depends on
-`sorryAx` until this lands. -/
+/-- H1 joint-smoothness row of the Riemann-arm refold identity data: joint smoothness in
+`(x, s)` over the realized small set of the Ricci-fold remainder field along the realized
+path at weight `s • T`. The field refolds onto `-(1/2)` times the moving pair-trace
+operator applied to the slot-extended, reindexed two-summand fold weight, the weight pair
+is linear in `s • T`, so the joint smoothness is the path-scalar multiple of the doubled
+realized-family cometric-double-trace engine on a fixed weight section — the two
+moving-frame legs enter at the zero jet, the weight at its zero jet only. Degenerate
+litmus: at `s = 0` the weight is `0` and the subject vanishes
+(`ricciArmRicciFoldRemainderField_zero_weight`). -/
 theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -7133,8 +8797,160 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) (δ := δ) (δ' := δ) :=
-  sorry
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) (δ := δ) (δ' := δ) := by
+  classical
+  have hperY : ∀ (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SSpace 2 I z) p.1
+          (ricciFoldBiContrFib (I := I) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
+            (p.2 • T) p.1 (Y p.1)))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) := by
+    intro Y
+    have hXiApp : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 6 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 6 ℝ E)
+          (E := fun z : M => Tensor0SSpace 6 I z) x
+          ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) (Y x))) :=
+      ContMDiff.clm_bundle_apply (b := id)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection.contMDiff Y.contMDiff
+    have hXiJoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 6 ℝ E)) ∞
+        (fun q : M × ℝ => TotalSpace.mk' (Tensor0SModel 6 ℝ E)
+          (E := fun z : M => Tensor0SSpace 6 I z) q.1
+          ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) :=
+      (hXiApp.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
+    have hcdtf4 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
+      g₀ T 0 hδ hδZ
+      (fun q : M × ℝ => (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)) hXiJoint
+    have hcdtf2 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2)
+      g₀ T 0 hδ hδZ
+      (fun q : M × ℝ => cometricDoubleTraceFib (I := I)
+        (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
+        ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) hcdtf4
+    have hsmul := bdJointTotalSpace0S_smulFun_local (I := I) (M := M) (d := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ))
+      (f := fun s : ℝ => (-(1 / 2) : ℝ) * s)
+      ((contDiff_const.mul contDiff_id :
+        ContDiff ℝ ∞ (fun s : ℝ => (-(1 / 2) : ℝ) * s)))
+      (fun q : M × ℝ => cometricDoubleTraceFib (I := I)
+        (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
+        (cometricDoubleTraceFib (I := I)
+          (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
+          ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))))
+      hcdtf2
+    refine hsmul.congr (fun q _ => ?_)
+    refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+      (E := fun z : M => Tensor0SSpace 2 I z) q.1 t) ?_
+    have h1 : ricciFoldBiContrFib (I := I) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2)
+        (q.2 • T) q.1 (Y q.1) =
+        (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
+          (((-(1 / 2) : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ (q.2 • T) +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ (q.2 • T))))).toSection q.1))
+          (Y q.1) := by
+      rw [← bdRicciFold_eq_refold (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) (q.2 • T)]
+      rfl
+    rw [h1]
+    rw [bdRicciFoldXi_smul (I := I) (M := M) g₀ T q.2]
+    rw [appCcRS_smul_right (I := I) (M := M) g₀ 2 6 2 q.2
+      (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)))]
+    rw [show ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
+        (((-(1 / 2) : ℝ) • q.2 • appCcRS (I := I) (M := M) g₀ 2 6 2
+          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) =
+        ((-(1 / 2) : ℝ) * q.2) • ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
+          ((appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) from by
+      rw [show ((((-(1 / 2) : ℝ) • q.2 • appCcRS (I := I) (M := M) g₀ 2 6 2
+          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) =
+          (-(1 / 2) : ℝ) • q.2 • ((appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1) from by
+        rw [SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]; rfl]
+      rw [show (((-(1 / 2) : ℝ) • q.2 • ((appCcRS (I := I) (M := M) g₀ 2 6 2
+          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) : _) =
+          ((-(1 / 2) : ℝ) * q.2) • ((appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1) from by
+        rw [smul_smul]]
+      rfl]
+    refine congrArg (fun t => ((-(1 / 2) : ℝ) * q.2) • t) ?_
+    rw [show ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
+        ((appCcRS (I := I) (M := M) g₀ 2 6 2
+          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) =
+        cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
+          (cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
+            ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                    bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) from by
+      rw [appCcRS_toSection]
+      rfl]
+  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
+    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ => ricciFoldBiContrFib (I := I) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) (p.2 • T) p.1)
+    (S := realizedSmallSet (δ := δ) (δ' := δ)) hperY
+  refine hCLM.congr (fun p _ => ?_)
+  rfl
 
 set_option linter.unusedVariables false in
 /-- Deferred input (H3 ball-uniform pointwise cap row of the Riemann-arm refold identity
@@ -7167,21 +8983,66 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_rfns_ballUniform
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) ≤ Λ :=
   sorry
 
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+private theorem bdExists_rfnsT_zero_jet_cap (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
+    ∃ Csob : ℝ, 0 ≤ Csob ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2) {R : ℝ} (_hR : 0 ≤ R),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T.toSection x) ≤
+            (Csob * R) ^ 2 := by
+  classical
+  obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
+    exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
+  refine ⟨Csob, hCsob_nn, ?_⟩
+  intro T R hR hball x
+  have hball0 : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
+    intro j hj
+    rw [show (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • T from (zero_smul ℝ T).symm,
+      iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, abs_zero, zero_mul]
+    exact hR
+  have hsum := hCsob T 0 hR hball hball0 1 ⟨by norm_num, le_refl 1⟩ x
+  have hterms : ∀ k ∈ Finset.range 3, 0 ≤
+      (letI : Bundle.RiemannianBundle
+          (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+        Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + k)
+      ‖(iteratedCovGrad (I := I) g₀ 0 2 k
+          (convexPerturbation (I := I) g₀ T 0 1)).toSection x‖) := by
+    intro k _
+    letI : Bundle.RiemannianBundle
+        (fun b : M => Tensor0SBundle.TensorRSSpace 0 (2 + k) I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + k)
+    exact norm_nonneg _
+  have h0 := le_trans (Finset.single_le_sum hterms
+    (show (0 : ℕ) ∈ Finset.range 3 from Finset.mem_range.mpr (by norm_num))) hsum
+  have hcp1 : convexPerturbation (I := I) g₀ T 0 1 = T := by
+    rw [convexPerturbation, smul_zero, zero_add, one_smul]
+  rw [hcp1, iteratedCovGrad_zero] at h0
+  letI : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+  have h0' : ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ ≤ Csob * R := h0
+  have hb : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T.toSection x) =
+      ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ ^ 2 :=
+    riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 2 x (T.toSection x)
+  have hnn : (0 : ℝ) ≤ ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ :=
+    norm_nonneg _
+  nlinarith [h0', hb, hnn, mul_nonneg hCsob_nn hR]
+
 set_option linter.unusedVariables false in
-/-- Deferred input (H3 ball-uniform pointwise cap row of the Riemann-arm refold identity
-data; pattern donor: `rfns_bgRBiContrFib_le` of `RicciThreeArmCorrectionFieldBound` — the
-generic-`g₁`+`htie` ∃C-before-∀ pointwise class against the uniform background-curvature
-bound `exists_uniform_riemannOp_LeviCivita_gNorm_bound` — composed with the realized-path
-adapter of `exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform`): the
+/-- H3 ball-uniform pointwise cap row of the Riemann-arm refold identity data: the
 ball-uniform pointwise fibre-norm-square cap for the Ricci-fold remainder field along the
-realized path at weight `s • T` — the weight enters at its zero jet only, capped by the
-`gFibreOpBound` smallness through the ball. LEG-COUNT: two moving-frame legs
-(`g_s`-orthonormal conversions at the zero jet); the two-leg rate `1/(1−δ)` is absorbed
-into the ball-uniform constant. SMALL-LITERALS: ∃Λ-form, zero numeric caps. SUP-ANCHOR:
-pointwise fibre-norm-square sup, `∃Λ` BEFORE `∀T ∀s ∀x`. Degenerate litmus: at `s = 0`
+realized path at weight `s • T`. The field refolds onto the path-scaled moving pair-trace
+operator applied to the fixed fold weight at `T`, so the cap is the product of the
+pair-trace operator's zero-jet grid cap, the slot-extension frame factors, the fixed
+double-trace and lowered-curvature compact sups, and the weight's zero-jet Sobolev cap
+through the `a + 2`-jet ball — the weight enters at its zero jet only, and the two
+moving-frame legs ride inside the pair-trace zero-jet cap. Degenerate litmus: at `s = 0`
 the weight is `0` and the subject vanishes
-(`ricciArmRicciFoldRemainderField_zero_weight`). Every consumer transitively depends on
-`sorryAx` until this lands. -/
+(`ricciArmRicciFoldRemainderField_zero_weight`). -/
 theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -7196,8 +9057,369 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
         ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
               ((ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) ≤ Λ :=
-  sorry
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) ≤ Λ := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
+  obtain ⟨CP, hCP_nn, hCP⟩ := bdPairTraceOp_tgrid (I := I) (M := M) g₀ hδ₁_lt
+  obtain ⟨Csob, hCsob_nn, hTcapAll⟩ :=
+    bdExists_rfnsT_zero_jet_cap (I := I) (M := M) g₀ a ha_super
+  obtain ⟨KD4, hKD4_nn, hKD4⟩ :=
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 6 4
+      (cometricDoubleTraceField (I := I) g₀ 4)
+  obtain ⟨KsR, hKsR_nn, hKsR⟩ :=
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 6
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))
+  set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
+  have hfr_nn : 0 ≤ fr := Nat.cast_nonneg _
+  refine ⟨CP 0 * (fr * (fr * (4 * (KD4 * (KsR * (Csob * R) ^ 2))))),
+    mul_nonneg (hCP_nn 0) (mul_nonneg hfr_nn (mul_nonneg hfr_nn (mul_nonneg (by norm_num)
+      (mul_nonneg hKD4_nn (mul_nonneg hKsR_nn (sq_nonneg _)))))), ?_⟩
+  intro T δ hδ_le hδ hδZ hball s hs x
+  by_cases hM : Nonempty M
+  swap
+  · exact ((not_nonempty_iff.mp hM).false x).elim
+  obtain ⟨x₀⟩ := hM
+  have hδ0 : 0 ≤ δ := bdDelta_nonneg (I := I) (M := M) g₀ x₀ T hδ
+  have hδ_le' : δ ≤ δ₁ := le_trans hδ_le (le_max_left _ _)
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+  obtain ⟨hs0, hs1⟩ := hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+    fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rwa [heq] at hraw
+  have hfield : ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T) =
+      ((-(1 / 2) : ℝ) * s) •
+        appCcRS (I := I) (M := M) g₀ 2 6 2
+          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T))) := by
+    rw [bdRicciFold_eq_refold (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)]
+    rw [bdRicciFoldXi_smul (I := I) (M := M) g₀ T s]
+    rw [appCcRS_smul_right (I := I) (M := M) g₀ 2 6 2 s
+      (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)))]
+    rw [smul_smul]
+  rw [hfield]
+  rw [show (((((-(1 / 2) : ℝ) * s) •
+      appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x)) =
+      ((-(1 / 2) : ℝ) * s) •
+        ((appCcRS (I := I) (M := M) g₀ 2 6 2
+          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 2 2 x]
+  have hsq1 : ((-(1 / 2) : ℝ) * s) ^ 2 ≤ 1 := by nlinarith
+  have hcomp : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      ((appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) ≤
+      riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
+          ((bdPairTraceOp (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+          ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) := by
+    rw [appCcRS_toSection]
+    exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 2 6 2 x
+      ((bdPairTraceOp (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x)
+      ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x)
+  have hPTO : riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
+      ((bdPairTraceOp (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ CP 0 := by
+    have h := hCP (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+      (convexPerturbation (I := I) g₀ T 0 s) htie hδ_le' hδ0 hδP 0 x
+    rw [iteratedCovGrad_zero] at h
+    refine le_trans h (le_of_eq ?_)
+    rw [Combinatorics.antidiagonalTupleGridWindow, Finset.sum_range_one,
+      Combinatorics.antidiagonalTupleGrid_zero, mul_one]
+  have hTcap : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+      (T.toSection x) ≤ (Csob * R) ^ 2 := hTcapAll T hR hball x
+  have hXi : riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+      ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) ≤
+      fr * (fr * (4 * (KD4 * (KsR * (Csob * R) ^ 2)))) := by
+    have hWgen : ∀ σw : Equiv.Perm (Fin 6),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+          ((appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+              (appCcRS (I := I) (M := M) g₀ 0 2 6
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x) ≤
+        KD4 * (KsR * (Csob * R) ^ 2) := by
+      intro σw
+      have hc1 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+          ((appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+              (appCcRS (I := I) (M := M) g₀ 0 2 6
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x) ≤
+          riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
+              ((cometricDoubleTraceField (I := I) g₀ 4).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+              ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                (appCcRS (I := I) (M := M) g₀ 0 2 6
+                  (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                    (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) := by
+        rw [appCcRS_toSection]
+        exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 0 6 4 x _ _
+      have hperm : riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+          ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+            ((appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T).toSection x) := by
+        have h := rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+          g₀ 0 6 σw
+          (appCcRS (I := I) (M := M) g₀ 0 2 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))
+          (fun y d => by
+            rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) 0 x
+        rwa [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
+      have hc2 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+          ((appCcRS (I := I) (M := M) g₀ 0 2 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T).toSection x) ≤
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+              ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T.toSection x) := by
+        rw [appCcRS_toSection]
+        exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 0 2 6 x _ _
+      have hKsRx := hKsR x
+      have hKD4x := hKD4 x
+      have hrfns2 : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+          ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) :=
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 6 x _
+      have hTnn : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+          (T.toSection x) :=
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x _
+      have hsE : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+          ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)).toSection x) :=
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 6 x _
+      have hD4nn : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
+          ((cometricDoubleTraceField (I := I) g₀ 4).toSection x) :=
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 6 4 x _
+      calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+            ((appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                (appCcRS (I := I) (M := M) g₀ 0 2 6
+                  (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                    (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x)
+          ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 6 4 x
+                ((cometricDoubleTraceField (I := I) g₀ 4).toSection x) *
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+                ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                  (appCcRS (I := I) (M := M) g₀ 0 2 6
+                    (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                      (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) := hc1
+        _ ≤ KD4 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+              ((rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                (appCcRS (I := I) (M := M) g₀ 0 2 6
+                  (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                    (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) :=
+            mul_le_mul_of_nonneg_right hKD4x hrfns2
+        _ = KD4 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 6 x
+              ((appCcRS (I := I) (M := M) g₀ 0 2 6
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T).toSection x) := by
+            rw [hperm]
+        _ ≤ KD4 * (riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+              ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)).toSection x) *
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T.toSection x)) :=
+            mul_le_mul_of_nonneg_left hc2 hKD4_nn
+        _ ≤ KD4 * (KsR * (Csob * R) ^ 2) := by
+            refine mul_le_mul_of_nonneg_left ?_ hKD4_nn
+            exact mul_le_mul hKsRx hTcap hTnn hKsR_nn
+    have hperm6 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+        ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+          ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) := by
+      have h := rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+        g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)))
+        (fun y d => by
+          rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) 0 x
+      rwa [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
+    have hslot2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+        ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) ≤
+        fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 5 x
+          ((slotExtendIter (I := I) (M := M) g₀ 0 4 1
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) := by
+      have h := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 5
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 1
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)) 0 x
+      rwa [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
+    have hslot1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 5 x
+        ((slotExtendIter (I := I) (M := M) g₀ 0 4 1
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) ≤
+        fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+          ((bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x) := by
+      have h := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 4
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T) 0 x
+      rwa [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
+    have hW4 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+        ((bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x) ≤
+        4 * (KD4 * (KsR * (Csob * R) ^ 2)) := by
+      have hsplit : ((bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x) =
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T).toSection x +
+            (bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x := by
+        rw [SmoothCcTensor.toSection_add]
+        rfl
+      rw [hsplit]
+      have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 4 x
+        ((bdRicciFoldWeightA (I := I) (M := M) g₀ T).toSection x)
+        ((bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x)
+      have hWA := hWgen (Equiv.swap (1 : Fin 6) 3)
+      have hWB := hWgen bdTauK3b
+      have hWA' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+          ((bdRicciFoldWeightA (I := I) (M := M) g₀ T).toSection x) ≤
+          KD4 * (KsR * (Csob * R) ^ 2) := hWA
+      have hWB' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+          ((bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x) ≤
+          KD4 * (KsR * (Csob * R) ^ 2) := hWB
+      linarith
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+          ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x)
+        = riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+            ((slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) := hperm6
+      _ ≤ fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 5 x
+            ((slotExtendIter (I := I) (M := M) g₀ 0 4 1
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) := hslot2
+      _ ≤ fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x
+            ((bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T).toSection x)) :=
+          mul_le_mul_of_nonneg_left hslot1 hfr_nn
+      _ ≤ fr * (fr * (4 * (KD4 * (KsR * (Csob * R) ^ 2)))) := by
+          refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hW4 hfr_nn) hfr_nn
+  have hPTOnn : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
+      ((bdPairTraceOp (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 6 2 x _
+  have hXinn : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+      ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 6 x _
+  have hcompnn : (0 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      ((appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 2 x _
+  calc (((-(1 / 2) : ℝ) * s) ^ 2) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          ((appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x)
+      ≤ 1 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          ((appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) :=
+        mul_le_mul_of_nonneg_right hsq1 hcompnn
+    _ = riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          ((appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) := one_mul _
+    _ ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 6 2 x
+          ((bdPairTraceOp (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 6 x
+          ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) := hcomp
+    _ ≤ CP 0 * (fr * (fr * (4 * (KD4 * (KsR * (Csob * R) ^ 2))))) :=
+        mul_le_mul hPTO hXi hXinn (hCP_nn 0)
 
 set_option linter.unusedVariables false in
 /-- Deferred input (H4 two-step jet-window row of the Riemann-arm refold identity data;
@@ -7302,18 +9524,475 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
   sorry
 
 set_option linter.unusedVariables false in
-/-- Deferred input (H4 two-step jet-window row of the Riemann-arm refold identity data;
-pattern donor: `exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow` in this
-file — the ∃K-before-∀ per-order L² window class; mechanism: the Ricci-fold remainder is
-ZERO-jet in the weight `s • T` (fold map E6 window legality) against the uniform
-background-curvature bound, so the `i`-th coefficient jet consumes weight jets up to `i`
-and `∇ⁱ` stays inside the `range (i + 2)` window): the per-order L² jet window for the
-Ricci-fold remainder field along the realized path at weight `s • T`. LEG-COUNT: two
-moving-frame legs at the zero jet; the rate is absorbed into `K`. SMALL-LITERALS:
-∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE `∀T ∀i ∀s`, per-order L² window
-against `1 + ∑_{j < i+2} ‖∇ʲT‖²`. Degenerate litmus: at `s = 0` the weight is `0` and the
-subject vanishes (`ricciArmRicciFoldRemainderField_zero_weight`). Every consumer
-transitively depends on `sorryAx` until this lands. -/
+set_option linter.unusedSectionVars false in
+private theorem bdRicciFoldComposite_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P T : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hboundP : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hPT : ∀ (l : ℕ) (x : M),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x))
+        (hT0 : ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T.toSection x) ≤ Λ0)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (appCcRS (I := I) (M := M) g₀ 2 6 2
+                (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+                (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+                  (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                    (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                      bdRicciFoldWeightB (I := I) (M := M) g₀ T))))).toSection x) ≤
+          C i * Combinatorics.antidiagonalTupleGridWindow
+            (fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x)) (i + 2) := by
+  classical
+  obtain ⟨CP, hCP_nn, hCP⟩ := bdPairTraceOp_tgrid (I := I) (M := M) g₀ hδ₀
+  have hK4ex : ∀ l' : ℕ, ∃ K : ℝ, 0 ≤ K ∧ ∀ b : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 6 (4 + l') b
+        ((iteratedCovGrad (I := I) g₀ 6 4 l'
+          (cometricDoubleTraceField (I := I) g₀ 4)).toSection b) ≤ K :=
+    fun l' => exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M)
+      g₀ 6 (4 + l')
+      (iteratedCovGrad (I := I) g₀ 6 4 l' (cometricDoubleTraceField (I := I) g₀ 4))
+  choose K4 hK4_nn hK4 using hK4ex
+  have hK5ex : ∀ m' : ℕ, ∃ K : ℝ, 0 ≤ K ∧ ∀ b : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + m') b
+        ((iteratedCovGrad (I := I) g₀ 2 6 m'
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))).toSection b) ≤ K :=
+    fun m' => exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M)
+      g₀ 2 (6 + m')
+      (iteratedCovGrad (I := I) g₀ 2 6 m'
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
+  choose K5 hK5_nn hK5 using hK5ex
+  set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
+  have hfr_nn : 0 ≤ fr := Nat.cast_nonneg _
+  set C6 : ℕ → ℝ := fun m => appCcGdiag (E := E) m *
+    ∑ m' ∈ Finset.range (m + 1),
+      K5 m' * (((m + 1 - m' : ℕ) : ℝ) * (Λ0 + 1)) with hC6_def
+  have hC6_nn : ∀ m, 0 ≤ C6 m := by
+    intro m
+    rw [hC6_def]
+    exact mul_nonneg (appCcGdiag_nonneg (E := E) m)
+      (Finset.sum_nonneg fun m' _ => mul_nonneg (hK5_nn m')
+        (mul_nonneg (Nat.cast_nonneg _) (by linarith)))
+  set C7 : ℕ → ℝ := fun l => appCcGdiag (E := E) l *
+    ∑ l' ∈ Finset.range (l + 1),
+      K4 l' * ∑ m ∈ Finset.range (l + 1 - l'), C6 m with hC7_def
+  have hC7_nn : ∀ l, 0 ≤ C7 l := by
+    intro l
+    rw [hC7_def]
+    exact mul_nonneg (appCcGdiag_nonneg (E := E) l)
+      (Finset.sum_nonneg fun l' _ => mul_nonneg (hK4_nn l')
+        (Finset.sum_nonneg fun m _ => hC6_nn m))
+  refine ⟨fun i => appCcGdiag (E := E) i * ∑ i' ∈ Finset.range (i + 1),
+      CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
+        (fr * (fr * (4 * C7 l))) *
+          Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1),
+    fun i => mul_nonneg (appCcGdiag_nonneg (E := E) i)
+      (Finset.sum_nonneg fun i' _ => mul_nonneg (hCP_nn i')
+        (Finset.sum_nonneg fun l _ => mul_nonneg
+          (mul_nonneg hfr_nn (mul_nonneg hfr_nn (mul_nonneg (by norm_num) (hC7_nn l))))
+          (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg _ _))), ?_⟩
+  intro g₁ P T htie δ hδ_le hδ0 hboundP hPT hT0 i x
+  set b : ℕ → ℝ := fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l' T).toSection x) with hb_def
+  set bP : ℕ → ℝ := fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l' P).toSection x) with hbP_def
+  have hb : ∀ l', 0 ≤ b l' :=
+    fun l' => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l') x _
+  have hbP : ∀ l', 0 ≤ bP l' :=
+    fun l' => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l') x _
+  have hbPb : ∀ l', bP l' ≤ b l' := fun l' => hPT l' x
+  set W : ℝ := Combinatorics.antidiagonalTupleGridWindow b (i + 2) with hW_def
+  have hW_nn : (0 : ℝ) ≤ W := Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (i + 2)
+  have hTcell : ∀ n : ℕ, b n ≤ (Λ0 + 1) * Combinatorics.antidiagonalTupleGridWindow b (n + 1) := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn0 | hn1
+    · subst hn0
+      have h0 : b 0 ≤ Λ0 := by
+        have := hT0 x
+        rw [hb_def]
+        simpa [iteratedCovGrad_zero] using this
+      have hone : (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (0 + 1) :=
+        Combinatorics.one_le_antidiagonalTupleGridWindow b hb (by norm_num)
+      nlinarith [hΛ0, hone, h0, hb 0]
+    · have hsingle : b n ≤ Combinatorics.antidiagonalTupleGrid b n :=
+        bdSingle_b_le_grid b hb n hn1
+      have hgw : Combinatorics.antidiagonalTupleGrid b n ≤
+          Combinatorics.antidiagonalTupleGridWindow b (n + 1) :=
+        Combinatorics.antidiagonalTupleGrid_le_window b hb (by omega)
+      have hwnn : (0 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (n + 1) :=
+        Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (n + 1)
+      nlinarith [le_trans hsingle hgw, hΛ0, hwnn]
+  have hInner : ∀ m : ℕ,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+        ((iteratedCovGrad (I := I) g₀ 0 6 m
+          (appCcRS (I := I) (M := M) g₀ 0 2 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) ≤
+        C6 m * Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by
+    intro m
+    refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+      (I := I) (M := M) g₀ m 0 2 6
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T x) ?_
+    have hwin_nn : (0 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (m + 2) :=
+      Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (m + 2)
+    have hcell : ∀ m' ∈ Finset.range (m + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + m') x
+            ((iteratedCovGrad (I := I) g₀ 2 6 m'
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))).toSection x) *
+          ∑ n ∈ Finset.range (m + 1 - m'),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 n T).toSection x) ≤
+        (K5 m' * (((m + 1 - m' : ℕ) : ℝ) * (Λ0 + 1))) *
+          Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by
+      intro m' hm'
+      rw [Finset.mem_range] at hm'
+      have hA1 := hK5 m' x
+      have hA2 : (∑ n ∈ Finset.range (m + 1 - m'),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 n T).toSection x)) ≤
+          (((m + 1 - m' : ℕ) : ℝ) * (Λ0 + 1)) *
+            Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by
+        have hstep : ∀ n ∈ Finset.range (m + 1 - m'), b n ≤
+            (Λ0 + 1) * Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by
+          intro n hn
+          rw [Finset.mem_range] at hn
+          refine le_trans (hTcell n) ?_
+          refine mul_le_mul_of_nonneg_left ?_ (by linarith)
+          exact Combinatorics.antidiagonalTupleGridWindow_mono b hb (by omega)
+        calc (∑ n ∈ Finset.range (m + 1 - m'),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 n T).toSection x))
+            ≤ ∑ _n ∈ Finset.range (m + 1 - m'),
+                (Λ0 + 1) * Combinatorics.antidiagonalTupleGridWindow b (m + 2) :=
+              Finset.sum_le_sum hstep
+          _ = (((m + 1 - m' : ℕ) : ℝ) * (Λ0 + 1)) *
+                Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by
+              rw [Finset.sum_const, nsmul_eq_mul, Finset.card_range]
+              ring
+      have hsum_nn : (0 : ℝ) ≤ ∑ n ∈ Finset.range (m + 1 - m'),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 n T).toSection x) :=
+        Finset.sum_nonneg fun n _ =>
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + n) x _
+      calc riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + m') x
+            ((iteratedCovGrad (I := I) g₀ 2 6 m'
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀))).toSection x) *
+          ∑ n ∈ Finset.range (m + 1 - m'),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + n) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 n T).toSection x)
+          ≤ K5 m' * ((((m + 1 - m' : ℕ) : ℝ) * (Λ0 + 1)) *
+              Combinatorics.antidiagonalTupleGridWindow b (m + 2)) :=
+            mul_le_mul hA1 hA2 hsum_nn (hK5_nn m')
+        _ = (K5 m' * (((m + 1 - m' : ℕ) : ℝ) * (Λ0 + 1))) *
+              Combinatorics.antidiagonalTupleGridWindow b (m + 2) := by ring
+    refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hcell)
+      (appCcGdiag_nonneg (E := E) m)) ?_
+    rw [hC6_def, ← Finset.sum_mul, ← mul_assoc]
+  have hWA : ∀ (σw : Equiv.Perm (Fin 6)) (l : ℕ),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 4 l
+          (appCcRS (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+              (appCcRS (I := I) (M := M) g₀ 0 2 6
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)))).toSection x) ≤
+        C7 l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+    intro σw l
+    refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+      (I := I) (M := M) g₀ l 0 6 4
+      (cometricDoubleTraceField (I := I) g₀ 4)
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+        (appCcRS (I := I) (M := M) g₀ 0 2 6
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)) x) ?_
+    have hperm : ∀ m : ℕ,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+          ((iteratedCovGrad (I := I) g₀ 0 6 m
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+              (appCcRS (I := I) (M := M) g₀ 0 2 6
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+          ((iteratedCovGrad (I := I) g₀ 0 6 m
+            (appCcRS (I := I) (M := M) g₀ 0 2 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)).toSection x) :=
+      fun m => rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+        g₀ 0 6 σw
+        (appCcRS (I := I) (M := M) g₀ 0 2 6
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+          (appCcRS (I := I) (M := M) g₀ 0 2 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))
+        (fun y d => by
+          rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) m x
+    have hcell : ∀ l' ∈ Finset.range (l + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 6 (4 + l') x
+            ((iteratedCovGrad (I := I) g₀ 6 4 l'
+              (cometricDoubleTraceField (I := I) g₀ 4)).toSection x) *
+          ∑ m ∈ Finset.range (l + 1 - l'),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+              ((iteratedCovGrad (I := I) g₀ 0 6 m
+                (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                  (appCcRS (I := I) (M := M) g₀ 0 2 6
+                    (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                      (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x) ≤
+        (K4 l' * ∑ m ∈ Finset.range (l + 1 - l'), C6 m) *
+          Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+      intro l' hl'
+      rw [Finset.mem_range] at hl'
+      have hA1 := hK4 l' x
+      have hA2 : (∑ m ∈ Finset.range (l + 1 - l'),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+            ((iteratedCovGrad (I := I) g₀ 0 6 m
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                (appCcRS (I := I) (M := M) g₀ 0 2 6
+                  (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                    (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x)) ≤
+          (∑ m ∈ Finset.range (l + 1 - l'), C6 m) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+        rw [Finset.sum_mul]
+        refine Finset.sum_le_sum fun m hm => ?_
+        rw [Finset.mem_range] at hm
+        rw [hperm m]
+        refine le_trans (hInner m) ?_
+        refine mul_le_mul_of_nonneg_left ?_ (hC6_nn m)
+        exact Combinatorics.antidiagonalTupleGridWindow_mono b hb (by omega)
+      have hsum_nn : (0 : ℝ) ≤ ∑ m ∈ Finset.range (l + 1 - l'),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+            ((iteratedCovGrad (I := I) g₀ 0 6 m
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                (appCcRS (I := I) (M := M) g₀ 0 2 6
+                  (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                    (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x) :=
+        Finset.sum_nonneg fun m _ =>
+          riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (6 + m) x _
+      calc riemannianFiberNormSq (I := I) (M := M) g₀ 6 (4 + l') x
+            ((iteratedCovGrad (I := I) g₀ 6 4 l'
+              (cometricDoubleTraceField (I := I) g₀ 4)).toSection x) *
+          ∑ m ∈ Finset.range (l + 1 - l'),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (6 + m) x
+              ((iteratedCovGrad (I := I) g₀ 0 6 m
+                (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σw
+                  (appCcRS (I := I) (M := M) g₀ 0 2 6
+                    (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                      (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) T))).toSection x)
+          ≤ K4 l' * ((∑ m ∈ Finset.range (l + 1 - l'), C6 m) *
+              Combinatorics.antidiagonalTupleGridWindow b (l + 2)) :=
+            mul_le_mul hA1 hA2 hsum_nn (hK4_nn l')
+        _ = (K4 l' * ∑ m ∈ Finset.range (l + 1 - l'), C6 m) *
+              Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by ring
+    refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hcell)
+      (appCcGdiag_nonneg (E := E) l)) ?_
+    rw [hC7_def, ← Finset.sum_mul, ← mul_assoc]
+  have hXitower : ∀ l : ℕ,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
+        ((iteratedCovGrad (I := I) g₀ 2 6 l
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) ≤
+      (fr * (fr * (4 * C7 l))) * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+    intro l
+    have hperm := rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M)
+      g₀ 2 6 bdSigmaE0
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T))
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)))
+      (fun y d => by
+        rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) l x
+    rw [hperm]
+    have h2 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 5
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 1
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T)) l x
+    have h1 := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 4
+      (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+        bdRicciFoldWeightB (I := I) (M := M) g₀ T) l x
+    have hW4 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 4 l
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+            bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) ≤
+        (4 * C7 l) * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
+      rw [iteratedCovGrad_add]
+      have hsplit : ((iteratedCovGrad (I := I) g₀ 0 4 l
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T) +
+          iteratedCovGrad (I := I) g₀ 0 4 l
+            (bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) =
+          (iteratedCovGrad (I := I) g₀ 0 4 l
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T)).toSection x +
+            (iteratedCovGrad (I := I) g₀ 0 4 l
+              (bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x := by
+        rw [SmoothCcTensor.toSection_add]
+        rfl
+      rw [hsplit]
+      have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (4 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 4 l
+          (bdRicciFoldWeightA (I := I) (M := M) g₀ T)).toSection x)
+        ((iteratedCovGrad (I := I) g₀ 0 4 l
+          (bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x)
+      have hA' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 4 l
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T)).toSection x) ≤
+          C7 l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) :=
+        hWA (Equiv.swap (1 : Fin 6) 3) l
+      have hB' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 4 l
+            (bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x) ≤
+          C7 l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) :=
+        hWA bdTauK3b l
+      linarith
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 2 6 l
+            (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x)
+        ≤ fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (5 + l) x
+            ((iteratedCovGrad (I := I) g₀ 1 5 l
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 1
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) := h2
+      _ ≤ fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 4 l
+              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                bdRicciFoldWeightB (I := I) (M := M) g₀ T)).toSection x)) :=
+          mul_le_mul_of_nonneg_left h1 hfr_nn
+      _ ≤ fr * (fr * ((4 * C7 l) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2))) := by
+          refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hW4 hfr_nn) hfr_nn
+      _ = (fr * (fr * (4 * C7 l))) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by ring
+  refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+    (I := I) (M := M) g₀ i 2 6 2
+    (bdPairTraceOp (I := I) (M := M) g₀ g₁)
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+        (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+          bdRicciFoldWeightB (I := I) (M := M) g₀ T))) x) ?_
+  have hcell : ∀ i' ∈ Finset.range (i + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + i') x
+          ((iteratedCovGrad (I := I) g₀ 6 2 i'
+            (bdPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) *
+        ∑ l ∈ Finset.range (i + 1 - i'),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
+            ((iteratedCovGrad (I := I) g₀ 2 6 l
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+                (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                  (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                    bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) ≤
+      (CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
+        (fr * (fr * (4 * C7 l))) *
+          Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1)) * W := by
+    intro i' hi'
+    rw [Finset.mem_range] at hi'
+    have hA1 : riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + i') x
+        ((iteratedCovGrad (I := I) g₀ 6 2 i'
+          (bdPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) ≤
+        CP i' * Combinatorics.antidiagonalTupleGridWindow b (i' + 1) := by
+      refine le_trans (hCP g₁ P htie hδ_le hδ0 hboundP i' x) ?_
+      exact mul_le_mul_of_nonneg_left
+        (bdGridWindow_mono_of_le bP b hbP hbPb (i' + 1)) (hCP_nn i')
+    have hA2 : (∑ l ∈ Finset.range (i + 1 - i'),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 2 6 l
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x)) ≤
+        ∑ l ∈ Finset.range (i + 1 - i'),
+          (fr * (fr * (4 * C7 l))) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2) :=
+      Finset.sum_le_sum fun l _ => hXitower l
+    have hsum_nn : (0 : ℝ) ≤ ∑ l ∈ Finset.range (i + 1 - i'),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (6 + l) x
+          ((iteratedCovGrad (I := I) g₀ 2 6 l
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection x) :=
+      Finset.sum_nonneg fun l _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 2 (6 + l) x _
+    have hA1_rhs_nn : (0 : ℝ) ≤ CP i' *
+        Combinatorics.antidiagonalTupleGridWindow b (i' + 1) :=
+      mul_nonneg (hCP_nn i')
+        (Combinatorics.antidiagonalTupleGridWindow_nonneg b hb (i' + 1))
+    refine le_trans (mul_le_mul hA1 hA2 hsum_nn hA1_rhs_nn) ?_
+    rw [Finset.mul_sum]
+    rw [show (CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
+        (fr * (fr * (4 * C7 l))) *
+          Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1)) * W =
+        ∑ l ∈ Finset.range (i + 1 - i'),
+          (CP i' * ((fr * (fr * (4 * C7 l))) *
+            Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1))) * W from by
+      rw [Finset.mul_sum, Finset.sum_mul]]
+    refine Finset.sum_le_sum fun l hl => ?_
+    rw [Finset.mem_range] at hl
+    have hpair : Combinatorics.antidiagonalTupleGridWindow b (i' + 1) *
+        Combinatorics.antidiagonalTupleGridWindow b (l + 1 + 1) ≤
+        Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1) *
+          Combinatorics.antidiagonalTupleGridWindow b (i' + (l + 1) + 1) :=
+      Combinatorics.antidiagonalTupleGridWindow_mul_le b hb i' (l + 1)
+    have hmono : Combinatorics.antidiagonalTupleGridWindow b (i' + (l + 1) + 1) ≤ W := by
+      rw [hW_def]
+      exact Combinatorics.antidiagonalTupleGridWindow_mono b hb (by omega)
+    have hfrC_nn : (0 : ℝ) ≤ fr * (fr * (4 * C7 l)) :=
+      mul_nonneg hfr_nn (mul_nonneg hfr_nn (mul_nonneg (by norm_num) (hC7_nn l)))
+    calc CP i' * Combinatorics.antidiagonalTupleGridWindow b (i' + 1) *
+          ((fr * (fr * (4 * C7 l))) *
+            Combinatorics.antidiagonalTupleGridWindow b (l + 2))
+        = (CP i' * (fr * (fr * (4 * C7 l)))) *
+            (Combinatorics.antidiagonalTupleGridWindow b (i' + 1) *
+              Combinatorics.antidiagonalTupleGridWindow b (l + 1 + 1)) := by
+          rw [show l + 2 = l + 1 + 1 from rfl]
+          ring
+      _ ≤ (CP i' * (fr * (fr * (4 * C7 l)))) *
+            (Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1) *
+              Combinatorics.antidiagonalTupleGridWindow b (i' + (l + 1) + 1)) := by
+          refine mul_le_mul_of_nonneg_left hpair ?_
+          exact mul_nonneg (hCP_nn i') hfrC_nn
+      _ ≤ (CP i' * (fr * (fr * (4 * C7 l)))) *
+            (Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1) * W) := by
+          refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg (hCP_nn i') hfrC_nn)
+          exact mul_le_mul_of_nonneg_left hmono
+            (Combinatorics.antidiagonalTupleGridWindowMulConst_nonneg _ _)
+      _ = (CP i' * ((fr * (fr * (4 * C7 l))) *
+            Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1))) * W := by
+          ring
+  refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hcell)
+    (appCcGdiag_nonneg (E := E) i)) ?_
+  rw [← Finset.sum_mul, ← mul_assoc]
+
+set_option linter.unusedVariables false in
+/-- H4 two-step jet-window row of the Riemann-arm refold identity data: the per-order L²
+jet window for the Ricci-fold remainder field along the realized path at weight `s • T`.
+The field refolds onto the path-scaled moving pair-trace operator applied to the fixed
+fold weight at `T`, so its jets convert onto the perturbation jets by the
+diagonal-product-grid calculus — the pair-trace jets through the moving-cometric grid
+window, the fixed double-trace and lowered-curvature factors through per-order compact
+sups, and the weight's zero jet through its ball-uniform Sobolev cap — with ball
+absorption inside the `range (i + 2)` window; the two moving-frame legs ride at the zero
+jet. Degenerate litmus: at `s = 0` the weight is `0` and the subject vanishes
+(`ricciArmRicciFoldRemainderField_zero_weight`). -/
 theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -7330,8 +10009,115 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
             (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
+  obtain ⟨Csob, hCsob_nn, hTcapAll⟩ :=
+    bdExists_rfnsT_zero_jet_cap (I := I) (M := M) g₀ a ha_super
+  obtain ⟨C, hC_nn, hpt⟩ := bdRicciFoldComposite_pointwise_gridWindow (I := I) (M := M)
+    g₀ hδ₁_lt ((Csob * R) ^ 2) (sq_nonneg _)
+  obtain ⟨Kg, hKg_nn, hKg⟩ :=
+    bdL2_tameEnvelope_of_gridWindow (I := I) (M := M) g₀ a ha_super hR
+  refine ⟨fun i => C i * ∑ k ∈ Finset.range (i + 2), Kg k,
+    fun i => mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k), ?_⟩
+  intro T δ hδ_le hδ hδZ hball i s hs
+  have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+  by_cases hM : Nonempty M
+  · obtain ⟨x₀⟩ := hM
+    have hδ0 : 0 ≤ δ := bdDelta_nonneg (I := I) (M := M) g₀ x₀ T hδ
+    have hδ_le' : δ ≤ δ₁ := le_trans hδ_le (le_max_left _ _)
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+      Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+          g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+      fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+    obtain ⟨hs0, hs1⟩ := hs
+    have hδP : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+      intro y v w
+      have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+      have heq : |1 - s| * δ + |s| * δ = δ := by
+        rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+        ring
+      rwa [heq] at hraw
+    have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+      rw [convexPerturbation, smul_zero, zero_add]
+    have hPT : ∀ (l : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l
+              (convexPerturbation (I := I) g₀ T 0 s)).toSection x) ≤
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) := by
+      intro l x
+      rw [hcP, iteratedCovGrad_smul_real]
+      rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) =
+          s • ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) from by
+        rw [SmoothCcTensor.toSection_smul]
+        rfl]
+      rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 0 (2 + l) x]
+      have hs2 : s ^ 2 ≤ 1 := by nlinarith
+      nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)]
+    have hfield : ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T) =
+        ((-(1 / 2) : ℝ) * s) •
+          appCcRS (I := I) (M := M) g₀ 2 6 2
+            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))) := by
+      rw [bdRicciFold_eq_refold (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)]
+      rw [bdRicciFoldXi_smul (I := I) (M := M) g₀ T s]
+      rw [appCcRS_smul_right (I := I) (M := M) g₀ 2 6 2 s
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T)))]
+      rw [smul_smul]
+    rw [hfield, iteratedCovGrad_smul_real, norm_smul, Real.norm_eq_abs, mul_pow]
+    have habs2 : |(-(1 / 2) : ℝ) * s| ^ 2 ≤ 1 := by
+      rw [abs_mul]
+      have h1 : |(-(1 / 2) : ℝ)| = 1 / 2 := by norm_num
+      have h2 : |s| ≤ 1 := by
+        rw [abs_of_nonneg hs0]
+        exact hs1
+      rw [h1]
+      nlinarith [abs_nonneg s]
+    have hmain := hKg T hball i (C i) (hC_nn i)
+      (appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))))
+      (fun x => hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (convexPerturbation (I := I) g₀ T 0 s) T htie hδ_le' hδ0 hδP hPT
+        (fun x' => hTcapAll T hR hball x') i x)
+    nlinarith [hmain, habs2, sq_nonneg ‖iteratedCovGrad (I := I) g₀ 2 2 i
+      (appCcRS (I := I) (M := M) g₀ 2 6 2
+        (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (slotExtendIter (I := I) (M := M) g₀ 0 4 2
+            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
+              bdRicciFoldWeightB (I := I) (M := M) g₀ T))))‖,
+      sq_abs ((-(1 / 2) : ℝ) * s)]
+  · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
+    have hz : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))‖ = 0 :=
+      bdNorm_zero_of_isEmpty (I := I) (M := M) g₀ 2 (2 + i) _
+    rw [hz]
+    have hK_nn : 0 ≤ C i * ∑ k ∈ Finset.range (i + 2), Kg k :=
+      mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k)
+    nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedVariables false in
 /-- Deferred input (dossier row RA-1, conjunct 3 of the frozen Riemann-arm refold data
