@@ -68,31 +68,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The unit value section of a rank-`(0,2)` coefficient tensor: the rank-two tensor field
-obtained by feeding the unit rank-zero tensor into the coefficient, fibrewise. This is the
-section-level carrier of `unitModel`. -/
-def ccTensorUnitValueSection (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
-    Π y : M, Tensor0SSpace 2 I y :=
-  fun y =>
-    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from T.toSection y)
-      (unitZeroSec (I := I) (M := M) y)
-
-theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
-    (T : SmoothCcTensor g 0 2) :
-    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
-      (fun y : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
-        (E := fun z : M => Tensor0SSpace 2 I z) y
-        (ccTensorUnitValueSection (I := I) (M := M) g T y)) := by
-  exact ContMDiff.clm_bundle_apply (𝕜 := ℝ) (n := (∞ : WithTop ℕ∞))
-    (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 2 ℝ E)
-    (E₁ := fun z : M => Tensor0SSpace 0 I z)
-    (E₂ := fun z : M => Tensor0SSpace 2 I z)
-    (IM := I) (IB := I) (b := id)
-    (ϕ := fun y : M =>
-      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from T.toSection y))
-    (v := fun y : M => unitZeroSec (I := I) (M := M) y)
-    T.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
-
 /-- The constructed second-gradient refold family for the Riemann arm at second endpoint
 zero: the moving tensor's unit value weights the folded four-monomial second-Bianchi kernel
 at the realized metric's orthonormal frames, averaged over the two symmetrization slot
@@ -405,61 +380,6 @@ theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_rfns_ballUniform_sq
     linarith
   rw [Real.sq_sqrt hsum_nn]
   exact hfin
-
-set_option linter.unusedVariables false in
-/-- Deferred input (dossier row RA-1, conjunct 3 of the frozen Riemann-arm refold data
-bundled with the order-zero-part conjuncts 1, 4, 7; pattern class: `riemannSec_difference`
-Palatini split + the exact path linearizations at second endpoint zero + the
-`appCc`/`unitModel` evaluation calculus + fixed-frame neighbourhood gluing, with the
-order-zero part `C0ra := bgRComm + arm0AA + (∇♯)K`-residual + Ricci-fold remainder): the
-per-parameter refold identity for the moving order-zero Riemann coefficient, with the
-second-gradient part the DOUBLED constructed folded four-monomial kernel family
-`(2 : ℝ) • riemannPalatiniRefoldC2Family` at existentially pinned, PARTNER-PAIRED permutation
-quadruples (`IsFramePairPartner` — the leader-sanctioned posit-layer strengthening restoring
-the dossier's `symmS` partner bookkeeping; it is what the paired refold estimates below
-consume at these witnesses; the doubling carries the identity — the family definition itself
-keeps its `½` weights — because the fold output equals TWICE the partner-family average on the
-symmetric sector), under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's
-`T` is `symmS`-representable at every wired level, so the antisymmetric escape sector is
-vacuous for chain inputs), and an order-zero family carrying joint smoothness, a
-ball-uniform pointwise fibre-norm sup, and the two-step jet window. Every consumer
-transitively depends on `sorryAx` until this lands. -/
-theorem exists_riemannPalatini_refold_identity_data
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
-    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
-      ∃ qA qB : Fin 4 → Equiv.Perm (Fin 4),
-      IsFramePairPartner qA qB ∧
-      ∀ (T : SmoothCcTensor g₀ 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
-          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
-        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
-        ∃ C0ra : ℝ → SmoothCcTensor g₀ 2 2,
-          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0ra (δ := δ) (δ' := δ) ∧
-          (∀ s ∈ Set.Icc (0 : ℝ) 1,
-            appCc (I := I) (M := M) g₀ 2 2
-                (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
-                  (realizedFam (I := I) g₀ T 0 hδ hδZ s))
-                (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
-              appCc (I := I) (M := M) g₀ 2 2 (C0ra s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
-                appCc (I := I) (M := M) g₀ 4 2
-                  ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ
-                    qA qB s)
-                  (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
-          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0ra s).toSection x) ≤
-              Λ ^ 2) ∧
-          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
-            ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0ra s)‖ ^ 2 ≤
-              K i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) :=
-  sorry
 
 private theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
@@ -7053,6 +6973,739 @@ private theorem riemannPalatiniRefoldC2Family_eq_symmS_kernel
   simp only [Equiv.Perm.mul_def, curvatureRefoldKernelCoeffField]
   rw [← h0, ← h1, ← h2, ← h3]
   module
+
+set_option linter.unusedSectionVars false in
+private lemma ccTensorBilin_smul_local (g₀ : SmoothRiemannianMetric I M)
+    (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
+    ccTensorBilin (I := I) g₀ (c • S) b u w =
+      c * ccTensorBilin (I := I) g₀ S b u w := by
+  rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+
+set_option linter.unusedSectionVars false in
+private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2)
+    (hsymm : ∀ (x : M) (u w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ S x u w = ccTensorBilin (I := I) g₀ S x w u) :
+    symmS (I := I) (M := M) g₀ S = S := by
+  have hswap : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S = S := by
+    refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
+    rw [domDomCongrSection_unitModel]
+    refine ContinuousMultilinearMap.ext (fun v => ?_)
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    have hv : ∀ u w : TangentSpace I x,
+        unitModel (I := I) (M := M) g₀ 2 S x ![u, w] =
+          unitModel (I := I) (M := M) g₀ 2 S x ![w, u] := by
+      intro u w
+      rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ S x u w,
+        unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ S x w u]
+      exact hsymm x u w
+    have hveta : (fun i => v ((Equiv.swap (0 : Fin 2) 1) i)) = ![v 1, v 0] := by
+      funext i
+      fin_cases i <;> rfl
+    have hveta' : v = ![v 0, v 1] := by
+      funext i
+      fin_cases i <;> rfl
+    rw [hveta]
+    conv_rhs => rw [hveta']
+    exact hv (v 1) (v 0)
+  have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
+  rw [symmS, hswap, htwo, smul_smul,
+    show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
+
+set_option linter.unusedSectionVars false in
+/-- Constant-in-`s` coefficient families are jointly smooth (the trivial class of the H1
+joint-smoothness rows: the section smoothness composed with the first projection). -/
+private theorem threeArmHjoint_const_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
+    (F : SmoothCcTensor g₀ r 2) {δ δ' : ℝ} :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
+      (fun _ : ℝ => F) (δ := δ) (δ' := δ') := by
+  rw [linearizedRicciThreeArmHjoint]
+  exact (F.toSection.contMDiff.comp contMDiff_fst).contMDiffOn
+
+set_option linter.unusedSectionVars false in
+private theorem threeArmHjoint_const_smul_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
+    (c : ℝ) (A : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
+    (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ')) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
+      (fun s => c • A s) (δ := δ) (δ' := δ') := by
+  have hsm := jointTotalSpaceRS_const_smul_local (I := I) (M := M) (r := r) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ')) c
+    (fun p : M × ℝ => (A p.2).toSection p.1) hA
+  refine hsm.congr (fun p _ => ?_)
+  refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
+  rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+
+set_option linter.unusedSectionVars false in
+private lemma norm_add_sq_le_local (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (A B : SmoothCcTensor g r s) :
+    ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
+  have hn := norm_add_le A B
+  nlinarith [mul_le_mul hn hn (norm_nonneg (A + B))
+      (add_nonneg (norm_nonneg A) (norm_nonneg B)),
+    sq_nonneg (‖A‖ - ‖B‖)]
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
+pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file over the
+`dLaBiContrFib` joint chart engine class, with the `RicciThreeArmAppCc` AppY engine as the
+realized-pair mechanism): joint smoothness in `(x, s)` over the realized small set of the
+mechanism-B quadratic residual field along the realized path at second endpoint zero — the
+connection-difference bi-contraction at the realized metric pair, jointly smooth through
+the moving metric. LEG-COUNT: two inverse-metric (`g_s⁻¹`) raisings inside the quadratic
+bi-contraction, both at the zero jet of the path parameter; no rate lives on this row (a
+`Prop`-valued smoothness row — the rate sits in the H3 cap and H4 window rows).
+SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps. SUP-ANCHOR: not applicable (no
+estimate content). Degenerate litmus: at `s = 0` the subject is
+`gInvDiffQuadResidualField g₀ g₀ = 0` (`gInvDiffQuadResidualField_self`). Every consumer
+transitively depends on `sorryAx` until this lands. -/
+theorem gInvDiffQuadResidualField_realizedFam_threeArmHjoint
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => gInvDiffQuadResidualField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) (δ := δ) (δ' := δ) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
+pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file, with the
+fixed-parameter smoothness `bgRBiContrFib` engine of `RicciThreeArmCorrectionFieldBound`
+as the fibre mechanism): joint smoothness in `(x, s)` over the realized small set of the
+background-curvature commutator coefficient field along the realized path — the bg-`R`
+bi-contraction at the moving `g_s`-orthonormal frames, jointly smooth through the moving
+metric. LEG-COUNT: two moving-frame legs (`g_s`-orthonormal conversions), both at the zero
+jet; no rate on this row. SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps.
+SUP-ANCHOR: not applicable. Degenerate litmus: at `s = 0` the subject is the fixed
+`ricciArmOrder0BgRCommCoeffField g₀ g₀`, whose section smoothness is the constant-family
+class. Every consumer transitively depends on `sorryAx` until this lands. -/
+theorem ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) (δ := δ) (δ' := δ) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
+pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file, with the
+fixed-parameter `sharpGradKoszulBiContrFib` smoothness of
+`RicciArmResidualCoefficientFields` as the fibre mechanism, jointly in `s` through BOTH
+the realized metric and the weight `s • T`): joint smoothness in `(x, s)` over the
+realized small set of the sharp-gradient Koszul residual field along the realized path at
+weight `s • T`. LEG-COUNT: one sharp (`g_s♯`) raising at the zero jet; the weight enters
+at its one-jet; no rate on this row. SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps.
+SUP-ANCHOR: not applicable. Degenerate litmus: at `s = 0` the weight is `0` and the
+subject vanishes (`ricciArmSharpGradKoszulResidualField_zero_weight`). Every consumer
+transitively depends on `sorryAx` until this lands. -/
+theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) (δ := δ) (δ' := δ) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H1 joint-smoothness row of the Riemann-arm refold identity data;
+pattern donor: `covDerivArmField_realizedFam_threeArmHjoint` in this file, with the
+fixed-parameter `ricciFoldBiContrFib` smoothness of `RicciArmResidualCoefficientFields`
+as the fibre mechanism, jointly in `s` through BOTH the realized metric and the weight
+`s • T`): joint smoothness in `(x, s)` over the realized small set of the Ricci-fold
+remainder field along the realized path at weight `s • T`. LEG-COUNT: two moving-frame
+legs at the zero jet; the weight enters at its zero jet only; no rate on this row.
+SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps. SUP-ANCHOR: not applicable.
+Degenerate litmus: at `s = 0` the weight is `0` and the subject vanishes
+(`ricciArmRicciFoldRemainderField_zero_weight`). Every consumer transitively depends on
+`sorryAx` until this lands. -/
+theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
+    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
+      (fun s => ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) (δ := δ) (δ' := δ) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H3 ball-uniform pointwise cap row of the Riemann-arm refold identity
+data; pattern donor: `rfns_bgRBiContrFib_le` of `RicciThreeArmCorrectionFieldBound` — the
+generic-`g₁`+`htie` ∃C-before-∀ pointwise class — composed with the realized-path adapter
+of `exists_arm0AAField_realizedFam_rfns_ballUniform`): the ball-uniform pointwise
+fibre-norm-square cap for the sharp-gradient Koszul residual field along the realized path
+at weight `s • T` — the weight's one-jet is absorbed by the `a + 2`-jet ball through the
+convex-perturbation pointwise `C²` Sobolev bound class. LEG-COUNT: one inverse-metric leg
+(the `g_s♯` raise at the zero jet); the one-leg rate `δ/(1−δ)` is absorbed into the
+ball-uniform constant. SMALL-LITERALS: ∃Λ-form, zero numeric caps. SUP-ANCHOR: pointwise
+fibre-norm-square sup, `∃Λ` BEFORE `∀T ∀s ∀x`. Degenerate litmus: at `s = 0` the weight is
+`0` and the subject vanishes (`ricciArmSharpGradKoszulResidualField_zero_weight`), so the
+cap is trivially satisfied there. Every consumer transitively depends on `sorryAx` until
+this lands. -/
+theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_rfns_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) ≤ Λ :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H3 ball-uniform pointwise cap row of the Riemann-arm refold identity
+data; pattern donor: `rfns_bgRBiContrFib_le` of `RicciThreeArmCorrectionFieldBound` — the
+generic-`g₁`+`htie` ∃C-before-∀ pointwise class against the uniform background-curvature
+bound `exists_uniform_riemannOp_LeviCivita_gNorm_bound` — composed with the realized-path
+adapter of `exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform`): the
+ball-uniform pointwise fibre-norm-square cap for the Ricci-fold remainder field along the
+realized path at weight `s • T` — the weight enters at its zero jet only, capped by the
+`gFibreOpBound` smallness through the ball. LEG-COUNT: two moving-frame legs
+(`g_s`-orthonormal conversions at the zero jet); the two-leg rate `1/(1−δ)` is absorbed
+into the ball-uniform constant. SMALL-LITERALS: ∃Λ-form, zero numeric caps. SUP-ANCHOR:
+pointwise fibre-norm-square sup, `∃Λ` BEFORE `∀T ∀s ∀x`. Degenerate litmus: at `s = 0`
+the weight is `0` and the subject vanishes
+(`ricciArmRicciFoldRemainderField_zero_weight`). Every consumer transitively depends on
+`sorryAx` until this lands. -/
+theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+              ((ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) ≤ Λ :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H4 two-step jet-window row of the Riemann-arm refold identity data;
+pattern donor: `exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow` in this
+file — the ∃K-before-∀ per-order L² window class over `range (i + 2)` moving-tensor jets;
+mechanism: the quadratic connection-difference bi-contraction jets convert onto the
+diagonal product grid of connection-difference jet pairs — the proven
+`RicciArmResidualFieldGridWindow` quadratic conversion class — with ball absorption of the
+grid cells): the per-order L² jet window for the mechanism-B quadratic residual field
+along the realized path. LEG-COUNT: two inverse-metric (`g_s⁻¹`) legs at the zero jet of
+the coefficient; the two-leg rate is absorbed into `K`; `∇ⁱ` stays inside the
+`range (i + 2)` window (zero-jet weight, quadratic in the one-jet connection difference).
+SMALL-LITERALS: ∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE `∀T ∀i ∀s`, per-order
+L² window against `1 + ∑_{j < i+2} ‖∇ʲT‖²`. Degenerate litmus: at `s = 0` the subject is
+`gInvDiffQuadResidualField g₀ g₀ = 0`. Every consumer transitively depends on `sorryAx`
+until this lands. -/
+theorem exists_gInvDiffQuadResidualField_realizedFam_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (gInvDiffQuadResidualField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s))‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H4 two-step jet-window row of the Riemann-arm refold identity data;
+pattern donor: `exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow` in this
+file — the ∃K-before-∀ per-order L² window class — with the
+`CurvatureCoefficientDifferenceJetTower` background-difference envelope as the difference
+mechanism; the subject is the WHOLE moving-vs-basepoint difference: per-endpoint splits
+are a dead route, since each endpoint alone carries a fixed jet tower with no path rate
+while the difference is one-jet in the perturbation): the per-order L² jet window for the
+background-difference of the bg-curvature commutator coefficient field along the realized
+path. LEG-COUNT: moving-frame legs at the zero jet; the difference carries the one-jet
+perturbation rate, absorbed into `K`; `∇ⁱ` stays inside the `range (i + 2)` window.
+SMALL-LITERALS: ∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE `∀T ∀i ∀s`, per-order
+L² window against `1 + ∑_{j < i+2} ‖∇ʲT‖²`. Degenerate litmus: at `s = 0` the difference
+vanishes (`sub_self`). Every consumer transitively depends on `sorryAx` until this
+lands. -/
+theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H4 two-step jet-window row of the Riemann-arm refold identity data;
+pattern donor: `exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow` in this
+file — the ∃K-before-∀ per-order L² window class; mechanism: the sharp-gradient Koszul
+bi-contraction is ONE-jet in the weight `s • T` (fold map E6 window legality), so the
+`i`-th coefficient jet consumes weight jets up to `i + 1` and `∇ⁱ` stays inside the
+`range (i + 2)` window, with the metric raisings at the zero jet): the per-order L² jet
+window for the sharp-gradient Koszul residual field along the realized path at weight
+`s • T`. LEG-COUNT: one inverse-metric (`g_s♯`) leg at the zero jet; the one-leg rate is
+absorbed into `K`. SMALL-LITERALS: ∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE
+`∀T ∀i ∀s`, per-order L² window against `1 + ∑_{j < i+2} ‖∇ʲT‖²`. Degenerate litmus: at
+`s = 0` the weight is `0` and the subject vanishes
+(`ricciArmSharpGradKoszulResidualField_zero_weight`). Every consumer transitively depends
+on `sorryAx` until this lands. -/
+theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (H4 two-step jet-window row of the Riemann-arm refold identity data;
+pattern donor: `exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow` in this
+file — the ∃K-before-∀ per-order L² window class; mechanism: the Ricci-fold remainder is
+ZERO-jet in the weight `s • T` (fold map E6 window legality) against the uniform
+background-curvature bound, so the `i`-th coefficient jet consumes weight jets up to `i`
+and `∇ⁱ` stays inside the `range (i + 2)` window): the per-order L² jet window for the
+Ricci-fold remainder field along the realized path at weight `s • T`. LEG-COUNT: two
+moving-frame legs at the zero jet; the rate is absorbed into `K`. SMALL-LITERALS:
+∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE `∀T ∀i ∀s`, per-order L² window
+against `1 + ∑_{j < i+2} ‖∇ʲT‖²`. Degenerate litmus: at `s = 0` the weight is `0` and the
+subject vanishes (`ricciArmRicciFoldRemainderField_zero_weight`). Every consumer
+transitively depends on `sorryAx` until this lands. -/
+theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+            (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- Deferred input (dossier row RA-1, conjunct 3 of the frozen Riemann-arm refold data
+bundled with the order-zero-part conjuncts 1, 4, 7; pattern class: `riemannSec_difference`
+Palatini split + the exact path linearizations at second endpoint zero + the
+`appCc`/`unitModel` evaluation calculus + fixed-frame neighbourhood gluing, with the
+order-zero part `C0ra := bgRComm + arm0AA + (∇♯)K`-residual + Ricci-fold remainder): the
+per-parameter refold identity for the moving order-zero Riemann coefficient, with the
+second-gradient part the DOUBLED constructed folded four-monomial kernel family
+`(2 : ℝ) • riemannPalatiniRefoldC2Family` at existentially pinned, PARTNER-PAIRED permutation
+quadruples (`IsFramePairPartner` — the leader-sanctioned posit-layer strengthening restoring
+the dossier's `symmS` partner bookkeeping; it is what the paired refold estimates below
+consume at these witnesses; the doubling carries the identity — the family definition itself
+keeps its `½` weights — because the fold output equals TWICE the partner-family average on the
+symmetric sector), under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's
+`T` is `symmS`-representable at every wired level, so the antisymmetric escape sector is
+vacuous for chain inputs), and an order-zero family carrying joint smoothness, a
+ball-uniform pointwise fibre-norm sup, and the two-step jet window. Every consumer
+transitively depends on `sorryAx` until this lands. -/
+theorem exists_riemannPalatini_refold_identity_data
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+      ∃ qA qB : Fin 4 → Equiv.Perm (Fin 4),
+      IsFramePairPartner qA qB ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        ∃ C0ra : ℝ → SmoothCcTensor g₀ 2 2,
+          linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0ra (δ := δ) (δ' := δ) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1,
+            appCc (I := I) (M := M) g₀ 2 2
+                (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s))
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
+              appCc (I := I) (M := M) g₀ 2 2 (C0ra s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
+                appCc (I := I) (M := M) g₀ 4 2
+                  ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ
+                    qA qB s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
+          (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0ra s).toSection x) ≤
+              Λ ^ 2) ∧
+          (∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
+            ‖iteratedCovGrad (I := I) g₀ 2 2 i (C0ra s)‖ ^ 2 ≤
+              K i * (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
+  classical
+  obtain ⟨ΛQ, hΛQ_nn, hcapQ⟩ :=
+    exists_arm0AAField_realizedFam_rfns_ballUniform (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨ΛB, hΛB_nn, hcapB⟩ :=
+    exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  obtain ⟨ΛS, hΛS_nn, hcapS⟩ :=
+    exists_ricciArmSharpGradKoszulResidualField_realizedFam_rfns_ballUniform (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  obtain ⟨ΛF, hΛF_nn, hcapF⟩ :=
+    exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  obtain ⟨KRm, hKRm_nn, hKRm⟩ :=
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 2
+      (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)
+  obtain ⟨KB0, hKB0_nn, hKB0⟩ :=
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 2
+      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+  obtain ⟨KQw, hKQw_nn, hwinQ⟩ :=
+    exists_gInvDiffQuadResidualField_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  obtain ⟨KBw, hKBw_nn, hwinB⟩ :=
+    exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_l2JetWindow
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨KSw, hKSw_nn, hwinS⟩ :=
+    exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  obtain ⟨KFw, hKFw_nn, hwinF⟩ :=
+    exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow (I := I) (M := M)
+      g₀ a ha_super hR hδ₀
+  have hΛSQ_nn : (0 : ℝ) ≤
+      2 * KRm + 8 * (2 * ΛQ + 2 * (2 * (2 * (2 * ΛB + 2 * KB0) + 2 * ΛS) + 2 * ΛF)) := by
+    linarith [hΛQ_nn, hΛB_nn, hΛS_nn, hΛF_nn, hKRm_nn, hKB0_nn]
+  refine ⟨Real.sqrt
+      (2 * KRm + 8 * (2 * ΛQ + 2 * (2 * (2 * (2 * ΛB + 2 * KB0) + 2 * ΛS) + 2 * ΛF))),
+    Real.sqrt_nonneg _,
+    fun i => 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2
+      + 8 * (2 * KQw i + 2 * (2 * (2 * KBw i + 2 * KSw i) + 2 * KFw i)),
+    fun i => by
+      have h5 : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 2 2 i
+          (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)‖ ^ 2 := sq_nonneg _
+      linarith [hKQw_nn i, hKBw_nn i, hKSw_nn i, hKFw_nn i],
+    ![Equiv.swap (0 : Fin 4) 2, Equiv.swap (1 : Fin 4) 3,
+      Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3, 1],
+    fun k => Equiv.swap (0 : Fin 4) 1 *
+      (![Equiv.swap (0 : Fin 4) 2, Equiv.swap (1 : Fin 4) 3,
+        Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3, 1] k),
+    fun _ => rfl, ?_⟩
+  intro T hTsymm δ hδ_le hδ hδZ hball
+  have hZball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2)‖ ≤ R := by
+    intro j hj
+    have hzero : iteratedCovGrad (I := I) g₀ 0 2 j (0 : SmoothCcTensor g₀ 0 2) = 0 := by
+      have h := iteratedCovGrad_sub (I := I) (g := g₀) (r := 0) (s := 2) (j := j) T T
+      rw [sub_self, sub_self] at h
+      exact h
+    rw [hzero, norm_zero]
+    exact hR
+  refine ⟨fun s =>
+    ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀
+      + (2 : ℝ) •
+        (gInvDiffQuadResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+              + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))),
+    ?_, ?_, ?_, ?_⟩
+  · exact threeArmHjoint_add_local (I := I) (M := M) g₀ _ _
+      (threeArmHjoint_const_local (I := I) (M := M) g₀
+        (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀))
+      (threeArmHjoint_const_smul_local (I := I) (M := M) g₀ (2 : ℝ) _
+        (threeArmHjoint_add_local (I := I) (M := M) g₀ _ _
+          (gInvDiffQuadResidualField_realizedFam_threeArmHjoint (I := I) (M := M)
+            g₀ T hδ hδZ)
+          (threeArmHjoint_add_local (I := I) (M := M) g₀ _ _
+            (threeArmHjoint_add_local (I := I) (M := M) g₀ _ _
+              (threeArmHjoint_sub_local (I := I) (M := M) g₀ _ _
+                (ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint (I := I) (M := M)
+                  g₀ T hδ hδZ)
+                (threeArmHjoint_const_local (I := I) (M := M) g₀
+                  (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)))
+              (ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint (I := I) (M := M)
+                g₀ T hδ hδZ))
+            (ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint (I := I) (M := M)
+              g₀ T hδ hδZ))))
+  · intro s hs
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+      Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+    have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+      rw [convexPerturbation, smul_zero, zero_add]
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+          g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ (s • T) y v w := by
+      intro y v w
+      rw [← hcP]
+      exact realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+    have hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+        ccTensorBilin (I := I) g₀ (s • T) x v w =
+          ccTensorBilin (I := I) g₀ (s • T) x w v := by
+      intro x v w
+      rw [ccTensorBilin_smul_local, ccTensorBilin_smul_local, hTsymm x v w]
+    have hsymmT : symmS (I := I) (M := M) g₀ T = T :=
+      symmS_eq_self_of_symm (I := I) (M := M) g₀ T hTsymm
+    beta_reduce
+    simp only [iteratedCovGrad_zero]
+    have hfam : (2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ
+        ![Equiv.swap (0 : Fin 4) 2, Equiv.swap (1 : Fin 4) 3,
+          Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3, 1]
+        (fun k => Equiv.swap (0 : Fin 4) 1 *
+          (![Equiv.swap (0 : Fin 4) 2, Equiv.swap (1 : Fin 4) 3,
+            Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3, 1] k)) s =
+        (2 * s : ℝ) • curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+          (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+          (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 := by
+      rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ _ _ (fun _ => rfl) s,
+        hsymmT, smul_smul]
+      rfl
+    rw [hfam, appCc_add_left, appCc_smul_left, appCc_smul_left]
+    suffices hfold : (1 / 2 : ℝ) •
+        (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)) T
+          - appCc (I := I) (M := M) g₀ 2 2
+              (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T) =
+        appCc (I := I) (M := M) g₀ 2 2
+            (gInvDiffQuadResidualField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                    (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+                  - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+                  + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                      (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+                  + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                      (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))) T
+          + appCc (I := I) (M := M) g₀ 4 2
+              (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+                (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
+                (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
+                (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+                (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (s • T)) by
+      have h2 : appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)) T
+          - appCc (I := I) (M := M) g₀ 2 2
+              (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T =
+          (2 : ℝ) • ((1 / 2 : ℝ) •
+            (appCc (I := I) (M := M) g₀ 2 2
+                (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s)) T
+              - appCc (I := I) (M := M) g₀ 2 2
+                  (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T)) := by
+        rw [smul_smul, show (2 : ℝ) * (1 / 2) = 1 by norm_num, one_smul]
+      rw [hfold, iteratedCovGrad_smul_real, appCc_smul_right, smul_add, smul_smul] at h2
+      rw [sub_eq_iff_eq_add] at h2
+      rw [h2]
+      abel
+    exact
+      ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
+        (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T) htie hPsymm T
+  · intro s hs x
+    have hQraw := hcapQ T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
+    have hQ : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ ΛQ := hQraw
+    have hB := hcapB T 0 hδ_le hδ hδ_le hδZ hball hZball s hs x
+    have hS := hcapS T hδ_le hδ hδZ hball s hs x
+    have hF := hcapF T hδ_le hδ hδZ hball s hs x
+    have hRm := hKRm x
+    have hB0 := hKB0 x
+    beta_reduce
+    rw [Real.sq_sqrt hΛSQ_nn]
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+      SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+    have houter := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
+      ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀).toSection x)
+      ((2 : ℝ) • ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+            - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+            + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+            + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))).toSection x))
+    have hsm : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((2 : ℝ) • ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+              + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))).toSection x)) =
+        4 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+              + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))).toSection x) := by
+      rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 2 2 x]
+      norm_num
+    have hX : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+              + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))).toSection x) ≤
+        2 * ΛQ + 2 * (2 * (2 * (2 * ΛB + 2 * KB0) + 2 * ΛS) + 2 * ΛF) := by
+      rw [show ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
+              + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))).toSection x) =
+          (gInvDiffQuadResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
+          + ((((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
+              - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+              + (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                  (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
+            + (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) from by
+        simp only [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_sub,
+          ContMDiffSection.coe_add, ContMDiffSection.coe_sub, Pi.add_apply, Pi.sub_apply]]
+      have h1 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
+        ((gInvDiffQuadResidualField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x)
+        (((((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
+            - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+            + (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
+          + (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x))
+      have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
+        ((((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+              (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
+            - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+            + (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x))
+        ((ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
+      have h3 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
+        (((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
+          - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x))
+        ((ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
+      have h4 := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x
+        ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x)
+        ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+      linarith [hQ, hB, hS, hF, hB0, h1, h2, h3, h4]
+    linarith [houter, hsm, hRm, hX]
+  · intro i s hs
+    have hQ := hwinQ T hδ_le hδ hδZ hball i s hs
+    have hD := hwinB T hδ_le hδ hδZ hball i s hs
+    have hS := hwinS T hδ_le hδ hδZ hball i s hs
+    have hF := hwinF T hδ_le hδ hδZ hball i s hs
+    beta_reduce
+    rw [iteratedCovGrad_add, iteratedCovGrad_smul_real, iteratedCovGrad_add,
+      iteratedCovGrad_add, iteratedCovGrad_add]
+    set jc := iteratedCovGrad (I := I) g₀ 2 2 i
+      (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) with hjc_def
+    set jq := iteratedCovGrad (I := I) g₀ 2 2 i
+      (gInvDiffQuadResidualField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) with hjq_def
+    set jd := iteratedCovGrad (I := I) g₀ 2 2 i
+      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀) with hjd_def
+    set js := iteratedCovGrad (I := I) g₀ 2 2 i
+      (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) with hjs_def
+    set jr := iteratedCovGrad (I := I) g₀ 2 2 i
+      (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) with hjr_def
+    have t1 := norm_add_sq_le_local (I := I) (M := M) g₀ jc
+      ((2 : ℝ) • (jq + (jd + js + jr)))
+    have t2 : ‖(2 : ℝ) • (jq + (jd + js + jr))‖ ^ 2 =
+        4 * ‖jq + (jd + js + jr)‖ ^ 2 := by
+      rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
+      ring
+    have t3 := norm_add_sq_le_local (I := I) (M := M) g₀ jq (jd + js + jr)
+    have t4 := norm_add_sq_le_local (I := I) (M := M) g₀ (jd + js) jr
+    have t5 := norm_add_sq_le_local (I := I) (M := M) g₀ jd js
+    have hW1 : (1 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by
+      have hsum : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 :=
+        Finset.sum_nonneg (fun j _ => sq_nonneg _)
+      linarith
+    have hcW : ‖jc‖ ^ 2 ≤ ‖jc‖ ^ 2 * (1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
+      le_mul_of_one_le_right (sq_nonneg _) hW1
+    linarith [t1, t2, t3, t4, t5, hQ, hD, hS, hF, hcW]
 
 set_option linter.unusedVariables false in
 /-- Dossier row RA-3a (conjunct 6 of the frozen Riemann-arm refold data): the pointwise

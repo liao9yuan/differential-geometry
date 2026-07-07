@@ -164,6 +164,46 @@ def metricDifferenceCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCc
     metricDifferenceCcTensor (I := I) (M := M) g₀ g₀ = 0 :=
   sub_self _
 
+/-- The unit value section of a rank-`(0,2)` coefficient tensor: the rank-two tensor field
+obtained by feeding the unit rank-zero tensor into the coefficient, fibrewise. This is the
+section-level carrier of `unitModel`. -/
+def ccTensorUnitValueSection (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
+    Π y : M, Tensor0SSpace 2 I y :=
+  fun y =>
+    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from T.toSection y)
+      (unitZeroSec (I := I) (M := M) y)
+
+theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g 0 2) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) y
+        (ccTensorUnitValueSection (I := I) (M := M) g T y)) := by
+  exact ContMDiff.clm_bundle_apply (𝕜 := ℝ) (n := (∞ : WithTop ℕ∞))
+    (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 2 ℝ E)
+    (E₁ := fun z : M => Tensor0SSpace 0 I z)
+    (E₂ := fun z : M => Tensor0SSpace 2 I z)
+    (IM := I) (IB := I) (b := id)
+    (ϕ := fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from T.toSection y))
+    (v := fun y : M => unitZeroSec (I := I) (M := M) y)
+    T.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
+
+set_option linter.unusedSectionVars false in
+private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I M)
+    (x : M) (v w : TangentSpace I x) :
+    ccTensorBilin (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
+      g.inner x v w := by
+  have hround : ccTensorMultilinear (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x =
+      metricCcTensorFib (I := I) g x := by
+    unfold ccTensorMultilinear metricCcTensor
+    rw [MixedSection.toMultilinearSection_fromMultilinearSection]
+    rfl
+  rw [ccTensorBilin_apply]
+  unfold ccTensorModel
+  rw [hround]
+  rfl
+
 /-- DEF-1 (M-dossier §ii): the mechanism-B quadratic residual coefficient field at a generic
 perturbed metric `g₁` — the `A ⋆ A` connection-difference bi-contraction with its `g₁⁻¹`
 raisings, the field-level generic-`g₁` analogue of the realized-family `arm0AAField`. -/
@@ -1433,6 +1473,50 @@ theorem bgRDiffRefoldRemainderField_self (g₀ : SmoothRiemannianMetric I M) :
   rw [bgRDiffRefoldRemainderField, metricDifferenceCcTensor_self, sub_self,
     ricciArmSharpGradKoszulResidualField_zero_weight,
     ricciArmRicciFoldRemainderField_zero_weight, add_zero, add_zero]
+
+set_option linter.unusedVariables false in
+/-- The shared field-level C₂-EXPOSED generic-`g₁` Palatini fold of the moving order-zero
+Riemann coefficient (the single source of fold truth for the Riemann-arm refold identity
+RA-1' and the M-dossier sym-sector cancellation C-EQ): for a generic perturbed metric
+`g₁ = g₀ + P` (the `htie` idiom) with symmetric perturbation `P` (chain-suppliable at every
+wired consumer: the realized path supplies `s • T` under `hTsymm`; the metric difference is
+symmetric by metric symmetry), the half background difference of the moving Riemann-arm
+coefficient applied to an arbitrary rank-`(0, 2)` argument `W` splits onto the pinned
+residual coefficient fields — the mechanism-B quadratic residual, the background-curvature
+commutator difference, and the two shared remainder fields at weight `P` (the bracket is
+definitionally `bgRDiffRefoldRemainderField` at `P := metricDifferenceCcTensor`) — plus the
+folded four-monomial second-Bianchi refold kernel at the DERIVED quadruple
+`σ₁ = swap 0 2, σ₂ = swap 1 3, σ₃ = swap 0 2 * swap 1 3, σ₄ = 1`, in the
+DERIVATION-FAITHFUL placement: the kernel WEIGHT is the applied argument `W` and the
+second gradient falls on the metric-difference tensor `P` (coefficient exactly `1`:
+donor `2` × Koszul `½` × kernel-internal `½`).
+Every consumer transitively depends on `sorryAx` until this lands. -/
+theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
+    (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v)
+    (W : SmoothCcTensor g₀ 0 2) :
+    (1 / 2 : ℝ) •
+        (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W
+          - appCc (I := I) (M := M) g₀ 2 2
+              (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) W) =
+      appCc (I := I) (M := M) g₀ 2 2
+          (gInvDiffQuadResidualField (I := I) (M := M) g₀ g₁
+            + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
+                  - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+                + ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ P
+                + ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ P)) W
+        + appCc (I := I) (M := M) g₀ 4 2
+            (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁
+              (ccTensorUnitValueSection (I := I) (M := M) g₀ W)
+              (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ W)
+              (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+              (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 P) :=
+  sorry
 
 /-! ### Stage E — the sym-sector cancellation equation (M-dossier C-EQ, kernel-field form) -/
 
