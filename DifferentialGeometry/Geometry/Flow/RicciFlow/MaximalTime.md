@@ -1,11 +1,36 @@
 # MaximalTime — dispatch plan for `extends_of_rmBounded`
 
+## ★ CURRENT STATE (2026-07-04): CLOSED on the interior-restart route — 0 sorry in this file
+
+`extends_of_rmBounded` is **proved with zero `sorry` in `MaximalTime.lean`**, rewired (Y2) onto the
+interior-restart + forward-uniqueness route. Real-build axiom list:
+`[propext, sorryAx, Classical.choice, Quot.sound]`, with `sorryAx` tracing to exactly the THREE
+cited PDE black boxes:
+
+1. **(N)** `ricci_flow_unif_existence` (`Evolution/ExtendViaUniqueness.lean`) — uniform short-time
+   existence under bounded geometry (parabolic continuous dependence; verified non-circular).
+2. **(B)** `ricci_flow_forward_unique` (same file) — forward uniqueness, smooth class (GSM77 Ch. 7 §5.2).
+3. `shiCovBound_of_soln` (`ExtendShiInputs.lean`) — Shi-type covariant tail bounds
+   (GSM77 Ch. 7; discharge plan = `ExtendShiInputs.md` §SHI DISCHARGE PLAN).
+
+Proof chain: `ricciFlowPDE_Ici_of_soln` → `ric_quad_le_of_soln` (hric) → `extendInputs_of_soln`
+→ (A) `ricci_flow_interior_restart` (proved from (N)) → (B) on `g_fam` vs `rr(·−t*)` →
+`extend_construction_of_restart` (Brick U) → `isSolutionOn_of_extendData`. Route documentation:
+`Evolution/ExtendViaUniqueness.md`, `ExtendShiInputs.md`.
+
+**The old restart-at-ω + C∞-glue route below is HISTORICAL** — `hleft`/`hLimit`/`hglue` and the
+`ricci_flow_extends_construction` call no longer exist in the proof; `CinftyLimitData`,
+`restart_short_time` (Gate-R), and `BBSLimitProducer` are dead code off every critical path (marked
+in their files). Everything from here down is kept as the historical dispatch record.
+
+---
+
 End goal: discharge `extends_of_rmBounded` (`MaximalTime.lean:153`), the BBS/long-time
 pillar of Hamilton 3D (`ham3_main`). Short-time existence is the collaborator's lane
 (`ricci_flow_short_time_existence`, proven modulo the single DeTurck `sorry`); assume/cite,
 do not build.
 
-## Current state (2026-06-13)
+## Historical state (2026-06-13, superseded)
 
 `extends_of_rmBounded` has a **complete proof skeleton**: it calls the banked
 `ricci_flow_extends_construction` (`Evolution/CinftyLimitGlue.lean:632`) with 4 sorry'd

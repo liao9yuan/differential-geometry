@@ -9,7 +9,14 @@ set_option linter.unusedSectionVars false
 /-!
 # BBSLimitProducer — Dispatch C: `cinftyLimitData_of_solution`
 
-Producer for the gating `hLimit` sorry in `MaximalTime.lean` (the `extends_of_rmBounded`
+**STATUS (2026-07-04): DEAD CODE.** `extends_of_rmBounded` was rewired (Y2) onto the
+interior-restart + forward-uniqueness route and no longer consumes `CinftyLimitData` or this
+producer; both sorries below are off every critical path (do NOT count them as live frontiers).
+The Shi-content successor is `shiCovBound_of_soln` (`ExtendShiInputs.lean`), whose discharge plan
+(`ExtendShiInputs.md` §SHI DISCHARGE PLAN) unifies the citation with the HCG `MovingShiBoundOn`
+interface. Kept for reference per the transitions rule.
+
+Producer for the (now-deleted) `hLimit` sorry in `MaximalTime.lean` (the `extends_of_rmBounded`
 BBS/long-time pillar of Hamilton 3D): from a **bounded-curvature** Ricci-flow solution on
 `[α, ω)` in **dimension 3**, produce the smooth limit data `CinftyLimitData g_fam α ω hαω`
 at the right endpoint `ω`.

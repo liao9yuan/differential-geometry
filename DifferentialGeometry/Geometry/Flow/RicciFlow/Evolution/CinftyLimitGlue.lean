@@ -11,6 +11,15 @@ set_option linter.unusedSectionVars false
 /-!
 # `C∞` limit metric and smooth glue across a finite Ricci-flow endpoint
 
+**STATUS (2026-07-04): SUPERSEDED for `extends_of_rmBounded`.** The maximal-time endpoint now uses
+the interior-restart + forward-uniqueness route (`Evolution/ExtendViaUniqueness.lean`,
+`RicciFlow/ExtendShiInputs.lean`); `MaximalTime.lean` no longer consumes `CinftyLimitData`,
+`restart_short_time` (whose Gate-R `sorry` is therefore dead code off every critical path), or
+`ricci_flow_extends_construction`. STILL LIVE from this file: the Stage-1 analytic engine
+(`tendsto_nhdsLT_of_bounded_deriv` and the chart-Gram corollary) and the `gluedFamily` definitional
+layer (`gluedFamily`/`_of_lt`/`_of_ge`/`_eq_left`), which Brick U reuses. The superseded
+declarations are kept for reference per the transitions rule and carry individual warnings.
+
 This file is the construction core of the Bando–Bernstein–Shi extension
 corollary (Chow–Knopf, *The Ricci Flow: An Introduction*, the mechanism behind
 Corollary 7.2): on a **closed** manifold a Ricci-flow solution on `[α, omega)` whose
@@ -237,7 +246,10 @@ produces a short-time Ricci flow on `[0, T)` with initial metric `g(omega)`.  We
 record the data in time-shifted form (initial time `omega`) so that it concatenates
 with the original solution at `omega`. -/
 
-/-- **Stage 2 (restart), raw short-time output.**  The short-time existence
+/-- **DEAD CODE (2026-07-04):** superseded by the interior-restart route; no consumers remain, and
+the Gate-R `sorry` below is off every critical path (do NOT count it as a live frontier).
+
+**Stage 2 (restart), raw short-time output.**  The short-time existence
 theorem produces, for the limit metric `g(omega)`, a positive time `T` and a metric
 family `r` on `[0, T)` with `r 0 = g(omega)`, jointly `C∞` chart-Gram up to the
 CLOSED initial endpoint (the half-open slab `[0, T)`), `C⁰` chart-Gram up to
@@ -649,7 +661,11 @@ The Stage-3 interface is supplied as a producer `glue` taking the restart family
 **closed-endpoint joint chart-Gram `C∞` on `[0, T)`** (Gate-R — the right-hand
 closed-half-slab smoothness the seam splice consumes), and the restart's own PDE;
 it returns the chosen extension length `ε ≤ T` together with the cross-`omega`
-regularity for that specific restart. -/
+regularity for that specific restart.
+
+**DEAD CODE (2026-07-04):** superseded by the interior-restart route
+(`extend_construction_of_restart`, `ExtendViaUniqueness.lean`); `MaximalTime.lean` no longer calls
+this. Kept for reference per the transitions rule. -/
 theorem ricci_flow_extends_construction
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαomega : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,
