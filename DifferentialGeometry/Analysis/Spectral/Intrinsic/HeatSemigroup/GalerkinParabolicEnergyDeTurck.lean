@@ -55,6 +55,27 @@ open scoped Classical in
       else 0) := rfl
 
 open scoped Classical in
+def deTurckGalerkinForcingSymm (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ) (t : ℝ)
+    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) : ℝ :=
+  if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
+    (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
+        (U N t) ((a : ℝ) + 2))).coeff i
+  else 0
+
+open scoped Classical in
+@[simp] lemma deTurckGalerkinForcingSymm_apply (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ) (t : ℝ)
+    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    deTurckGalerkinForcingSymm (I := I) (M := M) g₀ g_bg a U N t i =
+      (if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
+        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
+            (U N t) ((a : ℝ) + 2))).coeff i
+      else 0) := rfl
+
+open scoped Classical in
 noncomputable def galerkinCoordEmbedLM
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
