@@ -705,6 +705,58 @@ private lemma finiteEigenComboHs_eq_smoothCcToTensorHs
   rw [finiteEigenComboHs_coeff_eq, smoothCcToTensorHs_coeff,
     ← SmoothCcTensor.toL2_apply]
 
+/-- **Posited deferred input (`sorry`).** Existence of the spectral Galerkin approximations for
+the symmetrized DeTurck forcing: for each truncation `N` there is a per-mode coordinate flow `U`
+that is continuous, starts at `u₀`'s coordinates, and solves the linear ODE system with forcing
+`deTurckGalerkinForcingSymm`. Symmetric mirror of the proven raw helper
+`deTurckGalerkin_solution_exists` (snapshot `c848da47`), with the symmetrized forcing replacing the
+raw one; its proof (the symmetrized finite-dimensional Picard existence) has not landed yet, so
+consumers transitively depend on `sorryAx` until it does. -/
+theorem deTurckGalerkin_solution_existsSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) {T : ℝ} (hT : 0 ≤ T) :
+    ∃ U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ,
+      (∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+        ContinuousOn (fun t => U N t i) (Set.Icc (0 : ℝ) T)) ∧
+      (∀ N, ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+        HasDerivWithinAt (fun r => U N r i)
+          (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
+            deTurckGalerkinForcingSymm (I := I) (M := M) g₀ g_bg a U N t i)
+          (Set.Ici t) t) ∧
+      (∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = u₀.coeff i) :=
+  sorry
+
+/-- **Posited deferred input (`sorry`).** Per-scale closed dissipation inequality plus zero initial
+energy for the symmetrized DeTurck Galerkin flow: with vanishing initial coordinates there are
+per-scale constants for which the twice-tested forcing pairing is controlled by the next-scale and
+same-scale Galerkin energies plus a square-root seed term, and the initial Galerkin energy vanishes.
+Symmetric mirror of the proven raw helper `deTurckGalerkin_forcing_closure_perScale` (snapshot
+`c848da47`), with `deTurckGalerkinForcingSymm` replacing the raw forcing; its proof (the symmetrized
+per-scale energy dissipation chain closing onto `deTurckSobolevNHa2_diff_sobolevSplit_perScale'`) has
+not landed yet, so consumers transitively depend on `sorryAx` until it does. -/
+theorem deTurckGalerkin_forcing_closure_perScaleSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
+    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
+    (hU0 : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0) :
+    ∃ (Cδ : ℝ) (Cmid seed B0 : ℕ → ℝ), Cδ < 2 ∧ (∀ k, 0 ≤ Cmid k) ∧
+      (∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
+        2 * ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
+            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
+              (U N t i * deTurckGalerkinForcingSymm (I := I) (M := M) g₀ g_bg a U N t i) ≤
+          Cδ * galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
+              (U N) ((a : ℝ) + (k : ℝ) + 1) t +
+            Cmid k * galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
+              (U N) ((a : ℝ) + (k : ℝ)) t +
+            seed k *
+              Real.sqrt (galerkinEnergy (I := I) (M := M)
+                (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ)) t)) ∧
+      (∀ (N : ℕ) (k : ℕ),
+        galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
+          (U N) ((a : ℝ) + (k : ℝ)) 0 ≤ B0 k) :=
+  sorry
+
 section
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS symmS_smul domDomCongrSection)
