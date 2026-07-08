@@ -2258,7 +2258,7 @@ private theorem uniform_rfns_bound_lichnerowicz_coeffFields
       (realizedSmallSet (δ := δ) (δ' := δ'))
       (linearizedRicci_arm2FieldLichnerowicz_jointSmooth (I := I) g₀ T T' hδ hδ')
   · intro s hs x v
-    obtain ⟨_, _, _, hident⟩ :=
+    obtain ⟨_, _, _, hident, _, _⟩ :=
       (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
         (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
     exact hident hTsymm hT'symm s hs x v hδ_lt hδ'_lt
@@ -35575,7 +35575,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
               + appCc (I := I) (M := M) g₀ 4 2
                 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
-        obtain ⟨_, _, _, hident⟩ :=
+        obtain ⟨_, _, _, hident, _, _⟩ :=
           (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
             (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
         exact hident hTsymm hT'symm s hsIoo x v hδ_lt hδ'_lt
@@ -37073,7 +37073,7 @@ private theorem deTurckRHSArmDiff_eq_pathIntegralCoeff_triple_of_symm
             + appCc (I := I) (M := M) g₀ 4 2
               (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
-      obtain ⟨_, _, _, hident⟩ :=
+      obtain ⟨_, _, _, hident, _, _⟩ :=
         (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
           (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
       exact hident hTsymm hT'symm s hsIoo x v hδ_lt hδ'_lt
@@ -39166,9 +39166,12 @@ private theorem deTurckLieArm1Coeff_realizedFam_allOrder_tameEnvelope
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- Deferred corr-family interface input (all-order tame-envelope extension of the sanctioned
-order-truncated correction-field baseline). Provability rides the md0 correction-field
-re-engineering; every consumer transitively depends on `sorryAx` until that lands. -/
+/-- All-order tame jet envelope for the bare arm-1 correction field: the arm-1 identity conjunct
+of the correction-field spec (`corrFieldDataSpec`, sixth conjunct) pins the opaque `choose`
+witness to the concrete combination
+`linearizedRicciConnDiffOrder1Coeff - linearizedRicciArm1BaseCoeff`, whose per-order L² jet at
+window `i + 2` is bounded ball-uniformly by the difference-glue envelope
+`exists_corrArm1Field_realizedFam_jetL2_tameEnvelope`. -/
 private theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -39186,8 +39189,21 @@ private theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
               (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := by
+  classical
+  obtain ⟨K, hK_nn, hK⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨K, hK_nn, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i s hs
+  have hid :=
+    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+      (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.2.2.2.2.2
+  rw [show linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s =
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder1Coeff
+          (I := I) g₀ T T' hδ hδ' s
+        - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s from hid s]
+  exact hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
