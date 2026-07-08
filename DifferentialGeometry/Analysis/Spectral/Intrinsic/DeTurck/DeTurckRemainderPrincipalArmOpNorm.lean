@@ -491,35 +491,6 @@ lemma deTurckBudget_half_add_lt_one (n : ℕ) :
     linarith
   linarith
 
-def deTurckArmContractionThreshold'' (n : ℕ) : ℝ :=
-  1 / (1 + 2 * (deTurckArmFibreConst n + 32 * deTurckArmFibreConst n ^ 3))
-
-lemma deTurckArmContractionThreshold''_le {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n ≤ deTurckArmContractionThreshold n := by
-  have hC := one_le_deTurckArmFibreConst hn
-  unfold deTurckArmContractionThreshold'' deTurckArmContractionThreshold
-  have hC3 : 0 ≤ deTurckArmFibreConst n ^ 3 := by positivity
-  apply one_div_le_one_div_of_le (by linarith)
-  linarith
-
-lemma deTurckArmContractionThreshold''_le_third {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n ≤ 1 / 3 :=
-  le_trans (deTurckArmContractionThreshold''_le hn)
-    (deTurckArmContractionThreshold_le_third hn)
-
-lemma deTurckArmContractionThreshold''_lt_one {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n < 1 :=
-  lt_of_le_of_lt (deTurckArmContractionThreshold''_le_third hn)
-    (by norm_num : (1 : ℝ) / 3 < 1)
-
-lemma deTurckArmContractionThreshold''_le_third' (n : ℕ) [NeZero n] :
-    deTurckArmContractionThreshold'' n ≤ 1 / 3 :=
-  deTurckArmContractionThreshold''_le_third (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
-
-lemma deTurckArmContractionThreshold''_lt_one' (n : ℕ) [NeZero n] :
-    deTurckArmContractionThreshold'' n < 1 :=
-  deTurckArmContractionThreshold''_lt_one (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
-
 lemma deTurckArmFibreConst_cube_mul_div_le_thirtyTwo {n : ℕ} (hn : 1 ≤ n) {δ : ℝ}
     (hδ_le : δ ≤ deTurckArmContractionThreshold'' n) :
     32 * deTurckArmFibreConst n ^ 3 * (δ / (1 - δ)) ≤

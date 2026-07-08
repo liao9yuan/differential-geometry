@@ -471,7 +471,7 @@ theorem deTurckSobolevNHa2_jetSpectralMass_preserving
       rw [h0, smoothCcToTensorHs_smul, zero_smul]
     refine ⟨(Classical.choose (deTurckSobolevNHa2_exists_of_super
       (I := I) (M := M) g₀ a ha_super)).2,
-      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold_lt_one' (Module.finrank ℝ E)), fun t => ?_⟩
+      lt_of_le_of_lt hp_lt (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)), fun t => ?_⟩
     by_cases ht : t ∈ Set.Icc (0 : ℝ) d₂
     · exact hp_ball (F t) (hball_pt t ht)
     · have hF0 : F t = 0 := by simp only [hF_def, ht, if_neg, not_false_iff]
