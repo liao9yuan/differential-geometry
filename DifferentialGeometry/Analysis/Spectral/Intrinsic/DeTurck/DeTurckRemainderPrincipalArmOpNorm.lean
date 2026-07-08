@@ -5249,6 +5249,162 @@ private lemma armZeroTwoArm_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMe
   rw [hgi, Real.sqrt_one, mul_one, mul_one] at hb
   exact le_trans (abs_nonneg _) hb
 
+set_option linter.unusedSectionVars false in
+/-- Pointwise fibre eigenbound for symmetric `δ`-fibre-small data: if `T₀` is a symmetric
+`(0,2)`-tensor whose associated (symmetrized) fibre bilinear form is `g₀`-operator-bounded by
+`δ`, then the fibre Hilbert–Schmidt norm of `T₀` is bounded by `√n δ` pointwise (`n = dim`).
+The operator bound gives each frame row of the form a covector of `g₀`-norm `≤ δ`, so the row
+square-sum is `≤ δ²` and the `n`-fold total is `≤ n δ²`. -/
+private lemma armZeroTwoArm_data_fibreNormSq_le [Nonempty M]
+    (g₀ : SmoothRiemannianMetric I M) {δ : ℝ}
+    (T₀ : SmoothCcTensor g₀ 0 2)
+    (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v)
+    (hfibre : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+    ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₀.toSection x) ≤
+      (Module.finrank ℝ E : ℝ) * δ ^ 2 := by
+  classical
+  intro x
+  have hop : ∀ v w : TangentSpace I x,
+      |ccTensorBilin (I := I) g₀ T₀ x v w| ≤
+        δ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+    intro v w
+    have h := hfibre x v w
+    have heq : ccTensorBilinSymm (I := I) g₀ T₀ x v w =
+        ccTensorBilin (I := I) g₀ T₀ x v w := by
+      rw [ccTensorBilinSymm_apply, hTsymm x v w]; ring
+    rwa [heq] at h
+  obtain ⟨n, e, hn, horth, hpars, hexpand, hrfns⟩ :=
+    tangent_frame_expansion (I := I) (M := M) g₀ x
+  have hcomp_fiber : ∀ (i j : Fin n),
+      ccTensorBilin (I := I) g₀ T₀ x (e i) (e j) =
+        fiberNormSqComponent (I := I) (M := M) g₀ x 0 2 (T₀.toSection x) n e
+          (default : Fin 0 → Fin n) (![i, j] : Fin 2 → Fin n) := by
+    intro i j
+    have hconst : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k : Fin 0 => g₀.inner x (e ((default : Fin 0 → Fin n) k))) :
+          Tensor0SBundle.Tensor0SSpace 0 I x) =
+        ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+      apply Tensor0SBundle.tensor0SSpace_ext
+      intro u
+      change ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k : Fin 0 => g₀.inner x (e ((default : Fin 0 → Fin n) k)))) u =
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) u
+      rw [show ((ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) u : ℝ) = 1 from rfl]
+      change (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ)
+          (fun k => g₀.inner x (e ((default : Fin 0 → Fin n) k)) (u k)) = 1
+      rw [ContinuousMultilinearMap.mkPiAlgebra_apply]
+      exact Finset.prod_of_isEmpty _
+    rw [ccTensorBilin_apply]
+    unfold fiberNormSqComponent
+    rw [hconst]
+    have htuple : (fun k => e ((![i, j] : Fin 2 → Fin n) k)) =
+        (![e i, e j] : Fin 2 → TangentSpace I x) := by
+      funext k; fin_cases k <;> rfl
+    rw [htuple]
+    change ccTensorModel (I := I) g₀ T₀ x ![e i, e j] =
+      ((T₀.toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+        ![e i, e j] : ℝ)
+    unfold ccTensorModel
+    rw [ccTensorMultilinear_apply]
+    rfl
+  have hbridge : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₀.toSection x) =
+      ∑ a : Fin n, ∑ b : Fin n, (ccTensorBilin (I := I) g₀ T₀ x (e a) (e b)) ^ 2 := by
+    rw [riemannianFiberNormSq_eq_sum_component_sq (I := I) (M := M) g₀ x e hrfns
+      (T₀.toSection x) (default : Fin 0 → Fin n)]
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    rw [hcomp_fiber a b]
+  rw [hbridge]
+  have hrow : ∀ a : Fin n,
+      ∑ b : Fin n, (ccTensorBilin (I := I) g₀ T₀ x (e a) (e b)) ^ 2 ≤ δ ^ 2 := by
+    intro a
+    set c : Fin n → ℝ := fun b => ccTensorBilin (I := I) g₀ T₀ x (e a) (e b) with hc_def
+    set S : ℝ := ∑ b : Fin n, (c b) ^ 2 with hS_def
+    have hS_nn : 0 ≤ S := Finset.sum_nonneg (fun b _ => sq_nonneg _)
+    set u : TangentSpace I x := ∑ b : Fin n, c b • e b with hu_def
+    have hval : ccTensorBilin (I := I) g₀ T₀ x (e a) u = S := by
+      have hexp : ccTensorBilin (I := I) g₀ T₀ x (e a) u =
+          ∑ b : Fin n, c b * ccTensorBilin (I := I) g₀ T₀ x (e a) (e b) := by
+        rw [hu_def, map_sum]
+        refine Finset.sum_congr rfl (fun b _ => ?_)
+        rw [map_smul, smul_eq_mul]
+      rw [hexp, hS_def]
+      refine Finset.sum_congr rfl (fun b _ => ?_)
+      show c b * c b = (c b) ^ 2
+      ring
+    have hgiu : ∀ i : Fin n, g₀.inner x (e i) u = c i := by
+      intro i
+      have hexp : g₀.inner x (e i) u =
+          ∑ b : Fin n, c b * g₀.inner x (e i) (e b) := by
+        rw [hu_def, map_sum]
+        refine Finset.sum_congr rfl (fun b _ => ?_)
+        rw [map_smul, smul_eq_mul]
+      rw [hexp]
+      rw [Finset.sum_congr rfl (fun b _ => by rw [horth i b])]
+      simp
+    have hguu : g₀.inner x u u = S := by
+      rw [← hpars u, hS_def]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [hgiu i]
+    have hgee : g₀.inner x (e a) (e a) = 1 := by rw [horth a a, if_pos rfl]
+    have hopau := hop (e a) u
+    rw [hgee, Real.sqrt_one, mul_one, hguu, hval] at hopau
+    have hSle : S ≤ δ * Real.sqrt S := le_trans (le_abs_self S) hopau
+    have hsqrtS : Real.sqrt S ^ 2 = S := Real.sq_sqrt hS_nn
+    nlinarith [hSle, hsqrtS, sq_nonneg (Real.sqrt S - δ), Real.sqrt_nonneg S]
+  calc ∑ a : Fin n, ∑ b : Fin n, (ccTensorBilin (I := I) g₀ T₀ x (e a) (e b)) ^ 2
+      ≤ ∑ _a : Fin n, δ ^ 2 := Finset.sum_le_sum (fun a _ => hrow a)
+    _ = (n : ℝ) * δ ^ 2 := by rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+    _ = (Module.finrank ℝ E : ℝ) * δ ^ 2 := by
+        rw [show n = Module.finrank ℝ E from hn]
+
+/-- Spectral `m`-uniform core of the arm-zero two-arm operator bound, phrased against an
+abstract pointwise data eigenbound `B` (`‖T₀‖_{g,x} ≤ B` fibrewise): for the `(2+0,2)`-coefficient
+`C₀` whose covariant jets carry the two-arm envelope against `T₀` (`K`-window plus the `εa`-rated
+`‖∇^{i+2}T₀‖` top arm), the applied field `appCc C₀ (∇⁰ T₀)` is tame of order two on the spectral
+Sobolev scale with the `m`-uniform top coefficient `B εa`.  The `m`-uniformity of that top constant
+is the genuine content: the direct jet-sum route accumulates the diagonal-grid factor `√Gₘ` and is
+not `m`-uniform, so it needs the spectral `(1-Δ)`-iterate top-isolation induction run on the
+*coefficient* iterate `(1-Δ)^p C₀` (roles exchanged relative to the coefficient-small mirror
+`exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le`): each spectral peel moves one `(1-Δ)`
+onto the coefficient while the pointwise-`B`-small data stays at order zero (binomial-one top jet),
+the cross/commutator blocks fall to the family-uniform lower slot, and the coefficient `εa`-arm
+supplies the top jet at every order with the same `εa`.  Posited here as the single remaining
+genuine-math leaf, consumed by `appCc_armZeroTwoArmCoeff_opNorm_core` after the symmetric-data
+eigenbound `armZeroTwoArm_data_fibreNormSq_le` supplies `B = √n δ`; consumers transitively depend
+on `sorryAx` until it lands. -/
+private lemma appCc_armZeroTwoArm_spectralCore
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i)
+    (εa : ℝ) (hεa_nn : 0 ≤ εa) (Λa : ℝ) (hΛa_nn : 0 ≤ Λa) :
+    ∃ Cop : ℕ → ℝ, (∀ m, 0 ≤ Cop m) ∧
+      ∀ (C₀ : SmoothCcTensor g₀ (2 + 0) 2) (T₀ : SmoothCcTensor g₀ 0 2) (B : ℝ),
+        0 ≤ B →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₀.toSection x) ≤ B ^ 2) →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 0) 2 x (C₀.toSection x) ≤ Λa ^ 2) →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + 0) 2 i C₀‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+              εa ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) →
+        ∀ m : ℕ,
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+              (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ≤
+            B * εa *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
+  sorry
+
 /-- Core two-arm arm-zero operator bound: for the `(2+0,2)`-coefficient `C₀` carrying the
 two-arm jet envelope against `T₀` (window `K`-arm plus the `εa`-rated `‖∇^{i+2}T₀‖` top arm),
 with `T₀` symmetric and `g₀`-`δ`-fibre-small (`0 ≤ δ`), the applied field `appCc C₀ (∇⁰ T₀)`
@@ -5257,11 +5413,11 @@ the unique top Leibniz term pairs the coefficient's `εa`-arm top jets against t
 `√n δ`-small symmetric data (eigenvalue bound), while every other term loses at least one order
 into the family-uniform lower slot.  This is the arm-zero analog of the proven fibre-small
 third-arm machine `exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`, with the
-smallness moved from the coefficient sup to the data pointwise value.  The `m`-uniformity of
-the small top constant needs the spectral `(1-Δ)`-iterate top-isolation induction — the direct
-jet-sum conversion route accumulates a `Cₘ·∑ₖ√Gₖ` factor and does NOT stay `m`-uniform, so it
-cannot close the required `εB ≤ 2 √n εa δ` cap.  Posited here as the single genuine-math leaf;
-consumers transitively depend on `sorryAx` until it lands. -/
+smallness moved from the coefficient sup to the data pointwise value.  Assembled from the
+symmetric-data eigenbound `armZeroTwoArm_data_fibreNormSq_le` (`√n δ` fibre bound) feeding the
+`m`-uniform spectral core `appCc_armZeroTwoArm_spectralCore`; the latter still carries the
+`(1-Δ)`-iterate top-isolation induction as a `sorry`, so consumers transitively depend on
+`sorryAx` until it lands. -/
 private lemma appCc_armZeroTwoArmCoeff_opNorm_core
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -5287,8 +5443,44 @@ private lemma appCc_armZeroTwoArmCoeff_opNorm_core
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ≤
             Real.sqrt (Module.finrank ℝ E) * εa * δ *
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
-              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
-  sorry
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
+  classical
+  obtain ⟨Cop, hCop_nn, hcore⟩ :=
+    appCc_armZeroTwoArm_spectralCore (I := I) (M := M) g₀ a ha_super hR₀ Kc hKc_nn
+      εa hεa_nn Λa hΛa_nn
+  refine ⟨Cop, hCop_nn, fun C₀ T₀ δ hδ_nn hball hTsymm hfibre hsup hjet m => ?_⟩
+  rcases isEmpty_or_nonempty M with hM | hM
+  · have hzero : ∀ (τ : ℝ) (X : SmoothCcTensor g₀ 0 2),
+        smoothCcToTensorHs (I := I) (M := M) g₀ τ X = 0 := by
+      intro τ X
+      have hL2norm : ‖SmoothCcTensor.toL2 X‖ = 0 := by
+        rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_def,
+          DifferentialGeometry.Integral.L2.tensorL2Norm,
+          DifferentialGeometry.Integral.L2.tensorL2Inner,
+          MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+      have hL2 : SmoothCcTensor.toL2 X = 0 := norm_eq_zero.mp hL2norm
+      refine tensorHs.ext (funext fun i => ?_)
+      rw [smoothCcToTensorHs_coeff, tensorHs.zero_coeff,
+        hL2, tensorL2Coeff_eq_inner, inner_zero_right]
+    rw [hzero, hzero, hzero]
+    simp
+  · haveI := hM
+    have hB_nn : 0 ≤ Real.sqrt (Module.finrank ℝ E) * δ :=
+      mul_nonneg (Real.sqrt_nonneg _) hδ_nn
+    have hdata : ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₀.toSection x) ≤
+          (Real.sqrt (Module.finrank ℝ E) * δ) ^ 2 := by
+      intro x
+      have h := armZeroTwoArm_data_fibreNormSq_le (I := I) (M := M) g₀ T₀ hTsymm hfibre x
+      have hsq : (Real.sqrt (Module.finrank ℝ E) * δ) ^ 2 =
+          (Module.finrank ℝ E : ℝ) * δ ^ 2 := by
+        rw [mul_pow, Real.sq_sqrt (by positivity)]
+      rw [hsq]; exact h
+    have hmain := hcore C₀ T₀ (Real.sqrt (Module.finrank ℝ E) * δ) hB_nn hball hdata hsup hjet m
+    have htop : Real.sqrt (Module.finrank ℝ E) * δ * εa =
+        Real.sqrt (Module.finrank ℝ E) * εa * δ := by ring
+    rw [htop] at hmain
+    exact hmain
 
 /-- Deferred two-arm engine for the arm-zero coefficient application: for a
 `(2+0,2)`-coefficient `C₀` with fibre sup `Λa` and the two-arm jet envelope against the data
