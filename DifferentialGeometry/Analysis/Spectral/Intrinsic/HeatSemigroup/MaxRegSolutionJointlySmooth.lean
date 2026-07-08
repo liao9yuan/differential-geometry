@@ -1307,6 +1307,81 @@ theorem deTurckRicci_forcingBootstrap
       hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
       Ffam hδ_lt hδ f hf_id hf_smooth hf_mass hforce_coord h_pin hball
 
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
+set_option linter.unusedVariables false in
+/-- **Deferred input (`sorry`).** Forcing bootstrap for the SYMMETRIZED DeTurck Sobolev
+nonlinearity: the maximal-regularity Duhamel solution driven by `deTurckSobolevNHa2Symm` admits
+smooth per-mode forcing coordinates with all-order weighted mass bounds, and on the smallness
+horizon these coordinates are realized by the symmS-precomposed smooth remainder
+`deTurckSmoothRemainder g₀ g_bg (symmS g₀ (Ffam t))` of any pinned smooth representative family.
+This is the symmetric-sector mirror of `deTurckRicci_forcingBootstrap`; its proof (the
+symmetrized forcing chain) has not landed yet, so this declaration and every consumer —
+including `deTurckRicci_solution_with_jointReg` and `ricci_flow_short_time_existence` —
+transitively depend on `sorryAx` until it does. -/
+theorem deTurckRicci_forcingBootstrap_symm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) :
+    ∀ {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+        (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+          (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
+            (g_bg := g_bg) a (by omega))
+          (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
+            (g_bg := g_bg) a (by omega))).choose)
+        (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+        (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+        (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+        (hforce : gforce =ᵐ[timeMeasure T]
+          (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+        (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega))
+        (htrace : timeH1.trace0 _ T u = 0),
+      ∃ (d₂F : ℝ), 0 < d₂F ∧ d₂F ≤ T ∧
+        ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ),
+          (∀ i, ContDiff ℝ ∞ (f i)) ∧
+          (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+            ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+              ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂F,
+                tensorSobolevWeight (I := I) (M := M) i τ *
+                    (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
+          (∀ t ∈ Set.Icc (0 : ℝ) d₂F, ∀ i,
+            tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
+              perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) ∧
+          ∃ (R₀ : ℝ), 0 < R₀ ∧
+            (∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+              ∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ S : SmoothCcTensor g₀ 0 2,
+                SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
+                  tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                    (Nat.cast_nonneg a) (timeH1.toFun u t) →
+                  ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀) ∧
+            (∀ {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
+                (hT₁_le_d2F : T₁ ≤ d₂F)
+                (Ffam : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+                (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+                  (ccTensorBilinSymm (I := I) g₀ (Ffam t)) δ)
+                (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+                  SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Ffam t) =
+                    tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                      (Nat.cast_nonneg a) (timeH1.toFun u t))
+                (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+                  ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Ffam t)‖ ≤ R₀),
+              ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ i,
+                f i t = tensorL2Coeff (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                    (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+                      (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
+                        (symmS (I := I) (M := M) g₀ (Ffam t)) hδ_lt
+                        (gFibreOpBound_symmS (I := I) (M := M) g₀ (Ffam t) (hδ t)))) i) := by
+  sorry
+
 set_option linter.unusedVariables false in
 
 theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
