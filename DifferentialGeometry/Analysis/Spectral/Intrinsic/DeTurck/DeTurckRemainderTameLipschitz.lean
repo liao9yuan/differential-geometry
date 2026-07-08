@@ -38952,16 +38952,27 @@ private theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- Deferred corr-family interface input (order-zero arm, reshaped): the identity-fails
+/-- Deferred corr-family interface input (order-zero arm, two-arm reshape): the identity-fails
 certificate refuted the envelope for the bare correction field, so the bounded subject is the
 explicit combination of the correction field with its Riemann and curvature companion
-coefficients. Transcribes the reshaped correction-field spec clause; discharged at
-corr-discharge. Every consumer transitively depends on `sorryAx` until that lands. -/
+coefficients; moreover the naked window `Finset.range (i + 2)` misses the subject's genuine
+`∇^(i+2)`-content (the order-`i` jet of the realized-metric curvature coefficients carries the
+data's order-`(i + 2)` jet linearly), so the envelope carries a second arm
+`ε² · (‖∇^(i+2) T‖² + ‖∇^(i+2) T'‖²)` whose coefficient `ε` is an `O(1)` inverse-realized-metric
+contraction constant, pinned by the explicit budget-dual cap
+`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f` the DeTurck arm fibre constant): this is the
+weakest cap the ball-uniform spectral-split budget accepts. Transcribes the reshaped
+correction-field spec clause; discharged at corr-discharge. Every consumer transitively depends
+on `sorryAx` until that lands. -/
 private theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+    ∃ ε : ℝ, 0 ≤ ε ∧
+      27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
+        2 * (32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -38979,7 +38990,9 @@ private theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
                     (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) :=
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) +
+              ε ^ 2 * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) :=
   sorry
 
 set_option maxHeartbeats 1600000 in
@@ -41383,6 +41396,41 @@ private theorem exists_riemannLieCorr_curvatureRefold_data
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
+/-- The window-shifted jet-square sum `∑_{q ≤ i} ‖∇^(q+2) T₀‖²` is dominated by the naked
+window `∑_{j < i+2} ‖∇^j T₀‖²` plus the single top term `‖∇^(i+2) T₀‖²`. -/
+private theorem sum_range_shift_two_sq_le (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
+    (T₀ : SmoothCcTensor g₀ 0 2) :
+    ∑ q ∈ Finset.range (i + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 ≤
+      (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2 := by
+  rw [Finset.sum_range_succ]
+  have himg : ∑ q ∈ Finset.range i, ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 ≤
+      ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by
+    set f : ℕ → ℝ := fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 with hf_def
+    have hinj : ∀ q₁ ∈ Finset.range i, ∀ q₂ ∈ Finset.range i, q₁ + 2 = q₂ + 2 → q₁ = q₂ :=
+      fun q₁ _ q₂ _ h => by omega
+    have hsub : (Finset.range i).image (fun q => q + 2) ⊆ Finset.range (i + 2) := by
+      intro j hj
+      rw [Finset.mem_image] at hj
+      obtain ⟨q, hq, rfl⟩ := hj
+      rw [Finset.mem_range] at hq ⊢
+      omega
+    calc ∑ q ∈ Finset.range i, f (q + 2)
+        = ∑ j ∈ (Finset.range i).image (fun q => q + 2), f j :=
+          (Finset.sum_image hinj).symm
+      _ ≤ ∑ j ∈ Finset.range (i + 2), f j :=
+          Finset.sum_le_sum_of_subset_of_nonneg hsub (fun j _ _ => sq_nonneg _)
+  linarith
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+/-- Coefficient-sup and jet-envelope package for the order-zero DeTurck path integral against a
+zero background perturbation, curvature-refolded: the `C₀`-jet envelope carries the two-arm
+form, a naked-window arm plus the `ε₀`-rated top arm `ε₀² ‖∇^(i+2) T₀‖²` inherited from the
+two-arm correction-field interface; `ε₀ := 3 ε` absorbs the `(-2)`-scaling and the square-split
+of the path-integral tower. Depends on the deferred correction-field interface, hence on
+`sorryAx`, until corr-discharge lands. -/
 private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnvelope
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -41391,6 +41439,10 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
       gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
     ∃ Λ₀ : ℝ, 0 ≤ Λ₀ ∧
+    ∃ ε₀ : ℝ, 0 ≤ ε₀ ∧
+      3 * Real.sqrt (Module.finrank ℝ E) * ε₀ ≤
+        32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2 ∧
     ∃ K₀c : ℕ → ℝ, (∀ i, 0 ≤ K₀c i) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -41415,7 +41467,8 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
           (∀ i : ℕ,
             ‖iteratedCovGrad (I := I) g₀ 2 2 i C₀‖ ^ 2 ≤
               K₀c i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ∧
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+                ε₀ ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) ∧
           (∀ i : ℕ,
             ‖iteratedCovGrad (I := I) g₀ 4 2 i C₂r‖ ^ 2 ≤
               K₀c i * (1 + ∑ j ∈ Finset.range (i + 2),
@@ -41431,14 +41484,35 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
   obtain ⟨Λrl, hΛrl_nn, Krl, hKrl_nn, hchild⟩ :=
     exists_riemannLieCorr_curvatureRefold_data (I := I) (M := M) g₀ g_bg a
       ha_super hR_nn h13 (by norm_num : (1 : ℝ) / 3 ≤ 1 / 2)
-  obtain ⟨Kcb, hKcb_nn, hKcb⟩ :=
+  obtain ⟨Kcb, hKcb_nn, ε, hε_nn, hε_cap, hKcb⟩ :=
     linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface (I := I) (M := M) g₀ a
       ha_super hR_nn h13
+  have hε₀_cap : 3 * Real.sqrt (Module.finrank ℝ E) * (3 * ε) ≤
+      32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+        28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2 := by
+    have h23 : (1 : ℝ) - 1 / 3 = 2 / 3 := by norm_num
+    have hcap18 : 18 * (Real.sqrt (Module.finrank ℝ E) * ε) ≤
+        2 * (32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2) := by
+      calc 18 * (Real.sqrt (Module.finrank ℝ E) * ε)
+          = 27 * Real.sqrt (Module.finrank ℝ E) * ((1 : ℝ) - 1 / 3) * ε := by
+            rw [h23]; ring
+        _ ≤ 2 * (32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+            28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2) := hε_cap
+    calc 3 * Real.sqrt (Module.finrank ℝ E) * (3 * ε)
+        = 9 * (Real.sqrt (Module.finrank ℝ E) * ε) := by ring
+      _ ≤ 32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2 := by linarith
   refine ⟨Real.sqrt (8 * (2 * ΛC ^ 2 + 1 / 2 * Λrl ^ 2) + 4 * Λrl ^ 2), Real.sqrt_nonneg _,
-    fun i => ∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q),
-    fun i => Finset.sum_nonneg fun q _ => by
-      have h1 := hKcb_nn q
-      have h2 := hKrl_nn q
+    3 * ε, by linarith, hε₀_cap,
+    fun i => (∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2,
+    fun i => by
+      have h1 : (0 : ℝ) ≤ ∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q) :=
+        Finset.sum_nonneg fun q _ => by
+          have h2 := hKcb_nn q
+          have h3 := hKrl_nn q
+          linarith
+      have h4 : (0 : ℝ) ≤ 8 * ε ^ 2 := by positivity
       linarith, ?_⟩
   intro T₀ hsymm hball
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le (by norm_num)
@@ -41800,9 +41874,16 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
         have h1 := hKcb_nn q
         have h2 := hKrl_nn q
         linarith
-    have hprod_nn : (0 : ℝ) ≤ (∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
-        (1 + ∑ j ∈ Finset.range (i + 2),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := mul_nonneg hKS_nn hW_nn
+    have hX_nn : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2 := sq_nonneg _
+    have htotal_nn : (0 : ℝ) ≤
+        ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
+          (1 + ∑ j ∈ Finset.range (i + 2),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+          (3 * ε) ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2 := by
+      have h8 : (0 : ℝ) ≤ 8 * ε ^ 2 := by positivity
+      have h9 : (0 : ℝ) ≤ (3 * ε) ^ 2 := sq_nonneg _
+      have h10 := mul_nonneg (add_nonneg hKS_nn h8) hW_nn
+      nlinarith [mul_nonneg h9 hX_nn]
     have hwin : ∀ q : ℕ, q ≤ i →
         (1 : ℝ) + (∑ j ∈ Finset.range (q + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) ≤
@@ -41816,23 +41897,28 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
     have hjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
         (∑ q ∈ Finset.range (i + 1),
           ‖iteratedCovGrad (I := I) g₀ 2 2 q (Φ₀ s)‖ ^ 2) ≤
-        Real.sqrt ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
+        Real.sqrt (((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
           (1 + ∑ j ∈ Finset.range (i + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ^ 2 := by
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+          (3 * ε) ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) ^ 2 := by
       intro s hs
-      rw [Real.sq_sqrt hprod_nn]
+      rw [Real.sq_sqrt htotal_nn]
       have hper : ∀ q ∈ Finset.range (i + 1),
           ‖iteratedCovGrad (I := I) g₀ 2 2 q (Φ₀ s)‖ ^ 2 ≤
             (8 * Kcb q + 3 * Krl q) *
-            (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := by
+              (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+              8 * ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 := by
         intro q hq
         have hq_le : q ≤ i := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)
         have hcomboE := hKcb T₀ (0 : SmoothCcTensor g₀ 0 2) hδ_le hδT hδ_le hδZ
           hTball hZball q s hs
         rw [hpair (q + 2)] at hcomboE
-        have hcomboE' := le_trans hcomboE
-          (mul_le_mul_of_nonneg_left (hwin q hq_le) (hKcb_nn q))
+        have hz : ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2)
+            (0 : SmoothCcTensor g₀ 0 2)‖ = 0 := by
+          rw [hicg0 (q + 2), norm_zero]
+        rw [hz] at hcomboE
+        have hcomboW := mul_le_mul_of_nonneg_left (hwin q hq_le) (hKcb_nn q)
         have hC0E := henvC0 q s hs
         have hC0E' := le_trans hC0E
           (mul_le_mul_of_nonneg_left (hwin q hq_le) (hKrl_nn q))
@@ -41878,25 +41964,34 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
           mul_nonneg (hKrl_nn q) hW_nn
         have hexp : (8 * Kcb q + 3 * Krl q) *
             (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) =
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+            8 * ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 =
             8 * (Kcb q * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) +
             2 * (Krl q * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) +
             Krl q * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := by ring
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+            8 * (ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2) := by ring
         rw [hexp]
-        linarith [h1, h2, hcomboE', hC0E', hslack]
-      calc (∑ q ∈ Finset.range (i + 1),
-            ‖iteratedCovGrad (I := I) g₀ 2 2 q (Φ₀ s)‖ ^ 2)
-          ≤ ∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q) *
+        linarith [h1, h2, hcomboE, hcomboW, hC0E', hslack]
+      have hsum1 := Finset.sum_le_sum hper
+      have hsum2 : ∑ q ∈ Finset.range (i + 1),
+            ((8 * Kcb q + 3 * Krl q) *
               (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) :=
-            Finset.sum_le_sum hper
-        _ = (∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
-              (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := by
-            rw [Finset.sum_mul]
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+              8 * ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2) =
+          (∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
+            (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+            8 * ε ^ 2 * ∑ q ∈ Finset.range (i + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 := by
+        rw [Finset.sum_add_distrib, ← Finset.sum_mul, ← Finset.mul_sum]
+      have hshift := sum_range_shift_two_sq_le (I := I) (M := M) g₀ i T₀
+      have hmul8 := mul_le_mul_of_nonneg_left hshift
+        (by positivity : (0 : ℝ) ≤ 8 * ε ^ 2)
+      have hstep := le_trans hsum1 (le_of_eq hsum2)
+      nlinarith [hstep, hmul8, mul_nonneg (sq_nonneg ε) hX_nn, sq_nonneg ε, hW_nn]
     have htower := armField_pathIntegral_jetL2_tower_le (I := I) (M := M) g₀ 2 i Φ₀
       hSI hSopen hjΦ₀ (Real.sqrt_nonneg _) hjet
     have hsingle : ‖iteratedCovGrad (I := I) g₀ 2 2 i
@@ -41910,7 +42005,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
           (realizedSmallSet (δ := δ) (δ' := δ)) hSopen hSI hjΦ₀)‖ ^ 2)
         (fun q _ => sq_nonneg _) (Finset.self_mem_range_succ i)
     have hfin := le_trans hsingle htower
-    rw [Real.sq_sqrt hprod_nn] at hfin
+    rw [Real.sq_sqrt htotal_nn] at hfin
     exact hfin
   · intro i
     have hW_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
@@ -41924,9 +42019,12 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
         have h1 := hKcb_nn q
         have h2 := hKrl_nn q
         linarith
-    have hprod_nn : (0 : ℝ) ≤ (∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
+    have hε8_nn : (0 : ℝ) ≤ 8 * ε ^ 2 := by positivity
+    have hprod_nn : (0 : ℝ) ≤
+        ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
         (1 + ∑ j ∈ Finset.range (i + 2),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := mul_nonneg hKS_nn hW_nn
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) :=
+      mul_nonneg (add_nonneg hKS_nn hε8_nn) hW_nn
     have hwin : ∀ q : ℕ, q ≤ i →
         (1 : ℝ) + (∑ j ∈ Finset.range (q + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) ≤
@@ -41940,7 +42038,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
     have hjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
         (∑ q ∈ Finset.range (i + 1),
           ‖iteratedCovGrad (I := I) g₀ 4 2 q (C2f s)‖ ^ 2) ≤
-        Real.sqrt ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) *
+        Real.sqrt (((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
           (1 + ∑ j ∈ Finset.range (i + 2),
             ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ^ 2 := by
       intro s hs
@@ -41982,6 +42080,11 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
               (1 + ∑ j ∈ Finset.range (i + 2),
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := by
             rw [Finset.sum_mul]
+        _ ≤ ((∑ q ∈ Finset.range (i + 1), (8 * Kcb q + 3 * Krl q)) + 8 * ε ^ 2) *
+              (1 + ∑ j ∈ Finset.range (i + 2),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) := by
+            refine mul_le_mul_of_nonneg_right ?_ hW_nn
+            linarith
     have htower := armField_pathIntegral_jetL2_tower_le (I := I) (M := M) g₀ 4 i C2f
       hSI hSopen hjC2 (Real.sqrt_nonneg _) hjet
     have hsingle : ‖iteratedCovGrad (I := I) g₀ 4 2 i
@@ -42305,6 +42408,10 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
     ∃ εCr : ℝ, 0 ≤ εCr ∧
       (0 ≤ δ → εCr ≤ 19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) ∧
     ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
+    ∃ εar : ℝ, 0 ≤ εar ∧
+      3 * Real.sqrt (Module.finrank ℝ E) * εar ≤
+        32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2 ∧
     ∃ Λ₁ : ℝ, 0 ≤ Λ₁ ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -42339,7 +42446,8 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
           (∀ i : ℕ,
             ‖iteratedCovGrad (I := I) g₀ (2 + 0) 2 i C₀‖ ^ 2 ≤
               Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
-                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) ∧
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+                εar ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) ∧
           (∀ i : ℕ,
             ‖iteratedCovGrad (I := I) g₀ (2 + 1) 2 i C₁‖ ^ 2 ≤
               Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
@@ -42349,7 +42457,7 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
               Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2)) := by
   classical
-  obtain ⟨Λ₀, hΛ₀_nn, K₀c, hK₀c_nn, hN2⟩ :=
+  obtain ⟨Λ₀, hΛ₀_nn, ε₀, hε₀_nn, hε₀_cap, K₀c, hK₀c_nn, hN2⟩ :=
     deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnvelope (I := I) (M := M)
       g₀ g_bg a ha_super hR₀ hδ_le hδ_fibre
   obtain ⟨Λ₁', hΛ₁'_nn, K₁c, hK₁c_nn, hN3⟩ :=
@@ -42357,7 +42465,7 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
       g₀ g_bg a ha_super hR₀ hδ_le hδ_fibre
   refine ⟨max (19 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) 0,
     le_max_right _ _, ?_, fun i => K₀c i + K₁c i,
-    fun i => add_nonneg (hK₀c_nn i) (hK₁c_nn i), max Λ₀ Λ₁',
+    fun i => add_nonneg (hK₀c_nn i) (hK₁c_nn i), ε₀, hε₀_nn, hε₀_cap, max Λ₀ Λ₁',
     le_trans hΛ₀_nn (le_max_left _ _), ?_⟩
   · intro hδ_nn
     refine max_le (le_refl _) ?_
@@ -42400,7 +42508,8 @@ theorem exists_deTurckRHSArmDiff_zero_canonicalTop_curvatureRefold_coeffSup_jetE
       have hsum_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2 := by positivity
       have hle : K₀c i ≤ K₀c i + K₁c i := le_add_of_nonneg_right (hK₁c_nn i)
-      exact mul_le_mul_of_nonneg_right hle hsum_nn
+      have hmono := mul_le_mul_of_nonneg_right hle hsum_nn
+      linarith
     · intro i
       refine le_trans (hC₁env i) ?_
       have hsum_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
