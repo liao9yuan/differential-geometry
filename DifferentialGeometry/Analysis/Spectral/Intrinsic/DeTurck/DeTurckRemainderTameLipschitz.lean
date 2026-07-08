@@ -780,7 +780,9 @@ private theorem ccTensorBilin_symmS_symm
       ccTensorBilin (I := I) g₀ (symmS (I := I) g₀ T) x w v := by
   rw [ccTensorBilin_symmS, ccTensorBilin_symmS, ccTensorBilinSymm_symm]
 
-private theorem tensorSectionRealizeMetric_symmS_eq
+/-- Realizing the symmetrized tensor `symmS T` yields the same Riemannian metric as realizing
+`T` itself: the realized metric only sees the symmetric part of the perturbation. -/
+theorem tensorSectionRealizeMetric_symmS_eq
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
