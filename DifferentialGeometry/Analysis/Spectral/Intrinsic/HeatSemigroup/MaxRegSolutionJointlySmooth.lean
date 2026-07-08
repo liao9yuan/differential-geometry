@@ -508,6 +508,46 @@ private theorem realizedFamily_jointChartGramSmooth
     g hT T_rep hδ_lt hδ φ hφ_smooth hcoeff hmodemass
 
 set_option linter.unusedVariables false in
+/-- **Posited deferred input (`sorry`).** Smooth per-mode forcing time-coordinate family for the
+symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the Duhamel forcing
+`gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e. by a
+continuous-coordinate carrier family `F` whose per-mode coordinates coincide with globally smooth
+functions `f i` carrying all-order weighted spectral mass bounds. Symmetric mirror of the proven
+raw helper `forcingSmoothTimeCoords`/`deTurckForcing_smoothTimeCoordinateFamily`
+(snapshot `c848da47`); its proof (the symmetrized Galerkin forcing time-coordinate chain, at the
+`ForcingTimeBootstrap` rung) has not landed yet, so consumers transitively depend on `sorryAx`
+until it does. -/
+private theorem forcingSmoothTimeCoordsSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a (by omega))
+      (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a (by omega))).choose)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :
+    ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+      ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+      (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
+      (∀ i, ContDiff ℝ ∞ (f i)) ∧
+      (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+        ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂,
+            tensorSobolevWeight (I := I) (M := M) i τ *
+                (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
+      (⇑gforce =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] F) ∧
+      (∀ i, ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) d₂)) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i, (F t).coeff i = f i t) :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- **Posited deferred input (`sorry`).** Smooth per-mode forcing coordinates for the
 symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the Duhamel forcing
 `gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e.
@@ -552,8 +592,35 @@ private theorem forcingSmoothCoordsRealizeSymm
               (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
           perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) ∧
       (∀ i, (fun t => (gforce t).coeff i)
-          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i) :=
-  sorry
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i) := by
+  classical
+  obtain ⟨d₂, hd₂_pos, hd₂_le, f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
+    forcingSmoothTimeCoordsSymm (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce
+      hgforce
+  have hforce_coord : ∀ i, (fun t => (gforce t).coeff i)
+      =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i := by
+    intro i
+    have hrep_coeff : (fun t => (gforce t).coeff i)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)]
+        (fun t => (F t).coeff i) := hF_rep.fun_comp (fun S => S.coeff i)
+    refine hrep_coeff.trans ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+      (measurableSet_Icc (a := (0 : ℝ)) (b := d₂))] with s hs
+    exact hF_coeff s hs i
+  refine ⟨d₂, hd₂_pos, hd₂_le, f, hf_smooth, hf_mass, ?_, hforce_coord⟩
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  intro t ht i
+  rw [hduh, tensorHsToL2_tensorL2Coeff (Nat.cast_nonneg a)]
+  have hid := carrier_toFun_coeff_eq_perModeConv_IccExtend_restrict (I := I) (M := M)
+    (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT hT1 hd₂_pos hd₂_le h_compact gforce
+    (F := F) hF_coord_cont hF_rep i ht
+  rw [hid]
+  refine perModeConv_timeL2_congr (T := d₂) (TensorEigenIdx.lambda (I := I) (M := M) i)
+    (f₁ := Set.IccExtend hd₂_pos.le (fun p : ↑(Set.Icc (0 : ℝ) d₂) => (F (p : ℝ)).coeff i))
+    (f₂ := f i) ?_ ht
+  filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+    (measurableSet_Icc (a := (0 : ℝ)) (b := d₂))] with s hs
+  rw [Set.IccExtend_of_mem hd₂_pos.le _ hs, hF_coeff s hs i]
 
 set_option linter.unusedVariables false in
 /-- **Posited deferred input (`sorry`).** Smallness horizon for the symmetrized solution
@@ -590,8 +657,32 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t) →
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ :=
-  sorry
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ := by
+  classical
+  obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, _⟩ :=
+    forcingSmoothCoordsRealizeSymm (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
+      hduh hforce hgforce htrace
+  obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 ((a : ℝ) + 2) (by positivity)
+  obtain ⟨d₂, hd₂_pos, hd₂_le, hbound⟩ :=
+    tensorHs_smallTime_norm_le_of_perModeConv (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hd₂F_pos f
+      (fun i => (hf_smooth i).continuous)
+      (B := B) hB_sum
+      (fun i s hs => by
+        have h := hB_le i s hs
+        rwa [iteratedDeriv_zero] at h)
+      hR₀
+  refine ⟨d₂, hd₂_pos, le_trans hd₂_le hd₂F_le, ?_⟩
+  intro t ht S hS
+  have ht_d2F : t ∈ Set.Icc (0 : ℝ) d₂F := ⟨ht.1, le_trans ht.2 hd₂_le⟩
+  set W : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) :=
+    smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S with hW_def
+  have hWcoeff : ∀ i, W.coeff i =
+      perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t := by
+    intro i
+    rw [hW_def, smoothCcToTensorHs_coeff, hS, ← hf_id t ht_d2F i]
+  have := hbound t ht W hWcoeff
+  rwa [hW_def] at this
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
@@ -658,8 +749,164 @@ private theorem realizedForcingCoord_eq_smoothNSymm
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
             (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
               (symmS (I := I) (M := M) g₀ (F t)) hδ_lt
-              (gFibreOpBound_symmS (I := I) (M := M) g₀ (F t) (hδ t)))) i :=
-  sorry
+              (gFibreOpBound_symmS (I := I) (M := M) g₀ (F t) (hδ t)))) i := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) hc
+  set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+    fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) with hφ_def
+  have hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i) := fun i =>
+    perModeConv_contDiff_of_contDiff ⊤ _ (f i) (hf_smooth i)
+  have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+      ∀ i, tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t := by
+    intro t ht i
+    rw [h_pin t ht, tensorHsToL2_tensorL2Coeff]
+    have ht_icc : t ∈ Set.Icc (0 : ℝ) d₂F := ⟨ht.1, le_trans ht.2 hT₁_le_d2F⟩
+    have hid := hf_id t ht_icc i
+    rw [tensorHsToL2_tensorL2Coeff] at hid
+    rw [hid]
+  have hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i := by
+    intro k σ hσ
+    obtain ⟨Cmaj, hCmaj_sum, hCmaj_le⟩ :=
+      perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
+        (g := g₀) (r := 0) (s := 2) (T := d₂F) hd₂F_pos.le f hf_smooth hf_mass k σ hσ
+    refine ⟨Cmaj, hCmaj_sum, fun i t ht => ?_⟩
+    exact hCmaj_le i t ⟨ht.1, le_trans ht.2 hT₁_le_d2F⟩
+  have hfield_cont : ContinuousOn
+      (fun t : ℝ => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))
+      (Set.Icc (0 : ℝ) T₁) :=
+    realizedSol_solField_continuousOn_Ha2 (I := I) (M := M) g₀ a hT₁_pos F φ hφ_smooth
+      hcoeff hmodemass
+  have hu_eq : u = recentredCarrier (I := I) (M := M) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce := by
+    refine timeH1.ext ?_ ?_
+    · have hinit : u.init = 0 := by
+        rw [← timeH1.trace0_apply (X := tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) (T := T) u]
+        exact htrace
+      rw [hinit]
+      simp only [recentredCarrier, timeH1.init_mk]
+    · rw [hduh]
+      simp only [recentredCarrier, timeH1.deriv_mk]
+  have hfield_ae : (fun t => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)
+      =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+      (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)) := by
+    have hper : ∀ i, ∀ᵐ t ∂((MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict
+          (Set.Icc (0 : ℝ) T₁)),
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i =
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)).coeff i := by
+      intro i
+      have hsub : Set.Icc (0 : ℝ) T₁ ⊆ Set.Icc (0 : ℝ) T :=
+        Set.Icc_subset_Icc le_rfl hT₁_le
+      have hsol := MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub
+        (maxRegDuhamelSolField_coeff_ae (I := I) (M := M)
+          (h_compact := hc) (a := (a : ℝ)) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce i)
+      filter_upwards [hsol, MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Icc]
+        with t htsol htmem
+      have htmem' : t ∈ Set.Icc (0 : ℝ) T := hsub htmem
+      rw [htsol, tensorHs.zero_coeff, zero_add]
+      have hcarr : (timeH1.toFun u t).coeff i =
+          ∫ s in (0 : ℝ)..t, ((maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce).deriv s).coeff i := by
+        rw [hu_eq]
+        exact recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce i htmem'
+      rw [← hcarr, smoothCcToTensorHs_coeff, h_pin t htmem, tensorHsToL2_tensorL2Coeff]
+    rw [← MeasureTheory.ae_all_iff] at hper
+    filter_upwards [hper] with t ht
+    exact tensorHs.ext (funext fun i => ht i)
+  intro t₀ ht₀ i
+  set RHS : ℝ → ℝ := fun t => tensorL2Coeff (I := I) (M := M) hc
+      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+        (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
+          (symmS (I := I) (M := M) g₀ (F t)) hδ_lt
+          (gFibreOpBound_symmS (I := I) (M := M) g₀ (F t) (hδ t)))) i
+    with hRHS_def
+  have hRHS_smoothN : ∀ t, RHS t =
+      (deTurckSmoothN (I := I) (M := M) g₀ g_bg a (symmS (I := I) (M := M) g₀ (F t)) hδ_lt
+        (gFibreOpBound_symmS (I := I) (M := M) g₀ (F t) (hδ t))).coeff i := by
+    intro t; rw [hRHS_def, deTurckSmoothN_coeff]
+  have heqN : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i = RHS t := by
+    intro t ht
+    rw [hRHS_smoothN t,
+      deTurckSobolevNHa2Symm_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super (F t)
+        hδ_lt (gFibreOpBound_symmS (I := I) (M := M) g₀ (F t) (hδ t)) (hball t ht)]
+  obtain ⟨KN, hKN⟩ := deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  have hRHS_cont : ContinuousOn RHS (Set.Ico (0 : ℝ) T₁) := by
+    have hcomp : ContinuousOn
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i)
+        (Set.Icc (0 : ℝ) T₁) := by
+      have hN_cont : ContinuousOn
+          (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)))
+          (Set.Icc (0 : ℝ) T₁) :=
+        hKN.continuous.comp_continuousOn hfield_cont
+      exact (coeffCLM (I := I) (M := M) (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ)) i).continuous
+        |>.comp_continuousOn hN_cont
+    refine (hcomp.mono Set.Ico_subset_Icc_self).congr (fun t ht => ?_)
+    exact (heqN t ht).symm
+  have hLHS_cont : ContinuousOn (f i) (Set.Ico (0 : ℝ) T₁) :=
+    (hf_smooth i).continuous.continuousOn
+  have hae : (f i) =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Ico (0 : ℝ) T₁)] RHS := by
+    have h1 : f i =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂F)]
+        (fun t => (gforce t).coeff i) := (hforce_coord i).symm
+    have h2 : (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T]
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
+      hforce.fun_comp (fun S => S.coeff i)
+    have hsub₁ : Set.Icc (0 : ℝ) T₁ ⊆ Set.Icc (0 : ℝ) T :=
+      Set.Icc_subset_Icc le_rfl hT₁_le
+    have hsub₁F : Set.Icc (0 : ℝ) T₁ ⊆ Set.Icc (0 : ℝ) d₂F :=
+      Set.Icc_subset_Icc le_rfl hT₁_le_d2F
+    have h1' : f i =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (gforce t).coeff i) :=
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub₁F h1
+    have h2' : (fun t => (gforce t).coeff i)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub₁ h2
+    have h12 : f i =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
+      h1'.trans h2'
+    have h3 : (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i)
+        =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i) :=
+      hfield_ae.fun_comp (fun S =>
+        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a S).coeff i)
+    have hchain : f i =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i) :=
+      h12.trans h3
+    have hchain' : f i =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Ico (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i) :=
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) Set.Ico_subset_Icc_self hchain
+    refine hchain'.trans ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Ico] with t ht
+    exact heqN t ht
+  have heqOn : Set.EqOn (f i) RHS (Set.Ico (0 : ℝ) T₁) :=
+    MeasureTheory.Measure.eqOn_Ico_of_ae_eq (μ := (MeasureTheory.volume : MeasureTheory.Measure ℝ)) hae hLHS_cont hRHS_cont
+  exact heqOn ht₀
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
