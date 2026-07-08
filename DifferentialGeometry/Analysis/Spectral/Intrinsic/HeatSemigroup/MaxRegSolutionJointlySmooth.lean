@@ -507,17 +507,173 @@ private theorem realizedFamily_jointChartGramSmooth
   jointChartGramSmooth_of_spectralSmooth_timeSmooth (I := I) (M := M)
     g hT T_rep hδ_lt hδ φ hφ_smooth hcoeff hmodemass
 
+set_option linter.unusedVariables false in
+/-- **Posited deferred input (`sorry`).** Smooth per-mode forcing coordinates for the
+symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the Duhamel forcing
+`gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e.
+per mode by globally smooth functions `f i` carrying all-order weighted spectral mass bounds,
+and the solution-field coordinates are the corresponding per-mode convolutions. Symmetric
+mirror of the proven raw helper `forcingSmoothCoordsRealize` (snapshot `c848da47`); its proof
+(the symmetrized forcing time-coordinate chain) has not landed yet, so consumers transitively
+depend on `sorryAx` until it does. -/
+private theorem forcingSmoothCoordsRealizeSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a (by omega))
+      (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a (by omega))).choose)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega))
+    (htrace : timeH1.trace0 _ T u = 0) :
+    ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+      ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
+      (∀ i, ContDiff ℝ ∞ (f i)) ∧
+      (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+        ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂,
+            tensorSobolevWeight (I := I) (M := M) i τ *
+                (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i,
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
+          perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) ∧
+      (∀ i, (fun t => (gforce t).coeff i)
+          =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] f i) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **Posited deferred input (`sorry`).** Smallness horizon for the symmetrized solution
+field: for any prescribed radius `0 < R₀` there is a positive horizon `d₂ ≤ T` on which every
+smooth representative of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution has
+`H^{a+2}` norm at most `R₀`. Symmetric mirror of the proven raw helper
+`realizedSol_solField_smallnessHorizon_Ha2` (snapshot `c848da47`); its proof (small-time
+smallness through the symmetrized forcing coordinates) has not landed yet, so consumers
+transitively depend on `sorryAx` until it does. -/
+private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a (by omega))
+      (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a (by omega))).choose)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega))
+    (htrace : timeH1.trace0 _ T u = 0)
+    {R₀ : ℝ} (hR₀ : 0 < R₀) :
+    ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+      ∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ S : SmoothCcTensor g₀ 0 2,
+        SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t) →
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ :=
+  sorry
+
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
-/-- **Deferred input (`sorry`).** Forcing bootstrap for the SYMMETRIZED DeTurck Sobolev
-nonlinearity: the maximal-regularity Duhamel solution driven by `deTurckSobolevNHa2Symm` admits
-smooth per-mode forcing coordinates with all-order weighted mass bounds, and on the smallness
-horizon these coordinates are realized by the symmS-precomposed smooth remainder
-`deTurckSmoothRemainder g₀ g_bg (symmS g₀ (Ffam t))` of any pinned smooth representative family.
-This is the symmetric-sector mirror of `deTurckRicci_forcingBootstrap`; its proof (the
-symmetrized forcing chain) has not landed yet, so this declaration and every consumer —
-including `deTurckRicci_solution_with_jointReg` and `ricci_flow_short_time_existence` —
-transitively depend on `sorryAx` until it does. -/
+/-- **Posited deferred input (`sorry`).** Realization of the smooth forcing coordinates by the
+symmS-precomposed smooth remainder: on the smallness horizon, for any pinned smooth
+representative family `F` of the `deTurckSobolevNHa2Symm`-driven solution staying in the
+`deTurckSobolevNHa2_exists_of_super` ball, the smooth per-mode forcing coordinate `f i t`
+equals the `i`-th eigencoefficient of `deTurckSmoothRemainder g₀ g_bg (symmS g₀ (F t))`.
+Symmetric mirror of the proven raw helper `realizedForcingCoord_eq_smoothN` (snapshot
+`c848da47`), with `deTurckSobolevNHa2Symm_eq_smoothN` replacing the raw evaluation lemma; its
+proof has not landed yet, so consumers transitively depend on `sorryAx` until it does. -/
+private theorem realizedForcingCoord_eq_smoothNSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a ha_super)
+      (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
+        (g_bg := g_bg) a ha_super)).choose)
+    {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
+    {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hf_id : ∀ t ∈ Set.Icc (0 : ℝ) d₂F, ∀ i,
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
+        perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t)
+    (hf_smooth : ∀ i, ContDiff ℝ ∞ (f i))
+    (hf_mass : ∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) d₂F,
+          tensorSobolevWeight (I := I) (M := M) i τ *
+              (iteratedDeriv j (f i) t) ^ 2 ≤ B i)
+    (hforce_coord : ∀ i, (fun t => (gforce t).coeff i)
+        =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂F)] f i)
+    (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Nat.cast_nonneg a) (timeH1.toFun u t))
+    (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤
+        (Classical.choose (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a
+          ha_super)).1) :
+    ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ i,
+      f i t = tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
+              (symmS (I := I) (M := M) g₀ (F t)) hδ_lt
+              (gFibreOpBound_symmS (I := I) (M := M) g₀ (F t) (hδ t)))) i :=
+  sorry
+
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
+set_option linter.unusedVariables false in
+/-- Forcing bootstrap for the SYMMETRIZED DeTurck Sobolev nonlinearity: the maximal-regularity
+Duhamel solution driven by `deTurckSobolevNHa2Symm` admits smooth per-mode forcing coordinates
+with all-order weighted mass bounds, and on the smallness horizon these coordinates are
+realized by the symmS-precomposed smooth remainder
+`deTurckSmoothRemainder g₀ g_bg (symmS g₀ (Ffam t))` of any pinned smooth representative
+family. Symmetric-sector mirror of the raw `deTurckRicci_forcingBootstrap`, assembled from the
+posited children `forcingSmoothCoordsRealizeSymm`,
+`realizedSol_solField_smallnessHorizon_Ha2Symm`, and `realizedForcingCoord_eq_smoothNSymm`;
+those children are still `sorry`, so this theorem and every consumer — including
+`deTurckRicci_solution_with_jointReg` and `ricci_flow_short_time_existence` — transitively
+depend on `sorryAx` until they land. -/
 theorem deTurckRicci_forcingBootstrap_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) :
@@ -580,7 +736,24 @@ theorem deTurckRicci_forcingBootstrap_symm
                       (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg
                         (symmS (I := I) (M := M) g₀ (Ffam t)) hδ_lt
                         (gFibreOpBound_symmS (I := I) (M := M) g₀ (Ffam t) (hδ t)))) i) := by
-  sorry
+  classical
+  intro T hT hT1 hTT₀ u gforce hduh hforce hgforce htrace
+  obtain ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
+    forcingSmoothCoordsRealizeSymm (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
+      hduh hforce hgforce htrace
+  refine ⟨d₂F, hd₂F_pos, hd₂F_le, f, hf_smooth, hf_mass, hf_id, ?_⟩
+  set R₀ : ℝ := (Classical.choose
+    (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1 with hR₀_def
+  have hR₀_pos : 0 < R₀ :=
+    (Classical.choose_spec
+      (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
+  refine ⟨R₀, hR₀_pos, ?_, ?_⟩
+  · exact realizedSol_solField_smallnessHorizon_Ha2Symm (I := I) (M := M) g₀ g_bg a ha_super
+      hT hT1 hTT₀ u gforce hduh hforce hgforce htrace hR₀_pos
+  · intro T₁ hT₁_pos hT₁_le hT₁_le_d2F Ffam δ hδ_lt hδ h_pin hball
+    exact realizedForcingCoord_eq_smoothNSymm (I := I) (M := M) g₀ g_bg a (by omega)
+      hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
+      Ffam hδ_lt hδ f hf_id hf_smooth hf_mass hforce_coord h_pin hball
 
 set_option linter.unusedVariables false in
 
