@@ -508,15 +508,13 @@ private theorem realizedFamily_jointChartGramSmooth
     g hT T_rep hδ_lt hδ φ hφ_smooth hcoeff hmodemass
 
 set_option linter.unusedVariables false in
-/-- **Posited deferred input (`sorry`).** Smooth per-mode forcing time-coordinate family for the
-symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the Duhamel forcing
-`gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e. by a
-continuous-coordinate carrier family `F` whose per-mode coordinates coincide with globally smooth
-functions `f i` carrying all-order weighted spectral mass bounds. Symmetric mirror of the proven
-raw helper `forcingSmoothTimeCoords`/`deTurckForcing_smoothTimeCoordinateFamily`
-(snapshot `c848da47`); its proof (the symmetrized Galerkin forcing time-coordinate chain, at the
-`ForcingTimeBootstrap` rung) has not landed yet, so consumers transitively depend on `sorryAx`
-until it does. -/
+/-- Smooth per-mode forcing time-coordinate family for the symmetrized DeTurck fixed-point forcing:
+on a positive horizon `d₂ ≤ T` the Duhamel forcing `gforce` of the `deTurckSobolevNHa2Symm`-driven
+maximal-regularity solution is realized a.e. by a continuous-coordinate carrier family `F` whose
+per-mode coordinates coincide with globally smooth functions `f i` carrying all-order weighted
+spectral mass bounds. A direct forward of the symmetrized `ForcingTimeBootstrap` rung
+`deTurckForcing_smoothTimeCoordinateFamilySymm`; consumers transitively depend on the `sorry`s of
+that symmetrized Galerkin forcing time-coordinate chain until they land. -/
 private theorem forcingSmoothTimeCoordsSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -545,7 +543,8 @@ private theorem forcingSmoothTimeCoordsSymm
       (⇑gforce =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)] F) ∧
       (∀ i, ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) d₂)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ i, (F t).coeff i = f i t) :=
-  sorry
+  deTurckForcing_smoothTimeCoordinateFamilySymm (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+    hTT₀ gforce hforce hgforce
 
 set_option linter.unusedVariables false in
 /-- **Posited deferred input (`sorry`).** Smooth per-mode forcing coordinates for the
