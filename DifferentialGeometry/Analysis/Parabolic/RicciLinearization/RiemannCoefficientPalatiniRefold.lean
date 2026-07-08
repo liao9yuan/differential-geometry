@@ -6866,8 +6866,18 @@ partner-paired family `deTurckLieCovDerivRefoldC2Family` at existentially pinned
 permutations and signs, and an order-zero family carrying joint smoothness, a ball-uniform
 pointwise fibre-norm sup, and the two-step jet window. Stated under the chain-supplied
 symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is `symmS`-representable at every
-wired level), threaded to the basepoint-background identity core. Every consumer
-transitively depends on `sorryAx` until this lands. -/
+wired level). Proven as glue over the general-background identity core: the wrapper adds
+the background leg `deTurckLieCovDerivArmField g₀ (realizedFam s) g_bg −
+deTurckLieCovDerivArmField g₀ (realizedFam s) g₀` on top of the basepoint-background
+parent's order-zero family (via `threeArmHjoint_add_local`/`_sub_local` for joint
+smoothness, `riemannianFiberNormSq_add_le`/`_sub_le` for the cap, and
+`iteratedCovGrad_add`/`_sub` for the window), with the added leg's cap and window
+supplied by the proven engines
+`deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform` and
+`exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow`. Consumers transitively
+depend on `sorryAx` through the parent's residual order-zero-data child
+`exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data` until
+that child lands. -/
 theorem exists_deTurckLieCovDerivArm_refold_identity_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -8890,6 +8900,40 @@ private theorem bdJointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
       (f p₀.2) (A p₀)
 
 set_option linter.unusedVariables false in
+/-- Deferred input (`Q_true` joint-smoothness seam; pattern class: the moving-frame
+`A ⋆ A` bi-contraction fibre applied to a fixed smooth section along the realized path):
+joint `(x, s)`-smoothness over the realized small set of the antisymmetrized `A ⋆ A`
+commutator bi-contraction at the realized metric, applied to a fixed smooth
+`(0,2)`-tensor section. Truth basis on disk: for each fixed metric the applied fibre is
+smooth in `x` (`connDiffAACommBiContrFib_contMDiff`, via the fixed-frame local model
+`connDiffAACommBiContrFibFixedFrame_apply_section_contMDiff` and the neighbourhood
+gluing `connDiffAACommBiContrFib_eq_fixedFrame_on_nbhd`); the kernel is a finite
+`g_s`-frame sum of products of the connection difference at the realized family (jointly
+smooth in `(x, s)` — the private realized-family engines of
+`RicciLinearizationConnDiffUniformBounds`) against the moving frames and the moving
+inner product. The missing piece is only the joint moving-frame assembly of exactly this
+composite (the fixed-frame argument with the fixed metric replaced by the realized
+path), not new mathematics. Falsity screen: at `s = 0` the subject is
+`connDiffAACommBiContrFib g₀ g₀ ≡ 0` (`connDiffAACommBiContrFib_self`) applied to `Y` —
+the row is non-vacuous only through the moving sector, and the `Prop` carries no
+estimate content (no cap, no rate, no `∃`-constant to misplace). Sole citer: the H1
+`Q_true` joint-smoothness row directly below. Every consumer transitively depends on
+`sorryAx` until this seam lands. -/
+theorem connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
+    (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) p.1
+        (connDiffAACommBiContrFib (I := I) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) p.1 (Y p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- H1 joint-smoothness row of the Riemann-arm refold identity data (Form B `Q_true`):
 joint smoothness in `(x, s)` over the realized small set of the antisymmetrized `A ⋆ A`
 commutator coefficient field along the realized path — the `g_s`-orthonormal double
@@ -8899,8 +8943,12 @@ through the moving metric. LEG-COUNT: the quadratic `A ⋆ A` bi-contraction car
 on this row (a `Prop`-valued smoothness row — the rate sits in the H3 cap and H4 window
 rows). SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps. SUP-ANCHOR: not applicable
 (no estimate content). Degenerate litmus: at `s = 0` the subject is
-`ricciArmOrder0AACommCoeffField g₀ g₀ = 0` (`ricciArmOrder0AACommCoeffField_self`). Every
-consumer transitively depends on `sorryAx` until this lands. -/
+`ricciArmOrder0AACommCoeffField g₀ g₀ = 0` (`ricciArmOrder0AACommCoeffField_self`).
+Proven as the `clm`-section joint upgrade
+(`contMDiffOn_clm_section_of_pointwise_jointMR`) over the per-`Y` application seam child
+`connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn` directly above;
+every consumer transitively depends on `sorryAx` through that seam child until it
+lands. -/
 theorem ricciArmOrder0AACommCoeffField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -8908,8 +8956,18 @@ theorem ricciArmOrder0AACommCoeffField_realizedFam_threeArmHjoint
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
-        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) (δ := δ) (δ' := δ) :=
-  sorry
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s)) (δ := δ) (δ' := δ) := by
+  classical
+  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
+    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ => connDiffAACommBiContrFib (I := I) g₀
+      (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) p.1)
+    (S := realizedSmallSet (δ := δ) (δ' := δ))
+    (fun Y => connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn
+      (I := I) (M := M) g₀ T hδ hδZ Y)
+  refine hCLM.congr (fun p _ => ?_)
+  rfl
 
 set_option linter.unusedVariables false in
 /-- H1 joint-smoothness row of the Riemann-arm refold identity data: joint smoothness in
@@ -12102,6 +12160,88 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
         mul_le_mul hPTO hXi hXinn (hCP_nn 0)
 
 set_option linter.unusedVariables false in
+/-- Deferred input (Q_true raw-field grid-window seam; pattern class: the qtower close —
+the antisymmetrized `A ⋆ A` commutator coefficient field refolds onto the moving
+pair-trace operator applied to the slot-extended difference of the two slot-permuted
+Koszul-against-lowered-connection-difference fold weights, so the covariant-gradient
+fibre norms of the RAW field ride the bounded-factor grid of cap `i + 1` over window
+`i + 3` in the perturbation jets, with `C` perturbation-uniform and `δ₀`-rated): the
+pointwise capped grid window for the raw antisymmetrized `A ⋆ A` commutator coefficient
+field, generic in a perturbed metric `g₁ = g₀ + P`. This statement is PROVEN on disk as
+the private raw-field engine of
+`Analysis/Sobolev/TensorHilbert/RicciArmResidualFieldGridWindow` (the tower behind its
+sorry-free public input-symmetrized theorem
+`rfns_iteratedCovGrad_ricciArmOrder0AACommCoeffFieldInputSymm_boundedFactorGridWindow_le`);
+it is re-posited here ONLY because that engine is `private` to its home file — the
+discharge is a visibility/export pass on the tower file, not new mathematics. Falsity
+mechanism guarded at birth: the `i + 1` per-factor cap excludes the `i + 2`-order
+perturbation jet (the quadratic one-jet content occupies total grid weight `i + 2` at
+per-factor order at most `i + 1`), and without the cap the window form is false at the
+high-frequency `λ`-family witnesses. Every consumer transitively depends on `sorryAx`
+until the seam closes. -/
+theorem exists_rfns_icg_ricciArmOrder0AACommCoeffField_window
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)).toSection x) ≤
+          C i * Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- The `K = 1`, `W = 3` bounded-factor grid window carries only the order-one factor:
+its cells are the empty product, the single order-one factor, and the order-one pair, so
+a pointwise bound on the order-one entry bounds the whole window. -/
+private lemma bdWindowOneThree_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {B : ℝ}
+    (hB1 : b 1 ≤ B) :
+    Combinatorics.boundedFactorGridWindow b 1 3 ≤ 1 + B + B ^ 2 := by
+  classical
+  have hB0 : 0 ≤ B := le_trans (hb 1) hB1
+  have hgrid0 : Combinatorics.boundedFactorGrid b 1 0 = 1 :=
+    Combinatorics.boundedFactorGrid_zero b 1
+  have hgrid1 : Combinatorics.boundedFactorGrid b 1 1 = b 1 := by
+    rw [Combinatorics.boundedFactorGrid]
+    rw [Finset.sum_range_succ, Finset.sum_range_one]
+    rw [show Finset.Nat.antidiagonalTuple 0 1 = ∅ from
+      Finset.Nat.antidiagonalTuple_zero_succ 0]
+    rw [show Finset.Nat.antidiagonalTuple 1 1 = {![1]} from
+      Finset.Nat.antidiagonalTuple_one 1]
+    rw [Finset.filter_empty, Finset.sum_empty]
+    rw [Finset.filter_singleton]
+    rw [if_pos (by decide : ∀ m : Fin 1, (![1] : Fin 1 → ℕ) m ≤ 1)]
+    rw [Finset.sum_singleton]
+    rw [Fin.prod_univ_one]
+    norm_num
+  have hgrid2 : Combinatorics.boundedFactorGrid b 1 2 = b 1 * b 1 := by
+    rw [Combinatorics.boundedFactorGrid]
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]
+    rw [show Finset.Nat.antidiagonalTuple 0 2 = ∅ from
+      Finset.Nat.antidiagonalTuple_zero_succ 1]
+    rw [show Finset.Nat.antidiagonalTuple 1 2 = {![2]} from
+      Finset.Nat.antidiagonalTuple_one 2]
+    rw [Finset.filter_empty, Finset.sum_empty]
+    rw [Finset.filter_singleton]
+    rw [if_neg (by decide : ¬ ∀ m : Fin 1, (![2] : Fin 1 → ℕ) m ≤ 1)]
+    rw [Finset.sum_empty]
+    have h22 : (Finset.Nat.antidiagonalTuple 2 2).filter
+        (fun e : Fin 2 → ℕ => ∀ m, e m ≤ 1) = {![1, 1]} := by
+      decide
+    rw [h22, Finset.sum_singleton, Fin.prod_univ_two]
+    show (0 : ℝ) + 0 + b (![1, 1] 0) * b (![1, 1] 1) = b 1 * b 1
+    norm_num
+  rw [Combinatorics.boundedFactorGridWindow, Finset.sum_range_succ, Finset.sum_range_succ,
+    Finset.sum_range_one, hgrid0, hgrid1, hgrid2]
+  nlinarith [hb 1, hB1, hB0, sq_nonneg (b 1 - B)]
+
+set_option linter.unusedVariables false in
 /-- H3 ball-uniform pointwise cap row of the Riemann-arm refold identity data (Form B
 `Q_true`, weightless): the ball-uniform pointwise fibre-norm-square cap for the
 antisymmetrized `A ⋆ A` commutator coefficient field along the realized path. The retired
@@ -12113,8 +12253,16 @@ the `∃Λ` constant — no naked denominators. SMALL-LITERALS: ∃Λ-form, zero
 SUP-ANCHOR: pointwise fibre-norm-square sup, `∃Λ` BEFORE `∀T ∀s ∀x`; `ha_super` carries
 the `W^{a+2,2} ↪ C⁰` class exactly as in the committed siblings. Degenerate litmus: at
 `s = 0` the subject is `ricciArmOrder0AACommCoeffField g₀ g₀ = 0`
-(`ricciArmOrder0AACommCoeffField_self`), so the cap is trivially satisfied there. Every
-consumer transitively depends on `sorryAx` until this lands. -/
+(`ricciArmOrder0AACommCoeffField_self`), so the cap is trivially satisfied there. Filled
+as glue over the private raw-field grid-window seam child
+`exists_rfns_icg_ricciArmOrder0AACommCoeffField_window` (mirror of the proven raw-field
+engine in `RicciArmResidualFieldGridWindow`, re-posited here only because the source is
+`private`): the seam gives the pointwise `boundedFactorGridWindow` cap at `K = 1`,
+`W = 3`; the `K = 1, W = 3` cell arithmetic (`bdWindowOneThree_le`) collapses that window
+to `1 + b 1 + (b 1)^2` on the `s • T` jet path; and the one-jet cap
+`bdExists_rfnsT_one_jet_cap` (which is `s • T`-monotone via `s ^ 2 ≤ 1`) bounds the
+`k = 1` cell by `(Csob * R) ^ 2`. Every consumer transitively depends on `sorryAx`
+through the seam child until its underlying `private` export lands. -/
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -12129,8 +12277,66 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform
         ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
               ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
-                (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ Λ :=
-  sorry
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ Λ := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
+  obtain ⟨C, hC_nn, hpt⟩ :=
+    exists_rfns_icg_ricciArmOrder0AACommCoeffField_window (I := I) (M := M) g₀ hδ₁_lt
+  obtain ⟨Csob, hCsob_nn, hcap1⟩ :=
+    bdExists_rfnsT_one_jet_cap (I := I) (M := M) g₀ a ha_super
+  refine ⟨C 0 * (1 + (Csob * R) ^ 2 + ((Csob * R) ^ 2) ^ 2),
+    mul_nonneg (hC_nn 0) (by positivity), ?_⟩
+  intro T δ hδ_le hδ hδZ hball s hs x
+  by_cases hM : Nonempty M
+  swap
+  · exact ((not_nonempty_iff.mp hM).false x).elim
+  obtain ⟨x₀⟩ := hM
+  have hδ0 : 0 ≤ δ := bdDelta_nonneg (I := I) (M := M) g₀ x₀ T hδ
+  have hδ_le' : δ ≤ δ₁ := le_trans hδ_le (le_max_left _ _)
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+    Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+  obtain ⟨hs0, hs1⟩ := hs
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+    fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+    intro y v w
+    have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+    have heq : |1 - s| * δ + |s| * δ = δ := by
+      rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+      ring
+    rwa [heq] at hraw
+  have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+    rw [convexPerturbation, smul_zero, zero_add]
+  have h0 := hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+    (convexPerturbation (I := I) g₀ T 0 s) htie hδ_le' hδ0 hδP 0 x
+  rw [iteratedCovGrad_zero] at h0
+  have hss : 0 ≤ s * s := mul_nonneg hs0 hs0
+  have hs2 : s * s ≤ 1 := by nlinarith
+  have hb1 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 1
+        (convexPerturbation (I := I) g₀ T 0 s)).toSection x) ≤ (Csob * R) ^ 2 := by
+    rw [hcP, iteratedCovGrad_smul_real]
+    rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) =
+        s • ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x) from by
+      rw [SmoothCcTensor.toSection_smul]
+      rfl]
+    rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 0 (2 + 1) x]
+    have hT1 := hcap1 T hR hball x
+    nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + 1) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x), hT1, hss, hs2, sq_nonneg s]
+  have hwin := bdWindowOneThree_le
+    (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 l
+        (convexPerturbation (I := I) g₀ T 0 s)).toSection x))
+    (fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _)
+    hb1
+  exact le_trans h0 (mul_le_mul_of_nonneg_left hwin (hC_nn 0))
 
 set_option linter.unusedVariables false in
 /-- H4 two-step jet-window row of the Riemann-arm refold identity data (Form B `Q_true`):
@@ -12162,8 +12368,94 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
             (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s))‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) := by
+  classical
+  set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
+  have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
+  obtain ⟨C, hC_nn, hpt⟩ :=
+    exists_rfns_icg_ricciArmOrder0AACommCoeffField_window (I := I) (M := M) g₀ hδ₁_lt
+  obtain ⟨Kflat, hKflat_nn, hKflat⟩ :=
+    boundedFactorGridWindow_integral_ballUniform_flat_allOrders (I := I) (M := M) g₀ a
+      ha_super hR
+  refine ⟨fun i => C i * Kflat i, fun i => mul_nonneg (hC_nn i) (hKflat_nn i), ?_⟩
+  intro T δ hδ_le hδ hδZ hball i s hs
+  have hwin_nn : (0 : ℝ) ≤ 1 + ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 := by positivity
+  by_cases hM : Nonempty M
+  · obtain ⟨x₀⟩ := hM
+    have hδ0 : 0 ≤ δ := bdDelta_nonneg (I := I) (M := M) g₀ x₀ T hδ
+    have hδ_le' : δ ≤ δ₁ := le_trans hδ_le (le_max_left _ _)
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hs_mem : s ∈ realizedSmallSet (δ := δ) (δ' := δ) :=
+      Icc_subset_realizedSmallSet hδ_lt hδ_lt hs
+    obtain ⟨hs0, hs1⟩ := hs
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T 0 hδ hδZ s).inner y v w =
+          g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s) y v w :=
+      fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
+    have hδP : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
+      intro y v w
+      have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
+      have heq : |1 - s| * δ + |s| * δ = δ := by
+        rw [abs_of_nonneg (by linarith : (0 : ℝ) ≤ 1 - s), abs_of_nonneg hs0]
+        ring
+      rwa [heq] at hraw
+    have hcP : convexPerturbation (I := I) g₀ T 0 s = s • T := by
+      rw [convexPerturbation, smul_zero, zero_add]
+    have hss : 0 ≤ s * s := mul_nonneg hs0 hs0
+    have hs2 : s * s ≤ 1 := by nlinarith
+    have hptx : ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
+                (realizedFam (I := I) g₀ T 0 hδ hδZ s))).toSection x) ≤
+          C i * Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 1) (i + 3) := by
+      intro x
+      refine le_trans (hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s)
+        (convexPerturbation (I := I) g₀ T 0 s) htie hδ_le' hδ0 hδP i x) ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hC_nn i)
+      rw [Combinatorics.boundedFactorGridWindow, Combinatorics.boundedFactorGridWindow]
+      refine Finset.sum_le_sum fun k _ => ?_
+      rw [Combinatorics.boundedFactorGrid, Combinatorics.boundedFactorGrid]
+      refine Finset.sum_le_sum fun n _ => ?_
+      refine Finset.sum_le_sum fun e _ => ?_
+      refine Finset.prod_le_prod
+        (fun m _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + e m) x _)
+        (fun m _ => ?_)
+      rw [hcP, iteratedCovGrad_smul_real]
+      rw [show ((s • iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) =
+          s • ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) from by
+        rw [SmoothCcTensor.toSection_smul]
+        rfl]
+      rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 0 (2 + e m) x]
+      nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + e m) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x), hss, hs2]
+    obtain ⟨hWint, hWbound⟩ := hKflat T hball i
+    have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀
+      2 (2 + i)
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s)))
+      (fun x => C i * Combinatorics.boundedFactorGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) (i + 1) (i + 3))
+      (hWint.const_mul (C i)) hptx
+    refine le_trans key ?_
+    rw [MeasureTheory.integral_const_mul]
+    refine le_trans (mul_le_mul_of_nonneg_left hWbound (hC_nn i)) (le_of_eq ?_)
+    ring
+  · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
+    have hz : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T 0 hδ hδZ s))‖ = 0 :=
+      bdNorm_zero_of_isEmpty (I := I) (M := M) g₀ 2 (2 + i) _
+    rw [hz]
+    have hK_nn : 0 ≤ C i * Kflat i := mul_nonneg (hC_nn i) (hKflat_nn i)
+    nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedSectionVars false in
 private lemma bdBoundedFactorGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
