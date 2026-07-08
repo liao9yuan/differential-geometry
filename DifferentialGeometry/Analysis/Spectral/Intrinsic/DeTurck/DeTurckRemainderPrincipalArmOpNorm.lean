@@ -5228,6 +5228,68 @@ theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le
       rw [hnormL, hnorm2, hnorm1]
       exact hb
 
+set_option linter.unusedSectionVars false in
+private lemma armZeroTwoArm_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMetric I M)
+    {δ : ℝ}
+    (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (hfb : gFibreOpBound (I := I) (M := M) g₀ h δ) : 0 ≤ δ := by
+  classical
+  obtain ⟨x⟩ := (inferInstance : Nonempty M)
+  obtain ⟨n, e, hn, horth, hpars, hexpand, hrfns⟩ :=
+    tangent_frame_expansion (I := I) (M := M) g₀ x
+  have hn_pos : 0 < n := by
+    rw [hn]
+    have : Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E := rfl
+    rw [this]
+    exact Nat.pos_of_ne_zero (NeZero.ne _)
+  set i0 : Fin n := ⟨0, hn_pos⟩ with hi0_def
+  have hb := hfb x (e i0) (e i0)
+  have hgi : g₀.inner x (e i0) (e i0) = 1 := by
+    rw [horth i0 i0, if_pos rfl]
+  rw [hgi, Real.sqrt_one, mul_one, mul_one] at hb
+  exact le_trans (abs_nonneg _) hb
+
+/-- Core two-arm arm-zero operator bound: for the `(2+0,2)`-coefficient `C₀` carrying the
+two-arm jet envelope against `T₀` (window `K`-arm plus the `εa`-rated `‖∇^{i+2}T₀‖` top arm),
+with `T₀` symmetric and `g₀`-`δ`-fibre-small (`0 ≤ δ`), the applied field `appCc C₀ (∇⁰ T₀)`
+is tame of order two on the spectral Sobolev scale with the `√n εa δ`-small top coefficient:
+the unique top Leibniz term pairs the coefficient's `εa`-arm top jets against the pointwise
+`√n δ`-small symmetric data (eigenvalue bound), while every other term loses at least one order
+into the family-uniform lower slot.  This is the arm-zero analog of the proven fibre-small
+third-arm machine `exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`, with the
+smallness moved from the coefficient sup to the data pointwise value.  The `m`-uniformity of
+the small top constant needs the spectral `(1-Δ)`-iterate top-isolation induction — the direct
+jet-sum conversion route accumulates a `Cₘ·∑ₖ√Gₖ` factor and does NOT stay `m`-uniform, so it
+cannot close the required `εB ≤ 2 √n εa δ` cap.  Posited here as the single genuine-math leaf;
+consumers transitively depend on `sorryAx` until it lands. -/
+private lemma appCc_armZeroTwoArmCoeff_opNorm_core
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i)
+    (εa : ℝ) (hεa_nn : 0 ≤ εa) (Λa : ℝ) (hΛa_nn : 0 ≤ Λa) :
+    ∃ Cop : ℕ → ℝ, (∀ m, 0 ≤ Cop m) ∧
+      ∀ (C₀ : SmoothCcTensor g₀ (2 + 0) 2) (T₀ : SmoothCcTensor g₀ 0 2) (δ : ℝ),
+        0 ≤ δ →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v) →
+        gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 0) 2 x (C₀.toSection x) ≤ Λa ^ 2) →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + 0) 2 i C₀‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+              εa ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) →
+        ∀ m : ℕ,
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ (m : ℝ)
+              (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ≤
+            Real.sqrt (Module.finrank ℝ E) * εa * δ *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
+  sorry
+
 /-- Deferred two-arm engine for the arm-zero coefficient application: for a
 `(2+0,2)`-coefficient `C₀` with fibre sup `Λa` and the two-arm jet envelope against the data
 `T₀` — naked window plus the `εa`-rated top arm — and for symmetric ball data whose fibre
@@ -5265,8 +5327,39 @@ private theorem exists_smoothCcToTensorHs_appCc_armZeroTwoArmCoeff_opNorm_le
               (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ≤
             εB * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
-              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
-  sorry
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
+  classical
+  obtain ⟨Cop, hCop_nn, hcore⟩ :=
+    appCc_armZeroTwoArmCoeff_opNorm_core (I := I) (M := M) g₀ a ha_super hR₀
+      Kc hKc_nn εa hεa_nn Λa hΛa_nn
+  refine ⟨Real.sqrt (Module.finrank ℝ E) * εa * max δ 0,
+    mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hεa_nn) (le_max_right _ _),
+    fun hδ_nn => ?_, Cop, hCop_nn, fun C₀ T₀ hball hTsymm hfibre hsup hjet m => ?_⟩
+  · rw [max_eq_left hδ_nn]
+    have hnn : 0 ≤ Real.sqrt (Module.finrank ℝ E) * εa * δ :=
+      mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hεa_nn) hδ_nn
+    nlinarith [hnn]
+  · rcases isEmpty_or_nonempty M with hM | hM
+    · have hzero : ∀ (τ : ℝ) (X : SmoothCcTensor g₀ 0 2),
+          smoothCcToTensorHs (I := I) (M := M) g₀ τ X = 0 := by
+        intro τ X
+        have hL2norm : ‖SmoothCcTensor.toL2 X‖ = 0 := by
+          rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_def,
+            DifferentialGeometry.Integral.L2.tensorL2Norm,
+            DifferentialGeometry.Integral.L2.tensorL2Inner,
+            MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+        have hL2 : SmoothCcTensor.toL2 X = 0 := norm_eq_zero.mp hL2norm
+        refine tensorHs.ext (funext fun i => ?_)
+        rw [smoothCcToTensorHs_coeff, tensorHs.zero_coeff,
+          hL2, tensorL2Coeff_eq_inner, inner_zero_right]
+      rw [hzero, hzero, hzero]
+      simp
+    · haveI := hM
+      have hδ_nn : 0 ≤ δ :=
+        armZeroTwoArm_delta_nonneg (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T₀) hfibre
+      rw [max_eq_left hδ_nn]
+      exact hcore C₀ T₀ δ hδ_nn hball hTsymm hfibre hsup hjet m
 
 set_option maxHeartbeats 1000000 in
 /-- Split of the remainder difference into the principal cometric arm, a small third arm whose
