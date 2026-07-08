@@ -1371,6 +1371,23 @@ private theorem linearizedRicciArm0BaseCoeff_perOrder_rfns_ballUniform
   DifferentialGeometry.Integral.Connection.linearizedRicciArm0BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
     (I := I) (M := M) g₀ a ha_super hR hδ₀
 
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+/-- Per-order realized-family jet bound, at orders `i ≤ a`, for the bare arm-0 correction field
+`linearizedRicciArm0CorrField` (the opaque `choose` witness of `exists_arm0_arm1_corrField_data`),
+uniform over the `a + 2`-jet balls of `T, T'`: the arm-0 clause of the correction-field spec
+(`corrFieldDataSpec`, third conjunct) bounds the RESHAPED combination
+`C0 + (3/2) • ricciArmOrder0RiemannCoeff(realizedFam) − ricciArmOrder0CurvCoeff(realizedFam)`, so
+the bare field is peeled by the triangle inequality `(x+y+z)² ≤ 3x² + 3y² + 3z²` against the two
+realized-family curvature coefficients; each of those splits as background coefficient plus
+background difference, with the difference capped at orders `i ≤ a` by the sorry-free
+`backgroundDifference_perOrder_l2_ballUniform` towers of `CurvatureCoefficientDifferenceJetTower`
+instantiated at `g₁ = realizedFam`, `P = convexPerturbation`, and the spec window absorbed into
+the ball constant via `Σ_{j<i+2}(‖∇ʲT‖² + ‖∇ʲT'‖²) ≤ 2(a+2)R²`. TRANSIT: the spec chain
+(`exists_corrFieldChristoffelConst`) rests on the posited grid child at
+`RicciThreeArmCorrectionFieldTameEnvelope`; consumers transitively depend on `sorryAx` until it
+lands. -/
 private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1385,8 +1402,234 @@ private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 2 2 i
-              (linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
-  sorry
+              (linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i := by
+  classical
+  obtain ⟨KR, hKR_nn, hKR⟩ :=
+    ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨KC, hKC_nn, hKC⟩ :=
+    ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i =>
+    3 * (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrFieldTameJetBound
+        (I := I) (M := M) g₀ a R δ₀ i * (1 + 2 * ((a : ℝ) + 2) * R ^ 2)) +
+      27 / 2 * (KR i +
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+            (I := I) (M := M) g₀ g₀)‖ ^ 2) +
+      6 * (KC i +
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0CurvCoeff
+            (I := I) (M := M) g₀ g₀)‖ ^ 2),
+    fun i => ?_, ?_⟩
+  · have h1 :=
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrFieldTameJetBound_nonneg
+        (I := I) (M := M) g₀ a R δ₀ i
+    have h2 : (0 : ℝ) ≤ 1 + 2 * ((a : ℝ) + 2) * R ^ 2 := by positivity
+    have h3 := hKR_nn i
+    have h4 := hKC_nn i
+    have h5 : (0 : ℝ) ≤
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+            (I := I) (M := M) g₀ g₀)‖ ^ 2 := sq_nonneg _
+    have h6 : (0 : ℝ) ≤
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0CurvCoeff
+            (I := I) (M := M) g₀ g₀)‖ ^ 2 := sq_nonneg _
+    have h7 := mul_nonneg h1 h2
+    linarith
+  · intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+    have hs0 : (0 : ℝ) ≤ s := hs.1
+    have hs1 : s ≤ 1 := hs.2
+    have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
+    have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+    have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+    have hicg_smul : ∀ (r s' j : ℕ) (c : ℝ) (w : SmoothCcTensor g₀ r s'),
+        iteratedCovGrad (I := I) g₀ r s' j (c • w) =
+          c • iteratedCovGrad (I := I) g₀ r s' j w := by
+      intro r s' j c w
+      induction j with
+      | zero => simp only [iteratedCovGrad_zero]
+      | succ j ih =>
+        rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
+          DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
+    have hδP : gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+            (I := I) g₀ T T' s))
+        ((1 - s) * δ' + s * δ) :=
+      DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation_gFibreOpBound
+        (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
+    have hδP_le : (1 - s) * δ' + s * δ ≤ δ₀ := by
+      have e1 : (1 - s) * δ' ≤ (1 - s) * δ₀ := mul_le_mul_of_nonneg_left hδ'_le h1ms
+      have e2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
+      nlinarith [e1, e2]
+    have htie : ∀ (y : M) (v w : TangentSpace I y),
+        (realizedFam (I := I) g₀ T T' hδ hδ' s).inner y v w =
+          g₀.inner y v w +
+            ccTensorBilinSymm (I := I) g₀
+              (DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+                (I := I) g₀ T T' s) y v w :=
+      fun y v w =>
+        DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam_inner_of_mem
+          (I := I) g₀ T T' hδ hδ' (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs) y v w
+    have hPball : ∀ j : ℕ, j ≤ a + 2 →
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+            (I := I) g₀ T T' s)‖ ≤ R := by
+      intro j hj
+      have heq : iteratedCovGrad (I := I) g₀ 0 2 j
+          (DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+            (I := I) g₀ T T' s) =
+          (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T' +
+            s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+        rw [show DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+            (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+          iteratedCovGrad_add, hicg_smul, hicg_smul]
+      rw [heq]
+      calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T' +
+              s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+          ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖ +
+              ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+        _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ +
+              s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+            rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+              abs_of_nonneg h1ms, abs_of_nonneg hs0]
+        _ ≤ (1 - s) * R + s * R :=
+            add_le_add (mul_le_mul_of_nonneg_left (hT'ball j hj) h1ms)
+              (mul_le_mul_of_nonneg_left (hTball j hj) hs0)
+        _ = R := by ring
+    have hRmDiff := hKR (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      (DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+        (I := I) g₀ T T' s) hδP_le hδP htie hPball i hi
+    have hCvDiff := hKC (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      (DifferentialGeometry.PDE.DeTurck.RicciLinearization.convexPerturbation
+        (I := I) g₀ T T' s) hδP_le hδP htie hPball i hi
+    obtain ⟨_, _, hbound, _⟩ :=
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+        (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
+    have hjet := ((hbound ha_super hR hδ₀ hδ_le hδ'_le hTball hT'ball).2 i hi s hs).1
+    have hwin : ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) ≤ 2 * ((a : ℝ) + 2) * R ^ 2 := by
+      have hterm : ∀ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2 ≤ 2 * R ^ 2 := by
+        intro j hj
+        have hj_le : j ≤ a + 2 := by
+          have hj' := Finset.mem_range.mp hj
+          omega
+        have h1 : ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 ≤ R ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) (hTball j hj_le) 2
+        have h2 : ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2 ≤ R ^ 2 :=
+          pow_le_pow_left₀ (norm_nonneg _) (hT'ball j hj_le) 2
+        linarith
+      have hsum := Finset.sum_le_card_nsmul (Finset.range (i + 2)) _ (2 * R ^ 2) hterm
+      rw [Finset.card_range, nsmul_eq_mul] at hsum
+      have hcast : ((i + 2 : ℕ) : ℝ) ≤ (a : ℝ) + 2 := by
+        have hia : (i : ℝ) ≤ (a : ℝ) := Nat.cast_le.mpr hi
+        push_cast
+        linarith
+      have h2R : (0 : ℝ) ≤ 2 * R ^ 2 := by positivity
+      calc ∑ j ∈ Finset.range (i + 2),
+            (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)
+          ≤ ((i + 2 : ℕ) : ℝ) * (2 * R ^ 2) := hsum
+        _ ≤ ((a : ℝ) + 2) * (2 * R ^ 2) := mul_le_mul_of_nonneg_right hcast h2R
+        _ = 2 * ((a : ℝ) + 2) * R ^ 2 := by ring
+    have hone : (1 : ℝ) + ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) ≤
+        1 + 2 * ((a : ℝ) + 2) * R ^ 2 := by linarith
+    have hK_nn :=
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrFieldTameJetBound_nonneg
+        (I := I) (M := M) g₀ a R δ₀ i
+    have hZraw := le_trans hjet (mul_le_mul_of_nonneg_left hone hK_nn)
+    rw [show linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' =
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+          (I := I) g₀ T T' hδ hδ').choose from rfl]
+    set Cf := (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+        (I := I) g₀ T T' hδ hδ').choose s with hCf_def
+    set Rmf := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+        (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) with hRmf_def
+    set Cvf := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0CurvCoeff
+        (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) with hCvf_def
+    set Rm0 := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+        (I := I) (M := M) g₀ g₀ with hRm0_def
+    set Cv0 := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0CurvCoeff
+        (I := I) (M := M) g₀ g₀ with hCv0_def
+    have hRm_split : iteratedCovGrad (I := I) g₀ 2 2 i Rmf =
+        iteratedCovGrad (I := I) g₀ 2 2 i (Rmf - Rm0) +
+          iteratedCovGrad (I := I) g₀ 2 2 i Rm0 := by
+      rw [iteratedCovGrad_sub]
+      abel
+    have hRm_norm : ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ ≤
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (Rmf - Rm0)‖ +
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Rm0‖ := by
+      rw [hRm_split]
+      exact norm_add_le _ _
+    have hRm_sq : ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ ^ 2 ≤
+        2 * KR i + 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rm0‖ ^ 2 := by
+      have hx := pow_le_pow_left₀ (norm_nonneg _) hRm_norm 2
+      nlinarith [hRmDiff, hx,
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Rmf - Rm0)‖ -
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Rm0‖)]
+    have hCv_split : iteratedCovGrad (I := I) g₀ 2 2 i Cvf =
+        iteratedCovGrad (I := I) g₀ 2 2 i (Cvf - Cv0) +
+          iteratedCovGrad (I := I) g₀ 2 2 i Cv0 := by
+      rw [iteratedCovGrad_sub]
+      abel
+    have hCv_norm : ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖ ≤
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (Cvf - Cv0)‖ +
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cv0‖ := by
+      rw [hCv_split]
+      exact norm_add_le _ _
+    have hCv_sq : ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖ ^ 2 ≤
+        2 * KC i + 2 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Cv0‖ ^ 2 := by
+      have hx := pow_le_pow_left₀ (norm_nonneg _) hCv_norm 2
+      nlinarith [hCvDiff, hx,
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Cvf - Cv0)‖ -
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cv0‖)]
+    have hsm : iteratedCovGrad (I := I) g₀ 2 2 i ((3 / 2 : ℝ) • Rmf) =
+        (3 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i Rmf :=
+      hicg_smul 2 2 i (3 / 2 : ℝ) Rmf
+    have hCf_split : Cf = Cf + (3 / 2 : ℝ) • Rmf - Cvf - (3 / 2 : ℝ) • Rmf + Cvf := by
+      abel
+    have hicg_split : iteratedCovGrad (I := I) g₀ 2 2 i Cf =
+        iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf) -
+          (3 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i Rmf +
+          iteratedCovGrad (I := I) g₀ 2 2 i Cvf := by
+      conv_lhs => rw [hCf_split]
+      rw [iteratedCovGrad_add, iteratedCovGrad_sub, hsm]
+    have ht3 : ‖(3 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ =
+        (3 / 2 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ := by
+      rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 3 / 2)]
+    have htri : ‖iteratedCovGrad (I := I) g₀ 2 2 i Cf‖ ≤
+        ‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ +
+          (3 / 2 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ +
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖ := by
+      rw [hicg_split]
+      have ht1 := norm_add_le
+        (iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf) -
+          (3 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i Rmf)
+        (iteratedCovGrad (I := I) g₀ 2 2 i Cvf)
+      have ht2 := norm_sub_le
+        (iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf))
+        ((3 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 2 2 i Rmf)
+      linarith [ht1, ht2, ht3.le, ht3.ge]
+    have hx2 := pow_le_pow_left₀ (norm_nonneg _) htri 2
+    have hxsq : ‖iteratedCovGrad (I := I) g₀ 2 2 i Cf‖ ^ 2 ≤
+        3 * ‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ ^ 2 +
+          27 / 4 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ ^ 2 +
+          3 * ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖ ^ 2 := by
+      nlinarith [hx2,
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ -
+          (3 / 2 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖),
+        sq_nonneg (‖iteratedCovGrad (I := I) g₀ 2 2 i (Cf + (3 / 2 : ℝ) • Rmf - Cvf)‖ -
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖),
+        sq_nonneg ((3 / 2 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 2 2 i Rmf‖ -
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i Cvf‖)]
+    linarith [hxsq, hZraw, hRm_sq, hCv_sq]
 
 private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1406,6 +1649,15 @@ private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
   DifferentialGeometry.Integral.Connection.linearizedRicciArm1BaseCoeff_realizedFam_jetL2_perOrder_ballUniform
     (I := I) (M := M) g₀ a ha_super hR hδ₀
 
+/-- Per-order realized-family jet bound, at orders `i ≤ a`, for the bare arm-1 correction field
+`linearizedRicciArm1CorrField` (the opaque `choose` witness of `exists_arm0_arm1_corrField_data`),
+uniform over the `a + 2`-jet balls of `T, T'`: projects the arm-1 clause of the correction-field
+spec (`corrFieldDataSpec`, third conjunct), which bounds the bare `C1` jet by
+`corrFieldTameJetBound · (1 + Σ_{j<i+2} window)`, then absorbs the window into the ball constant
+via `Σ_{j<i+2}(‖∇ʲT‖² + ‖∇ʲT'‖²) ≤ 2(a+2)R²`. TRANSIT: the spec chain
+(`exists_corrFieldChristoffelConst`) rests on the posited grid child at
+`RicciThreeArmCorrectionFieldTameEnvelope`; consumers transitively depend on `sorryAx` until it
+lands. -/
 private theorem linearizedRicciArm1CorrField_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1420,8 +1672,60 @@ private theorem linearizedRicciArm1CorrField_perOrder_rfns_ballUniform
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
-              (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i :=
-  sorry
+              (linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s)‖ ^ 2 ≤ P i := by
+  classical
+  refine ⟨fun i =>
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrFieldTameJetBound
+        (I := I) (M := M) g₀ a R δ₀ i * (1 + 2 * ((a : ℝ) + 2) * R ^ 2),
+    fun i =>
+      mul_nonneg
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrFieldTameJetBound_nonneg
+          (I := I) (M := M) g₀ a R δ₀ i)
+        (by positivity), ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  obtain ⟨_, _, hbound, _⟩ :=
+    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+      (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
+  have hjet := ((hbound ha_super hR hδ₀ hδ_le hδ'_le hTball hT'ball).2 i hi s hs).2
+  have hwin : ∑ j ∈ Finset.range (i + 2),
+      (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) ≤ 2 * ((a : ℝ) + 2) * R ^ 2 := by
+    have hterm : ∀ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2 ≤ 2 * R ^ 2 := by
+      intro j hj
+      have hj_le : j ≤ a + 2 := by
+        have hj' := Finset.mem_range.mp hj
+        omega
+      have h1 : ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 ≤ R ^ 2 :=
+        pow_le_pow_left₀ (norm_nonneg _) (hTball j hj_le) 2
+      have h2 : ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2 ≤ R ^ 2 :=
+        pow_le_pow_left₀ (norm_nonneg _) (hT'ball j hj_le) 2
+      linarith
+    have hsum := Finset.sum_le_card_nsmul (Finset.range (i + 2)) _ (2 * R ^ 2) hterm
+    rw [Finset.card_range, nsmul_eq_mul] at hsum
+    have hcast : ((i + 2 : ℕ) : ℝ) ≤ (a : ℝ) + 2 := by
+      have hia : (i : ℝ) ≤ (a : ℝ) := Nat.cast_le.mpr hi
+      push_cast
+      linarith
+    have h2R : (0 : ℝ) ≤ 2 * R ^ 2 := by positivity
+    calc ∑ j ∈ Finset.range (i + 2),
+          (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)
+        ≤ ((i + 2 : ℕ) : ℝ) * (2 * R ^ 2) := hsum
+      _ ≤ ((a : ℝ) + 2) * (2 * R ^ 2) := mul_le_mul_of_nonneg_right hcast h2R
+      _ = 2 * ((a : ℝ) + 2) * R ^ 2 := by ring
+  have hone : (1 : ℝ) + ∑ j ∈ Finset.range (i + 2),
+      (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) ≤
+      1 + 2 * ((a : ℝ) + 2) * R ^ 2 := by linarith
+  have hK_nn :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrFieldTameJetBound_nonneg
+      (I := I) (M := M) g₀ a R δ₀ i
+  rw [show linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' =
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+        (I := I) g₀ T T' hδ hδ').choose_spec.choose from rfl]
+  exact le_trans hjet (mul_le_mul_of_nonneg_left hone hK_nn)
 
 private theorem ricciArmPrincipalCoeff_realizedFam_perOrder_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
