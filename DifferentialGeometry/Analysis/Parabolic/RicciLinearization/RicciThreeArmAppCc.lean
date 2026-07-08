@@ -2849,7 +2849,13 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M)
                 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
               + appCc (I := I) (M := M) g₀ 4 2
                 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+  (∀ s : ℝ, C0 s =
+    linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
+      - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s) ∧
+  (∀ s : ℝ, C1 s =
+    linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
+      - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -2864,7 +2870,7 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
   refine ⟨fun s => linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
       - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s,
     fun s => linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
-      - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s, ?_, ?_, ?_, ?_⟩
+      - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · have hfun : (fun s => linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s +
         (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
           - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s)) =
@@ -3054,6 +3060,8 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
   · intro hTsymm hT'symm s hs x v hδ_lt hδ'_lt
     exact linearizedRicciAt_eq_threeArm_connDiffCoeff (I := I) g₀ T T'
       hTsymm hT'symm hδ_lt hδ hδ'_lt hδ' s hs x v
+  · exact fun s => rfl
+  · exact fun s => rfl
 
 theorem exists_arm0_arm1_corrField_data (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -3394,7 +3402,7 @@ theorem exists_linearizedRicciOrder1DivCoeff (g₀ : SmoothRiemannianMetric I M)
                 + appCc (I := I) (M := M) g₀ 4 2 (Φ₂ s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
-  obtain ⟨_, _, _, hident⟩ :=
+  obtain ⟨_, _, _, hident, _, _⟩ :=
     (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec
   refine ⟨linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ',
     linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ',
