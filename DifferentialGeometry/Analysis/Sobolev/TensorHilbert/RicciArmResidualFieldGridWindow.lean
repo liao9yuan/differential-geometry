@@ -5825,7 +5825,7 @@ private lemma ricciArmOrder0AACommCoeffField_eq_refold (P : SmoothCcTensor g₀ 
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-private lemma exists_rfns_icg_ricciArmOrder0AACommCoeffField_window
+lemma exists_rfns_icg_ricciArmOrder0AACommCoeffField_window
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

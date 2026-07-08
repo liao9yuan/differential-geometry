@@ -12159,43 +12159,6 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
     _ ≤ CP 0 * (fr * (fr * (4 * (KD4 * (KsR * (Csob * R) ^ 2))))) :=
         mul_le_mul hPTO hXi hXinn (hCP_nn 0)
 
-set_option linter.unusedVariables false in
-/-- Deferred input (Q_true raw-field grid-window seam; pattern class: the qtower close —
-the antisymmetrized `A ⋆ A` commutator coefficient field refolds onto the moving
-pair-trace operator applied to the slot-extended difference of the two slot-permuted
-Koszul-against-lowered-connection-difference fold weights, so the covariant-gradient
-fibre norms of the RAW field ride the bounded-factor grid of cap `i + 1` over window
-`i + 3` in the perturbation jets, with `C` perturbation-uniform and `δ₀`-rated): the
-pointwise capped grid window for the raw antisymmetrized `A ⋆ A` commutator coefficient
-field, generic in a perturbed metric `g₁ = g₀ + P`. This statement is PROVEN on disk as
-the private raw-field engine of
-`Analysis/Sobolev/TensorHilbert/RicciArmResidualFieldGridWindow` (the tower behind its
-sorry-free public input-symmetrized theorem
-`rfns_iteratedCovGrad_ricciArmOrder0AACommCoeffFieldInputSymm_boundedFactorGridWindow_le`);
-it is re-posited here ONLY because that engine is `private` to its home file — the
-discharge is a visibility/export pass on the tower file, not new mathematics. Falsity
-mechanism guarded at birth: the `i + 1` per-factor cap excludes the `i + 2`-order
-perturbation jet (the quadratic one-jet content occupies total grid weight `i + 2` at
-per-factor order at most `i + 1`), and without the cap the window form is false at the
-high-frequency `λ`-family witnesses. Every consumer transitively depends on `sorryAx`
-until the seam closes. -/
-theorem exists_rfns_icg_ricciArmOrder0AACommCoeffField_window
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
-    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
-      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
-          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (i : ℕ) (x : M),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
-            ((iteratedCovGrad (I := I) g₀ 2 2 i
-              (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)).toSection x) ≤
-          C i * Combinatorics.boundedFactorGridWindow
-            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) :=
-  sorry
-
 set_option linter.unusedSectionVars false in
 /-- The `K = 1`, `W = 3` bounded-factor grid window carries only the order-one factor:
 its cells are the empty product, the single order-one factor, and the order-one pair, so
