@@ -22,11 +22,11 @@ pair), the shared sharp-gradient Koszul residual and Ricci-fold remainder fields
 background-curvature difference and refold remainder (`bgRDiffRefoldRemainderField`), each a
 pinned construction with a proven vanish-at-base litmus lemma.
 
-The closing sym-sector cancellation equation
+The closing sym-sector cancellation equation C-EQ″
 (`linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_eq_residualFieldSum`),
-splitting the input-slot-symmetrized moving arm-zero combination onto these fields, is posited
-here as a clearly-labelled deferred input (`sorry`); every consumer transitively depends on
-`sorryAx` until it lands.
+splitting the input-slot-symmetrized moving arm-zero combination onto these fields plus the
+`L0` pass-through and the packaged kernel contraction (`refoldKernelContractionField`), is
+PROVEN here as a corollary of the fold primitive — sorry-free.
 
 These fields feed the capped grid-window towers of
 `Analysis/Sobolev/TensorHilbert/RicciArmResidualFieldGridWindow`; this file sits upstream of
@@ -3481,64 +3481,967 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
   rw [hS1, hrowsum1, hrowsum0]
   ring
 
-/-! ### Stage E — the sym-sector cancellation equation (M-dossier C-EQ, kernel-field form) -/
+set_option maxHeartbeats 3200000
+
+/-! ### Stage E — the kernel-contraction field and the sym-sector cancellation equation C-EQ″
+
+The `(2,2)`-valued repackaging of the primitive's second-gradient refold kernel term in the
+`W`-slots: the four-monomial kernel weight now rides the DATA slot, while the second-gradient
+argument `G` (in application `∇²P`) is frozen into the coefficient. -/
+
+/-- The unit value section of a rank-`(0,4)` coefficient tensor (the rank-four carrier of
+`unitModel`, section level — the rank-four sibling of `ccTensorUnitValueSection`). -/
+def ccTensorFourUnitValueSection (g : SmoothRiemannianMetric I M)
+    (G : SmoothCcTensor g 0 4) : Π y : M, Tensor0SSpace 4 I y :=
+  fun y =>
+    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 4 I y from G.toSection y)
+      (unitZeroSec (I := I) (M := M) y)
 
 set_option linter.unusedSectionVars false in
-/-- M-dossier child C-EQ (CAND-A, in the leader-ruled KERNEL-FIELD form, restated on the
-CONFIRMED Form B): the generic-`g₁` field-level Palatini split of the
-input-slot-symmetrized moving arm-0 combination onto the two pinned residual coefficient
-fields. The linear `∇²`-content of the order-zero arm and of the half Riemann-arm
-difference annihilate on the `ccInputSymm` sector (the certified mechanism-A cancellation
-`Order0∇ = -(1/2) • RmArm∇`, symmetric-sector-ONLY — the antisymmetric free-Koszul witness
-`E₀₁ − E₁₀ ↦ 7949 ≠ 0` kills every full-field predecessor), so only the antisymmetrized
-`A ⋆ A` commutator field (`ricciArmOrder0AACommCoeffField`, the Form B `Q_true`) and the
-corrected background-curvature-difference and refold remainder (DEF-2′, carrying the
-input-slot-swapped bg-R difference, half the `(∇♯)K`-residual and minus the Ricci-fold
-remainder) survive on the right.
+theorem ccTensorFourUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
+    (G : SmoothCcTensor g 0 4) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+        (E := fun z : M => Tensor0SSpace 4 I z) y
+        (ccTensorFourUnitValueSection (I := I) (M := M) g G y)) := by
+  exact ContMDiff.clm_bundle_apply (𝕜 := ℝ) (n := (∞ : WithTop ℕ∞))
+    (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel 4 ℝ E)
+    (E₁ := fun z : M => Tensor0SSpace 0 I z)
+    (E₂ := fun z : M => Tensor0SSpace 4 I z)
+    (IM := I) (IB := I) (b := id)
+    (ϕ := fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 4 I y from G.toSection y))
+    (v := fun y : M => unitZeroSec (I := I) (M := M) y)
+    G.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
 
-KERNEL-FIELD FORM (fold derivation map E2/E4, leader-ruled; weight placement TRUTH-FIXED
-per the Form B derivation): the `C₂` term of this equation's fold derivation is
-`curvatureRefoldKernelCoeffField` at the DERIVED second-Bianchi quadruple
-`σ₁ = Equiv.swap 0 2, σ₂ = Equiv.swap 1 3, σ₃ = Equiv.swap 0 2 * Equiv.swap 1 3, σ₄ = 1`
-(partner quadruple `qB = Equiv.swap 0 1 * qA ·`, `IsFramePairPartner`-paired,
-`not_isFramePairPartner_self` rejecting the diagonal), at coefficient EXACTLY `1`
-(donor `2` × Koszul `½` × kernel-internal `½` closes), with the kernel WEIGHT the unit
-value of the APPLIED ARGUMENT `W` (`ccTensorUnitValueSection` of the datum the coefficient
-is applied to) and the SECOND GRADIENT falling on the metric-difference tensor `P` — the
-derivation-faithful placement of the shared fold primitive
-`ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient` —
-NOT the `½`-partner-averaged `riemannPalatiniRefoldC2Family` wrapper and NOT a
-metric-difference-weighted kernel. Hence the RA-1 defect D1 (the family carries HALF the
-fold) is NOT inherited — no `½`-family average appears in the derivation — and D2 (the
-mixed `α`-sector escape) is VOID: the metric-difference tensor is symmetric by
-construction, so no antisymmetric weight sector exists at field level.
+/-- Evaluation of a rank-two fibre tensor at a fixed model pair, as a continuous linear
+functional (the data-slot scalar of the kernel contraction). -/
+private def refoldKernelArgumentPairEvalCLM (x : M) (v : Fin 2 → E) :
+    Tensor0SSpace 2 I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D => Tensor0SSpace.toModel (𝕜 := ℝ) D v
+      map_add' := fun D₁ D₂ => by
+        rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+      map_smul' := fun c D => by
+        rw [Tensor0SSpace.toModel_smul]
+        rfl }
 
-COMPOSITION WALK (dossier §vi assembly map, on Form B): under this equation the frozen
-M-child capped-grid target assembles as
-`ccInputSymm (comb) = ccInputSymm (ricciArmOrder0AACommCoeffField) + ccInputSymm (bgRDiffRefoldRemainderField)` [C-EQ]
-`⟹ rfns (icg^i (LHS)) ≤ 2·rfns (icg^i ccInputSymm Q_true) + 2·rfns (icg^i ccInputSymm BGR)`
-[`iteratedCovGrad_add` + `riemannianFiberNormSq_add_le`]
-`⟹ ≤ (2·C_QTRUE i + 2·C_BGR i) · boundedFactorGridWindow (P-jets) (i+1) (i+3)`
-[the C-BGR capped grid-window tower of `RicciArmResidualFieldGridWindow`, re-derived on
-DEF-2′, plus the pending `Q_true` `ccInputSymm` tower twin — the C-QUAD program re-run on
-`ricciArmOrder0AACommCoeffField` through the same proven engines] — the
-`ccInputSymm_add`/`riemannianFiberNormSq_add_le` glue of the committed successor peel.
+set_option linter.unusedSectionVars false in
+private lemma refoldKernelArgumentPairEvalCLM_apply (x : M) (v : Fin 2 → E)
+    (D : Tensor0SSpace 2 I x) :
+    refoldKernelArgumentPairEvalCLM (I := I) (M := M) x v D =
+      Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
 
-VACUITY: both right-hand fields are PINNED constructions with proven diagonal litmuses
-(`ricciArmOrder0AACommCoeffField_self`, `bgRDiffRefoldRemainderField_self`), and the
-kernel pin sits at the pinned derived quadruple — this is a field EQUATION over named
-constructed objects, not an `∃`-residual child (the lane-T vacuity class is excluded by
-construction).
+/-- The frame-summed kernel-contraction refold monomial at a fixed frame family `B`: the
+DATA slot `D` supplies the weight `D(B_a, B_b)`, while the frozen rank-four argument section
+`Gs` receives the frame pair in its two leading slots after the slot permutation `σ`. This is
+the `W`-slot repackaging of `curvatureRefoldMonomialFibFixedFrame` (there the weight is frozen
+and the rank-four datum moves; here the rank-four argument is frozen and the weight moves). -/
+def refoldKernelContractionMonomialFibFixedFrame (Gs : Π b : M, Tensor0SSpace 4 I b)
+    (σ : Equiv.Perm (Fin 4))
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+    (refoldKernelArgumentPairEvalCLM (I := I) (M := M) x
+        ![(B a x : E), (B b x : E)]).smulRight
+      (leadingPairFeedFib (I := I) (M := M) 2 x (B a x) (B b x)
+        (slotPerm4Fib (I := I) (M := M) x σ (Gs x)))
 
-DEFERRED INPUT (`sorry`): the marathon leaf — the `riemannSec_difference` Palatini fold at
-field level on Form B (the R8 symbolic derivation is the fill road map: the on-disk
-`order0CLM` / `ricciCometricFourTraceCLM` evaluation shapes plus the two hand-bridge
-upgrades, the Koszul-derivative `DA ↔ K` identity at a general connection difference and
-the moving-frame raise, with the second-Bianchi completion forcing the `Wᵀ` transposition),
-per the fold derivation map. Every consumer transitively depends on `sorryAx` until it
-lands. -/
+set_option linter.unusedSectionVars false in
+/-- Non-discard guard (constructive side): the fixed-frame kernel-contraction monomial is the
+frame sum of the weighted refold monomials at the data-supplied weights. -/
+lemma refoldKernelContractionMonomialFibFixedFrame_apply
+    (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4))
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
+    (D : Tensor0SSpace 2 I x) :
+    refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M) Gs σ B x D =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        curvatureRefoldMonomialFib (I := I) (M := M) x
+          (Tensor0SSpace.toModel (𝕜 := ℝ) D ![(B a x : E), (B b x : E)]) σ
+          (B a x) (B b x) (Gs x) := by
+  rw [refoldKernelContractionMonomialFibFixedFrame, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [ContinuousLinearMap.smulRight_apply, refoldKernelArgumentPairEvalCLM_apply,
+    curvatureRefoldMonomialFib_apply]
+
+set_option linter.unusedSectionVars false in
+lemma refoldKernelContractionMonomialFibFixedFrame_toModel
+    (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4))
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
+    (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SSpace.toModel
+        (refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M) Gs σ B x D) v =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel (𝕜 := ℝ) D ![(B a x : E), (B b x : E)] *
+          Tensor0SSpace.toModel (𝕜 := ℝ) (Gs x)
+            (fun i => (Fin.cons ((B a x : E)) (Fin.cons ((B b x : E)) v) : Fin 4 → E)
+              (σ i)) := by
+  classical
+  rw [refoldKernelContractionMonomialFibFixedFrame_apply, ← Tensor0SSpace.toModelL_apply,
+    map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rw [Tensor0SSpace.toModelL_apply, curvatureRefoldMonomialFib_toModel]
+
+private theorem refoldKernelContractionMonomialFibFixedFrame_apply_section_contMDiff
+    (Gs : Π b : M, Tensor0SSpace 4 I b)
+    (hGs : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+        (E := fun z : M => Tensor0SSpace 4 I z) b (Gs b)))
+    (σ : Equiv.Perm (Fin 4))
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
+    (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        (refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M) Gs σ B x (Y x))) := by
+  classical
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 4
+  set Gσ : Cₛ^∞⟮I; Tensor0SModel 4 ℝ E, fun z : M => Tensor0SSpace 4 I z⟯ :=
+    { toFun := fun x : M => slotPerm4Fib (I := I) (M := M) x σ (Gs x)
+      contMDiff_toFun := by
+        have h := slotPerm4Fib_apply_section_contMDiff (I := I) (M := M) σ
+          ({ toFun := fun x : M => Gs x
+             contMDiff_toFun := hGs } :
+            Cₛ^∞⟮I; Tensor0SModel 4 ℝ E, fun z : M => Tensor0SSpace 4 I z⟯)
+        exact h }
+    with hGσ_def
+  have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
+      ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SSpace 2 I z) x
+          ((refoldKernelArgumentPairEvalCLM (I := I) (M := M) x
+              ![(B a x : E), (B b x : E)]).smulRight
+            (leadingPairFeedFib (I := I) (M := M) 2 x (B a x) (B b x)
+              (slotPerm4Fib (I := I) (M := M) x σ (Gs x))) (Y x))) := by
+    intro a b
+    have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (fun x : M => Tensor0SSpace.toModel (𝕜 := ℝ) (Y x) ![(B a x : E), (B b x : E)]) := by
+      have h := TensorMultilinear.contMDiff_section_apply (n := 2)
+        (fun b => Y b) Y.contMDiff
+        (![fun z => B a z, fun z => B b z])
+        (by
+          intro i
+          fin_cases i
+          · exact hB a
+          · exact hB b)
+      refine h.congr ?_
+      intro x
+      congr 1
+      funext i
+      fin_cases i <;> rfl
+    have hfeed1 : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 3 ℝ E)
+          (E := fun z : M => Tensor0SSpace 3 I z) x
+          (Tensor0SPartialEval.tensor0SPartialEval I M (s := 3)
+            (fun z => Gσ z) (fun z => B a z) x)) :=
+      Tensor0SPartialEval.contMDiff_tensor0SPartialEval I M (s := 3)
+        (fun z => Gσ z) Gσ.contMDiff (fun z => B a z) (hB a)
+    set Z3 : Cₛ^∞⟮I; Tensor0SModel 3 ℝ E, fun z : M => Tensor0SSpace 3 I z⟯ :=
+      { toFun := fun x : M => Tensor0SPartialEval.tensor0SPartialEval I M (s := 3)
+          (fun z => Gσ z) (fun z => B a z) x
+        contMDiff_toFun := hfeed1 }
+      with hZ3_def
+    have hfeed2 : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SSpace 2 I z) x
+          (Tensor0SPartialEval.tensor0SPartialEval I M (s := 2)
+            (fun z => Z3 z) (fun z => B b z) x)) :=
+      Tensor0SPartialEval.contMDiff_tensor0SPartialEval I M (s := 2)
+        (fun z => Z3 z) Z3.contMDiff (fun z => B b z) (hB b)
+    have hsmul := ContMDiff.smul_section
+      (f := fun x : M => Tensor0SSpace.toModel (𝕜 := ℝ) (Y x) ![(B a x : E), (B b x : E)])
+      (s := fun x : M => Tensor0SPartialEval.tensor0SPartialEval I M (s := 2)
+        (fun z => Z3 z) (fun z => B b z) x)
+      hscalar hfeed2
+    refine hsmul.congr ?_
+    intro x
+    rfl
+  set S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
+    fun a b =>
+      { toFun := fun x : M =>
+          (refoldKernelArgumentPairEvalCLM (I := I) (M := M) x
+              ![(B a x : E), (B b x : E)]).smulRight
+            (leadingPairFeedFib (I := I) (M := M) 2 x (B a x) (B b x)
+              (slotPerm4Fib (I := I) (M := M) x σ (Gs x))) (Y x)
+        contMDiff_toFun := hsummand a b } with hS_def
+  set Stot : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
+    ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b with hStot_def
+  have hStot := Stot.contMDiff
+  refine hStot.congr ?_
+  intro x
+  refine congrArg (TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SSpace 2 I z) x) ?_
+  rw [refoldKernelContractionMonomialFibFixedFrame, hStot_def]
+  have hcoeOuter : ((∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b :
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+        Π z : M, Tensor0SSpace 2 I z) =
+      ∑ a : Fin (Module.finrank ℝ E),
+        ((∑ b : Fin (Module.finrank ℝ E), S a b :
+          Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+          Π z : M, Tensor0SSpace 2 I z) :=
+    map_sum (ContMDiffSection.coeAddHom I (Tensor0SModel 2 ℝ E) ∞
+      (fun z : M => Tensor0SSpace 2 I z))
+      (fun a => ∑ b : Fin (Module.finrank ℝ E), S a b) Finset.univ
+  have hcoeInner : ∀ a : Fin (Module.finrank ℝ E),
+      ((∑ b : Fin (Module.finrank ℝ E), S a b :
+        Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+        Π z : M, Tensor0SSpace 2 I z) =
+      ∑ b : Fin (Module.finrank ℝ E), ((S a b : Π z : M, Tensor0SSpace 2 I z)) := fun a =>
+    map_sum (ContMDiffSection.coeAddHom I (Tensor0SModel 2 ℝ E) ∞
+      (fun z : M => Tensor0SSpace 2 I z)) (fun b => S a b) Finset.univ
+  have hsum : ((∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b :
+      Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
+        Π z : M, Tensor0SSpace 2 I z) x =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        (S a b : Π z : M, Tensor0SSpace 2 I z) x := by
+    rw [hcoeOuter, Finset.sum_apply]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [hcoeInner a, Finset.sum_apply]
+  rw [hsum, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [ContinuousLinearMap.sum_apply]
+  rfl
+
+-- The orthonormal double-trace frame-independence engine (kept private in
+-- `OperatorFieldSecondGradientRefold`); re-derived here for the kernel-contraction patching.
+private def kcInnerPairBilin (x : M)
+    (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (X : TangentSpace I x) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap
+    { toFun := fun Y => (K X Y) • (L X)
+      map_add' := fun Y Y' => by rw [map_add, add_smul]
+      map_smul' := fun c Y => by rw [map_smul, smul_eq_mul, RingHom.id_apply, mul_smul] }
+
+set_option linter.unusedSectionVars false in
+private lemma kcInnerPairBilin_apply (x : M)
+    (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (X Y Y' : TangentSpace I x) :
+    kcInnerPairBilin (I := I) x K L X Y Y' = K X Y * L X Y' := by
+  rw [kcInnerPairBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+    ContinuousLinearMap.smul_apply, smul_eq_mul]
+
+private def kcOuterPairBilin (g : SmoothRiemannianMetric I M) (x : M)
+    (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :
+    TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap
+    { toFun := fun X => ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        (chartInvGramMatrix (I := I) g x x k l * K X (chartModelBasis E k)) •
+          (ContinuousLinearMap.flip L (chartModelBasis E l))
+      map_add' := fun X X' => by
+        ext Y'
+        simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.coe_sum',
+          ContinuousLinearMap.coe_smul', Finset.sum_apply, Pi.smul_apply,
+          ContinuousLinearMap.flip_apply, map_add, smul_eq_mul]
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun l _ => ?_)
+        ring
+      map_smul' := fun c X => by
+        ext Y'
+        simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.coe_sum',
+          ContinuousLinearMap.coe_smul', Finset.sum_apply, Pi.smul_apply,
+          ContinuousLinearMap.flip_apply, map_smul, smul_eq_mul, RingHom.id_apply]
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl (fun l _ => ?_)
+        ring }
+
+set_option linter.unusedSectionVars false in
+private lemma kcOuterPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
+    (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
+    kcOuterPairBilin (I := I) g x K L X X' =
+      ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g x x k l *
+          (K X (chartModelBasis E k) * L X' (chartModelBasis E l)) := by
+  rw [kcOuterPairBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+  simp only [ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply, smul_eq_mul,
+    ContinuousLinearMap.flip_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  ring
+
+private theorem kc_double_frame_bilin_trace_eq_fixed
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hB : ∀ i j, g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0) :
+    ∑ a, ∑ b, K (B a) (B b) * L (B a) (B b) =
+      ∑ m, ∑ n, chartInvGramMatrix (I := I) g x x m n *
+        (∑ k, ∑ l, chartInvGramMatrix (I := I) g x x k l *
+          (K (chartModelBasis E m) (chartModelBasis E k) *
+            L (chartModelBasis E n) (chartModelBasis E l))) := by
+  classical
+  have hinner : ∀ a, ∑ b, K (B a) (B b) * L (B a) (B b) =
+      kcOuterPairBilin (I := I) g x K L (B a) (B a) := by
+    intro a
+    rw [kcOuterPairBilin_apply]
+    have h := orthonormal_basis_bilin_trace (I := I) (M := M) g (x := x)
+      (kcInnerPairBilin (I := I) x K L (B a)) B hB
+    simp only [kcInnerPairBilin_apply] at h
+    rw [h]
+  rw [Finset.sum_congr rfl (fun a _ => hinner a)]
+  have hout := orthonormal_basis_bilin_trace (I := I) (M := M) g (x := x)
+    (kcOuterPairBilin (I := I) g x K L) B hB
+  rw [hout]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  refine Finset.sum_congr rfl (fun n _ => ?_)
+  rw [kcOuterPairBilin_apply]
+
+private theorem kc_double_frame_bilin_trace_indep
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (B C : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hB : ∀ i j, g.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0)
+    (hC : ∀ i j, g.inner x (C i) (C j) = if i = j then (1 : ℝ) else 0) :
+    ∑ a, ∑ b, K (B a) (B b) * L (B a) (B b) =
+      ∑ a, ∑ b, K (C a) (C b) * L (C a) (C b) := by
+  rw [kc_double_frame_bilin_trace_eq_fixed (I := I) g x K L B hB,
+    kc_double_frame_bilin_trace_eq_fixed (I := I) g x K L C hC]
+
+-- Leading-pair partial evaluation as a bilinear form (kept private in
+-- `OperatorFieldSecondGradientRefold`); re-derived here.
+private def kcToModelEvalCLM (s : ℕ) (x : M) (v : Fin s → E) :
+    Tensor0SSpace s I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D => Tensor0SSpace.toModel (𝕜 := ℝ) D v
+      map_add' := fun D₁ D₂ => by
+        rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+      map_smul' := fun c D => by
+        rw [Tensor0SSpace.toModel_smul]
+        rfl }
+
+set_option linter.unusedSectionVars false in
+private lemma kcToModelEvalCLM_apply (s : ℕ) (x : M) (v : Fin s → E)
+    (D : Tensor0SSpace s I x) :
+    kcToModelEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
+
+private def kcPairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
+    (v : Fin s → E) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap
+    { toFun := fun p => (kcToModelEvalCLM (I := I) (M := M) s x v).comp
+        (tensor0S_curry (𝕜 := ℝ) (I := I) (M := M) s x
+          ((tensor0S_curry (𝕜 := ℝ) (I := I) (M := M) (s + 1) x G) p))
+      map_add' := fun p p' => by
+        rw [map_add, map_add, ContinuousLinearMap.comp_add]
+      map_smul' := fun c p => by
+        rw [map_smul, map_smul, RingHom.id_apply]
+        ext q
+        simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
+          map_smul] }
+
+set_option linter.unusedSectionVars false in
+private lemma kcPairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
+    (v : Fin s → E) (p q : TangentSpace I x) :
+    kcPairFeedScalarCLM (I := I) (M := M) s x G v p q =
+      Tensor0SSpace.toModel (𝕜 := ℝ) G (Fin.cons (p : E) (Fin.cons (q : E) v)) := by
+  rw [kcPairFeedScalarCLM, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+    ContinuousLinearMap.comp_apply, kcToModelEvalCLM_apply,
+    TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := (tensor0S_curry (𝕜 := ℝ) (I := I) (M := M) (s + 1) x G) p) (v0 := q) (vs := v),
+    TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := G) (v0 := p) (vs := Fin.cons (q : E) v)]
+
+/-- The frame-summed kernel-contraction refold monomial at the smooth orthonormal frame of
+`g₁`: the moving-metric kernel-contraction coefficient, fibre level. -/
+def refoldKernelContractionMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
+    (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M) Gs σ
+    (smoothOrthoFrame (I := I) g₁ x) x
+
+theorem refoldKernelContractionMonomialBiContrFib_eq_fixedFrame_on_nbhd
+    (g₁ : SmoothRiemannianMetric I M) (Gs : Π b : M, Tensor0SSpace 4 I b)
+    (σ : Equiv.Perm (Fin 4)) (x₀ : M) {y : M}
+    (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
+    refoldKernelContractionMonomialBiContrFib (I := I) (M := M) g₁ Gs σ y =
+      refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M) Gs σ
+        (smoothOrthoFrame (I := I) g₁ x₀) y := by
+  classical
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [refoldKernelContractionMonomialBiContrFib,
+    refoldKernelContractionMonomialFibFixedFrame_toModel,
+    refoldKernelContractionMonomialFibFixedFrame_toModel]
+  have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel (𝕜 := ℝ) D ![(Bf a : E), (Bf b : E)] *
+          Tensor0SSpace.toModel (𝕜 := ℝ) (Gs y)
+            (fun i => (Fin.cons ((Bf a : E)) (Fin.cons ((Bf b : E)) v) : Fin 4 → E)
+              (σ i)) =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        kcPairFeedScalarCLM (I := I) (M := M) 0 y D ![] (Bf a) (Bf b) *
+          kcPairFeedScalarCLM (I := I) (M := M) 2 y
+            (slotPerm4Fib (I := I) (M := M) y σ (Gs y)) v (Bf a) (Bf b) := by
+    intro Bf
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [kcPairFeedScalarCLM_apply, kcPairFeedScalarCLM_apply, slotPerm4Fib_toModel,
+      ContinuousMultilinearMap.domDomCongr_apply]
+    rfl
+  rw [hrewrite (fun a => smoothOrthoFrame (I := I) g₁ y a y),
+    hrewrite (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)]
+  exact kc_double_frame_bilin_trace_indep (I := I) g₁ y
+    (kcPairFeedScalarCLM (I := I) (M := M) 0 y D ![])
+    (kcPairFeedScalarCLM (I := I) (M := M) 2 y (slotPerm4Fib (I := I) (M := M) y σ (Gs y)) v)
+    (fun a => smoothOrthoFrame (I := I) g₁ y a y)
+    (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)
+    (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
+    (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)
+
+theorem refoldKernelContractionMonomialBiContrFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
+    (Gs : Π b : M, Tensor0SSpace 4 I b)
+    (hGs : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
+        (E := fun z : M => Tensor0SSpace 4 I z) b (Gs b)))
+    (σ : Equiv.Perm (Fin 4)) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (refoldKernelContractionMonomialBiContrFib (I := I) (M := M)
+          g₁ Gs σ x))) := by
+  classical
+  intro x₀
+  have h_fixed : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M)
+          Gs σ (smoothOrthoFrame (I := I) g₁ x₀) x))) x₀ := by
+    have h_glob : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+          (E := fun z : M => TensorRSSpace 2 2 I z) x
+          (TensorRSSpace.ofCLM (refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M)
+            Gs σ (smoothOrthoFrame (I := I) g₁ x₀) x))) := by
+      apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+        (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun z : M => Tensor0SSpace 2 I z)
+        (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SSpace 2 I z)
+        (φ := fun x : M => refoldKernelContractionMonomialFibFixedFrame (I := I) (M := M)
+          Gs σ (smoothOrthoFrame (I := I) g₁ x₀) x)
+      intro Y
+      exact refoldKernelContractionMonomialFibFixedFrame_apply_section_contMDiff
+        (I := I) (M := M) Gs hGs σ (smoothOrthoFrame (I := I) g₁ x₀)
+        (fun i => smoothOrthoFrame_smooth (I := I) g₁ x₀ i) Y
+    exact h_glob x₀
+  refine h_fixed.congr_of_eventuallyEq ?_
+  filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
+  exact congrArg (TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+    (E := fun z : M => TensorRSSpace 2 2 I z) y)
+    (congrArg TensorRSSpace.ofCLM
+      (refoldKernelContractionMonomialBiContrFib_eq_fixedFrame_on_nbhd (I := I) (M := M)
+        g₁ Gs σ x₀ hy))
+
+/-- The frame-summed kernel-contraction refold monomial as a smooth compactly supported
+`(2,2)` coefficient field: the frozen rank-`(0,4)` argument `G` rides the coefficient through
+its unit-value section, while the data slot receives the kernel weight. -/
+def refoldKernelContractionMonomialField (g₀ g₁ : SmoothRiemannianMetric I M)
+    (G : SmoothCcTensor g₀ 0 4) (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 2 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (refoldKernelContractionMonomialBiContrFib (I := I) (M := M)
+            g₁ (ccTensorFourUnitValueSection (I := I) (M := M) g₀ G) σ x))
+      contMDiff_toFun := refoldKernelContractionMonomialBiContrFib_contMDiff (I := I) (M := M)
+        g₁ (ccTensorFourUnitValueSection (I := I) (M := M) g₀ G)
+        (ccTensorFourUnitValueSection_contMDiff (I := I) (M := M) g₀ G) σ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+@[simp] theorem refoldKernelContractionMonomialField_toSection
+    (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
+    (σ : Equiv.Perm (Fin 4)) (x : M) :
+    (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ).toSection x =
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (refoldKernelContractionMonomialBiContrFib (I := I) (M := M)
+          g₁ (ccTensorFourUnitValueSection (I := I) (M := M) g₀ G) σ x)) := rfl
+
+/-- The kernel-contraction `(2,2)` coefficient field of the C-EQ″ kernel summand: the
+half-weighted `σ₁ + σ₂ − σ₃ − σ₄` combination of the frame-summed kernel-contraction refold
+monomials at the frozen rank-`(0,4)` argument `G` (in application: the second covariant
+gradient of the metric-difference tensor). The kernel weight of the primitive's refold term
+now rides the DATA slot, so the kernel summand of the sym-sector cancellation equation is a
+field in the applied argument's slots. -/
+def refoldKernelContractionField (g₀ g₁ : SmoothRiemannianMetric I M)
+    (G : SmoothCcTensor g₀ 0 4) (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
+    SmoothCcTensor g₀ 2 2 :=
+  (1 / 2 : ℝ) •
+    (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₁
+      + refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₂
+      - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₃
+      - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₄)
+
+set_option linter.unusedSectionVars false in
+/-- The kernel-contraction field agrees fibrewise with the frame sum of the folded
+four-monomial kernel `curvatureRefoldKernelFib` at the data-supplied weights and the frozen
+unit-value argument. -/
+theorem refoldKernelContractionField_toSection_eq_kernelFib_sum
+    (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (x : M) (D : Tensor0SSpace 2 I x) :
+    (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (refoldKernelContractionField (I := I) (M := M)
+          g₀ g₁ G σ₁ σ₂ σ₃ σ₄).toSection x) D =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        curvatureRefoldKernelFib (I := I) (M := M) x
+          (Tensor0SSpace.toModel (𝕜 := ℝ) D
+            ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+              (smoothOrthoFrame (I := I) g₁ x b x : E)])
+          σ₁ σ₂ σ₃ σ₄
+          (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+          (ccTensorFourUnitValueSection (I := I) (M := M) g₀ G x) := by
+  classical
+  rw [refoldKernelContractionField, SmoothCcTensor.toSection_smul,
+    SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
+    ContMDiffSection.coe_smul, Pi.smul_apply, ContMDiffSection.coe_sub, Pi.sub_apply,
+    ContMDiffSection.coe_sub, Pi.sub_apply, ContMDiffSection.coe_add, Pi.add_apply]
+  set Gs : Π b : M, Tensor0SSpace 4 I b :=
+    ccTensorFourUnitValueSection (I := I) (M := M) g₀ G with hGs_def
+  set F : Equiv.Perm (Fin 4) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Tensor0SSpace 2 I x :=
+    fun σ a b => curvatureRefoldMonomialFib (I := I) (M := M) x
+      (Tensor0SSpace.toModel (𝕜 := ℝ) D
+        ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+          (smoothOrthoFrame (I := I) g₁ x b x : E)]) σ
+      (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+      (Gs x) with hF_def
+  have happly : ∀ σ : Equiv.Perm (Fin 4),
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ).toSection x) D =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ a b := by
+    intro σ
+    exact refoldKernelContractionMonomialFibFixedFrame_apply (I := I) (M := M) Gs σ
+      (smoothOrthoFrame (I := I) g₁ x) x D
+  change (1 / 2 : ℝ) •
+      (((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₁).toSection x)
+        + (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₂).toSection x)
+        - (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₃).toSection x)
+        - (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₄).toSection x))
+        D) = _
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply,
+    ContinuousLinearMap.add_apply, happly σ₁, happly σ₂, happly σ₃, happly σ₄]
+  have hker : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+      curvatureRefoldKernelFib (I := I) (M := M) x
+        (Tensor0SSpace.toModel (𝕜 := ℝ) D
+          ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+            (smoothOrthoFrame (I := I) g₁ x b x : E)])
+        σ₁ σ₂ σ₃ σ₄
+        (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+        (Gs x)) =
+      ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        (1 / 2 : ℝ) • (F σ₁ a b + F σ₂ a b - F σ₃ a b - F σ₄ a b) := by
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    rw [hF_def]
+    rw [show curvatureRefoldKernelFib (I := I) (M := M) x
+        (Tensor0SSpace.toModel (𝕜 := ℝ) D
+          ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+            (smoothOrthoFrame (I := I) g₁ x b x : E)])
+        σ₁ σ₂ σ₃ σ₄
+        (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x) =
+        (1 / 2 : ℝ) •
+          (curvatureRefoldMonomialFib (I := I) (M := M) x
+              (Tensor0SSpace.toModel (𝕜 := ℝ) D
+                ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+                  (smoothOrthoFrame (I := I) g₁ x b x : E)]) σ₁
+              (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+            + curvatureRefoldMonomialFib (I := I) (M := M) x
+                (Tensor0SSpace.toModel (𝕜 := ℝ) D
+                  ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+                    (smoothOrthoFrame (I := I) g₁ x b x : E)]) σ₂
+                (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+            - curvatureRefoldMonomialFib (I := I) (M := M) x
+                (Tensor0SSpace.toModel (𝕜 := ℝ) D
+                  ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+                    (smoothOrthoFrame (I := I) g₁ x b x : E)]) σ₃
+                (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
+            - curvatureRefoldMonomialFib (I := I) (M := M) x
+                (Tensor0SSpace.toModel (𝕜 := ℝ) D
+                  ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+                    (smoothOrthoFrame (I := I) g₁ x b x : E)]) σ₄
+                (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x))
+        from rfl]
+    rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply]
+  rw [hker]
+  have hsplit : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+      (1 / 2 : ℝ) • (F σ₁ a b + F σ₂ a b - F σ₃ a b - F σ₄ a b)) =
+      (1 / 2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        (F σ₁ a b + F σ₂ a b - F σ₃ a b - F σ₄ a b) := by
+    rw [Finset.smul_sum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [Finset.smul_sum]
+  have hdist : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+      (F σ₁ a b + F σ₂ a b - F σ₃ a b - F σ₄ a b)) =
+      (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ₁ a b)
+        + (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ₂ a b)
+        - (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ₃ a b)
+        - (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ₄ a b) := by
+    have hinner : ∀ a : Fin (Module.finrank ℝ E),
+        (∑ b : Fin (Module.finrank ℝ E),
+          (F σ₁ a b + F σ₂ a b - F σ₃ a b - F σ₄ a b)) =
+        (∑ b : Fin (Module.finrank ℝ E), F σ₁ a b)
+          + (∑ b : Fin (Module.finrank ℝ E), F σ₂ a b)
+          - (∑ b : Fin (Module.finrank ℝ E), F σ₃ a b)
+          - (∑ b : Fin (Module.finrank ℝ E), F σ₄ a b) := by
+      intro a
+      rw [Finset.sum_sub_distrib, Finset.sum_sub_distrib, Finset.sum_add_distrib]
+    rw [Finset.sum_congr rfl (fun a _ => hinner a), Finset.sum_sub_distrib,
+      Finset.sum_sub_distrib, Finset.sum_add_distrib]
+  rw [hsplit, hdist]
+
+/-- Degenerate-witness litmus (argument kill): the kernel-contraction field rejects the zero
+rank-`(0,4)` argument outright — the construction genuinely uses `G`. -/
+theorem refoldKernelContractionField_zero_argument (g₀ g₁ : SmoothRiemannianMetric I M)
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
+    refoldKernelContractionField (I := I) (M := M) g₀ g₁
+      (0 : SmoothCcTensor g₀ 0 4) σ₁ σ₂ σ₃ σ₄ = 0 := by
+  classical
+  have hmono : ∀ σ : Equiv.Perm (Fin 4),
+      refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁
+        (0 : SmoothCcTensor g₀ 0 4) σ = 0 := by
+    intro σ
+    refine SmoothCcTensor.ext ?_
+    refine ContMDiffSection.ext (fun x => ?_)
+    rw [refoldKernelContractionMonomialField_toSection]
+    have hGs : ccTensorFourUnitValueSection (I := I) (M := M) g₀
+        (0 : SmoothCcTensor g₀ 0 4) x = 0 := by
+      rw [ccTensorFourUnitValueSection]
+      rw [show ((0 : SmoothCcTensor g₀ 0 4).toSection x) = 0 from by
+        rw [show (0 : SmoothCcTensor g₀ 0 4) =
+            (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 4) from (zero_smul ℝ _).symm,
+          SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+          zero_smul]]
+      rfl
+    have hzero : refoldKernelContractionMonomialBiContrFib (I := I) (M := M) g₁
+        (ccTensorFourUnitValueSection (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 4))
+        σ x = 0 := by
+      apply ContinuousLinearMap.ext
+      intro D
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro v
+      rw [refoldKernelContractionMonomialBiContrFib,
+        refoldKernelContractionMonomialFibFixedFrame_toModel]
+      rw [show (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          Tensor0SSpace.toModel (𝕜 := ℝ) D
+              ![(smoothOrthoFrame (I := I) g₁ x a x : E),
+                (smoothOrthoFrame (I := I) g₁ x b x : E)] *
+            Tensor0SSpace.toModel (𝕜 := ℝ)
+              (ccTensorFourUnitValueSection (I := I) (M := M) g₀
+                (0 : SmoothCcTensor g₀ 0 4) x)
+              (fun i => (Fin.cons ((smoothOrthoFrame (I := I) g₁ x a x : E))
+                (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : E)) v) : Fin 4 → E)
+                (σ i))) = 0 from
+        Finset.sum_eq_zero (fun a _ => Finset.sum_eq_zero (fun b _ => by
+          rw [hGs, Tensor0SSpace.toModel_zero, ContinuousMultilinearMap.zero_apply,
+            mul_zero]))]
+      simp only [ContinuousLinearMap.zero_apply, Tensor0SSpace.toModel_zero,
+        ContinuousMultilinearMap.zero_apply]
+    rw [hzero]
+    rfl
+  rw [refoldKernelContractionField, hmono σ₁, hmono σ₂, hmono σ₃, hmono σ₄]
+  rw [show (0 : SmoothCcTensor g₀ 2 2) + 0 - 0 - 0 = 0 from by abel, smul_zero]
+
+set_option linter.unusedSectionVars false in
+private theorem foldIteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) =
+      c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
+
+set_option linter.unusedSectionVars false in
+private lemma foldIteratedCovGrad_zero_arg (g₀ : SmoothRiemannianMetric I M) (r s j : ℕ) :
+    iteratedCovGrad (I := I) g₀ r s j (0 : SmoothCcTensor g₀ r s) = 0 := by
+  rw [show (0 : SmoothCcTensor g₀ r s) = (0 : ℝ) • (0 : SmoothCcTensor g₀ r s) from
+      (zero_smul ℝ _).symm,
+    foldIteratedCovGrad_smul_real, zero_smul]
+
+/-- Vacuity litmus (zero-perturbation kill): at the zero metric perturbation the second
+covariant gradient argument vanishes and the kernel-contraction field dies. -/
+theorem refoldKernelContractionField_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M)
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
+    refoldKernelContractionField (I := I) (M := M) g₀ g₁
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (0 : SmoothCcTensor g₀ 0 2)) σ₁ σ₂ σ₃ σ₄ = 0 := by
+  rw [foldIteratedCovGrad_zero_arg (I := I) (M := M) g₀ 0 2 2,
+    refoldKernelContractionField_zero_argument]
+
+/-- Vacuity litmus (diagonal kill): the kernel-contraction field rejects the diagonal
+witness `g₁ = g₀` at the metric-difference second-gradient argument. -/
+theorem refoldKernelContractionField_self (g₀ : SmoothRiemannianMetric I M)
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
+    refoldKernelContractionField (I := I) (M := M) g₀ g₀
+      (iteratedCovGrad (I := I) g₀ 0 2 2
+        (metricDifferenceCcTensor (I := I) (M := M) g₀ g₀)) σ₁ σ₂ σ₃ σ₄ = 0 := by
+  rw [metricDifferenceCcTensor_self, refoldKernelContractionField_zero_weight]
+
+set_option linter.unusedSectionVars false in
+/-- The packaging bridge: applying the kernel-contraction `(2,2)` field to a rank-`(0,2)`
+datum `W` recovers the primitive's second-gradient refold kernel term — the `(4,2)` kernel
+coefficient at the unit value of `W`, applied to the frozen argument `G`. -/
+theorem appCc_refoldKernelContractionField
+    (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
+    (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g₀ 0 2) :
+    appCc (I := I) (M := M) g₀ 2 2
+        (refoldKernelContractionField (I := I) (M := M) g₀ g₁ G σ₁ σ₂ σ₃ σ₄) W =
+      appCc (I := I) (M := M) g₀ 4 2
+        (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ W)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ W)
+          σ₁ σ₂ σ₃ σ₄) G := by
+  classical
+  refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
+  rw [unitModel, unitModel]
+  refine congrArg Tensor0SSpace.toModel ?_
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (appCc (I := I) (M := M) g₀ 2 2
+        (refoldKernelContractionField (I := I) (M := M) g₀ g₁ G σ₁ σ₂ σ₃ σ₄)
+        W).toSection x) (unitTensor (I := I) (M := M) x)) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (refoldKernelContractionField (I := I) (M := M) g₀ g₁ G σ₁ σ₂ σ₃ σ₄).toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+      (appCc (I := I) (M := M) g₀ 4 2
+        (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ W)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ W)
+          σ₁ σ₂ σ₃ σ₄) G).toSection x) (unitTensor (I := I) (M := M) x)) =
+      (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ W)
+          (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ W)
+          σ₁ σ₂ σ₃ σ₄).toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from G.toSection x)
+          (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [refoldKernelContractionField_toSection_eq_kernelFib_sum (I := I) (M := M)
+    g₀ g₁ G σ₁ σ₂ σ₃ σ₄ x
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
+      (unitTensor (I := I) (M := M) x))]
+  rw [curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum (I := I) (M := M)
+    g₀ g₁ (ccTensorUnitValueSection (I := I) (M := M) g₀ W)
+    (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ W) σ₁ σ₂ σ₃ σ₄ x]
+  rw [ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetric I M) (x : M)
+    (m : Fin 2 → E) :
+    unitModel (I := I) (M := M) g₀ 2 (metricCcTensor (I := I) (M := M) g₀ g) x m =
+      g.inner x (m 0) (m 1) := by
+  have hbase : unitModel (I := I) (M := M) g₀ 2 (metricCcTensor (I := I) (M := M) g₀ g) x =
+      Tensor0SSpace.toModel (metricCcTensorFib (I := I) g x) := by
+    rw [unitModel]
+    change Tensor0SSpace.toModel
+        ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (metricCcTensorFib (I := I) g x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x)
+            (1 : ℝ))) =
+      Tensor0SSpace.toModel (metricCcTensorFib (I := I) g x)
+    rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+      ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  rw [hbase]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- Under the perturbation tie and the symmetry of `P`, the perturbation IS the
+metric-difference tensor: the `htie`/`hPsymm` binder pair pins `P` extensionally. -/
+private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemannianMetric I M)
+    (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v) :
+    P = metricDifferenceCcTensor (I := I) (M := M) g₀ g₁ := by
+  have hsymm : symmS (I := I) (M := M) g₀ P = P :=
+    foldSymmS_eq_self (I := I) (M := M) g₀ P hPsymm
+  have hmd : metricDifferenceCcTensor (I := I) (M := M) g₀ g₁ =
+      symmS (I := I) (M := M) g₀ P := by
+    refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
+    refine ContinuousMultilinearMap.ext (fun m => ?_)
+    rw [show metricDifferenceCcTensor (I := I) (M := M) g₀ g₁ =
+        metricCcTensor (I := I) (M := M) g₀ g₁ - metricCcTensor (I := I) (M := M) g₀ g₀
+        from rfl]
+    rw [unitModel_sub_loc (I := I) (M := M) g₀ 2
+      (metricCcTensor (I := I) (M := M) g₀ g₁) (metricCcTensor (I := I) (M := M) g₀ g₀) x]
+    rw [ContinuousMultilinearMap.sub_apply]
+    rw [foldMetricCcTensor_unitModel_apply (I := I) (M := M) g₀ g₁ x m,
+      foldMetricCcTensor_unitModel_apply (I := I) (M := M) g₀ g₀ x m]
+    rw [show unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ P) x m =
+        unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ P) x ![m 0, m 1] from by
+      refine congrArg _ ?_
+      funext k
+      fin_cases k <;> rfl]
+    rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀
+      (symmS (I := I) (M := M) g₀ P) x (m 0) (m 1)]
+    rw [ccTensorBilin_symmS (I := I) (M := M) g₀ P x (m 0) (m 1)]
+    rw [htie x (m 0) (m 1)]
+    ring
+  rw [hmd, hsymm]
+
+/-- Extensionality of `(2,2)` coefficient fields through `appCc`: two fields agreeing on
+every smooth compactly supported rank-`(0,2)` datum are equal — every fibre value is realized
+by a global smooth section (`ContMDiffSection.exists_eq_at`). -/
+private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
+    (C D : SmoothCcTensor g₀ 2 2)
+    (h : ∀ W : SmoothCcTensor g₀ 0 2,
+      appCc (I := I) (M := M) g₀ 2 2 C W = appCc (I := I) (M := M) g₀ 2 2 D W) : C = D := by
+  classical
+  refine SmoothCcTensor.ext ?_
+  refine ContMDiffSection.ext (fun x => ?_)
+  refine tensorRSSpace_ext 2 2 x (fun u => ?_)
+  set V : TensorRSSpace 0 2 I x :=
+    (show TensorRSSpace 0 2 I x from
+      ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight u))
+    with hV_def
+  obtain ⟨σW, hσW⟩ := ContMDiffSection.exists_eq_at
+    (I := I) (n := (⊤ : ℕ∞)) (F := TensorRSModel 0 2 ℝ E)
+    (V := fun z : M => TensorRSSpace 0 2 I z) x V
+  set W₀ : SmoothCcTensor g₀ 0 2 :=
+    { toSection := σW
+      hasCompactSupport := HasCompactSupport.of_compactSpace _ } with hW₀_def
+  have h1 : (appCc (I := I) (M := M) g₀ 2 2 C W₀).toSection x =
+      (appCc (I := I) (M := M) g₀ 2 2 D W₀).toSection x := by
+    rw [h W₀]
+  have h2 : (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from C.toSection x)
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W₀.toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from D.toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W₀.toSection x)
+          (unitTensor (I := I) (M := M) x)) := by
+    have h1' := congrArg (fun (T : TensorRSSpace 0 2 I x) =>
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from T)
+        (unitTensor (I := I) (M := M) x)) h1
+    exact h1'
+  have hWval : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W₀.toSection x)
+      (unitTensor (I := I) (M := M) x) = u := by
+    rw [show W₀.toSection x = V from hσW, hV_def]
+    change ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight u)
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x)
+          (1 : ℝ)) = u
+    rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+      ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  rw [hWval] at h2
+  exact h2
+
+set_option linter.unusedSectionVars false in
+/-- The field-level form of the proven Palatini-fold primitive: the half background
+difference of the moving Riemann-arm coefficient equals the corrected quadratic residual
+plus DEF-2′ plus the packaged kernel contraction at the second-gradient argument — an
+equation of `(2,2)` coefficient fields, extensional over `appCc` from the primitive. -/
+private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kernelContraction
+    (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v) :
+    (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
+        - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) =
+      ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁
+        + bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁
+        + refoldKernelContractionField (I := I) (M := M) g₀ g₁
+            (iteratedCovGrad (I := I) g₀ 0 2 2 P)
+            (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+            (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 := by
+  classical
+  have hP := foldPerturbation_eq_metricDifference (I := I) (M := M) g₀ g₁ P htie hPsymm
+  rw [hP]
+  refine foldCcTensor22_ext_of_appCc (I := I) (M := M) g₀ _ _ (fun W => ?_)
+  have hprim :=
+    ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
+      (I := I) (M := M) g₀ g₁ P htie hPsymm W
+  rw [hP] at hprim
+  rw [appCc_smul_left (I := I) (M := M) g₀ 2 2, foldAppCc_sub_left (I := I) (M := M) g₀ 2 2]
+  rw [hprim]
+  rw [show (appCcRS (I := I) (M := M) g₀ 2 2 2
+        (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+        (ccSlotSwapField (I := I) (M := M) g₀)
+      + (1 / 2 : ℝ) •
+          ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁
+            (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁)
+      - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁
+          (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁)) =
+      bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁ from rfl]
+  rw [appCc_add_left (I := I) (M := M) g₀ 2 2
+    (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)
+    (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) W]
+  rw [appCc_add_left (I := I) (M := M) g₀ 2 2
+    (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁
+      + bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁)
+    (refoldKernelContractionField (I := I) (M := M) g₀ g₁
+      (iteratedCovGrad (I := I) g₀ 0 2 2
+        (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
+      (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+      (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1) W]
+  rw [appCc_add_left (I := I) (M := M) g₀ 2 2
+    (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)
+    (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) W]
+  rw [appCc_refoldKernelContractionField (I := I) (M := M) g₀ g₁
+    (iteratedCovGrad (I := I) g₀ 0 2 2
+      (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
+    (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+    (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 W]
+
+set_option linter.unusedSectionVars false in
+/-- C-EQ″ (the CORRECTED sym-sector cancellation equation, M-dossier child C-EQ restated on
+the adjudicated four-summand form): for a generic perturbed metric `g₁ = g₀ + P` (the `htie`
+idiom) with symmetric perturbation `P`, the input-slot-symmetrized moving arm-0 combination
+splits onto FOUR summands — the antisymmetrized `A ⋆ A` commutator field (`Q_true`), DEF-2′
+(the slot-swapped bg-R difference with the shared remainders), the order-zero
+connection-difference coefficient field itself (the `L0` pass-through, UNCANCELLED), and the
+packaged second-gradient kernel contraction at the derived second-Bianchi quadruple
+`σ₁ = swap 0 2, σ₂ = swap 1 3, σ₃ = swap 0 2 * swap 1 3, σ₄ = 1` and the argument
+`icg² P`.
+
+ADJUDICATION BASIS (the mechanism-A predecessor is DEAD): the unanimous two-lane flat-witness
+verdict — the previous two-summand form (C-EQ′, which claimed the linear `∇²`-content of the
+order-zero arm and the half Riemann-arm difference annihilate on the `ccInputSymm` sector)
+FAILS on the flat model once `∇P(x) ≠ 0`; the recorded cancellation holds ONLY on the
+`∇P = 0` slice. The corrected right-hand side keeps `ccInputSymm (L0)` and the kernel
+contraction on ALL sectors; no cancellation of the second-gradient content is claimed
+anywhere in this equation.
+
+PROOF (glue, no new deep math): a corollary of the PROVEN fold primitive
+`ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient`
+— `htie`/`hPsymm` pin `P` as the metric difference
+(`foldPerturbation_eq_metricDifference`), `appCc`-extensionality
+(`foldCcTensor22_ext_of_appCc`) lifts the applied (∀ `W`) primitive to the field identity
+`½ • (RmArm g₁ − RmArm g₀) = Q_true + DEF-2′ + kernelContraction` through the packaging
+bridge `appCc_refoldKernelContractionField`, and `ccInputSymm_add` distributes the
+symmetrization; the `L0` summand passes through untouched on both sides.
+
+VACUITY: all three constructed right-hand fields carry proven diagonal/zero-witness
+litmuses (`ricciArmOrder0AACommCoeffField_self`, `bgRDiffRefoldRemainderField_self`,
+`refoldKernelContractionField_self` / `_zero_weight` / `_zero_argument`). -/
 theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_eq_residualFieldSum
-    (g₀ g₁ : SmoothRiemannianMetric I M) :
+    (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+    (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v) :
     ccInputSymm (I := I) (M := M) g₀
         (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
           + (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
@@ -3546,7 +4449,20 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationI
       ccInputSymm (I := I) (M := M) g₀
           (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)
         + ccInputSymm (I := I) (M := M) g₀
-            (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) := sorry
+            (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁)
+        + ccInputSymm (I := I) (M := M) g₀
+            (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁)
+        + ccInputSymm (I := I) (M := M) g₀
+            (refoldKernelContractionField (I := I) (M := M) g₀ g₁
+              (iteratedCovGrad (I := I) g₀ 0 2 2 P)
+              (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
+              (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1) := by
+  rw [foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kernelContraction
+    (I := I) (M := M) g₀ g₁ P htie hPsymm]
+  rw [ccInputSymm_add (I := I) (M := M) g₀, ccInputSymm_add (I := I) (M := M) g₀,
+    ccInputSymm_add (I := I) (M := M) g₀]
+  abel
+
 
 end TensorSpectral
 end Parabolic
