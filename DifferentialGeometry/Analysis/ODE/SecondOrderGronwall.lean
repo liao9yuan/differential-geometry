@@ -25,6 +25,140 @@ open Set
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
+/-- The zero-initial Grönwall bound is monotone in the inhomogeneous amplitude.
+
+This small scalar bridge lets later Jacobi estimates replace a per-field
+initial speed by a uniform upper bound. -/
+lemma gronwallBound_zero_mono_eps
+    {K eps₁ eps₂ x : ℝ} (hK : 0 ≤ K) (hx : 0 ≤ x) (heps : eps₁ ≤ eps₂) :
+    gronwallBound 0 K eps₁ x ≤ gronwallBound 0 K eps₂ x := by
+  rcases eq_or_lt_of_le hK with hK0 | hKpos
+  · rw [← hK0]
+    simp only [gronwallBound_K0, zero_add]
+    exact mul_le_mul_of_nonneg_right heps hx
+  · have hKne : K ≠ 0 := ne_of_gt hKpos
+    have hKx_nonneg : 0 ≤ K * x := mul_nonneg hK hx
+    have hexp_nonneg : 0 ≤ Real.exp (K * x) - 1 := by
+      have hexp : 1 ≤ Real.exp (K * x) := Real.one_le_exp hKx_nonneg
+      linarith
+    have hcoef : 0 ≤ (Real.exp (K * x) - 1) / K :=
+      div_nonneg hexp_nonneg hKpos.le
+    simp only [gronwallBound_of_K_ne_0 hKne, zero_mul, zero_add]
+    calc
+      eps₁ / K * (Real.exp (K * x) - 1)
+          = eps₁ * ((Real.exp (K * x) - 1) / K) := by
+              field_simp [hKne]
+      _ ≤ eps₂ * ((Real.exp (K * x) - 1) / K) :=
+          mul_le_mul_of_nonneg_right heps hcoef
+      _ = eps₂ / K * (Real.exp (K * x) - 1) := by
+          field_simp [hKne]
+
+/-- With zero initial data, `gronwallBound` is linear in the inhomogeneous
+amplitude. -/
+lemma gronwallBound_zero_mul_eps
+    {K eps x a : ℝ} :
+    gronwallBound 0 K (a * eps) x = a * gronwallBound 0 K eps x := by
+  rcases eq_or_ne K 0 with hK0 | hKne
+  · rw [hK0]
+    simp only [gronwallBound_K0, zero_add]
+    ring
+  · simp only [gronwallBound_of_K_ne_0 hKne, zero_mul, zero_add]
+    field_simp [hKne]
+
+/-- A positive initial lower bound dominates the zero-initial Grönwall error
+after choosing a sufficiently small nonnegative time scale. -/
+lemma exists_gron_small
+    {K D B₀ : ℝ} (hB₀ : 0 < B₀) (hK : 0 ≤ K) (hD : 0 ≤ D) :
+    ∃ b B : ℝ, 0 < b ∧ 0 < B ∧
+      B ≤ B₀ - gronwallBound 0 (max K 1) (K * (b * D)) 1 := by
+  let L : ℝ := max K 1
+  let C : ℝ := (Real.exp L - 1) / L
+  let A : ℝ := K * D * C
+  let b : ℝ := B₀ / (2 * (A + 1))
+  let B : ℝ := B₀ / 2
+  have hL_pos : 0 < L := lt_of_lt_of_le zero_lt_one (le_max_right K 1)
+  have hL_ne : L ≠ 0 := ne_of_gt hL_pos
+  have hL_nonneg : 0 ≤ L := hL_pos.le
+  have hC_nonneg : 0 ≤ C := by
+    have hexp : 1 ≤ Real.exp L := Real.one_le_exp hL_nonneg
+    have hnum : 0 ≤ Real.exp L - 1 := by linarith
+    exact div_nonneg hnum hL_pos.le
+  have hA_nonneg : 0 ≤ A := by
+    exact mul_nonneg (mul_nonneg hK hD) hC_nonneg
+  have hA1_pos : 0 < A + 1 := by linarith
+  have hden_pos : 0 < 2 * (A + 1) := by positivity
+  refine ⟨b, B, div_pos hB₀ hden_pos, half_pos hB₀, ?_⟩
+  have hgb :
+      gronwallBound 0 L (K * (b * D)) 1 = b * A := by
+    simp only [gronwallBound_of_K_ne_0 hL_ne, zero_mul, zero_add]
+    dsimp [A, C]
+    field_simp [hL_ne]
+  have hfrac_le : A / (A + 1) ≤ 1 := by
+    rw [div_le_iff₀ hA1_pos]
+    linarith
+  have hbA_le : b * A ≤ B₀ / 2 := by
+    have hhalf_nonneg : 0 ≤ B₀ / 2 := by positivity
+    calc
+      b * A = (B₀ / 2) * (A / (A + 1)) := by
+        dsimp [b]
+        field_simp [hA1_pos.ne']
+      _ ≤ (B₀ / 2) * 1 := mul_le_mul_of_nonneg_left hfrac_le hhalf_nonneg
+      _ = B₀ / 2 := by ring
+  dsimp [B]
+  rw [hgb]
+  linarith
+
+/-- A positive initial lower bound dominates the zero-initial Grönwall error at
+time `1` after choosing the coefficient `K` sufficiently small. -/
+lemma exists_gron_smallK
+    {D B₀ : ℝ} (hB₀ : 0 < B₀) (hD : 0 ≤ D) :
+    ∃ K B : ℝ, 0 < K ∧ 0 < B ∧
+      ∀ {k : ℝ}, 0 ≤ k → k ≤ K →
+        B ≤ B₀ - gronwallBound 0 (max k 1) (k * D) 1 := by
+  let C : ℝ := Real.exp 1 - 1
+  let A : ℝ := D * C
+  let K : ℝ := min 1 (B₀ / (2 * (A + 1)))
+  let B : ℝ := B₀ / 2
+  have hC_nonneg : 0 ≤ C := by
+    have hexp : 1 ≤ Real.exp (1 : ℝ) := Real.one_le_exp (by norm_num)
+    dsimp [C]
+    linarith
+  have hA_nonneg : 0 ≤ A := mul_nonneg hD hC_nonneg
+  have hA1_pos : 0 < A + 1 := by linarith
+  have hden_pos : 0 < 2 * (A + 1) := by positivity
+  refine ⟨K, B, lt_min zero_lt_one (div_pos hB₀ hden_pos), half_pos hB₀, ?_⟩
+  intro k hk_nonneg hk_le
+  have hk_le_one : k ≤ 1 := hk_le.trans (min_le_left _ _)
+  have hmax : max k 1 = 1 := max_eq_right hk_le_one
+  have hgb :
+      gronwallBound 0 (max k 1) (k * D) 1 = k * A := by
+    rw [hmax]
+    simp only [gronwallBound_of_K_ne_0 one_ne_zero, zero_mul, zero_add]
+    dsimp [A, C]
+    ring_nf
+  have hK_le :
+      K ≤ B₀ / (2 * (A + 1)) := min_le_right _ _
+  have hfrac_le : A / (A + 1) ≤ 1 := by
+    rw [div_le_iff₀ hA1_pos]
+    linarith
+  have hhalf_nonneg : 0 ≤ B₀ / 2 := by positivity
+  have hKA_le :
+      (B₀ / (2 * (A + 1))) * A ≤ B₀ / 2 := by
+    calc
+      (B₀ / (2 * (A + 1))) * A = (B₀ / 2) * (A / (A + 1)) := by
+        field_simp [hA1_pos.ne']
+      _ ≤ (B₀ / 2) * 1 := mul_le_mul_of_nonneg_left hfrac_le hhalf_nonneg
+      _ = B₀ / 2 := by ring
+  have hkA_le : k * A ≤ B₀ / 2 := by
+    calc
+      k * A ≤ K * A := mul_le_mul_of_nonneg_right hk_le hA_nonneg
+      _ ≤ (B₀ / (2 * (A + 1))) * A :=
+        mul_le_mul_of_nonneg_right hK_le hA_nonneg
+      _ ≤ B₀ / 2 := hKA_le
+  dsimp [B]
+  rw [hgb]
+  linarith
+
 /-- Grönwall bound for a second-order linear ODE estimate, via the first-order
 system `(Y, Y')`. -/
 theorem norm_le_gronwall_secondOrder
@@ -116,6 +250,58 @@ theorem gronwall_sub_linear
           have := mul_le_mul_of_nonneg_right htb (norm_nonneg w)
           nlinarith
   exact norm_le_gronwall_secondOrder hK heps hcZ hcZ' hdZ hdZ' hboundZ hZ0 hZ'0
+
+/-- Endpoint upper estimate following from the perturbation form: a homogeneous
+second-order Grönwall solution stays below its linear part plus the Grönwall
+error. -/
+theorem gronwall_le_linear
+    {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
+    (hK : 0 ≤ K) (hb : 0 ≤ b)
+    (hcY : ContinuousOn Y (Icc 0 b))
+    (hcY' : ContinuousOn Y' (Icc 0 b))
+    (hdY : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y (Y' t) (Ici t) t)
+    (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
+    (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖)
+    (h0 : Y 0 = 0) (h0' : Y' 0 = w) :
+    ∀ t ∈ Icc 0 b,
+      ‖Y t‖ ≤ t * ‖w‖ + gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t := by
+  have hsub := gronwall_sub_linear hK hb hcY hcY' hdY hdY' hbound h0 h0'
+  intro t ht
+  have htw : ‖t • w‖ = t * ‖w‖ := by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg ht.1]
+  calc
+    ‖Y t‖ = ‖Y t - t • w + t • w‖ := by rw [sub_add_cancel]
+    _ ≤ ‖Y t - t • w‖ + ‖t • w‖ := norm_add_le _ _
+    _ ≤ gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t + t * ‖w‖ := by
+      exact add_le_add (hsub t ht) (le_of_eq htw)
+    _ = t * ‖w‖ + gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t := by ring
+
+/-- Endpoint lower estimate following from the perturbation form: the norm is at
+least the linear norm minus the Grönwall error. -/
+theorem gronwall_ge_linear
+    {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
+    (hK : 0 ≤ K) (hb : 0 ≤ b)
+    (hcY : ContinuousOn Y (Icc 0 b))
+    (hcY' : ContinuousOn Y' (Icc 0 b))
+    (hdY : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y (Y' t) (Ici t) t)
+    (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
+    (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖)
+    (h0 : Y 0 = 0) (h0' : Y' 0 = w) :
+    ∀ t ∈ Icc 0 b,
+      t * ‖w‖ - gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t ≤ ‖Y t‖ := by
+  have hsub := gronwall_sub_linear hK hb hcY hcY' hdY hdY' hbound h0 h0'
+  intro t ht
+  have htw : ‖t • w‖ = t * ‖w‖ := by
+    rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg ht.1]
+  have hlin :
+      t * ‖w‖ ≤ ‖Y t‖ + gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t := by
+    calc
+      t * ‖w‖ = ‖t • w‖ := htw.symm
+      _ = ‖Y t - (Y t - t • w)‖ := by rw [sub_sub_cancel]
+      _ ≤ ‖Y t‖ + ‖Y t - t • w‖ := norm_sub_le _ _
+      _ ≤ ‖Y t‖ + gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t := by
+        exact add_le_add le_rfl (hsub t ht)
+  linarith
 
 /-- **Nonvanishing of a Jacobi-type solution below the Grönwall scale.**  If the
 linearisation dominates the Grönwall error at the endpoint —

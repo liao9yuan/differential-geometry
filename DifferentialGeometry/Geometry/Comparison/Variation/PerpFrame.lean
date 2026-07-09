@@ -808,6 +808,86 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     intro x hx
     exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
 
+/-- A smooth bounded time reparametrization equal to the identity on an arbitrary
+closed time window strictly contained in `(-lam, lam)`. -/
+theorem exists_time_window_clip {a b lam : ℝ}
+    (hlam_pos : 0 < lam) (ha : -lam < a) (hb : b < lam) :
+    ∃ tau : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) tau ∧
+      Set.EqOn tau id (Set.Icc a b) ∧ ∀ t, |tau t| ≤ lam := by
+  have hclosed_t : IsClosed (Set.Icc a b) := isClosed_Icc
+  have hclosed_s : IsClosed ((Set.Ioo (-lam : ℝ) lam)ᶜ) := isOpen_Ioo.isClosed_compl
+  have hdisj : Disjoint ((Set.Ioo (-lam : ℝ) lam)ᶜ) (Set.Icc a b) := by
+    rw [Set.disjoint_compl_left_iff_subset]
+    intro x hx
+    exact ⟨lt_of_lt_of_le ha hx.1, lt_of_le_of_lt hx.2 hb⟩
+  obtain ⟨χ, hχ0, hχ1, hχIcc⟩ :=
+    exists_contMDiffMap_zero_one_of_isClosed 𝓘(ℝ, ℝ) (n := (⊤ : ℕ∞))
+      hclosed_s hclosed_t hdisj
+  refine ⟨fun t => χ t * t, ?_, ?_, ?_⟩
+  · have hcd : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (χ : ℝ → ℝ) := by
+      rw [← contMDiff_iff_contDiff]
+      exact χ.contMDiff
+    exact hcd.mul contDiff_id
+  · intro t ht
+    change χ t * t = t
+    rw [hχ1 ht]
+    simp
+  · intro t
+    change |χ t * t| ≤ lam
+    by_cases htΩ : t ∈ Set.Ioo (-lam : ℝ) lam
+    · have hχ_abs : |χ t| ≤ 1 := by
+        rw [abs_of_nonneg (hχIcc t).1]
+        exact (hχIcc t).2
+      have ht_abs : |t| ≤ lam := by
+        rw [abs_le]
+        exact ⟨le_of_lt htΩ.1, le_of_lt htΩ.2⟩
+      calc
+        |χ t * t| = |χ t| * |t| := abs_mul _ _
+        _ ≤ 1 * lam :=
+          mul_le_mul hχ_abs ht_abs (abs_nonneg _) (by norm_num)
+        _ = lam := one_mul _
+    · have hχ_zero : χ t = 0 := hχ0 htΩ
+      simpa [hχ_zero] using hlam_pos.le
+
+/-- A smooth bounded time reparametrization equal to the identity on
+`Icc 0 L`. -/
+theorem exists_time_clip {L lam : ℝ} (hL : 0 ≤ L) (hlam : L < lam) :
+    ∃ tau : ℝ → ℝ, ContDiff ℝ (∞ : WithTop ℕ∞) tau ∧
+      Set.EqOn tau id (Set.Icc 0 L) ∧ ∀ t, |tau t| ≤ lam := by
+  set delta : ℝ := (lam - L) / 2 with hdelta_def
+  have hdelta_pos : 0 < delta := by rw [hdelta_def]; linarith
+  have hlam_pos : 0 < lam := lt_of_le_of_lt hL hlam
+  obtain ⟨chi, hchi_cd, hchi_one, hchi_supp, hchi_range⟩ :=
+    exists_cutoff_one_on_Icc_supported_Ioo (L := L) hdelta_pos
+  refine ⟨fun t => chi t * t, hchi_cd.mul contDiff_id, ?_, ?_⟩
+  · intro t ht
+    change chi t * t = t
+    rw [hchi_one ht]
+    simp
+  · intro t
+    change |chi t * t| ≤ lam
+    by_cases htΩ : t ∈ Set.Ioo (-delta : ℝ) (L + delta)
+    · have hchi_abs : |chi t| ≤ 1 := by
+        rw [abs_of_nonneg (hchi_range t).1]
+        exact (hchi_range t).2
+      have hdelta_le : delta ≤ L + delta := by linarith
+      have ht_abs : |t| < L + delta := by
+        rw [abs_lt]
+        exact ⟨lt_of_le_of_lt (neg_le_neg hdelta_le) htΩ.1, htΩ.2⟩
+      exact le_of_lt (by
+      calc
+        |chi t * t| = |chi t| * |t| := abs_mul _ _
+        _ ≤ 1 * (L + delta) :=
+          mul_le_mul hchi_abs (le_of_lt ht_abs) (abs_nonneg _) (by norm_num)
+        _ = L + delta := one_mul _
+        _ < lam := by rw [hdelta_def]; linarith)
+    · have hnot_tsupport : t ∉ tsupport chi := fun h => htΩ (hchi_supp h)
+      have hchi_zero : chi t = 0 := by
+        have hnot_support : t ∉ Function.support chi := fun h =>
+          hnot_tsupport (subset_closure h)
+        simpa [Function.support] using hnot_support
+      simpa [hchi_zero] using hlam_pos.le
+
 set_option linter.unusedVariables false in
 /-- **Perpendicularity to the velocity is preserved (geodesic-on-a-set form).**
 The set-relativised analogue of `perp_to_velocity_preserved_of_parallel`: it only requires

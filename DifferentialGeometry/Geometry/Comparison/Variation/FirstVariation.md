@@ -39,3 +39,14 @@ constructed for `lbl411`: a smooth local family of length-minimizing geodesics
 from a moving base to the fixed point. Verification status: passed. Axiom
 prints for both adapters are `[propext, Classical.choice, Quot.sound]`; no
 `sorryAx`.
+
+## 2026-07-08 pointwise metric-compatibility wrapper
+
+Added `inner_deriv_at`, the `ContMDiffAt` version of the existing
+`metric_compat_hasDerivAt_inner` wrapper.  It still delegates to the same
+chart-derivative core theorem; the only change is that callers no longer need a
+globally smooth curve when the derivative is used at one time.
+
+Verification passed.  This is infrastructure only: it does not change the
+first-variation endpoint theorems and does not prove any new volume-comparison
+theorem.

@@ -32,6 +32,16 @@ Targeted build of `GoodCoveringItem3` passed after the Hopf--Rinow proper-realiz
 replacement, confirming the new `properMetricOn` producer assumptions do not affect this
 packaged-data consumer.
 
+## 2026-07-01, subsequence projection
+
+Added `Item3RadiusInput.subseq`.  It reindexes the item-3 exp-ball radius
+discipline along a subsequence, using `InjRadiusDecayInput.subseq` and the
+reindexed proper-metric family `fun k => P (f k)`.
+
+This is a producer-closure brick for the finite-hat Step-C pipeline: later
+diagonal/refinement steps can carry the item-3 radius input to the reindexed
+sequence without restating the exp-ball hypotheses.  Verification passed.
+
 ## Lean gotchas
 
 - The `𝓘(ℝ, E)` model-with-corners notation needs `open scoped Manifold`; without it,

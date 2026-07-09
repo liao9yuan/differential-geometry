@@ -37,6 +37,8 @@ good-frame producer (`RicBoundGoodFrame.lean`) is being finalized in the paralle
 ric_bound track.  F5/F6 are built against the statement below.
 -/
 
+universe u
+
 noncomputable section
 
 namespace DifferentialGeometry
@@ -83,6 +85,43 @@ theorem lemma45_corII
             eps * Cc * ∑ k ∈ Finset.range r,
               Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (q₂ + k)
                 (iterCov (I := I) gRef q₂ T k x))) := by
+  sorry
+
+/-- **Uniform-constant variant of `lemma45_corII` (the D1b-facing form).**  The book's
+Corollary II constant depends only on the dimension and the orders `(q₂, p)` — NOT on the
+metrics, the tensor, the set, or `ε` (chapter4.tex, lbl370; the geometry-free algebra is
+`Lemma45Constants.lemma45Const`).  The `∃ Cc` therefore commutes past the manifold and all
+data quantifiers.  The lbl406 recursion (D1b `exists_directedApproxSystem`) NEEDS this
+order of quantifiers: it budgets `C_r Σ C_i⁻¹ 2⁻ⁱ ≤ 2^{1-r}` with the constants chosen
+BEFORE the maps (STEPD_PLAN coda 37).  Same sorry-status as `lemma45_corII`; whoever proves
+that one proves this one with the explicit constant. -/
+theorem lemma45_corII_unif (q₂ p : ℕ) :
+    ∃ Cc : Real, 0 ≤ Cc ∧
+      ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
+        [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']
+        [IsManifold I 1 M'] [IsManifold I 2 M']
+        [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
+        {u : Set M'} (_ : IsOpen u)
+        (g gRef : SmoothRiemannianMetric I M')
+        (T : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) q₂)
+        (eps : Real), 0 ≤ eps → eps ≤ 1 →
+        (∀ x ∈ u, ∀ v : TangentSpace I x,
+          (1 + eps)⁻¹ * gRef.inner x v v ≤ g.inner x v v ∧
+            g.inner x v v ≤ (1 + eps) * gRef.inner x v v) →
+        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
+          Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + j)
+            (iterCov (I := I) gRef 2
+              (Tensor0SBundle.metricTensorField (I := I) g) j x)) ≤ eps) →
+        ∀ x ∈ u, ∀ r : ℕ, 0 < r → r ≤ p →
+          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (q₂ + r)
+              (iterCov (I := I) g q₂ T r x)) ≤
+            Real.sqrt ((1 + eps) ^ (q₂ + r)) *
+              (Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (q₂ + r)
+                  (iterCov (I := I) gRef q₂ T r x)) +
+                eps * Cc * ∑ k ∈ Finset.range r,
+                  Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (q₂ + k)
+                    (iterCov (I := I) gRef q₂ T k x))) := by
   sorry
 
 end HCGCompactness

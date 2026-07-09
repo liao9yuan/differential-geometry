@@ -52,7 +52,22 @@ def pointedCGHMaps_of_atZero
     (subseq : Nat -> Nat)
     (rmaps : PointedRiemannianCGMaps (I := I) (X.atZero (I := I))
       (L.atTime (I := I) 0) subseq) :
-    PointedCGHMaps (I := I) X L subseq where
+    PointedCGHMaps (I := I) X (L.atTime 0) subseq where
+  partialDiffeomorph := rmaps.partialDiffeomorph
+  source_exhausts := rmaps.source_exhausts
+  base_mem := rmaps.base_mem
+  basepoint_map := rmaps.basepoint_map
+
+/-- The comparison maps over an ARBITRARY pointed Riemannian manifold `P`, the
+field-copy of a `PointedRiemannianCGMaps` (metric-independent).  This is the
+generic form the `mc.limit`-side endgame instantiation uses (the AA machinery is
+re-indexed by `P`); `pointedCGHMaps_of_atZero` is the special case `P := L.atTime 0`. -/
+def pointedCGHMaps_of_manifold
+    (X : PointedFlowSeq.{u, uE, uH} (I := I))
+    (P : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (subseq : Nat -> Nat)
+    (rmaps : PointedRiemannianCGMaps (I := I) (X.atZero (I := I)) P subseq) :
+    PointedCGHMaps (I := I) X P subseq where
   partialDiffeomorph := rmaps.partialDiffeomorph
   source_exhausts := rmaps.source_exhausts
   base_mem := rmaps.base_mem
@@ -72,7 +87,7 @@ def cghMaps_of_hL0
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData.{u, uE, uH} (I := I) X.D)
     (hL0 : L.atTime (I := I) 0 = mc.limit) :
-    PointedCGHMaps (I := I) X L mc.subseq :=
+    PointedCGHMaps (I := I) X (L.atTime 0) mc.subseq :=
   pointedCGHMaps_of_atZero (I := I) X L mc.subseq (hL0.symm ▸ mc.maps)
 
 /-- The structured frontier ingredients of the smooth-flow-limit upgrade, given
@@ -85,12 +100,12 @@ structure FlowLimitData
   /-- Brick A: the limit Ricci flow on the time-zero limit manifold. -/
   L : PointedFlowData.{u, uE, uH} (I := I) X.D
   /-- Brick B: the spacetime comparison maps. -/
-  maps : PointedCGHMaps (I := I) X L mc.subseq
+  maps : PointedCGHMaps (I := I) X (L.atTime 0) mc.subseq
   /-- Brick E: scalar-curvature pullback convergence. -/
   scalar : ScalarPullbackTendsto (I := I) maps
   /-- Source/target σ-compactness (Brick C inputs). -/
   hσsrc : forall k : Nat,
-    letI : TopologicalSpace L.M := L.topology
+    letI : TopologicalSpace (L.atTime 0).M := L.topology
     IsSigmaCompact (maps.source k)
   hσtgt : forall k : Nat,
     letI : TopologicalSpace (X.term (mc.subseq k)).M :=
@@ -104,8 +119,8 @@ structure FlowLimitData
     Real -> SmoothRiemannianMetric I (SourceDomain (I := I) maps k)
   /-- Brick D: window-uniform `C^p` convergence of the pulled-back metrics
   (the moving-Shi norm bridge output). -/
-  conv : forall K : Set L.M,
-    forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+  conv : forall K : Set (L.atTime 0).M,
+    forall _hK : letI : TopologicalSpace (L.atTime 0).M := L.topology; IsCompact K,
     forall p : Nat,
     forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
       forall ε : Real, 0 < ε ->
@@ -113,7 +128,7 @@ structure FlowLimitData
           forall t : Real, t ∈ Set.Icc a b ->
             ((SourceDomainMetricData.ofRestrictPullback (I := I)
               (Φ := maps) (k := k) (hσsrc k) (hσtgt k)
-              (refMetric k)).derivNormSupOn (I := I) K p t) < ε
+              (refMetric k) (letI : TopologicalSpace L.M := L.topology; letI : ChartedSpace H L.M := L.charted; letI : IsManifold I ∞ L.M := L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := (by change IsManifold I ∞ L.M; infer_instance); letI : SigmaCompactSpace L.M := L.sigmaCompact; letI : T2Space L.M := L.t2; L.S.family.metric)).derivNormSupOn (I := I) K p t) < ε
 
 /-- **The smooth-flow-limit upgrade, assembled.**  From the structured frontier
 ingredients (Brick A–E) the time-zero conclusion `mc` upgrades to full smooth
@@ -126,7 +141,7 @@ theorem flowLimit_upgrade
     CompactnessConclusion (I := I) X :=
   ⟨d.L, mc.subseq, mc.strictMono,
     ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
-      d.maps d.scalar d.hσsrc d.hσtgt d.refMetric d.conv⟩⟩
+      d.maps d.scalar d.hσsrc d.hσtgt d.refMetric (letI : TopologicalSpace d.L.M := d.L.topology; letI : ChartedSpace H d.L.M := d.L.charted; letI : IsManifold I ∞ d.L.M := d.L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.L.M := (by change IsManifold I ∞ d.L.M; infer_instance); letI : SigmaCompactSpace d.L.M := d.L.sigmaCompact; letI : T2Space d.L.M := d.L.t2; d.L.S.family.metric) d.conv⟩⟩
 
 /-- Produce the theorem-facing `SmoothFlowLimitInput` from the structured
 frontier ingredients, available at every time-zero conclusion. -/

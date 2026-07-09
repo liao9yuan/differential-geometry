@@ -143,7 +143,10 @@ noncomputable def noncollapseInput_of_ham3
     simp [hi, hdim]
 
 /-- Scalar pullback convergence plus basepoint preservation gives the
-Hamilton basepoint scalar-convergence datum. -/
+Hamilton basepoint scalar-convergence datum.  Scalar pullback convergence is
+quantified over carrier times, so time `0` must lie on the common flow
+interval (`h0`); in the Section 12 setup this follows from the window
+hypothesis `Set.Icc (-(ham3_r0 ^ 2)) 0 ⊆ X.D.carrier`. -/
 theorem baseScalarConv_of_smoothCGH
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -152,11 +155,12 @@ theorem baseScalarConv_of_smoothCGH
     {L : PointedFlowData.{u, uE, uH} (I := I) X.D}
     {subseq : Nat -> Nat}
     (hseq : Ham3BaseScalarSeq (I := I) (M := M) P Q X)
+    (h0 : (0 : Real) ∈ X.D.carrier)
     (hconv : SmoothCGHConverges (I := I) X L subseq) :
     Ham3LimitBaseScalarConv (I := I) (M := M) P Q
       (pointedFlowToHam3 (I := I) (M := M) L subseq) := by
   classical
-  have hscalar := hconv.scalar_converges 0 L.basepoint
+  have hscalar := hconv.scalar_converges 0 h0 L.basepoint
   refine hscalar.congr' ?_
   filter_upwards with k
   letI : TopologicalSpace (X.term (subseq k)).M :=
@@ -174,7 +178,7 @@ theorem baseScalarConv_of_smoothCGH
   letI : T2Space (X.term (subseq k)).M :=
     (X.term (subseq k)).t2
   calc
-    (X.term (subseq k)).S.scalar 0 (hconv.spatial.maps.map k L.basepoint)
+    (X.term (subseq k)).S.scalar 0 (hconv.spatial.maps.map k (L.atTime 0).basepoint)
         = (X.term (subseq k)).S.scalar 0 (X.term (subseq k)).basepoint := by
           simp [PointedCGHMaps.map, hconv.spatial.maps.basepoint_map k]
     _ = ham3RescaledScalar (I := I) P Q (subseq k) 0
@@ -221,7 +225,9 @@ theorem toHam3Exists
     ⟨pointedFlowToHam3 (I := I) (M := M) L subseq, hsubseq,
       hwindow, hreg, hconnHam, hbdHam, ?_,
       hricTransfer L subseq,
-      baseScalarConv_of_smoothCGH (I := I) (M := M) P Q hbaseSeq hconv,
+      baseScalarConv_of_smoothCGH (I := I) (M := M) P Q hbaseSeq
+        (hwindow (Set.mem_Icc.mpr ⟨neg_nonpos.mpr (sq_nonneg ham3_r0), le_refl 0⟩))
+        hconv,
       ⟨hscalarPos L subseq, hpinchTransfer L subseq⟩⟩
   simpa [DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci.Ham3LimitFlow, pointedFlowToHam3] using
     L.isSolution

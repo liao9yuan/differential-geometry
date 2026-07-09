@@ -121,3 +121,19 @@ gradient identity) needs.
   on a nonzero vector (`Nontrivial E` from `Module.nontrivial_of_finrank_pos`).
 - `change`, not goal-changing `show` (style linter); `simp` (not `simp [Prod.ext_iff]`,
   flagged unused) closes the prod equalities.
+
+## `diagExpInv_contMDiffAt_order` (order `n`, `lbl430`(ii)) DONE 2026-07-05 — sorry-free, in `lake build`
+The order-`n` companion of `diagExpInv_contMDiffAt`. Statement: `(n : ℕ) (hn : 1 ≤ n) ⟹ ContMDiffAt
+(I.prod I) I.tangent (n:ℕ∞) (diagExpInv g hEnorm p) (p,p)`. Proof is a verbatim order-bump of the
+order-1 proof; the ONLY changes are the ContDiffAt order on the inner symm and the outer extChartAt.
+- **KEY (why order is free):** `ContDiffAt.localInverse`/`to_localInverse` are defined from the
+  *proof-irrelevant* `HasStrictFDerivAt`, so `(diagExpIFT g hEnorm p).symm =
+  (chartedDiagExp_contDiffAt g hEnorm p n hn).localInverse (diagExp_hasFDerivAt_zero_unipotent … 1
+  le_rfl) hn0 := rfl` holds at ANY order `n` (the order-1 `diagExpIFT` and the order-`n` localInverse
+  are the same PartialHomeomorph up to proof irrelevance). Then
+  `(chartedDiagExp_contDiffAt … n hn).to_localInverse … hn0` gives the `C^n` symm.
+- `hn0 : ((n:ℕ∞):WithTop ℕ∞) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)` — the ContDiff order is
+  `WithTop ℕ∞`, so `(n:ℕ∞)` is the DOUBLE coercion `↑↑n`; a single-coe `Nat.cast_ne_zero` mismatches.
+- Import graph checked FIRST (planner instruction): the C∞/order-`n` forward `chartedDiagExp` facts
+  (`chartedDiagExp_contDiffAt` already stated at general `n`) are NOT downstream of DiagExpDerivative
+  (no Step-B LocalDiffeomorphism↔OffZero cycle), so the bump is IN-PLACE, no downstream-file needed.

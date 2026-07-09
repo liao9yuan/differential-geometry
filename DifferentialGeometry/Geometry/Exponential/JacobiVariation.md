@@ -150,8 +150,8 @@ Then (d) the manifold IFT at `v ≠ 0` ⟹ `IsLocalDiffeomorphOn` ⟹
 - Step A DONE: `chartCoord_transverseVelocity_contDiffAt` de-privatized
   (CovariantCommutationCurvature.lean, visibility-only, re-verified green).
 - Step B IN PROGRESS: the regularity-export theorem in JacobiVariation.lean.
-  ACTIVE CLAIM on JacobiVariation.lean: token bca77123-4994-4b4b-88ce-d9c5b2bc4953
-  (release with `./scripts/lake-locked.ps1 release -Token bca77123-...` when done).
+  Historical claim token `bca77123-4994-4b4b-88ce-d9c5b2bc4953` was released;
+  do not treat it as active.
 
 ### OBSTRUCTION discovered (2026-06-11, before writing the export theorem)
 
@@ -212,3 +212,87 @@ parallel-transport chain (the genuine ODE need is C², `N≥2`):
 ⟹ the clamped radial central curve (`ContMDiff 8`) now qualifies for
 `exists_parallel_frame`. NEXT: the regularity-export theorem per the blueprint
 above, then instantiate `covGronwall_ne_zero`.
+
+### 2026-07-08 chartRep transfer bridge
+
+Added and verified `chartRep_congr_curve`: if two base curves agree near `t`
+and their sections agree as model-space tangent vectors near `t`, then their
+`chartRepAt` representatives agree near `t`.  `covDerivAlong_congr_curve` now
+reuses this bridge.
+
+This is the missing low-level transfer API for Step B's clamped-to-clean
+regularity route.  It does not yet export the full clean radial
+`hJdiff`/`hDJdiff` theorem.  The next target is the regularity producer:
+rebuild the clamped variation from `exists_radial_jacobi_radius`, prove
+clamped `J`/`DJ` chartRep differentiability using
+`variationField_chartRep_differentiableAt` and
+`variationField_covDeriv_chartRep_differentiableAt`, then transfer them with
+`chartRep_congr_curve`.
+
+### 2026-07-08 clean radial regularity export
+
+Added and verified `exists_jacobi_diff`.  It rebuilds the same clamped
+variation and norm budget as `exists_radial_jacobi_radius`, proves clamped
+variation-field and first-covariant-derivative `chartRepAt` differentiability
+using the existing variation-field differentiability lemmas, and transfers both
+facts to the clean radial objects with `chartRep_congr_curve`.
+
+This closes the clean radial `hJdiff`/`hDJdiff` producer for capped intervals
+`[0,b]` with `b ≤ 1`.  It does not close the endpoint `IsJacobiAt ... 0` /
+`D^2J(0)=0` producer, which still needs the missing continuity/API bridge at
+`0`.  Focused verification passed; the module was also targeted-built after
+refreshing a missing `GaussLemmaPullback.olean`.
+
+### 2026-07-08 endpoint route audit after regularity export
+
+The current endpoint target is still the concrete second initial condition
+`D_t^2 J(0)=0` (or equivalently `IsJacobiAt ... 0` plus `J(0)=0`).  Three
+routes were inspected:
+
+1. Extending the existing interior proof directly to `t0 = 0` fails at the
+   geodesic-equation sublemma.  `clamped_slice_covDeriv_velocity_zero` relies on
+   `maximalGeodesic_rescale_of_norm_lt_radius`, whose equality is packaged only
+   for `t in [0,1]`; this does not give the two-sided `nhds 0` germ needed by
+   `covDerivAlong`.
+2. The normal-coordinate route found only the first-order producer
+   `mfderiv_expMap_at_zero` plus lower chart-flow facts such as the derivative
+   of the chart phase vector field at the zero section.  There is no checked
+   API yet converting those facts into the covariant acceleration statement for
+   `t |-> expMap g p (t • a)` at `0`.
+3. The chart-flow rescaling route has a private orbit-projection theorem with
+   negative-time intervals, but the public `maximalGeodesic_rescale_at_one_of_small`
+   theorem still exposes only the `[0,1]` rescaling shape.  Using it for
+   `expMap (t • a)` with negative `t` would require a new sign/negative-scale
+   bridge, not a local rewrite in the endpoint Jacobi proof.
+
+Smallest honest next API: prove a radial-center acceleration producer, e.g.
+`covDerivAlong g (fun t => expMap g p (t • a)) (curveVelocity ...) 0 = 0` for
+small `a`.  Once that exists, the existing `commute_ds_dt_curvature` endpoint
+argument should be able to discharge `D_t^2 J(0)=0` without hiding the missing
+geometric input.
+
+### 2026-07-08 endpoint Jacobi theorem
+
+Added and verified the endpoint route promised above.
+
+New checked pieces:
+- `clamped_slice_covDeriv_velocity_zero_at_zero`: the clamped radial slice has
+  zero covariant acceleration at `0`, by germ transfer to
+  `Exponential.exp_radial_d2_zero`.
+- `exists_jacobi_zero`: radius-packaged endpoint `IsJacobiAt ... 0` for the
+  clean radial variation, under the intrinsic completeness / continuous
+  Riemannian-bundle hypotheses and the explicit `hEnorm` compatibility.
+
+The proof reuses the interior `exists_radial_jacobi_radius` commutation route:
+the only replaced input is `houterL`, now supplied by the endpoint acceleration
+producer instead of the one-sided maximal-geodesic rescale theorem.  Focused
+verification passed, and the module was targeted-built so downstream imports can
+see the new theorem.
+
+Remaining bridge: package `exists_jacobi_zero` in the Volume layer together with
+the existing `radialJacobiField` adapter and `d2_zero_of_jac0`.  Two direct
+Volume adapter attempts were not kept: adding the wrapper in `RadialGronwall`
+and then in `NormalChartMeasure` exposed public theorem-head instance plumbing
+around `IsContinuousRiemannianBundle` / `FiberBundle` / `VectorBundle`.  This is
+an adapter-context issue, not a mathematical obstruction to the endpoint Jacobi
+equation.

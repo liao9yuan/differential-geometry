@@ -94,6 +94,44 @@ theorem isJacobiAlong_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
         = 0
     linear_combination (norm := module) h
 
+/-- A pointwise Jacobi equation plus a curvature-term norm bound gives the
+second-covariant-derivative norm bound used by Gronwall estimates. -/
+theorem ode_bound_of_isJacobiAt
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (J : ∀ t : ℝ, TangentSpace I (γ t)) {K t : ℝ}
+    (hJ : IsJacobiAt (I := I) g γ J t)
+    (hcurv :
+      g.inner (γ t)
+        ((DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
+        ((DifferentialGeometry.Integral.Connection.riemannOp
+          (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+          (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t))
+      ≤ K ^ 2 * g.inner (γ t) (J t) (J t)) :
+    g.inner (γ t)
+      (covDerivAlong (I := I) g γ
+        (fun s : ℝ => covDerivAlong (I := I) g γ J s) t)
+      (covDerivAlong (I := I) g γ
+        (fun s : ℝ => covDerivAlong (I := I) g γ J s) t)
+      ≤ K ^ 2 * g.inner (γ t) (J t) (J t) := by
+  have hD :
+      covDerivAlong (I := I) g γ
+          (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
+        = - (DifferentialGeometry.Integral.Connection.riemannOp
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+            (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t) := by
+    have h := hJ
+    change covDerivAlong (I := I) g γ
+          (fun s : ℝ => covDerivAlong (I := I) g γ J s) t
+        + (DifferentialGeometry.Integral.Connection.riemannOp
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) (γ t))
+            (J t) (curveVelocity (I := I) γ t) (curveVelocity (I := I) γ t)
+        = 0 at h
+    linear_combination (norm := module) h
+  rw [hD]
+  simpa using hcurv
+
 end Variation
 end Riemannian
 end Geometry

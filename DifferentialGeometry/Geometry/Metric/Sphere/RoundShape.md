@@ -17,7 +17,17 @@ Plan: `plan-on-taking-a-spicy-kitten.md`, Step 5B (Gauss route), **Step C**: sha
   (unit `‖↑x‖=1` ⇒ singleton proj `= ⟪↑x,w⟫•↑x`); identify the normal coeff by C1 + `real_inner_comm`;
   finish with `module`.
 
-## C2 — the Gauss curvature value (IN PROGRESS, the hard symbolic core)
+## ✓✓ STEP C COMPLETE (2026-06-30, real-build sorry-free)
+
+11 verified lemmas here (C1, ambDeriv_gauss, ambDeriv2, FLAT `ambDeriv_bracket_symm`, inner_dIncl_metricCov,
+mdiffAt_inner_left, `mfderiv_mul_innerCoordFun_of_inner_eq_zero` [GPT-Pro unblock], inner_ambDeriv_nested,
+ambDeriv_section_mdiffAt, **`dIncl_curv_inner` = HEART, the Gauss equation**).  The curvature VALUE lives in
+`Curvature/Sphere/ConstCurvature.lean` as `roundMetric_sec_value`: `metricRm04StdAt roundMetric x X Y Y X =
+g(X,X)g(Y,Y) − g(X,Y)²` (c=1), via germ-reduction + HEART.  See the "BLOCKER BROKEN" section above for the
+durable synonym/coercion lessons.  Remaining for `spaceForm_const_metric`: the trivial `ConstPosSecMetric`
+wrapper (in Hamilton) + the quotient descent S³/Γ (the big frontier).
+
+## C2 — the Gauss curvature value (HISTORICAL plan — now DONE, see above)
 
 **Target.** `metricRm04StdAt roundMetric x X Y Y X = roundInner x X X · roundInner x Y Y − (roundInner x X Y)²`.
 
@@ -78,7 +88,23 @@ Proof: `← projConn_eq_metricCov`, `dIncl_projConn`, `← Submodule.starProject
 `Submodule.starProjection_inner_eq_zero` + `inner_sub_left`+`sub_eq_zero` (the inlined `horth`).
 **Also DONE: `mdiffAt_inner_left`** (`p ↦ ⟪w, F p⟫` differentiable, generic `F`).
 
-## ⚠ BLOCKER (2026-06-30): bare-coercion `mfderiv` → false `ChartedSpace E` instance
+## ✓ BLOCKER BROKEN (2026-06-30, GPT Pro consult): `mfderiv_mul_innerCoordFun_of_inner_eq_zero` DONE
+
+Pro's escape works and is VERIFIED. The unblocking lemma (scalar form, routed through the bundled
+`innerCoordFun`, never a bare `⟪w,↑·⟫` lambda or bare-coercion `mfderiv`):
+`mfderiv (fun p => φ p * (innerCoordFun w) p) x v = φ x * ⟪w, dIncl x v⟫` (for `φ` MDiffAt, `⟪w,↑x⟫=0`).
+Proof keys that finally worked: ψ smoothness via `(innerCoordFun w).contMDiff.contMDiffAt.mdifferentiableAt`
+(the accessor DOES work — earlier failures were from bare-coercion context, not the accessor); `hψx` via
+`rw [hψdef]; simpa [innerCoordFun]`; and the CRITICAL final-algebra fix — the `mfderiv ψ x` CLM has the
+`TangentSpace 𝓘(ℝ,ℝ)` synonym codomain that POISONS every `smul_apply`/`add_apply`/`*`/`•` (none match),
+so first rewrite it to a CLEAN-codomain CLM `hψCLM : mfderiv ψ x = (innerSL ℝ w).comp (dIncl x)`
+(via `ext u; show … = ⟪w, dIncl x u⟫; exact mfderiv_innerCoordFun w x u`), THEN
+`rw [(…).mfderiv]; simp only [hψx, hψCLM, zero_smul, add_zero]; change φ x • (((innerSL ℝ w).comp (dIncl x)) v) = …; rw [comp_apply, innerSL_apply_apply, smul_eq_mul]`.
+**Durable lesson:** for `mfderiv` into `ℝ`, the codomain `TangentSpace 𝓘(ℝ,ℝ) (f x)` synonym blocks ALL
+apply/arith simp lemmas — rewrite the derivative CLM to a clean `T_x →L ℝ` form first (or use `change`
+to the defeq pointwise-smul form), never fight `smul_apply` on the synonym.
+
+## ⚠ (historical) BLOCKER: bare-coercion `mfderiv` → false `ChartedSpace E` instance
 
 `inner_ambDeriv_nested` + its helper `inner_smul_coe_deriv` (the `roundInner·↑p` Leibniz term) were
 fully written and the MATH is correct, but were REVERTED — blocked by a Mathlib elaboration bug:

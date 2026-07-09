@@ -224,6 +224,32 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
   simp only [← hDVchart, ← hDWchart]
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
+/-- Pointwise metric-compatibility wrapper for the `g`-inner product of two
+sections along a curve.  It supplies the chart-trajectory derivative from
+`ContMDiffAt` at the point, then delegates to
+`metric_compat_hasDerivAt_inner_of_chartCurveDeriv`. -/
+lemma inner_deriv_at
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V W : ∀ t, TangentSpace I (γ t)) (t₀ : ℝ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t₀)
+    (hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀)
+    (hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀) :
+    HasDerivAt (fun s : ℝ => g.inner (γ s) (V s) (W s))
+      (g.inner (γ t₀) (covDerivAlong (I := I) g γ V t₀) (W t₀)
+        + g.inner (γ t₀) (V t₀) (covDerivAlong (I := I) g γ W t₀)) t₀ := by
+  have hn0 : n ≠ 0 := by
+    intro h; rw [h] at hn; exact absurd hn (by simp)
+  have hchartDeriv : DifferentiableAt ℝ (chartCurve (I := I) (γ t₀) γ) t₀ := by
+    have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) n ((extChartAt I (γ t₀)) ∘ γ) t₀ := by
+      have hφ : ContMDiffAt I 𝓘(ℝ, E) n (extChartAt I (γ t₀)) (γ t₀) :=
+        (contMDiffAt_extChartAt (I := I) (x := γ t₀)).of_le (by exact_mod_cast le_top)
+      exact hφ.comp t₀ hγ
+    exact (contMDiffAt_iff_contDiffAt.mp hmdiff).differentiableAt hn0
+  exact metric_compat_hasDerivAt_inner_of_chartCurveDeriv (I := I) g γ V W t₀
+    hγ.continuousAt hchartDeriv hVdiff hWdiff
+
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 /-- **Metric compatibility (Leibniz rule) for the `g`-inner product of two
 sections along a smooth curve.** Smooth-curve wrapper of
 `metric_compat_hasDerivAt_inner_of_chartCurveDeriv`: from `ContMDiff … ∞ γ` it
@@ -239,16 +265,7 @@ lemma metric_compat_hasDerivAt_inner
     HasDerivAt (fun s : ℝ => g.inner (γ s) (V s) (W s))
       (g.inner (γ t₀) (covDerivAlong (I := I) g γ V t₀) (W t₀)
         + g.inner (γ t₀) (V t₀) (covDerivAlong (I := I) g γ W t₀)) t₀ := by
-  have hn0 : n ≠ 0 := by
-    intro h; rw [h] at hn; exact absurd hn (by simp)
-  have hchartDeriv : DifferentiableAt ℝ (chartCurve (I := I) (γ t₀) γ) t₀ := by
-    have hmdiff : ContMDiffAt 𝓘(ℝ, ℝ) 𝓘(ℝ, E) n ((extChartAt I (γ t₀)) ∘ γ) t₀ := by
-      have hφ : ContMDiffAt I 𝓘(ℝ, E) n (extChartAt I (γ t₀)) (γ t₀) :=
-        (contMDiffAt_extChartAt (I := I) (x := γ t₀)).of_le (by exact_mod_cast le_top)
-      exact hφ.comp t₀ (hγ.contMDiffAt)
-    exact (contMDiffAt_iff_contDiffAt.mp hmdiff).differentiableAt hn0
-  exact metric_compat_hasDerivAt_inner_of_chartCurveDeriv (I := I) g γ V W t₀
-    hγ.continuous.continuousAt hchartDeriv hVdiff hWdiff
+  exact inner_deriv_at (I := I) hn g γ V W t₀ hγ.contMDiffAt hVdiff hWdiff
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 /-- **Intrinsic mixed-covariant commutation at the central curve.** For a smooth

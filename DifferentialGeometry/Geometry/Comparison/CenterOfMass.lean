@@ -109,6 +109,61 @@ theorem metricEnergy_half (μ : ι -> Real) (pts : ι -> X) (q : X) :
     metricEnergy μ pts q = ∑ i : ι, μ i * halfSqDist (pts i) q := by
   simp [metricEnergy, halfSqDist, Finset.mul_sum, mul_assoc, mul_comm]
 
+set_option maxHeartbeats 800000 in
+/-- **Argmin-stability of the center of mass.**  Let `μ, pts` be continuous families of weights and
+points over a (first-countable) parameter space `P`, and `c a` a global minimizer of
+`metricEnergy (μ a) (pts a)` lying in a fixed compact set `K`, with `c p₀` the *unique* global
+minimizer at `p₀`.  Then `c` is continuous at `p₀`.
+
+Standard argmin-stability: reduce to sequences (`P` first-countable); every subsequence of
+`c ∘ (params → p₀)` lies in the compact `K`, so has a convergent sub-subsequence `→ c*`
+(`IsCompact.tendsto_subseq`); passing the minimizing inequality
+`metricEnergy (μ aₙ) (pts aₙ) (c aₙ) ≤ metricEnergy (μ aₙ) (pts aₙ) y` to the limit (joint continuity
+of the energy in `(params, q)`) shows `c*` is a global minimizer at `p₀`, so `c* = c p₀` by
+uniqueness — hence every subsequence has a sub-subsequence `→ c p₀`. -/
+theorem metricEnergy_argmin_stable {P : Type*} [TopologicalSpace P] [FirstCountableTopology P]
+    {K : Set X} (hK : IsCompact K)
+    (μ : P -> ι -> Real) (pts : P -> ι -> X) (c : P -> X) (p₀ : P)
+    (hμ : Continuous μ) (hpts : Continuous pts)
+    (hc_min : ∀ a : P, ∀ y : X,
+      metricEnergy (μ a) (pts a) (c a) ≤ metricEnergy (μ a) (pts a) y)
+    (hc_mem : ∀ a : P, c a ∈ K)
+    (huniq : ∀ y : X,
+      (∀ z : X, metricEnergy (μ p₀) (pts p₀) y ≤ metricEnergy (μ p₀) (pts p₀) z) → y = c p₀) :
+    Filter.Tendsto c (nhds p₀) (nhds (c p₀)) := by
+  classical
+  have Econt : Continuous (fun aq : P × X => metricEnergy (μ aq.1) (pts aq.1) aq.2) := by
+    unfold metricEnergy
+    refine continuous_const.mul (continuous_finset_sum _ (fun i _ => ?_))
+    refine ((continuous_apply i).comp (hμ.comp continuous_fst)).mul ?_
+    exact (Continuous.dist continuous_snd
+      ((continuous_apply i).comp (hpts.comp continuous_fst))).pow 2
+  rw [tendsto_iff_seq_tendsto]
+  intro seq hseq
+  apply tendsto_of_subseq_tendsto
+  intro ns hns
+  obtain ⟨cstar, hcstar_mem, φ, hφ_mono, hφ_tend⟩ :=
+    hK.tendsto_subseq (x := fun n => c (seq (ns n))) (fun n => hc_mem (seq (ns n)))
+  have hp_tend : Filter.Tendsto (fun n => seq (ns (φ n))) Filter.atTop (nhds p₀) :=
+    hseq.comp (hns.comp hφ_mono.tendsto_atTop)
+  have hcstar_min : ∀ y : X,
+      metricEnergy (μ p₀) (pts p₀) cstar ≤ metricEnergy (μ p₀) (pts p₀) y := by
+    intro y
+    have hLHS : Filter.Tendsto
+        (fun n => metricEnergy (μ (seq (ns (φ n)))) (pts (seq (ns (φ n))))
+          (c (seq (ns (φ n))))) Filter.atTop
+        (nhds (metricEnergy (μ p₀) (pts p₀) cstar)) :=
+      (Econt.tendsto (p₀, cstar)).comp (hp_tend.prodMk_nhds hφ_tend)
+    have hRHS : Filter.Tendsto
+        (fun n => metricEnergy (μ (seq (ns (φ n)))) (pts (seq (ns (φ n)))) y) Filter.atTop
+        (nhds (metricEnergy (μ p₀) (pts p₀) y)) :=
+      ((Econt.comp (continuous_id.prodMk continuous_const)).tendsto p₀).comp hp_tend
+    exact le_of_tendsto_of_tendsto hLHS hRHS
+      (Filter.Eventually.of_forall (fun n => hc_min (seq (ns (φ n))) y))
+  refine ⟨φ, ?_⟩
+  rw [huniq cstar hcstar_min] at hφ_tend
+  exact hφ_tend
+
 /-- Weighted sums preserve strict midpoint Jensen convexity, provided all
 weights are nonnegative and at least one weight is positive. -/
 theorem metricEnergy_strict (μ : ι -> Real) (pts : ι -> X)

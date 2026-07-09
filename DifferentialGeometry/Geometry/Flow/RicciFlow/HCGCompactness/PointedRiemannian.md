@@ -9,3 +9,27 @@ Design note: `MetricComplete` is no longer an axiom. It uses Mathlib's `EMetricS
 Reason for the file split: the concrete Riemannian-emetric completeness predicate elaborates cleanly below the Ricci-flow and curvature imports. `Basic.lean` imports this file and then defines the flow-level data.
 
 Verification: passed.
+
+## 2026-06-30
+
+Added `MetricComplete.complete`, the direct projection from the pointed
+Riemannian completeness predicate to the active `CompleteSpace` field used by
+Step-C `CenterInput` packages.  This avoids re-unfolding `MetricComplete` at
+each center-of-mass consumer.
+
+Attempted but did not keep a stored-metric `enorm` projection here.  Importing
+the tangent norm comparison layer into this foundational pointed file perturbed
+instance synthesis in the existing `MetricComplete` definition, so that norm
+bridge should live in a higher Step-C/Hopf--Rinow consumer file that already
+imports the Riemannian norm comparison API.
+
+Verification status: focused check and targeted module build passed; axiom
+check for the new projection uses only the usual project axioms.
+
+## 2026-07-08
+
+Added `SeqMetricComplete.subseq`, the D6-facing reindexing wrapper for
+sequence completeness after Step A/D diagonal subsequences.  This is endpoint
+input threading only; it does not prove the conditional Theorem 3.9 endpoint.
+
+Verification passed.

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Metric
+import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
 
 set_option autoImplicit false
@@ -110,6 +111,28 @@ def HasCurvDerivBound
   letI : T2Space X.M := X.t2
   forall x : X.M, curvDerivNorm (I := I) k X.metric x <= C
 
+/-- A zeroth-order curvature-derivative bound supplies the global Rm04 bound
+used by the local volume-comparison endpoint. -/
+theorem rm04Bound_of_curv0
+    (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) {C : Real}
+    (hX : HasCurvDerivBound (I := I) X 0 C) :
+    letI : TopologicalSpace X.M := X.topology
+    letI : ChartedSpace H X.M := X.charted
+    letI : IsManifold I ∞ X.M := X.smooth
+    letI : SigmaCompactSpace X.M := X.sigmaCompact
+    letI : T2Space X.M := X.t2
+    Geometry.Riemannian.VolumeComparison.Rm04GlobalBound
+      (I := I) (M := X.M) X.metric C := by
+  letI : TopologicalSpace X.M := X.topology
+  letI : ChartedSpace H X.M := X.charted
+  letI : IsManifold I ∞ X.M := X.smooth
+  letI : SigmaCompactSpace X.M := X.sigmaCompact
+  letI : T2Space X.M := X.t2
+  intro x
+  simpa [Geometry.Riemannian.VolumeComparison.Rm04GlobalBound,
+    HasCurvDerivBound, curvDerivNorm, curvDerivNormSq, curvCovDeriv,
+    DifferentialGeometry.Integral.Connection.metricRm04_apply] using hX x
+
 /-- Bounded geometry for one pointed metric: all covariant derivatives of
 curvature have global bounds. -/
 structure BoundedGeometry
@@ -118,6 +141,20 @@ structure BoundedGeometry
   nonneg : forall k : Nat, 0 <= C k
   bound : forall k : Nat, HasCurvDerivBound (I := I) X k (C k)
 
+/-- Bounded geometry supplies the zeroth-order Rm04 bound consumed by the
+volume-comparison endpoint. -/
+theorem rm04Bound_of_geom
+    {X : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    (hX : BoundedGeometry (I := I) X) :
+    letI : TopologicalSpace X.M := X.topology
+    letI : ChartedSpace H X.M := X.charted
+    letI : IsManifold I ∞ X.M := X.smooth
+    letI : SigmaCompactSpace X.M := X.sigmaCompact
+    letI : T2Space X.M := X.t2
+    Geometry.Riemannian.VolumeComparison.Rm04GlobalBound
+      (I := I) (M := X.M) X.metric (hX.C 0) :=
+  rm04Bound_of_curv0 (I := I) X (hX.bound 0)
+
 /-- Uniform bounded geometry for a pointed metric sequence, matching MSM135
 Definition 3.8. -/
 structure SeqBoundedGeometry
@@ -125,6 +162,35 @@ structure SeqBoundedGeometry
   C : Nat -> Real
   nonneg : forall k : Nat, 0 <= C k
   bound : forall i k : Nat, HasCurvDerivBound (I := I) (X.obj i) k (C k)
+
+namespace SeqBoundedGeometry
+
+/-- Reindex uniform bounded geometry along a subsequence. -/
+def subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hX : SeqBoundedGeometry (I := I) X) (f : Nat -> Nat) :
+    SeqBoundedGeometry (I := I) (X.subseq f) where
+  C := hX.C
+  nonneg := hX.nonneg
+  bound := by
+    intro i k
+    simpa [PointedRiemannianSeq.subseq] using hX.bound (f i) k
+
+end SeqBoundedGeometry
+
+/-- Uniform bounded geometry supplies the time-slice Rm04 bound for each
+sequence member. -/
+theorem rm04Bound_of_seq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hX : SeqBoundedGeometry (I := I) X) (i : Nat) :
+    letI : TopologicalSpace (X.obj i).M := (X.obj i).topology
+    letI : ChartedSpace H (X.obj i).M := (X.obj i).charted
+    letI : IsManifold I ∞ (X.obj i).M := (X.obj i).smooth
+    letI : SigmaCompactSpace (X.obj i).M := (X.obj i).sigmaCompact
+    letI : T2Space (X.obj i).M := (X.obj i).t2
+    Geometry.Riemannian.VolumeComparison.Rm04GlobalBound
+      (I := I) (M := (X.obj i).M) (X.obj i).metric (hX.C 0) :=
+  rm04Bound_of_curv0 (I := I) (X.obj i) (hX.bound i 0)
 
 /-- Global spacetime zeroth-order curvature bound for one pointed flow. -/
 def HasSpacetimeCurvBound

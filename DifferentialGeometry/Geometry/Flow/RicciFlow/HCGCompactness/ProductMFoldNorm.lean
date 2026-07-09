@@ -5,6 +5,7 @@ import DifferentialGeometry.Tensor.RSTensor.NormSqProduct
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CovDerivStepCompContrNorm
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
+import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 
 set_option autoImplicit false
@@ -30,8 +31,9 @@ triangle inequality (`√normSq0S = ‖·‖` from the `inner0S` inner product),
 rule.  The contraction `A ∗ B` is then a trace of `A ⊗ B`, and Claim 1 follows by the
 invert-trick (`|g_k⁻¹| ≤ C`) and a double induction.
 
-The statement is recorded here as the precise analytic-core target; the proof is the
-remaining frontier (the single genuine mathematical `sorry` for Claim 1's analytic half).
+The bound was PROVED 2026-06-08 along exactly this route (see the theorem docstring
+below); this module is sorry-free.  (An earlier version of this header flagged the
+proof as a frontier `sorry` — stale, removed 2026-07-05.)
 -/
 
 noncomputable section
@@ -240,8 +242,8 @@ covariant derivative of `gRef` and `|·| = √normSq0S` the `gRef`-fiber norm.
 
 Proof route (`RicBoundProof.md`, 2026-06-08): induction on `m` from
 `nabla0S_product_realizes` + `iterCov_succ`/`_add` + `normSq0S_product`/`_domDomCongr`
-+ fiber-norm triangle + Pascal.  **Frontier:** the proof is the remaining analytic
-`sorry` for Claim 1. -/
++ fiber-norm triangle + Pascal.  (Proved 2026-06-08; an earlier version of this
+docstring flagged the proof as a frontier `sorry` — that note is obsolete.) -/
 theorem iterCov_product_sqrtNormSq_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (gRef : SmoothRiemannianMetric I M) (x : M)
     (basis : Module.Basis Idx Real (TangentSpace I x))
@@ -359,6 +361,75 @@ theorem iterCov_product_sqrtNormSq_le {Idx : Type*} [Fintype Idx] [DecidableEq I
               Real.sqrt (normSq0S (I := I) gRef x (s + c) (iterCov (I := I) gRef s A c x)) *
               Real.sqrt (normSq0S (I := I) gRef x (q + (m + 1 - c)) (iterCov (I := I) gRef q B (m + 1 - c) x)) :=
             Finset.sum_congr rfl fun c _ => by ring
+
+/-- **A function-scaled field is the tensor product with the promoted scalar.**
+`φ • B = ((fromScalarField φ) ⊗ B) · finCongr` as `(0,q)`-tensor fields (the
+rank cast `0 + q = q` is threaded by `domDomCongr`).  This is the bridge putting
+the bump-cutoff scaling `χ · T` in the scope of the `m`-fold product norm bound. -/
+theorem smulByFun_eq_product {q : ℕ} (φ : M → Real) (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ)
+    (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) q) :
+    tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (∞ : WithTop ℕ∞) φ hφ B =
+      MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (finCongr (Nat.zero_add q))
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 0) (q := q)
+          (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (∞ : WithTop ℕ∞) φ hφ) B) := by
+  refine DFunLike.ext _ _ (fun x => ?_)
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  have he : ∀ i : Fin q, finCongr (Nat.zero_add q) (Fin.natAdd 0 i) = i := by
+    intro i
+    ext
+    simp
+  show (φ x • B x) v =
+    ContinuousMultilinearMap.domDomCongr (finCongr (Nat.zero_add q))
+      (Bundle.continuousMultilinearMap.product_fun
+        (ContinuousMultilinearMap.constOfIsEmpty Real
+          (fun _ : Fin 0 => TangentSpace I x) (φ x))
+        (B x)) v
+  rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    Bundle.continuousMultilinearMap.product_fun_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, smul_eq_mul]
+  congr 1
+  refine congrArg (B x) (funext fun i => ?_)
+  show v i = v (finCongr (Nat.zero_add q) (Fin.natAdd 0 i))
+  exact (congrArg v (he i)).symm
+
+/-- **The `m`-fold norm bound for a function-scaled field** (the χ-Leibniz
+tower): `|∇ᵐ(φ·B)| ≤ ∑_{c ≤ m} \binom m c · |∇ᶜ(φ as (0,0)-field)| · |∇^{m-c}B|`,
+with `∇` the Levi-Civita covariant derivative of `gRef` and `|·| = √normSq0S`
+the `gRef`-fiber norm.  This is `iterCov_product_sqrtNormSq_le` at `s = 0`
+through `smulByFun_eq_product`; it is the analytic engine for the time-Lipschitz
+bound of a bump-extended metric sequence on the bump collar. -/
+theorem iterCov_smulF_le {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (gRef : SmoothRiemannianMetric I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv : MetricInverseInBasis_gen (I := I) gRef x basis (identityInvMetric (Idx := Idx)))
+    (m : ℕ) {q : ℕ} (φ : M → Real) (hφ : ContMDiff I 𝓘(ℝ, ℝ) ∞ φ)
+    (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) q) :
+    Real.sqrt (normSq0S (I := I) gRef x (q + m)
+        (iterCov (I := I) gRef q
+          (tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (∞ : WithTop ℕ∞) φ hφ B) m x)) ≤
+      ∑ c ∈ Finset.range (m + 1), (m.choose c : Real) *
+        Real.sqrt (normSq0S (I := I) gRef x (0 + c)
+          (iterCov (I := I) gRef 0
+            (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (∞ : WithTop ℕ∞) φ hφ) c x)) *
+        Real.sqrt (normSq0S (I := I) gRef x (q + (m - c))
+          (iterCov (I := I) gRef q B (m - c) x)) := by
+  rw [smulByFun_eq_product (I := I) φ hφ B,
+    normSq0S_iterCov_domDomCongr (I := I) gRef (finCongr (Nat.zero_add q))
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 0) (q := q)
+        (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (∞ : WithTop ℕ∞) φ hφ) B) m x basis hinv]
+  exact iterCov_product_sqrtNormSq_le (I := I) gRef x basis hinv m
+    (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (∞ : WithTop ℕ∞) φ hφ) B
 
 end HCGCompactness
 end DifferentialGeometry

@@ -1283,12 +1283,15 @@ theorem ricciChartFrameComp_jointContinuousOn [I.Boundaryless]
   (chartRicci_jointContinuousOn g_DT α Sp hgood h0 h1 h2 i j).congr
     (fun q hq => ricciTensor_chartBasisVec_alpha_eq (I := I) (g_DT q.1) α i j (hgood q hq))
 
+omit [CompactSpace M] in
 /-- **Chart-frame trace expansion of scalar curvature.**  On the good set, the scalar curvature is
 the chart-Gram-inverse contraction of the Ricci tensor evaluated on the chart-`α` basis frame:
 `R = ∑_{ij} (chartGram⁻¹)^{ij} · Ric(e^α_i, e^α_j)`.  The metric trace `metricScalarAt` is by
 definition `metricTracePair0SAt g (metricRicciAt g x)`; expand via `metricTracePair0SAt_eq_sum_basis`
 in the chart-basis (`chartBasisFamily`, with the matrix inverse `chartInvGramMatrix` as its
-`MetricInverseInBasis`) and convert `metricRicciAt → ricciTensor`. -/
+`MetricInverseInBasis`) and convert `metricRicciAt → ricciTensor`.  Stated without
+`[CompactSpace M]` (none of its ingredients need it) so noncompact consumers — the
+HCG-compactness scalar producer `scalarSub_le_dNorm` — can use it. -/
 theorem metricScalar_chartTrace_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :

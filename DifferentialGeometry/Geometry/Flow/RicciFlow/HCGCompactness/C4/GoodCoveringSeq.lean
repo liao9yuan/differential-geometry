@@ -72,6 +72,32 @@ structure NetLimitData (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   tendsto : ∀ α : Nat,
     Tendsto (fun k => seqRadius hd D P (φ k) α) atTop (𝓝 (rInf α))
 
+namespace NetLimitData
+
+/-- Refine a net-limit datum along a further strict subsequence. -/
+def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
+    NetLimitData hd D P where
+  φ := L.φ ∘ ψ
+  φ_mono := L.φ_mono.comp hψ
+  alive := L.alive
+  alive_eventually := by
+    intro α
+    exact hψ.tendsto_atTop.eventually (L.alive_eventually α)
+  rInf := L.rInf
+  rInf_mem := L.rInf_mem
+  tendsto := by
+    intro α
+    simpa [Function.comp_apply] using (L.tendsto α).comp hψ.tendsto_atTop
+
+@[simp] theorem subseq_phi {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
+    (L.subseq hψ).φ = L.φ ∘ ψ := rfl
+
+end NetLimitData
+
 /-- The diagonalization exists: `lbl389` boundedness + Bolzano--Weierstrass over the
 compact product, then Boolean stabilization.  A genuine proof — no axioms beyond the
 standing Hopf--Rinow black box carried by `P`. -/
@@ -114,6 +140,11 @@ noncomputable def NetLimitData.lamInf {hd : InjRadiusDecayInput (I := I) X} {D :
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)} (L : NetLimitData hd D P)
     (α : Nat) : Real :=
   hd.lambda D (L.rInf α)
+
+@[simp] theorem NetLimitData.subseq_lamInf {hd : InjRadiusDecayInput (I := I) X}
+    {D : Real} {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
+    (L.subseq hψ).lamInf = L.lamInf := rfl
 
 /-- MSM135 `lbl383` item 2 (with the `lbl391` radii): for `k` large, the
 `B̃ = B(x^α, λ^α/2)` balls at distinct indices are disjoint — the k-uniform tilde
@@ -251,6 +282,29 @@ theorem exists_stableNet (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     | true => exact Or.inl (hv.mono fun k hk => of_decide_eq_true hk)
     | false => exact Or.inr (hv.mono fun k hk => of_decide_eq_false hk)
 
+/-- Pairwise `B`-intersection stability is preserved by refining the master
+subsequence. -/
+theorem NetLimitData.stable_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) {ψ : Nat -> Nat} (hψ : StrictMono ψ)
+    (hstab :
+      ∀ α β : Nat,
+        (∀ᶠ k in atTop, BInter hd D P L.lamInf α β (L.φ k)) ∨
+        (∀ᶠ k in atTop, ¬ BInter hd D P L.lamInf α β (L.φ k))) :
+    ∀ α β : Nat,
+      (∀ᶠ k in atTop,
+        BInter hd D P (L.subseq hψ).lamInf α β ((L.subseq hψ).φ k)) ∨
+      (∀ᶠ k in atTop,
+        ¬ BInter hd D P (L.subseq hψ).lamInf α β ((L.subseq hψ).φ k)) := by
+  intro α β
+  rcases hstab α β with h | h
+  · exact Or.inl (by
+      simpa [NetLimitData.subseq, Function.comp_apply] using
+        hψ.tendsto_atTop.eventually h)
+  · exact Or.inr (by
+      simpa [NetLimitData.subseq, Function.comp_apply] using
+        hψ.tendsto_atTop.eventually h)
+
 /-- If the `B`-balls of `α, β` meet frequently along the subsequence, the limit radii
 are close: `r∞^β ≤ r∞^α + (5λ^α + 5λ^β)` (per-k triangle inequality passed to the
 limit along the meeting subfilter). -/
@@ -353,6 +407,9 @@ theorem NetLimitData.nesting (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     have h3 : (5 : Real) * L.lamInf β ≤ 5 * E2 * L.lamInf β := by nlinarith
     nlinarith [mul_pos (lt_of_lt_of_le zero_lt_one (hE1ge1.trans hE12)) hlamβpos]
 
+-- The declaration was already near the default heartbeat budget (nlinarith chains);
+-- the `r0`-cap threading (2026-07-05) pushed it over.  Genuinely heavy, not looping.
+set_option maxHeartbeats 800000 in
 /-- MSM135 `lbl383` item 5 (α-independent multiplicity `I(n,C₀)`): for `k` large, at
 most `Imult (50·e^{C·20λ(0)})` indices `β` have their `B`-ball meeting `B^α`.  The
 meeting centers are `λ[R_k]`-separated (`R_k = r_k^α + 10λ(0)`) and lie within
@@ -362,7 +419,10 @@ cap `β < A(2αλ(0)+10λ(0))`). -/
 theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
-    (vc : VolumeComparisonInput (I := I) X) (hvc : vc.dist = hd.dist) (α : Nat) :
+    (vc : VolumeComparisonInput (I := I) X) (hvc : vc.dist = hd.dist)
+    (hlam0r0 :
+      (50 * Real.exp (hd.C * (20 * hd.lambda D 0))) * hd.lambda D 0 ≤ vc.r0)
+    (α : Nat) :
     ∀ᶠ k in atTop,
       ∀ xα : (X.obj (L.φ k)).M, seqCenter hd D P (L.φ k) α = some xα →
       ∀ J : Finset Nat, (∀ β ∈ J, BInter hd D P L.lamInf α β (L.φ k)) →
@@ -507,9 +567,26 @@ theorem NetLimitData.inter_count (hd : InjRadiusDecayInput (I := I) X) {D : Real
     nlinarith
   have hr0 : 0 < hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0) :=
     hd.lambda_pos hD _
+  have hcapr :
+      (50 * Real.exp (hd.C * (20 * lam0))) *
+          hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0) ≤ vc.r0 := by
+    have hdist0 : (0 : Real) ≤ dist xα (X.obj (L.φ k)).basepoint := dist_nonneg
+    have harg : (0 : Real) ≤ dist xα (X.obj (L.φ k)).basepoint + 10 * lam0 := by
+      linarith [hlam0pos.le]
+    have hrle0 : hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0) ≤ lam0 := by
+      rw [hlam0def]
+      exact hd.lambda_antitone hD harg
+    have hm0_nonneg : 0 ≤ 50 * Real.exp (hd.C * (20 * lam0)) := by positivity
+    have hmul :=
+      mul_le_mul_of_nonneg_left hrle0 hm0_nonneg
+    have h0 :
+        (50 * Real.exp (hd.C * (20 * lam0))) * lam0 ≤ vc.r0 := by
+      rw [hlam0def]
+      exact hlam0r0
+    exact hmul.trans h0
   have hmul := vc.ballMult (50 * Real.exp (hd.C * (20 * lam0))) (L.φ k)
     (centers := fun b : ULift.{u} {β // β ∈ J} => yf b.down)
-    (r := hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0)) hr0
+    (r := hd.lambda D (dist xα (X.obj (L.φ k)).basepoint + 10 * lam0)) hr0 hcapr
     (fun b c hbc => by
       rw [hvc, ← ProperMetricOn.dist_eq hd hre P (L.φ k)]
       exact hsep b.down c.down fun h => hbc (ULift.down_injective h))

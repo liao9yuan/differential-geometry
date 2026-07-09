@@ -519,6 +519,26 @@ theorem cotangentSharp_inner_eval
       α (fun _ : Fin 1 => X) := by
   rw [cotangentSharp_inner_gen, cotangentToDual_apply_gen]
 
+/-- Raising the metric-lowered one-form recovers the original tangent vector. -/
+theorem cotangentSharp_dualToCotangent_tangentFlat_gen
+    (g : SmoothMetric_gen I M) (x : M) (X : TangentSpace I x) :
+    cotangentSharp_gen (I := I) g x
+      (dualToCotangent_gen (I := I) (tangentFlatLinear_gen (I := I) g x X)) = X := by
+  apply tangentFlatLinear_injective_gen (I := I) g x
+  ext Y
+  simp [tangentFlatLinear_apply_gen, cotangentSharp_inner_gen]
+
+/-- The cotangent metric of two metric-lowered vectors is the tangent metric. -/
+theorem cotangentInner_dualToCotangent_tangentFlat_gen
+    (g : SmoothMetric_gen I M) (x : M) (X Y : TangentSpace I x) :
+    cotangentInner_gen (I := I) g x
+      (dualToCotangent_gen (I := I) (tangentFlatLinear_gen (I := I) g x X))
+      (dualToCotangent_gen (I := I) (tangentFlatLinear_gen (I := I) g x Y)) =
+        g.inner x X Y := by
+  rw [cotangentInner_eq_sharp_gen,
+    cotangentSharp_dualToCotangent_tangentFlat_gen,
+    cotangentSharp_dualToCotangent_tangentFlat_gen]
+
 /-- Two tangent vectors are equal if they have the same metric pairing with a
 basis. -/
 theorem eq_of_inner_basis_eq_gen

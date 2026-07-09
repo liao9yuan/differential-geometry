@@ -2,6 +2,16 @@
 
 ## 2026-06-22 — added `C∞` normal chart inverse (section `NormalChartInftySmooth`)
 
+## 2026-07-08 - subsequence wrappers for D6
+
+Added checked `subseq` wrappers for `ExpInverseDerivBoundInput` and
+`NormalCoordMetricBoundInput`.  Both wrappers only reindex the sequence member
+`k` to `f k` and keep the uniform constants unchanged, which is the shape D6
+needs when composing Step A, Step D, and metric-limit subsequences.
+
+Verification passed for the focused file check and targeted `StepBInputs`
+module build.
+
 `normalChartAt_contMDiffAt_infty` / `normalChartAt_contMDiffOn_infty`: the normal chart inverse
 is `C∞` (was only `C¹`), via a fresh Banach IFT at `∞` on `extChartAt q ∘ expMap` (chart centred
 at the image point `q`, so `extChartAt`-invertibility is at its centre via

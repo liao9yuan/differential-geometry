@@ -380,3 +380,111 @@ downstream layer that already imports the metric/Hopf-Rinow side
 `ExpVariationSmooth.lean` would put the dependency in the wrong direction.
 
 Verification status: focused Lean check passed for the exponential-layer edit.
+
+## Implementation update (2026-06-30, C4 wrapper layer)
+
+Added the first C4 Step-C wrapper file:
+`DifferentialGeometry/Geometry/Flow/RicciFlow/HCGCompactness/C4/StepCCenterOfMass.lean`.
+
+Implemented:
+
+- `CenterInput`, bundling the routine C1 hypotheses plus `StrictDistInput`;
+- `CenterInput.exists_cm`;
+- `centerOfMass`;
+- `centerOfMass.mem`, `centerOfMass.min`, `centerOfMass.unique`;
+- `centerOfMass.dist_le`, using the `2 epsilon` stability package;
+- `centerOfMass.expInv_eqn`, the conditional book-form equation for the chosen
+  center.
+
+The strict Hessian/strict-convexity input lives in the new
+`StepCInputs.lean` as `StrictDistInput`. It is intentionally shaped exactly
+like the hypotheses consumed by `CenterOfMass.exists_unique_curve*`.
+
+The equation remains conditional on differentiability of the center energy,
+differentiability of the summands, and the one-summand gradient identity at the
+selected center. This is intentional: `HalfSqDistGradMain.lean` proves the
+first-variation identity under source/smallness/non-self hypotheses, but Step C
+still needs a radius/source/smoothness producer to discharge those hypotheses
+for every active summand.
+
+Verification status: focused checks and the targeted module build passed. Axiom
+prints for the new public endpoints reported `[propext, Classical.choice,
+Quot.sound]`.
+
+Implementation traps:
+
+- The wrapper must open `DifferentialGeometry.Integral.Connection` to see
+  `gradientFun`.
+- `CenterOfMass.sum_expInv_eq_zero` is currently indexed by `κ : Type`, so this
+  C4 wrapper also uses `ι : Type`, not an arbitrary universe-polymorphic index.
+
+## Implementation update (2026-06-30, local equation bridge)
+
+Added two more C1 equation-routing lemmas to `StepCCenterOfMass.lean`:
+
+- `centerOfMass.grad_half_self`: the self-summand formula
+  `grad (1/2 d(.,q)^2) q = -normalChartAt g q q`, proved by local minimality
+  and `normalChartAt_centre`.
+- `centerOfMass.centerEnergy_diff`: differentiability of the finite center
+  energy follows from differentiability of all half-squared-distance summands.
+- `centerOfMass.expInv_eqn_local`: an `exists rho > 0` bridge that discharges
+  the raw one-summand gradient hypothesis in `centerOfMass.expInv_eqn`.
+  Non-self summands use `HalfSqDistGradMain.grad_halfSqDist`; self summands use
+  `grad_half_self`. This theorem now derives center-energy differentiability
+  from the summand differentiability, so it no longer carries an `hdiffEnergy`
+  hypothesis.
+
+The theorem still deliberately requires the concrete Step-C radius/source and
+differentiability inputs:
+
+- each active summand lies in the normal-coordinate source at the chosen center;
+- non-self summands are small relative to the produced local radius;
+- all summands are differentiable at the chosen center.
+
+Thus the remaining producer layer is now sharper: prove those source,
+smallness, and differentiability facts for the concrete Step-C averaging
+configuration, rather than carrying an opaque `hgrad` assumption.
+
+Verification status: focused Lean check passed.
+
+Follow-up verification status: the current `StepCCenterOfMass` module targeted
+build passed, and a local scan of `StepCCenterOfMass.lean`/`StepCInputs.lean`
+found no `sorry` or `admit`.  Axiom probes for `CenterInput.exists_cm` and
+`centerOfMass.expInv_eqn_local` report only the usual project axioms.
+
+## Implementation update (2026-07-03, C2 = lbl430 IFT core landed)
+
+New file `C4/StepCSmoothness.lean`. `cmSolution_hasStrictFDerivAt` (green, `lake build`,
+axiom-clean `[propext, Classical.choice, Quot.sound]`): the Banach-IFT extraction half of
+lbl430(i). From an `ImplicitFunctionData 𝕜 (Ey × P) F P` for the "solve `G(y,params)=0` for
+`y`" equation (leftFun = the E-valued chart-coordinate cm equation `Σ μᵢ exp_y⁻¹ qᵢ`,
+rightFun = param projection), the parameter → center map
+`params ↦ (implicitFunction (leftFun pt) params).1` (y-component = cm) is `HasStrictFDerivAt`
+(C¹). Proof = `ContinuousLinearMap.fst.comp` of Mathlib
+`ImplicitFunctionData.hasStrictFDerivAt_implicitFunction_fderiv`.
+
+**Survey findings that shaped this (a9dacd23…):**
+- Joint smoothness `(y,q) ↦ exp_y⁻¹ q` is **AVAILABLE**: `Exponential.diagExpInv` +
+  `diagExpInv_contMDiffAt` (`ContMDiffAt (I.prod I) I.tangent 1 … (p,p)`) in
+  `DiagExpDerivative.lean`; plus `diagExp_hasFDerivAt_zero_unipotent` (zero-section derivative
+  `(z₁,z₂)↦(z₁,z₁+z₂)` = `unipotentCLE`).
+- Mathlib IFT = `ImplicitFunctionData` (solve-for-y form), NOT the surjective
+  `HasStrictFDerivAt.implicitFunction` (kernel/level-set form).
+- **`StrictDistInput` has NO Hessian/invertibility field** — only qualitative strict convexity.
+- `∂_y G ≈ -(Σμᵢ)id` (Hessian of ½d²) is **NOT formalized** (only first-variation
+  `grad_halfSqDist`/`halfSqDist_flat`).
+
+**Remaining C2 frontier (the concrete `ImplicitFunctionData` PRODUCER — multi-session):**
+1. Assemble chart-level `HasStrictFDerivAt` of `G = Σ μᵢ (chart of exp_y⁻¹ qᵢ)` from
+   `diagExpInv` (moving-base tangent space; `TangentSpace` defeq trap — fderiv of E→E maps, not
+   the mfderiv composite) + linearity in μ. **Long pole.**
+2. `∂_y G` invertibility — the `lbl413`-family Hessian input, pre-approved to add (extend
+   `StrictDistInput` or a sibling `CmHessianInput`: the y-slice derivative of the chart equation
+   is invertible, `≈ -(Σμᵢ)id`).
+3. Build `ImplicitFunctionData` (leftFun=G, rightFun=param-proj; `range_leftDeriv`/`isCompl_ker`
+   from invertibility) → `cmSolution_hasStrictFDerivAt` → connect to `centerOfMass` by
+   uniqueness. C^p (all-order) route = the `ContDiff` IFT (`ImplicitContDiff.lean`); C¹ here
+   suffices for B1.
+
+This session delivered the IFT CONSUMER half (verified). The concrete producer (steps 1–3),
+with step 1 the long pole, is the remaining lbl430 work.

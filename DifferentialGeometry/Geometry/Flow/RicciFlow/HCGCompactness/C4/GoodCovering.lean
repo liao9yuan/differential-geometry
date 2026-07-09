@@ -244,6 +244,21 @@ structure RealizesEdist (hd : InjRadiusDecayInput (I := I) X) : Prop where
     (letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
      edist x y) = ENNReal.ofReal (hd.dist k x y)
 
+namespace RealizesEdist
+
+/-- Reindex the realized-distance proof along a subsequence. -/
+theorem subseq {hd : InjRadiusDecayInput (I := I) X}
+    (hre : hd.RealizesEdist) (f : Nat -> Nat) :
+    (hd.subseq f).RealizesEdist := by
+  refine ⟨?_, ?_⟩
+  · intro k x y
+    exact hre.dist_nonneg (f k) x y
+  · intro k x y
+    simpa [InjRadiusDecayInput.subseq, PointedRiemannianSeq.subseq] using
+      hre.edist_eq (f k) x y
+
+end RealizesEdist
+
 /-- Under `RealizesEdist` the supplied distance is symmetric (from `edist_comm`). -/
 theorem RealizesEdist.dist_comm {hd : InjRadiusDecayInput (I := I) X}
     (hre : hd.RealizesEdist) (k : Nat) (x y : (X.obj k).M) :
@@ -343,6 +358,7 @@ so this is the A0' Bishop--Gromov bound `VolumeComparisonInput.ballMult`. -/
 theorem net_multiplicity (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : Nat)
     (hD : 0 < D) (hre : hd.RealizesEdist)
     (vc : VolumeComparisonInput (I := I) X) (hvc : vc.dist = hd.dist) (R : Real)
+    (hRcap : 4 * hd.lambda D R ≤ vc.r0)
     {S : Set ((X.obj k).M)} (hS : S.PairwiseDisjoint (hd.lambdaBall D k))
     (hSR : ∀ x ∈ S, hd.dist k x (X.obj k).basepoint ≤ R)
     (z : (X.obj k).M) (J : Finset ((X.obj k).M)) (hJS : ↑J ⊆ S)
@@ -360,7 +376,7 @@ theorem net_multiplicity (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : N
       _ ≤ hd.dist k i j :=
           hd.lambdaNet_dist_separated D k hD hre hS hiS hjS hij
   have hmul := vc.ballMult 4 k
-    (centers := fun i : {x // x ∈ J} => (i : (X.obj k).M)) (r := hd.lambda D R) hr
+    (centers := fun i : {x // x ∈ J} => (i : (X.obj k).M)) (r := hd.lambda D R) hr hRcap
     (fun i j hij => by
       rw [hvc]; exact hsep i i.2 j j.2 (fun h => hij (Subtype.ext h)))
     z Finset.univ
@@ -377,6 +393,24 @@ structure PackingBound (hd : InjRadiusDecayInput (I := I) X) (D : Real) where
     (∀ x ∈ J, hd.dist k x (X.obj k).basepoint ≤ r) →
     (∀ x ∈ J, ∀ y ∈ J, x ≠ y → hd.lambda D r ≤ hd.dist k x y) →
     J.card ≤ A r
+
+namespace PackingBound
+
+/-- Reindex a packing bound along a subsequence. -/
+def subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    (pb : hd.PackingBound D) (f : Nat -> Nat) :
+    (hd.subseq f).PackingBound D where
+  A := pb.A
+  card_le := by
+    intro k r J hJr hsep
+    refine pb.card_le (f k) r J ?_ ?_
+    · intro x hx
+      simpa [InjRadiusDecayInput.subseq, PointedRiemannianSeq.subseq] using hJr x hx
+    · intro x hx y hy hxy
+      simpa [InjRadiusDecayInput.subseq, InjRadiusDecayInput.lambda,
+        InjRadiusDecayInput.mu, PointedRiemannianSeq.subseq] using hsep x hx y hy hxy
+
+end PackingBound
 
 /-- MSM135 `lbl387` ball-number bound `A(r)` / A3 count: any finite set of net centers
 in `B(O,r)` has at most `A(r)` elements, from the `λ[r]`-separation of the net (`λ`

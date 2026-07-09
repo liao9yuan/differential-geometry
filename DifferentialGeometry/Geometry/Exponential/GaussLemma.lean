@@ -2145,6 +2145,32 @@ theorem metricBall_subset_normalBall
     rw [hy_eq]; exact hdist_eq
   rw [hdy, ENNReal.toReal_ofReal (Real.sqrt_nonneg _)]
 
+/-- A point whose Riemannian distance from `c` is below `expRadiusGp g c`
+belongs to the source of the normal chart at `c`. This is the source-membership
+projection of `metricBall_subset_normalBall`; use the stronger theorem when the
+radial vector or radius identity is also needed. -/
+theorem memNChartSrcOfDist
+    (g : SmoothRiemannianMetric I M) (c : M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    {y : M} (hfin : riemannianEDist I c y ≠ ⊤)
+    (hy : (riemannianEDist I c y).toReal < expRadiusGp (I := I) g c) :
+    y ∈ (NormalCoordinates.normalChartAt (I := I) g c).source := by
+  obtain ⟨v, hv_tgt, _hv_dom, _hv_len, hy_eq⟩ :=
+    metricBall_subset_normalBall (I := I) g c hEnorm hfin hy
+  set ψ := NormalCoordinates.normalChartAt (I := I) g c with hψ_def
+  have hv_symm_src : v ∈ ψ.symm.source := by
+    rw [hψ_def]
+    exact hv_tgt
+  have hy_symm : ψ.symm v = y := by
+    rw [hy_eq]
+    rw [hψ_def]
+    exact NormalCoordinates.normalChartAt_symm_apply (I := I) g c hv_symm_src
+  have hsrc : ψ.symm v ∈ ψ.source := by
+    exact ψ.symm.map_source hv_symm_src
+  rw [← hy_symm]
+  exact hsrc
+
 end LocalRadialIdentification
 
 end RadialMinimizerConvention

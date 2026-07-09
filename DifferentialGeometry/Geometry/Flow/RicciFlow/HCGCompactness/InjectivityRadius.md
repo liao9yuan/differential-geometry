@@ -9,3 +9,7 @@ Design note: `HasInjRadiusAt` now wraps the real normal-coordinate predicate `Co
 2026-05-27 adoption update: HCG injectivity radius now imports the normal-coordinate backend and exposes the definitional bridge plus the admissible-radius producer lemma. This layer requires `[I.Boundaryless]`, matching normal coordinates.
 
 Verification: passed.
+
+2026-07-01 Step-C closure update: added `BaseInjBound.subseq`, the
+subsequence projection for the basepoint injectivity-radius lower bound.  This
+is data-valued, so it is a `def`, not a theorem.  Verification passed.

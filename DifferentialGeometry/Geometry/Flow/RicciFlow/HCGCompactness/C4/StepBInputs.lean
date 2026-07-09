@@ -82,33 +82,66 @@ noncomputable def normalTransition
     normalChartAt (I := I) X.metric y
       (expMapDiffeo (I := I) X.metric x z)
 
-/-- Derivative bound for one normal-coordinate transition map on the chart overlap. -/
+/-- Derivative bound for one normal-coordinate transition map, on the chart overlap
+**below a scale cap `r₁`**: the evaluation point `z` lies in the `min r₁ (C²-radius of x)`
+ball, and its image lies in the `min r₁ (C²-radius of y)` normal ball of `y`.
+
+The scale cap is the book's own domain (MSM135 `lbl418` proves the bounds for
+`x, y ∈ B(p, r₁)`, `r₁ ≤ min{inj(p)/4, c/√C₀}`).  An uncapped version quantified over
+the whole chart overlap is over-strong: chart sources are not scale-controlled, and in
+negatively curved members `d(exp_x)` grows exponentially with the radius, so transition
+derivatives are not uniformly bounded far out. -/
 def NormalTransitionDerivBound
     (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : X.M)
-    (p : Nat) (C : Real) : Prop :=
+    (r₁ : Real) (p : Nat) (C : Real) : Prop :=
   letI : TopologicalSpace X.M := X.topology
   letI : ChartedSpace H X.M := X.charted
   letI : IsManifold I ∞ X.M := X.smooth
   letI : T2Space (TangentBundle I X.M) := X.t2TangentBundle
   forall z : E,
+    ‖z‖ < min r₁ (expMapC2Radius (I := I) X.metric x) ->
     z ∈ (expMapDiffeo (I := I) X.metric x).source ->
+      expMapDiffeo (I := I) X.metric x z ∈
+          (fun v : E => (expMap (I := I) X.metric y
+            (show TangentSpace I y from v) : X.M)) ''
+            Metric.ball (0 : E) (min r₁ (expMapC2Radius (I := I) X.metric y)) ->
       expMapDiffeo (I := I) X.metric x z ∈
           (normalChartAt (I := I) X.metric y).source ->
         ‖iteratedFDeriv Real p (normalTransition (I := I) X x y) z‖ <= C
 
 /-- MSM135 Chapter 4, section `lbl-2103` (S6 / `lbl418`): Jacobi/Rauch comparison
-bounds for derivatives of the normal-coordinate transition maps `exp_y⁻¹ ∘ exp_x`.
+bounds for derivatives of the normal-coordinate transition maps `exp_y⁻¹ ∘ exp_x`,
+valid below the comparison scale `r₁` (the book's `r₁ ≤ min{inj/4, c/√C₀}`).
 
 The field `exp_inv_deriv` is the deep external theorem, consumed by Steps B/C. -/
 structure ExpInverseDerivBoundInput
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
+  /-- The comparison scale below which the transition-derivative bounds hold. -/
+  r₁ : Real
+  r₁_pos : 0 < r₁
   derivC : Nat -> Real
   derivC_nonneg : forall p : Nat, 0 <= derivC p
   /-- Consumed by Steps B/C: uniform `C^p` bounds for the normal-coordinate
-  transition map on the overlap of two normal charts. -/
+  transition map on the overlap of two normal charts, below the scale `r₁`. -/
   exp_inv_deriv :
     forall k p : Nat, forall x y : (X.obj k).M,
-      NormalTransitionDerivBound (I := I) (X.obj k) x y p (derivC p)
+      NormalTransitionDerivBound (I := I) (X.obj k) x y r₁ p (derivC p)
+
+namespace ExpInverseDerivBoundInput
+
+/-- Reindex the normal-transition derivative input along a subsequence. -/
+def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : ExpInverseDerivBoundInput (I := I) X) (f : Nat -> Nat) :
+    ExpInverseDerivBoundInput (I := I) (X.subseq f) where
+  r₁ := h.r₁
+  r₁_pos := h.r₁_pos
+  derivC := h.derivC
+  derivC_nonneg := h.derivC_nonneg
+  exp_inv_deriv := by
+    intro k p x y
+    simpa [PointedRiemannianSeq.subseq] using h.exp_inv_deriv (f k) p x y
+
+end ExpInverseDerivBoundInput
 
 /-! ## `lbl395` normal-coordinate metric bounds (honest input) -/
 
@@ -485,6 +518,27 @@ structure NormalCoordMetricBoundInput
     forall (k p : Nat) (x : (X.obj k).M),
       NormalCoordMetricDerivBound (I := I) (X.obj k) x
         (Metric.ball (0 : E) (radius k x)) p (metricC p)
+
+namespace NormalCoordMetricBoundInput
+
+/-- Reindex the normal-coordinate metric bound input along a subsequence. -/
+def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : NormalCoordMetricBoundInput (I := I) X) (f : Nat -> Nat) :
+    NormalCoordMetricBoundInput (I := I) (X.subseq f) where
+  metricC := h.metricC
+  metricC_nonneg := h.metricC_nonneg
+  radius := fun k x => h.radius (f k) x
+  radius_pos := by
+    intro k x
+    exact h.radius_pos (f k) x
+  metric_equiv := by
+    intro k x
+    simpa [PointedRiemannianSeq.subseq] using h.metric_equiv (f k) x
+  metric_deriv := by
+    intro k p x
+    simpa [PointedRiemannianSeq.subseq] using h.metric_deriv (f k) p x
+
+end NormalCoordMetricBoundInput
 
 /-! ## `C∞` normal chart inverse (B-trans transition-map smoothness)
 

@@ -821,6 +821,45 @@ structure ProperMetricOn {I : ModelWithCorners Real E H}
     ∀ p : Y.M, ∀ t : ℝ, 0 ≤ t → t ≤ dist p Y.basepoint →
       ∃ q : Y.M, dist q Y.basepoint = t
 
+/-- The topology induced by a realized proper metric is the stored manifold
+topology. -/
+theorem ProperMetricOn.top_eq {I : ModelWithCorners Real E H}
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (P : ProperMetricOn (I := I) Y) :
+    P.ms.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace = Y.topology := by
+  have hem :
+      (letI : MetricSpace Y.M := P.ms
+       (inferInstance : PseudoEMetricSpace Y.M)) =
+        (letI : EMetricSpace Y.M := Y.emetricSpace
+         (inferInstance : PseudoEMetricSpace Y.M)) := by
+    apply PseudoEMetricSpace.ext
+    ext x y
+    change (letI : MetricSpace Y.M := P.ms; edist x y) =
+      (letI : EMetricSpace Y.M := Y.emetricSpace; edist x y)
+    rw [P.realizes x y]
+    have hdist :
+        (letI : MetricSpace Y.M := P.ms
+         edist x y) =
+          ENNReal.ofReal (letI : MetricSpace Y.M := P.ms
+           dist x y) := by
+      letI : MetricSpace Y.M := P.ms
+      exact edist_dist x y
+    exact hdist
+  have htop :
+      (letI : MetricSpace Y.M := P.ms
+       (inferInstance : PseudoEMetricSpace Y.M).toUniformSpace.toTopologicalSpace) =
+        (letI : EMetricSpace Y.M := Y.emetricSpace
+         (inferInstance : PseudoEMetricSpace Y.M).toUniformSpace.toTopologicalSpace) := by
+    simpa using
+      congrArg (fun m : PseudoEMetricSpace Y.M => m.toUniformSpace.toTopologicalSpace) hem
+  have hcan :
+      (letI : EMetricSpace Y.M := Y.emetricSpace
+       (inferInstance : PseudoEMetricSpace Y.M).toUniformSpace.toTopologicalSpace) =
+        Y.topology := by
+    rfl
+  change P.ms.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace = Y.topology
+  rw [htop, hcan]
+
 /-- Choice form of Hopf--Rinow proper metric realization. -/
 noncomputable def properMetricOn {I : ModelWithCorners Real E H}
     [InnerProductSpace Real E]

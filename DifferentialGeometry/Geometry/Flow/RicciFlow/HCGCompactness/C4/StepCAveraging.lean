@@ -1,0 +1,1142 @@
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCCenterOfMass
+
+set_option autoImplicit false
+set_option linter.style.longLine false
+set_option linter.unusedSectionVars false
+
+/-!
+# MSM135 Chapter 4 Step C pointwise averaging map
+
+This file packages the pointwise center-of-mass average used in Step C.  The
+actual partition-of-unity producer from the good cover is a separate layer; here
+the weights and points are supplied explicitly at each source point.
+-/
+
+noncomputable section
+
+universe u uE uH uX
+
+namespace DifferentialGeometry
+namespace HCGCompactness
+
+open Set Bundle Manifold
+open scoped Topology Manifold ContDiff ENNReal
+open DifferentialGeometry.Geometry.Riemannian
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace
+
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [NeZero (Module.finrank ℝ E)]
+variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+  [I.Boundaryless]
+variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M]
+  [ConnectedSpace M] [T3Space M]
+
+/-- The tangent extended-norm formula in the exact shape required by
+`CenterInput.enorm`. -/
+theorem metricEnorm (g : SmoothRiemannianMetric I M) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    ∀ x : M, ∀ v : TangentSpace I x,
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  intro x v
+  simpa using
+    (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+      (I := I) g x v)
+
+/-- The pointwise Step-C center-of-mass average of a finite family of points. -/
+noncomputable def centerAverage (g : SmoothRiemannianMetric I M)
+    {X : Type uX} {ι : Type} [Fintype ι] (μ : X → ι → ℝ)
+    (pts : X → ι → M) (join : M → M → ℝ → M) (p : X → M) (r : X → ℝ)
+    (h : ∀ x : X, CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+    (x : X) : M :=
+  centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (h x)
+
+/-- The pointwise Step-C center average on a restricted source set, with a
+chosen harmless default outside the set.  All Step-C estimates below use this
+only on `s`, so no center-of-mass hypotheses are required off `s`. -/
+noncomputable def centerAverageOn (g : SmoothRiemannianMetric I M)
+    {X : Type uX} {ι : Type} [Fintype ι] (s : Set X) (μ : X → ι → ℝ)
+    (pts : X → ι → M) (join : M → M → ℝ → M) (p : X → M) (r : X → ℝ)
+    (qstar : X → M)
+    (h : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+    (x : X) : M :=
+  by
+    classical
+    exact
+      if hx : x ∈ s then
+        centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (h x hx)
+      else qstar x
+
+namespace centerAverage
+
+variable {g : SmoothRiemannianMetric I M} {X : Type uX} {ι : Type}
+
+/-- Fill zero-weight entries by the target map.  This lets later Step-C code
+define arbitrary local-map values outside the active support without changing
+the center average. -/
+noncomputable def activeFill (μ : X → ι → ℝ) (pts : X → ι → M)
+    (qstar : X → M) : X → ι → M := by
+  classical
+  exact fun x i => if μ x i = 0 then qstar x else pts x i
+
+/-- If every nonzero-weight entry is close to the target, then every filled
+entry is close to the target. -/
+theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar : X → M}
+    {x : X} {ε : ℝ} (hε : 0 < ε)
+    (hactive :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, μ x i ≠ 0 → dist (qstar x) (pts x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ i : ι, dist (qstar x) (activeFill μ pts qstar x i) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  intro i
+  by_cases hzero : μ x i = 0
+  · simpa [activeFill, hzero] using hε
+  · simpa [activeFill, hzero] using hactive i hzero
+
+variable [Fintype ι]
+variable {μ : X → ι → ℝ} {pts : X → ι → M} {join : M → M → ℝ → M}
+  {p : X → M} {r : X → ℝ}
+  (h : ∀ x : X, CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+
+/-- On its source set, `centerAverageOn` is the ordinary selected center of
+mass. -/
+theorem on_eq {s : Set X} {qstar : X → M}
+    (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+    {x : X} (hx : x ∈ s) :
+    centerAverageOn (I := I) g s μ pts join p r qstar hOn x =
+      centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (hOn x hx) := by
+  simp [centerAverageOn, hx]
+
+/-- Build the pointwise `CenterInput` for a filled family.  The only point
+membership required of the original local maps is on nonzero weights; zero
+weights are filled by the target point. -/
+theorem inputOfFill {qstar : X → M} (x : X)
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : 0 < r x)
+    (hqstar :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      dist (p x) (qstar x) < r x)
+    (hactive :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, μ x i ≠ 0 → dist (p x) (pts x i) < r x)
+    (hμ_nonneg : ∀ i : ι, 0 ≤ μ x i)
+    (hμ_pos : ∃ i : ι, 0 < μ x i)
+    (hstrict :
+      StrictDistInput (I := I) g (activeFill μ pts qstar x) join (p x) (r x)) :
+    CenterInput (I := I) g (μ x) (activeFill μ pts qstar x) join (p x) (r x) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine
+    { complete := hcomplete
+      enorm := metricEnorm (I := I) g
+      r_pos := hr
+      pts_mem := ?_
+      μ_nonneg := hμ_nonneg
+      μ_pos := hμ_pos
+      strict := hstrict }
+  intro i
+  by_cases hzero : μ x i = 0
+  · simpa [activeFill, hzero] using hqstar
+  · simpa [activeFill, hzero] using hactive i hzero
+
+/-- Build the pointwise `CenterInput` for a filled family when the comparison
+target is also the center of the radius ball.  This discharges the target-in-ball
+field of `inputOfFill` from `dist_self` and radius positivity. -/
+theorem inputOfFillSelf {qstar : X -> M} (x : X)
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : 0 < r x)
+    (hactive :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      forall i : ι, μ x i ≠ 0 -> dist (qstar x) (pts x i) < r x)
+    (hμ_nonneg : forall i : ι, 0 ≤ μ x i)
+    (hμ_pos : exists i : ι, 0 < μ x i)
+    (hstrict :
+      StrictDistInput (I := I) g (activeFill μ pts qstar x) join (qstar x) (r x)) :
+    CenterInput (I := I) g (μ x) (activeFill μ pts qstar x) join (qstar x)
+      (r x) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine inputOfFill (I := I) (g := g) (μ := μ) (pts := pts) (join := join)
+    (p := qstar) (r := r) (qstar := qstar) x hcomplete hr ?_ hactive
+    hμ_nonneg hμ_pos hstrict
+  simpa using hr
+
+/-- The pointwise average lies in the corresponding closed `2r` ball. -/
+theorem mem (x : X) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    centerAverage (I := I) g μ pts join p r h x ∈ Metric.closedBall (p x) (2 * r x) := by
+  simpa [centerAverage] using
+    centerOfMass.mem (I := I) (g := g) (μ := μ x) (pts := pts x) (join := join)
+      (p := p x) (r := r x) (h x)
+
+/-- On its source set, `centerAverageOn` lies in the corresponding closed
+`2r` ball. -/
+theorem mem_on {s : Set X} {qstar : X → M}
+    (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+    {x : X} (hx : x ∈ s) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    centerAverageOn (I := I) g s μ pts join p r qstar hOn x ∈
+      Metric.closedBall (p x) (2 * r x) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  rw [on_eq (I := I) (g := g) (μ := μ) (pts := pts) (join := join) (p := p)
+    (r := r) hOn hx]
+  exact centerOfMass.mem (I := I) (g := g) (μ := μ x) (pts := pts x)
+    (join := join) (p := p x) (r := r x) (hOn x hx)
+
+/-- If all input points agree with a target point, the pointwise center average
+is that target point. -/
+theorem eq_of_all_eq {qstar : X → M} (x : X)
+    (hpts : ∀ i : ι, pts x i = qstar x) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    centerAverage (I := I) g μ pts join p r h x = qstar x := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  have hnear : ∀ i : ι, dist (qstar x) (pts x i) ≤ (0 : ℝ) := by
+    intro i
+    rw [hpts i, dist_self]
+  have hdist :
+      dist (centerAverage (I := I) g μ pts join p r h x) (qstar x) ≤ 0 :=
+    by
+      simpa [centerAverage] using
+        centerOfMass.dist_le (I := I) (g := g) (μ := μ x) (pts := pts x)
+          (join := join) (p := p x) (r := r x) (h x) (qstar := qstar x)
+          (by norm_num) hnear
+  exact dist_eq_zero.mp (le_antisymm hdist dist_nonneg)
+
+/-- Pointwise stability of the averaged map under a common `ε`-closeness bound. -/
+theorem dist_le {qstar : X → M} {ε : ℝ} (x : X) (hε : 0 ≤ ε)
+    (hnear :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, dist (qstar x) (pts x i) ≤ ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    dist (centerAverage (I := I) g μ pts join p r h x) (qstar x) ≤ 2 * ε := by
+  simpa [centerAverage] using
+    centerOfMass.dist_le (I := I) (g := g) (μ := μ x) (pts := pts x)
+      (join := join) (p := p x) (r := r x) (h x) (qstar := qstar x) hε hnear
+
+/-- On its source set, `centerAverageOn` satisfies the same pointwise stability
+bound as `centerAverage`. -/
+theorem dist_le_on {s : Set X} {default target : X → M} {ε : ℝ}
+    (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+    {x : X} (hx : x ∈ s) (hε : 0 ≤ ε)
+    (hnear :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, dist (target x) (pts x i) ≤ ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    dist (centerAverageOn (I := I) g s μ pts join p r default hOn x) (target x) ≤
+      2 * ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  rw [on_eq (I := I) (g := g) (μ := μ) (pts := pts) (join := join) (p := p)
+    (r := r) hOn hx]
+  exact centerOfMass.dist_le (I := I) (g := g) (μ := μ x) (pts := pts x)
+    (join := join) (p := p x) (r := r x) (hOn x hx) (qstar := target x) hε hnear
+
+/-- Uniform `C^0` stability of the pointwise average.  If every input point is
+uniformly close to the same target map, then the center-of-mass averages are
+uniformly close to that map. -/
+theorem unif_tendsto {s : Set X} {qstar : X → M}
+    {μSeq : ℕ → X → ι → ℝ} {ptsSeq : ℕ → X → ι → M}
+    {pSeq : ℕ → X → M} {rSeq : ℕ → X → ℝ}
+    (hSeq : ∀ n : ℕ, ∀ x : X,
+      CenterInput (I := I) g (μSeq n x) (ptsSeq n x) join (pSeq n x) (rSeq n x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ ε > 0, ∀ᶠ n in Filter.atTop, ∀ x ∈ s, ∀ i : ι,
+        dist (qstar x) (ptsSeq n x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    TendstoUniformlyOn
+      (fun n x => centerAverage (I := I) g (μSeq n) (ptsSeq n) join (pSeq n) (rSeq n)
+        (hSeq n) x) qstar Filter.atTop s := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  rw [Metric.tendstoUniformlyOn_iff]
+  intro ε hε
+  have hquarter : 0 < ε / 4 := by positivity
+  refine (hpts (ε / 4) hquarter).mono ?_
+  intro n hn x hx
+  have hnear : ∀ i : ι, dist (qstar x) (ptsSeq n x i) ≤ ε / 4 := fun i =>
+    le_of_lt (hn x hx i)
+  have hdist :
+      dist
+        (centerAverage (I := I) g (μSeq n) (ptsSeq n) join (pSeq n) (rSeq n) (hSeq n) x)
+        (qstar x) ≤ 2 * (ε / 4) :=
+    dist_le (I := I) (g := g) (μ := μSeq n) (pts := ptsSeq n) (join := join)
+      (p := pSeq n) (r := rSeq n) (hSeq n) (qstar := qstar) x (by positivity) hnear
+  rw [dist_comm]
+  calc
+    dist
+        (centerAverage (I := I) g (μSeq n) (ptsSeq n) join (pSeq n) (rSeq n) (hSeq n) x)
+        (qstar x) ≤ 2 * (ε / 4) := hdist
+    _ = ε / 2 := by ring
+    _ < ε := by linarith
+
+/-- Uniform `C^0` stability from per-index uniform convergence of the finite
+input family. -/
+theorem unif_tendsto_i {s : Set X} {qstar : X → M}
+    {μSeq : ℕ → X → ι → ℝ} {ptsSeq : ℕ → X → ι → M}
+    {pSeq : ℕ → X → M} {rSeq : ℕ → X → ℝ}
+    (hSeq : ∀ n : ℕ, ∀ x : X,
+      CenterInput (I := I) g (μSeq n x) (ptsSeq n x) join (pSeq n x) (rSeq n x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, TendstoUniformlyOn (fun n x => ptsSeq n x i) qstar Filter.atTop s) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    TendstoUniformlyOn
+      (fun n x => centerAverage (I := I) g (μSeq n) (ptsSeq n) join (pSeq n) (rSeq n)
+        (hSeq n) x) qstar Filter.atTop s := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine unif_tendsto (I := I) (g := g) (join := join) hSeq ?_
+  intro ε hε
+  have hfin :
+      ∀ᶠ n in Filter.atTop, ∀ i : ι, ∀ x ∈ s,
+        dist (qstar x) (ptsSeq n x i) < ε := by
+    refine Filter.eventually_all.mpr ?_
+    intro i
+    have hi := hpts i
+    rw [Metric.tendstoUniformlyOn_iff] at hi
+    exact hi ε hε
+  exact hfin.mono fun n hn x hx i => by
+    exact hn i x hx
+
+/-- Uniform `C^0` stability in the identity-target shape used for averaged
+local self-maps in Step C. -/
+theorem unif_tendsto_id {s : Set M}
+    {μSeq : ℕ → M → ι → ℝ} {ptsSeq : ℕ → M → ι → M}
+    {pSeq : ℕ → M → M} {rSeq : ℕ → M → ℝ}
+    (hSeq : ∀ n : ℕ, ∀ x : M,
+      CenterInput (I := I) g (μSeq n x) (ptsSeq n x) join (pSeq n x) (rSeq n x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, TendstoUniformlyOn (fun n x => ptsSeq n x i) (fun x : M => x)
+        Filter.atTop s) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    TendstoUniformlyOn
+      (fun n x => centerAverage (I := I) g (μSeq n) (ptsSeq n) join (pSeq n) (rSeq n)
+        (hSeq n) x) (fun x : M => x) Filter.atTop s := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact unif_tendsto_i (I := I) (g := g) (join := join) hSeq hpts
+
+/-- Two-index uniform `C^0` stability of the pointwise average.  This is the
+shape needed for the Step-C/C4 passage where the local maps depend on two
+large parameters independently. -/
+theorem unif_two_index {s : Set X} {qstar : X → M}
+    {μSeq : ℕ → ℕ → X → ι → ℝ} {ptsSeq : ℕ → ℕ → X → ι → M}
+    {pSeq : ℕ → ℕ → X → M} {rSeq : ℕ → ℕ → X → ℝ}
+    (hSeq : ∀ k l : ℕ, ∀ x : X,
+      CenterInput (I := I) g (μSeq k l x) (ptsSeq k l x) join (pSeq k l x)
+        (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s, ∀ i : ι,
+        dist (qstar x) (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist (qstar x)
+        (centerAverage (I := I) g (μSeq k l) (ptsSeq k l) join (pSeq k l)
+          (rSeq k l) (hSeq k l) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  intro ε hε
+  have hquarter : 0 < ε / 4 := by positivity
+  obtain ⟨N, hN⟩ := hpts (ε / 4) hquarter
+  refine ⟨N, fun k hk l hl x hx => ?_⟩
+  have hnear : ∀ i : ι, dist (qstar x) (ptsSeq k l x i) ≤ ε / 4 := fun i =>
+    le_of_lt (hN k hk l hl x hx i)
+  have hdist :
+      dist
+        (centerAverage (I := I) g (μSeq k l) (ptsSeq k l) join (pSeq k l) (rSeq k l)
+          (hSeq k l) x)
+        (qstar x) ≤ 2 * (ε / 4) :=
+    dist_le (I := I) (g := g) (μ := μSeq k l) (pts := ptsSeq k l) (join := join)
+      (p := pSeq k l) (r := rSeq k l) (hSeq k l) (qstar := qstar) x (by positivity)
+      hnear
+  rw [dist_comm]
+  calc
+    dist
+        (centerAverage (I := I) g (μSeq k l) (ptsSeq k l) join (pSeq k l) (rSeq k l)
+          (hSeq k l) x)
+        (qstar x) ≤ 2 * (ε / 4) := hdist
+    _ = ε / 2 := by ring
+    _ < ε := by linarith
+
+/-- Two-index uniform stability from per-index two-parameter convergence of the
+finite input family. -/
+theorem unif_two_index_i {s : Set X} {qstar : X → M}
+    {μSeq : ℕ → ℕ → X → ι → ℝ} {ptsSeq : ℕ → ℕ → X → ι → M}
+    {pSeq : ℕ → ℕ → X → M} {rSeq : ℕ → ℕ → X → ℝ}
+    (hSeq : ∀ k l : ℕ, ∀ x : X,
+      CenterInput (I := I) g (μSeq k l x) (ptsSeq k l x) join (pSeq k l x)
+        (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+        dist (qstar x) (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist (qstar x)
+        (centerAverage (I := I) g (μSeq k l) (ptsSeq k l) join (pSeq k l)
+          (rSeq k l) (hSeq k l) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine unif_two_index (I := I) (g := g) (join := join) hSeq ?_
+  intro ε hε
+  classical
+  choose N hN using fun i : ι => hpts i ε hε
+  let Nmax : ℕ := Finset.univ.sup N
+  refine ⟨Nmax, fun k hk l hl x hx i => ?_⟩
+  have hNi : N i ≤ Nmax := by
+    exact Finset.le_sup (s := Finset.univ) (f := N) (Finset.mem_univ i)
+  exact hN i k (le_trans hNi hk) l (le_trans hNi hl) x hx
+
+/-- Two-index uniform stability in the identity-target shape used after the
+Step-B local inverse/forward maps have been composed. -/
+theorem unif_two_index_id {s : Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hSeq : ∀ k l : ℕ, ∀ x : M,
+      CenterInput (I := I) g (μSeq k l x) (ptsSeq k l x) join (pSeq k l x)
+        (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+        dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverage (I := I) g (μSeq k l) (ptsSeq k l) join (pSeq k l)
+          (rSeq k l) (hSeq k l) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact unif_two_index_i (I := I) (g := g) (join := join) hSeq hpts
+
+/-- Two-index identity convergence when only nonzero-weight entries are known to
+converge; zero-weight entries are filled by the identity target. -/
+theorem unif_two_id_fill {s : Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hSeq : ∀ k l : ℕ, ∀ x : M,
+      CenterInput (I := I) g (μSeq k l x)
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+        (pSeq k l x) (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+        μSeq k l x i ≠ 0 → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverage (I := I) g (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (pSeq k l) (rSeq k l) (hSeq k l) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine unif_two_index_id (I := I) (g := g) (join := join) hSeq ?_
+  intro i ε hε
+  obtain ⟨N, hN⟩ := hpts i ε hε
+  refine ⟨N, fun k hk l hl x hx => ?_⟩
+  by_cases hzero : μSeq k l x i = 0
+  · simpa [activeFill, hzero] using hε
+  · simpa [activeFill, hzero] using hN k hk l hl x hx hzero
+
+/-- Restricted-source version of `unif_two_id_fill`.  The center input is only
+required on the source set where the estimate is used. -/
+theorem unif_two_id_fill_on {s : Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hSeq : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      CenterInput (I := I) g (μSeq k l x)
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+        (pSeq k l x) (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+        μSeq k l x i ≠ 0 → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverageOn (I := I) g s (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (pSeq k l) (rSeq k l) (fun x : M => x) (hSeq k l) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  intro ε hε
+  have hquarter : 0 < ε / 4 := by positivity
+  classical
+  choose N hN using fun i : ι => hpts i (ε / 4) hquarter
+  let Nmax : ℕ := Finset.univ.sup N
+  refine ⟨Nmax, fun k hk l hl x hx => ?_⟩
+  have hnear :
+      ∀ i : ι,
+        dist x (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x i) ≤
+          ε / 4 := by
+    intro i
+    by_cases hzero : μSeq k l x i = 0
+    · simpa [activeFill, hzero] using le_of_lt hquarter
+    · have hNi : N i ≤ Nmax := by
+        exact Finset.le_sup (s := Finset.univ) (f := N) (Finset.mem_univ i)
+      exact le_of_lt <| by
+        simpa [activeFill, hzero] using
+          hN i k (le_trans hNi hk) l (le_trans hNi hl) x hx hzero
+  have hdist :
+      dist
+          (centerOfMass (I := I) g (μSeq k l x)
+            (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+            (pSeq k l x) (rSeq k l x) (hSeq k l x hx)) x ≤
+        2 * (ε / 4) := by
+    simpa using
+      centerOfMass.dist_le (I := I) (g := g) (μ := μSeq k l x)
+        (pts := activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x)
+        (join := join) (p := pSeq k l x) (r := rSeq k l x) (hSeq k l x hx)
+        (qstar := x) (ε := ε / 4) (le_of_lt hquarter) hnear
+  rw [centerAverageOn, dif_pos hx, dist_comm]
+  exact lt_of_le_of_lt hdist (by nlinarith)
+
+/-- Two-index identity convergence for filled active families, with the
+pointwise `CenterInput` fields assembled from weight and radius facts. -/
+theorem unifTwoIdOfFill {s : Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : ∀ k l : ℕ, ∀ x : M, 0 < rSeq k l x)
+    (hqstar :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, dist (pSeq k l x) x < rSeq k l x)
+    (hactive_mem :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, ∀ i : ι, μSeq k l x i ≠ 0 →
+        dist (pSeq k l x) (ptsSeq k l x i) < rSeq k l x)
+    (hμ_nonneg : ∀ k l : ℕ, ∀ x : M, ∀ i : ι, 0 ≤ μSeq k l x i)
+    (hμ_pos : ∀ k l : ℕ, ∀ x : M, ∃ i : ι, 0 < μSeq k l x i)
+    (hstrict : ∀ k l : ℕ, ∀ x : M,
+      StrictDistInput (I := I) g
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+        (pSeq k l x) (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+        μSeq k l x i ≠ 0 → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverage (I := I) g (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (pSeq k l) (rSeq k l)
+          (fun x => inputOfFill (I := I) (g := g) (μ := μSeq k l)
+            (pts := ptsSeq k l) (join := join) (p := pSeq k l)
+            (r := rSeq k l) (qstar := fun x : M => x) x hcomplete (hr k l x)
+            (hqstar k l x) (hactive_mem k l x) (hμ_nonneg k l x) (hμ_pos k l x)
+            (hstrict k l x)) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact unif_two_id_fill (I := I) (g := g) (join := join)
+    (fun k l x => inputOfFill (I := I) (g := g) (μ := μSeq k l)
+      (pts := ptsSeq k l) (join := join) (p := pSeq k l)
+      (r := rSeq k l) (qstar := fun x : M => x) x hcomplete (hr k l x)
+      (hqstar k l x) (hactive_mem k l x) (hμ_nonneg k l x) (hμ_pos k l x)
+      (hstrict k l x))
+    hpts
+
+/-- Restricted-source version of `unifTwoIdOfFill`; all pointwise
+center-of-mass input facts are required only on the source set. -/
+theorem unifTwoIdOfFillOn {s : Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : ∀ k l : ℕ, ∀ x : M, x ∈ s → 0 < rSeq k l x)
+    (hqstar :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → dist (pSeq k l x) x < rSeq k l x)
+    (hactive_mem :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → ∀ i : ι, μSeq k l x i ≠ 0 →
+        dist (pSeq k l x) (ptsSeq k l x i) < rSeq k l x)
+    (hμ_nonneg : ∀ k l : ℕ, ∀ x : M, x ∈ s → ∀ i : ι, 0 ≤ μSeq k l x i)
+    (hμ_pos : ∀ k l : ℕ, ∀ x : M, x ∈ s → ∃ i : ι, 0 < μSeq k l x i)
+    (hstrict : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      StrictDistInput (I := I) g
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+        (pSeq k l x) (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+        μSeq k l x i ≠ 0 → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverageOn (I := I) g s (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (pSeq k l) (rSeq k l) (fun x : M => x)
+          (fun x hx => inputOfFill (I := I) (g := g) (μ := μSeq k l)
+            (pts := ptsSeq k l) (join := join) (p := pSeq k l)
+            (r := rSeq k l) (qstar := fun x : M => x) x hcomplete (hr k l x hx)
+            (hqstar k l x hx) (hactive_mem k l x hx) (hμ_nonneg k l x hx)
+            (hμ_pos k l x hx) (hstrict k l x hx)) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact unif_two_id_fill_on (I := I) (g := g) (join := join)
+    (fun k l x hx => inputOfFill (I := I) (g := g) (μ := μSeq k l)
+      (pts := ptsSeq k l) (join := join) (p := pSeq k l)
+      (r := rSeq k l) (qstar := fun x : M => x) x hcomplete (hr k l x hx)
+      (hqstar k l x hx) (hactive_mem k l x hx) (hμ_nonneg k l x hx)
+      (hμ_pos k l x hx) (hstrict k l x hx))
+    hpts
+
+/-- Restricted-source two-index identity convergence from active regions.
+
+This is the bridge used after a partition of unity: nonzero weights place the
+source point in the active region, and convergence only has to be proved there.
+The bundled weight input matches the nonnegativity/positive/sum-one package
+usually produced by a normalized finite partition of unity. -/
+theorem unifTwoIdRegOn {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : ∀ k l : ℕ, ∀ x : M, x ∈ s → 0 < rSeq k l x)
+    (hqstar :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → dist (pSeq k l x) x < rSeq k l x)
+    (hactive_mem :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → ∀ i : ι, μSeq k l x i ≠ 0 →
+        dist (pSeq k l x) (ptsSeq k l x i) < rSeq k l x)
+    (hμ : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      (∀ i : ι, 0 ≤ μSeq k l x i) ∧
+        (∃ i : ι, 0 < μSeq k l x i) ∧
+          ∑ i : ι, μSeq k l x i = 1)
+    (hstrict : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      StrictDistInput (I := I) g
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+        (pSeq k l x) (rSeq k l x))
+    (hregion : ∀ k l : ℕ, ∀ x : M, x ∈ s → ∀ i : ι,
+      μSeq k l x i ≠ 0 → x ∈ USeq k l i)
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x : M, x ∈ s →
+        x ∈ USeq k l i → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverageOn (I := I) g s (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (pSeq k l) (rSeq k l) (fun x : M => x)
+          (fun x hx => inputOfFill (I := I) (g := g) (μ := μSeq k l)
+            (pts := ptsSeq k l) (join := join) (p := pSeq k l)
+            (r := rSeq k l) (qstar := fun x : M => x) x hcomplete (hr k l x hx)
+            (hqstar k l x hx) (hactive_mem k l x hx) ((hμ k l x hx).1)
+            ((hμ k l x hx).2.1) (hstrict k l x hx)) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine unifTwoIdOfFillOn (I := I) (g := g) (join := join) hcomplete hr hqstar
+    hactive_mem (fun k l x hx => (hμ k l x hx).1)
+    (fun k l x hx => (hμ k l x hx).2.1) hstrict ?_
+  intro i ε hε
+  obtain ⟨N, hN⟩ := hpts i ε hε
+  refine ⟨N, fun k hk l hl x hx hμx => ?_⟩
+  exact hN k hk l hl x hx (hregion k l x hx i hμx)
+
+/-- Restricted-source two-index identity convergence from bundled active-region
+data.  This matches the pointwise package produced by the finite POU layer. -/
+theorem unifTwoIdDataOn {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {pSeq : ℕ → ℕ → M → M} {rSeq : ℕ → ℕ → M → ℝ}
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : ∀ k l : ℕ, ∀ x : M, x ∈ s → 0 < rSeq k l x)
+    (hqstar :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → dist (pSeq k l x) x < rSeq k l x)
+    (hactive_mem :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → ∀ i : ι, μSeq k l x i ≠ 0 →
+        dist (pSeq k l x) (ptsSeq k l x i) < rSeq k l x)
+    (hdata : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      ((∀ i : ι, 0 ≤ μSeq k l x i) ∧
+        (∃ i : ι, 0 < μSeq k l x i) ∧
+          ∑ i : ι, μSeq k l x i = 1) ∧
+        ∀ i : ι, μSeq k l x i ≠ 0 → x ∈ USeq k l i)
+    (hstrict : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      StrictDistInput (I := I) g
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join
+        (pSeq k l x) (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x : M, x ∈ s →
+        x ∈ USeq k l i → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverageOn (I := I) g s (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (pSeq k l) (rSeq k l) (fun x : M => x)
+          (fun x hx => inputOfFill (I := I) (g := g) (μ := μSeq k l)
+            (pts := ptsSeq k l) (join := join) (p := pSeq k l)
+            (r := rSeq k l) (qstar := fun x : M => x) x hcomplete (hr k l x hx)
+            (hqstar k l x hx) (hactive_mem k l x hx) ((hdata k l x hx).1.1)
+            ((hdata k l x hx).1.2.1) (hstrict k l x hx)) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact unifTwoIdRegOn (I := I) (g := g) (join := join) (USeq := USeq)
+    hcomplete hr hqstar hactive_mem (fun k l x hx => (hdata k l x hx).1)
+    hstrict (fun k l x hx i hμx => (hdata k l x hx).2 i hμx) hpts
+
+/-- Self-centered version of `unifTwoIdDataOn`.  The comparison ball is centered
+at the source point itself, so there is no separate `pSeq` or target-in-ball
+hypothesis. -/
+theorem unifTwoIdDataSelf {s : Set M} {USeq : ℕ → ℕ → ι → Set M}
+    {μSeq : ℕ → ℕ → M → ι → ℝ} {ptsSeq : ℕ → ℕ → M → ι → M}
+    {rSeq : ℕ → ℕ → M → ℝ}
+    (hcomplete :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : EMetricSpace M := EMetricSpace.ofRiemannianMetric I M
+      CompleteSpace M)
+    (hr : ∀ k l : ℕ, ∀ x : M, x ∈ s → 0 < rSeq k l x)
+    (hactive_mem :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ k l : ℕ, ∀ x : M, x ∈ s → ∀ i : ι, μSeq k l x i ≠ 0 →
+        dist x (ptsSeq k l x i) < rSeq k l x)
+    (hdata : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      ((∀ i : ι, 0 ≤ μSeq k l x i) ∧
+        (∃ i : ι, 0 < μSeq k l x i) ∧
+          ∑ i : ι, μSeq k l x i = 1) ∧
+        ∀ i : ι, μSeq k l x i ≠ 0 → x ∈ USeq k l i)
+    (hstrict : ∀ k l : ℕ, ∀ x : M, x ∈ s →
+      StrictDistInput (I := I) g
+        (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x) x) join x
+        (rSeq k l x))
+    (hpts :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x : M, x ∈ s →
+        x ∈ USeq k l i → dist x (ptsSeq k l x i) < ε) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ x ∈ s,
+      dist x
+        (centerAverageOn (I := I) g s (μSeq k l)
+          (activeFill (μSeq k l) (ptsSeq k l) (fun x : M => x)) join
+          (fun x : M => x) (rSeq k l) (fun x : M => x)
+          (fun x hx => inputOfFillSelf (I := I) (g := g) (μ := μSeq k l)
+            (pts := ptsSeq k l) (join := join) (r := rSeq k l)
+            (qstar := fun x : M => x) x hcomplete (hr k l x hx)
+            (hactive_mem k l x hx) ((hdata k l x hx).1.1)
+            ((hdata k l x hx).1.2.1) (hstrict k l x hx)) x) < ε := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact unif_two_id_fill_on (I := I) (g := g) (join := join)
+    (fun k l x hx => inputOfFillSelf (I := I) (g := g) (μ := μSeq k l)
+      (pts := ptsSeq k l) (join := join) (r := rSeq k l)
+      (qstar := fun x : M => x) x hcomplete (hr k l x hx)
+      (hactive_mem k l x hx) ((hdata k l x hx).1.1)
+      ((hdata k l x hx).1.2.1) (hstrict k l x hx))
+    (by
+      intro i ε hε
+      obtain ⟨N, hN⟩ := hpts i ε hε
+      refine ⟨N, fun k hk l hl x hx hμx => ?_⟩
+      exact hN k hk l hl x hx ((hdata k l x hx).2 i hμx))
+
+/-- Pointwise local-radius equation for the averaged map. -/
+theorem eqn_local (x : X)
+    (hdiffSummands :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist (pts x i))
+        (centerAverage (I := I) g μ pts join p r h x))
+    (hsrc :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, pts x i ∈
+        (NormalCoordinates.normalChartAt (I := I) g
+          (centerAverage (I := I) g μ pts join p r h x)).source) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∃ ρ : ℝ, 0 < ρ ∧
+      ((∀ i : ι, pts x i ≠ centerAverage (I := I) g μ pts join p r h x →
+        Real.sqrt
+          (g.inner (centerAverage (I := I) g μ pts join p r h x)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerAverage (I := I) g μ pts join p r h x) (pts x i) : E)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerAverage (I := I) g μ pts join p r h x) (pts x i) : E)) < ρ) →
+        ∑ i : ι, μ x i •
+          (show TangentSpace I (centerAverage (I := I) g μ pts join p r h x) from
+            NormalCoordinates.normalChartAt (I := I) g
+              (centerAverage (I := I) g μ pts join p r h x) (pts x i)) = 0) := by
+  simpa [centerAverage] using
+    centerOfMass.expInv_eqn_local (I := I) (g := g) (μ := μ x) (pts := pts x)
+      (join := join) (p := p x) (r := r x) (h x) hdiffSummands hsrc
+
+/-- Restricted-source local-radius equation for `centerAverageOn`. -/
+theorem eqn_local_on {s : Set X} {qstar : X → M}
+    (hOn : ∀ x : X, x ∈ s → CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))
+    {x : X} (hx : x ∈ s)
+    (hdiffSummands :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist (pts x i))
+        (centerAverageOn (I := I) g s μ pts join p r qstar hOn x))
+    (hsrc :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, pts x i ∈
+        (NormalCoordinates.normalChartAt (I := I) g
+          (centerAverageOn (I := I) g s μ pts join p r qstar hOn x)).source) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∃ ρ : ℝ, 0 < ρ ∧
+      ((∀ i : ι,
+        pts x i ≠ centerAverageOn (I := I) g s μ pts join p r qstar hOn x →
+        Real.sqrt
+          (g.inner (centerAverageOn (I := I) g s μ pts join p r qstar hOn x)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerAverageOn (I := I) g s μ pts join p r qstar hOn x)
+              (pts x i) : E)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerAverageOn (I := I) g s μ pts join p r qstar hOn x)
+              (pts x i) : E)) < ρ) →
+        ∑ i : ι, μ x i •
+          (show TangentSpace I
+              (centerAverageOn (I := I) g s μ pts join p r qstar hOn x) from
+            NormalCoordinates.normalChartAt (I := I) g
+              (centerAverageOn (I := I) g s μ pts join p r qstar hOn x)
+              (pts x i)) = 0) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  have hcm :
+      centerAverageOn (I := I) g s μ pts join p r qstar hOn x =
+        centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (hOn x hx) :=
+    on_eq (I := I) (g := g) (μ := μ) (pts := pts) (join := join) (p := p)
+      (r := r) hOn hx
+  have hdiff :
+      ∀ i : ι, MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist (pts x i))
+        (centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x) (hOn x hx)) := by
+    intro i
+    simpa [hcm] using hdiffSummands i
+  have hsrc' :
+      ∀ i : ι, pts x i ∈
+        (NormalCoordinates.normalChartAt (I := I) g
+          (centerOfMass (I := I) g (μ x) (pts x) join (p x) (r x)
+            (hOn x hx))).source := by
+    intro i
+    simpa [hcm] using hsrc i
+  rw [hcm]
+  exact centerOfMass.expInv_eqn_local (I := I) (g := g) (μ := μ x) (pts := pts x)
+    (join := join) (p := p x) (r := r x) (hOn x hx) hdiff hsrc'
+
+end centerAverage
+
+end HCGCompactness
+end DifferentialGeometry

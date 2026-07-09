@@ -1,0 +1,127 @@
+# StepCAveraging.lean
+
+## 2026-06-30
+
+Added the pointwise Step-C averaging wrapper.
+
+Implemented:
+
+- `centerAverage`, the center-of-mass average at a source point from supplied
+  weights, target points, joining curves, and the pointwise `CenterInput`;
+- `centerAverageOn`, the restricted-source version of the pointwise average:
+  on the source set it chooses the same center of mass, and outside the set it
+  uses a harmless default map so no off-set center input is needed;
+- `centerAverage.on_eq`, the on-source reduction of `centerAverageOn` to the
+  ordinary selected center of mass;
+- `metricEnorm`, the tangent extended-norm formula in the exact shape needed by
+  `CenterInput.enorm`;
+- `centerAverage.mem`, the closed `2r` ball membership statement;
+- `centerAverage.mem_on`, the restricted-source closed `2r` ball membership
+  statement for `centerAverageOn`;
+- `centerAverage.eq_of_all_eq`, the pointwise fact that the average of a
+  constant finite family is that same point;
+- `centerAverage.dist_le`, the pointwise `2 epsilon` stability statement;
+- `centerAverage.dist_le_on`, the restricted-source pointwise stability
+  statement for `centerAverageOn`;
+- `centerAverage.unif_tendsto`, the uniform `C^0` stability statement:
+  if every finite input point is uniformly close to the same target map on a
+  set, then the center averages converge uniformly to that target map;
+- `centerAverage.unif_tendsto_i`, the finite-index adapter from per-index
+  uniform convergence of each input point family;
+- `centerAverage.unif_tendsto_id`, the identity-target specialization for
+  averaged self-maps;
+- `centerAverage.unif_two_index`, the same uniform stability statement in the
+  two-parameter `k,l >= N` shape needed by the Step-C/C4 average of local maps;
+- `centerAverage.unif_two_index_i`, the finite-index adapter from per-index
+  two-parameter convergence thresholds;
+- `centerAverage.unif_two_index_id`, the two-parameter identity-target
+  specialization for composed local inverse/forward maps;
+- `centerAverage.activeFill`, the zero-weight-entry defaulting wrapper;
+- `centerAverage.activeFill_close`, the pointwise fact that defaulted entries
+  stay close when every active original entry is close;
+- `centerAverage.inputOfFill`, the pointwise `CenterInput` constructor for a
+  filled family: it discharges `pts_mem` from target-in-ball plus active
+  original entries in the ball, discharges `enorm` through `metricEnorm`, and
+  carries only the explicit completeness, weight, radius, and strict inputs;
+- `centerAverage.unif_two_id_fill`, the two-parameter identity-target
+  convergence wrapper where only nonzero-weight entries need convergence;
+- `centerAverage.unif_two_id_fill_on`, the restricted-source version where the
+  center input is required only for `x` in the source set;
+- `centerAverage.unifTwoIdOfFill`, the same convergence wrapper with the
+  pointwise filled-family `CenterInput` assembled from the routine active-map,
+  weight, radius, completeness, and strict-convexity hypotheses, with no
+  separate `enorm` hypothesis;
+- `centerAverage.unifTwoIdOfFillOn`, the corresponding restricted-source
+  wrapper: all radius, active-map, weight, and strict-convexity inputs are only
+  required where the finite partition is valid;
+- `centerAverage.unifTwoIdRegOn`, the active-region version of the restricted
+  two-index identity convergence theorem.  It takes normalized POU-style
+  weights, an active-support-to-region bridge, and convergence only on those
+  active regions, then routes everything through `unifTwoIdOfFillOn`;
+- `centerAverage.unifTwoIdDataOn`, the bundled-data version of the same
+  restricted active-region convergence theorem.  Its pointwise data hypothesis
+  matches the finite POU package from `NetLimitData.hatPOU_active_data`, so the
+  later concrete layer can pass normalized weights and active support as one
+  package;
+- `centerAverage.eqn_local`, the local-radius exponential equation routed
+  through `centerOfMass.expInv_eqn_local`.
+- `centerAverage.eqn_local_on`, the restricted-source local-radius equation
+  for `centerAverageOn`, reducing on `x ∈ s` to the ordinary selected center of
+  mass.  This keeps later POU consumers from unfolding the off-source default.
+
+The finite Step-C partition layer now supplies normalized weights and an
+active-support bridge.  The new `activeFill` wrapper is the consumer-side piece
+that lets later code define arbitrary local-map values outside the active
+support while keeping the center average and convergence statement controlled by
+only the nonzero weights.  `inputOfFill` and `unifTwoIdOfFill` now isolate the
+remaining C3/C4 obligations in the expected shape: show the active local maps
+land in the chosen small ball, show the target point itself lands there, import
+the POU weight facts, and supply the strict-convexity input for the filled
+finite family.  The tangent norm field is no longer a consumer obligation in
+this layer.
+
+The restricted-source wrappers are needed because the finite POU facts from the
+good-cover layer are only meaningful on the covered source set.  They avoid an
+artificial global `CenterInput`/positive-weight obligation outside that set,
+while keeping the existing global wrappers available for situations where a
+global family is already natural.
+
+This is still not the full C3 partition-of-unity construction. The next
+producer layer must combine the finite POU weights with concrete local
+forward/inverse maps from the Step-A/Step-B geometry on the covered source set,
+prove the pointwise active-map radius facts and strict-convexity hypotheses for
+the filled family there, pass `NetLimitData.hatPOU_active_data` directly to
+`centerAverage.unifTwoIdDataOn`, and prove the active local-map convergence on
+the regions selected by the bundled support bridge.
+
+Verification status: focused Lean check and targeted module build passed; axiom
+checks for the new identity, active-fill, norm, and filled-input wrappers use
+only the usual project axioms.  The restricted-source averaging wrappers also
+passed focused check, targeted module build, and the same usual-axiom probe.
+The restricted-source local equation wrapper passed the same checks and usual
+axiom probe.  The restricted-source membership and pointwise stability wrappers
+also passed focused check, targeted module build, and the usual axiom probe.
+The active-region convergence wrapper passed focused check, targeted module
+build, and the usual axiom probe.  The bundled active-region data wrapper also
+passed focused check, targeted module build, and the usual axiom probe.
+
+## 2026-07-01
+
+Added `centerAverage.inputOfFillSelf`.
+
+This is the self-centered specialization of `inputOfFill`: when the comparison
+target is also the center of the radius ball, the target-in-ball hypothesis is
+discharged from `dist_self` and the positive radius.  It is intended for the
+concrete Step-C averaging layer, where the source point itself is the natural
+center for the small ball around the local-map images.
+
+Added `centerAverage.unifTwoIdDataSelf`.
+
+This is the bundled-data self-centered version of `unifTwoIdDataOn`.  It removes
+the separate two-index center family and target-in-ball hypothesis from the
+generic averaging API: active map values only need to lie in the radius ball
+around the source point itself.  The proof routes through the existing
+active-fill convergence theorem and the new `inputOfFillSelf` constructor.
+
+Verification status: the focused Lean check passed, and the downstream
+`StepCAveragePOU` targeted module build passed after these helpers were added.

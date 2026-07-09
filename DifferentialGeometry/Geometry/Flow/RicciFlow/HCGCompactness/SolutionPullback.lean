@@ -13,7 +13,7 @@ field `∂ₜ(Φ^*g) = -2 Ric(Φ^*g)` follows from `S`'s equation by `pullbackMe
 
 noncomputable section
 
-open Set Function Filter Bundle Manifold
+open Set Function Filter Bundle Manifold Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.HCGCompactness
@@ -41,25 +41,30 @@ theorem _root_.IsLocalFrameOn.pushforward
     IsLocalFrameOn (V := (TangentSpace I : N → Type _)) I E (∞ : WithTop ℕ∞)
       (fun i (y : N) => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y))) (Φ '' u) where
   linearIndependent {y} hy := by
-    obtain ⟨x, hx, rfl⟩ := hy
-    have hb : (fun i => mfderiv I I (Φ : M → N) (Φ.symm (Φ x)) (frame i (Φ.symm (Φ x))))
-        = ⇑((hframe.toBasisAt hx).map
-            (Φ.mfderivToContinuousLinearEquiv infty_ne_zero x).toLinearEquiv) := by
+    have hsymm : Φ.symm y ∈ u := by
+      obtain ⟨x, hx, hxy⟩ := hy; rw [← hxy, Φ.symm_apply_apply]; exact hx
+    have hb : (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
+        = ⇑((hframe.toBasisAt hsymm).map
+            (Φ.mfderivToContinuousLinearEquiv infty_ne_zero (Φ.symm y)).toLinearEquiv) := by
       funext i
-      simp only [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
-        ContinuousLinearEquiv.coe_toLinearEquiv, ContinuousLinearEquiv.coe_coe,
-        Φ.mfderivToContinuousLinearEquiv_coe, Φ.symm_apply_apply]
+      rw [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
+        ContinuousLinearEquiv.coe_toLinearEquiv, ← ContinuousLinearEquiv.coe_coe,
+        Φ.mfderivToContinuousLinearEquiv_coe]
+    show LinearIndependent ℝ (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
     rw [hb]
     exact Module.Basis.linearIndependent _
   generating {y} hy := by
-    obtain ⟨x, hx, rfl⟩ := hy
-    have hb : (fun i => mfderiv I I (Φ : M → N) (Φ.symm (Φ x)) (frame i (Φ.symm (Φ x))))
-        = ⇑((hframe.toBasisAt hx).map
-            (Φ.mfderivToContinuousLinearEquiv infty_ne_zero x).toLinearEquiv) := by
+    have hsymm : Φ.symm y ∈ u := by
+      obtain ⟨x, hx, hxy⟩ := hy; rw [← hxy, Φ.symm_apply_apply]; exact hx
+    have hb : (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
+        = ⇑((hframe.toBasisAt hsymm).map
+            (Φ.mfderivToContinuousLinearEquiv infty_ne_zero (Φ.symm y)).toLinearEquiv) := by
       funext i
-      simp only [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
-        ContinuousLinearEquiv.coe_toLinearEquiv, ContinuousLinearEquiv.coe_coe,
-        Φ.mfderivToContinuousLinearEquiv_coe, Φ.symm_apply_apply]
+      rw [Module.Basis.map_apply, IsLocalFrameOn.toBasisAt_coe,
+        ContinuousLinearEquiv.coe_toLinearEquiv, ← ContinuousLinearEquiv.coe_coe,
+        Φ.mfderivToContinuousLinearEquiv_coe]
+    show ⊤ ≤ Submodule.span ℝ (Set.range
+      (fun i => mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y))))
     rw [hb]
     exact (Module.Basis.span_eq _).ge
   contMDiffOn i := by
@@ -70,8 +75,67 @@ theorem _root_.IsLocalFrameOn.pushforward
       (hframe.contMDiffOn i).comp (Φ.symm.contMDiff.contMDiffOn) hmaps
     have h2 := (Φ.contMDiff.contMDiff_tangentMap (by simp)).comp_contMDiffOn h1
     refine h2.congr ?_
-    rintro y ⟨x, hx, rfl⟩
-    simp only [Function.comp_apply, Φ.symm_apply_apply, tangentMap]
+    intro y _hy
+    change TotalSpace.mk' E y (mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y)))
+       = tangentMap I I (Φ : M → N) (TotalSpace.mk' E (Φ.symm y) (frame i (Φ.symm y)))
+    exact (congrArg
+      (fun b : N => TotalSpace.mk' E (E := fun z : N => TangentSpace I z) b
+        (mfderiv I I (Φ : M → N) (Φ.symm y) (frame i (Φ.symm y))))
+      (Φ.apply_symm_apply y)).symm
+
+/-- **Naturality of the gradient under a diffeomorphism.**  `grad_{Φ^*g}(f ∘ Φ) y = (dΦ_y)⁻¹
+(grad_g f (Φ y))` — the gradient is an isometry invariant.  Proved by nondegeneracy
+(`metricFlatEquiv` injective): both sides have the same `Φ^*g`-inner product with every `w`, via
+`inner_metricSharp` + `pullbackMetric_inner` + the chain rule `mfderiv_comp`. -/
+theorem gradientFun_pullback
+    [SigmaCompactSpace M] [T2Space M] [SigmaCompactSpace N] [T2Space N]
+    (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) (f : N → ℝ) (y : M)
+    (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f (Φ y)) :
+    gradientFun (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ) (f ∘ (Φ : M → N)) y
+      = (Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm
+          (gradientFun (I := I) g f (Φ y)) := by
+  have he : mfderiv I I (Φ : M → N) y
+      = ((Φ.mfderivToContinuousLinearEquiv infty_ne_zero y :
+          TangentSpace I y →L[ℝ] TangentSpace I (Φ y))) :=
+    (Φ.mfderivToContinuousLinearEquiv_coe infty_ne_zero (x := y)).symm
+  apply (metricFlatEquiv (I := I) (Diffeomorph.pullbackMetric (I := I) g Φ) y).injective
+  ext w
+  rw [metricFlatEquiv_apply, metricFlatEquiv_apply, gradientFun_eq, inner_metricSharp,
+    Diffeomorph.pullbackMetric_inner, he, ContinuousLinearEquiv.coe_coe,
+    ContinuousLinearEquiv.apply_symm_apply, gradientFun_eq, inner_metricSharp,
+    mfderiv_comp y hf (Φ.contMDiff.mdifferentiableAt infty_ne_zero)]
+  simp only [ContinuousLinearMap.coe_comp, he]
+  rfl
+
+/-- **Inverse differential of a diffeomorphism (applied form).**  `(dΦ_y)⁻¹ v = dΦ.symm_{Φ y} v`
+— the inverse differential of `Φ` at `y`, applied to `v`, is `mfderiv Φ.symm (Φ y) v`.  Proof: the
+left-inverse identity `mfderiv Φ.symm (Φ y) (mfderiv Φ y w) = w` (chain rule on `Φ.symm ∘ Φ = id`),
+specialized at `w = (dΦ_y)⁻¹ v` using `mfderiv Φ y ((dΦ_y)⁻¹ v) = v`. -/
+theorem mfderiv_symm_apply
+    (Φ : M ≃ₘ⟮I, I⟯ N) (y : M) (v : TangentSpace I (Φ y)) :
+    (Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v
+      = mfderiv I I (Φ.symm : N → M) (Φ y) v := by
+  have he : mfderiv I I (Φ : M → N) y
+      = ((Φ.mfderivToContinuousLinearEquiv infty_ne_zero y :
+          TangentSpace I y →L[ℝ] TangentSpace I (Φ y))) :=
+    (Φ.mfderivToContinuousLinearEquiv_coe infty_ne_zero (x := y)).symm
+  have heq : ((Φ.symm : N → M) ∘ (Φ : M → N)) =ᶠ[nhds y] id :=
+    Filter.Eventually.of_forall (fun z => Φ.symm_apply_apply z)
+  have hli : (mfderiv I I (Φ.symm : N → M) (Φ y)
+      (mfderiv I I (Φ : M → N) y ((Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v))
+        : TangentSpace I y)
+      = (Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v := by
+    rw [← ContinuousLinearMap.comp_apply,
+      ← mfderiv_comp y (Φ.symm.contMDiff.mdifferentiableAt infty_ne_zero)
+        (Φ.contMDiff.mdifferentiableAt infty_ne_zero),
+      heq.mfderiv_eq, mfderiv_id]
+    exact ContinuousLinearMap.id_apply
+      ((Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v)
+  have h2 : mfderiv I I (Φ : M → N) y
+      ((Φ.mfderivToContinuousLinearEquiv infty_ne_zero y).symm v) = v := by
+    rw [he, ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.apply_symm_apply]
+  rw [h2] at hli
+  exact hli.symm
 
 /-- The pulled-back Ricci-flow solution data: `t ↦ Φ^*(S.metric t)`. -/
 def solutionOn_pullback [SigmaCompactSpace M] [T2Space M]
@@ -125,7 +189,7 @@ theorem metricFamilySmoothOn_pullback
       Tensor0SBundle.metricTensorField_apply, Tensor0SBundle.metricTensorField_apply,
       Diffeomorph.pullbackMetric_inner]
   frameCompSmooth := by
-    intro Idx _ frame u _hframe i j
+    intro Idx _ frame u hframe i j
     have heq : (fun p : ℝ × M =>
           ((solutionOn_pullback (I := I) S Φ).family.metric p.1).inner p.2
             (frame i p.2) (frame j p.2))
@@ -136,11 +200,26 @@ theorem metricFamilySmoothOn_pullback
       exact Diffeomorph.pullbackMetric_inner (I := I) (S.family.metric p.1) Φ p.2
         (frame i p.2) (frame j p.2)
     rw [heq]
-    -- SMOOTH-TRANSPORT FRONTIER: joint `(t,x)` `ContMDiffOn` of the metric coefficient with the
-    -- `dΦ`-pushed frame inputs across `Φ`.  No base-map joint smooth-eval exists (the smooth
-    -- `contMDiff_section_apply` is single-manifold/spatial, unlike `eval_continuous`), and there is
-    -- no pushforward-`IsLocalFrameOn` under a diffeomorphism to feed `hS.smoothMetric.frameCompSmooth`.
-    sorry
+    -- the `dΦ`-pushed frame on `Φ '' u`, where `hS.smoothMetric.frameCompSmooth` applies
+    have hpf := hS.smoothMetric.frameCompSmooth
+      (fun k (y : N) => mfderiv I I (Φ : M → N) (Φ.symm y) (frame k (Φ.symm y)))
+      (hframe.pushforward Φ) i j
+    have hmap : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) (∞ : WithTop ℕ∞)
+        (fun p : ℝ × M => (p.1, (Φ : M → N) p.2)) :=
+      contMDiff_fst.prodMk (Φ.contMDiff.comp contMDiff_snd)
+    have hmaps : Set.MapsTo (fun p : ℝ × M => (p.1, (Φ : M → N) p.2))
+        (D.regular ×ˢ u) (D.regular ×ˢ (Φ '' u)) :=
+      fun p hp => ⟨hp.1, Set.mem_image_of_mem _ hp.2⟩
+    have hcomp := hpf.comp hmap.contMDiffOn hmaps
+    -- `frameN (Φ x) = dΦ_x (frame · x)` (the `Φ.symm (Φ x) = x` collapse, in the constant fiber `E`)
+    have hN : ∀ (k : Idx) (x : M),
+        (mfderiv I I (Φ : M → N) (Φ.symm (Φ x)) (frame k (Φ.symm (Φ x))) : E)
+          = (mfderiv I I (Φ : M → N) x (frame k x) : E) :=
+      fun k x => congrArg
+        (fun a : M => (mfderiv I I (Φ : M → N) a (frame k a) : E)) (Φ.symm_apply_apply x)
+    refine hcomp.congr ?_
+    intro p _hp
+    simp only [Function.comp_apply, hN]
 
 /-- **The pulled-back flow satisfies the Ricci-flow metric equation.**
 `∂ₜ(Φ^*g) = -2 Ric(Φ^*g)`, from `S`'s equation via `pullbackMetric_inner` and the `M≃N`
@@ -162,7 +241,7 @@ theorem metricVariationEquation_pullback
         = RicciAtFamily.toTensorField (I := I) S.ricciAt (t : ℝ) (Φ x)
             (mfderiv I I (Φ : M → N) x X) (mfderiv I I (Φ : M → N) x Y) := by
     simp only [RicciAtFamily.toTensorField_apply]
-    show metricRicciAt (I := I)
+    change metricRicciAt (I := I)
           (Diffeomorph.pullbackMetric (I := I) (S.base.metric (t : ℝ)) Φ) x (vec2 X Y)
         = metricRicciAt (I := I) (S.base.metric (t : ℝ)) (Φ x)
             (vec2 (mfderiv I I (Φ : M → N) x X) (mfderiv I I (Φ : M → N) x Y))
@@ -273,7 +352,7 @@ theorem ricciNorm_pullback
     ricciNorm (I := I) (solutionOn_pullback (I := I) S Φ) t x = ricciNorm (I := I) S t (Φ x) := by
   obtain ⟨B, hB⟩ :=
     exists_gOrthonormalBasis (Diffeomorph.pullbackMetric (I := I) (S.base.metric t) Φ) x
-  show Tensor0SBundle.normSq0S (I := I)
+  change Tensor0SBundle.normSq0S (I := I)
         (Diffeomorph.pullbackMetric (I := I) (S.base.metric t) Φ) x 2
         (metricRicci (I := I) (Diffeomorph.pullbackMetric (I := I) (S.base.metric t) Φ) x)
       = Tensor0SBundle.normSq0S (I := I) (S.base.metric t) (Φ x) 2
@@ -395,6 +474,48 @@ theorem smoothConnection_pullback
   intro t
   exact leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I)
     ((solutionOn_pullback (I := I) S Φ).base.metric (t : ℝ))
+
+/-- **The pulled-back metric family `Φ^*S` is a Ricci-flow solution.**  For a diffeomorphism
+`Φ : M ≃ₘ N` and an `IsSolutionOn` candidate `S` on `N`, the pulled-back family
+`t ↦ Φ^*(S.metric t)` satisfies all nine `IsSolutionOn` fields on `M`.  Eight fields transport
+from `hS` through the per-field pullback lemmas; the `ricciNormGrad` field is built directly from
+the pulled-back metric's own smooth Ricci-norm-squared (`normSq02_smooth`) and the realized-gradient
+regularity (`gradientFun_mdiffAt`) — the gradient field lives on `M` and is the gradient of `M`'s
+own smooth metric, so it is the *same* construction as the base `ricciNormGrad`, not a
+tangent-bundle pushforward.  This is the input `SolWindowData.mk` consumes via
+`hS : ∀ i, IsSolutionOn (S i)`. -/
+theorem isSolutionOn_pullback
+    [FiniteDimensional ℝ E]
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 N] [IsManifold I 2 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := N) D) (hS : IsSolutionOn (I := I) S)
+    (Φ : M ≃ₘ⟮I, I⟯ N) :
+    IsSolutionOn (I := I) (solutionOn_pullback (I := I) S Φ) where
+  smoothMetric := metricFamilySmoothOn_pullback (I := I) S hS Φ
+  smoothConnection := smoothConnection_pullback (I := I) S Φ
+  equation := metricVariationEquation_pullback (I := I) S hS Φ
+  scalarCont := scalarCont_pullback (I := I) S hS Φ
+  scalarTime := scalarTime_pullback (I := I) S hS Φ
+  ricciCont := ricciCont_pullback (I := I) S hS Φ
+  rm04Cont := rm04Cont_pullback (I := I) S hS Φ
+  ricciNormSpace := ricciNormSpace_pullback (I := I) S hS Φ
+  ricciNormGrad := by
+    intro t _ht x
+    have hsmooth : ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+        (ricciNorm (I := I) (solutionOn_pullback (I := I) S Φ) t) := by
+      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+        ((solutionOn_pullback (I := I) S Φ).family.metric t)
+        (metricRicci (I := I) (M := M)
+          ((solutionOn_pullback (I := I) S Φ).family.metric t))).congr ?_
+      intro y
+      simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
+        SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
+    exact DifferentialGeometry.Integral.Connection.gradientFun_mdiffAt (I := I)
+      ((solutionOn_pullback (I := I) S Φ).family.metric t) hsmooth x
+
 
 end RicciFlow
 end PDE

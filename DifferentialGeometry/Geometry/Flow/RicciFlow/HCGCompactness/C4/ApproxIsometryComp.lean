@@ -2,6 +2,10 @@
 -- and not `ApproximateIsometry`, which is currently stale-broken against the in-flight
 -- tensor-layer refactor (`Tensor0SBundle.normRS` relocation).
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
+import DifferentialGeometry.Bundle.ClmSectionSmooth
+import DifferentialGeometry.Geometry.Metric.MetricExistence
+import Mathlib.Geometry.Manifold.LocalDiffeomorph
+import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -126,6 +130,180 @@ theorem compEpsAccum {C : Real} {e δ : Nat → Real}
           C * Finset.sum (Finset.range (n + 1 + 1)) (fun i => δ i) := by
         conv_rhs => rw [Finset.sum_range_succ, mul_add]
       linarith [hstep n, ih]
+
+/-- **Smooth bump `χ ≡ 1` on a compact set inside an open set** (Step D1a component): on a
+σ-compact Hausdorff finite-dimensional manifold, a compact `K` inside an open `U` admits a
+smooth `[0,1]`-valued `χ` equal to `1` on `K` with `tsupport χ ⊆ U`.  Shrink `K ⊆ V ⊆ V̄ ⊆ U`
+(regularity) and apply `exists_contMDiffMap_one_nhds_of_subset_interior` to `(K, V̄)`. -/
+theorem exists_bump_one_on {K U : Set M} (hK : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U) :
+    ∃ χ : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) χ ∧ Set.EqOn χ 1 K ∧
+      tsupport χ ⊆ U ∧ ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1 := by
+  haveI : TopologicalSpace.MetrizableSpace M := Manifold.metrizableSpace I M
+  haveI : NormalSpace M := inferInstance
+  obtain ⟨V, hVopen, hKV, hVU⟩ :=
+    hK.exists_isOpen_closure_subset (hU.mem_nhdsSet.mpr hKU)
+  obtain ⟨f, hf1, hf0, hf01⟩ :=
+    exists_contMDiffMap_one_nhds_of_subset_interior (I := I) (n := (⊤ : ℕ∞))
+      hK.isClosed
+      (hKV.trans (interior_maximal subset_closure hVopen))
+  refine ⟨⇑f, f.contMDiff, ?_, ?_, hf01⟩
+  · intro x hx
+    exact hf1.self_of_nhdsSet x hx
+  · refine (closure_minimal ?_ isClosed_closure).trans hVU
+    intro x hx
+    by_contra hxV
+    exact hx (hf0 x hxV)
+
+section PullbackField
+
+open Bundle
+
+variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
+
+/-- **Bumped pullback of a metric's inner family along a partial diffeomorphism (D1a-(i)).**
+Given a compact `K` inside `Φ.source`, there is a globally smooth family of bilinear forms on `M`
+agreeing on `K` with the pointwise pullback `(v, w) ↦ h.inner (Φ x) (dΦ v) (dΦ w)`.  The family is
+`χ • (conjugation form)` for a bump `χ ≡ 1` on `K` supported in `Φ.source`; smoothness is the
+test-section engine with a per-point split (`x ∈ Φ.source` — the composed `clm_bundle` assembly
+with `tangentMapWithin`; `x ∉ tsupport χ` — locally zero). -/
+theorem exists_pullbackInner (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)) {K : Set M}
+    (hK : IsCompact K) (hKs : K ⊆ Φ.source) (h : SmoothRiemannianMetric I N) :
+    ∃ (χ : M → ℝ) (P : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ),
+      ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (∞ : WithTop ℕ∞)
+        (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) x (P x)) ∧
+      ContMDiff I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞) χ ∧
+      Set.EqOn χ 1 K ∧ tsupport χ ⊆ Φ.source ∧ (∀ x, χ x ∈ Set.Icc (0 : ℝ) 1) ∧
+      ∀ x : M, P x = χ x •
+        (ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)).comp
+          ((h.inner (Φ x)).comp (mfderiv I I Φ x)) := by
+  classical
+  obtain ⟨χ, hχ, hχK, hχsupp, hχ01⟩ :=
+    exists_bump_one_on (I := I) hK Φ.open_source hKs
+  -- the conjugation form (junk off the source)
+  set Q : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ := fun x =>
+    (ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)).comp
+      ((h.inner (Φ x)).comp (mfderiv I I Φ x)) with hQ
+  refine ⟨χ, fun x => χ x • Q x, ?_, hχ, hχK, hχsupp, hχ01, fun x => rfl⟩
+  · -- global smoothness by the test-section engine
+    apply cotangentCov_clmSection_smooth_aux
+      (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
+      (φ := fun x => χ x • Q x)
+    intro Y
+    apply cotangentCov_clmSection_smooth_aux
+      (V₂ := fun _ : M => ℝ)
+      (φ := fun x => (χ x • Q x) (Y x))
+    intro W x₀
+    rw [Bundle.contMDiffAt_section]
+    have hval : ∀ x : M, (χ x • Q x) (Y x) (W x)
+        = χ x * (h.inner (Φ x) (mfderiv I I Φ x (Y x)) (mfderiv I I Φ x (W x))) := by
+      intro x
+      simp only [hQ, ContinuousLinearMap.smul_apply, ContinuousLinearMap.comp_apply,
+        ContinuousLinearMap.precomp_apply, smul_eq_mul]
+    have hstage : ContMDiffAt I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+        (fun x => (χ x • Q x) (Y x) (W x)) x₀ := by
+      by_cases hx₀ : x₀ ∈ Φ.source
+      · -- the pullback scalar is smooth on the source; multiply by `χ`
+        have hφ : ContMDiffAt I I (∞ : WithTop ℕ∞) (Φ : M → N) x₀ :=
+          Φ.contMDiffOn_toFun.contMDiffAt (Φ.open_source.mem_nhds hx₀)
+        have hg' : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (∞ : WithTop ℕ∞)
+            (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+              (E := fun b : N => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
+              ((Φ : M → N) x) (h.inner ((Φ : M → N) x))) x₀ := by
+          have hcomp := ContMDiffAt.comp (I' := I) x₀ (h.contMDiff ((Φ : M → N) x₀)) hφ
+          exact hcomp
+        have hφOn : ContMDiffOn I I (∞ : WithTop ℕ∞) (Φ : M → N) Φ.source :=
+          Φ.contMDiffOn_toFun
+        have htm : ContMDiffOn I.tangent I.tangent (∞ : WithTop ℕ∞)
+            (tangentMapWithin I I (Φ : M → N) Φ.source)
+            (Bundle.TotalSpace.proj ⁻¹' Φ.source) :=
+          hφOn.contMDiffOn_tangentMapWithin le_rfl Φ.open_source.uniqueMDiffOn
+        have hpre_open : IsOpen
+            (Bundle.TotalSpace.proj ⁻¹' Φ.source : Set (TangentBundle I M)) :=
+          Φ.open_source.preimage (FiberBundle.continuous_proj E (TangentSpace I))
+        have hsec : ∀ Y' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,
+            ContMDiffAt I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+              (fun x => TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
+                ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x (Y' x))) x₀ := by
+          intro Y'
+          have hYs : ContMDiffAt I (I.prod 𝓘(ℝ, E)) (∞ : WithTop ℕ∞)
+              (fun x => TotalSpace.mk' E (E := fun b : M => TangentSpace I b)
+                x (Y' x)) x₀ := Y'.contMDiff x₀
+          have hmem : (TotalSpace.mk' E (E := fun b : M => TangentSpace I b)
+                x₀ (Y' x₀) : TangentBundle I M)
+              ∈ Bundle.TotalSpace.proj ⁻¹' Φ.source := hx₀
+          have hcomp := (htm.contMDiffAt (hpre_open.mem_nhds hmem)).comp x₀ hYs
+          refine hcomp.congr_of_eventuallyEq ?_
+          filter_upwards [Φ.open_source.mem_nhds hx₀] with x hx
+          show TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
+              ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x (Y' x))
+            = TotalSpace.mk' E (E := fun b : N => TangentSpace I b)
+              ((Φ : M → N) x)
+              (mfderivWithin I I (Φ : M → N) Φ.source x (Y' x))
+          rw [mfderivWithin_of_isOpen Φ.open_source hx]
+        have h_total : ContMDiffAt I (I.prod 𝓘(ℝ, ℝ)) (∞ : WithTop ℕ∞)
+            (fun x => TotalSpace.mk' ℝ (E := Bundle.Trivial N ℝ)
+              ((Φ : M → N) x)
+              (h.inner ((Φ : M → N) x)
+                (mfderiv I I (Φ : M → N) x (Y x))
+                (mfderiv I I (Φ : M → N) x (W x)))) x₀ :=
+          ContMDiffAt.clm_bundle_apply₂
+            (E₁ := fun b : N => TangentSpace I b)
+            (E₂ := fun b : N => TangentSpace I b)
+            (E₃ := fun _ : N => ℝ)
+            hg' (hsec Y) (hsec W)
+        have h_scalar : ContMDiffAt I 𝓘(ℝ, ℝ) (∞ : WithTop ℕ∞)
+            (fun x => h.inner ((Φ : M → N) x)
+              (mfderiv I I (Φ : M → N) x (Y x))
+              (mfderiv I I (Φ : M → N) x (W x))) x₀ := by
+          rw [contMDiffAt_totalSpace] at h_total
+          convert h_total.2 using 1
+        have hmul := (hχ.contMDiffAt (x := x₀)).mul h_scalar
+        refine hmul.congr_of_eventuallyEq ?_
+        filter_upwards with x
+        exact hval x
+      · -- off the support of `χ` the scalar vanishes locally
+        have hx₀' : x₀ ∉ tsupport χ := fun hmem => hx₀ (hχsupp hmem)
+        have hev : (fun x => (χ x • Q x) (Y x) (W x)) =ᶠ[nhds x₀] (fun _ => (0 : ℝ)) := by
+          filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx₀'] with x hx
+          rw [hval x, image_eq_zero_of_notMem_tsupport hx, zero_mul]
+        exact contMDiffAt_const.congr_of_eventuallyEq hev
+    refine hstage.congr_of_eventuallyEq ?_
+    filter_upwards with y
+    rfl
+
+/-- **Positivity of the pullback form on the source (D1a-(i))**: on `Φ.source` the derivative
+of a partial diffeomorphism is a linear equivalence (`isLocalDiffeomorphAt` +
+`mfderivToContinuousLinearEquiv`), so the pulled-back quadratic form of a metric is positive
+definite there. -/
+theorem pullInner_pos (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
+    {x : M} (hx : x ∈ Φ.source) (h : SmoothRiemannianMetric I N)
+    (v : TangentSpace I x) (hv : v ≠ 0) :
+    0 < h.inner ((Φ : M → N) x) (mfderiv I I (Φ : M → N) x v)
+        (mfderiv I I (Φ : M → N) x v) := by
+  refine h.pos _ _ (fun h0 => hv ?_)
+  -- `Φ.symm ∘ Φ = id` near `x`, so the derivative composition is the identity
+  have hfg : (Φ.symm : N → M) ∘ (Φ : M → N) =ᶠ[nhds x] id := by
+    filter_upwards [Φ.open_source.mem_nhds hx] with y hy
+    exact Φ.left_inv' hy
+  have hΦd : MDifferentiableAt I I (Φ : M → N) x :=
+    ((Φ.contMDiffOn_toFun.contMDiffAt (Φ.open_source.mem_nhds hx))).mdifferentiableAt
+      (by decide : (∞ : WithTop ℕ∞) ≠ 0)
+  have hΦsd : MDifferentiableAt I I (Φ.symm : N → M) ((Φ : M → N) x) :=
+    ((Φ.symm.contMDiffOn_toFun.contMDiffAt
+      (Φ.symm.open_source.mem_nhds (Φ.map_source' hx)))).mdifferentiableAt
+      (by decide : (∞ : WithTop ℕ∞) ≠ 0)
+  have hcomp : (mfderiv I I (Φ.symm : N → M) ((Φ : M → N) x)).comp
+      (mfderiv I I (Φ : M → N) x) = ContinuousLinearMap.id ℝ (TangentSpace I x) := by
+    rw [← mfderiv_comp x hΦsd hΦd, hfg.mfderiv_eq]
+    exact mfderiv_id
+  have happ : mfderiv I I (Φ.symm : N → M) ((Φ : M → N) x)
+      (mfderiv I I (Φ : M → N) x v) = v := by
+    simpa using DFunLike.congr_fun hcomp v
+  rw [← happ, h0]
+  exact (mfderiv I I (Φ.symm : N → M) ((Φ : M → N) x)).map_zero
+
+end PullbackField
 
 end HCGCompactness
 end DifferentialGeometry

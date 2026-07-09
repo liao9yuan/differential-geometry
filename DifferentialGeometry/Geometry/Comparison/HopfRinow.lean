@@ -32,6 +32,17 @@ For a smooth Riemannian metric `g` on a connected, sigma-compact,
 boundaryless smooth manifold `M` that is metric-complete as a
 `PseudoEMetricSpace`, this file packages the classical Hopf-Rinow chain.
 
+> **Sorry status (audited 2026-07-05):** this file carries 4 `sorry`s in 3
+> statement-level frontiers (`exists_continuous_path_realizing_riemannianEDist`,
+> `minimizing_path_is_smooth_geodesic`, `unit_speed_rescale`).  A reference scan
+> found **no downstream consumers** of these three declarations — they are dead
+> `sorry`s and do NOT poison the HCG/C4 chain, whose proper-realization needs are
+> served sorry-free by `HopfRinowProper.lean` (a separate route through
+> `MinimizingGeodesic`).  Keep them as recorded frontiers for the intrinsic
+> Hopf–Rinow completion, or discharge them; do not cite this file's presence in
+> an import closure as evidence of a sorry-tainted capstone without checking
+> `#print axioms` on the capstone itself.
+
 ## Geodesic-completeness chain
 
 * `gc_constant_speed` -- a geodesic has constant `g`-speed.

@@ -175,6 +175,10 @@ unless it is the explicit blocker for the theorem being proved.
 
 ## Known honest frontiers
 
+Fill plans (2026-07-05): the eight `ham3_main` frontiers are audited with fill
+routes in `DimensionThree/HAM3_BLACKBOX_PLAN.md`; the program-level roadmap and
+infrastructure gap list is `POINCARE_PLAN.md`.
+
 Do not hide these behind new wrappers:
 
 | Frontier | File | What remains |

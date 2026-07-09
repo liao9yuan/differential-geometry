@@ -112,6 +112,18 @@ A1 (λ) · A2 net (`exists_lambdaNet`) · A3 cover (`lambdaNet_cover`) · separa
 volume): `net_count_le` (A3 `A(r)` ball-number bound), `net_finite_in_ball` (net locally finite), and
 `exists_finite_cover` (**A4 `lbl388`** finite cover of `B(O,r)` by net balls). All verified, axiom-clean.
 
+## 2026-07-01, subsequence projections
+
+Added `RealizesEdist.subseq` and `PackingBound.subseq`.
+
+Together with `InjRadiusDecayInput.subseq` and `VolumeComparisonInput.subseq`,
+the Step-A distance-realization and packing data now survive ordinary
+subsequence refinement.  This is a producer-closure brick for later Step-C
+finite-hat/transition pipelines; it does not change the Hopf--Rinow or
+ordered-net frontiers recorded below.
+
+Verification passed.
+
 **HONEST CORRECTION:** A7/A11/A12 are NOT reachable by option 2 after all — they need cross-`k` center
 MATCHING (the distance-ORDERED net / the comparison maps), i.e. they too need **option 1 (Hopf–Rinow)**,
 not just "subsequence machinery". So option 2's clean reach was exactly A3 + A4.

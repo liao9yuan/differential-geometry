@@ -1,9 +1,11 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ProductMFoldNorm
+import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # The metric covariant-derivative arity bridge (`metricCovDerivNorm ↔ iterCov`)
@@ -91,13 +93,77 @@ theorem metricCovDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq I
         (iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) h) N x)) := by
   unfold metricCovDerivNorm
   rw [metricCovDeriv_eq_covDerivOfField, covDerivOfField_eq_iterCov]
-  show Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (N + 2)
+  change Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (N + 2)
       (ContinuousMultilinearMap.domDomCongr (acEquiv N)
         (iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) h) N x))) =
     Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
       (iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) h) N x))
   rw [normSq0S_domDomCongr (I := I) gRef x basis hinv (acEquiv N)
       (iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) h) N x)]
+
+/-- **The norm bridge for the metric difference.**  At a `gRef`-orthonormal
+basis, the textbook seminorm `metricDerivNorm N gk gInf gRef x` equals the
+`iterCov`-tower norm of the difference field,
+`√normSq0S gRef x (2 + N) (∇_gRef^N (metricTensorField gk − metricTensorField gInf))`.
+The `metricCovDeriv` difference is one `covDerivOfField` of the difference field
+(`covDerivOfField_sub`), and the rank cast is absorbed by `normSq0S_domDomCongr`. -/
+theorem metricDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (gk gInf gRef : SmoothRiemannianMetric I M) (N : ℕ) {x : M}
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gRef x basis
+      (Tensor0SBundle.identityInvMetric (Idx := Idx))) :
+    metricDerivNorm (I := I) N gk gInf gRef x =
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
+        (iterCov (I := I) gRef 2
+          (Tensor0SBundle.metricTensorField (I := I) gk
+            - Tensor0SBundle.metricTensorField (I := I) gInf) N x)) := by
+  unfold metricDerivNorm metricDiffCovDerivAt
+  have hsub : metricCovDeriv (I := I) gk gRef N x - metricCovDeriv (I := I) gInf gRef N x
+      = covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) gk
+            - Tensor0SBundle.metricTensorField (I := I) gInf) N x := by
+    rw [covDerivOfField_sub, metricCovDeriv_eq_covDerivOfField (I := I) gk gRef N,
+      metricCovDeriv_eq_covDerivOfField (I := I) gInf gRef N]
+    rfl
+  rw [hsub, covDerivOfField_eq_iterCov]
+  change Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (N + 2)
+      (ContinuousMultilinearMap.domDomCongr (acEquiv N)
+        (iterCov (I := I) gRef 2
+          (Tensor0SBundle.metricTensorField (I := I) gk
+            - Tensor0SBundle.metricTensorField (I := I) gInf) N x))) =
+    Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
+      (iterCov (I := I) gRef 2
+        (Tensor0SBundle.metricTensorField (I := I) gk
+          - Tensor0SBundle.metricTensorField (I := I) gInf) N x))
+  rw [normSq0S_domDomCongr (I := I) gRef x basis hinv (acEquiv N)
+      (iterCov (I := I) gRef 2
+        (Tensor0SBundle.metricTensorField (I := I) gk
+          - Tensor0SBundle.metricTensorField (I := I) gInf) N x)]
+
+/-- The metric-difference seminorm of a metric against itself vanishes:
+`|∇_gRef^a (g − g)|_gRef = 0`. -/
+theorem metricDerivNorm_self (a : Nat) (g gRef : SmoothRiemannianMetric I M) (x : M) :
+    metricDerivNorm (I := I) a g g gRef x = 0 := by
+  classical
+  unfold metricDerivNorm
+  have h0 : metricDiffCovDerivAt (I := I) a g g gRef x = 0 := sub_self _
+  rw [h0]
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) gRef x
+  have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gRef x basis
+      (Tensor0SBundle.identityInvMetric
+        (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    have h' := metricInverseInBasis_of_orthonormal (I := I) gRef basis hON
+    intro i j
+    simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h' i j
+  rw [Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (a + 2) basis hinv 0]
+  have hcomp : ∀ slots : Fin (a + 2) -> Fin (Module.finrank Real (TangentSpace I x)),
+      Tensor0SBundle.component0S (I := I) basis
+        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+          (I := I) (M := M) (a + 2) x) slots = 0 := by
+    intro slots
+    rw [Tensor0SBundle.component0S_apply]
+    exact ContinuousMultilinearMap.zero_apply _
+  simp [hcomp]
 
 end HCGCompactness
 end DifferentialGeometry

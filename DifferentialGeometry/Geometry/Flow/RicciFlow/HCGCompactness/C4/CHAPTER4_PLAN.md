@@ -1,15 +1,33 @@
 # MSM135 Chapter 4 (Theorem 3.9 / `metricCompactness`) — backlog
 
-**Endpoint:** discharge `metricCompactness` (`MetricCompactness.lean:309`, the lone
-`sorry` = the whole Cheeger–Gromov construction) by assembling Steps A→D.
+**Endpoint (RULING 2026-07-05, user):** the Chapter 4 target is the **conditional**
+Theorem 3.9 `MetricCompactnessInputs.metricCompactness`
+(`C4/MetricCompactnessInputs.lean`) — same conclusion, with the book-external
+theorems bundled as the explicit input structure `MetricCompactnessInputs`
+(A0 CGT decay, `lbl387` packing, A0' multiplicity, `lbl395` normal-coordinate
+bounds, `lbl418` exp⁻¹ derivatives, distance realization, scale compatibilities)
+plus per-member connectedness.  The **unconditional** `metricCompactness`
+(`MetricCompactness.lean`, the historical lone `sorry`) is NOT dischargeable by
+Steps A→D — its extra content is exactly those citations, unprovable in-tree
+without a Riemannian volume/comparison layer — and stays `sorry` as the external
+frontier.  Report Theorem 3.9 progress against the conditional endpoint only.
+The per-field mathematical audit lives in `MetricCompactnessInputs.lean` and
+`../PROJECT_MAP.md`.
 
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
 ONLY where the book itself cites an external theorem (`lbl384`, the Rauch comparison
-in `lbl387`, the Hessian comparison `lbl413`). Everything the book proves, we prove.
-Build via `& .\scripts\lake-locked.ps1 build +<Module>`; no `sorry`/admissions;
-`#print axioms`-clean.
+in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: the
+"`D` large enough" **scale-choice inputs** (`Item3RadiusInput`, `Item3GpScaleInput`,
+`SigmaScaleField`), which are book-internal choices deferred to the D6 assembly,
+where each must be DISCHARGED from the bundle (`normalBounds` uniform radius +
+choosing `D`); they may not survive into the final endpoint. Everything the book
+proves, we prove. Build via `& .\scripts\lake-locked.ps1 build +<Module>`; no
+`sorry`/admissions; `#print axioms`-clean.
 
 Legend: `[x]` done & verified · `[~]` honest-input (book-external) · `[ ]` todo.
+§-numbers mirror the BOOK's internal section order (§2 = Step A, §3 = Step B,
+§6 = Step C, §4 = Step D — the book proves Step C's tools in its §6), so they are
+intentionally non-monotone in this file.
 
 > **Maintenance note (2026-06-11):** done items are collapsed to a one-line
 > `→ file:decl` pointer; full build history lives in each file's same-name `.md`.
@@ -85,7 +103,11 @@ now also the vector-target core `arzelaAscoli_isCompact_closure` + sequential
 
 **Honest-input fields (book-external).** `GeometricInputs.lean`/`StepAInputs.lean`
 (A0 `lbl384` inj-radius decay, A0' Rauch/volume); `StepBInputs.lean` (S6 `lbl418`
-exp⁻¹ deriv — `ExpInverseDerivBoundInput`, temporary).
+exp⁻¹ deriv — `ExpInverseDerivBoundInput`, temporary);
+`GoodCoveringItem3.lean` (`Item3RadiusInput` = `lbl391`/`lbl392` "`D` large enough"
+Euclidean/inj `C²`-radius discipline; **`Item3GpScaleInput`** = `lbl383`/`lbl427`
+`g_p`-scale choice `4 λ^γ < expRadiusGp` at live centers — the C3 capstone's `hR`,
+added 2026-07-02; same un-provable-choice-radius boundary as `Item3RadiusInput`).
 
 ---
 
@@ -238,23 +260,101 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 
 ## §6 Step C — nonlinear averages (`L2638–end`)
 
-- [ ] C1 `lbl429` center of mass ⟸ S5 · C2 `lbl430` · C3 `lbl434` averaging maps ·
-      C4 `lbl436` average-of-→id-maps →id. ⟸ B6.
+- [~] C1 `lbl429` center of mass — `StepCCenterOfMass.centerOfMass` + `expInv_eqn_local`
+      (conditional on `StrictDistInput`) · [~] C2 `lbl430`(i) at `C¹` — COMPLETE 2026-07-04
+      (**C2' all-`p` upgrade OPEN** — see the 2026-07-05 item below) · [~] C3 `lbl434`
+      averaging maps — `stepCJoin` (0-sorry, honest scale inputs) · [~] C4 `lbl436`
+      average-of-→id-maps →id — the `stepCJoin` endpoint shape (averaged concrete maps
+      → id on `hatSourceBall`). ⟸ B6.
+      **C3 join COMPLETE 2026-07-03:** `StepCProducers.lean` — (A) `stepCJoinFixed`
+      (`unifHatCageSelfComp` with `hR`/`hKV` discharged) + (B) `stepCJoin` (concrete
+      `normalTransition` maps via `existsTransUniv` on `X.subseq L.φ`, averaged → id). Both
+      green, no sorry, axiom-clean `[propext, Classical.choice, Quot.sound]`. Endpoint =
+      `∃ phi, StrictMono phi ∧ (averaged concrete-map → id on hatSourceBall)` for B1. Bridges:
+      `Item3GpScaleInput` (hR honest scale), `properBallImgOfRad`/`hatCageImg` (cage↔chart-image),
+      `binfMemClosed` (hKV limit). Overlap/cocycle/σ-domain inputs threaded parametrically.
+      **C2 `lbl430`(i) at C¹ COMPLETE 2026-07-04:** `StepCSmoothness.lean` — the center of mass is
+      strictly differentiable (`C¹`) in (weights, points). Chain (all sorry-free, axiom-clean):
+      readout-form equation `chartCmEqn'` (RULING #3, smooth via `contMDiffAt_totalSpace`, no `A⁻¹`)
+      + `readout_sum_eq_zero_iff` (zero-set = book's `Σμᵢexp⁻¹qᵢ=0`) + `chartCmEqn'_contDiffAt`
+      (`hjoint` PROVED) + `readoutSol_hasStrictFDerivAt` (Banach IFT + local uniqueness conjunct) +
+      `center_hasStrictFDerivAt` (last-mile: IFT-injectivity identifies `chart_p∘c` with the implicit
+      `f`) + **`centerOfMass_hasStrictFDerivAt` (2026-07-04, GREEN — the literal `centerOfMass` symbol
+      in a `HasStrictFDerivAt` statement)**. **`hc_cont` DISCHARGED 2026-07-04 (GREEN):**
+      `Comparison/CenterOfMass.metricEnergy_argmin_stable` (general argmin-stability: `μ,pts`
+      continuous + `c a` a global min in a compact `K` + unique min at `p₀` ⟹ `c` continuous at `p₀`;
+      sequential reduction + `IsCompact.tendsto_subseq` + limit-passing via joint energy continuity +
+      uniqueness) → `StepCCenterOfMass.centerOfMass_cont` (the literal center's point continuity, from
+      `min`/`mem`/`unique` + `centerEnergy_eq_dist` + `ProperSpace`) → `StepCSmoothness.centerOfMassChart_cont`
+      (compose with `normalChartAt_contMDiffOn.continuousAt` = the `hc_cont` `Tendsto`). So the C2
+      endpoint is conditional ONLY on `CmHessianInput` + `StrictDistInput` + smallness (`hc_solves` =
+      per-params `expInv_eqn_local`+`readout_sum_eq_zero_iff` threading; `hpts`/`hsrc` = config
+      point-map continuity + center-in-chart-source).
+      **σ quantitative discharge (Ruling #4) 2026-07-04 — StepCProducers is 0-SORRY:** `properBallImgOfRad'`
+      (coercive-tightened, GREEN) + `hatCageImg'` (GREEN, `⊆ ball 0 (σ γ)` under strict `4λ/√c < σ γ`;
+      the strict scale kills the open/closed gap) + `hUx_of_sigma` (GREEN) + `SigmaScaleField` (the ONE
+      sibling `lbl383` field folding `4λ/√c < σ ∧ σ ≤ expMapC2Radius`, `.expRadiusGp` derives `hR`).
+      **B1 (`lbl397`) SKELETON 2026-07-04, STATEMENT CORRECTED 2026-07-05:**
+      `C4/StepB1ApproxIso.lean` — `stepB1_approxIso` STATEMENT (∃ k₀, ∀ k,ℓ≥k₀,
+      ∃ **partial** diffeo `Phi : PartialDiffeomorph I I Mₖ Mₗ ∞` with
+      `closedBall Oₖ r ⊆ Phi.source`, `Phi Oₖ=Oₗ`, ∧ `Nonempty (BookApproxIsoPartialData`
+      on the ball, onto its image`)`), typechecks, `sorry` body + docstring mapping each
+      obligation to its producer (`centerOfMass_hasStrictFDerivAt`, `stepCJoin`,
+      `comp_cov_le`/`comp_cov_accum`, lbl394 limits).
+      ⚠ The 2026-07-04 skeleton demanded a GLOBAL diffeo `Mₖ≃ₘMₗ` — mathematically wrong
+      (book L1515: `F_{kℓ;r} : B(Oₖ,r) → F(B) ⊆ Mₗ` is ball-onto-image; sequence members
+      need not be diffeomorphic, e.g. sphere/ℝⁿ mixtures satisfy all Thm 3.9 hypotheses).
+      Fixed via the new partial carrier `ApproxIsometryDefs.BookApproxIsoPartialData`
+      (+ `PreApproxIsoDataOn`, K-localized smoothness and pullback pinning).
+      See `StepCProducers.md` / `StepCSmoothness.md`.
+      **C2' (`lbl430` all-order) — REGULARITY HALF DONE 2026-07-05 (parallel session,
+      lbl430(ii)):** `centerOfMass_contDiffAt` (`StepCSmoothness.lean:900`) — the center
+      of mass is `C^n` for every finite `n`, via the pinned-`Φ` `C^n` Banach IFT
+      (`implicitSol_contDiffAt`), conditional only on `CmHessianInput` +
+      `StrictDistInput` + smallness; full build green.  **REMAINING for `lbl397`'s
+      `(ε,p)` for every `p`: the derivative-BOUNDS half** — `lbl430`'s quantitative
+      `|∇^{p+1}cm| ≤ C̃_{p+1}` (uniform over the configuration family), which the B1
+      assembly must thread; regularity alone gives no uniform constants.
 
 ## §4 Step D — directed system, limit, assembly (`L1883–2102`)
 
-- [ ] D1 `lbl406` · D2 `lbl407` ⟸ F8 · D3 build `M_∞` ⟸ F9–F13 · D4 completeness ·
-      **D5 ASSEMBLY: discharge `metricCompactness`** from D1–D4 + maps + convergence.
+**Execution plan: `STEPD_PLAN.md` (2026-07-05, STEPB_PLAN granularity).**  Summary:
+
+- [ ] D1 `lbl406` directed system (`exists_directedApproxSystem` + the partial-data
+      composition brick `partialData_comp`) ⟸ B1 (`stepB1_approxIso`), F6, F2.
+- [ ] D2 `lbl407` limiting metrics on balls (diagonal + `Ψ_j` isometry-in-the-limit)
+      ⟸ **the `lbl404` composition-convergence engine (shared gate with lbl399-`C∞`)**.
+- [ ] D3 `M_∞` smooth structure + metric transport (`DirectLimitManifold.lean`:
+      charted/IsManifold/metrizable + `g∞` with `incl* g∞ = g_{k,∞}`) ⟸ F9–F13 (done).
+      **GATE-FREE — start now; largest new infrastructure, riskiest brick = D3d.**
+- [ ] D4 convergence to the limit (`ofRestrictPullback` instantiation + ONE
+      chart-estimate→`derivNormSupOn` bridge).
+- [ ] D5 completeness (`MetricComplete limit` via compact closed balls / ProperSpace).
+- [ ] **D6 ASSEMBLY: discharge `MetricCompactnessInputs.metricCompactness`**
+      (the CONDITIONAL endpoint — ruling 2026-07-05) from D1–D5, including the
+      scale-input discharges (`Item3RadiusInput`/`Item3GpScaleInput`/`SigmaScaleField`
+      from `normalBounds` + choice of `D`).
 
 ---
 
-## Critical path (updated 2026-06-17)
+## Critical path (updated 2026-07-05)
 
-**DONE:** Step A (metric core + item 3, modulo black boxes) ; F-track F1/F2/F3/F5/F6 green,
-F7/F8 done (F8 needs only the honest-input `IsometryDerivBounds`), F4 carries one mechanical
-assembly-`sorry`. **LIVE frontier:** `B1→…→B6  →  C1→…→C4  →  D1→D2→D3→D4→D5` (D5 = discharge
-`metricCompactness`), all on the convergence-spine ruling above. Remaining non-B/C/D todo:
-F2-book, F4-assembly.
+**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track F1/F2/F3/F5/F6
+green, F7/F8 done (F8 needs only the honest-input `IsometryDerivBounds`), F4 carries one
+mechanical assembly-`sorry`; `lbl394` (both halves); C1/C3/C4-shape + C2-at-`C¹`;
+the conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED (sorry =
+the A→D assembly).  **LIVE frontier, three parallel lanes:**
+
+1. **B/C lane:** the `lbl404`/lbl399-`C∞` composition-convergence engine (Faà-di-Bruno,
+   `COMPCONV_HANDOFF.md`) → B2–B6 → C2' (all-`p` center-of-mass regularity) → B1 assembly
+   (`stepB1_approxIso`, partial-diffeo shape).
+2. **D3 lane (GATE-FREE, start now):** smooth structure + metric transport on the direct
+   limit (`STEPD_PLAN.md` D3a–D3e) — independent of lane 1.
+3. **After both:** D1→D2 → D4→D5 → **D6 = discharge the conditional endpoint**, including
+   the scale-input discharges.
+
+Remaining non-B/C/D todo: F2-book, F4-assembly.  The unconditional `metricCompactness`
+stays `sorry` (external citations; out of Chapter 4 scope by the 2026-07-05 ruling).
 
 ### 2026-06-22 — `lbl394` DONE (both halves); B1 scoped (intertwines with C)
 
@@ -288,10 +388,28 @@ native-discharge candidate for Step B `lbl395`.
 **§5 status:** item-3's §5 dependence collapsed (item-3a unconditional via normal coords).
 The remaining §5 surface is honest-input only.
 
-Honest-input boundary (total): A0 `lbl384`, A0' Rauch/volume, `lbl395` ([H6] Cor 4.12
-normal-coord metric bounds), S3 `lbl413` / `lbl416` (convexity + C²-radius scale), S6
-`lbl418` (`ExpInverseDerivBoundInput`), F8 `lbl375`/[H6] §5 (`IsometryDerivBounds`).
-The former Step A Hopf--Rinow `exists_proper_realization` input is discharged.
+Honest-input boundary (total, restructured 2026-07-05 — see
+`MetricCompactnessInputs.lean` + `../PROJECT_MAP.md` for the per-input audit):
+
+- **Sequence-level, bundled in `MetricCompactnessInputs`:** A0 `lbl384` (CGT decay),
+  `lbl387` `PackingBound`, A0' `VolumeComparisonInput` (**statement fixed 2026-07-05
+  and sharpened 2026-07-08: capped at containing scale `m * r ≤ r0`, not just
+  `r ≤ r0` — the uncapped form was FALSE in hyperbolic members**),
+  `RealizesEdist`, `lbl395` `NormalCoordMetricBoundInput`, S6 `lbl418`
+  `ExpInverseDerivBoundInput` (**statement fixed 2026-07-05: capped at the book's
+  comparison scale `r₁` — the uncapped form was over-strong/unsatisfiable**).
+- **Construction-stage, DISCHARGED at D6 (may not survive to the endpoint):**
+  `Item3RadiusInput` / `Item3GpScaleInput` / `SigmaScaleField` (the "`D` large enough"
+  choices; each follows from `normalBounds`' uniform radius + choosing `D`),
+  `CmHessianInput` / `StrictDistInput` (per-configuration `lbl413`/`lbl416`
+  consequences at book scale).
+- **Bundle-v2, gated on the B-loc bridge:** F8 `lbl375`/[H6] §5
+  (`IsometryDerivBounds`) — per-map-sequence; its universally-quantified bundle
+  field shape is pinned by the B-loc brick.
+
+The former Step A Hopf--Rinow `exists_proper_realization` input is discharged
+(`HopfRinowProper.lean`; note `Comparison/HopfRinow.lean` still carries 4 DEAD
+sorries in 3 unconsumed intrinsic-frontier statements — audited harmless 2026-07-05).
 *(Open question for Step B: whether S6 is derivable from `lbl395` + the F8
 bound-propagation, shrinking this set.)*
 
@@ -299,3 +417,21 @@ bound-propagation, shrinking this set.)*
 same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`);
 and the convergence spine (`MapConvergence`/`exists_cInf_subseq`/`isometry_seq_diffeo`) is
 consumed by Ch3's P3 metric-preconvergence too.
+
+## 2026-07-08 volume-input wiring status
+
+`Volume/Packing.lean` now has the checked generic capped packing cardinality
+gate, `C4/VolumeComparisonBridge.lean` has the explicit uniform local-volume
+producer `UniformBallPack` and its checked conversion to `VolumeComparisonInput`,
+and `MetricCompactnessInputs.lean` has `MetricCompactnessInputs.ofUniformVolume`
+to build the conditional endpoint bundle from that producer.
+
+This is dedicated infrastructure only. `VolumeComparisonInput` from
+`SeqBoundedGeometry` remains 0% proved until a real Bishop-Gromov/uniform-volume
+producer supplies `UniformBallPack`; the conditional endpoint
+`MetricCompactnessInputs.metricCompactness` remains 0% proved because its A-D
+assembly theorem is still the endpoint `sorry`.
+
+Next concrete target: either formalize the Bishop-Gromov producer for
+`UniformBallPack`, or treat `UniformBallPack` as the explicit book-external
+volume-comparison input and return to the Steps B/C/D assembly lane.

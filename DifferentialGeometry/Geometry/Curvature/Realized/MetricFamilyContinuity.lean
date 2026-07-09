@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamily
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.TensorRSModelEvalBasis
+import DifferentialGeometry.Geometry.Metric.OpenSubtype
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -263,6 +264,70 @@ theorem pullback
   refine hev.congr ?_
   intro p
   simp only [Set.restrict_apply, ContinuousMultilinearMap.compContinuousLinearMap_apply]
+
+/-- **Restriction of bundle continuity to an open submanifold.**  If a time-dependent `(0,s)`
+tensor family `A` on `M` is jointly continuous, then so is its restriction to an open submanifold
+`U ↪ M`, `(t, x) ↦ A t ↑x`.
+
+Restriction-analog of `Tensor0SFamilyContinuousOnSet.pullback` along the open inclusion
+`Subtype.val : U → M` (a `C∞` local diffeomorphism).  Proved through the component constructor
+`tensor0SFamilyContinuousOnSet_of_chartBasisComp` on `U`: in each `U`-chart, the restricted
+component on a chart-basis slot is `A` evaluated at `↑x` on the pushed-forward slots
+`d(Subtype.val)_x (chartBasisVecFiber …)`, whose continuity is `hA.eval_continuous` with the pushed
+chart-basis section `tangentMap Subtype.val ∘ chartBasisVec` (smooth on the chart, then
+`continuous_tangentMap`); the `mfderiv_subtype_val = id` collapse identifies the composed section
+with `A t ↑x`. -/
+theorem restrictOpen
+    {s : Nat} {K : Set Real}
+    (A : (t : Real) → (x : M) →
+      Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) s K A)
+    (U : TopologicalSpace.Opens M)
+    [SigmaCompactSpace U] [T2Space U]
+    [IsManifold I 1 U] [IsManifold I ((∞ : WithTop ℕ∞) + 1) U] :
+    Tensor0SFamilyContinuousOnSet (I := I) (M := U) s K
+      (fun t (x : U) => A t (x : M)) := by
+  apply tensor0SFamilyContinuousOnSet_of_chartBasisComp (M := U)
+    (N := fun x₀ => (trivializationAt E (TangentSpace I) x₀).baseSet)
+    (hN := fun x₀ => (Trivialization.open_baseSet _).mem_nhds
+      (FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) x₀))
+  intro x₀ idx
+  rw [continuousOn_iff_continuous_restrict]
+  -- The `U`-chart-basis slot pushed to `M` by `d(Subtype.val)` is a continuous section over `M`.
+  have hslot : ∀ k : Fin s, Continuous
+      (fun p : {q : {t : Real // t ∈ K} × U //
+            q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>
+        TotalSpace.mk' E (E := fun y : M => TangentSpace I y) ((p.1.2 : M))
+          (mfderiv I I (Subtype.val : U → M) p.1.2
+            (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2))) := by
+    intro k
+    have hcomp :
+        (fun p : {q : {t : Real // t ∈ K} × U //
+              q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} =>
+          TotalSpace.mk' E (E := fun y : M => TangentSpace I y) ((p.1.2 : M))
+            (mfderiv I I (Subtype.val : U → M) p.1.2
+              (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x₀ (idx k) p.1.2)))
+          = (tangentMap I I (Subtype.val : U → M)) ∘
+              (fun p => DifferentialGeometry.Integral.Measure.chartBasisVec (I := I) x₀ (idx k) p.1.2) := by
+      funext p; rfl
+    rw [hcomp]
+    refine ((contMDiff_subtype_val (I := I) (U := U) (n := ∞)).continuous_tangentMap
+      (by simp)).comp ?_
+    exact (DifferentialGeometry.Integral.Measure.chartBasisVec_contMDiffOn
+        (I := I) x₀ (idx k)).continuousOn.comp_continuous
+      (continuous_snd.comp continuous_subtype_val) (fun p => p.2)
+  have hev := hA.eval_continuous
+      (P := {q : {t : Real // t ∈ K} × U //
+        q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet})
+      (τ := fun p => p.1.1.1) (b := fun p => (p.1.2 : M))
+      (continuous_subtype_val.comp (continuous_fst.comp continuous_subtype_val))
+      (fun p => p.1.1.2)
+      (continuous_subtype_val.comp (continuous_snd.comp continuous_subtype_val))
+      hslot
+  refine hev.congr ?_
+  intro p
+  simp only [Set.restrict_apply, mfderiv_subtype_val_apply]
+  rfl
 
 end Tensor0SFamilyContinuousOnSet
 

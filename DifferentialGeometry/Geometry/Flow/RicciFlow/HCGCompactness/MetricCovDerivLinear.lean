@@ -191,6 +191,19 @@ theorem covDerivOfField_add
       rw [covDerivOfField_succ, covDerivOfField_succ, covDerivOfField_succ, ih,
         metricCovDerivStep_add]
 
+/-- The iterated background covariant derivative preserves differences in the
+tensor field (additivity plus `(-1)`-homogeneity). -/
+theorem covDerivOfField_sub
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 B0 :
+      Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (a : Nat) :
+    covDerivOfField (I := I) gRef (A0 - B0) a
+      = covDerivOfField (I := I) gRef A0 a - covDerivOfField (I := I) gRef B0 a := by
+  rw [sub_eq_add_neg, covDerivOfField_add, ← neg_one_smul Real B0,
+    covDerivOfField_smul, neg_one_smul, ← sub_eq_add_neg]
+
 /-- One background covariant-derivative step (Levi-Civita of `gRef`) on an
 arbitrary-rank covariant tensor field.  Generalises `metricCovDerivStep`, which
 fixes the input rank to `a + 2`, to any rank `s`.  This is the book's `∇` acting

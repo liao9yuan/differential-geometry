@@ -84,6 +84,20 @@ structure BaseInjBound
   pos : 0 < ρ
   bound : forall i : Nat, HasInjRadiusAt (I := I) (X.obj i) (X.obj i).basepoint ρ
 
+namespace BaseInjBound
+
+/-- Reindex a basepoint injectivity-radius lower bound along a subsequence. -/
+def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : BaseInjBound (I := I) X) (f : Nat -> Nat) :
+    BaseInjBound (I := I) (X.subseq f) where
+  ρ := h.ρ
+  pos := h.pos
+  bound := by
+    intro i
+    simpa [PointedRiemannianSeq.subseq] using h.bound (f i)
+
+end BaseInjBound
+
 /-- Time-zero basepoint injectivity-radius input for a pointed flow sequence. -/
 abbrev FlowBaseInjBound
     (X : PointedFlowSeq.{u, uE, uH} (I := I)) :=

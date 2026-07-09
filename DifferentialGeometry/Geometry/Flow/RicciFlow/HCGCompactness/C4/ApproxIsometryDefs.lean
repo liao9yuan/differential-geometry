@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Metric.Pullback
+import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import DifferentialGeometry.Tensor.RSTensor.QuadraticBounds.Unit
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.ConnectionDifference
@@ -139,7 +140,14 @@ structure PreApproxIsometryData
 /-- MSM135 Definition 4.1, localized two-sided data for diffeomorphisms.
 
 The forward field is the pre-approximate isometry on the source set.  The
-reverse field is the same condition for the inverse map on the target set. -/
+reverse field is the same condition for the inverse map on the target set.
+
+WARNING (`lbl397` role): this carrier takes a **global** diffeomorphism
+`M ≃ₘ N`.  The Chapter 4 comparison maps `F_{kℓ;r}` are diffeomorphisms of a
+ball onto an image (`lbl397`), and members of a bounded-geometry sequence need
+not be globally diffeomorphic — use `BookApproxIsoPartialData` below for the
+`lbl397`/Step B/C role.  This global form remains correct for genuinely total
+maps (e.g. the `lbl374` isometry limits). -/
 structure BookApproxIsometryData
     (K : Set M) (L : Set N) (eps : Real) (p : Nat)
     (Phi : M ≃ₘ⟮I, I⟯ N)
@@ -147,6 +155,180 @@ structure BookApproxIsometryData
     (h : SmoothRiemannianMetric I N) where
   forward : PreApproxIsometryData (I := I) K eps p (Phi : M -> N) g h
   reverse : PreApproxIsometryData (I := I) L eps p (Phi.symm : N -> M) h g
+
+/-- MSM135 Definition 4.1 localized to `K`, for a map that is only smooth near `K`
+(the coercion of a partial diffeomorphism).  Unlike `PreApproxIsometryData`, the
+smoothness is `ContMDiffOn … K` and the pullback `(0,2)` tensor field is pinned to
+the map **on `K` only** — off `K` the supplied smooth field is unconstrained
+extension data (a general partial map has junk values there, so a global
+`pullback_apply` is unsatisfiable). -/
+structure PreApproxIsoDataOn
+    (K : Set M) (eps : Real) (p : Nat)
+    (Phi : M -> N)
+    (g : SmoothRiemannianMetric I M)
+    (h : SmoothRiemannianMetric I N) where
+  eps_pos : 0 < eps
+  eps_lt_one : eps < 1
+  smoothOn : ContMDiffOn I I (∞ : WithTop ℕ∞) Phi K
+  pullback :
+    Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2
+  pullback_apply :
+    forall x : M, x ∈ K -> forall v : Fin 2 -> TangentSpace I x,
+      pullback x v =
+        h.inner (Phi x)
+          (mfderiv I I Phi x (v 0))
+          (mfderiv I I Phi x (v 1))
+  c0_small :
+    forall x : M, x ∈ K ->
+      metricTensorErrorNorm (I := I) pullback g x <= eps
+  cov_deriv_small :
+    forall a : Nat, 1 <= a -> a <= p ->
+      forall x : M, x ∈ K ->
+        tensor02CovDerivNormWith (I := I) a pullback g g x <= eps
+
+/-- **MSM135 Proposition `lbl397` carrier** — two-sided `(eps, p)` approximate-isometry
+data for a **partial** diffeomorphism, witnessed on `K ⊆ Phi.source` and its image
+`Phi '' K`.  The book's `F_{kℓ;r} : B(O_k, r) → F_{kℓ;r}(B(O_k, r)) ⊆ M_ℓ` is a
+diffeomorphism of a ball onto its image, never a global map: sequence members of a
+bounded-geometry sequence can have different topologies, so the global-`Diffeomorph`
+carrier `BookApproxIsometryData` is unprovable in this role. -/
+structure BookApproxIsoPartialData
+    (K : Set M) (eps : Real) (p : Nat)
+    (Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
+    (g : SmoothRiemannianMetric I M)
+    (h : SmoothRiemannianMetric I N) where
+  source_sub : K ⊆ Phi.source
+  forward : PreApproxIsoDataOn (I := I) K eps p (Phi : M -> N) g h
+  reverse : PreApproxIsoDataOn (I := I) ((Phi : M -> N) '' K) eps p (Phi.symm : N -> M) h g
+
+/-- Partial-map pre-approximate-isometry data with separate `C^0` and higher
+covariant-derivative tolerances.
+
+This is a D1b-facing bookkeeping carrier.  It keeps the supplied pullback field,
+smoothness, and pointwise formulas from `PreApproxIsoDataOn`, but does not force
+the tensor-error and covariant-derivative bounds to share one book epsilon. -/
+structure PreApproxIsoSep
+    (K : Set M) (c0 cov : Real) (p : Nat)
+    (Phi : M -> N)
+    (g : SmoothRiemannianMetric I M)
+    (h : SmoothRiemannianMetric I N) where
+  c0_nonneg : 0 <= c0
+  cov_nonneg : 0 <= cov
+  smoothOn : ContMDiffOn I I (∞ : WithTop ℕ∞) Phi K
+  pullback :
+    Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2
+  pullback_apply :
+    forall x : M, x ∈ K -> forall v : Fin 2 -> TangentSpace I x,
+      pullback x v =
+        h.inner (Phi x)
+          (mfderiv I I Phi x (v 0))
+          (mfderiv I I Phi x (v 1))
+  c0_small :
+    forall x : M, x ∈ K ->
+      metricTensorErrorNorm (I := I) pullback g x <= c0
+  cov_small :
+    forall a : Nat, 1 <= a -> a <= p ->
+      forall x : M, x ∈ K ->
+        tensor02CovDerivNormWith (I := I) a pullback g g x <= cov
+
+/-- Wrap separated partial-map data into the book carrier once both ledgers fit
+under the requested book epsilon. -/
+def PreApproxIsoSep.toBook
+    {K : Set M} {c0 cov eps : Real} {p : Nat} {Phi : M -> N}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (D : PreApproxIsoSep (I := I) K c0 cov p Phi g h)
+    (heps0 : 0 < eps) (heps1 : eps < 1)
+    (hc0 : c0 <= eps) (hcov : cov <= eps) :
+    PreApproxIsoDataOn (I := I) K eps p Phi g h where
+  eps_pos := heps0
+  eps_lt_one := heps1
+  smoothOn := D.smoothOn
+  pullback := D.pullback
+  pullback_apply := D.pullback_apply
+  c0_small := fun x hx => le_trans (D.c0_small x hx) hc0
+  cov_deriv_small := fun a h1 h2 x hx =>
+    le_trans (D.cov_small a h1 h2 x hx) hcov
+
+/-- Two-sided partial-map separated data for a partial diffeomorphism. -/
+structure BookApproxIsoSep
+    (K : Set M) (c0 cov : Real) (p : Nat)
+    (Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
+    (g : SmoothRiemannianMetric I M)
+    (h : SmoothRiemannianMetric I N) where
+  source_sub : K ⊆ Phi.source
+  forward : PreApproxIsoSep (I := I) K c0 cov p (Phi : M -> N) g h
+  reverse : PreApproxIsoSep (I := I) ((Phi : M -> N) '' K) c0 cov p (Phi.symm : N -> M) h g
+
+/-- Wrap two-sided separated partial data into `BookApproxIsoPartialData` once
+both ledgers fit under the requested book epsilon. -/
+def BookApproxIsoSep.toBook
+    {K : Set M} {c0 cov eps : Real} {p : Nat}
+    {Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (D : BookApproxIsoSep (I := I) K c0 cov p Phi g h)
+    (heps0 : 0 < eps) (heps1 : eps < 1)
+    (hc0 : c0 <= eps) (hcov : cov <= eps) :
+    BookApproxIsoPartialData (I := I) K eps p Phi g h where
+  source_sub := D.source_sub
+  forward := D.forward.toBook heps0 heps1 hc0 hcov
+  reverse := D.reverse.toBook heps0 heps1 hc0 hcov
+
+/-- Regard ordinary book pre-data as separated data with equal `C^0` and covariant
+ledgers. -/
+def PreApproxIsoDataOn.toSep
+    {K : Set M} {eps : Real} {p : Nat} {Phi : M -> N}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (D : PreApproxIsoDataOn (I := I) K eps p Phi g h) :
+    PreApproxIsoSep (I := I) K eps eps p Phi g h where
+  c0_nonneg := le_of_lt D.eps_pos
+  cov_nonneg := le_of_lt D.eps_pos
+  smoothOn := D.smoothOn
+  pullback := D.pullback
+  pullback_apply := D.pullback_apply
+  c0_small := D.c0_small
+  cov_small := D.cov_deriv_small
+
+/-- Regard ordinary book partial data as separated data with equal `C^0` and
+covariant ledgers. -/
+def BookApproxIsoPartialData.toSep
+    {K : Set M} {eps : Real} {p : Nat}
+    {Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (D : BookApproxIsoPartialData (I := I) K eps p Phi g h) :
+    BookApproxIsoSep (I := I) K eps eps p Phi g h where
+  source_sub := D.source_sub
+  forward := D.forward.toSep
+  reverse := D.reverse.toSep
+
+/-- Separated pre-data is monotone in the zone and in both ledgers. -/
+def PreApproxIsoSep.mono
+    {K K' : Set M} {c0 c0' cov cov' : Real} {p : Nat} {Phi : M -> N}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (D : PreApproxIsoSep (I := I) K c0 cov p Phi g h)
+    (hK : K' ⊆ K) (hc0 : c0 <= c0') (hcov : cov <= cov') :
+    PreApproxIsoSep (I := I) K' c0' cov' p Phi g h where
+  c0_nonneg := le_trans D.c0_nonneg hc0
+  cov_nonneg := le_trans D.cov_nonneg hcov
+  smoothOn := D.smoothOn.mono hK
+  pullback := D.pullback
+  pullback_apply := fun x hx v => D.pullback_apply x (hK hx) v
+  c0_small := fun x hx => le_trans (D.c0_small x (hK hx)) hc0
+  cov_small := fun a h1 h2 x hx =>
+    le_trans (D.cov_small a h1 h2 x (hK hx)) hcov
+
+/-- Two-sided separated partial data is monotone in the zone and both ledgers. -/
+def BookApproxIsoSep.mono
+    {K K' : Set M} {c0 c0' cov cov' : Real} {p : Nat}
+    {Phi : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (D : BookApproxIsoSep (I := I) K c0 cov p Phi g h)
+    (hK : K' ⊆ K) (hc0 : c0 <= c0') (hcov : cov <= cov') :
+    BookApproxIsoSep (I := I) K' c0' cov' p Phi g h where
+  source_sub := fun _ hx => D.source_sub (hK hx)
+  forward := D.forward.mono hK hc0 hcov
+  reverse := D.reverse.mono (Set.image_mono hK) hc0 hcov
 
 end MapLevel
 

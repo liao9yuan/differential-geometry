@@ -1,5 +1,20 @@
 # GoodCoveringOrdered.lean — faithful (book-ordered) Step A redo
 
+## 2026-06-30 — proper-metric topology bridge
+
+Added `ProperMetricOn.top_eq`: any `ProperMetricOn` whose `realizes` field
+identifies its metric edistance with the stored Riemannian emetric induces the
+stored manifold topology. The proof compares the two pseudo-emetric structures
+by extensionality on `edist`; the canonical Riemannian emetric already carries
+the stored topology by construction.
+
+This discharges the Step-C partition topology seam: metric balls from
+`ProperMetricOn.ms` can be transported to the manifold topology before invoking
+Mathlib's smooth partition-of-unity theorem.
+
+Verification status: focused check and targeted module build passed; axiom
+check for `ProperMetricOn.top_eq` uses only the usual project axioms.
+
 Decision (2026-06-08, user): redo Step A faithfully to MSM135 Ch4, using the book's
 **distance-ordered greedy net** (not the Zorn packing). The original plan isolated the
 complete-pointed-Riemannian-to-proper-metric step as the sole Hopf--Rinow deferral.

@@ -247,5 +247,48 @@ theorem image_ball_tangent
   exact image_ball_subset_of_path_comp (I := I) F heps
     (pathComp_tangent (I := I) F ENNReal.ofReal_ne_top hspeed) x0 r
 
+/-- **Localized image-ball control from a partial map's path-speed bound** (the lbl367
+form the D1b recursion needs; STEPD_PLAN coda 43).  If every `C¹` path from `x0` of
+`eLength < r` stays where `F` is defined and admits a pushed path of pointwise speed
+`≤ √(1+eps)`, then `F` maps `B(x0, r)` into `B(F x0, √(1+eps)·r)`.  Unlike
+`image_ball_tangent`, the speed hypothesis is only demanded for paths from `x0` of small
+length — a partial diffeomorphism with data on `closedBall x0 r₂`, `r < r₂`, supplies it
+(the path localizes into the closed ball by `pathELength_mono`). -/
+theorem image_ball_local
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M N : Type*}
+    [TopologicalSpace M] [ChartedSpace H M] [PseudoEMetricSpace M]
+    [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsRiemannianManifold I M]
+    [TopologicalSpace N] [ChartedSpace H N] [PseudoEMetricSpace N]
+    [RiemannianBundle (fun x : N => TangentSpace I x)]
+    [IsRiemannianManifold I N]
+    (F : M -> N) {eps r : Real} (heps : 0 < 1 + eps) (hr : 0 < r) (x0 : M)
+    (hspeed : forall {y : M} (γ : ℝ → M), (CMDiff[Set.Icc (0:ℝ) 1] 1 γ) →
+      γ 0 = x0 → γ 1 = y →
+      Manifold.pathELength (I := I) γ 0 1 < ENNReal.ofReal r →
+      exists η : ℝ → N, (CMDiff[Set.Icc (0:ℝ) 1] 1 η) ∧ η 0 = F x0 ∧ η 1 = F y ∧
+        Manifold.pathELength (I := I) η 0 1 ≤
+          ENNReal.ofReal (Real.sqrt (1 + eps)) * Manifold.pathELength (I := I) γ 0 1) :
+    F '' Metric.eball x0 (ENNReal.ofReal r) ⊆
+      Metric.closedEBall (F x0) (ENNReal.ofReal (Real.sqrt (1 + eps) * r)) := by
+  rintro _ ⟨x, hx, rfl⟩
+  rw [Metric.mem_eball, edist_comm, IsRiemannianManifold.out (I := I) x0 x] at hx
+  obtain ⟨γ, hγ0, hγ1, hγC, hγlen⟩ :=
+    Manifold.exists_lt_of_riemannianEDist_lt (I := I) hx
+  obtain ⟨η, hηC, hη0, hη1, hηlen⟩ := hspeed γ hγC hγ0 hγ1 hγlen
+  rw [Metric.mem_closedEBall, edist_comm, IsRiemannianManifold.out (I := I) (F x0) (F x)]
+  calc Manifold.riemannianEDist I (F x0) (F x)
+      ≤ Manifold.pathELength (I := I) η 0 1 := by
+        refine Manifold.riemannianEDist_le_pathELength hηC ?_ ?_ zero_le_one
+        · exact hη0
+        · exact hη1
+    _ ≤ ENNReal.ofReal (Real.sqrt (1 + eps)) * Manifold.pathELength (I := I) γ 0 1 := hηlen
+    _ ≤ ENNReal.ofReal (Real.sqrt (1 + eps)) * ENNReal.ofReal r := by
+        exact mul_le_mul_left' (le_of_lt hγlen) _
+    _ = ENNReal.ofReal (Real.sqrt (1 + eps) * r) := by
+        rw [← ENNReal.ofReal_mul (Real.sqrt_nonneg _)]
+
 end HCGCompactness
 end DifferentialGeometry

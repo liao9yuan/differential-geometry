@@ -234,6 +234,34 @@ theorem normSq0S_identity_eq_sum_sq
   intro slots _
   rfl
 
+/-- If every component of a covariant tensor in an orthonormal basis is bounded
+by `B`, then its squared fibre norm is bounded by the number of components
+times `B ^ 2`. -/
+theorem normSq0S_le_card_of_component_bound
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hinv :
+      MetricInverseInBasis_gen (I := I) g x basis (identityInvMetric (Idx := Idx)))
+    (A : Tensor0SSpace s I x) (B : Real) (hBnn : 0 ≤ B)
+    (hB : ∀ slots : Fin s -> Idx,
+      |component0S (I := I) basis A slots| ≤ B) :
+    normSq0S (I := I) g x s A ≤
+      (Fintype.card (Fin s -> Idx) : Real) * B ^ 2 := by
+  rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv A]
+  calc
+    (∑ slots : Fin s -> Idx,
+        (component0S (I := I) basis A slots) ^ 2)
+        ≤ ∑ _slots : Fin s -> Idx, B ^ 2 := by
+          apply Finset.sum_le_sum
+          intro slots _
+          have habs :
+              |component0S (I := I) basis A slots| ≤ |B| := by
+            simpa [abs_of_nonneg hBnn] using hB slots
+          have hsq := sq_le_sq.mpr habs
+          simpa [sq_abs] using hsq
+    _ = (Fintype.card (Fin s -> Idx) : Real) * B ^ 2 := by
+          rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+
 /-- The `(0,3)` specialization of `normSq0S_identity_eq_sum_sq`, with the
 first slot separated as the derivative direction. -/
 theorem normSq0S_three_identity_eq_sum

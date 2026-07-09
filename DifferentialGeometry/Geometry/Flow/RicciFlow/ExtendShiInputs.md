@@ -574,6 +574,168 @@ nablaRic normsq_evol t0_mem`) and outputs `MetricCovDerivOrderBoundOnWindow` wit
 4. Endpoint: `shiCovBound_of_soln := proof from movingShi_of_soln`; the route's third box becomes
    `movingShi_of_soln` — citation unified with HCG `hShi`.
 
+### BRICK S1 — SCOPE FINDING (2026-07-06, executor): S1 is under-scoped; two real blockers, STOP for planner ruling
+
+Scoped the wiring end to end (read `covOrderBound_of_soln` RicBound:1179, `ric_bound_field` :777,
+`metricCovOrderWindow_of_evolution` / `MetricCovOrderEvolutionInput` AllTimesBounds:4369/4403,
+`metricCovOrderEvolutionConstant` :4305, `MetricCovDerivOrderBoundOn(Window)` :691/:773, the two
+`covOrderBound_of_soln` consumers). **No code written** (pure scoping; claim released). Two blockers:
+
+**Blocker 1 — the equivalence gap (design/interface).** EVERY covariant-order producer
+(`covOrderBound_of_soln`, `covOrderBound_tower`, `ric_bound_field`) requires
+`hequiv : MetricUniformEquivalentOnWindow U β ψ gRef gSeq B` — the metric equivalence — to convert the
+MOVING-metric `MovingShiBoundOn` bound into the fixed-`gRef`-norm `ric_bound`. `shiCovBound_of_soln`
+CANNOT build it from its current inputs `(Rm04, _hS, _hbound)`: the equivalence is `hell` (ellipticity),
+which needs the pointwise Ricci-vs-metric bound `hric`, which needs the realization `_hRm` — absent from
+`shiCovBound_of_soln`'s signature. Fix (feasible): thread `hell` (already produced by
+`hell_of_soln` inside `extendInputs_of_soln`) into `shiCovBound_of_soln` as a hypothesis and convert to
+`MetricUniformEquivalentOnWindow`; `extendInputs_of_soln`'s PUBLIC signature stays stable. The plan's
+item 2 omitted this input.
+
+**Blocker 2 — the ψ-uniform tail (the real obstruction; item-3 STOP condition hit, but for a subtler
+reason than "constant blows up").** `shiCovBound_of_soln`'s output is a **tail** bound
+`∀ s ∈ Ico t₂ ω, … ≤ C` with ONE `C`. HCG's producers give only **Window (`Icc β ψ`) bounds with an
+EXISTENTIAL constant** (`covOrderBound_of_soln`/`_tower` conclude `∀ r ≤ N, ∃ Cw, …Window…`); there is
+**no tail/all-times producer and no explicit-constant accessor** (verified: the two consumers use the
+Window bound at a single fixed `t`, from a packaged `H.pack`, never a uniform tail). The underlying
+constant `metricCovOrderEvolutionConstant Cpp Cppp timeRadius initC = √(exp(α·timeRadius)·(initC²+β/α))`
+IS ψ-uniform — monotone in `timeRadius`, so `timeRadius := ω − t₂` dominates every `[t₂,ψ]`, ψ<ω — but
+it is only reachable through `metricCovOrderWindow_of_evolution`'s EXPLICIT constant, which needs the
+full `MetricCovOrderEvolutionInput` INCLUDING the lower-order tower (`ric_bound_field`'s `hBprev`/`Cg`).
+The only HCG path that assembles that tower (`covOrderBound_tower`) re-hides the constant existentially.
+So a clean ψ-uniform tail needs either **(a) replicating the explicit-constant order-tower in
+ExtendShiInputs** (per order ≤ 3: `nablaRicReal` + `normsq_evol_of_comp` [needs the flow-evolution `hev`,
+reuse `hevComp_of_solutions`/`solnTowerSwap_reg`] + `ric_bound_field` + `initC`-by-continuity, threaded
+through `metricCovOrderWindow_of_evolution` tracking the constant) — **this is S2-scale, not "wiring"**;
+or **(b) adding a uniform-constant / tail-form producer to the HCG lane** — violates "HCG import-only".
+Plus **initC** (the `t0`-value bound, `metricCovDerivNorm r (g_fam t₂) gRef x ≤ initC r` uniform in x) is
+a genuine compactness/continuity sub-brick, not free.
+
+**PLANNER DECISIONS NEEDED before S1 can proceed:** (1) bless the `hell`→`shiCovBound_of_soln` interface
+change; (2) choose the uniform-constant route — (a) executor replicates the explicit-constant tower in
+ExtendShiInputs (accept S2-scale here), (b) relax import-only to add one explicit-constant/tail HCG
+producer, or (c) reformulate the route's `hcov`/`shiCovBound` to a per-window shape and relocate the
+tail-uniformity obligation (note (A) `ricci_flow_interior_restart` currently consumes the TAIL form, so
+this pushes the problem, not removes it). Classification: not a local proof failure — a scope/design
+finding. Recommend (2a) folded into S2 (the tower is S2's content anyway) OR (2b) if the planner will
+own one small HCG addition.
+
+## PLANNER RULING on the S1 scoping stop (Fable, 2026-07-06)
+
+**Blocker 1 — APPROVED.** Thread `hell` into `shiCovBound_of_soln`. `extendInputs_of_soln`'s PUBLIC
+signature stays unchanged — it already holds `hell_of_soln hS hK hric`'s output internally, so it passes
+that to `shiCovBound_of_soln` for the `hcov` slot. Inside `shiCovBound_of_soln`, convert `hell` (the
+ellipticity `∃ Λ≥1, ∃ t₁∈Ico α ω, ∀ s∈Ico t₁ ω, ∀ x v, Λ⁻¹ g_α(v,v) ≤ g_s(v,v) ≤ Λ g_α(v,v)`) into the
+`MetricUniformEquivalentOnWindow` shape the covariant-order producers demand.
+
+**Blocker 2 — route (2b), NARROWED.** Allowed: create **exactly one** new self-contained file
+`HCGCompactness/CovOrderTail.lean`. FORBIDDEN: editing ANY existing HCG file, and (2a) replicating the
+tower in the extension lane. Rationale: the **canonical-home rule overrides import-only** — a
+ψ-uniform / explicit-constant statement is a *corollary of the window machine* and belongs in that layer;
+doing it in the extension lane would be a forbidden parallel API. Coordination risk ≈ 0: the Codex lane's
+live bricks are in `MetricPreconv*` / `StepC` / `GoodCovering`; `AllTimesBounds` / `RicBound` are stable
+P2-era files, and the new file only IMPORTS them. The new file's header MUST note it is an
+"extension-lane consumer corollary, NOT part of the P2/P3 brick flow." Three contents:
+  - **(i)** a **constant-tracking** version of the `covOrderBound_tower` skeleton whose conclusion constant
+    depends only on `KShi, N`, the equivalence constant, `initC`, and `timeRadius ≤ ω − t₂` — **NOT on ψ**
+    (via the confirmed monotonicity of `metricCovOrderEvolutionConstant = √(exp(α·timeRadius)·(initC²+β/α))`
+    in `timeRadius`). Reuse the existing sub-producers (`ric_bound_field`, `metricCovOrderWindow_of_evolution`,
+    `normsq_evol_of_comp`, `hevComp_of_solutions`, `solnTowerSwap_reg`, `nablaRicReal`) — the ONLY new content
+    is inducting over order with the EXPLICIT constant tracked instead of `∃`-hidden.
+  - **(ii)** the `hcov`-shaped **`Ico`-tail corollary**: from (i)'s per-`ψ` Window bound with the ψ-uniform
+    constant, take `ψ ↑ ω` (for `s ∈ Ico t₂ ω` pick `ψ ∈ (s,ω)`), yielding ONE constant on the whole tail.
+  - **(iii)** the **`initC` sub-lemma**: `∀ r, ∃ initC r, ∀ x∈univ, metricCovDerivNorm r (g_fam t₂) gRef x ≤
+    initC r` — continuity of the fixed smooth pair `(g_fam t₂, gRef)` on compact `M` ⟹ bounded.
+  **Fallback:** if the constant-tracking tower (i) fails **3 genuinely-different structured attempts**, STOP
+  and report; the route becomes (2a) **folded into S2** (the tower is S2's content anyway).
+
+**Blocker-alternative (2c) — REJECTED** (harder than the executor's read): (A) `ricci_flow_interior_restart`
+fixes `C` *before* `t_star` is chosen (the box's `Λ → τ₀ → t_star` order), so a per-window `C(ψ)` breaks
+the quantifier structure. The tail-uniform constant is real mathematics and must not be weakened for
+interface convenience.
+
+**Citation shape — FIXED (ψ-uniform tail form).** The new cited box is
+```
+movingShi_of_soln : ∃ KShi, ∃ t₂ ∈ Set.Ico α ω, ∀ ψ ∈ Set.Ico t₂ ω,
+    MovingShiBoundOn (I := I) Set.univ t₂ ψ (fun _ t => g_fam t) N KShi
+```
+— a **single** `KShi` (honest: the Shi constant depends only on the curvature bound and elapsed time
+`≤ ω − t₂`). `N` is fixed by what the tower's `nablaRic` input actually needs for orders ≤ 3 — READ it
+first, expected `N = 3`.
+
+## BRICK S1b — KICKOFF (execute the ruling)
+
+Goal: `shiCovBound_of_soln` sorry-free; the extension lane's ONLY sorries become `(N)
+ricci_flow_unif_existence`, `(B) ricci_flow_forward_unique`, and the new `movingShi_of_soln`.
+
+Pre-scoped producer map (verified locations; reuse, do NOT re-derive):
+- `covOrderBound_of_soln` `RicBound.lean:1179` (the `∃`-constant tower — reference for the skeleton and
+  the exact input list: `hKc hU hKU N D S hS hmet hreg B hequiv Bmax hBmax1 hBmax KShi hKShi0 hShi ht0
+  hDreg initC hinitC0 hinit timeRadius htime`).
+- `covOrderBound_tower` `RicBound.lean:1104` (the induction body to mirror **with constant tracking**).
+- `ric_bound_field` `RicBound.lean:777` (needs `hequiv` + `hBprev : ∀ r<N, MetricCovDerivOrderBoundOnWindow
+  … r (Cg r)` — the lower-order bounds; check whether its `Cpp/Cppp` depend on the `Cg` *values* or only
+  their existence — that decides how the constant compounds).
+- `metricCovOrderWindow_of_evolution` `AllTimesBounds.lean:4403`, `MetricCovOrderEvolutionInput` `:4369`
+  (fields `t0_mem nablaRic normsq_evol Cpp Cppp {non­neg} ric_bound initC init_bound timeRadius time_abs_le`),
+  `metricCovOrderEvolutionConstant` `:4305` (the explicit ψ-monotone constant), `metricCovOrderEvolutionAlpha/Beta`.
+- `normsq_evol_of_comp` `RicBound.lean:811` (builds `normsq_evol` from the componentwise flow evolution
+  `hev`; the single-flow `hev` is `hevComp_of_solutions` + `solnTowerSwap_reg`, as inside `covOrderBound_of_soln`).
+- `MetricCovDerivOrderBoundOnWindow` `AllTimesBounds.lean:773` = `∀ i, ∀ t∈Icc β ψ, MetricCovDerivOrderBoundOn
+  K a (gSeq i t) gRef C`; `MetricCovDerivOrderBoundOn` `:691` = `∀ x∈K, metricCovDerivNorm a h gRef x ≤ C`
+  (= `shiCovBound_of_soln`'s output atom).
+- `MovingShiBoundOn` `RicBound.lean:141`; `MetricUniformEquivalentOnWindow` (grep its def for the `hell`→it
+  conversion — two-sided ratio bound on the window).
+
+Single-flow instantiation: `gSeq := fun _ t => g_fam t` (`= S.base.metric t`), `gRef := g_fam α`,
+`K = U = Set.univ`, `D := fun _ => closedOpen α ω hαω`, `S := fun _ => S`, `t0 := t₂` (pick `t₂∈(α,ω)`),
+`β := t₂`, and on window `[t₂, ψ]` take `timeRadius := ω − t₂` (dominates every `|t−t₂|`, ψ<ω). `hmet =
+fun _ _ => rfl` (via `SolutionOn.family`), `hreg`: `Icc t₂ ψ ⊆ Ioo α ω` needs `α < t₂ ∧ ψ < ω`, `hDreg`:
+`Ioo α ω ∈ 𝓝` (open). `hequiv` from threaded `hell`; `hShi` from `movingShi_of_soln`; `initC` from (iii).
+
+Order 0 is separate from the `1 ≤ r` tower — handle `a = 0` directly (it is `metricCovDerivNorm 0 =
+‖g_fam s − g_fam α‖`-type, controlled by `hell` / order-0 continuity) and take the max with the tower
+constants for the single `C ≥ 1` in `shiCovBound_of_soln`'s output.
+
+Acceptance: `shiCovBound_of_soln` sorry-free; extension-lane sorries = exactly `(N)`, `(B)`,
+`movingShi_of_soln`; targeted build of `CovOrderTail` + `ExtendShiInputs` green; `#print axioms` on
+`extendInputs_of_soln` shows `sorryAx` via those three only. Report the new constant's FULL parameter
+table (which of `KShi, N, Λ/equiv-const, initC r, ω−t₂` it depends on, and how). Claim only
+`CovOrderTail.lean` (new) + `ExtendShiInputs.lean`; HCG existing files import-only.
+
+### BRICK S1b EXECUTOR STOP (2026-07-08): constant-tracking field API gap
+
+S1b stopped before Lean edits.  The `hell` threading is routine, and the single-flow instantiation
+shape remains correct, but the required ψ-uniform covariant-order tail cannot be proved from the
+current public HCG interfaces without either editing `RicBound.lean` or reimplementing its private
+constants-first field proof in the new consumer file.
+
+Failed structured routes:
+- Reusing `covOrderBound_tower` / `covOrderBound_of_soln` gives only `∀ ψ, ∀ r, ∃ Cw`; it does not
+  expose a single constant before ψ, so it cannot feed the `Ico t₂ ω` tail output.
+- Rebuilding the whole-manifold tower in `CovOrderTail.lean` with `covOrderBound_stage` still calls
+  `ric_bound_field`; its `Cpp, Cppp` are chosen after the window parameter ψ and the window proofs,
+  so Lean cannot promote the resulting per-ψ constants to one ψ-uniform constant.
+- Trying to build a constants-first field theorem from public APIs reaches the missing bridge:
+  `RicBound.lean`'s constants-first engine `perDomain` is private, while public
+  `ric_bound_field` hides the finite-cover constants existentially.  Reimplementing that proof in
+  `CovOrderTail.lean` would violate the ruling that the new file only tracks the tower constant and
+  reuses the existing field producer.
+
+Smallest next lemma/API: add a public constants-first companion to `ric_bound_field` in the HCG
+layer, or refactor `ric_bound_field` to return named `Cpp, Cppp` determined before β/ψ/window
+proofs from only `gRef`, `N`, `Bmax`, lower-order constants `Cg`, and `KShi`.  Once that exists,
+`CovOrderTail.lean` can carry the whole-manifold induction, use `metricCovOrderEvolutionConstant`
+with `timeRadius := ω - t₂`, and then take the `Ico` tail by choosing `ψ ∈ (s,ω)`.
+
+Progress estimate: `shiCovBound_of_soln` remains 0% discharged; S1b's dedicated implementation is
+0% (no Lean file landed); the missing constants-first `ric_bound_field` companion is the next
+producer API and is likely a small-to-medium HCG-layer refactor, not a local tactic proof.  The
+extension-lane S1 unification remains blocked behind that API; the wider HCG compactness project
+percentages are unchanged by this stop.
+
+Verification: no Lean file was changed; no Lean check was run.
+
 ### Phase S2 (the tower — the real mathematics): discharge `MovingShiBoundOn` for the single flow
 
 From the raw `|Rm|² ≤ K'` bound (`_hbound`), via the banked Bernstein machinery, at `N ≤ 3`,
@@ -597,7 +759,53 @@ From the raw `|Rm|² ≤ K'` bound (`_hbound`), via the banked Bernstein machine
 brick series after S1 fixes `movingShi_of_soln`'s exact (U, β, ψ, N) shape. (N)/(B) remain
 user-owned DeTurck-lane decisions, untouched by this plan.
 
-### BRICK S1 — KICKOFF PROMPT
+### PLANNER RULING on the S1 scoping stop (Fable, 2026-07-04) — both blockers answered
+
+Verified: `covOrderBound_tower` (RicBound:1104, existential constants), `covOrderBound_of_soln`
+(:1179), `metricCovOrderEvolutionConstant` (AllTimesBounds:4305, monotone in `timeRadius` ⟹
+ψ-uniform on the tail). The stop was correct; S1 as written was under-scoped. Decisions:
+
+1. **Blocker 1 — BLESSED.** Thread the equivalence into `shiCovBound_of_soln` (add the `hell`-shaped
+   hypothesis; `extendInputs_of_soln`'s public signature unchanged — it already holds `hell` from
+   `hell_of_soln`).
+2. **Blocker 2 — route (2b), SCOPED: one NEW self-contained file under `HCGCompactness/`**
+   (`CovOrderTail.lean`), and NOTHING else changes in the HCG lane. Rationale: the canonical-home
+   rule — a ψ-uniform/explicit-constant corollary of the window machinery belongs NEXT TO that
+   machinery; replicating it in the extension lane would be a forbidden parallel API. Coordination:
+   zero edits to existing HCG files (the Codex lane's live bricks are `MetricPreconv*`/StepC/
+   GoodCovering, not the P2-era stable `AllTimesBounds`/`RicBound`); the new file's header marks it
+   "extension-lane consumer corollary — not part of the P2/P3 brick flow". Contents:
+   (i) a constant-tracked variant of the `covOrderBound_tower` skeleton whose conclusion exposes a
+   constant depending only on `(KShi, N, hequiv-constant, initC, timeRadius ≤ ω − t₂)` — NOT on ψ
+   (use `metricCovOrderEvolutionConstant`'s monotonicity in `timeRadius`);
+   (ii) the tail corollary in exactly `hcov`'s shape (`Ico t₂ ω` union over `ψ ↑ ω`, one constant);
+   (iii) the `initC` sub-lemma (the `t₀`-value bound uniform in `x` — continuity of the fixed
+   smooth pair `(g_fam t₀, gRef)`'s covariant norms on compact `M`).
+   **Fallback:** if constant-tracking the tower skeleton fails after 3 genuinely different
+   structurings, STOP, report, and we fold S1 into S2 in the extension lane (option 2a) instead.
+3. **Citation shape PINNED (ψ-uniform tail form):** `movingShi_of_soln : ∃ KShi, 0 ≤ KShi ∧
+   ∃ t₂ ∈ Set.Ico α omega, ∀ ψ ∈ Set.Ico t₂ omega, MovingShiBoundOn Set.univ t₂ ψ
+   (fun _ t => g_fam t) N KShi` (ONE `KShi` for all ψ — faithful: Shi's constants depend on the
+   curvature bound and the elapsed time, both uniform on `[t₂, ω)`). `N` = whatever order the
+   tower's `nablaRic` inputs demand for metric orders `≤ 3` (read it; likely `N = 3`).
+4. **(2c) REJECTED** — (A)'s proof needs the constant before `t_star` is chosen (the box's `Λ → τ₀ →
+   t_star` order); a per-window `C(ψ)` breaks that quantifier structure. The tail-uniform constant
+   is true mathematics, not an interface convenience — state it, don't weaken it.
+
+### BRICK S1b — KICKOFF PROMPT (supersedes S1)
+
+*"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — sections 'SHI DISCHARGE
+PLAN' and 'PLANNER RULING on the S1 scoping stop'. Implement S1b: (1) the new
+`HCGCompactness/CovOrderTail.lean` per ruling item 2 (constant-tracked tower variant + Ico-tail
+corollary + initC lemma — NO edits to any existing HCGCompactness file); (2) thread `hell` into
+`shiCovBound_of_soln` and discharge it from the pinned `movingShi_of_soln` citation (ruling item 3)
+via the new tail corollary. Claim `ExtendShiInputs.lean` + the new file only. Acceptance:
+`shiCovBound_of_soln` sorry-free; the extension lane's only remaining sorries = (N), (B),
+`movingShi_of_soln`; targeted builds green; axiom check on `extendInputs_of_soln` traces to
+`movingShi_of_soln` only. Report the constant's exact parameter list (what it depends on) verbatim.
+Stop per CLAUDE.md."*
+
+### BRICK S1 — KICKOFF PROMPT (SUPERSEDED by S1b above; kept for the record)
 
 *"Read `DifferentialGeometry/Geometry/Flow/RicciFlow/ExtendShiInputs.md` — section 'SHI DISCHARGE
 PLAN', Phase S1. Implement S1: read `MetricCovOrderEvolutionInput`'s fields and their HCG

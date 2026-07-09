@@ -341,6 +341,42 @@ theorem bumpExtendOpen_inner_of_mem
           (I := I) R U gU χ hχ hχsupp x₀ i j)).choose_spec x v w]
   rw [bumpForm_apply, extZeroForm_of_mem (I := I) U gU hx v w]
 
+/-- The inner product of the bump extension at ANY point is the fiberwise convex combination
+`χ x • (gU extended by 0) x + (1 - χ x) • R.inner x`.  (On `U` this is
+`bumpExtendOpen_inner_of_mem`; this variant keeps the `extZeroForm` so it also applies off `U`,
+where `extZeroForm = 0`.) -/
+theorem bumpExtendOpen_inner
+    (R : SmoothRiemannianMetric I M) (U : Opens M)
+    [SigmaCompactSpace U] [T2Space U]
+    (gU : SmoothRiemannianMetric I U) (χ : M → ℝ)
+    (hχ : ContMDiff I 𝓘(ℝ, ℝ) ∞ χ) (hχ01 : ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1)
+    (hχsupp : tsupport χ ⊆ (U : Set M))
+    (x : M) (v w : TangentSpace I x) :
+    (R.bumpExtendOpen U gU χ hχ hχ01 hχsupp).inner x v w =
+      χ x • Geometry.extZeroForm (I := I) U gU x v w + (1 - χ x) • R.inner x v w := by
+  rw [show (R.bumpExtendOpen U gU χ hχ hχ01 hχsupp).inner x v w
+        = Geometry.bumpForm (I := I) R U gU χ x v w from
+      (smoothMetric_of_localCoeff (I := I) (Geometry.bumpForm (I := I) R U gU χ)
+        (fun x v w => Geometry.bumpForm_symm (I := I) R U gU χ x v w)
+        (fun x v hv => Geometry.bumpForm_pos (I := I) R U gU χ hχ01 hχsupp x v hv)
+        (fun x₀ i j => Geometry.bumpForm_coeff_contMDiffOn
+          (I := I) R U gU χ hχ hχsupp x₀ i j)).choose_spec x v w]
+  rw [Geometry.bumpForm_apply]
+
+/-- Off the topological support of `χ`, the bump extension coincides with the fallback metric
+`R`. -/
+theorem bumpExtendOpen_inner_of_notMem_tsupport
+    (R : SmoothRiemannianMetric I M) (U : Opens M)
+    [SigmaCompactSpace U] [T2Space U]
+    (gU : SmoothRiemannianMetric I U) (χ : M → ℝ)
+    (hχ : ContMDiff I 𝓘(ℝ, ℝ) ∞ χ) (hχ01 : ∀ x, χ x ∈ Set.Icc (0 : ℝ) 1)
+    (hχsupp : tsupport χ ⊆ (U : Set M))
+    (x : M) (hx : x ∉ tsupport χ) (v w : TangentSpace I x) :
+    (R.bumpExtendOpen U gU χ hχ hχ01 hχsupp).inner x v w = R.inner x v w := by
+  have hχ0 : χ x = 0 := image_eq_zero_of_notMem_tsupport hx
+  rw [bumpExtendOpen_inner (I := I) R U gU χ hχ hχ01 hχsupp x v w, hχ0]
+  simp
+
 /-- **Locality.**  On a set `V ⊆ U` where `χ = 1`, the bump extension agrees with the partial
 metric `gU`. -/
 theorem bumpExtendOpen_eq_gU_on

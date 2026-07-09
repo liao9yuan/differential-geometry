@@ -11,6 +11,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
+import DifferentialGeometry.Geometry.Metric.Sphere.QuotientDescent
+import DifferentialGeometry.Geometry.Curvature.PullbackNaturalityCross
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -80,36 +82,23 @@ def ConstPosSecMetric (g : SmoothRiemannianMetric I M) : Prop :=
 def AdmitsConstPosSec : Prop :=
   exists g : SmoothRiemannianMetric I M, ConstPosSecMetric (I := I) (M := M) g
 
-/-- The standard unit three-sphere in Euclidean four-space. -/
-abbrev RoundSphere3 : Type :=
-  {x : EuclideanSpace Real (Fin 4) // ‖x‖ = (1 : Real)}
-
-/-- Orbit quotient of the round three-sphere by a group action. -/
-abbrev SphereOrbitQuotient (Γ : Type*) [Group Γ] [MulAction Γ RoundSphere3] :
-    Type :=
-  Quotient (MulAction.orbitRel Γ RoundSphere3)
+/-- The ambient-dimension fact for the round three-sphere model: `dim ℝ⁴ = 3 + 1`. -/
+instance : Fact (Module.finrank Real (EuclideanSpace Real (Fin 4)) = 3 + 1) :=
+  ⟨by norm_num [finrank_euclideanSpace_fin]⟩
 
 /-- Witness data that a smooth manifold is presented as a spherical space-form
 quotient.
 
-This is topology/global-geometry data, not analytic Ricci-flow data:
-there is a finite group acting freely by isometries on the round three-sphere,
-the orbit quotient carries a smooth structure modeled on `I`, and the supplied
-manifold is smoothly homeomorphic to that quotient. -/
+This is topology/global-geometry data, not analytic Ricci-flow data: a finite group acting
+freely by ambient orthogonal isometries on the round three-sphere, packaged as a
+`Geometry.RoundQuotientData` over `EuclideanSpace ℝ (Fin 4)` (whose orbit quotient `data.Q`
+carries a smooth structure modeled on `𝓡 3` with descended round metric), together with a
+smooth equivalence of the supplied manifold `N` with that quotient. -/
 structure SphericalSpaceFormQuotientModel
     (I : ModelWithCorners Real E H) (N : Type*)
     [TopologicalSpace N] [ChartedSpace H N] : Type _ where
-  Γ : Type
-  [group : Group Γ]
-  [finiteGroup : Fintype Γ]
-  [action : MulAction Γ RoundSphere3]
-  action_isometric : forall γ : Γ, Isometry (fun p : RoundSphere3 => γ • p)
-  action_free : forall {γ : Γ} {p : RoundSphere3}, γ • p = p -> γ = 1
-  [quotientCharted : ChartedSpace H (SphereOrbitQuotient Γ)]
-  [quotientSmooth : IsManifold I ∞ (SphereOrbitQuotient Γ)]
-  quotientHomeomorph : N ≃ₜ SphereOrbitQuotient Γ
-  smooth_toFun : ContMDiff I I ∞ quotientHomeomorph
-  smooth_invFun : ContMDiff I I ∞ quotientHomeomorph.symm
+  data : Geometry.RoundQuotientData.{0, 0, 0} (EuclideanSpace Real (Fin 4)) 3
+  equiv : N ≃ₘ⟮I, 𝓡 3⟯ data.Q
 
 /-- Predicate that a smooth manifold is a spherical space-form quotient. -/
 def IsSphericalSpaceFormQuotient
@@ -2885,18 +2874,29 @@ Mathematically this is the direct construction: take the round metric on
 to `M` along the smooth equivalence stored in
 `IsSphericalSpaceFormQuotient`. -/
 theorem spaceForm_const_metric
+    (hM : Closed3Manifold (I := I) (M := M))
     (model : IsSphericalSpaceFormQuotient I M) :
     AdmitsConstPosSec (I := I) (M := M) := by
-  sorry
+  obtain ⟨S⟩ := model
+  obtain ⟨_hcompact, _hconn, hbdry, _hdim⟩ := hM
+  haveI : I.Boundaryless := hbdry
+  haveI : NeZero (Module.finrank ℝ (EuclideanSpace ℝ (Fin 3))) := by
+    rw [finrank_euclideanSpace_fin]; infer_instance
+  obtain ⟨c, hc, hsec⟩ := S.data.gQuot_constPosSec
+  refine ⟨Diffeomorph.pullbackMetricCross S.data.gQuot S.equiv, c, hc, fun x X Y => ?_⟩
+  rw [DifferentialGeometry.Integral.Connection.metricRm04Std_pullbackCross
+        S.data.gQuot S.equiv x X Y Y X, hsec,
+    ← Diffeomorph.pullbackMetricCross_inner S.data.gQuot S.equiv x X X,
+    ← Diffeomorph.pullbackMetricCross_inner S.data.gQuot S.equiv x Y Y,
+    ← Diffeomorph.pullbackMetricCross_inner S.data.gQuot S.equiv x X Y]
 
 /-- Reverse presentation direction of the standard equivalence, obtained by
 the quotient round metric construction. -/
 theorem ham3_const_box
     (hM : Closed3Manifold (I := I) (M := M))
     (hsph : SphericalSpaceForm (I := I) (M := M)) :
-    AdmitsConstPosSec (I := I) (M := M) := by
-  have _hclosed : Closed3Manifold (I := I) (M := M) := hM
-  exact spaceForm_const_metric (I := I) (M := M) hsph
+    AdmitsConstPosSec (I := I) (M := M) :=
+  spaceForm_const_metric (I := I) (M := M) hM hsph
 
 /-- The theorem-facing equivalence between constant positive sectional
 curvature and spherical space-form topology. -/

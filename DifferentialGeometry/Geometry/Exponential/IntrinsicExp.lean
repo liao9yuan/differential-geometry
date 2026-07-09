@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Comparison.HopfRinow
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import DifferentialGeometry.Geometry.Exponential.Defs
@@ -479,6 +480,7 @@ theorem intrinsicGeodesic_contMDiffOn
 section AgreementBridge
 
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
+open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1341,6 +1343,30 @@ theorem expMapIntrinsic_eq_expMap_of_small
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- For sufficiently small velocity, the chart-fixed exponential map agrees
+with the intrinsic exponential map.  This packages the intrinsic geodesic
+home-chart confinement input into `expMapIntrinsic_eq_expMap_of_small`. -/
+theorem exp_eq_intr_of_small
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q : M) :
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {v : TangentSpace I q},
+      Real.sqrt (g.inner q (v : E) (v : E)) < ρ →
+      expMap (I := I) g q v = expMapIntrinsic (I := I) g hEnorm q v := by
+  classical
+  obtain ⟨ρ₁, hρ₁_pos, heq⟩ := expMapIntrinsic_eq_expMap_of_small (I := I) g hEnorm q
+  obtain ⟨ρ₂, hρ₂_pos, hsrc⟩ := intrinsicGeodesic_foot_in_source_of_small (I := I) g hEnorm q
+  refine ⟨min ρ₁ ρ₂, lt_min hρ₁_pos hρ₂_pos, ?_⟩
+  intro v hv
+  exact (heq (lt_of_lt_of_le hv (min_le_left _ _))
+    (hsrc (lt_of_lt_of_le hv (min_le_right _ _)))).symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Affine time-rescaling of the moving-foot geodesic equation.**  If `γ`
 satisfies the moving-foot geodesic equation at `c · t`, then the rescaled curve
 `s ↦ γ (c · s)` satisfies it at `t`.  The new velocity is `c` times the old,
@@ -1673,6 +1699,108 @@ theorem intrinsicGeodesic_smul
   rw [hΓrep_def] at h1
   simp only [mul_one, hφ_def] at h1
   exact h1.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Near the centre, the chart-fixed radial exponential curve agrees with the
+single intrinsic geodesic with the same launch velocity.  This is the two-sided
+germ needed at the radial endpoint. -/
+theorem exp_radial_eq_intr
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q : M) (u : TangentSpace I q) :
+    (fun s : ℝ => expMap (I := I) g q (s • u))
+      =ᶠ[nhds (0 : ℝ)] intrinsicGeodesic (I := I) g hEnorm q u := by
+  classical
+  obtain ⟨ρ, hρ_pos, heq⟩ := exp_eq_intr_of_small (I := I) g hEnorm q
+  have hcont_norm : ContinuousAt
+      (fun z : E => Real.sqrt (g.inner q z z)) (0 : E) := by
+    fun_prop
+  have hcont_smul :
+      ContinuousAt (fun s : ℝ => ((s • u : TangentSpace I q) : E)) (0 : ℝ) := by
+    fun_prop
+  have hcont_norm_at : ContinuousAt
+      (fun z : E => Real.sqrt (g.inner q z z))
+      (((0 : ℝ) • u : TangentSpace I q) : E) := by
+    simpa using hcont_norm
+  have hlim_comp : Tendsto
+      ((fun z : E => Real.sqrt (g.inner q z z)) ∘
+        (fun s : ℝ => ((s • u : TangentSpace I q) : E)))
+      (nhds (0 : ℝ))
+      (nhds ((fun z : E => Real.sqrt (g.inner q z z))
+        (((0 : ℝ) • u : TangentSpace I q) : E))) :=
+    ContinuousAt.comp
+      (x := (0 : ℝ))
+      (f := fun s : ℝ => ((s • u : TangentSpace I q) : E))
+      (g := fun z : E => Real.sqrt (g.inner q z z))
+      hcont_norm_at hcont_smul
+  have hlim : Tendsto
+      (fun s : ℝ => Real.sqrt (g.inner q ((s • u : TangentSpace I q) : E)
+        ((s • u : TangentSpace I q) : E))) (nhds (0 : ℝ)) (nhds (0 : ℝ)) := by
+    simpa [Function.comp_def] using hlim_comp
+  have hsmall : {s : ℝ | Real.sqrt (g.inner q ((s • u : TangentSpace I q) : E)
+        ((s • u : TangentSpace I q) : E)) < ρ} ∈ nhds (0 : ℝ) := by
+    have hIio : Set.Iio ρ ∈ nhds (0 : ℝ) := isOpen_Iio.mem_nhds hρ_pos
+    exact hlim hIio
+  filter_upwards [hsmall] with s hs
+  calc
+    expMap (I := I) g q (s • u) =
+        expMapIntrinsic (I := I) g hEnorm q (s • u) := heq hs
+    _ = intrinsicGeodesic (I := I) g hEnorm q u s := by
+        rw [expMapIntrinsic_def, intrinsicGeodesic_smul]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The chart-fixed radial exponential curve satisfies the geodesic equation at
+the centre, under the intrinsic completeness hypotheses. -/
+theorem exp_radial_geo_zero
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q : M) (u : TangentSpace I q) :
+    Geodesic.HasGeodesicEquationAt (I := I) g
+      (fun s : ℝ => expMap (I := I) g q (s • u)) 0 := by
+  classical
+  have hEq := exp_radial_eq_intr (I := I) g hEnorm q u
+  exact Geodesic.HasGeodesicEquationAt.congr_of_eventuallyEq_at
+    (γ := fun s : ℝ => expMap (I := I) g q (s • u))
+    (γ' := intrinsicGeodesic (I := I) g hEnorm q u) (t₀ := 0)
+    hEq.eq_of_nhds hEq (intrinsicGeodesic_isGeodesic (I := I) g hEnorm q u 0)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The chart-fixed radial exponential curve has zero covariant acceleration at
+the centre, under the intrinsic completeness hypotheses. -/
+theorem exp_radial_d2_zero
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q : M) (u : TangentSpace I q) :
+    covDerivAlong (I := I) g
+      (fun s : ℝ => expMap (I := I) g q (s • u))
+      (fun s => (mfderiv 𝓘(ℝ, ℝ) I
+        (fun r : ℝ => expMap (I := I) g q (r • u)) s : ℝ →L[ℝ] _) (1 : ℝ))
+      0 = 0 := by
+  classical
+  have hC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2
+      (fun s : ℝ => expMap (I := I) g q (s • u)) 0 := by
+    set a : E := (u : E)
+    have hsmall : ‖(0 : ℝ) • a‖ < expMapC2Radius (I := I) g q := by
+      simp [expMapC2Radius_pos (I := I) g q]
+    have hC2a := radialCurve_contMDiffAt2 (I := I) g q a 0 hsmall
+    simpa [a] using hC2a
+  exact covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
+    (I := I) g _ 0 hC2 (exp_radial_geo_zero (I := I) g hEnorm q u)
 
 end AgreementBridge
 

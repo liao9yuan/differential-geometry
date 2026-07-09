@@ -71,33 +71,32 @@ interface; `cghMaps_of_hL0` is the producer that makes it constructible.
   on `M_∞`. The keystone bridge; consumes `hShi` (honest input).
 - **Brick E** (`scalar`): `ScalarPullbackTendsto` from `C^∞` metric convergence.
 
-## ▶ RESUME HERE (paused 2026-06-21) — executing the approved `g_∞` plan
+## ▶ RESUME HERE (updated 2026-07-01) — final assembly phase, plan = `P4_CONV_PLAN.md`
 
-Approved plan: `C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md` (the `g_∞`/`conv`/`L`
-engine, Route 2 = bump-extend + AA once on `M_∞`). Execution order: P1.1→P1.2→P1.4→P1.3→P1.5,
-then P2 (L+PDE), P3 (scalar+wiring).
+The transport layer is COMPLETE (all sorry-free, build-verified): P1.1 `convexComb`
+(`Geometry/Metric/ConvexCombination.lean`), P1.2 `bumpExtendOpen` (`Geometry/Metric/
+BumpExtend.lean`, repaired 2026-06-29 — see note below), P1.3 `MovingShiPullback.lean`,
+P1.4 `SolutionPullback.lean` (`solutionOn_pullback`/`isSolutionOn_pullback`, all 9 fields)
++ `WindowDataPullback.lean` (green 3899): all 5 `Sol*Data` sub-records + capstone
+`solWindowData_pullback` + endpoint `winGInfOfPullback` — the pullback layer works along a
+GLOBAL `Φ : M ≃ₘ N`, which fits `sourceTargetDiff : SourceDomain ≃ₘ TargetDomain`.
+Restriction-invariance (`MetricDerivNormRestrict.lean`) also done.
 
-DONE + verified (GREEN, sorry-free, axiom-clean):
-- restriction-invariance: `metricDerivNorm_restrictOpen` + `metricDerivNormSupOn_restrictOpen`
-  (`MetricDerivNormRestrict.lean`).
-- **P1.1** `SmoothRiemannianMetric.convexComb` + `convexComb_inner` + `convexComb_eq_left_on`
-  (NEW `Geometry/Metric/ConvexCombination.lean`).
+Remaining = the assembly phase: **`P4_CONV_PLAN.md`** (this folder), Bricks 1–7:
+(1) `solutionOn_restrictOpen`/`isSolutionOn_restrictOpen` — the ONE missing transport link
+(curvature ingredients banked: `Curvature/OpenSubtypeNaturality`, `RestrictOpenRm04`,
+`PullbackNaturalityLocal/Cross`); (2) per-k pulled-back flow on `SourceDomain` (thin
+composition); (3) `windowGInfAll` — one subsequence + one global gInf, all compacts
+(diagonal; independent, parallelizable); (4) bump-extended sequence + raw `windowGInf`
+hypotheses (bulkiest); (5) conv field + `gInf 0 = mc.limit.metric` + mc re-index along φ;
+(6) the `L` term + PDE `∂ₜg∞ = −2Ric(g∞)` (second frontier) + scalar + σ-compact;
+(7) endgame wiring through `flowLimit_upgrade` (done).
 
-**P1.2 DONE (2026-06-29, fixed + build-verified, 2941 jobs).** `SmoothRiemannianMetric.bumpExtendOpen`
-+ `bumpExtendOpen_inner_of_mem` + `bumpExtendOpen_eq_gU_on` in `Geometry/Metric/BumpExtend.lean`
-(`χ·(gU ext-by-0) + (1−χ)·R` total metric on `M`, via `smoothMetric_of_localCoeff` +
-`ContMDiffOn.smul_section_of_tsupport`). NOTE: the file had been left BROKEN by a prior stale-lock
-session (grep showed "0 sorry" but `lake build` revealed error-recovery sorries). Three bugs fixed:
-(1) `extZeroForm`'s `dite (x∈U)` needed `Decidable (x∈U)` → added `open scoped Classical`;
-(2) `bumpForm_symm` wrongly carried `omit [FiniteDimensional ℝ E]` (its proof needs FD via
-`bumpForm_apply`) → removed; (3) `extZeroForm_of_mem` left an unclosed `X=X` (rw motive cast on the
-dependent CLM/subtype-tangent type) → closed term-mode with
-`DFunLike.congr_fun (DFunLike.congr_fun (dif_pos hx) v) w`. LESSON: a grep "0 sorry" on an untracked
-file from a dead pid is NOT a green signal — always `lake build` before trusting it.
-
-NEXT = **P1.4** (SolWindowData on `V=bump≡1` nbhd, Shi via P1.3 pullback-naturality), then **P1.3**
-(Shi-tower pullback transfer — hardest, de-risked by `MetricCovDerivPullback.lean` bricks), **P1.5**
-(conv bridge via restriction-invariance + sup corollary, `refMetric := restrictOpen R`, `gRef := R`).
+P1.2 repair lesson (2026-06-29): a grep "0 sorry" on an untracked file from a dead pid is NOT
+a green signal — always `lake build` before trusting it (error-recovery sorries are invisible
+to grep). Fixes were: `open scoped Classical` for the `dite (x∈U)`; removed a wrong
+`omit [FiniteDimensional ℝ E]`; closed a rw-motive-cast `X=X` via
+`DFunLike.congr_fun (DFunLike.congr_fun (dif_pos hx) v) w`.
 
 ## 3.10 ⇐ 3.9 wiring plan (CORRECTED SCOPE 2026-06-21 — follows MSM135 §lbl352)
 

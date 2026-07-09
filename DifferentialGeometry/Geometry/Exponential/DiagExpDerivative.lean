@@ -601,6 +601,59 @@ theorem diagExpInv_contMDiffAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- **The inverse section is `C^n` at the diagonal `(p, p)`, for every finite order `n ≥ 1`**
+(MSM135 `lbl430`(ii)).  Same Banach-IFT construction as `diagExpInv_contMDiffAt`, but using the
+`C^n` forward smoothness `chartedDiagExp_contDiffAt` (the forward `diagExp` is `C^∞` on the
+`C²`-radius ball, so the order is not the obstruction): `ContDiffAt.to_localInverse` gives the local
+inverse at order `n`.  The `localInverse` map is order-independent — it is defined from the
+proof-irrelevant strict derivative — so it is exactly `diagExpIFT.symm`. -/
+theorem diagExpInv_contMDiffAt_order
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (n : ℕ) (hn : 1 ≤ n) :
+    ContMDiffAt (I.prod I) I.tangent (n : ℕ∞) (diagExpInv (I := I) g hEnorm p) (p, p) := by
+  have hn0 : ((n : ℕ∞) : WithTop ℕ∞) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)
+  have hsymm_eq : (diagExpIFT (I := I) g hEnorm p).symm =
+      (chartedDiagExp_contDiffAt (I := I) g hEnorm p n hn).localInverse
+        (diagExp_hasFDerivAt_zero_unipotent (I := I) g hEnorm p 1 le_rfl) hn0 := rfl
+  have hsymm_cd : ContDiffAt ℝ (n : ℕ∞) (diagExpIFT (I := I) g hEnorm p).symm
+      (chartedDiagExp (I := I) g hEnorm p (diagExpZeroPt (I := I) p)) := by
+    rw [hsymm_eq]
+    exact (chartedDiagExp_contDiffAt (I := I) g hEnorm p n hn).to_localInverse
+      (diagExp_hasFDerivAt_zero_unipotent (I := I) g hEnorm p 1 le_rfl) hn0
+  have h_outer : ContMDiffAt (I.prod I) 𝓘(ℝ, E × E) (n : ℕ∞)
+      (extChartAt (I.prod I) (p, p)) (p, p) :=
+    contMDiffAt_extChartAt (I := I.prod I) (x := (p, p)) (n := (n : ℕ∞))
+  have h_mid : ContMDiffAt 𝓘(ℝ, E × E) 𝓘(ℝ, E × E) (n : ℕ∞)
+      (diagExpIFT (I := I) g hEnorm p).symm (extChartAt (I.prod I) (p, p) (p, p)) := by
+    rw [outer_center (I := I) g hEnorm p]
+    exact contMDiffAt_iff_contDiffAt.mpr hsymm_cd
+  have hpt : (diagExpIFT (I := I) g hEnorm p).symm (extChartAt (I.prod I) (p, p) (p, p))
+      = diagExpZeroPt (I := I) p := by
+    have hsrc : diagExpZeroPt (I := I) p ∈ (diagExpIFT (I := I) g hEnorm p).source :=
+      ContDiffAt.mem_toOpenPartialHomeomorph_source
+        (chartedDiagExp_cdaOne (I := I) g hEnorm p)
+        (diagExp_hasFDerivAt_zero_unipotent (I := I) g hEnorm p 1 le_rfl) one_ne_zero
+    rw [outer_center (I := I) g hEnorm p, ← diagExpIFT_coe (I := I) g hEnorm p]
+    exact (diagExpIFT (I := I) g hEnorm p).left_inv hsrc
+  have h_inner : ContMDiffAt 𝓘(ℝ, E × E) I.tangent (n : ℕ∞)
+      (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
+      ((diagExpIFT (I := I) g hEnorm p).symm (extChartAt (I.prod I) (p, p) (p, p))) := by
+    rw [hpt]
+    have hb : range (I.tangent) = (univ : Set (E × E)) :=
+      ModelWithCorners.Boundaryless.range_eq_univ
+    have hsm := contMDiffWithinAt_extChartAt_symm_range_self (I := I.tangent) (n := (n : ℕ∞))
+      (⟨p, (0 : E)⟩ : TangentBundle I M)
+    rw [hb, contMDiffWithinAt_univ] at hsm
+    exact hsm
+  exact h_inner.comp (p, p) (h_mid.comp (p, p) h_outer)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **The right-inverse property.**  Near `(p, p)`, `diagExp (diagExpInv y) = y`.
 For `y = (q, pt)` this says `exp_q (diagExpInv (q, pt)).snd = pt` with projection `q`,
 i.e. `diagExpInv (q, pt)` is the inverse exponential `exp_q⁻¹(pt)`. -/

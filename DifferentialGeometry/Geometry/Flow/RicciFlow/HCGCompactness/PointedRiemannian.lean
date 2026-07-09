@@ -91,10 +91,53 @@ def MetricComplete {I : ModelWithCorners Real E H}
   letI : EMetricSpace X.M := EMetricSpace.ofRiemannianMetric I X.M
   CompleteSpace X.M
 
+namespace MetricComplete
+
+/-- Projection from the pointed-manifold completeness predicate to the active
+Riemannian emetric `CompleteSpace` instance. -/
+theorem complete {I : ModelWithCorners Real E H}
+    (X : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hX : MetricComplete (I := I) X) :
+    letI : TopologicalSpace X.M := X.topology
+    letI : ChartedSpace H X.M := X.charted
+    letI : IsManifold I ∞ X.M := X.smooth
+    letI : IsManifold I 1 X.M :=
+      IsManifold.of_le (I := I) (M := X.M) (n := ∞)
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : SigmaCompactSpace X.M := X.sigmaCompact
+    letI : T2Space X.M := X.t2
+    letI : TopologicalSpace.MetrizableSpace X.M :=
+      Manifold.metrizableSpace I X.M
+    letI : T3Space X.M := inferInstance
+    letI : RiemannianBundle (fun x : X.M => TangentSpace I x) :=
+      ⟨X.metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : X.M => TangentSpace I x) :=
+      ⟨⟨X.metric.inner, X.metric.contMDiff.continuous, by intro x v w; rfl⟩⟩
+    letI : EMetricSpace X.M := EMetricSpace.ofRiemannianMetric I X.M
+    CompleteSpace X.M := by
+  simpa [MetricComplete] using hX
+
+end MetricComplete
+
 /-- Completeness input for every term of a pointed metric sequence. -/
 structure SeqMetricComplete {I : ModelWithCorners Real E H}
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) : Prop where
   complete : forall i : Nat, MetricComplete (I := I) (X.obj i)
+
+namespace SeqMetricComplete
+
+variable {I : ModelWithCorners Real E H}
+
+/-- Reindex sequence completeness along a subsequence. -/
+theorem subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hX : SeqMetricComplete (I := I) X) (f : Nat -> Nat) :
+    SeqMetricComplete (I := I) (X.subseq f) where
+  complete := by
+    intro i
+    simpa [PointedRiemannianSeq.subseq] using hX.complete (f i)
+
+end SeqMetricComplete
 
 end HCGCompactness
 end DifferentialGeometry

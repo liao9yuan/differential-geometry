@@ -204,3 +204,18 @@ ContinuousMultilinearMap.compContinuousLinearMap_apply]`.
 Consumed in `HCGCompactness/SolutionPullback.lean` for `metricTensor_cont` (via `metricTensorField_apply`
 + `pullbackMetric_inner`), `ricciCont` (via `metricRicci_pullback_eval`), `rm04Cont` (via
 `metricRm04_pullback_eval`).  See SolutionPullback.md.
+
+## 2026-07-02: `Tensor0SFamilyContinuousOnSet.restrictOpen` (Brick 1 open-inclusion transport)
+
+NEW, verified sorry-free (targeted build).  Restriction-analog of `.pullback` along the open inclusion
+`Subtype.val : U → M` (`U : Opens M`): for `hA : Tensor0SFamilyContinuousOnSet (M := M) s K A`, the
+restriction `(t, x:U) ↦ A t ↑x` is jointly continuous over `{t∈K}×U`.  Same route as `.pullback` but
+`_of_chartBasisComp` on the SOURCE `U`, base `↑x`, slots pushed by `mfderiv Subtype.val` (= id, via
+`mfderiv_subtype_val_apply`); the pushed chart-basis section is `tangentMap Subtype.val ∘ chartBasisVec`.
+Two deltas vs `.pullback`: (1) pin `contMDiff_subtype_val (n := ∞)` for `continuous_tangentMap (by simp)`
+(else `n` is a metavar `by simp` can't discharge); (2) the final goal reduces to `A .. (fun i =>…) =
+A .. (fun k =>…)` (alpha) which `simp only [Set.restrict_apply, mfderiv_subtype_val_apply]` does NOT
+close — needs a trailing `rfl`.  Carries U-instances as hypotheses
+`[SigmaCompactSpace U] [T2Space U] [IsManifold I 1 U] [IsManifold I ((∞)+1) U]`.  Adds one import
+`Geometry/Metric/OpenSubtype` (for `mfderiv_subtype_val_apply`; no cycle).  Consumed in
+`HCGCompactness/SolutionRestrictOpen.lean` for `metricTensor_cont`/`ricciCont`/`rm04Cont`.

@@ -218,5 +218,237 @@ theorem mdiffAt_inner_left (w : E) {F : sphere (0 : E) 1 → E} {x : sphere (0 :
     inferInstanceAs (InnerProductSpace ℝ E)
   exact ((innerSL ℝ w).hasFDerivAt.hasMFDerivAt.comp x hF.hasMFDerivAt).mdifferentiableAt
 
+omit [FiniteDimensional ℝ E] in
+/-- **Normal-direction Leibniz term (scalar form).**  The derivative of `φ · ⟪w, ↑·⟫` paired with a
+fixed `w ⊥ ↑x` keeps only the `φ(x)·⟪w, dι v⟫` term — the `dφ` term dies.  Stated through the *bundled*
+`innerCoordFun w` (never a bare `⟪w, ↑·⟫` lambda), so it never re-elaborates the bare-coercion
+`mfderiv` that demands a false `ChartedSpace E` instance. -/
+theorem mfderiv_mul_innerCoordFun_of_inner_eq_zero
+    (w : E) {φ : sphere (0 : E) 1 → ℝ} {x : sphere (0 : E) 1}
+    (hφ : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ) φ x) (horth : ⟪w, (↑x : E)⟫ = 0)
+    (v : TangentSpace (𝓡 n) x) :
+    mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
+        (fun p => φ p * (innerCoordFun (E := E) (n := n) w) p) x v
+      = φ x * ⟪w, dIncl (n := n) x v⟫ := by
+  set ψ : sphere (0 : E) 1 → ℝ := ⇑(innerCoordFun (E := E) (n := n) w) with hψdef
+  have hψ : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ) ψ x :=
+    (innerCoordFun (E := E) (n := n) w).contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hψx : ψ x = 0 := by rw [hψdef]; simpa [innerCoordFun] using horth
+  -- Rewrite `mfderiv ψ x` to a CLEAN-codomain CLM (`T_x →L ℝ`, not the `TangentSpace 𝓘(ℝ,ℝ)`
+  -- synonym) so that `smul_apply`/`comp_apply` reduce.
+  have hψCLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ψ x = (innerSL ℝ w).comp (dIncl (n := n) x) := by
+    ext u
+    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ψ x u = ⟪w, dIncl (n := n) x u⟫
+    exact mfderiv_innerCoordFun (E := E) (n := n) w x u
+  show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (φ * ψ) x v = φ x * ⟪w, dIncl (n := n) x v⟫
+  rw [(hφ.hasMFDerivAt.mul hψ.hasMFDerivAt).mfderiv]
+  simp only [hψx, hψCLM, zero_smul, add_zero]
+  change φ x • (((innerSL ℝ w).comp (dIncl (n := n) x)) v) = φ x * ⟪w, dIncl (n := n) x v⟫
+  rw [ContinuousLinearMap.comp_apply, innerSL_apply_apply, smul_eq_mul]
+
+set_option maxHeartbeats 800000 in
+/-- **Nested-derivative expansion (Gauss + flatness input).**  Pairing the ambient derivative of the
+nested connection section `A = ∇_{Yf} Z` against a tangent vector splits into the second ambient
+derivative `ambDeriv2` (cancelled later by flatness) and a Gram term; the normal part of the Gauss
+formula only survives as `g(Z,Yf)·⟪dι v, dι W⟫`. -/
+theorem inner_ambDeriv_nested
+    (Z Yf : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
+    (x : sphere (0 : E) 1) (v W : TangentSpace (𝓡 n) x)
+    (hD : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E)
+      (fun p => ambDeriv (n := n) (⇑Z) p (Yf p)) x) :
+    ⟪ambDeriv (n := n)
+        (fun p => Integral.Connection.metricCov (roundMetric (E := E) (n := n)) (⇑Z) p (Yf p)) x v,
+        dIncl (n := n) x W⟫
+      = ⟪dIncl (n := n) x W, ambDeriv2 (n := n) Z Yf x v⟫
+        + roundInner (n := n) x (Z x) (Yf x) * ⟪dIncl (n := n) x W, dIncl (n := n) x v⟫ := by
+  have hZp : ∀ p, MDifferentiableAt (𝓡 n) (𝓡 n).tangent
+      (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y ((⇑Z) y))) p := fun p =>
+    Z.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hZd : ∀ p, MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n) (⇑Z)) p := fun p =>
+    dInclField_mdifferentiableAt (n := n) (hZp p)
+  have hYfd : ∀ p, MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n) (⇑Yf)) p := fun p =>
+    dInclField_mdifferentiableAt (n := n) (Yf.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+  have hcoeC : ContMDiffAt (𝓡 n) 𝓘(ℝ, E) ∞ ((↑) : sphere (0 : E) 1 → E) x :=
+    contMDiff_coe_sphere.contMDiffAt
+  have hcoeM : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x :=
+    hcoeC.mdifferentiableAt (by simp)
+  -- Gauss formula for the nested section's pushed field.
+  have hAfun : dInclField (n := n)
+        (fun p => Integral.Connection.metricCov (roundMetric (E := E) (n := n)) (⇑Z) p (Yf p))
+      = fun p => ambDeriv (n := n) (⇑Z) p (Yf p)
+          + roundInner (n := n) p (Z p) (Yf p) • (↑p : E) := by
+    funext p
+    rw [dInclField_apply, ← projConn_eq_metricCov (hZp p) (Yf p),
+      ambDeriv_gauss (n := n) (hZp p) (Yf p)]
+    module
+  -- `φ p = g(Z,Yf)` is smooth.
+  have hφ : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ)
+      (fun p => roundInner (n := n) p (Z p) (Yf p)) x := by
+    have hb : HasMFDerivAt (𝓡 n) 𝓘(ℝ, ℝ)
+        (fun p => ⟪dInclField (n := n) (⇑Z) p, dInclField (n := n) (⇑Yf) p⟫) x _ :=
+      ((isBoundedBilinearMap_inner (𝕜 := ℝ) (E := E)).hasFDerivAt
+        (dInclField (n := n) (⇑Z) x, dInclField (n := n) (⇑Yf) x)).hasMFDerivAt.comp x
+        ((hZd x).hasMFDerivAt.prodMk (hYfd x).hasMFDerivAt)
+    have heq : (fun p => roundInner (n := n) p (Z p) (Yf p))
+        = fun p => ⟪dInclField (n := n) (⇑Z) p, dInclField (n := n) (⇑Yf) p⟫ := by
+      funext p; rw [roundInner_apply]; rfl
+    rw [heq]; exact hb.mdifferentiableAt
+  -- The nested pushed field is differentiable at `x`.
+  have hAd : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n)
+        (fun p => Integral.Connection.metricCov (roundMetric (E := E) (n := n)) (⇑Z) p (Yf p))) x := by
+    rw [hAfun]; exact hD.add (hφ.smul hcoeM)
+  have hψ0 : ⟪dIncl (n := n) x W, (↑x : E)⟫ = (0 : ℝ) :=
+    Submodule.inner_left_of_mem_orthogonal (Submodule.mem_span_singleton_self _)
+      (by rw [← range_mfderiv_coe_sphere (n := n) x]; exact ⟨W, rfl⟩)
+  -- Move to the scalar field `⟪dι W, dι A ·⟫` and split via the Gauss form (`innerCoordFun` for the
+  -- normal part, so no bare `⟪dι W, ↑·⟫` lambda appears).
+  rw [ambDeriv_apply, real_inner_comm, ← mfderiv_inner_left (dIncl (n := n) x W) hAd v]
+  have hscal : (fun p => ⟪dIncl (n := n) x W, dInclField (n := n)
+        (fun p => Integral.Connection.metricCov (roundMetric (E := E) (n := n)) (⇑Z) p (Yf p)) p⟫)
+      = (fun p => ⟪dIncl (n := n) x W, ambDeriv (n := n) (⇑Z) p (Yf p)⟫)
+          + (fun p => roundInner (n := n) p (Z p) (Yf p)
+              * (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) p) := by
+    funext p
+    simp only [Pi.add_apply, hAfun, inner_add_right, inner_smul_right]
+    rfl
+  have hMh1 : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ)
+      (fun p => ⟪dIncl (n := n) x W, ambDeriv (n := n) (⇑Z) p (Yf p)⟫) x :=
+    mdiffAt_inner_left (dIncl (n := n) x W) hD
+  have hMh2 : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ)
+      (fun p => roundInner (n := n) p (Z p) (Yf p)
+        * (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) p) x :=
+    hφ.mul ((innerCoordFun (E := E) (n := n)
+      (dIncl (n := n) x W)).contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+  -- Rewrite both derivative CLMs to CLEAN-codomain `T_x →L ℝ` form (dodging the `TangentSpace 𝓘(ℝ,ℝ)`
+  -- synonym that blocks `add_apply`), then split and evaluate.
+  have h1CLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
+      (fun p => ⟪dIncl (n := n) x W, ambDeriv (n := n) (⇑Z) p (Yf p)⟫) x
+        = (innerSL ℝ (dIncl (n := n) x W)).comp (ambDeriv2 (n := n) Z Yf x) := by
+    ext u
+    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
+        (fun p => ⟪dIncl (n := n) x W, ambDeriv (n := n) (⇑Z) p (Yf p)⟫) x u
+          = ⟪dIncl (n := n) x W, ambDeriv2 (n := n) Z Yf x u⟫
+    rw [mfderiv_inner_left (dIncl (n := n) x W) hD u, ← ambDeriv2_apply]
+  have hψ0' : (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) x = 0 := by
+    simpa [innerCoordFun] using hψ0
+  have hψCLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) x
+      = (innerSL ℝ (dIncl (n := n) x W)).comp (dIncl (n := n) x) := by
+    ext u
+    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) x u
+        = ⟪dIncl (n := n) x W, dIncl (n := n) x u⟫
+    exact mfderiv_innerCoordFun (E := E) (n := n) (dIncl (n := n) x W) x u
+  have h2CLM : mfderiv (𝓡 n) 𝓘(ℝ, ℝ)
+      (fun p => roundInner (n := n) p (Z p) (Yf p)
+        * (innerCoordFun (E := E) (n := n) (dIncl (n := n) x W)) p) x
+        = (roundInner (n := n) x (Z x) (Yf x))
+          • (innerSL ℝ (dIncl (n := n) x W)).comp (dIncl (n := n) x) := by
+    show mfderiv (𝓡 n) 𝓘(ℝ, ℝ) ((fun p => roundInner (n := n) p (Z p) (Yf p))
+        * ⇑(innerCoordFun (E := E) (n := n) (dIncl (n := n) x W))) x = _
+    rw [(hφ.hasMFDerivAt.mul ((innerCoordFun (E := E) (n := n)
+      (dIncl (n := n) x W)).contMDiff.contMDiffAt.mdifferentiableAt (by simp)).hasMFDerivAt).mfderiv,
+      hψCLM, hψ0', zero_smul, add_zero]
+  rw [hscal, mfderiv_add hMh1 hMh2, h1CLM, h2CLM]
+  rfl
+
+/-- The first ambient covariant derivative `p ↦ D_{Yf}(dι Z)` of one smooth section along another is
+differentiable (the hypothesis `ambDeriv_bracket_symm`/`inner_ambDeriv_nested` need).  Via the Gauss
+formula it equals `dι(∇_{Yf} Z) − g(Z,Yf)·ν`, both summands smooth (`metricCov` sections are smooth). -/
+theorem ambDeriv_section_mdiffAt
+    (Z Yf : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
+    (x : sphere (0 : E) 1) :
+    MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (fun p => ambDeriv (n := n) (⇑Z) p (Yf p)) x := by
+  have hZp : ∀ p, MDifferentiableAt (𝓡 n) (𝓡 n).tangent
+      (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y ((⇑Z) y))) p := fun p =>
+    Z.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hZd : ∀ p, MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n) (⇑Z)) p := fun p =>
+    dInclField_mdifferentiableAt (n := n) (hZp p)
+  have hYfd : ∀ p, MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n) (⇑Yf)) p := fun p =>
+    dInclField_mdifferentiableAt (n := n) (Yf.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+  have hcoeC : ContMDiffAt (𝓡 n) 𝓘(ℝ, E) ∞ ((↑) : sphere (0 : E) 1 → E) x :=
+    contMDiff_coe_sphere.contMDiffAt
+  have hcoeM : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) ((↑) : sphere (0 : E) 1 → E) x :=
+    hcoeC.mdifferentiableAt (by simp)
+  have hφ : MDifferentiableAt (𝓡 n) 𝓘(ℝ, ℝ)
+      (fun p => roundInner (n := n) p (Z p) (Yf p)) x := by
+    have hb : HasMFDerivAt (𝓡 n) 𝓘(ℝ, ℝ)
+        (fun p => ⟪dInclField (n := n) (⇑Z) p, dInclField (n := n) (⇑Yf) p⟫) x _ :=
+      ((isBoundedBilinearMap_inner (𝕜 := ℝ) (E := E)).hasFDerivAt
+        (dInclField (n := n) (⇑Z) x, dInclField (n := n) (⇑Yf) x)).hasMFDerivAt.comp x
+        ((hZd x).hasMFDerivAt.prodMk (hYfd x).hasMFDerivAt)
+    have heq : (fun p => roundInner (n := n) p (Z p) (Yf p))
+        = fun p => ⟪dInclField (n := n) (⇑Z) p, dInclField (n := n) (⇑Yf) p⟫ := by
+      funext p; rw [roundInner_apply]; rfl
+    rw [heq]; exact hb.mdifferentiableAt
+  have hAd : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E) (dInclField (n := n)
+        (fun p => Integral.Connection.metricCov (roundMetric (E := E) (n := n)) (⇑Z) p (Yf p))) x :=
+    dInclField_mdifferentiableAt (n := n)
+      ((Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+        (Integral.Connection.metricCov (roundMetric (E := E) (n := n)))
+        (Integral.Connection.metricCov_smooth (roundMetric (E := E) (n := n))) Yf Z x).mdifferentiableAt
+        (by simp))
+  have hAfun : dInclField (n := n)
+        (fun p => Integral.Connection.metricCov (roundMetric (E := E) (n := n)) (⇑Z) p (Yf p))
+      = fun p => ambDeriv (n := n) (⇑Z) p (Yf p)
+          + roundInner (n := n) p (Z p) (Yf p) • (↑p : E) := by
+    funext p
+    rw [dInclField_apply, ← projConn_eq_metricCov (hZp p) (Yf p),
+      ambDeriv_gauss (n := n) (hZp p) (Yf p)]
+    module
+  rw [eq_sub_of_add_eq hAfun.symm]
+  exact hAd.sub (hφ.smul hcoeM)
+
+set_option maxHeartbeats 800000 in
+/-- **The Gauss equation (pre-pairing).**  For smooth sections `X Y Z`, the metric Riemann curvature of
+the round sphere paired against a tangent vector is the Gram combination
+`⟪dι R(X,Y)Z, dι W⟫ = g(Z,Y)·⟪dι X, dι W⟫ − g(Z,X)·⟪dι Y, dι W⟫`.  The second-derivative parts cancel by
+ambient flatness (`ambDeriv_bracket_symm`); the projection corrections drop out against the tangent
+`dι W`; the Gauss normal terms survive as the Gram products. -/
+theorem dIncl_curv_inner
+    (Z X Y : Cₛ^∞⟮𝓡 n; EuclideanSpace ℝ (Fin n), (TangentSpace (𝓡 n) : sphere (0 : E) 1 → Type _)⟯)
+    (x : sphere (0 : E) 1) (W : TangentSpace (𝓡 n) x)
+    (hDY : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E)
+      (fun p => ambDeriv (n := n) (⇑Z) p (Y p)) x)
+    (hDX : MDifferentiableAt (𝓡 n) 𝓘(ℝ, E)
+      (fun p => ambDeriv (n := n) (⇑Z) p (X p)) x) :
+    ⟪dIncl (n := n) x (Integral.Connection.CovariantDerivative.riemannCurvatureAux
+        (Integral.Connection.metricCov (roundMetric (E := E) (n := n))) (⇑X) (⇑Y) (⇑Z) x),
+        dIncl (n := n) x W⟫
+      = roundInner (n := n) x (Z x) (Y x) * ⟪dIncl (n := n) x (X x), dIncl (n := n) x W⟫
+        - roundInner (n := n) x (Z x) (X x) * ⟪dIncl (n := n) x (Y x), dIncl (n := n) x W⟫ := by
+  set g := roundMetric (E := E) (n := n) with hg
+  -- Differentiability of the three sections fed to the connection.
+  have hZb : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
+      (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y ((⇑Z) y))) x :=
+    Z.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hA : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
+      (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y
+        ((fun p => Integral.Connection.metricCov g (⇑Z) p (Y p)) y))) x :=
+    (Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      (Integral.Connection.metricCov g) (Integral.Connection.metricCov_smooth g) Y Z x).mdifferentiableAt (by simp)
+  have hB : MDifferentiableAt (𝓡 n) (𝓡 n).tangent
+      (fun y => (TotalSpace.mk' (EuclideanSpace ℝ (Fin n)) y
+        ((fun p => Integral.Connection.metricCov g (⇑Z) p (X p)) y))) x :=
+    (Integral.Connection.CovariantDerivative.cov_smooth_apply_contMDiffAt
+      (Integral.Connection.metricCov g) (Integral.Connection.metricCov_smooth g) X Z x).mdifferentiableAt (by simp)
+  -- Expand the curvature operator and inject `dι`, pairing with `dι W`.
+  rw [show Integral.Connection.CovariantDerivative.riemannCurvatureAux
+        (Integral.Connection.metricCov g) (⇑X) (⇑Y) (⇑Z) x
+      = Integral.Connection.metricCov g (fun p => Integral.Connection.metricCov g (⇑Z) p (Y p)) x (X x)
+        - Integral.Connection.metricCov g (fun p => Integral.Connection.metricCov g (⇑Z) p (X p)) x (Y x)
+        - Integral.Connection.metricCov g (⇑Z) x (mlieBracket (𝓡 n) (⇑X) (⇑Y) x) from rfl,
+    map_sub, map_sub, inner_sub_left, inner_sub_left,
+    inner_dIncl_metricCov hA (X x) W, inner_dIncl_metricCov hB (Y x) W,
+    inner_dIncl_metricCov hZb (mlieBracket (𝓡 n) (⇑X) (⇑Y) x) W,
+    inner_ambDeriv_nested Z Y x (X x) W hDY, inner_ambDeriv_nested Z X x (Y x) W hDX]
+  -- Flatness cancels the second-derivative parts; `real_inner_comm` aligns the Gram products.
+  have hflat := ambDeriv_bracket_symm Z X Y x hDY hDX
+  have hbr : ⟪dIncl (n := n) x W, ambDeriv2 (n := n) Z Y x (X x)⟫
+      - ⟪dIncl (n := n) x W, ambDeriv2 (n := n) Z X x (Y x)⟫
+        = ⟪ambDeriv (n := n) (⇑Z) x (mlieBracket (𝓡 n) (⇑X) (⇑Y) x), dIncl (n := n) x W⟫ := by
+    rw [← inner_sub_right, hflat, real_inner_comm]
+  rw [real_inner_comm (dIncl (n := n) x W) (dIncl (n := n) x (X x)),
+    real_inner_comm (dIncl (n := n) x W) (dIncl (n := n) x (Y x))]
+  linarith [hbr]
+
 end Geometry
 end DifferentialGeometry

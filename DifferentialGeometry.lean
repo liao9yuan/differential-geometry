@@ -1036,6 +1036,11 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 import DifferentialGeometry.Geometry.Comparison.Variation.SmoothCurveGerm
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
+import DifferentialGeometry.Geometry.Comparison.Volume.NormalChartMeasure
+import DifferentialGeometry.Geometry.Comparison.Volume.RadialGronwall
+import DifferentialGeometry.Geometry.Comparison.Volume.JacobianBounds
+import DifferentialGeometry.Geometry.Comparison.Volume.BallVolume
+import DifferentialGeometry.Geometry.Comparison.Volume.Packing
 import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import DifferentialGeometry.Geometry.Connection.Chart.CoordinateFrame
@@ -1459,6 +1464,7 @@ import DifferentialGeometry.Geometry.Operator.Scaling
 import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Geometry.Topology.FiniteAtlasIndexOnCompact
 import DifferentialGeometry.Geometry.Topology.SemilocallySimplyConnected
+import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 import DifferentialGeometry.Geometry.Topology.UniversalCover.Basic
 import DifferentialGeometry.Geometry.Topology.UniversalCover.ChartPullback
 import DifferentialGeometry.Geometry.Topology.UniversalCover.CompletenessPullback
