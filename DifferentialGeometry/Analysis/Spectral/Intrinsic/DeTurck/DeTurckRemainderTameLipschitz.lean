@@ -38970,18 +38970,65 @@ private theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-/-- Deferred corr-family interface input (order-zero arm, two-arm reshape): the identity-fails
-certificate refuted the envelope for the bare correction field, so the bounded subject is the
-explicit combination of the correction field with its Riemann and curvature companion
-coefficients; moreover the naked window `Finset.range (i + 2)` misses the subject's genuine
-`∇^(i+2)`-content (the order-`i` jet of the realized-metric curvature coefficients carries the
-data's order-`(i + 2)` jet linearly), so the envelope carries a second arm
-`ε² · (‖∇^(i+2) T‖² + ‖∇^(i+2) T'‖²)` whose coefficient `ε` is an `O(1)` inverse-realized-metric
-contraction constant, pinned by the explicit budget-dual cap
-`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f` the DeTurck arm fibre constant): this is the
-weakest cap the ball-uniform spectral-split budget accepts. Transcribes the reshaped
-correction-field spec clause; discharged at corr-discharge. Every consumer transitively depends
-on `sorryAx` until that lands. -/
+set_option linter.unusedVariables false in
+/-- Deferred high-order corr-arm-0 envelope input: at orders `i > a` the naked tame window is
+FALSE for the reshaped arm-0 correction subject (single-mode witness family — the order-`i`
+jet of the realized-metric curvature coefficients carries the data's order-`(i + 2)` jet
+linearly), so the envelope carries the second arm `ε² · (‖∇^(i+2) T‖² + ‖∇^(i+2) T'‖²)`,
+with `ε` an inverse-realized-metric contraction constant pinned by the budget-dual cap
+`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f` the DeTurck arm fibre constant). Deferred
+`sorry` input, to be discharged at corr-discharge; every consumer transitively depends on
+`sorryAx` until that lands. -/
+theorem exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+    ∃ ε : ℝ, 0 ≤ ε ∧
+      27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
+        2 * (32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (i : ℕ), a < i → ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0Coeff
+                  (I := I) g₀ T T' hδ hδ' s
+                - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
+                + (3 / 2 : ℝ) •
+                  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+                    (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0CurvCoeff
+                    (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s))‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) +
+              ε ^ 2 * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedVariables false in
+/-- All-order tame jet envelope interface for the reshaped arm-0 correction subject (the
+correction field combined with its Riemann and curvature companion coefficients at the
+realized-family metric): the arm-0 identity conjunct of the correction-field spec
+(`corrFieldDataSpec`, fifth conjunct) pins the opaque `choose` witness to the concrete
+combination `linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff`, after which
+the subject splits at the ball-absorption threshold: orders `i ≤ a` are bounded by the guarded
+donor envelope `exists_corrArm0Field_realizedFam_jetL2_tameEnvelope` (the `ε²`-arm entering as
+nonnegative slack), while orders `i > a` — where the naked window misses the subject's genuine
+`∇^(i+2)`-content — are bounded by the budget-dual-capped top-arm envelope
+`exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder`, whose `ε` and cap
+`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` pass through unchanged. The high-order envelope is a
+deferred `sorry` input; consumers transitively depend on `sorryAx` until corr-discharge
+lands. -/
 private theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -39010,8 +39057,56 @@ private theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) +
               ε ^ 2 * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
-                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) := by
+  classical
+  obtain ⟨Kle, hKle_nn, hKle⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  obtain ⟨Kgt, hKgt_nn, ε, hε_nn, hε_cap, hKgt⟩ :=
+    exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨fun i => Kle i + Kgt i, fun i => add_nonneg (hKle_nn i) (hKgt_nn i),
+    ε, hε_nn, hε_cap, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i s hs
+  have hid :=
+    (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_arm0_arm1_corrField_data
+      (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.2.2.2.2.1
+  rw [show linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s =
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0Coeff
+          (I := I) g₀ T T' hδ hδ' s
+        - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s from hid s]
+  have hwin_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
+      (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) :=
+    Finset.sum_nonneg fun j _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+  have htop_nn : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+      ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2 :=
+    add_nonneg (sq_nonneg _) (sq_nonneg _)
+  have hdist : (Kle i + Kgt i) * (1 + ∑ j ∈ Finset.range (i + 2),
+      (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) =
+      Kle i * (1 + ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) +
+      Kgt i * (1 + ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) := add_mul _ _ _
+  rcases le_or_gt i a with hia | hia
+  · have hb := hKle T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hia s hs
+    have h1 : (0 : ℝ) ≤ Kgt i * (1 + ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) :=
+      mul_nonneg (hKgt_nn i) (by linarith)
+    have h2 : (0 : ℝ) ≤ ε ^ 2 * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) :=
+      mul_nonneg (sq_nonneg ε) htop_nn
+    linarith
+  · have hb := hKgt T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i hia s hs
+    have h1 : (0 : ℝ) ≤ Kle i * (1 + ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) :=
+      mul_nonneg (hKle_nn i) (by linarith)
+    linarith
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in

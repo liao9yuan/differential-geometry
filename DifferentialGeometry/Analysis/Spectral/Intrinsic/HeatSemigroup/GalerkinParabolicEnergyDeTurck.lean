@@ -705,13 +705,218 @@ private lemma finiteEigenComboHs_eq_smoothCcToTensorHs
   rw [finiteEigenComboHs_coeff_eq, smoothCcToTensorHs_coeff,
     ← SmoothCcTensor.toL2_apply]
 
-/-- **Posited deferred input (`sorry`).** Existence of the spectral Galerkin approximations for
-the symmetrized DeTurck forcing: for each truncation `N` there is a per-mode coordinate flow `U`
-that is continuous, starts at `u₀`'s coordinates, and solves the linear ODE system with forcing
-`deTurckGalerkinForcingSymm`. Symmetric mirror of the proven raw helper
-`deTurckGalerkin_solution_exists` (snapshot `c848da47`), with the symmetrized forcing replacing the
-raw one; its proof (the symmetrized finite-dimensional Picard existence) has not landed yet, so
-consumers transitively depend on `sorryAx` until it does. -/
+private noncomputable def galerkinCoordFieldSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
+    EuclideanSpace ℝ {i // i ∈ S} → EuclideanSpace ℝ {i // i ∈ S} :=
+  fun w => galerkinCoordDiag (I := I) (M := M) g₀ S w +
+    galerkinCoordRestrict (I := I) (M := M) g₀ a S
+      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))
+
+private lemma galerkinCoordFieldSymm_apply
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
+    (w : EuclideanSpace ℝ {i // i ∈ S}) (j : {i // i ∈ S}) :
+    (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S w) j =
+      -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * w j +
+        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (galerkinCoordEmbed (I := I) (M := M) g₀ a S w)).coeff j.1 := by
+  change (galerkinCoordDiag (I := I) (M := M) g₀ S w) j +
+    (galerkinCoordRestrict (I := I) (M := M) g₀ a S _) j = _
+  rw [galerkinCoordDiag_apply, galerkinCoordRestrict_apply]
+
+private lemma galerkinCoordFieldSymm_lipschitzWith
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
+    ∃ K : ℝ≥0, LipschitzWith K (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S) := by
+  obtain ⟨K₀, hK₀⟩ := deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  refine ⟨‖galerkinCoordDiag (I := I) (M := M) g₀ S‖₊ +
+    ‖galerkinCoordRestrict (I := I) (M := M) g₀ a S‖₊ * K₀ *
+      ‖galerkinCoordEmbed (I := I) (M := M) g₀ a S‖₊, ?_⟩
+  have hdiag : LipschitzWith ‖galerkinCoordDiag (I := I) (M := M) g₀ S‖₊
+      (galerkinCoordDiag (I := I) (M := M) g₀ S) :=
+    (galerkinCoordDiag (I := I) (M := M) g₀ S).lipschitz
+  have hnonlin : LipschitzWith
+      (‖galerkinCoordRestrict (I := I) (M := M) g₀ a S‖₊ * K₀ *
+        ‖galerkinCoordEmbed (I := I) (M := M) g₀ a S‖₊)
+      (fun w => galerkinCoordRestrict (I := I) (M := M) g₀ a S
+        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))) :=
+    ((galerkinCoordRestrict (I := I) (M := M) g₀ a S).lipschitz.comp hK₀).comp
+      (galerkinCoordEmbed (I := I) (M := M) g₀ a S).lipschitz
+  exact hdiag.add hnonlin
+
+private lemma galerkinCoordFieldSymm_affineBound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
+    ∃ (C : ℝ) (K : ℝ≥0), 0 ≤ C ∧ ∀ w : EuclideanSpace ℝ {i // i ∈ S},
+      ‖galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S w‖ ≤ C + (K : ℝ) * ‖w‖ := by
+  obtain ⟨K₀, hK₀⟩ := deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  set Rst := galerkinCoordRestrict (I := I) (M := M) g₀ a S with hRst
+  set Emb := galerkinCoordEmbed (I := I) (M := M) g₀ a S with hEmb
+  set Diag := galerkinCoordDiag (I := I) (M := M) g₀ S with hDiag
+  set N0 : ℝ := ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+    (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hN0
+  refine ⟨‖Rst‖ * N0, ‖Diag‖₊ + ‖Rst‖₊ * K₀ * ‖Emb‖₊,
+    by positivity, ?_⟩
+  intro w
+  have hdecomp : galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S w =
+      Diag w + Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)) := rfl
+  rw [hdecomp]
+  have hdiag_bd : ‖Diag w‖ ≤ ‖Diag‖ * ‖w‖ := Diag.le_opNorm w
+  have hN_bd : ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
+      N0 + (K₀ : ℝ) * ‖Emb w‖ := by
+    have hlip2 : ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w) -
+        deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ ≤ (K₀ : ℝ) * ‖Emb w‖ := by
+      have hd := hK₀.dist_le_mul (Emb w) (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+      rw [dist_eq_norm, dist_eq_norm, sub_zero] at hd
+      exact hd
+    have htri : ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
+        ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w) -
+          deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ +
+        ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ := by
+      calc ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖
+          = ‖(deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w) -
+              deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0) +
+              deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ := by
+            rw [sub_add_cancel]
+        _ ≤ _ := norm_add_le _ _
+    rw [hN0]; linarith [htri, hlip2]
+  have hRst_bd : ‖Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w))‖ ≤
+      ‖Rst‖ * ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖ :=
+    Rst.le_opNorm _
+  have hEmb_bd : ‖Emb w‖ ≤ ‖Emb‖ * ‖w‖ := Emb.le_opNorm w
+  have hRst_nn : 0 ≤ ‖Rst‖ := norm_nonneg Rst
+  have hK₀_nn : 0 ≤ (K₀ : ℝ) := K₀.coe_nonneg
+  calc ‖Diag w + Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w))‖
+      ≤ ‖Diag w‖ + ‖Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w))‖ :=
+        norm_add_le _ _
+    _ ≤ ‖Diag‖ * ‖w‖ +
+          ‖Rst‖ * (N0 + (K₀ : ℝ) * ‖Emb w‖) := by
+        gcongr
+        exact le_trans hRst_bd (mul_le_mul_of_nonneg_left hN_bd hRst_nn)
+    _ ≤ ‖Diag‖ * ‖w‖ + ‖Rst‖ * (N0 + (K₀ : ℝ) * (‖Emb‖ * ‖w‖)) := by
+        gcongr
+    _ = ‖Rst‖ * N0 +
+          (‖Diag‖ + ‖Rst‖ * (K₀ : ℝ) * ‖Emb‖) * ‖w‖ := by ring
+    _ = ‖Rst‖ * N0 +
+          ((‖Diag‖₊ + ‖Rst‖₊ * K₀ * ‖Emb‖₊ : ℝ≥0) : ℝ) * ‖w‖ := by
+        push_cast [coe_nnnorm]
+        ring
+
+open scoped Classical in
+private theorem deTurckGalerkin_solution_exists_singleSymm
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) {T : ℝ} (hT : 0 < T)
+    (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
+    ∃ V : ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ,
+      (∀ i ∈ S, ContinuousOn (fun t => V t i) (Set.Icc (0 : ℝ) T)) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
+        HasDerivWithinAt (fun r => V r i)
+          (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
+            (if i ∈ S then (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+              (finiteEigenComboHs (I := I) (M := M) g₀ S (V t) ((a : ℝ) + 2))).coeff i else 0))
+          (Set.Ici t) t) ∧
+      (∀ i ∈ S, V 0 i = u₀.coeff i) ∧
+      (∀ t, ∀ i, i ∉ S → V t i = 0) := by
+  obtain ⟨Klip, hKlip⟩ :=
+    galerkinCoordFieldSymm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super S
+  obtain ⟨C, Kaff, hC, hAff⟩ :=
+    galerkinCoordFieldSymm_affineBound (I := I) (M := M) g₀ g_bg a ha_super S
+  set K : ℝ≥0 := max Klip Kaff with hK_def
+  have hlip_t : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      LipschitzWith K (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S) :=
+    fun _ _ => hKlip.weaken (le_max_left _ _)
+  have hcont_t : ∀ x : EuclideanSpace ℝ {i // i ∈ S},
+      ContinuousOn (fun _ : ℝ => galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S x)
+        (Set.Icc (0 : ℝ) T) := fun _ => continuousOn_const
+  have haff_t : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ x : EuclideanSpace ℝ {i // i ∈ S},
+      ‖galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S x‖ ≤ C + (K : ℝ) * ‖x‖ := by
+    intro _ _ x
+    have h1 := hAff x
+    have h2 : (Kaff : ℝ) * ‖x‖ ≤ (K : ℝ) * ‖x‖ := by
+      apply mul_le_mul_of_nonneg_right _ (norm_nonneg x)
+      exact_mod_cast le_max_right Klip Kaff
+    linarith
+  set w₀ : EuclideanSpace ℝ {i // i ∈ S} :=
+    WithLp.toLp 2 (fun j : {i // i ∈ S} => u₀.coeff j.1) with hw₀_def
+  obtain ⟨γ, hγ0, hγcont, hγderiv⟩ :=
+    forward_solution_of_lipschitzWith_affineBound
+      (E := EuclideanSpace ℝ {i // i ∈ S})
+      (f := fun _ => galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S) hT hC
+      hlip_t hcont_t haff_t w₀
+  refine ⟨fun t i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0, ?_, ?_, ?_, ?_⟩
+  · intro i hi
+    have hcoord : ContinuousOn (fun t => (γ t).ofLp ⟨i, hi⟩) (Set.Icc (0 : ℝ) T) := by
+      have hproj : Continuous (fun y : EuclideanSpace ℝ {i // i ∈ S} =>
+          y.ofLp (⟨i, hi⟩ : {i // i ∈ S})) :=
+        (EuclideanSpace.proj (𝕜 := ℝ) (⟨i, hi⟩ : {i // i ∈ S})).continuous
+      exact hproj.comp_continuousOn hγcont
+    refine hcoord.congr (fun t _ => ?_)
+    simp only [dif_pos hi]
+  · intro t ht i hi
+    have hVeq : ∀ s, (fun r => if h : i ∈ S then (γ r).ofLp ⟨i, h⟩ else 0) s =
+        (EuclideanSpace.proj (𝕜 := ℝ) ⟨i, hi⟩) (γ s) := by
+      intro s; simp only [dif_pos hi]; rfl
+    have hderiv_proj := ((EuclideanSpace.proj (𝕜 := ℝ) ⟨i, hi⟩).hasFDerivAt
+      (x := γ t)).comp_hasDerivWithinAt t (hγderiv t ht)
+    have hderiv_proj' :
+        HasDerivWithinAt (fun s => (γ s).ofLp ⟨i, hi⟩)
+          ((EuclideanSpace.proj (𝕜 := ℝ) ⟨i, hi⟩)
+            (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S (γ t)))
+          (Set.Ici (0 : ℝ)) t := hderiv_proj
+    have hRHS_eq : (EuclideanSpace.proj (𝕜 := ℝ) ⟨i, hi⟩)
+        (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S (γ t)) =
+        -(TensorEigenIdx.lambda (I := I) (M := M) i) *
+            (if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) +
+          (if i ∈ S then (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (finiteEigenComboHs (I := I) (M := M) g₀ S
+              (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2))).coeff i
+            else 0) := by
+      have hembed_eq : galerkinCoordEmbed (I := I) (M := M) g₀ a S (γ t) =
+          finiteEigenComboHs (I := I) (M := M) g₀ S
+            (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2) := by
+        apply tensorHs.ext
+        funext i'
+        rw [galerkinCoordEmbed_coeff, finiteEigenComboHs_coeff]
+        by_cases hi' : i' ∈ S
+        · simp only [if_pos hi', dif_pos hi']
+        · simp only [if_neg hi', dif_neg hi']
+      rw [EuclideanSpace.coe_proj]
+      change (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S (γ t)) ⟨i, hi⟩ = _
+      rw [galerkinCoordFieldSymm_apply, if_pos hi, dif_pos hi, hembed_eq]
+    have hfinal : HasDerivWithinAt (fun r => (γ r).ofLp ⟨i, hi⟩)
+        (-(TensorEigenIdx.lambda (I := I) (M := M) i) *
+            (if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) +
+          (if i ∈ S then (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (finiteEigenComboHs (I := I) (M := M) g₀ S
+              (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2))).coeff i
+            else 0))
+        (Set.Ici (0 : ℝ)) t := hRHS_eq ▸ hderiv_proj'
+    have hIci : HasDerivWithinAt (fun r => (γ r).ofLp ⟨i, hi⟩) _ (Set.Ici t) t :=
+      DifferentialGeometry.Analysis.ODE.hasDerivWithinAt_Ici_of_Ici_zero hfinal ht.1
+    have hcongr : (fun r => if h : i ∈ S then (γ r).ofLp ⟨i, h⟩ else 0) =
+        (fun r => (γ r).ofLp ⟨i, hi⟩) := by
+      funext r; rw [dif_pos hi]
+    rw [hcongr]
+    convert hIci using 2
+  · intro i hi
+    simp only [dif_pos hi]
+    rw [hγ0, hw₀_def]
+  · intro t i hi
+    simp only [dif_neg hi]
+
+/-- Existence of the spectral Galerkin approximations for the symmetrized DeTurck forcing: for
+each truncation `N` there is a per-mode coordinate flow `U` that is continuous on `[0, T]`,
+starts at `u₀`'s coordinates, and solves the linear ODE system with forcing
+`deTurckGalerkinForcingSymm`. Symmetric mirror of `deTurckGalerkin_solution_exists`, proved by
+the same finite-dimensional forward Picard argument with the symmetrized Sobolev nonlinearity
+`deTurckSobolevNHa2Symm` (globally Lipschitz by `deTurckSobolevNHa2Symm_lipschitzWith`) in place
+of the raw one. -/
 theorem deTurckGalerkin_solution_existsSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -724,8 +929,32 @@ theorem deTurckGalerkin_solution_existsSymm
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
             deTurckGalerkinForcingSymm (I := I) (M := M) g₀ g_bg a U N t i)
           (Set.Ici t) t) ∧
-      (∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = u₀.coeff i) :=
-  sorry
+      (∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = u₀.coeff i) := by
+  classical
+  rcases eq_or_lt_of_le hT with hT0 | hTpos
+  · refine ⟨fun _ _ i => u₀.coeff i, ?_, ?_, ?_⟩
+    · intro N i _
+      exact continuousOn_const
+    · intro N t ht i _
+      rw [← hT0] at ht
+      exact absurd ht.2 (not_lt.mpr ht.1)
+    · intro N i _; rfl
+  · choose V hVcont hVderiv hVinit hVzero using fun N =>
+      deTurckGalerkin_solution_exists_singleSymm (I := I) (M := M) g₀ g_bg a ha_super u₀ hTpos
+        (eigenIdxFinset (I := I) (M := M) g₀ N)
+    refine ⟨V, hVcont, ?_, hVinit⟩
+    intro N t ht i hi
+    have hderiv := hVderiv N t ht i hi
+    have hforcing_eq :
+        (if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
+          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (finiteEigenComboHs (I := I) (M := M) g₀
+              (eigenIdxFinset (I := I) (M := M) g₀ N) (V N t) ((a : ℝ) + 2))).coeff i
+          else 0) =
+        deTurckGalerkinForcingSymm (I := I) (M := M) g₀ g_bg a V N t i := by
+      rw [deTurckGalerkinForcingSymm_apply]
+    rw [hforcing_eq] at hderiv
+    exact hderiv
 
 section
 
