@@ -39209,20 +39209,78 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedVariables false in
-/-- POSIT analytic-core child of the high-order corr-arm-0 top-arm envelope, generic in a
-perturbed metric `g₁ = g₀ + P` (no realized-family plumbing): the ∇A-free arm-0 combination
-`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` carries its
-top-order data at single-factor order `i + 2`, and at `i > a` the guarded engine's grid split
-routes the k = 0 top cell (binomial 1, no i-growth, coefficient an i-uniform inverse-realized
-metric contraction constant of type `C(n)/(1 - δ₀)`) to the `ε²`-arm instead of ball-absorbing
-it, keeping the K-arm window at `range (i + 2)`. The cap
-`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f = deTurckArmFibreConst n = √(n³)`) cancels
-the `1/(1 - δ₀)` factor, leaving `n⁴`-scale slack. Deferred `sorry` input, to be discharged
-at corr-discharge; every consumer transitively depends on `sorryAx` until that lands. -/
+/-- POSIT analytic-core child (pointwise): top-cell separation for the ∇A-free arm-0
+combination `linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff`,
+generic in a perturbed metric `g₁ = g₀ + P`, with the budget-dual cap on the top
+coefficient, under the restriction `δ₀ ≤ 1/2` (the arm-0 kernel is a double g₁-frame trace,
+so the honest top coefficient carries `(1/(1 - δ₀))²` where the cap affords a single
+`1/(1 - δ₀)` factor; the unrestricted `δ₀ < 1` form is false near `δ₀ = 1`, while under
+`δ₀ ≤ 1/2` both factors are bounded by `2`). At every covariant-gradient order `i` the
+fibre-norm square splits into the
+binomial-one top cell — the single-factor `∇^(i+2)P` cell, whose coefficient is the
+underived inverse-perturbed-metric contraction, i-uniformly bounded by `ε²` with `ε` under
+the frozen budget-dual cap `27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)`
+(`f = deTurckArmFibreConst n = √(n³)`) — plus a per-order multiple of the cap-`(i + 1)`
+bounded-factor grid window over weights `< i + 3` (every residual Leibniz cell has
+per-factor order at most `i + 1`: a derivative falling on the coefficient lowers the top
+`P`-order, and a multi-factor cell of total weight `≤ i + 2` caps each factor at `i + 1`).
+The proven guarded siblings carry exactly this residual shape with an OPAQUE head constant
+(`rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_topSeparated_le`:
+head `Ktop · rfns(∇^(i+2)P)`, residual cap `i + 1`, window `i + 3`); the corr-discharge
+obligation is the same separation for the full combination with the head constant
+QUANTIFIED under the frozen cap. Single-mode families force any valid `ε` to dominate the
+honest top coefficient, so the cap margin (probe slack `~n⁴`, tightest at `n = 1` where the
+allowance is `ε ≤ 8/(27(1 - δ₀))`) is the irreducible content. Deferred `sorry` input;
+every consumer transitively depends on `sorryAx` until it lands. -/
+private theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_topSeparated_budgetDualCap_le
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀half : δ₀ ≤ 1 / 2) :
+    ∃ ε : ℝ, 0 ≤ ε ∧
+      27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
+        2 * (32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2) ∧
+    ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
+        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (i : ℕ) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 2 2 i
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CoeffField
+                  (I := I) (M := M) g₀ g₁
+                + (1 / 2 : ℝ) •
+                  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+                    (I := I) (M := M) g₀ g₁)).toSection x) ≤
+          ε ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+            + C i * Combinatorics.boundedFactorGridWindow
+                (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedVariables false in
+/-- High-order (`i > a`) per-order L² top-arm envelope for the ∇A-free arm-0 combination
+`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff`, generic in a
+perturbed metric `g₁ = g₀ + P` (no realized-family plumbing): proven by integrating the
+pointwise top-separated split of the posited analytic-core child
+`rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_topSeparated_budgetDualCap_le`
+— the `ε²`-weighted binomial-one top cell integrates exactly to `ε² ‖∇^(i+2)P‖²` (no ball
+absorption, hence no `i ≤ a` guard), while the cap-`(i + 1)` residual grid window (top order
+`i + 2` excluded per-factor) integrates flat through
+`boundedFactorGridWindow_integral_ballUniform_flat_allOrders` to the naked window
+`K i · (1 + ∑_{j < i+2} ‖∇^j P‖²)` with `K i := C i * Kflat i`; `ε` and the budget-dual cap
+`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f = deTurckArmFibreConst n = √(n³)`) pass
+through from the child unchanged, together with its `δ₀ ≤ 1/2` restriction. Depends on the
+posited child, hence transitively on
+`sorryAx`, until corr-discharge lands. -/
 private theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_topArm_tameEnvelope_generic_highOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀half : δ₀ ≤ 1 / 2) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
     ∃ ε : ℝ, 0 ≤ ε ∧
       27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
@@ -39243,8 +39301,113 @@ private theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_
                     (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
-              ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 :=
-  sorry
+              ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 := by
+  classical
+  obtain ⟨ε, hε_nn, hε_cap, C, hC_nn, hC⟩ :=
+    rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination_topSeparated_budgetDualCap_le
+      (I := I) (M := M) g₀ hδ₀ hδ₀half
+  obtain ⟨Kflat, hKflat_nn, hKflat⟩ :=
+    boundedFactorGridWindow_integral_ballUniform_flat_allOrders
+      (I := I) (M := M) g₀ a ha_super hR
+  refine ⟨fun i => C i * Kflat i, fun i => mul_nonneg (hC_nn i) (hKflat_nn i),
+    ε, hε_nn, hε_cap, ?_⟩
+  intro g₁ P δ hδ_le hδ htie hPball i hi
+  by_cases hM : Nonempty M
+  · obtain ⟨x₀⟩ := hM
+    have hδ0 : 0 ≤ δ := by
+      obtain ⟨v, hv⟩ : ∃ v : TangentSpace I x₀, v ≠ 0 := by
+        haveI : Nontrivial (TangentSpace I x₀) := by
+          have hfr : 0 < Module.finrank ℝ (TangentSpace I x₀) := by
+            have heq : Module.finrank ℝ (TangentSpace I x₀) = Module.finrank ℝ E := rfl
+            rw [heq]; exact Nat.pos_of_ne_zero (NeZero.ne _)
+          exact Module.nontrivial_of_finrank_pos hfr
+        exact exists_ne 0
+      have hpos : 0 < g₀.inner x₀ v v := g₀.pos x₀ v hv
+      have hbound := hδ x₀ v v
+      have hsqrt_pos : 0 < Real.sqrt (g₀.inner x₀ v v) := Real.sqrt_pos.mpr hpos
+      have habs_nn : 0 ≤ |ccTensorBilinSymm (I := I) g₀ P x₀ v v| := abs_nonneg _
+      by_contra hδc
+      have hδc' : δ < 0 := lt_of_not_ge hδc
+      have hrhs_neg : δ * Real.sqrt (g₀.inner x₀ v v) * Real.sqrt (g₀.inner x₀ v v) < 0 := by
+        have h1 : δ * Real.sqrt (g₀.inner x₀ v v) < 0 := mul_neg_of_neg_of_pos hδc' hsqrt_pos
+        exact mul_neg_of_neg_of_pos h1 hsqrt_pos
+      linarith [le_trans habs_nn hbound]
+    obtain ⟨hWint, hWbound⟩ := hKflat P hPball i
+    have hbint : MeasureTheory.Integrable
+        (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x))
+        (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+      DifferentialGeometry.Integral.Connection.integrable_riemannianFiberNormSq_toSection
+        (I := I) (M := M) g₀ 0 (2 + (i + 2)) (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)
+    have hF_int : MeasureTheory.Integrable
+        (fun x => ε ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+          + C i * Combinatorics.boundedFactorGridWindow
+              (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3))
+        (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
+      MeasureTheory.Integrable.add (hbint.const_mul (ε ^ 2)) (hWint.const_mul (C i))
+    have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g₀ 2 (2 + i)
+      (iteratedCovGrad (I := I) g₀ 2 2 i
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CoeffField
+            (I := I) (M := M) g₀ g₁
+          + (1 / 2 : ℝ) •
+            DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+              (I := I) (M := M) g₀ g₁))
+      (fun x => ε ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+        + C i * Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3))
+      hF_int
+      (fun x => hC g₁ P htie hδ_le hδ0 hδ i x)
+    refine le_trans key ?_
+    rw [MeasureTheory.integral_add (hbint.const_mul (ε ^ 2)) (hWint.const_mul (C i)),
+      MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul]
+    have hPtop : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 2)) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) =
+        ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 := by
+      rw [SmoothCcTensor.norm_def (I := I) (M := M) (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P),
+        tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g₀ 0
+          (2 + (i + 2)) (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)]
+    rw [hPtop]
+    have h2 : C i * (∫ x, Combinatorics.boundedFactorGridWindow
+        (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
+        (C i * Kflat i) * (1 + ∑ j ∈ Finset.range (i + 2),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
+      calc C i * (∫ x, Combinatorics.boundedFactorGridWindow
+            (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 1) (i + 3)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g₀))
+          ≤ C i * (Kflat i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2)) :=
+            mul_le_mul_of_nonneg_left hWbound (hC_nn i)
+        _ = (C i * Kflat i) * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by ring
+    linarith
+  · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
+    have hz : ‖iteratedCovGrad (I := I) g₀ 2 2 i
+        (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CoeffField
+            (I := I) (M := M) g₀ g₁
+          + (1 / 2 : ℝ) •
+            DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+              (I := I) (M := M) g₀ g₁)‖ = 0 := by
+      rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
+        MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
+    rw [hz]
+    have hwin_nn : (0 : ℝ) ≤ ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
+      Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+    have hK_nn : (0 : ℝ) ≤ C i * Kflat i := mul_nonneg (hC_nn i) (hKflat_nn i)
+    have h1 : (0 : ℝ) ≤ (C i * Kflat i) * (1 + ∑ j ∈ Finset.range (i + 2),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) :=
+      mul_nonneg hK_nn (by linarith)
+    have h2 : (0 : ℝ) ≤ ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 :=
+      mul_nonneg (sq_nonneg ε) (sq_nonneg _)
+    nlinarith
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -39265,12 +39428,13 @@ bound `‖∇^j (convexPerturbation T T' s)‖² ≤ ‖∇^j T‖² + ‖∇^j 
 composed with `norm_smul`/`abs_of_nonneg`, together with the cross-term `AM–GM`-style square)
 lifts the child's `P`-window and `P`-top-cell into the target's separate-`T`/`T'` window and
 top cell; `K`, `ε`, and the frozen cap `27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` pass through
-unchanged. Depends on the analytic-core child (POSIT), hence transitively on `sorryAx`
+unchanged, under the child's `δ₀ ≤ 1/2` restriction. Depends on the analytic-core child
+(POSIT), hence transitively on `sorryAx`
 until that lands. -/
 theorem exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀half : δ₀ ≤ 1 / 2) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
     ∃ ε : ℝ, 0 ≤ ε ∧
       27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
@@ -39301,7 +39465,7 @@ theorem exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
   classical
   obtain ⟨K, hK_nn, ε, hε_nn, hε_cap, hK⟩ :=
     linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_topArm_tameEnvelope_generic_highOrder
-      (I := I) (M := M) g₀ a ha_super hR hδ₀
+      (I := I) (M := M) g₀ a ha_super hR hδ₀ hδ₀half
   refine ⟨K, hK_nn, ε, hε_nn, hε_cap, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
   have hs0 : (0 : ℝ) ≤ s := hs.1
@@ -39406,14 +39570,15 @@ the subject splits at the ball-absorption threshold: orders `i ≤ a` are bounde
 donor envelope `exists_corrArm0Field_realizedFam_jetL2_tameEnvelope` (the `ε²`-arm entering as
 nonnegative slack), while orders `i > a` — where the naked window misses the subject's genuine
 `∇^(i+2)`-content — are bounded by the budget-dual-capped top-arm envelope
-`exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder`, whose `ε` and cap
-`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` pass through unchanged. The high-order envelope is a
+`exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder`, whose `ε`, cap
+`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)`, and `δ₀ ≤ 1/2` restriction pass through unchanged.
+The high-order envelope is a
 deferred `sorry` input; consumers transitively depend on `sorryAx` until corr-discharge
 lands. -/
 private theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (hδ₀half : δ₀ ≤ 1 / 2) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
     ∃ ε : ℝ, 0 ≤ ε ∧
       27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
@@ -39445,7 +39610,7 @@ private theorem linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface
       (I := I) (M := M) g₀ a ha_super hR hδ₀
   obtain ⟨Kgt, hKgt_nn, ε, hε_nn, hε_cap, hKgt⟩ :=
     exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
-      (I := I) (M := M) g₀ a ha_super hR hδ₀
+      (I := I) (M := M) g₀ a ha_super hR hδ₀ hδ₀half
   refine ⟨fun i => Kle i + Kgt i, fun i => add_nonneg (hKle_nn i) (hKgt_nn i),
     ε, hε_nn, hε_cap, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i s hs
@@ -41980,7 +42145,7 @@ private theorem deTurckPhiZeroPathIntegral_zero_curvatureRefold_coeffSup_jetEnve
       ha_super hR_nn h13 (by norm_num : (1 : ℝ) / 3 ≤ 1 / 2)
   obtain ⟨Kcb, hKcb_nn, ε, hε_nn, hε_cap, hKcb⟩ :=
     linearizedRicciArm0CorrField_allOrder_tameEnvelope_interface (I := I) (M := M) g₀ a
-      ha_super hR_nn h13
+      ha_super hR_nn h13 (by norm_num : (1 : ℝ) / 3 ≤ 1 / 2)
   have hε₀_cap : 3 * Real.sqrt (Module.finrank ℝ E) * (3 * ε) ≤
       32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
         28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2 := by
