@@ -39209,14 +39209,64 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedVariables false in
-/-- Deferred high-order corr-arm-0 envelope input: at orders `i > a` the naked tame window is
-FALSE for the reshaped arm-0 correction subject (single-mode witness family — the order-`i`
-jet of the realized-metric curvature coefficients carries the data's order-`(i + 2)` jet
-linearly), so the envelope carries the second arm `ε² · (‖∇^(i+2) T‖² + ‖∇^(i+2) T'‖²)`,
-with `ε` an inverse-realized-metric contraction constant pinned by the budget-dual cap
-`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f` the DeTurck arm fibre constant). Deferred
-`sorry` input, to be discharged at corr-discharge; every consumer transitively depends on
-`sorryAx` until that lands. -/
+/-- POSIT analytic-core child of the high-order corr-arm-0 top-arm envelope, generic in a
+perturbed metric `g₁ = g₀ + P` (no realized-family plumbing): the ∇A-free arm-0 combination
+`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` carries its
+top-order data at single-factor order `i + 2`, and at `i > a` the guarded engine's grid split
+routes the k = 0 top cell (binomial 1, no i-growth, coefficient an i-uniform inverse-realized
+metric contraction constant of type `C(n)/(1 - δ₀)`) to the `ε²`-arm instead of ball-absorbing
+it, keeping the K-arm window at `range (i + 2)`. The cap
+`27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` (with `f = deTurckArmFibreConst n = √(n³)`) cancels
+the `1/(1 - δ₀)` factor, leaving `n⁴`-scale slack. Deferred `sorry` input, to be discharged
+at corr-discharge; every consumer transitively depends on `sorryAx` until that lands. -/
+private theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_topArm_tameEnvelope_generic_highOrder
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
+    ∃ ε : ℝ, 0 ≤ ε ∧
+      27 * Real.sqrt (Module.finrank ℝ E) * (1 - δ₀) * ε ≤
+        2 * (32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 -
+          28 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 2) ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (htie : ∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
+        ∀ (i : ℕ), a < i →
+          ‖iteratedCovGrad (I := I) g₀ 2 2 i
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CoeffField
+                  (I := I) (M := M) g₀ g₁
+                + (1 / 2 : ℝ) •
+                  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff
+                    (I := I) (M := M) g₀ g₁)‖ ^ 2 ≤
+            K i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
+              ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedVariables false in
+/-- High-order corr-arm-0 top-arm envelope (`i > a` band): the reshaped arm-0 correction
+subject collapses onto the ∇A-free combination
+`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` at the
+realized-family metric (`corrArm0Combination_eq_order0_add_halfRiemann`), after which the
+generic analytic-core POSIT child
+`linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_topArm_tameEnvelope_generic_highOrder`
+supplies the top-cell isolated split `K i · (1 + ∑_{j < i+2} ‖∇^j P‖²) + ε² · ‖∇^{i+2} P‖²`
+on any perturbed metric `g₁ = g₀ + P`. Instantiated at `g₁ := realizedFam T T' s` and
+`P := convexPerturbation T T' s` (with `hδP := convexPerturbation_gFibreOpBound` at rate
+`(1 - s) δ' + s δ ≤ δ₀`, `htie := realizedFam_inner_of_mem ∘ Icc_subset_realizedSmallSet`,
+`hPball` from the triangle inequality on the convex weights), the convex-perturbation window
+bound `‖∇^j (convexPerturbation T T' s)‖² ≤ ‖∇^j T‖² + ‖∇^j T'‖²` (from `norm_add_le`
+composed with `norm_smul`/`abs_of_nonneg`, together with the cross-term `AM–GM`-style square)
+lifts the child's `P`-window and `P`-top-cell into the target's separate-`T`/`T'` window and
+top cell; `K`, `ε`, and the frozen cap `27 √n (1 - δ₀) ε ≤ 2 (32 f³ - 28 f²)` pass through
+unchanged. Depends on the analytic-core child (POSIT), hence transitively on `sorryAx`
+until that lands. -/
 theorem exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -39247,8 +39297,101 @@ theorem exists_corrArm0Field_realizedFam_jetL2_topArm_tameEnvelope_highOrder
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) +
               ε ^ 2 * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
-                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) :=
-  sorry
+                ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) := by
+  classical
+  obtain ⟨K, hK_nn, ε, hε_nn, hε_cap, hK⟩ :=
+    linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_topArm_tameEnvelope_generic_highOrder
+      (I := I) (M := M) g₀ a ha_super hR hδ₀
+  refine ⟨K, hK_nn, ε, hε_nn, hε_cap, ?_⟩
+  intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball i hi s hs
+  have hs0 : (0 : ℝ) ≤ s := hs.1
+  have hs1 : s ≤ 1 := hs.2
+  have h1ms : (0 : ℝ) ≤ 1 - s := by linarith
+  have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
+  have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
+  have hδP : gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
+      ((1 - s) * δ' + s * δ) :=
+    convexPerturbation_gFibreOpBound (I := I) (M := M) g₀ T T' hδ hδ' hs0 hs1
+  have hδP_le : (1 - s) * δ' + s * δ ≤ δ₀ := by
+    have e1 : (1 - s) * δ' ≤ (1 - s) * δ₀ := mul_le_mul_of_nonneg_left hδ'_le h1ms
+    have e2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
+    have e3 : (1 - s) * δ₀ + s * δ₀ = δ₀ := by ring
+    linarith [e1, e2, e3]
+  have htie : ∀ (y : M) (v w : TangentSpace I y),
+      (realizedFam (I := I) g₀ T T' hδ hδ' s).inner y v w =
+        g₀.inner y v w +
+          ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w :=
+    fun y v w =>
+      realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ'
+        (Icc_subset_realizedSmallSet hδ_lt hδ'_lt hs) y v w
+  have hnorm_le : ∀ j : ℕ,
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ≤
+        (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+          + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+    intro j
+    have heq : iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)
+        = (1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+          + s • iteratedCovGrad (I := I) g₀ 0 2 j T := by
+      rw [show convexPerturbation (I := I) g₀ T T' s = (1 - s) • T' + s • T from rfl,
+        iteratedCovGrad_add, iteratedCovGrad_smul', iteratedCovGrad_smul']
+    rw [heq]
+    calc ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'
+            + s • iteratedCovGrad (I := I) g₀ 0 2 j T‖
+        ≤ ‖(1 - s) • iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + ‖s • iteratedCovGrad (I := I) g₀ 0 2 j T‖ := norm_add_le _ _
+      _ = (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := by
+          rw [norm_smul, norm_smul, Real.norm_eq_abs, Real.norm_eq_abs,
+            abs_of_nonneg h1ms, abs_of_nonneg hs0]
+  have hPball : ∀ j : ℕ, j ≤ a + 2 →
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ≤ R := by
+    intro j hj
+    calc ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖
+        ≤ (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+            + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ := hnorm_le j
+      _ ≤ (1 - s) * R + s * R :=
+          add_le_add (mul_le_mul_of_nonneg_left (hT'ball j hj) h1ms)
+            (mul_le_mul_of_nonneg_left (hTball j hj) hs0)
+      _ = R := by ring
+  have hwin_ineq : ∀ j : ℕ,
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2 := by
+    intro j
+    have hnorm := hnorm_le j
+    have hy_nn : 0 ≤ (1 - s) * ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖
+        + s * ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ :=
+      add_nonneg (mul_nonneg h1ms (norm_nonneg _)) (mul_nonneg hs0 (norm_nonneg _))
+    nlinarith [mul_le_mul hnorm hnorm (norm_nonneg
+        (iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s))) hy_nn,
+      mul_nonneg (mul_nonneg hs0 h1ms)
+        (sq_nonneg (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ -
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖)),
+      mul_nonneg h1ms (sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖),
+      mul_nonneg hs0 (sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖)]
+  rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.corrArm0Combination_eq_order0_add_halfRiemann
+    (I := I) (M := M) g₀ T T' hδ hδ' s]
+  have hmain := hK (realizedFam (I := I) g₀ T T' hδ hδ' s)
+    (convexPerturbation (I := I) g₀ T T' s) hδP_le hδP htie hPball i hi
+  have hwinsum : ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤
+      ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2) :=
+    Finset.sum_le_sum (fun j _ => hwin_ineq j)
+  have h1 : K i * (1 + ∑ j ∈ Finset.range (i + 2),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2) ≤
+      K i * (1 + ∑ j ∈ Finset.range (i + 2),
+        (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)) :=
+    mul_le_mul_of_nonneg_left (by linarith) (hK_nn i)
+  have h2 : ε ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2)
+        (convexPerturbation (I := I) g₀ T T' s)‖ ^ 2 ≤
+      ε ^ 2 * (‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T‖ ^ 2 +
+        ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T'‖ ^ 2) :=
+    mul_le_mul_of_nonneg_left (hwin_ineq (i + 2)) (sq_nonneg ε)
+  linarith
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
