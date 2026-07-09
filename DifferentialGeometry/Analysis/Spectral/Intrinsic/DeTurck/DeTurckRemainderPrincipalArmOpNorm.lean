@@ -5334,6 +5334,56 @@ private lemma armZeroTwoArm_data_fibreNormSq_le [Nonempty M]
     _ = (Module.finrank ℝ E : ℝ) * δ ^ 2 := by
         rw [show n = Module.finrank ℝ E from hn]
 
+set_option linter.unusedSectionVars false in
+/-- Ladder-bottom engine for the arm-zero two-arm spectral core: along the `(1-Δ)`-iterate
+ladder of the applied field `appCc C₀ (∇⁰ T₀)`, the even rung is `L²`-bounded with the exact
+`B εa`-rated top against `‖T₀‖_{H^{2p+2}}`, and the odd rung — the squared `L²`/`∇L²` pair,
+which the odd spectral norm identity sums exactly — against `‖T₀‖_{H^{2p+3}}`.  This is the
+per-rung form of the `(1-Δ)`-iterate top-isolation induction: each spectral peel moves one
+`(1-Δ)` onto the coefficient iterate `(1-Δ)^p C₀` while the pointwise-`B`-small data stays at
+order zero (binomial-one top jet), the cross/commutator blocks fall to the `Kop`-rated lower
+slot, and the coefficient's `εa`-arm supplies the top jet at every rung with the same `εa` —
+which is what keeps the top constant `B εa` rung-uniform.  Deferred input: consumers
+transitively depend on `sorryAx` until it lands. -/
+private lemma appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i)
+    (εa : ℝ) (hεa_nn : 0 ≤ εa) (Λa : ℝ) (hΛa_nn : 0 ≤ Λa) :
+    ∃ Kop : ℕ → ℝ, (∀ p, 0 ≤ Kop p) ∧
+      ∀ (C₀ : SmoothCcTensor g₀ (2 + 0) 2) (T₀ : SmoothCcTensor g₀ 0 2) (B : ℝ),
+        0 ≤ B →
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₀.toSection x) ≤ B ^ 2) →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 0) 2 x (C₀.toSection x) ≤ Λa ^ 2) →
+        (∀ i : ℕ,
+          ‖iteratedCovGrad (I := I) g₀ (2 + 0) 2 i C₀‖ ^ 2 ≤
+            Kc i * (1 + ∑ j ∈ Finset.range (i + 2),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ^ 2) +
+              εa ^ 2 * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀‖ ^ 2) →
+        ∀ p : ℕ,
+          ‖oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p
+              (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ≤
+            B * εa *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 2) T₀‖ +
+              Kop p *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 1) T₀‖ ∧
+          ‖oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p
+              (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ^ 2 +
+            ‖covGrad (I := I) (M := M) g₀ 0 2
+              (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p
+                (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 T₀)))‖ ^ 2 ≤
+            (B * εa *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 3) T₀‖ +
+              Kop p *
+                ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 2) T₀‖) ^ 2 :=
+  sorry
+
 /-- Spectral `m`-uniform core of the arm-zero two-arm operator bound, phrased against an
 abstract pointwise data eigenbound `B` (`‖T₀‖_{g,x} ≤ B` fibrewise): for the `(2+0,2)`-coefficient
 `C₀` whose covariant jets carry the two-arm envelope against `T₀` (`K`-window plus the `εa`-rated
@@ -5345,10 +5395,12 @@ not `m`-uniform, so it needs the spectral `(1-Δ)`-iterate top-isolation inducti
 `exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le`): each spectral peel moves one `(1-Δ)`
 onto the coefficient while the pointwise-`B`-small data stays at order zero (binomial-one top jet),
 the cross/commutator blocks fall to the family-uniform lower slot, and the coefficient `εa`-arm
-supplies the top jet at every order with the same `εa`.  Posited here as the single remaining
-genuine-math leaf, consumed by `appCc_armZeroTwoArmCoeff_opNorm_core` after the symmetric-data
-eigenbound `armZeroTwoArm_data_fibreNormSq_le` supplies `B = √n δ`; consumers transitively depend
-on `sorryAx` until it lands. -/
+supplies the top jet at every order with the same `εa`.  Assembled from the per-rung ladder engine
+`appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` by the even/odd spectral rung identities
+(`smoothCcToTensorHs_even_norm_eq_toL2_iter`, `smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad`);
+consumed by `appCc_armZeroTwoArmCoeff_opNorm_core` after the symmetric-data eigenbound
+`armZeroTwoArm_data_fibreNormSq_le` supplies `B = √n δ`.  Consumers transitively depend on
+`sorryAx` until the ladder engine lands. -/
 private lemma appCc_armZeroTwoArm_spectralCore
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -5373,8 +5425,58 @@ private lemma appCc_armZeroTwoArm_spectralCore
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))‖ ≤
             B * εa *
                 ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 2) T₀‖ +
-              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ :=
-  sorry
+              Cop m * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((m : ℝ) + 1) T₀‖ := by
+  classical
+  obtain ⟨Kop, hKop_nn, hKop⟩ :=
+    appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le (I := I) (M := M) g₀ a ha_super hR₀
+      Kc hKc_nn εa hεa_nn Λa hΛa_nn
+  refine ⟨fun m => Kop (m / 2), fun m => hKop_nn (m / 2),
+    fun C₀ T₀ B hB_nn hball hdata hsup henv m => ?_⟩
+  have hlad := hKop C₀ T₀ B hB_nn hball hdata hsup henv
+  rcases Nat.even_or_odd m with ⟨p, hp⟩ | ⟨p, hp⟩
+  · have hm2 : m = 2 * p := by omega
+    subst hm2
+    have hidx : 2 * p / 2 = p := by omega
+    simp only [hidx]
+    have heven := smoothCcToTensorHs_even_norm_eq_toL2_iter (I := I) (M := M) g₀ p
+      (appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 T₀))
+    rw [SmoothCcTensor.norm_toL2] at heven
+    rw [heven]
+    exact (hlad p).1
+  · subst hp
+    have hidx : (2 * p + 1) / 2 = p := by omega
+    simp only [hidx]
+    set Y : SmoothCcTensor g₀ 0 2 :=
+      appCc (I := I) (M := M) g₀ (2 + 0) 2 C₀
+        (iteratedCovGrad (I := I) g₀ 0 2 0 T₀) with hY_def
+    have hodd := smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad
+      (I := I) (M := M) g₀ p Y
+    rw [SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2] at hodd
+    have h2 := (hlad p).2
+    have hc2 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p + 1 : ℕ) : ℝ) + 2) T₀‖ =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 3) T₀‖ :=
+      smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+    have hc1 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p + 1 : ℕ) : ℝ) + 1) T₀‖ =
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 2) T₀‖ :=
+      smoothCcToTensorHs_norm_order_congr (I := I) (M := M) g₀ (by push_cast; ring) T₀
+    rw [hc2, hc1]
+    set R : ℝ := B * εa *
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 3) T₀‖ +
+      Kop p * ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((2 * p : ℕ) : ℝ) + 2) T₀‖
+      with hR_def
+    have hR_nn : 0 ≤ R := by
+      rw [hR_def]
+      exact add_nonneg (mul_nonneg (mul_nonneg hB_nn hεa_nn) (norm_nonneg _))
+        (mul_nonneg (hKop_nn p) (norm_nonneg _))
+    have hsq : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 1 : ℕ) : ℝ) Y‖ ^ 2 ≤
+        R ^ 2 := by
+      rw [hodd]
+      exact h2
+    calc ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 1 : ℕ) : ℝ) Y‖
+        = Real.sqrt (‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * p + 1 : ℕ) : ℝ) Y‖ ^ 2) :=
+          (Real.sqrt_sq (norm_nonneg _)).symm
+      _ ≤ Real.sqrt (R ^ 2) := Real.sqrt_le_sqrt hsq
+      _ = R := Real.sqrt_sq hR_nn
 
 /-- Core two-arm arm-zero operator bound: for the `(2+0,2)`-coefficient `C₀` carrying the
 two-arm jet envelope against `T₀` (window `K`-arm plus the `εa`-rated `‖∇^{i+2}T₀‖` top arm),
@@ -5386,9 +5488,9 @@ into the family-uniform lower slot.  This is the arm-zero analog of the proven f
 third-arm machine `exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`, with the
 smallness moved from the coefficient sup to the data pointwise value.  Assembled from the
 symmetric-data eigenbound `armZeroTwoArm_data_fibreNormSq_le` (`√n δ` fibre bound) feeding the
-`m`-uniform spectral core `appCc_armZeroTwoArm_spectralCore`; the latter still carries the
-`(1-Δ)`-iterate top-isolation induction as a `sorry`, so consumers transitively depend on
-`sorryAx` until it lands. -/
+`m`-uniform spectral core `appCc_armZeroTwoArm_spectralCore`; the latter defers the per-rung
+ladder engine `appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` as a `sorry`, so consumers
+transitively depend on `sorryAx` until it lands. -/
 private lemma appCc_armZeroTwoArmCoeff_opNorm_core
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
