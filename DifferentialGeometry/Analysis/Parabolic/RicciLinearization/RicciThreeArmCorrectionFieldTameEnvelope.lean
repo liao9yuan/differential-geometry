@@ -386,7 +386,7 @@ theorem exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
       ‖iteratedCovGrad (I := I) g₀ 3 2 i
         (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)‖)]
 
-private theorem corrArm0Combination_eq_order0_add_halfRiemann
+theorem corrArm0Combination_eq_order0_add_halfRiemann
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
