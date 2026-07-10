@@ -64,7 +64,12 @@ private theorem neg_tangentMap_cmdwa
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).map_neg (X q₀.1 q₀.2)
 
-theorem conjugating_diffeo_family
+/-- The conjugating diffeomorphism family for the (negated) DeTurck vector field, additionally
+exporting the joint `(t, x)`-smoothness of the family orbit map on `Set.Ico 0 T ×ˢ Set.univ`
+(one-sided in time at `t = 0`): on `Set.Ico 0 T` the family agrees with the flow of the Seeley
+time-extension of the field, which is jointly `C^∞` on an open time interval containing
+`Set.Icc 0 T`. -/
+theorem conjugating_diffeo_family_jointsmooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T_DT : ℝ) (hDT : 0 < T_DT)
     (h_smooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -89,7 +94,9 @@ theorem conjugating_diffeo_family
           (TotalSpace.mk' E ((Φ_fam p.1 : M → M) p.2)
             (mfderiv I I (Φ_fam p.1 : M → M) p.2
               (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
-          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
+        (fun p : ℝ × M => (Φ_fam p.1 : M → M) p.2) (Set.Ico (0 : ℝ) T ×ˢ Set.univ) := by
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
   have hsmooth0_X : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -98,8 +105,9 @@ theorem conjugating_diffeo_family
     fun q hq => neg_tangentMap_cmdwa
       (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_smooth0 q hq)
   obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0,
-      hΦbundle0, hΦorbit_joint, hΦsection_joint⟩ :=
-    forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hsmooth0_X
+      hΦbundle0, hΦorbit_joint, hΦsection_joint, lo, hi, hlo, hhi, hΦsm⟩ :=
+    forward_flow_existence_smooth_neighborhood_of_jointsmooth_field
+      (I := I) X_DT T_DT hDT hsmooth0_X
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=
     time_dependent_vf_bare_flow_family (I := I) X_DT T_DT hDT Φ hΦ0
       (fun t ht htT => hdiffeo t ⟨ht, htT⟩)
@@ -110,7 +118,7 @@ theorem conjugating_diffeo_family
     rcases eq_or_lt_of_le hs.1 with h0 | h0
     · rw [← h0, hfam0, hΦ0]; rfl
     · exact hfameq s h0 hs.2 y
-  refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro x s hs
     exact hfamode s hs.1 hs.2 x
   · intro x
@@ -153,5 +161,44 @@ theorem conjugating_diffeo_family
           (mfderiv I I (fun y : M => Φ s y) x
             (Integral.Measure.chartBasisVecFiber (I := I) x₀ i x)) : TangentBundle I M)
     rw [hfun_eqOn s hs]
+  · have hIcoSub : Set.Ico (0 : ℝ) T_DT ⊆ Set.Ioo lo hi := fun t ht =>
+      ⟨lt_of_lt_of_le hlo ht.1, lt_trans ht.2 hhi⟩
+    have hraw : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun p : ℝ × M => Φ p.1 p.2)
+        (Set.Ico (0 : ℝ) T_DT ×ˢ Set.univ) :=
+      hΦsm.mono (Set.prod_mono hIcoSub (subset_refl _))
+    refine hraw.congr ?_
+    rintro ⟨s, x⟩ ⟨hs, -⟩
+    change (Φ_fam s : M → M) x = Φ s x
+    rw [hfun_eqOn s hs]
+
+theorem conjugating_diffeo_family
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
+    (T_DT : ℝ) (hDT : 0 < T_DT)
+    (h_smooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+        : TangentBundle I M))
+      (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ)) :
+    ∃ T : ℝ, 0 < T ∧ T ≤ T_DT ∧ ∃ Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M),
+      Φ_fam 0 = _root_.Diffeomorph.refl I M ∞ ∧
+      (∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => (Φ_fam u : M → M) x)
+          (Set.Ici (0 : ℝ)) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight
+            (-(deTurckVF (I := I) (g_DT s) g_bg ((Φ_fam s : M → M) x))))) ∧
+      (∀ x : M,
+        ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) ∧
+      (∀ (x : M) (v : TangentSpace I x),
+        ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam s : M → M) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
+      (ContinuousOn (fun p : ℝ × M => (Φ_fam p.1 : M → M) p.2) (Set.Ico 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i : Fin (Module.finrank ℝ E)),
+        ContinuousOn (fun p : ℝ × M =>
+          (TotalSpace.mk' E ((Φ_fam p.1 : M → M) p.2)
+            (mfderiv I I (Φ_fam p.1 : M → M) p.2
+              (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
+  obtain ⟨T, hT0, hT_le, Φ_fam, h0, hode, hcont0, hbundle0, horbit, hsection, -⟩ :=
+    conjugating_diffeo_family_jointsmooth (I := I) g_DT g_bg T_DT hDT h_smooth0
+  exact ⟨T, hT0, hT_le, Φ_fam, h0, hode, hcont0, hbundle0, horbit, hsection⟩
 
 end DifferentialGeometry.PDE.RicciFlow

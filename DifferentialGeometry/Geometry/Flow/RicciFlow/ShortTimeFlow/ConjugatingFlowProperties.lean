@@ -214,7 +214,7 @@ private theorem spatial_pushforward_chartCoord_contMDiffAt
         (achart H ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) (t, t)))
         ((fun q : ℝ × ℝ => (Φ_fam q.2 : M → M) x) p)
       = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((Φ_fam p.2 : M → M) x) := by
-    show (tangentBundleCore I M).coordChange (achart H ((Φ_fam p.2 : M → M) x)) (achart H α)
+    change (tangentBundleCore I M).coordChange (achart H ((Φ_fam p.2 : M → M) x)) (achart H α)
         ((Φ_fam p.2 : M → M) x)
       = (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ ((Φ_fam p.2 : M → M) x)
     have hsrcα : (Φ_fam p.2 : M → M) x ∈ (chartAt H α).source := hp
@@ -378,7 +378,7 @@ private theorem evalFormTwoVar_hasFDerivWithinAt
     have hbE : (Φ_fam p.2 : M → M) x ∈ e.baseSet := hb
     have hexpand := g_inner_eq_chart_sum (I := I) (g_DT p.1) α (by rw [he] at hbE; exact hbE) hsr
       (mfderiv I I (Φ_fam p.2 : M → M) x v) (mfderiv I I (Φ_fam p.2 : M → M) x w)
-    show evalFormTwoVar (I := I) g_DT Φ_fam x v w p = _
+    change evalFormTwoVar (I := I) g_DT Φ_fam x v w p = _
     unfold evalFormTwoVar
     rw [hexpand]
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
@@ -694,11 +694,11 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
 
 private theorem flow_pushforward_chartBasisVec_section_cmwa
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (J : Set ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
-      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (J ×ˢ Set.univ))
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) (m : ℕ)
-    (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) T) (b₀ : M)
+    (t₀ : ℝ) (ht₀ : t₀ ∈ J) (b₀ : M)
     (hb₀ : b₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) (m : ℕ)
       (fun p : ℝ × M =>
@@ -706,11 +706,11 @@ private theorem flow_pushforward_chartBasisVec_section_cmwa
           (mfderiv I I (Φ_fam p.1 : M → M) p.2
             (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
           : TangentBundle I M))
-      (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) (t₀, b₀) := by
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) (t₀, b₀) := by
   classical
-  set S : Set (ℝ × M) := Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
+  set S : Set (ℝ × M) := J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
     with hS
-  have hS_sub : S ⊆ Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
+  have hS_sub : S ⊆ J ×ˢ (Set.univ : Set M) := by
     rw [hS]; exact Set.prod_mono_right (Set.subset_univ _)
   have ht₀b₀ : (t₀, b₀) ∈ S := ⟨ht₀, hb₀⟩
   have hm1top : (((m : ℕ) + 1 : ℕ) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) :=
@@ -724,17 +724,17 @@ private theorem flow_pushforward_chartBasisVec_section_cmwa
       (Function.uncurry f) (S ×ˢ (Set.univ : Set M)) ((t₀, b₀), b₀) := by
     rw [hf_uncurry_eq]
     have hjointN : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ((m : ℕ) + 1 : ℕ)
-        (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) :=
+        (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (J ×ˢ Set.univ) :=
       hjoint.of_le hm1top
     have hpre : ContMDiffWithinAt ((𝓘(ℝ, ℝ).prod I).prod I) (𝓘(ℝ, ℝ).prod I) ((m : ℕ) + 1 : ℕ)
         (fun r : (ℝ × M) × M => ((r.1.1, r.2) : ℝ × M)) (S ×ˢ (Set.univ : Set M)) ((t₀, b₀), b₀) :=
       (contMDiffWithinAt_fst.fst).prodMk contMDiffWithinAt_snd
     have hmaps : Set.MapsTo (fun r : (ℝ × M) × M => ((r.1.1, r.2) : ℝ × M))
-        (S ×ˢ (Set.univ : Set M)) (Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M)) := by
+        (S ×ˢ (Set.univ : Set M)) (J ×ˢ (Set.univ : Set M)) := by
       rintro ⟨⟨t, b⟩, y⟩ ⟨hq, -⟩
       exact ⟨(hS_sub hq).1, Set.mem_univ _⟩
     have hmem' : ((fun r : (ℝ × M) × M => ((r.1.1, r.2) : ℝ × M)) ((t₀, b₀), b₀))
-        ∈ Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := ⟨ht₀, Set.mem_univ _⟩
+        ∈ J ×ˢ (Set.univ : Set M) := ⟨ht₀, Set.mem_univ _⟩
     exact (hjointN _ hmem').comp ((t₀, b₀), b₀) hpre hmaps
   have hg : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) I (m : ℕ)
       (fun q : ℝ × M => q.2) S (t₀, b₀) := contMDiffWithinAt_snd
@@ -787,11 +787,11 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M] in
 
 private theorem flow_pushforward_chartCoord_cmwa
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (J : Set ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
-      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (J ×ˢ Set.univ))
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) (m : ℕ)
-    (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) T) (b₀ : M)
+    (t₀ : ℝ) (ht₀ : t₀ ∈ J) (b₀ : M)
     (hb₀ : b₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) (m : ℕ)
       (fun p : ℝ × M =>
@@ -799,23 +799,23 @@ private theorem flow_pushforward_chartCoord_cmwa
           ((Φ_fam p.1 : M → M) p.2)
           (mfderiv I I (Φ_fam p.1 : M → M) p.2
             (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2)))
-      (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) (t₀, b₀) := by
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) (t₀, b₀) := by
   classical
   set α : M := (Φ_fam t₀ : M → M) b₀ with hα
   set e := trivializationAt E (TangentSpace I) α with he
-  set S : Set (ℝ × M) := Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
+  set S : Set (ℝ × M) := J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
     with hS
   set F : (ℝ × M) → TangentBundle I M := fun p : ℝ × M =>
     (TotalSpace.mk' E ((Φ_fam p.1 : M → M) p.2)
       (mfderiv I I (Φ_fam p.1 : M → M) p.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2))
       : TangentBundle I M) with hF
   have hsection := flow_pushforward_chartBasisVec_section_cmwa
-    (I := I) T Φ_fam hjoint x₀ i m t₀ ht₀ b₀ hb₀
+    (I := I) J Φ_fam hjoint x₀ i m t₀ ht₀ b₀ hb₀
   rw [Bundle.contMDiffWithinAt_totalSpace] at hsection
   obtain ⟨hsec_proj, hsec_fib⟩ := hsection
   have hbase0 : α ∈ e.baseSet := by
     rw [he, hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
-  have hS_sub : S ⊆ Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
+  have hS_sub : S ⊆ J ×ˢ (Set.univ : Set M) := by
     rw [hS]; exact Set.prod_mono_right (Set.subset_univ _)
   have horbit_cwa : ContinuousWithinAt (fun p : ℝ × M => (Φ_fam p.1 : M → M) p.2) S (t₀, b₀) :=
     ((hjoint.continuousOn).mono hS_sub).continuousWithinAt ⟨ht₀, hb₀⟩
@@ -859,29 +859,29 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M]
 
 private theorem flow_chartGramMatrix_alpha_cmwa
     (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (J J_g : Set ℝ) (hJJ : J ⊆ J_g) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
-      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (J ×ˢ Set.univ))
     (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
-        (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J_g ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (α : M) (p q : Fin (Module.finrank ℝ E)) (n : ℕ)
-    (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) T) (b₀ : M) (x₀ : M)
+    (t₀ : ℝ) (ht₀ : t₀ ∈ J) (b₀ : M) (x₀ : M)
     (hb₀ : b₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (hαbase : (Φ_fam t₀ : M → M) b₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (n : ℕ)
       (fun r : ℝ × M =>
         Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q)
-      (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) (t₀, b₀) := by
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) (t₀, b₀) := by
   classical
-  set S : Set (ℝ × M) := Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
+  set S : Set (ℝ × M) := J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
     with hS
   set eα := trivializationAt E (TangentSpace I) α with heα
   have hntop : ((n : ℕ) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) :=
     WithTop.coe_le_coe.mpr (le_top : ((n : ℕ) : ℕ∞) ≤ ⊤)
-  have hS_sub : S ⊆ Set.Ioo (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
+  have hS_sub : S ⊆ J ×ˢ (Set.univ : Set M) := by
     rw [hS]; exact Set.prod_mono_right (Set.subset_univ _)
   have ht₀b₀ : (t₀, b₀) ∈ S := ⟨ht₀, hb₀⟩
   have horbit_cwa : ContinuousWithinAt (fun r : ℝ × M => (Φ_fam r.1 : M → M) r.2) S (t₀, b₀) :=
@@ -901,13 +901,13 @@ private theorem flow_chartGramMatrix_alpha_cmwa
       ((hjoint.of_le hntop) _ (hS_sub ht₀b₀)).mono hS_sub
     exact hfst.prodMk (hb₂S.mono Set.inter_subset_left)
   have hmaps : Set.MapsTo (fun r : ℝ × M => (r.1, (Φ_fam r.1 : M → M) r.2))
-      S' (Set.Ioo (0 : ℝ) T ×ˢ eα.baseSet) := by
+      S' (J_g ×ˢ eα.baseSet) := by
     rintro r ⟨hrS, hrpre⟩
-    exact ⟨(hS_sub hrS).1, hrpre⟩
+    exact ⟨hJJ (hS_sub hrS).1, hrpre⟩
   have hgramAt : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (n : ℕ)
       (fun s : ℝ × M => Integral.Measure.chartGramMatrix (I := I) (g_DT s.1) α s.2 p q)
-      (Set.Ioo (0 : ℝ) T ×ˢ eα.baseSet) (t₀, (Φ_fam t₀ : M → M) b₀) :=
-    ((hgram_DT α p q).of_le hntop) _ ⟨ht₀, hαbase⟩
+      (J_g ×ˢ eα.baseSet) (t₀, (Φ_fam t₀ : M → M) b₀) :=
+    ((hgram_DT α p q).of_le hntop) _ ⟨hJJ ht₀, hαbase⟩
   have hcompS' : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (n : ℕ)
       (fun r : ℝ × M =>
         Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q)
@@ -1139,11 +1139,14 @@ theorem conjugating_flow_pullback_jointGram_data
             Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q)
           S (t₀, b₀) := by
       intro p q
-      have hVi := flow_pushforward_chartCoord_cmwa (I := I) T Φ_fam hjoint x₀ i n t₀ ht₀ b₀ hb₀
-      have hVj := flow_pushforward_chartCoord_cmwa (I := I) T Φ_fam hjoint x₀ j n t₀ ht₀ b₀ hb₀
+      have hVi := flow_pushforward_chartCoord_cmwa (I := I) (Set.Ioo (0 : ℝ) T) Φ_fam hjoint
+        x₀ i n t₀ ht₀ b₀ hb₀
+      have hVj := flow_pushforward_chartCoord_cmwa (I := I) (Set.Ioo (0 : ℝ) T) Φ_fam hjoint
+        x₀ j n t₀ ht₀ b₀ hb₀
       have hri := chartModelBasis_repr_cmwa (n := n) (S := S) (p₀ := (t₀, b₀)) hVi p
       have hrj := chartModelBasis_repr_cmwa (n := n) (S := S) (p₀ := (t₀, b₀)) hVj q
-      have hG := flow_chartGramMatrix_alpha_cmwa (I := I) g_DT T Φ_fam hjoint hgram_DT
+      have hG := flow_chartGramMatrix_alpha_cmwa (I := I) g_DT (Set.Ioo (0 : ℝ) T)
+        (Set.Ioo (0 : ℝ) T) (subset_refl _) Φ_fam hjoint hgram_DT
         α p q n t₀ ht₀ b₀ x₀ hb₀ hαbase'
       exact (hri.mul hrj).mul hG
     have hsum : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (n : ℕ)
@@ -1284,5 +1287,118 @@ theorem conjugating_flow_pullback_jointGram_data
         unfold Integral.DivergenceTheorem.chartGramOnE
         rw [(extChartAt I α).left_inv hsr0]
       rw [hgramEq]
+
+/-- One-sided corner variant of the pulled-back joint chart-Gram smoothness: when the
+conjugating family orbit map is jointly `C^∞` on `Set.Ico 0 T ×ˢ Set.univ` and the DeTurck
+chart-Gram entries are jointly `C^∞` on `Set.Icc 0 T ×ˢ baseSet`, the chart-Gram entries of
+the pulled-back metric family are jointly `C^∞` on `Set.Ico 0 T ×ˢ baseSet`, including
+`t = 0`. -/
+theorem conjugating_flow_pullback_jointGram_onesided
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
+    (hjoint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => (Φ_fam q.1 : M → M) q.2) (Set.Ico (0 : ℝ) T ×ˢ Set.univ))
+    (hgram_DT : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+        (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I)
+            (Diffeomorph.pullbackMetric (g_DT p.1) (Φ_fam p.1)) x₀ p.2 i j)
+        (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  classical
+  intro x₀ i j
+  rw [contMDiffOn_infty]
+  intro n p₀ hp₀
+  obtain ⟨ht₀, hb₀⟩ := hp₀
+  set t₀ : ℝ := p₀.1
+  set b₀ : M := p₀.2
+  set α : M := (Φ_fam t₀ : M → M) b₀ with hα
+  set e := trivializationAt E (TangentSpace I) α with he
+  set S : Set (ℝ × M) := Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
+    with hS
+  have hS_sub : S ⊆ Set.Ico (0 : ℝ) T ×ˢ (Set.univ : Set M) := by
+    rw [hS]; exact Set.prod_mono_right (Set.subset_univ _)
+  have ht₀b₀ : (t₀, b₀) ∈ S := ⟨ht₀, hb₀⟩
+  have hbase0 : α ∈ e.baseSet := by
+    rw [he, hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
+  have hαbase' : (Φ_fam t₀ : M → M) b₀ ∈ e.baseSet := by rw [← hα]; exact hbase0
+  have hsummand : ∀ p q : Fin (Module.finrank ℝ E),
+      ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (n : ℕ)
+        (fun r : ℝ × M =>
+          ((Integral.Measure.chartModelBasis E).repr
+            (e.continuousLinearMapAt ℝ ((Φ_fam r.1 : M → M) r.2)
+              (mfderiv I I (Φ_fam r.1 : M → M) r.2
+                (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2)))) p *
+          ((Integral.Measure.chartModelBasis E).repr
+            (e.continuousLinearMapAt ℝ ((Φ_fam r.1 : M → M) r.2)
+              (mfderiv I I (Φ_fam r.1 : M → M) r.2
+                (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2)))) q *
+          Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q)
+        S (t₀, b₀) := by
+    intro p q
+    have hVi := flow_pushforward_chartCoord_cmwa (I := I) (Set.Ico (0 : ℝ) T) Φ_fam hjoint
+      x₀ i n t₀ ht₀ b₀ hb₀
+    have hVj := flow_pushforward_chartCoord_cmwa (I := I) (Set.Ico (0 : ℝ) T) Φ_fam hjoint
+      x₀ j n t₀ ht₀ b₀ hb₀
+    have hri := chartModelBasis_repr_cmwa (n := n) (S := S) (p₀ := (t₀, b₀)) hVi p
+    have hrj := chartModelBasis_repr_cmwa (n := n) (S := S) (p₀ := (t₀, b₀)) hVj q
+    have hG := flow_chartGramMatrix_alpha_cmwa (I := I) g_DT (Set.Ico (0 : ℝ) T)
+      (Set.Icc (0 : ℝ) T) Set.Ico_subset_Icc_self Φ_fam hjoint hgram_DT
+      α p q n t₀ ht₀ b₀ x₀ hb₀ hαbase'
+    exact (hri.mul hrj).mul hG
+  have hsum : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (n : ℕ)
+      (fun r : ℝ × M => ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
+        ((Integral.Measure.chartModelBasis E).repr
+          (e.continuousLinearMapAt ℝ ((Φ_fam r.1 : M → M) r.2)
+            (mfderiv I I (Φ_fam r.1 : M → M) r.2
+              (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2)))) p *
+        ((Integral.Measure.chartModelBasis E).repr
+          (e.continuousLinearMapAt ℝ ((Φ_fam r.1 : M → M) r.2)
+            (mfderiv I I (Φ_fam r.1 : M → M) r.2
+              (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2)))) q *
+        Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q)
+      S (t₀, b₀) :=
+    ContMDiffWithinAt.sum (fun p _ => ContMDiffWithinAt.sum (fun q _ => hsummand p q))
+  have horbit_cwa : ContinuousWithinAt (fun r : ℝ × M => (Φ_fam r.1 : M → M) r.2) S (t₀, b₀) :=
+    ((hjoint.continuousOn).mono hS_sub).continuousWithinAt ht₀b₀
+  have hsrc0 : α ∈ (extChartAt I α).source := mem_extChartAt_source (I := I) α
+  have hpre : (fun r : ℝ × M => (Φ_fam r.1 : M → M) r.2) ⁻¹'
+      (e.baseSet ∩ (extChartAt I α).source) ∈ nhdsWithin (t₀, b₀) S := by
+    refine horbit_cwa.preimage_mem_nhdsWithin ((IsOpen.inter e.open_baseSet
+      (isOpen_extChartAt_source (I := I) α)).mem_nhds ?_)
+    exact ⟨hαbase', by rw [← hα]; exact hsrc0⟩
+  refine hsum.congr_of_eventuallyEq ?_ ?_
+  · filter_upwards [hpre] with r hr
+    obtain ⟨hbE, hsr⟩ := hr
+    rw [Integral.Measure.chartGramMatrix_apply, pullbackMetric_inner_eq_inner_mfderiv]
+    have hexpand := g_inner_eq_chart_sum (I := I) (g_DT r.1) α hbE hsr
+      (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ i r.2))
+      (mfderiv I I (Φ_fam r.1 : M → M) r.2 (Integral.Measure.chartBasisVecFiber (I := I) x₀ j r.2))
+    rw [hexpand]
+    refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
+    have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT r.1) α p q
+          (extChartAt I α ((Φ_fam r.1 : M → M) r.2))
+        = Integral.Measure.chartGramMatrix (I := I) (g_DT r.1) α ((Φ_fam r.1 : M → M) r.2) p q := by
+      unfold Integral.DivergenceTheorem.chartGramOnE
+      rw [(extChartAt I α).left_inv hsr]
+    rw [hgramEq]
+  · obtain ⟨hbE0, hsr0⟩ : (Φ_fam t₀ : M → M) b₀ ∈ e.baseSet ∧
+        (Φ_fam t₀ : M → M) b₀ ∈ (extChartAt I α).source := ⟨hαbase', by rw [← hα]; exact hsrc0⟩
+    rw [Integral.Measure.chartGramMatrix_apply, pullbackMetric_inner_eq_inner_mfderiv]
+    have hexpand := g_inner_eq_chart_sum (I := I) (g_DT t₀) α hbE0 hsr0
+      (mfderiv I I (Φ_fam t₀ : M → M) b₀ (Integral.Measure.chartBasisVecFiber (I := I) x₀ i b₀))
+      (mfderiv I I (Φ_fam t₀ : M → M) b₀ (Integral.Measure.chartBasisVecFiber (I := I) x₀ j b₀))
+    rw [hexpand]
+    refine Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ => ?_))
+    have hgramEq : Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t₀) α p q
+          (extChartAt I α ((Φ_fam t₀ : M → M) b₀))
+        = Integral.Measure.chartGramMatrix (I := I) (g_DT t₀) α ((Φ_fam t₀ : M → M) b₀) p q := by
+      unfold Integral.DivergenceTheorem.chartGramOnE
+      rw [(extChartAt I α).left_inv hsr0]
+    rw [hgramEq]
 
 end DifferentialGeometry.PDE.RicciFlow

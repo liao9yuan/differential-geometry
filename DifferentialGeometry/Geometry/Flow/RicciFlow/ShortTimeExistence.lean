@@ -45,32 +45,23 @@ theorem ricci_flow_short_time_existence
         ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
           (fun p : ℝ × M =>
             Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
-          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
-      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-        ContinuousOn
-          (fun p : ℝ × M =>
-            Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
           (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
           ((-2 : ℝ) *
             DifferentialGeometry.Integral.Connection.ricciTensor
               (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
-  obtain ⟨T_DT, g_DT, hDT, h_reg, h_smooth0, h_gram_DT, h_gram0_DT,
-      h_gramOnE0_DT, h_C2_DT⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.deturck_ricci_flow_parabolic_short_time_existence
+  obtain ⟨T_DT, g_DT, hDT, hJ⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.deTurckRicci_solution_with_jointReg
       (I := I) (M := M) g₀ g₀
+  obtain ⟨h_reg, h_smooth0, h_gram_DT, -, h_gramOnE0_DT, h_C2_DT⟩ :=
+    deTurckRicci_chartRegularity_of_jointChartGramSmooth (I := I) g₀ T_DT g_DT hJ
   obtain ⟨hT_DT_pos, hDT_init, hDT_deriv⟩ := hDT
   have h_construct :
       ∃ T : ℝ, 0 < T ∧ ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
         g_fam 0 = g₀ ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
           ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-            (fun p : ℝ × M =>
-              Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
-            (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
-        (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-          ContinuousOn
             (fun p : ℝ × M =>
               Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
             (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
@@ -84,8 +75,8 @@ theorem ricci_flow_short_time_existence
           (deTurckRicciRHS (I := I) g₀ (g_DT t) x v w)
           (Set.Ici 0) t := hDT_deriv
     obtain ⟨T, hT0, hT_le, Φ_fam, hΦ0, hΦode, hΦorbit0, hΦmfderiv0,
-        hΦorbit_joint, hΦsection_joint⟩ :=
-      conjugating_diffeo_family
+        -, -, hΦjoint⟩ :=
+      conjugating_diffeo_family_jointsmooth
         (I := I) g_DT g₀ T_DT hT_DT_pos h_smooth0
     have hΦode' : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
@@ -101,14 +92,14 @@ theorem ricci_flow_short_time_existence
       intro x₀ i j
       exact (h_gram_DT x₀ i j).mono
         (Set.prod_mono_left (Set.Ioo_subset_Ioo_right hT_le))
-    have h_gram0_DT_T : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-        ContinuousOn
+    have h_gramIcc_T : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
           (fun p : ℝ × M =>
             Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
-          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+          (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
       intro x₀ i j
-      exact (h_gram0_DT x₀ i j).mono
-        (Set.prod_mono_left (Set.Ico_subset_Ico_right hT_le))
+      exact (hJ x₀ i j).mono
+        (Set.prod_mono_left (Set.Icc_subset_Icc_right hT_le))
     have h_gramOnE0_T : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
         ContinuousOn
           (fun q : ℝ × M =>
@@ -135,11 +126,10 @@ theorem ricci_flow_short_time_existence
     obtain ⟨hΦ_orbit, hΦ_total⟩ :=
       conjugating_flow_orbit_pushforward_continuity_data (I := I) g_DT g₀ T hT0 Φ_fam hΦode'
         h_reg_T hΦorbit0 hΦmfderiv0
-    obtain ⟨h_gram_fam, h_gram0_fam⟩ :=
-      conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hΦode'
-        h_reg_T h_gram_DT_T h_gram0_DT_T hΦorbit_joint hΦsection_joint
+    have h_gram_fam :=
+      conjugating_flow_pullback_jointGram_onesided (I := I) g_DT T Φ_fam hΦjoint h_gramIcc_T
     refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
-      ?_, h_gram_fam, h_gram0_fam, ?_⟩
+      ?_, h_gram_fam, ?_⟩
     · change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
       rw [hΦ0, Diffeomorph.pullbackMetric_refl, hDT_init]
     · have hDT_deriv_Ico : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
