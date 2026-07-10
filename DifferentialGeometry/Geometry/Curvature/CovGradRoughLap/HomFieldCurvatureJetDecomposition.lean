@@ -95,10 +95,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 /-! ## Fibre-level evaluation helpers -/
 
-set_option backward.isDefEq.respectTransparency false in
-/-- Two `(r, a)`-tensor fibre elements agreeing on every lower input `D` and model tuple `v` under
-`Tensor0SSpace.toModel` are equal. -/
-private lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
+/-- Extensionality for operator-rank tensor fibres through the model evaluation: two
+`(r,a)`-operator fibres are equal once their model evaluations agree on every covariant
+subject `D` and every tangent tuple `v`. -/
+lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
     {T T' : TensorRSSpace r a I x}
     (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
       Tensor0SSpace.toModel
@@ -117,8 +117,10 @@ private lemma vecTail_cons' {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
   simp [Matrix.vecTail, Fin.cons_succ]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- `Tensor0SSpace.toModel` evaluation pushes through finite sums of fibre tensors. -/
-private lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
+
+/-- The model evaluation of a finite sum of covariant tensor fibres is the finite sum of
+the model evaluations. -/
+lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
   rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
@@ -223,15 +225,12 @@ smooth compactly-supported `(r, t)`-tensor `W`, evaluated at a lower input `D` a
 `X, Y`, is the genuine tensorial second covariant derivative `∇²_{X,Y} W (x)` evaluated at
 `(D, m)`.
 
-The contravariant-rank-`r` lift of `tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal`: the
-two leading slots are read off as iterated directional covariant derivatives
-(`covGrad_toSection_apply_eval`), the `(0, r)`-lower input is carried by a smooth section `w`
-through `D` via the Hom-connection product rule `tensorRSCovariantDerivative_apply` (twice — once
-at valence `t + 1`, once at valence `t` over the directional derivative `∇_Y W`), the slot-`0`
-Christoffel correction of the abstract `(0, t + 1)`-derivative is exposed by
-`abstract_succ_covDeriv_unfold_at_genVal`, and the two `w`-correction terms cancel pairwise,
-leaving exactly the two terms of `tensorSecondCovDeriv_def`. -/
-private theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
+/-- Second-covariant-gradient evaluation bridge: evaluating the twice-iterated covariant
+gradient of a compactly supported `(r,t)`-tensor field at smooth vector fields `X`, `Y`
+in the two new covariant slots agrees with the tensor second covariant derivative
+`tensorSecondCovDeriv` along `X`, `Y`, pointwise on every covariant subject `D` and
+tangent tuple `m`. -/
+theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (W : SmoothCcTensor g r t)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))

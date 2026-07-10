@@ -16469,10 +16469,10 @@ SUP-ANCHOR: pointwise fibre-norm-square sup, `∃Λ` BEFORE `∀T ∀s ∀x`; `h
 the `W^{a+2,2} ↪ C⁰` class exactly as in the committed siblings. Degenerate litmus: at
 `s = 0` the subject is `ricciArmOrder0AACommCoeffField g₀ g₀ = 0`
 (`ricciArmOrder0AACommCoeffField_self`), so the cap is trivially satisfied there. Filled
-as glue over the private raw-field grid-window seam child
-`exists_rfns_icg_ricciArmOrder0AACommCoeffField_window` (mirror of the proven raw-field
-engine in `RicciArmResidualFieldGridWindow`, re-proven here only because the source is
-`private`): the seam gives the pointwise `boundedFactorGridWindow` cap at `K = 1`,
+as glue over the raw-field grid-window engine
+`exists_rfns_icg_ricciArmOrder0AACommCoeffField_window` proven in
+`RicciArmResidualFieldGridWindow`: the engine gives the pointwise
+`boundedFactorGridWindow` cap at `K = 1`,
 `W = 3`; the `K = 1, W = 3` cell arithmetic (`bdWindowOneThree_le`) collapses that window
 to `1 + b 1 + (b 1)^2` on the `s • T` jet path; and the one-jet cap
 `bdExists_rfnsT_one_jet_cap` (which is `s • T`-monotone via `s ^ 2 ≤ 1`) bounds the

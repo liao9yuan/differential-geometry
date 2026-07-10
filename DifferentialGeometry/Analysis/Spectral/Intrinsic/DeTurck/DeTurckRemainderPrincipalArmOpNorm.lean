@@ -5341,251 +5341,6 @@ section BalLadder
 variable (g₀ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-open Tensor0SBundle in
-private lemma bal_tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
-    {T T' : TensorRSSpace r a I x}
-    (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
-      Tensor0SSpace.toModel
-          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace a I x from T) D) v =
-        Tensor0SSpace.toModel
-          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace a I x from T') D) v) :
-    T = T' := by
-  refine ContinuousLinearMap.ext (fun D => ?_)
-  apply Tensor0SSpace.toModel_injective
-  exact ContinuousMultilinearMap.ext (fun v => h D v)
-
-private lemma bal_vecTail_cons {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
-    Matrix.vecTail (Fin.cons a v) = v := by
-  funext j
-  simp [Matrix.vecTail, Fin.cons_succ]
-
-set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-open Tensor0SBundle in
-private lemma bal_toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
-    (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
-    Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
-  rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
-  simp only [Tensor0SSpace.toModelL_apply]
-
-set_option backward.isDefEq.respectTransparency false in
-open Tensor0SBundle in
-private noncomputable def bal_covApplyCcSec (g : SmoothRiemannianMetric I M) (r t : ℕ)
-    (W : SmoothCcTensor g r t)
-    {Y : Π b : M, TangentSpace I b}
-    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
-    Cₛ^∞⟮I; TensorRSModel r t ℝ E, (fun x : M => TensorRSSpace r t I x)⟯ where
-  toFun := fun y : M =>
-    covApply (tensorCov (I := I) g r t) Y (fun z : M => W.toSection z) y
-  contMDiff_toFun :=
-    covApplyRS_contMDiff (I := I) g r t W.toSection.contMDiff_toFun hY
-
-set_option backward.isDefEq.respectTransparency false in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option maxHeartbeats 3200000 in
-open Tensor0SBundle in
-private theorem bal_secondCovGrad_eval_eq_tensorSecondCovDeriv
-    (g : SmoothRiemannianMetric I M) (r t : ℕ)
-    (W : SmoothCcTensor g r t)
-    {X Y : Π b : M, TangentSpace I b}
-    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
-    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
-    (x : M) (D : Tensor0SSpace r I x) (m : Fin t → TangentSpace I x) :
-    Tensor0SSpace.toModel
-        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
-          (covGrad (I := I) (M := M) g r (t + 1)
-            (covGrad (I := I) (M := M) g r t W)).toSection x) D)
-        (Fin.cons (X x) (Fin.cons (Y x) m)) =
-      Tensor0SSpace.toModel
-        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-          tensorSecondCovDeriv (I := I) g r t X Y (fun y : M => W.toSection y) x) D) m := by
-  classical
-  obtain ⟨w, hwx⟩ := ContMDiffSection.exists_eq_at (I := I) (F := Tensor0SModel r ℝ E)
-    (V := fun z : M => Tensor0SSpace r I z) (n := (⊤ : ℕ∞)) x D
-  subst hwx
-  set GW : SmoothCcTensor g r (t + 1) := covGrad (I := I) (M := M) g r t W with hGW_def
-  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r (t + 1) GW x (w x)
-    (Fin.cons (X x) (Fin.cons (Y x) m))]
-  simp only [Fin.cons_zero]
-  rw [bal_vecTail_cons (X x) (Fin.cons (Y x) m)]
-  have happly₁ : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from
-      tensorCovDerivAt (I := I) (M := M) g r (t + 1) GW x (X x)) (w x) =
-      Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
-          (fun y : M =>
-            (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-              GW.toSection y) (w y)) x (X x) -
-        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from GW.toSection x)
-          (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w x (X x)) :=
-    TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r (t + 1)
-      (LeviCivita (I := I) g) GW.toSection w x (X x)
-  rw [happly₁, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  have hP_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (t + 1) ℝ E)) ∞
-      (fun y : M => TotalSpace.mk' (Tensor0SModel (t + 1) ℝ E)
-        (E := fun z : M => Tensor0SSpace (t + 1) I z) y
-        ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-          GW.toSection y) (w y))) :=
-    ContMDiff.clm_bundle_apply (b := id) GW.toSection.contMDiff w.contMDiff
-  have hP_curried : ContMDiffAt I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel t ℝ E)) ∞
-      (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel t ℝ E)
-        (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SSpace t I z) y
-        (Tensor0SNabla.curriedSection I M
-          (fun y' : M =>
-            (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-              GW.toSection y') (w y')) y)) x :=
-    TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section (I := I) (M := M)
-      (fun y : M =>
-        (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-          GW.toSection y) (w y)) x (hP_smooth x)
-  rw [show Tensor0SSpace.toModel
-      (Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
-        (fun y : M =>
-          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-            GW.toSection y) (w y)) x (X x))
-      (Fin.cons (Y x) m) =
-    Tensor0SSpace.toModel
-      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) t x
-        (Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
-          (fun y : M =>
-            (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-              GW.toSection y) (w y)) x (X x)) (Y x)) m from
-    (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
-      (T := Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
-        (fun y : M =>
-          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-            GW.toSection y) (w y)) x (X x)) (v0 := Y x) (vs := m)).symm]
-  have habs : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) t x
-      (Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
-        (fun y : M =>
-          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-            GW.toSection y) (w y)) x (X x))) (Y x) =
-      Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)
-          (fun y : M => Tensor0SNabla.curriedSection I M
-            (fun y' : M =>
-              (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-                GW.toSection y') (w y')) y (Y y)) x (X x) -
-        Tensor0SNabla.curriedSection I M
-          (fun y' : M =>
-            (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-              GW.toSection y') (w y')) x ((LeviCivita (I := I) g).toFun Y x (X x)) :=
-    abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g t
-      (fun y : M =>
-        (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-          GW.toSection y) (w y))
-      (Vfield := X) (Y := Y) (x := x)
-      (hP_curried.mdifferentiableAt (by simp))
-      ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))
-  rw [habs, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  have hsec : (fun y : M => Tensor0SNabla.curriedSection I M
-      (fun y' : M =>
-        (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-          GW.toSection y') (w y')) y (Y y)) =
-      (fun y : M =>
-        (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
-          covApply (tensorCov (I := I) g r t) Y (fun z : M => W.toSection z) y) (w y)) := by
-    funext y
-    apply Tensor0SSpace.toModel_injective
-    apply ContinuousMultilinearMap.ext
-    intro m'
-    rw [show Tensor0SNabla.curriedSection I M
-        (fun y' : M =>
-          (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-            GW.toSection y') (w y')) y =
-      tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) t y
-        ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-          GW.toSection y) (w y)) from rfl]
-    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
-      (T := (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
-        GW.toSection y) (w y)) (v0 := Y y) (vs := m')]
-    have hgw := covGrad_toSection_apply_eval (I := I) (M := M) g r t W y (w y)
-      (Fin.cons (Y y) m')
-    rw [hGW_def]
-    rw [hgw]
-    simp only [Fin.cons_zero]
-    rw [bal_vecTail_cons (Y y) m']
-    rfl
-  rw [hsec]
-  have happly₂ : Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)
-      (fun y : M =>
-        (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
-          covApply (tensorCov (I := I) g r t) Y (fun z : M => W.toSection z) y) (w y)) x (X x) =
-      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-        TensorRSNabla.tensorRSCovariantDerivative I M r t (LeviCivita (I := I) g)
-          (bal_covApplyCcSec (I := I) (M := M) g r t W hY) x (X x)) (w x) +
-        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-          tensorCovDerivAt (I := I) (M := M) g r t W x (Y x))
-          (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w x (X x)) := by
-    have h : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-        TensorRSNabla.tensorRSCovariantDerivative I M r t (LeviCivita (I := I) g)
-          (bal_covApplyCcSec (I := I) (M := M) g r t W hY) x (X x)) (w x) =
-        Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)
-          (fun y : M =>
-            (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
-              covApply (tensorCov (I := I) g r t) Y (fun z : M => W.toSection z) y) (w y))
-          x (X x) -
-          (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-            tensorCovDerivAt (I := I) (M := M) g r t W x (Y x))
-            (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
-              w x (X x)) :=
-      TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r t
-        (LeviCivita (I := I) g) (bal_covApplyCcSec (I := I) (M := M) g r t W hY) w x (X x)
-    exact sub_eq_iff_eq_add.mp h.symm
-  rw [happly₂, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-  have hPb : Tensor0SSpace.toModel
-      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from GW.toSection x)
-        (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w x (X x)))
-      (Fin.cons (Y x) m) =
-      Tensor0SSpace.toModel
-        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-          tensorCovDerivAt (I := I) (M := M) g r t W x (Y x))
-          (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
-            w x (X x))) m := by
-    have hgw := covGrad_toSection_apply_eval (I := I) (M := M) g r t W x
-      (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w x (X x))
-      (Fin.cons (Y x) m)
-    rw [hGW_def]
-    rw [hgw]
-    simp only [Fin.cons_zero]
-    rw [bal_vecTail_cons (Y x) m]
-  rw [hPb]
-  have hC₁ : Tensor0SSpace.toModel
-      (Tensor0SNabla.curriedSection I M
-        (fun y' : M =>
-          (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-            GW.toSection y') (w y')) x ((LeviCivita (I := I) g).toFun Y x (X x))) m =
-      Tensor0SSpace.toModel
-        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-          tensorCovDerivAt (I := I) (M := M) g r t W x
-            ((LeviCivita (I := I) g).toFun Y x (X x))) (w x)) m := by
-    rw [show Tensor0SNabla.curriedSection I M
-        (fun y' : M =>
-          (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
-            GW.toSection y') (w y')) x =
-      tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) t x
-        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from
-          GW.toSection x) (w x)) from rfl]
-    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
-      (T := (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from
-        GW.toSection x) (w x)) (v0 := (LeviCivita (I := I) g).toFun Y x (X x)) (vs := m)]
-    have hgw := covGrad_toSection_apply_eval (I := I) (M := M) g r t W x (w x)
-      (Fin.cons ((LeviCivita (I := I) g).toFun Y x (X x)) m)
-    rw [hGW_def]
-    rw [hgw]
-    simp only [Fin.cons_zero]
-    rw [bal_vecTail_cons ((LeviCivita (I := I) g).toFun Y x (X x)) m]
-  rw [hC₁]
-  have hSCD : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-      tensorSecondCovDeriv (I := I) g r t X Y (fun y : M => W.toSection y) x) (w x) =
-      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-        TensorRSNabla.tensorRSCovariantDerivative I M r t (LeviCivita (I := I) g)
-          (bal_covApplyCcSec (I := I) (M := M) g r t W hY) x (X x)) (w x) -
-        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
-          tensorCovDerivAt (I := I) (M := M) g r t W x
-            ((LeviCivita (I := I) g).toFun Y x (X x))) (w x) := rfl
-  rw [hSCD, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  ring
-
-set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 open Tensor0SBundle in
@@ -5619,12 +5374,12 @@ private lemma bal_rawLap_frame_sum_eval (g : SmoothRiemannianMetric I M) (r s : 
             (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
             (fun z : M => Φ.toSection z) x) D := by
     rw [hsec, ContinuousLinearMap.sum_apply]
-  rw [happ, bal_toModel_sum_eval]
+  rw [happ, toModel_sum_eval]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [show (iteratedCovGrad (I := I) g r s 2 Φ).toSection x =
       (covGrad (I := I) (M := M) g r (s + 1)
         (covGrad (I := I) (M := M) g r s Φ)).toSection x from rfl]
-  exact (bal_secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r s Φ
+  exact (secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r s Φ
     (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i)
     x D m).symm
 
@@ -5670,7 +5425,7 @@ private lemma bal_rawLap_toSection_eq_cometric (g : SmoothRiemannianMetric I M) 
         (DeTurck.cometricDoubleTraceField (I := I) g s)
         (iteratedCovGrad (I := I) g r s 2 Φ)).toSection x := by
   classical
-  apply bal_tensorRS_eq_of_toModel_eval_eq
+  apply tensorRS_eq_of_toModel_eval_eq
   intro D m
   refine (bal_rawLap_frame_sum_eval (I := I) g r s Φ x D m).trans ?_
   refine Eq.trans ?_ (bal_appCcRS_cometric_eval (I := I) g r s
