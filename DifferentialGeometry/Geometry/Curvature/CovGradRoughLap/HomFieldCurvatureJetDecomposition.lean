@@ -35,7 +35,10 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
-private lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
+/-- Extensionality for operator-rank tensor fibres through the model evaluation: two
+`(r,a)`-operator fibres are equal once their model evaluations agree on every covariant
+subject `D` and every tangent tuple `v`. -/
+lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
     {T T' : TensorRSSpace r a I x}
     (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
       Tensor0SSpace.toModel
@@ -54,7 +57,9 @@ private lemma vecTail_cons' {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-private lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
+/-- The model evaluation of a finite sum of covariant tensor fibres is the finite sum of
+the model evaluations. -/
+lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
   rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
@@ -146,7 +151,12 @@ private noncomputable def covApplyCcSec (r t : ℕ) (W : SmoothCcTensor g r t)
     covApplyRS_contMDiff (I := I) g r t W.toSection.contMDiff_toFun hY
 set_option backward.isDefEq.respectTransparency false in
 
-private theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
+/-- Second-covariant-gradient evaluation bridge: evaluating the twice-iterated covariant
+gradient of a compactly supported `(r,t)`-tensor field at smooth vector fields `X`, `Y`
+in the two new covariant slots agrees with the tensor second covariant derivative
+`tensorSecondCovDeriv` along `X`, `Y`, pointwise on every covariant subject `D` and
+tangent tuple `m`. -/
+theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (W : SmoothCcTensor g r t)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
