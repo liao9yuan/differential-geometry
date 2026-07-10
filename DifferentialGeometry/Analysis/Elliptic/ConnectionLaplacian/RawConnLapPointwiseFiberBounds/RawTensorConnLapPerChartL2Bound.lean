@@ -95,38 +95,6 @@ lemma rawChartFrameDataSq_nonneg
   unfold rawChartFrameDataSq
   exact sq_nonneg _
 
-theorem rawTensorConnLap_norm_sq_le_chart_data_on_pou_tsupport
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
-    (T :
-      letI _h_top : TopologicalSpace
-          (TotalSpace (TensorRSModel r s ℝ E)
-            (fun x : M => TensorRSSpace r s I x)) :=
-        tensorRSBundle_topology r s
-      letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
-          (fun x : M => TensorRSSpace r s I x) :=
-        tensorRSBundle_fiber r s
-      Cₛ^∞⟮I; TensorRSModel r s ℝ E,
-        fun b => TensorRSSpace r s I b⟯) :
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {b : M}, b ∈ tsupport (fun x : M =>
-          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
-          ‖rawTensorConnLap (I := I) g r s T.toFun b‖ ^ 2 ≤
-            C * rawChartFrameDataSq (I := I) g r s T.toFun b := by
-  classical
-  letI _h_top : TopologicalSpace
-      (TotalSpace (TensorRSModel r s ℝ E)
-        (fun x : M => TensorRSSpace r s I x)) :=
-    tensorRSBundle_topology r s
-  letI _h_fib : FiberBundle (TensorRSModel r s ℝ E)
-      (fun x : M => TensorRSSpace r s I x) :=
-    tensorRSBundle_fiber r s
-  refine ⟨1, by norm_num, ?_⟩
-  intro b _hb_pou
-  change ‖rawTensorConnLap (I := I) g r s T.toFun b‖ ^ 2 ≤
-    1 * ‖rawTensorConnLap (I := I) g r s T.toFun b‖ ^ 2
-  ring_nf
-  exact le_refl _
-
 end Connection
 end Integral
 end DifferentialGeometry

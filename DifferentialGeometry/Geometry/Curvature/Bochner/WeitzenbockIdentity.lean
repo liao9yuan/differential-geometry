@@ -51,23 +51,6 @@ theorem leibniz_inner_globally [I.Boundaryless]
   funext b
   exact leibniz_inner (I := I) g hV hW (X b)
 
-theorem laplacian_inner_self [I.Boundaryless]
-    (g : SmoothRiemannianMetric I M)
-    {V : Π b : M, TangentSpace I b}
-    (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V))
-    (hgVV : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => g.inner b (V b) (V b)))
-    (x : M)
-    (hLeibniz :
-      Δ_g (I := I) g hgVV x =
-        2 * g.inner x (connLaplacian_vector (I := I) g V x) (V x) +
-          2 * frobeniusSq_grad_vector (I := I) g V x) :
-    Δ_g (I := I) g hgVV x =
-      2 * g.inner x (connLaplacian_vector (I := I) g V x) (V x) +
-        2 * frobeniusSq_grad_vector (I := I) g V x := by
-  have h := connLaplacian_inner_self_of_trace (I := I) g hV hgVV x hLeibniz
-  rw [connLaplacian_function_def] at h
-  exact h
-
 theorem laplacian_inner_self_half [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {V : Π b : M, TangentSpace I b}
@@ -81,7 +64,7 @@ theorem laplacian_inner_self_half [I.Boundaryless]
     (1 / 2 : ℝ) * Δ_g (I := I) g hgVV x =
       g.inner x (connLaplacian_vector (I := I) g V x) (V x) +
         frobeniusSq_grad_vector (I := I) g V x := by
-  rw [laplacian_inner_self (I := I) g hV hgVV x hLeibniz]
+  rw [hLeibniz]
   ring
 
 theorem laplacian_grad_eq_grad_laplacian_plus_ricciSharp [I.Boundaryless]

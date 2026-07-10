@@ -389,8 +389,6 @@ import DifferentialGeometry.Analysis.ODE.GlobalLipschitzAffineExistence
 import DifferentialGeometry.Analysis.ODE.IntegralGronwall
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ChartCoverBijective
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ComposeIsId
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ReversedFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.UniformBijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.FullIntervalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.SeeleyTimeExtension
@@ -402,7 +400,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.U
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartLocalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.Hartman
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.MFDeriv
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldFlowFamily
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ManifoldIntegralFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
@@ -1304,7 +1301,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvature
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
-import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcreteWithBoundary
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFieldSplit

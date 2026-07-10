@@ -102,40 +102,6 @@ omit [IsManifold I ∞ M] in
 lemma ennreal_one_mul_eq (x : ℝ≥0∞) : ENNReal.ofReal 1 * x = x := by
   rw [ennreal_ofReal_one, one_mul]
 
-theorem wkpNormChartGen_equiv_of_pou
-    [I.Boundaryless]
-    [NeZero (Module.finrank ℝ E)]
-    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
-    (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
-    (k : ℕ) {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
-    (ρ₁ ρ₂ : SmoothPartitionOfUnity M I M Set.univ)
-    (_hρ₁ : ρ₁.IsSubordinate (fun α : M => (chartAt H α).source))
-    (_hρ₂ : ρ₂.IsSubordinate (fun α : M => (chartAt H α).source)) :
-    ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ 0 < C₂ ∧ ∀ u : M → ℝ,
-      (wkpNormChartGen (I := I) (M := M) g k p ρ₁ u =
-        wkpNormChartGen (I := I) (M := M) g k p ρ₂ u →
-        wkpNormChartGen (I := I) (M := M) g k p ρ₁ u ≤
-          ENNReal.ofReal C₁ * wkpNormChartGen (I := I) (M := M) g k p ρ₂ u ∧
-        wkpNormChartGen (I := I) (M := M) g k p ρ₂ u ≤
-          ENNReal.ofReal C₂ * wkpNormChartGen (I := I) (M := M) g k p ρ₁ u) ∧
-      (wkpNormChartGen (I := I) (M := M) g k p ρ₂ u = ⊤ →
-        wkpNormChartGen (I := I) (M := M) g k p ρ₁ u ≤
-          ENNReal.ofReal C₁ * wkpNormChartGen (I := I) (M := M) g k p ρ₂ u) ∧
-      (wkpNormChartGen (I := I) (M := M) g k p ρ₁ u = ⊤ →
-        wkpNormChartGen (I := I) (M := M) g k p ρ₂ u ≤
-          ENNReal.ofReal C₂ * wkpNormChartGen (I := I) (M := M) g k p ρ₁ u) := by
-  refine ⟨1, 1, one_pos, one_pos, fun u => ⟨?_, ?_, ?_⟩⟩
-  · intro h_eq
-    refine ⟨?_, ?_⟩
-    · rw [ennreal_one_mul_eq]; exact le_of_eq h_eq
-    · rw [ennreal_one_mul_eq]; exact le_of_eq h_eq.symm
-  · intro h_top
-    rw [h_top, ennreal_ofReal_mul_top_of_pos one_pos]
-    exact le_top
-  · intro h_top
-    rw [h_top, ennreal_ofReal_mul_top_of_pos one_pos]
-    exact le_top
-
 end Chart
 end Sobolev
 end Analysis

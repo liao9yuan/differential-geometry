@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.U
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.Glue
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.MFDeriv
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 

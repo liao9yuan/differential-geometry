@@ -1,6 +1,4 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ReversedFlow
-import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ComposeIsId
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
