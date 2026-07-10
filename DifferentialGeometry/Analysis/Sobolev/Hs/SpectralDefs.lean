@@ -75,9 +75,9 @@ def scalarL2Coeff {g : SmoothRiemannianMetric I M}
   (resolventHilbertEigenbasisSigma (I := I) (M := M) g).repr u i
 
 structure scalarHs (g : SmoothRiemannianMetric I M) (σ : ℝ) where
-  
+
   coeff : EigenIdx (I := I) (M := M) g → ℝ
-  
+
   weighted_summable :
     Summable (fun i => scalarSobolevWeight (I := I) (M := M) i σ *
       (coeff i) ^ 2)

@@ -55,7 +55,6 @@ theorem fatou_weighted_sq_mass_le {ι : Type*} (S : ℕ → Finset ι)
   refine ⟨summable_of_sum_le hnn hpartial, ?_⟩
   exact Real.tsum_le_of_sum_le hnn hpartial
 
-
 private theorem continuousOn_galerkinForcingSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
@@ -312,7 +311,6 @@ private theorem galerkinODE_solution_uniqueSymm
   rw [hcomp_j, hcomp_j] at hj
   exact hj
 
-
 private theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncationSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -416,9 +414,6 @@ private theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncationSymm
     unfold perModeConv
     simp
 
-/-- The short-time threshold attached to the symmetrized DeTurck Sobolev nonlinearity: the
-existence time produced by the abstract quasilinear fixed-point theorem
-`quasilinear_maxreg_solution_of_nemytskii` at `deTurckSobolevNHa2Symm`. -/
 private noncomputable def deTurckForceShortTimeSymm (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) : ℝ :=
   (quasilinear_maxreg_solution_of_nemytskii (I := I) (M := M) g₀ a
@@ -489,9 +484,6 @@ private theorem symmForce_contraction_coeff_le_half (C₁ C₂ : ℝ≥0) {T : �
           nlinarith [hfrac, div_nonneg hc2 (by positivity : (0:ℝ) ≤ (C₂:ℝ)+1)]
   linarith
 
-/-- The globally-defined retracted forcing map for the symmetrized DeTurck nonlinearity:
-`nemytskiiMixedForcingMap` at `deTurckSobolevNHa2Symm` precomposed with the retraction onto the
-small-forcing ball of radius `deTurckForceBallRadiusSymm`. -/
 private noncomputable def deTurckForceRetractedMapSymm (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
     timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T →
@@ -1081,12 +1073,6 @@ private theorem galerkinForcing_tendsto_force_timeL2_ofProjFixedPointSymm
   filter_upwards [hF] with t ht
   rw [ht, deTurckGalerkinForcingSymm_apply, if_pos hi]
 
-/-- Per-mode Galerkin convergence for the symmetrized DeTurck flow: the `N`-th Galerkin
-coordinate converges to the per-mode Duhamel convolution of the forcing mode coefficient.
-The Galerkin forcing coordinates converge in time-`L²` to the mode coefficient of the
-fixed-point forcing (projected-contraction argument at `deTurckSobolevNHa2Symm`), and each
-Galerkin coordinate solves the per-mode linear ODE, hence equals the per-mode convolution of
-its own forcing; passing to the limit in the convolution yields the claim. -/
 theorem galerkinSol_tendsto_solField_perModeConvSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1161,13 +1147,6 @@ theorem galerkinSol_tendsto_solField_perModeConvSymm
   rw [← hlam_def] at hstagea
   rw [hperm_eq, ← hstagea]
 
-/-- Uniform-in-`N` all-order spatial spectral mass control for the symmetrized DeTurck Galerkin
-limit: for each Sobolev order `σ` the weighted spectral mass of the per-mode Duhamel convolutions of
-the forcing mode coefficients is bounded on `[0, T]`. Symmetric mirror of the proven raw helper
-`deTurckGalerkin_solField_uniformSpatialMass_allOrder` (snapshot `c848da47`), assembled from the
-symmetrized Galerkin existence, per-scale energy closure, and per-mode convergence twins by the same
-Fatou weighted-mass argument; its conclusion is nonlinearity-agnostic, so this transits only the
-`sorry`s of its symmetric children. -/
 theorem deTurckGalerkin_solField_uniformSpatialMass_allOrderSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)

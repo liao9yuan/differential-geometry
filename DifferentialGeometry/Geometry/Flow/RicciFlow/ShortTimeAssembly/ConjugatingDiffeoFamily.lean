@@ -64,11 +64,6 @@ private theorem neg_tangentMap_cmdwa
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).map_neg (X q₀.1 q₀.2)
 
-/-- The conjugating diffeomorphism family for the (negated) DeTurck vector field, additionally
-exporting the joint `(t, x)`-smoothness of the family orbit map on `Set.Ico 0 T ×ˢ Set.univ`
-(one-sided in time at `t = 0`): on `Set.Ico 0 T` the family agrees with the flow of the Seeley
-time-extension of the field, which is jointly `C^∞` on an open time interval containing
-`Set.Icc 0 T`. -/
 theorem conjugating_diffeo_family_jointsmooth
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T_DT : ℝ) (hDT : 0 < T_DT)

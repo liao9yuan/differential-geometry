@@ -68,7 +68,7 @@ end DifferentialForm
 noncomputable def iprod (ω : Ω^(m + 1)⟮E, F⟯) (v : E → E) (hv : ContDiff ℝ ⊤ v) : Ω^m⟮E, F⟯ where
   toFun := fun e => ContinuousAlternatingMap.curryFin (ω e) (v e)
   smooth := by
-    
+
     have hbl : IsBoundedLinearMap ℝ (curryFin (𝕜 := ℝ) (E := E) (F := F) (n := m)) :=
       ⟨⟨curryFin_add, fun c f => curryFin_smul c f⟩, 1, one_pos, fun g => by
         simp only [one_mul]
@@ -132,18 +132,16 @@ theorem _root_.ederiv_smul_const (a : E → ℝ) (e : E [⋀^Fin m]→L[ℝ] ℝ
     (ha : DifferentiableAt ℝ a y) (v : Fin (m + 1) → E) :
     _root_.ederiv (fun z ↦ a z • e) y v =
       ∑ k : Fin (m + 1), (-1 : ℤ) ^ k.val • (fderiv ℝ a y (v k)) • e (k.removeNth v) := by
-  
-  
+
   have hd : HasFDerivAt (fun z ↦ a z • e) ((fderiv ℝ a y).smulRight e) y :=
     ha.hasFDerivAt.smul_const e
-  
+
   have hfderiv : fderiv ℝ (fun z ↦ a z • e) y = (fderiv ℝ a y).smulRight e := hd.fderiv
-  
+
   change ContinuousAlternatingMap.uncurryFin (fderiv ℝ (fun z ↦ a z • e) y) v = _
   rw [hfderiv, ContinuousAlternatingMap.uncurryFin_apply]
   refine Finset.sum_congr rfl fun k _ => ?_
-  
-  
+
   simp only [ContinuousLinearMap.smulRight_apply, ContinuousAlternatingMap.smul_apply]
 
 theorem _root_.ederiv_basis_expansion
@@ -162,7 +160,7 @@ theorem iprod_wedge (ω : Ω^(m + 1)⟮E, F⟯) (τ : Ω^(n + 1)⟮E, F'⟯) (f 
       iprod (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] τ)) v hv = ((iprod ω v hv) ∧[f] τ)
         + (-1 : ℝ)^(m + 1) • (DifferentialForm.domDomCongr Fin.finAddFlipAssoc (ω ∧[f] (iprod τ v hv))) := by
   ext e x
-  erw[DifferentialForm.add_apply, ContinuousAlternatingMap.add_apply] 
+  erw[DifferentialForm.add_apply, ContinuousAlternatingMap.add_apply]
   simp only [Nat.add_eq, iprod_apply, DifferentialForm.domDomCongr_apply, DifferentialForm.smul_apply, coe_smul]
   sorry
 
@@ -178,7 +176,7 @@ theorem pullback_toFun (f : E → F) (ω : Ω^k⟮F, G⟯) :
 
 theorem pullback_ederiv (f : E → F) (ω : Ω^n⟮F, G⟯) {x : E} (hf : ContDiffAt ℝ 2 f x) :
     pullback f (ederiv ω) x = ederiv (pullback f ω) x := by
-  
+
   sorry
 
 end DifferentialForm

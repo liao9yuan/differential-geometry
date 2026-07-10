@@ -26,8 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable (g : SmoothRiemannianMetric I M)
 
-/-- The truncation of a Sobolev-tensor element to a finite set of eigenmodes has norm at most
-the original (it is an orthogonal projection in the spectral coordinates). -/
 lemma norm_finiteEigenComboHs_self_le (σ : ℝ)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
@@ -52,7 +50,6 @@ lemma norm_finiteEigenComboHs_self_le (σ : ℝ)
     _ ≤ Real.sqrt (‖W‖ ^ 2) := Real.sqrt_le_sqrt hle_sq
     _ = ‖W‖ := Real.sqrt_sq (norm_nonneg _)
 
-/-- The finite-eigen truncation as a linear map on the time-frozen Sobolev tensor space. -/
 def spatialEigenProjLM (σ : ℝ) (N : ℕ) :
     tensorHs (I := I) (M := M) g 0 2 σ →ₗ[ℝ] tensorHs (I := I) (M := M) g 0 2 σ where
   toFun W :=
@@ -66,7 +63,6 @@ def spatialEigenProjLM (σ : ℝ) (N : ℕ) :
     simp only [tensorHs.smul_coeff, finiteEigenComboHs_coeff, RingHom.id_apply]
     by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g N <;> simp [hi]
 
-/-- The finite-eigen orthogonal projection on the time-frozen Sobolev tensor space. -/
 def spatialEigenProj (σ : ℝ) (N : ℕ) :
     tensorHs (I := I) (M := M) g 0 2 σ →L[ℝ] tensorHs (I := I) (M := M) g 0 2 σ :=
   LinearMap.mkContinuous (spatialEigenProjLM (I := I) (M := M) g σ N) 1 (fun W => by
@@ -157,7 +153,6 @@ private lemma normSq_spatialEigenProj_sub_add (σ : ℝ) (N : ℕ)
         by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g N <;> simp [hi]
     _ = ‖W‖ ^ 2 := (tensorHs.norm_sq_eq_tsum (I := I) (M := M) W).symm
 
-/-- The finite-eigen projections converge strongly to the identity on the Sobolev tensor space. -/
 lemma spatialEigenProj_tendsto (σ : ℝ) (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     Tendsto (fun N => spatialEigenProj (I := I) (M := M) g σ N W) atTop (𝓝 W) := by
   classical
@@ -191,7 +186,6 @@ lemma spatialEigenProj_tendsto (σ : ℝ) (W : tensorHs (I := I) (M := M) g 0 2 
     exact Real.sqrt_sq (norm_nonneg _)
   exact tendsto_sub_nhds_zero_iff.mp (tendsto_zero_iff_norm_tendsto_zero.mpr hnorm0)
 
-/-- The finite-eigen spectral projection on the time-`L²` Sobolev tensor space, acting fibrewise. -/
 def timeL2EigenProj (σ T : ℝ) (N : ℕ) :
     timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T →L[ℝ]
       timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T :=
@@ -202,8 +196,6 @@ lemma norm_timeL2EigenProj_le_one (σ T : ℝ) (N : ℕ) :
   refine le_trans ?_ (norm_spatialEigenProj_le_one (I := I) (M := M) g σ N)
   exact ContinuousLinearMap.norm_compLpL_le (spatialEigenProj (I := I) (M := M) g σ N)
 
-/-- The fibrewise finite-eigen projections converge strongly to the identity on the time-`L²`
-Sobolev tensor space (Galerkin truncation converges). -/
 lemma timeL2EigenProj_tendsto (σ T : ℝ) (x : timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T) :
     Tendsto (fun N => timeL2EigenProj (I := I) (M := M) g σ T N x) atTop (𝓝 x) := by
   classical
@@ -272,9 +264,6 @@ lemma timeL2EigenProj_tendsto (σ T : ℝ) (x : timeL2 (tensorHs (I := I) (M := 
     exact Real.sqrt_sq (norm_nonneg _)
   exact tendsto_sub_nhds_zero_iff.mp (tendsto_zero_iff_norm_tendsto_zero.mpr hnorm0)
 
-/-- B2 Hilbert-space brick: on the time-`L²` Sobolev tensor space there is a family of
-norm-`≤ 1` projections converging strongly to the identity (the finite-eigen Galerkin
-truncations), as consumed by the projected fixed-point convergence. -/
 theorem exists_timeL2EigenProjection (σ T : ℝ) :
     ∃ P : ℕ → (timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T →L[ℝ]
         timeL2 (tensorHs (I := I) (M := M) g 0 2 σ) T),

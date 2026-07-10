@@ -20,15 +20,15 @@ structure VectorBundleHom
     (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
     (E₂ : B₂ → Type*) [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
     [TopologicalSpace (TotalSpace F₂ E₂)] where
-  
+
   baseMap : B₁ → B₂
-  
+
   toFun : TotalSpace F₁ E₁ → TotalSpace F₂ E₂
-  
+
   continuous_toFun : Continuous toFun
-  
+
   fiberLinearMap : ∀ x : B₁, E₁ x →ₗ[𝕜] E₂ (baseMap x)
-  
+
   fiber_compat : ∀ (x : B₁) (v : E₁ x),
     toFun ⟨x, v⟩ = ⟨baseMap x, fiberLinearMap x v⟩
 
@@ -131,13 +131,13 @@ structure VectorBundleEquiv
     (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂]
     (E₂ : B₂ → Type*) [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜 (E₂ x)]
     [TopologicalSpace (TotalSpace F₂ E₂)] where
-  
+
   baseMap : B₁ → B₂
-  
+
   toHomeomorph : TotalSpace F₁ E₁ ≃ₜ TotalSpace F₂ E₂
-  
+
   fiberLinearEquiv : ∀ x : B₁, E₁ x ≃ₗ[𝕜] E₂ (baseMap x)
-  
+
   fiber_compat : ∀ (x : B₁) (v : E₁ x),
     toHomeomorph ⟨x, v⟩ = ⟨baseMap x, fiberLinearEquiv x v⟩
 
@@ -232,7 +232,7 @@ def symm (e : VectorBundleEquiv 𝕜 F₁ E₁ F₂ E₂) :
   baseMap y := (e.toHomeomorph.symm ⟨y, 0⟩).proj
   toHomeomorph := e.toHomeomorph.symm
   fiberLinearEquiv y :=
-    
+
     let x := (e.toHomeomorph.symm ⟨y, 0⟩).proj
     have hx : e.baseMap x = y := by
       have := e.proj_eq (e.toHomeomorph.symm ⟨y, 0⟩)
@@ -517,7 +517,7 @@ private lemma continuous_symm_of_fiberBijective'
       trivializationCoord_isInvertible (baseMap := baseMap) hφ_bij x x ⟨hx₁, hx₂⟩
     have hA_inv_cont : ContinuousAt (ContinuousLinearMap.inverse ∘ A) x :=
       (hA_inv_at_x.contDiffAt_map_inverse (n := 0)).continuousAt.comp hA_cont
-    
+
     have hNice_cont : ContinuousAt
         (fun p : B₂ × F₂ =>
           ContinuousLinearMap.inverse (A (baseMap.symm p.1)) p.2) (e₂ ⟨baseMap x, w⟩) := by

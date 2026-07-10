@@ -212,12 +212,9 @@ private theorem trivializationAt_separableFormBundleSection_eval_basis
   rw [separableFormAt_apply]
   refine Finset.prod_congr rfl ?_
   intro k _
-  
-  
-  
+
   rw [chartGramMatrix_apply]
-  
-  
+
   rfl
 
 private lemma contMDiffOn_separableFormBundleSection
@@ -226,15 +223,7 @@ private lemma contMDiffOn_separableFormBundleSection
     ContMDiffOn I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
       (separableFormBundleSection (I := I) (M := M) g r α φ_first)
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   set e : Trivialization (Tensor0SModel r ℝ E)
     (Bundle.TotalSpace.proj :
       Bundle.TotalSpace (Tensor0SModel r ℝ E)
@@ -247,28 +236,19 @@ private lemma contMDiffOn_separableFormBundleSection
       (separableFormAt (I := I) (M := M) g b r
         (fun k : Fin r => chartBasisVecFiber (I := I) α (φ_first k) b)))
   rw [hbaseSet_eq] at h_iff
-  
-  
-  
-  
-  
-  
+
   refine h_iff.mpr ?_
-  
-  
-  
+
   refine contMDiffOn_into_tensor0SModel_of_eval_basis _ ?_
   intro ψ
-  
-  
-  
+
   have h_prod_smooth : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun b : M => ∏ k : Fin r,
         chartGramMatrix (I := I) g α b (φ_first k) (ψ k))
       (trivializationAt E (TangentSpace I) α).baseSet := by
     refine contMDiffOn_finset_prod (fun k _ => ?_)
     exact chartGramMatrix_entry_contMDiffOn (I := I) g α (φ_first k) (ψ k)
-  
+
   refine h_prod_smooth.congr (fun b hb => ?_)
   exact trivializationAt_separableFormBundleSection_eval_basis
     (I := I) (M := M) g r α φ_first hb ψ
@@ -288,10 +268,10 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
         (fun i : Fin (r + s) =>
           chartBasisVecFiber (I := I) α (φ i) b))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  
+
   intro x₀ hx₀
   refine ContMDiffAt.contMDiffWithinAt ?_
-  
+
   have h_sep_smooth_at :
       ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
         (separableFormBundleSection (I := I) (M := M) g r α
@@ -300,7 +280,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
     (contMDiffOn_separableFormBundleSection (I := I) (M := M) g r α
       (fun k : Fin r => φ (Fin.castAdd s k))).contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  
+
   have h_S_smooth_at :
       ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
         (fun b : M =>
@@ -308,7 +288,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
             (E := fun y : M => TensorRSSpace r s I y) b (S b)) x₀ :=
     hS.contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  
+
   have h_applied : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun b : M =>
         TotalSpace.mk' (Tensor0SModel s ℝ E)
@@ -330,7 +310,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
             (fun k : Fin r =>
               chartBasisVecFiber (I := I) α (φ (Fin.castAdd s k)) b)))
       h_S_smooth_at h_sep_smooth_at
-  
+
   have h_tangent_smooth_at : ∀ j : Fin s,
       ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
         (fun b : M =>
@@ -340,7 +320,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
     have hcm := chartBasisVec_contMDiffOn (I := I) α (φ (Fin.natAdd r j))
     exact hcm.contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds hx₀)
-  
+
   have h_eval := TensorMultilinear.contMDiffAt_section_apply (I := I) (M := M)
     (T := fun b : M =>
       (S b)
@@ -352,10 +332,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
     (v := fun (j : Fin s) (b : M) =>
       chartBasisVecFiber (I := I) α (φ (Fin.natAdd r j)) b)
     h_tangent_smooth_at
-  
-  
-  
-  
+
   refine h_eval.congr_of_eventuallyEq ?_
   filter_upwards with b
   rw [lowerAllUpperIndices_apply]

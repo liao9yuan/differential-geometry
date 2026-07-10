@@ -456,8 +456,7 @@ lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner_on_compact
     have h_rhs : (C_proj * ‖T‖) * (C_proj * ‖T‖) = C_proj ^ 2 * ‖T‖ ^ 2 := by ring
     have h_lhs : ‖P_IJ T‖ * ‖P_IJ T‖ = ‖P_IJ T‖ ^ 2 := by rw [sq]
     linarith [hsq, h_lhs.symm.le, h_rhs.symm.le, h_lhs.le, h_rhs.le]
-  
-  
+
   have h_chart_sq_le : ‖T‖ ^ 2 ≤
       K * chartTensorInnerPointwise_rs_model (I := I) (M := M) g r s α b T T :=
     h_norm b hb T

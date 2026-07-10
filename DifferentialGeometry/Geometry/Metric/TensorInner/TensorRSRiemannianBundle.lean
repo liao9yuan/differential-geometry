@@ -261,26 +261,24 @@ lemma innerModelRS_quadratic_continuous
     Continuous (fun T : TensorRSModel r s ℝ E =>
       tensorInnerPointwise (I := I) (M := M) g r s b T T) := by
   classical
-  
+
   let ι := Fin (Module.finrank ℝ (TensorRSModel r s ℝ E))
   let basis : Module.Basis ι ℝ (TensorRSModel r s ℝ E) :=
     Module.finBasis ℝ (TensorRSModel r s ℝ E)
-  
+
   let φ : ι → (TensorRSModel r s ℝ E →ₗ[ℝ] ℝ) := fun i => basis.coord i
   have hφ_cont : ∀ i, Continuous (φ i) := fun i =>
     LinearMap.continuous_of_finiteDimensional (φ i)
-  
+
   have hexpand : ∀ T : TensorRSModel r s ℝ E,
       T = ∑ i : ι, (φ i T) • basis i := by
     intro T
     have := basis.linearCombination_repr T
-    
+
     rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype] at this
     · exact this.symm
     · intros; rw [zero_smul]
-  
-  
-  
+
   have hgen_left : ∀ (a : ι → ℝ) (S : TensorRSModel r s ℝ E),
       tensorInnerPointwise (I := I) (M := M) g r s b
         (∑ i : ι, a i • basis i) S =
@@ -327,8 +325,7 @@ lemma innerModelRS_quadratic_continuous
     intro j _
     rw [RR.map_smul]
     rfl
-  
-  
+
   have hbilin_aux : ∀ (T : TensorRSModel r s ℝ E) (a : ι → ℝ),
       T = ∑ i : ι, a i • basis i →
       tensorInnerPointwise (I := I) (M := M) g r s b T T =
@@ -362,14 +359,14 @@ lemma innerModelRS_quadratic_continuous
           tensorInnerPointwise (I := I) (M := M) g r s b (basis i) (basis j) := by
     intro T
     exact hbilin_aux T (fun i => φ i T) (hexpand T)
-  
+
   have hcont : Continuous (fun T : TensorRSModel r s ℝ E =>
       ∑ i : ι, ∑ j : ι, (φ i T) * (φ j T) *
         tensorInnerPointwise (I := I) (M := M) g r s b (basis i) (basis j)) := by
     refine continuous_finset_sum _ (fun i _ => ?_)
     refine continuous_finset_sum _ (fun j _ => ?_)
     refine ((hφ_cont i).mul (hφ_cont j)).mul continuous_const
-  
+
   refine hcont.congr ?_
   intro T
   exact (hbilin_expand T).symm

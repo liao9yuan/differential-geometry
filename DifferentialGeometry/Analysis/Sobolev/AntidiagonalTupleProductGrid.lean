@@ -173,9 +173,6 @@ theorem antidiagonalTupleGrid_convolution_closure
   ⟨fun i => (recGridCS A B i).1, fun i => (recGridCS_nonneg A B hA hB i).1,
     antidiagonalTupleGrid_convolution_bound b hb a A hA B hB hbase hstep⟩
 
-/-- The number of antidiagonal tuples of total weight `i` (all lengths `n ≤ i`), as a real
-constant: the sharp combinatorial factor for the grid product inequality
-`antidiagonalTupleGrid_mul_le`. -/
 noncomputable def antidiagonalTupleGridCount (i : ℕ) : ℝ :=
   ∑ n ∈ Finset.range (i + 1), ((Finset.Nat.antidiagonalTuple n i).card : ℝ)
 
@@ -197,10 +194,6 @@ lemma prodTerm_le_antidiagonalTupleGrid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j
     (fun n' _ => Finset.sum_nonneg (fun e' _ => Finset.prod_nonneg (fun m _ => hb _)))
     (Finset.mem_range.mpr hn)
 
-/-- Product closure of the antidiagonal product grid: the product of two grids of total
-weights `j` and `k` is dominated by the grid of total weight `j + k`, at the price of the
-tuple-count combinatorial factor (each cross product of cells concatenates, via `Fin.append`,
-to a cell of the combined weight). -/
 theorem antidiagonalTupleGrid_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j k : ℕ) :
     antidiagonalTupleGrid b j * antidiagonalTupleGrid b k ≤
       (antidiagonalTupleGridCount j * antidiagonalTupleGridCount k) *
@@ -267,8 +260,6 @@ theorem antidiagonalTupleGrid_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (
             ((Finset.Nat.antidiagonalTuple n j).card : ℝ) from rfl]
         rw [Finset.sum_mul]
 
-/-- Truncated antidiagonal product grid window: the sum of all grids of total weight
-strictly below `w`. -/
 noncomputable def antidiagonalTupleGridWindow (b : ℕ → ℝ) (w : ℕ) : ℝ :=
   ∑ k ∈ Finset.range w, antidiagonalTupleGrid b k
 
@@ -293,8 +284,6 @@ lemma one_le_antidiagonalTupleGridWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b 
   rw [← antidiagonalTupleGrid_zero b]
   exact antidiagonalTupleGrid_le_window b hb hw
 
-/-- The combinatorial constant of the window product inequality
-`antidiagonalTupleGridWindow_mul_le`. -/
 noncomputable def antidiagonalTupleGridWindowMulConst (a c : ℕ) : ℝ :=
   ∑ j ∈ Finset.range (a + 1), ∑ k ∈ Finset.range (c + 1),
     antidiagonalTupleGridCount j * antidiagonalTupleGridCount k
@@ -304,9 +293,6 @@ lemma antidiagonalTupleGridWindowMulConst_nonneg (a c : ℕ) :
   Finset.sum_nonneg (fun j _ => Finset.sum_nonneg (fun k _ =>
     mul_nonneg (antidiagonalTupleGridCount_nonneg j) (antidiagonalTupleGridCount_nonneg k)))
 
-/-- Product closure of the grid windows: the product of the weight-`< a + 1` and
-weight-`< c + 1` windows is dominated by the weight-`< a + c + 1` window, at the price of
-the tuple-count constant. -/
 theorem antidiagonalTupleGridWindow_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (a c : ℕ) :
     antidiagonalTupleGridWindow b (a + 1) * antidiagonalTupleGridWindow b (c + 1) ≤
       antidiagonalTupleGridWindowMulConst a c * antidiagonalTupleGridWindow b (a + c + 1) := by

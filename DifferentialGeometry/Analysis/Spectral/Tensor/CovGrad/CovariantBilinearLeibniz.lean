@@ -71,20 +71,20 @@ theorem norm_toSection_iteratedCovGrad_castRankCc (g : SmoothRiemannianMetric I 
   rfl
 
 structure ParallelTensorProduct (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ r₀ s₀ : ℕ) where
-  
+
   prod : ∀ {a b : ℕ}, SmoothCcTensor g r₁ (s₁ + a) → SmoothCcTensor g r₂ (s₂ + b) →
     SmoothCcTensor g r₀ (s₀ + a + b)
-  
+
   opNorm : ℝ
-  
+
   opNorm_nonneg : 0 ≤ opNorm
-  
+
   rfns_prod_le : ∀ {a b : ℕ} (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b))
     (x : M),
     riemannianFiberNormSq (I := I) (M := M) g r₀ (s₀ + a + b) x ((prod S T).toSection x) ≤
       opNorm * riemannianFiberNormSq (I := I) (M := M) g r₁ (s₁ + a) x (S.toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g r₂ (s₂ + b) x (T.toSection x)
-  
+
   covGrad_prod : ∀ {a b : ℕ} (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b)),
     covGrad g r₀ (s₀ + a + b) (prod S T) =
       castRankCc g r₀ (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)

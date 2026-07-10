@@ -242,18 +242,18 @@ theorem parallel_global_extension [I.Boundaryless]
 
 structure ParallelSegmentData [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (a b t₀ : ℝ) : Prop where
-  
+
   hab : a ≤ b
-  
+
   ht₀ : t₀ ∈ Set.Ioo a b
-  
+
   huCont : ContinuousOn (fun t => deriv (chartCurve (I := I) α γ) t) (Set.Icc a b)
-  
+
   huCurveCont : ContinuousOn (chartCurve (I := I) α γ) (Set.Icc a b)
-  
+
   huDeriv : ∀ t ∈ Set.Ioo a b,
     HasDerivAt (chartCurve (I := I) α γ) (deriv (chartCurve (I := I) α γ) t) t
-  
+
   hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source
 
 noncomputable def parallelTransport [I.Boundaryless]

@@ -40,7 +40,7 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
       tensorSobolevWeight (I := I) (M := M) i σ' * (φ i t) ^ 2 ≤ Cmaj i) :
     ContinuousOn W s := by
   classical
-  
+
   set negWeight : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
     fun i => tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ)) with hnegWeight
   have hnegWeight_sum : Summable negWeight :=
@@ -49,25 +49,25 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
     fun i => (negWeight i + Cmaj i) / 2 with hU
   have hU_sum : Summable U :=
     ((hnegWeight_sum.add hCmaj).div_const 2)
-  
+
   set f : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → tensorHs (I := I) (M := M) g 0 2 σ :=
     fun i t => φ i t •
       tensorHsBasisVec (I := I) (M := M) (g := g) (r := 0) (s := 2) σ i with hf
-  
+
   have hf_cont : ∀ i, ContinuousOn (f i) s := by
     intro i
     exact (hφ_cont i).smul continuousOn_const
-  
+
   have hf_bound : ∀ i, ∀ t ∈ s, ‖f i t‖ ≤ U i := by
     intro i t ht
     have hnorm : ‖f i t‖ =
         |φ i t| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i σ) := by
       rw [hf, norm_smul, Real.norm_eq_abs, norm_tensorHsBasisVec]
-    
+
     have hsq : ‖f i t‖ ^ 2 = tensorSobolevWeight (I := I) (M := M) i σ * (φ i t) ^ 2 := by
       rw [hnorm, mul_pow, sq_abs, sq_sqrt_tensorSobolevWeight]
       ring
-    
+
     have hsplit : tensorSobolevWeight (I := I) (M := M) i σ =
         negWeight i * tensorSobolevWeight (I := I) (M := M) i σ' := by
       have hbase : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
@@ -75,12 +75,12 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
       rw [hnegWeight]
       unfold tensorSobolevWeight
       rw [← Real.rpow_add hbase, show -(σ' - σ) + σ' = σ from by ring]
-    
+
     have hsq_le : ‖f i t‖ ^ 2 ≤ negWeight i * Cmaj i := by
       rw [hsq, hsplit, mul_assoc]
       exact mul_le_mul_of_nonneg_left (hmass i t ht)
         (by rw [hnegWeight]; exact tensorSobolevWeight_nonneg (I := I) (M := M) i _)
-    
+
     have hnW_nonneg : 0 ≤ negWeight i := by
       rw [hnegWeight]; exact tensorSobolevWeight_nonneg (I := I) (M := M) i _
     have hC_nonneg : 0 ≤ Cmaj i :=
@@ -98,10 +98,10 @@ theorem tensorHs_continuousOn_of_coeff_of_higher_mass
       rw [Real.sq_sqrt hnW_nonneg, Real.sq_sqrt hC_nonneg] at h2
       linarith
     exact hsqrt.trans hgeom
-  
+
   have hcont_tsum : ContinuousOn (fun t => ∑' i, f i t) s :=
     continuousOn_tsum hf_cont hU_sum (fun i t ht => hf_bound i t ht)
-  
+
   refine hcont_tsum.congr ?_
   intro t ht
   have hsum : HasSum

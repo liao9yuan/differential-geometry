@@ -61,14 +61,13 @@ theorem connDiff_inner_eq_half_covGradKoszul
       covGradEval (I := I) (M := M) g₀ S X Y Z x
         + covGradEval (I := I) (M := M) g₀ S Y X Z x
         - covGradEval (I := I) (M := M) g₀ S Z X Y x := by
-  
-  
+
   have hzero : ∀ (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       metricDiffCovDeriv (I := I) g₀ g₀ (fun b => P b) (fun b => Q b) (fun b => R b) x = 0 := by
     intro P Q R
     unfold metricDiffCovDeriv
     rw [sub_self]
-  
+
   have hXYZ : covGradEval (I := I) (M := M) g₀ S X Y Z x =
       metricDiffCovDeriv (I := I) g₁ g₀ (fun b => X b) (fun b => Y b) (fun b => Z b) x := by
     rw [covGradEval, covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
@@ -82,8 +81,7 @@ theorem connDiff_inner_eq_half_covGradKoszul
     rw [covGradEval, covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
       (I := I) (M := M) g₀ g₁ g₀ S hbil Z X Y x, hzero Z X Y, sub_zero]
   rw [hXYZ, hYXZ, hZXY]
-  
-  
+
   exact connDiff_koszul_metricDiff (I := I) g₁ g₀
     X.mdifferentiableAt Y.mdifferentiableAt Z.mdifferentiableAt
 
@@ -128,10 +126,9 @@ theorem connDiff_eq_appCc_invGram_covGrad
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (X x) =
       inverseMetricSharpFib (I := I) g₁ x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) := by
-  
+
   refine (SmoothRiemannianMetric.eq_of_inner_eq g₁ (fun ζ => ?_)).symm
-  
-  
+
   rw [inverseMetricSharpFib_inner (I := I) g₁ x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) ζ,
       cotangentToDualLinear_apply,
@@ -148,14 +145,14 @@ theorem cotangentCov_leviCivita_diff
         ((cotangentCov (LeviCivita (I := I) g₀)).toFun θ x v) w =
       -θ x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v) := by
   classical
-  
+
   set X : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x v with hXdef
   set Y : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x w with hYdef
   have hX := smoothExtensionTangent_mdiff (I := I) x v x
   have hY := smoothExtensionTangent_mdiff (I := I) x w x
   have hXx : X x = v := smoothExtensionTangent_eq (I := I) x v
   have hYx : Y x = w := smoothExtensionTangent_eq (I := I) x w
-  
+
   have h₁ : ((cotangentCov (LeviCivita (I := I) g₁)).toFun θ x v) w =
       cotangentScalar ((LeviCivita (I := I) g₁).toFun) θ x X Y := by
     rw [cotangentCov_toFun, cotangentCovFun_apply,
@@ -167,7 +164,7 @@ theorem cotangentCov_leviCivita_diff
         show v = X x from hXx.symm, show w = Y x from hYx.symm,
         cotangentCovAt_apply_of_diff (LeviCivita (I := I) g₀) hθ hX hY]
   rw [h₁, h₀, cotangentScalar_def, cotangentScalar_def]
-  
+
   have hconn : PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v =
       (LeviCivita (I := I) g₁).toFun Y x v - (LeviCivita (I := I) g₀).toFun Y x v := by
     have := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := Y) hY v
@@ -209,8 +206,7 @@ theorem koszulCovGradCovecCLM_mdiffAtCotangent
     rw [cotangentToCLM_koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b]
     rfl
   rw [hflat]
-  
-  
+
   have hconn_sm := PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
   have hconn_at := (hconn_sm x).mdifferentiableAt (by simp)
   exact metricFlat_mdiff (I := I) g₁ hconn_at
@@ -231,8 +227,7 @@ theorem covDerivConnDiff_principal_align
             (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w (X x)) := by
   have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ g₁ Z Y x
   have hbridge := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁ hθ (X x) w
-  
-  
+
   linarith [hbridge]
 
 set_option linter.unusedSectionVars false in
@@ -254,24 +249,24 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
         - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
             ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) := by
   classical
-  
+
   set K : Π b : M, Tensor0SSpace 1 I b :=
     fun b => koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b with hKdef
-  
+
   have hWeq : (fun b : M => inverseMetricSharpFib (I := I) g₁ b (K b)) =
       (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b)) := by
     funext b
     exact (connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ Z Y b).symm
   set W : Π b : M, TangentSpace I b :=
     fun b => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b) with hWdef
-  
+
   have hW_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) :=
     PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
   have hW_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) x :=
     (hW_sm x).mdifferentiableAt (by simp)
-  
+
   have hWsharp_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
         (inverseMetricSharpFib (I := I) g₁ b (K b))) x := by
@@ -280,15 +275,15 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
         (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) := by
       funext b; rw [congrFun hWeq b]
     rw [hfun]; exact hW_at
-  
+
   have hswap : (LeviCivita (I := I) g₀).toFun (fun b => W b) x (X x) =
       (LeviCivita (I := I) g₁).toFun (fun b => W b) x (X x) -
         PDE.DeTurck.connDiff (I := I) g₁ g₀ x (W x) (X x) := by
     have h := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := fun b => W b) (x := x) hW_at (X x)
     rw [h]; abel
-  
+
   have hpar := inverseMetricSharpField_covGrad_eq_zero (I := I) g₁ K hWsharp_at (X x)
-  
+
   have hW1 : (LeviCivita (I := I) g₁).toFun (fun b => W b) x (X x) =
       inverseMetricSharpFib (I := I) g₁ x
         (dualToCotangent (I := I)
@@ -297,11 +292,11 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
     rw [show (fun b => W b) =
         (fun b : M => inverseMetricSharpFib (I := I) g₁ b (K b)) from hWeq.symm]
     exact hpar
-  
+
   have hWx : W x = inverseMetricSharpFib (I := I) g₁ x (K x) := by
     have := congrFun hWeq x
     rw [hWdef]; exact this.symm
-  
+
   have hexpand : covDerivConnDiff (I := I) g₀ g₁
         (fun b => X b) (fun b => Z b) (fun b => Y b) x =
       (LeviCivita (I := I) g₀).toFun (fun b => W b) x (X x)
@@ -399,7 +394,7 @@ theorem combinedTrace42Model_apply
                 (Fin.cons ((Module.finBasis ℝ E) k) m))) := by
   classical
   obtain ⟨hp0, hp1, hp2, hp3⟩ := koszulSlotPerm_apply
-  
+
   have hcongr_eq : ∀ (D' : Tensor0SBundle.Tensor0SModel 4 ℝ E),
       (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
           koszulSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap D' =
@@ -414,7 +409,7 @@ theorem combinedTrace42Model_apply
     intro T
     rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-  
+
   have hT03 : ∀ (mm : Fin 2 → E),
       modelDoubleTrace (E := E) 2 L
           (ContinuousMultilinearMap.domDomCongr koszulSlotPerm D) mm =
@@ -441,17 +436,17 @@ theorem combinedTrace42Model_apply
   congr 1
   rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.sub_apply,
     ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply]
-  
+
   rw [modelDoubleTrace_apply (E := E) 2 L D m]
-  
+
   rw [ContinuousLinearMap.comp_apply, hcongr_eq, hT03 m]
-  
+
   rw [ContinuousLinearMap.comp_apply, hswap_eq, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousLinearMap.comp_apply, hcongr_eq, hT03 (fun i => m (Equiv.swap (0 : Fin 2) 1 i))]
-  
+
   rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun k _ => ?_
-  
+
   have htuple : (![m (Equiv.swap (0 : Fin 2) 1 0), m (Equiv.swap (0 : Fin 2) 1 1),
         (Module.finBasis ℝ E) k] : Fin 3 → E) = ![m 1, m 0, (Module.finBasis ℝ E) k] := by
     rw [Equiv.swap_apply_left, Equiv.swap_apply_right]
@@ -485,12 +480,9 @@ theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) 
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x => ricciArmPrincipalCoeffFib (I := I) g₁ x)
   intro Y
-  
+
   let κ : Equiv.Perm (Fin 4) := koszulSlotPerm
-  
-  
-  
-  
+
   have hreindex : ∀ {d : ℕ} (ρ : Equiv.Perm (Fin d))
       (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
       (_hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -522,26 +514,26 @@ theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) 
           ((Module.finBasis ℝ E) (τ j))) = _
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rfl
-  
+
   have hYκ := hreindex κ (fun x => Y x) Y.contMDiff
-  
+
   have hT03field := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) hYκ
-  
+
   have hCDTfield := ContMDiff.clm_bundle_apply (b := id)
     (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) Y.contMDiff
-  
+
   have hswapfield := hreindex (Equiv.swap (0 : Fin 2) 1)
     (fun x => (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         cometricDoubleTraceFib (I := I) g₁ 2 x)
         (Tensor0SBundle.Tensor0SSpace.ofModel
           (ContinuousMultilinearMap.domDomCongr κ (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))))
     hT03field
-  
+
   have hcomb := ((hT03field.add_section hswapfield).sub_section hCDTfield).const_smul_section
     (a := (1 / 2 : ℝ))
   refine hcomb.congr (fun x => ?_)
-  
+
   have hfib : ricciArmPrincipalCoeffFib (I := I) g₁ x (Y x) =
       (1 / 2 : ℝ) •
         ((((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
@@ -573,7 +565,7 @@ theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) 
       ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv,
       ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-  
+
   simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply]
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) hfib.symm
@@ -616,7 +608,7 @@ theorem ricciArmPrincipalCoeff_appCc_eq_combinedTrace
                     (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                       ((Module.finBasis ℝ E).cDualBasis k)))
                   (Fin.cons ((Module.finBasis ℝ E) k) v))) := by
-  
+
   rw [unitModel, appCc_toSection]
   rw [show ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
@@ -751,16 +743,16 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     fun b => Tensor0SNabla.curriedSection I M W₂ b (B b) with hW₁
   have hW₁_mdiff : TensorSectionMDiffAt (I := I) 1 W₁ x :=
     triMDiffAt_curried (I := I) (M := M) 1 W₂ hW₂_mdiff B
-  
+
   have hpeel1 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 2 V hV A v (Fin.cons (B x) ![C x])
-  
+
   have hpeel2 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 1 W₂ hW₂_mdiff B v ![C x]
-  
+
   have hpeel3 := tensor0SCovariantDerivative_succ_consEval_peel
     (I := I) (M := M) g₀ 0 W₁ hW₁_mdiff C v (fun i => Fin.elim0 i)
-  
+
   have hbase : Tensor0SSpace.toModel
       ((Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)).toFun
         (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (C b)) x v)
@@ -795,7 +787,7 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
       funext k
       fin_cases k <;> rfl
     rw [hscalar]
-  
+
   have hcorrC : Tensor0SSpace.toModel (W₁ x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v) (fun i => Fin.elim0 i)) =
       Tensor0SSpace.toModel (V x)
@@ -819,7 +811,7 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     apply congrArg
     funext k
     fin_cases k <;> rfl
-  
+
   have hcorrB : Tensor0SSpace.toModel (W₂ x)
         (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v)
           (Fin.cons (C x) (fun i => Fin.elim0 i))) =
@@ -837,7 +829,7 @@ private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     apply congrArg
     funext k
     fin_cases k <;> rfl
-  
+
   rw [hpeel1]
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M V y (A y)) = W₂ from rfl]
   rw [hpeel2]
@@ -1025,9 +1017,9 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
                 ![ζ, Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)]) := by
   classical
   rw [cotangentToDual_apply, dualToCotangent_apply]
-  
+
   have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ g₁ Z Y x
-  
+
   let ζf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩
   let Xf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
@@ -1036,7 +1028,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
   have hXfx : Xf x = X x := smoothExtensionTangent_eq (I := I) x (X x)
   have hXfmd := smoothExtensionTangent_mdiff (I := I) x (X x) x
   have hζfmd := smoothExtensionTangent_mdiff (I := I) x ζ x
-  
+
   have hcov : ((cotangentCov (LeviCivita (I := I) g₀)).toFun
         (fun b => cotangentToCLM (I := I)
           (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ =
@@ -1046,7 +1038,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     rw [cotangentCov_toFun, cotangentCovFun_apply, ← hXfx, ← hζfx]
     exact cotangentCovAt_apply_of_diff (LeviCivita (I := I) g₀) hθ hXfmd hζfmd
   rw [ContinuousLinearMap.coe_coe, hcov, cotangentScalar_def]
-  
+
   have hpairfun : (fun b : M => (cotangentToCLM (I := I)
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) =
       (fun b : M => (1 / 2 : ℝ) *
@@ -1058,7 +1050,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     rw [show (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b) =
         cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b) (ζf b) from rfl]
     rw [h]
-  
+
   have hext : extDerivFun (I := I)
         (fun b : M => (cotangentToCLM (I := I)
           (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) x (Xf x) =
@@ -1069,7 +1061,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     have hf := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S Z Y ζf x
     have hg := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S Y Z ζf x
     have hh := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S ζf Z Y x
-    
+
     have hmf0 := (((hf.hasMFDerivAt.add hg.hasMFDerivAt).sub hh.hasMFDerivAt).const_smul
       (1 / 2 : ℝ))
     have heq : (fun b : M => (cotangentToCLM (I := I)
@@ -1088,7 +1080,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
     rw [hmf.mfderiv]
     rfl
   rw [hext, hXfx]
-  
+
   have hθext : (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x))
         ((LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x)) =
       (1 / 2 : ℝ) *
@@ -1099,7 +1091,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
           - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
               ![(LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x), Z x, Y x]) := by
     set w : TangentSpace I x := (LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x) with hw
-    
+
     let wf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
       ⟨smoothExtensionTangent (I := I) x w, smoothExtensionTangent_contMDiff (I := I) x w⟩
     have hwfx : wf x = w := smoothExtensionTangent_eq (I := I) x w
@@ -1108,7 +1100,7 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
         cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x) (wf x) from by
       rw [hwfx]; rfl]
     rw [h]
-    
+
     have hcg : ∀ (A B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
         covGradEval (I := I) (M := M) g₀ S A B wf x =
           unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x ![A x, B x, w] := by
@@ -1119,12 +1111,12 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
       rw [covGradEval, unitModel, hwfx]; rfl
     rw [hcg Z Y, hcg Y Z, hcg2]
   rw [hθext]
-  
+
   rw [covGradEval_directionalDeriv (I := I) (M := M) g₀ S Z Y ζf x (X x),
       covGradEval_directionalDeriv (I := I) (M := M) g₀ S Y Z ζf x (X x),
       covGradEval_directionalDeriv (I := I) (M := M) g₀ S ζf Z Y x (X x)]
   rw [hζfx]
-  
+
   have ht1 : (Fin.cons (X x) (Fin.cons (Z x) (Fin.cons (Y x) ![ζ])) : Fin 4 → TangentSpace I x) =
       ![X x, Z x, Y x, ζ] := by funext k; fin_cases k <;> rfl
   have ht2 : (Fin.cons (X x) (Fin.cons (Y x) (Fin.cons (Z x) ![ζ])) : Fin 4 → TangentSpace I x) =
@@ -1559,7 +1551,7 @@ theorem palatini_tracedPrincipal_eq_combinedTrace
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![Z x, Y x]
         + palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x := by
   classical
-  
+
   have hsumeq : (∑ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
         (inverseMetricSharpFib (I := I) g₁ x
@@ -1640,7 +1632,7 @@ theorem combinedTrace42ModelZ_apply
     intro σ D'
     rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
     rfl
-  
+
   have htrace : ∀ (σ : Equiv.Perm (Fin 4)) (tup : Fin (Module.finrank ℝ E) → Fin 4 → E)
       (_htup : ∀ k, (fun j =>
         (![L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
@@ -1716,7 +1708,7 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun x => ricciArmPrincipalCoeffZFib (I := I) g₁ x)
   intro Y
-  
+
   have hreindex : ∀ (ρ : Equiv.Perm (Fin 4))
       (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 4 I x)
       (_hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
@@ -1748,7 +1740,7 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
           ((Module.finBasis ℝ E) (τ j))) = _
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rfl
-  
+
   have hcdt : ∀ (ρ : Equiv.Perm (Fin 4)),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
@@ -1761,7 +1753,7 @@ theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M)
     intro ρ
     exact ContMDiff.clm_bundle_apply (b := id)
       (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) (hreindex ρ (fun x => Y x) Y.contMDiff)
-  
+
   have hcomb := (((hcdt zSlotPerm1).add_section (hcdt zSlotPerm2)).sub_section
     (hcdt zSlotPerm3)).const_smul_section (a := (1 / 2 : ℝ))
   refine hcomb.congr (fun x => ?_)
@@ -2165,7 +2157,7 @@ theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
   rw [← alignedPrincipalEndoCZ_trace_eq (I := I) (M := M) g₀ g₁ S V W x]
   rw [← traceViaBasis_c (alignedPrincipalEndoCZ (I := I) (M := M) g₀ g₁ S V W x)]
   rw [palatiniTracedPrincipalZRemainder]
-  
+
   have hsumeq : ∀ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
         (inverseMetricSharpFib (I := I) g₁ x
@@ -2462,8 +2454,7 @@ private lemma g1Principal_splitCcross
   congr 1
   ext w
   rw [LinearMap.add_apply]
-  
-  
+
   have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ gcov Z Y x
   have halign := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ gop hθ v w
   rw [ContinuousLinearMap.coe_coe, ContinuousLinearMap.coe_coe]
@@ -2724,7 +2715,7 @@ theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
   rw [symmS_sub (I := I) (M := M) g₀ T T']
   rw [iteratedCovGrad_sub (I := I) g₀ 0 2 2
         (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')]
-  
+
   have happCc_sub : appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
         (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
           - iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) =
@@ -2956,8 +2947,7 @@ theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
       (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         R.toSection x))
   intro Y
-  
-  
+
   have hYσ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x
@@ -3028,13 +3018,13 @@ theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel, unitModel, appCc_toSection, appCc_toSection,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [reindexCoeff_toSection]
-  
+
   rw [reindexCoeffFib_apply (I := I) σ' x
     (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
       R.toSection x)
     ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
       W.toSection x) (unitTensor (I := I) (M := M) x))]
-  
+
   have hWu : Tensor0SBundle.Tensor0SSpace.toModel
       ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
         W.toSection x) (unitTensor (I := I) (M := M) x)) =
@@ -3099,23 +3089,23 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
           (appCc (I := I) (M := M) g₀ 4 2 R₂
             (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v := by
   classical
-  
+
   obtain ⟨σ', hσ'⟩ := exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
     (Equiv.swap (0 : Fin 2) 1) S 2
   refine ⟨(1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ', fun x v => ?_⟩
-  
+
   have hsymm : iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 S +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S) := by
     rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
-  
+
   set uR : ℝ := unitModel (I := I) (M := M) g₀ 2
     (appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huR
   set uRein : ℝ := unitModel (I := I) (M := M) g₀ 2
     (appCc (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R₂ σ')
       (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huRein
-  
+
   have hLHS : unitModel (I := I) (M := M) g₀ 2
       (appCc (I := I) (M := M) g₀ 4 2
         ((1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ')
@@ -3126,7 +3116,7 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
       ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
     rw [huR, huRein]
     simp only [smul_eq_mul]
-  
+
   have hSwap : unitModel (I := I) (M := M) g₀ 2
       (appCc (I := I) (M := M) g₀ 4 2 R₂
         (iteratedCovGrad (I := I) g₀ 0 2 2
@@ -3404,7 +3394,7 @@ theorem cotangentCov_leviCivita_diff_endpoint
       -θ x (PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v) := by
   have h1 := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁ hθ v w
   have h1' := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁' hθ v w
-  
+
   have hcocycle : PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v =
       PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v
         - PDE.DeTurck.connDiff (I := I) g₁' g₀ x w v := by
@@ -3708,7 +3698,7 @@ theorem combinedLowerArm_extension_free
   have hYwx : Yw x = v 1 := smoothExtensionTangent_eq (I := I) x (v 1)
   have hcons : (![v 0, v 1] : Fin 2 → TangentSpace I x) = v := by
     funext k; fin_cases k <;> rfl
-  
+
   have htel : ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
       (∑ i : Fin (Module.finrank ℝ E),
         (chartModelBasis E).repr
@@ -3757,7 +3747,7 @@ theorem combinedLowerArm_extension_free
           - (ricciTensor (I := I) g₁' x (v 0) (v 1) - ricciTensor (I := I) g₀ x (v 0) (v 1)) from by
       ring]
     rw [h₁, h₁']
-  
+
   have hgradX : ∀ i : Fin (Module.finrank ℝ E),
       covDerivConnDiff (I := I) g₀ g₁ (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
             (smoothExtensionTangent (I := I) x (v 0)) (smoothExtensionTangent (I := I) x (v 1)) x =
@@ -3779,7 +3769,7 @@ theorem combinedLowerArm_extension_free
       (covDerivConnDiff_diff_endpoint_graded (I := I) (M := M) g₀ g₁ g₁' Zv Yw
         ⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
           smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩ x)
-  
+
   have hregroup :
       ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
       (
@@ -3977,8 +3967,7 @@ theorem combinedLowerArm_extension_free
     rw [hgradX i, hgradZ i]
     simp only [hZv, hYw, ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
     abel
-  
-  
+
   have hPX := palatini_tracedPrincipalDiff_covector_eq_combinedTrace
     (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁' Zv Yw x
   have hPZ := palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
@@ -4005,8 +3994,7 @@ theorem combinedLowerArm_extension_free
       ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply]
     simp only [smul_eq_mul]
     ring
-  
-  
+
   have hP :
       ((∑ i : Fin (Module.finrank ℝ E),
           (chartModelBasis E).repr
@@ -4099,7 +4087,7 @@ lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x
         TangentSpace I x →L[ℝ] ℝ) = g₁'.inner x v := by
     ext w
     rw [inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_lowerFlatCLM]
-  
+
   have hinj : Function.Injective
       (fun u : TangentSpace I x => (g₁'.inner x u : TangentSpace I x →L[ℝ] ℝ)) := by
     intro a b hab
@@ -4464,7 +4452,7 @@ theorem order1CocycleLeg_flat_eq_explicit
   have hXex : Xe x = X x := smoothExtensionTangent_eq (I := I) x (X x)
   have hYex : Ye x = Y x := smoothExtensionTangent_eq (I := I) x (Y x)
   have hZex : Ze x = ζ := smoothExtensionTangent_eq (I := I) x ζ
-  
+
   rw [inverseMetricSharpFib_inner (I := I) g₁' x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
           - koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ,
@@ -4476,11 +4464,11 @@ theorem order1CocycleLeg_flat_eq_explicit
             - cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ from by
         rw [← cotangentToDualLinear_apply, ← cotangentToDualLinear_apply,
             ← cotangentToDualLinear_apply, map_sub, LinearMap.sub_apply]]
-  
+
   rw [show ζ = Ze x from hZex.symm]
   rw [koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁ S hbil X Y Ze x,
       koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁' S' hbil' X Y Ze x]
-  
+
   have hcg : ∀ (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       covGradEval (I := I) (M := M) g₀ S P Q R x
           - covGradEval (I := I) (M := M) g₀ S' P Q R x =
@@ -4490,7 +4478,7 @@ theorem order1CocycleLeg_flat_eq_explicit
     rw [covGrad_sub (I := I) (M := M) g₀ 0 2 S S', SmoothCcTensor.toSection_sub]
     rw [ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply,
         Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  
+
   have hval : ∀ (W : SmoothCcTensor g₀ 0 2)
       (P₁ P₂ Q₁ Q₂ R₁ R₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       P₁ x = P₂ x → Q₁ x = Q₂ x → R₁ x = R₂ x →
@@ -4498,8 +4486,7 @@ theorem order1CocycleLeg_flat_eq_explicit
           covGradEval (I := I) (M := M) g₀ W P₂ Q₂ R₂ x := by
     intro W P₁ P₂ Q₁ Q₂ R₁ R₂ hP hQ hR
     simp only [covGradEval, hP, hQ, hR]
-  
-  
+
   have eXY := (hcg X Y Ze).trans (hval (S - S') X Xe Y Ye Ze Ze hXex.symm hYex.symm rfl)
   have eYX := (hcg Y X Ze).trans (hval (S - S') Y Ye X Xe Ze Ze hYex.symm hXex.symm rfl)
   have eZXY := (hcg Ze X Y).trans (hval (S - S') Ze Ze X Xe Y Ye rfl hXex.symm hYex.symm)
@@ -4846,7 +4833,7 @@ theorem double_frame_bilin_trace_eq_fixed
           (K (chartModelBasis E m) (chartModelBasis E k) *
             Dd (chartModelBasis E n) (chartModelBasis E l))) := by
   classical
-  
+
   have hinner : ∀ a, ∑ b, K (B a) (B b) * Dd (B a) (B b) =
       outerPairBilin (I := I) g x K Dd (B a) (B a) := by
     intro a
@@ -4856,7 +4843,7 @@ theorem double_frame_bilin_trace_eq_fixed
     simp only [innerPairBilin_apply] at h
     rw [h]
   rw [Finset.sum_congr rfl (fun a _ => hinner a)]
-  
+
   have hout := orthonormal_basis_bilin_trace (I := I) (M := M) g (x := x)
     (outerPairBilin (I := I) g x K Dd) B hB
   rw [hout]
@@ -5001,7 +4988,7 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
         (E := fun z : M => Tensor0SSpace 2 I z) x
         (riemannBiContrFibFixedFrame (I := I) g₁ B x (Y x))) := by
   classical
-  
+
   have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -5034,7 +5021,7 @@ theorem riemannBiContrFibFixedFrame_apply_section_contMDiff (g₁ : SmoothRieman
     refine hsmul.congr ?_
     intro x
     rfl
-  
+
   set S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
     fun a b =>
@@ -5132,7 +5119,7 @@ theorem riemannBiContrFib_eq_fixedFrame_on_nbhd (g₁ : SmoothRiemannianMetric I
   intro v
   rw [riemannBiContrFib, riemannBiContrFibFixedFrame_toModel,
     riemannBiContrFibFixedFrame_toModel]
-  
+
   congr 1
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -6198,7 +6185,7 @@ theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianM
       deTurckLieFib (I := I) g₁ g_bg x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
           (unitTensor (I := I) (M := M) x)) from rfl]
-  
+
   set D : Tensor0SSpace 2 I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W.toSection x)
       (unitTensor (I := I) (M := M) x) with hD_def
@@ -6396,7 +6383,6 @@ theorem symmAbsorbedOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiema
       (Equiv.swap (0 : Fin 2) 1) S 0))
     (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
       (Equiv.swap (0 : Fin 2) 1) S 0)) x v
-
 
 set_option linter.unusedSectionVars false in
 

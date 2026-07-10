@@ -495,7 +495,7 @@ private lemma toModel_chartTensor0SSlotCorrection_sum_prodUnitEval (g : SmoothRi
     chartLeviCivitaParallelCLM (I := I) g x x X with hΦ
   apply ContinuousMultilinearMap.ext
   intro m
-  
+
   rw [show Tensor0SSpace.toModel
         (∑ k : Fin (p + q),
           chartTensor0SSlotCorrection (I := I) (p + q) g x (prodUnitEval (I := I) g S T) X x k) =
@@ -644,7 +644,7 @@ private lemma toModel_chartTensor0SCovariantDerivative_prodUnitEval_succ
   rw [toModel_chartTensor0SSlotCorrection_sum_prodUnitEval (I := I) g S T X x]
   rw [toModel_chartTensor0SCovariantDerivative_factor_succ (I := I) g S X x,
     toModel_chartTensor0SCovariantDerivative_factor_succ (I := I) g T X x]
-  
+
   rw [show Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (p' + 1) (q' + 1)
         (Tensor0SSpace.toModel
             (tensor0SIntrinsicChartCLM (I := I) (p' + 1) x (factorUnitEval (I := I) g S) x (X x)) -
@@ -814,7 +814,7 @@ private lemma covDerivUnitModel_prodUnitEval_frame (g : SmoothRiemannianMetric I
   set P : Π b' : M, Tensor0SSpace ((p' + 1) + (q' + 1)) I b' := prodUnitEval (I := I) g S T with hP
   have hP_mdiff : TensorSectionMDiffAt (I := I) ((p' + 1) + (q' + 1)) P x := by
     rw [hP]; exact prodUnitEval_tensorSectionMDiffAt (I := I) g S T x
-  
+
   have hprodaux : chartTensor0SCovariantDerivative (I := I) ((p' + 1) + (q' + 1)) g x P Xf x =
       Tensor0SNabla.tensor0SCovariantDerivative I M ((p' + 1) + (q' + 1)) (LeviCivita (I := I) g)
         P x (Xf x) :=
@@ -936,7 +936,7 @@ private lemma covDerivUnitModel_prodUnitEval (g : SmoothRiemannianMetric I M) {p
   set c : Fin (Module.finrank ℝ E) → ℝ :=
     fun i => ((DifferentialGeometry.Integral.Measure.chartModelBasis E).repr
       ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x w)) i with hc
-  
+
   have hdecomp : ∀ (n : ℕ) (Y : Π b' : M, Tensor0SSpace n I b'),
       Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M n (LeviCivita (I := I) g) Y x w) =

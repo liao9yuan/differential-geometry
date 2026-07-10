@@ -442,17 +442,15 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
           (unitZeroSec (I := I) (M := M) x))
         m := by
   classical
-  
+
   set GS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hGS
-  
+
   rw [covGrad_apply_unit_eval_genVal (I := I) (M := M) g (s + 1) GS x
     (Fin.cons (X x) (Fin.cons (Y x) m))]
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons (X x) (Fin.cons (Y x) m) ∘ Fin.succ) = Fin.cons (Y x) m from
     funext (fun j => by simp [Fin.cons_succ])]
-  
-  
-  
+
   rw [show
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         tensorCovDerivAt (I := I) (M := M) g 0 (s + 1) GS x (X x))
@@ -461,7 +459,7 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
         (unitGradFieldGen (I := I) (M := M) g s S) x (X x) from by
     rw [tensorCovDerivAt_def (I := I) (M := M) g 0 (s + 1) GS x (X x)]
     exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1) GS.toSection x (X x)]
-  
+
   rw [show Tensor0SSpace.toModel
         ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
           (unitGradFieldGen (I := I) (M := M) g s S) x (X x))
@@ -473,12 +471,12 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
     (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
         (unitGradFieldGen (I := I) (M := M) g s S) x (X x)) (v0 := Y x) (vs := m)).symm]
-  
+
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
     (unitGradFieldGen (I := I) (M := M) g s S) (Vfield := X) (Y := Y) (x := x)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))]
-  
+
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M
         (unitGradFieldGen (I := I) (M := M) g s S) y (Y y)) =
       (fun y : M =>
@@ -488,17 +486,13 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
     funext (fun y => curry_unitGradFieldGen_eq (I := I) (M := M) g s S y (Y y))]
   rw [curry_unitGradFieldGen_eq (I := I) (M := M) g s S x
     ((LeviCivita (I := I) g).toFun Y x (X x))]
-  
-  
+
   rw [tensorSecondCovDeriv_def (I := I) g 0 s X Y (fun y : M => S.toSection y) x]
-  
+
   refine congrArg (fun T : Tensor0SSpace s I x => Tensor0SSpace.toModel T m) ?_
-  
+
   rw [ContinuousLinearMap.sub_apply]
-  
-  
-  
-  
+
   have houter :
       (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun
           (fun y : M =>
@@ -523,7 +517,7 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
       (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun F x (X x)) ?_
     funext y
     rw [hσapp y, covApply_apply, ← tensorCovDerivAt_def (I := I) (M := M) g 0 s S y (Y y)]
-  
+
   have hchr :
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         tensorCovDerivAt (I := I) (M := M) g 0 s S x ((LeviCivita (I := I) g).toFun Y x (X x)))

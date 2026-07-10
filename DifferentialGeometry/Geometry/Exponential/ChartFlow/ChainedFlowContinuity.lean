@@ -55,61 +55,6 @@ theorem maximalGeodesic_continuousAt_zero
     filter_upwards [h_ball] with t ht using h_eq t ht
   exact hproj_cont.congr h_eventually.symm
 
-theorem expMap_geodesicSegment_compactImage
-    (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
-    IsCompact (maximalGeodesic (I := I) g p v₀ '' Set.Icc (0 : ℝ) 1) := by
-  have h_cont :
-      ContinuousOn (maximalGeodesic (I := I) g p v₀) (Set.Icc (0 : ℝ) 1) := by
-    sorry
-  exact isCompact_Icc.image_of_continuousOn h_cont
-
-theorem expMap_chainedFlow_joint_continuity
-    (g : SmoothRiemannianMetric I M) (p : M) (v₀ : TangentSpace I p) :
-    ∃ ρ : ℝ, 0 < ρ ∧
-      ContinuousOn
-        (fun vt : TangentSpace I p × ℝ =>
-          maximalGeodesic (I := I) g p vt.1 vt.2)
-        ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
-  sorry
-
-theorem expMap_chainedFlow_joint_contMDiff
-    (g : SmoothRiemannianMetric I M) (p : M) (v₀ : E)
-    (hv₀ : (show TangentSpace I p from v₀) ≠ 0) :
-    ∃ ρ : ℝ, 0 < ρ ∧
-      ContMDiffOn (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) I 1
-        (fun vt : E × ℝ =>
-          (maximalGeodesic (I := I) g p (show TangentSpace I p from vt.1) vt.2 : M))
-        ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
-  sorry
-
-theorem expMap_continuous
-    (g : SmoothRiemannianMetric I M) (p : M) :
-    Continuous (expMap (I := I) g p) := by
-  rw [continuous_iff_continuousAt]
-  intro v₀
-  obtain ⟨ρ, hρ, hjoint⟩ :=
-    expMap_chainedFlow_joint_continuity (I := I) g p v₀
-  set F : TangentSpace I p × ℝ → M :=
-    fun vt => maximalGeodesic (I := I) g p vt.1 vt.2 with hF_def
-  set s : TangentSpace I p → TangentSpace I p × ℝ := fun v => (v, 1) with hs_def
-  have hcomp_eq : expMap (I := I) g p = F ∘ s := by
-    funext v
-    simp only [Function.comp_apply, hF_def, hs_def, expMap]
-  rw [hcomp_eq]
-  have hs_cont : Continuous s := by
-    rw [hs_def]; exact continuous_id.prodMk continuous_const
-  have hs_maps : Set.MapsTo s (Metric.ball v₀ ρ)
-      ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
-    intro v hv
-    refine ⟨hv, ?_⟩
-    exact ⟨zero_le_one, le_refl 1⟩
-  have hball_nhds : Metric.ball v₀ ρ ∈ 𝓝 v₀ :=
-    Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hρ)
-  have hcw : ContinuousWithinAt (F ∘ s) (Metric.ball v₀ ρ) v₀ := by
-    apply ContinuousOn.continuousWithinAt _ (Metric.mem_ball_self hρ)
-    exact hjoint.comp hs_cont.continuousOn hs_maps
-  exact hcw.continuousAt hball_nhds
-
 end Exponential
 end Riemannian
 end Geometry

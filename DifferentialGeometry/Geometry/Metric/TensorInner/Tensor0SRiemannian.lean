@@ -147,8 +147,7 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
       rw [heq]
       have hT0 := hT (fun i : Fin 0 => Fin.elim0 i)
       have hS0 := hS (fun i : Fin 0 => Fin.elim0 i)
-      
-      
+
       have hempty :
           (fun k : Fin 0 => (chartModelBasis E) ((fun i : Fin 0 => Fin.elim0 i) k))
             = (fun i : Fin 0 => (Fin.elim0 i : E)) := by
@@ -204,7 +203,7 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
             (fun b : M => (S b).curryLeft ((chartModelBasis E) j))
             ?_ ?_
         · intro ψ
-          
+
           set ψ' : Fin (s + 1) → Fin (Module.finrank ℝ E) :=
             Fin.cons (α := fun _ => Fin (Module.finrank ℝ E)) i ψ with hψ'
           have hψ'_zero : ψ' 0 = i := by
@@ -224,8 +223,7 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
             funext k
             refine Fin.cases ?_ ?_ k
             · rw [hψ'_zero]
-              
-              
+
               simp
             · intro k'
               rw [hψ'_succ k']
@@ -280,8 +278,7 @@ theorem chartLocal_continuous_inner_of_smooth_sections
           (Tensor0SBundle.Tensor0SSpace.toModel
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) (S b)))
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  
-  
+
   have hbridge : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
       tensorInnerPointwise_0s (I := I) (M := M) s g b
         (Tensor0SBundle.Tensor0SSpace.toModel

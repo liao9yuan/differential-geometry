@@ -101,21 +101,6 @@ theorem p_mem_radialMinSet (g : SmoothRiemannianMetric I M) (p : M) :
     simp
   rw [h0, Real.sqrt_zero, ENNReal.ofReal_zero, riemannianEDist_self]
 
-theorem radial_image_T_preconnected (g : SmoothRiemannianMetric I M)
-    (p : M) {R : ℝ} (hR : 0 ≤ R) :
-    IsPreconnected
-      ((expMap (I := I) g p) '' (gBall (I := I) g p R)) := by
-  have hcont : Continuous (expMap (I := I) g p) :=
-    HopfRinow.expMap_continuous_of_geodesic_complete (I := I) g p
-  exact (gBall_isPreconnected (I := I) g p hR).image _ hcont.continuousOn
-
-theorem radial_image_is_open (g : SmoothRiemannianMetric I M)
-    (p : M) (R : ℝ) :
-    IsOpen
-      (Subtype.val ⁻¹' (radialMinSet (I := I) g p) :
-        Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) := by
-  sorry
-
 private lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) : 0 ≤ g.inner p v v := by
   rcases eq_or_ne v 0 with hv | hv
@@ -190,100 +175,6 @@ private lemma continuous_riemannianEDist_ambient
   haveI : RegularSpace M := inferInstance
   letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
   exact (continuous_const.edist continuous_id)
-
-theorem radial_image_is_closed (g : SmoothRiemannianMetric I M)
-    (p : M) (R : ℝ) :
-    IsClosed
-      (Subtype.val ⁻¹' (radialMinSet (I := I) g p) :
-        Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) := by
-  have hexp : Continuous (expMap (I := I) g p) :=
-    HopfRinow.expMap_continuous_of_geodesic_complete (I := I) g p
-  have hf : Continuous
-      (fun v : TangentSpace I p =>
-        ENNReal.ofReal (Real.sqrt (g.inner p v v))) :=
-    ENNReal.continuous_ofReal.comp (continuous_sqrt_gInner_self (I := I) g p)
-  have hh : Continuous
-      (fun v : TangentSpace I p =>
-        riemannianEDist I p (expMap (I := I) g p v)) :=
-    (continuous_riemannianEDist_ambient (I := I) p).comp hexp
-  set A : Set (TangentSpace I p) :=
-    {v : TangentSpace I p |
-      v ∈ gBall (I := I) g p (max R 0) ∧
-      ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
-        riemannianEDist I p (expMap (I := I) g p v) ∧
-      riemannianEDist I p (expMap (I := I) g p v) ≤ ENNReal.ofReal R} with hA
-  have hAclosed : IsClosed A := by
-    have heq : IsClosed
-        {v : TangentSpace I p |
-          ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
-            riemannianEDist I p (expMap (I := I) g p v)} :=
-      isClosed_eq hf hh
-    have hlev : IsClosed
-        {v : TangentSpace I p |
-          riemannianEDist I p (expMap (I := I) g p v) ≤ ENNReal.ofReal R} :=
-      IsClosed.preimage hh isClosed_Iic
-    have hsplit : A =
-        gBall (I := I) g p (max R 0) ∩
-          ({v : TangentSpace I p |
-              ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
-                riemannianEDist I p (expMap (I := I) g p v)} ∩
-            {v : TangentSpace I p |
-              riemannianEDist I p (expMap (I := I) g p v) ≤
-                ENNReal.ofReal R}) := by
-      ext v; simp only [hA, Set.mem_setOf_eq, Set.mem_inter_iff]
-    rw [hsplit]
-    exact (isClosed_gBall (I := I) g p (max R 0)).inter (heq.inter hlev)
-  have hAcompact : IsCompact A :=
-    (isCompact_gBall (I := I) g p (max R 0)).of_isClosed_subset hAclosed
-      (fun v hv => hv.1)
-  have hImageClosed : IsClosed (expMap (I := I) g p '' A) :=
-    (hAcompact.image hexp).isClosed
-  have hpreimage_eq :
-      (Subtype.val ⁻¹' (radialMinSet (I := I) g p) :
-        Set ↥{q : M | riemannianEDist I p q ≤ ENNReal.ofReal R}) =
-      Subtype.val ⁻¹' (expMap (I := I) g p '' A) := by
-    ext x
-    simp only [Set.mem_preimage]
-    constructor
-    · rintro ⟨v, hexpv, hlen⟩
-      have hxball : riemannianEDist I p x.val ≤ ENNReal.ofReal R := x.2
-      have hlen' : ENNReal.ofReal (Real.sqrt (g.inner p v v)) =
-          riemannianEDist I p (expMap (I := I) g p v) := by
-        rw [hexpv]; exact hlen
-      have hconstr : riemannianEDist I p (expMap (I := I) g p v) ≤
-          ENNReal.ofReal R := by rw [hexpv]; exact hxball
-      have hle : ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
-          ENNReal.ofReal R := by rw [hlen']; exact hconstr
-      have hvmax : Real.sqrt (g.inner p v v) ≤ max R 0 := by
-        rcases (ENNReal.ofReal_le_ofReal_iff' (p := Real.sqrt (g.inner p v v))
-          (q := R)).1 hle with h | h
-        · exact le_trans h (le_max_left R 0)
-        · exact le_trans h (le_max_right R 0)
-      exact ⟨v, ⟨hvmax, hlen', hconstr⟩, hexpv⟩
-    · rintro ⟨v, ⟨_hvmax, hlen', _hconstr⟩, hexpv⟩
-      have hrie : riemannianEDist I p x.val =
-          ENNReal.ofReal (Real.sqrt (g.inner p v v)) := by
-        rw [← hexpv, hlen']
-      exact ⟨v, hexpv, by rw [hrie]⟩
-  rw [hpreimage_eq]
-  exact hImageClosed.preimage continuous_subtype_val
-
-theorem radial_image_T_contains_rieDist_closedBall
-    (g : SmoothRiemannianMetric I M) (p : M) (R : ℝ) :
-    ∀ q : M, riemannianEDist I p q ≤ ENNReal.ofReal R →
-      ∃ v : TangentSpace I p,
-        expMap (I := I) g p v = q ∧
-          Real.sqrt (g.inner p v v) ≤ R := by
-  sorry
-
-theorem expMap_surjective_on_riemannianEDist_closedBall
-    (g : SmoothRiemannianMetric I M) (p : M) (R : ℝ) :
-    ∀ q : M, riemannianEDist I p q ≤ ENNReal.ofReal R →
-      ∃ v : TangentSpace I p,
-        expMap (I := I) g p v = q ∧
-          Real.sqrt (g.inner p v v) ≤ R ∧
-          ENNReal.ofReal (Real.sqrt (g.inner p v v)) = riemannianEDist I p q := by
-  sorry
 
 end RadialSurjectivity
 end Riemannian

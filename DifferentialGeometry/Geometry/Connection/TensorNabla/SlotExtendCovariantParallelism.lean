@@ -152,8 +152,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (r + 1) (s + 1)
         (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) = 0 := by
   classical
-  
-  
+
   have hslotZero : ∀ (y : M),
       Integral.Connection.slotExtendFib (I := I) (M := M) g₀ r s y
           (0 : Tensor0SBundle.Tensor0SSpace r I y →L[ℝ] Tensor0SBundle.Tensor0SSpace s I y) =
@@ -163,7 +162,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     intro D
     rw [Integral.Connection.slotExtendFib_apply, ContinuousLinearMap.zero_comp, map_zero,
       ContinuousLinearMap.zero_apply]
-  
+
   have hdir : ∀ (x : M) (v : E),
       Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v = 0 := by
     intro x v
@@ -171,7 +170,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     intro D
     apply Tensor0SBundle.Tensor0SSpace.toModel_injective
     refine ContinuousMultilinearMap.ext (fun m => ?_)
-    
+
     have heval := Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval
       (I := I) (M := M) g₀ r s Φ x D (Fin.cons v m)
     rw [hΦ, Integral.L2.SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply,
@@ -183,8 +182,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
     rw [ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
       ContinuousMultilinearMap.zero_apply]
     exact heval.symm
-  
-  
+
   apply Integral.L2.SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x

@@ -144,7 +144,7 @@ theorem ederivWithin_ederivWithin_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {s
     have : DifferentiableWithinAt ℝ (fderivWithin ℝ ω s) s x := (h.fderivWithin_right
       (hs) (by ring_nf; exact le_of_eq rfl) (hx)).differentiableWithinAt
       (by simp only [ne_eq, one_ne_zero, not_false_eq_true])
-    let ⟨ω'', h⟩ := this 
+    let ⟨ω'', h⟩ := this
     have uncurryDeriv := @ContinuousLinearMap.hasFDerivWithinAt ℝ _ _ _ _ _ _ _ _ _
       (@uncurryFinCLM ℝ E F _ _ _ _ _ n) (fderivWithin ℝ ω s x) t
     have chain : HasFDerivWithinAt (uncurryFinCLM ∘ (fderivWithin ℝ ω s)) (uncurryFinCLM ∘L ω'') s x
@@ -196,7 +196,7 @@ theorem ederiv_ederiv_apply (ω : E → E [⋀^Fin n]→L[ℝ] F) {x : E} (h : C
     have : DifferentiableAt ℝ (fderiv ℝ ω) x := (h.fderiv_right
       (by ring_nf; exact le_of_eq rfl)).differentiableAt
       (by simp only [ne_eq, one_ne_zero, not_false_eq_true])
-    let ⟨ω'', h⟩ := this 
+    let ⟨ω'', h⟩ := this
     have uncurryDeriv := @ContinuousLinearMap.hasFDerivAt ℝ _ _ _ _ _ _ _ _ _
       (@uncurryFinCLM ℝ E F _ _ _ _ _ n) (fderiv ℝ ω x)
     have chain : HasFDerivAt (uncurryFinCLM ∘ (fderiv ℝ ω)) (uncurryFinCLM ∘L ω'') x

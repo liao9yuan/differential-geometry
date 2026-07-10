@@ -40,35 +40,28 @@ noncomputable def VectorField.action
     (V : VectorField (I := I) (M := M)) (f : ScalarField (I := I) (M := M)) :
     ScalarField (I := I) (M := M) :=
   ⟨fun x => mfderiv I 𝓘(𝕜) f x (V x), by
-    
+
     intro x₀
     set e₀ := trivializationAt E (TangentSpace I) x₀
-    
+
     have hdf : ContMDiffAt I 𝓘(𝕜, E →L[𝕜] 𝕜) (⊤ : ℕ∞)
         (inTangentCoordinates I 𝓘(𝕜) id f (mfderiv I 𝓘(𝕜) f) x₀) x₀ :=
       f.contMDiff.contMDiffAt.mfderiv_const (WithTop.coe_le_coe.mpr le_top)
-    
+
     have hV : ContMDiffAt I 𝓘(𝕜, E) (⊤ : ℕ∞) (fun x => (e₀ ⟨x, V x⟩).2) x₀ :=
       (Bundle.contMDiffAt_section (n := (⊤ : ℕ∞)) x₀).mp V.contMDiff.contMDiffAt
-    
-    
-    
-    
+
     refine (hdf.clm_apply hV).congr_of_eventuallyEq ?_
     filter_upwards
       [e₀.open_baseSet.mem_nhds (mem_baseSet_trivializationAt E (TangentSpace I) x₀)]
     intro x hx
-    
-    
-    
+
     simp only [inTangentCoordinates, ContinuousLinearMap.inCoordinates, Function.id_def,
       TangentBundle.continuousLinearMapAt_model_space, ContinuousLinearMap.comp_apply]
-    
-    
+
     change mfderiv I 𝓘(𝕜) f x (V x) = mfderiv I 𝓘(𝕜) f x (e₀.symmL 𝕜 x ((e₀ ⟨x, V x⟩).2))
     congr 1
-    
-    
+
     exact (Bundle.Trivialization.symm_apply_apply_mk e₀ hx (V x)).symm⟩
 
 noncomputable instance : CommRing (ScalarField (I := I) (M := M)) :=
@@ -91,13 +84,12 @@ theorem VectorField.action_leibniz
     (V : VectorField (I := I) (M := M)) (f g : ScalarField (I := I) (M := M)) :
     V.action (f * g) = f * V.action g + g * V.action f := by
   apply DFunLike.ext; intro x
-  
-  
+
   have hf : HasMFDerivAt I 𝓘(𝕜) ⇑f x (mfderiv I 𝓘(𝕜) ⇑f x : TangentSpace I x →L[𝕜] 𝕜) :=
     ((f.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero)).hasMFDerivAt
   have hg : HasMFDerivAt I 𝓘(𝕜) ⇑g x (mfderiv I 𝓘(𝕜) ⇑g x : TangentSpace I x →L[𝕜] 𝕜) :=
     ((g.contMDiff x).mdifferentiableAt (mod_cast ENat.top_ne_zero)).hasMFDerivAt
-  
+
   have prod := congr_arg (· (V x)) (hf.mul hg).mfderiv
   exact prod
 

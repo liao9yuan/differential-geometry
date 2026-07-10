@@ -55,29 +55,29 @@ noncomputable def chartPushedRawPartial
 structure ChartPushedRawPartialLipschitz
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) where
-  
+
   C : ℝ
-  
+
   C_nonneg : 0 ≤ C
-  
+
   memLp : ∀ v : SmoothScalar g,
     MemLp (chartPushedRawPartial (I := I) (M := M) g α j v) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
-  
+
   bound : ∀ v : SmoothScalar g,
     eLpNorm (chartPushedRawPartial (I := I) (M := M) g α j v) 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)) ≤
       ENNReal.ofReal C * (‖v‖₊ : ℝ≥0∞)
-  
+
   add : ∀ v w : SmoothScalar g,
     chartPushedRawPartial (I := I) (M := M) g α j (v + w) =ᵐ[
         (chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)]
       fun y => chartPushedRawPartial (I := I) (M := M) g α j v y +
         chartPushedRawPartial (I := I) (M := M) g α j w y
-  
+
   smul : ∀ (c : ℝ) (v : SmoothScalar g),
     chartPushedRawPartial (I := I) (M := M) g α j (c • v) =ᵐ[
         (chartPulledWeightedMeasure (I := I) g α).restrict

@@ -327,33 +327,32 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ∫ t in (0 : ℝ)..1,
         unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v := by
-  
+
   set u : Tensor0SSpace r I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
       (unitTensor (I := I) (M := M) x) with hu
-  
+
   have hIIm : IntervalIntegrable (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0 1 :=
     ((hcont x).mono hSI).intervalIntegrable
-  
-  
+
   have key : ∀ Ψ : SmoothCcTensor g₀ r s',
       unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' Ψ W) x v =
         ((TensorRSSpace.toModel (Ψ.toSection x)) (Tensor0SSpace.toModel u)) v := by
     intro Ψ
     rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
       toModel_tensorRS_apply (I := I) r s' x (Ψ.toSection x) u]
-  
+
   rw [show unitModel (I := I) (M := M) g₀ s'
         (appCc (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ((TensorRSSpace.toModel
             ((pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint).toSection x))
           (Tensor0SSpace.toModel u)) v from key _]
-  
+
   rw [pathIntegralCoeffField_toModel]
-  
+
   rw [ContinuousLinearMap.intervalIntegral_apply hIIm (Tensor0SSpace.toModel u)]
-  
+
   have hcontApp : ContinuousOn (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) S :=
     (ContinuousLinearMap.apply ℝ (Tensor0SModel s' ℝ E)
@@ -361,12 +360,12 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
   have hIIapp : IntervalIntegrable (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) volume 0 1 :=
     (hcontApp.mono hSI).intervalIntegrable
-  
+
   rw [show (fun t : ℝ => unitModel (I := I) (M := M) g₀ s'
           (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v) =
         (fun t : ℝ => ((TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) v) from
     funext (fun t => key (Φ t))]
-  
+
   exact (ContinuousLinearMap.intervalIntegral_comp_comm
       (ContinuousMultilinearMap.apply ℝ (fun _ : Fin s' => E) ℝ v) hIIapp).symm
 

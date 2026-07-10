@@ -174,7 +174,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
       exact norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)
     have h1mem : (1 : ℕ) ∈ Finset.range 3 := by decide
     exact le_trans (Finset.single_le_sum hsum_terms h1mem) henv
-  -- clamp δ to [0, m] for the order-0 connDiff bound (gFibreOpBound is monotone in δ)
+
   have hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) (max δ 0) := by
     intro y a b
     refine le_trans (hδ y a b) ?_
@@ -188,7 +188,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
       _ = max δ 0 * Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) := by ring
   have hδ'_le : max δ 0 ≤ m := max_le hδ_le hm0
   have hδ'_nn : 0 ≤ max δ 0 := le_max_right _ _
-  -- order-0 connDiff bound applied to the metric-difference tensor P
+
   have hconn0 : ∀ a b : TangentSpace I x,
       Real.sqrt (g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)) ≤
@@ -206,7 +206,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
   have hSv_nn : 0 ≤ Sv := Real.sqrt_nonneg _
   have hSw_nn : 0 ≤ Sw := Real.sqrt_nonneg _
   have hSu_nn : 0 ≤ Su := Real.sqrt_nonneg _
-  -- bound the two covDerivConnDiff terms
+
   have hA1_bd : Real.sqrt (g₀.inner x A1 A1) ≤ CA * Sv * Sw * Su := by
     have h := hCA g₁ P hδ_le hδ htie x henv v w u
     rw [← hX_def, ← hY_def, ← hZ_def, ← hSv_def, ← hSw_def, ← hSu_def] at h
@@ -217,7 +217,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
     rw [← hX_def, ← hY_def, ← hZ_def, ← hSv_def, ← hSw_def, ← hSu_def] at h
     rw [hA2_def]
     exact h
-  -- rewrite S1, S2 as connDiff values
+
   have hS1_eq : S1 = PDE.DeTurck.connDiff (I := I) g₁ g₀ x u w := by
     rw [hS1_def]
     change CovariantDerivative.difference (LeviCivita (I := I) g₁) (LeviCivita (I := I) g₀) x
@@ -232,7 +232,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
     rw [hQ1_def, ← connDiff_eq_difference (I := I) g₀ g₁, hXx]
   have hQ2_eq : Q2 = PDE.DeTurck.connDiff (I := I) g₁ g₀ x S2 w := by
     rw [hQ2_def, ← connDiff_eq_difference (I := I) g₀ g₁, hYx]
-  -- bound the quadratic S∗S terms
+
   have hQ1_bd : Real.sqrt (g₀.inner x Q1 Q1) ≤ (C0 ^ 2 * B ^ 2) * Sv * Sw * Su := by
     rw [hQ1_eq]
     have hS1_bd : Real.sqrt (g₀.inner x S1 S1) ≤ C0 * Np * Su * Sw := by
@@ -300,7 +300,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
               = (C0 ^ 2 * Np ^ 2) * (Sv * Sw * Su) := by ring
             _ ≤ (C0 ^ 2 * B ^ 2) * (Sv * Sw * Su) := hstep
             _ = (C0 ^ 2 * B ^ 2) * Sv * Sw * Su := by ring
-  -- combine via triangle inequality on the g₀-norm
+
   set Kc : ℝ := 2 * CA + 2 * (C0 ^ 2 * B ^ 2) with hKc_def
   have hKc_nn : 0 ≤ Kc := by rw [hKc_def]; positivity
   have hRsub_bd : Real.sqrt (g₀.inner x (R1 - R0) (R1 - R0)) ≤ Kc * Sv * Sw * Su := by
@@ -325,7 +325,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
             ((C0 ^ 2 * B ^ 2) * Sv * Sw * Su + (C0 ^ 2 * B ^ 2) * Sv * Sw * Su) :=
           add_le_add htri1 htri2
       _ = Kc * Sv * Sw * Su := by rw [hKc_def]; ring
-  -- square to get the goal
+
   have hRsub_nn : 0 ≤ g₀.inner x (R1 - R0) (R1 - R0) :=
     metric_inner_self_nonneg (I := I) (M := M) g₀ x (R1 - R0)
   have hrhs_nn : 0 ≤ Kc * Sv * Sw * Su :=

@@ -255,11 +255,11 @@ theorem sq_eq_base_add_integral_of_indefinite
 
 structure CrossScaleField (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (a : ℝ) (T : ℝ) where
-  
+
   hiL2 : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T
-  
+
   lo : timeH1 (tensorHs (I := I) (M := M) g r s a) T
-  
+
   link : ∀ᵐ t ∂(timeMeasure T),
     tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         (show a ≤ a + 2 by linarith) (hiL2 t) = lo.toFun t

@@ -73,7 +73,7 @@ lemma covApply_cov_V_pairedSection_eq
     homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt I M E_U U F V cov_U cov_V
       (fun y : M => τ y) hτ hZ hY
   simp only [Pi.add_apply, pairedSection, covApply_apply]
-  
+
   rw [hkey]
   abel
 
@@ -101,7 +101,7 @@ lemma cov_V_toFun_pairedSection_apply
     homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt I M E_U U F V cov_U cov_V
       σ hσ hX_at hY
   rw [hXx] at hkey
-  
+
   rw [show cov_V.toFun (pairedSection (M := M) (U := U) (V := V) σ Y) x v =
       cov_V.toFun (fun y => σ y (Y y)) x v from rfl, hkey]
   abel
@@ -122,7 +122,7 @@ lemma cov_V_toFun_covApply_pairedSection_apply
           (covApply cov_U (fun b => Z b) (fun b => Y b) x) +
         (τ x) (cov_U.toFun (covApply cov_U (fun b => Z b) (fun b => Y b)) x v) := by
   classical
-  
+
   have hZ := Z.contMDiff
   have hτ := τ.contMDiff
   have hY := Y.contMDiff
@@ -133,7 +133,7 @@ lemma cov_V_toFun_covApply_pairedSection_apply
   have hY1 : ContMDiff I (I.prod 𝓘(ℝ, E_U)) ((∞ : WithTop ℕ∞) + 1)
       (fun y : M => TotalSpace.mk' E_U (E := U) y (Y y)) := by
     rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from by simp]; exact Y.contMDiff
-  
+
   have hcovZτ := covApply_mdifferentiableAt (cov := covHom cov_U cov_V) (x := x) hZ hτ1
   have hcovZY := covApply_mdifferentiableAt (cov := cov_U) (x := x) hZ hY1
   have hτ_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U →L[ℝ] F))
@@ -143,12 +143,10 @@ lemma cov_V_toFun_covApply_pairedSection_apply
   have hY_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U))
       (fun y : M => TotalSpace.mk' E_U (E := U) y (Y y)) x :=
     (hY x).mdifferentiableAt (by simp)
-  
+
   have hsec := covApply_cov_V_pairedSection_eq I M E_U U F V cov_U cov_V Z τ Y
   rw [hsec]
-  
-  
-  
+
   have hcovZτ_glob :=
     contMDiffOn_univ.mp (covApply_contMDiffOn (cov := covHom cov_U cov_V) hZ hτ1)
   have hcovZY_glob :=
@@ -161,7 +159,7 @@ lemma cov_V_toFun_covApply_pairedSection_apply
     ((ContMDiff.clm_bundle_apply (b := id) hτ hcovZY_glob) x).mdifferentiableAt (by simp)
   rw [cov_V.isCovariantDerivativeOnUniv.add hadd1 hadd2]
   simp only [ContinuousLinearMap.add_apply]
-  
+
   rw [cov_V_toFun_pairedSection_apply I M E_U U F V cov_U cov_V hcovZτ hY_at v,
       cov_V_toFun_pairedSection_apply I M E_U U F V cov_U cov_V hτ_at hcovZY v]
   abel
@@ -178,7 +176,7 @@ lemma riemannSec_cov_V_pairedSection_eq
         (τ x) (riemannSec cov_U (fun b => X b) (fun b => W b) (fun b => Y b) x) := by
   classical
   set cov := covHom cov_U cov_V with hcov
-  
+
   have hτ_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U →L[ℝ] F))
       (fun y : M => TotalSpace.mk' (E_U →L[ℝ] F)
         (E := fun z : M => (U z →L[ℝ] V z)) y (τ y)) x :=
@@ -186,15 +184,15 @@ lemma riemannSec_cov_V_pairedSection_eq
   have hY_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U))
       (fun y : M => TotalSpace.mk' E_U (E := U) y (Y y)) x :=
     (Y.contMDiff x).mdifferentiableAt (by simp)
-  
+
   rw [riemannSec_def]
-  
+
   rw [cov_V_toFun_covApply_pairedSection_apply I M E_U U F V cov_U cov_V W τ Y (X x),
       cov_V_toFun_covApply_pairedSection_apply I M E_U U F V cov_U cov_V X τ Y (W x)]
-  
+
   rw [cov_V_toFun_pairedSection_apply I M E_U U F V cov_U cov_V hτ_at hY_at
         (VectorField.mlieBracket I (fun b => X b) (fun b => W b) x)]
-  
+
   rw [riemannSec_def, riemannSec_def]
   simp only [covApply_apply, ContinuousLinearMap.sub_apply, map_sub]
   abel

@@ -35,9 +35,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
-/-- Extensionality for operator-rank tensor fibres through the model evaluation: two
-`(r,a)`-operator fibres are equal once their model evaluations agree on every covariant
-subject `D` and every tangent tuple `v`. -/
 lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
     {T T' : TensorRSSpace r a I x}
     (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
@@ -57,8 +54,6 @@ private lemma vecTail_cons' {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-/-- The model evaluation of a finite sum of covariant tensor fibres is the finite sum of
-the model evaluations. -/
 lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
@@ -151,11 +146,6 @@ private noncomputable def covApplyCcSec (r t : ℕ) (W : SmoothCcTensor g r t)
     covApplyRS_contMDiff (I := I) g r t W.toSection.contMDiff_toFun hY
 set_option backward.isDefEq.respectTransparency false in
 
-/-- Second-covariant-gradient evaluation bridge: evaluating the twice-iterated covariant
-gradient of a compactly supported `(r,t)`-tensor field at smooth vector fields `X`, `Y`
-in the two new covariant slots agrees with the tensor second covariant derivative
-`tensorSecondCovDeriv` along `X`, `Y`, pointwise on every covariant subject `D` and
-tangent tuple `m`. -/
 theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (W : SmoothCcTensor g r t)
     {X Y : Π b : M, TangentSpace I b}
@@ -175,12 +165,12 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (V := fun z : M => Tensor0SSpace r I z) (n := (⊤ : ℕ∞)) x D
   subst hwx
   set GW : SmoothCcTensor g r (t + 1) := covGrad (I := I) (M := M) g r t W with hGW_def
-  
+
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g r (t + 1) GW x (w x)
     (Fin.cons (X x) (Fin.cons (Y x) m))]
   simp only [Fin.cons_zero]
   rw [vecTail_cons' (X x) (Fin.cons (Y x) m)]
-  
+
   have happly₁ : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from
       tensorCovDerivAt (I := I) (M := M) g r (t + 1) GW x (X x)) (w x) =
       Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
@@ -192,7 +182,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r (t + 1)
       (LeviCivita (I := I) g) GW.toSection w x (X x)
   rw [happly₁, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  
+
   have hP_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (t + 1) ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel (t + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (t + 1) I z) y
@@ -210,8 +200,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       (fun y : M =>
         (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
           GW.toSection y) (w y)) x (hP_smooth x)
-  
-  
+
   rw [show Tensor0SSpace.toModel
       (Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
         (fun y : M =>
@@ -251,7 +240,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       (hP_curried.mdifferentiableAt (by simp))
       ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))
   rw [habs, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  
+
   have hsec : (fun y : M => Tensor0SNabla.curriedSection I M
       (fun y' : M =>
         (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
@@ -281,7 +270,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     rw [vecTail_cons' (Y y) m']
     rfl
   rw [hsec]
-  
+
   have happly₂ : Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)
       (fun y : M =>
         (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
@@ -308,7 +297,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
         (LeviCivita (I := I) g) (covApplyCcSec (I := I) (M := M) g r t W hY) w x (X x)
     exact sub_eq_iff_eq_add.mp h.symm
   rw [happly₂, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-  
+
   have hPb : Tensor0SSpace.toModel
       ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from GW.toSection x)
         (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w x (X x)))
@@ -326,7 +315,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     simp only [Fin.cons_zero]
     rw [vecTail_cons' (Y x) m]
   rw [hPb]
-  
+
   have hC₁ : Tensor0SSpace.toModel
       (Tensor0SNabla.curriedSection I M
         (fun y' : M =>
@@ -353,7 +342,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     simp only [Fin.cons_zero]
     rw [vecTail_cons' ((LeviCivita (I := I) g).toFun Y x (X x)) m]
   rw [hC₁]
-  
+
   have hSCD : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
       tensorSecondCovDeriv (I := I) g r t X Y (fun y : M => W.toSection y) x) (w x) =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
@@ -743,7 +732,7 @@ private theorem metricDoubleTraceFibFixedFrame_contMDiff (r t : ℕ)
         (∑ i : Fin (Module.finrank ℝ E),
           twoSlotPeel (I := I) (M := M) r t x (Z x) (B i x) (B i x))) := by
     refine ContMDiff.sum_section (s := Finset.univ) (fun i _ => ?_)
-    
+
     have hA : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r (t + 1) ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r (t + 1) ℝ E)
           (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r (t + 1) I z) x
@@ -959,7 +948,7 @@ private theorem ricciDefect_eval (g : SmoothRiemannianMetric I M) (r t : ℕ)
   have hYx : Y x = v1 := smoothExtensionTangent_eq (I := I) x v1
   have hXsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X) := smoothExtensionTangent_contMDiff x v0
   have hYsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y) := smoothExtensionTangent_contMDiff x v1
-  
+
   have hfib : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
         (iteratedCovGrad g r t 2 W -
           appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
@@ -974,17 +963,17 @@ private theorem ricciDefect_eval (g : SmoothRiemannianMetric I M) (r t : ℕ)
     rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
   rw [hfib, ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
-  
+
   rw [appFullSec_toSection, swapTwoSec_apply,
     swapTwoFib_eval (I := I) (M := M) r t x ((iteratedCovGrad g r t 2 W).toSection x) v0 v1 D m]
-  
+
   rw [show (iteratedCovGrad g r t 2 W).toSection x =
       (covGrad (I := I) (M := M) g r (t + 1)
         (covGrad (I := I) (M := M) g r t W)).toSection x from rfl]
   rw [show v0 = X x from hXx.symm, show v1 = Y x from hYx.symm]
   rw [secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W hXsm hYsm x D m,
     secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W hYsm hXsm x D m]
-  
+
   rw [← ContinuousMultilinearMap.sub_apply, ← Tensor0SSpace.toModel_sub,
     ← ContinuousLinearMap.sub_apply]
   rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
@@ -1161,26 +1150,26 @@ private lemma traceConj_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M
     metricDoubleTraceFib_apply (I := I) (M := M) g r (s + 1) x W]
   rw [ContinuousLinearMap.sum_apply, toModel_sum_eval]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  
+
   rw [twoSlotPeel_eval (I := I) (M := M) r (s + 1) x W
     (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) D
     (Fin.cons v0 m)]
-  
+
   rw [hW_def]
   rw [slotExtendFullFib_apply_eval (I := I) (M := M) g r (s + 2) (s + 2) x
     (swapTwoFib (I := I) (M := M) r s x) (swapTwoFib (I := I) (M := M) r (s + 1) x V) D
     (smoothOrthoFrame (I := I) g x i x)
     (Fin.cons (smoothOrthoFrame (I := I) g x i x) (Fin.cons v0 m))]
-  
+
   rw [swapTwoFib_eval (I := I) (M := M) r s x
     ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm
       (swapTwoFib (I := I) (M := M) r (s + 1) x V) (smoothOrthoFrame (I := I) g x i x))
     (smoothOrthoFrame (I := I) g x i x) v0 D m]
-  
+
   rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) r (s + 2) x
     (swapTwoFib (I := I) (M := M) r (s + 1) x V) (smoothOrthoFrame (I := I) g x i x) D
     (Fin.cons v0 (Fin.cons (smoothOrthoFrame (I := I) g x i x) m))]
-  
+
   rw [swapTwoFib_eval (I := I) (M := M) r (s + 1) x V
     (smoothOrthoFrame (I := I) g x i x) v0
     D (Fin.cons (smoothOrthoFrame (I := I) g x i x) m)]
@@ -1316,20 +1305,20 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
             (swapTwoSec (I := I) (M := M) (E := E) r s))
           (appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1
             (covGrad (I := I) (M := M) g r s S)) := by
-  
+
   have hT3 : iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S) =
       covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) := rfl
-  
+
   have hR1 := hRA_s1 (covGrad (I := I) (M := M) g r s S)
   rw [hT3] at hR1
-  
+
   have hcg1 := covGrad_appFullSec_eq (I := I) (M := M) g r (s + 2) (s + 2)
     (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 S)
-  
+
   have hR0 := hRA_s S
-  
+
   have hcg2 := covGrad_appFullSec_eq (I := I) (M := M) g r s (s + 2) RA_s S
-  
+
   have hsplit : ∀ A C : SmoothCcTensor g r (s + 3),
       A - appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
             (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
@@ -1348,7 +1337,7 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
     intro A C hC
     rw [appFullSec_sub_right, ← hC]
     abel
-  
+
   have hT3sub : covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) -
       appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
         (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
@@ -1363,7 +1352,7 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
           (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
             (swapTwoSec (I := I) (M := M) (E := E) r s))
           (iteratedCovGrad g r s 2 S) := by
-    
+
     have hσ₂₃T3 : appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
           (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
             (swapTwoSec (I := I) (M := M) (E := E) r s))
@@ -1392,7 +1381,7 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
               (swapTwoSec (I := I) (M := M) (E := E) r s)) (iteratedCovGrad g r s 2 S) from by
       rw [covGrad_sub]; abel]
     rw [hR0, hcg2]
-  
+
   rw [hsplit (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) _ hT3sub]
   rw [hR1]
 
@@ -1418,10 +1407,10 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
           appFullSec (I := I) (M := M) g r (s + 2) (s + 1) P₂
             (iteratedCovGrad g r s 2 S) := by
   classical
-  
+
   obtain ⟨RA_s, hRA_s⟩ := exists_ricciDefect_homField (I := I) (M := M) (E := E) g r s
   obtain ⟨RA_s1, hRA_s1⟩ := exists_ricciDefect_homField (I := I) (M := M) (E := E) g r (s + 1)
-  
+
   obtain ⟨P₀, hP₀⟩ := exists_appFullSec_comp (I := I) (M := M) g r s (s + 3) (s + 1)
     (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
     (homTensorRSCovGradSec (I := I) g r s (s + 2) RA_s)
@@ -1439,7 +1428,7 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
   obtain ⟨PB, hPB⟩ := exists_appFullSec_comp (I := I) (M := M) g r (s + 1) (s + 3) (s + 1)
     Tσ₂₃ RA_s1
   refine ⟨P₀, PA + PB, P₂, fun S => ?_⟩
-  
+
   rw [show iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S) =
       covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) from rfl]
   rw [appFullSec_slotExtTrace_eq (I := I) (M := M) (E := E) g r s
@@ -1447,9 +1436,9 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
   rw [← appFullSec_sub_right (I := I) (M := M) g r (s + 1 + 2) (s + 1)
     (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
     (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S))]
-  
+
   rw [headDifferenceDrop_bracket (I := I) (M := M) (E := E) g r s RA_s RA_s1 hRA_s hRA_s1 S]
-  
+
   rw [appFullSec_add_right, appFullSec_add_right, appFullSec_add_right]
   rw [hP₀ S, hP₂ (iteratedCovGrad g r s 2 S), hPA (covGrad (I := I) (M := M) g r s S)]
   rw [hTσ₂₃ (appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1
@@ -1510,19 +1499,18 @@ theorem exists_pointwiseTensorCurvRS_homField_jetDecomposition
       rawTensorConnLapSmooth (I := I) g r (s + 1) (covGrad (I := I) (M := M) g r s S) -
         covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) := rfl
   rw [hdef]
-  
+
   rw [hfac (s + 1) (covGrad (I := I) (M := M) g r s S)]
-  
+
   rw [show covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) =
       covGrad (I := I) (M := M) g r s
         (appFullSec (I := I) (M := M) g r (s + 2) s (Tr s) (iteratedCovGrad g r s 2 S)) from
     congrArg (covGrad (I := I) (M := M) g r s) (hfac s S)]
   rw [covGrad_appFullSec_eq (I := I) (M := M) g r (s + 2) s (Tr s) (iteratedCovGrad g r s 2 S)]
-  
+
   rw [appFullSec_sub_left (I := I) (M := M) g r (s + 2) (s + 1) P₂
     (homTensorRSCovGradSec (I := I) g r (s + 2) s (Tr s)) (iteratedCovGrad g r s 2 S)]
-  
-  
+
   rw [sub_add_eq_sub_sub, sub_right_comm, hhead S]
   abel
 

@@ -32,8 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ## The cometric slot-0 raise as a section operator -/
-
 def cometricRaiseSlot0FieldFun (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g₀ 0 (s + 2)) (x : M) : Tensor0SBundle.TensorRSSpace 1 (s + 1) I x :=
   cometricRaiseSlot0Fib g₀ s x
@@ -86,8 +84,6 @@ lemma cometricRaiseSlot0Fib_clm_apply (g₀ : SmoothRiemannianMetric I M) (s : �
       Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) (s + 1) x
         (inverseMetricSharpFib (I := I) g₀ x om) D := by
   rfl
-
-/-! ## The Koszul covector as an index-symmetrized covariant tensor -/
 
 noncomputable def koszulCovecCc (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 3 :=

@@ -853,8 +853,7 @@ private lemma kscr_deTurckCoeff_componentSqSum_eq (n : ℕ) (f : Fin n → Fin n
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Sharp deviation Parseval: the fibre norm of the difference of two principal
-cometric coefficients over the same base, bounded by the resolvent-factorized rate. -/
+
 private lemma kscr_rfns_pcc_deviation_le (g₀ ga gb : SmoothRiemannianMetric I M)
     (ha hb : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie_a : ∀ (y : M) (v w : TangentSpace I y),
@@ -1062,8 +1061,6 @@ private theorem kscr_reindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M)
   intro D
   rw [ContinuousLinearMap.sub_apply, reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     reindexCoeffFibGen_apply, ContinuousLinearMap.sub_apply]
-
-
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1712,7 +1709,6 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
           rw [hfC_def, hκ_def]
 
 end
-
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -2601,8 +2597,6 @@ theorem armField_pathIntegral_jetL2_perOrder_le
   refine le_trans hmono ?_
   rw [intervalIntegral.integral_const]
   simp
-
-
 
 end
 
@@ -4391,7 +4385,6 @@ theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_low
     · rw [h]; have := hD_nn 0 q; linarith
   exact mul_le_mul_of_nonneg_right hDle (Real.sqrt_nonneg _)
 
-
 open DifferentialGeometry.Integral.Measure in
 private theorem iteratedCovGrad_comp_l2_sq_eq
     (g₀ : SmoothRiemannianMetric I M) (m l : ℕ) (W : SmoothCcTensor g₀ 0 2) :
@@ -4664,7 +4657,6 @@ theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_hig
     · rw [h]; have := hD_nn 0 q; linarith
   exact mul_le_mul_of_nonneg_right hDle (Real.sqrt_nonneg _)
 
-
 theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -4708,12 +4700,7 @@ theorem exists_appCc_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le
     linarith
 
 set_option maxHeartbeats 1000000 in
-/-- Jet-window split of the remainder difference minus the principal cometric arm: two small
-objects are extracted — the fibre-small `(2+2,2)`-coefficient `C₂` and the arm-zero
-`(2+0,2)`-coefficient `C₀` carrying the two-arm jet envelope (naked window plus the
-`εa`-rated top arm) — and the residual is the order-one arm, whose jets obey the pure
-naked-window bound. The `C₀`-envelope's top arm rides the proven two-arm correction-field
-interface. -/
+
 theorem exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm_iteratedCovGrad_jet_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -4812,11 +4799,7 @@ theorem exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm
   exact hM2 1 (by omega) C₁ T₀ hball hC₁sup hC₁jet q
 
 set_option maxHeartbeats 1000000 in
-/-- Sobolev-scale tame split of the remainder difference minus the principal cometric arm:
-the fibre-small `(2+2,2)`-coefficient `C₂` and the arm-zero `(2+0,2)`-coefficient `C₀` (the
-latter carrying the two-arm jet envelope) are handed over with their fibre-sup and envelope
-rows, and the residual order-one arm obeys the pure one-order-loss tame bound on the spectral
-scale. -/
+
 theorem exists_smoothCcToTensorHs_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm_tame_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -5069,7 +5052,6 @@ theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_zero
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ (2 : ℝ) T₀‖ := h3
   linarith [h1]
 
-
 theorem exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le_succ
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -5223,11 +5205,7 @@ private lemma armZeroTwoArm_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMe
   exact le_trans (abs_nonneg _) hb
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise fibre eigenbound for symmetric `δ`-fibre-small data: if `T₀` is a symmetric
-`(0,2)`-tensor whose associated (symmetrized) fibre bilinear form is `g₀`-operator-bounded by
-`δ`, then the fibre Hilbert–Schmidt norm of `T₀` is bounded by `√n δ` pointwise (`n = dim`).
-The operator bound gives each frame row of the form a covector of `g₀`-norm `≤ δ`, so the row
-square-sum is `≤ δ²` and the `n`-fold total is `≤ n δ²`. -/
+
 private lemma armZeroTwoArm_data_fibreNormSq_le [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) {δ : ℝ}
     (T₀ : SmoothCcTensor g₀ 0 2)
@@ -5439,15 +5417,7 @@ private lemma bal_rawLap_toSection_eq_cometric (g : SmoothRiemannianMetric I M) 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Operator-rank cometric double-trace factorization of the rough Laplacian: at every rank
-`(r,s)`, the connection Laplacian of an operator field is the cometric double trace of its
-second covariant gradient, applied through the `appCcRS` coefficient composition.  The
-`(0,s)`-instance is `rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace_of_rank`; this is its
-verbatim generalization to positive contravariant rank (the Φ-side double-trace exchange),
-the same slot algebra evaluated on an operator fibre.  Proven pointwise on operator fibres:
-the frame trace of the connection Laplacian is matched slot-by-slot against the second
-covariant gradient, and the orthonormal-frame diagonal is exchanged for the cometric dual
-trace via `cometric_dualTrace_eq_orthoFrame_diag`. -/
+
 theorem rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s Φ =
@@ -8059,7 +8029,6 @@ private lemma bal_top (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
         (norm_nonneg _)
     nlinarith [hextra]
 
-
 set_option maxHeartbeats 3200000 in
 private lemma bal_top_odd (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -8851,19 +8820,7 @@ end BalLadder
 set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
-/-- Ladder-bottom engine for the arm-zero two-arm spectral core: along the `(1-Δ)`-iterate
-ladder of the applied field `appCc C₀ (∇⁰ T₀)`, the even rung is `L²`-bounded with the exact
-`B εa`-rated top against `‖T₀‖_{H^{2p+2}}`, and the odd rung — the squared `L²`/`∇L²` pair,
-which the odd spectral norm identity sums exactly — against `‖T₀‖_{H^{2p+3}}`.  This is the
-per-rung form of the `(1-Δ)`-iterate top-isolation induction: each spectral peel moves one
-`(1-Δ)` onto the coefficient iterate `(1-Δ)^p C₀` while the pointwise-`B`-small data stays at
-order zero (binomial-one top jet), the cross/commutator blocks fall to the `Kop`-rated lower
-slot, and the coefficient's `εa`-arm supplies the top jet at every rung with the same `εa` —
-which is what keeps the top constant `B εa` rung-uniform.  Proven by the coefficient-side
-spectral transport `bal_transport` (top branch `bal_top`/`bal_top_odd`, transported blocks
-`bal_Etrans`), with the exact top threaded through the operator-rank Gårding core `bal_Ccore`
-and the proven Φ-side double-trace exchange
-`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
+
 private lemma appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9108,24 +9065,6 @@ private lemma appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le
     rw [hsq]
     exact pow_le_pow_left₀ (Real.sqrt_nonneg _) hchain 2
 
-/-- Spectral `m`-uniform core of the arm-zero two-arm operator bound, phrased against an
-abstract pointwise data eigenbound `B` (`‖T₀‖_{g,x} ≤ B` fibrewise): for the `(2+0,2)`-coefficient
-`C₀` whose covariant jets carry the two-arm envelope against `T₀` (`K`-window plus the `εa`-rated
-`‖∇^{i+2}T₀‖` top arm), the applied field `appCc C₀ (∇⁰ T₀)` is tame of order two on the spectral
-Sobolev scale with the `m`-uniform top coefficient `B εa`.  The `m`-uniformity of that top constant
-is the genuine content: the direct jet-sum route accumulates the diagonal-grid factor `√Gₘ` and is
-not `m`-uniform, so it needs the spectral `(1-Δ)`-iterate top-isolation induction run on the
-*coefficient* iterate `(1-Δ)^p C₀` (roles exchanged relative to the coefficient-small mirror
-`exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le`): each spectral peel moves one `(1-Δ)`
-onto the coefficient while the pointwise-`B`-small data stays at order zero (binomial-one top jet),
-the cross/commutator blocks fall to the family-uniform lower slot, and the coefficient `εa`-arm
-supplies the top jet at every order with the same `εa`.  Assembled from the per-rung ladder engine
-`appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` by the even/odd spectral rung identities
-(`smoothCcToTensorHs_even_norm_eq_toL2_iter`, `smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad`);
-consumed by `appCc_armZeroTwoArmCoeff_opNorm_core` after the symmetric-data eigenbound
-`armZeroTwoArm_data_fibreNormSq_le` supplies `B = √n δ`.  The ladder engine closes over
-the proven Φ-side double-trace exchange
-`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private lemma appCc_armZeroTwoArm_spectralCore
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9203,19 +9142,6 @@ private lemma appCc_armZeroTwoArm_spectralCore
       _ ≤ Real.sqrt (R ^ 2) := Real.sqrt_le_sqrt hsq
       _ = R := Real.sqrt_sq hR_nn
 
-/-- Core two-arm arm-zero operator bound: for the `(2+0,2)`-coefficient `C₀` carrying the
-two-arm jet envelope against `T₀` (window `K`-arm plus the `εa`-rated `‖∇^{i+2}T₀‖` top arm),
-with `T₀` symmetric and `g₀`-`δ`-fibre-small (`0 ≤ δ`), the applied field `appCc C₀ (∇⁰ T₀)`
-is tame of order two on the spectral Sobolev scale with the `√n εa δ`-small top coefficient:
-the unique top Leibniz term pairs the coefficient's `εa`-arm top jets against the pointwise
-`√n δ`-small symmetric data (eigenvalue bound), while every other term loses at least one order
-into the family-uniform lower slot.  This is the arm-zero analog of the proven fibre-small
-third-arm machine `exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`, with the
-smallness moved from the coefficient sup to the data pointwise value.  Assembled from the
-symmetric-data eigenbound `armZeroTwoArm_data_fibreNormSq_le` (`√n δ` fibre bound) feeding the
-`m`-uniform spectral core `appCc_armZeroTwoArm_spectralCore`; the per-rung ladder engine
-`appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` closes over the proven Φ-side
-double-trace exchange `rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private lemma appCc_armZeroTwoArmCoeff_opNorm_core
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9280,18 +9206,6 @@ private lemma appCc_armZeroTwoArmCoeff_opNorm_core
     rw [htop] at hmain
     exact hmain
 
-/-- Deferred two-arm engine for the arm-zero coefficient application: for a
-`(2+0,2)`-coefficient `C₀` with fibre sup `Λa` and the two-arm jet envelope against the data
-`T₀` — naked window plus the `εa`-rated top arm — and for symmetric ball data whose fibre
-bilinear form is `δ`-small in the `g₀`-operator sense, the applied field `appCc C₀ (∇⁰ T₀)`
-is tame of order two on the spectral Sobolev scale with the δ-rated top coefficient
-`εB ≤ 2 √n εa δ`: the unique top Leibniz term pairs the coefficient's `ε`-arm top jets
-against the pointwise `√n δ`-small symmetric data (eigenvalue bound), while every other term
-loses at least one order into the family-uniform lower slot. Mirrors the proven fibre-small
-third-arm machine (`exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`) with the
-roles of coefficient and data smallness exchanged; the ladder engine underneath
-closes over the proven Φ-side double-trace exchange
-`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private theorem exists_smoothCcToTensorHs_appCc_armZeroTwoArmCoeff_opNorm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9353,10 +9267,7 @@ private theorem exists_smoothCcToTensorHs_appCc_armZeroTwoArmCoeff_opNorm_le
       exact hcore C₀ T₀ δ hδ_nn hball hTsymm hfibre hsup hjet m
 
 set_option maxHeartbeats 1000000 in
-/-- Split of the remainder difference into the principal cometric arm, a small third arm whose
-top-jet coefficient carries the full `32 f³ (δ/(1-δ))` budget cap, and a tame remainder: the
-third arm folds the fibre-small `C₂`-application together with the two-arm `C₀`-application,
-whose δ-rated top coefficients assemble under the cap via `28 f² + (32 f³ - 28 f²) = 32 f³`. -/
+
 theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThirdArm_add_tame
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9472,7 +9383,6 @@ theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThird
     have hA := hH3 C₂ T₀ hball hC₂sup hC₂jet (a + k - 1)
     have hB2 := hB' C₀ T₀ hball hTsymm (hδ_fibre T₀ hball) hC₀sup hC₀jet (a + k - 1)
     linarith [hA, hB2]
-
 
 end IntrinsicSpectral
 end RicciFlow

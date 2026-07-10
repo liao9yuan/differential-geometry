@@ -90,26 +90,25 @@ private theorem realizedSol_solField_continuousOn_Ha2
       (fun t : ℝ => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))
       (Set.Icc (0 : ℝ) T₁) := by
   classical
-  
-  
+
   set σ : ℝ := (a : ℝ) + 2 with hσ_def
   set p : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) + 1 with hp_def
   set σ' : ℝ := σ + p with hσ'_def
   obtain ⟨Cmaj, hCmaj_sum, hCmaj_le⟩ := hmodemass 0 σ' (by
     rw [hσ'_def, hσ_def, hp_def]; positivity)
-  
+
   have hmass : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T₁,
       tensorSobolevWeight (I := I) (M := M) i σ' * (φ i t) ^ 2 ≤ Cmaj i := by
     intro i t ht
     have := hCmaj_le i t ht
     rwa [iteratedDeriv_zero] at this
-  
+
   have hcoeff' : ∀ t ∈ Set.Icc (0 : ℝ) T₁, ∀ i,
       (smoothCcToTensorHs (I := I) (M := M) g₀ σ (F t)).coeff i = φ i t := by
     intro t ht i
     rw [smoothCcToTensorHs_coeff]
     exact hcoeff t ht i
-  
+
   have hwthr : ((weylSobolevExp (E := E) : ℕ) : ℝ) < σ' - σ := by
     rw [hσ'_def, hp_def]; ring_nf; linarith
   exact tensorHs_continuousOn_of_coeff_of_higher_mass (I := I) (M := M) g₀ hwthr
@@ -196,7 +195,6 @@ private theorem realizedFamily_flowDeriv_of_repr
     exact perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
       (g := g₀) (r := 0) (s := 2) (T := d₂F) hd₂F_pos.le f hf_smooth hf_mass k σ hσ
 
-
   have hcoeff : ∀ s ∈ Set.Icc (0 : ℝ) T₁, ∀ i,
       tensorL2Coeff (I := I) (M := M) hc
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F s)) i = φ i s := by
@@ -206,7 +204,6 @@ private theorem realizedFamily_flowDeriv_of_repr
     have hid := hf_id s hs_icc i
     rw [tensorHsToL2_tensorL2Coeff] at hid
     rw [hid]
-
 
   have hu_mem : ∀ s ∈ Set.Icc (0 : ℝ) T₁, ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ vH : tensorHs (I := I) (M := M) g₀ 0 2 σ,
@@ -237,7 +234,6 @@ private theorem realizedFamily_flowDeriv_of_repr
 
   intro t ht x v w
 
-
   obtain ⟨C, hC_pos, hC_bd⟩ :=
     abs_eigenBilinScalar_le (I := I) (M := M) g₀ a ha_lossy x v w
   set K : ℝ := Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) with hK_def
@@ -253,8 +249,6 @@ private theorem realizedFamily_flowDeriv_of_repr
             (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) := this
       _ = C * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) *
             Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) := by ring
-
-
 
   have hprod_summable : ∀ (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ),
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
@@ -323,9 +317,7 @@ private theorem realizedFamily_flowDeriv_of_repr
       have h := hB_le i s hs_icc
       rwa [iteratedDeriv_zero] at h
 
-
   obtain ⟨Bφ', hBφ'_sum, hBφ'_le⟩ := hφ_mass 1 ((a : ℝ) + (sW : ℝ)) (by positivity)
-
 
   set u_bd : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
     fun i => (1 / 2 : ℝ) * ((C * K) * Bφ' i) +
@@ -404,8 +396,6 @@ private theorem realizedFamily_flowDeriv_of_repr
     · refine (hsum_series s hs).congr (fun i => ?_)
       rw [hcoeff s hs i]
 
-
-
   have hG_deriv' : HasDerivWithinAt
       (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (F s) x v w)
       (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) (Set.Icc (0 : ℝ) T₁) t := by
@@ -420,9 +410,6 @@ private theorem realizedFamily_flowDeriv_of_repr
       exact Filter.mem_of_superset
         (inter_mem_nhdsWithin _ (Iio_mem_nhds ht.2)) hsub
     exact (hG_deriv'.mono_of_mem_nhdsWithin hmem)
-
-
-
 
   have hval : (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) =
       F_RHS
@@ -508,12 +495,7 @@ private theorem realizedFamily_jointChartGramSmooth
     g hT T_rep hδ_lt hδ φ hφ_smooth hcoeff hmodemass
 
 set_option linter.unusedVariables false in
-/-- Smooth per-mode forcing time-coordinate family for the symmetrized DeTurck fixed-point forcing:
-on a positive horizon `d₂ ≤ T` the Duhamel forcing `gforce` of the `deTurckSobolevNHa2Symm`-driven
-maximal-regularity solution is realized a.e. by a continuous-coordinate carrier family `F` whose
-per-mode coordinates coincide with globally smooth functions `f i` carrying all-order weighted
-spectral mass bounds. A direct forward of the symmetrized `ForcingTimeBootstrap` rung
-`deTurckForcing_smoothTimeCoordinateFamilySymm`. -/
+
 private theorem forcingSmoothTimeCoordsSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -546,13 +528,7 @@ private theorem forcingSmoothTimeCoordsSymm
     hTT₀ gforce hforce hgforce
 
 set_option linter.unusedVariables false in
-/-- Smooth per-mode forcing coordinates for the
-symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the Duhamel forcing
-`gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e.
-per mode by globally smooth functions `f i` carrying all-order weighted spectral mass bounds,
-and the solution-field coordinates are the corresponding per-mode convolutions. Symmetric
-mirror of the raw helper `forcingSmoothCoordsRealize` (snapshot `c848da47`), proven through
-the symmetrized forcing time-coordinate chain. -/
+
 private theorem forcingSmoothCoordsRealizeSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -620,12 +596,7 @@ private theorem forcingSmoothCoordsRealizeSymm
   rw [Set.IccExtend_of_mem hd₂_pos.le _ hs, hF_coeff s hs i]
 
 set_option linter.unusedVariables false in
-/-- Smallness horizon for the symmetrized solution
-field: for any prescribed radius `0 < R₀` there is a positive horizon `d₂ ≤ T` on which every
-smooth representative of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution has
-`H^{a+2}` norm at most `R₀`. Symmetric mirror of the raw helper
-`realizedSol_solField_smallnessHorizon_Ha2` (snapshot `c848da47`), proven by small-time
-smallness through the symmetrized forcing coordinates. -/
+
 private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -682,13 +653,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
-/-- Realization of the smooth forcing coordinates by the
-symmS-precomposed smooth remainder: on the smallness horizon, for any pinned smooth
-representative family `F` of the `deTurckSobolevNHa2Symm`-driven solution staying in the
-`deTurckSobolevNHa2_exists_of_super` ball, the smooth per-mode forcing coordinate `f i t`
-equals the `i`-th eigencoefficient of `deTurckSmoothRemainder g₀ g_bg (symmS g₀ (F t))`.
-Symmetric mirror of the raw helper `realizedForcingCoord_eq_smoothN` (snapshot
-`c848da47`), with `deTurckSobolevNHa2Symm_eq_smoothN` replacing the raw evaluation lemma. -/
+
 private theorem realizedForcingCoord_eq_smoothNSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -905,14 +870,7 @@ private theorem realizedForcingCoord_eq_smoothNSymm
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
-/-- Forcing bootstrap for the SYMMETRIZED DeTurck Sobolev nonlinearity: the maximal-regularity
-Duhamel solution driven by `deTurckSobolevNHa2Symm` admits smooth per-mode forcing coordinates
-with all-order weighted mass bounds, and on the smallness horizon these coordinates are
-realized by the symmS-precomposed smooth remainder
-`deTurckSmoothRemainder g₀ g_bg (symmS g₀ (Ffam t))` of any pinned smooth representative
-family. Symmetric-sector mirror of the raw `deTurckRicci_forcingBootstrap`, assembled from the
-proven children `forcingSmoothCoordsRealizeSymm`,
-`realizedSol_solField_smallnessHorizon_Ha2Symm`, and `realizedForcingCoord_eq_smoothNSymm`. -/
+
 theorem deTurckRicci_forcingBootstrap_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) :
@@ -1088,8 +1046,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     perModeConv_contDiff_of_contDiff ⊤ _ (f i) (hf_smooth i)
   have hφ_cont : ∀ i, Continuous (φ i) := fun i => (hφ_smooth i).continuous
 
-
-
   have hf_endpoint_sum : ∀ c : ℝ, 0 ≤ c → ∀ t ∈ Set.Icc (0 : ℝ) d₂F,
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i c *
         ∫ s in (0 : ℝ)..t, (f i s) ^ 2) := by
@@ -1132,7 +1088,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
           ≤ tensorSobolevWeight (I := I) (M := M) i c * ∫ s in (0 : ℝ)..d₂F, (f i s) ^ 2 :=
             mul_le_mul_of_nonneg_left htint hwt_nn
         _ ≤ d₂F * B i := hbig
-
 
   have hF₀_exists : ∀ t ∈ Set.Icc (0 : ℝ) d₂F,
       ∃ S : SmoothCcTensor g₀ 0 2,
@@ -1264,7 +1219,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
       rw [hFt]
       exact hFdef_pin t ht_icc
 
-
   have hF_cont : ContinuousOn
       (fun t : ℝ => (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)))
       (Set.Icc (0 : ℝ) T₁) := by
@@ -1279,7 +1233,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     exact hF_pin t ht
 
   have hδ_lt : (1 / 2 : ℝ) < 1 := by norm_num
-
 
   have hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀ := by
@@ -1299,9 +1252,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     F_RHS Nsec hRepr hT hT1 hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u F hδ_lt hF_small
     hF_pin f hf_smooth hf_mass hf_id hForceRepr
 
-
-
-
   have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
       ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
         tensorL2Coeff (I := I) (M := M) h_compact
@@ -1312,7 +1262,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     have hid := hf_id t ht_icc i
     rw [tensorHsToL2_tensorL2Coeff] at hid
     rw [hid]
-
 
   have hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
       ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
@@ -1326,8 +1275,6 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     refine ⟨Cmaj, hCmaj_sum, fun i t ht => ?_⟩
     have ht_icc : t ∈ Set.Icc (0 : ℝ) d₂F := ⟨ht.1, le_trans ht.2 hT₁_le_d2F⟩
     exact hCmaj_le i t ht_icc
-
-
 
   have hF_joint : JointChartGramSmooth (I := I) T₁
       (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hF_small t)) :=

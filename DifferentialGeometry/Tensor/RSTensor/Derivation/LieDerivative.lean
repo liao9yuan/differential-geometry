@@ -1,4 +1,3 @@
-
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorField.Pullback
@@ -99,17 +98,16 @@ noncomputable def mlieDeriv_tensor0SWithin (s : ℕ)
     (t : Set M)
     (x₀ : M) :
     Tensor0SSpace s I x₀ := by
-  
+
   let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
-  
-  
+
   let α' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) s := fun y =>
     α ((extChartAt I x₀).symm y)
-  
+
   let result := lieDeriv_tensor0SWithin s X' α'
     ((extChartAt I x₀).symm ⁻¹' t ∩ range I)
     (extChartAt I x₀ x₀)
-  
+
   exact result
 
 noncomputable def mlieDeriv_tensor0S (s : ℕ)
@@ -384,13 +382,13 @@ noncomputable def mlieDeriv_tensorRSWithin (r s : ℕ)
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
     (u : Set M) (x₀ : M) : TensorRSSpace r s I x₀ := by
-  
+
   let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
-  
+
   let T' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
     fun y => tensorRSSpace_continuousLinearEquiv (I := I) r s
       ((extChartAt I x₀).symm y) (T.toFun ((extChartAt I x₀).symm y))
-  
+
   exact (tensorRSSpace_continuousLinearEquiv (I := I) r s x₀).symm
     (lieDeriv_tensorRSFullWithin r s X' T'
       ((extChartAt I x₀).symm ⁻¹' u ∩ range I)

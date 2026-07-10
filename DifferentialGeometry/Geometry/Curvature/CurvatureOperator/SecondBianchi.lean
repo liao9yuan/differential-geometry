@@ -355,14 +355,14 @@ theorem second_bianchi_levi_civita
   classical
   rw [nablaCurvSec_flat cov hY hZ hW, nablaCurvSec_flat cov hZ hX hW,
       nablaCurvSec_flat cov hX hY hW]
-  
+
   have g1XYZ := covApply_outer_torsionFree_collapse cov htor (a := X) (A := Y) (B := Z)
     (x := x) hY hZ hW
   have g1YZX := covApply_outer_torsionFree_collapse cov htor (a := Y) (A := Z) (B := X)
     (x := x) hZ hX hW
   have g1ZXY := covApply_outer_torsionFree_collapse cov htor (a := Z) (A := X) (B := Y)
     (x := x) hX hY hW
-  
+
   have hXat : MDiffAt (T% X) x := (hX x).mdifferentiableAt (by simp)
   have hYat : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
   have hZat : MDiffAt (T% Z) x := (hZ x).mdifferentiableAt (by simp)
@@ -372,7 +372,7 @@ theorem second_bianchi_levi_civita
     (S := covApply cov X W) hYat hZat
   have g2ZXY := cov_toFun_torsionFree_vector_collapse cov htor (A := Z) (B := X)
     (S := covApply cov Y W) hZat hXat
-  
+
   have g3 := bianchi_bracket_jacobi_sum_eq_zero cov htor (x := x) hX hY hZ
   have g3W : cov.toFun W x (VectorField.mlieBracket I (covApply cov X Y) Z x)
       + cov.toFun W x (VectorField.mlieBracket I Y (covApply cov X Z) x)

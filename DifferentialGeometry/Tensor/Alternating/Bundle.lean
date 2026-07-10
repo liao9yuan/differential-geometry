@@ -37,7 +37,7 @@ variable [Π x, TopologicalSpace (E₂ x)]
 variable [Π x, ContinuousAdd (E₂ x)]
 
 instance (x : B) : AddCommMonoid (⋀^ι⟮𝕜; F₁, E₁; F₂, E₂⟯ x) := by
-  
+
   dsimp [Bundle.continuousAlternatingMap]
   infer_instance
 

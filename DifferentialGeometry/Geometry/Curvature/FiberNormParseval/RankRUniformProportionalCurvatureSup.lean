@@ -99,8 +99,7 @@ theorem riemannOp_tensorCovRS_apply_eval
           ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T)
             (riemannOp (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x v w Y₀)) u := by
   classical
-  
-  
+
   letI : TopologicalSpace (TotalSpace (Tensor0SModel r ℝ E)
       (fun y : M => Tensor0SSpace r I y)) := tensor0SBundle_topology r
   letI : FiberBundle (Tensor0SModel r ℝ E) (fun y : M => Tensor0SSpace r I y) :=
@@ -125,7 +124,7 @@ theorem riemannOp_tensorCovRS_apply_eval
     tensorRSBundle_vector r s
   letI : ContMDiffVectorBundle (∞ : WithTop ℕ∞) (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) I := tensorRSBundle_smooth ∞ r s
-  
+
   set X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
       (smoothExtensionTangent_contMDiff (I := I) x v) with hX_def
@@ -136,19 +135,19 @@ theorem riemannOp_tensorCovRS_apply_eval
   have hWx : (W : Π b : M, TangentSpace I b) x = w := smoothExtensionTangent_eq (I := I) x w
   have hX_smooth := smoothExtensionTangent_contMDiff (I := I) x v
   have hW_smooth := smoothExtensionTangent_contMDiff (I := I) x w
-  
+
   obtain ⟨A, hAx, hA_smooth⟩ := exists_smooth_tensorRS_section_eq (I := I) (M := M) r s x T
   set τ : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯ :=
     ContMDiffSection.mk A hA_smooth with hτ_def
-  
+
   obtain ⟨B, hBx, hB_smooth⟩ := exists_smooth_tensor0S_section_eq2 (I := I) (M := M) r x Y₀
   set Y : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun x : M => Tensor0SSpace r I x)⟯ :=
     ContMDiffSection.mk B hB_smooth with hY_def
   have hτx : (τ : Π b : M, TensorRSSpace r s I b) x = T := hAx
   have hYx : (Y : Π b : M, Tensor0SSpace r I b) x = Y₀ := hBx
-  
+
   have hkey := riemannSec_tensorCov_apply_eval (I := I) (M := M) g r s X W τ Y x u
-  
+
   have hLHS : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
         riemannOp (tensorCov (I := I) g r s) x v w T) Y₀ =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
@@ -158,7 +157,7 @@ theorem riemannOp_tensorCovRS_apply_eval
     congr 1
     rw [← hXx, ← hWx, ← hτx]
     exact riemannOp_apply_smooth (cov := tensorCov (I := I) g r s) hX_smooth hW_smooth hA_smooth
-  
+
   have hpaired_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (T% (fun b : M => (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from τ b) (Y b))) := by
     have hϕ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)) ∞
@@ -177,7 +176,7 @@ theorem riemannOp_tensorCovRS_apply_eval
       (Z := fun b => (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from τ b) (Y b))
       hX_smooth hW_smooth hpaired_smooth]
     rw [hXx, hWx, hτx, hYx]
-  
+
   have hContra : riemannSec (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
         (fun b => X b) (fun b => W b) (fun b => Y b) x =
       riemannOp (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x v w Y₀ := by
@@ -186,7 +185,7 @@ theorem riemannOp_tensorCovRS_apply_eval
       (X := fun b => X b) (Y := fun b => W b) (Z := fun b => Y b)
       hX_smooth hW_smooth hB_smooth]
     rw [hXx, hWx, hYx]
-  
+
   rw [hLHS, hkey, hCov, hContra, hτx]
 
 end Connection

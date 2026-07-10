@@ -83,7 +83,7 @@ theorem appCc_zero_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W = 0 := by
   have h := appCc_add_left (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) 0 W
   rw [add_zero] at h
-  
+
   have h2 : appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W -
       appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
       appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W := by
@@ -158,29 +158,29 @@ theorem normalForm_succ (g : SmoothRiemannianMetric I M)
   classical
   obtain ⟨Ψr, hΨr⟩ := hp r
   obtain ⟨Ψr1, hΨr1⟩ := hp (r + 1)
-  
+
   set Tk : (k : ℕ) → SmoothCcTensor g (r + (k + 1)) (r + (p + 1)) := fun k =>
     slotExtend (I := I) (M := M) g (r + k) (r + p) (Ψr k) -
       castSrcCc g (r + (p + 1)) (by omega : (r + 1) + k = r + (k + 1))
         (castRankCc_db g ((r + 1) + k) (by omega : (r + 1) + p = r + (p + 1)) (Ψr1 k))
     with hTk_def
-  
+
   refine ⟨fun j => match j with
     | 0 => covGrad (I := I) (M := M) g (r + 0) (r + p) (Ψr 0)
     | (k + 1) =>
         (if k + 1 < p + 1 then covGrad (I := I) (M := M) g (r + (k + 1)) (r + p) (Ψr (k + 1)) else 0)
           + Tk k, ?_⟩
   intro W
-  
+
   have hrec : op (p + 1) r W =
       covGrad g 0 (r + p) (op p r W) -
         castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
           (op p (r + 1) (covGrad g 0 r W)) := by
     rw [covGrad_op p r W]; abel
   rw [hrec, hΨr W]
-  
+
   rw [covGrad_normalForm_sum (I := I) (M := M) g p r Ψr W]
-  
+
   rw [hΨr1 (covGrad g 0 r W), castRankCc_db_finset_sum]
   rw [show (∑ k ∈ Finset.range (p + 1),
         castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
@@ -193,9 +193,9 @@ theorem normalForm_succ (g : SmoothRiemannianMetric I M)
           (iteratedCovGrad g 0 r (k + 1) W) from
     Finset.sum_congr rfl (fun k _ =>
       castRankCc_appCc_iteratedCovGrad_covGrad (I := I) (M := M) g p r k (Ψr1 k) W)]
-  
+
   rw [Finset.sum_add_distrib]
-  
+
   rw [Finset.sum_range_succ' (fun j =>
     appCc (I := I) (M := M) g (r + j) (r + (p + 1))
       ((match j with
@@ -204,8 +204,7 @@ theorem normalForm_succ (g : SmoothRiemannianMetric I M)
             (if k + 1 < p + 1 then covGrad (I := I) (M := M) g (r + (k + 1)) (r + p) (Ψr (k + 1))
               else 0) + Tk k))
       (iteratedCovGrad g 0 r j W)) (p + 1)]
-  
-  
+
   rw [show (∑ k ∈ Finset.range (p + 1),
         appCc (I := I) (M := M) g (r + (k + 1)) (r + (p + 1))
           ((if k + 1 < p + 1 then covGrad (I := I) (M := M) g (r + (k + 1)) (r + p) (Ψr (k + 1))
@@ -222,7 +221,7 @@ theorem normalForm_succ (g : SmoothRiemannianMetric I M)
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [appCc_add_left]]
-  
+
   rw [show (∑ k ∈ Finset.range (p + 1),
         appCc (I := I) (M := M) g (r + (k + 1)) (r + (p + 1)) (Tk k)
           (iteratedCovGrad g 0 r (k + 1) W)) =
@@ -238,7 +237,7 @@ theorem normalForm_succ (g : SmoothRiemannianMetric I M)
     rw [← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hTk_def, appCc_sub_left]]
-  
+
   rw [show (∑ k ∈ Finset.range (p + 1),
         appCc (I := I) (M := M) g (r + (k + 1)) (r + (p + 1))
           (if k + 1 < p + 1 then covGrad (I := I) (M := M) g (r + (k + 1)) (r + p) (Ψr (k + 1))
@@ -252,11 +251,11 @@ theorem normalForm_succ (g : SmoothRiemannianMetric I M)
     rw [if_neg (by omega : ¬ (p + 1 < p + 1)), appCc_zero_left, add_zero]
     refine Finset.sum_congr rfl (fun k hk => ?_)
     rw [if_pos (by simp only [Finset.mem_range] at hk; omega : k + 1 < p + 1)]]
-  
+
   rw [Finset.sum_range_succ' (fun k =>
     appCc (I := I) (M := M) g (r + k) (r + (p + 1))
       (covGrad (I := I) (M := M) g (r + k) (r + p) (Ψr k)) (iteratedCovGrad g 0 r k W)) p]
-  
+
   abel
 
 theorem normalForm_zero (g : SmoothRiemannianMetric I M)
@@ -293,31 +292,31 @@ theorem exists_jet_bound_of_normalForm (g : SmoothRiemannianMetric I M)
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
   obtain ⟨Ψ, hΨ⟩ := hNF
-  
+
   choose C hC_nn hC using fun k =>
     exists_uniform_riemannianFiberNormSq_appCc_le (I := I) (M := M) g (r + k) (r + p) (Ψ k)
   refine ⟨(p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), C k,
     mul_nonneg (by positivity) (Finset.sum_nonneg fun k _ => hC_nn k), fun W x => ?_⟩
-  
+
   set a : ℕ → ℝ := fun k => riemannianFiberNormSq (I := I) (M := M) g 0 (r + k) x
     ((iteratedCovGrad g 0 r k W).toSection x) with ha_def
   have ha_nn : ∀ k, 0 ≤ a k := fun k =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + k) x _
-  
+
   rw [hΨ W, SmoothCcTensor.toSection_sum_apply]
-  
+
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 (r + p) x
     (Finset.range (p + 1))
     (fun k => (appCc (I := I) (M := M) g (r + k) (r + p) (Ψ k)
       (iteratedCovGrad g 0 r k W)).toSection x)) ?_
   rw [Finset.card_range]
-  
+
   have hsummand : ∀ k ∈ Finset.range (p + 1),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
           ((appCc (I := I) (M := M) g (r + k) (r + p) (Ψ k)
             (iteratedCovGrad g 0 r k W)).toSection x) ≤ C k * a k := fun k _ => hC k _ x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
-  
+
   have hCa_le : (∑ k ∈ Finset.range (p + 1), C k * a k) ≤
       (∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k := by
     rw [Finset.sum_mul]

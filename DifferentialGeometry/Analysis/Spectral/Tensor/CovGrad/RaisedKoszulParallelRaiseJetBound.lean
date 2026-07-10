@@ -47,9 +47,6 @@ private lemma riemannianFiberNormSq_smul' (g : SmoothRiemannianMetric I M) (r s 
     tensorInnerPointwise_smul_right]
   ring
 
-/-- The all-order pointwise fibre-norm bound for the covariant gradient tower of the
-symmetrised metric perturbation `symmS g₀ T`: differentiating `symmS` never increases the
-jet beyond that of `T`. -/
 theorem rfns_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     {R : ℝ}
@@ -121,10 +118,6 @@ private lemma rfns_iteratedCovGrad_domDomCongr_symmSCovGrad3_le
   have hbnd := rfns_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ a T hTjet (i + 1) (by omega) x
   exact le_trans (le_of_eq hcomm) hbnd
 
-/-- The all-order pointwise fibre-norm bound for the covariant gradient tower of the Koszul
-covector `koszulCovecCc g₀ T` (the index-symmetrised covariant gradient of `symmS g₀ T`). Because
-it is a fixed linear combination of permutations of `∇(symmS g₀ T)`, its `i`-th covariant jet is
-uniformly bounded (independent of `i`) by the background jet budget `R²`. -/
 theorem rfns_iteratedCovGrad_koszulCovecCc_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     {R : ℝ}

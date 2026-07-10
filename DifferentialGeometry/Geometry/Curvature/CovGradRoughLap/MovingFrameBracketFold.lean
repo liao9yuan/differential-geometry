@@ -44,54 +44,6 @@ theorem movingFrameRemainderSection_eq_sub_add
   rw [movingFrameRemainderSection]
   abel
 
-theorem movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    ∃ (ι : Type) (_ : Fintype ι)
-      (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-      (W : ι → SmoothCcTensor g 0 (s + 1)),
-      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-          (pointwiseTensorCurv (I := I) (M := M) g s S -
-            GcurvSection (I := I) (M := M) g s S -
-            (genuineDiffCurvSection (I := I) (M := M) g s S +
-              ricTraceSection (I := I) (M := M) g s S)).toFun
-          (covGrad (I := I) (M := M) g 0 s S).toFun =
-        ∑ i, ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + 1)) g x
-                (Tensor0SSpace.toModel
-                  (loweredCovDerivAlongVF (I := I) (M := M) g 0 (s + 1) (W i).toSection (V i) x))
-                (Tensor0SSpace.toModel
-                  (liftedTensorSection (I := I) (M := M) g 0 (s + 1)
-                    (covGrad (I := I) (M := M) g 0 s S).toSection x))
-              + tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + 1)) g x
-                (Tensor0SSpace.toModel
-                  (liftedTensorSection (I := I) (M := M) g 0 (s + 1) (W i).toSection x))
-                (Tensor0SSpace.toModel
-                  (loweredCovDerivAlongVF (I := I) (M := M) g 0 (s + 1)
-                    (covGrad (I := I) (M := M) g 0 s S).toSection (V i) x))
-              + tensorInnerScalar (I := I) (M := M) g 0 (s + 1) (W i).toSection
-                  (covGrad (I := I) (M := M) g 0 s S).toSection x
-                * divergence_g (I := I) g (V i) x)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  obtain ⟨ι, fι, V, W, hp3⟩ :=
-    frameSummed_christoffelResidual_eq_bracketDivergence (I := I) (M := M) g s S
-  refine ⟨ι, fι, V, W, ?_⟩
-  rw [movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing
-    (I := I) (M := M) g s S]
-  exact hp3
-
-theorem movingFrameRemainderSection_l2Inner_eq_zero
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (pointwiseTensorCurv (I := I) (M := M) g s S -
-          GcurvSection (I := I) (M := M) g s S -
-          (genuineDiffCurvSection (I := I) (M := M) g s S +
-            ricTraceSection (I := I) (M := M) g s S)).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
-  obtain ⟨ι, _, V, W, hfold⟩ :=
-    movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace (I := I) (M := M) g s S
-  rw [hfold]
-  exact integral_frameSummed_bracketCovDeriv_combined_eq_zero (I := I) (M := M) g 0 (s + 1)
-    V W (covGrad (I := I) (M := M) g 0 s S)
-
 theorem frameSummed_bracketIntegral_empty_eq_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (V : Fin 0 → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

@@ -1,18 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
 
-/-!
-# Per-order L² tame envelopes for the order-one connection-difference coefficient
-
-The four-trace `appCcRS` refold of the order-one connection-difference Ricci-linearization
-coefficient field: `linearizedRicciConnDiffOrder1CoeffField g₀ g₁` factors as the four-trace
-cometric cast field (rank `(4,2)`) applied against the order-one connection-difference Leibniz
-kernel field (rank `(3,4)`), mirroring `ricciArmOrder1KoszulCoeff_eq_appCcRS`. On top of the
-refold, the generic ball-uniform order-0 sup bounds and all-order per-order L² tame jet
-envelopes for the two arms feed the diagonal-product-grid calculus exactly as in
-`ricciArmOrder1KoszulCoeff_perOrder_l2_tameEnvelope_generic`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -46,8 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- Smoothness of the four-trace cometric fiber family `x ↦ ricciCometricFourTraceCLM g₁ x`
-viewed as a rank-`(4,2)` tensor section. -/
+
 theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
@@ -67,9 +54,7 @@ theorem ricciCometricFourTraceCastG0Fib_contMDiff (g₁ : SmoothRiemannianMetric
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
 
 set_option linter.unusedSectionVars false in
-/-- Smoothness of the order-one connection-difference Leibniz kernel fiber family
-`x ↦ linearizedRicciConnDiffOrder1CLM x (A x)`, `A = connDiffSection g₁ g₀`, viewed as a
-rank-`(3,4)` tensor section. -/
+
 theorem linearizedRicciConnDiffOrder1KernelFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 4 ℝ E)) ∞
@@ -92,9 +77,6 @@ theorem linearizedRicciConnDiffOrder1KernelFib_contMDiff
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
-/-- The four-trace cometric cast field: the fiber family `ricciCometricFourTraceCLM g₁` of the
-perturbed metric `g₁`, cast as a rank-`(4,2)` smooth compactly supported tensor over the base
-metric `g₀`. The `p = 2` four-trace analogue of `cometricCastG0`. -/
 def ricciCometricFourTraceCastG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 where
   toSection :=
@@ -104,9 +86,6 @@ def ricciCometricFourTraceCastG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := ricciCometricFourTraceCastG0Fib_contMDiff (I := I) g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- The order-one connection-difference Leibniz kernel field: the fiber family
-`x ↦ linearizedRicciConnDiffOrder1CLM x (A x)` with `A = connDiffSection g₁ g₀`, as a
-rank-`(3,4)` smooth compactly supported tensor over `g₀`. -/
 def linearizedRicciConnDiffOrder1KernelField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 3 4 where
   toSection :=
@@ -133,9 +112,7 @@ set_option linter.unusedSectionVars false in
           ((connDiffSection (I := I) g₁ g₀).toSection x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The four-trace `appCcRS` refold: the order-one connection-difference coefficient field is
-the composition of the four-trace cometric cast field against the order-one Leibniz kernel
-field, mirroring `ricciArmOrder1KoszulCoeff_eq_appCcRS`. -/
+
 theorem linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder1CoeffField (I := I) (M := M) g₀ g₁ =
@@ -190,9 +167,7 @@ private lemma ricciArmPrincipalCoeffPure_sub_doubleTrace_clm
   rw [hcast, cometricDoubleTraceField_toSection, cometricDoubleTraceField_toSection]
 
 set_option linter.unusedSectionVars false in
-/-- The `p = 2` cometric cast decomposition: the pure `g₁` double-trace coefficient over the
-`g₀` base splits as the `g₀` background double-trace plus the slot-insert
-`gInvDiffRaisedEndoField` correction, mirroring `cometricCastG0_eq_doubleTrace_add_appCcRS`. -/
+
 theorem ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁ =
@@ -247,11 +222,7 @@ private lemma fourTrace_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (
   ring
 
 set_option linter.unusedVariables false in
-/-- Ball-uniform order-0 sup bound and all-order per-order L² tame jet envelope for the
-four-trace cometric cast field, generic in a perturbed metric `g₁ = g₀ + P`: the four-trace
-combination collapses onto argument-slot reindexings of the pure `g₁` double-trace
-coefficient, which splits as the `g₀` background double-trace plus the slot-insert
-`gInvDiffRaisedEndoField` correction whose jets are tamed by the antidiagonal grid engine. -/
+
 theorem ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -747,10 +718,6 @@ private theorem connDiffContrInsertionFib_contMDiff (g₀ g₁ : SmoothRiemannia
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
-/-- The connection-contraction insertion core field: the fiber family
-`x ↦ connContrCLM 2 1 x (A x)` with `A = connDiffSection g₁ g₀`, as a rank-`(3,4)` smooth
-compactly supported tensor over `g₀`. The five arms of the order-one Leibniz kernel are
-two-sided slot-permutation images of this single core. -/
 def connDiffContrInsertionField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 3 4 where
   toSection :=
@@ -922,11 +889,7 @@ def coreInPerm201 : Equiv.Perm (Fin 3) :=
   ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
 
 set_option linter.unusedSectionVars false in
-/-- The slot-extension refold of the connection-contraction insertion core: the
-`connContrCLM 2 1` insertion of the connection-difference section is the two-fold
-`slotExtend` spectator extension of `connDiffSection` itself, up to a rotation of the
-rank-3 coefficient slots. This ties the core's covariant jets to the connection-difference
-jets with two spectator `finrank` factors. -/
+
 theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffContrInsertionField (I := I) g₀ g₁ =
@@ -1015,16 +978,7 @@ theorem connDiffContrInsertionField_eq_reindex_slotExtend_two
   exact hL.trans hR.symm
 
 set_option linter.unusedVariables false in
-/-- Ball-uniform order-0 sup bound and all-order per-order L² tame jet envelope for the
-connection-contraction insertion core field, generic in `g₁ = g₀ + P`.
 
-Proven by the slot-extension refold
-(`connDiffContrInsertionField_eq_reindex_slotExtend_two`): the core is the two-fold
-`slotExtend` spectator extension of `connDiffSection g₁ g₀` up to a coefficient-slot
-rotation, so its covariant jets are controlled (with two spectator `finrank` factors) by
-the connection-difference jets, which the antidiagonal-grid tower
-(`exists_rfns_iteratedCovGrad_connDiffSection_tgrid`) tames into the `l + 2` jet window of
-`P`; the order-0 fibre sup follows from the supercritical pointwise jet embedding. -/
 theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1282,12 +1236,7 @@ theorem connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic
           mul_nonneg hK_nn (by linarith [hwin2_nn l])
 
 set_option linter.unusedVariables false in
-/-- Ball-uniform order-0 sup bound and all-order per-order L² tame jet envelope for the
-order-one connection-difference Leibniz kernel field, generic in `g₁ = g₀ + P`.
 
-Proven by the five-arm reduction `kernelField_eq_neg_arm_combination` and the slot-permutation
-jet invariances onto the single connection-contraction core, whose envelope is
-`connDiffContrInsertionField_order0sup_perOrder_l2_tameEnvelope_generic`. -/
 theorem linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

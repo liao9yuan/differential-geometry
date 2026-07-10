@@ -33,7 +33,7 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 structure ChartH4NonSmoothPOUWitness
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) (α : M) : Prop where
-  
+
   memWkp_four : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
     (d := Module.finrank ℝ E) 4 2
     (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed (I := I) (M := M)

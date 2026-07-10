@@ -195,7 +195,7 @@ lemma gSupVal_smul (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     rwa [← mul_assoc, mul_inv_cancel₀ (ne_of_gt hcpos), one_mul] at h2
 
 structure CSupTensor (g : SmoothRiemannianMetric I M) (r s k : ℕ) where
-  
+
   toHsTensor : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)
 
 namespace CSupTensor

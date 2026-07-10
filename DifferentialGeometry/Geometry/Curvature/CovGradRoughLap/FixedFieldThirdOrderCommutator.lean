@@ -304,7 +304,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
   have hW := covApply_contMDiff (cov := LeviCivita (I := I) g) hVs hVs
   have hXV := covApply_contMDiff (cov := LeviCivita (I := I) g) hVs hXs
   have hVX := covApply_contMDiff (cov := LeviCivita (I := I) g) hXs hVs
-  
+
   have hbrx : VectorField.mlieBracket I V X x =
       covApply (LeviCivita (I := I) g) V X x - covApply (LeviCivita (I := I) g) X V x :=
     (covApply_sub_eq_mlieBracket (LeviCivita (I := I) g)
@@ -325,18 +325,18 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         ((hVs y).mdifferentiableAt (by simp)) ((hXs y).mdifferentiableAt (by simp))).symm
     rw [covApply_apply, hbry, map_sub]
     rfl
-  
+
   have hρ0 := slotRead_covGrad_section (I := I) (M := M) g s S X
   have hρ0' := slotRead_covGrad_section (I := I) (M := M) g s S
     (covApply (LeviCivita (I := I) g) V X)
-  
+
   have hM3a := tensor0S_curry_covApply_slot0_leibniz_fib (I := I) (M := M) g s
     (covApplyCovGradCc (I := I) (M := M) g s S hVs) hVs hXs x
   have hM3b := tensor0S_curry_covApply_slot0_leibniz_fib (I := I) (M := M) g s
     (covGrad (I := I) (M := M) g 0 s S) hW hXs x
   have hM3c := tensor0S_curry_covApply_slot0_leibniz_fib (I := I) (M := M) g s
     (covGrad (I := I) (M := M) g 0 s S) hVs hXV x
-  
+
   have hρ1 : (fun y : M => tensor0SAsRS (I := I) (M := M) y
       ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
@@ -369,7 +369,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         ((LeviCivita (I := I) g).toFun X y (V y))]
     rw [hρ0]
     rfl
-  
+
   have hVAL : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         tensorSecondCovDeriv (I := I) g 0 (s + 1) V V
@@ -411,7 +411,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
             (fun y : M => (LeviCivita (I := I) g).toFun V y (X y))
             (fun y : M => S.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
-    
+
     have hD2split : tensorSecondCovDeriv (I := I) g 0 (s + 1) V V
         (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x =
         covApply (tensorCov (I := I) g 0 (s + 1)) V
@@ -420,7 +420,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x := by
       rw [tensorSecondCovDeriv_def]
       rfl
-    
+
     have hL2a : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (covGrad (I := I) (M := M) g 0 s
@@ -458,7 +458,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         (covApplyRS_contMDiff (I := I) g 0 s
           (covApplyRS_contMDiff (I := I) g 0 s hSAt hVs) hVs)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hW)
-    
+
     have hT1 : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         covApply (tensorCov (I := I) g 0 s) V
           (fun y : M => tensor0SAsRS (I := I) (M := M) y
@@ -500,7 +500,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (covApplyRS_contMDiff (I := I) g 0 s hSAt hXs) hVs)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hXV)]
       rfl
-    
+
     have hT3 : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         covApply (tensorCov (I := I) g 0 s) (covApply (LeviCivita (I := I) g) V V)
           (fun y : M => tensor0SAsRS (I := I) (M := M) y
@@ -528,7 +528,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
                   (unitZeroSec (I := I) (M := M) y))) (X y))) x
             (covApply (LeviCivita (I := I) g) V V x) from rfl]
       rw [hρ0]
-    
+
     have hq2 : (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (covApplyCovGradCc (I := I) (M := M) g s S hVs).toSection x)
@@ -593,7 +593,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (unitZeroSec (I := I) (M := M) x) :=
       curry_covGrad_unit_read (I := I) (M := M) g s S x
         ((LeviCivita (I := I) g).toFun X x (covApply (LeviCivita (I := I) g) V V x))
-    
+
     have hswap := secondCovDeriv_swap_outer (cov := tensorCov (I := I) g 0 s)
       (B := V) (W := X) (T := fun z : M => S.toSection z) (x := x) hVs hXs hSAt
     have hsw2 : (tensorCov (I := I) g 0 s).toFun
@@ -624,7 +624,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hXV)
         (covApplyRS_contMDiff (I := I) g 0 s hSAt hVX)]
       rfl
-    
+
     have hanti1 : tensorSecondCovDeriv (I := I) g 0 s
         (covApply (LeviCivita (I := I) g) V X) V (fun z : M => S.toSection z) x -
         tensorSecondCovDeriv (I := I) g 0 s V
@@ -639,7 +639,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
         riemannOp (tensorCov (I := I) g 0 s) x (X x)
           (covApply (LeviCivita (I := I) g) V V x) (S.toSection x) :=
       tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g 0 s hXs hW hSAt
-    
+
     have ht5dir : riemannOp (LeviCivita (I := I) g) x (V x) (X x) (V x) =
         (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g) X V) x (V x) -
         (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g) V V) x (X x) -
@@ -647,7 +647,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
           (LeviCivita (I := I) g).toFun V x (covApply (LeviCivita (I := I) g) X V x)) := by
       rw [← riemannSec_eq_riemannOp_smooth (cov := LeviCivita (I := I) g) hVs hXs hVs]
       rw [riemannSec_def, hbrx, map_sub]
-    
+
     have hd31 : tensorSecondCovDeriv (I := I) g 0 s
         (covApply (LeviCivita (I := I) g) V X) V (fun z : M => S.toSection z) x =
         (tensorCov (I := I) g 0 s).toFun
@@ -706,17 +706,17 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
             (V x)) := by
       rw [tensorSecondCovDeriv_def]
       rfl
-    
+
     rw [hD2split, rs_sub_apply', map_sub, ContinuousLinearMap.sub_apply]
     rw [hM3a, hM3b]
     rw [hT1, hT3, hq2, hq4]
     rw [hL2a, hL2b, ContinuousLinearMap.sub_apply, rs_sub_apply']
-    
+
     rw [hswap]
     simp only [rs_add_apply']
     rw [hsw2, hsw4]
     simp only [rs_sub_apply']
-    
+
     rw [show riemannOp (tensorCov (I := I) g 0 s) x
         ((LeviCivita (I := I) g).toFun X x (V x)) (V x) (S.toSection x) =
         riemannOp (tensorCov (I := I) g 0 s) x
@@ -736,7 +736,7 @@ theorem secondCovDeriv_covGrad_sub_covGrad_secondCovDeriv_slot0_eq
     simp only [map_sub]
     simp only [rs_sub_apply']
     abel
-  
+
   have h := congrArg (fun t : Tensor0SSpace s I x => Tensor0SSpace.toModel t m) hVAL
   simp only [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply] at h
   exact h

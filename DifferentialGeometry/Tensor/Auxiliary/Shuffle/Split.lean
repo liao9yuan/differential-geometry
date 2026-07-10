@@ -83,17 +83,9 @@ theorem removeNone_inv_mul {α : Type*} [DecidableEq α]
   apply Equiv.optionCongr_injective
   have h12 : (σ₁⁻¹ * σ₂) none = none := by simp [Equiv.Perm.coe_mul, h₁, h₂]
   have h12 : (σ₁⁻¹ * σ₂) none = none := by simp [Equiv.Perm.coe_mul, h₁, h₂]
-  
-  
-  
-  
-  
-  
-  
+
   have h_lhs := optionCongr_removeNone_of_fix_none _ h12
-  
-  
-  
+
   have h_oc : ∀ (σ : Equiv.Perm (Option α)) (hσ : σ none = none) (b : α),
       some (Equiv.removeNone σ b) = σ (some b) := by
     intro σ hσ b
@@ -113,26 +105,21 @@ theorem removeNone_inv_mul {α : Type*} [DecidableEq α]
         Function.comp_apply, Equiv.Perm.inv_def]
       show some ((Equiv.removeNone σ₁).symm ((Equiv.removeNone σ₂) a)) =
         σ₁.symm (σ₂ (some a))
-      
+
       rw [← h_oc σ₂ h₂ a]
-      
-      
-      
-      
+
       have : ∀ c, some ((Equiv.removeNone σ₁).symm c) = σ₁.symm (some c) := by
         intro c
         apply σ₁.injective
         rw [Equiv.apply_symm_apply, ← h_oc σ₁ h₁, Equiv.apply_symm_apply]
       exact this _
-  
-  
+
   exact h_lhs.trans h_rhs.symm
 
 theorem removeNone_sign {α : Type*} [DecidableEq α] [Fintype α]
     (σ : Equiv.Perm (Option α)) (h : σ none = none) :
     Equiv.Perm.sign (Equiv.removeNone σ) = Equiv.Perm.sign σ := by
-  
-  
+
   conv_rhs => rw [← optionCongr_removeNone_of_fix_none σ h]
   exact (Equiv.optionCongr_sign _).symm
 

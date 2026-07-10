@@ -265,7 +265,7 @@ private lemma joint_contDiffAt_chartInvGramOnE
     ContDiffAt ℝ ∞
       (fun p : ℝ × E => chartInvGramOnE (I := I) (gfam p.1) α k l p.2) (0, y₀) := by
   classical
-  
+
   have hGentry : ∀ a b : Fin (Module.finrank ℝ E),
       ContDiffAt ℝ ∞
         (fun p : ℝ × E => chartGramMatrix (I := I) (gfam p.1) α
@@ -273,7 +273,7 @@ private lemma joint_contDiffAt_chartInvGramOnE
     intro a b
     have := joint_contDiffAt_chartGramOnE (I := I) hfam a b hy
     simpa only [chartGramOnE_def] using this
-  
+
   have hdet : ContDiffAt ℝ ∞
       (fun p : ℝ × E => (chartGramMatrix (I := I) (gfam p.1) α
         ((extChartAt I α).symm p.2)).det) (0, y₀) := by
@@ -478,7 +478,7 @@ private lemma hasDerivAt_chartInvGramOnE
       ring]
     refine HasDerivAt.fun_sum (fun q _ => ?_)
     refine HasDerivAt.fun_sum (fun p _ => ?_)
-    
+
     set A : ℝ → ℝ := fun s => chartInvGramOnE (I := I) (gfam s) α k p y with hA
     set B : ℝ → ℝ := fun s =>
       chartGramOnE (I := I) g₀ α p q y - chartGramOnE (I := I) (gfam s) α p q y with hB
@@ -492,7 +492,7 @@ private lemma hasDerivAt_chartInvGramOnE
       have := hconstB.sub hg
       simpa [hB] using this
     have hB0 : B 0 = 0 := by simp [hB, hg0]
-    
+
     have hAB : HasDerivAt (fun s => A s * B s)
         (chartInvGramOnE (I := I) g₀ α k p y * (-(h p q y))) 0 := by
       have := hA_diff.hasDerivAt.mul hB_deriv
@@ -565,7 +565,7 @@ private lemma hasDerivAt_chartChristoffel
         chartInvGramOnE (I := I) (gfam s) α k l y * gramBracket (I := I) (gfam s) α i j l y) := by
     funext s; rw [chartChristoffel_eq_sum_invGramOnE_bracket]
   rw [heq]
-  
+
   set D : ℝ := ∑ l : Fin (Module.finrank ℝ E),
     ((-(∑ q : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E),
           chartInvGramOnE (I := I) g₀ α k p y * h p q y *
@@ -583,7 +583,7 @@ private lemma hasDerivAt_chartChristoffel
     have hG := hasDerivAt_chartInvGramOnE (I := I) hfam k l hy
     have hbr := hasDerivAt_gramBracket (I := I) hfam i j l hy
     have hprod := hG.mul hbr
-    
+
     have hGval : chartInvGramOnE (I := I) (gfam 0) α k l y =
         chartInvGramOnE (I := I) g₀ α k l y := by rw [hg0]
     have hbrval : gramBracket (I := I) (gfam 0) α i j l y =
@@ -678,12 +678,12 @@ private lemma hasDerivAt_partial_chartInvGramOnE
   refine HasDerivAt.neg ?_
   refine HasDerivAt.fun_sum (fun a _ => ?_)
   refine HasDerivAt.fun_sum (fun b _ => ?_)
-  
+
   have hG1 := hasDerivAt_chartInvGramOnE (I := I) hfam j a hy
   have hG2 := hasDerivAt_chartInvGramOnE (I := I) hfam b p hy
   have hGd := hasDerivAt_partial_chartGramOnE (I := I) hfam a b m hy
   have hprod := (hG1.mul hG2).mul hGd
-  
+
   have hG1v : chartInvGramOnE (I := I) (gfam 0) α j a y = chartInvGramOnE (I := I) g₀ α j a y := by
     rw [hg0]
   have hG2v : chartInvGramOnE (I := I) (gfam 0) α b p y = chartInvGramOnE (I := I) g₀ α b p y := by
@@ -751,18 +751,18 @@ private lemma hasDerivAt_partial_chartChristoffel
         partialDeriv (E := E) m
           (fun y => christoffelFirstOrderCorr (I := I) g₀ α h i j k y) y₀) 0 := by
   classical
-  
+
   have hderiv_eq : (fun y => deriv (fun s : ℝ =>
         chartChristoffel (I := I) (gfam s) α i j k y) 0) =ᶠ[nhds y₀]
       (fun y => chartLinearizedChristoffelPrincipal (I := I) g₀ α h i j k y +
         christoffelFirstOrderCorr (I := I) g₀ α h i j k y) := by
     filter_upwards [isOpen_interior.mem_nhds hy] with y hy'
     exact (hasDerivAt_chartChristoffel (I := I) hfam i j k hy').deriv
-  
+
   have hcomm := hasDerivAt_partialDeriv_comm
     (fun p : ℝ × E => chartChristoffel (I := I) (gfam p.1) α i j k p.2) m y₀
     (joint_contDiffAt_chartChristoffel (I := I) hfam i j k hy)
-  
+
   have hrhs : partialDeriv (E := E) m
         (fun y => deriv (fun s : ℝ => chartChristoffel (I := I) (gfam s) α i j k y) 0) y₀ =
       partialDeriv (E := E) m
@@ -833,7 +833,7 @@ lemma hasDerivAt_chartRicciTensor
         ricciDerivFirstOrderRemainder (I := I) g₀ α h i k y) 0 := by
   classical
   have hg0 : gfam 0 = g₀ := hfam.1
-  
+
   have hSO : HasDerivAt
       (fun s : ℝ => chartRicciSecondOrderTerm (I := I) (gfam s) α i k y)
       (chartRicciSecondOrderPart (I := I) g₀ α h i k y +
@@ -872,7 +872,7 @@ lemma hasDerivAt_chartRicciTensor
     rw [chartRicciSecondOrderPart_def, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     ring
-  
+
   have hFO : HasDerivAt
       (fun s : ℝ => chartRicciFirstOrderTerm (I := I) (gfam s) α i k y)
       (∑ j : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
@@ -905,7 +905,7 @@ lemma hasDerivAt_chartRicciTensor
     have hp1 := (hΓ1.mul hΓ2)
     have hp2 := (hΓ3.mul hΓ4)
     have hsub := hp1.sub hp2
-    
+
     rw [show chartChristoffel (I := I) (gfam 0) α j m j y =
           chartChristoffel (I := I) g₀ α j m j y from by rw [hg0],
       show chartChristoffel (I := I) (gfam 0) α i k m y =
@@ -916,7 +916,7 @@ lemma hasDerivAt_chartRicciTensor
           chartChristoffel (I := I) g₀ α i j m y from by rw [hg0]] at hsub
     refine hsub.congr_deriv ?_
     ring
-  
+
   have htotal := hSO.add hFO
   have heq : (fun s : ℝ => chartRicciTensor (I := I) (gfam s) α i k y) =
       (fun s : ℝ => chartRicciSecondOrderTerm (I := I) (gfam s) α i k y +
@@ -1156,7 +1156,7 @@ lemma hasDerivAt_chartLieDeTurckComp
                 (fun y' => chartDeTurckVFComp (I := I) (gfam s) g_bg α k y') y)) := by
     funext s; rw [chartLieDeTurckComp_def]
   rw [heq]
-  
+
   have hT1 : HasDerivAt
       (fun s : ℝ => ∑ k : Fin (Module.finrank ℝ E),
         chartDeTurckVFComp (I := I) (gfam s) g_bg α k y *
@@ -1172,7 +1172,7 @@ lemma hasDerivAt_chartLieDeTurckComp
     have hprod := hW.mul hG
     simp only [hg0] at hprod
     exact hprod
-  
+
   have hT2 : HasDerivAt
       (fun s : ℝ => ∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) (gfam s) α k j y *
@@ -1195,7 +1195,7 @@ lemma hasDerivAt_chartLieDeTurckComp
     simp only [hg0] at hprod
     refine hprod.congr_deriv ?_
     ring
-  
+
   have hT3 : HasDerivAt
       (fun s : ℝ => ∑ k : Fin (Module.finrank ℝ E),
         chartGramOnE (I := I) (gfam s) α i k y *
@@ -1447,7 +1447,7 @@ private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
             christoffelFirstOrderCorr (I := I) g₀ α h a b k y')) := by
     funext y'; rw [deTurckVFFirstOrderCorr]
   rw [hcorr_eq]
-  
+
   set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ := fun a b y' =>
     -(∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E),
       chartInvGramOnE (I := I) g₀ α a r y' * h r q y' *
@@ -1493,7 +1493,7 @@ private lemma partialDeriv_deTurckVFFirstOrderCorr_vanish
   rw [partialDeriv_mul (E := E) (chartInvGramOnE (I := I) g₀ α a b)
     (fun y' => christoffelFirstOrderCorr (I := I) g₀ α h a b k y')
     (chartInvGramOnE_differentiableAt_interior (I := I) g₀ α a b hy) (hcorr_diff a b)]
-  
+
   have hCval : C a b y = 0 := by
     rw [hC, neg_eq_zero]
     refine Finset.sum_eq_zero (fun q _ => Finset.sum_eq_zero (fun r _ => ?_))

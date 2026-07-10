@@ -648,7 +648,6 @@ private theorem productGridTerm_integral_le_topOrderJetSq
             mul_le_mul_of_nonneg_right (pow_le_pow_right₀ hMbar1 (by omega)) (sq_nonneg Rtop)
           exact le_trans e4 e5
 
-
 set_option linter.unusedVariables false in
 private theorem gInvDiffSlotCoeff_perOrder_l2_tame
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

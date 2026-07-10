@@ -160,7 +160,7 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
   classical
   set ι := TensorEigenIdx (I := I) (M := M) g r s
-  
+
   have hnormsq : ∀ n,
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           hσ'σ''.le (d n)‖ ^ 2 =
@@ -171,16 +171,16 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
       (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n))
     rwa [tensorHsInclusion_coeff] at h
-  
+
   have hsumm' : ∀ n, Summable (fun i : ι =>
       tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) :=
     fun n => tensorHs.weighted_summable_of_le (I := I) (M := M) hσ'σ''.le (d n)
-  
+
   have hmass'' : ∀ n,
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2
         = ‖d n‖ ^ 2 :=
     fun n => (tensorHs.norm_sq_eq_tsum (I := I) (M := M) (d n)).symm
-  
+
   suffices hsq : Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n)‖ ^ 2) atTop (𝓝 0) by
@@ -195,11 +195,11 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
     rw [Real.sqrt_zero] at hsqrt
     refine hsqrt.congr (fun n => ?_)
     rw [Real.sqrt_sq (hnn n)]
-  
+
   rw [Metric.tendsto_atTop]
   intro ε hε
   have hexp : σ' - σ'' < 0 := by linarith
-  
+
   obtain ⟨Λ, hΛgt1, hΛtail⟩ :
       ∃ Λ : ℝ, 1 < Λ ∧ Λ ^ (σ' - σ'') * C ^ 2 < ε / 2 := by
     set δ : ℝ := (ε / 2) / (C ^ 2 + 1) with hδ_def
@@ -223,14 +223,14 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
       have hεpos : 0 < ε / 2 := by linarith
       nlinarith [hεpos, hCsq_nn]
     linarith
-  
+
   set F : Finset ι :=
     (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g r s Λ).toFinset
     with hF_def
   have hmemF : ∀ i : ι, i ∈ F ↔
       1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ := by
     intro i; rw [hF_def, Set.Finite.mem_toFinset]; rfl
-  
+
   have hcompl_bd : ∀ (n : ℕ) (i : ι), i ∉ F →
       tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 ≤
         Λ ^ (σ' - σ'') *
@@ -239,7 +239,7 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
     have hΛle : Λ ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
       by_contra hcon
       exact hi ((hmemF i).2 (lt_of_not_ge hcon))
-    
+
     have hsplit : tensorSobolevWeight (I := I) (M := M) i σ' =
         tensorSobolevWeight (I := I) (M := M) i (σ' - σ'') *
           tensorSobolevWeight (I := I) (M := M) i σ'' := by
@@ -260,7 +260,7 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
       _ ≤ Λ ^ (σ' - σ'') *
               (tensorSobolevWeight (I := I) (M := M) i σ'' * ((d n).coeff i) ^ 2) :=
             mul_le_mul_of_nonneg_right hratio (by positivity)
-  
+
   have htail : ∀ n,
       ∑' i : { i : ι // i ∉ F },
           tensorSobolevWeight (I := I) (M := M) (i : ι) σ' * ((d n).coeff i) ^ 2 ≤
@@ -301,7 +301,7 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
             apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
             have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
             nlinarith [hCbd n, hnn, hC]
-  
+
   have hcoeff0 : ∀ i : ι, Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
     intro i
     have h := tensorHs.coeff_tendsto_zero_of_norm_tendsto_zero (I := I) (M := M)
@@ -321,11 +321,11 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
         have := hc.const_mul (tensorSobolevWeight (I := I) (M := M) i σ')
         simpa using this)
     simpa using h
-  
+
   rw [Metric.tendsto_atTop] at hfin0
   obtain ⟨N, hN⟩ := hfin0 (ε / 2) (by linarith)
   refine ⟨N, fun n hn => ?_⟩
-  
+
   have hsplit_sum :
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2 =
         (∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2) +
@@ -347,7 +347,7 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
       hσ'σ''.le (d n)‖ ^ 2 < ε := by
     rw [hnormsq n, hsplit_sum]
     linarith
-  
+
   rw [Real.dist_eq, sub_zero]
   have hnn : 0 ≤ ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
@@ -381,15 +381,15 @@ theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
     Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (u n - ulim)‖) atTop (𝓝 0) := by
-  
+
   set d : ℕ → tensorHs (I := I) (M := M) g r s σ'' := fun n => u n - ulim with hd_def
-  
+
   have hBnn : 0 ≤ B :=
     le_trans (tsum_nonneg (fun i => by
       have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i σ'' :=
         tensorSobolevWeight_nonneg (I := I) (M := M) i σ''
       positivity)) hlmass
-  
+
   have hCbd : ∀ n, ‖d n‖ ≤ 2 * Real.sqrt B := by
     intro n
     have hu : ‖u n‖ ≤ Real.sqrt B :=
@@ -400,7 +400,7 @@ theorem tensorHs_tendsto_of_tendsto_of_uniform_weightedMass
       _ ≤ ‖u n‖ + ‖ulim‖ := norm_sub_le _ _
       _ ≤ Real.sqrt B + Real.sqrt B := add_le_add hu hl
       _ = 2 * Real.sqrt B := by ring
-  
+
   have hlow : Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         (hσσ'.trans hσ'σ''.le) (d n)‖) atTop (𝓝 0) := by

@@ -65,7 +65,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
         ((fun z : M => T₀.toSection z) y)) := T₀.toSection.contMDiff
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
-  
+
   set proj : TensorRSSpace r s I b →L[ℝ] ℝ :=
     (tensorChartComponentProjection (E := E) r s Idx Jdx).comp
       ((trivializationAt (TensorRSModel r s ℝ E)
@@ -77,7 +77,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
           ((trivializationAt (TensorRSModel r s ℝ E)
               (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b D) := by
     intro D; rw [hproj_def, ContinuousLinearMap.comp_apply]
-  
+
   set Ψ : TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
     rawTensorConnLap_psi_bilinAt (I := I) g r s (fun z : M => T₀.toSection z) hT_total b
     with hΨ_def
@@ -86,7 +86,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
   have hB_orthonormal : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner b (B i) (B j) = if i = j then (1 : ℝ) else 0 :=
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g b i j
-  
+
   have hChartBasis_mdiff : ∀ k : Fin (Module.finrank ℝ E),
       MDifferentiableAt I (I.prod 𝓘(ℝ, E))
         (fun z : M => TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z
@@ -94,7 +94,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     fun k => ((chartBasisVec_contMDiffOn (I := I) α k).contMDiffAt
       ((trivializationAt E (TangentSpace I) α).open_baseSet.mem_nhds
         hb_base)).mdifferentiableAt (by simp)
-  
+
   have hLHS_trace :
       tensorChartComponentRaw (I := I) (M := M) g r s
           (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
@@ -103,8 +103,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     rw [rawTensorConnLap_eq_frame_trace (I := I) g r s
       (fun z : M => T₀.toSection z) hT_total b B hB_orthonormal]
     rw [← hΨ_def, hproj_apply]
-  
-  
+
   have hTrace_fibre :
       (∑ i : Fin (Module.finrank ℝ E), Ψ (B i) (B i)) =
         ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
@@ -124,8 +123,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     rw [map_sum]
     refine Finset.sum_congr rfl (fun l _ => ?_)
     rw [map_smul, smul_eq_mul]
-  
-  
+
   have hProjΨ_chartBasis : ∀ k l : Fin (Module.finrank ℝ E),
       proj (Ψ (chartBasisVecFiber (I := I) α k b) (chartBasisVecFiber (I := I) α l b)) =
           tensorChartComponentProjection (E := E) r s Idx Jdx
@@ -150,7 +148,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     rw [hΨ_def, rawTensorConnLap_psi_bilinAt_apply (I := I) g r s
       (fun z : M => T₀.toSection z) hT_total (hChartBasis_mdiff k) (hChartBasis_mdiff l)]
     rw [hproj_apply, map_sub, map_sub]
-  
+
   set A : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun k l =>
       chartInvGramMatrix (I := I) g α b k l *
@@ -177,7 +175,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
                 (fun z : M => chartBasisVecFiber (I := I) α k z) b
                 (chartBasisVecFiber (I := I) α l b))))
     with hC_def
-  
+
   have hProjΨ_split : ∀ k l : Fin (Module.finrank ℝ E),
       chartInvGramMatrix (I := I) g α b k l *
           proj (Ψ (chartBasisVecFiber (I := I) α k b)
@@ -270,18 +268,18 @@ private lemma christoffelTrace_proj_eq_wCoord_sum
         (LeviCivita (I := I) g)).toFun
       (fun z : M => T₀.toSection z) b
     with hLcov_def
-  
+
   have hChristEval : ∀ k l m : Fin (Module.finrank ℝ E),
       chartChristoffelEuclid (I := I) g α l k m y =
         chartChristoffel (I := I) g α l k m ((extChartAt I α) b) := by
     intro k l m
     rw [chartChristoffelEuclid_def, hsymm_te]
-  
+
   have hInvGramEval : ∀ k l : Fin (Module.finrank ℝ E),
       chartInvGramEuclid (I := I) g α k l y = chartInvGramMatrix (I := I) g α b k l := by
     intro k l
     rw [chartInvGramEuclid_def, chartInvGramOnE_def, hsymm_te, hleft_inv]
-  
+
   have hSummandLHS : ∀ k l : Fin (Module.finrank ℝ E),
       L (Lcov ((LeviCivita (I := I) g).toFun
             (fun z : M => chartBasisVecFiber (I := I) α k z) b
@@ -294,8 +292,7 @@ private lemma christoffelTrace_proj_eq_wCoord_sum
     rw [map_sum, map_sum]
     refine Finset.sum_congr rfl (fun m _ => ?_)
     rw [Lcov.map_smul, L.map_smul, smul_eq_mul]
-  
-  
+
   have hExpand : (∑ k : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
           chartInvGramMatrix (I := I) g α b k l *
@@ -512,9 +509,9 @@ theorem christoffelTrace_correction_eq_T₀_linear
       (extChartAt I α).map_source hb_src
     have hy_mem : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α := ⟨(extChartAt I α) b, hb_tgt, rfl⟩
-    
+
     rw [christoffelTrace_proj_eq_wCoord_sum (I := I) (M := M) g r s α T₀ Idx Jdx hb]
-    
+
     have hStep2 :
         (∑ m : Fin (Module.finrank ℝ E),
           wTraceCoordPullback (I := I) (M := M) g α m y *
@@ -535,7 +532,7 @@ theorem christoffelTrace_correction_eq_T₀_linear
       rw [chartα_proj_covRS_chartBasis_eq_euclidPartial_plus_lower
         (I := I) (M := M) g r s α T₀ m Idx Jdx hb]
     rw [hStep2]
-    
+
     have hStep3 :
         (- ∑ m : Fin (Module.finrank ℝ E),
             wTraceCoordPullback (I := I) (M := M) g α m y *
@@ -555,7 +552,7 @@ theorem christoffelTrace_correction_eq_T₀_linear
       refine Finset.sum_congr rfl (fun m _ => ?_)
       ring
     rw [hStep3]
-    
+
     have hPrincipal_block_eq :
         (∑ m : Fin (Module.finrank ℝ E),
           (- wTraceCoordPullback (I := I) (M := M) g α m y) *
@@ -585,7 +582,7 @@ theorem christoffelTrace_correction_eq_T₀_linear
         unfold christoffelTracePrincipalCoeff
         simp [hIne]
       · intro hI; exact absurd (Finset.mem_univ _) hI
-    
+
     have hZeroth_block_eq :
         (∑ m : Fin (Module.finrank ℝ E),
           (- wTraceCoordPullback (I := I) (M := M) g α m y) *

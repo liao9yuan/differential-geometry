@@ -120,7 +120,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
   classical
   set s : Set E := interior (extChartAt I α).target with hs_def
   have hs_open : IsOpen s := isOpen_interior
-  
+
   have hpair : ∀ a b : Fin (Module.finrank ℝ E),
       iteratedFDerivSeminorm N
         (fun z => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)
@@ -133,12 +133,12 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
             ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖)) := by
     intro a b
     refine Finset.sum_le_sum (fun m _ => ?_)
-    
+
     have hEq := chartGramOnE_realize_sub_eqOn_symm_rawComponent (I := I) (M := M)
       g_bg T T' hδ_lt hδ hδ'_lt hδ' α a b
     have hcongr := iteratedFDerivWithin_congr (𝕜 := ℝ) hEq hy m
     rw [hcongr]
-    
+
     have hfun_eq : Set.EqOn
         (fun y : E => (1 / 2 : ℝ) *
           (tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 (T - T') α ![] ![a, b]
@@ -150,7 +150,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
             rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] y)) s := by
       intro z _; rfl
     rw [iteratedFDerivWithin_congr (𝕜 := ℝ) hfun_eq hy m]
-    
+
     have hcd_ab : ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b]) s :=
       rawCompOnE_contDiffOn (I := I) (M := M) g_bg (T - T') α ![a, b]
     have hcd_ba : ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s :=
@@ -177,17 +177,17 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
       iteratedFDerivWithin_add_apply (hcd_ab.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top))
         (hcd_ba.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top)) hs_open.uniqueDiffOn hy]
     exact norm_add_le _ _
-  
+
   unfold chartGramJetDiffSeminormSum
   refine (Finset.sum_le_sum (fun a _ => Finset.sum_le_sum (fun b _ => hpair a b))).trans ?_
-  
+
   set col : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ := fun Jdx =>
     ∑ m ∈ Finset.range (N + 1),
       ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α Jdx) s y‖
     with hcol_def
   have hcol_nn : ∀ Jdx, 0 ≤ col Jdx := fun Jdx =>
     Finset.sum_nonneg fun m _ => norm_nonneg _
-  
+
   have hLHS_eq : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         ∑ m ∈ Finset.range (N + 1),
           ((1 / 2 : ℝ) *
@@ -204,7 +204,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     refine Finset.sum_congr rfl (fun m _ => ?_)
     ring
   rw [hLHS_eq]
-  
+
   have hsum_pair : ∀ f : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ,
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), f ![a, b]) =
         ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), f Jdx := by
@@ -225,7 +225,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
       (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (1 / 2 : ℝ) * (col ![a, b] + col ![b, a])) =
       ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), col Jdx := by
-    
+
     have hsplit : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           (1 / 2 : ℝ) * (col ![a, b] + col ![b, a])) =
         (∑ a, ∑ b, (1 / 2 : ℝ) * col ![a, b]) +

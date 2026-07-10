@@ -42,7 +42,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 structure SmoothCcTensorHs (g : SmoothRiemannianMetric I M) (r s k : ℕ) where
-  
+
   toCcTensor : SmoothCcTensor g r s
 
 namespace SmoothCcTensorHs

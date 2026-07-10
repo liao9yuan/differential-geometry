@@ -393,7 +393,7 @@ theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   let Wd : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯ :=
     ⟨fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace r I y from W.toSection y) (dSec y),
       hWd_smooth⟩
-  
+
   have hLHS :
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           tensorCovDerivAt (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x v) d =
@@ -417,7 +417,7 @@ theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       tensorRSCovariantDerivative_apply (I := I) (M := M) 0 s (LeviCivita (I := I) g)
         (appCc (I := I) (M := M) g r s Φ W).toSection dSec x v, hval,
       appCc_toSection (I := I) (M := M) g r s Φ W x, ContinuousLinearMap.comp_apply]
-  
+
   have hT1 :
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
           tensorCovDerivAt (I := I) (M := M) g r s Φ x v)
@@ -433,7 +433,7 @@ theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       tensorCovDerivAt_def (I := I) (M := M) g r s Φ x v,
       tensorRSCovariantDerivative_apply (I := I) (M := M) r s (LeviCivita (I := I) g)
         Φ.toSection Wd x v]
-  
+
   have hT2 :
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
@@ -498,14 +498,14 @@ theorem covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   beta_reduce
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-  
+
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x d v]
-  
+
   rw [appCc_toSection (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) W x,
     ContinuousLinearMap.comp_apply,
     covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d) v]
-  
+
   have hT2val : Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (appCc (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
@@ -528,7 +528,7 @@ theorem covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [show (Fin.cons (v 0) (v ∘ Fin.succ) ∘ Fin.succ) = v ∘ Fin.succ from
       funext (fun j => by simp [Fin.cons_succ])]
   rw [hT2val]
-  
+
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         tensorCovDerivAt (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x (v 0)) =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from

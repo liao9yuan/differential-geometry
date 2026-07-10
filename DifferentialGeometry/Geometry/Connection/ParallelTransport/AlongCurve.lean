@@ -25,7 +25,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 @[ext] structure SectionAlongCurve (I : ModelWithCorners ℝ E H) (M : Type*)
     [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     (_γ : ℝ → M) where
-  
+
   toFun : ℝ → E
 
 namespace SectionAlongCurve

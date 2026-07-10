@@ -211,9 +211,7 @@ theorem tensor0S_curry_apply_eval {n : ℕ} {b : M}
     (v0 : E) (vs : Fin n → E) :
     Tensor0SSpace.toModel (tensor0S_curry (I := I) (M := M) n b T v0) vs =
     Tensor0SSpace.toModel T (Fin.cons v0 vs) := by
-  
-  
-  
+
   change (((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => E) ℝ)
         ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (n + 1) b) T) v0)) vs =
       ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (n + 1) b) T) (Fin.cons v0 vs)
@@ -259,7 +257,7 @@ private theorem continuous_section_apply_aux : ∀ (n : ℕ)
         (fun _ : Fin 0 => E) ((T b) 0)) 0 = (T b) 0
       rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     rw [hev]
-    
+
     have huniq : (fun i : Fin 0 => v i b) = (0 : Fin 0 → E) := Subsingleton.elim _ _
     rw [huniq]
     rfl
@@ -282,8 +280,7 @@ private theorem continuous_section_apply_aux : ∀ (n : ℕ)
       (fun (i : Fin n) (b : M) => v i.succ b)
       (fun i => hv i.succ)
     refine hRec.congr (fun b => ?_)
-    
-    
+
     change Tensor0SSpace.toModel ((curriedSection T b) (v 0 b))
         (fun i : Fin n => v i.succ b) =
       Tensor0SSpace.toModel (T b) (fun i : Fin (n + 1) => v i b)
@@ -354,8 +351,7 @@ private theorem contMDiff_section_apply_aux : ∀ (n : ℕ)
       (fun (i : Fin n) (b : M) => v i.succ b)
       (fun i => hv i.succ)
     refine hRec.congr (fun b => ?_)
-    
-    
+
     change Tensor0SSpace.toModel (T b) (fun i : Fin (n + 1) => v i b) =
       Tensor0SSpace.toModel ((curriedSection T b) (v 0 b))
         (fun i : Fin n => v i.succ b)
@@ -493,9 +489,7 @@ private theorem contMDiffAt_section_apply_aux : ∀ (n : ℕ) (x₀ : M)
       (fun i => hv i.succ)
     refine hRec.congr_of_eventuallyEq ?_
     filter_upwards with b
-    
-    
-    
+
     show Tensor0SSpace.toModel (T b) (fun i : Fin (n + 1) => v i b) =
       Tensor0SSpace.toModel ((curriedSection T b) (v 0 b))
         (fun i : Fin n => v i.succ b)

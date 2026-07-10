@@ -251,7 +251,7 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
       _ = C ^ 2 * ∑ i ∈ Finset.range N, fi i ^ 2 := by
             congr 1
             exact Finset.sum_congr rfl (fun i _ => (hbridge_i i).symm)
-  
+
   have hsum_sq_le : ∑ i ∈ Finset.range N, fi i ^ 2 ≤ (∑ i ∈ Finset.range N, fi i) ^ 2 := by
     have hsq_sum : (∑ i ∈ Finset.range N, fi i) ^ 2 =
         ∑ i ∈ Finset.range N, fi i * (∑ j ∈ Finset.range N, fi j) := by

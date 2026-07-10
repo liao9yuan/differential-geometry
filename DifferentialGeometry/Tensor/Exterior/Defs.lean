@@ -25,9 +25,9 @@ variable {E F F' F'' G : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 structure DifferentialForm (n : ℕ) (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F] where
-  
+
   toFun : E → E [⋀^Fin n]→L[ℝ] F
-  
+
   smooth : ContDiff ℝ ⊤ toFun
 
 notation "Ω^" n "⟮" E ", " F "⟯" => DifferentialForm n E F

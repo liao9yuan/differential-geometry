@@ -1,23 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1TameEnvelope
 
-/-!
-# Covariant-jet diagonal-product grids for the order-zero connection-difference kernel
-
-The order-zero analogue of the order-one chain of `RicciConnDiffOrder1TameEnvelope`: the
-order-zero connection-difference Ricci-linearization coefficient field factors through the
-four-trace `appCcRS` refold `linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS` against the
-order-zero kernel field `linearizedRicciConnDiffOrder0KernelField` (the quadratic `A ⋆ A` and
-linear `∇A` connection-difference kernels, `A = connDiffSection g₁ g₀`). The kernel is an
-eight-arm two-sided slot-permutation combination of three insertion cores — the outer
-`connContrCLM 2 1` core (`connDiffContrInsertionField`), the inner `connContrCLM 1 1` core
-(`connDiffContrInsertionInnerField`), and the gradient `connContrCLM 1 2` core
-(`connDiffGradContrInsertionField`) — each a slot-extension refold of the
-connection-difference jets, so the kernel's covariant jets obey a pointwise
-diagonal-product-grid bound at total-weight window `l + 3` in the perturbation jets, and the
-moving four-trace factor obeys the window-`n + 1` grid bound through the
-`gInvDiffRaisedEndoField` slot-insert tower.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -51,9 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- Smoothness of the inner connection-contraction insertion fiber family
-`x ↦ connContrCLM 1 1 x (A x)`, `A = connDiffSection g₁ g₀`, viewed as a rank-`(2,3)` tensor
-section. -/
+
 theorem connDiffContrInsertionInnerFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 3 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 3 ℝ E)
@@ -76,10 +56,6 @@ theorem connDiffContrInsertionInnerFib_contMDiff (g₀ g₁ : SmoothRiemannianMe
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) x t) rfl
 
-/-- The inner connection-contraction insertion core field: the fiber family
-`x ↦ connContrCLM 1 1 x (A x)` with `A = connDiffSection g₁ g₀`, as a rank-`(2,3)` smooth
-compactly supported tensor over `g₀`. The inner factor of the quadratic arms of the
-order-zero connection-difference kernel. -/
 def connDiffContrInsertionInnerField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 3 where
   toSection :=
@@ -96,15 +72,11 @@ set_option linter.unusedSectionVars false in
       (show Tensor0SBundle.TensorRSSpace 2 3 I x from
         connContrCLM (I := I) 1 1 x ((connDiffSection (I := I) g₁ g₀).toSection x)) := rfl
 
-/-- The coefficient-slot swap of the single-spectator insertion refolds. -/
 def innerCoreInPerm10 : Equiv.Perm (Fin 2) :=
   ⟨![1, 0], ![1, 0], by decide, by decide⟩
 
 set_option linter.unusedSectionVars false in
-/-- The slot-extension refold of the inner connection-contraction insertion core: the
-`connContrCLM 1 1` insertion of the connection-difference section is the single `slotExtend`
-spectator extension of `connDiffSection` itself, up to the swap of the two rank-2
-coefficient slots. -/
+
 theorem connDiffContrInsertionInnerField_eq_reindex_slotExtend
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffContrInsertionInnerField (I := I) g₀ g₁ =
@@ -258,9 +230,7 @@ private lemma rs13ContrVec_pairing (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3
     rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul])
 
 set_option linter.unusedSectionVars false in
-/-- Smoothness of the gradient connection-contraction insertion fiber family
-`x ↦ connContrCLM 1 2 x ((∇A) x)`, `A = connDiffSection g₁ g₀`, viewed as a rank-`(2,4)`
-tensor section. -/
+
 theorem connDiffGradContrInsertionFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 4 ℝ E)
@@ -286,10 +256,6 @@ theorem connDiffGradContrInsertionFib_contMDiff (g₀ g₁ : SmoothRiemannianMet
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
-/-- The gradient connection-contraction insertion core field: the fiber family
-`x ↦ connContrCLM 1 2 x ((∇A) x)` with `A = connDiffSection g₁ g₀`, as a rank-`(2,4)` smooth
-compactly supported tensor over `g₀`. The linear `∇A` arms of the order-zero
-connection-difference kernel are two-sided slot-permutation images of this single core. -/
 def connDiffGradContrInsertionField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 where
   toSection :=
@@ -311,10 +277,7 @@ set_option linter.unusedSectionVars false in
             (connDiffSection (I := I) g₁ g₀)).toSection x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The slot-extension refold of the gradient connection-contraction insertion core: the
-`connContrCLM 1 2` insertion of the covariant gradient of the connection-difference section
-is the single `slotExtend` spectator extension of `∇A` itself, up to the swap of the two
-rank-2 coefficient slots. -/
+
 theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffGradContrInsertionField (I := I) g₀ g₁ =
@@ -394,9 +357,7 @@ theorem connDiffGradContrInsertionField_eq_reindex_slotExtend
   exact hL.trans hR.symm
 
 set_option linter.unusedSectionVars false in
-/-- Smoothness of the order-zero connection-difference kernel fiber family
-`x ↦ linearizedRicciConnDiffOrder0CLM x (A x) ((∇A) x)`, viewed as a rank-`(2,4)` tensor
-section. -/
+
 theorem linearizedRicciConnDiffOrder0KernelFib_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 4 ℝ E)) ∞
@@ -422,9 +383,6 @@ theorem linearizedRicciConnDiffOrder0KernelFib_contMDiff
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
-/-- The order-zero connection-difference Leibniz kernel field: the fiber family
-`x ↦ linearizedRicciConnDiffOrder0CLM x (A x) ((∇A) x)` with `A = connDiffSection g₁ g₀`,
-as a rank-`(2,4)` smooth compactly supported tensor over `g₀`. -/
 def linearizedRicciConnDiffOrder0KernelField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 where
   toSection :=
@@ -448,9 +406,7 @@ set_option linter.unusedSectionVars false in
             (connDiffSection (I := I) g₁ g₀)).toSection x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The four-trace `appCcRS` refold: the order-zero connection-difference coefficient field
-is the composition of the four-trace cometric cast field against the order-zero Leibniz
-kernel field, mirroring `linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS`. -/
+
 theorem linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁ =
@@ -619,10 +575,7 @@ private lemma o0Rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Pointwise diagonal-product grid bound for a quadratic `A ⋆ A` arm of the order-zero
-kernel: the `appCcRS` composition of the outer insertion core against a rank-`(2,3)` factor
-whose jets carry the single-`A` window grids multiplies the two windows into the
-total-weight window `l + 3`. -/
+
 private theorem quadArm_rfns_windowGrid_le (g₀ : SmoothRiemannianMetric I M)
     (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     (core : SmoothCcTensor g₀ 3 4) (W23 : SmoothCcTensor g₀ 2 3)
@@ -741,11 +694,7 @@ private lemma rfns_eightArm_cascade (g : SmoothRiemannianMetric I M) (r s : ℕ)
   linarith [c12, c123, c1234, c12345, c123456, cm7, cm8, h1, h2, h3, h4, h5, h6, h7, h8]
 
 set_option linter.unusedVariables false in
-/-- Pointwise diagonal-product-grid bound, at total-weight window `l + 3`, for the covariant
-gradients of the order-zero connection-difference Leibniz kernel field, generic in a
-perturbed metric `g₁ = g₀ + P`: through the eight-arm combination, the quadratic `A ⋆ A`
-arms multiply two single-`A` window grids (total weight `l + 2`), and the linear `∇A` arms
-carry the single factor of order `l + 2` — all inside the window `l + 3`. -/
+
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
@@ -1084,11 +1033,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0KernelField_diagonalPr
     _ _ _ _ _ _ _ _ hB1 hB2 hB3 hB4 hB5 hB6 hB7 hB8
 
 set_option linter.unusedVariables false in
-/-- Pointwise diagonal-product-grid bound, at total-weight window `n + 1`, for the covariant
-gradients of the moving four-trace cometric cast field, generic in a perturbed metric
-`g₁ = g₀ + P`: through the reindex combination onto the pure `g₁` double-trace coefficient
-and its `g₀`-background + slot-insert `gInvDiffRaisedEndoField` decomposition, every jet is a
-fixed-background sup times the inverse-metric slot-insert grid tower. -/
+
 theorem rfns_iteratedCovGrad_ricciCometricFourTraceCastG0_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ n, 0 ≤ C n) ∧

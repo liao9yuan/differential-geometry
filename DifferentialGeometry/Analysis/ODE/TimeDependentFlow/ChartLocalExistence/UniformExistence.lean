@@ -14,15 +14,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 structure ChartLocalPicardData
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) where
-  
+
   T : ℝ
   T_pos : 0 < T
-  
+
   r : ℝ
   r_pos : 0 < r
-  
+
   flow : E → ℝ → E
-  
+
   flow_spec : ∀ y ∈ Metric.closedBall (I ((chartAt H α) α)) r,
     flow y 0 = y ∧
     ∀ t ∈ Set.Icc (0 : ℝ) T,

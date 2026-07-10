@@ -2051,8 +2051,6 @@ private lemma connDiffSection_eq_armSlotEndoCc_zero (g₀ g₁ : SmoothRiemannia
   rw [connDiffPairing_apply]
   rfl
 
-
-
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 private lemma armSlotEndoCc_one_eq_reindex_slotExtend (g₀ : SmoothRiemannianMetric I M)
@@ -2346,7 +2344,6 @@ theorem exists_rfns_iteratedCovGrad_connDiffSection_tgrid
           ∑ i ∈ Finset.range (j + 1), 10 * ∑ l ∈ Finset.range (j + 1 - i), S l) * G := by
         ring
 
-
 private def quadraticConnDiffCc (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 1 3 :=
   appCcRS (I := I) (M := M) g₀ 1 2 3
@@ -2396,7 +2393,6 @@ private lemma quadraticConnDiffCc_toModel (g₀ g₁ : SmoothRiemannianMetric I 
   rw [connDiffPairing_apply]
   rw [cotangentToDual_apply]
   rfl
-
 
 set_option backward.isDefEq.respectTransparency false in
 private def covectorExtensionSection (g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -2730,7 +2726,6 @@ private lemma gridSum_mul_gridSum_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (
           (∑ k ∈ Finset.range m3, Combinatorics.antidiagonalTupleGrid b k) := by
         rw [Finset.sum_mul]
 
-
 set_option backward.isDefEq.respectTransparency false in
 private def perturbationSharpEndoFib (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -2920,7 +2915,6 @@ private lemma slotInsert_perturbationSharp_eq_raise_symmS (g₀ : SmoothRiemanni
   rw [unitModel_eq_ccTensorBilin_pt (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T) x
     (w 0) (inverseMetricSharpFib (I := I) g₀ x om)]
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T x]
-
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -3194,7 +3188,6 @@ private lemma rfns_iteratedCovGrad_slotInsert3_perturbationSharp_le
       (symmS (I := I) (M := M) g₀ T)) j x]
   rw [riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀
     (Equiv.swap (0 : Fin 2) 1) (symmS (I := I) (M := M) g₀ T) j x]
-
 
 set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_diagonalProductGrid_le
@@ -5069,7 +5062,6 @@ private lemma rfns_smul_b (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_right]
   ring
 
-
 theorem rfns_iteratedCovGrad_riemannMixedCoeff_backgroundDifference_le_loweredDifference
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -5222,7 +5214,6 @@ theorem rfns_iteratedCovGrad_riemannMixedCoeff_backgroundDifference_le_loweredDi
             ((iteratedCovGrad (I := I) g₀ 0 4 i
               (riemannLoweredBackgroundDifference (I := I) (M := M) g₀ g₁)).toSection x) := by
         ring
-
 
 set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_diagonalProductGrid_le
@@ -7922,7 +7913,6 @@ theorem slotInsertEndoCc_ricEndoBackgroundDifferenceField_perOrder_l2_ballUnifor
     rw [hz]
     simpa using mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
 
-
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -8006,7 +7996,6 @@ theorem ricciArmOrder0RiemannCoeff_backgroundDifference_perOrder_l2_ballUniform
         MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
     rw [hz]
     simpa using mul_nonneg (hC_nn i) (Finset.sum_nonneg (fun k _ => hKg_nn k))
-
 
 set_option linter.unusedVariables false in
 theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
@@ -8126,7 +8115,6 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
         (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁)))]
   rw [← SmoothCcTensor.norm_def]
   exact mul_le_mul_of_nonneg_left hKi (by positivity)
-
 
 set_option linter.unusedVariables false in
 private theorem curvDiffGrid_productTerm_integral_tame_le
@@ -10543,7 +10531,6 @@ private theorem tsExists_palatiniPair_jets (g₀ : SmoothRiemannianMetric I M) {
   rw [tsRfns_iteratedCovGrad_rsDomDomCongrSection_eq (I := I) (M := M) g₀ 1 3
     (finRotate 3) A m x]
   nlinarith [hAjets]
-
 
 set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_topSeparated_le
@@ -13273,7 +13260,7 @@ theorem boundedFactorGridWindow_integral_ballUniform_tameWindow
           (∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
             ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 :=
         Finset.sum_range_succ _ (i + 2)
-    
+
       have htop : ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 ≤ R ^ 2 := by
         have h := hPball (i + 2) (by omega)
         nlinarith [norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P)]

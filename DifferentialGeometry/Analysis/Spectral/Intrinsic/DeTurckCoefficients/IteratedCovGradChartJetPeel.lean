@@ -131,9 +131,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     have : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr (NeZero.ne n); exact_mod_cast this
   set Npair : ℝ := (n : ℝ) ^ (r + (s + P)) with hNpair_def
   have hNpair_nn : 0 ≤ Npair := by positivity
-  
-  
-  
+
   set Cstep : ℝ := 1 + Npair * (2 : ℝ) ^ P * Γ with hCstep_def
   have hCstep_nn : 0 ≤ Cstep := by rw [hCstep_def]; positivity
   set Cp : ℕ → ℝ := fun p => Cstep ^ p with hCp_def
@@ -141,7 +139,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
   refine ⟨(Finset.range (P + 1)).sup' ⟨0, Finset.mem_range.mpr (Nat.succ_pos P)⟩ Cp,
     le_trans (hCp_nn 0) (Finset.le_sup' Cp (Finset.mem_range.mpr (Nat.succ_pos P))), ?_⟩
   intro X
-  
+
   have hmain : ∀ p l : ℕ, l + p ≤ P →
       ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
@@ -155,7 +153,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     | zero =>
         intro l _hlP Idx Jdx y _hy
         simp only [hCp_def, pow_zero, one_mul]
-        
+
         have hLHS :
             ‖iteratedFDeriv ℝ l
                 (rawPullR (I := I) (M := M) g r (s + 0)
@@ -172,11 +170,11 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
           chartImagePOUTsupport_subset_target (I := I) (M := M) α hy
         set Z : SmoothCcTensor g r (s + p) :=
           iteratedCovGrad (I := I) g r s p X with hZ_def
-        
+
         set m0 : Fin (Module.finrank ℝ E) := Jdx 0 with hm0_def
         set Jtail : Fin (s + p) → Fin (Module.finrank ℝ E) :=
           Matrix.vecTail Jdx with hJtail_def
-        
+
         have hsplit : rawPullR (I := I) (M := M) g r (s + (p + 1))
               (iteratedCovGrad (I := I) g r s (p + 1) X) α Idx Jdx =ᶠ[nhds y]
             (fun z => euclidPartial (E := E) m0
@@ -206,7 +204,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
           rw [hcovGrad_eq, hstep]
           ring
         rw [(Filter.EventuallyEq.iteratedFDeriv ℝ hsplit l).self_of_nhds]
-        
+
         have hA_cdAt : ContDiffAt ℝ ∞
             (fun z => euclidPartial (E := E) m0
               (rawPullR (I := I) (M := M) g r (s + p) Z α Idx Jtail) z) y := by
@@ -242,11 +240,11 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
         have hjle : (l : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
         rw [fun_iteratedFDeriv_add_apply (hA_cdAt.of_le hjle) (hB_cdAt.of_le hjle)]
         refine le_trans (norm_add_le _ _) ?_
-        
+
         set RHS : ℝ := bareChartJetContent (I := I) (M := M) g r s X α (l + (p + 1)) y
           with hRHS_def
         have hRHS_nn : 0 ≤ RHS := bareChartJetContent_nonneg (I := I) (M := M) g r s X α _ y
-        
+
         have hA : ‖iteratedFDeriv ℝ l
               (fun z => euclidPartial (E := E) m0
                 (rawPullR (I := I) (M := M) g r (s + p) Z α Idx Jtail) z) y‖ ≤
@@ -265,7 +263,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
             rw [hRHS_def]
             exact bareChartJetContent_mono (I := I) (M := M) g r s X α (by omega) y
           exact mul_le_mul_of_nonneg_left hwin (hCp_nn p)
-        
+
         have hB : ‖iteratedFDeriv ℝ l
               (fun z => covDerivLowerOrderTerm (I := I) (M := M)
                 g r (s + p) Z α m0 Idx Jtail z) y‖ ≤
@@ -274,7 +272,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
             g r (s + p) Z α m0 Idx Jtail l hy_mem
           refine hleib.trans ?_
           have hp_le_P : p ≤ P := by omega
-          
+
           have h_per : ∀ q'' : (Fin r → Fin (Module.finrank ℝ E)) ×
                 (Fin (s + p) → Fin (Module.finrank ℝ E)),
               (∑ l' ∈ Finset.range (l + 1),
@@ -344,7 +342,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
             rw [← Finset.sum_mul, h2]
             refine mul_le_mul_of_nonneg_right ?_ (by positivity)
             exact pow_le_pow_right₀ (by norm_num) (by omega)
-          
+
           calc (∑ q'' : (Fin r → Fin (Module.finrank ℝ E)) ×
                   (Fin (s + p) → Fin (Module.finrank ℝ E)),
                 ∑ l' ∈ Finset.range (l + 1),
@@ -375,7 +373,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
                       push_cast
                       exact pow_le_pow_right₀ hn1 (by omega)
             _ = (Npair * (2 : ℝ) ^ P * Γ * Cp p) * RHS := by ring
-        
+
         have hCp_succ : Cp (p + 1) = Cp p + Npair * (2 : ℝ) ^ P * Γ * Cp p := by
           simp only [hCp_def]; rw [pow_succ, hCstep_def]; ring
         calc ‖iteratedFDeriv ℝ l
@@ -386,7 +384,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
                   g r (s + p) Z α m0 Idx Jtail z) y‖
             ≤ Cp p * RHS + (Npair * (2 : ℝ) ^ P * Γ * Cp p) * RHS := add_le_add hA hB
           _ = Cp (p + 1) * RHS := by rw [hCp_succ]; ring
-  
+
   intro p l hlP Idx Jdx y hy
   refine (hmain p l hlP Idx Jdx y hy).trans ?_
   refine mul_le_mul_of_nonneg_right ?_
@@ -422,7 +420,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
               ((iteratedCovGrad (I := I) g r s i D).toSection
                 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) := by
   classical
-  
+
   obtain ⟨Cpeel, hCpeel_nn, hCpeel⟩ :=
     iteratedFDeriv_rawPullR_le_zeroContent_sum (I := I) (M := M) g r s α N N (le_refl N)
   set b' : EuclN → M := fun y : EuclN =>
@@ -430,7 +428,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
   set FibAt : EuclN → ℕ → ℝ := fun y i =>
     Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i) (b' y)
       ((iteratedCovGrad (I := I) g r s i D).toSection (b' y))) with hFibAt_def
-  
+
   have h_fib : ∀ i : ℕ, ∃ Ci : ℝ, 0 ≤ Ci ∧
       ∀ {z : EuclN}, z ∈ chartPouKernel (I := I) (M := M) α →
         zeroContentR (I := I) (M := M) g r (s + i)
@@ -466,9 +464,9 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
   have hFib_nn : ∀ i, 0 ≤ Fib i := fun i => Real.sqrt_nonneg _
   set FibSum : ℝ := ∑ i ∈ Finset.range (N + 1), Fib i with hFibSum_def
   have hFibSum_nn : 0 ≤ FibSum := Finset.sum_nonneg fun i _ => hFib_nn i
-  
+
   have hyK' : y ∈ chartImagePOUTsupport (I := I) (M := M) α := hyK
-  
+
   have h_zc : ∀ i ∈ Finset.range (N + 1),
       zeroContentR (I := I) (M := M) g r (s + i)
         (iteratedCovGrad (I := I) g r s i D) α y ≤ Cfibmax * Fib i := by
@@ -479,7 +477,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     rw [hFib_def]
     exact mul_le_mul_of_nonneg_right
       (Finset.le_sup' Cfib (Finset.mem_range.mpr hiN)) (Real.sqrt_nonneg _)
-  
+
   have h_each : ∀ q' : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
       (∑ m ∈ Finset.range (N + 1),
@@ -506,7 +504,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
       rw [hreindex] at hpeel
       refine hpeel.trans ?_
       refine mul_le_mul_of_nonneg_left ?_ hCpeel_nn
-      
+
       calc (∑ i ∈ Finset.range (m + 1),
             zeroContentR (I := I) (M := M) g r (s + i)
               (iteratedCovGrad (I := I) g r s i D) α y)
@@ -524,7 +522,7 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
     push_cast
     ring
-  
+
   calc bareChartJetContent (I := I) (M := M) g r s D α N y
       = ∑ q' : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),

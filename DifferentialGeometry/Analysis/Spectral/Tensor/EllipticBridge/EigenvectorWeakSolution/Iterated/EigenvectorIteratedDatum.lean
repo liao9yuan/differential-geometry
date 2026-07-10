@@ -46,16 +46,16 @@ structure eigenvectorIteratedTensorChartBilinearData
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ) where
-  
+
   directions : Fin m → Fin (Module.finrank ℝ E)
-  
+
   fChartEff : EuclN → ℝ
-  
+
   fChartEff_memLp_weighted :
     MemLp fChartEff 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
-  
+
   m_diff_variational_identity :
     ∀ ψ : EuclN → ℝ, ContDiff ℝ (⊤ : ℕ∞) ψ → HasCompactSupport ψ →
       tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α →

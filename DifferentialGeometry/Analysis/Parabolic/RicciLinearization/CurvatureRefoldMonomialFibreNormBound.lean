@@ -5,26 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiber
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
-/-!
-# Fibre-norm cap for the frame-summed second-gradient refold monomial
-
-The pointwise `g₀`-Frobenius fibre-norm cap for the frame-summed weighted refold monomial
-coefficient `curvatureRefoldMonomialBiContrFib` at a metric `g₁` that is a `δ`-small
-symmetric perturbation of the background `g₀`, with an operator-bounded weight tensor: the
-cap is the dimensional fibre constant times the TWO-LEG rate `δW / (1 − δ)²`.
-
-The two inverse-metric legs are the two `g₁`-sharp/`g₀`-flat frame conversions: writing the
-monomial in a `g₀`-orthonormal basis, the double `g₁`-orthonormal frame sum contracts the
-weight through the raised vectors `♯_{g₁}♭_{g₀} e_k`, i.e. through the matrix
-`V = M W M` with `M` the `g₁`-cometric in `g₀`-coordinates (`‖M‖ ≤ 1/(1−δ)`, one leg per
-side) and `W` the weight matrix. The weight enters through its ROW-Frobenius norm: each row
-`w_a = ∑_b W(B_a, B_b) B_b` has `g₁`-norm at most `δW/(1−δ)` by Cauchy–Schwarz against the
-operator bound, so `‖W‖_F ≤ √n · δW/(1−δ)` over the frame — this is what makes the cap
-carry the sharp `√(n³)` fibre constant (`deTurckArmFibreConst`) rather than a crude
-entrywise power of `n`, and the bound is TIGHT at `n = 1` (the pure-trace circle witness
-attains equality).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -57,8 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-/-- Counting reduction for a `Fin 4`-tuple sum whose summand depends only on the values at
-the two leading slots: the two free slots contribute the square of the index-set size. -/
+
 private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → ℝ) :
     ∑ K : Fin 4 → Fin n, F (K 0) (K 1) =
       ((n : ℝ) ^ 2) * ∑ k : Fin n, ∑ l : Fin n, F k l := by
@@ -86,7 +65,7 @@ private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → 
   rw [Finset.sum_congr rfl (fun k _ => h2 k), ← Finset.mul_sum]
 
 set_option linter.unusedSectionVars false in
-/-- Expansion of a metric inner product against a weighted sum in the second slot. -/
+
 private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) :
     g.inner x u (∑ b, c b • v b) = ∑ b, c b * g.inner x u (v b) := by
@@ -94,7 +73,7 @@ private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
   exact Finset.sum_congr rfl (fun b _ => by rw [map_smul, smul_eq_mul])
 
 set_option linter.unusedSectionVars false in
-/-- Expansion of a metric inner product against a weighted sum in the first slot. -/
+
 private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) (u : TangentSpace I x) :
     g.inner x (∑ a, c a • v a) u = ∑ a, c a * g.inner x (v a) u := by
@@ -106,8 +85,7 @@ private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul])
 
 set_option linter.unusedSectionVars false in
-/-- The `g₁`-inner product of two coefficient combinations of a `g₁`-orthonormal family is
-the Euclidean pairing of the coefficient vectors. -/
+
 private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (B : Fin d → TangentSpace I x)
     (hB : ∀ a b, g₁.inner x (B a) (B b) = if a = b then (1 : ℝ) else 0)
@@ -122,10 +100,7 @@ private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) 
   exact if_pos (Finset.mem_univ a)
 
 set_option linter.unusedSectionVars false in
-/-- Parseval-based operator bound for the `g₁♯g₀♭` frame-conversion matrix: the
-`g₀`-component sum of any coefficient combination of a `g₁`-orthonormal family is
-controlled by `1/(1−δ)` times the Euclidean size of the coefficients — one inverse-metric
-leg. -/
+
 private lemma sum_sq_component_le_of_orthonormal
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {δ : ℝ} (h1mδ : (0 : ℝ) < 1 - δ)
     (hcomp : ∀ u : TangentSpace I x,
@@ -154,22 +129,19 @@ private lemma sum_sq_component_le_of_orthonormal
     _ = (1 / (1 - δ)) * ∑ a, (c a) ^ 2 := by ring
 
 set_option linter.unusedSectionVars false in
-/-- Division-power bookkeeping for the row-leg composition. -/
+
 private lemma div_pow_div_arith {t : ℝ} (ht : t ≠ 0) (u : ℝ) :
     (u / t) ^ 2 / t = u ^ 2 / t ^ 3 := by
   field_simp
 
 set_option linter.unusedSectionVars false in
-/-- Division-power bookkeeping for the column-leg composition. -/
+
 private lemma one_div_mul_pow_arith {t : ℝ} (ht : t ≠ 0) (D u : ℝ) :
     (1 / t) * (D * (u / t ^ 3)) = D * (u / t ^ 4) := by
   field_simp
 
 set_option linter.unusedSectionVars false in
-/-- The `g₀`-norm of a weight row over a `g₁`-orthonormal frame: the row vector
-`w_a = ∑_b W(B_a, B_b) • B_b` of an operator-`δW`-bounded weight has `g₀`-norm squared at
-most `δW²/(1−δ)³` — the row-Frobenius weight leg `δW/(1−δ)` squared, times one more
-inverse-metric leg for the `g₀`-measurement. -/
+
 private lemma weight_row_g0norm_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {δ δW : ℝ}
     (h1mδ : (0 : ℝ) < 1 - δ) (hδW0 : 0 ≤ δW)
@@ -271,8 +243,7 @@ private lemma weight_row_g0norm_le
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Real scalings pull out of the pointwise Riemannian fibre-norm square as the square of
-the scalar. -/
+
 theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -291,12 +262,7 @@ theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Pointwise `g₀`-Frobenius fibre-norm cap for the frame-summed weighted refold monomial
-coefficient at a `δ`-small symmetric perturbation `g₁` of the background, with an
-operator-`δW`-bounded weight: the cap is the dimensional fibre constant
-`deTurckArmFibreConst = √(n³)` times the TWO-LEG rate `δW/(1−δ)²`, squared. The two legs
-are the two `g₁♯g₀♭` frame conversions of the double frame sum; the weight contributes its
-row-Frobenius norm `√n·δW` over the `g₁`-orthonormal frame. Tight at `n = 1`. -/
+
 theorem rfns_curvatureRefoldMonomialBiContrFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

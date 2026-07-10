@@ -44,8 +44,7 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_l
   obtain ⟨kappa, hkappa_nn, hbound⟩ :=
     exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le
       (I := I) (M := M) g s hX hY
-  
-  
+
   refine ⟨fun j => (4 : ℝ) ^ j * gridWindowSum kappa 0 s j,
     fun j => mul_nonneg (by positivity) (gridWindowSum_nonneg hkappa_nn 0 s j), fun Z j x => ?_⟩
   exact hbound Z j x

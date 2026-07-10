@@ -252,7 +252,7 @@ private lemma sum5_collect_basis_inner
           ∑ c : Fin (Module.finrank ℝ E), ∑ d : Fin (Module.finrank ℝ E),
             F a b c d z) • (chartModelBasis E) z := by
   classical
-  
+
   rw [show (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         ∑ c : Fin (Module.finrank ℝ E), ∑ d : Fin (Module.finrank ℝ E),
           ∑ z : Fin (Module.finrank ℝ E), (F a b c d z) • (chartModelBasis E) z) =
@@ -362,7 +362,7 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
   rw [LeviCivita_chart_apply (I := I) g x₀ hx₀_good hS_at v]
   rw [chartLeviCivita_apply (I := I) g x₀ S hx₀_good v]
   rw [trivToE_self_apply (I := I) x₀ v]
-  
+
   rw [hev.fderiv_eq, fderiv_christoffelVWSum_apply (I := I) g x₀ V W v]
   have hSx₀_repr :
       chartE_section_repr (I := I) x₀ S x₀ =
@@ -384,7 +384,7 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
           (chartModelBasis E) m) v]
   rw [trivToE_self_apply (I := I) x₀ v]
   rw [map_add]
-  
+
   have hv_basis : (v : E) =
       ∑ k : Fin (Module.finrank ℝ E), ((chartModelBasis E).repr V) k • (chartModelBasis E) k := by
     have : (V : E) = v := by rw [hV_def]; exact trivToE_self_apply (I := I) x₀ v
@@ -435,7 +435,7 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
     rw [hLHS1]
   · refine congrArg (trivFromE (I := I) x₀ x₀) ?_
     have hVeqv : (V : E) = v := by rw [hV_def]; exact trivToE_self_apply (I := I) x₀ v
-    
+
     rw [sum3_collect_basis_inner (fun p q r =>
       ((chartModelBasis E).repr v) p *
         ((chartModelBasis E).repr
@@ -445,16 +445,16 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
                   chartChristoffel (I := I) g x₀ i j m (extChartAt I x₀ x₀)) •
                 (chartModelBasis E) m)) q *
         chartChristoffel (I := I) g x₀ p q r (extChartAt I x₀ x₀))]
-    
+
     rw [sum5_collect_basis_inner (fun i j k l m =>
       ((chartModelBasis E).repr V) i * ((chartModelBasis E).repr V) k *
         ((chartModelBasis E).repr W) j *
         chartChristoffel (I := I) g x₀ k l m (extChartAt I x₀ x₀) *
         chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀))]
-    
+
     refine Finset.sum_congr rfl (fun z _ => ?_)
     refine congrArg (fun t : ℝ => t • (chartModelBasis E) z) ?_
-    
+
     have hLHScoeff :
         (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E),
           ((chartModelBasis E).repr v) p *
@@ -477,7 +477,7 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
       refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
       ring
     rw [hLHScoeff]
-    
+
     rw [sum4_scalar_swap_pairs (fun p q i j =>
       ((chartModelBasis E).repr V) p * ((chartModelBasis E).repr V) i *
         ((chartModelBasis E).repr W) j *
@@ -565,11 +565,11 @@ theorem polyCoordExtensionTangent_smooth (x₀ : M) {P : E → E}
   have hu_open : IsOpen u := (chartAt H x₀).open_source
   have hψ_tsupport : tsupport ψ ⊆ u :=
     (linExtBump (I := I) x₀).tsupport_subset_chartAt_source
-  
+
   set F : Π b : M, TangentSpace I b :=
     fun b => trivFromE (I := I) x₀ b (P (extChartAt I x₀ b - extChartAt I x₀ x₀)) with hF_def
   have hbaseEq : u = (trivializationAt E (TangentSpace I) x₀).baseSet := rfl
-  
+
   have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I x₀) (chartAt H x₀).source :=
     contMDiffOn_extChartAt (I := I) (n := ∞) (x := x₀)
   have hPval : ContMDiffOn I 𝓘(ℝ, E) ∞
@@ -627,14 +627,14 @@ theorem covApply_polyCoordExtensionTangent_basepoint_eq
     (polyCoordExtensionTangent_smooth (I := I) x₀ hP).mdifferentiableAt (by norm_num)
   rw [LeviCivita_chart_apply (I := I) g x₀ hself hMDiff u]
   rw [chartLeviCivita_apply (I := I) g x₀ (polyCoordExtensionTangent (I := I) x₀ P) hself u]
-  
+
   have hfd :
       fderiv ℝ (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P)
           ∘ (extChartAt I x₀).symm) (extChartAt I x₀ x₀) =
         fderiv ℝ (fun y : E => P (y - extChartAt I x₀ x₀)) (extChartAt I x₀ x₀) :=
     (chartE_section_repr_polyCoordExtensionTangent_eventuallyEq (I := I) x₀ P).fderiv_eq
   rw [hfd, trivToE_self_apply (I := I) x₀ u]
-  
+
   have hrepr0 :
       chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) x₀ = P 0 := by
     rw [chartE_section_repr_eq_trivToE, polyCoordExtensionTangent_basepoint,
@@ -667,7 +667,7 @@ private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
   rw [LeviCivita_chart_apply (I := I) g x₀ hb hCat (linearExtensionTangent (I := I) x₀ u b)]
   rw [chartLeviCivita_apply (I := I) g x₀ (polyCoordExtensionTangent (I := I) x₀ P) hb
     (linearExtensionTangent (I := I) x₀ u b)]
-  
+
   have hev :
       (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm)
         =ᶠ[𝓝 (φ b)] (fun y : E => P (y - c)) := by
@@ -693,7 +693,7 @@ private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
         = P (y - c)
     simp only [Function.comp_apply]
     rw [hy', φ.right_inv hy_tgt]
-  
+
   have hfd :
       fderiv ℝ (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm)
         (φ b) = fderiv ℝ P (φ b - c) := by
@@ -707,7 +707,7 @@ private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
       hPd.comp (φ b) hshift
     rw [hcomp.fderiv, ContinuousLinearMap.comp_id]
   rw [hfd]
-  
+
   have hread : trivToE (I := I) x₀ b (linearExtensionTangent (I := I) x₀ u b) =
       tangentCoord (I := I) x₀ u := by
     have hub : linearExtensionTangent (I := I) x₀ u b = coordExtensionTangent (I := I) x₀ u b := by
@@ -716,7 +716,7 @@ private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
     have := chartE_section_repr_coordExtensionTangent_eq (I := I) x₀ u hb_base
     rwa [chartE_section_repr_eq_trivToE] at this
   rw [hread]
-  
+
   have hreprb : chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) b =
       P (φ b - c) := by
     have hWb : polyCoordExtensionTangent (I := I) x₀ P b =
@@ -786,7 +786,7 @@ private lemma chartE_section_repr_covApply_polyCoordExt_eventuallyEq
   rw [trivToE_trivFromE (I := I) x₀ hbbase]
   rw [christoffelCorrection_apply (I := I) g x₀ b (P (φ b - c))
     (linearExtensionTangent (I := I) x₀ u b)]
-  
+
   have hreadrepr :
       trivToE (I := I) x₀ b (linearExtensionTangent (I := I) x₀ u b) =
         tangentCoord (I := I) x₀ u := by
@@ -824,7 +824,7 @@ private lemma covApply_covApply_polyCoordExt_basepoint_reduce
   set S : Π b : M, TangentSpace I b :=
     Connection.covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
       (polyCoordExtensionTangent (I := I) x₀ P) with hS_def
-  
+
   have hC1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
       (T% (polyCoordExtensionTangent (I := I) x₀ P)) := by
     have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
@@ -840,13 +840,13 @@ private lemma covApply_covApply_polyCoordExt_basepoint_reduce
   rw [LeviCivita_chart_apply (I := I) g x₀ hx₀_good hS_at u]
   rw [chartLeviCivita_apply (I := I) g x₀ S hx₀_good u]
   rw [trivToE_self_apply (I := I) x₀ u]
-  
+
   have hev' : (chartE_section_repr (I := I) x₀ S ∘ φ.symm)
       =ᶠ[𝓝 c] innerReprPoly (I := I) g x₀ P u := hev
   have hfd_eq : fderiv ℝ (chartE_section_repr (I := I) x₀ S ∘ φ.symm) c =
       fderiv ℝ (innerReprPoly (I := I) g x₀ P u) c := hev'.fderiv_eq
   rw [hfd_eq]
-  
+
   have hSx₀_repr : chartE_section_repr (I := I) x₀ S x₀ = innerReprPoly (I := I) g x₀ P u c := by
     have h0 := hev'.self_of_nhds
     simp only [Function.comp_apply] at h0
@@ -874,7 +874,7 @@ private lemma hasFDerivAt_centredQuad_at_centre
   have hu : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) c :=
     (hasFDerivAt_id c).sub_const c
   have happ := hc.clm_apply hu
-  
+
   have hzero : (Qbil (c - c)).comp (ContinuousLinearMap.id ℝ E) +
       (Qbil.comp (ContinuousLinearMap.id ℝ E)).flip (c - c) = (0 : E →L[ℝ] E) := by
     rw [sub_self]; ext w; simp
@@ -906,7 +906,7 @@ private lemma fderiv_jetCancelPoly_centred
   classical
   set c := extChartAt I x₀ x₀ with hc
   set L : E →L[ℝ] E := christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) with hL
-  
+
   have hlinFD : HasFDerivAt (fun y : E => -(L (y - c))) (-L) c := by
     have h0 : HasFDerivAt (fun y : E => L (y - c)) L c := by
       have hshift : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) c :=
@@ -915,10 +915,10 @@ private lemma fderiv_jetCancelPoly_centred
         (L.hasFDerivAt).comp c hshift
       rwa [ContinuousLinearMap.comp_id] at hcomp
     exact h0.neg
-  
+
   have hquadFD : HasFDerivAt (fun y : E => (1 / 2 : ℝ) • Qbil (y - c) (y - c)) 0 c :=
     hasFDerivAt_centredQuad_at_centre Qbil c
-  
+
   have hsum : HasFDerivAt (fun y : E => jetCancelPoly (I := I) g x₀ v Qbil (y - c)) (-L) c := by
     have hadd := hlinFD.add hquadFD
     rw [add_zero] at hadd
@@ -1335,7 +1335,7 @@ private lemma exists_jetCancelQuadraticCoeff
               (linearExtensionTangent (I := I) x₀ v)) x₀ u) := by
   classical
   set V : E := tangentCoord (I := I) x₀ v with hV
-  
+
   set Φ₁ : E →L[ℝ] E →L[ℝ] E :=
     (christoffelCorrectionBilin (I := I) g x₀).comp
       (-(christoffelCorrection (I := I) g x₀ x₀ V)) with hΦ₁
@@ -1344,12 +1344,12 @@ private lemma exists_jetCancelQuadraticCoeff
     -(psiDGamma (I := I) g x₀ V) - psiGG (I := I) g x₀ V - (2 : ℝ) • Φ₁ with hQbil
   set P : E → E := jetCancelPoly (I := I) g x₀ v Qbil with hP
   set c := extChartAt I x₀ x₀ with hc
-  
+
   have hU : tangentCoord (I := I) x₀ u = u := tangentCoord_self (I := I) x₀ u
-  
+
   have hfP0 : fderiv ℝ P 0 u = -(christoffelCorrection (I := I) g x₀ x₀ V u) := by
     rw [hP]; exact fderiv_jetCancelPoly_zero_apply (I := I) g x₀ v Qbil u
-  
+
   rw [covApply_covApply_polyCoordExt_basepoint_reduce (I := I) g x₀
     (jetCancelPoly_contDiff (I := I) g x₀ v Qbil) u]
   rw [show jetCancelPoly (I := I) g x₀ v Qbil = P from rfl]
@@ -1362,7 +1362,7 @@ private lemma exists_jetCancelQuadraticCoeff
                   (((chartModelBasis E).repr (fderiv ℝ P 0 u)) j) *
                   chartChristoffel (I := I) g x₀ i j m c) • (chartModelBasis E) m from
       fderiv_innerReprPoly_jetCancel (I := I) g x₀ v Qbil u]
-  
+
   rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         ∑ m : Fin (Module.finrank ℝ E),
           (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
@@ -1374,18 +1374,18 @@ private lemma exists_jetCancelQuadraticCoeff
       Finset.sum_congr rfl (fun m _ => ?_)))
     rw [show trivToE (I := I) x₀ x₀ u = u from trivToE_self_apply (I := I) x₀ u, hU]]
   rw [hU]
-  
+
   set Cterm : E := christoffelCorrection (I := I) g x₀ x₀ (fderiv ℝ P 0 u) u with hCterm
   rw [show (1 / 2 : ℝ) • (Qbil u u + Qbil u u) = Qbil u u from by
     rw [← two_smul ℝ (Qbil u u), smul_smul]; norm_num]
   rw [show Qbil u u + Cterm + Cterm = Qbil u u + (2 : ℝ) • Cterm from by
     rw [add_assoc, ← two_smul ℝ Cterm]]
-  
+
   rw [map_add, map_smul,
     show trivFromE (I := I) x₀ x₀ (Qbil u u) = Qbil u u from
       trivFromE_self_apply (I := I) x₀ (Qbil u u),
     show trivFromE (I := I) x₀ x₀ Cterm = Cterm from trivFromE_self_apply (I := I) x₀ Cterm]
-  
+
   rw [show (LeviCivita (I := I) g).toFun
         (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
           (linearExtensionTangent (I := I) x₀ v)) x₀ u =
@@ -1395,7 +1395,7 @@ private lemma exists_jetCancelQuadraticCoeff
     rw [linearExtensionTangent_eq (I := I) x₀ u]]
   rw [covApply_covApply_linearExtensionTangent_basepoint_eq (I := I) g x₀ v u]
   rw [← hV]
-  
+
   rw [hQbil]
   simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.neg_apply,
     ContinuousLinearMap.smul_apply]
@@ -1406,7 +1406,7 @@ private lemma exists_jetCancelQuadraticCoeff
         ((-(christoffelCorrection (I := I) g x₀ x₀ V)) u) u =
       christoffelCorrection (I := I) g x₀ x₀ (-(christoffelCorrection (I := I) g x₀ x₀ V u)) u
     rw [christoffelCorrectionBilin_apply, ContinuousLinearMap.neg_apply]]
-  
+
   module
 
 theorem exists_linExtJetCancellingCorrection
@@ -1423,8 +1423,7 @@ theorem exists_linExtJetCancellingCorrection
             (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
               (linearExtensionTangent (I := I) x₀ v)) x₀ u)) := by
   classical
-  
-  
+
   obtain ⟨Qbil, hQbil⟩ := exists_jetCancelQuadraticCoeff (I := I) g x₀ v
   set P : E → E := jetCancelPoly (I := I) g x₀ v Qbil with hP_def
   have hP_cd : ContDiff ℝ ∞ P := jetCancelPoly_contDiff (I := I) g x₀ v Qbil
@@ -1434,12 +1433,12 @@ theorem exists_linExtJetCancellingCorrection
   · intro u
     rw [covApply_polyCoordExtensionTangent_basepoint_eq (I := I) g x₀ hP_cd u]
     rw [hP_def, jetCancelPoly_zero, fderiv_jetCancelPoly_centred (I := I) g x₀ v Qbil u]
-    
+
     have hcc0 : christoffelCorrection (I := I) g x₀ x₀ (0 : E) u = 0 := by
       rw [christoffelCorrection_apply]
       simp
     rw [hcc0, add_zero]
-    
+
     rw [covApply_linearExtensionTangent_basepoint_eq (I := I) g x₀ v u]
     rw [map_neg]
   · intro u
@@ -1455,10 +1454,10 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
         (LeviCivita (I := I) g).toFun
             (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u) W) x₀ u = 0) := by
   classical
-  
+
   obtain ⟨C, hC_sm, hC_x, hC_grad, hC_hess⟩ :=
     exists_linExtJetCancellingCorrection (I := I) g x₀ v
-  
+
   refine ⟨fun b => linearExtensionTangent (I := I) x₀ v b + C b, ?_, ?_, ?_, ?_⟩
   · exact (linearExtensionTangent_smooth (I := I) x₀ v).add_section hC_sm
   · change linearExtensionTangent (I := I) x₀ v x₀ + C x₀ = v
@@ -1479,8 +1478,7 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
         (LeviCivita (I := I) g).toFun C x₀ u from rfl]
     rw [hC_grad u, add_neg_cancel]
   · intro u
-    
-    
+
     have hsplit : covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
           (fun b => linearExtensionTangent (I := I) x₀ v b + C b) =
         covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
@@ -1499,7 +1497,7 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
         leviCivitaStitched_add_on_goodSet (I := I) g b hLvb hCb hbgood]
       rfl
     rw [hsplit]
-    
+
     have hLu1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
         (T% (linearExtensionTangent (I := I) x₀ v)) := by
       rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
@@ -1544,20 +1542,20 @@ theorem covApply_covApply_eq_linExt_of_covApply_zero
   have hZ_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z) :=
     linearExtensionTangent_smooth (I := I) x₀ (Y x₀)
   have hZ_x : Z x₀ = Y x₀ := linearExtensionTangent_eq (I := I) x₀ (Y x₀)
-  
+
   set D : Π b : M, TangentSpace I b := fun b => Y b - Z b with hD_def
   have hD_x : D x₀ = 0 := by rw [hD_def]; simp [hZ_x]
   have hD_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% D) := by
     have := hY.sub_section hZ_sm
     simpa [hD_def, Pi.sub_apply] using this
-  
+
   have hsplit : covApply (LeviCivita (I := I) g) Y W =
       covApply (LeviCivita (I := I) g) Z W + covApply (LeviCivita (I := I) g) D W := by
     funext b
     simp only [Connection.covApply_apply, Pi.add_apply, hD_def]
     rw [map_sub]
     abel
-  
+
   have hW1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% W) := by
     have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
     rw [h]; exact hW
@@ -1565,15 +1563,15 @@ theorem covApply_covApply_eq_linExt_of_covApply_zero
     Connection.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g) hZ_sm hW1
   have hBD : MDiffAt (T% (covApply (LeviCivita (I := I) g) D W)) x₀ :=
     Connection.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g) hD_sm hW1
-  
+
   have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hBZ hBD (Set.mem_univ x₀)
   rw [hsplit]
   rw [LeviCivita_toFun] at hadd ⊢
   rw [hadd]
   rw [ContinuousLinearMap.add_apply]
-  
+
   have hDvanish : leviCivitaStitched (I := I) g (covApply (LeviCivita (I := I) g) D W) x₀ (Y x₀) = 0 := by
-    
+
     have hτ_sm : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
         (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
           (E := fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) x
@@ -1589,16 +1587,16 @@ theorem covApply_covApply_eq_linExt_of_covApply_zero
       (I := I) (M := M) (E_U := E) (U := (TangentSpace I : M → Type _)) (F := E)
       (V := (TangentSpace I : M → Type _)) (LeviCivita (I := I) g) (LeviCivita (I := I) g)
       τ Dsec x₀ (Y x₀)
-    
+
     rw [show (Dsec : Π b : M, TangentSpace I b) x₀ = 0 from hD_x] at hleib
     rw [ContinuousLinearMap.map_zero] at hleib
-    
+
     have hτD : (fun y => (τ : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) y
           ((Dsec : Π b : M, TangentSpace I b) y)) =
         covApply (LeviCivita (I := I) g) D W := by
       funext y; rfl
     rw [hτD] at hleib
-    
+
     have hτterm : (τ : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) x₀
           ((LeviCivita (I := I) g) (Dsec : Π b : M, TangentSpace I b) x₀ (Y x₀)) = 0 :=
       hgrad _

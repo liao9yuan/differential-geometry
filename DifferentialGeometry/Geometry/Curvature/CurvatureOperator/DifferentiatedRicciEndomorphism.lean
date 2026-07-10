@@ -201,7 +201,7 @@ private lemma nablaCurvSec_add_acted
   have hX := X.contMDiff; have hY := Y.contMDiff; have hZ := Z.contMDiff
   have hW := W.contMDiff; have hW' := W'.contMDiff
   rw [nablaCurvSec_def, nablaCurvSec_def, nablaCurvSec_def]
-  
+
   have hsecWW' : (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => (W + W') b) b) =
       (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => W b) b)
         + (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => W' b) b) := by
@@ -225,7 +225,7 @@ private lemma nablaCurvSec_add_acted
     rw [hsecWW', cov.isCovariantDerivativeOnUniv.add (hRWsm.mdifferentiableAt (by simp))
       (hRW'sm.mdifferentiableAt (by simp))]
     rfl
-  
+
   have hcXY := covApply_contMDiff (cov := cov) hX hY
   have h2 : riemannSec cov (covApply cov (fun b => X b) (fun b => Y b)) (fun b => Z b)
         (fun b => (W + W') b) x =
@@ -236,7 +236,7 @@ private lemma nablaCurvSec_add_acted
       funext b; simp only [ContMDiffSection.coe_add, Pi.add_apply]
     rw [heq]
     exact riemannSec_add_acted_smooth (cov := cov) hcXY hZ hW hW'
-  
+
   have hcXZ := covApply_contMDiff (cov := cov) hX hZ
   have h3 : riemannSec cov (fun b => Y b) (covApply cov (fun b => X b) (fun b => Z b))
         (fun b => (W + W') b) x =
@@ -247,8 +247,7 @@ private lemma nablaCurvSec_add_acted
       funext b; simp only [ContMDiffSection.coe_add, Pi.add_apply]
     rw [heq]
     exact riemannSec_add_acted_smooth (cov := cov) hY hcXZ hW hW'
-  
-  
+
   have hcovT4 : covApply cov (fun b => X b) (fun b => (W + W') b) =
       covApply cov (fun b => X b) (fun b => W b) + covApply cov (fun b => X b) (fun b => W' b) := by
     funext b
@@ -285,8 +284,7 @@ private lemma nablaCurvSec_smul_acted
   set Xf : M → ℝ := fun b => extDerivFun (I := I) f b (X b) with hXf_def
   have hXf : ContMDiff I 𝓘(ℝ, ℝ) ∞ Xf := extDerivFunApply_contMDiff hf hX
   have hfW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (f • fun b => W b)) := hf.smul_section hW
-  
-  
+
   have hsec1 :
       (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (f • fun b => W b) b) =
         f • (fun b => riemannSec cov (fun b => Y b) (fun b => Z b) (fun b => W b) b) := by
@@ -305,7 +303,7 @@ private lemma nablaCurvSec_smul_acted
       (hf.mdifferentiableAt (by simp))]
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
       ContinuousLinearMap.smulRight_apply, hXf_def]
-  
+
   have hcXY := covApply_contMDiff (cov := cov) hX hY
   have hcXZ := covApply_contMDiff (cov := cov) hX hZ
   have h2 : riemannSec cov (covApply cov (fun b => X b) (fun b => Y b)) (fun b => Z b)
@@ -318,9 +316,7 @@ private lemma nablaCurvSec_smul_acted
       f x • riemannSec cov (fun b => Y b) (covApply cov (fun b => X b) (fun b => Z b))
         (fun b => W b) x :=
     riemannSec_smul_acted_smooth (cov := cov) hf hY hcXZ hW
-  
-  
-  
+
   have hcXW := covApply_contMDiff (cov := cov) hX hW
   have hsec4 : covApply cov (fun b => X b) (f • fun b => W b) =
       f • covApply cov (fun b => X b) (fun b => W b) + Xf • (fun b => W b) := by
@@ -356,7 +352,7 @@ private lemma nablaCurvSec_finsetSum_acted
   induction s using Finset.induction_on with
   | empty =>
       simp only [Finset.sum_empty]
-      
+
       have h := nablaCurvSec_add_acted (g := g) X Y Z
         (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
         (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x
@@ -391,7 +387,7 @@ private lemma nablaCurvSec_acted_eventuallyEq
   have hW_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% W) := by simpa using hW
   have hW'_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% W') := by simpa using hW'
   rw [nablaCurvSec_def, nablaCurvSec_def]
-  
+
   have hsec_ev : ∀ᶠ b in 𝓝 x,
       riemannSec cov Y Z W b = riemannSec cov Y Z W' b := by
     rw [Filter.eventually_iff_exists_mem] at hWW' ⊢
@@ -411,7 +407,7 @@ private lemma nablaCurvSec_acted_eventuallyEq
       (hRYZW_sm.mdifferentiableAt (by simp)) (hRYZW'_sm.mdifferentiableAt (by simp))
       Filter.univ_mem hsec_ev
   rw [hT1]
-  
+
   have hcXY := covApply_contMDiff (cov := cov) hX hY
   have hcXZ := covApply_contMDiff (cov := cov) hX hZ
   have hcXY_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (covApply cov X Y)) := by
@@ -426,8 +422,7 @@ private lemma nablaCurvSec_acted_eventuallyEq
       riemannSec cov Y (covApply cov X Z) W' x :=
     riemannSec_eq_of_Z_eventuallyEq (cov := cov) hY hcXZ hW_le hW'_le hWW'
   rw [hT3]
-  
-  
+
   have hcXW := covApply_contMDiff (cov := cov) hX hW
   have hcXW' := covApply_contMDiff (cov := cov) hX hW'
   have hcXW_le : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% (covApply cov X W)) := by
@@ -555,7 +550,7 @@ theorem nablaBaseSlotCurv_add_acted
       nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b) (fun b => Z b)
         (fun b => ev b) x := nablaBaseSlotCurv_eq_nablaCurvSec (I := I) g X Y Z x v
   rw [hbase, hbu, hbv]
-  
+
   have hval : (euv : Π b : M, TangentSpace I b) x = (eu + ev) x := by
     simp only [heuv_def, heu_def, hev_def, ContMDiffSection.coeFn_mk, ContMDiffSection.coe_add,
       Pi.add_apply, smoothExtensionTangent_eq]
@@ -580,7 +575,7 @@ theorem nablaBaseSlotCurv_smul_acted
         (fun b => eu b) x := nablaBaseSlotCurv_eq_nablaCurvSec (I := I) g X Y Z x u
   rw [hbase, hbu]
   have hcsmooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c) := contMDiff_const
-  
+
   set ecu' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk ((fun _ : M => c) • (fun b => smoothExtensionTangent (I := I) x u b))
       (hcsmooth.smul_section eu.contMDiff) with hecu'_def
@@ -596,7 +591,7 @@ theorem nablaBaseSlotCurv_smul_acted
     rw [hecuval, hecu'val]
   rw [nablaCurvSec_eq_of_acted_eq (g := g) X Y Z ecu ecu' x hval]
   have h := nablaCurvSec_smul_acted (g := g) hcsmooth X Y Z eu x
-  
+
   have hfield : (fun b => (ecu' : Π b : M, TangentSpace I b) b) =
       ((fun _ : M => c) • fun b => (eu : Π b : M, TangentSpace I b) b) := by
     funext b
@@ -901,7 +896,7 @@ theorem tensorInnerPointwise_slotSubst_sum
               (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)))
           (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) := by
   classical
-  
+
   have hsum : TensorRSSpace.toModel (∑ k : Fin s,
         tensor0SAsRS (I := I) (M := M) x
           (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) =
@@ -918,8 +913,7 @@ theorem tensorInnerPointwise_slotSubst_sum
     rw [hL, map_sum]
     exact Finset.sum_congr rfl (fun k _ => TensorRSSpace.toModelL_apply _)
   rw [hsum]
-  
-  
+
   let φ : TensorRSModel 0 s ℝ E →+ ℝ :=
     { toFun := fun m => tensorInnerPointwise (I := I) (M := M) g 0 s x m
         (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D))

@@ -76,8 +76,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
     riemannianFiberNormSq (I := I) (M := M) g 0 s x U ≤
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x T := by
   classical
-  
-  
+
   let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
   have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt x
@@ -94,7 +93,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
   set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
   have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
     fun u v => rfl
-  
+
   have hpars : ∀ v : TangentSpace I x, ∑ i : Fin n, g.inner x (e i) v ^ 2 = g.inner x v v := by
     intro v
     have h := OrthonormalBasis.sum_sq_inner_right eob v
@@ -120,25 +119,24 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x S =
         ∑ K : Fin 0 → Fin n, ∑ J : Fin (s + 1 + 1) → Fin n,
           fiberNormSqSummand (I := I) (M := M) g x 0 (s + 1 + 1) S n e K J := fun S => rfl
-  
+
   set Uu : Tensor0SSpace s I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from U)
       (unitZeroSec (I := I) (M := M) x) with hUu_def
   set Tu : Tensor0SSpace (s + 1 + 1) I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x from T)
       (unitZeroSec (I := I) (M := M) x) with hTu_def
-  
+
   set D : Fin n → Fin n → (Fin s → Fin n) → ℝ :=
     fun a b J => Tensor0SSpace.toModel Tu
       (Fin.cons (e a) (Fin.cons (e b) (fun k : Fin s => e (J k)))) with hD_def
-  
-  
+
   have hcomp : ∀ J : Fin s → Fin n,
       fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J =
         ∑ a : Fin n, ∑ b : Fin n,
           (g.inner x (e a) w * g.inner x (e b) w) • D a b J := by
     intro J
-    
+
     have hUcomp : fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J =
         Tensor0SSpace.toModel Uu (fun k : Fin s => e (J k)) := by
       have hco : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
@@ -152,12 +150,12 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
       rw [hco, hUu_def]
       rfl
     rw [hUcomp]
-    
+
     have hUT : Tensor0SSpace.toModel Uu (fun k : Fin s => e (J k)) =
         Tensor0SSpace.toModel Tu
           (Fin.cons w (Fin.cons w (fun k : Fin s => e (J k)))) := hU _
     rw [hUT]
-    
+
     have hstep1 : Tensor0SSpace.toModel Tu
           (Fin.cons w (Fin.cons w (fun k : Fin s => e (J k)))) =
         ∑ a : Fin n, g.inner x (e a) w • Tensor0SSpace.toModel
@@ -168,7 +166,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         (Fin.cons w (fun k : Fin s => e (J k)))
     rw [hstep1]
     refine Finset.sum_congr rfl (fun a _ => ?_)
-    
+
     have hstep2 : Tensor0SSpace.toModel
           (tensor0S_curry (I := I) (M := M) (s + 1) x Tu (e a))
           (Fin.cons w (fun k : Fin s => e (J k))) =
@@ -181,7 +179,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         (fun b => g.inner x (e b) w) e w (hexp w) (fun k : Fin s => e (J k))
     rw [hstep2, Finset.smul_sum]
     refine Finset.sum_congr rfl (fun b _ => ?_)
-    
+
     have hcurry2 : Tensor0SSpace.toModel
         (tensor0S_curry (I := I) (M := M) s x
           (tensor0S_curry (I := I) (M := M) (s + 1) x Tu (e a)) (e b))
@@ -194,7 +192,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         Tu (e a) (Fin.cons (e b) (fun k : Fin s => e (J k)))]
     rw [hcurry2]
     exact (mul_smul (g.inner x (e a) w) (g.inner x (e b) w) (D a b J)).symm
-  
+
   have hDcomp : ∀ (a b : Fin n) (J : Fin s → Fin n),
       fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1 + 1) T n e K₀
           (Fin.cons a (Fin.cons b J)) = D a b J := by
@@ -220,15 +218,14 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
     unfold fiberNormSqComponent
     rw [hco, htuple]
     rfl
-  
-  
+
   have hCS : ∀ J : Fin s → Fin n,
       (fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J) ^ 2 ≤
         ∑ a : Fin n, ∑ b : Fin n,
           (fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1 + 1) T n e K₀
             (Fin.cons a (Fin.cons b J))) ^ 2 := by
     intro J
-    
+
     have hflat : fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J =
         ∑ p : Fin n × Fin n,
           (g.inner x (e p.1) w * g.inner x (e p.2) w) * D p.1 p.2 J := by
@@ -237,7 +234,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
       refine Finset.sum_congr rfl (fun b _ => ?_)
       rw [smul_eq_mul]
     rw [hflat]
-    
+
     have hcs := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset (Fin n × Fin n))
       (fun p => g.inner x (e p.1) w * g.inner x (e p.2) w) (fun p => D p.1 p.2 J)
     have hcoeff : ∑ p : Fin n × Fin n,
@@ -273,10 +270,10 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
           refine Finset.sum_congr rfl (fun a _ => ?_)
           refine Finset.sum_congr rfl (fun b _ => ?_)
           rw [hDcomp a b J]
-  
+
   rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x s e hreprS U K₀]
   rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x (s + 1 + 1) e hreprT T K₀]
-  
+
   have hexpandT : ∑ J'' : Fin (s + 1 + 1) → Fin n,
         (fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1 + 1) T n e K₀ J'') ^ 2 =
       ∑ a : Fin n, ∑ b : Fin n, ∑ J : Fin s → Fin n,
@@ -301,7 +298,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
           (fun pr => by simp [Fin.consEquiv])]
     rw [Fintype.sum_prod_type]
   rw [hexpandT]
-  
+
   calc ∑ J : Fin s → Fin n,
           (fiberNormSqComponent (I := I) (M := M) g x 0 s U n e K₀ J) ^ 2
       ≤ ∑ J : Fin s → Fin n, ∑ a : Fin n, ∑ b : Fin n,
@@ -354,7 +351,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
   set rhs : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
       ((covGrad (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hrhs_def
-  
+
   have hsum :
       (rawTensorConnLapSmooth (I := I) g 0 s S).toSection x =
         ∑ i : Fin n,
@@ -366,7 +363,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
       (fun y : M => S.toSection y) x]
     rw [metricTraceHessian_def (I := I) g 0 s (fun y : M => S.toSection y) x]
   rw [hsum]
-  
+
   have hsub :
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (∑ i : Fin n,
@@ -383,7 +380,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
   have hcard : ((Finset.univ : Finset (Fin n)).card : ℝ) = (n : ℝ) := by
     rw [Finset.card_univ, Fintype.card_fin]
   rw [hcard] at hsub
-  
+
   have hterm : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (tensorSecondCovDeriv (I := I) g 0 s
@@ -436,10 +433,10 @@ theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
   have hK1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn_pos
   refine ⟨(n : ℝ), hK1, ?_⟩
   intro s S
-  
+
   set HH : Integral.L2.SmoothCcTensor g 0 (s + 1 + 1) :=
     covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) with hHH_def
-  
+
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           ((rawTensorConnLapSmooth (I := I) g 0 s S).toSection x) ≤
@@ -449,7 +446,7 @@ theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
     rw [Finset.sum_const, Finset.card_range, one_nsmul]
     rw [hHH_def]
     exact rawConnLap_fiberNormSq_le_secondCovGrad (I := I) (M := M) g s S x
-  
+
   have hpack :
       ‖rawTensorConnLapSmooth (I := I) g 0 s S‖ ≤
         (n : ℝ) * ∑ _i ∈ Finset.range 1, ‖HH‖ :=

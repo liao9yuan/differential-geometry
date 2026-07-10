@@ -34,17 +34,16 @@ theorem topology_eq (s : ℕ) (x : B) :
       (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜))) := by
   change instTopologicalSpaceContinuousMultilinearMap 𝕜 s F E x = _
   simp only [instTopologicalSpaceContinuousMultilinearMap]
-  
+
   set e := trivializationAt F E x
   set g : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜 →L[𝕜]
       ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜 :=
     ContinuousMultilinearMap.compContinuousLinearMapL (fun _ => e.symmL 𝕜 x) with hg_def
   have hfactor : (↑(Pretrivialization.continuousMultilinearMap 𝕜 s e) ∘
       TotalSpace.mk' _ x) = Prod.mk x ∘ g := by funext; rfl
-  
+
   rw [hfactor, ← induced_compose, (isInducing_prodMkRight x).eq_induced.symm]
-  
-  
+
   set g' := ContinuousMultilinearMap.compContinuousLinearMapL (F := 𝕜)
     (E₁ := fun _ : Fin s => F) (E := fun _ : Fin s => E x)
     (fun _ => e.continuousLinearMapAt 𝕜 x) with hg'_def
@@ -150,15 +149,14 @@ theorem triv_zero_symmL_apply_elim0 (x₀ x : B)
   set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => F) 𝕜)
     (Bundle.continuousMultilinearMap 𝕜 0 F E) x₀ with he_def
   have hbase : x ∈ e.baseSet := hx
-  
+
   have hsymmL : (e.symmL 𝕜 x ω₀ : Bundle.continuousMultilinearMap 𝕜 0 F E x) =
       e.symm x ω₀ := by
     simp [Trivialization.symmL_apply]
   rw [hsymmL]
-  
+
   have h1 := triv_zero_apply_eq (F := F) (E := E) x₀ x (e.symm x ω₀) 0
-  
-  
+
   have h2 : (e ⟨x, e.symm x ω₀⟩ : B × _) = (x, ω₀) :=
     e.apply_mk_symm hbase ω₀
   rw [show (e ⟨x, e.symm x ω₀⟩ : B × _).2 = ω₀ from congrArg Prod.snd h2] at h1
@@ -175,45 +173,35 @@ theorem triv_symmL_eq_compContinuousLinearMap {s : ℕ} (x₀ x : B)
   set e := trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜)
     (Bundle.continuousMultilinearMap 𝕜 s F E) x₀ with he_def
   have hbase : x ∈ e.baseSet := hx
-  
+
   have hsymmL : (e.symmL 𝕜 x T : Bundle.continuousMultilinearMap 𝕜 s F E x) =
       e.symm x T := by
     simp [Trivialization.symmL_apply]
   rw [hsymmL]
-  
+
   apply Bundle.continuousMultilinearMap.ext
   intro v
-  
+
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   have h_fwd : ∀ (M : Bundle.continuousMultilinearMap 𝕜 s F E x)
       (w : Fin s → F),
       (e ⟨x, M⟩).2 w = M (fun i => (trivializationAt F E x₀).symmL 𝕜 x (w i)) := by
     intro M w; rfl
   have h_rt : (e ⟨x, e.symm x T⟩ : B × _) = (x, T) :=
     e.apply_mk_symm hbase T
-  
+
   have h_snd : (e ⟨x, e.symm x T⟩ : B × _).2 = T := congrArg Prod.snd h_rt
-  
+
   have h_apply := h_fwd (e.symm x T)
     (fun i => (trivializationAt F E x₀).continuousLinearMapAt 𝕜 x (v i))
-  
-  
+
   rw [h_snd] at h_apply
-  
-  
+
   conv_rhs at h_apply =>
     arg 2; ext i
     rw [(trivializationAt F E x₀).symmL_continuousLinearMapAt hx (v i)]
-  
+
   exact h_apply.symm
 
 def toModel {s : ℕ} {x : B}

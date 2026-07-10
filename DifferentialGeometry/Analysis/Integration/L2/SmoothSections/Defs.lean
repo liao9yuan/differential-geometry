@@ -92,10 +92,10 @@ lemma mem_compactlySupportedSmoothTensorSections {r s : ℕ}
         (fun x : M => TensorRSSpace.toModel (S x)) := Iff.rfl
 
 structure SmoothCcTensor (g : SmoothRiemannianMetric I M) (r s : ℕ) where
-  
+
   toSection : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
     (fun x : M => TensorRSSpace r s I x)⟯
-  
+
   hasCompactSupport :
     HasCompactSupport (fun x : M => TensorRSSpace.toModel (toSection x))
 

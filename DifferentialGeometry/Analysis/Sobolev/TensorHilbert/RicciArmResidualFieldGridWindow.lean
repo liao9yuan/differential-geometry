@@ -4,42 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
 
-/-!
-# Capped bounded-factor grid windows for the arm-0 residual coefficient fields
-
-The two capped bounded-factor grid towers of the leader-signed M-dossier (§iii, children
-C-QUAD and C-BGR): pointwise bounds, at the bounded-factor grid of cap `i + 1` over the
-window `i + 3` in the perturbation jets, for the covariant gradients of the
-input-slot-symmetrized arm-0 residual coefficient fields `gInvDiffQuadResidualField`
-(DEF-1, the mechanism-B `A ⋆ A` quadratic residual) and `bgRDiffRefoldRemainderField`
-(DEF-2, the bg-R difference and refold remainder), generic in a perturbed metric
-`g₁ = g₀ + P`, with the constant `P`-uniform and `δ₀`-dependent, no ball binder — the
-statements mirror the M-child capped-grid target of
-`RicciThreeArmCorrectionFieldTameEnvelope` binder-for-binder, so the eventual assembly
-glue composes through `ccInputSymm_add` and `riemannianFiberNormSq_add_le` without
-friction.
-
-The C-QUAD tower is fully proven: the input-slot symmetrization is opened into its
-`appCcRS`/`ccSlotSwapField` average, the quadratic subject is converted onto the two
-`connDiffSection` jet towers by the proven fixed-`g₀`-frame conversion child
-(`exists_rfns_iteratedCovGrad_gInvDiffQuadResidualField_connDiffSection_diagonalProductGrid`,
-discharged by the collapsed double-trace refold of the bi-contraction kernel through
-`connDiffLoweredCc`), and the capped window assembles through
-`exists_rfns_iteratedCovGrad_connDiffSection_tgrid` and the bounded-factor grid product
-calculus. The C-BGR tower is fully proven over its three per-summand conversion children
-(the bg-R trace difference, the `(∇♯)K`-residual and the Ricci-fold remainder at the
-metric-difference weight, each onto the `P`-jet capped window): the bg-R trace difference
-and Ricci-fold remainder conversions refold the moving `g₁`-orthoframe traces through the
-`g₁`-cometric double trace and cross-split the moving trace onto the slot-zero insertion
-of `gInvDiffRaisedEndoField` over the fixed `g₀`-trace, with the fixed background
-curvature consumed as compact `appCcRS`/`slotExtendIter` weights and the
-metric-difference weight converted to the `P`-jets through `symmS`; the `(∇♯)K`-residual
-conversion collapses the `g₁`-sharp-raised Koszul vector onto the connection difference
-under the metric tie and refolds the kernel onto the four-permutation `appCcRS` family of
-the `g₀`-Koszul covector against the lowered connection difference, whose jets land on
-the `P`-jets through the Koszul pointwise comparison and the `connDiffSection` jet tower.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -635,38 +599,7 @@ private lemma sum_rect_le_sum_triangle (a : ℕ → ℝ) (ha : ∀ j, 0 ≤ a j)
 end helpers
 
 set_option linter.unusedVariables false in
-/-- Fixed-`g₀`-frame / product-engine conversion for the mechanism-B quadratic residual
-(the C-QUAD tower's conversion child): the `g₀`-covariant `i`-jets of the `A ⋆ A`
-double-`g₀`-orthoframe bi-contraction `gInvDiffQuadResidualField g₀ g₁` are controlled by
-the diagonal product grid of the two `connDiffSection g₁ g₀` jet towers, with a constant
-depending on `g₀` and `i` only.
 
-LEG-COUNT LAW at birth: ZERO inverse-metric legs cross this estimate — both `g₁⁻¹` raises
-of the `A ⋆ A` content stay inside the quoted `connDiffSection` jets on the right, and the
-bi-contraction frames are the FIXED `g₀`-orthoframes
-(`connDiffBiContrFib g₁ g₀ g₁ g₀ x = connDiffBiContrFibFixedFrame … (smoothOrthoFrame g₀ x) x`),
-so `K` is built from `g₀`-frame-jet sups and finrank/card combinatorics alone: no `δ`
-binder, no rate denominator, `P`-uniform by construction. The two-leg rate
-`(1/(1 − δ₀))²` of the C-QUAD fill enters only through the consuming glue's two citations
-of `exists_rfns_iteratedCovGrad_connDiffSection_tgrid` (`CA j₁ * CA j₂`), never here.
-
-SMALL-LITERALS: literal-free `∃ K`-form — no numeric cap appears.
-
-SUP-ANCHOR: the `i = 0` instance is the pointwise anchor — the quadratic fibre is bounded
-by `K 0` times the squared `connDiffSection` fibre pair, which the consuming tgrid tower
-rates as a `δ`-rated `P`-uniform fibre cap under `∃C`-before-`∀g₁` (the
-`rfns_connDiffBiContrFib_self_le_of_lt_one` class: `C * ‖∇P‖⁴`, the `(1,1)` grid cell);
-no compactness bound on any `g₁`-dependent object.
-
-Diagonal witness: at `g₁ = g₀` both sides vanish (`connDiff_self`,
-`gInvDiffQuadResidualField_self`) — the estimate is tight and non-vacuous there.
-
-Proven by the collapsed double-trace refold: the `A ⋆ A` bi-contraction kernel is exactly
-`appCcRS g₀ 2 1 2` of a double-trace arm against a double-trace weight, both built from
-`connDiffLoweredCc g₀ g₁` via `cometricDoubleTraceField` and `slotExtend` (the inner
-connection-difference leg is expanded on the `g₀`-orthoframe at the frame center), and the
-`appCcRS` diagonal-product-grid engine cascades through the refold with `g₀`-only
-compactness sups and the rectangle-into-triangle grid combinatorics. -/
 theorem exists_rfns_iteratedCovGrad_gInvDiffQuadResidualField_connDiffSection_diagonalProductGrid
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
@@ -1043,46 +976,7 @@ theorem exists_rfns_iteratedCovGrad_gInvDiffQuadResidualField_connDiffSection_di
         rw [mul_assoc]
 
 set_option linter.unusedVariables false in
-/-- Dossier child C-QUAD: pointwise capped-grid bound for the covariant gradients of the
-input-slot-symmetrized mechanism-B quadratic residual field
-`ccInputSymm (gInvDiffQuadResidualField g₀ g₁)` (DEF-1), generic in a perturbed metric
-`g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the window `i + 3` in the
-`P`-jets, with `C` `P`-uniform and `δ₀`-dependent.
 
-LEG-COUNT LAW at birth (fork-4 rule): the field carries TWO connection-difference legs
-(`A ⋆ A`; each `connDiff` is one `g₁⁻¹` raise), so the constant construction of any fill
-must carry the two-leg rate `(1/(1 − δ₀))²` — placed in the `C`-construction, never as a
-naked cap literal: the statement is literal-free (the `∃ C` bounded-factor-grid form
-absorbs the rate) and `δ₀ < 1` is fixed in the outer binder, so the two-leg factor is
-finite. A `(1 − δ)¹`-rated cap is FALSE at two legs: lane X witness (`n = 2`, pure trace
-`T = −c • g₀`, `δ = 3/4`): `32400 > 10368`; lane Y witness (`n = 1`, `S¹`, `δ = 3/4`):
-`1296 > 81` — the `n = 1` tightness of the two-leg rate. Lane Z cert class (`A`–`I`
-transcript): `2√n³·δ/(1−δ)² ≤ 4√n³·δ/(1−δ)` at `δ ≤ 1/2` — no such literal appears here;
-the construction stays finite at each finrank `n = 1, 2, 3`.
-
-MECHANISM B (grid_witness `n = 2`, the direct test bed, leader-certified
-`/tmp/grid_witness.lean`): the quadratic one-jet residual occupies total grid weight
-`k = i + 2` with per-factor order at most `i + 1` (`mainB`: `comb = −1/4` on the symmetric
-datum at the one-jet witness, degree-2 homogeneous), which the cap `i + 1` over the window
-`i + 3` accommodates — cells `e = (a + 1, b + 1)`, `a + b = i`.
-
-SUP-ANCHOR law: the `k = 0` grid cell (`1 ≤` the window, by
-`Combinatorics.one_le_boundedFactorGridWindow`) carries the order-zero fibre sup; the
-realized pointwise anchor is a `δ`-rated `P`-uniform fibre cap under `∃C`-before-`∀g₁`
-(erratum-#2 class): the conversion child at `i = 0` composed with the
-`exists_rfns_iteratedCovGrad_connDiffSection_tgrid` fibre instance — consistent with the
-mechanism-B fibre bound (`rfns_connDiffBiContrFib_self_le_of_lt_one`: the `A ⋆ A` fibre
-norm is controlled by `‖∇P‖⁴`, the `(1,1)` cell of the capped grid). The only compactness
-bound in the fill (`exists_bound_riemannianFiberNormSq_smoothCcTensor`) is applied to the
-`g₁`-INDEPENDENT `ccSlotSwapField` jets, which are trivially `P`-uniform.
-
-Proven by opening `ccInputSymm` into its `appCcRS`/`ccSlotSwapField` average, converting
-the quadratic subject onto the two `connDiffSection` jet towers via the proven conversion
-child
-`exists_rfns_iteratedCovGrad_gInvDiffQuadResidualField_connDiffSection_diagonalProductGrid`,
-and assembling the capped window through
-`exists_rfns_iteratedCovGrad_connDiffSection_tgrid`, the `appCcRS` diagonal-product-grid
-engine, and `boundedFactorGridWindow_mul_le`/`boundedFactorGridWindow_mono`. -/
 theorem rfns_iteratedCovGrad_gInvDiffQuadResidualFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1484,11 +1378,6 @@ private lemma rfns_icg_rsDomDomCongrSection_eq (r s : ℕ) (σ : Equiv.Perm (Fin
     (rsDomDomCongrSection (I := I) (M := M) g₀ r s σ R)] at h
   exact h
 
-/-- The slot permutation of the pair-trace refold: it rearranges the six covariant slots of
-the two-fold slot extension of a rank-`(0,4)` kernel argument so that the two extension slots
-land on the two `g₁`-cometric trace pairs of `mvPairTraceOp` while the four kernel-argument
-slots follow in the refold order.  This is the permutation realizing the identity
-`refoldKernelContractionMonomialField_eq_mvPairTraceRefold`. -/
 def sigmaE : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![1, 3, 4, 5, 0, 2] : Fin 6 → Fin 6) i,
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
@@ -1520,10 +1409,7 @@ private def tauM4 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The moving (`g₁`-cometric) double trace, packaged as a compactly supported operator
-tensor over the background metric `g₀`: at each point it contracts the first two covariant
-slots of a rank-`(0, s + 2)` argument against the cometric of `g₁`.  For `g₁ = g₀` it is the
-fixed background double trace `cometricDoubleTraceField`. -/
+
 def mvDoubleTraceField (s : ℕ) : SmoothCcTensor g₀ (s + 2) s where
   toSection :=
     { toFun := fun x : M =>
@@ -1998,11 +1884,6 @@ private lemma slotExtendIter_three_toModel (X : SmoothCcTensor g₀ 0 3) (x : M)
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rfl
 
-/-- The double moving pair-trace kernel: the composition of the `g₁`-cometric double traces
-at ranks `4` and `2`, packaged as a rank-`(6,2)` operator tensor over the background `g₀`.
-Applied to the `sigmaE`-reindexed two-fold slot extension of a rank-`(0,4)` argument it
-realizes the refold kernel-contraction monomial field
-(`refoldKernelContractionMonomialField_eq_mvPairTraceRefold`). -/
 def mvPairTraceOp : SmoothCcTensor g₀ 6 2 :=
   appCcRS (I := I) (M := M) g₀ 6 4 2
     (mvDoubleTraceField (I := I) (M := M) g₀ g₁ 2)
@@ -2011,10 +1892,7 @@ def mvPairTraceOp : SmoothCcTensor g₀ 6 2 :=
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Frame evaluation of the double moving pair trace against the `sigmaE`-reindexed two-fold
-slot extension of a rank-`(0,4)` argument: the composite is the double `g₁`-orthonormal-frame
-sum pairing the operator argument `D` against the frame pair and the kernel argument `X`
-against the output slots and the frame pair. -/
+
 lemma mvPairTraceOp_apply_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel
@@ -2653,10 +2531,7 @@ private lemma exists_rfns_icg_mvDoubleTraceField_window (s : ℕ) {δ₀ : ℝ} 
               (Module.finrank ℝ E : ℝ) ^ (s + 1) * CΛ u₂) + 2 * KD u) * W := by ring
 
 set_option linter.unusedVariables false in
-/-- Capped bounded-factor grid window for the covariant jets of the double moving pair-trace
-kernel: for a perturbed metric `g₁ = g₀ + P` inside the `δ`-fibre ball, the order-`u` jet of
-`mvPairTraceOp g₀ g₁` is bounded by a `P`-uniform constant times the bounded-factor grid
-window of cap `K ≥ u` and weight `u + 1` in the `P`-jets. -/
+
 lemma exists_rfns_icg_mvPairTraceOp_window {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ u, 0 ≤ C u) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -4380,36 +4255,7 @@ private lemma exists_rfns_icg_k2FoldWeightGen_window (σ : Equiv.Perm (Fin 6))
 end bgrConversion
 
 set_option linter.unusedVariables false in
-/-- Per-summand conversion child of the C-BGR tower (bg-R trace difference): pointwise
-capped-grid bound for the covariant gradients of the background-curvature trace difference
-`ricciArmOrder0BgRCommCoeffField g₀ g₁ - ricciArmOrder0BgRCommCoeffField g₀ g₀`, generic
-in a perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the
-window `i + 3` in the `P`-jets, with `C` `P`-uniform and `δ₀`-dependent.
 
-LEG-COUNT LAW: ZERO inverse-metric legs — the background curvature is fixed (compact sup)
-and the moving `g₁`-orthoframes enter at the zero jet only; the difference is consumed as
-a SINGLE object (no per-endpoint split), so the moving-frame content beyond the `P`-jets
-cancels in the difference and any frame-control rate lives inside the `C`-construction,
-never as a naked cap literal (`δ₀ < 1` in the outer binder keeps it finite).
-
-SUP-ANCHOR: the `k = 0` grid cell (`1 ≤` the window, by
-`Combinatorics.one_le_boundedFactorGridWindow`) carries the order-zero fibre sup; the
-pointwise anchor class is the generic-`g₁` bound `rfns_bgRBiContrFib_le`
-(`∃C`-before-`∀g₁`, `htie` form), with the realized-path precedent
-`exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform`.
-
-Diagonal litmus: at `g₁ = g₀` the subject vanishes (`sub_self`), so the estimate reduces
-to `0 ≤ C i *` window — tight and non-vacuous there.
-
-Proven by the moving-frame trace refold: at either endpoint the field equals the
-`g₁`-cometric double trace of a fixed weight built from the lowered background curvature
-`riemannLoweredCc g₀ g₀ g₀` through the `appCcRS`/`slotExtendIter` calculus (proven
-pointwise at the orthoframe center), the difference of the moving and background traces
-collapses onto the slot-zero insertion of `gInvDiffRaisedEndoField g₀ g₁` by the
-fullRaisedEndo cross-split — realizing the trace-basis independence, so the moving-frame
-content beyond the `P`-jets cancels in the difference — and the capped window assembles
-from the public `slotInsertEndoCc` diagonal-product-grid tower (whose constant carries
-the `δ₀`-rate), the `appCcRS` product-grid engine, and `g₁`-independent compact sups. -/
 theorem rfns_iteratedCovGrad_ricciArmOrder0BgRCommCoeffFieldDifference_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -4590,43 +4436,7 @@ theorem rfns_iteratedCovGrad_ricciArmOrder0BgRCommCoeffFieldDifference_boundedFa
         ring
 
 set_option linter.unusedVariables false in
-/-- Per-summand conversion child of the C-BGR tower (`(∇♯)K`-residual at the
-metric-difference weight): pointwise capped-grid bound for the covariant gradients of
-`ricciArmSharpGradKoszulResidualField g₀ g₁ (metricDifferenceCcTensor g₀ g₁)`, generic in
-a perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the
-window `i + 3` in the `P`-jets, with `C` `P`-uniform and `δ₀`-dependent.
 
-LEG-COUNT LAW: exactly ONE `g₁`-raise at the zero jet (the sharp raise of
-`sharpRaisedKoszulVec`), so the constant construction of any fill carries the one-leg rate
-`(1/(1 − δ₀))¹` — placed in the `C`-construction, never as a naked cap literal; `δ₀ < 1`
-in the outer binder keeps it finite.
-
-MECHANISM B: the field is one-jet in the weight, and the weight is the metric difference
-tied to `P` by `htie`, so the residual content sits at total grid weight `k = i + 2` with
-per-factor order at most `i + 1` (the `(∇♯)`-leg is one-jet in `P` against the one-jet
-Koszul of the metric-difference weight), inside the capped window.
-
-SUP-ANCHOR: the `k = 0` grid cell (`1 ≤` the window, by
-`Combinatorics.one_le_boundedFactorGridWindow`) carries the order-zero fibre sup; the
-compactness class `exists_bound_riemannianFiberNormSq_smoothCcTensor` applies to
-`g₁`-independent data only.
-
-Diagonal litmus: at `g₁ = g₀` the weight vanishes (`metricDifferenceCcTensor_self`) and
-the field dies on the zero weight (`ricciArmSharpGradKoszulResidualField_zero_weight`), so
-the estimate reduces to `0 ≤ C i *` window — tight and non-vacuous there.
-
-Proven by the Palatini refold: under the metric tie the metric-difference weight equals
-`symmS g₀ P` and the `g₁`-sharp-raised Koszul vector collapses onto the connection
-difference (`Ψ = A`, through `connDiffInner_g1_eq_half_covGradSymmS`), so the field
-equals `2` times the `g₁`-cometric pair trace of the four-permutation
-`appCcRS`/`slotExtendIter` family of the `g₀`-Koszul covector `koszulCovecCc g₀ P`
-against the lowered connection difference (proven pointwise at the orthoframe center by
-expanding the inner connection-difference legs on the `g₀`-orthoframe); the Koszul leg
-converts to the `P`-jets by the pointwise comparison `10 · b (w + 1)`, the
-lowered-difference leg by the `connDiffSection` jet tower (carrying the one-leg
-`δ₀`-rate inside `C`), and the capped window assembles by the product-grid engine and
-the bounded-factor window calculus at the exact cap-window fit
-`(u + 1) + (w + 3) - 1 ≤ i + 3`. -/
 theorem rfns_iteratedCovGrad_ricciArmSharpGradKoszulResidualFieldMetricDifference_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -4961,35 +4771,7 @@ theorem rfns_iteratedCovGrad_ricciArmSharpGradKoszulResidualFieldMetricDifferenc
           Combinatorics.boundedFactorGridWindow b (i + 1) (i + 3) := by ring
 
 set_option linter.unusedVariables false in
-/-- Per-summand conversion child of the C-BGR tower (Ricci-fold remainder at the
-metric-difference weight): pointwise capped-grid bound for the covariant gradients of
-`ricciArmRicciFoldRemainderField g₀ g₁ (metricDifferenceCcTensor g₀ g₁)`, generic in a
-perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the window
-`i + 3` in the `P`-jets, with `C` `P`-uniform and `δ₀`-dependent.
 
-LEG-COUNT LAW: ZERO inverse-metric legs — the field is zero-jet in the weight against the
-fixed background curvature (compact sup), and the moving `g₁`-orthoframes enter at the
-zero jet; any frame-control rate lives inside the `C`-construction, never as a naked cap
-literal (`δ₀ < 1` in the outer binder keeps it finite).
-
-SUP-ANCHOR: the `k = 0` grid cell (`1 ≤` the window, by
-`Combinatorics.one_le_boundedFactorGridWindow`) carries the order-zero fibre sup; the
-compactness class `exists_bound_riemannianFiberNormSq_smoothCcTensor` applies to
-`g₁`-independent data only.
-
-Diagonal litmus: at `g₁ = g₀` the weight vanishes (`metricDifferenceCcTensor_self`) and
-the field dies on the zero weight (`ricciArmRicciFoldRemainderField_zero_weight`), so the
-estimate reduces to `0 ≤ C i *` window — tight and non-vacuous there.
-
-Proven by the pair-trace refold: at the metric-difference weight (equal to `symmS g₀ P`
-under `htie`) the field is `−(1/2)` times the `g₁`-cometric pair trace of the
-two-summand kernel weight built from `riemannLoweredCc g₀ g₀ g₀` against the zero-jet
-weight through the `appCcRS`/`slotExtendIter` calculus (proven pointwise at the
-orthoframe center); the moving pair traces convert onto the `gInvDiffRaisedEndoField`
-grid towers by the fullRaisedEndo cross-split, the weight jets land on the `P`-jets —
-the order-zero jet capped `P`-uniformly through `hbound` at `δ ≤ δ₀ < 1`, the higher
-jets by the `symmS` pointwise comparison — and the capped window assembles by the
-product-grid engine and the bounded-factor window calculus. -/
 theorem rfns_iteratedCovGrad_ricciArmRicciFoldRemainderFieldMetricDifference_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -5218,7 +5000,7 @@ theorem rfns_iteratedCovGrad_ricciArmRicciFoldRemainderFieldMetricDifference_bou
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- Left scalar homogeneity of the kernel application calculus. -/
+
 private theorem appCcRS_smul_left_local (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (k : ℝ) (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
     appCcRS (I := I) (M := M) g a b c (k • Φ) W =
@@ -5236,8 +5018,7 @@ private theorem appCcRS_smul_left_local (g : SmoothRiemannianMetric I M) (a b c 
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
-/-- The input-slot swap is an involution under the kernel application calculus:
-precomposing a `(2,2)` coefficient with the slot swap twice returns the coefficient. -/
+
 @[simp] private theorem appCcRS_ccSlotSwapField_involutive (g : SmoothRiemannianMetric I M)
     (C : SmoothCcTensor g 2 2) :
     appCcRS (I := I) (M := M) g 2 2 2
@@ -5264,43 +5045,7 @@ precomposing a `(2,2)` coefficient with the slot swap twice returns the coeffici
   exact Tensor0SSpace.ofModel_toModel D
 
 set_option linter.unusedVariables false in
-/-- Dossier child C-BGR: pointwise capped-grid bound for the covariant gradients of the
-input-slot-symmetrized bg-R difference and refold remainder field
-`ccInputSymm (bgRDiffRefoldRemainderField g₀ g₁)` (DEF-2), generic in a perturbed metric
-`g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the window `i + 3` in the
-`P`-jets, with `C` `P`-uniform and `δ₀`-dependent.
 
-LEG-COUNT LAW at birth: the field carries at most ONE inverse-metric leg — the bg-R trace
-difference has zero legs (fixed background `R₀`, compact sup; frames enter at the zero
-jet), the Ricci-fold remainder is zero-jet in the weight against `R₀` (zero legs), and the
-`(∇♯)K`-residual carries exactly one `g₁`-raise at the zero jet (one leg) — so the
-constant construction of any fill carries the one-leg rate `(1/(1 − δ₀))¹`, placed in the
-`C`-construction, never as a naked cap literal; `δ₀ < 1` in the outer binder keeps it
-finite, `4√n³·δ/(1−δ)`-class at each finrank `n = 1, 2, 3` (`√n³ = 1, 2√2, 3√3`). The
-two-leg violations of the lane X/Y witnesses (`32400 > 10368`; `1296 > 81`) do not arise
-here: the `A ⋆ A` two-leg content is DEF-1's, not this field's.
-
-MECHANISM B (grid_witness `n = 2`, leader-certified `/tmp/grid_witness.lean`): on the
-one-jet witness the residual content sits at total grid weight `k = i + 2` with per-factor
-order at most `i + 1` (the `(∇♯)`-leg is one-jet in `P` against the one-jet Koszul of the
-metric-difference weight), inside the capped window.
-
-SUP-ANCHOR law: the `k = 0` grid cell (`1 ≤` the window, by
-`Combinatorics.one_le_boundedFactorGridWindow`) carries the order-zero fibre sup; the
-pointwise anchor class is the compactness bound
-`exists_bound_riemannianFiberNormSq_smoothCcTensor`, with the realized-path precedent
-`exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform` for the bg-R trace
-summand.
-
-Proven by opening `ccInputSymm` into its `appCcRS`/`ccSlotSwapField` average, splitting
-the subject definitionally onto its three summands, converting each summand onto the
-`P`-jet capped window through the three proven per-summand conversion children
-(`rfns_iteratedCovGrad_ricciArmOrder0BgRCommCoeffFieldDifference_boundedFactorGridWindow_le`,
-`rfns_iteratedCovGrad_ricciArmSharpGradKoszulResidualFieldMetricDifference_boundedFactorGridWindow_le`
-and
-`rfns_iteratedCovGrad_ricciArmRicciFoldRemainderFieldMetricDifference_boundedFactorGridWindow_le`),
-and assembling the swap arm through the `appCcRS` diagonal-product-grid engine with
-`g₁`-independent compact sups. -/
 theorem rfns_iteratedCovGrad_bgRDiffRefoldRemainderFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -6053,54 +5798,7 @@ lemma exists_rfns_icg_ricciArmOrder0AACommCoeffField_window
 end qCommConversion
 
 set_option linter.unusedVariables false in
-/-- Q_true input-symmetrized capped grid tower (M-child assembly grain): pointwise
-capped-grid bound for the covariant gradients of the input-slot-symmetrized
-antisymmetrized `A ⋆ A` commutator coefficient field
-`ccInputSymm (ricciArmOrder0AACommCoeffField g₀ g₁)` (Form B `Q_true`), generic in a
-perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the window
-`i + 3` in the `P`-jets, with `C` `P`-uniform and `δ₀`-dependent — the exact
-binder-for-binder mirror of the C-QUAD sibling
-`rfns_iteratedCovGrad_gInvDiffQuadResidualFieldInputSymm_boundedFactorGridWindow_le`, so
-the M-child assembly glue composes through `ccInputSymm_add` and
-`riemannianFiberNormSq_add_le` without friction.
 
-LEG-COUNT LAW at birth (fork-4 rule): the field carries TWO connection-difference legs
-(the antisymmetrized `A ⋆ A` commutator; each `connDiff` is one-jet in `P` with one
-`g₁⁻¹` raise), and the two moving `g₁`-frame legs and the `g₁`-inner are ZERO-jet
-algebraic legs, so the two-leg rate `(1/(1 − δ₀))²` and every moving-trace control rate
-live inside the `C`-construction, never as a naked cap literal: the statement is
-literal-free (the `∃ C` bounded-factor-grid form absorbs the rates) and `δ₀ < 1` is fixed
-in the outer binder, so the two-leg factor is finite.
-
-MECHANISM B (grid arithmetic): the quadratic one-jet content occupies total grid weight
-`k = i + 2` with per-factor order at most `i + 1`, which the cap `i + 1` over the window
-`i + 3` accommodates — the same cells `e = (a + 1, b + 1)`, `a + b = i`, as the C-QUAD
-sibling; the zero-jet moving legs contribute `P`-jet factors only through the
-`mvPairTraceOp` window at merged weight inside the same cap.
-
-SUP-ANCHOR law: the `k = 0` grid cell (`1 ≤` the window, by
-`Combinatorics.one_le_boundedFactorGridWindow`) carries the order-zero fibre sup as a
-`δ`-rated `P`-uniform fibre cap under `∃C`-before-`∀g₁` (erratum-#2 class); the only
-compactness bounds in the fill are on `g₁`-INDEPENDENT data (the `ccSlotSwapField` jets
-and the fixed `g₀`-trace fields inside the cited windows), which are trivially
-`P`-uniform.
-
-Diagonal litmus: at `g₁ = g₀` the subject vanishes
-(`ricciArmOrder0AACommCoeffField_self` — both connection-difference legs of each kernel
-monomial die), so the estimate reduces to `0 ≤ C i *` window — tight and non-vacuous
-there.
-
-Proven by opening `ccInputSymm` into its `appCcRS`/`ccSlotSwapField` average and
-converting the raw commutator field through the moving-frame pair-trace refold: the
-`Q_true` kernel is the DIFFERENCE of two `A ∘ A` monomials, each folded — through the
-`g₁`-inner Koszul bridge (`koszulCovecCc_unitModel_eq_g1_inner`) and the
-`g₀`-orthoframe expansion of the inner `A`-leg — onto the two-permutation `k2FoldWeight`
-family of the `g₀`-Koszul covector against the lowered connection difference, so the
-field refolds onto `mvPairTraceOp` applied to
-`k2FoldWeight sigmaQ1 P − k2FoldWeight sigmaQ2 P`; the capped window assembles from the
-`mvPairTraceOp` window, the generic-`σ` `k2FoldWeight` window, `rfns` subadditivity
-across the monomial difference, the `appCcRS` diagonal-product-grid engine, and
-`boundedFactorGridWindow_mul_le`/`boundedFactorGridWindow_mono`. -/
 theorem rfns_iteratedCovGrad_ricciArmOrder0AACommCoeffFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -6260,14 +5958,8 @@ set_option maxHeartbeats 3200000
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-/-! ### The kernel-contraction conversion (C-EQ″ kernel summand tower, cap `i + 2`) -/
-
 set_option maxHeartbeats 3200000 in
-/-- The exact refold identity: each kernel-contraction refold monomial field is the double
-moving pair-trace kernel `mvPairTraceOp g₀ g₁` applied (through `appCcRS`) to the
-`sigmaE`-reindexed two-fold slot extension of the permuted rank-`(0,4)` argument.  This
-exposes the monomial as a linear operator field in the frozen argument `G` with all of the
-`g₁`-dependence in the kernel. -/
+
 theorem refoldKernelContractionMonomialField_eq_mvPairTraceRefold
     (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
     (σ : Equiv.Perm (Fin 4)) :
@@ -6582,34 +6274,7 @@ private theorem exists_rfns_icg_refoldKernelContractionField_window
     hC4_nn i]
 
 set_option linter.unusedVariables false in
-/-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
-kernel-contraction field of the corrected sym-sector cancellation equation (C-EQ″), at the
-second covariant gradient of the symmetrized perturbation and the derived second-Bianchi
-quadruple, generic in a perturbed metric `g₁ = g₀ + P` — at the bounded-factor grid of cap
-`i + 2` over the window `i + 3` in the `P`-jets.
 
-BIRTH BATTERY (leader-ordered, quoted):
-LEG-COUNT LAW: the kernel coefficient is `P`-jet-0 (four-monomial slot algebra against the
-moving `g₁`-cometric pair traces — the `mvPairTraceOp` refold); the moving frame legs enter
-at the ZERO jet; every frame/trace-control rate lives inside the `C`-construction (through
-the `mvPairTraceOp` window tower at `δ ≤ δ₀ < 1`), never as a naked cap literal.
-SMALL-LITERALS: `∃ C`-form with `C` `P`-uniform and `δ₀`-dependent, `∃C`-BEFORE-`∀g₁`; zero
-numeric cap literals beyond the structural `i + 2`/`i + 3` grid shape.
-SUP-ANCHOR: the `k = 0` grid cell (`1 ≤` window) carries the order-zero fibre sups; the
-compactness class (`exists_bound_riemannianFiberNormSq_smoothCcTensor`) applies to the
-`g₁`-independent slot-swap arm only.
-a3de82: the kernel argument `icg² (symmS P)` IS 2-jet content of `P` — the single
-`∇^{i+2}P` factor rides the `icg^i`-row as the ONE cap-`(i + 2)` cell (cell `k = l + 2`,
-linear in the `P`-jets), correctly classified OUTSIDE any frozen `range (i + 2)` row: this
-is the C₂-slot cap-`(i + 2)` class of the slot taxonomy, and exactly why this tower carries
-cap `i + 2` while the quadratic residual towers stay at cap `i + 1`.
-
-Proven by the `mvPairTraceOp` refold of the kernel-contraction monomials (the data-slot
-weight rides the moving cometric pair trace; the frozen argument enters as a slot-extended,
-slot-permuted `(0,4)` passenger), the `appCcRS` diagonal-product-grid engine, the
-`slotExtend`/`domDomCongr`/`iteratedCovGrad`-composition fibre-norm calculus landing the
-argument jets on `b (2 + l)`, the single-factor grid absorb, and the slot-swap
-symmetrization assembly of the `Q_true` tower. -/
 theorem rfns_iteratedCovGrad_refoldKernelContractionFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -7870,15 +7535,7 @@ private lemma k4a_sum_reorg {d m : ℕ} (A B : Fin d → ℝ) (C D : Fin m → F
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 6400000 in
-/-- Sharp corner operator bound for the double moving pair-trace refold (pointwise,
-`i`-uniform, dimension-free): the binomial-diagonal `appCcLeibnizPsi` cell of
-`mvPairTraceOp g₀ g₁` acting on the order-`i` covariant jet of the `sigmaE`-reindexed
-two-fold slot extension of the permuted second gradient of `symmS P` costs at most
-`((1/(1 - δ₀))²)²` times the fibre-norm square of `∇^(i+2)P`.  The kernel is a pure
-frame reindex: in the composite every `g₁`-orthonormal frame index is matched and
-squared, so the only cost is the two `g₁`-to-`g₀` frame conversions of the two trace
-pairs, each bounded by `1/(1 - δ₀)` at operator-norm level through the raised
-endomorphism bound; no dimension factor appears. -/
+
 theorem rfns_appCcRS_mvPairTraceOp_leibnizCorner_refoldArgument_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -8216,12 +7873,7 @@ theorem rfns_appCcRS_mvPairTraceOp_leibnizCorner_refoldArgument_le
         ring
 
 set_option linter.unusedVariables false in
-/-- Capped residual window for the leibniz-lower cells of the refold monomial (pointwise,
-per refold monomial): subtracting from `∇^i` of the kernel-contraction refold monomial its
-binomial-diagonal `mvPairTraceOp` corner leaves exactly the lower Leibniz cells, in which
-every derivative that lands on the moving kernel lowers the top `P`-order, so the residual
-is bounded by a `P`-uniform per-order constant times the bounded-factor grid window of cap
-`i + 1` and weight `i + 3` in the `P`-jets. -/
+
 theorem exists_rfns_icg_refoldKernelContractionMonomialField_leibnizResidual_window
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧

@@ -5,18 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder0Ke
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 
-/-!
-# Tame jet envelopes for the three-arm correction fields
-
-All-order per-order L² tame jet envelopes for the arm-0 and arm-1 correction subjects of the
-linearized Ricci three-arm decomposition along the realized family: the arm-1 correction field
-`linearizedRicciConnDiffOrder1Coeff - linearizedRicciArm1BaseCoeff`, and the combined arm-0
-subject `linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff
-+ (3/2) • ricciArmOrder0RiemannCoeff - ricciArmOrder0CurvCoeff` (curvature coefficients at the
-realized-family metric). Every covariant-gradient order `i` of the subject is L²-bounded by a
-ball-uniform constant times the tame window `1 + ∑_{j < i + 2} (‖∇ʲT‖² + ‖∇ʲT'‖²)`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -57,14 +45,7 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
 set_option linter.unusedVariables false in
-/-- All-order per-order L² tame jet envelope for the order-one connection-difference
-Ricci-linearization coefficient field, generic in a perturbed metric `g₁ = g₀ + P`.
 
-Proven via the four-trace `appCcRS` refold
-`linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS` and the diagonal-product-grid calculus,
-mirroring `ricciArmOrder1KoszulCoeff_perOrder_l2_tameEnvelope_generic`, over the proven arm
-envelopes `ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic` and
-`linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic`. -/
 theorem linearizedRicciConnDiffOrder1CoeffField_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -216,10 +197,7 @@ theorem linearizedRicciConnDiffOrder1CoeffField_perOrder_l2_tameEnvelope_generic
         ring
 
 set_option linter.unusedVariables false in
-/-- All-order per-order L² tame jet envelope for the arm-1 correction field
-`linearizedRicciConnDiffOrder1Coeff - linearizedRicciArm1BaseCoeff` along the realized family:
-the difference glue of the order-one connection-difference coefficient envelope with the
-order-one Koszul arm coefficient envelope, both at window `i + 2`. -/
+
 theorem exists_corrArm1Field_realizedFam_jetL2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -470,24 +448,7 @@ private lemma pJetGridWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
                 ((iteratedCovGrad (I := I) g₀ 0 2 (e m) P).toSection x) := rfl
 
 set_option linter.unusedVariables false in
-/-- Pointwise diagonal-product-grid bound, at total-weight window `i + 3`, for the covariant
-gradients of the order-zero connection-difference Ricci-linearization coefficient field,
-generic in a perturbed metric `g₁ = g₀ + P`.
 
-The field is the moving four-trace contraction of the quadratic `A ⋆ A` and linear `∇A`
-connection-difference kernels of the order-zero linearized-Ricci arm, so its `i`-th covariant
-gradient carries linear cells of single-factor order `i + 2` (the `∇ⁱ∇A ∼ ∇^{i+2}P` content)
-and quadratic cells `e = (a + 1, b + 1)`, `a + b = i`, of total weight `i + 2` — all inside
-the moving-metric-legal total-weight window `range (i + 3)` of
-`rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le`
-(the proof template; no `range (i + 2)` window and no cancellation is claimed — the certified
-arm-0 cancellation is symmetric-sector-only and plays no role at this window). The moving
-four-trace factors are `δ`-ball-controlled through `htie`/`hbound` exactly as in the
-`connDiffSection`/inverse-metric grid towers.
-
-Proven by the `appCcRS` refold of the order-zero coefficient field onto the four-trace
-kernel (`linearizedRicciConnDiffOrder0CoeffField_eq_appCcRS`) and the kernel and cast
-diagonal-product grid calculus of `RicciConnDiffOrder0KernelJetGrid`. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -615,19 +576,9 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalPro
       Combinatorics.antidiagonalTupleGridWindow b (i + 3) from rfl]
   exact le_of_eq (by ring)
 
-
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
-order-zero connection-difference coefficient field `ccInputSymm (L0)`, generic in a perturbed
-metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 2` over the window `i + 3` in
-the `P`-jets — the per-`k` antidiagonal-to-bounded-factor conversion of the window-`i + 3`
-diagonal-product-grid bound: every total-weight-`k` cell of the `range (i + 3)` diagonal grid
-has per-factor order at most `k ≤ i + 2`, so the whole window embeds cell-by-cell in the
-cap-`(i + 2)` bounded-factor grid (the linear `∇^{i+2}P` cell of the `∇A`-block is the top
-cell — the C₂-slot cap-`(i + 2)` class; no cancellation is claimed, matching the
-diagonal-grid child's disclaimer). The slot-swap arm of the symmetrization assembles through
-the `appCcRS` diagonal-product-grid engine with `g₁`-independent compact sups. -/
+
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -819,31 +770,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffFieldInputSymm_bo
 
 set_option maxHeartbeats 3200000 in
 set_option linter.unusedVariables false in
-/-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
-MOVING arm-0 combination
-`ccInputSymm (linearizedRicciConnDiffOrder0CoeffField + (1/2) • (RmArm g₁ − RmArm g₀))` —
-the ∇A-free combination with the fixed background Riemann arm peeled off — generic in a
-perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 2` over the window
-`i + 3` in the `P`-jets.
 
-CAP `i + 2` (adjudication-corrected): the previously recorded mechanism-A cancellation of the
-linear `∇²P` content is a `∇P = 0`-slice identity ONLY (the flat-witness two-lane refutation
-of the predecessor equation) — on a general perturbation the symmetrized combination retains
-a second-gradient kernel term carrying a single `∇^{i+2}P` factor (the C₂-slot
-cap-`(i + 2)` class), so the combination's honest per-factor cap is `i + 2`; the quadratic
-`A ⋆ A`/`(g₁⁻¹)′` residual cells (total weight `i + 2`, per-factor order `i + 1`) embed by
-grid monotonicity.
-
-Proven by the corrected sym-sector cancellation equation
-(`linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_eq_residualFieldSum`,
-instantiated at the symmetrized perturbation `symmS P`) and the four-summand peel: the
-`Q_true` and DEF-2′ `ccInputSymm` towers of `RicciArmResidualFieldGridWindow` (cap `i + 1`,
-fed through `Combinatorics.boundedFactorGridWindow_mono`), the order-zero coefficient
-conversion tower
-(`rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffFieldInputSymm_boundedFactorGridWindow_le`),
-and the kernel-contraction tower
-(`rfns_iteratedCovGrad_refoldKernelContractionFieldInputSymm_boundedFactorGridWindow_le`),
-glued by `iteratedCovGrad_add` and `riemannianFiberNormSq_add_le`. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -998,25 +925,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfBackgroundD
   linarith
 
 set_option linter.unusedVariables false in
-/-- Pointwise capped-grid bound for the covariant gradients of the input-slot-symmetrized
-∇A-free arm-0 combination
-`ccInputSymm (linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff)`,
-generic in a perturbed metric `g₁ = g₀ + P`, at the bounded-factor grid of cap `i + 1` over the
-window `i + 3`.
 
-The symmetric sector is the honest home of the arm-0 estimate: the realized Ricci
-linearization applies its arm-0 coefficients to `ccTensorBilinSymm`-symmetrized data only.
-CAP `i + 2` (adjudication-corrected): the linear second-gradient content of the combination
-does NOT cancel on the symmetric sector away from the `∇P = 0` slice (the flat-witness
-two-lane refutation of the predecessor equation), so the honest per-factor cap is `i + 2`
-(the C₂-slot class carried by the kernel-contraction summand of C-EQ″); the quadratic
-`A ⋆ A`/`(g₁⁻¹)′` residual cells (total weight `i + 2`, per-factor order `i + 1`) embed by
-grid monotonicity.
-
-Proven by peeling the fixed symmetrized background Riemann arm
-`ccInputSymm ((1/2) • ricciArmOrder0RiemannCoeff g₀ g₀)` (a `g₁`-independent smooth field,
-jet-bounded by compactness and absorbed into the grid window via
-`one_le_boundedFactorGridWindow`) off the moving-content grid child via `ccInputSymm_add`. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1109,31 +1018,8 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
           ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) (i + 2) (i + 3)) from by ring]
   linarith
 
-
-
 set_option linter.unusedVariables false in
-/-- Pointwise diagonal-product-grid bound, at total-weight window `i + 3`, for the covariant
-gradients of the input-slot-antisymmetric remainder of the ∇A-free arm-0 combination (the
-combination minus its input-slot symmetrization `ccInputSymm`).
 
-The remainder carries exactly the content named by the machine-checked `grid_witness`
-constraint (`/tmp/grid_witness.lean` MECHANISM A, sym-sector-only cancellation — PLAN dead-routes
-grep anchor): the antisymmetric-sector linear `∇²P` cells at total weight `i + 2` (single factor
-of order `i + 2` — inside the `i + 3` window, ball-absorbed under the `i ≤ a` guard of the
-consuming envelope, which is exactly why the guarded envelope survives the `grid_witness`
-MECHANISM-B total-`k` arithmetic) and antisymmetric quadratic residual cells. Moving-Rm
-content is Palatini-split onto the `RicciThreeArmCorrectionFieldBound` families exactly as in
-`rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le`
-(the window-`i + 3` sibling and proof template).
-
-Proven from the `ccInputSymm` slot-swap calculus: the remainder is the halved
-swap-antisymmetrization `(1/2) • (comb − comb ∘ swap)`, bounded by the triangle inequality
-through per-order window-`i + 3` grid bounds for the combination itself — the proven
-order-zero coefficient grid child
-`rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalProductGrid_le`, the
-proven moving-Rm background-difference grid bound, and compactness jet sups for the fixed
-background fields — composed through the `appCcRS` diagonal-product-grid calculus against the
-fixed slot-swap field. -/
 theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombinationInputAsymmRemainder_diagonalProductGrid_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -1411,19 +1297,7 @@ theorem rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0RiemannHalfCombination
   linarith [hGi, hXb]
 
 set_option linter.unusedVariables false in
-/-- Per-order L² tame jet envelope, at orders `i ≤ a`, for the ∇A-free arm-0 combination
-`linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff`, generic in a
-perturbed metric `g₁ = g₀ + P`.
 
-GUARDED at `i ≤ a`: the unguarded all-order form is FALSE (single-mode witness family — the
-linear `∇²P` content integrates to `‖∇^{i+2}P‖²`, ball-absorbable only for `i ≤ a`). Proven
-by the pointwise symmetric/antisymmetric split of the combination onto the two grid
-children: the symmetric-sector capped grid (cap `i + 2`) integrates through the
-capped-top-layer engine
-(`boundedFactorGridWindow_integral_ballUniform_flat_allOrders`, consumed at index `i + 1` so
-its cap covers `i + 2`, with the top `j = i + 2` envelope term ball-absorbed into the
-`(1 + R²)`-inflated constant under the `i ≤ a` guard), the antisymmetric remainder grid
-through the per-layer ball-uniform engine with the top window absorbed by the guard. -/
 theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1669,18 +1543,7 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnve
     nlinarith [hwin_nn, h1, h2]
 
 set_option linter.unusedVariables false in
-/-- Per-order L² tame jet envelope, at orders `i ≤ a`, for the combined arm-0 correction subject
-`linearizedRicciConnDiffOrder0Coeff - linearizedRicciArm0BaseCoeff
-+ (3/2) • ricciArmOrder0RiemannCoeff - ricciArmOrder0CurvCoeff` (curvature coefficients at the
-realized-family metric) along the realized family, at window `i + 2` — the arm-0 clause of the
-reshaped correction-field spec (`corrFieldDataSpec`).
 
-GUARDED at `i ≤ a` in the md0 binder shape: the unguarded all-order form is FALSE (single-mode
-witness family at `i ≥ a + 1`). The combined subject collapses definitionally onto the ∇A-free
-combination `linearizedRicciConnDiffOrder0CoeffField + (1/2) • ricciArmOrder0RiemannCoeff` at
-the realized metric, and the window enters through the `i ≤ a`-guarded generic engine
-(`linearizedRicciConnDiffOrder0RiemannHalfCombination_perOrder_l2_tameEnvelope_generic`),
-whose grid children are proven. -/
 theorem exists_corrArm0Field_realizedFam_jetL2_tameEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

@@ -170,7 +170,7 @@ private lemma frame_field_energy_eq_sum_trace_fiberNormSq
     rw [orthoWeighted_frame_sum_collapse (I := I) (M := M) g s x e horth Tr (φ 0)
       (fun k => e (Fin.tail φ k))]
   rw [Finset.sum_congr rfl (fun φ (_ : φ ∈ Finset.univ) => hcollapse φ)]
-  
+
   rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (s + 1) => Fin n))
         (fun (pr : Fin n × (Fin s → Fin n)) =>
           Tensor0SSpace.toModel
@@ -202,7 +202,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
   classical
-  
+
   have huniform : ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
       ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x),
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
@@ -236,7 +236,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
   refine ⟨fun s => (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * C s), fun s => ?_, ?_⟩
   · exact mul_nonneg (Nat.cast_nonneg _) (mul_nonneg (Nat.cast_nonneg _) (hC_nonneg s))
   intro s S x v hv
-  
+
   set n : ℕ := Module.finrank ℝ E with hn_def
   set F : Fin n → TensorRSSpace 0 s I x := fun i =>
     riemannSec (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -248,14 +248,14 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
       (fun y : M => S.toSection y) x = ∑ i : Fin n, F i := by
     rw [genuineCurvTraceFixedFramePureR]
   rw [htrace]
-  
+
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) :=
     smoothExtensionTangent_contMDiff (I := I) x v
   have hS_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
     S.toSection.contMDiff
-  
+
   have hFop : ∀ i : Fin n, F i =
       riemannOp (tensorCov (I := I) g 0 s) x
         (smoothOrthoFrame (I := I) g x i x) (smoothExtensionTangent (I := I) x v x)
@@ -263,10 +263,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           (fun y : M => S.toSection y) x) := by
     intro i; rw [hF_def]
     exact tensor3rdCurv_pure_R_eq_riemannOp (I := I) g 0 s i hW hS_total
-  
-  
-  
-  
+
   have hcovApply_le : ∀ i : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
           (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
@@ -279,7 +276,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     have horthF : ∀ a b : Fin n, g.inner x (eF a) (eF b) = if a = b then (1 : ℝ) else 0 := by
       intro a b; rw [heF_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
     set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
-    
+
     have hweight : ∀ (m : ℕ),
         ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
           (fun k => g.inner x (eF (K₀ k))) : Tensor0SSpace 0 I x) =
@@ -324,7 +321,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
         rw [fiberNormSqSummand, hweight (s + 1)]; rfl
       · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
       · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
-    
+
     have hslice_eq :
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
             (slot0Curry (I := I) (M := M) g x s eF K₀
@@ -363,7 +360,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     rw [← hslice_eq]
     exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eF K₀
       hreprS hreprSucc ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
-  
+
   have hgv : g.inner x (smoothExtensionTangent (I := I) x v x) (smoothExtensionTangent (I := I) x v x)
       = 1 := by rw [smoothExtensionTangent_eq x v]; exact hv
   have hper : ∀ i : Fin n,
@@ -382,7 +379,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
     refine le_trans hbound ?_
     refine mul_le_mul_of_nonneg_left ?_ (hC_nonneg s)
     exact hcovApply_le i
-  
+
   calc riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i)
       ≤ (n : ℝ) * ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by
         have := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 s x
@@ -416,7 +413,7 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     exists_uniform_genuineCurvTracePureR_fiberNormSq_bound (I := I) (M := M) g
   refine ⟨fun s => Real.sqrt ((Module.finrank ℝ E : ℝ) * Kpure s), fun s => Real.sqrt_nonneg _,
     fun s S x n e hn horth => ?_⟩
-  
+
   set Tr : Fin n → TensorRSSpace 0 s I x := fun a =>
     genuineCurvTraceFixedFramePureR (I := I) g s
       (smoothExtensionTangent (I := I) x (e a)) (smoothOrthoFrame (I := I) g x)
@@ -430,12 +427,12 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     intro w m; rw [genuineThirdCurvFieldFibPureR]
   rw [frame_field_energy_eq_sum_trace_fiberNormSq (I := I) (M := M) g s x e hn horth Tr
     (genuineThirdCurvFieldFibPureR (I := I) (M := M) g s S x e) hfield]
-  
+
   have hCsq : (Real.sqrt ((Module.finrank ℝ E : ℝ) * Kpure s)) ^ 2 =
       (Module.finrank ℝ E : ℝ) * Kpure s :=
     Real.sq_sqrt (mul_nonneg (Nat.cast_nonneg _) (hKpure_nn s))
   rw [hCsq]
-  
+
   have hper : ∀ a : Fin n,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (Tr a) ≤
         Kpure s * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x

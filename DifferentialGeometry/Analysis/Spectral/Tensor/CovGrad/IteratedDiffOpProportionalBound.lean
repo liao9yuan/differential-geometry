@@ -60,13 +60,13 @@ theorem exists_proportional_recCurvDiffOp
     | zero =>
         rw [show (fun p r => match p with
             | 0 => kappa0 r | (p' + 1) => kappaHigh p' r) 0 r = kappa0 r from rfl]
-        
+
         rw [Finset.sum_range_one]
         exact hbase0 r W x
     | succ p' =>
         rw [show (fun p r => match p with
             | 0 => kappa0 r | (p'' + 1) => kappaHigh p'' r) (p' + 1) r = kappaHigh p' r from rfl]
-        
+
         rw [show (p' + 1) + 1 = p' + 2 from rfl]
         exact hhigh p' r W x
 

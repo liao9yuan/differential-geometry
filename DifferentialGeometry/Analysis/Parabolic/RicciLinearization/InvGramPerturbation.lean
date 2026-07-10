@@ -93,11 +93,11 @@ end PartialDerivAlgebra
 
 structure ChartMetricPerturbation (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
     [FiniteDimensional ℝ E] where
-  
+
   toFun : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → (E → ℝ)
-  
+
   symm' : ∀ i j y, toFun i j y = toFun j i y
-  
+
   smooth' : ∀ i j, ContDiff ℝ ∞ (toFun i j)
 
 namespace ChartMetricPerturbation

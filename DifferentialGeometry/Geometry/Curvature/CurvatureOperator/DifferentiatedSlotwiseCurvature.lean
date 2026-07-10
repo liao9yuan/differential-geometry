@@ -110,8 +110,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
             (fun b => W b) x) := by
   classical
   set covHom := HomConnectionGen.homBundleCovariantDerivativeGen I M E_U U F V cov_U cov_V with hcovHom
-  
-  
+
   set BXY : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (covApply covT (fun b => X b) (fun b => Y b))
       (covApply_contMDiff (cov := covT) X.contMDiff Y.contMDiff) with hBXY
@@ -127,7 +126,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
   set Dτ : Cₛ^∞⟮I; E_U →L[ℝ] F, (fun x : M => U x →L[ℝ] V x)⟯ :=
     ContMDiffSection.mk (covApply covHom (fun b => X b) (fun b => τ b))
       (covApply_contMDiff (cov := covHom) X.contMDiff τ.contMDiff) with hDτ
-  
+
   have hτat : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U →L[ℝ] F))
       (fun y : M => TotalSpace.mk' (E_U →L[ℝ] F)
         (E := fun z : M => (U z →L[ℝ] V z)) y (τ y)) x :=
@@ -151,8 +150,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
   have hRUW_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U))
       (fun y : M => TotalSpace.mk' E_U (E := U) y (RUW y)) x :=
     (RUW.contMDiff x).mdifferentiableAt (by simp)
-  
-  
+
   have hPsec : (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
         (fun b => riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) b) (fun b => W b)) =
       (fun b => riemannSec cov_V (fun b => Y b) (fun b => Z b)
@@ -165,7 +163,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
     simp only [HomConnectionGen.pairedSection, Pi.sub_apply]
     rw [show RUW b = riemannSec cov_U (fun b => Y b) (fun b => Z b) (fun b => W b) b from rfl]
     rw [hstar]
-  
+
   have hsm1 : MDiffAt (T% (fun b => riemannSec cov_V (fun b => Y b) (fun b => Z b)
       (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => W b)) b)) x := by
     have := riemannSec_contMDiff (cov := cov_V) Y.contMDiff Z.contMDiff
@@ -175,8 +173,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
   have hsm2 : MDiffAt (T% (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
       (fun b => τ b) (fun b => RUW b))) x :=
     ((ContMDiff.clm_bundle_apply (b := id) τ.contMDiff RUW.contMDiff) x).mdifferentiableAt (by simp)
-  
-  
+
   have hVadd : cov_V.toFun (fun b => riemannSec cov_V (fun b => Y b) (fun b => Z b)
           (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => W b)) b)
           x (X x) =
@@ -196,11 +193,10 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
       ((ContMDiff.clm_bundle_apply (b := id) hRHτ_smooth W.contMDiff) x).mdifferentiableAt (by simp)
     rw [hsplit, cov_V.isCovariantDerivativeOnUniv.add hsmσW hsm2]
     rfl
-  
+
   rw [nablaRiemannSec_def]
   simp only [ContinuousLinearMap.sub_apply]
-  
-  
+
   rw [show covHom.toFun
         (fun b => riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) b) x (X x) (W x) =
       cov_V.toFun (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
@@ -222,7 +218,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
       (σ := fun b => τ b) (Y := fun b => RUW b) hτat hRUW_at (X x)
     rw [← hcovHom] at h
     exact h] at hVadd
-  
+
   rw [show cov_V.toFun (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
           (fun b => riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) b)
           (fun b => W b)) x (X x) =
@@ -232,9 +228,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
         - ((covHom.toFun (fun b => τ b) x (X x)) (RUW x)
             + τ x (cov_U.toFun (fun b => RUW b) x (X x))) from
     (eq_sub_of_add_eq hVadd.symm)]
-  
-  
-  
+
   rw [show riemannSec covHom (covApply covT (fun b => X b) (fun b => Y b)) (fun b => Z b)
         (fun b => τ b) x (W x) =
       (riemannSec covHom (fun b => BXY b) (fun b => Z b) (fun b => τ b) x) (W x) from rfl,
@@ -247,16 +241,14 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
         (covApply covHom (fun b => X b) (fun b => τ b)) x (W x) =
       (riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => Dτ b) x) (W x) from rfl,
     HomConnectionGen.riemannSec_homBundleGen_apply_eq I M E_U U F V cov_U cov_V Y Z Dτ W x]
-  
+
   rw [show (riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) x)
         (cov_U.toFun (fun b => W b) x (X x)) =
       (riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) x) (DXW x) from rfl,
     HomConnectionGen.riemannSec_homBundleGen_apply_eq I M E_U U F V cov_U cov_V Y Z τ DXW x]
-  
+
   rw [nablaRiemannSec_def, nablaRiemannSec_def, map_sub, map_sub, map_sub]
-  
-  
-  
+
   rw [show covApply cov_V (fun b => X b)
         (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => W b)) =
       HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => Dτ b) (fun b => W b)
@@ -265,7 +257,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
     rw [← hcovHom] at h
     rw [h]
     rfl]
-  
+
   rw [show riemannSec cov_V (fun b => Y b) (fun b => Z b)
         (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => Dτ b) (fun b => W b)
           + HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => DXW b))
@@ -290,8 +282,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
       ((covApply_contMDiff (cov := cov_V) Y.contMDiff hP1sm x).mdifferentiableAt (by simp))
       ((covApply_contMDiff (cov := cov_V) Y.contMDiff hP2sm x).mdifferentiableAt (by simp))
       ((covApply_contMDiff (cov := cov_V) Y.contMDiff (hP1sm.add_section hP2sm) x).mdifferentiableAt (by simp))]
-  
-  
+
   simp only [hBXY, hBXZ, hDτ, hDXW, hRUW, ContMDiffSection.coeFn_mk]
   rw [show covApply covHom (fun b => X b) (fun b => τ b) x =
       covHom.toFun (fun b => τ b) x (X x) from rfl]
@@ -399,15 +390,14 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
       nablaRiemannSec (LeviCivita (I := I) g) (homGenS (I := I) (M := M) g s)
         (fun b => X b) (fun b => Y b) (fun b => Z b) (curriedSection I M A) x := by
   classical
-  
-  
+
   have hA1 : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ((∞ : WithTop ℕ∞) + 1)
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b (A b)) := by
     rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from by simp]; exact hA
   have hAatAll : ∀ b : M, TensorSectionMDiffAt (I := I) (s + 1) A b := fun b =>
     (hA b).mdifferentiableAt (by simp)
-  
+
   have hRYZ_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ∞
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b
@@ -419,7 +409,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
       (fun b => riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         (fun b => Y b) (fun b => Z b) A b) x :=
     (hRYZ_smooth x).mdifferentiableAt (by simp)
-  
+
   have hcovApply_at : ∀ (P : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       TensorSectionMDiffAt (I := I) (s + 1)
         (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -428,8 +418,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
     have hsm := covApply_contMDiffOn (cov := tensor0SCovariantDerivative I M (s + 1)
       (LeviCivita (I := I) g)) P.contMDiff hA1
     exact (hsm.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp)
-  
-  
+
   have hcurry_covApply : ∀ (P : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       curriedSection I M
           (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -439,8 +428,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
     funext b
     rw [curriedSection_apply, covApply_apply, covApply_apply,
       tensor0S_curry_tensor0SCov_succ_eq_homGenS (I := I) (M := M) g s A (hAatAll b) (P b)]
-  
-  
+
   have hcurry_RYZ :
       curriedSection I M
           (fun b => riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -450,16 +438,14 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
     funext b
     rw [curriedSection_apply,
       tensor0S_curry_riemannSec_tensor0SCov_succ_eq (I := I) (M := M) g s Y Z A hA b]
-  
+
   rw [nablaTensor0SCurv_def, nablaRiemannSec_def]
   rw [map_sub, map_sub, map_sub]
-  
-  
+
   rw [tensor0S_curry_tensor0SCov_succ_eq_homGenS (I := I) (M := M) g s
       (fun b => riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         (fun b => Y b) (fun b => Z b) A b) hRYZ_at (X x), hcurry_RYZ]
-  
-  
+
   rw [show riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         (covApply (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b)) (fun b => Z b) A x =
       riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -495,7 +481,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
       (covApply_contMDiff (cov := tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         X.contMDiff hA) x,
     hcurry_covApply X]
-  
+
   rfl
 
 theorem nablaTensor0SCurv_succ_consEval
@@ -520,12 +506,12 @@ theorem nablaTensor0SCurv_succ_consEval
       (fun x : M => TangentSpace I x →L[ℝ] Tensor0SSpace s I x)⟯ :=
     ContMDiffSection.mk (curriedSection I M A)
       ((contMDiff_curriedSection_iff_section I M A).mp hA) with hAcurry_def
-  
+
   rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := nablaTensor0SCurv (I := I) g (s + 1) X Y Z A x) (v0 := u₀) (vs := u')]
-  
+
   rw [tensor0S_curry_nablaTensor0SCurv_succ_eq (I := I) g s X Y Z A hA x]
-  
+
   rw [show nablaRiemannSec (LeviCivita (I := I) g) (homGenS (I := I) (M := M) g s)
         (fun b => X b) (fun b => Y b) (fun b => Z b) (curriedSection I M A) x =
       nablaRiemannSec (LeviCivita (I := I) g)
@@ -542,9 +528,9 @@ theorem nablaTensor0SCurv_succ_consEval
     (cov_U := LeviCivita (I := I) g)
     (cov_V := tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
     (covT := LeviCivita (I := I) g) X Y Z Acurry Y₀ x]
-  
+
   rw [Tensor0SBundle.Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  
+
   rw [show (Acurry : Π b : M, TangentSpace I b →L[ℝ] Tensor0SSpace s I b) x =
       curriedSection I M A x from rfl, curriedSection_apply,
     show (nablaRiemannSec (LeviCivita (I := I) g) (LeviCivita (I := I) g)
@@ -553,8 +539,7 @@ theorem nablaTensor0SCurv_succ_consEval
       nablaBaseSlotCurv (I := I) g X Y Z x u₀ from rfl,
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := A x) (v0 := nablaBaseSlotCurv (I := I) g X Y Z x u₀) (vs := u')]
-  
-  
+
   rfl
 
 theorem nablaTensor0SCurv_apply_eval
@@ -748,24 +733,23 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     fun i => smoothOrthoFrame (I := I) g x i with hB_def
   have hBsm : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)) :=
     fun i => smoothOrthoFrame_smooth (I := I) g x i
-  
-  
+
   have hconj : ∀ i,
       g.inner x (nablaCurvSec cov (B i) (B i) Y W x) (U x) =
         g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) := by
     intro i
-    
+
     have hsk1 : g.inner x (nablaCurvSec cov (B i) (B i) Y W x) (U x) =
         - g.inner x (nablaCurvSec cov (B i) (B i) Y U x) (W x) := by
       have h := nablaCurvSec_metric_skew45 (I := I) g (X := B i) (Y := B i) (Z := Y) (W := W)
         (U := U) (x := x) (hBsm i) (hBsm i) hY hW hU
       linarith [h]
-    
+
     have hps : g.inner x (nablaCurvSec cov (B i) (B i) Y U x) (W x) =
         g.inner x (nablaCurvSec cov (B i) U W (B i) x) (Y x) := by
       exact nablaCurvSec_inner_pair_symm (I := I) g (X := B i) (Y := B i) (Z := Y) (W := U)
         (U := W) (hBsm i) (hBsm i) hY hU hW
-    
+
     have hsk2 : g.inner x (nablaCurvSec cov (B i) U W (B i) x) (Y x) =
         - g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) := by
       have h := nablaCurvSec_metric_skew45 (I := I) g (X := B i) (Y := U) (Z := W) (W := B i)
@@ -773,8 +757,7 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
       linarith [h]
     rw [hsk1, hps, hsk2]; ring
   rw [Finset.sum_congr rfl (fun i _ => hconj i)]
-  
-  
+
   have hbi : ∀ i,
       g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x)
         + g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x)
@@ -782,7 +765,7 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     intro i
     exact nablaCurvSec_bianchi_paired (I := I) g (X := B i) (Y := U) (Z := W) (W := Y)
       (U := B i) (x := x) (hBsm i) hU hW hY
-  
+
   have hrew : ∀ i,
       g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) =
         - g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x)
@@ -790,13 +773,12 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     intro i; linarith [hbi i]
   rw [Finset.sum_congr rfl (fun i _ => hrew i)]
   rw [Finset.sum_sub_distrib, Finset.sum_neg_distrib]
-  
+
   have hterm3 : ∑ i : Fin (Module.finrank ℝ E),
       g.inner x (nablaCurvSec cov W (B i) U Y x) (B i x) =
       nablaRicci (I := I) g W U Y x := by
     rw [nablaRicci_eq_frame_trace_nablaCurvSec (I := I) g hW hU hY]
-  
-  
+
   have hterm2 : ∑ i : Fin (Module.finrank ℝ E),
       g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
       - nablaRicci (I := I) g U Y W x := by
@@ -804,12 +786,12 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
         g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
           - g.inner x (nablaCurvSec cov U (B i) Y W x) (B i x) := by
       intro i
-      
+
       have hps : g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
           g.inner x (nablaCurvSec cov U Y (B i) W x) (B i x) :=
         nablaCurvSec_inner_pair_symm (I := I) g (X := U) (Y := W) (Z := B i) (W := Y)
           (U := B i) hU hW (hBsm i) hY (hBsm i)
-      
+
       rw [hps, nablaCurvSec_swap23 (I := I) g (X := U) (Y := Y) (Z := B i) (W := W) (x := x)
         hY (hBsm i) hW, map_neg, ContinuousLinearMap.neg_apply]
     rw [Finset.sum_congr rfl (fun i _ => hconv i), Finset.sum_neg_distrib,

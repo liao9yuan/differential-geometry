@@ -113,9 +113,7 @@ private lemma compContinuousLinearMap_curryLeft {s : ℕ}
   ext m
   simp only [ContinuousMultilinearMap.curryLeft_apply,
     ContinuousMultilinearMap.compContinuousLinearMap_apply]
-  
-  
-  
+
   have hcons_eq : (fun i : Fin (s + 1) => L ((Fin.cons w m : Fin (s + 1) → E) i)) =
       (Fin.cons (L w) (fun i' : Fin s => L (m i')) : Fin (s + 1) → E) := by
     funext i
@@ -142,7 +140,7 @@ private lemma tensorInnerPointwise_0s_sum_left
         (zero_smul _ _).symm]
       rw [tensorInnerPointwise_0s_smul_left, zero_mul]
   | succ n ih =>
-      
+
       have ih_app := ih (fun k : Fin n => c k.succ) (fun k : Fin n => S k.succ)
       rw [Fin.sum_univ_succ, Fin.sum_univ_succ]
       rw [tensorInnerPointwise_0s_add_left, tensorInnerPointwise_0s_smul_left]
@@ -290,8 +288,7 @@ private theorem chartTensorInnerOnChartBasis_eq_chartTensorInnerPointwise_compos
   | zero =>
       intro T S
       rw [chartTensorInnerOnChartBasis_zero, chartTensorInnerPointwise_0s_zero]
-      
-      
+
       simp only [ContinuousMultilinearMap.compContinuousLinearMap_apply]
       congr 1 <;>
         · congr 1
@@ -348,7 +345,7 @@ private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
       ∑ k : Fin (Module.finrank ℝ E),
         chartJMatrix (I := I) (M := M) α b a k *
           ((chartModelBasis E).repr v) k := by
-  
+
   have hv : v = ∑ k : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr v) k • (chartModelBasis E) k :=
     ((chartModelBasis E).sum_repr v).symm
@@ -386,9 +383,9 @@ private lemma chartGramMatrix_eq_matrix_form
         gramMatrixAt (I := I) (M := M) g b *
         chartJinvMatrix (I := I) (M := M) α b := by
   ext i j
-  
+
   rw [chartGramMatrix_eq_innerJinv]
-  
+
   have hi : chartJinv (I := I) (M := M) α b ((chartModelBasis E) i) =
       ∑ a, chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a := by
     rw [chartJinv_basis (I := I) (M := M) α b i]
@@ -398,13 +395,7 @@ private lemma chartGramMatrix_eq_matrix_form
     rw [chartJinv_basis (I := I) (M := M) α b j]
     exact chartBasisVecFiber_eq_sum (I := I) (M := M) α b j
   rw [hi, hj]
-  
-  
-  
-  
-  
-  
-  
+
   have hLHS_eq :
       (g.inner b (∑ a : Fin (Module.finrank ℝ E),
           chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a))
@@ -415,7 +406,7 @@ private lemma chartGramMatrix_eq_matrix_form
           chartJinvMatrix (I := I) (M := M) α b a i *
             chartJinvMatrix (I := I) (M := M) α b b' j *
             g.inner b ((chartModelBasis E) a) ((chartModelBasis E) b') := by
-    
+
     have hL : g.inner b (∑ a : Fin (Module.finrank ℝ E),
           chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a) =
         ∑ a : Fin (Module.finrank ℝ E),
@@ -429,7 +420,7 @@ private lemma chartGramMatrix_eq_matrix_form
     refine Finset.sum_congr rfl ?_
     intro a _
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
-    
+
     rw [show (g.inner b ((chartModelBasis E) a))
         (∑ b' : Fin (Module.finrank ℝ E),
           chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
@@ -450,7 +441,7 @@ private lemma chartGramMatrix_eq_matrix_form
       · rw [smul_eq_mul]
       · exact ContinuousLinearMap.map_smul ((g.inner b) ((chartModelBasis E) a)) _ _
   refine hLHS_eq.trans ?_
-  
+
   rw [Matrix.mul_apply]
   rw [show ∑ b' : Fin (Module.finrank ℝ E),
       ((chartJinvMatrix (I := I) (M := M) α b)ᵀ *
@@ -472,7 +463,7 @@ private lemma chartGramMatrix_eq_matrix_form
   · refine Finset.sum_congr rfl ?_
     intro b' _
     rw [Matrix.mul_apply]
-    
+
     refine congr_arg (· * chartJinvMatrix (I := I) (M := M) α b b' j) ?_
     refine Finset.sum_congr rfl ?_
     intro a _
@@ -484,7 +475,7 @@ private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
         chartJMatrix (I := I) (M := M) α b = 1 := by
   ext a c
   rw [Matrix.mul_apply]
-  
+
   have hsum_eq : ∑ k, chartJinvMatrix (I := I) (M := M) α b a k *
       chartJMatrix (I := I) (M := M) α b k c =
     ((chartModelBasis E).repr (chartJinv (I := I) (M := M) α b
@@ -510,8 +501,7 @@ private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
         chartJinvMatrix (I := I) (M := M) α b = 1 := by
   ext a c
   rw [Matrix.mul_apply]
-  
-  
+
   have hsum_eq : ∑ k, chartJMatrix (I := I) (M := M) α b a k *
       chartJinvMatrix (I := I) (M := M) α b k c =
     ((chartModelBasis E).repr (chartJ (I := I) (M := M) α b
@@ -579,7 +569,7 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
           (chartJinvMatrix (I := I) (M := M) α b a i *
             chartJinvMatrix (I := I) (M := M) α b c j) =
       (gramMatrixAt (I := I) (M := M) g b)⁻¹ a c := by
-  
+
   have hLHS_form :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -589,11 +579,9 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
       (chartJinvMatrix (I := I) (M := M) α b *
         (chartGramMatrix g α b)⁻¹ *
         (chartJinvMatrix (I := I) (M := M) α b)ᵀ) a c := by
-    
-    
+
     rw [Matrix.mul_apply]
-    
-    
+
     rw [show ∑ j : Fin (Module.finrank ℝ E),
         (chartJinvMatrix (I := I) (M := M) α b *
           (chartGramMatrix g α b)⁻¹) a j *
@@ -614,40 +602,27 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
       intro j _
       rw [Matrix.mul_apply, Matrix.transpose_apply]
   rw [hLHS_form]
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   have hJinvMat_inv := chartJinvMatrix_inv (I := I) (M := M) α hb
-  
+
   have hrhs : (chartJinvMatrix (I := I) (M := M) α b *
       (chartGramMatrix g α b)⁻¹ *
       (chartJinvMatrix (I := I) (M := M) α b)ᵀ) *
       gramMatrixAt (I := I) (M := M) g b = 1 := by
-    
+
     have hGramEq := chartGramMatrix_eq_matrix_form (I := I) (M := M) g α b
-    
-    
-    
+
     have hJinvMatT_mul_G :
         (chartJinvMatrix (I := I) (M := M) α b)ᵀ *
             gramMatrixAt (I := I) (M := M) g b =
           chartGramMatrix g α b *
             (chartJinvMatrix (I := I) (M := M) α b)⁻¹ := by
-      
-      
-      
+
       rw [hGramEq, hJinvMat_inv]
       rw [Matrix.mul_assoc, Matrix.mul_assoc]
       rw [chartJinvMatrix_mul_chartJMatrix (I := I) (M := M) α hb]
       rw [Matrix.mul_one]
-    
+
     rw [Matrix.mul_assoc, Matrix.mul_assoc,
       hJinvMatT_mul_G,
       ← Matrix.mul_assoc (chartGramMatrix g α b)⁻¹,
@@ -655,13 +630,12 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
       Matrix.one_mul,
       hJinvMat_inv,
       chartJinvMatrix_mul_chartJMatrix (I := I) (M := M) α hb]
-  
-  
+
   have hMain : chartJinvMatrix (I := I) (M := M) α b *
       (chartGramMatrix g α b)⁻¹ *
       (chartJinvMatrix (I := I) (M := M) α b)ᵀ =
       (gramMatrixAt (I := I) (M := M) g b)⁻¹ := by
-    
+
     exact (Matrix.inv_eq_left_inv hrhs).symm
   rw [hMain]
 
@@ -680,15 +654,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
   | succ s ih =>
       intro b hb T S
       rw [tensorInnerPointwise_0s_succ, chartTensorInnerOnChartBasis_succ]
-      
-      
-      
-      
-      
-      
-      
-      
-      
+
       have step1 :
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -708,7 +674,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
         intro j _
         rw [← ih hb _ _]
       rw [step1]
-      
+
       have step2_T : ∀ i : Fin (Module.finrank ℝ E),
           T.curryLeft (chartBasisVecFiber (I := I) α i b) =
             ∑ a : Fin (Module.finrank ℝ E),
@@ -725,7 +691,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
         intro j
         rw [chartBasisVecFiber_eq_sum (I := I) (M := M) α b j]
         exact curryLeft_sum (E := E) (s := s) S _ _
-      
+
       have step3 : ∀ i j : Fin (Module.finrank ℝ E),
           tensorInnerPointwise_0s (I := I) (M := M) s g b
               (T.curryLeft (chartBasisVecFiber (I := I) α i b))
@@ -747,7 +713,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
         refine Finset.sum_congr rfl ?_
         intro b' _
         ring
-      
+
       have step4 :
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -778,8 +744,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
         intro b' _
         ring
       rw [step4]
-      
-      
+
       have step5_0 :
           ∀ (i : Fin (Module.finrank ℝ E)),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -801,11 +766,11 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) := by
         intro i
-        
+
         rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E))]
         refine Finset.sum_congr rfl ?_
         intro a _
-        
+
         rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E))]
       have step5_1 :
           ∑ i : Fin (Module.finrank ℝ E),
@@ -853,13 +818,13 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) := by
         rw [step5_1]
-        
+
         rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E))]
         refine Finset.sum_congr rfl ?_
         intro a _
         rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E))]
       rw [step5]
-      
+
       have step6 :
           ∑ a : Fin (Module.finrank ℝ E),
             ∑ b' : Fin (Module.finrank ℝ E),
@@ -885,13 +850,13 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
         intro a _
         refine Finset.sum_congr rfl ?_
         intro b' _
-        
+
         rw [Finset.sum_mul]
         refine Finset.sum_congr rfl ?_
         intro i _
         rw [Finset.sum_mul]
       rw [step6]
-      
+
       have step7 : ∀ (a c : Fin (Module.finrank ℝ E)),
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
@@ -923,7 +888,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
         refine Finset.sum_congr rfl ?_
         intro b' _
         rw [step7 a b']
-      
+
       symm
       exact step8
 

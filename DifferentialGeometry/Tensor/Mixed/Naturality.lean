@@ -120,7 +120,7 @@ theorem multilinearHomEquivDualMultilinearTensor_naturality
       (TensorProduct.map _ _).map_add]
   | tmul α β =>
     set η := (dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm α with hη_def
-    
+
     have hMHE_symm_tmul : MHE.symm (α ⊗ₜ[𝕜] β) =
         (homEquivCDualTensor 𝕜
           (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
@@ -132,7 +132,7 @@ theorem multilinearHomEquivDualMultilinearTensor_naturality
         LinearEquiv.refl_symm, LinearEquiv.refl_apply]
       rfl
     rw [hMHE_symm_tmul]
-    
+
     have hconj :
         (compContinuousLinearMapL (fun _ : Fin s => Φ.symm.toContinuousLinearMap)).comp
             (((homEquivCDualTensor 𝕜 _ _).symm (η ⊗ₜ[𝕜] β)).comp
@@ -145,7 +145,7 @@ theorem multilinearHomEquivDualMultilinearTensor_naturality
       ext M'
       simp only [ContinuousLinearMap.comp_apply, homEquivCDualTensor_symm_tmul, map_smul]
     rw [hconj]
-    
+
     have hMHE_apply_h_symm :
         MHE ((homEquivCDualTensor 𝕜 _ _).symm
             ((η.comp (compContinuousLinearMapL

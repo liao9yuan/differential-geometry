@@ -84,7 +84,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
       g.inner x (eC a) (eC b) = if a = b then (1 : ℝ) else 0 := fun a b => hBorth a b
   haveI : Nonempty (Fin (Module.finrank ℝ E)) :=
     ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
-  
+
   have he_li : LinearIndependent ℝ eC := by
     rw [linearIndependent_iff']
     intro fs c hsum k hk_mem
@@ -111,7 +111,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
     hbse horthC]
   have hBix : B i x = eC i := rfl
   rw [hBix]
-  
+
   have hcomp : ∀ K : Fin r → Fin (Module.finrank ℝ E), ∀ J : Fin s → Fin (Module.finrank ℝ E),
       (fiberNormSqComponent (I := I) (M := M) g x r s
           ((covGradBundleEquiv (I := I) (M := M) r s x).symm T (eC i))
@@ -121,7 +121,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
     intro K J
     rw [reading_fiberNormSqComponent_eq (I := I) (M := M) g r s x T eC K J i]
   rw [Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => hcomp K J))]
-  
+
   refine Finset.sum_le_sum (fun K _ => ?_)
   let consi : (Fin s → Fin (Module.finrank ℝ E)) → (Fin (s + 1) → Fin (Module.finrank ℝ E)) :=
     fun J => Fin.cons i J

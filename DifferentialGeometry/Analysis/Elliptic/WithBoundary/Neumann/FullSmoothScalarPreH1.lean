@@ -40,9 +40,9 @@ private abbrev I_half (n : ℕ) [NeZero n] :
   modelWithCornersEuclideanHalfSpace n
 
 structure FullSmoothScalar (g : SmoothRiemannianMetric (I_half n) M) where
-  
+
   toFun : M → ℝ
-  
+
   smooth : ContMDiff (I_half n) 𝓘(ℝ, ℝ) ∞ toFun
 
 namespace FullSmoothScalar

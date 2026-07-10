@@ -32,7 +32,7 @@ structure TensorChartBilinearH1ComplData
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (_P₀ : TensorCompIdx (E := E) r s) where
-  
+
   toChartData : ChartBilinearH1ComplData (I := I) (M := M) g α
 
 namespace TensorChartBilinearH1ComplData

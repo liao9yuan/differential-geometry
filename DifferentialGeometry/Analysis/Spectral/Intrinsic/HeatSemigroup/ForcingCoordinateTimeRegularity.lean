@@ -125,13 +125,11 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (symmS domDomCongrSection tensorResolventHilbertEigenbasisSigma
     tensorResolventHilbertEigenbasisSigma_apply eigenvectorSmooth_toL2)
 
-/-- The finite eigenvalue block of a tensor eigenindex: all indices sharing its eigenvalue. -/
 private noncomputable def eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
   Finset.univ.map ⟨Sigma.mk i.1, sigma_mk_injective⟩
 
-/-- Membership in the eigenvalue block is equality of the eigenvalue components. -/
 private lemma mem_eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} :
     j ∈ eigenBlockFinset (I := I) (M := M) g₀ i ↔ j.1 = i.1 := by
@@ -145,7 +143,6 @@ private lemma mem_eigenBlockFinset (g₀ : SmoothRiemannianMetric I M)
     subst hμ
     exact Finset.mem_map.mpr ⟨kk, Finset.mem_univ kk, rfl⟩
 
-/-- The matrix coefficients of the slot swap on an eigenbasis vector. -/
 private noncomputable def swapEigenCoeff (g₀ : SmoothRiemannianMetric I M)
     (i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2) : ℝ :=
   tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
@@ -153,7 +150,6 @@ private noncomputable def swapEigenCoeff (g₀ : SmoothRiemannianMetric I M)
       (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1)
         (eigenSmooth (I := I) (M := M) g₀ i))) j
 
-/-- The Hilbert eigenbasis vector is the `L²` image of the smooth eigentensor. -/
 private lemma eigenbasis_eq_toL2_eigenSmooth_loc (g₀ : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
@@ -163,7 +159,6 @@ private lemma eigenbasis_eq_toL2_eigenSmooth_loc (g₀ : SmoothRiemannianMetric 
     (hCompact (I := I) (M := M) g₀) i]
   exact (eigenvectorSmooth_toL2 (I := I) (M := M) g₀ 0 2 i).symm
 
-/-- Two `L²` tensors with equal spectral coefficients are equal. -/
 private lemma tensorL2_eq_of_coeff_eq (g₀ : SmoothRiemannianMetric I M)
     {U V : TensorL2 0 2 g₀}
     (h : ∀ k, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀) U k =
@@ -174,7 +169,7 @@ private lemma tensorL2_eq_of_coeff_eq (g₀ : SmoothRiemannianMetric I M)
   exact h k
 
 open scoped Classical in
-/-- Spectral coefficient of a finite eigenbasis combination. -/
+
 private lemma tensorL2Coeff_sum_smul_basis (g₀ : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
@@ -210,7 +205,6 @@ private lemma tensorL2Coeff_sum_smul_basis (g₀ : SmoothRiemannianMetric I M)
     intro j hj
     rw [if_neg (fun h => hkS (by rw [h]; exact hj))]
 
-/-- The slot swap of a smooth eigentensor expands over its finite eigenvalue block. -/
 private lemma toL2_swap_eigenSmooth_eq_blockSum (g₀ : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
@@ -230,8 +224,6 @@ private lemma toL2_swap_eigenSmooth_eq_blockSum (g₀ : SmoothRiemannianMetric I
     refine tensorL2Coeff_toL2_swap_eigenSmooth_eq_zero_of_fst_ne (I := I) (M := M) g₀ i k ?_
     exact fun h => hk ((mem_eigenBlockFinset (I := I) (M := M) g₀).mpr h.symm)
 
-/-- Bessel bound: the block matrix coefficients of the swapped eigentensor have square sum
-at most one. -/
 private lemma sum_sq_swapEigenCoeff_le_one (g₀ : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
@@ -259,7 +251,6 @@ private lemma sum_sq_swapEigenCoeff_le_one (g₀ : SmoothRiemannianMetric I M)
     _ ≤ ‖Y‖ ^ 2 := hb
     _ = 1 := by rw [hnorm, one_pow]
 
-/-- Block expansion of the spectral coefficients of a slot-swapped smooth tensor. -/
 private lemma tensorL2Coeff_toL2_swap_eq_blockSum (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 2)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
@@ -280,7 +271,6 @@ private lemma tensorL2Coeff_toL2_swap_eq_blockSum (g₀ : SmoothRiemannianMetric
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [real_inner_smul_left, ← tensorL2Coeff_eq_inner]
 
-/-- Block expansion of the spectral coefficients of a symmetrized smooth tensor. -/
 private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 2)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
@@ -302,7 +292,6 @@ private lemma tensorL2Coeff_toL2_symmS_eq_blockSum (g₀ : SmoothRiemannianMetri
   rw [htoL2, tensorL2Coeff_smul, tensorL2Coeff_add,
     tensorL2Coeff_toL2_swap_eq_blockSum (I := I) (M := M) g₀ X i]
 
-/-- The Sobolev weight is constant on eigenvalue blocks. -/
 private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M)
     {i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2} (h : j.1 = i.1) (σ : ℝ) :
     tensorSobolevWeight (I := I) (M := M) j σ = tensorSobolevWeight (I := I) (M := M) i σ := by
@@ -313,15 +302,12 @@ private lemma tensorSobolevWeight_eq_of_block (g₀ : SmoothRiemannianMetric I M
     rw [h]
   rw [hlam]
 
-/-- The symmetrized coordinate path: the finite block combination of the coordinates realizing
-the spectral coefficients of the `symmS`-symmetrized field. -/
 private noncomputable def symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) (t : ℝ) : ℝ :=
   (1 / 2 : ℝ) * (φ i t + ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i,
     swapEigenCoeff (I := I) (M := M) g₀ i j * φ j t)
 
-/-- The symmetrized coordinate path inherits any uniform smoothness order. -/
 private lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} {n : WithTop ℕ∞}
     (hφ : ∀ i, ContDiff ℝ n (φ i)) (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
@@ -330,8 +316,6 @@ private lemma symmCoeffPath_contDiff (g₀ : SmoothRiemannianMetric I M)
   exact contDiff_const.mul ((hφ i).add
     (ContDiff.sum fun j _ => contDiff_const.mul (hφ j)))
 
-/-- The symmetrized coordinate path realizes the spectral coefficients of the symmetrized
-tensor whenever the original path realizes those of the tensor. -/
 private lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (X : SmoothCcTensor g₀ 0 2) {t : ℝ}
@@ -346,7 +330,6 @@ private lemma symmCoeffPath_realizes (g₀ : SmoothRiemannianMetric I M)
   congr 2
   exact Finset.sum_congr rfl fun j _ => by rw [hX j]
 
-/-- Iterated derivatives distribute over finite sums of scalar multiples. -/
 private lemma iteratedDeriv_finsetSum_const_mul {ι' : Type*} (s : Finset ι')
     (c : ι' → ℝ) (f : ι' → ℝ → ℝ) (k : ℕ)
     (hf : ∀ j, ContDiff ℝ (k : ℕ) (f j)) (t : ℝ) :
@@ -366,8 +349,6 @@ private lemma iteratedDeriv_finsetSum_const_mul {ι' : Type*} (s : Finset ι')
     congr 1
     exact iteratedDeriv_const_mul_field (c b) (f b)
 
-/-- Iterated derivatives of the symmetrized coordinate path are the block combinations of the
-iterated derivatives of the original path. -/
 private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
     (hφ : ∀ j, ContDiff ℝ (k : ℕ) (φ j))
@@ -381,10 +362,6 @@ private lemma iteratedDeriv_symmCoeffPath (g₀ : SmoothRiemannianMetric I M)
     ((ContDiff.sum fun j _ => contDiff_const.mul (hφ j)).contDiffAt),
     iteratedDeriv_finsetSum_const_mul _ _ _ k hφ t]
 
-/-- Weighted spectral mass transfer to the symmetrized coordinate path: a summable majorant at
-weight `τ` for the block combination follows from majorants for the original path at weights `τ`
-and `τ + weylSobolevExp + 1`, by Cauchy–Schwarz over the finite eigenvalue block and the Weyl
-summability of negative weight powers. -/
 private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
     {d : ℝ} (hd_pos : 0 < d)
     {φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ} (k : ℕ)
@@ -436,7 +413,7 @@ private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           (iteratedDeriv k (φ j) t) ^ 2 :=
         le_trans hcs (mul_le_of_le_one_left hsum_nn
           (sum_sq_swapEigenCoeff_le_one (I := I) (M := M) g₀ i))
-    -- split the weight through the block and gain the negative Weyl power
+
       have hstep : tensorSobolevWeight (I := I) (M := M) i τ *
           ∑ j ∈ eigenBlockFinset (I := I) (M := M) g₀ i, (iteratedDeriv k (φ j) t) ^ 2 =
           tensorSobolevWeight (I := I) (M := M) i (-ρ) *
@@ -483,8 +460,6 @@ private lemma symmCoeffPath_spectralMass (g₀ : SmoothRiemannianMetric I M)
           add_le_add (mul_le_mul_of_nonneg_left h1 (by norm_num))
             (mul_le_mul_of_nonneg_left h2 (by norm_num))
 
-/-- Spectral reconstruction: coordinates with all-weight order-zero spectral mass on a compact
-time interval are realized there by a path of smooth compactly supported tensors. -/
 private theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetric I M)
     {d₂ : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
@@ -543,8 +518,6 @@ private theorem exists_smoothCcPath_realizing_coeff (g₀ : SmoothRiemannianMetr
   choose! S₀ hS₀ using hreconstruct
   exact ⟨S₀, hS₀⟩
 
-/-- On the realizability ball the symmetrized Sobolev nonlinearity of an embedded smooth tensor
-is the raw nonlinearity of the embedded `symmS`-symmetrization. -/
 private theorem deTurckSobolevNHa2Symm_embed_eq_raw_embed_symmS
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (X : SmoothCcTensor g₀ 0 2)
@@ -571,14 +544,7 @@ private theorem deTurckSobolevNHa2Symm_embed_eq_raw_embed_symmS
       hball)).symm
 
 set_option linter.unusedVariables false in
-/-- Jet spectral-mass preservation under the symmetrized DeTurck nonlinearity: applying
-`deTurckSobolevNHa2Symm` to a ball-confined field with jet spectral-mass-controlled coordinates
-yields a field whose coordinates again carry jet spectral-mass control. The field is realized as
-the Sobolev embedding of a spectrally reconstructed smooth path; on the realizability ball the
-symmetrized nonlinearity of the embedded path is the raw nonlinearity of the embedded
-`symmS`-symmetrized path, whose coordinates are the finite eigenvalue-block combination
-`symmCoeffPath` of the original coordinates and hence inherit jet spectral-mass control, so the
-raw preservation theorem `deTurckSobolevNHa2_jetSpectralMass_preserving` applies. -/
+
 private theorem deTurckForcing_jetSpectralMass_preservingSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -667,9 +633,7 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
   exact hψt
 
 set_option linter.unusedVariables false in
-/-- Finite-order jet spectral-mass preservation under the symmetrized DeTurck nonlinearity;
-the `C^k` mirror of `deTurckForcing_jetSpectralMass_preservingSymm`, reduced to the raw
-finite-order preservation theorem on the embedded `symmS`-symmetrized reconstruction path. -/
+
 private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -768,9 +732,7 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
   exact hψt
 
 set_option linter.unusedVariables false in
-/-- Finite-order smooth forcing driver for the symmetrized DeTurck forcing: mirror of
-`deTurckForcing_finiteOrderSmoothDriver` over `deTurckSobolevNHa2Symm`, with the per-order jet
-gain supplied by `deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving`. -/
+
 private theorem deTurckForcing_finiteOrderSmoothDriverSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -885,11 +847,7 @@ private theorem deTurckForcing_finiteOrderSmoothDriverSymm
     exact ⟨ψ, hψ_smooth, hψ_mass, fun i => (hforce_coeff i).trans (hψ_ae i)⟩
 
 set_option linter.unusedVariables false in
-/-- Smooth forcing time-coordinate driver for the symmetrized DeTurck forcing: from a uniform
-spatial spectral-mass bound the forcing coordinates are realized a.e. by globally smooth
-functions carrying all-order weighted mass bounds. Mirror of
-`maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass` over the symmetrized finite-order
-driver `deTurckForcing_finiteOrderSmoothDriverSymm`. -/
+
 theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -965,12 +923,7 @@ theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
 end SymmSCoefficientBlockTransfer
 
 set_option linter.unusedVariables false in
-/-- Parabolic-interior jet spectral-mass control for the symmetrized DeTurck solution field on a
-smallness horizon. Symmetric mirror of the proven raw helper
-`maxRegSolField_parabolicInterior_jetSpectralMass` (snapshot `c848da47`), assembled from the
-symmetrized finite-order driver and the symmetrized uniform spatial-mass twin by the same
-per-mode-convolution smallness argument; its interior algebra is nonlinearity-agnostic, so this
-transits only the `sorry`s of its symmetric children. -/
+
 theorem maxRegSolField_parabolicInterior_jetSpectralMassSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1108,11 +1061,7 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMassSymm
     exact hstep1.trans hstep2
 
 set_option linter.unusedVariables false in
-/-- Symmetrized smooth forcing driver: the symmetrized DeTurck forcing coordinates are realized a.e.
-by globally smooth functions carrying all-order weighted mass bounds. Symmetric mirror of the proven
-raw helper `deTurckForcing_smoothForcingDriver` (snapshot `c848da47`), assembled from the symmetrized
-parabolic-interior twin and the symmetrized jet-preservation twin; the forcing identity is threaded
-through the symmetrized nonlinearity, so this transits only the `sorry`s of its symmetric children. -/
+
 private theorem deTurckForcing_smoothForcingDriverSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1162,10 +1111,7 @@ private theorem deTurckForcing_smoothForcingDriverSymm
   exact hforce_coeff.trans (hψ_ae i)
 
 set_option linter.unusedVariables false in
-/-- Symmetrized fixed-point forcing mode-coefficient smoothness and mass. Symmetric mirror of the
-proven raw helper `deTurckForcing_fixedPoint_coeff_smooth_and_mass` (snapshot `c848da47`), a
-nonlinearity-agnostic repackaging of the symmetrized smooth forcing driver through the
-`timeModeCoeff` bridge; this transits only the `sorry`s of its symmetric children. -/
+
 private theorem deTurckForcing_fixedPoint_coeff_smooth_and_massSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1207,9 +1153,7 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_massSymm
   exact hbridge.trans (hf_ae i)
 
 set_option linter.unusedVariables false in
-/-- Symmetrized all-order jet smoothness of the forcing mode coefficients. Symmetric mirror of the
-proven raw helper `deTurckForcing_timeModeCoeff_smooth_allOrderJet` (snapshot `c848da47`); a direct
-forward of the symmetrized fixed-point twin, so this transits only its children's `sorry`s. -/
+
 theorem deTurckForcing_timeModeCoeff_smooth_allOrderJetSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1240,10 +1184,7 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJetSymm
     g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
 
 set_option linter.unusedVariables false in
-/-- Symmetrized a.e. smooth forcing time-coordinate jet. Symmetric mirror of the proven raw helper
-`deTurckForcing_smoothCoordinate_aeTimeJet` (snapshot `c848da47`), a nonlinearity-agnostic
-repackaging of the symmetrized all-order jet twin through the `timeModeCoeff` bridge; this transits
-only the `sorry`s of its symmetric children. -/
+
 theorem deTurckForcing_smoothCoordinate_aeTimeJetSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)

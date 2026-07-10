@@ -25,25 +25,22 @@ noncomputable def concreteConn
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ where
   toFun x := cov Y x (X x)
   contMDiff_toFun := by
-    
-    
+
     have hY_plus : ContMDiff I (I.prod 𝓘(ℝ, E)) (∞ + 1) (T% fun x => Y x) := by
       rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from by simp]
       exact Y.contMDiff
     have hcov_smooth := (‹ContMDiffCovariantDerivative cov ∞›).contMDiff.contMDiff
       (hY_plus.contMDiffOn)
-    
-    
-    
+
     have hcov_global : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
         (fun x => TotalSpace.mk' (E →L[ℝ] E)
           (E := fun (x : M) => TangentSpace I x →L[ℝ] TangentSpace I x) x (cov Y x)) := by
       rwa [← contMDiffOn_univ]
-    
+
     have hX_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
         (fun x => TotalSpace.mk' E (E := TangentSpace I) x (X x)) :=
       X.contMDiff
-    
+
     exact ContMDiff.clm_bundle_apply (b := id) hcov_global hX_smooth
 
 theorem concreteConn_apply
@@ -95,11 +92,10 @@ theorem concreteConn_leibniz
     concreteConn I M cov X (f • Y) =
       vectorFieldActionSmooth I M X f • Y + f • concreteConn I M cov X Y := by
   apply ContMDiffSection.ext; intro x
-  
-  
+
   change cov (fun x => (f : M → ℝ) x • Y x) x (X x) =
     (vectorFieldActionSmooth I M X f) x • Y x + f x • cov Y x (X x)
-  
+
   have hY : MDiffAt (T% fun x => Y x) x := Y.mdifferentiableAt
   have hf : MDiffAt (f : M → ℝ) x :=
     f.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
@@ -107,8 +103,7 @@ theorem concreteConn_leibniz
   rw [hfY_eq, cov.isCovariantDerivativeOn.leibniz hY hf]
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply]
-  
-  
+
   simp only [vectorFieldActionSmooth, ContMDiffMap.coeFn_mk, vectorFieldAction]
   abel
 end Connection

@@ -50,7 +50,7 @@ private lemma chartGramMatrix_adjugate_entry_contMDiffOn
       (fun b : M => (chartGramMatrix g α b).adjugate i j)
       (trivializationAt E (TangentSpace I) α).baseSet := by
   classical
-  
+
   have hexp :
       (fun b : M => (chartGramMatrix g α b).adjugate i j)
         = (fun b : M =>
@@ -58,7 +58,7 @@ private lemma chartGramMatrix_adjugate_entry_contMDiffOn
     funext b
     rw [Matrix.adjugate_apply]
   rw [hexp]
-  
+
   have hexp2 :
       (fun b : M =>
           ((chartGramMatrix g α b).updateRow j (Pi.single i 1)).det)
@@ -75,8 +75,7 @@ private lemma chartGramMatrix_adjugate_entry_contMDiffOn
   refine contMDiffOn_finset_sum (fun σ _ => ?_)
   refine ContMDiffOn.mul (contMDiffOn_const) ?_
   refine contMDiffOn_finset_prod (fun k _ => ?_)
-  
-  
+
   by_cases hσkj : σ k = j
   · have heq :
         (fun b : M =>
@@ -101,8 +100,7 @@ lemma chartGramMatrix_inv_entry_contMDiffOn
     ContMDiffOn I 𝓘(ℝ) ∞
       (fun b : M => (chartGramMatrix g α b)⁻¹ i j)
       (trivializationAt E (TangentSpace I) α).baseSet := by
-  
-  
+
   have hexp :
       (fun b : M => (chartGramMatrix g α b)⁻¹ i j)
         = (fun b : M => (chartGramMatrix g α b).det⁻¹ *
@@ -111,7 +109,7 @@ lemma chartGramMatrix_inv_entry_contMDiffOn
     rw [Matrix.inv_def]
     simp [Ring.inverse_eq_inv', Matrix.smul_apply, smul_eq_mul]
   rw [hexp]
-  
+
   intro b hb
   have hdet := chartGramMatrix_det_contMDiffOn (I := I) g α b hb
   have hadj := chartGramMatrix_adjugate_entry_contMDiffOn (I := I) g α i j b hb
@@ -164,7 +162,7 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn
   induction s with
   | zero =>
       intro S T
-      
+
       have heq :
           (fun b : M =>
               chartTensorInnerPointwise_0s (I := I) (M := M) 0 g α b S T)

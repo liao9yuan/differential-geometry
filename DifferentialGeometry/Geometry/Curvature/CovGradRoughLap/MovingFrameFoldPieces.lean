@@ -119,68 +119,6 @@ noncomputable def christoffelResidualPairingFib
           (covGrad (I := I) (M := M) g 0 s S).toSection x)
           (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x i x)))
 
-theorem movingFrameRemainder_integral_eq_christoffelResidualPairing
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
-          ((pointwiseTensorCurv (I := I) (M := M) g s S -
-            GcurvSection (I := I) (M := M) g s S -
-            (genuineDiffCurvSection (I := I) (M := M) g s S +
-              ricTraceSection (I := I) (M := M) g s S)).toFun x)
-          ((covGrad (I := I) (M := M) g 0 s S).toFun x)
-        ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      ∫ x, (∑ i : Fin (Module.finrank ℝ E),
-              christoffelResidualPairingFib (I := I) (M := M) g s S x i)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  sorry
-
-theorem movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (pointwiseTensorCurv (I := I) (M := M) g s S -
-          GcurvSection (I := I) (M := M) g s S -
-          (genuineDiffCurvSection (I := I) (M := M) g s S +
-            ricTraceSection (I := I) (M := M) g s S)).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun =
-      ∫ x, (∑ i : Fin (Module.finrank ℝ E),
-              christoffelResidualPairingFib (I := I) (M := M) g s S x i)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  movingFrameRemainder_integral_eq_christoffelResidualPairing (I := I) (M := M) g s S
-
-theorem frameSummed_christoffelResidualPairing_integral_eq_zero
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    ∫ x, (∑ i : Fin (Module.finrank ℝ E),
-            christoffelResidualPairingFib (I := I) (M := M) g s S x i)
-        ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 :=
-  sorry
-
-theorem frameSummed_christoffelResidual_eq_bracketDivergence
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    ∃ (ι : Type) (_ : Fintype ι)
-      (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-      (W : ι → SmoothCcTensor g 0 (s + 1)),
-      ∫ x, (∑ i : Fin (Module.finrank ℝ E),
-              christoffelResidualPairingFib (I := I) (M := M) g s S x i)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-        ∑ a, ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + 1)) g x
-                (Tensor0SSpace.toModel
-                  (loweredCovDerivAlongVF (I := I) (M := M) g 0 (s + 1) (W a).toSection (V a) x))
-                (Tensor0SSpace.toModel
-                  (liftedTensorSection (I := I) (M := M) g 0 (s + 1)
-                    (covGrad (I := I) (M := M) g 0 s S).toSection x))
-              + tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + 1)) g x
-                (Tensor0SSpace.toModel
-                  (liftedTensorSection (I := I) (M := M) g 0 (s + 1) (W a).toSection x))
-                (Tensor0SSpace.toModel
-                  (loweredCovDerivAlongVF (I := I) (M := M) g 0 (s + 1)
-                    (covGrad (I := I) (M := M) g 0 s S).toSection (V a) x))
-              + tensorInnerScalar (I := I) (M := M) g 0 (s + 1) (W a).toSection
-                  (covGrad (I := I) (M := M) g 0 s S).toSection x
-                * divergence_g (I := I) g (V a) x)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
-  refine ⟨Fin 0, inferInstance, Fin.elim0, Fin.elim0, ?_⟩
-  rw [frameSummed_christoffelResidualPairing_integral_eq_zero (I := I) (M := M) g s S,
-    Finset.univ_eq_empty, Finset.sum_empty]
-
 end Connection
 end Integral
 end DifferentialGeometry

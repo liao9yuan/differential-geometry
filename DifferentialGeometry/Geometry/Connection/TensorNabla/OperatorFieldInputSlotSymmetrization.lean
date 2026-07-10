@@ -1,19 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
 
-/-!
-# Input-slot symmetrization of rank-`(2,2)` operator coefficient fields
-
-The input-slot swap `D ↦ D ∘ swap` of rank-two tensor data, as a smooth `(2,2)`-coefficient
-field, and the induced input-slot symmetrization `C ↦ (1/2) • (C + C ∘ swap)` of `(2,2)`
-coefficient fields (precomposition via `appCcRS`).
-
-A `(2,2)` coefficient field acts fibrewise as a continuous linear map from rank-two tensor data
-to rank-two values (`appCc`). Its input-slot symmetrization agrees with the original coefficient
-on symmetric data — in particular on every datum the realized Ricci linearization feeds its
-arm-0 coefficients (`ccTensorBilinSymm` symmetrizes the perturbation directions), so the
-symmetrized coefficient is the honest carrier of symmetric-sector estimates.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -73,8 +59,6 @@ private lemma domDomCongr_swap_smul (c : ℝ)
   ext m
   simp [ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- The input-slot swap on rank-two tensor fibres: `D ↦ D ∘ (swap of the two slots)`,
-as a continuous linear endomorphism of `Tensor0SSpace 2 I x`. -/
 def slotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
   LinearMap.toContinuousLinearMap
@@ -94,7 +78,6 @@ set_option linter.unusedSectionVars false in
         (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
           (Tensor0SSpace.toModel (𝕜 := ℝ) D)) := rfl
 
-/-- The input-slot swap as a `(2,2)`-coefficient fibre value. -/
 def ccSlotSwapFib (x : M) : TensorRSSpace 2 2 I x :=
   slotSwapFib (I := I) (M := M) x
 
@@ -147,9 +130,6 @@ theorem ccSlotSwapFib_contMDiff :
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-/-- The input-slot swap of rank-two data, as a smooth `(2,2)`-coefficient field: composing a
-`(2,2)` coefficient with it (via `appCcRS`) precomposes the coefficient with the swap of its two
-data slots. -/
 def ccSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 where
   toSection :=
     { toFun := fun x : M => ccSlotSwapFib (I := I) (M := M) x
@@ -161,10 +141,6 @@ set_option linter.unusedSectionVars false in
     (ccSlotSwapField (I := I) (M := M) g).toSection x =
       ccSlotSwapFib (I := I) (M := M) x := rfl
 
-/-- Input-slot symmetrization of a `(2,2)` coefficient field: the average of the coefficient
-with its precomposition by the data-slot swap. On symmetric data (the only data the realized
-Ricci linearization applies its arm-0 coefficients to — `ccTensorBilinSymm` kills the
-antisymmetric part) it acts exactly as the original coefficient. -/
 def ccInputSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) :
     SmoothCcTensor g 2 2 :=
   (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C (ccSlotSwapField (I := I) (M := M) g))
@@ -179,7 +155,7 @@ lemma ccInputSymm_toSection (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor
             (slotSwapFib (I := I) (M := M) x))) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- Input-slot symmetrization is additive in the coefficient. -/
+
 theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
     ccInputSymm (I := I) (M := M) g (C + D) =
       ccInputSymm (I := I) (M := M) g C + ccInputSymm (I := I) (M := M) g D := by
@@ -193,8 +169,7 @@ theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g
   rw [smul_add]
 
 set_option linter.unusedSectionVars false in
-/-- The defect of a `(2,2)` coefficient field from its input-slot symmetrization is half its
-defect from its own slot-swap precomposition. -/
+
 lemma sub_ccInputSymm_eq_half_smul_sub_appCcRS (g : SmoothRiemannianMetric I M)
     (C : SmoothCcTensor g 2 2) :
     C - ccInputSymm (I := I) (M := M) g C =

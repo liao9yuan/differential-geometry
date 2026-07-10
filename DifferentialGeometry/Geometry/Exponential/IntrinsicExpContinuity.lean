@@ -1564,74 +1564,6 @@ private theorem intrinsicVelocityLift_continuousOn_step
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem intrinsicGeodesic_jointContinuity
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T2Space (TangentBundle I M)]
-    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) (v₀ : TangentSpace I p) :
-    ∃ ρ : ℝ, 0 < ρ ∧
-      ContinuousOn
-        (fun vt : TangentSpace I p × ℝ =>
-          intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2)
-        ((Metric.ball v₀ ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
-  classical
-  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  refine continuousOn_ball_prod_Icc_of_local_windows (V := TangentSpace I p) v₀
-    (fun vt => intrinsicGeodesic (I := I) g hEnorm p vt.1 vt.2) ?_
-  intro t ht
-  set α : M := intrinsicGeodesic (I := I) g hEnorm p v₀ t with hα_def
-  set z : TangentSpace I p → E × E :=
-    fun v =>
-      ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
-          (intrinsicGeodesic (I := I) g hEnorm p v) t,
-        deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
-          (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E)
-    with hz_def
-  set x₀ : E := (z v₀).1 with hx₀_def
-  set w₀ : E := (z v₀).2 with hw₀_def
-  have hα_foot : intrinsicGeodesic (I := I) g hEnorm p v₀ t = α := rfl
-  have hx₀_eq : x₀ = extChartAt I α α := by
-    rw [hx₀_def, hz_def]
-    simp only [DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve_def]
-    rw [hα_foot]
-  have hx₀ : x₀ ∈ interior (extChartAt I α).target := by
-    rw [hx₀_eq]
-    have hsrc : α ∈ (extChartAt I α).source := mem_extChartAt_source (I := I) α
-    have htgt : extChartAt I α α ∈ (extChartAt I α).target :=
-      (extChartAt I α).map_source hsrc
-    exact DifferentialGeometry.Integral.DivergenceTheorem.extChartAt_target_subset_interior_of_boundaryless
-      (I := I) α htgt
-  have hz0 : z v₀ = (x₀, w₀) := by rw [hx₀_def, hw₀_def]
-  obtain ⟨rz, hrz, hz_cont, hgeo⟩ :
-      ∃ rz : ℝ, 0 < rz ∧ ContinuousOn z (Metric.ball v₀ rz) ∧
-      (∀ (b : ContDiffBump ((x₀, w₀) : E × E)),
-        Metric.closedBall ((x₀, w₀) : E × E) b.rOut ⊆
-          (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E) →
-        ∃ rgeo εgeo : ℝ, 0 < rgeo ∧ 0 < εgeo ∧ rgeo ≤ rz ∧
-        (∀ v ∈ Metric.ball v₀ rgeo, z v ∈ Metric.ball ((x₀, w₀) : E × E) b.rIn) ∧
-        (∀ v ∈ Metric.ball v₀ rgeo, ∀ s ∈ Set.Ioo (t - εgeo) (t + εgeo),
-          intrinsicGeodesic (I := I) g hEnorm p v s ∈ (chartAt H α).source) ∧
-        (∀ v ∈ Metric.ball v₀ rgeo, ∀ s ∈ Set.Ioo (t - εgeo) (t + εgeo),
-          ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
-              (intrinsicGeodesic (I := I) g hEnorm p v) s,
-            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
-              (intrinsicGeodesic (I := I) g hEnorm p v)) s) : E × E)
-            ∈ Metric.closedBall ((x₀, w₀) : E × E) b.rIn) ∧
-        (∀ v ∈ Metric.ball v₀ rgeo,
-          ((DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
-              (intrinsicGeodesic (I := I) g hEnorm p v) t,
-            deriv (DifferentialGeometry.Geometry.Riemannian.AlongCurve.chartCurve (I := I) α
-              (intrinsicGeodesic (I := I) g hEnorm p v)) t) : E × E) = z v)) := by
-    sorry
-  exact intrinsicGeodesic_window_of_junction_data (I := I) g hEnorm p v₀ α
-    (x₀ := x₀) (w₀ := w₀) hx₀ (z := z) (tₖ := t) (rz := rz) hrz hz_cont hz0 hgeo
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-
 theorem expMapIntrinsic_continuous_of_jointContinuity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1668,21 +1600,6 @@ theorem expMapIntrinsic_continuous_of_jointContinuity
     apply ContinuousOn.continuousWithinAt _ (Metric.mem_ball_self hρ)
     exact hcont.comp hsl_cont.continuousOn hsl_maps
   exact hcw.continuousAt hball_nhds
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-
-theorem expMapIntrinsic_continuous
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [T2Space (TangentBundle I M)]
-    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) :
-    Continuous (fun v : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p v) :=
-  expMapIntrinsic_continuous_of_jointContinuity (I := I) g hEnorm p
-    (fun v₀ => intrinsicGeodesic_jointContinuity (I := I) g hEnorm p v₀)
 
 end Exponential
 end Riemannian

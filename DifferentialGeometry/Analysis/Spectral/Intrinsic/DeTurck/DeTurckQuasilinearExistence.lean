@@ -40,7 +40,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
     (hA : 0 ≤ A) (hB : 0 ≤ B)
     (hbound : ∀ᵐ t ∂(timeMeasure T), ‖h t‖ ≤ A * ‖p t‖ + B * ‖q t‖) :
     ‖h‖ ≤ A * ‖p‖ + B * ‖q‖ := by
-  
+
   set Pf : ℝ → ℝ := fun t => ‖(p : ℝ → Y) t‖ with hPf
   set Qf : ℝ → ℝ := fun t => ‖(q : ℝ → Z) t‖ with hQf
   have hPm : AEStronglyMeasurable Pf (timeMeasure T) :=
@@ -49,7 +49,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
     (Lp.aestronglyMeasurable q).norm
   have hAPm : AEStronglyMeasurable (A • Pf) (timeMeasure T) := hPm.const_smul A
   have hBQm : AEStronglyMeasurable (B • Qf) (timeMeasure T) := hQm.const_smul B
-  
+
   have hmono : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
       eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) := by
     refine eLpNorm_mono_ae ?_
@@ -60,7 +60,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
       rw [happ]; exact add_nonneg (mul_nonneg hA (norm_nonneg _)) (mul_nonneg hB (norm_nonneg _))
     rw [Real.norm_eq_abs, abs_of_nonneg hge, happ]
     exact ht
-  
+
   have htri : eLpNorm (A • Pf + B • Qf) 2 (timeMeasure T) ≤
       eLpNorm (A • Pf) 2 (timeMeasure T) + eLpNorm (B • Qf) 2 (timeMeasure T) :=
     eLpNorm_add_le hAPm hBQm (by norm_num)
@@ -70,7 +70,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
   have hscaleQ : eLpNorm (B • Qf) 2 (timeMeasure T) =
       ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
     rw [eLpNorm_const_smul, eLpNorm_norm, Real.enorm_eq_ofReal hB]
-  
+
   have hfinal : eLpNorm (h : ℝ → X) 2 (timeMeasure T) ≤
       ENNReal.ofReal A * eLpNorm (p : ℝ → Y) 2 (timeMeasure T) +
         ENNReal.ofReal B * eLpNorm (q : ℝ → Z) 2 (timeMeasure T) := by
@@ -106,7 +106,7 @@ theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (
   have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
   refine timeModeCoeff_injective (I := I) (M := M) h_compact (fun i => ?_)
   rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)]
-  
+
   rw [maxRegDuhamelSolField, maxRegDuhamelSolFieldHa1,
     timeModeCoeff_add (I := I) (M := M), timeModeCoeff_add (I := I) (M := M),
     maxRegHomogeneousSolField_timeModeCoeff (I := I) (M := M) (a := a) (T := T) hT.le u₀ i,
@@ -133,22 +133,15 @@ def deTurckTimeNemytskii (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤
     (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super)
 
-/-- The Lipschitz constant of the symmetrized DeTurck Sobolev nonlinearity
-`deTurckSobolevNHa2Symm`, extracted from `deTurckSobolevNHa2Symm_lipschitzWith`. -/
 def deTurckLipConstSymm (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) : ℝ≥0 :=
   (deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super).choose
 
-/-- The symmetrized DeTurck Sobolev nonlinearity is globally Lipschitz with the extracted
-constant `deTurckLipConstSymm`. -/
 theorem deTurckSobolevNHa2Symm_lipschitzWith_lipConst (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     LipschitzWith (deTurckLipConstSymm (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
       (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a) :=
   (deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
 
-/-- Mixed pointwise Lipschitz estimate for the symmetrized DeTurck Sobolev nonlinearity: the
-increment is controlled by a lower-order (`H^{a+1}`) factor times the full-order distance plus a
-lower-order distance, the shape consumed by the abstract quasilinear existence theorem. -/
 theorem deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
@@ -420,9 +413,6 @@ private theorem norm_nemytskiiMixedForcingMap_zero_le (g₀ : SmoothRiemannianMe
   filter_upwards [hcoe, hzero] with t ht htz
   rw [ht, htz, Pi.zero_apply]
 
-/-- The small-forcing ball radius attached to the symmetrized DeTurck Sobolev nonlinearity,
-built from the mixed Lipschitz constant of `deTurckSobolevNHa2Symm` exactly as
-`deTurckForceBallRadius` is built from the raw one. -/
 def deTurckForceBallRadiusSymm (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) : ℝ :=
   1 / (16 * (((deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M)

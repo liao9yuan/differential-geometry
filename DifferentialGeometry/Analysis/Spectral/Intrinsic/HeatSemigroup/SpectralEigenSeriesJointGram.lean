@@ -96,9 +96,7 @@ private theorem eigenChartIncrementMode_contDiffOn
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   set S := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.eigenvectorSmooth
     (I := I) (M := M) g 0 2 i with hS_def
-  
-  
-  
+
   have hB : ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -125,8 +123,7 @@ private theorem eigenChartIncrementMode_contDiffOn
     have hpx := happ x hx
     rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
     exact hpx.2
-  
-  
+
   rw [Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I)] at hScal
   have hsource_eq : (chartAt H α).source = (extChartAt I α).source := by
     rw [extChartAt_source (I := I)]
@@ -151,7 +148,7 @@ private theorem eigenChartIncrementMode_contDiffOn
         (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y)))
       (interior (extChartAt I α).target) :=
     hcomp.contDiffOn
-  
+
   have htime : ContDiffOn ℝ ∞ (fun q : ℝ × E => φ i q.1)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
@@ -404,7 +401,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     fun k => spectralPartialSum_toHs_cauchy (I := I) (M := M) g u hu (2 * k)
   have hF_L2 : Tendsto (fun n => (F n : TensorL2 0 2 g)) atTop (𝓝 u) :=
     spectralPartialSum_toL2_tendsto (I := I) (M := M) g u
-  
+
   have hsum := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
   have hexists : ∃ β ∈ chartAtlasPOU_finset (I := I) (M := M),
       0 < ((chartAtlasPOU I M) β : C^∞⟮I, M; ℝ⟯) x := by
@@ -431,7 +428,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
   have hround : (extChartAt I β).symm (toEuclidean.symm yx) = x := by
     rw [hyx_def, ContinuousLinearEquiv.symm_apply_apply]
     exact (extChartAt I β).left_inv (by rw [extChartAt_source (I := I)]; exact hx_src)
-  
+
   have hcomp_eq : ∀ (Z : SmoothCcTensor g 0 2) (Q : CompIdx E 0 2),
       tensorChartComponent (I := I) (M := M) g 0 2 Z β Q.1 Q.2 yx =
         ρ * tensorChartComponentRaw (I := I) (M := M) g 0 2 Z β Q.1 Q.2 x := by
@@ -439,7 +436,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     rw [tensorChartComponent_def,
       chartPushedRaw_apply_of_mem (I := I) (M := M) β _ hyx_mem, hround]
     rfl
-  
+
   have hraw_tendsto : ∀ Q : CompIdx E 0 2,
       Tendsto (fun n => tensorChartComponentRaw (I := I) (M := M) g 0 2 (F n) β Q.1 Q.2 x)
         atTop (𝓝 (tensorChartComponentRaw (I := I) (M := M) g 0 2 Trep β Q.1 Q.2 x)) := by
@@ -451,7 +448,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
     have hscaled := hct.const_mul ρ⁻¹
     simp only [← mul_assoc, inv_mul_cancel₀ hρne, one_mul] at hscaled
     exact hscaled
-  
+
   rw [ccTensorBilinSymm_eq_sum_chartBasis (I := I) (M := M) g Trep β hx_src v w]
   have hrw : (fun n => ccTensorBilinSymm (I := I) g (F n) x v w) =
       fun n => ∑ Q : CompIdx E 0 2,
@@ -817,9 +814,9 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
   classical
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hUDO : UniqueDiffOn ℝ O := isOpen_interior.uniqueDiffOn
-  
+
   set kE : ℕ := Module.finrank ℝ E + 2 * m + 1 with hkE_def
-  
+
   have hper : ∀ m' : ℕ, m' ≤ m → ∃ Cm' : ℝ, 0 ≤ Cm' ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ y ∈ B,
         ‖iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y‖ ≤
@@ -834,7 +831,7 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
      eigenvectorSmooth_toHs_norm_le_lambda_pow (I := I) (M := M) g kE
    refine ⟨(1 / 2 : ℝ) * (Cab + Cba) * Cdec, by positivity, fun i y hy => ?_⟩
    set S := eigenvectorSmooth (I := I) (M := M) g 0 2 i with hS_def
-   
+
    have hcongr : iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y =
        iteratedFDerivWithin ℝ m'
          ((1 / 2 : ℝ) • (rawCompOnE (I := I) (M := M) g S α ![i', j'] +
@@ -919,27 +916,27 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
   set O : Set E := interior (extChartAt I α).target with hO_def
   set s : Set (ℝ × E) := Set.Icc (0 : ℝ) T ×ˢ B with hs_def
   have hUD : UniqueDiffOn ℝ s := (uniqueDiffOn_Icc hT).prod hB_uniq
-  
+
   obtain ⟨Csp, pSp, hCsp_nn, hCsp⟩ :=
     exists_eigenSpatialFactor_jet_le_lambda_pow (I := I) (M := M) g α i' j' k hB_compact hB
-  
+
   set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
   set σ0 : ℝ := 2 * (pSp : ℝ) + 2 * (sW : ℝ) with hσ0_def
   have hσ0_nn : (0 : ℝ) ≤ σ0 := by rw [hσ0_def]; positivity
-  
+
   have htime : ∀ a : ℕ, ∃ Cm : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cm ∧
       ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
         tensorSobolevWeight (I := I) (M := M) i σ0 * (iteratedDeriv a (φ i) t) ^ 2 ≤ Cm i :=
     fun a => hmodemass a σ0 hσ0_nn
   choose Cmf hCmf_summable hCmf using htime
-  
+
   have hweyl : Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (-(2 * (sW : ℝ)))) := by
     refine tensorEigen_summable_negpow (I := I) (M := M) g (2 * (sW : ℝ)) ?_
     rw [hsW_def]; push_cast; have := weylSobolevExp_gt_finrank (E := E); push_cast at this ⊢
     have h0 : (0:ℝ) ≤ (weylSobolevExp (E := E) : ℝ) := by positivity
     nlinarith [h0]
-  
+
   have hbase_pos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
       (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i := fun i => by
     have := tensor_lambda_nonneg (I := I) (M := M) i; linarith
@@ -949,7 +946,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
         Real.sqrt (Cmf j i) * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) := by
     intro j i t ht
     have hmm := hCmf j i t ht
-    
+
     have hw : tensorSobolevWeight (I := I) (M := M) i σ0 =
         ((1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ))) ^ 2 := by
       unfold tensorSobolevWeight
@@ -958,7 +955,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     rw [hw] at hmm
     set W : ℝ := (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (((pSp : ℝ)) + (sW : ℝ)) with hW_def
     have hW_pos : 0 < W := Real.rpow_pos_of_pos (hbase_pos i) _
-    
+
     have hCm_nn : 0 ≤ Cmf j i := le_trans (by positivity) hmm
     have habs : |iteratedDeriv j (φ i) t| ≤ Real.sqrt (Cmf j i) / W := by
       rw [le_div_iff₀ hW_pos]
@@ -970,7 +967,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     rw [Real.rpow_neg (hbase_pos i).le]
     rw [div_eq_mul_inv] at habs
     rwa [← hW_def]
-  
+
   set Kconst : ℝ := (2 : ℝ) ^ k * (k.factorial : ℝ) * (k.factorial : ℝ) *
     (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ k * (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k *
     Csp with hKconst_def
@@ -1033,7 +1030,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     change _ ≤ ∑ a ∈ Finset.range (k + 1), termf a i
     refine Finset.sum_le_sum (fun a ha => ?_)
     have hak : a ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp ha)
-    
+
     set Cφa : ℝ := (∑ j ∈ Finset.range (a + 1), Real.sqrt (Cmf j i)) *
       (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) with hCφa_def
     have hCφa_nn : 0 ≤ Cφa := by
@@ -1053,14 +1050,14 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
       (eigenSpatialFactor_contDiffOn (I := I) (M := M) g α i' j' i) hB hUD (k - a) q hq
       (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)
       (fun jj hjj => hCsp jj (by omega) i q.2 hqB)
-    
+
     have hfn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ := norm_nonneg _
     have hgn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ (k - a)
         (fun p : ℝ × E => eigenSpatialFactor (I := I) (M := M) g α i' j' i p.2) s q‖ := norm_nonneg _
     have hchoose_nn : (0:ℝ) ≤ (k.choose a : ℝ) := by positivity
     have hF1 := hfst_bnd
     have hG1 := hsnd_bnd
-    
+
     have hsp_nn : 0 ≤ Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp :=
       mul_nonneg hCsp_nn (pow_nonneg hbase_nn _)
     have hprod : ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
@@ -1083,7 +1080,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
           mul_le_mul_of_nonneg_left hprod hchoose_nn
       _ ≤ termf a i := by
           simp only [htermf_def, hCφa_def, hKconst_def, hwfun_def]
-          
+
           have hcollapse : (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ))) *
               (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp =
               tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) := by
@@ -1106,7 +1103,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
           have hsnd_pow : (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ (k - a) ≤
               (‖ContinuousLinearMap.snd ℝ ℝ E‖ + 1) ^ k :=
             pow_le_pow_right₀ (by linarith [norm_nonneg (ContinuousLinearMap.snd ℝ ℝ E)]) (by omega)
-          
+
           have hlhs_eq : (k.choose a : ℝ) * (((a.factorial : ℝ) *
                 (Ssqrt * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (-(((pSp : ℝ)) + (sW : ℝ)))) *
                 (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
@@ -1168,11 +1165,11 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
   set vv : TangentSpace I x := chartBasisVecFiber (I := I) α i' x with hvv
   set ww : TangentSpace I x := chartBasisVecFiber (I := I) α j' x with hww
   set u : TensorL2 0 2 g := SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t) with hu_def
-  
+
   have hcoeff_t : ∀ i, tensorL2Coeff (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i = φ i t :=
     fun i => hcoeff t hqt i
-  
+
   have hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ vH : tensorHs (I := I) (M := M) g 0 2 σ,
         tensorHsToL2 (I := I) (M := M) (g := g) (r := 0) (s := 2)
@@ -1185,8 +1182,7 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
       rw [iteratedDeriv_zero] at h
       rw [hcoeff_t i]
       exact h
-  
-  
+
   have hpartial : ∀ n,
       ccTensorBilinSymm (I := I) g (spectralPartialSum (I := I) (M := M) g u n) x vv ww =
         ∑ i ∈ eigenIdxFinset (I := I) (M := M) g n,
@@ -1195,7 +1191,7 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
     rw [spectralPartialSum, ccTensorBilinSymm_finiteEigenCombo]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [hcoeff_t i, eigenChartIncrementMode]
-  
+
   have hTrep_u : (T_rep t : TensorL2 0 2 g) = u := by rw [hu_def, SmoothCcTensor.toL2_apply]
   have htend_lhs : Filter.Tendsto
       (fun n => ∑ i ∈ eigenIdxFinset (I := I) (M := M) g n,
@@ -1205,8 +1201,7 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
     have h := spectralPartialSum_ccTensorBilinSymm_tendsto
       (I := I) (M := M) g u hu (T_rep t) hTrep_u x vv ww
     refine h.congr (fun n => (hpartial n))
-  
-  
+
   set Ω : Set E := interior (extChartAt I α).target with hΩ_def
   have hΩ_open : IsOpen Ω := isOpen_interior
   obtain ⟨r, hr_pos, hball_sub⟩ := Metric.isOpen_iff.mp hΩ_open q.2 hqy
@@ -1233,8 +1228,7 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
     have hb := hv0_bd i q hqmemBc
     rwa [iteratedFDerivWithin_zero_eq_comp, Function.comp_apply,
       (LinearIsometryEquiv.norm_map _ _)] at hb
-  
-  
+
   have hhasSum : HasSum
       (fun i => eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q)
       (∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q) :=
@@ -1245,7 +1239,7 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
       Filter.atTop
       (𝓝 (∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q)) :=
     hhasSum.comp (tendsto_eigenIdxFinset_atTop (I := I) (M := M) g)
-  
+
   exact tendsto_nhds_unique htend_lhs htend_tsum
 
 theorem realizedChartGramIncrement_euclidean_contDiffOn
@@ -1276,9 +1270,7 @@ theorem realizedChartGramIncrement_euclidean_contDiffOn
   rintro ⟨t₀, y₀⟩ hmem
   obtain ⟨_ht₀, hy₀⟩ := hmem
   obtain ⟨r, hr_pos, hball_sub⟩ := Metric.isOpen_iff.mp hΩ_open y₀ hy₀
-  
-  
-  
+
   refine ⟨Set.univ ×ˢ Metric.ball y₀ (r / 2), isOpen_univ.prod Metric.isOpen_ball,
     ⟨Set.mem_univ t₀, Metric.mem_ball_self (by positivity)⟩, ?_⟩
   set B : Set E := Metric.ball y₀ (r / 2) with hB_def

@@ -61,12 +61,12 @@ noncomputable def TensorProduct.mapLBilinear :
     (F₁ →L[𝕜] G₁) →L[𝕜] (F₂ →L[𝕜] G₂) →L[𝕜]
       ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) := by
   classical
-  
+
   haveI : FiniteDimensional 𝕜 (F₁ →L[𝕜] G₁) := ContinuousLinearMap.finiteDimensional
   haveI : FiniteDimensional 𝕜 (F₂ →L[𝕜] G₂) := ContinuousLinearMap.finiteDimensional
   haveI : FiniteDimensional 𝕜 ((F₂ →L[𝕜] G₂) →L[𝕜] F₁ ⊗[𝕜] F₂ →L[𝕜] G₁ ⊗[𝕜] G₂)
     := ContinuousLinearMap.finiteDimensional
-  
+
   let innerLM (L₁ : F₁ →L[𝕜] G₁) :
       (F₂ →L[𝕜] G₂) →ₗ[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) :=
     { toFun := fun L₂ => TensorProduct.mapL (𝕜 := 𝕜) L₁ L₂
@@ -76,7 +76,7 @@ noncomputable def TensorProduct.mapLBilinear :
   let innerCLM (L₁ : F₁ →L[𝕜] G₁) :
       (F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂)) :=
     (innerLM (L₁ := L₁)).toContinuousLinearMap
-  
+
   let outerLM :
       (F₁ →L[𝕜] G₁) →ₗ[𝕜]
         ((F₂ →L[𝕜] G₂) →L[𝕜] ((F₁ ⊗[𝕜] F₂) →L[𝕜] (G₁ ⊗[𝕜] G₂))) :=
@@ -84,7 +84,7 @@ noncomputable def TensorProduct.mapLBilinear :
       map_add' := by
         intro L₁ L₁'
         ext L₂ x
-        
+
         simpa [innerCLM, innerLM] using congrArg (fun f => f x)
           (TensorProduct.mapL_add_left (𝕜 := 𝕜) (L₂ := L₂) (L₁ := L₁) (L₁' := L₁'))
       map_smul' := by

@@ -2247,7 +2247,6 @@ theorem lieArm1_psiB_feed (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
       (hC2b_nn q) hΛκ_nn hΛsf_nn hA0 hsf0 (hAL2 q hq_le) (hsfL2 q hq_le)
       (hC2b q hq_le)
 
-
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SBundle.Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -2622,7 +2621,6 @@ private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg (fun t : Fin 3 → E => Tensor0SBundle.Tensor0SSpace.toModel D t)
     (by funext i; fin_cases i <;> rfl)
-
 
 open DifferentialGeometry.Integral.DivergenceTheorem (chartInvGramMatrix)
 

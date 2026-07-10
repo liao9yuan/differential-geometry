@@ -66,7 +66,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
   rw [chartGramOnE_def, chartGramOnE_def]
   rw [chartGramMatrix_realize_apply (I := I) g_bg T hδ_lt hδ α p a b,
     chartGramMatrix_realize_apply (I := I) g_bg T' hδ_lt hδ' α p a b]
-  
+
   rw [show (chartGramMatrix (I := I) g_bg α p a b +
         ccTensorBilinSymm (I := I) g_bg T p
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p)) -
@@ -77,16 +77,16 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p) -
         ccTensorBilinSymm (I := I) g_bg T' p
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p) by ring]
-  
+
   rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
-  
+
   have hrawAB := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (T - T') α hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
     (![a, b] : Fin 2 → Fin (Module.finrank ℝ E))
   have hrawBA := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (T - T') α hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
     (![b, a] : Fin 2 → Fin (Module.finrank ℝ E))
-  
+
   have hframe : chartFrameBasisModel (I := I) (M := M) α p 0
       (![] : Fin 0 → Fin (Module.finrank ℝ E)) =
       (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -99,8 +99,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     exact h
   rw [hframe] at hrawAB hrawBA
-  
-  
+
   have hbilin : ∀ (i j : Fin (Module.finrank ℝ E)),
       ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -118,7 +117,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
         ![chartBasisVecFiber (I := I) α i p, chartBasisVecFiber (I := I) α j p] := by
       funext k; fin_cases k <;> rfl
     rw [hvecAB, ccTensorBilin_apply, ccTensorBilin_apply]
-    
+
     show Tensor0SSpace.toModel
         ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -128,7 +127,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
     rfl
   rw [hrawAB, hrawBA, hbilin a b, hbilin b a]
-  
+
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   ring
 

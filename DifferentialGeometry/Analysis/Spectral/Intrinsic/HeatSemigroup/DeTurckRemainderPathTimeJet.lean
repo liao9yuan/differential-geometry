@@ -1512,7 +1512,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
   set jetD : M → ℝ → Tensor0SBundle.TensorRSModel 0 2 ℝ E :=
     fun x t => iteratedDerivWithin j (fun s => (Rec s).toFun x) (Set.Icc (0 : ℝ) T) t
       with hjetD
-  -- per-fibre ContDiffWithinAt of the recon section path (fixed x), via the chart-repr
+
   have hfiberRepr : ∀ (α : M) (x : M), x ∈ (chartAt H α).source →
       ∀ t ∈ Set.Icc (0 : ℝ) T,
       ContDiffWithinAt ℝ ∞
@@ -1572,7 +1572,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
       exact (hLeq s).symm
     · simp only [Function.comp_apply]
       exact (hLeq t).symm
-  -- chart-repr of the time-jet section equals the time-jet of the recon chart-repr
+
   have hChartCommute : ∀ (α : M) (x : M), x ∈ (chartAt H α).source → ∀ t ∈ Set.Icc (0 : ℝ) T,
       DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
           (fun z : M => Tensor0SBundle.TensorRSSpace.ofModel (jetD z t)) x =
@@ -1627,7 +1627,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
     refine iteratedDerivWithin_congr ?_ ht
     intro s _
     exact hΦeq s
-  -- the chart-repr time-jet is jointly smooth on the chart source
+
   have hChartJet : ∀ α : M, ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
       (fun p : M × ℝ =>
@@ -1645,7 +1645,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
     intro p hp
     obtain ⟨hx, ht⟩ := hp
     exact hChartCommute α p.1 hx p.2 ht
-  -- the time-jet section bundle smoothness (conjunct (b))
+
   have hJet : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 0 2 I z) p.1
@@ -1719,7 +1719,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
       (e := trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α) hsource).mpr
       ⟨contMDiffWithinAt_fst, hfib⟩)
-  -- the x-direction slice of hJet at a fixed time in Icc gives a smooth section
+
   have hSlice : ∀ t : ℝ, t ∈ Set.Icc (0 : ℝ) T →
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
@@ -1733,7 +1733,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
     have hcomp := hJet.comp harg hmaps
     rw [contMDiffOn_univ] at hcomp
     exact hcomp
-  -- materialise Rjt: the jet section on Icc, zero elsewhere (off-Icc values are never used)
+
   set Rjt : ℝ → SmoothCcTensor g₀ 0 2 := fun t =>
     if ht : t ∈ Set.Icc (0 : ℝ) T then
       { toSection := ⟨fun x => Tensor0SBundle.TensorRSSpace.ofModel (jetD x t), hSlice t ht⟩
@@ -1755,7 +1755,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
     have : (Rjt t).toFun x = Tensor0SBundle.TensorRSSpace.toModel ((Rjt t).toSection x) := rfl
     rw [this, hRjtSection t ht x, Tensor0SBundle.TensorRSSpace.toModel_ofModel]
   refine ⟨Rjt, ?_, ?_⟩
-  · -- conjunct (a): the coefficient identity
+  ·
     intro i t ht
     haveI : IsFiniteMeasure
         (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
@@ -1764,7 +1764,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
       with hμ
     set eig := Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i
       with heig
-    -- spectral coefficient = fibre-inner integral
+
     have hcoeffInt : ∀ S : SmoothCcTensor g₀ 0 2,
         tensorL2Coeff (I := I) (M := M) hc
             (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S) i =
@@ -1778,7 +1778,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
           (Analysis.Parabolic.TensorSpectral.eigenvectorSmooth (I := I) (M := M) g₀ 0 2 i),
         SmoothCcTensor.inner_toL2, SmoothCcTensor.inner_def]
       rfl
-    -- integrand of the recon coefficient path
+
     set fInt : M → ℝ → ℝ := fun x s =>
       DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
         (eig.toFun x) ((Rec s).toFun x) with hfInt
@@ -1786,16 +1786,16 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
         (fun p : M × ℝ => fInt p.1 p.2) ((Set.univ : Set M) ×ˢ Set.Icc (0 : ℝ) T) :=
       deTurckRHSSection_realize_path_tensorInner_eigenSmooth_jointContMDiffOn (I := I) (M := M)
         g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass i
-    -- LHS rewrite via the integral form
+
     have hLHS_eq : (fun s => tensorL2Coeff (I := I) (M := M) hc
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rec s)) i)
         = fun s => ∫ x, fInt x s ∂μ := by
       funext s
       rw [hcoeffInt (Rec s)]
     rw [hLHS_eq]
-    -- push iteratedDerivWithin through the integral
+
     rw [iteratedDerivWithin_integral_param_Icc μ hT j fInt hfInt_joint t ht]
-    -- push iteratedDerivWithin through the fibre-inner CLM, fibre by fibre
+
     have hfiberJet : ∀ x : M, iteratedDerivWithin j (fun s => fInt x s) (Set.Icc (0 : ℝ) T) t =
         DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
           (eig.toFun x) (jetD x t) := by
@@ -1808,7 +1808,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
       rw [hfInt]
       rw [hjetD]
       exact hL
-    -- assemble: integral of the fibre jet = coefficient of Rjt t
+
     have hRHS_eq : (∫ x, iteratedDerivWithin j (fun s => fInt x s) (Set.Icc (0 : ℝ) T) t ∂μ)
         = ∫ x, DifferentialGeometry.Integral.L2.tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x
             (eig.toFun x) ((Rjt t).toFun x) ∂μ := by
@@ -1816,7 +1816,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
       simp only []
       rw [hfiberJet x, hRjtToFun t ht x]
     rw [hRHS_eq, ← hcoeffInt (Rjt t)]
-  · -- conjunct (b): joint smoothness
+  ·
     refine hJet.congr ?_
     intro p hp
     obtain ⟨_, ht⟩ := hp

@@ -17,7 +17,7 @@ class HasOrientableBoundary
     {I : ModelWithCorners ℝ E H} [hI : HasSmoothBoundary E H I]
     (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M] : Prop
 where
-  
+
   inwardCoord_chart_consistent :
     ∀ (α₀ α₁ : BoundaryManifold I M) (y : BoundaryManifold I M),
       (y : M) ∈ (chartAt H (α₀ : M)).source →

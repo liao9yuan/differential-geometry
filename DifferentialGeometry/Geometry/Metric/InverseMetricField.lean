@@ -60,7 +60,7 @@ lemma inverseMetricSharpFib_ne_zero_of_ne_zero (g : SmoothRiemannianMetric I M) 
     inverseMetricSharpFib (I := I) g x α ≠ 0 := by
   intro hzero
   apply hα
-  
+
   have hdual : cotangentToDualLinear (I := I) (x := x) α = 0 := by
     ext w
     rw [← inverseMetricSharpFib_inner (I := I) g x α w, hzero]

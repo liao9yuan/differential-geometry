@@ -3,31 +3,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.MeanInequalities
 
-/-!
-# Finite-product Hölder inequality for Riemannian fibre norms
-
-The generalized (finite-family) Hölder inequality in Bochner-integral form, and its
-instantiation to pointwise products of Riemannian fibre norms of smooth compactly supported
-tensor sections over the Riemannian volume measure.
-
-* `holder_integral_prod_rpow_le_prod_integral_rpow`: for a finite family of nonnegative
-  integrable functions `fᵢ` and weights `θᵢ ≥ 0` with `∑ θᵢ = 1`,
-  `∫ ∏ fᵢ ^ θᵢ ≤ ∏ (∫ fᵢ) ^ θᵢ` — the Bochner-integral form of
-  `ENNReal.lintegral_prod_norm_pow_le`.
-* `holder_integral_prod_riemannianFiberNormSq_le`: for a finite family of smooth compactly
-  supported `(r m, s m)`-tensor sections on a closed manifold and weights `0 < θ m` with
-  `∑ θ m = 1`, the integral of the pointwise product of squared fibre norms is bounded by
-  `∏ (∫ ‖·‖² ^ (1/θ m)) ^ θ m` — each factor is an `L^{1/θ m}` norm power of a squared
-  fibre norm, the exact per-factor shape consumed by the Gagliardo–Nirenberg fibre-norm
-  interpolation.
-* `holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound`: the mixed form where a
-  subfamily `t₀` of factors is bounded pointwise by constants and Hölder is applied to the
-  remaining factors.
-* `holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound`: the natural-number
-  weight specialization — factors of order `e m` with total order `∑ e m = k`, order-zero
-  factors sup-bounded, positive-order factors Hölder'd with exponents `k / e m`.
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -44,10 +19,6 @@ section ScalarHolder
 
 variable {α ι : Type*} [MeasurableSpace α] {μ : MeasureTheory.Measure α}
 
-/-- **Generalized Hölder inequality**, Bochner-integral form: for a finite family of
-nonnegative integrable functions `fᵢ` and nonnegative weights `θᵢ` summing to `1`,
-`∫ ∏ᵢ fᵢ ^ θᵢ ∂μ ≤ ∏ᵢ (∫ fᵢ ∂μ) ^ θᵢ`. Real-valued counterpart of
-`ENNReal.lintegral_prod_norm_pow_le`. -/
 theorem holder_integral_prod_rpow_le_prod_integral_rpow
     (t : Finset ι) (f : ι → α → ℝ) (θ : ι → ℝ)
     (hf_int : ∀ i ∈ t, MeasureTheory.Integrable (f i) μ)
@@ -115,11 +86,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedSectionVars false in
 
-/-- **Generalized Hölder inequality for Riemannian fibre norms**: for a finite family of
-smooth compactly supported `(r m, s m)`-tensor sections `S m` on a closed manifold and
-weights `0 < θ m` with `∑ θ m = 1`, the integral of the pointwise product of squared fibre
-norms is bounded by the product of the `L^{1/θ m}`-norm powers
-`(∫ ‖S m‖² ^ (1/θ m)) ^ θ m`. -/
 theorem holder_integral_prod_riemannianFiberNormSq_le
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (r s : ι → ℕ) (S : ∀ m, SmoothCcTensor g (r m) (s m)) (θ : ι → ℝ)
@@ -184,9 +150,6 @@ theorem holder_integral_prod_riemannianFiberNormSq_le
 
 set_option linter.unusedSectionVars false in
 
-/-- Mixed sup/Hölder bound for a finite product of squared fibre norms: factors in `t₀` are
-bounded pointwise by constants `Λ m`, and the generalized Hölder inequality with weights
-`θ` is applied to the remaining factors `t \ t₀`. -/
 theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} [DecidableEq ι]
     (t t₀ : Finset ι) (ht₀ : t₀ ⊆ t)
@@ -250,12 +213,6 @@ theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
 
 set_option linter.unusedSectionVars false in
 
-/-- Natural-number weight form of the mixed sup/Hölder bound, the per-tuple engine for
-order-graded products: each factor `m` carries order `e m` with total order
-`∑ m ∈ t, e m = k > 0`; order-zero factors are sup-bounded by `Λ m`, and positive-order
-factors are Hölder'd with exponent `k / e m`, producing exactly the
-`(∫ ‖·‖² ^ (k/e m)) ^ (e m/k)` factors consumed by the Gagliardo–Nirenberg fibre-norm
-interpolation. -/
 theorem holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (r s : ι → ℕ) (S : ∀ m, SmoothCcTensor g (r m) (s m))

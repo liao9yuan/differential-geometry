@@ -46,7 +46,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 structure sharpDiffPerKBdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (N : ℕ) where
-  
+
   h_pou_resolv : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s) (K' : ℕ)
     (β : M) (Q : TensorCompIdx (E := E) r s),
     K' ≤ N →
@@ -57,7 +57,7 @@ structure sharpDiffPerKBdd
           β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) :
           EuclN → ℝ) y)
       (chartTargetEuclid (I := I) (M := M) β)
-  
+
   Ceig : ℕ → ℝ
   eEig : ℕ → ℕ
   hCeig_nn : ∀ K', 0 ≤ Ceig K'
@@ -72,7 +72,7 @@ structure sharpDiffPerKBdd
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖
-  
+
   CresH : ℕ → ℝ
   eResH : ℕ → ℕ
   hCresH_nn : ∀ K', 0 ≤ CresH K'
@@ -91,7 +91,7 @@ structure sharpDiffPerKBdd
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖
-  
+
   CresL : ℕ → ℝ
   eResL : ℕ → ℕ
   hCresL_nn : ∀ K', 0 ≤ CresL K'
@@ -110,7 +110,7 @@ structure sharpDiffPerKBdd
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖
-  
+
   Cpar : ℕ → ℝ
   ePar : ℕ → ℕ
   hCpar_nn : ∀ K', 0 ≤ Cpar K'
@@ -128,7 +128,7 @@ structure sharpDiffPerKBdd
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖
-  
+
   Ccom : ℕ → ℝ
   eCom : ℕ → ℕ
   hCcom_nn : ∀ K', 0 ≤ Ccom K'
@@ -146,7 +146,7 @@ structure sharpDiffPerKBdd
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖
-  
+
   CcR : ℕ → ℝ
   eCcR : ℕ → ℕ
   hCcR_nn : ∀ K', 0 ≤ CcR K'
@@ -164,7 +164,7 @@ structure sharpDiffPerKBdd
           ‖tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M)
               g r s) i‖
-  
+
   Ccut : ℕ → ℝ
   eCcut : ℕ → ℕ
   hCcut_nn : ∀ K', 0 ≤ Ccut K'

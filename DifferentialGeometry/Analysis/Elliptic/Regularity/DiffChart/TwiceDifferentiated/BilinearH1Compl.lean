@@ -159,73 +159,73 @@ lemma densitySecondDerivOnEuclid_bounded_on_compact
 structure DiffTwiceChartBilinearH1ComplData
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) where
-  
+
   base1 : DiffChartBilinearH1ComplData (I := I) (M := M) g α
-  
+
   direction2 : Fin (Module.finrank ℝ E)
-  
+
   u_chart_deriv2 : EuclN → ℝ
-  
+
   f_chart_deriv2 : EuclN → ℝ
-  
+
   u_chart_second_deriv : EuclN → ℝ
-  
+
   weak_partial_deriv2 : Fin (Module.finrank ℝ E) → EuclN → ℝ
-  
+
   weak_partial_second_deriv : Fin (Module.finrank ℝ E) → EuclN → ℝ
-  
+
   u_chart_deriv2_isWeakPartial :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction2
       u_chart_deriv2 base1.u_chart_deriv
       (chartTargetEuclid (I := I) (M := M) α)
-  
+
   f_chart_deriv2_isWeakPartial :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction2
       f_chart_deriv2 base1.f_chart_deriv
       (chartTargetEuclid (I := I) (M := M) α)
-  
+
   u_chart_second_deriv_isWeakPartial :
     DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction2
       u_chart_second_deriv base1.u_chart_deriv
       (chartTargetEuclid (I := I) (M := M) α)
-  
+
   weak_partial_deriv2_isWeakPartial :
     ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction2
       (weak_partial_deriv2 i) (base1.weak_partial_deriv i)
       (chartTargetEuclid (I := I) (M := M) α)
-  
+
   weak_partial_second_deriv_isWeakPartial :
     ∀ i, DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) direction2
       (weak_partial_second_deriv i) (base1.weak_partial_deriv i)
       (chartTargetEuclid (I := I) (M := M) α)
-  
+
   u_chart_deriv2_locally_memLp :
     ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp u_chart_deriv2 2 ((volume : Measure EuclN).restrict K)
-  
+
   f_chart_deriv2_locally_memLp :
     ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp f_chart_deriv2 2 ((volume : Measure EuclN).restrict K)
-  
+
   u_chart_second_deriv_locally_memLp :
     ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp u_chart_second_deriv 2 ((volume : Measure EuclN).restrict K)
-  
+
   weak_partial_deriv2_locally_memLp :
     ∀ i, ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp (weak_partial_deriv2 i) 2
         ((volume : Measure EuclN).restrict K)
-  
+
   weak_partial_second_deriv_locally_memLp :
     ∀ i, ∀ K : Set EuclN, IsCompact K →
       K ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp (weak_partial_second_deriv i) 2
         ((volume : Measure EuclN).restrict K)
-  
+
   twice_differentiated_variational_identity :
     ∀ ψ : EuclN → ℝ, ContDiff ℝ (⊤ : ℕ∞) ψ → HasCompactSupport ψ →
       tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α →

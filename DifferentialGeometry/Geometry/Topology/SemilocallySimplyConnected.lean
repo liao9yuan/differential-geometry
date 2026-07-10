@@ -19,7 +19,7 @@ namespace Topology
 
 class SemilocallySimplyConnectedSpace (X : Type*) [TopologicalSpace X] :
     Prop where
-  
+
   out : ∀ x : X, ∃ U ∈ nhds x, ∀ γ : _root_.Path x x,
           Set.range γ.toContinuousMap ⊆ U →
             (⟦γ⟧ : _root_.Path.Homotopic.Quotient x x) = ⟦_root_.Path.refl x⟧
