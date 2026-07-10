@@ -31,7 +31,11 @@ namespace DifferentialGeometry
 open Set Topology
 
 /-- A sequence of topological spaces with open-embedding transition maps, bundled with
-the directed-system laws.  This is the input of the sequential direct limit. -/
+the directed-system laws.  This is the input of the sequential direct limit.
+
+The open-embedding hypothesis is structural, not cosmetic: it makes the stage ranges open in the
+limit.  A merely embedded image would not supply the open cover needed by the direct-limit topology
+or by the manifold charts in `DirectLimitManifold`. -/
 structure SeqSystem (A : ℕ → Type u) [∀ k, TopologicalSpace (A k)] where
   F : ∀ {k ℓ : ℕ}, k ≤ ℓ → A k → A ℓ
   map_self : ∀ (k : ℕ) (x : A k), F (le_refl k) x = x
@@ -42,6 +46,47 @@ structure SeqSystem (A : ℕ → Type u) [∀ k, TopologicalSpace (A k)] where
 namespace SeqSystem
 
 variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] (S : SeqSystem A)
+
+/-- Compose adjacent maps from stage `k` to any later stage using `Nat.leRecOn`. -/
+def succMap (f : ∀ k, A k → A (k + 1)) {k ℓ : ℕ} (h : k ≤ ℓ) : A k → A ℓ :=
+  fun x => Nat.leRecOn h (@fun k => f k) x
+
+/-- The composite of adjacent open embeddings is an open embedding. -/
+theorem succMap_isOpenEmb (f : ∀ k, A k → A (k + 1))
+    (hf : ∀ k, IsOpenEmbedding (f k)) {k ℓ : ℕ} (h : k ≤ ℓ) :
+    IsOpenEmbedding (succMap f h) := by
+  induction ℓ, h using Nat.le_induction with
+  | base =>
+      change IsOpenEmbedding (succMap f (Nat.le_refl k))
+      have hfun : succMap f (Nat.le_refl k) = id := by
+        funext x
+        exact Nat.leRecOn_self x
+      rw [hfun]
+      exact IsOpenEmbedding.id
+  | succ ℓ hkℓ ih =>
+      have hfun : succMap f (Nat.le.step hkℓ) = f ℓ ∘ succMap f hkℓ := by
+        funext x
+        exact Nat.leRecOn_succ hkℓ x
+      rw [hfun]
+      exact (hf ℓ).comp ih
+
+/-- Build a sequential direct system from adjacent open embeddings. -/
+def ofSucc (f : ∀ k, A k → A (k + 1)) (hf : ∀ k, IsOpenEmbedding (f k)) : SeqSystem A where
+  F h := succMap f h
+  map_self _ x := Nat.leRecOn_self x
+  map_map h₁ h₂ x := (Nat.leRecOn_trans h₁ h₂ x).symm
+  isOpenEmb h := succMap_isOpenEmb f hf h
+
+/-- Transition maps do not depend on the proof of `k ≤ ℓ`.  This keeps rewrites across
+common-stage choices such as `max k ℓ` from depending on proof-term accidents. -/
+theorem F_proof_irrel {k ℓ : ℕ} (h₁ h₂ : k ≤ ℓ) :
+    S.F h₁ = S.F h₂ := by
+  rw [Subsingleton.elim h₁ h₂]
+
+/-- Pointwise form of `F_proof_irrel`. -/
+theorem F_apply_irrel {k ℓ : ℕ} (h₁ h₂ : k ≤ ℓ) (x : A k) :
+    S.F h₁ x = S.F h₂ x := by
+  rw [S.F_proof_irrel h₁ h₂]
 
 /-- Two stage-points are related when they agree at some common later stage. -/
 def Rel (p q : Σ k, A k) : Prop :=
@@ -142,6 +187,18 @@ theorem iUnion_range_incl : ⋃ ℓ : ℕ, Set.range (S.incl ℓ) = Set.univ := 
   obtain ⟨ℓ, x, hx⟩ := S.exists_incl_eq z
   exact ⟨ℓ, x, hx⟩
 
+/-- Final-topology criterion for the direct limit: a set is open iff all stage preimages are open. -/
+theorem isOpen_iff_incl {U : Set S.Lim} :
+    IsOpen U ↔ ∀ k : ℕ, IsOpen (S.incl k ⁻¹' U) := by
+  constructor
+  · intro hU k
+    exact (S.continuous_incl k).isOpen_preimage U hU
+  · intro hU
+    apply isOpen_coinduced.mpr
+    rw [isOpen_sigma_iff]
+    intro k
+    simpa [incl] using hU k
+
 /-- MSM135 `lbl379` (compact sets in the direct limit): a compact subset of the limit
 is the embedded image of a compact subset of some stage. -/
 theorem isCompact_exists {K : Set S.Lim} (hK : IsCompact K) :
@@ -157,6 +214,16 @@ theorem isCompact_exists {K : Set S.Lim} (hK : IsCompact K) :
   have himg : IsCompact (S.incl (t.sup id) '' (S.incl (t.sup id) ⁻¹' K)) := by
     rwa [Set.image_preimage_eq_of_subset hsub]
   exact ((S.incl_isOpenEmb (t.sup id)).isEmbedding.isCompact_iff).mpr himg
+
+/-- Compact subsets of the direct limit lie in one stage range.  This is the finite-subcover
+consequence of the increasing open cover by stage ranges. -/
+theorem compact_subset_range {K : Set S.Lim} (hK : IsCompact K) :
+    ∃ k : ℕ, K ⊆ Set.range (S.incl k) := by
+  obtain ⟨k, Kk, _hKk, hK_eq⟩ := S.isCompact_exists hK
+  refine ⟨k, ?_⟩
+  rw [hK_eq]
+  rintro z ⟨x, _hx, rfl⟩
+  exact ⟨x, rfl⟩
 
 /-- MSM135 `lbl380`: a sequential direct limit of σ-compact stages is σ-compact. -/
 theorem sigmaCompact [∀ k, SigmaCompactSpace (A k)] : SigmaCompactSpace S.Lim := by
@@ -214,6 +281,20 @@ theorem continuous_lift {X : Type*} [TopologicalSpace X] (ψ : ∀ k, A k → X)
     (hcont : ∀ k, Continuous (ψ k)) : Continuous (S.lift ψ hψ) := by
   apply Continuous.quotient_lift
   exact continuous_sigma fun k => hcont k
+
+/-- Final-topology continuity criterion: a map out of the direct limit is continuous iff its
+restrictions to all stages are continuous. -/
+theorem continuous_iff_incl {X : Type*} [TopologicalSpace X] {f : S.Lim → X} :
+    Continuous f ↔ ∀ k : ℕ, Continuous (f ∘ S.incl k) := by
+  constructor
+  · intro hf k
+    exact hf.comp (S.continuous_incl k)
+  · intro hf
+    rw [continuous_def]
+    intro U hU
+    rw [S.isOpen_iff_incl]
+    intro k
+    simpa [Function.comp_def] using (hf k).isOpen_preimage U hU
 
 end SeqSystem
 

@@ -2,9 +2,14 @@
 
 Source used: MSM135 Chapter 3, especially the pointed-solution and compactness-theorem statements. Chapter 4 was used only to identify the metric compactness/direct-limit backend as the proof frontier.
 
-Introduced definitions: `PointedFlowData`, `PointedFlowSeq`, `CompleteInput`, `CurvBoundInput`, `InjInput`, and `NoncollapseInput`. The metric-only pointed Riemannian definitions now live in `PointedRiemannian.lean`.
+Introduced definitions: `PointedFlowData`, `PointedFlowSeq`, `CompleteInput`, `CurvBoundInput`, and `InjInput`. The metric-only pointed Riemannian definitions now live in `PointedRiemannian.lean`.
 
-Existing APIs found: RicciFlower already has `RicciFlow.SolutionOn`, `RicciFlow.IsSolutionOn`, `Realized.RealTimeInterval`, and canonical lowered curvature via `S.base.rm04`. The HCG injectivity-radius layer now uses the normal-coordinate backend; the legacy `InjInput` and `NoncollapseInput` remain compatibility input packages for older wrappers.
+2026-07-09: removed the arbitrary numeric `NoncollapseInput`.  Canonical volume
+noncollapse now uses `FlowBaseVolData` plus `IsFlowBaseVolBound` in
+`NoncollapseInjectivity.lean`, based on actual metric balls and Riemannian
+volume.  The real compactness theorem continues to consume `FlowBaseInjBound`.
+
+Existing APIs found: RicciFlower already has `RicciFlow.SolutionOn`, `RicciFlow.IsSolutionOn`, `Realized.RealTimeInterval`, and canonical lowered curvature via `S.base.rm04`. The HCG injectivity-radius layer now uses the normal-coordinate backend; only the legacy `InjInput` remains for older wrappers.
 
 2026-05-28 legacy-input clarification: `InjInput` and `NoncollapseInput` are explicitly compatibility baggage. `InjInput.injRadiusAtBase` is not connected to the normal-coordinate injectivity radius, and `NoncollapseInput.volumeAtBase` is not yet tied to a formalized Riemannian volume computation. New compactness statements should use `FlowBaseInjBound`, not `InjInput`.
 

@@ -13,8 +13,8 @@ set_option linter.unusedSectionVars false
 `centerOfMass_contDiffAt` (`lbl430`(ii)) proves the center of mass is `C^n` for every finite `n`.
 That is *regularity*, not *bounds*: it gives no uniform-in-configuration constants.  This file is the
 **quantitative half** — eq `lbl431`, `|∇_q^α ∇_μ^β cm| ≤ C̃_{|α|+|β|+1}` uniform over configurations
-at the book scale (`r < c(n)/√C₀`, `inj(q) > 3r`) — which gates `stepB1_approxIso`'s `(ε, p)`
-conjunct.
+at the book scale (`r < c(n)/√C₀`, `inj(q) > 3r`) — which is needed to produce the arbitrary-order
+metric bounds inside `StepB1RawInput`.
 
 ## Book route (chapter4.tex L2709+, proof of `lbl430`(i)) — mirrored, not a general IFT engine
 The center of mass `cm` is the unique zero of `G(q) = Σ μᵢ exp_q⁻¹ qᵢ`.  The book:
@@ -25,8 +25,10 @@ The center of mass `cm` is the unique zero of `G(q) = Σ μᵢ exp_q⁻¹ qᵢ`.
    `‖D cm‖ ≤ Λ B₁`; order `j` isolates `∂_z G · D^j cm = −(poly in D^{<j} cm and D^{≤j} G)` and bounds
    by induction with `Λ`, `B_{≤j}`.
 
-This file provides the base case (order 1) natively, the two honest inputs (1)/(2), and states the
-endpoint with the `j ≥ 2` inductive step as the remaining frontier.  See `StepCDerivBounds.md`.
+This file proves the order-one and order-two bounds (`cmChartFDerivLe`, `cmChartDerivLe2`) and the
+reusable higher-order Faà-di-Bruno bricks.  It deliberately does not state the arbitrary-order
+endpoint until order-`p` regularity and a recursive numerical majorant are threaded honestly.
+See `StepCDerivBounds.md`.
 -/
 
 noncomputable section
@@ -755,33 +757,30 @@ theorem cmChartFDerivLe
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Endpoint — eq `lbl431`, quantitative covariant-derivative bounds of the center of mass.**
-`‖∇^j (normalChartAt g p ∘ cm)‖ ≤ C̃ j` for `j ≤ pOrd`, uniform over configurations satisfying the
-audited inputs `hbd` (`CmHessianBoundInput`, `Λ`) and `hGbd` (`CmGDerivBound`, `B`).  The constants
-`C̃` are the book's `C̃_{|α|+|β|+1}(n, inj(p), C₀,…,C_{…})` (existence asserted; taken here as given,
-compatible with the base cases via `hC0`/`hC1`).
+/-- **Order-two part of eq `lbl431`, quantitative derivative bounds of the center of mass.**
+`‖D^j (normalChartAt g p ∘ cm)‖ ≤ C̃ j` for `j ≤ 2`, uniformly over configurations satisfying the
+audited inputs `hbd` (`CmHessianBoundInput`, `Λ`) and `hGbd` (`CmGDerivBound`, `B`).
 
-`j = 0` (`‖cm‖ ≤ C̃ 0`), `j = 1` (`cmChartFDerivLe`, `‖∇ cm‖ ≤ Λ·B₁ ≤ C̃ 1`), and `j = 2` are
-native.  The `j = 2` case is Route A landed: the neighbourhood implicit-derivative formula
+`j = 0` (`‖cm‖ ≤ C̃ 0`) and `j = 1` (`cmChartFDerivLe`, `‖D cm‖ ≤ Λ·B₁ ≤ C̃ 1`) are the base
+cases.  The `j = 2` case uses the neighbourhood implicit-derivative formula
 (`implicitFDeriv_eventuallyEq`, fed by the `C²` regularity `hf2`/`hG2` and the neighbourhood
 Hessian input `hnbhd`) differentiates once more via `implicitDeriv_two_le`, with the block
 derivatives supplied by `graphBlockDeriv` from `‖∇²G‖ ≤ B 2` and `‖∇f‖ ≤ Λ·B₁`; the constant is
-`C̃₂ = Λ'²·a₂·B₁ + Λ'·a₂` with `a₂ = B₂·(Λ·B₁+1)` (`hC2`).  The remaining `sorry` is `j ≥ 3` —
-the pure (c) recursion `D^j f = D^{j−1}(−(∂_zG)⁻¹∘∂_pG)`, a strong induction through
-`norm_iteratedFDeriv_comp_le` with recursive `C̃`; the analytic ingredients (the Neumann bound
-`norm_iteratedFDeriv_ringInverse_le`, the formula, the block engine) are all proved above. -/
-theorem cmChartDerivLe
+`C̃₂ = Λ'²·a₂·B₁ + Λ'·a₂` with `a₂ = B₂·(Λ·B₁+1)` (`hC2`).  The arbitrary-order theorem is not
+stated here: it additionally needs order-`p` regularity and an explicit recursive construction of
+`C̃`; neither follows from the order-two hypotheses below. -/
+theorem cmChartDerivLe2
     [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
       ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E)) (pOrd : ℕ)
+    (p : M) {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
     (hbd : CmHessianBoundInput (I := I) g hEnorm p z₀ params₀)
     (B : ℕ → ℝ)
     (Dj : (E × ((ι → ℝ) × (ι → E))) →L[ℝ] E)
     (hG : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => chartCmEqn' (I := I) g hEnorm p w.1 w.2)
       Dj (z₀, params₀))
-    (hGbd : CmGDerivBound (I := I) g hEnorm p z₀ params₀ pOrd B)
+    (hGbd : CmGDerivBound (I := I) g hEnorm p z₀ params₀ 2 B)
     (c : ((ι → ℝ) × (ι → E)) → M) (Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E)
     (hcderiv : HasFDerivAt
       (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df params₀)
@@ -796,11 +795,11 @@ theorem cmChartDerivLe
     (hnbhd : CmHessianNbhdInput (I := I) g hEnorm p c params₀)
     (Ctil : ℕ → ℝ)
     (hC0 : ‖z₀‖ ≤ Ctil 0)
-    (hC1 : 1 ≤ pOrd → hbd.Λ * B 1 ≤ Ctil 1)
-    (hC2 : 2 ≤ pOrd →
+    (hC1 : hbd.Λ * B 1 ≤ Ctil 1)
+    (hC2 :
       hnbhd.Λ ^ 2 * (B 2 * (hbd.Λ * B 1 + 1)) * B 1
         + hnbhd.Λ * (B 2 * (hbd.Λ * B 1 + 1)) ≤ Ctil 2) :
-    ∀ j : ℕ, j ≤ pOrd →
+    ∀ j : ℕ, j ≤ 2 →
       ‖iteratedFDeriv ℝ j
           (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀‖
         ≤ Ctil j := by
@@ -814,7 +813,7 @@ theorem cmChartDerivLe
       rwa [norm_iteratedFDeriv_one, hG.fderiv] at h
     exact le_trans
       (cmChartFDerivLe (I := I) g hEnorm p z₀ params₀ hbd Dj (B 1) hG hB c Df hcderiv hc0 hc_solves)
-      (hC1 hj)
+      hC1
   · -- j = 2: Route A — the neighbourhood formula differentiated once (`implicitDeriv_two_le`).
     -- Eventual differentiability of `f = chart ∘ c` from the `C²` regularity.
     have hf_ev : ∀ᶠ q in nhds params₀,
@@ -841,7 +840,7 @@ theorem cmChartDerivLe
       exact (hq.differentiableAt (by norm_num)).hasFDerivAt
     -- `‖∇f‖ ≤ Λ·B₁` (the `j = 1` content) and the second-derivative datum `H'` with `‖H'‖ ≤ B₂`.
     have hB1 : ‖Dj‖ ≤ B 1 := by
-      have h := hGbd 1 (le_trans one_le_two hj)
+      have h := hGbd 1 (by omega)
       rwa [norm_iteratedFDeriv_one, hG.fderiv] at h
     have hDf_le : ‖Df‖ ≤ hbd.Λ * B 1 :=
       implicitDeriv_one_le (fun z params => chartCmEqn' (I := I) g hEnorm p z params) z₀ params₀
@@ -925,9 +924,8 @@ theorem cmChartDerivLe
         ((NormalCoordinates.normalChartAt (I := I) g p (c q) : E), q))
       A' B' hnbhd.Λ (B 2 * (hbd.Λ * B 1 + 1)) (B 1) (B 2 * (hbd.Λ * B 1 + 1))
       hf_ev hG_ev hc_solves hnbhd.ev_isUnit hAd hBd hnbhd.inv_le hb₁ ha₂ hb₂
-    exact hmain.trans (hC2 hj)
-  · -- j ≥ 3: the pure (c) recursion (strong induction through `norm_iteratedFDeriv_comp_le`).
-    sorry
+    exact hmain.trans hC2
+  · omega
 
 end CmBounds
 

@@ -1624,6 +1624,23 @@ private theorem radial_riemannianEDist_eq_radius
     rw [radialCurve_pathELength_eq (I := I) g p a hEnorm ha_eucl]
   exact le_antisymm hle hge
 
+/-- Inside the intrinsic exponential radius, the Riemannian distance to a
+radial exponential point equals the `g_p`-length of its launch vector.  The
+small-radius hypothesis supplies the normal-chart and exponential-domain
+memberships needed by the underlying radial-distance identity. -/
+theorem edist_exp_eq_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {a : E}
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (ha_small : Real.sqrt (g.inner p a a) < expRadiusGp (I := I) g p) :
+    riemannianEDist I p (expMap (I := I) g p (show TangentSpace I p from a))
+      = ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  have ha_eucl : ‖a‖ < expMapC2Radius (I := I) g p :=
+    norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p ha_small
+  exact radial_riemannianEDist_eq_radius (I := I) g p hEnorm
+    (mem_expDomain_of_norm_lt_radius (I := I) g p ha_eucl)
+    (ball_subset_normalChartAt_target (I := I) g p ha_eucl) ha_small
+
 /-- **Short-time confinement of a curve to the small normal ball at its
 launch point.** If `γ` is `C¹` on `[a, b]` with `γ t₀ = q` at an interior
 parameter `t₀ ∈ (a, b)`, then there is a `δ > 0` such that the forward sub-arc

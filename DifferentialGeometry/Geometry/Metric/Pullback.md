@@ -10,3 +10,9 @@ HCG open comparison domains use `Diffeomorph.pullbackMetric` after constructing
 their open-subtype restricted target metrics.
 
 Verification: passed for this file.
+
+## 2026-07-09: pullback composition
+
+Added `Diffeomorph.pullbackMetric_trans`: pullback through `Phi.trans Psi` is the
+iterated pullback through `Psi` and then `Phi`. The proof is pointwise from
+`pullbackMetric_inner` and `mfderiv_comp`. Focused verification passed.

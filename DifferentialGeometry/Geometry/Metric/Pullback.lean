@@ -276,6 +276,34 @@ theorem Diffeomorph.pullbackMetric_refl
   unfold Diffeomorph.pullbackMetric
   congr 1
 
+/-- Pulling a metric back through a composite diffeomorphism is the iterated pullback. -/
+theorem Diffeomorph.pullbackMetric_trans
+    {P : Type*} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
+    [SigmaCompactSpace M] [T2Space M] [SigmaCompactSpace N] [T2Space N]
+    (g : SmoothRiemannianMetric I P) (Φ : M ≃ₘ⟮I, I⟯ N) (Ψ : N ≃ₘ⟮I, I⟯ P) :
+    Diffeomorph.pullbackMetric (Diffeomorph.pullbackMetric g Ψ) Φ =
+      Diffeomorph.pullbackMetric g (Φ.trans Ψ) := by
+  have metric_ext : ∀ (g₁ g₂ : SmoothRiemannianMetric I M),
+      (∀ (x : M) (v w : TangentSpace I x), g₁.inner x v w = g₂.inner x v w) → g₁ = g₂ := by
+    intro g₁ g₂ h
+    obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g₁
+    obtain ⟨i₂, s₂, p₂, b₂, c₂⟩ := g₂
+    have hi : i₁ = i₂ :=
+      funext fun x => ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => h x v w
+    subst hi
+    rfl
+  apply metric_ext
+  intro x v w
+  rw [Diffeomorph.pullbackMetric_inner, Diffeomorph.pullbackMetric_inner,
+    Diffeomorph.pullbackMetric_inner]
+  have hcomp : mfderiv I I (Φ.trans Ψ : M → P) x =
+      (mfderiv I I (Ψ : N → P) (Φ x)).comp (mfderiv I I (Φ : M → N) x) :=
+    mfderiv_comp x
+      (Ψ.contMDiff.mdifferentiableAt (by decide : (∞ : WithTop ℕ∞) ≠ 0))
+      (Φ.contMDiff.mdifferentiableAt (by decide : (∞ : WithTop ℕ∞) ≠ 0))
+  rw [hcomp]
+  rfl
+
 /-- Smoothness of the pullback inner-product section over `M`.
 This is exactly the `contMDiff` field of `Diffeomorph.pullbackMetric g Φ`. -/
 theorem Diffeomorph.pullbackInner_contMDiff

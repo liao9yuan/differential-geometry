@@ -306,3 +306,15 @@ finite good-frame cover of `K` via `metricDerivNorm_le_compSq_uniform` — the s
 finite-cover pattern as `ric_bound`, already the plan of record (line 196,
 MetricPreconvBridge.md:154-160).  No uniform-vs-pointwise conversion lemma is
 missing.
+
+## 2026-07-09: per-order reference chart input
+
+Refactored the shared-bump finite-family proof through private `engine_input_family`, whose only
+analytic input is the already-converted chart-component bound. The original
+`exists_chart_engineInput_family` statement is retained as a wrapper. Added `engine_input_refs`,
+which supplies the same chart functions from `metricComp_iter_refs` when the reference metric may
+depend on the requested order.
+
+Focused verification and the targeted module build both pass. The same checked file now also exports
+`exists_chart_refs`, the single-chart `C^∞` extractor consumed by the diagonal limit spine. No new
+proof frontier was introduced in this conversion layer.

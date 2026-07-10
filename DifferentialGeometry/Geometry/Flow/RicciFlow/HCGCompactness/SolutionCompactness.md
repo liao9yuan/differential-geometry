@@ -1,5 +1,25 @@
 # SolutionCompactness
 
+## 2026-07-09 canonical consumer
+
+`solutionComp_of_mc` is now the canonical theorem-facing consumer. It takes a
+specific `MetricCompactnessConclusion (X.atZero)` and concrete
+`FlowUpgradeData X mc`; it neither invokes the unconditional
+`metricCompactness` frontier nor accepts the desired conclusion as input.
+
+The zero-callsite legacy APIs `SmoothFlowLimitInput`,
+`smoothFlowLimitInput_of_flowLimitData`, and `solutionCompactness` were removed.
+They accepted the desired compactness conclusion through an `upgrade` field and
+therefore obscured rather than solved the flow-compactness producer frontier.
+
+This consumer refactor is 100% complete. The checked conditional consumer is
+100%, while unconditional Theorem 3.10 remains 0%; its dedicated producer
+machinery is tracked separately in the P4 notes. The project-wide endpoint
+remains 0%, and the current HCG machinery estimate is about 45%.
+
+The material below predates the 2026-07-09 removal and is retained only as
+historical design context.
+
 Source used: MSM135 Definition 3.6 and Theorem 3.10, with the Pro review warning that curvature bounds alone do not supply the derivative-estimate backend in Lean.
 
 Introduced definitions: `SmoothFlowLimitInput` and `solutionCompactness`.

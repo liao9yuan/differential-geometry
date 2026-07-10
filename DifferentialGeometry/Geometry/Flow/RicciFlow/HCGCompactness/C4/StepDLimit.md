@@ -34,6 +34,21 @@ NormedSpace slot ⟹ the structure's `I`-metavariable freezes and the error surf
 the consumer file's instance set exactly (drop `NormedSpace`, keep `InnerProductSpace`).  Diagnose
 with `#check @Struct` probes (the probe shows the real baked spine).
 
+## D4b/c source-domain bridge checked (2026-07-09)
+
+`limitCGMapsOf` separates the sequence-stage metrics from the cocycle family used to glue the
+limit metric. `limitCGConverges` takes uniform compact-open seminorm convergence on every stage and
+constructs `PointedRiemannianCGConverges` for the direct-limit comparison maps. The proof identifies
+the restricted limit metric with the pullback of the stage-limit metric using
+`limitMetric_of_mem`, transports all three metric slots by
+`metricDerivNormSupOn_pullback_image`, and removes the target open subtype with
+`metricDerivNormSupOn_restrictOpen`.
+
+Focused verification passed without new `sorry`. The remaining D4 endpoint packaging is the
+ambient-target lift: current chain instantiation has codomain carrier `U k`, while the final
+compactness conclusion needs codomain carrier `M k` with target set `U k`. The next API should lift
+`inclPartialDiffeo` through the open-subtype embedding, not reprove the convergence estimate.
+
 ## D5 distance cornerstones DONE (2026-07-07, same session, §StepD5) — green + axiom-clean
 1. `enorm_mfd_incl` — **pointwise isometry** `‖mfderiv (incl k) a v‖ₑ = ‖v‖ₑ` under the two
    `RiemannianBundle` letI's.  Proof = the `TangentNormDiamond` idiom verbatim:
@@ -89,15 +104,53 @@ with `#check @Struct` probes (the probe shows the real baked spine).
    ASCRIBED `exact (complete_of_proper : CompleteSpace S.toSeqSystem.Lim)` (the ascription pins
    `α` so the metric-vs-emetric uniformity defeq check fires).
 
-### D5 status: **COMPLETE** (all mathematical content + endpoint).
-Remaining Step D: D1 (D1a heavy: bump-extension + partial cov-norm naturality), D2 (`lbl404`
-gate), D4b/c, D6 (instantiation + honest-input discharges: the metric exhaustion here, from the
-`2^k`-ball structure + `lbl367`; `hcpt` from members' `ProperMetricOn`).
+### Historical D5 status: conditional consumer complete; concrete producer not complete.
+The 2026-07-09 audit below retracts the claim that `hcpt` follows from members'
+`ProperMetricOn`: the stages are open balls. Concrete D5 still needs metric exhaustion and an
+honest compact-cover producer.
+
+## 2026-07-09 review fill — hidden Hamilton assumptions live here, not in D3
+
+The direct-limit review's hidden Hamilton assumptions are already separated at this layer.
+`limitPointed`/`limitPointedCoc` consume finite-dimensionality, `CompleteSpace E`,
+`SigmaCompactSpace`, `T2Space`, basepoint data, the smooth metric family, and the tangent-level
+metric cocycle.  `limitCGMaps` consumes the open range exhaustion and basepoint transport.
+`limitComplete` consumes the genuinely metric inputs: metric exhaustion (`hexh`), stage-ball
+compactness (`hcpt`), preconnected stages, `[NeZero (finrank ℝ E)]`, and `[I.Boundaryless]`.
+
+Completeness, connectedness, and Hamilton properness/exhaustion are therefore not consequences of
+the bare direct-limit manifold. They remain consumer assumptions/proved endpoints in D4–D6 and
+should not be hidden inside `SeqSystem` or `SmoothSeqSystem`.
 
 ## Consumers (future Step D lanes)
 - D4a: comparison maps `Φ k := (incl k)⁻¹` — use `SmoothSeqSystem.contMDiffAt_invIncl` +
   `contMDiff_incl`; the reference-metric pullback identity is `limitMetric_pullback`.
-- D5: completeness of `limitPointedCoc` (`MetricComplete`) via `isCompact_exists` + per-member
-  properness — separate brick.
+- D5: completeness of `limitPointedCoc` (`MetricComplete`) via metric exhaustion plus compact
+  stage covers; open-stage properness is unavailable.
 - D6: instantiate `S`/`g`/`hg` from the D1/D2 outputs (subsequence re-index folds into the
   `SmoothSeqSystem`).
+
+## 2026-07-09: D5 correction after concrete-stage audit
+
+The earlier claim that `hcpt` follows from the members' properness is false for the actual open
+ball stages. A restricted metric on an open ball need not be proper, even when the ambient member
+is proper. Consequently the old conditional `limitComplete` is not a completed concrete D5
+producer.
+
+The corrected abstract API is checked:
+
+- `HasCompactBallCover` asks directly for a compact stage cover of every finite limit ball.
+- `compactCover_of_step` combines metric exhaustion with compact containment of each successor
+  image.
+- `compact_cball_cover` and `limitComplete_cover` derive compact limit balls and completeness.
+
+This API removes the false open-stage properness assumption, but it does not manufacture metric
+exhaustion. The attempted shortcut from relatively compact successor images to completeness is
+also false: relative compact nesting alone does not prevent Cauchy sequences from approaching a
+boundary missing from the union. This is route error 3/3 in the restarted audit.
+
+Concrete D5 remains 0% as a theorem from the Step-D geometric data. Its dedicated abstract
+consumer machinery is about 80%; the missing mathematical producer is a quantitative statement
+that the distance from the limit basepoint to the complement of the `n`th stage tends to infinity.
+The checked `tailSystem_compact` brick supplies compact containment once that metric-exhaustion
+statement is proved.

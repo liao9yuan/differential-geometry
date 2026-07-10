@@ -1,20 +1,59 @@
 # FlowLimitUpgrade.lean — P4 assembly skeleton (MSM135 Thm 3.10 upgrade)
 
-Plan: `C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md`.
+Historical plan pointer (superseded):
+`C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md`.  Current producer
+state is tracked in the repo by `P4_CONV_PLAN.md` and `ConvFieldEndgame.md`.
 
-## Landed + verified (2026-06-17, axiom-clean, build green 3789 jobs)
+## 2026-07-09: concrete upgrade boundary
+
+`FlowUpgradeData X mc` is now the canonical producer package above
+`FlowLimitData`. It exposes the further strictly monotone subsequence and the
+actual limit-flow data over `mc.compSubseq`; `FlowUpgradeData.toConclusion` is
+the only assembly step. This package cannot be populated by supplying the
+desired `CompactnessConclusion`.
+
+`FlowLimitData` now also records `hL0 : L.atTime 0 = mc.limit`. This is the
+pointed-limit invariant that makes the package an upgrade of the specific
+Theorem 3.9 conclusion `mc`, rather than unrelated smooth-limit data sharing
+only its subsequence. The endgame producer supplies it from its two comparison
+equalities; removing that equality input would weaken the canonical API.
+
+Focused verification passed for this module and the downstream
+`ConvFieldEndgame` and `SolutionCompactness` consumers; the exported-module
+refresh also passed.
+
+The module no longer imports `SolutionCompactness`, so the low-level P4
+assembly is independent of the theorem-facing API.  The former exact-conclusion
+adapter was removed; `solutionComp_of_mc` and the conditional wrappers consume
+`FlowUpgradeData` directly.
+
+Focused verification and the targeted module refresh passed. Refactor item 5
+at this boundary: 100%. The conditional Theorem 3.10 consumer assembly from an
+honest Theorem 3.9 conclusion and concrete upgrade data is 100% checked. Unconditional
+Theorem 3.10: 0%; this refactor does not prove Theorem 3.9 or discharge the
+remaining P4 producer hypotheses. The project-wide endpoint remains 0%; the
+current project map's separate Chapter 4 machinery estimate remains about 59%,
+while whole-HCG machinery remains about 45%.
+
+> **Superseded as current instructions (2026-07-09).**  Everything below this
+> notice is retained as an implementation log.  In particular, the old
+> “Remaining”, “RESUME HERE”, and 3.10⇐3.9 wiring instructions must not be used
+> as the live handoff; use the canonical `FlowUpgradeData` boundary above plus
+> `P4_CONV_PLAN.md` / `ConvFieldEndgame.md`.
+
+## Historical: landed + verified (2026-06-17, axiom-clean, build green 3789 jobs)
 
 - `FlowLimitData X mc` — bundles the P4 frontier ingredients given the time-zero
   conclusion `mc : MetricCompactnessConclusion (X.atZero)`: `L` (Brick A, limit
-  flow), `maps` (Brick B), `scalar` (Brick E), `hσsrc`/`hσtgt`/`refMetric`
+  flow), `hL0` (its time-zero pointed-limit identification), `maps` (Brick B),
+  `scalar` (Brick E), `hσsrc`/`hσtgt`/`refMetric`
   (Brick C inputs), `conv` (Brick D, the window norm-bridge output).
 - `flowLimit_upgrade` — PROVES the upgrade arrow: assembles `FlowLimitData`
   through the already-built `SmoothCGHConverges.ofRestrictPullback` →
   `CompactnessConclusion X`. **Brick F's core (correctly feeding the keystone
   constructor) is DONE.**
-- `smoothFlowLimitInput_of_flowLimitData` — produces the theorem-facing
-  `SmoothFlowLimitInput X` (previously assumed at 4 sites, never produced) from a
-  per-`mc` `FlowLimitData` builder.
+- Historical adapter `smoothFlowLimitInput_of_flowLimitData` — removed on
+  2026-07-09 with the exact-conclusion compatibility API.
 
 So the P4 assembly is verified; the previously-opaque `upgrade` is now a proved
 theorem modulo the explicit honest frontier fields.
@@ -39,6 +78,7 @@ instance syntax infers the frontier field types from the supplied `maps`:
 ```lean
 flowLimit_upgrade X mc
   { L := L
+    hL0 := hL0
     maps := cghMaps_of_hL0 X mc L hL0   -- Brick A+B, the only non-frontier field
     scalar := …      -- Brick E (honest frontier input)
     hσsrc := …; hσtgt := …; refMetric := …   -- Brick C inputs
@@ -52,7 +92,7 @@ implementation, no redundant adapters). The honest frontier fields stay as
 `FlowLimitData` fields (item #4), so the structure itself is the intended input
 interface; `cghMaps_of_hL0` is the producer that makes it constructible.
 
-## Remaining — discharge the `FlowLimitData` fields (the per-brick work)
+## Historical field-discharge checklist (superseded as a current task)
 
 - **Brick A** (`L`): the limit Ricci flow on `mc.limit.M` with metric `gInf`
   (Lemma 3.11 output) + `IsSolutionOn` (limit-is-a-solution — HARD). Build `L`
@@ -71,7 +111,7 @@ interface; `cghMaps_of_hL0` is the producer that makes it constructible.
   on `M_∞`. The keystone bridge; consumes `hShi` (honest input).
 - **Brick E** (`scalar`): `ScalarPullbackTendsto` from `C^∞` metric convergence.
 
-## ▶ RESUME HERE (updated 2026-07-01) — final assembly phase, plan = `P4_CONV_PLAN.md`
+## Historical resume point (superseded 2026-07-09 — do not resume here)
 
 The transport layer is COMPLETE (all sorry-free, build-verified): P1.1 `convexComb`
 (`Geometry/Metric/ConvexCombination.lean`), P1.2 `bumpExtendOpen` (`Geometry/Metric/
@@ -98,7 +138,7 @@ to grep). Fixes were: `open scoped Classical` for the `dite (x∈U)`; removed a 
 `omit [FiniteDimensional ℝ E]`; closed a rw-motive-cast `X=X` via
 `DFunLike.congr_fun (DFunLike.congr_fun (dif_pos hx) v) w`.
 
-## 3.10 ⇐ 3.9 wiring plan (CORRECTED SCOPE 2026-06-21 — follows MSM135 §lbl352)
+## Historical 3.10 ⇐ 3.9 wiring plan (superseded as the current route)
 
 The upgrade IS the book's "compactness for solutions from compactness for metrics"
 (§lbl352). **BBS/Shi is a CITED input, not a proof obligation** — see
@@ -113,7 +153,7 @@ Book steps and their Lean status:
 3. Assemble into solution convergence : `flowLimit_upgrade` — **DONE**.
 4. "limit is a solution" : `ricci_continuous_in_metric_time` — **DONE** (one-sentence Ricci-continuity).
 
-**THE ONE REMAINING FRONTIER = the norm bridge (old "Brick D"), now precisely pinned:**
+**HISTORICAL FRONTIER (SUPERSEDED) — the old norm-bridge diagnosis:**
 `winGInfOfSol` gives the covariant norm for TOTAL metrics on M_∞; the `conv` field needs
 it on the per-k SourceDomain SUBTYPE (Φ_k is a `PartialDiffeomorph`, so Φ_k^*g_k only
 lives on the source `U_k`). Bridge = **restriction-invariance of `metricDerivNormSupOn`**:
@@ -123,11 +163,11 @@ submanifold. Building block: `covDerivAlong_restrict_eq_leviCivita`
 the only genuine missing lemma; the rest (`SolWindowData` for Φ_k^*g_k from the cited Shi
 bounds, threading `hσsrc`/`hσtgt`/`refMetric`) is pullback bookkeeping.
 
-Remaining work, in order: (a) `metricDerivNorm`/`metricDerivNormSupOn` restriction-invariance
+Historical work list (superseded): (a) `metricDerivNorm`/`metricDerivNormSupOn` restriction-invariance
 lemma; (b) `SolWindowData` builder for the pulled-back flows (cited `hShi` → `H0`/`Hcov`/`Hlip`);
 (c) `conv` producer = `winGInfOfData` ∘ (b) bridged by (a); (d) wire through `flowLimit_upgrade`.
 
-### Progress + the conv-field frontier (2026-06-21)
+### Historical progress + conv-field frontier (2026-06-21; superseded)
 
 - **(a) DONE, verified.** `metricDerivNorm_restrictOpen` (pointwise, via "Koszul is local":
   `OpenSubtypeNaturality.lean` bracket/Koszul/connection restriction) + **`metricDerivNormSupOn_restrictOpen`**
@@ -171,7 +211,6 @@ lemma; (b) `SolWindowData` builder for the pulled-back flows (cited `hShi` → `
 - Per the approved plan (scope = "frontiers as inputs"), `hShi` and the Thm-3.9
   conclusion stay honest inputs (`mc` is the Thm-3.9 conclusion; `hShi` enters
   Brick D's `winGInfOfSol` application).
-- The user chose to EXPAND `SmoothFlowLimitInput` (vs the producer route); the
-  full expand+rewire of `SolutionCompactness.lean`'s structure + 4 consumers is
-  Brick F-final. For now `smoothFlowLimitInput_of_flowLimitData` bridges to the
-  existing structure without touching consumers.
+- Superseded design choice: the exact-conclusion compatibility structure and
+  its bridge were removed on 2026-07-09.  Canonical consumers now take
+  `FlowUpgradeData` directly.

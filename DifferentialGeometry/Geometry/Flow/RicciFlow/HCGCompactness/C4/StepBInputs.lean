@@ -219,6 +219,67 @@ theorem normalCoordMetric_apply
     ContinuousLinearMap.precomp_apply]
   rfl
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The extended norm of a radial exponential-curve velocity is the square root
+of the normal-coordinate metric in the radial direction.  This is the
+`normalCoordMetric`-facing form of `mfderiv_exp_radial` used by the Step-B
+basepoint-separation argument. -/
+theorem radialEnorm_normal
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
+    (v : E) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      ⟨Y.metric.toRiemannianMetric⟩
+    ∀ (t : Real), ‖t • v‖ < expMapC2Radius (I := I) Y.metric x →
+    ‖mfderiv 𝓘(Real, Real) I
+        (fun s : Real => (expMap (I := I) Y.metric x
+          (show TangentSpace I x from (s • v)) : Y.M)) t (1 : Real)‖ₑ =
+      ENNReal.ofReal (Real.sqrt (normalCoordMetric (I := I) Y x (t • v) v v)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    ⟨Y.metric.toRiemannianMetric⟩
+  intro t ht
+  have hsrc : t • v ∈ (expMapDiffeo (I := I) Y.metric x).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x ht
+  have hev : expMapDiffeo (I := I) Y.metric x =ᶠ[nhds (t • v)]
+      (fun z : E => (expMap (I := I) Y.metric x
+        (show TangentSpace I x from z) : Y.M)) := by
+    refine Filter.eventuallyEq_of_mem
+      ((expMapDiffeo (I := I) Y.metric x).open_source.mem_nhds hsrc) ?_
+    intro z hz
+    exact expMapDiffeo_apply_eq (I := I) Y.metric x hz
+  rw [mfderiv_exp_radial (I := I) Y.metric x v t ht]
+  rw [← ofReal_norm_eq_enorm, norm_eq_sqrt_real_inner]
+  have hinner :
+      (inner Real
+        (mfderiv 𝓘(Real, E) I
+          (fun z : E => (expMap (I := I) Y.metric x
+            (show TangentSpace I x from z) : Y.M)) (t • v)
+          (show TangentSpace I x from v))
+        (mfderiv 𝓘(Real, E) I
+          (fun z : E => (expMap (I := I) Y.metric x
+            (show TangentSpace I x from z) : Y.M)) (t • v)
+          (show TangentSpace I x from v)) : Real) =
+        Y.metric.inner
+          (expMap (I := I) Y.metric x (show TangentSpace I x from (t • v)))
+          (mfderiv 𝓘(Real, E) I
+            (fun z : E => (expMap (I := I) Y.metric x
+              (show TangentSpace I x from z) : Y.M)) (t • v)
+            (show TangentSpace I x from v))
+          (mfderiv 𝓘(Real, E) I
+            (fun z : E => (expMap (I := I) Y.metric x
+              (show TangentSpace I x from z) : Y.M)) (t • v)
+            (show TangentSpace I x from v)) := rfl
+  rw [hinner, normalCoordMetric_apply (I := I),
+    expMapDiffeo_apply_eq (I := I) Y.metric x hsrc, hev.mfderiv_eq]
+
 /-- **Pushforward section smoothness** (frontier-1 producer, step 3): for forward `f =
 expMapDiffeo` which is `C∞` on an open `U`, the bundle section `z ↦ ⟨f z, d f_z v⟩` of `TM`
 (over the base map `f`) is `ContMDiffOn`.  Obtained from

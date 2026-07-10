@@ -1,5 +1,41 @@
 # HamiltonPositiveRicciAdapter
 
+## Current state — 2026-07-09 source realization and witness binding
+
+`Ham3SourceLink` is now data, parameterized by the actual point-selection
+witness.  It records the common-time inclusion, selected basepoint map, and
+equality between each source metric and the pullback of the corresponding
+`ham3RescaledSol` metric, while retaining the separate base-scalar identity.
+`Ham3SourceLink.realizes` converts these fields mechanically into
+`Ham3SourceRealizes` for the concrete `cghToHam3` record.
+
+`HamCGHConclusion` now binds Ricci transfer, scalar positivity, and pinching
+transfer inside the existential scope of the actual `L`, subsequence, smooth-CGH
+witness, and completeness proof.  `toHam3Exists` no longer asks for any of
+those conclusions for every arbitrary `Ham3CGHLimitData`, and boundarylessness
+is obtained from the ambient model instance rather than presented as a fake
+limit-topology producer.
+
+Focused verification and the targeted adapter refresh passed after one local
+namespace qualification.  The adapter contract is 100% checked infrastructure; construction of the actual
+common-window source and the Hamilton compactness producer remain 0%.  Whole
+HCG machinery remains about 45%, and endpoint theorems remain 0%.
+
+The dated material below is historical unless an individual section explicitly
+says otherwise.
+
+## 2026-07-09 noncollapse cleanup
+
+Removed the zero-callsite `noncollapseInput_of_ham3` projection and the arbitrary
+numeric `NoncollapseInput` type it targeted.  The adapter must eventually
+construct or identify the actual Hamilton rescaled `PointedFlowSeq`, prove
+`IsFlowBaseVolBound`, and cross the single `flowInj_of_vol` CGT frontier.  A
+basepoint scalar equality alone is insufficient to identify those flow balls.
+
+Focused adapter verification is currently blocked before elaboration because
+the shared workspace lacks `Lemma45Engine.olean` while that upstream source is
+claimed by another active lane.  No adapter-local error has been observed.
+
 Source used: the current `HamiltonPositiveRicci.lean` black-box interface around `Ham3CGHLimitData`, `Ham3LimitSubseq`, `Ham3LimitWindow`, `Ham3LimitFlow`, `Ham3CGHLimitExists`, and `ham3_cgh_limit`.
 
 Introduced definitions: `pointedFlowToHam3` and theorem `toHam3Exists`.
@@ -131,3 +167,23 @@ Lessons preserved from the source comments:
   convergence.
 
 Verification: focused checking passed for this cleanup pass.
+
+## 2026-07-09 convergence-data retention
+
+The old `pointedFlowToHam3` forgetful constructor was removed.  Its replacement
+`cghToHam3` stores the actual source `PointedFlowSeq`, original Hamilton index
+map, both strict-monotonicity proofs, `SmoothCGHConverges` witness and comparison
+maps, source-to-original-manifold diffeomorphisms, and all-time limit
+completeness.
+
+`Ham3SourceLink` now exposes the original indexing and source topology instead
+of pretending that a scalar equality alone realizes the Hamilton rescalings.
+The stronger `HamCGHConclusion` includes limit completeness.  The arbitrary
+`HamCGHTopology.lift` desired-conclusion wrapper and zero-callsite
+`ham3OfCompactSol` were deleted; the adapter stops honestly at
+`toHam3Exists` until the generic smooth-CGH limit-completeness/topology producer
+is available.
+
+The adapter theorem machinery is structurally complete, but the actual
+common-window Hamilton source producer is about 20% and the Hamilton compactness
+endpoint remains 0%.

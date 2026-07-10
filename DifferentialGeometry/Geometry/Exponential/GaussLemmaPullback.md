@@ -30,3 +30,11 @@ Change (Option X — minimal, all opaque consumers safe):
 
 All focused checks GREEN; the new endpoints are axiom-clean (`propext, Classical.choice, Quot.sound`).
 Downstream consumption (named-radius metric producers) lives in `HCGCompactness/StepBInputs.lean`.
+
+## 2026-07-09: public radial-chain bridge
+
+Promoted the formerly private radial chain-rule calculation to the public theorem
+`mfderiv_exp_radial`.  It identifies the velocity of `t ↦ exp_p(t • a)` with the differential
+of `exp_p` at `t • a` applied to `a`, under the existing `expMapC2Radius` smallness condition.
+This is the reusable exponential-layer API needed by Step B; no HCG-specific data enters its
+statement.  Focused verification and the targeted module refresh passed.

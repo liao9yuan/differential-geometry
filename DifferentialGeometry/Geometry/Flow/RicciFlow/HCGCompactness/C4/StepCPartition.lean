@@ -32,6 +32,165 @@ variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
+section FinitePOU
+
+variable {ι M : Type*} [Fintype ι]
+variable [TopologicalSpace M] [ChartedSpace H M]
+
+/-- Package a finite family of global smooth nonnegative weights as a smooth
+partition of unity.  The two sum hypotheses are kept separate because the
+partition is only required to sum to one on `s`. -/
+noncomputable def pouOfFinite {s : Set M} (w : ι → M → Real)
+    (hw : ∀ i, ContMDiff I 𝓘(Real) ∞ (w i))
+    (hnonneg : ∀ i x, 0 ≤ w i x)
+    (hsum : ∀ x ∈ s, ∑ i, w i x = 1)
+    (hle : ∀ x, ∑ i, w i x ≤ 1) :
+    SmoothPartitionOfUnity ι I M s where
+  toFun i := ⟨w i, hw i⟩
+  locallyFinite' := locallyFinite_of_finite _
+  nonneg' := hnonneg
+  sum_eq_one' x hx := by
+    simpa only [ContMDiffMap.coeFn_mk, finsum_eq_sum_of_fintype] using hsum x hx
+  sum_le_one' x := by
+    simpa only [ContMDiffMap.coeFn_mk, finsum_eq_sum_of_fintype] using hle x
+
+/-- A finite smooth partition made by `pouOfFinite` is subordinate whenever
+the topological support of every supplied weight lies in its assigned set. -/
+theorem pouOfFinite_sub {s : Set M} {U : ι → Set M} (w : ι → M → Real)
+    (hw : ∀ i, ContMDiff I 𝓘(Real) ∞ (w i))
+    (hnonneg : ∀ i x, 0 ≤ w i x)
+    (hsum : ∀ x ∈ s, ∑ i, w i x = 1)
+    (hle : ∀ x, ∑ i, w i x ≤ 1)
+    (hsub : ∀ i, tsupport (w i) ⊆ U i) :
+    (pouOfFinite (I := I) w hw hnonneg hsum hle).IsSubordinate U := by
+  intro i
+  simpa only [pouOfFinite, ContMDiffMap.coeFn_mk] using hsub i
+
+/-- A denominator that agrees with the raw numerator sum where `τ = 1` and
+stays equal to `1` where `τ = 0`. -/
+noncomputable def cutoffDenom (a : ι → M → Real) (τ : M → Real) (x : M) : Real :=
+  τ x * ∑ i, a i x + (1 - τ x)
+
+/-- Globally normalized finite weights.  On the region where `τ = 1` these are
+the usual quotients `a_i / ∑ a_j`; away from that region the added denominator
+term prevents a `0 / 0` smoothness seam. -/
+noncomputable def cutoffWeights (a : ι → M → Real) (τ : M → Real)
+    (i : ι) (x : M) : Real :=
+  τ x * a i x / cutoffDenom a τ x
+
+/-- The cutoff denominator is strictly positive when every nonzero cutoff
+point lies in the positivity set of the raw numerator sum. -/
+theorem cutoffDenom_pos {a : ι → M → Real} {τ : M → Real}
+    (hτrange : ∀ x, τ x ∈ Set.Icc (0 : Real) 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x) (x : M) :
+    0 < cutoffDenom a τ x := by
+  rcases hτrange x with ⟨hτ0, hτ1⟩
+  by_cases hτzero : τ x = 0
+  · simp [cutoffDenom, hτzero]
+  by_cases hτone : τ x = 1
+  · simpa [cutoffDenom, hτone] using hpos x hτzero
+  have hsum : 0 < ∑ i, a i x := hpos x hτzero
+  have hmul : 0 ≤ τ x * ∑ i, a i x := mul_nonneg hτ0 hsum.le
+  have hrest : 0 < 1 - τ x := sub_pos.mpr (lt_of_le_of_ne hτ1 hτone)
+  exact add_pos_of_nonneg_of_pos hmul hrest
+
+/-- Each globally normalized cutoff weight is smooth. -/
+theorem cutoffWeights_smooth {a : ι → M → Real} {τ : M → Real}
+    (ha : ∀ i, ContMDiff I 𝓘(Real) ∞ (a i))
+    (hτ : ContMDiff I 𝓘(Real) ∞ τ)
+    (hτrange : ∀ x, τ x ∈ Set.Icc (0 : Real) 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x) (i : ι) :
+    ContMDiff I 𝓘(Real) ∞ (cutoffWeights a τ i) := by
+  classical
+  have hsum : ContMDiff I 𝓘(Real) ∞ (fun x => ∑ j, a j x) :=
+    ContMDiff.sum fun j _ => ha j
+  have hden : ContMDiff I 𝓘(Real) ∞ (cutoffDenom a τ) := by
+    simpa only [cutoffDenom] using (hτ.mul hsum).add (contMDiff_const.sub hτ)
+  simpa only [cutoffWeights] using
+    (hτ.mul (ha i)).div₀ hden (fun x => ne_of_gt (cutoffDenom_pos hτrange hpos x))
+
+/-- Each globally normalized cutoff weight is nonnegative. -/
+theorem cutoffWeights_nonneg {a : ι → M → Real} {τ : M → Real}
+    (ha : ∀ i x, 0 ≤ a i x)
+    (hτrange : ∀ x, τ x ∈ Set.Icc (0 : Real) 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x) (i : ι) (x : M) :
+    0 ≤ cutoffWeights a τ i x :=
+  div_nonneg (mul_nonneg (hτrange x).1 (ha i x))
+    (cutoffDenom_pos hτrange hpos x).le
+
+/-- The finite cutoff-weight sum is the cutoff times the raw sum divided by
+the positive cutoff denominator. -/
+theorem cutoffWeights_sum (a : ι → M → Real) (τ : M → Real) (x : M) :
+    ∑ i, cutoffWeights a τ i x =
+      τ x * (∑ i, a i x) / cutoffDenom a τ x := by
+  simp only [cutoffWeights, ← Finset.sum_div, ← Finset.mul_sum]
+
+/-- On the set where the cutoff is one, the cutoff weights sum to one. -/
+theorem cutoffWeights_one {s : Set M} {a : ι → M → Real} {τ : M → Real}
+    (hτone : ∀ x ∈ s, τ x = 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x) {x : M} (hx : x ∈ s) :
+    ∑ i, cutoffWeights a τ i x = 1 := by
+  rw [cutoffWeights_sum]
+  have ht : τ x = 1 := hτone x hx
+  have ht0 : τ x ≠ 0 := by rw [ht]; exact one_ne_zero
+  have hsum : (∑ i, a i x) ≠ 0 := ne_of_gt (hpos x ht0)
+  simp [cutoffDenom, ht, hsum]
+
+/-- The cutoff weights sum to at most one everywhere. -/
+theorem cutoffWeights_le {a : ι → M → Real} {τ : M → Real}
+    (hτrange : ∀ x, τ x ∈ Set.Icc (0 : Real) 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x) (x : M) :
+    ∑ i, cutoffWeights a τ i x ≤ 1 := by
+  rw [cutoffWeights_sum]
+  apply (div_le_one (cutoffDenom_pos hτrange hpos x)).2
+  unfold cutoffDenom
+  linarith [(hτrange x).2]
+
+/-- A cutoff weight cannot have larger topological support than its raw
+numerator. -/
+theorem cutoffWeights_sub (a : ι → M → Real) (τ : M → Real) (i : ι) :
+    tsupport (cutoffWeights a τ i) ⊆ tsupport (a i) := by
+  apply closure_mono
+  intro x hx
+  rw [Function.mem_support] at hx ⊢
+  intro hai
+  apply hx
+  simp [cutoffWeights, hai]
+
+/-- Build a global smooth partition of unity from finite raw numerators and a
+cutoff supported inside their common positivity region. -/
+noncomputable def pouOfCutoff {s : Set M} (a : ι → M → Real) (τ : M → Real)
+    (ha : ∀ i, ContMDiff I 𝓘(Real) ∞ (a i))
+    (hanonneg : ∀ i x, 0 ≤ a i x)
+    (hτ : ContMDiff I 𝓘(Real) ∞ τ)
+    (hτrange : ∀ x, τ x ∈ Set.Icc (0 : Real) 1)
+    (hτone : ∀ x ∈ s, τ x = 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x) :
+    SmoothPartitionOfUnity ι I M s :=
+  pouOfFinite (I := I) (fun i => cutoffWeights a τ i)
+    (cutoffWeights_smooth ha hτ hτrange hpos)
+    (cutoffWeights_nonneg hanonneg hτrange hpos)
+    (fun _ hx => cutoffWeights_one hτone hpos hx)
+    (cutoffWeights_le hτrange hpos)
+
+/-- The cutoff-normalized partition is subordinate to every family containing
+the topological supports of its raw numerators. -/
+theorem pouOfCutoff_sub {s : Set M} {U : ι → Set M}
+    (a : ι → M → Real) (τ : M → Real)
+    (ha : ∀ i, ContMDiff I 𝓘(Real) ∞ (a i))
+    (hanonneg : ∀ i x, 0 ≤ a i x)
+    (hτ : ContMDiff I 𝓘(Real) ∞ τ)
+    (hτrange : ∀ x, τ x ∈ Set.Icc (0 : Real) 1)
+    (hτone : ∀ x ∈ s, τ x = 1)
+    (hpos : ∀ x, τ x ≠ 0 → 0 < ∑ i, a i x)
+    (hsub : ∀ i, tsupport (a i) ⊆ U i) :
+    (pouOfCutoff (I := I) a τ ha hanonneg hτ hτrange hτone hpos).IsSubordinate U := by
+  intro i
+  simpa only [pouOfCutoff, pouOfFinite, ContMDiffMap.coeFn_mk] using
+    (cutoffWeights_sub a τ i).trans (hsub i)
+
+end FinitePOU
+
 namespace NetLimitData
 
 /-- The finite Step-C hat ball indexed by `γ < A r` at sequence index `k`.
@@ -47,6 +206,60 @@ noncomputable def hatBall (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   match seqCenter hd D P (L.φ k) (γ : Nat) with
   | some c => Metric.ball c (4 * L.lamInf (γ : Nat))
   | none => ∅
+
+/-- The strict inner Step-C ball.  These `3 * λ^γ` balls eventually cover the
+source ball, while their closures still fit inside the `4 * λ^γ` hats. -/
+noncomputable def innerBall (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
+    (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r)) :
+    Set ((X.obj (L.φ k)).M) :=
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  match seqCenter hd D P (L.φ k) (γ : Nat) with
+  | some c => Metric.ball c (3 * L.lamInf (γ : Nat))
+  | none => ∅
+
+@[simp] theorem innerBall_subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
+    (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r))
+    {ψ : Nat -> Nat} (hψ : StrictMono ψ) :
+    (L.subseq hψ).innerBall hd D P pb r k γ =
+      L.innerBall hd D P pb r (ψ k) γ := by
+  cases hcenter : seqCenter hd D P (L.φ (ψ k)) (γ : Nat) with
+  | none =>
+      simp [innerBall, NetLimitData.subseq, Function.comp_apply, hcenter]
+      rfl
+  | some c =>
+      simp [innerBall, NetLimitData.subseq, NetLimitData.lamInf, Function.comp_apply,
+        hcenter]
+      rfl
+
+/-- Each strict inner Step-C ball is open in the realized metric. -/
+theorem innerBall_open (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
+    (pb : hd.PackingBound D) (r : Real) (k : Nat) (γ : Fin (pb.A r)) :
+    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+    IsOpen (L.innerBall hd D P pb r k γ) := by
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  unfold innerBall
+  split
+  · exact Metric.isOpen_ball
+  · exact isOpen_empty
+
+/-- The strict inner ball is contained in its associated hat. -/
+theorem innerBall_subset_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (γ : Fin (pb.A r)) :
+    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+    L.innerBall hd D P pb r k γ ⊆ L.hatBall hd D P pb r k γ := by
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  cases hcenter : seqCenter hd D P (L.φ k) (γ : Nat) with
+  | none => simp [innerBall, hatBall, hcenter]
+  | some c =>
+      simp only [innerBall, hatBall, hcenter]
+      apply Metric.ball_subset_ball
+      have hpos : 0 < L.lamInf (γ : Nat) := hd.lambda_pos hD (L.rInf (γ : Nat))
+      nlinarith
 
 @[simp] theorem hatBall_subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (L : NetLimitData hd D P)
@@ -94,6 +307,25 @@ theorem hatBall_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   obtain ⟨γ, hγ, c, hc, hpc⟩ := hk p hpdist
   refine mem_iUnion.mpr ⟨⟨γ, hγ⟩, ?_⟩
   simp [hatBall, hc, Metric.mem_ball, hpc]
+
+/-- For every fixed source radius, the strict inner balls already cover the
+closed source ball at all sufficiently large sequence indices. -/
+theorem innerBall_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
+    (r : Real) :
+    ∀ᶠ k in atTop,
+      letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+      Metric.closedBall (X.obj (L.φ k)).basepoint r ⊆
+        ⋃ γ : Fin (pb.A r), L.innerBall hd D P pb r k γ := by
+  filter_upwards [L.inner_cover hd hD P hre pb r] with k hcover
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  intro p hp
+  have hpdist : dist p (X.obj (L.φ k)).basepoint ≤ r := by
+    simpa [Metric.mem_closedBall] using hp
+  obtain ⟨γ, hγ, c, hc, hpc⟩ := hcover p hpdist
+  refine mem_iUnion.mpr ⟨⟨γ, hγ⟩, ?_⟩
+  simp [innerBall, hc, Metric.mem_ball, hpc]
 
 /-- Smooth partition of unity subordinate to the finite Step-C hat cover at one
 large sequence index. -/

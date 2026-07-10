@@ -159,3 +159,14 @@ Now imports `GaussLemmaPullback` and opens `…Geometry.Riemannian` (for `expMap
 Remaining: the β-wrapper assembly in `StepBLocalMetrics.lean` (fixed `U`, `hdom`, feed `hsub` from
 `Item3RadiusInput`'s `ρ ≤ expMapC2Radius`).  No smoothness/geometry frontier remains; gated only on the
 honest-input `radius_lb` wiring.  Full detail in `StepBLocalMetrics.md` (session-5 UPDATE).
+
+## 2026-07-09: radial velocity norm producer
+
+Added `radialEnorm_normal`, the `normalCoordMetric`-facing velocity identity for the radial
+exponential curve.  It combines the public exponential-layer chain rule
+`mfderiv_exp_radial`, the tangent-fiber Riemannian norm bridge, and local equality of
+`expMapDiffeo` with `expMap` on the named exponential ball.  The theorem has the exact
+extended-norm shape consumed by the Step-B separation estimate.
+
+Verification passed for the focused file check and targeted module refresh.  This closes the
+former TangentSpace-instance/API blocker; it does not by itself produce `StepB1RawInput`.

@@ -1,23 +1,30 @@
 # Lemma45F4.lean — MSM135 Corollary II endpoint (`lemma45_corII`, F4)
 
 The book-facing F4 endpoint that F5/F6/Step B consume: Cor II with the intrinsic
-Lemma I `hF3` **discharged from the approximate-isometry data**, so consumers
-need no `hF3` hypothesis. Stated 2026-06-11; elaborates green with ONE expected
-`sorry`.
+Lemma I `hF3` discharged from the approximate-isometry data, so consumers need
+no `hF3` hypothesis.
 
-## The narrow `sorry` (honest, mechanical — NOT new mathematics)
+## Complete 2026-07-09
 
-The real math is done and green elsewhere:
-- `lemma45_F3` (Lemma45Engine) — Lemma I, component `compL2` form;
-- `compL2_tower_eq_gen` + `hF3_term` (Lemma45Intrinsic) — the intrinsic lift (the
-  former frontier);
-- `lemma45_cor_II_of_intrinsic` (Lemma45Covariant) — Cor II from `hF3`.
+`lemma45_corII`, `lemma45_corII_unif`, and the exact-constant core
+`lemma45_corII_bound` are proved and verified with no local `sorry` warning.
+The proof chooses a smooth frame that is `g`-orthonormal at the evaluation point,
+works on `u' ∩ u`, uses `metricComp_mul` to absorb the good-frame and metric-swap
+loss into `4^(2+p)`, applies the explicit-constant `lemma45_F3_bound`, lifts via
+`hF3_term`, and closes with `lemma45_cor_II_of_intrinsic`.
 
-The `sorry` is the assembly: produce a g-ON frame at each `x ∈ u` (apply
-`exists_goodFrame_compBound` with `gRef := g`), discharge `lemma45_F3`'s per-frame
-inputs, ∃-collect `hF3_term` into `hF3`, feed `lemma45_cor_II_of_intrinsic`.
-Deferred while the good-frame producer (`RicBoundGoodFrame.lean`) is finalized in
-the parallel ric_bound track (it was dirty/uncommitted at the time of writing).
+## 2026-07-09 feasibility route used
+
+The proof was not a direct plumbing call.  The good-frame bridge gives component
+smallness with an explicit factor: the new checked lemma
+`RicBoundGoodFrame.metricComp_le` proves
+`compL2(...) <= 2^(2+j) * eps` from the intrinsic `sqrt(normSq0S) <= eps`
+hypothesis.  However, `lemma45_F3` currently consumes an unscaled component
+smallness parameter satisfying `eps <= 1`.
+
+The implemented route was the first option: `claim1MulConst` makes the Claim-1
+constant data-independent, `lemma45_F3_bound` accepts `L * eps`, and
+`metricComp_mul` supplies the uniform `L = 4^(2+p)` after the metric swap.
 
 ## Statement (consumers depend only on this)
 
@@ -28,8 +35,8 @@ the parallel ric_bound track (it was dirty/uncommitted at the time of writing).
      √normSq0S g (∇_g^r T) ≤ √((1+eps)^{q₂+r})·(√normSq0S gRef (∇_gRef^r T) +
         eps·Cc·Σ_{k<r} √normSq0S gRef (∇_gRef^k T))`.
 
-Imports only `MetricCovDerivLinear` + `Comparison` (committed); the discharge will
-add `Lemma45Covariant` + `Lemma45Intrinsic` + `RicBoundGoodFrame`.
+Imports the checked component engine, intrinsic/covariant lifts, and good-frame
+producer used by the completed proof.
 
 ## What consumes it: F5 (Composition I, C^p)
 

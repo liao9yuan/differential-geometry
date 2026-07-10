@@ -90,6 +90,34 @@ theorem frame_e_mdiffOn
       e₀.baseSet :=
   (e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE).contMDiffOn d
 
+set_option backward.isDefEq.respectTransparency false in
+/-- The components of a smooth covariant tensor field in a trivialization frame
+are smooth on the trivialization domain. -/
+theorem tensorComp_mdiffOn {r : ℕ}
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r)
+    (basisE : Module.Basis Idx Real E) (k : Fin r → Idx) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => frameComp0S (I := I) T
+        (fun a y' => e₀.localFrame basisE a y') y k) e₀.baseSet := by
+  intro y hy
+  have hT : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun x : M => Tensor0SSpace r I x) b (T b)) y :=
+    T.contMDiff.contMDiffAt
+  have hv : ∀ i : Fin r,
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := fun x : M => TangentSpace I x) b
+          (e₀.localFrame basisE (k i) b)) y :=
+    fun i => (frame_e_mdiffOn e₀ basisE (k i)).contMDiffAt
+      (e₀.open_baseSet.mem_nhds hy)
+  have h := TensorMultilinear.contMDiffAt_section_apply_gen
+    (T := fun b : M => T b) hT
+    (v := fun (i : Fin r) (b : M) => e₀.localFrame basisE (k i) b) hv
+  exact h.contMDiffWithinAt
+
 /-- The `A_k = ∇_k − ∇_ref` component field in the trivialization frame, with the
 contracted UPPER slot LAST (`m 2`), as the towers and `claim1` consume it:
 `A(m) = Γ(g_k)^{m 2}_{m 0, m 1} − Γ(gRef)^{m 2}_{m 0, m 1}`. -/

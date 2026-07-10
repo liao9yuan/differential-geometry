@@ -140,6 +140,27 @@ theorem metricDerivNorm_eq_iterCov {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
         (Tensor0SBundle.metricTensorField (I := I) gk
           - Tensor0SBundle.metricTensorField (I := I) gInf) N x)]
 
+/-- Changing only the norm metric in an order-zero metric-difference seminorm costs the
+pointwise covariant two-tensor norm-equivalence factor. -/
+theorem diffNorm_zero_change
+    (A B gNorm gBase : SmoothRiemannianMetric I M) (x : M) {C : Real}
+    (hC : 1 ≤ C)
+    (hequiv : ∀ v : TangentSpace I x,
+      C⁻¹ * gBase.inner x v v ≤ gNorm.inner x v v ∧
+        gNorm.inner x v v ≤ C * gBase.inner x v v) :
+    metricDerivNorm (I := I) 0 A B gNorm x ≤
+      Real.sqrt (C ^ 2) * metricDerivNorm (I := I) 0 A B gBase x := by
+  unfold metricDerivNorm metricDiffCovDerivAt
+  change Real.sqrt (Tensor0SBundle.normSq0S (I := I) gNorm x 2
+      (Tensor0SBundle.metricTensorField (I := I) A x -
+        Tensor0SBundle.metricTensorField (I := I) B x)) ≤
+    Real.sqrt (C ^ 2) *
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) gBase x 2
+        (Tensor0SBundle.metricTensorField (I := I) A x -
+          Tensor0SBundle.metricTensorField (I := I) B x))
+  exact Tensor0SBundle.sqrt_normSq0S_le_of_metric_equiv
+    (I := I) gBase gNorm x 2 hC hequiv _
+
 /-- The metric-difference seminorm of a metric against itself vanishes:
 `|∇_gRef^a (g − g)|_gRef = 0`. -/
 theorem metricDerivNorm_self (a : Nat) (g gRef : SmoothRiemannianMetric I M) (x : M) :
@@ -156,14 +177,7 @@ theorem metricDerivNorm_self (a : Nat) (g gRef : SmoothRiemannianMetric I M) (x 
     intro i j
     simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h' i j
   rw [Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (a + 2) basis hinv 0]
-  have hcomp : ∀ slots : Fin (a + 2) -> Fin (Module.finrank Real (TangentSpace I x)),
-      Tensor0SBundle.component0S (I := I) basis
-        (0 : Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M) (a + 2) x) slots = 0 := by
-    intro slots
-    rw [Tensor0SBundle.component0S_apply]
-    exact ContinuousMultilinearMap.zero_apply _
-  simp [hcomp]
+  simp
 
 end HCGCompactness
 end DifferentialGeometry

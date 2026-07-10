@@ -1129,8 +1129,11 @@ open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 /-- **Radial chain rule.** For `‖t₀ • a‖ < expMapC2Radius g p`,
-`mfderiv (u ↦ exp_p (u • a)) t₀ 1 = mfderiv exp_p (t₀ • a) a`. -/
-private lemma radialCurve_mfderiv_chain
+`mfderiv (u ↦ exp_p (u • a)) t₀ 1 = mfderiv exp_p (t₀ • a) a`.
+
+This is the public bridge from a one-dimensional radial curve to the differential
+of the exponential map at the corresponding tangent vector. -/
+theorem mfderiv_exp_radial
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
     (ht : ‖t₀ • a‖ < expMapC2Radius (I := I) g p) :
     mfderiv 𝓘(ℝ, ℝ) I
@@ -1388,7 +1391,7 @@ theorem gauss_lemma_pullback
       rw [hav]
       have hnorm1 : ‖(1 : ℝ) • v‖ < expMapC2Radius (I := I) g p := by
         rw [one_smul]; exact hsmall
-      rw [radialCurve_mfderiv_chain (I := I) g p v 1 hnorm1, one_smul]
+      rw [mfderiv_exp_radial (I := I) g p v 1 hnorm1, one_smul]
     have hsvar1 : mfderiv 𝓘(ℝ, ℝ) I
         (fun u : ℝ => (expMap (I := I) g p
           (show TangentSpace I p from ((1 : ℝ) • (v + (gaussClamp δ u) • w))) : M)) 0 (1 : ℝ)

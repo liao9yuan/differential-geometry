@@ -51,13 +51,37 @@ variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- **ε-homogeneous abstract Claim 1.**  On the smooth frame domain, if the metric
-component field is ε-flat (`|∇^j g| ≤ ε` for `1 ≤ j ≤ m+1`), the lowered relation
-`|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` holds up to order `m`, and `Ginv` is the pointwise
-inverse of `g` with `|Ginv| ≤ C0`, then the upper tower of `A` is ε-linearly small:
-`|∇_U^m A| ≤ C·ε` with `C = C(m, C0, KR)` independent of ε.  Strong induction; the
-`ε²` lower-order products are absorbed by `ε ≤ 1`. -/
-theorem claim1_eps {u : Set M} (hu : IsOpen u)
+/-- The data-independent constant for the scaled ε-homogeneous Claim 1
+induction.  Its inputs are only the inverse bound, the relation bound, the
+component-loss factor, and the derivative order. -/
+noncomputable def claim1MulConst (C0 KR L : Real) (m : ℕ) : Real :=
+  Nat.strongRecOn' m fun n C =>
+    max C0 0 * (max KR 0 * L +
+      ∑ c : Fin n, (n.choose c : Real) * C c c.isLt * L)
+
+/-- Unfolding equation for `claim1MulConst`. -/
+theorem claim1MulConst_eq (C0 KR L : Real) (m : ℕ) :
+    claim1MulConst C0 KR L m =
+      max C0 0 * (max KR 0 * L +
+        ∑ c ∈ Finset.range m, (m.choose c : Real) * claim1MulConst C0 KR L c * L) := by
+  rw [claim1MulConst, Nat.strongRecOn'_beta, ← Fin.sum_univ_eq_sum_range]
+  rfl
+
+/-- The scaled Claim 1 constant is nonnegative when the component-loss factor
+is nonnegative. -/
+theorem claim1MulConst_nonneg {C0 KR L : Real} (hL : 0 ≤ L) (m : ℕ) :
+    0 ≤ claim1MulConst C0 KR L m := by
+  induction m using Nat.strong_induction_on with
+  | _ m ih =>
+      rw [claim1MulConst_eq]
+      refine mul_nonneg (le_max_right C0 0) (add_nonneg (mul_nonneg (le_max_right KR 0) hL) ?_)
+      exact Finset.sum_nonneg fun c hc =>
+        mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (ih c (Finset.mem_range.mp hc))) hL
+
+/-- Explicit-constant form of scaled ε-homogeneous Claim 1.  Unlike the
+existential wrapper below, this exposes that the bound is independent of all
+frame and metric data. -/
+theorem claim1_eps_mul_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -71,40 +95,34 @@ theorem claim1_eps {u : Set M} (hu : IsOpen u)
     (hinv : ∀ x ∈ u, ∀ c e : Idx,
       (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
         Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
-    (C0 KR eps : Real)
+    (C0 KR L eps : Real) (hL : 0 ≤ L)
     (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
     (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
     (m : ℕ) :
     (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m + 1 →
-      compL2 (iterCovComp (I := I) frame chr g j x) ≤ eps) →
+      compL2 (iterCovComp (I := I) frame chr g j x) ≤ L * eps) →
     (∀ x ∈ u, ∀ m', m' ≤ m →
       compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
         KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
-    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
-      compL2 (iterCovCompU (I := I) frame chr A m x) ≤ C * eps := by
+    ∀ x ∈ u, compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+      claim1MulConst C0 KR L m * eps := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
-    intro hK hrelB
+    intro hK hrelB x hx
     classical
     have hKR0 : (0 : Real) ≤ max KR 0 := le_max_right KR 0
-    -- the IH constants for every lower order
-    have hCc : ∀ c, c < m → ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
-        compL2 (iterCovCompU (I := I) frame chr A c x) ≤ C * eps := fun c hc =>
+    have hCcB : ∀ c, c < m → ∀ x ∈ u,
+        compL2 (iterCovCompU (I := I) frame chr A c x) ≤
+          claim1MulConst C0 KR L c * eps := fun c hc =>
       ih c hc (fun x hx j h1 h2 => hK x hx j h1 (by omega))
         (fun x hx m' h' => hrelB x hx m' (le_trans h' (le_of_lt hc)))
-    choose! Cc hCc0 hCcB using hCc
-    refine ⟨max C0 0 * (max KR 0 + ∑ c ∈ Finset.range m, (m.choose c : Real) * Cc c),
-      ?_, ?_⟩
-    · refine mul_nonneg (le_max_right C0 0) ?_
-      have hS : (0 : Real) ≤ ∑ c ∈ Finset.range m, (m.choose c : Real) * Cc c :=
-        Finset.sum_nonneg fun c hc =>
-          mul_nonneg (Nat.cast_nonneg _) (hCc0 c (Finset.mem_range.mp hc))
-      linarith
-    intro x hx
-    set S := ∑ c ∈ Finset.range m, (m.choose c : Real) * Cc c with hSdef
+    set S := ∑ c ∈ Finset.range m,
+      (m.choose c : Real) * claim1MulConst C0 KR L c * L with hSdef
     have hS0 : 0 ≤ S := Finset.sum_nonneg fun c hc =>
-      mul_nonneg (Nat.cast_nonneg _) (hCc0 c (Finset.mem_range.mp hc))
-    have hgm1eps : compL2 (iterCovComp (I := I) frame chr g (m + 1) x) ≤ eps :=
+      mul_nonneg
+        (mul_nonneg (Nat.cast_nonneg _)
+          (claim1MulConst_nonneg hL c)) hL
+    have hgm1eps : compL2 (iterCovComp (I := I) frame chr g (m + 1) x) ≤ L * eps :=
       hK x hx (m + 1) (by omega) le_rfl
     have hgm1 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m + 1) x) :=
       compL2_nonneg _
@@ -113,7 +131,6 @@ theorem claim1_eps {u : Set M} (hu : IsOpen u)
         max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) :=
       le_trans (hrelB x hx m le_rfl)
         (mul_le_mul_of_nonneg_right (le_max_left KR 0) hgm1)
-    -- the core chain: invert + isolated top + the relation (as in `claim1_abstract`)
     have hcore : compL2 (iterCovCompU (I := I) frame chr A m x) ≤
         compL2 (Ginv x) *
           (max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
@@ -141,37 +158,43 @@ theorem claim1_eps {u : Set M} (hu : IsOpen u)
               ∑ c ∈ Finset.range m, (m.choose c : Real) *
                 compL2 (iterCovCompU (I := I) frame chr A c x) *
                 compL2 (iterCovComp (I := I) frame chr g (m - c) x)) := mul_comm _ _
-    -- numeric: the lower-order block is ≤ S·ε (each term carries ε², absorbed by ε ≤ 1)
     have hsum : (∑ c ∈ Finset.range m, (m.choose c : Real) *
           compL2 (iterCovCompU (I := I) frame chr A c x) *
           compL2 (iterCovComp (I := I) frame chr g (m - c) x)) ≤ S * eps := by
       rw [hSdef, Finset.sum_mul]
       refine Finset.sum_le_sum fun c hc => ?_
       have hc' := Finset.mem_range.mp hc
-      have hAc : compL2 (iterCovCompU (I := I) frame chr A c x) ≤ Cc c * eps :=
-        hCcB c hc' x hx
-      have hgmc : compL2 (iterCovComp (I := I) frame chr g (m - c) x) ≤ eps :=
+      have hAc := hCcB c hc' x hx
+      have hgmc : compL2 (iterCovComp (I := I) frame chr g (m - c) x) ≤ L * eps :=
         hK x hx (m - c) (by omega) (by omega)
-      have hb0 : (0 : Real) ≤ (m.choose c : Real) * Cc c :=
-        mul_nonneg (Nat.cast_nonneg _) (hCc0 c hc')
+      have hCc0 : 0 ≤ claim1MulConst C0 KR L c :=
+        claim1MulConst_nonneg (C0 := C0) (KR := KR) hL c
+      have hb0 : (0 : Real) ≤ (m.choose c : Real) * claim1MulConst C0 KR L c * L :=
+        mul_nonneg (mul_nonneg (Nat.cast_nonneg _) hCc0) hL
       calc (m.choose c : Real) * compL2 (iterCovCompU (I := I) frame chr A c x) *
             compL2 (iterCovComp (I := I) frame chr g (m - c) x)
-          ≤ (m.choose c : Real) * (Cc c * eps) *
+          ≤ (m.choose c : Real) * (claim1MulConst C0 KR L c * eps) *
               compL2 (iterCovComp (I := I) frame chr g (m - c) x) :=
             mul_le_mul_of_nonneg_right
               (mul_le_mul_of_nonneg_left hAc (Nat.cast_nonneg _)) (compL2_nonneg _)
-        _ ≤ (m.choose c : Real) * (Cc c * eps) * eps :=
+        _ ≤ (m.choose c : Real) * (claim1MulConst C0 KR L c * eps) * (L * eps) :=
             mul_le_mul_of_nonneg_left hgmc
-              (mul_nonneg (Nat.cast_nonneg _) (mul_nonneg (hCc0 c hc') heps0))
-        _ ≤ (m.choose c : Real) * Cc c * eps := by nlinarith [mul_nonneg hb0 heps0]
-    -- assemble
+              (mul_nonneg (Nat.cast_nonneg _) (mul_nonneg hCc0 heps0))
+        _ ≤ ((m.choose c : Real) * claim1MulConst C0 KR L c * L) * eps := by
+            nlinarith [mul_nonneg hb0 heps0]
+    have htop : max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) ≤
+        max KR 0 * L * eps := by
+      calc
+        max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x)
+            ≤ max KR 0 * (L * eps) := mul_le_mul_of_nonneg_left hgm1eps hKR0
+        _ = max KR 0 * L * eps := by ring
     have hbr : max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
           (∑ c ∈ Finset.range m, (m.choose c : Real) *
             compL2 (iterCovCompU (I := I) frame chr A c x) *
             compL2 (iterCovComp (I := I) frame chr g (m - c) x)) ≤
-        (max KR 0 + S) * eps := by
+        (max KR 0 * L + S) * eps := by
       rw [add_mul]
-      exact add_le_add (mul_le_mul_of_nonneg_left hgm1eps hKR0) hsum
+      exact add_le_add htop hsum
     have hbr0 : (0 : Real) ≤
         max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
         ∑ c ∈ Finset.range m, (m.choose c : Real) *
@@ -179,15 +202,87 @@ theorem claim1_eps {u : Set M} (hu : IsOpen u)
           compL2 (iterCovComp (I := I) frame chr g (m - c) x) :=
       add_nonneg (mul_nonneg hKR0 hgm1) (Finset.sum_nonneg fun c _ =>
         mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (compL2_nonneg _)) (compL2_nonneg _))
-    have hGx : compL2 (Ginv x) ≤ max C0 0 := le_trans (hGinv x hx) (le_max_left C0 0)
+    have hGx : compL2 (Ginv x) ≤ max C0 0 :=
+      le_trans (hGinv x hx) (le_max_left C0 0)
     calc compL2 (iterCovCompU (I := I) frame chr A m x)
         ≤ compL2 (Ginv x) *
             (max KR 0 * compL2 (iterCovComp (I := I) frame chr g (m + 1) x) +
             ∑ c ∈ Finset.range m, (m.choose c : Real) *
               compL2 (iterCovCompU (I := I) frame chr A c x) *
               compL2 (iterCovComp (I := I) frame chr g (m - c) x)) := hcore
-      _ ≤ max C0 0 * ((max KR 0 + S) * eps) := mul_le_mul hGx hbr hbr0 (le_max_right C0 0)
-      _ = max C0 0 * (max KR 0 + S) * eps := by ring
+      _ ≤ max C0 0 * ((max KR 0 * L + S) * eps) :=
+        mul_le_mul hGx hbr hbr0 (le_max_right C0 0)
+      _ = claim1MulConst C0 KR L m * eps := by
+        rw [claim1MulConst_eq, hSdef]
+        ring
+
+/-- **Scaled ε-homogeneous abstract Claim 1.**  On the smooth frame domain, if the metric
+component field satisfies `|∇^j g| ≤ L * ε` for `1 ≤ j ≤ m+1`, the lowered relation
+`|∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` holds up to order `m`, and `Ginv` is the pointwise
+inverse of `g` with `|Ginv| ≤ C0`, then the upper tower of `A` is ε-linearly small:
+`|∇_U^m A| ≤ C·ε` with `C = C(m, C0, KR, L)` independent of ε.  Strong induction;
+the `L * ε²` lower-order products are absorbed by `ε ≤ 1`. -/
+theorem claim1_eps_mul {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (g : M → (Fin (1 + 1) → Idx) → Real)
+    (hg : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u)
+    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+    {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real)
+    (hA : ∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
+    (hinv : ∀ x ∈ u, ∀ c e : Idx,
+      (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
+    (C0 KR L eps : Real) (hL : 0 ≤ L)
+    (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
+    (m : ℕ) :
+    (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m + 1 →
+      compL2 (iterCovComp (I := I) frame chr g j x) ≤ L * eps) →
+    (∀ x ∈ u, ∀ m', m' ≤ m →
+      compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
+        KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
+    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
+      compL2 (iterCovCompU (I := I) frame chr A m x) ≤ C * eps := by
+  intro hK hrelB
+  exact ⟨claim1MulConst C0 KR L m, claim1MulConst_nonneg hL m,
+    claim1_eps_mul_bound hu frame chr hframe hchr g hg Ginv A hA hinv C0 KR L eps
+      hL heps0 heps1 hGinv m hK hrelB⟩
+
+/-- **ε-homogeneous abstract Claim 1.**  This is `claim1_eps_mul` with unit
+component-loss factor. -/
+theorem claim1_eps {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (g : M → (Fin (1 + 1) → Idx) → Real)
+    (hg : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u)
+    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+    {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real)
+    (hA : ∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
+    (hinv : ∀ x ∈ u, ∀ c e : Idx,
+      (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
+    (C0 KR eps : Real)
+    (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
+    (m : ℕ) :
+    (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m + 1 →
+      compL2 (iterCovComp (I := I) frame chr g j x) ≤ eps) →
+    (∀ x ∈ u, ∀ m', m' ≤ m →
+      compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
+        KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
+    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
+      compL2 (iterCovCompU (I := I) frame chr A m x) ≤ C * eps := by
+  intro hK
+  refine claim1_eps_mul hu frame chr hframe hchr g hg Ginv A hA hinv C0 KR 1 eps
+    zero_le_one heps0 heps1 hGinv m ?_
+  simpa only [one_mul] using hK
 
 /-! ## The connection-change one-step (W2)
 
@@ -958,10 +1053,9 @@ mirroring `AkMFold.claim1`'s `hrelB` derivation), the bounded component Lemma 4.
 (`lemma45_component_bdd`, over `lemma45DoubleBdd`), and the endpoint `lemma45_F3`
 with the geometric inputs discharged by `hkoszul_of_leviCivita`. -/
 
-/-- **ε-homogeneous Claim 1, Koszul-relation form** — `claim1_eps` with `hrelB`
-derived from the lowered-Koszul field identity (the `AkMFold.claim1` derivation,
-ε-tracked). -/
-theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
+/-- **Scaled ε-homogeneous Claim 1, Koszul-relation form** — `claim1_eps_mul`
+with `hrelB` derived from the lowered-Koszul field identity. -/
+theorem claim1_koszul_bound {u : Set M} (hu : IsOpen u)
     (frame : Idx → (x : M) → TangentSpace I x)
     (chr : M → Idx → Idx → Idx → Real)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -981,15 +1075,15 @@ theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
         c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
         (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
           c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j))))
-    (C0 eps : Real) (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (C0 L eps : Real) (hL : 0 ≤ L) (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
     (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
     (m : ℕ)
     (hK : ∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m + 1 →
-      compL2 (iterCovComp (I := I) frame chr g j x) ≤ eps) :
-    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
-      compL2 (iterCovCompU (I := I) frame chr A m x) ≤ C * eps := by
-  refine claim1_eps hu frame chr hframe hchr g hg Ginv A hA hinv C0
-    (|c₁| + |c₂| + |c₃|) eps heps0 heps1 hGinv m hK ?_
+      compL2 (iterCovComp (I := I) frame chr g j x) ≤ L * eps) :
+    ∀ x ∈ u, compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+      claim1MulConst C0 (|c₁| + |c₂| + |c₃|) L m * eps := by
+  refine claim1_eps_mul_bound hu frame chr hframe hchr g hg Ginv A hA hinv C0
+    (|c₁| + |c₂| + |c₃|) L eps hL heps0 heps1 hGinv m hK ?_
   intro x hx m' _
   have hterm : ∀ (ci : Real) (Pi : Fin 3 ≃ Fin 3),
       compL2 (iterCovComp (I := I) frame chr
@@ -1053,6 +1147,72 @@ theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
   have hG0 : (0 : Real) ≤ compL2 (iterCovComp (I := I) frame chr g (m' + 1) x) := compL2_nonneg _
   nlinarith [abs_nonneg c₁, abs_nonneg c₂, abs_nonneg c₃, hG0, h23]
 
+/-- Existential wrapper around the explicit scaled Koszul Claim 1 bound. -/
+theorem claim1_koszul_mul {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (g : M → (Fin (1 + 1) → Idx) → Real)
+    (hg : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u)
+    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+    (A : M → (Fin (2 + 1) → Idx) → Real)
+    (hA : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
+    (hinv : ∀ x ∈ u, ∀ c e : Idx,
+      (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
+    (c₁ c₂ c₃ : Real) (P₁ P₂ P₃ : Fin 3 ≃ Fin 3)
+    (hkoszul : ∀ y ∈ u, contrTail (A y) (g y) =
+      fun idx : Fin 3 → Idx =>
+        c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
+        (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
+          c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j))))
+    (C0 L eps : Real) (hL : 0 ≤ L) (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
+    (m : ℕ)
+    (hK : ∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m + 1 →
+      compL2 (iterCovComp (I := I) frame chr g j x) ≤ L * eps) :
+    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
+      compL2 (iterCovCompU (I := I) frame chr A m x) ≤ C * eps := by
+  refine ⟨claim1MulConst C0 (|c₁| + |c₂| + |c₃|) L m,
+    claim1MulConst_nonneg hL m, ?_⟩
+  exact claim1_koszul_bound hu frame chr hframe hchr g hg Ginv A hA hinv
+    c₁ c₂ c₃ P₁ P₂ P₃ hkoszul C0 L eps hL heps0 heps1 hGinv m hK
+
+/-- **ε-homogeneous Claim 1, Koszul-relation form.**  This is
+`claim1_koszul_mul` with unit component-loss factor. -/
+theorem claim1_eps_koszul {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (g : M → (Fin (1 + 1) → Idx) → Real)
+    (hg : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u)
+    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+    (A : M → (Fin (2 + 1) → Idx) → Real)
+    (hA : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
+    (hinv : ∀ x ∈ u, ∀ c e : Idx,
+      (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
+    (c₁ c₂ c₃ : Real) (P₁ P₂ P₃ : Fin 3 ≃ Fin 3)
+    (hkoszul : ∀ y ∈ u, contrTail (A y) (g y) =
+      fun idx : Fin 3 → Idx =>
+        c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
+        (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
+          c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j))))
+    (C0 eps : Real) (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
+    (m : ℕ)
+    (hK : ∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m + 1 →
+      compL2 (iterCovComp (I := I) frame chr g j x) ≤ eps) :
+    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
+      compL2 (iterCovCompU (I := I) frame chr A m x) ≤ C * eps := by
+  refine claim1_koszul_mul hu frame chr hframe hchr g hg Ginv A hA hinv
+    c₁ c₂ c₃ P₁ P₂ P₃ hkoszul C0 1 eps zero_le_one heps0 heps1 hGinv m ?_
+  simpa only [one_mul] using hK
+
 /-- **Bounded component Lemma 4.5** — `lemma45_component` over the bounded double
 induction `lemma45DoubleBdd`: the difference-tower bounds are required only below
 the envelope `P`. -/
@@ -1100,16 +1260,150 @@ theorem lemma45_component_bdd {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
       (iterCovComp (I := I) frame chrG T i') k x))
     (fun i' k => compL2_nonneg _) hOne
 
-/-- **F3 = MSM135 Lemma 4.5** (`lbl370`, book-facing component form, the goal
-endpoint).  On a local-frame domain `u`, let `chrG`/`chrH` be the frame
-Christoffels of the Levi-Civita connections of `g`/`gRef`.  If the `g`-component
-inverse is bounded (`hGinv`) and the `chrH`-derivatives of the `g`-components are
-ε-small up to order `p` (`hgK`), then for every smooth tensor component field `T`
-and every `0 < ρ ≤ p` there is `C ≥ 0` with
+/-- **Scaled F3 = MSM135 Lemma 4.5** (`lbl370`, component form).  If the
+`chrH`-derivatives of the `g`-components are bounded by `L * ε`, the final
+connection-change error remains ε-linear, with `L` absorbed into `C`.  Then for
+every smooth tensor component field `T` and every `0 < ρ ≤ p` there is `C ≥ 0` with
 `|∇_G^ρ T| ≤ |∇_H^ρ T| + ε·C·Σ_{j<ρ} |∇_H^j T|` at every `x ∈ u`.
 The geometric inputs are discharged by `hkoszul_of_leviCivita` (the lowered-Koszul
-identity), `claim1_eps_koszul` (the ε-linear difference-tower bounds), and
+identity), `claim1_koszul_mul` (the ε-linear difference-tower bounds), and
 `lemma45_component_bdd` (the bounded double induction over the `hOne` engine). -/
+theorem lemma45_F3_bound {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
+    (g gRef : SmoothRiemannianMetric I M)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u)
+    (hframeS : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrG : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        frame hframe y d i j) u)
+    (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe y d i j) u)
+    (hgsm : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => frameComp0S (I := I) (metricTensorField (I := I) g) frame y k) u)
+    (T : M → (Fin r₀ → Idx) → Real)
+    (hT : ∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u)
+    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+    (hinv : ∀ x ∈ u, ∀ c e : Idx,
+      (∑ l : Idx, frameComp0S (I := I) (metricTensorField (I := I) g) frame x
+          (Fin.snoc (fun _ : Fin 1 => l) c) *
+        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
+    (C0 L eps : Real) (hL : 0 ≤ L) (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
+    (p : ℕ)
+    (hgK : ∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
+      compL2 (iterCovComp (I := I) frame
+        (fun z => christoffelSymbolInFrame
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe z)
+        (frameComp0S (I := I) (metricTensorField (I := I) g) frame) j x) ≤ L * eps) :
+    ∀ x ∈ u, ∀ ρ : ℕ, 0 < ρ → ρ ≤ p →
+      compL2 (iterCovComp (I := I) frame
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+            frame hframe z) T ρ x) ≤
+        compL2 (iterCovComp (I := I) frame
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe z) T ρ x) +
+        eps * lemma45Const
+          (fun c => claim1MulConst C0 (|(1 / 2 : Real)| + |(1 / 2 : Real)| + |-(1 / 2 : Real)|) L c)
+          p r₀ *
+          ∑ j ∈ Finset.range ρ,
+            compL2 (iterCovComp (I := I) frame
+              (fun z => christoffelSymbolInFrame
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                frame hframe z) T j x) := by
+  classical
+  set chrG : M → Idx → Idx → Idx → Real := fun z => christoffelSymbolInFrame
+    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+    frame hframe z with hchrGdef
+  set chrH : M → Idx → Idx → Idx → Real := fun z => christoffelSymbolInFrame
+    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+    frame hframe z with hchrHdef
+  have hDsm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => chrDiffField chrG chrH y k) u :=
+    fun k => (hchrG _ _ _).sub (hchrH _ _ _)
+  let B : ℕ → Real := fun c =>
+    claim1MulConst C0 (|(1 / 2 : Real)| + |(1 / 2 : Real)| + |-(1 / 2 : Real)|) L c
+  have hB0 : ∀ c, 0 ≤ B c := fun c => claim1MulConst_nonneg hL c
+  have hBb : ∀ c, c < p → ∀ z ∈ u,
+      compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ B c * eps := by
+    intro c hc
+    exact claim1_koszul_bound hu frame chrH hframeS hchrH
+      (frameComp0S (I := I) (metricTensorField (I := I) g) frame) hgsm Ginv
+      (chrDiffField chrG chrH) hDsm hinv
+      (1 / 2) (1 / 2) (-(1 / 2))
+      (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
+      (fun y hy => hkoszul_of_leviCivita hu g gRef frame hframe y hy)
+      C0 L eps hL heps0 heps1 hGinv c
+      (fun z hz j h1 h2 => hgK z hz j h1 (by omega))
+  intro x hx ρ hρ0 hρp
+  have h := lemma45_component_bdd hu frame chrG chrH hframeS hchrG hchrH T hT B hB0
+    eps heps0 heps1 p (fun c hc z hz => hBb c hc z hz) hx p 0 ρ hρ0 hρp (by omega)
+  rw [zero_add] at h
+  simpa only [B] using h
+
+/-- Existential wrapper around the explicit scaled component Lemma 4.5 bound. -/
+theorem lemma45_F3_mul {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
+    (g gRef : SmoothRiemannianMetric I M)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u)
+    (hframeS : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrG : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+        frame hframe y d i j) u)
+    (hchrH : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => christoffelSymbolInFrame
+        (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe y d i j) u)
+    (hgsm : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => frameComp0S (I := I) (metricTensorField (I := I) g) frame y k) u)
+    (T : M → (Fin r₀ → Idx) → Real)
+    (hT : ∀ k : Fin r₀ → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => T y k) u)
+    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+    (hinv : ∀ x ∈ u, ∀ c e : Idx,
+      (∑ l : Idx, frameComp0S (I := I) (metricTensorField (I := I) g) frame x
+          (Fin.snoc (fun _ : Fin 1 => l) c) *
+        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
+    (C0 L eps : Real) (hL : 0 ≤ L) (heps0 : 0 ≤ eps) (heps1 : eps ≤ 1)
+    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
+    (p : ℕ)
+    (hgK : ∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
+      compL2 (iterCovComp (I := I) frame
+        (fun z => christoffelSymbolInFrame
+          (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe z)
+        (frameComp0S (I := I) (metricTensorField (I := I) g) frame) j x) ≤ L * eps) :
+    ∃ C : Real, 0 ≤ C ∧ ∀ x ∈ u, ∀ ρ : ℕ, 0 < ρ → ρ ≤ p →
+      compL2 (iterCovComp (I := I) frame
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
+            frame hframe z) T ρ x) ≤
+        compL2 (iterCovComp (I := I) frame
+          (fun z => christoffelSymbolInFrame
+            (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe z) T ρ x) +
+        eps * C *
+          ∑ j ∈ Finset.range ρ,
+            compL2 (iterCovComp (I := I) frame
+              (fun z => christoffelSymbolInFrame
+                (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
+                frame hframe z) T j x) := by
+  let B : ℕ → Real := fun c =>
+    claim1MulConst C0 (|(1 / 2 : Real)| + |(1 / 2 : Real)| + |-(1 / 2 : Real)|) L c
+  refine ⟨lemma45Const B p r₀,
+    lemma45Const_nonneg (fun c => claim1MulConst_nonneg hL c) p r₀, ?_⟩
+  simpa only [B] using lemma45_F3_bound hu g gRef frame hframe hframeS hchrG hchrH
+    hgsm T hT Ginv hinv C0 L eps hL heps0 heps1 hGinv p hgK
+
+/-- **F3 = MSM135 Lemma 4.5** (`lbl370`, book-facing component form).  This is
+`lemma45_F3_mul` with unit component-loss factor. -/
 theorem lemma45_F3 {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
     (g gRef : SmoothRiemannianMetric I M)
     (frame : Idx → (x : M) → TangentSpace I x)
@@ -1157,37 +1451,8 @@ theorem lemma45_F3 {r₀ : ℕ} {u : Set M} (hu : IsOpen u)
               (fun z => christoffelSymbolInFrame
                 (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
                 frame hframe z) T j x) := by
-  classical
-  set chrG : M → Idx → Idx → Idx → Real := fun z => christoffelSymbolInFrame
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g)
-    frame hframe z with hchrGdef
-  set chrH : M → Idx → Idx → Idx → Real := fun z => christoffelSymbolInFrame
-    (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) gRef)
-    frame hframe z with hchrHdef
-  have hDsm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun y => chrDiffField chrG chrH y k) u :=
-    fun k => (hchrG _ _ _).sub (hchrH _ _ _)
-  -- the per-order ε-linear difference-tower bounds, totalized
-  have hDb : ∀ c : ℕ, ∃ C, 0 ≤ C ∧ (c < p → ∀ z ∈ u,
-      compL2 (iterCovCompU (I := I) frame chrH (chrDiffField chrG chrH) c z) ≤ C * eps) := by
-    intro c
-    by_cases hc : c < p
-    · obtain ⟨C, hC0, hCb⟩ := claim1_eps_koszul hu frame chrH hframeS hchrH
-        (frameComp0S (I := I) (metricTensorField (I := I) g) frame) hgsm Ginv
-        (chrDiffField chrG chrH) hDsm hinv
-        (1 / 2) (1 / 2) (-(1 / 2))
-        (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
-        (fun y hy => hkoszul_of_leviCivita hu g gRef frame hframe y hy)
-        C0 eps heps0 heps1 hGinv c
-        (fun z hz j h1 h2 => hgK z hz j h1 (by omega))
-      exact ⟨C, hC0, fun _ => hCb⟩
-    · exact ⟨0, le_rfl, fun hcontra => absurd hcontra hc⟩
-  choose B hB0 hBb using hDb
-  refine ⟨lemma45Const B p r₀, lemma45Const_nonneg hB0 p r₀, ?_⟩
-  intro x hx ρ hρ0 hρp
-  have h := lemma45_component_bdd hu frame chrG chrH hframeS hchrG hchrH T hT B hB0
-    eps heps0 heps1 p (fun c hc z hz => hBb c hc z hz) hx p 0 ρ hρ0 hρp (by omega)
-  rw [zero_add] at h
-  exact h
+  refine lemma45_F3_mul hu g gRef frame hframe hframeS hchrG hchrH hgsm T hT Ginv hinv
+    C0 1 eps zero_le_one heps0 heps1 hGinv p ?_
+  simpa only [one_mul] using hgK
 
 end DifferentialGeometry.PDE.RicciFlow

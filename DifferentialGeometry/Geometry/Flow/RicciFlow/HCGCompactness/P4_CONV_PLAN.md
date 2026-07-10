@@ -67,8 +67,11 @@ of the limit flow `L`; Ricci-continuity closes "limit is a solution".
   `restrictOpen (L.S.family.metric t)` — hard-wired), `derivNormSupOn` (:1424).
 - **Time-0 input**: `mc.convergence` (`MetricCompactness.lean:1062`, `MetricSourceCPConvOn`
   :968): `Φ_k^* g_k(0) → mc.limit.metric` in the source-domain C^p seminorm on compacts.
-- **Assembly (done)**: `flowLimit_upgrade`, `smoothFlowLimitInput_of_flowLimitData`,
-  `cghMaps_of_hL0`, `pointedCGHMaps_of_atZero` (`FlowLimitUpgrade.lean`).
+- **Assembly (done)**: `flowUpgrade_of_maps`, `flowUpgrade_of_mc`,
+  `solutionComp_of_mc`, `cghMaps_of_hL0`, and
+  `pointedCGHMaps_of_atZero` (`FlowLimitUpgrade.lean` /
+  `SolutionCompactness.lean`).  The former exact-conclusion
+  `SmoothFlowLimitInput` route was deleted.
 - Diagonalization helper: `C4/DiagonalSubseq.lean`; Mathlib `CompactExhaustion` (σ-compact M).
 
 ## KEY architectural facts (read before coding)
@@ -521,9 +524,9 @@ inputs for `isSolutionOn_of_reg` from `co.convPt` + 7a bounds via
 `L := flowOfMetric … co.gInf (isSolutionOn_of_reg … hsmooth …)` (hsmooth = tracked input,
 ruling 5a); `hL0` via `flowOfMetric_atTime` + `gInf_zero_eq`; re-index `mc.compSubseq co.φ
 co.hφ`; instantiate `rmaps := hL0.symm ▸ (mc.compSubseq …).maps` and discharge the 7a inputs
-by `cases hL0`; FlowLimitData term (`maps := cghMaps_of_hL0 …`, `conv := ofRP_supOn_conv …`)
-→ `flowLimit_upgrade` → `smoothFlowLimitInput_of_flowLimitData`. Decide the
-`SmoothFlowLimitInput` expansion (deferred item #5) only if the final shape demands it.
+by `cases hL0`; construct `FlowLimitData` (`maps := cghMaps_of_hL0 …`,
+`conv := ofRP_supOn_conv …`) → `flowUpgrade_of_mc` → `solutionComp_of_mc`.
+Do not restore the deleted exact-conclusion compatibility backend.
 
 TOOLING NOTE (2026-07-03/04): PowerShell 5.1 has TWO Lean-file-corrupting traps.
 (1) `Add-Content/Set-Content -Encoding utf8` writes a BOM → empties Lake's importArts →

@@ -1,4 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasure
+import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -8,111 +11,105 @@ set_option linter.style.longLine false
 # Perelman no-local-collapsing statement interfaces
 
 This file records the MSM135 Chapter 6 noncollapsing vocabulary without
-asserting the hard global analytic theorem.  The metric-ball, curvature-control,
-volume, and singularity-model data are kept as explicit fields or hypotheses so
-later passes can connect them to the geometric and measure APIs.
+asserting the hard global analytic theorem.  The canonical `FlowMetricBall` API
+uses the actual time-slice metric, Riemannian volume measure, and canonical
+curvature tensor.  The older arbitrary-numeric records remain below only as an
+explicit legacy compatibility layer.
 -/
 
 namespace DifferentialGeometry.PDE.RicciFlow.Perelman
 
 noncomputable section
 
-variable {M : Type*}
+universe u uE uH
 
-/-- A ball at a time whose curvature has been controlled at the relevant scale. -/
-structure ScaleControlledBall (M : Type*) where
+open Bundle Tensor0SBundle MeasureTheory
+open scoped Manifold ContDiff ENNReal
+
+variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
+variable [FiniteDimensional Real E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [T2Space M] [SigmaCompactSpace M]
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+
+/-- A genuine geodesic ball in a time slice of a Ricci-flow candidate.
+
+The time is a `FlowTime D` parameter, so interval membership is encoded by the
+type.  The structure stores only the center and positive radius; its set,
+volume, and curvature-scale predicates are derived from the flow. -/
+structure FlowMetricBall (S : SolutionOn (I := I) (M := M) D)
+    (time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D) where
   center : M
-  time : Real
   radius : Real
-  volume : Real
-  curvatureControlled : Prop
+  radius_pos : 0 < radius
 
-namespace ScaleControlledBall
+namespace FlowMetricBall
 
-/-- The small scale-controlled ball is contained in the large one at the
-level currently expressible by this abstract interface: same center and time,
-and no larger radius.  A later Riemannian ball API should turn this predicate
-into actual set inclusion. -/
-def Nested (small large : ScaleControlledBall M) : Prop :=
-  large.center = small.center /\ large.time = small.time /\
-    small.radius <= large.radius
+variable {S : SolutionOn (I := I) (M := M) D}
+variable {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D}
 
-end ScaleControlledBall
+/-- The open ball with `B`'s center and radius, measured using the time-`t`
+metric. -/
+def setAt (B : FlowMetricBall S time) (t : Real) : Set M :=
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨(S.base.metric t).toRiemannianMetric⟩
+  {x : M | Manifold.riemannianEDist I B.center x < ENNReal.ofReal B.radius}
 
-/-- A single scale-controlled ball is `kappa`-noncollapsed in dimension `n`. -/
-def KappaNoncollapsedAtBall (n : Nat) (kappa : Real)
-    (B : ScaleControlledBall M) : Prop :=
-  0 < kappa ∧ 0 < B.radius ∧
-    (B.curvatureControlled -> kappa * B.radius ^ n ≤ B.volume)
+/-- The flow metric ball at its distinguished time. -/
+def set (B : FlowMetricBall S time) : Set M :=
+  B.setAt (time : Real)
 
-/-- `kappa`-noncollapsing on a chosen family of scale-controlled balls. -/
-def KappaNoncollapsedOnBalls (n : Nat) (kappa : Real)
-    (balls : Set (ScaleControlledBall M)) : Prop :=
-  ∀ B : ScaleControlledBall M, B ∈ balls -> KappaNoncollapsedAtBall n kappa B
+/-- The actual Riemannian volume of a flow metric ball. -/
+def volume (B : FlowMetricBall S time) : ℝ≥0∞ :=
+  DifferentialGeometry.Integral.Measure.volumeMeasureOn
+    (I := I) (M := M) S.family time B.set
 
-/-- Noncollapsing at all scales below `rho`, matching the book's scale-restricted
-definition in labels `lbl647` and `lbl652`. -/
-def RicciFlowKappaNoncollapsedBelowScale (n : Nat) (kappa rho : Real)
-    (balls : Set (ScaleControlledBall M)) : Prop :=
-  0 < rho ∧
-    KappaNoncollapsedOnBalls n kappa {B : ScaleControlledBall M | B ∈ balls ∧ B.radius ≤ rho}
+/-- The squared norm of the canonical lowered Riemann tensor of `S(t)`. -/
+def rmNormSq (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M) : Real :=
+  Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 (S.base.rm04 t x)
 
-/-- Statement interface for preservation of noncollapsing under pointed limits,
-label `lbl648`. -/
-def KappaNoncollapsedPreservedUnderLimits (sourceLimit targetLimit : Prop) : Prop :=
-  sourceLimit -> targetLimit
+/-- Curvature is controlled at scale `r` on the backward parabolic cylinder
+based on the time-`B.time` ball.  Squared curvature is used, hence the
+scale-invariant inequality `r⁴ |Rm|² ≤ 1`. -/
+def IsRmControlled (B : FlowMetricBall S time) : Prop :=
+  Set.Icc ((time : Real) - B.radius ^ 2) (time : Real) ⊆ D.carrier ∧
+    ∀ t ∈ Set.Icc ((time : Real) - B.radius ^ 2) (time : Real), ∀ x ∈ B.setAt t,
+      B.radius ^ 4 * rmNormSq S t x ≤ 1
 
-/-- Statement interface connecting noncollapsing to injectivity radius lower
-bounds, labels `lbl650`-`lbl651`. -/
-def KappaNoncollapsedImpliesInjectivityRadiusLowerBound
-    (noncollapsed injectivityLowerBound : Prop) : Prop :=
-  noncollapsed -> injectivityLowerBound
+/-- The actual volume lower bound defining `κ`-noncollapsing on one flow ball,
+using the model dimension. -/
+def IsKappaNoncollapsed (kappa : Real) (B : FlowMetricBall S time) : Prop :=
+  0 < kappa ∧
+    ENNReal.ofReal kappa * ENNReal.ofReal B.radius ^ Module.finrank Real E ≤ B.volume
 
-/-- Locally collapsing solution interface, label `lbl653`. -/
-def LocallyCollapsingAtTime (_n : Nat) (_time : Real) (collapseWitness : Prop) : Prop :=
-  collapseWitness
+/-- Actual set-theoretic nesting of flow metric balls at the same time. -/
+def Nested (small large : FlowMetricBall S time) : Prop :=
+  small.set ⊆ large.set
 
-/-- No local collapsing, version A, label `lbl655`. -/
-def NoLocalCollapsingTheoremA (n : Nat) (T rho : Real)
-    (balls : Set (ScaleControlledBall M)) : Prop :=
-  0 < T -> 0 < rho ->
-    ∃ kappa : Real, 0 < kappa ∧ RicciFlowKappaNoncollapsedBelowScale n kappa rho balls
+/-- Riemannian volume is monotone under genuine ball inclusion. -/
+theorem volume_mono {small large : FlowMetricBall S time} (h : small.Nested large) :
+    small.volume ≤ large.volume := by
+  unfold volume
+  exact measure_mono h
 
-/-- No local collapsing, version B, label `lbl656`. -/
-def NoLocalCollapsingTheoremB (n : Nat) (time : Real) (collapseWitness : Prop) : Prop :=
-  ¬ LocallyCollapsingAtTime n time collapseWitness
+end FlowMetricBall
 
-/-- Equivalence of no local collapsing and the little-loop formulation,
-label `lbl657`. -/
-def NoLocalCollapsingLittleLoopEquivalent (nlc littleLoop : Prop) : Prop :=
-  nlc ↔ littleLoop
+/-- `κ`-noncollapsing on every curvature-controlled flow ball below scale
+`rho`. -/
+def KappaNoncollapsedBelowScale
+    (S : SolutionOn (I := I) (M := M) D) (kappa rho : Real) : Prop :=
+  0 < rho ∧ ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowTime D)
+    (B : FlowMetricBall S t), B.radius ≤ rho →
+    B.IsRmControlled → B.IsKappaNoncollapsed kappa
 
-/-- `mu`-lower-bounds-control-volume-ratios interface, labels `lbl661`-`lbl673`. -/
-def MuControlsVolumeRatios (muLower volumeRatioLower : Real) : Prop :=
-  muLower ≤ volumeRatioLower
-
-/-- Singularity-model existence interface, labels `lbl674`-`lbl676`. -/
-def FiniteTimeSingularityModelExists (hypothesis conclusion : Prop) : Prop :=
-  hypothesis -> conclusion
-
-/-- Improved no-local-collapsing theorem, labels `lbl677`-`lbl682`. -/
-def ImprovedNoLocalCollapsingTheorem (n : Nat) (T rho : Real)
-    (balls : Set (ScaleControlledBall M)) : Prop :=
-  0 < T -> 0 < rho ->
-    ∃ kappa : Real, 0 < kappa ∧ RicciFlowKappaNoncollapsedBelowScale n kappa rho balls
-
-/-- Topping diameter-control style estimate, labels `lbl683`-`lbl686`. -/
-def ToppingDiameterControl (diameterBound curvatureScaleBound : Real) : Prop :=
-  diameterBound ≤ curvatureScaleBound
-
-/-- Cheng eigenvalue comparison interface, labels `lbl690`-`lbl692`. -/
-def ChengEigenvalueComparison (lowerBound eigenvalueEstimate : Real) : Prop :=
-  lowerBound ≤ eigenvalueEstimate
-
-/-- Weaker heat-equation version of the no-local-collapsing argument,
-labels `lbl693`-`lbl696`. -/
-def HeatEquationNoLocalCollapsingVariant (hypothesis conclusion : Prop) : Prop :=
-  hypothesis -> conclusion
+/-- The geometric no-local-collapsing conclusion below a fixed scale.  The
+hard Perelman theorem is the future producer of this predicate. -/
+def NoLocalCollapsing
+    (S : SolutionOn (I := I) (M := M) D) (rho : Real) : Prop :=
+  ∃ kappa : Real, 0 < kappa ∧ KappaNoncollapsedBelowScale S kappa rho
 
 end
 

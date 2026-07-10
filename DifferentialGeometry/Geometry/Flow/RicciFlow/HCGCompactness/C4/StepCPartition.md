@@ -61,3 +61,22 @@ transition refinements from unfolding `hatBall`, `NetLimitData.subseq`, and
 `lamInf` by hand.
 
 Verification status: focused Lean check and targeted module refresh passed.
+
+## 2026-07-09 Finite POU and inner-cover layer
+
+Added a direct constructor `pouOfFinite` for a finite family of globally smooth
+nonnegative weights whose sum is one on the source.  Added the cutoff-normalized
+family `cutoffWeights` and `pouOfCutoff`; its denominator
+
+`tau * sum atoms + (1 - tau)`
+
+remains positive across the zero-denominator boundary, so the global extension
+is genuinely smooth rather than an implicit `0 / 0` convention.  The support
+of each cutoff weight stays inside the support of its raw atom.
+
+Added the factor-`3` `innerBall` family, subsequence stability, openness,
+inclusion in the factor-`4` hats, and the eventual source-ball cover.  These
+theorems deliberately preserve the existing factor-`4` Step-C join interface.
+
+Verification passed.  This is producer machinery only: the concrete special
+atoms and the final `StepB1RawInput` producer remain open.

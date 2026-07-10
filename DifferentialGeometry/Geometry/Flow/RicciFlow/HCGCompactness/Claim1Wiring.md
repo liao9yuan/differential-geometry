@@ -337,3 +337,10 @@ statement-preserving (no consumer of B5 is affected).
 (B1, builds smooth sections via `ContMDiffSection.exists_eq_at_gen`), `claim1_geom` (B6 assembly wiring
 `ContMDiffOn` bricks).  These belong to the bundle/model-topology workstream, not component-eval.  See
 `Tensor/RSTensor/ComponentEvalApiPlan.md` (6th pass).
+
+## 2026-07-09: generic tensor component smoothness
+
+Added and verified `tensorComp_mdiffOn`: components of any smooth covariant
+tensor field in a trivialization frame are smooth on the base set.  F4 uses it
+for its arbitrary tensor `T`; it replaces a repeated metric/Ricci-specific proof
+pattern without unfolding tensor representations.

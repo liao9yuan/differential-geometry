@@ -1,9 +1,27 @@
 # StepCDerivBounds.lean — MSM135 C2 (`lbl430`), the QUANTITATIVE derivative-bounds half
 
+## Current state — 2026-07-09: false all-order statement removed
+
+The former `cmChartDerivLe` was unprovable: it assumed only `C²` regularity and constrained
+`Ctil` only at orders 0, 1, and 2, yet concluded bounds for every `j ≤ pOrd`.  It has been removed.
+
+The checked replacement is `cmChartDerivLe2`, which states exactly the order-0/1/2 result and has
+no `sorry`.  The arbitrary-order textbook theorem remains 0% and is deliberately not stated until
+the API carries both:
+
+- order-`p` regularity for the center family and the joint equation;
+- an explicit recursive numerical majorant constructing `Ctil j` from `Λ`, `B`, and lower-order
+  constants.
+
+The existing inverse/graph Faà-di-Bruno lemmas are reusable machinery, but the common-open-set
+bilinear estimate, recurrence design, and strong induction are substantive remaining work, not
+“pure threading.”
+
 ## Goal
 `lbl430`(i) bounds half (eq `lbl431`): the center of mass has **uniform-in-configuration**
 covariant-derivative bounds `|∇_q^α ∇_μ^β cm| ≤ C̃_{|α|+|β|+1}` for all orders, at the book scale
-`r < c(n)/√C₀`, `inj(q) > 3r`. This GATES `stepB1_approxIso`'s `(ε,p)` conjunct (B1 consumes the
+`r < c(n)/√C₀`, `inj(q) > 3r`. This gates production of the arbitrary-`p` bounds carried by
+`StepB1RawInput` (B1 consumes the
 `comp_cov_le`/`comp_cov_accum` shape). `centerOfMass_contDiffAt` (lbl430(ii), the C^n REGULARITY)
 gives smoothness but NOT the uniform constants — regularity ≠ bounds.
 
@@ -39,9 +57,10 @@ The book applies the IFT to `G(q) = Σ μᵢ exp_q⁻¹ qᵢ`, `cm` = the unique
   `HasFDerivAt.comp`/`.unique`, `opNorm_le_bound`, `le_opNorm`. Green.
 - **(3) general `j`** — the Faà-di-Bruno EXPANSION of `iteratedFDeriv^j (G∘(f,id))` isolating the
   leading `∂_z G · D^j f` is the genuine frontier. Mathlib's `norm_iteratedFDeriv_comp_le` gives the
-  BOUND but not the algebraic isolation of the top term. Endpoint stated, induction step = ONE sorry.
+  BOUND but not the algebraic isolation of the top term.  No arbitrary-order endpoint is currently
+  stated; the recurrence, common-neighborhood bookkeeping, and strong induction remain to be built.
 
-## State (2026-07-06)
+## Historical state (2026-07-06)
 - `implicitDeriv_one_le` (abstract, E-only): GREEN — the j=1 base, real math content.
 - `CmHessianBoundInput` (structure, `‖L.symm‖ ≤ Λ`): GREEN honest input, audit-rule docstring.
 - `CmGDerivBound` (Prop, `∀ j ≤ p, ‖iteratedFDeriv j G‖ ≤ B j`): GREEN honest input, S6-reduction
@@ -67,14 +86,14 @@ The book applies the IFT to `G(q) = Σ μᵢ exp_q⁻¹ qᵢ`, `cm` = the unique
   `hf2`/`hG2` (`C²` regularity from lbl430(ii)) → eventual differentiability, `hnbhd` → eventual
   invertibility + `Λ`, `graphBlockDeriv` at `inl`/`inr` from `‖∇²G‖ ≤ B 2` and `‖∇f‖ ≤ Λ·B₁`,
   constant `C̃₂ = Λ'²·a₂·B₁ + Λ'·a₂`, `a₂ = B₂·(Λ·B₁+1)` (`hC2`).
-- `cmChartDerivLe` (∀ j ≤ p endpoint): j=0/j=1/j=2 discharged; ONE sorry = `j≥3` = the pure (c)
-  recursion (strong induction `D^j f = D^{j−1}(RHS)` through `norm_iteratedFDeriv_comp_le`,
-  recursive `C̃`); all analytic ingredients for it are proved above.
-- Verified: full `lake build` green; `implicitDeriv_one_le`, `cmChartFDerivLe`,
+- Historical: the former `cmChartDerivLe` discharged j=0/j=1/j=2 and left j≥3 as a `sorry`.
+  That statement has now been removed because its hypotheses did not justify the higher orders;
+  the checked low-order replacement is `cmChartDerivLe2`.
+- Historical verification passed; `implicitDeriv_one_le`, `cmChartFDerivLe`,
   `norm_iteratedFDeriv_ringInverse_le`, `implicitFDeriv_eq`, `implicitFDeriv_eventuallyEq`,
   `graphBlockDeriv`, `implicitDeriv_two_le` all axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
-## (c) j≥3 bricks LANDED (2026-07-07, all GREEN axiom-clean); remaining = assembly only
+## Partial j≥3 reusable machinery (2026-07-07); no all-order endpoint
 - `multilinear_prod_opNorm_le` (`‖M.prod N‖ ≤ max ‖M‖ ‖N‖`), `norm_iteratedFDeriv_id_le`,
   `norm_iteratedFDeriv_graph_le` (`‖∇^i (f,id)‖ ≤ max ‖∇^i f‖ 1` via `iteratedFDeriv_prodMk`).
 - `norm_iteratedFDeriv_invComp_le`: `‖∇^m (Ring.inverse ∘ A) x‖ ≤ m!·(m!·(max Λ 1)^{m+1})·D^m`
@@ -87,13 +106,15 @@ The book applies the IFT to `G(q) = Σ μᵢ exp_q⁻¹ qᵢ`, `cm` = the unique
   (`pow_le_pow_right'` needs `MulLeftMono`, fails on ℝ); `ContDiffAt.differentiableAt` takes
   `n ≠ 0` (not `1 ≤ n`) — `(by norm_num)`.
 
-**Remaining assembly (c4/c5, next session):** (c4) the bilinear collection
+**Remaining higher-order work (c4/c5):** this is substantive producer work, not merely assembly.
+(c4) the bilinear collection
 `‖∇^m ((inverse∘A)·B)‖ ≤ Σ C(m,k)·…` via `norm_iteratedFDerivWithin_le_of_bilinear` at `compL`
 (`norm_compL_le`), + `ContinuousLinearMap.norm_iteratedFDeriv_comp_left` for the fixed
 `Φ = (compL).flip inl/inr` post-composition (`‖Φ‖ ≤ 1` via `norm_flip` + `norm_compL_le`);
-(c5) recursive constants `C̃` + the strong induction in `cmChartDerivLe`'s `j≥3` branch, feeding
+(c5) recursive constants `C̃` + the strong induction for a future honest all-order theorem, feeding
 (c4) with `Dj q := fderiv G (graph q)`, the IH, `hnbhd`, and per-order `CmGDerivBound`/regularity
-(order-`pOrd` hypotheses).  All analytic content is now proved; c4/c5 are pure threading.
+(order-`pOrd` hypotheses).  The existing bricks substantially reduce the problem, but c4/c5 still
+require a real recurrence/API design and common-neighborhood bookkeeping.
 
 ## What (c) j≥3 still needed (pre-brick scoping, superseded)
 Strong induction with IH `‖itF i f‖ ≤ C̃ i` (i < j): bound `‖itF (j−1) RHS‖` by (i) the bilinear
@@ -106,8 +127,10 @@ demands of the comp/bilinear lemmas don't hold; work `Within` an open set where 
 hypotheses hold, as in the Neumann lemma).  Genuinely a full session: the pair-itF algebra, the
 `D^i`-shape conversion (`D := 1 + Σ Cᵢ`), and the recursion constants.
 
-## Ingredient (a) DONE — what (b) j=2 and (c) still need (2026-07-06)
-Ingredient (a) (the neighbourhood formula) is green.  To close `cmChartDerivLe`'s `sorry` the CM
+## Historical pre-order-two scoping (2026-07-06; superseded)
+
+At that snapshot ingredient (a) (the neighbourhood formula) was green, while the old
+`cmChartDerivLe` proof still had a `sorry`; the CM
 wiring remains (all API paths confirmed to exist, but the CM-specific bounds are substantial):
 1. **Neighbourhood invertibility input** (component ①): the endpoint needs
    `∀ᶠ p in 𝓝 params₀, IsUnit (∂_zG(chart(c p), p)) ∧ ‖Ring.inverse (∂_zG(chart(c p), p))‖ ≤ Λ`.
@@ -176,7 +199,8 @@ wiring remains (all API paths confirmed to exist, but the CM-specific bounds are
   definitional, so `Prod.ext (add_zero x).symm (zero_add y).symm` closes it by defeq.
 
 ## Honest position
-This is the QUANTITATIVE half of C2 = one of PROJECT_MAP §6's three riskiest items. The regularity
-(C^n) half is done; this half is now: base case + honest inputs green, the general induction is the
-remaining frontier (one precise sorry). Whole HCG project ≈ 30% (unchanged — the frontier moved, not
-closed). B1's `(ε,p)` conjunct is gated on the general-j endpoint being sorry-free.
+This is the QUANTITATIVE half of C2.  The regularity half and the order-two quantitative theorem are
+checked; the arbitrary-order theorem is not stated and remains 0%.  Its dedicated reusable
+machinery is roughly 70–80%, but B1's arbitrary `(ε,p)` producer remains gated on the recurrence and
+strong-induction endpoint.  At project scale, the whole HCG program is conservatively about **45%
+machinery**, while its endpoint theorems remain **0%**.

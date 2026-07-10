@@ -62,6 +62,18 @@ proof (`compL2Sq = ∑ component0S(iterCov)²` via `iterCovComp_eq_iterCov` +
 2^s·√N`.  Needs the same `set_option backward.isDefEq.respectTransparency false`
 as B5.  This converts intrinsic (B_r) bounds into the `hgB` compL2 form on u'.
 
+## 2026-07-09: `metricComp_le` specialization added
+
+Added the small checked specialization
+`metricComp_le`: an intrinsic bound
+`sqrt(normSq0S gRef (2+j) (iterCov gRef 2 (metricTensorField g) j y)) <= eps`
+implies the frame-component bound needed by component estimates, but with the
+honest good-frame factor
+`compL2(...) <= 2^(2+j) * eps`.
+
+This exposed the F4 scaling issue, which is now closed by the explicit scaled
+Claim-1/F3 constants and `metricComp_mul`.  Verification passed.
+
 ## REMAINING for ric_bound (next bricks)
 2. Shi moving→fixed: `normSq0S_le_of_metric_equiv` (Comparison.lean) through
    eq 3.3 + the moving-Christoffel `iterCovComp_eq_iterCov`.
@@ -83,3 +95,10 @@ Both focused-check **green** without the option, no new API lemma. **Kept** `ric
 `ContMDiffOn` smoothness producer → bundle/section class, not component-eval). Statement-preserving; the
 `ric_bound`/eq-3.4 consumers are unaffected. Triage signal + cross-file results in
 `Tensor/RSTensor/ComponentEvalApiPlan.md`.
+
+## 2026-07-09: `metricComp_mul` closes the F4 metric swap
+
+Added and verified `metricComp_mul`.  A frame controlled by `g`, pointwise
+equivalence `g <= C gRef` with `1 <= C <= 2`, and the intrinsic `gRef` derivative
+bound imply the component estimate with uniform loss `4^(2+p)` for all `j <= p`.
+This is the exact producer consumed by the completed `Lemma45F4` assembly.

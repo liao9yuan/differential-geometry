@@ -23,11 +23,16 @@ The smooth structure on the sequential topological direct limit
 (`lbl408`, the limit manifold `M∞ := dirlim B(O_k, 2^k)`), built purely against the
 abstract `SeqSystem` engine — it carries **no** Step A/B/C imports.
 
-Charts on `S.Lim`: for a point `z = incl k a` the chart is `chartAt H a ∘ (incl k)⁻¹`,
-an `OpenPartialHomeomorph S.Lim H` with source `incl k '' (chartAt H a).source` (open
-because `incl k` is an open embedding).  The transition between two such charts is the
-factor-level transition `(incl ℓ)⁻¹ ∘ (incl k)` written in the factor charts; it is
-smooth because the `S.F` are, giving `IsManifold I ∞ S.Lim`.
+Charts on `S.Lim`: every representative `⟨k, a⟩` supplies an admissible chart
+`chartAt H a ∘ (incl k)⁻¹`, an `OpenPartialHomeomorph S.Lim H` with source
+`incl k '' (chartAt H a).source` (open because `incl k` is an open embedding).
+`ChartedSpace.chartAt` chooses one such representative chart by `Classical.choose`; the
+mathematical content is not literal representative independence, but smooth compatibility of all
+stage charts on overlaps.  The transition between two such charts is the factor-level transition
+`(incl ℓ)⁻¹ ∘ (incl k)` written in the factor charts; on a common later stage `m ≥ k, ℓ` this is
+`Function.invFun (F_{ℓ≤m}) ∘ F_{k≤m}` on the subset where the latter lands in `range (F_{ℓ≤m})`.
+It is smooth because the `S.F` are smooth and have smooth inverses on their open ranges, giving
+`IsManifold I ∞ S.Lim`.
 
 ## Layout
 * `SeqSystem.inclHomeo`, `SeqSystem.limChart`, `SeqSystem.instChartedSpaceLim` — D3a.
@@ -70,8 +75,10 @@ theorem inclHomeo_symm_apply (k : ℕ) (x : A k) :
     (S.inclHomeo k).symm (S.incl k x) = x :=
   (S.incl_isOpenEmb k).toOpenPartialHomeomorph_left_inv (S.incl k)
 
-/-- The chart of `Lim` from stage `k` and factor point `a`: `chartAt H a` precomposed with
-the inverse of the stage inclusion, an `OpenPartialHomeomorph Lim H`. -/
+/-- A stage-supplied chart of `Lim` from stage `k` and factor point `a`: `chartAt H a`
+precomposed with the inverse of the stage inclusion, an `OpenPartialHomeomorph Lim H`.
+All such representative charts enter the atlas; `chartAt` later chooses one, while compatibility
+is proved by chart-transition smoothness. -/
 def limChart (k : ℕ) (a : A k) : OpenPartialHomeomorph S.Lim H :=
   (S.inclHomeo k).symm.trans (chartAt H a)
 
@@ -96,7 +103,10 @@ def rep (z : S.Lim) : Σ k, A k := (S.exists_sigma_incl z).choose
 theorem incl_rep (z : S.Lim) : S.incl (S.rep z).1 (S.rep z).2 = z :=
   (S.exists_sigma_incl z).choose_spec
 
-/-- **D3a: the direct limit of `H`-charted manifold factors is `H`-charted.** -/
+/-- **D3a: the direct limit of `H`-charted manifold factors is `H`-charted.**
+The atlas contains every stage-supplied chart.  The distinguished `chartAt` uses one chosen
+representative of the quotient point only to inhabit the `ChartedSpace` field; compatibility is
+handled later by overlap transitions, not by making this chosen chart canonical. -/
 instance instChartedSpaceLim : ChartedSpace H S.Lim where
   atlas := ⋃ (k : ℕ), ⋃ (a : A k), {S.limChart k a}
   chartAt z := S.limChart (S.rep z).1 (S.rep z).2
@@ -184,10 +194,24 @@ end Charted
 
 end SeqSystem
 
-/-- A `SeqSystem` whose factors are `C^∞` manifolds modelled on `(I, H)` and whose transition maps
-`F h` are `C^∞` diffeomorphisms onto their open images: `ContMDiff` with a `ContMDiff` inverse on the
-range.  These are MSM135 Chapter 4 Step D's `Ψ_k` open embeddings, out of which the limit manifold
-`M∞ = dirlim B(O_k, 2^k)` (`lbl408`) is built. -/
+/-- A `SeqSystem` whose factors are `C^∞` manifolds modelled on the same `(I, H)` and whose
+transition maps are smooth diffeomorphisms onto open images.
+
+The topological half is inherited from `SeqSystem.isOpenEmb`; the two fields below add the smooth
+forward map and the smooth inverse on `range (F h)`.  This is stronger than a merely smooth open
+topological embedding and is the honest data needed for the limit atlas transitions.  Ricci-flow
+side conditions such as finite-dimensionality, Hausdorff/sigma-compact stages, and boundaryless
+metric-distance assumptions are kept on the later consumers that actually need them, not on this
+bare smooth direct-limit structure.
+
+Do not weaken this to `IsOpenEmbedding` plus `ContMDiff`: on `ℝ`, the map `x ↦ x^3` is a smooth
+open topological embedding onto all of `ℝ`, but its inverse is not `C^1` at `0`; the stage charts
+would have a cube-root transition and would not form a smooth atlas.
+
+The use of `Function.invFun` is intentionally range-scoped.  Outside `range (F h)` it is arbitrary,
+so downstream theorems must keep inverse smoothness, continuity, and evaluation facts restricted
+to the range, or package the same data as a partial diffeomorphism/local diffeomorphism onto the
+open image. -/
 structure SmoothSeqSystem
     {E : Type uE} [NormedAddCommGroup E] [NormedSpace ℝ E]
     {H : Type uH} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
@@ -233,9 +257,109 @@ variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpa
   [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
 variable (S : SmoothSeqSystem I A)
 
+/-- Adjacent smooth maps have smooth `Nat.leRecOn` composites. -/
+theorem succMap_contMDiff (f : ∀ k, A k → A (k + 1))
+    (hf : ∀ k, ContMDiff I I ∞ (f k)) {k ℓ : ℕ} (h : k ≤ ℓ) :
+    ContMDiff I I ∞ (SeqSystem.succMap f h) := by
+  induction ℓ, h using Nat.le_induction with
+  | base =>
+      change ContMDiff I I ∞ (SeqSystem.succMap f (Nat.le_refl k))
+      have hfun : SeqSystem.succMap f (Nat.le_refl k) = id := by
+        funext x
+        exact Nat.leRecOn_self x
+      rw [hfun]
+      exact contMDiff_id
+  | succ ℓ hkℓ ih =>
+      have hfun : SeqSystem.succMap f (Nat.le.step hkℓ) =
+          f ℓ ∘ SeqSystem.succMap f hkℓ := by
+        funext x
+        exact Nat.leRecOn_succ hkℓ x
+      rw [hfun]
+      exact (hf ℓ).comp ih
+
+/-- The inverse of an adjacent-map composite is smooth on its range when every adjacent inverse
+is smooth on its own range. -/
+theorem succMap_inv_mdiff (f : ∀ k, A k → A (k + 1))
+    (hemb : ∀ k, IsOpenEmbedding (f k))
+    (hfInv : ∀ k, ContMDiffOn I I ∞ (Function.invFun (f k)) (Set.range (f k)))
+    {k ℓ : ℕ} (h : k ≤ ℓ) :
+    ContMDiffOn I I ∞ (Function.invFun (SeqSystem.succMap f h))
+      (Set.range (SeqSystem.succMap f h)) := by
+  induction ℓ, h using Nat.le_induction with
+  | base =>
+      change ContMDiffOn I I ∞
+        (Function.invFun (SeqSystem.succMap f (Nat.le_refl k)))
+        (Set.range (SeqSystem.succMap f (Nat.le_refl k)))
+      have hfun : SeqSystem.succMap f (Nat.le_refl k) = id := by
+        funext x
+        exact Nat.leRecOn_self x
+      rw [hfun]
+      have hinvId : Function.invFun (id : A k → A k) = id := by
+        funext x
+        exact Function.leftInverse_invFun Function.injective_id x
+      rw [hinvId]
+      simpa using
+        (contMDiff_id : ContMDiff I I ∞ (id : A k → A k)).contMDiffOn
+  | succ ℓ hkℓ ih =>
+      let prev : A k → A ℓ := SeqSystem.succMap f hkℓ
+      have hfun : SeqSystem.succMap f (Nat.le.step hkℓ) = f ℓ ∘ prev := by
+        funext x
+        exact Nat.leRecOn_succ hkℓ x
+      rw [hfun]
+      have hprev : Function.Injective prev :=
+        (SeqSystem.succMap_isOpenEmb f hemb hkℓ).injective
+      have htotal : Function.Injective (f ℓ ∘ prev) := (hemb ℓ).injective.comp hprev
+      have hinvTotal : ContMDiffOn I I ∞ (Function.invFun (f ℓ))
+          (Set.range (f ℓ ∘ prev)) := by
+        refine (hfInv ℓ).mono ?_
+        rintro y ⟨x, rfl⟩
+        exact ⟨prev x, rfl⟩
+      have hmaps : Set.MapsTo (Function.invFun (f ℓ)) (Set.range (f ℓ ∘ prev))
+          (Set.range prev) := by
+        rintro y ⟨x, rfl⟩
+        simp only [Function.comp_apply]
+        rw [Function.leftInverse_invFun (hemb ℓ).injective]
+        exact ⟨x, rfl⟩
+      have hiPrev : ContMDiffOn I I ∞ (Function.invFun prev) (Set.range prev) := by
+        simpa only [prev] using ih
+      have hsmooth := hiPrev.comp hinvTotal hmaps
+      refine hsmooth.congr (fun y hy => ?_)
+      obtain ⟨x, rfl⟩ := hy
+      simp only [Function.comp_apply]
+      rw [Function.leftInverse_invFun (hemb ℓ).injective,
+        Function.leftInverse_invFun hprev]
+      change Function.invFun (f ℓ ∘ prev) ((f ℓ ∘ prev) x) = x
+      exact Function.leftInverse_invFun htotal x
+
+/-- Build a smooth sequential system from adjacent smooth open embeddings whose inverses are
+smooth on their open ranges. -/
+def ofSucc (f : ∀ k, A k → A (k + 1))
+    (hemb : ∀ k, IsOpenEmbedding (f k))
+    (hf : ∀ k, ContMDiff I I ∞ (f k))
+    (hfInv : ∀ k, ContMDiffOn I I ∞ (Function.invFun (f k)) (Set.range (f k))) :
+    SmoothSeqSystem I A where
+  toSeqSystem := SeqSystem.ofSucc f hemb
+  contMDiff_F h := succMap_contMDiff f hf h
+  contMDiffOn_invFun_F h := succMap_inv_mdiff f hemb hfInv h
+
+/-- The transition of `ofSucc` from `k` to `k+1` is the supplied adjacent map. -/
+@[simp] theorem ofSucc_F_succ (f : ∀ k, A k → A (k + 1))
+    (hemb : ∀ k, IsOpenEmbedding (f k))
+    (hf : ∀ k, ContMDiff I I ∞ (f k))
+    (hfInv : ∀ k, ContMDiffOn I I ∞ (Function.invFun (f k)) (Set.range (f k)))
+    (k : ℕ) :
+    (ofSucc (I := I) f hemb hf hfInv).toSeqSystem.F (Nat.le_succ k) = f k := by
+  funext x
+  change SeqSystem.succMap f (Nat.le_succ k) x = f k x
+  unfold SeqSystem.succMap
+  rw [show Nat.le_succ k = Nat.le.step (Nat.le_refl k) by rfl,
+    Nat.leRecOn_succ (Nat.le_refl k) x, Nat.leRecOn_self]
+
 /-- **D3b crux (MSM135 `lbl409`): the factor transition `A k ⇢ A ℓ` is `C^∞` on its domain.**  On the
-overlap it factors through the common stage `m = max k ℓ` as `(F_{ℓ≤m})⁻¹ ∘ F_{k≤m}`, a composition
-of the smooth `F_{k≤m}` and the smooth inverse of the open embedding `F_{ℓ≤m}`. -/
+overlap it factors through the common stage `m = max k ℓ` as
+`Function.invFun (F_{ℓ≤m}) ∘ F_{k≤m}`, restricted to the subset where `F_{k≤m}` lands in
+`range (F_{ℓ≤m})`. This is the smooth compatibility proof for representative charts, not a
+claim that the chosen `chartAt` is independent of representative. -/
 theorem transitionHomeo_contMDiffOn (k ℓ : ℕ) :
     ContMDiffOn I I ∞ (S.toSeqSystem.transitionHomeo k ℓ)
       (S.toSeqSystem.transitionHomeo k ℓ).source := by
@@ -339,7 +463,10 @@ section MetricTransport
 
 Per-factor smooth Riemannian metrics `g k` satisfying the isometry cocycle `(F h)^* g ℓ = g k`
 (`MetricCocycle`) glue to a smooth Riemannian metric on `S.Lim` with `(incl k)^* g∞ = g k`
-(`limitMetric` / `limitMetric_pullback`).  The fiberwise definition pulls `g k` back along the
+(`limitMetric` / `limitMetric_pullback`).  The cocycle is the real tangent-level statement:
+pointwise equality of inner products after applying the actual differential `mfderiv (F h)` to
+both tangent vectors; set-level or distance-level compatibility would not glue smooth Riemannian
+tensor fields.  The fiberwise definition pulls `g k` back along the
 smooth local inverse `Function.invFun (incl k)` of the open embedding `incl k` (so no derivative
 inverses appear); stage-independence is the cocycle compared through a common later stage (the
 `transitionHomeo` technique of D3b); smoothness of the metric section is the test-section engine
@@ -391,7 +518,8 @@ private theorem mfd_base_eq
   subst hxy; rfl
 
 /-- **The local inverse of the stage inclusion is `C^∞` on the (open) range.**  On the chart
-source it agrees with `(chartAt H a).symm ∘ limChart k a`. -/
+source it agrees with `(chartAt H a).symm ∘ limChart k a`.  No smoothness or definitional behavior
+of `Function.invFun (incl k)` is used away from `range (incl k)`. -/
 theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
     (hz : z ∈ Set.range (S.toSeqSystem.incl k)) :
     ContMDiffAt I I ∞ (Function.invFun (S.toSeqSystem.incl k)) z := by
@@ -434,7 +562,8 @@ theorem contMDiffAt_invIncl (k : ℕ) {z : S.toSeqSystem.Lim}
 /-- **The inverse of a stage inclusion, packaged as a `PartialDiffeomorph S.Lim → A k`** with
 source the (open) stage range and target everything (MSM135 Step D4a: the Cheeger–Gromov
 comparison maps `Φ_k := (incl k)⁻¹`).  Forward smoothness is `contMDiffAt_invIncl`, inverse
-smoothness is `contMDiff_incl`. -/
+smoothness is `contMDiff_incl`.  This is the preferred API when the inverse domain matters:
+the raw `Function.invFun` remains arbitrary off the source. -/
 noncomputable def inclPartialDiffeo (k : ℕ) :
     PartialDiffeomorph I I S.toSeqSystem.Lim (A k) (∞ : WithTop ℕ∞) where
   toFun := Function.invFun (S.toSeqSystem.incl k)
@@ -468,6 +597,11 @@ theorem invIncl_incl_le {j k : ℕ} (hjk : j ≤ k) (a : A j) :
 metric back to the earlier one; this is the hypothesis under which the direct limit carries the
 limit metric `g∞`.
 
+This is the genuine Riemannian cocycle: at every `a : A k`, it compares the two inner products
+after applying the actual manifold differential `mfderiv I I (S.toSeqSystem.F h) a` to both tangent
+vectors.  A statement only about set images, quotient representatives, distances, or ball
+compatibility is not strong enough for the smooth metric gluing below.
+
 Honest-input note: this is a hypothesis of an abstract gluing lemma, not a project axiom.  It is
 mathematically satisfiable at book scale — MSM135 `lbl407` (Step D2c) produces exactly this
 statement for consecutive stages and functoriality (`map_map` + the chain rule) extends it to all
@@ -477,6 +611,56 @@ def MetricCocycle (g : ∀ k, SmoothRiemannianMetric I (A k)) : Prop :=
     (g ℓ).inner (S.toSeqSystem.F h a)
       (mfderiv I I (S.toSeqSystem.F h) a v) (mfderiv I I (S.toSeqSystem.F h) a w)
       = (g k).inner a v w
+
+/-- It suffices to verify the metric cocycle on adjacent transition maps. -/
+theorem MetricCocycle.ofSucc (g : ∀ k, SmoothRiemannianMetric I (A k))
+    (hstep : ∀ k (a : A k) (v w : TangentSpace I a),
+      (g (k + 1)).inner (S.toSeqSystem.F (Nat.le_succ k) a)
+        (mfderiv I I (S.toSeqSystem.F (Nat.le_succ k)) a v)
+        (mfderiv I I (S.toSeqSystem.F (Nat.le_succ k)) a w) =
+      (g k).inner a v w) :
+    S.MetricCocycle g := by
+  intro k l h
+  induction l, h using Nat.le_induction with
+  | base =>
+      intro a v w
+      have hself : S.toSeqSystem.F (Nat.le_refl k) = id := by
+        funext x
+        exact S.toSeqSystem.map_self k x
+      rw [hself, mfderiv_id]
+      rfl
+  | succ l hkl ih =>
+      intro a v w
+      let hs : l ≤ l + 1 := Nat.le_succ l
+      have hcomp : S.toSeqSystem.F (Nat.le.step hkl) =
+          S.toSeqSystem.F hs ∘ S.toSeqSystem.F hkl := by
+        funext x
+        calc
+          S.toSeqSystem.F (Nat.le.step hkl) x =
+              S.toSeqSystem.F (hkl.trans hs) x :=
+            S.toSeqSystem.F_apply_irrel (Nat.le.step hkl) (hkl.trans hs) x
+          _ = S.toSeqSystem.F hs (S.toSeqSystem.F hkl x) :=
+            (S.toSeqSystem.map_map hkl hs x).symm
+      have hhd : MDifferentiableAt I I (S.toSeqSystem.F hkl) a :=
+        (S.contMDiff_F hkl).contMDiffAt.mdifferentiableAt (by decide)
+      have hsd : MDifferentiableAt I I (S.toSeqSystem.F hs)
+          (S.toSeqSystem.F hkl a) :=
+        (S.contMDiff_F hs).contMDiffAt.mdifferentiableAt (by decide)
+      rw [hcomp, mfderiv_comp a hsd hhd]
+      simp only [Function.comp_apply]
+      calc
+        (g (l + 1)).inner (S.toSeqSystem.F hs (S.toSeqSystem.F hkl a))
+            (mfderiv I I (S.toSeqSystem.F hs) (S.toSeqSystem.F hkl a)
+              (mfderiv I I (S.toSeqSystem.F hkl) a v))
+            (mfderiv I I (S.toSeqSystem.F hs) (S.toSeqSystem.F hkl a)
+              (mfderiv I I (S.toSeqSystem.F hkl) a w)) =
+          (g l).inner (S.toSeqSystem.F hkl a)
+            (mfderiv I I (S.toSeqSystem.F hkl) a v)
+            (mfderiv I I (S.toSeqSystem.F hkl) a w) :=
+          hstep l (S.toSeqSystem.F hkl a)
+            (mfderiv I I (S.toSeqSystem.F hkl) a v)
+            (mfderiv I I (S.toSeqSystem.F hkl) a w)
+        _ = (g k).inner a v w := ih a v w
 
 /-- The stage-`k` candidate for the limit inner product at `z`: the pullback of `g k` along the
 local inverse of `incl k` (junk off the range of `incl k`). -/
@@ -657,7 +841,9 @@ cocycle glue to a smooth Riemannian metric on the direct limit: at `z` the inner
 pullback of `g k` along the local inverse of any stage inclusion whose range contains `z`
 (stage-independent by `stageInner_congr`).  Smoothness of the metric section is proved through the
 test-section engine (`cotangentCov_clmSection_smooth_aux`) and `tangentMapWithin` smoothness of the
-local inverse on the open range.  The defining pullback property is `limitMetric_pullback`. -/
+local inverse on the open range.  This deliberately uses a pointwise representative definition plus
+local formulas on stage ranges, not an abstract sheaf/gluing theorem for smooth metrics.  The
+defining pullback property is `limitMetric_pullback`. -/
 noncomputable def limitMetric (g : ∀ k, SmoothRiemannianMetric I (A k))
     (hg : S.MetricCocycle g) : SmoothRiemannianMetric I S.toSeqSystem.Lim where
   inner z := S.stageInner g (S.toSeqSystem.rep z).1 z
@@ -783,6 +969,20 @@ theorem limitMetric_pullback (g : ∀ k, SmoothRiemannianMetric I (A k))
     ((S.contMDiff_incl k).mdifferentiableAt (by decide))
   rw [happ v, happ w]
   exact inner_base_eq (g k) hφk v w
+
+/-- On the range of a stage inclusion, the glued metric is the pullback of that stage metric
+along the smooth local inverse of the inclusion. -/
+theorem limitMetric_of_mem (g : ∀ k, SmoothRiemannianMetric I (A k))
+    (hg : S.MetricCocycle g) (k : ℕ) {z : S.toSeqSystem.Lim}
+    (hz : z ∈ Set.range (S.toSeqSystem.incl k)) (v w : TangentSpace I z) :
+    (S.limitMetric g hg).inner z v w =
+      (g k).inner (Function.invFun (S.toSeqSystem.incl k) z)
+        (mfderiv I I (Function.invFun (S.toSeqSystem.incl k)) z v)
+        (mfderiv I I (Function.invFun (S.toSeqSystem.incl k)) z w) := by
+  have hstage : (S.limitMetric g hg).inner z = S.stageInner g k z := by
+    change S.stageInner g (S.toSeqSystem.rep z).1 z = S.stageInner g k z
+    exact S.stageInner_congr g hg (S.mem_range_rep z) hz
+  rw [hstage, S.stageInner_apply]
 
 end MetricTransport
 

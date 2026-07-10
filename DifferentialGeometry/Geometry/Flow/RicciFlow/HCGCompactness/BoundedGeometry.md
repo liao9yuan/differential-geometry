@@ -6,7 +6,7 @@ Introduced definitions: `curvCovDerivStep`, `curvCovDeriv`, `curvDerivNormSq`, `
 
 Design note: bounded geometry is derivative-order indexed. `HasCurvDerivBound` is no longer an opaque predicate: it unfolds to a global pointwise bound on `curvDerivNorm`, defined from the canonical metric Riemann tensor, iterated `totalNabla0S`, and the metric-induced `normSq0S`. The flow derivative bound is a spacetime family of spatial curvature-derivative bounds on the time-slice metrics.
 
-2026-05-27 correction: removed the vague curvature-bound axioms. The remaining solution compactness theorem still needs `FlowDerivativeInput` and `SmoothFlowLimitInput`; those are theorem-facing packages, but their curvature-bound fields now have concrete norm content.
+2026-05-27 correction, updated 2026-07-09: removed the vague curvature-bound axioms. The canonical conditional solution-compactness route needs `FlowDerivativeInput` and concrete `FlowUpgradeData`; the former exact-conclusion `SmoothFlowLimitInput` package has been deleted. The curvature-bound fields have concrete norm content.
 
 Verification: passed.
 

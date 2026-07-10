@@ -1,27 +1,29 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.SolutionCompactness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompactnessSubseq
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# P4 assembly: the smooth-flow-limit upgrade from structured frontier inputs
+# P4 assembly: concrete smooth-flow-limit upgrade data
 
-The MSM135 Theorem 3.10 backend (`SmoothFlowLimitInput.upgrade`) assembled from
-the genuine frontier ingredients, given the time-zero Cheeger--Gromov
-compactness conclusion `mc : MetricCompactnessConclusion (X.atZero)`:
+The MSM135 Theorem 3.10 backend is assembled from genuine frontier ingredients,
+given the time-zero Cheeger--Gromov compactness conclusion
+`mc : MetricCompactnessConclusion (X.atZero)`:
 
 * `L` — the limit Ricci flow (Brick A: limit-is-a-solution);
+* `hL0` — the limit flow's time-zero pointed manifold is `mc.limit`;
 * `maps` — the spacetime comparison maps (Brick B, from `mc.maps`);
 * `scalar` — scalar-curvature pullback convergence (Brick E);
 * `conv` — the window-uniform `C^p` convergence of the pulled-back metrics
   (Brick D: the norm bridge, consuming the moving-Shi bound `hShi`).
 
 These are bundled in `FlowLimitData`; `flowLimit_upgrade` assembles them through
-the already-built `SmoothCGHConverges.ofRestrictPullback`, and
-`smoothFlowLimitInput_of_flowLimitData` produces the theorem-facing
-`SmoothFlowLimitInput`.  The hard frontiers (A, D, E) remain honest input fields
-here (the `hShi`/Theorem-3.9 scope); discharging them is the per-brick work.
+the already-built `SmoothCGHConverges.ofRestrictPullback`.  `FlowUpgradeData`
+also records the further subsequence selected by the spacetime
+Arzela--Ascoli argument.  The hard frontiers (A, D, E) remain honest input
+fields here; no field accepts the desired compactness conclusion itself.
 -/
 
 noncomputable section
@@ -99,6 +101,8 @@ structure FlowLimitData
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))) where
   /-- Brick A: the limit Ricci flow on the time-zero limit manifold. -/
   L : PointedFlowData.{u, uE, uH} (I := I) X.D
+  /-- The limit flow is based on the pointed limit supplied by Theorem 3.9. -/
+  hL0 : L.atTime (I := I) 0 = mc.limit
   /-- Brick B: the spacetime comparison maps. -/
   maps : PointedCGHMaps (I := I) X (L.atTime 0) mc.subseq
   /-- Brick E: scalar-curvature pullback convergence. -/
@@ -143,14 +147,34 @@ theorem flowLimit_upgrade
     ⟨SmoothCGHConverges.ofRestrictPullback (I := I)
       d.maps d.scalar d.hσsrc d.hσtgt d.refMetric (letI : TopologicalSpace d.L.M := d.L.topology; letI : ChartedSpace H d.L.M := d.L.charted; letI : IsManifold I ∞ d.L.M := d.L.smooth; letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) d.L.M := (by change IsManifold I ∞ d.L.M; infer_instance); letI : SigmaCompactSpace d.L.M := d.L.sigmaCompact; letI : T2Space d.L.M := d.L.t2; d.L.S.family.metric) d.conv⟩⟩
 
-/-- Produce the theorem-facing `SmoothFlowLimitInput` from the structured
-frontier ingredients, available at every time-zero conclusion. -/
-theorem smoothFlowLimitInput_of_flowLimitData
+/-- Concrete data for the Theorem 3.10 upgrade after the spacetime
+Arzela--Ascoli argument selects a further strictly monotone subsequence.
+
+Unlike the legacy `SmoothFlowLimitInput`, this record cannot be inhabited by
+supplying the desired conclusion: it must expose the actual limit flow,
+comparison maps, scalar convergence, and window-uniform metric convergence in
+its `FlowLimitData` field. -/
+structure FlowUpgradeData
     (X : PointedFlowSeq.{u, uE, uH} (I := I))
-    (build : forall mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)),
-      FlowLimitData (I := I) X mc) :
-    SmoothFlowLimitInput (I := I) X :=
-  ⟨fun mc => flowLimit_upgrade (I := I) X mc (build mc)⟩
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))) where
+  /-- The further subsequence selected by spacetime Arzela--Ascoli. -/
+  φ : Nat -> Nat
+  /-- The further subsequence is strictly monotone. -/
+  hφ : StrictMono φ
+  /-- The concrete smooth-flow-limit data over the reindexed metric limit. -/
+  data : FlowLimitData (I := I) X (mc.compSubseq φ hφ)
+
+namespace FlowUpgradeData
+
+/-- Assemble the smooth CGH compactness conclusion from concrete upgrade data. -/
+theorem toConclusion
+    {X : PointedFlowSeq.{u, uE, uH} (I := I)}
+    {mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I))}
+    (d : FlowUpgradeData (I := I) X mc) :
+    CompactnessConclusion (I := I) X :=
+  flowLimit_upgrade (I := I) X (mc.compSubseq d.φ d.hφ) d.data
+
+end FlowUpgradeData
 
 end HCGCompactness
 end DifferentialGeometry

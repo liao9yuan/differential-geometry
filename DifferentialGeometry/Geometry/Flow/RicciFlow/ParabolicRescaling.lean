@@ -247,6 +247,25 @@ private theorem metricRm04_scaleMetric
   simpa [paraSolution, paraFamily, SolutionFamily.rm04] using
     metricRm04_scaleMetric (I := I) R hR (S.base.metric (paraTime τ R s)) x
 
+/-- The squared norm of the lowered Riemann tensor scales by `R⁻²` under
+parabolic rescaling. -/
+theorem paraRmNormSq
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (τ R : Real) (hR : 0 < R) (hτ : τ ∈ D.carrier)
+    (s : Real) (x : M) :
+    Tensor0SBundle.normSq0S (I := I)
+        ((paraSolution (I := I) S τ R hR hτ).base.metric s) x 4
+        ((paraSolution (I := I) S τ R hR hτ).base.rm04 s x) =
+      (R⁻¹) ^ 2 * Tensor0SBundle.normSq0S (I := I)
+        (S.base.metric (paraTime τ R s)) x 4
+        (S.base.rm04 (paraTime τ R s) x) := by
+  rw [paraSolution_rm04, show
+    (paraSolution (I := I) S τ R hR hτ).base.metric s =
+      scaleMetric (I := I) R hR (S.base.metric (paraTime τ R s)) by rfl,
+    Tensor0SBundle.normSq0S_scale, Tensor0SBundle.normSq0S_smul]
+  field_simp [ne_of_gt hR]
+
 @[simp] private theorem paraNablaRic_eq
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)

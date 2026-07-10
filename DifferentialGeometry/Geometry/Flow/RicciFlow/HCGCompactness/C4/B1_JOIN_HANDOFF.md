@@ -1,5 +1,20 @@
 # B1 JOIN (C3 producer join → C2 smoothness → lbl397 assembly) — GPT kickoff prompt
 
+> **Live correction, 2026-07-09.**  The task list below is historical: `StepCProducers.stepCJoin`,
+> `StepB1ApproxIso.StepB1RawInput` / `stepB1_of_raw`, and the conditional all-order B1 carriers now
+> exist.  Resume from `StepB1Producers.md` and `PROJECT_MAP.md`.  The current producer frontier is
+> constructing `StepB1RawInput` from the concrete finite-hat/POU data and uniform bounds.  The
+> former radial `hderiv` blocker is closed by `mfderiv_exp_radial`, `radialEnorm_normal`, and
+> `normLowerOfSepExp`.
+>
+> **Further live correction, 2026-07-09.**  `seqCenter_edist_ge` and
+> `seqChartNorm_ge` now carry the concrete good-covering separation through to
+> the normal-coordinate norm bound.  The next blocker is an interface mismatch:
+> `stepCJoin` takes a bundled arbitrary `SmoothPartitionOfUnity`, whereas the
+> book's basepoint/convergence proofs use the explicit chart weights
+> `normWeights (bumpNum ...)`.  Choose and implement a single bridge between
+> those representations before attempting `StepB1RawInput` assembly.
+
 **Supersedes `STEPC_B1_HANDOFF.md` (its task (A) and most of (B)/(D) landed).
 Paste everything below the line into the new session. Self-contained.**
 

@@ -8,6 +8,7 @@ import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -947,6 +948,74 @@ theorem metricComp_iteratedFDeriv_le
     exact le_trans (hC q k z hz) (le_max_left _ _)
   have hbound := hCV (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) y hy b hbnd
   simpa using hbound
+
+/-- Chart-component derivative bounds when the reference metric may depend on the requested
+order.  Only covariant orders up to `r` need uniform bounds relative to `gRef r`; higher orders
+required by the all-orders conversion interface are supplied pointwise for each fixed sequence
+term and do not enter the resulting finite sum. -/
+theorem metricComp_iter_refs
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (r : ℕ) :
+    ∃ Mr : Real, 0 ≤ Mr ∧ ∀ k : ℕ, ∀ y ∈ Kc,
+      ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) (gRef r)
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)))
+        (extChartAt I x₀ y)‖ ≤ Mr := by
+  classical
+  obtain ⟨CV, hCV0, hCV⟩ :=
+    iteratedFDeriv_comp_le_tower (I := I) (gRef r) hKc hKchart r 0 V
+  let C : ℕ → Real := fun q =>
+    if hq : q ≤ r then Classical.choose (hbdd r q hq Kc hKc) else 0
+  have hC : ∀ q (hq : q ≤ r), ∀ k : ℕ, ∀ z ∈ Kc,
+      metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C q := by
+    intro q hq
+    dsimp only [C]
+    rw [dif_pos hq]
+    exact Classical.choose_spec (hbdd r q hq Kc hKc)
+  let B : ℕ → Real := fun q => max (C q) 0
+  have hB0 : ∀ q, 0 ≤ B q := fun q => le_max_right _ _
+  refine ⟨CV * ∑ q ∈ Finset.range (r + 1), B q,
+    mul_nonneg hCV0 (Finset.sum_nonneg fun q _ => hB0 q), ?_⟩
+  intro k y hy
+  choose Cfix hCfix using fun q =>
+    metricCovDerivNorm_bddOn (I := I) hKc q (gSeq k) (gRef r)
+  let b : ℕ → Real := fun q => if q ≤ r then B q else max (Cfix q) 0
+  have hbnd : ∀ q : ℕ, ∀ z ∈ Kc, Real.sqrt
+      (normSq0S (I := I) (gRef r) z (q + 2)
+        (covDerivOfField (I := I) (gRef r)
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z)) ≤ b q := by
+    intro q z hz
+    have hcompeq : Real.sqrt (normSq0S (I := I) (gRef r) z (q + 2)
+        (covDerivOfField (I := I) (gRef r)
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z)) =
+        metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z := by
+      simp only [metricCovDerivNorm, metricCovDeriv_eq_covDerivOfField]
+    rw [hcompeq]
+    by_cases hq : q ≤ r
+    · rw [show b q = B q by simp [b, hq]]
+      exact le_trans (hC q hq k z hz) (le_max_left _ _)
+    · rw [show b q = max (Cfix q) 0 by simp [b, hq]]
+      exact le_trans (hCfix q z hz) (le_max_left _ _)
+  have hbound := hCV (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) y hy b hbnd
+  have hsum : ∑ q ∈ Finset.range (r + 1), b q =
+      ∑ q ∈ Finset.range (r + 1), B q := by
+    apply Finset.sum_congr rfl
+    intro q hq
+    have hqr : q ≤ r := Nat.le_of_lt_succ (Finset.mem_range.mp hq)
+    simp [b, hqr]
+  calc
+    ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) (gRef r)
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)))
+      (extChartAt I x₀ y)‖ ≤ CV * ∑ q ∈ Finset.range (0 + r + 1), b q := hbound
+    _ = CV * ∑ q ∈ Finset.range (r + 1), B q := by
+      rw [show 0 + r + 1 = r + 1 by omega, hsum]
 
 /-- **Per-chart bump-extended metric-component sequence** (the `exists_cInf_subseq`
 input).  For a metric sequence with uniform `(B_q)` bounds, a chart `x₀`, a slot

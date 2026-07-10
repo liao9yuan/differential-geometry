@@ -115,3 +115,10 @@ cited lemma exists; it is volume + careful CLM completeness bookkeeping.
 - The file adds one instance hypothesis `[WeaklyLocallyCompactSpace M]` to `windowGInfAll`
   (needed by `CompactExhaustion.choice`); for a manifold over a finite-dim model this is
   discharged downstream via `I.locallyCompactSpace` + `ChartedSpace.locallyCompactSpace`.
+
+## 2026-07-09: compact-open limit uniqueness API
+
+Added `metricCInf_inner`, which turns `MetricCInfConvOnCompacts` into pointwise convergence of
+every scalar metric-inner component, and `metricCInf_unique`, which proves uniqueness even when
+the two convergence statements use different fixed reference metrics. Focused verification
+passed without warnings or new `sorry`.

@@ -818,6 +818,28 @@ theorem metricDerivNormSupOn_pullback_image
     rw [metricDerivNorm_pullback (I := I) gk gInf gRef Phi a x]
     exact hr
 
+/-- Compact-open smooth convergence of metrics is preserved by simultaneous pullback along a
+fixed diffeomorphism. -/
+theorem metricCInf_pullback
+    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace N] [T2Space N] [BoundarylessManifold I N]
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 N] [IsManifold I 2 N]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+    (gSeq : ℕ → SmoothRiemannianMetric I N)
+    (gInf gRef : SmoothRiemannianMetric I N) (Phi : M ≃ₘ⟮I, I⟯ N)
+    (hconv : MetricCInfConvOnCompacts (I := I) gSeq gInf gRef) :
+    MetricCInfConvOnCompacts (I := I)
+      (fun k => Diffeomorph.pullbackMetric (I := I) (gSeq k) Phi)
+      (Diffeomorph.pullbackMetric (I := I) gInf Phi)
+      (Diffeomorph.pullbackMetric (I := I) gRef Phi) := by
+  intro K hK p ε hε
+  obtain ⟨k₀, hk₀⟩ := hconv (Phi '' K) (hK.image Phi.continuous) p ε hε
+  refine ⟨k₀, fun k hk => ?_⟩
+  rw [metricDerivNormSupOn_pullback_image (I := I)]
+  exact hk₀ k hk
+
 set_option maxHeartbeats 400000 in
 /-- **Naturality of the scalar curvature under `M ≃ₘ N`.**  Scalar curvature is an isometry
 invariant: `metricScalarAt (Φ^*g) x = metricScalarAt g (Φ x)`.  The scalar analog of

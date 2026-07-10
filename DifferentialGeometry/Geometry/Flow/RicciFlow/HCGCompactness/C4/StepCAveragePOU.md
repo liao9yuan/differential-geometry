@@ -466,3 +466,61 @@ membership facts from the good-covering and Step-B transition data.
 Verification status: the focused Lean check and targeted module build passed
 for this adapter.  Its axiom probe reports only the usual project axioms.  No
 new `sorry` or `admit` occurs in this file.
+
+## 2026-07-09, explicit-weight canonical-cage endpoint
+
+Added `NetLimitData.unifHatCageData` alongside the existing POU-backed
+`unifHatCageSelfComp`.
+
+The new theorem keeps the same canonical-cage geometry and two-sided Step-B
+transition hypotheses, but consumes an explicit weight family `mu` through
+`centerAverage.WeightDataOn`.  It passes `hmu.data` directly to
+`centerAverage.unifTwoIdDataSelf`, while the existing `hatSrcPtsOfComp` chain
+still supplies the per-hat decoded-map convergence.  The old POU endpoint was
+left unchanged.
+
+Scope limitation: this endpoint assumes every nonzero weight is active in the
+existing radius-`4 * lamInf` `hatBall`.  The book's chart-bump numerators are
+supported in the larger radius-`5 * lamInf` balls, so this theorem does not by
+itself instantiate the book weights or close the Step-B1 producer.  A genuine
+support-set adapter or a consumer generalized to the book support balls is
+still required.
+
+Verification status: the focused Lean check passed, with no new `sorry` or
+`admit`.
+
+Progress accounting: `unifHatCageData` itself is complete (100%).  The concrete
+book-weight producer remains unstated/unproved (0%), and textbook Step B1
+remains 0%; this is a consumer-side bridge within roughly 50% complete Step-B
+machinery and roughly 59--60% complete Chapter-4 machinery.
+
+## 2026-07-09, dead-slot-compatible cage endpoint
+
+The finite bound `A(r)` is an upper bound, so a `Fin (A r)` slot may have
+`seqCenter = none`.  Requiring a live center at every slot was therefore
+strictly stronger than the good-cover construction.
+
+Added `hatCageSrcCases`: a dead slot has an empty canonical cage, while a live
+slot uses `hatCageSrcOfRad` at its actual center.  Added `unifHatCageSrc`, the
+explicit-weight averaging endpoint whose geometric input is the exact condition
+the proof consumes:
+
+`hatSourceCage gamma ⊆ (normalChartAt metric (center gamma)).source`.
+
+The prior all-live `unifHatCageData` remains unchanged as a compatibility
+wrapper/endpoint.  Both new declarations passed focused verification.  This
+closes the dead-slot consumer-interface obstruction; constructing the concrete
+atom family and its sequence-level convergence remains producer work.
+
+## 2026-07-09, realized radial-data adapters
+
+Added `properBallNormal`, the data-retaining companion of
+`properBallSrcOfRad`: a point in a realized proper-metric ball below
+`expRadiusGp` has a normal vector whose `g_c`-length equals the realized
+distance.  Added `properExpDist`, which reads the same equality for a radial
+exponential point.  Both live in this norm-aligned layer so downstream atom
+proofs do not reinstall incompatible tangent-fibre norm instances.
+
+Focused verification and the targeted module build passed.  These adapters are
+reusable geometry producers; they do not change the theorem-level progress by
+themselves.

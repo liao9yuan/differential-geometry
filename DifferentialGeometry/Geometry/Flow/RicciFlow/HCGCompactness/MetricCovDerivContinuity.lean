@@ -112,6 +112,36 @@ theorem metricCovDerivNorm_bddOn {K : Set M} (hK : IsCompact K)
     ((metricCovDerivNorm_cont (I := I) a h gRef).continuousOn)
   exact ⟨metricCovDerivNorm (I := I) a h gRef z₀, fun z hz => hmax hz⟩
 
+/-- An eventual uniform covariant-derivative bound on a compact set extends across the finite
+initial segment of a metric sequence. -/
+theorem cov_bdd_of_eventual {K : Set M} (hK : IsCompact K)
+    (a : ℕ) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (hevent : ∃ k₀ : ℕ, ∃ C : Real, ∀ k : ℕ, k₀ ≤ k → ∀ z ∈ K,
+      metricCovDerivNorm (I := I) a (gSeq k) gRef z ≤ C) :
+    ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) a (gSeq k) gRef z ≤ C := by
+  obtain ⟨k₀, Ctail, htail⟩ := hevent
+  have hinit : ∀ n : ℕ, ∃ C : Real, ∀ k : ℕ, k < n → ∀ z ∈ K,
+      metricCovDerivNorm (I := I) a (gSeq k) gRef z ≤ C := by
+    intro n
+    induction n with
+    | zero => exact ⟨0, fun k hk => by omega⟩
+    | succ n ih =>
+      obtain ⟨Cn, hCn⟩ := ih
+      obtain ⟨Ck, hCk⟩ := metricCovDerivNorm_bddOn (I := I) hK a (gSeq n) gRef
+      refine ⟨max Cn Ck, fun k hk z hz => ?_⟩
+      by_cases hkn : k < n
+      · exact (hCn k hkn z hz).trans (le_max_left _ _)
+      · have hkeq : k = n := by omega
+        subst k
+        exact (hCk z hz).trans (le_max_right _ _)
+  obtain ⟨Cinit, hCinit⟩ := hinit k₀
+  refine ⟨max Cinit Ctail, fun k z hz => ?_⟩
+  by_cases hk : k < k₀
+  · exact (hCinit k hk z hz).trans (le_max_left _ _)
+  · exact (htail k (by omega) z hz).trans (le_max_right _ _)
+
 /-- **Compact boundedness of the metric-difference derivative norm, uniformly in
 the order `a ≤ p`**, for fixed metrics: the finitely many per-order sups on a
 compact are dominated by one nonnegative constant. -/
@@ -133,6 +163,21 @@ theorem metricDerivNorm_bddOn {K : Set M} (hK : IsCompact K)
     fun a ha z hz => ?_⟩
   refine le_trans (hCf a z hz) (le_trans ?_ (le_max_right 0 _))
   exact Finset.le_sup' Cf (Finset.mem_range.2 (Nat.lt_succ_of_le ha))
+
+/-- Every pointwise derivative norm represented in the compact supremum is at most that
+supremum. Compact boundedness supplies the `BddAbove` premise for `le_csSup`. -/
+theorem derivNorm_le_sup {K : Set M} (hK : IsCompact K)
+    {a p : ℕ} (hap : a ≤ p) (gk gInf gRef : SmoothRiemannianMetric I M)
+    {x : M} (hx : x ∈ K) :
+    metricDerivNorm (I := I) a gk gInf gRef x ≤
+      metricDerivNormSupOn (I := I) K p gk gInf gRef := by
+  obtain ⟨C, _, hC⟩ := metricDerivNorm_bddOn (I := I) hK p gk gInf gRef
+  have hbdd : BddAbove {r : Real | ∃ q : ℕ, q ≤ p ∧ ∃ z : M, z ∈ K ∧
+      metricDerivNorm (I := I) q gk gInf gRef z = r} := by
+    refine ⟨C, ?_⟩
+    rintro r ⟨q, hqp, z, hz, rfl⟩
+    exact hC q hqp z hz
+  exact le_csSup hbdd ⟨a, hap, x, hx, rfl⟩
 
 end HCGCompactness
 end DifferentialGeometry

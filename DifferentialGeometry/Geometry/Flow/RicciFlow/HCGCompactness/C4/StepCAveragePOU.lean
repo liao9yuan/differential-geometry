@@ -26,6 +26,7 @@ namespace HCGCompactness
 open Filter Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
 open DifferentialGeometry.Geometry.Riemannian
+open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
@@ -247,6 +248,114 @@ theorem properBallSrcOfRad
     rw [hed, ENNReal.toReal_ofReal (dist_nonneg : 0 ≤ dist c y)]
     exact lt_of_le_of_lt hdist_le hR
   exact memNChartSrcOfDist (I := I) Y.metric c hEnorm hfin hsmall
+
+/-- A point in a realized proper-metric ball below the radial normal radius has
+normal coordinates whose `g_c`-length is exactly the realized distance. -/
+theorem properBallNormal
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (P : ProperMetricOn (I := I) Y) {c y : Y.M} {R : Real}
+    (hR :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      R < expRadiusGp (I := I) Y.metric c)
+    (hy : letI : MetricSpace Y.M := P.ms; y ∈ Metric.ball c R) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := P.ms
+    ∃ v : E,
+      v ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric c).target ∧
+      (show TangentSpace I c from v) ∈ expDomain (I := I) Y.metric c ∧
+      Real.sqrt (Y.metric.inner c v v) = dist c y ∧
+      y = expMap (I := I) Y.metric c (show TangentSpace I c from v) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : MetricSpace Y.M := P.ms
+  letI : RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+    ⟨Y.metric.toRiemannianMetric⟩
+  have hEnorm : ∀ x : Y.M, ∀ w : TangentSpace I x,
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner x w w)) := by
+    intro x w
+    simpa using
+      (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) Y.metric x w)
+  have hed : riemannianEDist I c y = ENNReal.ofReal (dist c y) := by
+    have h := P.realizes c y
+    simpa [PointedRiemannianManifold.emetricSpace] using h
+  have hfin : riemannianEDist I c y ≠ (⊤ : ENNReal) := by
+    rw [hed]
+    exact ENNReal.ofReal_ne_top
+  have hdist_lt : dist c y < R := by
+    simpa only [Metric.mem_ball, dist_comm] using hy
+  have hsmall : (riemannianEDist I c y).toReal <
+      expRadiusGp (I := I) Y.metric c := by
+    rw [hed, ENNReal.toReal_ofReal dist_nonneg]
+    exact hdist_lt.trans hR
+  obtain ⟨v, hvtgt, hvdom, hvlen, hyeq⟩ :=
+    metricBall_subset_normalBall (I := I) Y.metric c hEnorm hfin hsmall
+  refine ⟨v, hvtgt, hvdom, ?_, hyeq⟩
+  calc
+    Real.sqrt (Y.metric.inner c v v) = (riemannianEDist I c y).toReal := hvlen
+    _ = dist c y := by rw [hed, ENNReal.toReal_ofReal dist_nonneg]
+
+/-- Below the radial normal radius, the stored realized metric distance to a
+radial exponential point equals the launch vector's `g_c`-length. -/
+theorem properExpDist
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (P : ProperMetricOn (I := I) Y) (c : Y.M) {v : E}
+    (hv :
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      Real.sqrt (Y.metric.inner c v v) < expRadiusGp (I := I) Y.metric c) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := P.ms
+    dist c (expMap (I := I) Y.metric c (show TangentSpace I c from v)) =
+      Real.sqrt (Y.metric.inner c v v) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : MetricSpace Y.M := P.ms
+  letI : RiemannianBundle (fun x : Y.M => TangentSpace I x) :=
+    ⟨Y.metric.toRiemannianMetric⟩
+  have hEnorm : ∀ x : Y.M, ∀ w : TangentSpace I x,
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (Y.metric.inner x w w)) := by
+    intro x w
+    simpa using
+      (DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        (I := I) Y.metric x w)
+  have hed := edist_exp_eq_radius (I := I) Y.metric c hEnorm hv
+  have hdist :
+      riemannianEDist I c
+          (expMap (I := I) Y.metric c (show TangentSpace I c from v)) =
+        ENNReal.ofReal
+          (dist c (expMap (I := I) Y.metric c (show TangentSpace I c from v))) := by
+    have h := P.realizes c
+      (expMap (I := I) Y.metric c (show TangentSpace I c from v))
+    simpa [PointedRiemannianManifold.emetricSpace] using h
+  have hofReal :
+      ENNReal.ofReal
+          (dist c (expMap (I := I) Y.metric c (show TangentSpace I c from v))) =
+        ENNReal.ofReal (Real.sqrt (Y.metric.inner c v v)) := by
+    rw [← hdist]
+    exact hed
+  exact (ENNReal.ofReal_eq_ofReal_iff dist_nonneg (Real.sqrt_nonneg _)).mp hofReal
 
 namespace NetLimitData
 
@@ -545,6 +654,44 @@ theorem hatCageSrcOfRad (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     NetLimitData.hatCageSrcOfBall (I := I) (X := X) hd P L pb r n center gamma
       hcenter
       (properBallSrcOfRad (I := I) (Y := X.obj (L.φ n)) (P := P (L.φ n)) hR)
+
+/-- Direct source inclusion for every finite hat, allowing dead indices.  A
+dead hat has empty canonical cage; a live hat uses the radial source bound at
+its actual sequence center. -/
+theorem hatCageSrcCases (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (center : Fin (pb.A r) -> (X.obj (L.φ n)).M)
+    (hR :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall c : (X.obj (L.φ n)).M,
+        seqCenter hd D P (L.φ n) (gamma : Nat) = some c ->
+          c = center gamma ∧
+            4 * L.lamInf (gamma : Nat) <
+              expRadiusGp (I := I) (X.obj (L.φ n)).metric c) :
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    forall gamma : Fin (pb.A r),
+      NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)).source := by
+  intro gamma
+  cases hc : seqCenter hd D P (L.φ n) (gamma : Nat) with
+  | none =>
+      simp [NetLimitData.hatSourceCage, NetLimitData.hatBall, hc]
+  | some c =>
+      rcases hR gamma c hc with ⟨rfl, hrad⟩
+      exact NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n center
+        gamma hc hrad
 
 /-- Compact-cage convergence supplies the active-region convergence input needed
 by `unifHatIdOn`. -/
@@ -3052,6 +3199,240 @@ theorem unifHatCageComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (by simpa [sourceK] using hKV)
 
 /-- Self-centered decoded composition averaging on the canonical finite-hat
+cages for explicit normalized weights, assuming their canonical source cages
+lie directly in the chosen normal-chart sources.  This admits empty/dead slots
+without requiring a fictitious sequence center for every finite index. -/
+theorem unifHatCageSrc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (mu : (X.obj (L.φ n)).M -> Fin (pb.A r) -> Real)
+    (hmu :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
+      centerAverage.WeightDataOn
+        (NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+        (fun gamma : Fin (pb.A r) =>
+          (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+            (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+            Set (X.obj (L.φ n)).M)) mu)
+    (join : (X.obj (L.φ n)).M -> (X.obj (L.φ n)).M -> Real ->
+      (X.obj (L.φ n)).M)
+    (radSeq : Nat -> Nat -> (X.obj (L.φ n)).M -> Real)
+    (center : Fin (pb.A r) -> (X.obj (L.φ n)).M)
+    (U V : Fin (pb.A r) -> Set E)
+    (B : Fin (pb.A r) -> Nat -> E -> E)
+    (Binf : Fin (pb.A r) -> E -> E)
+    (A : Fin (pb.A r) -> Nat -> E -> E)
+    (Ainf : Fin (pb.A r) -> E -> E)
+    (hconn :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      ConnectedSpace (X.obj (L.φ n)).M)
+    (hX : SeqMetricComplete (I := I) X)
+    (hsrcK :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r),
+        NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
+          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+            (center gamma)).source)
+    (hrad : forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+      x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+        0 < radSeq a b x)
+    (hactive_mem :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      letI : RiemannianBundle
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.inner,
+          (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M :=
+        HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+      let ptsSeq :=
+        decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+          forall gamma : Fin (pb.A r), mu x gamma ≠ 0 ->
+            dist x (ptsSeq a b x gamma) < radSeq a b x)
+    (hstrict :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      let ptsSeq :=
+        decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+          StrictDistInput (I := I) (X.obj (L.φ n)).metric
+            (centerAverage.activeFill mu (ptsSeq a b)
+              (fun y : (X.obj (L.φ n)).M => y) x)
+            join x (radSeq a b x))
+    (hmap :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
+        A gamma b (B gamma a v) ∈
+          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+            (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
+    (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
+    (hB : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
+    (hA : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
+    (hBcont : forall gamma : Fin (pb.A r), ContinuousOn (Binf gamma) (U gamma))
+    (hAcont : forall gamma : Fin (pb.A r), ContinuousOn (Ainf gamma) (V gamma))
+    (hid : forall gamma : Fin (pb.A r), forall v : E, v ∈ U gamma ->
+      Binf gamma v ∈ V gamma -> Ainf gamma (Binf gamma v) = v)
+    (hKU :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r),
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
+          U gamma)
+    (hKV :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
+        Binf gamma v ∈ V gamma) :
+    let hcomplete :=
+      NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ n)).M
+    letI : T3Space (X.obj (L.φ n)).M := inferInstance
+    letI : RiemannianBundle
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.inner,
+        (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace (X.obj (L.φ n)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    let ptsSeq :=
+      decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+    forall eps : Real, eps > 0 -> exists N : Nat,
+      forall a : Nat, a >= N -> forall b : Nat, b >= N ->
+        forall x : (X.obj (L.φ n)).M,
+          x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+            dist x
+              (centerAverageOn (I := I) (X.obj (L.φ n)).metric
+                (NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+                mu
+                (centerAverage.activeFill mu (ptsSeq a b)
+                  (fun y : (X.obj (L.φ n)).M => y))
+                join (fun y : (X.obj (L.φ n)).M => y) (radSeq a b)
+                (fun y : (X.obj (L.φ n)).M => y)
+                (fun y hy => centerAverage.inputOfFillSelf (I := I)
+                  (g := (X.obj (L.φ n)).metric) (μ := mu)
+                  (pts := ptsSeq a b) (join := join)
+                  (r := radSeq a b) (qstar := fun y : (X.obj (L.φ n)).M => y)
+                  y hcomplete (hrad a b y hy)
+                  (hactive_mem a b y hy)
+                  ((hmu.data hy).1.1) ((hmu.data hy).1.2.1)
+                  (hstrict a b y hy)) x) < eps := by
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ n)).M
+  letI : T3Space (X.obj (L.φ n)).M := inferInstance
+  letI : RiemannianBundle
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.inner,
+      (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace (X.obj (L.φ n)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+  let hcomplete :=
+    NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
+  let ptsSeq :=
+    decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+  let sourceK : Fin (pb.A r) -> Set (X.obj (L.φ n)).M :=
+    fun gamma => NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma
+  exact centerAverage.unifTwoIdDataSelf (I := I)
+    (g := (X.obj (L.φ n)).metric) (join := join)
+    (s := NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+    (USeq := fun _ _ gamma =>
+      (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+        (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+        Set (X.obj (L.φ n)).M))
+    (μSeq := fun _ _ => mu) (ptsSeq := ptsSeq) (rSeq := radSeq)
+    hcomplete hrad (by simpa [ptsSeq] using hactive_mem)
+    (fun _ _ y hy => hmu.data hy)
+    (by simpa [ptsSeq] using hstrict)
+    (by
+      simpa [ptsSeq, decodedCompPts] using
+        NetLimitData.hatSrcPtsOfComp (I := I) (X := X) hd P L pb r n center
+          sourceK U V B Binf A Ainf hconn
+          (by simpa [sourceK] using
+            NetLimitData.hatCageCompact (I := I) (X := X) hd P L pb r n)
+          (by simpa [sourceK] using
+            NetLimitData.hatCageSub (I := I) (X := X) hd P L pb r n)
+          (by simpa [sourceK] using hsrcK)
+          (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
+          (by simpa [sourceK] using hKU)
+          (by simpa [sourceK] using hKV))
+
+/-- Self-centered decoded composition averaging on the canonical finite-hat
 cages.  This is the source-centered version of `unifHatCageComp`. -/
 theorem unifHatCageSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
@@ -3271,6 +3652,246 @@ theorem unifHatCageSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
+
+/-- Self-centered decoded composition averaging on the canonical finite-hat
+cages for explicit normalized weights active in the existing `4 * lamInf`
+`hatBall`s.  Book weights supported in the larger `5 * lamInf` balls require a
+separate support-set adapter before using this endpoint. -/
+theorem unifHatCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (mu : (X.obj (L.φ n)).M -> Fin (pb.A r) -> Real)
+    (hmu :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
+      centerAverage.WeightDataOn
+        (NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+        (fun gamma : Fin (pb.A r) =>
+          (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+            (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+            Set (X.obj (L.φ n)).M)) mu)
+    (join : (X.obj (L.φ n)).M -> (X.obj (L.φ n)).M -> Real ->
+      (X.obj (L.φ n)).M)
+    (radSeq : Nat -> Nat -> (X.obj (L.φ n)).M -> Real)
+    (center : Fin (pb.A r) -> (X.obj (L.φ n)).M)
+    (U V : Fin (pb.A r) -> Set E)
+    (B : Fin (pb.A r) -> Nat -> E -> E)
+    (Binf : Fin (pb.A r) -> E -> E)
+    (A : Fin (pb.A r) -> Nat -> E -> E)
+    (Ainf : Fin (pb.A r) -> E -> E)
+    (hconn :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      ConnectedSpace (X.obj (L.φ n)).M)
+    (hX : SeqMetricComplete (I := I) X)
+    (hcenter : forall gamma : Fin (pb.A r),
+      seqCenter hd D P (L.φ n) (gamma : Nat) = some (center gamma))
+    (hR :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r),
+        4 * L.lamInf (gamma : Nat) <
+          expRadiusGp (I := I) (X.obj (L.φ n)).metric (center gamma))
+    (hrad : forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+      x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+        0 < radSeq a b x)
+    (hactive_mem :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      letI : RiemannianBundle
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.inner,
+          (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M :=
+        HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+      let ptsSeq :=
+        decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+          forall gamma : Fin (pb.A r), mu x gamma ≠ 0 ->
+            dist x (ptsSeq a b x gamma) < radSeq a b x)
+    (hstrict :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      let ptsSeq :=
+        decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+          StrictDistInput (I := I) (X.obj (L.φ n)).metric
+            (centerAverage.activeFill mu (ptsSeq a b)
+              (fun y : (X.obj (L.φ n)).M => y) x)
+            join x (radSeq a b x))
+    (hmap :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
+        A gamma b (B gamma a v) ∈
+          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+            (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
+    (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
+    (hB : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
+    (hA : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
+    (hBcont : forall gamma : Fin (pb.A r), ContinuousOn (Binf gamma) (U gamma))
+    (hAcont : forall gamma : Fin (pb.A r), ContinuousOn (Ainf gamma) (V gamma))
+    (hid : forall gamma : Fin (pb.A r), forall v : E, v ∈ U gamma ->
+      Binf gamma v ∈ V gamma -> Ainf gamma (Binf gamma v) = v)
+    (hKU :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r),
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
+          U gamma)
+    (hKV :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
+        Binf gamma v ∈ V gamma) :
+    let hcomplete :=
+      NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ n)).M
+    letI : T3Space (X.obj (L.φ n)).M := inferInstance
+    letI : RiemannianBundle
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.inner,
+        (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace (X.obj (L.φ n)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    let ptsSeq :=
+      decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+    forall eps : Real, eps > 0 -> exists N : Nat,
+      forall a : Nat, a >= N -> forall b : Nat, b >= N ->
+        forall x : (X.obj (L.φ n)).M,
+          x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+            dist x
+              (centerAverageOn (I := I) (X.obj (L.φ n)).metric
+                (NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+                mu
+                (centerAverage.activeFill mu (ptsSeq a b)
+                  (fun y : (X.obj (L.φ n)).M => y))
+                join (fun y : (X.obj (L.φ n)).M => y) (radSeq a b)
+                (fun y : (X.obj (L.φ n)).M => y)
+                (fun y hy => centerAverage.inputOfFillSelf (I := I)
+                  (g := (X.obj (L.φ n)).metric) (μ := mu)
+                  (pts := ptsSeq a b) (join := join)
+                  (r := radSeq a b) (qstar := fun y : (X.obj (L.φ n)).M => y)
+                  y hcomplete (hrad a b y hy)
+                  (hactive_mem a b y hy)
+                  ((hmu.data hy).1.1) ((hmu.data hy).1.2.1)
+                  (hstrict a b y hy)) x) < eps := by
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ n)).M
+  letI : T3Space (X.obj (L.φ n)).M := inferInstance
+  letI : RiemannianBundle
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.inner,
+      (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace (X.obj (L.φ n)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+  let hcomplete :=
+    NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
+  let ptsSeq :=
+    decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+  let sourceK : Fin (pb.A r) -> Set (X.obj (L.φ n)).M :=
+    fun gamma => NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma
+  exact centerAverage.unifTwoIdDataSelf (I := I)
+    (g := (X.obj (L.φ n)).metric) (join := join)
+    (s := NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+    (USeq := fun _ _ gamma =>
+      (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+        (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+        Set (X.obj (L.φ n)).M))
+    (μSeq := fun _ _ => mu) (ptsSeq := ptsSeq) (rSeq := radSeq)
+    hcomplete hrad (by simpa [ptsSeq] using hactive_mem)
+    (fun _ _ y hy => hmu.data hy)
+    (by simpa [ptsSeq] using hstrict)
+    (by
+      simpa [ptsSeq, decodedCompPts] using
+        NetLimitData.hatSrcPtsOfComp (I := I) (X := X) hd P L pb r n center
+          sourceK U V B Binf A Ainf hconn
+          (by simpa [sourceK] using
+            NetLimitData.hatCageCompact (I := I) (X := X) hd P L pb r n)
+          (by simpa [sourceK] using
+            NetLimitData.hatCageSub (I := I) (X := X) hd P L pb r n)
+          (by
+            intro gamma
+            simpa [sourceK] using
+              NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n
+                center gamma (hcenter gamma) (hR gamma))
+          (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
+          (by simpa [sourceK] using hKU)
+          (by simpa [sourceK] using hKV))
 
 end NetLimitData
 

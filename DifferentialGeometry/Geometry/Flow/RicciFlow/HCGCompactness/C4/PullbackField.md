@@ -47,6 +47,21 @@ ContMDiffSection FunLike-coe is not rfl.
 
 Next brick: (iii) `partialData_comp` (coda 21).
 
+## 2026-07-09 open-ball restriction API
+
+The D1-to-direct-limit adapter is now explicit and verified:
+
+- `PartialDiffeomorph.opensMap` codomain-restricts `Φ|U` into a larger target open `V`;
+- `opensMap_isOpenEmb` proves it is an open embedding;
+- `opensMap_contMDiff` proves forward smoothness;
+- `opensMap_inv_mdiff` proves `Function.invFun` is smooth on the actual range.
+- `opensDiffeo_mfderiv` exposes that the subtype diffeomorphism has the ambient
+  `PartialDiffeomorph` differential.
+
+The proof factors through `toOpensDiffeo` and the smooth inclusion of one open subtype into
+another. The inverse theorem is deliberately range-scoped and requires `Nonempty U`, exactly as
+the Step-D positive-radius balls provide.
+
 ## 2026-07-07 (goal session, rounds 5-7): partialData_comp PROVED — D1a complete
 
 `partialData_comp` (D1a-(iii), the lbl406 composition brick) fully proved: two-sided partial
@@ -57,9 +72,9 @@ collar realize (strengthened exists_pullbackField) + error triangle + four F5 in
 (equiv/hgK/hδ₀/hδ₁ — hgK consumed from the OTHER side's reverse data, which is why the
 book's data is two-sided) + comp_cov_le + germ-vanishing (restriction-naturality as
 germ-congr) + tower/norm bridges.  Five covNormWith_pd_zone live calls total.
-Axiom status: sorryAx inherited ONLY from F5→lemma45_corII→Lemma45F4.lean:86 (B-track's one
-narrow mechanical sorry; disclosed in docstring).  All other new session declarations
-axiom-clean.  Durable Lean lessons in STEPD_PLAN codas 22-36 (∃-elim-into-Prop hoisting,
+Axiom status at the time: `sorryAx` was inherited only from the then-open F4
+assembly.  That F4 dependency is now closed; the composition proof itself remains
+sorry-free.  Durable Lean lessons in STEPD_PLAN codas 22-36 (∃-elim-into-Prop hoisting,
 acEquiv .symm direction, set_option ladder 1M→2M, left/right_inv coe traps).
 
 ## 2026-07-08: half-composition API frontier exposed
@@ -97,3 +112,35 @@ ordinary two-sided composition wrapper, but it is not the D1b hacc replacement.
 D1b still needs the half-composition split: forward on the peel-last ledger and
 reverse on the peel-first shifted-tail ledger, then assemble with the existing
 fold/germ transports.
+
+## 2026-07-09: separated composition organs proved
+
+`compSepFwd` and `compSepRev` are now proved, using the same forward/reverse
+organs as `partialData_comp` but with separated ledgers.  The key formal repair
+was to avoid routing through ordinary `PreApproxIsoDataOn`: separated data allows
+zero ledgers, while the ordinary carrier requires a strictly positive epsilon.
+The proof therefore uses `Classical.choose` witnesses for compact collars and
+pullback fields, then feeds F5 directly with `q` and `e1`.
+
+Verification passed for `PullbackField.lean`, and the targeted module build
+also passed so the compiled upstream body is refreshed.  The remaining `sorry`
+warnings in this file are the older ordinary half wrappers `compDataFwd` and
+`compDataRev`; they are not the D1b separated-recursion organs.  D1b's
+composition frontier has moved from `compSepFwd`/`compSepRev` to the upstream
+B/C producer.  The F4/F5 uniform constant chain was proved later on 2026-07-09,
+and `PullbackField.lean` rechecked successfully afterward.
+
+## 2026-07-09: open-map differential
+
+Added `PartialDiffeomorph.opensMap_mfderiv`: codomain restriction to a larger target open does
+not change the ambient differential. The proof mirrors `opensDiffeo_mfderiv` through the two
+open-subtype inclusions. Focused verification and the targeted producer build passed; the two
+older ordinary-wrapper `sorry`s are unchanged.
+
+## 2026-07-09: ambient open-target lift
+
+`PartialDiffeomorph.liftTargetOpen` now lifts a full-target partial diffeomorphism into an open
+subtype to the ambient manifold. Its inverse uses `Function.invFun Subtype.val` only on the open
+range; `invSubtype_mdiff` proves precisely that range-scoped smoothness. `liftOpen_mfderiv` reads
+the ambient differential back as the original subtype-valued differential. Focused verification
+and the targeted producer build passed. No new `sorry` was introduced.

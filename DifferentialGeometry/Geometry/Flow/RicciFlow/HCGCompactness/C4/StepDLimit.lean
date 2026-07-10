@@ -1,7 +1,10 @@
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedRiemannian
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCompactness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivPullback
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNormRestrict
 import DifferentialGeometry.Geometry.Comparison.HopfRinowProper
+import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -106,23 +109,224 @@ theorem rangeExhausts (S : SmoothSeqSystem I A) :
     rw [hKeq]
     exact (Set.image_subset_range _ _).trans (S.toSeqSystem.range_incl_mono hk)
 
-/-- **D4a — the Cheeger–Gromov comparison maps of the limit** (MSM135 Step D, L2048–2085 shape):
-the inverses `Φ_k := (incl k)⁻¹` of the stage inclusions, packaged as
-`PointedRiemannianCGMaps` from the stage sequence to the limit pointed manifold.  Sources are the
-stage ranges (an open exhaustion by `rangeExhausts`), the basepoint lies in every source, and it
-maps to the transported stage basepoints (`invIncl_incl_le`). -/
-noncomputable def limitCGMaps (S : SmoothSeqSystem I A) (O₀ : A 0)
-    (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) :
+/-- **D4a — comparison maps with separate sequence and limit-stage metrics.**  The maps depend
+only on the direct system, while the source pointed sequence uses `gSeq` and the direct-limit
+metric is glued from the cocycle family `gLim`. -/
+noncomputable def limitCGMapsOf (S : SmoothSeqSystem I A) (O₀ : A 0)
+    (gSeq gLim : ∀ k, SmoothRiemannianMetric I (A k)) (hgLim : S.MetricCocycle gLim) :
     PointedRiemannianCGMaps.{u, uE, uH} (I := I)
-      (X := factorSeq S O₀ g)
-      (L := (limitPointedCoc S O₀ g hg : PointedRiemannianManifold.{u, uE, uH} (I := I)))
+      (X := factorSeq S O₀ gSeq)
+      (L := (limitPointedCoc S O₀ gLim hgLim :
+        PointedRiemannianManifold.{u, uE, uH} (I := I)))
       (subseq := id) where
   partialDiffeomorph k := S.inclPartialDiffeo k
   source_exhausts := rangeExhausts S
   base_mem k := ⟨S.toSeqSystem.F (Nat.zero_le k) O₀, S.toSeqSystem.incl_comp (Nat.zero_le k) O₀⟩
   basepoint_map k := S.invIncl_incl_le (Nat.zero_le k) O₀
 
+/-- Same-family specialization of `limitCGMapsOf`. -/
+noncomputable def limitCGMaps (S : SmoothSeqSystem I A) (O₀ : A 0)
+    (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) :
+    PointedRiemannianCGMaps.{u, uE, uH} (I := I)
+      (X := factorSeq S O₀ g)
+      (L := (limitPointedCoc S O₀ g hg : PointedRiemannianManifold.{u, uE, uH} (I := I)))
+      (subseq := id) :=
+  limitCGMapsOf S O₀ g g hg
+
 end StepD4a
+
+section StepD4bc
+
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+  [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)]
+variable {H : Type uH} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
+variable {A : ℕ → Type u} [∀ k, TopologicalSpace (A k)] [∀ k, ChartedSpace H (A k)]
+  [∀ k, IsManifold I ∞ (A k)] [∀ k, Nonempty (A k)]
+  [∀ k, SigmaCompactSpace (A k)] [∀ k, T2Space (A k)]
+
+set_option maxHeartbeats 800000 in
+/-- **D4b/c — stagewise compact-open convergence gives convergence to the direct limit.**
+The comparison maps are the inverses of the stage inclusions.  The source-domain seminorm is
+transported to the stage by simultaneous pullback invariance and open-subtype restriction
+invariance; the local formula `limitMetric_of_mem` identifies the restricted direct-limit metric
+with the pullback of the stage-limit metric. -/
+def limitCGConverges
+    (S : SmoothSeqSystem I A) (O₀ : A 0)
+    (gSeq gLim : ∀ k, SmoothRiemannianMetric I (A k))
+    (hgLim : S.MetricCocycle gLim)
+    (hstage : ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ k₀ : ℕ, ∀ k : ℕ, k₀ ≤ k →
+      ∀ K : Set (A k), IsCompact K →
+        metricDerivNormSupOn (I := I) K p (gSeq k) (gLim k) (gLim k) < ε) :
+    PointedRiemannianCGConverges (I := I)
+      (factorSeq S O₀ gSeq) (limitPointedCoc S O₀ gLim hgLim) id
+      (limitCGMapsOf S O₀ gSeq gLim hgLim) := by
+  let Φ := limitCGMapsOf S O₀ gSeq gLim hgLim
+  have hσsrc : ∀ k : ℕ,
+      letI : TopologicalSpace (limitPointedCoc S O₀ gLim hgLim).M :=
+        (limitPointedCoc S O₀ gLim hgLim).topology
+      IsSigmaCompact (Φ.source k) := by
+    intro k
+    letI : TopologicalSpace (limitPointedCoc S O₀ gLim hgLim).M :=
+      (limitPointedCoc S O₀ gLim hgLim).topology
+    letI : ChartedSpace H (limitPointedCoc S O₀ gLim hgLim).M :=
+      (limitPointedCoc S O₀ gLim hgLim).charted
+    letI : SigmaCompactSpace (limitPointedCoc S O₀ gLim hgLim).M :=
+      (limitPointedCoc S O₀ gLim hgLim).sigmaCompact
+    exact Geometry.isSigmaCompact_of_isOpen I (Φ.source_open k)
+  have hσtgt : ∀ k : ℕ,
+      letI : TopologicalSpace ((factorSeq S O₀ gSeq).obj (id k)).M :=
+        ((factorSeq S O₀ gSeq).obj (id k)).topology
+      IsSigmaCompact (Φ.target k) := by
+    intro k
+    letI : TopologicalSpace ((factorSeq S O₀ gSeq).obj (id k)).M :=
+      ((factorSeq S O₀ gSeq).obj (id k)).topology
+    letI : ChartedSpace H ((factorSeq S O₀ gSeq).obj (id k)).M :=
+      ((factorSeq S O₀ gSeq).obj (id k)).charted
+    letI : SigmaCompactSpace ((factorSeq S O₀ gSeq).obj (id k)).M :=
+      ((factorSeq S O₀ gSeq).obj (id k)).sigmaCompact
+    exact Geometry.isSigmaCompact_of_isOpen I (Φ.target_open k)
+  let refMetric : ∀ k : ℕ,
+      letI : TopologicalSpace (MetricSourceDomain (I := I) Φ k) :=
+        metricSourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (MetricSourceDomain (I := I) Φ k) :=
+        metricSourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (MetricSourceDomain (I := I) Φ k) :=
+        metricSourceDomSmooth (I := I) Φ k
+      SmoothRiemannianMetric I (MetricSourceDomain (I := I) Φ k) := fun k => by
+    letI : TopologicalSpace (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomCharted (I := I) Φ k
+    letI : IsManifold I ∞ (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomSmooth (I := I) Φ k
+    letI : SigmaCompactSpace (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomSigmaOf (I := I) Φ k (hσsrc k)
+    letI : T2Space (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomT2 (I := I) Φ k
+    let sourceSigma : SigmaCompactSpace (metricSourceOpen (I := I) Φ k) := by
+      change SigmaCompactSpace (MetricSourceDomain (I := I) Φ k)
+      exact metricSourceDomSigmaOf (I := I) Φ k (hσsrc k)
+    let sourceT2 : T2Space (metricSourceOpen (I := I) Φ k) := by
+      change T2Space (MetricSourceDomain (I := I) Φ k)
+      exact metricSourceDomT2 (I := I) Φ k
+    exact @SmoothRiemannianMetric.restrictOpen E inferInstance inferInstance H inferInstance I
+      S.toSeqSystem.Lim inferInstance inferInstance inferInstance inferInstance
+      (S.limitMetric gLim hgLim) (metricSourceOpen (I := I) Φ k) sourceSigma sourceT2
+  refine PointedRiemannianCGConverges.ofRestrictPullback (I := I)
+    Φ hσsrc hσtgt refMetric ?_
+  intro K hK p ε hε
+  obtain ⟨kSrc, hkSrc⟩ := Φ.source_subset hK
+  obtain ⟨kConv, hkConv⟩ := hstage ε hε p
+  refine ⟨max kSrc kConv, fun k hk => ?_⟩
+  have hkS : kSrc ≤ k := le_trans (Nat.le_max_left kSrc kConv) hk
+  have hkC : kConv ≤ k := le_trans (Nat.le_max_right kSrc kConv) hk
+  letI : TopologicalSpace (limitPointedCoc S O₀ gLim hgLim).M :=
+    (limitPointedCoc S O₀ gLim hgLim).topology
+  letI : ChartedSpace H (limitPointedCoc S O₀ gLim hgLim).M :=
+    (limitPointedCoc S O₀ gLim hgLim).charted
+  letI : TopologicalSpace ((factorSeq S O₀ gSeq).obj (id k)).M :=
+    ((factorSeq S O₀ gSeq).obj (id k)).topology
+  letI : ChartedSpace H ((factorSeq S O₀ gSeq).obj (id k)).M :=
+    ((factorSeq S O₀ gSeq).obj (id k)).charted
+  letI : TopologicalSpace (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomCharted (I := I) Φ k
+  letI : T2Space (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomSigmaOf (I := I) Φ k (hσsrc k)
+  letI : TopologicalSpace (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomTop (I := I) Φ k
+  letI : ChartedSpace H (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomCharted (I := I) Φ k
+  letI : T2Space (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomSigmaOf (I := I) Φ k (hσtgt k)
+  let F := metricSourceTargetDiff (I := I) Φ k
+  let sourceSigma : SigmaCompactSpace (metricSourceOpen (I := I) Φ k) := by
+    change SigmaCompactSpace (MetricSourceDomain (I := I) Φ k)
+    exact metricSourceDomSigmaOf (I := I) Φ k (hσsrc k)
+  let sourceT2 : T2Space (metricSourceOpen (I := I) Φ k) := by
+    change T2Space (MetricSourceDomain (I := I) Φ k)
+    exact metricSourceDomT2 (I := I) Φ k
+  let targetSigma : SigmaCompactSpace (metricTargetOpen (I := I) Φ k) := by
+    change SigmaCompactSpace (MetricTargetDomain (I := I) Φ k)
+    exact metricTargetDomSigmaOf (I := I) Φ k (hσtgt k)
+  let targetT2 : T2Space (metricTargetOpen (I := I) Φ k) := by
+    change T2Space (MetricTargetDomain (I := I) Φ k)
+    exact metricTargetDomT2 (I := I) Φ k
+  let sourceMetric : SmoothRiemannianMetric I (MetricSourceDomain (I := I) Φ k) :=
+    @SmoothRiemannianMetric.restrictOpen E inferInstance inferInstance H inferInstance I
+      S.toSeqSystem.Lim inferInstance inferInstance inferInstance inferInstance
+      (S.limitMetric gLim hgLim) (metricSourceOpen (I := I) Φ k) sourceSigma sourceT2
+  let targetSeq : SmoothRiemannianMetric I (MetricTargetDomain (I := I) Φ k) :=
+    @SmoothRiemannianMetric.restrictOpen E inferInstance inferInstance H inferInstance I
+      (A k) inferInstance inferInstance inferInstance inferInstance
+      (gSeq k) (metricTargetOpen (I := I) Φ k) targetSigma targetT2
+  let targetLim : SmoothRiemannianMetric I (MetricTargetDomain (I := I) Φ k) :=
+    @SmoothRiemannianMetric.restrictOpen E inferInstance inferInstance H inferInstance I
+      (A k) inferInstance inferInstance inferInstance inferInstance
+      (gLim k) (metricTargetOpen (I := I) Φ k) targetSigma targetT2
+  have hlim : sourceMetric = Diffeomorph.pullbackMetric (I := I) targetLim F := by
+    have metric_ext : ∀ (g₁ g₂ : SmoothRiemannianMetric I
+        (MetricSourceDomain (I := I) Φ k)),
+        (∀ (x : MetricSourceDomain (I := I) Φ k) (v w : TangentSpace I x),
+          g₁.inner x v w = g₂.inner x v w) → g₁ = g₂ := by
+      intro g₁ g₂ h
+      obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g₁
+      obtain ⟨i₂, s₂, p₂, b₂, c₂⟩ := g₂
+      have hi : i₁ = i₂ :=
+        funext fun x => ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => h x v w
+      subst hi
+      rfl
+    apply metric_ext
+    intro x v w
+    dsimp only [sourceMetric, targetLim]
+    change (S.limitMetric gLim hgLim).inner (x : (limitPointedCoc S O₀ gLim hgLim).M) v w =
+      (gLim k).inner (F x : ((factorSeq S O₀ gSeq).obj (id k)).M)
+        (mfderiv I I F x v) (mfderiv I I F x w)
+    rw [S.limitMetric_of_mem gLim hgLim k x.2]
+    rw [metricSourceTargetDiff_mfderiv (I := I) Φ k x v,
+      metricSourceTargetDiff_mfderiv (I := I) Φ k x w]
+    rfl
+  change metricDerivNormSupOn (I := I)
+      (metricSourceCompactSet (I := I) Φ k K) p
+      (Diffeomorph.pullbackMetric (I := I) targetSeq F)
+      sourceMetric sourceMetric < ε
+  rw [hlim, metricDerivNormSupOn_pullback_image (I := I)]
+  have hKsource : IsCompact (metricSourceCompactSet (I := I) Φ k K) :=
+    metricSourceCompactSet_isCompact (I := I) Φ k hK (hkSrc k hkS)
+  have hKtarget : IsCompact (F '' metricSourceCompactSet (I := I) Φ k K) :=
+    hKsource.image F.continuous
+  let stageVal : MetricTargetDomain (I := I) Φ k → A k := by
+    change {x : A k // x ∈ Set.univ} → A k
+    exact Subtype.val
+  let stageSet : Set (A k) :=
+    stageVal '' (F '' metricSourceCompactSet (I := I) Φ k K)
+  have hvalCont : Continuous stageVal := by
+    dsimp only [stageVal]
+    exact continuous_subtype_val
+  have hKstage : IsCompact stageSet := hKtarget.image hvalCont
+  calc
+    metricDerivNormSupOn (I := I)
+        (F '' metricSourceCompactSet (I := I) Φ k K) p targetSeq targetLim targetLim =
+      metricDerivNormSupOn (I := I) stageSet p (gSeq k) (gLim k) (gLim k) := by
+          dsimp only [targetSeq, targetLim]
+          dsimp only [stageSet, stageVal]
+          exact @metricDerivNormSupOn_restrictOpen E inferInstance inferInstance
+            inferInstance inferInstance inferInstance H inferInstance I
+            (A k) inferInstance inferInstance inferInstance inferInstance inferInstance
+            (gSeq k) (gLim k) (gLim k) (metricTargetOpen (I := I) Φ k)
+            targetSigma targetT2 (F '' metricSourceCompactSet (I := I) Φ k K) p
+    _ < ε := hkConv k hkC stageSet hKstage
+
+end StepD4bc
 
 section StepD5
 
@@ -380,6 +584,119 @@ theorem isCompact_cball_lim (S : SmoothSeqSystem I A)
       hw'.trans_lt (ENNReal.lt_add_right hr one_ne_zero)
     have hstage := edist_invIncl_le S g hg k hlt hk
     refine ⟨Function.invFun (S.toSeqSystem.incl k) w, hstage, Function.invFun_eq hwr⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Every finite closed ball of the direct limit is covered by the image of a compact set in one
+stage.  This is the correct localized compactness input for an open-stage direct system. -/
+def HasCompactBallCover (S : SmoothSeqSystem I A)
+    (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g) : Prop :=
+  ∀ (z : S.toSeqSystem.Lim) (r : ENNReal), r ≠ ⊤ →
+    letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+      ⟨(S.limitMetric g hg).toRiemannianMetric⟩
+    ∃ k, ∃ K : Set (A k), IsCompact K ∧
+      ∀ w : S.toSeqSystem.Lim,
+        Manifold.riemannianEDist I z w ≤ r → w ∈ S.toSeqSystem.incl k '' K
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Metric-ball exhaustion plus compact containment of each stage image in the next stage gives
+a compact stage cover for every finite limit ball. -/
+theorem compactCover_of_step (S : SmoothSeqSystem I A)
+    (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
+    (hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal),
+      letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+        ⟨(S.limitMetric g hg).toRiemannianMetric⟩
+      ∃ k, ∀ w : S.toSeqSystem.Lim,
+        Manifold.riemannianEDist I z w ≤ r → w ∈ Set.range (S.toSeqSystem.incl k))
+    (hstep : ∀ k, ∃ K : Set (A (k + 1)), IsCompact K ∧
+      Set.range (S.toSeqSystem.F (Nat.le_succ k)) ⊆ K) :
+    HasCompactBallCover S g hg := by
+  intro z r _hr
+  obtain ⟨k, hk⟩ := hexh z r
+  obtain ⟨K, hK, hFK⟩ := hstep k
+  refine ⟨k + 1, K, hK, fun w hw => ?_⟩
+  obtain ⟨a, rfl⟩ := hk w hw
+  refine ⟨S.toSeqSystem.F (Nat.le_succ k) a, hFK ⟨a, rfl⟩, ?_⟩
+  exact S.toSeqSystem.incl_comp (Nat.le_succ k) a
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A compact stage cover makes each finite closed limit ball compact. -/
+theorem compact_cball_cover (S : SmoothSeqSystem I A)
+    (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
+    (hcover : HasCompactBallCover S g hg)
+    (z : S.toSeqSystem.Lim) (r : ENNReal) (hr : r ≠ ⊤) :
+    letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+      ⟨(S.limitMetric g hg).toRiemannianMetric⟩
+    IsCompact {w : S.toSeqSystem.Lim | Manifold.riemannianEDist I z w ≤ r} := by
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric g hg).toRiemannianMetric⟩
+  obtain ⟨k, K, hK, hsub⟩ := hcover z r hr
+  have himg : IsCompact (S.toSeqSystem.incl k '' K) :=
+    hK.image (S.toSeqSystem.continuous_incl k)
+  refine IsCompact.of_isClosed_subset himg ?_ ?_
+  · letI : IsManifold I 1 S.toSeqSystem.Lim :=
+      IsManifold.of_le (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+    letI : TopologicalSpace.MetrizableSpace S.toSeqSystem.Lim :=
+      Manifold.metrizableSpace I S.toSeqSystem.Lim
+    letI : T3Space S.toSeqSystem.Lim := inferInstance
+    letI : IsContinuousRiemannianBundle E
+        (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+      ⟨⟨(S.limitMetric g hg).inner, (S.limitMetric g hg).contMDiff.continuous,
+        by intro x v w; rfl⟩⟩
+    letI : EMetricSpace S.toSeqSystem.Lim :=
+      EMetricSpace.ofRiemannianMetric I S.toSeqSystem.Lim
+    have hcont : Continuous fun w : S.toSeqSystem.Lim => edist z w :=
+      continuous_const.edist continuous_id
+    have hset : {w : S.toSeqSystem.Lim | Manifold.riemannianEDist I z w ≤ r} =
+        (fun w : S.toSeqSystem.Lim => edist z w) ⁻¹' Set.Iic r := rfl
+    rw [hset]
+    exact IsClosed.preimage hcont isClosed_Iic
+  · intro w hw
+    change Manifold.riemannianEDist I z w ≤ r at hw
+    exact hsub w hw
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Localized D5 completeness.**  Compact stage covers of finite limit balls imply that the
+direct-limit metric is proper and hence complete, without requiring the open stages themselves to
+be complete or proper. -/
+theorem limitComplete_cover [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    (S : SmoothSeqSystem I A) (O₀ : A 0)
+    (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
+    [∀ k, PreconnectedSpace (A k)]
+    (hcover : HasCompactBallCover S g hg) :
+    MetricComplete (I := I) (limitPointedCoc S O₀ g hg) := by
+  unfold MetricComplete
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric g hg).toRiemannianMetric⟩
+  letI : IsManifold I 1 S.toSeqSystem.Lim :=
+    IsManifold.of_le (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+  letI : TopologicalSpace.MetrizableSpace S.toSeqSystem.Lim :=
+    Manifold.metrizableSpace I S.toSeqSystem.Lim
+  letI : T3Space S.toSeqSystem.Lim := inferInstance
+  letI : IsContinuousRiemannianBundle E
+      (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨⟨(S.limitMetric g hg).inner, (S.limitMetric g hg).contMDiff.continuous,
+      by intro x v w; rfl⟩⟩
+  letI : EMetricSpace S.toSeqSystem.Lim :=
+    EMetricSpace.ofRiemannianMetric I S.toSeqSystem.Lim
+  letI : MetricSpace S.toSeqSystem.Lim :=
+    EMetricSpace.toMetricSpace
+      (fun x y => Geometry.Riemannian.Exponential.riemannianEDist_ne_top (I := I) x y)
+  haveI : ProperSpace S.toSeqSystem.Lim := by
+    refine ProperSpace.of_isCompact_closedBall_of_le 0 (fun z r hr => ?_)
+    have h := compact_cball_cover S g hg hcover z (ENNReal.ofReal r) ENNReal.ofReal_ne_top
+    have hset : Metric.closedBall z r =
+        {w : S.toSeqSystem.Lim |
+          Manifold.riemannianEDist I z w ≤ ENNReal.ofReal r} := by
+      rw [← Metric.closedEBall_ofReal hr]
+      ext w
+      exact Metric.mem_closedEBall'
+    rw [hset]
+    exact h
+  exact (complete_of_proper : CompleteSpace S.toSeqSystem.Lim)
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

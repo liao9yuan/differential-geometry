@@ -50,3 +50,10 @@ GREEN: focused checks + targeted build
 (3803 jobs, 0 errors); style warnings (`show`→`change`) cleaned.
 `#print axioms` on all 4 endpoints (and the 3 Tensor-layer lemmas) =
 `[propext, Classical.choice, Quot.sound]`.
+## 2026-07-09: finite initial segment absorption
+
+Added checked theorem `cov_bdd_of_eventual`: an eventual sequence-uniform covariant-derivative
+bound on a compact set extends to the whole sequence because every fixed metric pair is bounded
+there and only finitely many initial indices remain. This is the generic compactness bridge used
+by Step D's fixed-stage pullback sequence. Focused verification and the targeted module build
+passed.

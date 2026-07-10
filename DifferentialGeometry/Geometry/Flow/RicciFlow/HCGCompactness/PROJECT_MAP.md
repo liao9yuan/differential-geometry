@@ -2,8 +2,8 @@
 
 > **Wider program (2026-07-05):** this map covers the HCG compactness lane.
 > The program-level plans sit one directory up:
-> `../DimensionThree/HAM3_BLACKBOX_PLAN.md` (the 8 frontiers of `ham3_main`,
-> incl. the Perelman no-local-collapsing box and its fill routes) and
+> `../DimensionThree/HAM3_BLACKBOX_PLAN.md` (the original 8-frontier audit for
+> `ham3_main`; 6 remain open, incl. the Perelman no-local-collapsing box) and
 > `../POINCARE_PLAN.md` (the Poincaré-endpoint master plan + infrastructure gap
 > list).  HCG compactness is `ham3_cgh_limit`'s producer and Morgan–Tian
 > `converge2`'s counterpart inside that program.
@@ -21,18 +21,20 @@ writing a new overview elsewhere.
 ## 1. Goal and theorem tree (MSM135 Chapters 3–4)
 
 ```
-Thm 3.10  Ricci-flow solution compactness            [Ch3 line]
+Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
+                                                       conditional wrapper checked]
   ⇐ Thm 3.9  metric compactness                      [Ch4 line, proved in book Ch4]
   ⇐ Lemma 3.11  whole-window C^p metric bounds       [DONE sorry-free, hShi = cited hyp]
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions, ~1/3)
+                    → Step B (local metrics/transitions, ~1/2)
                     → Step C (center-of-mass averaging, ~3/4)
-                    → Step D (direct limit + assembly; ENDPOINT 0% — no D6
-                      assembly theorem; D1b local recursion closed but upstream
-                      B1/compSep organs are still proof-frontier declarations)
-                    + F-track engines (F1–F13, ~90%)
+                    → Step D (direct limit + assembly; ENDPOINT 0% — D2/D3/D4
+                      ambient convergence is checked; D5 metric exhaustion,
+                      shrunk-stage metric transport, D6 assembly, and the B1
+                      raw producer remain open)
+                    + F-track engines (F1–F13, ~95%)
 ```
 
 ## 2. Endpoints and their `sorry`s (report progress ONLY against these)
@@ -40,8 +42,8 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Endpoint | Where | Status |
 |---|---|---|
 | **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessInputs.lean` | STATED 2026-07-05; `sorry` = the honest A→D assembly.  **The Ch4 target.** |
-| Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | `sorry` = conditional endpoint + externally cited theorems (CGT, Bishop–Gromov, [H6]) + connectedness.  NOT dischargeable in-tree (no volume layer); out of Ch4 scope by the 2026-07-05 ruling. |
-| Thm 3.10 upgrade (3.10 ⇐ 3.9) | `FlowLimitUpgrade.lean` + P4 chain | in flight (`P4_CONV_PLAN.md`) |
+| Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | `sorry` = conditional endpoint + externally cited theorems (CGT, Bishop–Gromov, [H6]) + connectedness; out of Ch4 scope by the 2026-07-05 ruling. |
+| Conditional Thm 3.10 `solutionComp_cond` / `compactnessSol_cond` | `C4/SolutionCompactnessInputs.lean` + `HamiltonCompactness.lean` | checked consumer from conditional Thm 3.9 plus concrete `FlowUpgradeData`; it does not prove the upstream 3.9 frontier or unconditional Thm 3.10 |
 | Lemma 3.11 | capstone `covOrderBound_of_soln` chain | DONE sorry-free (hShi hypothesis) |
 
 ## 3. Live lanes and their entry documents
@@ -49,8 +51,8 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Lane | Entry plan | State |
 |---|---|---|
 | Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/COMPCONV_HANDOFF.md` | active |
-| Ch4 Step D | **`C4/STEPD_PLAN.md`** (2026-07-05) | plan ready; D3 lane is gate-free |
-| Ch3 P4 final assembly (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` | active |
+| Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` | active; D2/D3/D4 ambient convergence and shrunk-tail compact containment checked; D5 metric exhaustion, tail metric transport, and D6 open; recount stopped at 3/3 |
+| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
 | Space-form / quotient curvature | memory note `spaceform-hardroute-build` + same-name `.md`s | parallel, unrelated to 3.9/3.10 |
 
@@ -97,16 +99,17 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (2026-07-05)
+## 6. Honest progress (updated 2026-07-09)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
   Step B ~1/2 (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
-  `stepB1_approxIso` endpoint keeps ONE `sorry` = the C-track producer bundle
-  (`lbl400/402/403` + lbl430-bounds), i.e. the B/C engine — **audit 2026-07-06
-  (`C4/StepB1Producers.lean`): this bundle is BLOCKED BELOW the "engines ready"
-  premise.**  **⭐ B1 ENDPOINT `stepB1_of_bounds` (ANY order `p`) DONE 2026-07-07
+  **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
+  were removed.  `StepB1RawInput` now exposes the C-track producer boundary, and
+  `stepB1_of_raw` is the checked conditional assembly.  Producer of that package
+  from the endpoint inputs: 0%; textbook B1 theorem: 0%.  **⭐ B1 ENDPOINT
+  `stepB1_of_bounds` (ANY order `p`) DONE 2026-07-07
   (`C4/StepB1Producers.lean`, green/axiom-clean)**: the full `lbl397` conclusion at any
   `p` closes from honest chart-level inputs (local diffeo on `U` + `InjOn` + basepoint
   fix + forward/reverse `C⁰` `hc0` AND `C^p` covariant-derivative `hcov` bounds) via one
@@ -123,7 +126,26 @@ its docstring BEFORE consumers are built against it.
   UNCONDITIONAL `lbl397` = producing the endpoint's honest input bounds: the uniform-`hc0`
   compactness + the `hcov` covariant-derivative bounds (the latter's engine — pullback
   invariance `covNormWith_pd_zone`, `iterCov_metric_zero` — is BUILT in `C4/PullbackField.lean`;
-  NOT a pinned frontier, contrary to an earlier retracted note) + the C-track input production. **(b) `lbl403` CLOSED 2026-07-07 (both halves, sorry-free/axiom-clean)**:
+  NOT a pinned frontier, contrary to an earlier retracted note) + the C-track input production.
+  **2026-07-09 radial-separation closure:** `mfderiv_exp_radial` + `radialEnorm_normal` close the
+  former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
+  bound directly from named-exp-ball containment and Riemannian separation.  This improves the
+  producer machinery but does not change the rounded totals: the `StepB1RawInput` producer and
+  textbook B1 theorem remain 0%; Step-B machinery remains about 50%.
+  **Later 2026-07-09:** `seqCenter_zero` / `seqCenter_edist_ge` and
+  `seqChartNorm_ge` connect the actual ordered-net centers to that coordinate
+  lower bound.  The former POU representation mismatch is now resolved:
+  `centerAverage.WeightDataOn`, `normWeights_data` / `bumpWeights_data`,
+  `NetLimitData.unifHatCageData`, and `stepCJoinDataFixed` give a checked
+  explicit-weight route through the current radius-`4 * lamInf` hat endpoint,
+  while the bundled POU entrypoints remain available.  `bumpNum_sum_one`
+  reduces the book-cutoff denominator bound to ordinary inner-ball coverage
+  plus the concrete fact that the cutoff's non-one locus lies in the base
+  inner ball.  The remaining producer work is the intrinsic quadratic
+  chart-bump family and these two support/coverage facts; the literal MSM135
+  radius-`5 * lamInf` support instantiation is still distinct.  The rounded
+  progress totals remain unchanged.
+  **(b) `lbl403` CLOSED 2026-07-07 (both halves, sorry-free/axiom-clean)**:
   manifold forward IFT `Geometry/Coordinates/LocalDiffeoIFT.lean` incl. the **`n = ∞`
   version** (`contMDiffOn_isLocalDiffeomorphOn_infty`, inverse-uniqueness upgrade of the
   order-1 diffeo) + Neumann `isInvertible_of_norm_id_sub_lt` + antilipschitz injectivity
@@ -142,8 +164,8 @@ its docstring BEFORE consumers are built against it.
   weights (convergence φ_k→φ_∞ + basepoint concentration `δ_{α0}`, `StepCAveragePOU`
   lane); (ii) targets per-slot convergence (instantiate `comp_cInf_id_on` on the concrete
   transitions; C⁰ base = `stepCJoin`); (iii) `Φ_cm` `ContDiffOn ∞` + `CenterInput` family
-  (C2 chain; quantitative variant awaits lbl430-bounds `j ≥ 2`); + the fixed-signature
-  can't supply `stepCJoin`'s honest inputs.  B2–B6 open); Step C ~3/4
+  (C2 chain; quantitative variant awaits the honest all-order lbl430 bounds); the
+  `StepB1RawInput` producer must thread `stepCJoin`'s honest inputs.  B2–B6 open); Step C ~3/4
   (C1/C3/C4-shape done conditionally; C2
   regularity at `C^n` for every finite `n` DONE 2026-07-05 — `lbl430`(ii),
   `centerOfMass_contDiffAt`; C2 quantitative `|∇^j cm| ≤ C̃_j` bounds half
@@ -161,14 +183,16 @@ its docstring BEFORE consumers are built against it.
   j=2 LANDED sorry-free/axiom-clean: `graphBlockDeriv` (block-family derivative bound
   `‖∇(∂G∘graph)‖ ≤ ‖∇²G‖·(‖∇f‖+1)`), `implicitDeriv_two_le` (abstract `‖∇²f‖ ≤ Λ²a₂b₁ + Λb₂`),
   `CmHessianNbhdInput` (nbhd Hessian input bound to the center family, audit docstring), and the
-  endpoint `cmChartDerivLe` j=2 case fully wired (`C²` regularity → eventual differentiability,
-  `graphBlockDeriv` at `inl`/`inr` from `B 2`, `C̃₂ = Λ'²a₂B₁ + Λ'a₂`, `a₂ = B₂(ΛB₁+1)`)**;
-  `cmChartDerivLe`'s ONE `sorry` is now the PURE (c) `j≥3` recursion; **2026-07-07 (c) analytic
+  checked `cmChartDerivLe2` fully wires j≤2 (`C²` regularity → eventual differentiability,
+  `graphBlockDeriv` at `inl`/`inr` from `B 2`, `C̃₂ = Λ'²a₂B₁ + Λ'a₂`, `a₂ = B₂(ΛB₁+1)`)**.
+  **2026-07-09 statement repair:** the former all-order `cmChartDerivLe` was removed because C²
+  regularity and constraints on only `Ctil 0/1/2` cannot imply j≥3 bounds.  The honest all-order
+  theorem remains unstated/0% and needs order-p regularity plus a recursive majorant.  **2026-07-07 (c) analytic
   bricks ALSO landed green/axiom-clean** (`multilinear_prod_opNorm_le`, `norm_iteratedFDeriv_id_le`/
   `_graph_le`, `norm_iteratedFDeriv_invComp_le` (Faà-di-Bruno for `inverse∘A` on the unit set),
-  `norm_iteratedFDeriv_graphComp_le` (Faà-di-Bruno through the graph)); remaining = c4/c5 pure
-  threading (bilinear collection at `compL` + recursive constants + the strong induction — scoped
-  in StepCDerivBounds.md); Step D ~35%
+  `norm_iteratedFDeriv_graphComp_le` (Faà-di-Bruno through the graph)); remaining = c4/c5
+  (bilinear collection at `compL` + recursive constants + the strong induction — scoped
+  in StepCDerivBounds.md); Step D machinery ~88%
   (**D3 COMPLETE 2026-07-07 — `lbl408` all of D3a–D3e green, axiom-clean, zero warnings**:
   `Geometry/Topology/DirectLimitManifold.lean` = `ChartedSpace H Lim` (D3a) + `IsManifold I ∞ Lim`
   (D3b, `lbl409` transition crux) + σ-compact/T2/`T2Space (TangentBundle I Lim)` (D3c, via NEW
@@ -193,42 +217,100 @@ its docstring BEFORE consumers are built against it.
   `chainComp`/`chainComp'` (two bracketings, equality-parameter right fold), `chainComp_coe_head`
   + `chainComp'_snoc`, `geomTailBudget`, `exists_strictMono_ge`, exact-zero separated base
   `reflSepData`, and the separated scalar ledger (`sepTail`, `sepBeta`, `sepFeed_le_beta`,
-  `sepNextC0_le`, `sepNextCov_le`) are checked.  **2026-07-09: the `exists_directedApprox`
-  local recursion body is CLOSED** in `StepDDirected.lean`: the active `hacc` carries separated
+  `sepNextC0_le`, `sepNextCov_le`) are checked.  **2026-07-09: the conditional consumer
+  `directed_of_b1` is CLOSED** in `StepDDirected.lean`: the active `hacc` carries separated
   `c0/cov` ledgers, uses peel-last `compSepFwd` and peel-first `compSepRev`, transports the
   right-fold inverse germ back to the left fold, and focused-checks with no local `sorry`
-  warning.  It is **not axiom-clean yet** because it consumes `stepB1_approxIso` and the separated
-  composition organs `compSepFwd`/`compSepRev`, which remain proof-frontier declarations.
-  **HONEST SEPARATION (per CLAUDE.md rule):** D1b local theorem body = **100% modulo imported
-  frontiers**; D1b axiom-clean completion remains blocked by those upstream frontiers.  The Step D
+  warning.  **2026-07-09 later: the separated composition organs `compSepFwd`/`compSepRev`
+  are now proved in `PullbackField.lean`**.  **2026-07-09 F4/F5 CLOSED:**
+  `claim1MulConst` / `lemma45_F3_bound` expose data-independent scaled constants,
+  `RicBoundGoodFrame.metricComp_mul` absorbs the good-frame and metric-swap loss,
+  and both `lemma45_corII` and `lemma45_corII_unif` are proved.  F5,
+   `PullbackField`, and `StepDDirected` verify downstream.  The former false B1
+   dependency is now an explicit `StepB1RawInput` argument.  **2026-07-09 D1-to-D2
+   REALIZATION LANDED:** `SeqSystem.ofSucc`, `SmoothSeqSystem.ofSucc`, the range-scoped
+   open-ball restriction API, and `StepDLimitMetrics.directedBallSystem` turn the eventual
+   D1 maps into a tail-shifted smooth open-ball system.  The former `lbl404` gate is also
+   green in `MapConvergenceComp.lean`.  D2's actual ball pullback metric, ambient-inner
+   readout, restriction covariant-norm bridge, positive-order bounds, and `C0` lower/upper
+   plus order-zero bounds are checked locally.  **2026-07-09 D2 PREFIX-TAIL GEOMETRY
+   LANDED:** target-normalized chain splitting, nested/composite pullback equality,
+   prefix image containment, and exact positive-order bound transport are focused green.
+   `metricComp_iter_refs` converts bounds measured against an order-dependent prefix reference
+   into uniform chart-component derivative bounds.  **D2a COMPLETE 2026-07-09:**
+   `engine_input_refs` now propagates through `metricPreconv_refs` and `metricCInf_refs`;
+   `chainPullback_bdd` proves the concrete fixed-stage pullback sequence's bounds, and
+   `exists_chain_limit`/`exists_chain_data` produce its stagewise C-infinity limits from the
+   eventual D1 package.  The live D2 frontier is the common diagonal, `lbl407`, and the cocycle.
+  **HONEST SEPARATION (per CLAUDE.md rule):** conditional D1b consumer body = **100% checked**;
+  producing `StepB1RawInput` and proving the textbook D1b theorem remain **0%**.  The Step D
   ASSEMBLY endpoint (D6 discharging `metricCompactness`) is **0%** — not yet stated/proved.
-  Step D **machinery estimate ≈ 85–86%** (NOT endpoint completion); remaining machinery: prove
-  `compSepFwd`/`compSepRev`, D2 (lbl404-gated), D4b/c, D5a assembly, D6.
-  F-track ~90% (F4 one mechanical sorry, F2-book todo).  Ch4 **machinery** overall ≈ **58%**;
+   Step D **machinery estimate ≈ 88%** (NOT endpoint completion); remaining machinery:
+   the B/C producer bundle for D1 axiom-clean status, the D5 metric-exhaustion
+   producer, shrunk-stage metric transport, and D6 reindex/assembly.
+  F-track ~95% (F4 is closed; F2-book wrapper remains).
+   Ch4 **machinery** overall ≈ **58–59%**;
   Ch4 endpoint theorems (metricCompactness / Step-D assembly) still **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
-- Ch3: Lemma 3.11 done (hShi hypothesis); P4 assembly in flight; 3.10 endpoint not
-  yet assembled.
-- **Whole HCG project — MACHINERY estimate ≈ 41–44%** (this is infrastructure coverage, NOT
-  endpoint completion).  **Endpoint theorems (unconditional Thm 3.9, `metricCompactness`, and the
-  Step-D assembly) remain 0% proved** — each still carries a sorry or is unstated.  D1b
-  `exists_directedApprox` is locally closed but not axiom-clean because of upstream proof
-  frontiers.  Do not read the machinery % as theorem completion.
+- Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
+  `solutionComp_cond` → `compactnessSol_cond` is checked from conditional Thm 3.9
+  plus concrete `FlowUpgradeData`; its remaining producer hypotheses stay in the
+  P4 lane.  Unconditional Thm 3.10 remains 0%.  **2026-07-09 noncollapse repair:**
+  the canonical Perelman layer
+  now defines actual time-slice metric balls, Riemannian volume, parabolic
+  curvature control, and model-dimension kappa lower bounds.  Hamilton's
+  `Ham3Noncollapse` now ranges over genuine `paraSolution` rescalings; the fake
+  `Ham3BallPair`/numeric-volume path was removed.  The checked data/realization
+  machinery includes the proved `ham3_rm_control` theorem and is about 40%, while
+  `ham3_noncollapse`, no-local-collapsing, and the
+  Cheeger-Gromov-Taylor `flowInj_of_vol` producer theorems remain 0%.
+  **2026-07-09 CGH/3.10 repair:** `Ham3CGHLimitData` now retains the real source,
+  original-index composition, `SmoothCGHConverges` maps, source-to-original
+  diffeomorphisms, and limit-slice completeness.  The forgetful adapter and
+  arbitrary `HamCGHTopology.lift` wrapper were removed.  `LimitRoundAt` keeps
+  the exact complete slice and Ricci lower bound used by the repaired
+  `limit_to_orig` statement.  `PointedRiemannianManifold.compact_of_ricci` and
+  `PointedCGHMaps.exists_source_univ` / `target_univ` / `globalDiffeomorph`
+  provide the real compact-limit globalization route, and `limit_to_orig` is
+  now checked with no `sorry` (**theorem 100%**).  Separately, the conditional route
+  `MetricCompactnessInputs.metricCompactness -> FlowUpgradeData ->
+  solutionComp_cond -> compactnessSol_cond` is checked and makes zero calls to
+  the unconditional Theorem 3.9; the former exact-conclusion backend has been
+  removed.  This conditional assembly machinery is 100%; unconditional Theorem 3.10 and
+  `ham3_cgh_limit` remain 0% pending the common-window/source compactness producer.
+  The Hamilton contract now makes that producer exact: `Ham3SourceRealizes`
+  carries common-time inclusion, selected basepoints, and pullback equality to
+  the actual rescaled metrics; `Ham3CompactInput` retains the raw curvature
+  bound, window, kappa, and noncollapse; both black boxes carry the finite
+  maximal-time interval.  Transfers are bound to the actual CGH witness rather
+  than quantified over arbitrary limits.  This contract refactor is checked
+  infrastructure, not completion of either producer.
+- **Whole HCG project — conservative MACHINERY estimate ≈ 45%** (this is infrastructure coverage,
+  NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
+  the Step-D assembly, unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved** — each
+  still carries a `sorry` or is unstated.  The
+  `directed_of_b1` consumer is checked only from explicit `StepB1RawInput`; do not read that
+  conditional assembly or the machinery % as theorem completion.
   The riskiest open items (D3d metric transport RESOLVED 2026-07-07; D1a-(ii) naturality wall
   DISSOLVED 2026-07-07 — was a third walls-overcount, the restrictOpen/pullback stack pre-existed):
-  the `lbl404` composition-convergence engine, the quantitative center-of-mass derivative bounds
-  (`lbl430` bounds half), and the B1 producer bundle.
+  the arbitrary-order quantitative center-of-mass derivative theorem
+  (`lbl430` bounds half), the B1 raw producer, and the D5 metric-exhaustion /
+  shrunk-stage metric / D6 assembly chain.
 
 ## 7. Real sorries in this tree (audited 2026-07-09)
 
 `MetricCompactness.lean` (unconditional endpoint) · `C4/MetricCompactnessInputs.lean`
-(conditional endpoint = the working target) · `C4/StepB1ApproxIso.lean` (B1 skeleton)
-· `C4/Lemma45F4.lean` (F4 mechanical assembly) · `C4/StepCDerivBounds.lean`
-(`cmChartDerivLe`, ONE sorry = the `lbl430`(i) general-`j` Faà-di-Bruno induction
-step; base case `j≤1` + honest inputs sorry-free) · `C4/PullbackField.lean`
-(`compSepFwd`/`compSepRev` proof organs still precise frontiers) ·
-`C4/StepB1ApproxIso.lean` (B/C-track gate).  `C4/StepDDirected.lean` has no active local
+(conditional endpoint = the working target) · `C4/PullbackField.lean`
+(older ordinary `compDataFwd`/`compDataRev` wrappers remain frontiers; the D1b separated
+`compSepFwd`/`compSepRev` organs are proved).  `C4/StepB1ApproxIso.lean` has no `sorry` after the
+false P-only endpoint was replaced by `StepB1RawInput` plus `stepB1_of_raw`.
+`C4/StepCDerivBounds.lean` also has no `sorry`: it now exposes only the checked order-two theorem
+`cmChartDerivLe2`; the honest arbitrary-order theorem is not yet stated.
+`C4/StepDDirected.lean` has no active local
 proof `sorry` after the separated `hacc` replacement.  Other `sorry` grep hits in
 `HCGCompactness/` may include docstring mentions; inspect before counting.  `Comparison/HopfRinow.lean` carries 4
 dead sorries (3 unconsumed statements — see its header note); the C4 chain's
 properness needs are served sorry-free by `HopfRinowProper.lean`.
+
+The public `HCGCompactness.lean` umbrella imports the new modules and passed a
+focused check after the Hamilton and adapter module refreshes.

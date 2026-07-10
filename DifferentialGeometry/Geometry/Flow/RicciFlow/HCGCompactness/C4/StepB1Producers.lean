@@ -1,4 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepB1ApproxIso
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs
+import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAveraging
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringSeq
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceComp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
@@ -24,9 +29,10 @@ out in real analysis or missing API (survey 2026-07-05):
   `StepCAveraging.eq_of_all_eq` (green) gives the `C⁰` diagonal identity of the center average.  But
   the *averaged* map `G^β_{kℓ;r} = chart_ℓ ∘ centerAverageOn ∘ chart_k⁻¹` is the center of mass of
   `A(r)` near-identity summands; bounding `‖∇^p(G^β − id)‖` requires the Faà-di-Bruno composition of
-  the **threaded cm-derivative bound** (shape `StepCDerivBounds.cmChartDerivLe` conclusion,
-  `‖∇^j(chart∘cm)‖ ≤ C̃ j` for `j ≤ p+1`; itself sorried at `j ≥ 2` — the in-flight lbl430-bounds
-  brick) with the summand `C^p→id` smallness.  This is a genuine multi-lemma analysis, not
+  the **threaded cm-derivative bound** (`‖∇^j(chart∘cm)‖ ≤ C̃ j` for `j ≤ p+1`).
+  `StepCDerivBounds.cmChartDerivLe2` proves only the honest order-two part; the arbitrary-order
+  theorem still needs order-`p` regularity and a recursive numerical majorant.  Combining it
+  with the summand `C^p→id` smallness is genuine multi-lemma analysis, not
   transcription.  Remaining frontier.
 
 - **(b) `lbl403` — local diffeomorphism + injectivity: CLOSED 2026-07-07.**  `hloc`: the manifold
@@ -48,14 +54,17 @@ out in real analysis or missing API (survey 2026-07-05):
   `F^0_{kℓ}(O_k) = O_ℓ`.  **MISSING POU PRODUCER** — no such fact exists in `StepCAveragePOU`
   (off-limits to edit); it must be added there before (d) can close.
 
-## The fixed-signature obstruction
-`stepB1_approxIso`'s signature is `(P : ∀ k, ProperMetricOn (X.obj k)) r ε p` only, and feeds Step D
-verbatim.  Even with (a)–(d) built, that endpoint's `sorry` cannot be zeroed: the producers need
-`stepCJoin`'s ~two dozen honest inputs (`NetLimitData`, `PackingBound`, `ExpInverseDerivBoundInput`,
-the POU, overlaps, …) which are NOT derivable from `X + P` alone — they are the conditional
-endpoint's input bundle (PROJECT_MAP §4).  Zeroing the `sorry` needs either the honest-input bundle
-threaded into `stepB1_approxIso` (changing the fixed statement — a planner decision) or Step A/D
-producers that construct those inputs from `X + P`.
+## Honest assembly boundary
+The former `stepB1_approxIso` incorrectly exposed a theorem from `X + P` alone.  It has been
+replaced by `StepB1RawInput` plus the conditional consumer `stepB1_of_raw`; Step D likewise consumes
+that package explicitly through `directed_of_b1`.  The package records the raw comparison map,
+local diffeomorphism/injectivity/basepoint data, and two-sided `PreApproxIsoDataOn`, not the final
+`BookApproxIsoPartialData` conclusion.
+
+The genuine B/C theorem remains 0% until this file constructs `StepB1RawInput` from the conditional
+endpoint's C-track data (`NetLimitData`, `PackingBound`, `ExpInverseDerivBoundInput`, the POU,
+overlaps, and the derivative bounds).  The checked `_of_raw` assembly must not be reported as that
+producer theorem.
 -/
 
 noncomputable section
@@ -328,6 +337,23 @@ theorem normWeights_nonneg {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {
     (hnn : ∀ j, 0 ≤ num j z) (i : ι) : 0 ≤ normWeights num i z :=
   div_nonneg (hnn i) (Finset.sum_nonneg fun j _ => hnn j)
 
+/-- A nonnegative normalized family with nonzero denominator has a positive slot. -/
+theorem normWeights_pos {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {z : E'}
+    (hnn : ∀ j, 0 ≤ num j z) (hne : (∑ j, num j z) ≠ 0) :
+    ∃ i, 0 < normWeights num i z := by
+  have hsum : ∑ i, normWeights num i z = 1 := normWeights_sum hne
+  have hpos : 0 < ∑ i, normWeights num i z := by rw [hsum]; exact zero_lt_one
+  simpa only [Finset.mem_univ, true_and] using
+    (Finset.sum_pos_iff_of_nonneg
+      (fun i (_hi : i ∈ Finset.univ) => normWeights_nonneg hnn i)).mp hpos
+
+/-- A nonzero normalized weight can only occur in a nonzero numerator slot. -/
+theorem num_ne_of_weight_ne {ι : Type*} [Fintype ι] {num : ι → E' → ℝ} {i : ι} {z : E'}
+    (hweight : normWeights num i z ≠ 0) : num i z ≠ 0 := by
+  intro hnum
+  apply hweight
+  simp [normWeights, hnum]
+
 /-- **Basepoint concentration**: if all numerators except slot `i0` vanish at `z` (the `χ`-cutoff
 at the basepoint) and the live one is nonzero, the weights are the Kronecker `δ_{i0}` there —
 feeding `centerOfMass_delta` for the `F(O_k) = O_ℓ` basepoint identity. -/
@@ -347,6 +373,19 @@ theorem normWeights_contDiffOn {ι : Type*} [Fintype ι] {U : Set E'} {num : ι 
     (hne : ∀ z ∈ U, (∑ j, num j z) ≠ 0) (i : ι) :
     ContDiffOn ℝ (∞ : WithTop ℕ∞) (normWeights num i) U :=
   (hnum i).div (ContDiffOn.sum fun j _ => hnum j) hne
+
+/-- Nonnegative numerators with nonvanishing sum and controlled active support
+produce exactly the pointwise weight data consumed by the Step-C average. -/
+theorem normWeights_data {ι : Type} [Fintype ι] {s : Set E'} {U : ι → Set E'}
+    {num : ι → E' → ℝ}
+    (hnn : ∀ z ∈ s, ∀ i, 0 ≤ num i z)
+    (hne : ∀ z ∈ s, (∑ j, num j z) ≠ 0)
+    (hactive : ∀ z ∈ s, ∀ i, num i z ≠ 0 → z ∈ U i) :
+    centerAverage.WeightDataOn s U (fun z i => normWeights num i z) where
+  nonneg z hz i := normWeights_nonneg (hnn z hz) i
+  pos z hz := normWeights_pos (hnn z hz) (hne z hz)
+  sum_one z hz := normWeights_sum (hne z hz)
+  active_mem z hz i hi := hactive z hz i (num_ne_of_weight_ne hi)
 
 /-- **Pointwise products preserve `C^∞` convergence on compacts** — quotient-formula machinery
 for the book's POU weights (`φ^α = χ∘J⋅ψ^α∘J / (…)`): pair the factors (`mapCInfConv_prodMk`)
@@ -448,6 +487,18 @@ theorem bumpNum_nonneg {ι : Type*} [DecidableEq ι] {χ : E' → ℝ} {ψ : ι 
   · exact hψ i0 _
   · exact mul_nonneg (hχ _) (hψ i _)
 
+/-- The book's explicit bump quotient supplies the pointwise weight package
+once denominator positivity and bump-support membership are known. -/
+theorem bumpWeights_data {ι : Type} [DecidableEq ι] [Fintype ι]
+    {s : Set E'} {U : ι → Set E'} {χ : E' → ℝ} {ψ : ι → E' → ℝ}
+    {J : ι → E' → E'} {i0 : ι}
+    (hχ : ∀ t, 0 ≤ χ t) (hψ : ∀ i t, 0 ≤ ψ i t)
+    (hne : ∀ z ∈ s, (∑ j, bumpNum χ ψ J i0 j z) ≠ 0)
+    (hactive : ∀ z ∈ s, ∀ i, bumpNum χ ψ J i0 i z ≠ 0 → z ∈ U i) :
+    centerAverage.WeightDataOn s U
+      (fun z i => normWeights (bumpNum χ ψ J i0) i z) :=
+  normWeights_data (fun z _hz i => bumpNum_nonneg hχ hψ i z) hne hactive
+
 /-- **Basepoint kill**: where the cutoff vanishes (`χ (J_{i0} x₀) = 0`, the book's `O_k`), every
 non-base numerator vanishes and the base one is the bare bump value — combined with
 `normWeights_delta` and `centerOfMass_delta` this is the full weight side of `F(O_k) = O_ℓ`. -/
@@ -458,11 +509,10 @@ theorem bumpNum_delta {ι : Type*} [DecidableEq ι] {χ : E' → ℝ} {ψ : ι �
   refine ⟨fun j hj => ?_, by simp [bumpNum]⟩
   simp [bumpNum, hj, hχ0]
 
-/-- **Basepoint kill, the book's actual mechanism (`lbl383` ball separation)**: at the basepoint
-the base chart sends `O_k` to `0` where `χ` is NONzero (it is the `B⁰`-bump), and it is the
-`ψ_j`-readouts that vanish — `O_k`'s image in each non-base chart lies OUTSIDE the `ψ_j` support
-(the separated-balls choice).  `bumpNum_delta` above (the `χ`-kill) is an alternative sufficient
-condition, not dischargeable on the book's data; use THIS one for the `lbl400` instantiation. -/
+/-- **Alternative basepoint kill by separated bump supports.**  If every non-base `ψ_j` readout
+vanishes at the basepoint, the non-base numerators vanish independently of `χ`.  This is useful
+for separation-based variants, but it is not the mechanism used in MSM135: there `χ` is chosen
+to vanish near the origin, so `bumpNum_delta` is the book-facing `lbl400` route. -/
 theorem bumpNum_delta' {ι : Type*} [DecidableEq ι] {χ : E' → ℝ} {ψ : ι → E' → ℝ}
     {J : ι → E' → E'} {i0 : ι} {x₀ : E'} (hψ0 : ∀ j, j ≠ i0 → ψ j (J j x₀) = 0) :
     (∀ j, j ≠ i0 → bumpNum χ ψ J i0 j x₀ = 0) ∧
@@ -554,6 +604,32 @@ theorem bumpNum_sum_low {ι : Type*} [DecidableEq ι] [Fintype ι] {χ : E' → 
   obtain ⟨j, hj⟩ := h
   exact le_trans hj (Finset.single_le_sum
     (fun j' _ => bumpNum_nonneg hχ hψ j' z) (Finset.mem_univ j))
+
+/-- **Book cutoff denominator bound.**  Suppose the ordinary inner bump balls
+cover `z`.  If the base cutoff is `1`, any covering slot contributes numerator
+`1`; if it is not `1`, it suffices that `z` lies in the base slot's inner bump
+ball, whose uncut numerator is `1`.  Thus the modified numerator sum remains at
+least `1` after the basepoint cutoff. -/
+theorem bumpNum_sum_one {ι : Type*} [DecidableEq ι] [Fintype ι]
+    [HasContDiffBump E'] {χ : E' → ℝ} (f : ι → ContDiffBump (0 : E'))
+    {J : ι → E' → E'} {i0 : ι} {z : E'}
+    (hχ : ∀ t, 0 ≤ χ t)
+    (hcover : ∃ j, ‖J j z‖ ≤ (f j).rIn)
+    (hbase : χ (J i0 z) ≠ 1 → ‖J i0 z‖ ≤ (f i0).rIn) :
+    1 ≤ ∑ j, bumpNum χ (fun i => ⇑(f i)) J i0 j z := by
+  apply bumpNum_sum_low hχ (fun i t => (f i).nonneg)
+  by_cases hχ1 : χ (J i0 z) = 1
+  · obtain ⟨j, hj⟩ := hcover
+    refine ⟨j, bumpNumLowOfMem f hj ?_ ?_⟩
+    · intro _hj
+      rw [hχ1]
+    · intro _hj
+      exact le_rfl
+  · refine ⟨i0, bumpNumLowOfMem f (hbase hχ1) ?_ ?_⟩
+    · intro hi
+      exact (hi rfl).elim
+    · intro _hi
+      exact le_rfl
 
 /-- **The complete weights-slot producer** — the `hw` input of `averagedTargets₂` from the fully
 concrete weight pipeline: `w_k := normWeights (bumpNum χ ψ (J · k) i0)` with fixed `ContDiffBump`
@@ -1309,7 +1385,7 @@ theorem pullbackErrComp
         (NormalCoordinates.normalChartAt (I := I) gn (F y)
           (F ((NormalCoordinates.normalChartAt (I := I) gk y).symm
             (NormalCoordinates.normalChartAt (I := I) gk y q)))))
-    {ε η : ℝ} (hη : 0 ≤ η)
+    {ε η : ℝ}
     (hA : ‖fderiv ℝ (fun z => NormalCoordinates.normalChartAt (I := I) gn (F y)
         (F ((NormalCoordinates.normalChartAt (I := I) gk y).symm z))) (0 : E)
       - ContinuousLinearMap.id ℝ E‖ ≤ ε)
@@ -1449,7 +1525,7 @@ theorem pullbackErrNorm
             * ((Real.sqrt cLow)⁻¹ * (Real.sqrt cLow)⁻¹)) := by
     refine (sqrtNormSq_le_of_comp (I := I) gk y basis hON _ hc0 ?_)
     intro i j
-    have h := pullbackErrComp (I := I) gk gn hpb hG hev hη hA hB (basis i) (basis j)
+    have h := pullbackErrComp (I := I) gk gn hpb hG hev hA hB (basis i) (basis j)
     refine h.trans ?_
     have hbb : ‖(basis i : TangentSpace I y)‖ * ‖(basis j : TangentSpace I y)‖
         ≤ (Real.sqrt cLow)⁻¹ * (Real.sqrt cLow)⁻¹ :=
@@ -1773,6 +1849,114 @@ theorem normLowerOfSep (Y : PointedRiemannianManifold.{u, uE, uH} (I := J')) (x 
     (ENNReal.ofReal_le_ofReal_iff (by positivity)).mp hchain
   rw [div_le_iff₀ (by positivity : (0 : ℝ) < Real.sqrt 2)]
   linarith [hle]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Radial-exponential specialization of `normLowerOfSep`.**  If the coordinate segment
+stays in a set contained in the named exponential ball, a Riemannian separation lower bound
+forces the required Euclidean coordinate separation.  The radial curve's `C¹` regularity and
+velocity norm are supplied by the exponential layer, rather than threaded as caller inputs. -/
+theorem normLowerOfSepExp
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := J')) (x : Y.M)
+    {U : Set F} {v : F}
+    (heq : NormalCoordMetricEquivOn (I := J') Y x U)
+    (hseg : ∀ t : ℝ, t ∈ Set.Icc (0 : ℝ) 1 → t • v ∈ U) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace G Y.M := Y.charted
+    letI : IsManifold J' ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle J' Y.M) := Y.t2TangentBundle
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace J' y) :=
+      ⟨Y.metric.toRiemannianMetric⟩
+    U ⊆ Metric.ball (0 : F) (expMapC2Radius (I := J') Y.metric x) →
+    ∀ {lam : ℝ},
+      ENNReal.ofReal lam ≤ Manifold.riemannianEDist J' x
+        (expMap (I := J') Y.metric x (show TangentSpace J' x from v)) →
+      lam / Real.sqrt 2 ≤ ‖v‖ := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace G Y.M := Y.charted
+  letI : IsManifold J' ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle J' Y.M) := Y.t2TangentBundle
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace J' y) :=
+    ⟨Y.metric.toRiemannianMetric⟩
+  intro hsub lam hlam
+  have hsmall : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ‖t • v‖ < expMapC2Radius (I := J') Y.metric x := by
+    intro t ht
+    simpa only [Metric.mem_ball, dist_zero_right] using hsub (hseg t ht)
+  have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) J' 1
+      (fun t : ℝ => (expMap (I := J') Y.metric x
+        (show TangentSpace J' x from (t • v)) : Y.M)) (Set.Icc (0 : ℝ) 1) := by
+    intro t ht
+    exact (radialCurve_contMDiffAt2 (I := J') Y.metric x v t (hsmall t ht)).contMDiffWithinAt.of_le
+      (by norm_num)
+  have hend :
+      (expMap (I := J') Y.metric x (show TangentSpace J' x from ((0 : ℝ) • v)) : Y.M) = x := by
+    rw [zero_smul]
+    exact expMap_zero (I := J') Y.metric x
+  have hderiv : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      ‖mfderiv 𝓘(ℝ, ℝ) J'
+        (fun s : ℝ => (expMap (I := J') Y.metric x
+          (show TangentSpace J' x from (s • v)) : Y.M)) t 1‖ₑ =
+        ENNReal.ofReal (Real.sqrt (normalCoordMetric (I := J') Y x (t • v) v v)) := by
+    intro t ht
+    exact radialEnorm_normal (I := J') Y x v t (hsmall t ht)
+  apply normLowerOfSep (J' := J') Y x heq hseg _ hcurve hend hderiv
+  simpa only [one_smul] using hlam
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Concrete good-covering separation in normal coordinates.**  A nonzero live
+ordered-net center sees the sequence basepoint at Euclidean normal-coordinate
+distance at least `λ(0) / √2`, provided the radial segment stays in the
+`NormalCoordMetricEquivOn` region inside the named exponential ball. -/
+theorem seqChartNorm_ge
+    {Z : PointedRiemannianSeq.{u, uE, uH} (I := J')}
+    (hd : InjRadiusDecayInput (I := J') Z) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := J') (Z.obj k)) (k : Nat) {α : Nat}
+    (hα : α ≠ 0) {c : (Z.obj k).M} (hc : seqCenter hd D P k α = some c)
+    {U : Set F} (heq : NormalCoordMetricEquivOn (I := J') (Z.obj k) c U) :
+    letI : TopologicalSpace (Z.obj k).M := (Z.obj k).topology
+    letI : ChartedSpace G (Z.obj k).M := (Z.obj k).charted
+    letI : IsManifold J' ∞ (Z.obj k).M := (Z.obj k).smooth
+    letI : T2Space (TangentBundle J' (Z.obj k).M) := (Z.obj k).t2TangentBundle
+    letI : RiemannianBundle (fun y : (Z.obj k).M => TangentSpace J' y) :=
+      ⟨(Z.obj k).metric.toRiemannianMetric⟩
+    (Z.obj k).basepoint ∈
+        (NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c).source →
+    (∀ t : Real, t ∈ Set.Icc (0 : Real) 1 →
+      t • NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+        (Z.obj k).basepoint ∈ U) →
+    U ⊆ Metric.ball (0 : F) (expMapC2Radius (I := J') (Z.obj k).metric c) →
+    hd.lambda D 0 / Real.sqrt 2 ≤
+      ‖NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+        (Z.obj k).basepoint‖ := by
+  letI : TopologicalSpace (Z.obj k).M := (Z.obj k).topology
+  letI : ChartedSpace G (Z.obj k).M := (Z.obj k).charted
+  letI : IsManifold J' ∞ (Z.obj k).M := (Z.obj k).smooth
+  letI : T2Space (TangentBundle J' (Z.obj k).M) := (Z.obj k).t2TangentBundle
+  letI : RiemannianBundle (fun y : (Z.obj k).M => TangentSpace J' y) :=
+    ⟨(Z.obj k).metric.toRiemannianMetric⟩
+  intro hbase hseg hsub
+  have hvsrc :
+      NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+          (Z.obj k).basepoint ∈
+        (NormalCoordinates.expMapDiffeo (I := J') (Z.obj k).metric c).source :=
+    (NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c).map_source hbase
+  have hexp :
+      (expMap (I := J') (Z.obj k).metric c
+        (show TangentSpace J' c from
+          NormalCoordinates.normalChartAt (I := J') (Z.obj k).metric c
+            (Z.obj k).basepoint) : (Z.obj k).M) = (Z.obj k).basepoint := by
+    rw [← NormalCoordinates.expMapDiffeo_apply_eq
+      (I := J') (Z.obj k).metric c hvsrc]
+    exact NormalCoordinates.normalChartAt_left_inv
+      (I := J') (Z.obj k).metric c hbase
+  have hsep : ENNReal.ofReal (hd.lambda D 0) ≤
+      Manifold.riemannianEDist J' c (Z.obj k).basepoint := by
+    have h := seqCenter_edist_ge hd hD P k hα hc
+    simpa [PointedRiemannianManifold.emetricSpace] using h
+  rw [← hexp] at hsep
+  exact normLowerOfSepExp (J' := J') (Z.obj k) c heq hseg hsub hsep
 
 end PathBridge
 

@@ -11,8 +11,9 @@ set_option linter.unusedSectionVars false
 This file contains theorem-facing data and input packages for pointed
 Ricci-flow compactness.  The metric-only pointed Riemannian layer and concrete
 Riemannian-distance completeness predicate live in `PointedRiemannian.lean`.
-The legacy injectivity-radius and noncollapsing slots remain compatibility
-input packages for older wrappers.
+The legacy numeric injectivity-radius slot remains for older wrappers.  The
+canonical noncollapse-to-injectivity boundary lives in
+`NoncollapseInjectivity.lean` and uses actual metric balls and volumes.
 -/
 
 noncomputable section
@@ -165,24 +166,6 @@ structure InjInput {I : ModelWithCorners Real E H}
   iota : Real
   iota_pos : 0 < iota
   inj_lower : forall i : Nat, iota <= injRadiusAtBase i
-
-/-- Noncollapsing input at a fixed basepoint scale.
-
-This is the volume-side alternative to an injectivity-radius hypothesis.  It is
-kept separate because Perelman's theorem supplies volume noncollapse before a
-Cheeger--Gromov--Taylor style injectivity-radius bridge is formalized.  The
-stored `volumeAtBase` values are compatibility data, not yet values of a
-formalized Riemannian volume functional. -/
-structure NoncollapseInput {I : ModelWithCorners Real E H}
-    (_X : PointedFlowSeq.{u, uE, uH} (I := I)) where
-  kappa : Real
-  radius : Real
-  volumeAtBase : Nat -> Real
-  kappa_pos : 0 < kappa
-  radius_pos : 0 < radius
-  volume_lower :
-    forall i : Nat,
-      kappa * radius ^ (Module.finrank Real E) <= volumeAtBase i
 
 end HCGCompactness
 end DifferentialGeometry

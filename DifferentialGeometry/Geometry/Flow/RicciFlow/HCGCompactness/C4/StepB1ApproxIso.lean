@@ -1,7 +1,5 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCProducers
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsometryDefs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsometryCompHigher
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringOrdered
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 
 set_option autoImplicit false
@@ -11,8 +9,10 @@ set_option linter.unusedSectionVars false
 /-!
 # MSM135 Chapter 4 Step B1 (`lbl397`) — the comparison maps `F_{kℓ;r}` are approximate isometries
 
-**STATEMENT-ONLY SKELETON (plan-mode deliverable).**  This file pins the target of the B1 assembly
-session: the endpoint statement, its hypotheses (each mapped to its producer), and a `sorry` body.
+This file exposes the honest B1 assembly boundary.  `StepB1RawInput` records the raw C-track
+comparison-map producers (local diffeomorphism, injectivity, basepoint, and forward/reverse
+metric bounds); `stepB1_of_raw` converts those producers into the book's partial approximate
+isometry with no additional mathematical assumption.
 
 MSM135 chapter4.tex L1622–1881 (`lbl400`/`lbl402`/`lbl403`).  For each `r > 0`, `ε > 0`, `p ∈ ℕ`,
 the center-of-mass comparison map
@@ -38,8 +38,9 @@ the center-of-mass comparison map
 
 ## Status of the honest inputs still above C3/C2
 The `centerOfMass_hasStrictFDerivAt` consumption still carries C2's two open inputs (`CmHessianInput`
-and the cm-continuity producer `hc_cont`); `stepCJoin` is green.  This skeleton fixes the B1 *shape*
-so the assembly session can wire the producers without re-deriving the statement.
+and the cm-continuity producer `hc_cont`); `stepCJoin` is green.  These obligations belong in a
+producer of `StepB1RawInput`, rather than being hidden behind a theorem whose only hypotheses are
+properness of the sequence members.
 -/
 
 noncomputable section
@@ -143,8 +144,42 @@ theorem stepB1_glue
 
 end Glue
 
+/-- **Honest C-track input boundary for MSM135 `lbl397`.**  For every requested radius,
+tolerance, and derivative order, the C-track supplies a threshold and raw comparison maps with
+the local-diffeomorphism, injectivity, basepoint, and two-sided metric estimates needed by
+`stepB1_glue`.  This deliberately stores producer data rather than the final
+`BookApproxIsoPartialData` conclusion. -/
+structure StepB1RawInput (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) : Prop where
+  comparison : ∀ (r : Real), 0 < r → ∀ (ε : Real), 0 < ε → ε < 1 → ∀ (p : Nat),
+    ∃ k₀ : Nat, ∀ k ℓ : Nat, k₀ ≤ k → k₀ ≤ ℓ →
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (X.obj k).M := (X.obj k).t2
+      letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj k).M := (X.obj k).smooth
+      letI : TopologicalSpace (X.obj ℓ).M := (X.obj ℓ).topology
+      letI : ChartedSpace H (X.obj ℓ).M := (X.obj ℓ).charted
+      letI : IsManifold I ∞ (X.obj ℓ).M := (X.obj ℓ).smooth
+      letI : T2Space (X.obj ℓ).M := (X.obj ℓ).t2
+      letI : SigmaCompactSpace (X.obj ℓ).M := (X.obj ℓ).sigmaCompact
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj ℓ).M := (X.obj ℓ).smooth
+      letI : MetricSpace (X.obj k).M := (P k).ms
+      letI : MetricSpace (X.obj ℓ).M := (P ℓ).ms
+      letI : Nonempty (X.obj k).M := ⟨(X.obj k).basepoint⟩
+      ∃ (R : Real) (_ : r < R) (F : (X.obj k).M → (X.obj ℓ).M),
+        IsLocalDiffeomorphOn I I (∞ : WithTop ℕ∞) F (Metric.ball (X.obj k).basepoint R) ∧
+        Set.InjOn F (Metric.ball (X.obj k).basepoint R) ∧
+        F (X.obj k).basepoint = (X.obj ℓ).basepoint ∧
+        Nonempty (PreApproxIsoDataOn (I := I) (Metric.closedBall (X.obj k).basepoint r) ε p F
+          (X.obj k).metric (X.obj ℓ).metric) ∧
+        Nonempty (PreApproxIsoDataOn (I := I) (F '' Metric.closedBall (X.obj k).basepoint r) ε p
+          (Function.invFunOn F (Metric.ball (X.obj k).basepoint R))
+          (X.obj ℓ).metric (X.obj k).metric)
+
 /-- **MSM135 `lbl397` (B1) — the comparison maps `F_{kℓ;r}` are approximate isometries.**
-STATEMENT-ONLY SKELETON (see the module docstring for the producer of each obligation).
+This is the proved assembly from the honest raw C-track input `StepB1RawInput`.  It is a
+conditional consumer, not the final producer theorem of the book.
 
 For every radius `r > 0`, tolerance `ε ∈ (0,1)`, and order `p`, there is a subsequence-threshold
 `k₀` such that for all `k, ℓ ≥ k₀` there is a **partial** diffeomorphism
@@ -159,7 +194,8 @@ Statement correction (2026-07-05): the book's `F_{kℓ;r} : B(O_k,r) → F_{kℓ
 `(X.obj k).M ≃ₘ (X.obj ℓ).M`, which is unprovable — bounded-geometry sequence members need not be
 diffeomorphic (e.g. a sequence alternating a round sphere and Euclidean space satisfies every
 Theorem 3.9 hypothesis). -/
-theorem stepB1_approxIso (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+theorem stepB1_of_raw (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (B : StepB1RawInput (X := X) P)
     (r : Real) (hr : 0 < r) (ε : Real) (hε : 0 < ε) (hε1 : ε < 1) (p : Nat) :
     ∃ k₀ : Nat, ∀ k ℓ : Nat, k₀ ≤ k → k₀ ≤ ℓ →
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
@@ -182,39 +218,7 @@ theorem stepB1_approxIso (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
         Nonempty (BookApproxIsoPartialData (I := I)
           (Metric.closedBall (X.obj k).basepoint r)
           ε p Phi (X.obj k).metric (X.obj ℓ).metric) := by
-  -- **The single open frontier** — the C-track producers, in flight: for `k, ℓ` large enough the
-  -- center-of-mass comparison map `F_{kℓ;r}` (`lbl400`, `stepCJoin`) restricts to a ball-onto-image
-  -- local diffeomorphism (`lbl403`: nonsingular `dF ≈ id` by Neumann invertibility + injectivity
-  -- from `C⁰`-closeness) fixing the basepoint (`lbl400` `χ`-cutoff), and carries forward/reverse
-  -- `(ε, p)` pre-approximate-isometry data (`lbl402` + `comp_cov_le`/`comp_cov_accum` + the
-  -- quantitative `|∇^{p+1}cm| ≤ C̃` bounds, discharged by the lbl430-bounds brick — in flight).
-  -- Everything below (`stepB1_glue`) is PROVED; only this `obtain` is open.
-  obtain ⟨k₀, hk₀⟩ : ∃ k₀ : Nat, ∀ k ℓ : Nat, k₀ ≤ k → k₀ ≤ ℓ →
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
-      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
-      letI : T2Space (X.obj k).M := (X.obj k).t2
-      letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
-      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj k).M := (X.obj k).smooth
-      letI : TopologicalSpace (X.obj ℓ).M := (X.obj ℓ).topology
-      letI : ChartedSpace H (X.obj ℓ).M := (X.obj ℓ).charted
-      letI : IsManifold I ∞ (X.obj ℓ).M := (X.obj ℓ).smooth
-      letI : T2Space (X.obj ℓ).M := (X.obj ℓ).t2
-      letI : SigmaCompactSpace (X.obj ℓ).M := (X.obj ℓ).sigmaCompact
-      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.obj ℓ).M := (X.obj ℓ).smooth
-      letI : MetricSpace (X.obj k).M := (P k).ms
-      letI : MetricSpace (X.obj ℓ).M := (P ℓ).ms
-      haveI : Nonempty (X.obj k).M := ⟨(X.obj k).basepoint⟩
-      ∃ (R : Real) (_ : r < R) (F : (X.obj k).M → (X.obj ℓ).M),
-        IsLocalDiffeomorphOn I I (∞ : WithTop ℕ∞) F (Metric.ball (X.obj k).basepoint R) ∧
-        Set.InjOn F (Metric.ball (X.obj k).basepoint R) ∧
-        F (X.obj k).basepoint = (X.obj ℓ).basepoint ∧
-        Nonempty (PreApproxIsoDataOn (I := I) (Metric.closedBall (X.obj k).basepoint r) ε p F
-          (X.obj k).metric (X.obj ℓ).metric) ∧
-        Nonempty (PreApproxIsoDataOn (I := I) (F '' Metric.closedBall (X.obj k).basepoint r) ε p
-          (Function.invFunOn F (Metric.ball (X.obj k).basepoint R))
-          (X.obj ℓ).metric (X.obj k).metric) := by
-    sorry
+  obtain ⟨k₀, hk₀⟩ := B.comparison r hr ε hε hε1 p
   refine ⟨k₀, fun k ℓ hk hl => ?_⟩
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted

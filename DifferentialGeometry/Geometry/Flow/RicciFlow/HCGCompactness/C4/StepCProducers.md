@@ -1,5 +1,21 @@
 # StepCProducers.lean — C3 producer join (design/audit note, 2026-07-02)
 
+## PROGRESS 2026-07-09: fixed-source explicit-weight join landed
+
+`stepCJoinDataFixed` is verified without `sorry`.  It mirrors `stepCJoinFixed`'s
+geometry/transition inputs, but consumes `mu` together with
+`centerAverage.WeightDataOn hatSourceBall hatBall mu` and calls
+`NetLimitData.unifHatCageData`.  The existing `Item3GpScaleInput` and closed-set
+limit bridge still discharge the radius and `Binf`-membership obligations; no new
+abstract producer hypothesis was introduced.
+
+Scope boundary: this endpoint is complete for weights active in the current
+`4 * lamInf` `hatBall`s.  It is not the textbook `5 * lamInf` support-ball
+instantiation; the support-set adapter needed to feed those book weights remains
+open.  Consequently this local fixed-source endpoint is 100%, while the book
+support instantiation and the unconditional `StepB1RawInput` producer remain 0%;
+the rounded whole-project totals do not change.
+
 **Status (2026-07-02, session 2): step 1 LANDED; join structure resolved; join not yet built.**
 
 ## PLANNER RULING #2 (2026-07-02) — uniform-`U γ` tension: parametric σ-shape; join in ONE session

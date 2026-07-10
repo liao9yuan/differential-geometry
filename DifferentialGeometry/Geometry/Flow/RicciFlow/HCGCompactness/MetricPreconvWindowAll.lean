@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowGInf
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivContinuity
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -110,6 +111,64 @@ theorem metricInnerApply_diff_le
     mul_nonneg (mul_nonneg hmn hmd) (hgnn v),
     mul_nonneg (mul_nonneg hmn hmd) (hgnn w),
     mul_nonneg (mul_nonneg hmn hmd) (hgnn (v + w))]
+
+/-- Compact-open smooth convergence of metrics implies pointwise convergence of every scalar
+component of the metric inner product, independently of the chosen fixed reference metric. -/
+theorem metricCInf_inner
+    (gSeq : ℕ → SmoothRiemannianMetric I M) (gInf gRef : SmoothRiemannianMetric I M)
+    (hconv : MetricCInfConvOnCompacts (I := I) gSeq gInf gRef)
+    (x : M) (v w : TangentSpace I x) :
+    Tendsto (fun k => (gSeq k).inner x v w) atTop (nhds (gInf.inner x v w)) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  let n : ℝ := Module.finrank ℝ (TangentSpace I x)
+  let S : ℝ := gRef.inner x (v + w) (v + w) + gRef.inner x v v + gRef.inner x w w
+  have hn : 0 ≤ n := by dsimp only [n]; positivity
+  have hS : 0 ≤ S := by
+    have hnonneg : ∀ z : TangentSpace I x, 0 ≤ gRef.inner x z z := by
+      intro z
+      by_cases hz : z = 0
+      · subst hz
+        simp
+      · exact (gRef.pos x z hz).le
+    dsimp only [S]
+    linarith [hnonneg (v + w), hnonneg v, hnonneg w]
+  have hden : 0 < n * S + 1 := by positivity
+  obtain ⟨k₀, hk₀⟩ := hconv {x} isCompact_singleton 0 (ε / (n * S + 1)) (by positivity)
+  refine ⟨k₀, fun k hk => ?_⟩
+  have hpoint : metricDerivNorm (I := I) 0 (gSeq k) gInf gRef x <
+      ε / (n * S + 1) := lt_of_le_of_lt
+    (derivNorm_le_sup (I := I) isCompact_singleton le_rfl
+      (gSeq k) gInf gRef (Set.mem_singleton x))
+    (hk₀ k hk)
+  have hbound := metricInnerApply_diff_le (I := I) (gSeq k) gInf gRef x v w
+  change |(gSeq k).inner x v w - gInf.inner x v w| ≤
+    n * metricDerivNorm (I := I) 0 (gSeq k) gInf gRef x * S at hbound
+  rw [Real.dist_eq]
+  have hprod : n * metricDerivNorm (I := I) 0 (gSeq k) gInf gRef x * S ≤
+      (n * S) * (ε / (n * S + 1)) := by
+    have hnorm : 0 ≤ metricDerivNorm (I := I) 0 (gSeq k) gInf gRef x :=
+      Real.sqrt_nonneg _
+    nlinarith [hpoint.le, mul_nonneg hn hS]
+  have hfrac : (n * S) * (ε / (n * S + 1)) < ε := by
+    have hid : (n * S) * (ε / (n * S + 1)) = (n * S) * ε / (n * S + 1) := by
+      rw [mul_div_assoc]
+    rw [hid, div_lt_iff₀ hden]
+    nlinarith [hε, mul_nonneg hn hS]
+  exact lt_of_le_of_lt (le_trans hbound hprod) hfrac
+
+/-- A metric sequence has at most one compact-open smooth limit, even when the two convergence
+statements use different fixed reference metrics. -/
+theorem metricCInf_unique
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (A B gRefA gRefB : SmoothRiemannianMetric I M)
+    (hA : MetricCInfConvOnCompacts (I := I) gSeq A gRefA)
+    (hB : MetricCInfConvOnCompacts (I := I) gSeq B gRefB) : A = B := by
+  refine metric_ext_inner A B fun x => ?_
+  refine ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => ?_
+  exact tendsto_nhds_unique
+    (metricCInf_inner (I := I) gSeq A gRefA hA x v w)
+    (metricCInf_inner (I := I) gSeq B gRefB hB x v w)
 
 /-- **Scalar Cauchy from order-0 seminorm Cauchy.**  If the order-0 metric
 difference seminorm `metricDerivNorm 0 (gk m) (gk l) gRef x` is Cauchy, then each

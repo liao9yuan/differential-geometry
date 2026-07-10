@@ -125,3 +125,17 @@ active-fill convergence theorem and the new `inputOfFillSelf` constructor.
 
 Verification status: the focused Lean check passed, and the downstream
 `StepCAveragePOU` targeted module build passed after these helpers were added.
+
+## 2026-07-09, explicit weight data
+
+Added `centerAverage.WeightDataOn`, the generic pointwise package for normalized
+finite weights on a source set together with their nonzero-weight active-region
+bridge.  Added `WeightDataOn.data` to expose the package in the exact conjunction
+shape already consumed by `unifTwoIdDataOn` and `unifTwoIdDataSelf`.
+
+This package deliberately records no smoothness or convergence assumptions:
+those remain separate producer obligations, while the center-average consumer
+only needs nonnegativity, a positive entry, sum one, and active-region
+membership.
+
+Verification status: the focused Lean check passed.

@@ -512,6 +512,101 @@ theorem compL2_tower_le
             (iterCov (I := I) gM r T j y)) :=
         mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
 
+/-- At a good-frame point, an intrinsic bound on the `gRef`-covariant
+derivatives of the metric tensor gives the corresponding frame-component bound,
+with the explicit good-frame factor `2^(2+j)`.  This is the honest bridge needed
+before feeding intrinsic metric-derivative hypotheses into component estimates
+such as MSM135 Lemma 4.5. -/
+theorem metricComp_le
+    (g gRef : SmoothRiemannianMetric I M)
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
+    {y : M} (hy : y ∈ u)
+    (hcomp : ∀ (s : ℕ) (A : Tensor0SSpace s I y),
+      (∑ I0 : Fin s → Idx,
+        Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy) A I0 ^ 2) ≤
+        2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef y s A)
+    (j : ℕ) {eps : Real}
+    (hbound : Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (2 + j)
+      (iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) g) j y)) ≤ eps) :
+    compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) (Tensor0SBundle.metricTensorField (I := I) g) frame) j y) ≤
+      2 ^ (2 + j) * eps := by
+  have h := compL2_tower_le (I := I) (gM := gRef) (gRef := gRef) (r := 2)
+    (T := Tensor0SBundle.metricTensorField (I := I) g) frame hframe hu hy hcomp j
+  exact le_trans h
+    (mul_le_mul_of_nonneg_left hbound (by positivity : (0 : Real) ≤ 2 ^ (2 + j)))
+
+/-- At a frame controlled by `g`, an intrinsic `gRef`-bound for the
+`gRef`-covariant derivatives of `g` gives a component bound with the uniform
+loss `4^(2+p)` for all orders `j ≤ p`, provided `g ≤ C gRef` and `C ≤ 2`. -/
+theorem metricComp_mul
+    (g gRef : SmoothRiemannianMetric I M)
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
+    {y : M} (hy : y ∈ u)
+    (hcomp : ∀ (s : ℕ) (A : Tensor0SSpace s I y),
+      (∑ I0 : Fin s → Idx,
+        Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy) A I0 ^ 2) ≤
+        2 ^ s * Tensor0SBundle.normSq0S (I := I) g y s A)
+    (C : Real) (hC1 : 1 ≤ C) (hC2 : C ≤ 2)
+    (hequiv : ∀ v : TangentSpace I y,
+      C⁻¹ * gRef.inner y v v ≤ g.inner y v v ∧
+        g.inner y v v ≤ C * gRef.inner y v v)
+    (p j : ℕ) (hj : j ≤ p) {eps : Real} (heps0 : 0 ≤ eps)
+    (hbound : Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (2 + j)
+      (iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) g) j y)) ≤ eps) :
+    compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) (Tensor0SBundle.metricTensorField (I := I) g) frame) j y) ≤
+      4 ^ (2 + p) * eps := by
+  let A := iterCov (I := I) gRef 2 (Tensor0SBundle.metricTensorField (I := I) g) j y
+  have htow := compL2_tower_le (I := I) (gM := gRef) (gRef := g) (r := 2)
+    (T := Tensor0SBundle.metricTensorField (I := I) g) frame hframe hu hy hcomp j
+  have hconv := Tensor0SBundle.sqrt_normSq0S_le_of_metric_equiv
+    (I := I) gRef g y (2 + j) hC1 hequiv A
+  have hC0 : (0 : Real) ≤ C := le_trans zero_le_one hC1
+  have hCp1 : (1 : Real) ≤ C ^ (2 + j) := one_le_pow₀ hC1
+  have hsqrt : Real.sqrt (C ^ (2 + j)) ≤ C ^ (2 + j) := by
+    have hsq : C ^ (2 + j) ≤ (C ^ (2 + j)) ^ 2 := by nlinarith
+    calc
+      Real.sqrt (C ^ (2 + j)) ≤ Real.sqrt ((C ^ (2 + j)) ^ 2) :=
+        Real.sqrt_le_sqrt hsq
+      _ = C ^ (2 + j) := Real.sqrt_sq (by positivity)
+  have hCpow : C ^ (2 + j) ≤ (2 : Real) ^ (2 + j) :=
+    pow_le_pow_left₀ hC0 hC2 (2 + j)
+  have hsqrt2 : Real.sqrt (C ^ (2 + j)) ≤ (2 : Real) ^ (2 + j) :=
+    le_trans hsqrt hCpow
+  have hcoef : (2 : Real) ^ (2 + j) * Real.sqrt (C ^ (2 + j)) ≤
+      (4 : Real) ^ (2 + j) := by
+    calc
+      (2 : Real) ^ (2 + j) * Real.sqrt (C ^ (2 + j))
+          ≤ (2 : Real) ^ (2 + j) * (2 : Real) ^ (2 + j) :=
+        mul_le_mul_of_nonneg_left hsqrt2 (by positivity)
+      _ = (4 : Real) ^ (2 + j) := by rw [← mul_pow]; norm_num
+  have hpow : (4 : Real) ^ (2 + j) ≤ 4 ^ (2 + p) :=
+    pow_le_pow_right₀ (by norm_num) (by omega)
+  calc
+    compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) (Tensor0SBundle.metricTensorField (I := I) g) frame) j y)
+        ≤ 2 ^ (2 + j) * Real.sqrt (Tensor0SBundle.normSq0S (I := I) g y (2 + j) A) :=
+      htow
+    _ ≤ 2 ^ (2 + j) *
+        (Real.sqrt (C ^ (2 + j)) *
+          Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (2 + j) A)) :=
+      mul_le_mul_of_nonneg_left hconv (by positivity)
+    _ ≤ 2 ^ (2 + j) * (Real.sqrt (C ^ (2 + j)) * eps) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hbound (Real.sqrt_nonneg _)) (by positivity)
+    _ = (2 ^ (2 + j) * Real.sqrt (C ^ (2 + j))) * eps := by ring
+    _ ≤ 4 ^ (2 + j) * eps := mul_le_mul_of_nonneg_right hcoef heps0
+    _ ≤ 4 ^ (2 + p) * eps := mul_le_mul_of_nonneg_right hpow heps0
+
 /-- **The reverse tower bound at a good-frame point**: from the
 norm-versus-component upper bound (`exists_goodFrame_compBound`'s second
 output, with constant `Cu ≥ 1`), the intrinsic norm of the `iterCov` tower is

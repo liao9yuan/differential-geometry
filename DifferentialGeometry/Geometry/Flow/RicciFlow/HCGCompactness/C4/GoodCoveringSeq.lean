@@ -40,6 +40,48 @@ noncomputable def seqCenter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
   haveI : ProperSpace (X.obj k).M := (P k).proper
   OrderedNet.netCenter (X.obj k).basepoint (hd.lambda D) (hd.lambda_continuous D) α
 
+/-- The zeroth center of every sequence net is the pointed-manifold basepoint. -/
+@[simp] theorem seqCenter_zero (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) :
+    seqCenter hd D P k 0 = some (X.obj k).basepoint := by
+  letI : MetricSpace (X.obj k).M := (P k).ms
+  haveI : ProperSpace (X.obj k).M := (P k).proper
+  exact OrderedNet.netCenter_zero _ _ _
+
+/-- Every nonzero live sequence-net center is at least `λ(0)` from the basepoint
+in the realized proper metric. -/
+theorem seqCenter_dist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) {α : Nat}
+    (hα : α ≠ 0) {c : (X.obj k).M} (hc : seqCenter hd D P k α = some c) :
+    letI : MetricSpace (X.obj k).M := (P k).ms
+    hd.lambda D 0 ≤ dist c (X.obj k).basepoint := by
+  letI : MetricSpace (X.obj k).M := (P k).ms
+  haveI : ProperSpace (X.obj k).M := (P k).proper
+  have hc' : OrderedNet.netCenter (X.obj k).basepoint (hd.lambda D)
+      (hd.lambda_continuous D) α = some c := hc
+  have hcO : c ≠ (X.obj k).basepoint :=
+    OrderedNet.netCenter_ne (X.obj k).basepoint (hd.lambda_continuous D)
+      (fun s => hd.lambda_pos hD s) hα hc'
+      (OrderedNet.netCenter_zero (X.obj k).basepoint (hd.lambda D)
+        (hd.lambda_continuous D))
+  exact OrderedNet.netList_dist_ge (X.obj k).basepoint (hd.lambda_continuous D)
+    (hd.lambda_antitone hD) (fun s => hd.lambda_pos hD s) α
+    (OrderedNet.netCenter_mem (X.obj k).basepoint (hd.lambda D)
+      (hd.lambda_continuous D) α hc') hcO
+
+/-- Riemannian-emetric form of `seqCenter_dist_ge`, using the realization stored
+by `ProperMetricOn`.  This is the separation input used by the Step-B
+basepoint-concentration argument. -/
+theorem seqCenter_edist_ge (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k : Nat) {α : Nat}
+    (hα : α ≠ 0) {c : (X.obj k).M} (hc : seqCenter hd D P k α = some c) :
+    letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
+    ENNReal.ofReal (hd.lambda D 0) ≤ edist c (X.obj k).basepoint := by
+  letI : MetricSpace (X.obj k).M := (P k).ms
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
+  rw [(P k).realizes c (X.obj k).basepoint]
+  exact ENNReal.ofReal_le_ofReal (seqCenter_dist_ge hd hD P k hα hc)
+
 /-- The `α`-th net radius `r_k^α = d(x_k^α, O_k)` (junk value `0` when dead). -/
 noncomputable def seqRadius (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (k α : Nat) : Real :=
@@ -184,14 +226,13 @@ theorem NetLimitData.tilde_disjoint (hd : InjRadiusDecayInput (I := I) X) {D : R
     exact h
   exact hdisj.mono (Metric.ball_subset_ball h1) (Metric.ball_subset_ball h2)
 
-/-- MSM135 `lbl383` item 4 (with the `lbl391` radii, `B̂ = B(x^γ, 4λ^γ)`): for `k`
-large, every point of `B(O_k, r)` lies in some `B̂` ball of index `γ < A r`.  Combines
-the per-k factor-2 cover (`netList_cover` at a `netList_passes` stage), the index cap
-(`netCenter_index_lt`), and the `lbl390` window (`2λ[r_k^γ] ≤ 4λ^γ`). -/
-theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+/-- The ordered-net cover fits eventually inside every fixed enlargement
+`a * λ^γ` with `2 < a`.  The net construction gives radius `2 * λ[r_k^γ]`,
+while the diagonal subsequence makes `λ[r_k^γ]` converge to `λ^γ`. -/
+theorem NetLimitData.scaled_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
-    (r : Real) :
+    (r a : Real) (ha : 2 < a) :
     ∀ᶠ k in atTop,
       ∀ p : (X.obj (L.φ k)).M,
         (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
@@ -199,11 +240,16 @@ theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         ∃ γ : Nat, γ < pb.A r ∧ ∃ c : (X.obj (L.φ k)).M,
           seqCenter hd D P (L.φ k) γ = some c ∧
           (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-           dist p c < 4 * L.lamInf γ) := by
+           dist p c < a * L.lamInf γ) := by
   have hwin : ∀ᶠ k in atTop, ∀ γ ∈ Finset.range (pb.A r),
-      hd.lambda D (L.rInf γ) / 2 ≤ hd.lambda D (seqRadius hd D P (L.φ k) γ) ∧
-      hd.lambda D (seqRadius hd D P (L.φ k) γ) ≤ 2 * hd.lambda D (L.rInf γ) :=
-    (Filter.eventually_all_finset _).mpr fun γ _ => L.lambda_window hd hD P γ
+      hd.lambda D (seqRadius hd D P (L.φ k) γ) <
+        a / 2 * hd.lambda D (L.rInf γ) :=
+    (Filter.eventually_all_finset _).mpr fun γ _ => by
+      have hpos := hd.lambda_pos hD (L.rInf γ)
+      have hcont : Tendsto (fun k => hd.lambda D (seqRadius hd D P (L.φ k) γ)) atTop
+          (𝓝 (hd.lambda D (L.rInf γ))) :=
+        ((hd.lambda_continuous D).continuousAt.tendsto).comp (L.tendsto γ)
+      exact hcont.eventually (Iio_mem_nhds (by nlinarith))
   filter_upwards [hwin] with k hk
   intro p hp
   letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
@@ -241,11 +287,44 @@ theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   have hwγ := hk γ (Finset.mem_range.mpr hγA)
   rw [hrad] at hwγ
   refine ⟨γ, hγA, c, hcenter, ?_⟩
-  have h4 : 2 * hd.lambda D (dist c (X.obj (L.φ k)).basepoint) ≤ 4 * L.lamInf γ := by
-    have hw2 := hwγ.2
+  have hscale : 2 * hd.lambda D (dist c (X.obj (L.φ k)).basepoint) <
+      a * L.lamInf γ := by
     unfold NetLimitData.lamInf
-    linarith
-  exact lt_of_lt_of_le hcb h4
+    nlinarith
+  exact hcb.trans hscale
+
+/-- MSM135 `lbl383` item 4 (with the `lbl391` radii, `B̂ = B(x^γ, 4λ^γ)`): for `k`
+large, every point of `B(O_k, r)` lies in some `B̂` ball of index `γ < A r`. -/
+theorem NetLimitData.hat_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
+    (r : Real) :
+    ∀ᶠ k in atTop,
+      ∀ p : (X.obj (L.φ k)).M,
+        (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+         dist p (X.obj (L.φ k)).basepoint ≤ r) →
+        ∃ γ : Nat, γ < pb.A r ∧ ∃ c : (X.obj (L.φ k)).M,
+          seqCenter hd D P (L.φ k) γ = some c ∧
+          (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+           dist p c < 4 * L.lamInf γ) :=
+  L.scaled_cover hd hD P hre pb r 4 (by norm_num)
+
+/-- A strict inner version of the finite cover.  It leaves one `λ^γ` of room
+between the covering ball and the existing `4 * λ^γ` hat, so a smooth bump can
+be one on the inner ball while its topological support stays inside the hat. -/
+theorem NetLimitData.inner_cover (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
+    (r : Real) :
+    ∀ᶠ k in atTop,
+      ∀ p : (X.obj (L.φ k)).M,
+        (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+         dist p (X.obj (L.φ k)).basepoint ≤ r) →
+        ∃ γ : Nat, γ < pb.A r ∧ ∃ c : (X.obj (L.φ k)).M,
+          seqCenter hd D P (L.φ k) γ = some c ∧
+          (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+           dist p c < 3 * L.lamInf γ) :=
+  L.scaled_cover hd hD P hre pb r 3 (by norm_num)
 
 /-- The `B`-balls (radius `5λ^·`, MSM135 `lbl391`) of indices `α, β` meet in the
 `k`-th manifold. -/

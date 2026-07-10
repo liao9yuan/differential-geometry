@@ -1,9 +1,37 @@
-# ConvFieldEndgame.lean — Brick 7b of the P4 conv engine (the endgame assembly)
+# ConvFieldEndgame.lean — concrete P4 upgrade-data producer
 
-Plan: `P4_CONV_PLAN.md` Brick 7b. Assembles Bricks 4–7a into the theorem-facing
-endpoint `flowLimit_upgrade X mc' (build) : CompactnessConclusion X`, modulo the
-THREE tracked inputs (Thm 3.9's `mc`, moving-Shi `hShiT`, `hsmooth`) + the
-mc-comparison data (`hequivT`/`hrel`/`hcp`/`hcovSrc`/`hlipG`/`hchi`/`hkcont`).
+The live canonical output is concrete `FlowUpgradeData`, produced by
+`flowUpgrade_of_maps` / `flowUpgrade_of_mc` and consumed by the conditional
+Theorem 3.10 wrappers.  The older conclusion-valued theorems remain
+compatibility consumers.  The tracked mathematical inputs (Thm 3.9's `mc`,
+moving-Shi `hShiT`, `hsmooth`, and the comparison data) remain explicit.
+
+## 2026-07-09: endgame now exports concrete upgrade producers
+
+`flowUpgrade_of_maps` and `flowUpgrade_of_mc` now produce
+`FlowUpgradeData X mc`, exposing the selected subsequence and the actual
+`FlowLimitData`. The established public theorems `flowLimit_of_maps` and
+`flowLimit_of_mc` are retained as compatibility consumers and are one-line
+applications of `.toConclusion`. Thus the canonical theorem path can consume
+the endgame's concrete construction without an exact-conclusion backend; that
+former compatibility API has been removed.
+
+The pointed-limit contract is now retained in the produced data:
+`FlowLimitData.hL0 : L.atTime 0 = mc.limit`. Previously
+`flowUpgrade_of_maps` required `hPlim : P = mc.limit`, but its result forgot
+that fact; deleting `hPlim` would have allowed an alleged upgrade over `mc` to
+carry an unrelated pointed limit. The producer now records
+`hPL.trans hPlim`, so both equalities have durable mathematical content. A
+repository-wide call audit found only the two same-file consumers; both already
+supply the required pointed-limit equality and need no signature change.
+
+Focused verification and the targeted module refresh passed. The
+producer/consumer split itself is 100%.
+Conditional endgame assembly from its tracked mathematical inputs is 100%
+checked; the remaining `hsol`/PDE producer frontier and unconditional Theorem
+3.10 remain separate, with the latter still 0%. The project-wide endpoint is
+still 0%; this structural refactor does not change the project map's roughly
+59% Chapter 4 machinery estimate or the roughly 45% whole-HCG machinery estimate.
 
 ## 2026-07-08: `hsol` DECOMPOSITION — the `hpde` chain hits a REAL frontier (NOT mechanical)
 
@@ -61,7 +89,14 @@ banked-but-uncomposed bridge as A.1.  **PART C** is ready the moment `hsol` deco
 bridge (a genuine construction), not a producer call.  `flowLimit_endgame`
 (hsol/scalar tracked) stands verified; A.1 + A.2 is the next focused brick.
 
-## 2026-07-07b: THE BOOK-FACING ENDGAME THEOREM `flowLimit_endgame` **WIRED + PROVED**
+## Historical execution record (superseded as current instructions)
+
+> Everything below this notice is retained for proof provenance.  The old
+> `STATUS`, `THE FRONTIER`, `READY-TO-EXECUTE`, and mechanical execution-map
+> headings are superseded; do not resume from them.  The live route is the
+> concrete `FlowUpgradeData` producer described above.
+
+### 2026-07-07b: compatibility consumer `flowLimit_endgame` wired + proved
 
 `flowLimit_endgame` (ConvFieldEndgame.lean:508) upgrades `flowLimit_of_mc` to the
 ruling-5a book-facing form: its hypotheses are ONLY `mc`, the book-cited
@@ -102,7 +137,7 @@ discharger is the `scalarConv_of_dnConv` chain).  REMAINING refinement = expand
 leaving only `hsmooth` (ruling-5a) + genuinely-unproducible continuity carried.
 `RicciFromJets.lean` mojibake repaired 2026-07-04 — the `hpde` imports can be re-added.
 
-## 2026-07-07: THE ENDGAME THEOREM `flowLimit_of_mc` **WRITTEN + PROVED** (MSM135 Thm 3.10 ⇐ 3.9)
+### 2026-07-07: compatibility consumer `flowLimit_of_mc` written + proved
 
 `flowLimit_of_mc` (ConvFieldEndgame.lean) assembles `CompactnessConclusion X`
 from `mc` (Thm 3.9) plus the honest tracked producer outputs. `lake env lean`
@@ -233,13 +268,13 @@ all-of-`Φ.source k` to `grow k` granularity, to drop the `hchi` citation.
 is carried as a tracked input (the "mc-comparison data" the plan sanctions);
 Theorem 3.9's public conclusion `MetricCompactnessConclusion` is NOT changed.
 
-## STATUS (2026-07-04): assembly core VERIFIED; instantiation BLOCKED on the phantom-L refactor
+## Historical status (2026-07-04; superseded): phantom-L refactor blocker
 
 - **`flowLimit_of_co` (the assembly core) — VERIFIED.** Targeted `build +…ConvFieldEndgame`
   = "Build completed successfully (3923 jobs)"; `flowLimit_of_co` builds sorry-free. It takes
   `(mc, L, hL0, R, bf, hsrc, htgt, β, ψ, hcarrier, co, hLmetric, scalar)` and assembles the full
-  7-field `FlowLimitData` for `mc' := mc.compSubseq co.φ co.hφ` → `flowLimit_upgrade` →
-  `CompactnessConclusion X`. All 7 fields (`L`/`maps`/`scalar`/`hσsrc`/`hσtgt`/`refMetric`/`conv`)
+  8-field `FlowLimitData` for `mc' := mc.compSubseq co.φ co.hφ` → `flowLimit_upgrade` →
+  `CompactnessConclusion X`. All 8 fields (`L`/`hL0`/`maps`/`scalar`/`hσsrc`/`hσtgt`/`refMetric`/`conv`)
   discharged: σ-compactness via `isSigmaCompact_of_isOpen`, `refMetric` via `refRes`, and the
   `conv` field via `ofRP_supOn_conv` + the sub-window inclusion (`Φ'.partialDiffeomorph k`
   reduces to `endgamePhi.partialDiffeomorph (co.φ k)` by `rfl`, so `ofRestrictPullback` reduces
@@ -250,7 +285,7 @@ Theorem 3.9's public conclusion `MetricCompactnessConclusion` is NOT changed.
   the PDE data), so their imports are omitted to keep the core buildable. The FULL endgame
   (constructing `L` and the PDE inputs) must re-add them.
 
-## THE FRONTIER: the phantom-L instantiation circularity (precisely characterized)
+## Historical frontier (superseded): phantom-L instantiation circularity
 
 `flowLimit_of_co` takes `L`, `co : ConvOut (endgamePhi mc L hL0) …`, and `hLmetric :
 L.S.family.metric = co.gInf` as INPUTS. To instantiate the endgame they must be constructed:
@@ -291,7 +326,7 @@ inputs can be wired.
 `MetricCompactness.lean:1138`/`Field.lean:282` sorry warnings are unrelated declarations
 `flowLimit_of_co` does not depend on).
 
-## READY-TO-EXECUTE REFACTOR SPEC (2026-07-04) — the P-index re-parametrization
+## Historical refactor spec (superseded — do not execute): P-index re-parametrization
 
 **Key simplifier (verified):** `PointedCGHMaps X L subseq` (`PointedConvergence.lean:499`) and
 `PointedRiemannianCGMaps (X.atZero) (L.atTime 0) subseq` (`MetricCompactness.lean:35`) have the
@@ -335,8 +370,10 @@ NO proof rewrites where re-typing suffices):**
    metricLimit_pdeOn∘ricciConv_of_dnConv on co.convPt) (scalar/ricci/rm04 continuity))` →
    `hL0 := flowOfMetric_atTime … (gInf_zero_eq … from mc.convergence via conv0_of_cp)` →
    `flowLimit_of_co mc L hL0 R bf hsrc htgt β ψ hcarrier co hLmetric scalar` (hLmetric =
-   `flowOfMetric_metric` rfl) → `CompactnessConclusion X`. Then wrap in
-   `smoothFlowLimitInput_of_flowLimitData`. Tracked inputs: `mc` (Thm 3.9), the moving-Shi bounds
+   `flowOfMetric_metric` rfl) → `FlowUpgradeData X mc` via the checked upgrade
+   constructor → `solutionComp_of_mc X mc`.  The former
+   `smoothFlowLimitInput_of_flowLimitData` route was deleted. Tracked inputs:
+   `mc` (Thm 3.9), the moving-Shi bounds
    (via `srcShi`), `hsmooth`, + the 7a-carried comparison data (`hequivT`/`hrel`/`hcp`/`hcovSrc`/
    `hlipG`/`hchi`).
 
@@ -381,7 +418,7 @@ tree left). Concrete findings that REFINE the recipe:
    (option b) + the 6-file cascade + the endgame instantiation. The Python rename script is at
    `scratchpad/reindex_pc.py` (reproducible). Snapshots were removed after restore.
 
-## COMPLETE MECHANICAL EXECUTION MAP (2026-07-05, 2nd attempt — validated, restored green)
+## Historical mechanical execution map (superseded; 2026-07-05 record)
 
 The zone-aware rename + full threading surface are now mapped exactly. A future one-pass session
 (ideally with a committed checkpoint so `git checkout` is the revert, or commit-per-file) applies:

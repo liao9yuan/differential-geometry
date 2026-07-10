@@ -120,3 +120,12 @@ estimate that was deliberately left as an interface on 2026-06-09.
   `claim1` instantiation (Phase R).
 - **ric_bound Phase R**: Step-4 telescoping needs `iterCov_one_chr_change` (built
   here, general chrG/chrH) — the same one-step identity.
+
+## 2026-07-09: explicit scaled constants
+
+Added and verified the scaled chain `claim1MulConst` / `claim1_eps_mul_bound` /
+`claim1_koszul_bound` / `lemma45_F3_bound`.  Component hypotheses may now be
+`L * eps` with only the original `eps <= 1`; `L` is absorbed into a pure numeric
+constant.  The existential APIs remain compatibility wrappers.  This makes the
+F3 constant visibly independent of manifold, metrics, tensor, frame, and
+epsilon, which is required by the constant-first F4 endpoint.

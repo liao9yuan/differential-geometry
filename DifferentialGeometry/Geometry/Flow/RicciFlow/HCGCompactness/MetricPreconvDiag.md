@@ -330,3 +330,15 @@ report — a planner decision, not yours"), C1a/C1b are NOT built in a vacuum.
    so this likely needs a consumer-side change too.
 3. Supply `gInf` as a hypothesis to the P3 endpoint (as Brick D's `windowPreconv`
    already does with its `gInf` argument), deferring the construction.
+
+## 2026-07-09: order-dependent reference extraction
+
+The earlier fixed-reference limitation is now removed for the smooth-limit spine. The checked
+`exists_frame_refs`, `exists_allcomp_refs`, and `exists_limit_refs` route consumes bounds relative
+to `gRef r` for all derivative orders `q <= r`. The checked endpoint `metricPreconv_refs` produces
+a genuine `SmoothRiemannianMetric` using a separate fixed `gBase` only for the uniform positive
+lower bound. The old fixed-reference declarations remain unchanged.
+
+Focused verification passed. This closes the smooth-limit half of the D2 extraction problem; full
+`MetricCInfConvOnCompacts` convergence is handled by the corresponding assembly wrapper rather than
+by weakening this theorem's conclusion.

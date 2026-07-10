@@ -429,3 +429,12 @@ Order-1 route in detail:
   by chart — check whether `SmoothRiemannianMetric` has a local-construction
   constructor or whether to build the `(0,2)`-field first and add
   positivity/symmetry.
+
+## 2026-07-09: per-order reference adapter
+
+Added `metricComp_iter_refs`. For chart derivative order `r`, it accepts uniform covariant bounds
+only through order `r` against `gRef r`. The older all-orders conversion theorem formally asks for
+all covariant orders, so orders above `r` are filled using compact boundedness for each fixed
+sequence term; those constants do not enter the finite sum in the conclusion. Focused
+verification passed. This is the D2 prefix-tail bridge that avoids a new global
+connection-change estimate while preserving the existing fixed-reference API.

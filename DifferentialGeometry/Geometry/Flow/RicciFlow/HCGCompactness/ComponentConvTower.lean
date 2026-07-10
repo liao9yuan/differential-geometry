@@ -762,14 +762,19 @@ a single `χ` serves an entire finite family `Vfam`: each member's bump-extended
 order-0 carrier is globally `ContDiff` with uniform iterated-derivative bounds.
 This is what lets the `n²` frame pairs share one bump (and hence one `U/Kc`) for the
 diagonal producing `hpairs`. -/
-theorem exists_chart_engineInput_family
+private theorem engine_input_family
     (gRef : SmoothRiemannianMetric I M)
     (gSeq : ℕ → SmoothRiemannianMetric I M)
-    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
-      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
     (x₀ : M)
     {ι : Type*}
     (Vfam : ι → Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (hcomp : ∀ (p : ι) (r : ℕ) {Kc : Set M}, IsCompact Kc →
+      Kc ⊆ (chartAt H x₀).source →
+      ∃ Mr : Real, 0 ≤ Mr ∧ ∀ k : ℕ, ∀ y ∈ Kc,
+        ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w
+                (fun a => Vfam p a w))) (extChartAt I x₀ y)‖ ≤ Mr)
     {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source) :
     ∃ (χ : E → Real),
       ContDiff Real (∞ : WithTop ℕ∞) χ ∧
@@ -859,8 +864,7 @@ theorem exists_chart_engineInput_family
     exact le_trans (le_trans (hBi i x hx) (le_max_left _ _))
       (Finset.single_le_sum (fun ii _ => le_max_right _ _)
         (Finset.mem_range.2 (Nat.lt_succ_of_le hir)))
-  choose Mr hMr0 hMrb using fun j =>
-    metricComp_iteratedFDeriv_le (I := I) gRef gSeq hbdd x₀ hKccpt hKcsrc (Vfam p) j
+  choose Mr hMr0 hMrb using fun j => hcomp p j hKccpt hKcsrc
   refine ⟨2 ^ r * Bχ * ∑ j ∈ Finset.range (r + 1), Mr j, fun k x => ?_⟩
   set ggk : E → Real := fun x => χ1 x * cr k x with hggk
   have hggcd : ContDiff Real (∞ : WithTop ℕ∞) ggk :=
@@ -888,6 +892,102 @@ theorem exists_chart_engineInput_family
   simp only [hΦeq]
   exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
     hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
+
+/-- **Shared-`χ` engine input for a finite family of slot tuples.** -/
+theorem exists_chart_engineInput_family
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M)
+    {ι : Type*}
+    (Vfam : ι → Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source) :
+    ∃ (χ : E → Real),
+      ContDiff Real (∞ : WithTop ℕ∞) χ ∧
+      tsupport χ ⊆ (extChartAt I x₀).target ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      ∀ p : ι,
+        (∀ k : ℕ, ContDiff Real (∞ : WithTop ℕ∞)
+          (fun x : E => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w
+                (fun a => Vfam p a w)) x)) ∧
+        (∀ r : ℕ, ∃ Mr : Real, ∀ k : ℕ, ∀ x : E,
+          ‖iteratedFDeriv Real r (fun x : E => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w
+                (fun a => Vfam p a w)) x) x‖ ≤ Mr) := by
+  apply engine_input_family gRef gSeq x₀ Vfam ?_ hK₀ hK₀chart
+  intro p r Kc hKc hKchart
+  exact metricComp_iteratedFDeriv_le (I := I) gRef gSeq hbdd x₀ hKc hKchart (Vfam p) r
+
+/-- Shared chart-engine input when each requested order has its own reference metric. -/
+theorem engine_input_refs
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (x₀ : M)
+    {ι : Type*}
+    (Vfam : ι → Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source) :
+    ∃ (χ : E → Real),
+      ContDiff Real (∞ : WithTop ℕ∞) χ ∧
+      tsupport χ ⊆ (extChartAt I x₀).target ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      ∀ p : ι,
+        (∀ k : ℕ, ContDiff Real (∞ : WithTop ℕ∞)
+          (fun x : E => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gBase
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w
+                (fun a => Vfam p a w)) x)) ∧
+        (∀ r : ℕ, ∃ Mr : Real, ∀ k : ℕ, ∀ x : E,
+          ‖iteratedFDeriv Real r (fun x : E => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gBase
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w
+                (fun a => Vfam p a w)) x) x‖ ≤ Mr) := by
+  apply engine_input_family gBase gSeq x₀ Vfam ?_ hK₀ hK₀chart
+  intro p r Kc hKc hKchart
+  obtain ⟨Mr, hMr0, hMr⟩ :=
+    metricComp_iter_refs (I := I) gRef gSeq hbdd x₀ hKc hKchart (Vfam p) r
+  refine ⟨Mr, hMr0, fun k y hy => ?_⟩
+  exact hMr k y hy
+
+/-- Per-chart `C^∞` extraction when each requested order has its own reference metric. -/
+theorem exists_chart_refs
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (x₀ : M)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source) :
+    ∃ (φ : ℕ → ℕ) (Φinf : E → Real) (χ : E → Real),
+      StrictMono φ ∧ ContDiff Real (∞ : WithTop ℕ∞) Φinf ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      MapCInfConvOnCompacts Set.univ
+        (fun k => fun x : E => χ x *
+          writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gBase
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ k))) 0) w
+                (fun a => V a w)) x) Φinf := by
+  let Vfam : Unit → Fin 2 →
+      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) := fun _ => V
+  obtain ⟨χ, _hχcd, _hχsupp, hχ1, hfamily⟩ :=
+    engine_input_refs (I := I) gBase gRef gSeq hbdd x₀ Vfam hK₀ hK₀chart
+  obtain ⟨hΦcd, hΦbd⟩ := hfamily ()
+  let Φ : ℕ → E → Real := fun k x => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+    (fun w : M => (covDerivOfField (I := I) gBase
+      (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)) x
+  obtain ⟨φ, Φinf, hφ, hΦinf, hconv⟩ :=
+    exists_cInf_subseq Φ hΦcd
+      (fun r K _ => by obtain ⟨C, hC⟩ := hΦbd r; exact ⟨C, fun k x _ => hC k x⟩)
+  refine ⟨φ, Φinf, χ, hφ, hΦinf, hχ1, ?_⟩
+  change MapCInfConvOnCompacts Set.univ (fun k => Φ (φ k)) Φinf
+  exact hconv
 
 end HCGCompactness
 end DifferentialGeometry

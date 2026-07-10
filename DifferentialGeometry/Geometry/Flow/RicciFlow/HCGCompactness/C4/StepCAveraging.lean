@@ -113,6 +113,23 @@ theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar :
   · simpa [activeFill, hzero] using hactive i hzero
 
 variable [Fintype ι]
+
+/-- Pointwise normalized finite weights on `s`, together with the regions on
+which their nonzero entries are active. -/
+structure WeightDataOn (s : Set X) (U : ι → Set X) (μ : X → ι → ℝ) : Prop where
+  nonneg : ∀ x ∈ s, ∀ i : ι, 0 ≤ μ x i
+  pos : ∀ x ∈ s, ∃ i : ι, 0 < μ x i
+  sum_one : ∀ x ∈ s, ∑ i : ι, μ x i = 1
+  active_mem : ∀ x ∈ s, ∀ i : ι, μ x i ≠ 0 → x ∈ U i
+
+/-- Expose `WeightDataOn` in the conjunction shape consumed by the Step-C
+two-index averaging theorems. -/
+theorem WeightDataOn.data {s : Set X} {U : ι → Set X} {μ : X → ι → ℝ}
+    (h : WeightDataOn s U μ) {x : X} (hx : x ∈ s) :
+    ((∀ i : ι, 0 ≤ μ x i) ∧ (∃ i : ι, 0 < μ x i) ∧ ∑ i : ι, μ x i = 1) ∧
+      ∀ i : ι, μ x i ≠ 0 → x ∈ U i := by
+  exact ⟨⟨h.nonneg x hx, h.pos x hx, h.sum_one x hx⟩, h.active_mem x hx⟩
+
 variable {μ : X → ι → ℝ} {pts : X → ι → M} {join : M → M → ℝ → M}
   {p : X → M} {r : X → ℝ}
   (h : ∀ x : X, CenterInput (I := I) g (μ x) (pts x) join (p x) (r x))

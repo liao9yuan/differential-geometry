@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConvTower
 import DifferentialGeometry.Geometry.Metric.SmoothMetricFromCoeff
 
 set_option autoImplicit false
@@ -324,6 +324,58 @@ lemma exists_engine_frameConv
   exact htend
 
 include I in
+/-- Frame-component extraction when the derivative order may choose its reference metric. -/
+lemma exists_frame_refs
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (i j : Fin (Module.finrank Real E)) (φ : ℕ → ℕ) :
+    ∃ (ψ : ℕ → ℕ) (Φinf : E → Real), StrictMono ψ ∧ ContDiff Real (∞ : WithTop ℕ∞) Φinf ∧
+      ∀ x ∈ K₀, Filter.Tendsto (fun m => (gSeq (φ (ψ m))).inner x
+        (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x))
+        Filter.atTop (nhds (Φinf (extChartAt I x₀ x))) := by
+  obtain ⟨σi, hσi⟩ :=
+    exists_section_eqOn_compact (I := I) x₀ (Module.finBasis Real E i) hK₀ hK₀chart
+  obtain ⟨σj, hσj⟩ :=
+    exists_section_eqOn_compact (I := I) x₀ (Module.finBasis Real E j) hK₀ hK₀chart
+  have hbdd' : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K,
+        metricCovDerivNorm (I := I) q ((gSeq ∘ φ) k) (gRef r) z ≤ C := by
+    intro r q hqr K hK
+    obtain ⟨C, hC⟩ := hbdd r q hqr K hK
+    exact ⟨C, fun k z hz => hC (φ k) z hz⟩
+  obtain ⟨ψ, Φinf, χ, hψ, hΦinf, hχ1, hconv⟩ :=
+    exists_chart_refs (I := I) gBase gRef (gSeq ∘ φ) hbdd' x₀ ![σi, σj] hK₀ hK₀chart
+  refine ⟨ψ, Φinf, hψ, hΦinf, fun x hx => ?_⟩
+  have htend := tendsto_of_cInf hconv (Set.mem_univ (extChartAt I x₀ x))
+  have hxsrc : x ∈ (extChartAt I x₀).source := by
+    rw [extChartAt_source]
+    exact hK₀chart hx
+  have hxi : σi x = Geometry.frameVec (I := I) x₀ i x :=
+    (hσi.self_of_nhdsSet x hx).trans
+      (congrFun (frameVec_eq_tangentConst (I := I) x₀ i).symm x)
+  have hxj : σj x = Geometry.frameVec (I := I) x₀ j x :=
+    (hσj.self_of_nhdsSet x hx).trans
+      (congrFun (frameVec_eq_tangentConst (I := I) x₀ j).symm x)
+  have hfun : (fun m => χ (extChartAt I x₀ x) * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gBase
+          (Tensor0SBundle.metricTensorField (I := I) ((gSeq ∘ φ) (ψ m))) 0) w
+            (fun a => (![σi, σj] : Fin 2 → _) a w)) (extChartAt I x₀ x))
+      = (fun m => (gSeq (φ (ψ m))).inner x
+          (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x)) := by
+    funext m
+    rw [hχ1 x hx, one_mul, writtenInExtChartAt_real_apply,
+      PartialEquiv.left_inv _ hxsrc, covDerivOfField_zero,
+      Tensor0SBundle.metricTensorField_apply]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Function.comp_apply]
+    rw [hxi, hxj]
+  rw [hfun] at htend
+  exact htend
+
+include I in
 /-- **Gap A producer — `C^∞`-on-compacts frame-component convergence.**  The
 Brick-B engine returns `MapCInfConvOnCompacts` (full `C^∞`-on-compacts, not only
 pointwise `Tendsto`) of the bump-extended chart representative of the `(i,j)`
@@ -438,6 +490,24 @@ lemma exists_refine_componentConv
   exact ⟨ψ, hψ, fun x hx => ⟨Φinf (extChartAt I x₀ x), hconv x hx⟩⟩
 
 include I in
+/-- Pointwise frame-component refinement under order-dependent reference metrics. -/
+lemma exists_comp_refs
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (i j : Fin (Module.finrank Real E)) (φ : ℕ → ℕ) :
+    ∃ ψ : ℕ → ℕ, StrictMono ψ ∧ ∀ x ∈ K₀, ∃ L : Real,
+      Filter.Tendsto (fun m => (gSeq (φ (ψ m))).inner x
+        (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x))
+        Filter.atTop (nhds L) := by
+  obtain ⟨ψ, Φinf, hψ, _, hconv⟩ :=
+    exists_frame_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀ hK₀chart i j φ
+  exact ⟨ψ, hψ, fun x hx => ⟨Φinf (extChartAt I x₀ x), hconv x hx⟩⟩
+
+include I in
 /-- The frame `frameVec x₀ · x` is a basis of the fibre `TangentSpace I x` whenever
 `x` lies in the trivialization base set (`symmL x` is the inverse trivialization
 equivalence there). -/
@@ -478,6 +548,43 @@ lemma exists_refine_allComponents
       obtain ⟨ψ₀, hψ₀, hs⟩ := ih φ'
       obtain ⟨ψ₁, hψ₁, hp⟩ :=
         exists_refine_componentConv (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart p.1 p.2 (φ' ∘ ψ₀)
+      refine ⟨ψ₀ ∘ ψ₁, hψ₀.comp hψ₁, fun q hq x hx => ?_⟩
+      rcases Finset.mem_insert.1 hq with rfl | hqs
+      · obtain ⟨L, hL⟩ := hp x hx
+        exact ⟨L, by simpa [Function.comp] using hL⟩
+      · obtain ⟨L, hL⟩ := hs q hqs x hx
+        exact ⟨L, hL.comp hψ₁.tendsto_atTop⟩
+  obtain ⟨ψ, hψ, hψspec⟩ := key Finset.univ φ
+  exact ⟨ψ, hψ, fun i j x hx => hψspec (i, j) (Finset.mem_univ _) x hx⟩
+
+include I in
+/-- Simultaneous finite frame-component refinement with order-dependent references. -/
+lemma exists_allcomp_refs
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (φ : ℕ → ℕ) :
+    ∃ ψ : ℕ → ℕ, StrictMono ψ ∧ ∀ i j : Fin (Module.finrank Real E), ∀ x ∈ K₀,
+      ∃ L : Real, Filter.Tendsto (fun m => (gSeq (φ (ψ m))).inner x
+        (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x))
+        Filter.atTop (nhds L) := by
+  have key : ∀ s : Finset (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)),
+      ∀ φ' : ℕ → ℕ, ∃ ψ : ℕ → ℕ, StrictMono ψ ∧ ∀ p ∈ s, ∀ x ∈ K₀, ∃ L : Real,
+        Filter.Tendsto (fun m => (gSeq (φ' (ψ m))).inner x
+          (Geometry.frameVec (I := I) x₀ p.1 x) (Geometry.frameVec (I := I) x₀ p.2 x))
+          Filter.atTop (nhds L) := by
+    intro s
+    induction s using Finset.induction with
+    | empty => exact fun φ' => ⟨id, strictMono_id, by simp⟩
+    | @insert p s hps ih =>
+      intro φ'
+      obtain ⟨ψ₀, hψ₀, hs⟩ := ih φ'
+      obtain ⟨ψ₁, hψ₁, hp⟩ :=
+        exists_comp_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀ hK₀chart
+          p.1 p.2 (φ' ∘ ψ₀)
       refine ⟨ψ₀ ∘ ψ₁, hψ₀.comp hψ₁, fun q hq x hx => ?_⟩
       rcases Finset.mem_insert.1 hq with rfl | hqs
       · obtain ⟨L, hL⟩ := hp x hx
@@ -535,6 +642,56 @@ lemma exists_limit_gm (hne : Nonempty M)
   exact ⟨φ, hφmono, gm, hgm, hsymm, hpos⟩
 
 include I in
+/-- Pointwise positive-definite metric limit under order-dependent reference metrics. -/
+lemma exists_limit_refs (hne : Nonempty M)
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (hlow : ∃ c : Real, 0 < c ∧ ∀ (k : ℕ) (x : M) (v : TangentSpace I x),
+      c * gBase.inner x v v ≤ (gSeq k).inner x v v) :
+    ∃ φ : ℕ → ℕ, StrictMono φ ∧
+      ∃ gm : Π x : M, TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real,
+        (∀ x, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop (nhds (gm x))) ∧
+        (∀ (x : M) (v w : TangentSpace I x), gm x v w = gm x w v) ∧
+        (∀ (x : M) (v : TangentSpace I x), v ≠ 0 → 0 < gm x v v) := by
+  obtain ⟨c, K, hKc, hKchart, hcover⟩ := exists_chart_cover (I := I) (M := M) hne
+  set P : ℕ → (ℕ → ℕ) → Prop := fun k ξ => ∀ i j : Fin (Module.finrank Real E), ∀ x ∈ K k,
+    ∃ L : Real, Filter.Tendsto (fun m => (gSeq (ξ m)).inner x
+      (Geometry.frameVec (I := I) (c k) i x) (Geometry.frameVec (I := I) (c k) j x))
+      Filter.atTop (nhds L) with hPdef
+  obtain ⟨φ, hφmono, hφP⟩ := exists_diag_subseq P
+    (fun k φ' _ => by
+      obtain ⟨ψ, hψ, hspec⟩ :=
+        exists_allcomp_refs (I := I) gBase gRef gSeq hbdd
+          (c k) (hKc k) (hKchart k) φ'
+      exact ⟨ψ, hψ, hspec⟩)
+    (fun k φ' ψ hψ hP i j x hx => by
+      obtain ⟨L, hL⟩ := hP i j x hx
+      exact ⟨L, hL.comp hψ.tendsto_atTop⟩)
+    (fun k φ' a hP i j x hx => by
+      obtain ⟨L, hL⟩ := hP i j x hx
+      exact ⟨L, (Filter.tendsto_add_atTop_iff_nat a).mp hL⟩)
+  have hconv : ∀ x : M, ∃ Lx : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real,
+      Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop (nhds Lx) := by
+    intro x
+    obtain ⟨k, hxK⟩ := hcover x
+    have hxbase : x ∈ (trivializationAt E (TangentSpace I : M → Type _) (c k)).baseSet := by
+      rw [TangentBundle.trivializationAt_baseSet]
+      exact hKchart k hxK
+    obtain ⟨b, hb⟩ := exists_frameVec_basis (I := I) (c k) hxbase
+    refine exists_tendsto_clm_of_basis_eval b (fun m => (gSeq (φ m)).inner x) ?_
+    intro i j
+    obtain ⟨L, hL⟩ := hφP k i j x hxK
+    refine ⟨L, ?_⟩
+    rw [hb i, hb j]
+    exact hL
+  obtain ⟨gm, hgm, hsymm, hpos⟩ :=
+    exists_gm_symm_pos (I := I) gBase gSeq φ hconv hlow
+  exact ⟨φ, hφmono, gm, hgm, hsymm, hpos⟩
+
+include I in
 /-- **C1b — `hcoeff`.**  Each frame component `x ↦ gm x (frameVec x₀ i x)(frameVec x₀ j x)`
 of the pointwise limit is smooth on the trivialization base set.  Locally near any
 `z`, re-running the engine on `gSeq ∘ φ` produces a smooth chart function `Φinf`;
@@ -580,6 +737,54 @@ lemma frameComp_contMDiffOn
   exact (hsmooth.congr_of_eventuallyEq heq).contMDiffWithinAt
 
 include I in
+/-- Smoothness of the pointwise limit's frame components under order-dependent references. -/
+lemma frame_smooth_refs
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (φ : ℕ → ℕ)
+    (gm : Π x : M, TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real)
+    (hgm : ∀ x, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop (nhds (gm x)))
+    (x₀ : M) (i j : Fin (Module.finrank Real E)) :
+    ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun x => gm x (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x))
+      (trivializationAt E (TangentSpace I : M → Type _) x₀).baseSet := by
+  haveI : LocallyCompactSpace H := I.locallyCompactSpace
+  haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
+  intro z hz
+  have hzsrc : z ∈ (chartAt H x₀).source := by
+    have hz' := hz
+    rwa [TangentBundle.trivializationAt_baseSet] at hz'
+  obtain ⟨K₀, hK₀c, hzint, hK₀sub⟩ :=
+    exists_compact_subset (chartAt H x₀).open_source hzsrc
+  obtain ⟨ψ, Φinf, hψ, hΦcd, heng⟩ :=
+    exists_frame_refs (I := I) gBase gRef gSeq hbdd x₀ hK₀c hK₀sub i j φ
+  have hid : ∀ x ∈ K₀,
+      gm x (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x)
+        = Φinf (extChartAt I x₀ x) := by
+    intro x hx
+    have hcont : Continuous
+        (fun η : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real =>
+          η (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x)) :=
+      ((ContinuousLinearMap.apply Real Real (Geometry.frameVec (I := I) x₀ j x)).comp
+        (ContinuousLinearMap.apply Real (TangentSpace I x →L[Real] Real)
+          (Geometry.frameVec (I := I) x₀ i x))).continuous
+    have hB := ((hcont.tendsto (gm x)).comp (hgm x)).comp hψ.tendsto_atTop
+    exact tendsto_nhds_unique hB (heng x hx)
+  have hsmooth : ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun x => Φinf (extChartAt I x₀ x)) z :=
+    (contMDiff_iff_contDiff.mpr hΦcd).contMDiffAt.comp z (contMDiffAt_extChartAt' hzsrc)
+  have hK₀nhds : K₀ ∈ nhds z :=
+    Filter.mem_of_superset (isOpen_interior.mem_nhds hzint) interior_subset
+  have heq : (fun x => gm x (Geometry.frameVec (I := I) x₀ i x)
+        (Geometry.frameVec (I := I) x₀ j x)) =ᶠ[nhds z]
+      (fun x => Φinf (extChartAt I x₀ x)) := by
+    filter_upwards [hK₀nhds] with x hx using hid x hx
+  exact (hsmooth.congr_of_eventuallyEq heq).contMDiffWithinAt
+
+include I in
 /-- **C1a + C1b — the spatial limit metric (lbl351 core).**  From the `(B_r)`
 covariant-derivative bounds and the uniform lower bound `hlow`, one subsequence
 `φ` of the metric sequence converges pointwise to a genuine
@@ -599,6 +804,31 @@ theorem metricPreconv_gInf (hne : Nonempty M)
   refine ⟨φ, hφ, gInf, fun x => ?_⟩
   have hx : gInf.inner x = gm x := by ext v w; exact hgInf x v w
   rw [hx]; exact hgm x
+
+include I in
+/-- Spatial metric precompactness with a separate reference metric for each order. -/
+theorem metricPreconv_refs (hne : Nonempty M)
+    (gBase : SmoothRiemannianMetric I M)
+    (gRef : ℕ → SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ r q : ℕ, q ≤ r → ∀ K : Set M, IsCompact K → ∃ C : Real,
+      ∀ k : ℕ, ∀ z ∈ K, metricCovDerivNorm (I := I) q (gSeq k) (gRef r) z ≤ C)
+    (hlow : ∃ c : Real, 0 < c ∧ ∀ (k : ℕ) (x : M) (v : TangentSpace I x),
+      c * gBase.inner x v v ≤ (gSeq k).inner x v v) :
+    ∃ φ : ℕ → ℕ, StrictMono φ ∧ ∃ gInf : SmoothRiemannianMetric I M,
+      ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop
+        (nhds (gInf.inner x)) := by
+  obtain ⟨φ, hφ, gm, hgm, hsymm, hpos⟩ :=
+    exists_limit_refs (I := I) hne gBase gRef gSeq hbdd hlow
+  obtain ⟨gInf, hgInf⟩ :=
+    Geometry.smoothMetric_of_localCoeff gm hsymm hpos
+      (fun x₀ i j => frame_smooth_refs (I := I) gBase gRef gSeq hbdd φ gm hgm x₀ i j)
+  refine ⟨φ, hφ, gInf, fun x => ?_⟩
+  have hx : gInf.inner x = gm x := by
+    ext v w
+    exact hgInf x v w
+  rw [hx]
+  exact hgm x
 
 include I in
 /-- **Gap B base case (covariant order 0).**  The order-0 covariant-tower component

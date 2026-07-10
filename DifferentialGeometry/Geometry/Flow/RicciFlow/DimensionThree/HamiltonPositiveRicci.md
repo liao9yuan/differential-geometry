@@ -1,5 +1,40 @@
 # HamiltonPositiveRicci live frontier audit
 
+## Current state — 2026-07-09
+
+The current Hamilton file has five theorem-shaped `sorry`s:
+`ham3_short_isSolution`, `ham3_flow_exists_normalized`, `ham3_noncollapse`,
+`ham3_cgh_limit`, and `ham3_space_box`.  In particular:
+
+- `ham3_rm_control` is proved: it realizes the old rescaled curvature estimate
+  on genuine `FlowMetricBall`s, using the checked parabolic norm-scaling route;
+- `Ham3SourceRealizes` now requires common-time carrier inclusion, the selected
+  basepoint map, and equality with the pullback of the actual
+  `ham3RescaledSol` metric; both Ricci and pinching transfer predicates consume
+  this same realization;
+- `Ham3RmBound` and `Ham3CompactInput` retain the raw slab estimate, common
+  window, kappa, and geometric noncollapse through the compactness call;
+- `ham3_noncollapse` and `ham3_cgh_limit` now expose the finite maximal-time
+  interval (`h0omega`, `hD`) instead of silently discarding it;
+- `ham3_noncollapse` and `ham3_cgh_limit` remain genuine producer endpoints at
+  **0%**;
+- `PointedRiemannianManifold.compact_of_ricci`, the eventual global comparison
+  maps, and `limit_to_orig` are checked; `limit_to_orig` is **100%** as a
+  theorem and has no `sorry`;
+- `spaceForm_const_metric` is also checked; only the forward classification
+  theorem `ham3_space_box` remains open in that pair.
+
+Focused verification and the targeted `HamiltonPositiveRicci` refresh passed
+after this interface tightening.  The source/compactness contract refactor is
+100% checked infrastructure; it does not raise either open producer theorem
+above 0%.
+
+The whole HCG project is conservatively about **45% machinery**, while its
+endpoint theorems remain **0%**.  The checked `limit_to_orig` consumer must not
+be counted as progress on the still-open `ham3_cgh_limit` producer.
+
+## Archived 2026-06-05 snapshot (superseded by the current state above)
+
 Date: 2026-06-05
 
 Workspace: `E:\testdifferential-geometry`
@@ -12,10 +47,10 @@ Lean file:
 Verification:
 
 - `lake build` completed successfully after the branch update.
-- Current Hamilton file has six theorem-shaped `sorry`s.
+- At that snapshot the Hamilton file had six theorem-shaped `sorry`s.
 - `DifferentialGeometry/Geometry/Flow/RicciFlow/MaximalTime.lean` has one additional extension-criterion `sorry` that is upstream of the maximal-flow package story.
 
-## Current structure
+## Historical structure (2026-06-05)
 
 This file is no longer just a statement shell.  The middle Hamilton pipeline is
 substantially checked:
@@ -41,7 +76,7 @@ The important point is that the finite-dimensional 3D algebra and the static
 Einstein-to-space-form computation are already checked.  The remaining work is
 mostly not local tensor algebra.
 
-## Remaining `sorry`s
+## Historical 2026-06-05 `sorry` inventory
 
 ### `ham3_flow_exists_normalized`
 
@@ -188,7 +223,7 @@ free isometric quotients of the round sphere.  It is not a Lean-local theorem
 from the current fields alone, because the structure does not already package a
 descended smooth Riemannian metric.
 
-## Best next work
+## Historical 2026-06-05 work order (superseded)
 
 Recommended order:
 
@@ -220,7 +255,7 @@ Recommended order:
    They are global topology/quotient geometry, not the Ricci-flow endpoint
    frontier.  They should live in a separate topology/space-form layer.
 
-## Short next prompt
+## Historical next prompt (superseded)
 
 Work in `E:\testdifferential-geometry` on
 `DifferentialGeometry/Geometry/Flow/RicciFlow/DimensionThree/HamiltonPositiveRicci.lean`.
@@ -1382,3 +1417,44 @@ Lessons preserved from the source comments:
 
 Verification: focused checking passed for this cleanup pass.  The only
 diagnostics were the existing theorem-shaped `sorry` warnings in this file.
+
+## 2026-07-09 real noncollapse migration
+
+The Hamilton-side noncollapse package now uses the canonical geometric API in
+`Perelman/Noncollapsing.lean`:
+
+- `ham3RescaledSol` is the actual `paraSolution` at the selected point-time and
+  scalar-curvature scale;
+- `ham3RescaledZero` records time zero as a member of that rescaled interval;
+- `ham3RescaledBall` is the genuine intrinsic time-zero metric ball centered at
+  `Q.point i`;
+- `Ham3Noncollapse` asks for `IsRmControlled` and
+  `IsKappaNoncollapsed` on those balls.
+
+The abstract `Ham3BallPair`, its arbitrary real-valued volume fields, and the
+`unitVolLower`/`unitNested` projection wrappers were deleted.  The focused file
+check passed.  The new `ham3_rm_control` theorem is checked and realizes the
+parabolic curvature bound on these actual balls.  The theorem `ham3_noncollapse` itself is still a genuine
+Perelman producer frontier and remains 0%; its dedicated geometric data path is
+about 40%.  The broader Hamilton Section 12 endpoint remains 0%.
+
+## 2026-07-09 CGH retention and `limit_to_orig` repair
+
+`Ham3CGHLimitData` now retains the actual source sequence, composed original
+index map, `SmoothCGHConverges` witness (hence its spatial comparison maps),
+source-to-`M` diffeomorphisms, and completeness of every carrier-time limit
+slice.  Primitive limit manifold/instance fields were retained so the existing
+tensor proofs continue to use definitionally identical instances.
+
+The static Einstein argument now produces `LimitRoundAt`: the exact flow slice,
+a positive Ricci lower bound, and constant positive sectional curvature.
+`LimitConstPosSec` remains only as a compatibility projection.  The repaired
+`limit_to_orig` no longer takes unused `P`, `Q`, or an unrelated conjunction;
+it consumes the exact carrier time, connectedness, boundarylessness, and
+`LimitRoundAt`, while the record supplies completeness and the real CGH maps.
+
+The data-retention refactor is 100%.  The Bonnet--Myers compactness step and
+eventual-global-map API now live in `HCGCompactness/PointedConvergenceGlobal.lean`,
+and `limit_to_orig` is checked with no `sorry` (**theorem 100%**).  The source
+producer `ham3_cgh_limit` remains **0%**, so the whole Hamilton Section 12
+endpoint remains **0%** despite this completed consumer.

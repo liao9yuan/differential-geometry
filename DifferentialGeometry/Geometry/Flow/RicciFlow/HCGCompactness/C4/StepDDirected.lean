@@ -16,18 +16,16 @@ comparison maps `Ψ_j : B(O_{k_j}, 2^j) → B(O_{k_{j+1}}, 2^{j+1})` fixing base
 
 Architecture (STEPD_PLAN codas 37–44): obtain the uniform F5 constant from
 `comp_cov_le_unif` ONCE; budget the ε-chain `C_r Σ C_i⁻¹ 2⁻ⁱ ≤ 2^{1-r}` a priori; choose
-`k_{j+1}` by the B1 threshold (`stepB1_approxIso`, sorry-backed per the gate policy);
+`k_{j+1}` by the B1 threshold supplied through `StepB1RawInput`;
 compose data along `PartialDiffeomorph.trans` with the C-parameterized `partialData_comp`;
 ball nesting `Ψ_r(B(O,2^r)) ⊆ B(O',2^{r+1})` via `image_ball_local` + the hspeed supplier
 below.
 
 ## Status
 
-The D1b recursion body in this file is locally closed: `exists_directedApprox`
-focused-checks without a local `sorry` warning.  Its axiom report is still not
-clean because it consumes upstream gate declarations, notably the B1 statement
-`stepB1_approxIso` and the separated composition organs `compSepFwd` /
-`compSepRev`, which are intentionally proof-frontier declarations for now.
+The D1b recursion body in this file is locally closed: `directed_of_b1`
+focused-checks without a local `sorry` warning.  Its B/C dependency is now an
+explicit `StepB1RawInput` argument rather than a false theorem derived from properness alone.
 -/
 
 noncomputable section
@@ -250,6 +248,113 @@ theorem chainComp_base {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
   | succ l ih =>
       rw [chainComp_apply_succ, ih]
       simpa [Nat.add_assoc] using hbase (j + l)
+
+/-- Splitting a chain after a fixed prefix agrees pointwise with composing the prefix and tail.
+The cast exposes the sole dependent-index transport, namely associativity of addition. -/
+theorem chainComp_add_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
+    [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
+    (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
+    (j a b : ℕ) (x : Mf j) :
+    cast (congrArg Mf (Nat.add_assoc j a b).symm)
+        ((chainComp (I := I) (Mf := Mf) Ψ j (a + b) : Mf j → Mf (j + (a + b))) x) =
+      (chainComp (I := I) (Mf := Mf) Ψ (j + a) b : Mf (j + a) → Mf ((j + a) + b))
+        ((chainComp (I := I) (Mf := Mf) Ψ j a : Mf j → Mf (j + a)) x) := by
+  have cast_step : ∀ (m n : ℕ) (h : m = n) (y : Mf m),
+      cast (congrArg Mf (congrArg Nat.succ h))
+          ((Ψ m : Mf m → Mf (m + 1)) y) =
+        (Ψ n : Mf n → Mf (n + 1)) (cast (congrArg Mf h) y) := by
+    intro m n h y
+    subst h
+    rfl
+  induction b with
+  | zero =>
+      rfl
+  | succ b ih =>
+      change
+        cast (congrArg Mf (Nat.add_assoc j a (b + 1)).symm)
+            ((Ψ (j + (a + b)) : Mf (j + (a + b)) → Mf (j + (a + b) + 1))
+              ((chainComp (I := I) (Mf := Mf) Ψ j (a + b) :
+                Mf j → Mf (j + (a + b))) x)) =
+          (Ψ ((j + a) + b) : Mf ((j + a) + b) → Mf ((j + a) + b + 1))
+            ((chainComp (I := I) (Mf := Mf) Ψ (j + a) b :
+              Mf (j + a) → Mf ((j + a) + b))
+              ((chainComp (I := I) (Mf := Mf) Ψ j a : Mf j → Mf (j + a)) x))
+      calc
+        cast (congrArg Mf (Nat.add_assoc j a (b + 1)).symm)
+            ((Ψ (j + (a + b)) : Mf (j + (a + b)) → Mf (j + (a + b) + 1))
+              ((chainComp (I := I) (Mf := Mf) Ψ j (a + b) :
+                Mf j → Mf (j + (a + b))) x)) =
+            (Ψ ((j + a) + b) : Mf ((j + a) + b) → Mf ((j + a) + b + 1))
+              (cast (congrArg Mf (Nat.add_assoc j a b).symm)
+                ((chainComp (I := I) (Mf := Mf) Ψ j (a + b) :
+                  Mf j → Mf (j + (a + b))) x)) := by
+              simpa only [Nat.add_succ] using
+                cast_step (j + (a + b)) ((j + a) + b) (Nat.add_assoc j a b).symm
+                  ((chainComp (I := I) (Mf := Mf) Ψ j (a + b) :
+                    Mf j → Mf (j + (a + b))) x)
+        _ = (Ψ ((j + a) + b) : Mf ((j + a) + b) → Mf ((j + a) + b + 1))
+              ((chainComp (I := I) (Mf := Mf) Ψ (j + a) b :
+                Mf (j + a) → Mf ((j + a) + b))
+                ((chainComp (I := I) (Mf := Mf) Ψ j a : Mf j → Mf (j + a)) x)) := by
+              rw [ih]
+
+/-- A chain with its target transported to the prefix-tail parenthesization. -/
+noncomputable def chainCompAssoc {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
+    [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
+    (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
+    (j a b : ℕ) :
+    PartialDiffeomorph I I (Mf j) (Mf ((j + a) + b)) (∞ : WithTop ℕ∞) :=
+  (Nat.add_assoc j a b).symm ▸ chainComp (I := I) (Mf := Mf) Ψ j (a + b)
+
+private theorem targetCast_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
+    [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
+    {j l m : ℕ} (h : l = m)
+    (Φ : PartialDiffeomorph I I (Mf j) (Mf l) (∞ : WithTop ℕ∞)) :
+    (h ▸ Φ).source = Φ.source := by
+  subst h
+  rfl
+
+/-- Reassociating a chain's target index leaves its source unchanged. -/
+theorem chainAssoc_source {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
+    [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
+    (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
+    (j a b : ℕ) :
+    (chainCompAssoc (I := I) (Mf := Mf) Ψ j a b).source =
+      (chainComp (I := I) (Mf := Mf) Ψ j (a + b)).source := by
+  simpa only [chainCompAssoc] using
+    targetCast_source (I := I) (Nat.add_assoc j a b).symm
+      (chainComp (I := I) (Mf := Mf) Ψ j (a + b))
+
+/-- Pointwise prefix-tail formula for `chainCompAssoc`. -/
+theorem chainCompAssoc_apply {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
+    [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
+    (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
+    (j a b : ℕ) (x : Mf j) :
+    (chainCompAssoc (I := I) (Mf := Mf) Ψ j a b : Mf j → Mf ((j + a) + b)) x =
+      (chainComp (I := I) (Mf := Mf) Ψ (j + a) b : Mf (j + a) → Mf ((j + a) + b))
+        ((chainComp (I := I) (Mf := Mf) Ψ j a : Mf j → Mf (j + a)) x) := by
+  have cast_apply : ∀ {m n : ℕ} (h : m = n)
+      (F : PartialDiffeomorph I I (Mf j) (Mf m) (∞ : WithTop ℕ∞)) (y : Mf j),
+      ((h ▸ F : PartialDiffeomorph I I (Mf j) (Mf n) (∞ : WithTop ℕ∞)) : Mf j → Mf n) y =
+        cast (congrArg Mf h) ((F : Mf j → Mf m) y) := by
+    intro m n h F y
+    subst h
+    rfl
+  unfold chainCompAssoc
+  rw [cast_apply]
+  exact chainComp_add_apply (I := I) (Mf := Mf) Ψ j a b x
+
+/-- As functions, the associated chain is the prefix followed by the tail. -/
+theorem chainCompAssoc_eq {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
+    [∀ j, ChartedSpace H (Mf j)] [∀ j, IsManifold I ∞ (Mf j)]
+    (Ψ : ∀ j, PartialDiffeomorph I I (Mf j) (Mf (j + 1)) (∞ : WithTop ℕ∞))
+    (j a b : ℕ) :
+    (chainCompAssoc (I := I) (Mf := Mf) Ψ j a b : Mf j → Mf ((j + a) + b)) =
+      (PartialDiffeomorph.trans (I := I)
+        (chainComp (I := I) (Mf := Mf) Ψ j a)
+        (chainComp (I := I) (Mf := Mf) Ψ (j + a) b) : Mf j → Mf ((j + a) + b)) := by
+  funext x
+  exact chainCompAssoc_apply (I := I) (Mf := Mf) Ψ j a b x
 
 /-- Peel-head apply for the right fold (definitional). -/
 theorem chainComp'_apply_succ {Mf : ℕ → Type u} [∀ j, TopologicalSpace (Mf j)]
@@ -754,7 +859,7 @@ section Endpoint
 /-- **The geometric budget closes the two-sided ledger** (D1b analytic core).  For the
 per-step tolerances `δ_i = 2^{-(j+i)}` the accumulated composite error
 `∑_{i≤l} 2^{-(j+i)} ≤ 2·2^{-j} = 2^{1-j}` is below any `ε > 0` once `j ≥ j₀(ε)`, uniformly in
-the composite length `l`.  This is what makes the `exists_directedApprox` conclusion
+the composite length `l`.  This is what makes the `directed_of_b1` conclusion
 "for every `(ε, p)`, eventually" hold: the tail of the geometric chain vanishes. -/
 theorem geomTailBudget : ∀ ε : ℝ, 0 < ε → ∃ j₀ : ℕ, ∀ j : ℕ, j₀ ≤ j → ∀ l : ℕ,
     ∑ i ∈ Finset.range (l + 1), (1 / 2 : ℝ) ^ (j + i) ≤ ε := by
@@ -1190,7 +1295,7 @@ theorem sepTailBudget (B ε : ℝ) (hε : 0 < ε) :
 
 /-- **A strictly increasing subsequence dominating any threshold schedule** (D1b σ core).
 For any `T : ℕ → ℕ` there is a `StrictMono σ` with `T j ≤ σ j` for every `j`; the D1b
-recursion instantiates `T` with the `stepB1_approxIso` thresholds so that each composite step
+recursion instantiates `T` with the `stepB1_of_raw` thresholds so that each composite step
 `σ j → σ (j+1)` clears the per-step approximate-isometry threshold. -/
 theorem exists_strictMono_ge (T : ℕ → ℕ) :
     ∃ σ : ℕ → ℕ, StrictMono σ ∧ ∀ j, T j ≤ σ j := by
@@ -1221,9 +1326,11 @@ passing to a subsequence `σ`, there are basepoint-preserving partial comparison
 `Ψ_j : M_{σ j} ⇢ M_{σ(j+1)}` whose `l`-fold composites `chainComp Ψ j l` carry
 `(ε, p)`-approximate-isometry data on the closed `2^j`-ball for every `(ε, p)` once
 `j ≥ j₀(ε, p)`.  Recursion per the book (chapter4.tex L1915–1955) with the a-priori uniform
-budget from `comp_cov_le_unif`; consumes the B1 threshold `stepB1_approxIso` (sorry-backed —
-this endpoint's axiom report shows B1's `sorryAx` until the B/C tracks close). -/
-theorem exists_directedApprox (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) :
+budget from `comp_cov_le_unif`; consumes the honest raw comparison-map package
+`StepB1RawInput`, whose eventual producer is the B/C track.  This conditional consumer is not
+the final D1 theorem from the endpoint hypotheses. -/
+theorem directed_of_b1 (P : ∀ k, ProperMetricOn (I := I) (X.obj k))
+    (B : StepB1RawInput (X := X) P) :
     ∃ σ : ℕ → ℕ, StrictMono σ ∧
       (letI : ∀ j, TopologicalSpace (X.obj (σ j)).M := fun j => (X.obj (σ j)).topology
        letI : ∀ j, ChartedSpace H (X.obj (σ j)).M := fun j => (X.obj (σ j)).charted
@@ -1246,9 +1353,9 @@ theorem exists_directedApprox (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) :
   have hepos : ∀ j : ℕ, (0 : ℝ) < (1 / 2 : ℝ) ^ (j + 1) := fun j => by positivity
   have helt : ∀ j : ℕ, (1 / 2 : ℝ) ^ (j + 1) < 1 :=
     fun j => pow_lt_one₀ (by norm_num) (by norm_num) (by omega)
-  -- the per-step `stepB1_approxIso` threshold schedule, and a subsequence dominating it.
+  -- the per-step `stepB1_of_raw` threshold schedule, and a subsequence dominating it.
   set T : ℕ → ℕ := fun j =>
-    (stepB1_approxIso P ((2 : ℝ) ^ (j + 1)) (hrpos j) ((1 / 2 : ℝ) ^ (j + 1)) (hepos j)
+    (stepB1_of_raw P B ((2 : ℝ) ^ (j + 1)) (hrpos j) ((1 / 2 : ℝ) ^ (j + 1)) (hepos j)
       (helt j) j).choose with hT
   obtain ⟨σ, hσmono, hσge⟩ := exists_strictMono_ge T
   refine ⟨σ, hσmono, ?_⟩
@@ -1276,7 +1383,7 @@ theorem exists_directedApprox (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) :
   -- both endpoints of each step clear that step's threshold.
   have hstep : ∀ j : ℕ, T j ≤ σ j ∧ T j ≤ σ (j + 1) := fun j =>
     ⟨hσge j, le_trans (hσge j) (le_of_lt (hσmono (Nat.lt_succ_self j)))⟩
-  -- extract the comparison maps `Ψ j` from `stepB1_approxIso` at `(σ j, σ (j+1))`, KEEPING the
+  -- extract the comparison maps `Ψ j` from `stepB1_of_raw` at `(σ j, σ (j+1))`, KEEPING the
   -- full per-step data (source containment, basepoint, and the `(δ_j, j)`-approx-isometry data).
   have hΨex : ∀ j : ℕ,
       ∃ Φ : PartialDiffeomorph I I (X.obj (σ j)).M (X.obj (σ (j + 1))).M (∞ : WithTop ℕ∞),
@@ -1286,7 +1393,7 @@ theorem exists_directedApprox (P : ∀ k, ProperMetricOn (I := I) (X.obj k)) :
         Nonempty (BookApproxIsoPartialData (I := I)
           (Metric.closedBall ((X.obj (σ j)).basepoint) ((2 : ℝ) ^ (j + 1)))
           ((1 / 2 : ℝ) ^ (j + 1)) j Φ (X.obj (σ j)).metric (X.obj (σ (j + 1))).metric) :=
-    fun j => (stepB1_approxIso P ((2 : ℝ) ^ (j + 1)) (hrpos j) ((1 / 2 : ℝ) ^ (j + 1)) (hepos j)
+    fun j => (stepB1_of_raw P B ((2 : ℝ) ^ (j + 1)) (hrpos j) ((1 / 2 : ℝ) ^ (j + 1)) (hepos j)
       (helt j) j).choose_spec (σ j) (σ (j + 1)) (hstep j).1 (hstep j).2
   choose Ψ hΨsrc hΨbase hΨdata using hΨex
   refine ⟨Ψ, hΨbase, ?_⟩

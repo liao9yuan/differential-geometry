@@ -23,3 +23,10 @@ packaging now builds from real open-subtype restriction and pullback metrics;
 the remaining input is the analytic seminorm convergence for those constructed
 metrics, plus the existing global `metricCompactness` compactness `sorry`.
 Verification passed with the expected single `metricCompactness` `sorry`.
+
+2026-07-09 comparison-domain differential update: added
+`metricSourceTargetDiff_mfderiv`. It identifies the differential of the bundled source-to-target
+diffeomorphism with the ambient differential of the stored comparison map. The proof differentiates
+the two equal ambient composites and removes the source/target subtype inclusions. Focused
+verification and the targeted module build passed; the expected unconditional endpoint `sorry` is
+unchanged.

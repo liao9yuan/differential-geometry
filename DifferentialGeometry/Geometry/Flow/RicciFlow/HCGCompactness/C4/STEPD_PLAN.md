@@ -16,21 +16,123 @@ seems to need one, stop and report (it means an upstream producer is misshapen).
 
 ---
 
+## Current execution structure (2026-07-09)
+
+This section is the active running source of truth.  The older D1--D6 sections
+and chronological codas below are kept for proof-route detail, but this current
+status overrides stale instructions such as starting with D3 or treating D5 as
+unfinished.
+
+Overall accounting, by endpoint:
+
+- `MetricCompactnessInputs.metricCompactness`: theorem body still 0% complete;
+  the endpoint is still a `sorry`.
+- Step D assembly / D6: 0%; no final assembly theorem has been stated and
+  proved.
+- Step D machinery: about 88%.  D3 and ambient-target D4 are implemented;
+  D1b's local recursion body is closed modulo its explicit B/C producer.  D2a
+  fixed-stage limits, D2b's common diagonal/`lbl407` estimate, D2c's adjacent
+  metric cocycle, and D2d's full cocycle are checked on the large stages.  D5
+  has a corrected abstract compact-cover consumer, but the concrete
+  metric-exhaustion producer is not proved.  Shrunk tail geometry and compact
+  successor containment are checked; tail metric transport, metric exhaustion,
+  D6, and final reindex bookkeeping remain.
+- D1b conditional consumer `directed_of_b1`: body is 100% checked.  The F4/F5
+  uniform constant chain is proved and checked downstream.  The false P-only
+  `stepB1_approxIso` was removed; `directed_of_b1` now exposes the missing B/C
+  mathematics as `StepB1RawInput`.  The textbook D1b theorem from the endpoint
+  hypotheses remains 0%.
+
+Active lanes to finish Step D:
+
+1. **Lane 1: D1 axiom-clean composition frontier.**
+   Do not restart the `StepDDirected.lean` `hacc` recursion.  It is closed.
+   `compSepFwd` and `compSepRev` are now proved in `PullbackField.lean`, reusing
+   the existing `partialData_comp` proof organs with separated ledgers.  The
+   downstream D1b consumer checked after the refresh.  The remaining Lane 1
+   branches are now:
+   - B1: produce `StepB1RawInput` from the C-track data; the missing work is the
+     honest-input bundle / instantiation that
+     supplies POU weights, target convergence, center-input data, local
+     diffeomorphism/injectivity, and forward/reverse bounds.
+   - F4/F5: **closed 2026-07-09.**  `claim1MulConst` and
+     `lemma45_F3_bound` expose data-independent scaled constants;
+     `RicBoundGoodFrame.metricComp_mul` absorbs the good-frame and metric-swap
+     losses into `4^(2+p)`; `lemma45_corII`, `lemma45_corII_unif`, F5,
+     `PullbackField`, and `StepDDirected` all verify.  No F4 `sorry` remains.
+
+2. **Lane 2: D2 limiting metrics.**
+   `C4/StepDLimitMetrics.lean` now contains the verified realization chain
+   `ballSystem` -> `ballSystemOfData` -> `directedBallSystem`: the eventual D1
+   data yields a tail-shifted `SmoothSeqSystem` of open balls.  D2a is now
+   complete: the concrete fixed-stage pullback sequence has checked per-order
+   `hbdd`, fixed-base `hlow`, and a `MetricCInfConvOnCompacts` limit through
+   `metricCInf_refs`.  `exists_chain_data` derives its inputs from the original
+   eventual D1 package.  D2b is complete: `exists_limits_close` returns one
+   common diagonal, all fixed-stage limits, and the uniform all-tail `lbl407`
+   estimate.  D2c is also complete: the same output carries the pointwise
+   pullback cocycle for adjacent limit metrics.  The D6 audit additionally
+   requires shrunk stages of radius `2^n`: their source/image control, closed
+   ball containment, smooth system, and compact successor containment are
+   checked.  Restricting or rebuilding the large-stage limit metrics on this
+   shrunk system is deliberately gated on the D5 metric-exhaustion proof.
+
+3. **Lane 3: D4b/c convergence to the limit — complete.**
+   D4a (`limitCGMaps`) is done.  `limitCGConverges` and `chainCGConverges`
+   provide the subtype-target form.  `PartialDiffeomorph.liftTargetOpen`,
+   `chainAmbientMaps`, `ambientCGConverges`, and `chainAmbientConv` now lift the
+   same result to the original ambient members with target `U k`; the zero-tail
+   identity is `chainPullback_zero`.
+
+4. **Lane 4: D5 concrete completeness producer.**
+   The old per-stage-properness input is false for open stages.  The corrected
+   `HasCompactBallCover` / `limitComplete_cover` consumer is checked, as is
+   `tailSystem_compact`.  The remaining producer must prove that finite
+   limit-metric balls lie in a stage range.  The next feasibility target is a
+   quantitative lower bound on the limit distance from the basepoint to the
+   complement of the `n`th shrunk stage, using `lbl407` metric comparison and
+   the radius `2^n`.
+
+5. **Lane 5: D6 final assembly.**
+   Compose the Step A subsequence, D1 directed system, and D2 diagonal
+   subsequence; assemble the limit, maps, convergence, and completeness fields;
+   discharge the remaining construction-scale inputs (`Item3RadiusInput`,
+   `Item3GpScaleInput`, `SigmaScaleField`) from the uniform normal-radius data;
+   replace the `MetricCompactnessInputs.metricCompactness` `sorry`.
+
+Current stop status: the restarted feasibility audit reached **3/3 genuine
+route errors**, so work stops here under the user's explicit rule.  The errors
+are: (1) open-stage properness is false; (2) the large radius `2^(j0+n)` stages
+leave no compact-nesting margin; (3) relative compactness of successor images
+alone does not imply completeness of their union.  Current next target on a
+fresh recount: **Lane 4, a distance-to-stage-boundary lemma implying metric
+exhaustion**.  Do not resume D6 wiring or rerun the diagonal D2 construction
+until that gate is proved.
+Lane 1's F4
+branch is complete.  Its remaining B1 branch is a genuine C-track input-design
+task, not a local D1 proof: `StepB1RawInput` cannot be produced from `X + P`
+without the POU/target-convergence/center/local-diffeomorphism/bounds
+bundle.  Continue Step D on the independent D2 lane while that producer bundle
+is designed.  The older ordinary `compDataFwd`/`compDataRev` wrappers remain
+separate non-D1b warnings in `PullbackField.lean`.
+
+---
+
 ## 0. Producer map (what Step D consumes, and its current state)
 
 | Book cite | Content | Lean producer | State |
 |---|---|---|---|
-| `lbl397` | approx isometry on a large ball (B1) | `StepB1ApproxIso.stepB1_approxIso` | **statement-only skeleton** (partial-diffeo shape fixed 2026-07-05); its own assembly is the B/C-track frontier |
+| `lbl397` | approx isometry on a large ball (B1) | `StepB1ApproxIso.stepB1_of_raw` | conditional assembly green from `StepB1RawInput`; producer from real C-track inputs 0%; textbook endpoint reserved |
 | `lbl372` | composition accumulation `e n ≤ C·Σδᵢ` (F6) | `ApproxIsometryCompHigher.comp_cov_accum` | green |
 | `lbl367` | image-ball control `Φ(B(O,r)) ⊆ B(O',(1+ε)^{1/2}r)` (F2) | `Distances.image_ball_tangent` (+ `F2-book` wrapper, still todo) | green core |
-| `lbl404` | `C⁰→C^∞` composition-convergence ("apply Lemma 4.4 again") | **MISSING** — the Faà-di-Bruno convergence brick (`COMPCONV_HANDOFF.md`) | open, shared with lbl399/B-track |
+| `lbl404` | `C⁰→C^∞` composition-convergence ("apply Lemma 4.4 again") | `MapConvergenceComp.lean` (`MapCInfConvOnCompacts.comp` and moving-composition derivative convergence) | green |
 | `lbl379–381` | direct-limit topology: compact-factors / σ-compact / T2 | `Geometry/Topology/DirectLimit.lean` (`SeqSystem`, `Lim`, `incl`, `isCompact_exists`, `sigmaCompact`, `t2Space`, `lift`) | green |
 | `lbl332` | C^∞-CG convergence definition | `MetricCompactness.lean` (`MetricCGConvergenceData`, `PointedRiemannianCGConverges.ofRestrictPullback`, `MetricSourceData.ofRestrictPullback`) | green |
 | — | per-member proper realization | `GoodCoveringOrdered.properMetricOn` (needs `MetricComplete` + `ConnectedSpace`) | green |
 
-Two **critical-path gates** from outside Step D: `lbl397` (B1 assembly) and
-`lbl404` (composition-convergence engine).  Everything in §D3 below is
-independent of both gates and can be built immediately.
+The remaining **critical-path gate** from outside Step D is `lbl397` (B1
+assembly).  The old `lbl404` composition-convergence gate is closed in
+`MapConvergenceComp.lean`.
 
 ---
 
@@ -97,17 +199,29 @@ on each ball, with the uniform closeness
 Consequence (L1996–2006): each `Ψ_j` is an **isometry** `g_{j,∞} → g_{j+1,∞}`
 (two-term telescoping estimate).
 
-**Lean route:** metrics in the normal charts are Gram-valued maps
-`E → (E →L E →L ℝ)`; per the convergence-spine ruling use
-`MapConvergence.exists_cInf_subseq_on` + `DiagonalSubseq` — NO new metric-AA.
-The pullback-under-composition convergence is where **`lbl404`** (the
-composition-convergence engine) enters; the book itself says "follows from
-Lemma 4.4 again".
+**Lean route:** the open-ball realization is complete in
+`StepDLimitMetrics.lean`.  For metric extraction, first try the existing
+intrinsic endpoint `ComponentConvAssembly.metricPreconvInf` on each fixed
+stage; it already packages the all-orders diagonal once `hbdd` and `hlow` are
+proved.  Use `MapConvergenceComp.MapCInfConvOnCompacts.comp` for the later
+composition/cocycle passage — NO new metric-AA.
 
 **Bricks:**
-- D2a `pullback_seq_bounded` — uniform `C^p` bounds for `Ψ_{j,ℓ}* g_{j+ℓ}` in a
-  fixed normal chart, from `comp_approx` + `normalBounds` (the bundle's `lbl395`
-  field).  File: NEW `C4/StepDLimitMetrics.lean`.
+- D2a0 open-ball realization — **DONE, verified.** `ballOpen`, `ballSystem`,
+  `ballSystemOfData`, and `directedBallSystem` connect the eventual D1 maps to
+  `SmoothSeqSystem` through a single tail shift.
+- D2a `pullback_seq_bounded` — define the smooth Riemannian pullback metrics on
+  a fixed `ballOpen`, then prove `metricPreconvInf`'s `hbdd` and `hlow` from
+  `comp_approx`.  **Direct tail bricks DONE:** `ballPullbackMetric`,
+  `ballPullback_covNorm`, `ballPullback_cov_le`, `ballPullback_lower/upper`, and
+  `ballPullback_zero_le`.  **Prefix-tail geometry DONE:**
+  `chainComp_add_apply`, `chainCompAssoc(_apply/_eq)`, `ballTransSource`,
+  `nestedBallPullback`, `ballPullback_trans`, `ballPullback_congr`,
+  `prefixTail_cov_le`, `chainPrefix_cov_le`, and `chain_image_ball`.
+  `metricComp_iter_refs` is focused green.  **Live sub-brick:** verify
+  `engine_input_refs`, then carry this per-order-reference chart input through
+  the extraction/limit assembly.  Do not strengthen D1 to all orders at fixed
+  `j`, and do not misuse `lemma45_corII` as a generic reference-change theorem.
 - D2b `exists_limit_metrics` — the diagonal extraction + the `lbl407` uniform
   closeness estimate.  ⟸ D2a, `exists_cInf_subseq_on`, `DiagonalSubseq`.
 - D2c `psi_isometry_limit` — `Ψ_j* g_{j+1,∞} = g_{j,∞}` on the ball (telescoping
@@ -117,8 +231,9 @@ Lemma 4.4 again".
   `DirectedApproxSystem`-with-limits structure; do NOT model the re-indexing as
   separate layers.
 
-**Gate:** `lbl404` engine (shared with the B-track's lbl399-`C∞`; one brick, two
-consumers — build it once in `MapConvergence`).
+**Gate status:** the former `lbl404` gate is green in
+`MapConvergenceComp.lean`.  The live D2 frontier is now the pullback-metric
+realization plus its intrinsic derivative/lower bounds.
 
 ## D3 — `lbl408`: the limit manifold (independent of D1/D2 — START HERE)
 
@@ -237,6 +352,43 @@ mechanical but fiddly (PartialDiffeomorph.trans source arithmetic).  Everything
 else is assembly against existing engines.
 
 ## Status log
+
+- 2026-07-09 (D4 ambient continuation, new route recount 0/3): the prior
+  carrier-level blocker is closed.  `PartialDiffeomorph.liftTargetOpen` gives a
+  smooth ambient lift with target exactly the open set and
+  `liftOpen_mfderiv` gives its differential readout.  `chainPullback_zero`,
+  `chainAmbientSeq`, `chainAmbientMaps`, `ambientCGConverges`, and
+  `chainAmbientConv` are checked.  The comparison maps now land in the original
+  ambient manifolds and consume the existing `lbl407` estimate without a new
+  estimate.  Next target: D6 reindex/assembly.  Route errors: **0/3**.
+
+- 2026-07-09 (D4 continuation, route count 3/3): D2d and the source-domain D4
+  bridge are checked. `SmoothSeqSystem.MetricCocycle.ofSucc` and
+  `chainMetricCocycle` extend adjacent limit compatibility to the full cocycle;
+  `tail_derivSup_lt` gives the compact supremum estimate;
+  `limitCGConverges` packages direct-limit convergence; and
+  `chainCGConverges` instantiates it from `lbl407`.  Route error #3 is a
+  carrier-level packaging mistake: `chainCGConverges` targets the open-ball
+  subtype sequence `U n`, while `MetricCompactnessConclusion X` requires maps
+  into the original members `X.obj (subseq n).M`.  The estimates are valid, but
+  this result cannot fill D6.  Smallest repair: a smooth open-embedding lift of
+  `inclPartialDiffeo`, an ambient `PointedRiemannianCGMaps` package, and the
+  zero-tail restriction identity.  This is a routine-to-medium missing API, not
+  a mathematical obstruction.  Stop condition reached: **3/3 route errors**.
+
+- 2026-07-09 (D2 prefix-tail continuation, route count 2/3): the geometric
+  prefix-tail path is now checked end to end through `chainPrefix_cov_le` and
+  `chain_image_ball`.  Route error #1 was treating exact pullback invariance as
+  sufficient for the old `metricPreconvInf.hbdd`; its reference metric depends
+  on the requested order.  Route error #2 was treating `lemma45_corII` as a
+  generic reference-change estimate; it requires the background metric tower
+  to be small under the same `eps <= 1`.  The third route is viable rather than
+  failed: `metricComp_iter_refs` converts per-order references directly to
+  uniform chart-component derivative bounds.  That route is now complete:
+  `engine_input_refs`, `metricPreconv_refs`, `metricCInf_refs`,
+  `chainPullback_bdd`, `exists_chain_limit`, and `exists_chain_data` all check,
+  with targeted producer builds refreshed.  D2a is closed.  Route failures
+  remain **2/3**; the next target is D2b's common diagonal and `lbl407` estimate.
 
 - 2026-07-08 (D6 input threading): `MetricCompactnessInputs` now has checked
   wrappers for the endpoint-hypothesis Step A entrypoint.  `properMetrics`
@@ -448,12 +600,15 @@ else is assembly against existing engines.
   stage-ball compactness ⟹ closed limit `riemannianEDist`-balls of finite radius compact;
   closedness via `EMetricSpace.ofRiemannianMetric`, where `edist = riemannianEDist` by `rfl`).
   D5a remaining = ONLY the `ProperSpace`/`CompleteSpace` endpoint glue on the realized
-  `riemMetricSpace` layer.  AND THE GLUE LANDED: **`limitComplete` DONE — D5 COMPLETE**
+  `riemMetricSpace` layer.  AND THE CONDITIONAL GLUE LANDED: **`limitComplete` DONE AS AN
+  ABSTRACT CONSUMER, NOT CONCRETE D5**
   (`MetricComplete (limitPointedCoc …)` from the exhaustion + stage-ball-compactness honest
   inputs; `EMetricSpace.toMetricSpace` uniformity-defeq + `ProperSpace.of_isCompact_closedBall_of_le`
   + ascribed `complete_of_proper`; needs `[NeZero (finrank ℝ E)]` + `[I.Boundaryless]` +
-  `[∀ k, PreconnectedSpace (A k)]`).  Step D completion: **~55%** (D3 ✓ D4a ✓ D5 ✓; remaining
-  D1, D2 (`lbl404` gate), D4b/c, D6).  **D1a UNBLOCK FOUND:** the bump-extension engine for the
+  `[∀ k, PreconnectedSpace (A k)]`).  Retrospective correction (2026-07-09): the actual open
+  stages do not satisfy the assumed stage-ball compactness, so concrete D5 still needs the
+  metric-exhaustion/compact-cover route recorded in the active status above.  The old ~55%
+  completion claim is withdrawn.  **D1a UNBLOCK FOUND:** the bump-extension engine for the
   composite pullback field already EXISTS — `Geometry/Metric/BumpExtend.lean`
   `SmoothRiemannianMetric.bumpExtendOpen` (partial metric on an open `U` + bump ⟹ total smooth
   metric agreeing with the partial one where `χ = 1`, with the `extZeroForm`/`bumpForm`/chart-frame
@@ -1476,11 +1631,10 @@ else is assembly against existing engines.
   elaboration/defeq blow-up, so the proof keeps the original metric-ball
   carrier and uses explicit intermediate types at the `himg_mid` boundary.
 
-  Honest status: `exists_directedApprox` is locally proved in
-  `StepDDirected.lean` modulo imported proof-frontier declarations.  It is not
-  axiom-clean yet: the proof still depends on `stepB1_approxIso` and on the
-  separated composition organs `compSepFwd`/`compSepRev`, which remain precise
-  `sorry` frontiers in upstream files by this phase's assumptions.  Next target:
-  do **not** restart `hacc`; prove `compSepFwd` and `compSepRev` in
-  `PullbackField.lean` from the existing `partialData_comp` organs, then return
-  to the B/C gate for `stepB1_approxIso`.
+  Honest status update (2026-07-09 later): `exists_directedApprox` is locally
+  proved in `StepDDirected.lean` modulo imported proof-frontier declarations.
+  The separated composition organs `compSepFwd` and `compSepRev` are now proved
+  in `PullbackField.lean`; do **not** restart `hacc` or re-open the scalar
+  ledger route.  The remaining D1b axiom-clean blockers are the B/C-track
+  `stepB1_approxIso` producer bundle and the inherited F5 uniform producer
+  behind `comp_cov_le_unif` / `Lemma45F4`.

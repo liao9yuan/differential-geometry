@@ -142,3 +142,10 @@ route is proven viable by `metricRm04Std_pullback`/`covDerivOfField_pullback`, s
 — but it is a multi-lemma build, not a quick fill. Everything downstream of it
 (`ricciSection_pullback` → `ricCovTower_pullback` → MovingShiBoundOn transfer) is mechanical
 given the banked engine.
+
+## 2026-07-09: compact-open pullback stability
+
+Added `metricCInf_pullback`, the direct compact-open convergence corollary of
+`metricDerivNormSupOn_pullback_image`. Focused verification and the targeted producer build
+passed without new `sorry`; this result is independent of the curvature frontier described
+above.

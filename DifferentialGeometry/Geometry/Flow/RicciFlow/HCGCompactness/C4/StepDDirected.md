@@ -3,7 +3,7 @@
 ## State (2026-07-09)
 
 Focused `StepDDirected.lean` verification passes with no local `sorry` warning.
-The `exists_directedApprox` recursion body is now locally closed in this file:
+The `directed_of_b1` recursion body is now locally closed in this file:
 the separated scalar gates (`sepTail`, `sepBeta`, `sepFeed_le_beta`,
 `sepNextC0_le`, `sepNextCov_le`), exact-zero base (`reflSepData`), and
 two-ledger `hacc` replacement all check.  The successor step uses the planned
@@ -11,23 +11,30 @@ split: peel-last forward via `compSepFwd`, peel-first reverse via `compSepRev`,
 then fold equality/germ transport plus `BookApproxIsoSep.ofParts`, finally
 restricting closed-ball data back to the required open-ball carrier.
 
-Important caveat: this is not axiom-clean completion of the whole D1/B/C stack.
-`exists_directedApprox` still depends on upstream proof-frontier declarations:
-`stepB1_approxIso` (B/C-track gate) and the separated composition organs
-`compSepFwd`/`compSepRev` in `PullbackField.lean`.  Those were intentionally
-left as frontiers in this phase.  The old single-`a` commented scaffolds were
-removed from `StepDDirected.lean` so future `sorry` greps are not misled by stale
-examples.
+Important caveat: this is not completion of the whole D1/B/C stack.
+`compSepFwd` and `compSepRev` are now proved in `PullbackField.lean`, so the
+separated-composition blocker is closed.  The F4/F5 uniform producer chain is
+also now proved and verified through this file.  The false P-only `stepB1_approxIso`
+was removed; `directed_of_b1` now takes an explicit `StepB1RawInput`.  Producing
+that package from the conditional compactness inputs is still the B/C frontier.  The old single-`a` commented
+scaffolds were removed from `StepDDirected.lean` so future `sorry` greps are not
+misled by stale examples.
 
-Progress accounting: D1b local theorem body is 100% closed modulo imported
-frontiers; D1b axiom-clean completion is still blocked by upstream organs.  Step
-D assembly/D6 remains 0% because no assembly theorem discharging
+Progress accounting: the conditional D1b consumer body is 100% checked, while
+the textbook D1b theorem from the endpoint hypotheses is 0%.  The missing producer
+is `StepB1RawInput`, not F4/F5 or the separated-composition organs.  Step D conditional
+machinery is about 87--88%;
+Step D assembly/D6 remains 0% because no assembly theorem discharging
 `metricCompactness` has been proved.  Whole HCG endpoint completion is still
 0%; machinery moves only modestly upward.
 
-Next target outside this phase: prove the `compSepFwd` and `compSepRev` organs
-from the existing `partialData_comp` proof organs in `PullbackField.lean`, then
-continue the B/C producer gate for `stepB1_approxIso`.
+Downstream check after refreshing `PullbackField.lean` passed: the proved
+`compSepFwd`/`compSepRev` bodies do not break the D1b consumer.
+
+Next target outside this phase: produce `StepB1RawInput` from the honest C-track
+data, or continue the independent Step D D2 limiting-metrics lane.
+The former F4 scaling gate is closed by `metricComp_mul`, explicit Claim-1/F3
+constants, and the completed `lemma45_corII_unif`.
 
 ## State (2026-07-07)
 
@@ -467,3 +474,14 @@ adapters check, replace `hacc` with the two-ledger invariant:
 - `c0 <= 2 * sepTail s l`;
 - `cov <= sepBeta B * sepTail s l`;
 - final endpoint wraps with `BookApproxIsoSep.toBook`.
+
+## 2026-07-09: D2 chain split API
+
+Added and focused-checked the target-normalized prefix-tail API used by D2:
+
+- `chainComp_add_apply` gives the pointwise split with the explicit Nat-associativity cast;
+- `chainCompAssoc` transports the full chain to target `M ((j+a)+b)`;
+- `chainCompAssoc_apply` and `chainCompAssoc_eq` identify it with the prefix followed by the tail.
+
+The dependent cast is handled once in this producer. D2 consumers no longer need to manipulate
+`j + (a+b)` versus `(j+a)+b` themselves.

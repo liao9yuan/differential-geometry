@@ -5,6 +5,18 @@ Producers for `stepB1_glue`'s inputs (`hloc`/`hinj`/`hbase`/approx-iso data) + t
 abstract convergence endpoint.  Everything here is sorry-free/axiom-clean
 (`[propext, Classical.choice, Quot.sound]`); full `lake build` green (3918 jobs, 2026-07-07).
 
+## 2026-07-09 API correction
+
+The false P-only `stepB1_approxIso` theorem was removed.  This producer layer now targets
+`StepB1RawInput`; the checked consumer is `stepB1_of_raw`, and Step D's conditional consumer is
+`directed_of_b1`.  These names reserve the textbook endpoint names for future theorems derived
+from the real compactness inputs.  Producer completion remains 0%: the package makes the missing
+B/C mathematics explicit but does not prove it.
+
+Focused verification passed after the API/comment refresh.  The local unused `hη` argument of
+`pullbackErrComp` was also removed; its only caller already carries the nonnegativity fact needed
+for the surrounding estimate.
+
 ## Delivered (goal-session 2026-07-07, all green)
 
 ### (b) `lbl403` — CLOSED (with `Geometry/Coordinates/LocalDiffeoIFT.lean`)
@@ -112,13 +124,13 @@ On top of it this file builds:
   weights is literally: pick `ψ`/`χ` = concrete `ContDiffBump` data, substitute the
   `StepCTransitionRefine` transition families for `J`, and supply the covering-positivity
   denominator bound (the one honest geometric input, shape pinned by `normWeightsConv.hlow`).
-- **BOOK-MECHANISM CORRECTION (goal-round 8)**: rereading L1622–78, the basepoint kill is
-  **ψ-support separation**, NOT the `χ`-cutoff — `J⁰(O_k) = 0` (own chart) where the `B⁰`-bump `χ`
-  is NONzero; it is `ψ_j(J_j O_k)` that vanish (`lbl383` separated balls put `O_k`'s non-base
-  chart images outside the `ψ_j` supports).  Added **`bumpNum_delta'`** (the ψ-kill version — USE
-  THIS for the instantiation); `bumpNum_delta` (χ-kill) kept as an alternative sufficient
-  condition, not dischargeable on the book's data.  A live instance of the
-  "follow-the-book-LaTeX-exactly" lesson.
+- **BOOK-MECHANISM CORRECTION (2026-07-09, superseding the old goal-round-8 reading)**:
+  MSM135 Chapter 4 lines 1586–94 explicitly choose `χ = 0` in a neighborhood of the origin and
+  `χ = 1` outside the base inner ball.  Hence the book-facing basepoint route is exactly
+  **`bumpNum_delta`**: `J⁰(O_k) = 0` and the cutoff kills every non-base numerator.
+  `bumpNum_delta'` remains a valid separation-based alternative, but it is not the mechanism used
+  by the text.  Consequently `seqChartNorm_ge` is reusable alternative infrastructure rather than
+  a required input for the book's basepoint identity.
 - **WEIGHTS-SLOT PRODUCER DONE (goal-round 9)** — **`weightsSlot`**: the COMPLETE weight pipeline
   `w_k := normWeights (bumpNum χ ψ (J · k) i0)` (fixed `ContDiffBump` data + `k`-side transition
   families) chained `bumpNumConv → normWeightsConv → comp_tendsto_atTop` into `averagedTargets₂`'s
@@ -127,11 +139,10 @@ On top of it this file builds:
   numerator `≥ δ`" (nonneg family + `Finset.single_le_sum`).  **The `lbl404` chain is now
   producer-complete end to end on the B side**: `averagedTargets₂ ∘ (weightsSlot, targetsDiagConv,
   chartCm_contDiffOn, diagEventuallyEqId/chartCm_diag)`; every remaining hypothesis is either
-  concrete data (`ContDiffBump` instances, `StepCTransitionRefine` transitions) or one of the two
-  pinned geometric honest inputs (per-point single-numerator lower bound; ψ-support separation at
-  the basepoint `bumpNum_delta'.hψ0`) — both dischargeable from `netList_separated`
-  (GoodCoveringOrdered:338) + the chart-metric bridges (`metricBall_subset_normalBall`) in the
-  follow-up instantiation session.
+  concrete data (`ContDiffBump` instances, `StepCTransitionRefine` transitions) or the pinned
+  covering/denominator input.  The book's basepoint identity uses the cutoff condition
+  `χ(J⁰(O_k)) = 0` and `bumpNum_delta`; `bumpNum_delta'.hψ0` plus `netList_separated` is only an
+  alternative route.
 
 ## Goal-rounds 9–15 (2026-07-07): the COMPLETE B-side chain, one route failure
 All green/axiom-clean unless noted (`lake build` 3918 each round):
@@ -343,7 +354,7 @@ unify.  `PullbackField.lean` (now Codex's lane per the 2026-07-07 migration) wor
 level directly to avoid this; the bridge should be owned there, not forced via the direct route.
 File deleted, not left in the tree.
 
-## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain## Three cross-layer bricks remain (each fresh-session-sized; ALL shapes pinned)
+## Three cross-layer bricks remain (historical 2026-07-07 snapshot)
 1. **tensor-norm bridge**: `metricTensorErrorNorm`/`normSq0S` (= `inner0S`, fiber metric layer)
    ↔ the chart bilinear-form `|·|` of `quadPerturbNeumann` — Tensor0S component/orthonormal-basis
    plumbing (`Tensor0SMetric.lean` stack).
@@ -375,3 +386,118 @@ quantitative variant additionally awaits the lbl430-bounds brick `j ≥ 2`).
 - Pi difference is `rfl` (`(f - g) = fun y i => f y i - g y i`); `simp [Pi.sub_apply]` "no progress".
 - `MapCInfConvOnCompacts.comp` needs `[ProperSpace F]` on the middle space — carry
   `[ProperSpace (P × Q)]` as instance hypothesis in the abstract endpoint.
+
+## 2026-07-09: radial separation brick closed
+
+The historical item 2 above is now closed at the correct layers:
+
+- `GaussLemmaPullback.mfderiv_exp_radial` is the public one-dimensional radial chain rule.
+- `StepBInputs.radialEnorm_normal` turns it into the exact `normalCoordMetric` extended-norm
+  equality formerly threaded as `hderiv` by `edistLeOfEquivOn` / `normLowerOfSep`.
+- `normLowerOfSepExp` specializes the generic distance estimate to the actual radial exponential
+  curve.  From segment containment in the named exponential ball and a Riemannian-distance lower
+  bound, it directly produces `lam / sqrt 2 ≤ ‖v‖`; both `C¹` regularity and the velocity identity
+  are now discharged internally.
+
+Focused checks passed for the exponential layer, `StepBInputs`, and the full
+`StepB1Producers` file; the two upstream modules were refreshed successfully.
+The targeted `StepB1Producers` module refresh exceeded the tool wall-clock twice (the longer
+attempt reached three minutes) without emitting a Lean diagnostic; the focused full-file check
+remains the successful proof verification for this edit.
+
+Honest progress accounting: this radial separation sub-brick is 100% complete.  The proposed
+producer theorem constructing `StepB1RawInput` is still unstated/unproved (0%), and therefore the
+textbook B1 theorem is still 0%; its dedicated machinery remains about 50%.  Step B overall stays
+about 50%, Chapter-4 machinery stays about 59–60%, and the conditional Theorem 3.9 endpoint stays
+0%.  The next real B/C producer frontier is concrete finite-hat/POU instantiation (including
+basepoint concentration) plus the uniform all-order bounds, not another radial derivative lemma.
+
+## 2026-07-09: concrete net-center chart separation
+
+The good-covering-to-weight chain now reaches the exact Euclidean norm bound:
+
+- `GoodCoveringSeq.seqCenter_zero`, `seqCenter_dist_ge`, and
+  `seqCenter_edist_ge` expose the base slot and `lambda D 0` separation for a
+  nonzero live sequence center.
+- `seqChartNorm_ge` combines that concrete Riemannian separation with
+  `normLowerOfSepExp`, the normal-chart round trip, and the named exponential
+  ball containment.  Its conclusion is the `lambda D 0 / sqrt 2 <= norm J`
+  estimate immediately preceding `bumpNumDeltaOfNorm.hfar`.
+
+Focused checks passed for `GoodCoveringSeq` and the full `StepB1Producers`
+file; the missing `StepCAveragePOU` artifact encountered downstream was
+refreshed successfully.  The `GoodCoveringSeq` exported module refresh also
+passed.
+
+Precise remaining design gap: `StepCProducers.stepCJoin` consumes an arbitrary
+bundled `SmoothPartitionOfUnity rho`, while the book-weight convergence and
+basepoint concentration chain in this file is built for the explicit chart
+family `normWeights (bumpNum ...)`.  No theorem currently constructs a global
+`SmoothPartitionOfUnity` whose chart readouts are those explicit weights, and
+`normWeights`/`bumpNum` occur nowhere outside this file.  Closing this requires
+one deliberate interface choice: construct the special global POU (including
+extension-by-zero, subordination, and denominator positivity), or generalize
+the Step-C averaging consumer to an explicit smooth/nonnegative/sum-one/
+subordinate weight package.  Do not hide this mismatch behind a new weight
+concentration hypothesis.
+
+Honest accounting remains unchanged at the rounded scale: the new sequence
+separation machinery is complete, but the `StepB1RawInput` producer and the
+textbook B1 theorem remain 0%; Step-B dedicated machinery is about 50%,
+Chapter-4 machinery about 59--60%, and the conditional Theorem 3.9 endpoint 0%.
+
+## 2026-07-09: explicit-weight interface decision
+
+The preceding interface choice is now resolved in favor of a lightweight
+`centerAverage.WeightDataOn` consumer bridge, while retaining the bundled POU
+entrypoints as compatibility wrappers.  This is forced by two live facts:
+
+- the averaging core uses only pointwise nonnegativity, a positive slot,
+  sum-one, and active-set membership; it does not consume global POU smoothness;
+- MSM135 makes the explicit weights subordinate to the radius-`5 lambda`
+  `B_k^alpha`, whereas the existing `StepCPartition.hatBall` is the
+  radius-`4 lambda` covering ball.  Packaging the book weights as the current
+  hat-subordinate `SmoothPartitionOfUnity` would assert the wrong support.
+
+The book-mechanism audit also corrected the old goal-round-8 note: Chapter 4
+chooses `chi = 0` near the origin, so `bumpNum_delta` is the actual basepoint
+route.  `bumpNum_delta'`, `bumpNumDeltaOfNorm`, and `seqChartNorm_ge` remain
+valid separation-based alternatives, not required book inputs.
+
+The explicit package bridge has now landed and passed focused verification.
+`normWeights_pos` supplies the positive slot from nonnegative numerators and a
+nonzero denominator; `num_ne_of_weight_ne` reduces active membership of a
+normalized weight to active membership of its numerator; `normWeights_data`
+assembles the generic `WeightDataOn`; and `bumpWeights_data` specializes it to
+`normWeights (bumpNum ...)`.  Denominator positivity and
+numerator-support-to-active-ball membership remain visible geometric inputs.
+
+The concurrent `StepB1ApproxIso` cleanup removed C-track transitive imports, so
+this producer now imports its actual dependencies (`StepBInputs`,
+`GaussLemmaPullback`, `StepCAveraging`, `StepCSmoothness`, and `GoodCoveringSeq`)
+directly.  In particular, the owner of `radialCurve_contMDiffAt2` is no longer
+reached accidentally through the C-track import closure.  The first
+two verification attempts encountered transient missing `.olean` files while
+those concurrently edited upstream modules were rebuilding; after the named
+artifacts stabilized, the full focused file check passed.
+
+Honest rounded accounting is unchanged: `StepB1RawInput` producer 0%, textbook
+B1 theorem 0%, Step-B dedicated machinery about 50%, Chapter-4 machinery about
+59--60%, and the conditional Theorem 3.9 endpoint 0%.
+
+## 2026-07-09: book-cutoff denominator reduction
+
+Added `bumpNum_sum_one`.  It isolates the two geometric cases in the MSM135
+basepoint modification: where the cutoff is `1`, an ordinary covering inner
+bump gives a unit numerator; where the cutoff is not `1`, membership in the
+base slot's inner bump gives the uncut base numerator `1`.  Nonnegativity then
+raises this to a lower bound of `1` for the full modified numerator sum.
+
+This does not assume the missing geometry.  The remaining concrete producer
+must still prove that the ordinary inner bumps cover and that the cutoff's
+non-one locus lies inside the base inner bump.  Focused verification passed
+after the stale upstream artifacts in the shared build tree were refreshed.
+
+The rounded accounting remains unchanged: this closes the algebraic
+denominator reduction, not the `StepB1RawInput` producer or textbook B1
+theorem; both remain 0%.

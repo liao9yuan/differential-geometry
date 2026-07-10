@@ -505,6 +505,111 @@ theorem metricSourceTargetDiff_apply
       Φ.map k (x : L.M) := by
   rfl
 
+/-- The differential of the source-to-target diffeomorphism is the ambient differential of the
+comparison map. -/
+theorem metricSourceTargetDiff_mfderiv
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedRiemannianCGMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace L.M := L.topology
+    letI : ChartedSpace H L.M := L.charted
+    letI : IsManifold I ∞ L.M := L.smooth
+    letI : TopologicalSpace (X.obj (subseq k)).M := (X.obj (subseq k)).topology
+    letI : ChartedSpace H (X.obj (subseq k)).M := (X.obj (subseq k)).charted
+    letI : IsManifold I ∞ (X.obj (subseq k)).M := (X.obj (subseq k)).smooth
+    letI : TopologicalSpace (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomCharted (I := I) Φ k
+    letI : IsManifold I ∞ (MetricSourceDomain (I := I) Φ k) :=
+      metricSourceDomSmooth (I := I) Φ k
+    letI : TopologicalSpace (MetricTargetDomain (I := I) Φ k) :=
+      metricTargetDomTop (I := I) Φ k
+    letI : ChartedSpace H (MetricTargetDomain (I := I) Φ k) :=
+      metricTargetDomCharted (I := I) Φ k
+    letI : IsManifold I ∞ (MetricTargetDomain (I := I) Φ k) :=
+      metricTargetDomSmooth (I := I) Φ k
+    ∀ (x : MetricSourceDomain (I := I) Φ k) (v : TangentSpace I x),
+      mfderiv I I (metricSourceTargetDiff (I := I) Φ k) x v =
+        mfderiv I I (Φ.map k) (x : L.M) v := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : ChartedSpace H L.M := L.charted
+  letI : IsManifold I ∞ L.M := L.smooth
+  letI : TopologicalSpace (X.obj (subseq k)).M := (X.obj (subseq k)).topology
+  letI : ChartedSpace H (X.obj (subseq k)).M := (X.obj (subseq k)).charted
+  letI : IsManifold I ∞ (X.obj (subseq k)).M := (X.obj (subseq k)).smooth
+  letI : TopologicalSpace (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomCharted (I := I) Φ k
+  letI : IsManifold I ∞ (MetricSourceDomain (I := I) Φ k) :=
+    metricSourceDomSmooth (I := I) Φ k
+  letI : TopologicalSpace (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomTop (I := I) Φ k
+  letI : ChartedSpace H (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomCharted (I := I) Φ k
+  letI : IsManifold I ∞ (MetricTargetDomain (I := I) Φ k) :=
+    metricTargetDomSmooth (I := I) Φ k
+  intro x v
+  let F := metricSourceTargetDiff (I := I) Φ k
+  have hFd : MDifferentiableAt I I (F : MetricSourceDomain (I := I) Φ k ->
+      MetricTargetDomain (I := I) Φ k) x :=
+    F.contMDiff.contMDiffAt.mdifferentiableAt (by decide)
+  have hvalT : MDifferentiableAt I I
+      (Subtype.val : MetricTargetDomain (I := I) Φ k -> (X.obj (subseq k)).M) (F x) :=
+    ContMDiffAt.mdifferentiableAt
+      ((contMDiff_subtype_val (I := I) (n := (∞ : WithTop ℕ∞))
+        (U := metricTargetOpen (I := I) Φ k)).contMDiffAt)
+      (by decide)
+  have hvalS : MDifferentiableAt I I
+      (Subtype.val : MetricSourceDomain (I := I) Φ k -> L.M) x :=
+    ContMDiffAt.mdifferentiableAt
+      ((contMDiff_subtype_val (I := I) (n := (∞ : WithTop ℕ∞))
+        (U := metricSourceOpen (I := I) Φ k)).contMDiffAt)
+      (by decide)
+  have hmap : MDifferentiableAt I I (Φ.map k) (x : L.M) :=
+    ((Φ.partialDiffeomorph k).contMDiffOn_toFun.contMDiffAt
+      ((Φ.partialDiffeomorph k).open_source.mem_nhds x.2)).mdifferentiableAt (by decide)
+  have hleft := mfderiv_comp x hvalT hFd
+  have hright := mfderiv_comp x hmap hvalS
+  have hfun :
+      (fun y : MetricSourceDomain (I := I) Φ k => ((F y :
+        MetricTargetDomain (I := I) Φ k) : (X.obj (subseq k)).M)) =
+        fun y : MetricSourceDomain (I := I) Φ k => Φ.map k (y : L.M) := by
+    funext y
+    exact metricSourceTargetDiff_apply (I := I) Φ k y
+  have heq : mfderiv I I
+      (fun y : MetricSourceDomain (I := I) Φ k => ((F y :
+        MetricTargetDomain (I := I) Φ k) : (X.obj (subseq k)).M)) x =
+      mfderiv I I (fun y : MetricSourceDomain (I := I) Φ k => Φ.map k (y : L.M)) x := by
+    rw [hfun]
+  have happ := DFunLike.congr_fun (hleft.symm.trans (heq.trans hright)) v
+  change
+      (mfderiv I I
+          (Subtype.val : MetricTargetDomain (I := I) Φ k -> (X.obj (subseq k)).M) (F x))
+        (mfderiv I I (F : MetricSourceDomain (I := I) Φ k ->
+          MetricTargetDomain (I := I) Φ k) x v) =
+      (mfderiv I I (Φ.map k) (x : L.M))
+        (mfderiv I I (Subtype.val : MetricSourceDomain (I := I) Φ k -> L.M) x v) at happ
+  have htarget :
+      (mfderiv I I
+          (Subtype.val : MetricTargetDomain (I := I) Φ k -> (X.obj (subseq k)).M) (F x))
+        (mfderiv I I (F : MetricSourceDomain (I := I) Φ k ->
+          MetricTargetDomain (I := I) Φ k) x v) =
+        mfderiv I I (F : MetricSourceDomain (I := I) Φ k ->
+          MetricTargetDomain (I := I) Φ k) x v := by
+    simpa only using mfderiv_subtype_val_apply (I := I)
+      (metricTargetOpen (I := I) Φ k) (F x)
+      (mfderiv I I (F : MetricSourceDomain (I := I) Φ k ->
+        MetricTargetDomain (I := I) Φ k) x v)
+  have hsource :
+      mfderiv I I (Subtype.val : MetricSourceDomain (I := I) Φ k -> L.M) x v = v := by
+    simpa only using mfderiv_subtype_val_apply (I := I)
+      (metricSourceOpen (I := I) Φ k) x v
+  rw [htarget, hsource] at happ
+  exact happ
+
 @[simp]
 theorem metricSourceTargetDiff_symm_apply
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}

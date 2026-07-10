@@ -85,20 +85,20 @@ noncomputable def endgamePhi
     PointedCGHMaps (I := I) X (L.atTime 0) mc.subseq :=
   pointedCGHMaps_of_atZero (I := I) X L mc.subseq (hL0.symm ▸ mc.maps)
 
-/-- **Brick 7b: the endgame assembly (assembly core).**  From the limit flow `L`
+/-- **Brick 7b: the concrete endgame upgrade data.**  From the limit flow `L`
 with `hL0 : L.atTime 0 = mc.limit`, the AA output `co` for the comparison maps
 `endgamePhi mc L hL0`, the metric identification `hLmetric` (the limit-flow metric
 IS the AA limit `co.gInf` on the window), the scalar-curvature pullback convergence
-`scalar`, and the window-covering hypothesis `hcarrier : X.D.carrier ⊆ [β,ψ]`, the
-time-zero Cheeger--Gromov compactness conclusion `mc` upgrades to full smooth
-Cheeger--Gromov--Hamilton convergence of the flows.
+`scalar`, and the window-covering hypothesis `hcarrier : X.D.carrier ⊆ [β,ψ]`,
+produce `FlowUpgradeData` over the time-zero Cheeger--Gromov compactness
+conclusion `mc`.
 
 The subsequence is re-indexed along `co.φ`; the re-indexed maps
 `(endgamePhi mc L hL0).compSubseq co.φ co.hφ` have, at stage `k`, source/target and
 partial diffeomorphism definitionally those of `endgamePhi` at `co.φ k`, so the conv
 field's `ofRestrictPullback` data reduces to the `ofRP_supOn_conv` bridge output by
 `rfl` (no `▸`-cast reconciliation needed). -/
-theorem flowLimit_of_maps
+noncomputable def flowUpgrade_of_maps
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (L : PointedFlowData (I := I) X.D)
     (P : PointedRiemannianManifold (I := I))
@@ -127,7 +127,8 @@ theorem flowLimit_of_maps
     (scalar : ScalarPullbackTendsto (I := I)
       (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
         PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
-    CompactnessConclusion (I := I) X := by
+    FlowUpgradeData (I := I) X mc := by
+  have hL0 : L.atTime (I := I) 0 = mc.limit := hPL.trans hPlim
   subst hPL
   letI : TopologicalSpace L.M := L.topology
   letI : ChartedSpace H L.M := L.charted
@@ -145,9 +146,12 @@ theorem flowLimit_of_maps
   -- the re-indexed Theorem 3.9 conclusion and the re-indexed spacetime maps
   set mc' := mc.compSubseq co.φ co.hφ with hmc'
   set Φ' := (Φ).compSubseq co.φ co.hφ with hΦ'
-  -- assemble the FlowLimitData for the re-indexed conclusion `mc'`
-  refine flowLimit_upgrade (I := I) X mc'
+  -- expose the further subsequence and its concrete FlowLimitData
+  refine ⟨co.φ, co.hφ, ?_⟩
+  change FlowLimitData (I := I) X mc'
+  refine
     { L := L
+      hL0 := by simpa [mc'] using hL0
       maps := Φ'
       scalar := hscalar
       hσsrc := ?_
@@ -179,6 +183,41 @@ theorem flowLimit_of_maps
     have htβψ : t ∈ Set.Icc β ψ := hcarrier (hab ht)
     exact hk0 k hk t htβψ
 
+/-- Assemble the smooth CGH compactness conclusion from the concrete endgame
+upgrade data produced by `flowUpgrade_of_maps`. -/
+theorem flowLimit_of_maps
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
+    (L : PointedFlowData (I := I) X.D)
+    (P : PointedRiemannianManifold (I := I))
+    (hPlim : P = mc.limit)
+    (hPL : L.atTime (I := I) 0 = P)
+    (Φ : PointedCGHMaps (I := I) X P mc.subseq)
+    (R :
+      letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M)
+    (bf : BumpFamily (I := I) Φ)
+    (hsrc : SrcSigma (I := I) Φ)
+    (htgt : TgtSigma (I := I) Φ)
+    (β ψ : Real)
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (hLmetric :
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : T2Space L.M := L.t2
+      letI : IsManifold I ∞ L.M := L.smooth
+      letI : SigmaCompactSpace L.M := L.sigmaCompact
+      forall t : Real, t ∈ Set.Icc β ψ ->
+        HEq (L.S.family.metric t) (co.gInf t))
+    (scalar : ScalarPullbackTendsto (I := I)
+      (hPL.symm ▸ (Φ.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X (L.atTime 0) (mc.subseq ∘ co.φ))) :
+    CompactnessConclusion (I := I) X :=
+  (flowUpgrade_of_maps (I := I) (X := X) mc L P hPlim hPL Φ R bf hsrc htgt
+    β ψ hcarrier co hLmetric scalar).toConclusion
+
 /-- Compatibility wrapper: `flowLimit_of_maps` at the endgame maps
 `endgamePhi mc L hL0` (the time-0 comparison maps transported to `L`). -/
 theorem flowLimit_of_co
@@ -209,7 +248,7 @@ theorem flowLimit_of_co
   flowLimit_of_maps (I := I) mc L (L.atTime 0) hL0 rfl (endgamePhi (I := I) mc L hL0) R bf hsrc htgt β ψ
     hcarrier co (fun t ht => heq_of_eq (hLmetric t ht)) scalar
 
-/-- **The P4 endgame theorem — MSM135 Thm 3.10 ⇐ 3.9 (assembled from `mc`).**
+/-- **The concrete P4 endgame data — MSM135 Thm 3.10 ⇐ 3.9.**
 From the time-0 metric Cheeger–Gromov compactness `mc`, the limit-manifold
 comparison maps `Φ₀` (built from `mc.maps` on `mc.limit`), the Arzelà–Ascoli
 output `co := convOut …` (the tracked AA producer, fed by the Brick-7a
@@ -217,14 +256,64 @@ producers), the time-0 identification `hzero : co.gInf 0 = mc.limit.metric`
 (discharger = `gInf_zero_eq` from `mc.convergence`), the limit Ricci-flow
 certificate `hsol` (built by `isSolutionOn_of_reg` from the tracked joint
 regularity `hsmooth` and the PDE/continuity producers), and the scalar-curvature
-pullback convergence `scalar` (discharger = `scalarConv_of_dnConv`), the sequence
-of flows has a smooth Cheeger–Gromov–Hamilton convergent subsequence.
+pullback convergence `scalar` (discharger = `scalarConv_of_dnConv`), produce the
+concrete `FlowUpgradeData` consumed by the canonical Theorem 3.10 endpoint.
 
 The limit flow is `L := flowOfMetric X.D mc.limit co.gInf hsol`, whose time-0
 slice is `mc.limit` by `flowOfMetric_atTime` (this is `hL0`), and whose metric
 family is `co.gInf` definitionally.  `flowLimit_of_maps` is instantiated at
 `P := mc.limit` with the maps `Φ₀` DIRECTLY — no phantom-`L` cast, since the AA
 machinery is re-indexed by `P` (2026-07-06 refactor). -/
+noncomputable def flowUpgrade_of_mc
+    (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
+    (Φ₀ : PointedCGHMaps (I := I) X mc.limit mc.subseq)
+    (R :
+      letI : TopologicalSpace mc.limit.M := mc.limit.topology
+      letI : ChartedSpace H mc.limit.M := mc.limit.charted
+      letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
+      SmoothRiemannianMetric I mc.limit.M)
+    (bf : BumpFamily (I := I) Φ₀)
+    (hsrc : SrcSigma (I := I) Φ₀)
+    (htgt : TgtSigma (I := I) Φ₀)
+    (β ψ : Real)
+    (hcarrier : X.D.carrier ⊆ Set.Icc β ψ)
+    (co : ConvOut (I := I) Φ₀ R bf hsrc htgt β ψ)
+    (hzero :
+      letI : TopologicalSpace mc.limit.M := mc.limit.topology
+      letI : ChartedSpace H mc.limit.M := mc.limit.charted
+      letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
+      co.gInf 0 = mc.limit.metric)
+    (hsol :
+      letI : TopologicalSpace mc.limit.M := mc.limit.topology
+      letI : ChartedSpace H mc.limit.M := mc.limit.charted
+      letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth
+      letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact
+      letI : T2Space mc.limit.M := mc.limit.t2
+      letI : IsManifold I 1 mc.limit.M :=
+        IsManifold.of_le (I := I) (M := mc.limit.M) (n := ∞)
+          (by decide : (1 : WithTop ℕ∞) ≤ ∞)
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) mc.limit.M := by
+        change IsManifold I ∞ mc.limit.M
+        infer_instance
+      DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I)
+        ({ base := { metric := co.gInf } } :
+          DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := mc.limit.M) X.D))
+    (scalar : ScalarPullbackTendsto (I := I)
+      ((flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero).symm ▸
+        (Φ₀.compSubseq co.φ co.hφ) :
+        PointedCGHMaps (I := I) X
+          ((flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime 0)
+          (mc.subseq ∘ co.φ))) :
+    FlowUpgradeData (I := I) X mc := by
+  have hL0 :
+      (flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime (I := I) 0 = mc.limit :=
+    flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero
+  exact flowUpgrade_of_maps (I := I) mc
+    (flowOfMetric (I := I) X.D mc.limit co.gInf hsol) mc.limit rfl hL0 Φ₀
+    R bf hsrc htgt β ψ hcarrier co (fun t _ => HEq.rfl) scalar
+
+/-- **The P4 endgame theorem — MSM135 Theorem 3.10 from Theorem 3.9.**
+Assemble the smooth CGH compactness conclusion from `flowUpgrade_of_mc`. -/
 theorem flowLimit_of_mc
     (mc : MetricCompactnessConclusion (I := I) (X.atZero (I := I)))
     (Φ₀ : PointedCGHMaps (I := I) X mc.limit mc.subseq)
@@ -265,13 +354,9 @@ theorem flowLimit_of_mc
         PointedCGHMaps (I := I) X
           ((flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime 0)
           (mc.subseq ∘ co.φ))) :
-    CompactnessConclusion (I := I) X := by
-  have hL0 :
-      (flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime (I := I) 0 = mc.limit :=
-    flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero
-  exact flowLimit_of_maps (I := I) mc
-    (flowOfMetric (I := I) X.D mc.limit co.gInf hsol) mc.limit rfl hL0 Φ₀
-    R bf hsrc htgt β ψ hcarrier co (fun t _ => HEq.rfl) scalar
+    CompactnessConclusion (I := I) X :=
+  (flowUpgrade_of_mc (I := I) (X := X) mc Φ₀ R bf hsrc htgt β ψ
+    hcarrier co hzero hsol scalar).toConclusion
 
 /-- **P4 endgame wiring, steps 1–3: the AA output from the book-cited
 sequence-flow inputs.**  Executes the four Brick-7a producers

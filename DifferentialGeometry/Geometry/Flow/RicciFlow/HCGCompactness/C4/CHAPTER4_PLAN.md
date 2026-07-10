@@ -14,6 +14,15 @@ frontier.  Report Theorem 3.9 progress against the conditional endpoint only.
 The per-field mathematical audit lives in `MetricCompactnessInputs.lean` and
 `../PROJECT_MAP.md`.
 
+**Current interface repair (2026-07-09):** the former P-only
+`stepB1_approxIso` statement was false and has been deleted.  The checked
+assembly is now `stepB1_of_raw`, consuming `StepB1RawInput`; Step D exposes the
+same missing producer explicitly through `directed_of_b1`.  Likewise, the
+former all-order `cmChartDerivLe` endpoint was deleted: only
+`cmChartDerivLe2` (`j ≤ 2`) is checked, while the arbitrary-order recurrence is
+unstated and 0%.  Older occurrences of those two deleted theorem names below
+describe historical planning only; they are not live APIs or proved gates.
+
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
 ONLY where the book itself cites an external theorem (`lbl384`, the Rauch comparison
 in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: the
