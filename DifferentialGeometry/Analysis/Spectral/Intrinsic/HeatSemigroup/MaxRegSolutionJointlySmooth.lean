@@ -552,9 +552,8 @@ symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the 
 `gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e.
 per mode by globally smooth functions `f i` carrying all-order weighted spectral mass bounds,
 and the solution-field coordinates are the corresponding per-mode convolutions. Symmetric
-mirror of the proven raw helper `forcingSmoothCoordsRealize` (snapshot `c848da47`); its proof
-(the symmetrized forcing time-coordinate chain) has not landed yet, so consumers transitively
-depend on `sorryAx` until it does. -/
+mirror of the raw helper `forcingSmoothCoordsRealize` (snapshot `c848da47`), proven through
+the symmetrized forcing time-coordinate chain. -/
 private theorem forcingSmoothCoordsRealizeSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -625,10 +624,9 @@ set_option linter.unusedVariables false in
 /-- **Posited deferred input (`sorry`).** Smallness horizon for the symmetrized solution
 field: for any prescribed radius `0 < R₀` there is a positive horizon `d₂ ≤ T` on which every
 smooth representative of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution has
-`H^{a+2}` norm at most `R₀`. Symmetric mirror of the proven raw helper
-`realizedSol_solField_smallnessHorizon_Ha2` (snapshot `c848da47`); its proof (small-time
-smallness through the symmetrized forcing coordinates) has not landed yet, so consumers
-transitively depend on `sorryAx` until it does. -/
+`H^{a+2}` norm at most `R₀`. Symmetric mirror of the raw helper
+`realizedSol_solField_smallnessHorizon_Ha2` (snapshot `c848da47`), proven by small-time
+smallness through the symmetrized forcing coordinates. -/
 private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -690,9 +688,8 @@ symmS-precomposed smooth remainder: on the smallness horizon, for any pinned smo
 representative family `F` of the `deTurckSobolevNHa2Symm`-driven solution staying in the
 `deTurckSobolevNHa2_exists_of_super` ball, the smooth per-mode forcing coordinate `f i t`
 equals the `i`-th eigencoefficient of `deTurckSmoothRemainder g₀ g_bg (symmS g₀ (F t))`.
-Symmetric mirror of the proven raw helper `realizedForcingCoord_eq_smoothN` (snapshot
-`c848da47`), with `deTurckSobolevNHa2Symm_eq_smoothN` replacing the raw evaluation lemma; its
-proof has not landed yet, so consumers transitively depend on `sorryAx` until it does. -/
+Symmetric mirror of the raw helper `realizedForcingCoord_eq_smoothN` (snapshot
+`c848da47`), with `deTurckSobolevNHa2Symm_eq_smoothN` replacing the raw evaluation lemma. -/
 private theorem realizedForcingCoord_eq_smoothNSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -915,11 +912,8 @@ with all-order weighted mass bounds, and on the smallness horizon these coordina
 realized by the symmS-precomposed smooth remainder
 `deTurckSmoothRemainder g₀ g_bg (symmS g₀ (Ffam t))` of any pinned smooth representative
 family. Symmetric-sector mirror of the raw `deTurckRicci_forcingBootstrap`, assembled from the
-posited children `forcingSmoothCoordsRealizeSymm`,
-`realizedSol_solField_smallnessHorizon_Ha2Symm`, and `realizedForcingCoord_eq_smoothNSymm`;
-those children are still `sorry`, so this theorem and every consumer — including
-`deTurckRicci_solution_with_jointReg` and `ricci_flow_short_time_existence` — transitively
-depend on `sorryAx` until they land. -/
+proven children `forcingSmoothCoordsRealizeSymm`,
+`realizedSol_solField_smallnessHorizon_Ha2Symm`, and `realizedForcingCoord_eq_smoothNSymm`. -/
 theorem deTurckRicci_forcingBootstrap_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) :

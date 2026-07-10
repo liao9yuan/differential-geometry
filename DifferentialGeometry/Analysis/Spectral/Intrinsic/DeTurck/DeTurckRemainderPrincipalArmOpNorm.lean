@@ -4712,8 +4712,8 @@ set_option maxHeartbeats 1000000 in
 objects are extracted — the fibre-small `(2+2,2)`-coefficient `C₂` and the arm-zero
 `(2+0,2)`-coefficient `C₀` carrying the two-arm jet envelope (naked window plus the
 `εa`-rated top arm) — and the residual is the order-one arm, whose jets obey the pure
-naked-window bound. The `C₀`-envelope's top arm rides the two-arm correction-field interface,
-so consumers transitively depend on `sorryAx` until corr-discharge lands. -/
+naked-window bound. The `C₀`-envelope's top arm rides the proven two-arm correction-field
+interface. -/
 theorem exists_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm_iteratedCovGrad_jet_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -4816,8 +4816,7 @@ set_option maxHeartbeats 1000000 in
 the fibre-small `(2+2,2)`-coefficient `C₂` and the arm-zero `(2+0,2)`-coefficient `C₀` (the
 latter carrying the two-arm jet envelope) are handed over with their fibre-sup and envelope
 rows, and the residual order-one arm obeys the pure one-order-loss tame bound on the spectral
-scale. Consumers transitively depend on `sorryAx` via the two-arm correction-field interface
-until corr-discharge lands. -/
+scale. -/
 theorem exists_smoothCcToTensorHs_deTurckSmoothRemainderDiff_sub_principalCometricArm_smallThirdArm_tame_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9107,10 +9106,9 @@ order zero (binomial-one top jet), the cross/commutator blocks fall to the `Kop`
 slot, and the coefficient's `εa`-arm supplies the top jet at every rung with the same `εa` —
 which is what keeps the top constant `B εa` rung-uniform.  Proven by the coefficient-side
 spectral transport `bal_transport` (top branch `bal_top`/`bal_top_odd`, transported blocks
-`bal_Etrans`), with the exact top threaded through the operator-rank Gårding core `bal_Ccore`;
-the one remaining deferred input is the posited Φ-side double-trace exchange
-`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`, so consumers transitively depend
-on `sorryAx` until that lands. -/
+`bal_Etrans`), with the exact top threaded through the operator-rank Gårding core `bal_Ccore`
+and the proven Φ-side double-trace exchange
+`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private lemma appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9370,9 +9368,9 @@ supplies the top jet at every order with the same `εa`.  Assembled from the per
 `appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` by the even/odd spectral rung identities
 (`smoothCcToTensorHs_even_norm_eq_toL2_iter`, `smoothCcToTensorHs_odd_norm_sq_eq_toL2_iter_add_covGrad`);
 consumed by `appCc_armZeroTwoArmCoeff_opNorm_core` after the symmetric-data eigenbound
-`armZeroTwoArm_data_fibreNormSq_le` supplies `B = √n δ`.  The ladder engine is proven modulo
-the posited Φ-side double-trace exchange `rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`,
-so consumers transitively depend on `sorryAx` until that lands. -/
+`armZeroTwoArm_data_fibreNormSq_le` supplies `B = √n δ`.  The ladder engine closes over
+the proven Φ-side double-trace exchange
+`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private lemma appCc_armZeroTwoArm_spectralCore
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9461,9 +9459,8 @@ third-arm machine `exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`, w
 smallness moved from the coefficient sup to the data pointwise value.  Assembled from the
 symmetric-data eigenbound `armZeroTwoArm_data_fibreNormSq_le` (`√n δ` fibre bound) feeding the
 `m`-uniform spectral core `appCc_armZeroTwoArm_spectralCore`; the per-rung ladder engine
-`appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` is proven modulo the posited Φ-side
-double-trace exchange `rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`, so
-consumers transitively depend on `sorryAx` until that lands. -/
+`appCc_armZeroTwoArm_oneMinusConnLapIter_l2_le` closes over the proven Φ-side
+double-trace exchange `rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private lemma appCc_armZeroTwoArmCoeff_opNorm_core
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9537,10 +9534,9 @@ is tame of order two on the spectral Sobolev scale with the δ-rated top coeffic
 against the pointwise `√n δ`-small symmetric data (eigenvalue bound), while every other term
 loses at least one order into the family-uniform lower slot. Mirrors the proven fibre-small
 third-arm machine (`exists_smoothCcToTensorHs_appCc_fibreSmallCoeff_opNorm_le`) with the
-roles of coefficient and data smallness exchanged; the ladder engine underneath is proven
-modulo the posited Φ-side double-trace exchange
-`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`, so every consumer transitively
-depends on `sorryAx` until that lands. -/
+roles of coefficient and data smallness exchanged; the ladder engine underneath
+closes over the proven Φ-side double-trace exchange
+`rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs`. -/
 private theorem exists_smoothCcToTensorHs_appCc_armZeroTwoArmCoeff_opNorm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -9605,9 +9601,7 @@ set_option maxHeartbeats 1000000 in
 /-- Split of the remainder difference into the principal cometric arm, a small third arm whose
 top-jet coefficient carries the full `32 f³ (δ/(1-δ))` budget cap, and a tame remainder: the
 third arm folds the fibre-small `C₂`-application together with the two-arm `C₀`-application,
-whose δ-rated top coefficients assemble under the cap via `28 f² + (32 f³ - 28 f²) = 32 f³`.
-Consumers transitively depend on `sorryAx` via the two-arm correction-field interface and the
-arm-zero two-arm engine until corr-discharge lands. -/
+whose δ-rated top coefficients assemble under the cap via `28 f² + (32 f³ - 28 f²) = 32 f³`. -/
 theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThirdArm_add_tame
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
