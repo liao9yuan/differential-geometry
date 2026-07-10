@@ -330,11 +330,10 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  -- Both sides are `(0, r)`-tensors at `x`, i.e. CLMs `T0S(0) →L T0S(r)`; test on `d`.
+
   apply ContinuousLinearMap.ext
   intro d
-  -- `appCc`'s section value is definitionally the fibrewise composition (`appCc_toSection` is `rfl`);
-  -- `Φ₀`'s fibre is definitionally the bundled curvature endomorphism (`diffCurvPhi0Fib` is `rfl`).
+
   show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
       (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x) d =
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
@@ -344,7 +343,7 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
   rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
       (curvatureContraction (I := I) (M := M) g r W hX hY).toSection x from rfl,
     curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
-  -- Goal: riemannOp(tensorCov g 0 r) x (X x)(Y x)(W x) d = riemannOp(tensor0SCov r) x (X x)(Y x)(W x d).
+
   obtain ⟨dSec, hdSec⟩ := ContMDiffSection.exists_eq_at (I := I)
     (F := Tensor0SModel 0 ℝ E) (V := fun y : M => Tensor0SSpace 0 I y) (n := (⊤ : ℕ∞)) x d
   have hWd_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
@@ -352,7 +351,7 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
         (E := fun z : M => Tensor0SSpace r I z) y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace r I y from W.toSection y) (dSec y))) :=
     ContMDiff.clm_bundle_apply (b := id) W.toSection.contMDiff dSec.contMDiff
-  -- LHS: convert riemannOp(tensorCov)(W x) d to riemannSec and apply the Hom-bundle naturality.
+
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
         riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x)) d =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
@@ -381,7 +380,7 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
     riemannSec_tensor0SCov_zero_eq_zero (I := I) (M := M) g ⟨fun b => X b, hX⟩ ⟨fun b => Y b, hY⟩
       (fun b => dSec b) dSec.contMDiff x]
   rw [map_zero, sub_zero]
-  -- RHS: convert riemannOp(tensor0SCov r)(W x d) to riemannSec of the same paired section.
+
   rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
         riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
           x (X x) (Y x))
@@ -469,8 +468,7 @@ theorem exists_proportional_diffCurvOp_highOrder :
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
-  -- The recursion of `diffCurvOp` in the engine's `castRankCc_db` form (the tower's `covGrad_diffCurvOp_eq`
-  -- uses `castRankCc_lg`, defeq to `castRankCc_db` — both are `h ▸ ·`).
+
   have hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       covGrad g 0 (r + p) (diffCurvOp (I := I) (M := M) g hX hY p r W) =
         diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W +
@@ -479,19 +477,19 @@ theorem exists_proportional_diffCurvOp_highOrder :
     intro p r W
     rw [covGrad_diffCurvOp_eq (I := I) (M := M) g hX hY p r W]
     rfl
-  -- The operator-field normal form holds at every order from the (proved) base factorisation.
+
   have hNF : ∀ (p r : ℕ),
       NormalForm (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) p r :=
     fun p => normalForm_of_base (I := I) (M := M) g
       (diffCurvOp (I := I) (M := M) g hX hY) hcovGrad_op
       (fun r => diffCurvPhi0 (I := I) (M := M) g hX hY r)
       (fun r W => diffCurvOp_zero_eq_appCc (I := I) (M := M) g hX hY r W) p
-  -- The per-order jet envelope, assembled into a per-order, per-rank family.
+
   choose kap hkap_nn hkap using fun p r =>
     exists_jet_bound_of_normalForm (I := I) (M := M) g
       (diffCurvOp (I := I) (M := M) g hX hY) p r (hNF p r)
   refine ⟨fun p r => kap (p + 1) r, fun p r => hkap_nn (p + 1) r, fun p r W x => ?_⟩
-  -- The order-`(p + 1)` jet bound has window `range ((p + 1) + 1) = range (p + 2)`.
+
   have h := hkap (p + 1) r W x
   rw [show (p + 1) + 1 = p + 2 from rfl] at h
   exact h
@@ -550,13 +548,13 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
-  -- Non-negativity of `g.inner x v v` (metric positive-definiteness).
+
   have hgnn : ∀ (x : M) (v : TangentSpace I x), 0 ≤ g.inner x v v := by
     intro x v
     rcases eq_or_ne v 0 with hv0 | hv0
     · rw [hv0]; simp
     · exact (g.pos x v hv0).le
-  -- Smoothness (hence continuity) of the metric self-pairings of the global frame fields `X`, `Y`.
+
   have hgcont : ∀ (Z : Π b : M, TangentSpace I b),
       ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z) → Continuous (fun x : M => g.inner x (Z x) (Z x)) := by
     intro Z hZ
@@ -575,8 +573,7 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
   have hYcont : Continuous (fun x : M => g.inner x (Y x) (Y x)) := hgcont Y hY
   cases p with
   | zero =>
-      -- Order `0`: the continuous envelope is the rank-`r` curvature-operator envelope `Ccurv r`
-      -- times the continuous metric factors `g(X, X) · g(Y, Y)` — no supremum required.
+
       choose Ccurv hCcurv_cont hCcurv_nn hCcurv using
         fun r => exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional
           (I := I) (M := M) g r
@@ -584,16 +581,13 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
         fun r => ((hCcurv_cont r).mul hXcont).mul hYcont, fun r x => ?_, fun r W x => ?_⟩
       · exact mul_nonneg (mul_nonneg (hCcurv_nn r x) (hgnn x (X x))) (hgnn x (Y x))
       · rw [Finset.sum_range_one]
-        -- The single jet summand `rfns g 0 (r + 0) x ((∇^0 W).toSection x)` is defeq to
-        -- `rfns g 0 r x (W.toSection x)`; the order-`0` contraction is value-local.
+
         rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
             riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x) from
           curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
         exact hCcurv r x (X x) (Y x) (W.toSection x)
   | succ p' =>
-      -- Order `p' + 1 ≥ 1`: the per-tower posited high-order **jet** envelope, as a constant (hence
-      -- continuous) per-rank function; its window `range (p' + 2)` is the per-order window
-      -- `range ((p' + 1) + 1)`.
+
       obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
         exists_proportional_diffCurvOp_highOrder (I := I) (M := M) g hX hY
       refine ⟨fun r _ => kappaHigh p' r, fun r => continuous_const,
@@ -713,7 +707,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       exact hkappa p r W x
   | succ j ih =>
       intro p r W x
-      -- Abbreviations for the target order × rank window `K` and gradient-order jet grid `S` at j+1.
+
       set K : ℝ := gridWindowSum kappa p r (j + 1) with hK_def
       set S : ℝ := ∑ q ∈ Finset.range (p + (j + 1) + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
@@ -722,7 +716,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       have hS_nn : 0 ≤ S := Finset.sum_nonneg fun q _ =>
         riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _
       have hpow_nn : (0 : ℝ) ≤ (4 : ℝ) ^ j := by positivity
-      -- Front-commute the innermost gradient and expand the single covariant gradient by Leibniz.
+
       rw [show riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + (j + 1)) x
             ((iteratedCovGrad g 0 (r + p) (j + 1)
               (diffCurvOp (I := I) (M := M) g hX hY p r W)).toSection x) =
@@ -740,18 +734,18 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
             (castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
               (diffCurvOp (I := I) (M := M) g hX hY p (r + 1)
                 (covGrad (I := I) (M := M) g 0 r W)))).toSection x)).trans ?_
-      -- Abbreviate the order × rank window sums (`kA`, `kB`) and gradient jet grids (`sA`, `sB`).
+
       set kA : ℝ := gridWindowSum kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum kappa p (r + 1) j with hkB_def
-      -- Branch A's `(p+1, r, W)` jet window `range ((p+1)+j+1) = range (p+(j+1)+1)` equals `S`.
+
       set sA : ℝ := ∑ q ∈ Finset.range ((p + 1) + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hsA_def
-      -- Branch B's `(p, r+1, ∇W)` jet window `range (p+j+1)`, summand shifted to `∇^{q+1}W`.
+
       set sB : ℝ := ∑ q ∈ Finset.range (p + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (q + 1)) x
           ((iteratedCovGrad g 0 r (q + 1) W).toSection x) with hsB_def
-      -- The induction hypothesis on the two pieces, factored to `4^j · (k · s)`.
+
       have hA : riemannianFiberNormSq (I := I) (M := M) g 0 ((r + (p + 1)) + j) x
             ((iteratedCovGrad g 0 (r + (p + 1)) j
               (diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W)).toSection x) ≤
@@ -759,7 +753,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
         refine (ih (p + 1) r W x).trans_eq ?_
         rw [hkA_def, hsA_def, mul_assoc]
       have hB0 := ih p (r + 1) (covGrad (I := I) (M := M) g 0 r W) x
-      -- Shift the second piece's `q`-grid `∇^q(∇W) = ∇^{q+1}W`.
+
       have hBshift : gridWindowSum kappa p (r + 1) j *
             ∑ q ∈ Finset.range (p + j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 ((r + 1) + q) x
@@ -775,19 +769,19 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
           (4 : ℝ) ^ j * (kB * sB) := by
         refine hB0.trans_eq ?_
         rw [mul_assoc, ← hBshift]
-      -- The four window/grid sums are dominated by `K` resp. `S`, all nonnegative.
+
       have hkA_le : kA ≤ K := by
         rw [hkA_def, hK_def]
         exact gridWindowSum_shift_le hkappa_nn p r j 1 0 le_rfl (Nat.zero_le _)
       have hkB_le : kB ≤ K := by
         rw [hkB_def, hK_def]
         exact gridWindowSum_shift_le hkappa_nn p r j 0 1 (Nat.zero_le _) le_rfl
-      -- Branch A's jet window equals the target window `range (p+(j+1)+1)`.
+
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
         exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
-      -- Branch B's shifted jet window `range (p+j+1)` of `∇^{q+1}W` sits inside the target.
+
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
         refine le_trans (sum_range_shift_le (p + j + 1)
@@ -803,7 +797,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       have hsB_nn : 0 ≤ sB :=
         Finset.sum_nonneg fun q _ =>
           riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + (q + 1)) x _
-      -- Combine: 2·4^j·(kA·sA) + 2·4^j·(kB·sB) ≤ 4^{j+1}·(K·S).
+
       have hprodA : kA * sA ≤ K * S := mul_le_mul hkA_le hsA_le hsA_nn hK_nn
       have hprodB : kB * sB ≤ K * S := mul_le_mul hkB_le hsB_le hsB_nn hK_nn
       have hgoal : (2 : ℝ) * ((4 : ℝ) ^ j * (kA * sA)) +
@@ -822,7 +816,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
         rw [hK_def, hS_def, mul_assoc]
       rw [htarget] at hgoal
       refine le_trans ?_ hgoal
-      -- The second addend carries the rank-cast; convert it to `hB`'s uncast fibre norm.
+
       have hb_eq : riemannianFiberNormSq (I := I) (M := M) g 0 (((r + p) + 1) + j) x
             ((iteratedCovGrad g 0 ((r + p) + 1) j
               (castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
@@ -876,8 +870,7 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaG
   refine ⟨kappa, hkappa_nn, fun Z j x => ?_⟩
   have hgrid := rfns_iteratedCovGrad_diffCurvOp_grid (I := I) (M := M) g hX hY
     hkappa_nn hkappa j 0 s Z x
-  -- `diffCurvOp 0 s Z = curvatureContraction g s Z hX hY`, and `s + 0 = s`; the grid's jet window at
-  -- `p = 0` is `range (0 + j + 1) = range (j + 1)`, the claimed `∑_{q < j + 1} rfns`.
+
   rw [diffCurvOp_zero g hX hY s Z] at hgrid
   simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 

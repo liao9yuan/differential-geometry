@@ -93,10 +93,10 @@ private theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS
         (chartBasisVecFiber (I := I) α (Jdx 0) b)
         (chartBasisVecFiber (I := I) α (Jdx 1) b) := by
   classical
-  -- Closed-form: the raw `(0,2)` component is `(toSection b)(chartFrameBasis)` on the chart tuple.
+
   rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (deTurckRHSSectionBg (I := I) g_bg g₁) α hb Idx Jdx]
-  -- For `r = 0`, the chart-frame basis element is the canonical `(0,0)` unit `constOfIsEmpty 1`.
+
   have hframe : chartFrameBasisModel (I := I) (M := M) α b 0 Idx =
       (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I b) (1 : ℝ)) := by
@@ -107,13 +107,13 @@ private theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     exact h
   rw [hframe]
-  -- The section value at the unit recovers `deTurckRicciRHS` via the model-evaluation identity.
+
   have hmodel := deTurckRHSSection_toModel_apply (I := I) g_bg g₁ b
     (fun k : Fin 2 => chartBasisVecFiber (I := I) α (Jdx k) b)
-  -- `(deTurckRHSSectionBg g_bg g₁).toSection b = (deTurckRHSSection g_bg g₁).toSection b` by rfl.
+
   rw [show (deTurckRHSSectionBg (I := I) g_bg g₁).toSection b =
       (deTurckRHSSection (I := I) g_bg g₁).toSection b from rfl]
-  -- The direct bilinear evaluation of the `(0,2)` fibre value agrees with its `toModel` value.
+
   have hdirect :
       ((deTurckRHSSection (I := I) g_bg g₁).toSection b
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -147,22 +147,22 @@ theorem tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie
     chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hb
   set v₀ : TangentSpace I b := chartBasisVecFiber (I := I) α (Jdx 0) b with hv₀_def
   set v₁ : TangentSpace I b := chartBasisVecFiber (I := I) α (Jdx 1) b with hv₁_def
-  -- Step 1+2: raw component = `deTurckRicciRHS g_bg g₁ b v₀ v₁`.
+
   rw [tensorChartComponentRaw_deTurckRHSSectionBg_eq_deTurckRicciRHS (I := I) (M := M) g_bg g₁ α
       hb_src Idx Jdx]
   rw [show chartBasisVecFiber (I := I) α (Jdx 0) b = v₀ from rfl,
     show chartBasisVecFiber (I := I) α (Jdx 1) b = v₁ from rfl]
-  -- Step 3: expand `deTurckRicciRHS = -2 · Ric + 𝓛_W g`.
+
   rw [deTurckRicciRHS, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
-  -- The Ricci slot: off-centre chart Ricci basis identity.
+
   have hRic :
       ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g₁) b v₀ v₁ =
         chartRicciTensor (I := I) g₁ α (Jdx 0) (Jdx 1) (extChartAt I α b) := by
     have h := ricciTensor_chartBasisVec_alpha_eq (I := I) g₁ α (Jdx 0) (Jdx 1) hb
     rw [hv₀_def, hv₁_def]
     exact h
-  -- The Lie slot: Cartan chart matrix + textbook carrier identification.
+
   have hLie :
       lieDerivMetricClm (I := I) g₁
         (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁)

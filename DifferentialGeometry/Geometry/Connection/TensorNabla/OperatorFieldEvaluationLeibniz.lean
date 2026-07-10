@@ -104,11 +104,11 @@ honest, instance-plumbing-free fingerprint of the fibrewise curvature operator; 
 family away from a pathological free `covGrad_op`-family (whose high-order layer can be unbounded). -/
 structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop where
-  /-- The order-`0` base is `ℝ`-linear in the section (stated at the fibre-value level). -/
+
   linear : ∀ (r : ℕ) (c₁ c₂ : ℝ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
     (op 0 r (c₁ • W₁ + c₂ • W₂)).toSection x =
       c₁ • (op 0 r W₁).toSection x + c₂ • (op 0 r W₂).toSection x
-  /-- The order-`0` base is value-local: its fibre value at `x` depends only on `W (x)`. -/
+
   local' : ∀ (r : ℕ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
     W₁.toSection x = W₂.toSection x → (op 0 r W₁).toSection x = (op 0 r W₂).toSection x
 

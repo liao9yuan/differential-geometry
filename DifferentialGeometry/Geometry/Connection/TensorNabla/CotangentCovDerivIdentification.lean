@@ -170,7 +170,7 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
     X.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
   have hYmd : MDiffAt (T% (fun b : M => Y b)) x :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  -- Reduce `cotangentCov` to the Leibniz defect `cotangentScalar`.
+
   have hcov : cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
       cotangentScalar ((LeviCivita (I := I) g).toFun) (ccTensor01Covec g σ) x
         (fun b : M => X b) (fun b : M => Y b) := by
@@ -182,10 +182,10 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
   rw [hcov, cotangentScalar_def]
   simp only []
   rw [hXx]
-  -- The abstract `(0, 1)` covariant derivative read through `cotangentToCLM` is that defect.
+
   have hpair := tensor0SCovariantDerivative_one_cotangentToCLM (I := I) (M := M)
     g (unitEvalSection (I := I) (M := M) g 1 σ) hUz Y v
-  -- The covector field is exactly the `cotangentToCLM` reading of `unitEvalSection`.
+
   have hθeq : (fun b : M => ccTensor01Covec g σ b (Y b)) =
       (fun b : M => cotangentToCLM (I := I)
         (unitEvalSection (I := I) (M := M) g 1 σ b) (Y b)) := rfl
@@ -195,7 +195,7 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
       cotangentToCLM (I := I) (unitEvalSection (I := I) (M := M) g 1 σ x)
         ((LeviCivita (I := I) g).toFun (fun y => Y y) x v) from rfl]
   rw [← hpair]
-  -- Finally, fold the abstract `(0, 1)` derivative back to `tensorCovDerivAt`.
+
   rw [← hYx]
   congr 2
   rw [tensorCovDerivAt_def]

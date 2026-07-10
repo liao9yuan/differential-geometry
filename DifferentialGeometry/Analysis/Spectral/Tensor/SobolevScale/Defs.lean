@@ -221,9 +221,9 @@ eigenbasis expansion lies in the weighted `ℓ²`; see `tensorHsToL2`.
 The structure is intentionally topology-free: the `Hˢ` Hilbert topology
 is installed below via an `InnerProductSpace.Core`. -/
 structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) where
-  /-- The eigenbasis-coordinate family. -/
+
   coeff : TensorEigenIdx (I := I) (M := M) g r s → ℝ
-  /-- The weighted square-summability witness placing `coeff` in `Hˢ`. -/
+
   weighted_summable :
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (coeff i) ^ 2)

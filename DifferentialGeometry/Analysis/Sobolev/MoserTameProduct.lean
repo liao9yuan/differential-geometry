@@ -137,11 +137,10 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
   classical
   refine ⟨(2 : ℝ) ^ k, by positivity, ?_⟩
   intro c w P Λ Λ₀ hΛ hΛ₀ hc hw hP
-  -- The family of `L²` jet terms of `w` carrying the high derivative (valence `q + (k - i)`).
+
   set Tw : ∀ i, Integral.L2.SmoothCcTensor g 0 (q + (k - i)) :=
     fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q (k - i) w with hTw_def
-  -- Pointwise: dominate every `c`-factor by its `C^k` sup `Λ²` and every binomial by `(2^k)²`,
-  -- reducing the Leibniz product bound to a single multiple of `∑ rfns(∇^{k-i} w)`.
+
   have hpt :
       ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) g 0 (p + q + k) x
@@ -179,7 +178,7 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       _ = ((2 : ℝ) ^ k * Λ) ^ 2 *
             riemannianFiberNormSq (I := I) (M := M) g 0 (q + (k - i)) x ((Tw i).toSection x) := by
           ring
-  -- Lift the pointwise bound to the metric `L²` norm via the finite-sum packaging lemma.
+
   have hpack :
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P‖ ≤
         ((2 : ℝ) ^ k * Λ) * ∑ i ∈ Finset.range (k + 1), ‖Tw i‖ :=
@@ -187,7 +186,7 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       (fun i => q + (k - i)) Tw
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P)
       ((2 : ℝ) ^ k * Λ) (by positivity) hpt
-  -- Reindex `∑ ‖∇^{k-i} w‖` (over `i`) to `∑ ‖∇^i w‖` by the reflection of `range (k+1)`.
+
   have hreindex : (∑ i ∈ Finset.range (k + 1), ‖Tw i‖) =
       ∑ i ∈ Finset.range (k + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q i w‖ := by
@@ -195,7 +194,7 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
       (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 q i w‖) (k + 1)
     simpa [hTw_def, Nat.succ_sub_one] using this
   rw [hreindex] at hpack
-  -- Convert the `SmoothCcTensor` norms to `tensorL2Norm` and absorb the (nonnegative) `c`-term.
+
   rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 (p + q) k P)] at hpack
   have hsum_w_eq : (∑ i ∈ Finset.range (k + 1),
@@ -918,15 +917,13 @@ private theorem l2jet_logConvex_iteratedCovGrad
   obtain ⟨K, hK1, htrace⟩ := exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm (I := I) (M := M) g
   refine ⟨K, hK1, ?_⟩
   intro u i
-  -- Unfold the `(i+1)`- and `(i+2)`-jets one covariant gradient at a time.  These rewrites
-  -- carry the iterated-gradient sections into the `covGrad ∘ covGrad` form on which the two
-  -- `L²` Bochner halves are stated; the residual `Nat` index defeqs are absorbed by `exact`.
+
   simp only [PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s (i + 1) u,
     PDE.RicciFlow.iteratedCovGrad_succ (I := I) g 0 s i u]
-  -- `S := ∇^i u`, the `(0, s+i)`-tensor whose covariant gradients are the successive jets.
+
   set S : Integral.L2.SmoothCcTensor g 0 (s + i) :=
     PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u with hS_def
-  -- The three `L²` jet norms appearing in the (rewritten) goal.
+
   set aGrad : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 1))
     (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S).toFun
     with haGrad_def
@@ -936,18 +933,18 @@ private theorem l2jet_logConvex_iteratedCovGrad
       (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s + i) S)).toFun
     with haHess_def
   have haS_nn : 0 ≤ aS := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
-  -- Integration-by-parts half: `‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖` (the on-disk diagonal Green identity).
+
   have hibp : aGrad ^ 2 ≤
       Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
           (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := by
     rw [haGrad_def, haS_def]
     exact covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g (s + i) S
-  -- Trace half: `‖Δ_∇ S‖ ≤ K · ‖∇²S‖` (the valence-uniform posited trace bound).
+
   have htr : Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
         (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun ≤ K * aHess := by
     rw [haHess_def]
     exact htrace (s + i) S
-  -- Chain: `aGrad² ≤ ‖Δ_∇ S‖ · aS ≤ (K · aHess) · aS = K · aS · aHess`.
+
   calc aGrad ^ 2
       ≤ Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
           (rawTensorConnLapSmooth (I := I) g 0 (s + i) S).toFun * aS := hibp
@@ -971,9 +968,9 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
   set μ := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   set V : ℝ := (μ Set.univ).toReal with hV
   have hVnn : 0 ≤ V := ENNReal.toReal_nonneg
-  -- ‖u‖² = ∫ riemannianFiberNormSq u
+
   have hsq := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g s u
-  -- ∫ riemannianFiberNormSq u ≤ ∫ Λ₀² = Λ₀² · V
+
   have hint_mono : (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ∂μ)
       ≤ ∫ _x : M, Λ₀ ^ 2 ∂μ := by
     apply MeasureTheory.integral_mono
@@ -984,7 +981,7 @@ private theorem l2Norm_le_sup_mul_sqrt_vol
     rw [MeasureTheory.integral_const, smul_eq_mul, hV, MeasureTheory.measureReal_def]
   have hsq_le : Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ^ 2 ≤ V * Λ₀ ^ 2 := by
     rw [hsq]; rw [hconst] at hint_mono; exact hint_mono
-  -- square root
+
   have hnn : 0 ≤ Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun :=
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
   have hrhs_nn : 0 ≤ Λ₀ * Real.sqrt V := mul_nonneg hΛ₀ (Real.sqrt_nonneg V)
@@ -1047,18 +1044,18 @@ private theorem l2Interp_pow_iteratedCovGrad
     rw [hC]; positivity
   refine ⟨C, hC_nn, ?_⟩
   intro u Λ₀ hΛ₀ hsup j hj0 hjk
-  -- The discrete L²-jet sequence.
+
   set a : ℕ → ℝ := fun i =>
     Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
       (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun with ha_def
   have ha_nn : ∀ i, 0 ≤ a i := fun i =>
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
-  -- Log-convexity for this sequence (from the posited child).
+
   have ha_lc : ∀ i, (a (i + 1)) ^ 2 ≤ K * a i * a (i + 2) := fun i => hlc u i
-  -- The HLP power law.
+
   have hpow : (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j :=
     hlp_real a ha_nn K hK1 ha_lc j k hj0 hjk
-  -- Endpoint: a 0 = ‖u‖_{L²} ≤ Λ₀ · V.
+
   have ha0_eq : a 0 = Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun := by
     rw [ha_def]
     simp only [Nat.add_zero]
@@ -1066,14 +1063,14 @@ private theorem l2Interp_pow_iteratedCovGrad
   have ha0_le : a 0 ≤ Λ₀ * V := by
     rw [ha0_eq, hV]
     exact l2Norm_le_sup_mul_sqrt_vol (I := I) (M := M) g s u Λ₀ hΛ₀ hsup
-  -- Bound the endpoint power.
+
   have ha0_pow : (a 0) ^ (k - j) ≤ (Λ₀ * V) ^ (k - j) :=
     pow_le_pow_left₀ (ha_nn 0) ha0_le (k - j)
-  -- Combine and absorb the volume factor into C.
+
   have hΛ₀V_nn : 0 ≤ Λ₀ * V := mul_nonneg hΛ₀ hVnn
   have hak_pow_nn : 0 ≤ (a k) ^ j := pow_nonneg (ha_nn k) j
   have hKpow_nn : 0 ≤ K ^ (k ^ 3) := pow_nonneg (le_trans zero_le_one hK1) _
-  -- step 1: K^{k³}·V^{k-j} ≤ C^k.
+
   have hKV_le_Ck : K ^ (k ^ 3) * V ^ (k - j) ≤ C ^ k := by
     have hVpow : V ^ (k - j) ≤ (max 1 V) ^ k := by
       calc V ^ (k - j) ≤ (max 1 V) ^ (k - j) := pow_le_pow_left₀ hVnn hmaxV (k - j)
@@ -1083,7 +1080,7 @@ private theorem l2Interp_pow_iteratedCovGrad
       rw [hC, mul_pow, ← pow_mul, hexp]
     rw [hCk]
     apply mul_le_mul_of_nonneg_left hVpow hKpow_nn
-  -- step 2: chain.
+
   calc (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := hpow
     _ ≤ K ^ (k ^ 3) * (Λ₀ * V) ^ (k - j) * (a k) ^ j := by
         apply mul_le_mul_of_nonneg_right _ hak_pow_nn
@@ -1145,13 +1142,13 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + j) _
   have hak_nn : 0 ≤ ak :=
     Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + k) _
-  -- The integer-power interpolation supplied by the deep analytic input.
+
   have hpow : aj ^ k ≤ C ^ k * Λ₀ ^ (k - j) * ak ^ j := hC u Λ₀ hΛ₀ hsup j hj0 hjk
-  -- Take `k`-th roots (`rpow (1/k)`), which is monotone on nonnegatives.
+
   have hmono : (aj ^ k) ^ ((k : ℝ)⁻¹) ≤ (C ^ k * Λ₀ ^ (k - j) * ak ^ j) ^ ((k : ℝ)⁻¹) :=
     Real.rpow_le_rpow (by positivity) hpow (by positivity)
   rw [Real.pow_rpow_inv_natCast haj_nn hk0] at hmono
-  -- Compute the `k`-th root of the right-hand side via the `rpow` algebra.
+
   have hcast_sub : ((k - j : ℕ) : ℝ) = (k : ℝ) - (j : ℝ) := by
     rw [Nat.cast_sub (le_of_lt hjk)]
   have hexp1 : ((k : ℝ) - (j : ℝ)) * (k : ℝ)⁻¹ = 1 - (j : ℝ) / k := by

@@ -18,27 +18,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTr
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
 
-/-!
-# Sobolev-scale tameness of a coefficient-applied second covariant gradient
-
-For a generic `(4,2)`-coefficient field `C` whose covariant jets are controlled by the jets of a
-data tensor `T₀` inside a fixed Sobolev ball, the operator `S ↦ C ⋅ ∇²S` is tame on the spectral
-Sobolev scale along the `(1 - Δ)`-iterate family of `T₀`:
-
-* the commutator `[Δ, C ⋅ ∇²(-)]` loses three orders with a family-uniform tame constant
-  (`exists_rawConnLap_appCc_secondCovGrad_commutator_Hs_family_le`);
-* the derived-coefficient block `∇C ⋅ ∇²S` is an order-two operator
-  (`exists_appCc_covGradCoeff_secondCovGrad_l2_le`);
-* if moreover the coefficient is pointwise fibre-small, `‖C‖_{g,x} ≤ εC`, the full operator
-  satisfies `‖C ⋅ ∇²S‖_{H^j} ≤ εC ‖Δ S‖_{H^j} + Clower j ‖S‖_{H^{j+1}}` with the *unit-top*
-  constant `εC` — all curvature and metric constants land in the lower-order slot
-  (`exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le`).
-
-The supercritical coefficient sups are produced by the sharp `C⁰`-jet-sum embedding, so the
-supercriticality threshold is `2 * finrank + 10` (not the `4 * finrank + 10` of the wide
-partition-of-unity window).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -874,10 +853,6 @@ private lemma coeff_jet_linear_of_sq (g₀ : SmoothRiemannianMetric I M)
           Real.sqrt (Kc i) ^ 2 * ((1 + c) * (1 + y)) ^ 2 by ring,
           Real.sq_sqrt (hKc_nn i)]
 
-/-- The derived-coefficient block: if the covariant jets of a `(4,2)`-coefficient `C₂` are
-square-controlled by the jets of a data tensor `T₀` lying in the `H^{a+2}`-ball of radius `R₀`,
-then `∇C₂ ⋅ ∇²S` is an order-two operator, uniformly over the ball. The coefficient sup comes
-from the sharp supercritical jet-sum embedding. -/
 theorem exists_appCc_covGradCoeff_secondCovGrad_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -990,10 +965,7 @@ theorem exists_appCc_covGradCoeff_secondCovGrad_l2_le
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 800000 in
 set_option linter.unusedVariables false in
-/-- Commutator tameness: for a `(4,2)`-coefficient `C₂` whose covariant jets are square-controlled
-by the jets of `T₀` in the `H^{a+2}`-ball, the commutator of the rough Laplacian with the operator
-`S ↦ C₂ ⋅ ∇²S` loses three orders on the `(1 - Δ)`-iterate family of `T₀`, with constants uniform
-over the ball and the family. -/
+
 theorem exists_rawConnLap_appCc_secondCovGrad_commutator_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -1347,14 +1319,7 @@ theorem exists_rawConnLap_appCc_secondCovGrad_commutator_Hs_family_le
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j + 3 : ℕ) : ℝ) S‖ := by ring
 
 set_option maxHeartbeats 1600000 in
-/-- Unit-top Sobolev-scale bound for a fibre-small coefficient applied to the second covariant
-gradient: if `C₂` is pointwise fibre-bounded by `εC` and its covariant jets are square-controlled
-by the jets of `T₀` in the `H^{a+2}`-ball, then along the `(1 - Δ)`-iterate family of `T₀`
 
-`‖C₂ ⋅ ∇²S‖_{H^j} ≤ εC ‖Δ S‖_{H^j} + Clower j ‖S‖_{H^{j+1}}`,
-
-with the top constant exactly `εC` — every curvature/metric constant lands in the lower-order
-slot. -/
 theorem exists_appCc_secondCovGrad_fibreSmallCoeff_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)

@@ -277,12 +277,12 @@ lemma sqrt_inner_gInvDiffRaisedEndo_le
   have hNv_nn : 0 ≤ Nv := Real.sqrt_nonneg _
   have hN_sq : N * N = g₀.inner x Dv Dv := by
     rw [hN, ← Real.sqrt_mul hg0Dv_nn, Real.sqrt_mul_self hg0Dv_nn]
-  -- The `g₁`-quadratic form of `Dv` equals `−h(v, Dv)`.
+
   have hg1Dv : g₁.inner x Dv Dv = -(h x v Dv) := by
     have hp := inner_g1_gInvDiffRaisedEndo (I := I) g₀ g₁ x v Dv
     rw [hDv] at hp ⊢
     rw [hp, htie x v Dv]; ring
-  -- Bound `g₁(Dv, Dv) ≤ δ · Nv · N`.
+
   have hgate := hδ x v Dv
   have habs : |h x v Dv| ≤ δ * Nv * N := by
     rw [hNv, hN]; exact hgate
@@ -290,12 +290,12 @@ lemma sqrt_inner_gInvDiffRaisedEndo_le
     rw [hg1Dv]
     calc -(h x v Dv) ≤ |h x v Dv| := neg_le_abs _
       _ ≤ δ * Nv * N := habs
-  -- The `g₁`-lower comparison.
+
   have hlow := g1_self_lower_bound (I := I) g₀ g₁ h htie hδ x Dv
-  -- `(1 - δ) · N² ≤ δ · Nv · N`.
+
   have hkey : (1 - δ) * (N * N) ≤ δ * Nv * N := by
     rw [hN_sq]; exact le_trans hlow hg1Dv_le
-  -- Divide by `(1 - δ) · N` (or `N = 0` case).
+
   rcases eq_or_lt_of_le hN_nn with hN0 | hNpos
   · rw [← hN0]
     exact mul_nonneg (div_nonneg hδ_nn hcoeff.le) hNv_nn
@@ -433,11 +433,11 @@ lemma gInvDiffRaisedEndo_eq_metricSharp_flatDiff (g₀ g₁ : SmoothRiemannianMe
       metricSharp (I := I) g₁ x
         ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) := by
   rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM_eq_metricSharp]
-  -- `v = metricSharp g₁ x (g₁.inner x v)`: the `g₁`-flat inverted by the `g₁`-sharp.
+
   have hv : metricSharp (I := I) g₁ x (g₁.inner x v).toLinearMap = v := by
     rw [← inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₁ g₁ x v]
     exact inverseMetricSharpFib_g0FlatCLM (I := I) g₁ x v
-  -- `metricSharp` is the symm of the flat equiv, hence additive/subtractive.
+
   have hsharp_sub : metricSharp (I := I) g₁ x
         ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap)
       = metricSharp (I := I) g₁ x (g₀.inner x v).toLinearMap
@@ -795,14 +795,14 @@ theorem riemannianFiberNormSq_gInvDiffSlotEndo_le
       ≤ ((Module.finrank ℝ E : ℝ) * (δ / (1 - δ))) ^ 2 := by
   classical
   set Λ : TangentSpace I x →L[ℝ] TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x with hΛ
-  -- Slot norm = dim · ∑_J (g₀(Λ e_{J₀}, e_{J₁}))², in a frame `e` carrying Parseval.
+
   obtain ⟨n, e, hn, horth, hpar, heq⟩ :=
     riemannianFiberNormSq_slotInsert_eq_dim_mul (I := I) g₀ x Λ
   have hnE : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by rw [hn]
   rw [show gInvDiffSlotEndo (I := I) g₀ g₁ x = slotInsertEndoFib (I := I) (M := M) 2 0 x Λ from rfl, heq]
   set r : ℝ := δ / (1 - δ) with hr
   have hr_nn : 0 ≤ r := div_nonneg hδ_nn (by linarith)
-  -- Per-vector squared raised bound `g₀(Λ a, Λ a) ≤ r²` for a unit frame vector `a := e i`.
+
   have hper : ∀ i : Fin n, g₀.inner x (Λ (e i)) (Λ (e i)) ≤ r ^ 2 := by
     intro i
     have hsqrt := sqrt_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x (e i)
@@ -813,22 +813,22 @@ theorem riemannianFiberNormSq_gInvDiffSlotEndo_le
       metric_inner_self_nonneg (I := I) (M := M) g₀ x (Λ (e i))
     have hsq := Real.sq_sqrt hLnn
     nlinarith [Real.sqrt_nonneg (g₀.inner x (Λ (e i)) (Λ (e i))), hsqrt, hsq, hr_nn]
-  -- Reindex `∑_J` over `J : Fin 2 → Fin n` as `∑_a ∑_b`, apply Parseval in `b`, then bound in `a`.
+
   have hJsplit : (∑ J : Fin 2 → Fin n, (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2)
       = ∑ a : Fin n, ∑ b : Fin n, (g₀.inner x (Λ (e a)) (e b)) ^ 2 := by
     rw [← (finTwoArrowEquiv (Fin n)).symm.sum_comp
       (fun J : Fin 2 → Fin n => (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2)]
     rw [Fintype.sum_prod_type]; rfl
-  -- Parseval collapses the `b`-sum to `g₀(Λ e_a, Λ e_a)`.
+
   have hParseval : (∑ a : Fin n, ∑ b : Fin n, (g₀.inner x (Λ (e a)) (e b)) ^ 2)
       = ∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)) :=
     Finset.sum_congr rfl (fun a _ => hpar (Λ (e a)))
-  -- Bound the `a`-sum: each summand ≤ r², so the sum ≤ n · r².
+
   have hsum_le : (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a))) ≤ (n : ℝ) * r ^ 2 := by
     calc (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
         ≤ ∑ _a : Fin n, r ^ 2 := Finset.sum_le_sum (fun a _ => hper a)
       _ = (n : ℝ) * r ^ 2 := by rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]; ring
-  -- Assemble: dim · (inner-sum) ≤ dim · (n · r²) = (dim · r)².
+
   rw [hJsplit, hParseval]
   have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   calc (n : ℝ) * (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
@@ -881,9 +881,9 @@ theorem exists_gInvDiffFibreEndo_neumannFibreBound
   refine ⟨2 * (Module.finrank ℝ E : ℝ), by positivity, ?_⟩
   intro g₁ h htie δ hδ_half hδ_nn hδ x v
   have hδ_lt1 : δ < 1 := by linarith
-  -- The fibre value is the fibrewise composition `(slotEndo).comp v`.
+
   rw [gInvDiffFibreEndo_apply]
-  -- Reduce `rfns((slotEndo).comp v)` to `rfns(slotEndo) · rfns(v)` by the partial-contraction CS.
+
   have hcomp := riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 0 2 2 x
     (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))
     (show TensorRSSpace 0 2 I x from v)
@@ -897,18 +897,18 @@ theorem exists_gInvDiffFibreEndo_neumannFibreBound
           (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v) := by
     rfl
   rw [hslotcomp] at hcomp
-  -- Bound `rfns(slotEndo)` by `(dim · (δ/(1-δ)))²` and pass to `(Cnorm · δ)²`.
+
   have hslot_le := riemannianFiberNormSq_gInvDiffSlotEndo_le (I := I) g₀ g₁ h htie hδ_lt1 hδ_nn hδ x
   have hv_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v :=
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x v
-  -- `dim · (δ/(1-δ)) ≤ (2·dim)·δ` because `1/(1-δ) ≤ 2` for `δ < 1/2`, hence the squared bound.
+
   have hcoeff : 0 < 1 - δ := by linarith
   have hslot_le' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
         (show TensorRSSpace 2 2 I x from
           TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))
       ≤ ((2 * (Module.finrank ℝ E : ℝ)) * δ) ^ 2 := by
     refine hslot_le.trans ?_
-    -- `(dim · (δ/(1-δ)))² ≤ ((2·dim)·δ)²` since `0 ≤ dim·(δ/(1-δ)) ≤ (2·dim)·δ`.
+
     have hdimnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
     have hbase_nn : 0 ≤ (Module.finrank ℝ E : ℝ) * (δ / (1 - δ)) :=
       mul_nonneg hdimnn (div_nonneg hδ_nn hcoeff.le)

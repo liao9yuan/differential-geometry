@@ -761,7 +761,6 @@ private lemma contract_covGrad_eq_covDeriv
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g 0 s T x D (Fin.cons (v : E) m)]
   rw [Fin.cons_zero, Matrix.vecTail, show (Fin.cons (v : E) m ∘ Fin.succ) = m from by funext i; simp]
 
-
 set_option linter.unusedSectionVars false in
 private lemma fnsc_contract (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (n : ℕ) (e : Fin n → TangentSpace I x) (i : Fin n)
@@ -828,7 +827,6 @@ private lemma tip_succ_eq_sum_contract_orthoFrame
   · intro K _ hK; exact absurd (funext fun k => k.elim0) hK
   · intro h; exact absurd (Finset.mem_univ _) h
 
-
 set_option linter.unusedSectionVars false in
 private def contractFrameSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (b : M)
@@ -843,7 +841,6 @@ private lemma contractFrameSection_apply
     (i : Fin (Module.finrank ℝ E)) (y : M) :
     contractFrameSection (I := I) (M := M) g s V b i y =
       contract_covariant 0 s y (smoothOrthoFrame (I := I) g b i y) (V.toSection y) := rfl
-
 
 set_option linter.unusedSectionVars false in
 private lemma divergence_oneSidedVF_summand_eq
@@ -961,7 +958,6 @@ private lemma divergence_oneSidedVF_summand_eq
   rw [show (fun y : M => (B : ∀ z : M, TangentSpace I z) y) =
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
-
 
 set_option linter.unusedSectionVars false in
 private lemma centeredFrame_basis_exists

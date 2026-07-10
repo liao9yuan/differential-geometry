@@ -33,7 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-
 set_option linter.unusedSectionVars false in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
@@ -286,7 +285,6 @@ lemma rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
-
 private lemma ccTensorBilinSymm_zero_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w = 0 := by
@@ -349,7 +347,6 @@ private lemma unitModel_eq_ccTensorBilin_loc (g₀ : SmoothRiemannianMetric I M)
   refine congrArg _ ?_
   funext k
   fin_cases k <;> rfl
-
 
 private lemma omRecoverEndoCc_eq_idEndo_add_raise
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -452,7 +449,6 @@ private lemma omRecoverEndoCc_eq_idEndo_add_raise
     rw [unitModel_eq_ccTensorBilin_loc, ccTensorBilin_symmS]]
   rw [htie]
 
-
 private lemma rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 1 x
         ((sharpFlatEndoCc (I := I) g₀ g₀).toSection x) ≤
@@ -474,7 +470,6 @@ private lemma rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
       (Module.finrank ℝ E : ℝ) ^ 2 := by norm_num
   rw [hsimp] at hb
   exact hb
-
 
 set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_omRecoverEndoCc_le

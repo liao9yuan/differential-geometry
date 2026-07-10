@@ -203,7 +203,7 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   have hC := mdifferentiableAt_curriedSection_of_section (I := I) (M := M) s S hS
   apply ContinuousLinearMap.ext
   intro w
-  -- `Vext` extends the derivative direction `v`; `Y` extends the slot input `w`.
+
   set Vext : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (smoothExtensionTangent (I := I) x v)
       (smoothExtensionTangent_contMDiff (I := I) x v) with hVext_def
@@ -218,7 +218,7 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   have hYat : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  -- Right side at direction `v = Vext x`, slot `w = Y x`: the generic Hom product-rule difference.
+
   have hgen := HomConnectionGen.homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
     I M E (TangentSpace I : M → Type _) (Tensor0SModel s ℝ E)
     (fun x : M => Tensor0SSpace s I x)
@@ -227,11 +227,10 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
     (curriedSection I M S) (x := x) hC
     (V_field := (Vext : Π b : M, TangentSpace I b)) (Y := (Y : Π b : M, TangentSpace I b))
     hVat hYat
-  -- Left side: the same product-rule difference, via the section Leibniz at direction `v`.
+
   have hleib := tensor0SCovariantDerivative_curriedSection_hom_leibniz
     (I := I) (M := M) g s S hS Y v
-  -- Reduce the slot input `w` and the derivative direction `v` to the extensions' values, then
-  -- match the generic-Hom apply formula and the section Leibniz directly (both as `Vext x`/`Y x`).
+
   have hgoal : tensor0S_curry (I := I) (M := M) s x
         (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g) S x
           ((Vext : Π b : M, TangentSpace I b) x))
@@ -267,15 +266,14 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
       riemannSec (homGenS (I := I) (M := M) g s) (fun b => X b) (fun b => W b)
         (curriedSection I M A) x := by
   classical
-  -- Global smoothness of `A` (`+1` degree, for `covApply` smoothness) and pointwise
-  -- differentiability of `A` at every base point.
+
   have hA1 : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ((∞ : WithTop ℕ∞) + 1)
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b (A b)) := by
     rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from by simp]; exact hA
   have hAatAll : ∀ b : M, TensorSectionMDiffAt (I := I) (s + 1) A b := fun b =>
     (hA b).mdifferentiableAt (by simp)
-  -- `TensorSectionMDiffAt (s+1)` of an inner covariant-derivative section `covApply ∇ Z A` at `x`.
+
   have hcovApply_at : ∀ (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       TensorSectionMDiffAt (I := I) (s + 1)
         (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -284,8 +282,7 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
     have hsm := covApply_contMDiffOn (cov := tensor0SCovariantDerivative I M (s + 1)
       (LeviCivita (I := I) g)) Z.contMDiff hA1
     exact (hsm.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp)
-  -- The curried inner sections agree: `curriedSection (covApply ∇ Z A) =
-  -- covApply (homGenS) Z (curriedSection A)` (the section conjugation at every base point).
+
   have hcurry_covApply : ∀ (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       curriedSection I M
           (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -348,8 +345,7 @@ theorem riemannSec_tensor0SCov_succ_consEval
         Tensor0SSpace.toModel (A x)
           (Fin.cons (baseSlotCurv (I := I) g X W x u₀) u') := by
   classical
-  -- Package the leading-slot extension `ext u₀` and the curried section `curry A` as smooth
-  -- sections, as required by the generic Hom-bundle curvature–Leibniz rule.
+
   set Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (smoothExtensionTangent (I := I) x u₀)
       (smoothExtensionTangent_contMDiff (I := I) x u₀) with hY_def
@@ -358,13 +354,13 @@ theorem riemannSec_tensor0SCov_succ_consEval
       (fun x : M => TangentSpace I x →L[ℝ] Tensor0SSpace s I x)⟯ :=
     ContMDiffSection.mk (curriedSection I M A)
       ((contMDiff_curriedSection_iff_section I M A).mp hA) with hAcurry_def
-  -- Step 1: peel the leading argument of the LHS via the curry-evaluation identity.
+
   rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
       (fun b => X b) (fun b => W b) A x) (v0 := u₀) (vs := u')]
-  -- Step 2: conjugate the tensor curvature into the generic Hom-bundle curvature.
+
   rw [tensor0S_curry_riemannSec_tensor0SCov_succ_eq (I := I) (M := M) g s X W A hA x]
-  -- Step 3: the generic Hom curvature–Leibniz rule (read at `u₀ = Y x`).
+
   rw [show (u₀ : TangentSpace I x) = (Y : Π b : M, TangentSpace I b) x from hYx.symm]
   rw [show riemannSec (homGenS (I := I) (M := M) g s) (fun b => X b) (fun b => W b)
         (curriedSection I M A) x =
@@ -380,12 +376,10 @@ theorem riemannSec_tensor0SCov_succ_consEval
     (LeviCivita (I := I) g)
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) X W
     Acurry Y x]
-  -- Step 4: distribute `toModel(·)(u')` over the subtraction, identify the two residues.
+
   rw [Tensor0SBundle.Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   rw [hYx]
-  -- Both residues now match the target: the first (paired-section curvature) and the second
-  -- (`Acurry x v` read on `u'` equals `A x (cons v u')` by the curry-evaluation identity) reduce
-  -- definitionally to the target's two slot-wise residues.
+
   congr 1
 
 /-- **Slot-wise curvature formula for the covariant `(0, t)`-tensor connection (tuple form).**
@@ -423,19 +417,19 @@ theorem riemannSec_tensor0SCov_apply_eval
   | succ s ih =>
       intro A hA x u
       classical
-      -- The smooth paired section `b ↦ A b ⌟ (ext (u 0)) b`.
+
       have hpaired_smooth : TensorSmooth (I := I) s
           (fun b => curriedSection I M A b (smoothExtensionTangent (I := I) x (u 0) b)) :=
         ContMDiff.clm_bundle_apply (b := id)
           ((contMDiff_curriedSection_iff_section I M A).mp hA)
           (smoothExtensionTangent_contMDiff (I := I) x (u 0))
-      -- Peel the leading slot.
+
       rw [show u = Fin.cons (u 0) (Fin.tail u) from (Fin.cons_self_tail u).symm,
         riemannSec_tensor0SCov_succ_consEval (I := I) g s X W A hA x (u 0) (Fin.tail u)]
       have hih := ih (fun b => curriedSection I M A b (smoothExtensionTangent (I := I) x (u 0) b))
         hpaired_smooth x (Fin.tail u)
       rw [hih]
-      -- `paired x` evaluated on a tuple is `A x` on the cons with leading entry `u 0`.
+
       have hpx : ∀ v : Fin s → TangentSpace I x,
           Tensor0SSpace.toModel
               (curriedSection I M A x (smoothExtensionTangent (I := I) x (u 0) x)) v =
@@ -446,7 +440,7 @@ theorem riemannSec_tensor0SCov_apply_eval
             (T := A x) (v0 := u 0) (vs := v)]
       rw [Finset.sum_congr rfl (fun k _ => by
         rw [hpx (Function.update (Fin.tail u) k (baseSlotCurv (I := I) g X W x (Fin.tail u k)))])]
-      -- Cons-update identities to assemble the `Fin (s + 1)` sum.
+
       have hcons_lead :
           Fin.cons (baseSlotCurv (I := I) g X W x (u 0)) (Fin.tail u) =
             Function.update u 0 (baseSlotCurv (I := I) g X W x (u 0)) := by

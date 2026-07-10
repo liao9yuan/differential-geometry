@@ -1879,9 +1879,7 @@ private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
       (I := I) (M := M) g r s α Idx Jdx
   refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
   intro T₀ b hb
-  -- Step 1 (proven outright, frame-dependent → frame-independent reduction):
-  -- the centred-frame cross-block minus Γ-trace equals `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`,
-  -- via the parent's centred-frame trace identities (NO moving-centre frame smoothness used).
+
   have hReduce :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ l : Fin (Module.finrank ℝ E),
@@ -2630,7 +2628,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
     chartImagePOUTsupport_subset_target (I := I) (M := M) α
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
-  -- Uniform coefficient sup-bounds on the compact kernel, up to order `2k`.
+
   obtain ⟨B2, hB2_nn, hB2⟩ : ∃ C : ℝ, 0 ≤ C ∧
       ∀ (k' l' : Fin n), ∀ i ≤ 2 * k, ∀ y ∈ K,
         ‖iteratedFDeriv ℝ i (C_2 k' l') y‖ ≤ C := by
@@ -2677,7 +2675,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
       exact (hCf ⟨I', J'⟩ i hi y hy).trans
         (Finset.le_sup'_of_le Cf (Finset.mem_univ
           (⟨I', J'⟩ : (Fin r → Fin n) × (Fin s → Fin n))) le_rfl)
-  -- Uniform coefficient bound and combinatorial cardinalities.
+
   set Bmax : ℝ := max B2 (max B1 B0) with hBmax_def
   have hBmax_nn : 0 ≤ Bmax := le_trans hB2_nn (le_max_left _ _)
   have hB2_le : B2 ≤ Bmax := le_max_left _ _
@@ -2693,7 +2691,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
   have hR_nn : 0 ≤ R := rawConnLapRhsHsContent_nonneg (I := I) (M := M) g r s k T α y
   have hsqrtR_nn : 0 ≤ Real.sqrt R := Real.sqrt_nonneg _
   have hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α := hK_sub hyK
-  -- The chart pull-back of `Δ_∇ T`, as a function near `y`, equals the explicit three-block sum.
+
   set Δpull : EuclN → ℝ := rawConnLapPull (I := I) (M := M) g r s
     (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx with hΔpull_def
   set RHSfun : EuclN → ℝ := fun z =>
@@ -2722,7 +2720,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) = RHSfun z
     rw [hform_z, hb_round, hRHSfun_def]
   rw [(h_evEq.iteratedFDeriv ℝ j).self_of_nhds]
-  -- A single summand operator-norm bound, after Leibniz: ≤ 2^{2k} · Bmax · √R.
+
   have hraw_sqrt : ∀ (q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E))) (m : ℕ), m ≤ 2 * (k + 1) →
       ‖iteratedFDeriv ℝ m (rawConnLapPull (I := I) (M := M) g r s T α q.1 q.2) y‖ ≤
@@ -2783,7 +2781,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
         ≤ (2 : ℝ) ^ (2 * k) * (Bmax * Real.sqrt R) :=
           mul_le_mul_of_nonneg_right h2j_le (by positivity)
       _ = (2 : ℝ) ^ (2 * k) * Bmax * Real.sqrt R := by ring
-  -- Bound `‖D^j RHSfun y‖` by `Ktot · √R` via the three blocks.
+
   have h_block2_le :
       ‖iteratedFDeriv ℝ j (fun z =>
         ∑ p : Fin n × Fin n,
@@ -2874,7 +2872,7 @@ private lemma exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsCon
       (fun z hz => chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α p hz)
       (fun m z hz => euclidPartialIter_chartPushedRaw_norm_le_zero (I := I) (M := M)
         g r s T α p m hz)
-  -- Assemble: ‖D^j RHSfun‖ ≤ Ktot · √R, then square.
+
   have h_norm_le : ‖iteratedFDeriv ℝ j RHSfun y‖ ≤ Ktot * Real.sqrt R := by
     set b2fn : EuclN → ℝ := fun z =>
       ∑ p : Fin n × Fin n,
@@ -3010,7 +3008,7 @@ theorem exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent
                 (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx) y‖ ^ 2 ≤
             B * rawConnLapRhsHsContent (I := I) (M := M) g r s k T α y := by
   classical
-  -- Per-chart constants, assembled into an atlas-uniform `B` over the finite active set.
+
   have hperα : ∀ w : M × (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)), ∃ Bα : ℝ, 0 ≤ Bα ∧
       ∀ (T : Integral.L2.SmoothCcTensor g r s) (j : ℕ), j ≤ 2 * k →
@@ -3838,8 +3836,7 @@ theorem exists_rawConnLapIter_toHs_le_toHs
       obtain ⟨Ci, hCi_nn, hCi⟩ := ih (k + 1)
       obtain ⟨C1, hC1_nn, hC1⟩ := exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g k
       refine ⟨C1 * Ci, mul_nonneg hC1_nn hCi_nn, fun T => ?_⟩
-      -- One peel: `Δ_∇^{i+1} T = Δ_∇ (Δ_∇^i T)`, then single-step at order `k` and `ih` at
-      -- order `k+1`.
+
       have hpeel : rawTensorConnLapIter (I := I) g 0 2 (i + 1) T
           = rawTensorConnLapSmooth (I := I) g 0 2 (rawTensorConnLapIter (I := I) g 0 2 i T) := by
         rw [rawTensorConnLapIter_succ]
@@ -3868,7 +3865,7 @@ theorem toHs_norm_mono (g : SmoothRiemannianMetric I M) {r s : ℕ} {m n : ℕ} 
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) n T‖ := by
   rw [tensorPouSobolevHilbert_norm_eq, tensorPouSobolevHilbert_norm_eq]
   refine ENNReal.toReal_mono (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g n T).ne ?_
-  -- Monotone in the order via the successor step, by induction on the gap `n - m`.
+
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hmn
   clear hmn
   induction d with
@@ -4205,7 +4202,7 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
     measurable_sqrtPou (I := I) (M := M) g r s T α Idx Jdx
   have hw_supp : tsupport w ⊆ Kα :=
     tsupport_sqrtPou_subset (I := I) (M := M) g r s T α Idx Jdx
-  -- Pointwise: `|Scalar = ρ·raw| ≤ |w = √ρ·raw|`, hence `eLpNorm Scalar ≤ eLpNorm w`.
+
   have h_ptwise : ∀ x : M,
       ‖tensorChartComponentScalar (I := I) (M := M) g r s T α Idx Jdx x‖ ≤ ‖w x‖ := by
     intro x
@@ -4242,13 +4239,13 @@ private lemma sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand
           (riemannianVolumeMeasure (I := I) (M := M) g) ≤
         eLpNorm w 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
     eLpNorm_mono h_ptwise
-  -- Reverse measure bridge for `w`.
+
   have h_bridge := hCbr (u := w) hw_meas hw_supp
   rw [show DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
         = DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure I M g
       from rfl] at h_bridge
-  -- Chain at the `ℝ≥0∞` level.
+
   set lhsE : ℝ≥0∞ :=
     eLpNorm (tensorChartComponentScalar (I := I) (M := M) g r s T α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) with hlhsE_def
@@ -4321,14 +4318,14 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
   classical
   set Sf : Finset M := DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
     (I := I) (M := M) with hSf_def
-  -- A uniform constant: the finset-sum of the per-chart reverse-bridge constants.
+
   choose Cα hCα_nn hCα using fun α (_ : α ∈ Sf) =>
     sq_eLpNorm_scalar_le_const_mul_hsNorm_zero_summand (I := I) (M := M) (E := E) g r s α
   set Cmax : ℝ := ∑ α ∈ Sf.attach, Cα α.val α.property with hCmax_def
   have hCmax_nn : 0 ≤ Cmax :=
     Finset.sum_nonneg (fun α _ => hCα_nn α.val α.property)
   refine ⟨Cmax, hCmax_nn, fun T => ?_⟩
-  -- Abbreviation for the order-`0` chart-Sobolev summand at chart `α`, component `(Idx, Jdx)`.
+
   set summand : M → (Fin r → Fin (Module.finrank ℝ E)) →
       (Fin s → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
     fun α Idx Jdx =>
@@ -4353,7 +4350,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
             (I := I) (M := M) g r s T α Idx Jdx) 2
           (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure
             (I := I) (M := M) g)) ^ 2 with hlhsEsq_def
-  -- Per-`(α ∈ Sf, Idx, Jdx)`: `lhsEsq ≤ ofReal Cmax · summand`.
+
   have h_perchart : ∀ α ∈ Sf, ∀ Idx Jdx,
       lhsEsq α Idx Jdx ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
     intro α hα Idx Jdx
@@ -4365,7 +4362,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
         ≤ ENNReal.ofReal (Cα α hα) * summand α Idx Jdx := hCα α hα T Idx Jdx
       _ ≤ ENNReal.ofReal Cmax * summand α Idx Jdx := by
           gcongr
-  -- Sum over `(Idx, Jdx)` and `α ∈ Sf`.
+
   have h_sum_le :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx) ≤
         ENNReal.ofReal Cmax * ∑ α ∈ Sf, ∑ Idx, ∑ Jdx, summand α Idx Jdx := by
@@ -4375,8 +4372,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     refine Finset.sum_le_sum (fun Idx _ => ?_)
     rw [Finset.mul_sum]
     exact Finset.sum_le_sum (fun Jdx _ => h_perchart α hα Idx Jdx)
-  -- The finset double sum of summands is `≤` the full `tsum` representation, which is
-  -- `tensorPouSobolevHsNormSq g 0 T`.
+
   have h_summand_eq_normSq :
       tensorPouSobolevHsNormSq (I := I) (M := M) g 0 T =
         ∑' α : M, ∑ Idx, ∑ Jdx, summand α Idx Jdx := by
@@ -4413,7 +4409,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     rw [h_summand_eq_normSq]
     refine h_sum_le.trans ?_
     gcongr
-  -- Transport to `ℝ` via `.toReal`.
+
   have h_lhsEsq_ne_top : ∀ α Idx Jdx, lhsEsq α Idx Jdx ≠ ⊤ := by
     intro α Idx Jdx
     rw [hlhsEsq_def]
@@ -4428,7 +4424,7 @@ theorem exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero
     ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_normSq_ne_top
   have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_total_le
   rw [ENNReal.toReal_mul, ENNReal.toReal_ofReal hCmax_nn] at h_toReal
-  -- Identify the `.toReal` of the finset double sum with the real-valued goal LHS.
+
   have h_lhs_toReal :
       (∑ α ∈ Sf, ∑ Idx, ∑ Jdx, lhsEsq α Idx Jdx).toReal =
         ∑ α ∈ Sf, ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
@@ -4487,7 +4483,7 @@ theorem exists_l2Norm_le_tensorPouSobolevHsNorm_zero
   obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
     exists_sum_componentL2Norm_sq_le_tensorPouSobolevHsNormSq_zero (I := I) (M := M) g r s
   refine ⟨Real.sqrt (C₁ * C₂), Real.sqrt_nonneg _, fun T => ?_⟩
-  -- `‖T‖² ≤ C₁ · (component sum) ≤ C₁ · C₂ · ‖·‖²_{H⁰_chart}`, then take square roots.
+
   set L : ℝ := tensorL2Norm (I := I) (M := M) g r s T.toFun with hL_def
   have hL_eq : ‖T‖ = L := (tensorL2Norm_toFun_eq_norm (I := I) (M := M) g T).symm
   set N : ℝ := (tensorPouSobolevHsNorm (I := I) (M := M) g 0 T).toReal with hN_def

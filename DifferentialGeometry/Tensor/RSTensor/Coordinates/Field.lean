@@ -144,7 +144,7 @@ noncomputable def Tensor0SField.fromScalarField [CompleteSpace 𝕜]
     let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
     refine (contMDiff_multilinearSection_iff_coord (TangentSpace I) n b _).mpr
       fun σ x₀ => ?_
-    -- The trivialized coordinate of constOfIsEmpty at σ : Fin 0 → Fin d is just the scalar
+
     have hcoord : ∀ x, (continuousMultilinearMap_basis b 0).repr
         (trivializationAt (Tensor0SModel 0 𝕜 E)
           (fun x => Tensor0SSpace 0 I x) x₀
@@ -191,16 +191,15 @@ theorem Tensor0SField.toScalarField_contMDiff [CompleteSpace 𝕜]
     (fun x => Tensor0SSpace 0 I x) x₀).open_baseSet.mem_nhds
     (mem_baseSet_trivializationAt _ _ x₀)
   filter_upwards [hbase] with x hx
-  -- Any (0,0)-tensor is constOfIsEmpty of its scalar value
+
   have hα_const : α x = ContinuousMultilinearMap.constOfIsEmpty 𝕜
       (fun _ : Fin 0 => TangentSpace I x) (Tensor0SField.toScalarField n α x) := by
     ext v
-    -- Unfold the equiv (= id) wrapping both sides, then constOfIsEmpty_apply
+
     simp only [tensor0SSpace_continuousLinearEquiv, ContinuousLinearEquiv.coe_mk,
       LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, id,
       Tensor0SField.toScalarField, Tensor0SSpace.toModel]
-    -- Goal: (α x) v = (constOfIsEmpty 𝕜 _ ((α x) Fin.elim0)) v
-    -- constOfIsEmpty c v = c definitionally, so RHS = (α x) Fin.elim0 = (α x) applied to Fin.elim0
+
     change DFunLike.coe (F := ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => TangentSpace I x) 𝕜)
       (α x) v =
       DFunLike.coe (F := ContinuousMultilinearMap 𝕜 (fun _ : Fin 0 => TangentSpace I x) 𝕜)
@@ -227,9 +226,9 @@ theorem Tensor0SField.fromScalarField_toScalarField [CompleteSpace 𝕜]
       (Tensor0SField.toScalarField_contMDiff n α) = α := by
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) 0
   apply ContMDiffSection.ext; intro x
-  -- LHS = constOfIsEmpty 𝕜 _ (toScalarField n α x), need to show = α x
+
   simp only [Tensor0SField.fromScalarField]
-  -- α x = constOfIsEmpty 𝕜 _ (toScalarField n α x)
+
   symm; ext v
   simp only [tensor0SSpace_continuousLinearEquiv, ContinuousLinearEquiv.coe_mk,
     LinearEquiv.coe_mk, LinearMap.coe_mk, AddHom.coe_mk, id,
@@ -247,7 +246,7 @@ theorem Tensor0SField.toScalarField_add [CompleteSpace 𝕜]
     (α + β).toScalarField n = α.toScalarField n + β.toScalarField n := by
   ext x
   simp only [Tensor0SField.toScalarField, Pi.add_apply]
-  -- Goal: ((α + β) x).toModel Fin.elim0 = (α x).toModel Fin.elim0 + (β x).toModel Fin.elim0
+
   rw [show (α + β) x = α x + β x from rfl, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
@@ -331,12 +330,12 @@ noncomputable def tensor0SField_product
     let b : Module.Basis (Fin d) 𝕜 E := Module.finBasis 𝕜 E
     rw [contMDiff_multilinearSection_iff_coord (TangentSpace I) n b]
     intro σ x₀
-    -- Extract coordinate smoothness of α and β
+
     have hα := ((contMDiff_multilinearSection_iff_coord (TangentSpace I) n b
       (fun x => (α x : Tensor0SSpace s I x))).mp α.contMDiff)
     have hβ := ((contMDiff_multilinearSection_iff_coord (TangentSpace I) n b
       (fun x => (β x : Tensor0SSpace q I x))).mp β.contMDiff)
-    -- Rewrite the coordinate of the product as a product of coordinates
+
     simp_rw [Bundle.continuousMultilinearMap.triv_coord_product b σ x₀ _ (α _) (β _)]
     exact (contMDiffAt_const (c := ContinuousLinearMap.mul 𝕜 𝕜).clm_apply
       (hα (σ ∘ Fin.castAdd q) x₀)).clm_apply (hβ (σ ∘ Fin.natAdd s) x₀)⟩

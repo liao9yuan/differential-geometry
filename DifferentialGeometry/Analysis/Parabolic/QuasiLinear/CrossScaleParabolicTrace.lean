@@ -353,14 +353,11 @@ theorem sq_eq_base_add_integral_of_indefinite
 
 structure CrossScaleField (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (a : ℝ) (T : ℝ) where
-  /-- The upper-scale (`H^{a+2}`) `L²`-in-time datum, an a.e.-class. -/
+
   hiL2 : timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T
-  /-- The lower-scale (`Hᵃ`) time-Sobolev datum: initial value and `L²`
-  derivative. -/
+
   lo : timeH1 (tensorHs (I := I) (M := M) g r s a) T
-  /-- For almost every `t`, the `Hᵃ` view of the pointwise value `hiL2 t` is the
-  indefinite `Hᵃ`-integral `lo.toFun t` of the derivative.  This is the a.e.
-  compatibility of the two scales; no continuity is assumed. -/
+
   link : ∀ᵐ t ∂(timeMeasure T),
     tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         (show a ≤ a + 2 by linarith) (hiL2 t) = lo.toFun t

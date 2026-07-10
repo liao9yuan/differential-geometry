@@ -116,7 +116,7 @@ private lemma orthonormal_rfns_exists_basis
           fiberNormSqSummand (I := I) (M := M) g x 0 t S n e K J) :
     ∃ bse : Module.Basis (Fin n) ℝ (TangentSpace I x), ∀ i : Fin n, bse i = e i := by
   classical
-  -- Equip `T_x M` with the `g`-inner-product structure (so `horth` is genuine orthonormality).
+
   let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
   have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
     g.toRiemannianMetric.continuousAt x
@@ -131,7 +131,7 @@ private lemma orthonormal_rfns_exists_basis
     fun u v => rfl
   set d : ℕ := Module.finrank ℝ (TangentSpace I x) with hd_def
   have hdE : Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E := rfl
-  -- (1) `e` is orthonormal, hence linearly independent, hence `n ≤ d`.
+
   have horthonormal : Orthonormal ℝ e := by
     rw [orthonormal_iff_ite]
     intro i j; rw [hinner_eq (e i) (e j)]; exact horth i j
@@ -139,7 +139,7 @@ private lemma orthonormal_rfns_exists_basis
   have hn_le_d : n ≤ d := by
     have := hli.fintype_card_le_finrank
     simpa using this
-  -- (2) The component map `Φ : (0,t)-tensors → ℝ^{Fin t → Fin n}` is injective ⟹ `d ≤ n`.
+
   set Φ : TensorRSSpace 0 t I x →ₗ[ℝ] ((Fin t → Fin n) → ℝ) :=
     { toFun := fun T J => fiberNormSqComponent (I := I) (M := M) g x 0 t T n e
         (fun k => k.elim0) J
@@ -154,7 +154,7 @@ private lemma orthonormal_rfns_exists_basis
     rw [← LinearMap.ker_eq_bot]
     rw [LinearMap.ker_eq_bot']
     intro T hT
-    -- `Φ T = 0` ⟹ every component vanishes ⟹ `rfns T = 0` ⟹ `T = 0`.
+
     have hcomp0 : ∀ J : Fin t → Fin n,
         fiberNormSqComponent (I := I) (M := M) g x 0 t T n e (fun k => k.elim0) J = 0 := by
       intro J; exact congrFun hT J
@@ -164,7 +164,7 @@ private lemma orthonormal_rfns_exists_basis
       rw [fiberNormSqSummand_eq_component_sq]
       rw [show K = (fun k : Fin 0 => k.elim0) from funext (fun k => k.elim0)]
       rw [hcomp0 J]; ring
-    -- Positive-definiteness of `rfns` via the tensor-inner bridge.
+
     have hpd := riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 t x T
     rw [hrfns0] at hpd
     have hTm0 : TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
@@ -195,7 +195,7 @@ private lemma orthonormal_rfns_exists_basis
     exact absurd hdt_le_nt (not_le.mpr (Nat.pow_lt_pow_left hlt (by omega)))
   have hcard : Fintype.card (Fin n) = d := by
     rw [Fintype.card_fin]; omega
-  -- (3) Linearly-independent family of the right cardinality is a basis.
+
   haveI : Nonempty (Fin n) := by
     rw [← Fintype.card_pos_iff, hcard]; exact hd_pos
   refine ⟨basisOfLinearIndependentOfCardEqFinrank hli (by rw [hcard, hd_def]), ?_⟩
@@ -305,17 +305,14 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
               (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j)
                 (dualTensorFrameS (I := I) (M := M) g x t e J))) ≤ C := by
   classical
-  -- The single dual-frame curvature term is uniformly bounded by `K`; the displayed energy is a
-  -- sum of `n^(t+2)` such terms with `n ≤ d := finrank E` (a `g`-orthonormal family is linearly
-  -- independent), so the energy is bounded by the fixed constant `C := d^(t+2) · K`.
+
   obtain ⟨K, hK_nonneg, hK_term⟩ :=
     exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound (I := I) (M := M) g t
   set d : ℕ := Module.finrank ℝ E with hd_def
   refine ⟨(d : ℝ) ^ (t + 2) * K, ?_, ?_⟩
   · exact mul_nonneg (pow_nonneg (Nat.cast_nonneg d) _) hK_nonneg
   intro x n e horth
-  -- `n ≤ d`: the `g`-orthonormal family `e` is linearly independent in the `d`-dimensional
-  -- `g`-inner-product structure on `T_x M`.
+
   have hn_le_d : n ≤ d := by
     let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
     have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
@@ -336,7 +333,7 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
     have hcardE : Module.finrank ℝ (TangentSpace I x) = d := rfl
     rw [hcardE] at hcard
     simpa using hcard
-  -- Bound the displayed energy term-by-term by the constant `K`, then count `n^(t+2)` terms.
+
   have hsum_le_const :
       (∑ i : Fin n, ∑ j : Fin n, ∑ J : Fin t → Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 t x
@@ -348,7 +345,7 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
     refine Finset.sum_le_sum (fun J _ => ?_)
     exact hK_term x e horth i j J
   refine le_trans hsum_le_const ?_
-  -- Evaluate the constant triple sum: `∑_{i,j,J} K = n^(t+2) · K`.
+
   have hconst_eq :
       (∑ _i : Fin n, ∑ _j : Fin n, ∑ _J : Fin t → Fin n, K) = (n : ℝ) ^ (t + 2) * K := by
     rw [Finset.sum_const, Finset.sum_const, Finset.sum_const]
@@ -356,7 +353,7 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
     push_cast
     ring
   rw [hconst_eq]
-  -- `n^(t+2) · K ≤ d^(t+2) · K` since `n ≤ d` and `K ≥ 0`.
+
   refine mul_le_mul_of_nonneg_right ?_ hK_nonneg
   exact pow_le_pow_left₀ (Nat.cast_nonneg n) (by exact_mod_cast hn_le_d) (t + 2)
 
@@ -421,7 +418,7 @@ theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
     exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const (I := I) (M := M) g t
   refine ⟨fun _ => C, continuous_const, fun _ => hC_nonneg, ?_⟩
   intro x n e horth hrepr T
-  -- The constant `C` bounds the dual-frame curvature energy `Cx(x, e)`.
+
   have hCx_le_C :
       (∑ i : Fin n, ∑ j : Fin n, ∑ J : Fin t → Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 t x
@@ -435,10 +432,10 @@ theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
     -- dual frame `dualTensorFrameS g x 0 e J₀`, so `T = c • (that unit)` with `c² = rfns T`.
     subst ht0
     set J₀ : Fin 0 → Fin n := fun k => k.elim0 with hJ₀
-    -- `φ S := fiberNormSqComponent g x 0 0 S n e J₀ J₀` is the single rank-`0` frame component.
+
     set φ : TensorRSSpace 0 0 I x → ℝ :=
       fun S => fiberNormSqComponent (I := I) (M := M) g x 0 0 S n e J₀ J₀ with hφ_def
-    -- For rank `0` the intrinsic fibre norm is the single squared component.
+
     have hrfns_sq : ∀ S : TensorRSSpace 0 0 I x,
         riemannianFiberNormSq (I := I) (M := M) g 0 0 x S = φ S ^ 2 := by
       intro S
@@ -449,15 +446,15 @@ theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
         (fun h => absurd (Finset.mem_univ J₀) h)]
       simp only [hφ_def]
       rw [fiberNormSqSummand_eq_component_sq]
-    -- The unit dual frame has component `1`.
+
     have hφ_unit : φ (dualTensorFrameS (I := I) (M := M) g x 0 e J₀) = 1 := by
       simp only [hφ_def]
       rw [fiberNormSqComponent_dualTensorFrameS (I := I) (M := M) g x 0 e horth J₀ J₀ J₀]
       simp
-    -- `φ` is `ℝ`-linear (component is additive and scales).
+
     have hφ_smul : ∀ (a : ℝ) (S : TensorRSSpace 0 0 I x), φ (a • S) = a * φ S := by
       intro a S; simp only [hφ_def]; rw [fiberNormSqComponent_smul]
-    -- `φ` is injective: `φ S = 0 ⟹ rfns S = 0 ⟹ S = 0` (positive-definiteness via the bridge).
+
     have hφ_inj : ∀ S : TensorRSSpace 0 0 I x, φ S = 0 → S = 0 := by
       intro S hS
       have hrfns0 : riemannianFiberNormSq (I := I) (M := M) g 0 0 x S = 0 := by
@@ -473,7 +470,7 @@ theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
           (r := 0) (s := 0) (x := x) (0 : TensorRSSpace 0 0 I x) := by
         rw [hSm0]; exact (map_zero _).symm
       exact TensorRSSpace.toModel_injective (𝕜 := ℝ) (E := E) (I := I) (M := M) this
-    -- Hence `T = φ T • dualTensorFrameS g x 0 e J₀`: their difference has component `0`.
+
     set D := dualTensorFrameS (I := I) (M := M) g x 0 e J₀ with hD_def
     have hT_eq : T = φ T • D := by
       have hdiff : φ (T - φ T • D) = 0 := by
@@ -485,7 +482,7 @@ theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
         rw [hφD]; ring
       have hTD : T - φ T • D = 0 := hφ_inj _ hdiff
       exact sub_eq_zero.mp hTD
-    -- Apply curvature linearity in the tensor slot and the rfns scaling.
+
     have hLHS_eq :
         (∑ i : Fin n, ∑ j : Fin n,
             riemannianFiberNormSq (I := I) (M := M) g 0 0 x
@@ -499,14 +496,14 @@ theorem exists_continuous_riemannOp_tensorCovS_frameEnergy_bound
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl (fun j _ => ?_)
       conv_lhs => rw [hT_eq, (riemannOp (tensorCov (I := I) g 0 0) x (e i) (e j)).map_smul (φ T) D]
-      -- `rfns (c • v) = c² · rfns v`.
+
       rw [hrfns_sq, hrfns_sq]
       have : φ (φ T • riemannOp (tensorCov (I := I) g 0 0) x (e i) (e j) D) =
           φ T * φ (riemannOp (tensorCov (I := I) g 0 0) x (e i) (e j) D) := hφ_smul _ _
       rw [this]; ring
     rw [hLHS_eq, hrfns_sq T]
     rw [show (fun _ : M => C) x = C from rfl]
-    -- `φ T² · (dual-frame energy at `J₀`) ≤ φ T² · C = C · rfns T`.
+
     have hsq_nonneg : (0 : ℝ) ≤ φ T ^ 2 := sq_nonneg _
     have henergy0_le_C :
         (∑ i : Fin n, ∑ j : Fin n,

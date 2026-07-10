@@ -262,7 +262,7 @@ lemma covGrad_covDeriv_leadingSlot_eq_abstractHess
           (unitEvalSection (I := I) (M := M) g s S) x
           ((LeviCivita (I := I) g).toFun Z x (Y x)) := by
   classical
-  -- Transport the outer derivative through the unit: identify with the abstract derivative of `U`.
+
   rw [show
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (tensorCov (I := I) g 0 (s + 1)).toFun
@@ -272,12 +272,12 @@ lemma covGrad_covDeriv_leadingSlot_eq_abstractHess
         (unitGradFieldGen (I := I) (M := M) g s S) x (Y x) from
     covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
       (covGrad (I := I) (M := M) g 0 s S).toSection x (Y x)]
-  -- Expose the slot-`0` Christoffel correction.
+
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
     (unitGradFieldGen (I := I) (M := M) g s S) (Vfield := Y) (Y := Z) (x := x)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((hY x).mdifferentiableAt (by simp)) ((hZ x).mdifferentiableAt (by simp))]
-  -- Read each slot-`0` curry of `U` as the abstract directional derivative of `V`.
+
   rw [curriedSection_unitGradFieldGen_eq_covApply_abstract (I := I) (M := M) g s S Z]
   rw [curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S x
     ((LeviCivita (I := I) g).toFun Z x (Y x))]
@@ -310,11 +310,11 @@ lemma covGrad_covDeriv_inner_leadingSlot_eq_abstractIter
           (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) Y
             (unitEvalSection (I := I) (M := M) g s S)) x w := by
   classical
-  -- Slot-`0` curry at the unit reads the directional covariant derivative along `w`.
+
   rw [tensor0S_curry_covGradBundleEquiv_unit_genVal (I := I) (M := M) s x
     ((tensorCov (I := I) g 0 s).toFun
       (covApply (tensorCov (I := I) g 0 s) Y (fun z : M => S.toSection z)) x) w]
-  -- Transport the outer derivative through the unit, reading the inner `∇_Y S` at the unit.
+
   set σ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯ :=
     ContMDiffSection.mk
       (fun y : M => covApply (tensorCov (I := I) g 0 s) Y (fun z : M => S.toSection z) y)
@@ -332,7 +332,7 @@ lemma covGrad_covDeriv_inner_leadingSlot_eq_abstractIter
       (covApply (tensorCov (I := I) g 0 s) Y (fun z : M => S.toSection z)) from
       funext (fun y => hσapp y)]]
   rw [covDeriv_unit_eval_eq_genVal (I := I) (M := M) g s σ x w]
-  -- The unit-evaluated inner section is the abstract directional derivative `∇^{abs}_Y V`.
+
   rw [show (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from σ y)
         (unitZeroSec (I := I) (M := M) y)) =
       covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) Y
@@ -399,24 +399,22 @@ theorem covGrad_covDeriv_leadingSlot_commutation
   classical
   set nab := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) with hnab
   set V := unitEvalSection (I := I) (M := M) g s S with hV
-  -- The two curvature-free reductions.
+
   rw [covGrad_covDeriv_leadingSlot_eq_abstractHess (I := I) (M := M) g s S hY hZ x]
   rw [covGrad_covDeriv_inner_leadingSlot_eq_abstractIter (I := I) (M := M) g s S hY x (Z x)]
-  -- Expand the abstract Riemann curvature via `riemannSec_def`.
+
   rw [riemannSec_def nab Y Z V x]
-  -- Torsion-freeness: with the project's argument convention,
-  -- `(LeviCivita g).toFun Z x (Y x) − (LeviCivita g).toFun Y x (Z x) = [Y, Z]_x`.
+
   have hbr : (LeviCivita (I := I) g).toFun Z x (Y x) -
       (LeviCivita (I := I) g).toFun Y x (Z x) = VectorField.mlieBracket I Y Z x :=
     (CovariantDerivative.torsion_eq_zero_iff (cov := LeviCivita (I := I) g)).mp
       (LeviCivita_torsion_eq_zero (I := I) g)
       ((hY x).mdifferentiableAt (by simp)) ((hZ x).mdifferentiableAt (by simp))
-  -- The slot-`0` Christoffel direction equals the bracket plus the inner Christoffel direction:
-  -- `(LeviCivita g).toFun Z x (Y x) = [Y,Z] + (LeviCivita g).toFun Y x (Z x)`.
+
   have hdir : (LeviCivita (I := I) g).toFun Z x (Y x) =
       VectorField.mlieBracket I Y Z x + (LeviCivita (I := I) g).toFun Y x (Z x) := by
     rw [← hbr]; abel
-  -- Rewrite the slot-`0` Christoffel of the `A`-side via `hdir`, then fold via additivity of `nab`.
+
   rw [hdir, map_add]
   abel
 

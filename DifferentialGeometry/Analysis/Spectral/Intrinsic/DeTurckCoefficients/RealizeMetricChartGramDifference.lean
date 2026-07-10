@@ -103,7 +103,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
   rw [chartGramOnE_def, chartGramOnE_def]
   rw [chartGramMatrix_realize_apply (I := I) g_bg T hδ_lt hδ α p a b,
     chartGramMatrix_realize_apply (I := I) g_bg T' hδ_lt hδ' α p a b]
-  -- The background Gram entries cancel.
+
   rw [show (chartGramMatrix (I := I) g_bg α p a b +
         ccTensorBilinSymm (I := I) g_bg T p
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p)) -
@@ -114,16 +114,16 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p) -
         ccTensorBilinSymm (I := I) g_bg T' p
           (chartBasisVecFiber (I := I) α a p) (chartBasisVecFiber (I := I) α b p) by ring]
-  -- Each symmetrized bilinear value expands by `ccTensorBilinSymm_apply`.
+
   rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
-  -- The raw `(0,2)` component of `T - T'` is the bilinear value of its difference section.
+
   have hrawAB := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (T - T') α hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
     (![a, b] : Fin 2 → Fin (Module.finrank ℝ E))
   have hrawBA := tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g_bg 0 2
     (T - T') α hp (![] : Fin 0 → Fin (Module.finrank ℝ E))
     (![b, a] : Fin 2 → Fin (Module.finrank ℝ E))
-  -- For `r = 0` the chart-frame basis element is the canonical unit `constOfIsEmpty 1`.
+
   have hframe : chartFrameBasisModel (I := I) (M := M) α p 0
       (![] : Fin 0 → Fin (Module.finrank ℝ E)) =
       (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -136,8 +136,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
     exact h
   rw [hframe] at hrawAB hrawBA
-  -- The bilinear value of `(T - T')` recovers `ccTensorBilin (T - T')`, which is the difference
-  -- `ccTensorBilin T - ccTensorBilin T'` of the per-tensor extracted forms.
+
   have hbilin : ∀ (i j : Fin (Module.finrank ℝ E)),
       ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -155,7 +154,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
         ![chartBasisVecFiber (I := I) α i p, chartBasisVecFiber (I := I) α j p] := by
       funext k; fin_cases k <;> rfl
     rw [hvecAB, ccTensorBilin_apply, ccTensorBilin_apply]
-    -- `ccTensorModel g S p ![v,w] = toModel (S.toSection p (const 1)) ![v,w]` for any `S`.
+
     show Tensor0SSpace.toModel
         ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -165,7 +164,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
     rfl
   rw [hrawAB, hrawBA, hbilin a b, hbilin b a]
-  -- Both `ccTensorBilinSymm` are the half-sum; assemble.
+
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   ring
 

@@ -13,26 +13,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 
-/-!
-# Palatini refold of the Riemann and Lie coefficients along the Ricci-linearization path
-
-The second-gradient refold of the moving order-zero coefficients along the realized metric
-path at second endpoint zero: the covariant-gradient-of-connection-difference content of the
-moving Riemann coefficient (and of the DeTurck Lie arms) is re-expressed as a rank-`(4,2)`
-coefficient acting on the two-step gradient of the moving tensor, with the remaining
-background-curvature, quadratic connection-difference, and one-jet sharp-gradient content
-collected into a rank-`(2,2)` part acting on the zeroth gradient.
-
-The constructed second-gradient families (`riemannPalatiniRefoldC2Family`) instantiate the
-generic folded four-monomial kernel calculus of
-`Geometry/Connection/TensorNabla/OperatorFieldSecondGradientRefold` at the realized metric
-family, with the moving tensor's unit value as coefficient weight.
-
-The refold identities and their estimates are the children of the Riemann-arm (`RA`) and
-Lie-correction (`LC`) refold data statements of the DeTurck remainder tame-Lipschitz
-development; every one of them is proven sorry-free.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -67,12 +47,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- The constructed second-gradient refold family for the Riemann arm at second endpoint
-zero: the moving tensor's unit value weights the folded four-monomial second-Bianchi kernel
-at the realized metric's orthonormal frames, averaged over the two symmetrization slot
-conventions `qA`, `qB` (the `symmS` partner bookkeeping) and scaled by the path parameter
-(the connection-difference rate at second endpoint zero). The exact permutation quadruples
-are pinned by the refold identity child below. -/
 def riemannPalatiniRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -92,8 +66,7 @@ def riemannPalatiniRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
         (qB 0) (qB 1) (qB 2) (qB 3)))
 
 set_option linter.unusedSectionVars false in
-/-- The constructed second-gradient family vanishes at path parameter zero: the refold
-carries the connection-difference rate, which vanishes at the path's first endpoint. -/
+
 @[simp] lemma riemannPalatiniRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -103,24 +76,9 @@ carries the connection-difference rate, which vanishes at the path's first endpo
     riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB 0 = 0 := by
   rw [riemannPalatiniRefoldC2Family, zero_smul]
 
-/-- The `symmS` partner pairing of two slot-pattern quadruples for the folded four-monomial
-refold kernel: each pattern of the second quadruple is the frame-pair swap of the
-corresponding pattern of the first, where `Equiv.swap 0 1` acts on the two leading argument
-slots — the slots that receive the orthonormal frame pair. Under this pairing the half-sum
-of the two kernels sees the weight tensor only through its symmetrization: by
-`curvatureRefoldMonomialFib_toModel`, the monomial at pattern `σ` and frames `(q, p)` equals
-the monomial at pattern `Equiv.swap 0 1 * σ` and frames `(p, q)`, so the `a ↔ b` reindex of
-the double frame sum averages the weight over its two slots, i.e. replaces the raw moving
-tensor by `ccTensorBilinSymm`. This is the structural condition under which the
-connection-difference-rate caps of the refold estimates hold; unpaired quadruple pairs see
-the raw antisymmetric weight content, which the symmetrized smallness `gFibreOpBound`
-hypothesis does not control. -/
 def IsFramePairPartner (qA qB : Fin 4 → Equiv.Perm (Fin 4)) : Prop :=
   ∀ k : Fin 4, qB k = Equiv.swap (0 : Fin 4) 1 * qA k
 
-/-- Vacuity litmus: the partner pairing rejects every diagonal witness — no quadruple is its
-own partner. In particular the unpaired convention `qA = qB` behind the antisymmetric-weight
-refutation of the ∀-independent estimate forms is excluded. -/
 lemma not_isFramePairPartner_self (q : Fin 4 → Equiv.Perm (Fin 4)) :
     ¬ IsFramePairPartner q q := by
   intro h
@@ -129,8 +87,6 @@ lemma not_isFramePairPartner_self (q : Fin 4 → Equiv.Perm (Fin 4)) :
   rw [Equiv.swap_apply_left, Equiv.Perm.one_apply] at h1
   exact absurd h1 (by decide)
 
-/-- The covariant-derivative arm of the DeTurck Lie coefficient as a standalone smooth
-compactly supported `(2,2)` coefficient field (the `dLaBiContrFib` bi-contraction). -/
 def deTurckLieCovDerivArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -147,8 +103,6 @@ set_option linter.unusedSectionVars false in
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x)) := rfl
 
-/-- The vector-field endomorphism arm of the DeTurck Lie coefficient as a standalone smooth
-compactly supported `(2,2)` coefficient field (the slot-inserted `deTurckLieWEndo`). -/
 def deTurckLieEndoArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -166,8 +120,7 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- The DeTurck Lie coefficient decomposes as the sum of its covariant-derivative arm and
-its vector-field endomorphism arm. -/
+
 theorem deTurckLieCoeffField_eq_covDerivArm_add_endoArm
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg =
@@ -183,15 +136,7 @@ theorem deTurckLieCoeffField_eq_covDerivArm_add_endoArm
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Dossier row RA-3b (conjunct 5 of the frozen Riemann-arm refold data): pointwise
-fibre-norm sup for the moving order-zero Riemann coefficient along the realized path,
-uniform over the moving tensor's `a + 2`-jet ball. The moving coefficient splits as the
-background coefficient plus the background difference; the difference is capped at grid
-order zero by the background-difference diagonal-product grid of
-`CurvatureCoefficientDifferenceJetTower`, whose grid cells (jets of the convex-perturbation
-tensor up to order two) are absorbed pointwise by the `Csob` convex-perturbation `C²`
-Sobolev bound on the jet ball, while the background part is capped by the compact-manifold
-uniform fibre-norm bound. -/
+
 theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_rfns_ballUniform_sq
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -937,13 +882,7 @@ private theorem curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
   rfl
 
 set_option linter.unusedVariables false in
-/-- Dossier row RA-2 (conjunct 2 of the frozen Riemann-arm refold data): joint smoothness
-of the constructed second-gradient refold family, for every permutation-quadruple
-convention. The family is the path-parameter multiple of the half-sum of two folded
-four-monomial kernels at the realized metric; each frame-summed monomial coefficient is
-jointly smooth because on a chart it is the double inverse-Gram contraction of the
-metric-free weight and argument data (`double_frame_bilin_trace` in chart form), with the
-realized family's inverse Gram matrix jointly smooth in the path parameter. -/
+
 theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -1009,16 +948,6 @@ theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     ContMDiffSection.coe_smul, Pi.smul_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContMDiffSection.coe_add, Pi.add_apply]
 
-/-- The constructed second-gradient refold family for the covariant-derivative arm of the
-DeTurck Lie coefficient at second endpoint zero: the moving tensor's unit value weights the
-three sharp-Koszul-gradient monomials at the realized metric's orthonormal frames, each
-monomial partner-paired with its leading-frame-slot swap at half weight (so the effective
-coefficient weight is the symmetrized moving tensor -- the `symmS` average carried by the
-construction itself, never by independent quantifiers), with signed monomial weights of
-magnitude at most one and an overall path-parameter scale (the connection-difference rate
-at second endpoint zero). Three monomials at half weight over partner pairs give the three
-ledger copies of the frozen cap literal `3`. The exact permutations and signs are pinned by
-the refold identity child below. -/
 def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1037,9 +966,7 @@ def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
         ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
 
 set_option linter.unusedSectionVars false in
-/-- The constructed covariant-derivative-arm second-gradient family vanishes at path
-parameter zero: the refold carries the connection-difference rate, which vanishes at the
-path's first endpoint. -/
+
 @[simp] lemma deTurckLieCovDerivRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1049,10 +976,8 @@ path's first endpoint. -/
     deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε 0 = 0 := by
   rw [deTurckLieCovDerivRefoldC2Family, zero_smul]
 
-
 set_option linter.unusedSectionVars false in
-/-- The unit-value carrier of a slot-swapped rank-two coefficient tensor is the slot-swapped
-unit-value carrier. -/
+
 lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
     (p q' : TangentSpace I x) :
@@ -1071,12 +996,7 @@ lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
   fin_cases i <;> rfl
 
 set_option linter.unusedSectionVars false in
-/-- Leading-frame-slot partner transport for the frame-summed refold monomial at unit-value
-weights: precomposing the slot pattern with the swap of the two leading (frame) slots is the
-same coefficient as loading the slot-swapped weight tensor at the unswapped pattern — the
-double frame sum reindexes. This is the identity through which the partner-paired family
-`deTurckLieCovDerivRefoldC2Family` carries the symmetrized moving tensor as its effective
-weight. -/
+
 theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1126,9 +1046,8 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
   rw [toModel_ccTensorUnitValueSection_domDomCongrSection_swap]
 
-
 set_option linter.unusedSectionVars false in
-/-- Additivity of the unit-value carrier in the coefficient tensor. -/
+
 lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (y : M) :
     ccTensorUnitValueSection (I := I) (M := M) g₀ (S + S') y =
@@ -1141,7 +1060,7 @@ lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- Homogeneity of the unit-value carrier in the coefficient tensor. -/
+
 lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ)
     (S : SmoothCcTensor g₀ 0 2) (y : M) :
     ccTensorUnitValueSection (I := I) (M := M) g₀ (c • S) y =
@@ -1153,7 +1072,7 @@ lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- Additivity of the frame-summed refold monomial in its unit-value weight. -/
+
 theorem curvatureRefoldMonomialCoeffField_unitValue_add
     (g₀ g₁ : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1199,7 +1118,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_add
   rw [add_mul]
 
 set_option linter.unusedSectionVars false in
-/-- Homogeneity of the frame-summed refold monomial in its unit-value weight. -/
+
 theorem curvatureRefoldMonomialCoeffField_unitValue_smul
     (g₀ g₁ : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1236,11 +1155,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_smul
   ring
 
 set_option linter.unusedSectionVars false in
-/-- The partner-paired half sum of refold monomials carries the SYMMETRIZED moving tensor
-as its effective unit-value weight: the pairing baked into the constructed family is
-exactly the `symmS` average, so the `gFibreOpBound` hypothesis on the symmetrized tensor
-controls the paired coefficient — the certificate that universal quantification over the
-permutation-and-sign conventions is sound for the partner-paired construction. -/
+
 theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
@@ -1270,13 +1185,8 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     curvatureRefoldMonomialCoeffField_unitValue_add,
     curvatureRefoldMonomialCoeffField_unitValue_trans_swap]
 
-
 set_option linter.unusedSectionVars false in
-/-- The constructed covariant-derivative-arm family carries the SYMMETRIZED moving tensor
-as its effective weight: the partner pairing in the definition is the `symmS` average.
-This is the birth certificate that the family's estimate package is sound for every
-permutation-and-sign convention — the fibre-norm cap is controlled by the `gFibreOpBound`
-hypothesis on the symmetrized tensor. -/
+
 theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1298,8 +1208,7 @@ theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannia
     (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (q i)
 
 set_option linter.unusedSectionVars false in
-/-- The covariant-derivative arm field coincides with the `deTurckLieDLaCoeffField` of the
-jet-bound tower: both package the `dLaBiContrFib` bi-contraction fibre. -/
+
 private theorem covDerivArmField_eq_dLaCoeffField
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg =
@@ -1309,8 +1218,7 @@ private theorem covDerivArmField_eq_dLaCoeffField
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- The endomorphism arm field coincides with the `deTurckLieDLbCoeffField` of the jet-bound
-tower: both package the slot-inserted `deTurckLieWEndo` fibre. -/
+
 private theorem endoArmField_eq_dLbCoeffField
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg =
@@ -1320,7 +1228,7 @@ private theorem endoArmField_eq_dLbCoeffField
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- Joint smoothness passes through pointwise sums of coefficient families. -/
+
 private theorem threeArmHjoint_add_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (A B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ'))
@@ -1338,7 +1246,7 @@ private theorem threeArmHjoint_add_local (g₀ : SmoothRiemannianMetric I M) {r 
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
 set_option linter.unusedSectionVars false in
-/-- Joint smoothness passes through pointwise differences of coefficient families. -/
+
 private theorem threeArmHjoint_sub_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (A B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ'))
@@ -1356,9 +1264,7 @@ private theorem threeArmHjoint_sub_local (g₀ : SmoothRiemannianMetric I M) {r 
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
 set_option linter.unusedSectionVars false in
-/-- Joint smoothness of the covariant-derivative arm along the realized path at second
-endpoint zero, for every background: the `dLaBiContrFib` joint-smoothness engine of the
-higher-order coefficient tower, read through the arm field. -/
+
 private theorem covDerivArmField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1374,9 +1280,7 @@ private theorem covDerivArmField_realizedFam_threeArmHjoint
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- Joint smoothness of the endomorphism arm along the realized path at second endpoint
-zero, for every background: the arm is the full DeTurck Lie coefficient minus the
-covariant-derivative arm, and both carry joint-smoothness engines. -/
+
 private theorem endoArmField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1418,7 +1322,7 @@ private theorem endoArmField_realizedFam_threeArmHjoint
   rw [hsplit, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
 set_option linter.unusedSectionVars false in
-/-- Iterated covariant gradients commute with real scalings of the tensor. -/
+
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =
@@ -1426,7 +1330,6 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   induction j with
   | zero => simp only [iteratedCovGrad_zero]
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
-
 
 set_option linter.unusedSectionVars false in
 private theorem bdExists_fixedField_rfns_jet (g₀ : SmoothRiemannianMetric I M)
@@ -6447,14 +6350,7 @@ private theorem bdCovDerivArmDiff_pointwise_gridWindow (g₀ g_bg : SmoothRieman
   rw [← Finset.sum_mul, ← mul_assoc]
 
 set_option linter.unusedVariables false in
-/-- Generic-in-`g₁` ladder step for the covariant-derivative-arm background-pair
-difference window: the difference of the two arm instantiations carries no moving-metric
-two-jet — by the connection-difference cocycle its kernel content is the fixed background
-kernel together with quadratic connection-difference monomials carrying at most one moving
-leg, so the coefficient is one-jet in the perturbation with the metric raisings at the
-zero jet and `∇ⁱ` stays inside the `range (i + 2)` window; proven by the
-diagonal-product-grid technique with ball absorption, as in the
-`CurvatureCoefficientDifferenceJetTower` background-difference envelopes. -/
+
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6508,15 +6404,7 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_perOrder_l2_tameEnvelo
     nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedVariables false in
-/-- Deferred input (two-step jet window share of the covariant-derivative-arm
-background-pair difference; pattern class: the difference of the two arm instantiations
-carries no moving-metric two-jet -- by the connection-difference cocycle its kernel is the
-moving covariant gradient of the FIXED background connection difference, so the coefficient
-is one-jet in the moving tensor, with the metric raisings at the zero jet; tame-envelope
-technique at the `range (i + 2)` window with ball absorption, as in the proven
-`exists_corrArm1Field_realizedFam_jetL2_tameEnvelope` difference template and the
-`DeTurckLie*L2JetBound` per-order towers): the per-order envelope for the background-pair
-difference of the covariant-derivative arm along the realized path. -/
+
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -6583,15 +6471,6 @@ theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
 
-
-/-- The pair-trace form of the constructed covariant-derivative-arm second-gradient refold
-family: each signed, partner-paired refold monomial re-expressed as the moving pair-trace
-operator loaded with the two-step covariant gradient of the moving tensor, slot-arranged by
-the monomial pattern composed with the argument/weight exchange (the double swap of the
-frame pair against the evaluation pair), so the coefficient acts on the moving tensor's
-zeroth gradient instead of its second. Its `appCc`-action on the moving tensor equals the
-constructed family's `appCc`-action on the two-step gradient, so subtracting it from the
-covariant-derivative arm realizes the refold identity's order-zero coefficient. -/
 def deTurckLieCovDerivRefoldPairTraceFamily (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -6726,8 +6605,7 @@ private lemma lrRealizedFam_zero (g₀ : SmoothRiemannianMetric I M)
   · rw [realizedFam, dif_neg h]
 
 set_option linter.unusedSectionVars false in
-/-- Transport of the linearized Koszul covector across an equality of metrics whose weights
-share the same underlying section. -/
+
 private lemma lrKoszulCovec_congr {g g' : SmoothRiemannianMetric I M} (h : g = g')
     (S : SmoothCcTensor g 0 2) (S' : SmoothCcTensor g' 0 2)
     (hs : HEq S S') (x : M) (u ζ : TangentSpace I x) :
@@ -6736,8 +6614,7 @@ private lemma lrKoszulCovec_congr {g g' : SmoothRiemannianMetric I M} (h : g = g
   rw [eq_of_heq hs]
 
 set_option linter.unusedSectionVars false in
-/-- The symmetrized part of a symmetric coefficient tensor is the tensor itself (local
-copy of the downstream `symmS_eq_self_of_symm`, placed before the residual development). -/
+
 private lemma lrSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
@@ -6769,10 +6646,7 @@ private lemma lrSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 set_option linter.unusedSectionVars false in
-/-- The exact fibre linearization of the connection difference between the realized path
-and the fixed background: the realized-vs-basepoint linearization of
-`connDiff_realizedFam_eq_smul_sharp` transported through `lrRealizedFam_zero`, with the
-velocity identified with the moving tensor through the chain symmetry hypothesis. -/
+
 private lemma lrConnDiff_linearization (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -6813,9 +6687,7 @@ private lemma lrConnDiff_linearization (g₀ : SmoothRiemannianMetric I M)
           (linearizedKoszulCovec (I := I) g₀ T x u ζ) := hkey
 
 set_option linter.unusedSectionVars false in
-/-- The lowered form of the connection-difference linearization: pairing the realized
-connection difference against a vector in the moving metric evaluates the linearized
-Koszul covector at the path-parameter rate. -/
+
 private lemma lrConnDiff_inner (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -6831,9 +6703,7 @@ private lemma lrConnDiff_inner (g₀ : SmoothRiemannianMetric I M)
     map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul, inner_metricSharp]
 
 set_option linter.unusedVariables false in
-/-- The linearized-Koszul carrier of the moving tensor as a compactly supported
-`(0,3)`-field: the signed half-sum of the three slot-permuted copies of the covariant
-gradient whose unit model realizes `linearizedKoszulCovec g₀ T`. -/
+
 private def lrKT (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 3 :=
   (1 / 2 : ℝ) •
@@ -6914,7 +6784,7 @@ private lemma lrExtDerivFun_apply_scalar (f : M → ℝ) {x : M} (v : TangentSpa
   rfl
 
 set_option linter.unusedSectionVars false in
-/-- The covariant derivative of the vanishing self connection difference vanishes. -/
+
 private lemma lrCovDerivConnDiff_self_zero (g₀ : SmoothRiemannianMetric I M)
     (x : M) (v0 p q : TangentSpace I x) :
     covDerivConnDiff (I := I) g₀ g₀
@@ -6963,11 +6833,7 @@ private lemma lrCovDerivConnDiff_self_zero (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedVariables false in
 set_option maxHeartbeats 12800000 in
-/-- The exact fibre evaluation of the covariant-derivative-arm kernel at basepoint
-background: the moving covariant gradient of the connection difference pairs against the
-moving metric as the path-parameter multiple of the second-gradient linearized-Koszul
-carrier, up to three quadratic connection-difference corrections. The two-jet content of
-the arm is thereby isolated in the covariant gradient of `lrKT`. -/
+
 private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -7280,9 +7146,7 @@ private theorem lrKernel_inner (g₀ : SmoothRiemannianMetric I M)
     linarith [hE3]
 
 set_option linter.unusedVariables false in
-/-- The moving-metric-lowered connection difference as a `(0,3)`-field anchored at the
-background: the raise-insert of the moving inverse metric at the pairing slot of the
-background-lowered connection difference. -/
+
 private def lrOmegaHat (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 :=
   appCcRS (I := I) (M := M) g₀ 0 3 3
     (slotInsertEndoCc (I := I) (M := M) g₀ 2 (fullRaisedEndoField (I := I) (M := M) gm g₀))
@@ -7347,16 +7211,14 @@ private lemma lrOmegaHat_unitModel_apply (g₀ gm : SmoothRiemannianMetric I M)
     (PDE.DeTurck.connDiff (I := I) gm g₀ x (m 1) (m 2)) (m 0)
 
 set_option linter.unusedVariables false in
-/-- The pure-inner quadratic connection-difference field: the moving-lowered connection
-difference fed with a second connection difference at its pairing slot. -/
+
 private def lrQB (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   appCcRS (I := I) (M := M) g₀ 0 3 4
     (armSlotEndoCc (I := I) (M := M) g₀ 2 (bdConnPair (I := I) (M := M) g₀ gm))
     (lrOmegaHat (I := I) (M := M) g₀ gm)
 
 set_option linter.unusedVariables false in
-/-- The nested quadratic connection-difference field: a connection difference of a
-connection-difference vector, lowered in the moving metric. -/
+
 private def lrQA (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   appCcRS (I := I) (M := M) g₀ 0 3 4
     (armSlotEndoCc (I := I) (M := M) g₀ 2 (bdConnPair (I := I) (M := M) g₀ gm))
@@ -7488,9 +7350,7 @@ private def lrPermC : Equiv.Perm (Fin 4) :=
    by decide, by decide⟩
 
 set_option linter.unusedVariables false in
-/-- The full quadratic connection-difference correction field of the covariant-derivative
-arm at basepoint background: the six slot-permuted quadratic monomials of the symmetrized
-kernel identity. -/
+
 private def lrQuadF (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 4 :=
   domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 4) 1) (lrQB (I := I) (M := M) g₀ gm)
     + lrQB (I := I) (M := M) g₀ gm
@@ -7567,8 +7427,7 @@ private def lrSigmaW2 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option linter.unusedVariables false in
-/-- The first background-curvature derivation-action coefficient: the weight slot receives
-the curvature-rotated first argument. -/
+
 private def lrRiemW1 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
   appCcRS (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW1
@@ -7576,8 +7435,7 @@ private def lrRiemW1 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option linter.unusedVariables false in
-/-- The second background-curvature derivation-action coefficient: the weight slot receives
-the curvature-rotated second argument. -/
+
 private def lrRiemW2 (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 2 4 :=
   appCcRS (I := I) (M := M) g₀ 2 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 lrSigmaW2
@@ -7755,9 +7613,7 @@ private lemma lrRiemW2_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
   rfl
 
 set_option linter.unusedVariables false in
-/-- The background-curvature derivation-action field on the moving tensor: the two-term
-curvature commutator action of the Ricci identity, as an explicit composition of the fixed
-curvature coefficients with the tensor. -/
+
 private def lrCurvF (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 4 :=
   appCcRS (I := I) (M := M) g₀ 0 2 4 (lrRiemW1 (I := I) (M := M) g₀) T
@@ -7909,9 +7765,7 @@ private lemma lrCoeff_eq_unitScalarRSLift (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- The Ricci identity for the second covariant gradient of the moving tensor at the
-antisymmetrized derivative pair: the commutator is the background-curvature derivation
-action (local adaptation of the arm-zero fold-pair antisymmetrization to point vectors). -/
+
 private lemma lrRIC (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (x : M) (a b c d : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 T) x ![a, b, c, d]
@@ -8076,9 +7930,7 @@ private lemma lrUnitEval_ddc_rel (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Slot-permutation naturality of the covariant gradient at unit-model evaluation: the
-gradient of a slot-permuted field evaluates as the gradient of the field at the permuted
-argument slots, the derivative slot passing through. -/
+
 private lemma lrCovGrad_ddc_unitModel (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (W : SmoothCcTensor g₀ 0 3) (x : M)
     (w : Fin 4 → TangentSpace I x) :
@@ -8147,7 +7999,7 @@ private lemma lrTsec_rel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Argument-slot symmetry of the first covariant gradient of a symmetric tensor. -/
+
 private lemma lrCovGradT_argswap (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -8226,7 +8078,7 @@ private lemma lrCgTsec_rel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTens
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Argument-slot symmetry of the second covariant gradient of a symmetric tensor. -/
+
 private lemma lrICG2_argswap (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -8296,8 +8148,7 @@ private lemma lrICG2_argswap (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Unit-model expansion of the covariant gradient of the linearized-Koszul carrier into
-the three slot-permuted second gradients of the moving tensor. -/
+
 private lemma lrCovGradKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (w0 w1 w2 w3 : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
@@ -8347,9 +8198,7 @@ private lemma lrCovGradKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     fin_cases k <;> rfl]
 
 set_option linter.unusedVariables false in
-/-- The order-zero residual of the covariant-derivative arm at basepoint background: the
-half-path-scaled background-curvature derivation action together with the quadratic
-connection-difference corrections. -/
+
 private def lrR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hδZ : gFibreOpBound (I := I) (M := M) g₀
@@ -8360,8 +8209,7 @@ private def lrR4 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 25600000 in
-/-- The summand-level cancellation identity: the symmetrized arm kernel plus the pinned
-signed pair-trace family combination collapses onto the order-zero residual. -/
+
 private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -8436,10 +8284,7 @@ private theorem lrSummand (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 51200000 in
-/-- The master residual identity of the covariant-derivative arm at basepoint background:
-the arm minus the pinned pair-trace family is the pair trace of the order-zero residual
-`lrR4` -- the curvature derivation action at half path weight together with the quadratic
-connection-difference corrections. -/
+
 private theorem lrArm_sub_family_eq_pairTrace (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -9002,8 +8847,7 @@ private lemma lrBFGW_mono_of_le (b b' : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
   exact Finset.prod_le_prod (fun m _ => hb (e m)) (fun m _ => hbb (e m))
 
 set_option linter.unusedSectionVars false in
-/-- Plain grid windows embed into the bounded-factor windows once every admissible cell
-order fits below the factor cap. -/
+
 private lemma lrWindow_le_bFGW (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {K W W' : ℕ}
     (hK : W ≤ K + 1) (hW : W ≤ W') (_hW1 : 1 ≤ W') :
     Combinatorics.antidiagonalTupleGridWindow b W ≤
@@ -9019,7 +8863,7 @@ private lemma lrWindow_le_bFGW (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {K W W'
         rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
 
 set_option linter.unusedSectionVars false in
-/-- Jet cells embed into the bounded-factor window at the zero-jet cap. -/
+
 private lemma lrTcell_bfgw (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {Λ0 : ℝ} (hΛ0 : 0 ≤ Λ0)
     (h0 : b 0 ≤ Λ0) {n K W : ℕ} (hnK : n ≤ K) (hnW : n + 1 ≤ W) :
     b n ≤ (Λ0 + 1) * Combinatorics.boundedFactorGridWindow b K W := by
@@ -9140,9 +8984,7 @@ private theorem lrExists_rfnsT_one_jet_cap (g₀ : SmoothRiemannianMetric I M) (
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- Bounded-factor window for the jets of the curvature derivation-action field: the
-fixed curvature coefficients contribute compact sups, the tensor contributes single jet
-cells absorbed at the zero-jet cap. -/
+
 private theorem lrCurvF_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
@@ -9253,8 +9095,7 @@ private theorem lrCurvF_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (h�
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- Plain grid window for the jets of the raise-inserted moving-lowered connection
-difference. -/
+
 private theorem lrOmegaHat_gridWindow (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ l, 0 ≤ C l) ∧
@@ -9400,9 +9241,7 @@ private theorem lrOmegaHat_gridWindow (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- Bounded-factor window for the jets of the quadratic connection-difference correction
-field: two moving one-jet legs multiply into the bounded-factor window with per-factor
-order below the cap. -/
+
 private theorem lrQuadF_bfgw (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
@@ -9672,8 +9511,7 @@ private lemma lrGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : ∀ j, 0 ≤ b 
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- Bounded-factor window for the jets of the order-zero residual along the realized
-path. -/
+
 private theorem lrR4_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
@@ -9788,8 +9626,7 @@ private theorem lrR4_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 25600000 in
-/-- Pointwise bounded-factor grid window for the difference between the
-covariant-derivative arm at basepoint background and the pinned pair-trace family. -/
+
 private theorem lrPointwise_bfgw (g₀ : SmoothRiemannianMetric I M) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
@@ -10151,8 +9988,7 @@ private theorem lrJoint0S_smulFun_local {d : ℕ} {S : Set ℝ}
       (f p₀.2) (A p₀)
 
 set_option linter.unusedSectionVars false in
-/-- Explicit six-monomial shape of the pinned pair-trace family at the derived
-permutation-and-sign data. -/
+
 private lemma lrFamilyField_eq (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -10225,11 +10061,7 @@ private lemma lrFamilyField_eq (g₀ : SmoothRiemannianMetric I M)
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-/-- Joint smoothness in `(x, s)` over the realized small set of the pinned pair-trace
-family: the six monomials are the moving pair-trace operator applied to fixed
-slot-permuted second-gradient sections, so the joint smoothness assembles from the
-realized-family cometric-double-trace engine over each fixed section, the local joint
-add/scalar combinators, and the path scalar `s`. -/
+
 private theorem lrFamily_threeArmHjoint (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -10459,26 +10291,7 @@ private lemma lrWindowOneThree_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {B :
   nlinarith [hb 1, hB1, hB0, sq_nonneg (b 1 - B)]
 
 set_option linter.unusedVariables false in
-/-- Dossier row LC-1 order-zero part, the residual data of the basepoint-background refold
-identity: joint smoothness, a ball-uniform pointwise fibre-norm sup, and the two-step jet
-window for the difference between the moving covariant-derivative arm at basepoint
-background and the pair-trace form of the constructed second-gradient refold family at the
-pinned permutations and signs. Proven through the master residual refold
-`lrArm_sub_family_eq_pairTrace`: on the symmetric sector (`hTsymm`) the arm kernel's
-second-gradient Koszul monomials cancel exactly against the pair-trace family after the
-Ricci-identity slot exchange, so the difference is minus the moving pair-trace of the
-order-zero residual weight `lrR4` — the path-scaled background-curvature derivation action
-on `T` minus the quadratic connection-difference correction field. The joint-smoothness
-conjunct splits along the master identity's two sides (`dLaBiContrFib` engine for the arm,
-the realized-family cometric-double-trace engine over the six fixed slot-permuted
-second-gradient sections for the family); the cap and window conjuncts bound the residual
-weight in the bounded-factor grid window (fixed curvature sups with zero-jet cells at the
-Sobolev zero-jet cap for the curvature part, moving one-jet leg pairs through the
-pair-cell product bound for the quadratic part) and integrate through the sorry-free flat
-tame envelope; the cap conjunct is the window's order-zero cell arithmetic under the
-one-jet Sobolev cap. Without `hTsymm` the antisymmetric high-frequency escape sector rides
-the raw two-step gradient in the pair-trace family with no counterpart in the arm, and the
-jet window fails. -/
+
 theorem exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -10620,25 +10433,8 @@ theorem exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order
       have hK_nn : 0 ≤ C i * Kflat i := mul_nonneg (hC_nn i) (hKflat_nn i)
       nlinarith [hwin_nn, hK_nn]
 
-
 set_option linter.unusedVariables false in
-/-- Dossier row LC-1 identity core at background equal to the path basepoint; pattern
-class: the connection-difference cocycle degenerates -- the arm kernel IS the moving
-covariant gradient of `connDiff (realizedFam s) g₀`, and the second-gradient Koszul
-monomials refold onto the CONSTRUCTED partner-paired family
-`deTurckLieCovDerivRefoldC2Family` at the pinned permutations and signs. Proven as glue:
-the order-zero coefficient is the arm minus the pair-trace form of the family
-(`deTurckLieCovDerivRefoldPairTraceFamily`), so the identity conjunct is the exact
-argument/weight exchange reindexing of the six refold monomials
-(`bdMonoRefold_appCc_eq_pairTrace_appCc`), valid for every moving tensor; the joint
-smoothness, ball-uniform pointwise fibre-norm sup, and two-step jet window of the residual
-are the proven order-zero data
-`exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data`, which is
-where the chain-supplied symmetry hypothesis `hTsymm` is consumed (the realized path
-transmits only `symmS T`, so on the symmetric sector the arm's two-jet content cancels
-against the pair-trace family exactly and the residual is one-jet). This is the
-general-background statement instantiated at `g_bg := g₀`: the background leg is absent,
-leaving exactly the moving refold core. -/
+
 theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -10704,31 +10500,7 @@ theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
   abel
 
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier row LC-1, identity core with the order-zero-part shares of rows
-LC-4/LC-5/LC-6; pattern class: connection-difference cocycle `sub_add_sub` at the realized
-path plus the endpoint exact fibre linearization
-`covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp`, the lower-slot symmetry
-of the connection difference (`connDiff_symm`, which folds the raw-weight frame sum onto
-the partner-paired constructed family), and the `appCc`/`unitModel` evaluation calculus
-with fixed-frame neighbourhood gluing; the order-zero family carries the background
-connection-difference leg, the quadratic connection-difference corrections, and the one-jet
-sharp-gradient residual): the per-parameter refold identity for the covariant-derivative
-arm of the DeTurck Lie coefficient, with the second-gradient part the CONSTRUCTED
-partner-paired family `deTurckLieCovDerivRefoldC2Family` at existentially pinned
-permutations and signs, and an order-zero family carrying joint smoothness, a ball-uniform
-pointwise fibre-norm sup, and the two-step jet window. Stated under the chain-supplied
-symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is `symmS`-representable at every
-wired level). Proven as glue over the general-background identity core: the wrapper adds
-the background leg `deTurckLieCovDerivArmField g₀ (realizedFam s) g_bg −
-deTurckLieCovDerivArmField g₀ (realizedFam s) g₀` on top of the basepoint-background
-parent's order-zero family (via `threeArmHjoint_add_local`/`_sub_local` for joint
-smoothness, `riemannianFiberNormSq_add_le`/`_sub_le` for the cap, and
-`iteratedCovGrad_add`/`_sub` for the window), with the added leg's cap and window
-supplied by the proven engines
-`deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform` and
-`exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow`, together with the parent's
-residual order-zero-data child
-`exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data`. -/
+
 theorem exists_deTurckLieCovDerivArm_refold_identity_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -10909,9 +10681,7 @@ theorem exists_deTurckLieCovDerivArm_refold_identity_data
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- Sharp three-summand subadditivity of the pointwise fibre-norm square (the exact
-`card = 3` constant, so that three ledger copies close into the squared triple cap with
-zero headroom). -/
+
 private lemma riemannianFiberNormSq_add3_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (u + v + w) ≤
@@ -10933,9 +10703,7 @@ private lemma riemannianFiberNormSq_add3_le (g : SmoothRiemannianMetric I M)
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x w]
 
 set_option linter.unusedSectionVars false in
-/-- The unit-value carrier of the symmetrized moving tensor is pointwise the symmetrized
-bilinear realization, so the `gFibreOpBound` hypothesis on `ccTensorBilinSymm` is exactly
-an operator bound on the weight of the constructed refold families. -/
+
 private lemma toModel_unitValue_symmS_abs_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -11714,13 +11482,7 @@ private theorem bdL2_tameEnvelope_of_gridWindow42 (g₀ : SmoothRiemannianMetric
         ring
 
 set_option linter.unusedVariables false in
-/-- Per-monomial two-step jet window for the frame-summed refold monomial coefficient along
-the realized path at the symmetrized unit-value weight: the monomial refolds onto the moving
-pair-trace operator applied to the slot-extended, reindexed symmetrized weight, so its jets
-convert onto the perturbation jets by the diagonal-product-grid calculus with ball absorption
-inside the `range (i + 2)` window — the weight and the metric raisings ride at the zero jet,
-with the weight's zero jet capped by the `gFibreOpBound` smallness; generic in the slot
-pattern. -/
+
 theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -11817,8 +11579,7 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
     nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedSectionVars false in
-/-- Four-term fibre-norm-square subadditivity for a signed four-monomial combination, at
-the sharp copy count `4`. -/
+
 private lemma riemannianFiberNormSq_addsub4_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w z : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (u + v - w - z) ≤
@@ -11839,12 +11600,7 @@ private lemma riemannianFiberNormSq_addsub4_le (g : SmoothRiemannianMetric I M)
   linarith
 
 set_option linter.unusedSectionVars false in
-/-- Under the `symmS` partner pairing the constructed Riemann-arm family is the single
-folded four-monomial kernel at the SYMMETRIZED unit-value weight, scaled by the path
-parameter: the birth certificate that the family's effective weight is `symmS` of the
-moving tensor, so the `gFibreOpBound` hypothesis on the symmetrized tensor controls the
-paired family for every partner-paired permutation-quadruple convention (the Riemann-arm
-analogue of `deTurckLieCovDerivRefoldC2Family_eq_symmS_weight`). -/
+
 private theorem riemannPalatiniRefoldC2Family_eq_symmS_kernel
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -11912,8 +11668,7 @@ private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 set_option linter.unusedSectionVars false in
-/-- Constant-in-`s` coefficient families are jointly smooth (the trivial class of the H1
-joint-smoothness rows: the section smoothness composed with the first projection). -/
+
 private theorem threeArmHjoint_const_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (F : SmoothCcTensor g₀ r 2) {δ δ' : ℝ} :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
@@ -12112,7 +11867,6 @@ private theorem bdBgRComm_eq_refold (g₀ g : SmoothRiemannianMetric I M) :
       (fun i : Fin 0 => i.elim0))]
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [mul_comm]
-
 
 private def bdTauK3b : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![5, 0, 2, 1, 4, 3] : Fin 6 → Fin 6) i,
@@ -13161,18 +12915,7 @@ private lemma bdAACommBiContrFibAppY_realizedFam_jointContMDiffOn
   exact hfinal
 
 set_option linter.unusedVariables false in
-/-- Joint `(x, s)`-smoothness over the realized small set of the antisymmetrized `A ⋆ A`
-commutator bi-contraction at the realized metric, applied to a fixed smooth `(0,2)`-tensor
-section (the `Q_true` joint-smoothness seam). On a chart the moving `g_s`-orthonormal
-double frame trace refolds onto the double inverse-Gram contraction
-(`double_frame_bilin_trace_chartα`); the quadratic connection-difference kernel at chart
-basis vectors expands through the chart Christoffel differences of the realized family
-against the moving Gram matrix (`connDiff_chartBasis_pair_eq_sum`); every chart scalar is
-jointly smooth by the realized-family chart Christoffel/Gram/inverse-Gram engines, and the
-chart readouts assemble to the bundle statement through the model basis representation.
-Degenerate litmus: at `s = 0` the subject is `connDiffAACommBiContrFib g₀ g₀ ≡ 0`
-(`connDiffAACommBiContrFib_self`) applied to `Y`. Sole citer: the H1 `Q_true`
-joint-smoothness row directly below. -/
+
 theorem connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -13188,19 +12931,7 @@ theorem connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn
   bdAACommBiContrFibAppY_realizedFam_jointContMDiffOn (I := I) (M := M) g₀ T 0 hδ hδZ Y
 
 set_option linter.unusedVariables false in
-/-- H1 joint-smoothness row of the Riemann-arm refold identity data (Form B `Q_true`):
-joint smoothness in `(x, s)` over the realized small set of the antisymmetrized `A ⋆ A`
-commutator coefficient field along the realized path — the `g_s`-orthonormal double
-contraction of the quadratic connection-difference commutator kernel, jointly smooth
-through the moving metric. LEG-COUNT: the quadratic `A ⋆ A` bi-contraction carries two
-`g_s`-frame legs and the `g_s`-inner at the zero jet of the path parameter; no rate lives
-on this row (a `Prop`-valued smoothness row — the rate sits in the H3 cap and H4 window
-rows). SMALL-LITERALS: ∃-free `Prop` row, zero numeric caps. SUP-ANCHOR: not applicable
-(no estimate content). Degenerate litmus: at `s = 0` the subject is
-`ricciArmOrder0AACommCoeffField g₀ g₀ = 0` (`ricciArmOrder0AACommCoeffField_self`).
-Proven as the `clm`-section joint upgrade
-(`contMDiffOn_clm_section_of_pointwise_jointMR`) over the per-`Y` application seam child
-`connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn` directly above. -/
+
 theorem ricciArmOrder0AACommCoeffField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -13222,13 +12953,7 @@ theorem ricciArmOrder0AACommCoeffField_realizedFam_threeArmHjoint
   rfl
 
 set_option linter.unusedVariables false in
-/-- H1 joint-smoothness row of the Riemann-arm refold identity data: joint smoothness in
-`(x, s)` over the realized small set of the background-curvature commutator coefficient
-field along the realized path. The field refolds onto the moving cometric double trace of
-a fixed weight built from the lowered background curvature, so the joint smoothness is the
-realized-family cometric-double-trace engine applied to a fixed smooth weight section —
-the bg-`R` bi-contraction's two moving-frame legs enter at the zero jet only. Degenerate
-litmus: at `s = 0` the subject is the fixed `ricciArmOrder0BgRCommCoeffField g₀ g₀`. -/
+
 theorem ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -14351,17 +14076,7 @@ private theorem bdTensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
   · exact hpointwise p₀ (by rw [← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)
 
 set_option linter.unusedVariables false in
-/-- H1 joint-smoothness row of the Riemann-arm refold identity data: joint smoothness in
-`(x, s)` over the realized small set of the sharp-gradient Koszul residual field along the
-realized path at weight `s • T`. Under the realized metric tie the field refolds onto the
-moving pair-trace of the slot-extended four-permutation family of moving single traces
-pairing the raw Koszul covector of the weight against the Koszul covector of the tie; the
-weight family is quadratic in the path parameter, so the joint smoothness assembles from
-three nested realized-family cometric-double-trace engines over the fixed Koszul pair
-sections, the joint tensor-product and reindexing engines, and the path scalar `2s²`.
-LEG-COUNT: one sharp (`g_s♯`) raising at the zero jet; the weight enters at its one-jet;
-no rate on this row. Degenerate litmus: at `s = 0` the weight is `0` and the subject
-vanishes (`ricciArmSharpGradKoszulResidualField_zero_weight`). -/
+
 theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -14935,15 +14650,7 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
   rfl
 
 set_option linter.unusedVariables false in
-/-- H1 joint-smoothness row of the Riemann-arm refold identity data: joint smoothness in
-`(x, s)` over the realized small set of the Ricci-fold remainder field along the realized
-path at weight `s • T`. The field refolds onto `-(1/2)` times the moving pair-trace
-operator applied to the slot-extended, reindexed two-summand fold weight, the weight pair
-is linear in `s • T`, so the joint smoothness is the path-scalar multiple of the doubled
-realized-family cometric-double-trace engine on a fixed weight section — the two
-moving-frame legs enter at the zero jet, the weight at its zero jet only. Degenerate
-litmus: at `s = 0` the weight is `0` and the subject vanishes
-(`ricciArmRicciFoldRemainderField_zero_weight`). -/
+
 theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -15330,17 +15037,7 @@ private theorem bdExists_rfnsT_one_jet_cap (g₀ : SmoothRiemannianMetric I M) (
   nlinarith [h0', hb, hnn, mul_nonneg hCsob_nn hR]
 
 set_option linter.unusedVariables false in
-/-- H3 ball-uniform pointwise cap row of the Riemann-arm refold identity data: the
-ball-uniform pointwise fibre-norm-square cap for the sharp-gradient Koszul residual field
-along the realized path at weight `s • T`. Under the realized metric tie the field refolds
-onto the path-scaled moving pair-trace operator applied to the four-permutation
-moving-trace weight family in the raw Koszul covector of the weight against the Koszul
-covector of the tie, so the cap is the product of the pair-trace and moving-trace zero-jet
-grid caps — carrying the one-leg `g_s♯` rate inside their `δ₀`-dependent constants — the
-slot-extension frame factors, and the two Koszul one-jet Sobolev caps through the
-`a + 2`-jet ball. Degenerate litmus: at `s = 0` the weight is `0` and the subject vanishes
-(`ricciArmSharpGradKoszulResidualField_zero_weight`), so the cap is trivially satisfied
-there. -/
+
 theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -15972,7 +15669,6 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_rfns_ballUniform
         refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
         exact mul_le_mul hPTO hXi hcompnn (hCP_nn 0)
 
-
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -16023,16 +15719,7 @@ private theorem bdExists_rfnsT_zero_jet_cap (g₀ : SmoothRiemannianMetric I M) 
   nlinarith [h0', hb, hnn, mul_nonneg hCsob_nn hR]
 
 set_option linter.unusedVariables false in
-/-- H3 ball-uniform pointwise cap row of the Riemann-arm refold identity data: the
-ball-uniform pointwise fibre-norm-square cap for the Ricci-fold remainder field along the
-realized path at weight `s • T`. The field refolds onto the path-scaled moving pair-trace
-operator applied to the fixed fold weight at `T`, so the cap is the product of the
-pair-trace operator's zero-jet grid cap, the slot-extension frame factors, the fixed
-double-trace and lowered-curvature compact sups, and the weight's zero-jet Sobolev cap
-through the `a + 2`-jet ball — the weight enters at its zero jet only, and the two
-moving-frame legs ride inside the pair-trace zero-jet cap. Degenerate litmus: at `s = 0`
-the weight is `0` and the subject vanishes
-(`ricciArmRicciFoldRemainderField_zero_weight`). -/
+
 theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -16412,9 +16099,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform
         mul_le_mul hPTO hXi hXinn (hCP_nn 0)
 
 set_option linter.unusedSectionVars false in
-/-- The `K = 1`, `W = 3` bounded-factor grid window carries only the order-one factor:
-its cells are the empty product, the single order-one factor, and the order-one pair, so
-a pointwise bound on the order-one entry bounds the whole window. -/
+
 private lemma bdWindowOneThree_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {B : ℝ}
     (hB1 : b 1 ≤ B) :
     Combinatorics.boundedFactorGridWindow b 1 3 ≤ 1 + B + B ^ 2 := by
@@ -16457,26 +16142,7 @@ private lemma bdWindowOneThree_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {B :
   nlinarith [hb 1, hB1, hB0, sq_nonneg (b 1 - B)]
 
 set_option linter.unusedVariables false in
-/-- H3 ball-uniform pointwise cap row of the Riemann-arm refold identity data (Form B
-`Q_true`, weightless): the ball-uniform pointwise fibre-norm-square cap for the
-antisymmetrized `A ⋆ A` commutator coefficient field along the realized path. The retired
-`arm0AAField` cap is NOT reusable here (term-1-only, wrong frame metric, no
-antisymmetrization), so this cap is stated fresh in the erratum-#2 shape. LEG-COUNT: the
-quadratic bi-contraction is one-jet in each connection-difference leg; the `g_s`-frames
-and the `g_s`-inner are zero-jet algebraic legs; all rates (`1/(1−δ₀)` class) live inside
-the `∃Λ` constant — no naked denominators. SMALL-LITERALS: ∃Λ-form, zero numeric caps.
-SUP-ANCHOR: pointwise fibre-norm-square sup, `∃Λ` BEFORE `∀T ∀s ∀x`; `ha_super` carries
-the `W^{a+2,2} ↪ C⁰` class exactly as in the committed siblings. Degenerate litmus: at
-`s = 0` the subject is `ricciArmOrder0AACommCoeffField g₀ g₀ = 0`
-(`ricciArmOrder0AACommCoeffField_self`), so the cap is trivially satisfied there. Filled
-as glue over the raw-field grid-window engine
-`exists_rfns_icg_ricciArmOrder0AACommCoeffField_window` proven in
-`RicciArmResidualFieldGridWindow`: the engine gives the pointwise
-`boundedFactorGridWindow` cap at `K = 1`,
-`W = 3`; the `K = 1, W = 3` cell arithmetic (`bdWindowOneThree_le`) collapses that window
-to `1 + b 1 + (b 1)^2` on the `s • T` jet path; and the one-jet cap
-`bdExists_rfnsT_one_jet_cap` (which is `s • T`-monotone via `s ^ 2 ≤ 1`) bounds the
-`k = 1` cell by `(Csob * R) ^ 2`. -/
+
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -16553,18 +16219,7 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform
   exact le_trans h0 (mul_le_mul_of_nonneg_left hwin (hC_nn 0))
 
 set_option linter.unusedVariables false in
-/-- H4 two-step jet-window row of the Riemann-arm refold identity data (Form B `Q_true`):
-the per-order L² jet window for the antisymmetrized `A ⋆ A` commutator coefficient field
-along the realized path. The quadratic `A ⋆ A` grid mechanism carries: the field is
-quadratic in the one-jet connection difference with zero-jet algebraic frame legs, so the
-Leibniz maximum single-factor order is `i + 1`, inside the frozen `range (i + 2)` window
-(the diagonal-product-grid engines are generic in the field; the swap from the retired
-quadratic residual changes only zero-jet algebraic legs and an algebraic
-antisymmetrization). LEG-COUNT: two `g_s`-frame legs at the zero jet; the two-leg rate is
-absorbed into `K`. SMALL-LITERALS: ∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE
-`∀T ∀i ∀s`, per-order L² window against `1 + ∑_{j < i+2} ‖∇ʲT‖²`; the `k = 0` grid cell
-is anchored by the H3 cap row. Degenerate litmus: at `s = 0` the subject is
-`ricciArmOrder0AACommCoeffField g₀ g₀ = 0`. -/
+
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -16683,16 +16338,7 @@ private lemma bdBoundedFactorGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : �
   exact Finset.prod_le_prod (fun m _ => hb (e m)) (fun m _ => hbb (e m))
 
 set_option linter.unusedVariables false in
-/-- H4 two-step jet-window row of the Riemann-arm refold identity data: the per-order L²
-jet window for the background-difference of the bg-curvature commutator coefficient field
-along the realized path. The difference is consumed WHOLE (per-endpoint splits are a dead
-route): the committed background-pair grid-window conversion bounds its jets pointwise by
-the capped grid of the perturbation jets at cap `i + 1` over window `i + 3` — the
-moving-frame content beyond the perturbation jets cancels in the difference — the path
-weight `s • T` is dominated cellwise by `T`, and the capped window integrates to the
-`range (i + 2)` L² envelope through the flat all-orders ball-uniform engine, so the
-one-jet perturbation rate and the base-metric data ride inside `K`. Degenerate litmus: at
-`s = 0` the difference vanishes (`sub_self`). -/
+
 theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -17354,17 +17000,7 @@ private lemma bdSGKComposite_pointwise_boundedWindow (g₀ : SmoothRiemannianMet
   exact le_of_eq (by ring)
 
 set_option linter.unusedVariables false in
-/-- H4 two-step jet-window row of the Riemann-arm refold identity data: the per-order L²
-jet window for the sharp-gradient Koszul residual field along the realized path at weight
-`s • T`. Under the realized metric tie the field refolds onto the path-scaled moving
-pair-trace operator applied to the four-permutation moving-trace weight family in the raw
-Koszul covector of the weight against the Koszul covector of the tie, so its jets convert
-pointwise onto the capped grid of the perturbation jets at cap `i + 1` over window `i + 3`
-— the pair-trace and moving-trace jets through the moving-cometric grid windows carrying
-the one-leg `g_s♯` rate, the two Koszul legs each one-jet in `T` — and the capped window
-integrates to the `range (i + 2)` L² envelope through the flat all-orders ball-uniform
-engine. Degenerate litmus: at `s = 0` the weight is `0` and the subject vanishes
-(`ricciArmSharpGradKoszulResidualField_zero_weight`). -/
+
 theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -17557,7 +17193,6 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
     have hK_nn : 0 ≤ 4 * (C i * Kflat i) :=
       mul_nonneg (by norm_num) (mul_nonneg (hC_nn i) (hKflat_nn i))
     nlinarith [hwin_nn, hK_nn]
-
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
@@ -18019,16 +17654,7 @@ private theorem bdRicciFoldComposite_pointwise_gridWindow (g₀ : SmoothRiemanni
   rw [← Finset.sum_mul, ← mul_assoc]
 
 set_option linter.unusedVariables false in
-/-- H4 two-step jet-window row of the Riemann-arm refold identity data: the per-order L²
-jet window for the Ricci-fold remainder field along the realized path at weight `s • T`.
-The field refolds onto the path-scaled moving pair-trace operator applied to the fixed
-fold weight at `T`, so its jets convert onto the perturbation jets by the
-diagonal-product-grid calculus — the pair-trace jets through the moving-cometric grid
-window, the fixed double-trace and lowered-curvature factors through per-order compact
-sups, and the weight's zero jet through its ball-uniform Sobolev cap — with ball
-absorption inside the `range (i + 2)` window; the two moving-frame legs ride at the zero
-jet. Degenerate litmus: at `s = 0` the weight is `0` and the subject vanishes
-(`ricciArmRicciFoldRemainderField_zero_weight`). -/
+
 theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -18156,9 +17782,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
     nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedSectionVars false in
-/-- On a symmetric applied datum the input-slot swap dissolves: applying a slot-swapped
-`(2,2)` coefficient to a symmetric rank-`(0,2)` tensor agrees with applying the raw
-coefficient — the unit value of a symmetric tensor is a fixed point of the slot swap. -/
+
 private lemma appCc_appCcRS_slotSwapField_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 2 2) (T : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -18204,23 +17828,7 @@ private lemma appCc_appCcRS_slotSwapField_eq_of_symm (g₀ : SmoothRiemannianMet
   rfl
 
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier row RA-1, conjunct 3 of the frozen Riemann-arm refold data
-bundled with the order-zero-part conjuncts 1, 4, 7; pattern class: `riemannSec_difference`
-Palatini split + the exact path linearizations at second endpoint zero + the
-`appCc`/`unitModel` evaluation calculus + fixed-frame neighbourhood gluing, with the
-order-zero part on Form B `C0ra := arm0AAComm + ΔbgRComm + ½·(∇♯)K`-residual − Ricci-fold
-remainder (the fold's `Wᵀ` swap leg dissolves on the symmetric chain datum `T`)): the
-per-parameter refold identity for the moving order-zero Riemann coefficient, with the
-second-gradient part the DOUBLED constructed folded four-monomial kernel family
-`(2 : ℝ) • riemannPalatiniRefoldC2Family` at existentially pinned, PARTNER-PAIRED permutation
-quadruples (`IsFramePairPartner` — the leader-sanctioned posit-layer strengthening restoring
-the dossier's `symmS` partner bookkeeping; it is what the paired refold estimates below
-consume at these witnesses; the doubling carries the identity — the family definition itself
-keeps its `½` weights — because the fold output equals TWICE the partner-family average on the
-symmetric sector), under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's
-`T` is `symmS`-representable at every wired level, so the antisymmetric escape sector is
-vacuous for chain inputs), and an order-zero family carrying joint smoothness, a
-ball-uniform pointwise fibre-norm sup, and the two-step jet window. -/
+
 theorem exists_riemannPalatini_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -18605,25 +18213,7 @@ theorem exists_riemannPalatini_refold_identity_data
     linarith [t1, t2, t3, t4, t5, t6, hjs_nn, hQ, hD, hS, hF, hcW]
 
 set_option linter.unusedVariables false in
-/-- Dossier row RA-3a (conjunct 6 of the frozen Riemann-arm refold data): the pointwise
-fibre-norm cap for the DOUBLED constructed second-gradient refold family — the subject is
-`(2 : ℝ) • riemannPalatiniRefoldC2Family`, the exact `C₂` the refold identity carries, so
-the consumer cap conjunct discharges verbatim — at the literal `8`, for every
-PARTNER-PAIRED permutation-quadruple convention (`IsFramePairPartner`; by
-`riemannPalatiniRefoldC2Family_eq_symmS_kernel` the pairing makes the doubled family the
-path-scaled signed sum of four refold monomials at the SYMMETRIZED weight
-`ccTensorBilinSymm`, which `hδ` caps — the earlier ∀-independent form was false: an
-antisymmetric moving tensor at `δ = 0` defeats the cap through the raw unpaired weight).
-The rate is TWO-LEG — each monomial carries one inverse-metric leg through the
-realized-frame weight conversion and one through the frame vectors feeding the argument
-slots, measured in the background metric — so the four monomials close by the
-per-monomial bi-contraction bound `rfns_curvatureRefoldMonomialBiContrFib_le` at the sharp
-`4·fC·δ/(1−δ)²` (the four-monomial Bianchi fold cancels to a two-term difference, halving
-the copy count, and the doubling restores the full fold weight), and the literal
-`8 = 4 (sharp) × 2 (headroom)` closes exactly under `hδ_half` (`4δ/(1−δ)² ≤ 8δ/(1−δ)` at
-`δ ≤ 1/2`); the `δ`-unrestricted one-leg form was false (exact-arithmetic witnesses:
-pure-trace `T = −c·g₀` at `n = 2, δ = 9/10`, and the circle family at `n = 1, δ = 3/4`),
-and the sole consumer chain holds `δ ≤ 1/3`. -/
+
 theorem riemannPalatiniRefoldC2Family_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_half : δ ≤ 1 / 2)
@@ -18767,20 +18357,7 @@ theorem riemannPalatiniRefoldC2Family_rfns_le
     mul_nonneg (mul_nonneg hδ0 hδ0) (sq_nonneg (fC * (δ / (1 - δ) ^ 2)))]
 
 set_option linter.unusedVariables false in
-/-- Dossier row RA-4 (conjunct 8 of the frozen Riemann-arm refold data): the two-step jet
-window for the DOUBLED constructed second-gradient refold family — both conjuncts on
-`(2 : ℝ) • riemannPalatiniRefoldC2Family`, the exact `C₂` of the refold identity — for
-every PARTNER-PAIRED permutation-quadruple convention (`IsFramePairPartner`; the anchor
-conjunct is exactly the paired doubled cap of `riemannPalatiniRefoldC2Family_rfns_le`,
-which is false without the pairing, and — like that cap — rides the TWO-LEG sharp rate
-`4·fC·δ/(1−δ)²` of the doubled family, closing into the literal `8 = 4 (sharp) ×
-2 (headroom)` only under `hδ_half`: `4δ/(1−δ)² ≤ 8δ/(1−δ)` at `δ ≤ 1/2`; the
-`δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at `n = 2,
-δ = 9/10` and `n = 1, δ = 3/4`, while the sole consumer chain holds `δ ≤ 1/3`). The
-window conjunct assembles by `riemannPalatiniRefoldC2Family_eq_symmS_kernel` from four
-instances of the proven per-monomial window
-`exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow` at the paired
-quadruple. -/
+
 theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -18907,28 +18484,7 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
   linarith [hG0w, hG1w, hG2w, hG3w]
 
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier rows LC-4/LC-5/LC-6, constructed-family shares at the frozen cap
-literal `3`; pattern class: joint smoothness of the realized-family coefficient
-constructions through the fixed-frame patching of the refold kernel calculus; the
-Koszul-sharp TWO-LEG `δ/(1−δ)²` fibre-norm class for the cap -- the partner pairing inside
-the family definition symmetrizes the coefficient weight, so the weight is controlled by the
-`gFibreOpBound` hypothesis on the symmetrized moving tensor for EVERY permutation-and-sign
-convention (the construction carries the pairing, so the universal quantification over
-conventions is sound, unlike independent-quadruple forms); and the tame-envelope technique
-with ball absorption for the two-step window -- the coefficient carries the moving tensor
-and the metric raisings at the zero jet, so `∇ⁱ` stays inside `range (i + 2)`; small
-literals checked at `n = 1, 2, 3` at fill): joint smoothness, the pointwise fibre-norm cap
-at the three-copy literal `3` on the two-leg rate `δ/(1−δ)²`, and the two-step jet window
-for the constructed covariant-derivative-arm second-gradient family. The family is THREE
-sharp-Koszul-gradient monomials with NO Bianchi fold (unlike the Riemann-arm four-monomial
-fold, which halves its copy count and leaves `2×` headroom), each monomial carrying one
-inverse-metric leg through the realized-frame unit-value weight and one through the frame
-vectors in the coefficient slots measured by the background metric, so the sharp rate is
-`3·fC·δ/(1−δ)²` — the denominator matches the two-leg count and the bound is TIGHT at
-`n = 1` (the pure-trace circle witness at `δ = 3/4` attains it); the one-leg denominator
-`δ/(1−δ)` was false for EVERY `δ ∈ (0, 1)` (ratio `1/(1−δ)`; exact arithmetic `36 > 9` at
-`δ = 1/2` and `9/4 > 3/2` at the consumer threshold `δ = 1/3`, so no `δ`-restriction
-short of `δ = 0` repairs it). -/
+
 theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19194,19 +18750,7 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
       hK0_nn i, hK1_nn i, hK2_nn i, hwin_nn]
 
 set_option linter.unusedVariables false in
-/-- Deferred input (dossier row LC-1 with its arm shares of rows LC-4/LC-5/LC-6, at cap
-literal `3` on the two-leg rate `δ/(1−δ)²`; pattern class: connection-difference cocycle
-`sub_add_sub` + the exact path linearizations at second endpoint zero, refolding the
-moving-endpoint covariant-gradient-of-connection-difference content of the `dLaBiContrFib`
-bi-contraction onto the second gradient at three ledger copies, with the background leg and
-the one-jet sharp-gradient residual riding the order-zero part; sup anchors and two-step
-windows as in the Riemann-arm rows — except that the second-gradient cap rides the TWO-LEG
-denominator `(1−δ)²`: the three-monomial covariant-derivative-arm family has no Bianchi
-fold, its sharp rate `3·fC·δ/(1−δ)²` is tight at `n = 1`, and the one-leg denominator was
-false for every `δ ∈ (0, 1)`): the refold data package for the covariant-derivative arm of
-the DeTurck Lie coefficient along the realized path. Stated under the chain-supplied
-symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is `symmS`-representable at every
-wired level), threaded to the refold identity core. -/
+
 theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19269,11 +18813,7 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     positivity
 
 set_option linter.unusedSectionVars false in
-/-- The background-pair difference of the DeTurck vector field at a fixed moving metric
-collapses to the inverse-Gram-traced connection difference of the two backgrounds: the
-moving-metric leg of the two instantiations cancels by the connection-difference cocycle,
-so the difference carries no derivative of the moving metric at all. This is the
-vector-field cocycle behind the endomorphism-arm background-difference child below. -/
+
 theorem deTurckVF_background_sub_eq_connDiff_trace
     (g₁ gA gB : SmoothRiemannianMetric I M) (x : M) :
     (PDE.DeTurck.deTurckVF (I := I) g₁ gA :
@@ -19299,13 +18839,7 @@ theorem deTurckVF_background_sub_eq_connDiff_trace
     add_sub_cancel_left]
 
 set_option linter.unusedVariables false in
-/-- Generic-in-`g₁` ladder step for the endomorphism-arm background-pair difference
-window: the difference of the two vector fields is the moving-cometric trace of the fixed
-background connection difference, so the difference coefficient is one-jet in the
-perturbation with the metric raisings at the zero jet and `∇ⁱ` stays inside the
-`range (i + 2)` window; proven by the diagonal-product-grid technique with ball
-absorption, as in the `CurvatureCoefficientDifferenceJetTower` background-difference
-envelopes. -/
+
 theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19358,15 +18892,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_g
     nlinarith [hwin_nn, hK_nn]
 
 set_option linter.unusedVariables false in
-/-- Deferred input (two-step jet window share of the endomorphism-arm background-pair
-difference; pattern class: by `deTurckVF_background_sub_eq_connDiff_trace` the difference
-of the two vector fields is the inverse-Gram-traced connection difference of the
-backgrounds, so the difference coefficient is one-jet in the moving tensor with metric
-raisings at the zero jet; tame-envelope technique at the `range (i + 2)` window with ball
-absorption, as in the proven `exists_corrArm1Field_realizedFam_jetL2_tameEnvelope`
-difference template and the `DeTurckLie*L2JetBound` per-order towers): the per-order
-envelope for the background-pair difference of the endomorphism arm along the realized
-path. -/
+
 theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19434,22 +18960,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
 
 set_option linter.unusedVariables false in
-/-- Deferred input (fork-3 remedy replacing the per-instantiation endomorphism-arm refold
-package, which is false as stated: the background-independent moving-leg two-jet content of
-`deTurckLieWEndo` is fed into the FULL moving tensor, and the mixed sector -- the
-antisymmetric part of the moving tensor against the second gradient of its symmetrized part
--- is controlled neither by a `δ/(1 − δ)` second-gradient cap (the `gFibreOpBound`
-hypothesis bounds only the symmetrized tensor) nor by the order-zero two-step window (the
-moving-metric two-jet screen; dead-route class: two-jet content never rides a frozen
-`range (i + 2)` order-zero window). The background-PAIR DIFFERENCE is the form the
-full-subject assembly consumes, and there the two-jet contents cancel outright: by
-`deTurckVF_background_sub_eq_connDiff_trace` the difference of the two vector fields is the
-inverse-Gram-traced connection difference of the backgrounds, so the difference arm is
-one-jet in the moving tensor -- zero second-gradient ledger copies, a pure order-zero
-package; nothing is refolded and nothing two-jet is hidden. Pattern class: background
-uniform fibre-norm bounds and convex-perturbation pointwise `C²` for the sup, parametric
-inverse-Gram joint smoothness, and the tame-envelope technique at the `range (i + 2)`
-window for the one-jet coefficient family. -/
+
 theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19523,14 +19034,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     linarith [h1, h2]
 
 set_option linter.unusedVariables false in
-/-- Public re-derivation, at second endpoint zero and first path parameter zero, of the
-exact fibre linearization of the covariant gradient of the connection difference along the
-realized path (the private `covDerivConnDiff_realizedFam_eq_smul_covDerivSharp` of the
-path-Palatini development is stated for interior first parameters only; this is the
-endpoint version its refold consumers need, with the private sharp-Koszul field spelled
-out). Resolves dossier item OPEN-2 as a public wrapper: the connection difference is the
-path-parameter multiple of the sharp-Koszul field (`connDiff_realizedFam_eq_smul_sharp`),
-and the scalar rate exits the covariant derivative by linearity. -/
+
 theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

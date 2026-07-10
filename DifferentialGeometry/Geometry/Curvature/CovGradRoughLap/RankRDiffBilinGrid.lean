@@ -132,19 +132,18 @@ covariant width `r`, fibrewise-`ℝ`-linear in the contracted section), with two
 and the per-order, per-rank base-point-uniform proportional fibre envelope in **jet** form
 `rfns_op_le`. -/
 structure DiffBilinOpRS (g : SmoothRiemannianMetric I M) (c : ℕ) where
-  /-- The `p`-times differentiated operator at base covariant width `r`, fibrewise-linear in the
-  section. -/
+
   op : ∀ (p r : ℕ), SmoothCcTensor g c r → SmoothCcTensor g c (r + p)
-  /-- The exact recursive single-step covariant Leibniz of the family (non-parallel). -/
+
   covGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g c r),
     covGrad g c (r + p) (op p r W) =
       op (p + 1) r W +
         castRankCc_db g c (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g c r W))
-  /-- The per-order **and per-rank** proportional fibre-envelope constant. -/
+
   kappa : ℕ → ℕ → ℝ
-  /-- The envelope constant is nonnegative. -/
+
   kappa_nonneg : ∀ p r, 0 ≤ kappa p r
-  /-- The per-order, per-rank, base-point-uniform proportional fibre bound in **jet form**. -/
+
   rfns_op_le : ∀ (p r : ℕ) (W : SmoothCcTensor g c r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g c (r + p) x ((op p r W).toSection x) ≤
       kappa p r * ∑ q ∈ Finset.range (p + 1),

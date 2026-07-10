@@ -113,11 +113,10 @@ theorem exists_order2IterateNspec_le_tensorPouSobolevHsNorm
         order2IterateNspec (I := I) (M := M) g T ≤
           C₁ * (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal := by
   classical
-  -- Per-iterate order-dropping constants `Cj`, `j ∈ {0, 1, 2}`, each with
-  -- `‖toL2 (Δ_∇^j T)‖ ≤ Cj · (tensorPouSobolevHsNorm g 2 T).toReal`.
+
   obtain ⟨Cl2, hCl2_nn, hCl2⟩ :=
     exists_l2Norm_le_toHs_zero (I := I) (M := M) g
-  -- `Cdrop j` controls `‖(Δ_∇^j T).toHs 0‖ ≤ Cdrop j · ‖T.toHs j‖`.
+
   set Cdrop : ℕ → ℝ := fun j =>
     (exists_rawConnLapIter_toHs_le_toHs (I := I) (M := M) g j 0).choose with hCdrop_def
   have hCdrop_nn : ∀ j : ℕ, 0 ≤ Cdrop j := fun j =>
@@ -127,30 +126,29 @@ theorem exists_order2IterateNspec_le_tensorPouSobolevHsNorm
           (rawTensorConnLapIter (I := I) g 0 2 j T)‖ ≤
         Cdrop j * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (0 + j) T‖ := fun j T =>
     (exists_rawConnLapIter_toHs_le_toHs (I := I) (M := M) g j 0).choose_spec.2 T
-  -- The combined per-iterate constant.
+
   set Cj : ℕ → ℝ := fun j => Cl2 * Cdrop j with hCj_def
   have hCj_nn : ∀ j : ℕ, 0 ≤ Cj j := fun j => mul_nonneg hCl2_nn (hCdrop_nn j)
-  -- Per-iterate bound `‖toL2 (Δ_∇^j T)‖ ≤ Cj j · (tensorPouSobolevHsNorm g 2 T).toReal`
-  -- for `j ≤ 2`.
+
   have hterm : ∀ (j : ℕ), j ≤ 2 → ∀ T : SmoothCcTensor g 0 2,
       ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)‖ ≤
         Cj j * (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal := by
     intro j hj T
     set N2 : ℝ := (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal with hN2_def
     have hN2_nn : 0 ≤ N2 := ENNReal.toReal_nonneg
-    -- `‖toL2 (Δ_∇^j T)‖ ≤ Cl2 · ‖(Δ_∇^j T).toHs 0‖`.
+
     have hstep2 :
         ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)‖ ≤
           Cl2 * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) 0
             (rawTensorConnLapIter (I := I) g 0 2 j T)‖ :=
       hCl2 (rawTensorConnLapIter (I := I) g 0 2 j T)
-    -- `‖(Δ_∇^j T).toHs 0‖ ≤ Cdrop j · ‖T.toHs j‖`.
+
     have hstep3 :
         ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) 0
             (rawTensorConnLapIter (I := I) g 0 2 j T)‖ ≤
           Cdrop j * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (0 + j) T‖ :=
       hCdrop_spec j T
-    -- `‖T.toHs j‖ = ‖T.toHs (0 + j)‖ ≤ ‖T.toHs 2‖` (monotone in the order, `j ≤ 2`).
+
     have hstep4 :
         ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (0 + j) T‖ ≤ N2 := by
       rw [hN2_def, ← tensorPouSobolevHilbert_norm_eq (I := I) (M := M) g 2 T]
@@ -166,7 +164,7 @@ theorem exists_order2IterateNspec_le_tensorPouSobolevHsNorm
               (mul_le_mul_of_nonneg_left hstep4 (hCdrop_nn j)) hCl2_nn
       _ = (Cl2 * Cdrop j) * N2 := by ring
       _ = Cj j * N2 := by rw [hCj_def]
-  -- Sum the three terms; the constant is `∑_{j ∈ range 3} Cj j`.
+
   refine ⟨∑ j ∈ Finset.range (2 + 1), Cj j,
     Finset.sum_nonneg (fun j _ => hCj_nn j), fun T => ?_⟩
   set N2 : ℝ := (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal with hN2_def

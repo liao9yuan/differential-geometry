@@ -77,7 +77,7 @@ theorem hasDerivWithinAt_tsum {α : Type*} {f : α → ℝ → ℝ} {f' : α →
   have hkey := DifferentialGeometry.Analysis.hasFDerivWithinAt_tsum
     hF hFbd hu hs hx₀ hf0 hx
   have hderiv := hkey.hasDerivWithinAt
-  -- `(∑' i, toSpanSingleton ℝ (f' i x)) 1 = ∑' i, f' i x`.
+
   have hsumF : Summable fun i => ContinuousLinearMap.toSpanSingleton ℝ (f' i x) := by
     refine Summable.of_norm_bounded hu (fun i => ?_)
     rw [ContinuousLinearMap.norm_toSpanSingleton, Real.norm_eq_abs]

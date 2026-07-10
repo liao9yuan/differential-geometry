@@ -165,7 +165,7 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
   classical
   set ι := TensorEigenIdx (I := I) (M := M) g r s
-  -- the intermediate (σ') norm squared, expanded as the σ'-weighted time mass
+
   have hnormsq : ∀ n,
       ‖timeL2Inclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           hσ'σ''.le (d n)‖ ^ 2 =
@@ -177,7 +177,7 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n))]
     exact tsum_congr (fun i => by
       rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) hσ'σ''.le (d n) i])
-  -- summability of the σ'-weighted time mass of `d n`
+
   have hsumm' : ∀ n, Summable (fun i : ι =>
       tensorSobolevWeight (I := I) (M := M) i σ' *
         ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2) := by
@@ -187,18 +187,18 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         hσ'σ''.le (d n))
     refine h.congr (fun i => ?_)
     rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) hσ'σ''.le (d n) i]
-  -- summability of the σ''-weighted time mass of `d n`
+
   have hsumm'' : ∀ n, Summable (fun i : ι =>
       tensorSobolevWeight (I := I) (M := M) i σ'' *
         ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2) :=
     fun n => summable_weight_mul_norm_timeModeCoeff_sq
       (I := I) (M := M) h_compact (f := d n)
-  -- the σ''-weighted time mass of `d n` equals ‖d n‖²
+
   have hmass'' : ∀ n,
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ'' *
           ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2 = ‖d n‖ ^ 2 :=
     fun n => (norm_sq_eq_tsum_timeModeCoeff (I := I) (M := M) h_compact (f := d n)).symm
-  -- It suffices to show the squared intermediate norm tends to 0.
+
   suffices hsq : Tendsto (fun n =>
       ‖timeL2Inclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n)‖ ^ 2) atTop (𝓝 0) by
@@ -213,11 +213,11 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
     rw [Real.sqrt_zero] at hsqrt
     refine hsqrt.congr (fun n => ?_)
     rw [Real.sqrt_sq (hnn n)]
-  -- ε-N: prove the squared intermediate norm tends to 0 directly.
+
   rw [Metric.tendsto_atTop]
   intro ε hε
   have hexp : σ' - σ'' < 0 := by linarith
-  -- Choose a threshold Λ > 1 controlling the high-mode tail by ε/2.
+
   obtain ⟨Λ, hΛgt1, hΛtail⟩ :
       ∃ Λ : ℝ, 1 < Λ ∧ Λ ^ (σ' - σ'') * C ^ 2 < ε / 2 := by
     set δ : ℝ := (ε / 2) / (C ^ 2 + 1) with hδ_def
@@ -241,14 +241,14 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
       have hεpos : 0 < ε / 2 := by linarith
       nlinarith [hεpos, hCsq_nn]
     linarith
-  -- The finite low-mode set: `{i : 1 + λᵢ < Λ}`.
+
   set F : Finset ι :=
     (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g r s Λ).toFinset
     with hF_def
   have hmemF : ∀ i : ι, i ∈ F ↔
       1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ := by
     intro i; rw [hF_def, Set.Finite.mem_toFinset]; rfl
-  -- On the complement, `Λ ≤ 1 + λᵢ`, so the σ'-weight is `≤ Λ^{σ'-σ''}·σ''-weight`.
+
   have hcompl_bd : ∀ (n : ℕ) (i : ι), i ∉ F →
       tensorSobolevWeight (I := I) (M := M) i σ' *
           ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2 ≤
@@ -282,7 +282,7 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
               (tensorSobolevWeight (I := I) (M := M) i σ'' *
                 ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2) :=
             mul_le_mul_of_nonneg_right hratio (by positivity)
-  -- The high-mode tail of the σ'-mass is ≤ Λ^{σ'-σ''}·C², uniformly in n.
+
   have htail : ∀ n,
       ∑' i : { i : ι // i ∉ F },
           tensorSobolevWeight (I := I) (M := M) (i : ι) σ' *
@@ -328,7 +328,7 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
             apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg (by linarith) _)
             have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
             nlinarith [hCbd n, hnn, hC]
-  -- On the finite low set, each coordinate norm² → 0, so the finite σ'-mass → 0.
+
   have hcoeff0 : ∀ i : ι,
       Tendsto (fun n => ‖timeModeCoeff (I := I) (M := M) (d n) i‖) atTop (𝓝 0) := by
     intro i
@@ -354,11 +354,11 @@ theorem timeL2_norm_tendsto_zero_of_low_tendsto_of_uniform
         have := hc.const_mul (tensorSobolevWeight (I := I) (M := M) i σ')
         simpa using this)
     simpa using h
-  -- Eventually the finite part is < ε/2; combine with the uniform tail < ε/2.
+
   rw [Metric.tendsto_atTop] at hfin0
   obtain ⟨N, hN⟩ := hfin0 (ε / 2) (by linarith)
   refine ⟨N, fun n hn => ?_⟩
-  -- Split the σ'-mass into finite + complement and bound each by ε/2.
+
   have hsplit_sum :
       ∑' i : ι, tensorSobolevWeight (I := I) (M := M) i σ' *
           ‖timeModeCoeff (I := I) (M := M) (d n) i‖ ^ 2 =

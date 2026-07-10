@@ -11,30 +11,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldInputSlotSymmetrization
 
-/-!
-# Residual coefficient fields of the arm-zero generic-endpoint Palatini fold
-
-The constructive residual coefficient fields of the generic-`g₁` Palatini fold of the moving
-arm-zero Ricci-linearization coefficients: the inverse-Gram quadratic residual
-(`gInvDiffQuadResidualField`, the connection-difference bi-contraction at the swapped metric
-pair), the shared sharp-gradient Koszul residual and Ricci-fold remainder fields
-(`ricciArmSharpGradKoszulResidualField`, `ricciArmRicciFoldRemainderField`), and the
-background-curvature difference and refold remainder (`bgRDiffRefoldRemainderField`), each a
-pinned construction with a proven vanish-at-base litmus lemma.
-
-The closing sym-sector cancellation equation C-EQ″
-(`linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_eq_residualFieldSum`),
-splitting the input-slot-symmetrized moving arm-zero combination onto these fields plus the
-`L0` pass-through and the packaged kernel contraction (`refoldKernelContractionField`), is
-PROVEN here as a corollary of the fold primitive — sorry-free.
-
-These fields feed the capped grid-window towers of
-`Analysis/Sobolev/TensorHilbert/RicciArmResidualFieldGridWindow`; this file sits upstream of
-the tame-envelope import cone
-(`Analysis/Parabolic/RicciLinearization/RicciThreeArmCorrectionFieldTameEnvelope`), so the
-envelope side may import the towers without an import cycle.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -69,19 +45,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-! ### Arm-0 residual coefficient fields of the generic-`g₁` Palatini fold (M-dossier §ii)
-
-The pinned constructed residual fields of the leader-signed M-dossier: DEF-1
-(`gInvDiffQuadResidualField`, the mechanism-B `A ⋆ A` quadratic residual, the generic-`g₁`
-field-level analogue of `arm0AAField`), the two SHARED remainder fields of the fold
-derivation map (`ricciArmSharpGradKoszulResidualField`, `ricciArmRicciFoldRemainderField` —
-named once, serving both the RA-1 subtree and the M-child's held C-EQ), and DEF-2
-(`bgRDiffRefoldRemainderField`, the bg-R trace difference plus the shared remainders at the
-metric-difference weight). Every field is a pinned construction with a proven vacuity
-litmus (`connDiff g₀ g₀ = 0` diagonal kill for DEF-1; `sub_self` plus the zero-weight kills
-for DEF-2), certified in scratch before materialization per the leader's condition. -/
-
-/-- The pointwise rank-`(0,2)` tensor carrying the inner product of a metric `g`. -/
 def metricCcTensorFib (g : SmoothRiemannianMetric I M) (x : M) : Tensor0SSpace 2 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ from
     { toFun := fun m => g.inner x (m 0) (m 1)
@@ -141,8 +104,6 @@ theorem metricCcTensorFib_section_contMDiff (g : SmoothRiemannianMetric I M) :
   change g.inner x (e₁.symmL ℝ x (b (σ 0))) (e₁.symmL ℝ x (b (σ 1))) = _
   rw [hframeEq 0, hframeEq 1]
 
-/-- A metric `g` as a smooth compactly supported rank-`(0,2)` coefficient tensor over a
-background metric `g₀`. -/
 def metricCcTensor (g₀ g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 where
   toSection :=
     MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
@@ -154,19 +115,13 @@ def metricCcTensor (g₀ g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0
         Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2))
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- The difference of two metrics as a smooth compactly supported rank-`(0,2)` coefficient
-tensor over the first: the canonical weight datum of the generic-`g₁` Palatini fold. -/
 def metricDifferenceCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=
   metricCcTensor (I := I) (M := M) g₀ g₁ - metricCcTensor (I := I) (M := M) g₀ g₀
 
-/-- Vacuity litmus for the difference datum: it rejects the diagonal witness. -/
 @[simp] theorem metricDifferenceCcTensor_self (g₀ : SmoothRiemannianMetric I M) :
     metricDifferenceCcTensor (I := I) (M := M) g₀ g₀ = 0 :=
   sub_self _
 
-/-- The unit value section of a rank-`(0,2)` coefficient tensor: the rank-two tensor field
-obtained by feeding the unit rank-zero tensor into the coefficient, fibrewise. This is the
-section-level carrier of `unitModel`. -/
 def ccTensorUnitValueSection (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     Π y : M, Tensor0SSpace 2 I y :=
   fun y =>
@@ -204,9 +159,6 @@ private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I 
   rw [hround]
   rfl
 
-/-- DEF-1 (M-dossier §ii): the mechanism-B quadratic residual coefficient field at a generic
-perturbed metric `g₁` — the `A ⋆ A` connection-difference bi-contraction with its `g₁⁻¹`
-raisings, the field-level generic-`g₁` analogue of the realized-family `arm0AAField`. -/
 def gInvDiffQuadResidualField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   connDiffBiContrCoeffField (I := I) (M := M) g₁ g₀ g₁ g₀
@@ -219,8 +171,7 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- Vacuity litmus for DEF-1: the quadratic residual field rejects the diagonal witness
-`g₁ = g₀` — both connection-difference legs vanish. -/
+
 theorem gInvDiffQuadResidualField_self (g₀ : SmoothRiemannianMetric I M) :
     gInvDiffQuadResidualField (I := I) (M := M) g₀ g₀ = 0 := by
   classical
@@ -245,15 +196,6 @@ theorem gInvDiffQuadResidualField_self (g₀ : SmoothRiemannianMetric I M) :
   rw [hzero]
   rfl
 
-/-! ### Stage A′ — the antisymmetrized `A ⋆ A` commutator coefficient field (Form B Q_true) -/
-
-/-- The bilinear kernel of the antisymmetrized connection-difference commutator arm at a
-fixed frame pair `(p, q)`: with `A := connDiff g₁ g₀` in the `(ARGUMENT)(DIRECTION)`
-application order of `connDiff_apply`, the kernel is the two-monomial difference
-`g₁(A[A[q; p]; v₀], v₁) − g₁(A[A[q; v₀]; p], v₁)` — the quadratic `A ⋆ A` bi-contraction
-content of the corrected arm-zero fold (Form B `Q_true`), with the curvature-style
-antisymmetrization exchanging the frame direction and the first input direction. One-jet
-in each connection-difference leg; the `g₁`-inner is a zero-jet algebraic leg. -/
 def connDiffAACommKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -283,8 +225,6 @@ set_option linter.unusedSectionVars false in
   rw [connDiffAACommKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, ContinuousLinearMap.sub_apply]
 
-/-- The antisymmetrized `A ⋆ A` commutator kernel repackaged as a bilinear form in the
-frame pair, for the orthonormal-frame trace-independence patching. -/
 def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -334,8 +274,6 @@ set_option linter.unusedSectionVars false in
   rw [frameConnDiffAACommKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
-/-- Summand of the antisymmetrized `A ⋆ A` commutator arm at a frame pair: the input datum
-evaluated at the frame pair weights the kernel bilinear form. -/
 def connDiffAACommSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -362,7 +300,6 @@ set_option linter.unusedSectionVars false in
     Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply, smul_eq_mul]
   rfl
 
-/-- The antisymmetrized `A ⋆ A` commutator bi-contraction at a fixed frame family. -/
 def connDiffAACommBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -554,15 +491,12 @@ theorem connDiffAACommBiContrFibFixedFrame_contMDiff (g₀ g₁ : SmoothRiemanni
   exact connDiffAACommBiContrFibFixedFrame_apply_section_contMDiff
     (I := I) g₀ g₁ B hB Y
 
-/-- The antisymmetrized `A ⋆ A` commutator bi-contraction at the moving `g₁`-orthonormal
-frames: the Form B `Q_true` fibre. -/
 def connDiffAACommBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   connDiffAACommBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₁ x) x
 
 set_option linter.unusedSectionVars false in
-/-- Fibre evaluation (the `Q_true` kernel shape at the moving `g₁`-orthonormal frames):
-the datum evaluated at the frame pair weights the antisymmetrized `A ⋆ A` kernel. -/
+
 lemma connDiffAACommBiContrFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (connDiffAACommBiContrFib (I := I) g₀ g₁ x D) v =
@@ -635,13 +569,6 @@ theorem connDiffAACommBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I
     (congrArg TensorRSSpace.ofCLM
       (connDiffAACommBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₀ g₁ x₀ hy))
 
-/-- The Form B `Q_true` field: the antisymmetrized `A ⋆ A` commutator coefficient field at
-a generic perturbed metric `g₁` — the `g₁`-orthonormal double contraction of the quadratic
-connection-difference commutator kernel
-`g₁(A[A[B̃_b; B̃_a]; v₀] − A[A[B̃_b; v₀]; B̃_a], v₁)`, `A := connDiff g₁ g₀` in the
-`(ARGUMENT)(DIRECTION)` order of `connDiff_apply`. Pure `A ⋆ A` content (no moving-metric
-curvature); one-jet in each connection-difference leg; the two `g₁`-frame legs and the
-`g₁`-inner are zero-jet algebraic legs. -/
 def ricciArmOrder0AACommCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -659,9 +586,7 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (connDiffAACommBiContrFib (I := I) g₀ g₁ x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- Vacuity litmus at the fibre (zero-perturbation kill): the antisymmetrized `A ⋆ A`
-commutator fibre rejects the diagonal witness `g₁ = g₀` — both connection-difference legs
-of each kernel monomial vanish. -/
+
 theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M) :
     connDiffAACommBiContrFib (I := I) g₀ g₀ x = 0 := by
   classical
@@ -688,8 +613,7 @@ theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M
     ContinuousMultilinearMap.zero_apply]
 
 set_option linter.unusedSectionVars false in
-/-- Vacuity litmus for the Form B `Q_true` field: it rejects the diagonal witness
-`g₁ = g₀` — the connection difference vanishes, killing both quadratic legs. -/
+
 theorem ricciArmOrder0AACommCoeffField_self (g₀ : SmoothRiemannianMetric I M) :
     ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₀ = 0 := by
   classical
@@ -697,8 +621,6 @@ theorem ricciArmOrder0AACommCoeffField_self (g₀ : SmoothRiemannianMetric I M) 
   refine ContMDiffSection.ext (fun x => ?_)
   rw [ricciArmOrder0AACommCoeffField_toSection, connDiffAACommBiContrFib_self]
   rfl
-
-/-! ### Stage B — the (∇♯)K sharp-gradient Koszul residual field (shared, per fold map E6) -/
 
 private lemma vec3_upd_zero {F : Type*} (a b c z : F) :
     Function.update ![a, b, c] 0 z = ![z, b, c] := by
@@ -716,7 +638,7 @@ private lemma vec3_upd_two {F : Type*} (a b c z : F) :
   fin_cases k <;> simp [Function.update]
 
 set_option linter.unusedSectionVars false in
-/-- Additivity of the linearized Koszul covector in its first argument slot. -/
+
 lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u u' ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x (u + u') ζ =
@@ -740,7 +662,7 @@ lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Homogeneity of the linearized Koszul covector in its first argument slot. -/
+
 lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x (c • u) ζ =
@@ -763,7 +685,7 @@ lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Additivity of the linearized Koszul covector in its second argument slot. -/
+
 lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u ζ ζ' : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u (ζ + ζ') =
@@ -787,7 +709,7 @@ lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- Homogeneity of the linearized Koszul covector in its second argument slot. -/
+
 lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u (c • ζ) =
@@ -810,7 +732,7 @@ lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
   ring
 
 set_option linter.unusedSectionVars false in
-/-- The linearized Koszul covector of the zero weight vanishes (zero-weight kill). -/
+
 lemma linearizedKoszulCovec_zero_weight (g' : SmoothRiemannianMetric I M) (x : M)
     (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' (0 : SmoothCcTensor g' 0 2) x u ζ = 0 := by
@@ -831,9 +753,6 @@ lemma linearizedKoszulCovec_zero_weight (g' : SmoothRiemannianMetric I M) (x : M
   rw [hunit ![ζ, u, z], hunit ![u, ζ, z], hunit ![z, ζ, u]]
   ring
 
-/-- The `g₁`-sharp raise of the `g₀`-Koszul covector of a weight `S` — the mixed-metric
-raised Koszul vector whose fold-pair commutator content the sharp-gradient residual field
-carries. The metric raisings sit at the zero jet; the weight enters through its one-jet. -/
 def sharpRaisedKoszulVec (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (u ζ : TangentSpace I x) : TangentSpace I x :=
   metricSharp (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x u ζ)
@@ -878,11 +797,6 @@ lemma sharpRaisedKoszulVec_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M) 
     sharpRaisedKoszulVec (I := I) g₀ g₁ (0 : SmoothCcTensor g₀ 0 2) x u ζ = 0 := by
   rw [sharpRaisedKoszulVec, linearizedKoszulCovec_zero_weight, metricSharp_def, map_zero]
 
-/-- The bilinear kernel of the sharp-gradient Koszul residual arm at a fixed frame pair
-`(p, q)`: the fold-pair antisymmetrized `(∇⁰♯_{g₁})K_S` content, written through the
-lowered-connection-difference identity
-`g₁((∇⁰_X ♯_{g₁})ω, z) = −g₁(A(X, ♯_{g₁}ω), z) − g₁(♯_{g₁}ω, A(X, z))`
-(`A := connDiff g₁ g₀`, `∇⁰g₀ = 0`), so that the metric raisings sit at the zero jet. -/
 def sharpGradKoszulKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -932,8 +846,6 @@ set_option linter.unusedSectionVars false in
     ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.comp_apply]
 
-/-- The sharp-gradient Koszul kernel repackaged as a bilinear form in the frame pair, for
-the orthonormal-frame trace-independence patching. -/
 def frameSharpGradKoszulKernel (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v0 v1 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -993,8 +905,6 @@ set_option linter.unusedSectionVars false in
   rw [frameSharpGradKoszulKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
-/-- Summand of the sharp-gradient Koszul residual arm at a frame pair: the input datum
-evaluated at the frame pair weights the kernel bilinear form. -/
 def sharpGradKoszulSummandFib (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -1022,8 +932,6 @@ set_option linter.unusedSectionVars false in
     Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply, smul_eq_mul]
   rfl
 
-/-- The sharp-gradient Koszul residual bi-contraction at a fixed frame family, with the
-donor's factor `2`. -/
 def sharpGradKoszulBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
@@ -1165,8 +1073,7 @@ private lemma linearizedKoszulCovec_basis_contMDiffOn_generic
     fin_cases i <;> rfl
 
 set_option linter.unusedSectionVars false in
-/-- Smoothness of the mixed-metric sharp-raised Koszul vector along smooth section
-arguments. -/
+
 lemma sharpRaisedKoszulVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (U Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -1370,7 +1277,6 @@ theorem sharpGradKoszulBiContrFibFixedFrame_contMDiff (g₀ g₁ : SmoothRiemann
   exact sharpGradKoszulBiContrFibFixedFrame_apply_section_contMDiff
     (I := I) g₀ g₁ S B hB Y
 
-/-- The sharp-gradient Koszul residual bi-contraction at the moving orthonormal frames. -/
 def sharpGradKoszulBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -1438,10 +1344,6 @@ theorem sharpGradKoszulBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric 
     (congrArg TensorRSSpace.ofCLM
       (sharpGradKoszulBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₀ g₁ S x₀ hy))
 
-/-- The `(∇♯)K`-residual coefficient field (fold map gap item 4, shared by the RA-1 subtree
-and the M-child's C-EQ): the frame bi-contraction of the fold-pair antisymmetrized
-`(∇⁰♯_{g₁})K_S` content, generic in the perturbed metric `g₁` and the weight `S`. One-jet
-in `S`; metric raisings at the zero jet. -/
 def ricciArmSharpGradKoszulResidualField (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -1459,7 +1361,7 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (sharpGradKoszulBiContrFib (I := I) g₀ g₁ S x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- Vacuity litmus (zero-weight kill): the `(∇♯)K`-residual field rejects the zero weight. -/
+
 theorem ricciArmSharpGradKoszulResidualField_zero_weight
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁
@@ -1498,8 +1400,6 @@ theorem ricciArmSharpGradKoszulResidualField_zero_weight
   rw [hzero]
   rfl
 
-/-! ### Stage C — the Ricci-fold remainder field (shared, per fold map E6) -/
-
 set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_zero_weight (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
@@ -1516,10 +1416,6 @@ lemma ccTensorBilin_zero_weight (g : SmoothRiemannianMetric I M) (x : M)
   rw [ContinuousLinearMap.zero_apply, Tensor0SSpace.toModel_zero]
   rfl
 
-/-- The bilinear kernel of the Ricci-fold remainder arm at a fixed frame pair `(p, q)`: the
-background-curvature commutator action on the weight `S`, from the Ricci-identity fold of
-the antisymmetrized second-gradient pair (the `½` is the fold-pair coefficient). Zero-jet
-in `S` against the background curvature. -/
 def ricciFoldKernelBilin (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -1560,7 +1456,6 @@ set_option linter.unusedSectionVars false in
     AddHom.coe_mk, ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply,
     ContinuousLinearMap.comp_apply, smul_eq_mul]
 
-/-- The Ricci-fold kernel repackaged as a bilinear form in the frame pair. -/
 def frameRicciFoldKernel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (v0 v1 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -1581,7 +1476,6 @@ set_option linter.unusedSectionVars false in
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.compL_apply,
     ContinuousLinearMap.flip_apply, smul_eq_mul]
 
-/-- Summand of the Ricci-fold remainder arm at a frame pair. -/
 def ricciFoldSummandFib (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -1609,7 +1503,6 @@ set_option linter.unusedSectionVars false in
     Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply, smul_eq_mul]
   rfl
 
-/-- The Ricci-fold remainder bi-contraction at a fixed frame family. -/
 def ricciFoldBiContrFibFixedFrame (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
@@ -1789,7 +1682,6 @@ theorem ricciFoldBiContrFibFixedFrame_contMDiff (g₀ : SmoothRiemannianMetric I
   intro Y
   exact ricciFoldBiContrFibFixedFrame_apply_section_contMDiff (I := I) g₀ S B hB Y
 
-/-- The Ricci-fold remainder bi-contraction at the moving orthonormal frames. -/
 def ricciFoldBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   ricciFoldBiContrFibFixedFrame (I := I) g₀ S (smoothOrthoFrame (I := I) g₁ x) x
@@ -1854,9 +1746,6 @@ theorem ricciFoldBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (congrArg TensorRSSpace.ofCLM
       (ricciFoldBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₀ g₁ S x₀ hy))
 
-/-- The Ricci-fold remainder coefficient field (fold map gap item 5, shared by the RA-1
-subtree and the M-child's C-EQ): the frame bi-contraction of the background-curvature
-commutator action on the weight `S`, at the moving orthonormal frames. Zero-jet in `S`. -/
 def ricciArmRicciFoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -1874,8 +1763,7 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (ricciFoldBiContrFib (I := I) g₀ g₁ S x)) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- Vacuity litmus (zero-weight kill): the Ricci-fold remainder field rejects the zero
-weight. -/
+
 theorem ricciArmRicciFoldRemainderField_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁
       (0 : SmoothCcTensor g₀ 0 2) = 0 := by
@@ -1904,15 +1792,6 @@ theorem ricciArmRicciFoldRemainderField_zero_weight (g₀ g₁ : SmoothRiemannia
   rw [hzero]
   rfl
 
-/-! ### Stage D — DEF-2 and its vacuity litmus; tower statement elaboration checks -/
-
-/-- DEF-2′ (Form B): the background-curvature-difference and refold-remainder coefficient
-field at a generic perturbed metric `g₁` — the bg-R commutator difference PRECOMPOSED with
-the input-slot swap (the `Wᵀ` transposition of the corrected fold identity, absorbed as
-`appCcRS` against `ccSlotSwapField` so the bracket stays one applied `(2,2)` coefficient
-and the `ccInputSymm` sector algebra sees the swap through its own simp set), plus HALF
-the shared `(∇♯)K`-residual and MINUS the Ricci-fold remainder, the latter two at the
-metric-difference weight. -/
 def bgRDiffRefoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   appCcRS (I := I) (M := M) g₀ 2 2 2
@@ -1925,9 +1804,7 @@ def bgRDiffRefoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M) :
         (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁)
 
 set_option linter.unusedSectionVars false in
-/-- Vacuity litmus for DEF-2′: the field rejects the diagonal witness `g₁ = g₀` — the
-slot-swapped bg-R difference cancels and both shared remainder fields die on the zero
-weight. -/
+
 theorem bgRDiffRefoldRemainderField_self (g₀ : SmoothRiemannianMetric I M) :
     bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₀ = 0 := by
   rw [bgRDiffRefoldRemainderField, metricDifferenceCcTensor_self, sub_self,
@@ -1979,7 +1856,6 @@ private lemma unitModel_smul_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c :
   simp only [unitModel]
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]
-
 
 set_option linter.unusedSectionVars false in
 private theorem foldOrthoFrame_basis_at_center (g : SmoothRiemannianMetric I M) (x : M) :
@@ -2055,7 +1931,6 @@ private lemma foldInvSharpKoszul_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric
   intro z
   rw [inverseMetricSharpFib_inner (I := I) g₁ x _ z, cotangentToDualLinear_apply,
     koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ X Y x z]
-
 
 private lemma vec2_upd_zero {F : Type*} (a b z : F) :
     Function.update ![a, b] 0 z = ![z, b] := by
@@ -2233,7 +2108,6 @@ private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
       ccTensorBilin (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d) from
     hAPtoModel ![c, riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d]]
 
-
 set_option linter.unusedSectionVars false in
 private lemma foldBilinSymm_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -2336,7 +2210,6 @@ private lemma foldCompleteness_slot2 (g₁ : SmoothRiemannianMetric I M) (x : M)
     rw [vec2_upd_one]
     exact congrArg (fun t : TangentSpace I x => (![(p : E), (t : E)] : Fin 2 → E)) hexp
   rw [hfinal, hkey]
-
 
 set_option linter.unusedSectionVars false in
 private lemma foldCore_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -2471,7 +2344,6 @@ private lemma foldCore_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [hinner, hc1, hc2]
   ring
 
-
 set_option linter.unusedSectionVars false in
 private lemma foldToModel_slot2_neg (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x)
     (p w : TangentSpace I x) :
@@ -2557,7 +2429,6 @@ private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
     rw [hRz_def]
     exact riemannOp_swap (cov := LeviCivita (I := I) g₀) x Ba u z
   rw [hswap2, foldToModel_slot2_neg (I := I) (M := M) x D Ba Rz]
-
 
 set_option linter.unusedSectionVars false in
 private lemma foldQuadruplePatterns (x : M) (p q c d : TangentSpace I x) :
@@ -2688,7 +2559,6 @@ private lemma foldKernelTerm_eval (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [smul_eq_mul]
   ring
 
-
 set_option linter.unusedSectionVars false in
 private lemma foldDonorWeight_eq (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x) :
@@ -2782,7 +2652,6 @@ private lemma foldSwapBgR_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     rw [bgRBiContrFibFixedFrame_toModel]
     refine Finset.sum_congr rfl (fun c _ => ?_)
     exact toModel_slotSwapFib_pair (I := I) (M := M) x Wuv _ _
-
 
 set_option linter.unusedSectionVars false in
 private lemma unitModel_smul_apply_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
@@ -2950,8 +2819,6 @@ private lemma foldPsymm_zero (g₀ : SmoothRiemannianMetric I M) :
   intro x v w
   rw [ccTensorBilin_zero_weight, ccTensorBilin_zero_weight]
 
-
-
 set_option linter.unusedSectionVars false in
 private theorem foldAppCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
@@ -2969,7 +2836,6 @@ private theorem foldAppCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
       Φ₁.toSection x - Φ₂.toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
-
 
 set_option linter.unusedSectionVars false in
 private theorem foldSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
@@ -3003,38 +2869,7 @@ private theorem foldSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 set_option linter.unusedVariables false in
-/-- The shared field-level C₂-EXPOSED generic-`g₁` Palatini fold of the moving order-zero
-Riemann coefficient, in the CORRECTED Form B
-`L = Q_true + ΔbgRComm[Wᵀ] − RF + ½·SGK + kernel`
-(the single source of fold truth for the Riemann-arm refold identity RA-1' and the
-M-dossier sym-sector cancellation C-EQ): for a generic perturbed metric `g₁ = g₀ + P` (the
-`htie` idiom) with symmetric perturbation `P` (chain-suppliable at every wired consumer:
-the realized path supplies `s • T` under `hTsymm`; the metric difference is symmetric by
-metric symmetry), the half background difference of the moving Riemann-arm coefficient
-applied to an arbitrary rank-`(0, 2)` argument `W` (ALL `W` — no symmetry hypothesis on
-`W`) splits onto the pinned residual coefficient fields: the antisymmetrized `A ⋆ A`
-commutator field (`ricciArmOrder0AACommCoeffField`, the corrected quadratic residual),
-the background-curvature commutator difference PRECOMPOSED with the input-slot swap
-(`appCcRS … (ccSlotSwapField g₀)` — the `Wᵀ` transposition forced by the second-Bianchi
-completion, which lands the curvature vector in the kernel's SECOND slot while the bg-R
-kernel feeds the FIRST), plus HALF the shared `(∇♯)K`-residual and MINUS the Ricci-fold
-remainder at weight `P` (the bracket is definitionally `bgRDiffRefoldRemainderField` at
-`P := metricDifferenceCcTensor`) — plus the folded four-monomial second-Bianchi refold
-kernel at the DERIVED quadruple
-`σ₁ = swap 0 2, σ₂ = swap 1 3, σ₃ = swap 0 2 * swap 1 3, σ₄ = 1`, in the
-DERIVATION-FAITHFUL placement: the kernel WEIGHT is the applied argument `W` and the
-second gradient falls on the metric-difference tensor `P` (coefficient exactly `1`:
-donor `2` × Koszul `½` × kernel-internal `½`).
-Recorded corrections riding the corrected mechanism: the defect-(3) conversion of the
-eventual marathon fill targets the fold `R⁰`-block `T1R0`, NOT the donor `T1`; the refold
-identity is calibrated live in curved `g₀` (the covariant-vanishing calibration, not a
-flat-model reading); the connection-difference slot convention throughout is
-`connDiff_apply`'s `(ARGUMENT)(DIRECTION)` application order.
-Proven fibrewise: the donor evaluation opens both moving Riemann traces,
-`riemannSec_difference` with the Koszul-derivative bridge splits the moving block, the
-second-covariant-gradient commutator collapses the Ricci pair onto the negated fold
-remainder, and `g₁`-orthonormal completeness lands the background trace on the
-slot-swapped commutator difference at the transposed argument. -/
+
 theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -3483,14 +3318,6 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
 
 set_option maxHeartbeats 3200000
 
-/-! ### Stage E — the kernel-contraction field and the sym-sector cancellation equation C-EQ″
-
-The `(2,2)`-valued repackaging of the primitive's second-gradient refold kernel term in the
-`W`-slots: the four-monomial kernel weight now rides the DATA slot, while the second-gradient
-argument `G` (in application `∇²P`) is frozen into the coefficient. -/
-
-/-- The unit value section of a rank-`(0,4)` coefficient tensor (the rank-four carrier of
-`unitModel`, section level — the rank-four sibling of `ccTensorUnitValueSection`). -/
 def ccTensorFourUnitValueSection (g : SmoothRiemannianMetric I M)
     (G : SmoothCcTensor g 0 4) : Π y : M, Tensor0SSpace 4 I y :=
   fun y =>
@@ -3514,8 +3341,6 @@ theorem ccTensorFourUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (v := fun y : M => unitZeroSec (I := I) (M := M) y)
     G.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
 
-/-- Evaluation of a rank-two fibre tensor at a fixed model pair, as a continuous linear
-functional (the data-slot scalar of the kernel contraction). -/
 private def refoldKernelArgumentPairEvalCLM (x : M) (v : Fin 2 → E) :
     Tensor0SSpace 2 I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
@@ -3533,11 +3358,6 @@ private lemma refoldKernelArgumentPairEvalCLM_apply (x : M) (v : Fin 2 → E)
     refoldKernelArgumentPairEvalCLM (I := I) (M := M) x v D =
       Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
 
-/-- The frame-summed kernel-contraction refold monomial at a fixed frame family `B`: the
-DATA slot `D` supplies the weight `D(B_a, B_b)`, while the frozen rank-four argument section
-`Gs` receives the frame pair in its two leading slots after the slot permutation `σ`. This is
-the `W`-slot repackaging of `curvatureRefoldMonomialFibFixedFrame` (there the weight is frozen
-and the rank-four datum moves; here the rank-four argument is frozen and the weight moves). -/
 def refoldKernelContractionMonomialFibFixedFrame (Gs : Π b : M, Tensor0SSpace 4 I b)
     (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
@@ -3549,8 +3369,7 @@ def refoldKernelContractionMonomialFibFixedFrame (Gs : Π b : M, Tensor0SSpace 4
         (slotPerm4Fib (I := I) (M := M) x σ (Gs x)))
 
 set_option linter.unusedSectionVars false in
-/-- Non-discard guard (constructive side): the fixed-frame kernel-contraction monomial is the
-frame sum of the weighted refold monomials at the data-supplied weights. -/
+
 lemma refoldKernelContractionMonomialFibFixedFrame_apply
     (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -3709,8 +3528,6 @@ private theorem refoldKernelContractionMonomialFibFixedFrame_apply_section_contM
   rw [ContinuousLinearMap.sum_apply]
   rfl
 
--- The orthonormal double-trace frame-independence engine (kept private in
--- `OperatorFieldSecondGradientRefold`); re-derived here for the kernel-contraction patching.
 private def kcInnerPairBilin (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X : TangentSpace I x) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -3809,8 +3626,6 @@ private theorem kc_double_frame_bilin_trace_indep
   rw [kc_double_frame_bilin_trace_eq_fixed (I := I) g x K L B hB,
     kc_double_frame_bilin_trace_eq_fixed (I := I) g x K L C hC]
 
--- Leading-pair partial evaluation as a bilinear form (kept private in
--- `OperatorFieldSecondGradientRefold`); re-derived here.
 private def kcToModelEvalCLM (s : ℕ) (x : M) (v : Fin s → E) :
     Tensor0SSpace s I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
@@ -3854,8 +3669,6 @@ private lemma kcPairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s 
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := G) (v0 := p) (vs := Fin.cons (q : E) v)]
 
-/-- The frame-summed kernel-contraction refold monomial at the smooth orthonormal frame of
-`g₁`: the moving-metric kernel-contraction coefficient, fibre level. -/
 def refoldKernelContractionMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
     (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -3945,9 +3758,6 @@ theorem refoldKernelContractionMonomialBiContrFib_contMDiff (g₁ : SmoothRieman
       (refoldKernelContractionMonomialBiContrFib_eq_fixedFrame_on_nbhd (I := I) (M := M)
         g₁ Gs σ x₀ hy))
 
-/-- The frame-summed kernel-contraction refold monomial as a smooth compactly supported
-`(2,2)` coefficient field: the frozen rank-`(0,4)` argument `G` rides the coefficient through
-its unit-value section, while the data slot receives the kernel weight. -/
 def refoldKernelContractionMonomialField (g₀ g₁ : SmoothRiemannianMetric I M)
     (G : SmoothCcTensor g₀ 0 4) (σ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 2 2 where
   toSection :=
@@ -3969,12 +3779,6 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (refoldKernelContractionMonomialBiContrFib (I := I) (M := M)
           g₁ (ccTensorFourUnitValueSection (I := I) (M := M) g₀ G) σ x)) := rfl
 
-/-- The kernel-contraction `(2,2)` coefficient field of the C-EQ″ kernel summand: the
-half-weighted `σ₁ + σ₂ − σ₃ − σ₄` combination of the frame-summed kernel-contraction refold
-monomials at the frozen rank-`(0,4)` argument `G` (in application: the second covariant
-gradient of the metric-difference tensor). The kernel weight of the primitive's refold term
-now rides the DATA slot, so the kernel summand of the sym-sector cancellation equation is a
-field in the applied argument's slots. -/
 def refoldKernelContractionField (g₀ g₁ : SmoothRiemannianMetric I M)
     (G : SmoothCcTensor g₀ 0 4) (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
     SmoothCcTensor g₀ 2 2 :=
@@ -3985,9 +3789,7 @@ def refoldKernelContractionField (g₀ g₁ : SmoothRiemannianMetric I M)
       - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₄)
 
 set_option linter.unusedSectionVars false in
-/-- The kernel-contraction field agrees fibrewise with the frame sum of the folded
-four-monomial kernel `curvatureRefoldKernelFib` at the data-supplied weights and the frozen
-unit-value argument. -/
+
 theorem refoldKernelContractionField_toSection_eq_kernelFib_sum
     (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (x : M) (D : Tensor0SSpace 2 I x) :
@@ -4105,8 +3907,6 @@ theorem refoldKernelContractionField_toSection_eq_kernelFib_sum
       Finset.sum_sub_distrib, Finset.sum_add_distrib]
   rw [hsplit, hdist]
 
-/-- Degenerate-witness litmus (argument kill): the kernel-contraction field rejects the zero
-rank-`(0,4)` argument outright — the construction genuinely uses `G`. -/
 theorem refoldKernelContractionField_zero_argument (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
     refoldKernelContractionField (I := I) (M := M) g₀ g₁
@@ -4174,8 +3974,6 @@ private lemma foldIteratedCovGrad_zero_arg (g₀ : SmoothRiemannianMetric I M) (
       (zero_smul ℝ _).symm,
     foldIteratedCovGrad_smul_real, zero_smul]
 
-/-- Vacuity litmus (zero-perturbation kill): at the zero metric perturbation the second
-covariant gradient argument vanishes and the kernel-contraction field dies. -/
 theorem refoldKernelContractionField_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
     refoldKernelContractionField (I := I) (M := M) g₀ g₁
@@ -4183,8 +3981,6 @@ theorem refoldKernelContractionField_zero_weight (g₀ g₁ : SmoothRiemannianMe
   rw [foldIteratedCovGrad_zero_arg (I := I) (M := M) g₀ 0 2 2,
     refoldKernelContractionField_zero_argument]
 
-/-- Vacuity litmus (diagonal kill): the kernel-contraction field rejects the diagonal
-witness `g₁ = g₀` at the metric-difference second-gradient argument. -/
 theorem refoldKernelContractionField_self (g₀ : SmoothRiemannianMetric I M)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) :
     refoldKernelContractionField (I := I) (M := M) g₀ g₀
@@ -4193,9 +3989,7 @@ theorem refoldKernelContractionField_self (g₀ : SmoothRiemannianMetric I M)
   rw [metricDifferenceCcTensor_self, refoldKernelContractionField_zero_weight]
 
 set_option linter.unusedSectionVars false in
-/-- The packaging bridge: applying the kernel-contraction `(2,2)` field to a rank-`(0,2)`
-datum `W` recovers the primitive's second-gradient refold kernel term — the `(4,2)` kernel
-coefficient at the unit value of `W`, applied to the frozen argument `G`. -/
+
 theorem appCc_refoldKernelContractionField
     (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (W : SmoothCcTensor g₀ 0 2) :
@@ -4266,8 +4060,7 @@ private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetri
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- Under the perturbation tie and the symmetry of `P`, the perturbation IS the
-metric-difference tensor: the `htie`/`hPsymm` binder pair pins `P` extensionally. -/
+
 private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -4301,9 +4094,6 @@ private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemanni
     ring
   rw [hmd, hsymm]
 
-/-- Extensionality of `(2,2)` coefficient fields through `appCc`: two fields agreeing on
-every smooth compactly supported rank-`(0,2)` datum are equal — every fibre value is realized
-by a global smooth section (`ContMDiffSection.exists_eq_at`). -/
 private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
     (C D : SmoothCcTensor g₀ 2 2)
     (h : ∀ W : SmoothCcTensor g₀ 0 2,
@@ -4347,10 +4137,7 @@ private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
   exact h2
 
 set_option linter.unusedSectionVars false in
-/-- The field-level form of the proven Palatini-fold primitive: the half background
-difference of the moving Riemann-arm coefficient equals the corrected quadratic residual
-plus DEF-2′ plus the packaged kernel contraction at the second-gradient argument — an
-equation of `(2,2)` coefficient fields, extensional over `appCc` from the primitive. -/
+
 private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kernelContraction
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -4406,36 +4193,7 @@ private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kern
     (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 W]
 
 set_option linter.unusedSectionVars false in
-/-- C-EQ″ (the CORRECTED sym-sector cancellation equation, M-dossier child C-EQ restated on
-the adjudicated four-summand form): for a generic perturbed metric `g₁ = g₀ + P` (the `htie`
-idiom) with symmetric perturbation `P`, the input-slot-symmetrized moving arm-0 combination
-splits onto FOUR summands — the antisymmetrized `A ⋆ A` commutator field (`Q_true`), DEF-2′
-(the slot-swapped bg-R difference with the shared remainders), the order-zero
-connection-difference coefficient field itself (the `L0` pass-through, UNCANCELLED), and the
-packaged second-gradient kernel contraction at the derived second-Bianchi quadruple
-`σ₁ = swap 0 2, σ₂ = swap 1 3, σ₃ = swap 0 2 * swap 1 3, σ₄ = 1` and the argument
-`icg² P`.
 
-ADJUDICATION BASIS (the mechanism-A predecessor is DEAD): the unanimous two-lane flat-witness
-verdict — the previous two-summand form (C-EQ′, which claimed the linear `∇²`-content of the
-order-zero arm and the half Riemann-arm difference annihilate on the `ccInputSymm` sector)
-FAILS on the flat model once `∇P(x) ≠ 0`; the recorded cancellation holds ONLY on the
-`∇P = 0` slice. The corrected right-hand side keeps `ccInputSymm (L0)` and the kernel
-contraction on ALL sectors; no cancellation of the second-gradient content is claimed
-anywhere in this equation.
-
-PROOF (glue, no new deep math): a corollary of the PROVEN fold primitive
-`ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient`
-— `htie`/`hPsymm` pin `P` as the metric difference
-(`foldPerturbation_eq_metricDifference`), `appCc`-extensionality
-(`foldCcTensor22_ext_of_appCc`) lifts the applied (∀ `W`) primitive to the field identity
-`½ • (RmArm g₁ − RmArm g₀) = Q_true + DEF-2′ + kernelContraction` through the packaging
-bridge `appCc_refoldKernelContractionField`, and `ccInputSymm_add` distributes the
-symmetrization; the `L0` summand passes through untouched on both sides.
-
-VACUITY: all three constructed right-hand fields carry proven diagonal/zero-witness
-litmuses (`ricciArmOrder0AACommCoeffField_self`, `bgRDiffRefoldRemainderField_self`,
-`refoldKernelContractionField_self` / `_zero_weight` / `_zero_argument`). -/
 theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_eq_residualFieldSum
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -4462,7 +4220,6 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationI
   rw [ccInputSymm_add (I := I) (M := M) g₀, ccInputSymm_add (I := I) (M := M) g₀,
     ccInputSymm_add (I := I) (M := M) g₀]
   abel
-
 
 end TensorSpectral
 end Parabolic

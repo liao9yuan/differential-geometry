@@ -1231,7 +1231,7 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
     change (trivializationAt E (TangentSpace I) α).baseSet ∩
           (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source
     rw [Set.inter_self]; rfl
-  -- per-i chart-rep of term1 and term2, each jointly ContMDiffOn on baseSet ×ˢ S, via L6.
+
   have hterm1 : ∀ i : Fin (Module.finrank ℝ E),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
         (fun p : M × ℝ => DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
@@ -1252,7 +1252,7 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
       (fun t => _c2_term2Sec (I := I) g₀ (Bf i) (F t)) ?_
     have := _c2_traceTerm2_jointContMDiffOn (I := I) g₀ F S (Bf i) hF
     exact this
-  -- assemble the sum of (term1 - term2) chart-reps on baseSet ×ˢ S
+
   have hsum : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
       (fun p : M × ℝ => ∑ i : Fin (Module.finrank ℝ E),
         (DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr
@@ -1262,11 +1262,11 @@ private theorem _c2_fixedFrameTrace_chartRepr_jointContMDiffOn
       (baseSet ×ˢ S) := by
     intro p hp
     exact ContMDiffWithinAt.sum (fun i _ => (hterm1 i p hp).sub (hterm2 i p hp))
-  -- the sum equals the chart-rep of the fixed-frame trace on baseSet ×ˢ S
+
   rw [hbaseSet_eq] at hsum
   refine hsum.congr ?_
   intro p _hp
-  -- fibre-level: chart-rep of the fixed-frame trace = sum of (term1 - term2) chart-reps
+
   rw [DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply,
     rawTensorConnLap_fixedFrame_def, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -1304,11 +1304,11 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
   classical
   refine contMDiffOn_of_locally_contMDiffOn ?_
   rintro ⟨x₀, s₀⟩ ⟨-, hs₀⟩
-  -- a partition-of-unity-positive chart centre α (possibly ≠ x₀)
+
   obtain ⟨α, hα_pos⟩ := (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ x₀)
   set pou : M → ℝ := fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x with hpou
   have hpou_cont : Continuous pou := (chartAtlasPOU I M α).contMDiff.continuous
-  -- the open neighbourhood U = {pou > 0} of x₀, inside both the POU tsupport and the good set
+
   set U : Set M := {x : M | 0 < pou x} with hU
   have hU_open : IsOpen U := isOpen_lt continuous_const hpou_cont
   have hx₀U : x₀ ∈ U := hα_pos
@@ -1327,7 +1327,7 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
     simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_univ, true_and, and_true]
     tauto
   rw [hinter]
-  -- chart-rep of the fixed-frame trace, jointly ContMDiffOn on (chart α source) ×ˢ S, restricted to U ×ˢ S
+
   have hCR0 := _c2_fixedFrameTrace_chartRepr_jointContMDiffOn (I := I) g₀ F S α hF
   have hU_sub_src : U ⊆ (chartAt H α).source := fun x hx => htsupp_sub_src (hU_sub_tsupp hx)
   have hCR : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
@@ -1339,7 +1339,7 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
           (fun y : M => (F p.2).toSection y) z) p.1)
       (U ×ˢ S) :=
     hCR0.mono (fun q hq => ⟨hU_sub_src hq.1, hq.2⟩)
-  -- reassemble the section on U ×ˢ S via the chart-center trivialization
+
   intro p₀ hp₀
   obtain ⟨hx₀src, hs₀'⟩ := hp₀
   have hbaseSet : p₀.1 ∈ (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
@@ -1360,7 +1360,7 @@ theorem rawTensorConnLapSmooth_jointContMDiffOn
       (trivializationAt (Tensor0SBundle.TensorRSModel 0 2 ℝ E)
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α).source := by
     rw [Bundle.Trivialization.mem_source]; exact hbaseSet
-  -- the chart-rep equals the fibre coordinate (.2) on U ×ˢ S, using the cornerstone trace identity
+
   have hfib : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ))
       𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E) ∞
       (fun p : M × ℝ =>

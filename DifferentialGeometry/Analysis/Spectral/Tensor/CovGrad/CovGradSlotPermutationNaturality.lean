@@ -237,8 +237,7 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
   classical
   rw [DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM_apply,
     DifferentialGeometry.Integral.Connection.tensor0SIntrinsicChartCLM_apply]
-  -- The reindexed section's chart pullback is the constant fibre isometry post-composed with
-  -- the original chart pullback.
+
   set L : Tensor0SModel s ℝ E ≃L[ℝ] Tensor0SModel s ℝ E :=
     (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ).toContinuousLinearEquiv with hL
   have hpull :
@@ -258,7 +257,7 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
   rw [L.comp_fderiv]
   rw [ContinuousLinearMap.comp_apply]
   rw [hL, ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
-  -- The linear isometry `domDomCongrₗᵢ` is the slot reindexing `domDomCongr σ`.
+
   rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ)
         ((fderiv ℝ (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr
             (I := I) s α T ∘ (extChartAt I α).symm) (extChartAt I α b))
@@ -267,7 +266,7 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
         ((fderiv ℝ (DifferentialGeometry.Integral.Connection.tensor0SChartE_section_repr
             (I := I) s α T ∘ (extChartAt I α).symm) (extChartAt I α b))
           (DifferentialGeometry.Integral.Connection.trivToE (I := I) α b v)) from rfl]
-  -- Now the fibre-from-model map commutes with `domDomCongr σ`.
+
   rw [tensor0SChartFiberFromModel_domDomCongr (I := I) s σ α b hb]
 
 /-- **The slot-`k` substitution CLM is `σ`-reindexed by relocating the active slot.**  The slot
@@ -305,13 +304,13 @@ private lemma chartTensor0SSlotCorrection_sum_domDomCongr
   intro m
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
-  -- Reindex the left sum by `k ↦ σ.symm k`.
+
   rw [← Equiv.sum_comp σ.symm (fun k => DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection
     (I := I) s g α T X b k (fun i => m (σ i)))]
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection_apply_localSlotCLM,
     DifferentialGeometry.Integral.Connection.chartTensor0SSlotCorrection_apply_localSlotCLM]
-  -- LHS: `(domDomCongr σ (T b)) (fun i => localSlotCLM k Φ i (m i))`.
+
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   refine congrArg _ ?_
   funext i
@@ -414,7 +413,7 @@ lemma tensor0SCovariantDerivative_succ_domDomCongr
     DifferentialGeometry.Integral.Connection.self_mem_chartLeviCivitaGoodSet x
   have hxE : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
     DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet_mem_baseSet hx_good
-  -- Per-frame-vector naturality.
+
   have hframe : ∀ i : Fin (Module.finrank ℝ E),
       (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
           (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) ŝ' x)
@@ -437,7 +436,7 @@ lemma tensor0SCovariantDerivative_succ_domDomCongr
     rw [DifferentialGeometry.Integral.Connection.chartTensor0SCovariantDerivative_eq_abstract_succ_aux
       (I := I) (M := M) g x s ŝ (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i)
       hx_good hŝ hXi_at]
-  -- Extend to an arbitrary direction via the frame decomposition.
+
   conv_lhs => rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose
     (I := I) x hxE v, map_sum]
   conv_rhs => rw [DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose
@@ -492,11 +491,10 @@ theorem tensorCovDerivAt_unit_toModel_domDomCongr_of_section
       ContinuousMultilinearMap.domDomCongr σ
         (covDerivUnitModel (I := I) (M := M) g s S x v) := by
   classical
-  -- Step 1: reduce both directional cov-derivs to the bundled `(0, s)`-cov-deriv of the
-  -- unit-evaluated section.
+
   rw [covDerivUnitModel_eq_tensor0SCovariantDerivative (I := I) (M := M) g s S' x v,
     covDerivUnitModel_eq_tensor0SCovariantDerivative (I := I) (M := M) g s S x v]
-  -- The hypothesis, read at the level of the unit-evaluated sections (`toModel` is the identity).
+
   have hrel : ∀ y : M, unitEvalSection (I := I) (M := M) g s S' y =
       ContinuousMultilinearMap.domDomCongr σ
         (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from
@@ -579,9 +577,7 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
     refine ⟨Equiv.Perm.decomposeFin.symm (0, σ'), fun x => ?_⟩
     apply ContinuousMultilinearMap.ext
     intro v
-    -- `∇^{i+1} = covGrad (∇^i ·)` (definitionally, `s + (i+1) = (s+i)+1`); restate the goal in
-    -- that fully-reduced shape so each order-`i+1` unit form is the `covGrad` one at arity
-    -- `(s+i)+1`.
+
     change unitModel (I := I) (M := M) g (s + i + 1)
         (covGrad (I := I) (M := M) g 0 (s + i)
           (iteratedCovGrad (I := I) (M := M) g 0 s i S')) x v =
@@ -589,19 +585,19 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
         (unitModel (I := I) (M := M) g (s + i + 1)
           (covGrad (I := I) (M := M) g 0 (s + i)
             (iteratedCovGrad (I := I) (M := M) g 0 s i S)) x) v
-    -- Read off the leftmost (gradient) slot on both sides via `covGrad_toSection_apply_eval`.
+
     rw [unitModel_covGrad_apply (I := I) (M := M) g (s + i)
       (iteratedCovGrad (I := I) (M := M) g 0 s i S') x v]
     rw [ContinuousMultilinearMap.domDomCongr_apply,
       unitModel_covGrad_apply (I := I) (M := M) g (s + i)
         (iteratedCovGrad (I := I) (M := M) g 0 s i S) x
         (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ')) k))]
-    -- Naturality of the directional covariant derivative against `σ'` (the IH relation).
+
     rw [tensorCovDerivAt_unit_toModel_domDomCongr_of_section (I := I) (M := M) g (s + i) σ'
       (iteratedCovGrad (I := I) (M := M) g 0 s i S)
       (iteratedCovGrad (I := I) (M := M) g 0 s i S') hσ' x (v 0)]
     rw [ContinuousMultilinearMap.domDomCongr_apply]
-    -- The reindexed tuple fixes slot `0` and restricts to `vecTail v ∘ σ'` on the rest.
+
     have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ')) (0 : Fin (s + i + 1))) = v 0 := by
       rw [Equiv.Perm.decomposeFin_symm_apply_zero]
     have htail :
@@ -683,11 +679,11 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
           ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
             tensorCovDerivAt (I := I) (M := M) g r s Φ x v) D)) := by
   classical
-  -- Local smooth extension `w` of the `(0, r)`-input `D`.
+
   obtain ⟨w, hw⟩ := ContMDiffSection.exists_eq_at (I := I)
     (F := Tensor0SModel r ℝ E) (V := fun y : M => Tensor0SSpace r I y)
     (n := (⊤ : ℕ∞)) x D
-  -- The `(0, s)`-application sections and their fibrewise `σ`-relation.
+
   set u : Π y : M, Tensor0SSpace s I y :=
     fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y) with hu_def
   set u' : Π y : M, Tensor0SSpace s I y :=
@@ -704,7 +700,7 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
     have h := hrel y (w y)
     rw [hu'_def, hu_def]
     exact h
-  -- Both directional derivatives via the Hom product rule.
+
   rw [tensorCovDerivAt_def (I := I) (M := M) g r s Φ' x v,
     tensorCovDerivAt_def (I := I) (M := M) g r s Φ x v]
   have hHL' := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r s
@@ -714,7 +710,7 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
   rw [← hw]
   rw [hHL', hHL]
   rw [Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_sub, domDomCongr_sub]
-  -- The source arm: `Φ'(∇^{(0,r)}_v w) = σ`-reindex of `Φ(∇^{(0,r)}_v w)` (hypothesis at that input).
+
   have hsource :
       Tensor0SSpace.toModel
           ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ'.toSection x)
@@ -726,7 +722,7 @@ theorem tensorCovDerivAt_rs_toModel_domDomCongr
               (Tensor0SNabla.tensor0SCovariantDerivative I M r
                 (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) w x v))) :=
     hrel x _
-  -- The target arm: rank-`0` directional naturality on `u, u'`.
+
   have htarget :
       Tensor0SSpace.toModel
           (Tensor0SNabla.tensor0SCovariantDerivative I M s
@@ -791,10 +787,10 @@ theorem covGrad_rs_toModel_domDomCongr
   rw [ContinuousMultilinearMap.domDomCongr_apply,
     covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ x d
       (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ)) k))]
-  -- Naturality of the directional covariant derivative against `σ`.
+
   rw [tensorCovDerivAt_rs_toModel_domDomCongr (I := I) (M := M) g r s σ Φ Φ' hrel x (v 0) d]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
-  -- The reindexed tuple fixes slot `0` and restricts to `vecTail v ∘ σ` on the rest.
+
   have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ)) (0 : Fin (s + 1))) = v 0 := by
     rw [Equiv.Perm.decomposeFin_symm_apply_zero]
   have htail :
@@ -851,12 +847,11 @@ private lemma lowerAllUpperIndices_zero_domDomCongr_of_unitModel
   rw [hSS' x, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
   rw [lowerAllUpperIndices_zero_apply_unitModel (I := I) (M := M) g s S x]
-  -- Both sides are `unitModel S x` applied to a tuple; the tuples agree because
-  -- `Fin.natAdd 0 ∘ σ = ρ ∘ Fin.natAdd 0` with `ρ` the transport of `σ`.
+
   congr 1
   funext j
   congr 1
-  -- `(natAdd 0 (σ j)) = ρ (natAdd 0 j)` where `ρ = (finCongr (zero_add)).permCongr.symm σ`.
+
   rw [Equiv.permCongr_symm, Equiv.permCongr_apply]
   apply Fin.ext
   simp
@@ -887,7 +882,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
       ((iteratedCovGrad (I := I) (M := M) g 0 s i S').toSection x),
     riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + i) x
       ((iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x)]
-  -- `tensorInnerPointwise g 0 n = tensorInnerPointwise_0s (0 + n) (lower ·) (lower ·)`.
+
   change tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + i)) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel

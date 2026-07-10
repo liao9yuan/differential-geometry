@@ -81,7 +81,7 @@ theorem fderivWithin_iteratedFDerivWithin_apply_eq {G W : Type*}
       = iteratedFDerivWithin ℝ n (fun y => fderivWithin ℝ f s y u) s x := by
   induction n with
   | zero =>
-    -- `iteratedFDerivWithin 0 g s = (curryFin0).symm ∘ g`; the linear iso commutes with `fderivWithin`.
+
     intro x hx
     rw [iteratedFDerivWithin_zero_eq_comp,
       LinearIsometryEquiv.comp_fderivWithin _ (hs x hx)]
@@ -90,27 +90,27 @@ theorem fderivWithin_iteratedFDerivWithin_apply_eq {G W : Type*}
     rfl
   | succ n IH =>
     intro x hx
-    -- Abbreviate the `n`-th iterate `H`; it is `C²` within `s` (an iterate of a `C∞` map).
+
     set H := iteratedFDerivWithin ℝ n f s with hH_def
-    -- The currying linear isometry peeled off by `iteratedFDerivWithin_succ_eq_comp_left`.
+
     set e := (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => G) W).symm with he_def
-    -- LHS factors through the outer derivative of `H` in direction `u`.
+
     have hLHS : fderivWithin ℝ (iteratedFDerivWithin ℝ (n + 1) f s) s x u
         = e (fderivWithin ℝ (fderivWithin ℝ H s) s x u) := by
       rw [iteratedFDerivWithin_succ_eq_comp_left]
       rw [e.comp_fderivWithin (f := fderivWithin ℝ H s) (hs x hx)]
       rfl
-    -- RHS, by the induction hypothesis at every point, is the outer derivative of `∂_u H`.
+
     have hIHeq : Set.EqOn (iteratedFDerivWithin ℝ n (fun y => fderivWithin ℝ f s y u) s)
         (fun y => fderivWithin ℝ H s y u) s := fun y hy => (IH y hy).symm
     have hRHS : iteratedFDerivWithin ℝ (n + 1) (fun y => fderivWithin ℝ f s y u) s x
         = e (fderivWithin ℝ (fun y => fderivWithin ℝ H s y u) s x) := by
       rw [iteratedFDerivWithin_succ_eq_comp_left, Function.comp_apply,
         fderivWithin_congr hIHeq (hIHeq hx)]
-    -- The two outer derivatives agree by the second-order Clairaut symmetry of `H`.
+
     rw [hLHS, hRHS]
     congr 1
-    -- `fderivWithin (∂_u H) s x = (fderivWithin (fderivWithin H s) s x).flip u`.
+
     have hHC2 : ContDiffWithinAt ℝ 2 H s x := by
       refine (hf x hx).iteratedFDerivWithin_right hs ?_ hx
       have h2n : (2 : WithTop ℕ∞) + (n : WithTop ℕ∞) = ((2 + n : ℕ∞) : WithTop ℕ∞) := by norm_cast
@@ -155,7 +155,7 @@ theorem iteratedFDerivWithin_prod_match_zero_of_jet_vanish
     iteratedFDerivWithin ℝ n D (Set.Ici (0:ℝ) ×ˢ V) (0, z) = 0 := by
   set S : Set (ℝ × E) := Set.Ici (0:ℝ) ×ˢ V with hS_def
   have hUD : UniqueDiffOn ℝ S := UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hV.uniqueDiffOn
-  -- Every point of the slab is accumulated from its interior (the open right half-slab).
+
   have hSclo : S ⊆ closure (interior S) := by
     have hsub : Set.Ioi (0:ℝ) ×ˢ V ⊆ interior S := by
       rw [hS_def, interior_prod_eq, interior_Ici, hV.interior_eq]
@@ -163,12 +163,11 @@ theorem iteratedFDerivWithin_prod_match_zero_of_jet_vanish
     rw [hS_def] at hp
     rw [closure_prod_eq, closure_Ioi]
     exact ⟨hp.1, subset_closure hp.2⟩
-  -- Strengthen to a statement universally quantified over the family and the seam point, so the
-  -- successor step can recurse into the transverse partial `∂ₜ D`.
+
   clear_value S
   induction n generalizing D z with
   | zero =>
-    -- `iteratedFDerivWithin 0 D S (0, z) = D (0, z) = 0` by the `i = 0` jet hypothesis.
+
     have h0 : D (0, z) = 0 := by
       have := hjet 0 z hz
       rwa [iteratedDerivWithin_zero] at this
@@ -176,31 +175,31 @@ theorem iteratedFDerivWithin_prod_match_zero_of_jet_vanish
     rw [iteratedFDerivWithin_zero_apply, h0]
     simp
   | succ n IH =>
-    -- It suffices that the Fréchet derivative of the `n`-th iterated derivative vanishes at (0,z).
+
     have hmem : ((0:ℝ), z) ∈ S := by rw [hS_def]; exact ⟨Set.self_mem_Ici, hz⟩
     rw [iteratedFDerivWithin_succ_eq_comp_left, Function.comp_apply]
     have hsuff : fderivWithin ℝ (iteratedFDerivWithin ℝ n D S) S (0, z) = 0 := by
-      -- A continuous linear map on `ℝ × E` vanishes once it kills `(1,0)` and every `(0,e)`.
+
       refine ContinuousLinearMap.ext (fun p => ?_)
       obtain ⟨t, e⟩ := p
       have hsplit : (t, e) = t • ((1:ℝ), (0:E)) + ((0:ℝ), e) := by
         simp [Prod.smul_mk, Prod.mk_add_mk]
       rw [show (0 : (ℝ × E) →L[ℝ] ((ℝ × E) [×n]→L[ℝ] F)) (t, e) = 0 from rfl, hsplit, map_add,
         map_smul]
-      -- Transverse direction `(1,0)`: commute with `iteratedFDerivWithin`, then use IH on `∂ₜ D`.
+
       have htrans : fderivWithin ℝ (iteratedFDerivWithin ℝ n D S) S (0, z) ((1:ℝ), (0:E)) = 0 := by
         rw [fderivWithin_iteratedFDerivWithin_apply_eq hUD hSclo n hD ((1:ℝ), (0:E)) (0, z) hmem]
-        -- `∂ₜ D` is `C∞` on `S`.
+
         have hDt : ContDiffOn ℝ ∞ (fun y => fderivWithin ℝ D S y ((1:ℝ), (0:E))) S := by
           have hfd : ContDiffOn ℝ ∞ (fderivWithin ℝ D S) S :=
             hD.fderivWithin hUD (by exact_mod_cast le_top)
           exact hfd.clm_apply contDiffOn_const
-        -- Its one-sided `t`-jets are the shifted `t`-jets of `D`, hence vanish on `V`.
+
         have hjett : ∀ i : ℕ, ∀ w ∈ V,
             iteratedDerivWithin i (fun t => fderivWithin ℝ D S (t, w) ((1:ℝ), (0:E)))
               (Set.Ici 0) 0 = 0 := by
           intro i w hw
-          -- On `Ici 0`, `t ↦ ∂ₜ D (t,w)` equals `derivWithin (D · w) (Ici 0)`.
+
           have hcongr : Set.EqOn
               (fun t => fderivWithin ℝ D S (t, w) ((1:ℝ), (0:E)))
               (derivWithin (fun t => D (t, w)) (Set.Ici 0)) (Set.Ici 0) := by
@@ -219,9 +218,9 @@ theorem iteratedFDerivWithin_prod_match_zero_of_jet_vanish
             ← iteratedDerivWithin_succ']
           exact hjet (i + 1) w hw
         exact IH hjett hz hDt
-      -- Seam-tangential direction `(0,e)`: derivative of the `n`-th iterate along the seam is 0.
+
       have hseam : fderivWithin ℝ (iteratedFDerivWithin ℝ n D S) S (0, z) ((0:ℝ), e) = 0 := by
-        -- Pull back along `ι : v ↦ (0, v)`; `iteratedFDerivWithin n D S ∘ ι = 0` on `V`.
+
         set ι : E → ℝ × E := fun v => (0, v) with hι_def
         set g : ℝ × E → (ℝ × E) [×n]→L[ℝ] F := iteratedFDerivWithin ℝ n D S with hg_def
         have hιmaps : Set.MapsTo ι V S := fun v hv => by
@@ -232,13 +231,13 @@ theorem iteratedFDerivWithin_prod_match_zero_of_jet_vanish
         have hgdiff : DifferentiableWithinAt ℝ g S (0, z) :=
           (hD.differentiableOn_iteratedFDerivWithin (by exact_mod_cast ENat.coe_lt_top n) hUD)
             (0, z) hmem
-        -- The composite is identically `0` on `V` (the IH), so `fderivWithin (g ∘ ι) V z = 0`.
+
         have hcompzero : fderivWithin ℝ (g ∘ ι) V z = 0 := by
           have hEq : Set.EqOn (g ∘ ι) (fun _ => 0) V := by
             intro v hv
             simpa [hg_def, hι_def, Function.comp_apply] using IH hjet hv hD
           rw [fderivWithin_congr hEq (hEq hz), fderivWithin_const_apply]
-        -- The chain rule expresses the same composite derivative through the seam direction.
+
         have hchain : fderivWithin ℝ (g ∘ ι) V z
             = (fderivWithin ℝ g S (0, z)).comp (ContinuousLinearMap.inr ℝ ℝ E) := by
           rw [fderivWithin_comp z hgdiff hιdiff hιmaps (hV.uniqueDiffOn z hz),
@@ -265,7 +264,7 @@ theorem iteratedFDerivWithin_prod_match
     (n : ℕ) {z : E} (hz : z ∈ V) :
     iteratedFDerivWithin ℝ n Φ (Set.Ici (0:ℝ) ×ˢ V) (0, z)
       = iteratedFDerivWithin ℝ n ψ (Set.Ici (0:ℝ) ×ˢ V) (0, z) := by
-  -- Work with the difference `D = Φ - ψ`; the goal becomes `iteratedFDerivWithin n D · = 0`.
+
   set S : Set (ℝ × E) := Set.Ici (0:ℝ) ×ˢ V with hS_def
   have hUD : UniqueDiffOn ℝ S := UniqueDiffOn.prod (uniqueDiffOn_Ici 0) hV.uniqueDiffOn
   have hmem : ((0:ℝ), z) ∈ S := ⟨Set.self_mem_Ici, hz⟩
@@ -273,13 +272,13 @@ theorem iteratedFDerivWithin_prod_match
     (hΦ (0, z) hmem).of_le (by exact_mod_cast le_top)
   have hψn : ContDiffWithinAt ℝ n ψ S (0, z) :=
     (hψ (0, z) hmem).of_le (by exact_mod_cast le_top)
-  -- `iteratedFDerivWithin n (Φ - ψ) = iteratedFDerivWithin n Φ - iteratedFDerivWithin n ψ`.
+
   have hsub : iteratedFDerivWithin ℝ n (Φ - ψ) S (0, z)
       = iteratedFDerivWithin ℝ n Φ S (0, z) - iteratedFDerivWithin ℝ n ψ S (0, z) :=
     iteratedFDerivWithin_sub_apply hΦn hψn hUD hmem
-  -- The difference is `C∞` on `S`.
+
   have hD : ContDiffOn ℝ ∞ (Φ - ψ) S := hΦ.sub hψ
-  -- All one-sided `t`-jets of the difference vanish on `V`, by linearity of `iteratedDerivWithin`.
+
   have hjet : ∀ i : ℕ, ∀ w ∈ V,
       iteratedDerivWithin i (fun t => (Φ - ψ) (t, w)) (Set.Ici 0) 0 = 0 := by
     intro i w hw
@@ -305,7 +304,7 @@ theorem iteratedFDerivWithin_prod_match
         = iteratedDerivWithin i (fun t => ψ (t, w)) (Set.Ici 0) 0 := htjet i hw
     rw [hsubt, iteratedDerivWithin_sub Set.self_mem_Ici (uniqueDiffOn_Ici 0) hΦw hψw,
       htjetw, sub_self]
-  -- Apply the vanishing form and unwind.
+
   have hzero : iteratedFDerivWithin ℝ n (Φ - ψ) S (0, z) = 0 :=
     iteratedFDerivWithin_prod_match_zero_of_jet_vanish hV hD hjet n hz
   rw [hzero] at hsub

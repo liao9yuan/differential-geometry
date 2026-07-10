@@ -116,9 +116,7 @@ theorem riemannSec_tensorCov_apply_eval
       (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
       (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
       X W τ Y x
-  -- The `(r, s)`-connection `tensorCov g r s` is *definitionally* the single generic Hom-bundle
-  -- covariant derivative on `Hom((0,r), (0,s))`, so the applied curvature value coincides with the
-  -- generic Hom curvature–Leibniz right-hand side `R_V(τ·Y) − τ(R_U Y)` (no `toModel` yet).
+
   have heq :
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
           riemannSec (tensorCov (I := I) g r s)

@@ -3,15 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 
-/-!
-# Per-order L² tame envelopes for the order-1 Koszul arm coefficient
-
-The generic (in a perturbed metric `g₁ = g₀ + P`) per-order L² tame jet envelopes for the
-cast cometric `cometricCastG0` and for the order-1 Koszul arm coefficient
-`ricciArmOrder1KoszulCoeff`: every covariant-gradient order `i` of these coefficient fields is
-L²-bounded by a ball-uniform constant times the tame window `1 + ∑_{j < i + k} ‖∇ʲP‖²`.
--/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap

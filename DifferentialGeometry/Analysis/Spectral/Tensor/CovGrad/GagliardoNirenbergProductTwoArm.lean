@@ -250,7 +250,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
   classical
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
-  -- The engine constant families (per top order `m`), for the two valences (S,T-independent).
+
   set CSf : ℕ → ℝ := fun m =>
     if h : 1 ≤ m then
       (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le (I := I) (M := M) g s₁ m h).choose
@@ -271,7 +271,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
       exact (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
         (I := I) (M := M) g s₂ m h).choose_spec.1
     · exact le_refl 0
-  -- The uniform constant: dominates every product `CSf m · CTf m` (m ≤ k) and is ≥ 1.
+
   set Cbig : ℝ := 1 + ∑ m ∈ Finset.range (k + 1), CSf m * CTf m with hCbig
   have hCbig1 : (1 : ℝ) ≤ Cbig := by
     rw [hCbig]
@@ -286,18 +286,18 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
     have hterm : CSf m * CTf m ≤ ∑ m' ∈ Finset.range (k + 1), CSf m' * CTf m' :=
       Finset.single_le_sum (fun m' _ => mul_nonneg (hCSf_nn m') (hCTf_nn m')) hmem
     linarith
-  -- Choose the constant; then introduce the tensors and bounds.
+
   refine ⟨(k + 1) ^ 2 * Cbig, by positivity, ?_⟩
   intro S T ΛS ΛT hΛS hΛT hSsup hTsup
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ
-  -- Abbreviations for the iterated covariant jets and their squared fibre norms.
+
   set Sj : ℕ → M → ℝ := fun a x =>
     riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + a) x
       ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S).toSection x) with hSj
   set Tj : ℕ → M → ℝ := fun b x =>
     riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
       ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T).toSection x) with hTj
-  -- L²-norm ↔ ∫ rfns bridge for each jet.
+
   have hSnorm : ∀ a, ∫ x, Sj a x ∂μ =
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S‖ ^ 2 := by
     intro a
@@ -312,7 +312,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
       ← tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g (s₂ + b)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T),
       ← Integral.L2.SmoothCcTensor.norm_def (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T)]
-  -- Continuity, nonnegativity, integrability of the jet squared fibre norms.
+
   have hSj_cont : ∀ a, Continuous (Sj a) := fun a => by
     rw [hSj]; exact continuous_rfns g 0 (s₁ + a) _
   have hTj_cont : ∀ b, Continuous (Tj b) := fun b => by
@@ -329,7 +329,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
     rw [hμ]
     exact ((hSj_cont a).mul (hTj_cont b)).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- Pointwise sup hypotheses re-read against `Sj 0`, `Tj 0`.
+
   have hSsup0 : ∀ x, Sj 0 x ≤ ΛS ^ 2 := by
     intro x; rw [hSj]; dsimp only
     rw [PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 s₁ S]
@@ -338,12 +338,12 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
     intro x; rw [hTj]; dsimp only
     rw [PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 s₂ T]
     exact hTsup x
-  -- The two arms are nonnegative.
+
   have hAS_nn : 0 ≤ ΛT ^ 2 * ∑ a ∈ Finset.range (k + 1),
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S‖ ^ 2 := by positivity
   have hAT_nn : 0 ≤ ΛS ^ 2 * ∑ b ∈ Finset.range (k + 1),
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2 := by positivity
-  -- ===== The per-cell bound. =====
+
   have hcell : ∀ i, i ≤ k → ∀ l, i + l ≤ k →
       ∫ x, Sj i x * Tj l x ∂μ ≤ Cbig *
         ((ΛT ^ 2 * ∑ a ∈ Finset.range (k + 1),
@@ -431,7 +431,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
           exact div_self (ne_of_gt hm_posR)
         have hi_posR : 0 < (i : ℝ) := by exact_mod_cast hipos
         have hl_posR : 0 < (l : ℝ) := by exact_mod_cast hlpos
-        -- Conjugate exponents `p = m/i`, `q = m/l`.
+
         set p : ℝ := (m : ℝ) / i with hp
         set q : ℝ := (m : ℝ) / l with hq
         have hp_one : 1 < p := by rw [hp, lt_div_iff₀ hi_posR, one_mul]; exact_mod_cast hmi
@@ -441,18 +441,18 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
           rw [hp, hq, inv_div, inv_div, ← add_div,
             show (i : ℝ) + l = (m : ℝ) by push_cast [hm]; ring]
           exact div_self (ne_of_gt hm_posR)
-        -- Hölder at the cell diagonal.
+
         have hHolder := real_holder_two_nonneg g (Sj i) (Tj l)
           (hSj_cont i) (hTj_cont l) (hSj_nn i) (hTj_nn l) hpq
         have h1p : (1 : ℝ) / p = wi := by rw [hp, one_div_div, hwi]
         have h1q : (1 : ℝ) / q = wl := by rw [hq, one_div_div, hwl]
         rw [h1p, h1q] at hHolder
-        -- Engine bounds (S at `j = i`, T at `j = l`, top order `m`).
+
         have hSe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
           (I := I) (M := M) g s₁ m hm1).choose_spec.2 S ΛS hΛS hSsup i hipos hmi
         have hTe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
           (I := I) (M := M) g s₂ m hm1).choose_spec.2 T ΛT hΛT hTsup l hlpos hml
-        -- Fold the engine constants into `CSf m`, `CTf m`.
+
         have hCSf_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
             (I := I) (M := M) g s₁ m hm1).choose = CSf m := by
           simp only [hCSf, dif_pos hm1]
@@ -461,10 +461,10 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
           simp only [hCTf, dif_pos hm1]
         rw [hCSf_m] at hSe
         rw [hCTf_m] at hTe
-        -- Match exponents to the `wi`, `wl` form.
+
         rw [mul_div_assoc 2 (i : ℝ) m, ← hwi] at hSe
         rw [mul_div_assoc 2 (l : ℝ) m, ← hwl] at hTe
-        -- Bridge the engine's `tensorL2Norm … .toFun` to the section norm `‖∇^m S‖`.
+
         rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₁ + m)
               (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ m S).toFun =
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ m S‖ from
@@ -475,21 +475,21 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ m T‖ from
             (Integral.L2.SmoothCcTensor.norm_def
               (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ m T)).symm] at hTe
-        -- Identify the Hölder power-integrands with the engine integrands.
+
         set Iφp : ℝ := ∫ x, Sj i x ^ p ∂μ with hIφp
         set Iψq : ℝ := ∫ x, Tj l x ^ q ∂μ with hIψq
-        -- (`set Iφp`/`set Iψq` already fold the engine integrands into `Iφp`/`Iψq`.)
+
         have hIφp_nn : 0 ≤ Iφp := by
           rw [hIφp]; exact integral_nonneg (fun x => Real.rpow_nonneg (hSj_nn i x) _)
         have hIψq_nn : 0 ≤ Iψq := by
           rw [hIψq]; exact integral_nonneg (fun x => Real.rpow_nonneg (hTj_nn l x) _)
-        -- The Young arm-split (validated helper).
+
         have hys := young_arm_split wi wl (CSf m) (CTf m) ΛS ΛT
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ m S‖
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ m T‖
           Iφp Iψq hwi_nn hwl_nn hwsum (hCSf_nn m) (hCTf_nn m) hΛS hΛT
           (norm_nonneg _) (norm_nonneg _) hIφp_nn hIψq_nn hSe hTe
-        -- Chain Hölder ≤ Iφp^wi · Iψq^wl with the arm-split, then bound by `Cbig·(arms)`.
+
         have hNS_sum : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ m S‖ ^ 2 ≤
             ∑ a ∈ Finset.range (k + 1),
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S‖ ^ 2 :=
@@ -552,7 +552,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
                           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2 :=
                         mul_le_mul_of_nonneg_left hNT_sum (by positivity)
                 linarith
-  -- ===== Assemble: integrability + the bound. =====
+
   constructor
   · -- Integrability of the grid integrand.
     have hcont : Continuous (fun x => ∑ i ∈ Finset.range (k + 1), Sj i x *
@@ -578,7 +578,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
           simp only [Finset.mul_sum],
         MeasureTheory.integral_finset_sum _ (fun l _ => hint_cell i l)]
     rw [hrw]
-    -- Bound the double sum cell-by-cell, then by the cell count.
+
     have hsum_le : ∑ i ∈ Finset.range (k + 1), ∑ l ∈ Finset.range (k + 1 - i),
           ∫ x, Sj i x * Tj l x ∂μ ≤
         ∑ i ∈ Finset.range (k + 1), ∑ l ∈ Finset.range (k + 1 - i),
@@ -592,7 +592,7 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
         rw [Finset.mem_range] at hi hl; omega
       exact hcell i hik l hilk
     refine le_trans hsum_le ?_
-    -- The constant double sum is ≤ (k+1)² · its summand.
+
     set c : ℝ := Cbig * ((ΛT ^ 2 * ∑ a ∈ Finset.range (k + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S‖ ^ 2)
       + (ΛS ^ 2 * ∑ b ∈ Finset.range (k + 1),
@@ -678,12 +678,12 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ
-  -- The single symmetric engine constant (one valence pair, window `k`).
+
   obtain ⟨C, hC0, hsym⟩ :=
     exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le (I := I) (M := M) g s₁ s₂ k
   refine ⟨2 * C, by positivity, ?_⟩
   intro U W T₁ T₂ Cmid ΛW ΛT hCmid hΛW hΛT hWsup hT₁sup hT₂sup hgrid
-  -- Abbreviations for the difference-factor and fixed-pair jet squared fibre norms.
+
   set Wj : ℕ → M → ℝ := fun a x =>
     riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + a) x
       ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a W).toSection x) with hWj
@@ -693,7 +693,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
   set T2j : ℕ → M → ℝ := fun b x =>
     riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
       ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T₂).toSection x) with hT2j
-  -- Continuity / nonnegativity / integrability of the jet squared fibre norms.
+
   have hWj_cont : ∀ a, Continuous (Wj a) := fun a => by
     rw [hWj]; exact continuous_rfns g 0 (s₁ + a) _
   have hT1j_cont : ∀ b, Continuous (T1j b) := fun b => by
@@ -706,7 +706,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
     rw [hT1j]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
   have hT2j_nn : ∀ b x, 0 ≤ T2j b x := fun b x => by
     rw [hT2j]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
-  -- The two pair grids (one per fixed endpoint).
+
   set grid : (ℕ → M → ℝ) → M → ℝ := fun Tj x =>
     ∑ i ∈ Finset.range (k + 1), Wj i x * ∑ l ∈ Finset.range (k + 1 - i), Tj l x with hgridDef
   have hgrid_cont : ∀ Tj : ℕ → M → ℝ, (∀ b, Continuous (Tj b)) → Continuous (grid Tj) := by
@@ -716,7 +716,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
   have hgrid_int : ∀ Tj : ℕ → M → ℝ, (∀ b, Continuous (Tj b)) → Integrable (grid Tj) μ := by
     intro Tj hTj; rw [hμ]
     exact (hgrid_cont Tj hTj).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
-  -- LHS = ‖∇^j U‖² = ∫ rfns(∇^j U).
+
   have hUbridge : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ∂μ := by
@@ -724,7 +724,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U),
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g (s₁ + j)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U)]
-  -- The pointwise grid splits over the pair: grid(T₁+T₂) = grid(T₁) + grid(T₂).
+
   have hgrid_split : ∀ x,
       (∑ i ∈ Finset.range (k + 1), Wj i x *
           ∑ l ∈ Finset.range (k + 1 - i), (T1j l x + T2j l x)) = grid T1j x + grid T2j x := by
@@ -732,14 +732,14 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [Finset.sum_add_distrib, mul_add]
-  -- Integrand domination: rfns(∇^j U)(x) ≤ Cmid·(grid T1j x + grid T2j x).
+
   have hUgrid_int : Integrable
       (fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x)) μ := by
     rw [hμ]
     exact (continuous_rfns g 0 (s₁ + j) _).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
-  -- Integrate the pointwise grid: ∫ rfns(∇^j U) ≤ Cmid·(∫ grid T1j + ∫ grid T2j).
+
   have hintU_le : ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ∂μ ≤
       Cmid * ((∫ x, grid T1j x ∂μ) + ∫ x, grid T2j x ∂μ) := by
@@ -756,7 +756,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
         rw [← hgrid_split x]; exact hgrid x
     refine le_trans hstep (le_of_eq ?_)
     rw [integral_const_mul, integral_add (hgrid_int T1j hT1j_cont) (hgrid_int T2j hT2j_cont)]
-  -- Each grid integral is bounded by the symmetric engine's two arms (S := W, T := T_p).
+
   have harm : ∀ (T : Integral.L2.SmoothCcTensor g 0 s₂) (Tj : ℕ → M → ℝ),
       (Tj = fun b x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T).toSection x)) →
@@ -768,7 +768,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by
     intro T Tj hTjdef hTsup
     have he := hsym W T ΛW ΛT hΛW hΛT hWsup hTsup
-    -- Identify ∫ grid Tj with the symmetric engine's grid integral.
+
     have hgrideq : ∫ x, grid Tj x ∂μ =
         ∫ x, ∑ i ∈ Finset.range (k + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
@@ -779,11 +779,11 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
       refine integral_congr_ae (Eventually.of_forall (fun x => ?_))
       rw [hgridDef]; dsimp only; rw [hWj, hTjdef]
     rw [hgrideq]
-    -- The engine's `ΛT²·∑‖∇W‖² + ΛW²·∑‖∇T‖²` (S := W, T := T) — its first arm carries ΛT on W.
+
     exact he.2
   have harm1 := harm T₁ T1j hT1j hT₁sup
   have harm2 := harm T₂ T2j hT2j hT₂sup
-  -- Assemble: ‖∇^j U‖² = ∫ rfns ≤ Cmid·(∫g₁ + ∫g₂) ≤ Cmid·C·(two pair arms).
+
   rw [hUbridge]
   refine le_trans hintU_le ?_
   have hWsum_nn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (k + 1),
@@ -873,7 +873,7 @@ private theorem young_arm_split_scaled
   have hX_nn : 0 ≤ X := by rw [hX]; positivity
   have hY_nn : 0 ≤ Y := by rw [hY]; positivity
   have hs_pos : (0 : ℝ) < t ^ (-(wi / wl)) := Real.rpow_pos_of_pos ht0 _
-  -- The scaled geometric mean is the unscaled one.
+
   have hpow : (t * X) ^ wi * (t ^ (-(wi / wl)) * Y) ^ wl = X ^ wi * Y ^ wl := by
     rw [Real.mul_rpow ht0.le hX_nn, Real.mul_rpow hs_pos.le hY_nn,
       ← Real.rpow_mul ht0.le (-(wi / wl)) wl]
@@ -884,7 +884,7 @@ private theorem young_arm_split_scaled
   have hgm := Real.geom_mean_le_arith_mean2_weighted hwi_pos.le hwl_pos.le
     (mul_nonneg ht0.le hX_nn) (mul_nonneg hs_pos.le hY_nn) hwsum
   rw [hpow] at hgm
-  -- Relax the weights to `1` and the rescale factor to `(1/t)^k`.
+
   have hwi1 : wi ≤ 1 := by linarith
   have hwl1 : wl ≤ 1 := by linarith
   have hsk : t ^ (-(wi / wl)) ≤ (1 / t) ^ k := by
@@ -962,7 +962,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
   classical
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
-  -- The engine constants at the single diagonal `m = k`.
+
   set CS : ℝ :=
     if h : 1 ≤ k then
       (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le (I := I) (M := M) g s₁ k h).choose
@@ -1036,7 +1036,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
     exact Finset.single_le_sum
       (f := fun b => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2)
       (fun b _ => sq_nonneg _) (Finset.mem_range.mpr (Nat.lt_succ_of_le le_rfl))
-  -- The internal rescale.
+
   set tt : ℝ := t / ((k : ℝ) * Cbig + 1) with htt
   have htt0 : 0 < tt := by rw [htt]; positivity
   have htt1 : tt ≤ 1 := by
@@ -1045,7 +1045,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
   have htt_le_t : tt ≤ t := by
     rw [htt, div_le_iff₀ (by linarith)]
     nlinarith [ht0.le]
-  -- ===== The per-cell bound. =====
+
   have hcell : ∀ i, i < k →
       ∫ x, Sj i x * Tj (k - i) x ∂μ ≤
         Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
@@ -1153,7 +1153,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
             positivity
         _ = Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
             ring
-  -- ===== Assemble. =====
+
   refine ⟨?_, ?_⟩
   · have hcont : Continuous (fun x => ∑ i ∈ Finset.range k, Sj i x * Tj (k - i) x) := by
       refine continuous_finset_sum _ (fun i _ => (hSj_cont i).mul (hTj_cont (k - i)))
@@ -1169,7 +1169,7 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
       Finset.sum_le_sum (fun i hi => hcell i (Finset.mem_range.mp hi))
     refine le_trans hsum_le ?_
     rw [Finset.sum_const, nsmul_eq_mul, Finset.card_range]
-    -- `k·Cbig·tt ≤ t` and `k·Cbig·(1/tt)^k ≤ (k·Cbig·(k·Cbig+1)^k)·(1/t)^k`.
+
     have htop : (k : ℝ) * (Cbig * tt) ≤ t := by
       rw [htt]
       rw [show (k : ℝ) * (Cbig * (t / ((k : ℝ) * Cbig + 1)))

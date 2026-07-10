@@ -75,25 +75,25 @@ lemma norm_iteratedFDeriv_rawPullR_le_iteratedFDerivWithin_rawCompOnE
   set O : Set E := interior (extChartAt I α).target with hO_def
   have hO_open : IsOpen O := isOpen_interior
   have hUD : UniqueDiffOn ℝ O := hO_open.uniqueDiffOn
-  -- `rawPullR = rawCompOnE ∘ e`, with `e := toEuclidean.symm`.
+
   rw [rawPullR_eq_rawCompOnE_comp (I := I) (M := M) g S α Jdx]
-  -- The preimage `e ⁻¹' O` is open in `EuclN` and contains `y`.
+
   have hpre_open : IsOpen (e ⁻¹' O) := hO_open.preimage e.continuous
   have hy_pre : y ∈ e ⁻¹' O := hy
-  -- Plain jet of `rawCompOnE ∘ e` equals the within-jet on the open preimage.
+
   have hplain : iteratedFDeriv ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx ∘ ⇑e) y =
       iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx ∘ ⇑e) (e ⁻¹' O) y :=
     (iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
       (f := rawCompOnE (I := I) (M := M) g S α Jdx ∘ ⇑e) m hpre_open hy_pre).symm
   rw [hplain]
-  -- Composition-on-the-right within-jet formula for the continuous-linear equivalence `e`.
+
   have hcomp := e.iteratedFDerivWithin_comp_right (f := rawCompOnE (I := I) (M := M) g S α Jdx)
     hUD (x := y) hy m
   rw [hcomp]
-  -- The composed multilinear map has norm `≤ ‖∂^m_within f (e y)‖ · ‖e‖^m`.
+
   refine (ContinuousMultilinearMap.norm_compContinuousLinearMap_le _ _).trans ?_
   rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
-  -- `e = toEuclidean.symm` as a `→L`.
+
   have he_norm : ‖(e : EuclN →L[ℝ] E)‖ = ‖((toEuclidean (E := E)).symm : EuclN →L[ℝ] E)‖ := rfl
   rw [he_norm, mul_comm]
 

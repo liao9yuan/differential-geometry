@@ -799,8 +799,7 @@ private theorem genuineCurvTraceFixedFramePureR_frame_independent
     inferInstanceAs (T2Space (Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y))
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 s I y) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y))
-  -- The scalarization `T ↦ toModel (T D) m` as a continuous linear map on the `(0, s)`-tensor
-  -- fibre `TensorRSSpace 0 s I y`, then `Hb X Y := scalarize (Vb X Y)` with `Vb := pureRValuedBilinAt`.
+
   set scalarize : TensorRSSpace 0 s I y →L[ℝ] ℝ :=
     LinearMap.toContinuousLinearMap
       { toFun := fun T => Tensor0SSpace.toModel

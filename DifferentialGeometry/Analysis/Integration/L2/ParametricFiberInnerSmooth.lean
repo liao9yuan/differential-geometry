@@ -60,8 +60,7 @@ theorem contMDiff_partial_deriv_snd
     (F : C^∞⟮I.prod 𝓘(ℝ, ℝ), M × ℝ; ℝ⟯) :
     ContMDiff (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ => deriv (fun s => F (p.1, s)) p.2) := by
-  -- Rewrite `deriv` as `mfderiv ... 1`, then use smoothness of `mfderiv` of a jointly
-  -- smooth function.
+
   have hrw : (fun p : M × ℝ => deriv (fun s => F (p.1, s)) p.2) =
       fun p : M × ℝ => (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s => F (p.1, s)) p.2) (1 : ℝ) := by
     funext p

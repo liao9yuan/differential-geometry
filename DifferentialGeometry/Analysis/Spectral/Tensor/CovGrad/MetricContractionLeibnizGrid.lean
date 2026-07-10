@@ -172,8 +172,7 @@ theorem gridWindowSum_shift_le {κ : ℕ → ℕ → ℝ} (hκ : ∀ p r, 0 ≤ 
   unfold gridWindowSum
   rw [← Finset.sum_product', ← Finset.sum_product']
   set f : ℕ × ℕ → ℝ := fun b => κ (p + b.1) (r + b.2) with hf_def
-  -- Reindex the shifted `(j+1)×(j+1)` grid onto the common summand `f`, then dominate by the larger
-  -- `(j+2)×(j+2)` grid (the shifted grid is a subset, all summands nonnegative).
+
   have hshift : ∑ b ∈ (Finset.range (j + 1) ×ˢ Finset.range (j + 1)),
         κ ((p + dp) + b.1) ((r + dr) + b.2) =
       ∑ b ∈ ((Finset.range (j + 1) ×ˢ Finset.range (j + 1)).image
@@ -236,23 +235,18 @@ envelope genuinely uses the section; at the rank-`0`-degenerate base, `op 1 0 W 
 is genuinely nonzero on a non-flat `M` with the jet RHS `kappa 1 0 · (rfns(W) + rfns(∇W))(x)` positive,
 so it is not vacuous. -/
 structure DiffBilinOp (g : SmoothRiemannianMetric I M) where
-  /-- The `p`-times differentiated operator at base rank `r`, fibrewise-linear in the section. -/
+
   op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)
-  /-- The exact recursive single-step covariant Leibniz of the family (non-parallel). -/
+
   covGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
     covGrad g 0 (r + p) (op p r W) =
       op (p + 1) r W +
         castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W))
-  /-- The per-order **and per-rank** proportional fibre-envelope constant. The rank index is genuine:
-  the rank-`r` curvature derivation acts on all `r` slots, so its fibre-operator constant grows with
-  `r`; no single order-only family covers all ranks. -/
+
   kappa : ℕ → ℕ → ℝ
-  /-- The envelope constant is nonnegative. -/
+
   kappa_nonneg : ∀ p r, 0 ≤ kappa p r
-  /-- The per-order, per-rank, base-point-uniform proportional fibre bound in **jet form**
-  (boundedness of the operator at rank `r` against the order-`≤ p` covariant jet of the section). The
-  single-value form `≤ kappa p r · rfns(W)(x)` is FALSE at the rank-`0`-degenerate base
-  (`op 1 0 W = −cast(op 0 1 (∇W))` reads `∇W`); the honest invariant reads up to `∇^p W`. -/
+
   rfns_op_le : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x ((op p r W).toSection x) ≤
       kappa p r * ∑ q ∈ Finset.range (p + 1),
@@ -333,11 +327,11 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
               (Φ.op p (r + 1) (covGrad g 0 r W)))).toSection x)).trans ?_
       set kA : ℝ := gridWindowSum Φ.kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum Φ.kappa p (r + 1) j with hkB_def
-      -- Branch A's `(p+1, r, W)` window `range ((p+1)+j+1) = range (p+(j+1)+1)` equals the target `S`.
+
       set sA : ℝ := ∑ q ∈ Finset.range ((p + 1) + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hsA_def
-      -- Branch B's `(p, r+1, ∇W)` window `range (p+j+1)`, summand shifted to `∇^{q+1}W`.
+
       set sB : ℝ := ∑ q ∈ Finset.range (p + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (q + 1)) x
           ((iteratedCovGrad g 0 r (q + 1) W).toSection x) with hsB_def
@@ -367,12 +361,12 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
       have hkB_le : kB ≤ K := by
         rw [hkB_def, hK_def]
         exact gridWindowSum_shift_le Φ.kappa_nonneg p r j 0 1 (Nat.zero_le _) le_rfl
-      -- Branch A's window equals the target window `range (p+(j+1)+1)` (the indices coincide).
+
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
         exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
           (fun _ _ => rfl))
-      -- Branch B's shifted window `range (p+j+1)` of `∇^{q+1}W` sits inside the target `range (p+j+2)`.
+
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
         refine le_trans (sum_range_shift_le_db (p + j + 1)
@@ -446,9 +440,7 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : DiffBilinOp g) :
     fun r j => mul_nonneg (by positivity) (gridWindowSum_nonneg Φ.kappa_nonneg 0 r j),
     fun r W j x => ?_⟩
   have hgrid := Φ.rfns_iteratedCovGrad_grid j 0 r W x
-  -- The `p = 0` instance: `op 0 r W` lives at rank `(r + 0) + j`; the grid RHS jet window is
-  -- `range (0 + j + 1) = range (j + 1)`, so the three-factor `4^j · gridWindowSum κ 0 r j · ∑_q rfns`
-  -- is the claimed `C r j · ∑_q rfns`.
+
   simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 
 /-- **The binomial covariant-Leibniz `rfns` double grid at a single centre `x₀`.**

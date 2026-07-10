@@ -198,7 +198,7 @@ private lemma nablaBaseSlotCurv_zero_Z
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     nablaBaseSlotCurv (I := I) g X Y 0 x u = 0 := by
   classical
-  -- `Z`-additivity via the `(Y, Z)`-antisymmetry and `Y`-additivity (`nablaBaseSlotCurv_add_right`).
+
   have hext : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b => smoothExtensionTangent (I := I) x u b)) :=
     smoothExtensionTangent_contMDiff (I := I) x u
@@ -208,7 +208,7 @@ private lemma nablaBaseSlotCurv_zero_Z
     rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec]
     exact nablaCurvSec_swap23 (g := g) Y.contMDiff W.contMDiff hext
   rw [hswap 0]
-  -- `nablaBaseSlotCurv g X 0 Y x u = 0` (first antisym slot zero).
+
   have h := nablaBaseSlotCurv_add_right (I := I) g X 0 0 Y x u
   rw [add_zero] at h
   rw [add_eq_left.mp h.symm, neg_zero]
@@ -270,7 +270,7 @@ private lemma nablaBaseSlotCurv_finsetSum_Z
     nablaBaseSlotCurv (I := I) g X Y (∑ i ∈ t, Z i) x u =
       ∑ i ∈ t, nablaBaseSlotCurv (I := I) g X Y (Z i) x u := by
   classical
-  -- via the `(Y, Z)`-antisymmetry and `Y`-finite-sum additivity.
+
   have hext : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b => smoothExtensionTangent (I := I) x u b)) :=
     smoothExtensionTangent_contMDiff (I := I) x u
@@ -280,7 +280,7 @@ private lemma nablaBaseSlotCurv_finsetSum_Z
     rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec]
     exact nablaCurvSec_swap23 (g := g) Y.contMDiff W.contMDiff hext
   rw [hswap (∑ i ∈ t, Z i)]
-  -- first antisymmetric slot finite-sum additivity.
+
   have hY : nablaBaseSlotCurv (I := I) g X (∑ i ∈ t, Z i) Y x u =
       ∑ i ∈ t, nablaBaseSlotCurv (I := I) g X (Z i) Y x u := by
     classical
@@ -368,7 +368,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
   set ev : Fin n → ℝ := fun s => (chartBasisFamily (I := I) α hxbase).repr w s with hev_def
   set P : Fin n → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     fun p => chartFrameExtSection (I := I) α p x with hP_def
-  -- the chart-coordinate decomposition of each slot value.
+
   have hSp_decomp : (Sp : Π z : M, TangentSpace I z) x =
       (∑ p : Fin n, a p • P p : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x := by
     rw [ContMDiffSection.finset_sum_apply]
@@ -398,13 +398,12 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     rw [← hrep]
     refine Finset.sum_congr rfl (fun s _ => ?_)
     rw [hev_def, chartBasisFamily_apply]
-  -- Replace the three section slots by the frame-extension sums (value-determinacy), and the
-  -- acted vector by its chart-frame sum.
+
   rw [nablaBaseSlotCurv_eq_of_leftMidRight (I := I) g Sp (∑ p : Fin n, a p • P p)
       Sq (∑ q : Fin n, b q • P q) Sr (∑ r : Fin n, c r • P r) x hSp_decomp hSq_decomp hSr_decomp w]
   conv_lhs => rw [hw_decomp]
   rw [nablaBaseSlotCurv_finsetSum_smul_acted]
-  -- Per `s`, expand the three section slots into the triple chart-coordinate sum.
+
   have hper_s : ∀ s : Fin n,
       nablaBaseSlotCurv (I := I) g (∑ p : Fin n, a p • P p) (∑ q : Fin n, b q • P q)
           (∑ r : Fin n, c r • P r) x (chartBasisVecFiber (I := I) α s x) =
@@ -420,10 +419,9 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     rw [nablaBaseSlotCurv_smul_right, nablaBaseSlotCurv_finsetSum_Z, Finset.smul_sum, Finset.smul_sum]
     refine Finset.sum_congr rfl (fun r _ => ?_)
     rw [nablaBaseSlotCurv_smul_Z, smul_smul, smul_smul]
-  -- Assemble: substitute `hper_s`, expand `P p = chartFrameExtSection`, apply the chart-frame value
-  -- expansion, then reorganise the five-fold sum into `∑_l coeff_l • e^α_l`.
+
   rw [Finset.sum_congr rfl (fun s _ => by rw [hper_s s])]
-  -- expand each `nablaBaseSlotCurv (P p)(P q)(P r) x (e_s)` by the chart-frame value expansion.
+
   have hPval : ∀ (p q r s : Fin n),
       nablaBaseSlotCurv (I := I) g (P p) (P q) (P r) x (chartBasisVecFiber (I := I) α s x) =
         ∑ l : Fin n,
@@ -433,8 +431,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     exact nablaBaseSlotCurv_chartBasisVec_alpha_value (I := I) g α p q r s hx (P p) (P q) (P r)
       (chartFrameExtSection_value (I := I) α p x) (chartFrameExtSection_value (I := I) α q x)
       (chartFrameExtSection_value (I := I) α r x)
-  -- Substitute the chart-frame value expansion `hPval`, flatten all smuls/sums into the canonical
-  -- 5-fold sum over `(s, p, q, r, l)`, then reindex `l` to the front.
+
   have hLHS : (∑ s : Fin n, ev s •
         ∑ p : Fin n, ∑ q : Fin n, ∑ r : Fin n,
           (a p * b q * c r) •
@@ -457,7 +454,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     congr 2
     ring
   rw [hLHS]
-  -- reindex `∑_s ∑_p ∑_q ∑_r ∑_l = ∑_l ∑_p ∑_q ∑_r ∑_s` (move `l` front, `s` back).
+
   rw [show (∑ s : Fin n, ∑ p : Fin n, ∑ q : Fin n, ∑ r : Fin n, ∑ l : Fin n,
         (a p * b q * c r * ev s *
           nablaChartRiemannCoeff (I := I) g α p q r s l (extChartAt I α x)) •
@@ -471,7 +468,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
         (a p * b q * c r * ev s *
           nablaChartRiemannCoeff (I := I) g α p q r s l (extChartAt I α x)) •
           chartBasisVecFiber (I := I) α l x with hF_def
-    -- bubble `l` up through `r, q, p, s`.
+
     have e1 : (∑ s : Fin n, ∑ p : Fin n, ∑ q : Fin n, ∑ r : Fin n, ∑ l : Fin n, F s p q r l) =
         ∑ s : Fin n, ∑ p : Fin n, ∑ q : Fin n, ∑ l : Fin n, ∑ r : Fin n, F s p q r l := by
       refine Finset.sum_congr rfl (fun s _ => ?_)
@@ -498,7 +495,7 @@ private lemma nablaBaseSlotCurv_chartCoord_expand
     refine Finset.sum_congr rfl (fun q _ => ?_)
     rw [Finset.sum_comm]]
   refine Finset.sum_congr rfl (fun l _ => ?_)
-  -- inner: ∑_p ∑_q ∑_r ∑_s coeff • e_l = (∑_p ∑_q ∑_r ∑_s coeff) • e_l.
+
   rw [Finset.sum_smul]
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [Finset.sum_smul]
@@ -675,7 +672,7 @@ private lemma sum4_prod_factor {ι : Type*} [Fintype ι] (F G H K : ι → ℝ) 
     (∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, F p * G q * H r * K s) =
       (∑ p : ι, F p) * (∑ q : ι, G q) * (∑ r : ι, H r) * (∑ s : ι, K s) := by
   classical
-  -- pull `∑_s K s`, then `∑_r H r`, etc., out of the four-fold sum.
+
   have hs : (∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, F p * G q * H r * K s) =
       ∑ p : ι, ∑ q : ι, ∑ r : ι, (F p * G q * H r) * (∑ s : ι, K s) :=
     Finset.sum_congr rfl (fun p _ => Finset.sum_congr rfl (fun q _ =>
@@ -716,7 +713,7 @@ private lemma W_chartFrame_expand
   classical
   rw [Finset.sum_congr rfl (fun i _ => nablaBaseSlotCurv_chartCoord_expand (I := I) g α hx hxbase
     (B i) (B i) Ba u)]
-  -- swap `∑_i ∑_l = ∑_l ∑_i` and pull the per-`l` coefficient sum out.
+
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [Finset.sum_smul]
@@ -770,15 +767,14 @@ private lemma gNorm_W_le_chartConstants
         (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u) ≤
       CG * CR ^ 2 * (Module.finrank ℝ E : ℝ) ^ 7 * cg⁻¹ ^ 4 * g.inner x u u := by
   classical
-  -- (work directly with `Module.finrank ℝ E`)
-  -- chart coordinates of the slot vectors.
+
   set bi : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i p => (chartBasisFamily (I := I) α hx_base).repr (B i x) p
     with hbi_def
   set ca : Fin (Module.finrank ℝ E) → ℝ := fun r => (chartBasisFamily (I := I) α hx_base).repr (Ba x) r with hca_def
   set du : Fin (Module.finrank ℝ E) → ℝ := fun s => (chartBasisFamily (I := I) α hx_base).repr u s with hdu_def
   set R : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
     fun p q r s l => nablaChartRiemannCoeff (I := I) g α p q r s l (extChartAt I α x) with hR_def
-  -- the per-`l` coefficient.
+
   set coeff : Fin (Module.finrank ℝ E) → ℝ := fun l =>
     ∑ i : Fin (Module.finrank ℝ E), ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
       bi i p * bi i q * ca r * du s * R p q r s l with hcoeff_def
@@ -786,7 +782,7 @@ private lemma gNorm_W_le_chartConstants
       (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u) =
         ∑ l : Fin (Module.finrank ℝ E), coeff l • chartBasisVecFiber (I := I) α l x := by
     rw [W_chartFrame_expand (I := I) g α hx_good hx_base B Ba u]
-  -- The intrinsic norm via the chart Gram form, bounded above by `CG · ∑_l coeff_l²`.
+
   have hgnorm_le :
       g.inner x (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u)
           (∑ i : Fin (Module.finrank ℝ E), nablaBaseSlotCurv (I := I) g (B i) (B i) Ba x u) ≤
@@ -804,19 +800,19 @@ private lemma gNorm_W_le_chartConstants
       ring
     rw [heq]
     exact hCGbound coeff
-  -- Per-`l` coefficient bound: |coeff l| ≤ CR · Sa · Su · (∑_i Sbi_i²) where S(v) = ∑|repr v|.
+
   set Sbi : Fin (Module.finrank ℝ E) → ℝ := fun i => ∑ p : Fin (Module.finrank ℝ E), |bi i p| with hSbi_def
   set Sa : ℝ := ∑ r : Fin (Module.finrank ℝ E), |ca r| with hSa_def
   set Su : ℝ := ∑ s : Fin (Module.finrank ℝ E), |du s| with hSu_def
   have hSbi_nn : ∀ i, 0 ≤ Sbi i := fun i => Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSa_nn : 0 ≤ Sa := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
   have hSu_nn : 0 ≤ Su := Finset.sum_nonneg (fun _ _ => abs_nonneg _)
-  -- |coeff l| ≤ ∑_i CR · Sbi_i · Sbi_i · Sa · Su.
+
   have hcoeff_abs : ∀ l, |coeff l| ≤ ∑ i : Fin (Module.finrank ℝ E), CR * (Sbi i * Sbi i * Sa * Su) := by
     intro l
     rw [hcoeff_def]
     refine le_trans (Finset.abs_sum_le_sum_abs _ _) (Finset.sum_le_sum (fun i _ => ?_))
-    -- inner four-fold sum over p, q, r, s.
+
     have hinner : |∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
           bi i p * bi i q * ca r * du s * R p q r s l| ≤
         ∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
@@ -828,12 +824,12 @@ private lemma gNorm_W_le_chartConstants
       rw [abs_mul, abs_mul, abs_mul, abs_mul]
       exact mul_le_mul_of_nonneg_left (hCRbound p q r s l) (by positivity)
     refine le_trans hinner ?_
-    -- factor the four-fold abs sum: = Sbi_i · Sbi_i · Sa · Su · CR.
+
     have hfac : (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
           |bi i p| * |bi i q| * |ca r| * |du s| * CR) =
         (Sbi i) * (Sbi i) * Sa * Su * CR := by
       rw [hSbi_def, hSa_def, hSu_def]
-      -- pull `CR` out, then factor the four-fold product sum.
+
       rw [show (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
             |bi i p| * |bi i q| * |ca r| * |du s| * CR) =
           (∑ p : Fin (Module.finrank ℝ E), ∑ q : Fin (Module.finrank ℝ E), ∑ r : Fin (Module.finrank ℝ E), ∑ s : Fin (Module.finrank ℝ E),
@@ -848,7 +844,7 @@ private lemma gNorm_W_le_chartConstants
       rw [sum4_prod_factor (fun p => |bi i p|) (fun q => |bi i q|) (fun r => |ca r|)
         (fun s => |du s|)]
     rw [hfac]; exact le_of_eq (by ring)
-  -- Collect: |coeff l| ≤ CR · Sa · Su · (∑_i Sbi_i²).
+
   set T : ℝ := ∑ i : Fin (Module.finrank ℝ E), Sbi i * Sbi i with hT_def
   have hT_nn : 0 ≤ T := Finset.sum_nonneg (fun i _ => mul_nonneg (hSbi_nn i) (hSbi_nn i))
   have hcoeff_abs' : ∀ l, |coeff l| ≤ CR * Sa * Su * T := by
@@ -856,7 +852,7 @@ private lemma gNorm_W_le_chartConstants
     refine le_trans (hcoeff_abs l) ?_
     rw [hT_def, Finset.mul_sum]
     refine le_of_eq (Finset.sum_congr rfl (fun i _ => by ring))
-  -- coeff_l² ≤ CR² · Sa² · Su² · T², then ∑_l ≤ n · (that).
+
   have hcoeff_sq : ∀ l, coeff l ^ 2 ≤ (CR * Sa * Su * T) ^ 2 := by
     intro l
     calc coeff l ^ 2 = |coeff l| ^ 2 := (sq_abs _).symm
@@ -867,7 +863,7 @@ private lemma gNorm_W_le_chartConstants
           Finset.sum_le_sum (fun l _ => hcoeff_sq l)
       _ = (Module.finrank ℝ E : ℝ) * (CR * Sa * Su * T) ^ 2 := by
           rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- Chebyshev for each `S(v)² ≤ n · ∑(repr v)²`, then chart-Gram-lower + orthonormality.
+
   have hCheb : ∀ (v : TangentSpace I x), (∑ p : Fin (Module.finrank ℝ E), |(chartBasisFamily (I := I) α hx_base).repr v p|) ^ 2 ≤
       (Module.finrank ℝ E : ℝ) * ∑ p : Fin (Module.finrank ℝ E), (chartBasisFamily (I := I) α hx_base).repr v p ^ 2 := by
     intro v
@@ -879,7 +875,7 @@ private lemma gNorm_W_le_chartConstants
       Finset.sum_congr rfl (fun p _ => sq_abs _)
     rw [heq] at h
     exact h
-  -- Sa² ≤ n · cg⁻¹, Su² ≤ n · cg⁻¹ · g(u, u), Sbi_i² ≤ n · cg⁻¹.
+
   have hcg_inv_nn : (0 : ℝ) ≤ cg⁻¹ := le_of_lt (inv_pos.mpr hcg)
   have hn_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
   have hguu_nn : 0 ≤ g.inner x u u := metric_inner_self_nonneg (I := I) g x u
@@ -902,7 +898,7 @@ private lemma gNorm_W_le_chartConstants
       rw [hBon i, mul_one]
     refine le_trans (hCheb (B i x)) ?_
     gcongr
-  -- T = ∑_i Sbi_i² ≤ n² cg⁻¹.
+
   have hT_le : T ≤ (Module.finrank ℝ E : ℝ) ^ 2 * cg⁻¹ := by
     have hstep : T ≤ ∑ _i : Fin (Module.finrank ℝ E), (Module.finrank ℝ E : ℝ) * cg⁻¹ := by
       rw [hT_def]
@@ -910,7 +906,7 @@ private lemma gNorm_W_le_chartConstants
     refine le_trans hstep ?_
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
     rw [show ((Module.finrank ℝ E : ℝ) ^ 2 * cg⁻¹) = (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * cg⁻¹) from by ring]
-  -- (CR Sa Su T)² ≤ CR² n⁶ cg⁻⁴ g(u,u) via the arithmetic core.
+
   have hSaTU_sq : (CR * Sa * Su * T) ^ 2 ≤
       CR ^ 2 * ((Module.finrank ℝ E : ℝ) ^ 6 * cg⁻¹ ^ 4) * g.inner x u u :=
     diffCurv_arith_core hCR hSa_nn hSu_nn hT_nn hn_nn hcg_inv_nn hguu_nn hSa_sq hSu_sq hT_le
@@ -991,8 +987,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
                 (smoothOrthoFrame_smooth (I := I) g x a)) x u) ≤
           Kw x * g.inner x u u := by
   classical
-  -- (work directly with `Module.finrank ℝ E`)
-  -- Per-chart uniform constants from the three uniform chart bounds.
+
   have hCR_ex : ∀ α : M, ∃ C : ℝ, 0 ≤ C ∧
       ∀ b ∈ tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x),
         ∀ p q r s l : Fin (Module.finrank ℝ E),
@@ -1029,7 +1024,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
   refine ⟨fun _ => ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Kα α, continuous_const,
     fun _ => Finset.sum_nonneg (fun α _ => hKα_nonneg α), ?_⟩
   intro x a u
-  -- Rewrite `W` as the explicit frame sum and find a chart `α` whose PoU weight at `x` is nonzero.
+
   simp only [nablaBaseSlotCurvFrameSumCLM_apply]
   have hsum := DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
     (I := I) (M := M) x
@@ -1049,7 +1044,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     pouTsupport_subset_goodSet (I := I) α hx_tsupport
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
-  -- Orthonormality of the smooth orthonormal frame at its centre.
+
   have hBon : ∀ i : Fin (Module.finrank ℝ E),
       g.inner x ((ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
           (smoothOrthoFrame_smooth (I := I) g x i)) x)
@@ -1067,7 +1062,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     have := smoothOrthoFrame_orthonormal_at_center (I := I) g x a a
     rw [if_pos rfl] at this
     simpa using this
-  -- Apply the pointwise chart-`α` bound.
+
   have hpt := gNorm_W_le_chartConstants (I := I) g α hx_base hx_good
     (CR := CR α) (CG := CG α) (cg := cg α) (hCR0 α) (hCG0 α) (hcg0 α)
     (fun p q r s l => hCRbound α x hx_tsupport p q r s l)

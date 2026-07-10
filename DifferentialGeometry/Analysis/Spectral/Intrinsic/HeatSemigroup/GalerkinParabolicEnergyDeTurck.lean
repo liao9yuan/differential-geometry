@@ -413,25 +413,6 @@ theorem deTurckGalerkin_solution_exists
     rw [hforcing_eq] at hderiv
     exact hderiv
 
-theorem deTurckGalerkinForcing_tame_diff_mass
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
-    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
-    ∃ (Cδ₀ Ctame : ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ 0 ≤ Ctame ∧
-      ∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
-        ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
-            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-              ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
-                  (finiteEigenComboHs (I := I) (M := M) g₀
-                    (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i -
-                (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
-                  (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 ≤
-          Cδ₀ ^ 2 * galerkinEnergy (I := I) (M := M)
-            (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ) + 1) t +
-          Ctame ^ 2 * galerkinEnergy (I := I) (M := M)
-            (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ)) t :=
-  sorry
-
 theorem deTurckGalerkinForcing_seed_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -506,154 +487,6 @@ theorem deTurckGalerkinForcing_seed_mass
     _ = ‖v‖ ^ 2 := (tensorHs.norm_sq_eq_tsum (I := I) (M := M) v).symm
     _ = ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) Wrem‖ ^ 2 := by
         rw [hv_def]
-
-theorem deTurckGalerkin_forcing_dissipation
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
-    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
-    ∃ (Cδ Cmid : ℝ) (seed : ℕ → ℝ), Cδ < 2 ∧ 0 ≤ Cmid ∧
-      ∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
-        2 * ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
-            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-              (U N t i * deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i) ≤
-          Cδ * galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
-              (U N) ((a : ℝ) + (k : ℝ) + 1) t +
-            Cmid * galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
-              (U N) ((a : ℝ) + (k : ℝ)) t +
-            seed k *
-              Real.sqrt (galerkinEnergy (I := I) (M := M)
-                (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ)) t) := by
-  classical
-  obtain ⟨Cδ₀, Ctame, hCδ₀_nn, hCδ₀_lt, hCtame_nn, htame⟩ :=
-    deTurckGalerkinForcing_tame_diff_mass (I := I) (M := M) g₀ g_bg a ha_super (T := T) U
-  obtain ⟨Cseed, hCseed_nn, hseed⟩ :=
-    deTurckGalerkinForcing_seed_mass (I := I) (M := M) g₀ g_bg a ha_super
-  refine ⟨1 + Cδ₀ ^ 2, Ctame ^ 2, fun k => 2 * Cseed k,
-    by nlinarith [hCδ₀_lt, hCδ₀_nn], by positivity, ?_⟩
-  intro N k t ht
-  set S := eigenIdxFinset (I := I) (M := M) g₀ N with hS
-  set σ : ℝ := (a : ℝ) + (k : ℝ) with hσ
-  set v := finiteEigenComboHs (I := I) (M := M) g₀ S (U N t) ((a : ℝ) + 2) with hv
-  set w0 := deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
-    (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) with hw0
-  set w := deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a v with hw
-  have hUcoeff : ∀ i ∈ S, U N t i = v.coeff i := by
-    intro i hi
-    rw [hv, finiteEigenComboHs_coeff, if_pos hi]
-  have hFcoeff : ∀ i ∈ S, deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i =
-      w.coeff i := by
-    intro i hi
-    rw [deTurckGalerkinForcing_apply, if_pos hi]
-  have hLHS_eq :
-      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-          (U N t i * deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i) =
-        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-          (v.coeff i * ((w.coeff i - w0.coeff i) + w0.coeff i)) := by
-    refine Finset.sum_congr rfl (fun i hi => ?_)
-    rw [hUcoeff i hi, hFcoeff i hi]; ring
-  have hsplit :
-      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-          (v.coeff i * ((w.coeff i - w0.coeff i) + w0.coeff i)) =
-        (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-            (v.coeff i * (w.coeff i - w0.coeff i))) +
-          ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-            (v.coeff i * w0.coeff i) := by
-    rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl (fun i _ => ?_); ring
-  have hEσ1 : galerkinEnergy (I := I) (M := M) S (U N) (σ + 1) t =
-      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (v.coeff i) ^ 2 := by
-    unfold galerkinEnergy
-    refine Finset.sum_congr rfl (fun i hi => ?_)
-    rw [hUcoeff i hi]
-  have hEσ : galerkinEnergy (I := I) (M := M) S (U N) σ t =
-      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (v.coeff i) ^ 2 := by
-    unfold galerkinEnergy
-    refine Finset.sum_congr rfl (fun i hi => ?_)
-    rw [hUcoeff i hi]
-  have htame_k := htame N k t ht
-  have hseed_k := hseed N k
-  have hmass_general :
-      ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
-          (w.coeff i - w0.coeff i) ^ 2 ≤
-        Cδ₀ ^ 2 * galerkinEnergy (I := I) (M := M) S (U N) (σ + 1) t +
-          Ctame ^ 2 * galerkinEnergy (I := I) (M := M) S (U N) σ t := htame_k
-  have hTame :
-      2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-          (v.coeff i * (w.coeff i - w0.coeff i)) ≤
-        (1 + Cδ₀ ^ 2) * galerkinEnergy (I := I) (M := M) S (U N) (σ + 1) t +
-          Ctame ^ 2 * galerkinEnergy (I := I) (M := M) S (U N) σ t := by
-    have hcs := two_mul_sum_crossScale_le_eps (I := I) (M := M) S σ
-      (fun i => v.coeff i) (fun i => w.coeff i - w0.coeff i) (ε := 1) one_pos
-    have hmass' :
-        ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
-            (w.coeff i - w0.coeff i) ^ 2 ≤
-          Cδ₀ ^ 2 * (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) *
-              (v.coeff i) ^ 2) +
-            Ctame ^ 2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-              (v.coeff i) ^ 2 := by
-      rw [hEσ1, hEσ] at hmass_general; exact hmass_general
-    rw [hEσ1, hEσ]
-    calc 2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-            (v.coeff i * (w.coeff i - w0.coeff i))
-        ≤ 1 * (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (v.coeff i) ^ 2) +
-            1⁻¹ * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
-              (w.coeff i - w0.coeff i) ^ 2 := hcs
-      _ ≤ (1 + Cδ₀ ^ 2) *
-            (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i (σ + 1) * (v.coeff i) ^ 2) +
-            Ctame ^ 2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-              (v.coeff i) ^ 2 := by
-          rw [one_mul, inv_one, one_mul]; nlinarith [hmass']
-  have hSeed :
-      2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (v.coeff i * w0.coeff i) ≤
-        2 * Cseed k *
-          Real.sqrt (galerkinEnergy (I := I) (M := M) S (U N) σ t) := by
-    have hmono : ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ * (w0.coeff i) ^ 2 ≤
-        Cseed k ^ 2 := hseed_k
-    have hbound := two_mul_sum_sameScale_le_sqrt (I := I) (M := M) S σ
-      (fun i => v.coeff i) (fun i => w0.coeff i) (hCseed_nn k) hmono
-    rw [hEσ]; exact hbound
-  have hfinal :
-      2 * ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
-          (U N t i * deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i) ≤
-        (1 + Cδ₀ ^ 2) * galerkinEnergy (I := I) (M := M) S (U N) (σ + 1) t +
-          Ctame ^ 2 * galerkinEnergy (I := I) (M := M) S (U N) σ t +
-          2 * Cseed k * Real.sqrt (galerkinEnergy (I := I) (M := M) S (U N) σ t) := by
-    rw [hLHS_eq, hsplit, mul_add]
-    have hEσ1nn := galerkinEnergy_nonneg (I := I) (M := M) S (U N) (σ + 1) t
-    nlinarith [hTame, hSeed, hEσ1nn]
-  exact hfinal
-
-theorem deTurckGalerkin_forcing_closure
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
-    (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ)
-    (hU0 : ∀ N, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N, U N 0 i = 0) :
-    ∃ (Cδ Cmid : ℝ) (seed B0 : ℕ → ℝ), Cδ < 2 ∧ 0 ≤ Cmid ∧
-      (∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
-        2 * ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
-            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-              (U N t i * deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i) ≤
-          Cδ * galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
-              (U N) ((a : ℝ) + (k : ℝ) + 1) t +
-            Cmid * galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
-              (U N) ((a : ℝ) + (k : ℝ)) t +
-            seed k *
-              Real.sqrt (galerkinEnergy (I := I) (M := M)
-                (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ)) t)) ∧
-      (∀ (N : ℕ) (k : ℕ),
-        galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
-          (U N) ((a : ℝ) + (k : ℝ)) 0 ≤ B0 k) := by
-  obtain ⟨Cδ, Cmid, seed, hCδ, hCmid, hdiss⟩ :=
-    deTurckGalerkin_forcing_dissipation (I := I) (M := M) g₀ g_bg a ha_super (T := T) U
-  refine ⟨Cδ, Cmid, seed, fun _ => 0, hCδ, hCmid, hdiss, ?_⟩
-  intro N k
-  have hzero : galerkinEnergy (I := I) (M := M) (eigenIdxFinset (I := I) (M := M) g₀ N)
-      (U N) ((a : ℝ) + (k : ℝ)) 0 = 0 := by
-    unfold galerkinEnergy
-    refine Finset.sum_eq_zero (fun i hi => ?_)
-    rw [hU0 N i hi]
-    ring
-  rw [hzero]
 
 private lemma mass_le_of_sqrt_split {A B C c d : ℝ}
     (hA : 0 ≤ A) (hB : 0 ≤ B) (hC : 0 ≤ C) (hc : 0 ≤ c) (hc1 : c < 1) (hd : 0 ≤ d)
@@ -910,13 +743,6 @@ private theorem deTurckGalerkin_solution_exists_singleSymm
   · intro t i hi
     simp only [dif_neg hi]
 
-/-- Existence of the spectral Galerkin approximations for the symmetrized DeTurck forcing: for
-each truncation `N` there is a per-mode coordinate flow `U` that is continuous on `[0, T]`,
-starts at `u₀`'s coordinates, and solves the linear ODE system with forcing
-`deTurckGalerkinForcingSymm`. Symmetric mirror of `deTurckGalerkin_solution_exists`, proved by
-the same finite-dimensional forward Picard argument with the symmetrized Sobolev nonlinearity
-`deTurckSobolevNHa2Symm` (globally Lipschitz by `deTurckSobolevNHa2Symm_lipschitzWith`) in place
-of the raw one. -/
 theorem deTurckGalerkin_solution_existsSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -976,7 +802,6 @@ private lemma gscr_eigenIdxFinset_lambda_closed (g₀ : SmoothRiemannianMetric I
     rw [hij]
   rw [hl]
 
-
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
@@ -995,10 +820,7 @@ private lemma gscr_finiteEigenComboHs_eq_smoothCcToTensorHs
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Primed spectral-coercive split for the DeTurck smooth remainder at the θ″
-contraction threshold, consuming the symmetry-carrying ball-uniform spectral
-split. The inner quantification gains the bilinear-symmetry hypothesis on the
-subject exactly as in the supplier. -/
+
 theorem deTurckSmoothRemainder_spectralCoercive_split'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -1132,24 +954,10 @@ theorem deTurckSmoothRemainder_spectralCoercive_split'
   rw [hLHS_rw, hRHS1, hRHS2]
   exact le_trans hLHS_le (hker k T₀ hTsymm hball)
 
-
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Primed per-scale Sobolev split for the DeTurck Galerkin nonlinearity at the
-θ″ contraction threshold, over the SYMMETRIZED eigen-ansatz: the subject is the
-symmetrization `symmS` of the finite eigen-combination, whose slot-swap
-equivariance discharges the bilinear-symmetry hypothesis of the primed
-spectral-coercive split, with the Galerkin energies on the right recovered at
-constant one through the swap-engine mass contraction.
 
-⚠ DEFERRED-TO-SWITCH INTERFACE: the hypothesis `htie` (the action of
-`deTurckSobolevNHa2` on smooth embeds at the OUTER parameters `(R₀, δ)`) is NOT
-yet dischargeable — `deTurckSobolevNHa2` currently bakes its parameters via
-`Classical.choose` at the OLD contraction threshold. `htie` becomes provable
-(and this hypothesis disappears) at the switch wave, when the operator is
-re-pinned to the θ″ parameter supplier. No reader should mistake this
-hypothesis-carrying form for the final statement. -/
 theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -1453,12 +1261,7 @@ private lemma deTurckSobolevNHa2Symm_zero_eq
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Per-scale tame difference-mass bound for the symmetrized DeTurck Galerkin subject: the
-`a + k - 1`-weighted truncated coefficient mass of the difference of `deTurckSobolevNHa2Symm`
-between the finite eigen-combination and zero is controlled by the next-scale Galerkin energy at
-constant strictly below one plus a per-scale multiple of the same-scale Galerkin energy. Symmetric
-per-scale mirror of `deTurckGalerkinForcing_tame_diff_mass`, closing onto the symmetrized Sobolev
-split `deTurckSobolevNHa2_diff_sobolevSplit_perScale'` at the baked operator parameters. -/
+
 theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
@@ -1554,10 +1357,7 @@ theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Seed-mass bound for the symmetrized DeTurck Galerkin forcing at the zero subject: the
-`a + k`-weighted truncated coefficient mass of `deTurckSobolevNHa2Symm` at `0` is bounded by a
-per-scale constant squared. Symmetric mirror of the proven raw helper
-`deTurckGalerkinForcing_seed_mass`, via the zero-subject bridge to the raw operator. -/
+
 theorem deTurckGalerkinForcingSymm_seed_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
@@ -1586,11 +1386,7 @@ theorem deTurckGalerkinForcingSymm_seed_mass
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Per-scale dissipation inequality for the symmetrized DeTurck Galerkin forcing: the
-twice-tested forcing pairing at scale `a + k` is controlled by the next-scale Galerkin energy at
-constant strictly below two, a per-scale multiple of the same-scale Galerkin energy, and a
-per-scale square-root seed term. Symmetric per-scale mirror of the proven raw helper
-`deTurckGalerkin_forcing_dissipation`. -/
+
 theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
@@ -1712,13 +1508,7 @@ theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-/-- Per-scale closed dissipation inequality plus zero initial energy for the symmetrized DeTurck
-Galerkin flow: with vanishing initial coordinates there are per-scale constants for which the
-twice-tested forcing pairing is controlled by the next-scale and same-scale Galerkin energies plus
-a square-root seed term, and the initial Galerkin energy vanishes. Symmetric mirror of the proven
-raw helper `deTurckGalerkin_forcing_closure`, with `deTurckGalerkinForcingSymm` replacing the raw
-forcing; the per-scale energy dissipation chain closes onto the symmetrized Sobolev split
-`deTurckSobolevNHa2_diff_sobolevSplit_perScale'` at the baked operator parameters. -/
+
 theorem deTurckGalerkin_forcing_closure_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}

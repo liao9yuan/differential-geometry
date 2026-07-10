@@ -1475,11 +1475,6 @@ theorem conjugating_flow_pullback_jointGram_data
         rw [(extChartAt I α).left_inv hsr0]
       rw [hgramEq]
 
-/-- One-sided corner variant of the pulled-back joint chart-Gram smoothness: when the
-conjugating family orbit map is jointly `C^∞` on `Set.Ico 0 T ×ˢ Set.univ` and the DeTurck
-chart-Gram entries are jointly `C^∞` on `Set.Icc 0 T ×ˢ baseSet`, the chart-Gram entries of
-the pulled-back metric family are jointly `C^∞` on `Set.Ico 0 T ×ˢ baseSet`, including
-`t = 0`. -/
 theorem conjugating_flow_pullback_jointGram_onesided
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

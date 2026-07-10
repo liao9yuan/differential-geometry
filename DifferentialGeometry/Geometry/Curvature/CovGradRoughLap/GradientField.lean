@@ -672,17 +672,15 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
           (unitZeroSec (I := I) (M := M) x))
         m := by
   classical
-  -- Abbreviations.
+
   set GS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hGS
-  -- STEP 1: read slot 0 of ∇²S off as the directional covariant derivative of ∇S along `X x`.
+
   rw [covGrad_apply_unit_eval_genVal (I := I) (M := M) g (s + 1) GS x
     (Fin.cons (X x) (Fin.cons (Y x) m))]
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons (X x) (Fin.cons (Y x) m) ∘ Fin.succ) = Fin.cons (Y x) m from
     funext (fun j => by simp [Fin.cons_succ])]
-  -- The slot-`0`-read value is `(∇^{RS}_{X x} (∇S).toSection)(x)(unit)`, a `(0, s + 1)`-tensor;
-  -- transport the unit through the `(0, s + 1)` covariant derivative (parallel unit), giving
-  -- `(cov_{s+1}.toFun U_{GS} x (X x))` with `U_{GS} = unitGradFieldGen`.
+
   rw [show
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         tensorCovDerivAt (I := I) (M := M) g 0 (s + 1) GS x (X x))
@@ -691,7 +689,7 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
         (unitGradFieldGen (I := I) (M := M) g s S) x (X x) from by
     rw [tensorCovDerivAt_def (I := I) (M := M) g 0 (s + 1) GS x (X x)]
     exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1) GS.toSection x (X x)]
-  -- Read slot 0 of this `(0, s + 1)`-tensor off at `Y x` via the tensor-curry evaluation.
+
   rw [show Tensor0SSpace.toModel
         ((Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
           (unitGradFieldGen (I := I) (M := M) g s S) x (X x))
@@ -703,12 +701,12 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
     (TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
         (unitGradFieldGen (I := I) (M := M) g s S) x (X x)) (v0 := Y x) (vs := m)).symm]
-  -- Unfold the slot-`0` Christoffel correction of the abstract `(0, s + 1)` derivative.
+
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
     (unitGradFieldGen (I := I) (M := M) g s S) (Vfield := X) (Y := Y) (x := x)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))]
-  -- The two pieces use the slot-`0` reading `(∇_w S)(·)(unit)` of `U_{GS}`.
+
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M
         (unitGradFieldGen (I := I) (M := M) g s S) y (Y y)) =
       (fun y : M =>
@@ -718,17 +716,13 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
     funext (fun y => curry_unitGradFieldGen_eq (I := I) (M := M) g s S y (Y y))]
   rw [curry_unitGradFieldGen_eq (I := I) (M := M) g s S x
     ((LeviCivita (I := I) g).toFun Y x (X x))]
-  -- Match against the `tensorSecondCovDeriv` definition: both sides are now the `.toModel m`
-  -- reading of a `Tensor0SSpace s`-valued subtraction.
+
   rw [tensorSecondCovDeriv_def (I := I) g 0 s X Y (fun y : M => S.toSection y) x]
-  -- Identify the two `(0, s)`-tensor subtraction values, then take `.toModel m`.
+
   refine congrArg (fun T : Tensor0SSpace s I x => Tensor0SSpace.toModel T m) ?_
-  -- The right-hand subtraction is a CLM-subtraction applied to the unit; distribute it.
+
   rw [ContinuousLinearMap.sub_apply]
-  -- The outer-derivative term. The RHS `(tensorCov g 0 s).toFun (∇_Y S) x (X x)(unit)`
-  -- transports the unit through the `(0, s)` covariant derivative (parallel unit), giving
-  -- `cov_s.toFun (y ↦ (∇_Y S)(y)(unit)) x (X x)`, and `(∇_Y S)(y)(unit)` is exactly
-  -- `tensorCovDerivAt g 0 s S y (Y y)(unit)`.
+
   have houter :
       (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun
           (fun y : M =>
@@ -753,7 +747,7 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
       (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)).toFun F x (X x)) ?_
     funext y
     rw [hσapp y, covApply_apply, ← tensorCovDerivAt_def (I := I) (M := M) g 0 s S y (Y y)]
-  -- The Christoffel term: directly `tensorCovDerivAt`-vs-`tensorCov` identification.
+
   have hchr :
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         tensorCovDerivAt (I := I) (M := M) g 0 s S x ((LeviCivita (I := I) g).toFun Y x (X x)))

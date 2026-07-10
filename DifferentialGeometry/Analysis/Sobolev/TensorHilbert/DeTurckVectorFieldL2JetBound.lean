@@ -948,8 +948,6 @@ private theorem diagonalProductTerm_integral_le
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) := e5
 
 set_option linter.unusedVariables false in
-
-set_option linter.unusedVariables false in
 private theorem diagonalProductGrid_rfns_integral_ballUniform_succ
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -1135,7 +1133,6 @@ private theorem diagonalProductGrid_rfns_integral_ballUniform_succ
       refine le_trans hle1 ?_
       rw [heq2]
       exact le_add_of_nonneg_right hvol_nn
-
 
 section RaisedKoszulSuccHelpers
 

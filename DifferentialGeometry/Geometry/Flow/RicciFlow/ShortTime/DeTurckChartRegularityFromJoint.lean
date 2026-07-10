@@ -561,13 +561,13 @@ private lemma jointDeTurckVFComp_alongChart_contMDiffOn
         DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k
           (extChartAt I α q.2))
       (s ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
-  -- The joint-Euclidean chart component, as a scalar function `G : ℝ × E → ℝ`.
+
   set G : ℝ × E → ℝ :=
     fun q : ℝ × E => DeTurckLinearization.chartDeTurckVFComp (I := I) (g_DT q.1) g_bg α k q.2
     with hG_def
   have hGEuclid : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) :=
     jointDeTurckVFComp_contDiffOn g_bg T g_DT hJ α k
-  -- The smooth moving chart point `f : ℝ × M → ℝ × E`, into the model `𝓘(ℝ, ℝ × E)`.
+
   set f : ℝ × M → ℝ × E := fun q : ℝ × M => (q.1, extChartAt I α q.2) with hf_def
   have hf_smooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ × E) ∞ f
       (s ×ˢ chartLeviCivitaGoodSet (I := I) α) := by
@@ -579,7 +579,7 @@ private lemma jointDeTurckVFComp_alongChart_contMDiffOn
       (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) := by
     rintro ⟨t, x⟩ ⟨ht, hx⟩
     exact ⟨hs ht, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx⟩
-  -- Compose pointwise: `G ∘ f` is `ContMDiffWithinAt` at every good-set point.
+
   intro q hq
   have hGf : ContDiffWithinAt ℝ ∞ G (Set.Icc 0 T ×ˢ interior (extChartAt I α).target) (f q) :=
     hGEuclid.contDiffWithinAt (hmaps hq)

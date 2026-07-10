@@ -62,7 +62,7 @@ theorem hasChartJetLip_chartDeTurckRicciRHS
     hKsub (-2 : ℝ)
   have hLie := hasChartJetLip_chartLieDeTurckComp (I := I) (M := M) g₁ g₂ g_bg α hK hKsub i k
   have hAdd := HasChartJetLip.add hKsub hRic hLie
-  -- `max 2 2 = 2`, and the field equals `chartDeTurckRicciRHS` by `chartDeTurckRicciRHS_def`.
+
   have hmax : max 2 2 = 2 := by norm_num
   rw [hmax] at hAdd
   refine hAdd.congr ?_
@@ -99,7 +99,7 @@ theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE
   refine ⟨C * ((Module.finrank ℝ E) : ℝ), by positivity, fun y hy => ?_⟩
   have hyint : y ∈ interior (extChartAt I α).target := hKsub hy
   refine (hC y hy).trans ?_
-  -- `chartGramJetDiffSeminormSum (N+2) g₁ g₂ ≤ n · bareChartJetContentOnE (T−T') (N+2)`.
+
   have hgram := chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE (I := I) (M := M)
     g_bg T T' hδ_lt hδ hδ'_lt hδ' α (N + 2) hyint
   rw [hg₁_def, hg₂_def]

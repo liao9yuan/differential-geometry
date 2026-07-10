@@ -1429,56 +1429,6 @@ section OffZero
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-/-- **Exponential-map regularity away from the zero vector.** For a smooth
-Riemannian metric `g`, base point `p : M`, and a nonzero tangent vector
-`v ≠ 0`, the exponential map `fun w => expMap g p w` is `ContMDiffAt 𝓘(ℝ, E) I 1`
-at `v`.
-
-This is the off-zero analogue of `expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData`. At
-the zero vector that statement assumes a `HasChartFlowGeodesicMatchData`
-witness; here no such hypothesis is required, because away from `0` the
-joint `C¹` smoothness in `(w, t)` of the chained geodesic flow yields the
-regularity directly. The proof takes the `t = 1` slice of that joint flow:
-it precomposes the flow `(w, t) ↦ maximalGeodesic g p w t` with the smooth
-slice map `w ↦ (w, 1)` and uses `expMap g p w = maximalGeodesic g p w 1`. -/
-theorem expMap_contMDiffAt_of_ne_zero
-    (g : SmoothRiemannianMetric I M) (p : M) {v : E}
-    (hv : (show TangentSpace I p from v) ≠ 0) :
-    ContMDiffAt 𝓘(ℝ, E) I 1
-      (fun w : E => (expMap (I := I) g p (show TangentSpace I p from w) : M))
-      v := by
-  classical
-  obtain ⟨ρ, hρ, hjoint⟩ :=
-    expMap_chainedFlow_joint_contMDiff (I := I) g p v hv
-  set F : E × ℝ → M :=
-    fun vt => (maximalGeodesic (I := I) g p (show TangentSpace I p from vt.1) vt.2 : M)
-    with hF_def
-  set sl : E → E × ℝ := fun w => (w, 1) with hsl_def
-  have hcomp_eq :
-      (fun w : E => (expMap (I := I) g p (show TangentSpace I p from w) : M)) =
-        F ∘ sl := by
-    funext w
-    simp only [Function.comp_apply, hF_def, hsl_def, expMap]
-  rw [hcomp_eq]
-  have hsl_within : ContMDiffWithinAt 𝓘(ℝ, E) (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) 1 sl
-      (Metric.ball v ρ) v := by
-    rw [hsl_def]
-    exact (contMDiffWithinAt_id (I := 𝓘(ℝ, E))).prodMk
-      (contMDiffWithinAt_const (I := 𝓘(ℝ, E)) (I' := 𝓘(ℝ, ℝ)) (c := (1 : ℝ)))
-  have hsl_maps : Set.MapsTo sl (Metric.ball v ρ)
-      ((Metric.ball v ρ) ×ˢ Set.Icc (0 : ℝ) 1) := by
-    intro w hw
-    exact ⟨hw, ⟨zero_le_one, le_refl 1⟩⟩
-  have hF_within : ContMDiffWithinAt (𝓘(ℝ, E).prod 𝓘(ℝ, ℝ)) I 1 F
-      ((Metric.ball v ρ) ×ˢ Set.Icc (0 : ℝ) 1) (sl v) := by
-    apply hjoint
-    exact ⟨Metric.mem_ball_self hρ, ⟨zero_le_one, le_refl 1⟩⟩
-  have hcw : ContMDiffWithinAt 𝓘(ℝ, E) I 1 (F ∘ sl) (Metric.ball v ρ) v :=
-    hF_within.comp v hsl_within hsl_maps
-  have hball_nhds : Metric.ball v ρ ∈ 𝓝 v :=
-    Metric.isOpen_ball.mem_nhds (Metric.mem_ball_self hρ)
-  exact hcw.contMDiffAt hball_nhds
-
 end OffZero
 
 end Exponential

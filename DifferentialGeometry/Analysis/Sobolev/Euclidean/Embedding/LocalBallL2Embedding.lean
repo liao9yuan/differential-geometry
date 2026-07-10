@@ -987,7 +987,6 @@ theorem smooth_localBall_L2_pointwise_embedding_sharp
   have hda' : (d : ℝ) < 2 * ((2 * a : ℕ) : ℝ) := by push_cast; linarith
   exact smooth_localBall_L2_pointwise_embedding_supercritical (2 * a) hda' hR
 
-
 end Euclidean
 end Sobolev
 end Analysis

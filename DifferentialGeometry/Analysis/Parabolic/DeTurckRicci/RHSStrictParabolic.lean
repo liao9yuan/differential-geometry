@@ -114,7 +114,7 @@ private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
         exact (((chartModelBasis E).coord a).toContinuousLinearMap.differentiableAt).comp y
           ((differentiableAt_id).sub (differentiableAt_const _)))]
     congr 1
-    -- ∂_p [repr(z - y₀) a] = repr(e_p) a = δ_{pa}
+
     have hlin : (fun z : E => (chartModelBasis E).repr (z - extChartAt I x x) a) =
         fun z : E => (chartModelBasis E).coord a (z - extChartAt I x x) := by
       funext z; rw [Module.Basis.coord_apply]
@@ -162,14 +162,14 @@ private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ 
   set K : ℝ := formComp (I := I) x t c d with hK
   set L : E → ℝ := fun z : E => ∑ a : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr ξ a * (chartModelBasis E).repr (z - extChartAt I x x) a with hL
-  -- the test perturbation, as ½ K L²
+
   have hfun : (symbolTestPerturbation (I := I) x x ξ t ht c d) =
       fun z : E => ((1 / 2 : ℝ) * K) * (L z * L z) := by
     funext z
     have hval : symbolTestPerturbation (I := I) x x ξ t ht c d z =
         (1 / 2 : ℝ) * (L z) ^ 2 * formComp (I := I) x t c d := rfl
     rw [hval, hK]; ring
-  -- L differentiable everywhere
+
   have hL_diff : ∀ z : E, DifferentiableAt ℝ L z := by
     intro z
     rw [hL]
@@ -181,7 +181,7 @@ private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ 
     rw [hlin]
     exact (((chartModelBasis E).coord a).toContinuousLinearMap.differentiableAt).comp z
       ((differentiableAt_id).sub (differentiableAt_const _))
-  -- ∂_q (½ K L²) = ½ K · (∂_q L · L + L · ∂_q L) = K · L · ∂_q L
+
   have hinner : partialDeriv (E := E) q
         (symbolTestPerturbation (I := I) x x ξ t ht c d) =
       fun z : E => ((1 / 2 : ℝ) * K) * (partialDeriv (E := E) q L z * L z +
@@ -192,7 +192,7 @@ private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ 
       ((hL_diff z).mul (hL_diff z))]
     rw [partialDeriv_mul (E := E) L L (hL_diff z) (hL_diff z)]
   rw [hinner]
-  -- now differentiate again in p
+
   have hLq : ∀ z : E, partialDeriv (E := E) q L z = (chartModelBasis E).repr ξ q := by
     intro z; rw [hL]; exact partialDeriv_testLinearForm x ξ q z
   have hgoal_fun : (fun z : E => ((1 / 2 : ℝ) * K) * (partialDeriv (E := E) q L z * L z +
@@ -287,12 +287,12 @@ private theorem deTurckRicciRHS_test_perturbation_readoff
   classical
   set hh : ChartMetricPerturbation E := symbolTestPerturbation (I := I) x x ξ t ht with hhdef
   have hx_src : x ∈ (chartAt H x).source := mem_chart_source H x
-  -- value and first-jet of the test perturbation vanish at y₀ = extChartAt I x x
+
   have hval : ∀ a b, hh a b (extChartAt I x x) = 0 :=
     fun a b => symbolTestPerturbation_apply_self (I := I) x x ξ t ht a b
   have hjet : ∀ p a b, partialDeriv (E := E) p (hh a b) (extChartAt I x x) = 0 :=
     fun p a b => partialDeriv_symbolTestPerturbation_self (I := I) x x ξ t ht p a b
-  -- strip the Ricci first-order remainder (a sum of single-`∂h` terms)
+
   have hRicci :
       chartRicciSecondOrderPart (I := I) g₀ x hh i j (extChartAt I x x) =
         ricciSymbolComp (I := I) g₀ x ξ t i j := by
@@ -323,14 +323,14 @@ private theorem deTurckRicciRHS_test_perturbation_readoff
       rw [hjet i l j, hjet j l i, hjet l i j, hjet i l jj, hjet jj l i, hjet l i jj]
       ring
     rw [hrem, add_zero]
-  -- strip the DeTurck-correction first-order remainder
+
   have hCorr :
       chartDeTurckCorrSecondOrderPart (I := I) g₀ g_bg x hh i j (extChartAt I x x) =
         deTurckCorrSymbolComp (I := I) g₀ g_bg x ξ t i j := by
     rw [chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
         (I := I) g₀ g_bg x hh i j hx_src]
     rw [chartDeTurckCorrPrincipalSymbolExpr_symbolTestPerturbation g₀ g_bg x ξ t ht i j]
-    -- the first-order remainder vanishes: every term carries a `∂h`-factor (= 0 at y₀)
+
     have hLCP : ∀ a b k : Fin (Module.finrank ℝ E),
         chartLinearizedChristoffelPrincipal (I := I) g₀ x hh a b k (extChartAt I x x) = 0 := by
       intro a b k
@@ -375,9 +375,9 @@ private theorem deTurckRicciRHS_test_perturbation_readoff
         hblock_zero (fun k => chartGramOnE (I := I) g₀ x k j (extChartAt I x x)) i,
         hblock_zero (fun k => chartGramOnE (I := I) g₀ x i k (extChartAt I x x)) j, add_zero]
     rw [hrem, add_zero]
-  -- assemble: both sides equal metricCovectorNormSq·formComp
+
   rw [deTurckRicciRHSChartSecondOrderPart, hRicci, hCorr]
-  -- LHS: −2·ricciSymbolComp + deTurckCorrSymbolComp = deTurckSymbol(eᵢ,eⱼ) = |ξ|²·t_{ij}
+
   have hLHS : (-2 : ℝ) * ricciSymbolComp (I := I) g₀ x ξ t i j +
         deTurckCorrSymbolComp (I := I) g₀ g_bg x ξ t i j =
       DifferentialGeometry.PDE.DeTurck.metricCovectorNormSq (I := I) g₀ x ξ *
@@ -387,7 +387,7 @@ private theorem deTurckRicciRHS_test_perturbation_readoff
       ← DifferentialGeometry.PDE.DeTurck.deTurckSymbol_apply_apply (I := I) g₀ g_bg x ξ t]
     exact DifferentialGeometry.PDE.DeTurck.deTurckSymbol_apply_apply_eq_isotropic_of_symm
       (I := I) g₀ g_bg x ξ t ht i j
-  -- RHS: −(isotropicSymbol(deTurckSymbolCoeff) ...)(eᵢ,eⱼ) = |ξ|²·t_{ij}
+
   rw [hLHS, DifferentialGeometry.PDE.DeTurck.isotropicSymbol_apply_apply,
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply, formComp_def]
   simp only [LinearMap.smul_apply, smul_eq_mul]

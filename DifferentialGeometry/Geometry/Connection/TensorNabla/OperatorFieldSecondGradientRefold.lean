@@ -4,29 +4,6 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 
-/-!
-# Second-gradient refold kernels for operator coefficient fields
-
-The generic slot calculus that re-expresses a moving-frame-summed, tensor-weighted
-second-derivative contraction as a rank-`(4,2)` operator coefficient acting on the two-step
-gradient datum: feeding a fixed tangent pair into the two leading slots of a rank-four tensor
-(`slotFeedFib`, `leadingPairFeedFib`), rank-four slot permutations (`slotPerm4Fib`), the
-weighted refold monomial `curvatureRefoldMonomialFib`, and the folded four-monomial
-second-Bianchi kernel `curvatureRefoldKernelFib`.
-
-At field level, a weight tensor `W` and an orthonormal frame of a metric `g₁` produce the
-frame-summed bi-contraction coefficient `curvatureRefoldMonomialCoeffField` (and its kernel
-combination `curvatureRefoldKernelCoeffField`), a smooth compactly supported `(4,2)`
-coefficient: the weight `W(B_a, B_b)` rides the coefficient while the argument slot receives
-the two-step-gradient datum. Smoothness is proved by fixed-frame patching over
-`smoothOrthoFrameNbhd`, and the frame sum is frame-independent by the orthonormal double-trace
-identity.
-
-The zero-weight lemmas record the degenerate-witness litmus: a vanishing weight kills the
-coefficient outright, and the evaluation lemmas pin that every input (weight, permutation,
-frame pair, argument) is genuinely used.
--/
-
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
@@ -54,8 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-- Feed a fixed tangent vector into the leading slot of a rank-`(s+1)` covariant tensor,
-as a continuous linear map of fibres. -/
 def slotFeedFib (s : ℕ) (x : M) (p : TangentSpace I x) :
     Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace s I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace (s + 1) I x) := inferInstance
@@ -81,7 +56,6 @@ lemma slotFeedFib_toModel (s : ℕ) (x : M) (p : TangentSpace I x)
       Tensor0SSpace.toModel G (Fin.cons (p : E) v) :=
   TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (T := G) (v0 := p) (vs := v)
 
-/-- Feed a fixed pair of tangent vectors into the two leading slots: `G ↦ G(p, q, ·, …, ·)`. -/
 def leadingPairFeedFib (s : ℕ) (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SSpace s I x :=
   (slotFeedFib (I := I) (M := M) s x q).comp
@@ -126,8 +100,6 @@ private lemma domDomCongr4_smul (σ : Equiv.Perm (Fin 4)) (c : ℝ)
   ext m
   simp [ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- Rank-four slot permutation as a fibre continuous linear map (the `Fin 4` analogue of
-`slotSwapFib`). -/
 def slotPerm4Fib (x : M) (σ : Equiv.Perm (Fin 4)) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 4 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 4 I x) := inferInstance
@@ -152,7 +124,6 @@ lemma slotPerm4Fib_toModel (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 
       ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G) := by
   rw [slotPerm4Fib_apply, Tensor0SSpace.toModel_ofModel]
 
-/-- Applying the rank-four slot permutation to a smooth section yields a smooth section. -/
 theorem slotPerm4Fib_apply_section_contMDiff (σ : Equiv.Perm (Fin 4))
     (Y : Cₛ^∞⟮I; Tensor0SModel 4 ℝ E, fun x : M => Tensor0SSpace 4 I x⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
@@ -197,18 +168,12 @@ theorem slotPerm4Fib_apply_section_contMDiff (σ : Equiv.Perm (Fin 4))
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-/-- One refold monomial: the weight `tw` (the moving tensor's frame-pair value) rides the
-COEFFICIENT, while the two-step-gradient datum is the ARGUMENT, contracted at slot pattern `σ`
-with the frame pair fed into the two leading slots. -/
 def curvatureRefoldMonomialFib (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
   tw • ((leadingPairFeedFib (I := I) (M := M) 2 x p q).comp
     (slotPerm4Fib (I := I) (M := M) x σ))
 
-/-- Non-discard guard (vacuity litmus, constructive side): the monomial genuinely uses its
-weight, its permutation, its frame pair, and its argument — its value is the weighted
-leading-pair contraction of the permuted argument. -/
 lemma curvatureRefoldMonomialFib_apply (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) (G : Tensor0SSpace 4 I x) :
     curvatureRefoldMonomialFib (I := I) (M := M) x tw σ p q G =
@@ -225,16 +190,11 @@ lemma curvatureRefoldMonomialFib_toModel (x : M) (tw : ℝ) (σ : Equiv.Perm (Fi
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, leadingPairFeedFib_toModel,
     slotPerm4Fib_toModel, ContinuousMultilinearMap.domDomCongr_apply]
 
-/-- Degenerate-witness litmus: a vanishing weight kills the refold monomial outright. -/
 @[simp] lemma curvatureRefoldMonomialFib_zero_weight (x : M) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) :
     curvatureRefoldMonomialFib (I := I) (M := M) x 0 σ p q = 0 := by
   rw [curvatureRefoldMonomialFib, zero_smul]
 
-/-- The folded four-monomial (second-Bianchi) refold kernel: the antisymmetrized
-covariant-gradient-of-Koszul extraction, after the Ricci-identity fold of its
-derivative-slot-antisymmetric pair, leaves exactly four second-gradient monomials at half
-weight, at slot patterns `σ₁, σ₂` (positive) and `σ₃, σ₄` (negative). -/
 def curvatureRefoldKernelFib (x : M) (tw : ℝ)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (p q : TangentSpace I x) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -244,7 +204,6 @@ def curvatureRefoldKernelFib (x : M) (tw : ℝ)
       - curvatureRefoldMonomialFib (I := I) (M := M) x tw σ₃ p q
       - curvatureRefoldMonomialFib (I := I) (M := M) x tw σ₄ p q)
 
-/-- Degenerate-witness litmus: a vanishing weight kills the four-monomial kernel outright. -/
 @[simp] lemma curvatureRefoldKernelFib_zero_weight (x : M)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (p q : TangentSpace I x) :
     curvatureRefoldKernelFib (I := I) (M := M) x 0 σ₁ σ₂ σ₃ σ₄ p q = 0 := by
@@ -254,13 +213,6 @@ def curvatureRefoldKernelFib (x : M) (tw : ℝ)
   simp
 
 section FrameSum
-
-/-! ### Orthonormal double-trace frame independence
-
-The weighted double frame sum `∑ a, ∑ b, K (B a) (B b) * L (B a) (B b)` of two bilinear
-scalar forms over a `g`-orthonormal frame equals a fixed chart-basis expression, hence is
-independent of the orthonormal frame. This is the fibrewise engine behind the fixed-frame
-patching of the frame-summed refold coefficients below. -/
 
 private def innerPairBilin (x : M) (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X : TangentSpace I x) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -375,9 +327,6 @@ private lemma toModelEvalCLM_apply (s : ℕ) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     toModelEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
 
-/-- Package `(p, q) ↦ (toModel G) (p, q, v…)` — the leading-pair partial evaluation of a
-rank-`(s+2)` fibre tensor at a frozen tail — as a bilinear continuous form on the tangent
-fibre. -/
 private def pairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -405,11 +354,6 @@ private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := G) (v0 := p) (vs := Fin.cons (q : E) v)]
 
-/-! ### Frame-summed refold coefficients -/
-
-/-- The frame-summed weighted refold monomial at a fixed frame family `B`: the weight
-`W(B_a, B_b)` rides the coefficient; the argument receives the frame pair in its two leading
-slots after the slot permutation `σ`. -/
 def curvatureRefoldMonomialFibFixedFrame (W : Π b : M, Tensor0SSpace 2 I b)
     (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
@@ -553,8 +497,6 @@ theorem curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff
   rw [ContinuousLinearMap.sum_apply]
   rfl
 
-/-- The frame-summed weighted refold monomial at the smooth orthonormal frame of `g₁`:
-the moving-metric bi-contraction refold coefficient, fibre level. -/
 def curvatureRefoldMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
@@ -643,9 +585,6 @@ theorem curvatureRefoldMonomialBiContrFib_contMDiff (g₁ : SmoothRiemannianMetr
       (curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd (I := I) (M := M)
         g₁ W σ x₀ hy))
 
-/-- The frame-summed weighted refold monomial as a smooth compactly supported `(4,2)`
-coefficient field: the weight tensor `W` rides the coefficient through its values on the
-`g₁`-orthonormal frame pair, while the argument slot expects a two-step-gradient datum. -/
 def curvatureRefoldMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -672,8 +611,6 @@ set_option linter.unusedSectionVars false in
         TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
           g₁ W σ x)) := rfl
 
-/-- Degenerate-witness litmus at the frame-summed level: where the weight tensor vanishes,
-the refold coefficient vanishes. -/
 lemma curvatureRefoldMonomialBiContrFib_zero_weight (g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4)) {x : M}
     (hx : W x = 0) :
@@ -687,9 +624,6 @@ lemma curvatureRefoldMonomialBiContrFib_zero_weight (g₁ : SmoothRiemannianMetr
       0 from by rw [Tensor0SSpace.toModel_zero]; rfl]
   exact curvatureRefoldMonomialFib_zero_weight (I := I) (M := M) x σ _ _
 
-/-- The folded four-monomial second-Bianchi refold kernel as a smooth compactly supported
-`(4,2)` coefficient field: the half-weighted `σ₁ + σ₂ − σ₃ − σ₄` combination of the
-frame-summed weighted refold monomials. -/
 def curvatureRefoldKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -703,8 +637,7 @@ def curvatureRefoldKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
       - curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₄)
 
 set_option linter.unusedSectionVars false in
-/-- The kernel coefficient field agrees fibrewise with the frame sum of the folded
-four-monomial kernel `curvatureRefoldKernelFib` at the `g₁`-orthonormal frame weights. -/
+
 theorem curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞

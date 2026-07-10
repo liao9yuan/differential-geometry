@@ -110,13 +110,12 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
                 homTensorRSCovGradSec (I := I) (M := M) g r (m + (i + 1)) (c + k) (D (i + 1))
               else 0) +
               slotExtendFullSec (I := I) (M := M) g r (m + i) (c + k) (D i), fun W => ?_⟩
-      -- `∇^{k+1}(Q·W) = ∇(∇^k(Q·W))`, expanded by the order-`k` derived-field expansion.
+
       rw [show iteratedCovGrad g r c (k + 1) (appFullSec (I := I) (M := M) g r m c Q W) =
           covGrad (I := I) (M := M) g r (c + k)
             (iteratedCovGrad g r c k (appFullSec (I := I) (M := M) g r m c Q W)) from rfl,
         hD W, covGrad_finset_sum]
-      -- Termwise full-Hom covariant product rule: each summand contributes the
-      -- differentiated-coefficient action on `∇^i W` plus the slot-extended action on `∇^{i+1} W`.
+
       rw [show (∑ i ∈ Finset.range (k + 1), covGrad (I := I) (M := M) g r (c + k)
             (appFullSec (I := I) (M := M) g r (m + i) (c + k) (D i)
               (iteratedCovGrad g r m i W))) =
@@ -132,7 +131,7 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
             (iteratedCovGrad g r m i W)]
           rfl)]
       rw [Finset.sum_add_distrib]
-      -- Split the target sum off its bottom index `i = 0`.
+
       rw [Finset.sum_range_succ' (fun j =>
         appFullSec (I := I) (M := M) g r (m + j) (c + (k + 1))
           ((match j with
@@ -143,7 +142,7 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
                   else 0) +
                   slotExtendFullSec (I := I) (M := M) g r (m + i) (c + k) (D i)))
           (iteratedCovGrad g r m j W)) (k + 1)]
-      -- Each target `j = i + 1` term splits into the guarded gradient term and the slot term.
+
       rw [show (∑ i ∈ Finset.range (k + 1),
             appFullSec (I := I) (M := M) g r (m + (i + 1)) (c + (k + 1))
               ((if i + 1 < k + 1 then
@@ -164,7 +163,7 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [appFullSec_add_left]]
-      -- The guarded gradient sum drops its vanishing top term `i = k`.
+
       rw [show (∑ i ∈ Finset.range (k + 1),
             appFullSec (I := I) (M := M) g r (m + (i + 1)) (c + (k + 1))
               (if i + 1 < k + 1 then
@@ -179,12 +178,12 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
         rw [if_neg (by omega : ¬ (k + 1 < k + 1)), appFullSec_zero_left, add_zero]
         refine Finset.sum_congr rfl (fun i hi => ?_)
         rw [if_pos (by simp only [Finset.mem_range] at hi; omega : i + 1 < k + 1)]]
-      -- Split the differentiated-coefficient sum off its bottom index as well.
+
       rw [Finset.sum_range_succ' (fun i =>
         appFullSec (I := I) (M := M) g r (m + i) (c + (k + 1))
           (homTensorRSCovGradSec (I := I) (M := M) g r (m + i) (c + k) (D i))
           (iteratedCovGrad g r m i W)) k]
-      -- Both sides are now an arrangement of the same three blocks.
+
       abel
 
 set_option linter.unusedSectionVars false in
@@ -212,10 +211,10 @@ theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetr
             riemannianFiberNormSq (I := I) (M := M) g r (m + i) x
               ((iteratedCovGrad g r m i W).toSection x) := by
   classical
-  -- One derived-field family per gradient order.
+
   choose D hD using fun k =>
     homFieldAction_iteratedCovGrad_expansion (I := I) (M := M) g r m c Q k
-  -- The uniform per-summand contraction constant of each fixed derived field.
+
   set C : ℕ → ℕ → ℝ := fun k i =>
     (exists_uniform_riemannianFiberNormSq_appFullRS_le (I := I) (M := M) g r (m + i) (c + k)
       (fun x : M => D k i x) (D k i).contMDiff).choose with hC_def
@@ -233,26 +232,26 @@ theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetr
   refine ⟨fun k => ((k + 1 : ℕ) : ℝ) * ∑ i ∈ Finset.range (k + 1), C k i,
     fun k => mul_nonneg (Nat.cast_nonneg _) (Finset.sum_nonneg fun i _ => hC_nn k i),
     fun W k x => ?_⟩
-  -- Abbreviate the jet terms.
+
   set a : ℕ → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g r (m + i) x
     ((iteratedCovGrad g r m i W).toSection x) with ha_def
   have ha_nn : ∀ i, 0 ≤ a i := fun i =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + i) x _
-  -- Step 1: expand by the derived-field family and pass `rfns` through the finite sum.
+
   rw [hD k W, SmoothCcTensor.toSection_sum_apply]
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r (c + k) x
     (Finset.range (k + 1))
     (fun i => (appFullSec (I := I) (M := M) g r (m + i) (c + k) (D k i)
       (iteratedCovGrad g r m i W)).toSection x)) ?_
   rw [Finset.card_range]
-  -- Step 2: bound each summand by its uniform fixed-field contraction envelope.
+
   have hsummand : ∀ i ∈ Finset.range (k + 1),
       riemannianFiberNormSq (I := I) (M := M) g r (c + k) x
           ((appFullSec (I := I) (M := M) g r (m + i) (c + k) (D k i)
             (iteratedCovGrad g r m i W)).toSection x) ≤ C k i * a i :=
     fun i _ => hC_bound k i (iteratedCovGrad g r m i W) x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
-  -- Step 3: `∑_i C·a ≤ (∑_i C) · (∑_i a)`, all terms nonnegative.
+
   have hCa_le : (∑ i ∈ Finset.range (k + 1), C k i * a i) ≤
       (∑ i ∈ Finset.range (k + 1), C k i) * ∑ i ∈ Finset.range (k + 1), a i := by
     rw [Finset.sum_mul]
@@ -357,7 +356,7 @@ theorem exists_appFullSec_on_jet_iteratedCovGrad_window_bound (g : SmoothRiemann
   refine ⟨cc, hcc_nn, fun S k x => ?_⟩
   refine (hcc (iteratedCovGrad g r s j S) k x).trans (le_of_eq ?_)
   refine congrArg (fun t => cc k * t) ?_
-  -- Re-index the inner `∇^j S`-jet window `i < k + 1` onto the `S`-jet window `i < 1 + k`.
+
   rw [Nat.add_comm 1 k]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [rfns_iteratedCovGrad_comp (I := I) (M := M) g r s j i S x]

@@ -488,7 +488,6 @@ theorem traceHessianCoeff_realizedFam_jetL2_perOrder_ballUniform
       - ‖iteratedCovGrad (I := I) g₀ 4 2 i (A - B)‖),
     mul_le_mul htri htri hA_nn (add_nonneg hp_nn hq_nn)]
 
-
 set_option linter.unusedVariables false in
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem

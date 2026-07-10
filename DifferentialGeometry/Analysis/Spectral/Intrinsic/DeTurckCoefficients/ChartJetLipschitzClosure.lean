@@ -68,14 +68,14 @@ single constant per order `N`, uniform over `K`. -/
 structure HasChartJetLip
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (K : Set E)
     (F : SmoothRiemannianMetric I M → E → ℝ) (d : ℕ) : Prop where
-  /-- `F g` is `C^∞` on the chart-target interior, for both metrics. -/
+
   contDiff : ∀ g : SmoothRiemannianMetric I M,
     ContDiffOn ℝ ∞ (F g) (interior (extChartAt I α).target)
-  /-- Uniform `Cᴺ` bound on `F g` over `K`, for both metrics and every order. -/
+
   bound : ∀ N : ℕ, ∃ B : ℝ, 0 ≤ B ∧ ∀ y ∈ K, ∀ m : ℕ, m ≤ N →
     ‖iteratedFDerivWithin ℝ m (F g₁) (interior (extChartAt I α).target) y‖ ≤ B ∧
       ‖iteratedFDerivWithin ℝ m (F g₂) (interior (extChartAt I α).target) y‖ ≤ B
-  /-- All-order chart-jet Lipschitz estimate with derivative loss `d`. -/
+
   lip : ∀ N : ℕ, ∃ C : ℝ, 0 < C ∧ ∀ y ∈ K,
     ‖iteratedFDerivWithin ℝ N (fun z => F g₁ z - F g₂ z)
         (interior (extChartAt I α).target) y‖ ≤

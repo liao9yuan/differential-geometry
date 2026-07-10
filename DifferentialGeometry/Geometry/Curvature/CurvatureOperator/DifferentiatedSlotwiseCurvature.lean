@@ -199,8 +199,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
             (fun b => W b) x) := by
   classical
   set covHom := HomConnectionGen.homBundleCovariantDerivativeGen I M E_U U F V cov_U cov_V with hcovHom
-  -- Smoothness packages for the slot-derivatives `∇_X Y`, `∇_X Z` (tangent sections) and the
-  -- `U`-curvature section `b ↦ R^U(Y, Z) W b`, plus the Hom-curvature section `b ↦ R^H(Y, Z) τ b`.
+
   set BXY : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ContMDiffSection.mk (covApply covT (fun b => X b) (fun b => Y b))
       (covApply_contMDiff (cov := covT) X.contMDiff Y.contMDiff) with hBXY
@@ -216,7 +215,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
   set Dτ : Cₛ^∞⟮I; E_U →L[ℝ] F, (fun x : M => U x →L[ℝ] V x)⟯ :=
     ContMDiffSection.mk (covApply covHom (fun b => X b) (fun b => τ b))
       (covApply_contMDiff (cov := covHom) X.contMDiff τ.contMDiff) with hDτ
-  -- Differentiability-at-`x` facts.
+
   have hτat : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U →L[ℝ] F))
       (fun y : M => TotalSpace.mk' (E_U →L[ℝ] F)
         (E := fun z : M => (U z →L[ℝ] V z)) y (τ y)) x :=
@@ -240,8 +239,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
   have hRUW_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E_U))
       (fun y : M => TotalSpace.mk' E_U (E := U) y (RUW y)) x :=
     (RUW.contMDiff x).mdifferentiableAt (by simp)
-  -- The curvature–Leibniz identity (★) `riemannSec_homBundleGen_apply_eq` in additive `(P)` form,
-  -- as a section identity for the paired curvature section of `σ = R^H(Y, Z) τ` against `W`.
+
   have hPsec : (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
         (fun b => riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) b) (fun b => W b)) =
       (fun b => riemannSec cov_V (fun b => Y b) (fun b => Z b)
@@ -254,7 +252,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
     simp only [HomConnectionGen.pairedSection, Pi.sub_apply]
     rw [show RUW b = riemannSec cov_U (fun b => Y b) (fun b => Z b) (fun b => W b) b from rfl]
     rw [hstar]
-  -- Smoothness of the two summand sections of the paired curvature section (for `cov_V`-additivity).
+
   have hsm1 : MDiffAt (T% (fun b => riemannSec cov_V (fun b => Y b) (fun b => Z b)
       (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => W b)) b)) x := by
     have := riemannSec_contMDiff (cov := cov_V) Y.contMDiff Z.contMDiff
@@ -264,8 +262,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
   have hsm2 : MDiffAt (T% (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
       (fun b => τ b) (fun b => RUW b))) x :=
     ((ContMDiff.clm_bundle_apply (b := id) τ.contMDiff RUW.contMDiff) x).mdifferentiableAt (by simp)
-  -- `cov_V`-additivity gives the split of the leading derivative through the additive form of `(★)`:
-  -- `cov_V (R^V_paired) x (X x) = cov_V (σ·W) x (X x) + cov_V (τ·R^U(Y,Z)W) x (X x)`.
+
   have hVadd : cov_V.toFun (fun b => riemannSec cov_V (fun b => Y b) (fun b => Z b)
           (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => W b)) b)
           x (X x) =
@@ -285,11 +282,10 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
       ((ContMDiff.clm_bundle_apply (b := id) hRHτ_smooth W.contMDiff) x).mdifferentiableAt (by simp)
     rw [hsplit, cov_V.isCovariantDerivativeOnUniv.add hsmσW hsm2]
     rfl
-  -- Expand the LHS via `nablaRiemannSec_def` and push the slot input `W x` through the subtraction.
+
   rw [nablaRiemannSec_def]
   simp only [ContinuousLinearMap.sub_apply]
-  -- Leading term `T1`: Hom product rule, `(★)`-split of the paired curvature section, and the Hom
-  -- product rule again on the residual paired section `τ · R^U(Y,Z)W`.
+
   rw [show covHom.toFun
         (fun b => riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) b) x (X x) (W x) =
       cov_V.toFun (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
@@ -311,7 +307,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
       (σ := fun b => τ b) (Y := fun b => RUW b) hτat hRUW_at (X x)
     rw [← hcovHom] at h
     exact h] at hVadd
-  -- Replace the leading `cov_V (σ·W)` term using `hVadd` (the additive `(★)`-split).
+
   rw [show cov_V.toFun (HomConnectionGen.pairedSection (M := M) (U := U) (V := V)
           (fun b => riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) b)
           (fun b => W b)) x (X x) =
@@ -321,9 +317,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
         - ((covHom.toFun (fun b => τ b) x (X x)) (RUW x)
             + τ x (cov_U.toFun (fun b => RUW b) x (X x))) from
     (eq_sub_of_add_eq hVadd.symm)]
-  -- Terms `T2`, `T3`, `T4`: the undifferentiated curvature–Leibniz rule `(★)` on each curvature
-  -- term, with the antisymmetric/derivative slots `∇_X Y`, `∇_X Z` and the derivative section `∇_X τ`
-  -- packaged as smooth sections (`BXY`, `BXZ`, `Dτ`).
+
   rw [show riemannSec covHom (covApply covT (fun b => X b) (fun b => Y b)) (fun b => Z b)
         (fun b => τ b) x (W x) =
       (riemannSec covHom (fun b => BXY b) (fun b => Z b) (fun b => τ b) x) (W x) from rfl,
@@ -336,16 +330,14 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
         (covApply covHom (fun b => X b) (fun b => τ b)) x (W x) =
       (riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => Dτ b) x) (W x) from rfl,
     HomConnectionGen.riemannSec_homBundleGen_apply_eq I M E_U U F V cov_U cov_V Y Z Dτ W x]
-  -- The `T1`-leftover `(R^H(Y,Z)τ x)(∇_X W)`: read `∇_X W = DXW x` and apply `(★)` once more.
+
   rw [show (riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) x)
         (cov_U.toFun (fun b => W b) x (X x)) =
       (riemannSec covHom (fun b => Y b) (fun b => Z b) (fun b => τ b) x) (DXW x) from rfl,
     HomConnectionGen.riemannSec_homBundleGen_apply_eq I M E_U U F V cov_U cov_V Y Z τ DXW x]
-  -- Expand the right-hand side: `nablaRiemannSec` of `cov_V` (on the paired section) and of `cov_U`.
+
   rw [nablaRiemannSec_def, nablaRiemannSec_def, map_sub, map_sub, map_sub]
-  -- The `cov_V`-curvature term `S4` on the inner `∇_X(τ·W)` section: split the inner derivative
-  -- through the product rule `covApply_cov_V_pairedSection_eq`, then the section-additivity of
-  -- `riemannSec` (`riemannSec_add_third`).
+
   rw [show covApply cov_V (fun b => X b)
         (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => W b)) =
       HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => Dτ b) (fun b => W b)
@@ -354,7 +346,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
     rw [← hcovHom] at h
     rw [h]
     rfl]
-  -- Section-additivity of `riemannSec cov_V Y Z (·)` over the two paired summands.
+
   rw [show riemannSec cov_V (fun b => Y b) (fun b => Z b)
         (HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => Dτ b) (fun b => W b)
           + HomConnectionGen.pairedSection (M := M) (U := U) (V := V) (fun b => τ b) (fun b => DXW b))
@@ -379,8 +371,7 @@ lemma nablaRiemannSec_homBundleGen_apply_eq
       ((covApply_contMDiff (cov := cov_V) Y.contMDiff hP1sm x).mdifferentiableAt (by simp))
       ((covApply_contMDiff (cov := cov_V) Y.contMDiff hP2sm x).mdifferentiableAt (by simp))
       ((covApply_contMDiff (cov := cov_V) Y.contMDiff (hP1sm.add_section hP2sm) x).mdifferentiableAt (by simp))]
-  -- Normalize the packaged sections back to their raw `covApply`/curvature forms so the equal atoms
-  -- on both sides match syntactically, then the two pairs of mixed monomials cancel.
+
   simp only [hBXY, hBXZ, hDτ, hDXW, hRUW, ContMDiffSection.coeFn_mk]
   rw [show covApply covHom (fun b => X b) (fun b => τ b) x =
       covHom.toFun (fun b => τ b) x (X x) from rfl]
@@ -525,15 +516,14 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
       nablaRiemannSec (LeviCivita (I := I) g) (homGenS (I := I) (M := M) g s)
         (fun b => X b) (fun b => Y b) (fun b => Z b) (curriedSection I M A) x := by
   classical
-  -- Global smoothness of `A` (`+1` degree, for `covApply`/`riemannSec` smoothness) and pointwise
-  -- differentiability of `A` (and the inner curvature/covApply sections) at base points.
+
   have hA1 : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ((∞ : WithTop ℕ∞) + 1)
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b (A b)) := by
     rw [show (∞ : WithTop ℕ∞) + 1 = ∞ from by simp]; exact hA
   have hAatAll : ∀ b : M, TensorSectionMDiffAt (I := I) (s + 1) A b := fun b =>
     (hA b).mdifferentiableAt (by simp)
-  -- The smooth tensor-curvature section `b ↦ R^{(s+1)}(Y, Z) A b` and its pointwise smoothness.
+
   have hRYZ_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ∞
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b
@@ -545,7 +535,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
       (fun b => riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         (fun b => Y b) (fun b => Z b) A b) x :=
     (hRYZ_smooth x).mdifferentiableAt (by simp)
-  -- `TensorSectionMDiffAt (s+1)` of an inner covariant-derivative section `covApply ∇ P A` at x.
+
   have hcovApply_at : ∀ (P : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       TensorSectionMDiffAt (I := I) (s + 1)
         (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -554,8 +544,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
     have hsm := covApply_contMDiffOn (cov := tensor0SCovariantDerivative I M (s + 1)
       (LeviCivita (I := I) g)) P.contMDiff hA1
     exact (hsm.contMDiffAt (Filter.univ_mem)).mdifferentiableAt (by simp)
-  -- The curried inner sections agree: `curriedSection (covApply ∇ P A) = covApply (homGenS) P
-  -- (curriedSection A)`, the section conjugation at every base point.
+
   have hcurry_covApply : ∀ (P : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       curriedSection I M
           (covApply (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -565,8 +554,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
     funext b
     rw [curriedSection_apply, covApply_apply, covApply_apply,
       tensor0S_curry_tensor0SCov_succ_eq_homGenS (I := I) (M := M) g s A (hAatAll b) (P b)]
-  -- The curried tensor-curvature section agrees: `curriedSection (b ↦ R^{(s+1)}(Y,Z) A b) =
-  -- b ↦ R^{homGenS}(Y,Z) (curriedSection A) b`, the undifferentiated curvature conjugation pointwise.
+
   have hcurry_RYZ :
       curriedSection I M
           (fun b => riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -576,16 +564,14 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
     funext b
     rw [curriedSection_apply,
       tensor0S_curry_riemannSec_tensor0SCov_succ_eq (I := I) (M := M) g s Y Z A hA b]
-  -- Expand both sides into their four Leibniz terms; the curry is a continuous linear equiv.
+
   rw [nablaTensor0SCurv_def, nablaRiemannSec_def]
   rw [map_sub, map_sub, map_sub]
-  -- Leading connection-derivative term: section conjugation, with the curried curvature section
-  -- identified by `hcurry_RYZ`.
+
   rw [tensor0S_curry_tensor0SCov_succ_eq_homGenS (I := I) (M := M) g s
       (fun b => riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         (fun b => Y b) (fun b => Z b) A b) hRYZ_at (X x), hcurry_RYZ]
-  -- Three curvature terms: undifferentiated curvature conjugation (the antisymmetric/derivative
-  -- slots `∇_X Y`, `∇_X Z` packaged as smooth sections; the inner `∇_X A` section by `hcovApply_at`).
+
   rw [show riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         (covApply (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b)) (fun b => Z b) A x =
       riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -621,7 +607,7 @@ lemma tensor0S_curry_nablaTensor0SCurv_succ_eq
       (covApply_contMDiff (cov := tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
         X.contMDiff hA) x,
     hcurry_covApply X]
-  -- The two antisymmetric-slot derivative terms match the bundled-section packaging definitionally.
+
   rfl
 
 /-- **The differentiated leading-slot peel of the tensor curvature (the single inductive slot-algebra
@@ -689,12 +675,12 @@ theorem nablaTensor0SCurv_succ_consEval
       (fun x : M => TangentSpace I x →L[ℝ] Tensor0SSpace s I x)⟯ :=
     ContMDiffSection.mk (curriedSection I M A)
       ((contMDiff_curriedSection_iff_section I M A).mp hA) with hAcurry_def
-  -- Step 1: peel the leading argument of the LHS via the curry-evaluation identity.
+
   rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := nablaTensor0SCurv (I := I) g (s + 1) X Y Z A x) (v0 := u₀) (vs := u')]
-  -- Step 2: conjugate the differentiated tensor curvature into the generic Hom-bundle one.
+
   rw [tensor0S_curry_nablaTensor0SCurv_succ_eq (I := I) g s X Y Z A hA x]
-  -- Step 3: the generic differentiated Hom curvature–Leibniz rule (read at `u₀ = Y₀ x`).
+
   rw [show nablaRiemannSec (LeviCivita (I := I) g) (homGenS (I := I) (M := M) g s)
         (fun b => X b) (fun b => Y b) (fun b => Z b) (curriedSection I M A) x =
       nablaRiemannSec (LeviCivita (I := I) g)
@@ -711,9 +697,9 @@ theorem nablaTensor0SCurv_succ_consEval
     (cov_U := LeviCivita (I := I) g)
     (cov_V := tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
     (covT := LeviCivita (I := I) g) X Y Z Acurry Y₀ x]
-  -- Step 4: distribute `toModel(·)(u')` over the subtraction; identify the two residues.
+
   rw [Tensor0SBundle.Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  -- Second residue: `Acurry x (nablaCurvSec …)` read on `u'` is `A x` on the cons-tuple.
+
   rw [show (Acurry : Π b : M, TangentSpace I b →L[ℝ] Tensor0SSpace s I b) x =
       curriedSection I M A x from rfl, curriedSection_apply,
     show (nablaRiemannSec (LeviCivita (I := I) g) (LeviCivita (I := I) g)
@@ -722,8 +708,7 @@ theorem nablaTensor0SCurv_succ_consEval
       nablaBaseSlotCurv (I := I) g X Y Z x u₀ from rfl,
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := A x) (v0 := nablaBaseSlotCurv (I := I) g X Y Z x u₀) (vs := u')]
-  -- First residue: `pairedSection Acurry Y₀ = b ↦ curriedSection A b (ext u₀ b)` definitionally,
-  -- so the differentiated `homGenS`-curvature of the paired section is `nablaTensor0SCurv g s` of it.
+
   rfl
 
 /-- **The differentiated slot-wise curvature transfer (tuple form).** For smooth tangent fields
@@ -1058,24 +1043,23 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     fun i => smoothOrthoFrame (I := I) g x i with hB_def
   have hBsm : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)) :=
     fun i => smoothOrthoFrame_smooth (I := I) g x i
-  -- Step 1 (value-level): rewrite the diagonal trace `∑_i g((∇_{B_i}R)(B_i,Y)W, U)` as the conjugate
-  -- trace `∑_i g((∇_{B_i}R)(U,W)Y, B_i)` using only the metric antisymmetry and the pair symmetry.
+
   have hconj : ∀ i,
       g.inner x (nablaCurvSec cov (B i) (B i) Y W x) (U x) =
         g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) := by
     intro i
-    -- swap acted slot `W` and pairing `U`: g((∇R)(B_i,Y)W, U) = −g((∇R)(B_i,Y)U, W)
+
     have hsk1 : g.inner x (nablaCurvSec cov (B i) (B i) Y W x) (U x) =
         - g.inner x (nablaCurvSec cov (B i) (B i) Y U x) (W x) := by
       have h := nablaCurvSec_metric_skew45 (I := I) g (X := B i) (Y := B i) (Z := Y) (W := W)
         (U := U) (x := x) (hBsm i) (hBsm i) hY hW hU
       linarith [h]
-    -- pair symmetry: g((∇R)(B_i,Y)U, W) = g((∇R)(U,W)B_i, Y)
+
     have hps : g.inner x (nablaCurvSec cov (B i) (B i) Y U x) (W x) =
         g.inner x (nablaCurvSec cov (B i) U W (B i) x) (Y x) := by
       exact nablaCurvSec_inner_pair_symm (I := I) g (X := B i) (Y := B i) (Z := Y) (W := U)
         (U := W) (hBsm i) (hBsm i) hY hU hW
-    -- swap acted slot `B_i` and pairing `Y`: g((∇R)(U,W)B_i, Y) = −g((∇R)(U,W)Y, B_i)
+
     have hsk2 : g.inner x (nablaCurvSec cov (B i) U W (B i) x) (Y x) =
         - g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) := by
       have h := nablaCurvSec_metric_skew45 (I := I) g (X := B i) (Y := U) (Z := W) (W := B i)
@@ -1083,8 +1067,7 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
       linarith [h]
     rw [hsk1, hps, hsk2]; ring
   rw [Finset.sum_congr rfl (fun i _ => hconj i)]
-  -- Step 2 (the contraction): the conjugate trace `S(U,W,Y) := ∑_i g((∇_{B_i}R)(U,W)Y, B_i)`
-  -- collapses via the paired second Bianchi `(B_i, U, W)` acting on `Y`, paired against `B_i`.
+
   have hbi : ∀ i,
       g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x)
         + g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x)
@@ -1092,7 +1075,7 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     intro i
     exact nablaCurvSec_bianchi_paired (I := I) g (X := B i) (Y := U) (Z := W) (W := Y)
       (U := B i) (x := x) (hBsm i) hU hW hY
-  -- Rearrange each summand: S_i = −(term2_i) − (term3_i).
+
   have hrew : ∀ i,
       g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) =
         - g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x)
@@ -1100,13 +1083,12 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     intro i; linarith [hbi i]
   rw [Finset.sum_congr rfl (fun i _ => hrew i)]
   rw [Finset.sum_sub_distrib, Finset.sum_neg_distrib]
-  -- term3 trace: ∑_i g((∇_W R)(B_i, U) Y, B_i) = ∇_W Ric(U, Y).
+
   have hterm3 : ∑ i : Fin (Module.finrank ℝ E),
       g.inner x (nablaCurvSec cov W (B i) U Y x) (B i x) =
       nablaRicci (I := I) g W U Y x := by
     rw [nablaRicci_eq_frame_trace_nablaCurvSec (I := I) g hW hU hY]
-  -- term2 trace: ∑_i g((∇_U R)(W, B_i) Y, B_i) = −∇_U Ric(Y, W). Reorganize the inner curvature to
-  -- the bridge form by pair symmetry then the first-slot antisymmetry of `∇R`.
+
   have hterm2 : ∑ i : Fin (Module.finrank ℝ E),
       g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
       - nablaRicci (I := I) g U Y W x := by
@@ -1114,12 +1096,12 @@ theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
         g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
           - g.inner x (nablaCurvSec cov U (B i) Y W x) (B i x) := by
       intro i
-      -- pair symmetry: g((∇_U R)(W, B_i) Y, B_i) = g((∇_U R)(Y, B_i) W, B_i)
+
       have hps : g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
           g.inner x (nablaCurvSec cov U Y (B i) W x) (B i x) :=
         nablaCurvSec_inner_pair_symm (I := I) g (X := U) (Y := W) (Z := B i) (W := Y)
           (U := B i) hU hW (hBsm i) hY (hBsm i)
-      -- swap antisymmetric slots: g((∇_U R)(Y, B_i) W, B_i) = −g((∇_U R)(B_i, Y) W, B_i)
+
       rw [hps, nablaCurvSec_swap23 (I := I) g (X := U) (Y := Y) (Z := B i) (W := W) (x := x)
         hY (hBsm i) hW, map_neg, ContinuousLinearMap.neg_apply]
     rw [Finset.sum_congr rfl (fun i _ => hconv i), Finset.sum_neg_distrib,

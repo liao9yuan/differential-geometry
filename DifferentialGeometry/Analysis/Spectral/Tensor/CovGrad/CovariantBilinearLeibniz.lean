@@ -156,26 +156,20 @@ This is the abstraction realized by a metric contraction of a tensor product (`�
 generic and decoupled from any specific nonlinearity so as to be a reusable covariant-calculus
 byproduct. -/
 structure ParallelTensorProduct (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ r₀ s₀ : ℕ) where
-  /-- The section-level bilinear product, at every shifted gradient order `(a, b)`. -/
+
   prod : ∀ {a b : ℕ}, SmoothCcTensor g r₁ (s₁ + a) → SmoothCcTensor g r₂ (s₂ + b) →
     SmoothCcTensor g r₀ (s₀ + a + b)
-  /-- The `g`-Riemannian fibrewise operator norm of the bilinear map. -/
+
   opNorm : ℝ
-  /-- The operator norm is nonnegative. -/
+
   opNorm_nonneg : 0 ≤ opNorm
-  /-- The uniform fibrewise operator bound, in the intrinsic `g`-Riemannian squared fibre norm
-  `riemannianFiberNormSq`: the boundedness of the continuous bilinear map, phrased `g`-natively (no
-  chart trivialisation, no model-fibre operator norm — the latter being chart-Jacobian-unbounded on a
-  multi-chart manifold). -/
+
   rfns_prod_le : ∀ {a b : ℕ} (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b))
     (x : M),
     riemannianFiberNormSq (I := I) (M := M) g r₀ (s₀ + a + b) x ((prod S T).toSection x) ≤
       opNorm * riemannianFiberNormSq (I := I) (M := M) g r₁ (s₁ + a) x (S.toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g r₂ (s₂ + b) x (T.toSection x)
-  /-- The exact single-step covariant Leibniz identity: parallelism of the map makes the derivative
-  of the product split into the two one-sided derivatives with no cross term.  The left summand
-  carries covariant rank `(s₀ + a + 1) + b`, rank-cast to the differentiated rank `(s₀ + a + b) + 1`
-  via `castRankCc`. -/
+
   covGrad_prod : ∀ {a b : ℕ} (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b)),
     covGrad g r₀ (s₀ + a + b) (prod S T) =
       castRankCc g r₀ (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)

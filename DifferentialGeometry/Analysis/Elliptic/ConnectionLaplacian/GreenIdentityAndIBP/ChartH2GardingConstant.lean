@@ -274,7 +274,7 @@ theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
   set nT : ℝ := ‖SmoothCcTensor.toL2 T‖ with hnT_def
   have hnLap_nn : 0 ≤ nLap := norm_nonneg _
   have hnT_nn : 0 ≤ nT := norm_nonneg _
-  -- Rewrite the abstract-`L²` norms appearing in `nLap, nT` as `tensorL2Norm … .toFun`.
+
   have hnLap_eq : nLap =
       tensorL2Norm (I := I) (M := M) g 0 2 (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun := by
     rw [hnLap_def, SmoothCcTensor.norm_toL2,
@@ -282,14 +282,14 @@ theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
         (rawTensorConnLapSmooth (I := I) g 0 2 T)]
   have hnT_eq : nT = tensorL2Norm (I := I) (M := M) g 0 2 T.toFun := by
     rw [hnT_def, SmoothCcTensor.norm_toL2, tensorL2Norm_toFun_eq_norm (I := I) (M := M) g T]
-  -- The three iterated-covGrad `L²` norms in the bridge sum (literals as the bridge produces them).
+
   set nGrad : ℝ := tensorL2Norm (I := I) (M := M) g 0 (2 + 1)
     (iteratedCovGrad g 0 2 1 T).toFun with hnGrad_def
   set nHess : ℝ := tensorL2Norm (I := I) (M := M) g 0 (2 + 1 + 1)
     (iteratedCovGrad g 0 2 2 T).toFun with hnHess_def
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 (2 + 1) _
   have hnHess_nn : 0 ≤ nHess := tensorL2Norm_nonneg (I := I) (M := M) g 0 (2 + 1 + 1) _
-  -- The bridge sum `∑_{j ∈ range 3} ‖∇^j T‖_{L²}` is exactly `nT + nGrad + nHess`.
+
   have hsum_eq :
       (∑ j ∈ Finset.range (2 * 1 + 1),
         tensorL2Norm (I := I) (M := M) g 0 (2 + j)
@@ -300,7 +300,7 @@ theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
     rw [show tensorL2Norm (I := I) (M := M) g 0 (2 + 0) T.toFun = nT from by rw [hnT_eq]]
   have hbridge_T := hbridge T
   rw [hsum_eq] at hbridge_T
-  -- `nGrad`, `nHess` as the geometric `covGrad` chains used by the order-1 / order-2 controls.
+
   have hnGrad_cov : nGrad =
       tensorL2Norm (I := I) (M := M) g 0 3 (covGrad (I := I) (M := M) g 0 2 T).toFun := by
     rw [hnGrad_def, iteratedCovGrad_succ, iteratedCovGrad_zero]
@@ -308,7 +308,7 @@ theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
       tensorL2Norm (I := I) (M := M) g 0 (3 + 1)
         (covGrad (I := I) (M := M) g 0 3 (covGrad (I := I) (M := M) g 0 2 T)).toFun := by
     rw [hnHess_def, iteratedCovGrad_succ, iteratedCovGrad_succ, iteratedCovGrad_zero]
-  -- order-1 control `‖∇T‖² ≤ ‖Δ_∇T‖ · ‖T‖`, and the Young absorption `‖∇T‖ ≤ (nLap + nT)/2`.
+
   have horder1 : nGrad ^ 2 ≤
       tensorL2Norm (I := I) (M := M) g 0 2 (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun *
         tensorL2Norm (I := I) (M := M) g 0 2 T.toFun := by
@@ -320,12 +320,12 @@ theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
     have hgrad_sq : nGrad ^ 2 ≤ ((nLap + nT) / 2) ^ 2 := le_trans horder1' hyoung
     have hhalf_nn : 0 ≤ (nLap + nT) / 2 := by linarith
     exact le_of_sq_le_sq hgrad_sq hhalf_nn
-  -- the order-2 covariant Gårding bound `‖∇²T‖ ≤ Cg · (nLap + nT)`.
+
   have hHess_le : nHess ≤ Cg * (nLap + nT) := by
     have := hHess T
     rw [← hnHess_cov, ← hnLap_eq, ← hnT_eq] at this
     exact this
-  -- assemble: nT + nGrad + nHess ≤ (1 + Cg + 1) · (nLap + nT).
+
   have hsum_le : nT + nGrad + nHess ≤ (1 + Cg + 1) * (nLap + nT) := by
     have hnT_le : nT ≤ 1 * (nLap + nT) := by rw [one_mul]; linarith
     have hgrad_le' : nGrad ≤ 1 * (nLap + nT) := by

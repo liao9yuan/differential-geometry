@@ -761,10 +761,10 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   beta_reduce
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-  -- LHS: read the gradient slot `v 0` of `covGrad (appFullRS Ψ W)`.
+
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) x
     d v]
-  -- Term 1: `appFullRS (homTensorRSCovGradFieldFib Ψ) W` reads the gradient slot `v 0` first.
+
   have hT1val : Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
           (appFullRS (I := I) (M := M) g r a (c + 1)
@@ -784,7 +784,7 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     rw [show (Fin.cons (v 0) (v ∘ Fin.succ) ∘ Fin.succ) = v ∘ Fin.succ from
       funext (fun j => by simp [Fin.cons_succ])]
   rw [hT1val]
-  -- Term 2: `appFullRS (slotExtendFull Ψ) (∇W)` reads the new passenger slot `v 0` first.
+
   have hT2val : Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
           (appFullRS (I := I) (M := M) g r (a + 1) (c + 1)
@@ -809,7 +809,7 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     rw [show (Fin.cons (v 0) (v ∘ Fin.succ) ∘ Fin.succ) = v ∘ Fin.succ from
       funext (fun j => by simp [Fin.cons_succ])]
   rw [hT2val]
-  -- Both sides now read the tail of the directional rule `tensorCovDerivAt_appFullRS_eq` in direction `v 0`.
+
   rw [tensorCovDerivAt_appFullRS_eq (I := I) (M := M) g r a c Ψ hΨ W x (v 0)]
   rw [ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
     homTensorRSCovDirHom]
@@ -1171,7 +1171,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
   classical
   obtain ⟨Qr, hQr⟩ := hp rr
   obtain ⟨Qr1, hQr1⟩ := hp (rr + 1)
-  -- The slot-mismatch coefficient at index k+1: slotExtendFullSec (Qr k) − recast(Qr1 k).
+
   set Tk : (k : ℕ) → HomTensorRSField (E := E) (M := M) r (rr + (k + 1)) (rr + d + (p + 1)) I := fun k =>
     slotExtendFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Qr k) -
       castHomSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
@@ -1185,16 +1185,16 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
           homTensorRSCovGradSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + p) (Qr (k + 1))
           else 0) + Tk k, ?_⟩
   intro W
-  -- LHS recursion: op (p+1) rr W = ∇(op p rr W) − cast(op p (rr+1) (∇W)).
+
   have hrec : op (p + 1) rr W =
       covGrad g r (rr + d + p) (op p rr W) -
         castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
           (op p (rr + 1) (covGrad g r rr W)) := by
     rw [covGrad_op p rr W]; abel
   rw [hrec, hQr W]
-  -- The gradient term, expanded.
+
   rw [covGrad_normalFormFull_sum (I := I) (M := M) g r d p rr Qr W]
-  -- The cast term, expanded.
+
   rw [hQr1 (covGrad g r rr W), castRankCc_db_finset_sum]
   rw [show (∑ k ∈ Finset.range (p + 1),
         castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
@@ -1208,9 +1208,9 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
           (iteratedCovGrad g r rr (k + 1) W) from
     Finset.sum_congr rfl (fun k _ =>
       castRankCc_appFullSec_iteratedCovGrad_covGrad (E := E) (I := I) (M := M) g r d p rr k (Qr1 k) W)]
-  -- Split the gradient sum into its two parts.
+
   rw [Finset.sum_add_distrib]
-  -- Rewrite the target sum.
+
   rw [Finset.sum_range_succ' (fun j =>
     appFullSec (I := I) (M := M) g r (rr + j) (rr + d + (p + 1))
       ((match j with
@@ -1220,7 +1220,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
               homTensorRSCovGradSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + p) (Qr (k + 1))
               else 0) + Tk k))
       (iteratedCovGrad g r rr j W)) (p + 1)]
-  -- Each RHS j=k+1 term splits into the (guarded) gradient term and the slot-mismatch Tk-term.
+
   rw [show (∑ k ∈ Finset.range (p + 1),
         appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           ((if h : k + 1 < p + 1 then
@@ -1239,7 +1239,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [appFullSec_add_left]]
-  -- The Tk-sum splits into the slotExtend sum (S) minus the recast sum (C).
+
   rw [show (∑ k ∈ Finset.range (p + 1),
         appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1)) (Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) =
@@ -1256,7 +1256,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
     rw [← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hTk_def, appFullSec_sub_left]]
-  -- The guarded gradient sum equals ∑_{k<p} G_{k+1} (the k=p term is appFullSec 0 = 0).
+
   rw [show (∑ k ∈ Finset.range (p + 1),
         appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           (if h : k + 1 < p + 1 then
@@ -1271,12 +1271,12 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
     rw [dif_neg (by omega : ¬ (p + 1 < p + 1)), appFullSec_zero_left, add_zero]
     refine Finset.sum_congr rfl (fun k hk => ?_)
     rw [dif_pos (by simp only [Finset.mem_range] at hk; omega : k + 1 < p + 1)]]
-  -- The G-sum (∑_{k<p+1}) splits as G₀ + ∑_{k<p} G_{k+1}.
+
   rw [Finset.sum_range_succ' (fun k =>
     appFullSec (I := I) (M := M) g r (rr + k) (rr + d + (p + 1))
       (homTensorRSCovGradSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Qr k))
       (iteratedCovGrad g r rr k W)) p]
-  -- Both sides are now an arrangement of G₀ + (∑_{k<p} G_{k+1}) + (∑ S) − (∑ C).
+
   abel
 
 set_option linter.unusedSectionVars false in
@@ -1323,7 +1323,7 @@ theorem exists_jet_bound_of_normalFormFull (g : SmoothRiemannianMetric I M) (r d
               ((iteratedCovGrad g r rr q W).toSection x) := by
   classical
   obtain ⟨Q, hQ⟩ := hNF
-  -- Uniform per-summand fibre-operator constant for the fixed full-Hom field section `Q k`.
+
   choose C hC_nn hC using fun k =>
     exists_uniform_riemannianFiberNormSq_appFullRS_le (I := I) (M := M) g r (rr + k) (rr + d + p)
       (fun x : M => Q k x) (Q k).contMDiff
@@ -1333,21 +1333,21 @@ theorem exists_jet_bound_of_normalFormFull (g : SmoothRiemannianMetric I M) (r d
     ((iteratedCovGrad g r rr k W).toSection x) with ha_def
   have ha_nn : ∀ k, 0 ≤ a k := fun k =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (rr + k) x _
-  -- Step 1: rewrite `op p rr W` by the normal form and pass `rfns` through the finite sum.
+
   rw [hQ W, SmoothCcTensor.toSection_sum_apply]
-  -- Step 2: `rfns(∑ ...) ≤ card · ∑ rfns(appFullSec (Q k) (∇^k W))`.
+
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r (rr + d + p) x
     (Finset.range (p + 1))
     (fun k => (appFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k)
       (iteratedCovGrad g r rr k W)).toSection x)) ?_
   rw [Finset.card_range]
-  -- Step 3: each summand `rfns(appFullSec (Q k) (∇^k W))(x) ≤ C k · a k`.
+
   have hsummand : ∀ k ∈ Finset.range (p + 1),
       riemannianFiberNormSq (I := I) (M := M) g r (rr + d + p) x
           ((appFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k)
             (iteratedCovGrad g r rr k W)).toSection x) ≤ C k * a k := fun k _ => hC k _ x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
-  -- Step 4: `∑_k C k · a k ≤ (∑_k C k) · (∑_k a k)` (all nonnegative), giving the claimed bound.
+
   have hCa_le : (∑ k ∈ Finset.range (p + 1), C k * a k) ≤
       (∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k := by
     rw [Finset.sum_mul]

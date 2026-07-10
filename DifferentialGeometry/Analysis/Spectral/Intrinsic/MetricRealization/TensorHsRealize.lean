@@ -173,17 +173,16 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
   letI instTens : Bundle.RiemannianBundle
       (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
-  -- A `g₀(x)`-orthonormal frame `e` of `TₓM`, with Parseval `∑ᵢ g₀(eᵢ,u)² = g₀(u,u)`
-  -- and the expansion `u = ∑ᵢ g₀(eᵢ,u) • eᵢ`.
+
   obtain ⟨n, e, _hn, horth, hpars, hexpand, hrfns⟩ :=
     tangent_frame_expansion (I := I) (M := M) g₀ x
   set B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
     ccTensorBilin (I := I) g₀ T x with hB_def
-  -- The frame components of the bilinear form and the frame coefficients of `v, w`.
+
   set coef : Fin n × Fin n → ℝ :=
     fun p => g₀.inner x (e p.1) v * g₀.inner x (e p.2) w with hcoef_def
   set comp : Fin n × Fin n → ℝ := fun p => B (e p.1) (e p.2) with hcomp_def
-  -- Step 1: the bilinear value expands over the frame.
+
   have hexpV : v = ∑ i : Fin n, g₀.inner x (e i) v • e i := hexpand v
   have hexpW : w = ∑ j : Fin n, g₀.inner x (e j) w • e j := hexpand w
   have hvalue : B v w = ∑ p : Fin n × Fin n, coef p * comp p := by
@@ -217,11 +216,11 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
         (g₀.inner x (e i) v * g₀.inner x (e j) w) • B (e i) (e j))]
     refine Finset.sum_congr rfl (fun p _ => ?_)
     rw [hcoef_def, hcomp_def, smul_eq_mul]
-  -- Step 2: the squared value is bounded by the product of the two sums (discrete CS).
+
   have hCS : (∑ p : Fin n × Fin n, coef p * comp p) ^ 2 ≤
       (∑ p : Fin n × Fin n, coef p ^ 2) * ∑ p : Fin n × Fin n, comp p ^ 2 :=
     Finset.sum_mul_sq_le_sq_mul_sq Finset.univ coef comp
-  -- Step 3a: the coefficient-sum factors as `g₀(v,v) · g₀(w,w)`.
+
   have hcoefsq : (∑ p : Fin n × Fin n, coef p ^ 2) =
       g₀.inner x v v * g₀.inner x w w := by
     rw [Fintype.sum_prod_type (f := fun p : Fin n × Fin n => coef p ^ 2)]
@@ -233,15 +232,12 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
       refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
       rw [hcoef_def]
       ring
-  -- Step 3b: the component-sum is the squared `g₀`-fibre norm of `T.toSection x`.
-  -- The frame component `B (e i) (e j)` equals the bundle frame component
-  -- `fiberNormSqComponent g₀ x 0 2 (T.toSection x) n e () ![i, j]`.
+
   have hcomp_fiber : ∀ (K : Fin 0 → Fin n) (i j : Fin n),
       comp (i, j) = fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
         (T.toSection x) n e K (![i, j] : Fin 2 → Fin n) := by
     intro K i j
-    -- `fiberNormSqComponent` applies the section to the empty-product `(0,0)`-tensor and
-    -- the pair `(e i, e j)`; that empty-product tensor is `constOfIsEmpty 1`.
+
     have hconst : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
           (fun k : Fin 0 => g₀.inner x (e (K k))) :
           Tensor0SBundle.Tensor0SSpace 0 I x) =
@@ -259,21 +255,19 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
           (fun k => g₀.inner x (e (K k)) (u k)) = 1
       rw [ContinuousMultilinearMap.mkPiAlgebra_apply]
       exact Finset.prod_of_isEmpty _
-    -- `comp (i, j) = ccTensorBilin g₀ T x (e i) (e j) = ccTensorModel ![e i, e j]`.
+
     have hcompij : comp (i, j) = ccTensorModel (I := I) g₀ T x ![e i, e j] := by
       rw [hcomp_def, hB_def]
       exact ccTensorBilin_apply (I := I) g₀ T x (e i) (e j)
     rw [hcompij]
-    -- `fiberNormSqComponent` applies the section to the empty-product `(0,0)`-tensor
-    -- (which is `constOfIsEmpty 1` by `hconst`) and the pair `(e i, e j)`.
+
     unfold fiberNormSqComponent
     rw [hconst]
     have htuple : (fun k => e ((![i, j] : Fin 2 → Fin n) k)) =
         (![e i, e j] : Fin 2 → TangentSpace I x) := by
       funext k; fin_cases k <;> rfl
     rw [htuple]
-    -- Both sides are `(T.toSection x unit) ![e i, e j]`: `ccTensorModel` is `toModel` of
-    -- `ccTensorMultilinear = T.toSection x unit`, and `toModel` is `id` on the carrier.
+
     change ccTensorModel (I := I) g₀ T x ![e i, e j] =
       ((T.toSection x
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -286,13 +280,12 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
       ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ ^ 2 := by
     rw [← riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 2 x
       (T.toSection x)]
-    -- `riemannianFiberNormSq` is the diagonal frame double-sum over our frame `e`
-    -- (`tangent_frame_expansion`), each summand the square of `fiberNormSqComponent`.
+
     rw [hrfns (T.toSection x)]
     rw [Fintype.sum_unique (fun K : Fin 0 → Fin n =>
       ∑ J : Fin 2 → Fin n,
         fiberNormSqSummand (I := I) (M := M) g₀ x 0 2 (T.toSection x) n e K J)]
-    -- Reindex `J : Fin 2 → Fin n` by `(J 0, J 1)` via the `finTwoArrowEquiv` equivalence.
+
     refine (Fintype.sum_equiv (finTwoArrowEquiv (Fin n))
       (fun J : Fin 2 → Fin n =>
         fiberNormSqSummand (I := I) (M := M) g₀ x 0 2 (T.toSection x) n e
@@ -304,7 +297,7 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
     simp only [finTwoArrowEquiv_apply, Equiv.toFun_as_coe, piFinTwoEquiv_apply]
     rw [fiberNormSqSummand_eq_component_sq,
       hcomp_fiber (default : Fin 0 → Fin n) (J 0) (J 1), hJ]
-  -- Step 4: assemble.
+
   have hnorm_nn : 0 ≤ ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ := norm_nonneg _
   have hvv_nn : 0 ≤ g₀.inner x v v :=
     DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x v
@@ -321,7 +314,7 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
             rw [hcoefsq, hcompsq]
       _ = ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ ^ 2 *
             (g₀.inner x v v * g₀.inner x w w) := by ring
-  -- Take square roots: `|B v w| ≤ ‖T‖ · √(g₀ v v) · √(g₀ w w)`.
+
   have hrhs_nn : 0 ≤ ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ *
       Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
     mul_nonneg (mul_nonneg hnorm_nn (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)

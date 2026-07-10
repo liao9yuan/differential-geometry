@@ -457,33 +457,32 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ∫ t in (0 : ℝ)..1,
         unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v := by
-  -- Abbreviate the fixed contracted-then-unit-evaluated `(0, r)`-tensor `u = (W x) unit`.
+
   set u : Tensor0SSpace r I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
       (unitTensor (I := I) (M := M) x) with hu
-  -- The model-fibre family `t ↦ (Φ t).toModel x` is interval-integrable (continuous on `[0,1] ⊆ S`).
+
   have hIIm : IntervalIntegrable (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0 1 :=
     ((hcont x).mono hSI).intervalIntegrable
-  -- Reduce both read-offs to the model-operator action at `u` and evaluation at `v`
-  -- (`unitModel (appCc Ψ W) x v = ((Ψ x).toModel (u.toModel)) v`, via `toModel_tensorRS_apply`).
+
   have key : ∀ Ψ : SmoothCcTensor g₀ r s',
       unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' Ψ W) x v =
         ((TensorRSSpace.toModel (Ψ.toSection x)) (Tensor0SSpace.toModel u)) v := by
     intro Ψ
     rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
       toModel_tensorRS_apply (I := I) r s' x (Ψ.toSection x) u]
-  -- Rewrite the integrated coefficient's read-off to the model operator at `u`, evaluated at `v`.
+
   rw [show unitModel (I := I) (M := M) g₀ s'
         (appCc (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ((TensorRSSpace.toModel
             ((pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint).toSection x))
           (Tensor0SSpace.toModel u)) v from key _]
-  -- The integrated coefficient's model fibre is the model interval integral.
+
   rw [pathIntegralCoeffField_toModel]
-  -- Push the model-operator evaluation at `u.toModel` through the interval integral.
+
   rw [ContinuousLinearMap.intervalIntegral_apply hIIm (Tensor0SSpace.toModel u)]
-  -- Push the tuple evaluation at `v` (the `Tensor0SModel s'`-CMM application CLM) through the integral.
+
   have hcontApp : ContinuousOn (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) S :=
     (ContinuousLinearMap.apply ℝ (Tensor0SModel s' ℝ E)
@@ -491,12 +490,12 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
   have hIIapp : IntervalIntegrable (fun t : ℝ =>
       (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) volume 0 1 :=
     (hcontApp.mono hSI).intervalIntegrable
-  -- The RHS integrand is the per-`t` model read-off at `v` (via `key`).
+
   rw [show (fun t : ℝ => unitModel (I := I) (M := M) g₀ s'
           (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v) =
         (fun t : ℝ => ((TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) v) from
     funext (fun t => key (Φ t))]
-  -- Both sides: the CMM evaluation at `v` commutes with the interval integral (apply-CLM commute).
+
   exact (ContinuousLinearMap.intervalIntegral_comp_comm
       (ContinuousMultilinearMap.apply ℝ (fun _ : Fin s' => E) ℝ v) hIIapp).symm
 

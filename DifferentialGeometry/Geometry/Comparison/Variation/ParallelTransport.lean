@@ -306,18 +306,18 @@ source on the closed interval. Bundling these keeps the
 `parallelTransport` section and its specification lemmas readable. -/
 structure ParallelSegmentData [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (a b t₀ : ℝ) : Prop where
-  /-- The interval is nondegenerate. -/
+
   hab : a ≤ b
-  /-- The base time lies in the open interval. -/
+
   ht₀ : t₀ ∈ Set.Ioo a b
-  /-- The chart-curve velocity is continuous on the closed interval. -/
+
   huCont : ContinuousOn (fun t => deriv (chartCurve (I := I) α γ) t) (Set.Icc a b)
-  /-- The chart-curve is continuous on the closed interval. -/
+
   huCurveCont : ContinuousOn (chartCurve (I := I) α γ) (Set.Icc a b)
-  /-- The chart-curve is differentiable on the open interval. -/
+
   huDeriv : ∀ t ∈ Set.Ioo a b,
     HasDerivAt (chartCurve (I := I) α γ) (deriv (chartCurve (I := I) α γ) t) t
-  /-- `γ` stays in the chart source on the closed interval. -/
+
   hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source
 
 /-- **parallel-section-packaging (def).** The parallel transport of

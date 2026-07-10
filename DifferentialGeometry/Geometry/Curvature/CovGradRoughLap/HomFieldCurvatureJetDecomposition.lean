@@ -95,9 +95,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 /-! ## Fibre-level evaluation helpers -/
 
-/-- Extensionality for operator-rank tensor fibres through the model evaluation: two
-`(r,a)`-operator fibres are equal once their model evaluations agree on every covariant
-subject `D` and every tangent tuple `v`. -/
 lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
     {T T' : TensorRSSpace r a I x}
     (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
@@ -118,8 +115,6 @@ private lemma vecTail_cons' {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-/-- The model evaluation of a finite sum of covariant tensor fibres is the finite sum of
-the model evaluations. -/
 lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
@@ -225,11 +220,6 @@ smooth compactly-supported `(r, t)`-tensor `W`, evaluated at a lower input `D` a
 `X, Y`, is the genuine tensorial second covariant derivative `∇²_{X,Y} W (x)` evaluated at
 `(D, m)`.
 
-/-- Second-covariant-gradient evaluation bridge: evaluating the twice-iterated covariant
-gradient of a compactly supported `(r,t)`-tensor field at smooth vector fields `X`, `Y`
-in the two new covariant slots agrees with the tensor second covariant derivative
-`tensorSecondCovDeriv` along `X`, `Y`, pointwise on every covariant subject `D` and
-tangent tuple `m`. -/
 theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (W : SmoothCcTensor g r t)
     {X Y : Π b : M, TangentSpace I b}
@@ -249,12 +239,12 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     (V := fun z : M => Tensor0SSpace r I z) (n := (⊤ : ℕ∞)) x D
   subst hwx
   set GW : SmoothCcTensor g r (t + 1) := covGrad (I := I) (M := M) g r t W with hGW_def
-  -- STEP 1: read the leading slot of `∇(∇W)` as the directional derivative along `X x`.
+
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g r (t + 1) GW x (w x)
     (Fin.cons (X x) (Fin.cons (Y x) m))]
   simp only [Fin.cons_zero]
   rw [vecTail_cons' (X x) (Fin.cons (Y x) m)]
-  -- STEP 2: Hom-connection product rule at valence `t + 1` against the section `w` through `D`.
+
   have happly₁ : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from
       tensorCovDerivAt (I := I) (M := M) g r (t + 1) GW x (X x)) (w x) =
       Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
@@ -266,7 +256,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r (t + 1)
       (LeviCivita (I := I) g) GW.toSection w x (X x)
   rw [happly₁, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  -- STEP 3: smoothness of the contracted `(0, t + 1)`-section and of its curried section.
+
   have hP_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (t + 1) ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel (t + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (t + 1) I z) y
@@ -284,8 +274,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       (fun y : M =>
         (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace (t + 1) I y from
           GW.toSection y) (w y)) x (hP_smooth x)
-  -- STEP 4: expose the `Y x`-slot through the curry, then unfold the slot-`0` Christoffel
-  -- correction of the abstract `(0, t + 1)`-derivative.
+
   rw [show Tensor0SSpace.toModel
       (Tensor0SNabla.tensor0SCovariantDerivative I M (t + 1) (LeviCivita (I := I) g)
         (fun y : M =>
@@ -325,7 +314,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
       (hP_curried.mdifferentiableAt (by simp))
       ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))
   rw [habs, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
-  -- STEP 5: the slot-`Y`-read of the contracted section is `y ↦ (∇_Y W)(y)(w y)`.
+
   have hsec : (fun y : M => Tensor0SNabla.curriedSection I M
       (fun y' : M =>
         (show Tensor0SSpace r I y' →L[ℝ] Tensor0SSpace (t + 1) I y' from
@@ -355,7 +344,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     rw [vecTail_cons' (Y y) m']
     rfl
   rw [hsec]
-  -- STEP 6: Hom-connection product rule at valence `t` over the directional-derivative section.
+
   have happly₂ : Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)
       (fun y : M =>
         (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
@@ -382,7 +371,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
         (LeviCivita (I := I) g) (covApplyCcSec (I := I) (M := M) g r t W hY) w x (X x)
     exact sub_eq_iff_eq_add.mp h.symm
   rw [happly₂, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
-  -- STEP 7: read the `Y x`-slot of the `w`-correction `(∇W)(x)(u₀)`.
+
   have hPb : Tensor0SSpace.toModel
       ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 1) I x from GW.toSection x)
         (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g) w x (X x)))
@@ -400,7 +389,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     simp only [Fin.cons_zero]
     rw [vecTail_cons' (Y x) m]
   rw [hPb]
-  -- STEP 8: read the curried Christoffel correction `curry((∇W)(x)(w x))(∇_X Y (x))`.
+
   have hC₁ : Tensor0SSpace.toModel
       (Tensor0SNabla.curriedSection I M
         (fun y' : M =>
@@ -427,7 +416,7 @@ theorem secondCovGrad_eval_eq_tensorSecondCovDeriv (r t : ℕ)
     simp only [Fin.cons_zero]
     rw [vecTail_cons' ((LeviCivita (I := I) g).toFun Y x (X x)) m]
   rw [hC₁]
-  -- STEP 9: assemble; the `(∇_Y W)(u₀)`-pair cancels, leaving `tensorSecondCovDeriv_def`.
+
   have hSCD : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
       tensorSecondCovDeriv (I := I) g r t X Y (fun y : M => W.toSection y) x) (w x) =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
@@ -844,7 +833,7 @@ private theorem metricDoubleTraceFibFixedFrame_contMDiff (r t : ℕ)
         (∑ i : Fin (Module.finrank ℝ E),
           twoSlotPeel (I := I) (M := M) r t x (Z x) (B i x) (B i x))) := by
     refine ContMDiff.sum_section (s := Finset.univ) (fun i _ => ?_)
-    -- the `i`-th summand `x ↦ twoSlotPeel (Z x) (B i x) (B i x)` is smooth.
+
     have hA : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r (t + 1) ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r (t + 1) ℝ E)
           (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r (t + 1) I z) x
@@ -1099,7 +1088,7 @@ private theorem ricciDefect_eval (g : SmoothRiemannianMetric I M) (r t : ℕ)
   have hYx : Y x = v1 := smoothExtensionTangent_eq (I := I) x v1
   have hXsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X) := smoothExtensionTangent_contMDiff x v0
   have hYsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y) := smoothExtensionTangent_contMDiff x v1
-  -- The fibre value of the difference at `x` is the CLM difference.
+
   have hfib : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
         (iteratedCovGrad g r t 2 W -
           appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
@@ -1114,17 +1103,17 @@ private theorem ricciDefect_eval (g : SmoothRiemannianMetric I M) (r t : ℕ)
     rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
   rw [hfib, ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
-  -- Read the swapped term: `σ₁₂` swaps the two leading slots.
+
   rw [appFullSec_toSection, swapTwoSec_apply,
     swapTwoFib_eval (I := I) (M := M) r t x ((iteratedCovGrad g r t 2 W).toSection x) v0 v1 D m]
-  -- Both terms now read the two leading covariant slots of `∇²W = covGrad (covGrad W)`.
+
   rw [show (iteratedCovGrad g r t 2 W).toSection x =
       (covGrad (I := I) (M := M) g r (t + 1)
         (covGrad (I := I) (M := M) g r t W)).toSection x from rfl]
   rw [show v0 = X x from hXx.symm, show v1 = Y x from hYx.symm]
   rw [secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W hXsm hYsm x D m,
     secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W hYsm hXsm x D m]
-  -- The antisymmetric part is the Riemann curvature operator (Ricci identity).
+
   rw [← ContinuousMultilinearMap.sub_apply, ← Tensor0SSpace.toModel_sub,
     ← ContinuousLinearMap.sub_apply]
   rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
@@ -1320,26 +1309,26 @@ private lemma traceConj_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M
     metricDoubleTraceFib_apply (I := I) (M := M) g r (s + 1) x W]
   rw [ContinuousLinearMap.sum_apply, toModel_sum_eval]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  -- `Tr(s+1)` traces slots `(0,1)` of `W = σ₂₃ (σ₁₂ V)`; tail is the full `(r, s+1)`-tuple.
+
   rw [twoSlotPeel_eval (I := I) (M := M) r (s + 1) x W
     (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) D
     (Fin.cons v0 m)]
-  -- `σ₂₃` (slotExt of `σ₁₂`) reads slot `0` (= `Bᵢ`) as passenger, swaps the next two.
+
   rw [hW_def]
   rw [slotExtendFullFib_apply_eval (I := I) (M := M) g r (s + 2) (s + 2) x
     (swapTwoFib (I := I) (M := M) r s x) (swapTwoFib (I := I) (M := M) r (s + 1) x V) D
     (smoothOrthoFrame (I := I) g x i x)
     (Fin.cons (smoothOrthoFrame (I := I) g x i x) (Fin.cons v0 m))]
-  -- `σ₁₂` on the `(r, s+2)` per-passenger tensor swaps its leading two slots `(Bᵢ, v0) ↦ (v0, Bᵢ)`.
+
   rw [swapTwoFib_eval (I := I) (M := M) r s x
     ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm
       (swapTwoFib (I := I) (M := M) r (s + 1) x V) (smoothOrthoFrame (I := I) g x i x))
     (smoothOrthoFrame (I := I) g x i x) v0 D m]
-  -- the passenger peel reads slot `0` of `σ₁₂ V`.
+
   rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) r (s + 2) x
     (swapTwoFib (I := I) (M := M) r (s + 1) x V) (smoothOrthoFrame (I := I) g x i x) D
     (Fin.cons v0 (Fin.cons (smoothOrthoFrame (I := I) g x i x) m))]
-  -- finally `σ₁₂` on `V` swaps its leading two slots `(Bᵢ, v0) ↦ (v0, Bᵢ)`.
+
   rw [swapTwoFib_eval (I := I) (M := M) r (s + 1) x V
     (smoothOrthoFrame (I := I) g x i x) v0
     D (Fin.cons (smoothOrthoFrame (I := I) g x i x) m)]
@@ -1496,20 +1485,20 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
             (swapTwoSec (I := I) (M := M) (E := E) r s))
           (appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1
             (covGrad (I := I) (M := M) g r s S)) := by
-  -- `T3 := ∇³S`, and `∇²S = ∇(∇S)`.
+
   have hT3 : iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S) =
       covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) := rfl
-  -- the `σ₁₂` bracket at valence `s + 1` is the Ricci defect on `∇S`.
+
   have hR1 := hRA_s1 (covGrad (I := I) (M := M) g r s S)
   rw [hT3] at hR1
-  -- first product rule: `∇(σ₁₂·∇²S) = (∇σ₁₂)·∇²S + σ₂₃·∇³S`.
+
   have hcg1 := covGrad_appFullSec_eq (I := I) (M := M) g r (s + 2) (s + 2)
     (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 S)
-  -- the Ricci defect on `S`: `∇²S − σ₁₂·∇²S = RA_s · S`.
+
   have hR0 := hRA_s S
-  -- second product rule: `∇(RA_s · S) = (∇RA_s)·S + extRA_s·∇S`.
+
   have hcg2 := covGrad_appFullSec_eq (I := I) (M := M) g r s (s + 2) RA_s S
-  -- assemble: `T3 − σ₂₃(σ₁₂ T3) = (T3 − σ₂₃ T3) + σ₂₃(T3 − σ₁₂ T3)`.
+
   have hsplit : ∀ A C : SmoothCcTensor g r (s + 3),
       A - appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
             (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
@@ -1528,7 +1517,7 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
     intro A C hC
     rw [appFullSec_sub_right, ← hC]
     abel
-  -- the `σ₂₃` bracket telescopes through the two product rules and the Ricci defect on `S`.
+
   have hT3sub : covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) -
       appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
         (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
@@ -1543,7 +1532,7 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
           (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
             (swapTwoSec (I := I) (M := M) (E := E) r s))
           (iteratedCovGrad g r s 2 S) := by
-    -- `σ₂₃·∇³S = ∇(σ₁₂·∇²S) − (∇σ₁₂)·∇²S` (product rule, `∇G2 = T3`).
+
     have hσ₂₃T3 : appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
           (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
             (swapTwoSec (I := I) (M := M) (E := E) r s))
@@ -1572,7 +1561,7 @@ private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s
               (swapTwoSec (I := I) (M := M) (E := E) r s)) (iteratedCovGrad g r s 2 S) from by
       rw [covGrad_sub]; abel]
     rw [hR0, hcg2]
-  -- combine through `hsplit` with the `σ₁₂` Ricci defect on `∇S`.
+
   rw [hsplit (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) _ hT3sub]
   rw [hR1]
 
@@ -1614,10 +1603,10 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
           appFullSec (I := I) (M := M) g r (s + 2) (s + 1) P₂
             (iteratedCovGrad g r s 2 S) := by
   classical
-  -- The Ricci-defect fields at valences `s` and `s + 1`.
+
   obtain ⟨RA_s, hRA_s⟩ := exists_ricciDefect_homField (I := I) (M := M) (E := E) g r s
   obtain ⟨RA_s1, hRA_s1⟩ := exists_ricciDefect_homField (I := I) (M := M) (E := E) g r (s + 1)
-  -- The composite fixed Hom fields supplying `P₀`, `P₁`, `P₂`.
+
   obtain ⟨P₀, hP₀⟩ := exists_appFullSec_comp (I := I) (M := M) g r s (s + 3) (s + 1)
     (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
     (homTensorRSCovGradSec (I := I) g r s (s + 2) RA_s)
@@ -1635,7 +1624,7 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
   obtain ⟨PB, hPB⟩ := exists_appFullSec_comp (I := I) (M := M) g r (s + 1) (s + 3) (s + 1)
     Tσ₂₃ RA_s1
   refine ⟨P₀, PA + PB, P₂, fun S => ?_⟩
-  -- STEP 1: trace-conjugation of the slot-extended trace term, then factor `Tr (s+1)`.
+
   rw [show iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S) =
       covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) from rfl]
   rw [appFullSec_slotExtTrace_eq (I := I) (M := M) (E := E) g r s
@@ -1643,9 +1632,9 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
   rw [← appFullSec_sub_right (I := I) (M := M) g r (s + 1 + 2) (s + 1)
     (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
     (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S))]
-  -- STEP 2: the bracket telescopes (Ricci identity + product rules).
+
   rw [headDifferenceDrop_bracket (I := I) (M := M) (E := E) g r s RA_s RA_s1 hRA_s hRA_s1 S]
-  -- STEP 3: distribute `Tr (s+1)` and repackage each composite through the representation theorem.
+
   rw [appFullSec_add_right, appFullSec_add_right, appFullSec_add_right]
   rw [hP₀ S, hP₂ (iteratedCovGrad g r s 2 S), hPA (covGrad (I := I) (M := M) g r s S)]
   rw [hTσ₂₃ (appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1
@@ -1747,19 +1736,18 @@ theorem exists_pointwiseTensorCurvRS_homField_jetDecomposition
       rawTensorConnLapSmooth (I := I) g r (s + 1) (covGrad (I := I) (M := M) g r s S) -
         covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) := rfl
   rw [hdef]
-  -- term 1: the rough Laplacian of `∇S` factors through `Tr (s+1)`.
+
   rw [hfac (s + 1) (covGrad (I := I) (M := M) g r s S)]
-  -- term 2: differentiate the trace factorisation of `Δ_∇ S`.
+
   rw [show covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) =
       covGrad (I := I) (M := M) g r s
         (appFullSec (I := I) (M := M) g r (s + 2) s (Tr s) (iteratedCovGrad g r s 2 S)) from
     congrArg (covGrad (I := I) (M := M) g r s) (hfac s S)]
   rw [covGrad_appFullSec_eq (I := I) (M := M) g r (s + 2) s (Tr s) (iteratedCovGrad g r s 2 S)]
-  -- expand the merged trace-gradient field on `∇²S`.
+
   rw [appFullSec_sub_left (I := I) (M := M) g r (s + 2) (s + 1) P₂
     (homTensorRSCovGradSec (I := I) g r (s + 2) s (Tr s)) (iteratedCovGrad g r s 2 S)]
-  -- isolate the order-`3` head difference `Tr (s+1)·∇³S − slotExt(Tr s)·∇³S`
-  -- (the two towers coincide definitionally), then substitute the commutator identity.
+
   rw [sub_add_eq_sub_sub, sub_right_comm, hhead S]
   abel
 

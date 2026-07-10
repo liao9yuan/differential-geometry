@@ -224,7 +224,7 @@ lemma thirdOrder_commutation_abstract
             + (2 : ℝ) • riemannSec cov B w (covApply cov B V) x)
         + secondOrderChristoffelResidual (I := I) g cov B w V x := by
   classical
-  -- Smoothness of the once- and twice-differentiated sections needed for the additivity split.
+
   have hwBV : ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (covApply cov w (covApply cov B V))) :=
     covApply_covApply_contMDiff (cov := cov) hw hB hV
   have hbr : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (VectorField.mlieBracket I B w)) :=
@@ -234,7 +234,7 @@ lemma thirdOrder_commutation_abstract
     covApply_contMDiff (cov := cov) hbr hV
   have hRsec : ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (fun b : M => riemannSec cov B w V b)) :=
     riemannSec_contMDiff (cov := cov) hB hw hV
-  -- The section-level swap `(SW)`: `∇_B(∇_w V) = ∇_w(∇_B V) + ∇_{[B,w]} V + R(B,w)V`.
+
   have hSW : covApply cov B (covApply cov w V) =
       covApply cov w (covApply cov B V)
         + covApply cov (VectorField.mlieBracket I B w) V
@@ -243,7 +243,7 @@ lemma thirdOrder_commutation_abstract
     have := covApply_outer_swap_eq_riemannSec cov B w V y
     simp only [Pi.add_apply, covApply_apply]
     rw [this]
-  -- Differentiate `(SW)` along `B`, splitting the outer `cov.toFun` over the three-term sum.
+
   have hsplit : cov.toFun (covApply cov B (covApply cov w V)) x (B x) =
       cov.toFun (covApply cov w (covApply cov B V)) x (B x)
         + cov.toFun (covApply cov (VectorField.mlieBracket I B w) V) x (B x)
@@ -261,9 +261,9 @@ lemma thirdOrder_commutation_abstract
     rw [cov.isCovariantDerivativeOnUniv.add h12 h3,
         cov.isCovariantDerivativeOnUniv.add h1 h2]
     simp only [ContinuousLinearMap.add_apply]
-  -- The first split-term: one more pointwise first-order swap, with `T := ∇_B V`.
+
   have hswap2 := covApply_outer_swap_eq_riemannSec cov B w (covApply cov B V) x
-  -- The curvature-section leading term, via `nablaTensorCurvSec_def`.
+
   have hcurv : cov.toFun (fun b : M => riemannSec cov B w V b) x (B x) =
       nablaTensorCurvSec (I := I) g cov B B w V x
         + riemannSec cov (covApply (LeviCivita (I := I) g) B B) w V x
@@ -315,12 +315,12 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
   classical
   set nab := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) with hnab
   set V := unitEvalSection (I := I) (M := M) g s S with hV
-  -- Slot-`0` curry at the unit reads the directional derivative of the Hessian section along `w`.
+
   rw [tensor0S_curry_covGradBundleEquiv_unit_genVal (I := I) (M := M) s x
     ((tensorCov (I := I) g 0 s).toFun
       (fun y : M => tensorSecondCovDeriv (I := I) g 0 s B B
         (fun z : M => S.toSection z) y) x) (w x)]
-  -- Package the Hessian section as a smooth `(0, s)`-section.
+
   have hSsec : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
@@ -354,12 +354,12 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
       hHsmooth with hσ
   have hσapp : ∀ y : M, σ y =
       tensorSecondCovDeriv (I := I) g 0 s B B (fun z : M => S.toSection z) y := fun y => rfl
-  -- Rewrite the inner section to `σ`, then transport the outer `∇_w` through the unit.
+
   rw [show (fun y : M => tensorSecondCovDeriv (I := I) g 0 s B B
         (fun z : M => S.toSection z) y) = (fun y : M => σ y) from
     funext (fun y => (hσapp y).symm)]
   rw [covDeriv_unit_eval_eq_genVal (I := I) (M := M) g s σ x (w x)]
-  -- The unit-evaluated Hessian section is the abstract `(0, s)` Hessian of `V`.
+
   rw [show (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from σ y)
         (unitZeroSec (I := I) (M := M) y)) =
       (fun y : M => nab.toFun (covApply nab B V) y (B y) - nab.toFun V y
@@ -367,7 +367,7 @@ lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
     funext y
     rw [hσapp y]
     exact tensorSecondCovDeriv_unit_eval_genVal (I := I) (M := M) g s S hB y]
-  -- Split the outer `∇_w` over the Hessian's subtraction.
+
   have hVsm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun z : M => Tensor0SSpace s I z) y (V y)) :=
@@ -413,16 +413,16 @@ lemma curry_covApply_unitGradFieldGen_eq_abstractHess
   set nab := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g) with hn
   set U := unitGradFieldGen (I := I) (M := M) g s S with hU
   set V := unitEvalSection (I := I) (M := M) g s S with hV
-  -- `curry (∇_B U)_y (w y) = curry (nab1.toFun U y (B y)) (w y)`.
+
   have hcov : Tensor0SNabla.curriedSection I M (covApply nab1 B U) y (w y) =
       tensor0S_curry (I := I) (M := M) s y (nab1.toFun U y (B y)) (w y) := by
     rw [Tensor0SNabla.curriedSection_apply]; rfl
   rw [hcov]
-  -- Slot-`0` Christoffel exposure of the abstract `(0, s + 1)` derivative along `B`, slot `w`.
+
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s U (Vfield := B) (Y := w) (x := y)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S y).mdifferentiableAt (by simp))
     ((hB y).mdifferentiableAt (by simp)) ((hw y).mdifferentiableAt (by simp))]
-  -- The two pieces read `curry U · = ∇^{abs}_· V`.
+
   rw [curriedSection_unitGradFieldGen_eq_covApply_abstract (I := I) (M := M) g s S w]
   rw [curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S y
     ((LeviCivita (I := I) g).toFun w y (B y))]
@@ -472,7 +472,7 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
             (unitEvalSection (I := I) (M := M) g s S) x
             ((covApply (LeviCivita (I := I) g) (covApply (LeviCivita (I := I) g) B B) w) x) := by
   classical
-  -- Smoothness of the tangent Christoffel field `∇_B w` and the inner gradient field `∇_B U`.
+
   have hCwsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply (LeviCivita (I := I) g) B w)) :=
     covApply_contMDiff (cov := LeviCivita (I := I) g) hB hw
   have hUsm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 1) ℝ E)) ∞
@@ -497,18 +497,18 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
     (Tensor0SNabla.contMDiff_curriedSection_iff_section (I := I) (M := M)
       (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
         (LeviCivita (I := I) g)) B (unitGradFieldGen (I := I) (M := M) g s S))).mp hBUsm
-  -- STEP 1: `Aᵢ(unit) = nab1.toFun (∇_B U) x (B x) − nab1.toFun U x (∇_B B)`.
+
   rw [tensorSecondCovDeriv_covGrad_unit_eval_genVal (I := I) (M := M) g s S hB x]
-  -- STEP 2: curry the slot-`0` direction `w` (linear over the subtraction).
+
   rw [map_sub, ContinuousLinearMap.sub_apply]
-  -- STEP 3a (term `T1`): the leading directional term, via `abstract_succ` (direction `B`, slot `w`).
+
   rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
     (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
       (LeviCivita (I := I) g)) B (unitGradFieldGen (I := I) (M := M) g s S))
     (Vfield := B) (Y := w) (x := x)
     ((hcurBU x).mdifferentiableAt (by simp))
     ((hB x).mdifferentiableAt (by simp)) ((hw x).mdifferentiableAt (by simp))]
-  -- STEP 3b (term `T2`): the Christoffel directional term, via `abstract_succ` (direction `∇_B B`).
+
   rw [show (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
         (unitGradFieldGen (I := I) (M := M) g s S) x
         ((LeviCivita (I := I) g).toFun B x (B x)) =
@@ -521,7 +521,7 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((covApply_contMDiff (cov := LeviCivita (I := I) g) hB hB x).mdifferentiableAt (by simp))
     ((hw x).mdifferentiableAt (by simp))]
-  -- STEP 4: read the `U`-curries: the inner double-curry (`Hessian`) and the unit-section curries.
+
   rw [show (fun y : M => Tensor0SNabla.curriedSection I M
         (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
           (LeviCivita (I := I) g)) B (unitGradFieldGen (I := I) (M := M) g s S)) y (w y)) =
@@ -533,16 +533,16 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
             (unitEvalSection (I := I) (M := M) g s S) y
             ((covApply (LeviCivita (I := I) g) B w) y)) from
     funext (fun y => curry_covApply_unitGradFieldGen_eq_abstractHess (I := I) (M := M) g s S hB hw y)]
-  -- The `T1`-Christoffel `curry (∇_B U)_x (∇_B w)`: same double-curry identity at slot `∇_B w`.
+
   rw [show ((LeviCivita (I := I) g).toFun w x (B x)) = (covApply (LeviCivita (I := I) g) B w x)
     from rfl]
   rw [curry_covApply_unitGradFieldGen_eq_abstractHess (I := I) (M := M) g s S
     (w := covApply (LeviCivita (I := I) g) B w) hB hCwsm x]
-  -- The `T2` `U`-curries: `curry U_· (·) = ∇^{abs}_· V`.
+
   rw [curriedSection_unitGradFieldGen_eq_covApply_abstract (I := I) (M := M) g s S w]
   rw [curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S x
     ((LeviCivita (I := I) g).toFun w x ((covApply (LeviCivita (I := I) g) B B) x))]
-  -- STEP 5: split the outer `∇_B` over the inner Hessian section, then `abel`.
+
   have hVsm : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
         (E := fun z : M => Tensor0SSpace s I z) y (unitEvalSection (I := I) (M := M) g s S y)) :=
@@ -602,7 +602,7 @@ lemma covGrad_covDeriv_leadingSlot_secondOrder_eq_abstract
       (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) h1 h2]
     simp only [ContinuousLinearMap.sub_apply]
   rw [hsplitB]
-  -- Convert the `[Dw]V` term to `covApply`-of-`covApply` form and normalise the scalar `2 •`.
+
   rw [show ((LeviCivita (I := I) g).toFun w x ((covApply (LeviCivita (I := I) g) B B) x)) =
       (covApply (LeviCivita (I := I) g) (covApply (LeviCivita (I := I) g) B B) w x) from rfl]
   simp only [two_smul]

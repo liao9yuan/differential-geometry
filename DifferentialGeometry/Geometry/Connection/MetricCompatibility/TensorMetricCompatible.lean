@@ -689,7 +689,7 @@ lemma tensor0SCovariantDerivative_succ_consEval_peel
   classical
   have hleib := tensor0SCovariantDerivative_curriedSection_hom_leibniz
     (I := I) (M := M) g s W hW Y v
-  -- Peel term 1: tensor0S_curry s x (∇^{(0,s+1)}_v W) (Y x), read on m.
+
   have hterm1 : Tensor0SSpace.toModel
         (tensor0S_curry (I := I) (M := M) s x
           (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g) W x v) (Y x)) m =
@@ -699,7 +699,7 @@ lemma tensor0SCovariantDerivative_succ_consEval_peel
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g) W x v)
       (v0 := Y x) (vs := m)
-  -- Peel term 2: curriedSection W x (∇^{TM}_v Y), read on m.
+
   have hterm2 : Tensor0SSpace.toModel
         (curriedSection I M W x ((LeviCivita (I := I) g).toFun (fun y => Y y) x v)) m =
       Tensor0SSpace.toModel (W x)

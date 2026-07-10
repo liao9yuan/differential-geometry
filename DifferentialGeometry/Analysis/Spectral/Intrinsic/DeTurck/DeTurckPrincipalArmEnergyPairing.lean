@@ -419,49 +419,6 @@ private theorem armPrincipalSlotPairing_eq_neg_inner
     tensorL2Inner_smul_right (I := I) (M := M) g₀ 0 ((2 + n) + 1) (-1 : ℝ) A.toFun B.toFun]
   ring
 
-private theorem oneMinusConnLapIter_arm_add_slotInner_squaredLower
-    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
-    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
-    (htie : ∀ (y : M) (v w : TangentSpace I y),
-      g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
-    ∃ Ccomm : ℝ, 0 ≤ Ccomm ∧
-      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
-        tensorL2Inner (I := I) (M := M) g₀ 0 2
-            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
-            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun +
-          (⟪iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀,
-              appCc (I := I) (M := M) g₀ ((2 + n) + 1) ((2 + n) + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ (2 + n)
-                  (gInvDiffRaisedEndoField (I := I) (M := M) g₀ g₁))
-                (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u₀)⟫_ℝ : ℝ) ≤
-        Ccomm *
-          (∑ j ∈ Finset.range (n + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 :=
-  sorry
-
-private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_squaredLower
-    [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
-    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
-    (htie : ∀ (y : M) (v w : TangentSpace I y),
-      g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ) :
-    ∃ Ccomm : ℝ, 0 ≤ Ccomm ∧
-      ∀ (u₀ : SmoothCcTensor g₀ 0 2),
-        tensorL2Inner (I := I) (M := M) g₀ 0 2
-            (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
-            (deTurckPrincipalCometricArm (I := I) (M := M) g₀ g₁ u₀).toFun -
-          armPrincipalSlotPairing (I := I) (M := M) g₀ g₁ n u₀ ≤
-        Ccomm *
-          (∑ j ∈ Finset.range (n + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) ^ 2 := by
-  obtain ⟨Ccomm, hCcomm_nn, hbound⟩ :=
-    oneMinusConnLapIter_arm_add_slotInner_squaredLower
-      (I := I) (M := M) g₀ g₁ n h htie hδ_lt hδ_nn hδ
-  refine ⟨Ccomm, hCcomm_nn, fun u₀ => ?_⟩
-  rw [armPrincipalSlotPairing_eq_neg_inner (I := I) (M := M) g₀ g₁ n u₀, sub_neg_eq_add]
-  exact hbound u₀
-
 set_option linter.unusedSectionVars false in
 private lemma armResidual_vecTail_cons {α : Type*} {n : ℕ} (a : α) (w : Fin n → α) :
     Matrix.vecTail (Fin.cons a w) = w := by

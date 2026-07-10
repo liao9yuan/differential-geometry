@@ -134,10 +134,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 set_option linter.unusedVariables false in
-/-- Symmetrized smooth forcing time-coordinate field. Symmetric mirror of the proven raw helper
-`deTurckForcing_smoothTimeCoordinateField` (snapshot `c848da47`), assembled from the symmetrized
-a.e. smooth-coordinate jet twin by the same slab-summable carrier-field construction; the carrier
-algebra is nonlinearity-agnostic, so this transits only the `sorry`s of its symmetric children. -/
+
 theorem deTurckForcing_smoothTimeCoordinateFieldSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -198,11 +195,7 @@ theorem deTurckForcing_smoothTimeCoordinateFieldSymm
   rw [ht_eq i, hF_coeff t ht_mem i]
 
 set_option linter.unusedVariables false in
-/-- Symmetrized smooth forcing time-coordinate family with continuous carrier coordinates. Symmetric
-mirror of the proven raw helper `deTurckForcing_smoothTimeCoordinateFamily` (snapshot `c848da47`), a
-nonlinearity-agnostic continuity upgrade of the symmetrized field twin; this is the rung the
-frontier posit `forcingSmoothTimeCoordsSymm` forwards onto, and transits only the `sorry`s of its
-symmetric children. -/
+
 theorem deTurckForcing_smoothTimeCoordinateFamilySymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)

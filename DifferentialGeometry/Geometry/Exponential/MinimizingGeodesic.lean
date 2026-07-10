@@ -208,36 +208,7 @@ lemma gUnitSphere_isCompact (g : SmoothRiemannianMetric I M) (p : M) :
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Compactness of the intrinsic sphere `S_δ`.** For any `δ`, the image of the
-`g`-unit sphere under `w ↦ expMapIntrinsic g hEnorm p (δ • w)` is compact. -/
-theorem intrinsicSphere_isCompact
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p : M) (δ : ℝ) :
-    IsCompact
-      ((fun w : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p (δ • w))
-        '' {w : TangentSpace I p | g.inner p w w = 1}) := by
-  have hexp : Continuous (fun v : TangentSpace I p =>
-      expMapIntrinsic (I := I) g hEnorm p v) :=
-    expMapIntrinsic_continuous (I := I) g hEnorm p
-  have hscale : Continuous (fun w : TangentSpace I p => δ • w) :=
-    continuous_const_smul δ
-  have hcomp : Continuous
-      (fun w : TangentSpace I p => expMapIntrinsic (I := I) g hEnorm p (δ • w)) :=
-    hexp.comp hscale
-  exact (gUnitSphere_isCompact (I := I) g p).image hcomp
 
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- Continuity of `q' ↦ riemannianEDist I q' q` for the manifold topology.
-
-The ambient `[PseudoEMetricSpace M]` need not have the manifold topology, so its
-`edist`-continuity does not transfer; instead we use Mathlib's canonical
-`PseudoEMetricSpace.ofRiemannianMetric I M`, whose `edist` is `riemannianEDist I`
-definitionally and whose topology is the manifold topology by construction. -/
 lemma continuous_riemannianEDist_to
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (q : M) :
@@ -255,64 +226,6 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
 is a `g`-unit vector `u` with `x₀ := expMapIntrinsic g hEnorm p (δ • u)`
 minimising `riemannianEDist · q` over `S_δ`.
 
-Existence of a `g`-unit vector uses the positive dimension of `E`; the minimum is
-the extreme value theorem `IsCompact.exists_isMinOn` on the compact `S_δ`. -/
-theorem exists_min_riemannianEDist_on_intrinsicSphere
-    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
-    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
-    (g : SmoothRiemannianMetric I M)
-    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
-      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (p q : M) (δ : ℝ) :
-    ∃ u : TangentSpace I p, g.inner p u u = 1 ∧
-      ∀ w : TangentSpace I p, g.inner p w w = 1 →
-        riemannianEDist I (expMapIntrinsic (I := I) g hEnorm p (δ • u)) q ≤
-          riemannianEDist I (expMapIntrinsic (I := I) g hEnorm p (δ • w)) q := by
-  classical
-  set f : TangentSpace I p → M :=
-    fun w => expMapIntrinsic (I := I) g hEnorm p (δ • w) with hf_def
-  set sph : Set (TangentSpace I p) := {w : TangentSpace I p | g.inner p w w = 1}
-    with hsph_def
-  have hsph_ne : sph.Nonempty := by
-    have hfin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
-    haveI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
-    obtain ⟨x, hx_ne⟩ : ∃ x : TangentSpace I p, x ≠ 0 :=
-      ⟨(exists_ne (0 : E)).choose, (exists_ne (0 : E)).choose_spec⟩
-    have hc_pos : 0 < g.inner p x x := g.pos p x hx_ne
-    have hc_ne : g.inner p x x ≠ 0 := ne_of_gt hc_pos
-    set s : ℝ := Real.sqrt (g.inner p x x)⁻¹ with hs_def
-    have hs_sq : s * s = (g.inner p x x)⁻¹ := by
-      rw [hs_def]
-      exact Real.mul_self_sqrt (inv_nonneg.mpr hc_pos.le)
-    refine ⟨s • x, ?_⟩
-    change g.inner p (s • x) (s • x) = 1
-    rw [gInner_smul_self (I := I) g p s x]
-    rw [show s ^ 2 = s * s by ring, hs_sq, inv_mul_cancel₀ hc_ne]
-  have hcont : Continuous (fun x : M => riemannianEDist I x q) :=
-    continuous_riemannianEDist_to (I := I) q
-  have hfcont : Continuous f := by
-    have hexp : Continuous (fun v : TangentSpace I p =>
-        expMapIntrinsic (I := I) g hEnorm p v) :=
-      expMapIntrinsic_continuous (I := I) g hEnorm p
-    exact hexp.comp (continuous_const_smul δ)
-  have hcompact : IsCompact sph := gUnitSphere_isCompact (I := I) g p
-  have hcontOn : ContinuousOn (fun w : TangentSpace I p =>
-      riemannianEDist I (f w) q) sph :=
-    (hcont.comp hfcont).continuousOn
-  obtain ⟨u, hu_mem, hu_min⟩ :=
-    hcompact.exists_isMinOn hsph_ne hcontOn
-  refine ⟨u, hu_mem, ?_⟩
-  intro w hw
-  exact hu_min (show w ∈ sph from hw)
-
-attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
-  Tensor0SBundle.tangentSpace_normedSpace in
-/-- The radial ray `t ↦ expMapIntrinsic g hEnorm p (t • u)` is continuous in
-`t`.  By the spray-homogeneity identity `intrinsicGeodesic_smul`,
-`expMapIntrinsic p (t • u) = intrinsicGeodesic p u t`, so the ray is the single
-intrinsic geodesic `intrinsicGeodesic p u`, whose continuity in time is the
-(per-launch-velocity) `intrinsicGeodesic_continuous` — this route avoids the
-in-velocity joint continuity of the exponential map. -/
 theorem radialRay_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

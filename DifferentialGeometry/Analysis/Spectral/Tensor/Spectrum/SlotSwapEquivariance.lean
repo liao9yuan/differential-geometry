@@ -738,10 +738,6 @@ theorem sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 X) i) ^ 2 := by ring
 
-/-- Within a single eigenvalue block (indexed by `Fin` of the eigenspace dimension) the slot-swap
-does not increase the summed square spectral mass: it is an orthonormal endomorphism of the finite
-eigenblock, so Bessel's inequality against the block projection of `X` bounds the swapped
-coefficients by the original ones. -/
 private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
     (μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g 0 2) :
     ∑ k : Fin (Module.finrank ℝ (tensorResolventEigenspace (I := I) (M := M) g 0 2 μ.val)),
@@ -867,9 +863,6 @@ private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
             (SmoothCcTensor.toL2 X) ⟨μ, l⟩) ^ 2 := by
         rw [hF]; exact Finset.sum_map _ _ _
 
-/-- The weighted (`tensorHs`) spectral mass of the symmetrized field `symmS X` does not exceed that
-of `X`: the slot-swap is a weighted isometry per eigenblock, so the block Bessel bound plus the
-`½(a+b)` arithmetic-geometric inequality collapse the symmetrization constant to exactly `1`. -/
 private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
     ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
@@ -992,10 +985,6 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
           (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
             (SmoothCcTensor.toL2 X) i) ^ 2 := by ring
 
-/-- The symmetrization operator `symmS` is a weak contraction on every weighted Sobolev scale
-`smoothCcToTensorHs σ` with constant exactly `1`: `‖smoothCcToTensorHs σ (symmS X)‖ ≤
-‖smoothCcToTensorHs σ X‖`. The slot-swap preserves each eigenvalue block's spectral mass, so
-averaging with the identity can only decrease it. -/
 theorem norm_smoothCcToTensorHs_symmS_le (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (X : SmoothCcTensor g₀ 0 2) :
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ (symmS (I := I) (M := M) g₀ X)‖ ≤

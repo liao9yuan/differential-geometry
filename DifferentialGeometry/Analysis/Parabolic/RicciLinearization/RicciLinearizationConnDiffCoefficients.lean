@@ -2326,7 +2326,6 @@ private theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
   rw [hTA1, hTA2, hTA3, hTB2, hmid]
   ring
 
-
 set_option linter.unusedSectionVars false
 
 lemma toModel_empty_eq_iso {y : M} (T : Tensor0SBundle.Tensor0SSpace 0 I y)
