@@ -28,11 +28,9 @@ generic folded four-monomial kernel calculus of
 `Geometry/Connection/TensorNabla/OperatorFieldSecondGradientRefold` at the realized metric
 family, with the moving tensor's unit value as coefficient weight.
 
-The refold identities and their estimates are posited here as clearly-labelled deferred
-inputs (`sorry`) with consumer-minimal statements: they are the children of the frozen
-Riemann-arm (`RA`) and Lie-correction (`LC`) refold data statements of the DeTurck remainder
-tame-Lipschitz development, per the leader-signed RA/LC fill-architecture dossier. Every
-consumer transitively depends on `sorryAx` until they land.
+The refold identities and their estimates are the children of the Riemann-arm (`RA`) and
+Lie-correction (`LC`) refold data statements of the DeTurck remainder tame-Lipschitz
+development; every one of them is proven sorry-free.
 -/
 
 noncomputable section
@@ -6518,8 +6516,7 @@ is one-jet in the moving tensor, with the metric raisings at the zero jet; tame-
 technique at the `range (i + 2)` window with ball absorption, as in the proven
 `exists_corrArm1Field_realizedFam_jetL2_tameEnvelope` difference template and the
 `DeTurckLie*L2JetBound` per-order towers): the per-order envelope for the background-pair
-difference of the covariant-derivative arm along the realized path. Every consumer
-transitively depends on `sorryAx` until this lands. -/
+difference of the covariant-derivative arm along the realized path. -/
 theorem exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -10641,8 +10638,7 @@ where the chain-supplied symmetry hypothesis `hTsymm` is consumed (the realized 
 transmits only `symmS T`, so on the symmetric sector the arm's two-jet content cancels
 against the pair-trace family exactly and the residual is one-jet). This is the
 general-background statement instantiated at `g_bg := g₀`: the background leg is absent,
-leaving exactly the moving refold core. Every consumer transitively depends on `sorryAx`
-through the residual order-zero-data child until it lands. -/
+leaving exactly the moving refold core. -/
 theorem exists_deTurckLieCovDerivArm_basepointBackground_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -10730,10 +10726,9 @@ smoothness, `riemannianFiberNormSq_add_le`/`_sub_le` for the cap, and
 `iteratedCovGrad_add`/`_sub` for the window), with the added leg's cap and window
 supplied by the proven engines
 `deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform` and
-`exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow`. Consumers transitively
-depend on `sorryAx` through the parent's residual order-zero-data child
-`exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data` until
-that child lands. -/
+`exists_deTurckLieCovDerivArm_backgroundDifference_l2JetWindow`, together with the parent's
+residual order-zero-data child
+`exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data`. -/
 theorem exists_deTurckLieCovDerivArm_refold_identity_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -16481,8 +16476,7 @@ engine in `RicciArmResidualFieldGridWindow`, re-posited here only because the so
 `W = 3`; the `K = 1, W = 3` cell arithmetic (`bdWindowOneThree_le`) collapses that window
 to `1 + b 1 + (b 1)^2` on the `s • T` jet path; and the one-jet cap
 `bdExists_rfnsT_one_jet_cap` (which is `s • T`-monotone via `s ^ 2 ≤ 1`) bounds the
-`k = 1` cell by `(Csob * R) ^ 2`. Every consumer transitively depends on `sorryAx`
-through the seam child until its underlying `private` export lands. -/
+`k = 1` cell by `(Csob * R) ^ 2`. -/
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -16570,8 +16564,7 @@ antisymmetrization). LEG-COUNT: two `g_s`-frame legs at the zero jet; the two-le
 absorbed into `K`. SMALL-LITERALS: ∃K-form, zero numeric caps. SUP-ANCHOR: `∃K` BEFORE
 `∀T ∀i ∀s`, per-order L² window against `1 + ∑_{j < i+2} ‖∇ʲT‖²`; the `k = 0` grid cell
 is anchored by the H3 cap row. Degenerate litmus: at `s = 0` the subject is
-`ricciArmOrder0AACommCoeffField g₀ g₀ = 0`. Every consumer transitively depends on
-`sorryAx` until this lands. -/
+`ricciArmOrder0AACommCoeffField g₀ g₀ = 0`. -/
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -18227,8 +18220,7 @@ keeps its `½` weights — because the fold output equals TWICE the partner-fami
 symmetric sector), under the chain-supplied symmetry hypothesis `hTsymm` (the Galerkin chain's
 `T` is `symmS`-representable at every wired level, so the antisymmetric escape sector is
 vacuous for chain inputs), and an order-zero family carrying joint smoothness, a
-ball-uniform pointwise fibre-norm sup, and the two-step jet window. Every consumer
-transitively depends on `sorryAx` until this lands. -/
+ball-uniform pointwise fibre-norm sup, and the two-step jet window. -/
 theorem exists_riemannPalatini_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -18786,10 +18778,9 @@ which is false without the pairing, and — like that cap — rides the TWO-LEG 
 `δ`-unrestricted one-leg form was refuted by exact-arithmetic witnesses at `n = 2,
 δ = 9/10` and `n = 1, δ = 3/4`, while the sole consumer chain holds `δ ≤ 1/3`). The
 window conjunct assembles by `riemannPalatiniRefoldC2Family_eq_symmS_kernel` from four
-instances of the posited per-monomial window
+instances of the proven per-monomial window
 `exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow` at the paired
-quadruple, so every consumer transitively depends on `sorryAx` until that per-monomial
-share lands. -/
+quadruple. -/
 theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -18937,8 +18928,7 @@ vectors in the coefficient slots measured by the background metric, so the sharp
 `n = 1` (the pure-trace circle witness at `δ = 3/4` attains it); the one-leg denominator
 `δ/(1−δ)` was false for EVERY `δ ∈ (0, 1)` (ratio `1/(1−δ)`; exact arithmetic `36 > 9` at
 `δ = 1/2` and `9/4 > 3/2` at the consumer threshold `δ = 1/3`, so no `δ`-restriction
-short of `δ = 0` repairs it). Every consumer transitively depends on
-`sorryAx` until this lands. -/
+short of `δ = 0` repairs it). -/
 theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19216,8 +19206,7 @@ fold, its sharp rate `3·fC·δ/(1−δ)²` is tight at `n = 1`, and the one-leg
 false for every `δ ∈ (0, 1)`): the refold data package for the covariant-derivative arm of
 the DeTurck Lie coefficient along the realized path. Stated under the chain-supplied
 symmetry hypothesis `hTsymm` (the Galerkin chain's `T` is `symmS`-representable at every
-wired level), threaded to the refold identity core. Every consumer transitively depends on
-`sorryAx` until this lands. -/
+wired level), threaded to the refold identity core. -/
 theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19377,7 +19366,7 @@ raisings at the zero jet; tame-envelope technique at the `range (i + 2)` window 
 absorption, as in the proven `exists_corrArm1Field_realizedFam_jetL2_tameEnvelope`
 difference template and the `DeTurckLie*L2JetBound` per-order towers): the per-order
 envelope for the background-pair difference of the endomorphism arm along the realized
-path. Every consumer transitively depends on `sorryAx` until this lands. -/
+path. -/
 theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -19460,8 +19449,7 @@ one-jet in the moving tensor -- zero second-gradient ledger copies, a pure order
 package; nothing is refolded and nothing two-jet is hidden. Pattern class: background
 uniform fibre-norm bounds and convex-perturbation pointwise `C²` for the sup, parametric
 inverse-Gram joint smoothness, and the tame-envelope technique at the `range (i + 2)`
-window for the one-jet coefficient family. Every consumer transitively depends on
-`sorryAx` until this lands. -/
+window for the one-jet coefficient family. -/
 theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)

@@ -62,10 +62,9 @@ Ricci-linearization coefficient field, generic in a perturbed metric `g₁ = g�
 
 Proven via the four-trace `appCcRS` refold
 `linearizedRicciConnDiffOrder1CoeffField_eq_appCcRS` and the diagonal-product-grid calculus,
-mirroring `ricciArmOrder1KoszulCoeff_perOrder_l2_tameEnvelope_generic`. TRANSIT: the two arm
-envelopes (`ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic` and
-`linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic`) are
-posited `sorry` children; consumers transitively depend on `sorryAx` until they land. -/
+mirroring `ricciArmOrder1KoszulCoeff_perOrder_l2_tameEnvelope_generic`, over the proven arm
+envelopes `ricciCometricFourTraceCastG0_order0sup_perOrder_l2_tameEnvelope_generic` and
+`linearizedRicciConnDiffOrder1KernelField_order0sup_perOrder_l2_tameEnvelope_generic`. -/
 theorem linearizedRicciConnDiffOrder1CoeffField_perOrder_l2_tameEnvelope_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
