@@ -296,34 +296,12 @@ private theorem flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth
     rw [hrw]
     exact hϕ
 
-/-- A time-dependent field `X_DT` that is jointly `C∞` up to AND across `t = 0` on the
-CLOSED slab `Icc 0 T ×ˢ univ` (`hsmooth0`) admits a single forward flow `Φ : ℝ → M → M`
-with `Φ 0 = id`, per-time diffeomorphisms on `(0,T)`, the bare geometric velocity
-`∂ₛ Φ s x = X_DT t (Φ t x)` on `(0,T)`, `t = 0` right-continuity of the orbit `s ↦ Φ s x`,
-`t = 0` right-continuity of the bundle-valued moving spatial Jacobian
-`s ↦ ⟨Φ s x, mfderiv I I (Φ s) x v⟩`, the joint orbit continuity up to `0` on `Ico 0 T ×ˢ univ`,
-and the joint chart-basis pushforward bundle-section continuity up to `0`.  The single closed-slab
-smoothness `hsmooth0` subsumes the former interior-`C∞` + `C⁰`-to-`0` + `C¹`-chart-gradient-to-`0`
-trio.
-
-The whole theorem is proven sorry-free.  The flow `Φ` (and its reverse `Ψ`) is CONSTRUCTED by
-smoothly extending the field across `t = 0` (`seeley_time_extend`) and running the closed-manifold
-full-interval flow-with-reverse engine (`global_flow_full_interval_with_reverse_on_closed_manifold`),
-which delivers `Φ` jointly `C∞` on an *open* slab `Ioo lo hi ×ˢ univ` with `lo < 0 < T < hi`:
-
-* `Φ 0 = id`, the bare geometric velocity on `(0,T)`, and the orbit right-continuity at `0` are
-  read off from the engine's output;
-* the per-time diffeomorphism witnesses on `(0,T)` are assembled by
-  `time_dependent_vf_diffeomorph_slice_of_smooth_bijective` from the per-slice smoothness of `Φ t`
-  and `Ψ t` together with the two engine mutual-inverse identities;
-* the bundle-valued moving-Jacobian right-continuity is
-  `flow_mfderiv_continuousWithinAt_zero_of_jointSmooth` (the bundled tangent map of the joint flow);
-* the joint orbit continuity up to `0` is the restriction of the engine's open-slab joint smoothness
-  to `Ico 0 T ⊆ Ioo lo hi`;
-* the joint chart-basis pushforward bundle-section continuity is
-  `flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth` (the open-slab joint smoothness of the
-  pushforward of the smooth chart frame), restricted to `Ico 0 T`. -/
-theorem forward_flow_existence_onesided_of_jointsmooth_field
+/-- Forward-flow existence for a time-dependent vector field that is jointly `C^∞` on
+`Set.Icc 0 T ×ˢ Set.univ`, additionally exporting the joint `(t, x)`-smoothness of the flow
+itself on `Set.Ioo lo hi ×ˢ Set.univ` for an open time interval with `lo < 0` and `T < hi`:
+the flow of the Seeley time-extension of the field is jointly smooth on an open neighborhood
+of the closed time interval and restricts to the one-sided flow of the original field. -/
+theorem forward_flow_existence_smooth_neighborhood_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
@@ -342,7 +320,10 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
           (TotalSpace.mk' E (Φ p.1 p.2)
             (mfderiv I I (fun y : M => Φ p.1 y) p.2
               (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
-          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∃ lo hi : ℝ, lo < 0 ∧ T < hi ∧
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.1 q.2)
+          (Set.Ioo lo hi ×ˢ Set.univ)) := by
   obtain ⟨Xext, hXsm, hXeq⟩ := seeley_time_extend X_DT T hT hsmooth0
   obtain ⟨Φ, Ψ, lo, hi, hlo, hhi, hΦ0, hΦsm, hΦvel, hΨsm, hΨΦ, hΦΨ⟩ :=
     global_flow_full_interval_with_reverse_on_closed_manifold Xext hXsm T hT
@@ -375,9 +356,8 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
         (Set.Ioo lo hi ×ˢ (Set.univ : Set M)) := fun y _ => ⟨ht, Set.mem_univ _⟩
     have hcomp := hxsm.comp x hpair.contMDiffWithinAt hmaps
     simpa using hcomp.contMDiffAt Filter.univ_mem
-  refine ⟨Φ, hΦ0, ?_, hvel_eq, ?_, ?_, ?_, ?_⟩
-  · -- C2: per-time diffeomorphisms on `(0,T)`.
-    intro t ht
+  refine ⟨Φ, hΦ0, ?_, hvel_eq, ?_, ?_, ?_, ?_, ⟨lo, hi, hlo, hhi, hΦsm⟩⟩
+  · intro t ht
     have ht0 : 0 < t := ht.1
     have htHi : t < hi := lt_trans ht.2 hhi
     have htIco : t ∈ Set.Ico (0 : ℝ) hi := ⟨ht0.le, htHi⟩
@@ -417,5 +397,29 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
       exact flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth Φ hΦsm x₀ i 0 p.1 hp.1 p.2 hp.2
     have hcontOn := hsecOn.continuousOn
     exact hcontOn.mono (Set.prod_mono hIcoSub (subset_refl _))
+
+theorem forward_flow_existence_onesided_of_jointsmooth_field
+    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hsmooth0 : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+    ∃ Φ : ℝ → M → M, (∀ x : M, Φ 0 x = x) ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x) ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
+        (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) ∧
+      (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0) ∧
+      (∀ (x : M) (v : TangentSpace I x),
+        ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
+          (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
+      (ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i : Fin (Module.finrank ℝ E)),
+        ContinuousOn (fun p : ℝ × M =>
+          (TotalSpace.mk' E (Φ p.1 p.2)
+            (mfderiv I I (fun y : M => Φ p.1 y) p.2
+              (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
+  obtain ⟨Φ, hΦ0, hdiffeo, hode, hcont0, hbundle0, horbit, hsection, -⟩ :=
+    forward_flow_existence_smooth_neighborhood_of_jointsmooth_field (I := I) X_DT T hT hsmooth0
+  exact ⟨Φ, hΦ0, hdiffeo, hode, hcont0, hbundle0, horbit, hsection⟩
 
 end DifferentialGeometry.PDE.RicciFlow
