@@ -243,7 +243,6 @@ theorem green_first_with_boundary_face_sum_eq_zero_of_interior_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
-    (hf_int : tsupport f ⊆ I.interior M)
     (hh_int : tsupport h ⊆ I.interior M) :
     boundaryFaceSum (I := I) g
         (smoothSmul (I := I) f hf

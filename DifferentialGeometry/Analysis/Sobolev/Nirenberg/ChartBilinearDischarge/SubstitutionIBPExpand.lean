@@ -230,14 +230,10 @@ theorem variational_identity_v_h_expanded
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    {K_0 : Set EuclN}
+    {η : EuclN → ℝ}
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
-      chartTargetEuclid (I := I) (M := M) α)
+    {R₀ : ℝ} {h : ℝ}
     (weak_partial_v_h : Fin (Module.finrank ℝ E) → EuclN → ℝ)
     (h_var_id_at_v_h :
       (∫ y in Metric.cthickening |h| K_0,
@@ -267,26 +263,7 @@ theorem variational_identity_v_h_expanded
               (d := Module.finrank ℝ E) k h (D.weak_partial j) z +
             2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
               DifferentialGeometry.Analysis.Sobolev.diffQuot
-                (d := Module.finrank ℝ E) k h D.u_chart z) y)
-    (h_principal_integrable : ∀ i j : Fin (Module.finrank ℝ E),
-      Integrable (fun y =>
-        weightedInvGramOnEuclid (I := I) g α i j y *
-          D.weak_partial i y *
-          weak_partial_v_h j y)
-        ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0)))
-    (h_principal_integrable_subst : ∀ i j : Fin (Module.finrank ℝ E),
-      Integrable (fun y =>
-        weightedInvGramOnEuclid (I := I) g α i j y *
-          D.weak_partial i y *
-          DifferentialGeometry.Analysis.Sobolev.diffQuot
-            (d := Module.finrank ℝ E) k (-h)
-            (fun z => (η z) ^ 2 *
-              DifferentialGeometry.Analysis.Sobolev.diffQuot
-                (d := Module.finrank ℝ E) k h (D.weak_partial j) z +
-              2 * η z * (fderiv ℝ η z) (EuclideanSpace.single j 1) *
-                DifferentialGeometry.Analysis.Sobolev.diffQuot
-                  (d := Module.finrank ℝ E) k h D.u_chart z) y)
-        ((volume : Measure EuclN).restrict (Metric.cthickening |h| K_0))) :
+                (d := Module.finrank ℝ E) k h D.u_chart z) y) :
     (∫ y in Metric.cthickening |h| K_0,
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),

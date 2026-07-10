@@ -72,7 +72,6 @@ theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
 
 set_option linter.unusedVariables false in
 theorem flat_raw_variational_identity
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

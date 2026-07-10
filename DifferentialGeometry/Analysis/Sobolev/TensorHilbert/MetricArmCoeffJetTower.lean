@@ -1504,8 +1504,7 @@ theorem riemannianFiberNormSq_armSlotFib_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) (B : ℝ)
     (hArm : ∀ a b : TangentSpace I x, g₀.inner x a a = 1 → g₀.inner x b b = 1 →
-      g₀.inner x (Arm a b) (Arm a b) ≤ B)
-    (hB : 0 ≤ B) :
+      g₀.inner x (Arm a b) (Arm a b) ≤ B) :
     riemannianFiberNormSq (I := I) (M := M) g₀ (s + 1) (s + 1 + 1) x
         (show TensorRSSpace (s + 1) (s + 1 + 1) I x from
           TensorRSSpace.ofCLM (armSlotFib (I := I) (M := M) s x Arm)) ≤

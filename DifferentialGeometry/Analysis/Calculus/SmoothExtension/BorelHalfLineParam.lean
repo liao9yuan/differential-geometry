@@ -589,7 +589,7 @@ private theorem exists_contDiff_tsupport_subset_eventuallyEq_one
 set_option linter.unusedVariables false in
 
 theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
-    (g : ℝ → E → F) (K : Set E) (hK : IsCompact K) (z₀ : E) (hz₀ : z₀ ∈ interior K)
+    (g : ℝ → E → F) (K : Set E) (z₀ : E) (hz₀ : z₀ ∈ interior K)
     (hg : ContDiffOn ℝ ∞ (Function.uncurry g) ((Set.Ici (0:ℝ)) ×ˢ K)) :
     ∃ gext : ℝ → E → F, ∃ V ∈ nhds z₀,
       ContDiffOn ℝ ∞ (Function.uncurry gext) ((Set.univ : Set ℝ) ×ˢ V) ∧

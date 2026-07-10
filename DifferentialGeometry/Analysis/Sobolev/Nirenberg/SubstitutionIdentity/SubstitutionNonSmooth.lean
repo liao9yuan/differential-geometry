@@ -357,17 +357,14 @@ theorem principal_term_ge_lambda_norm_sq_nonsmooth
 set_option linter.unusedVariables false in
 
 theorem nirenberg_master_inequality_nonsmooth
-    {Ω : Set EuclN} (hΩ : IsOpen Ω) (B : SmoothEllipticBilinearForm d Ω)
+    {Ω : Set EuclN} (B : SmoothEllipticBilinearForm d Ω)
     {u f : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
-    (hf_l2 : MemLp f 2 (volume : Measure EuclN))
     (hf_l2_loc : ∀ {Ω' : Set EuclN}, IsCompact (closure Ω') →
       MemLp f 2 (volume.restrict Ω'))
     {g : Fin d → EuclN → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure EuclN))
     (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
-    (h_weak : DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.IsWeakSolution
-      (Ω := Ω) (B := B) u f)
     {η : EuclN → ℝ} (hη : ContDiff ℝ ⊤ η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : EuclN, ‖fderiv ℝ η x‖ ≤ N)

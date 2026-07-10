@@ -126,11 +126,8 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
 set_option linter.unusedVariables false in
 
 theorem parallel_picard_lindelof_data
-    (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
-    (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
-    (hu : ContinuousOn uPrime (Set.Icc a b))
-    (hγ : ContinuousOn (chartCurve (I := I) α γ) (Set.Icc a b))
-    (hsource : ∀ t ∈ Set.Icc a b, γ t ∈ (chartAt H α).source) :
+    (α : M) (γ : ℝ → M)
+    (uPrime : ℝ → E) {a b : ℝ} :
     True := trivial
 
 set_option linter.style.show false in

@@ -585,8 +585,7 @@ set_option linter.unusedVariables false in
 
 theorem inner_grad_g_with_boundary_symm
     (g : SmoothRiemannianMetric I M)
-    {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
-    (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h) (x : M) :
+    {f h : M → ℝ} (x : M) :
     g.inner x (grad_g_with_boundary (I := I) g f x)
         (grad_g_with_boundary (I := I) g h x) =
       g.inner x (grad_g_with_boundary (I := I) g h x)

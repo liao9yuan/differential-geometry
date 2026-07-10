@@ -254,14 +254,11 @@ theorem chartBilinear_substitution_identity_holds_composite
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
+    {K_0 : Set EuclN}
+    {η : EuclN → ℝ}
     (hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
-      chartTargetEuclid (I := I) (M := M) α)
+    {R₀ : ℝ} {h : ℝ}
     (h_substitution_identity_holds :
       h ≠ 0 → K_0 ≠ ∅ →
       chartBilinear_LHS (I := I) (M := M) D K_0 η k h =

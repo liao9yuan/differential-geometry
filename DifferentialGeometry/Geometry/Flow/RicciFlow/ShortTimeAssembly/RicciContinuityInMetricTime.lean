@@ -1179,8 +1179,6 @@ theorem ricci_gfam_continuous_on
 set_option linter.unusedVariables false in
 theorem ricci_continuous_in_metric_time
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (x : M) (v w : TangentSpace I x)
-    (hval : ∀ y : M, ∀ p q : TangentSpace I y,
-      ContinuousOn (fun s : ℝ => (g_DT s).inner y p q) (Set.Icc 0 T))
     (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →
       ∀ i j : Fin (Module.finrank ℝ E), ∀ k : ℕ, k ≤ 2 →
         ContinuousOn

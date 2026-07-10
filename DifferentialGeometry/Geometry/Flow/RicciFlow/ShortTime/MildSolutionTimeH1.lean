@@ -40,7 +40,6 @@ variable
 
 theorem deturck_mildsolution_timeh1
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E < 2 * (a - 2))
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
       tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
