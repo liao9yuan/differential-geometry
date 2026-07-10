@@ -596,8 +596,7 @@ on a positive horizon `d₂ ≤ T` the Duhamel forcing `gforce` of the `deTurckS
 maximal-regularity solution is realized a.e. by a continuous-coordinate carrier family `F` whose
 per-mode coordinates coincide with globally smooth functions `f i` carrying all-order weighted
 spectral mass bounds. A direct forward of the symmetrized `ForcingTimeBootstrap` rung
-`deTurckForcing_smoothTimeCoordinateFamilySymm`; consumers transitively depend on the `sorry`s of
-that symmetrized Galerkin forcing time-coordinate chain until they land. -/
+`deTurckForcing_smoothTimeCoordinateFamilySymm`. -/
 private theorem forcingSmoothTimeCoordsSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
@@ -630,7 +629,7 @@ private theorem forcingSmoothTimeCoordsSymm
     hTT₀ gforce hforce hgforce
 
 set_option linter.unusedVariables false in
-/-- **Posited deferred input (`sorry`).** Smooth per-mode forcing coordinates for the
+/-- Smooth per-mode forcing coordinates for the
 symmetrized DeTurck fixed-point forcing: on a positive horizon `d₂ ≤ T` the Duhamel forcing
 `gforce` of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution is realized a.e.
 per mode by globally smooth functions `f i` carrying all-order weighted spectral mass bounds,
@@ -704,7 +703,7 @@ private theorem forcingSmoothCoordsRealizeSymm
   rw [Set.IccExtend_of_mem hd₂_pos.le _ hs, hF_coeff s hs i]
 
 set_option linter.unusedVariables false in
-/-- **Posited deferred input (`sorry`).** Smallness horizon for the symmetrized solution
+/-- Smallness horizon for the symmetrized solution
 field: for any prescribed radius `0 < R₀` there is a positive horizon `d₂ ≤ T` on which every
 smooth representative of the `deTurckSobolevNHa2Symm`-driven maximal-regularity solution has
 `H^{a+2}` norm at most `R₀`. Symmetric mirror of the raw helper
@@ -766,7 +765,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS) in
 set_option linter.unusedVariables false in
-/-- **Posited deferred input (`sorry`).** Realization of the smooth forcing coordinates by the
+/-- Realization of the smooth forcing coordinates by the
 symmS-precomposed smooth remainder: on the smallness horizon, for any pinned smooth
 representative family `F` of the `deTurckSobolevNHa2Symm`-driven solution staying in the
 `deTurckSobolevNHa2_exists_of_super` ball, the smooth per-mode forcing coordinate `f i t`

@@ -10632,7 +10632,7 @@ the order-zero coefficient is the arm minus the pair-trace form of the family
 argument/weight exchange reindexing of the six refold monomials
 (`bdMonoRefold_appCc_eq_pairTrace_appCc`), valid for every moving tensor; the joint
 smoothness, ball-uniform pointwise fibre-norm sup, and two-step jet window of the residual
-are the posited order-zero data
+are the proven order-zero data
 `exists_deTurckLieCovDerivArm_basepointBackground_pairTraceResidual_order0_data`, which is
 where the chain-supplied symmetry hypothesis `hTsymm` is consumed (the realized path
 transmits only `symmS T`, so on the symmetric sector the arm's two-jet content cancels
@@ -16461,7 +16461,7 @@ set_option linter.unusedVariables false in
 `Q_true`, weightless): the ball-uniform pointwise fibre-norm-square cap for the
 antisymmetrized `A ⋆ A` commutator coefficient field along the realized path. The retired
 `arm0AAField` cap is NOT reusable here (term-1-only, wrong frame metric, no
-antisymmetrization), so this cap is posited fresh in the erratum-#2 shape. LEG-COUNT: the
+antisymmetrization), so this cap is stated fresh in the erratum-#2 shape. LEG-COUNT: the
 quadratic bi-contraction is one-jet in each connection-difference leg; the `g_s`-frames
 and the `g_s`-inner are zero-jet algebraic legs; all rates (`1/(1−δ₀)` class) live inside
 the `∃Λ` constant — no naked denominators. SMALL-LITERALS: ∃Λ-form, zero numeric caps.
@@ -16471,7 +16471,7 @@ the `W^{a+2,2} ↪ C⁰` class exactly as in the committed siblings. Degenerate 
 (`ricciArmOrder0AACommCoeffField_self`), so the cap is trivially satisfied there. Filled
 as glue over the private raw-field grid-window seam child
 `exists_rfns_icg_ricciArmOrder0AACommCoeffField_window` (mirror of the proven raw-field
-engine in `RicciArmResidualFieldGridWindow`, re-posited here only because the source is
+engine in `RicciArmResidualFieldGridWindow`, re-proven here only because the source is
 `private`): the seam gives the pointwise `boundedFactorGridWindow` cap at `K = 1`,
 `W = 3`; the `K = 1, W = 3` cell arithmetic (`bdWindowOneThree_le`) collapses that window
 to `1 + b 1 + (b 1)^2` on the `s • T` jet path; and the one-jet cap

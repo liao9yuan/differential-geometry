@@ -1128,7 +1128,7 @@ content is Palatini-split onto the `RicciThreeArmCorrectionFieldBound` families 
 
 Proven from the `ccInputSymm` slot-swap calculus: the remainder is the halved
 swap-antisymmetrization `(1/2) • (comb − comb ∘ swap)`, bounded by the triangle inequality
-through per-order window-`i + 3` grid bounds for the combination itself — the posited
+through per-order window-`i + 3` grid bounds for the combination itself — the proven
 order-zero coefficient grid child
 `rfns_iteratedCovGrad_linearizedRicciConnDiffOrder0CoeffField_diagonalProductGrid_le`, the
 proven moving-Rm background-difference grid bound, and compactness jet sups for the fixed
