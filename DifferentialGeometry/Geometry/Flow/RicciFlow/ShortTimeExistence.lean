@@ -195,4 +195,6 @@ theorem ricci_flow_short_time_existence
       · exact h_interior t ⟨h0, ht.2⟩ x v w
   exact h_construct
 
+#print axioms ricci_flow_short_time_existence
+
 end DifferentialGeometry.PDE.RicciFlow
