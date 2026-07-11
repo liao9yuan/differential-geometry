@@ -4,6 +4,10 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrec
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrection.ChristoffelBound
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartPartialUniformBoundElementaryScalarBounds
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartPartialUniformBoundChartPushedRegularity
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartPartialUniformBoundLeibnizTermFactorization
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.CutoffChartPartialUniformBoundPrincipalCovariantComponentBound
 
 noncomputable section
 
@@ -41,57 +45,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-private lemma eLpNorm_add_add_sub_le
-    {β : Type*} [MeasurableSpace β] {ν : Measure β} {a b c : β → ℝ}
-    (ha : AEStronglyMeasurable a ν) (hb : AEStronglyMeasurable b ν)
-    (hc : AEStronglyMeasurable c ν) :
-    eLpNorm (fun y => a y + b y - c y) 2 ν ≤
-      eLpNorm a 2 ν + eLpNorm b 2 ν + eLpNorm c 2 ν := by
-  have h_ab : eLpNorm (fun y => a y + b y) 2 ν ≤
-      eLpNorm a 2 ν + eLpNorm b 2 ν :=
-    eLpNorm_add_le ha hb (by norm_num)
-  have h_full : eLpNorm (fun y => (a y + b y) - c y) 2 ν ≤
-      eLpNorm (fun y => a y + b y) 2 ν + eLpNorm c 2 ν :=
-    eLpNorm_sub_le (ha.add hb) hc (by norm_num)
-  exact h_full.trans (by gcongr)
-
-private lemma abs_prod_kronecker_le_one'
-    {ι : Type*} (t : Finset ι) (f : ι → Prop) [DecidablePred f] :
-    |∏ i ∈ t, (if f i then (1 : ℝ) else 0)| ≤ 1 := by
-  classical
-  induction t using Finset.induction with
-  | empty => simp
-  | insert i t hi ih =>
-      rw [Finset.prod_insert hi, abs_mul]
-      by_cases hf : f i
-      · rw [if_pos hf, abs_one, one_mul]; exact ih
-      · rw [if_neg hf, abs_zero, zero_mul]; exact zero_le_one
-
-private lemma abs_kronecker_le_one' {P : Prop} [Decidable P] :
-    |if P then (1 : ℝ) else 0| ≤ 1 := by
-  by_cases h : P
-  · rw [if_pos h, abs_one]
-  · rw [if_neg h, abs_zero]; exact zero_le_one
-
-private lemma abs_sum_coeff_kronecker_le'
-    {ι : Type*} (t : Finset ι) (f : ι → ℝ) (P : ι → Prop) [DecidablePred P]
-    {Cχ : ℝ} (hCχ_nn : 0 ≤ Cχ) (hf : ∀ i ∈ t, |f i| ≤ Cχ) :
-    |∑ i ∈ t, f i * (if P i then (1 : ℝ) else 0)| ≤ t.card * Cχ := by
-  classical
-  have hbound : ∀ i ∈ t,
-      |f i * (if P i then (1 : ℝ) else 0)| ≤ Cχ := by
-    intro i hi
-    rw [abs_mul]
-    calc |f i| * |if P i then (1 : ℝ) else 0|
-        ≤ Cχ * 1 :=
-          mul_le_mul (hf i hi) abs_kronecker_le_one' (abs_nonneg _) hCχ_nn
-      _ = Cχ := mul_one _
-  calc |∑ i ∈ t, f i * (if P i then (1 : ℝ) else 0)|
-      ≤ ∑ i ∈ t, |f i * (if P i then (1 : ℝ) else 0)| :=
-        Finset.abs_sum_le_sum_abs _ _
-    _ ≤ ∑ _i ∈ t, Cχ := Finset.sum_le_sum hbound
-    _ = t.card * Cχ := by rw [Finset.sum_const, nsmul_eq_mul]
-
 private def cutoffKernelM (α : M) : Set M :=
   tsupport (fun x : M => ((chartKernelCutoff (I := I) (M := M) α
     : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -117,12 +70,6 @@ private lemma cutoffKernelM_subset_baseSet (α : M) :
   rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
   exact cutoffKernelM_subset_chart_source (I := I) (M := M) α hx
 
-private lemma chartKernelCutoff_contMDiff (α : M) :
-    ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => ((chartKernelCutoff (I := I) (M := M) α
-        : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) :=
-  (chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯).contMDiff
-
 private lemma chartPushedRaw_cutoff_contDiff (α : M) :
     ContDiff ℝ ∞
       (chartPushedRaw (I := I) (M := M) α
@@ -131,120 +78,6 @@ private lemma chartPushedRaw_cutoff_contDiff (α : M) :
     (I := I) (M := M)
     (chartKernelCutoff_contMDiff (I := I) (M := M) α)
     (cutoffKernelM_subset_chart_source (I := I) (M := M) α)
-
-private lemma euclidPartial_contDiff_of_contDiff'
-    {u : EuclN → ℝ} (hu : ContDiff ℝ ∞ u) (k : Fin (Module.finrank ℝ E)) :
-    ContDiff ℝ ∞ (euclidPartial (E := E) k u) := by
-  have hfd : ContDiff ℝ ∞ (fun z => fderiv ℝ u z) :=
-    hu.fderiv_right (m := (∞ : WithTop ℕ∞))
-      (by rw [show (∞ : WithTop ℕ∞) + 1 = (∞ : WithTop ℕ∞) from rfl])
-  have hcomp : euclidPartial (E := E) k u =
-      (fun L : EuclN →L[ℝ] ℝ => L (EuclideanSpace.single k 1)) ∘
-        (fun z => fderiv ℝ u z) := by
-    funext z; rw [euclidPartial_def]; rfl
-  rw [hcomp]
-  exact (ContinuousLinearMap.apply ℝ ℝ
-    (EuclideanSpace.single k 1)).contDiff.comp hfd
-
-private lemma cutoffComponentEuclid_contDiff
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    ContDiff ℝ ∞
-      (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) := by
-  rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_contDiff
-    (I := I) (M := M)
-    (cutoffComponentScalar_contMDiff (I := I) (M := M) g r s S α Idx Jdx)
-    (cutoffComponentScalar_tsupport_subset_source
-      (I := I) (M := M) g r s S α Idx Jdx)
-
-private lemma cutoffComponentEuclid_hasCompactSupport
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    HasCompactSupport
-      (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) := by
-  rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.chartPushedRaw_smooth_hasCompactSupport_local
-    (I := I) (M := M)
-    (cutoffComponentScalar_tsupport_subset_source
-      (I := I) (M := M) g r s S α Idx Jdx)
-
-private lemma cutoffComponentEuclid_tsupport_subset
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    tsupport (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) ⊆
-      chartTargetEuclid (I := I) (M := M) α := by
-  rw [cutoffComponentEuclid_eq_chartPushedRaw]
-  exact DifferentialGeometry.Analysis.Laplacian.SmoothFChartResidualBilinearBound.tsupport_chartPushedRaw_subset_chartTargetEuclid
-    (I := I) (M := M)
-    (cutoffComponentScalar_tsupport_subset_source
-      (I := I) (M := M) g r s S α Idx Jdx)
-
-private lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
-        (d := Module.finrank ℝ E) 2 k
-        (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx)
-        (chartTargetEuclid (I := I) (M := M) α)
-      =ᵐ[(volume : Measure EuclN).restrict
-          (chartTargetEuclid (I := I) (M := M) α)]
-      euclidPartial (E := E) k
-        (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) := by
-  classical
-  set u : EuclN → ℝ :=
-    cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx with hu_def
-  have hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u :=
-    cutoffComponentEuclid_contDiff (I := I) (M := M) g r s S α Idx Jdx
-  have hu_cpt : HasCompactSupport u :=
-    cutoffComponentEuclid_hasCompactSupport (I := I) (M := M) g r s S α Idx Jdx
-  have hu_tsupp : tsupport u ⊆ chartTargetEuclid (I := I) (M := M) α :=
-    cutoffComponentEuclid_tsupport_subset (I := I) (M := M) g r s S α Idx Jdx
-  have hΩ_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
-    chartTargetEuclid_isOpen (I := I) (M := M) α
-  have hp_one : (1 : ℝ≥0∞) ≤ 2 := by norm_num
-  have hu_W1 : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
-      (d := Module.finrank ℝ E) 1 2 u (chartTargetEuclid (I := I) (M := M) α) :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport
-      (d := Module.finrank ℝ E) hΩ_open hu_smooth hu_cpt hu_tsupp hp_one 1
-  have hu_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 u
-      (chartTargetEuclid (I := I) (M := M) α) :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hu_W1
-  have h_ae :=
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial_smooth_ae_eq
-      (d := Module.finrank ℝ E) hp_one hΩ_open hu_smooth hu_W1p k
-  refine h_ae.trans (Filter.EventuallyEq.of_eq ?_)
-  funext y
-  rw [euclidPartial_def]
-
-private lemma cutoffComponentEuclid_eq_cutoff_mul_rawPushed
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E))
-    {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx y =
-      chartPushedRaw (I := I) (M := M) α
-          (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y *
-        chartPushedRaw (I := I) (M := M) α
-          (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) y := by
-  classical
-  rw [cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy,
-    chartPushedRaw_apply_of_mem (I := I) (M := M) α
-      (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) hy,
-    chartPushedRaw_apply_of_mem (I := I) (M := M) α
-      (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hy]
-  rfl
 
 private lemma euclidPartial_cutoffComponentEuclid_eq_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -304,70 +137,6 @@ private lemma euclidPartial_cutoffComponentEuclid_eq_leibniz
     euclidPartial_def, euclidPartial_def]
   ring
 
-private lemma euclidPartial_rawPushed_eq_covDerivComponent_sub'
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E))
-    {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    euclidPartial (E := E) k
-        (chartPushedRaw (I := I) (M := M) α
-          (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)) y =
-      tensorChartComponentProjection (E := E) r s Idx Jdx
-          ((trivializationAt (TensorRSModel r s ℝ E)
-              (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ
-            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
-            (chartTensorRSCovariantDerivative (I := I) r s g α S.toSection
-              (chartBasisVecFiber (I := I) α k)
-              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))
-        - covDerivLowerOrderTerm (I := I) (M := M) g r s S α k Idx Jdx y := by
-  have h := covDerivComponent_eq_euclidPartial_add_lowerOrder
-    (I := I) (M := M) g r s S α k Idx Jdx hy
-  linarith [h]
-
-private def cutoffLeibnizCrossTerm
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  fun y : EuclN =>
-    euclidPartial (E := E) k
-        (chartPushedRaw (I := I) (M := M) α
-          (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯))) y *
-      chartPushedRaw (I := I) (M := M) α
-        (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) y
-
-private def cutoffCovDerivComponent
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  fun y : EuclN =>
-    chartPushedRaw (I := I) (M := M) α
-        (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y *
-      tensorChartComponentProjection (E := E) r s Idx Jdx
-        ((trivializationAt (TensorRSModel r s ℝ E)
-            (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ
-          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
-          (chartTensorRSCovariantDerivative (I := I) r s g α S.toSection
-            (chartBasisVecFiber (I := I) α k)
-            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))))
-
-private def cutoffLowerOrderTerm
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
-  fun y : EuclN =>
-    chartPushedRaw (I := I) (M := M) α
-        (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y *
-      covDerivLowerOrderTerm (I := I) (M := M) g r s S α k Idx Jdx y
-
 private lemma euclidPartial_cutoffComponentEuclid_eq_three_terms
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -405,32 +174,6 @@ private lemma euclidPartial_chartPushedRaw_cutoff_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (euclidPartial_contDiff_of_contDiff' (E := E)
     (chartPushedRaw_cutoff_contDiff (I := I) (M := M) α) k).continuous.continuousOn
-
-private lemma chartPushedRaw_rawComponent_continuousOn'
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    ContinuousOn
-      (chartPushedRaw (I := I) (M := M) α
-        (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx))
-      (chartTargetEuclid (I := I) (M := M) α) :=
-  (chartPushedRaw_tensorChartComponentRaw_contDiffOn
-    (I := I) (M := M) g r s S α Idx Jdx).continuousOn
-
-private lemma euclidPartial_chartPushedRaw_rawComponent_continuousOn'
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    ContinuousOn
-      (euclidPartial (E := E) k
-        (chartPushedRaw (I := I) (M := M) α
-          (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)))
-      (chartTargetEuclid (I := I) (M := M) α) :=
-  (euclidPartial_chartPushedRaw_contDiffOn
-    (I := I) (M := M) g r s S α k Idx Jdx).continuousOn
 
 private lemma cutoffCovDerivComponent_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -719,40 +462,6 @@ private lemma exists_const_rawComponentCutoffM_sq_le
           (S.toFun b) (S.toFun b) :=
       mul_nonneg (mul_nonneg (sq_nonneg _) hK_nn) hQ_nn
     simpa using h_rhs_nn
-
-private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq'
-    {β : Type*} [MeasurableSpace β] (μ : Measure β) (f : β → ℝ) :
-    (eLpNorm f 2 μ) ^ 2 = ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
-  classical
-  have h2_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
-  have h2_ne_top : (2 : ℝ≥0∞) ≠ (⊤ : ℝ≥0∞) := by norm_num
-  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal (μ := μ) h2_ne_zero h2_ne_top]
-  have h2_toReal : ((2 : ℝ≥0∞)).toReal = 2 := by show ENNReal.toReal 2 = 2; rfl
-  rw [h2_toReal]
-  have h_inner_eq : ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ (2 : ℝ) ∂μ =
-      ∫⁻ x, (‖f x‖ₑ : ℝ≥0∞) ^ 2 ∂μ := by
-    refine lintegral_congr_ae ?_
-    filter_upwards with x
-    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, ENNReal.rpow_natCast]
-  rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
-  norm_num
-
-private lemma le_sqrt_of_sq_le' {x y : ℝ≥0∞} (h : x ^ 2 ≤ y) :
-    x ≤ y ^ ((1 : ℝ) / 2) := by
-  have h_xpow : x = (x ^ 2) ^ ((1 : ℝ) / 2) := by
-    rw [← ENNReal.rpow_natCast x 2, ← ENNReal.rpow_mul]
-    norm_num
-  conv_lhs => rw [h_xpow]
-  exact ENNReal.rpow_le_rpow h (by norm_num)
-
-private lemma sqrt_ofReal_eq_ofReal_sqrt' {a : ℝ} (ha : 0 ≤ a) :
-    (ENNReal.ofReal a) ^ ((1 : ℝ) / 2) = ENNReal.ofReal (Real.sqrt a) := by
-  rw [show a = Real.sqrt a * Real.sqrt a from (Real.mul_self_sqrt ha).symm,
-    ENNReal.ofReal_mul (Real.sqrt_nonneg _),
-    show (ENNReal.ofReal (Real.sqrt a)) * (ENNReal.ofReal (Real.sqrt a)) =
-      (ENNReal.ofReal (Real.sqrt a)) ^ 2 from by ring,
-    ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
-  norm_num
 
 private lemma exists_const_eLpNorm_rawComponentCutoffM_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -1065,127 +774,6 @@ private theorem exists_const_eLpNorm_cutoffLeibnizCrossTerm_le_uniform
         rw [ENNReal.ofReal_mul hCχ_nn, ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
 
-private noncomputable def cutoffCovNormSumFun
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M) : M → ℝ :=
-  fun b : M =>
-    ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-      Real.sqrt
-        (∑ i : Fin (Module.finrank ℝ E),
-          ‖chartRSTwistInv (I := I) (M := M) α b r s
-              (TensorRSSpace.toModel
-                (tensorCovDerivAt (I := I) (M := M) g r s S b
-                  (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
-
-private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
-    (trivializationAt (TensorRSModel r s ℝ E)
-        (fun y : M => TensorRSSpace r s I y) α).baseSet =
-      (chartAt H α).source := by
-  change ((trivializationAt (Tensor0SModel r ℝ E)
-        (fun y : M => Tensor0SSpace r I y) α).baseSet) ∩
-      ((trivializationAt (Tensor0SModel s ℝ E)
-        (fun y : M => Tensor0SSpace s I y) α).baseSet) =
-        (chartAt H α).source
-  change (trivializationAt E (TangentSpace I) α).baseSet ∩
-      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source
-  rw [Set.inter_self]
-  rfl
-
-private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (i : Fin (Module.finrank ℝ E)) :
-    ContMDiffOn I (𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
-      (fun b : M =>
-        chartRSTwistInv (I := I) (M := M) α b r s
-          (TensorRSSpace.toModel
-            (tensorCovDerivAt (I := I) (M := M) g r s S b
-              (chartBasisVecFiber (I := I) α i b))))
-      ((chartAt H α).source) := by
-  classical
-  have htriv := tensorCovDeriv_chartBasis_trivImage_contMDiffOn
-    (I := I) (M := M) g r s S α i
-  rw [show (trivializationAt E (TangentSpace I) α).baseSet =
-      (chartAt H α).source from rfl] at htriv
-  refine htriv.congr (fun b hb => ?_)
-  rw [← triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
-    r s α hb
-    (tensorCovDerivAt (I := I) (M := M) g r s S b
-      (chartBasisVecFiber (I := I) α i b))]
-  have hb_base : b ∈ (trivializationAt (TensorRSModel r s ℝ E)
-      (fun y : M => TensorRSSpace r s I y) α).baseSet := by
-    rw [tensorRS_baseSet_eq_chart_source' (I := I) (M := M) α r s]
-    exact hb
-  change (trivializationAt (TensorRSModel r s ℝ E)
-      (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ b
-      (tensorCovDerivAt (I := I) (M := M) g r s S b
-        (chartBasisVecFiber (I := I) α i b)) = _
-  rw [Bundle.Trivialization.linearMapAt_apply, if_pos hb_base]
-
-private lemma cutoffCovNormSqSum_continuousOn_chart_source
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M) :
-    ContinuousOn
-      (fun b : M =>
-        ∑ i : Fin (Module.finrank ℝ E),
-          ‖chartRSTwistInv (I := I) (M := M) α b r s
-              (TensorRSSpace.toModel
-                (tensorCovDerivAt (I := I) (M := M) g r s S b
-                  (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
-      ((chartAt H α).source) := by
-  refine continuousOn_finset_sum _ (fun i _ => ?_)
-  have hcov : ContinuousOn
-      (fun b : M =>
-        chartRSTwistInv (I := I) (M := M) α b r s
-          (TensorRSSpace.toModel
-            (tensorCovDerivAt (I := I) (M := M) g r s S b
-              (chartBasisVecFiber (I := I) α i b))))
-      ((chartAt H α).source) :=
-    (chartRSTwistInv_tensorCovDeriv_contMDiffOn' (I := I) (M := M)
-      g r s S α i).continuousOn
-  exact (hcov.norm).pow 2
-
-private lemma cutoffCovNormSumFun_continuous
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M) :
-    Continuous (cutoffCovNormSumFun (I := I) (M := M) g r s S α) := by
-  classical
-  set χ : C^∞⟮I, M; ℝ⟯ := chartKernelCutoff (I := I) (M := M) α with hχ_def
-  set w : M → ℝ := fun b : M =>
-    Real.sqrt
-      (∑ i : Fin (Module.finrank ℝ E),
-        ‖chartRSTwistInv (I := I) (M := M) α b r s
-            (TensorRSSpace.toModel
-              (tensorCovDerivAt (I := I) (M := M) g r s S b
-                (chartBasisVecFiber (I := I) α i b)))‖ ^ 2) with hw_def
-  have hfun_eq : cutoffCovNormSumFun (I := I) (M := M) g r s S α =
-      fun b : M => ((χ : C^∞⟮I, M; ℝ⟯) : M → ℝ) b • w b := by
-    funext b
-    rw [cutoffCovNormSumFun]
-    rfl
-  rw [hfun_eq]
-  refine continuous_of_tsupport (fun x hx => ?_)
-  have hx_supp : x ∈ tsupport ((χ : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
-    tsupport_smul_subset_left
-      (f := fun b : M => ((χ : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) (g := w) hx
-  have hx_src : x ∈ (chartAt H α).source :=
-    chartKernelCutoff_tsupport_subset_source (I := I) (M := M) α hx_supp
-  have hχ_contAt : ContinuousAt ((χ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x :=
-    (χ.contMDiff.continuous).continuousAt
-  have hw_contOn : ContinuousOn w ((chartAt H α).source) := by
-    rw [hw_def]
-    exact (cutoffCovNormSqSum_continuousOn_chart_source (I := I) (M := M)
-      g r s S α).sqrt
-  have hw_contAt : ContinuousAt w x :=
-    hw_contOn.continuousAt ((chartAt H α).open_source.mem_nhds hx_src)
-  exact hχ_contAt.smul hw_contAt
-
-private lemma cutoffCovNormSumFun_measurable
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M) :
-    Measurable (cutoffCovNormSumFun (I := I) (M := M) g r s S α) :=
-  (cutoffCovNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
-
 private lemma cutoffCovNormSumFun_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -1215,173 +803,6 @@ private lemma cutoffCovNormSumFun_tsupport_subset
               (TensorRSSpace.toModel
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2))
-
-private lemma chartBasePoint_mem_goodSet'
-    (α : M) {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
-      chartLeviCivitaGoodSet (I := I) α := by
-  have hsrc : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
-      (chartAt H α).source :=
-    symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-  rw [mem_chartLeviCivitaGoodSet_iff_mem_extChartAt_source (I := I) α,
-    extChartAt_source]
-  exact hsrc
-
-private lemma cutoffCovDerivComponent_le_chartPushedRaw
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (k : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E))
-    (y : EuclN) :
-    ‖cutoffCovDerivComponent (I := I) (M := M) g r s S α k Idx Jdx y‖ ≤
-      (chartComponentProjectionUniformBound (E := E) r s •
-        chartPushedRaw (I := I) (M := M) α
-          (cutoffCovNormSumFun (I := I) (M := M) g r s S α)) y := by
-  classical
-  set C_proj : ℝ := chartComponentProjectionUniformBound (E := E) r s
-    with hC_proj_def
-  have hC_proj_nn : 0 ≤ C_proj :=
-    chartComponentProjectionUniformBound_nonneg (E := E) r s
-  by_cases hy : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y)
-      with hb_def
-    have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α :=
-      chartBasePoint_mem_goodSet' (I := I) (M := M) α hy
-    have hb_src : b ∈ (chartAt H α).source := by
-      have := symm_toEuclidean_symm_mem_chartAtSource (I := I) (M := M) α hy
-      rwa [← hb_def] at this
-    have hχ_nn : 0 ≤ ((chartKernelCutoff (I := I) (M := M) α
-        : C^∞⟮I, M; ℝ⟯) : M → ℝ) b :=
-      (chartKernelCutoff_mem_Icc (I := I) (M := M) α b).1
-    have hcut_eval : chartPushedRaw (I := I) (M := M) α
-        (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y =
-          ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b := by
-      rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
-        (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) hy]
-    have hcov_eval : chartPushedRaw (I := I) (M := M) α
-        (cutoffCovNormSumFun (I := I) (M := M) g r s S α) y =
-          cutoffCovNormSumFun (I := I) (M := M) g r s S α b := by
-      rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
-        (cutoffCovNormSumFun (I := I) (M := M) g r s S α) hy]
-    have hcomp_eq :
-        tensorChartComponentProjection (E := E) r s Idx Jdx
-            ((trivializationAt (TensorRSModel r s ℝ E)
-                (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
-              (chartTensorRSCovariantDerivative (I := I) r s g α S.toSection
-                (chartBasisVecFiber (I := I) α k) b)) =
-          tensorChartComponentProjection (E := E) r s Idx Jdx
-            (chartRSTwistInv (I := I) (M := M) α b r s
-              (TensorRSSpace.toModel
-                (tensorCovDerivAt (I := I) (M := M) g r s S b
-                  (chartBasisVecFiber (I := I) α k b)))) := by
-      rw [← tensorCovDerivAt_eq_chartTensorRSCovariantDerivative (I := I) (M := M)
-        g r s S α k hb_good]
-      rw [triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel (I := I) (M := M)
-        r s α hb_src
-        (tensorCovDerivAt (I := I) (M := M) g r s S b
-          (chartBasisVecFiber (I := I) α k b))]
-    set X : TensorRSModel r s ℝ E :=
-      chartRSTwistInv (I := I) (M := M) α b r s
-        (TensorRSSpace.toModel
-          (tensorCovDerivAt (I := I) (M := M) g r s S b
-            (chartBasisVecFiber (I := I) α k b))) with hX_def
-    have h_proj_le :
-        ‖tensorChartComponentProjection (E := E) r s Idx Jdx X‖ ≤
-          C_proj * ‖X‖ :=
-      (ContinuousLinearMap.le_opNorm _ _).trans
-        (mul_le_mul_of_nonneg_right
-          (tensorChartComponentProjection_norm_le_uniform (E := E) r s Idx Jdx)
-          (norm_nonneg _))
-    have h_norm_le_sqrt :
-        ‖X‖ ≤
-          Real.sqrt
-            (∑ i : Fin (Module.finrank ℝ E),
-              ‖chartRSTwistInv (I := I) (M := M) α b r s
-                  (TensorRSSpace.toModel
-                    (tensorCovDerivAt (I := I) (M := M) g r s S b
-                      (chartBasisVecFiber (I := I) α i b)))‖ ^ 2) := by
-      have hsq_le :
-          ‖X‖ ^ 2 ≤
-            ∑ i : Fin (Module.finrank ℝ E),
-              ‖chartRSTwistInv (I := I) (M := M) α b r s
-                  (TensorRSSpace.toModel
-                    (tensorCovDerivAt (I := I) (M := M) g r s S b
-                      (chartBasisVecFiber (I := I) α i b)))‖ ^ 2 :=
-        Finset.single_le_sum
-          (f := fun i : Fin (Module.finrank ℝ E) =>
-            ‖chartRSTwistInv (I := I) (M := M) α b r s
-                (TensorRSSpace.toModel
-                  (tensorCovDerivAt (I := I) (M := M) g r s S b
-                    (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
-          (fun i _ => sq_nonneg _) (Finset.mem_univ k)
-      have hX_eq : ‖X‖ = Real.sqrt (‖X‖ ^ 2) :=
-        (Real.sqrt_sq (norm_nonneg _)).symm
-      rw [hX_eq]
-      exact Real.sqrt_le_sqrt hsq_le
-    unfold cutoffCovDerivComponent
-    rw [hcomp_eq, hcut_eval]
-    have h_norm_prod :
-        ‖((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-            tensorChartComponentProjection (E := E) r s Idx Jdx X‖ =
-          ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-            ‖tensorChartComponentProjection (E := E) r s Idx Jdx X‖ := by
-      rw [norm_mul, Real.norm_of_nonneg hχ_nn]
-    have hRHS_eq :
-        (C_proj •
-          chartPushedRaw (I := I) (M := M) α
-            (cutoffCovNormSumFun (I := I) (M := M) g r s S α)) y =
-          C_proj *
-            (((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)
-                : M → ℝ) b *
-              Real.sqrt
-                (∑ i : Fin (Module.finrank ℝ E),
-                  ‖chartRSTwistInv (I := I) (M := M) α b r s
-                      (TensorRSSpace.toModel
-                        (tensorCovDerivAt (I := I) (M := M) g r s S b
-                          (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)) := by
-      change C_proj * chartPushedRaw (I := I) (M := M) α
-        (cutoffCovNormSumFun (I := I) (M := M) g r s S α) y = _
-      rw [hcov_eval]
-      rfl
-    rw [h_norm_prod, hRHS_eq]
-    set w : ℝ :=
-      Real.sqrt
-        (∑ i : Fin (Module.finrank ℝ E),
-          ‖chartRSTwistInv (I := I) (M := M) α b r s
-              (TensorRSSpace.toModel
-                (tensorCovDerivAt (I := I) (M := M) g r s S b
-                  (chartBasisVecFiber (I := I) α i b)))‖ ^ 2) with hw_def
-    have hw_nn : 0 ≤ w := Real.sqrt_nonneg _
-    have h_proj_le_w :
-        ‖tensorChartComponentProjection (E := E) r s Idx Jdx X‖ ≤
-          C_proj * w :=
-      h_proj_le.trans
-        (mul_le_mul_of_nonneg_left h_norm_le_sqrt hC_proj_nn)
-    calc ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-            ‖tensorChartComponentProjection (E := E) r s Idx Jdx X‖
-        ≤ ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b *
-            (C_proj * w) :=
-          mul_le_mul_of_nonneg_left h_proj_le_w hχ_nn
-      _ = C_proj *
-            (((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)
-                : M → ℝ) b * w) := by
-          ring
-  · have hcov_zero : chartPushedRaw (I := I) (M := M) α
-        (cutoffCovNormSumFun (I := I) (M := M) g r s S α) y = 0 :=
-      chartPushedRaw_apply_of_notMem (I := I) (M := M) α
-        (cutoffCovNormSumFun (I := I) (M := M) g r s S α) hy
-    have hcomp_zero : cutoffCovDerivComponent (I := I) (M := M)
-        g r s S α k Idx Jdx y = 0 := by
-      unfold cutoffCovDerivComponent
-      rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α
-        (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) hy,
-        zero_mul]
-    rw [hcomp_zero, norm_zero]
-    change (0 : ℝ) ≤ C_proj * chartPushedRaw (I := I) (M := M) α
-      (cutoffCovNormSumFun (I := I) (M := M) g r s S α) y
-    rw [hcov_zero, mul_zero]
 
 private lemma exists_const_eLpNorm_cutoffCovDerivComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -1497,57 +918,6 @@ private lemma exists_const_eLpNorm_cutoffCovDerivComponent_le_uniform
         rw [ENNReal.ofReal_mul hC_proj_nn,
           ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
-
-private lemma chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E))
-    {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    chartPushedRaw (I := I) (M := M) α
-          (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y *
-        tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx
-          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) =
-      cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx y := by
-  classical
-  rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
-      (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) hy,
-    cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
-  rfl
-
-private lemma cutoffLowerOrderTerm_eq_linearCombination
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (m : Fin (Module.finrank ℝ E))
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E))
-    {y : EuclN}
-    (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    cutoffLowerOrderTerm (I := I) (M := M) g r s S α m Idx Jdx y =
-      ∑ p : (Fin r → Fin (Module.finrank ℝ E)) ×
-            (Fin s → Fin (Module.finrank ℝ E)),
-        covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx p.2 y *
-          cutoffComponentEuclid (I := I) (M := M) g r s S α p.1 p.2 y := by
-  classical
-  unfold cutoffLowerOrderTerm
-  rw [covDerivComponent_lowerOrder_eq_linearCombination
-    (I := I) (M := M) g r s S α m Idx Jdx y, Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun p _ => ?_)
-  rw [← mul_assoc, mul_comm (chartPushedRaw (I := I) (M := M) α
-        (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y)
-      (covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx p.1 Jdx p.2 y),
-    mul_assoc,
-    chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent (I := I) (M := M)
-      g r s S α p.1 p.2 hy]
-
-private lemma cutoffComponentEuclid_continuous
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (S : SmoothCcTensor g r s) (α : M)
-    (Idx : Fin r → Fin (Module.finrank ℝ E))
-    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    Continuous (cutoffComponentEuclid (I := I) (M := M) g r s S α Idx Jdx) :=
-  (cutoffComponentEuclid_contDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
 
 private lemma mem_cutoffKernelM_image_of_cutoffComponentEuclid_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
